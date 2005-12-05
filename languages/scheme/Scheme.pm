@@ -1,4 +1,4 @@
-# $Id: Scheme.pm 7951 2005-05-01 14:20:38Z bernhard $
+# $Id: Scheme.pm 10259 2005-11-29 22:06:21Z bernhard $
 
 package Scheme;
 
@@ -42,7 +42,7 @@ sub link_functions {
   my $code = $main->{code};
   my $header = << 'END_HEADER';
 # Header information
-    new_pad 0
+    # new_pad 0
 END_HEADER
 
   while (@missing) {

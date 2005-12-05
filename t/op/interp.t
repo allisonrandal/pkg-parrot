@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: interp.t 9552 2005-10-24 23:35:38Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: interp.t 10228 2005-11-28 22:52:05Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/op/interp.t - Running the Interpreter
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/interp.t
+	% prove t/op/interp.t
 
 =head1 DESCRIPTION
 
@@ -17,8 +24,9 @@ C<interpinfo> opcode.
 
 =cut
 
-use Parrot::Test tests => 7;
 
+SKIP: {
+	skip("we really shouldn't run just a label - use a sub", 1);
 output_is(<<'CODE', <<'OUTPUT', "runinterp - new style");
 	new P0, .ParrotInterpreter
 	print "calling\n"
@@ -35,6 +43,7 @@ calling
 In 2
 ending
 OUTPUT
+}
 
 # Need to disable DOD while trace is on, as there's a non-zero chance that a
 # DOD sweep would occur, causing a bonus "DOD" line in the output, which makes
@@ -120,17 +129,6 @@ before
 after
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "interpinfo lexpad");
-    .include "interpinfo.pasm"
-    new_pad 0
-    peek_pad P10
-    interpinfo P11, .INTERPINFO_CURRENT_LEXPAD
-    eq_addr P10, P11, ok
-    print "not "
-ok: print "ok\n"
-    end
-CODE
-ok
-OUTPUT
 
-1;
+## remember to change the number of tests :-)
+BEGIN { plan tests => 6; }

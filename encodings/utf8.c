@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: utf8.c 9303 2005-10-02 20:15:51Z leo $
+$Id: utf8.c 9913 2005-11-12 02:24:59Z particle $
 
 =head1 NAME
 
@@ -307,54 +307,78 @@ utf8_set_position(Interp *interpreter, String_iter *i, UINTVAL pos)
 }
 
 
-/* This function needs to go through and get all the code points one
-   by one and turn them into a utf8 sequence */
-static void
-to_encoding(Interp *interpreter, STRING *src)
-{
-    if (src->encoding == Parrot_utf8_encoding_ptr)
-        return;
-    UNIMPL;
-}
-
 static STRING *
-copy_to_encoding(Interp *interpreter, STRING *src)
+to_encoding(Interp *interpreter, STRING *src, STRING *dest)
 {
-    STRING *dest;
-    String_iter src_iter, dest_iter;
-    UINTVAL offs, c;
+    STRING *result;
+    String_iter src_iter;
+    UINTVAL offs, c, dest_len, dest_pos, src_len;
+    int in_place = dest == NULL;
+    unsigned char *new_pos, *pos, *p;
 
     if (src->encoding == Parrot_utf8_encoding_ptr)
-        return string_copy(interpreter, src);
+        return in_place ? src : string_copy(interpreter, src);
+    src_len = src->strlen;
+    if (in_place) {
+        result = src;
+    }
+    else {
+        result = dest;
+    }
 
-    /*
-     * TODO adapt string creation functions
-     */
-    dest = string_make_empty(interpreter, enum_stringrep_one, src->strlen);
-    dest->charset  = Parrot_unicode_charset_ptr;
-    dest->encoding = Parrot_utf8_encoding_ptr;
-    dest->strlen   = src->strlen;
+    /* init iter before possilby changing encoding */
+    ENCODING_ITER_INIT(interpreter, src, &src_iter);
+    result->charset  = Parrot_unicode_charset_ptr;
+    result->encoding = Parrot_utf8_encoding_ptr;
+    result->strlen   = src_len;
 
     if (!src->strlen)
         return dest;
 
-    ENCODING_ITER_INIT(interpreter, src, &src_iter);
-    ENCODING_ITER_INIT(interpreter, dest, &dest_iter);
-
-    for (offs = 0; offs < src->strlen; ++offs) {
-        c = src_iter.get_and_advance(interpreter, &src_iter);
-        if (dest_iter.bytepos >= PObj_buflen(dest) - 4) {
-            UINTVAL need = (src->strlen - offs) * 1.5;
-            if (need < 16)
-                need = 16;
-            Parrot_reallocate_string(interpreter, dest,
-                    PObj_buflen(dest) + need);
-        }
-        dest_iter.set_and_advance(interpreter, &dest_iter, c);
+    if (in_place) {
+        /* need intermediate memory */
+        p = mem_sys_allocate(src_len);
     }
-    assert(dest->strlen  == dest_iter.charpos);
-    dest->bufused = dest_iter.bytepos;
-    return dest;
+    else {
+        Parrot_reallocate_string(interpreter, dest, src_len);
+        p = dest->strstart;
+    }
+    if (src->charset == Parrot_ascii_charset_ptr) {
+        for (dest_len = 0; dest_len < src_len; ++dest_len) {
+            p[dest_len] = ((unsigned char*)src->strstart)[dest_len];
+        }
+        result->bufused = dest_len;
+    }
+    else {
+        dest_len = src_len;
+        dest_pos = 0;
+        for (offs = 0; offs < src_len; ++offs) {
+            c = src_iter.get_and_advance(interpreter, &src_iter);
+            if (dest_len - dest_pos < 6) {
+                UINTVAL need = (UINTVAL)((src->strlen - offs) * 1.5);
+                if (need < 16)
+                    need = 16;
+                dest_len += need;
+                if (in_place)
+                    p = mem_sys_realloc(p, dest_len);
+                else {
+                    Parrot_reallocate_string(interpreter, dest, dest_len);
+                    p = dest->strstart;
+                }
+            }
+
+            pos = p + dest_pos;
+            new_pos = utf8_encode(pos, c);
+            dest_pos += (new_pos - pos);
+        }
+        result->bufused = dest_pos;
+    }
+    if (in_place) {
+        Parrot_reallocate_string(interpreter, src, src->bufused);
+        memcpy(src->strstart, p, src->bufused);
+        mem_sys_free(p);
+    }
+    return result;
 }
 
 static UINTVAL
@@ -404,7 +428,7 @@ set_byte(Interp *interpreter, const STRING *src,
 	internal_exception(0, "set_byte past the end of the buffer");
     }
     contents = src->strstart;
-    contents[offset] = byte;
+    contents[offset] = (unsigned char)byte;
 }
 
 static STRING *
@@ -415,8 +439,6 @@ get_codepoints(Interp *interpreter, STRING *src,
     UINTVAL start;
     STRING *return_string = Parrot_make_COW_reference(interpreter,
 	    src);
-    return_string->encoding = src->encoding;
-    return_string->charset = src->charset;
     iter_init(interpreter, src, &iter);
     iter.set_position(interpreter, &iter, offset);
     start = iter.bytepos;
@@ -449,11 +471,20 @@ get_bytes(Interp *interpreter, STRING *src,
 
 static STRING *
 get_codepoints_inplace(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count, STRING *dest_string)
+	UINTVAL offset, UINTVAL count, STRING *return_string)
 {
-
-    UNIMPL;
-    return NULL;
+    String_iter iter;
+    UINTVAL start;
+    Parrot_reuse_COW_reference(interpreter, src, return_string);
+    iter_init(interpreter, src, &iter);
+    iter.set_position(interpreter, &iter, offset);
+    start = iter.bytepos;
+    return_string->strstart = (char *)return_string->strstart + start ;
+    iter.set_position(interpreter, &iter, offset + count);
+    return_string->bufused = iter.bytepos - start;
+    return_string->strlen = count;
+    return_string->hashval = 0;
+    return return_string;
 }
 
 static STRING *
@@ -526,7 +557,6 @@ Parrot_encoding_utf8_init(Interp *interpreter)
 	"utf8",
 	4, /* Max bytes per codepoint 0 .. 0x10ffff */
 	to_encoding,
-	copy_to_encoding,
 	get_codepoint,
 	set_codepoint,
 	get_byte,

@@ -141,7 +141,7 @@ bad_length:
   $I2 = string_index($S3,$S1)
 
 range_do:
-  if index_1 > $I2 goto done
+###  if index_1 > $I2 goto done   XXX no such label
   if index_1 >= 0  goto range_top
   index_1 = 0
 range_top:
@@ -180,16 +180,15 @@ match_next:
   the_string = argv[1]
   unless nocase goto match_continue
   pattern = downcase pattern
-  pattern = downcase the_string
+
+  the_string = downcase the_string
 
 match_continue:
   .local pmc globber
   globber = find_global "PGE", "glob"
 
-  .local pmc rule, pir, exp
-  (rule, pir, exp) = globber(pattern)
-
-  .local pmc match
+  .local pmc rule, match 
+  rule = globber(pattern)
   match = rule(the_string)
 
   .return match.__get_bool()

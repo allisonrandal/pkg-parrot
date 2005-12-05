@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrotio.pmc 9260 2005-09-28 16:00:42Z robert $
+$Id: parrotio.pmc 10181 2005-11-25 23:06:18Z leo $
 
 =head1 NAME
 
@@ -95,6 +95,22 @@ Open the file with the given mode and use the IO given layer.
 =item C<void class_init()>
 
 Class initialization.
+
+=item C<METHOD INTVAL eof()>
+
+Return 0/1 according to eof state of the object.
+
+=item C<METHOD void flush()>
+
+Flush pending writes.
+
+=item C<METHOD INTVAL setbuf(INTVAL)>
+
+XXX TBD
+
+=item C<METHOD INTVAL setlinebuf()>
+
+XXX TBD
 
 =cut
 

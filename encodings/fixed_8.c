@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: fixed_8.c 8809 2005-08-04 16:18:40Z leo $
+$Id: fixed_8.c 9913 2005-11-12 02:24:59Z particle $
 
 =head1 NAME
 
@@ -17,20 +17,15 @@ This file implements the encoding functions for fixed-width 8-bit codepoints
 #include "parrot/parrot.h"
 #include "fixed_8.h"
 
-/* This function needs to go through and get all the code points one
-   by one and turn them into a byte */
-static void
-to_encoding(Interp *interpreter, STRING *source_string)
-{
-}
+#define UNIMPL internal_exception(UNIMPLEMENTED, "unimpl fixed_8")
 
 static STRING *
-copy_to_encoding(Interp *interpreter, STRING *source_string)
+to_encoding(Interp *interpreter, STRING *src, STRING *dest)
 {
-    STRING *return_string = NULL;
-
-    return return_string;
+    UNIMPL;
+    return NULL;
 }
+
 
 /* codepoints are bytes, so delegate */
 static UINTVAL
@@ -70,7 +65,7 @@ set_byte(Interp *interpreter, const STRING *source_string,
 	internal_exception(0, "set_byte past the end of the buffer");
     }
     contents = source_string->strstart;
-    contents[offset] = byte;
+    contents[offset] = (unsigned char)byte;
 }
 
 /* Delegate to get_bytes */
@@ -118,8 +113,6 @@ get_bytes_inplace(Interp *interpreter, STRING *source_string,
 	UINTVAL offset, UINTVAL count, STRING *return_string)
 {
     Parrot_reuse_COW_reference(interpreter, source_string, return_string);
-    return_string->encoding = source_string->encoding;
-    return_string->charset = source_string->charset;
 
     return_string->strstart = (char *)return_string->strstart + offset ;
     return_string->bufused = count;
@@ -150,6 +143,7 @@ set_bytes(Interp *interpreter, STRING *source_string,
 static void
 become_encoding(Interp *interpreter, STRING *source_string)
 {
+    UNIMPL;
 }
 
 
@@ -211,7 +205,6 @@ Parrot_encoding_fixed_8_init(Interp *interpreter)
 	"fixed_8",
 	1, /* Max bytes per codepoint */
 	to_encoding,
-	copy_to_encoding,
 	get_codepoint,
 	set_codepoint,
 	get_byte,

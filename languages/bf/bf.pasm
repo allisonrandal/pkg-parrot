@@ -1,10 +1,11 @@
-# $Id: bf.pasm 7995 2005-05-06 20:29:48Z bernhard $
+# $Id: bf.pasm 9951 2005-11-13 17:36:39Z coke $
 # A Brainfuck interpreter
 # By Leon Brocard <acme@astray.com>
 #
 # See http://www.catseye.mb.ca/esoteric/bf/
 # for more information on this silly language
 
+  get_params '(0)', P5  # P5 = @ARGV
   # Get the brainfuck source file into S0
   set S0, P5[1]
   if S0, SOURCE

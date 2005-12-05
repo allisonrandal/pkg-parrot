@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: interpreter.h 9645 2005-10-30 13:46:40Z leo $
+ *     $Id: interpreter.h 10304 2005-12-02 01:32:09Z leo $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -48,6 +48,7 @@ typedef enum {
     PARROT_THREAD_DEBUG_FLAG        = 0x10,
     PARROT_EVAL_DEBUG_FLAG          = 0x20,  /* create EVAL_n file */
     PARROT_REG_DEBUG_FLAG           = 0x40,  /* fill I,N with garbage */
+    PARROT_CTX_DESTROY_DEBUG_FLAG   = 0x80,  /* ctx of a sub is gone */
     PARROT_ALL_DEBUG_FLAGS          = 0xffff
 } Parrot_debug_flags;
 /* &end_gen */
@@ -177,9 +178,11 @@ typedef struct Parrot_Context {
     INTVAL ref_count;                   /* how often refered to */
     struct Stack_Chunk *reg_stack;      /* register stack */
 
-    struct Stack_Chunk *pad_stack;      /* Base of the lex pad stack */
     struct Stack_Chunk *user_stack;     /* Base of the scratch stack */
     struct Stack_Chunk *control_stack;  /* Base of the flow control stack */
+    PMC      *lex_pad;                  /* LexPad PMC */
+    struct Parrot_Context *outer_ctx;   /* outer context, if a closure */
+    struct Parrot_Context *caller_ctx;  /* caller context */
     UINTVAL warns;             /* Keeps track of what warnings
                                  * have been activated */
     UINTVAL errors;            /* fatals that can be turned off */
@@ -201,8 +204,9 @@ typedef struct Parrot_Context {
     opcode_t *current_pc;       /* program counter of Sub invocation */
     String *current_package;    /* The package we're currently in */
     INTVAL current_HLL;         /* see also src/hll.c */
-    opcode_t *current_args;      /* ptr into code with set_args opcode */
     opcode_t *current_results;   /* ptr into code with get_results opcode */
+    /* deref the constants - we need it all the time */
+    struct PackFile_Constant ** constants;
 } parrot_context_t;
 
 #define ALIGNED_CTX_SIZE ( ((sizeof(struct Parrot_Context) + NUMVAL_SIZE - 1) \

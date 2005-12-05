@@ -1,4 +1,4 @@
-# $Id: bfco.pir 7989 2005-05-05 16:57:39Z bernhard $
+# $Id: bfco.pir 9896 2005-11-10 23:40:39Z bernhard $
 # An Optimizing Brainfuck compiler
 # By Leo based on bfc.imc by Leon
 ##########################
@@ -262,8 +262,8 @@ NEXT:
 
   # Now actually run it
   compreg P1, "PASM"
-  compile P0, P1, code
-  invoke
+  P0 = P1( code )
+  P0()
   end
 debug:
   ret

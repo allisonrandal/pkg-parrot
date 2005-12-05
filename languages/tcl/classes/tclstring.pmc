@@ -1,7 +1,7 @@
 /* TclString.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: tclstring.pmc 8148 2005-05-24 00:53:04Z coke $
+ *     $Id: tclstring.pmc 10093 2005-11-18 15:21:29Z coke $
  *  Overview:
  *     These are the vtable functions for the TclString base class
  *  Data Structure and Algorithms:
@@ -15,7 +15,7 @@
 
 static STRING *true, *false, *yes, *no;
 
-pmclass TclString extends TclObject extends String dynpmc group tcl_group {
+pmclass TclString extends TclObject extends String dynpmc group tcl_group hll Tcl maps String {
 
     void class_init () {
         PMC *string_anchor;

@@ -1,6 +1,14 @@
-#! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: string_cs.t 9763 2005-11-03 21:34:23Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: string_cs.t 10228 2005-11-28 22:52:05Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+use Parrot::Config;
+
 
 =head1 NAME
 
@@ -8,7 +16,7 @@ t/op/string_cs.t - String Charset Tests
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/string_cs.t
+	% prove t/op/string_cs.t
 
 =head1 DESCRIPTION
 
@@ -16,8 +24,6 @@ Tests charset support.
 
 =cut
 
-use Parrot::Test tests => 31;
-use Test::More;
 
 output_is( <<'CODE', <<OUTPUT, "basic syntax" );
     set S0, ascii:"ok 1\n"
@@ -244,12 +250,12 @@ CODE
 OUTPUT
 
 SKIP: {
-  skip('TODO wordboundary', 1);
-output_is( <<'CODE', <<OUTPUT, "find_word_boundary");
+  skip('TODO wordboundary has no cclass', 1);
+output_is( <<'CODE', <<OUTPUT, "find a word_boundary");
     set S0, "_ab 09z"
     set I0, 0
 lp:
-    find_word_boundary I0, S0, I0
+    find_cclass I0, .CCLASS_???, S0, I0, I1
     print I0
     print " "
     eq I0, -1, done
@@ -259,7 +265,7 @@ done:
     print "ok\n"
     end
 CODE
-0 2 3 6 -1 ok
+0 2 3 6 7 ok
 OUTPUT
 }
 
@@ -504,3 +510,340 @@ CODE
 abcdefg
 abcdefg
 OUTPUT
+
+SKIP: {
+  skip('no ICU lib', 16) unless $PConfig{has_icu};
+output_is( <<'CODE', <<"OUTPUT", "unicode downcase");
+    set S0, iso-8859-1:"TÖTSCH"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    downcase S1
+    getstdout P0          # need to convert back to utf8
+    push P0, "utf8"       # push utf8 output layer
+    print S1
+    print "\n"
+    end
+CODE
+t\xc3\xb6tsch
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "unicode downcase, trans_charset_s_i");
+    set S0, iso-8859-1:"TÖTSCH"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    downcase S1
+    find_charset I0, "iso-8859-1"
+    trans_charset S1, I0
+    print S1
+    print "\n"
+    end
+CODE
+t\xf6tsch
+OUTPUT
+output_is( <<'CODE', <<"OUTPUT", "unicode downcase - transcharset");
+    set S0, iso-8859-1:"TÖTSCH"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    downcase S1
+    find_encoding I0, "utf8"
+    trans_encoding S2, S1, I0
+    print S2
+    print "\n"
+    end
+CODE
+t\xc3\xb6tsch
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 ord, length");
+    set S0, iso-8859-1:"TÖTSCH"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    find_encoding I0, "utf16"
+    trans_encoding S1, S1, I0
+    length I1, S1
+    print I1
+    print "\n"
+    null I0
+loop:
+    ord I2, S1, I0
+    print I2
+    print '_'
+    inc I0
+    lt I0, I1, loop
+    print "\n"
+    end
+CODE
+6
+84_214_84_83_67_72_
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "chopn utf8");
+    set S0, iso-8859-1:"TTÖÖ"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    chopn S1, 2
+    print_item S1
+    length I0, S1
+    print_item I0
+    .include "stringinfo.pasm"
+    stringinfo I0, S1, .STRINGINFO_BUFUSED
+    print_item I0
+    print_newline
+    end
+CODE
+TT 2 2
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 append");
+    set S0, iso-8859-1:"Tötsch"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    find_encoding I0, "utf16"
+    trans_encoding S1, S1, I0
+    concat S1, " Leo"
+    length I0, S1
+    print_item I0
+    .include "stringinfo.pasm"
+    stringinfo I0, S1, .STRINGINFO_BUFUSED
+    print_item I0
+    print_newline
+    find_encoding I0, "utf8"
+    trans_encoding S2, S1, I0
+    print S2
+    print "\n"
+    end
+CODE
+10 20
+T\xc3\xb6tsch Leo
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 concat");
+    set S0, iso-8859-1:"Tötsch"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    find_encoding I0, "utf16"
+    trans_encoding S1, S1, I0
+    concat S2, S1, " Leo"
+    length I0, S2
+    print_item I0
+    .include "stringinfo.pasm"
+    stringinfo I0, S2, .STRINGINFO_BUFUSED
+    print_item I0
+    print_newline
+    find_encoding I0, "utf8"
+    trans_encoding S2, S2, I0
+    print S2
+    print "\n"
+    end
+CODE
+10 20
+T\xc3\xb6tsch Leo
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 substr");
+    set S0, iso-8859-1:"Tötsch"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    find_encoding I0, "utf16"
+    trans_encoding S1, S1, I0
+    substr S2, S1, 1, 2
+    find_encoding I0, "utf8"
+    trans_encoding S2, S2, I0
+    print S2
+    print "\n"
+    end
+CODE
+\xc3\xb6t
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 replace");
+    set S0, iso-8859-1:"Tötsch"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    find_encoding I0, "utf16"
+    trans_encoding S1, S1, I0
+    substr S2, S1, 1, 1, "oe"
+    find_encoding I0, "utf8"
+    trans_encoding S2, S2, I0
+    trans_encoding S1, S1, I0
+    print S2
+    print "\n"
+    print S1
+    print "\n"
+    end
+CODE
+\xc3\xb6
+Toetsch
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 index, latin1 search");
+    set S0, iso-8859-1:"TÖTSCH"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    downcase S1
+    set S2, iso-8859-1:"öt"
+    index I0, S1, S2
+    print I0
+    print "\n"
+    end
+CODE
+1
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "utf16 index, latin1 search");
+    set S0, iso-8859-1:"TÖTSCH"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    downcase S1
+    set S2, iso-8859-1:"öt"
+    index I0, S1, S2
+    print I0
+    print "\n"
+    concat S1, S2
+    index I0, S1, S2, 2
+    print I0
+    print "\n"
+    end
+CODE
+1
+6
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "unicode upcase");
+    set S0, iso-8859-1:"tötsch"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    upcase S1
+    getstdout P0          # need to convert back to utf8
+    push P0, "utf8"       # push utf8 output layer
+    print S1
+    print "\n"
+    end
+CODE
+T\x{c3}\x{96}TSCH
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "unicode upcase to combined char");
+    set S1, unicode:"hacek j \u01f0"
+    upcase S1
+    getstdout P0          # need to convert back to utf8
+    push P0, "utf8"       # push utf8 output layer
+    print S1
+    print "\n"
+    end
+CODE
+HACEK J J\xcc\x8c
+OUTPUT
+
+# charset/unicode.c
+#
+# 106         dest_len = u_strToUpper(src->strstart, dest_len,
+# (gdb) p src_len
+# $17 = 7
+# (gdb) p dest_len
+# $18 = 7
+# (gdb) x /8h src->strstart
+# 0x844fb60:      0x005f  0x005f  0x005f  0x01f0  0x0031  0x0032  0x0033  0x0000
+# (gdb) n
+# 110         src->bufused = dest_len * sizeof(UChar);
+# (gdb) p dest_len
+# $19 = 8
+# (gdb) x /8h src->strstart
+# 0x844fb60:      0x005f  0x005f  0x005f  0x004a  0x030c  0x0031  0x0032  0x0000
+
+output_is( <<'CODE', <<"OUTPUT", "unicode upcase to combined char 3.2 bug?");
+    set S1, unicode:"___\u01f0123"
+    upcase S1
+    getstdout P0          # need to convert back to utf8
+    push P0, "utf8"       # push utf8 output layer
+    print S1
+    print "\n"
+    end
+CODE
+___J\xcc\x8c123
+OUTPUT
+
+output_is( <<'CODE', <<"OUTPUT", "unicode titlecase");
+    set S0, iso-8859-1:"tötsch leo"
+    find_charset I0, "unicode"
+    trans_charset S1, S0, I0
+    titlecase S1
+    getstdout P0          # need to convert back to utf8
+    push P0, "utf8"       # push utf8 output layer
+    print S1
+    print "\n"
+    end
+CODE
+T\x{c3}\x{b6}tsch Leo
+OUTPUT
+
+output_is( <<'CODE', <<OUTPUT, "combose combined char" );
+    set S1, unicode:"___\u01f0___"
+    length I0, S1
+    upcase S1        # decompose J+hacek
+    length I1, S1    # 1 longer
+    downcase S1      # j+hacek
+    length I2, S1
+    compose S1, S1
+    length I3, S1    # back at original string
+    getstdout P0          # need to convert back to utf8
+    push P0, "utf8"       # push utf8 output layer
+    print S1
+    print "\n"
+    print_item I0
+    print_item I1
+    print_item I2
+    print_item I3
+    print_newline
+    end
+CODE
+___\x{c7}\x{b0}___
+7 8 8 7
+OUTPUT
+
+}  # SKIP
+
+output_is( <<'CODE', <<'OUTPUT', "escape ascii" );
+    set S0, "abcdefghi\n"
+    escape S1, S0
+    print S1
+    print "\n"
+    end
+CODE
+abcdefghi\n
+OUTPUT
+
+output_is( <<'CODE', <<'OUTPUT', "escape ctrl" );
+    set S0, "\x00\x01\x1f\x7f"
+    escape S1, S0
+    print S1
+    print "\n"
+    end
+CODE
+\x{0}\x{1}\x{1f}\x{7f}
+OUTPUT
+
+output_is( <<'CODE', <<'OUTPUT', "escape latin1");
+    set S0, iso-8859-1:"tötsch leo"
+    escape S1, S0
+    print S1
+    print "\n"
+    end
+CODE
+t\x{f6}tsch leo
+OUTPUT
+
+output_is( <<'CODE', <<'OUTPUT', "escape unicode" );
+    set S0, unicode:"\u2001\u2002\u2003\u2004\x{e01ef}\u0114"
+    escape S1, S0
+    print S1
+    print "\n"
+    end
+CODE
+\u2001\u2002\u2003\u2004\x{e01ef}\u0114
+OUTPUT
+
+
+## remember to change the number of tests :-)
+BEGIN { plan tests => 51; }
+

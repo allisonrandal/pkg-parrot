@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Test.pm 8483 2005-07-01 15:51:04Z particle $
+# $Id: Test.pm 10095 2005-11-18 17:47:48Z particle $
 
 =head1 NAME
 
@@ -26,6 +26,7 @@ This module provides various Parrot-specific test functions.
 
 =head2 Functions
 
+The parameter C<$language> is the language of the code.
 The parameter C<$code> is the code that should be executed or transformed.
 The parameter C<$expected> is the expected result.
 The parameter C<$unexpected> is the unexpected result.
@@ -33,12 +34,32 @@ The parameter C<$description> should describe the test.
 
 Any optional parameters can follow.  For example, to mark a test as a TODO test (where you know the implementation does not yet work), pass:
 
-	todo => 'reason to consider this TODO'
+    todo => 'reason to consider this TODO'
 
 at the end of the argument list.  Valid reasons include C<bug>,
 C<unimplemented>, and so on.
 
 =over 4
+
+=item C<language_output_is( $language, $code, $expected, $description)> 
+
+Runs a langugage test and passes the test if a string comparison
+of the output with the expected result it true.
+
+=item C<language_output_like( $language, $code, $expected, $description)> 
+
+Runs a langugage test and passes the test
+if the  output matches the expected result.
+
+=item C<language_output_isnt( $language, $code, $expected, $description)> 
+
+Runs a langugage test and passes the test if a string comparison
+if a string comparison of the output with the unexpected result is false.
+
+=item C<pasm_output_isnt($code, $unexpected, $description)> or C<output_isnt($code, $unexpected, $description)>
+
+Runs the Parrot Assembler code and passes the test
+if a string comparison of the output with the unexpected result is false.
 
 =item C<pasm_output_is($code, $expected, $description)> or C<output_is($code, $expected, $description)>
 
@@ -54,6 +75,21 @@ the  output matches the expected result.
 
 Runs the Parrot Assembler code and passes the test
 if a string comparison of the output with the unexpected result is false.
+
+=item C<past_output_is($code, $expected, $description)>
+
+Runs the PAST code and passes the test if a string comparison of output
+with the expected result is true.
+
+=item C<past_output_like($code, $expected, $description)>
+
+Runs the PAST code and passes the test if output matches the expected
+result.
+
+=item C<past_output_isnt($code, $unexpected, $description)>
+
+Runs the PAST code and passes the test if a string comparison of the output
+with the unexpected result is false.
 
 =item C<pir_output_is($code, $expected, $description)>
 
@@ -115,6 +151,11 @@ expected result.
 Compiles and runs the C code, passing the test if a string comparison of
 output with the unexpected result is false.
 
+=item C<example_output_is( $example_fn, $expected )
+
+Determine the language from the extension of C<$example_fn> and
+runs language_output_is().
+
 =item C<skip($why, $how_many)>
 
 Use within a C<SKIP: { ... }> block to indicate why and how many test
@@ -126,9 +167,9 @@ Run the given $command in a cross-platform manner.
 
 %options include...
 
-    STDOUT	filehandle to redirect STDOUT to
-    STDERR     	filehandle to redirect STDERR to
-    CD		directory to run the command in
+    STDOUT    filehandle to redirect STDOUT to
+    STDERR    filehandle to redirect STDERR to
+    CD        directory to run the command in
 
 For example:
 
@@ -158,13 +199,16 @@ require Test::Builder;
 require Test::More;
 
 
-@EXPORT = qw( output_is          output_like          output_isnt
+@EXPORT = qw( 
+              language_output_is language_output_like language_output_isnt
+              example_output_is
+              output_is          output_like          output_isnt
               pasm_output_is     pasm_output_like     pasm_output_isnt
+              past_output_is     past_output_like     past_output_isnt
               pir_output_is      pir_output_like      pir_output_isnt
               pir_2_pasm_is      pir_2_pasm_like      pir_2_pasm_isnt
               pbc_output_is      pbc_output_like      pbc_output_isnt
               c_output_is        c_output_like        c_output_isnt
-              language_output_is language_output_like language_output_isnt
               plan
               skip
               slurp_file
@@ -309,6 +353,9 @@ sub _generate_functions {
         pasm_output_is     => 'is_eq',
         pasm_output_isnt   => 'isnt_eq',
         pasm_output_like   => 'like',
+        past_output_is     => 'is_eq',
+        past_output_isnt   => 'isnt_eq',
+        past_output_like   => 'like',
         pir_output_is      => 'is_eq',
         pir_output_isnt    => 'isnt_eq',
         pir_output_like    => 'like',
@@ -342,16 +389,19 @@ sub _generate_functions {
             # Name of the file with test code.
             # This depends on which kind of code we are testing.
             my $code_f;
-            if ( $func =~ /^pir_output/ ) {
+            if ( $func =~ m/^pir_output/ ) {
                 $code_f = per_test('.pir', $test_no);
             }
             elsif ( $func =~ m/^output_/ || $func =~ m/^pasm_output_/ ) {
                 $code_f = per_test('.pasm', $test_no);
             }
-            elsif ( $func =~ /^pir_2_pasm_/) {
+            elsif ( $func =~ m/^past_/) {
+                $code_f = per_test('.past', $test_no);
+            }
+            elsif ( $func =~ m/^pir_2_pasm_/) {
                 $code_f = per_test('.pir', $test_no);
             }
-            elsif ( $func =~ /^pbc_output_/ ) {
+            elsif ( $func =~ m/^pbc_output_/ ) {
                 $code_f = per_test('.pbc', $test_no);
             }
             else {
@@ -365,17 +415,17 @@ sub _generate_functions {
                 my $pbc_f = per_test('.pbc', $test_no);
                 my $cmd = qq{$parrot ${args} -o $pbc_f "$code_f"};
                 run_command($cmd, CD => $path_to_parrot,
-			    STDOUT => $out_f, STDERR => $out_f);
+                STDOUT => $out_f, STDERR => $out_f);
 
                 my $o_f = per_test('.o', $test_no);
                 $cmd = qq{$parrot ${args} -o $o_f "$pbc_f"};
                 run_command($cmd, CD => $path_to_parrot,
-			    STDOUT => $out_f, STDERR => $out_f);
+                STDOUT => $out_f, STDERR => $out_f);
 
                 my $noext_f = per_test('', $test_no);
                 $cmd = qq{make EXEC=$noext_f exec};
                 run_command($cmd, CD => $path_to_parrot,
-			    STDOUT => $out_f, STDERR => $out_f);
+                STDOUT => $out_f, STDERR => $out_f);
             }
             if ( $func =~ /^pbc_output_/ && $args =~ /-r / ) {
                 # native tests with --run-pbc don't make sense
@@ -383,7 +433,7 @@ sub _generate_functions {
             }
             elsif ( $func =~ /^pir_2_pasm_/) {
                 $out_f = per_test('.pasm', $test_no);
-	        my $opt = $code_f =~ m!opt(.)! ? "-O$1" : "-O1";
+                my $opt = $code_f =~ m!opt(.)! ? "-O$1" : "-O1";
                 $args = "$args $opt --output=$out_f";
             }
             $code_f = File::Spec->rel2abs($code_f);
@@ -424,9 +474,9 @@ sub _generate_functions {
 
                 # Normalize the expected output,
                 # Let's not worry too much about whitespace
-	        $expected =~ s/^\s*$//gm;
-	        $expected =~ s/[\t ]+/ /gm;
-	        $expected =~ s/[\t ]+$//gm;
+                $expected =~ s/^\s*$//gm;
+                $expected =~ s/[\t ]+/ /gm;
+                $expected =~ s/[\t ]+$//gm;
             }
 
             # set a TODO for Test::Builder to find
@@ -446,39 +496,54 @@ sub _generate_functions {
         }
     }
 
+    my %builtin_language_prefix = (
+        IMC   => 'pir',
+        PASM  => 'pasm',
+        PAST  => 'past',
+        PIR   => 'pir',
+                                  );
+
     my %language_test_map = (
         language_output_is   => 'output_is',
         language_output_like => 'output_like',
         language_output_isnt => 'output_isnt',
-                             );
+                            );
 
     foreach my $func ( keys %language_test_map ) {
         no strict 'refs';
 
         *{$package.'::'.$func} = sub ($$$;$) {
-            # TODO: $language should be the name of the test Module
-            #       that would open the door for Scheme::Test
-            my $language = $_[0];
-            $language = ucfirst($language) unless ( $language eq 'm4' );
+            my ( $language, @remaining ) = @_;
 
-            # make sure TODO will work, by telling Test::Builder which package
-            # the .t file is in (one more than usual, due to the extra layer
-            # of package indirection
-            my $level = $builder->level();
-            $builder->level(2);
-
-            # get modified parrot command.
-            require "Parrot/Test/$language.pm";
-            # set the builder object, and parrot config.
-            my $obj = eval "Parrot::Test::${language}->new()";
-            $obj->{builder} = $builder;
-            $obj->{relpath} = $path_to_parrot;
-            $obj->{parrot}  = $parrot;
             my $meth = $language_test_map{$func};
-            $obj->$meth(@_[1..$#_]);
+            if ( my $prefix = $builtin_language_prefix{$language} ) { 
+                my $test_func = "${package}::${prefix}_${meth}";
+                &$test_func( @remaining );
+            }
+            else {
+                # TODO: $language should be the name of the test Module
+                #       that would open the door for Scheme::Test
+                # try it both ways
+                $language = ucfirst($language) unless ( $language eq 'm4' );
 
-            # restore prior level, just in case.
-            $builder->level($level);
+                # make sure TODO will work, by telling Test::Builder which package
+                # the .t file is in (one more than usual, due to the extra layer
+                # of package indirection
+                my $level = $builder->level();
+                $builder->level(2);
+
+                # get modified parrot command.
+                require "Parrot/Test/$language.pm";
+                # set the builder object, and parrot config.
+                my $obj = eval "Parrot::Test::${language}->new()";
+                $obj->{builder} = $builder;
+                $obj->{relpath} = $path_to_parrot;
+                $obj->{parrot}  = $parrot;
+                $obj->$meth(@remaining);
+
+                # restore prior level, just in case.
+                $builder->level($level);
+            }
         }
     }
 
@@ -531,35 +596,34 @@ sub _generate_functions {
 
             my ($cmd, $exit_code);
             $cmd = "$PConfig{cc} $PConfig{ccflags} $PConfig{cc_debug} " .
-	           " -I./include -c " .
-                   "$PConfig{cc_o_out}$obj_f $source_f";
+                " -I./include -c " .
+                "$PConfig{cc_o_out}$obj_f $source_f";
             $exit_code = run_command($cmd,
-		    'STDOUT' => $build_f,
-		    'STDERR' => $build_f);
+                'STDOUT' => $build_f,
+                'STDERR' => $build_f);
             $builder->diag("'$cmd' failed with exit code $exit_code")
-			if $exit_code;
+                if $exit_code;
 
             if (! -e $obj_f) {
                 $builder->diag("Failed to build '$obj_f': " .
-			slurp_file($build_f));
+                    slurp_file($build_f));
                 unlink $build_f;
                 $builder->ok(0,$desc);
                 return 0;
             }
 
-	    my $cfg = "src$PConfig{slash}parrot_config$PConfig{o}";
+        my $cfg = "src$PConfig{slash}parrot_config$PConfig{o}";
             $cmd = "$PConfig{link} $PConfig{linkflags} $PConfig{ld_debug} " .
-		   "$obj_f $cfg $PConfig{ld_out}$exe_f " .
-		   "$libparrot $iculibs $PConfig{libs}";
+           "$obj_f $cfg $PConfig{ld_out}$exe_f " .
+           "$libparrot $iculibs $PConfig{libs}";
             $exit_code = run_command($cmd,
-		'STDOUT' => $build_f,
-		'STDERR' => $build_f);
+        'STDOUT' => $build_f,
+        'STDERR' => $build_f);
             $builder->diag("'$cmd' failed with exit code $exit_code")
-		if $exit_code;
+        if $exit_code;
 
             if (! -e $exe_f) {
-                $builder->diag("Failed to build '$exe_f': " .
-			slurp_file($build_f));
+                $builder->diag("Failed to build '$exe_f': " . slurp_file($build_f));
                 unlink $build_f;
                 $builder->ok(0,$desc);
 
@@ -582,6 +646,28 @@ sub _generate_functions {
 
             return $pass;
         }
+    }
+}
+
+sub example_output_is {
+    my ($example_fn, $expected) = @_;
+
+    my %lang_for_extension 
+        = ( pasm => 'PASM',
+            past => 'PAST',
+            pir  => 'PIR',
+            imc  => 'PIR', );
+
+    my ( $extension ) = $example_fn =~ m{ [.]                         # introducing extension
+                                          ( pasm | pir | imc | past ) # match and capture the extension
+                                          \z                          # at end of string
+                                        }ixms or Usage();
+    if ( defined $extension ) { 
+        my $code = slurp_file($example_fn);
+        language_output_is( $lang_for_extension{$extension}, $code, $expected, $example_fn );
+    }
+    else {
+      fail( defined $extension, "no extension recognized for $example_fn" );
     }
 }
 

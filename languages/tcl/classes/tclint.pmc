@@ -1,7 +1,7 @@
 /* TclInt.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: tclint.pmc 9260 2005-09-28 16:00:42Z robert $
+ *     $Id: tclint.pmc 10093 2005-11-18 15:21:29Z coke $
  *  Overview:
  *     These are the vtable functions for the TclInt base class
  *  Data Structure and Algorithms:
@@ -11,7 +11,7 @@
 
 #include "parrot/parrot.h"
 
-pmclass TclInt extends TclObject extends Integer dynpmc group tcl_group {
+pmclass TclInt extends TclObject extends Integer dynpmc group tcl_group hll Tcl maps Integer {
 
     /*
      * MMD Override:

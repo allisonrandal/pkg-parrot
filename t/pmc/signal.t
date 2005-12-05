@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: signal.t 9544 2005-10-24 19:38:34Z leo $
+# $Id: signal.t 10196 2005-11-27 01:49:35Z coke $
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ my %platforms = map {$_=>1} qw/
 
 if ($platforms{$^O}) {
     #plan tests => 3;
-    plan skip_all => 'Signals currently diabled';
+    plan skip_all => 'Signals currently disabled';
 }
 else {
     plan skip_all => 'No events yet';

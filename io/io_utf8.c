@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_utf8.c 7588 2005-03-02 17:00:51Z leo $
+$Id: io_utf8.c 9901 2005-11-11 14:27:10Z leo $
 
 =head1 NAME
 
@@ -52,7 +52,8 @@ PIO_utf8_write(theINTERP, ParrotIOLayer *l, ParrotIO *io, STRING *s)
     if (s->encoding == Parrot_utf8_encoding_ptr)
         return PIO_write_down(interpreter, l->down, io, s);
 
-    dest = Parrot_utf8_encoding_ptr->copy_to_encoding(interpreter, s);
+    dest = Parrot_utf8_encoding_ptr->to_encoding(interpreter, s,
+            new_string_header(interpreter, 0));
     return PIO_write_down(interpreter, l->down, io, dest);
 }
 

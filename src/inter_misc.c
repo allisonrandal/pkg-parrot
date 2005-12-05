@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_misc.c 9260 2005-09-28 16:00:42Z robert $
+$Id: inter_misc.c 10240 2005-11-29 12:12:58Z leo $
 
 =head1 NAME
 
@@ -252,7 +252,7 @@ interpinfo_p(Interp *interpreter, INTVAL what)
         case NAMESPACE_ROOT: /* XXX */
             return interpreter->globals->stash_hash;
         case CURRENT_LEXPAD:
-            return scratchpad_get_current(interpreter);
+            return CONTEXT(interpreter->ctx)->lex_pad;
         default:        /* or a warning only? */
             internal_exception(UNIMPLEMENTED,
                     "illegal argument in interpinfo");

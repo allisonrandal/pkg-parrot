@@ -2,9 +2,9 @@
 
 use strict;
 use lib qw(tcl/t t . ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 57;
+use Parrot::Test tests => 63;
+use Parrot::Config;
 use Test::More;
-use vars qw($TODO);
 
 language_output_is("tcl",<<TCL,<<OUT,"first, initial");
  string
@@ -102,15 +102,41 @@ TCL
 
 OUT
 
-TODO: {
-local $TODO="__string_index can't handle negative numbers yet.";
-
-language_output_is("tcl",<<TCL,<<OUT,"index, undershot");
+language_output_is("tcl",<<TCL,<<OUT,"index, undershot, neg.");
  puts [string index abcde -1]
 TCL
 
 OUT
-}
+
+language_output_is("tcl",<<TCL,<<OUT,"index, overshot, neg.");
+ puts [string index abcde end--1]
+TCL
+
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"index, float");
+ puts [string index abcde 1.2]
+TCL
+bad index "1.2": must be integer or end?-integer?
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"index, end-float");
+ puts [string index abcde end-1.2]
+TCL
+bad index "end-1.2": must be integer or end?-integer?
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"index, overshot, neg.");
+ puts [string index abcde bogus]
+TCL
+bad index "bogus": must be integer or end?-integer?
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"index, bad -end");
+ puts [string index abcde end-bogus]
+TCL
+bad index "end-bogus": must be integer or end?-integer?
+OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"length, too many args");
  puts [string length a b]
@@ -144,7 +170,7 @@ TCL
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"range, too many args");
- string range a b c d 
+ string range a b c d
 TCL
 wrong # args: should be "string range string first last"
 OUT
@@ -215,11 +241,20 @@ TCL
 0
 OUT
 
+SKIP: {
+  skip("Parrot not configured with ICU",2) unless $PConfig{has_icu};
 language_output_is("tcl",<<TCL,<<OUT,"string match nocase");
-  puts [string match -nocase ABC abc ]
+  puts [string match -nocase ABC abc]
 TCL
 1
 OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string match nocase: unicode (Greek alphas)");
+  puts [string match -nocase \u03b1 \u0391]
+TCL
+1
+OUT
+}
 
 language_output_is("tcl",<<'TCL',<<OUT,"string match \[");
   puts [string match {\[} {[}]
@@ -337,6 +372,9 @@ TCL
 1
 OUT
 
+SKIP: {
+  skip("Parrot not configured with ICU",3) unless $PConfig{has_icu};
+
 language_output_is("tcl",<<'TCL',<<OUT,"string equal, diff with -nocase");
   puts [string equal -nocase APPLEs oranGES]
 TCL
@@ -354,5 +392,5 @@ language_output_is("tcl",<<'TCL',<<OUT,"string equal, -length and -nocase");
 TCL
 1
 OUT
-
+}
 

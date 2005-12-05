@@ -1,7 +1,7 @@
 /* sub.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: sub.h 9599 2005-10-27 19:43:43Z leo $
+ *     $Id: sub.h 10240 2005-11-29 12:12:58Z leo $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures
@@ -48,8 +48,8 @@ union parrot_context_t;
 #define NEED_CONTINUATION ((void*)1)
 
 /*
- * Sub and Closure share a Parrot_sub structure, Closure has additionally
- * a lexical pad stack
+ * Sub and Closure share a Parrot_sub structure.
+ * Closures have additionally an 'outer_ctx'
  */
 typedef struct Parrot_sub {
     struct PackFile_ByteCode *seg;      /* bytecode segment */
@@ -62,12 +62,13 @@ typedef struct Parrot_sub {
     PMC      *multi_signature;  /* list of types for MMD */
     INTVAL   n_regs_used[4];	/* INSP in PBC */
 
-    PMC      *lexicals;         /* OrderedHash of Lexicals */
+    PMC      *lex_info;         /* LexInfo PMC */
+    PMC      *outer_sub;        /* :outer for closures */
     PMC      *eval_pmc;         /* eval container / NULL */
+    parrot_context_t *ctx;      /* the context this sub is in */
 
     /* - end common */
-
-    struct Stack_Chunk *pad_stack;      /* only for closure */
+    struct Parrot_Context *outer_ctx;   /* outer context, if a closure */
 } * parrot_sub_t;
 
 #define PMC_sub(pmc)		  ((parrot_sub_t)PMC_struct_val(pmc))
@@ -87,12 +88,13 @@ typedef struct Parrot_coro {
     PMC      *multi_signature;  /* list of types for MMD */
     INTVAL   n_regs_used[4];	/* INSP in PBC */
 
-    PMC      *lexicals;         /* OrderedHash of Lexicals */
+    PMC      *lex_info;         /* LexInfo PMC */
+    PMC      *outer_sub;        /* :outer for closures */
     PMC      *eval_pmc;         /* eval container / NULL */
+    struct Parrot_Context  *ctx;          /* coroutine context */
 
     /* - end common */
 
-    struct Parrot_Context  *ctx;          /* coroutine context */
     struct PackFile_ByteCode *caller_seg;  /* bytecode segment */
 } * parrot_coro_t;
 
@@ -106,7 +108,8 @@ typedef struct Parrot_cont {
     struct Parrot_Context *to_ctx;   /* pointer to dest context */
     /* a Continuation keeps the from_ctx alive */
     struct Parrot_Context *from_ctx;  /* sub, this cont is returning from */
-    struct Parrot_Context *ctx_copy; /* full continuation only */
+    opcode_t *current_results;    /* ptr into code with get_results opcode
+                                    full continuation only */
 } * parrot_cont_t;
 
 #define PMC_cont(pmc)		  ((parrot_cont_t)PMC_struct_val(pmc))
@@ -137,6 +140,9 @@ void invalidate_retc_context(Interp *interpreter, PMC *cont);
 STRING* Parrot_full_sub_name(Interp* interpreter, PMC* sub);
 int Parrot_Context_info(Interp *interpreter, parrot_context_t *, struct Parrot_Context_info *);
 STRING* Parrot_Context_infostr(Interp *interpreter, parrot_context_t *);
+
+PMC* Parrot_find_pad(Interp*, STRING *lex_name, parrot_context_t *);
+PMC* parrot_new_closure(Interp*, PMC*);
 
 #endif /* PARROT_SUB_H_GUARD */
 

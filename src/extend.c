@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: extend.c 9641 2005-10-30 11:49:47Z rafl $
+$Id: extend.c 10177 2005-11-25 15:05:03Z leo $
 
 =head1 NAME
 
@@ -714,6 +714,8 @@ Parrot_call_sub(Parrot_INTERP interpreter, Parrot_PMC sub,
     PARROT_CALLIN_START(interpreter);
 
     va_start(ap, signature);
+    CONTEXT(interpreter->ctx)->constants =
+        PMC_sub(sub)->seg->const_table->constants;
     result = Parrot_runops_fromc_arglist(interpreter, sub, signature, ap);
     va_end(ap);
 

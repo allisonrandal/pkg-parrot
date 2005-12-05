@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: debug.pod 9718 2005-11-02 19:12:47Z leo $
+# $Id: debug.pod 10340 2005-12-04 06:58:31Z chromatic $
 
 =head1 NAME
 
@@ -160,5 +160,3 @@ list of flags. Or have a look at the information provided by:
 or
 
   shell> parrot --help-debug
-
-=back

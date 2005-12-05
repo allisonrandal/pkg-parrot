@@ -81,18 +81,9 @@ providing a compreg-compatible method.
 .sub __prepare_lib :load :anon
 
   # Load any dependant libraries.
-  load_bytecode "languages/tcl/lib/tclbinaryops.pbc"
-  load_bytecode "languages/tcl/lib/tclcommand.pbc"
-  load_bytecode "languages/tcl/lib/tclcommandlist.pbc"
-  load_bytecode "languages/tcl/lib/tclconst.pbc"
-  load_bytecode "languages/tcl/lib/tclfunc.pbc"
-  load_bytecode "languages/tcl/lib/tclops.pbc"
-  load_bytecode "languages/tcl/lib/tclvar.pbc"
-  load_bytecode "languages/tcl/lib/tclword.pbc"
-  load_bytecode "library/Data/Escape.pbc"
   load_bytecode "Getopt/Long.pir"  
-  #load_bytecode "library/PGE.pbc" # XXX Can't load this if Getopt/Long loaded.
-  load_bytecode "library/PGE/Glob.pbc"
+  load_bytecode "PGE.pbc" # XXX Can't load this if Getopt/Long loaded.
+  load_bytecode "PGE/Glob.pbc"
 
   #_load_grammar()
  
@@ -178,26 +169,26 @@ providing a compreg-compatible method.
   store_global "_Tcl", "proc_body", $P1
 
   $P1 = new .TclArray
-  store_global "_Tcl", "proc_parsed", $P1
-
-  $P1 = new .TclArray
   store_global "_Tcl", "proc_args", $P1
 
-  # We need to store these ourselves, because creating dynamic
-  # .subroutines in PIR runs the risk of garbage collection if we're
-  # not careful. 
-  # XXX - these should be removed when the procedure is then deleted.
-  $P1 = new .TclArray
-  store_global "_Tcl", "proc_exec", $P1
-
   # Global variable initialization
+
+   #version info
   $P0 = new .String
   $P0 = "0.1"
   store_global "Tcl", "$tcl_patchLevel", $P0
   $P0 = new .String
   $P0 = "0.1"
   store_global "Tcl", "$tcl_version", $P0
- 
+   
+    #error information
+  $P0 = new .TclString
+  $P0 = 'NONE'
+  store_global 'Tcl', '$errorCode', $P0
+  $P0 = new .TclString
+  $P0 = ''
+  store_global 'Tcl', '$errorInfo', $P0
+
   # Setup the default channelIds
   $P1 = new .TclArray
   $P2 = getstdin
@@ -213,10 +204,18 @@ providing a compreg-compatible method.
   $P1 = 1
   store_global "_Tcl", "next_channel_id", $P1
 
-  # Setup the calling level (for upvar, uplevel, interpreter)
+  # calling level (for upvar, uplevel, globals vs. lex)
   $P1 = new .Integer
   $P1 = 0
   store_global "_Tcl", "call_level", $P1
+
+  # Change counter: when something is compiled, it is compared to
+  # This counter: if the counter hasn't changed since it was compiled,
+  # it's safe to use the inline version (if available)
+  # Otherwise fallback to the interpreted version.
+  $P1 = new .Integer
+  $P1 = 0
+  store_global "_Tcl", "epoch", $P1
 
   # register the TCL compiler.
   $P1 = find_global "_Tcl", "_tcl_compile"
@@ -243,6 +242,8 @@ providing a compreg-compatible method.
   ($I0,$S0) = compiler(0,tcl_code)
   .return pir_compiler($I0,$S0)
 .end
+
+${FALLBACKS}
 
 ${RULES}
 

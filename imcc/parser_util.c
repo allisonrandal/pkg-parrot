@@ -62,7 +62,7 @@ iNEW(Interp *interpreter, IMC_Unit * unit, SymReg * r0,
         IMCC_fataly(interpreter, E_SyntaxError,
                 "Unknown PMC type '%s'\n", type);
     sprintf(fmt, "%%s, %d\t # .%s", pmc_num, type);
-    r0->usage = U_NEW;
+    r0->usage |= U_NEW;
     if (!strcmp(type, "PerlArray") || !strcmp(type, "PerlHash") || !strcmp(type, "Hash"))
         r0->usage |= U_KEYED;
     free(type);
@@ -448,7 +448,6 @@ INS(Interp *interpreter, IMC_Unit * unit, char *name,
             else
                 return NULL;
         }
-        strcpy(fullname, name);
     }
     else
         strcpy(fullname, name);
@@ -928,6 +927,8 @@ try_rev_cmp(Parrot_Interp interpreter, IMC_Unit * unit, char *name,
     for (i = 0; i < sizeof(br_pairs)/sizeof(br_pairs[0]); i++) {
         if (strcmp(name, br_pairs[i].op) == 0) {
             to_swap =  br_pairs[i].to_swap;
+            if (r[to_swap + 1]->set == 'P')
+                return NULL;
             t = r[to_swap];
             r[to_swap] = r[to_swap + 1];
             r[to_swap + 1] = t;

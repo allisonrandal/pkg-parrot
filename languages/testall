@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: testall 9779 2005-11-04 17:41:49Z bernhard $
+# $Id: testall 10287 2005-12-01 10:33:05Z fperrad $
 
 use strict;
 
@@ -69,18 +69,15 @@ my $html = grep { $_ eq '--html' } @ARGV;
 # These could all be tested:
 #
 # BASIC                No t/harness, two implementations
-# Zcode		       Can't run *.t from here, only from subdir
-# cola                 No t/harness, no standard test suite
+# cola                 not maintained
 # conversion           No t/harness
 # forth                No t/harness
 # jako                 No t/harness
 # lisp                 No t/harness
-# miniperl             No t/harness
+# miniperl             not maintained, should be removed
 # parakeet             No t/harness
-# perl6                t/harness has no --files
-# python               needs testing
-# regex                No t/harness
-# ruby                 No t/harness
+# python               not maintained
+# ruby                 not maintained, should be removed
 
 
 my @unified_testable_languages = 
@@ -88,13 +85,17 @@ my @unified_testable_languages =
        bc
        befunge
        bf
+       lua
        m4
        ook
        parrot_compiler
        punie
+       regex
        scheme
        tcl
+       unlambda
        urm );
+# @unified_testable_languages = qw( unlambda );
 
 my @harnesses =
     grep {-f $_}

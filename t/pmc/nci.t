@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: nci.t 9773 2005-11-04 14:18:47Z leo $
+# $Id: nci.t 10170 2005-11-24 19:55:14Z leo $
 
 =head1 NAME
 
@@ -51,6 +51,7 @@ pir_output_is( << 'CODE', << "OUTPUT", "nci_c - return a char in an INTEGER regi
   ( nci_c_out ) = nci_c( )
   print nci_c_out
   print "\n"
+NOT_LOADED:
 .end
 CODE
 libnci_test was successfully loaded
@@ -201,6 +202,7 @@ pir_output_is( << 'CODE', << "OUTPUT", "nci_l - return a long in an INTEGER regi
   ( nci_l_out ) = nci_l( )
   print nci_l_out
   print "\n"
+NOT_LOADED:
 .end
 CODE
 libnci_test was successfully loaded
@@ -236,6 +238,7 @@ pir_output_is( << 'CODE', << "OUTPUT", "nci_p - return a pointer to int");
     I2 = nci_p_out[0]
     print I2
     print "\n"
+NOT_LOADED:
 .end
 CODE
 libnci_test was successfully loaded
@@ -260,6 +263,7 @@ pir_output_is( << 'CODE', << "OUTPUT", "nci_t - return a C-string");
     .local string nci_t_out
     ( nci_t_out ) = nci_t( )
     print nci_t_out
+NOT_LOADED:
 .end
 CODE
 libnci_test was successfully loaded
@@ -285,6 +289,7 @@ pir_output_is( << 'CODE', << "OUTPUT", "nci_s - return a short in an INTEGER reg
   ( nci_s_out ) = nci_s( )
   print nci_s_out
   print "\n"
+NOT_LOADED:
 .end
 CODE
 libnci_test was successfully loaded

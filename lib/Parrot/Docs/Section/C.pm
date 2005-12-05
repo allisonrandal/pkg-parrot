@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: C.pm 6114 2004-05-22 12:30:08Z mikescott $
+# $Id: C.pm 9855 2005-11-09 16:32:50Z jonathan $
 
 =head1 NAME
 
@@ -277,11 +277,6 @@ sub new
             $self->c_pair_item('', 'thread'),
             $self->c_header_item('', 'thr_pthread'),
             $self->c_pair_item('', 'tsq'),
-        ),
-        $self->new_group(
-            'Regular Expressions', 
-            '',
-            $self->c_pair_item('Regular expression support.', 'rx', 'rxstacks'),
         ),
         $self->new_group(
             'Exceptions',

@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: complex.pmc 9498 2005-10-17 13:49:14Z leo $
+$Id: complex.pmc 9888 2005-11-10 17:53:15Z particle $
 
 =head1 NAME
 
@@ -970,11 +970,7 @@ MMD_Complex: {
                     IM(SELF) == IM(value)
                 );
         }
-MMD_Float: {
-/*
-        XXX: the above really should be MMD_DEFAULT, but that causes
-             t/dynclass/pycomplex.t to fail.
-*/
+MMD_DEFAULT: {
             if(IM(SELF) != 0.0)
                 return (INTVAL)0;
             return (RE(SELF) == VTABLE_get_number(INTERP, value));

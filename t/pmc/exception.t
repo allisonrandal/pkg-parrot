@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: exception.t 9714 2005-11-02 18:32:18Z leo $
+# $Id: exception.t 10252 2005-11-29 19:43:20Z leo $
 
 =head1 NAME
 
@@ -16,7 +16,7 @@ Tests C<Exception> and C<Exception_Handler> PMCs.
 
 =cut
 
-use Parrot::Test tests => 26;
+use Parrot::Test tests => 24;
 use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', "push_eh - clear_eh");
@@ -47,6 +47,60 @@ main
 caught it
 OUTPUT
 
+output_is(<<'CODE', <<'OUTPUT', "get_results");
+    print "main\n"
+    push_eh handler
+    new P1, .Exception
+    set P1[0], "just pining"
+    throw P1
+    print "not reached\n"
+    end
+handler:
+    get_results "(0,0)", P0, S0
+    print "caught it\n"
+    typeof S1, P0
+    print S1
+    print "\n"
+    print S0
+    print "\n"
+    null P5
+    end
+
+CODE
+main
+caught it
+Exception
+just pining
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', ".get_results() - PIR");
+.sub main :main
+    print "main\n"
+    push_eh _handler
+    new P1, .Exception
+    set P1[0], "just pining"
+    throw P1
+    print "not reached\n"
+    end
+_handler:
+    .local pmc e
+    .local string s
+    .get_results (e, s)
+    print "caught it\n"
+    typeof S1, e
+    print S1
+    print "\n"
+    print s
+    print "\n"
+    null P5
+.end
+CODE
+main
+caught it
+Exception
+just pining
+OUTPUT
+
 output_is(<<'CODE', <<'OUTPUT', "push_eh - throw - message");
     print "main\n"
     push_eh _handler
@@ -57,8 +111,8 @@ output_is(<<'CODE', <<'OUTPUT', "push_eh - throw - message");
     print "not reached\n"
     end
 _handler:
+    get_results "(0,0)", P5, S0
     print "caught it\n"
-    set S0, P5["_message"]	# P5 is the exception object
     print S0
     print "\n"
     end
@@ -66,56 +120,6 @@ CODE
 main
 caught it
 something happend
-OUTPUT
-
-output_is(<<'CODE', <<'OUTPUT', "push_eh - throw - message, check P5");
-    print "main\n"
-    push_eh _handler
-
-    new P30, .Exception
-    set P30["_message"], "something happend"
-    new P5, .Undef
-    set P5, "a string\n"
-    throw P30
-    print "not reached\n"
-    end
-_handler:
-    print "caught it\n"
-    set S0, P5["_message"]	# P5 is the exception object
-    print S0
-    print "\n"
-    set P0, P5["_P5"]	# original P5
-    print P0
-    end
-CODE
-main
-caught it
-something happend
-a string
-OUTPUT
-
-output_is(<<'CODE', <<'OUTPUT', "push_eh - throw - lexical");
-    print "main\n"
-    new_pad 0
-    new P0, .Integer
-    set P0, 42
-    store_lex -1, "$a", P0
-    push_eh _handler
-
-    new P30, .Exception
-    throw P30
-    print "not reached\n"
-    end
-_handler:
-    print "caught it\n"
-    find_lex P0, "$a"
-    print P0
-    print "\n"
-    end
-CODE
-main
-caught it
-42
 OUTPUT
 
 output_like(<<'CODE', <<'OUTPUT', "throw - no handler");
@@ -161,14 +165,14 @@ output_is(<<'CODE', <<'OUTPUT', "2 exception handlers");
     print "not reached\n"
     end
 _handler1:
+    get_results "(0,0)", P5, S0
     print "caught it in 1\n"
-    set S0, P5["_message"]
     print S0
     print "\n"
     end
 _handler2:
+    get_results "(0,0)", P0, S0
     print "caught it in 2\n"
-    set S0, P5["_message"]
     print S0
     print "\n"
     end
@@ -189,14 +193,14 @@ output_is(<<'CODE', <<'OUTPUT', "2 exception handlers, throw next");
     print "not reached\n"
     end
 _handler1:
+    get_results "(0,0)", P5, S0
     print "caught it in 1\n"
-    set S0, P5["_message"]
     print S0
     print "\n"
     end
 _handler2:
+    get_results "(0,0)", P5, S0
     print "caught it in 2\n"
-    set S0, P5["_message"]
     print S0
     print "\n"
     throw P5	# XXX rethrow?
@@ -227,6 +231,7 @@ output_is(<<'CODE', <<OUT, "die, error, severity");
     print "not reached\n"
     end
 _handler:
+    get_results "(0,0)", P5, S0
     print "caught it\n"
     set I0, P5["_type"]
     print "error "
@@ -254,26 +259,6 @@ CODE
 /No exception handler and no message/
 OUT
 
-output_like(<<'CODE', <<OUT, "find_lex");
-    new_pad 0
-    push_eh _handler
-    find_lex P1, "no_such_thing"
-    clear_eh
-ok:
-    print "resumed\n"
-    end
-_handler:
-    print "caught it\n"
-    set S0, P5["_message"]
-    print S0
-    print "\n"
-    branch ok
-CODE
-/^caught it
-Lexical 'no_such_thing' not found
-resumed
-/
-OUT
 
 output_is(<<'CODE', '', "exit exception");
     noop
@@ -281,46 +266,6 @@ output_is(<<'CODE', '', "exit exception");
     print "not reached\n"
     end
 CODE
-
-pir_output_is(<<'CODE', <<'OUTPUT', "set recursion limit, method call ");
-
-# see also t/op/gc_14.imc
-
-.sub main :main
-    .local pmc n
-    new_pad 0
-    $P0 = getinterp
-    $P0."recursion_limit"(50)
-    newclass $P0, "b"
-    $I0 = find_type "b"
-    $P0 = new $I0
-    $P1 = new Integer
-    $P1 = 0
-    n = $P0."b11"($P1)
-    print "ok 1\n"
-    print n
-    print "\n"
-.end
-.namespace ["b"]
-.sub b11 method
-    .param pmc n
-    .local pmc n1
-    new_pad -1
-    store_lex -1, "n", n
-    n1 = new Integer
-    n1 = n + 1
-    push_eh catch
-    n = self."b11"(n1)
-    store_lex -1, "n", n
-    clear_eh
-catch:
-    n = find_lex "n"
-    .return(n)
-.end
-CODE
-ok 1
-49
-OUTPUT
 
 output_is(<<'CODE', <<'OUTPUT', "push_eh - throw");
     print "main\n"

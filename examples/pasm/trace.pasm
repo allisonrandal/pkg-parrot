@@ -1,13 +1,13 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: trace.pasm 9780 2005-11-04 17:52:59Z bernhard $
+# $Id: trace.pasm 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
-examples/assembly/trace.pasm - Tracing
+examples/pasm/trace.pasm - Tracing
 
 =head1 SYNOPSIS
 
-    % ./parrot examples/assembly/trace.pasm
+    % ./parrot examples/pasm/trace.pasm
 
 =head1 DESCRIPTION
 

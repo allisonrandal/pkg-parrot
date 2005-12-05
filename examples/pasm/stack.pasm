@@ -1,13 +1,13 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: stack.pasm 9765 2005-11-03 22:30:08Z bernhard $
+# $Id: stack.pasm 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
-examples/assembly/stack.pasm - User Stack
+examples/pasm/stack.pasm - User Stack
 
 =head1 SYNOPSIS
 
-    % ./parrot examples/assembly/stack.pasm
+    % ./parrot examples/pasm/stack.pasm
 
 =head1 DESCRIPTION
 

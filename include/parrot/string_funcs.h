@@ -1,7 +1,7 @@
 /* string_funcs.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: string_funcs.h 8176 2005-05-27 10:03:40Z leo $
+ *     $Id: string_funcs.h 10121 2005-11-21 13:00:23Z leo $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -17,7 +17,7 @@
 
 /* Declarations of accessors */
 
-void Parrot_reuse_COW_reference(Interp *, STRING *, STRING *);
+STRING *Parrot_reuse_COW_reference(Interp *, STRING *, STRING *);
 STRING *Parrot_make_COW_reference(Interp *, STRING *);
 void Parrot_unmake_COW(Interp *, STRING *);
 INTVAL string_compute_strlen(Interp *, STRING *);
@@ -26,7 +26,7 @@ STRING *string_concat(Interp *, STRING *, STRING *, UINTVAL);
 STRING *string_append(Interp *, STRING *, STRING *, UINTVAL);
 STRING *string_repeat(Interp *, const STRING *, UINTVAL,
                       STRING **);
-STRING *string_chopn(Interp *, STRING *, INTVAL);
+STRING *string_chopn(Interp *, STRING *, INTVAL, int in_place);
 STRING *string_substr(Interp *, STRING *, INTVAL,
                       INTVAL, STRING **, int replace_dest);
 STRING *string_replace(Interp *, STRING *, INTVAL, INTVAL,
@@ -94,6 +94,9 @@ UINTVAL string_decode_and_advance(struct string_iterator_t *i);
 size_t string_hash(Interp *interpreter, STRING *s, size_t seed);
 STRING * string_unescape_cstring(Interp *,
         const char *cstring, char delimiter, const char *enc_or_charset);
+STRING * string_escape_string(Interp *, STRING *);
+STRING * string_escape_string_delimited(Interp *, STRING *, UINTVAL len);
+STRING * string_compose(Interp *, STRING *);
 
 STRING *string_upcase(Interp *, const STRING *);
 STRING *string_downcase(Interp *, const STRING *);
@@ -120,6 +123,8 @@ INTVAL Parrot_string_find_word_boundary(Interp *, STRING *, INTVAL offset);
 
 STRING* Parrot_string_trans_charset(Interp *, STRING *src,
         INTVAL charset_nr, STRING *dest);
+STRING* Parrot_string_trans_encoding(Interp *, STRING *src,
+        INTVAL encoding_nr, STRING *dest);
 
 CHARSET* string_rep_compatible (Interp *, STRING *a, const STRING *b,
         ENCODING**);

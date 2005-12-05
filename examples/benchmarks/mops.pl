@@ -1,6 +1,6 @@
 #! perl 
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: mops.pl 5578 2004-03-08 11:43:48Z leo $
+# $Id: mops.pl 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
@@ -79,7 +79,7 @@ exit(0);                      # end
 
 =head1 SEE ALSO
 
-F<examples/assembly/mops.pasm>,
+F<examples/benchmarks/mops.pasm>,
 F<examples/mops/mops.c>,
 F<examples/mops/mops.cs>,
 F<examples/mops/mops.il>,

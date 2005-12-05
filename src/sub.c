@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sub.c 9558 2005-10-25 16:11:59Z particle $
+$Id: sub.c 10301 2005-12-01 22:32:51Z particle $
 
 =head1 NAME
 
@@ -20,6 +20,7 @@ Subroutines, continuations, co-routines and other fun stuff...
 
 #include "parrot/parrot.h"
 #include "parrot/method_util.h"
+#include "parrot/oplib/ops.h"
 
 /*
 
@@ -38,7 +39,6 @@ mark_context(Interp* interpreter, parrot_context_t* ctx)
     PObj *obj;
     int i;
 
-    mark_stack(interpreter, ctx->pad_stack);
     mark_stack(interpreter, ctx->user_stack);
     mark_stack(interpreter, ctx->control_stack);
     mark_register_stack(interpreter, ctx->reg_stack);
@@ -63,6 +63,9 @@ mark_context(Interp* interpreter, parrot_context_t* ctx)
     if (obj)
         pobject_lives(interpreter, obj);
     obj = (PObj*)ctx->current_package;
+    if (obj)
+        pobject_lives(interpreter, obj);
+    obj = (PObj*)ctx->lex_pad;
     if (obj)
         pobject_lives(interpreter, obj);
     for (i = 0; i < ctx->n_regs_used[REGNO_PMC]; ++i) {
@@ -115,13 +118,6 @@ struct Parrot_sub *
 new_closure(Interp *interp)
 {
     struct Parrot_sub *newsub = new_sub(interp);
-    PMC * pad = scratchpad_get_current(interp);
-    newsub->pad_stack = new_stack(interp, "Pad");
-    if (pad) {
-        /* put the correct pad in place */
-        stack_push(interp, &newsub->pad_stack, pad,
-                STACK_ENTRY_PMC, STACK_CLEANUP_NULL);
-    }
     return newsub;
 }
 /*
@@ -154,8 +150,7 @@ new_continuation(Interp *interp, struct Parrot_cont *to)
         cc->seg = interp->code;
         cc->address = NULL;
     }
-    cc->ctx_copy = mem_sys_allocate(sizeof(struct Parrot_Context));
-    memcpy(cc->ctx_copy, to_ctx, sizeof(struct Parrot_Context));
+    cc->current_results = to_ctx->current_results;
     return cc;
 }
 
@@ -177,7 +172,7 @@ new_ret_continuation(Interp *interp)
     cc->to_ctx = CONTEXT(interp->ctx);
     cc->from_ctx = NULL;    /* filled in during a call */
     cc->seg = interp->code;
-    cc->ctx_copy = NULL;
+    cc->current_results = NULL;
     cc->address = NULL;
     return cc;
 }
@@ -298,7 +293,7 @@ Parrot_full_sub_name(Interp* interpreter, PMC* sub)
 
 int
 Parrot_Context_info(Interp *interpreter, parrot_context_t *ctx,
-	struct Parrot_Context_info *info)
+                    struct Parrot_Context_info *info)
 {
     struct Parrot_sub *sub;
 
@@ -312,26 +307,26 @@ Parrot_Context_info(Interp *interpreter, parrot_context_t *ctx,
 
     /* is the current sub of the specified context valid? */
     if (PMC_IS_NULL(ctx->current_sub)) {
-	info->subname = string_from_cstring(interpreter, "???", 3);
-	info->nsname = info->subname;
-	info->fullname = string_from_cstring(interpreter, "??? :: ???", 10);
-	info->pc = -1;
-	return 0;
+        info->subname = string_from_cstring(interpreter, "???", 3);
+        info->nsname = info->subname;
+        info->fullname = string_from_cstring(interpreter, "??? :: ???", 10);
+        info->pc = -1;
+        return 0;
     }
 
     /* make sure there is a sub (not always the case, e.g in pasm code) */
     if (ctx->current_sub->vtable->base_type == enum_class_Undef ||
-	    PMC_sub(ctx->current_sub)->address == 0) {
-	/* XXX: is this correct? (try with load_bytecode) */
-	/* use the current interpreter's bytecode as start address */
-	if (ctx->current_pc != NULL)
-	    info->pc = ctx->current_pc - interpreter->code->base.data;
-	return 1;
+        PMC_sub(ctx->current_sub)->address == 0) {
+    /* XXX: is this correct? (try with load_bytecode) */
+    /* use the current interpreter's bytecode as start address */
+    if (ctx->current_pc != NULL)
+        info->pc = ctx->current_pc - interpreter->code->base.data;
+        return 1;
     }
 
     /* fetch struct Parrot_sub of the current sub in the given context */
     if (!VTABLE_isa(interpreter, ctx->current_sub,
-                const_string(interpreter, "Sub")))
+                    const_string(interpreter, "Sub")))
         return 1;
 
     sub = PMC_sub(ctx->current_sub);
@@ -340,45 +335,45 @@ Parrot_Context_info(Interp *interpreter, parrot_context_t *ctx,
 
     /* set the namespace name and fullname of the sub */
     if (PMC_IS_NULL(sub->namespace)) {
-	info->nsname = string_from_cstring(interpreter, "", 0);
-	info->fullname = info->subname;
+        info->nsname = string_from_cstring(interpreter, "", 0);
+        info->fullname = info->subname;
     } else {
-	info->nsname = VTABLE_get_string(interpreter, sub->namespace);
-	info->fullname = string_concat(interpreter, info->nsname,
-		string_from_cstring(interpreter, " :: ", 4), 0);
-	info->fullname = string_concat(interpreter, info->fullname,
-		info->subname, 1);
+        info->nsname = VTABLE_get_string(interpreter, sub->namespace);
+        info->fullname = string_concat(interpreter, info->nsname,
+        string_from_cstring(interpreter, " :: ", 4), 0);
+        info->fullname = string_concat(interpreter, info->fullname,
+        info->subname, 1);
     }
 
     /* return here if there is no current pc */
     if (ctx->current_pc == NULL)
-	return 1;
+        return 1;
 
     /* calculate the current pc */
     info->pc = ctx->current_pc - sub->seg->base.data;
 
     /* determine the current source file/line */
     if (ctx->current_pc) {
-	size_t offs = info->pc;
-	size_t i, n;
-	/* XXX: interpreter->code->cur_cs is not correct, is it? */
-	opcode_t *pc = interpreter->code->base.data;
-	struct PackFile_Debug *debug = interpreter->code->debugs;
-
-	/*assert(pc == sub->seg->base.data);*/
-	for (i = n = 0; n < interpreter->code->base.size; i++) {
-        op_info_t *op_info = &interpreter->op_info_table[*pc];
-        if (i >= debug->base.size)
-            return 0;
-        if (n >= offs) {
-            /* set source line and file */
-            info->line = debug->base.data[i];
-            info->file = Parrot_debug_pc_to_filename(interpreter, debug, i);
-            break;
+        size_t offs = info->pc;
+        size_t i, n;
+        opcode_t *pc = sub->seg->base.data;
+        struct PackFile_Debug *debug = sub->seg->debugs;
+        for (i = n = 0; n < sub->seg->base.size; i++) {
+            op_info_t *op_info = &interpreter->op_info_table[*pc];
+            opcode_t var_args = 0;
+            if (i >= debug->base.size)
+                return 0;
+            if (n >= offs) {
+                /* set source line and file */
+                info->line = debug->base.data[i];
+                info->file = string_to_cstring(interpreter,
+                Parrot_debug_pc_to_filename(interpreter, debug, i));
+                break;
+            }
+            ADD_OP_VAR_PART(interpreter, sub->seg, pc, var_args);
+            n += op_info->arg_count + var_args;
+            pc += op_info->arg_count + var_args;
         }
-        n += op_info->arg_count;
-        pc += op_info->arg_count;
-	}
     }
     return 1;
 }
@@ -388,17 +383,88 @@ Parrot_Context_infostr(Interp *interpreter, parrot_context_t *ctx)
 {
     struct Parrot_Context_info info;
     const char* msg = (CONTEXT(interpreter->ctx) == ctx) ?
-	"current instr.:":
-	"called from Sub";
+        "current instr.:":
+        "called from Sub";
 
     if (Parrot_Context_info(interpreter, ctx, &info)) {
-	return Parrot_sprintf_c(interpreter,
-		"%s '%Ss' pc %d (%s:%d)\n", msg,
-		info.fullname, info.pc, info.file, info.line);
+        return Parrot_sprintf_c(interpreter,
+            "%s '%Ss' pc %d (%s:%d)\n", msg,
+            info.fullname, info.pc, info.file, info.line);
     }
     return NULL;
 }
 
+/*
+
+=item C<PMC* Parrot_find_pad(Interp*, STRING *lex_name)>
+
+Locate the LexPad containing the given name. Return NULL on failure.
+
+=cut
+
+*/
+
+PMC*
+Parrot_find_pad(Interp* interpreter, STRING *lex_name, parrot_context_t *ctx)
+{
+    PMC *lex_pad;
+    parrot_context_t *outer;
+
+    while (1) {
+        lex_pad = ctx->lex_pad;
+        outer = ctx->outer_ctx;
+        if (!outer)
+            return lex_pad;
+        if (!PMC_IS_NULL(lex_pad)) {
+            if (VTABLE_exists_keyed_str(interpreter, lex_pad, lex_name))
+                return lex_pad;
+        }
+        ctx = outer;
+    }
+    return NULL;
+}
+
+PMC*
+parrot_new_closure(Interp *interpreter, PMC *sub_pmc)
+{
+    PMC *clos_pmc;
+    struct Parrot_sub *clos, *sub;
+    PMC *cont;
+    parrot_context_t *ctx;
+
+    clos_pmc = VTABLE_clone(interpreter, sub_pmc);
+    clos_pmc->vtable = Parrot_base_vtables[enum_class_Closure];
+    sub = PMC_sub(sub_pmc);
+    clos = PMC_sub(clos_pmc);
+    /* 
+     * the given sub_pmc has to have an :outer(sub) that is
+     * this subroutine
+     */
+    ctx = CONTEXT(interpreter->ctx);
+    if (PMC_IS_NULL(sub->outer_sub)) {
+        real_exception(interpreter, NULL, INVALID_OPERATION,
+                "'%Ss' isn't a closure (no :outer)", sub->name);
+    }
+    /* if (sub->outer_sub != ctx->current_sub) - fails if outer
+     * is a closure too e.g. test 'closure 4'
+     */
+    if (0 == string_equal(interpreter,
+                (PMC_sub(ctx->current_sub))->name,
+                sub->name)) {
+        real_exception(interpreter, NULL, INVALID_OPERATION,
+                "'%Ss' isn't the :outer of '%Ss')",
+                (PMC_sub(ctx->current_sub))->name,
+                sub->name);
+    }
+    cont = ctx->current_cont;
+    /* preserve this frame by converting the continuation */
+    cont->vtable = Parrot_base_vtables[enum_class_Continuation];
+    /* remember this (the :outer) ctx in the closure */
+    clos->outer_ctx = ctx;
+    /* the closure refs now this context too */
+    ctx->ref_count++;
+    return clos_pmc;
+}
 /*
 
 =back

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_compiler.in 9081 2005-08-28 16:34:00Z bernhard $
+# $Id: parrot_compiler.in 10275 2005-11-30 20:03:15Z particle $
 
 # Makefile for languages/parrot_compiler
 
@@ -30,13 +30,10 @@ test :
 	cd .. && $(PERL) -I../lib parrot_compiler/t/harness
 
 clean :
-	$(RM_F) *.pbc
-	$(RM_F) parrot_compiler.pasm
-	$(RM_F) t/*/*.pbc
+	$(RM_F) *.pbc parrot_compiler.pasm t/*/*.pbc
 
 realclean : clean
-	$(RM_F) core
-	$(RM_F) *.pbc
+	$(RM_F) core *.pbc
 
 parrot.pbc : parrot.pasm
 	$(PARROT) -o parrot.pbc parrot.pasm

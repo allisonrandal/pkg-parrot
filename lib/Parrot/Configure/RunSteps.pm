@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: RunSteps.pm 9527 2005-10-21 10:40:53Z jhoblitt $
+# $Id: RunSteps.pm 10117 2005-11-20 22:25:22Z jhoblitt $
 
 =head1 NAME
 
@@ -23,58 +23,62 @@ package Parrot::Configure::RunSteps;
 use strict;
 use vars qw(@steps);
 
+use Parrot::Configure::Data;
+
 # EDIT HERE TO ADD NEW TESTS
 @steps = qw(
-    init/manifest.pl
-    init/data.pl
-    init/miniparrot.pl
-    init/hints.pl
-    init/headers.pl
-    inter/progs.pl
-    inter/lex.pl
-    inter/yacc.pl
-    auto/gcc.pl
-    init/optimize.pl
-    inter/shlibs.pl
-    inter/charset.pl
-    inter/encoding.pl
-    inter/types.pl
-    inter/ops.pl
-    inter/exp.pl
-    inter/pmc.pl
-    auto/alignptrs.pl
-    auto/headers.pl
-    auto/sizes.pl
-    auto/byteorder.pl
-    auto/pack.pl
-    auto/format.pl
-    auto/isreg.pl
-    auto/jit.pl
-    gen/cpu.pl
-    auto/funcptr.pl
-    auto/cgoto.pl
-    auto/inline.pl
-    auto/gc.pl
-    auto/memalign.pl
-    auto/signal.pl
-    auto/env.pl
-    auto/aio.pl
-    auto/gmp.pl
-    auto/gdbm.pl
-    auto/snprintf.pl
-    auto/perldoc.pl
-    auto/python.pl
-    auto/antlr.pl
-    auto/bc.pl
-    auto/m4.pl
-    gen/icu.pl
-    gen/revision.pl
-    gen/config_h.pl
-    gen/core_pmcs.pl
-    gen/parrot_include.pl
-    gen/makefiles.pl
-    gen/platform.pl
-    gen/config_pm.pl
+    init/manifest.pm
+    init/defaults.pm
+    init/miniparrot.pm
+    init/hints.pm
+    init/headers.pm
+    inter/progs.pm
+    inter/make.pm
+    inter/lex.pm
+    inter/yacc.pm
+    auto/gcc.pm
+    init/optimize.pm
+    inter/shlibs.pm
+    inter/charset.pm
+    inter/encoding.pm
+    inter/types.pm
+    inter/ops.pm
+    inter/exp.pm
+    inter/pmc.pm
+    auto/alignptrs.pm
+    auto/headers.pm
+    auto/sizes.pm
+    auto/byteorder.pm
+    auto/va_ptr.pm
+    auto/pack.pm
+    auto/format.pm
+    auto/isreg.pm
+    auto/jit.pm
+    gen/cpu.pm
+    auto/funcptr.pm
+    auto/cgoto.pm
+    auto/inline.pm
+    auto/gc.pm
+    auto/memalign.pm
+    auto/signal.pm
+    auto/env.pm
+    auto/aio.pm
+    auto/gmp.pm
+    auto/gdbm.pm
+    auto/snprintf.pm
+    auto/perldoc.pm
+    auto/python.pm
+    auto/antlr.pm
+    auto/bc.pm
+    auto/m4.pm
+    gen/icu.pm
+    gen/revision.pm
+    gen/config_h.pm
+    gen/core_pmcs.pm
+    gen/parrot_include.pm
+    gen/makefiles.pm
+    gen/platform.pm
+    gen/config_pm.pm
 );
 
 =item C<runsteps()>
@@ -87,6 +91,8 @@ sub runsteps {
     shift;
     my %args=@_;
 
+    my $step = 'Configure::Step';
+
     local $SIG{__WARN__} = sub {
         warn $_[0] unless $_[0] =~ /^Subroutine runstep redefined at config/
     };
@@ -95,41 +101,48 @@ sub runsteps {
     my $n = 0;
 
     for (@steps) {
+        # FIXME the steps still all live in the same namespace so the value of
+        # result has to be reset
         undef $Configure::Step::result;
+        my $result;
 
         die "No config/$_" unless -e "config/$_";
         require "config/$_";
-        print "\n$Configure::Step::description";
+
+        my $description = $step->description;
+
+        print "\n", $description;
         print '...';
-	++$n;
-	if ($args{'verbose-step'}) {
-	    if ($args{'verbose-step'} =~ /^\d+$/ &&
-		    $n == $args{'verbose-step'}) {
-		$args{verbose} = 2;
-	    }
-	    elsif ($Configure::Step::description =~ /$args{'verbose-step'}/) {
-		$args{verbose} = 2;
-	    }
-	}
-	# cc_build uses this verbose setting
-	Configure::Data->set('verbose' => $args{verbose}) if $n > 2;
+        ++$n;
+
+        if ($args{'verbose-step'}) {
+            if ($args{'verbose-step'} =~ /^\d+$/ &&
+                $n == $args{'verbose-step'}) {
+                $args{verbose} = 2;
+            }
+            elsif ($description =~ /$args{'verbose-step'}/) {
+                $args{verbose} = 2;
+            }
+        }
+
+        # cc_build uses this verbose setting
+        Parrot::Configure::Data->set('verbose' => $args{verbose}) if $n > 2;
 
         print "\n" if $args{verbose} && $args{verbose} == 2;
 
-        $Configure::Step::result ||= 'done';
-
-
         {
             local $_;
-            Configure::Step::runstep(@args{@Configure::Step::args});
+            $step->runstep(@args{@Configure::Step::args});
         }
 
-        print "..." if $args{verbose} && $args{verbose} == 2;
-        print "." x (71 - length($Configure::Step::description) 
-                        - length($Configure::Step::result));
-        print "$Configure::Step::result." unless m{^inter/} && $args{ask};
+        $result = $step->result || 'done';
 
-	$args{verbose} = $verbose;
+        print "..." if $args{verbose} && $args{verbose} == 2;
+        print "." x (71 - length($description)
+                        - length($result));
+        print "$result." unless m{^inter/} && $args{ask};
+
+        $args{verbose} = $verbose;
     }
 }
 

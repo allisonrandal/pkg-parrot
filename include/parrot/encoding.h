@@ -1,7 +1,7 @@
 /* encoding.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: encoding.h 8291 2005-06-08 09:12:15Z leo $
+ *     $Id: encoding.h 9901 2005-11-11 14:27:10Z leo $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:
@@ -15,8 +15,7 @@
 
 #include "parrot/parrot.h"
 
-typedef void (*encoding_to_encoding_t)(Interp*, STRING *string);
-typedef STRING *(*encoding_copy_to_encoding_t)(Interp*, STRING *string);
+typedef STRING * (*encoding_to_encoding_t)(Interp*, STRING *src, STRING *dest);
 typedef UINTVAL (*encoding_get_codepoint_t)(Interp*, const STRING *src, UINTVAL offset);
 typedef void (*encoding_set_codepoint_t)(Interp*, STRING *src, UINTVAL offset, UINTVAL codepoint);
 typedef UINTVAL (*encoding_get_byte_t)(Interp*, const STRING *src, UINTVAL offset);
@@ -42,7 +41,6 @@ struct _encoding {
     const char *name;
     UINTVAL max_bytes_per_codepoint;
     encoding_to_encoding_t to_encoding;
-    encoding_copy_to_encoding_t copy_to_encoding;
     encoding_get_codepoint_t get_codepoint;
     encoding_set_codepoint_t  set_codepoint;
     encoding_get_byte_t  get_byte;
@@ -64,6 +62,8 @@ typedef struct _encoding ENCODING;
 #if !defined PARROT_NO_EXTERN_ENCODING_PTRS
 extern ENCODING *Parrot_fixed_8_encoding_ptr;
 extern ENCODING *Parrot_utf8_encoding_ptr;
+extern ENCODING *Parrot_utf16_encoding_ptr;
+extern ENCODING *Parrot_ucs2_encoding_ptr;
 extern ENCODING *Parrot_default_encoding_ptr;
 #endif
 
@@ -80,13 +80,15 @@ ENCODING *Parrot_default_encoding(Interp *);
 typedef INTVAL (*encoding_converter_t)(Interp *, ENCODING *lhs, ENCODING *rhs);
 encoding_converter_t Parrot_find_encoding_converter(Interp *, ENCODING *lhs, ENCODING *rhs);
 
+void parrot_deinit_encodings(Interp *);
+INTVAL Parrot_encoding_number(Interp *, STRING *encodingname);
+INTVAL Parrot_encoding_number_of_str(Interp *, STRING *src);
+STRING* Parrot_encoding_name(Interp *, INTVAL number_of_encoding);
+ENCODING* Parrot_get_encoding(Interp *, INTVAL number_of_encoding);
+const char * Parrot_encoding_c_name(Interp *, INTVAL number_of_encoding);
 
 #define ENCODING_MAX_BYTES_PER_CODEPOINT(i, src) \
     ((ENCODING *)src->encoding)->max_bytes_per_codepoint
-#define ENCODING_TO_ENCODING(i, src, offset, count) \
-    ((ENCODING *)src->encoding)->to_encoding(i, src, offset, count)
-#define ENCODING_COPY_TO_ENCODING(i, src) \
-    ((ENCODING *)src->encoding)->copy_to_encoding(i, src)
 #define ENCODING_GET_CODEPOINT(i, src, offset) \
     ((ENCODING *)src->encoding)->get_codepoint(i, src, offset)
 #define ENCODING_SET_CODEPOINT(i, src, offset, codepoint) \

@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: pair.pmc 8374 2005-06-15 14:51:11Z leo $
+$Id: pair.pmc 9888 2005-11-10 17:53:15Z particle $
 
 =head1 NAME
 
@@ -238,8 +238,6 @@ Used to unarchive the Pair.
 
     void thaw(visit_info *info) {
         IMAGE_IO *io = info->image_io;
-        Hash *hash;
-        PMC *dummy;
 
         SUPER(info);
         if (info->extra_flags == EXTRA_IS_NULL) {

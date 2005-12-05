@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: retcontinuation.pmc 9519 2005-10-20 07:48:06Z leo $
+$Id: retcontinuation.pmc 10288 2005-12-01 16:02:47Z leo $
 
 =head1 NAME
 
@@ -119,25 +119,13 @@ the frame pointer in the stack frame cache.
         INTERP->ctx.bp = CONTEXT(INTERP->ctx)->bp;
         INTERP->ctx.bp_ps = CONTEXT(INTERP->ctx)->bp_ps;
         next = cc->address;
-        if (next) {
-            if (CONTEXT(INTERP->ctx)->current_results) {
-                /*
-                 * the register pointer is already switched back
-                 * to the caller, therefore the registers of the
-                 * sub we are returning from aren't marked, if
-                 * inside argument passing a DOD run is triggered
-                 * therefore we have to block DOD
-                 */
-                Parrot_block_DOD(INTERP);
-                parrot_pass_args(INTERP, cc->seg,
-                        caller_ctx,
-                        PARROT_OP_get_results_pc);
-                Parrot_unblock_DOD(INTERP);
-            }
-            INTERP->current_returns = NULL;
-        }
         Parrot_free_context(INTERP, cc->from_ctx, 1);
         cc->from_ctx = NULL;
+        /*
+         * the to_ctx is marked in Continuation.mark
+         * NULLify it or turn off the custom_mark bit
+         */
+        cc->to_ctx = NULL;
         INTERP->current_args = NULL;
         /* no address and no segment */
         if (!cc->seg) {

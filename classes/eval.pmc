@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: eval.pmc 9806 2005-11-06 11:31:18Z leo $
+$Id: eval.pmc 10092 2005-11-18 14:56:29Z leo $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ clear_fixups(Interp* interpreter, PMC* self)
             case enum_fixup_sub:
                 ci = ft->fixups[i]->offset;
                 sub = ct->constants[ci]->u.key;
-                VTABLE_destroy(interpreter, sub);
+                PMC_sub(sub)->seg = NULL;
                 ct->constants[ci]->u.key = NULL;
                 ft->fixups[i]->type = 0;
         }
@@ -110,7 +110,7 @@ mark_subs(Interp* interpreter, PMC* self)
     }
 }
 
-pmclass Eval extends Closure need_ext {
+pmclass Eval extends Sub need_ext {
 
     void init() {
         parrot_sub_t sub_data;
@@ -195,7 +195,6 @@ for writing to disc and later loading via C<load_bytecode>.
         STRING *res;
         struct PackFile *pf;
         size_t size, aligned_size;
-        opcode_t *packed;
         struct PackFile_ByteCode *seg;
 
         pf = PackFile_new(INTERP, 0);

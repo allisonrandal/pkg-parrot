@@ -1,4 +1,4 @@
-### $ANTLR 2.7.5 (20050425): "bc_python.g" -> "BcTreeWalker.py"$
+### $ANTLR 2.7.5 (20051104): "bc_python.g" -> "BcTreeWalker.py"$
 ### import antlr and other modules ..
 import sys
 import antlr
@@ -61,6 +61,7 @@ PIR_HEADER = 40
 PIR_NOOP = 41
 PIR_COMMENT = 42
 PIR_NEWLINE = 43
+PAST_Stmts = 44
 
 ### user code>>>
 
@@ -963,14 +964,14 @@ class Walker(antlr.TreeParser):
         self.returnAST = gen_pir_AST
         self._retTree = _t
     
-    def gen_p6(self, _t):    
+    def gen_antlr_past(self, _t):    
         
-        gen_p6_AST_in = None
+        gen_antlr_past_AST_in = None
         if _t != antlr.ASTNULL:
-            gen_p6_AST_in = _t
+            gen_antlr_past_AST_in = _t
         self.returnAST = None
         currentAST = antlr.ASTPair()
-        gen_p6_AST = None
+        gen_antlr_past_AST = None
         B_AST = None
         B = None
         try:      ## for error handling
@@ -979,13 +980,13 @@ class Walker(antlr.TreeParser):
             self.expr_list(_t)
             _t = self._retTree
             B_AST = self.returnAST
-            gen_p6_AST = currentAST.root
-            gen_p6_AST = antlr.make(self.astFactory.create(PIR_HEADER,"pir header\n#"), B_AST, self.astFactory.create(PIR_FOOTER,"pir footer\n#"));
-            currentAST.root = gen_p6_AST
-            if (gen_p6_AST != None) and (gen_p6_AST.getFirstChild() != None):
-                currentAST.child = gen_p6_AST.getFirstChild()
+            gen_antlr_past_AST = currentAST.root
+            gen_antlr_past_AST = antlr.make(self.astFactory.create(PAST_Stmts,"dummy past stmts\n#"));
+            currentAST.root = gen_antlr_past_AST
+            if (gen_antlr_past_AST != None) and (gen_antlr_past_AST.getFirstChild() != None):
+                currentAST.child = gen_antlr_past_AST.getFirstChild()
             else:
-                currentAST.child = gen_p6_AST
+                currentAST.child = gen_antlr_past_AST
             currentAST.advanceChildToEnd()
         
         except antlr.RecognitionException, ex:
@@ -993,7 +994,7 @@ class Walker(antlr.TreeParser):
             if _t:
                 _t = _t.getNextSibling()
         
-        self.returnAST = gen_p6_AST
+        self.returnAST = gen_antlr_past_AST
         self._retTree = _t
     
 
@@ -1041,6 +1042,7 @@ _tokenNames = [
     "PIR_HEADER", 
     "PIR_NOOP", 
     "PIR_COMMENT", 
-    "PIR_NEWLINE"
+    "PIR_NEWLINE", 
+    "PAST_Stmts"
 ]
     

@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: bigint.pmc 8173 2005-05-27 09:33:37Z leo $
+$Id: bigint.pmc 9933 2005-11-12 22:18:52Z jhoblitt $
 
 =head1 NAME
 
@@ -213,7 +213,7 @@ bigint_bitwise_shr_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC 
     mpz_tdiv_q_2exp(BN(dest), BN(self), value);
 }
 
-#else
+#else /* ifdef PARROT_HAS_GMP */
 
 static void
 bigint_init(Interp *interpreter, PMC *self) {
@@ -406,7 +406,7 @@ bigint_bitwise_shr_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC 
     real_exception(interpreter, NULL, E_LibraryNotLoadedError,
         "no bigint lib loaded");
 }
-#endif
+#endif /* ifdef PARROT_HAS_GMP */
 
 pmclass BigInt {
 

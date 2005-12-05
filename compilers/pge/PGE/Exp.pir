@@ -8,10 +8,12 @@
 .const int PGE_CUT_MATCH = -3
 .const int PGE_CUT_CUT = -4
 
-.sub "__onload"
+.sub "__onload" :load
     .local pmc optable
     .local pmc term
 
+    $I0 = find_type "PGE::Exp"
+    if $I0 goto end
     $P0 = getclass "PGE::Match"
     $P0 = subclass $P0, "PGE::Exp"
     $P1 = subclass $P0, "PGE::Exp::Literal"
@@ -29,8 +31,9 @@
     $P1 = subclass $P0, "PGE::Exp::Modifier"
     $P1 = subclass $P0, "PGE::Exp::Closure"
     $P1 = subclass $P0, "PGE::Exp::Commit"
-    $P0 = new Integer
+    $P0 = new .Integer
     store_global "PGE::Exp", "$_serno", $P0
+  end:
 .end
 
 
@@ -135,6 +138,22 @@ won't be a problem, but is the use of the start parameter thread-safe?
   end:
 .end
 
+.sub "escape" :method
+    .param string str
+    str = escape str
+    str = concat '"', str
+    str = concat str, '"'
+    $I0 = index str, "\\x"
+    if $I0 >= 0 goto unicode
+    $I0 = index str, "\\u"
+    if $I0 >= 0 goto unicode
+    goto end
+  unicode:
+    str = concat "unicode:", str
+  end:
+    .return (str)
+.end
+
 .sub "quant" :method
     .local int min, max, islazy, iscut
     .local string qstr
@@ -220,7 +239,7 @@ register.
   lazy_1:
     emit(code, "  %s_l1:", label)
     bsr test
-    emit(code, "    if rep < %s goto %s_lit1", min, label)
+    emit(code, "    if rep < %s goto %s_l1", min, label)
     emit(code, "  %s_l2:", label)
     if iscut goto cut
     if max == PGE_INF goto lazy_2
@@ -267,7 +286,7 @@ register.
     if $I0 goto end
     emit(code, "    $I0 = defined captscope[%s]", cname)
     emit(code, "    if $I0 goto %s_c1", label)
-    emit(code, "    $P0 = new PerlArray")
+    emit(code, "    $P0 = new .PerlArray")
     emit(code, "    captscope[%s] = $P0", cname)
     emit(code, "    save captscope")
     emit(code, "    bsr %s_c1", label)
@@ -279,20 +298,32 @@ register.
   end:
     .return (captsave, captback)
 .end
- 
-.sub "reduce" :method
-    .local pmc args
-    args = getattribute self, "PGE::Match\x0@:capt"
-    if_null args, end
-    $I0 = elements args
+
+.sub "firstchars" :method
+    .param pmc explist         :slurpy
+    $S1 = ""
   loop:
-    dec $I0
-    if $I0 < 0 goto end
-    $P0 = args[$I0]
-    $P0 = $P0.reduce()
-    args[$I0] = $P0
+    unless explist goto end
+    $P0 = shift explist
+    $I0 = exists $P0["firstchars"]
+    if $I0 == 0 goto nofirstchars
+    $S0 = $P0["firstchars"]
+    if $S0 == "" goto nofirstchars
+    $S1 .= $S0
     goto loop
   end:
+    self["firstchars"] = $S1
+    .return ()
+  nofirstchars:
+    self["firstchars"] = ""
+    .return ()
+.end
+ 
+.sub "reduce" :method
+    .param pmc next
+    $P0 = new .Exception
+    $P0["_message"] = "Attempt to reduce PGE::Exp abstract class"
+    throw $P0
     .return (self)
 .end
 
@@ -314,9 +345,9 @@ register.
     .local pmc exp0
     .local string exp0label
 
-    code = new String
+    code = new .String
     exp0 = self["expr"]
-    exp0 = exp0.reduce()
+    exp0 = exp0.reduce(self)
     self["expr"] = exp0
 
     exp0label = "R"
@@ -345,8 +376,8 @@ register.
     emit(code, "    $P0 = interpinfo %s", .INTERPINFO_CURRENT_SUB)
     emit(code, "    setattribute mob, \"PGE::Match\\x0&:corou\", $P0")
     emit(code, "    lastpos = length target")
-    emit(code, "    gpad = new PerlArray")
-    emit(code, "    rcache = new PerlHash")
+    emit(code, "    gpad = new .PerlArray")
+    emit(code, "    rcache = new .PerlHash")
     emit(code, "    captscope = mob")
     emit(code, "    pos = mfrom")
     emit(code, "    if pos >= 0 goto try_at_pos")
@@ -354,9 +385,17 @@ register.
     emit(code, "  try_match:")
     emit(code, "    cutting = 0")
     emit(code, "    if pos > lastpos goto fail_forever")
+    $S1 = exp0["firstchars"]
+    if $S1 == "" goto nofc
+    $S1 = self."escape"($S1)
+    emit(code, "    $S0 = substr target, pos, 1")
+    emit(code, "    $I0 = index %s, $S0", $S1)
+    emit(code, "    if $I0 < 0 goto try_match_1")
+  nofc:
     emit(code, "    mfrom = pos")
     self.emitsub(code, exp0label, "pos", "NOCUT")
     emit(code, "    if cutting <= %s goto fail_cut", PGE_CUT_RULE)
+    emit(code, "  try_match_1:")
     emit(code, "    inc pos")
     emit(code, "    goto try_match")
     emit(code, "  try_at_pos:")
@@ -387,6 +426,20 @@ register.
 
 .namespace [ "PGE::Exp::Literal" ]
 
+.sub "reduce" :method
+    .param pmc next
+    $S0 = self["value"]
+    $S0 = substr $S0, 0, 1
+    $I0 = self["ignorecase"]
+    if $I0 == 0 goto end
+    $S1 = downcase $S0
+    $S0 = upcase $S0
+    $S0 .= $S1
+  end:
+    self["firstchars"] = $S0
+    .return (self)
+.end
+
 .sub "gen" :method
     .param pmc code
     .param string label
@@ -400,15 +453,25 @@ register.
     downcase $S1
   lit_1:
     $I1 = length $S1
-    $P0 = find_global "Data::Escape", "String"
-    $S1 = $P0($S1, '"')
+    $S1 = self."escape"($S1)
     emit(code, "\n  %s: # literal %s    ##", label, $S0)
-    $S0 = "    if $S0 != unicode:\"%s\" goto %s"
+    $S0 = "    if $S0 != %s goto %s"
     self.genfixedstr(code, label, next, $S0, $S1, $I1)
     .return ()
 .end    
 
 .namespace [ "PGE::Exp::EnumCharList" ]
+
+.sub "reduce" :method
+    .param pmc next
+    $S0 = ""
+    $I0 = self["isnegated"]
+    if $I0 goto end
+    $S0 = self["charlist"]
+  end:
+    self["firstchars"] = $S0
+    .return (self)
+.end
 
 .sub "gen" :method
     .param pmc code
@@ -424,15 +487,14 @@ register.
   charlist_1:
     emit(code, "\n  %s: # charclass %s    ##", label, $S0)
     $I1 = length $S1
-    $P0 = find_global "Data::Escape", "String"
-    $S1 = $P0($S1, '"')
+    $S1 = self."escape"($S1)
     $I0 = self["isnegated"]
     if $I0 goto charlist_2
-    $S0 = "    $I0 = index unicode:\"%s\", $S0\n    if $I0 < 0 goto %s"
+    $S0 = "    $I0 = index %s, $S0\n    if $I0 < 0 goto %s"
     self.genfixedstr(code, label, next, $S0, $S1, 1)
     .return ()
   charlist_2:
-    $S0 = "    $I0 = index unicode:\"%s\", $S0\n    if $I0 >= 0 goto %s"
+    $S0 = "    $I0 = index %s, $S0\n    if $I0 >= 0 goto %s"
     self.genfixedstr(code, label, next, $S0, $S1, 1)
     .return ()
 .end    
@@ -440,6 +502,12 @@ register.
 
 .namespace [ "PGE::Exp::Scalar" ]
 
+.sub "reduce" :method
+    .param pmc next
+    self["firstchars"] = ""
+    .return (self)
+.end
+    
 .sub "gen" method
     .param pmc code
     .param string label
@@ -466,10 +534,12 @@ register.
 .namespace [ "PGE::Exp::CCShortcut" ]
 
 .sub "reduce" :method
+    .param pmc next
     $S0 = self["value"]
     if $S0 != "\\n" goto end
     self["isquant"] = 1
   end:
+    self["firstchars"] = ""
 .end
     
 .sub "gen" :method
@@ -557,14 +627,15 @@ register.
 .namespace [ "PGE::Exp::Concat" ]
 
 .sub "reduce" :method
+    .param pmc next
     .local pmc exp0, exp1, exp10
 
-    exp0 = self[0]
-    exp0 = exp0.reduce()
-    self[0] = exp0
     exp1 = self[1]
-    exp1 = exp1.reduce()
+    exp1 = exp1.reduce(next)
     self[1] = exp1
+    exp0 = self[0]
+    exp0 = exp0.reduce(exp1)
+    self[0] = exp0
 
   concat_lit:
     $I0 = exp0["isquant"]
@@ -595,6 +666,14 @@ register.
     $P0 = exp1[1]
     self[1] = $P0
   concat_lit_end:
+    $I0 = exp0["isquant"]
+    if $I0 == 0 goto exp0_min1
+    $I0 = exp0["min"]
+    if $I0 > 0 goto exp0_min1
+    self.firstchars(exp0, exp1)
+    .return (self)
+  exp0_min1:
+    self.firstchars(exp0)
     .return (self)
 .end
 
@@ -616,6 +695,12 @@ register.
 .end
 
 .namespace [ "PGE::Exp::Anchor" ]
+
+.sub "reduce" :method
+    .param pmc next
+    self.firstchars(next)
+    .return (self)
+.end
 
 .sub "gen" :method
     .param pmc code
@@ -674,7 +759,20 @@ register.
 
 .namespace [ "PGE::Exp::Alt" ]
 
-.sub "gen" method
+.sub "reduce" :method
+    .param pmc next
+    .local pmc exp0, exp1
+    exp0 = self[0]
+    exp0 = exp0.reduce(next)
+    self[0] = exp0
+    exp1 = self[1]
+    exp1 = exp1.reduce(next)
+    self[1] = exp1
+    self.firstchars(exp0, exp1)
+    .return (self)
+.end
+
+.sub "gen" :method
     .param pmc code
     .param string label
     .param string next
@@ -695,6 +793,19 @@ register.
 
 
 .namespace [ "PGE::Exp::Conj" ]
+
+.sub "reduce" :method
+    .param pmc next
+    .local pmc exp0, exp1
+    exp0 = self[0]
+    exp0 = exp0.reduce(next)
+    self[0] = exp0
+    exp1 = self[1]
+    exp1 = exp1.reduce(next)
+    self[1] = exp1
+    self.firstchars(exp0, exp1)
+    .return (self)
+.end
 
 .sub "gen" :method
     .param pmc code
@@ -739,21 +850,31 @@ register.
 .namespace [ "PGE::Exp::Quant" ]
 
 .sub "reduce" :method
+    .param pmc next
     .local pmc exp
 
     exp = self[0]
-    exp = exp.reduce()
+    exp = exp.reduce(next)
     $I0 = exp["isquant"]
     if $I0 == 1 goto noreduce
     exp["isquant"] = 1
-    $P0 = self["min"]
-    exp["min"] = $P0
-    $P0 = self["max"]
-    exp["max"] = $P0
     $P0 = self["islazy"]
     exp["islazy"] = $P0
+    $P0 = self["max"]
+    exp["max"] = $P0
+    $P0 = self["min"]
+    exp["min"] = $P0
+    if $P0 > 0 goto quant1
+    exp.firstchars(exp, next)
+  quant1:
     .return (exp)
   noreduce:
+    $P0 = self["min"]
+    if $P0 > 0 goto quant2
+    self.firstchars(exp, next)
+    .return (self)
+  quant2:
+    self.firstchars(exp)
     .return (self)
 .end
 
@@ -828,11 +949,13 @@ register.
 .namespace [ "PGE::Exp::Group" ]
 
 .sub "reduce" :method
+    .param pmc next
     .local pmc exp
     self["isquant"] = 1
     exp = self[0]
-    exp = exp.reduce()
+    exp = exp.reduce(next)
     self[0] = exp
+    self.firstchars(exp)
     .return (self)
 .end
 
@@ -902,7 +1025,11 @@ register.
 .namespace [ "PGE::Exp::Subrule" ]
 
 .sub "reduce" :method
+    .param pmc next
     self["isquant"] = 1
+    self["firstchars"] = ""
+    $S0 = next["firstchars"]
+    self["nextchars"] = $S0
     .return (self)
 .end
 
@@ -911,7 +1038,7 @@ register.
     .param string label
     .param string next
     .local pmc emit
-    .local string subname, subargs
+    .local string subname, subargs, nextchars
     .local string cname, captsave, captback
     .local int iscapture, iscut, isnegated
     emit = find_global "PGE::Exp", "emit"
@@ -920,16 +1047,14 @@ register.
     iscut = self["iscut"]
     isnegated = self["isnegated"]
     cname = self["cname"]
+    nextchars = self["nextchars"]
     emit(code, "\n  %s:  # subrule %s    ##", label, subname)
     subargs = ""
     $I0 = exists self["arg"]
     if $I0 == 0 goto nosubargs
-    $P0 = find_global "Data::Escape", "String"
     $S0 = self["arg"]
-    $S0 = $P0($S0, '"')
-    subargs = ', "'
-    subargs .= $S0
-    subargs .= '"'
+    $S0 = self."escape"($S0)
+    subargs = concat ", ", $S0
   nosubargs:
     captsave = ""
     captback = ""
@@ -950,7 +1075,6 @@ register.
     emit(code, "    ($P1,$P9,$P9,$P0) = newfrom(captscope, pos, \"%s\")", $S0)
     emit(code, "    $P0 = pos")
     emit(code, "    $P0 = find_global \"%s\", \"%s\"", $S0, $S1)
-    emit(code, "    $P0 = $P0($P1%s)", subargs)
     goto subrule_3
   subrule_simple_name:
     emit(code, "    $P0 = getattribute captscope, \"PGE::Match\\x0$:pos\"")
@@ -962,8 +1086,15 @@ register.
     emit(code, "  %s_s1:", label)
     emit(code, "    $P0 = find_global \"%s\"", subname)
     emit(code, "  %s_s2:", label)
-    emit(code, "    $P0 = $P0(captscope%s)", subargs)
+    emit(code, "    $P1 = captscope", subargs)
   subrule_3:
+    if nextchars == "" goto subrule_3a
+    nextchars = self.escape(nextchars)
+    emit(code, "    $P2 = new .String")
+    emit(code, "    $P2 = %s", nextchars)
+    emit(code, "    setprop $P0, \"nextchars\", $P2")
+  subrule_3a:
+    emit(code, "    $P0 = $P0($P1%s)", subargs)
     emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$:pos\"")
     emit(code, "    if $P1 <= %s goto %s_commit", PGE_CUT_MATCH, label)
     if isnegated == 0 goto subrule_4
@@ -972,7 +1103,7 @@ register.
     emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$:from\"")
     emit(code, "    $P1 = pos")
     emit(code, "    goto %s", next)
-    goto end
+    goto subrule_commit
   subrule_4:
     emit(code, "    if $P1 < 0 goto fail")
     if iscapture == 0 goto subrule_5
@@ -1004,6 +1135,12 @@ register.
 
 .namespace [ "PGE::Exp::Cut" ]
 
+.sub "reduce" :method
+    .param pmc next
+    self.firstchars(next)
+    .return (self)
+.end
+
 .sub "gen" :method
     .param pmc code
     .param string label
@@ -1022,7 +1159,9 @@ register.
 .namespace [ "PGE::Exp::Closure" ]
 
 .sub "reduce" :method
+    .param pmc next
     self["isquant"] = 1
+    self["firstchars"] = ""
     .return (self)
 .end
 
@@ -1035,17 +1174,16 @@ register.
     emit = find_global "PGE::Exp", "emit"
     value = self["value"]
     lang = self["lang"]
-    $P0 = find_global "Data::Escape", "String"
-    value = $P0(value, '"')
-    lang = $P0(lang, '"')
+    value = self."escape"(value)
+    lang = self."escape"(lang)
     emit(code, "\n  %s:  # closure    ##", label)
-    emit(code, "    $S0 = \"%s:\"", lang)
-    emit(code, "    $S1 = \"%s\"", value)
+    emit(code, "    $S0 = concat %s, \":\"", lang)
+    emit(code, "    $S1 = %s", value)
     emit(code, "    $S0 .= $S1")
     emit(code, "    $P0 = find_global \"PGE::Rule\", \"%:cache\"")
     emit(code, "    $I0 = exists $P0[$S0]")
     emit(code, "    if $I0 goto %s_1", label)
-    emit(code, "    $P1 = compreg \"%s\"", lang)
+    emit(code, "    $P1 = compreg %s", lang)
     emit(code, "    $P1 = $P1($S1)")
     emit(code, "    $P0[$S0] = $P1")
     emit(code, "  %s_1:", label)
@@ -1057,6 +1195,12 @@ register.
 .end
 
 .namespace [ "PGE::Exp::Commit" ]
+
+.sub "reduce" :method
+    .param pmc next
+    self["firstchars"] = ""
+    .return (self)
+.end
 
 .sub "gen" :method
     .param pmc code

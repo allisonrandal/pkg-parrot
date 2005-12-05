@@ -1,7 +1,7 @@
 /* TclFloat.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: tclfloat.pmc 8984 2005-08-18 12:30:26Z mdiep $
+ *     $Id: tclfloat.pmc 10093 2005-11-18 15:21:29Z coke $
  *  Overview:
  *     These are the vtable functions for the TclFloat base class
  *  Data Structure and Algorithms:
@@ -13,7 +13,7 @@
 #include "parrot/parrot.h"
 #include <assert.h>
 
-pmclass TclFloat extends TclObject extends Float dynpmc group tcl_group {
+pmclass TclFloat extends TclObject extends Float dynpmc group tcl_group hll Tcl maps Float {
 
     STRING* get_string () {
         UINTVAL buflen;

@@ -1,4 +1,4 @@
-# $Id: input.pir 9578 2005-10-26 20:00:39Z bernhard $
+# $Id: input.pir 10280 2005-11-30 21:23:07Z bernhard $
 
 =head1 NAME 
 
@@ -7,7 +7,7 @@ input.pir - Setting up input and reading input
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer. All Rights Reserved.
-CVS Info:   $Id: input.pir 9578 2005-10-26 20:00:39Z bernhard $
+CVS Info:   $Id: input.pir 10280 2005-11-30 21:23:07Z bernhard $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -52,14 +52,14 @@ TOOO: recognize nested quoted strings
 
   # setup of stacks
   .local pmc stack_in_state
-  stack_in_state = new Hash
+  stack_in_state = new .Hash
   state['stack'] = stack_in_state
   .local pmc empty_array
-  empty_array = new ResizablePMCArray
+  empty_array = new .ResizablePMCArray
   stack_in_state['token'] = empty_array
-  empty_array = new ResizablePMCArray
+  empty_array = new .ResizablePMCArray
   stack_in_state['input'] = empty_array
-  empty_array = new ResizablePMCArray
+  empty_array = new .ResizablePMCArray
   stack_in_state['wrapup'] = empty_array
 
   # setup of some rules
@@ -67,9 +67,9 @@ TOOO: recognize nested quoted strings
   # TODO: Use named or positional captures
   # TODO: rulesub for frozen state 
   .local pmc p6rule
-  find_global p6rule, "PGE", "p6rule"
+  p6rule = compreg "PGE::P6Rule"
   .local pmc rulesub_in_state
-  rulesub_in_state = new Hash
+  rulesub_in_state = new .Hash
   state['rulesub'] = rulesub_in_state
   .local pmc rulesub
   rulesub = p6rule( "^(<[_a..zA..Z]><[_a..zA..Z0..9>]>*)" )
@@ -118,7 +118,7 @@ TODO: open these files and complain when they don't or pass filehandles
   .local int stack_size
   stack_size = input_stack
   if stack_size > 0 goto NOT_FIRST_FILE
-    input_block = new Hash
+    input_block = new .Hash
     input_block['type'] = 'INPUT_STRING'
     input_block['string'] = input_string
     push input_stack, input_block

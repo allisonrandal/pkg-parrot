@@ -1,7 +1,7 @@
 /* TclArray.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: tclarray.pmc 8968 2005-08-15 14:56:16Z leo $
+ *     $Id: tclarray.pmc 10093 2005-11-18 15:21:29Z coke $
  *  Overview:
  *     These are the vtable functions for the TclArray base class
  *  Data Structure and Algorithms:
@@ -51,7 +51,7 @@ static STRING* make_hash_key(Interp* interpreter, PMC * key)
 }
 
 
-pmclass TclArray extends Hash need_ext does hash dynpmc group tcl_group {
+pmclass TclArray extends Hash need_ext does hash dynpmc group tcl_group hll Tcl maps Hash {
 
 /*
 

@@ -1,11 +1,6 @@
 #if !defined(PARROT_IMCC_SYMREG_H_GUARD)
 #define PARROT_IMCC_SYMREG_H_GUARD
 
-/* constants */
-
-#define HASH_SIZE 25013
-
-
 /* types */
 
 enum VARTYPE {		/* variable type can be */
@@ -53,7 +48,6 @@ typedef struct _Life_range {
 enum USAGE {
 	U_KEYED		= 1 << 0,	/* array, hash, keyed */
 	U_NEW		= 1 << 1,	/* PMC was inited */
-	U_SPILL		= 1 << 2,	/* reg is spilled */
 	U_GLOBAL        = 1 << 3,       /* symbol is global (fixup) */
 	U_LEXICAL       = 1 << 4,       /* symbol is lexical */
 	U_FIXUP         = 1 << 5,       /* maybe not global, force fixup */
@@ -68,10 +62,9 @@ typedef struct _SymReg {
     int want_regno;	     /* wanted register number */
     INTVAL color;            /* Color: parrot register number
     				and parrot const table index of VTCONST */
-    int score;               /* How costly it is to spill this symbol */
+    int offset;              /* used for label fixup */
     int use_count;	     /* How often this symbol is used */
     int lhs_use_count;	     /* How often this symbol is written to */
-    int simplified;          /* Has it been simplified during the process? */
     Life_range **life_info;  /* Each block has its Life_range status */
     struct _SymReg * next;   /* used in the symbols hash */
     struct _Instruction * first_ins;	/* first and last instruction */
@@ -84,6 +77,11 @@ typedef struct _SymReg {
     int pmc_type;               /* class enum */
 } SymReg;
 
+typedef struct _SymHash {
+    SymReg ** data;
+    int size;
+    int entries;
+} SymHash;
 
 /* namespaces */
 
@@ -133,9 +131,9 @@ void add_pcc_multi(SymReg *r, SymReg * arg);
 void add_namespace(Parrot_Interp interpreter, struct _IMC_Unit *);
 
 typedef enum {
-	/* P_NON_PROTOTYPED = 0x00,	*/
-	/* P_PROTOTYPED     = 0x01,	*/
-	/* P_NONE           = 0x02, */
+	P_NONE           = 0x00,
+	P_NEED_LEX       = 0x01,
+	/* P_XXXX           = 0x02, */
 	P_METHOD         = 0x04,
 
 	P_ANON           = SUB_FLAG_PF_ANON,  /* 0x8 - private3 */
@@ -184,20 +182,22 @@ SymReg * find_sym(Interp *, const char * name);
 SymReg * get_sym(const char * name);
 SymReg* get_pasm_reg(Interp* interpreter, char *name);
 SymReg* get_const(Interp *interpreter, const char *name, int type);
-SymReg * _get_sym(SymReg * hash[], const char * name);
-SymReg * _mk_symreg(SymReg* hash[],char * name, int t);
-SymReg * _mk_const(SymReg *hash[], char * name, int t);
-void _store_symreg(SymReg *hash[], SymReg * r);
-SymReg * _mk_address(Interp *, SymReg *hash[], char * name, int uniq);
+SymReg * _get_sym(SymHash *hash, const char * name);
+SymReg * _mk_symreg(SymHash *hash,char * name, int t);
+void   create_symhash(SymHash *hash);
+SymReg * _mk_const(SymHash *hash, char * name, int t);
+void _store_symreg(SymHash *hash, SymReg * r);
+SymReg * _mk_address(Interp *, SymHash *hash, char * name, int uniq);
 SymReg * link_keys(Interp *, int nargs, SymReg *keys[]);
 void clear_locals(struct _IMC_Unit *);
-void clear_sym_hash(SymReg **);
+void clear_sym_hash(SymHash *);
 void clear_globals(Interp *);
 unsigned int  hash_str(const char * str);
-void _delete_sym(Interp *, struct _IMC_Unit *, const char * name);
 SymReg * dup_sym(SymReg *r);
+void debug_dump_sym_hash(SymHash *hsh);
 
-SymReg * _find_sym(Interp *,Namespace * ns, SymReg * hash[], const char * name);
+
+SymReg * _find_sym(Interp *,Namespace * ns, SymHash *hash, const char * name);
 char * _mk_fullname(Namespace * ns, const char * name);
 char * mk_fullname(const char * name);
 void push_namespace(char * name);
@@ -205,4 +205,14 @@ void pop_namespace(char * name);
 
 
 #endif /* PARROT_IMCC_SYMREG_H_GUARD */
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ *
+ * vim: expandtab shiftwidth=4:
+*/
 

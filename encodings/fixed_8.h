@@ -1,7 +1,7 @@
 /* fixed_8.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: fixed_8.h 7584 2005-03-02 09:03:30Z leo $
+ *     $Id: fixed_8.h 9901 2005-11-11 14:27:10Z leo $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:
@@ -13,8 +13,6 @@
 #if !defined(PARROT_ENCODING_FIXED_8_H_GUARD)
 #define PARROT_ENCODING_FIXED_8_H_GUARD
 
-static void to_encoding(Interp *interpreter, STRING *source_string);
-static STRING *copy_to_encoding(Interp *interpreter, STRING *source_string);
 static UINTVAL get_codepoint(Interp *interpreter, const STRING *source_string, UINTVAL offset);
 static void set_codepoint(Interp *interpreter, STRING *source_string, UINTVAL offset, UINTVAL codepoint);
 static UINTVAL get_byte(Interp *interpreter, const STRING *source_string, UINTVAL offset);

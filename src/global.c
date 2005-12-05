@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: global.c 9465 2005-10-12 04:50:00Z mdiep $
+$Id: global.c 10240 2005-11-29 12:12:58Z leo $
 
 =head1 NAME
 
@@ -197,8 +197,11 @@ Parrot_get_name(Interp* interpreter, STRING *name)
 {
     PMC *g, *pad, *current_sub, *namespace;
 
+    /* TODO
     pad = scratchpad_get_current(interpreter);
     g = scratchpad_find(interpreter, pad, name);
+    */
+    pad = g = NULL;
     if (!g) {
         current_sub = CONTEXT(interpreter->ctx)->current_sub;
         if (current_sub &&

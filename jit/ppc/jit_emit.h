@@ -3,7 +3,7 @@
  *
  * PPC
  *
- * $Id: jit_emit.h 9703 2005-11-02 07:41:22Z leo $
+ * $Id: jit_emit.h 10065 2005-11-17 12:12:34Z leo $
  */
 
 #if !defined(PARROT_PPC_JIT_EMIT_H_GUARD)
@@ -927,8 +927,8 @@ ppc_sync_cache (void *_start, void *_end)
     ppc_sync();
 }
 
+#endif /* JIT_IMCC */
 #endif /* JIT_EMIT == 0 */
-#endif
 #endif /* PARROT_PPC_JIT_EMIT_H_GUARD */
 
 /*

@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.t 9570 2005-10-25 21:04:20Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: jit.t 10228 2005-11-28 22:52:05Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/op/jit.t - JIT register allocation
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/jit.t
+	% prove t/op/jit.t
 
 =head1 DESCRIPTION
 
@@ -22,8 +29,6 @@ should just be the same.
 
 =cut
 
-# test WRT JIT register allocation
-use Parrot::Test tests => 60;
 
 output_is(<<'CODE', <<'OUTPUT', "add_i_i_i 1,2,3 mapped");
 set I0,0
@@ -1210,3 +1215,7 @@ output_is(<<'CODE', <<'OUTPUT', "div bug");
 CODE
 2
 OUTPUT
+
+
+## remember to change the number of tests :-)
+BEGIN { plan tests => 60; }

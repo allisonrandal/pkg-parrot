@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: exceptions.c 9550 2005-10-24 23:06:01Z leo $
+$Id: exceptions.c 10241 2005-11-29 13:33:29Z leo $
 
 =head1 NAME
 
@@ -392,23 +392,8 @@ throw_exception(Interp * interpreter, PMC *exception, void *dest)
     handler = find_exception_handler(interpreter, exception);
     if (!handler)
         return NULL;
-    /* create return continuation with current context */
-    if (dest) {
-        VTABLE_set_pmc_keyed_int(interpreter, exception, 4,
-                new_ret_continuation_pmc(interpreter, dest));
-    }
     /* put the handler aka continuation ctx in the interpreter */
-    address = VTABLE_invoke(interpreter, handler, NULL);
-    /* XXX preserve P5 register */
-    VTABLE_set_pmc_keyed_int(interpreter, exception, 3, REG_PMC(5));
-#if 0
-    /* remember handler */
-    key = key_new_cstring(interpreter, "_handler");
-    VTABLE_set_pmc_keyed(interpreter, exception, key, handler);
-#endif
-    /* generate and place return continuation */
-    /* put exception object in P5 */
-    REG_PMC(5) = exception;
+    address = VTABLE_invoke(interpreter, handler, exception);
     /* address = VTABLE_get_pointer(interpreter, handler); */
     if (PObj_get_FLAGS(handler) & SUB_FLAG_C_HANDLER) {
         /* its a C exception handler */
@@ -439,9 +424,7 @@ rethrow_exception(Interp * interpreter, PMC *exception)
     if (exception->vtable->base_type != enum_class_Exception)
         PANIC("Illegal rethrow");
     handler = find_exception_handler(interpreter, exception);
-    address = VTABLE_invoke(interpreter, handler, NULL);
-    /* put exception object in P5 */
-    REG_PMC(5) = exception;
+    address = VTABLE_invoke(interpreter, handler, exception);
     /* return the address of the handler */
     return address;
 }
@@ -451,7 +434,7 @@ rethrow_exception(Interp * interpreter, PMC *exception)
 =item C<void
 rethrow_c_exception(Interp * interpreter)>
 
-Return back to runloop, assumes exception is still in C<REG_PMC(5)> and
+Return back to runloop, assumes exception is still in C<TODO> and
 that this is called from within a handler setup with C<new_c_exception>.
 
 =cut
@@ -461,12 +444,10 @@ that this is called from within a handler setup with C<new_c_exception>.
 void
 rethrow_c_exception(Interp * interpreter)
 {
-    PMC *exception, *handler, *p5;
+    PMC *exception, *handler;
     Parrot_exception *the_exception = interpreter->exceptions;
 
-    p5 = VTABLE_get_pmc_keyed_int(interpreter, REG_PMC(5), 3);
-    exception = REG_PMC(5);
-    REG_PMC(5) = p5;
+    exception = NULL;   /* TODO */
     handler = find_exception_handler(interpreter, exception);
     /* XXX we should only peek for the next handler */
     push_exception(interpreter, handler);

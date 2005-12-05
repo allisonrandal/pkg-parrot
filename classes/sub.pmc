@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sub.pmc 9796 2005-11-05 15:06:00Z leo $
+$Id: sub.pmc 10321 2005-12-03 12:43:42Z leo $
 
 =head1 NAME
 
@@ -32,6 +32,8 @@ clear_fixup(Interp* interpreter, PMC* self)
     struct PackFile_ConstTable *ct;
 
     seg = PMC_sub(self)->seg;
+    if (!seg)
+        return;
     ft = seg->fixups;
     if (!ft)
         return;
@@ -159,7 +161,7 @@ Sets the name of the subroutine.
 
 =item C<void set_pointer(void *value)>
 
-Sets the pointer to the actual subroutine. 
+Sets the pointer to the actual subroutine.
 
 *** Don't use that - use .Sub constants instead ***
 
@@ -264,22 +266,8 @@ Invokes the subroutine.
          * If the private2 flag is set, this code is called by a
          * tailcall opcode.
          *
-         * We don't allocate a new register frame, we execute the sub
-         * C() in this frame. This also implies that we loose the
-         * full caller chain A -> B -> C, inside C it looks like A -> C.
-         *
-         * As no new frame is allocated, we don't check the recursion limit.
-         *
-         * Running in this frame is always safe:
-         * - no return continuation is invoked, which could get
-         *   recycled
-         * - we just pass the current continuation on to C(), whatever
-         *   kind of continuation it is.
-         *   Using this continuation is as safe as the execution of
-         *   this sub B() was.
-         * - And finally: as continuations don't close over registers
-         *   any changes in the register done by C() can't have any
-         *   impact on possible continuations executing later here.
+         * We allocate a new register frame and recycle it
+         * immediately after argument passing.
          *
          */
         pc = sub->address;
@@ -289,66 +277,34 @@ Invokes the subroutine.
         args_passed = 0;
         if (ccont == NEED_CONTINUATION) {
             ccont = new_ret_continuation_pmc(interpreter, next);
-            goto create_ctx;
         }
 
         assert (!PMC_IS_NULL(ccont));
         /*
-         * if we do a taicall, we have to check that registers
-         * don't overlap
+         * plain subroutine call
+         * create new context, place it in interpreter
          */
-        if (PObj_get_FLAGS(ccont) & SUB_FLAG_TAILCALL) {
-            opcode_t *new_pc;
-            new_pc = parrot_pass_args_tail_call(INTERP, sub, pc);
-            /* clear tail call flag - it has to be set again
-             * by the tailcall opcode
-             */
-            PObj_get_FLAGS(ccont) &= ~SUB_FLAG_TAILCALL;
-            if (new_pc) {
-                pc = new_pc;
-                args_passed = 1;
-                context = CONTEXT(INTERP->ctx);
-            }
-        }
-        else {
-create_ctx:
-            /*
-             * plain subroutine call
-             * create new context, place it in interpreter
-             */
-            Parrot_alloc_context(INTERP, sub->n_regs_used);
-            context = CONTEXT(INTERP->ctx);
-            /* check recursion/call depth */
-            if (++context->recursion_depth >
-                    INTERP->recursion_limit) {
-                real_exception(INTERP, next, E_RuntimeError,
-                        "maximum recursion depth exceeded");
-            }
-            /*
-             * and copy set context variables
-             */
-            context->current_cont = ccont;
-        }
+        Parrot_alloc_context(INTERP, sub->n_regs_used);
+        context = CONTEXT(INTERP->ctx);
+        context->caller_ctx = caller_ctx;
         context->current_sub = SELF;
         context->current_pc = pc;
-        context->current_args = INTERP->current_args;
-        INTERP->current_args = NULL;
-        /*
-         * when next == NULL the call creates args in the
-         * new frame, e.g. called from runops_fromc
-         * else if the sub starts with get_params, pass arguments now
-         */
-        if (next && *pc == PARROT_OP_get_params_pc && !args_passed) {
-            INTERP->current_params = pc;
-            /* argument passing code returns the address beyond
-             * get_params, so that we can skip this opcode, we
-             * start executing in the sub after this opcode
-             */
-            pc = parrot_pass_args(INTERP, sub->seg, caller_ctx,
-                    PARROT_OP_get_params_pc);
+        context->current_cont = ccont;
+        /* check recursion/call depth */
+        if (++context->recursion_depth >
+                INTERP->recursion_limit) {
+            real_exception(INTERP, next, E_RuntimeError,
+                    "maximum recursion depth exceeded");
         }
+        /*
+         * and copy set context variables
+         */
+        PMC_cont(ccont)->from_ctx = context;
+        /*
+         * set context of the sub
+         */
+        sub->ctx = context;
 
-        PMC_cont(ccont)->from_ctx = CONTEXT(INTERP->ctx);
         if (!PMC_IS_NULL(INTERP->current_object)) {
             context->current_object = INTERP->current_object;
             INTERP->current_object = NULL;
@@ -356,9 +312,31 @@ create_ctx:
             INTERP->current_method = NULL;
         }
         context->current_HLL = sub->HLL_id;
+        /* create pad if needed
+         * TODO move this up in front of argument passing
+         *      and factor out common code with coroutine pmc
+         */
+        if (!PMC_IS_NULL(sub->lex_info)) {
+            context->lex_pad = pmc_new_init(INTERP,
+                    Parrot_get_ctx_HLL_type(interpreter,
+                        enum_class_LexPad),
+                    sub->lex_info);
+            VTABLE_set_pointer(INTERP, context->lex_pad, context);
+        }
         /* switch code segment if needed */
         if (INTERP->code != sub->seg) {
             Parrot_switch_to_cs(INTERP, sub->seg, 1);
+        }
+        if (PObj_get_FLAGS(ccont) & SUB_FLAG_TAILCALL) {
+            if (!(*pc == PARROT_OP_get_params_pc ||
+                        (*pc == PARROT_OP_push_eh_ic &&
+                         pc[2] == PARROT_OP_get_params_pc))) {
+                /* TODO keep it or resize it */
+                --context->recursion_depth;
+                PObj_get_FLAGS(ccont) &= ~SUB_FLAG_TAILCALL;
+                context->caller_ctx = caller_ctx->caller_ctx;
+                Parrot_free_context(INTERP, caller_ctx, 1);
+            }
         }
         return pc;
     }
@@ -461,6 +439,18 @@ Archives the subroutine.
         (info->visit_pmc_now)(INTERP, sub->namespace, info);
         info->thaw_ptr = &sub->multi_signature;
         (info->visit_pmc_now)(INTERP, sub->multi_signature, info);
+        info->thaw_ptr = &sub->outer_sub;
+        (info->visit_pmc_now)(INTERP, sub->outer_sub, info);
+        /*
+         * XXX visit_pmc_now is wrong, because it breaks
+         *     depth-first visit inside the todo list
+         * TODO change all user visit functions to use
+         *    visit_pmc (the todo renamed visit_pm_later)
+         *
+         * Therefore the hash must be last during visit for now.   
+         */    
+        info->thaw_ptr = &sub->lex_info;
+        (info->visit_pmc_now)(INTERP, sub->lex_info, info);
         SUPER(info);
     }
 
@@ -482,6 +472,7 @@ Archives the subroutine.
          * - HLL_id
          * - multi_signature
          * - n_regs_used[i]
+         * - lex_info
          */
 
         /*
@@ -580,8 +571,6 @@ Called after the subroutine as been unarchived.
 
 =over 4
 
-=item C<METHOD PMC* get_name_space()>
-
 =item C<METHOD PMC* get_namespace()>
 
 Return the namespace PMC or Undef. The namespace PMC is either a
@@ -591,16 +580,14 @@ String PMC or a Key PMC for a nested namespace.
 
 Return amount of used registers for register kinds "I", "S", "P", "N".
 
+=item C<METHOD PMC* get_lexinfo()>
+
+Return the LexInfo PMC, if any or a Null PMC.
+
 =cut
 
 */
 
-    METHOD PMC* get_name_space() {
-        struct Parrot_sub * sub = PMC_sub(SELF);
-
-        return PMC_IS_NULL(sub->namespace) ?
-            pmc_new(INTERP, enum_class_Undef) : sub->namespace;
-    }
 
     METHOD PMC* get_namespace() {
         struct Parrot_sub * sub = PMC_sub(SELF);
@@ -628,6 +615,15 @@ Return amount of used registers for register kinds "I", "S", "P", "N".
         return sub->n_regs_used[p - types];
     }
 
+    METHOD PMC* get_lexinfo() {
+        struct Parrot_sub * sub = PMC_sub(SELF);
+        return sub->lex_info ? sub->lex_info : PMCNULL;
+    }
+
+    METHOD PMC* get_outer() {
+        struct Parrot_sub * sub = PMC_sub(SELF);
+        return sub->outer_sub ? sub->outer_sub : PMCNULL;
+    }
 
 }
 

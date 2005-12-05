@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: objects.c 9260 2005-09-28 16:00:42Z robert $
+$Id: objects.c 10301 2005-12-01 22:32:51Z particle $
 
 =head1 NAME
 
@@ -448,15 +448,13 @@ parrot_class_register(Interp* interpreter, STRING *class_name,
     INTVAL new_type;
     VTABLE *new_vtable, *parent_vtable;
     PMC *vtable_pmc;
-    char *c_error;
 
     /*
      * register the class in the PMCs name class_hash
      */
     if ((new_type = pmc_type(interpreter, class_name)) > enum_type_undef) {
-        c_error = string_to_cstring(interpreter, class_name);
-        internal_exception(1, "Class %s already registered!\n", c_error);
-        string_cstring_free(c_error);
+        real_exception(interpreter, NULL, INVALID_OPERATION,
+                "Class %Ss already registered!\n", class_name);
     }
     new_type = pmc_register(interpreter, class_name);
     /* Build a new vtable for this class

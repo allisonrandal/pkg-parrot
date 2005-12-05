@@ -1,6 +1,6 @@
 /* packfile.h
 *
-* $Id: packfile.h 9599 2005-10-27 19:43:43Z leo $
+* $Id: packfile.h 9832 2005-11-07 23:37:19Z jonathan $
 *
 * History:
 *  Rework by Melvin; new bytecode format, make bytecode portable.
@@ -341,7 +341,7 @@ void Parrot_pop_cs(Interp *);
 */
 struct PackFile_Debug * Parrot_new_debug_seg(Interp *,
         struct PackFile_ByteCode *cs, size_t size);
-char * Parrot_debug_pc_to_filename(Interp *interpreter,
+STRING * Parrot_debug_pc_to_filename(Interp *interpreter,
         struct PackFile_Debug *debug, opcode_t pc);
 void Parrot_debug_add_mapping(Interp *interpreter,
                          struct PackFile_Debug *debug,

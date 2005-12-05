@@ -14,13 +14,15 @@ a number of built-in rules.
 .include "cclass.pasm"
 .include "interpinfo.pasm"
 
-.sub "__onload" 
+.sub "__onload" :load
     .local pmc base
-    .local pmc p6rule
+    $I0 = find_type "PGE::Rule"
+    if $I0 goto end
     base = getclass "PGE::Match"
     $P0 = subclass base, "PGE::Rule"
-    $P0 = new Hash
+    $P0 = new .Hash
     store_global "PGE::Rule", "%:cache", $P0
+  end:
     .return ()
 .end
 
@@ -32,7 +34,7 @@ Match a null string (always returns true on first match).
 
 =cut
 
-.sub null
+.sub "null"
     .param pmc mob
     .local pmc target, mfrom, mpos
     $P0 = find_global "PGE::Match", "newfrom"
@@ -47,7 +49,7 @@ Force a backtrack.  (Taken from A05.)
 
 =cut
 
-.sub fail
+.sub "fail"
     .param pmc mob
     $P0 = find_global "PGE::Match", "newfrom"
     .return $P0(mob)
@@ -384,27 +386,49 @@ Match whitespace between tokens.
     .local string target
     .local pmc mfrom, mpos
     .local int rep, pos, lastpos
+    .local string nextchars
     .const .Sub corou = "ws_corou"
+    nextchars = ""
+    $P0 = interpinfo .INTERPINFO_CURRENT_SUB
+    $P1 = getprop "nextchars", $P0
+    if_null $P1, ws_1
+    delprop $P0, "nextchars"
+    nextchars = $P1
+  ws_1:
     $P0 = find_global "PGE::Match", "newfrom"
     (mob, target, mfrom, mpos) = $P0(mob)
     lastpos = length target
     pos = mfrom
-    if pos >= lastpos goto end
-    if pos < 1 goto ws_succ
+    if pos >= lastpos goto found
+    if pos < 1 goto ws_scan
     $I0 = is_cclass .CCLASS_WORD, target, pos
-    if $I0 == 0 goto ws_succ
+    if $I0 == 0 goto ws_scan
     $I1 = pos - 1
     $I0 = is_cclass .CCLASS_WORD, target, $I1
-    if $I0 == 0 goto ws_succ
-    .return (mob)
-  ws_succ:
-    $I0 = find_not_cclass .CCLASS_WHITESPACE, target, pos, lastpos
-    mpos = $I0
-    if $I0 == pos goto end
+    if $I0 == 0 goto ws_scan
+    goto end
+  ws_scan:
+    $I0 = pos
+    pos = find_not_cclass .CCLASS_WHITESPACE, target, pos, lastpos
+    if pos == $I0 goto nobacktrack
+    $I0 = length nextchars
+    if $I0 == 0 goto backtrack
+    $I1 = find_cclass .CCLASS_WHITESPACE, nextchars, 0, $I0
+    if $I1 >= $I0 goto nobacktrack
+  backtrack:
+    mpos = pos
     $P0 = corou
     $P0 = clone $P0
     setattribute mob, "PGE::Match\x0&:corou", $P0
     $P0(mob, mfrom, mpos)
+    .return (mob)
+  nobacktrack:
+    if nextchars == "" goto found
+    $S1 = substr target, pos, 1
+    $I1 = index nextchars, $S1
+    if $I1 < 0 goto end
+  found:
+    mpos = pos
   end:
     .return (mob)
 .end
@@ -425,7 +449,8 @@ Match whitespace between tokens.
 =item C<before(PMC mob, STR pattern)>
 
 Perform lookahead -- i.e., check if we're at a position where
-C<pattern> matches.  Always returns a zero-width Match object.
+C<pattern> matches.  Returns a zero-width Match object on
+success.
 
 =cut
 
@@ -445,7 +470,7 @@ C<pattern> matches.  Always returns a zero-width Match object.
     rule = cache[pattern]
     goto match
   new_pattern:
-    $P0 = find_global "PGE", "p6rule"
+    $P0 = compreg "PGE::P6Rule"
     rule = $P0(pattern)
     cache[pattern] = rule
   match:
@@ -454,6 +479,62 @@ C<pattern> matches.  Always returns a zero-width Match object.
     $P0 = getattribute mob, "PGE::Match\x0$:from"
     $P1 = getattribute mob, "PGE::Match\x0$:pos"
     assign $P1, $P0
+    null $P0
+    setattribute mob, "PGE::Match\x0&:corou", $P0
+  end:
+    .return (mob)
+.end
+
+=item C<after(PMC mob, STR pattern)>
+
+Perform lookbehind -- i.e., check if the string before the
+current position matches <pattern> (anchored at the end).
+Returns a zero-width Match object on success.
+
+XXX: Note that this implementation cheats in a big way.
+S05 says that C<after> is implemented by reversing the 
+syntax tree and looking for things in opposite order going
+to the left.  This implementation just grabs the (sub)string
+up to the current match position and tests that, anchoring
+the pattern to the end of the substring.  It's cheap and
+potentially very inefficient, but it "works" for now.
+
+=cut
+
+.sub "after"
+    .param pmc mob
+    .param string pattern      :optional
+    .param int has_pattern     :opt_flag
+    .local pmc cache, rule
+    .local int from
+
+    if has_pattern goto lookbehind
+    mob = fail(mob)
+    .return (mob)
+  lookbehind:
+    pattern = concat "[", pattern
+    pattern = concat pattern, "]$"
+    cache = find_global "PGE::Rule", "%:cache"
+    $I0 = exists cache[pattern]
+    if $I0 == 0 goto new_pattern
+    rule = cache[pattern]
+    goto match
+  new_pattern:
+    $P0 = compreg "PGE::P6Rule"
+    rule = $P0(pattern)
+    cache[pattern] = rule
+  match:
+    $P0 = getattribute mob, "PGE::Match\x0$:target"
+    $S0 = $P0
+    $P0 = getattribute mob, "PGE::Match\x0$:pos"
+    from = $P0
+    $S0 = substr $S0, 0, from
+    mob = rule($S0)
+    unless mob goto end
+    $P0 = getattribute mob, "PGE::Match\x0$:from"
+    $P1 = getattribute mob, "PGE::Match\x0$:pos"
+    $P0 = from
+    $P1 = from
     null $P0
     setattribute mob, "PGE::Match\x0&:corou", $P0
   end:

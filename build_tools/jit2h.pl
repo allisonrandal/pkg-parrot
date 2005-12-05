@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit2h.pl 7937 2005-04-28 15:41:47Z leo $
+# $Id: jit2h.pl 10236 2005-11-29 01:45:11Z chip $
 
 =head1 NAME
 
@@ -460,7 +460,7 @@ if ($genfile =~ /jit_cpu.c/) {
 EOC
 }
 
-print("jit2h: $njit (+ $vjit vtable) of $core_numops ops are JITed.\n");
+print("jit2h: JITed $njit (+ $vjit vtable) of $core_numops ops\n");
 sub make_subs {
     my ($ptr, $type, $index) = @_;
     return(($ptr eq '&' ? '&' : '') . sprintf($argmaps{$type_to_arg{$type}}, $index));

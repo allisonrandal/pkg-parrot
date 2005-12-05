@@ -1,6 +1,14 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: pyfunc.t 9452 2005-10-11 13:45:38Z leo $
+#! perl
+# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
+# $Id: pyfunc.t 10145 2005-11-23 03:15:23Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 4;
+use Parrot::Config;
+
 
 =head1 NAME
 
@@ -8,7 +16,7 @@ t/dynclass/pyfunc.t - Python Functions
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/dynclass/pyfunc.t
+	% prove t/dynclass/pyfunc.t
 
 =head1 DESCRIPTION
 

@@ -1,7 +1,7 @@
 /* iso_8859_1.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: iso-8859-1.h 9388 2005-10-07 11:25:43Z leo $
+ *     $Id: iso-8859-1.h 10028 2005-11-16 18:21:29Z leo $
  *  Overview:
  *     This is the header for the iso_8859-1 charset functions
  *  Data Structure and Algorithms:
@@ -12,17 +12,6 @@
 
 #if !defined(PARROT_CHARSET_ISO_8859_1_H_GUARD)
 #define PARROT_CHARSET_ISO_8859_1_H_GUARD
-
-static void set_graphemes(Interp *, STRING *source_string, UINTVAL offset, UINTVAL replace_count, STRING *insert_string);
-static void compose(Interp *, STRING *source_string);
-static void decompose(Interp *, STRING *source_string);
-static void upcase(Interp *, STRING *source_string);
-static void downcase(Interp *, STRING *source_string);
-static void titlecase(Interp *, STRING *source_string);
-static void upcase_first(Interp *, STRING *source_string);
-static void downcase_first(Interp *, STRING *source_string);
-static void titlecase_first(Interp *, STRING *source_string);
-static UINTVAL validate(Interp *, STRING *source_string);
 
 STRING *charset_cvt_iso_8859_1_to_ascii(Interp *, STRING *src, STRING *dest);
 

@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pl 9194 2005-09-14 18:30:31Z bernhard $
+# $Id: Configure.pl 10119 2005-11-21 02:54:11Z particle $
 
 =head1 NAME
 
@@ -285,7 +285,7 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $cvsid='$Id: Configure.pl 9194 2005-09-14 18:30:31Z bernhard $';
+      my $cvsid='$Id: Configure.pl 10119 2005-11-21 02:54:11Z particle $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
 $cvsid
@@ -384,6 +384,7 @@ EOT
 }
 
 $args{debugging} = 1 unless ((exists $args{debugging}) && !$args{debugging});
+$args{maintainer} = 1 if defined $args{lex} or defined $args{yacc};
 
 print <<"END";
 Parrot Version $parrot_version Configure 2.0
@@ -401,12 +402,15 @@ END
 #Run the actual steps
 Parrot::Configure::RunSteps->runsteps(%args);
 
+# tell users what to do next
+my $make = Parrot::Configure::Data->get('make');
+
 print <<"END";
 
 Okay, we're done!
 
-You can now use `make' (or your platform's equivalent to `make') to build your
-Parrot. After that, you can use `make test' to run the test suite.
+You can now use `$make' to build your Parrot. After that,
+you can use `$make test' to run the test suite.
 
 Happy Hacking,
         The Parrot Team

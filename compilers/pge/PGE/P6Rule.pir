@@ -2,8 +2,10 @@
 
 .namespace [ "PGE::P6Rule" ]
 
-.sub "__onload"
+.sub "__onload" :load
     .local pmc optable
+    $I0 = find_type "PGE::Exp::WS"
+    if $I0 goto end
     $P0 = getclass "PGE::Exp::Subrule"
     $P1 = subclass $P0, "PGE::Exp::WS"
     $P0 = getclass "PGE::Exp"
@@ -70,6 +72,7 @@
     optable.addtok("prefix::", "<infix:|", "nows", $P0)
 
     optable.addtok("close:>", "<prefix::", "nows")
+    optable.addtok("close:}", "<prefix::", "nows")
 
     $P0 = new Hash
     store_global "PGE::P6Rule", "%escape", $P0
@@ -81,6 +84,10 @@
     $P0["h"] = unicode:"\x09\x20\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
     $P0["n"] = unicode:"\x0a\x0d\x0c\x85\u2028\u2029"
     # See http://www.unicode.org/Public/UNIDATA/PropList.txt for above
+
+    $P0 = find_global "PGE", "p6rule"
+    compreg "PGE::P6Rule", $P0
+  end:
 .end
 
 
@@ -107,13 +114,14 @@
     if initchar != "\\" goto term_literal
 
   term_backslash:
+    $I0 = is_cclass .CCLASS_NUMERIC, target, pos
+    if $I0 goto err_backslash_digit
     initchar = substr target, pos, 1
-    $I0 = index "01234567", initchar
-    if $I0 >= 0 goto term_backslash_o
     isnegated = is_cclass .CCLASS_UPPERCASE, target, pos 
     inc pos
     $S0 = downcase initchar
     if $S0 == 'x' goto term_backslash_x            # \x.. \X..
+    if $S0 == 'o' goto term_backslash_o            # \o.. \O..
     $P0 = find_global "PGE::P6Rule", "%escape"
     $I0 = exists $P0[$S0]                          # \e\f\r\t\v\h
     if $I0 == 0 goto term_literal
@@ -198,6 +206,9 @@
     $P0 = pos
     .return (mob)
 
+  err_backslash_digit:
+    parse_error(mob, pos, "\\1 and \\012 illegal, use $1, \\o012, or \\x0a")
+    goto end
   err_nodigits:
     parse_error(mob, pos, "No digits found in \\x...")
     goto end
@@ -209,19 +220,27 @@
 .sub "parse_modifier"
     .param pmc mob
     .local int pos, lastpos
-    .local string target
+    .local string target, value
     .local pmc mfrom, mpos
     $P0 = find_global "PGE::Match", "newfrom"
     (mob, target, mfrom, mpos) = $P0(mob, 0, "PGE::Exp::Modifier")
     pos = mfrom
     lastpos = length target
-    $I0 = pos
+    value = "1"
     inc pos
+    $I0 = pos
+    pos = find_not_cclass .CCLASS_NUMERIC, target, pos, lastpos
+    if pos == $I0 goto name
+    $I1 = pos - $I0
+    value = substr target, $I0, $I1
+    $I0 = pos
+  name:
     pos = find_not_cclass .CCLASS_WORD, target, pos, lastpos
     $I1 = pos - $I0
     $S0 = substr target, $I0, $I1
+    $S0 = concat ":", $S0
     mob["mname"] = $S0
-    mob["value"] = 1
+    mob["value"] = value
     $S0 = substr target, pos, 1
     if $S0 != "(" goto end
     $I0 = pos + 1
@@ -399,8 +418,7 @@
     mob["subname"] = subname
     mob["iscapture"] = iscapture
     if iscapture == 0 goto end
-    $P1 = find_global "Data::Escape", "String"
-    $S0 = $P1(subname, '"')
+    $S0 = escape subname
     $S0 = concat '"', $S0
     $S0 = concat $S0, '"'
     mob["cname"] = $S0
@@ -518,8 +536,7 @@
   name_1:
     $I1 = $I0 - pos
     cname = substr target, pos, $I1
-    $P1 = find_global "Data::Escape", "String"
-    cname = $P1(cname, '"')
+    cname = escape cname
     cname = concat '"', cname
     cname = concat cname, '"'
     mob["cname"] = cname
@@ -538,7 +555,7 @@
     .param string message
     $P0 = getattribute mob, "PGE::Match\x0$:pos"
     $P0 = pos
-    $P0 = new Exception
+    $P0 = new .Exception
     $S0 = "p6rule parse error: "
     $S0 .= message
     $P0["_message"] = $S0
@@ -581,8 +598,8 @@
 
     $P0 = find_global "PGE::Rule", "p6rule"
     exp = $P0(exp)
-    pad = new Hash
-    $P0 = new Hash
+    pad = new .Hash
+    $P0 = new .Hash
     pad["reps"] = $P0
     pad["cutnum"] = PGE_CUT_GROUP
     pad["subpats"] = 0
@@ -591,7 +608,7 @@
     $P0 = $P0.p6analyze(pad)
     exp["expr"] = $P0
 
-    $P0 = new String
+    $P0 = new .String
     $P0 = "\n.namespace [ \""
     $P0 .= grammar
     $P0 .= "\" ]\n\n"
@@ -679,8 +696,8 @@
     .local pmc exp0, exp1
 
     reps = pad["reps"]
-    savereps = new Hash
-    $P0 = new Iterator, reps
+    savereps = new .Hash
+    $P0 = new .Iterator, reps
   reps_1:
     unless $P0 goto reps_2
     $P1 = shift $P0
@@ -791,7 +808,7 @@
     subpats = pad["subpats"]
     pad["subpats"] = 0
     pad["isarray"] = 0
-    $P0 = new Hash
+    $P0 = new .Hash
     pad["reps"] = $P0
     exp = self[0]
     exp = exp.p6analyze(pad)

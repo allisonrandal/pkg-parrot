@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: exit.t 6741 2004-10-01 21:16:56Z jrieks $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: exit.t 10142 2005-11-23 01:56:46Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 3;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/src/exit.t - Exiting
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/src/exit.t
+	% prove t/src/exit.t
 
 =head1 DESCRIPTION
 
@@ -16,7 +23,6 @@ Tests C<Parrot_exit()> and C<Parrot_on_exit()> functions.
 
 =cut
 
-use Parrot::Test tests => 3;
 
 c_output_is(<<'CODE', <<'OUTPUT', "Parrot_exit");
         #include <stdio.h>

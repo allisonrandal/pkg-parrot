@@ -1,4 +1,4 @@
-# $Id: macro.pir 9406 2005-10-08 11:55:03Z bernhard $
+# $Id: macro.pir 10280 2005-11-30 21:23:07Z bernhard $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ src/macro.pir - does macro substitution
 =head1 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer.  All Rights Reserved.
-CVS Info:   $Id: macro.pir 9406 2005-10-08 11:55:03Z bernhard $
+CVS Info:   $Id: macro.pir 10280 2005-11-30 21:23:07Z bernhard $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -132,7 +132,7 @@ NESTING_LIMIT_NOT_REACHED_YET:
   state['expansion_level'] = expansion_level
 
   .local pmc arguments
-  arguments = new ResizablePMCArray
+  arguments = new .ResizablePMCArray
   collect_arguments( state, arguments )
 
   .local string text

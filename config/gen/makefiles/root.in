@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: root.in 9747 2005-11-03 16:19:37Z coke $
+# $Id: root.in 10305 2005-12-02 01:51:48Z particle $
 
 ###############################################################################
 # NOTES:
@@ -85,6 +85,7 @@ RM_RF      = ${rm_rf}
 AR_CR      = ${ar} ${ar_flags}
 RANLIB     = ${ranlib}
 PERL       = ${perl}
+CP         = $(PERL) -MExtUtils::Command -e cp
 TOUCH      = $(PERL) -MExtUtils::Command -e touch
 YACC       = ${yacc}
 LEX        = ${lex}
@@ -105,13 +106,13 @@ LINT       = splint
 # note: +distinctinternalnames with +externalnamelen at 8 characters
 #       (the ANSI standard) is not going to fly for us.
 LINTFLAGS  = -weak +showscan +showsummary +posixstrictlib -abstract \
-    +aliasunique +ansireserved +ansireservedinternal +assignexpose \
-    +bitwisesigned +boolcompare +booltype BOOLVAL +casebreak -castfcnptr \
-    -charint +continuecomment +controlnestdepth 15 +cppnames +declundef \
-    +distinctinternalnames +evalorder +fielduse +forcehints -globs \
-    +imptype +includenest 8 +incondefs +incondefslib +linelen 9999 \
-    +longintegral +macroassign +macroempty +macroredef +matchanyintegral \
-    +nestedextern +noeffect +readonlystrings +realcompare +shadow -type
+	+aliasunique +ansireserved +ansireservedinternal +assignexpose \
+	+bitwisesigned +boolcompare +booltype BOOLVAL +casebreak -castfcnptr \
+	-charint +continuecomment +controlnestdepth 15 +cppnames +declundef \
+	+distinctinternalnames +evalorder +fielduse +forcehints -globs \
+	+imptype +includenest 8 +incondefs +incondefslib +linelen 9999 \
+	+longintegral +macroassign +macroempty +macroredef +matchanyintegral \
+	+nestedextern +noeffect +readonlystrings +realcompare +shadow -type
 
 # slightly weaker, more realistic variant.
 LINTFLAGS2 = $(LINTFLAGS) -ansireserved -retvalother -bitwisesigned
@@ -153,62 +154,65 @@ NONGEN_HEADERS  = ${TEMP_nongen_headers}
 ###############################################################################
 
 GEN_MAKEFILES = \
-    Makefile \
-    languages/Makefile \
-#CONDITIONED_LINE(has_perldoc):    docs/Makefile \
-    dynclasses/Makefile \
-    dynoplibs/Makefile \
-    languages/cola/Makefile \
-    languages/parrot_compiler/Makefile \
-    languages/jako/Makefile \
-    languages/miniperl/Makefile \
-    languages/scheme/Makefile \
-    languages/befunge/Makefile \
-    languages/bf/Makefile \
-    languages/ook/Makefile \
-    languages/lisp/Makefile \
-    languages/m4/Makefile \
-    languages/perl6/Makefile \
-    languages/urm/Makefile \
-    languages/tcl/Makefile \
-    languages/tcl/examples/Makefile \
-    editor/Makefile \
-    compilers/pge/Makefile \
-    languages/punie/Makefile \
-    languages/bc/Makefile \
-    languages/Zcode/Makefile
+	Makefile \
+	languages/Makefile \
+#CONDITIONED_LINE(has_perldoc):	docs/Makefile \
+	dynclasses/Makefile \
+	dynoplibs/Makefile \
+	languages/amber/Makefile \
+	languages/cola/Makefile \
+	languages/parrot_compiler/Makefile \
+	languages/jako/Makefile \
+	languages/miniperl/Makefile \
+	languages/scheme/Makefile \
+	languages/befunge/Makefile \
+	languages/bf/Makefile \
+	languages/ook/Makefile \
+	languages/lisp/Makefile \
+	languages/m4/Makefile \
+	languages/perl6/Makefile \
+	languages/urm/Makefile \
+	languages/tcl/Makefile \
+	languages/tcl/examples/Makefile \
+	editor/Makefile \
+	compilers/pge/Makefile \
+	compilers/tge/Makefile \
+	languages/punie/Makefile \
+	languages/bc/Makefile \
+	languages/Zcode/Makefile \
+	languages/lua/Makefile
 
 GEN_CONFIGS = \
-    include/parrot/config.h \
-    include/parrot/platform.h \
-    include/parrot/platform_interface.h \
-    include/parrot/has_header.h \
-    include/parrot/feature.h \
-    include/parrot/core_pmcs.h \
-    include/parrot/exec_dep.h \
-    lib/Parrot/Config.pm \
-    lib/Parrot/PMC.pm \
-    runtime/parrot/include/config.fpmc \
-    $(SRC_DIR)/platform.c \
-    $(SRC_DIR)/revision.c \
-#CONDITIONED_LINE(platform_asm):    $(SRC_DIR)/platform_asm.s \
-    $(SRC_DIR)/core_pmcs.c \
-    CFLAGS \
-    $(IMCC_DIR)/CFLAGS \
-    config_lib.pasm \
-    $(SRC_DIR)/nci_test$(O) \
-    libparrot.def \
-    ast/ast.y.flag \
-    build_tools/build_dynclasses.pl \
-    $(IMCC_DIR)/imcc.y.flag \
-    ops/core_ops.c \
-    ops/core_ops_switch.c
+	include/parrot/config.h \
+	include/parrot/platform.h \
+	include/parrot/platform_interface.h \
+	include/parrot/has_header.h \
+	include/parrot/feature.h \
+	include/parrot/core_pmcs.h \
+	include/parrot/exec_dep.h \
+	lib/Parrot/Config.pm \
+	lib/Parrot/PMC.pm \
+	runtime/parrot/include/config.fpmc \
+	$(SRC_DIR)/platform.c \
+	$(SRC_DIR)/revision.c \
+#CONDITIONED_LINE(platform_asm):	$(SRC_DIR)/platform_asm.s \
+	$(SRC_DIR)/core_pmcs.c \
+	CFLAGS \
+	$(IMCC_DIR)/CFLAGS \
+	config_lib.pasm \
+	$(SRC_DIR)/nci_test$(O) \
+	libparrot.def \
+	ast/ast.y.flag \
+	build_tools/build_dynclasses.pl \
+	$(IMCC_DIR)/imcc.y.flag \
+	ops/core_ops.c \
+	ops/core_ops_switch.c
 
 # most of these are generated by config/gen/parrot_include.pl
 
 GEN_PASM_INCLUDES = \
-    runtime/parrot/include/signal.pasm \
-    ${TEMP_gen_pasm_includes}
+	runtime/parrot/include/signal.pasm \
+	${TEMP_gen_pasm_includes}
 
 STICKY_FILES = $(GEN_CONFIGS) $(GEN_MAKEFILES) myconfig $(GEN_PASM_INCLUDES)
 
@@ -226,69 +230,69 @@ STICKY_FILES = $(GEN_CONFIGS) $(GEN_MAKEFILES) myconfig $(GEN_PASM_INCLUDES)
 GEN_OPSFILES =
 
 GEN_HEADERS = \
-    $(INC_DIR)/vtable.h \
-    $(INC_DIR)/oplib/core_ops.h \
-    $(INC_DIR)/oplib/ops.h \
-    $(INC_DIR)/oplib/core_ops_switch.h \
-    $(INC_DIR)/extend_vtable.h
+	$(INC_DIR)/vtable.h \
+	$(INC_DIR)/oplib/core_ops.h \
+	$(INC_DIR)/oplib/ops.h \
+	$(INC_DIR)/oplib/core_ops_switch.h \
+	$(INC_DIR)/extend_vtable.h
 
 GEN_SOURCES = \
-    $(SRC_DIR)/core_ops.c \
-    $(SRC_DIR)/fingerprint.c \
-    $(SRC_DIR)/nci.c \
-    $(SRC_DIR)/core_ops_switch.c \
-    $(SRC_DIR)/jit_cpu.c \
-    $(SRC_DIR)/parrot_config.c \
-    $(SRC_DIR)/null_config.c \
-    $(SRC_DIR)/install_config.c \
-    $(SRC_DIR)/exec_cpu.c \
-    $(SRC_DIR)/extend_vtable.c
+	$(SRC_DIR)/core_ops.c \
+	$(SRC_DIR)/fingerprint.c \
+	$(SRC_DIR)/nci.c \
+	$(SRC_DIR)/core_ops_switch.c \
+	$(SRC_DIR)/jit_cpu.c \
+	$(SRC_DIR)/parrot_config.c \
+	$(SRC_DIR)/null_config.c \
+	$(SRC_DIR)/install_config.c \
+	$(SRC_DIR)/exec_cpu.c \
+	$(SRC_DIR)/extend_vtable.c
 
 GEN_MODULES = \
-    lib/Parrot/OpLib/core.pm
+	lib/Parrot/OpLib/core.pm
 
 GEN_LIBRARY = \
-    $(LIBRARY_DIR)/config.pbc \
-    $(LIBRARY_DIR)/Data/Dumper/Base.pbc \
-    $(LIBRARY_DIR)/Data/Dumper/Default.pbc \
-    $(LIBRARY_DIR)/Data/Dumper.pbc \
-    $(LIBRARY_DIR)/Data/Escape.pbc \
-    $(LIBRARY_DIR)/Data/Sort.pbc \
-    $(LIBRARY_DIR)/Digest/MD5.pbc \
-    $(LIBRARY_DIR)/dumper.pbc \
-    $(LIBRARY_DIR)/Getopt/Long.pbc \
-    $(LIBRARY_DIR)/JSON.pbc \
-    $(LIBRARY_DIR)/ncurses.pbc \
-    $(LIBRARY_DIR)/parrotlib.pbc \
-    $(LIBRARY_DIR)/pcre.pbc \
-    $(LIBRARY_DIR)/PGE/Dumper.pbc \
-    $(LIBRARY_DIR)/PGE/Glob.pbc \
-    $(LIBRARY_DIR)/PGE/Text.pbc \
-    $(LIBRARY_DIR)/Stream/Base.pbc \
-    $(LIBRARY_DIR)/Stream/Combiner.pbc \
-    $(LIBRARY_DIR)/Stream/Coroutine.pbc \
-    $(LIBRARY_DIR)/Stream/Filter.pbc \
-    $(LIBRARY_DIR)/Stream/Lines.pbc \
-    $(LIBRARY_DIR)/Stream/ParrotIO.pbc \
-    $(LIBRARY_DIR)/Stream/Replay.pbc \
-    $(LIBRARY_DIR)/Stream/Sub.pbc \
-    $(LIBRARY_DIR)/Stream/Writer.pbc \
-    $(LIBRARY_DIR)/YAML/Parser/Syck.pbc
+	$(LIBRARY_DIR)/config.pbc \
+	$(LIBRARY_DIR)/Data/Dumper/Base.pbc \
+	$(LIBRARY_DIR)/Data/Dumper/Default.pbc \
+	$(LIBRARY_DIR)/Data/Dumper.pbc \
+	$(LIBRARY_DIR)/Data/Escape.pbc \
+	$(LIBRARY_DIR)/Data/Sort.pbc \
+	$(LIBRARY_DIR)/Digest/MD5.pbc \
+	$(LIBRARY_DIR)/dumper.pbc \
+	$(LIBRARY_DIR)/Getopt/Long.pbc \
+	$(LIBRARY_DIR)/JSON.pbc \
+	$(LIBRARY_DIR)/ncurses.pbc \
+	$(LIBRARY_DIR)/parrotlib.pbc \
+	$(LIBRARY_DIR)/pcre.pbc \
+	$(LIBRARY_DIR)/PGE/Dumper.pbc \
+	$(LIBRARY_DIR)/PGE/Glob.pbc \
+	$(LIBRARY_DIR)/PGE/Text.pbc \
+	$(LIBRARY_DIR)/Stream/Base.pbc \
+	$(LIBRARY_DIR)/Stream/Combiner.pbc \
+	$(LIBRARY_DIR)/Stream/Coroutine.pbc \
+	$(LIBRARY_DIR)/Stream/Filter.pbc \
+	$(LIBRARY_DIR)/Stream/Lines.pbc \
+	$(LIBRARY_DIR)/Stream/ParrotIO.pbc \
+	$(LIBRARY_DIR)/Stream/Replay.pbc \
+	$(LIBRARY_DIR)/Stream/Sub.pbc \
+	$(LIBRARY_DIR)/Stream/Writer.pbc \
+	$(LIBRARY_DIR)/YAML/Parser/Syck.pbc
 # XXX Why don't these build?
-    #runtime/parrot/library/libpcre.pbc \
-    #runtime/parrot/library/Data/Replace.pbc \
-    #runtime/parrot/library/postgres.pbc \
+#	runtime/parrot/library/libpcre.pbc \
+#	runtime/parrot/library/Data/Replace.pbc \
+#	runtime/parrot/library/postgres.pbc \
 
 # the dependencies of jit_emit.h are done explicitely
 # including this file in GEN_HEADERS causes unnecessary recompile of all
 FLUID_FILES = \
-    $(GEN_OPSFILES) \
-    $(GEN_HEADERS) \
-    $(GEN_SOURCES) \
-    $(GEN_MODULES) \
-    $(GEN_LIBRARY) \
-    $(INC_DIR)/jit_emit.h \
-    runtime/parrot/include/parrotlib.pbc
+	$(GEN_OPSFILES) \
+	$(GEN_HEADERS) \
+	$(GEN_SOURCES) \
+	$(GEN_MODULES) \
+	$(GEN_LIBRARY) \
+	$(INC_DIR)/jit_emit.h \
+	runtime/parrot/include/parrotlib.pbc
 
 
 ###############################################################################
@@ -299,51 +303,43 @@ FLUID_FILES = \
 
 # these are private to the IMCC subsystem
 IMCC_H_FILES = \
-    $(IMCC_DIR)/imc.h \
-    $(IMCC_DIR)/stacks.h \
-    $(IMCC_DIR)/cfg.h \
-    $(IMCC_DIR)/class.h \
-    $(IMCC_DIR)/instructions.h \
-    $(IMCC_DIR)/debug.h \
-    $(IMCC_DIR)/sets.h \
-    $(IMCC_DIR)/unit.h \
-    $(IMCC_DIR)/symbol.h \
-    $(IMCC_DIR)/symreg.h \
-    $(IMCC_DIR)/pbc.h \
-    $(IMCC_DIR)/optimizer.h \
-    $(IMCC_DIR)/parser.h \
-    $(IMCC_DIR)/imcparser.h
+	$(IMCC_DIR)/imc.h \
+	$(IMCC_DIR)/cfg.h \
+	$(IMCC_DIR)/instructions.h \
+	$(IMCC_DIR)/debug.h \
+	$(IMCC_DIR)/sets.h \
+	$(IMCC_DIR)/unit.h \
+	$(IMCC_DIR)/symreg.h \
+	$(IMCC_DIR)/pbc.h \
+	$(IMCC_DIR)/optimizer.h \
+	$(IMCC_DIR)/parser.h \
+	$(IMCC_DIR)/imcparser.h
 
 IMCC_O_FILES = \
-    $(IMCC_DIR)/imcparser$(O) \
-    $(IMCC_DIR)/imclexer$(O) \
-    $(IMCC_DIR)/imc$(O) \
-    $(IMCC_DIR)/stacks$(O) \
-    $(IMCC_DIR)/symbol$(O) \
-    $(IMCC_DIR)/class$(O) \
-    $(IMCC_DIR)/symreg$(O) \
-    $(IMCC_DIR)/instructions$(O) \
-    $(IMCC_DIR)/cfg$(O) \
-    $(IMCC_DIR)/reg_alloc$(O) \
-    $(IMCC_DIR)/sets$(O) \
-    $(IMCC_DIR)/debug$(O) \
-    $(IMCC_DIR)/optimizer$(O) \
-    $(IMCC_DIR)/pbc$(O) \
-    $(IMCC_DIR)/parser_util$(O) \
-    $(IMCC_DIR)/jit$(O) \
-    $(IMCC_DIR)/sub$(O) \
-    $(IMCC_DIR)/fastcall$(O) \
-    $(IMCC_DIR)/pcc$(O)
+	$(IMCC_DIR)/imcparser$(O) \
+	$(IMCC_DIR)/imclexer$(O) \
+	$(IMCC_DIR)/imc$(O) \
+	$(IMCC_DIR)/symreg$(O) \
+	$(IMCC_DIR)/instructions$(O) \
+	$(IMCC_DIR)/cfg$(O) \
+	$(IMCC_DIR)/reg_alloc$(O) \
+	$(IMCC_DIR)/sets$(O) \
+	$(IMCC_DIR)/debug$(O) \
+	$(IMCC_DIR)/optimizer$(O) \
+	$(IMCC_DIR)/pbc$(O) \
+	$(IMCC_DIR)/parser_util$(O) \
+	$(IMCC_DIR)/jit$(O) \
+	$(IMCC_DIR)/pcc$(O)
 
 AST_H_FILES = \
-    $(AST_DIR)/ast.h \
-    $(AST_DIR)/astparser.h
+	$(AST_DIR)/ast.h \
+	$(AST_DIR)/astparser.h
 
 AST_O_FILES = \
-    $(AST_DIR)/astparser$(O) \
-    $(AST_DIR)/astlexer$(O) \
-    $(AST_DIR)/ast_main$(O) \
-    $(AST_DIR)/node$(O)
+	$(AST_DIR)/astparser$(O) \
+	$(AST_DIR)/astlexer$(O) \
+	$(AST_DIR)/ast_main$(O) \
+	$(AST_DIR)/node$(O)
 
 # generated list of header files
 GENERAL_H_FILES   = $(NONGEN_HEADERS) $(GEN_HEADERS) ${TEMP_cg_h}
@@ -358,98 +354,97 @@ ENCODING_O_FILES  = ${TEMP_encoding_o}
 
 
 IO_O_FILES = \
-    $(IO_DIR)/io$(O) \
-    $(IO_DIR)/io_buf$(O) \
-    $(IO_DIR)/io_layers$(O) \
-    $(IO_DIR)/io_unix$(O) \
-    $(IO_DIR)/io_utf8$(O) \
-    $(IO_DIR)/io_mmap$(O) \
-    $(IO_DIR)/io_win32$(O) \
-    $(IO_DIR)/io_stdio$(O) \
-    $(IO_DIR)/io_passdown$(O)
+	$(IO_DIR)/io$(O) \
+	$(IO_DIR)/io_buf$(O) \
+	$(IO_DIR)/io_layers$(O) \
+	$(IO_DIR)/io_unix$(O) \
+	$(IO_DIR)/io_utf8$(O) \
+	$(IO_DIR)/io_mmap$(O) \
+	$(IO_DIR)/io_win32$(O) \
+	$(IO_DIR)/io_stdio$(O) \
+	$(IO_DIR)/io_passdown$(O)
 
 INTERP_O_FILES = \
-    $(SRC_DIR)/charset$(O) \
-    $(SRC_DIR)/encoding$(O) \
-    $(SRC_DIR)/exceptions$(O) \
-    $(SRC_DIR)/global_setup$(O) \
-    $(SRC_DIR)/interpreter$(O)  \
-    $(SRC_DIR)/inter_call$(O)  \
-    $(SRC_DIR)/inter_cb$(O)  \
-    $(SRC_DIR)/inter_create$(O)  \
-    $(SRC_DIR)/inter_misc$(O)  \
-    $(SRC_DIR)/inter_run$(O)  \
-    $(SRC_DIR)/register$(O) \
-    $(SRC_DIR)/memory$(O) \
-    $(SRC_DIR)/objects$(O) \
-    $(SRC_DIR)/packfile$(O) \
-    $(SRC_DIR)/stacks$(O) \
-    $(SRC_DIR)/stack_common$(O) \
-    $(SRC_DIR)/string$(O) \
-    $(SRC_DIR)/string_primitives$(O) \
-    $(SRC_DIR)/sub$(O) \
-    $(SRC_DIR)/lexical$(O) \
-    $(SRC_DIR)/runops_cores$(O) \
-    $(SRC_DIR)/trace$(O) \
-    $(SRC_DIR)/pmc$(O) \
-    $(SRC_DIR)/pmc_freeze$(O) \
-    $(SRC_DIR)/key$(O) \
-    $(SRC_DIR)/hash$(O) \
-    $(SRC_DIR)/core_pmcs$(O) \
-#CONDITIONED_LINE(platform_asm):    $(SRC_DIR)/platform_asm$(O) \
-    $(SRC_DIR)/platform$(O) ${TEMP_jit_o} \
-    $(SRC_DIR)/intlist$(O) \
-    $(SRC_DIR)/list$(O) \
-    $(SRC_DIR)/library$(O) \
-    $(SRC_DIR)/global$(O) \
-    $(SRC_DIR)/embed$(O) \
-    $(SRC_DIR)/warnings$(O) \
-    $(SRC_DIR)/packout$(O) \
-    $(SRC_DIR)/byteorder$(O) \
-    $(SRC_DIR)/debug$(O) \
-    $(SRC_DIR)/smallobject$(O) \
-    $(SRC_DIR)/headers$(O) \
-    $(SRC_DIR)/hll$(O) \
-    $(SRC_DIR)/dod$(O) \
-    $(SRC_DIR)/gc_ims$(O) \
-    $(SRC_DIR)/gc_gms$(O) \
-    $(SRC_DIR)/method_util$(O) \
-    $(SRC_DIR)/exit$(O) \
-    $(SRC_DIR)/misc$(O) \
-    $(SRC_DIR)/spf_render$(O) \
-    $(SRC_DIR)/spf_vtable$(O) \
-    $(SRC_DIR)/datatypes$(O) \
-    $(SRC_DIR)/fingerprint$(O) \
-    $(SRC_DIR)/nci$(O) \
-    $(SRC_DIR)/cpu_dep$(O) \
-    $(SRC_DIR)/tsq$(O) \
-    $(SRC_DIR)/longopt$(O) \
-    $(SRC_DIR)/events$(O) \
-    $(SRC_DIR)/thread$(O) \
-    $(SRC_DIR)/dynext$(O) \
-    $(SRC_DIR)/utils$(O) \
-    $(SRC_DIR)/vtables$(O) \
-    $(SRC_DIR)/pic$(O) \
-    $(SRC_DIR)/mmd$(O) \
-    $(SRC_DIR)/builtin$(O) \
-    $(SRC_DIR)/extend$(O) \
-    $(SRC_DIR)/extend_vtable$(O) \
-    $(SRC_DIR)/revision$(O) \
-    $(PF_DIR)/pf_items$(O) \
-    $(OPS_DIR)/core_ops$(O) \
-    $(OPS_DIR)/core_ops_switch$(O) \
-    ${asmfun_o} \
-    ${TEMP_cg_o} \
-    ${TEMP_exec_o} \
-    ${TEMP_gc_o}
+	$(SRC_DIR)/charset$(O) \
+	$(SRC_DIR)/encoding$(O) \
+	$(SRC_DIR)/exceptions$(O) \
+	$(SRC_DIR)/global_setup$(O) \
+	$(SRC_DIR)/interpreter$(O)  \
+	$(SRC_DIR)/inter_call$(O)  \
+	$(SRC_DIR)/inter_cb$(O)  \
+	$(SRC_DIR)/inter_create$(O)  \
+	$(SRC_DIR)/inter_misc$(O)  \
+	$(SRC_DIR)/inter_run$(O)  \
+	$(SRC_DIR)/register$(O) \
+	$(SRC_DIR)/memory$(O) \
+	$(SRC_DIR)/objects$(O) \
+	$(SRC_DIR)/packfile$(O) \
+	$(SRC_DIR)/stacks$(O) \
+	$(SRC_DIR)/stack_common$(O) \
+	$(SRC_DIR)/string$(O) \
+	$(SRC_DIR)/string_primitives$(O) \
+	$(SRC_DIR)/sub$(O) \
+	$(SRC_DIR)/runops_cores$(O) \
+	$(SRC_DIR)/trace$(O) \
+	$(SRC_DIR)/pmc$(O) \
+	$(SRC_DIR)/pmc_freeze$(O) \
+	$(SRC_DIR)/key$(O) \
+	$(SRC_DIR)/hash$(O) \
+	$(SRC_DIR)/core_pmcs$(O) \
+#CONDITIONED_LINE(platform_asm):	$(SRC_DIR)/platform_asm$(O) \
+	$(SRC_DIR)/platform$(O) ${TEMP_jit_o} \
+	$(SRC_DIR)/intlist$(O) \
+	$(SRC_DIR)/list$(O) \
+	$(SRC_DIR)/library$(O) \
+	$(SRC_DIR)/global$(O) \
+	$(SRC_DIR)/embed$(O) \
+	$(SRC_DIR)/warnings$(O) \
+	$(SRC_DIR)/packout$(O) \
+	$(SRC_DIR)/byteorder$(O) \
+	$(SRC_DIR)/debug$(O) \
+	$(SRC_DIR)/smallobject$(O) \
+	$(SRC_DIR)/headers$(O) \
+	$(SRC_DIR)/hll$(O) \
+	$(SRC_DIR)/dod$(O) \
+	$(SRC_DIR)/gc_ims$(O) \
+	$(SRC_DIR)/gc_gms$(O) \
+	$(SRC_DIR)/method_util$(O) \
+	$(SRC_DIR)/exit$(O) \
+	$(SRC_DIR)/misc$(O) \
+	$(SRC_DIR)/spf_render$(O) \
+	$(SRC_DIR)/spf_vtable$(O) \
+	$(SRC_DIR)/datatypes$(O) \
+	$(SRC_DIR)/fingerprint$(O) \
+	$(SRC_DIR)/nci$(O) \
+	$(SRC_DIR)/cpu_dep$(O) \
+	$(SRC_DIR)/tsq$(O) \
+	$(SRC_DIR)/longopt$(O) \
+	$(SRC_DIR)/events$(O) \
+	$(SRC_DIR)/thread$(O) \
+	$(SRC_DIR)/dynext$(O) \
+	$(SRC_DIR)/utils$(O) \
+	$(SRC_DIR)/vtables$(O) \
+	$(SRC_DIR)/pic$(O) \
+	$(SRC_DIR)/mmd$(O) \
+	$(SRC_DIR)/builtin$(O) \
+	$(SRC_DIR)/extend$(O) \
+	$(SRC_DIR)/extend_vtable$(O) \
+	$(SRC_DIR)/revision$(O) \
+	$(PF_DIR)/pf_items$(O) \
+	$(OPS_DIR)/core_ops$(O) \
+	$(OPS_DIR)/core_ops_switch$(O) \
+	${asmfun_o} \
+	${TEMP_cg_o} \
+	${TEMP_exec_o} \
+	${TEMP_gc_o}
 
 O_FILES = \
-    $(INTERP_O_FILES) \
-    $(CHARSET_O_FILES) \
-    $(IO_O_FILES) $(CLASS_O_FILES) \
-    $(ENCODING_O_FILES) \
-    $(IMCC_O_FILES) \
-    $(AST_O_FILES)
+	$(INTERP_O_FILES) \
+	$(CHARSET_O_FILES) \
+	$(IO_O_FILES) $(CLASS_O_FILES) \
+	$(ENCODING_O_FILES) \
+	$(IMCC_O_FILES) \
+	$(AST_O_FILES)
 
 OPS_FILES = ${ops} $(GEN_OPSFILES)
 
@@ -488,7 +483,7 @@ LIBNCI_TEST_SO    = $(DYNEXT_DIR)/libnci_test$(LOAD_EXT)
 # This is set to  MAKE=$make if your $make command doesn't
 # do it for you.
 ${make_set_make}
-MAKE_C = ${make_c}
+MAKE = ${make_c}
 
 # These need to be above lines that define suffix rules to be portable
 # (certainly FreeBSD make doesn't grok the .imc.pbc rule otherwise)
@@ -502,6 +497,9 @@ MAKE_C = ${make_c}
 # There is probably a better way to do this, but I can't work it out right now.
 .c$(O) :
 	@$(PERL) tools/dev/cc_flags.pl $(CUR_DIR)/CFLAGS $(CC) "" $(CFLAGS) -I$(@D) ${cc_o_out}$@ -c $<
+
+# XXX These obviously require parrot: had trouble adding parrot as a dependency
+# here, though. Ignored on OS X, at least.
 
 .imc.pbc :
 	$(PARROT) -o $@ $<
@@ -522,34 +520,37 @@ MAKE_C = ${make_c}
 ###############################################################################
 
 all : \
-    flags_dummy \
-    $(PARROT) \
-    runtime/parrot/include/parrotlib.pbc \
-    runtime/parrot/include/config.fpmc \
-    docs \
-    $(LIBNCI_TEST_SO) \
-    $(GEN_LIBRARY) \
-    dynclasses \
-    compilers
+	flags_dummy \
+	$(PARROT) \
+	runtime/parrot/include/parrotlib.pbc \
+	runtime/parrot/include/config.fpmc \
+	docs \
+	$(LIBNCI_TEST_SO) \
+	$(GEN_LIBRARY) \
+	dynclasses \
+	compilers \
+	$(PBCMERGE)
+
+$(GEN_LIBRARY) : $(PARROT)
 
 # constant string support
 .c.str :
 	$(PERL) build_tools/c2str.pl $< > $@
 
 STR_FILES = \
-    $(SRC_DIR)/builtin.str \
-    $(SRC_DIR)/inter_call.str \
-    $(SRC_DIR)/inter_cb.str \
-    $(SRC_DIR)/inter_misc.str \
-    $(SRC_DIR)/global.str \
-    $(SRC_DIR)/global_setup.str \
-    $(SRC_DIR)/library.str \
-    $(SRC_DIR)/mmd.str \
-    $(SRC_DIR)/pmc.str \
-    $(SRC_DIR)/objects.str \
-    $(SRC_DIR)/spf_render.str \
-    $(SRC_DIR)/spf_vtable.str \
-    $(CLASS_STR_FILES)
+	$(SRC_DIR)/builtin.str \
+	$(SRC_DIR)/inter_call.str \
+	$(SRC_DIR)/inter_cb.str \
+	$(SRC_DIR)/inter_misc.str \
+	$(SRC_DIR)/global.str \
+	$(SRC_DIR)/global_setup.str \
+	$(SRC_DIR)/library.str \
+	$(SRC_DIR)/mmd.str \
+	$(SRC_DIR)/pmc.str \
+	$(SRC_DIR)/objects.str \
+	$(SRC_DIR)/spf_render.str \
+	$(SRC_DIR)/spf_vtable.str \
+	$(CLASS_STR_FILES)
 
 $(INC_DIR)/string_private_cstring.h : $(STR_FILES) build_tools/c2str.pl
 	$(PERL) build_tools/c2str.pl --all
@@ -581,13 +582,21 @@ help :
 	@echo "Executables:"
 	@echo "  all:               'parrot' and the documentation."
 	@echo "                     This is the default."
+	@echo ""
+	@echo "  shared:            'parrot', dynamically linked"
+	@echo "  all_shared:        'parrot', dynamically linked and the documentation"
+	@echo ""
 	@echo "  world:             'all' and 'parrot_utils'."
+	@echo "  world_shared:      'all_shared' and 'parrot_utils_shared'"
+	@echo ""
 	@echo "  parrot_utils:      $(PDUMP), $(DIS), $(PINFO), $(PDB) and $(PBCMERGE)"
 	@echo "  $(PDUMP):             Parrot Dumper"
 	@echo "  $(DIS):       Parrot Disassembler"
 	@echo "  $(PINFO):          Information about Parrot Byte Code"
 	@echo "  $(PDB):               Parrot Debugger"
 	@echo "  $(PBCMERGE):         Parrot Debugger"
+	@echo ""
+	@echo "  parrot_utils_shared: same as parrot_utils, but linked against a shared libparrot"
 	@echo ""
 	@echo "Installation:"
 	@echo "  install:           Install under '/usr/local/parrot' on Unix systems"
@@ -637,7 +646,7 @@ help :
 	@echo "  dynclasses-clean:  Proxy for target 'clean' of dynclasses/Makefile"
 	@echo ""
 	@echo "Language implementations:"
-	@echo "  compilers:         Proxy for default target of compilers/pge"
+	@echo "  compilers:         Proxy for default target of pge and tge compilers"
 	@echo "  languages:         Proxy for default target of languages/Makefile"
 	@echo "  languages-test:    Proxy for target 'test' of languages/Makefile"
 	@echo "  languages-smoke:   Proxy for target 'test' of languages/Makefile"
@@ -664,7 +673,10 @@ help :
 
 world : all parrot_utils
 
+world_shared: all_shared parrot_utils_shared
+
 parrot_utils : $(PDUMP) $(DIS) $(PINFO) $(PDB) $(PBCMERGE)
+parrot_utils_shared : $(PDUMP)_shared $(DIS)_shared $(PINFO)_shared $(PDB)_shared $(PBCMERGE)_shared
 
 flags_dummy :
 	@echo Compiling with:
@@ -677,42 +689,42 @@ runtime/parrot/include/config.fpmc : myconfig config_lib.pasm $(MINIPARROT)
 	@echo Invoking Parrot to generate runtime/parrot/include/config.fpmc --cross your fingers
 	$(MINIPARROT) config_lib.pasm > $@
 
-parrot.def : build_tools\parrotdef.pl
-	perl build_tools/parrotdef.pl
+parrot.def :
+	$(PERL) build_tools/parrotdef.pl
 
 $(PARROT) : $(IMCC_DIR)/main$(O) $(GEN_HEADERS) $(LIBPARROT) \
-    lib/Parrot/OpLib/core.pm $(SRC_DIR)/parrot_config$(O) \
-    $(MINIPARROT) ${parrot_exe_def}
+	lib/Parrot/OpLib/core.pm $(SRC_DIR)/parrot_config$(O) \
+	$(MINIPARROT) ${parrot_exe_def}
 	$(LINK) ${ld_out}$(PARROT) $(LINKFLAGS) $(LINK_DYNAMIC) ${ld_parrot_exe_def} \
-    $(IMCC_DIR)/main$(O) $(ALL_PARROT_LIBS) $(SRC_DIR)/parrot_config$(O)
+	$(IMCC_DIR)/main$(O) $(ALL_PARROT_LIBS) $(SRC_DIR)/parrot_config$(O)
 #
 # TODO build the real miniparrot
 #
 $(MINIPARROT) : $(IMCC_DIR)/main$(O) $(GEN_HEADERS) $(LIBPARROT) \
-    lib/Parrot/OpLib/core.pm $(SRC_DIR)/null_config$(O)
+	lib/Parrot/OpLib/core.pm $(SRC_DIR)/null_config$(O)
 	$(LINK) ${ld_out}$(MINIPARROT) $(LINKFLAGS) $(IMCC_DIR)/main$(O) \
-    $(ALL_PARROT_LIBS) $(SRC_DIR)/null_config$(O)
+	$(ALL_PARROT_LIBS) $(SRC_DIR)/null_config$(O)
 
 $(INSTALLABLEPARROT) : $(IMCC_DIR)/main$(O) $(GEN_HEADERS) $(LIBPARROT) \
-    lib/Parrot/OpLib/core.pm $(SRC_DIR)/install_config$(O) \
-    $(PARROT)
+	lib/Parrot/OpLib/core.pm $(SRC_DIR)/install_config$(O) \
+	$(PARROT)
 	$(LINK) ${ld_out}$(INSTALLABLEPARROT) $(LINKFLAGS) \
-    $(IMCC_DIR)/main$(O) \
-    $(ALL_PARROT_LIBS) $(SRC_DIR)/install_config$(O)
+	$(IMCC_DIR)/main$(O) \
+	$(ALL_PARROT_LIBS) $(SRC_DIR)/install_config$(O)
 
 $(SRC_DIR)/parrot_config.c :  runtime/parrot/include/config.fpmc \
-    $(BUILD_TOOLS_DIR)/parrot_config_c.pl
+	$(BUILD_TOOLS_DIR)/parrot_config_c.pl
 	$(PERL) $(BUILD_TOOLS_DIR)/parrot_config_c.pl > \
-    $(SRC_DIR)/parrot_config.c
+	$(SRC_DIR)/parrot_config.c
 
 $(SRC_DIR)/install_config.c :  install_config.fpmc \
-    $(BUILD_TOOLS_DIR)/parrot_config_c.pl
+	$(BUILD_TOOLS_DIR)/parrot_config_c.pl
 	$(PERL) $(BUILD_TOOLS_DIR)/parrot_config_c.pl --install > \
-    $(SRC_DIR)/install_config.c
+	$(SRC_DIR)/install_config.c
 
 $(SRC_DIR)/null_config.c : myconfig $(BUILD_TOOLS_DIR)/parrot_config_c.pl
 	$(PERL) $(BUILD_TOOLS_DIR)/parrot_config_c.pl --mini > \
-    $(SRC_DIR)/null_config.c
+	$(SRC_DIR)/null_config.c
 
 install_config.fpmc : myconfig config_lib.pasm $(PARROT)
 	@echo Invoking Parrot to generate install_config.fpmc
@@ -743,6 +755,8 @@ check_source : $(GENERAL_H_FILES)
 
 shared : $(GEN_HEADERS) blib/lib/libparrot$(SHARE_EXT).$(SOVERSION) $(LIBPARROT) $(INSTALLABLEPARROT)
 	$(LINK) ${ld_out}$(INSTALLABLEPARROT) $(LINKFLAGS) $(IMCC_DIR)/main$(O) -Lblib/lib -lparrot $(ICU_SHARED) $(C_LIBS)
+
+all_shared : all shared
 
 static : $(GEN_HEADERS) $(LIBPARROT)
 
@@ -779,6 +793,11 @@ $(PDB) : $(SRC_DIR)/pdb$(O) $(LIBPARROT)
 	$(SRC_DIR)/null_config$(O) \
 	$(LINKFLAGS) $(ALL_PARROT_LIBS)
 
+$(PDB)_shared : $(SRC_DIR)/pdb$(O) blib/lib/libparrot$(SHARE_EXT).$(SOVERSION)
+	$(LINK) ${ld_out}$(PDB)_shared \
+	$(SRC_DIR)/pdb$(O) \
+	$(LINKFLAGS) -Lblib/lib -lparrot $(ALL_PARROT_LIBS)
+
 #
 # Parrot Disassembler
 #
@@ -787,9 +806,14 @@ $(SRC_DIR)/disassemble$(O) : $(GENERAL_H_FILES)
 
 $(DIS) : $(SRC_DIR)/disassemble$(O) $(LIBPARROT)
 	$(LINK) ${ld_out}$(DIS) \
-    $(SRC_DIR)/disassemble$(O) \
-    $(SRC_DIR)/null_config$(O) \
-    $(LINKFLAGS) $(ALL_PARROT_LIBS)
+	$(SRC_DIR)/disassemble$(O) \
+	$(SRC_DIR)/null_config$(O) \
+	$(LINKFLAGS) $(ALL_PARROT_LIBS)
+
+$(DIS)_shared : $(SRC_DIR)/disassemble$(O) blib/lib/libparrot$(SHARE_EXT).$(SOVERSION)
+	$(LINK) ${ld_out}$(DIS)_shared \
+	$(SRC_DIR)/disassemble$(O) \
+	$(LINKFLAGS) -Lblib/lib -lparrot $(ALL_PARROT_LIBS)
 
 #
 # Parrot Dump
@@ -797,29 +821,43 @@ $(DIS) : $(SRC_DIR)/disassemble$(O) $(LIBPARROT)
 
 $(PDUMP) : $(SRC_DIR)/pdump$(O) $(SRC_DIR)/packdump$(O) $(LIBPARROT)
 	$(LINK) ${ld_out}$(PDUMP) \
-    $(SRC_DIR)/pdump$(O) \
-    $(SRC_DIR)/null_config$(O) \
-    $(SRC_DIR)/packdump$(O) $(LINKFLAGS) $(ALL_PARROT_LIBS)
+	$(SRC_DIR)/pdump$(O) \
+	$(SRC_DIR)/null_config$(O) \
+	$(SRC_DIR)/packdump$(O) $(LINKFLAGS) $(ALL_PARROT_LIBS)
+
+$(PDUMP)_shared : $(SRC_DIR)/pdump$(O) $(SRC_DIR)/packdump$(O) blib/lib/libparrot$(SHARE_EXT).$(SOVERSION)
+	$(LINK) ${ld_out}$(PDUMP)_shared \
+	$(SRC_DIR)/pdump$(O) \
+	$(SRC_DIR)/packdump$(O) \
+	$(LINKFLAGS) -Lblib/lib -lparrot $(ALL_PARROT_LIBS)
 
 
 # pbc_info
 $(PINFO) : $(SRC_DIR)/pbc_info$(O) $(LIBPARROT)
 	$(LINK) ${ld_out}$(PINFO) \
-    $(SRC_DIR)/pbc_info$(O) \
-    $(SRC_DIR)/null_config$(O) \
-    $(LINKFLAGS) $(ALL_PARROT_LIBS)
+	$(SRC_DIR)/pbc_info$(O) \
+	$(SRC_DIR)/null_config$(O) \
+	$(LINKFLAGS) $(ALL_PARROT_LIBS)
+
+$(PINFO)_shared : $(SRC_DIR)/pbc_info$(O) blib/lib/libparrot$(SHARE_EXT).$(SOVERSION)
+	$(LINK) ${ld_out}$(PINFO)_shared \
+	$(SRC_DIR)/pbc_info$(O) \
+	$(LINKFLAGS) -Lblib/lib -lparrot $(ALL_PARROT_LIBS)
 
 #
 # Parrot Bytecode File Merger
 #
 
-# pbc_info
 $(PBCMERGE) : $(SRC_DIR)/pbc_merge$(O) $(LIBPARROT) $(SRC_DIR)/parrot_config$(O)
 	$(LINK) ${ld_out}$(PBCMERGE) \
 	$(SRC_DIR)/pbc_merge$(O) \
 	$(SRC_DIR)/parrot_config$(O) \
-	$(LINKFLAGS) $(ALL_PARROT_LIBS)
+	$(LINKFLAGS) $(LINK_DYNAMIC) $(ALL_PARROT_LIBS)
 
+$(PBCMERGE)_shared : $(SRC_DIR)/pbc_merge$(O) blib/lib/libparrot$(SHARE_EXT).$(SOVERSION)
+	$(LINK) ${ld_out}$(PBCMERGE)_shared \
+	$(SRC_DIR)/pbc_merge$(O) \
+	$(LINKFLAGS) -Lblib/lib -lparrot $(ALL_PARROT_LIBS)
 
 
 ###############################################################################
@@ -828,10 +866,10 @@ $(PBCMERGE) : $(SRC_DIR)/pbc_merge$(O) $(LIBPARROT) $(SRC_DIR)/parrot_config$(O)
 #
 ###############################################################################
 
-$(IMCC_DIR)/main$(O) : $(IMCC_DIR)/main.c $(GENERAL_H_FILES)
+$(IMCC_DIR)/main$(O) : $(IMCC_DIR)/main.c $(GENERAL_H_FILES) $(IMCC_H_FILES)
 
 include/parrot/oplib/ops.h lib/Parrot/OpLib/core.pm : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2pm.pl \
-    lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(OPS_DIR)/ops.num
+	lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(OPS_DIR)/ops.num
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2pm.pl $(OPS_FILES)
 
 $(SRC_DIR)/fingerprint.c : $(BUILD_TOOLS_DIR)/fingerprint_c.pl PBC_COMPAT
@@ -849,15 +887,11 @@ $(SRC_DIR)/revision.c : $(SVN_ENTRIES) $(BUILD_TOOLS_DIR)/revision_c.pl
 
 examples-clean:
 	$(RM_F) \
-    examples/assembly/mops$(EXE) \
-    examples/assembly/mops.c \
-    examples/assembly/mops$(O) \
-    examples/assembly/mops.pbc \
-    examples/mops/mops$(O) \
-    examples/mops/mops$(EXE) \
-    examples/pasm/hello.pbc \
-    examples/pasm/hello$(O) \
-    examples/pasm/hello$(EXE)
+		examples/mops/mops$(O) \
+		examples/mops/mops$(EXE) \
+		examples/pasm/hello.pbc \
+		examples/pasm/hello$(O) \
+		examples/pasm/hello$(EXE)
 
 # hello
 hello: test_prep examples/pasm/hello$(EXE)
@@ -870,7 +904,7 @@ examples/pasm/hello$(O): examples/pasm/hello.pbc
 	$(PARROT) -o examples/pasm/hello$(O) examples/pasm/hello.pbc
 
 examples/pasm/hello$(EXE): examples/pasm/hello$(O)
-	$(MAKE) EXEC=examples/pasm/hello exec
+	$(MAKE) . EXEC=examples/pasm/hello exec
 
 
 
@@ -945,8 +979,6 @@ $(SRC_DIR)/method_util$(O) : $(GENERAL_H_FILES)
 
 $(SRC_DIR)/sub$(O) : $(GENERAL_H_FILES)
 
-$(SRC_DIR)/lexical$(O) : $(GENERAL_H_FILES)
-
 $(SRC_DIR)/string$(O) : $(GENERAL_H_FILES) $(INC_DIR)/string_private_cstring.h
 
 $(SRC_DIR)/string_primitives$(O) : $(GENERAL_H_FILES) $(ICU_H_FILES)
@@ -964,16 +996,16 @@ $(SRC_DIR)/thread$(O) : $(GENERAL_H_FILES)
 $(SRC_DIR)/extend$(O) : $(GENERAL_H_FILES) $(INC_DIR)/extend.h
 
 $(SRC_DIR)/interpreter$(O) : $(SRC_DIR)/interpreter.c $(GENERAL_H_FILES) \
-    ${TEMP_jit_h}
+	${TEMP_jit_h}
 
 $(SRC_DIR)/inter_call$(O) : $(SRC_DIR)/inter_call.c $(GENERAL_H_FILES) \
-    $(SRC_DIR)/inter_call.str
+	$(SRC_DIR)/inter_call.str
 
 $(SRC_DIR)/inter_cb$(O) : $(SRC_DIR)/inter_cb.c $(GENERAL_H_FILES) \
-    $(SRC_DIR)/inter_cb.str
+	$(SRC_DIR)/inter_cb.str
 
 $(SRC_DIR)/inter_misc$(O) : $(SRC_DIR)/inter_misc.c $(GENERAL_H_FILES) \
-    $(SRC_DIR)/inter_misc.str
+	$(SRC_DIR)/inter_misc.str
 
 $(SRC_DIR)/inter_create$(O) : $(SRC_DIR)/inter_create.c $(GENERAL_H_FILES)
 
@@ -1057,12 +1089,12 @@ $(SRC_DIR)/charset$(O) : $(SRC_DIR)/charset.c $(GENERAL_H_FILES)
 $(OPS_DIR)/core_ops$(O) : $(GENERAL_H_FILES) $(OPS_DIR)/core_ops.c
 
 #core_ops depends upon config.h so that it gets updated along with updates to config.h's version numbers
-$(OPS_DIR)/core_ops.c $(INC_DIR)/oplib/core_ops.h : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(INC_DIR)/config.h lib/Parrot/OpLib/core.pm
+$(OPS_DIR)/core_ops.c $(INC_DIR)/oplib/core_ops.h : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(INC_DIR)/config.h lib/Parrot/OpLib/core.pm lib/Parrot/OpTrans/C.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2c.pl C --core
 
 $(OPS_DIR)/core_ops_switch$(O) : $(GENERAL_H_FILES) $(OPS_DIR)/core_ops_switch.c
 
-$(OPS_DIR)/core_ops_switch.c $(INC_DIR)/oplib/core_ops_switch.h : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(INC_DIR)/config.h lib/Parrot/OpLib/core.pm
+$(OPS_DIR)/core_ops_switch.c $(INC_DIR)/oplib/core_ops_switch.h : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(INC_DIR)/config.h lib/Parrot/OpLib/core.pm lib/Parrot/OpTrans/CSwitch.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2c.pl CSwitch --core
 
 build_tools\parrotdef.pl : $(CLASS_PMC_FILES)
@@ -1084,14 +1116,14 @@ $(INC_DIR)/vtable.h : vtable.tbl $(BUILD_TOOLS_DIR)/vtable_h.pl lib/Parrot/Vtabl
 	$(PERL) $(BUILD_TOOLS_DIR)/vtable_h.pl
 
 $(INC_DIR)/jit_emit.h : jit/${jitcpuarch}/jit_emit.h
-	$(PERL) -MFile::Copy=cp -e ${PQ}cp q|jit/${jitcpuarch}/jit_emit.h|, q|$(INC_DIR)/jit_emit.h|${PQ}
+	$(CP) jit/${jitcpuarch}/jit_emit.h $(INC_DIR)/jit_emit.h
 $(INC_DIR)/exec_dep.h : jit/${jitcpuarch}/exec_dep.h
-	$(PERL) -MFile::Copy=cp -e ${PQ}cp q|jit/${jitcpuarch}/exec_dep.h|, q|$(INC_DIR)/exec_dep.h|${PQ}
+	$(CP) jit/${jitcpuarch}/exec_dep.h $(INC_DIR)/exec_dep.h
 $(SRC_DIR)/jit_cpu.c : lib/Parrot/OpLib/core.pm $(INC_DIR)/jit_emit.h \
-    jit/${jitcpuarch}/core.jit $(BUILD_TOOLS_DIR)/jit2h.pl
+	jit/${jitcpuarch}/core.jit $(BUILD_TOOLS_DIR)/jit2h.pl
 	$(PERL) $(BUILD_TOOLS_DIR)/jit2h.pl ${jitcpuarch} $(SRC_DIR)/jit_cpu.c
 $(SRC_DIR)/exec_cpu.c : lib/Parrot/OpLib/core.pm $(INC_DIR)/jit_emit.h \
-    jit/${jitcpuarch}/core.jit ${TEMP_exec_h} $(INC_DIR)/exec_dep.h $(BUILD_TOOLS_DIR)/jit2h.pl
+	jit/${jitcpuarch}/core.jit ${TEMP_exec_h} $(INC_DIR)/exec_dep.h $(BUILD_TOOLS_DIR)/jit2h.pl
 	$(PERL) $(BUILD_TOOLS_DIR)/jit2h.pl ${jitcpuarch} $(SRC_DIR)/exec_cpu.c
 
 # imcc file dependencies
@@ -1143,16 +1175,16 @@ docs.stub:
 	@echo "Perldoc is required, but not detected."
 
 docs.dummy :
-	$(MAKE_C) docs
+	$(MAKE) docs
 
 docs-clean :
-	$(MAKE_C) docs clean
+	$(MAKE) docs clean
 
 html.dummy :
-	$(MAKE_C) docs html
+	$(MAKE) docs html
 
 html-clean :
-	$(MAKE_C) docs html-clean
+	$(MAKE) docs html-clean
 
 ###############################################################################
 #
@@ -1162,14 +1194,15 @@ html-clean :
 
 dynclasses : dynclasses.dummy
 
-dynclasses.dummy :
-	$(MAKE_C) dynclasses
+# XXX this dependancy is too broad, and should be narrowed down
+dynclasses.dummy : $(PARROT)
+	$(MAKE) dynclasses
 
 dynclasses-test :
-	$(MAKE_C) dynclasses test
+	$(MAKE) dynclasses test
 
 dynclasses-clean :
-	$(MAKE_C) dynclasses clean
+	$(MAKE) dynclasses clean
 
 ###############################################################################
 #
@@ -1179,22 +1212,23 @@ dynclasses-clean :
 
 compilers : compilers.dummy
 
-compilers.dummy :
-	$(MAKE_C) compilers/pge
+compilers.dummy : $(PARROT)
+	$(MAKE) compilers/pge
+	$(MAKE) compilers/tge
 
 languages : languages.dummy
 
 languages.dummy :
-	$(MAKE_C) languages
+	$(MAKE) languages
 
 languages-test :
-	$(MAKE_C) languages test
+	$(MAKE) languages test
 
 languages-smoke :
-	$(MAKE_C) languages smoke
+	$(MAKE) languages smoke
 
 languages-clean :
-	$(MAKE_C) languages clean
+	$(MAKE) languages clean
 
 ###############################################################################
 #
@@ -1203,7 +1237,8 @@ languages-clean :
 ###############################################################################
 
 compilers-clean :
-	$(MAKE_C) compilers/pge clean
+	$(MAKE) compilers/pge clean
+	$(MAKE) compilers/tge clean
 
 ###############################################################################
 #
@@ -1212,7 +1247,7 @@ compilers-clean :
 ###############################################################################
 
 editor-clean :
-	$(MAKE_C) editor clean
+	$(MAKE) editor clean
 
 ###############################################################################
 #
@@ -1224,53 +1259,57 @@ editor-clean :
 # to disable GC_DEBUG.
 EXTRA_TEST_ARGS    = --gc-debug --running-make-test
 RUN_TEST_FILES = \
-    t/run/*.t
+	t/run/*.t
 SRC_TEST_FILES = \
-    t/src/*.t
+	t/src/*.t
 PERL_TEST_FILES = \
-    t/perl/*.t
+	t/perl/*.t
 RUNCORE_TEST_FILES = \
-    t/op/*.t \
-    t/pmc/*.t \
-    t/native_pbc/*.t \
-    $(IMCC_DIR)/t/*/*.t \
-    t/library/*.t \
-    t/dynclass/foo.t t/dynclass/g*.t \
-    t/examples/*.t \
-    t/p6rules/*.t
+	t/compilers/imcc/*/*.t \
+	t/op/*.t \
+	t/pmc/*.t \
+	t/native_pbc/*.t \
+	t/dynclass/foo.t \
+	t/dynclass/dyn*.t \
+	t/dynclass/g*.t \
+	t/compilers/pge/*.t \
+	t/compilers/pge/p5regexp/*.t \
+	t/compilers/pge/p6rules/*.t \
+	t/compilers/tge/*.t \
+	t/library/*.t \
+	t/examples/*.t
 TOOLS_TEST_FILES = \
-    t/tools/*.t
+	t/tools/*.t
+DISTRO_TEST_FILES = \
+	t/distro/*.t
 
 # Common prep for all test targets.
 # We propably need a complete build before running the tests.
 test_prep : all
 
-# Run test cases with a single call of t/harness
-# Users have to look at only one report.
+# Run test cases with a single call of t/harness. Users have to look at only
+# one report. The default set of tests to run is contained in t/harness,
+# make any edits there.
 # Normal core
 test : test_prep
-	$(PERL) t/harness $(EXTRA_TEST_ARGS) $(PARROT_ARGS) \
-    $(RUNCORE_TEST_FILES) \
-    $(RUN_TEST_FILES) \
-    $(SRC_TEST_FILES)  \
-    $(PERL_TEST_FILES)  \
-    $(TOOLS_TEST_FILES)
+	$(PERL) t/harness $(EXTRA_TEST_ARGS) $(PARROT_ARGS)
 
 # Test various run cores and other stuff
 # 'testC', 'testg' and 'testj' are tested only
 # when the needed runcores are available
 fulltest : \
-    testb \
-#CONDITIONED_LINE(cg_flag):    testC \
-    testf \
-#CONDITIONED_LINE(cg_flag):    testg \
-#CONDITIONED_LINE(jitcapable):    testj \
-    testr \
-    testS \
-    src_tests \
-    perl_tests \
-    testbench \
-    doc_tests
+	testb \
+#CONDITIONED_LINE(cg_flag):	testC \
+	testf \
+#CONDITIONED_LINE(cg_flag):	testg \
+#CONDITIONED_LINE(jitcapable):	testj \
+	testr \
+	testS \
+	src_tests \
+	perl_tests \
+	testbench \
+	doc_tests \
+	distro_tests
 
 # bounds checking, slow core
 testb : test_prep
@@ -1327,12 +1366,11 @@ doc_tests :
 
 # Running a benchmark
 mopsbench : test_prep
-	$(PARROT) $(PARROT_ARGS) examples/assembly/mops.pasm
+	$(PARROT) $(PARROT_ARGS) examples/benchmarks/mops_intval.pasm
 
-# Running the game of live
-lifetest : test_prep
-	$(PARROT) $(PARROT_ARGS) examples/assembly/life.pasm
-
+# distro tests
+distro_tests : test_prep
+	$(PERL) t/harness $(DISTRO_TEST_FILES)
 
 ###############################################################################
 #
@@ -1359,109 +1397,119 @@ nokfile :
 ###############################################################################
 
 clean : \
-    test-clean \
-    prog-clean \
-    dynext-clean \
-    languages-clean \
-#CONDITIONED_LINE(has_perldoc):    docs-clean \
-    dynclasses-clean \
-    examples-clean \
-    imcc-clean \
-    compilers-clean \
-    smoke-clean \
-    editor-clean
+	test-clean \
+	prog-clean \
+	dynext-clean \
+	languages-clean \
+#CONDITIONED_LINE(has_perldoc):	docs-clean \
+	dynclasses-clean \
+	examples-clean \
+	imcc-clean \
+	compilers-clean \
+	smoke-clean \
+	editor-clean
 	${TEMP_cg_r}
 	$(RM_F) chartypes *.s *~ $(FLUID_FILES)
 
 prog-clean :
 	$(RM_F) \
-    $(O_FILES) \
-    $(PARROT) \
-    $(MINIPARROT) \
-    $(INSTALLABLEPARROT) \
-    $(IMCC_DIR)/main$(O) \
-    $(PDUMP) $(SRC_DIR)/pdump$(O) $(SRC_DIR)/packdump$(O) \
-    $(SRC_DIR)/pbc_info$(O) $(PINFO) \
-    $(PDB) $(SRC_DIR)/pdb$(O) \
-    $(PBCMERGE) $(SRC_DIR)/pbc_merge$(O) \
-    $(DIS) $(SRC_DIR)/disassemble$(O) \
-    $(SRC_DIR)/null_config$(O) \
-    $(SRC_DIR)/parrot_config$(O) \
-    $(SRC_DIR)/install_config$(O) \
-	install_config.fpmc \
-    $(LIBNCI_TEST_SO) \
-    $(LIBPARROT)
+		$(O_FILES) \
+		$(PARROT) \
+		$(MINIPARROT) \
+		$(INSTALLABLEPARROT) \
+		$(IMCC_DIR)/main$(O) \
+		$(PDUMP) $(PDUMP)_shared $(SRC_DIR)/pdump$(O) $(SRC_DIR)/packdump$(O) \
+		$(SRC_DIR)/pbc_info$(O) $(PINFO)_shared $(PINFO) \
+		$(PDB) $(PDB)_shared $(SRC_DIR)/pdb$(O) \
+		$(PBCMERGE) $(PBCMERGE)_shared $(SRC_DIR)/pbc_merge$(O) \
+		$(DIS) $(DIS)_shared $(SRC_DIR)/disassemble$(O) \
+		$(SRC_DIR)/null_config$(O) \
+		$(SRC_DIR)/parrot_config$(O) \
+		$(SRC_DIR)/install_config$(O) \
+		install_config.fpmc \
+		$(LIBNCI_TEST_SO) \
+		$(LIBPARROT)
 	$(PERL) build_tools/c2str.pl --init
-	$(RM_F) $(STR_FILES) $(INC_DIR)/string_private_cstring.h
-	$(RM_F) classes/*.c classes/*.h classes/*.dump vtable.dump
-	$(RM_F) *.def *.lib *.exp
+	$(RM_F) \
+		$(STR_FILES) $(INC_DIR)/string_private_cstring.h \
+		classes/*.c classes/*.h classes/*.dump vtable.dump \
+		*.def *.lib *.exp
 
 dynext-clean :
-# shared libs
-	$(RM_F) $(DYNEXT_DIR)/*$(LOAD_EXT)
-	$(RM_F) $(DYNEXT_DIR)/*$(SHARE_EXT)
-# win32 import library (shared object is deleted by LIBNCI_TEST_SO above)
-	$(RM_F) $(DYNEXT_DIR)/*.lib
-# win32 program data base - contains debugging info
-	$(RM_F) *.pdb $(DYNEXT_DIR)/*.pdb
-# win32 incremental link status files
-	$(RM_F) *.ilk $(DYNEXT_DIR)/*.ilk
-# win32 exported functions and data items
-	$(RM_F) $(DYNEXT_DIR)/*.exp
-# win32 export definition files
-	$(RM_F) *.def
+# shared libs (LOAD_EXT, SHARE_EXT)
+# win32 import library (.lib - shared object is deleted by LIBNCI_TEST_SO above)
+# win32 program data base - contains debugging info (.pdb)
+# win32 incremental link status files (.ilk)
+# win32 exported functions and data items (.exp)
+# win32 export definition files (.def)
+	$(RM_F) \
+		$(DYNEXT_DIR)/*$(LOAD_EXT) \
+		$(DYNEXT_DIR)/*$(SHARE_EXT) \
+		$(DYNEXT_DIR)/*.lib \
+		*.pdb $(DYNEXT_DIR)/*.pdb \
+		*.ilk $(DYNEXT_DIR)/*.ilk \
+		$(DYNEXT_DIR)/*.exp \
+		*.def
 
 # Remove files generated by the test suite
 test-clean :
-	$(RM_F) t/benchmarks*.imc
-	$(RM_F) t/benchmarks*.pir
-	$(RM_F) t/benchmarks*.pasm
-	$(RM_F) t/library/*.imc
-	$(RM_F) t/library/*.pir
-	$(RM_F) t/library/*.pbc
-	$(RM_F) t/op/*.pasm
-	$(RM_F) t/op/*.imc
-	$(RM_F) t/op/*.pir
-	$(RM_F) t/op/*.pbc
-	$(RM_F) t/op/*.out
-	$(RM_F) t/op/*.o
-	$(RM_F) t/op/*.stabs.s
-	$(RM_F) t/pmc/*.pasm
-	$(RM_F) t/pmc/*.imc
-	$(RM_F) t/pmc/*.pir
-	$(RM_F) t/pmc/*.pbc
-	$(RM_F) t/pmc/*.out
-	$(RM_F) t/pmc/*.o
-	$(RM_F) t/pmc/*.stabs.s
-	$(RM_F) t/p6rules/*.pir
-	$(RM_F) t/p6rules/*.pbc
-	$(RM_F) t/p6rules/*.pasm
-	$(RM_F) t/p6rules/*.out
-	$(RM_F) t/stress/*.pasm
-	$(RM_F) t/stress/*.pbc
-	$(RM_F) t/stress/*.out
-	$(RM_F) t/stress/*.o
-	$(RM_F) t/stress/*.stabs.s
-	$(RM_F) t/src/*.c
-	$(RM_F) t/tools/*.imc
-	$(RM_F) t/tools/*.pbc
-	$(RM_F) $(IMCC_DIR)/t/*/*.out
-	$(RM_F) $(IMCC_DIR)/t/*/*.imc
-	$(RM_F) $(IMCC_DIR)/t/*/*.pir
-	$(RM_F) $(IMCC_DIR)/t/*/*.pbc
-	$(RM_F) $(IMCC_DIR)/t/*/*.o
-	$(RM_F) $(IMCC_DIR)/t/*/*.stabs.s
-	$(RM_F) $(IMCC_DIR)/t/*/*.pasm
+	$(RM_F) \
+		t/benchmarks*.imc \
+		t/benchmarks*.pir \
+		t/benchmarks*.pasm \
+		t/library/*.imc \
+		t/library/*.pir \
+		t/library/*.pbc \
+		t/op/*.pasm \
+		t/op/*.imc \
+		t/op/*.pir \
+		t/op/*.pbc \
+		t/op/*.out \
+		t/op/*.o \
+		t/op/*.stabs.s \
+		t/pmc/*.pasm \
+		t/pmc/*.imc \
+		t/pmc/*.pir \
+		t/pmc/*.pbc \
+		t/pmc/*.out \
+		t/pmc/*.o \
+		t/pmc/*.stabs.s \
+		t/compilers/pge/*.pir \
+		t/compilers/pge/*.pbc \
+		t/compilers/pge/*.pasm \
+		t/compilers/pge/*.out \
+        t/compilers/pge/p5regexp/*.pir \
+        t/compilers/pge/p6rules/*.pir \
+		t/compilers/pge/p6rules/*.pbc \
+		t/compilers/pge/p6rules/*.pasm \
+		t/compilers/pge/p6rules/*.out \
+		t/compilers/tge/*.pir \
+		t/stress/*.pasm \
+		t/stress/*.pbc \
+		t/stress/*.out \
+		t/stress/*.o \
+		t/stress/*.stabs.s \
+		t/src/*.c \
+		t/tools/*.imc \
+		t/tools/*.pbc \
+		t/compilers/imcc/*/*.out \
+		t/compilers/imcc/*/*.imc \
+		t/compilers/imcc/*/*.pir \
+		t/compilers/imcc/*/*.pbc \
+		t/compilers/imcc/*/*.o \
+		t/compilers/imcc/*/*.stabs.s \
+		t/compilers/imcc/*/*.pasm
 
 imcc-clean:
 	$(RM_F) \
-    $(IMCC_DIR)/core \
-    $(IMCC_DIR)/*.o \
-    $(IMCC_DIR)/imcparser.output
+		$(IMCC_DIR)/core \
+		$(IMCC_DIR)/*.o \
+		$(IMCC_DIR)/imcparser.output
 
 realclean : clean
-	$(RM_F) $(STICKY_FILES)
-	$(RM_RF) blib
+	$(RM_RF) \
+		$(STICKY_FILES) \
+		blib
 
 distclean : realclean
 
@@ -1510,13 +1558,13 @@ lint2 : $(PARROT)
 
 install : $(INSTALLABLEPARROT)
 	$(PERL) tools/dev/install_files.pl \
-    --buildprefix=$(BUILDPREFIX) \
-    --prefix=$(PREFIX) \
-    --exec-prefix=$(EXEC_PREFIX) \
-    --bindir=$(BIN_DIR) \
-    --libdir=$(LIB_DIR) \
-    --includedir=$(INCLUDE_DIR) \
-    MANIFEST MANIFEST.generated
+	--buildprefix=$(BUILDPREFIX) \
+	--prefix=$(PREFIX) \
+	--exec-prefix=$(EXEC_PREFIX) \
+	--bindir=$(BIN_DIR) \
+	--libdir=$(LIB_DIR) \
+	--includedir=$(INCLUDE_DIR) \
+	MANIFEST MANIFEST.generated
 
 ###############################################################################
 #
@@ -1547,16 +1595,16 @@ win32-inno-installer : world install
 #
 ###############################################################################
 
-miniparrot-prebuild : $(GEN_CONFIGS) $(FLUID_FILES)
-	@tools/dev/rebuild_miniparrot.pl --action=clean
-	@tools/dev/rebuild_miniparrot.pl --action=prebuild_classes $(CLASS_O_FILES)
-	@tools/dev/rebuild_miniparrot.pl --action=copy_src $(GEN_CONFIGS) $(FLUID_FILES) $(ALL_H_FILES)
-	@tools/dev/rebuild_miniparrot.pl --action=copy_src classes/*.h $(IMCC_DIR)/main.c $(INC_DIR)/debug.h
-	@tools/dev/rebuild_miniparrot.pl --action=copy_src_from_obj $(O_FILES)
-	@tools/dev/rebuild_miniparrot.pl --action=write_buildscripts --executable=parrot $(O_FILES) $(IMCC_DIR)/main$(O)
-
-miniparrot-update :
-	tools/dev/rebuild_miniparrot.pl
+#miniparrot-prebuild : $(GEN_CONFIGS) $(FLUID_FILES)
+#	@tools/dev/rebuild_miniparrot.pl --action=clean
+#	@tools/dev/rebuild_miniparrot.pl --action=prebuild_classes $(CLASS_O_FILES)
+#	@tools/dev/rebuild_miniparrot.pl --action=copy_src $(GEN_CONFIGS) $(FLUID_FILES) $(ALL_H_FILES)
+#	@tools/dev/rebuild_miniparrot.pl --action=copy_src classes/*.h $(IMCC_DIR)/main.c $(INC_DIR)/debug.h
+#	@tools/dev/rebuild_miniparrot.pl --action=copy_src_from_obj $(O_FILES)
+#	@tools/dev/rebuild_miniparrot.pl --action=write_buildscripts --executable=parrot $(O_FILES) $(IMCC_DIR)/main$(O)
+#
+#miniparrot-update :
+#	tools/dev/rebuild_miniparrot.pl
 
 ###############################################################################
 #
@@ -1575,7 +1623,7 @@ exec_so : $(SRC_DIR)/exec_start$(O) blib/lib/libparrot$(SHARE_EXT)
 # for use by t/pmc/nci.t
 $(LIBNCI_TEST_SO): $(SRC_DIR)/nci_test$(O)
 	$(LD) $(LD_LOAD_FLAGS) ${ncilib_link_extra} $(LDFLAGS) \
-    ${ld_out}$@ $(SRC_DIR)/nci_test$(O) $(C_LIBS)
+	${ld_out}$@ $(SRC_DIR)/nci_test$(O) $(C_LIBS)
 
 # vim ctags
 # this needs exuberant-ctags
@@ -1595,12 +1643,7 @@ tags.dummy:
 ###############################################################################
 
 smoke : all
-	$(PERL) t/harness --html $(EXTRA_TEST_ARGS) $(PARROT_ARGS) \
-    $(RUNCORE_TEST_FILES) \
-    $(RUN_TEST_FILES) \
-    $(SRC_TEST_FILES)  \
-    $(PERL_TEST_FILES)  \
-    $(TOOLS_TEST_FILES)
+	$(PERL) t/harness --html $(EXTRA_TEST_ARGS) $(PARROT_ARGS)
 	$(PERL) util/smokeserv-client.pl smoke.html
 
 smoke-clean :

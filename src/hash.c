@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: hash.c 9558 2005-10-25 16:11:59Z particle $
+$Id: hash.c 9899 2005-11-11 10:58:20Z leo $
 
 =head1 NAME
 
@@ -520,7 +520,7 @@ pointer once Buffers can define their own custom mark routines.
 The problem is: During DODs stack walking the item on the stack must be
 a PMC. When an auto C<Hash*> is seen, it doesn't get properly marked
 (only the C<Hash*> buffer is marked, not its contents). By passing the
-C<**hptr> up to the PerlHash's or Hash's init function, the newly constructed PMC is
+C<**hptr> up to the Hash's init function, the newly constructed PMC is
 on the stack I<including> this newly constructed Hash, so that it gets
 marked properly.
 
@@ -597,6 +597,7 @@ new_hash_x(Interp *interpreter, Hash **hptr,
         hash_comp_fn compare, hash_hash_key_fn keyhash)
 {
     Hash *hash = mem_sys_allocate(sizeof(Hash));
+    hash->container = NULL;
     *hptr = hash;
     init_hash(interpreter, hash, val_type, hkey_type,
             compare, keyhash);

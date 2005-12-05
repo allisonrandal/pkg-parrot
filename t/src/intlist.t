@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: intlist.t 6741 2004-10-01 21:16:56Z jrieks $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: intlist.t 10142 2005-11-23 01:56:46Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 4;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/src/intlist.t - Integer Lists
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/src/intlist.t
+	% prove t/src/intlist.t
 
 =head1 DESCRIPTION
 
@@ -16,7 +23,6 @@ Tests the various intlist_* functions.
 
 =cut
 
-use Parrot::Test tests => 4;
 
 c_output_is(<<'CODE', <<'OUTPUT', "creation");
         #include <stdio.h>

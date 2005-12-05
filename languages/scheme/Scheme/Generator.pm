@@ -1,4 +1,4 @@
-# $Id: Generator.pm 7951 2005-05-01 14:20:38Z bernhard $
+# $Id: Generator.pm 10259 2005-11-29 22:06:21Z bernhard $
 
 package Scheme::Generator;
 
@@ -365,7 +365,7 @@ sub _op_lambda {
   $self->{regs}{P}{1} = 1;
   
   # expand the lexical scope
-  $self->_add_inst('', 'new_pad', [-1]);
+  $self->_add_inst('', '# new_pad', [-1]);
   my $oldscope = $self->{scope};
   $self->{scope} = { '*UP*' => $oldscope };
 
@@ -385,7 +385,7 @@ sub _op_lambda {
 
   $self->_add_inst('', 'set', ['P5', $temp]);
 
-  $self->_add_inst('', 'pop_pad');
+  $self->_add_inst('', '# pop_pad');
   $self->_add_inst('', 'returncc');
   $self->_add_inst("DONE_$label");
 

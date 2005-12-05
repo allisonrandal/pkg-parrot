@@ -1,6 +1,6 @@
 """
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: mops.py 5178 2004-01-31 16:09:21Z mikescott $
+# $Id: mops.py 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
@@ -84,7 +84,7 @@ sys.exit(0)                  # end
 
 =head1 SEE ALSO
 
-F<examples/assembly/mops.pasm>,
+F<examples/benchmarks/mops.pasm>,
 F<examples/mops/mops.c>,
 F<examples/mops/mops.cs>,
 F<examples/mops/mops.il>,

@@ -102,10 +102,10 @@ other than the default, and multiple interpreters.
   # ends with )
   .local int char
   char = ord name, -1
-  if char != 41 goto scalar
+  if char != 41 goto find_scalar
   # contains a (
   char = index name, "("
-  if char == -1 goto scalar
+  if char == -1 goto find_scalar
 
 find_array:
   .local string var
@@ -126,17 +126,14 @@ find_array:
 
   $I0 = does array, "hash"
   unless $I0 goto cant_set_not_array
-  # goto set_array
-
-set_array:
-  array[key] = value
-  variable = clone value
-  .return(variable)
+  goto set_array
 
 create_array:
   array = new .TclArray
-  array[key] = value
   __store_var(var, array)
+
+set_array:
+  array[key] = value
   variable = clone value
   .return(variable)
 
@@ -146,11 +143,20 @@ cant_set_not_array:
   $S0 .= "\": variable isn't array"
   .throw($S0)
 
-scalar:
+find_scalar:
+  .local pmc scalar
+  null scalar
+  scalar = __find_var(name)
+  if_null scalar, create_scalar
+  assign scalar, value
+  goto return_scalar
+  
+create_scalar:
   __store_var(name, value)
+
+return_scalar:
   variable = clone value
   .return(variable)
-
 .end
 
 =head2 _Tcl::__find_var
@@ -168,31 +174,31 @@ Gets the actual variable from memory and returns it.
   
   .local pmc value
 
-  push_eh notfound
-    $S0 = substr name, 1, 2
-    if $S0 == "::"     goto coloned
+  $S0 = substr name, 1, 2
+  if $S0 == "::"     goto coloned
   
-    .local int call_level
-    $P1 = find_global "_Tcl", "call_level"
-    call_level = $P1
-    if call_level == 0 goto global_var
-lexical_var:
-    value = find_lex call_level, name
-    goto clear_found
+  .local int call_level
+  $P1 = find_global "_Tcl", "call_level"
+  call_level = $P1
+  if call_level == 0 goto global_var
+
+  push_eh notfound
+    value = find_lex_pdd20( name )
+  clear_eh
+  goto found
 
 coloned:
     substr name, 1, 2, ""
-global_var:
-    value = find_global "Tcl", name
-    # goto clear_found
 
-clear_found:
-    clear_eh
-found:
-  .return(value)
+global_var:
+  push_eh notfound
+    value = find_global "Tcl", name
+  clear_eh
+  goto found
 
 notfound:
   null value
+found:
   .return(value)
 .end
 
@@ -207,6 +213,7 @@ Sets the actual variable from memory.
 .sub __store_var
   .param string name
   .param pmc value
+
   name = "$" . name
 
   $S0 = substr name, 1, 2
@@ -217,7 +224,7 @@ Sets the actual variable from memory.
   call_level = $P1
   if call_level == 0 goto global_var
 lexical_var:
-  store_lex call_level, name, value
+  store_lex_pdd20 ( name, value )
   .return()
 
 coloned:
@@ -225,5 +232,48 @@ coloned:
 global_var:
   store_global "Tcl", name, value
 
+  .return()
+.end
+
+.sub find_lex_pdd20
+  .param string variable_name
+
+  .local pmc interp, lexpad, variable
+  .local int depth
+  interp = getinterp
+  depth = 2 # we know it's not us or our direct caller.
+
+get_lexpad:
+  # Is there a lexpad at this depth?
+  lexpad = interp["lexpad";depth]
+  unless_null lexpad, got_lexpad
+
+  # try again
+  inc depth
+  goto get_lexpad
+got_lexpad:
+  variable = lexpad[variable_name]
+  .return(variable)
+.end
+
+.sub store_lex_pdd20
+  .param string variable_name
+  .param pmc variable
+
+  .local pmc interp, lexpad, variable
+  .local int depth
+  interp = getinterp
+  depth = 2 # we know it's not us or our direct caller.
+
+get_lexpad:
+  # Is there a lexpad at this depth?
+  lexpad = interp["lexpad";depth]
+  unless_null lexpad, got_lexpad
+
+  # try again
+  inc depth
+  goto get_lexpad
+got_lexpad:
+  lexpad[variable_name] = variable
   .return()
 .end

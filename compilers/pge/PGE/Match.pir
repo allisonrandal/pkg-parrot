@@ -10,8 +10,10 @@ This file implements match objects returned by the Parrot Grammar Engine.
 
 .namespace [ "PGE::Match" ]
 
-.sub "__onload"
+.sub "__onload" :load
     .local pmc base
+    $I0 = find_type "PGE::Match"
+    if $I0 goto end
     $P0 = getclass "PerlHash"
     base = subclass $P0, "PGE::Match"
     addattribute base, "$:target"                  # target
@@ -19,6 +21,7 @@ This file implements match objects returned by the Parrot Grammar Engine.
     addattribute base, "$:pos"                     # current match position
     addattribute base, "&:corou"                   # match's corou
     addattribute base, "@:capt"                    # subpattern captures
+  end:
     .return ()
 .end
 
@@ -47,9 +50,9 @@ the current position of C<mob>.
   newfrom_1:
     $I0 = isa mob, "PGE::Match"
     if $I0 goto newfrom_mob
-    target = new String
+    target = new .String
     assign target, mob
-    from = new PerlInt
+    from = new .PerlInt
     from = -1
     if has_grammar goto new_me
     grammar = "PGE::Rule"
@@ -66,7 +69,7 @@ the current position of C<mob>.
     me = new $I0
     setattribute me, "PGE::Match\x0$:target", target
     setattribute me, "PGE::Match\x0$:from", from
-    pos = new PerlInt
+    pos = new .PerlInt
     pos = -1
     setattribute me, "PGE::Match\x0$:pos", pos
     if has_fromd == 0 goto end
@@ -185,6 +188,25 @@ Returns the portion of the target string matched by this object.
     .return ("")
 .end
 
+=item C<__get_string_keyed_int(int key)>
+
+Returns the portion of the target string matched by C<key>,
+in string context. If the Match object contains an array of
+matches, a space seperated list of matches is returned.
+
+=cut
+
+.sub "__get_string_keyed_int" method
+	.param int key
+    $P0 = getattribute self, "PGE::Match\x0@:capt"
+	$S0 = ''
+    if_null $P0, get_1
+    $P0 = $P0[key]
+	$S0 = $P0
+  get_1:
+    .return ($S0)
+.end
+
 =item C<__get_pmc_keyed_int(int key)>
 
 Returns the subpattern capture associated with C<key>.  This
@@ -208,7 +230,7 @@ objects depending on the rule.
     .local pmc capt
     capt = getattribute self, "PGE::Match\x0@:capt"
     unless_null capt, set_1
-    capt = new PerlArray
+    capt = new .PerlArray
     setattribute self, "PGE::Match\x0@:capt", capt
   set_1:
     capt[key] = val

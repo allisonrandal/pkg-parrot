@@ -1,13 +1,13 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: fact.pasm 9499 2005-10-17 14:00:40Z leo $
+# $Id: fact.pasm 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
-examples/assembly/fact.pasm - Mmmm, beer good
+examples/pasm/fact.pasm - Mmmm, beer good
 
 =head1 SYNOPSIS
 
-    % ./parrot examples/assembly/fact.pasm
+    % ./parrot examples/pasm/fact.pasm
 
 =head1 DESCRIPTION
 

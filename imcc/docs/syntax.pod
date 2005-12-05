@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: syntax.pod 9739 2005-11-03 14:01:52Z coke $
+# $Id: syntax.pod 10262 2005-11-30 02:45:16Z chip $
 
 =head1 NAME
 
@@ -60,15 +60,14 @@ Example:
 =item <type>
 
 B<int>, B<float>, B<string>, B<pmc> or a valid parrot PMC type like
-B<PerlArray>.
+B<Array>.
 
 =item <reg>
 
-A PASM register I0..I31, S0..S31, N0..N31, P0..P31, or a IMCC temporary
+A PASM register In, Sn, Nn, Pn, or a IMCC temporary
 register $In, $Sn, $Nn, $Pn, where B<n> consists of digit(s) only.
-The parrot register B<P31> is reserved for spilling and should not be
-used in complex code sections, which might need spilling (see
-F<operation.pod>).
+Note: The register P5 is used to hold the exception PMC in exception
+handlers.
 
 =item <var>
 
@@ -165,7 +164,27 @@ prefix.
 
 Define the HLL for the current module. If the string C<hll_lib> isn't empty
 this B<compile time pragma> also loads the shared lib for the HLL, so that
-integer types are working for creatin new PMCs.
+integer type constants are working for creating new PMCs.
+
+=item .HLL_map .CoreTyp, .UserType
+
+Whenever Parrot has to create PMCs inside C code on behalf of the running user
+program it consults the current type mapping for the executing HLL and creates
+a PMC of type I<.UserType> instead of I<.CoreType>, if such a mapping is defined.
+
+E.g. with this code snippet ...
+
+  .sub _my_init :immediate
+    $P0 = loadlib 'dynlexpad'
+  .end
+
+  .HLL "Foo", ""
+  .HLL_map .LexPad, .DynLexPad
+
+  .sub main :main
+    ...
+
+... all subroutines for language I<Foo> would use a dynamic lexpad pmc.
 
 =item .sub <identifier>
 
@@ -237,23 +256,21 @@ Directives used for Parrot Calling Conventions.
 
 At the top of a subroutine, declare a local variable, in the mannter
 of B<.local>, into which parameter(s) of the current subroutine should
-be stored. Available flags are:
-C<:slurpy>, C<:optional>, and C<:opt_count>.  [XXX Chip - finish this
-update]
+be stored. Available flags:
+C<:slurpy>, C<:optional>, and C<:opt_flag>.
 
 =item .param <reg> [:<flag> ...]
 
 At the top of a subroutine, specify where parameter(s) of the current
-subroutine should be stored.  Available flags are:
-C<:slurpy>, C<:optional>, and C<:opt_count>.  [XXX Chip - finish this
-update]
-
+subroutine should be stored.  Available flags:
+C<:slurpy>, C<:optional>, and C<:opt_flag>.
 
 =item .return <var> [:<flag> ...]
 
 Between B<.pcc_begin_return> and B<.pcc_end_return>, specify one or
 more of the return value(s) of the current subroutine.  Available
-flags: C<:flat>.  [XXX Chip - finish this update]
+flags:
+C<:flat>.
 
 =back
 
@@ -264,16 +281,26 @@ flags: C<:flat>.  [XXX Chip - finish this update]
 =item .arg <var> [:<flag> ...]
 
 Between B<.pcc_begin> and B<.pcc_call>, specify an argument to be
-passed.  Available flags: C<:flat>.  [XXX Chip - finish this update]
+passed.  Available flags:
+C<:flat>.
 
 =item .result <var> [:<flag> ...]
 
 Between B<.pcc_call> and B<.pcc_end>, specify where one or more return
-value(s) should be stored.  Available flags are:
-C<:slurpy>, C<:optional>, and C<:opt_count>.  [XXX Chip - finish this
-update]
+value(s) should be stored.  Available flags:
+C<:slurpy>, C<:optional>, and C<:opt_count>.
 
 =back
+
+=head2 Parameter Passing Flags
+
+See L<PDD03|pdds/pdd03_calling_conventions.pod> for a description of
+the meaning of the flag bits bits C<SLURPY>, C<OPTIONAL>, C<OPT_FLAG>,
+and C<FLAT>, which correspond to the claling convention flags
+C<:slurpy>, C<:optional>, C<:opt_flag>, and C<:flat>.
+
+[TODO - once these flag bits are solidified by long-term use, then we
+may choose to copy appropriate bits of the documentation to here.]
 
 =head2 Instructions
 

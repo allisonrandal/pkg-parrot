@@ -13,15 +13,11 @@ file.
 
 .sub "main" :main
     .local pmc load
-    .local pmc p6rule
-    .local pmc gparse
-    .local pmc stmt
     .local string keyword
     .local string name
     .local string rulex
     .local string grammar
     .local string code
-    load_bytecode "Data/Escape.pbc"
     load = find_global "PGE::TokenHash", "__onload"
     load()
     load = find_global "PGE::Match", "__onload"
@@ -39,7 +35,7 @@ file.
     $P0 = open "library.pge", "<"
     $S0 = read $P0, 65535
     close $P0
-    $P1 = find_global "PGE", "compile_rules"
+    $P1 = compreg "PGE::P6Grammar"
     code = $P1($S0)
     print code
 .end
