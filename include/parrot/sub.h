@@ -1,7 +1,7 @@
 /* sub.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: sub.h 10240 2005-11-29 12:12:58Z leo $
+ *     $Id: sub.h 10442 2005-12-11 13:05:18Z leo $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures
@@ -72,7 +72,6 @@ typedef struct Parrot_sub {
 } * parrot_sub_t;
 
 #define PMC_sub(pmc)		  ((parrot_sub_t)PMC_struct_val(pmc))
-#define PMC_sub_ASSIGN(pmc,sub)	  VOIDPTR_ASSIGN(parrot_sub_t, PMC_struct_val(pmc), sub)
 
 /* the first entries must match Parrot_sub, so we can cast
  * these two to the other type
@@ -99,7 +98,6 @@ typedef struct Parrot_coro {
 } * parrot_coro_t;
 
 #define PMC_coro(pmc) 		  ((parrot_coro_t)PMC_struct_val(pmc))
-#define PMC_coro_ASSIGN(pmc,coro) VOIDPTR_ASSIGN(parrot_coro_t, PMC_struct_val(pmc), coro)
 
 typedef struct Parrot_cont {
     /* continuation destination */
@@ -113,7 +111,6 @@ typedef struct Parrot_cont {
 } * parrot_cont_t;
 
 #define PMC_cont(pmc)		  ((parrot_cont_t)PMC_struct_val(pmc))
-#define PMC_cont_ASSIGN(pmc,cont) VOIDPTR_ASSIGN(parrot_cont_t, PMC_struct_val(pmc), cont)
 
 struct Parrot_Context_info {
     STRING* subname;

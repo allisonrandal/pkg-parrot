@@ -1,4 +1,4 @@
-# $Id: befunge.in 8050 2005-05-10 19:33:29Z bernhard $
+# $Id: befunge.in 10475 2005-12-13 00:36:26Z particle $
 
 # Makefile for languages/befunge
 
@@ -35,8 +35,8 @@ build: befunge.pasm debug.pasm flow.pasm io.pasm load.pasm maths.pasm stack.pasm
 
 clean:
 	$(RM_F) core \
-    *.pbc \
-    *~
+    "*.pbc" \
+    "*~"
 
 realclean: clean
 	$(RM_RF) Makefile

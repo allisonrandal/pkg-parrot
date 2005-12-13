@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Return.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Return.pm 10435 2005-12-10 23:33:03Z gregor $
 #
 
 use strict;
@@ -127,11 +127,13 @@ sub compile
       $ret_val = $temp;
     }
 
-    $compiler->emit("  .return $ret_val");
+    $compiler->emit("  .return($ret_val)");
   }
 
   #
   # Go to the subroutine exit point:
+  #
+  # TODO: Isn't this really a no-op, after doing a .return(...)?
   #
 
   $compiler->emit("  goto _${sub_name}_LEAVE");

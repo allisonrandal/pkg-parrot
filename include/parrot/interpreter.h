@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: interpreter.h 10304 2005-12-02 01:32:09Z leo $
+ *     $Id: interpreter.h 10458 2005-12-12 12:02:28Z leo $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -173,7 +173,7 @@ typedef struct Parrot_Context {
     Regs_ni                bp;          /* pointers to FLOATVAL & INTVAL */
     Regs_ps                bp_ps;       /* pointers to PMC & STR */
     /* end common header */
-    INTVAL n_regs_used[4];	        /* INSP in PBC */
+    INTVAL *n_regs_used;	        /* INSP in PBC points to Sub */
     size_t regs_mem_size;               /* memory occupied by registers */
     INTVAL ref_count;                   /* how often refered to */
     struct Stack_Chunk *reg_stack;      /* register stack */
@@ -199,8 +199,6 @@ typedef struct Parrot_Context {
     PMC *current_cont;          /* the return continuation PMC */
     PMC *current_object;        /* current object if a method call */
     STRING *current_method;     /* name of method */
-    UINTVAL current_class_offset; /* Offset into the class array of the
-                                    currently found method */
     opcode_t *current_pc;       /* program counter of Sub invocation */
     String *current_package;    /* The package we're currently in */
     INTVAL current_HLL;         /* see also src/hll.c */
@@ -327,7 +325,9 @@ struct parrot_interp_t {
     /* 2:   PMC *Argv;                   list of argv */
     /* 3:   PMC *NCI func hash           hash of NCI funcs */
     /* 4:   PMC *ParrotInterpreter       that's me */
-    /* 5:   PMC *Dyn_libs           Array of dynamically loaded ParrotLibrary  */
+    /* 5:   PMC *Dyn_libs        Array of dynamically loaded ParrotLibrary  */
+    /* 6:   PMC *Config_Hash             Hash of config settings  */
+    /* 7:   PMC *Lib_Paths               LoL of search paths  */
 
     PMC* DOD_registry;                        /* registered PMCs added to the root set */
 
@@ -382,9 +382,11 @@ typedef enum {
     IGLOBALS_COMPREG_HASH,
     IGLOBALS_ARGV_LIST,
     IGLOBALS_NCI_FUNCS,
-    IGLOBALS_INTERPRETER,
-    IGLOBALS_DYN_LIBS,
+    IGLOBALS_INTERPRETER,       /* this interpreter as ParrotInterpreter PMC */   
+    IGLOBALS_DYN_LIBS,		/* Hash of ParrotLibrary loaded dynamic ext */
     IGLOBALS_CONFIG_HASH,
+    IGLOBALS_LIB_PATHS,		/* LoL of search paths and dynamic ext */
+    IGLOBALS_PBC_LIBS,          /* Hash of load_bytecode cde */    
 
     IGLOBALS_SIZE
 } iglobals_enum;

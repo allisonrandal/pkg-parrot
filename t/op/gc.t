@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: gc.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: gc.t 10472 2005-12-12 22:12:28Z particle $
 
 use strict;
 use warnings;
@@ -257,25 +257,28 @@ hello
 OUTPUT
 
 # this is a stripped down version of imcc/t/syn/pcc_16
-# s. also classes/retcontinuation.pmc
+# s. also src/classes/retcontinuation.pmc
 output_is(<<'CODE', <<OUTPUT, "coro context and invalid return continuations");
-.include "interpinfo.pasm"
 .pcc_sub main:
     .const .Sub P0 = "co1"
     set I20, 0
 l:
+    get_results '()'
+    set_args '()'
     invokecc P0
     inc I20
     lt I20, 3, l
     print "done\n"
     end
 .pcc_sub co1:
+    get_params '()'
     set P17, P1
 col:
     print "coro\n"
     sweep 1
     yield
     branch col
+
 CODE
 coro
 coro
@@ -706,7 +709,84 @@ CODE
 k1k2k3
 OUTPUT
 
+output_is( <<'CODE', <<'OUT', "reg_stack marking" );
+new P1, .PerlInt
+set P1, 0
+new P3, .PerlInt
+set P3, 0
+new P4, .PerlInt
+set P4, 50
+new P6, .PerlInt
+new P7, .PerlInt
+
+LOOP:
+  save P1
+  bsr PRIMECHECK
+  restore P9
+  unless P9, NOTPRIME
+#ISPRIME:
+  inc P6
+  assign P7, P1
+NOTPRIME:
+  inc P1
+  ne P1,P4, LOOP
+
+DONE:
+  print"N primes calculated to "
+  print P1
+  print " is "
+  print P6
+  print "\n"
+  print "last is: "
+  print P7
+  print "\n"
+  end
+
+PRIMECHECK:
+ saveall
+  sweep 1
+ restore P5
+ lt P5,1,ret0
+new P6, .PerlInt
+ assign P6,P5
+ dec P6
+NLOOP:
+  le P6, 1, ret1
+new P7, .PerlInt
+  cmod P7, P5, P6
+  eq P7, 0, ret0
+  dec P6
+  branch NLOOP
+  # is prime
+ret1:
+  new P0, .PerlInt
+  set P0, 1
+  save P0
+  restoreall
+  ret
+ret0:
+  new P0, .PerlInt
+  set P0, 0
+  save P0
+  restoreall
+  ret
+CODE
+N primes calculated to 50 is 16
+last is: 47
+OUT
+
+=head1 SEE ALSO
+
+F<examples/benchmarks/primes.c>,
+F<examples/benchmarks/primes.pasm>,
+F<examples/benchmarks/primes.pl>,
+F<examples/benchmarks/primes2_i.pasm>,
+F<examples/benchmarks/primes2.c>,
+F<examples/benchmarks/primes2.py>.
+
+=cut
+
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 21; }
+BEGIN { plan tests => 22; }
 

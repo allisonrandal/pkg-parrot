@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: global.c 10240 2005-11-29 12:12:58Z leo $
+$Id: global.c 10364 2005-12-05 23:47:45Z leo $
 
 =head1 NAME
 
@@ -195,13 +195,14 @@ the interpreter's errors setting.
 PMC *
 Parrot_get_name(Interp* interpreter, STRING *name)
 {
-    PMC *g, *pad, *current_sub, *namespace;
+    PMC *g, *lex_pad, *current_sub, *namespace;
+    parrot_context_t *ctx = CONTEXT(interpreter->ctx);
 
-    /* TODO
-    pad = scratchpad_get_current(interpreter);
-    g = scratchpad_find(interpreter, pad, name);
-    */
-    pad = g = NULL;
+    lex_pad = Parrot_find_pad(interpreter, name, ctx);
+    g = NULL;
+    if (!PMC_IS_NULL(lex_pad)) {
+	g = VTABLE_get_pmc_keyed_str(interpreter, lex_pad, name);
+    }
     if (!g) {
         current_sub = CONTEXT(interpreter->ctx)->current_sub;
         if (current_sub &&

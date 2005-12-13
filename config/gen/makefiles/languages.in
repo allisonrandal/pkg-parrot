@@ -1,4 +1,4 @@
-# $Id: languages.in 10286 2005-12-01 08:24:14Z fperrad $
+# $Id: languages.in 10375 2005-12-06 19:37:27Z particle $
 
 # setup of commands
 ${make_set_make}
@@ -65,7 +65,7 @@ test:   all
 
 smoke:  all
 	$(PERL) testall --html
-	$(PERL) ../util/smokeserv-client.pl languages_smoke.html
+	$(PERL) ../tools/util/smokeserv-client.pl languages_smoke.html
 
 smoke-clean :
 	$(RM_F) languages_smoke.html

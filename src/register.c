@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: register.c 10304 2005-12-02 01:32:09Z leo $
+$Id: register.c 10445 2005-12-11 15:58:47Z leo $
 
 =head1 NAME
 
@@ -156,7 +156,7 @@ void
 create_initial_context(Interp *interpreter)
 {
     int i;
-    INTVAL num_regs[] ={32,32,32,32};
+    static INTVAL num_regs[] ={32,32,32,32};
 
     /*
      * create some initial free_list slots
@@ -182,9 +182,15 @@ create_initial_context(Interp *interpreter)
 
 Cleanup dead context memory. Called by the gargabe collector.
 
-=item C<void Parrot_alloc_context(Interp *, INTVAL *n_regs_used)>
+=item C<parrot_context_t* Parrot_alloc_context(Interp *, INTVAL *n_regs_used)>
 
-Allocate a new context and set the context pointer.
+Allocate a new context and set the context pointer. Please note that the register
+usage C<n_regs_used> is not copied, just the pointer is stored.
+The function returns the new context.
+
+=item C<parrot_context_t* Parrot_dup_context(Interp *, parrot_context_t*)>
+
+Like above but duplicate the passed context.
 
 =item C<void Parrot_set_context_threshold(Interp *, parrot_context_t *ctxp)>
 
@@ -389,8 +395,36 @@ Parrot_free_context(Interp *interpreter, parrot_context_t *ctxp, int re_use)
 
 #else
 
+struct Parrot_Context *
+Parrot_dup_context(Interp *interpreter, struct Parrot_Context *old)
+{
+    size_t reg_alloc, diff;
+    int slot;
+    void *ptr;
+    struct Parrot_Context *ctx;
 
-void
+    reg_alloc = old->regs_mem_size;
+    slot = reg_alloc >> 3;
+    ptr = interpreter->ctx_mem.free_list[slot];
+
+    if (ptr) {
+        interpreter->ctx_mem.free_list[slot] = *(void **) ptr;
+    }
+    else {
+	ptr = mem_sys_allocate(reg_alloc + ALIGNED_CTX_SIZE);
+    }
+    CONTEXT(interpreter->ctx) = ctx = ptr;
+    ctx->regs_mem_size = reg_alloc;
+    ctx->prev = old;
+    ctx->n_regs_used = old->n_regs_used;
+    diff = (long*)ctx - (long*)old;
+    interpreter->ctx.bp.regs_i += diff;
+    interpreter->ctx.bp_ps.regs_s += diff;
+    init_context(interpreter, ctx, old);
+    return ctx;
+}
+
+struct Parrot_Context *
 Parrot_alloc_context(Interp *interpreter, INTVAL *n_regs_used)
 {
     struct Parrot_Context *old, *ctx;
@@ -438,8 +472,7 @@ Parrot_alloc_context(Interp *interpreter, INTVAL *n_regs_used)
     CONTEXT(interpreter->ctx) = ctx = ptr;
     ctx->prev = old;
     ctx->regs_mem_size = reg_alloc;
-    for (i = 0; i < 4; ++i)
-        ctx->n_regs_used[i] = n_regs_used[i];
+    ctx->n_regs_used = n_regs_used;
     /* regs start past the context */
     p = (void *) ((char *)ptr + ALIGNED_CTX_SIZE);
     /* ctx.bp points to I0, which has Nx at left */
@@ -447,6 +480,7 @@ Parrot_alloc_context(Interp *interpreter, INTVAL *n_regs_used)
     /* this points to S0 */
     interpreter->ctx.bp_ps.regs_s = (STRING**)((char*)p + size_nip);
     init_context(interpreter, ctx, old);
+    return ctx;
 }
 
 void
@@ -616,7 +650,7 @@ mark_register_stack(Parrot_Interp interpreter, Stack_Chunk_t* chunk)
             break;
         save_r = (save_regs_t *)STACK_DATAP(chunk);
         ctx.bp.regs_i    = NULL;
-        ctx.bp_ps.regs_p = save_r->bp_ps.regs_p;
+        ctx.bp_ps.regs_p = save_r->old_bp_ps.regs_p;
         for (i = 0; i < save_r->n_regs_pmc; ++i) {
             obj = (PObj *)CTX_REG_PMC(&ctx, i);
             if (obj)

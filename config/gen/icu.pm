@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: icu.pm 10337 2005-12-04 02:53:32Z jhoblitt $
+# $Id: icu.pm 10479 2005-12-13 01:50:55Z particle $
 
 =head1 NAME
 
@@ -98,7 +98,7 @@ sub runstep {
   if ($without) {
     Parrot::Configure::Data->set(
       has_icu     => 0,
-      icu_shared  => '',  # used for generating dynclasses/Makefile
+      icu_shared  => '',  # used for generating src/dynclasses/Makefile
       icu_datadir => '',  # used for generation Makefile
     );
     $result = "no" unless defined $Configure::Step::result;

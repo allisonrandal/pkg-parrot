@@ -1,4 +1,4 @@
-# $Id: m4.in 9723 2005-11-02 20:15:57Z bernhard $
+# $Id: m4.in 10475 2005-12-13 00:36:26Z particle $
 
 # Makefile for languages/m4
 
@@ -70,15 +70,15 @@ html:
 clean:
 	$(RM_RF) \
 m4.pbc \
-*.pdb \
-*.obj \
-src/*.pbc \
-src/*~ \
-t/*/*.m4 \
-t/*/*.parrot_out \
-t/*/*.gnu_out \
-t/*/*.imc \
-t/*/*.pir \
+"*.pdb" \
+"*.obj" \
+"src/*.pbc" \
+"src/*~" \
+"t/*/*.m4" \
+"t/*/*.parrot_out" \
+"t/*/*.gnu_out" \
+"t/*/*.imc" \
+"t/*/*.pir" \
 $(M4_EVALUATE_SO) 
 
 realclean: clean

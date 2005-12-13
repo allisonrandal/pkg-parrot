@@ -6,7 +6,7 @@ LD_LOAD_FLAGS = ${ld_load_flags}
 PERL = ${perl}
 RM_F = ${rm_f}
 LOAD_EXT = ${load_ext}
-OPS2C = -I..${slash}lib ..${slash}build_tools${slash}ops2c.pl
+OPS2C = -I..${slash}lib ..${slash}tools${slash}build${slash}ops2c.pl
 CFLAGS = ${ccflags} ${cc_debug} ${ccwarn} ${cc_hasjit} ${cg_flag} ${gc_flag}
 
 
@@ -43,7 +43,7 @@ all: myops_ops$(LOAD_EXT) myops_ops_cg$(LOAD_EXT) myops_ops_cgp$(LOAD_EXT) \
 	$(PERL) -MFile::Copy=cp -e ${PQ}cp q|$@|, q|../runtime/parrot/dynext/$@|${PQ}
 
 clean :
-	$(RM_F) *.c *.h *$(LOAD_EXT)
+	$(RM_F) "*.c" "*.h" "*$(LOAD_EXT)"
 
 realclean: clean
 	$(RM_F) Makefile

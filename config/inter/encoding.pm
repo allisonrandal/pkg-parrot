@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: encoding.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: encoding.pm 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -28,8 +28,8 @@ sub runstep {
     my $self = shift;
   my @encoding=(
     sort
-    map  { m{\./encodings/(.*)} }
-    glob "./encodings/*.c"
+    map  { m{\./src/encodings/(.*)} }
+    glob "./src/encodings/*.c"
   );
 
   my $encoding_list = $_[1] || join(' ', grep {defined $_} @encoding);
@@ -45,7 +45,7 @@ END
       $encoding_list = prompt('Which encodings would you like?', $encoding_list);
     }
   }
-  # names of class files for classes/Makefile
+  # names of class files for src/classes/Makefile
   (my $TEMP_encoding_o = $encoding_list) =~ s/\.c/\$(O)/g;
 
   my $TEMP_encoding_build = <<"E_NOTE";
@@ -57,7 +57,7 @@ E_NOTE
   foreach my $encoding (split(/\s+/, $encoding_list)) {
       $encoding =~ s/\.c$//;
       $TEMP_encoding_build .= <<END
-encodings/$encoding\$(O): encodings/$encoding.h encodings/$encoding.c \$(NONGEN_HEADERS)
+src/encodings/$encoding\$(O): src/encodings/$encoding.h src/encodings/$encoding.c \$(NONGEN_HEADERS)
 
 
 END
@@ -65,7 +65,7 @@ END
 
   # build list of libraries for link line in Makefile
   my $slash = Parrot::Configure::Data->get('slash');
-  $TEMP_encoding_o  =~ s/^| / encodings${slash}/g;
+  $TEMP_encoding_o  =~ s/^| / src${slash}encodings${slash}/g;
 
   Parrot::Configure::Data->set(
     encoding             => $encoding_list,

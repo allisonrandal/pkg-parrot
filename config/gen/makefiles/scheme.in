@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: scheme.in 8050 2005-05-10 19:33:29Z bernhard $
+# $Id: scheme.in 10475 2005-12-13 00:36:26Z particle $
 
 # Makefile for languages/scheme
 
@@ -73,10 +73,10 @@ all: test.pbc and.pbc foo.pbc
 
 clean:
 	$(RM_F) foo.pasm foo.pbc \
-	        t/*/*.pasm \
-	        t/*/*.pbc \
-	        t/*/*.scheme \
-	        t/*/*.out
+	        "t/*/*.pasm" \
+	        "t/*/*.pbc" \
+	        "t/*/*.scheme" \
+	        "t/*/*.out"
 
 realclean: clean
 	$(RM_RF) Makefile

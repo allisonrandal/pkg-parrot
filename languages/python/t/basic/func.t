@@ -1,4 +1,4 @@
-# $Id: func.t 7256 2004-12-07 21:39:02Z rubys $
+# $Id: func.t 7803 2005-04-11 13:37:27Z leo $
 
 use strict;
 use lib '../../lib';

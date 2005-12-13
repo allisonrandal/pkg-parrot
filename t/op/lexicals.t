@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: lexicals.t 10328 2005-12-03 21:08:07Z particle $
+# $Id: lexicals.t 10365 2005-12-06 00:06:34Z autrijus $
 
 use strict;
 use warnings;
@@ -989,6 +989,41 @@ CODE
 /Lexical 'no_such' not found/
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', 'find_name on lexicals');
+.sub main :main
+	.lex 'a', $P0
+        $P1 = new .String
+        $P1 = "ok\n"
+	store_lex 'a', $P1
+	$P2 = find_name 'a'
+        print $P0
+        print $P1
+        print $P2
+.end
+CODE
+ok
+ok
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'multiple names', todo => 'unspeccced');
+.sub main :main
+	.lex 'a', $P0
+	.lex 'b', $P0
+        $P1 = new .String
+        $P1 = "ok\n"
+	store_lex 'a', $P1
+	$P2 = find_name 'b'
+        print $P0
+        print $P1
+        print $P2
+.end
+CODE
+ok
+ok
+ok
+OUTPUT
+
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 40; }
+BEGIN { plan tests => 42; }

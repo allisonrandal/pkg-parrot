@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.pm 10342 2005-12-04 12:18:33Z leo $
+# $Id: jit.pm 10489 2005-12-13 12:59:20Z leo $
 
 =head1 NAME
 
@@ -31,6 +31,7 @@ sub runstep {
 
     return if $miniparrot;
 
+    my $jitbase             = "jit"; # base path for jit sources
     my $archname            =  $Config{archname};
     my ($cpuarch, $osname)  =  split( /-/, $archname);
 
@@ -73,9 +74,10 @@ sub runstep {
     my $jitarchname = "$cpuarch-$osname";
     my ( $jitcapable, $execcapable ) = ( 0, 0 );
 
-    print( qq{-e "jit/$cpuarch/core.jit" = }, -e "jit/$cpuarch/core.jit" ? 'yes' : 'no', "\n" ) if $verbose;
+    print( qq{-e "$jitbase/$cpuarch/core.jit" = }, -e "$jitbase/$cpuarch/core.jit" ? 'yes' : 'no', "\n" ) if $verbose;
 
-    if (-e "jit/$cpuarch/core.jit") {
+    # XXX disable all but i386, ppc
+    if (-e "$jitbase/$cpuarch/core.jit" && ($cpuarch eq 'i386' || $cpuarch eq 'ppc')) {
         $jitcapable = 1;
 	# XXX disable sun4 - doesn't even build
         if ($cpuarch =~ /sun4|sparc64/ && (1 || 
@@ -85,12 +87,12 @@ sub runstep {
         }
     }
 
-    if (-e "jit/$cpuarch/$jitarchname.s") {
-        copy_if_diff("jit/$cpuarch/$jitarchname.s", "src/asmfun.s");
+    if (-e "$jitbase/$cpuarch/$jitarchname.s") {
+        copy_if_diff("$jitbase/$cpuarch/$jitarchname.s", "src/asmfun.s");
         Parrot::Configure::Data->set(asmfun_o => 'src/asmfun$(O)');
     }
-    elsif (-e "jit/$cpuarch/asm.s") {
-        copy_if_diff("jit/$cpuarch/asm.s", "src/asmfun.s");
+    elsif (-e "$jitbase/$cpuarch/asm.s") {
+        copy_if_diff("$jitbase/$cpuarch/asm.s", "src/asmfun.s");
         Parrot::Configure::Data->set(asmfun_o => 'src/asmfun$(O)');
     }
     else {

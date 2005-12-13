@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: rebuild_miniparrot.pl 5133 2004-01-20 19:01:43Z mikescott $
+# $Id: rebuild_miniparrot.pl 10472 2005-12-12 22:12:28Z particle $
 ################################################################################
 
 =head1 NAME
@@ -71,12 +71,12 @@ sub prebuild_classes {
 
     foreach my $obj (@ARGV) {
         my $src = $obj;
-        $src =~ s/classes\/(.*)\.o/$1\.c/g;
+        $src =~ s/src\/classes\/(.*)\.o/$1\.c/g;
 
 	push @src, $src;
     }
 
-    run_command("cd classes; make @src");
+    run_command("cd src/classes && make @src");
 }
 
 sub clean {

@@ -1,3 +1,10 @@
+parrot (0.4.0+svn10489-1) experimental; urgency=low
+
+  * New svn snapshot for experimental.
+  * Compile with --optimize.
+
+ -- Florian Ragwitz <rafl@debian.org>  Tue, 13 Dec 2005 13:40:41 +0100
+
 parrot (0.4.0-1) unstable; urgency=low
 
   * New upstream release.

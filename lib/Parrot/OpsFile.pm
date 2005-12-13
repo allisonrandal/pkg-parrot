@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: OpsFile.pm 9260 2005-09-28 16:00:42Z robert $
+# $Id: OpsFile.pm 10361 2005-12-05 23:09:12Z particle $
 
 =head1 NAME
 
@@ -15,8 +15,8 @@ Parrot::OpsFile - Ops To C Code Generation
 C<Parrot::OpsFile> takes one or more files of op functions and
 creates real C code for them.
 
-This class is used by F<build_tools/ops2c.pl>,
-F<build_tools/ops2pm.pl> and F<build_tools/pbc2c.pl>.
+This class is used by F<tools/build/ops2c.pl>,
+F<tools/build/ops2pm.pl> and F<tools/build/pbc2c.pl>.
 
 =head2 Op Functions
 
@@ -789,11 +789,11 @@ sub push_op
 
 =item C<Parrot::OpTrans>
 
-=item F<build_tools/ops2c.pl>
+=item F<tools/build/ops2c.pl>
 
-=item F<build_tools/ops2pm.pl>
+=item F<tools/build/ops2pm.pl>
 
-=item F<build_tools/pbc2c.pl>
+=item F<tools/build/pbc2c.pl>
 
 =back
 

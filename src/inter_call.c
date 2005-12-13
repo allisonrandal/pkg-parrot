@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_call.c 10288 2005-12-01 16:02:47Z leo $
+$Id: inter_call.c 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -25,7 +25,12 @@ subroutines.
 #include "parrot/oplib/ops.h"
 #include "inter_call.str"
 
-#define PREMATURE_OPT
+/*
+ * the define below can't be turned on yet - all code that accesses
+ * non-signature arrays, like :slurpy, must be outside the scope of
+ * this define
+ */ 
+/* #define PREMATURE_OPT */
 
 #ifdef PREMATURE_OPT
 
@@ -875,7 +880,7 @@ set_retval_f(Parrot_Interp interpreter, int sig_ret, parrot_context_t *ctx)
 
 =head1 SEE ALSO
 
-F<include/parrot/interpreter.h>, F<src/inter_run.c>, F<classes/sub.pmc>.
+F<include/parrot/interpreter.h>, F<src/inter_run.c>, F<src/classes/sub.pmc>.
 
 =cut
 

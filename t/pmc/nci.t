@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: nci.t 10170 2005-11-24 19:55:14Z leo $
+# $Id: nci.t 10459 2005-12-12 12:54:33Z leo $
 
 =head1 NAME
 
@@ -430,7 +430,7 @@ pir_output_is( << 'CODE', << "OUTPUT", "get_string()" );
     print "\n"
 .end
 CODE
-libnci_test$PConfig{load_ext} was successfully loaded
+libnci_test was successfully loaded
 OUTPUT
 
 

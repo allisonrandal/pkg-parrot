@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Libs.pm 6137 2004-05-25 21:18:13Z mikescott $
+# $Id: Libs.pm 10474 2005-12-13 00:01:37Z particle $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ sub new
 	return $self->SUPER::new(
 		'Libraries', 'libs.html', '',
 		$self->new_group('Parrot Core Libraries', '', 'runtime/parrot/library'),
-		$self->new_group('Dynamic Libraries', '', 'dynoplibs'),
+		$self->new_group('Dynamic Libraries', '', 'src/dynoplibs'),
 	);
 }
 

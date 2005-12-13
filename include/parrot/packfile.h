@@ -1,6 +1,6 @@
 /* packfile.h
 *
-* $Id: packfile.h 9832 2005-11-07 23:37:19Z jonathan $
+* $Id: packfile.h 10401 2005-12-08 10:07:33Z leo $
 *
 * History:
 *  Rework by Melvin; new bytecode format, make bytecode portable.
@@ -282,7 +282,7 @@ struct PackFile_Segment * PackFile_Segment_new_seg(Interp *,
 struct PackFile_ByteCode * PF_create_default_segs(Interp*,
         const char *file_name, int add);
 
-void Parrot_load_bytecode(Interp *, const char *filename);
+void Parrot_load_bytecode(Interp *, STRING *filename);
 /*
 ** PackFile_Segment Functions:
 */

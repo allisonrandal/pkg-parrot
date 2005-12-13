@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: library.h 8024 2005-05-09 12:30:05Z leo $
+ *     $Id: library.h 10399 2005-12-08 08:43:31Z leo $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:
@@ -24,12 +24,26 @@ typedef enum {
     PARROT_RUNTIME_FT_SOURCE  = 0x0F00
 } enum_runtime_ft;
 
+typedef enum {
+    PARROT_LIB_PATH_INCLUDE,            /* .include "foo" */
+    PARROT_LIB_PATH_LIBRARY,            /* load_bytecode "bar" */
+    PARROT_LIB_PATH_DYNEXT,             /* loadlib "baz" */
+    PARROT_LIB_DYN_EXTS,                /* ".so", ".dylib" .. */
+    /* must be last: */
+    PARROT_LIB_PATH_SIZE
+} enum_lib_paths;
+
 char* Parrot_locate_runtime_file(Interp *, const char *file_name,
+        enum_runtime_ft);
+STRING* Parrot_locate_runtime_file_str(Interp *, STRING *file_name,
         enum_runtime_ft);
 
 void Parrot_autoload_class(Interp *, STRING *class);
 STRING * parrot_get_config_string(Interp* );
 const char* Parrot_get_runtime_prefix(Interp *, STRING **prefix);
+void parrot_init_library_paths(Interp *);
+STRING * parrot_split_path_ext(Interp* , STRING *in, 
+        STRING **wo_ext, STRING **ext);
 
 #endif /* PARROT_LIBRARY_H_GUARD */
 

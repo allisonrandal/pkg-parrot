@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Directory.pm 7329 2004-12-22 01:59:12Z chromatic $
+# $Id: Directory.pm 10438 2005-12-11 03:34:21Z jhoblitt $
 
 =head1 NAME
 
@@ -161,7 +161,13 @@ sub relative_path
 	
 	$path = $path->path if ref $path;
 	
-	return File::Spec->abs2rel($path, $self->path);
+	my $rel_path = File::Spec->abs2rel($path, $self->path);
+
+    # some (all?) versions of File::Spec->abs2rel() prior to 3.13 return ''
+    # instead of '.' to indicate the current working directory.  In order to be
+    # compatible with both pre/post version 3.13 we're normalizing the current
+    # working dir to be '.'.
+    return (defined $rel_path and $rel_path eq '') ? '.' : $rel_path;
 }
 
 =item C<parent()>

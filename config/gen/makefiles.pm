@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: makefiles.pm 10273 2005-11-30 18:07:24Z fperrad $
+# $Id: makefiles.pm 10485 2005-12-13 06:59:19Z fperrad $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ sub makefiles {
           commentType       => '#', 
           replace_slashes   => 1, 
           conditioned_lines => 1);
-  genfile('config/gen/makefiles/dynclasses_pl.in' => 'build_tools/build_dynclasses.pl',
+  genfile('config/gen/makefiles/dynclasses_pl.in' => 'tools/build/dynclasses.pl',
           commentType       => '#',
           replace_slashes   => 0, 
           conditioned_lines => 1);
@@ -66,11 +66,11 @@ sub makefiles {
   genfile('config/gen/makefiles/tge.in'       => 'compilers/tge/Makefile',
           commentType       => '#',
           replace_slashes   => 1);
-  genfile('config/gen/makefiles/dynclasses.in' => 'dynclasses/Makefile',
+  genfile('config/gen/makefiles/dynclasses.in' => 'src/dynclasses/Makefile',
           commentType       => '#',
           replace_slashes   => 1, 
           conditioned_lines => 1);
-  genfile('config/gen/makefiles/dynoplibs.in' => 'dynoplibs/Makefile',
+  genfile('config/gen/makefiles/dynoplibs.in' => 'src/dynoplibs/Makefile',
           commentType       => '#',
           replace_slashes   => 1);
   genfile('config/gen/makefiles/editor.in'    => 'editor/Makefile',
@@ -81,7 +81,8 @@ sub makefiles {
           replace_slashes   => 1);
   genfile('config/gen/makefiles/amber.in'     => 'languages/amber/Makefile',
           commentType       => '#',
-          replace_slashes   => 1);
+          replace_slashes   => 1, 
+          conditioned_lines => 1);
   genfile('config/gen/makefiles/bc.in'        => 'languages/bc/Makefile',
           commentType => '#', 
           replace_slashes => 1);
@@ -102,7 +103,8 @@ sub makefiles {
           replace_slashes   => 1);
   genfile('config/gen/makefiles/lua.in'       => 'languages/lua/Makefile',
           commentType       => '#',
-          replace_slashes   => 1);
+          replace_slashes   => 1, 
+          conditioned_lines => 1);
   genfile('config/gen/makefiles/miniperl.in'  => 'languages/miniperl/Makefile',
           commentType       => '#',
           replace_slashes   => 1);
@@ -124,7 +126,8 @@ sub makefiles {
           replace_slashes   => 1);
   genfile('config/gen/makefiles/tcl.in'       => 'languages/tcl/Makefile',
           commentType       => '#',
-          replace_slashes   => 1);
+          replace_slashes   => 1, 
+          conditioned_lines => 1);
   genfile('config/gen/makefiles/tcl_examples.in' => 'languages/tcl/examples/Makefile',
           commentType       => '#',
           replace_slashes   => 1);
@@ -138,7 +141,7 @@ sub makefiles {
   if ( Parrot::Configure::Data->get('has_perldoc') ) {
     # set up docs/Makefile, partly based on the .ops in the root dir
 
-    opendir OPS, "ops" or die "opendir ops: $!";
+    opendir OPS, "src/ops" or die "opendir ops: $!";
     my @ops = sort grep { !/^\./ && /\.ops$/ } readdir OPS;
     closedir OPS;
 
@@ -161,9 +164,9 @@ sub makefiles {
     foreach my $ops (@ops) {
         my $pod = $ops;
         $pod =~ s/\.ops$/.pod/;
-        print MAKEFILE "ops$slash$pod: ..${slash}ops${slash}$ops\n";
+        print MAKEFILE "ops$slash$pod: ..${slash}src${slash}ops${slash}$ops\n";
         if ($new_perldoc == 1) {
-            print MAKEFILE "\tperldoc -ud ops${slash}$pod ..${slash}ops${slash}$ops\n\n";
+            print MAKEFILE "\tperldoc -ud ops${slash}$pod ..${slash}src${slash}ops${slash}$ops\n\n";
         } else {
             print MAKEFILE "\tperldoc -u ..${slash}ops${slash}$ops > ops${slash}$pod\n\n";
         }

@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: parrot.h 10240 2005-11-29 12:12:58Z leo $
+ *     $Id: parrot.h 10346 2005-12-05 14:30:45Z leo $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -70,6 +70,9 @@
 
 #ifdef PARROT_HAS_HEADER_SYSMMAN
 #  include <sys/mman.h>
+#  ifndef MAP_FAILED
+#    define MAP_FAILED -1
+#  endif
 #endif /* PARROT_HAS_HEADER_SYSMMAN */
 
 #ifdef PARROT_HAS_HEADER_SYSTIME

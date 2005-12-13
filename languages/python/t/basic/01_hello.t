@@ -1,4 +1,4 @@
-# $Id: 01_hello.t 6308 2004-07-03 20:22:06Z leo $
+# $Id: 01_hello.t 7803 2005-04-11 13:37:27Z leo $
 
 use strict;
 use lib '../../lib';

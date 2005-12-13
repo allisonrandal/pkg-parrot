@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Call.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Call.pm 10435 2005-12-10 23:33:03Z gregor $
 #
 
 use strict;
@@ -130,13 +130,9 @@ sub compile
   else {
 #    $self->DEBUG(0, "Calling '%s' as regular sub (props = %s)...", $name, join(", ", %props));
 
-    foreach my $arg (@args) {
-      $compiler->emit("  .arg $arg");
-    }
-
     $name =~ s/::/__/;
 
-    $compiler->emit("  call _${name}");
+    $compiler->emit("  _${name}(" . join(", ", @args) . ")");
   }
 
   return 1;

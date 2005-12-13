@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: charset.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: charset.pm 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -28,8 +28,8 @@ sub runstep {
     my $self = shift;
   my @charset=(
     sort
-    map  { m{\./charset/(.*)} }
-    glob "./charset/*.c"
+    map  { m{\./src/charset/(.*)} }
+    glob "./src/charset/*.c"
   );
 
   my $charset_list = $_[1] || join(' ', grep {defined $_} @charset);
@@ -45,7 +45,7 @@ END
       $charset_list = prompt('Which charsets would you like?', $charset_list);
     }
   }
-  # names of class files for classes/Makefile
+  # names of class files for src/classes/Makefile
   (my $TEMP_charset_o = $charset_list) =~ s/\.c/\$(O)/g;
 
   my $TEMP_charset_build = <<"E_NOTE";
@@ -57,7 +57,7 @@ E_NOTE
   foreach my $charset (split(/\s+/, $charset_list)) {
       $charset =~ s/\.c$//;
       $TEMP_charset_build .= <<END
-charset/$charset\$(O): charset/$charset.h charset/ascii.h charset/$charset.c \$(NONGEN_HEADERS)
+src/charset/$charset\$(O): src/charset/$charset.h src/charset/ascii.h src/charset/$charset.c \$(NONGEN_HEADERS)
 
 
 END
@@ -65,7 +65,7 @@ END
 
   # build list of libraries for link line in Makefile
   my $slash = Parrot::Configure::Data->get('slash');
-  $TEMP_charset_o  =~ s/^| / charset${slash}/g;
+  $TEMP_charset_o  =~ s/^| / src${slash}charset${slash}/g;
 
   Parrot::Configure::Data->set(
     charset             => $charset_list,

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: thread.c 10107 2005-11-20 12:06:54Z leo $
+$Id: thread.c 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -683,7 +683,7 @@ pt_DOD_stop_mark(Parrot_Interp interpreter)
 
 =head1 SEE ALSO
 
-F<classes/parrotinterpreter.pmc>, F<docs/dev/events.pod>.
+F<src/classes/parrotinterpreter.pmc>, F<docs/dev/events.pod>.
 
 =cut
 

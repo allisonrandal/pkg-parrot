@@ -1,4 +1,4 @@
-# $Id: oo_attr.t 7273 2004-12-10 03:35:07Z rubys $
+# $Id: oo_attr.t 7803 2005-04-11 13:37:27Z leo $
 
 use strict;
 use lib '../../lib';

@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: io.t 10142 2005-11-23 01:56:46Z particle $
+# $Id: io.t 10464 2005-12-12 17:18:45Z particle $
 
 use strict;
 use warnings;
@@ -214,7 +214,7 @@ OUTPUT
 ###############################################################################
 
 c_output_is($main . <<'CODE', <<'OUTPUT', "PIO_parse_open_flags");
-#include "../io/io_private.h"
+#include "../src/io/io_private.h"
 
 static opcode_t*
 the_test(Interp *interpreter,
@@ -536,7 +536,7 @@ OUTPUT
 setup("temp.file", "abcdefg");
 
 c_output_is($main . <<'CODE', <<'OUTPUT', "PIO_seek");
-#include "../io/io_private.h"
+#include "../src/io/io_private.h"
 
 static opcode_t*
 the_test(Interp *interpreter,

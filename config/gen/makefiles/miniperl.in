@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: miniperl.in 8155 2005-05-24 19:57:16Z particle $
+# $Id: miniperl.in 10475 2005-12-13 00:36:26Z particle $
 #
 
 PERL=${perl}
@@ -61,10 +61,10 @@ all: test.pbc and.pbc foo.pbc
 clean:
 	$(RM_F) \
 foo.pasm foo.pbc \
-t/*/*.pasm \
-t/*/*.pbc \
-t/*/*.mpl \
-t/*/*.out
+"t/*/*.pasm" \
+"t/*/*.pbc" \
+"t/*/*.mpl" \
+"t/*/*.out"
 
 over:
 	@make clean

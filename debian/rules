@@ -16,7 +16,7 @@ debian/control: debian/control.in VERSION
 configure: debian/control configure-stamp
 configure-stamp:
 	dh_testdir
-	perl Configure.pl --prefix=/usr
+	perl Configure.pl --prefix=/usr --optimize
 	touch configure-stamp
 
 build: build-stamp
