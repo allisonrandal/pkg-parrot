@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2002 Gregor N. Purdy. All rights reserved.
+Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packdump.c 9465 2005-10-12 04:50:00Z mdiep $
+$Id: packdump.c 10834 2006-01-01 16:39:05Z leo $
 
 =head1 NAME
 
@@ -121,8 +121,8 @@ PackFile_Constant_dump(Interp *interpreter,
                             "\tname => '%Ss',\n"
                             "\tnamespace => '%Ss'\n",
                             pmc->vtable->whoami,
-                            sub->address - code_start,
-                            sub->end - code_start,
+                            sub->start_offs,
+                            sub->end_offs,
                             sub->name,
                             sub->namespace ?
                                 (sub->namespace->vtable->base_type ==

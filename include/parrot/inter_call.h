@@ -1,7 +1,7 @@
 /* inter_call.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: inter_call.h 10179 2005-11-25 18:25:52Z leo $
+ *     $Id: inter_call.h 10518 2005-12-14 09:13:31Z leo $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Call argument handling.
@@ -50,6 +50,7 @@ struct call_state {
     struct call_state_1 dest;
     UnionVal val;
     int opt_so_far;
+    int n_actual_args;
 };
 
 int Parrot_init_arg_sig(Interp *, parrot_context_t *ctx,

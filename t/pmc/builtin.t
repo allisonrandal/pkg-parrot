@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: builtin.t 10933 2006-01-06 01:43:24Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 4;
 
 =head1 NAME
 
@@ -8,7 +14,7 @@ t/pmc/builtin.t - Builtin Methods
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/builtin.t
+	% prove t/pmc/builtin.t
 
 =head1 DESCRIPTION
 
@@ -16,7 +22,6 @@ Tests builtin opcode-like methods.
 
 =cut
 
-use Parrot::Test tests => 4;
 
 pir_output_is(<<'CODE', <<'OUT', "three ways to call a method");
 .sub main :main
@@ -54,6 +59,12 @@ pir_output_is(<<'CODE', <<'OUT', "say");
     say "ok 3"
     say io, "ok 4"
     "say"(io, "ok 5")
+    .local pmc s
+    s = new .String
+    s = "ok 6"
+    say io, s
+    s = "ok 7"
+    say s
 .end
 CODE
 ok 1
@@ -61,6 +72,8 @@ ok 2
 ok 3
 ok 4
 ok 5
+ok 6
+ok 7
 OUT
 
 SKIP: {
@@ -116,3 +129,4 @@ ok 5
 OUT
 
 }
+

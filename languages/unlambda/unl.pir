@@ -1,4 +1,4 @@
-# $Id: unl.pir 10225 2005-11-28 21:35:50Z bernhard $
+# $Id: unl.pir 10743 2005-12-28 20:48:15Z particle $
 
 =head1 DESCRIPTION
 
@@ -424,5 +424,5 @@ void:
         .return x(v)
 .end
 
-.include "library/dumper.imc"
+.include "library/dumper.pir"
 # vim: ft=imc sw=4:

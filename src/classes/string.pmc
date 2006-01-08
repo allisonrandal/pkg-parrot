@@ -1,6 +1,6 @@
 /*
 Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: string.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: string.pmc 10870 2006-01-03 17:37:12Z particle $
 
 =head1 NAME
 
@@ -132,7 +132,7 @@ Returns the big numbers representation of the string.
 */
 
     PMC* get_bignum () {
-	STRING *s = DYNSELF.get_string();
+        STRING *s = DYNSELF.get_string();
         PMC *ret = pmc_new(INTERP, enum_class_BigInt);
         VTABLE_set_string_native(INTERP, ret, s);
         return ret;
@@ -611,20 +611,19 @@ Replace the string at C<key> with the chr of C<value>.
 
     INTVAL get_integer_keyed(PMC* key) {
         STRING *s = PMC_str_val(SELF);
-
         return string_ord(INTERP, s, key_integer(INTERP, key));
     }
 
     void set_string_keyed(PMC* key, STRING *value) {
         STRING *s = PMC_str_val(SELF);
-	INTVAL len = string_length(INTERP, value);
-	string_replace(INTERP, s, key_integer(INTERP, key), len, value, NULL);
+        INTVAL len = string_length(INTERP, value);
+        string_replace(INTERP, s, key_integer(INTERP, key), len, value, NULL);
     }
 
     void set_integer_keyed(PMC* key, INTVAL value) {
         STRING *s = PMC_str_val(SELF);
-	STRING *c = string_chr(INTERP, (UINTVAL) value);
-	string_replace(INTERP, s, key_integer(INTERP, key), 1, c, NULL);
+        STRING *c = string_chr(INTERP, (UINTVAL) value);
+        string_replace(INTERP, s, key_integer(INTERP, key), 1, c, NULL);
     }
 /*
 
@@ -642,8 +641,7 @@ Replace every occurence of C<orig> with C<new>.
         INTVAL old_len = string_length(INTERP, orig);
         INTVAL new_len = string_length(INTERP, new);
         
-        while (-1 != (i = string_str_index(INTERP, s, orig, i)))
-        {
+        while (-1 != (i = string_str_index(INTERP, s, orig, i))) {
             (void)string_replace(INTERP, s, i, old_len, new, NULL);
             i += new_len;
         }
@@ -677,7 +675,7 @@ Return length of the string.
 */
 
     INTVAL elements () {
-	return string_length(INTERP, PMC_str_val(SELF));
+        return string_length(INTERP, PMC_str_val(SELF));
     }
 
     PMC* slice (PMC* key, INTVAL f) {
@@ -695,7 +693,7 @@ Return length of the string.
     }
 
     PMC* get_iter () {
-	PMC *iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
+        PMC *iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
         PMC *key =  pmc_new(INTERP, enum_class_Key);
         PMC_struct_val(iter) = key;
         PObj_get_FLAGS(key) |= KEY_integer_FLAG;
@@ -764,6 +762,103 @@ Downcase this string
         PObj_custom_mark_SET(ret);
         return ret;
     }
+
+/*
+
+=item C<void trans(STRING* src, PMC* trams_table)>
+
+Translate ascii string C<src> with entries from C<trans_table>.
+
+=cut
+
+*/
+
+    METHOD void trans(STRING* src, PMC* table) {
+        INTVAL i, len;
+        unsigned char *p, ch;
+        INTVAL *tr_data;
+
+        len = string_length(interpreter, src);
+        if (!len)
+            return;
+        if (src->charset != Parrot_ascii_charset_ptr)
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                "Can't translate non-ascii"); 
+        p = src->strstart;
+        /* TODO verify trans table */
+        tr_data = PMC_data(table);    /* XXX */
+        for (i = 0; i < len; ++i, ++p) {
+            ch = *p;
+            ch = (unsigned char)tr_data[ch];
+            if (ch)
+                *p = ch;
+        }
+    }
+
+/*
+
+=item C<void reverse(STRING* src)>
+
+Reverse the ascii STRING C<src> in place.
+
+=cut
+
+*/
+
+    METHOD void reverse(STRING* src) {
+        INTVAL i, len;
+        unsigned char *p, ch;
+
+        len = string_length(interpreter, src);
+        if (!len)
+            return;
+        if (src->charset != Parrot_ascii_charset_ptr)
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                "Can't reverse non-ascii"); 
+        p = src->strstart;
+        for (i = 0, --len; i < len; ++i, --len) {
+            ch = p[len];
+            p[len] = p[i];
+            p[i] = ch;
+        }
+    }
+
+
+
+/*
+
+=item C<INTEGER is_integer(STRING* src)>
+
+Checks if the ascii STRING C<str> is just an integer.
+
+=cut
+
+*/
+
+    METHOD INTVAL is_integer(STRING* src) {
+        INTVAL i, len;
+        unsigned char *p;
+
+        len = string_length(interpreter, src);
+        if (!len)
+            return (INTVAL)(0);
+        if (src->charset != Parrot_ascii_charset_ptr)
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                "Can't is_integer non-ascii"); 
+
+        i = 0;
+        p = src->strstart;
+
+        if (p[i] == '-' || p[i] == '+' ||
+            (p[i] >= '0' && p[i] <= '9')) {
+            for (i = 1; i < len; ++i)
+                if (p[i] < '0' || p[i] > '9')
+                    return (INTVAL)(0);
+            return (INTVAL)(1);
+        }
+        else
+            return (INTVAL)(0);
+    }
 }
 
 /*
@@ -783,9 +878,4 @@ Downcase this string
  *
  * vim: expandtab shiftwidth=4:
 */
-
-
-
-
-
 

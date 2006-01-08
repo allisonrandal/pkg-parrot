@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2002 Gregor N. Purdy. All rights reserved.
+Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packout.c 7826 2005-04-13 23:38:16Z chromatic $
+$Id: packout.c 10698 2005-12-27 18:32:31Z gregor $
 
 =head1 NAME
 

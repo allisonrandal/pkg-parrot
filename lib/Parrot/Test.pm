@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Test.pm 10446 2005-12-11 16:13:16Z bernhard $
+# $Id: Test.pm 10913 2006-01-05 15:16:04Z rafl $
 
 =head1 NAME
 
@@ -146,7 +146,7 @@ expected result.
 Compiles and runs the C code, passing the test if a string comparison of
 output with the unexpected result is false.
 
-=item C<example_output_is( $example_fn, $expected )
+=item C<example_output_is( $example_fn, $expected )>
 
 Determine the language from the extension of C<$example_fn> and
 runs language_output_is().
@@ -476,6 +476,7 @@ sub _generate_functions {
 
             # set a TODO for Test::Builder to find
             my $call_pkg = $builder->exported_to() || '';
+            # die Dumper( $code, $expected, $desc, \%extra, $extra{todo}, $call_pkg ) if ( keys %extra );
             local *{ $call_pkg . '::TODO' } = \$extra{todo}
                 if defined $extra{todo};
 
@@ -574,17 +575,10 @@ sub _generate_functions {
             print SOURCE $source;
             close SOURCE;
 
-            (my $libparrot_root = $PConfig{blib_lib_libparrot_a}) =~ s/\$\(A\)//;
-            my $libparrot_dynamic = $libparrot_root.$PConfig{share_ext};
+            my $libparrot_shared = "$PConfig{rpath_blib} -L$PConfig{blib_dir} -lparrot";
+            my $libparrot_static  = $PConfig{blib_dir}.$PConfig{slash}.$PConfig{libparrot_static};
 
-            my $libparrot;
-
-            # use shared library version if available
-            if( -e $libparrot_dynamic ) {
-                $libparrot = '-Lblib/lib -lparrot';
-            } else {
-                $libparrot = $libparrot_root.$PConfig{a};
-            }
+            my $libparrot = $PConfig{parrot_is_shared} ? $libparrot_shared : $libparrot_static;
 
             my $iculibs = "";
             if ($PConfig{'has_icu'}) {
@@ -649,7 +643,7 @@ sub _generate_functions {
 }
 
 sub example_output_is {
-    my ($example_fn, $expected) = @_;
+    my ($example_fn, $expected, @options) = @_;
 
     my %lang_for_extension 
         = ( pasm => 'PASM',
@@ -663,7 +657,7 @@ sub example_output_is {
                                         }ixms or Usage();
     if ( defined $extension ) { 
         my $code = slurp_file($example_fn);
-        language_output_is( $lang_for_extension{$extension}, $code, $expected, $example_fn );
+        language_output_is( $lang_for_extension{$extension}, $code, $expected, $example_fn, @options );
     }
     else {
       fail( defined $extension, "no extension recognized for $example_fn" );

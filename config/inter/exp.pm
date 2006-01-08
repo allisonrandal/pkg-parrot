@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: exp.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: exp.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Asks the user whether to set up experimental networking.
 
 =cut
 
-package Configure::Step;
+package inter::exp;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,26 +20,27 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':inter';
 
-$description="Setting up experimental systems...";
+$description = "Setting up experimental systems...";
 
-@args=qw(ask expnetwork);
+@args = qw(ask expnetwork);
 
-sub runstep {
-    my $self = shift;
-  my $net=$_[1] || 'n';
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-  if($_[0]) {
-    $net=prompt("\n\nEnable experimental networking?", $net) if $_[0];
-  }
+    my $net = $conf->options->get('expnetwork') || 'n';
 
-  if($net =~ /n/i || !$net) {
-    $net=0;
-  }
-  else {
-    $net=1;
-  }
-  
-  Parrot::Configure::Data->set(expnetworking => $net);
+    if ($conf->options->get('ask')) {
+        $net = prompt("\n\nEnable experimental networking?", $net);
+    }
+
+    if ($net =~ /n/i || !$net) {
+        $net = 0;
+    } else {
+        $net = 1;
+    }
+
+    $conf->data->set(expnetworking => $net);
 }
 
 1;

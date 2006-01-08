@@ -1,7 +1,7 @@
 /* headers.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: headers.h 7507 2005-01-25 15:59:30Z leo $
+ *     $Id: headers.h 10592 2005-12-20 14:53:14Z leo $
  *  Overview:
  *     Header management functions. Handles getting of various headers,
  *     and pool creation
@@ -11,18 +11,28 @@
  *  References:
  */
 
-/* XXX kwoo:  This was formerly mis-defined as PARROT_BUFFERS_H_GUARD -- if
- *      any weirdness goes forth, check for clashes with that header.
- */
 #if !defined(PARROT_HEADERS_H_GUARD)
 #define PARROT_HEADERS_H_GUARD
 
 #include "parrot/parrot.h"
 
-#define BUFFER_ALIGNMENT 16
-/* XXX Temporary alignment hack.  See mem_allocate in resources.c */
-#define STRING_ALIGNMENT 16 /* was 4 */
+/*
+ * we need an alignment that is the same as malloc(3) have for
+ * allocating Buffer items like FLOATVAL (double)
+ * This should be either a config hint or tested
+ */
+#ifdef MALLOC_ALIGNMENT       
+#  define BUFFER_ALIGNMENT MALLOC_ALIGNMENT       
+#else
+/* or (2 * sizeof(size_t)) */
+#  define BUFFER_ALIGNMENT 8
+#endif
 
+#define BUFFER_ALIGN_1 (BUFFER_ALIGNMENT - 1)
+#define BUFFER_ALIGN_MASK ~BUFFER_ALIGN_1 
+
+#define WORD_ALIGN_1 (sizeof(void *) - 1)
+#define WORD_ALIGN_MASK ~WORD_ALIGN_1 
 
 /* pool creation and access functions */
 struct Small_Object_Pool *new_pmc_pool(Interp *interpreter);

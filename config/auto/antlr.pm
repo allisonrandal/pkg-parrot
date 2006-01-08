@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: antlr.pm 10117 2005-11-20 22:25:22Z jhoblitt $
+# $Id: antlr.pm 10844 2006-01-02 02:56:12Z jhoblitt $
 
 =head1 NAME
 
@@ -7,8 +7,8 @@ config/auto/antlr - Check whether antlr works
 
 =head1 DESCRIPTION
 
-Determines wheter antlr exists on the system.
-Is so, then check whether there is support for Python output.
+Determines wheter antlr exists on the system. Is so, then check whether there
+is support for Python output.
 
 When antlr is not found, then something like
 
@@ -18,7 +18,7 @@ might help.
 
 =cut
 
-package Configure::Step;
+package auto::antlr;
 
 use strict;
 use vars qw($description $result @args);
@@ -31,30 +31,33 @@ $description = "Determining whether antlr is installed...";
 
 @args = qw(verbose);
 
-sub runstep {
-    my $self = shift;
-    my ( $out, $err ) = capture_output( 'antlr', '-h' );
-    my $output = join( '', $out || '', $err || '' );
-    my ($python, $major, $minor, $revision) = 
-        $output =~ m/(Python)\s+(\d+).(\d+)(?:.(\d+))?/;
+sub runstep
+{
+    my ($self, $conf) = @_;
+
+    my ($out, $err) = capture_output('antlr', '-h');
+    my $output = join('', $out || '', $err || '');
+    my ($python, $major, $minor, $revision) = $output =~ m/(Python)\s+(\d+).(\d+)(?:.(\d+))?/;
     my $has_antlr = ($output =~ m/ANTLR Parser Generator/) ? 1 : 0;
 
-    Parrot::Configure::Data->set(has_antlr => $has_antlr);
+    $conf->data->set(has_antlr => $has_antlr);
 
     my $has_antlr_with_python = 0;
-    if ( $has_antlr ) {
+    if ($has_antlr) {
         unlink <config/auto/antlr/*.py>;
-        capture_output( 'antlr', '-o', 'config/auto/antlr', 'config/auto/antlr/test_python.g' );
+        capture_output('antlr', '-o', 'config/auto/antlr', 'config/auto/antlr/test_python.g');
         $has_antlr_with_python = 1 if -e 'config/auto/antlr/test_python_l.py';
-        $result = $has_antlr_with_python ?
-                                       'yes, with python' :
-                                       'yes, no python';
+        $result =
+            $has_antlr_with_python
+            ? 'yes, with python'
+            : 'yes, no python';
     } else {
-        $result = ($output =~ m/NoClassDefFoundError/) ?
-                                     'no, NoClassDefFoundError' :
-                                     'no';
+        $result =
+            ($output =~ m/NoClassDefFoundError/)
+            ? 'no, NoClassDefFoundError'
+            : 'no';
     }
-    Parrot::Configure::Data->set(has_antlr_with_python => $has_antlr_with_python);
+    $conf->data->set(has_antlr_with_python => $has_antlr_with_python);
 }
 
 1;

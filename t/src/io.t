@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: io.t 10464 2005-12-12 17:18:45Z particle $
+# $Id: io.t 10696 2005-12-27 15:32:34Z particle $
 
 use strict;
 use warnings;
@@ -43,8 +43,9 @@ sub teardown
 {
 	my $name = @_ ? shift : "temp.file";
 
-	unlink($name) if -e $name;
-	die "Failed to delete $name"if -e $name;
+	my $delete_counter;
+	unlink($name) while( -e $name and 3 > $delete_counter++ and sleep 1);
+	die "Failed to delete $name" if -e $name;
 }
 
 my $main = <<'CODE';

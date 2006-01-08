@@ -1,8 +1,12 @@
-#!perl -w
+#!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: labels.t 10394 2005-12-07 20:07:02Z particle $
+# $Id: labels.t 10826 2005-12-31 22:40:24Z ambs $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Config;
 use Parrot::Test tests => 6;
 
 ##############################

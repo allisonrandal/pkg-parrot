@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: manifest.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: manifest.pm 10710 2005-12-28 00:25:21Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Uses C<ExtUtils::Manifest> to check that the distribution is complete.
 
 =cut
 
-package Configure::Step;
+package init::manifest;
 
 use strict;
 use vars qw($description $result @args);
@@ -25,19 +25,19 @@ $description = "Checking MANIFEST...";
 
 @args = qw(nomanicheck);
 
-sub runstep {
-    my $self = shift;
-  my ( $nomanicheck ) = @_;
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-  if ( $nomanicheck ) {
-    $result = 'skipped';
-    return; 
-  }
+    if ($conf->options->get('nomanicheck')) {
+        $result = 'skipped';
+        return;
+    }
 
-  my @missing = ExtUtils::Manifest::manicheck();
+    my @missing = ExtUtils::Manifest::manicheck();
 
-  if (@missing) {
-     print <<"END";
+    if (@missing) {
+        print <<"END";
 
 Ack, some files were missing!  I can't continue running
 without everything here.  Please try to find the above
@@ -45,6 +45,8 @@ files and then try running Configure again.
 
 END
 
-    exit 1;
-  }
+        exit 1;
+    }
 }
+
+1;

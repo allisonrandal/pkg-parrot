@@ -1,4 +1,4 @@
-/* $Id: imc.h 10396 2005-12-07 21:08:05Z particle $ */
+/* $Id: imc.h 10642 2005-12-24 16:12:17Z azuroth $ */
 
 #if !defined(PARROT_IMCC_IMC_H_GUARD)
 #define PARROT_IMCC_IMC_H_GUARD
@@ -126,6 +126,7 @@ struct imcc_ostat {
 	int deleted_labels;
 	int if_branch;
 	int branch_branch;
+  int branch_cond_loop;
 	int invariants_moved;
 	int deleted_ins;
 	int used_once;

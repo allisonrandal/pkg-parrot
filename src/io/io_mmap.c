@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id$
+$Id: io_mmap.c 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -118,9 +118,10 @@ PIO_mmap_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
 	*buf = new_string_header(interpreter, 0);
     }
     s = *buf;
+    /* TODO create string_free API for reusing string headers */
     if (s->strstart && PObj_sysmem_TEST(s))
-        mem_sys_free(s->strstart);
-    PObj_get_FLAGS(s) |= PObj_external_FLAG|PObj_bufstart_external_FLAG;
+        mem_sys_free(PObj_bufstart(s));
+    PObj_get_FLAGS(s) |= PObj_external_FLAG;
     PObj_bufstart(s) = s->strstart = io->b.startb + io->fpos;
     len = s->bufused ? s->bufused : io->b.size;
     io->fpos += len;

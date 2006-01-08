@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: register.c 10445 2005-12-11 15:58:47Z leo $
+$Id: register.c 10519 2005-12-14 12:23:38Z leo $
 
 =head1 NAME
 
@@ -282,6 +282,7 @@ init_context(Interp *interpreter, parrot_context_t *ctx, parrot_context_t *old)
         ctx->errors = old->errors;
         ctx->trace_flags = old->trace_flags;
         ctx->runloop_level = old->runloop_level;
+	ctx->pred_offset = old->pred_offset;
         /* end COW */
         ctx->recursion_depth = old->recursion_depth;
     }

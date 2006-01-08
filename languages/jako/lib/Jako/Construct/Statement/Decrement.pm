@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Decrement.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Decrement.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -46,10 +46,20 @@ sub compile
 {
   my $self = shift;
   my ($compiler) = @_;
+  
+  my $ident_name = $self->ident->value;
 
-  my $ident = $self->ident->value;
-
+  my $ident = $self->ident->compile($compiler);
+  
   $compiler->emit("  dec $ident");
+  
+  if (($self->ident->kind eq 'var') and ($self->ident->scope eq 'global')) {
+    my $pmc_type = $self->ident->type->imcc_pmc;
+    my $pmc_reg = $compiler->temp_pmc();
+    $compiler->emit("  $pmc_reg = new $pmc_type");
+    $compiler->emit("  $pmc_reg = $ident");
+    $compiler->emit("  global \"$ident_name\" = $pmc_reg");
+  }
 
   return 1;
 }

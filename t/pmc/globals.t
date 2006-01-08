@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: globals.t 7803 2005-04-11 13:37:27Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: globals.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 3;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/globals.t - Globals and Namespaces
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/globals.t
+	% prove t/pmc/globals.t
 
 =head1 DESCRIPTION
 
 Tests the globals fetch and store operations.
 
 =cut
-
-use Parrot::Test tests => 3;
-use Test::More;
 
 pir_output_is(<<'CODE', <<'OUTPUT', "get namespace");
 .sub main

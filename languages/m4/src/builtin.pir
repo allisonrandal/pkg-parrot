@@ -1,4 +1,4 @@
-# $Id: builtin.pir 10280 2005-11-30 21:23:07Z bernhard $
+# $Id: builtin.pir 10691 2005-12-27 11:38:07Z bernhard $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ builtin.pir - builtin and user defined macros
 =head2 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: builtin.pir 10280 2005-11-30 21:23:07Z bernhard $
+SVN Info:   $Id: builtin.pir 10691 2005-12-27 11:38:07Z bernhard $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -503,9 +503,7 @@ Decrease a number.
   .local string ret
   ret = arg0
 
-  .pcc_begin_return
-    .return ret
-  .pcc_end_return
+  .return( ret )
 .end
 
 

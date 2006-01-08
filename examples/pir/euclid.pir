@@ -1,7 +1,7 @@
-# Copyright (C) 2001 Gregor N. Purdy. All rights reserved.
+# Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 # This program is free software. It is subject to the same
 # license as Perl itself.
-# $Id: euclid.pir 9502 2005-10-17 19:48:05Z bernhard $
+# $Id: euclid.pir 10698 2005-12-27 18:32:31Z gregor $
 
 =head1 NAME
 

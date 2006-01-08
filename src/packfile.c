@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2002 Gregor N. Purdy. All rights reserved.
+Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packfile.c 10458 2005-12-12 12:02:28Z leo $
+$Id: packfile.c 10698 2005-12-27 18:32:31Z gregor $
 
 =head1 NAME
 
@@ -274,9 +274,9 @@ run_sub(Parrot_Interp interpreter, PMC* sub_pmc)
 /*
 
 =item <static PMC*
-do_sub_pragmas(Parrot_Interp interpreter, struct PackFile *self, int action)>
+do_1_sub_pragma(Parrot_Interp interpreter, struct PackFile *self, int action)>
 
-Run autoloaded bytecode, mark MAIN subroutine entry
+Run autoloaded or immediate bytecode, mark MAIN subroutine entry
 
 =cut
 
@@ -289,6 +289,7 @@ do_1_sub_pragma(Parrot_Interp interpreter, PMC* sub_pmc, int action)
     size_t start_offs;
     struct Parrot_sub * sub = PMC_sub(sub_pmc);
     PMC *result;
+    void *lo_var_ptr;
 
     switch (action) {
         case PBC_IMMEDIATE:
@@ -297,11 +298,14 @@ do_1_sub_pragma(Parrot_Interp interpreter, PMC* sub_pmc, int action)
              */
             if (PObj_get_FLAGS(sub_pmc) & SUB_FLAG_PF_IMMEDIATE) {
                 PObj_get_FLAGS(sub_pmc) &= ~SUB_FLAG_PF_IMMEDIATE;
+                lo_var_ptr = interpreter->lo_var_ptr;
                 result = run_sub(interpreter, sub_pmc);
                 /*
                  * reset initial flag so MAIN detection works
+                 * and reset lo_var_ptr to prev
                  */
                 interpreter->resume_flag = RESUME_INITIAL;
+                interpreter->lo_var_ptr = lo_var_ptr;
                 return result;
             }
         case PBC_POSTCOMP:
@@ -344,43 +348,6 @@ do_1_sub_pragma(Parrot_Interp interpreter, PMC* sub_pmc, int action)
             }
     }
     return NULL;
-}
-
-static void
-do_sub_pragmas(Interp* interpreter, struct PackFile_ByteCode *self, int action)
-{
-    opcode_t i, ci;
-    struct PackFile_FixupTable *ft;
-    struct PackFile_ConstTable *ct;
-    PMC *sub_pmc, *result;
-
-    ft = self->fixups;
-    ct = self->const_table;
-    for (i = 0; i < ft->fixup_count; i++) {
-        switch (ft->fixups[i]->type) {
-            case enum_fixup_sub:
-                /*
-                 * offset is an index into the const_table holding
-                 * the Sub PMC
-                 */
-                ci = ft->fixups[i]->offset;
-                sub_pmc = ct->constants[ci]->u.key;
-                switch (sub_pmc->vtable->base_type) {
-                    case enum_class_Sub:
-                    case enum_class_Closure:
-                    case enum_class_Coroutine:
-                        result = do_1_sub_pragma(interpreter, sub_pmc, action);
-                        /*
-                         * replace the Sub PMC with the result of the
-                         * computation
-                         */
-                        if (action == PBC_IMMEDIATE && !PMC_IS_NULL(result)) {
-                            ft->fixups[i]->type = enum_fixup_none;
-                            ct->constants[ci]->u.key = result;
-                        }
-                }
-        }
-    }
 }
 
 /*
@@ -440,10 +407,10 @@ mark_const_subs(Parrot_Interp interpreter)
 /*
 
 =item C<static void
-fixup_subs(Interp *interpreter, struct PackFile_Bytecode *self,
+do_sub_pragmas(Interp *interpreter, struct PackFile_Bytecode *self,
    int action, PMC *eval_pmc)>
 
-Fixes up the constant subroutine objects. B<action> is one of
+B<action> is one of
 B<PBC_PBC>, B<PBC_LOADED>, or B<PBC_MAIN>. Also store the C<eval_pmc>
 in the sub structure, so that the eval PMC is kept alive be living subs.
 
@@ -452,17 +419,16 @@ in the sub structure, so that the eval PMC is kept alive be living subs.
 */
 
 void
-fixup_subs(Interp *interpreter, struct PackFile_ByteCode *self,
+do_sub_pragmas(Interp *interpreter, struct PackFile_ByteCode *self,
         int action, PMC *eval_pmc)
 {
     opcode_t i, ci;
     struct PackFile_FixupTable *ft;
     struct PackFile_ConstTable *ct;
-    PMC *sub_pmc;
-    int again = 0;
+    PMC *sub_pmc, *result;
 
 #if TRACE_PACKFILE
-    PIO_eprintf(NULL, "PackFile: fixup_subs\n");
+    PIO_eprintf(NULL, "PackFile: do_sub_pragmas\n");
 #endif
 
     ft = self->fixups;
@@ -484,13 +450,19 @@ fixup_subs(Interp *interpreter, struct PackFile_ByteCode *self,
                     case enum_class_Closure:
                     case enum_class_Coroutine:
                         PMC_sub(sub_pmc)->eval_pmc = eval_pmc;
-                        VTABLE_thawfinish(interpreter, sub_pmc, NULL);
-                        if (PObj_get_FLAGS(sub_pmc) & SUB_FLAG_PF_MASK) {
+                        if ((PObj_get_FLAGS(sub_pmc) & SUB_FLAG_PF_MASK) &&
+                                    sub_pragma(interpreter, action, sub_pmc)) {
+                            result = do_1_sub_pragma(interpreter, 
+                                    sub_pmc, action);
                             /*
-                             * private4-7 are sub pragmas LOAD ...
+                             * replace the Sub PMC with the result of the
+                             * computation
                              */
-                            again |= sub_pragma(interpreter,
-                                    action, sub_pmc);
+                            if (action == PBC_IMMEDIATE && 
+                                    !PMC_IS_NULL(result)) {
+                                ft->fixups[i]->type = enum_fixup_none;
+                                ct->constants[ci]->u.key = result;
+                            }
                         }
                         break;
                 }
@@ -500,14 +472,6 @@ fixup_subs(Interp *interpreter, struct PackFile_ByteCode *self,
                 ft->fixups[i]->seg = self;
                 break;
         }
-    }
-    if (again) {
-        /*
-         * there were subs that wanted to be run on load
-         * we have to do it there, above not all subs got their
-         * absolute address, so we couldn't run these.
-         */
-        do_sub_pragmas(interpreter, self, action);
     }
 }
 
@@ -1908,6 +1872,7 @@ byte_code_new (Interp* interpreter, struct PackFile *pf,
     byte_code->debugs = NULL;
     byte_code->const_table = NULL;
     byte_code->fixups = NULL;
+    byte_code->pic_index = NULL;
     return (struct PackFile_Segment *) byte_code;
 }
 
@@ -2450,6 +2415,8 @@ Parrot_switch_to_cs(Interp *interpreter,
                 new_cs->base.name);
     interpreter->code = new_cs;
     CONTEXT(interpreter->ctx)->constants = new_cs->const_table->constants;
+    CONTEXT(interpreter->ctx)->pred_offset = 
+	    new_cs->base.data - (opcode_t*) new_cs->prederef.code;
     new_cs->prev = cur_cs;
     if (really)
         prepare_for_run(interpreter);
@@ -3353,7 +3320,7 @@ PackFile_append_pbc(Interp *interpreter, const char *filename)
 	return NULL;
     PackFile_add_segment(interpreter, &interpreter->initial_pf->directory,
 	    &pf->directory.base);
-    do_sub_pragmas(interpreter, pf->cur_cs, PBC_LOADED);
+    do_sub_pragmas(interpreter, pf->cur_cs, PBC_LOADED, NULL);
     return pf;
 }
 
@@ -3413,7 +3380,7 @@ Parrot_load_bytecode(Interp *interpreter, STRING *file_str)
     else {
 	cs = IMCC_compile_file(interpreter, filename);
 	if (cs) {
-	    fixup_subs(interpreter, cs, PBC_LOADED, NULL);
+	    do_sub_pragmas(interpreter, cs, PBC_LOADED, NULL);
 	}
 	else
 	    real_exception(interpreter, NULL, E_LibraryNotLoadedError,
@@ -3425,9 +3392,10 @@ Parrot_load_bytecode(Interp *interpreter, STRING *file_str)
 /*
 
 =item C<void
-PackFile_fixup_subs(Interp *interpreter, pbc_action_enum_t)>
+PackFile_fixup_subs(Interp *interpreter, pbc_action_enum_t, PMC *eval)>
 
-I<What does this do?>
+Run :load or :immediate subroutines for the current code segment.
+If C<eval> is given, set this is the owner of the subroutines.
 
 =cut
 
@@ -3436,7 +3404,7 @@ I<What does this do?>
 void
 PackFile_fixup_subs(Interp *interpreter, pbc_action_enum_t what, PMC *eval)
 {
-    fixup_subs(interpreter, interpreter->code, what, eval);
+    do_sub_pragmas(interpreter, interpreter->code, what, eval);
 }
 
 /*

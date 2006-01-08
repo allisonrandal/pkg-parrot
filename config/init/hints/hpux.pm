@@ -1,11 +1,20 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hpux.pm 9954 2005-11-13 22:06:22Z jhoblitt $
+# $Id: hpux.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
-my $libs = Parrot::Configure::Data->get('libs');
-if ( $libs !~ /-lpthread/ ) {
-    $libs .= ' -lpthread';
+package init::hints::hpux;
+
+use strict;
+
+sub runstep
+{
+    my ($self, $conf) = @_;
+
+    my $libs = $conf->data->get('libs');
+    if ($libs !~ /-lpthread/) {
+        $libs .= ' -lpthread';
+    }
+
+    $conf->data->set(libs => $libs);
 }
 
-Parrot::Configure::Data->set(
-    libs => $libs,
-);
+1;

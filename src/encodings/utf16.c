@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: utf16.c 10413 2005-12-09 01:34:54Z particle $
+$Id: utf16.c 10587 2005-12-19 19:14:03Z leo $
 
 =head1 NAME
 
@@ -109,6 +109,7 @@ to_encoding(Interp *interpreter, STRING *src, STRING *dest)
             if (in_place)
                 p = mem_sys_realloc(p, dest_len * sizeof(UChar));
             else {
+                result->bufused = dest_len * sizeof(UChar);
                 Parrot_reallocate_string(interpreter, dest, sizeof(UChar) * dest_len);
                 p = dest->strstart;
             }

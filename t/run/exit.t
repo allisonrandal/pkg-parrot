@@ -1,7 +1,7 @@
 #! perl -w
 
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: exit.t 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 

@@ -20,11 +20,16 @@
 #include "pbc.h"
 #include "parser.h"
 
-#define IMCC_VERSION "0.4.0"
+#define IMCC_VERSION "0.4.1"
 
 static int load_pbc, run_pbc, write_pbc, pre_process, pasm_file;
 static char optimizer_opt[20];
+
+#ifdef MSVC
+__declspec(dllimport) FILE *yyin;
+#else
 extern FILE *yyin;
+#endif
 
 static void
 usage(FILE* fp)
@@ -124,7 +129,7 @@ imcc_version(void)
     if (PARROT_REVISION != rev) {
 	printf( "Warning: used Configure.pl revision %d!\n", rev );
     }
-    printf("Copyright (C) 2001-2005 The Perl Foundation.  All Rights Reserved.\n\
+    printf("Copyright (C) 2001-2006 The Perl Foundation.  All Rights Reserved.\n\
 \n\
 Parrot may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Parrot source kit.\n\
@@ -328,8 +333,9 @@ parseflags(Parrot_Interp interp, int *argc, char **argv[])
                 }
                 if (strchr(optimizer_opt, '2')) {
                     /* FIXME -O2 is borken */
-#if 0
-                    optimizer_level |= (OPT_CFG | OPT_PRE);
+#if 1
+                    IMCC_INFO(interp)->optimizer_level |= 
+                        (OPT_PRE | OPT_CFG);
 #else
                     IMCC_INFO(interp)->optimizer_level |= OPT_PRE;
 #endif
@@ -454,7 +460,12 @@ main(int argc, char * argv[])
     char *sourcefile;
     const char *output_file;
 
-    Interp *interp = Parrot_new(NULL);
+    Interp *interp;
+
+    Parrot_set_config_hash();
+
+    interp = Parrot_new(NULL);
+
 
     Parrot_init(interp);
 
@@ -469,8 +480,14 @@ main(int argc, char * argv[])
 
     /* Default optimization level is zero; see optimizer.c, imc.h */
     if (!*optimizer_opt) {
+#if 1
         strcpy(optimizer_opt, "0");
         IMCC_INFO(interp)->optimizer_level = 0;
+#else
+        /* won't even make with this: something with Data::Dumper and set_i_p_i*/
+        strcpy(optimizer_opt, "1");
+        IMCC_INFO(interp)->optimizer_level = OPT_PRE;
+#endif
     }
 
     /* Read in the source and determine whether it's Parrot bytecode,

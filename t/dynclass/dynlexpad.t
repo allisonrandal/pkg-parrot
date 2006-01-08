@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: dynlexpad.t 10966 2006-01-07 16:28:06Z leo $
 
 use strict;
 use warnings;
@@ -50,7 +50,7 @@ my $loadlib = <<'EOC';
     lib = loadlib "dynlexpad"
 .end
 
-.HLL "Some", ""
+.HLL "Some", "dynlexpad"
 .HLL_map .LexPad, .DynLexPad
 
 EOC

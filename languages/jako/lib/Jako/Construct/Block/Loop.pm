@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Loop.pm 10452 2005-12-12 00:35:41Z gregor $
+# $Id: Loop.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -44,21 +44,16 @@ sub compile
 
   my $namespace = $prefix;
 
-  my $left;
-  my $op;
-  my $right;
-
-  if ($kind eq 'while' or $kind eq 'until') {
-    $left  = $self->left->value;
-    $op    = $self->op;
-    $right = $self->right->value;
-  }
-
   if ($kind eq 'while' or $kind eq 'until') {
     my $test = ($kind eq 'while') ? 'unless' : 'if';
 
     $compiler->emit("${prefix}_NEXT:");
+
+    my $op    = $self->op;
+    my $left  = $self->left->compile($compiler);
+    my $right = $self->right->compile($compiler);
     $compiler->emit("  $test $left $op $right goto ${prefix}_LAST");
+
     $compiler->emit("${prefix}_REDO:");
 
     if ($self->content) {

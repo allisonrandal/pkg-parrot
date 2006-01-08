@@ -1,6 +1,6 @@
 /*
 Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: builtin.c 8390 2005-06-16 09:37:33Z leo $
+$Id: builtin.c 10850 2006-01-02 22:14:48Z ambs $
 
 =head1 NAME
 
@@ -39,9 +39,12 @@ static Builtins builtins[] = {
     { "atan2", 	"PJOP",		"Float", 	0, 0 },
     { "cos", 	"PJO", 		"Float", 	0, 0 },
     { "cosh", 	"PJO", 		"Float", 	0, 0 },
+    { "cd",     "vJOS",         "OS",           0, 0 },
+    { "cwd",    "SJO",          "OS",           0, 0 },
     { "exp", 	"PJO", 		"Float", 	0, 0 },
+    { "mkdir",  "vJOSI",        "OS",           0, 0 },
     { "ln", 	"PJO", 		"Float", 	0, 0 },
-    { "log10", 	"PJO", 		"Float", 	0, 0 },
+    { "log10",  "PJO",          "Float", 	0, 0 },
     { "log2", 	"PJO", 		"Float", 	0, 0 },
     { "sec", 	"PJO", 		"Float", 	0, 0 },
     { "sech", 	"PJO", 		"Float", 	0, 0 },
@@ -50,13 +53,20 @@ static Builtins builtins[] = {
     { "tan", 	"PJO", 		"Float", 	0, 0 },
     { "tanh", 	"PJO", 		"Float", 	0, 0 },
     { "index",  "IJSS.I",       "String",       0, 0 },
+    { "is_integer","IJS",       "String",       0, 0 },
+    { "link",   "vJOSS",        "OS",           0, 0 },
     { "lower", 	"PJO",	        "String", 	0, 0 },
     { "open", 	"PJS.S",	"ParrotIO", 	0, 0 },
     { "puts", 	"IJOS",         "ParrotIO", 	0, 0 },
+    { "reverse","vJS",          "String",       0, 0 },
+    { "rm",     "vJOS",         "OS",           0, 0 },
     { "say", 	"IJS",          "ParrotIO", 	0, 0 },
     { "say", 	"IJOS",         "ParrotIO", 	0, 0 },
     { "say", 	"vJS",          "ParrotIO", 	0, 0 },
-    { "say", 	"vJOS",         "ParrotIO", 	0, 0 }
+    { "say", 	"vJOS",         "ParrotIO", 	0, 0 },
+    { "symlink","vJOSS",        "OS",           0, 0 },
+    { "trans",  "vJSP",         "String",       0, 0 },
+    { "umask",  "IJOI",         "OS",           0, 0 },
 };
 
 /*
@@ -131,7 +141,7 @@ find_builtin_s(Interp *interpreter, STRING *func)
 }
 
 static int
-check_builtin_sig(Interp *interpreter, size_t i, char *sig)
+check_builtin_sig(Interp *interpreter, size_t i, char *sig, int pass)
 {
     Builtins *b = builtins + i;
     const char *p;
@@ -150,6 +160,8 @@ check_builtin_sig(Interp *interpreter, size_t i, char *sig)
         }
         if (*p == 'O' && *sig == 'P')
             continue;
+        if (pass && (*p == 'P' || *sig == 'P'))
+            continue;
         if (*p != *sig)
             return 0;
     }
@@ -163,7 +175,7 @@ check_builtin_sig(Interp *interpreter, size_t i, char *sig)
 int
 Parrot_is_builtin(Interp *interpreter, char *func, char *sig)
 {
-    int i, n;
+    int bi, i, n, pass;
 
     i = find_builtin(interpreter, func);
     if (i < 0)
@@ -171,18 +183,21 @@ Parrot_is_builtin(Interp *interpreter, char *func, char *sig)
     if (!sig)
         return i;
     n = sizeof(builtins) / sizeof(builtins[0]);
-    while (!check_builtin_sig(interpreter, i, sig)) {
+    bi = i;
+    for (pass = 0; pass <= 1; ++pass) {
+        i = bi;
+again:
+        if (check_builtin_sig(interpreter, i, sig, pass)) 
+            return i;
         if (i < n - 1) {
             /* try next with same name */
             ++i;
             if (strcmp(func, builtins[i].c_name))
-                return -1;
+                continue;
+            goto again;
         }
-        else
-            return -1;
     }
-
-    return i;
+    return -1;
 }
 
 PMC*

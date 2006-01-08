@@ -146,11 +146,11 @@ get_keyvec(Parrot_Interp interpreter, int op)
 {
     int i, k;
     op_info_t * op_info = &interpreter->op_info_table[op];
-    for (i = k = 0; i < op_info->arg_count - 1; i++)
-        if (op_info->types[i+1] == PARROT_ARG_K ||
-            op_info->types[i+1] == PARROT_ARG_KC ||
-            op_info->types[i+1] == PARROT_ARG_KI ||
-            op_info->types[i+1] == PARROT_ARG_KIC)
+    for (i = k = 0; i < op_info->op_count - 1; i++)
+        if (op_info->types[i] == PARROT_ARG_K ||
+            op_info->types[i] == PARROT_ARG_KC ||
+            op_info->types[i] == PARROT_ARG_KI ||
+            op_info->types[i] == PARROT_ARG_KIC)
             k |= KEY_BIT(i);
     return k;
 }
@@ -272,7 +272,7 @@ to_infix(Interp *interpreter, char *name, SymReg **r, int *n, int mmd_op)
         (*n)++;
     }
     r[0] = mmd;
-    if (is_n)
+    if (is_n && *n == 4)
         return "n_infix";
     else
         return "infix";
@@ -463,15 +463,15 @@ INS(Interp *interpreter, IMC_Unit * unit, char *name,
     op_info = &interpreter->op_info_table[op];
 
     *format = '\0';
-    /* info->arg_count is offset by one, first is opcode
+    /* info->op_count is args + 1
      * build instruction format
      * set LV_in / out flags */
-    if (n != op_info->arg_count-1)
+    if (n != op_info->op_count-1)
         IMCC_fataly(interpreter, E_SyntaxError,
                 "arg count mismatch: op #%d '%s' needs %d given %d",
-                op, fullname, op_info->arg_count-1, n);
+                op, fullname, op_info->op_count-1, n);
     for (i = 0; i < n; i++) {
-        switch (op_info->dirs[i+1]) {
+        switch (op_info->dirs[i]) {
             case PARROT_ARGDIR_INOUT:
                 dirs |= 1 << (16 + i);
                 /* go on */
@@ -550,8 +550,8 @@ INS(Interp *interpreter, IMC_Unit * unit, char *name,
     /*
      * mark registers that are labels
      */
-    for (i = 0; i < op_info->arg_count-1; i++) {
-        if (op_info->labels[i+1])
+    for (i = 0; i < op_info->op_count-1; i++) {
+        if (op_info->labels[i])
             ins->type |= ITBRANCH | (1 << i);
         else {
             if (r[i]->type == VTADDRESS)
@@ -659,8 +659,8 @@ imcc_compile(Parrot_Interp interp, const char *s, int pasm_file)
      */
     sub_data = PMC_sub(sub);
     sub_data->seg = new_cs;
-    sub_data->address = new_cs->base.data;
-    sub_data->end = new_cs->base.data + new_cs->base.size;
+    sub_data->start_offs = 0;
+    sub_data->end_offs = new_cs->base.size;
     sub_data->name = string_from_cstring(interp, name, 0);
 
     if (imc_info) {

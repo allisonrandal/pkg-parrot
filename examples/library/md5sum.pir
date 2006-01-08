@@ -1,8 +1,8 @@
-# $Id: md5sum.pir 9479 2005-10-13 18:56:52Z bernhard $
+# $Id: md5sum.pir 10754 2005-12-29 01:19:55Z particle $
 
 =head1 NAME
 
-examples/library/md5sum.imc - calculate MD5 checksums
+examples/library/md5sum.pir - calculate MD5 checksums
 
 =head1 SYNOPSIS
 

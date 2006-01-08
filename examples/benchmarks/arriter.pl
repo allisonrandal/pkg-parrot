@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: arriter.pl 5175 2004-01-31 13:16:08Z mikescott $
+# $Id: arriter.pl 10728 2005-12-28 17:00:50Z particle $
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ print "\n";
 
 =head1 SEE ALSO
 
-F<examples/benchmarks/arriter.imc>,
-F<examples/benchmarks/arriter_o1.imc>.
+F<examples/benchmarks/arriter.pir>,
+F<examples/benchmarks/arriter_o1.pir>.
 
 =cut

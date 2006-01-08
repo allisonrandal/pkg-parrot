@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: interpreter.h 10458 2005-12-12 12:02:28Z leo $
+ *     $Id: interpreter.h 10974 2006-01-08 00:03:56Z jonathan $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -205,6 +205,10 @@ typedef struct Parrot_Context {
     opcode_t *current_results;   /* ptr into code with get_results opcode */
     /* deref the constants - we need it all the time */
     struct PackFile_Constant ** constants;
+    /* code->prederefed.code - code->base.data in opcodes 
+     * to simplify conversio between code ptrs in e.g. invoke
+     */
+    size_t pred_offset;
 } parrot_context_t;
 
 #define ALIGNED_CTX_SIZE ( ((sizeof(struct Parrot_Context) + NUMVAL_SIZE - 1) \
@@ -426,6 +430,8 @@ __declspec(dllimport) extern PMC * PMCNULL;  /* Holds single Null PMC         */
 Interp *make_interpreter(Interp * parent, Interp_flags);
 void Parrot_init(Interp *);
 void Parrot_destroy(Interp *);
+
+void Parrot_set_config_hash_internal(const unsigned char*, unsigned int);
 
 INTVAL interpinfo(Interp *interpreter, INTVAL what);
 PMC*   interpinfo_p(Interp *interpreter, INTVAL what);

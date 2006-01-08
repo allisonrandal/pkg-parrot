@@ -1,4 +1,4 @@
-# $Id: RELEASE_INSTRUCTIONS 10343 2005-12-04 15:27:40Z leo $
+# $Id: RELEASE_INSTRUCTIONS 10986 2006-01-08 14:15:28Z leo $
 
 To prepare a release:
 
@@ -11,8 +11,10 @@ To prepare a release:
     2.  Update files with version-specific information:
 
         a.  Increment the version number in:
-	    VERSION, parrot.spec, 
-	    adjust IMCC_VERSION in imcc/main.c, MANIFEST.generated
+	    - VERSION
+            - parrot.spec, 
+	    - compilers/imcc/main.c
+            - MANIFEST.generated
 
         b.  Change the information in DEVELOPING to reflect
             this release's version number and date.

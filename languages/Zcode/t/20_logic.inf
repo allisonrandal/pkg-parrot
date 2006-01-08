@@ -1,4 +1,4 @@
-! $Id: $
+! $Id: 20_logic.inf 10933 2006-01-06 01:43:24Z particle $
 
 Include "declare.inf"; ! variable declarations
 Include "assert.inf"; ! p/f/pt (ok/not_ok) routines

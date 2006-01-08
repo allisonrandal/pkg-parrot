@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: objects.t 9451 2005-10-11 13:40:14Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: objects.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 62;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/objects.t - Objects
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/objects.t
+	% prove t/pmc/objects.t
 
 =head1 DESCRIPTION
 
 Tests the object/class subsystem.
 
 =cut
-
-use Parrot::Test tests => 62;
-use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', "find_type (base class)");
     newclass P1, "Foo"

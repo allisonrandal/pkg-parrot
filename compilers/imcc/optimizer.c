@@ -70,6 +70,7 @@ static int branch_branch(Interp *interpreter, IMC_Unit *);
 static int branch_reorg(Interp *interpreter, IMC_Unit *);
 static int unused_label(Interp *interpreter, IMC_Unit *);
 static int dead_code_remove(Interp *interpreter, IMC_Unit *);
+static int branch_cond_loop(Interp *interpreter, IMC_Unit *);
 
 static int constant_propagation(Interp *interpreter, IMC_Unit *);
 static int used_once(Interp *, IMC_Unit *);
@@ -109,6 +110,8 @@ cfg_optimize(Interp *interpreter, IMC_Unit * unit)
     if (IMCC_INFO(interpreter)->optimizer_level & OPT_PRE) {
         IMCC_info(interpreter, 2, "cfg_optimize\n");
         if (branch_branch(interpreter, unit))
+            return 1;
+        if (branch_cond_loop(interpreter, unit))
             return 1;
         if (branch_reorg(interpreter, unit))
             return 1;
@@ -450,7 +453,8 @@ strength_reduce(Interp *interpreter, IMC_Unit * unit)
         if ( (ins->opnum == PARROT_OP_set_i_ic &&
                       IMCC_int_from_reg(interpreter, ins->r[1]) == 0)
           || (ins->opnum == PARROT_OP_set_n_nc &&
-                      atof(ins->r[1]->name) == 0.0)) {
+                      atof(ins->r[1]->name) == 0.0 &&
+                      ins->r[1]->name[0] != '-')) {
             IMCC_debug(interpreter, DEBUG_OPT1, "opt1 %I => ", ins);
             --ins->r[1]->use_count;
             tmp = INS(interpreter, unit, "null", "", ins->r, 1, 0, 0);
@@ -474,33 +478,42 @@ strength_reduce(Interp *interpreter, IMC_Unit * unit)
 static int
 constant_propagation(Interp *interpreter, IMC_Unit * unit)
 {
-    Instruction *ins, *ins2;
+    Instruction *ins, *ins2, *tmp;
     int op;
     int i;
     char fullname[128];
     SymReg *c, *old, *o;
     int any = 0;
+    int found;
 
     IMCC_info(interpreter, 2, "\tconstant_propagation\n");
     for (ins = unit->instructions; ins; ins = ins->next) {
+        found = 0;
         if (!strcmp(ins->op, "set") &&
                 ins->opsize == 3 &&             /* no keyed set */
                 ins->r[1]->type == VTCONST &&
                 ins->r[0]->set != 'P') {        /* no PMC consts */
+            found = 1;
             c = ins->r[1];
             o = ins->r[0];
+        } else if (!strcmp(ins->op, "null") && ins->r[0]->set == 'I') {
+            found = 1;
+            c = mk_const(interpreter, str_dup("0"), 'I');
+            o = ins->r[0];
+        } /* this would be good because 'set I0, 0' is reduced to 'null I0'
+               before it gets to us */
 
-            IMCC_debug(interpreter, DEBUG_OPT1,
+        if (found) {
+            IMCC_debug(interpreter, DEBUG_OPT2,
                     "propagating constant %I => \n", ins);
             for (ins2 = ins->next; ins2; ins2 = ins2->next) {
                 if (ins2->type & ITSAVES ||
                     /* restrict to within a basic block */
                     ins2->bbindex != ins->bbindex)
                     goto next_constant;
-                /* parrot opsize has opcode too, so argument count is
-                 * opsize - 1
+                /* was opsize - 2, changed to n_r - 1
                  */
-                for (i = ins2->opsize - 2; i >= 0; i--) {
+                for (i = ins2->n_r - 1; i >= 0; i--) {
                     if (!strcmp(o->name, ins2->r[i]->name)) {
                         if (instruction_writes(ins2,ins2->r[i]))
                             goto next_constant;
@@ -510,17 +523,27 @@ constant_propagation(Interp *interpreter, IMC_Unit * unit)
                                     ins2, i);
                             old = ins2->r[i];
                             ins2->r[i] = c;
-                            op = check_op(interpreter, fullname, ins2->op,
-                                    ins2->r, ins2->opsize, ins2->keys);
-                            if (op < 0) {
-                                ins2->r[i] = old;
-                                IMCC_debug(interpreter, DEBUG_OPT2," - no %s\n", fullname);
-                            }
-                            else {
-                                --old->use_count;
-                                ins2->opnum = op;
+       /* first we try subst_constants for e.g. if 10 < 5 goto next*/
+                            tmp = IMCC_subst_constants(interpreter,
+                                unit, ins2->op, ins2->r, ins2->opsize,
+                                &found);
+                            if (found) {
+                                subst_ins(unit, ins2, tmp, 1);
                                 any = 1;
-                                IMCC_debug(interpreter, DEBUG_OPT2," -> %I\n", ins2);
+                                IMCC_debug(interpreter, DEBUG_OPT2," reduced to %I\n", tmp);
+                            } else {
+                                op = check_op(interpreter, fullname, ins2->op,
+                                    ins2->r, ins2->n_r, ins2->keys);
+                                if (op < 0) {
+                                    ins2->r[i] = old;
+                                    IMCC_debug(interpreter, DEBUG_OPT2," - no %s\n", fullname);
+                                }
+                                else {
+                                    --old->use_count;
+                                    ins2->opnum = op;
+                                    any = 1;
+                                    IMCC_debug(interpreter, DEBUG_OPT2," -> %I\n", ins2);
+                                }
                             }
                         }
                     }
@@ -585,35 +608,33 @@ eval_ins(Interp *interpreter, char *op, size_t ops, SymReg **r)
         IMCC_fatal(interpreter, 1, "eval_ins: op '%s' not found\n", op);
     op_info = interpreter->op_info_table + opnum;
     /* now fill registers */
-    for (i = 0; i < op_info->arg_count; i++) {
+    eval[0] = opnum;
+    for (i = 0; i < op_info->op_count - 1; i++) {
         switch (op_info->types[i]) {
-            case PARROT_ARG_OP:
-                eval[i] = opnum;
-                break;
             case PARROT_ARG_IC:
-                assert((i == 3 && ops == 2) || (i == 2 && ops == 1));
+                assert(i && ops == (unsigned int)i);
                 /* set branch offset to zero */
-                eval[i] = 0;
+                eval[i + 1] = 0;
                 break;
             case PARROT_ARG_I:
             case PARROT_ARG_N:
             case PARROT_ARG_S:
-                eval[i] = i - 1;        /* regs used are I0, I1, I2 */
-                if (ops <= 2 || i > 1) { /* fill source regs */
-                    switch (r[i-1]->set) {
+                eval[i + 1] = i;        /* regs used are I0, I1, I2 */
+                if (ops <= 2 || i) { /* fill source regs */
+                    switch (r[i]->set) {
                         case 'I':
-                            REG_INT(i-1) =
-                                IMCC_int_from_reg(interpreter, r[i-1]);
+                            REG_INT(i) =
+                                IMCC_int_from_reg(interpreter, r[i]);
                             break;
                         case 'N':
                             s = string_from_cstring(interpreter,
-                                    r[i-1]->name, 0);
-                            REG_NUM(i-1) =
+                                    r[i]->name, 0);
+                            REG_NUM(i) =
                                 string_to_num(interpreter, s);
                             break;
                         case 'S':
-                            REG_STR(i-1) =
-                                IMCC_string_from_reg(interpreter, r[i-1]);
+                            REG_STR(i) =
+                                IMCC_string_from_reg(interpreter, r[i]);
                             break;
                     }
                 }
@@ -627,10 +648,10 @@ eval_ins(Interp *interpreter, char *op, size_t ops, SymReg **r)
 
     /* eval the opcode */
     pc = (interpreter->op_func_table[opnum]) (eval, interpreter);
-    /* the returned pc is either incremented by arg_count or is eval,
+    /* the returned pc is either incremented by op_count or is eval,
      * as the branch offset is 0 - return true if it branched
      */
-    assert(pc == eval + op_info->arg_count || pc == eval);
+    assert(pc == eval + op_info->op_count || pc == eval);
     return pc == eval;
 }
 
@@ -819,7 +840,7 @@ IMCC_subst_constants(Interp *interpreter, IMC_Unit * unit, char *name,
 /* optimizations with CFG built */
 
 /*
- * branch L1  => branch L2
+ * if I0 goto L1  => if IO goto L2
  * ...
  * L1:
  * branch L2
@@ -837,20 +858,22 @@ branch_branch(Interp *interpreter, IMC_Unit * unit)
     IMCC_info(interpreter, 2, "\tbranch_branch\n");
     /* reset statistic globals */
     for (ins = unit->instructions; ins; ins = ins->next) {
-        if ((ins->type & IF_goto) && !strcmp(ins->op, "branch")) {
-            r = get_sym(ins->r[0]->name);
+          if (get_branch_regno(ins) >= 0) {
+            r = get_sym(get_branch_reg(ins)->name);
 
             if (r && (r->type & VTADDRESS) && r->first_ins) {
                 next = r->first_ins->next;
-                if (!next)
-                    break;
-                if ((next->type & IF_goto) &&
-                        !strcmp(next->op, "branch")) {
+/*                if (!next || !strcmp(next->r[0]->name, get_branch_reg(ins)->name))
+                    break;*/
+                if (next &&
+                      (next->type & IF_goto) &&
+                      !strcmp(next->op, "branch") &&
+                      strcmp(next->r[0]->name, get_branch_reg(ins)->name)) {
                     IMCC_debug(interpreter, DEBUG_OPT1,
                             "found branch to branch '%s' %I\n",
                             r->first_ins->r[0]->name, next);
                     ostat.branch_branch++;
-                    ins->r[0] = next->r[0];
+                    ins->r[get_branch_regno(ins)] = next->r[0];
                     changed = 1;
                 }
             }
@@ -882,7 +905,7 @@ branch_reorg(Interp *interpreter, IMC_Unit * unit)
 
     IMCC_info(interpreter, 2, "\tbranch_reorg\n");
     for (i = 0; i < unit->n_basic_blocks; i++) {
-	ins = unit->bb_list[i]->end;
+        ins = unit->bb_list[i]->end;
         /* if basic block ends with unconditional jump */
         if ((ins->type & IF_goto) && !strcmp(ins->op, "branch")) {
             r = get_sym(ins->r[0]->name);
@@ -898,26 +921,162 @@ branch_reorg(Interp *interpreter, IMC_Unit * unit)
                 /* if target block is not reached by falling into it from another block */
                 if (!found) {
                     /* move target block and its positional successors
-                     * to follow block with unconditional jump */
+                     * to follow block with unconditional jump
+                     * (this could actually be in another block) */
                     for (end = start; end->next; end = end->next) {
                         if ((end->type & IF_goto) && !strcmp(end->op, "branch")) {
                             break;
                         }
                     }
-                    ins->next->prev = end;
-                    start->prev->next = end->next;
-                    if (end->next)
-                        end->next->prev = start->prev;
-                    end->next = ins->next;
-                    ins->next = start;
-                    start->prev = ins;
-                    IMCC_debug(interpreter, DEBUG_OPT1,
-                            "found branch to reorganize '%s' %I\n",
-                            r->first_ins->r[0]->name, ins);
-                    /* unconditional jump can be eliminated */
-                    ostat.deleted_ins++;
-                    ins = delete_ins(unit, ins, 1);
-                    return 1;
+
+                    /* this was screwing up multi-block loops... */
+                    if (end != ins) {
+                        ins->next->prev = end;
+                        start->prev->next = end->next;
+                        if (end->next)
+                            end->next->prev = start->prev;
+                        end->next = ins->next;
+                        ins->next = start;
+                        start->prev = ins;
+                        IMCC_debug(interpreter, DEBUG_OPT1,
+                                "found branch to reorganize '%s' %I\n",
+                                r->first_ins->r[0]->name, ins);
+                        /* unconditional jump can be eliminated */
+                        ostat.deleted_ins++;
+                        ins = delete_ins(unit, ins, 1);
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+    return changed;
+}
+
+static int
+branch_cond_loop_swap(Interp *interp, IMC_Unit *unit, Instruction *branch,
+        Instruction *start, Instruction *cond)
+{
+    int changed = 0;
+    int args;
+    const char *neg_op = get_neg_op(cond->op, &args);
+    if (neg_op) {
+        char *label;
+        int count, size, found;
+        
+        size = strlen(branch->r[0]->name) + 10; /* + '_post999' */
+        
+        label = malloc(size);
+        found = 0;
+        for (count = 1; count != 999; ++count) {
+            sprintf(label, "%s_post%d", branch->r[0]->name, count);
+            if (get_sym(label) == 0) {
+                found = 1;
+                break;
+            }
+        }
+        
+        if (found) {
+            Instruction *tmp;
+            SymReg *regs[3], *r;
+
+            /* cond_op has 2 or 3 args */
+            assert(args <= 3);
+            
+            r = mk_local_label(interp, str_dup(label));
+            tmp = INS_LABEL(unit, r, 0);
+            insert_ins(unit, cond, tmp);
+            
+            
+            for (start = start->next; start != cond; start = start->next) {
+                if (!(start->type & ITLABEL)) {
+                    tmp = INS(interp, unit, start->op, "", 
+                            start->r, start->n_r, start->keys, 0);
+                    prepend_ins(unit, branch, tmp);
+                }
+            }
+            
+            for (count = 0; count != args; ++count) {
+                regs[count] = cond->r[count];
+            }
+
+            regs[get_branch_regno(cond)] = 
+                mk_label_address(interp, str_dup(label));
+            tmp = INS(interp, unit, (char*)neg_op, "", regs, args, 0, 0);
+            subst_ins(unit, branch, tmp, 1);
+            
+            IMCC_debug(interp, DEBUG_OPT1, 
+            "loop %s -> %s converted to post-test, added label %s\n",
+            branch->r[0]->name, get_branch_reg(cond)->name, label);
+
+            ostat.branch_cond_loop++;
+            changed = 1;
+        }
+        
+        free(label);
+    }
+
+    return changed;
+}
+
+/*
+ * start:           => start:
+ * if cond goto end    if cond goto end
+ * ...
+ * branch start        start_post1:
+ * end:                ...
+ *                     unless cond goto start_post562
+ *                     end:
+ *
+ * The basic premise is "branch (A) to conditional (B), where B goes to
+ * just after A."
+ * 
+ * Returns TRUE if any optimizations were performed. Otherwise, returns
+ * FALSE.
+ */
+static int
+branch_cond_loop(Interp *interpreter, IMC_Unit * unit)
+{
+    Instruction *ins, *cond, *end, *start;
+    SymReg * r;
+    int changed = 0, found;
+
+    IMCC_info(interpreter, 2, "\tbranch_cond_loop\n");
+    /* reset statistic globals */
+
+    for (ins = unit->instructions; ins; ins = ins->next) {
+        if ((ins->type & IF_goto) && !strcmp(ins->op, "branch") ) {
+            /* get `end` label */
+            end = ins->next;
+            /* get `start` label */
+            r = get_sym(ins->r[0]->name);
+
+            if (end && (end->type & ITLABEL) &&
+                r && (r->type & VTADDRESS) && r->first_ins) {
+
+                start = r->first_ins;
+                found = 0;
+
+                for (cond = start->next; cond; cond = cond->next) {
+                    /* no good if it's an unconditional branch*/
+                    if (cond->type & IF_goto && !strcmp(cond->op, "branch")) {
+                        break;
+                    } else if (cond->type & ITPCCRET || cond->type & ITPCCSUB
+                            || cond->type & ITCALL) {
+                        break;
+                        /* just until we can copy set_args et al */
+                    } else if (cond->type & ITBRANCH && get_branch_regno(cond) >= 0) {
+                        found = 1;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    char *lbl = get_branch_reg(cond)->name;
+                    r = get_sym(lbl);
+                    if (r && (r->type & VTADDRESS) && r->first_ins == end) {
+                        changed |= branch_cond_loop_swap(interpreter, unit, ins, start, cond);
+                    }
                 }
             }
         }

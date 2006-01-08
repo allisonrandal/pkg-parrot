@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd03_calling_conventions.pod 10264 2005-11-30 03:07:41Z chip $
+# $Id: pdd03_calling_conventions.pod 10704 2005-12-27 22:35:57Z leo $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Parrot's inter-routine calling conventions.
 
 =head1 VERSION
 
-$Revision: 10264 $
+$Revision: 10704 $
 
 =head1 DESCRIPTION
 
@@ -236,19 +236,21 @@ C<set> (pass by reference).
 =item *
 
 When the target is a P register and the source is an integer, the P will be
-set to a new .Integer which has been C<assign>ed the given integer.
+set to a new .Integer[1] which has been C<assign>ed the given integer.
 
 =item *
 
 When the target is a P register and the source is a number, the P will be set
-to a new .Float which has been C<assign>ed the given number.
+to a new .Float[1] which has been C<assign>ed the given number.
 
 =item *
 
 When the target is a P register and the source is a string, the P will be set
-to a new .String which has been C<assign>ed the given string.
+to a new .String[1] which has been C<assign>ed the given string.
 
 =back
+
+[1] according the current HLL type mappings.
 
 =head1 BUGS
 
@@ -262,17 +264,12 @@ Named parameters (partly done)
 
 =item *
 
-HLL type mapping -- e.g. for HLL "Foo", having an incoming I register map to a
-FooInteger.
-
-=item *
-
 Specific exceptions to throw for specific errors.
 
 =back
 
-Also, PIR should have pretty syntactical sugar around the get and set opcodes,
-but it doesn't.  This document should specify what that looks like, too.
+PIR has pretty syntactical sugar around the get and set opcodes.
+This document should specify what that looks like, too.
 
 =head1 ATTACHMENTS
 

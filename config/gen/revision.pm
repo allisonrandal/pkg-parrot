@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: revision.pl 7804 2005-04-11 14:12:16Z jrieks $
+# $Id: revision.pm 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -7,12 +7,12 @@ config/gen/revision.pm - Parrot's configure revision
 
 =head1 DESCRIPTION
 
-Determines parrot's SVN revision.  In a release, there
-are no .svn directories, so this field is empty.
+Determines parrot's SVN revision.  In a release, there are no .svn directories,
+so this field is empty.
 
 =cut
 
-package Configure::Step;
+package gen::revision;
 
 use strict;
 use vars qw($description $result);
@@ -23,20 +23,22 @@ use Parrot::Revision;
 
 $description = "Determining Parrot's revision";
 
-sub runstep {
-    my $self = shift;
+sub runstep
+{
+    my ($self, $conf) = @_;
+
     my $revision = $Parrot::Revision::current;
     my $entries  = $Parrot::Revision::svn_entries;
 
-    Parrot::Configure::Data->set(
-	revision => $revision,
-	SVN_ENTRIES => $entries
+    $conf->data->set(
+        revision    => $revision,
+        SVN_ENTRIES => $entries
     );
-    
+
     if ($revision >= 1) {
-	$result = "r$revision";
+        $result = "r$revision";
     } else {
-	$result = "done";
+        $result = "done";
     }
 }
 

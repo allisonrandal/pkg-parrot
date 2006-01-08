@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: exec_start.c 9814 2005-11-07 07:30:41Z fperrad $
+$Id: exec_start.c 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -128,7 +128,7 @@ main(int argc, char **argv) {
         printf( "Can't unpack.\n" );
         return 1;
     }
-    fixup_subs(interpreter, pf->cur_cs, PBC_PBC, NULL);
+    PackFile_fixup_subs(interpreter, PBC_PBC, NULL);
     Parrot_loadbc(interpreter, pf);
     setup_argv(interpreter, argc, argv);
 

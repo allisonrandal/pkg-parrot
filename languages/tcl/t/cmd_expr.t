@@ -2,13 +2,43 @@
 
 use strict;
 use lib qw(tcl/t t . ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 52;
+use Parrot::Test tests => 97;
 use Test::More;
 
 language_output_is("tcl",<<TCL,<<OUT,"int");
  puts [expr 42]
 TCL
 42
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"unary -");
+ puts [expr -2]
+TCL
+-2
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"unary +");
+ puts [expr +2]
+TCL
+2
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"unary ~");
+ puts [expr ~0]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"unary !");
+ puts [expr !2]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"double unary !");
+ puts [expr !!2]
+TCL
+1
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"mul");
@@ -128,7 +158,7 @@ TCL
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"==, eq");
- puts [expr 1 == 1]
+ puts [expr 2 == 2]
 TCL
 1
 OUT
@@ -335,5 +365,250 @@ language_output_is("tcl",<<'TCL',<<'OUT',"puts inside an expr");
 TCL
 2
 
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"eq, extra characters after quotes");
+  puts [expr {"foo"eq{foo}}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"eq, extra characters after brace");
+  puts [expr {{foo}eq"foo"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"eq (false)");
+  puts [expr {"foo"eq{baz}}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"ne (true)");
+  puts [expr {{foo}ne{baz}}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"ne (false)");
+  puts [expr {{foo}ne{foo}}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string == (true)");
+  puts [expr {"foo"=="foo"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string == (false)");
+  puts [expr {"foo"=="baz"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string != (true)");
+  puts [expr {"foo" != "baz"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string != (false)");
+  puts [expr {"foo"!="foo"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string <= (less)");
+  puts [expr {"abb"<="abc"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string <= (greater)");
+  puts [expr {"abc"<="abb"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string <= (equal)");
+  puts [expr {"abc"<="abc"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string >= (less)");
+  puts [expr {"abb" >= "abc"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string >= (greater)");
+  puts [expr {"abc" >= "abb"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string >= (equal)");
+  puts [expr {"abc" >= "abc"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string < (less)");
+  puts [expr {"abb" < "abc"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string < (greater)");
+  puts [expr {"abc" < "abb"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string < (equal)");
+  puts [expr {"abc" < "abc"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string > (less)");
+  puts [expr {"abb" > "abc"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string > (greater)");
+  puts [expr {"abc" > "abb"}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string > (equal)");
+  puts [expr {"abc" > "abc"}]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"unknown math function");
+  puts [expr fink()]
+TCL
+unknown math function "fink"
+OUT
+
+TODO: {
+  local $TODO = "not all string cases are currently working properly";
+
+language_output_is("tcl",<<TCL,<<OUT,"string mul");
+ puts [expr {"a" * "b"}]
+TCL
+can't use non-numeric string as operand of "*"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string div");
+ puts [expr {"a" / "b"}]
+TCL
+can't use non-numeric string as operand of "/"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string remainder");
+ puts [expr {"a" % "b"}]
+TCL
+can't use non-numeric string as operand of "%"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string plus");
+ puts [expr {"a" + "b"}]
+TCL
+can't use non-numeric string as operand of "+"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string minus");
+ puts [expr {"a" - "b"}]
+TCL
+can't use non-numeric string as operand of "-"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string left shift");
+ puts [expr {"a" << "b"}]
+TCL
+can't use non-numeric string as operand of "<<"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string right shift");
+ puts [expr {"a" >> "b"}]
+TCL
+can't use non-numeric string as operand of ">>"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string &");
+ puts [expr {"a" & "b"}]
+TCL
+can't use non-numeric string as operand of "&"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string |");
+ puts [expr {"a" | "b"}]
+TCL
+can't use non-numeric string as operand of "|"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"string ^");
+ puts [expr {"a" ^ "b"}]
+TCL
+can't use non-numeric string as operand of "^"
+OUT
+
+}
+
+language_output_is("tcl",<<TCL,<<OUT,"octal");
+ puts [expr 000012345]
+TCL
+5349
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"neg octal");
+ puts [expr -000012345]
+TCL
+-5349
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"pos octal");
+ puts [expr +000012345]
+TCL
+5349
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"bad octal");
+ puts [expr 0000912345]
+TCL
+expected integer but got "0000912345" (looks like invalid octal number)
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"floats aren't octal");
+ puts [expr 000012345.0]
+TCL
+12345.0
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string > int");
+ puts [expr {"a" > 10}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string int < int");
+ puts [expr {"2" < 10}]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"string int < string int");
+ puts [expr {"2" < "10"}]
+TCL
+1
 OUT
 

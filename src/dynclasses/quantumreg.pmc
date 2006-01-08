@@ -1,6 +1,6 @@
 /* quantumreg.pmc
  *  CVS Info
- *     $Id$
+ *     $Id: quantumreg.pmc 10933 2006-01-06 01:43:24Z particle $
  *  Overview:
  *     These are the vtable functions for the QuantumReg PMC
  *  Data Structure and Algorithms:

@@ -1,9 +1,13 @@
-#!perl -w
+#!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: op.t 10238 2005-11-29 03:16:07Z particle $
+# $Id: op.t 10829 2006-01-01 14:28:50Z ambs $
 
 use strict;
-use Parrot::Test tests => 25;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Config;
+use Parrot::Test tests => 32;
 
 ##############################
 pir_output_is(<<'CODE', <<'OUT', "+=");
@@ -12,10 +16,15 @@ pir_output_is(<<'CODE', <<'OUT', "+=");
     $I0 += 20
     print $I0
     print "\n"
+
+    $I0 += -20
+    print $I0
+    print "\n"
     end
 .end
 CODE
 30
+10
 OUT
 
 ##############################
@@ -25,10 +34,15 @@ pir_output_is(<<'CODE', <<'OUT', "-=");
     $I0 -= 20
     print $I0
     print "\n"
+
+    $I0 -= -20
+    print $I0
+    print "\n"
     end
 .end
 CODE
 -10
+10
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', "*=");
@@ -37,10 +51,15 @@ pir_output_is(<<'CODE', <<'OUT', "*=");
     $I0 *= 20
     print $I0
     print "\n"
+
+    $I0 *= -2
+    print $I0
+    print "\n"
     end
 .end
 CODE
 200
+-400
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', "/=");
@@ -49,10 +68,18 @@ pir_output_is(<<'CODE', <<'OUT', "/=");
     $I0 /= 2
     print $I0
     print "\n"
+
+    $N0 = 20
+    $N0 /= .5
+    $I0 = $N0
+    print $I0
+    print "\n"
+
     end
 .end
 CODE
 10
+40
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', "%=");
@@ -61,10 +88,16 @@ pir_output_is(<<'CODE', <<'OUT', "%=");
     $I0 %= 7
     print $I0
     print "\n"
+
+    $I0 = 200
+    $I0 %= 2
+    print $I0
+    print "\n"
     end
 .end
 CODE
 6
+0
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', ".=");
@@ -73,21 +106,32 @@ pir_output_is(<<'CODE', <<'OUT', ".=");
     $S0 .= "cd"
     print $S0
     print "\n"
+
+    $S0 .= ""
+    print $S0
+    print "\n"
     end
 .end
 CODE
 abcd
+abcd
 OUT
+
 pir_output_is(<<'CODE', <<'OUT', "&=");
 .sub test :main
     $I0 =  0b1011
     $I0 &= 0b1000
     print $I0
     print "\n"
+
+    $I0 &= 0b0000
+    print $I0
+    print "\n"
     end
 .end
 CODE
 8
+0
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', "|=");
@@ -96,10 +140,15 @@ pir_output_is(<<'CODE', <<'OUT', "|=");
     $I0 |= 0b1000
     print $I0
     print "\n"
+
+    $I0 |= 0b0100
+    print $I0
+    print "\n"
     end
 .end
 CODE
 11
+15
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', "~=");
@@ -108,10 +157,15 @@ pir_output_is(<<'CODE', <<'OUT', "~=");
     $I0 ~= 0b1000
     print $I0
     print "\n"
+
+    $I0 ~= 0b0011
+    print $I0
+    print "\n"
     end
 .end
 CODE
 3
+0
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', ">>=");
@@ -190,10 +244,16 @@ pir_output_is(<<'CODE', <<'OUT', "x = length");
     $I0 = length s
     print $I0
     print "\n"
+
+    s = ""
+    $I0 = length s
+    print $I0
+    print "\n"
     end
 .end
 CODE
 3
+0
 OUT
 
 pir_output_is(<<'CODE', <<'OUT', "x = sin");
@@ -201,7 +261,7 @@ pir_output_is(<<'CODE', <<'OUT', "x = sin");
     $N0 = sin 0
     print $N0
     print "\n"
-end
+    end
 .end
 CODE
 0.000000
@@ -213,7 +273,7 @@ pir_output_is(<<'CODE', <<'OUT', "x = can");
     $I0 = can $P0, "puts"
     print $I0
     print "\n"
-end
+    end
 .end
 CODE
 1
@@ -225,7 +285,7 @@ pir_output_is(<<'CODE', <<'OUT', "x = isa");
     $I0 = isa $P0, "scalar"
     print $I0
     print "\n"
-end
+    end
 .end
 CODE
 1
@@ -318,4 +378,154 @@ BLAH:
 .end
 CODE
 PASS
+OUT
+
+
+pir_output_is(<<'CODE', <<'OUT', 'X = A == B');
+.sub main :main
+    $I0 = 1 == 1
+    print $I0
+    print "\n"
+
+    $I0 = 1 == 0
+    print $I0
+    print "\n"
+.end
+CODE
+1
+0
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', 'X = A < B');
+.sub main :main
+    $I0 = 1 < 1
+    print $I0
+    print "\n"
+
+    $I0 = 0 < 1
+    print $I0
+    print "\n"
+.end
+CODE
+0
+1
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', 'X = A > B');
+.sub main :main
+    $I0 = 1 > 1
+    print $I0
+    print "\n"
+
+    $I0 = 4 > 1
+    print $I0
+    print "\n"
+.end
+CODE
+0
+1
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', 'X = A >= B');
+.sub main :main
+    $I0 = 1 >= 1
+    print $I0
+    print "\n"
+
+    $I0 = 4 >= 1
+    print $I0
+    print "\n"
+
+    $I0 = 0 >= 1
+    print $I0
+    print "\n"
+.end
+CODE
+1
+1
+0
+OUT
+
+
+pir_output_is(<<'CODE', <<'OUT', 'X = A <= B');
+.sub main :main
+    $I0 = 1 <= 1
+    print $I0
+    print "\n"
+
+    $I0 = 4 <= 1
+    print $I0
+    print "\n"
+
+    $I0 = 0 <= 1
+    print $I0
+    print "\n"
+.end
+CODE
+1
+0
+1
+OUT
+
+
+pir_output_is(<<'CODE', <<'OUT', 'X = A != B');
+.sub main :main
+    $I0 = 1 != 1
+    print $I0
+    print "\n"
+
+    $I0 = 4 != 1
+    print $I0
+    print "\n"
+.end
+CODE
+0
+1
+OUT
+
+
+pir_output_is(<<'CODE', <<'OUT', 'Test octal/hex/bin/dec numbers');
+.sub main :main
+    $I0 = 0077
+    print $I0
+    print "\n"
+
+    $I0 = 0o77
+    print $I0
+    print "\n"
+
+    $I0 = 0xfF
+    print $I0
+    print "\n"
+
+    $I0 = 0b1101
+    print $I0
+    print "\n"
+
+    $I0 = 0O10
+    print $I0
+    print "\n"
+
+    $I0 = 0X10
+    print $I0
+    print "\n"
+
+    $I0 = 0B10
+    print $I0
+    print "\n"
+
+    $I0 = 10
+    print $I0
+    print "\n"
+
+.end
+CODE
+77
+63
+255
+13
+8
+16
+2
+10
 OUT

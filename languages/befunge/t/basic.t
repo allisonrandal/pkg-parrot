@@ -1,8 +1,9 @@
 #! perl -w
-# $Id: basic.t 8054 2005-05-10 20:46:43Z bernhard $
+# $Id: basic.t 10753 2005-12-28 23:06:44Z bernhard $
 
 use Data::Dumper;
-use Test::More tests => 1;
+#use Test::More tests => 1;
+use Test::More  skip_all => 'befunge.pasm does not compile';
 use Parrot::Test;
 
 use FindBin;

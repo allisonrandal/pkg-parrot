@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: object-meths.t 10371 2005-12-06 11:28:56Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: object-meths.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 33;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/object-meths.t - Object Methods
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/object-meths.t
+	% prove t/pmc/object-meths.t
 
 =head1 DESCRIPTION
 
 Tests PMC object methods.
 
 =cut
-
-use Parrot::Test tests => 33;
-use Test::More;
 
 output_like(<<'CODE', <<'OUTPUT', "callmethod - unknown method");
     newclass P2, "Foo"

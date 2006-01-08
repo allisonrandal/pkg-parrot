@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: fixedpmcarray.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: fixedpmcarray.pmc 10871 2006-01-03 17:50:14Z particle $
 
 =head1 NAME
 
@@ -692,7 +692,7 @@ Return a new iterator for SELF.
     }
 
     PMC* get_iter () {
-	PMC *iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
+        PMC *iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
         PMC *key =  pmc_new(INTERP, enum_class_Key);
         PMC_struct_val(iter) = key;
         PObj_get_FLAGS(key) |= KEY_integer_FLAG;
@@ -720,12 +720,12 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
                 "FixedPMCArray: index out of bounds!");
 
         data = (PMC**)PMC_data(SELF);
-	return !PMC_IS_NULL(data[key]);
+        return !PMC_IS_NULL(data[key]);
     }
 
     INTVAL exists_keyed (PMC* key) {
         INTVAL ix = key_integer(INTERP, key);
-	return SELF.exists_keyed_int(ix);
+        return SELF.exists_keyed_int(ix);
     }
 
 /*
@@ -772,6 +772,26 @@ Used to unarchive the array.
         SUPER(info);
         if (info->extra_flags == EXTRA_IS_NULL)
             DYNSELF.set_integer_native(io->vtable->shift_integer(INTERP, io));
+    }
+
+/*
+
+=item C<INTVAL defined_keyed_int(INTVAL key)>
+
+Returns TRUE is the element at C<key> is defined; otherwise returns false.
+
+=cut
+
+*/
+
+    INTVAL defined_keyed_int (INTVAL key) {
+        PMC* val;
+
+        val = DYNSELF.get_pmc_keyed_int(key);
+        if(PMC_IS_NULL(val))
+            return 0;
+
+        return VTABLE_defined(INTERP, val);
     }
 
 }

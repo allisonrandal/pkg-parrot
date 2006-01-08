@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: fib.pl 6246 2004-06-19 09:11:48Z leo $
+# $Id: fib.pl 10728 2005-12-28 17:00:50Z particle $
 
 =head1 NAME
 
@@ -30,6 +30,6 @@ print "fib($N) = ", fib($N), "\n";
 
 =head1 SEE ALSO
 
-F<examples/benchmarks/fib.imc>.
+F<examples/benchmarks/fib.pir>.
 
 =cut

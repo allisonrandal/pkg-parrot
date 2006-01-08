@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: testall 10287 2005-12-01 10:33:05Z fperrad $
+# $Id: testall 10771 2005-12-29 18:52:47Z bernhard $
 
 use strict;
 
@@ -76,6 +76,7 @@ my $html = grep { $_ eq '--html' } @ARGV;
 # lisp                 No t/harness
 # miniperl             not maintained, should be removed
 # parakeet             No t/harness
+# punie                Problems with exhaustive memory usage
 # python               not maintained
 # ruby                 not maintained, should be removed
 
@@ -85,17 +86,18 @@ my @unified_testable_languages =
        bc
        befunge
        bf
+       jako
        lua
+       lazy-k
        m4
        ook
        parrot_compiler
-       punie
        regex
        scheme
        tcl
        unlambda
        urm );
-# @unified_testable_languages = qw( unlambda );
+# @unified_testable_languages = qw( punie );
 
 my @harnesses =
     grep {-f $_}

@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: sys.t 9533 2005-10-22 08:11:23Z jhoblitt $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: sys.t 10751 2005-12-28 22:47:30Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 1;
 
 =head1 NAME
 
@@ -8,7 +14,7 @@ t/pmc/sys.t - System Tests
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/sys.t
+	% prove t/pmc/sys.t
 
 =head1 DESCRIPTION
 
@@ -16,18 +22,15 @@ Tests system dependend stuff
 
 =cut
 
-use Parrot::Test tests => 1;
-use Test::More;
-
 END {
-  unlink "temp.imc";
+  unlink "temp.pir";
 };
 
 pir_output_is(<<'CODE', <<OUT, "spawnw, _config");
 
 .sub _test :main
      .local pmc O
-     open O, "temp.imc", ">"
+     open O, "temp.pir", ">"
      print O, ".sub _main :main\n"
      print O, "\tprint \"Hello, World!\\n\"\n"
      print O, ".end\n"
@@ -42,13 +45,13 @@ pir_output_is(<<'CODE', <<OUT, "spawnw, _config");
     cmd = '.'
     cmd .= slash
     cmd .= parrot
-    cmd .= " temp.imc"
+    cmd .= " temp.pir"
     spawnw $I0, cmd
     print $I0
     print "\n"
 .end
 
-.include "library/config.imc"
+.include "library/config.pir"
 CODE
 Hello, World!
 0

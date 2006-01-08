@@ -1,9 +1,9 @@
-# $Id: lazy.pir 9456 2005-10-11 14:29:20Z leo $
+# $Id: lazy.pir 10743 2005-12-28 20:48:15Z particle $
 
 =head1 DESCRIPTION
 
-This is a lazy-k interpreter - basically a rewrite of lazy.cpp in PIR.
-Lazy-k is a pure functional programming language following the SKI calculus
+This is a Lazy K interpreter - basically a rewrite of lazy.cpp in PIR.
+Lazy K is a pure functional programming language following the SKI calculus.
 
 =head1 AUTHOR
 
@@ -26,6 +26,7 @@ And a lot of comments in the source - sorry.
 
 .sub _main :main
     .param pmc argv
+
     .local int argc
     .local pmc in
 
@@ -87,19 +88,22 @@ put:
 .end
 
 # append expressions so that they are run in sequence
-.sub compose
+.sub run_in_sequence
     .param pmc f
     .param pmc g
+
     .local pmc k1f,  NUL
     null NUL
     k1f = new_expr(expK1, f, NUL)
+
     .return  new_expr(expS2, k1f, g)
 .end
 
 .sub append
     .param pmc old
     .param pmc n
-    .return compose(n, old)
+
+    .return run_in_sequence(n, old)
 .end
 
 # convert expression (which sould be a churn numeral to a native int
@@ -181,12 +185,14 @@ err:
     .param int type
     .param pmc lhs
     .param pmc rhs
+
     .local pmc expr
     expr = new FixedPMCArray
     expr = 3
     expr[0] = type
     expr[1] = lhs
     expr[2] = rhs
+
     .return (expr)
 .end
 
@@ -194,6 +200,7 @@ err:
 .sub new_apply
     .param pmc lhs
     .param pmc rhs
+
     .return new_expr(expA, lhs, rhs)
 .end
 
@@ -521,5 +528,5 @@ not_num:
     print "\n"
 .end
 
-.include "library/dumper.imc"
+.include "library/dumper.pir"
 # vim: ft=imc sw=4:

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: ops.pm 10425 2005-12-10 01:51:41Z particle $
+# $Id: ops.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Asks the user to select which ops files to include.
 
 =cut
 
-package Configure::Step;
+package inter::ops;
 
 use strict;
 use vars qw($description $result @args);
@@ -22,47 +22,47 @@ use Parrot::Configure::Step ':inter';
 
 $description = 'Determining what opcode files should be compiled in...';
 
-@args=qw(ask ops);
+@args = qw(ask ops);
 
-sub runstep {
-    my $self = shift;
-  my @ops=(
-    sort {
-      if($a =~ /core\.ops/) { return -1 }
-      if($b =~ /core\.ops/) { return  1 }
-      return               ( $a cmp $b )
-    }
-    grep { !/vtable\.ops/ }
-    glob "src/ops/*.ops"
-  );
+sub runstep
+{
+    my ($self, $conf) = @_;
 
+    my @ops = (
+        sort {
+            if ($a =~ /core\.ops/) { return -1 }
+            if ($b =~ /core\.ops/) { return 1 }
+            return ($a cmp $b)
+            }
+            grep {
+            !/vtable\.ops/
+            } glob "src/ops/*.ops"
+    );
 
-  my $ops=join ' ', grep { !/obscure\.ops/ } @ops;
+    my $ops = join ' ', grep { !/obscure\.ops/ } @ops;
 
-  $ops=$_[1] if defined $_[1];
+    $ops = $conf->options->get('ops') if defined $conf->options->get('ops');
 
-  # ops selection disabled - until we can build and load
-  # opcode subset libs
-  if (0 && $_[0]) {
-  print <<"END";
+    # ops selection disabled - until we can build and load
+    # opcode subset libs
+    if (0 && $conf->options->get('ask')) {
+        print <<"END";
 
 
 The following opcode files are available:
   @ops
 END
-    {
-      $ops=prompt('Which opcode files would you like?', $ops);
+        {
+            $ops = prompt('Which opcode files would you like?', $ops);
 
-      if($ops !~ m{\bcore\.ops}) {
-        print "core.ops must be the first selection.\n";
-        redo;
-      }
+            if ($ops !~ m{\bcore\.ops}) {
+                print "core.ops must be the first selection.\n";
+                redo;
+            }
+        }
     }
-  }
 
-  Parrot::Configure::Data->set(
-    ops => $ops
-  );
+    $conf->data->set(ops => $ops);
 }
 
 1;

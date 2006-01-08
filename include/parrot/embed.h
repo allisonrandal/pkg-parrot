@@ -1,7 +1,7 @@
 /* embed.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: embed.h 8195 2005-05-28 14:22:13Z leo $
+ *     $Id: embed.h 10974 2006-01-08 00:03:56Z jonathan $
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.
@@ -61,6 +61,11 @@ void Parrot_disassemble(Parrot_Interp);
 void Parrot_exit(int status);
 
 void Parrot_run_native(Parrot_Interp interpreter, native_func_t func);
+
+/* Parrot_set_config_hash exists in *_config.o (e.g install_config.o),
+   so if you make this call then you will need to link with it in
+   addition to libparrot */
+void Parrot_set_config_hash(void);
 
 int Parrot_revision(void);
 

@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Constant.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Constant.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -94,6 +94,7 @@ sub new
 
   $sym = Jako::Symbol->new( # TODO: Just point at the Declaration?
     $self->block,
+    ($self->is_global ? 'global' : 'local'),
     $self->access,
     $self->type,
     $self->name,

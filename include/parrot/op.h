@@ -1,7 +1,7 @@
 /* op.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: op.h 6853 2004-10-18 01:35:33Z brentdax $
+ *     $Id: op.h 10543 2005-12-15 22:36:46Z leo $
  *  Overview:
  *     Header file for op functions.
  *  Data Structure and Algorithms:
@@ -15,7 +15,7 @@
 
 #include "parrot/config.h"
 
-#define PARROT_MAX_ARGS 10
+#define PARROT_MAX_ARGS 8
 
 typedef enum {
     PARROT_INLINE_OP,
@@ -23,21 +23,20 @@ typedef enum {
 } op_type_t;
 
 typedef enum {
-    PARROT_ARG_OP = 0,
+    PARROT_ARG_IC = PARROT_ARG_INTVAL   | PARROT_ARG_CONSTANT,
+    PARROT_ARG_NC = PARROT_ARG_FLOATVAL | PARROT_ARG_CONSTANT,
+    PARROT_ARG_PC = PARROT_ARG_PMC      | PARROT_ARG_CONSTANT,
+    PARROT_ARG_SC = PARROT_ARG_STRING   | PARROT_ARG_CONSTANT,
+    PARROT_ARG_KEYED = 0x10,     /* reuse MAYBE_FLATTEN */
+    PARROT_ARG_KC = PARROT_ARG_PC       | PARROT_ARG_KEYED,
+    PARROT_ARG_KIC= PARROT_ARG_IC       | PARROT_ARG_KEYED,
 
-    PARROT_ARG_IC,
-    PARROT_ARG_NC,
-    PARROT_ARG_PC,
-    PARROT_ARG_SC,
-    PARROT_ARG_KC,
-    PARROT_ARG_KIC,
-
-    PARROT_ARG_I,
-    PARROT_ARG_N,
-    PARROT_ARG_P,
-    PARROT_ARG_S,
-    PARROT_ARG_K,
-    PARROT_ARG_KI
+    PARROT_ARG_I = PARROT_ARG_INTVAL,
+    PARROT_ARG_N = PARROT_ARG_FLOATVAL,
+    PARROT_ARG_P = PARROT_ARG_PMC,
+    PARROT_ARG_S = PARROT_ARG_STRING,
+    PARROT_ARG_K = PARROT_ARG_P         | PARROT_ARG_KEYED,
+    PARROT_ARG_KI= PARROT_ARG_I         | PARROT_ARG_KEYED
 } arg_type_t;
 
 typedef enum {
@@ -79,10 +78,10 @@ typedef struct {
     const char *func_name;
     /* const char *body; unused */
     unsigned short jump;           /* s. above */
-    short arg_count;               /* Includes opcode as one arg */
-    char types[PARROT_MAX_ARGS];   /* arg_type_t, 0 = op */
-    char dirs[PARROT_MAX_ARGS];    /* arg_dir_t   0 = op */
-    char labels[PARROT_MAX_ARGS];  /* 0/1         0 = op */
+    short op_count;               /* Includes opcode as one arg */
+    char types[PARROT_MAX_ARGS];   /* arg_type_t, 0 = 1st arg */
+    char dirs[PARROT_MAX_ARGS];    /* arg_dir_t   0 = 1st arg */
+    char labels[PARROT_MAX_ARGS];  /* 0/1         0 = 1st arg */
     unsigned int flags;
 } op_info_t;
 

@@ -1,6 +1,12 @@
-#! perl -w
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: perlarray.t 7898 2005-04-20 21:57:23Z bernhard $
+# $Id: perlarray.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 28;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/perlarray.t - testing the PerlArray PMC
 
 =head1 SYNOPSIS
 
-    % perl -Ilib t/pmc/perlarray.t
+    % prove t/pmc/perlarray.t
 
 =head1 DESCRIPTION
 
 Tests the C<PerlArray> PMC. Checks basic and Perl-specific array behaviour.
 
 =cut
-
-use Parrot::Test tests => 28;
-use Test::More;
 
 my $fp_equality_macro = <<'ENDOFMACRO';
 .macro fp_eq (    J, K, L )

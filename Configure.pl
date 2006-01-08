@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pl 10119 2005-11-21 02:54:11Z particle $
+# $Id: Configure.pl 10930 2006-01-06 00:36:52Z particle $
 
 =head1 NAME
 
@@ -12,8 +12,8 @@ Configure.pl - Parrot's Configuration Script
 
 =head1 DESCRIPTION
 
-This is Parrot's configuration script. It should be run to create the
-necessary system-specific files before building Parrot.
+This is Parrot's configuration script. It should be run to create the necessary
+system-specific files before building Parrot.
 
 =head2 Command-line Options
 
@@ -31,8 +31,8 @@ Prints out the version number of Configure.pl and exits.
 
 =item C<--verbose>
 
-Tells Configure.pl to output extra information about the configuration
-data it is setting.
+Tells Configure.pl to output extra information about the configuration data it
+is setting.
 
 =item C<--verbose=2>
 
@@ -59,8 +59,8 @@ This turns on the user prompts.
 
 Compile Options
 
-You can add and remove option values with C<< :rem{<opt>} >> and
-C<< :add{<opt>} >>. For example:
+You can add and remove option values with C<< :rem{<opt>} >> and C<<
+:add{<opt>} >>. For example:
 
     perl Configure.pl --ccflags=":rem{-g} :add{-O2}"
 
@@ -69,6 +69,10 @@ C<< :add{<opt>} >>. For example:
 =item C<--debugging=0>
 
 Debugging is turned on by default. Use this to disable it.
+
+=item C<--parrot_is_shared>
+
+Link parrot dynamically.
 
 =item C<--profile>
 
@@ -132,8 +136,8 @@ Specify which parser to use.
 
 =item C<--define=val1[,val2]>
 
-Generate "#define PARROT_DEF_VAL1 1" ... entries in has_header.h.
-Currently needed to use inet_aton for systems that lack inet_pton:
+Generate "#define PARROT_DEF_VAL1 1" ... entries in has_header.h. Currently
+needed to use inet_aton for systems that lack inet_pton:
 
   --define=inet_aton
 
@@ -177,9 +181,8 @@ Use JIT to emit a native executable.
 
 =item C<--gc=(type)>
 
-Determine the type of garbage collection. The value for C<type> should
-be one of: C<gc>, C<libc>, C<malloc> or C<malloc-trace>. The default is
-C<gc>.
+Determine the type of garbage collection. The value for C<type> should be one
+of: C<gc>, C<libc>, C<malloc> or C<malloc-trace>. The default is C<gc>.
 
 =back
 
@@ -191,29 +194,15 @@ ICU Options
 
 Use the specified icu-config script to determine the necessary ICU options.
 
-Use --icu-config=none to disable the autodetect feature. Parrot will
-then be build with its own ICU.
+Use --icu-config=none to disable the autodetect feature. Parrot will then be
+build without ICU.
 
-B<Note:> If you specify another ICU option than --icu-config, the
-autodetection functionality will be disabled.
-
-=item C<--icuplatform=(platform)>
-
-Use the given platform name to pass to ICU's runConfigureICU. (See icu/source/runConfigureICU for the list of available "platform" names, which specify both operating system and compiler.)
-
-=item C<--icuconfigureargs=(arguments)>
-
-Pass the given arguments to ICU's configuration script, instead of the default.
-
-=item C<--icudatadir=(path)>
-
-Use the given directory to locate ICU's data file(s) at runtime
-
-If you have an installed unicode package, you can use these two options instead:
+B<Note:> If you specify another ICU option than --icu-config, the autodetection
+functionality will be disabled.
 
 =item C<--icushared=(linkeroption)>
 
-Linker command to link against ICU library version 2.6.
+Linker command to link against ICU library.
 
 E.g.
 
@@ -223,13 +212,11 @@ E.g.
 
 =item C<--icuheaders=(header_dir)>
 
-Location of ICU header files without the /unicode suffix. The header files must match your platform, especially F<platform.h> must be present.
+Location of ICU header files without the /unicode suffix.
 
 E.g.
 
 --icuheaders='/home/lt/icu/'
-
-You might also need '--nomanicheck'.
 
 =back
 
@@ -239,8 +226,8 @@ Other Options
 
 =item C<--maintainer>
 
-Use this option if you want imcc's parser and lexer files to be
-generated. Needs a working parser and lexer.
+Use this option if you want imcc's parser and lexer files to be generated.
+Needs a working parser and lexer.
 
 =item C<--miniparrot>
 
@@ -248,8 +235,8 @@ Build parrot assuming only pure ANSI C is available.
 
 =item C<--expnetwork>
 
-Enable experimental networking. This is an unused option and should
-probably be removed.
+Enable experimental networking. This is an unused option and should probably be
+removed.
 
 =back
 
@@ -267,7 +254,7 @@ use vars qw($parrot_version @parrot_version);
 use lib 'lib';
 
 use Parrot::BuildUtil;
-use Parrot::Configure::RunSteps;
+use Parrot::Configure;
 
 $| = 1;
 
@@ -285,7 +272,7 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $cvsid='$Id: Configure.pl 10119 2005-11-21 02:54:11Z particle $';
+      my $cvsid='$Id: Configure.pl 10930 2006-01-06 00:36:52Z particle $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
 $cvsid
@@ -313,13 +300,14 @@ General Options:
 Compile Options:
 
 You can add and remove option values with :rem{<opt>} and :add{<opt>}
-e.g. : --ccflags="rem{-g} :add{-O2}"
+e.g. : --ccflags=":rem{-g} :add{-O2}"
 
    --debugging=0        Disable debugging, default = 1
-   --profile            Turn on profiled compile (gcc only for now)
+   --inline             Compiler supports inline
    --optimize           Optimized compile
    --optimize=flags     Add given optimizer flags
-   --inline             Compiler supports inline
+   --parrot_is_shared   Link parrot dynamically
+   --profile            Turn on profiled compile (gcc only for now)
 
    --cc=(compiler)      Use the given compiler
    --ccflags=(flags)    Use the given compiler flags
@@ -388,7 +376,7 @@ $args{maintainer} = 1 if defined $args{lex} or defined $args{yacc};
 
 print <<"END";
 Parrot Version $parrot_version Configure 2.0
-Copyright (C) 2001-2005 The Perl Foundation.  All Rights Reserved.
+Copyright (C) 2001-2006 The Perl Foundation.  All Rights Reserved.
 
 Hello, I'm Configure. My job is to poke and prod your system to figure out
 how to build Parrot. The process is completely automated, unless you passed in
@@ -399,11 +387,77 @@ Since you're running this script, you obviously have Perl 5--I'll be pulling
 some defaults from its configuration.
 END
 
-#Run the actual steps
-Parrot::Configure::RunSteps->runsteps(%args);
+# EDIT HERE TO ADD NEW TESTS
+my @steps = qw(
+    init::manifest
+    init::defaults
+    init::miniparrot
+    init::hints
+    init::headers
+    inter::progs
+    inter::make
+    inter::lex
+    inter::yacc
+    auto::gcc
+    auto::msvc
+    init::optimize
+    inter::shlibs
+    inter::libparrot
+    inter::charset
+    inter::encoding
+    inter::types
+    inter::ops
+    inter::exp
+    inter::pmc
+    auto::alignptrs
+    auto::headers
+    auto::sizes
+    auto::byteorder
+    auto::va_ptr
+    auto::pack
+    auto::format
+    auto::isreg
+    auto::jit
+    gen::cpu
+    auto::funcptr
+    auto::cgoto
+    auto::inline
+    auto::gc
+    auto::memalign
+    auto::signal
+    auto::env
+    auto::aio
+    auto::gmp
+    auto::gdbm
+    auto::snprintf
+    auto::perldoc
+    auto::python
+    auto::antlr
+    auto::bc
+    auto::m4
+    gen::icu
+    gen::revision
+    gen::config_h
+    gen::core_pmcs
+    gen::parrot_include
+    gen::makefiles
+    gen::platform
+    gen::config_pm
+);
+
+my $conf = Parrot::Configure->new;
+{
+    # XXX $Parrot::Configure::Step::conf is a temporty hack
+    no warnings qw(once);
+    $Parrot::Configure::Step::conf = $conf;
+}
+$conf->add_steps(@steps);
+$conf->options->set(%args);
+# Run the actual steps
+$conf->runsteps;
 
 # tell users what to do next
-my $make = Parrot::Configure::Data->get('make');
+my $make = $conf->data->get('make');
 
 print <<"END";
 

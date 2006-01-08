@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: subs.t 10183 2005-11-26 11:05:39Z bernhard $
+# $Id: subs.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;
@@ -33,7 +33,7 @@ F<t/examples/pir.t>
 
 # Set up expected output for examples
 my %expected
-  = (
+    = (
     'bsr_ret.pasm'        =>  << 'END_EXPECTED',
 Main
 TestSub
@@ -71,19 +71,21 @@ Hello from subroutine
 Hello from main
 END_EXPECTED
 
-    'sub1.imc'        =>  << 'END_EXPECTED',
-7 8 nine
+    'single_retval.pir'     =>  << 'END_EXPECTED',
+7 10 nine 10
+return: 10
+7 10 nine 10
 return: 10
 END_EXPECTED
 
-    'sub2.imc'        =>  << 'END_EXPECTED',
+    'multi_retvals.pir'     =>  << 'END_EXPECTED',
 return: 10 11 12
 END_EXPECTED
 
-    'sub3.imc'        =>  << 'END_EXPECTED',
+    'no_retval.pir'         =>  << 'END_EXPECTED',
 7 8 nine
 END_EXPECTED
-   );
+    );
 
 while ( my ( $example, $expected ) = each %expected ) {
     example_output_is( "examples/subs/$example", $expected );

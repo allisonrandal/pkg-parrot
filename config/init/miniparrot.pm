@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: miniparrot.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: miniparrot.pm 10844 2006-01-02 02:56:12Z jhoblitt $
 
 =head1 NAME
 
@@ -7,16 +7,16 @@ config/init/miniparrot.pm - Miniparrot configuration
 
 =head1 DESCRIPTION
 
-Modifies settings to match miniparrot (ANSI C Parrot)'s needs.  This step primarily 
-overwrites a lot of settings in the Configure database to disable JIT and match ANSI 
-characteristics.
+Modifies settings to match miniparrot (ANSI C Parrot)'s needs.  This step
+primarily  overwrites a lot of settings in the Configure database to disable
+JIT and match ANSI  characteristics.
 
-Centralizing these settings will (hopefully) allow for an eventual move away from using 
-Configure at all for miniparrot builds.
+Centralizing these settings will (hopefully) allow for an eventual move away
+from using  Configure at all for miniparrot builds.
 
 =cut
 
-package Configure::Step;
+package init::miniparrot;
 
 use strict;
 use vars qw($description $result @args);
@@ -25,17 +25,19 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step;
 
-$description="Tweaking settings for miniparrot...";
+$description = "Tweaking settings for miniparrot...";
 
-@args=qw(miniparrot);
+@args = qw(miniparrot);
 
-sub runstep {
-    my $self = shift;
-    return unless $_[0];
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-    Parrot::Configure::Data->set(
+    return unless $conf->options->get('miniparrot');
+
+    $conf->data->set(
         miniparrot         => 1,
-        DEVEL              => Parrot::Configure::Data->get('DEVEL').'-miniparrot',
+        DEVEL              => $conf->data->get('DEVEL') . '-miniparrot',
         TEMP_cg_h          => '',
         TEMP_cg_c          => '',
         TEMP_cg_o          => '',
@@ -60,15 +62,18 @@ sub runstep {
         has_sigatomic_t    => undef,
         has_sigaction      => undef,
         has_setitimer      => undef,
+
         # we can't guarantee anything about pointer alignment under ANSI C89.
         # so we will have to check every byte.
-        ptr_alignment      => 1
+        ptr_alignment => 1
     );
-    
+
     #Allow ANSI headers only
-    foreach (qw(assert complex ctype errno locale math setjmp signal stdarg
-                stdio stdlib string time)) {
-        Parrot::Configure::Data->set("i_$_" => 1);
+    foreach (
+        qw(assert complex ctype errno locale math setjmp signal stdarg
+        stdio stdlib string time)
+        ) {
+        $conf->data->set("i_$_" => 1);
     }
 }
 

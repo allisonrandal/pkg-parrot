@@ -1,4 +1,5 @@
 .namespace [ "_Tcl" ] 
+
 =head1 NAME
 
 Tcl Parser
@@ -13,19 +14,15 @@ at <http://www.tcl.tk/man/tcl8.4/TclCmd/Tcl.htm>.
 
 =over 4
 
-=item C<(int register_num, string pir_code) = compile(int register_num, string tcl_code)>
+=item C<pmc commands = parse(string tcl_code)>
 
-Parses the Tcl code and returns generated PIR code.
-
-Argument register_num is the first register number that is available for use by the
-generated PIR.
-
-Return register_num is the register number that contains the result of this code.
+Parses the Tcl code and returns an array of TclCommand objects.
+First, it performs the \<newline> substitution. Then it fetches
+commands, one at a time (skipping over comments).
 
 =cut
 
-.sub compile
-  .param int register_num
+.sub parse
   .param string tcl_code
 
   .local int len
@@ -91,87 +88,7 @@ done_comment:
   goto next_command
 
 done:
-  .return "compile_dispatch"(commands,register_num)
-.end
-
-=item C<(pmc invokable) = pir_compiler(int register_num, string PIR)>
-=item C<(string code)   = pir_compiler(int register_num, string PIR, 1)>
-
-A thin wrapper for the <compreg>'d PIR compiler. 
-Given inline PIR code, wrap it in anonymous subroutine and return the
-fully qualified PIR.
-
-If the third argument is present, don't compile the wrapper sub, just
-return the wrapped code.
-
-Argument register_num is the first register number that is available for
-use by the generated PIR.
-
-=cut
-
-.sub pir_compiler
-  .param int result_reg
-  .param string pir_code
-  .param int code_only     :optional
-  .param int has_code_only :opt_flag
-
-  if has_code_only goto done_init
-  code_only = 0
-
-done_init:
-
-  .local pmc compiled_num
-  compiled_num = find_global "_Tcl", "compiled_num"
-  inc compiled_num
-
-  .local string stub_code
-  # If someone wants to generate standalone code only, include
-  # The library bits that they'll need.
-
-  stub_code = <<"END_PIR"
-.sub _dynlexload :immediate
-$P1=loadlib 'dynlexpad'
-.end
-.HLL 'tcl', 'tcl_group'
-.HLL_map .LexPad, .DynLexPad
-.pragma n_operators 1
-.sub compiled_tcl_sub%i :anon :main
-load_bytecode 'languages/tcl/lib/tcllib.pbc'
-%s.return ($P%i)
-.end
-END_PIR
-
-  if code_only goto set_args
-
-  # Otherwise, leave out items that will will cause reloading
-  # conflicts with the parser itself.
-  stub_code = <<"END_PIR"
-.pragma n_operators 1
-.sub compiled_tcl_sub%i :anon
-%s.return ($P%i)
-.end
-END_PIR
-
-set_args:
-  $P1 = new .Array
-  $P1 = 3
-  $P1[0] = compiled_num
-  $P1[1] = pir_code
-  $P1[2] = result_reg
-
-  # The pir_code element above should always end in a \n, so we don't
-  # need to add one explicitly before the .return
-
-  pir_code = sprintf stub_code, $P1
-
-  unless code_only goto compile_it
-  .return (pir_code)
-
-compile_it:
-  .local pmc pir_compiler
-  pir_compiler = compreg "PIR"
-
-  .return pir_compiler(pir_code)
+  .return(commands)
 .end
 
 =item C<int pos = skip_comment(string tcl_code, int pos)>
@@ -387,14 +304,14 @@ done:
 dispatch_sub:
   $S0 = dispatch[char]
   $P0 = find_name $S0
-  (word, pos) = $P0(tcl_code, chars, pos)
+  (word, pos) = $P0(tcl_code, pos, chars)
   inc pos
 
 really_done:
   .return(word, pos)
 .end
 
-=item C<(pmc word, int pos) = get_quote(string tcl_code, pmc chars, int pos)>
+=item C<(pmc word, int pos) = get_quote(string tcl_code, int pos, pmc chars)>
 
 Parses a quote and returns a TclWord object containing the separate
 parts (or, if there's only one, it's child).
@@ -408,8 +325,9 @@ parts (or, if there's only one, it's child).
 
 .sub get_quote
   .param string tcl_code
-  .param pmc chars
   .param int pos
+  .param pmc chars     :optional
+  .param int has_chars :opt_flag
   
   .local int start
   start = pos + 1
@@ -470,27 +388,35 @@ missing_quote:
 
 check_chars:
   $I0 = pos + 1
-  if $I0 == len goto done
+  if $I0 == len goto save_end
+  unless has_chars goto save_end
   $I1 = is_cclass .CCLASS_WHITESPACE, tcl_code, $I0
-  if $I1 == 1 goto done
+  if $I1 == 1 goto save_end
   $I1 = ord tcl_code, $I0
   $I1 = exists chars[$I1]
-  if $I1 == 1 goto done
+  if $I1 == 1 goto save_end
  
   .throw("extra characters after close-quote")
 
-done:
+save_end:
   $I0 = pos - start
+  if $I0 == 0 goto done
   $S0 = substr tcl_code, start, $I0
   $I0 = find_type "TclConst"
   $P0 = new $I0
   $P0 = $S0
   push word, $P0
-  
+
+done:
+  $I0 = elements word
+  if $I0 != 1 goto really_done
+  word = word[0]
+
+really_done:
   .return(word, pos)
 .end
 
-=item C<(pmc const, int pos) = get_brace(string tcl_code, pmc chars, int pos)>
+=item C<(pmc const, int pos) = get_brace(string tcl_code, int pos, pmc chars)>
 
 Parses a {} quoted expression, returning a TclConst object.
 
@@ -503,8 +429,9 @@ Parses a {} quoted expression, returning a TclConst object.
 
 .sub get_brace
   .param string tcl_code
-  .param pmc chars
   .param int pos
+  .param pmc chars     :optional
+  .param int has_chars :opt_flag
   
   .local int start, len
   start = pos + 1
@@ -538,6 +465,7 @@ missing_close_brace:
 check_chars:
   $I0 = pos + 1
   if $I0 == len goto done
+  unless has_chars goto done
   $I1 = is_cclass .CCLASS_WHITESPACE, tcl_code, $I0
   if $I1 == 1 goto done
   $I1 = ord tcl_code, $I0
@@ -690,77 +618,6 @@ done:
   $P0 = new $I0
   $P0 = $S0
   .return($P0, pos)
-.end
-
-
-=item C<(int register_num, str code) = compile_dispatch(pmc thing, int register_num)>
-
-Given an object, call its compile method, or, if it's constant, generate
-code on its behalf. Returns PIR code.
-
-Argument register_num is the first register number that is available for use by the
-generated PIR.
-
-Return register_num is the register number that contains the result of this code.
-
-=cut
-
-.sub compile_dispatch
-  .param pmc thing
-  .param int register_num
-
-  .local string pir_code
-
-  $I0 = can thing, "compile"
-
-  if $I0 goto can_compile
-
-  .local string thing_type,lquote,rquote
-  thing_type = typeof thing
-  lquote = ""
-  rquote = ""
-  if thing_type == "TclString" goto stringish
-  if thing_type == "String" goto    stringish
-  $S0 = thing
-  goto set_args
-stringish:
-  $S0 = thing
-
-  .local string charset_name
-  $I0 = charset $S0
-  charset_name = charsetname $I0
-
-  $S0 = escape $S0
-
-  lquote = charset_name . ":\""
-  rquote = "\"" 
-set_args:
-
-  .local pmc printf_args
-  printf_args = new .Array
-  printf_args = 6
-  printf_args[0] = register_num
-  printf_args[1] = thing_type
-  printf_args[2] = register_num
-  printf_args[3] = lquote
-  printf_args[4] = $S0
-  printf_args[5] = rquote
- 
-  pir_code = sprintf "$P%i = new .%s\n$P%i=%s%s%s\n", printf_args
-
-  # PIR's compiler can't deal with the utf16 code is generated as a result
-  # of the string manipulation that brings us to this point. So, we need
-  # to downcast it to ASCII. Which should be lossless, given the code that
-  # we're generating. It should be possible to move this trans_charset
-  # to where the upcasting is occuring instead of doing it once here. (XXX)
-
-  $I0 = find_charset 'ascii'
-  pir_code = trans_charset $I0
-
-  .return(register_num,pir_code)
-
-can_compile:
-  .return thing."compile"(register_num)
 .end
 
 =back

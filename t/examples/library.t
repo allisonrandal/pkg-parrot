@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: library.t 10183 2005-11-26 11:05:39Z bernhard $
+# $Id: library.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;
@@ -34,7 +34,7 @@ F<t/examples/japh.t>
 my %expected
   = (
     'getopt_demo.pir'        =>  << 'END_EXPECTED',
-Hi, I am 'getopt_demo.imc'.
+Hi, I am 'getopt_demo.pir'.
 
 You haven't passed the option '--bool'. This is fine with me.
 You haven't passed the option '--string'. This is fine with me.
@@ -57,7 +57,7 @@ my $PARROT = ".$PConfig{slash}$PConfig{test_prog}";
     is( $sum, "fb171bd1a17bf6cd08d73105ad738a35\t$sample_fn\n", $md5sum_fn );
 }
 
-# Testing pcre.imc with a simple pattern, if we have PCRE
+# Testing pcre.pir with a simple pattern, if we have PCRE
 my $cmd = ($^O =~ /MSWin32/) ? "pcregrep --version" : "pcre-config --version";
 my $has_pcre = Parrot::Test::run_command($cmd, STDERR => '/dev/null') == 0;
 SKIP:
@@ -74,6 +74,6 @@ END_EXPECTED
 
 TODO:
 {
-  local $TODO = 'ncurses_life.imc not testable yet';
-  fail( 'ncurses_life.imc' );
+  local $TODO = 'ncurses_life.pir not testable yet';
+  fail( 'ncurses_life.pir' );
 };

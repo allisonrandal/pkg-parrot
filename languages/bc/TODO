@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: TODO 10933 2006-01-06 01:43:24Z particle $
 
 # Some tidbits on what is to do for Parrot bc.
 # See docs/parrot_bc.pod for visions.

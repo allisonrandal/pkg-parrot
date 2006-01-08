@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: funcptr.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: funcptr.pm 10649 2005-12-25 03:15:38Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Verifies that the compiler supports function pointer casts.
 
 =cut
 
-package Configure::Step;
+package auto::funcptr;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,20 +20,22 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description="Verifying that the compiler supports function pointer casts...";
+$description = "Verifying that the compiler supports function pointer casts...";
 
-@args=qw(verbose);
+@args = qw(verbose);
 
-sub runstep {
-    my $self = shift;
-  my $jitcapable=Parrot::Configure::Data->get('jitcapable');
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-  if ($jitcapable) {
-    cc_gen('config/auto/funcptr/test_c.in');
-    eval { cc_build(); };
+    my $jitcapable = $conf->data->get('jitcapable');
 
-    if ($@ || cc_run() !~ /OK/) {
-      print <<"END";
+    if ($jitcapable) {
+        cc_gen('config/auto/funcptr/test_c.in');
+        eval { cc_build(); };
+
+        if ($@ || cc_run() !~ /OK/) {
+            print <<"END";
 Although it is not required by the ANSI C standard,
 Parrot requires the ability to cast from void pointers to function
 pointers for its JIT support.
@@ -45,12 +47,12 @@ to use the JIT code.
 If you wish to continue without JIT support, please re-run this script
 With the '--jitcapable=0' argument.
 END
-      exit(-1);
+            exit(-1);
+        }
+        cc_clean();
+        print " (yes) " if $conf->options->get('verbose');
+        $result = 'yes';
     }
-    cc_clean();
-    print " (yes) " if $_[0];
-    $result = 'yes';
-  }
 }
 
 1;

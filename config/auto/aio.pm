@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: aio.pm 10337 2005-12-04 02:53:32Z jhoblitt $
+# $Id: aio.pm 10710 2005-12-28 00:25:21Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determines whether the platform supports AIO.
 
 =cut
 
-package Configure::Step;
+package auto::aio;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,41 +20,47 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description="Determining if your platform supports AIO...";
+$description = "Determining if your platform supports AIO...";
 
-@args=qw(verbose);
+@args = qw(verbose);
 
-sub runstep {
-    my $self = shift;
+sub runstep
+{
+    my ($self, $conf) = (shift, shift);
+
     my $test;
-    my ($verbose) = @_;
-    my $libs = Parrot::Configure::Data->get('libs');
-    Parrot::Configure::Data->add(' ', libs => '-lrt');
+    my $verbose = $conf->options->get('verbose');
+    my $libs    = $conf->data->get('libs');
+    $conf->data->add(' ', libs => '-lrt');
 
     cc_gen('config/auto/aio/aio.in');
     eval { cc_build(); };
-    if (! $@) {
-	$test = cc_run(35);
-	# if the test is failing with sigaction err
-	# we should repeat it with a different signal number
-	if ($test =~ /SIGRTMIN=(\d+)\sSIGRTMAX=(\d+)\n
+    if (!$@) {
+        $test = cc_run(35);
+
+        # if the test is failing with sigaction err
+        # we should repeat it with a different signal number
+        if (
+            $test =~ /SIGRTMIN=(\d+)\sSIGRTMAX=(\d+)\n
 		INFO=42\n
-		ok/x) {
-	    print " (yes) " if $verbose;
+		ok/x
+            ) {
+            print " (yes) " if $verbose;
             $result = 'yes';
 
-	    Parrot::Configure::Data->set(
-		aio => 'define',
-		HAS_AIO => 1,
-		D_SIGRTMIN => $1,
-		D_SIGRTMAX => $2,
-	    );
-	}
+            $conf->data->set(
+                aio        => 'define',
+                HAS_AIO    => 1,
+                D_SIGRTMIN => $1,
+                D_SIGRTMAX => $2,
+            );
+        }
 
-    }
-    else {
-	Parrot::Configure::Data->set(libs => $libs);
-	print " (no) " if $verbose;
+    } else {
+        $conf->data->set(libs => $libs);
+        print " (no) " if $verbose;
         $result = 'no';
     }
 }
+
+1;

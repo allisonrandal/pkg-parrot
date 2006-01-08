@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: data.pm 9910 2005-11-11 22:50:48Z jhoblitt $
+# $Id: Data.pm 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -20,9 +20,27 @@ package Parrot::Configure::Data;
 
 use strict;
 
-use vars qw( %c %triggers );
-
 use Data::Dumper;
+
+=item Parrot::Configure::Data->new()
+
+Ojbect constructor.
+
+=cut
+
+sub new
+{
+    my $class = shift;
+
+    my $self = {
+        c        => {},
+        triggers => {},
+    };
+
+    bless $self, ref $class || $class;
+
+    return $self;
+}
 
 =item Parrot::Configure::Data->get($key,...)
 
@@ -30,10 +48,13 @@ Return value or hash slice for key.
 
 =cut
 
-sub get {
+sub get
+{
     my $self = shift;
 
-    return @c{@_};
+    my $c = $self->{c};
+
+    return @$c{@_};
 }
 
 =item Parrot::Configure::Data->set($key,$val, ...)
@@ -42,7 +63,8 @@ Set config values
 
 =cut
 
-sub set {
+sub set
+{
     my $self = shift;
 
     my $verbose = defined $self->get('verbose') && $self->get('verbose') == 2;
@@ -51,8 +73,8 @@ sub set {
 
     while (my ($key, $val) = splice @_, 0, 2) {
         print "\t$key => ", defined($val) ? "'$val'" : 'undef', ",\n"
-	        if $verbose;
-        $c{$key}=$val;
+            if $verbose;
+        $self->{c}{$key} = $val;
 
         foreach my $trigger ($self->gettriggers($key)) {
             print "\tcalling trigger $trigger for $key\n" if $verbose;
@@ -63,6 +85,8 @@ sub set {
     }
 
     print ");\n" if $verbose;
+
+    return $self;
 }
 
 =item Parrot::Configure::Data->add($delim, $key,$val, ...)
@@ -71,18 +95,20 @@ Append values delimited by C<$delim> to existing keys or set values.
 
 =cut
 
-sub add {
+sub add
+{
     my ($self, $delim) = @_;
 
     while (my ($key, $val) = splice @_, 0, 2) {
-        my ($old) = $c{$key};
+        my ($old) = $self->{c}{$key};
         if (defined $old) {
             $self->set($key, "$old$delim$val");
-        }
-        else {
+        } else {
             $self->set($key, $val);
         }
     }
+
+    return $self;
 }
 
 =item Parrot::Configure::Data->keys()
@@ -91,8 +117,11 @@ Return config keys.
 
 =cut
 
-sub keys {
-    return keys %c;
+sub keys
+{
+    my $self = shift;
+
+    return keys %{$self->{c}};
 }
 
 =item Parrot::Configure::Data->dump()
@@ -107,44 +136,50 @@ Dump config keys.
     my $dd_version;
     if ($Data::Dumper::VERSION =~ /([\d.]+)/) {
         $dd_version = $1;
-    }
-    else {
+    } else {
         $dd_version = $Data::Dumper::VERSION;
     }
 
     if ($dd_version >= 2.12) {
-        *dump=sub {
-            Data::Dumper->new([\%c], ['*PConfig'])->Sortkeys(1)->Dump();
+        *dump = sub {
+            my $self = shift;
+            Data::Dumper->new([$self->{c}], ['*PConfig'])->Sortkeys(1)->Dump();
         };
-    }
-    else {
-        *dump=sub {
-            Data::Dumper->new([\%c], ['*PConfig'])->Dump();
+    } else {
+        *dump = sub {
+            my $self = shift;
+            Data::Dumper->new([$self->{c}], ['*PConfig'])->Dump();
         };
     }
 }
 
 =item Parrot::Configure::Data->clean()
 
-Delete keys matching /^TEMP_/ from config. These are used only temporarly
-e.g. as file lists for Makefile generation.
+Delete keys matching /^TEMP_/ from config. These are used only temporarly e.g.
+as file lists for Makefile generation.
 
 =cut
 
-sub clean {
-    delete $c{$_} for grep { /^TEMP_/ } CORE::keys %c;
+sub clean
+{
+    my $self = shift;
+
+    delete $self->{c}{$_} for grep { /^TEMP_/ } CORE::keys %{$self->{c}};
+
+    return $self;
 }
 
 =item Parrot::Configure::Data->settrigger($key, $trigger, $cb)
 
-Set a callback on C<$key> named C<$trigger>.  Multiple triggers can be
-set on a given key.  When the key is set via C<set> or C<add> then all
-callbacks that are defined will be called.  Triggers are passed the
-key and value that was set after it has been changed.
+Set a callback on C<$key> named C<$trigger>.  Multiple triggers can be set on a
+given key.  When the key is set via C<set> or C<add> then all callbacks that
+are defined will be called.  Triggers are passed the key and value that was set
+after it has been changed.
 
 =cut
 
-sub settrigger {
+sub settrigger
+{
     my ($self, $key, $trigger, $cb) = @_;
 
     return unless defined $key and defined $trigger and defined $cb;
@@ -154,7 +189,7 @@ sub settrigger {
     print "Setting trigger $trigger on configuration key $key\n",
         if $verbose;
 
-    $triggers{$key}{$trigger} = $cb;
+    $self->{triggers}{$key}{$trigger} = $cb;
 
     return $self;
 }
@@ -165,17 +200,18 @@ Get the names of all triggers set for C<$key>.
 
 =cut
 
-sub gettriggers {
+sub gettriggers
+{
     my ($self, $key) = @_;
 
-    return unless defined $triggers{$key};
+    return unless defined $self->{triggers}{$key};
 
     my $verbose = defined $self->get('verbose') && $self->get('verbose') == 2;
 
     print "Looking up all triggers on configuration key $key\n"
         if $verbose;
 
-    return CORE::keys %{$triggers{$key}};
+    return CORE::keys %{$self->{triggers}{$key}};
 }
 
 =item Parrot::Configure::Data->gettrigger($key, $trigger)
@@ -184,17 +220,20 @@ Get the callback set for C<$key> under the name C<$trigger>
 
 =cut
 
-sub gettrigger {
+sub gettrigger
+{
     my ($self, $key, $trigger) = @_;
 
-    return unless defined $triggers{$key} and defined $triggers{$key}{$trigger};
+    return
+        unless defined $self->{triggers}{$key}
+        and defined $self->{triggers}{$key}{$trigger};
 
     my $verbose = defined $self->get('verbose') && $self->get('verbose') == 2;
 
     print "Looking up trigger $trigger on configuration key $key\n"
         if $verbose;
 
-    return $triggers{$key}{$trigger};
+    return $self->{triggers}{$key}{$trigger};
 }
 
 =item Parrot::Configure::Data->deltrigger($key, $trigger)
@@ -203,17 +242,20 @@ Removes the trigger on C<$key> named by C<$trigger>
 
 =cut
 
-sub deltrigger {
+sub deltrigger
+{
     my ($self, $key, $trigger) = @_;
 
-    return unless defined $triggers{$key} and defined $triggers{$key}{$trigger};
+    return
+        unless defined $self->{triggers}{$key}
+        and defined $self->{triggers}{$key}{$trigger};
 
     my $verbose = defined $self->get('verbose') && $self->get('verbose') == 2;
 
     print "Removing trigger $trigger on configuration key $key\n"
         if $verbose;
 
-    delete $triggers{$key}{$trigger};
+    delete $self->{triggers}{$key}{$trigger};
 
     return $self;
 }

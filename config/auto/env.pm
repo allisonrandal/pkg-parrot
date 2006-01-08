@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: env.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: env.pm 10649 2005-12-25 03:15:38Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determining if the C library has C<setenv()> and C<unsetenv()>.
 
 =cut
 
-package Configure::Step;
+package auto::env;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,11 +20,15 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description="Determining if your C library has setenv / unsetenv...";
-@args=qw(verbose);
+$description = "Determining if your C library has setenv / unsetenv...";
+@args        = qw(verbose);
 
-sub runstep {
-    my $self = shift;
+sub runstep
+{
+    my ($self, $conf) = (shift, shift);
+
+    my $verbose = $conf->options->get('verbose');
+
     my ($setenv, $unsetenv) = (0, 0);
 
     cc_gen('config/auto/env/test_setenv.in');
@@ -40,25 +44,22 @@ sub runstep {
     }
     cc_clean();
 
-    Parrot::Configure::Data->set(
-	setenv => $setenv,
-	unsetenv => $unsetenv
+    $conf->data->set(
+        setenv   => $setenv,
+        unsetenv => $unsetenv
     );
 
     if ($setenv && $unsetenv) {
-	print " (both) " if $_[0];
+        print " (both) " if $verbose;
         $result = 'both';
-    }
-    elsif ($setenv) {
-	print " (setenv) " if $_[0];
+    } elsif ($setenv) {
+        print " (setenv) " if $verbose;
         $result = 'setenv';
-    }
-    elsif ($unsetenv) {
-	print " (unsetenv) " if $_[0];
+    } elsif ($unsetenv) {
+        print " (unsetenv) " if $verbose;
         $result = 'unsetenv';
-    }
-    else {
-	print " (no) " if $_[0];
+    } else {
+        print " (no) " if $verbose;
         $result = 'no';
     }
 }

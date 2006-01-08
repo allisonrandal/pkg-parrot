@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Tools.pm 10368 2005-12-06 01:04:53Z particle $
+# $Id: Tools.pm 10620 2005-12-22 07:48:49Z fperrad $
 
 =head1 NAME
 
@@ -76,7 +76,7 @@ sub new
 			$self->new_item('', 'tools/dev/mk_native_pbc'),
 		),
 		$self->new_group('Utilities', '',
-			$self->new_item('', 'util'),
+			$self->new_item('', 'tools/util'),
 		),
 	);
 }

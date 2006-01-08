@@ -1,5 +1,5 @@
 // Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-// $Id: bc_python.g 10448 2005-12-11 17:58:12Z bernhard $
+// $Id: bc_python.g 10981 2006-01-08 11:46:00Z bernhard $
 
 
 // based on antrltut by javadude
@@ -574,7 +574,7 @@ past_p_expr_p_newline!
                                      #( [ PAST_Exp, "dummy exp 2" ],
                                         #( [ PAST_Op, "dummy print op 2" ],
                                            #( [ PAST_Exp, "dummy exp 2:1" ],
-                                              [ PAST_Val, "\"\\n\"" ]
+                                              [ PAST_Val, "\\n" ]
                                             )
                                          )
                                       )

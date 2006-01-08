@@ -1,9 +1,9 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: pcre.pir 9479 2005-10-13 18:56:52Z bernhard $
+# $Id: pcre.pir 10747 2005-12-28 21:53:23Z particle $
 
 =head1 NAME
 
-examples/library/pcre.imc - Perl compatible regular expressions
+examples/library/pcre.pir - Perl compatible regular expressions
 
 =head1 SYNOPSIS
 
@@ -22,7 +22,7 @@ E<lt>jerry dot gay at gmail dot com<gt>
 =cut
 
 
-.include 'library/pcre.imc'
+.include 'library/pcre.pir'
 
 
 .sub main :main

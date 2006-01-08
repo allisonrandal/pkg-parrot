@@ -1,6 +1,14 @@
-#! perl -w
+#! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: config.t 10933 2006-01-06 01:43:24Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 3;
+use Parrot::Config;
+use Cwd qw(cwd);
 
 =head1 NAME
 
@@ -8,7 +16,7 @@ t/pmc/config.t - Builtin Config
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/config.t
+	% prove t/pmc/config.t
 
 =head1 DESCRIPTION
 
@@ -16,9 +24,6 @@ Tests the parrot config interface.
 
 =cut
 
-use Parrot::Test tests => 3;
-use Parrot::Config;
-use Cwd qw(cwd);
 
 pir_output_is(<<'CODE', <<'OUT', "get config hash");
 .sub main :main
@@ -47,7 +52,7 @@ CODE
 
 pir_output_is(<<'CODE', <<'OUT', "load src/pbc from library path");
 .sub main :main
-    load_bytecode "config.imc"
+    load_bytecode "config.pir"
     print "ok 1\n"
     load_bytecode "config.pbc"
     print "ok 2\n"
@@ -56,4 +61,3 @@ CODE
 ok 1
 ok 2
 OUT
-

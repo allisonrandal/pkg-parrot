@@ -1,6 +1,6 @@
 /*
 Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: float.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: float.pmc 10871 2006-01-03 17:50:14Z particle $
 
 =head1 NAME
 
@@ -118,7 +118,7 @@ Returns a Parrot string representation of the number.
     STRING* get_repr () {
         double d = (double) PMC_num_val(SELF);
         const char *sign = "-";
-	if (!signbit(PMC_num_val(SELF)))
+        if (!signbit(PMC_num_val(SELF)))
             sign = "";
         d = fabs(d);
         return Parrot_sprintf_c(INTERP, "%s" FLOATVAL_FMT, sign, d);

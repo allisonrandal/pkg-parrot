@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: isreg.pm 10117 2005-11-20 22:25:22Z jhoblitt $
+# $Id: isreg.pm 10649 2005-12-25 03:15:38Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determines if the C library has a working C<S_ISREG>.
 
 =cut
 
-package Configure::Step;
+package auto::isreg;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,25 +20,25 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description="Determining if your C library has a working S_ISREG...";
+$description = "Determining if your C library has a working S_ISREG...";
 
-@args=qw(verbose);
+@args = qw(verbose);
 
-sub runstep {
-    my $self = shift;
+sub runstep
+{
+    my ($self, $conf) = @_;
+
     my $test = 0;
 
     cc_gen('config/auto/isreg/test_c.in');
     eval { cc_build(); };
     unless ($@ || cc_run() !~ /ok/) {
-	$test = 1;
+        $test = 1;
     }
     cc_clean();
 
-    Parrot::Configure::Data->set(
-	isreg  => $test
-    );
-    print($test ? " (Yep) " : " (no) ") if $_[0];
+    $conf->data->set(isreg => $test);
+    print($test ? " (Yep) " : " (no) ") if $conf->options->get('verbose');
     $result = $test ? 'yes' : 'no';
 }
 

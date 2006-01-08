@@ -1,4 +1,5 @@
 .include "languages/tcl/lib/returncodes.pir"
+.include "languages/tcl/lib/macros.pir"
 
 .namespace [ "TclWord" ]
 
@@ -41,7 +42,7 @@ loop:
    
   $P0 = self[i]
 
-  (register_num,temp_code) = compiler($P0,register_num)
+  (register_num,temp_code) = compiler(register_num, $P0)
   pir_code .= temp_code
   push compiled_args, register_num
   inc register_num 
@@ -80,4 +81,12 @@ concat_loop:
 concat_loop_done:
   .return(register_num,pir_code)
 
+.end
+
+# When we stringify, because we inherit from TclList, we would normally
+# get wrapping {}'s, which breaks if we're actually using this result
+# to compile code.
+
+.sub __get_string :method
+  .throw("Can't get a string from a TclWord")
 .end

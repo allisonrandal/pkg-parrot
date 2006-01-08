@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Bc.pm 10933 2006-01-06 01:43:24Z particle $
 
 package Parrot::Test::Bc;
 

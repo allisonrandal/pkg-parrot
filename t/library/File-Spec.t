@@ -1,10 +1,28 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: File-Spec.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;
+use lib qw( t . lib ../lib ../../lib );
+use Test::More;
 use Parrot::Test;
+
+
+=head1 NAME
+
+t/library/File-Spec.t - test File::Spec module
+
+=head1 SYNOPSIS
+
+	% prove t/library/File-Spec.t
+
+=head1 DESCRIPTION
+
+Tests file specifications.
+
+=cut
+
 
 ##############################
 # File::Spec
@@ -112,7 +130,7 @@ Unix
 OUT
 
 
-# remember to update the number of tests! :-)
+# remember to change the number of tests! :-)
 BEGIN {
 	if( $^O eq 'MSWin32' ) {
 		plan tests => 21;

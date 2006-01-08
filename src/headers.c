@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: headers.c 8802 2005-08-04 07:35:53Z leo $
+$Id: headers.c 10614 2005-12-21 10:33:39Z leo $
 
 =head1 NAME
 
@@ -120,7 +120,6 @@ new_bufferlike_pool(Interp *interpreter,
             new_small_object_pool(interpreter, buffer_size, num_headers);
 
     pool->mem_pool = interpreter->arena_base->memory_pool;
-    pool->align_1 = BUFFER_ALIGNMENT - 1;
     (interpreter->arena_base->init_pool)(interpreter, pool);
     return pool;
 }
@@ -165,7 +164,6 @@ new_string_pool(Interp *interpreter, INTVAL constant)
         pool = make_bufferlike_pool(interpreter, sizeof(STRING));
     pool->objects_per_alloc = GC_DEBUG(interpreter) ?
             GC_DEBUG_STRING_HEADERS_PER_ALLOC : STRING_HEADERS_PER_ALLOC;
-    pool->align_1 = STRING_ALIGNMENT - 1;
     return pool;
 }
 
@@ -353,7 +351,7 @@ new_string_header(Interp *interpreter, UINTVAL flags)
             ? interpreter->
             arena_base->constant_string_header_pool :
             interpreter->arena_base->string_header_pool);
-    PObj_get_FLAGS(string) |= flags | PObj_is_string_FLAG;
+    PObj_get_FLAGS(string) |= flags | PObj_is_string_FLAG|PObj_is_COWable_FLAG;
     SET_NULL(string->strstart);
     return string;
 }
@@ -413,15 +411,13 @@ size_t
 get_max_buffer_address(Interp *interpreter)
 {
     UINTVAL i;
-    size_t max = interpreter->arena_base->constant_string_header_pool->
-        end_arena_memory;
+    size_t max = 0;
+    struct Arenas *arena_base = interpreter->arena_base;
 
-    for (i = 0; i < interpreter->arena_base->num_sized; i++) {
-        if (interpreter->arena_base->sized_header_pools[i]) {
-            if (max < interpreter->arena_base->
-                    sized_header_pools[i]->end_arena_memory)
-                max = interpreter->arena_base->sized_header_pools[i]->
-                        end_arena_memory;
+    for (i = 0; i < arena_base->num_sized; i++) {
+        if (arena_base->sized_header_pools[i]) {
+            if (arena_base-> sized_header_pools[i]->end_arena_memory > max)
+                max = arena_base->sized_header_pools[i]->end_arena_memory;
         }
     }
 
@@ -443,16 +439,14 @@ size_t
 get_min_buffer_address(Interp *interpreter)
 {
     UINTVAL i;
-    size_t min = interpreter->arena_base->constant_string_header_pool->
-            start_arena_memory;
+    struct Arenas *arena_base = interpreter->arena_base;
+    size_t min = (size_t) -1;
 
-    for (i = 0; i < interpreter->arena_base->num_sized; i++) {
-        if (interpreter->arena_base->sized_header_pools[i] &&
-            interpreter->arena_base->sized_header_pools[i]->start_arena_memory) {
-            if (min > interpreter->arena_base->
-                    sized_header_pools[i]->start_arena_memory)
-                min = interpreter->arena_base->sized_header_pools[i]->
-                        start_arena_memory;
+    for (i = 0; i < arena_base->num_sized; i++) {
+        if (arena_base->sized_header_pools[i] &&
+            arena_base->sized_header_pools[i]->start_arena_memory) {
+            if (arena_base->sized_header_pools[i]->start_arena_memory < min)
+                min = arena_base->sized_header_pools[i]->start_arena_memory;
         }
     }
     return min;
@@ -508,10 +502,6 @@ is_buffer_ptr(Interp *interpreter, void *ptr)
 {
     UINTVAL i;
     struct Arenas *arena_base = interpreter->arena_base;;
-
-    if (contained_in_pool(interpreter,
-                    arena_base->constant_string_header_pool, ptr))
-        return 1;
 
     for (i = 0; i < arena_base->num_sized; i++) {
         if (arena_base->sized_header_pools[i] &&

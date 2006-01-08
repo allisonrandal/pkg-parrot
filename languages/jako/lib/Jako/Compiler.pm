@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Compiler.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Compiler.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -48,7 +48,7 @@ sub temp_reg
 
 sub temp_int { return shift->temp_reg('I'); }
 sub temp_num { return shift->temp_reg('N'); }
-sub temp_obj { return shift->temp_reg('P'); }
+sub temp_pmc { return shift->temp_reg('P'); }
 sub temp_str { return shift->temp_reg('S'); }
 
 

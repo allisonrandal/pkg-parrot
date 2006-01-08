@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Literal.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Literal.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -92,6 +92,8 @@ sub compile
       $ident =~ s/^{(.*)}$/$1/; # Strip '{' and '}'.
 
       my $sym = $self->block->find_symbol($ident);
+
+      $ident = Jako::Construct::Expression::Value::Identifier->compile2($compiler, $self->block, $ident, $sym->kind, $sym->scope, $sym->type);
 
       $self->SYNTAX_ERROR("Cannot interpolate '%s': symbol not found!", $ident)
         unless $sym;

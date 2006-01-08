@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id$
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: data_escape.t 10933 2006-01-06 01:43:24Z particle $
+
+use strict;
+use warnings;
+use lib qw( t . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,15 +15,12 @@ t/library/data_escape.t - Data::Escape tests
 
 =head1 SYNOPSIS
 
-	% perl t/harness t/library/data_escape.t
+	% prove t/library/data_escape.t
 
 =cut
 
-use strict;
-use Parrot::Test;
 
-
-my $lib= 'Data/Escape.imc';
+my $lib= 'Data/Escape.pir';
 my $ns= 'Data::Escape';
 my @subs= qw/ String /;
 
@@ -277,7 +281,8 @@ foreach my $codepoint (@codes) {
 	);
 }
 
-## don't forget to change the number of tests!
+
+## remember to change the number of tests! :-)
 BEGIN { plan tests => 22; }
 
 # vim: ft=imc :

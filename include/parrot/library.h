@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: library.h 10399 2005-12-08 08:43:31Z leo $
+ *     $Id: library.h 10974 2006-01-08 00:03:56Z jonathan $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:
@@ -39,7 +39,6 @@ STRING* Parrot_locate_runtime_file_str(Interp *, STRING *file_name,
         enum_runtime_ft);
 
 void Parrot_autoload_class(Interp *, STRING *class);
-STRING * parrot_get_config_string(Interp* );
 const char* Parrot_get_runtime_prefix(Interp *, STRING **prefix);
 void parrot_init_library_paths(Interp *);
 STRING * parrot_split_path_ext(Interp* , STRING *in, 

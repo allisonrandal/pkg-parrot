@@ -1,4 +1,4 @@
-# $Id $
+# $Id: LANGUAGES.STATUS 10918 2006-01-05 16:08:58Z eiffel $
 
 =head1 Languages targeting parrot
 
@@ -25,7 +25,7 @@ Incomplete - but all examples and test cases are working.
 
 =item Last verified with parrot version
 
-0.3.1
+0.4.0
 
 =item Location
 
@@ -315,17 +315,24 @@ Gregor Purdy
 
 =item Description
 
-C/Perl like language, first compiler for Parrot
+C/Perl like language, first compiler for Parrot. The intent is to have a block-structured
+language that is higher level than IMC, but still exposes the underlying virtual machine
+rather directly, in the hope that this will eventually be useful for coding extensions to
+the VM in a language more natural than IMC.
 
 =item Status
 
-Functioning, although not all examples work. Calling conventions and NCI
-have changed since the Jako subroutine and NCI code generation was written,
-causing some breakage.
+The compiler Works, and the language and examples include subroutines and global
+constants and variables. NCI also works.
+Jako examples are tested during smoke testing.
+
+Has a low-tech hand-coded lexer and parser, and the ability to spit out the parse
+tree as XML for debugging. Syntax is a bit rigid, but includes forms that will
+be familiar to Perl programmers.
 
 =item Last verified with parrot version
 
-0.0.11
+0.4.0 (actually, HEAD of TRUNK as of 2005-12-22, which is post 0.4.0)
 
 =item Location
 
@@ -345,23 +352,24 @@ Leopold TE<ouml>tsch
 =item Description
 
 lazy-k is a pure functional programming language according to the SKI calculus.
+See also http://homepages.cwi.nl/~tromp/cl/lazy-k.html
 
 =item Status
 
-Unknown
+Working, but not complete. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.2.2
+0.4.0
 
 =item Location
 
-http://homepages.cwi.nl/~tromp/cl/lazy-k.html
+C<languages/lazy-k>
 
 =back
 
 
-=head2 Lua for Pirate (formerly known as Pirate, a new name is sought)
+=head2 Monkey, an implementation of Lua on Parrot
 
 =over 4
 
@@ -371,19 +379,23 @@ Klaas-Jan Stol
 
 =item Description
 
-Making Lua work on Parrot
+Making Lua work on Parrot.
+Implemented in C. The lexer is built with Flex. The Parser is built with Bison.
+TreeCC is used to generate the code for creating the Abstract Syntax Tree.
+Lua bytecode translation is being investigated.
 
 =item Status
 
-Unknown
+Simple examples are working. The current version is 0.2.2.
 
 =item Last verified with parrot version
 
-Unknown
+0.4.0
 
 =item Location
 
 http://members.home.nl/joeijoei/parrot/
+The Lua PMCs are in <languages/lua>.
 
 =back
 
@@ -680,11 +692,11 @@ regex
 =item Status
 
 Working but fairly minimal.
-Part of languages smoke testing, a lot of tests failing.
+Part of languages smoke testing. Almost all tests are succeeding.
 
 =item Last verified with parrot version
 
-0.3.1
+0.4.0
 
 =item Location
 
@@ -766,10 +778,11 @@ Scheme
 
 Functioning, as far as implemented. Lists and functions are working but many
 functions are missing implementation. 70% pass ratio due to recent deprecations.
+Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.3.0
+0.4.0
 
 =item Location
 
@@ -792,13 +805,12 @@ A from scratch implementation of a Tcl 8.5 compiler in parrot.
 
 =item Status
 
-Some tests failing due to unimplemented unicode features.
-Passes about 10% of *tcl*'s test suite (modulo clock).
-Still many builtins to implement.
+[break],[continue],[rename] - some tests failing.
+Passes about 5.5% of tcl's (converted) test suite
 
 =item Last verified with parrot version
 
-0.3.1
+0.4.0
 
 =item Location
 
@@ -818,18 +830,18 @@ Leopold TE<ouml>tsch
 =item Description
 
 unlambda is a pure functional programming language with mostly eager evaluation following the SKI calculus (+ a few extensions)
-
+See also http://www.madore.org/~david/programs/unlambda/
 =item Status
 
-Bus error (OS X only?)
+Working. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.2.2
+0.4.0
 
 =item Location
 
-http://www.madore.org/~david/programs/unlambda/
+C<languages/unlambda>
 
 =back
 
@@ -900,16 +912,16 @@ Amir Karger, Leopold TE<ouml>tsch
 
 =item Description
 
-Infocom's Z-machine
+Infocom's Z-machine. See also http://en.wikipedia.org/wiki/Z-machine.
 
 =item Status
 
 25 out of 66 Z3 opcodes all or mostly done. A long way from Zork.
-Broken with recent deprecations.
+3 out of 4 test files working.
 
 =item Last verified with parrot version
 
-0.2.3
+0.4.0
 
 =item Location
 

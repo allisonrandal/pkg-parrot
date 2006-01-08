@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: ref.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: ref.pmc 10871 2006-01-03 17:50:14Z particle $
 
 =head1 NAME
 
@@ -57,7 +57,7 @@ Sets the referenced PMC to C<*initializer>.
 
     void init_pmc (PMC* initializer) {
         PMC_pmc_val(SELF) = initializer; /* the referred PMC itself */
-	PObj_custom_mark_SET(SELF);
+        PObj_custom_mark_SET(SELF);
         if (initializer) {
             /*
              * if referred PMC needs active destruction

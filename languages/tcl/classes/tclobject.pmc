@@ -1,7 +1,7 @@
 /* tclobject.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: tclobject.pmc 8148 2005-05-24 00:53:04Z coke $
+ *     $Id: tclobject.pmc 10527 2005-12-14 22:33:25Z mdiep $
  *  Overview:
  *     These are the vtable functions for the tclobject base class
  *  Data Structure and Algorithms:
@@ -49,22 +49,6 @@ pmclass TclObject dynpmc group tcl_group {
 		break;
 	}
 	pmc_reuse(INTERP, SELF, type, 0);
-    }
-
-    void set_pmc (PMC* value) {
-        INTVAL base_type;
-
-        base_type = value->vtable->base_type;
-
-        DYNSELF.morph(value->vtable->base_type);
-
-        if (base_type == dynclass_TclInt) {
-              DYNSELF.set_integer_same(value);
-        } else if(base_type == dynclass_TclFloat) {
-              DYNSELF.set_number_same(value);
-        } else if(base_type == dynclass_TclString) {
-              DYNSELF.set_string_same(value);
-        }
     }
 
     void set_integer_native (INTVAL value) {

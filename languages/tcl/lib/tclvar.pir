@@ -1,4 +1,5 @@
 .include "languages/tcl/lib/returncodes.pir"
+.include "languages/tcl/lib/macros.pir"
 
 .namespace [ "TclVar" ]
 
@@ -13,7 +14,7 @@ Define the attributes required for the class.
 =cut
 
 .sub __class_init :load
-  $P0 = getclass "TclConst"
+  $P0 = getclass "String"
   $P1 = subclass $P0, "TclVar"
 .end
 

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cgoto.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: cgoto.pm 10649 2005-12-25 03:15:38Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determines whether the compiler supports computed C<goto>.
 
 =cut
 
-package Configure::Step;
+package auto::cgoto;
 
 use strict;
 use vars qw($description $result @args);
@@ -21,26 +21,27 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step ':auto';
 
 $description = "Determining whether your compiler supports computed goto...";
-@args = qw(cgoto miniparrot verbose);
+@args        = qw(cgoto miniparrot verbose);
 
-sub runstep {
-    my $self = shift;
-    my ($cgoto, $miniparrot, $verbose) = @_;
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-    return if $miniparrot;
+    return if $conf->options->get('miniparrot');
+
+    my ($cgoto, $verbose) = $conf->options->get(qw(cgoto verbose));
 
     my $test;
     if (defined $cgoto) {
         $test = $cgoto;
-    }
-    else {
+    } else {
         cc_gen('config/auto/cgoto/test_c.in');
         $test = eval { cc_build(); 1; } || 0;
         cc_clean();
     }
 
     if ($test) {
-        Parrot::Configure::Data->set(
+        $conf->data->set(
             TEMP_cg_h => '$(INC_DIR)/oplib/core_ops_cg.h $(INC_DIR)/oplib/core_ops_cgp.h',
             TEMP_cg_c => <<'EOF',
 $(OPS_DIR)/core_ops_cg$(O): $(GENERAL_H_FILES) $(OPS_DIR)/core_ops_cg.c
@@ -55,13 +56,12 @@ EOF
             TEMP_cg_o => '$(OPS_DIR)/core_ops_cg$(O) $(OPS_DIR)/core_ops_cgp$(O)',
             TEMP_cg_r => '$(RM_F) $(INC_DIR)/oplib/core_ops_cg.h $(OPS_DIR)/core_ops_cg.c \
                     $(INC_DIR)/oplib/core_ops_cgp.h $(OPS_DIR)/core_ops_cgp.c',
-            cg_flag   => '-DHAVE_COMPUTED_GOTO'
+            cg_flag => '-DHAVE_COMPUTED_GOTO'
         );
         print " (yes) " if $verbose;
         $result = 'yes';
-    }
-    else {
-        Parrot::Configure::Data->set(
+    } else {
+        $conf->data->set(
             TEMP_cg_h => '',
             TEMP_cg_c => '',
             TEMP_cg_o => '',

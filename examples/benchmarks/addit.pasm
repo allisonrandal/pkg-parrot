@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: addit.pasm 5175 2004-01-31 13:16:08Z mikescott $
+# $Id: addit.pasm 10754 2005-12-29 01:19:55Z particle $
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ DONE:
 
 =head1 SEE ALSO
 
-F<examples/benchmarks/addit.pl>, F<examples/benchmarks/addit.imc>,
-F<examples/benchmarks/addit2.imc>.
+F<examples/benchmarks/addit.pl>, F<examples/benchmarks/addit.pir>,
+F<examples/benchmarks/addit2.pir>.
 
 =cut

@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Integer.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Integer.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -21,10 +21,11 @@ sub new
   my ($token) = @_;
 
   return bless {
-    TOKEN => $token,
-    CODE  => 'I',
-    NAME  => 'int',
-    IMCC  => 'int'
+    TOKEN    => $token,
+    CODE     => 'I',
+    NAME     => 'int',
+    IMCC     => 'int',
+    IMCC_PMC => 'Integer'
   }, $class;
 }
 

@@ -1,7 +1,12 @@
-#! perl -w
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: integer.t 10706 2005-12-27 23:03:52Z particle $
 
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: integer.t 9451 2005-10-11 13:40:14Z leo $
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 11;
 
 =head1 NAME
 
@@ -9,15 +14,13 @@ t/pmc/integer.t - Integer basic type
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/integer.t
+	% prove t/pmc/integer.t
 
 =head1 DESCRIPTION
 
 Tests the Integer PMC.
 
 =cut
-
-use Parrot::Test tests => 11;
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "basic math");
 
