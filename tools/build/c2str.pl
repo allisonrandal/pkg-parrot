@@ -1,4 +1,11 @@
 #! perl
+# $Id: c2str.pl 11280 2006-01-21 13:33:08Z bernhard $
+
+=head1 NAME
+
+tools/build/c2str.pl - constant string support
+
+=cut 
 
 use lib 'lib';
 use Text::Balanced qw(extract_delimited);
@@ -162,7 +169,7 @@ HEADER
     close OUT;
 }
 
-=pod
+=for never
 
 print <<"HEADER";
 /*
@@ -234,4 +241,5 @@ while (<IN>) {
 
   print output_string (substr($str,1,-1), $line);
 }
+
 =cut

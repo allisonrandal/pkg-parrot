@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pdb.c 10044 2005-11-16 21:13:33Z rafl $
+$Id: pdb.c 11629 2006-02-17 16:31:48Z leo $
 
 =head1 NAME
 
@@ -97,41 +97,60 @@ Print the help.
 You can also debug Parrot code by using the C<debug_init>, C<debug_load>
 and C<debug_break> ops in F<ops/debug.ops>.
 
+=over 4
+
 =cut
 
 */
 
-#include "parrot/embed.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "../compilers/imcc/imc.h"
+#include "../compilers/imcc/parser.h"
+#include "parrot/embed.h"
 
-void PDB_printwelcome(void);
+static void PDB_printwelcome(void);
 
 /*
 
-int
-main(int argc, char *argv[])
+=item C<int main(int argc, char *argv[])>
 
 Reads the PASM or PBC file from argv[1], loads it, and then calls
 Parrot_debug().
 
+=cut
+
 */
+
+extern void imcc_init(Parrot_Interp interp);
 
 int
 main(int argc, char *argv[])
 {
-    Parrot_Interp interpreter;
+    Parrot_Interp interpreter, debugger;
     char *filename;
     Parrot_PackFile pf;
+    char *ext;
+    int pasm_file;
+    PDB_t *pdb;
 
-    interpreter = Parrot_new(NULL);
-
-    if (!interpreter) {
-        return 1;
-    }
+    /*Parrot_set_config_hash();  TODO link with cfg */
+    debugger = Parrot_new(NULL);
+    Parrot_init(debugger);
+    pdb = (PDB_t *)mem_sys_allocate_zeroed(sizeof(PDB_t));
+    /* attach pdb structure */
+    debugger->pdb = pdb;
+    
+    interpreter = Parrot_new(debugger);
+    interpreter->debugger = debugger; 
+    pdb->debugee = interpreter;
 
     Parrot_init(interpreter);
+    Parrot_block_DOD(interpreter);
+    Parrot_block_GC(interpreter);
+    imcc_init(interpreter);
+    IMCC_ast_init(interpreter);
 
     if (argc < 2) {
         fprintf(stderr, "Usage: pdb programfile [program-options]\n");
@@ -139,34 +158,69 @@ main(int argc, char *argv[])
     }
 
     filename = argv[1];
+    ext = strrchr(filename, '.');
+    if (ext && strcmp (ext, ".pbc") == 0) {
 
-    pf = Parrot_readbc(interpreter, filename);
+        pf = Parrot_readbc(interpreter, filename);
 
-    if (!pf) {
-        return 1;
+        if (!pf) {
+            return 1;
+        }
+
+        Parrot_loadbc(interpreter, pf);
     }
+    else {
+        pf = PackFile_new(interpreter, 0);
+        Parrot_loadbc(interpreter, pf);
 
-    Parrot_loadbc(interpreter, pf);
+        IMCC_push_parser_state(interpreter);
+        IMCC_INFO(interpreter)->state->file = filename;
+
+        if (!(imc_yyin_set(fopen(filename, "r"))))    {
+            IMCC_fatal(interpreter, E_IOError,
+                    "Error reading source file %s.\n",
+                    filename);
+        }
+        pasm_file = 0;
+        if (ext && strcmp (ext, ".pasm") == 0) 
+            pasm_file = 1;
+        emit_open(interpreter, 1, NULL);
+        IMCC_INFO(interpreter)->state->pasm_file = pasm_file;
+        yyparse((void *) interpreter);
+        imc_compile_all_units(interpreter);
+
+        imc_cleanup(interpreter);
+
+        fclose(imc_yyin_get());
+        PackFile_fixup_subs(interpreter, PBC_POSTCOMP, NULL);
+    }
+    Parrot_unblock_DOD(interpreter);
+    Parrot_unblock_GC(interpreter);
+
     PDB_printwelcome();
-    Parrot_debug(interpreter, argc - 1, argv + 1);
-    Parrot_destroy(interpreter);
+
+    Parrot_runcode(interpreter, argc - 1, argv + 1);
+    Parrot_exit(0);
 
     return 0;
 }
 
 /*
 
-void
-PDB_printwelcome()
+=item C<static void PDB_printwelcome()>
 
 Prints out the welcome string.
 
+=cut
+
 */
 
-void
+static void
 PDB_printwelcome()
 {
-    fprintf(stderr, "Parrot Debugger 0.0.2\n");
+    fprintf(stderr, "Parrot Debugger 0.4.x\n");
+    fprintf(stderr, "\nPlease note: ");
+    fprintf(stderr, "the debugger is currently under reconstruction\n");
 }
 
 /*
@@ -179,7 +233,24 @@ F<src/debug.c>, F<include/parrot/debug.h>.
 
 =head1 HISTORY
 
-Initial version by Daniel Grunblatt on 2002.5.19.
+=over 4
+
+=item * Initial version by Daniel Grunblatt on 2002.5.19.
+
+=item * Start of rewrite - leo 2005.02.16
+
+The debugger now uses it's own interpreter. User code is run in
+Interp* debugee. We have:
+
+  debug_interp->pdb->debugee->debugger
+    ^                            |
+    |                            v
+    +------------- := -----------+
+
+Debug commands are mostly run inside the C<debugger>. User code
+runs of course in the C<debugee>.
+
+=back
 
 =head1 TODO
 
@@ -194,6 +265,7 @@ it bang now, try listing the source before loading or disassembling it.
 history/completion).
 
 =item * Some other things I don't remember now because it's late.
+
 
 =back
 

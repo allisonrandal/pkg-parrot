@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Parser.pir 10933 2006-01-06 01:43:24Z particle $
+# $Id: Parser.pir 11563 2006-02-16 00:42:07Z jisom $
 
 =pod
 
@@ -69,6 +69,6 @@ MATCH_FAIL:
 
 =head1 AUTHOR
 
-Jerry Gay a.k.a. particle (E<jerry.gay@gmail.com>)
+Jerry Gay a.k.a. particle (L<jerry.gay@gmail.com>)
 
 =cut

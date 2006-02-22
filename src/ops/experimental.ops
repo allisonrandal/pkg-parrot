@@ -224,6 +224,98 @@ inline op exec(in STR) {
 
 =back
 
+=head2 Namespace opcodes
+
+These will be moved to F<var.ops> soon.
+
+=over 4
+
+=item B<get_namespace>(out PMC)
+
+Get currrent namespace.
+
+=item B<get_namespace>(out PMC, in PMC)
+
+=item B<get_namespace>(out PMC, in KEY)
+
+Get the specified currrent namespace.
+
+=item B<find_global>(out PMC, in KEY, in STR)
+
+Find the variable $3 in $2.
+
+=cut
+
+op get_namespace(out PMC) {
+    PMC *current_sub;
+    current_sub = CONTEXT(interpreter->ctx)->current_sub;
+    $1 = PMC_sub(current_sub)->namespace;
+    goto NEXT();
+}
+
+op find_global(out PMC, in KEY, in STR) {
+    $1 = Parrot_find_global_p(interpreter, $2, $3);
+    goto NEXT();
+}
+
+=back
+
+=head2 More Experimental Ops
+
+=over 4
+
+=item C<debug_brk>
+
+Break into debugger. Implementation notes:
+
+ - x86/gcc ... works with gdb
+ - TODO
+
+For other architectures, this is a C<noop>.
+
+=cut
+
+op debug_brk() {
+#if defined(__GNUC__) && defined(i386)
+    __asm__("int3");       /* opcode 0xcc */
+#endif
+    goto NEXT();
+}
+
+=item B<pow>(out NUM, in NUM, in INT)
+
+Set $1 to $2 raised to the power $3.
+
+=cut
+
+inline op pow(out NUM, in NUM, in INT) :base_core {
+    FLOATVAL n2 = $2;
+    FLOATVAL res = 1.0;
+    INTVAL   e  = $3;
+    int s = 1;
+    if (e != 0) {
+	if (e < 0) {
+	    s = -1;
+	    e = -e;
+	}
+    }
+    while (e) {
+	if (e & 1) {
+	    res *= n2;
+	}
+	n2 *= n2;
+	e >>= 1;
+    }
+    if (s < 0) {
+	res = 1.0/res;
+    }
+    $1 = res;
+    goto NEXT();
+}
+
+
+=back
+
 =head1 COPYRIGHT
 
 Copyright (C) 2001-2004 The Perl Foundation.  All rights reserved.

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: revision_c.pl 10933 2006-01-06 01:43:24Z particle $
+# $Id: revision_c.pl 11245 2006-01-18 17:33:03Z jonathan $
 
 =head1 NAME
 
@@ -35,9 +35,9 @@ print <<"EOF";
 #include "parrot/config.h"
 
 /* also in "parrot/embed.h" */
-int Parrot_revision(void);
+PARROT_API int Parrot_revision(void);
 /* also in "parrot/misc.h" */
-int Parrot_config_revision(void);
+PARROT_API int Parrot_config_revision(void);
 
 int Parrot_revision(void)
 {

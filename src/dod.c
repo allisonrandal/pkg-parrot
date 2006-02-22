@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: dod.c 10622 2005-12-22 12:09:19Z leo $
+$Id: dod.c 11355 2006-01-26 12:23:21Z leo $
 
 =head1 NAME
 
@@ -26,7 +26,6 @@ There's also a verbose mode for garbage collection.
 
 #define DOD_C_SOURCE
 #include "parrot/parrot.h"
-#include "parrot/method_util.h"
 #include <assert.h>
 
 /* Set this to 1 to see if unanchored objects are found in system areas.
@@ -309,7 +308,7 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
     for (i = 1; i < (unsigned int)enum_class_max; i++) {
         VTABLE *vtable;
         /*
-         * XXX dynclasses groups have empty slots for abstract objects
+         * XXX dynpmc groups have empty slots for abstract objects
          */
         if ( (vtable = Parrot_base_vtables[i])) {
 #if 0
@@ -691,17 +690,6 @@ Parrot_dod_sweep(Interp *interpreter,
     UINTVAL free_arenas = 0, old_total_used = 0;
 #endif
 
-    /*
-     * A DOD run is triggered by any pool's resource shortage.
-     * If one pool has plenty of free objects, we don't run through the
-     * pool to free only some objects, except it's the pmc_pool
-     * which might need timely destruction.
-     */
-    if (pool != arena_base->pmc_pool &&
-            pool->num_free_objects >
-            pool->total_objects - pool->replenish_level)
-        return;
-
     /* Run through all the buffer header pools and mark */
     for (cur_arena = pool->last_Arena;
             NULL != cur_arena; cur_arena = cur_arena->prev) {
@@ -988,6 +976,7 @@ trace_mem_block(Interp *interpreter,
                 /* ...and since pobject_lives doesn't care about bufstart, it
                  * doesn't really matter if it sets a flag */
                 pobject_lives(interpreter, (PObj *)ptr);
+                            
             }
         }
     }

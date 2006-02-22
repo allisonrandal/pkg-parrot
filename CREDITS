@@ -1,4 +1,4 @@
-﻿# $Id: CREDITS 10939 2006-01-06 16:52:23Z particle $
+﻿# $Id: CREDITS 11387 2006-01-31 13:12:07Z leo $
 
 	Following in the steps of other open source projects that
 	eventually take over the world, here is the partial list
@@ -27,6 +27,7 @@ D: Building on various platforms.
 N: Alberto Manuel Brandao Simoes
 E: ambs@cpan.org
 D: Some random patches
+S: Braga, Portugal
 
 N: Aldo Calpini
 D: Debugging tutorial
@@ -76,7 +77,6 @@ D: Numerous improvements and proposals.
 N: Bernhard Schmalhofer
 D: Bugfixes
 D: Parrot m4
-D: Getopt/Long.pir
 D: Parrot bc
 D: Cleanup of examples/assembly 
 
@@ -158,9 +158,10 @@ W: http://www.tu-chemnitz.de/~rafl/
 D: Debian packaging
 S: Chemnitz, Germany
 
-N: François PERRAD
+N: François Perrad
 D: build fixes for MinGW
 D: a patch to remove slash_exec from config
+D: language Lua
 
 N: Garrett Rooney
 D: Fix typo in PARROT_BIGENDIAN case
@@ -237,7 +238,7 @@ D: Lexical pads, CPS.
 N: Jonathan Stowe
 
 N: Jonathan Worthington
-D: Win32 dynclasses support, Win32 fixes, PBC utilities, debug segment work
+D: Win32 dynpmc support, Win32 fixes, PBC utilities, debug segment work
 D: and various patches
 E: jonathan@jwcs.net
 W: http://www.jwcs.net/~jonathan/
@@ -256,6 +257,9 @@ E: jhoblitt@cpan.org
 D: bug wrangling, doc & makefile cleanups, and Pod tests
 D: mucking around with Configure
 
+N: Joshua Isom, a.k.a jisom
+D: Getopt/Obj.pir
+
 N: Josh Wilmes
 
 N: Juergen Boemmels
@@ -270,7 +274,8 @@ N: Kevin Tew
 D: Warnings fix
 
 N: Klaas-Jan Stol
-D: dynclasses and doc updates
+D: dynpmc and doc updates
+D: Lua PMC
 E: vanderlay@home.nl
 
 N: Lars Balker Rasmussen
@@ -298,7 +303,7 @@ D: Various patches for pmc2c.pl
 D: Run Tcl test suite in partcl, and add various partcl bits
 
 N: Matt Fowles
-D: Resizable*Array classes
+D: Resizable*Array PMCs
 
 N: Mattia Barbon
 D: Win32 fixes, dynamic PMC creation and loading
@@ -372,6 +377,9 @@ N: Ritz Daniel
 
 N: Robert Spier
 D: Keeps us running
+
+N: Roger Browne 
+D: Author of Amber; bug fixes and tests
 
 N: Roland Illing
 D: Building Parrot with pkgsrc
@@ -455,3 +463,7 @@ E: will@coleda.com
 D: Tcl language (partcl), website, various languages/ upkeep, misc.
 
 N: Zach Lipton
+
+N: Norman Nunley
+D: Shaving a Ponie
+E: nnunley@gmail.com

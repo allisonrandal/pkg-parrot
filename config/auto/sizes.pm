@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: sizes.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: sizes.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines the sizes of various types.
 package auto::sizes;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -49,7 +49,8 @@ sub runstep
             float4_t         => 'double',
             float8_t         => 'double',
         );
-        return;
+        $self->set_result('using miniparrot defaults');
+        return $self;
     }
 
     cc_gen('config/auto/sizes/test_c.in');
@@ -186,6 +187,8 @@ END
     }
 
     cc_clean();
+
+    return $self;
 }
 
 1;

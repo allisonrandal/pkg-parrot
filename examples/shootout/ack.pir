@@ -1,6 +1,8 @@
-#!./parrot -C
+#!./parrot -Oc -Cj
 #
 # ackermann - ack(3, 9) is default 
+# shootout runs ack(3, 11)
+# time for ack(3,11):  0.8s (AMD X2@2000)
 # by Leopold Toetsch
 
 .sub main :main
@@ -21,7 +23,7 @@ xdefault:
     y = $S0
 go:
     $P0 = getinterp
-    $P0.'recursion_limit'(10000)
+    $P0.'recursion_limit'(100000)
     r = ack(x, y)
     .local pmc args
     args = new .ResizableIntegerArray

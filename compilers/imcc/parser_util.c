@@ -17,7 +17,6 @@
 #define _PARSER
 
 #include "imc.h"
-#include "parrot/method_util.h"
 #include "parrot/interp_guts.h"
 #include "parrot/dynext.h"
 #include "parrot/embed.h"
@@ -28,7 +27,7 @@
  * FIXME create an official interface
  *       this is needed for the debugger pdb and called from imcc/main.c
  */
-void imcc_init(Parrot_Interp interpreter);
+PARROT_API void imcc_init(Parrot_Interp interpreter);
 PMC * imcc_compile_pir(Parrot_Interp interp, const char *s);
 PMC * imcc_compile_pasm(Parrot_Interp interp, const char *s);
 
@@ -538,9 +537,6 @@ INS(Interp *interpreter, IMC_Unit * unit, char *name,
     else if (!strcmp(name, "yield")) {
         cur_unit->instructions->r[0]->pcc_sub->calls_a_sub |= 1 |ITPCCYIELD;
     }
-    else if (!strcmp(name, "push_eh")) {
-        cur_unit->has_push_eh = 1;
-    }
     else if (!memcmp(name, "invoke", 6) ||
             !memcmp(name, "callmethod", 10)) {
         if (cur_unit->type & IMC_PCCSUB)
@@ -561,7 +557,10 @@ INS(Interp *interpreter, IMC_Unit * unit, char *name,
     }
     if (op_info->jump && op_info->jump != PARROT_JUMP_ENEXT) {
         ins->type |= ITBRANCH;
-        if (!strcmp(name, "branch"))
+        /* TODO use opnum constants */
+        if (!strcmp(name, "branch") ||
+            !strcmp(name, "tailcall") ||
+            !strcmp(name, "returncc"))    
             ins->type |= IF_goto;
         else if (!strcmp(fullname, "jump_i") ||
                 !strcmp(fullname, "jsr_i") ||
@@ -606,6 +605,7 @@ imcc_compile(Parrot_Interp interp, const char *s, int pasm_file)
     PMC *sub;
     parrot_sub_t sub_data;
     struct _imc_info_t *imc_info = NULL;
+    struct parser_state_t *next;
     union {
         const void * __c_ptr;
         void * __ptr;
@@ -637,6 +637,7 @@ imcc_compile(Parrot_Interp interp, const char *s, int pasm_file)
         }
     }
     IMCC_push_parser_state(interp);
+    next = IMCC_INFO(interp)->state->next;
     if (imc_info)
         IMCC_INFO(interp)->state->next = NULL;
     IMCC_INFO(interp)->state->pasm_file = pasm_file;
@@ -644,6 +645,16 @@ imcc_compile(Parrot_Interp interp, const char *s, int pasm_file)
     expect_pasm = 0;
 
     compile_string(interp, const_cast(s));
+
+    /*
+     * compile_string NULLifies frames->next, so that yywrap
+     * doesn't try to continue compiling the previous buffer
+     * This OTOH prevents pop_parser-state ->
+     *  
+     * set next here and pop
+     */
+    IMCC_INFO(interp)->state->next = next;
+    IMCC_pop_parser_state(interp);
 
     sub = pmc_new(interp, enum_class_Eval);
     PackFile_fixup_subs(interp, PBC_MAIN, sub);
@@ -873,7 +884,12 @@ try_find_op(Parrot_Interp interpreter, IMC_Unit * unit, char *name,
     }
     if (n == 3 && r[0]->set == 'N') {
         if (r[1]->set == 'I') {
+            SymReg *r1 = r[1];
             changed |= change_op(interpreter, unit, r, 1, emit);
+            /* op Nx, Iy, Iy: reuse generated temp Nz */
+            if (r[2]->set == 'I' && r[2]->type != VTADDRESS &&
+                    r[2] == r1)
+                r[2] = r[1];
         }
         if (r[2]->set == 'I' && r[2]->type != VTADDRESS) {
             changed |= change_op(interpreter, unit, r, 2, emit);
@@ -944,6 +960,8 @@ multi_keyed(Interp *interpreter, IMC_Unit * unit, char *name,
     SymReg *preg[3];    /* px,py,pz */
     SymReg *nreg[3];
     Instruction *ins = 0;
+
+    UNUSED(emit);
 
     /* count keys in keyvec */
     kv = keyvec;

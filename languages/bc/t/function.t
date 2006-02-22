@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: function.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: function.t 11457 2006-02-06 21:11:20Z bernhard $
 
 =head1 NAME
 
@@ -15,8 +15,16 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib", "$FindBin::Bin/../../../lib";
 
-use Parrot::Test tests => 8;
+use Parrot::Config qw(%PConfig);
+use Parrot::Test;
 use Test::More;
+
+if ( $PConfig{has_python} ) {
+  plan tests => 8;
+}
+else {
+  plan skip_all => 'ANTLR2 based bc needs Python';
+}
 
 language_output_is( 'bc', << 'END_CODE', << 'END_EXPECTED', "block without newlines", with_past => 1 );
 1; { 2 }

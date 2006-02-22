@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_passdown.c 10462 2005-12-12 17:00:32Z particle $
+$Id: io_passdown.c 11563 2006-02-16 00:42:07Z jisom $
 
 =head1 NAME
 
@@ -623,7 +623,7 @@ PIO_listen_down(theINTERP, ParrotIOLayer *layer, ParrotIO *io, INTVAL backlog)
 /*
 
 =item C<ParrotIO *
-PIO_accept_down(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *address)Y
+PIO_accept_down(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *address)>
 
 
 Looks for the implementation of C<Accept> and calls it if found,

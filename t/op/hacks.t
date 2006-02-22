@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hacks.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: hacks.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -37,7 +37,7 @@ sub has_signal {
 SKIP: {
   skip("no universal SIGFPE handling", 2);
 
-output_is(<<'CODE', <<OUT, "catch a SIGFPE");
+pasm_output_is(<<'CODE', <<OUT, "catch a SIGFPE");
     push_eh _handler
     div I10, 0
     print "not reached\n"
@@ -60,7 +60,7 @@ error -8
 severity 0
 OUT
 
-output_is(<<'CODE', <<OUT, "catch a SIGFPE 2");
+pasm_output_is(<<'CODE', <<OUT, "catch a SIGFPE 2");
     push_eh _handler
     div I10, 0
     print "not reached\n"

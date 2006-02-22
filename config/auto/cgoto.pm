@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cgoto.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: cgoto.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines whether the compiler supports computed C<goto>.
 package auto::cgoto;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -27,7 +27,10 @@ sub runstep
 {
     my ($self, $conf) = @_;
 
-    return if $conf->options->get('miniparrot');
+    if ($conf->options->get('miniparrot')) {
+        $self->set_result('skipped');
+        return $self;
+    }
 
     my ($cgoto, $verbose) = $conf->options->get(qw(cgoto verbose));
 
@@ -59,7 +62,7 @@ EOF
             cg_flag => '-DHAVE_COMPUTED_GOTO'
         );
         print " (yes) " if $verbose;
-        $result = 'yes';
+        $self->set_result('yes');
     } else {
         $conf->data->set(
             TEMP_cg_h => '',
@@ -69,8 +72,10 @@ EOF
             cg_flag   => ''
         );
         print " (no) " if $verbose;
-        $result = 'no';
+        $self->set_result('no');
     }
+
+    return $self;
 }
 
 1;

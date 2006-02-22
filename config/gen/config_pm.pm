@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: config_pm.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: config_pm.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -16,7 +16,7 @@ file.
 package gen::config_pm;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -82,6 +82,8 @@ END
 
     close IN  or die "Can't close config_lib.in: $!";
     close OUT or die "Can't close config_lib.pasm: $!";
+
+    return $self;
 }
 
 1;

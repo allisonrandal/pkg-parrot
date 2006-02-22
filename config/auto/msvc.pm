@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: msvc.pm 10933 2006-01-06 01:43:24Z particle $
+# $Id: msvc.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines whether the C compiler is actually C<Visual C++>.
 package auto::msvc;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -43,23 +43,23 @@ sub runstep
     # Therefore, test if it's defined to see if MSVC's installed.
     # return 'no' if it's not.
     unless (defined $msvc{_MSC_VER}) {
-        $result = 'no';
+        $self->set_result('no');
         $conf->data->set(msvcversion => undef);
-        return;
+        return $self;
     }
 
     my $major = int($msvc{_MSC_VER} / 100);
     my $minor = $msvc{_MSC_VER} % 100;
     unless (defined $major && defined $minor) {
         print " (no) " if $verbose;
-        $result = 'no';
+        $self->set_result('no');
         $conf->data->set(msvcversion => undef);
-        return;
+        return $self;
     }
 
     my $msvcversion = "$major.$minor";
     print " (yep: $msvcversion )" if $verbose;
-    $result = 'yes';
+    $self->set_result('yes');
 
     $conf->data->set(msvcversion => $msvcversion);
 
@@ -74,6 +74,8 @@ sub runstep
         # for details.
         $conf->data->add(" ", "ccflags", "-D_CRT_SECURE_NO_DEPRECATE");
     }
+
+    return $self;
 }
 
 1;

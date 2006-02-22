@@ -1,6 +1,6 @@
 /* dynext.h
 *
-* $Id: dynext.h 6571 2004-08-23 09:10:02Z leo $
+* $Id: dynext.h 11093 2006-01-11 17:50:35Z jonathan $
 *
 *   Parrot dynamic extensions
 */
@@ -10,10 +10,10 @@
 
 
 /* dynamic lib/oplib/PMC loading */
-PMC *Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer);
+PARROT_API PMC *Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer);
 
 /* dynamic lib/oplib/PMC init */
-PMC *
+PARROT_API PMC *
 Parrot_init_lib(Interp *interpreter,
                 PMC *(*load_func)(Interp *),
                 void (*init_func)(Interp *, PMC *));

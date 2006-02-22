@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: headers.pm 10637 2005-12-24 11:00:22Z jhoblitt $
+# $Id: headers.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Uses C<ExtUtils::Manifest> to determine which headers are nongenerated.
 package init::headers;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -44,6 +44,8 @@ sub runstep
         inc                 => $inc,
         TEMP_nongen_headers => $TEMP_nongen_headers,
     );
+
+    return $self;
 }
 
 1;

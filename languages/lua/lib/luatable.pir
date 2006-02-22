@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: luatable.pir 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: luatable.pir 11618 2006-02-17 07:56:34Z fperrad $
 
 =head1 NAME
 
@@ -112,12 +112,46 @@ C<sep> is the empty string, the default for C<i> is 1, and the default for
 C<j> is the size of the table. If C<i> is greater than C<j>, returns the
 empty string.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _table_concat :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc sep :optional
+    .param pmc i :optional
+    .param pmc j :optional
+    .local pmc idx
+    .local pmc value
+    .local pmc ret
+    $S0 = optstring(sep, "")
+    $I0 = optint(i, 1)
+    $I1 = optint(j, 0)
+    checktype(table, "table")
+    unless $I1 == 0 goto L1
+    $I1 = getn(table)
+L1:
+    $S1 = ""
+    new idx, .LuaNumber 
+L2:
+    unless $I0 <= $I1 goto L3
+    idx = $I0
+    value = table[idx]
+    $I2 = isa value, "LuaString"
+    if $I2 goto L4
+    $I2 = isa value, "LuaNumber"
+    if $I2 goto L4
+    argerror("table contains non-strings")
+L4:
+    $S2 = value
+    concat $S1, $S2
+    unless $I0 != $I1 goto L5
+    concat $S1, $S0
+L5:    
+    add $I0, 1
+    goto L2
+L3:
+    new ret, .LuaString
+    ret = $S1
+    .return (ret)
 .end
 
 =item C<table.foreach (table, f)>
@@ -129,12 +163,28 @@ the final value of C<foreach>.
 
 See the C<next> function for extra information about table traversals.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see next in luapir.pir).
 
 =cut
 
 .sub _table_foreach :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc f :optional
+    .local pmc idx
+    .local pmc value
+    .local pmc ret
+    checktype(table, "table")
+    checktype(f, "Sub")
+    new idx, .LuaNil
+L1:
+    (idx, value) = next(table, idx)
+    if idx goto L2
+    .return ()
+L2:
+    (ret) = f(idx, value)
+    $I0 = defined ret
+    unless $I0 goto L1
+    .return (ret)       
 .end
 
 =item C<table.foreachi (table, f)>
@@ -145,15 +195,35 @@ Indices are visited in sequential order, from 1 to C<n>, where C<n> is the
 size of the table. If C<f> returns a non-B<nil> value, then the loop is
 broken and this value is returned as the result of C<foreachi>.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _table_foreachi :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc f :optional
+    .local pmc index
+    .local pmc value
+    .local pmc ret
+    .local int i
+    .local int n
+    checktype(table, "table")
+    checktype(f, "Sub")
+    n = getn(table)
+    i = 0
+    new index, .LuaNumber
+L1:
+    add i, 1
+    unless i <= n goto L2
+    index = i
+    value = table[index]
+    (ret) = f(index, value) 
+    $I0 = defined ret
+    unless $I0 goto L1
+    .return (ret)       
+L2:
+    .return ()
 .end
 
-=item C<table.getn (table)>
+=item C<table.getn (table)>       
 
 Returns the size of a table, when seen as a list. If the table has an C<n>
 field with a numeric value, this value is the size of the table. Otherwise,
@@ -161,12 +231,18 @@ if there was a previous call to C<table.setn> over this table, the respective
 value is returned. Otherwise, the size is one less the first integer index
 with a B<nil> value.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see getn in luapir.pir).
 
 =cut
 
 .sub _table_getn :anon
-    not_implemented()
+    .param pmc table :optional
+    .local pmc ret
+    checktype(table, "table")
+    $I0 = getn(table)
+    new ret, .LuaNumber
+    ret = $I0
+    .return (ret)
 .end
 
 =item C<table.sort (table [, comp])>
@@ -181,12 +257,40 @@ operator C<<> is used instead.
 The sort algorithm is I<not> stable, that is, elements considered equal by
 the given order may have their relative positions changed by the sort.
 
-NOT YET IMPLEMENTED.
+NOT YET IMPLEMENTED (see auxsort).
 
 =cut
 
 .sub _table_sort :anon
+    .param pmc table :optional
+    .param pmc comp :optional
+    .local int n
+    checktype(table, "table")
+    n = getn(table)
+    if_null comp, L1
+    if comp goto L1
+    checktype(comp, "Sub")
+    goto L2
+L1:    
+    .const .Sub lessthan = "lessthan"
+    comp = lessthan
+L2:
+    auxsort(table, comp, n)
+.end
+
+.sub auxsort :anon
+    .param pmc table
+    .param pmc comp
+    .param int u
     not_implemented()
+.end
+
+.sub lessthan :anon
+    .param pmc l
+    .param pmc r
+    .local int ret
+    ret = cmp l, r
+    .return (ret)
 .end
 
 =item C<table.insert (table, [pos,] value)>
@@ -197,12 +301,46 @@ where C<n> is the size of the table, so that a call C<table.insert(t,x)>
 inserts C<x> at the end of table C<t>. This function also updates the size
 of the table by calling C<table.setn(table, n+1)>.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see setn in luapir.pir).
 
 =cut
 
 .sub _table_insert :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc arg2 :optional
+    .param pmc arg3 :optional
+    .local pmc value
+    .local pmc index
+    .local int n
+    .local int pos
+    checktype(table, "table")
+    n = getn(table)
+    n = n + 1
+    unless_null arg3, L1
+    pos = n
+    value = arg2
+    goto L2
+L1:
+    pos = checknumber(arg2)    
+    unless pos > n goto L3
+    n = pos
+L3:
+    value = arg3
+L2:
+    setn(table, n)
+    new index, .LuaNumber
+L4:
+    n = n - 1
+    unless n >= pos goto L5
+    index = n
+    $P0 = table[index]
+    $I0 = n + 1
+    index = $I0
+    table[index] = $P0
+    goto L4
+L5:
+    index = pos
+    table[index] = value
 .end
 
 =item C<table.remove (table [, pos])>
@@ -214,12 +352,43 @@ table, so that a call C<table.remove(t)> removes the last element of table
 C<t>. This function also updates the size of the table by calling
 C<table.setn(table, n-1)>.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see setn in luapir.pir).
 
 =cut
 
 .sub _table_remove :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc pos :optional
+    .local pmc index
+    .local pmc ret
+    .local int n
+    .local int ipos
+    checktype(table, "table")
+    n = getn(table)
+    ipos = optint(pos, n)
+    unless n <= 0 goto L1
+    new ret, .LuaNil
+    .return (ret)
+L1:      
+    $I1 = n - 1
+    setn(table, $I1)
+    new index, .LuaNumber
+    index = ipos
+    ret = table[index]
+L2:
+    unless ipos < n goto L3
+    $I2 = ipos + 1
+    index = $I2
+    $P0 = table[index]
+    index = ipos
+    table[index] = $P0
+    ipos = $I2
+    goto L2
+L3:
+    new $P0, .LuaNil
+    index = n
+    table[index] = $P0        
+    .return (ret)
 .end
 
 =item C<table.setn (table, n)>
@@ -228,18 +397,23 @@ Updates the size of a table. If the table has a field C<"n"> with a numerical
 value, that value is changed to the given C<n>. Otherwise, it updates an
 internal state so that subsequent calls to C<table.getn(table)> return C<n>.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see setn in luapir.pir).
 
 =cut
 
 .sub _table_setn :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc n :optional
+    checktype(table, "table")
+    $I0 = checknumber(n)
+    setn(table, $I0)
 .end
 
 =back
 
 =head1 AUTHORS
 
+Francois Perrad
 
 =cut
 

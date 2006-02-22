@@ -1,9 +1,9 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_config_c.pl 10974 2006-01-08 00:03:56Z jonathan $
+# $Id: parrot_config_c.pl 11122 2006-01-12 11:31:34Z leo $
 use strict;
 
-my ($svnid) = '$Id: parrot_config_c.pl 10974 2006-01-08 00:03:56Z jonathan $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+my ($svnid) = '$Id: parrot_config_c.pl 11122 2006-01-12 11:31:34Z leo $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 
@@ -32,8 +32,8 @@ use strict;
 
 my ($mini_parrot, $install_parrot);
 
-$mini_parrot = 1    if (@ARGV && $ARGV[0] =~ /mini/);
-$install_parrot = 1 if (@ARGV && $ARGV[0] =~ /install/);
+$mini_parrot = 1    if @ARGV && $ARGV[0] =~ /mini/;
+$install_parrot = 1 if @ARGV && $ARGV[0] =~ /install/;
 
 print << "EOF";
 /*
@@ -45,7 +45,12 @@ print << "EOF";
  *
  */
 
-#include "parrot/embed.h"
+#include "parrot/parrot.h"
+
+/* proto is in embed.h, but we don't include anything here, which
+ * could pull in some globals
+ */
+void Parrot_set_config_hash(void);  
 
 void
 Parrot_set_config_hash_internal (const unsigned char* parrot_config,
@@ -69,9 +74,11 @@ else {
     binmode F;
     $_ = <F>;
     close F;
-#    $_ ||= "\0";
+
     my @c = split '';
-    printf '    ';
+    die "'$image_file' is truncated. Remove it and rerun make\n" if !@c;
+
+    print '    ';
     my $i;
     for (@c) {
         printf "0x%02x", ord($_);

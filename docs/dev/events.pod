@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: events.pod 10474 2005-12-13 00:01:37Z particle $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: events.pod 11525 2006-02-13 18:40:19Z particle $
 
 =head1 NAME
 

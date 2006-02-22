@@ -1,7 +1,7 @@
 /* pic.h
  *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: pic.h 10933 2006-01-06 01:43:24Z particle $
+ *     $Id: pic.h 11572 2006-02-16 08:25:56Z leo $
  *  Overview:
  *     This is the api header for the pic subsystem
  *  Data Structure and Algorithms:
@@ -79,6 +79,12 @@ void * parrot_pic_opcode(Interp *, INTVAL op);
 
 typedef int (*arg_pass_f)(Interp *, PMC *sig,
         char *src_base, void **src_pc, char *dest_base, void **dest_pc);
+
+int parrot_pic_check_sig(Interp *, PMC *sig1, PMC *sig2, int *type);
+int parrot_pic_is_safe_to_jit(Interp *, PMC *sub,
+	PMC *sig_args, PMC *sig_results, int *flags);
+
+funcptr_t  parrot_pic_JIT_sub(Interp *, PMC *sub, int flags);
 
 #endif /* PARROT_PIC_H_GUARD */
 

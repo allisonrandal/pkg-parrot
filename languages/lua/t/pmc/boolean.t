@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: boolean.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: boolean.t 11586 2006-02-16 17:44:54Z fperrad $
 
 =head1 NAME
 
@@ -13,11 +13,11 @@ t/pmc/boolean.t - LuaBoolean
 =head1 DESCRIPTION
 
 Tests C<LuaBoolean> PMC
-(implemented in F<languages/lua/classes/luaboolean.pmc>).
+(implemented in F<languages/lua/pmc/luaboolean.pmc>).
 
 =cut
 
-use Parrot::Test tests => 6;
+use Parrot::Test tests => 9;
 use Test::More;
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
@@ -27,23 +27,21 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
-    bool1 = isa pmc1, "scalar"
+    bool1 = isa pmc1, "LuaBase"
     print bool1
     print "\n"
-    bool1 = isa pmc1, "Integer"
-    print bool1
-    print "\n"
-    bool1 = isa pmc1, "Boolean"
-    print bool1
-    print "\n"
+#    bool1 = isa pmc1, "Integer"
+#    print bool1
+#    print "\n"
+#    bool1 = isa pmc1, "Boolean"
+#    print bool1
+#    print "\n"
     bool1 = isa pmc1, "LuaBoolean"
     print bool1
     print "\n"
     end
 .end
 CODE
-1
-1
 1
 1
 OUTPUT
@@ -55,6 +53,9 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check interface");
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
+    bool1 = does pmc1, "scalar"
+    print bool1
+    print "\n"
     bool1 = does pmc1, "boolean"
     print bool1
     print "\n"
@@ -67,6 +68,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check interface");
     end
 .end
 CODE
+1
 1
 1
 0
@@ -149,3 +151,62 @@ CODE
 true
 1
 OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL & .const");
+.HLL "Lua", "lua_group"
+.sub _main
+    .const .LuaBoolean cst1 = "1"
+    print cst1
+    print "\n"
+    .local int bool1
+    bool1 = isa cst1, "LuaBoolean"
+    print bool1
+    print "\n"
+.end
+CODE
+true
+1
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check tostring");
+.HLL "Lua", "lua_group"
+.sub _main
+    .local pmc pmc1
+    pmc1 = new .LuaBoolean
+    pmc1 = 1
+    print pmc1
+    print "\n"
+    $P0 = pmc1."tostring"()
+    print $P0
+    print "\n"
+    $S0 = typeof $P0
+    print $S0
+    print "\n"
+.end
+CODE
+true
+true
+string
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check tonumber");
+.HLL "Lua", "lua_group"
+.sub _main
+    .local pmc pmc1
+    pmc1 = new .LuaBoolean
+    pmc1 = 1
+    print pmc1
+    print "\n"
+    $P0 = pmc1."tonumber"()
+    print $P0
+    print "\n"
+    $S0 = typeof $P0
+    print $S0
+    print "\n"
+.end
+CODE
+true
+nil
+nil
+OUTPUT
+

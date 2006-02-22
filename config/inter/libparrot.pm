@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: libparrot.pm 10975 2006-01-08 00:42:47Z jonathan $
+# $Id: libparrot.pm 11697 2006-02-21 19:02:14Z leo $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ step determines whether it should be build static or shared.
 package inter::libparrot;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -61,15 +61,19 @@ sub runstep {
         : ''
     );
 
-    $conf->data->set(
-        libparrot_ldflags => ($parrot_is_shared)
-        ? '-L' . $conf->data->get('build_dir')
-               . $conf->data->get('slash')
-               . $conf->data->get('blib_dir') . ' -lparrot'
-        : $conf->data->get('libparrot')
-    );
+    unless (defined($conf->data->get('libparrot_ldflags'))) {
+        $conf->data->set(
+            libparrot_ldflags => ($parrot_is_shared)
+            ? '-L' . $conf->data->get('build_dir')
+                   . $conf->data->get('slash')
+                   . $conf->data->get('blib_dir') . ' -lparrot'
+            : $conf->data->get('libparrot')
+        );
+    }
 
-    $result = $parrot_is_shared ? 'yes' : 'no';
+    $self->set_result($parrot_is_shared ? 'yes' : 'no');
+
+    return $self;
 }
 
 1;

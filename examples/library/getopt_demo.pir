@@ -1,9 +1,9 @@
-# Copyright (C) 2004-2005 The Perl Foundation.  All rights reserved.
-# $Id: getopt_demo.pir 10754 2005-12-29 01:19:55Z particle $
+# Copyright (C) 2004-2006 The Perl Foundation.  All rights reserved.
+# $Id: getopt_demo.pir 11196 2006-01-15 16:03:22Z jisom $
 
 =head1 NAME
 
-examples/library/getopt_demo.pir - demonstrating library/Getopt/Long.pir
+examples/library/getopt_demo.pir - demonstrating use of the module Getopt/Obj.pir
 
 =head1 SYNOPSIS
 
@@ -14,7 +14,7 @@ examples/library/getopt_demo.pir - demonstrating library/Getopt/Long.pir
 =head1 DESCRIPTION
 
 This demo program shows how to handle command line arguments with the
-PIR library F<runtime/parrot/library/Getopt/Long.pir>.
+PIR library F<runtime/parrot/library/Getopt/Obj.pir>.
 
 =cut
 
@@ -26,34 +26,33 @@ This is executed when you call F<getopt_demo.pir>.
 
 =cut
 
-.sub main @MAIN 
+.sub main :main
   .param pmc argv
 
-  load_bytecode "Getopt/Long.pbc"
-  .local pmc get_options
-  find_global get_options, "Getopt::Long", "get_options"
+  load_bytecode "Getopt/Obj.pbc"
 
-  # Assemble specification for get_options
-  # in an array of format specifiers
-  .local pmc opt_spec    
-  opt_spec = new ResizableStringArray 
-  # --version, boolean
-  push opt_spec, "version"
-  # --help, boolean
-  push opt_spec, "help"
-  # --bool, boolean
-  push opt_spec, "bool"
-  # --string, string
-  push opt_spec, "string=s"
-  # --integer, integer
-  push opt_spec, "integer=i"
-
-  # the program name is the first element in argv
+  # shift name of the program, so that argv contains only options and extra params
   .local string program_name
   program_name = shift argv
 
+  # Specification of command line arguments.
+  .local pmc getopts
+  getopts = new "Getopt::Obj"
+  # getopts."notOptStop"(1)
+
+  # --version, boolean
+  push getopts, "version|v"
+  # --help, boolean
+  push getopts, "help|h"
+  # --bool, boolean
+  push getopts, "bool|b"
+  # --string, string
+  push getopts, "string|s=s"
+  # --integer, integer
+  push getopts, "integer|i=i"
+
   .local pmc opt
-  ( opt ) = get_options( argv, opt_spec )
+  opt = getopts."get_options"(argv)
 
   # Now we do what the passed options tell
   .local int is_defined
@@ -61,7 +60,7 @@ This is executed when you call F<getopt_demo.pir>.
   # Was '--version' passed ?
   is_defined = defined opt["version"]
   unless is_defined goto NO_VERSION_FLAG
-    print "getopt_demo.pir 0.03\n"
+    print "getopt_demo.pir 0.04\n"
     end
   NO_VERSION_FLAG:
 
@@ -143,16 +142,14 @@ TODO: Pass a flag for EXIT_FAILURE and EXIT_SUCCESS
   print program_name
   print " [OPTION]... [STRING]...\n"
   print "\n"
-  print "Currently only long options are available.\n"
-  print "\n"
   print "Operation modes:\n"
-  print "      --help                   display this help and exit\n"
-  print "      --version                output version information and exit\n"
+  print "   -h --help                   display this help and exit\n"
+  print "   -v --version                output version information and exit\n"
   print "\n"
   print "For demo of option parsing:\n"
-  print "      --string=STRING          a string option\n"
-  print "      --integer=INTEGER        an integer option\n"
-  print "      --bool                   a boolean option\n"
+  print "   -s --string=STRING          a string option\n"
+  print "   -i --integer=INTEGER        an integer option\n"
+  print "   -b --bool                   a boolean option\n"
 .end
 
 =head1 AUTHOR
@@ -161,6 +158,6 @@ Bernhard Schmalhofer - C<Bernhard.Schmalhofer@gmx.de>
 
 =head1 SEE ALSO
 
-F<runtime/parrot/library/Getopt/Long.pir>
+F<runtime/parrot/library/Getopt/Obj.pir>
 
 =cut

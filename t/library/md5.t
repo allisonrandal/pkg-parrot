@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: md5.t 10494 2005-12-13 15:28:33Z particle $
+# $Id: md5.t 11563 2006-02-16 00:42:07Z jisom $
 
 use strict;
 use warnings;
@@ -342,7 +342,7 @@ CODE
 OUT
 
 
-=bash
+=begin bash
 
 test output created with:
 
@@ -353,6 +353,8 @@ for i in $(seq 1 200); do
     str=$(echo -n "$str" | md5sum | cut -d ' ' -f 1)
     echo "$str"
 done
+
+=end bash
 
 =cut
 
@@ -578,7 +580,7 @@ b63d8a186e272754b70953ddd441e9fd
 eab26f6455a08779bcb43bc48c02c717
 OUT
 
-=bash
+=begin bash
 
 test output created with:
 
@@ -589,6 +591,8 @@ for i in $(seq 1 200); do
     str=$(echo -n "$str$str" | md5sum | cut -d ' ' -f 1)
     echo "$str"
 done
+
+=end bash
 
 =cut
 

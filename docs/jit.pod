@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.pod 10379 2005-12-06 21:36:57Z leo $
+# $Id: jit.pod 11674 2006-02-20 06:31:06Z jhoblitt $
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ B<Parrot_jit_emit_mov*> functions have to be implemented.
 
 The functions to generate native code for core parrot opcodes are specified
 here. To simplify the maintenance of these functions, they are specified in a
-format that is pre-processed by F<jit2h.pl> to produce a valid C source file,
+format that is pre-processed by F<jit2c.pl> to produce a valid C source file,
 F<jit_cpu.c>. See L<Format of .jit Files> below.
 
 =item include/parrot/jit.h
@@ -90,12 +90,12 @@ array, which maps from opcode addresses to native code addresses.
 
 =item jit.c
 
-B<build_asm>() is the main routine of the code generator, which loops over the
-parrot bytecode, calling the code generating routines for each opcode while
-filling in the B<op_map> array.  This array is used by the JIT subsystem to
-perform certain types of fixups on native code, as well as by the native code
-itself to convert bytecode program counters values (opcode_t *'s) to hardware
-program counter values.
+B<parrot_build_asm>() is the main routine of the code generator, which loops
+over the parrot bytecode, calling the code generating routines for each opcode
+while filling in the B<op_map> array.  This array is used by the JIT subsystem
+to perform certain types of fixups on native code, as well as by the native
+code itself to convert bytecode program counters values (opcode_t *'s) to
+hardware program counter values.
 
 The bytecode is considered an array of B<opcode_t> sized elements, with
 parallel entries in B<op_map>.  B<op_map> is initially populated with the
@@ -105,11 +105,9 @@ offsets are converted to absolute addresses.  This trades the low up-front cost
 of converting all offsets once, for the unknown cost of repeatedly converting
 these offsets while executing native code.
 
-If the architecture defines B<INT_REGISTERS_TO_MAP> and
-B<FLOAT_REGISTERS_TO_MAP> as nonzero, this amount of most used registers per
-code section are mapped to native processor registers.
+See F<src/jit/skeleton/jit_emit.h> for details.
 
-=item jit2h.pl
+=item jit2c.pl
 
 Preprocesses the .jit files to produce F<jit_cpu.c>.
 
@@ -130,18 +128,18 @@ the defines must therefore follow a specific syntax.
     #else
 
     ... defines
-
-    #ifndef JIT_IMCC
-
-    ... initialization of maps
-    ... and possibly private static functions
+    static const jit_arch_info arch_info = {
+       ... initialization of maps
+       ... and possibly private static functions
+    }
 
     #endif
-    #endif
 
-See also F<jit/skeleton/jit_emit.h> for a more detailed explanation.
+See F<jit/skeleton/jit_emit.h> for a more detailed explanation.
 
 =head2 Defines
+
+XXX most are moved into C<jit_arch_info> now.
 
 =over 4
 
@@ -512,7 +510,7 @@ from Parrot_jit_debug, which generates a symbol file in I<stabs> format, s.
 B<info stabs> for more (or less :-()
 
 The following script calls F<ddd> (the graphic debugger fronted) and attaches
-the symbol file, after it got built in F<build_asm>.
+the symbol file, after it got built in F<parrot_build_asm>.
 
     # dddp
     # run ddd parrot with given file
@@ -586,4 +584,4 @@ XXX (p)rinting register contents like shown above is currently not supported.
 
 =head1 SEE ALSO
 
-F<docs/dev/jit_i386.dev>, F<jit/skeleton/jit_emit.h> 
+F<docs/dev/jit_i386.pod>, F<jit/skeleton/jit_emit.h> 

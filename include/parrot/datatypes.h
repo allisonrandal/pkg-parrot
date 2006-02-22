@@ -3,7 +3,7 @@
  *  Copyright: (c) 2002 Leopold Toetsch <lt@toetsch.at>
  *  License:  Artistic/GPL, see README and LICENSES for details
  *  CVS Info
- *     $Id: datatypes.h 5205 2004-02-05 16:42:50Z leo $
+ *     $Id: datatypes.h 11093 2006-01-11 17:50:35Z jonathan $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *
@@ -127,8 +127,8 @@ extern const struct _data_types data_types[];
 #endif
 
 
-INTVAL Parrot_get_datatype_enum(Parrot_Interp, STRING *);
-STRING * Parrot_get_datatype_name(Parrot_Interp, INTVAL );
+PARROT_API INTVAL Parrot_get_datatype_enum(Parrot_Interp, STRING *);
+PARROT_API STRING * Parrot_get_datatype_name(Parrot_Interp, INTVAL );
 
 #endif /* PARROT_DATATYPES_H_GUARD */
 

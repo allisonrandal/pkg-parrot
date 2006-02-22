@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: io.pir 9523 2005-10-20 22:05:12Z bernhard $
+# Copyright (C) 2001-2006 The Perl Foundation.  All rights reserved.
+# $Id: io.pir 11194 2006-01-15 14:29:57Z bernhard $
 
 =head1 NAME
 
@@ -35,6 +35,11 @@ You should check where the file is going to be before you run this.
     P0 = open test_fn, "<"
     S0 = read P0, 1024 
     print S0
+
+    # now clean up after ourselves.
+    P1 = new "OS"
+    P1."rm"(test_fn)
+
 .end
 
 =head1 SEE ALSO

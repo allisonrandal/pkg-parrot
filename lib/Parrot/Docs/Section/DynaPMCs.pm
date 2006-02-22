@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: DynaPMCs.pm 10479 2005-12-13 01:50:55Z particle $
+# $Id: DynaPMCs.pm 11226 2006-01-17 19:09:59Z bernhard $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ sub new
 	
 	return $self->SUPER::new(
 		'Dynamic PMCs', 'dynapmc.html', '',
-		$self->new_group('Loading', '', 'src/dynclasses'),
+		$self->new_group('Loading', '', 'src/dynpmc'),
 		$self->new_group('Runtime', '', 'runtime/parrot/include'),
 	);
 }

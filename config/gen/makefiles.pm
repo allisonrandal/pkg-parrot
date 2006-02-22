@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: makefiles.pm 10982 2006-01-08 12:22:06Z bernhard $
+# $Id: makefiles.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Generates the various F<Makefile>s and other files needed to build Parrot.
 package gen::makefiles;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -30,7 +30,8 @@ sub runstep
 
     $self->makefiles($conf);
     $self->cflags($conf);
-    genfile('config/gen/makefiles/libparrot_def.in', 'libparrot.def');
+
+    return $self;
 }
 
 sub cflags
@@ -69,7 +70,13 @@ sub makefiles
         conditioned_lines              => 1
     );
     genfile(
-        'config/gen/makefiles/dynclasses_pl.in' => 'tools/build/dynclasses.pl',
+        'config/gen/makefiles/dynpmc_pl.in' => 'tools/build/dynpmc.pl',
+        commentType                             => '#',
+        replace_slashes                         => 0,
+        conditioned_lines                       => 1
+    );
+	genfile(
+        'config/gen/makefiles/dynoplibs_pl.in' => 'tools/build/dynoplibs.pl',
         commentType                             => '#',
         replace_slashes                         => 0,
         conditioned_lines                       => 1
@@ -85,7 +92,7 @@ sub makefiles
         replace_slashes               => 1
     );
     genfile(
-        'config/gen/makefiles/dynclasses.in' => 'src/dynclasses/Makefile',
+        'config/gen/makefiles/dynpmc.in' => 'src/dynpmc/Makefile',
         commentType                          => '#',
         replace_slashes                      => 1,
         conditioned_lines                    => 1
@@ -132,6 +139,12 @@ sub makefiles
         replace_slashes                => 1
     );
     genfile(
+        'languages/HQ9plus/config/makefiles/root.in' => 'languages/HQ9plus/Makefile',
+        commentType                  => '#',
+        replace_slashes              => 1,
+        conditioned_lines            => 1
+    );
+    genfile(
         'config/gen/makefiles/jako.in' => 'languages/jako/Makefile',
         commentType                    => '#',
         replace_slashes                => 1
@@ -142,7 +155,7 @@ sub makefiles
         replace_slashes                => 1
     );
     genfile(
-        'config/gen/makefiles/lua.in' => 'languages/lua/Makefile',
+        'languages/lua/config/makefiles/root.in' => 'languages/lua/Makefile',
         commentType                   => '#',
         replace_slashes               => 1,
         conditioned_lines             => 1
@@ -203,6 +216,9 @@ sub makefiles
         'config/gen/makefiles/Zcode.in' => 'languages/Zcode/Makefile',
         commentType                     => '#',
         replace_slashes                 => 1
+    );
+    genfile(
+        'config/gen/makefiles/parrot.pc.in' => 'parrot.pc'
     );
 
     if ($conf->data->get('has_perldoc')) {

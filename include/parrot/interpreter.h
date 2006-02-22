@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: interpreter.h 10974 2006-01-08 00:03:56Z jonathan $
+ *     $Id: interpreter.h 11698 2006-02-21 19:33:43Z leo $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -68,11 +68,13 @@ typedef enum {
     PARROT_SLOW_CORE,                         /* slow bounds/trace/profile core */
     PARROT_FUNCTION_CORE = PARROT_SLOW_CORE,
     PARROT_FAST_CORE      = 0x01,             /* fast DO_OP core */
-    PARROT_SWITCH_CORE    = 0x02,             /*  P                */
-    PARROT_CGP_CORE       = 0x06,             /* CP                */
-    PARROT_CGOTO_CORE     = 0x04,             /* C    = cgoto      */
-    PARROT_JIT_CORE       = 0x10,             /* TODO arange bits for P testing */
-    PARROT_EXEC_CORE      = 0x20              /* TODO Parrot_exec_run variants */
+    PARROT_SWITCH_CORE    = 0x02,             /*   P   = prederef   */
+    PARROT_CGP_CORE       = 0x06,             /*  CP                */
+    PARROT_CGOTO_CORE     = 0x04,             /*  C    = cgoto      */
+    PARROT_JIT_CORE       = 0x10,             /* J     = JIT        */
+    PARROT_CGP_JIT_CORE   = 0x16,             /* JCP                */
+    PARROT_SWITCH_JIT_CORE  = 0x12,           /* J P                */
+    PARROT_EXEC_CORE      = 0x20          /* TODO Parrot_exec_run variants */
 } Parrot_Run_core_t;
 
 /* &end_gen */
@@ -167,15 +169,22 @@ typedef union {
     INTVAL       *regs_i;
 } Regs_ni;
 
+/* If CTX_LEAK_DEBUG is enabled, then turning on PARROT_CTX_DESTROY_DEBUG_FLAG
+   will print tons of detail about when Parrot_Context structures are allocated
+   and deallocated to stderr.  If CTX_LEAK_DEBUG is disabled, then all of the
+   relevant code is omitted, and PARROT_CTX_DESTROY_DEBUG_FLAG has no effect.
+ */
+#define CTX_LEAK_DEBUG 1
+
 typedef struct Parrot_Context {
     /* common header with Interp_Context */
-    struct Parrot_Context *prev;
+    struct Parrot_Context *unused1;	/* placeholder */
     Regs_ni                bp;          /* pointers to FLOATVAL & INTVAL */
     Regs_ps                bp_ps;       /* pointers to PMC & STR */
     /* end common header */
     INTVAL *n_regs_used;	        /* INSP in PBC points to Sub */
     size_t regs_mem_size;               /* memory occupied by registers */
-    INTVAL ref_count;                   /* how often refered to */
+    int ref_count;                   /* how often refered to */
     struct Stack_Chunk *reg_stack;      /* register stack */
 
     struct Stack_Chunk *user_stack;     /* Base of the scratch stack */
@@ -245,7 +254,9 @@ struct Interp_Context {
 
 #define CONTEXT(ctx) ((ctx).state)
 
-#define CHUNKED_CTX_MEM 0           /* see src/register.c */
+#define CHUNKED_CTX_MEM 0           /* no longer works, but will be reinstated
+                                       some day; see src/register.c for details.
+                                    */
 
 typedef struct _context_mem {
 #if CHUNKED_CTX_MEM
@@ -315,6 +326,7 @@ struct parrot_interp_t {
     const char* output_file;                  /* The file into which output is written */
 
     PDB_t *pdb;                               /* Debug system */
+    Interp * debugger;                        /* trace / debug interpreter */  
 
     void *lo_var_ptr;                         /* Pointer to memory on runops system stack */
 
@@ -403,11 +415,7 @@ typedef enum {
 #define PARROT_CATCH_NULL 1
 
 #if PARROT_CATCH_NULL
-#    if !defined(PARROT_BUILDING_WIN32_DLL)
-extern PMC * PMCNULL;                        /* Holds single Null PMC         */
-#    else
-__declspec(dllimport) extern PMC * PMCNULL;  /* Holds single Null PMC         */
-#    endif /* PARROT_BUILDING_WIN32_DLL */
+PARROT_API extern PMC * PMCNULL;   /* Holds single Null PMC */
 #  define PMC_IS_NULL(p) (!(p) || (p) == PMCNULL)
 #else
 #  define PMCNULL NULL
@@ -427,11 +435,11 @@ __declspec(dllimport) extern PMC * PMCNULL;  /* Holds single Null PMC         */
 
 /* &end_gen */
 
-Interp *make_interpreter(Interp * parent, Interp_flags);
-void Parrot_init(Interp *);
-void Parrot_destroy(Interp *);
+PARROT_API Interp *make_interpreter(Interp * parent, Interp_flags);
+PARROT_API void Parrot_init(Interp *);
+PARROT_API void Parrot_destroy(Interp *);
 
-void Parrot_set_config_hash_internal(const unsigned char*, unsigned int);
+PARROT_API void Parrot_set_config_hash_internal(const unsigned char*, unsigned int);
 
 INTVAL interpinfo(Interp *interpreter, INTVAL what);
 PMC*   interpinfo_p(Interp *interpreter, INTVAL what);
@@ -439,34 +447,34 @@ STRING*interpinfo_s(Interp *interpreter, INTVAL what);
 
 void runops(Interp *, size_t offset);
 void runops_int(Interp *, size_t offset);
-parrot_context_t* Parrot_runops_fromc(Interp *, PMC *sub);
-void* Parrot_runops_fromc_args(Interp *, PMC *sub, const char *sig, ...);
-INTVAL Parrot_runops_fromc_args_reti(Interp *, PMC *, const char *, ...);
-FLOATVAL Parrot_runops_fromc_args_retf(Interp *, PMC *, const char *, ...);
+PARROT_API parrot_context_t* Parrot_runops_fromc(Interp *, PMC *sub);
+PARROT_API void* Parrot_runops_fromc_args(Interp *, PMC *sub, const char *sig, ...);
+PARROT_API INTVAL Parrot_runops_fromc_args_reti(Interp *, PMC *, const char *, ...);
+PARROT_API FLOATVAL Parrot_runops_fromc_args_retf(Interp *, PMC *, const char *, ...);
 
-void* Parrot_runops_fromc_arglist(Interp *, PMC *, const char *sig, va_list);
-INTVAL Parrot_runops_fromc_arglist_reti(Interp *, PMC *, const char *, va_list);
-FLOATVAL Parrot_runops_fromc_arglist_retf(Interp *, PMC *, const char *,
+PARROT_API void* Parrot_runops_fromc_arglist(Interp *, PMC *, const char *sig, va_list);
+PARROT_API INTVAL Parrot_runops_fromc_arglist_reti(Interp *, PMC *, const char *, va_list);
+PARROT_API FLOATVAL Parrot_runops_fromc_arglist_retf(Interp *, PMC *, const char *,
         va_list);
 
-void* Parrot_run_meth_fromc(Interp *, PMC *sub, PMC* obj, STRING *meth);
-void* Parrot_run_meth_fromc_args(Interp *, PMC *sub,
+PARROT_API void* Parrot_run_meth_fromc(Interp *, PMC *sub, PMC* obj, STRING *meth);
+PARROT_API void* Parrot_run_meth_fromc_args(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, ...);
-INTVAL Parrot_run_meth_fromc_args_reti(Interp *, PMC *sub,
+PARROT_API INTVAL Parrot_run_meth_fromc_args_reti(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, ...);
-FLOATVAL Parrot_run_meth_fromc_args_retf(Interp *, PMC *sub,
+PARROT_API FLOATVAL Parrot_run_meth_fromc_args_retf(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, ...);
 
-void* Parrot_run_meth_fromc_arglist(Interp *, PMC *sub,
+PARROT_API void* Parrot_run_meth_fromc_arglist(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, va_list);
-INTVAL Parrot_run_meth_fromc_arglist_reti(Interp *, PMC *sub,
+PARROT_API INTVAL Parrot_run_meth_fromc_arglist_reti(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, va_list);
-FLOATVAL Parrot_run_meth_fromc_arglist_retf(Interp *, PMC *sub,
+PARROT_API FLOATVAL Parrot_run_meth_fromc_arglist_retf(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, va_list);
 
-void Parrot_callback_C(void *external_data, PMC *callback_info);
-void Parrot_callback_D(PMC *callback_info, void *external_data);
-PMC* Parrot_make_cb(Interp * interpreter, PMC* sub, PMC* user_data,
+PARROT_API void Parrot_callback_C(void *external_data, PMC *callback_info);
+PARROT_API void Parrot_callback_D(PMC *callback_info, void *external_data);
+PARROT_API PMC* Parrot_make_cb(Interp * interpreter, PMC* sub, PMC* user_data,
         STRING* cb_signature);
 
 typedef opcode_t *(*native_func_t)(Interp * interpreter,
@@ -478,7 +486,7 @@ VAR_SCOPE native_func_t run_native;
 typedef PMC *(*Parrot_compiler_func_t)(Parrot_Interp interpreter,
                                        const char * program );
 
-void Parrot_compreg(Interp * interpreter, STRING *, Parrot_compiler_func_t func);
+PARROT_API void Parrot_compreg(Interp * interpreter, STRING *, Parrot_compiler_func_t func);
 INTVAL sysinfo_i(Interp * interpreter, INTVAL info_wanted);
 STRING *sysinfo_s(Interp * interpreter, INTVAL info_wanted);
 void exec_init_prederef(Interp *interpreter,
@@ -486,12 +494,12 @@ void exec_init_prederef(Interp *interpreter,
 
 void prepare_for_run(Interp * interpreter);
 void *init_jit(Interp * interpreter, opcode_t *pc);
-void dynop_register(Interp * interpreter, PMC* op_lib);
+PARROT_API void dynop_register(Interp * interpreter, PMC* op_lib);
 void do_prederef(void **pc_prederef, Interp * interpreter, int type);
 
 void clone_interpreter(PMC* dest, PMC* self);
 
-void enter_nci_method(Interp *, int type,
+PARROT_API void enter_nci_method(Interp *, int type,
 		 void *func, const char *name, const char *proto);
 
 

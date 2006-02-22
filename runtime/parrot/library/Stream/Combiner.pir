@@ -1,4 +1,4 @@
-# $Id: Combiner.pir 10741 2005-12-28 20:32:30Z particle $
+# $Id: Combiner.pir 11602 2006-02-16 22:15:36Z leo $
 
 =head1 TITLE
 
@@ -167,7 +167,7 @@ Reads from all assigned sources and calls the combiner.
     set sources, .ITERATE_FROM_START
 
     # create the string array
-    new args, .StringArray
+    new args, .ResizableStringArray
 
 READ_LOOP:
     unless sources goto CALL

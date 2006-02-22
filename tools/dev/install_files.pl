@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: install_files.pl 10951 2006-01-07 12:45:55Z rafl $
+# $Id: install_files.pl 11442 2006-02-06 08:34:08Z fperrad $
 ################################################################################
 
 =head1 TITLE
@@ -114,10 +114,6 @@ use File::Basename qw(dirname basename);
 use File::Copy;
 use File::Spec;
 use strict;
-use lib 'lib';
-use Parrot::Config;
-
-my $exe = $PConfig{'exe'};
 
 # When run from the makefile, which is probably the only time this
 # script will ever be used, all of these defaults will get overridden.
@@ -181,10 +177,6 @@ while(<>) {
         my $copy = $dest;
         $dest =~ s/^installable_//; # parrot with different config
         $dest = File::Spec->catdir($options{bindir}, $dest);
-        if ($exe) {
-           $src .= $exe;
-           $dest .= $exe;
-        }
         if ($copy =~ /^installable/) {
             push @installable_exe, [$src, $dest];
             next;
@@ -194,6 +186,12 @@ while(<>) {
         $dest = File::Spec->catdir($options{includedir}, $dest);
     } elsif ($meta{doc}) {
         $dest = File::Spec->catdir($options{docdir}, $dest);
+    } elsif ($meta{pkgconfig}) {
+        # For the time being this is hardcoded as being installed under libdir
+        # as it is typically donw with automake installed packages.  If there
+        # is a use case to make this configurable we'll add a seperate
+        # --pkgconfigdir option.
+        $dest = File::Spec->catdir($options{libdir}, 'pkgconfig', $dest);
     } else {
         $dest =~ s/^runtime/lib/;
         $dest = File::Spec->catdir($options{prefix}, $dest);

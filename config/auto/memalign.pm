@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: memalign.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: memalign.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines if the C library supports C<memalign()>.
 package auto::memalign;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -32,12 +32,14 @@ sub runstep
 
     if ($conf->options->get('miniparrot')) {
         $conf->data->set(memalign => '');
-        print "(skipped) " if $verbose;
-        return;
+        $self->set_result('skipped');
+        return $self;
     }
 
     if (defined $conf->data->get('memalign')) {
-        return; # already set; leave it alone
+        # already set; leave it alone
+        $self->set_result('already set');
+        return $self;
     }
     my $test = 0;
 
@@ -77,7 +79,9 @@ sub runstep
         : '';
     $conf->data->set(memalign => $f);
     print($test ? " (Yep:$f) " : " (no) ") if $verbose;
-    $result = $test ? 'yes' : 'no';
+    $self->set_result($test ? 'yes' : 'no');
+
+    return $self;
 }
 
 1;

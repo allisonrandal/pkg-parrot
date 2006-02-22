@@ -5,8 +5,11 @@
  * Intermediate Code Compiler for Parrot.
  *
  * Copyright (C) 2002 Melvin Smith <melvin.smith@mindspring.com>
+ * Copyright 2002-2006 The Perl Foundation. All Righs Reserved
  *
  * Grammar for the parser.
+ *
+ * $Id: imcc.y 11644 2006-02-18 15:36:46Z leo $
  *
  */
 
@@ -44,6 +47,7 @@
  * Some convenient vars
  */
 static SymReg *cur_obj, *cur_call;
+static char *adv_named_id = NULL;
 int cur_pmc_type;      /* used in mk_ident */
 IMC_Unit * cur_unit;
 SymReg *cur_namespace; /* ugly hack for mk_address */
@@ -313,6 +317,58 @@ set_lexical(Interp *interp, SymReg *r, char *name)
 }
 
 
+static void
+add_pcc_named_arg(Interp *interp, SymReg *cur_call, char *name, SymReg *value)
+{
+    SymReg *r;
+    r = mk_const(interp, name, 'S');
+    r->type |= VT_NAMED;
+    add_pcc_arg(cur_call, r);
+    add_pcc_arg(cur_call, value);
+}
+
+
+static void
+add_pcc_named_result(Interp *interp, SymReg *cur_call, char *name, SymReg *value)
+{
+    SymReg *r;
+    r = mk_const(interp, name, 'S');
+    r->type |= VT_NAMED;
+    add_pcc_result(cur_call, r);
+    add_pcc_result(cur_call, value);
+}
+
+
+static void
+add_pcc_named_param(Interp *interp, SymReg *cur_call, char *name, SymReg *value)
+{
+    SymReg *r;
+    r = mk_const(interp, name, 'S');
+    r->type |= VT_NAMED;
+    add_pcc_param(cur_call, r);
+    add_pcc_param(cur_call, value);
+}
+
+static void
+add_pcc_named_return(Interp *interp, SymReg *cur_call, char *name, SymReg *value)
+{
+    SymReg *r;
+    r = mk_const(interp, name, 'S');
+    r->type |= VT_NAMED;
+    add_pcc_return(cur_call, r);
+    add_pcc_return(cur_call, value);
+}
+
+static void
+adv_named_set(Interp *interp, char *name) {
+    if (adv_named_id) {
+        IMCC_fataly(interp, E_SyntaxError,
+                    "Named parameter with more than one name.\n");
+    }
+    adv_named_id = name;
+}
+
+
 %}
 
 %union {
@@ -330,7 +386,7 @@ set_lexical(Interp *interp, SymReg *r, char *name)
 
 %token <t> PRAGMA N_OPERATORS HLL HLL_MAP
 %token <t> GOTO ARG IF UNLESS PNULL
-%token <t> ADV_FLAT ADV_SLURPY ADV_OPTIONAL ADV_OPT_FLAG
+%token <t> ADV_FLAT ADV_SLURPY ADV_OPTIONAL ADV_OPT_FLAG ADV_NAMED ADV_ARROW
 %token <t> NEW
 %token <t> NAMESPACE ENDNAMESPACE DOT_METHOD
 %token <t> SUB SYM LOCAL LEXICAL CONST
@@ -347,6 +403,7 @@ set_lexical(Interp *interp, SymReg *r, char *name)
 %token <t> PCC_BEGIN_YIELD PCC_END_YIELD NCI_CALL METH_CALL INVOCANT
 %token <t> MAIN LOAD IMMEDIATE POSTCOMP METHOD ANON OUTER NEED_LEX
 %token <t> MULTI
+%token <t> UNIQUE_REG
 %token <s> LABEL
 %token <t> EMIT EOM
 %token <s> IREG NREG SREG PREG IDENTIFIER REG MACRO ENDM
@@ -360,7 +417,7 @@ set_lexical(Interp *interp, SymReg *r, char *name)
 %type <s> classname relop
 %type <i> labels _labels label  statement sub_call
 %type <i> pcc_sub_call
-%type <sr> sub_param sub_params pcc_arg pcc_result pcc_args pcc_results
+%type <sr> sub_param sub_params pcc_arg pcc_result pcc_args pcc_results sub_param_type_def
 %type <sr> pcc_returns pcc_return pcc_call arg arglist the_sub multi_type
 %type <t> argtype_list argtype paramtype_list paramtype
 %type <t> pcc_return_many
@@ -378,12 +435,14 @@ set_lexical(Interp *interp, SymReg *r, char *name)
 %type <t> begin_ret_or_yield end_ret_or_yield
 %token <t> LINECOMMENT
 %token <s> FILECOMMENT
-%type <idlist> id_list
+%type <idlist> id_list id_list_id
 
 %nonassoc CONCAT DOT
 %nonassoc  <t> POINTY
 
 %pure_parser
+
+%parse-param {Interp *interp}
 
 %start program
 
@@ -558,15 +617,33 @@ sub:
    ;
 
 sub_params:
-     /* empty */                       { $$ = 0; } %prec LOW_PREC
-   | '\n'                              { $$ = 0; }
-   | sub_params sub_param '\n'         { add_pcc_param(cur_call, $2);}
+     /* empty */                        { $$ = 0; } %prec LOW_PREC
+   | '\n'                               { $$ = 0; }
+   | sub_params sub_param '\n'          { 
+         if (adv_named_id) {
+             add_pcc_named_param(interp,cur_call,adv_named_id,$2);
+             adv_named_id = NULL;
+         } else add_pcc_param(cur_call, $2);
+   }
    ;
 
 sub_param:
-     PARAM                             { is_def=1; }
-     type IDENTIFIER  paramtype_list   { $$ = mk_ident(interp, $4, $3);
-                                         is_def=0; $$->type |= $5; }
+   PARAM { is_def=1; } sub_param_type_def { $$ = $3; is_def=0; }
+   ;
+
+sub_param_type_def:
+     type IDENTIFIER paramtype_list    { if ($3 & VT_UNIQUE_REG)
+                                             $$ = mk_ident_ur(interp, $2, $1);
+                                         else
+                                             $$ = mk_ident(interp, $2, $1);
+                                         $$->type |= $3; }
+   | type STRINGC ADV_ARROW IDENTIFIER paramtype_list { 
+                                         if ($5 & VT_UNIQUE_REG)
+                                             $$ = mk_ident_ur(interp, $4, $1);
+                                         else
+                                             $$ = mk_ident(interp, $4, $1);
+                                         $$->type |= $5;
+                                         adv_named_set(interp,$2);}
    ;
 
 opt_comma:
@@ -587,7 +664,7 @@ outer: OUTER '(' STRINGC ')'
    ;
 
 multi_types:
-     /* empty */     { $$ = 0; }
+     /* empty */     { add_pcc_multi(cur_call, NULL); }
    | multi_types COMMA multi_type { $$ = 0; add_pcc_multi(cur_call, $3); }
    | multi_type      { $$ = 0;  add_pcc_multi(cur_call, $1);}
    ;
@@ -606,7 +683,17 @@ multi_type:
                               r = mk_const(interp, str_dup("PMC"), 'S');
                            }
                            $$ = r;
-                       }
+                      }
+   | STRINGC          {
+                          SymReg *r;
+                          if (strcmp($1, "_"))
+                              r = mk_const(interp, $1, 'S');
+                          else {
+                              free($1),
+                              r = mk_const(interp, str_dup("PMC"), 'S');
+                           }
+                           $$ = r;
+                      }
    ;
 
 sub_body:
@@ -736,25 +823,36 @@ pcc_results:
 
 pcc_result:
      RESULT target paramtype_list      {  $$ = $2; $$->type |= $3; }
-   | LOCAL { is_def=1; }
-             type IDENTIFIER           {  mk_ident(interp, $4, $3); is_def=0; $$=0; }
+   | LOCAL { is_def=1; } type id_list_id           
+     {
+         IdList* l = $4;
+         if (l->unique_reg)
+                 mk_ident_ur(interp, l->id, $3);
+             else
+                 mk_ident(interp, l->id, $3);
+         is_def=0;
+         $$=0;
+     }
    ;
 
 paramtype_list:
      /* empty */                       {  $$ = 0; }
-   | paramtype_list paramtype        {  $$ = $1 | $2; }
+   | paramtype_list paramtype          {  $$ = $1 | $2; }
    ;
 
 paramtype:
      ADV_SLURPY                        {  $$ = VT_FLAT;   }
    | ADV_OPTIONAL                      {  $$ = VT_OPTIONAL; }
    | ADV_OPT_FLAG                      {  $$ = VT_OPT_FLAG; }
+   | ADV_NAMED                         {  $$ = VT_NAMED; }
+   | ADV_NAMED '(' STRINGC ')'         {  adv_named_set(interp,$3); $$ = 0; }
+   | UNIQUE_REG                      {  $$ = VT_UNIQUE_REG; }
    ;
 
 
 begin_ret_or_yield:
      PCC_BEGIN_RETURN { $$ = 0; }
-   | PCC_BEGIN_YIELD { $$ = 1; }
+   | PCC_BEGIN_YIELD  { $$ = 1; }
    ;
 
 end_ret_or_yield:
@@ -775,10 +873,12 @@ pcc_ret:
 
 pcc_returns:
      /* empty */   {  $$ = 0; }
-   | pcc_returns '\n'
-                   {  if($1) add_pcc_return(IMCC_INFO(interp)->sr_return, $1); }
-   | pcc_returns pcc_return '\n'
-                   {  if($2) add_pcc_return(IMCC_INFO(interp)->sr_return, $2); }
+   | pcc_returns '\n'      {
+       if($1) add_pcc_return(IMCC_INFO(interp)->sr_return, $1); 
+   }
+   | pcc_returns pcc_return '\n'      {
+       if($2) add_pcc_return(IMCC_INFO(interp)->sr_return, $2); 
+   }
    ;
 
 pcc_return:
@@ -804,8 +904,22 @@ pcc_return_many:
 
 var_returns:
     /* empty */ { $$ = 0; }
-  | arg                     {  add_pcc_return(IMCC_INFO(interp)->sr_return, $1);    }
-  | var_returns COMMA arg   {  add_pcc_return(IMCC_INFO(interp)->sr_return, $3);    }
+  | arg                     {  
+      if (adv_named_id) {
+          add_pcc_named_return(interp,IMCC_INFO(interp)->sr_return,
+                               adv_named_id, $1);
+          adv_named_id = NULL;
+      } else add_pcc_return(IMCC_INFO(interp)->sr_return, $1); }
+  | STRINGC ADV_ARROW var {
+      add_pcc_named_return(interp,IMCC_INFO(interp)->sr_return,$1,$3);}
+  | var_returns COMMA arg   {  
+      if (adv_named_id) {
+          add_pcc_named_return(interp,IMCC_INFO(interp)->sr_return,
+                               adv_named_id,$3);
+           adv_named_id = NULL;
+      } else add_pcc_return(IMCC_INFO(interp)->sr_return, $3);    }
+  | var_returns COMMA STRINGC ADV_ARROW var   {  
+      add_pcc_named_return(interp,IMCC_INFO(interp)->sr_return,$3,$5);}
   ;
 
 
@@ -855,21 +969,39 @@ instruction:
                    { $$ = $2; }
     ;
 
-id_list : IDENTIFIER
-         {
-            IdList* l = malloc(sizeof(IdList));
-            l->next = NULL;
-            l->id = $1;
-            $$ = l;
-         }
+id_list : 
+     id_list_id
+     {
+         IdList* l = $1;
+         l->next = NULL;
+         $$ = l;
+     }
 
-        | id_list COMMA IDENTIFIER
-        {  IdList* l = malloc(sizeof(IdList));
-           l->id = $3;
-           l->next = $1;
-           $$ = l;
-        }
-        ;
+   | id_list COMMA id_list_id
+     {  
+         IdList* l = $3;
+         l->next = $1;
+         $$ = l;
+     }
+   ;
+
+id_list_id :
+     IDENTIFIER UNIQUE_REG
+     {
+         IdList* l = malloc(sizeof(IdList));
+         l->id = $1;
+         l->unique_reg = 1;
+         $$ = l;
+     }
+
+   | IDENTIFIER
+     {
+         IdList* l = malloc(sizeof(IdList));
+         l->id = $1;
+         l->unique_reg = 0;
+         $$ = l;
+     }
+   ;
 
 labeled_inst:
      assignment
@@ -878,17 +1010,19 @@ labeled_inst:
    | ENDNAMESPACE IDENTIFIER         { pop_namespace($2); }
    | LOCAL           { is_def=1; } type id_list
      {
-        IdList* l = $4;
+         IdList* l = $4;
          while(l) {
              IdList* l1;
-             mk_ident(interp, l->id, $3);
+             if (l->unique_reg)
+                 mk_ident_ur(interp, l->id, $3);
+             else
+                 mk_ident(interp, l->id, $3);
              l1 = l;
              l = l->next;
              free(l1);
+         }
+         is_def=0; $$=0;
      }
-    is_def=0; $$=0;
-
-   }
    | LEXICAL STRINGC COMMA target
                     {
                        set_lexical(interp, $4, $2); $$ = 0;
@@ -1009,11 +1143,11 @@ assignment:
             cur_call = NULL;
             $$ = 0;
          }
-   |
+   | '('
          {
             $<i>$ = IMCC_create_itcall_label(interp);
          }
-     '(' targetlist  ')' '=' the_sub '(' arglist ')'
+      targetlist  ')' '=' the_sub '(' arglist ')'
          {
            IMCC_itcall_sub(interp, $6);
            cur_call = NULL;
@@ -1095,8 +1229,21 @@ sub_call:
 
 arglist:
      /* empty */             {  $$ = 0; }
-   | arglist COMMA arg       {  $$ = 0; add_pcc_arg(cur_call, $3); }
-   | arg                     {  $$ = 0; add_pcc_arg(cur_call, $1); }
+   | arglist COMMA arg       {  $$ = 0; 
+       if (adv_named_id) {
+           add_pcc_named_arg(interp, cur_call, adv_named_id, $3);
+           adv_named_id = NULL;
+       } else add_pcc_arg(cur_call, $3); 
+   }
+   | arg                     {  $$ = 0; 
+       if (adv_named_id) {
+           add_pcc_named_arg(interp, cur_call,adv_named_id,$1);
+           adv_named_id = NULL;
+       } else add_pcc_arg(cur_call, $1);
+   }
+   | arglist COMMA STRINGC ADV_ARROW var { $$ = 0;
+                                     add_pcc_named_arg(interp,cur_call,$3,$5);}
+   | STRINGC ADV_ARROW var { $$ = 0; add_pcc_named_arg(interp,cur_call,$1,$3);}
    ;
 
 arg:
@@ -1109,15 +1256,30 @@ argtype_list:
    ;
 
 argtype:
-     ADV_FLAT                {  $$ = VT_FLAT; }
+     ADV_FLAT                  { $$ = VT_FLAT; }
+   | ADV_NAMED                 { $$ = VT_NAMED; }
+   | ADV_NAMED '(' STRINGC ')' { adv_named_set(interp,$3); $$ = 0; }
    ;
 
 result: target paramtype_list  { $$ = $1; $$->type |= $2; }
    ;
 
 targetlist:
-     targetlist COMMA result { $$ = 0; add_pcc_result(cur_call, $3); }
-   | result                  { $$ = 0; add_pcc_result(cur_call, $1); }
+     targetlist COMMA result { 
+         $$ = 0;
+         if (adv_named_id) {
+             add_pcc_named_result(interp,cur_call,adv_named_id,$3);
+             adv_named_id = NULL;
+         } else add_pcc_result(cur_call, $3); }
+   | targetlist COMMA STRINGC ADV_ARROW target { 
+        add_pcc_named_result(interp,cur_call,$3,$5); }
+   | result                  { 
+       $$ = 0;
+       if (adv_named_id) {
+           add_pcc_named_result(interp,cur_call,adv_named_id,$1);
+           adv_named_id = NULL;
+       } else add_pcc_result(cur_call, $1); }
+   | STRINGC ADV_ARROW target { add_pcc_named_result(interp,cur_call,$1,$3); }
    | /* empty */             {  $$ = 0; }
    ;
 
@@ -1171,6 +1333,11 @@ _var_or_i:
                       regs[nargs++] = $1;
                       keyvec |= KEY_BIT(nargs);
                       regs[nargs++] = $3; $$ = $1;
+                   }
+   | '[' keylist ']'
+                   {
+                      regs[nargs++] = $2;
+                      $$ = $2;
                    }
    ;
 sub_label_op_c:
@@ -1248,14 +1415,13 @@ string:
 %%
 
 
-/* XXX how to get an Interp* here */
-int yyerror(char * s)
+int yyerror(Interp *interp, char * s)
 {
     /* support bison 1.75, convert 'parse error to syntax error' */
     if (!memcmp(s, "parse", 5))
-        IMCC_fataly(NULL, E_SyntaxError, "syntax%s", s+5);
+        IMCC_fataly(interp, E_SyntaxError, "syntax%s", s+5);
     else
-        IMCC_fataly(NULL, E_SyntaxError, s);
+        IMCC_fataly(interp, E_SyntaxError, s);
     /* fprintf(stderr, "last token = [%s]\n", yylval.s); */
     return 0;
 }

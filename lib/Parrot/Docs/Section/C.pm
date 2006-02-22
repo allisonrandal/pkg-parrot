@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: C.pm 10620 2005-12-22 07:48:49Z fperrad $
+# $Id: C.pm 11440 2006-02-06 08:26:11Z fperrad $
 
 =head1 NAME
 
@@ -180,8 +180,7 @@ sub new
             '',
             $self->c_item(
                 'Parrot Packfile API and utilities.', 
-                'pairs' => ['packfile'],
-                'sources' => ['packdump', 'packout', 'pdump', 'pf_items']
+                'contents' => ['src/packfile'],
             ),
             $self->c_source_item('', 'byteorder'),
         ),
@@ -200,7 +199,6 @@ sub new
             $self->c_header_item('', 'vtables'),
             $self->c_pair_item('', 'key'),
             $self->c_pair_item('', 'sub'),
-            $self->c_pair_item('', 'method_util'),
             $self->c_header_item('', 'pobj'),
             $self->c_header_item('', 'perltypes'),
             $self->c_pair_item('', 'pmc_freeze'),
@@ -238,11 +236,6 @@ sub new
             'Extensions', 
             '',
             $self->c_pair_item('', 'extend'),
-        ),
-        $self->new_group(
-            'NCI', 
-            '',
-            $self->c_pair_item('', 'nci'),
         ),
         $self->new_group(
             'JIT', 

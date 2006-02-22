@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: defaults.pm 10980 2006-01-08 11:23:09Z bernhard $
+# $Id: defaults.pm 11697 2006-02-21 19:02:14Z leo $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Sets up the configuration system's default values and data structures.
 package init::defaults;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -80,17 +80,9 @@ sub runstep
         # ld to build a shared library, e.g.  -shared for GNU ld.
         ld_share_flags => $Config{lddlflags},
 
-        # These relate to building of dynclasses.
-        cc_building_dynclass_flag => '',
-
         # Flags to tell ld to build a dynamically loadable module, e.g.
-        # -shared for GNU ld.  Also some platforms (Win32) need to generate and
-        # pass the linker an export list.  Dynamically loadable modules
+        # -shared for GNU ld.
         ld_load_flags     => $Config{lddlflags},
-        parrot_exe_def    => '',
-        ld_parrot_exe_def => '',
-        parrot_dll_def    => '',
-        ld_parrot_dll_def => '',
 
         libs => $Config{libs},
 
@@ -118,6 +110,11 @@ sub runstep
 
         # include debug info in executable
         ld_debug => '',
+
+        # Way to decorate a function to mark it as an exportable or
+        # importable symbol.
+        sym_export => '',
+        sym_import => '',
 
         # Library build directory
         blib_dir      => 'blib/lib',
@@ -215,6 +212,8 @@ sub runstep
             ld_debug => " -pg ",
         );
     }
+
+    return $self;
 }
 
 1;

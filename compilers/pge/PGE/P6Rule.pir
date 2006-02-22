@@ -106,6 +106,8 @@
     $I0 = is_cclass .CCLASS_WHITESPACE, target, pos
     if $I0 goto term_ws
     initchar = substr target, pos, 1
+    $I0 = index "<>[](){}:*?+|&^$.", initchar
+    if $I0 >= 0 goto err_noterm
     inc pos
     if initchar == "#" goto term_ws
     if initchar != "\\" goto term_literal
@@ -203,6 +205,9 @@
     $P0 = pos
     .return (mob)
 
+  err_noterm:
+    parse_error(mob, pos, "Term expected")
+    goto end
   err_backslash_digit:
     parse_error(mob, pos, "\\1 and \\012 illegal, use $1, \\o012, or \\x0a")
     goto end
@@ -514,9 +519,21 @@
     if $S0 == '<' goto name
     $I0 = find_not_cclass .CCLASS_NUMERIC, target, pos, lastpos
     if $I0 > pos goto numeric
+    $I0 = find_not_cclass .CCLASS_WORD, target, pos, lastpos
+    if $I0 > pos goto scalar
   eos_anchor:
     (mob, $P0, mfrom, mpos) = newfrom(mob, 0, "PGE::Exp::Anchor")
     mob["value"] = "$"
+    goto end
+  scalar:
+    (mob, $P0, mfrom, mpos) = newfrom(mob, 0, "PGE::Exp::Scalar")
+    dec pos
+    $I1 = $I0 - pos
+    cname = substr target, pos, $I1
+    cname = concat '"', cname
+    cname = concat cname, '"'
+    mob["cname"] = cname
+    pos = $I0
     goto end
   numeric:
     (mob, $P0, mfrom, mpos) = newfrom(mob, 0, "PGE::Exp::Scalar")
@@ -555,6 +572,15 @@
     $P0 = new .Exception
     $S0 = "p6rule parse error: "
     $S0 .= message
+    $S0 .= " at offset "
+    $S1 = pos
+    $S0 .= $S1
+    $S0 .= ", found '"
+    $P1 = getattribute mob, "PGE::Match\x0$:target"
+    $S1 = $P1
+    $S1 = substr $S1, pos, 1
+    $S0 .= $S1
+    $S0 .= "'"
     $P0["_message"] = $S0
     throw $P0
     .return ()
@@ -584,6 +610,8 @@
     .local pmc sub
     .local pmc pad
 
+    null code
+    null sub
     if has_name goto p6rule_1
     name = "_pge_rule"
     if has_gram goto p6rule_1
@@ -595,6 +623,9 @@
 
     $P0 = find_global "PGE::Rule", "p6rule"
     exp = $P0(exp)
+    unless exp goto end
+    $S0 = exp
+    if $S0 != pattern goto end
     pad = new .Hash
     $P0 = new .Hash
     pad["reps"] = $P0
@@ -604,6 +635,7 @@
     $P0 = exp["expr"]
     $P0 = $P0.p6analyze(pad)
     exp["expr"] = $P0
+    if_null $P0, end
 
     $P0 = new .String
     $P0 = "\n.namespace [ \""

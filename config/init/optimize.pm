@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: optimize.pm 10881 2006-01-04 05:04:38Z jhoblitt $
+# $Id: optimize.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ the C<CCFLAGS>. Should this be part of config/inter/progs.pm ? XXX
 package init::optimize;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -34,7 +34,7 @@ sub runstep
     # is given, however, use that instead. 
     my $optimize = $conf->options->get('optimize');
     if (defined $optimize) {
-        $result = 'yes';
+        $self->set_result('yes');
         # disable debug flags
         $conf->data->set(cc_debug => '');
         $conf->data->add(' ', ccflags => "-DDISABLE_GC_DEBUG=1 -DNDEBUG");
@@ -50,9 +50,11 @@ sub runstep
             $conf->data->set(optimize => $optimize);
         }
     } else {
-        $result = 'no';
+        $self->set_result('no');
         print "(none requested) " if $conf->options->get('verbose');
     }
+
+    return $self;
 }
 
 1;

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: env.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: env.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determining if the C library has C<setenv()> and C<unsetenv()>.
 package auto::env;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -51,17 +51,19 @@ sub runstep
 
     if ($setenv && $unsetenv) {
         print " (both) " if $verbose;
-        $result = 'both';
+        $self->set_result('both');
     } elsif ($setenv) {
         print " (setenv) " if $verbose;
-        $result = 'setenv';
+        $self->set_result('setenv');
     } elsif ($unsetenv) {
         print " (unsetenv) " if $verbose;
-        $result = 'unsetenv';
+        $self->set_result('unsetenv');
     } else {
         print " (no) " if $verbose;
-        $result = 'no';
+        $self->set_result('no');
     }
+
+    return $self;
 }
 
 1;

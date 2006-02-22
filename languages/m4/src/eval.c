@@ -1,4 +1,4 @@
-/* $Id: eval.c 9723 2005-11-02 20:15:57Z bernhard $ */
+/* $Id: eval.c 11162 2006-01-13 22:13:22Z jonathan $ */
 
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
@@ -18,6 +18,7 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define PARROT_IN_EXTENSION
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -85,7 +86,7 @@ static eval_error          exp_term( eval_token, eval_t * );
 static eval_error          unary_term( eval_token, eval_t * );
 static eval_error          simple_term( eval_token, eval_t * );
 boolean_for_m4             evaluate (const char *, eval_t *);
-int                        m4_evaluate(void *);
+PARROT_DYNEXT_EXPORT int   m4_evaluate(void *);
 
 /*--------------------.
 | Lexical functions.  |

@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Test.pm 10913 2006-01-05 15:16:04Z rafl $
+# $Id: Test.pm 11603 2006-02-16 23:02:20Z particle $
 
 =head1 NAME
 
@@ -211,7 +211,7 @@ require Test::More;
           );
 @ISA = qw(Exporter);
 
-# tell parrot it's being tested.  this disables searching of installed libraries
+# tell parrot it's being tested--disables searching of installed libraries.
 # (see Parrot_get_runtime_prefix in src/library.c).
 $ENV{PARROT_TEST} = 1 unless defined($ENV{PARROT_TEST});
 
@@ -294,6 +294,7 @@ sub run_command {
 
 sub per_test {
     my ($ext, $test_no) = @_;
+    return unless defined $ext and defined $test_no;
 
     my $t = $0;  # $0 is name of the test script
     $t =~ s/\.t$/_$test_no$ext/;
@@ -514,13 +515,12 @@ sub _generate_functions {
             my $meth = $language_test_map{$func};
             if ( my $prefix = $builtin_language_prefix{$language} ) { 
                 my $test_func = "${package}::${prefix}_${meth}";
-                &$test_func( @remaining );
+                $test_func->( @remaining );
             }
             else {
                 # TODO: $language should be the name of the test Module
                 #       that would open the door for Scheme::Test
-                # try it both ways
-                $language = ucfirst($language) unless ( $language eq 'm4' );
+                $language = ucfirst($language);
 
                 # make sure TODO will work, by telling Test::Builder which package
                 # the .t file is in (one more than usual, due to the extra layer
@@ -528,8 +528,9 @@ sub _generate_functions {
                 my $level = $builder->level();
                 $builder->level(2);
 
-                # get modified parrot command.
+                # Load module that knows how to test the language implementation
                 require "Parrot/Test/$language.pm";
+
                 # set the builder object, and parrot config.
                 my $obj = eval "Parrot::Test::${language}->new()";
                 $obj->{builder} = $builder;

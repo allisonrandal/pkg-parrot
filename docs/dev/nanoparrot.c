@@ -1,5 +1,6 @@
 /*
- * nanoparrot.c
+ * Copyright (C) 2001-2006, The Perl Foundation.
+ * $Id: nanoparrot.c 11525 2006-02-13 18:40:19Z particle $
  *
  * - demonstrates how the interpreter interprets bytecode
  *   its vastly simplified but the very basics are the same

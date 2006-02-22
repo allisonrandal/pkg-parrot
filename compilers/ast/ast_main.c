@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-$Id: ast_main.c 10656 2005-12-25 15:00:46Z leo $
+$Id: ast_main.c 11355 2006-01-26 12:23:21Z leo $
 
 =head1 NAME
 
@@ -19,7 +19,6 @@ The AST (Abstract Syntax Tree) represents the code of a HLL source module.
 */
 
 #include "../../compilers/imcc/imc.h"
-#include "parrot/method_util.h"
 #include "ast.h"
 
 extern FILE* ASTin;

@@ -1,7 +1,7 @@
 /*
  * jit.h
  *
- * $Id: jit.h 8365 2005-06-15 08:32:37Z leo $
+ * $Id: jit.h 11467 2006-02-07 20:20:14Z leo $
  */
 
 #if !defined(PARROT_JIT_H_GUARD)
@@ -9,9 +9,6 @@
 
 typedef void (*jit_f)(Interp *interpreter, opcode_t *pc);
 
-jit_f build_asm(Interp *interpreter, opcode_t *pc,
-                opcode_t *code_start, opcode_t *code_end,
-                void *objfile);
 
 void Parrot_destroy_jit(void *);
 
@@ -165,6 +162,18 @@ typedef struct {
     INTVAL                          *slot_ptr;
 } Parrot_jit_constant_pool_t;
 
+typedef enum {
+    JIT_CODE_FILE,
+    JIT_CODE_SUB,
+    JIT_CODE_SUB_REGS_ONLY,
+
+    /* size */
+    JIT_CODE_TYPES,
+    /* special cases */  
+    JIT_CODE_RECURSIVE     = 0x10,
+    JIT_CODE_SUB_REGS_ONLY_REC = JIT_CODE_SUB_REGS_ONLY|JIT_CODE_RECURSIVE
+} enum_jit_code_type;
+
 /*  Parrot_jit_info_t
  *      All the information needed to jit the bytecode will be here.
  *
@@ -186,8 +195,10 @@ typedef struct {
     Parrot_jit_arena_t               arena;
     Parrot_jit_optimizer_t          *optimizer;
     Parrot_jit_constant_pool_t      *constant_pool;
-    char                            *intval_map;
-    char                            *floatval_map;
+    enum_jit_code_type              code_type; 
+    int                             flags;
+    const struct jit_arch_info_t    *arch_info;
+    int                              n_args;
 #  if EXEC_CAPABLE
     Parrot_exec_objfile_t           *objfile;
 #  else
@@ -220,12 +231,6 @@ extern Parrot_jit_fn_info_t op_exec[];
 
 void Parrot_jit_newfixup(Parrot_jit_info_t *jit_info);
 
-void Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-                      Interp *interpreter);
-
-void Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-                        Interp *interpreter);
-
 void Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
                         Interp *interpreter);
 
@@ -246,23 +251,8 @@ void Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
 
 /*
  * interface functions for the register save/restore code
- *
- * 1) old style with memory location of the register
- */
-
-void Parrot_jit_emit_mov_mr_n(
-    Interp *interpreter, char *mem, int);
-void Parrot_jit_emit_mov_mr(
-    Interp *interpreter, char *mem, int);
-void Parrot_jit_emit_mov_rm_n(
-    Interp *interpreter, int reg, char *mem);
-void Parrot_jit_emit_mov_rm(
-    Interp *interpreter, int reg, char *mem);
-
-/*
- * 2) new style with offsets relative to the base register
- *    These are used if the platform defines the macro
- *    Parrot_jit_emit_get_base_reg_no
+ * with offsets relative to the base register (obtained by
+ * Parrot_jit_emit_get_base_reg_no)
  */
 void Parrot_jit_emit_mov_mr_n_offs(
     Interp *, int base_reg, size_t offs, int src_reg);
@@ -273,6 +263,58 @@ void Parrot_jit_emit_mov_rm_n_offs(
 void Parrot_jit_emit_mov_rm_offs(
     Interp *, int dst_reg, int base_reg, size_t offs);
 
+/*
+ * interface to architecture specific details
+ */
+typedef void (*jit_arch_f)(Parrot_jit_info_t *, Interp *);
+
+typedef struct {
+    /*
+     * begin function - emit ABI call prologue 
+     */
+    jit_arch_f jit_begin;
+
+    int n_mapped_I;
+    int n_preserved_I;
+    const char *map_I;
+    int n_mapped_F;
+    int n_preserved_F;
+    const char *map_F;
+} jit_arch_regs;
+
+typedef void (*mov_RM_f)(Parrot_jit_info_t *, 
+        int cpu_reg, int base_reg, INTVAL offs);
+typedef void (*mov_MR_f)(Parrot_jit_info_t *, 
+        int base_reg, INTVAL offs, int cpu_reg);
+        
+typedef struct jit_arch_info_t {
+    /* CPU <- Parrot reg move functions */
+    mov_RM_f mov_RM_i;
+    mov_RM_f mov_RM_n;
+    /* Parrot <- CPU reg move functions */
+    mov_MR_f mov_MR_i;
+    mov_MR_f mov_MR_n;
+
+    /* fixup branches and calls after codegen */
+    jit_arch_f jit_dofixup;
+    /* flush caches */
+    jit_arch_f jit_flush_cache;
+    /* register mapping info */
+    const jit_arch_regs regs[JIT_CODE_TYPES];
+} jit_arch_info;
+
+/*
+ * return the jit_arch_info for the given JIT_CODE type
+ */
+const jit_arch_info * Parrot_jit_init(Interp *);
+
+/*
+ * interface to create JIT code
+ */
+Parrot_jit_info_t *
+parrot_build_asm(Interp *interpreter, 
+                opcode_t *code_start, opcode_t *code_end,
+                void *objfile, enum_jit_code_type);
 /*
  * NCI interface
  */

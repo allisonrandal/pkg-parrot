@@ -1,7 +1,7 @@
 /* pmc_freeze.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: pmc_freeze.h 8292 2005-06-08 13:53:36Z leo $
+ *     $Id: pmc_freeze.h 11109 2006-01-12 01:19:20Z jonathan $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:
@@ -84,13 +84,13 @@ typedef struct _visit_info {
 /*
  * public interfaces
  */
-STRING* Parrot_freeze(Parrot_Interp, PMC*);
-STRING* Parrot_freeze_at_destruct(Parrot_Interp, PMC*);
+PARROT_API STRING* Parrot_freeze(Parrot_Interp, PMC*);
+PARROT_API STRING* Parrot_freeze_at_destruct(Parrot_Interp, PMC*);
 
-PMC*    Parrot_thaw(Parrot_Interp, STRING*);
-PMC*    Parrot_thaw_constants(Parrot_Interp, STRING*);
+PARROT_API PMC*    Parrot_thaw(Parrot_Interp, STRING*);
+PARROT_API PMC*    Parrot_thaw_constants(Parrot_Interp, STRING*);
 
-PMC*    Parrot_clone(Parrot_Interp, PMC*);
+PARROT_API PMC*    Parrot_clone(Parrot_Interp, PMC*);
 
 #endif /* PARROT_PMC_FREEZE_H_GUARD */
 

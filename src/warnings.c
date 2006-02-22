@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: warnings.c 9475 2005-10-13 12:30:33Z leo $
+$Id: warnings.c 11579 2006-02-16 09:49:44Z leo $
 
 =head1 NAME
 
@@ -10,6 +10,8 @@ src/warnings.c - Warning and error reporting
 
 Parrot C<STRING> and C string versions of a function to print warning/error
 messages.
+
+=over 4
 
 =cut
 
@@ -34,7 +36,7 @@ Prints the bytecode location of the warning or error to C<PIO_STDERR>.
 void
 print_pbc_location(Parrot_Interp inter)
 {
-    PIO_eprintf(inter, "%Ss",
+    PIO_eprintf(inter, "%Ss\n",
             Parrot_Context_infostr(inter, CONTEXT(inter->ctx)));
 }
 

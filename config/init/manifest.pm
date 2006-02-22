@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: manifest.pm 10710 2005-12-28 00:25:21Z jhoblitt $
+# $Id: manifest.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Uses C<ExtUtils::Manifest> to check that the distribution is complete.
 package init::manifest;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -30,8 +30,8 @@ sub runstep
     my ($self, $conf) = @_;
 
     if ($conf->options->get('nomanicheck')) {
-        $result = 'skipped';
-        return;
+        $self->set_result('skipped');
+        return $self;
     }
 
     my @missing = ExtUtils::Manifest::manicheck();
@@ -45,8 +45,10 @@ files and then try running Configure again.
 
 END
 
-        exit 1;
+        return;
     }
+
+    return $self;
 }
 
 1;

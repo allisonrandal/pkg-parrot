@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: types.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: types.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ be.
 package inter::types;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -45,6 +45,8 @@ sub runstep
         nv       => $floatval,
         opcode_t => $opcode
     );
+
+    return $self;
 }
 
 1;

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: pack.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: pack.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Figures out how to C<pack()> Parrot's types.
 package auto::pack;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -94,6 +94,8 @@ AARGH
 Configure.pl:  Unable to find an integer type that fits a pointer.
 AARGH
     }
+
+    return $self;
 }
 
 1;

@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: data.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: data.t 11387 2006-01-31 13:12:07Z leo $
 
 use strict;
 use warnings;
@@ -173,7 +173,7 @@ can_ok('Parrot::Configure::Data', qw(
 {
     my $pcd = Parrot::Configure::Data->new;
 
-    $pcd->set(
+    $pcd->add('',
         'a' => 1,
         'b' => 2,
         'c' => 3,

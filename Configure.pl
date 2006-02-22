@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pl 10930 2006-01-06 00:36:52Z particle $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: Configure.pl 11690 2006-02-21 01:55:14Z jhoblitt $
 
 =head1 NAME
 
@@ -58,11 +58,6 @@ This turns on the user prompts.
 =back
 
 Compile Options
-
-You can add and remove option values with C<< :rem{<opt>} >> and C<<
-:add{<opt>} >>. For example:
-
-    perl Configure.pl --ccflags=":rem{-g} :add{-O2}"
 
 =over
 
@@ -272,7 +267,7 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $cvsid='$Id: Configure.pl 10930 2006-01-06 00:36:52Z particle $';
+      my $cvsid='$Id: Configure.pl 11690 2006-02-21 01:55:14Z jhoblitt $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
 $cvsid
@@ -298,9 +293,6 @@ General Options:
    --ask                Have Configure ask for commonly-changed info
 
 Compile Options:
-
-You can add and remove option values with :rem{<opt>} and :add{<opt>}
-e.g. : --ccflags=":rem{-g} :add{-O2}"
 
    --debugging=0        Disable debugging, default = 1
    --inline             Compiler supports inline
@@ -428,11 +420,11 @@ my @steps = qw(
     auto::env
     auto::aio
     auto::gmp
+    auto::readline
     auto::gdbm
     auto::snprintf
     auto::perldoc
     auto::python
-    auto::antlr
     auto::bc
     auto::m4
     gen::icu
@@ -454,7 +446,7 @@ my $conf = Parrot::Configure->new;
 $conf->add_steps(@steps);
 $conf->options->set(%args);
 # Run the actual steps
-$conf->runsteps;
+$conf->runsteps or exit(1);
 
 # tell users what to do next
 my $make = $conf->data->get('make');

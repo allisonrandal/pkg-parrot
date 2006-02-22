@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: config_h.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: config_h.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ features.
 package gen::config_h;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -121,6 +121,8 @@ EOF
     close HH;
 
     move_if_diff("$hh.tmp", $hh);
+
+    return $self;
 }
 
 1;

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io.c 10582 2005-12-19 16:19:22Z leo $
+$Id: io.c 11501 2006-02-10 18:27:13Z particle $
 
 =head1 NAME
 

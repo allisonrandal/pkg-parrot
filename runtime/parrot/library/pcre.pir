@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pcre.pir 10751 2005-12-28 22:47:30Z particle $
+# $Id: pcre.pir 11563 2006-02-16 00:42:07Z jisom $
 
 =head1 TITLE
 
@@ -169,6 +169,7 @@ Returns the match.
 
 .include "library/config.pir"
 
+=back
 
 =head1 BUGS
 

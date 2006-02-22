@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sub.c 10656 2005-12-25 15:00:46Z leo $
+$Id: sub.c 11612 2006-02-17 02:29:10Z rgrjr $
 
 =head1 NAME
 
@@ -19,7 +19,6 @@ Subroutines, continuations, co-routines and other fun stuff...
 */
 
 #include "parrot/parrot.h"
-#include "parrot/method_util.h"
 #include "parrot/oplib/ops.h"
 
 /*
@@ -126,7 +125,8 @@ new_closure(Interp *interp)
 new_continuation(Interp *interp, struct Parrot_cont *to)>
 
 Returns a new C<Parrot_cont> to the context of C<to> with its own copy of the
-current interpreter context.
+current interpreter context.  If C<to> is C<NULL>, then the C<to_ctx> is set
+to the current context.
 
 =cut
 
@@ -348,6 +348,8 @@ Parrot_Context_info(Interp *interpreter, parrot_context_t *ctx,
         size_t i, n;
         opcode_t *pc = sub->seg->base.data;
         struct PackFile_Debug *debug = sub->seg->debugs;
+        if (!debug)
+            return 0;
         for (i = n = 0; n < sub->seg->base.size; i++) {
             op_info_t *op_info = &interpreter->op_info_table[*pc];
             opcode_t var_args = 0;
@@ -378,7 +380,7 @@ Parrot_Context_infostr(Interp *interpreter, parrot_context_t *ctx)
 
     if (Parrot_Context_info(interpreter, ctx, &info)) {
         return Parrot_sprintf_c(interpreter,
-            "%s '%Ss' pc %d (%s:%d)\n", msg,
+            "%s '%Ss' pc %d (%s:%d)", msg,
             info.fullname, info.pc, info.file, info.line);
     }
     return NULL;
@@ -453,6 +455,12 @@ parrot_new_closure(Interp *interpreter, PMC *sub_pmc)
     clos->outer_ctx = ctx;
     /* the closure refs now this context too */
     ctx->ref_count++;
+#if CTX_LEAK_DEBUG
+    if (Interp_debug_TEST(interpreter, PARROT_CTX_DESTROY_DEBUG_FLAG)) {
+        fprintf(stderr, "[alloc closure  %p, outer_ctx %p, ref_count=%d]\n",
+                clos_pmc, ctx, (int) ctx->ref_count);
+    }
+#endif
     return clos_pmc;
 }
 /*

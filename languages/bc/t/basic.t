@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 10981 2006-01-08 11:46:00Z bernhard $
+# $Id: basic.t 11556 2006-02-15 22:05:22Z bernhard $
 
 =head1 NAME
 
@@ -15,8 +15,16 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib", "$FindBin::Bin/../../../lib";
 
-use Parrot::Test tests => 75;
+use Parrot::Config qw(%PConfig);
+use Parrot::Test;
 use Test::More;
+
+if ( $PConfig{has_python} ) {
+  plan tests => 78;
+}
+else {
+  plan skip_all => 'ANTLR2 based bc needs Python';
+}
 
 # A little helper to make setting up tests easier
 sub run_tests {
@@ -44,8 +52,13 @@ sub run_tests {
 }
 
 my @tests = (
+       # single non-negative integer 
+       [ '1', [ 1 ], 'positive int 1', with_past => 1, with_antlr3 => 1  ],
+       [ '0', [ 0 ], 'zero', with_past => 1, with_antlr3 => 1  ],
+       [ '2', [ 2 ], 'positive int', with_past => 1, with_antlr3 => 1  ],
+       [ '12345678', [ 12345678 ], 'another positive int', with_past => 1, with_antlr3 => 1  ],
+
        # multiple lines
-       [ '1', [ 1 ], 'one line', with_past => 1  ],
        [ "1\n2", [ 1, 2 ], 'two lines', with_past => 1  ],
        [ "1\n2\n3\n4\n\n5\n6\n7", [ 1, 2, 3, 4, 5, 6, 7 ], 'seven lines', with_past => 1  ],
 
@@ -64,13 +77,13 @@ my @tests = (
        #[ '+1', '1', 'unary +', with_past => 1, ], Surprise, there is no unary + in POSIX bc
        [ '-1', '-1', 'unary -', with_past => 1, ],
        [ '0', '0', undef, with_past => 1, ],
-       [ '-0', '0', undef, with_past => 0, ],
+       [ '-0', '0', undef, with_past => 1, ],
        [ '1', '1', undef, with_past => 1, ],
        [ '-10', '-10', undef, with_past => 1, ],
        [ '123456789', '123456789', undef, with_past => 1, ],
        [ '-123456789', '-123456789', undef, with_past => 1, ],
-       [ '0001', '1', undef, with_past => 0, ],
-       [ '-0001', '-1', undef, with_past => 0 ],
+       [ '0001', '1', undef, with_past => 1, ],
+       [ '-0001', '-1', undef, with_past => 1 ],
 
        # floats
        [ '-1.0001', '-1.0001' ],

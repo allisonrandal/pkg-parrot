@@ -1,4 +1,4 @@
-# $Id: Replay.pir 10741 2005-12-28 20:32:30Z particle $
+# $Id: Replay.pir 11602 2006-02-16 22:15:36Z leo $
 
 =head1 TITLE
 
@@ -177,7 +177,7 @@ END:
     
     classoffset $I0, self, "Stream::Replay::Buffer"
 
-    temp = new StringArray
+    temp = new ResizableStringArray
     setattribute self, $I0, temp
     
     inc $I0

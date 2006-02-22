@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_include.pm 10653 2005-12-25 08:55:48Z jhoblitt $
+# $Id: parrot_include.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Generates the F<runtime/parrot/include> files.
 package gen::parrot_include;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -37,7 +37,7 @@ my @files = qw(
     include/parrot/string.h
     include/parrot/vtable.h
     include/parrot/warnings.h
-    src/classes/timer.pmc
+    src/pmc/timer.pmc
     src/utils.c
 );
 my $destdir = 'runtime/parrot/include';
@@ -149,6 +149,8 @@ EOF
         close(F);
     }
     $conf->data->set(TEMP_gen_pasm_includes => join("\t\\\n\t", @generated));
+
+    return $self;
 }
 
 1;

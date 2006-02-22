@@ -1,4 +1,4 @@
-# $Id: lazy.pir 10743 2005-12-28 20:48:15Z particle $
+# $Id: lazy.pir 11641 2006-02-18 12:54:27Z bernhard $
 
 =head1 DESCRIPTION
 
@@ -366,7 +366,7 @@ not_s1:
 	s2ik1 = new_expr(expS2, i, k1c)
 	lhs[1] = s2ik1
 	$P0 = new_expr(expLR, NUL, NUL)
-	$P1 = new_expr(expK1, $P0)
+	$P1 = new_expr(expK1, $P0, NUL)
 	lhs[2] = $P1
 	goto s2
 not_lr:

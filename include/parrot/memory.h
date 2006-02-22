@@ -1,7 +1,7 @@
 /* memory.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: memory.h 6853 2004-10-18 01:35:33Z brentdax $
+ *     $Id: memory.h 11108 2006-01-12 00:42:48Z jonathan $
  *  Overview:
  *     This is the api header for the memory subsystem
  *  Data Structure and Algorithms:
@@ -13,13 +13,13 @@
 #if !defined(PARROT_MEMORY_H_GUARD)
 #define PARROT_MEMORY_H_GUARD
 #include <assert.h>
-void *mem_sys_allocate(size_t);
+PARROT_API void *mem_sys_allocate(size_t);
 
-void *mem_sys_allocate_zeroed(size_t);
+PARROT_API void *mem_sys_allocate_zeroed(size_t);
 
-void *mem__sys_realloc(void *, size_t);
+PARROT_API void *mem__sys_realloc(void *, size_t);
 #define mem_sys_realloc(x,y) (assert(x!=NULL), mem__sys_realloc(x,y))
-void mem_sys_free(void *);
+PARROT_API void mem_sys_free(void *);
 
 void *mem__internal_allocate(size_t, const char *, int);
 #define mem_internal_allocate(x) mem__internal_allocate(x, __FILE__, __LINE__)

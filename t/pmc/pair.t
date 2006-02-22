@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pair.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: pair.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -22,7 +22,7 @@ Tests the C<Pair> PMC.
 
 =cut
 
-output_is(<<'CODE', <<'OUT', 'create');
+pasm_output_is(<<'CODE', <<'OUT', 'create');
     new P0, .Pair
     print "ok 1\n"
     new P1, .Integer

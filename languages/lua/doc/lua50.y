@@ -65,22 +65,36 @@ _end_block
 stat
 :	varlist1	'='	explist1
 |	functioncall	%prec	NONARG
-|	DO	block	END
-|	WHILE	exp	DO	block	END
-|	REPEAT	block	UNTIL	exp
-|	IF	exp	THEN	block	_elseif_star	ELSE	block	END
-|	IF	exp	THEN	block	_elseif_star	END
-|	FOR	NAME	'='	exp	','	exp	','	exp	DO	block	END
-|	FOR	NAME	'='	exp	','	exp	DO	block	END
-|	FOR	namelist	IN	explist1	DO	block	END
-|	FUNCTION	funcname	funcbody
-|	LOCAL	FUNCTION	NAME	funcbody
+|	DO
+		block	END
+|	WHILE	exp	DO
+					block	END
+|	REPEAT
+			block	UNTIL	exp
+|	_if_then	block	_elseif_star	ELSE
+													block	END
+|	_if_then	block	_elseif_star	END
+|	FOR	NAME	'='	exp	','	exp	','	exp	DO
+											block	END
+|	FOR	NAME	'='	exp	','	exp	DO
+									block	END
+|	FOR	namelist	IN	explist1	DO
+										block	END
+|	FUNCTION
+				funcname	funcbody
+|	LOCAL	FUNCTION
+						NAME	funcbody
 |	LOCAL	namelist	'='	explist1
 |	LOCAL	namelist
 ;
 
+_if_then
+:	IF	exp	THEN
+;
+
 _elseif_star
-:	_elseif_star	ELSEIF	exp	THEN	block
+:	_elseif_star	ELSEIF	exp	THEN
+										block
 |	/* empty */
 ;
 
@@ -171,7 +185,8 @@ args
 ;
 
 function
-:	FUNCTION	funcbody
+:	FUNCTION
+				funcbody
 ;
 
 funcbody
@@ -180,9 +195,14 @@ funcbody
 ;
 
 parlist1
-:	namelist	','	'...'
-|	namelist
+:	parlist	','	'...'
+|	parlist
 |	'...'
+;
+
+parlist
+:	parlist	','	NAME
+|	NAME
 ;
 
 tableconstructor

@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cygwin.pm 10985 2006-01-08 13:36:28Z leo $
+# $Id: cygwin.pm 11313 2006-01-22 22:58:27Z nickg $
 
 package init::hints::cygwin;
 
@@ -27,15 +27,12 @@ sub runstep
         libs                => $libs,
         has_static_linking  => 0,
         has_dynamic_linking => 1,
-        parrot_is_shared    => 1
+        parrot_is_shared    => 1,
+        sym_export => '__declspec(dllexport)',
+        sym_import => '__declspec(dllimport)'
     );
 
-    # We need to define inet_aton on Cygwin.  The contents of the --define
-    # switch are in $_[2].  XXX EVIL EVIL EVIL HACK.  If you need to do this
-    # elsewhere, please do everyone a favor and write a proper interface for
-    # modifying the command-line args, or even better do something to make the
-    # define interface not suck.
-    # XXX CLI options shouldn't be being modified like this  
+    # inet_aton needs to be defined on Cygwin.
     my $define = $conf->options->get('define');
     unless ($define) {
         $define = 'inet_aton';

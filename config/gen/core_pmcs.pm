@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: core_pmcs.pm 10653 2005-12-25 08:55:48Z jhoblitt $
+# $Id: core_pmcs.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Generates the core PMC list F<include/parrot/core_pmcs.h>.
 package gen::core_pmcs;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -31,6 +31,8 @@ sub runstep
     $self->generate_h($conf);
     $self->generate_c($conf);
     $self->generate_pm($conf);
+
+    return $self;
 }
 
 sub generate_h

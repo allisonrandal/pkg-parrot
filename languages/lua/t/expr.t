@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: expr.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: expr.t 11586 2006-02-16 17:44:54Z fperrad $
 
 =head1 NAME
 
@@ -22,10 +22,8 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 6;
-
-SKIP: {
-skip("pb convertion.", 3);
+use Parrot::Test tests => 11;
+use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'relational op (by reference)' );
 a = {}; a.x = 1; a.y = 0;
@@ -53,7 +51,12 @@ print(2<"15")
 CODE
 /compare/
 OUT
-}
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'relational op' );
+print("2"<15)
+CODE
+/compare/
+OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'logical op' );
 print(4 and 5)
@@ -69,6 +72,24 @@ false
 4
 5
 text
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'logical op' );
+print(10 or error())
+print(nil or "a")
+print(nil and 10)
+print(false and error())
+print(false and nil)
+print(false or nil)
+print(10 and 20)
+CODE
+10
+a
+nil
+false
+false
+nil
+20
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'logical not' );
@@ -101,4 +122,45 @@ Hello World
 Hello
 OUT
 
+language_output_is( 'lua', <<'CODE', <<'OUT', 'coercion' );
+print("10" + 1)
+print("10 + 1")
+print("-5.3" * "2")
+print(10 .. 20)
+print(tostring(10) == "10")
+print(10 .. "" == "10")
+CODE
+11
+10 + 1
+-10.6
+1020
+true
+true
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'no coercion' );
+print("hello" + 1)
+CODE
+/perform arithmetic/
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'clone ?' );
+print(10 + 2)
+print(10 + 5)
+a = 20
+print(a + 3)
+print(a + 6)
+b = 30
+c = b + 4
+d = b + 7
+print(c)
+print(d)
+CODE
+12
+15
+23
+26
+34
+37
+OUT
 

@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: streams.t 10741 2005-12-28 20:32:30Z particle $
+# $Id: streams.t 11604 2006-02-16 23:31:37Z leo $
 
 use strict;
 use warnings;
@@ -252,7 +252,7 @@ LOOP:
 
 .sub _combiner
     .param pmc strings
-    .param string str
+    .local string str
     .local string ret
 
     ret = strings[0]

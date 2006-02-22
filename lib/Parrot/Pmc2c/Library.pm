@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Library.pm 10361 2005-12-05 23:09:12Z particle $
+# $Id: Library.pm 11389 2006-01-31 13:42:31Z jonathan $
 
 =head1 NAME
 
@@ -27,7 +27,7 @@ use Parrot::Pmc2c qw(dynext_load_code dont_edit);
 =item C<new($opt, $vtable_dump, %pmcs)>
 
     $library = Parrot::Pmc2c::Library->new
-        ( $options,     # hash refernce, the same passet to other constructors
+        ( $options,     # hash refernce, the same passed to other constructors
           $vtable_dump, # vtable.dump
           pmc1        => $pmc1_dump,
           pmc2        => $pmc2_dump,
@@ -149,6 +149,7 @@ sub includes() {
     my $self = shift;
     my $cout = "";
     $cout .= <<"EOC";
+#define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "parrot/dynext.h"

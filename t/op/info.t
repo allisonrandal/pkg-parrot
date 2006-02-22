@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: info.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: info.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ Tests the information finding operations.
 =cut
 
 
-output_is(<<'CODE', 'yes', "find_type");
+pasm_output_is(<<'CODE', 'yes', "find_type");
 	set I0, .PerlArray
 	find_type I1, "PerlArray"
 	eq I0, I1, YES

@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: python.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: python.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ Store version of Python.
 package auto::python;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -43,11 +43,13 @@ sub runstep
     my $has_python_2_4 = 0;
     if ($has_python) {
         $has_python_2_4 = ($major eq '2' && $minor eq '4') ? 1 : 0;
-        $result = "yes, $major.$minor.$revision";
+        $self->set_result("yes, $major.$minor.$revision");
     } else {
-        $result = 'no';
+        $self->set_result('no');
     }
     $conf->data->set(has_python_2_4 => $has_python_2_4);
+
+    return $self;
 }
 
 1;

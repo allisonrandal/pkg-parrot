@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: nci.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: nci.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -825,7 +825,7 @@ CODE
 OUTPUT
 
 
-output_like(<<'CODE', <<'OUTPUT', "nci_pi - align");
+pasm_output_like(<<'CODE', <<'OUTPUT', "nci_pi - align");
   loadlib P1, "libnci_test"
   dlfunc P0, P1, "nci_pi", "pi"
   # this test function returns a struct { char; int }

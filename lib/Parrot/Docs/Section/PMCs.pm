@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: PMCs.pm 10620 2005-12-22 07:48:49Z fperrad $
+# $Id: PMCs.pm 11248 2006-01-18 20:02:15Z bernhard $
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ sub new
 {
 	my $self = shift;
 	my $dist = Parrot::Distribution->new;
-    my $dir = $dist->existing_directory_with_name('src/classes');
+    my $dir = $dist->existing_directory_with_name('src/pmc');
 	
 	my @concrete_items = ();
 	my @abstract_items = ();

@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: table.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: table.t 11675 2006-02-20 08:00:49Z fperrad $
 
 =head1 NAME
 
@@ -13,11 +13,11 @@ t/pmc/table.t - LuaTable
 =head1 DESCRIPTION
 
 Tests C<LuaTable> PMC
-(implemented in F<languages/lua/classes/luatable.pmc>).
+(implemented in F<languages/lua/pmc/luatable.pmc>).
 
 =cut
 
-use Parrot::Test tests => 10;
+use Parrot::Test tests => 12;
 use Test::More;
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
@@ -30,7 +30,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
     bool1 = isa pmc1, "scalar"
     print bool1
     print "\n"
-    bool1 = isa pmc1, "Hash"
+    bool1 = isa pmc1, "LuaBase"
     print bool1
     print "\n"
     bool1 = isa pmc1, "LuaTable"
@@ -90,7 +90,6 @@ pir_output_like(<< 'CODE', << 'OUTPUT', "check get_string");
     find_type $I0, "LuaTable"
     .local pmc pmc1
     pmc1 = new $I0
-    pmc1["key"] = "value"
     print pmc1
     print "\n"
     end
@@ -109,7 +108,6 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check get_bool");
     bool1 = istrue pmc1
     print bool1
     print "\n"
-    pmc1["key"] = "value"
     bool1 = istrue pmc1
     print bool1
     print "\n"
@@ -251,3 +249,39 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL");
 CODE
 1
 OUTPUT
+
+pir_output_like(<< 'CODE', << 'OUTPUT', "check tostring");
+.HLL "Lua", "lua_group"
+.sub _main
+    .local pmc pmc1
+    pmc1 = new .LuaTable
+    print pmc1
+    print "\n"
+    $P0 = pmc1."tostring"()
+    print $P0
+    print "\n"
+    $S0 = typeof $P0
+    print $S0
+    print "\n"
+.end
+CODE
+/table: [0-9A-Fa-f]{8}\ntable: [0-9A-Fa-f]{8}\nstring/
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check tonumber");
+.HLL "Lua", "lua_group"
+.sub _main
+    .local pmc pmc1
+    pmc1 = new .LuaTable
+    $P0 = pmc1."tonumber"()
+    print $P0
+    print "\n"
+    $S0 = typeof $P0
+    print $S0
+    print "\n"
+.end
+CODE
+nil
+nil
+OUTPUT
+

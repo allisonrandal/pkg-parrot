@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: dynext.c 10472 2005-12-12 22:12:28Z particle $
+$Id: dynext.c 11248 2006-01-18 20:02:15Z bernhard $
 
 =head1 NAME
 
@@ -281,7 +281,7 @@ Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer)
     }
 
     /*
-     * work around gcc 3.3.3 and other problem with dynclasses
+     * work around gcc 3.3.3 and other problem with dynpmcs
      * something during library loading doesn't stand a DOD run
      */
     Parrot_block_DOD(interpreter);
@@ -327,7 +327,7 @@ Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer)
 
 =head1 SEE ALSO
 
-F<include/parrot/dynext.h> and F<src/classes/parrotlibrary.pmc>.
+F<include/parrot/dynext.h> and F<src/pmc/parrotlibrary.pmc>.
 
 =head1 HISTORY
 

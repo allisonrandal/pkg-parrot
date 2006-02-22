@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: objects.c 10659 2005-12-25 17:49:33Z leo $
+$Id: objects.c 11500 2006-02-10 17:06:23Z coke $
 
 =head1 NAME
 
@@ -736,6 +736,7 @@ class_mro_merge(Interp* interpreter, PMC *seqs)
 {
     PMC *res, *seq, *cand, *nseqs, *s;
     INTVAL i, j, k;
+    cand = NULL; /* silence compiler uninit warning */
 
     res = pmc_new(interpreter, enum_class_ResizablePMCArray);
     while (1) {
@@ -1122,15 +1123,15 @@ find_method_direct_1(Interp* interpreter, PMC *class,
                               STRING *method_name)
 {
     PMC* method, *mro;
-    STRING *namespace_name;
+    STRING *name;
     INTVAL i, n;
 
     mro = class->vtable->mro;
     n = VTABLE_elements(interpreter, mro);
     for (i = 0; i < n; ++i) {
         class = VTABLE_get_pmc_keyed_int(interpreter, mro, i);
-        namespace_name = VTABLE_namespace_name(interpreter, class);
-        method = Parrot_find_global(interpreter, namespace_name, method_name);
+        name = VTABLE_name(interpreter, class);
+        method = Parrot_find_global(interpreter, name, method_name);
         TRACE_FM(interpreter, class, method_name, method);
         if (method) {
             return method;

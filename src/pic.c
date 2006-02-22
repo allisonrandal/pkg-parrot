@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: pic.c 10617 2005-12-21 17:16:03Z leo $
+$Id: pic.c 11572 2006-02-16 08:25:56Z leo $
 
 =head1 NAME
 
@@ -28,12 +28,13 @@ Given this bytecode:
   | infix_ic_p_p | .MMD_SUBTRACT | P5 | P6 | callmethodcc_sc | "method" |
   +--------------+---------------+----+----+-----------------+----------+
 
-In init_prederef the opcodes are replaced with prederef__, operands are
-replaced with their addresses:
+In init_prederef the opcodes are replaced with prederef__, operands
+are replaced with their addresses (&) in the const table or offsets
+(+) in the register frame:
 
     0               1              2    3    4                5
   +--------------+---------------+----+----+-----------------+----------+
-  | prederef__   |&.MMD_SUBTRACT | &P5| &P6| prederef__      |&"method" |
+  | prederef__   | .MMD_SUBTRACT | +P5| +P6| prederef__      |&"method" |
   +--------------+---------------+----+----+-----------------+----------+
 
 we have code->pic_index with an index into pic_store - the pic_index is
@@ -50,14 +51,14 @@ in the pic_store at the index pic_index:
 
     0                    1     2    3
   +--------------------+-----+----+----+-----------------------+-----+
-  | pic_infix___ic_p_p | MIC1|&P5 |&P6 | pic_callmethodcc___sc | MIC2|
+  | pic_infix___ic_p_p | MIC1|+P5 |+P6 | pic_callmethodcc___sc | MIC2|
   +--------------------+-----+----+----+-----------------------+-----+
 
 This can be further optimized due to static inlining:
 
     0                    1     2    3
   +--------------------+-----+----+----+-----------------------+-----+
-  | pic_inline_sub_p_p | MIC1|&P5 |&P6 | pic_callmethodcc___sc | MIC2|
+  | pic_inline_sub_p_p | MIC1|+P5 |+P6 | pic_callmethodcc___sc | MIC2|
   +--------------------+-----+----+----+-----------------------+-----+
 
 The opcode is an opcode number for the switched core or the actual code address
@@ -82,8 +83,15 @@ lookup of the cache has to be done in the opcode itself.
 #  include "parrot/oplib/core_ops_cgp.h"
 #endif
 
+#if HAS_JIT
+#include "parrot/exec.h"
+#include "parrot/jit.h"
+#endif
+
+#define PIC_TEST 1
+
 /* needs a Makefile dependency */
-/* #include "classes/pmc_integer.h" */
+/* #include "pmc/pmc_integer.h" */
 
 extern void Parrot_Integer_i_subtract_Integer(Interp* , PMC* pmc, PMC* value);
 
@@ -168,6 +176,7 @@ parrot_PIC_op_is_cached(Interp *interpreter, int op_code)
         case PARROT_OP_infix_ic_p_p: return 1;
         case PARROT_OP_get_params_pc: return 1;
         case PARROT_OP_set_returns_pc: return 1;
+        case PARROT_OP_set_args_pc: return 1;
     }
     return 0;
 }
@@ -259,7 +268,7 @@ pass_int(Interp *interpreter, PMC *sig, char *src_base, void **src,
 		char *dest_base, void **dest)
 {
     INTVAL arg;
-    int i, n = PMC_int_val(sig);
+    int i, n = SIG_ELEMS(sig);
     for (i = 2 ; n; ++i, --n) {
         arg = *(INTVAL *)(src_base + ((opcode_t*)src)[i]);
         *(INTVAL *)(dest_base + ((opcode_t*)dest)[i])= arg;
@@ -272,7 +281,7 @@ pass_num(Interp *interpreter, PMC *sig, char *src_base, void **src,
 		char *dest_base, void **dest)
 {
     FLOATVAL arg;
-    int i, n = PMC_int_val(sig);
+    int i, n = SIG_ELEMS(sig);
     for (i = 2 ; n; ++i, --n) {
         arg = *(FLOATVAL *)(src_base + ((opcode_t*)src)[i]);
         *(FLOATVAL *)(dest_base + ((opcode_t*)dest)[i])= arg;
@@ -285,7 +294,7 @@ pass_str(Interp *interpreter, PMC *sig, char *src_base, void **src,
 		char *dest_base, void **dest)
 {
     STRING* arg;
-    int i, n = PMC_int_val(sig);
+    int i, n = SIG_ELEMS(sig);
     for (i = 2 ; n; ++i, --n) {
         arg = *(STRING* *)(src_base + ((opcode_t*)src)[i]);
         *(STRING* *)(dest_base + ((opcode_t*)dest)[i])= arg;
@@ -298,7 +307,7 @@ pass_pmc(Interp *interpreter, PMC *sig, char *src_base, void **src,
 		char *dest_base, void **dest)
 {
     PMC* arg;
-    int i, n = PMC_int_val(sig);
+    int i, n = SIG_ELEMS(sig);
     for (i = 2 ; n; ++i, --n) {
         arg = *(PMC* *)(src_base + ((opcode_t*)src)[i]);
         *(PMC* *)(dest_base + ((opcode_t*)dest)[i])= arg;
@@ -311,15 +320,14 @@ pass_mixed(Interp *interpreter, PMC *sig, char *src_base, void **src,
 		char *dest_base, void **dest)
 {
     PMC* argP;
-    int i, n = PMC_int_val(sig);
+    int i, n = SIG_ELEMS(sig);
     INTVAL *bitp, bits;
     INTVAL argI;
     FLOATVAL argN;
     STRING *argS;
 
-    assert(PObj_is_PMC_TEST(sig));
-    assert(sig->vtable->base_type == enum_class_FixedIntegerArray);
-    bitp = PMC_data(sig);
+    ASSERT_SIG_PMC(sig);
+    bitp = SIG_ARRAY(sig);
     for (i = 2 ; n; ++i, --n) {
         bits = *bitp++;
         switch (bits) {
@@ -366,25 +374,24 @@ pass_mixed(Interp *interpreter, PMC *sig, char *src_base, void **src,
  * return argument count and type of the signature or -1 if not pic-able
  * the type PARROT_ARG_CONSTANT stands for mixed types or constants
  */
-static int
-pic_check_sig(Interp *interpreter, PMC *sig1, PMC *sig2, int *type)
+int
+parrot_pic_check_sig(Interp *interpreter, PMC *sig1, PMC *sig2, int *type)
 {
     int i, n, t0, t1, t2;
+    t0 = 0; /* silence compiler uninit warning */
 
-    assert(PObj_is_PMC_TEST(sig1));
-    assert(sig1->vtable->base_type == enum_class_FixedIntegerArray);
-    assert(PObj_is_PMC_TEST(sig2));
-    assert(sig2->vtable->base_type == enum_class_FixedIntegerArray);
-    n = VTABLE_elements(interpreter, sig1);
-    if (n != VTABLE_elements(interpreter, sig2))
+    ASSERT_SIG_PMC(sig1);
+    ASSERT_SIG_PMC(sig2);
+    n = SIG_ELEMS(sig1);
+    if (n != SIG_ELEMS(sig2))
         return -1;
     if (!n) {
         *type = 0;
         return 0;
     }
     for (i = 0; i < n; ++i) {
-        t1 = VTABLE_get_integer_keyed_int(interpreter, sig1, i);
-        t2 = VTABLE_get_integer_keyed_int(interpreter, sig2, i);
+        t1 = SIG_ITEM(sig1, i);
+        t2 = SIG_ITEM(sig2, i);
         if (!i) {
             t0 = t1 & PARROT_ARG_TYPE_MASK;
             *type = t0;
@@ -437,12 +444,12 @@ is_pic_param(Interp *interpreter, void **pc, Parrot_MIC* mic, opcode_t op)
         const_nr = args[1];
         /* check current_args signature */
         sig2 = caller_ctx->constants[const_nr]->u.key;
-        n = pic_check_sig(interpreter, sig1, sig2, &type);
+        n = parrot_pic_check_sig(interpreter, sig1, sig2, &type);
         if (n == -1)
             return 0;
     }
     else {
-        if (VTABLE_elements(interpreter, sig1) == 0) {
+        if (SIG_ELEMS(sig1) == 0) {
             sig2 = NULL;
             type = n = 0;
         }
@@ -471,6 +478,66 @@ is_pic_param(Interp *interpreter, void **pc, Parrot_MIC* mic, opcode_t op)
     mic->m.sig = sig1;
     /* remember this sig2 - it has to match the other end at call time */
     mic->lru.u.signature = sig2;
+    return 1;
+}
+
+
+static int
+is_pic_func(Interp *interpreter, void **pc, Parrot_MIC *mic, int core_type)
+{
+    PMC *sub, *sig_args, *sig_results;
+    char *base;
+    parrot_context_t *ctx;
+    opcode_t *op, n;
+    int flags;
+    
+    /*
+     * if we have these opcodes
+     *
+     *   set_args '(..)' ...
+     *   set_p_pc Px, PFunx
+     *   get_results '(..)' ...
+     *   invokecc_p Px
+     *
+     * and all args are matching the called sub and we don't have
+     * too many args, and only INTVAL or FLOATVAL, the 
+     * whole sequence is replaced by the C<callr> pic opcode.  
+     *
+     * Oh, I forgot to mention - the to-be-called C function is of
+     * course compiled on-the-fly by the JIT compiler ;)
+     *
+     * pc is at set_args
+     */
+
+    base = (char*)interpreter->ctx.bp.regs_i;
+    ctx = CONTEXT(interpreter->ctx);
+    sig_args = (PMC*)(pc[1]);
+    ASSERT_SIG_PMC(sig_args);
+    n = SIG_ELEMS(sig_args);
+    interpreter->current_args = (opcode_t*)pc + ctx->pred_offset;
+    pc += 2 + n;
+    op = (opcode_t*)pc + ctx->pred_offset;
+    if (*op != PARROT_OP_set_p_pc)
+        return 0;
+    do_prederef(pc, interpreter, core_type);
+    sub = (PMC*)(pc[2]);
+    assert(PObj_is_PMC_TEST(sub)); 
+    if (sub->vtable->base_type != enum_class_Sub)
+        return 0;
+    pc += 3;    /* results */
+    op = (opcode_t*)pc + ctx->pred_offset;
+    if (*op != PARROT_OP_get_results_pc)
+        return 0;
+    do_prederef(pc, interpreter, core_type);
+    sig_results = (PMC*)(pc[1]);
+    ASSERT_SIG_PMC(sig_results);
+
+    ctx->current_results = (opcode_t*)pc + ctx->pred_offset;
+    if (!parrot_pic_is_safe_to_jit(interpreter, sub, 
+                sig_args, sig_results, &flags))
+        return 0;
+    mic->lru.f.real_function = parrot_pic_JIT_sub(interpreter, sub, flags);
+    mic->m.sig = sig_args;
     return 1;
 }
 
@@ -526,6 +593,12 @@ parrot_PIC_prederef(Interp *interpreter, opcode_t op, void **pc_pred, int core)
             if (is_pic_param(interpreter, pc_pred, mic, op)) {
                 pc_pred[1] = (void*) mic;
                 op = PARROT_OP_pic_set_returns___pc;
+            }
+            break;
+        case PARROT_OP_set_args_pc:
+            if (is_pic_func(interpreter, pc_pred, mic, core)) {
+                pc_pred[1] = (void*) mic;
+                op = PARROT_OP_pic_callr___pc;
             }
             break;
     }

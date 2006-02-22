@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: freebsd.pm 10939 2006-01-06 16:52:23Z particle $
+# $Id: freebsd.pm 11197 2006-01-15 18:04:01Z jisom $
 
 package init::hints::freebsd;
 

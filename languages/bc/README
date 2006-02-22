@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: README 10933 2006-01-06 01:43:24Z particle $
+# $Id: README 11368 2006-01-29 12:32:54Z bernhard $
 
 This is an implementation of 'POSIX bc' for Parrot.
 'bc' is an arbitrary precision calculator dating back from Unix stone age.
@@ -34,3 +34,12 @@ For compatability with 'POSIX bc' the flags '--standard' and '--quiet' are used.
 Documentation:
 
 Sparse documentation is available in docs/parrot_bc.pod.
+
+Rumblings on ANTLR 3 are in docs/antlr_3.pod.
+
+ANTLR 3 is under development. The easiest backend seems to be Java. So for now there is a 'build_java' and
+'test_java' targets. Be sure to do a 
+
+  export CLASSPATH=/home/bernhard/devel/ANTLR/v3/antlr-3.0ea7/lib/antlr-3.0ea7.jar:/home/bernhard/devel/ANTLR/v3/antlr-3.0ea7/lib/antlr-2.7.5.jar:/home/bernhard/devel/ANTLR/v3/antlr-3.0ea7/lib/stringtemplate-2.3b4.jar:$CLASSPATH
+
+first.

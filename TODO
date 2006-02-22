@@ -1,4 +1,4 @@
-# $Id: TODO 10565 2005-12-17 07:58:57Z jhoblitt $
+# $Id: TODO 11689 2006-02-21 01:49:01Z chromatic $
 
 All TODO items should be documented in RT. (http://rt.perl.org/)
 
@@ -8,7 +8,7 @@ A listing of all TODO items is available at:
 
 To add TODOs to this list (which is powered by RT), send an email to 
 
- parrotbugs@parrotcode.org
+ parrotbug@parrotcode.org
 
 Begin your subject with '[TODO]' so that the bug is automatically marked as a
 TODO ticket.  For reasons of consistency, the encouraged format of the subject

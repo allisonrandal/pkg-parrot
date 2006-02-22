@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: const.t 10826 2005-12-31 22:40:24Z ambs $
+# $Id: const.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -148,7 +148,7 @@ ok 3
 OUT
 
 
-output_is(<<'CODE', <<'OUT', "const I/N mismatch");
+pasm_output_is(<<'CODE', <<'OUT', "const I/N mismatch");
     set I0, 2.0
     print I0
     print "\n"

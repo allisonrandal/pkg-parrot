@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: coroutine.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: coroutine.t 11593 2006-02-16 19:46:00Z particle $
 
 use strict;
 use warnings;
@@ -22,7 +22,7 @@ Tests the C<Coroutine> PMC.
 
 =cut
 
-output_is(<<'CODE', <<'OUTPUT', "Coroutine 1");
+pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine 1");
 .include "interpinfo.pasm"
 .pcc_sub _main:
     .const .Sub P0 = "_coro"
@@ -76,6 +76,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "Coroutines - M. Wallace yield example");
         print "\n"
     goto loop
 return_here:
+    .get_results ()
     end
 .end
 
@@ -105,7 +106,7 @@ CODE
 10 0
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in main");
+pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in main");
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -123,6 +124,7 @@ lp:
     print "done\n"
     end
 _catchm:
+    get_results '(0, 0)' , P5, S0
     print "catch main\n"
     end
 
@@ -134,6 +136,7 @@ corolp:
     yield
     branch corolp
 _catchc:
+    get_results '(0, 0)' , P5, S0
     print "catch coro\n"
     end
 CODE
@@ -141,7 +144,7 @@ back 1
 catch main
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro");
+pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro");
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -158,6 +161,7 @@ lp:
     print "done\n"
     end
 _catchm:
+    get_results '(0, 0)' , P5, S0
     print "catch main\n"
     end
 
@@ -170,6 +174,7 @@ corolp:
     find_global P17, "no_such"
     branch corolp
 _catchc:
+    get_results '(0, 0)' , P5, S0
     print "catch coro\n"
     end
 CODE
@@ -177,7 +182,7 @@ back 1
 catch coro
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro no handler");
+pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro no handler");
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -194,6 +199,7 @@ lp:
     print "done\n"
     end
 _catchm:
+    get_results '(0, 0)' , P5, S0
     print "catch main\n"
     end
 .pcc_sub _coro:
@@ -211,7 +217,7 @@ back 1
 catch main
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro rethrow");
+pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro rethrow");
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -228,6 +234,7 @@ lp:
     print "done\n"
     end
 _catchm:
+    get_results '(0, 0)' , P5, S0
     print "catch main\n"
     end
 
@@ -240,7 +247,7 @@ corolp:
     find_global P17, "no_such"
     branch corolp
 _catchc:
-    get_results '(0)' , P5
+    get_results '(0, 0)' , P5, S0
     print "catch coro\n"
     rethrow P5
     end

@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: dumper.t 10741 2005-12-28 20:32:30Z particle $
+# $Id: dumper.t 11602 2006-02-16 22:15:36Z leo $
 
 use strict;
 use warnings;
@@ -530,6 +530,7 @@ pir_output_is(<<'CODE', <<'OUT', "dumping objects");
 
 .sub __dump method
     .param pmc dumper
+    .param string dname
     .local string subindent
     .local string indent
     .local string name
@@ -918,23 +919,7 @@ CODE
 ]
 OUTPUT
 
-# no. 26
-pir_output_is(<<'CODE', <<'OUTPUT', "dumping StringArray PMC");
-.sub test :main
-    .local pmc array
-
-    new array, .StringArray
-    push array, "hello"
-    push array, "world"
-    _dumper( array, "array:" )
-.end
-.include "library/dumper.pir"
-CODE
-"array:" => StringArray (size:2) [
-    "hello",
-    "world"
-]
-OUTPUT
+# no. 26 - Deleted --leo
 
 # no. 27
 pir_output_is(<<'CODE', <<'OUTPUT', "custom dumper");
@@ -981,4 +966,4 @@ OUTPUT
 
 
 ## remember to change the number of tests! :-)
-BEGIN { plan tests => 27; }
+BEGIN { plan tests => 26; }

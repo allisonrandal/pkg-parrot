@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: undef.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: undef.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -22,7 +22,7 @@ Tests mainly morphing undef to other types.
 
 =cut
 
-output_is(<<'CODE', <<'OUTPUT', "morph to string");
+pasm_output_is(<<'CODE', <<'OUTPUT', "morph to string");
         new P0, .String
         new P1, .Undef
         set P0, "foo"

@@ -492,10 +492,22 @@ mk_multi_sig(Interp* interpreter, SymReg *r)
 
     pcc_sub = r->pcc_sub;
     multi_sig = pmc_new(interpreter, enum_class_FixedStringArray);
+
     n = pcc_sub->nmulti;
     VTABLE_set_integer_native(interpreter, multi_sig, n);
+    /* :multi() n = 1, reg = NULL */
+    if (!pcc_sub->multi[0]) {
+        sig = string_from_cstring(interpreter, "__VOID", 0);
+        VTABLE_set_string_keyed_int(interpreter, multi_sig, 0, sig);
+        return multi_sig;
+    }
     for (i = 0; i < n; ++i) {
-        sig = string_from_cstring(interpreter, pcc_sub->multi[i]->name, 0);
+        if (pcc_sub->multi[i]->name[0] == '"')
+            sig = string_unescape_cstring(interpreter, 
+                                          pcc_sub->multi[i]->name + 1, '"',
+                                          NULL);
+        else
+            sig = string_from_cstring(interpreter, pcc_sub->multi[i]->name, 0);
         VTABLE_set_string_keyed_int(interpreter, multi_sig, i, sig);
     }
     return multi_sig;
@@ -594,6 +606,7 @@ find_outer(Interp *interpreter, IMC_Unit *unit)
     for (s = globals.cs->first; s; s = s->next) {
         sub = s->unit->instructions->r[0];
         if (!strcmp(sub->name, unit->outer->name)) {
+            PObj_get_FLAGS(s->unit->sub_pmc) |= SUB_FLAG_IS_OUTER;
             return s->unit->sub_pmc;
         }
     }
@@ -656,7 +669,8 @@ add_const_pmc_sub(Interp *interpreter, SymReg *r,
 
 
     type = (r->pcc_sub->calls_a_sub & ITPCCYIELD) ?
-        enum_class_Coroutine : enum_class_Sub;
+        enum_class_Coroutine :
+        unit->outer ? enum_class_Closure : enum_class_Sub;
     /* TODO constant - see also src/packfile.c
     */
     sub_pmc = pmc_new(interpreter, type);
@@ -687,12 +701,6 @@ add_const_pmc_sub(Interp *interpreter, SymReg *r,
     sub->lex_info = create_lexinfo(interpreter, unit, sub_pmc,
             r->pcc_sub->pragma & P_NEED_LEX);
     sub->outer_sub = find_outer(interpreter, unit);
-    /*
-     * XXX work around implict P5 usage in exception handling code
-     *     need at least 6 PMC regs
-     */
-    if (unit->has_push_eh && sub->n_regs_used[REGNO_PMC] < 6)
-        sub->n_regs_used[REGNO_PMC] = 6;
     /*
      * check if it's declared multi
      */
@@ -1053,7 +1061,7 @@ verify_signature(Interp *interpreter, Instruction *ins, opcode_t *pc)
     PMC *sig_arr = interpreter->code->const_table->constants[pc[-1]]->u.key;
     INTVAL i, n, sig;
     SymReg *r;
-    int no_consts, needed;
+    int no_consts, needed=0;
     PMC *changed_sig = NULL;
 
     assert(PObj_is_PMC_TEST(sig_arr));
@@ -1063,11 +1071,12 @@ verify_signature(Interp *interpreter, Instruction *ins, opcode_t *pc)
     n = VTABLE_elements(interpreter, sig_arr);
     for (i = 0; i < n; ++i) {
         r = ins->r[i + 1];
-        if (no_consts && (r->type & VTCONST))
-                IMCC_fatal(interpreter, 1, "e_pbc_emit: "
-                        "constant argument '%s' in get param/result\n",
-                        r->name);
         sig = VTABLE_get_integer_keyed_int(interpreter, sig_arr, i);
+        if (! (sig & PARROT_ARG_NAME) && 
+                no_consts && (r->type & VTCONST))
+            IMCC_fatal(interpreter, 1, "e_pbc_emit: "
+                    "constant argument '%s' in get param/result\n",
+                    r->name);
         if ((r->type & VTCONST) && !(sig & PARROT_ARG_CONSTANT)) {
             if (!changed_sig)
                 changed_sig = VTABLE_clone(interpreter, sig_arr);

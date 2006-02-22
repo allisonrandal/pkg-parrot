@@ -1,7 +1,7 @@
 /* hll.h
  *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: hll.h 10933 2006-01-06 01:43:24Z particle $
+ *     $Id: hll.h 11102 2006-01-11 21:48:32Z jonathan $
  *  Overview:
  *     This is the api header for the hll subsystem
  *  Data Structure and Algorithms:
@@ -13,12 +13,12 @@
 #if !defined(PARROT_HLL_H_GUARD)
 #define PARROT_HLL_H_GUARD
 
-INTVAL Parrot_register_HLL(Interp*, STRING *hll_name, STRING *hll_lib);
-INTVAL Parrot_get_HLL_id(Interp*, STRING *hll_name);
-void Parrot_register_HLL_type(Interp *, INTVAL hll_id,
+PARROT_API INTVAL Parrot_register_HLL(Interp*, STRING *hll_name, STRING *hll_lib);
+PARROT_API INTVAL Parrot_get_HLL_id(Interp*, STRING *hll_name);
+PARROT_API void Parrot_register_HLL_type(Interp *, INTVAL hll_id,
 	INTVAL core_type, INTVAL hll_type);
-INTVAL Parrot_get_HLL_type(Interp *, INTVAL hll_id, INTVAL core_type);
-INTVAL Parrot_get_ctx_HLL_type(Interp *, INTVAL core_type);
+PARROT_API INTVAL Parrot_get_HLL_type(Interp *, INTVAL hll_id, INTVAL core_type);
+PARROT_API INTVAL Parrot_get_ctx_HLL_type(Interp *, INTVAL core_type);
 
 #endif /* PARROT_HLL_H_GUARD */
 

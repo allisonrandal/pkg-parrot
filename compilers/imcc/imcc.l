@@ -275,6 +275,7 @@ SP              [ ]
 <emit,INITIAL>":anon"    return(ANON);
 <emit,INITIAL>":outer"   return(OUTER);
 <emit,INITIAL>":lex"     return(NEED_LEX);
+":unique_reg"  return(UNIQUE_REG);
 
 ".result"       return(RESULT);
 ".get_results"       return(GET_RESULTS);
@@ -285,6 +286,8 @@ SP              [ ]
 ":slurpy"       return(ADV_SLURPY);
 ":optional"     return(ADV_OPTIONAL);
 ":opt_flag"     return(ADV_OPT_FLAG);
+":named"        return(ADV_NAMED);
+"=>"            return(ADV_ARROW);
 
 <emit,INITIAL>".namespace"    return(NAMESPACE);
 <emit,INITIAL>".HLL"          return(HLL);
@@ -986,6 +989,12 @@ pop_parser_state(Interp* interp)
         destroy_frame(tmp);
     }
     IMCC_INFO(interp)->state = (struct parser_state_t *) frames;
+}
+
+void
+IMCC_pop_parser_state(Interp* interp)
+{
+    pop_parser_state(interp);
 }
 
 void

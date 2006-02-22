@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_create.c 10613 2005-12-21 10:15:55Z leo $
+$Id: inter_create.c 11612 2006-02-17 02:29:10Z rgrjr $
 
 =head1 NAME
 
@@ -21,14 +21,11 @@ Create or destroy a Parrot interpreter.c
 
 #include <assert.h>
 #include "parrot/parrot.h"
-#include "parrot/method_util.h"
 #include "parrot/oplib/core_ops.h"
 
 #if EXEC_CAPABLE
 Interp interpre;
 #endif
-
-#define CTX_LEAK_DEBUG 0
 
 #define ATEXIT_DESTROY
 
@@ -176,6 +173,12 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
     PARROT_ERRORS_off(interpreter, PARROT_ERRORS_ALL_FLAG);
     /* undefined globals are errors by default */
     PARROT_ERRORS_on(interpreter, PARROT_ERRORS_GLOBALS_FLAG);
+    /* param count mismatch is an error by default */
+    PARROT_ERRORS_on(interpreter, PARROT_ERRORS_PARAM_COUNT_FLAG );
+#if 0
+    /* TODO not yet - too many test failures */
+    PARROT_ERRORS_on(interpreter, PARROT_ERRORS_RESULT_COUNT_FLAG );
+#endif
 
     /* allocate stack chunk cache */
     stack_system_init(interpreter);

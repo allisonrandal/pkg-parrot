@@ -1,4 +1,4 @@
-# $Id: editor.in 10947 2006-01-07 04:19:35Z jisom $
+# $Id: editor.in 11115 2006-01-12 04:06:05Z jhoblitt $
 
 OPS_DIR     = ../src/ops
 VIM_DIR     = $(HOME)/.vim
@@ -6,10 +6,10 @@ VIM_FT_DIR  = $(VIM_DIR)/plugin
 VIM_IN_DIR  = $(VIM_DIR)/indent
 VIM_SYN_DIR = $(VIM_DIR)/syntax
 
-PERL  = ${perl}
-CP    = ${cp}
-MKDIR = ${mkdir}
-RM_F  = ${rm_f}
+PERL  = @perl@
+CP    = @cp@
+MKDIR = @mkdir@
+RM_F  = @rm_f@
 
 default: all
 
@@ -49,7 +49,7 @@ vim-install: pir.vim
 imc.kate: imcc.xml
 
 imcc.xml:
-	$(PERL) kate_syntax.pl '..${slash}' > imcc.xml
+	$(PERL) kate_syntax.pl '..@slash@' > imcc.xml
 
 vim-uninstall:
 	$(RM_F) $(VIM_SYN_DIR)/pir.vim

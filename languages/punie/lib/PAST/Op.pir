@@ -19,11 +19,12 @@ is a subclass of PAST::Node.
     .return ()
 .end
 
-.sub "set_node" method
+.sub "set_node" :method
     .param string source
     .param int pos
     .param string op
-    .param pmc children
+    .param pmc children :optional
+    .param int got_children :opt_flag
     $P1 = getattribute self, "source"
     $P1 = source
     $P2 = getattribute self, "pos"
@@ -31,12 +32,14 @@ is a subclass of PAST::Node.
     $P3 = new PerlString
     $P3 = op
     setattribute self, "op", $P3
-    setattribute self, "children", children
+    unless got_children goto no_children
+      setattribute self, "children", children
+    no_children:
     .return ()
 .end
 
-.sub "dump" method
-    .param int level
+.sub "dump" :method
+    .param int level :optional
     .local string indent
     indent = repeat "    ", level # tab is 4 spaces here
     level += 1 # set level for attributes
@@ -58,7 +61,7 @@ is a subclass of PAST::Node.
     .return ()
 .end
 
-.sub op method
+.sub op :method
     $P2 = getattribute self, "op"
     .return ($P2)
 .end

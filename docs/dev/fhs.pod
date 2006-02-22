@@ -1,3 +1,6 @@
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: fhs.pod 11525 2006-02-13 18:40:19Z particle $
+
 =pod
 
 =head1 Title

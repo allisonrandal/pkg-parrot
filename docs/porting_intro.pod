@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: porting_intro.pod 9344 2005-10-05 03:02:04Z jhoblitt $
+# $Id: porting_intro.pod 11507 2006-02-11 17:08:54Z leo $
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ familiarity with common VM techniques but relatively little knowledge of Parrot
 internals.  For each feature, a brief description of its purpose, hints on
 helping to port it, and pointers to more information are included.
 
-=head1 CGoto
+=head1 CGoto or CGP (CGoto Predereferenced)
 
 =head2 What it is
 

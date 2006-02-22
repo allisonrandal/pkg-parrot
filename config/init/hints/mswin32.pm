@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: mswin32.pm 10974 2006-01-08 00:03:56Z jonathan $
+# $Id: mswin32.pm 11697 2006-02-21 19:02:14Z leo $
 
 package init::hints::mswin32;
 
@@ -51,24 +51,30 @@ sub runstep
             # ZI messes with __LINE__
             cc_debug             => '-Zi',
             ld_debug             => '-debug',
-            ld_share_flags       => '-dll -def:libparrot.def',
-            ld_load_flags        => '-dll -def:libparrot.def',
+            ld_share_flags       => '-dll',
+            ld_load_flags        => '-dll',
             ld_out               => '-out:',
             ldflags              => '-nologo -nodefaultlib',
-            libparrot_static     => 'libparrot_s'.$conf->data->get('a'),
-            libparrot_shared     => 'libparrot_s$(SHARE_EXT)',
+            libparrot_static     => 'libparrot'.$conf->data->get('a'),
+            libparrot_shared     => 'libparrot$(SHARE_EXT)',
             ar_flags             => '',
             ar_out               => '-out:',
             slash                => '\\',
             blib_dir             => 'blib\\lib',
             ccflags              => $ccflags,
             ccwarn               => '',
-            has_dynamic_linking  => 1
+            has_dynamic_linking  => 1,
+            parrot_is_shared     => 1,
+
+            sym_export => '__declspec(dllexport)',
+            sym_import => '__declspec(dllimport)'
         );
-        
-        # We'll build shared by default.
-        $conf->data->set('parrot_is_shared') = 1
-            unless defined($conf->data->get('parrot_is_shared'));
+
+        # If we are building shared, need to include dynamic libparrot.lib, otherwise
+        # the static libparrot.lib.
+        if ($conf->data->get('parrot_is_shared')) {
+            $conf->data->set(libparrot_ldflags => 'libparrot$(A)');
+        }
 
         # 'link' needs to be link.exe, not cl.exe.
         # This makes 'link' and 'ld' the same.
@@ -80,24 +86,6 @@ sub runstep
             $linkflags =~ s/-opt:\S+//;
             $conf->data->set(linkflags => $linkflags);
         }
-
-        # We need to build a .def file to export parrot.exe symbols in a
-        # static build and similarly to the shared lib otherwise.
-        if ($conf->data->get('parrot_is_shared')) {
-            $conf->data->set(
-                ld_parrot_dll_def => '-def:parrot.def',
-                parrot_dll_def    => 'parrot.def'
-            );
-        } else {
-            $conf->data->set(
-                ld_parrot_exe_def => '-def:parrot.def',
-                parrot_exe_def    => 'parrot.def'
-            );
-        }
-
-        # When building dynclasses we need to flag up the need to
-        # mark shared variables with __declspec(dllimport).
-        $conf->data->set(cc_building_dynclass_flag => '-DPARROT_BUILDING_WIN32_DLL');
     } elsif ($is_intel) {
         $conf->data->set(
             share_ext  => '.dll',
@@ -113,8 +101,8 @@ sub runstep
             libs                 => "$libs libircmt.lib",
             ld                   => 'xilink',
             ld_debug             => '-debug',
-            ld_share_flags       => '-dll -def:libparrot.def',
-            ld_load_flags        => '-dll -def:libparrot.def',
+            ld_share_flags       => '-dll',
+            ld_load_flags        => '-dll',
             ld_out               => '-out:',
             ldflags              => '-nologo -nodefaultlib',
             ar                   => 'xilib',
@@ -124,7 +112,7 @@ sub runstep
             blib_dir             => 'blib\\lib',
             ccflags              => $ccflags,
             ccwarn               => '',
-            has_dynamic_linking  => 1,
+            has_dynamic_linking  => 1
         );
 
         # 'link' needs to be xilink.exe, not icl.exe.
@@ -180,14 +168,11 @@ sub runstep
                 cc             => 'gcc',
                 ccflags        => '-DWIN32 ',
                 ld             => 'g++',
-                ld_load_flags  => '-shared ',
-                ld_share_flags => '-shared ',
                 ldflags        => '',
                 libs           =>
                     '-lmsvcrt -lmoldname -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -lnetapi32 -luuid -lws2_32 -lmpr -lwinmm -lversion -lodbc32 ',
                 link              => 'gcc',
                 linkflags         => '',
-                ncilib_link_extra => 'src/libnci_test.def',
                 o                 => '.o',
                 slash             => '\\',
                 blib_dir          => 'blib\\lib',
@@ -198,25 +183,20 @@ sub runstep
         } elsif ($make =~ /dmake/i) {
 
             # mingw Perl
-            $conf->data->set(
-                ld_load_flags     => '-shared ',
-                ld_share_flags    => '-shared ',
-                ncilib_link_extra => 'src/libnci_test.def',
-            );
         } else {
             warn "unknown configuration";
         }
 
-        # We need to build a .def file to export parrot.exe symbols.
         $conf->data->set(
-            ld_parrot_exe_def => 'parrot.def',
-            parrot_exe_def    => 'parrot.def',
-            link_dynamic      => '-Wl,--out-implib,parrot.a',
+            parrot_is_shared     => 1,
+            has_dynamic_linking  => 1,
+            ld_load_flags        => '-shared ',
+            ld_share_flags       => '-shared ',
+            libparrot_ldflags    => $conf->data->get('build_dir') . '/libparrot.dll',
+            ncilib_link_extra    => 'src/libnci_test.def',
+            sym_export           => '__declspec(dllexport)',
+            sym_import           => '__declspec(dllimport)',
         );
-
-        # When building dynclasses we need to flag up the need to
-        # mark shared variables with __declspec(dllimport).
-        $conf->data->set(cc_building_dynclass_flag => '-DPARROT_BUILDING_WIN32_DLL');
     }
 }
 

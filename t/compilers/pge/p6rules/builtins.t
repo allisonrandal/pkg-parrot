@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: builtins.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: builtins.t 11495 2006-02-10 07:09:08Z pmichaud $
 
 use strict;
 use warnings;
@@ -188,7 +188,7 @@ p6rule_is  ('az', '<+alpha>+', 'metasyntax with leading + (<+...>)',
 
 
 ## null pattern is illegal
-p6rule_like($str, '', '/Missing term at offset.*/',
+p6rule_like($str, '', '/rule error/',
     'null pattern ()');
 
 

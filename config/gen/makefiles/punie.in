@@ -1,11 +1,11 @@
-# $Id: punie.in 10933 2006-01-06 01:43:24Z particle $
+# $Id: punie.in 11115 2006-01-12 04:06:05Z jhoblitt $
 
 # Setup some commands
-LN_S     = ${lns}
-PERL     = ${perl}
-RM_F     = ${rm_f}
-PARROT   = ..${slash}..${slash}parrot${exe}
-CP       = ${cp}
+LN_S     = @lns@
+PERL     = @perl@
+RM_F     = @rm_f@
+PARROT   = ..@slash@..@slash@parrot@exe@
+CP       = @cp@
 
 # the default target
 all: punie.pbc

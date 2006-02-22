@@ -1,17 +1,17 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: scheme.in 10475 2005-12-13 00:36:26Z particle $
+# $Id: scheme.in 11115 2006-01-12 04:06:05Z jhoblitt $
 
 # Makefile for languages/scheme
 
 # Setup of some commands
-PERL       = ${perl}
-RM_F       = ${rm_f}
+PERL       = @perl@
+RM_F       = @rm_f@
 
 DIR        = languages/scheme
 TOOL_DIR   = ../..
 ASM        = ../../parrot
 SCHEMEC    = $(PERL) schemec
-INTERP     = ./${test_prog}
+INTERP     = ./@test_prog@
 
 default: build
 

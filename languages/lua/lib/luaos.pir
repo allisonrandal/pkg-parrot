@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: luaos.pir 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: luaos.pir 11618 2006-02-17 07:56:34Z fperrad $
 
 =head1 NAME
 
@@ -104,6 +104,8 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _os_clock :anon
+    .local pmc ret
+    new ret, .LuaNumber
     not_implemented()
 .end
 
@@ -135,6 +137,10 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _os_date :anon
+    .param pmc format :optional
+    .param pmc time :optional
+    $S0 = optstring(format, "%c")
+    $I0 = optint(time, -1)
     not_implemented()
 .end
 
@@ -148,6 +154,10 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _os_difftime :anon
+    .param pmc t2 :optional
+    .param pmc t1 :optional
+    $I0 = checkint(t2)
+    $I1 = optint(t1, 0)
     not_implemented()
 .end
 
@@ -160,7 +170,7 @@ is system-dependent.
 =cut
 
 .sub _os_execute :anon
-    .param pmc command
+    .param pmc command :optional
     .local pmc ret
     $S0 = checkstring(command)
     $I0 = spawnw $S0
@@ -191,7 +201,7 @@ if the variable is not defined.
 =cut
 
 .sub _os_getenv :anon
-    .param pmc varname
+    .param pmc varname :optional
     .local pmc ret
     $S0 = checkstring(varname)
     new $P0, .Env
@@ -213,9 +223,10 @@ B<nil>, plus a string describing the error.
 =cut
 
 .sub _os_remove :anon
-    .param pmc filename
+    .param pmc filename :optional
     .local pmc ret
     $S0 = checkstring(filename)
+    $S1 = $S0
     new $P0, .OS
     push_eh _handler
     $P0."rm"($S0)
@@ -228,11 +239,11 @@ _handler:
     .local pmc e
     .local string s
     .get_results (e, s)
-    concat $S0, ": "
-    concat $S0, s
+    concat $S1, ": "
+    concat $S1, s
     new nil, .LuaNil
     new msg, .LuaString
-    msg = $S0
+    msg = $S1
     .return (nil, msg)
 .end
 
@@ -241,12 +252,33 @@ _handler:
 Renames file named C<oldname> to C<newname>. If this function fails, it
 returns B<nil>, plus a string describing the error.
 
-NOT YET IMPLEMENTED.              
-
 =cut
 
 .sub _os_rename :anon
-    not_implemented()
+    .param pmc oldname :optional
+    .param pmc newname :optional
+    .local pmc ret
+    $S0 = checkstring(oldname)
+    $S2 = $S0
+    $S1 = checkstring(newname)
+    new $P0, .File
+    push_eh _handler
+    $P0."rename"($S0, $S1)
+    new ret, .LuaBoolean
+    ret = 1
+    .return (ret)
+_handler:
+    .local pmc nil
+    .local pmc msg
+    .local pmc e
+    .local string s
+    .get_results (e, s)
+    concat $S2, ": "
+    concat $S2, s
+    new nil, .LuaNil
+    new msg, .LuaString
+    msg = $S2
+    .return (nil, msg)
 .end
 
 =item C<os.setlocale (locale [, category])>
@@ -262,6 +294,9 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _os_setlocale :anon
+    .param pmc locale :optional
+    .param pmc category :optional
+    $S1 = optstring(category, "all")
     not_implemented()
 .end
 
@@ -278,11 +313,23 @@ seconds since some given start time (the "epoch"). In other systems, the
 meaning is not specified, and the number returned by C<time> can be used only
 as an argument to C<date> and C<difftime>.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE.
 
 =cut
 
 .sub _os_time :anon
+    .param pmc table :optional
+    .local pmc ret
+    if_null table, L0
+    $S0 = typeof table
+    if $S0 != "nil" goto L1
+L0:
+    $I0 = time
+    new ret, .LuaNumber
+    ret = $I0
+    .return (ret)
+L1:
+    checktype(table, "table")
     not_implemented()
 .end
 
@@ -301,6 +348,8 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _os_tmpname :anon
+    .local pmc ret
+    new ret, .LuaString
     not_implemented()
 .end
 

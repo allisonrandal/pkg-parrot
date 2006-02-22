@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Vtable.pm 10541 2005-12-15 21:33:32Z particle $
+# $Id: Vtable.pm 11356 2006-01-26 16:54:12Z leo $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Parrot::Vtable - Functions for manipulating vtables
 C<Parrot::Vtable> provides a collection of functions for manipulating
 PMC vtables. It is used by F<tools/build/jit2h.pl>, F<tools/build/pmc2c.pl>,
 F<tools/build/vtable_h.pl>, F<tools/dev/gen_class.pl>, and
-F<src/classes/null.pl>.
+F<src/pmc/null.pl>.
 
 =head2 Functions
 
@@ -138,7 +138,7 @@ typedef enum {
 } vtable_flags_t;
 
 struct _vtable {
-    struct PACKAGE *package; /* Pointer to package this vtable belongs to */
+    PMC *namespace;          /* Pointer to namespace for this class */
     INTVAL base_type;        /* 'type' value for MMD */
     STRING* whoami;          /* Name of class this vtable is for */
     UINTVAL flags;           /* Flags. Duh */
@@ -215,7 +215,7 @@ EOM
  */
 #ifdef PARROT_IN_OBJECTS_C
 static const char * const Parrot_vtable_slot_names[] = {
-    "",     /* Pointer to package this vtable belongs to */
+    "",     /* Pointer to namespace for this class */
     "",     /* 'type' value for MMD */
     "",     /* Name of class this vtable is for */
     "",     /* Flags. Duh */
@@ -403,7 +403,7 @@ sub parse_params
 
 =item F<tools/dev/gen_class.pl>
 
-=item F<src/classes/null.pl>
+=item F<src/pmc/null.pl>
 
 =back
 
