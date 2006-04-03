@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: prop.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: prop.t 11845 2006-03-10 02:27:01Z particle $
 
 use strict;
 use warnings;
@@ -75,7 +75,7 @@ No
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "resetting a property");
-    new P0, .PerlArray
+    new P0, .ResizablePMCArray
     new P1, .String
     new P2, .String
     new P3, .String

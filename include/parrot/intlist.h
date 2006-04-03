@@ -1,7 +1,7 @@
 /* stacks.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: intlist.h 7859 2005-04-18 03:49:02Z chromatic $
+ *  SVN Info
+ *     $Id: intlist.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Integer list routines. Constant-time push, pop, length operations.
  *     Fast linear-time lookup (requires walking through the chunks).

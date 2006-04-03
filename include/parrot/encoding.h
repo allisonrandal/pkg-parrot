@@ -1,7 +1,7 @@
 /* encoding.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: encoding.h 11093 2006-01-11 17:50:35Z jonathan $
+ *  SVN Info
+ *     $Id: encoding.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:

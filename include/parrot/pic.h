@@ -1,7 +1,7 @@
 /* pic.h
  *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: pic.h 11572 2006-02-16 08:25:56Z leo $
+ *  SVN Info
+ *     $Id: pic.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the api header for the pic subsystem
  *  Data Structure and Algorithms:

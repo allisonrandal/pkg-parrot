@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: namespace.t 11345 2006-01-25 14:46:30Z leo $
+# $Id: namespace.t 11907 2006-03-15 17:07:00Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 18;
+use Parrot::Test tests => 23;
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "verify NameSpace type");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
+    $P0 = find_global "Foo"
     typeof $S0, $P0
     print $S0
     print "\n"
@@ -52,6 +52,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "verify NameSpace type");
 CODE
 NameSpace
 OUTPUT
+
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::bar");
 .sub 'main' :main
     $P0 = find_global "Foo", "bar"
@@ -103,7 +104,7 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::bar hash");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
+    $P0 = find_global "Foo"
     $P1 = $P0["bar"]
     print "ok\n"
     $P1()
@@ -122,7 +123,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::bar root");
 .sub 'main' :main
     .include "interpinfo.pasm"
     $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
-    $P1 = $P0["\0Foo"]
+    $P1 = $P0["parrot";"Foo"]
     $P2 = $P1["bar"]
     print "ok\n"
     $P2()
@@ -155,8 +156,8 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz hash");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
-    $P1 = $P0["\0Bar"]
+    $P0 = find_global "Foo"
+    $P1 = $P0["Bar"]
     $P2 = $P1["baz"]
     print "ok\n"
     $P2()
@@ -173,8 +174,8 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz hash 2");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
-    $P1 = $P0["\0Bar" ; "baz"]
+    $P0 = find_global "Foo"
+    $P1 = $P0["Bar" ; "baz"]
     print "ok\n"
     $P1()
 .end
@@ -192,7 +193,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz hash 3");
 .sub 'main' :main
     .include "interpinfo.pasm"
     $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
-    $P1 = $P0["\0Foo";"\0Bar" ; "baz"]
+    $P1 = $P0["parrot";"Foo";"Bar" ; "baz"]
     print "ok\n"
     $P1()
 .end
@@ -208,9 +209,9 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz alias");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
-    $P1 = $P0["\0Bar"]
-    store_global "\0TopBar", $P1
+    $P0 = find_global "Foo"
+    $P1 = $P0["Bar"]
+    store_global "TopBar", $P1
     $P2 = find_global "TopBar", "baz"
     print "ok\n"
     $P2()
@@ -300,8 +301,8 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "get namespace in Foo::Bar::baz");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
-    $P1 = find_global $P0, "\0Bar"
+    $P0 = find_global "Foo"
+    $P1 = find_global $P0, "Bar"
     $P2 = find_global $P1, "baz"
     print "ok\n"
     $P2()
@@ -314,25 +315,15 @@ pir_output_is(<<'CODE', <<'OUTPUT', "get namespace in Foo::Bar::baz");
     .include "pmctypes.pasm"
     $P0 = interpinfo .INTERPINFO_CURRENT_SUB
     $P1 = $P0."get_namespace"()
-    typeof $I0, $P1
-    if $I0 == .Key goto is_key
-    print $P1
-    print "\n"
-    .return()
-is_key:
-    print $P1
-    $P1 = shift $P1
-    $I1 = defined $P1
-    unless $I1 goto ex
-    print "::"
-    goto is_key
-ex:
+    $P2 = $P1.'name'()
+    $S0 = join '::', $P2
+    print $S0
     print "\n"
 .end
 CODE
 ok
 baz
-Foo::Bar
+::parrot::Foo::Bar
 OUTPUT
 
 SKIP: {
@@ -387,3 +378,119 @@ CODE
 unicode namespaces are fun
 OUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', "verify root and parrot namespaces");
+# name may change though
+.sub main :main
+    .include "interpinfo.pasm"
+    $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    typeof $S0, $P0
+    print $S0
+    print "\n"
+    $P1 = $P0["parrot"]
+    print $P1
+    print "\n"
+    typeof $S0, $P1
+    print $S0
+    print "\n"
+.end
+CODE
+NameSpace
+parrot
+NameSpace
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "ns.name()");
+.sub main :main
+    .include "interpinfo.pasm"
+    $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    $P1 = $P0["parrot"]
+    $P3 = new .NameSpace
+    $P1["Foo"] = $P3
+    $P2 = $P3.'name'()
+    $I2 = elements $P2
+    print $I2
+    print "\n"
+    $S0 = join '::', $P2
+    print $S0
+    print "\n"
+.end
+# namespace root doesnt have a name
+# XXX should the root namespace be included?
+CODE
+3
+::parrot::Foo
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "get_namespace_p_p, getnamespace_p_kc");
+.sub main :main
+    .include "interpinfo.pasm"
+    $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    $P1 = $P0["parrot"]
+    $P3 = new .NameSpace
+    $P1["Foo"] = $P3
+    # fetch w array
+    $P1 = new .FixedStringArray
+    $P1 = 2
+    $P1[0] = 'parrot'
+    $P1[1] = 'Foo'
+    $P2 = get_namespace $P1
+    $P2 = $P2.'name'()
+    $I2 = elements $P2
+    print $I2
+    print "\n"
+    $S0 = join '::', $P2
+    print $S0
+    print "\n"
+    # fetch w key
+    $P2 = get_namespace ["parrot";"Foo"]
+    $P2 = $P2.'name'()
+    $I2 = elements $P2
+    print $I2
+    print "\n"
+    $S0 = join '::', $P2
+    print $S0
+    print "\n"
+.end
+# namespace root doesnt have a name
+# XXX should the root namespace be included?
+CODE
+3
+::parrot::Foo
+3
+::parrot::Foo
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "Sub.get_namespace, get_namespace");
+.sub 'main' :main
+    $P0 = find_global "Foo", "bar"
+    print "ok\n"
+    $P1 = $P0."get_namespace"()
+    $P2 = $P1.name()
+    $S0 = join '::', $P2
+    print $S0
+    print "\n"
+    $P0()
+.end
+
+.namespace ["Foo"]
+.sub 'bar'
+    $P1 = get_namespace
+    print $P1
+    print "\n"
+.end
+CODE
+ok
+::parrot::Foo
+Foo
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "check parrot ns");
+.sub 'main' :main
+    $P0 = get_namespace ["parrot"; "String"]
+    $P1 = find_global $P0, "lower"
+    $S0 = $P1("OK\n")
+    print $S0
+.end
+CODE
+ok
+OUTPUT

@@ -1,17 +1,18 @@
-# $Id: punie.in 11115 2006-01-12 04:06:05Z jhoblitt $
+# $Id: punie.in 11965 2006-03-21 16:00:59Z particle $
 
 # Setup some commands
 LN_S     = @lns@
 PERL     = @perl@
 RM_F     = @rm_f@
 PARROT   = ..@slash@..@slash@parrot@exe@
+PGE_DIR  = ..@slash@..@slash@compilers@slash@pge
 CP       = @cp@
 
 # the default target
 all: punie.pbc
 
 lib/PunieGrammar.pbc: lib/PunieGrammar.pir lib/punie.g
-	$(PARROT) pge_compile.pir lib/punie.g > lib/punie_grammar_gen.pir
+	$(PARROT) $(PGE_DIR)@slash@rulec.pir --output=lib/punie_grammar_gen.pir lib/punie.g
 	$(PARROT) -o lib/PunieGrammar.pbc --output-pbc lib/PunieGrammar.pir 
 
 punie.pbc: lib/PunieGrammar.pbc punie.pir

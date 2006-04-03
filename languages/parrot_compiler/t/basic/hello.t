@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hello.t 10737 2005-12-28 18:28:52Z particle $
+# $Id: hello.t 11761 2006-02-27 07:57:10Z bernhard $
 
 use strict;
 use lib 'parrot_compiler/lib';
@@ -18,7 +18,7 @@ my %code = ( PASM => << 'END_PASM', PIR => << 'END_PIR', PAST => << 'END_PAST' )
 END_PASM
 
 
-.sub test @MAIN
+.sub test :main
     print "Hello, this is PIR.\n"
 .end
 END_PIR

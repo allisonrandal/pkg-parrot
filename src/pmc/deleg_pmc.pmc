@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: deleg_pmc.pmc 11356 2006-01-26 16:54:12Z leo $
+$Id: deleg_pmc.pmc 11877 2006-03-12 16:25:12Z leo $
 
 =head1 NAME
 
@@ -81,6 +81,11 @@ pmclass deleg_pmc {
     PMC* find_method(STRING* method_name) {
         return SUPER(method_name);
     }
+
+    PMC* namespace() {
+        return SELF->vtable->_namespace;
+    }
+
 }
 
 /*

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: none.pmc 11248 2006-01-18 20:02:15Z bernhard $
+$Id: none.pmc 11911 2006-03-16 18:16:52Z particle $
 
 =head1 NAME
 
@@ -57,7 +57,7 @@ information see F<src/pmc.c>.
     }
 
     STRING* get_string () {
-        return SELF->vtable->whoami;
+        return string_make_empty(INTERP,enum_stringrep_one,0);
     }
 
     INTVAL get_bool () {

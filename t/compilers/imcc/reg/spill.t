@@ -1,6 +1,6 @@
 #!perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: spill.t 10238 2005-11-29 03:16:07Z particle $
+# $Id: spill.t 11755 2006-02-27 01:02:12Z chromatic $
 
 use strict;
 use Parrot::Test tests => 9;
@@ -528,13 +528,13 @@ pir_output_is(<<'CODE', <<'OUT', "bug #32996");
 	end
 .end
 
-.sub method1 method
+.sub method1 :method
 	print "In method 1\n"
 	.pcc_begin_return
 	.pcc_end_return
 .end
 
-.sub method2 method
+.sub method2 :method
 	print "In method 2\n"
 	.pcc_begin_return
 	.pcc_end_return

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: compiler.pmc 11355 2006-01-26 12:23:21Z leo $
+$Id: compiler.pmc 11896 2006-03-14 12:19:16Z leo $
 
 =head1 NAME
 
@@ -36,12 +36,7 @@ C<Eval> PMC with a new PackFile attached.
 */
 
     void* invoke (void * code_ptr) {
-        typedef INTVAL (*nci_sub_t)(Interp * , PMC * );
-        nci_sub_t func = (nci_sub_t)D2FPTR(PMC_data(SELF));
-        
-        INTERP->current_cont = NULL;
-        func(INTERP, SELF);
-        return code_ptr;
+        return SUPER(code_ptr);
     }
 }
 

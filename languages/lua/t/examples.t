@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: examples.t 11446 2006-02-06 14:07:49Z fperrad $
+# $Id: examples.t 11798 2006-03-06 07:28:55Z fperrad $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ OUT
 language_output_like( 'lua', <<'CODE', <<'OUT', 'version' );
 print(_VERSION)
 CODE
-/Lua 5.0/
+/Lua 5\.[01]/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'factorial (recursive)' );

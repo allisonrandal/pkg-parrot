@@ -18,13 +18,19 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 20;
+use Parrot::Test tests => 24;
 use Test::More;
 
 language_output_like( 'lua', <<'CODE', <<'OUT', '-true' );
 print(-true)
 CODE
-/attempt to perform arithmetic on a boolean value/
+/attempt to perform arithmetic on a \w+ value/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', '# true' );
+print(# true)
+CODE
+/attempt to get length of a boolean value/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'not false' );
@@ -53,6 +59,12 @@ OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'true / -7' );
 print(true / -7)
+CODE
+/attempt to perform arithmetic on a boolean value/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'true % 4' );
+print(true % 4)
 CODE
 /attempt to perform arithmetic on a boolean value/
 OUT
@@ -139,5 +151,19 @@ language_output_like( 'lua', <<'CODE', <<'OUT', 'true >= 0' );
 print(true >= 0)
 CODE
 /attempt to compare \w+ with \w+/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'get_pmc_keyed' );
+a = true
+print(a[1])
+CODE
+/attempt to index/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'set_pmc_keyed' );
+a = true
+a[1] = 1
+CODE
+/attempt to index/
 OUT
 

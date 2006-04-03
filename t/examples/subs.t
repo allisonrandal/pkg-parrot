@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: subs.t 11402 2006-02-02 14:45:05Z leo $
+# $Id: subs.t 12067 2006-03-28 20:17:11Z bernhard $
 
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ t/examples/subs.t - Test examples in F<examples/subs>
 
 =head1 SYNOPSIS
 
-	% prove t/examples/subs.t
+    % prove t/examples/subs.t
 
 =head1 DESCRIPTION
 

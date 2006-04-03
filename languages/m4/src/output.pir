@@ -1,4 +1,4 @@
-# $Id: output.pir 7965 2005-05-03 21:32:31Z bernhard $
+# $Id: output.pir 11903 2006-03-14 20:49:11Z bernhard $
 
 =head1 NAME 
 
@@ -7,7 +7,7 @@ output.pir - handle output for Parrot m4
 =head1 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer. All Rights Reserved.
-CVS Info:   $Id: output.pir 7965 2005-05-03 21:32:31Z bernhard $
+SVN Info:   $Id: output.pir 11903 2006-03-14 20:49:11Z bernhard $
 Overview:   output
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html

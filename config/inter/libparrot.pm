@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: libparrot.pm 11697 2006-02-21 19:02:14Z leo $
+# $Id: libparrot.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':inter';
 
-$description = 'Determine if parrot should be linked against a shared library...';
+$description = 'Determine if parrot should be linked against a shared library';
 
 @args = qw(ask parrot_is_shared);
 

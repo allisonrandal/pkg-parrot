@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: resizablebooleanarray.t 11553 2006-02-15 18:11:54Z particle $
+# $Id: resizablebooleanarray.t 11845 2006-03-10 02:27:01Z particle $
 
 use strict;
 use warnings;
@@ -629,7 +629,7 @@ lp:
     mod I9, I0, 100
     ne I9, 0, lp1
     # force GC => 142 DOD + 142 collects / 10^5 accesses
-    new P1, .PerlArray
+    new P1, .ResizablePMCArray
     set P1[I0], I0
     concat S0, S1, S1
     set S2, S0

@@ -1,9 +1,10 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: openbsd.pm 10637 2005-12-24 11:00:22Z jhoblitt $
+# $Id: openbsd.pm 11796 2006-03-05 05:47:54Z jisom $
 
 package init::hints::openbsd;
 
 use strict;
+use Config;
 
 sub runstep
 {
@@ -18,8 +19,13 @@ sub runstep
     my $libs = $conf->data->get('libs');
     if ($libs !~ /-lpthread/) {
         $libs .= ' -lpthread';
-    }
-    $conf->data->set(libs => $libs);
+	}
+	$conf->data->set(libs => $libs);
+
+	if ((split('-', $Config{archname}))[0] eq 'powerpc') {
+		$conf->data->set(as => 'as -mregnames');
+	}
+
 }
 
 1;

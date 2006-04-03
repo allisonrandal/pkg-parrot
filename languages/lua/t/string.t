@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: string.t 11446 2006-02-06 14:07:49Z fperrad $
+# $Id: string.t 11947 2006-03-20 07:53:35Z fperrad $
 
 =head1 NAME
 
@@ -21,17 +21,8 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 7;
+use Parrot::Test tests => 9;
 use Test::More;
-
-language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function string.char");
-print(string.char(65, 66, 67))
-print(string.char())
-CODE
-ABC
-
-OUTPUT
-
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function string.byte");
 print(string.byte("ABC"))
@@ -39,12 +30,33 @@ print(string.byte("ABC", 2))
 print(string.byte("ABC", -1))
 print(string.byte("ABC", 4))
 print(string.byte("ABC", 0))
+print(string.byte("ABC", 1, 3))
+print(string.byte("ABC", 1, 4))
 CODE
 65
 66
 67
-nil
-nil
+
+
+65	66	67
+65	66	67
+OUTPUT
+
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "method s:byte");
+s = "ABC"
+print(s:byte(2))
+CODE
+66
+OUTPUT
+
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function string.char");
+print(string.char(65, 66, 67))
+print(string.char())
+CODE
+ABC
+
 OUTPUT
 
 
@@ -79,6 +91,17 @@ CODE
 ababab
 
 
+
+OUTPUT
+
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function string.reverse");
+print(string.reverse("abcde"))
+print(string.reverse("abcd"))
+print(string.reverse(""))
+CODE
+edcba
+dcba
 
 OUTPUT
 

@@ -38,7 +38,7 @@
     optable.addtok("circumfix:[ ]", "term:", "nows", "PGE::Exp::Group")
     optable.addtok("circumfix:( )", "term:", "nows", "PGE::Exp::Group")
 
-    optable.addtok("<commit>", "term:", "nows", "PGE::Exp::Commit")
+    optable.addtok("term:<commit>", "term:", "nows", "PGE::Exp::Commit")
 
     $P0 = find_global "PGE::P6Rule", "parse_subrule"
     optable.addtok("term:<", "term:", "nows", $P0)
@@ -56,9 +56,9 @@
     optable.addtok("postfix:*", "<term:", "left", $P0)
     optable.addtok("postfix:+", "postfix:*", "left", $P0)
     optable.addtok("postfix:?", "postfix:*", "left", $P0)
-    optable.addtok("postfix::", "postfix:*", "left", "PGE::Exp::Cut")
-    $P0 = find_global "PGE::Rule", "fail"
-    optable.addtok("postfix:::", "postfix:*", "left", $P0)
+
+    $P0 = find_global "PGE::P6Rule", "parse_cut"
+    optable.addtok("postfix::", "postfix:*", "left", $P0)
 
     optable.addtok("infix:", "<postfix:*", "right,nows", "PGE::Exp::Concat")
     optable.addtok("infix:&", "<infix:", "left,nows", "PGE::Exp::Conj")
@@ -83,6 +83,12 @@
     $P0["n"] = unicode:"\x0a\x0d\x0c\x85\u2028\u2029"
     # See http://www.unicode.org/Public/UNIDATA/PropList.txt for above
 
+    # Create and store closure preprocessors in %closure_pp
+    $P0 = new Hash
+    store_global "PGE::P6Rule", "%closure_pp", $P0
+    $P1 = find_global "PGE::P6Rule", "PIR_closure"
+    $P0["PIR"] = $P1
+
     $P0 = find_global "PGE", "p6rule"
     compreg "PGE::P6Rule", $P0
 .end
@@ -97,9 +103,9 @@
     .local string initchar
     .local int base, isnegated
     newfrom = find_global "PGE::Match", "newfrom"
-    $P0 = getattribute mob, "PGE::Match\x0$:target"
+    $P0 = getattribute mob, "PGE::Match\x0$.target"
     target = $P0
-    $P0 = getattribute mob, "PGE::Match\x0$:pos"
+    $P0 = getattribute mob, "PGE::Match\x0$.pos"
     pos = $P0
     lastpos = length target
 
@@ -201,7 +207,7 @@
     if pos > 0 goto term_ws_1
     pos = lastpos
   end:
-    $P0 = getattribute mob, "PGE::Match\x0$:pos"
+    $P0 = getattribute mob, "PGE::Match\x0$.pos"
     $P0 = pos
     .return (mob)
 
@@ -509,9 +515,9 @@
     .local pmc newfrom, mfrom, mpos
     .local string cname
     newfrom = find_global "PGE::Match", "newfrom"
-    $P0 = getattribute mob, "PGE::Match\x0$:target"
+    $P0 = getattribute mob, "PGE::Match\x0$.target"
     target = $P0
-    $P0 = getattribute mob, "PGE::Match\x0$:pos"
+    $P0 = getattribute mob, "PGE::Match\x0$.pos"
     pos = $P0
     lastpos = length target
     inc pos
@@ -562,12 +568,28 @@
     mpos = pos
     .return (mob)
 .end
+
+.sub "parse_cut"
+    .param pmc mob
+    .local string target
+    .local pmc mfrom, mpos
+    .local pmc newfrom
+    newfrom = find_global "PGE::Match", "newfrom"
+    (mob, target, mfrom, mpos) = newfrom(mob, 0, "PGE::Exp::Cut")
+    $I0 = mfrom
+    inc $I0
+    $S0 = substr target, $I0, 1
+    if $S0 == ":" goto end
+    mpos = mfrom + 1
+  end:
+    .return (mob)
+.end
     
 .sub "parse_error"
     .param pmc mob
     .param int pos
     .param string message
-    $P0 = getattribute mob, "PGE::Match\x0$:pos"
+    $P0 = getattribute mob, "PGE::Match\x0$.pos"
     $P0 = pos
     $P0 = new .Exception
     $S0 = "p6rule parse error: "
@@ -576,7 +598,7 @@
     $S1 = pos
     $S0 .= $S1
     $S0 .= ", found '"
-    $P1 = getattribute mob, "PGE::Match\x0$:target"
+    $P1 = getattribute mob, "PGE::Match\x0$.target"
     $S1 = $P1
     $S1 = substr $S1, pos, 1
     $S0 .= $S1
@@ -951,15 +973,46 @@
 
 .sub "p6analyze" :method
     .param pmc pad
-    $S0 = pad[":lang"]
-    self["lang"] = $S0
-    if $S0 != "PIR" goto end
+    .local string lang
+    .local pmc closure_pp
+    .local pmc closure_fn
+    lang = pad[":lang"]
+    self["lang"] = lang
+    # see if we need to do any pre-processing of the closure
+    closure_pp = find_global "PGE::P6Rule", "%closure_pp"
+    $I0 = defined closure_pp[lang]
+    if $I0 == 0 goto end
+    closure_fn = closure_pp[lang]
     $S1 = self["value"]
-    $I0 = index $S1, ".sub"
-    if $I0 >= 0 goto end
-    $S1 = concat ".sub anon :anon\n.param pmc match\n", $S1
-    $S1 .= "\n.end\n"
+    $S1 = closure_fn($S1)
     self["value"] = $S1
   end:
     .return (self)
+.end
+
+
+=head1 Functions
+
+=over 4
+
+=item C<PIR_closure(string code)>
+
+This helper function helps with :lang(PIR) closures in rules
+by adding a ".sub" wrapper around the code if one isn't 
+already present.
+
+=back
+
+=cut
+
+.namespace [ "PGE::P6Rule" ]
+
+.sub "PIR_closure"
+    .param string code
+    $I0 = index code, ".sub"
+    if $I0 >= 0 goto end
+    code = concat ".sub anon :anon\n.param pmc match\n", code
+    code .= "\n.end\n"
+  end:
+    .return (code)
 .end

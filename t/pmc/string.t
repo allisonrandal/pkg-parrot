@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: string.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: string.t 11892 2006-03-13 20:25:10Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 38;
+use Parrot::Test tests => 39;
 
 =head1 NAME
 
@@ -1199,4 +1199,13 @@ CODE
 1
 0
 1
+OUTPUT
+
+pir_output_is( <<'CODE', <<OUTPUT, "new_from_string");
+.sub main :main
+    .const .String ok = "ok\n"
+    print ok
+.end
+CODE
+ok
 OUTPUT

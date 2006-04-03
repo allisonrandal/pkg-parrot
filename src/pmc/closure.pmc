@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: closure.pmc 11616 2006-02-17 03:31:57Z rgrjr $
+$Id: closure.pmc 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -66,6 +66,10 @@ Marks the closure as live.
 
 /*
 
+=item C<void set_pointer(void *value)>
+
+Sets the address to the closure entry.
+
 =item C<void* invoke(void* next)>
 
 Invokes the closure.
@@ -73,6 +77,12 @@ Invokes the closure.
 =cut
 
 */
+
+    void set_pointer (void* value) {
+        struct Parrot_sub * sub = PMC_sub(SELF);
+        opcode_t *addr = value;
+        sub->start_offs = addr -  sub->seg->base.data;
+    }
 
     void* invoke (void* next) {
         struct Parrot_sub * sub = PMC_sub(SELF);
@@ -86,8 +96,8 @@ Invokes the closure.
              */
             sub->ctx->outer_ctx = sub->outer_ctx;
         }
-        else if ((PObj_get_FLAGS(outer_sub) & SUB_FLAG_IS_OUTER &&
-            PMC_sub(outer_sub)->ctx)) {
+        else if ((PObj_get_FLAGS(outer_sub) & SUB_FLAG_IS_OUTER) &&
+            PMC_sub(outer_sub)->ctx) {
             /* the sub was invoked earlier - it still has the context
              * due to the SUB_FLAG_IS_OUTER flag
              */
@@ -99,7 +109,7 @@ Invokes the closure.
             while (caller) {
                 if (caller->current_sub == outer_sub) {
                     cont = caller->current_cont;
-                    cont->vtable = Parrot_base_vtables[enum_class_Continuation];
+                    cont->vtable = interpreter->vtables[enum_class_Continuation];
                     sub->outer_ctx = sub->ctx->outer_ctx = caller;
                     caller->ref_count++;
                     return next;
@@ -116,7 +126,7 @@ Invokes the closure.
                 (void)VTABLE_invoke(INTERP, sub->outer_sub, next);
                 caller = CONTEXT(INTERP->ctx);
                 cont = caller->current_cont;
-                cont->vtable = Parrot_base_vtables[enum_class_Continuation];
+                cont->vtable = interpreter->vtables[enum_class_Continuation];
                 sub->outer_ctx = sub->ctx->outer_ctx = caller;
                 caller->ref_count++;
                 (void)VTABLE_invoke(INTERP, cont, next);

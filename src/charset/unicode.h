@@ -1,7 +1,7 @@
 /* unicode.h
  *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: unicode.h 7584 2005-03-02 09:03:30Z leo $
+ *  SVN Info
+ *     $Id: unicode.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the header for the unicode charset functions
  *  Data Structure and Algorithms:

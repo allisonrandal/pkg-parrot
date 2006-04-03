@@ -1,7 +1,7 @@
 /* key.h
  *  Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: key.h 11108 2006-01-12 00:42:48Z jonathan $
+ *  SVN Info
+ *     $Id: key.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:

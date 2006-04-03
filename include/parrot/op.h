@@ -1,7 +1,7 @@
 /* op.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: op.h 10543 2005-12-15 22:36:46Z leo $
+ *  SVN Info
+ *     $Id: op.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Header file for op functions.
  *  Data Structure and Algorithms:
@@ -27,7 +27,7 @@ typedef enum {
     PARROT_ARG_NC = PARROT_ARG_FLOATVAL | PARROT_ARG_CONSTANT,
     PARROT_ARG_PC = PARROT_ARG_PMC      | PARROT_ARG_CONSTANT,
     PARROT_ARG_SC = PARROT_ARG_STRING   | PARROT_ARG_CONSTANT,
-    PARROT_ARG_KEYED = 0x10,     /* reuse MAYBE_FLATTEN */
+    PARROT_ARG_KEYED = 0x20,     /* reuse MAYBE_FLATTEN */
     PARROT_ARG_KC = PARROT_ARG_PC       | PARROT_ARG_KEYED,
     PARROT_ARG_KIC= PARROT_ARG_IC       | PARROT_ARG_KEYED,
 

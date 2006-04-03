@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: multiarray.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: multiarray.t 11845 2006-03-10 02:27:01Z particle $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ and cloning.
 =cut
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "multiarray creation");
-	new P1, .PerlArray
+	new P1, .ResizablePMCArray
 	# intial size
 	set P1[0], 0
 	set P1[1], 50
@@ -45,7 +45,7 @@ ok
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "multiarray access 2d");
-	new P1, .PerlArray
+	new P1, .ResizablePMCArray
 	# intial size
 	set P1[0], 0
 	set P1[1], 100
@@ -102,7 +102,7 @@ ok 2
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "multiarray access 3d");
-	new P1, .PerlArray
+	new P1, .ResizablePMCArray
 	# initial size
 	set P1[0], 0
 	set P1[1], 200

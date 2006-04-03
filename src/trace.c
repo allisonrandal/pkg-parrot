@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: trace.c 11588 2006-02-16 18:24:58Z leo $
+$Id: trace.c 11926 2006-03-18 15:52:04Z leo $
 
 =head1 NAME
 
@@ -68,6 +68,9 @@ trace_pmc_dump(Interp *interpreter, PMC* pmc)
     if (!pmc->vtable) {
         PIO_eprintf(debugger, "<!!no vtable!!>");
         return;
+    }
+    if (PObj_on_free_list_TEST(pmc)) {
+        PIO_eprintf(debugger, "**************** PMC is on free list *****\n");
     }
     if (pmc->vtable->class == pmc) {
         STRING *name = trace_class_name(interpreter, pmc);

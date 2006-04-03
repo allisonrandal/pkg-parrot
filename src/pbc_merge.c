@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation. All Rights Reserved.
-$Id: pbc_merge.c 10933 2006-01-06 01:43:24Z particle $
+$Id: pbc_merge.c 12076 2006-03-29 22:22:22Z bernhard $
 
 =head1 NAME
 
@@ -521,7 +521,8 @@ pbc_merge_pic_index(Interp *interpreter, struct pbc_merge_input **inputs,
     int i;
     struct PackFile_Segment * pic_index, *in_seg; 
     size_t size, j;
-    opcode_t k, cursor = 0, start = 0, last;
+    opcode_t k, cursor = 0, start = 0;
+    opcode_t last = 0; /* avoid unitialized warning */
 
     /* calc needed size */
     for (i = 0, size = 0; i < num_inputs; i++) {
@@ -721,7 +722,7 @@ main(int argc, char **argv)
     int i;
 
     /* Create a Parrot interpreter. */
-    interpreter = make_interpreter(NULL, PARROT_NO_FLAGS);
+    interpreter = Parrot_new(NULL);
     Parrot_init(interpreter);
     Parrot_block_DOD(interpreter);
 

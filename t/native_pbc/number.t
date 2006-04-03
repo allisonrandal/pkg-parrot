@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: number.t 10144 2005-11-23 02:24:38Z particle $
+# $Id: number.t 11903 2006-03-14 20:49:11Z bernhard $
 
 use strict;
 use warnings;
@@ -42,7 +42,7 @@ $ mv n.pbc t/native_pbc/number_$(N).pbc
 # - increase number of tests
 # - include the pdump header info for reference
 # - put the file into MANIFEST
-# - add the file as binary (cvs add -kb) and commit it
+# - add the file as binary (svn add) and commit it
 # thanks -leo
 
 =cut

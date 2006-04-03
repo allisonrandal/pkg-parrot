@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: snprintf.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: snprintf.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step qw(cc_gen cc_build cc_clean cc_run);
 
-$description = "Testing snprintf ...";
+$description = 'Testing snprintf';
 
 @args = qw(verbose);
 

@@ -1,7 +1,7 @@
 /* io.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: io.h 11102 2006-01-11 21:48:32Z jonathan $
+ *  SVN Info
+ *     $Id: io.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:

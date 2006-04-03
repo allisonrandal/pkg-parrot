@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: io.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: io.t 11982 2006-03-22 15:23:08Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 32;
+use Parrot::Test tests => 35;
 
 =head1 NAME
 
@@ -617,3 +617,98 @@ pir_output_like(<<'CODE', <<'OUT', 'read on null PMC throws exception', todo => 
 CODE
 /some crazy exception/
 OUT
+
+open FOO, ">temp.file";  # write utf8
+print FOO "T\xc3\xb6tsch\n";
+close FOO;
+
+pir_output_is(<<'CODE', <<"OUTPUT", "utf8 read layer");
+.sub main :main
+    .local pmc pio
+    .local int len
+    .include "stat.pasm"
+    .local string f
+    f = 'temp.file'
+    len = stat f, .STAT_FILESIZE
+    pio = open f, "<"
+    push pio, "utf8"
+    $S0 = read pio, len
+    close pio
+    $I1 = charset $S0
+    $S2 = charsetname $I1
+    print $S2
+    print "\n"
+    $I1 = encoding $S0
+    $S2 = encodingname $I1
+    print $S2
+    print "\n"
+    $I1 = find_charset 'iso-8859-1'
+    trans_charset $S1, $S0, $I1
+    print $S1
+.end
+CODE
+unicode
+utf8
+T\xf6tsch
+OUTPUT
+
+pir_output_is(<<'CODE', <<"OUTPUT", "utf8 read layer - readline");
+.sub main :main
+    .local pmc pio
+    .local string f
+    f = 'temp.file'
+    pio = open f, "<"
+    push pio, "utf8"
+    $S0 = readline pio
+    close pio
+    $I1 = charset $S0
+    $S2 = charsetname $I1
+    print $S2
+    print "\n"
+    $I1 = encoding $S0
+    $S2 = encodingname $I1
+    print $S2
+    print "\n"
+    $I1 = find_charset 'iso-8859-1'
+    trans_charset $S1, $S0, $I1
+    print $S1
+.end
+CODE
+unicode
+utf8
+T\xf6tsch
+OUTPUT
+pir_output_is(<<'CODE', <<"OUTPUT", "utf8 read layer, read parts");
+.sub main :main
+    .local pmc pio
+    .local int len
+    .include "stat.pasm"
+    .local string f
+    f = 'temp.file'
+    len = stat f, .STAT_FILESIZE
+    pio = open f, "<"
+    push pio, "utf8"
+    $S0 = read pio, 2
+    len -= 2
+    $S1 = read pio, len
+    $S0 .= $S1
+    close pio
+    $I1 = charset $S0
+    $S2 = charsetname $I1
+    print $S2
+    print "\n"
+    $I1 = encoding $S0
+    $S2 = encodingname $I1
+    print $S2
+    print "\n"
+    $I1 = find_charset 'iso-8859-1'
+    trans_charset $S1, $S0, $I1
+    print $S1
+.end
+CODE
+unicode
+utf8
+T\xf6tsch
+OUTPUT
+
+unlink("temp.file");

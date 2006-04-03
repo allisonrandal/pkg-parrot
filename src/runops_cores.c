@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: runops_cores.c 11698 2006-02-21 19:33:43Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: runops_cores.c 12076 2006-03-29 22:22:22Z bernhard $
 
 =head1 NAME
 
@@ -118,7 +118,16 @@ runops_trace_core(Interp *interpreter, opcode_t *pc)
     if (!interpreter->debugger) {
         PMC *pio;
 
-        debugger = interpreter->debugger = make_interpreter(interpreter, 0);
+        debugger = interpreter->debugger = 
+            /*
+             * using a distinct interpreter for tracing should be ok
+             * - just in case, make it easy to switch
+             */
+#if 1
+            make_interpreter(interpreter, 0);
+#else
+            interpreter;
+#endif
         debugger->lo_var_ptr = interpreter->lo_var_ptr;
         pio = PIO_STDERR(debugger);
         if (PIO_isatty(debugger, pio))

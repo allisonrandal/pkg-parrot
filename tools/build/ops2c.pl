@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ops2c.pl 11138 2006-01-13 00:30:07Z jonathan $
+# $Id: ops2c.pl 12025 2006-03-25 16:21:09Z leo $
 
 =head1 NAME
 
@@ -317,38 +317,31 @@ foreach my $op ($ops->ops) {
     my $args       = "$opsarraytype *cur_opcode, Interp * interpreter";
     my $definition;
     my $comment    = '';
-    $prev_def      = '';
     my $one_op     = "";
 
     if ($suffix =~ /cg/) {
-        $prev_def = $definition = "PC_$index:";
-        $comment  =  "/* ". $op->func_name($trans) ." */";
-        push @cg_jump_table, "        &&PC_$index,\n";
+	$definition = "PC_$index:";
+	$comment    = "/* ". $op->full_name() ." */";
     } elsif ($suffix =~ /switch/) {
-      $comment    =  "/* ". $op->func_name($trans) ." */";
-      $one_op     = <<END_C;
-    case $index:	$comment
-END_C
-    }
-    elsif ($suffix eq '') {
-        $definition  = "$sym_export $opsarraytype * $func_name ($args);\n";
-        $definition .= "$opsarraytype *\n$func_name ($args)";
+	$definition = "case $index:";
+	$comment    = "/* ". $op->full_name() ." */";
     }
     else {
-        $definition  = "static $opsarraytype *\n$func_name ($args)";
+        $definition = "$prototype;\n$opsarraytype *\n$func_name ($args)";
     }
+
     my $source = $op->source($trans);
     $source    =~ s/\bop_lib\b/${bs}op_lib/;
     $source    =~ s/\bops_addr\b/${bs}ops_addr/g;
 
-    if ($suffix =~ /switch/) {
-        $one_op .= "\t{\n$source}\n\n";
+    if ($suffix =~ /cg/) {
+	push @cg_jump_table, "        &&PC_$index,\n";
     }
-    else {
+    elsif ($suffix eq '') {
         push @op_func_table, sprintf("  %-50s /* %6ld */\n",
             "$func_name,", $index);
-        $one_op .= "$definition $comment {\n$source}\n\n";
     }
+    $one_op .= "$definition $comment {\n$source}\n\n";
     push @op_funcs, $one_op;
     $index++;
 }
@@ -430,7 +423,7 @@ my ($op_info, $op_func, $getop);
 $op_info = $op_func = 'NULL';
 $getop = '( int (*)(const char *, int) )NULL';
 
-if ($suffix !~ /cg/ && $suffix !~ /switch/) {
+if ($suffix eq '') {
     $op_func = "${bs}op_func_table";
     print SOURCE <<END_C;
 

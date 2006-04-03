@@ -1,4 +1,4 @@
-/* $Id: imc.h 11700 2006-02-22 10:56:20Z leo $ */
+/* $Id: imc.h 11852 2006-03-10 11:49:20Z leo $ */
 
 #if !defined(PARROT_IMCC_IMC_H_GUARD)
 #define PARROT_IMCC_IMC_H_GUARD
@@ -182,7 +182,6 @@ typedef struct _imc_info_t {
     struct nodeType_t *top_node;
 
     struct parser_state_t *state;
-    INTVAL HLL_id;
 
 } imc_info_t;
 

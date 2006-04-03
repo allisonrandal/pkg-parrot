@@ -90,7 +90,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 =cut
 
-.sub "dump" method
+.sub "dump" :method
     .param string prefix       :optional           # name of match variable
     .param int has_prefix      :opt_flag
     .param string b1           :optional           # bracket open
@@ -122,7 +122,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     $I0 = self
     print $I0
     print "\n"
-    capt = getattribute self, "PGE::Match\x0@:capt"
+    capt = getattribute self, "PGE::Match\x0@!capt"
     if_null capt, subrules
     spi = 0
     spc = elements capt
@@ -158,13 +158,13 @@ An alternate dump output for a Match object and all of its subcaptures.
     goto subrules_1
 
   dumper:
-    $I0 = isa $P0, "Array"
-    if $I0 goto dumper_0
     $I0 = isa $P0, "PGE::Match"
-    unless $I0 goto dumper_3
+    unless $I0 goto dumper_0
     $P0."dump"(prefix1, b1, b2)
     ret
   dumper_0:
+    $I0 = does $P0, "array"
+    unless $I0 goto dumper_3
     $I0 = 0
     $I1 = elements $P0
   dumper_1:
@@ -201,14 +201,14 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp" ]
 
-.sub "dumpindent" method
+.sub "dumpindent" :method
     .param int indent
     $S0 = repeat ' ', indent
     print $S0
     .return ()
 .end
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     self."dumpindent"(indent)
     print "EXP (abstract) "
@@ -220,7 +220,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Start" ]
 
-.sub dump method
+.sub dump :method
     .param int indent
     .local pmc exp1
     $S0 = self["firstchars"]
@@ -234,7 +234,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::End" ]
 
-.sub dump method
+.sub dump :method
     .param int indent
     self."dumpindent"(indent)
     print "End\n"
@@ -243,7 +243,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Literal" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     .local pmc literal
     literal = self["literal"]
@@ -259,7 +259,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Scalar" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     .local pmc cname
     cname = self["cname"]
@@ -275,7 +275,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Dot" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     self."dumpindent"(indent)
     print "DOT "
@@ -287,7 +287,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::CharClass" ]
 
-.sub dump method
+.sub dump :method
     .param int indent
     self."dumpindent"(indent)
     print "CharClass "
@@ -305,7 +305,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::WS" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     self."dumpindent"(indent)
     print "<?ws> "
@@ -317,7 +317,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Anchor" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     .local string token
     self."dumpindent"(indent)
@@ -331,7 +331,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Concat" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     $P0 = self["exp1"]
     $P0."dump"(indent)
@@ -342,7 +342,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Alt" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     .local int offset
     .local pmc exp
@@ -369,7 +369,7 @@ obsoleted in favor of a Data::Dumper method.
 
 .namespace [ "PGE::Exp::Group" ]
 
-.sub "dump" method
+.sub "dump" :method
     .param int indent
     .local int offset
     .local pmc exp
@@ -408,3 +408,35 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
+.namespace [ "PGE::OPTable" ]
+
+=head2 C<PGE::OPTable> Methods
+
+=over 4
+
+=item C<__dump(PMC dumper, STR label)>
+
+This method enables Data::Dumper to work on PGE::OPTable objects.
+
+=cut
+
+.sub "__dump" :method
+    .param pmc dumper
+    .param string label
+    ($S2, $S3) = dumper."newIndent"()
+    print "\n"
+    $P0 = getattribute self, "PGE::OPTable\x0%!token"
+    print $S2
+    dumper."dump"(label, $P0)
+    print "\n"
+    $P0 = getattribute self, "PGE::OPTable\x0%!key"
+    print $S2
+    dumper."dump"(label, $P0)
+    print "\n"
+    $P0 = getattribute self, "PGE::OPTable\x0%!klen"
+    print $S2
+    dumper."dump"(label, $P0)
+    dumper."deleteIndent"()
+.end
+
+=back

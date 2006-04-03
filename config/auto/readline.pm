@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: readline.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: readline.pm 11802 2006-03-06 16:01:29Z fperrad $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Config;
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining if your platform supports readline...";
+$description = 'Determining if your platform supports readline';
 
 @args = qw(verbose);
 
@@ -37,7 +37,7 @@ sub runstep
     my $ccflags   = $conf->data->get('ccflags');
     if ($^O =~ /mswin32/i) {
         if ($cc =~ /^gcc/i) {
-            $conf->data->add(' ', libs => '-lreadline');
+            $conf->data->add(' ', libs => '-lreadline -lgw32c -lole32 -luuid -lwsock32 -lmsvcp60');
         } else {
             $conf->data->add(' ', libs => 'readline.lib');
         }

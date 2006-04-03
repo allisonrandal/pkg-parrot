@@ -1,8 +1,8 @@
 /*
  * debug.h
  *
- * CVS Info
- *    $Id: debug.h 11588 2006-02-16 18:24:58Z leo $
+ * SVN Info
+ *    $Id: debug.h 11903 2006-03-14 20:49:11Z bernhard $
  * Overview:
  *    Parrot debugger header files
  * History:

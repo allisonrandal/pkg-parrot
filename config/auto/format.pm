@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: format.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: format.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step;
 
-$description = "Figuring out what formats should be used for sprintf...";
+$description = 'Figuring out what formats should be used for sprintf';
 
 @args = ();
 

@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: float.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: float.t 11893 2006-03-13 21:16:08Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 45;
+use Parrot::Test tests => 46;
 
 =head1 NAME
 
@@ -1362,4 +1362,14 @@ CODE
 1
 OUTPUT
 
+
+pir_output_is( <<'CODE', <<OUTPUT, "new_from_string");
+.sub main :main
+    .const .Float pi = "3.1"
+    print pi
+    print "\n"
+.end
+CODE
+3.1
+OUTPUT
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: past.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: past.t 12067 2006-03-28 20:17:11Z bernhard $
 
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ t/examples/pir.t - Test examples in F<examples/past>
 
 =head1 SYNOPSIS
 
-	% prove t/examples/past.t
+    % prove t/examples/past.t
 
 =head1 DESCRIPTION
 

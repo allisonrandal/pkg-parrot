@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: bc.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: bc.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Config;
 use Parrot::Configure::Step ':auto', 'capture_output';
 
-$description = "Determining whether GNU bc is installed...";
+$description = 'Determining whether GNU bc is installed';
 
 @args = qw();
 

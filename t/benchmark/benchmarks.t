@@ -1,7 +1,6 @@
 #! perl
-# Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: benchmarks.t 11703 2006-02-22 13:35:12Z leo $
-
+# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
+# $Id: benchmarks.t 12067 2006-03-28 20:17:11Z bernhard $
 
 use strict;
 use warnings;
@@ -12,20 +11,20 @@ use Test::More;
 
 =head1 NAME
 
-t/benchmark/benchmarks.t - test scrips in examples/benchmarks
+t/benchmark/benchmarks.t - test scripts in examples/benchmarks
 
 =head1 SYNOPSIS
 
-	prove t/benchmarks/benchmarks.t
+    prove t/benchmark/benchmarks.t
 
 =head1 DESCRIPTION
 
-Called by 'make testbench'.
+Called by 'make benchmark_tests'.
 
 =cut
 
-
-# Set up expected output from files in 'examples/benchmarks'
+# Expected output from scripts in 'examples/benchmarks'.
+# The expected out is needed for checking results with pir_output_is() and pir_output_like(). 
 my %outputs = (
     q{addit.pir} => qq(21001097.970000\n),
     q{addit.pasm} => qq(21001097.970000\n),
@@ -78,9 +77,7 @@ ResizableStringArray:\s\d+\.\d+s\n
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
 SArray:\s\d+\.\d+s\n
-\n
-StringArray:\s\d+\.\d+s\n
-      \n$/x,
+\s+$/x,
     q{arriter.pir} => qq(100000\n100000\n100000\n111111\n),
     q{arriter_o1.pir} => qq(100000\n100000\n100000\n111111\n),
     q{bench_newp.pasm} => qr/^\d+\.\d+\sseconds.\s\d+\.\d+\sloops\/sec\n
@@ -210,55 +207,25 @@ StringArray:\s\d+\.\d+s\n
     q{vpm.pir} => qq(100000;\nl hackerjust another per\n)
 );
 
-my %todo = ( q{arriter.pir}                     => 'syntax error',
-             q{arriter_o1.pir}                  => 'syntax error',
-             q{gc_header_new.pasm}              => 'syntax error', 
-             q{gc_waves_headers.pasm}           => 'syntax error', 
-             q{gc_waves_sizeable_headers.pasm}  => 'syntax error', 
-             q{stress3.pasm}                    => 'Null PMC access in get_integer()',
-             q{vpm.pir}                         => 'delete_keyed() not implemented',
+# These scripts are known to be failing.
+# Heh, currently all tests are working!
+my %todo = ( 
            );
 
-
 plan tests => scalar keys %outputs;
-# plan skip_all => 'currently not working';1
 
 foreach ( sort keys %outputs ) {
-  SKIP: {
-        my $bench;
-        eval {
-            my $file = q(examples/benchmarks/) . $_;
-            open( BENCH, qq(examples/benchmarks/$_) )
-              or die qq(Could not open $_:  $!.\n); 
-            while ( my $line = <BENCH> ) { $bench .= $line; }
-            close( BENCH );
-        };
-        skip( $@, 1 ) if $@;
+    SKIP: {
+        my $bench = Parrot::Test::slurp_file( "examples/benchmarks/$_" );
+        skip( "Could not slurp $_", 1 ) unless $bench;
 
         my @todo = $todo{$_} ? ( todo => $todo{$_} ) : ();
         
-        # XXX use example_output_is() and example_output_like()
-        if ( ref $outputs{ $_ } eq q(Regexp) ) {
-            if ( /\.pasm$/ ) {
-                pasm_output_like( $bench, $outputs{ $_ }, $_, @todo );
-            }
-            elsif ( /\.pir$/ ) {
-                pir_output_like( $bench, $outputs{ $_ }, $_, @todo );
-            }
-            else {
-                skip( qq(Unknown file type:  $_.), 1 );
-            }
+        if ( ref $outputs{$_} eq 'Regexp' ) {
+            example_output_like( "examples/benchmarks/$_", $outputs{$_}, @todo );
         }
         else {
-            if ( /\.pasm$/ ) {
-                pasm_output_is( $bench, $outputs{ $_ }, $_, @todo );
-            }
-            elsif ( /\.pir$/ ) {
-                pir_output_is( $bench, $outputs{ $_ }, $_, @todo );
-            }
-            else {
-                skip( qq(Unknown file type:  $_.), 1 );
-            }
+            example_output_is( "examples/benchmarks/$_", $outputs{$_}, @todo );
         }
     }
 }

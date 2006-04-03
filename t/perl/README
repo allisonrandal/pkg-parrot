@@ -1,5 +1,6 @@
-# Copyright: 2003-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: README 9673 2005-10-31 10:47:16Z bernhard $
+# Copyright: 2003-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: README 11976 2006-03-21 22:38:27Z bernhard $
 
-This directory contains test code written in Perl5.
+This directory contains test code for Perl5 modules used as helpers for Parrot.
 See also the documentation in ../../docs/tests.pod.
+Test of the Perl5 modules used for Parrot configuration are in ../t/configure.

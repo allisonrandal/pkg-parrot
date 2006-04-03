@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: constructor.t 11446 2006-02-06 14:07:49Z fperrad $
+# $Id: constructor.t 11798 2006-03-06 07:28:55Z fperrad $
 
 =head1 NAME
 
@@ -29,8 +29,10 @@ language_output_is( 'lua', <<'CODE', <<'OUT', 'list-style init' );
 days = {"Sunday", "Monday", "Tuesday", "Wednesday",
         "Thursday", "Friday", "Saturday"}
 print(days[4])
+print(#days)
 CODE
 Wednesday
+7
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'record-style init' );

@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: builtins.t 11495 2006-02-10 07:09:08Z pmichaud $
+# $Id: builtins.t 12000 2006-03-24 03:45:10Z pmichaud $
 
 use strict;
 use warnings;
@@ -35,7 +35,6 @@ my $PRE = <<PRE;
     load_bytecode "PGE/Dumper.pir"
     load_bytecode "PGE/Glob.pir"
     load_bytecode "PGE/Text.pir"
-    load_bytecode "PGE/Util.pir"
     .local string target, pattern
     .local pmc p6rule, rulesub, pir, exp, match
     p6rule = compreg 'PGE::P6Rule'

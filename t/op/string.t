@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: string.t 11477 2006-02-09 05:17:54Z particle $
+# $Id: string.t 11755 2006-02-27 01:02:12Z chromatic $
 
 use strict;
 use warnings;
@@ -2651,7 +2651,7 @@ pir_output_is( <<'CODE', <<OUTPUT, "join: __get_string returns a null string");
 
 .namespace ["Foo"]
 
-.sub __get_string method
+.sub __get_string :method
     .local string ret
 
     null ret

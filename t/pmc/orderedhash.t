@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: orderedhash.t 11489 2006-02-09 18:58:48Z particle $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: orderedhash.t 11931 2006-03-18 22:30:14Z bernhard $
 
 use strict;
 use warnings;

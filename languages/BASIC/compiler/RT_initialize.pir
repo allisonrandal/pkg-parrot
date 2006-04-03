@@ -1,6 +1,8 @@
+# $Id: RT_initialize.pir 11761 2006-02-27 07:57:10Z bernhard $
+
 .const int TYPE = 0
 .const int VALUE = 1
-.sub _main @MAIN
+.sub _main :main
 	$P0 = new .PerlHash 
 	store_global "BASICARR", $P0
 	$P0 = new .PerlArray

@@ -1,4 +1,4 @@
-# $Id: vtable.tbl 11356 2006-01-26 16:54:12Z leo $
+# $Id: vtable.tbl 12005 2006-03-24 15:19:48Z leo $
 # [MAIN] #default section name
 
 # MMD_EQ ... MMD_STRCMP must be in one block
@@ -10,11 +10,12 @@ void init()
 # init must be first for JITed vtable meths
 void init_pmc(PMC* initializer)
 void init_pmc_props(PMC* initializer, PMC* properties)
-PMC* instantiate()
+PMC* instantiate(PMC* sig)
 PMC* new_from_string(STRING* rep, INTVAL flags)
 void morph(INTVAL type)
 void mark()
 void destroy()
+PMC* namespace()
 
 PMC* getprop(STRING* key)
 void setprop(STRING* key, PMC* value)

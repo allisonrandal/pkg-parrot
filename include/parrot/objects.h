@@ -1,7 +1,7 @@
 /* objects.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: objects.h 11108 2006-01-12 00:42:48Z jonathan $
+ *  SVN Info
+ *     $Id: objects.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Parrot class and object header stuff
  *  Data Structure and Algorithms:

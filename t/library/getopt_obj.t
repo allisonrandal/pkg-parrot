@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: getopt_obj.t 11232 2006-01-17 22:27:20Z particle $
+# $Id: getopt_obj.t 11911 2006-03-16 18:16:52Z particle $
 
 use strict;
 use warnings;
@@ -344,7 +344,7 @@ pir_output_is(<<'CODE', <<'OUT', "double dash stop");
 	print $S0
 	print "\n"
 
-	# Hash sets an nonexistant value to None
+	# Hash sets an nonexistant value to ''
 	$S0 = $P1["bar"]
 	print "bar is "
 	print $S0
@@ -358,7 +358,7 @@ pir_output_is(<<'CODE', <<'OUT', "double dash stop");
 .end
 CODE
 foo is 1
-bar is None
+bar is 
 argv[0] is --bar
 OUT
 
@@ -406,7 +406,7 @@ pir_output_is(<<'CODE', <<'OUT', "notOptStop");
 .end
 CODE
 foo is 1
-bar is None
+bar is 
 argv[0] is foo
 argv[1] is --bar
 OUT

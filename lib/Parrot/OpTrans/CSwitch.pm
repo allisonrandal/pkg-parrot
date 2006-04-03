@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: CSwitch.pm 11198 2006-01-15 18:49:33Z leo $
+# $Id: CSwitch.pm 11757 2006-02-27 01:03:39Z chromatic $
 
 =head1 NAME
 
@@ -26,6 +26,14 @@ use Parrot::OpTrans;
 use Parrot::OpTrans::CPrederef;
 use vars qw(@ISA);
 @ISA = qw(Parrot::OpTrans::CPrederef);
+
+sub new
+{
+	my $class = shift;
+	my $self  = $class->SUPER::new( @_ );
+	$self->{split_count} ||= 0;
+	return $self;
+}
 
 =item C<core_type()>
 
@@ -224,7 +232,7 @@ sub run_core_finish
 		*cur_opcode = CORE_OPS_wrapper__;
 		continue;
 	    }
-	    internal_exception(1, "illegal opcode\\n");
+	    internal_exception(1, "illegal opcode in switch core\\n");
 	    break;
 	} /* switch */
 END_C

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: coroutine.pmc 11617 2006-02-17 05:15:46Z particle $
+$Id: coroutine.pmc 11906 2006-03-15 16:14:19Z leo $
 
 =head1 NAME
 
@@ -66,18 +66,21 @@ static void
 print_sub_name(Interp* interpreter, PMC* sub)
 {
     struct Parrot_coro * co = PMC_coro(sub);
+    Interp *tracer;
 
-    PIO_eprintf(interpreter, "# %s coro '%Ss'",
+    tracer = interpreter->debugger ? 
+        interpreter->debugger : interpreter;
+    PIO_eprintf(tracer, "# %s coro '%Ss'",
         !(PObj_get_FLAGS(sub) & SUB_FLAG_CORO_FF) ? 
         "Calling" : "yielding from",
         Parrot_full_sub_name(interpreter, sub));
     if (co->ctx &&
         (PObj_get_FLAGS(sub) & SUB_FLAG_CORO_FF)) {
-        PIO_eprintf(interpreter, " to '%Ss'",
+        PIO_eprintf(tracer, " to '%Ss'",
                 Parrot_full_sub_name(interpreter, 
                     co->ctx->caller_ctx->current_sub));
     }
-    PIO_eprintf(interpreter, "\n# ");
+    PIO_eprintf(tracer, "\n# ");
     print_pbc_location(interpreter);
 }
 
@@ -108,10 +111,10 @@ Clone the couroutine.
         PMC* ret = pmc_new_noinit(INTERP, SELF->vtable->base_type);
         PObj_custom_mark_destroy_SETALL(ret);
         sub = mem_sys_allocate(sizeof(struct Parrot_coro));
-        memcpy(sub, PMC_sub(SELF), sizeof(struct Parrot_coro));
-        sub->name = string_copy(INTERP, sub->name);
         PMC_struct_val(ret) = sub;
         PMC_pmc_val(ret) = NULL;
+        memcpy(sub, PMC_sub(SELF), sizeof(struct Parrot_coro));
+        sub->name = string_copy(INTERP, sub->name);
         return ret;
     }
 
@@ -157,6 +160,11 @@ Swaps the "context".
             ctx->caller_ctx = caller_ctx;
             PMC_cont(ccont)->from_ctx = ctx;
             ctx->current_sub = SELF;
+            ctx->current_HLL = co->HLL_id;
+            if (co->namespace_stash) {
+                /* :anon sub don't have it */
+                ctx->current_namespace = co->namespace_stash;
+            }
             ctx->current_cont = ccont;
             ctx->current_object = NULL;
             INTERP->current_object = NULL;

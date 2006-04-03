@@ -1,7 +1,7 @@
 /* resources.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: resources.h 10587 2005-12-19 19:14:03Z leo $
+ *  SVN Info
+ *     $Id: resources.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Defines the resource allocation API
  *  Data Structure and Algorithms:

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: operation.pod 10579 2005-12-19 12:08:43Z leo $
+# $Id: operation.pod 11758 2006-02-27 01:04:55Z chromatic $
 
 =head1 NAME
 
@@ -116,7 +116,7 @@ Consider these two code snippets (block numbers are attached):
 
 and:
 
-  .sub main @MAIN 
+  .sub main :main
  0      $I0 = 0		# initialized
  0      if $I0 goto l1	# branch to bb 1 or 2
  1      $I1 = 1		# init only in block 1

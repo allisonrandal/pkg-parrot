@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: byteorder.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: byteorder.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ use vars qw($description @args);
 use Parrot::Configure::Step qw(:auto);
 use base qw(Parrot::Configure::Step::Base);
 
-$description = "Computing native byteorder for Parrot's wordsize...";
+$description = q{Computing native byteorder for Parrot's wordsize};
 
 @args = ();
 

@@ -1,3 +1,4 @@
+# $Id: parakeet.pir 11763 2006-02-27 08:29:19Z bernhard $
 
 # Parakeet is a stack machine language for the Parrot VM not entirely
 # unlike the Forth programming language.  Parakeet is extremely simple
@@ -270,7 +271,7 @@
 ##
 ##########################################################
 
-.sub _main @MAIN
+.sub _main :main
   .param PerlArray argv
 
   .STACK = new .PerlArray
@@ -748,7 +749,7 @@
 
     .emit(".sub _")
     .emit(.CURR)
-    .emit(" method\n")
+    .emit(" :method\n")
     .emit("inc .LEVEL\nnew_pad .LEVEL\n")
     .NEXT
 

@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: submissions.pod 10948 2006-01-07 07:14:20Z jhoblitt $
+# $Id: submissions.pod 11788 2006-03-04 16:22:21Z bernhard $
 
 =head1 NAME
 
@@ -160,10 +160,11 @@ The list of these ignore files can be set up with:
 
     svn propedit svn:ignore <PATH>
 
-In order to keep the two different checks synchronized, the MANIFEST.SKIP file
-should be regenerated with:
+In order to keep the two different checks synchronized, 
+the MANIFEST and MANIFEST.SKIP file should be regenerated with:
 
-    perl tools/dev/gen_manifest_skip.pl > MANIFEST.SKIP
+    perl tools/dev/mk_manifest_and_skip.pl
+
 
 =head1 How To Submit Something New
 

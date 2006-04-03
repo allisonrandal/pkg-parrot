@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: exception.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: exception.t 11992 2006-03-22 22:25:01Z bernhard $
 
 use strict;
 use warnings;
@@ -76,7 +76,7 @@ Exception
 just pining
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "get_results - be sure registers are ok");
+pasm_output_is(<<'CODE', <<'OUTPUT', "get_results - be sure registers are ok");
 # see also #38459
     print "main\n"
     new P0, .Integer

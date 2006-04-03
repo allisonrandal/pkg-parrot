@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Vtable.pm 11356 2006-01-26 16:54:12Z leo $
+# $Id: Vtable.pm 11809 2006-03-07 11:38:59Z leo $
 
 =head1 NAME
 
@@ -138,7 +138,7 @@ typedef enum {
 } vtable_flags_t;
 
 struct _vtable {
-    PMC *namespace;          /* Pointer to namespace for this class */
+    PMC * _namespace;        /* Pointer to namespace for this class */
     INTVAL base_type;        /* 'type' value for MMD */
     STRING* whoami;          /* Name of class this vtable is for */
     UINTVAL flags;           /* Flags. Duh */

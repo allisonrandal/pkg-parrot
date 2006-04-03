@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pge_examples.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: pge_examples.t 12000 2006-03-24 03:45:10Z pmichaud $
 
 use strict;
 use warnings;
@@ -61,7 +61,7 @@ pir_output_is(<<'CODE', <<'OUT', "parse FASTA");
 
 .sub "example" :main
     load_bytecode 'PGE.pbc'
-    load_bytecode 'PGE/Util.pir'
+    load_bytecode 'PGE/P6Grammar.pir'
 
     .local string fasta_grammar
     fasta_grammar = <<'END_FASTA_GRAMMAR'

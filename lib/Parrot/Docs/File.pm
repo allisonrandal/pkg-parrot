@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: File.pm 7546 2005-02-20 19:25:37Z bernhard $
+# $Id: File.pm 11903 2006-03-14 20:49:11Z bernhard $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ my $UNDEFINED = 'Undefined';
 my %type_for_suffix = (
 	'BASIC' => 'README file',
 	'C' => 'C code',
-	'Log' => 'CVS Entries file',
+	'Log' => 'SVN Entries file',   # propably obsolete
 	'PL' => 'Perl script',
 	'SKIP' => 'MANIFEST skip file',
 	'STATUS' => 'Languages status file',

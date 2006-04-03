@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: smallobject.c 8160 2005-05-24 22:41:17Z particle $
+$Id: smallobject.c 12044 2006-03-27 13:27:10Z leo $
 
 =head1 NAME
 
@@ -167,10 +167,6 @@ gc_ms_get_free_object(Interp *interpreter,
     PObj_on_free_list_CLEAR((PObj*) ptr);
 #endif
     --pool->num_free_objects;
-#if ! DISABLE_GC_DEBUG
-    if (GC_DEBUG(interpreter))
-        PObj_version((Buffer*)ptr) = interpreter->arena_base->dod_runs;
-#endif
     return ptr;
 }
 

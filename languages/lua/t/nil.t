@@ -18,13 +18,19 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 20;
+use Parrot::Test tests => 24;
 use Test::More;
 
 language_output_like( 'lua', <<'CODE', <<'OUT', '-nil' );
 print(-nil)
 CODE
 /attempt to perform arithmetic on a nil value/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', '# nil' );
+print(# nil)
+CODE
+/attempt to get length of a nil value/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'not nil' );
@@ -53,6 +59,12 @@ OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'nil / -7' );
 print(nil / -7)
+CODE
+/attempt to perform arithmetic on a nil value/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'nil % 4' );
+print(nil % 4)
 CODE
 /attempt to perform arithmetic on a nil value/
 OUT
@@ -139,5 +151,19 @@ language_output_like( 'lua', <<'CODE', <<'OUT', 'nil >= 0' );
 print(nil >= 0)
 CODE
 /attempt to compare \w+ with \w+/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'get_pmc_keyed' );
+a = nil
+print(a[1])
+CODE
+/attempt to index/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'set_pmc_keyed' );
+a = nil
+a[1] = 1
+CODE
+/attempt to index/
 OUT
 

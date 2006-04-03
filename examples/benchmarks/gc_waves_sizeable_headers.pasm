@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: gc_waves_sizeable_headers.pasm 5482 2004-02-29 13:19:06Z leo $
+# $Id: gc_waves_sizeable_headers.pasm 11937 2006-03-19 14:18:26Z bernhard $
 
 =head1 NAME
 
@@ -42,7 +42,6 @@ indicating:
 mainloop:
 
 loopup:
-	pushs
 	concat S1, S0, S0
 	concat S2, S0, S0
 	concat S3, S0, S0
@@ -68,7 +67,6 @@ loopup:
 	lt I1, I0, loopup
 
 loopdown:
-	pops
 	dec I1
 	gt I1, 0, loopdown
 

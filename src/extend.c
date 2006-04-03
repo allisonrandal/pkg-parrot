@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: extend.c 11563 2006-02-16 00:42:07Z jisom $
+$Id: extend.c 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -1101,7 +1101,7 @@ Returns the vtable corresponding to the given PMC ID.
 Parrot_VTABLE
 Parrot_get_vtable(Parrot_INTERP interpreter, Parrot_Int id)
 {
-    return Parrot_base_vtables[id];
+    return interpreter->vtables[id];
 }
 
 /*

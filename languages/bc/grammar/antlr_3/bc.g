@@ -1,5 +1,5 @@
 // Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-// $Id: bc.g 11678 2006-02-20 18:40:50Z bernhard $ 
+// $Id: bc.g 11917 2006-03-17 17:49:10Z bernhard $ 
  
 // Parse bc with ANTLR3
 // This grammar is derived from <http://www.funet.fi/pub/doc/posix/p1003.2/d11.2/4.3>
@@ -16,6 +16,7 @@ options
 tokens 
 {
   PROGRAM;
+  UNARY_MINUS;
 } 
 
 program 
@@ -23,7 +24,12 @@ program
   ;
 
 input_item
+  : expression +
+  ;
+
+expression
   : INT
+  | '-' expression -> ^( UNARY_MINUS expression )
   ;
 
 INT
@@ -35,6 +41,18 @@ quit
   : 'quit'
   ;    
 
+// ignore multiple-line comments
+
+
+ML_COMMENT
+  : '/*'
+    ( options {greedy=false;} : . )*
+    '*/'
+    {
+      channel = 99;       // send into nirwana 
+    }
+	;
+
 WS
   : (   ' '
       |   '\t'
@@ -42,6 +60,6 @@ WS
       |   '\n'
     )+
     {
-      channel = 99;
+      channel = 99;       // send into nirwana 
     }
   ;    

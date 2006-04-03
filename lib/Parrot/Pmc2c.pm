@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Pmc2c.pm 11536 2006-02-14 07:37:34Z fperrad $
+# $Id: Pmc2c.pm 11928 2006-03-18 17:43:35Z leo $
 
 =head1 NAME
 
@@ -535,7 +535,7 @@ sub rewrite_vtable_method ($$$$$) {
     # Rewrite DYNSUPER(args)
     s/DYNSUPER          # Macro: DYNSUPER
       \(\s*(.*?)\)      # capture argument list
-     /"Parrot_base_vtables[$supertype].$method(" . full_arguments($1) . ')'/xeg;
+     /"interpreter->vtables[$supertype].$method(" . full_arguments($1) . ')'/xeg;
 
     # Rewrite OtherClass.SUPER(args...)
     s/(\w+)             # capture OtherClass
@@ -874,41 +874,40 @@ EOC
 EOC
     $cout .= <<"EOC";
         /*
-         * Parrot_base_vtables is a true global - register just once
+         * create vtable - clone it - we have to set a few items
          */
-        if (!Parrot_base_vtables[entry]) {
-            struct _vtable *vt_clone =
-                Parrot_clone_vtable(interp, &temp_base_vtable);
+        struct _vtable *vt_clone =
+            Parrot_clone_vtable(interp, &temp_base_vtable);
 
 EOC
     # init vtable slot
     if ($self->{flags}{dynpmc}) {
         $cout .= <<"EOC";
-            vt_clone->base_type = entry;
-            vt_clone->whoami = string_make(interp,
-                "$classname", @{[length($classname)]}, "ascii",
-                PObj_constant_FLAG|PObj_external_FLAG);
-            vt_clone->isa_str = string_make(interp,
-                "$isa", @{[length($isa)]}, "ascii",
-                PObj_constant_FLAG|PObj_external_FLAG);
-            vt_clone->does_str = string_make(interp,
-                "$does", @{[length($does)]}, "ascii",
-                PObj_constant_FLAG|PObj_external_FLAG);
+        vt_clone->base_type = entry;
+        vt_clone->whoami = string_make(interp,
+            "$classname", @{[length($classname)]}, "ascii",
+            PObj_constant_FLAG|PObj_external_FLAG);
+        vt_clone->isa_str = string_make(interp,
+            "$isa", @{[length($isa)]}, "ascii",
+            PObj_constant_FLAG|PObj_external_FLAG);
+        vt_clone->does_str = string_make(interp,
+            "$does", @{[length($does)]}, "ascii",
+            PObj_constant_FLAG|PObj_external_FLAG);
 EOC
     }
     else {
         $cout .= <<"EOC";
-            vt_clone->whoami = CONST_STRING(interp, "$classname");
-            vt_clone->isa_str = CONST_STRING(interp, "$isa");
-            vt_clone->does_str = CONST_STRING(interp, "$does");
+        vt_clone->whoami = CONST_STRING(interp, "$classname");
+        vt_clone->isa_str = CONST_STRING(interp, "$isa");
+        vt_clone->does_str = CONST_STRING(interp, "$does");
 EOC
     }
     $cout .= <<"EOC";
-            Parrot_base_vtables[entry] = vt_clone;
-        }
+        interp->vtables[entry] = vt_clone;
 EOC
     $cout .= <<"EOC";
-    } /* pass */
+    } 
+    else { /* pass */
 EOC
 
    # To make use of the .HLL directive, register any mapping...
@@ -918,44 +917,38 @@ EOC
       my $maps = (keys %{$self->{flags}{maps}})[0];
       $cout .= <<"EOC";
 
-    if (pass) {
-        /* Register this PMC as a HLL mapping */
-        INTVAL pmc_id = Parrot_get_HLL_id(
-            interp, const_string(interp, "$hll")
-        );
-        if (pmc_id > 0)
-            Parrot_register_HLL_type(
-                interp, pmc_id, enum_class_$maps, entry
+        {
+            /* Register this PMC as a HLL mapping */
+            INTVAL pmc_id = Parrot_get_HLL_id(
+                interp, const_string(interp, "$hll")
             );
-    } /*pass*/
+            if (pmc_id > 0)
+                Parrot_register_HLL_type(
+                    interp, pmc_id, enum_class_$maps, entry
+                );
+        } /* Register */
 EOC
-   }
+    }
 
+    $cout .= <<"EOC";
+        /* setup MRO and _namespace */
+        Parrot_create_mro(interp, entry);
+EOC
     # declare each nci method for this class
-    my $firstnci = 1;
     foreach my $method (@{ $self->{methods} }) {
       next unless $method->{loc} eq 'nci';
       my $proto = proto($method->{type}, $method->{parameters});
-      if ($firstnci) {
-          $cout .= <<"EOC";
-    if (pass) {
-EOC
-      }
       $cout .= <<"EOC";
         enter_nci_method(interp, entry,
                 F2DPTR(Parrot_${classname}_$method->{meth}),
                 "$method->{meth}", "$proto");
 EOC
-      $firstnci = 0;
     }
-      $cout .= <<"EOC" unless $firstnci;
-    }
-EOC
 
     # include any class specific init code from the .pmc file
     $cout .= <<"EOC";
+        /* class_init */
     $class_init_code
-    if (pass == 1) {
 EOC
 
     # declare auxiliary variables for dyncpmc IDs
@@ -965,9 +958,6 @@ EOC
         int my_enum_class_$dynpmc = pmc_type(interp, string_from_const_cstring(interp, "$dynpmc", 0));
 EOC
     }
-        $cout .= <<"EOC";
-        Parrot_create_mro(interp, entry);
-EOC
     # init MMD "right" slots with the dynpmc types
     foreach my $entry (@init_mmds) {
         if ($entry->[1] eq $classname) {
@@ -1496,8 +1486,7 @@ sub body
     return <<EOC;
 $l
 ${decl} {
-	Parrot_on_exit(show_backtrace, interpreter);
-	internal_exception(NULL_REG_ACCESS,
+	real_exception(interpreter, NULL, NULL_REG_ACCESS,
 		"Null PMC access in $meth()");
         $ret
 }

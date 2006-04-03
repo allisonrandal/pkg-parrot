@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_unix.c 11698 2006-02-21 19:33:43Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: io_unix.c 11836 2006-03-09 16:00:15Z leo $
 
 =head1 NAME
 
@@ -718,6 +718,7 @@ static INTVAL
 PIO_unix_connect(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *r)
 {
     UNUSED(layer);
+    UNUSED(interpreter);
 
     if (r) {
         struct sockaddr_in sa;
@@ -726,9 +727,11 @@ PIO_unix_connect(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *r)
         io->remote.sin_port = sa.sin_port;
     }
 AGAIN:
+#if PIO_TRACE
     PIO_eprintf(interpreter,
             "connect: fd = %d port = %d\n",
             io->fd, ntohs(io->remote.sin_port));
+#endif
     if ((connect(io->fd, (struct sockaddr*)&io->remote,
                     sizeof(struct sockaddr))) != 0) {
         switch(errno) {
@@ -831,14 +834,14 @@ static ParrotIO *
 PIO_unix_accept(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
 {
     int newsock;
-    socklen_t newsize;
+    Parrot_Socklen_t addrlen;
     ParrotIO *newio;
 
     UNUSED(layer);
     newio = PIO_new(interpreter, PIO_F_SOCKET, 0, PIO_F_READ|PIO_F_WRITE);
 
     if ((newsock = accept(io->fd, (struct sockaddr *)&newio->remote,
-                          &newsize)) == -1)
+                          &addrlen)) == -1)
     {
         fprintf(stderr, "accept: errno=%d", errno);
         /* Didn't get far enough, free the io */

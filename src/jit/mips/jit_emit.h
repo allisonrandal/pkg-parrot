@@ -1,8 +1,8 @@
 /*
  * jit_emit.h
  *
- * CVS Info
- *    $Id: jit_emit.h 10066 2005-11-17 13:27:21Z rafl $
+ * SVN Info
+ *    $Id: jit_emit.h 11903 2006-03-14 20:49:11Z bernhard $
  * Overview:
  *    MIPS JIT
  * History:

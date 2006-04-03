@@ -1,7 +1,7 @@
 /* TclInt.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: tclint.pmc 10933 2006-01-06 01:43:24Z particle $
+ *  SVN Info
+ *     $Id: tclint.pmc 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     These are the vtable functions for the TclInt base class
  *  Data Structure and Algorithms:

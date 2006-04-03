@@ -1,7 +1,7 @@
 /* tsq.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: tsq.h 5144 2004-01-25 14:12:55Z leo $
+ *  SVN Info
+ *     $Id: tsq.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Defines the thread-safe queue system
  *  Data Structure and Algorithms:

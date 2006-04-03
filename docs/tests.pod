@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: tests.pod 10751 2005-12-28 22:47:30Z particle $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: tests.pod 12076 2006-03-29 22:22:22Z bernhard $
 
 =head1 NAME
 
@@ -28,8 +28,8 @@ in the languages directory.
 
 Parrot has a status page with smoke test results
 L<http://smoke.parrotcode.org/smoke/>. You can supply new tests
-results just running C<make smoke>. It will run the same tests as
-C<make test> would, but creating a HTML table with the test
+results by just running C<make smoke>. It will run the same tests as
+C<make test> would, but will additionally create a HTML table with the test
 results. At the end, it will try to upload the test results to the
 smoke server.
 
@@ -53,7 +53,7 @@ it might also make sense to create a new F<*.t> file.
 =head1 How to write a test
 
 The testing framework needs to know how many tests it should expect.  So the
-number of planned tests needs to be incremented when adding a new test.  This
+number of planned tests needs to be incremented when adding a new test. This
 is done near the top of a test file, in a line that looks like:
 
   use Parrot::Test tests => 8;
@@ -76,7 +76,7 @@ new test like this:
 
 =head2 Parrot Intermediate Representation
 
-Tests can also be written in B<PIR>. This is done with C<pir_output_is> and
+Writing tests  in B<PIR> is more convenient. This is done with C<pir_output_is> and
 friends.
 
     pir_output_is(<<'CODE',<<'OUT','nothing useful');
@@ -105,7 +105,7 @@ C source tests are usually located in F<t/src/*.t>.  A simple test looks like:
         interpreter = Parrot_new(NULL);
 
         if (!interpreter)
-        return 1;
+            return 1;
 
         Parrot_init(interpreter);
         Parrot_run_native(interpreter, the_test);
@@ -131,10 +131,14 @@ Note that it's always a good idea to output "done" to confirm that the compiled
 code executed completely. When mixing C<printf> and C<PIO_printf> always append
 a C<fflush(stdout);> after the former.
 
+=head2 Test Perl5 helpers
+
+Perl5 unit tests are in F<t/perl/*.t>.
+
 =head2 Testing language implementations
 
-Language implementations are usually tested with the test function
-C<language_output_is>.
+Language implementations are usually tested with 
+C<language_output_is> and friends..
 
 =head1 Ideal tests:
 
@@ -179,5 +183,7 @@ See L<Test::More> on how to do that.
 =head1 SEE ALSO
 
 L<http://qa.perl.org/>
+F<t/TESTS.STATUS.pod>
+F<t/README>
 
 =cut

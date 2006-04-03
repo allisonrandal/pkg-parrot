@@ -1,4 +1,4 @@
-﻿# $Id: CREDITS 11387 2006-01-31 13:12:07Z leo $
+﻿# $Id: CREDITS 11858 2006-03-10 18:23:19Z autrijus $
 
 	Following in the steps of other open source projects that
 	eventually take over the world, here is the partial list
@@ -68,8 +68,8 @@ D: Buffered IO fix
 
 N: Ask Bjoern Hansen
 
-N: Autrijus Tang
-D: various bugfixes
+N: Audrey Tang
+D: Pugs, a Perl6->Parrot implementation.
 
 N: Benjamin Goldberg
 D: Numerous improvements and proposals.

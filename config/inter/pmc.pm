@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: pmc.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: pmc.pm 11812 2006-03-07 16:14:31Z leo $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':inter';
 
-$description = 'Determining what pmc files should be compiled in...';
+$description = 'Determining what pmc files should be compiled in';
 
 @args = qw(ask pmc);
 
@@ -151,7 +151,7 @@ E_NOTE
         $TEMP_pmc_build .= <<END
 src/pmc/$pmc.c src/pmc/pmc_$pmc.h : src/pmc/$pmc.dump
 
-src/pmc/$pmc.dump : vtable.dump $parent_dumps 
+src/pmc/$pmc.dump : vtable.dump $parent_dumps lib/Parrot/Pmc2c.pm
 
 src/pmc/pmc_$pmc.h: src/pmc/$pmc.pmc
 	\$(PMC2CC) src/pmc/$pmc.pmc

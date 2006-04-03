@@ -1,3 +1,5 @@
+# $Id: dynpmc.in 11903 2006-03-14 20:49:11Z bernhard $
+
 PERL = @perl@
 RM_F = @rm_f@
 LOAD_EXT = @load_ext@
@@ -79,4 +81,4 @@ realclean: clean
 
 distclean: realclean
 
-cvsclean: realclean
+svnclean: realclean

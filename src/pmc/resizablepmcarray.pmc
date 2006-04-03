@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: resizablepmcarray.pmc 11610 2006-02-17 01:54:32Z particle $
+$Id: resizablepmcarray.pmc 11844 2006-03-10 01:47:38Z particle $
 
 =head1 NAME
 
@@ -255,6 +255,58 @@ If key is a slice, do a splice as set that item.
         for (i = idx; i < n - 1; ++i)
             data[i] = data[i + 1];
         PMC_int_val(SELF)--;
+    }
+
+/*
+
+=item C<INTVAL exists_keyed_int(INTVAL key)>
+
+=item C<INTVAL exists_keyed_int(PMC* key)>
+
+Returns TRUE is the element at C<key> exists; otherwise returns false.
+
+=cut
+
+*/
+    INTVAL exists_keyed_int (INTVAL key) {
+        PMC **data;
+
+        if (key < 0)
+            key += PMC_int_val(SELF);
+        if (key < 0 || key >= PMC_int_val(SELF))
+            return 0;
+
+        data = (PMC**)PMC_data(SELF);
+        return !PMC_IS_NULL(data[key]);
+    }
+
+    INTVAL exists_keyed (PMC* key) {
+        INTVAL ix = key_integer(INTERP, key);
+        return SELF.exists_keyed_int(ix);
+    }
+
+/*
+
+=item C<INTVAL defined_keyed_int(INTVAL key)>
+
+Returns TRUE is the element at C<key> is defined; otherwise returns false.
+
+=cut
+
+*/
+
+    INTVAL defined_keyed_int (INTVAL key) {
+        PMC* val;
+
+        if (key < 0)
+            key += PMC_int_val(SELF);
+        if (key < 0 || key >= PMC_int_val(SELF))
+            return 0;
+        val = DYNSELF.get_pmc_keyed_int(key);
+        if(PMC_IS_NULL(val))
+            return 0;
+
+        return VTABLE_defined(INTERP, val);
     }
 
 /*

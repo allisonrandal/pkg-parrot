@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pl 11690 2006-02-21 01:55:14Z jhoblitt $
+# $Id: Configure.pl 11903 2006-03-14 20:49:11Z bernhard $
 
 =head1 NAME
 
@@ -228,11 +228,6 @@ Needs a working parser and lexer.
 
 Build parrot assuming only pure ANSI C is available.
 
-=item C<--expnetwork>
-
-Enable experimental networking. This is an unused option and should probably be
-removed.
-
 =back
 
 =head1 SEE ALSO
@@ -242,24 +237,23 @@ F<lib/Parrot/Configure/Step.pm>, F<docs/configuration.pod>
 
 =cut
 
-use 5.005_02;
-
 use strict;
-use vars qw($parrot_version @parrot_version);
+use warnings;
 use lib 'lib';
+use 5.008;
 
+use English qw( -no_match_vars );
 use Parrot::BuildUtil;
 use Parrot::Configure;
 
-$| = 1;
+# These globals are accessed in config/init/defaults.pm
+our $parrot_version = Parrot::BuildUtil::parrot_version();
+our @parrot_version = Parrot::BuildUtil::parrot_version();
 
-$parrot_version = parrot_version();
-@parrot_version = parrot_version();
+$OUTPUT_AUTOFLUSH = 1;
 
 # Handle options
-
 my %args;
-
 for (@ARGV) {
   my($key, $value) = m/--([-\w]+)(?:=(.*))?/;
   $key   = 'help' unless defined $key;
@@ -267,10 +261,10 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $cvsid='$Id: Configure.pl 11690 2006-02-21 01:55:14Z jhoblitt $';
+      my $svnid = '$Id: Configure.pl 11903 2006-03-14 20:49:11Z bernhard $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
-$cvsid
+$svnid
 END
       exit;
     };
@@ -354,7 +348,6 @@ Other Options (may not be implemented):
    --maintainer         Create imcc's parser and lexer files. Needs a working
                         parser and lexer.
    --miniparrot         Build parrot assuming only pure ANSI C is available
-   --expnetwork         Enable experimental networking (unused)
 
 EOT
       exit;
@@ -399,7 +392,6 @@ my @steps = qw(
     inter::encoding
     inter::types
     inter::ops
-    inter::exp
     inter::pmc
     auto::alignptrs
     auto::headers
@@ -417,6 +409,7 @@ my @steps = qw(
     auto::gc
     auto::memalign
     auto::signal
+    auto::socklen_t
     auto::env
     auto::aio
     auto::gmp

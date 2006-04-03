@@ -1,7 +1,7 @@
 /* global_setup.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: global_setup.h 5911 2004-04-22 08:55:40Z leo $
+ *  SVN Info
+ *     $Id: global_setup.h 11928 2006-03-18 17:43:35Z leo $
  *  Overview:
  *      Contains declarations of global data and the functions
  *      that initialize that data.
@@ -18,7 +18,8 @@
 #include "parrot/interpreter.h"
 
 
-void init_world(Interp * interp);
+void init_world(Interp *);
+void parrot_global_setup_2(Interp *);
 
 #endif /* PARROT_GLOBAL_SETUP_H_GUARD */
 

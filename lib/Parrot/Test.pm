@@ -1,9 +1,9 @@
-# Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Test.pm 11603 2006-02-16 23:02:20Z particle $
+# Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: Test.pm 12067 2006-03-28 20:17:11Z bernhard $
 
 =head1 NAME
 
-Parrot::Test - Functions for testing Parrot and language implementations
+Parrot::Test - testing routines for Parrot and language implementations
 
 =head1 SYNOPSIS
 
@@ -32,12 +32,15 @@ The parameter C<$expected> is the expected result.
 The parameter C<$unexpected> is the unexpected result.
 The parameter C<$description> should describe the test.
 
-Any optional parameters can follow.  For example, to mark a test as a TODO test (where you know the implementation does not yet work), pass:
+Any optional parameters can follow.  For example, to mark a test as a TODO test
+(where you know the implementation does not yet work), pass:
 
     todo => 'reason to consider this TODO'
 
 at the end of the argument list.  Valid reasons include C<bug>,
 C<unimplemented>, and so on.
+
+B<Note:> you I<must> use a C<$description> with TODO tests.
 
 =over 4
 
@@ -146,15 +149,28 @@ expected result.
 Compiles and runs the C code, passing the test if a string comparison of
 output with the unexpected result is false.
 
-=item C<example_output_is( $example_fn, $expected )>
+=item C<example_output_is( $example_f, $expected, @todo )>
 
-Determine the language from the extension of C<$example_fn> and
-runs language_output_is().
+Determine the language from the extension of C<$example_f> and runs
+language_output_is().  This I<does> set a description for you, so don't pass
+one.
+
+=item C<example_output_like( $example_f, $expected, @todo )>
+
+Determine the language from the extension of C<$example_f> and runs
+language_output_like().  This I<does> set a description for you, so don't pass
+one.
+
+=item C<example_output_isnt( $example_f, $expected, @todo )>
+
+Determine the language from the extension of C<$example_f> and runs
+language_output_isnt().  This I<does> set a description for you, so don't pass
+one.
 
 =item C<skip($why, $how_many)>
 
-Use within a C<SKIP: { ... }> block to indicate why and how many test
-are being skipped. Just like in Test::More.
+Use within a C<SKIP: { ... }> block to indicate why and how many tests to skip,
+just like in Test::More.
 
 =item C<run_command($command, %options)>
 
@@ -182,43 +198,29 @@ Read the whole file $file_name and return the content as a string.
 package Parrot::Test;
 
 use strict;
-use vars qw(@EXPORT @ISA);
+use warnings;
 
-use Parrot::Config;
-use File::Spec;
-use Data::Dumper;
 use Cwd;
+use Data::Dumper;
+use File::Spec;
+use Parrot::Config;
 
 require Exporter;
 require Test::Builder;
 require Test::More;
 
+our @EXPORT = qw( plan run_command skip slurp_file );
 
-@EXPORT = qw( 
-              language_output_is language_output_like language_output_isnt
-              example_output_is
-              output_is          output_like          output_isnt
-              pasm_output_is     pasm_output_like     pasm_output_isnt
-              past_output_is     past_output_like     past_output_isnt
-              pir_output_is      pir_output_like      pir_output_isnt
-              pir_2_pasm_is      pir_2_pasm_like      pir_2_pasm_isnt
-              pbc_output_is      pbc_output_like      pbc_output_isnt
-              c_output_is        c_output_like        c_output_isnt
-              plan
-              skip
-              slurp_file
-              run_command
-          );
-@ISA = qw(Exporter);
+use base qw( Exporter );
 
 # tell parrot it's being tested--disables searching of installed libraries.
 # (see Parrot_get_runtime_prefix in src/library.c).
-$ENV{PARROT_TEST} = 1 unless defined($ENV{PARROT_TEST});
+$ENV{PARROT_TEST} = 1 unless defined $ENV{PARROT_TEST};
 
 my $builder = Test::Builder->new();
 
 sub import {
-    my($class, $plan, @args) = @_;
+    my ($class, $plan, @args) = @_;
 
     $builder->plan( $plan, @args );
 
@@ -229,20 +231,20 @@ sub import {
 # redirections ( tested on Linux and Win2k )
 # An alternative is using Test::Output
 sub run_command {
-    my($command, %redir) = @_;
+    my ($command, %options) = @_;
 
     # To run the command in a different directory.
-    my $chdir = delete $redir{CD};
+    my $chdir = delete $options{CD};
 
-    foreach (keys %redir) {
+    foreach (keys %options) {
         m/^STD(OUT|ERR)$/ or die "I don't know how to redirect '$_' yet! ";
     }
-    foreach (values %redir) {
+    foreach (values %options) {
         $_ = 'NUL:' if $^O eq 'MSWin32' and $_ eq '/dev/null';
     }
 
-    my $out = $redir{'STDOUT'} || '';
-    my $err = $redir{'STDERR'} || '';
+    my $out = $options{'STDOUT'} || '';
+    my $err = $options{'STDERR'} || '';
 
     if ( $out and $err and $out eq $err ) {
         $err = "&STDOUT";
@@ -268,13 +270,13 @@ sub run_command {
     }
 
     my $orig_dir;
-    if( $chdir ) {
+    if ( $chdir ) {
         $orig_dir = cwd;
         chdir $chdir;
     }
 
     # Execute all commands
-    system $_ for (@$command);
+    system( $_ ) for (@{$command});
 
     if( $chdir ) {
         chdir $orig_dir;
@@ -294,6 +296,7 @@ sub run_command {
 
 sub per_test {
     my ($ext, $test_no) = @_;
+
     return unless defined $ext and defined $test_no;
 
     my $t = $0;  # $0 is name of the test script
@@ -302,14 +305,13 @@ sub per_test {
     return $t;
 }
 
-sub generate_code {
-    my ($code, $directory, $test_no, $code_f) = @_;
+sub write_code_to_file {
+    my ($code, $code_f) = @_;
 
-    local( *CODE );
-    open(CODE, "> $code_f") or die "Unable to open '$code_f'";
-    binmode(CODE);
-    print CODE $code;
-    close( CODE );
+    open my $CODE, '>', $code_f or die "Unable to open '$code_f'";
+    binmode $CODE;
+    print $CODE $code;
+    close $CODE;
 
     return;
 }
@@ -331,8 +333,18 @@ sub slurp_file {
     return $file;
 }
 
+sub convert_line_endings {
+    my ( $text ) = @_;
+
+    $text =~ s/\cM\cJ/\n/g;
+}
+
+# 
+# private methods, should not be used by Modules inherition from Parrot::Test
+#
+
 sub _generate_functions {
-    my ($package, $code_generator) = @_;
+    my $package = 'Parrot::Test';
 
     my $path_to_parrot = $INC{"Parrot/Config.pm"};
     $path_to_parrot =~ s:lib/Parrot/Config.pm$::;
@@ -340,9 +352,6 @@ sub _generate_functions {
     my $parrot = File::Spec->join(File::Spec->curdir(), 'parrot' . $PConfig{exe});
 
     my %parrot_test_map = (
-        output_is          => 'is_eq',
-        output_isnt        => 'isnt_eq',
-        output_like        => 'like',
         pbc_output_is      => 'is_eq',
         pbc_output_isnt    => 'isnt_eq',
         pbc_output_like    => 'like',
@@ -355,19 +364,18 @@ sub _generate_functions {
         pir_output_is      => 'is_eq',
         pir_output_isnt    => 'isnt_eq',
         pir_output_like    => 'like',
-        pir_2_pasm_is      => 'is_eq',
-        pir_2_pasm_isnt    => 'isnt_eq',
-        pir_2_pasm_like    => 'like',
                           );
 
     foreach my $func ( keys %parrot_test_map ) {
+        push @EXPORT, $func;
         no strict 'refs';
 
-        *{$package.'::'.$func} = sub ($$;$%) {
-            my( $code, $expected, $desc, %extra ) = @_;
+        *{$package.'::'.$func} = sub {
+            local $SIG{__WARN__} = \&report_odd_hash;
+            my( $code, $expected, $desc, %extra) = @_;
 
             # Strange Win line endings
-            $expected =~ s/\cM\cJ/\n/g;
+            convert_line_endings( $expected );
 
             # set up default description
             unless ( $desc ) {
@@ -388,14 +396,11 @@ sub _generate_functions {
             if ( $func =~ m/^pir_output/ ) {
                 $code_f = per_test('.pir', $test_no);
             }
-            elsif ( $func =~ m/^output_/ || $func =~ m/^pasm_output_/ ) {
+            elsif ( $func =~ m/^pasm_output_/ ) {
                 $code_f = per_test('.pasm', $test_no);
             }
             elsif ( $func =~ m/^past_/) {
                 $code_f = per_test('.past', $test_no);
-            }
-            elsif ( $func =~ m/^pir_2_pasm_/) {
-                $code_f = per_test('.pir', $test_no);
             }
             elsif ( $func =~ m/^pbc_output_/ ) {
                 $code_f = per_test('.pbc', $test_no);
@@ -403,46 +408,55 @@ sub _generate_functions {
             else {
                 die "Unknown test function: $func";
             }
+            $code_f = File::Spec->rel2abs($code_f);
+
+            # native tests are just run, others need to write code first
+            if ($code_f !~ /\.pbc$/) {
+                write_code_to_file($code, $code_f);
+            }
 
             my $args = $ENV{TEST_PROG_ARGS} || '';
             my $run_exec = 0;
             if ( $args =~ s/--run-exec// ) {
                 $run_exec = 1;
-                my $pbc_f = per_test('.pbc', $test_no);
-                my $cmd = qq{$parrot ${args} -o $pbc_f "$code_f"};
-                run_command($cmd, CD => $path_to_parrot,
-                STDOUT => $out_f, STDERR => $out_f);
-
-                my $o_f = per_test('.o', $test_no);
-                $cmd = qq{$parrot ${args} -o $o_f "$pbc_f"};
-                run_command($cmd, CD => $path_to_parrot,
-                STDOUT => $out_f, STDERR => $out_f);
-
-                my $noext_f = per_test('', $test_no);
-                $cmd = qq{make EXEC=$noext_f exec};
-                run_command($cmd, CD => $path_to_parrot,
-                STDOUT => $out_f, STDERR => $out_f);
+                my $pbc_f  = per_test('.pbc', $test_no);
+                my $o_f    = per_test('_pbcexe' . $PConfig{o}, $test_no);
+                my $exe_f  = per_test( '_pbcexe' . $PConfig{exe}, $test_no);  # Make cleanup and svn:ignore more simple
+                my $exec_f = per_test( '_pbcexe', $test_no);  # Make cleanup and svn:ignore more simple
+                $exe_f =~ s@[\\/:]@$PConfig{slash}@g;
+                # XXX put this into sub generate_pbc()
+                run_command(qq{$parrot $args -o $pbc_f "$code_f"},
+                            CD     => $path_to_parrot,
+                            STDOUT => $out_f,
+                            STDERR => $out_f);
+                if ( -e $pbc_f ) {
+                    run_command(qq{$parrot $args -o $o_f "$pbc_f"},
+                                CD     => $path_to_parrot,
+                                STDOUT => $out_f,
+                                STDERR => $out_f);
+                    if ( -e $o_f ) {
+                        run_command(qq{$PConfig{make} EXEC=$exec_f exec},
+                                    CD     => $path_to_parrot,
+                                    STDOUT => $out_f,
+                                    STDERR => $out_f);
+                        if ( -e $exe_f ) {
+                            run_command($exe_f,
+                                        CD     => $path_to_parrot,
+                                        STDOUT => $out_f,
+                                        STDERR => $out_f);
+                        }
+                    }
+                }
             }
+
             if ( $func =~ /^pbc_output_/ && $args =~ /-r / ) {
                 # native tests with --run-pbc don't make sense
                 return $builder->skip( "no native tests with -r" );
             }
-            elsif ( $func =~ /^pir_2_pasm_/) {
-                $out_f = per_test('.pasm', $test_no);
-                my $opt = $code_f =~ m!opt(.)! ? "-O$1" : "-O1";
-                $args = "$args $opt --output=$out_f";
-            }
-            $code_f = File::Spec->rel2abs($code_f);
-
-            # native tests are just run, others need to write code first
-            if ($code_f !~ /\.pbc$/) {
-                $code_generator->($code, $path_to_parrot, $test_no, $code_f);
-            }
 
             my ( $exit_code, $cmd );
             unless ( $run_exec ) {
-                if ( $func !~ /^pir_2_pasm_/ &&
-                     ( $args =~ s/--run-pbc// || $args =~ s/-r //) ) {
+                if ( $args =~ s/--run-pbc// || $args =~ s/-r // ) {
                     my $pbc_f = per_test('.pbc', $test_no);
                     $args = qq{$args -o "$pbc_f"};
 
@@ -456,23 +470,86 @@ sub _generate_functions {
                 } else {
                     $cmd = qq{$parrot $args "$code_f"};
                 }
-                $exit_code = run_command($cmd, CD => $path_to_parrot,
-                    STDOUT => $out_f, STDERR => $out_f);
+                $exit_code = run_command($cmd,
+                                         CD     => $path_to_parrot,
+                                         STDOUT => $out_f,
+                                         STDERR => $out_f);
             }
 
             my $meth = $parrot_test_map{$func};
             my $real_output = slurp_file($out_f);
-            if ( $func =~ /^pir_2_pasm_/ ) {
+
+            # set a TODO for Test::Builder to find
+            my $call_pkg = $builder->exported_to() || '';
+            # die Dumper( $code, $expected, $desc, \%extra, $extra{todo}, $call_pkg ) if ( keys %extra );
+            local *{ $call_pkg . '::TODO' } = \$extra{todo}
+                if defined $extra{todo};
+
+            my $pass = $builder->$meth( $real_output, $expected, $desc );
+            $builder->diag("'$cmd' failed with exit code $exit_code")
+                  if $exit_code and not $pass;
+
+            unless($ENV{POSTMORTEM}) {
+                unlink $out_f;
+            }
+
+            return $pass;
+        };
+    }
+
+    my %pir_2_pasm_test_map = (
+        pir_2_pasm_is      => 'is_eq',
+        pir_2_pasm_isnt    => 'isnt_eq',
+        pir_2_pasm_like    => 'like',
+                              );
+
+    foreach my $func ( keys %pir_2_pasm_test_map ) {
+        push @EXPORT, $func;
+        no strict 'refs';
+
+        *{$package.'::'.$func} = sub {
+            my ( $code, $expected, $desc, %extra ) = @_;
+
+            # Strange Win line endings
+            convert_line_endings( $expected );
+
+            # set up default description
+            unless ( $desc ) {
+               (undef, my $file, my $line) = caller();
+               $desc = "($file line $line)";
+            }
+
+            # $test_no will be part of temporary file
+            my $test_no = $builder->current_test() + 1;
+
+            # Name of the file with test code.
+            my $code_f = File::Spec->rel2abs( per_test('.pir', $test_no) );
+
+            # output file
+            my $out_f  = per_test('.pasm', $test_no);
+
+            my $opt = $code_f =~ m!opt(.)! ? "-O$1" : "-O1";
+            my $args = $ENV{TEST_PROG_ARGS} || '';
+            $args .= " $opt --output=$out_f";
+            $args =~ s/--run-exec//;
+
+            write_code_to_file($code, $code_f);
+
+            my $cmd = qq{$parrot $args "$code_f"};
+            my $exit_code = run_command($cmd,
+                                        CD     => $path_to_parrot,
+                                        STDOUT => $out_f,
+                                        STDERR => $out_f);
+
+            my $meth = $pir_2_pasm_test_map{$func};
+            my $real_output = slurp_file($out_f);
+            {
                 # The parrot open '--outfile=file.pasm' seems to create unnecessary whitespace
                 $real_output =~ s/^\s*$//gm;
                 $real_output =~ s/[\t ]+/ /gm;
-                $real_output =~ s/[\t ]+$//gm;
+                $real_output =~ s/ +$//gm;
 
-                # Normalize the expected output,
-                # Let's not worry too much about whitespace
-                $expected =~ s/^\s*$//gm;
                 $expected =~ s/[\t ]+/ /gm;
-                $expected =~ s/[\t ]+$//gm;
             }
 
             # set a TODO for Test::Builder to find
@@ -490,7 +567,7 @@ sub _generate_functions {
             }
 
             return $pass;
-        }
+        };
     }
 
     my %builtin_language_prefix = (
@@ -507,32 +584,37 @@ sub _generate_functions {
                             );
 
     foreach my $func ( keys %language_test_map ) {
+        push @EXPORT, $func;
         no strict 'refs';
 
-        *{$package.'::'.$func} = sub ($$;$%) {
+        *{$package.'::'.$func} = sub {
             my ( $language, @remaining ) = @_;
 
             my $meth = $language_test_map{$func};
             if ( my $prefix = $builtin_language_prefix{$language} ) { 
+                my $level = $builder->level();
+                $builder->level( $level + 2 );
                 my $test_func = "${package}::${prefix}_${meth}";
                 $test_func->( @remaining );
+                $builder->level( $level );
             }
             else {
                 # TODO: $language should be the name of the test Module
                 #       that would open the door for Scheme::Test
                 $language = ucfirst($language);
 
-                # make sure TODO will work, by telling Test::Builder which package
-                # the .t file is in (one more than usual, due to the extra layer
-                # of package indirection
+                # make sure TODO will work, by telling Test::Builder which
+                # package the .t file is in (one more than usual, due to the
+                # extra layer of package indirection
                 my $level = $builder->level();
                 $builder->level(2);
 
                 # Load module that knows how to test the language implementation
                 require "Parrot/Test/$language.pm";
+                my $class = "Parrot::Test::${language}";
 
                 # set the builder object, and parrot config.
-                my $obj = eval "Parrot::Test::${language}->new()";
+                my $obj         = $class->new();
                 $obj->{builder} = $builder;
                 $obj->{relpath} = $path_to_parrot;
                 $obj->{parrot}  = $parrot;
@@ -544,6 +626,41 @@ sub _generate_functions {
         }
     }
 
+    # XXX this is broken WRT todo tests
+    my %example_test_map = (
+        example_output_is   => 'language_output_is',
+        example_output_like => 'language_output_like',
+        example_output_isnt => 'language_output_isnt',
+                           );
+
+    foreach my $func ( keys %example_test_map ) {
+        push @EXPORT, $func;
+        no strict 'refs';
+
+        *{$package.'::'.$func} = sub {
+            my ($example_f, $expected, @options) = @_;
+
+            my %lang_for_extension 
+                = ( pasm => 'PASM',
+                    past => 'PAST',
+                    pir  => 'PIR',
+                    imc  => 'PIR', );
+
+            my ( $extension ) = $example_f =~ m{ [.]                         # introducing extension
+                                                 ( pasm | pir | imc | past ) # match and capture the extension
+                                                 \z                          # at end of string
+                                               }ixms or Usage();
+            if ( defined $extension ) { 
+                my $code = slurp_file($example_f);
+                my $test_func = join( '::', $package, $example_test_map{$func} );
+                $test_func->( $lang_for_extension{$extension}, $code, $expected, $example_f, @options );
+            }
+            else {
+                fail( defined $extension, "no extension recognized for $example_f" );
+            }
+        }
+    }
+
     my %c_test_map = (
          c_output_is   => 'is_eq',
          c_output_isnt => 'isnt_eq',
@@ -551,30 +668,30 @@ sub _generate_functions {
                      );
 
     foreach my $func ( keys %c_test_map ) {
+        push @EXPORT, $func;
         no strict 'refs';
 
-        *{$package.'::'.$func} = sub ($$;$ ) {
-            my($source, $expected, $desc) = @_;
+        *{$package.'::'.$func} = sub {
+            my ($source, $expected, $desc) = @_;
 
             # $test_no will be part of temporary file
             my $test_no = $builder->current_test() + 1;
 
             $expected =~ s/\cM\cJ/\n/g;
-            local( *SOURCE );
             my $source_f = per_test('.c', $test_no);
             my $obj_f = per_test($PConfig{o}, $test_no);
-            my $exe_f = per_test($PConfig{exe}, $test_no);
+            my $exe_f = per_test($PConfig{exe}, $test_no);  
             $exe_f =~ s@[\\/:]@$PConfig{slash}@g;
             my $out_f = per_test('.out', $test_no);
             my $build_f = per_test('.build', $test_no);
             my $pdb_f = per_test('.pdb', $test_no);
             my $ilk_f = per_test('.ilk', $test_no);
 
-            open SOURCE, "> $source_f" or die "Unable to open '$source_f'";
-            binmode SOURCE;
-            print SOURCE "/* DO NOT EDIT - Autogenerated test file */\n";
-            print SOURCE $source;
-            close SOURCE;
+            open my $SOURCE, '>', $source_f or die "Unable to open '$source_f'";
+            binmode $SOURCE;
+            print $SOURCE "/* DO NOT EDIT - Autogenerated test file */\n";
+            print $SOURCE $source;
+            close $SOURCE;
 
             my $libparrot_shared = "$PConfig{rpath_blib} -L$PConfig{blib_dir} -lparrot";
             my $libparrot_static  = $PConfig{blib_dir}.$PConfig{slash}.$PConfig{libparrot_static};
@@ -591,8 +708,8 @@ sub _generate_functions {
                 " -I./include -c " .
                 "$PConfig{cc_o_out}$obj_f $source_f";
             $exit_code = run_command($cmd,
-                'STDOUT' => $build_f,
-                'STDERR' => $build_f);
+                                     'STDOUT' => $build_f,
+                                     'STDERR' => $build_f);
             $builder->diag("'$cmd' failed with exit code $exit_code")
                 if $exit_code;
 
@@ -605,12 +722,12 @@ sub _generate_functions {
             }
 
         my $cfg = "src$PConfig{slash}parrot_config$PConfig{o}";
-            $cmd = "$PConfig{link} $PConfig{linkflags} $PConfig{ld_debug} " .
-           "$obj_f $cfg $PConfig{ld_out}$exe_f " .
-           "$libparrot $iculibs $PConfig{libs}";
+        $cmd =   "$PConfig{link} $PConfig{linkflags} $PConfig{ld_debug} "
+               . "$obj_f $cfg $PConfig{ld_out}$exe_f "
+               . "$libparrot $iculibs $PConfig{libs}";
             $exit_code = run_command($cmd,
-        'STDOUT' => $build_f,
-        'STDERR' => $build_f);
+                                     'STDOUT' => $build_f,
+                                     'STDERR' => $build_f);
             $builder->diag("'$cmd' failed with exit code $exit_code")
         if $exit_code;
 
@@ -643,34 +760,7 @@ sub _generate_functions {
     }
 }
 
-sub example_output_is {
-    my ($example_fn, $expected, @options) = @_;
-
-    my %lang_for_extension 
-        = ( pasm => 'PASM',
-            past => 'PAST',
-            pir  => 'PIR',
-            imc  => 'PIR', );
-
-    my ( $extension ) = $example_fn =~ m{ [.]                         # introducing extension
-                                          ( pasm | pir | imc | past ) # match and capture the extension
-                                          \z                          # at end of string
-                                        }ixms or Usage();
-    if ( defined $extension ) { 
-        my $code = slurp_file($example_fn);
-        language_output_is( $lang_for_extension{$extension}, $code, $expected, $example_fn, @options );
-    }
-    else {
-      fail( defined $extension, "no extension recognized for $example_fn" );
-    }
-}
-
-Parrot::Test::_generate_functions(__PACKAGE__, \&generate_code );
-
-=head1 TODO
-
-C<generate_code> should be renamed and be published to everybody who needs
-to generate files.
+Parrot::Test::_generate_functions();
 
 =head1 SEE ALSO
 
@@ -688,4 +778,29 @@ to generate files.
 
 =cut
 
+sub report_odd_hash {
+    my $warning = shift;
+    if ($warning =~ /Odd number of elements in hash assignment/) {
+        require Carp;
+        my @args = DB::uplevel_args();
+        shift @args;
+        my $func = ( caller() )[2];
+
+        Carp::carp(
+            "Odd $func invocation; probably missing description for TODO test"
+        );
+    } else {
+        warn $warning;
+    }
+}
+
+package DB;
+
+sub uplevel_args {
+    my @foo = caller( 2 );
+    return @DB::args;
+}
+
 1;
+
+# vim: expandtab sw=4

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: embed.c 11698 2006-02-21 19:33:43Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: embed.c 12076 2006-03-29 22:22:22Z bernhard $
 
 =head1 NAME
 
@@ -75,7 +75,6 @@ Use this function when you call into Parrot before entering a run loop.
 void
 Parrot_init(Interp *interpreter)
 {
-
     if (!interpreter->world_inited) {
         /* global_setup.c:init_world sets up some vtable stuff.
          * It must only be called once.
@@ -458,7 +457,6 @@ setup_argv(Interp *interpreter, int argc, char ** argv)
                 argc);
     }
 
-    /* XXX @ARGS should propably be a ResizableStringArray */
     userargv = pmc_new_noinit(interpreter, enum_class_ResizableStringArray);
     /* immediately anchor pmc to root set */
     VTABLE_set_pmc_keyed_int(interpreter, interpreter->iglobals,
@@ -767,7 +765,7 @@ Parrot_runcode(Interp *interpreter, int argc, char *argv[])
         PIO_eprintf(interpreter, " ***\n");
     }
 
-    /* Set up @ARGS (or whatever this language calls it) in P5. */
+    /* Set up @ARGS (or whatever this language calls it) in userargv. */
     userargv = setup_argv(interpreter, argc, argv);
 
 #if EXEC_CAPABLE

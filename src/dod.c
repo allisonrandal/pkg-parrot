@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: dod.c 11355 2006-01-26 12:23:21Z leo $
+$Id: dod.c 12045 2006-03-27 16:21:22Z leo $
 
 =head1 NAME
 
@@ -197,10 +197,9 @@ void pobject_lives(Interp *interpreter, PObj *obj)
 #if ! DISABLE_GC_DEBUG
 #  if GC_VERBOSE
     if (CONSERVATIVE_POINTER_CHASING) {
-        fprintf(stderr, "GC Warning! Unanchored %s %p version " INTVAL_FMT
+        fprintf(stderr, "GC Warning! Unanchored %s %p " 
                 " found in system areas \n",
-                PObj_is_PMC_TEST(obj) ? "PMC" : "Buffer",
-                obj, PObj_version(obj));
+                PObj_is_PMC_TEST(obj) ? "PMC" : "Buffer", obj);
     }
 #  endif
 #endif
@@ -275,7 +274,6 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
      * note: adding locals here did cause increased DOD runs
      */
     unsigned int i = 0;
-    struct Stash *stash = 0;
 
     if (trace_stack == 2) {
         trace_system_areas(interpreter);
@@ -305,18 +303,19 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
      * It seems that the Class PMC gets DODed - these should
      * get created as constant PMCs.
      */
-    for (i = 1; i < (unsigned int)enum_class_max; i++) {
+    for (i = 1; i < (unsigned int)interpreter->n_vtable_max; i++) {
         VTABLE *vtable;
         /*
          * XXX dynpmc groups have empty slots for abstract objects
          */
-        if ( (vtable = Parrot_base_vtables[i])) {
+        if ( (vtable = interpreter->vtables[i])) {
 #if 0
             if (vtable->class)
                 pobject_lives(interpreter, (PObj *)vtable->class);
 #endif
             if (vtable->mro)
                 pobject_lives(interpreter, (PObj *)vtable->mro);
+            pobject_lives(interpreter, (PObj *)vtable->_namespace);
         }
     }
 
@@ -324,12 +323,8 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
     for (i = 0; i <= E_LAST_PYTHON_E; ++i) {
         pobject_lives(interpreter, (PObj*)interpreter->exception_list[i]);
     }
-    /* Walk through the stashes */
-    stash = interpreter->globals;
-    while (stash) {
-        pobject_lives(interpreter, (PObj *)stash->stash_hash);
-        stash = stash->parent_stash;
-    }
+    /* mark the stash_hash */
+    pobject_lives(interpreter, (PObj *)interpreter->stash_hash);
     /* s. packfile.c */
     mark_const_subs(interpreter);
 
@@ -690,6 +685,17 @@ Parrot_dod_sweep(Interp *interpreter,
     UINTVAL free_arenas = 0, old_total_used = 0;
 #endif
 
+#if 0
+                if (Interp_trace_TEST(interpreter, 1)) {
+                    Interp *tracer = interpreter->debugger;
+                    PMC *pio = PIO_STDERR(interpreter);
+                    PIO_flush(interpreter, pio);
+                    if (tracer) {
+                        pio = PIO_STDERR(tracer);
+                        PIO_flush(tracer, pio);
+                    }
+                }
+#endif
     /* Run through all the buffer header pools and mark */
     for (cur_arena = pool->last_Arena;
             NULL != cur_arena; cur_arena = cur_arena->prev) {
@@ -738,8 +744,8 @@ Parrot_dod_sweep(Interp *interpreter,
             }
             else {
                 /* it must be dead */
-#if GC_VERBOSE
-                if (GC_DEBUG(interpreter) && PObj_report_TEST(b)) {
+#if 0
+                if (Interp_trace_TEST(interpreter, 1)) {
                     fprintf(stderr, "Freeing pobject %p\n", b);
                     if (PObj_is_PMC_TEST(b)) {
                         fprintf(stderr, "\t = PMC type %s\n",
@@ -1149,6 +1155,16 @@ Parrot_dod_ms_run(Interp *interpreter, int flags)
 
     if (arena_base->DOD_block_level) {
         return;
+    }
+    if (interpreter->debugger) {
+        /*
+         * if the other interpreter did a DOD run, it can set
+         * life bits of shared objects, but these aren't reset, because
+         * they are in a different arena. When now such a PMC points to
+         * other non-shared object, these wouldn't be marked amd hence
+         * collected.
+         */
+        Parrot_dod_clear_live_bits(interpreter);
     }
     /*
      * the sync sweep is always at the end, so that

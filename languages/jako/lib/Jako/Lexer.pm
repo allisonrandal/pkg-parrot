@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Lexer.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Lexer.pm 12028 2006-03-26 04:31:23Z gregor $
 #
 
 use strict;
@@ -287,6 +287,20 @@ sub scan_line
     if ($text =~ m{^( \+ | - | \* | / | % )(.*)$}x) {
       push @tokens, Jako::Token->new(
         $file, $line, 'infix-arith', undef, $1);
+      $text = $2;
+      next;
+    }
+
+    if ($text =~ m{^( ~= )(.*)$}x) {
+      push @tokens, Jako::Token->new(
+        $file, $line, 'concat-assign', undef, $1);
+      $text = $2;
+      next;
+    }
+
+    if ($text =~ m{^( ~ )(.*)$}x) {
+      push @tokens, Jako::Token->new(
+        $file, $line, 'infix-concat', undef, $1);
       $text = $2;
       next;
     }

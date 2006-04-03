@@ -1,7 +1,7 @@
 /* global.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: global.h 11102 2006-01-11 21:48:32Z jonathan $
+ *  SVN Info
+ *     $Id: global.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *      Contains accessor functions for globals
  *  Data Structure and Algorithms:

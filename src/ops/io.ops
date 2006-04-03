@@ -358,8 +358,6 @@ op read(out STR, in PMC, in INT) :base_io {
 Read a line up to EOL from filehandle $2.
 This switches the filehandle to linebuffer-mode.
 
-If for some reason the line's longer than 64K you get only 64K
-
 =cut
 
 inline op readline(out STR, in PMC) :base_io {
@@ -522,7 +520,7 @@ op tell(out INT, out INT, in PMC) :base_io {
 
 =item B<connect>(out INT, in PMC, in STR)
 
-=item B<recv>(out INT, in PMC, in STR)
+=item B<recv>(out INT, in PMC, out STR)
 
 =item B<send>(out INT, in PMC, in STR)
 
@@ -554,9 +552,10 @@ op connect(out INT, in PMC, in STR) :base_network {
     goto NEXT();
 }
 
-op recv(out INT, in PMC, in STR) :base_network {
+op recv(out INT, in PMC, out STR) :base_network {
     STRING *dest = $3;
     $1 = (INTVAL)PIO_recv(interpreter, $2, &dest);
+    $3 = dest;
     goto NEXT();
 }
 

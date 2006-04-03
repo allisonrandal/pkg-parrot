@@ -1,7 +1,7 @@
 /* pmc_freeze.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: pmc_freeze.h 11109 2006-01-12 01:19:20Z jonathan $
+ *  SVN Info
+ *     $Id: pmc_freeze.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:

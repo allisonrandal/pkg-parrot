@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: model_users.pod 10933 2006-01-06 01:43:24Z particle $
+# $Id: model_users.pod 11858 2006-03-10 18:23:19Z autrijus $
 
 =head1 NAME
 
@@ -27,11 +27,11 @@ helped.
 =head1 MODEL USERS
 
 
-=head2 "Autrijus": Perl 6 implementer
+=head2 "Audrey": Perl 6 implementer
 
-Autrijus has a favorite language, Perl 6, and he wants to target it to Parrot.
+Audrey has a favorite language, Perl 6, and he wants to target it to Parrot.
 
-Autrijus:
+Audrey:
 
 =over 4
 

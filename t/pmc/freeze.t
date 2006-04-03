@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: freeze.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: freeze.t 12065 2006-03-28 19:09:42Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 27;
+use Parrot::Test tests => 28;
 
 =head1 NAME
 
@@ -894,3 +894,24 @@ ResizablePMCArray
 three.14
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', "freeze/thaw a Conure");
+.sub main :main
+    .local pmc cl, o
+    cl = newclass 'Conure'
+    addattribute cl, 'temperature'
+    o = new 'Conure'
+    $S0 = freeze o
+    $P1 = thaw $S0
+    $P2 = getattribute $P1, 'temperature'
+    say $P2
+.end
+
+.namespace ['Conure']
+.sub __init :method
+    $P0 = new .Integer
+    $P0 = 37
+    setattribute self, 'temperature', $P0
+.end
+CODE
+37
+OUTPUT

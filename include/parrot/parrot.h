@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: parrot.h 10841 2006-01-01 22:46:24Z jhoblitt $
+ *  SVN Info
+ *     $Id: parrot.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd_template.pod 10264 2005-11-30 03:07:41Z chip $
+# $Id: pdd_template.pod 11771 2006-02-28 13:23:15Z bernhard $
 
 =head1 NAME
 
@@ -11,15 +11,23 @@ Summary of the contents of the PDD.
 
 =head1 VERSION
 
-$Revision$
+$Revision: 11771 $
 
 =head1 DESCRIPTION
 
 Description of the subject.
 
+=head1 DEFINITIONS
+
+Definitions of important terms. (optional)
+
 =head1 IMPLEMENTATION
 
 Implementation details.
+
+=head1 LANGUAGE NOTES
+
+Notes on application to high-level languages. (optional)
 
 =head1 ATTACHMENTS
 

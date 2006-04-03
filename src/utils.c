@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: utils.c 10399 2005-12-08 08:43:31Z leo $
+$Id: utils.c 11737 2006-02-25 11:58:21Z leo $
 
 =head1 NAME
 
@@ -628,6 +628,88 @@ Parrot_byte_rindex(Interp *interpreter, const STRING *base,
     }
 
     return -1;
+}
+
+/*
+
+=item C<typedef int (*reg_move_func)(Interp*, unsigned char d, unsigned char s, void *);>
+
+=item C<void Parrot_register_move(Interp *, int n_regs,
+        unsigned char *dest_regs, unsigned char *src_regs,
+        unsigned char temp_reg, 
+        reg_move_func mov, 
+        reg_move_func mov_alt, 
+        void *info)>
+
+Move C<n_regs> from the given register list C<src_regs> to C<dest_regs>.
+
+  n_regs    ... amount of registers to move
+  dest_regs ... list of register numbers 0..255
+  src_regs  ... list of register numbers 0..255
+  temp_reg  ... a register number not in one of these lists
+  mov       ... a register move function to be called to move one register
+  mov_alt   ... a register move function to be called to move one register
+                which triese fetching from an alternate src (or NULLfunc):
+    
+    (void)  (mov)(interp, dest, src, info);       
+    moved = (mov_alt)(interp, dest, src, info);
+
+Some C<dest_regs> might be the same as C<src_regs>, which makes this a bit 
+non-trivial, because if the destination is already clobbered, using it
+later as source doesn"t work. E.g.
+
+  0 <- 1
+  1 <- 0     # register 0 already clobbered
+
+or
+
+  2 <- 0
+  0 <- 1
+  3 <- 2      # register 2 already clobbered - reorder moves
+
+To handle such cases, we do:
+
+  a) rearrange the order of moves (not possible in the first case)
+     and/or if that failed:
+  b) if an alternate move function is available, it may fetch the
+     source from a different (non-clobbered) location - call it.
+     if the function returns 0 also use c)
+  c) if no alternate move function is available, use the temp reg   
+
+The amount of register moves should of course be minimal.  
+
+TODO add a define, if it's implemented so that we can start filling the gaps
+
+=cut
+
+*/
+
+/* proto TODO mv to hdr */
+typedef int (*reg_move_func)(Interp*, unsigned char d, unsigned char s, void *);
+
+void 
+Parrot_register_move(Interp *, int n_regs,
+        unsigned char *dest_regs, unsigned char *src_regs,
+        unsigned char temp_reg, 
+        reg_move_func mov, 
+        reg_move_func mov_alt, 
+        void *info);
+void 
+Parrot_register_move(Interp *interpreter, int n_regs,
+        unsigned char *dest_regs, unsigned char *src_regs,
+        unsigned char temp_reg, 
+        reg_move_func mov, 
+        reg_move_func mov_alt, 
+        void *info)
+{
+    int i;
+    /* TODO */
+
+    /* brute force and wrong */
+    for (i = 0; i < n_regs; ++i) {
+        if (dest_regs[i] != src_regs[i])
+            mov(interpreter, dest_regs[i], src_regs[i], info);
+    }
 }
 
 /*

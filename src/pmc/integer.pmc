@@ -1,6 +1,6 @@
 /*
 Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: integer.pmc 11617 2006-02-17 05:15:46Z particle $
+$Id: integer.pmc 12005 2006-03-24 15:19:48Z leo $
 
 =head1 NAME
 
@@ -74,6 +74,10 @@ overflow_p(Interp *interpreter, PMC *self, PMC *val, PMC *dest, int mmd)
 pmclass Integer extends scalar does integer does scalar {
 
 /*
+=item C<PMC instantiate(PMC* sig)>
+
+Create a new Integer with arguments passed according to pdd03.
+
 
 =item C<void init()>
 
@@ -82,6 +86,31 @@ Initializes the integer with a default value of C<0>.
 =cut
 
 */
+    PMC* instantiate(PMC* sig) {
+        PMC* ret = new_pmc_header(INTERP, 0);
+        opcode_t *arg_op;
+        INTVAL init = 0;
+
+        ret->vtable = INTERP->vtables[SELF->vtable->base_type];
+        arg_op = interpreter->current_args;
+        if (SIG_ELEMS(sig) == 2) {
+            switch (SIG_ITEM(sig, 1)) {
+                case PARROT_ARG_I:
+                    init = REG_INT(arg_op[3]);
+                    break;
+                case PARROT_ARG_IC:
+                    init = arg_op[3];
+                    break;
+                default:
+                    internal_exception(1, 
+                            "Integer.instantiate: unhandled initializer");
+                    break;
+            }
+        }
+        PMC_int_val(ret) = init;
+        return ret;
+    }
+
     void init () {
         PMC_int_val(SELF) = 0;
     }
@@ -91,10 +120,6 @@ Initializes the integer with a default value of C<0>.
 =item C<PMC new_from_string(STRING *rep)>
 
 Class method to construct an Integer from the string representation C<rep>.
-
-=item C<PMC* instantiate()>
-
-Class method to construct an Integer according to passed arguments.
 
 =cut
 
@@ -110,64 +135,6 @@ Class method to construct an Integer according to passed arguments.
             res = pmc_new(INTERP, type);
         /* TODO bigint overflow */
         PMC_int_val(res) = string_to_int(INTERP, rep);
-        return res;
-    }
-
-    PMC* instantiate() {
-        PMC *class = REG_PMC(2);
-        int argcP = REG_INT(3);
-        int argcS = REG_INT(2);
-        int base;
-        PMC *res, *arg;
-        STRING *num;
-        INTVAL type;
-        STRING *isa;
-
-        type = class->vtable->base_type;
-        if (!argcP) {
-            res = pmc_new(INTERP, type);
-            if (!argcS)
-                return res;
-            return DYNSELF.new_from_string(REG_STR(5), 0);
-        }
-        base = 10;
-        if (argcP == 2)
-            base = VTABLE_get_integer(INTERP, REG_PMC(6));
-        arg = REG_PMC(5);
-        isa = CONST_STRING(INTERP, "Integer");
-        if (VTABLE_isa(INTERP, arg, isa) && base == 10) {
-            res = pmc_new(INTERP, type);
-            PMC_int_val(res) = PMC_int_val(arg);
-            return res;
-        }
-
-        isa = CONST_STRING(INTERP, "Float");
-        if (VTABLE_isa(INTERP, arg, isa)) {
-            FLOATVAL d = VTABLE_get_number(INTERP, arg);
-            const char *sign = "-";
-            INTVAL i = VTABLE_get_integer(INTERP, arg);
-            d = floor(d);
-            if (d == i) {
-                res = pmc_new(INTERP, type);
-                PMC_int_val(res) = i;
-                return res;
-            }
-            if (!signbit(d))
-                sign = "";
-            d = fabs(d);
-            num = Parrot_sprintf_c(INTERP, "%s%.12g", sign, d);
-        }
-        else
-            num = VTABLE_get_string(INTERP, arg);
-        /* TODO preserved type */
-        res = pmc_new(INTERP, enum_class_BigInt);
-        VTABLE_set_string_keyed_int(INTERP, res, base, num);
-        if (num->strlen < 9) {  /* XXX */
-            /* TODO not if it would overflow */
-            INTVAL intnum = VTABLE_get_integer(INTERP, res);
-            res = pmc_new(INTERP, type); /*TODO morph */
-            PMC_int_val(res) = intnum;
-        }
         return res;
     }
 

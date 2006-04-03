@@ -1,5 +1,5 @@
-# Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Distribution.pm 11177 2006-01-14 13:29:48Z bernhard $
+# Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: Distribution.pm 11904 2006-03-14 22:53:28Z bernhard $
 
 =head1 NAME
 
@@ -8,7 +8,8 @@ Parrot::Distribution - Parrot Distribution Directory
 =head1 SYNOPSIS
 
     use Parrot::Distribution;
-    $dist = Parrot::Distribution->new();
+
+    my $dist = Parrot::Distribution->new();
 
 =head1 DESCRIPTION
 
@@ -29,6 +30,8 @@ file methods can be used depending on the circumstances.
 package Parrot::Distribution;
 
 use strict;
+use warnings;
+use 5.008;
 
 use Data::Dumper;
 use ExtUtils::Manifest;
@@ -37,7 +40,7 @@ use Parrot::Revision;
 use Parrot::Configure::Step qw(capture_output);
 
 use Parrot::Docs::Directory;
-@Parrot::Distribution::ISA = qw(Parrot::Docs::Directory);
+use base qw(Parrot::Docs::Directory);
 
 =item C<new()>
 
@@ -91,12 +94,9 @@ sub c_source_file_directories
     my $self = shift;
     
     return
-        $self->directory_with_name('compilers')
-            ->directory_with_name('ast'),
-        $self->directory_with_name('compilers')
-            ->directory_with_name('imcc'),
-        $self->directory_with_name('examples')
-            ->directory_with_name('c'),
+        $self->directory_with_name('compilers')->directory_with_name('ast'),
+        $self->directory_with_name('compilers')->directory_with_name('imcc'),
+        $self->directory_with_name('examples')->directory_with_name('c'),
         $self->directory_with_name('src'),
         $self->directory_with_name('src/encodings'),
         $self->directory_with_name('src/io'),
@@ -114,7 +114,7 @@ Returns the C source file with the specified name.
 sub c_source_file_with_name
 {
     my $self = shift;
-    my $name = shift || return undef;
+    my $name = shift || return;
     
     $name .= '.c' unless $name =~ /\.[Cc]$/o;
     
@@ -125,7 +125,8 @@ sub c_source_file_with_name
     }
     
     print 'WARNING: ' . __FILE__ . ':' . __LINE__ . ' File not found:' . $name ."\n";
-    return undef;
+
+    return;
 }
 
 =item C<c_header_file_directories()>
@@ -156,7 +157,7 @@ Returns the C header file with the specified name.
 sub c_header_file_with_name
 {
     my $self = shift;
-    my $name = shift || return undef;
+    my $name = shift || return;
     
     $name .= '.h' unless $name =~ /\.[Hh]$/o;
     
@@ -166,7 +167,7 @@ sub c_header_file_with_name
             if $dir->file_exists_with_name($name);
     }
     
-    return undef;
+    return;
 }
 
 =item C<file_for_perl_module($module)>
@@ -178,7 +179,7 @@ Returns the Perl module file for the specified module.
 sub file_for_perl_module
 {
     my $self = shift;
-    my $module = shift || return undef;
+    my $module = shift || return;
 
     my @path = split '::', $module;
     
@@ -189,7 +190,7 @@ sub file_for_perl_module
     
     foreach my $name (@path)
     {
-        return undef unless $dir = $dir->existing_directory_with_name($name);
+        return unless $dir = $dir->existing_directory_with_name($name);
     }
     
     return $dir->existing_file_with_name($module);
@@ -282,3 +283,4 @@ sub gen_manifest_skip {
 =cut
 
 1;
+

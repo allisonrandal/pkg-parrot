@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: gc.t 11477 2006-02-09 05:17:54Z particle $
+# $Id: gc.t 12043 2006-03-27 13:02:27Z leo $
 
 use strict;
 use warnings;
@@ -187,7 +187,7 @@ pir_output_is(<<'CODE', <<OUTPUT, "vanishing return continuation in method calls
 .end
 
 .namespace ["Foo"]
-.sub __init method
+.sub __init :method
     print "init\n"
     sweep 1
     new P6, .String
@@ -196,14 +196,14 @@ pir_output_is(<<'CODE', <<OUTPUT, "vanishing return continuation in method calls
     sweep 1
 .end
 
-.sub do_inc method
+.sub do_inc :method
     sweep 1
     inc self
     sweep 1
     print "back from _inc\n"
 .end
 
-.sub __increment method
+.sub __increment :method
     print "inc\n"
     sweep 1
 .end
@@ -229,10 +229,9 @@ pasm_output_is(<<'CODE', <<OUTPUT, "failing if regsave is not marked");
 .namespace ["Source"]
 .pcc_sub __get_string:	# buffer
     get_params "(0)", P2
-    getprop P12, "buf", P2
+    getprop P12, "buffer", P2
     sweep 1
-    typeof I12, P12
-    ne I12, .PerlUndef, buffer_ok
+    unless_null P12, buffer_ok
     find_type I12, "Source::Buffer"
     new P12, I12
     new P14, .String
@@ -305,7 +304,7 @@ pir_output_is(<<'CODE', <<OUTPUT, "Recursion and exceptions");
     print "\n"
 .end
 .namespace ["b"]
-.sub b11 method
+.sub b11 :method
     .param pmc n
     .local pmc n1
     # new_pad -1

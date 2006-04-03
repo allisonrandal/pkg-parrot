@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_misc.c 10240 2005-11-29 12:12:58Z leo $
+$Id: inter_misc.c 12083 2006-04-01 11:33:22Z leo $
 
 =head1 NAME
 
@@ -40,58 +40,21 @@ void
 enter_nci_method(Parrot_Interp interpreter, int type,
 		 void *func, const char *name, const char *proto)
 {
-#if 0
-    PMC *method, *method_table, **table;
-    int i;
-
-    if (type >= (int)interpreter->nci_method_table_size) {
-        if (!interpreter->nci_method_table_size) {
-            table = interpreter->nci_method_table =
-                mem_sys_allocate_zeroed((enum_class_max) * sizeof(PMC*));
-            for (i = 0; i < enum_class_max; ++i)
-                SET_NULL_P(table[i], PMC*);
-            interpreter->nci_method_table_size = enum_class_max;
-        }
-        else {
-            table = interpreter->nci_method_table =
-                mem_sys_realloc(interpreter->nci_method_table,
-                        (type + 1) * sizeof(PMC*));
-            for (i = interpreter->nci_method_table_size; i < type + 1; ++i)
-                table[i] = NULL;
-            interpreter->nci_method_table_size = type + 1;
-        }
-    }
-    else
-        table = interpreter->nci_method_table;
-    if (!table[type])
-        table[type] = pmc_new(interpreter, enum_class_Hash);
-    method_table = table[type];
-
-    method = pmc_new(interpreter, enum_class_NCI);
-    VTABLE_set_pointer_keyed_str(interpreter, method,
-            string_make(interpreter, proto, strlen(proto),
-                NULL, PObj_constant_FLAG|PObj_external_FLAG),
-            func);
-    VTABLE_set_pmc_keyed_str(interpreter, method_table,
-            string_make(interpreter, name,
-                strlen(name), NULL,
-                PObj_constant_FLAG|PObj_external_FLAG),
-            method);
-#else
     PMC *method;
     method = pmc_new(interpreter, enum_class_NCI);
+    /* create call func */
     VTABLE_set_pointer_keyed_str(interpreter, method,
             string_make(interpreter, proto, strlen(proto),
                 NULL, PObj_constant_FLAG|PObj_external_FLAG),
             func);
-    Parrot_store_global(interpreter,
-        Parrot_base_vtables[type]->whoami,
+    /* insert it into namespace */
+    VTABLE_set_pmc_keyed_str(interpreter, 
+        interpreter->vtables[type]->_namespace,
             string_make(interpreter, name,
                 strlen(name), NULL,
                 PObj_constant_FLAG|PObj_external_FLAG),
             method);
 
-#endif
 }
 
 /*
@@ -124,7 +87,7 @@ Parrot_compreg(Parrot_Interp interpreter, STRING *type, Parrot_compiler_func_t f
     VTABLE_set_pmc_keyed_str(interpreter, hash, type, nci);
     /* build native call interface fir the C sub in "func" */
     sc = CONST_STRING(interpreter, "PJt");
-    VTABLE_set_pointer_keyed_str(interpreter, nci, sc, func);
+    VTABLE_set_pointer_keyed_str(interpreter, nci, sc, (void*)func);
 }
 
 
@@ -250,7 +213,7 @@ interpinfo_p(Interp *interpreter, INTVAL what)
         case CURRENT_OBJECT:
             return CONTEXT(interpreter->ctx)->current_object;
         case NAMESPACE_ROOT: /* XXX */
-            return interpreter->globals->stash_hash;
+            return interpreter->stash_hash;
         case CURRENT_LEXPAD:
             return CONTEXT(interpreter->ctx)->lex_pad;
         default:        /* or a warning only? */

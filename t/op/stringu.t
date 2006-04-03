@@ -1,12 +1,13 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: stringu.t 11477 2006-02-09 05:17:54Z particle $
+# $Id: stringu.t 12078 2006-03-30 20:16:44Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test;
+use Parrot::Config;
 
 
 =head1 NAME
@@ -245,7 +246,61 @@ CODE
 AAAAAAAAAA\xd9\xa6
 OUTPUT
 
+SKIP: {
+  skip('no ICU lib', 3) unless $PConfig{has_icu};
+pir_output_is( <<'CODE', <<OUTPUT, "downcase changes string behind scenes");
+.sub main
+    .local string str
+    .local string rest
+
+    str = unicode:".xyz"
+    rest = substr str, 1
+    print rest
+    print "\n"
+
+    str = unicode:".xyz"
+    $S99 = downcase str
+    rest = substr str, 1
+    print rest
+    print "\n"
+
+.end
+CODE
+xyz
+xyz
+OUTPUT
+
+pir_output_is( <<'CODE', <<OUTPUT, "downcase asciish");
+.sub main
+    .local string str
+    .local string rest
+    str = unicode:".XYZ"
+    $S0 = downcase str
+    print $S0
+    print "\n"
+.end
+CODE
+.xyz
+OUTPUT
+
+# escape does not produce utf8, just a raw sequence of chars
+pir_output_is( <<"CODE", <<'OUTPUT', "escape utf16");
+.sub main
+    .local string s, t
+    .local int i
+    s = iso-8859-1:"T\xf6tsch"
+    i = find_charset "unicode"
+    s = trans_charset s, i
+    t = upcase s
+    escape t, t
+    print t
+    print "\\n"
+.end
+CODE
+T\x{d6}TSCH
+OUTPUT
+}
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 19; }
+BEGIN { plan tests => 22; }
 

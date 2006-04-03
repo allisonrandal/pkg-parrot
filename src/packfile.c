@@ -2,7 +2,7 @@
 Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packfile.c 11414 2006-02-03 14:30:07Z leo $
+$Id: packfile.c 11906 2006-03-15 16:14:19Z leo $
 
 =head1 NAME
 
@@ -346,7 +346,7 @@ do_1_sub_pragma(Parrot_Interp interpreter, PMC* sub_pmc, int action)
                 }
                 else {
                     /* XXX which warn_class */
-                    Parrot_warn(interpreter, PARROT_WARNINGS_ALL_FLAG, "@MAIN sub not allowed\n");
+                    Parrot_warn(interpreter, PARROT_WARNINGS_ALL_FLAG, ":main sub not allowed\n");
                 }
             }
     }
@@ -448,28 +448,22 @@ do_sub_pragmas(Interp *interpreter, struct PackFile_ByteCode *self,
                     internal_exception(1,
                             "Illegal fixup offset (%d) in enum_fixup_sub");
                 sub_pmc = ct->constants[ci]->u.key;
-                switch (sub_pmc->vtable->base_type) {
-                    case enum_class_Sub:
-                    case enum_class_Closure:
-                    case enum_class_Coroutine:
-                        PMC_sub(sub_pmc)->eval_pmc = eval_pmc;
-                        if ((PObj_get_FLAGS(sub_pmc) & SUB_FLAG_PF_MASK) &&
-                                    sub_pragma(interpreter, action, sub_pmc)) {
-                            result = do_1_sub_pragma(interpreter, 
-                                    sub_pmc, action);
-                            /*
-                             * replace the Sub PMC with the result of the
-                             * computation
-                             */
-                            if (action == PBC_IMMEDIATE && 
-                                    !PMC_IS_NULL(result)) {
-                                ft->fixups[i]->type = enum_fixup_none;
-                                ct->constants[ci]->u.key = result;
-                            }
-                        }
-                        break;
+                PMC_sub(sub_pmc)->eval_pmc = eval_pmc;
+                if ((PObj_get_FLAGS(sub_pmc) & SUB_FLAG_PF_MASK) &&
+                        sub_pragma(interpreter, action, sub_pmc)) {
+                    result = do_1_sub_pragma(interpreter, 
+                            sub_pmc, action);
+                    /*
+                     * replace the Sub PMC with the result of the
+                     * computation
+                     */
+                    if (action == PBC_IMMEDIATE && 
+                            !PMC_IS_NULL(result)) {
+                        ft->fixups[i]->type = enum_fixup_none;
+                        ct->constants[ci]->u.key = result;
+                    }
                 }
-                /* goon */
+                break;
             case enum_fixup_label:
                 /* fill in current bytecode seg */
                 ft->fixups[i]->seg = self;
@@ -1844,6 +1838,10 @@ byte_code_destroy (Interp* interpreter, struct PackFile_Segment *self)
 	    byte_code->prederef.branches = NULL;
 	}
     }
+    byte_code->fixups = NULL;
+    byte_code->debugs = NULL;
+    byte_code->const_table = NULL;
+    byte_code->pic_index = NULL;
 }
 
 /*
@@ -2415,9 +2413,12 @@ Parrot_switch_to_cs(Interp *interpreter,
     /* compiling source code uses this function too,
      * which gives misleading trace messages
      */
-    if (really && Interp_trace_TEST(interpreter, PARROT_TRACE_SUB_CALL_FLAG))
-        PIO_eprintf(interpreter, "*** switching to %s\n",
+    if (really && Interp_trace_TEST(interpreter, PARROT_TRACE_SUB_CALL_FLAG)) {
+        Interp *tracer = interpreter->debugger ? 
+            interpreter->debugger : interpreter;
+        PIO_eprintf(tracer, "*** switching to %s\n",
                 new_cs->base.name);
+    }
     interpreter->code = new_cs;
     CONTEXT(interpreter->ctx)->constants = new_cs->const_table->constants;
     CONTEXT(interpreter->ctx)->pred_offset = 
@@ -3199,7 +3200,10 @@ PackFile_Constant_unpack_pmc(Interp *interpreter,
          * XXX place this code in Sub.thaw ?
          */
         if (!(PObj_get_FLAGS(pmc) & SUB_FLAG_PF_ANON)) {
+            /* PF structures aren't fully constructed yet */
+            Parrot_block_DOD(interpreter);
             Parrot_store_sub_in_namespace(interpreter, pmc);
+            Parrot_unblock_DOD(interpreter);
         }
     }
     /*

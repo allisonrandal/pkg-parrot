@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: warnings.c 11579 2006-02-16 09:49:44Z leo $
+$Id: warnings.c 11709 2006-02-23 16:49:23Z leo $
 
 =head1 NAME
 
@@ -34,10 +34,15 @@ Prints the bytecode location of the warning or error to C<PIO_STDERR>.
 */
 
 void
-print_pbc_location(Parrot_Interp inter)
+print_pbc_location(Parrot_Interp interpreter)
 {
-    PIO_eprintf(inter, "%Ss\n",
-            Parrot_Context_infostr(inter, CONTEXT(inter->ctx)));
+    Interp *tracer;
+
+    tracer = interpreter->debugger ? 
+        interpreter->debugger : interpreter;
+    PIO_eprintf(tracer, "%Ss\n",
+            Parrot_Context_infostr(interpreter, 
+                CONTEXT(interpreter->ctx)));
 }
 
 /*

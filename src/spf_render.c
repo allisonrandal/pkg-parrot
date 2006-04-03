@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: spf_render.c 11095 2006-01-11 17:59:04Z leo $
+$Id: spf_render.c 12061 2006-03-28 14:45:54Z leo $
 
 =head1 NAME
 
@@ -477,10 +477,9 @@ Parrot_sprintf_format(Interp *interpreter, STRING *pat,
 
                         case '*':
                             info.flags |= FLAG_WIDTH;
-                            info.width *= 10;
-                            info.width += (UINTVAL)obj->getint(interpreter,
+                            info.width = (UINTVAL)obj->getint(interpreter,
                                                       SIZE_XVAL, obj);
-                            continue;
+                            /* fall through */
 
                         case '.':
                             info.phase = PHASE_PREC;
@@ -510,9 +509,9 @@ Parrot_sprintf_format(Interp *interpreter, STRING *pat,
 
                         case '*':
                             info.flags |= FLAG_PREC;
-                            info.prec *= 10;
-                            info.prec += (UINTVAL)obj->getint(interpreter,
+                            info.prec = (UINTVAL)obj->getint(interpreter,
                                                      SIZE_XVAL, obj);
+                            info.phase = PHASE_TYPE;
                             continue;
 
                         default:

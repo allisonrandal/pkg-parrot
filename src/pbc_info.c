@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pbc_info.c 11563 2006-02-16 00:42:07Z jisom $
+$Id: pbc_info.c 12076 2006-03-29 22:22:22Z bernhard $
 
 =head1 NAME
 
@@ -60,13 +60,13 @@ the directory using PackFile_map_segments() and iter().
 */
 
 int
-main(int argc, char **argv)
+main(int argc, char * argv[] )
 {
     struct PackFile *pf;
     Interp *interpreter;
     struct PackFile_Segment *seg;
 
-    interpreter = make_interpreter(NULL, PARROT_NO_FLAGS);
+    interpreter = Parrot_new(NULL);
     Parrot_init(interpreter);
 
     pf = Parrot_readbc(interpreter, argv[1]);

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: gcc.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: gcc.pm 12087 2006-04-01 14:10:13Z leo $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining if your C compiler is actually gcc...";
+$description = 'Determining if your C compiler is actually gcc';
 
 @args = qw(miniparrot verbose);
 
@@ -88,7 +88,7 @@ sub runstep
 
         my @opt_and_vers = (
             0 =>
-                "-Wall -Wstrict-prototypes -Wmissing-prototypes -Winline -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Waggregate-return -Winline -W -Wno-unused",
+                "-Wall -Wstrict-prototypes -Wmissing-prototypes -Winline -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Waggregate-return -Winline -W -Wno-unused",
 
             # others; ones we might like marked with ?
             # ? -Wundef for undefined idenfiers in #if
@@ -104,6 +104,10 @@ sub runstep
             #    function.  -Wlong-long
             # Ha. this is the default! with -pedantic.
             # -Wno-long-long for the nicest bit of C99
+            #
+            # -Wcast-align is now removed: it gives too many false positives
+            #    e.g. when accessing registers - this is all aligned
+     
             2.7  => "",
             2.8  => "-Wsign-compare",
             2.95 => "",
