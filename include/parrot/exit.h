@@ -1,7 +1,7 @@
 /* exit.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: exit.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: exit.h 12537 2006-05-06 20:06:21Z petdance $
  *  Overview:
  *     
  *  Data Structure and Algorithms:
@@ -14,8 +14,11 @@
 #if !defined(PARROT_EXIT_H_GUARD)
 #define PARROT_EXIT_H_GUARD
 
+#include "parrot/compiler.h"    /* compiler capabilities */
+
 PARROT_API int Parrot_on_exit(void (*function)(int , void *), void *arg);
-PARROT_API void Parrot_exit(int status);
+PARROT_API void Parrot_exit(int status)
+            __attribute__noreturn__;
 
 #endif /* PARROT_EXIT_H_GUARD */
 

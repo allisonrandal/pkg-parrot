@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: jitn.t 11477 2006-02-09 05:17:54Z particle $
+# $Id: jitn.t 12503 2006-05-04 21:14:02Z coke $
 
 use strict;
 use warnings;
@@ -183,6 +183,7 @@ set N1,1
 set N2,2
 set N3,3
 set N4,4
+set N5,0
 set N0,N1
 set N2,N3
 set N0,N1
@@ -255,6 +256,7 @@ set N1,1
 set N2,2
 set N3,3
 set N4,4
+set N6,0
 set N0,N1
 set N2,N3
 set N0,N1

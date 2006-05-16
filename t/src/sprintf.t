@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: sprintf.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: sprintf.t 12217 2006-04-14 10:59:04Z bernhard $
 
 use strict;
 use warnings;
@@ -178,7 +178,6 @@ int main(int argc, char* argv[]) {
     Interp * interpreter;
 
     interpreter = Parrot_new(NULL);
-    Parrot_init_stacktop(interpreter, &interpreter);
     do_test(interpreter);
 
     Parrot_exit(0);

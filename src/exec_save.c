@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: exec_save.c 5503 2004-03-03 10:13:00Z leo $
+$Id: exec_save.c 12492 2006-05-03 20:53:31Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ Save the C<Parrot_exec_objfile_t> to the native format.
 
 #include <parrot/parrot.h>
 #include "parrot/exec.h"
-#include "parrot/exec_save.h"
+#include "exec_save.h"
 
 static void save_zero(FILE *fp);
 static void save_int(FILE *fp, int i);
@@ -792,7 +792,7 @@ save_int(FILE *fp, int i)
 
 =head1 SEE ALSO
 
-F<include/parrot/exec.h>, F<include/parrot/exec_save.h>, F<src/exec.c>
+F<include/parrot/exec.h>, F<src/exec_save.h>, F<src/exec.c>
 and F<src/exec_start.c>.
 
 =head1 HISTORY

@@ -1,10 +1,10 @@
-# $Id: dynpmc.in 11903 2006-03-14 20:49:11Z bernhard $
+# $Id: dynpmc.in 12465 2006-04-30 15:11:25Z bernhard $
 
-PERL = @perl@
-RM_F = @rm_f@
-LOAD_EXT = @load_ext@
+PERL        = @perl@
+RM_F        = @rm_f@
+LOAD_EXT    = @load_ext@
 RUNTIME_DIR = @build_dir@@slash@runtime@slash@parrot@slash@dynext
-O = @o@
+O           = @o@
 
 # add your dynamic pmcs here
 #
@@ -13,12 +13,13 @@ O = @o@
 # There is no config probe for libquantum yet, so add 'quantumreg' manually if desired
 #
 PMCS = \
-#CONDITIONED_LINE(has_gdbm):gdbmhash \
   dynlexpad \
+  foo \
+#CONDITIONED_LINE(has_gdbm):gdbmhash \
   match \
   matchrange \
-  subproxy \
-  foo
+  perlarray perlhash perlnum perlstring perlenv perlint perlscalar perlundef \
+  subproxy 
 
 DISABLED_PMCS = \
   pybuiltin \
@@ -57,7 +58,7 @@ all :
 	@$(BUILD) copy "--destination=$(RUNTIME_DIR)" $(PMCS)
 
 test : all
-	cd .. ; perl -Ilib t/harness t/dynpmc/*.t
+	cd ../.. ; perl -Ilib t/harness t/dynpmc/*.t
 
 testclean :
 	$(RM_F) "../../t/dynpmc/*.pir" "../../t/dynpmc/*.pbc"

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrotinterpreter.pmc 11906 2006-03-15 16:14:19Z leo $
+$Id: parrotinterpreter.pmc 12201 2006-04-13 13:23:02Z leo $
 
 =head1 NAME
 
@@ -568,11 +568,11 @@ Finish thawing.
         for (i = n; i < m; ++i) {
             entry = VTABLE_get_pmc_keyed_int(INTERP, new_info, i);
             lib_pmc = VTABLE_get_pmc_keyed_int(INTERP, entry, 1);
-            if (PMC_IS_NULL(lib_pmc))
-                continue;
-            lib_name = VTABLE_get_string(INTERP, lib_pmc);
-            if (lib_name->strlen)
-                Parrot_load_lib(INTERP, lib_name, NULL);
+            if (!PMC_IS_NULL(lib_pmc)) {
+                lib_name = VTABLE_get_string(INTERP, lib_pmc);
+                if (lib_name->strlen)
+                    Parrot_load_lib(INTERP, lib_name, NULL);
+            }
             hll_name = VTABLE_get_string_keyed_int(INTERP, entry, 0);
             /* create HLL namespace */
             hll_name = string_downcase(INTERP, hll_name);
@@ -584,13 +584,8 @@ Finish thawing.
              * XXX always try to fetch namespace first?
              */
 
-            ns_hash = VTABLE_get_pmc_keyed_str(INTERP, INTERP->stash_hash,
+            ns_hash = Parrot_global_namespace(INTERP, INTERP->stash_hash,
                     hll_name);
-            if (!ns_hash) {
-                ns_hash  = pmc_new(INTERP, enum_class_NameSpace);
-                VTABLE_set_pmc_keyed_str(INTERP, INTERP->stash_hash,
-                        hll_name, ns_hash);
-            }
             /* cache HLLs toplevel namespace */
             VTABLE_set_pmc_keyed_int(INTERP, INTERP->HLL_namespace, 
                     i, ns_hash);

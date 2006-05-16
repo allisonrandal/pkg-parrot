@@ -1,6 +1,7 @@
 #! perl -w
+
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pl 11903 2006-03-14 20:49:11Z bernhard $
+# $Id: Configure.pl 12403 2006-04-23 21:25:33Z bernhard $
 
 =head1 NAME
 
@@ -240,7 +241,7 @@ F<lib/Parrot/Configure/Step.pm>, F<docs/configuration.pod>
 use strict;
 use warnings;
 use lib 'lib';
-use 5.008;
+use 5.006;
 
 use English qw( -no_match_vars );
 use Parrot::BuildUtil;
@@ -261,7 +262,7 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $svnid = '$Id: Configure.pl 11903 2006-03-14 20:49:11Z bernhard $';
+      my $svnid = '$Id: Configure.pl 12403 2006-04-23 21:25:33Z bernhard $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
 $svnid
@@ -448,8 +449,9 @@ print <<"END";
 
 Okay, we're done!
 
-You can now use `$make' to build your Parrot. After that,
-you can use `$make test' to run the test suite.
+You can now use `$make' to build your Parrot.
+(NOTE: do not use `$make -j <n>'!)
+After that, you can use `$make test' to run the test suite.
 
 Happy Hacking,
         The Parrot Team

@@ -1,10 +1,10 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: multisub.pmc 11648 2006-02-18 16:53:50Z rgrjr $
+$Id: multisub.pmc 12114 2006-04-04 22:50:48Z bernhard $
 
 =head1 NAME
 
-src/pmc/multisub.pmc - A container for Perl6 mutli subs
+src/pmc/multisub.pmc - A container for Perl6 multi subs
 
 =head1 DESCRIPTION
 

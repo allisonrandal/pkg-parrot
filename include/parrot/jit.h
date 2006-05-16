@@ -1,7 +1,7 @@
 /*
  * jit.h
  *
- * $Id: jit.h 11467 2006-02-07 20:20:14Z leo $
+ * $Id: jit.h 12094 2006-04-03 07:10:43Z fperrad $
  */
 
 #if !defined(PARROT_JIT_H_GUARD)
@@ -226,10 +226,10 @@ typedef struct {
     int                            extcall;
 } Parrot_jit_fn_info_t;
 
-extern Parrot_jit_fn_info_t op_jit[];
+extern PARROT_API Parrot_jit_fn_info_t *op_jit;
 extern Parrot_jit_fn_info_t op_exec[];
 
-void Parrot_jit_newfixup(Parrot_jit_info_t *jit_info);
+PARROT_API void Parrot_jit_newfixup(Parrot_jit_info_t *jit_info);
 
 void Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
                         Interp *interpreter);

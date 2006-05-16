@@ -1,3 +1,5 @@
+# $Id: oo2.pasm 12177 2006-04-11 19:56:05Z bernhard $
+
 # all timings Athlon 800, gcc 2.95.2
 
 # parrot SVN-HEAD
@@ -47,11 +49,11 @@ loop:
 .include "interpinfo.pasm"
     interpinfo P2, .INTERPINFO_CURRENT_OBJECT
     classoffset I0, P2, "Foo"
-    new P10, .PerlInt
+    new P10, .Integer
     set P10, 10
     setattribute P2, I0, P10
     inc I0
-    new P10, .PerlInt
+    new P10, .Integer
     set P10, 20
     setattribute P2, I0, P10
     returncc

@@ -1,8 +1,8 @@
-# $Id: 002_many_files.t 9533 2005-10-22 08:11:23Z jhoblitt $
+# $Id: 002_many_files.t 12226 2006-04-14 15:02:50Z bernhard $
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../../lib", "$FindBin::Bin/../../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib m4/lib );
 
 use Parrot::Config;
 #use Test::More tests => 3; 

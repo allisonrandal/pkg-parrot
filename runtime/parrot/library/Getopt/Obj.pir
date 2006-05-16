@@ -80,9 +80,6 @@ the attributes they'll use.
     addattribute spec, "optarg"
 .end
 
-.include "library/dumper.pir"
-.include "iterator.pasm"
-
 =back
 
 =head2 Class Getopt::Obj
@@ -122,7 +119,6 @@ wanted.
     .local string name, long, short, arg, key, val
     return = new .Hash
 
-    push_eh handler
     i = 0
 beginfor:
     argc = argv
@@ -171,18 +167,19 @@ else_2:
     null val
 endif_2:
     (name, spec) = self."getNameForKey"(key)
+    if null name goto redofor
     long = spec."long"()
     $I0 = length $S0
-    unless long == key goto beginstore
+    unless long == key goto beginstore_1
     $I0 = spec."optarg"()
     $I1 = spec."type"()
     unless $I1 == .Boolean goto endif_4
     val = 1
-    goto beginstore
+    goto beginstore_1
 endif_4:
-    if $I0 goto beginstore
+    if $I0 goto beginstore_1
     if_null val, error_0
-    goto beginstore
+    goto beginstore_1
 error_0:
     MissingRequired(long)
 
@@ -196,6 +193,7 @@ shortarg:
     val = substr arg, 2
 
     (name, spec) = self."getNameForKey"(key)
+    if null name goto redofor
 
     key = name
 
@@ -215,6 +213,7 @@ beginfor_0:
     key = substr keys, jkl, 1
 
     (name, spec) = self."getNameForKey"(key)
+    if null name goto redofor
     $I0 = spec."type"()
     unless $I0 == .Boolean goto error_2
 
@@ -253,7 +252,9 @@ error_2:
 beginstore:
 
     (name, spec) = self."getNameForKey"(key)
+    if null name goto redofor
 
+beginstore_1:
     # Store the value...
     $I0 = spec."type"()
     $S0 = typeof $I0
@@ -328,20 +329,13 @@ redofor:
 endfor:
 
     goto finish
-handler:
-    get_results "(0,0)", $P0, $S0
-    if $S0 == "Option key not found" goto endif_6
-    rethrow $P0
 endif_6:
     $I0 = self."notOptStop"()
     if $I0 goto finish
-    # This seems necessary...don't know why
-    push_eh handler
     inc i
     goto beginfor
 
 finish:
-    clear_eh
     .return(return)
 .end
 
@@ -383,44 +377,32 @@ A long option of "foo" is set to C<.String>, with "optarg" set to a true value.
     $P0 = self."add"()
 
     $I0 = index format, ':'
-    if $I0 == -1 goto process
-    substr format, $I0, 1, '='
+    if $I0 == -1 goto else_0
     $P0."optarg"(1)
-process:
-    $I0 = index format, '='
-    unless $I0 == -1 goto else_0
-    # Is a boolean
-    $I0 = index format, '|'
-    unless $I0 != -1 goto else_1
-    # long then a short
-    long = substr format, 0, $I0
-    inc $I0
-    # force one character
-    short = substr format, $I0, 1
-    $P0."long"(long)
-    $P0."short"(short)
-    .return()
-else_1:
-    $I0 = length format
-    unless $I0 == 1 goto long_0
-    $P0."short"(format)
-    .return()
-long_0:
-    $P0."long"(format)
-    .return()
-#---------------------------
+    goto check
 else_0:
+    key = format
     $I0 = index format, '='
+    # .Boolean is the default
+    if $I0 == -1 goto endcase
+check:
     key = substr format, 0, $I0
     inc $I0
-    # force one character
-    type = substr format, $I0, 1
+    # get type
+    type = substr format, $I0
 
     if type == 's' goto str
     if type == '@' goto array
     if type == '%' goto hash
     if type == 'i' goto integer
     if type == 'f' goto flt
+    $P0 = new .Exception
+    $S0 = "Unknown specs option '"
+    $S0 .= type
+    $S0 .= "'"
+    $P0["_message"] = $S0
+    throw $P0
+
 str:
     $P0."type"(.String)
     goto endcase
@@ -454,7 +436,6 @@ endif_2:
     short = substr key, $I0
     $P0."long"(long)
     $P0."short"(short)
-    .return()
 .end
 
 =item C<Getopt::Obj::Spec add()>
@@ -501,15 +482,24 @@ beginfor:
     goto nextfor
 return:
     .return(name, spec)
-    goto endfor
+
 nextfor:
     inc j
     goto beginfor
 endfor:
     # Don't return anything, easier to catch an exception...
+    $I0 = self."notOptStop"()
+    if $I0 goto finish
     $P0 = new .Exception
-    $P0["_message"] = "Option key not found"
+    $S0 = "Option '"
+    $S0 .= key 
+    $S0 .= "' not in specs"
+    $P0["_message"] = $S0
     throw $P0
+finish:
+    null $S0
+    null $P0
+    .return ($S0, $P0)
 .end
 
 =item C<INT self."notOptStop"()>
@@ -527,15 +517,13 @@ later.  Or of course, it's not an argument at all and perhaps a filename.
 .sub "notOptStop" :method
     .param int val :optional
     .param int opt :opt_flag
+    $P0 = getattribute self, "notOptStop"
     unless opt goto else_0
     # Setting
-    $P0 = new .Boolean
     $P0 = val
-    setattribute self, "notOptStop", $P0
     goto endif_0
 else_0:
     # Getting
-    $P0 = getattribute self, "notOptStop"
     val = $P0
 endif_0:
     .return(val)
@@ -544,18 +532,17 @@ endif_0:
 =item C<MissingRequired(STRING arg)>
 
 When a required argument is missing, throws an exception with the message
-"Missing a required argument".
+"Missing a required argument for option 'foo'".
 
 =cut
 
 .sub MissingRequired
     .param string arg
-    #printerr "Missing a required argument to "
-    #printerr arg
-    #printerr "\n"
-    #exit 1
     $P0 = new .Exception
-    $P0["_message"] = "Missing a required argument"
+    $S0 = "Missing a required argument for option '"
+    $S0 .= arg
+    $S0 .= "'"
+    $P0["_message"] = $S0
     throw $P0
 .end
 
@@ -614,35 +601,20 @@ long/short arguments instead of one of each.
 .sub name :method
     .param string val :optional
     .param int opt :opt_flag
+    $P0 = getattribute self, "name"
     unless opt goto else
     # Setting
-    $P0 = new .String
     $P0 = val
-    setattribute self, "name", $P0
     goto endif
 else:
     # Getting
-    .local pmc tmp
-    $P0 = getattribute self, "name"
-    $S0 = $P0
-    if $S0 != '' goto case_0
-    $S0 = self."long"()
-    if $S0 != '' goto case_1
-    $S0 = self."short"()
-    if $S0 != '' goto case_2
-    # XXX This actually is an error, the program forgot to set name, long, or
-    # short
-    val = ''
-    goto endif
-case_0:
-    $P0 = getattribute self, "name"
     val = $P0
-    goto endif
-case_1:
-    val = self."long"()
-    goto endif
-case_2:
-    val = self."short"()
+    if val != '' goto endif
+    $P0 = getattribute self, "long"
+    val = $P0
+    if val != '' goto endif
+    $P0 = getattribute self, "short"
+    val = $P0
 endif:
     .return(val)
 .end
@@ -659,15 +631,13 @@ string set as the long.
 .sub "long" :method
     .param string val :optional
     .param int opt :opt_flag
+    $P0 = getattribute self, "long"
     unless opt goto else_0
     # Setting
-    $P0 = new .String
     $P0 = val
-    setattribute self, "long", $P0
     goto endif_0
 else_0:
     # Getting
-    $P0 = getattribute self, "long"
     val = $P0
 endif_0:
     .return(val)
@@ -687,15 +657,13 @@ NOTE: There is no checking to ensure that short is only one character.
 .sub "short" :method
     .param string val :optional
     .param int opt :opt_flag
+    $P0 = getattribute self, "short"
     unless opt goto else_0
     # Setting
-    $P0 = new .String
     $P0 = val
-    setattribute self, "short", $P0
     goto endif_0
 else_0:
     # Getting
-    $P0 = getattribute self, "short"
     val = $P0
 endif_0:
     .return(val)
@@ -760,15 +728,13 @@ code.  There's no guarantees they won't be reassigned.
 .sub "type" :method
     .param int val :optional
     .param int opt :opt_flag
+    $P0 = getattribute self, "type"
     unless opt goto else_0
     # Setting
-    $P0 = new .Integer
     $P0 = val
-    setattribute self, "type", $P0
     goto endif_0
 else_0:
     # Getting
-    $P0 = getattribute self, "type"
     val = $P0
 endif_0:
     .return(val)
@@ -787,15 +753,13 @@ C<-fbar>, C<-f> is set to C<bar>.  In C<-f bar> it is NOT set.
 .sub "optarg" :method
     .param int val :optional
     .param int opt :opt_flag
+    $P0 = getattribute self, "optarg"
     unless opt goto else_0
     # Setting
-    $P0 = new .Boolean
     $P0 = val
-    setattribute self, "optarg", $P0
     goto endif_0
 else_0:
     # Getting
-    $P0 = getattribute self, "optarg"
     val = $P0
 endif_0:
     .return(val)
@@ -828,10 +792,6 @@ in argv in case the program wants it, such as indicating stdin or stdout.
 
 For an arg to a short arg, e.g. -C -d, will put -d as the value for -C so long
 as -C is not a C<.Boolean>.  Should it be an error?
-
-=item *
-
-Should MissingRequired exit or just throw an exception?
 
 =back
 

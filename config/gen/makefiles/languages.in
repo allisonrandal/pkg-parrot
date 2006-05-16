@@ -1,4 +1,4 @@
-# $Id: languages.in 11898 2006-03-14 17:30:01Z bernhard $
+# $Id: languages.in 12464 2006-04-30 14:30:29Z bernhard $
 
 # setup of commands
 @make_set_make@
@@ -9,6 +9,7 @@ RM_F      = @rm_f@
 # add new languages here
 # remove obsolete languages here
 LANGUAGES = \
+    APL \
     BASIC \
     HQ9plus \
     Zcode \
@@ -72,6 +73,7 @@ smoke-clean :
 	$(RM_F) languages_smoke.html
 
 clean: \
+    APL.clean \
     BASIC.clean \
     HQ9plus.clean \
     Zcode.clean \
@@ -87,6 +89,8 @@ clean: \
     miniperl.clean \
     ook.clean \
     parrot_compiler.clean \
+    perl6.clean \
+    pugs.clean \
     punie.clean \
     regex.clean \
     scheme.clean \
@@ -100,6 +104,14 @@ clean: \
 #
 
 # The *.dummy targets are a replacement for the target .PHONY in 'GNU make'
+
+APL : APL.dummy
+APL.dummy:
+	- $(MAKE) APL
+APL.test:
+	- $(MAKE) APL test
+APL.clean:
+	- $(MAKE) APL clean
 
 BASIC : BASIC.dummy
 BASIC.dummy:
@@ -221,6 +233,22 @@ parrot_compiler.test:
 	- $(MAKE) parrot_compiler test
 parrot_compiler.clean:
 	- $(MAKE) parrot_compiler clean
+
+perl6 : perl6.dummy
+perl6.dummy:
+	- $(MAKE) perl6
+perl6.test:
+	- $(MAKE) perl6 test
+perl6.clean:
+	- $(MAKE) perl6 clean
+
+pugs : pugs.dummy
+pugs.dummy:
+	- $(MAKE) pugs
+pugs.test:
+	- $(MAKE) pugs test
+pugs.clean:
+	- $(MAKE) pugs clean
 
 punie : punie.dummy
 punie.dummy:

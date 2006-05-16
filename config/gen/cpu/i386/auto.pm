@@ -1,9 +1,9 @@
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: auto.pm 11749 2006-02-26 14:37:20Z bernhard $
+# $Id: auto.pm 12474 2006-05-01 09:51:59Z bernhard $
 
 =head1 NAME
 
-config/gen/cpu/i386/auto.pl
+config/gen/cpu/i386/auto.pm
 
 =head1 DESCRIPTION
 

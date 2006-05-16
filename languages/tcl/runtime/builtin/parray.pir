@@ -1,7 +1,8 @@
 ###
 # [parray]
 
-.namespace [ "Tcl" ]
+.HLL 'Tcl', 'tcl_group'
+.namespace [ '' ]
 
 .sub "&parray"
   .param pmc argv :slurpy
@@ -24,13 +25,13 @@
 
   .local pmc array
   .local int call_level
-  $P0 = find_global "_Tcl", "call_level"
+  .get_from_HLL($P0, '_tcl', 'call_level')
   call_level = $P0
 
   null array
   push_eh catch_var
   if call_level goto find_lex
-    array = find_global "Tcl", full_name
+    array = find_global full_name
     clear_eh
     branch catch_var
   find_lex:
@@ -55,10 +56,10 @@ match_all:
   .local int maxsize
   maxsize = 1
 
-  load_bytecode "PGE.pbc"
-  load_bytecode "PGE/Glob.pbc"
+  load_bytecode 'PGE.pbc'
+  load_bytecode 'PGE/Glob.pbc'
   .local pmc rule
-  $P0 = find_global "PGE", "glob"
+  $P0 = compreg 'PGE::Glob'
   (rule, $P1, $P2) = $P0(match_str)
 
 

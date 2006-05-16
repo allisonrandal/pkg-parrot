@@ -1,4 +1,4 @@
-$Id: queens_r.pir 10183 2005-11-26 11:05:39Z bernhard $
+$Id: queens_r.pir 12193 2006-04-12 20:04:06Z bernhard $
 
 # recursive queens placement
 # prints all 92 solutions in chess notation
@@ -8,8 +8,8 @@ $Id: queens_r.pir 10183 2005-11-26 11:05:39Z bernhard $
 
 .sub main :main
     .local pmc queen_row, queen_state
-    queen_row = new ResizableIntegerArray
-    queen_state = new ResizableIntegerArray
+    queen_row = new .ResizableIntegerArray
+    queen_state = new .ResizableIntegerArray
     solve(0, queen_row, queen_state)
 .end
 

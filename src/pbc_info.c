@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pbc_info.c 12076 2006-03-29 22:22:22Z bernhard $
+$Id: pbc_info.c 12217 2006-04-14 10:59:04Z bernhard $
 
 =head1 NAME
 
@@ -67,7 +67,6 @@ main(int argc, char * argv[] )
     struct PackFile_Segment *seg;
 
     interpreter = Parrot_new(NULL);
-    Parrot_init(interpreter);
 
     pf = Parrot_readbc(interpreter, argv[1]);
 

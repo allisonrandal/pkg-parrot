@@ -9,7 +9,7 @@ punie -- A compiler for Perl 1
 =head1 DESCRIPTION
 
 Punie is a compiler for Perl version 1, running on Parrot. Its parser is
-a PGE grammar (a subclass of PGE::Rule). The compilation is a series of
+a PGE grammar (a subclass of PGE::Grammar). The compilation is a series of
 tree transformations using TGE: from match tree to abstract syntax tree
 (AST), from AST to opcode syntax tree (OST), and finally from OST to
 bytecode (actually to PIR, at first). For more on the ideas behind the
@@ -54,22 +54,18 @@ and logic ops.
     unless $I0 goto err_match_fail           # if match fails stop
 #    print "parse succeeded\n"
 #    print "Match tree dump:\n"
-#    load_bytecode "dumper.pir"
-#    load_bytecode "PGE/Dumper.pir"
+#    load_bytecode "dumper.pbc"
+#    load_bytecode "PGE/Dumper.pbc"
 #    $P0 = find_global "_dumper"
 #    $P0(match, "$/")
 
     # "Traverse" the parse tree
-    .local string tg_source
-    tg_source = _slurp_file('languages/punie/lib/pge2past.g')
-
-    load_bytecode "TGE.pbc"
+    load_bytecode "languages/punie/lib/ASTGrammar.pbc"
     .local pmc grammar
-    grammar = new 'TGE'
-    grammar.agcompile(tg_source)
+     grammar = new 'ASTGrammar'
 
     # Construct the "AST"
-    load_bytecode "languages/punie/lib/PAST.pir"
+    load_bytecode "PAST.pbc"
     .local pmc astbuilder
     astbuilder = grammar.apply(match)
     .local pmc ast
@@ -83,11 +79,9 @@ and logic ops.
     # Compile the abstract syntax tree down to an opcode syntax tree
     load_bytecode "languages/punie/lib/POST.pir"
     load_bytecode 'languages/punie/lib/PunieOpLookup.pir'
-    .local string ost_tg_source
-    ost_tg_source = _slurp_file('languages/punie/lib/past2post.g')
+    load_bytecode "languages/punie/lib/OSTGrammar.pbc"
     .local pmc ostgrammar
-    ostgrammar = new 'TGE'
-    ostgrammar.agcompile(ost_tg_source)
+    ostgrammar = new 'OSTGrammar'
     .local pmc ostbuilder
     ostbuilder = ostgrammar.apply(ast)
     .local pmc ost
@@ -99,11 +93,9 @@ and logic ops.
 #    ost.dump()
 
     # Compile the OST down to PIR
-    .local string pir_tg_source
-    pir_tg_source = _slurp_file('languages/punie/lib/post2pir.g')
+    load_bytecode "languages/punie/lib/PIRGrammar.pbc"
     .local pmc pirgrammar
-    pirgrammar = new 'TGE'
-    pirgrammar.agcompile(pir_tg_source)
+    pirgrammar = new 'PIRGrammar'
     .local pmc pirbuilder
     pirbuilder = pirgrammar.apply(ost)
     .local pmc pir

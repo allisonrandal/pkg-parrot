@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: vtables.c 11928 2006-03-18 17:43:35Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: vtables.c 12588 2006-05-10 03:06:58Z petdance $
 
 =head1 NAME
 
@@ -30,7 +30,8 @@ Creates and returns a pointer to the new C<VTABLE>.
 */
 
 VTABLE *
-Parrot_new_vtable(Parrot_Interp interpreter) {
+Parrot_new_vtable(Parrot_Interp interpreter)
+{
     return mem_sys_allocate_zeroed(sizeof(VTABLE));
 }
 
@@ -50,8 +51,9 @@ Destroys C<*vtable>.
 */
 
 VTABLE *
-Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable) {
-    VTABLE *new_vtable = mem_sys_allocate(sizeof(VTABLE));
+Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable)
+{
+    VTABLE * const new_vtable = mem_sys_allocate(sizeof(VTABLE));
     if (new_vtable) {
         memcpy(new_vtable, base_vtable, sizeof(VTABLE));
     }
@@ -60,7 +62,8 @@ Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable) {
 
 
 void
-Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable) {
+Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable)
+{
     mem_sys_free(vtable);
 }
 
@@ -79,8 +82,8 @@ parrot_realloc_vtables(Interp *interpreter)
     /* 16 bigger seems reasonable, though it's only a pointer
        table and we could get bigger without blowing much memory
        */
-    INTVAL new_max = interpreter->n_vtable_alloced + 16;
-    INTVAL new_size = new_max * sizeof(VTABLE *);
+    const INTVAL new_max = interpreter->n_vtable_alloced + 16;
+    const INTVAL new_size = new_max * sizeof(VTABLE *);
     INTVAL i;
     interpreter->vtables = mem_sys_realloc(interpreter->vtables, new_size);
     /* Should set all the empty slots to the null PMC's

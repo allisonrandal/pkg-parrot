@@ -1,5 +1,5 @@
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: tests.pod 12076 2006-03-29 22:22:22Z bernhard $
+# $Id: tests.pod 12217 2006-04-14 10:59:04Z bernhard $
 
 =head1 NAME
 
@@ -107,7 +107,6 @@ C source tests are usually located in F<t/src/*.t>.  A simple test looks like:
         if (!interpreter)
             return 1;
 
-        Parrot_init(interpreter);
         Parrot_run_native(interpreter, the_test);
         printf("done\n");
     fflush(stdout);

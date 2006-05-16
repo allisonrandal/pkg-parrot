@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: exception.pmc 11355 2006-01-26 12:23:21Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: exception.pmc 12507 2006-05-04 22:10:56Z bernhard $
 
 =head1 NAME
 

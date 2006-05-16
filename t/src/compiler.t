@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: compiler.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: compiler.t 12217 2006-04-14 10:59:04Z bernhard $
 
 use strict;
 use warnings;
@@ -93,7 +93,6 @@ int main(int margc, char* margv[]) {
     if ( interpreter == NULL )
 	return 1;
 
-    Parrot_init(interpreter);
     /* this registers the PIR compiler */
     imcc_init(interpreter);
     /* dummy pf and segment to get things started */

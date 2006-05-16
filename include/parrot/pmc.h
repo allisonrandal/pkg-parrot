@@ -1,7 +1,7 @@
 /* pmc.h
  *  Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: pmc.h 11975 2006-03-21 22:23:53Z bernhard $
+ *     $Id: pmc.h 12333 2006-04-18 13:40:26Z leo $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:
@@ -33,6 +33,7 @@ PARROT_API PMC *constant_pmc_new_init(Interp *, INTVAL base_type, PMC *);
 
 PARROT_API INTVAL pmc_register(Interp *, STRING *);
 PARROT_API INTVAL pmc_type(Interp *, STRING *);
+PARROT_API INTVAL pmc_type_p(Interp *, PMC *);
 
 /*
  * DOD registry interface

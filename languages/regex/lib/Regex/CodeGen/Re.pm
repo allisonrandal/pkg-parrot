@@ -1,3 +1,5 @@
+# $Id: Re.pm 12463 2006-04-30 14:02:48Z bernhard $
+
 package Regex::CodeGen::Re;
 use Regex::RegexOps ();
 use base 'Regex::CodeGen';

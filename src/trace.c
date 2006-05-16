@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: trace.c 11926 2006-03-18 15:52:04Z leo $
+$Id: trace.c 12117 2006-04-05 04:49:19Z petdance $
 
 =head1 NAME
 
@@ -42,8 +42,8 @@ trace_class_name(Interp *interpreter, PMC* pmc)
 {
     STRING *class_name;
     if (PObj_is_class_TEST(pmc)) {
-        SLOTTYPE *class_array = PMC_data(pmc);
-        PMC *class_name_pmc = get_attrib_num(class_array, PCD_CLASS_NAME);
+        SLOTTYPE * const class_array = PMC_data(pmc);
+        PMC * const class_name_pmc = get_attrib_num(class_array, PCD_CLASS_NAME);
         class_name = PMC_str_val(class_name_pmc);
     }
     else
@@ -54,8 +54,7 @@ trace_class_name(Interp *interpreter, PMC* pmc)
 void
 trace_pmc_dump(Interp *interpreter, PMC* pmc)
 {
-    char *escaped;
-    Interp *debugger = interpreter->debugger;
+    Interp * const debugger = interpreter->debugger;
 
     if (!pmc) {
         PIO_eprintf(debugger, "(null)");
@@ -73,17 +72,16 @@ trace_pmc_dump(Interp *interpreter, PMC* pmc)
         PIO_eprintf(debugger, "**************** PMC is on free list *****\n");
     }
     if (pmc->vtable->class == pmc) {
-        STRING *name = trace_class_name(interpreter, pmc);
+        STRING * const name = trace_class_name(interpreter, pmc);
         PIO_eprintf(debugger, "Class=%Ss:PMC(%#p)", name, pmc);
     }
-    else if (
-             pmc->vtable->base_type == enum_class_String) {
-        STRING *s = VTABLE_get_string(interpreter, pmc);
+    else if ( pmc->vtable->base_type == enum_class_String) {
+        const STRING * const s = VTABLE_get_string(interpreter, pmc);
         if (!s)
             PIO_eprintf(debugger, "%S=PMC(%#p Str:(NULL))",
                     VTABLE_name(interpreter, pmc), pmc);
         else {
-            escaped = PDB_escape(s->strstart, s->strlen);
+            char * const escaped = PDB_escape(s->strstart, s->strlen);
             PIO_eprintf(debugger, "%S=PMC(%#p Str:\"%s\")",
                     VTABLE_name(interpreter, pmc), pmc,
                     escaped ? escaped : "(null)");
@@ -143,12 +141,9 @@ Prints a key to C<stderr>, returns the length of the output.
 int
 trace_key_dump(Interp *interpreter, PMC *key)
 {
-    char *escaped;
-    STRING *s;
-    int len = 0;
-    Interp *debugger = interpreter->debugger;
+    Interp * const debugger = interpreter->debugger;
 
-    len += PIO_eprintf(debugger, "[");
+    int len = PIO_eprintf(debugger, "[");
 
     while (key) {
         switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
@@ -159,12 +154,14 @@ trace_key_dump(Interp *interpreter, PMC *key)
             len += PIO_eprintf(debugger, "%vg", PMC_num_val(key));
             break;
         case KEY_string_FLAG:
-            s = PMC_str_val(key);
+            {
+            STRING * const s = PMC_str_val(key);
             /* XXX do it w/o degrading to C string */
-            escaped = PDB_escape(PObj_bufstart(s), s->strlen);
+            char * const escaped = PDB_escape(PObj_bufstart(s), s->strlen);
             len += PIO_eprintf(debugger, "\"%s\"", escaped?escaped:"(null)");
-                if (escaped)
-                    mem_sys_free(escaped);
+            if (escaped)
+                mem_sys_free(escaped);
+            }
             break;
         case KEY_integer_FLAG|KEY_register_FLAG:
             len += PIO_eprintf(debugger, "I%vd=%vd", PMC_int_val(key),
@@ -175,12 +172,14 @@ trace_key_dump(Interp *interpreter, PMC *key)
                     REG_NUM(PMC_int_val(key)));
             break;
         case KEY_string_FLAG|KEY_register_FLAG:
-            s = REG_STR(PMC_int_val(key));
-            escaped = PDB_escape(s->strstart, s->strlen);
+            {
+            STRING * const s = REG_STR(PMC_int_val(key));
+            char * const escaped = PDB_escape(s->strstart, s->strlen);
             len += PIO_eprintf(debugger, "S%vd=\"%s\"", PMC_int_val(key),
-                    escaped ? escaped : "(null");
-                if (escaped)
-                    mem_sys_free(escaped);
+                    escaped ? escaped : "(null)");
+            if (escaped)
+                mem_sys_free(escaped);
+            }
             break;
         case KEY_pmc_FLAG|KEY_register_FLAG:
             len += PIO_eprintf(debugger, "P%vd=", PMC_int_val(key));
@@ -192,12 +191,12 @@ trace_key_dump(Interp *interpreter, PMC *key)
             break;
         }
 
-        if (key)
+        if (key) {
             key = PMC_data(key);
-
-        if (key) 
-            len += PIO_eprintf(debugger, ";");
-    }
+            if (key)
+                len += PIO_eprintf(debugger, ";");
+        }
+    } /* while */
 
     len += PIO_eprintf(debugger, "]");
     return len;
@@ -222,7 +221,6 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
               opcode_t *pc)
 {
     INTVAL i, s, n;
-    char *escaped;
     int more = 0, var_args;
     Interp *debugger = interpreter->debugger;
     op_info_t *info = &interpreter->op_info_table[*pc];
@@ -265,7 +263,7 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
         len += PIO_eprintf(debugger, " ");
         /* pass 1 print arguments */
         for (i = s; i < n; i++) {
-            opcode_t o = *(pc + i);
+            const opcode_t o = pc[i];
             if (i < info->op_count)
                 type = info->types[i - 1];
             else
@@ -294,12 +292,14 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
                         len += PIO_eprintf(debugger, "PC%d", (int)o);
                     break;
                 case PARROT_ARG_SC:
-                    escaped = PDB_escape(PCONST(o)->u.string->strstart,
+                    {
+                    char * const escaped = PDB_escape(PCONST(o)->u.string->strstart,
                             PCONST(o)->u.string->bufused);
                     len += PIO_eprintf(debugger, "\"%s\"",
                             escaped ? escaped : "(null)");
                     if (escaped)
                         mem_sys_free(escaped);
+                    }
                     break;
                 case PARROT_ARG_KC:
                     len += trace_key_dump(interpreter, PCONST(o)->u.key);
@@ -339,7 +339,7 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
         if (!more)
             goto done;
         if (len < ARGS_COLUMN)  {
-            STRING *fill = string_repeat(debugger, 
+            STRING * const fill = string_repeat(debugger,
                     const_string(debugger, " "),
                     ARGS_COLUMN - len, NULL);
             PIO_putps(debugger, PIO_STDERR(debugger), fill);
@@ -350,7 +350,7 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
 
         /* pass 2 print argument details if needed */
         for (i = 1; i < n; i++) {
-            opcode_t o = *(pc + i);
+            const opcode_t o = pc[i];
             if (i < info->op_count)
                 type = info->types[i - 1];
             else
@@ -375,8 +375,8 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
                     trace_pmc_dump(interpreter, REG_PMC(o));
                     break;
                 case PARROT_ARG_S:
-                    if (REG_STR(*(pc+i))) {
-                        escaped = PDB_escape(REG_STR(o)->strstart,
+                    if (REG_STR(pc[i])) {
+                        char * const escaped = PDB_escape(REG_STR(o)->strstart,
                                 REG_STR(o)->bufused);
                         PIO_eprintf(debugger, "S%vd=\"%s\"", o,
                                 escaped ? escaped : "(null)");
@@ -391,8 +391,7 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
                     trace_key_dump(interpreter, REG_PMC(*(pc + i)));
                     break;
                 case PARROT_ARG_KI:
-                    PIO_eprintf(debugger, "I%vd=[%vd]", o,
-                            REG_INT(o));
+                    PIO_eprintf(debugger, "I%vd=[%vd]", o, REG_INT(o));
                     break;
                 default:
                     break;

@@ -1,10 +1,10 @@
-# $Id: Gnu.pm 11544 2006-02-14 21:00:57Z bernhard $
+# $Id: Gnu.pm 12415 2006-04-24 19:32:28Z bernhard $
 
 package Parrot::Test::M4::Gnu;
 
 use strict;
 use warnings;
-use 5.008;
+use 5.006;
 
 use base 'Parrot::Test::M4';
 
@@ -19,10 +19,11 @@ sub get_out_fn {
 
 sub get_test_prog {
     my $self = shift;
-    my ( $count ) = @_;
-
-    my $lang_fn        = Parrot::Test::per_test( '.m4', $count );
+    my ( $path_to_parrot, $path_to_language, $count ) = @_;
+ 
+    
     my $test_prog_args = $ENV{TEST_PROG_ARGS} || q{};
+    my $lang_fn        = Parrot::Test::per_test( '.m4', $count );
 
     return ( "$ENV{PARROT_M4_TEST_PROG} $test_prog_args languages/${lang_fn}" );
 }

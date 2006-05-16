@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_utf8.c 11982 2006-03-22 15:23:08Z leo $
+$Id: io_utf8.c 12606 2006-05-10 17:54:59Z petdance $
 
 =head1 NAME
 
@@ -88,7 +88,6 @@ ok:
     return len;
 }
 
-void *Parrot_utf8_encode(void *ptr, UINTVAL c);
 static size_t
 PIO_utf8_write(theINTERP, ParrotIOLayer *l, ParrotIO *io, STRING *s)
 {

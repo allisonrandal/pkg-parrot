@@ -1,5 +1,5 @@
 # Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Test.pm 12067 2006-03-28 20:17:11Z bernhard $
+# $Id: Test.pm 12274 2006-04-16 10:52:41Z bernhard $
 
 =head1 NAME
 
@@ -191,6 +191,14 @@ For example:
 
 Read the whole file $file_name and return the content as a string.
 
+=item C<convert_line_endings($text)>
+
+Convert Win32 style line endins with Unix style line endings.
+
+=item C<path_to_parrot()>
+
+Construct a relative path from the current dir to the parrot root dir.
+
 =back
 
 =cut
@@ -236,11 +244,11 @@ sub run_command {
     # To run the command in a different directory.
     my $chdir = delete $options{CD};
 
-    foreach (keys %options) {
-        m/^STD(OUT|ERR)$/ or die "I don't know how to redirect '$_' yet! ";
-    }
-    foreach (values %options) {
-        $_ = 'NUL:' if $^O eq 'MSWin32' and $_ eq '/dev/null';
+    while (my($key, $value) = each %options) {
+        $key =~ m/^STD(OUT|ERR)$/
+            or die "I don't know how to redirect '$key' yet!";
+        $value = File::Spec->devnull
+            if $value eq '/dev/null';
     }
 
     my $out = $options{'STDOUT'} || '';
@@ -339,6 +347,17 @@ sub convert_line_endings {
     $text =~ s/\cM\cJ/\n/g;
 }
 
+sub path_to_parrot {
+
+    my $path = $INC{'Parrot/Config.pm'};
+    $path   =~ s{ /lib/Parrot/Config.pm \z}{}xms;
+    if ( $path eq q{} ) {
+         $path = File::Spec->curdir();
+    }
+
+    return $path;
+}
+
 # 
 # private methods, should not be used by Modules inherition from Parrot::Test
 #
@@ -346,9 +365,7 @@ sub convert_line_endings {
 sub _generate_functions {
     my $package = 'Parrot::Test';
 
-    my $path_to_parrot = $INC{"Parrot/Config.pm"};
-    $path_to_parrot =~ s:lib/Parrot/Config.pm$::;
-    $path_to_parrot = File::Spec->curdir() if $path_to_parrot eq "";
+    my $path_to_parrot = path_to_parrot();
     my $parrot = File::Spec->join(File::Spec->curdir(), 'parrot' . $PConfig{exe});
 
     my %parrot_test_map = (

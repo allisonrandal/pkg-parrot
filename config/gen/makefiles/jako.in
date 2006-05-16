@@ -1,7 +1,7 @@
 #
 # Makefile.in
 #
-# $Id: jako.in 12027 2006-03-26 04:27:59Z gregor $
+# $Id: jako.in 12247 2006-04-15 03:28:59Z gregor $
 #
 
 PERL = @perl@

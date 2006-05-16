@@ -1,7 +1,8 @@
 # XXX Stub 
 # help shootout compile
 
-.namespace [ '_Tcl::builtins']
+.HLL '_Tcl', ''
+.namespace [ 'builtins']
 
 .sub 'interp'
   .param int register_num

@@ -1,7 +1,7 @@
 /* objects.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: objects.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: objects.h 12340 2006-04-18 15:10:09Z leo $
  *  Overview:
  *     Parrot class and object header stuff
  *  Data Structure and Algorithms:
@@ -35,9 +35,10 @@ typedef enum {
     POD_FIRST_ATTRIB    /* attributes start here */
 } PARROT_OBJECT_DATA_ENUM;
 
-PARROT_API PMC *Parrot_single_subclass(Parrot_Interp, PMC *, STRING *);
-PARROT_API void Parrot_new_class(Parrot_Interp, PMC *, STRING *);
+PARROT_API PMC *Parrot_single_subclass(Parrot_Interp, PMC *, PMC *);
+PARROT_API void Parrot_new_class(Parrot_Interp, PMC *, PMC *);
 PARROT_API PMC *Parrot_class_lookup(Parrot_Interp, STRING *);
+PARROT_API PMC *Parrot_class_lookup_p(Parrot_Interp, PMC *);
 PARROT_API PMC *Parrot_add_parent(Parrot_Interp, PMC *, PMC *);
 PARROT_API PMC *Parrot_remove_parent(Parrot_Interp, PMC *, PMC *);
 PARROT_API PMC *Parrot_multi_subclass(Parrot_Interp, PMC *, STRING *);
@@ -62,6 +63,7 @@ PARROT_API void Parrot_set_class_constructor(Parrot_Interp, STRING *, INTVAL, ST
 PARROT_API void Parrot_set_class_destructor(Parrot_Interp, STRING *, INTVAL, STRING *);
 PARROT_API void Parrot_set_class_fallback(Parrot_Interp, STRING *, INTVAL, STRING *);
 PARROT_API void Parrot_invalidate_method_cache(Interp*, STRING *class, STRING *meth);
+PARROT_API STRING *readable_name(Parrot_Interp, PMC *);
 
 /* Objects, classes and PMCarrays all use the same data scheme:
  * PMC_data() holds a malloced array, PMC_int_val() is the size of it

@@ -1,13 +1,13 @@
-# $Id: 015___file__.t 11459 2006-02-06 21:24:20Z bernhard $
+# $Id: 015___file__.t 12226 2006-04-14 15:02:50Z bernhard $
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../../lib", "$FindBin::Bin/../../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib m4/lib );
 
 use Parrot::Test tests => 1;
 
 {
-  language_output_like( 'm4', <<'CODE', qr/Currently the file 'languages.m4.t.builtins.015___file___1\.m4' is being processed\.\n/, '__line__' );
+  language_output_like( 'm4', <<'CODE', qr/Currently the file '.*builtins.015___file___1\.m4' is being processed\.\n/, '__line__' );
 Currently the file '__file__' is being processed.
 CODE
 }

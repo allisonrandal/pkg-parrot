@@ -1,7 +1,8 @@
 # XXX Stub 
 # help tcltest compile
 
-.namespace [ '_Tcl::builtins']
+.HLL '_Tcl', ''
+.namespace [ 'builtins']
 
 .sub 'auto_execok'
   .param int register_num

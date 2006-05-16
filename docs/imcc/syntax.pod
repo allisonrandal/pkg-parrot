@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: syntax.pod 11888 2006-03-13 18:42:03Z autrijus $
+# $Id: syntax.pod 12377 2006-04-19 16:16:09Z coke $
 
 =head1 NAME
 
@@ -164,7 +164,7 @@ Define the HLL for the current file. If the string C<hll_lib> isn't empty
 this B<compile time pragma> also loads the shared lib for the HLL, so that
 integer type constants are working for creating new PMCs.
 
-=item .HLL_map .CoreTyp, .UserType
+=item .HLL_map .CoreType, .UserType
 
 Whenever Parrot has to create PMCs inside C code on behalf of the running user
 program it consults the current type mapping for the executing HLL and creates

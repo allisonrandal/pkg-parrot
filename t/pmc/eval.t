@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: eval.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: eval.t 12199 2006-04-13 12:09:36Z leo $
 
 use strict;
 use warnings;
@@ -612,6 +612,6 @@ EOC
     print "\n"
 .end
 CODE
-foo
-bar
+parrot;foo
+parrot;bar
 OUTPUT

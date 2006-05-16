@@ -1,5 +1,24 @@
 #! perl -w
-# $Id: basic.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: basic.t 12511 2006-05-05 07:10:12Z fperrad $
+
+=head1 NAME
+
+ook/t/basic.t - testing ook
+
+
+=head1 SYNOPSIS
+
+	% cd languages && perl ook/t/basic.t
+
+=head1 DESCRIPTION
+
+Test hello.ook.
+
+head1 TODO
+
+test executing test.ook
+ 
+=cut
 
 use strict;
 use warnings;
@@ -7,32 +26,28 @@ use FindBin;
 use lib "$FindBin::Bin/../../../lib";
 
 use Test::More tests => 1;
-use Parrot::Test();
+use Parrot::Test  ();
 use Parrot::Config qw(%PConfig);
 use File::Spec;
 
 # execute hello.ook
-my $updir         = File::Spec->updir();
-my $languages_dir = File::Spec->catdir( $FindBin::Bin, $updir, $updir ); 
-my $parrot        = File::Spec->catfile( $updir, 'parrot' . $PConfig{exe} );
+my $parrot    = File::Spec->catfile( File::Spec->updir(), $PConfig{test_prog} );
+my $ook       = $parrot . q{ } . File::Spec->catfile( 'ook', 'ook.pbc' );
+my $hello_ook = File::Spec->catfile( 'ook', 'hello.ook' ); 
 
 # Test running hello.ook
 
-my $out_fn = File::Spec->catfile( 'ook', 'hello.out' );
+my $out_fn    = File::Spec->catfile( 'ook', 'hello.out' );
 
 # STDERR is written into same output file
 my $exit_code = Parrot::Test::run_command( 
-    "$parrot ook/ook.pbc ook/hello.ook",
-    CD     => $languages_dir,
+    "$ook $hello_ook",
     STDOUT => $out_fn,
-    STDERR => $out_fn 
-                                         );
+    STDERR => $out_fn, 
+);
   
-my $out = Parrot::Test::slurp_file(
-                    File::Spec->catfile($languages_dir, $out_fn)
-                                  );
+my $out = Parrot::Test::slurp_file( $out_fn );
 is( $out, << 'OUT', 'output from hello.ook' );
 Hello World!
 OUT
 
-# TODO: test executing test.ook

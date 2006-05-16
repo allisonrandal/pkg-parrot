@@ -1,7 +1,7 @@
 /* builtin.h
  *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: builtin.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: builtin.h 12537 2006-05-06 20:06:21Z petdance $
  *  Overview:
  *     This is the api header for builtins.
  *  Data Structure and Algorithms:
@@ -13,12 +13,17 @@
 #if !defined(PARROT_BUILTIN_H_GUARD)
 #define PARROT_BUILTIN_H_GUARD
 
-void Parrot_init_builtins(Interp *);
-int  Parrot_is_builtin(Interp *, char *func, char *sig);
-PMC* Parrot_find_builtin(Interp *interpreter, STRING *func);
-const char * Parrot_builtin_get_c_namespace(Interp *, int bi);
-int Parrot_builtin_is_class_method(Interp *, int bi);
-int Parrot_builtin_is_void(Interp *, int bi);
+#include "parrot/compiler.h"
+
+void Parrot_init_builtins(Interp *interpreter);
+int  Parrot_is_builtin(Interp *interpreter, const char *func, const char *sig)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+PMC* Parrot_find_builtin(Interp *interpreter, STRING *func)
+        __attribute__nonnull__(2);
+const char * Parrot_builtin_get_c_namespace(Interp *interpreter, int bi);
+int Parrot_builtin_is_class_method(Interp *interpreter, int bi);
+int Parrot_builtin_is_void(Interp *interpreter, int bi);
 
 #endif /* PARROT_BUILTIN_H_GUARD */
 

@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: embed.pod 12076 2006-03-29 22:22:22Z bernhard $
+# $Id: embed.pod 12392 2006-04-21 19:55:31Z ambs $
 
 =head1 NAME
 
@@ -17,7 +17,6 @@ embed.pod - Parrot embedding system
         argc--; argv++; /* skip the program name */
 
         interp=Parrot_new(NULL);
-        Parrot_init(interp);
 
         if(PARROT_JIT_CAPABLE) {
             Parrot_set_run_core(interp, PARROT_JIT_CORE);  /* activate JIT */
@@ -204,11 +203,7 @@ This constant contains the name of your operating system (as the JIT sees it).
 Allocates and returns a new Parrot interpreter. C<parent> is NULL for the main
 interpreter that will be destroyed last.
 
-=item C<void Parrot_init(Parrot_Interp)>
-
-Initializes a Parrot interpreter.
-
-=item C<void Parrot_setflag(Parrot_Interp, Parrot_Interp_flag, Parrot_Interp_flag_val)>
+=item C<void Parrot_setflags(Parrot_Interp, Parrot_Interp_flag, Parrot_Interp_flag_val)>
 
 Sets a flag in the Parrot interpreter.
 

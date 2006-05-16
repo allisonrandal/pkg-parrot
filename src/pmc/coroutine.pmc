@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: coroutine.pmc 11906 2006-03-15 16:14:19Z leo $
+$Id: coroutine.pmc 12311 2006-04-17 23:21:13Z leo $
 
 =head1 NAME
 
@@ -161,10 +161,7 @@ Swaps the "context".
             PMC_cont(ccont)->from_ctx = ctx;
             ctx->current_sub = SELF;
             ctx->current_HLL = co->HLL_id;
-            if (co->namespace_stash) {
-                /* :anon sub don't have it */
-                ctx->current_namespace = co->namespace_stash;
-            }
+            ctx->current_namespace = co->namespace_stash;
             ctx->current_cont = ccont;
             ctx->current_object = NULL;
             INTERP->current_object = NULL;

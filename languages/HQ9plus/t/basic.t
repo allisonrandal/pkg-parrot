@@ -1,5 +1,7 @@
+#! perl
+
 # Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 11366 2006-01-28 20:03:50Z bernhard $
+# $Id: basic.t 12285 2006-04-17 12:24:11Z bernhard $
 
 =head1 NAME
 
@@ -12,8 +14,8 @@ Very basic checks, but all tests of HQ9plus are necessarily basic
 =cut
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../lib", "$FindBin::Bin/../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib HQ9plus/lib );
 
 use Parrot::Test tests => 6;
 

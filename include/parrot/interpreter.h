@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: interpreter.h 12076 2006-03-29 22:22:22Z bernhard $
+ *     $Id: interpreter.h 12423 2006-04-25 10:12:04Z fperrad $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -443,9 +443,9 @@ PARROT_API void Parrot_destroy(Interp *);
 
 PARROT_API void Parrot_set_config_hash_internal(const unsigned char*, unsigned int);
 
-INTVAL interpinfo(Interp *interpreter, INTVAL what);
-PMC*   interpinfo_p(Interp *interpreter, INTVAL what);
-STRING*interpinfo_s(Interp *interpreter, INTVAL what);
+PARROT_API INTVAL interpinfo(Interp *interpreter, INTVAL what);
+PARROT_API PMC*   interpinfo_p(Interp *interpreter, INTVAL what);
+PARROT_API STRING*interpinfo_s(Interp *interpreter, INTVAL what);
 
 void runops(Interp *, size_t offset);
 void runops_int(Interp *, size_t offset);

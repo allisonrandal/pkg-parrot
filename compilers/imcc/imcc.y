@@ -9,7 +9,7 @@
  *
  * Grammar for the parser.
  *
- * $Id: imcc.y 11852 2006-03-10 11:49:20Z leo $
+ * $Id: imcc.y 12333 2006-04-18 13:40:26Z leo $
  *
  */
 
@@ -1117,6 +1117,8 @@ assignment:
                         { $$ = iNEW(interp, cur_unit, $1, $4, NULL, 1); }
    | target '=' NEW var
                         { $$ = MK_I(interp, cur_unit, "new", 2, $1, $4); }
+   | target '=' NEW '[' keylist ']'
+                        { $$ = MK_I(interp, cur_unit, "new", 2, $1, $5); }
    | target '=' NEW var COMMA var
                         { $$ = MK_I(interp, cur_unit, "new", 3, $1, $4, $6); }
    | target '=' NEW var '[' keylist ']'

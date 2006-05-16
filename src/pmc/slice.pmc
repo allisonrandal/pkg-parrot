@@ -1,6 +1,6 @@
 /*
-Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: slice.pmc 11613 2006-02-17 02:40:57Z particle $
+Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
+$Id: slice.pmc 12114 2006-04-04 22:50:48Z bernhard $
 
 =head1 NAME
 

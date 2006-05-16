@@ -1,4 +1,4 @@
-# $Id: input.pir 11903 2006-03-14 20:49:11Z bernhard $
+# $Id: input.pir 12442 2006-04-27 03:57:44Z pmichaud $
 
 =head1 NAME 
 
@@ -7,7 +7,7 @@ input.pir - Setting up input and reading input
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer. All Rights Reserved.
-SVN Info:   $Id: input.pir 11903 2006-03-14 20:49:11Z bernhard $
+SVN Info:   $Id: input.pir 12442 2006-04-27 03:57:44Z pmichaud $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -67,7 +67,7 @@ TOOO: recognize nested quoted strings
   # TODO: Use named or positional captures
   # TODO: rulesub for frozen state 
   .local pmc p6rule
-  p6rule = compreg "PGE::P6Rule"
+  p6rule = compreg "PGE::P6Regex"
   .local pmc rulesub_in_state
   rulesub_in_state = new .Hash
   state['rulesub'] = rulesub_in_state

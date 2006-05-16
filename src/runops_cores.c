@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: runops_cores.c 12076 2006-03-29 22:22:22Z bernhard $
+$Id: runops_cores.c 12132 2006-04-06 21:20:46Z bernhard $
 
 =head1 NAME
 
@@ -21,10 +21,9 @@ the faster dispatch of operations.
 
 */
 
-#include "parrot/runops_cores.h"
+#include "runops_cores.h"
 #include "parrot/embed.h"
 #include "parrot/trace.h"
-
 #include "parrot/interp_guts.h"
 
 #ifdef HAVE_COMPUTED_GOTO
@@ -201,10 +200,10 @@ operations, with tracing, bounds checking and profiling enabled.
 opcode_t *
 runops_profile_core(Interp *interpreter, opcode_t *pc)
 {
-    opcode_t cur_op, old_op;
-    RunProfile *profile = interpreter->profile;
+    opcode_t cur_op;
+    RunProfile * const profile = interpreter->profile;
 
-    old_op = profile->cur_op;
+    const opcode_t old_op = profile->cur_op;
     /*
      * if we are reentering the runloop:
      * - remember old op and calc time till now
@@ -241,7 +240,7 @@ runops_profile_core(Interp *interpreter, opcode_t *pc)
 
 =head1 SEE ALSO
 
-F<include/parrot/runops_cores.h>.
+F<src/runops_cores.h>.
 
 =cut
 

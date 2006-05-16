@@ -1,4 +1,21 @@
-# $Id: NEWS 12089 2006-04-02 13:44:22Z leo $
+# $Id: NEWS 12662 2006-05-14 09:04:54Z leo $
+
+New in 0.4.4
+
+- hierarchical class names
+- APL compiler
+  - under development
+  - understands simple vector ops, strings
+  - demonstrates use of Unicode in Parrot
+- pgc, a compiler for rules and operator precedence parsers
+- Major redesign and improvements for PGE
+  - compilers understand named parameter options
+  - :ratchet option implemented to support non-backtracking quantifiers
+- TGE (tree grammar engine) for tree transformations
+  - tgc, tree grammar compiler
+- perl6 compiler
+  - support for many operators, lexical scalars, regex matches
+- new pheme (Parrot scheme) compiler  
 
 New in 0.4.3
 

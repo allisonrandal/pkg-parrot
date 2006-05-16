@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: library.c 10987 2006-01-08 15:13:23Z leo $
+$Id: library.c 12179 2006-04-12 12:38:15Z leo $
 
 =head1 NAME
 
@@ -317,7 +317,7 @@ Parrot_get_runtime_prefix(Interp *interpreter, STRING **prefix_str)
         char *ret;
 
         if (prefix_str) {
-            *prefix_str = CONST_STRING(interpreter, pwd);
+            *prefix_str = const_string(interpreter, pwd);
             return NULL;
         }
         ret = mem_sys_allocate(3);

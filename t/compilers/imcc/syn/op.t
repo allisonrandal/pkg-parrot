@@ -1,15 +1,14 @@
-#!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: op.t 10829 2006-01-01 14:28:50Z ambs $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: op.t 12162 2006-04-09 20:07:40Z bernhard $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Config;
 use Parrot::Test tests => 32;
 
-##############################
 pir_output_is(<<'CODE', <<'OUT', "+=");
 .sub test :main
     $I0 = 10
@@ -27,7 +26,6 @@ CODE
 10
 OUT
 
-##############################
 pir_output_is(<<'CODE', <<'OUT', "-=");
 .sub test :main
     $I0 = 10
@@ -207,7 +205,7 @@ OUT
 pir_output_is(<<'CODE', <<'OUT', "x = defined");
 .sub test :main
     .local pmc a
-    a = new PerlArray
+    a = new ResizablePMCArray
     push a, 10
     $I0 = defined a
     print $I0

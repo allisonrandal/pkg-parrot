@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: extend.c 11975 2006-03-21 22:23:53Z bernhard $
+$Id: extend.c 12592 2006-05-10 04:55:00Z petdance $
 
 =head1 NAME
 
@@ -653,7 +653,7 @@ Returns the special C<NULL> PMC.
 
 */
 
-Parrot_PMC Parrot_PMC_null() {
+Parrot_PMC Parrot_PMC_null(void) {
     return PMCNULL;
 }
 

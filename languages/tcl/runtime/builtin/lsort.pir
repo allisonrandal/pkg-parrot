@@ -2,7 +2,8 @@
 # [lsort]
 #
 
-.namespace [ "Tcl" ]
+.HLL 'Tcl', 'tcl_group'
+.namespace [ '' ]
 
 .sub "&lsort"
   .param pmc argv :slurpy
@@ -15,8 +16,8 @@
   argc = argv
   if argc == 0 goto wrong_args
 
-  compare = find_global "_Tcl\0builtins\0lsort", "ascii"
-  sort = find_global "_Tcl\0builtins\0lsort", "sort"
+  .get_from_HLL(compare,'_tcl';'helpers';'lsort','ascii')
+  .get_from_HLL(sort,'_tcl';'helpers';'lsort','sort')
 
   # possible options
   .local int decr, unique
@@ -43,14 +44,14 @@ c_uniq:
   unique = 1
   branch chew_flag
 c_int:
-  compare = find_global "_Tcl\0builtins\0lsort", "integer"
+  .get_from_HLL(compare,'_tcl';'helpers';'lsort','integer')
   branch chew_flag
 
 
 got_list:
 
   .local pmc __list
-  __list = find_global "_Tcl", "__list"
+  .get_from_HLL(__list,'_tcl','__list')
   $P0 = __list($P0)
 
   sort(compare, $P0, decr)
@@ -88,7 +89,8 @@ wrong_args:
   .throw ("wrong # args: should be \"lsort ?options? list\"")
 .end
 
-.namespace [ "_Tcl\0builtins\0lsort" ]
+.HLL '_Tcl', ''
+.namespace [ 'helpers'; 'lsort' ]
 
 .sub "sort"
   .param pmc compare
@@ -178,7 +180,7 @@ decreasing:
 
   # check that they're actually integers.
   .local pmc __number
-  __number = find_global '_Tcl', '__number'
+  .get_from_HLL(__number, '_tcl', '__number')
   s1 = __number(s1)
   s2 = __number(s2)
 

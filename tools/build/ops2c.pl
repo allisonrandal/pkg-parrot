@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ops2c.pl 12025 2006-03-25 16:21:09Z leo $
+# $Id: ops2c.pl 12540 2006-05-07 04:27:54Z petdance $
 
 =head1 NAME
 
@@ -165,7 +165,9 @@ $base =~ s/\.ops$//;
 my $incdir  = "include/parrot/oplib";
 my $include = "parrot/oplib/${base}_ops${suffix}.h";
 my $header  = "include/$include";
-my $source  = "src/ops/${base}_ops${suffix}.c";
+# SOURCE is closed and reread, which confuses make -j
+# create a temp file and rename it
+my $source  = "src/ops/${base}_ops${suffix}.c.temp";
 
 if ($base =~ m!^src/dynoplibs/! || $dynamic_flag) {
     $source  =~ s!src/ops/!!;
@@ -330,9 +332,9 @@ foreach my $op ($ops->ops) {
         $definition = "$prototype;\n$opsarraytype *\n$func_name ($args)";
     }
 
-    my $source = $op->source($trans);
-    $source    =~ s/\bop_lib\b/${bs}op_lib/;
-    $source    =~ s/\bops_addr\b/${bs}ops_addr/g;
+    my $src = $op->source($trans);
+    $src    =~ s/\bop_lib\b/${bs}op_lib/;
+    $src    =~ s/\bops_addr\b/${bs}ops_addr/g;
 
     if ($suffix =~ /cg/) {
 	push @cg_jump_table, "        &&PC_$index,\n";
@@ -341,7 +343,7 @@ foreach my $op ($ops->ops) {
         push @op_func_table, sprintf("  %-50s /* %6ld */\n",
             "$func_name,", $index);
     }
-    $one_op .= "$definition $comment {\n$source}\n\n";
+    $one_op .= "$definition $comment {\n$src}\n\n";
     push @op_funcs, $one_op;
     $index++;
 }
@@ -410,6 +412,7 @@ close(SOURCE);
 open(SOURCE, ">>$source") || die "Error appending to $source: $!\n";
 unless ($nolines_flag) {
     my $source_escaped = $source;
+    $source_escaped =~ s|\.temp||;
     $source_escaped =~ s|(\\)|$1$1|g; # escape backslashes
     print SOURCE qq{#line $line "$source_escaped"\n};
 }
@@ -572,28 +575,27 @@ static size_t hash_str(const char * str) {
     size_t key = 0;
     const char * s;
     for(s=str; *s; s++)
-    key = key * 65599 + *s;
+        key = key * 65599 + *s;
     return key;
 }
 
 static void store_op(op_info_t *info, int full) {
-    HOP *p = mem_sys_allocate(sizeof(HOP));
-    size_t hidx;
-    hidx = hash_str(full ? info->full_name : info->name) % OP_HASH_SIZE;
+    HOP * const p = mem_sys_allocate(sizeof(HOP));
+    const size_t hidx = hash_str(full ? info->full_name : info->name) % OP_HASH_SIZE;
     p->info = info;
     p->next = hop[hidx];
     hop[hidx] = p;
 }
 static int get_op(const char * name, int full) {
     HOP * p;
-    size_t hidx = hash_str(name) % OP_HASH_SIZE;
+    const size_t hidx = hash_str(name) % OP_HASH_SIZE;
     if (!hop) {
-    hop = mem_sys_allocate_zeroed(OP_HASH_SIZE * sizeof(HOP*));
-    hop_init();
+        hop = mem_sys_allocate_zeroed(OP_HASH_SIZE * sizeof(HOP*));
+        hop_init();
     }
-    for(p = hop[hidx]; p; p = p->next) {
-    if(!strcmp(name, full ? p->info->full_name : p->info->name))
-        return p->info - ${bs}op_lib.op_info_table;
+    for (p = hop[hidx]; p; p = p->next) {
+        if(!strcmp(name, full ? p->info->full_name : p->info->name))
+            return p->info - ${bs}op_lib.op_info_table;
     }
     return -1;
 }
@@ -602,24 +604,24 @@ static void hop_init() {
     op_info_t * info = ${bs}op_lib.op_info_table;
     /* store full names */
     for (i = 0; i < ${bs}op_lib.op_count; i++)
-    store_op(info + i, 1);
+        store_op(info + i, 1);
     /* plus one short name */
     for (i = 0; i < ${bs}op_lib.op_count; i++)
-    if (get_op(info[i].name, 0) == -1)
-        store_op(info + i, 0);
+        if (get_op(info[i].name, 0) == -1)
+            store_op(info + i, 0);
 }
 static void hop_deinit(void)
 {
     HOP *p, *next;
-    size_t i;
     if (hop) {
-    for (i = 0; i < OP_HASH_SIZE; i++)
-        for(p = hop[i]; p; ) {
-        next = p->next;
-        free(p);
-        p = next;
-    }
-    free(hop);
+        size_t i;
+        for (i = 0; i < OP_HASH_SIZE; i++)
+            for (p = hop[i]; p; ) {
+                next = p->next;
+                free(p);
+                p = next;
+        }
+        free(hop);
     }
     hop = 0;
 }
@@ -705,5 +707,10 @@ $load_func(Parrot_Interp interpreter)
 END_C
 
 }
+
+close SOURCE;
+my $final = $source;
+$final =~ s/\.temp//;
+rename $source, $final;
 
 exit 0;

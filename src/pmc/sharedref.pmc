@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sharedref.pmc 11613 2006-02-17 02:40:57Z particle $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: sharedref.pmc 12544 2006-05-07 05:19:38Z petdance $
 
 =head1 NAME
 
@@ -155,7 +155,7 @@ or at least a detection if the referred PMC is already destroyed.
 */
 
     void destroy() {
-        PMC *ref = PMC_pmc_val(SELF);
+        PMC * const ref = PMC_pmc_val(SELF);
         if (PObj_active_destroy_TEST(ref))
             VTABLE_destroy(INTERP, ref);
         if (PMC_sync(SELF)->owner != INTERP)

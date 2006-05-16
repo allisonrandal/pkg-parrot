@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: boolean.pmc 12005 2006-03-24 15:19:48Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: boolean.pmc 12544 2006-05-07 05:19:38Z petdance $
 
 =head1 NAME
 
@@ -22,7 +22,6 @@ it doesn't morph to other types. Only its value is changed.
 */
 
 #include "parrot/parrot.h"
-#include "parrot/perltypes.h"
 
 pmclass Boolean extends Integer does boolean does scalar {
 
@@ -65,8 +64,9 @@ C<bool> object according to the passed PMC value.
 */
     PMC* instantiate(PMC* sig) {
         /* XXX other types */
-        int argcP = REG_INT(3);
-        PMC *res = pmc_new(interpreter, enum_class_Boolean);
+        const int argcP = REG_INT(3);
+        PMC * const res = pmc_new(interpreter, enum_class_Boolean);
+
         if (argcP)
             PMC_int_val(res) = VTABLE_get_bool(interpreter, REG_PMC(5));
         return PMCNULL; /* TODO */

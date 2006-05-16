@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: key.c 7285 2004-12-13 13:46:27Z leo $
+$Id: key.c 12595 2006-05-10 11:36:52Z leo $
 
 =head1 NAME
 
@@ -466,7 +466,8 @@ key_mark(Interp *interpreter, PMC *key)
     if (flags == KEY_hash_iterator_FLAGS)
         return;
 
-    if (PMC_data(key))
+    /* if iteration hasn't started, above flag isn't set yet */
+    if (PMC_data(key) && PMC_data(key) != (void *)INITBucketIndex)
         pobject_lives(interpreter, (PObj *)PMC_data(key));
 
 }

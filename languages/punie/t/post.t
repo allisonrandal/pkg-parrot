@@ -21,11 +21,12 @@ CODE
 
 $code .= "    node = new 'POST::$module'\n";
 $code .= <<'CODE'
-    $P0 = new PerlString
+    $P0 = new .String
     $P0 = 'bar'
-    $P1 = new PerlArray
-    push $P1, $P0
-    node.set_node('foo', 42, $P1)
+    node.'source'('foo')
+    node.'pos'(42)
+    node.'add_child'($P0)
+
     $P1 = getattribute node, 'source'
     print $P1
     print "\n"

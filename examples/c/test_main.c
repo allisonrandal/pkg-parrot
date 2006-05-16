@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: test_main.c 12076 2006-03-29 22:22:22Z bernhard $
+$Id: test_main.c 12217 2006-04-14 10:59:04Z bernhard $
 
 =head1 NAME
 
@@ -77,7 +77,6 @@ main(int argc, char *argv[])
     if (!interpreter) {
         return 1;
     }
-    Parrot_init(interpreter);
 
     filename = parseflags(interpreter, &argc, &argv);
 

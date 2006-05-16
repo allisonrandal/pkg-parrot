@@ -1,8 +1,8 @@
-# $Id: 014_ifelse.t 8317 2005-06-12 09:50:50Z bernhard $
+# $Id: 014_ifelse.t 12226 2006-04-14 15:02:50Z bernhard $
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../../lib", "$FindBin::Bin/../../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib m4/lib );
 
 use Parrot::Test tests => 1;
 

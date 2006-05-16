@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: thread.t 11478 2006-02-09 08:26:19Z fperrad $
+# $Id: thread.t 12325 2006-04-18 06:59:24Z fperrad $
 
 =head1 NAME
 
@@ -17,10 +17,10 @@ Tests C<LuaThread> PMC
 
 =cut
 
-use Parrot::Test tests => 10;
+use Parrot::Test tests => 8;
 use Test::More;
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check inheritance' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaThread"
@@ -48,27 +48,7 @@ CODE
 1
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check interface");
-.sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaThread"
-    .local pmc pmc1
-    pmc1 = new $I0
-    .local int bool1
-    bool1 = does pmc1, "sub"
-    print bool1
-    print "\n"
-    bool1 = does pmc1, "no_interface"
-    print bool1
-    print "\n"
-    end
-.end
-CODE
-1
-0
-OUTPUT
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "check name");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check name' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaThread"
@@ -88,7 +68,7 @@ thread
 thread
 OUTPUT
 
-pir_output_like(<< 'CODE', << 'OUTPUT', "check get_string");
+pir_output_like( << 'CODE', << 'OUTPUT', 'check get_string' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaThread"
@@ -102,7 +82,7 @@ CODE
 /thread: [0-9A-Fa-f]{8}/
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check get_bool");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check get_bool' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaThread"
@@ -117,10 +97,6 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check get_bool");
     bool1 = istrue pmc1
     print bool1
     print "\n"
-#    .local string str1
-#    str1 = classname pmc1
-#    print str1
-#    print "\n"
     end
 .end
 .sub f1
@@ -132,7 +108,7 @@ CODE
 1
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check logical_not");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check logical_not' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaThread"
@@ -155,17 +131,12 @@ false
 boolean
 OUTPUT
 
-TODO: {
-local $TODO = "not implemented.";
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL' );
 .HLL "Lua", "lua_group"
 .sub _main
-    .local pmc pmc1
-    pmc1 = new .LuaThread
-#    .const .LuaThread F1 = "f1"
     .const .Sub F1 = "f1"
-    pmc1 = F1
+    .local pmc pmc1
+    pmc1 = new .LuaThread, F1
     .local int bool1
     bool1 = isa pmc1, "LuaThread"
     print bool1
@@ -180,27 +151,7 @@ CODE
 1
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL (autoboxing)");
-.HLL "Lua", "lua_group"
-.sub _main
-    .local pmc pmc1
-    pmc1 = test()
-    .local int bool1
-    bool1 = isa pmc1, "LuaThread"
-    print bool1
-    print "\n"
-.end
-.sub test
-    .const .Sub T = "test"
-    .return (T)
-.end
-CODE
-1
-OUTPUT
-
-}
-
-pir_output_like(<< 'CODE', << 'OUTPUT', "check tostring");
+pir_output_like( << 'CODE', << 'OUTPUT', 'check tostring' );
 .HLL "Lua", "lua_group"
 .sub _main
     .local pmc pmc1
@@ -218,7 +169,7 @@ CODE
 /thread: [0-9A-Fa-f]{8}\nthread: [0-9A-Fa-f]{8}\nstring/
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check tonumber");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check tonumber' );
 .HLL "Lua", "lua_group"
 .sub _main
     .local pmc pmc1
@@ -234,3 +185,4 @@ CODE
 nil
 nil
 OUTPUT
+

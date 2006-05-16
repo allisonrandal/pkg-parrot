@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: spawnw.t 11477 2006-02-09 05:17:54Z particle $
+# $Id: spawnw.t 12162 2006-04-09 20:07:40Z bernhard $
 
 use strict;
 use warnings;
@@ -153,7 +153,7 @@ loop:
         branch loop
 end:
         $S0 = concat $S0, "}) / 100"
-        new args, .PerlArray
+        new args, .ResizablePMCArray
         push args, "perl"
         push args, "-e"
         push args, $S0

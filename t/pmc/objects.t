@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: objects.t 11992 2006-03-22 22:25:01Z bernhard $
+# $Id: objects.t 12615 2006-05-11 14:46:56Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 63;
+use Parrot::Test tests => 76;
 
 =head1 NAME
 
@@ -1128,7 +1128,7 @@ pasm_output_like(<<'CODE', <<'OUTPUT', "subclassing a non-existent class");
     print "Uh-oh...\n"
     end
 CODE
-/Class 'Nemo' doesn't exist/
+/Class 'Character' doesn't exist/
 OUTPUT
 # '
 pasm_output_like(<<'CODE', <<'OUTPUT', "anon. subclass of non-existent class");
@@ -1953,4 +1953,251 @@ ok 1
 ok 2
 OUTPUT
     
-    
+pasm_output_is(<<'CODE', <<'OUTPUT', "newclass [] parsing)");
+    newclass P0, ['Foo';'Bar']
+    print "ok\n"
+    end
+CODE
+ok
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "verfiy namespace types");
+    newclass P0, ['Foo';'Bar']
+    getinterp P0
+    .include "iglobals.pasm"
+    set P1, P0[.IGLOBALS_CLASSNAME_HASH]
+    typeof S0, P1
+    print S0
+    print "\n"
+    set P2, P1['Foo']
+    typeof S0, P2
+    print S0
+    print "\n"
+    end
+CODE
+NameSpace
+NameSpace
+OUTPUT
+
+pasm_output_like(<<'CODE', <<'OUTPUT', "verfiy data type");
+    newclass P0, ['Foo';'Bar']
+    getinterp P0
+    .include "iglobals.pasm"
+    set P1, P0[.IGLOBALS_CLASSNAME_HASH]
+    set P2, P1['Foo']
+    set P3, P2['Bar']
+    print P3
+    print "\n"
+    end
+CODE
+/\d+/
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "new keyed");
+.sub main :main
+    .local pmc cl, o
+    cl = newclass ['Foo';'Bar']
+    o = new  ['Foo';'Bar']
+    print "ok\n"
+.end
+.namespace ['Foo';'Bar']
+.sub __init :method
+    print "__init\n"
+.end
+CODE
+__init
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "new keyed 2");
+.sub main :main
+    .local pmc c1, c2, o1, o2
+    c1 = newclass ['Foo';'Bar']
+    c2 = newclass ['Foo';'Baz']
+    o1 = new      ['Foo';'Bar']
+    o2 = new      ['Foo';'Baz']
+    print "ok\n"
+.end
+.namespace ['Foo';'Bar']
+.sub __init :method
+    print "__init Bar\n"
+.end
+.namespace ['Foo';'Baz']
+.sub __init :method
+    print "__init Baz\n"
+.end
+
+CODE
+__init Bar
+__init Baz
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "new keyed 3");
+.sub main :main
+    .local pmc c1, c2, c3, o1, o2, o3
+    c1 = newclass ['Foo';'Bar']
+    c2 = newclass ['Foo';'Baz']
+    c3 = newclass 'Foo'
+    o1 = new      ['Foo';'Bar']
+    o2 = new      ['Foo';'Baz']
+    o3 = new      'Foo'
+    print "ok\n"
+.end
+.namespace ['Foo';'Bar']
+.sub __init :method
+    print "__init Bar\n"
+.end
+.namespace ['Foo';'Baz']
+.sub __init :method
+    print "__init Baz\n"
+.end
+
+.namespace ['Foo']
+.sub __init :method
+    print "__init Foo\n"
+.end
+CODE
+__init Bar
+__init Baz
+__init Foo
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "subclass keyed");
+.sub main :main
+    .local pmc base, o1, o2
+    base = subclass 'Hash', ['Perl6'; 'PAST'; 'Node']
+    addattribute base, '$.source'                  # original source
+    addattribute base, '$.pos'                     # offset position
+
+    $P0 = subclass base, ['Perl6'; 'PAST'; 'Sub']
+    $P0 = subclass base, ['Perl6'; 'PAST'; 'Stmt']
+    print "ok 1\n"
+
+    o1 = new   ['Perl6'; 'PAST'; 'Sub']
+    o2 = new   ['Perl6'; 'PAST'; 'Stmt']
+    print "ok 2\n"
+.end
+.namespace ['Perl6'; 'PAST'; 'Stmt']
+.sub __init :method
+    print "__init Stmt\n"
+.end
+.namespace ['Perl6'; 'PAST'; 'Sub']
+.sub __init :method
+    print "__init Sub\n"
+.end
+CODE
+ok 1
+__init Sub
+__init Stmt
+ok 2
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "class name");
+.sub main :main
+    .local pmc base, o1, o2
+    base = subclass 'Hash', ['Perl6'; 'PAST'; 'Node']
+    $S0 = classname base
+    print $S0
+    print "\n"
+.end
+CODE
+Perl6;PAST;Node
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "getclass");
+.sub main :main
+    .local pmc base, o1, o2
+    base = subclass 'Hash', ['Perl6'; 'PAST'; 'Node']
+    $P0 = getclass ['Perl6'; 'PAST'; 'Node']
+    $S0 = classname $P0
+    print $S0
+    print "\n"
+.end
+CODE
+Perl6;PAST;Node
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "isa (#39045)");
+.sub main :main
+    .local pmc base, o1, o2
+    base = subclass 'Hash', ['Perl6'; 'PAST'; 'Node']
+    $P0 = new [ 'Perl6'; 'PAST'; 'Node' ]
+    $I0 = isa $P0, [ 'Perl6'; 'PAST'; 'Node']
+    print $I0
+    $I0 = isa $P0, 'Hash'
+    print $I0
+    $I0 = isa $P0, 'Perl6'
+    print $I0
+    print "\n"
+.end
+CODE
+110
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "new nested ordering", todo => 'awaiting fix');
+.sub main :main
+    .local pmc c1, c2
+    c1 = newclass ['Foo']
+    c2 = newclass ['Foo';'Baz']
+    print "ok\n"
+.end
+.namespace ['Foo']
+.sub __init :method
+    print "__init Foo\n"
+.end
+.namespace ['Foo';'Bar']
+.sub __init :method
+	print "__init Bar\n"
+.end
+CODE
+__init Foo
+__init Bar
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "vtable override once removed (#39056)", todo=>'rt #39056');
+.sub main :main
+    .local pmc base
+    $P0 = getclass 'Integer'
+    base = subclass $P0, 'Foo'          # create subclass 'Foo'
+    addattribute base, '@!capt'
+
+    $P0 = subclass 'Foo', 'Bar'         # create subclass 'Bar'
+    $P1 = new 'Bar'                     # create an instance of 'Bar'
+
+    $S1 = $P1                           # get its string representation
+    print $S1                           # display it
+    print "\n"
+.end
+
+.namespace [ 'Bar' ]
+
+.sub '__get_string' :method
+    $S0 = 'ok bar'
+    .return ($S0)
+.end
+CODE
+ok bar
+OUTPUT
+
+
+pir_output_is(<<'CODE', <<'OUTPUT', "super __init called twice (#39081)");
+.sub main :main
+    $P0 = newclass 'Foo'
+    $P1 = subclass $P0, 'Bar'
+
+    $P2 = new 'Bar'
+.end
+
+.namespace [ 'Foo' ]
+
+.sub '__init' :method
+    say "foo constructor"
+    .return ()
+.end
+CODE
+foo constructor
+OUTPUT
+

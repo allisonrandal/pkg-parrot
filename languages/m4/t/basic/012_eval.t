@@ -1,14 +1,16 @@
-# $Id: 012_eval.t 9723 2005-11-02 20:15:57Z bernhard $
+# $Id: 012_eval.t 12273 2006-04-16 10:39:21Z bernhard $
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../../lib", "$FindBin::Bin/../../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib m4/lib );
 
 use Parrot::Config;
-use Test::More tests => 1; 
+use Parrot::Test tests => 1; 
+use Test::More;
 
 my $real_out;
-my $parrot    = "cd .. && .$PConfig{slash}parrot$PConfig{exe}";
+my $path_to_parrot = Parrot::Test::path_to_parrot();
+my $parrot         = "cd $path_to_parrot && .$PConfig{slash}parrot$PConfig{exe}";
 
 $real_out     = `$parrot languages/m4/examples/eval.pir 2>&1`; 
 is( $real_out, << 'END_OUT', 'single expression' );

@@ -1,5 +1,5 @@
 /*
- * main.c
+ * $Id: main.c 12672 2006-05-14 15:43:40Z leo $
  *
  * Intermediate Code Compiler for Parrot.
  *
@@ -22,7 +22,7 @@
 #include "pbc.h"
 #include "parser.h"
 
-#define IMCC_VERSION "0.4.3"
+#define IMCC_VERSION "0.4.4"
 
 static int load_pbc, run_pbc, write_pbc, pre_process, pasm_file;
 static char optimizer_opt[20];
@@ -486,15 +486,11 @@ main(int argc, char * argv[])
     int obj_file, ast_file = 0;
     char *sourcefile;
     const char *output_file;
-
     Interp *interp;
 
     Parrot_set_config_hash();
 
     interp = Parrot_new(NULL);
-
-
-    Parrot_init(interp);
 
     Parrot_block_DOD(interp);
     Parrot_block_GC(interp);

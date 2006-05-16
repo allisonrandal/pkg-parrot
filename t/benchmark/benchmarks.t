@@ -1,10 +1,10 @@
-#! perl
 # Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: benchmarks.t 12067 2006-03-28 20:17:11Z bernhard $
+# $Id: benchmarks.t 12177 2006-04-11 19:56:05Z bernhard $
 
 use strict;
 use warnings;
 use lib qw( lib . ../lib ../../lib );
+
 use Parrot::Test;
 use Test::More;
 
@@ -26,9 +26,9 @@ Called by 'make benchmark_tests'.
 # Expected output from scripts in 'examples/benchmarks'.
 # The expected out is needed for checking results with pir_output_is() and pir_output_like(). 
 my %outputs = (
-    q{addit.pir} => qq(21001097.970000\n),
+    q{addit.pir}  => qq(2.10011e+07\n),
     q{addit.pasm} => qq(21001097.970000\n),
-    q{addit2.pir} => qq(21001097.970000\n),
+    q{addit2.pir} => qq(2.10011e+07\n),
     q{array_access.pir} => qr/
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
@@ -53,10 +53,6 @@ FixedStringArray:\s\d+\.\d+s\n
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
 IntList:\s\d+\.\d+s\n
-\n
-1\s\*\s1000\s=\s1000\n
-100\s\*\s1000\s=\s100000\n
-PerlArray:\s\d+\.\d+s\n
 \n
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
@@ -94,7 +90,7 @@ SArray:\s\d+\.\d+s\n
         freeze\stime\s\d+\.\d+\n
         \s\sthaw\stime\s\d+\.\d+\n
         Image\slen\s\d+\n
-        PerlArray\s100000\n$/x,
+        ResizablePMCArray\s100000\n$/x,
     q{gc_alloc_new.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
         A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n

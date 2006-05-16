@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: scalar.pmc 11613 2006-02-17 02:40:57Z particle $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: scalar.pmc 12114 2006-04-04 22:50:48Z bernhard $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ according to the type of C<*value>.
             /* doesn't morph */
             DYNSELF.morph(value->vtable->base_type);
         }
-        if (value->vtable->base_type == enum_class_PerlUndef ||
+        if (value->vtable->base_type == enum_class_Undef ||
                 value->vtable->base_type == enum_class_Undef) {
             DYNSELF.morph(value->vtable->base_type);
             return;

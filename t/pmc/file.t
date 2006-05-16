@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: file.t 11307 2006-01-22 16:37:38Z ambs $
+# $Id: file.t 12425 2006-04-25 16:05:55Z chromatic $
 
 use strict;
 use warnings;
@@ -84,7 +84,7 @@ pir_output_is(<<'CODE', <<"OUT", "Test is_file");
 
         $S1 = "xpto"
         $I1 = $P1."is_file"($S1)
-        $I1 = !I1
+        $I1 = !$I1
 
         if $I1 goto ok1
         print "not "

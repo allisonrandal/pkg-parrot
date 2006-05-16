@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: dod.c 12045 2006-03-27 16:21:22Z leo $
+$Id: dod.c 12592 2006-05-10 04:55:00Z petdance $
 
 =head1 NAME
 
@@ -992,19 +992,15 @@ trace_mem_block(Interp *interpreter,
 
 /*
 
-=item C<static void Parrot_dod_clear_live_bits(Parrot_Interp interpreter)>
-
+FUNCDOC:
 Run through all PMC arenas and clear live bits.
-
-=cut
 
 */
 
-void Parrot_dod_clear_live_bits(Parrot_Interp interpreter);
 void
 Parrot_dod_clear_live_bits(Parrot_Interp interpreter)
 {
-    struct Small_Object_Pool *pool = interpreter->arena_base->pmc_pool;
+    struct Small_Object_Pool * const pool = interpreter->arena_base->pmc_pool;
     struct Small_Object_Arena *arena;
     UINTVAL i;
 #if !ARENA_DOD_FLAGS

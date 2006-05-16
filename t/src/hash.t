@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hash.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: hash.t 12291 2006-04-17 16:11:54Z leo $
 
 use strict;
 use warnings;
@@ -36,10 +36,7 @@ int exit_value = 0;
 int main(int argc, char* argv[])
 {
     Parrot_Interp interpreter = Parrot_new(NULL);
-    if (!interpreter) {
-        return 1;
-    }
-    Parrot_init(interpreter);
+    Parrot_init_stacktop(interpreter, &interpreter);
 
     Parrot_run_native(interpreter, the_test);
 

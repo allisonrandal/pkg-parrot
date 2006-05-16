@@ -1,12 +1,13 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: namespace.t 11907 2006-03-15 17:07:00Z leo $
+# $Id: namespace.t 12352 2006-04-18 20:03:43Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 23;
+use Parrot::Test tests => 27;
+use Parrot::Config;
 
 =head1 NAME
 
@@ -326,8 +327,6 @@ baz
 ::parrot::Foo::Bar
 OUTPUT
 
-SKIP: {
-	skip("disabled class method", 1);
 pir_output_is(<<'CODE', <<'OUTPUT', "segv in get_name");
 .namespace ['pugs';'main']
 .sub 'main' :main
@@ -340,9 +339,6 @@ pir_output_is(<<'CODE', <<'OUTPUT', "segv in get_name");
 CODE
 ok
 OUTPUT
-
-}
-
 
 pir_output_is(<<'CODE', <<'OUT', "latin1 namespace, global");
 .namespace [ iso-8859-1:"François" ]
@@ -382,10 +378,14 @@ pir_output_is(<<'CODE', <<'OUTPUT', "verify root and parrot namespaces");
 # name may change though
 .sub main :main
     .include "interpinfo.pasm"
+    # root namespace
     $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
     typeof $S0, $P0
     print $S0
     print "\n"
+    print $P0
+    print "\n"
+    # parrot namespace
     $P1 = $P0["parrot"]
     print $P1
     print "\n"
@@ -395,6 +395,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "verify root and parrot namespaces");
 .end
 CODE
 NameSpace
+
 parrot
 NameSpace
 OUTPUT
@@ -494,3 +495,148 @@ pir_output_is(<<'CODE', <<'OUTPUT', "check parrot ns");
 CODE
 ok
 OUTPUT
+
+my $temp_a = "temp_a";
+my $temp_b = "temp_b";
+
+END {
+    unlink("$temp_a.pir", "$temp_a.pbc", "$temp_b.pir", "$temp_b.pbc");
+};
+
+open S, ">$temp_a.pir" or die "Can't write $temp_a.pir";
+print S <<'EOF';
+.HLL "Foo", ""
+.namespace ["Foo_A"]
+.sub loada :load
+    $P0 = find_global "Foo_A", "A"
+    print "ok 1\n"
+    load_bytecode "temp_b.pbc"
+.end
+
+.sub A
+.end
+EOF
+close S;
+
+open S, ">$temp_b.pir" or die "Can't write $temp_b.pir";
+print S <<'EOF';
+.namespace ["Foo_B"]
+.sub loadb :load
+    $P0 = find_global "Foo_B", "B"
+    print "ok 2\n"
+.end
+
+.sub B
+.end
+EOF
+
+close S;
+
+system(".$PConfig{slash}parrot$PConfig{exe} -o $temp_a.pbc $temp_a.pir");
+system(".$PConfig{slash}parrot$PConfig{exe} -o $temp_b.pbc $temp_b.pir");
+
+pir_output_is(<<'CODE', <<'OUTPUT', "HLL and load_bytecode - #38888");
+.sub main :main
+    load_bytecode "temp_a.pbc"
+    print "ok 3\n"
+.end
+CODE
+ok 1
+ok 2
+ok 3
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "HLL and vars");
+# initial storage of _tcl global variable...
+
+.HLL '_Tcl', ''
+
+.include 'interpinfo.pasm'
+
+.sub huh 
+  $P0 = new .Integer
+  $P0 = 3.14
+  store_global '$variable', $P0
+.end
+
+# start running HLL language
+.HLL 'Tcl', ''
+
+.sub foo :main
+  huh()
+  $P1 = interpinfo .INTERPINFO_NAMESPACE_ROOT
+  $P2 = $P1['_tcl']
+  $P3 = $P2['$variable'] 
+  print $P3
+  print "\n"
+.end
+CODE
+3.14
+OUTPUT
+
+{
+my $temp_a = "temp_a.pir";
+
+END {
+    unlink($temp_a);
+};
+
+open S, '>', $temp_a or die "Can't write $temp_a";
+print S <<'EOF';
+.HLL 'eek', ''
+
+.sub foo :load :anon
+  $P1 = new .String
+  $P1 = "3.14\n"
+  store_global '$whee', $P1
+.end
+
+.sub bark
+  $P0 = find_global '$whee'
+  print $P0
+.end
+EOF
+close S;
+
+pir_output_is(<<'CODE', <<'OUTPUT', ":anon subs still get default namespace");
+.HLL 'cromulent', ''
+
+.sub what
+   load_bytecode 'temp_a.pir'
+  .include 'interpinfo.pasm'
+  .local pmc var
+   var = interpinfo .INTERPINFO_NAMESPACE_ROOT
+   var = var['eek']
+   var = var['bark']
+
+    var()
+.end
+CODE
+3.14
+OUTPUT
+}
+
+SKIP: {
+  skip('not implemented', 1);
+pir_output_is(<<'CODE', <<'OUTPUT', "find_global should find from .HLL namespace, not current .namespace");
+.HLL 'bork', ''
+.namespace [ '' ]
+
+.sub a :immediate
+  $P1 = new .String
+  $P1 = "ok\n"
+  store_global "eek", $P1
+.end
+
+.namespace [ 'sub_namespace' ]
+
+.sub whee :main
+
+$P1 = find_global 'eek'
+print $P1
+.end
+
+CODE
+ok
+OUTPUT
+}

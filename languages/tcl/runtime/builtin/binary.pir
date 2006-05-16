@@ -1,4 +1,5 @@
-.namespace [ "Tcl" ]
+.HLL 'Tcl', 'tcl_group'
+.namespace [ '' ]
 
 .sub "&binary"
   .param pmc argv :slurpy
@@ -13,9 +14,8 @@
   .local pmc subcommand_proc
   null subcommand_proc
 
-  push_eh bad_args
-    subcommand_proc = find_global "_Tcl\0builtins\0binary", subcommand_name
-  clear_eh
+  .get_from_HLL(subcommand_proc,'_tcl'; 'helpers'; 'binary', subcommand_name)
+  if_null subcommand_proc, bad_args
   .return subcommand_proc(argv)
 
 bad_args:
@@ -30,7 +30,8 @@ no_args:
 
 .end
 
-.namespace [ "_Tcl\0builtins\0binary" ]
+.HLL '_Tcl',''
+.namespace [ 'helpers'; 'binary' ]
 
 .macro getBinaryArg ()
   if argvIndex == argc goto out_of_args
@@ -48,7 +49,7 @@ no_args:
   unless argc goto bad_args
 
   .local pmc binary_types
-  binary_types = find_global '_Tcl', 'binary_types'
+  binary_types = find_global 'binary_types'
 
   .local string outputString,formatString
   outputString = binary:""

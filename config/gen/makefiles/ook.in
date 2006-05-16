@@ -1,4 +1,4 @@
-# $Id: ook.in 11115 2006-01-12 04:06:05Z jhoblitt $
+# $Id: ook.in 12378 2006-04-19 18:02:12Z bernhard $
 
 # Makefile for languages/ook
 
@@ -28,7 +28,7 @@ help :
 all: build
 
 test: build
-	cd .. && $(PERL) ook/t/harness
+	$(PERL) -I../../lib t/harness
 
 build: ook.pasm
 	$(PARROT) -o ook.pbc ook.pasm

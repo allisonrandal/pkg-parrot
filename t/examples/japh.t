@@ -1,5 +1,5 @@
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: japh.t 12067 2006-03-28 20:17:11Z bernhard $
+# $Id: japh.t 12614 2006-05-11 13:58:18Z pmichaud $
 
 use strict;
 use warnings;
@@ -38,7 +38,6 @@ Get the TODO JAPHs working or decide that they are not suitable for testing.
 my %todo = ( 1  => 'opcode "pack" is gone',
              2  => 'opcode "pack" is gone',
              4  => 'namespace has changed',
-             8  => 'works only on little endian',
              9  => 'P1 is no longer special',
              10 => 'core dump',
              11 => 'opcode "pack" is gone, other reasons',
@@ -49,6 +48,12 @@ my %todo = ( 1  => 'opcode "pack" is gone',
              16 => 'unknown reason',
              17 => 'unknown reason',
            );
+if ( $PConfig{bigendian} ) {
+    $todo{8} = 'works only on little endian';
+}
+if ( $PConfig{intvalsize} == 8) {
+    $todo{8} = 'works only with 32-bit integer values';
+}
 
 # run all tests and tell about todoness
 foreach ( 1 .. 17 ) {

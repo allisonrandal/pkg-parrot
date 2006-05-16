@@ -42,7 +42,6 @@ CODE
 -260
 OUT
 
-
 language_output_is( 'lua', <<'CODE', <<'OUT', 'object' );
 Account = {balance = 0}
 
@@ -56,7 +55,6 @@ print(a.balance)
 CODE
 -100
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'object' );
 Account = { balance = 0,
@@ -77,7 +75,6 @@ CODE
 200
 100
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'classe' );
 Account = {balance = 0}
@@ -110,7 +107,6 @@ CODE
 0
 200
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'inheritance' );
 Account = {balance = 0}
@@ -168,7 +164,7 @@ CODE
 OUT
 
 TODO: {
-local $TODO = "fix me";
+local $TODO = 'fix me';
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'multiple inheritance' );
 -- look up for 'k' in list of tables 'plist'
@@ -181,6 +177,7 @@ end
 
 function createClass (...)
     local c = {}  -- new class
+    local arg = {...}
 
     -- class will search for each method in the list of its
     -- parents ('arg' is the list of parents)
@@ -257,7 +254,6 @@ print(acc1.getBalance())
 CODE
 60
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'single-method approach' );
 function newObject (value)

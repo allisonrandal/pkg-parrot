@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: exit.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: exit.t 12217 2006-04-14 10:59:04Z bernhard $
 
 use strict;
 use warnings;
@@ -91,7 +91,6 @@ int main(int argc, char* argv[])
     if (!interpreter) {
         return 1;
     }
-    Parrot_init(interpreter);
     Parrot_on_exit(ex1, 0);
     Parrot_on_exit(ex2, 0);
     Parrot_on_exit(ex3, interpreter);

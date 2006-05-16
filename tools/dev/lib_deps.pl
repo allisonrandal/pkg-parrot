@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: lib_deps.pl 5133 2004-01-20 19:01:43Z mikescott $
+# $Id: lib_deps.pl 12105 2006-04-03 20:54:04Z particle $
 ################################################################################
 
 =head1 NAME
@@ -43,6 +43,8 @@ magical and therefore less conclusive.
 
 use strict;
 use File::Find;
+use File::Spec;
+
 
 my %defined_in;
 my %referenced_in;
@@ -87,11 +89,12 @@ sub do_source {
 
     # note: need to run this a second time so the database is built.
     # should just use the build process to do it the first time.
+    my $devnull = File::Spec->devnull;
     my $cmd = "cxref -raw -Iinclude -xref @files";
     print "Running cxref (pass 1)\n";
-    system("$cmd > /dev/null 2>/dev/null");
+    system("$cmd > $devnull 2>$devnull");
     print "Running cxref (pass 2)\n";
-    open(F, "$cmd 2>/dev/null|")
+    open(F, "$cmd 2>$devnull|")
       || die "Can't run $cmd.\n";
 
     my %external_calls;

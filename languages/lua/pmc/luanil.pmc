@@ -1,6 +1,6 @@
 /*
 Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-$Id: luanil.pmc 11832 2006-03-09 07:43:00Z fperrad $
+$Id: luanil.pmc 12417 2006-04-25 06:39:43Z fperrad $
 
 =head1 NAME
 
@@ -8,8 +8,12 @@ pmc/luanil.pmc - Lua Nil
 
 =head1 DESCRIPTION
 
-C<LuaNil> provides a class with the behaviour of the Lua C<Nil> value.
-Implementation is based on the Undef PMC. LuaNil is no longer a singleton;
+C<LuaNil> extends C<LuaBase> to provide a class with the behaviour of
+the Lua C<Nil> type.
+
+=for rational
+
+LuaNil is no longer a singleton;
 this would be a problem, as all uninitialized values in Lua are LuaNil.
 If some value is assigned, the LuaNil should morph into the correct type,
 and so a new PMC is constructed anyway. Therefore, we may as well create
@@ -47,15 +51,6 @@ pmclass LuaNil
             string_representation = const_string(INTERP, "nil");
             dynpmc_LuaBoolean = pmc_type(INTERP,
               string_from_const_cstring(INTERP, "LuaBoolean", 0));
-
-            /* namespace hack */
-            meth = Parrot_find_global(INTERP,
-                const_string(INTERP, "LuaNil"),
-                const_string(INTERP, "rawequal"));
-            Parrot_store_global(INTERP,
-                const_string(INTERP, "nil"),
-                const_string(INTERP, "rawequal"),
-                meth);
         }
     }
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: ncurses_life.pir 11319 2006-01-23 12:26:25Z leo $
+# $Id: ncurses_life.pir 12193 2006-04-12 20:04:06Z bernhard $
 
 =head1 NAME
 
@@ -634,11 +634,11 @@ f1:
 not_P:
 	if $S0 != "A" goto not_A	# absolute
 	format = ABS
-	points = new ResizableIntegerArray
+	points = new .ResizableIntegerArray
 not_A:
 	if $S0 != "R" goto not_R	# relative
 	format = REL
-	points = new ResizableIntegerArray
+	points = new .ResizableIntegerArray
 not_R:
 	goto loop
 

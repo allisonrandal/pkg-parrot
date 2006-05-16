@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pmc.c 11975 2006-03-21 22:23:53Z bernhard $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: pmc.c 12615 2006-05-11 14:46:56Z leo $
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ any other necessary initialization.
 PMC *
 pmc_new(Interp *interpreter, INTVAL base_type)
 {
-    PMC *pmc = pmc_new_noinit(interpreter, base_type);
+    PMC * const pmc = pmc_new_noinit(interpreter, base_type);
     VTABLE_init(interpreter, pmc);
     return pmc;
 }
@@ -127,7 +127,7 @@ pmc_reuse(Interp *interpreter, PMC *pmc, INTVAL new_type,
             /* if the PMC has a PMC_EXT structure,
              * return it to the pool/arena
              */
-            struct Small_Object_Pool *ext_pool =
+            struct Small_Object_Pool * const ext_pool =
                 interpreter->arena_base->pmc_ext_pool;
             ext_pool->add_free_object(interpreter, ext_pool, pmc->pmc_ext);
         }
@@ -153,8 +153,7 @@ pmc_reuse(Interp *interpreter, PMC *pmc, INTVAL new_type,
 /*
 
 =item C<static PMC*
-get_new_pmc_header(Interp *interpreter, INTVAL base_type,
-    UINTVAL flags)>
+get_new_pmc_header(Interp *interpreter, INTVAL base_type, UINTVAL flags)>
 
 Gets a new PMC header.
 
@@ -163,8 +162,7 @@ Gets a new PMC header.
 */
 
 static PMC*
-get_new_pmc_header(Interp *interpreter, INTVAL base_type,
-    UINTVAL flags)
+get_new_pmc_header(Interp *interpreter, INTVAL base_type, UINTVAL flags)
 {
     PMC *pmc;
     VTABLE *vtable = interpreter->vtables[base_type];
@@ -260,8 +258,8 @@ initialization for continuations.
 PMC *
 pmc_new_noinit(Interp *interpreter, INTVAL base_type)
 {
-    PMC *pmc;
-    pmc = get_new_pmc_header(interpreter, base_type, 0);
+    PMC * const pmc = get_new_pmc_header(interpreter, base_type, 0);
+
     return pmc;
 }
 
@@ -279,7 +277,7 @@ Creates a new constant PMC of type C<base_type>.
 PMC *
 constant_pmc_new_noinit(Interp *interpreter, INTVAL base_type)
 {
-    PMC *pmc = get_new_pmc_header(interpreter, base_type,
+    PMC * const pmc = get_new_pmc_header(interpreter, base_type,
             PObj_constant_FLAG);
     return pmc;
 }
@@ -298,7 +296,7 @@ Creates a new constant PMC of type C<base_type>, the call C<init>.
 PMC *
 constant_pmc_new(Interp *interpreter, INTVAL base_type)
 {
-    PMC *pmc = get_new_pmc_header(interpreter, base_type,
+    PMC * const pmc = get_new_pmc_header(interpreter, base_type,
             PObj_constant_FLAG);
     VTABLE_init(interpreter, pmc);
     return pmc;
@@ -318,7 +316,7 @@ As C<pmc_new()>, but passes C<init> to the PMC's C<init_pmc()> method.
 PMC *
 pmc_new_init(Interp *interpreter, INTVAL base_type, PMC *init)
 {
-    PMC *pmc = pmc_new_noinit(interpreter, base_type);
+    PMC * const pmc = pmc_new_noinit(interpreter, base_type);
 
     VTABLE_init_pmc(interpreter, pmc, init);
 
@@ -328,8 +326,7 @@ pmc_new_init(Interp *interpreter, INTVAL base_type, PMC *init)
 /*
 
 =item C<PMC *
-constant_pmc_new_init(Interp *interpreter, INTVAL base_type,
-        PMC *init)>
+constant_pmc_new_init(Interp *interpreter, INTVAL base_type, PMC *init)>
 
 As C<constant_pmc_new>, but passes C<init> to the PMC's C<init_pmc> method.
 
@@ -338,10 +335,9 @@ As C<constant_pmc_new>, but passes C<init> to the PMC's C<init_pmc> method.
 */
 
 PMC *
-constant_pmc_new_init(Interp *interpreter, INTVAL base_type,
-        PMC *init)
+constant_pmc_new_init(Interp *interpreter, INTVAL base_type, PMC *init)
 {
-    PMC *pmc = get_new_pmc_header(interpreter, base_type, 1);
+    PMC * const pmc = get_new_pmc_header(interpreter, base_type, 1);
     VTABLE_init_pmc(interpreter, pmc, init);
     return pmc;
 }
@@ -398,36 +394,49 @@ Returns the PMC type for C<name>.
 INTVAL
 pmc_type(Interp* interpreter, STRING *name)
 {
-    HashBucket *bucket;
-    PMC *classname_hash = interpreter->class_hash;
+    PMC * const classname_hash = interpreter->class_hash;
+    PMC *item;
 
-    bucket = hash_get_bucket(interpreter, PMC_struct_val(classname_hash), name);
-    if (bucket)
-        return PMC_int_val((PMC*) bucket->value);
+    item = VTABLE_get_pointer_keyed_str(interpreter, classname_hash, name); 
+    /* nested namespace with same name */
+    if (item->vtable->base_type == enum_class_NameSpace)
+        return 0;
+    if (!PMC_IS_NULL(item))
+        return PMC_int_val((PMC*) item);
     return Parrot_get_datatype_enum(interpreter, name);
 
+}
+
+INTVAL
+pmc_type_p(Interp* interpreter, PMC *name)
+{
+    PMC * const classname_hash = interpreter->class_hash;
+    PMC *item;
+
+    item = VTABLE_get_pointer_keyed(interpreter, classname_hash, name); 
+    if (!PMC_IS_NULL(item))
+        return PMC_int_val((PMC*) item);
+    return 0;
 }
 
 static PMC*
 create_class_pmc(Interp *interpreter, INTVAL type)
 {
-    PMC *class;
     /*
      * class interface - a PMC is its own class
      * put an instance of this PMC into class
      *
      * create a constant PMC
      */
-    class = get_new_pmc_header(interpreter, type, PObj_constant_FLAG);
+    PMC * const class = get_new_pmc_header(interpreter, type, PObj_constant_FLAG);
     if (PObj_is_PMC_EXT_TEST(class)) {
         /* if the PMC has a PMC_EXT structure,
          * return it to the pool/arena
          * we don't need it - basically only the vtable is important
          */
-        struct Small_Object_Pool *ext_pool =
+        struct Small_Object_Pool * const ext_pool =
             interpreter->arena_base->pmc_ext_pool;
-        ext_pool->add_free_object(interpreter, ext_pool,
-                class->pmc_ext);
+        ext_pool->add_free_object(interpreter, ext_pool, class->pmc_ext);
     }
     class->pmc_ext = NULL;
     DOD_flag_CLEAR(is_special_PMC, class);
@@ -454,7 +463,7 @@ Parrot_create_mro(Interp *interpreter, INTVAL type)
 {
     VTABLE *vtable;
     STRING *class_name, *isa;
-    INTVAL pos, len, parent_type, total;
+    INTVAL pos, parent_type, total;
     PMC *class, *mro;
     PMC *ns;
 
@@ -468,7 +477,7 @@ Parrot_create_mro(Interp *interpreter, INTVAL type)
     isa = vtable->isa_str;
     total = (INTVAL)string_length(interpreter, isa);
     for (pos = 0; ;) {
-        len = string_length(interpreter, class_name);
+        INTVAL len = string_length(interpreter, class_name);
         pos += len + 1;
         parent_type = pmc_type(interpreter, class_name);
         if (!parent_type)   /* abstract classes don't have a vtable */

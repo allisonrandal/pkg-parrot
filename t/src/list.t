@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: list.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: list.t 12217 2006-04-14 10:59:04Z bernhard $
 
 use strict;
 use warnings;
@@ -40,7 +40,6 @@ int main(int argc, char* argv[])
     if (!interpreter) {
         return 1;
     }
-    Parrot_init(interpreter);
 
     Parrot_run_native(interpreter, the_test);
 
