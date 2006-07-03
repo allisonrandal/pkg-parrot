@@ -1,4 +1,4 @@
-# $Id: Combiner.pir 11756 2006-02-27 01:02:49Z chromatic $
+# $Id: Combiner.pir 12837 2006-05-30 13:47:57Z coke $
 
 =head1 TITLE
 
@@ -206,6 +206,6 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004, the Perl Foundation.
+Copyright (C) 2004, The Perl Foundation.
 
 =cut

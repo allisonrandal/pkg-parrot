@@ -3,11 +3,11 @@
 #
 # System ops.
 #
-# Copyright: 2003-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2003-2005, The Perl Foundation.
 # This program is free software. Its use is subject to the same
 # license as Parrot.
 #
-# $Id: sys.jako 12028 2006-03-26 04:31:23Z gregor $
+# $Id: sys.jako 12840 2006-05-30 15:08:05Z coke $
 #
 
 module sys

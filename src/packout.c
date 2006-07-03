@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2006 The Perl Foundation. All rights reserved.
+Copyright (C) 2001-2006, The Perl Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packout.c 12140 2006-04-08 14:33:01Z petdance $
+$Id: packout.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

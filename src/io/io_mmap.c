@@ -1,6 +1,6 @@
 /*
-Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: io_mmap.c 10933 2006-01-06 01:43:24Z particle $
+Copyright (C) 2005, The Perl Foundation.
+$Id: io_mmap.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

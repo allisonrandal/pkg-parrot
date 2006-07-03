@@ -1,4 +1,4 @@
-# $Id: dynoplibs.in 11903 2006-03-14 20:49:11Z bernhard $
+# $Id: dynoplibs.in 12755 2006-05-23 03:38:23Z mdiep $
 
 PERL = @perl@
 RM_F = @rm_f@
@@ -12,13 +12,13 @@ OPLIBS = \
   myops \
   dan
 
-BUILD = $(PERL) "@build_dir@@slash@tools@slash@build@slash@dynoplibs.pl"
+BUILD = $(PERL) @build_dir@@slash@tools@slash@build@slash@dynoplibs.pl
 
 all :
 	@$(BUILD) generate $(OPLIBS)
 	@$(BUILD) compile $(OPLIBS)
 	@$(BUILD) linklibs $(OPLIBS)
-	@$(BUILD) copy "--destination=$(RUNTIME_DIR)" $(OPLIBS)
+	@$(BUILD) copy --destination=$(RUNTIME_DIR) $(OPLIBS)
 
 test : all
 	 cd ..@slash@.. ; perl -Ilib t/harness t/dynoplibs/*.t

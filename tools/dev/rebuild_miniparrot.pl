@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: rebuild_miniparrot.pl 11248 2006-01-18 20:02:15Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: rebuild_miniparrot.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 NAME

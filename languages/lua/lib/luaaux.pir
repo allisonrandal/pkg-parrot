@@ -1,5 +1,5 @@
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: luaaux.pir 12002 2006-03-24 10:03:50Z fperrad $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: luaaux.pir 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

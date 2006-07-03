@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: mk_inno.pl 11146 2006-01-13 13:58:13Z fperrad $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: mk_inno.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 TITLE

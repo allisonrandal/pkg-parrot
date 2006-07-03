@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: retcontinuation.pmc 11709 2006-02-23 16:49:23Z leo $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: retcontinuation.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

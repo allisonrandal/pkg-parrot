@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_stdio.c 10462 2005-12-12 17:00:32Z particle $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: io_stdio.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

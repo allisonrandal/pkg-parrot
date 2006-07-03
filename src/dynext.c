@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: dynext.c 12219 2006-04-14 11:53:28Z bernhard $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: dynext.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

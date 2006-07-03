@@ -1,7 +1,7 @@
 /* pmc.h
- *  Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: pmc.h 12333 2006-04-18 13:40:26Z leo $
+ *     $Id: pmc.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:

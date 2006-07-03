@@ -1,6 +1,6 @@
 /*
-Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: bigint.pmc 12434 2006-04-26 13:27:42Z particle $
+Copyright (C) 2004, The Perl Foundation.
+$Id: bigint.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: compiler.pmc 11896 2006-03-14 12:19:16Z leo $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: compiler.pmc 12928 2006-06-12 19:33:05Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,6 @@ assembler/compilers.
 */
 
 #include "parrot/parrot.h"
-#include "parrot/interp_guts.h"
 
 pmclass Compiler extends NCI need_ext {
 

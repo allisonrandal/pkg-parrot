@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: tail.t 11801 2006-03-06 13:29:55Z leo $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: tail.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

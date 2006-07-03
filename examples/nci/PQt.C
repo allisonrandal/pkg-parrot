@@ -1,7 +1,7 @@
 /*
 
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: PQt.C 10406 2005-12-08 19:55:13Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: PQt.C 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

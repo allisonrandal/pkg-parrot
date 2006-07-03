@@ -1,11 +1,11 @@
 #
 # File.pm
 #
-# Copyright: 2003-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2003-2005, The Perl Foundation.
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: File.pm 10435 2005-12-10 23:33:03Z gregor $
+# $Id: File.pm 12840 2006-05-30 15:08:05Z coke $
 #
 
 use strict;

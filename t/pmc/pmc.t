@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: pmc.t 12175 2006-04-11 18:48:55Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: pmc.t 12922 2006-06-10 19:02:16Z rgrjr $
 
 use strict;
 use warnings;
@@ -78,18 +78,18 @@ starting
 ending
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "illegal min newpmc");
+pasm_output_like(<<'CODE', <<'OUTPUT', "illegal min newpmc");
 	new P0, 0
 	end
 CODE
-Illegal PMC enum (0) in new
+/Illegal PMC enum \(0\) in new/
 OUTPUT
 
-pasm_output_is(<<"CODE", <<"OUTPUT", "illegal max newpmc");
+pasm_output_like(<<"CODE", <<'OUTPUT', "illegal max newpmc");
 	new P0, $max_pmc
 	end
 CODE
-Illegal PMC enum ($max_pmc) in new
+/Illegal PMC enum \(\d+\) in new/
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', 'typeof');

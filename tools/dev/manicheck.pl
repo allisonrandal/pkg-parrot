@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: manicheck.pl 8619 2005-07-13 19:23:27Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: manicheck.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 NAME

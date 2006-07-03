@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: getopt_obj.t 12223 2006-04-14 13:13:50Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: getopt_obj.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

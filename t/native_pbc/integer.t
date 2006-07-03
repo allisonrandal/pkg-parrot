@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: integer.t 11992 2006-03-22 22:25:01Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: integer.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

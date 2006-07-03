@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: mk_manifests.pl 5133 2004-01-20 19:01:43Z mikescott $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: mk_manifests.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 TITLE

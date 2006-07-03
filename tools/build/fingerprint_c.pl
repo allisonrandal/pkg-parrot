@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: fingerprint_c.pl 10361 2005-12-05 23:09:12Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: fingerprint_c.pl 12825 2006-05-30 00:13:26Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ops2c.pl 12540 2006-05-07 04:27:54Z petdance $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: ops2c.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_create.c 12350 2006-04-18 17:54:42Z particle $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: inter_create.c 12932 2006-06-13 05:12:41Z petdance $
 
 =head1 NAME
 
@@ -65,7 +65,8 @@ Setup default compiler for PASM.
 
 */
 
-static void setup_default_compreg(Parrot_Interp interpreter)
+static void
+setup_default_compreg(Parrot_Interp interpreter)
 {
     STRING *pasm1 = string_from_cstring(interpreter, "PASM1", 0);
 

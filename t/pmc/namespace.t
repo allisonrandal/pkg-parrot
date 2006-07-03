@@ -1,12 +1,12 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: namespace.t 12352 2006-04-18 20:03:43Z coke $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: namespace.t 12953 2006-06-16 16:11:10Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 27;
+use Parrot::Test tests => 32;
 use Parrot::Config;
 
 =head1 NAME
@@ -153,6 +153,27 @@ pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz");
 CODE
 ok
 baz
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "find_global Foo::bazz not found");
+.sub 'main' :main
+    $P2 = find_global ["Foo"], "bazz"
+    $P2()
+    print "ok\n"
+.end
+CODE
+/Global 'bazz' not found/
+OUTPUT
+
+# [this used to behave differently from the previous case.]
+pir_output_like(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::bazz not found");
+.sub 'main' :main
+    $P2 = find_global ["Foo";"Bar"], "bazz"
+    $P2()
+    print "ok\n"
+.end
+CODE
+/Global 'bazz' not found/
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz hash");
@@ -324,7 +345,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "get namespace in Foo::Bar::baz");
 CODE
 ok
 baz
-::parrot::Foo::Bar
+parrot::Foo::Bar
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "segv in get_name");
@@ -415,11 +436,9 @@ pir_output_is(<<'CODE', <<'OUTPUT', "ns.name()");
     print $S0
     print "\n"
 .end
-# namespace root doesnt have a name
-# XXX should the root namespace be included?
 CODE
-3
-::parrot::Foo
+2
+parrot::Foo
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "get_namespace_p_p, getnamespace_p_kc");
@@ -452,13 +471,11 @@ pir_output_is(<<'CODE', <<'OUTPUT', "get_namespace_p_p, getnamespace_p_kc");
     print $S0
     print "\n"
 .end
-# namespace root doesnt have a name
-# XXX should the root namespace be included?
 CODE
-3
-::parrot::Foo
-3
-::parrot::Foo
+2
+parrot::Foo
+2
+parrot::Foo
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "Sub.get_namespace, get_namespace");
@@ -481,7 +498,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "Sub.get_namespace, get_namespace");
 .end
 CODE
 ok
-::parrot::Foo
+parrot::Foo
 Foo
 OUTPUT
 
@@ -616,16 +633,25 @@ CODE
 OUTPUT
 }
 
-SKIP: {
-  skip('not implemented', 1);
-pir_output_is(<<'CODE', <<'OUTPUT', "find_global should find from .HLL namespace, not current .namespace");
+
+# the test was skipped, the description says:
+# find_global should find from .HLL namespace, not current .namespace
+# but according to pdd21, {find,store}_global are relative to current
+
+SKIP:
+{
+    skip("immediate test, doesn't with -r (from .pbc)", 1)
+	if ( exists $ENV{TEST_PROG_ARGS} and $ENV{TEST_PROG_ARGS} =~ m/-r/ );
+
+pir_output_is(<<'CODE', <<'OUTPUT', "find_global in current");
 .HLL 'bork', ''
 .namespace [ '' ]
 
 .sub a :immediate
   $P1 = new .String
   $P1 = "ok\n"
-  store_global "eek", $P1
+  store_global 'sub_namespace', "eek", $P1
+## store_global "eek", $P1
 .end
 
 .namespace [ 'sub_namespace' ]
@@ -635,8 +661,74 @@ pir_output_is(<<'CODE', <<'OUTPUT', "find_global should find from .HLL namespace
 $P1 = find_global 'eek'
 print $P1
 .end
-
 CODE
 ok
 OUTPUT
 }
+
+open S, ">$temp_b.pir" or die "Can't write $temp_b.pir";
+print S <<'EOF';
+.HLL 'B', ''
+.sub b_foo
+    print "b_foo\n"
+.end
+EOF
+close S;
+
+pir_output_is(<<"CODE", <<'OUTPUT', "export_to");
+.HLL 'A', ''
+.sub main :main
+    a_foo()
+    load_bytecode "$temp_b.pir"
+    .local pmc nsr, nsa, nsb, ar
+    ar = new .ResizableStringArray
+    push ar, "b_foo"
+    .include "interpinfo.pasm"
+    nsr = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    nsa = nsr['a']
+    nsb = nsr['b']
+    nsb."export_to"(nsa, ar)
+    b_foo()
+.end
+
+.sub a_foo
+    print "a_foo\\n"
+.end
+CODE
+a_foo
+b_foo
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "get_parent");
+.sub main :main
+    .local pmc ns
+    ns = get_namespace ['parrot';'Foo']
+    ns = ns.'get_parent'()
+    print ns
+    print "\n"
+.end
+.namespace ['Foo']
+.sub dummy
+.end
+CODE
+parrot
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "find_global [''], \"print_ok\"");
+.namespace ['']
+
+.sub print_ok
+  print "ok\n"
+  .return()
+.end
+
+.namespace ['foo']
+
+.sub main :main
+  $P0 = find_global [''], 'print_ok'
+  $P0()
+  end
+.end
+CODE
+ok
+OUTPUT

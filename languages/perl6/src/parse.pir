@@ -33,12 +33,31 @@ and returns the result to the caller.
     .local pmc ws
 
     optable = find_global 'Perl6::Grammar', "$optable"
-    ws = find_global 'Perl6::Grammar', 'expression_ws'
+    ws = find_global 'Perl6::Grammar', 'ws'
     setattribute optable, "PGE::OPTable\x0&!ws", ws
     if has_stoptoken > 0 goto expression_1
     stoptoken = ''
   expression_1:
     .return optable."parse"(mob, 'stop'=> stoptoken)
+.end
+
+
+=item C<listop_expression>
+
+Parse a listop expression -- i.e., the tokens that follow
+a listop.  This limits the parse to tokens that are tighter
+than the listop precedence level, nominally indicated by C<< infix:<== >>.
+
+=cut
+
+.sub 'listop_expression'
+    .param pmc mob
+    .param pmc adverbs         :slurpy :named
+    .local pmc optable, ws
+    optable = find_global 'Perl6::Grammar', "$optable"
+    ws = find_global 'Perl6::Grammar', 'ws'
+    setattribute optable, "PGE::OPTable\x0&!ws", ws
+    .return optable.'parse'(mob, 'tighter'=>'infix:<==')
 .end
 
 
@@ -80,16 +99,17 @@ Handles parsing of the various types of quoted literals.
   with_scalar:
 
     .local string target
-    .local pmc newfrom, mfrom, mpos
-    .local int capt
-    newfrom = find_global 'PGE::Match', 'newfrom'
-    (mob, target, mfrom, mpos) = newfrom(mob)
-    capt = 0
+    .local pmc mfrom, mpos
+    .local int pos
+    (mob, pos, target, mfrom, mpos) = mob.'new'(mob)
 
-    .local int pos, lastpos, delimlen
-    pos = mfrom
+    .local int capt, lastpos, delimlen
+    capt = 0
     lastpos = length target
     delimlen = length delim
+
+    .local string in_backslash_num
+    in_backslash_num = ''
 
     .local string lstop
     lstop = ''
@@ -140,9 +160,9 @@ Handles parsing of the various types of quoted literals.
   scan_literal_backslash:
     inc pos
     $S0 = substr target, pos, 1
-    # if $S0 == 'x' goto scan_backslash_x          # XXX: to-do
-    # if $S0 == 'd' goto scan_backslash_d          # XXX: to-do
-    # if $S0 == 'o' goto scan_backslash_o          # XXX: to-do
+    if $S0 == 'x' goto scan_backslash_x
+    if $S0 == 'd' goto scan_backslash_d
+    if $S0 == 'o' goto scan_backslash_o
     $I0 = index "abefnrt", $S0
     if $I0 < 0 goto scan_literal_1
     $S0 = substr "\x07\x08\e\f\n\r\t", $I0, 1
@@ -150,10 +170,54 @@ Handles parsing of the various types of quoted literals.
     concat literal, $S0
     inc pos
     goto scan_literal_loop
+
+  ## parse \x, \x[NN], \x[NN,NN]; same for \d and \o
+  scan_backslash_x:
+    .local int base
+    base = 16
+    goto scan_bxdo_chars
+  scan_backslash_d:
+    base = 10
+    goto scan_bxdo_chars
+  scan_backslash_o:
+    base = 8
+    goto scan_bxdo_chars
+  scan_bxdo_chars:
+    ##   increment past the x, d, or o
+    inc pos
+    .local int decnum, isbracketed
+    decnum = 0
+    $S0 = substr target, pos, 1
+    isbracketed = iseq $S0, '['
+    ##   increment past any open bracket
+    pos += isbracketed
+  scan_bxdo_chars_loop:
+    $S0 = substr target, pos, 1
+    $I0 = index '0123456789abcdef', $S0
+    if $I0 < 0 goto scan_bxdo_chars_end
+    if $I0 >= base goto scan_bxdo_chars_end
+    decnum *= base
+    decnum += $I0
+    inc pos
+    goto scan_bxdo_chars_loop
+  scan_bxdo_chars_end:
+    ##   add the character to the literal
+    $S1 = chr decnum
+    concat literal, $S1
+    unless isbracketed goto scan_bxdo_end
+    if $S0 == ']' goto scan_bxdo_end
+    if $S0 != ',' goto fail
+    inc pos
+    decnum = 0
+    goto scan_bxdo_chars_loop
+  scan_bxdo_end:
+    pos += isbracketed
+    goto scan_literal_loop
+
   scan_literal_end:
-    ($P0, $P1, $P2, $P3) = newfrom(mob)
-    $P2 = litfrom
-    $P3 = pos
+    ($P0, $P1, $P2, $P3, $P4) = mob.'new'(mob)
+    $P3 = litfrom
+    $P4 = pos
     $P0.'value'(literal)
     $P0['type'] = 'str'
     mob[capt] = $P0
@@ -194,7 +258,9 @@ working -- it will likely change.
     unless args goto with_stop
     stop = shift args
   with_stop: 
-    $P0 = find_global 'PGE::Grammar', 'regex'
+    .include 'interpinfo.pasm'
+    $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    $P0 = $P0['parrot';'PGE::Grammar';'regex']
     $P1 = $P0(mob, 'stop'=>stop)
     .return ($P1)
 .end

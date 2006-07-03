@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: multisub.pmc 12114 2006-04-04 22:50:48Z bernhard $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: multisub.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

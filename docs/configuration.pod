@@ -1,5 +1,5 @@
-# Copyright: 2004-2006 The Perl Foundation. All Rights Reserved.
-# $Id: configuration.pod 11744 2006-02-26 10:55:39Z bernhard $
+# Copyright (C) 2004-2006, The Perl Foundation.
+# $Id: configuration.pod 12839 2006-05-30 14:34:31Z coke $
 
 =pod
 

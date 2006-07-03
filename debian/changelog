@@ -1,3 +1,11 @@
+parrot (0.4.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use DH_COMPAT 5.
+  * Bump up Standards-Version to 3.7.2 (no changes).
+
+ -- Florian Ragwitz <rafl@debian.org>  Mon,  3 Jul 2006 16:47:52 +0200
+
 parrot (0.4.4-1) unstable; urgency=low
 
   * New upstream release.

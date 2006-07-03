@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: resizablebooleanarray.pmc 12496 2006-05-04 06:20:10Z petdance $
+Copyright (C) 2001-2005, The Perl Foundation.
+$Id: resizablebooleanarray.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

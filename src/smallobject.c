@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: smallobject.c 12584 2006-05-09 21:51:17Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: smallobject.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

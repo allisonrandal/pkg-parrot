@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: sarray.t 11605 2006-02-16 23:36:21Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: sarray.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

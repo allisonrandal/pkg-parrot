@@ -1,7 +1,7 @@
 /* encoding.h
- *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2004-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: encoding.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: encoding.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:
@@ -80,7 +80,9 @@ PARROT_API ENCODING *Parrot_default_encoding(Interp *);
 typedef INTVAL (*encoding_converter_t)(Interp *, ENCODING *lhs, ENCODING *rhs);
 PARROT_API encoding_converter_t Parrot_find_encoding_converter(Interp *, ENCODING *lhs, ENCODING *rhs);
 
+void parrot_init_encodings_2(Interp *);
 void parrot_deinit_encodings(Interp *);
+
 PARROT_API INTVAL Parrot_encoding_number(Interp *, STRING *encodingname);
 PARROT_API INTVAL Parrot_encoding_number_of_str(Interp *, STRING *src);
 PARROT_API STRING* Parrot_encoding_name(Interp *, INTVAL number_of_encoding);

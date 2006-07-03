@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: gc_header_reuse.pasm 5482 2004-02-29 13:19:06Z leo $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: gc_header_reuse.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

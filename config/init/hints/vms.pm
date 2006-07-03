@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: vms.pm 10701 2005-12-27 21:14:53Z jhoblitt $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: vms.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::vms;
 

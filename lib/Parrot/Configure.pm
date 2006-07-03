@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pm 12106 2006-04-04 03:24:30Z petdance $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: Configure.pm 12836 2006-05-30 13:40:58Z coke $
 
 =pod
 
@@ -206,7 +206,7 @@ sub runsteps
 
         my $step = $step_name->new;
 
-        # XXX This works. but is propably not a good design.
+        # XXX This works. but is probably not a good design.
         # Using $step->description() would be nicer   
         my $description = $step->description();
         $description = "" unless defined $description;

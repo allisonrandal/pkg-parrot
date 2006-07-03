@@ -1,5 +1,5 @@
 /*
- * $Id: main.c 12672 2006-05-14 15:43:40Z leo $
+ * $Id: main.c 12972 2006-06-19 14:01:03Z leo $
  *
  * Intermediate Code Compiler for Parrot.
  *
@@ -22,7 +22,7 @@
 #include "pbc.h"
 #include "parser.h"
 
-#define IMCC_VERSION "0.4.4"
+#define IMCC_VERSION "0.4.5"
 
 static int load_pbc, run_pbc, write_pbc, pre_process, pasm_file;
 static char optimizer_opt[20];
@@ -94,7 +94,7 @@ help(void)
     "    -. --wait    Read a keystroke before starting\n"
     "       --runtime-prefix\n"
     "   <Compiler options>\n"
-    "    -d --imcc_debug[=HEXFLAGS]\n"
+    "    -d --imcc-debug[=HEXFLAGS]\n"
     "    -v --verbose\n"
     "    -E --pre-process-only\n"
     "    -o --output=FILE\n"
@@ -125,7 +125,7 @@ imcc_version(void)
     if (PARROT_REVISION != rev) {
 	printf( "Warning: used Configure.pl revision %d!\n", rev );
     }
-    printf("Copyright (C) 2001-2006 The Perl Foundation.  All Rights Reserved.\n\
+    printf("Copyright (C) 2001-2006, The Perl Foundation.\n\
 \n\
 Parrot may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Parrot source kit.\n\
@@ -620,6 +620,8 @@ main(int argc, char * argv[])
         fclose(imc_yyin_get());
 
         IMCC_info(interp, 1, "%ld lines compiled.\n", line);
+        if (per_pbc)
+            PackFile_fixup_subs(interp, PBC_POSTCOMP, NULL);
     }
 
     /* Produce a PBC output file, if one was requested */
@@ -646,9 +648,6 @@ main(int argc, char * argv[])
         fclose(fp);
         IMCC_info(interp, 1, "%s written.\n", output_file);
         free(packed);
-        /* TODO */
-        if (run_pbc != 2)
-            PackFile_fixup_subs(interp, PBC_POSTCOMP, NULL);
     }
 
     /* If necessary, load the file written above */

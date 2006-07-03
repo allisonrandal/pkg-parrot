@@ -2,8 +2,8 @@ Source: parrot
 Section: interpreters
 Priority: optional
 Maintainer: Florian Ragwitz <rafl@debian.org>
-Build-Depends: debhelper (>= 4.0.0), perl, perl-doc, libgmp3-dev, libgdbm-dev, python, libicu34-dev, libreadline-dev
-Standards-Version: 3.6.2
+Build-Depends: debhelper (>= 5.0.0), perl, perl-doc, libgmp3-dev, libgdbm-dev, python, libicu34-dev, libreadline-dev
+Standards-Version: 3.7.2
 
 Package: parrot
 Architecture: any

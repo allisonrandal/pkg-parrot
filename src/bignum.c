@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2001-2006 Yet Another Society.  All rights reserved.
-$Id: bignum.c 12588 2006-05-10 03:06:58Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: bignum.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

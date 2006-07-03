@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: eval.t 10826 2005-12-31 22:40:24Z ambs $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: eval.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

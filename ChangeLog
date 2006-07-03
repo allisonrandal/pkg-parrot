@@ -1,4 +1,11 @@
-# $Id: ChangeLog 12672 2006-05-14 15:43:40Z leo $
+# $Id: ChangeLog 12972 2006-06-19 14:01:03Z leo $
+
+2006.06.19    leo
+	* Released 0.4.5
+	See NEWS for more.
+
+2006.06.03    leo
+        * I and N registers are never cleared to 0 / 0.0 on subroutine entry
 
 2006.05.14    leo
 	* Released 0.4.4
@@ -3615,9 +3622,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 12672 2006-05-14 15:43:40Z leo $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 12972 2006-06-19 14:01:03Z leo $
 	into generated files
-	   but the $Id: ChangeLog 12672 2006-05-14 15:43:40Z leo $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 12972 2006-06-19 14:01:03Z leo $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

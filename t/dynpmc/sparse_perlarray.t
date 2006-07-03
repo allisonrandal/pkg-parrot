@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: sparse_perlarray.t 12673 2006-05-14 15:45:03Z pmichaud $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: sparse_perlarray.t 12937 2006-06-14 06:57:39Z fperrad $
 
 use strict;
 use warnings;
@@ -11,11 +11,11 @@ use Parrot::Test tests => 4;
 
 =head1 NAME
 
-t/pmc/sparse_perlarray.t - testing sparse arrays using the PerlArray PMC
+t/dynpmc/sparse_perlarray.t - testing sparse arrays using the PerlArray PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/sparse_perlarray.t
+    % prove t/dynpmc/sparse_perlarray.t
 
 =head1 DESCRIPTION
 

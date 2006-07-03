@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: embed.c 12217 2006-04-14 10:59:04Z bernhard $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: embed.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

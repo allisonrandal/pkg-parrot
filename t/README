@@ -1,5 +1,5 @@
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: README 11986 2006-03-22 19:22:29Z bernhard $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: README 12838 2006-05-30 14:19:10Z coke $
 
 This directory contains the Parrot test suite.
 For details, see the documentation in '../docs/tests.pod'.

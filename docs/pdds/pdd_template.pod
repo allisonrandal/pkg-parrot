@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd_template.pod 11771 2006-02-28 13:23:15Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: pdd_template.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Summary of the contents of the PDD.
 
 =head1 VERSION
 
-$Revision: 11771 $
+$Revision: 12839 $
 
 =head1 DESCRIPTION
 

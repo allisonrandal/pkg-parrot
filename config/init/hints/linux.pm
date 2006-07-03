@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: linux.pm 11501 2006-02-10 18:27:13Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: linux.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::linux;
 

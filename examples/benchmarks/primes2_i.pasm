@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: primes2_i.pasm 5578 2004-03-08 11:43:48Z leo $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: primes2_i.pasm 12973 2006-06-19 15:06:58Z leo $
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ of primes and the last one found.
 set I1, 0
 set I3, 0
 set I4, 10000
+set I6, 0
 
 LOOP:
   save I1

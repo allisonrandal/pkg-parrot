@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: exit.c 12529 2006-05-06 03:19:25Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: exit.c 12932 2006-06-13 05:12:41Z petdance $
 
 =head1 NAME
 
@@ -69,7 +69,8 @@ Exit, calling any registered exit handlers.
 
 */
 
-void Parrot_exit(int status) {
+void
+Parrot_exit(int status) {
     /* call all the exit handlers */
 
     /* Must write the loop this way to protect against an exit handler calling

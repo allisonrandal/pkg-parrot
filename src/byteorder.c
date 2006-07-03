@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: byteorder.c 5373 2004-02-23 21:14:23Z leo $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: byteorder.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

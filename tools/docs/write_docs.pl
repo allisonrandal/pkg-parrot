@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: write_docs.pl 5507 2004-03-03 11:17:29Z mikescott $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: write_docs.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

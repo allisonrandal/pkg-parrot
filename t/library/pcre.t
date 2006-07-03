@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pcre.t 12105 2006-04-03 20:54:04Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: pcre.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

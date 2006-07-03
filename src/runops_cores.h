@@ -1,7 +1,7 @@
 /* runops_cores.h
- *  Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: runops_cores.h 12132 2006-04-06 21:20:46Z bernhard $
+ *     $Id: runops_cores.h 12826 2006-05-30 01:36:30Z coke $
  *  Overview:
  *     Header for runops cores.
  *  Data Structure and Algorithms:

@@ -1,5 +1,5 @@
-# Copyright: 2002 The Perl Foundation.  All Rights Reserved.
-# $Id: OpTrans.pm 5806 2004-04-04 23:44:39Z mikescott $
+# Copyright (C) 2002, The Perl Foundation.
+# $Id: OpTrans.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

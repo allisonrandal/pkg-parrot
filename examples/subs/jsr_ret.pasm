@@ -1,8 +1,8 @@
-# Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
+# Copyright (C) 2001-2005, The Perl Foundation.
 # This program is free software. It is subject to the same
 # license as Perl itself.
 #
-# $Id: jsr_ret.pasm 10698 2005-12-27 18:32:31Z gregor $
+# $Id: jsr_ret.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

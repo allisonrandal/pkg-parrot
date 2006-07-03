@@ -1,9 +1,9 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_config_c.pl 11122 2006-01-12 11:31:34Z leo $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: parrot_config_c.pl 12841 2006-05-30 15:23:20Z coke $
 use strict;
 
-my ($svnid) = '$Id: parrot_config_c.pl 11122 2006-01-12 11:31:34Z leo $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+my ($svnid) = '$Id: parrot_config_c.pl 12841 2006-05-30 15:23:20Z coke $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: debugger.pod 11728 2006-02-24 19:11:04Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: debugger.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

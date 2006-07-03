@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Parrot_PIR_Formatter.t 12673 2006-05-14 15:45:03Z pmichaud $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: Parrot_PIR_Formatter.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-$Id: primes2.c 5178 2004-01-31 16:09:21Z mikescott $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: primes2.c 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

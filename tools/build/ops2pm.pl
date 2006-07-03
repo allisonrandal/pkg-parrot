@@ -1,7 +1,7 @@
 #! perl -w
 
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: ops2pm.pl 10425 2005-12-10 01:51:41Z particle $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: ops2pm.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: perlhash.t 12465 2006-04-30 15:11:25Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: perlhash.t 12937 2006-06-14 06:57:39Z fperrad $
 
 use strict;
 use warnings;
@@ -11,11 +11,11 @@ use Parrot::Test tests => 38;
 
 =head1 NAME
 
-t/pmc/perlhash.t - testing the PerlHash PMC
+t/dynpmc/perlhash.t - testing the PerlHash PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/perlhash.t
+    % prove t/dynpmc/perlhash.t
 
 =head1 DESCRIPTION
 

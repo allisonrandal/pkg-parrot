@@ -1,7 +1,7 @@
 /* hll.h
- *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2005, The Perl Foundation.
  *  SVN Info
- *     $Id: hll.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: hll.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the api header for the hll subsystem
  *  Data Structure and Algorithms:

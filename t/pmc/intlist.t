@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: intlist.t 12638 2006-05-12 21:59:28Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: intlist.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

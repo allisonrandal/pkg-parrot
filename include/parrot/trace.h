@@ -1,7 +1,7 @@
 /* trace.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: trace.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: trace.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     Tracing support for runops_cores.c.
  *  Data Structure and Algorithms:

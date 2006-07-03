@@ -1,7 +1,7 @@
 /* memory.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: memory.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: memory.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the api header for the memory subsystem
  *  Data Structure and Algorithms:

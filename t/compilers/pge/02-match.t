@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: 02-match.t 12668 2006-05-14 15:36:59Z pmichaud $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: 02-match.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;
@@ -23,7 +23,7 @@ Tests the Match class directly.
 
 =cut
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'concat on a Match object (rt#39135)',         'todo'=>'rt #39135');
+pir_output_is(<<'CODE', <<'OUTPUT', 'concat on a Match object (rt#39135)');
 .sub main :main
     load_bytecode 'PGE.pbc'
 
@@ -36,10 +36,10 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'concat on a Match object (rt#39135)',      
     $P3 = new .String
     $P3 = 'hello '
 
-    $P4 = new .String
-    $P4 = concat $P3, $P2
+    $P4 = n_concat $P3, $P2
     say $P4              # hello world
 .end
+
 CODE
 world
 hello world

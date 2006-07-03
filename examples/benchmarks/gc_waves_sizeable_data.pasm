@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: gc_waves_sizeable_data.pasm 5482 2004-02-29 13:19:06Z leo $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: gc_waves_sizeable_data.pasm 12973 2006-06-19 15:06:58Z leo $
 
 =head1 NAME
 
@@ -35,6 +35,7 @@ statistics indicating:
 =cut
 
 	set I0, 11
+	set I3, 0
 	set I2, 200
 	set S0,  "                         "
 	set S1, S0

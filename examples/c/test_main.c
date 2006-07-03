@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: test_main.c 12217 2006-04-14 10:59:04Z bernhard $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: test_main.c 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 
@@ -256,7 +256,7 @@ version(void)
     fprintf(stderr,
             "This is parrot version " PARROT_VERSION " built for "
             PARROT_ARCHNAME "\n\
-Copyright (C) 2001-2003 The Perl Foundation.  All Rights Reserved.\n\
+Copyright (C) 2001-2003, The Perl Foundation.\n\
 \n\
 Parrot may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Parrot source kit.\n\

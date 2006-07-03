@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: pod_errors.pl 11903 2006-03-14 20:49:11Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: pod_errors.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

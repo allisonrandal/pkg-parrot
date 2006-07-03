@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: nativecall.pl 12083 2006-04-01 11:33:22Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: nativecall.pl 12884 2006-06-05 13:29:13Z audreyt $
 
 =head1 NAME
 
@@ -250,7 +250,7 @@ sub print_head {
  */
 
 /* nci.c
- *  Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2005, The Perl Foundation.
  *  SVN Info
  *     \$Id\$
  *  Overview:
@@ -586,7 +586,7 @@ HEADER
         PMC_data(temp_pmc) = (void*)$value;
         VTABLE_set_pmc_keyed_str(interpreter, HashPointer, string_from_cstring(interpreter, "$key", 0), temp_pmc);
 PUT_POINTER
-#        qq|        hash_put( interpreter, known_frames, const_cast("$key"), $value );|;
+#        qq|        parrot_hash_put( interpreter, known_frames, const_cast("$key"), $value );|;
 }
 
 

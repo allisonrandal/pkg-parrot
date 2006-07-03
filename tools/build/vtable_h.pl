@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: vtable_h.pl 10361 2005-12-05 23:09:12Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: vtable_h.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

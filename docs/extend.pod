@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All rights reserved.
-# $Id: extend.pod 10933 2006-01-06 01:43:24Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: extend.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

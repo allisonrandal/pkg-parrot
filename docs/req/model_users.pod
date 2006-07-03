@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: model_users.pod 11858 2006-03-10 18:23:19Z autrijus $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: model_users.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

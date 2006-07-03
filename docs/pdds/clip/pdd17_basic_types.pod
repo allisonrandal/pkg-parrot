@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd17_basic_types.pod 11719 2006-02-23 22:07:13Z particle $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: pdd17_basic_types.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

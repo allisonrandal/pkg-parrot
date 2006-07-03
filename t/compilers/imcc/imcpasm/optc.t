@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: optc.t 11738 2006-02-25 12:13:50Z leo $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: optc.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use Parrot::Test tests => 3;

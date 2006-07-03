@@ -1,5 +1,5 @@
-# Copyright (C) 2005 The Perl Foundation.  All rights reserved.
-# $Id: calc.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: calc.t 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: makefiles.pm 12458 2006-04-30 02:43:47Z chromatic $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: makefiles.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 
@@ -170,11 +170,6 @@ sub makefiles
         commentType                   => '#',
         replace_slashes               => 1,
         conditioned_lines             => 1
-    );
-    genfile(
-        'config/gen/makefiles/miniperl.in' => 'languages/miniperl/Makefile',
-        commentType                        => '#',
-        replace_slashes                    => 1
     );
     genfile(
         'languages/m4/config/makefiles/root.in' => 'languages/m4/Makefile',

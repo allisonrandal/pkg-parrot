@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: calling.t 12612 2006-05-11 10:47:18Z leo $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: calling.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

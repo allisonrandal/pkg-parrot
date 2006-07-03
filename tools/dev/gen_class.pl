@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: gen_class.pl 11248 2006-01-18 20:02:15Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: gen_class.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ my $classname = shift
 ## emit file header
 print <<EOF;
 /* ${classname}.pmc
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
  *     \$Id\$
  *  Overview:

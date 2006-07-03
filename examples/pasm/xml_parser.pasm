@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: xml_parser.pasm 10798 2005-12-30 19:22:44Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: xml_parser.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

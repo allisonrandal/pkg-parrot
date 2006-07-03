@@ -1,5 +1,5 @@
-// Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-// $Id: antlr_past2pir_past.g 12456 2006-04-29 15:02:04Z bernhard $
+// Copyright (C) 2005-2006, The Perl Foundation.
+// $Id: antlr_past2pir_past.g 12840 2006-05-30 15:08:05Z coke $
 
 header "AntlrPast2PirPastTreeWalker.__init__" 
 {

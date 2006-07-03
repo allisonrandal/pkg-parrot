@@ -1,6 +1,6 @@
 ## $Id$
 
-ROOT: past(.) = {
+transform past (ROOT) :language('PIR') {
     .local pmc past
     past = new 'Perl6::PAST::Block'
     past.'init'('node'=>node, 'name'=>'anon', 'blocktype'=>'block')
@@ -13,7 +13,7 @@ ROOT: past(.) = {
 }
 
 
-Perl6::Grammar::statement_list:  past(.) = {
+transform past (Perl6::Grammar::statement_list) :language('PIR') {
     .local pmc past
     .local pmc iter
 
@@ -34,11 +34,13 @@ Perl6::Grammar::statement_list:  past(.) = {
 }
 
 
-Perl6::Grammar::statement: past(.) = {
+transform past (Perl6::Grammar::statement) :language('PIR') {
     $P0 = node['statement_control']
     if $P0 goto statement_control
     $P0 = node['block']
-    if $P0 goto block
+    if $P0 goto statement_block
+    $P0 = node['use_statement']
+    if $P0 goto statement_use
 
   expression:
     .local pmc stmt
@@ -59,7 +61,7 @@ Perl6::Grammar::statement: past(.) = {
     $P0 = modifier['expression']
     exprpast = tree.'get'('past', $P0, 'Perl6::Grammar::expression')
     stmt = new 'Perl6::PAST::Op'
-    stmt.'init'(exprpast, thenpast, elsepast, 'op'=>'statement_control:if', 'node'=>modifier)
+    stmt.'init'(exprpast, thenpast, elsepast, 'name'=>'statement_control:if', 'node'=>modifier)
 
   expression_1:
     .local pmc past
@@ -73,16 +75,20 @@ Perl6::Grammar::statement: past(.) = {
     past.'init'($P1, 'node'=>node)
     .return (past)
 
-  block:
+  statement_block:
     $P1 = tree.'get'('past', $P0, 'Perl6::Grammar::block')
     $P1.'blocktype'('immediate')
     past = new 'Perl6::PAST::Stmt'
     past.'init'($P1, 'node'=>node)
     .return (past)
+
+  statement_use:
+    null $P0
+    .return ($P0)
 }
 
 
-Perl6::Grammar::statement_control: past(.) = {
+transform past (Perl6::Grammar::statement_control) :language('PIR') {
     .local pmc key, exprlist, blocklist
     key = node['KEY']
     exprlist = node['expression']
@@ -118,14 +124,14 @@ Perl6::Grammar::statement_control: past(.) = {
   if_op:
     .local pmc past
     past = new "Perl6::PAST::Op"
-    past.init(exprpast, thenpast, elsepast, 'node'=>node, 'op'=>'statement_control:if')
+    past.init(exprpast, thenpast, elsepast, 'node'=>node, 'name'=>'statement_control:if')
     elsepast = past
     if exprc > 0 goto expr_block_pair
     .return (past)
 }
 
 
-Perl6::Grammar::expression: past(.) = {
+transform past (Perl6::Grammar::expression) :language('PIR') {
     .local pmc past
 
     $P0 = node['expr']
@@ -136,7 +142,7 @@ Perl6::Grammar::expression: past(.) = {
 }
 
 
-Perl6::Grammar::expr: past(.) = {
+transform past (Perl6::Grammar::expr) :language('PIR') {
     .local string type
     type = node['type']
     if type != "" goto pastrule
@@ -152,16 +158,9 @@ Perl6::Grammar::expr: past(.) = {
     .return tree.'get'($S0, node, 'Perl6::Grammar::expr')
   no_pastrule:
 
-    .local string postop
-    postop = optok['post']
-    if postop > '' goto with_postop
-    postop = concat "'", type
-    postop = concat postop, "'"
-  with_postop:
-
     .local pmc past, children, iter
     past = new 'Perl6::PAST::Op'
-    past.'init'('node'=>node, 'op'=>type, 'name'=>postop)
+    past.'init'('node'=>node, 'name'=>type)
     $P0 = node.'get_array'()
     if null $P0 goto iter_end
     iter = new .Iterator, $P0
@@ -189,18 +188,79 @@ Perl6::Grammar::expr: past(.) = {
 }
 
 
-Perl6::Grammar::expr: past_term(.) = {
-    .local pmc iter
+transform past_term (Perl6::Grammar::expr) :language('PIR') {
+    .local pmc iter, past
+    ##   listop requires special handling
+    $I0 = defined node['listop']
+    if $I0 goto term_listop
+
+    ##   for all other terms, we can call a different
+    ##   rule based on the subrule matched
     $P0 = node.'get_hash'()
     iter = new .Iterator, $P0
   iter_loop:
     unless iter goto term_error
     $S0 = shift iter
+    if $S0 == 'type' goto iter_loop
+    if $S0 == 'postop' goto iter_loop
     $P0 = iter[$S0]
     $S1 = concat 'Perl6::Grammar::', $S0
-    $P1 = tree.'get'('past', $P0, $S1)
-    if null $P1 goto iter_loop
-    .return ($P1)
+    past = tree.'get'('past', $P0, $S1)
+    if null past goto iter_loop
+    goto term_postop
+
+  term_listop:
+    ##   convert the listop name to &name var
+    .local string name
+    name = node['listop';'ident']
+    name = concat '&', name
+    past = new 'Perl6::PAST::Var'
+    past.'init'('name'=>name, 'node'=>node)
+    $I0 = defined node['listop_expression']
+    if $I0 == 0 goto no_listop_args
+    .local pmc cpast
+    $P0 = node['listop_expression';0;'expr']
+    cpast = tree.'get'('past', $P0, 'Perl6::Grammar::expr')
+    past = past.'new'('Perl6::PAST::Op', past, cpast, 'name'=>'postcircumfix:( )')
+    goto term_postop
+  no_listop_args:
+    $I0 = defined node['postop']
+    if $I0 goto term_postop
+    past = past.'new'('Perl6::PAST::Op', past, 'name'=>'postcircumfix:( )')
+
+  term_postop:
+    ##   now, add any post[circum]fix ops that might have occurred
+    $I0 = exists node['postop']
+    if $I0 == 0 goto postop_end
+    $P0 = node['postop']
+    iter = new .Iterator, $P0
+  postop_loop:
+    unless iter goto postop_end
+    ##   process a single postop
+    .local pmc postop
+    postop = shift iter
+    $P0 = postop.'get_hash'()
+    $P0 = new .Iterator, $P0
+    .local string opname
+    opname = shift $P0
+    postop = $P0[opname]
+    opname = concat opname, ':'
+    $S0 = postop['KEY']
+    opname = concat opname, $S0
+    $S0 = postop['KEY_CLOSE']
+    if $S0 == '' goto with_opname
+    opname = concat opname, ' '
+    opname = concat opname, $S0
+  with_opname:
+    past = past.'new'('Perl6::PAST::Op', past, 'name'=>opname)
+    $I0 = exists postop['expression';0;'expr']
+    if $I0 == 0 goto postop_loop
+    $P1 = postop['expression';0;'expr']
+    $P1 = tree.'get'('past', $P1, 'Perl6::Grammar::expr')
+    past.'add_child'($P1)
+    goto postop_loop
+  postop_end:
+    .return (past)
 
   term_error:
     print "error: 'term' node has incorrect structure.\n"
@@ -208,39 +268,28 @@ Perl6::Grammar::expr: past_term(.) = {
 }
 
 
-Perl6::Grammar::expr: past_listop(.) = {
+transform past (Perl6::Grammar::circumfix) :language('PIR') {
     .local string name
-    ##   get the listop name, convert it to &name var
-    name = node['ident']
-    name = concat '&', name
-    .local pmc vpast
-    vpast = new 'Perl6::PAST::Var'
-    vpast.'init'('node'=>node, 'name'=>name)
-    ##   if we have no children, then we're the lhs of a postfix op
-    $I0 = defined node[0]
-    if $I0 goto has_child
-    .return (vpast)
-
-  has_child:
-    .local pmc past, cpast
+    $S0 = node['KEY']
+    $S1 = node['KEY_CLOSE']
+    name = concat 'circumfix:', $S0
+    name = concat name, ' '
+    name = concat name, $S1
+    .local pmc past
     past = new 'Perl6::PAST::Op'
-    past.'init'(vpast, 'node'=>node, 'op'=>'postcircumfix:( )')   
-    $P0 = node[0]
-    cpast = tree.'get'('past', $P0, 'Perl6::Grammar::expr')
-    if null cpast goto has_child_1
-    past.'add_child'(cpast)
-  has_child_1:
+    past.'init'('node'=>node, 'name'=>name)
+    $I0 = exists node['expression';0]
+    if $I0 == 0 goto end
+    $P0 = node['expression';0;'expr']
+    $P1 = tree.'get'('past', $P0, 'Perl6::Grammar::expr')
+    past.'add_child'($P1)
+  end:
     .return (past)
 }
-    
-
-Perl6::Grammar::type: past(.) = {
-    null $P0
-    .return ($P0)
-}
 
 
-Perl6::Grammar::scoped_variables: past(.) = {
+
+transform past (Perl6::Grammar::scoped_variables) :language('PIR') {
     .local string scope, name
     scope = node['scope_declarator']
     name = node['variable']
@@ -263,7 +312,7 @@ Perl6::Grammar::scoped_variables: past(.) = {
 }
 
 
-Perl6::Grammar::variable: past(.) = {
+transform past (Perl6::Grammar::variable) :language('PIR') {
     .local string name
     name = node
     .local pmc past
@@ -275,6 +324,8 @@ Perl6::Grammar::variable: past(.) = {
     vdecl = block.'vardecl'(name)
     $I0 = isa vdecl, 'Perl6::PAST::Var'
     if $I0 == 0 goto declare_var
+    $S0 = vdecl.'scope'()
+    past.'scope'($S0)
     .return (past)
   declare_var:
     past.'scope'('outer')
@@ -283,7 +334,7 @@ Perl6::Grammar::variable: past(.) = {
 }
 
 
-Perl6::Grammar::integer: past(.) = {
+transform past (Perl6::Grammar::integer) :language('PIR') {
     .local pmc past
     $P0 = new .Perl6Str
     $S0 = node
@@ -295,7 +346,7 @@ Perl6::Grammar::integer: past(.) = {
 }
 
 
-Perl6::Grammar::number: past(.) = {
+transform past (Perl6::Grammar::number) :language('PIR') {
     .local pmc past
     $N0 = node
     past = new 'Perl6::PAST::Val'
@@ -304,7 +355,7 @@ Perl6::Grammar::number: past(.) = {
 }
 
 
-Perl6::Grammar::string_literal: past(.) = {
+transform past (Perl6::Grammar::string_literal) :language('PIR') {
     .local pmc past
     $P0 = node['quoted_literal']
     $P0 = $P0.'get_array'()
@@ -328,14 +379,14 @@ Perl6::Grammar::string_literal: past(.) = {
     past = cpast
     goto iter_loop
   cpast_concat:
-    past = past.'new'('Perl6::PAST::Op', past, cpast, 'node'=>node, 'op'=>'infix:~', 'name'=>'concat')
+    past = past.'new'('Perl6::PAST::Op', past, cpast, 'node'=>node, 'name'=>'infix:~')
     goto iter_loop
   iter_end:
     .return (past)
 }
 
 
-Perl6::Grammar::version: past(.) = {
+transform past (Perl6::Grammar::version) :language('PIR') {
     $S0 = node
     $S0 = concat "'", $S0
     $S0 = concat $S0, "'"
@@ -346,7 +397,7 @@ Perl6::Grammar::version: past(.) = {
 }
 
 
-Perl6::Grammar::block: past(.) = {
+transform past (Perl6::Grammar::block) :language('PIR') {
     .local pmc outer, past
     outer = find_global 'Perl6::PAST', '$?BLOCK'
     past = new 'Perl6::PAST::Block'
@@ -361,7 +412,7 @@ Perl6::Grammar::block: past(.) = {
 }
 
 
-Perl6::Grammar::regex_term: past(.) = {
+transform past (Perl6::Grammar::regex_term) :language('PIR') {
     .local pmc outer, past
     outer = find_global 'Perl6::PAST', '$?BLOCK'
     past = new 'Perl6::PAST::Block'
@@ -371,5 +422,43 @@ Perl6::Grammar::regex_term: past(.) = {
     .return (past)
 }
 
+
+transform past (Perl6::Grammar::subroutine) :language('PIR') {
+    .local pmc outer, past
+    outer = find_global 'Perl6::PAST', '$?BLOCK'
+    past = new 'Perl6::PAST::Block'
+    past.'init'('node'=>node, 'outer'=>outer, 'blocktype'=>'sub')
+    store_global 'Perl6::PAST', '$?BLOCK', past
+
+    $P0 = node['ident']
+    unless $P0 goto with_ident
+    $S0 = $P0[0]
+    past.'name'($S0)
+  with_ident:
+
+    $I0 = exists node['signature']
+    if $I0 == 0 goto with_signature
+    $P0 = node['signature';0;'invocants';'parameter']
+    .local pmc iter
+    iter = new .Iterator, $P0
+  invocant_loop:
+    unless iter goto invocant_end
+    .local pmc pnode
+    .local string pname
+    pnode = shift iter
+    pname = pnode['variable']
+    $P0 = past.'add_child_new'('Perl6::PAST::Var', 'node'=>pnode, 'name'=>pname, 'scope'=>'parameter')
+    past.'vardecl'(pname, $P0)
+    goto invocant_loop
+  invocant_end:
+  with_signature:
+
+    .local pmc cpast
+    $P0 = node['block';'statement_list']
+    cpast = tree.'get'('past', $P0, 'Perl6::Grammar::statement_list')
+    past.'add_child'(cpast)
+    store_global 'Perl6::PAST', '$?BLOCK', outer
+    .return (past)
+}
 
 ## vim: expandtab sw=4

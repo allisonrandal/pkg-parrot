@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: jit_debug_xcoff.c 11975 2006-03-21 22:23:53Z bernhard $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: jit_debug_xcoff.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

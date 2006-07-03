@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: root.in 12605 2006-05-10 17:53:42Z petdance $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: root.in 12827 2006-05-30 02:28:15Z coke $
 
 ###############################################################################
 # NOTES:
@@ -185,15 +185,12 @@ GEN_MAKEFILES = \
     editor/Makefile \
     languages/Makefile \
     languages/amber/Makefile \
+    languages/APL/Makefile \
     languages/bc/Makefile \
     languages/befunge/Makefile \
     languages/bf/Makefile \
     languages/cola/Makefile \
     languages/HQ9plus/Makefile \
-    languages/APL/Makefile \
-    languages/perl6/Makefile \
-    languages/pheme/Makefile \
-    languages/pugs/Makefile \
     languages/jako/Makefile \
     languages/lisp/Makefile \
     languages/lua/Makefile \
@@ -201,6 +198,9 @@ GEN_MAKEFILES = \
     languages/miniperl/Makefile \
     languages/ook/Makefile \
     languages/parrot_compiler/Makefile \
+    languages/perl6/Makefile \
+    languages/pheme/Makefile \
+    languages/pugs/Makefile \
     languages/punie/Makefile \
     languages/regex/Makefile \
     languages/scheme/Makefile \
@@ -1341,7 +1341,7 @@ TOOLS_TEST_FILES = \
     t/tools/*.t
 
 # Common prep for all test targets.
-# We propably need a complete build before running the tests.
+# We probably need a complete build before running the tests.
 test_prep : all
 
 # Run test cases with a single call of t/harness. Users have to look at only

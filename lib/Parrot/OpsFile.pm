@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: OpsFile.pm 11788 2006-03-04 16:22:21Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: OpsFile.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

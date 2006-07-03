@@ -1,6 +1,6 @@
 (include_file lib/PhemeTest.pir)
 
-(plan 5)
+(plan 6)
 
 (is (car (a b c)) a "car of (a b c) should be a")
 
@@ -10,16 +10,15 @@
 	(a b c)
 	"car of ((a b c) x y z) should be (a b c)")
 
-(is_deeply (car ()) () "car of empty list should be empty list")
+(is (car ()) "nil" "car of empty list should be nil")
 
-; fails because Test::More does not handle nested strings
-;(is_deeply
-;	(car
-;		(((hotdogs)) (and) (pickle) relish))
-;	((hotdogs))
-;	"car of list of double-nested lists should be double-nested list")
+(is_deeply
+	(car
+		(((hotdogs)) (and) (pickle) relish))
+	((hotdogs))
+	"car of list of double-nested lists should be double-nested list")
 
- (is_deeply
+(is_deeply
  	(cdr ((a b c) x y z))
  	(x y z)
  	"cdr of list of lists should be second part" )

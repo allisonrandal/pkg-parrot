@@ -1,7 +1,7 @@
 /* thread.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: thread.h 12117 2006-04-05 04:49:19Z petdance $
+ *     $Id: thread.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the api header for the thread primitives
  *  Data Structure and Algorithms:

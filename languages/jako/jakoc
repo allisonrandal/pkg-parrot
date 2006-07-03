@@ -4,11 +4,11 @@
 #
 # by Gregor N. Purdy <gregor@focusresearch.com>
 #
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2001-2005, The Perl Foundation.
 # This program is free software. It is subject to the same license
 # as Perl itself.
 #
-# $Id: jakoc 7819 2005-04-13 00:20:52Z gregor $
+# $Id: jakoc 12840 2006-05-30 15:08:05Z coke $
 #
 
 use strict;

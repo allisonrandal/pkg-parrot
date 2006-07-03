@@ -1,7 +1,7 @@
 #! perl
 
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 12285 2006-04-17 12:24:11Z bernhard $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: basic.t 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

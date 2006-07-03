@@ -1,5 +1,5 @@
-// Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-// $Id: bc_python.g 11326 2006-01-23 20:53:22Z bernhard $
+// Copyright (C) 2005, The Perl Foundation.
+// $Id: bc_python.g 12840 2006-05-30 15:08:05Z coke $
 
 
 // based on antrltut by javadude

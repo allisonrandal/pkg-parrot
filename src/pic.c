@@ -1,6 +1,6 @@
 /*
-Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: pic.c 12140 2006-04-08 14:33:01Z petdance $
+Copyright (C) 2004, The Perl Foundation.
+$Id: pic.c 12933 2006-06-13 05:28:20Z petdance $
 
 =head1 NAME
 
@@ -195,7 +195,7 @@ bytecode segement.
 */
 
 Parrot_MIC*
-parrot_PIC_alloc_mic(Interp*interpreter, size_t n)
+parrot_PIC_alloc_mic(Interp* interpreter, size_t n)
 {
     Parrot_PIC_store * const store = interpreter->code->pic_store;
     assert(n < store->n_mics);

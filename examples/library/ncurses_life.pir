@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: ncurses_life.pir 12193 2006-04-12 20:04:06Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: ncurses_life.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

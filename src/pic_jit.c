@@ -1,6 +1,6 @@
 /*
-Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-$Id: pic_jit.c 12588 2006-05-10 03:06:58Z petdance $
+Copyright (C) 2006, The Perl Foundation.
+$Id: pic_jit.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

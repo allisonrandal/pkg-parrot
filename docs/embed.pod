@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: embed.pod 12392 2006-04-21 19:55:31Z ambs $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: embed.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: subrules.t 12610 2006-05-11 00:49:19Z pmichaud $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: subrules.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

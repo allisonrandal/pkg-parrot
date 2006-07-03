@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: parrotobject.t 11615 2006-02-17 02:54:09Z particle $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: parrotobject.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

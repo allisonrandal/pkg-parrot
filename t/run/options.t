@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: options.t 12103 2006-04-03 20:14:43Z particle $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: options.t 12838 2006-05-30 14:19:10Z coke $
 
 =head1 NAME
 

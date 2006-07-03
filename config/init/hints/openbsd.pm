@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: openbsd.pm 11796 2006-03-05 05:47:54Z jisom $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: openbsd.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::openbsd;
 

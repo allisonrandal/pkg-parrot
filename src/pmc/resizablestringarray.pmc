@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: resizablestringarray.pmc 12233 2006-04-14 16:17:53Z leo $
+Copyright (C) 2001-2005, The Perl Foundation.
+$Id: resizablestringarray.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

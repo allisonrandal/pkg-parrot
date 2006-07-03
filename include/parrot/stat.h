@@ -1,7 +1,7 @@
 /* string.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: stat.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: stat.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:

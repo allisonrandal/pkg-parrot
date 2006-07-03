@@ -1,5 +1,5 @@
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: streams.t 12239 2006-04-14 18:06:27Z particle $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: streams.t 12841 2006-05-30 15:23:20Z coke $
 
 use strict;
 use warnings;
@@ -224,7 +224,7 @@ read:[   99 Please send patches and suggestions to the Perl 6 Internals mailing 
 read:[  100 ]
 read:[  101 =head1 COPYRIGHT]
 read:[  102 ]
-read:[  103 Copyright (c) 2004, the Perl Foundation.]
+read:[  103 Copyright (C) 2004, The Perl Foundation.]
 read:[  104 ]
 read:[  105 =cut]
 EXP_FILELINES
@@ -253,7 +253,7 @@ read:[nd\n.end\n\n=head1 AUTHOR\n\nJens Rieks E<lt>parrot at ]
 read:[jensbeimsurfen dot deE<gt> is the author\nand maint]
 read:[ainer.\nPlease send patches and suggestions to the ]
 read:[Perl 6 Internals mailing list.\n\n=head1 COPYRIGHT\n\n]
-read:[Copyright (c) 2004, the Perl Foundation.\n\n=cut\n]
+read:[Copyright (C) 2004, The Perl Foundation.\n\n=cut\n]
 EXP_PARROTIO
     },
 );

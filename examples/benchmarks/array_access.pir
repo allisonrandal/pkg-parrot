@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006 The Perl Foundation.  All rights reserved.
-# $Id: array_access.pir 12162 2006-04-09 20:07:40Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: array_access.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

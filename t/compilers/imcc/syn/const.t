@@ -1,13 +1,13 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: const.t 11489 2006-02-09 18:58:48Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: const.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 33;
+use Parrot::Test tests => 34;
 use vars qw($TODO);
 
 pir_output_is(<<'CODE', <<'OUT', "globalconst 1");
@@ -595,4 +595,20 @@ CODE
 10.000000
 OUT
 
-
+pir_output_is(<<'CODE', <<'OUT', "RT # 34991");
+.const int c = 12
+.sub test
+    .local float a
+    a = 96
+    # Uncomment this line, and the c symbol is 'forgotten'
+    a += c
+    print a
+    print_newline
+    print c
+    print_newline
+    end
+.end
+CODE
+108.000000
+12
+OUT

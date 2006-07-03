@@ -34,15 +34,16 @@ compiler.
     load_bytecode 'PGE/Text.pbc'
     load_bytecode 'PGE/Util.pbc'
     load_bytecode 'TGE.pbc'
-    
-    $P0 = getclass 'TGE'
+
+    $P0 = getclass 'TGE::Grammar'
     $P1 = subclass $P0, 'Perl6::PAST::Grammar'
     $P1 = subclass $P0, 'Perl6::POST::Grammar'
 
-    $P0 = compreg 'PGE::P6Regex'
-    $P1 = $P0('^<Perl6::Grammar::program>')
-    store_global 'Perl6', '&parse', $P1
-   
+    $P0 = subclass 'PGE::Match', 'Match'
+    $P0 = subclass 'Match', 'Grammar'
+    $P0 = subclass 'Grammar', 'Perl6::Grammar'
+    $P0 = subclass 'ResizablePMCArray', 'Perl6List'
+
     $P0 = find_global 'Perl6', 'compile' 
     compreg 'Perl6', $P0
 
@@ -51,6 +52,7 @@ compiler.
     ##   eliminate this when we can map classnames more easily.
     $P0 = new .Hash
     $P0['Str'] = '.Perl6Str'
+    $P0['Any'] = '_'
     store_global 'Perl6', '%!parrotclass', $P0
 .end
 
@@ -82,8 +84,8 @@ compiled code as a PMC.
   parse:
     .local pmc parse
     .local pmc match
-    parse = find_global 'Perl6', '&parse'
-    match = parse(code)
+    parse = find_global 'Perl6::Grammar', 'program'
+    match = parse(code, 'grammar'=>'Perl6::Grammar', 'pos'=>0)
 
     unless match goto return_match
     unless dump goto parse_1
@@ -92,7 +94,6 @@ compiled code as a PMC.
     if target == 'parse' goto return_match
 
   build_ast:
-    match = match['Perl6::Grammar::program']
     .local pmc astgrammar, astbuilder, ast
     astgrammar = new 'Perl6::PAST::Grammar'
     astbuilder = astgrammar.apply(match)
@@ -144,7 +145,7 @@ compiled code as a PMC.
 
 .include 'src/main.pir'
 
-.include 'src/builtins.pir'
+.include 'src/builtins_gen.pir'
 
 .namespace [ 'Perl6::Grammar' ]
 .include 'src/grammar_gen.pir'

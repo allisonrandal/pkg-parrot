@@ -1,7 +1,7 @@
 /* gdbmhash.pmc
- *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2005, The Perl Foundation.
  *  SVN Info
- *     $Id: gdbmhash.pmc 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: gdbmhash.pmc 12826 2006-05-30 01:36:30Z coke $
  *  Overview:
  *     These are the vtable functions for the GDBMHash PMC
  *  Data Structure and Algorithms:

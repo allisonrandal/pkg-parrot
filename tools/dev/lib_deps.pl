@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: lib_deps.pl 12105 2006-04-03 20:54:04Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: lib_deps.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 NAME

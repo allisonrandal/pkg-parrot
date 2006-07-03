@@ -1,6 +1,6 @@
 /*
-Copyright: 2003-2006 The Perl Foundation.  All Rights Reserved.
-$Id: mmd.c 12540 2006-05-07 04:27:54Z petdance $
+Copyright (C) 2003-2006, The Perl Foundation.
+$Id: mmd.c 12864 2006-06-01 19:54:45Z leo $
 
 =head1 NAME
 
@@ -92,22 +92,6 @@ dump_mmd(Interp *interpreter, INTVAL function)
 }
 #endif
 
-/*
- * isa_str contains for real objects and for deleg_pmc objects
- * both the string "delegate" - so compare a vtable slot
- */
-
-extern void Parrot_deleg_pmc_mark(Interp*, PMC* pmc);
-
-static int
-isa_deleg_pmc(Interp *interpreter, PMC *p)
-                __attribute__nonnull__(2);
-
-static int
-isa_deleg_pmc(Interp *interpreter, PMC *p)
-{
-    return p->vtable->mark == Parrot_deleg_pmc_mark;
-}
 
 funcptr_t
 get_mmd_dispatch_type(Interp *interpreter, INTVAL func_nr, INTVAL left_type,
@@ -145,22 +129,6 @@ get_mmd_dispatch_type(Interp *interpreter, INTVAL func_nr, INTVAL left_type,
             PMC *nci;
             /* C function is at struct_val */
             func = D2FPTR(PMC_struct_val(method));
-            /*
-             * if one of the arguments isa deleg_pmc
-             * install the mmd_wrapper as real function
-             */
-            if (isa_deleg_pmc(interpreter,
-                        interpreter->vtables[left_type]->class)
-                    || (r > 0 && isa_deleg_pmc(interpreter,
-                            interpreter->vtables[r]->class))) {
-                /* TODO check dest too */
-                nci = pmc_new(interpreter, enum_class_Bound_NCI);
-                dod_register_pmc(interpreter, nci);     /* XXX */
-                *is_pmc = 2;
-                PMC_struct_val(nci) = func;
-                return D2FPTR(nci);
-            }
-
             *is_pmc = 0;
             mmd_register(interpreter, func_nr, left_type, r,
                     PMC_struct_val(method));
@@ -250,50 +218,6 @@ Inplace dispatch functions for C<< left <op=> right >>.
 
 */
 
-static PMC*
-mmd_wrap_p_ppp(Interp *interpreter, PMC *nci, PMC *right, PMC *dest) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l, *r, *d, *n = NULL;
-    mmd_f_p_ppp real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-        n = left;
-    }
-    else
-        l = left;
-    if (isa_deleg_pmc(interpreter, right)) {
-        attrib_array = PMC_data(right);
-        r = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-        n = right;
-    }
-    else
-        r = right;
-    if (dest && isa_deleg_pmc(interpreter, dest)) {
-        attrib_array = PMC_data(dest);
-        d = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else {
-        d = dest;
-        attrib_array = NULL;
-    }
-    real_function = (mmd_f_p_ppp)D2FPTR(PMC_struct_val(nci));
-    d = (real_function)(interpreter, l, r, d);
-    if (attrib_array) {
-        attrib_array[POD_FIRST_ATTRIB] = d;
-        return dest;
-    }
-    if (!n)
-        return d;
-    dest = VTABLE_clone(interpreter, n);
-    attrib_array = PMC_data(dest);
-    attrib_array[POD_FIRST_ATTRIB] = d;
-    return dest;
-
-}
-
 PMC*
 mmd_dispatch_p_ppp(Interp *interpreter,
 		 PMC *left, PMC *right, PMC *dest, INTVAL func_nr)
@@ -307,17 +231,6 @@ mmd_dispatch_p_ppp(Interp *interpreter,
 
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    right->vtable->base_type,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            return mmd_wrap_p_ppp(interpreter, sub, right, dest);
-        }
         if (dest)
             return Parrot_runops_fromc_args(interpreter, sub, "PPPP",
                     left, right, dest);
@@ -328,43 +241,6 @@ mmd_dispatch_p_ppp(Interp *interpreter,
     else {
         return (*real_function)(interpreter, left, right, dest);
     }
-}
-
-static PMC*
-mmd_wrap_p_pip(Interp *interpreter, PMC *nci, INTVAL right, PMC *dest) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l, *d, *n = NULL;
-    mmd_f_p_pip real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-        n = left;
-    }
-    else
-        l = left;
-    if (dest && isa_deleg_pmc(interpreter, dest)) {
-        attrib_array = PMC_data(dest);
-        d = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else {
-        d = dest;
-        attrib_array = NULL;
-    }
-    real_function = (mmd_f_p_pip)D2FPTR(PMC_struct_val(nci));
-    d = (real_function)(interpreter, l, right, d);
-    if (attrib_array) {
-        attrib_array[POD_FIRST_ATTRIB] = d;
-        return dest;
-    }
-    if (!n)
-        return d;
-    dest = VTABLE_clone(interpreter, n);
-    attrib_array = PMC_data(dest);
-    attrib_array[POD_FIRST_ATTRIB] = d;
-    return dest;
-
 }
 
 PMC*
@@ -379,17 +255,6 @@ mmd_dispatch_p_pip(Interp *interpreter,
 
     if (is_pmc) {
         PMC * const sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    enum_type_INTVAL,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            return mmd_wrap_p_pip(interpreter, sub, right, dest);
-        }
         if (dest)
             return Parrot_runops_fromc_args(interpreter, sub, "PPIP",
                     left, right, dest);
@@ -400,43 +265,6 @@ mmd_dispatch_p_pip(Interp *interpreter,
     else {
         return (*real_function)(interpreter, left, right, dest);
     }
-}
-
-static PMC*
-mmd_wrap_p_pnp(Interp *interpreter, PMC *nci, FLOATVAL right, PMC *dest) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l, *d, *n = NULL;
-    mmd_f_p_pnp real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-        n = left;
-    }
-    else
-        l = left;
-    if (dest && isa_deleg_pmc(interpreter, dest)) {
-        attrib_array = PMC_data(dest);
-        d = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else {
-        d = dest;
-        attrib_array = NULL;
-    }
-    real_function = (mmd_f_p_pnp)D2FPTR(PMC_struct_val(nci));
-    d = (real_function)(interpreter, l, right, d);
-    if (attrib_array) {
-        attrib_array[POD_FIRST_ATTRIB] = d;
-        return dest;
-    }
-    if (!n)
-        return d;
-    dest = VTABLE_clone(interpreter, n);
-    attrib_array = PMC_data(dest);
-    attrib_array[POD_FIRST_ATTRIB] = d;
-    return dest;
-
 }
 
 PMC*
@@ -453,17 +281,6 @@ mmd_dispatch_p_pnp(Interp *interpreter,
             func_nr, left_type, enum_type_FLOATVAL, &is_pmc);
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    enum_type_FLOATVAL,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            return mmd_wrap_p_pnp(interpreter, sub, right, dest);
-        }
         if (dest)
             return Parrot_runops_fromc_args(interpreter, sub, "PPNP",
                     left, right, dest);
@@ -476,42 +293,6 @@ mmd_dispatch_p_pnp(Interp *interpreter,
     }
 }
 
-static PMC*
-mmd_wrap_p_psp(Interp *interpreter, PMC *nci, STRING *right, PMC *dest) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l, *d, *n = NULL;
-    mmd_f_p_psp real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-        n = left;
-    }
-    else
-        l = left;
-    if (dest && isa_deleg_pmc(interpreter, dest)) {
-        attrib_array = PMC_data(dest);
-        d = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else {
-        d = dest;
-        attrib_array = NULL;
-    }
-    real_function = (mmd_f_p_psp)D2FPTR(PMC_struct_val(nci));
-    d = (real_function)(interpreter, l, right, d);
-    if (attrib_array) {
-        attrib_array[POD_FIRST_ATTRIB] = d;
-        return dest;
-    }
-    if (!n)
-        return d;
-    dest = VTABLE_clone(interpreter, n);
-    attrib_array = PMC_data(dest);
-    attrib_array[POD_FIRST_ATTRIB] = d;
-    return dest;
-
-}
 PMC*
 mmd_dispatch_p_psp(Interp *interpreter,
 		 PMC *left, STRING *right, PMC *dest, INTVAL func_nr)
@@ -526,17 +307,6 @@ mmd_dispatch_p_psp(Interp *interpreter,
             func_nr, left_type, enum_type_STRING, &is_pmc);
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    enum_type_STRING,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            return mmd_wrap_p_psp(interpreter, sub, right, dest);
-        }
         if (dest)
             return Parrot_runops_fromc_args(interpreter, sub, "PPSP",
                     left, right, dest);
@@ -547,29 +317,6 @@ mmd_dispatch_p_psp(Interp *interpreter,
     else {
         return (*real_function)(interpreter, left, right, dest);
     }
-}
-
-static void
-mmd_wrap_v_pp(Interp *interpreter, PMC *nci, PMC *right) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l, *r;
-    mmd_f_v_pp real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        l = left;
-    if (isa_deleg_pmc(interpreter, right)) {
-        attrib_array = PMC_data(right);
-        r = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        r = right;
-    real_function = (mmd_f_v_pp)D2FPTR(PMC_struct_val(nci));
-    (real_function)(interpreter, l, r);
 }
 
 /*
@@ -588,41 +335,11 @@ mmd_dispatch_v_pp(Interp *interpreter,
 
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    right->vtable->base_type,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            mmd_wrap_v_pp(interpreter, sub, right);
-            return;
-        }
         Parrot_runops_fromc_args(interpreter, sub, "vPP", left, right);
     }
     else {
         (*real_function)(interpreter, left, right);
     }
-}
-
-static void
-mmd_wrap_v_pi(Interp *interpreter, PMC *nci, INTVAL right) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l;
-    mmd_f_v_pi real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        l = left;
-    assert(l != left);
-    real_function = (mmd_f_v_pi)D2FPTR(PMC_struct_val(nci));
-    (real_function)(interpreter, l, right);
 }
 
 void
@@ -639,41 +356,11 @@ mmd_dispatch_v_pi(Interp *interpreter,
             func_nr, left_type, enum_type_INTVAL, &is_pmc);
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    enum_type_INTVAL,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            mmd_wrap_v_pi(interpreter, sub, right);
-            return;
-        }
         Parrot_runops_fromc_args(interpreter, sub, "vPI", left, right);
     }
     else {
         (*real_function)(interpreter, left, right);
     }
-}
-
-static void
-mmd_wrap_v_pn(Interp *interpreter, PMC *nci, FLOATVAL right) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l;
-    mmd_f_v_pn real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        l = left;
-    assert(l != left);
-    real_function = (mmd_f_v_pn)D2FPTR(PMC_struct_val(nci));
-    (real_function)(interpreter, l, right);
 }
 
 void
@@ -690,18 +377,6 @@ mmd_dispatch_v_pn(Interp *interpreter,
             func_nr, left_type, enum_type_FLOATVAL, &is_pmc);
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    enum_type_FLOATVAL,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            mmd_wrap_v_pn(interpreter, sub, right);
-            return;
-        }
         Parrot_runops_fromc_args(interpreter, sub, "vPN", left, right);
     }
     else {
@@ -709,23 +384,6 @@ mmd_dispatch_v_pn(Interp *interpreter,
     }
 }
 
-static void
-mmd_wrap_v_ps(Interp *interpreter, PMC *nci, STRING* right) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l;
-    mmd_f_v_ps real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        l = left;
-    assert(l != left);
-    real_function = (mmd_f_v_ps)D2FPTR(PMC_struct_val(nci));
-    (real_function)(interpreter, l, right);
-}
 void
 mmd_dispatch_v_ps(Interp *interpreter,
 		 PMC *left, STRING *right, INTVAL func_nr)
@@ -740,18 +398,6 @@ mmd_dispatch_v_ps(Interp *interpreter,
             func_nr, left_type, enum_type_STRING, &is_pmc);
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    enum_type_STRING,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            mmd_wrap_v_ps(interpreter, sub, right);
-            return;
-        }
         Parrot_runops_fromc_args(interpreter, sub, "vPS", left, right);
     }
     else {
@@ -759,28 +405,6 @@ mmd_dispatch_v_ps(Interp *interpreter,
     }
 }
 
-static INTVAL
-mmd_wrap_i_pp(Interp *interpreter, PMC *nci, PMC *right) {
-    PMC *left = PMC_pmc_val(nci);
-    PMC *l, *r;
-    mmd_f_i_pp real_function;
-    SLOTTYPE *attrib_array;
-
-    if (isa_deleg_pmc(interpreter, left)) {
-        attrib_array = PMC_data(left);
-        l = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        l = left;
-    if (isa_deleg_pmc(interpreter, right)) {
-        attrib_array = PMC_data(right);
-        r = get_attrib_num(attrib_array, POD_FIRST_ATTRIB);
-    }
-    else
-        r = right;
-    real_function = (mmd_f_i_pp)D2FPTR(PMC_struct_val(nci));
-    return (real_function)(interpreter, l, r);
-}
 /*
 
 =item C<INTVAL
@@ -808,17 +432,6 @@ mmd_dispatch_i_pp(Interp *interpreter,
 
     if (is_pmc) {
         sub = (PMC*)real_function;
-        if (is_pmc == 2) {
-            /* mmd_register the wrapper */
-            mmd_register(interpreter, func_nr, left->vtable->base_type,
-                    right->vtable->base_type,
-                    D2FPTR((UINTVAL) sub | 3));
-            is_pmc = 3;
-        }
-        if (is_pmc == 3) {
-            PMC_pmc_val(sub) = left;
-            return mmd_wrap_i_pp(interpreter, sub, right);
-        }
         ret = Parrot_runops_fromc_args_reti(interpreter, sub, "IPP",
                 left, right);
     }
@@ -1441,7 +1054,7 @@ mmd_arg_tuple_func(Interp *interpreter)
      * - dispatch in invoke - yeah ugly
      */
 
-    arg_tuple = pmc_new(interpreter, enum_class_FixedIntegerArray);
+    arg_tuple = pmc_new(interpreter, enum_class_ResizableIntegerArray);
     args_op = interpreter->current_args;
     if (!args_op)
         return arg_tuple;
@@ -1449,27 +1062,40 @@ mmd_arg_tuple_func(Interp *interpreter)
     constants = interpreter->code->const_table->constants;
     ++args_op;
     args_array = constants[*args_op]->u.key;
-    assert(args_array->vtable->base_type == enum_class_FixedIntegerArray);
-    sig_len = VTABLE_elements(interpreter, args_array);
+    ASSERT_SIG_PMC(args_array);
+    sig_len = SIG_ELEMS(args_array);
     if (!sig_len)
         return arg_tuple;
-    VTABLE_set_integer_native(interpreter, arg_tuple, sig_len);
     ++args_op;
 
     for (i = 0; i < sig_len; ++i, ++args_op) {
-        type = VTABLE_get_integer_keyed_int(interpreter, args_array, i);
+        type = SIG_ITEM(args_array, i);
+        /* named don't MMD */
+        if (type & PARROT_ARG_NAME)
+            break;
+        /* expand flattening args */
+        if (type & PARROT_ARG_FLATTEN) {
+            int j, n;
+
+            idx = *args_op;
+            arg = REG_PMC(idx);
+            n = VTABLE_elements(interpreter, arg);
+            for (j = 0; j < n; ++j)  {
+                PMC *elem = VTABLE_get_pmc_keyed_int(interpreter, arg, j);
+                type = VTABLE_type(interpreter, elem);
+                VTABLE_push_integer(interpreter, arg_tuple, type);
+            }
+            return arg_tuple;
+        }
         switch (type & PARROT_ARG_TYPE_MASK) {
             case PARROT_ARG_INTVAL:
-                VTABLE_set_integer_keyed_int(interpreter, arg_tuple,
-                        i, enum_type_INTVAL);
+                VTABLE_push_integer(interpreter, arg_tuple, enum_type_INTVAL);
                 break;
             case PARROT_ARG_FLOATVAL:
-                VTABLE_set_integer_keyed_int(interpreter, arg_tuple,
-                        i, enum_type_FLOATVAL);
+                VTABLE_push_integer(interpreter, arg_tuple, enum_type_FLOATVAL);
                 break;
             case PARROT_ARG_STRING:
-                VTABLE_set_integer_keyed_int(interpreter, arg_tuple,
-                        i, enum_type_STRING);
+                VTABLE_push_integer(interpreter, arg_tuple, enum_type_STRING);
                 break;
             case PARROT_ARG_PMC:
                 idx = *args_op;
@@ -1478,8 +1104,7 @@ mmd_arg_tuple_func(Interp *interpreter)
                 else
                     arg = REG_PMC(idx);
                 type = VTABLE_type(interpreter, arg);
-                VTABLE_set_integer_keyed_int(interpreter, arg_tuple,
-                        i, type);
+                VTABLE_push_integer(interpreter, arg_tuple, type);
                 break;
             default:
                 internal_exception(1,
@@ -1633,19 +1258,25 @@ static PMC*
 mmd_cvt_to_types(Interp* interpreter, PMC *multi_sig)
 {
     INTVAL i, n, type;
-    PMC *ar;
+    PMC *ar, *sig_elem;
     STRING *sig;
 
     n = VTABLE_elements(interpreter, multi_sig);
     ar = pmc_new(interpreter, enum_class_FixedIntegerArray);
     VTABLE_set_integer_native(interpreter, ar, n);
     for (i = 0; i < n; ++i) {
-        sig = VTABLE_get_string_keyed_int(interpreter, multi_sig, i);
-        if (memcmp(sig->strstart, "__VOID", 6) == 0) {
-            PMC_int_val(ar)--;  /* XXX */
-            break;
+        sig_elem = VTABLE_get_pmc_keyed_int(interpreter, multi_sig, i);
+        if (sig_elem->vtable->base_type == enum_class_String) {
+            sig = VTABLE_get_string(interpreter, sig_elem);
+            if (memcmp(sig->strstart, "__VOID", 6) == 0) {
+                PMC_int_val(ar)--;  /* XXX */
+                break;
+            }
+            type = pmc_type(interpreter, sig);
         }
-        type = pmc_type(interpreter, sig);
+        else {
+            type = pmc_type_p(interpreter, sig_elem);
+        }
         VTABLE_set_integer_keyed_int(interpreter, ar, i, type);
     }
     return ar;
@@ -1670,7 +1301,7 @@ mmd_distance(Interp *interpreter, PMC *pmc, PMC *arg_tuple)
             /* some method */
             return 0;
         }
-        if (multi_sig->vtable->base_type == enum_class_FixedStringArray) {
+        if (multi_sig->vtable->base_type == enum_class_FixedPMCArray) {
             multi_sig = PMC_sub(pmc)->multi_signature =
                 mmd_cvt_to_types(interpreter, multi_sig);
         }
@@ -1975,7 +1606,7 @@ mmd_search_global(Interp *interpreter, STRING *meth, PMC *arg_tuple, PMC *cl)
 {
     PMC *pmc;
 
-    pmc = Parrot_find_global_p(interpreter, interpreter->stash_hash, meth);
+    pmc = Parrot_find_global_p(interpreter, interpreter->root_namespace, meth);
     if (pmc) {
         if (mmd_maybe_candidate(interpreter, pmc, arg_tuple, cl))
             return 1;
@@ -2002,7 +1633,7 @@ mmd_get_ns(Interp *interpreter)
 
     ns_name = CONST_STRING(interpreter, "__parrot_core");
     ns = VTABLE_get_pmc_keyed_str(interpreter, 
-            interpreter->stash_hash, ns_name);
+            interpreter->root_namespace, ns_name);
     return ns;
 }
 
@@ -2014,11 +1645,11 @@ mmd_create_ns(Interp *interpreter)
 
     ns_name = CONST_STRING(interpreter, "__parrot_core");
     ns = VTABLE_get_pmc_keyed_str(interpreter, 
-            interpreter->stash_hash, ns_name);
+            interpreter->root_namespace, ns_name);
     if (PMC_IS_NULL(ns)) {
         ns = pmc_new(interpreter, enum_class_NameSpace);
         VTABLE_set_pmc_keyed_str(interpreter, 
-                interpreter->stash_hash, ns_name, ns);
+                interpreter->root_namespace, ns_name, ns);
     }
     return ns;
 }

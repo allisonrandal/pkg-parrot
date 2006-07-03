@@ -1,4 +1,4 @@
-Perl6::PAST::Block: root(.) = {
+transform root (Perl6::PAST::Block) :language('PIR') {
     $P0 = new .Undef
     store_global 'Perl6::POST', '$?BLOCK', $P0
     store_global 'Perl6::PAST', '$?BLOCK', $P0
@@ -6,7 +6,7 @@ Perl6::PAST::Block: root(.) = {
 }
 
 
-Perl6::PAST::Block: post(.) = {
+transform post (Perl6::PAST::Block) :language('PIR') {
     .local string name, blocktype
     name = node.'name'()
     blocktype = node.'blocktype'()
@@ -50,7 +50,7 @@ Perl6::PAST::Block: post(.) = {
 }
 
 
-Perl6::Grammar: post(.) = {
+transform post (Perl6::Grammar) :language('PIR') {
     ##   We generally get here because of a PGE regex in the 
     ##   code that is stored as a child of a Block.  The regex
     ##   AST is already reduced to what we want to pass to
@@ -61,7 +61,7 @@ Perl6::Grammar: post(.) = {
 }
 
 
-Perl6::PAST::Stmts: post(.) = {
+transform post (Perl6::PAST::Stmts) :language('PIR') {
     .local pmc iter, ops
     ops = new 'Perl6::POST::Ops'
     ops.'init'('node'=>node)
@@ -80,7 +80,7 @@ Perl6::PAST::Stmts: post(.) = {
 }
 
 
-Perl6::PAST::Stmt: post(.) = {
+transform post (Perl6::PAST::Stmt) :language('PIR') {
     .local pmc past, post
     past = node[0]
     post = tree.'get'('post', past)
@@ -88,17 +88,17 @@ Perl6::PAST::Stmt: post(.) = {
 }
 
 
-Perl6::PAST::Exp: post(.) = {
+transform post (Perl6::PAST::Exp) :language('PIR') {
     $P0 = node[0]
     $P1 = tree.'get'('post', $P0)
     .return ($P1)
 }
 
 
-Perl6::PAST::Op: post(.) = {
+transform post (Perl6::PAST::Op) :language('PIR') {
     .local string opname, pasttype
     .local pmc optable, optok
-    opname = node.'op'()
+    opname = node.'name'()
     optable = find_global 'Perl6::Grammar', '$optable'
     optok = optable[opname]
     pasttype = optok['pasttype']
@@ -107,17 +107,35 @@ Perl6::PAST::Op: post(.) = {
   dispatch_post:
     .return tree.'get'(pasttype, node)
 }
+
+
+transform postname (Perl6::PAST::Op) :language('PIR') {
+    ##   return the name to be used for this op in POST
+    ##   as given by the "post" trait or the operator
+    ##   name.
+    .local pmc optable, optok
+    .local string opname, postname
+    optable = find_global 'Perl6::Grammar', '$optable'
+    opname = node.'name'()
+    optok = optable[opname]
+    postname = optok['post']
+    if postname > '' goto end
+    postname = concat "'", opname
+    postname = concat postname, "'"
+  end:
+    .return (postname)
+}
     
 
-Perl6::PAST::Op: simple(.) = {
+transform simple (Perl6::PAST::Op) :language('PIR') {
     ##   create our return past node
     .local pmc ops
     ops = new 'Perl6::POST::Ops'
     ops.'init'('node'=>node)
 
-    .local string opname, postop
-    opname = node.'op'()
-    postop = node.'name'()
+    .local string opname, postname
+    opname = node.'name'()
+    postname = tree.'get'('postname', node)
 
   op_children:
     .local pmc iter, arglist
@@ -151,12 +169,12 @@ Perl6::PAST::Op: simple(.) = {
   with_opreturn:
     ops.'add_child_new'('Perl6::POST::Op', ops, opreturn, 'name'=>'new')
   end:
-    ops.'add_child_new'('Perl6::POST::Op', ops, arglist :flat, 'name'=>postop)
+    ops.'add_child_new'('Perl6::POST::Op', ops, arglist :flat, 'name'=>postname)
     .return (ops)
 }
 
 
-Perl6::PAST::Op: call(.) = {
+transform call (Perl6::PAST::Op) :language('PIR') {
     ##   This rule handles sub calls (e.g., postcircumfix:( ))
     .local pmc ops
     ops = new 'Perl6::POST::Ops'
@@ -167,8 +185,23 @@ Perl6::PAST::Op: call(.) = {
     arglist = new .ResizablePMCArray
     iter = node.'child_iter'()
     spast = shift iter
+
+    ##   if the spost is a &var, then use it directly
+    ##   as the name of the sub to be called.
+    $I0 = isa spast, 'Perl6::PAST::Var'
+    if $I0 == 0 goto spast_expr
+    $S0 = spast.'name'()
+    $S1 = substr $S0, 0, 1
+    if $S1 != '&' goto spast_expr
+    substr $S0, 0, 1, "'"
+    $S0 = concat $S0, "'"
+    spost = new .String
+    spost = $S0
+    goto with_spost
+  spast_expr:
     spost = tree.'get'('post', spast)
     ops.'add_child'(spost)
+  with_spost:
 
     ##   See if the argument is an infix:, list.  If so, elevate
     ##   its children to be the children (arguments) to the call
@@ -176,7 +209,7 @@ Perl6::PAST::Op: call(.) = {
     $P0 = node[1]
     $I0 = isa $P0, 'Perl6::PAST::Op'
     if $I0 == 0 goto iter_loop
-    $S0 = $P0.'op'()
+    $S0 = $P0.'name'()
     if $S0 != 'infix:,' goto iter_loop
     iter = $P0.'child_iter'()
 
@@ -197,7 +230,7 @@ Perl6::PAST::Op: call(.) = {
 }
 
 
-Perl6::PAST::Op: assign(.) = {
+transform assign (Perl6::PAST::Op) :language('PIR') {
     .local pmc ops
     ops = new 'Perl6::POST::Ops'
     ops.'init'('node'=>node)
@@ -220,7 +253,7 @@ Perl6::PAST::Op: assign(.) = {
 }
 
 
-Perl6::PAST::Op: cond(.) = {
+transform cond (Perl6::PAST::Op) :language('PIR') {
     .local pmc ops
     ops = new 'Perl6::POST::Ops'
     ops.'init'('node'=>node)
@@ -259,7 +292,7 @@ Perl6::PAST::Op: cond(.) = {
 }
 
 
-Perl6::PAST::Op: xor(.) = {
+transform xor (Perl6::PAST::Op) :language('PIR') {
     .local pmc ops
     ops = new 'Perl6::POST::Ops'
     ops.'init'('node'=>node)
@@ -305,7 +338,7 @@ Perl6::PAST::Op: xor(.) = {
 }
 
 
-Perl6::PAST::Op: chain(.) = {
+transform chain (Perl6::PAST::Op) :language('PIR') {
     .local pmc ops
     ops = new 'Perl6::POST::Ops'
     ops.'init'('node'=>node)
@@ -319,7 +352,7 @@ Perl6::PAST::Op: chain(.) = {
   chain_loop:
     $I0 = isa node, 'Perl6::PAST::Op'
     if $I0 == 0 goto chain_end
-    opname = node.'op'()
+    opname = node.'name'()
     optok = optable[opname]
     pasttype = optok['pasttype']
     if pasttype != 'chain' goto chain_end
@@ -337,12 +370,12 @@ Perl6::PAST::Op: chain(.) = {
 
   clist_loop:
     .local pmc bpast, bpost
-    .local string postop
+    .local string postname
     bpast = node[1]
     bpost = tree.'get'('post', bpast)
-    postop = node.'name'()
+    postname = tree.'get'('postname', node)
     ops.'add_child'(bpost)
-    ops.'add_child_new'('Perl6::POST::Op', ops, apost, bpost, 'name'=>postop)
+    ops.'add_child_new'('Perl6::POST::Op', ops, apost, bpost, 'name'=>postname)
     unless clist goto clist_end
     ops.'add_child_new'('Perl6::POST::Op', ops, endlabel, 'name'=>'unless')
     apost = bpost
@@ -355,7 +388,7 @@ Perl6::PAST::Op: chain(.) = {
 
 
 
-Perl6::PAST::Val: post(.) = {
+transform post (Perl6::PAST::Val) :language('PIR') {
     .local string val, valtype, objtype
     val = node.'name'()
     valtype = node.'valtype'()
@@ -382,7 +415,7 @@ Perl6::PAST::Val: post(.) = {
 }
     
 
-Perl6::PAST::Var: post(.) = {
+transform post (Perl6::PAST::Var) :language('PIR') {
     .local string name, scope
     .local pmc post
     name = node.'name'()
@@ -390,6 +423,7 @@ Perl6::PAST::Var: post(.) = {
 
     if scope == 'package' goto with_scope
     if scope == 'lexical' goto with_scope
+    if scope == 'parameter' goto with_scope
     .local pmc outer
     outer = find_global 'Perl6::PAST', '$?BLOCK'
   outer_loop:

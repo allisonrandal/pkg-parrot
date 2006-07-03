@@ -1,7 +1,7 @@
 #! perl -w
 
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pl 12403 2006-04-23 21:25:33Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: Configure.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 
@@ -262,7 +262,7 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $svnid = '$Id: Configure.pl 12403 2006-04-23 21:25:33Z bernhard $';
+      my $svnid = '$Id: Configure.pl 12841 2006-05-30 15:23:20Z coke $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
 $svnid
@@ -362,7 +362,7 @@ $args{maintainer} = 1 if defined $args{lex} or defined $args{yacc};
 
 print <<"END";
 Parrot Version $parrot_version Configure 2.0
-Copyright (C) 2001-2006 The Perl Foundation.  All Rights Reserved.
+Copyright (C) 2001-2006, The Perl Foundation.
 
 Hello, I'm Configure. My job is to poke and prod your system to figure out
 how to build Parrot. The process is completely automated, unless you passed in

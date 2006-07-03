@@ -1,8 +1,39 @@
 http://schemers.org/Documents/Standards/R5RS/HTML/
 
+Atom:
+	- create atom object
+	- add subtypes for string, number, etc.?
+
+Cons:
+	- fix cons count for empty cons?
+
+Builtins:
+	- consider if eq? and eqlist? should really be multis
+		- add varieties for mismatched parameters if not
+	- refactor is_deeply() and is() in Pheme::Test
+		- add diagnostics too, if possible
+	- add nil?
+	- fix car on empty cons
+
+Special forms:
+	- cond
+	- lambda (be careful of define interaction though!)
+	- else
+	- and
+	- or
+
 Compiler:
-	- merge PAST/POST improvements back to Punie
-	- share those nodes somehow
+	- extract and merge POST improvements with Punie
+		- publish them under compilers/
+		- share those nodes somehow
+	- port to new TGE, when the branch lands
+	- fix load_bytecode section in generated code
+	- refactor compiler backend object
+		- share with Perl 6 and Punie
+		- move somewhere in Parrot lib path
+		- allow dumping of trees and (runnable) PIR
+	- use precompiled tree grammars
+	- merge all PBC files into pheme.pbc
 
 Fix namespace:
 	- lowercase
@@ -10,7 +41,6 @@ Fix namespace:
 	- use nested namespaces properly
 
 Grammar:
-	- empty list does NOT work yet
 	- tighten identifiers
 		- allow ! $ % & * + - . / : < = > ? @ ^ _ ~ 
 		- start with any non-number-beginning character
@@ -19,15 +49,9 @@ Grammar:
 		- ... can be an identifier
 	- fix whitespace
 		- space, newline (also tab, carriage return)
-	- allow comments
-		- semicolon to end of line
-		- can be at start of line
 	- parse numbers
 		- . + - allowed at the start of a number
 	- add more rules
-		- ` indicates almost constant data
-		- ' indicates literal data
-		- " delimits strings
 		- \ is an escape character
 
 Predicates:

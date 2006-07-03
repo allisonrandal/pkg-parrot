@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Vtable.pm 11809 2006-03-07 11:38:59Z leo $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: Vtable.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

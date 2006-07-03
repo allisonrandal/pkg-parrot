@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ChangeLog 10396 2005-12-07 21:08:05Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: ChangeLog 12828 2006-05-30 02:34:44Z coke $
 
 - 2005-12-07	particle
 	* moved imcc/ directory to compilers/imcc/

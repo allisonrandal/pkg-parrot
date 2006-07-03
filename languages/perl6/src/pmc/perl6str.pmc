@@ -1,5 +1,5 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+Copyright (C) 2001-2006, The Perl Foundation.
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ we just call C<get_number()> and return that as an integer.
         FLOATVAL f = DYNSELF.get_number();
         return (INTVAL)f;
     }
-         
+
 
 /*
 
@@ -118,7 +118,7 @@ digits.
                 }
                 if (s1 < end && *s1 == '_' && isdigit(*(s1+1))) s1++;
             }
-           
+
             /* handle integer part */
             while (s1 < end && isdigit(*s1)) {
                 f = f * 10 + (*s1) - '0';

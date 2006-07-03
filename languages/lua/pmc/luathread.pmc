@@ -1,6 +1,6 @@
 /*
-Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-$Id: luathread.pmc 12211 2006-04-14 07:02:16Z fperrad $
+Copyright (C) 2005-2006, The Perl Foundation.
+$Id: luathread.pmc 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

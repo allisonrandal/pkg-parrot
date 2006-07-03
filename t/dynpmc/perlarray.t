@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: perlarray.t 12465 2006-04-30 15:11:25Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: perlarray.t 12937 2006-06-14 06:57:39Z fperrad $
 
 use strict;
 use warnings;
@@ -11,11 +11,11 @@ use Parrot::Test tests => 32;
 
 =head1 NAME
 
-t/pmc/perlarray.t - testing the PerlArray PMC
+t/dynpmc/perlarray.t - testing the PerlArray PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/perlarray.t
+    % prove t/dynpmc/perlarray.t
 
 =head1 DESCRIPTION
 

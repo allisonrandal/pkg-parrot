@@ -1,10 +1,10 @@
-ROOT: result(.) = {
+transform result (ROOT) :language('PIR') {
 	.local string result
 	result = <<'EOT'
 .namespace [ 'Pheme' ]
 
 .sub __onload :anon :load
-	load_bytecode 'lib/PhemeSymbols.pbc'
+#	load_bytecode 'lib/PhemeSymbols.pbc'
 	main()
 .end
 
@@ -31,7 +31,7 @@ EOT
 	.return( result )
 }
 
-POST::Sub: emit(.) = {
+transform emit (POST::Sub) :language('PIR') {
 	.local string result
 	.local string name
 	name = node.'name'()
@@ -83,7 +83,7 @@ POST::Sub: emit(.) = {
 	.return( result )
 }
 
-POST::Ops: resolve_ops(.) = {
+transform resolve_ops (POST::Ops) :language('PIR') {
 	.local pmc result
 
 	.local pmc children
@@ -95,18 +95,31 @@ POST::Ops: resolve_ops(.) = {
 	.local string child_type
 	child_type = typeof first_child
 
-	unless child_type == 'POST::Op' goto insert_check
+	unless child_type == 'POST::Op' goto maybe_an_exp
 	.return( node )
 
+  maybe_an_exp:
+ 	.local string op_type
+	unless child_type == 'POST::Val' goto insert_check
+	.local string valtype
+	valtype = first_child.'valtype'()
+	unless valtype goto insert_check
+	op_type = '__list_to_cons'
+	goto return_node
+
   insert_check:
+	op_type = '__resolve_at_runtime' 
+
+  return_node:
   	.local pmc check_node
 	check_node = new 'POST::Op'
-	check_node.'op'( '__resolve_at_runtime' )
+	check_node.'op'( op_type )
 	unshift children, check_node
+
 	.return( node )
 }
 
-POST::Ops: emit(.) = {
+transform emit (POST::Ops) :language('PIR') {
 	.local string result
 
 	# get name for variable used to hold the results of this op
@@ -158,7 +171,7 @@ POST::Ops: emit(.) = {
 	.return( result )
 }
 
-POST::Ops: emit_declarations(.) = {
+transform emit_declarations (POST::Ops) :language('PIR') {
 	.local string result
 	result = ''
 
@@ -190,7 +203,7 @@ POST::Ops: emit_declarations(.) = {
 	.return( result )
 }
 
-POST::Val: emit(.) = {
+transform emit (POST::Val) :language('PIR') {
 	.local string result
 	result = node.'value'()
 
@@ -210,19 +223,19 @@ POST::Val: emit(.) = {
 	.return( result )
 }
 
-POST::Var: emit(.) = {
+transform emit (POST::Var) :language('PIR') {
 	.local string varname
 	varname = node.'varname'()
 	.return( varname )
 }
 
-POST::Var: outvar(.) = {
+transform outvar (POST::Var) :language('PIR') {
 	.local string result
 	result = node.'varname'()
 	.return( result )
 }
 
-POST::Op: emit(.) = {
+transform emit (POST::Op) :language('PIR') {
 	.local string result
 	.local string name
 	name = node.'op'()

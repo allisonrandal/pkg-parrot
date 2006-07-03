@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: objects.c 12594 2006-05-10 10:47:30Z leo $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: objects.c 12884 2006-06-05 13:29:13Z audreyt $
 
 =head1 NAME
 
@@ -199,7 +199,8 @@ on the existence of the method for this class.
 */
 
 static void
-create_deleg_pmc_vtable(Interp *interpreter, PMC *class, PMC *class_name)
+create_deleg_pmc_vtable(Interp *interpreter, PMC *class, 
+        PMC *class_name, int full)
 {
     int i;
     const char *meth;
@@ -235,7 +236,7 @@ create_deleg_pmc_vtable(Interp *interpreter, PMC *class, PMC *class_name)
                     class_name, meth);
 #endif
         }
-        else {
+        else if (full) {
             /*
              * if the method doesn't exist, put in the deleg_pmc vtable,
              * but only if ParrotObject hasn't overridden the method
@@ -246,11 +247,6 @@ create_deleg_pmc_vtable(Interp *interpreter, PMC *class, PMC *class_name)
                 ((void **)vtable)[i] = ((void**)object_vtable)[i];
         }
     }
-    /*
-     * a cruel hash to disceren a delegate from a deleg_pmc vtable
-     * see also src/mmd.c:isa_deleg_pmc
-     */
-    class->vtable->mark = vtable->mark;
 }
 
 /*
@@ -379,7 +375,29 @@ Parrot_single_subclass(Interp* interpreter, PMC *base_class,
          * then create a vtable derived from ParrotObject and
          * deleg_pmc - the ParrotObject vtable is already built
          */
-        create_deleg_pmc_vtable(interpreter, child_class, name);
+        create_deleg_pmc_vtable(interpreter, child_class, name, 1);
+    }
+    else {
+        /*
+         * if any parent isa PMC, then still individual vtables might
+         * be overridden in this subclass
+         */
+        const PMC* parent;
+        int i, n, any_pmc_parent;
+
+        n = VTABLE_elements(interpreter, mro);
+        any_pmc_parent = 0;
+
+        /* 0 = this, 1 = parent (handled above), 2 = grandpa */
+        for (i = 2; i < n; ++i) {
+            parent = VTABLE_get_pmc_keyed_int(interpreter, mro, i);
+            if (!PObj_is_class_TEST(parent)) {
+                any_pmc_parent = 1;
+                break;
+            }
+        }
+        if (any_pmc_parent)
+            create_deleg_pmc_vtable(interpreter, child_class, name, 0);
     }
     return child_class;
 }
@@ -523,8 +541,6 @@ parrot_class_register(Interp* interpreter, PMC *name,
     /* Build a new vtable for this class
      * The child class PMC gets the vtable of its parent class or
      * a ParrotClass vtable
-     *
-     * XXX we are leaking this vtable
      */
     parent_vtable = new_class->vtable;
     if (parent && PObj_is_class_TEST(parent))
@@ -608,7 +624,7 @@ get_init_meth(Interp* interpreter, PMC *class,
 #else
     if ( !(props = PMC_metadata(class)))
         return NULL;
-    b = hash_get_bucket(interpreter,
+    b = parrot_hash_get_bucket(interpreter,
                 (Hash*) PMC_struct_val(props), prop_str);
     if (!b)
         return NULL;
@@ -1386,7 +1402,7 @@ attr_str_2_num(Interp* interpreter, PMC *object, STRING *attr)
     class = GET_CLASS((SLOTTYPE *)PMC_data(object), object);
     class_array = (SLOTTYPE *)PMC_data(class);
     attr_hash = get_attrib_num(class_array, PCD_ATTRIBUTES);
-    b = hash_get_bucket(interpreter,
+    b = parrot_hash_get_bucket(interpreter,
                 (Hash*) PMC_struct_val(attr_hash), attr);
     if (b)
         return PMC_int_val((PMC*)b->value);
@@ -1489,7 +1505,7 @@ Parrot_class_offset(Interp* interpreter, PMC *object, STRING *class) {
     /*
      * cheat a bit--the offset_hash is a Hash PMC
      */
-    b = hash_get_bucket(interpreter,
+    b = parrot_hash_get_bucket(interpreter,
                 (Hash*) PMC_struct_val(offset_hash), class);
     if (!b)
         offset = -1;

@@ -1,5 +1,5 @@
-# Copyright: 2002-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_compiler.pir 11366 2006-01-28 20:03:50Z bernhard $
+# Copyright (C) 2002-2006, The Perl Foundation.
+# $Id: parrot_compiler.pir 12840 2006-05-30 15:08:05Z coke $
 
 .sub main :main
   .param pmc argv

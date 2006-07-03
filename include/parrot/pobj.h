@@ -1,7 +1,7 @@
 /* pobj.h
- *  Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2005, The Perl Foundation.
  *  SVN Info
- *     $Id: pobj.h 12044 2006-03-27 13:27:10Z leo $
+ *     $Id: pobj.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:

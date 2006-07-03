@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: hello-dwim.pir 10749 2005-12-28 22:09:59Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: hello-dwim.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

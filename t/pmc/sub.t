@@ -1,13 +1,13 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: sub.t 12465 2006-04-30 15:11:25Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: sub.t 12871 2006-06-02 14:19:51Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 44;
+use Parrot::Test tests => 53;
 use Parrot::Config;
 
 =head1 NAME
@@ -649,6 +649,23 @@ first
 second
 OUTPUT
 
+pir_output_like(<<'CODE', <<'OUTPUT', "implicit :main with wrong # args.");
+.sub a
+  .param int op1
+  .param int op2
+.end
+CODE
+/argument count mismatch in main \(more than 1 param\)/
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "explicit :main with wrong # args.");
+.sub a :main
+  .param int op1
+  .param int op2
+.end
+CODE
+/argument count mismatch in main \(more than 1 param\)/
+OUTPUT
 
 $temp = "temp.pir";
 open S, ">$temp" or die "Can't write $temp";
@@ -889,9 +906,9 @@ OUTPUT
 
 
 {
-    # the test is failing when run with --run-pbc (make testr)
-    # actually the POSTCOMP is run and "initial" is printed, but
-    # its not captured by the test system
+    # the test has different output when run with --run-pbc (make testr)
+    # actually not - compiling creates 2 'initial'
+    #                running emts 'main'
 
     my $code = <<'CODE';
 .sub optc :immediate, :postcomp
@@ -901,20 +918,20 @@ OUTPUT
     print "main\n"
 .end
 CODE
-    my $output = <<'OUTPUT';
+    my $descr = ':immediate, :postcomp';
+    if ( exists $ENV{TEST_PROG_ARGS} and $ENV{TEST_PROG_ARGS} =~ m/-r/ )
+    {
+	pir_output_is( $code, <<'OUT', $descr);
+initial
 initial
 main
-OUTPUT
-    my $descr = ':immediate, :postcomp';
-    if ( exists $ENV{TEST_PROG_ARGS} and $ENV{TEST_PROG_ARGS} =~ m/-r / )
-    {
-        TODO:
-        {
-            local $TODO = "output from :postcomp is lost";
-            pasm_output_is( $code, $output, $descr);
-        };
+OUT
     } else {
-        pir_output_is( $code, $output, $descr);
+	pir_output_is( $code, <<'OUT', $descr);
+initial
+initial
+main
+OUT
     }
 }
 
@@ -1142,4 +1159,96 @@ CODE
 /uninit.*\n.*\nback\nok/
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', ':postcomp');
+.sub main :main
+    print "main\n"
+.end
+.sub pc :postcomp
+    print "pc\n"
+.end
+.sub im :immediate
+    print "im\n"
+.end
+.sub pc2 :postcomp
+    print "pc2\n"
+.end
+.sub im2 :immediate
+    print "im2\n"
+.end
+CODE
+im
+im2
+pc
+pc2
+main
+OUTPUT
 
+# see also #38964
+pir_output_is(<<'CODE', <<'OUTPUT', 'unicode sub names, compilation');
+.sub unicode:"\u7777"
+   print "ok\n"
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'unicode sub names, invocation');
+.sub unicode:"\u7777"
+    print "ok\n"
+.end
+
+.sub test :main
+    unicode:"\u7777"()
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'unicode sub names, dynamic');
+.sub unicode:"\u7777"
+    print "ok\n"
+.end
+
+.sub test :main
+    $P1 = find_name unicode:"\u7777"
+    $P1()
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', 'unicode sub names');
+.sub unicode:"\u7777"
+    print "ok\n"
+.end
+
+.sub test :main
+    # unicode:"\u7777" ends up as a string nicode:"\u7777
+    # (or it did, in r12860)
+    $P1 = find_name 'nicode:"\u7777'
+    $P1()
+.end
+CODE
+/Name 'nicode:"\\u7777' not found\n.*\n/
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'unicode sub constant');
+.sub main :main
+    .const .Sub s = unicode:"\u7777"
+    s()
+.end
+
+.sub unicode:"\u7777"
+   print "ok\n"
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'literal \u in sub name (not unicode)');
+.sub '\u2193'
+    say 'ok'
+.end
+CODE
+ok
+OUTPUT

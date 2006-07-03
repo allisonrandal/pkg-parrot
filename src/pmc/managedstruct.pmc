@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: managedstruct.pmc 12546 2006-05-07 05:27:27Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: managedstruct.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 DESCRIPTION
 

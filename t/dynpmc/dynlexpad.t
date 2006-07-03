@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: dynlexpad.t 11226 2006-01-17 19:09:59Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: dynlexpad.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

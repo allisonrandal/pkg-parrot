@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd03_calling_conventions.pod 12611 2006-05-11 08:48:18Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: pdd03_calling_conventions.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Parrot's inter-routine calling conventions.
 
 =head1 VERSION
 
-$Revision: 12611 $
+$Revision: 12839 $
 
 =head1 DESCRIPTION
 

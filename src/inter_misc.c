@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: inter_misc.c 12584 2006-05-09 21:51:17Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: inter_misc.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
@@ -214,7 +214,7 @@ interpinfo_p(Interp *interpreter, INTVAL what)
         case CURRENT_OBJECT:
             return CONTEXT(interpreter->ctx)->current_object;
         case NAMESPACE_ROOT: 
-            return interpreter->stash_hash;
+            return interpreter->root_namespace;
         case CURRENT_LEXPAD:
             return CONTEXT(interpreter->ctx)->lex_pad;
         default:        /* or a warning only? */

@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: darwin.pm 11611 2006-02-17 01:55:27Z jisom $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: darwin.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::darwin;
 

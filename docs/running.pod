@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: running.pod 11507 2006-02-11 17:08:54Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: running.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot - running
 
 =head1 VERSION
 
-$Revision: 11507 $
+$Revision: 12839 $
 
 =head1 OVERVIEW
 

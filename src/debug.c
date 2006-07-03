@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: debug.c 11647 2006-02-18 16:12:23Z leo $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: debug.c 12928 2006-06-12 19:33:05Z bernhard $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ debugger, and the C<debug> ops.
 #include <stdio.h>
 #include <stdlib.h>
 #include "parrot/parrot.h"
-#include "parrot/interp_guts.h"
+#include "interp_guts.h"
 #include "parrot/oplib.h"
 #include "parrot/trace.h"
 #include "parrot/debug.h"

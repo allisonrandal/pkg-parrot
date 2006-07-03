@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: mk_manifest_and_skip.pl 12600 2006-05-10 16:57:10Z bernhard $
+# $Id: mk_manifest_and_skip.pl 12688 2006-05-15 19:40:33Z bernhard $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ use File::Find;
 
 my @dirs;  # will be filled in wanted
 
-# XXX Most of these can propably be cleaned up
+# XXX Most of these can probably be cleaned up
 my %special = qw(
     NEWS                                            [devel]doc
     PBC_COMPAT                                      [devel]doc

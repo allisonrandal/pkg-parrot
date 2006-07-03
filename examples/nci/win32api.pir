@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: win32api.pir 10739 2005-12-28 18:56:46Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: win32api.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

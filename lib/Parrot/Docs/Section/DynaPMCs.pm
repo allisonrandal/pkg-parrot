@@ -1,5 +1,5 @@
-# Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: DynaPMCs.pm 11226 2006-01-17 19:09:59Z bernhard $
+# Copyright (C) 2004, The Perl Foundation.
+# $Id: DynaPMCs.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

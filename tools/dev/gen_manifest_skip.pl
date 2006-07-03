@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: gen_manifest_skip.pl 10296 2005-12-01 19:40:02Z coke $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: gen_manifest_skip.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Op.pm 10698 2005-12-27 18:32:31Z gregor $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: Op.pm 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 
@@ -469,7 +469,7 @@ license as Parrot itself.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
+Copyright (C) 2001-2005, The Perl Foundation.
 
 =end TODO
 

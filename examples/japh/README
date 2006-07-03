@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: README 9135 2005-09-04 10:26:32Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+$Id: README 12835 2006-05-30 13:32:26Z coke $
 
 XXX
 XXX a lot of the JAPHs are currently broken due to recent core changes

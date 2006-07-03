@@ -1,7 +1,7 @@
 /* exceptions.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: exceptions.h 12549 2006-05-07 06:21:28Z petdance $
+ *     $Id: exceptions.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:

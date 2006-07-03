@@ -1,5 +1,5 @@
-# Copyright: 2002-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: call_list.txt 11838 2006-03-09 17:26:33Z timbo $
+# Copyright (C) 2002-2005, The Perl Foundation.
+# $Id: call_list.txt 12826 2006-05-30 01:36:30Z coke $
 
 # Function signature declarations for Parrot Native Call Interface.
 # The first alphanumeric is the type of the return value,

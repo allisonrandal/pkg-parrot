@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Step.pm 12102 2006-04-03 20:05:44Z particle $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: Step.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

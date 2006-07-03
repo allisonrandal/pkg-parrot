@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 11917 2006-03-17 17:49:10Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: basic.t 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 
@@ -190,7 +190,7 @@ TODO:
            # floats
            [ '.1', '.1', 'Parrot bc says 0.1', with_past => 1 ],
            [ '-.1', '-.1', 'Parrot bc says -0.1', with_past => 1],
-           [ '-1.0000001', '-1.0000001', 'propably limited precission of Float PMC', with_past => 1 ],
+           [ '-1.0000001', '-1.0000001', 'probably limited precission of Float PMC', with_past => 1 ],
 
            # keyword quit
            [ "0\n1; 2; quit;  3", [ 0 ], 'is that correct in GNU bc?', with_past => 1 ],

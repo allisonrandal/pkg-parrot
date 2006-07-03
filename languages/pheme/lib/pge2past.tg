@@ -1,4 +1,12 @@
-ROOT: result(.) = {
+transform result (ROOT) :language('PIR') {
+	# XXX: transform into a method on the TGE object, when it's possible
+	.local pmc specials
+	specials = new .Hash
+	specials['define'] = 1
+	specials['quote']  = 1
+
+	store_global 'specials', specials
+
 	.local pmc result
 	result = new 'Node'
 
@@ -43,12 +51,12 @@ ROOT: result(.) = {
 	.return( result )
 }
 
-list: result(.) = {
+transform result (list) :language('PIR') {
 	.local pmc result
 	result = new 'PAST::Exp'
 
 	.local pmc match
-	match = node['list_items']
+	match = node['list_item']
 
 	.local pmc iter
 	iter  = new Iterator, match # setup iterator for node
@@ -59,7 +67,7 @@ list: result(.) = {
 
 	.local pmc child
 	child = shift iter
-	child = tree.get( 'result', child, 'list_items' )
+	child = tree.get( 'result', child, 'list_item' )
 
 	.local pmc op
 	op    = tree.get( 'maybe_op', child )
@@ -68,7 +76,7 @@ list: result(.) = {
   iter_loop:
 	unless iter, iter_end        # while (entries) ...
 	shift child, iter            # get key for next entry
-	child = tree.get( 'result', child, 'list_items' )
+	child = tree.get( 'result', child, 'list_item' )
 	result.'add_child'( child )
 	goto iter_loop
 
@@ -77,42 +85,71 @@ list: result(.) = {
 	child_type = typeof op
 	unless child_type == 'PAST::Op' goto return_result
 
-	result = tree.get( 'maybe_promote_sub', result )
+	result = tree.get( 'handle_specials', result )
 
   return_result:
 	.return( result )
 }
 
-PAST::Exp: maybe_op(.) = {
+# XXX - don't know why I need this, but it prevents ambiguity errors
+transform maybe_op (PAST::Exp) :language('PIR') {
 	.return( node )
 }
 
-PAST::Val: maybe_op(.) = {
+transform maybe_op (PAST::Val) :language('PIR') {
+	.local string value
+	.local string valtype
+
+	value   = node.'value'()
+	valtype = node.'valtype'()
+
+	unless valtype goto treat_as_op
+
+	.local pmc val
+	val = new 'PAST::Val'
+	val.'value'( value )
+	val.'valtype'( valtype )
+
+	.return( val )
+
+  treat_as_op:
 	.local pmc op
 	op = new 'PAST::Op'
-
-	.local string op_name
-	op_name = node.'value'()
-
-	op.'op'( op_name )
+	op.'op'( value )
 
 	.return( op )
 }
 
-PAST::Exp: maybe_promote_sub(.) = {
+transform handle_specials (PAST::Exp) :language('PIR') {
+	.local pmc children
+	children = node.'children'()
+
+	.local pmc op
+	op = children[0]
+
+	.local string name
+	name = op.'op'()
+
+	.local pmc specials
+	specials = find_global 'specials'
+
+	.local int special_exists
+	special_exists = exists specials[name]
+
+	unless special_exists goto not_a_special
+
+	node = tree.'get'( name, node )
+
+  not_a_special:
+	.return( node )
+}
+
+transform define (PAST::Exp) :language('PIR') {
 	.local pmc children
 	children = node.'children'()
 
 	.local pmc op
 	op       = children[0]
-
-
-	.local string op_name
-	op_name = op.'op'()
-	if op_name == 'define' goto return_sub
-	.local pmc result
-	result = node
-	.return( result )
 
   return_sub:
 	.local pmc sub_name
@@ -136,8 +173,52 @@ PAST::Exp: maybe_promote_sub(.) = {
 	.return( result )
 }
 
+transform quote (PAST::Exp) :language( 'PIR' ) {
+	.local pmc children
+	children = node.'children'()
+
+	# remove this Exp and promote the first sibling
+	.local pmc sibling
+	sibling  = children[1]
+	children = sibling.'children'()
+
+	.local pmc first_child
+	first_child = children[0]
+
+	.local string child_type
+	child_type = typeof first_child
+
+	unless child_type == 'PAST::Op' goto rewrite_op
+
+	.local string op_name
+	op_name = first_child.'op'()
+
+	# if it's an empty list, let it be an empty list
+	unless op_name == '__make_empty_cons' goto rewrite_op
+	.return( sibling )
+
+  rewrite_op:
+	.local pmc val_child
+	val_child = new 'PAST::Val'
+
+	# XXX: this might fail unless the first kid is an op
+	.local string value
+	value   = first_child.'op'()
+	val_child.'value'( value )
+
+	children[0] = val_child
+	
+	.local pmc cons_op
+	cons_op = new 'PAST::Op'
+	cons_op.'op'( '__list_to_cons' )
+
+	unshift children, cons_op
+
+	.return( sibling )
+}
+
 # XXX: almost certainly wrong
-empty_list: result(.) = {
+transform result (empty_list) :language('PIR') {
 	.local pmc result
 	result = new 'PAST::Exp'
 
@@ -149,19 +230,44 @@ empty_list: result(.) = {
 	.return( result )
 }
 
-atom: result(.) = {
+transform result (atom) :language('PIR') {
 	.local pmc result
 	result   = new 'PAST::Val'
 
 	.local string value
 	value    = node
 
+	.local string valtype
+	valtype  = ''
+
+	.local int quote
+	.local int value_length
+	value_length = length value
+
+	quote = exists node['quote']
+	unless quote goto check_double_quoted
+
+	dec value_length
+	value   = substr value, 1, value_length
+	valtype = 'literal'
+	goto unquoted
+
+  check_double_quoted:
+	quote = exists node['quoted_string']
+	unless quote goto unquoted
+
+	sub value_length, 2
+	value   = substr value, 1, value_length
+	valtype = 'literal'
+	goto unquoted
+
+  unquoted:
 	result.'value'( value )
-	result.'valtype'( '' )
+	result.'valtype'( valtype )
 	.return( result )
 }
 
-quoted_string: result(.) = {
+transform result (quoted_string) :language('PIR') {
 	.local pmc result
 	result = new 'PAST::Val'
 
@@ -189,7 +295,7 @@ quoted_string: result(.) = {
 	.return( result )
 }
 
-list_items: result(.) = {
+transform result (list_item) :language('PIR') {
 	.local pmc result
 	.local pmc iter
 

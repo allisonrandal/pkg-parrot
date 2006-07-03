@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: examples.t 12252 2006-04-15 07:21:35Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: examples.t 12840 2006-05-30 15:08:05Z coke $
 
 use strict;
 use warnings;

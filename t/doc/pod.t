@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pod.t 11968 2006-03-21 16:42:57Z coke $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: pod.t 12838 2006-05-30 14:19:10Z coke $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ParrotCompiler.pm 12039 2006-03-26 19:46:16Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: ParrotCompiler.pm 12840 2006-05-30 15:08:05Z coke $
 
 use strict;
 

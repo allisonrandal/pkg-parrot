@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: gc_waves_sizeable_headers.pasm 11937 2006-03-19 14:18:26Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: gc_waves_sizeable_headers.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

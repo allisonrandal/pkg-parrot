@@ -1,7 +1,6 @@
 #! perl
-
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: exit.t 12636 2006-05-12 19:58:38Z ambs $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: exit.t 12838 2006-05-30 14:19:10Z coke $
 
 =head1 NAME
 

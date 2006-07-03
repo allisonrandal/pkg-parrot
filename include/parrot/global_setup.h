@@ -1,7 +1,7 @@
 /* global_setup.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: global_setup.h 11928 2006-03-18 17:43:35Z leo $
+ *     $Id: global_setup.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *      Contains declarations of global data and the functions
  *      that initialize that data.

@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: 01-codestring.t 12668 2006-05-14 15:36:59Z pmichaud $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: 01-codestring.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

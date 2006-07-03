@@ -1,5 +1,5 @@
-# Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: libpcre.pir 12262 2006-04-15 16:16:43Z bernhard $
+# Copyright (C) 2004-2006, The Perl Foundation.
+# $Id: libpcre.pir 12837 2006-05-30 13:47:57Z coke $
 
 =head1 TITEL
 

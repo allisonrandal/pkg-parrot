@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: iterator.pmc 12566 2006-05-09 03:40:54Z petdance $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: iterator.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

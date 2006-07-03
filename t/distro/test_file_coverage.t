@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: test_file_coverage.t 11765 2006-02-27 09:02:58Z bernhard $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: test_file_coverage.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

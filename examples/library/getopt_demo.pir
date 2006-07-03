@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006 The Perl Foundation.  All rights reserved.
-# $Id: getopt_demo.pir 11196 2006-01-15 16:03:22Z jisom $
+# Copyright (C) 2004-2006, The Perl Foundation.
+# $Id: getopt_demo.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

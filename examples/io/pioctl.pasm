@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: pioctl.pasm 5176 2004-01-31 13:51:31Z mikescott $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: pioctl.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: root.in 11395 2006-02-01 10:39:56Z bernhard $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: root.in 12840 2006-05-30 15:08:05Z coke $
 
 # Setup of some commands
 PERL          = @perl@

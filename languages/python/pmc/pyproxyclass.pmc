@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pyproxyclass.pmc 11564 2006-02-16 00:51:49Z jhoblitt $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: pyproxyclass.pmc 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

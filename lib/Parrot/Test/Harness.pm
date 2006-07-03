@@ -1,5 +1,5 @@
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Harness.pm 12227 2006-04-14 15:17:39Z bernhard $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: Harness.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

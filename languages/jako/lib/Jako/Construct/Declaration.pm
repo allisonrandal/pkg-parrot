@@ -1,11 +1,11 @@
 #
 # Declaration.pm
 #
-# Copyright: 2002-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2002-2005, The Perl Foundation.
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Declaration.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Declaration.pm 12840 2006-05-30 15:08:05Z coke $
 #
 
 use strict;

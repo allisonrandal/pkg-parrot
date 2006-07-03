@@ -1,5 +1,5 @@
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: library.t 12100 2006-04-03 19:43:55Z bernhard $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: library.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;
