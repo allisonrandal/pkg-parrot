@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: object-meths.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/pmc/object-meths.t 13099 2006-07-01T21:25:20.974025Z chip  $
 
 use strict;
 use warnings;
@@ -250,7 +250,7 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "constructor - parents");
     print "baz_init\n"
     returncc
 
-    .namespace [""]	# main again
+    .namespace	# main again
 .pcc_sub _sub:
     print "in sub\n"
     returncc
@@ -691,7 +691,7 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "constructor - parents BUILD");
     print "baz_init\n"
     returncc
 
-    .namespace [""]	# main again
+    .namespace	# main again
 .pcc_sub _sub:
     print "in sub\n"
     returncc
@@ -726,7 +726,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "same method name in two namespaces");
     .pcc_end_return
 .end
 
-.namespace [""]
+.namespace
 .sub _main :main
     print "ok\n"
 .end

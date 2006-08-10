@@ -1,4 +1,4 @@
-# $Id: 03_types.t 7252 2004-12-07 15:46:28Z rubys $
+# $Id: /local/languages/python/t/basic/03_types.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use lib '../../lib';

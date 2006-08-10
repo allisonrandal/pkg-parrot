@@ -1,4 +1,4 @@
-# $Id: dynpmc.in 12755 2006-05-23 03:38:23Z mdiep $
+# $Id: /local/config/gen/makefiles/dynpmc.in 12755 2006-05-23T03:38:23.621690Z mdiep  $
 
 PERL        = @perl@
 RM_F        = @rm_f@

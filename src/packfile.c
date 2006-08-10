@@ -2,7 +2,7 @@
 Copyright (C) 2001-2006, The Perl Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packfile.c 12932 2006-06-13 05:12:41Z petdance $
+$Id: /local/src/packfile.c 13660 2006-07-28T17:05:24.263356Z chip  $
 
 =head1 NAME
 
@@ -910,6 +910,29 @@ PackFile_new(Interp* interpreter, INTVAL is_mapped)
     pf->fetch_op = (opcode_t (*)(unsigned char*)) NULLfunc;
     pf->fetch_iv = (INTVAL (*)(unsigned char*)) NULLfunc;
     pf->fetch_nv = (void (*)(unsigned char *, unsigned char *)) NULLfunc;
+    return pf;
+}
+
+/*
+
+=item C<struct PackFile * PackFile_new_dummy(Interp*, const char *name)>
+
+Create a new (initial) dummy PackFile. This is needed, if the interpreter
+doesn't load any bytecode, but is using Parrot_compile_string.
+
+=cut
+
+*/
+
+struct PackFile *
+PackFile_new_dummy(Interp* interpreter, const char *name)
+{
+    struct PackFile *pf;
+
+    pf = PackFile_new(interpreter, 0);
+    interpreter->initial_pf = pf;
+    interpreter->code = 
+        pf->cur_cs = PF_create_default_segs(interpreter, name, 1);
     return pf;
 }
 

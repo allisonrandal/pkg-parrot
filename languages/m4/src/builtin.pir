@@ -1,4 +1,4 @@
-# $Id: builtin.pir 11640 2006-02-18 12:46:43Z bernhard $
+# $Id: /local/languages/m4/src/builtin.pir 11640 2006-02-18T12:46:43.643690Z bernhard  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ builtin.pir - builtin and user defined macros
 =head2 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: builtin.pir 11640 2006-02-18 12:46:43Z bernhard $
+SVN Info:   $Id: /local/languages/m4/src/builtin.pir 11640 2006-02-18T12:46:43.643690Z bernhard  $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 

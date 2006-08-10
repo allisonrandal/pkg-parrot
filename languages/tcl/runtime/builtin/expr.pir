@@ -5,40 +5,30 @@
 # expr arg [... arg arg]
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&expr"
+.sub '&expr'
   .param pmc argv :slurpy
  
   .local string expr
   .local int argc
   .local int looper
 
-  .local pmc retval
-  .local pmc expression_compiler,pir_compiler
-  .get_from_HLL(expression_compiler, '_tcl', '__expression_compile')
-  .get_from_HLL(pir_compiler, '_tcl', 'pir_compiler')
+  .local pmc __expr
+  __expr = get_root_global ['_tcl'], '__expr'
 
-  expr = ""
+  expr = ''
   looper = 0
   argc = argv 
   unless argc goto no_args
 
-loop:
-  if looper == argc goto loop_done
-  $S0 = argv[looper]
-  concat expr, $S0
-  inc looper
-  if looper == argc goto loop_done
-  concat expr," "
-
-  goto loop
+  expr = join ' ', argv
 
 loop_done:
-  ($I0,$S0) = expression_compiler(0,expr)
-  $P2 = pir_compiler($I0,$S0)
-  .return $P2()
+  $P1 = __expr(expr)
+  $P2 = $P1()
+  .return ($P2)
 
 no_args:
-  .throw("wrong # args: should be \"expr arg ?arg ...?\"")
+  .throw('wrong # args: should be "expr arg ?arg ...?"')
 .end

@@ -1,7 +1,7 @@
 /* register.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: register.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/register.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     Defines the register api
  *  Data Structure and Algorithms:

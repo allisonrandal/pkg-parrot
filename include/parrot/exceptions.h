@@ -1,7 +1,7 @@
 /* exceptions.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: exceptions.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/exceptions.h 13784 2006-08-01T17:54:04.760248Z chip  $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:
@@ -157,7 +157,6 @@ struct parrot_exception_t {
     long error;                         /* exception_type_enum */
     STRING *msg;                        /* may be NULL */
     void *resume;                       /* opcode_t* for resume or NULL */
-    int runloop_level;                  /* for reentering run loop */
     struct parrot_exception_t *prev;    /* interpreters handler stack */
     long language;                      /* what is this? */
     long system;                        /* what is this? */

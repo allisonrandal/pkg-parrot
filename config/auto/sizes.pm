@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: sizes.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/auto/sizes.pm 13003 2006-06-22T16:18:58.705067Z jonathan  $
 
 =head1 NAME
 
@@ -129,6 +129,7 @@ END
             cc_gen('config/auto/sizes/test2_c.in');
             cc_build();
             %hugeintval = eval cc_run();
+            cc_clean();
         };
 
         # clear int8_t on error
@@ -138,7 +139,6 @@ END
         }
 
         if ($hugeintval{hugeintvalsize} > $intvalsize) {
-
             # We found something bigger than intval.
             $conf->data->set(%hugeintval);
             last;

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: $
+# $Id: /local/docs/pdds/clip/pdd25_threads.pod 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ Parrot's threading model.
 
 =head1 VERSION
 
-$Revision: $
+$Revision: 13523 $
 
 =head1 DEFINITIONS
 

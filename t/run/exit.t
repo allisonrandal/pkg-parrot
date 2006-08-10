@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: exit.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/run/exit.t 12838 2006-05-30T14:19:10.150135Z coke  $
 
 =head1 NAME
 

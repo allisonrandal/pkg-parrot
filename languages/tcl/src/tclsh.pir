@@ -10,11 +10,7 @@
 # available
 #
 
-.sub _load_lib :immediate
-    .local pmc lib
-    lib = loadlib 'dynlexpad'
-.end
-
+.loadlib 'dynlexpad'
 .HLL 'Tcl', 'tcl_group'
 .HLL_map .LexPad, .DynLexPad
 
@@ -54,8 +50,8 @@
   store_global '$tcl_interactive', tcl_interactive
 
   .local pmc compiler,pir_compiler
-  .get_from_HLL(compiler,'_tcl', 'compile')
-  .get_from_HLL(pir_compiler,'_tcl', 'pir_compiler')
+  compiler     = get_root_global ['_tcl'], 'compile'
+  pir_compiler = get_root_global ['_tcl'], 'pir_compiler'
 
   if argc > 1 goto open_file
 
@@ -87,17 +83,14 @@ input_loop:
   goto input_loop_continue
 
 loop_error:
-  .local pmc exception
+  .catch()
   .local string exception_msg
-  get_results '(0)', exception, exception_msg
+  .get_message(exception_msg)
   # Are we just missing a close-foo?
-  # XXX Should add check to make sure we're dealing with a tcl exception
-  #     and not a mere parrot one.
   if exception_msg == 'missing close-brace' goto input_loop_continue2
   if exception_msg == "missing quote"       goto input_loop_continue2
   
 loop_error_real:
-  .catch()
   .get_stacktrace($S0)
   print $S0
   #goto input_loop_continue
@@ -177,8 +170,8 @@ oneliner:
   .local string tcl_code
   tcl_code = opt['e']
   if dump_only goto oneliner_dump
-  .get_from_HLL($P1, '_tcl', 'compile')
-  .get_from_HLL($P2, '_tcl', 'pir_compiler')
+  $P1 = get_root_global ['_tcl'], 'compile'
+  $P2 = get_root_global ['_tcl'], 'pir_compiler'
   ($I0, $S1) = $P1(0,tcl_code)
   $P3 = $P2($I0,$S1)
   push_eh file_error
@@ -187,9 +180,9 @@ oneliner:
   goto done
 
 oneliner_dump:
-  .get_from_HLL($P1, '_tcl', 'compile')
-  .get_from_HLL($P2, '_tcl', 'pir_compiler')
-  ($I0, $S1) = $P1(0,tcl_code,1)
+  $P1 = get_root_global ['_tcl'], 'compile'
+  $P2 = get_root_global ['_tcl'], 'pir_compiler'
+  ($I0, $S1) = $P1(0,tcl_code)
   $S2 = $P2($I0,$S1,1)
   print $S2
 
@@ -228,8 +221,8 @@ got_prompt:
   varname .= $S0
 
   .local pmc compiler,pir_compiler
-  .get_from_HLL(compiler, '_tcl', 'compile')
-  .get_from_HLL(pir_compiler, '_tcl', 'pir_compiler')
+  compiler     = get_root_global ['_tcl'], 'compile'
+  pir_compiler = get_root_global ['_tcl'], 'pir_compiler'
 
   push_eh no_prompt
     $P0 = find_global varname

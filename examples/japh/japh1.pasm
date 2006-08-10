@@ -1,4 +1,4 @@
-# $Id: japh1.pasm 9150 2005-09-07 19:51:21Z bernhard $
+# $Id: /local/examples/japh/japh1.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 
 # The very first JaPH: obfuscated
     bounds 1

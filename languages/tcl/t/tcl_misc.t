@@ -2,7 +2,7 @@
 
 use strict;
 use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 23;
+use Parrot::Test tests => 27;
 use Test::More;
 
 language_output_is("tcl",<<'TCL',<<OUT,"leading spacex2 should be ok");
@@ -155,6 +155,13 @@ TCL
 1 {unmatched open brace in list}
 OUT
 
+language_output_is("tcl",<<'TCL',<<'OUT',"{} command");
+  proc {} {} {puts ok}
+  {}
+TCL
+ok
+OUT
+
 {
 
   # Note - we need to keep the path around for windows
@@ -175,3 +182,24 @@ env(pig)    = oink
 OUT
 }
 
+language_output_is("tcl", <<'TCL', <<'OUT', "args checking from inlined commands");
+  proc incr {} { puts ok }
+  incr
+TCL
+ok
+OUT
+
+language_output_is('tcl', <<'TCL', <<'OUT', 'order of arguments with __integer conversion');
+set x 0012
+puts [list $x [incr x]]
+TCL
+0012 11
+OUT
+
+language_output_is('tcl', <<'TCL', <<'OUT', 'make sure list value can be overridden by a string value');
+  set value [list a b c]
+  set value 2
+  puts $value
+TCL
+2
+OUT

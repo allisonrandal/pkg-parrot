@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: metatable.t 11501 2006-02-10 18:27:13Z particle $
+# $Id: /local/languages/lua/t/metatable.t 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 

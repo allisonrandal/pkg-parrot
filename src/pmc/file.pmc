@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: file.pmc 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pmc/file.pmc 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 
@@ -49,6 +49,32 @@ information see F<src/pmc.c>.
 
     void set_pointer(void* ptr) {
         File_PMC = (PMC*) ptr;
+    }
+
+/*
+
+=item C<INTVAL exists(STRING* file)>
+
+Returns a true value (1) if the supplied file or directory exists.
+
+=cut
+
+*/
+
+    METHOD INTVAL exists(STRING *path) {
+        struct stat info;
+        char *cpath = string_to_cstring(interpreter, path);
+#ifdef WIN32
+        int error = stat(cpath, &info);
+#else
+        int error = lstat(cpath, &info);
+#endif
+        string_cstring_free(cpath);
+        if (error) {
+            return 0;
+        }
+
+        return 1;
     }
 
 /*

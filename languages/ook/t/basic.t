@@ -1,5 +1,5 @@
 #! perl -w
-# $Id: basic.t 12511 2006-05-05 07:10:12Z fperrad $
+# $Id: /local/languages/ook/t/basic.t 12511 2006-05-05T07:10:12.060851Z fperrad  $
 
 =head1 NAME
 

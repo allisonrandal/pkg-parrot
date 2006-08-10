@@ -1,5 +1,5 @@
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: luapackage.pir 11848 2006-03-10 08:39:33Z fperrad $
+# $Id: /local/languages/lua/lib/luapackage.pir 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 

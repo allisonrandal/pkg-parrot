@@ -1,9 +1,9 @@
 #!perl -w
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: alloc.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/compilers/imcc/reg/alloc.t 13078 2006-06-30T23:50:00.784287Z leo  $
 
 use strict;
-use Parrot::Test tests => 3;
+use Parrot::Test tests => 11;
 
 pir_output_is(<<'CODE', <<'OUT', "alligator");
 # if the side-effect of set_addr/continuation isn't
@@ -80,4 +80,78 @@ main:
         mul I2, I1, 2
         set_returns
         returncc
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', "Explicit large register: S, PIR");
+.sub main
+  S32 = "ok\n"
+  print S32
+.end
+CODE
+ok
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', "Explicit large register: N, PIR");
+.sub main
+  N32 = 3.8
+  print N32
+  print "\n"
+.end
+CODE
+3.800000
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', "Explicit large register: I, PIR");
+.sub main
+  I32 = 123
+  print I32
+  print "\n"
+.end
+CODE
+123
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', "Explicit large register: P, PIR");
+.sub main
+  P32 = new .String
+  P32 = "ok\n"
+  print P32
+.end
+CODE
+ok
+OUT
+
+pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: S, PASM");
+  set S32, "ok\n"
+  print S32
+  end
+CODE
+ok
+OUT
+
+pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: N, PASM");
+  set N32, 3.8
+  print N32
+  print "\n"
+  end
+CODE
+3.800000
+OUT
+
+pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: I, PASM");
+  set I32, 123
+  print I32
+  print "\n"
+  end
+CODE
+123
+OUT
+
+pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: P, PASM");
+  new P32, .String
+  set P32, "ok\n"
+  print P32
+  end
+CODE
+ok
 OUT

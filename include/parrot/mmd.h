@@ -1,7 +1,7 @@
 /* mmd.h
  *  Copyright (C) 2003, The Perl Foundation.
  *  SVN Info
- *     $Id: mmd.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/mmd.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     This is the api header for the mmd subsystem
  *  Data Structure and Algorithms:

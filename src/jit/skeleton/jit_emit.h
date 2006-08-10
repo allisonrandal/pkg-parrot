@@ -3,7 +3,7 @@
  *
  * skeleton example - a stripped down jit/ppc/jit_emit.h
  *
- * $Id: jit_emit.h 11430 2006-02-05 22:14:12Z leo $
+ * $Id: /local/src/jit/skeleton/jit_emit.h 11501 2006-02-10T18:27:13.457666Z particle  $
  */
 
 #if !defined(PARROT_PPC_JIT_EMIT_H_GUARD)

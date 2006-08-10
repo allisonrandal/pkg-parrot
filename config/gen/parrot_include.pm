@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: parrot_include.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/gen/parrot_include.pm 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 
@@ -35,6 +35,7 @@ my @files = qw(
     include/parrot/resources.h
     include/parrot/stat.h
     include/parrot/string.h
+    include/parrot/pmc.h
     include/parrot/vtable.h
     include/parrot/warnings.h
     src/pmc/timer.pmc

@@ -459,7 +459,7 @@ __END__
 
 =head1 VERSION
 
-$Id: Block.pm 12840 2006-05-30 15:08:05Z coke $
+$Id: /local/languages/jako/lib/Jako/Construct/Block.pm 12840 2006-05-30T15:08:05.048089Z coke  $
 
 =head1 AUTHOR
 

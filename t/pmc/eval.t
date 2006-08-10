@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: eval.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/pmc/eval.t 13660 2006-07-28T17:05:24.263356Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 18;
+use Parrot::Test tests => 19;
 
 =head1 NAME
 
@@ -614,4 +614,23 @@ EOC
 CODE
 parrot;foo
 parrot;bar
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "catch compile err: RT:#39892");
+.sub main :main
+     push_eh handler
+     $P2 = compreg "PIR"
+     $S0 = <<"EPIR"
+  .sub foo
+     print a typo
+  .end
+EPIR
+     $P0 = $P2($S0)
+     $P0()
+     end
+handler:
+     print "ok\n"
+.end
+CODE
+ok
 OUTPUT

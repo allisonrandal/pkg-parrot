@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: Item.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/Item.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =head1 NAME
 
@@ -31,6 +31,8 @@ file to place under the file path in the index HTML.
 package Parrot::Docs::Item;
 
 use strict;
+use warnings;
+
 use Parrot::Docs::Directory;
 use Parrot::Docs::POD2HTML;
 

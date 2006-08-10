@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: table.t 11084 2006-01-11 13:12:49Z fperrad $
+# $Id: /local/languages/lua/t/table.t 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 

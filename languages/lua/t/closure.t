@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: closure.t  $
+# $Id: /local/languages/lua/t/closure.t 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 

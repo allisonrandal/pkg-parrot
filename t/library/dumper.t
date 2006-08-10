@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: dumper.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/library/dumper.t 13099 2006-07-01T21:25:20.974025Z chip  $
 
 use strict;
 use warnings;
@@ -557,7 +557,7 @@ pir_output_is(<<'CODE', <<'OUT', "dumping objects");
     .pcc_begin_return
     .pcc_end_return
 .end
-.namespace [""]
+.namespace
 .include "library/dumper.pir"
 CODE
 "VAR1" => ResizablePMCArray (size:2) [
@@ -951,7 +951,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "custom dumper");
     dumper.'dump'('attr', ar)
     print "\n}"
 .end
-.namespace ['']
+.namespace
 .include 'library/dumper.pir'
 
 CODE

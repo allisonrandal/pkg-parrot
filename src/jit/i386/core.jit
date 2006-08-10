@@ -1,7 +1,7 @@
 ;
 ; i386/core.jit
 ;
-; $Id: core.jit 12350 2006-04-18 17:54:42Z particle $
+; $Id: /local/src/jit/i386/core.jit 12350 2006-04-18T17:54:42.711093Z particle  $
 ;
 
 # TODO complete this

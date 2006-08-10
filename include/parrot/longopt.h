@@ -1,7 +1,7 @@
 /* longopt.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: longopt.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/longopt.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     Command line option parsing (for pre-initialized code)
  *  Data Structure and Algorithms:

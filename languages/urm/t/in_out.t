@@ -1,4 +1,4 @@
-# $Id: in_out.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: /local/languages/urm/t/in_out.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";

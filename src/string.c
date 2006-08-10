@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: string.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/string.c 13603 2006-07-26T02:38:24.100453Z chip  $
 
 =head1 NAME
 
@@ -22,7 +22,8 @@ strings.
 
 #include "parrot/parrot.h"
 #include "parrot/compiler.h"
-#include "parrot/string_private_cstring.h"
+#include "string_private_cstring.h"
+#include "parrot/string_funcs.h"
 #include <assert.h>
 
 /*
@@ -45,10 +46,12 @@ strings.
            s->charset && \
            !PObj_on_free_list_TEST(s))
 
+/* HEADER: include/parrot/string_funcs.h */
 
 /*
 
-FUNCDOC:
+FUNCDOC: Parrot_unmake_COW
+
 If the specified Parrot string is copy-on-write then the memory is
 copied over and the copy-on-write flag is cleared.
 
@@ -64,6 +67,8 @@ Parrot_unmake_COW(Interp *interpreter, STRING *s /*NN*/)
         /* Create new pool data for this header to use,
          * independent of the original COW data */
         PObj_constant_CLEAR(s);
+        /* constant may have been marked */
+        PObj_live_CLEAR(s);     
         /*
          * allocate a dummy strings memory
          * buflen might be bigger and used, so pass this length
@@ -90,7 +95,8 @@ Parrot_unmake_COW(Interp *interpreter, STRING *s /*NN*/)
 
 /*
 
-FUNCDOC:
+FUNCDOC: copy_string_header
+
 Copies the string header from the first Parrot string to the second.
 
 */
@@ -103,7 +109,8 @@ copy_string_header(String *dest /*NN*/, const String *src /*NN*/)
 
 /*
 
-FUNCDOC:
+FUNCDOC: Parrot_make_COW_reference
+
 Creates a copy-on-write string by cloning a string header without
 allocating a new buffer.
 
@@ -113,9 +120,9 @@ STRING *
 Parrot_make_COW_reference(Interp *interpreter, STRING *s)
 {
     STRING *d;
-    if (s == NULL) {
+    if (s == NULL)
         return NULL;
-    }
+
     if (PObj_constant_TEST(s)) {
         d = new_string_header(interpreter, 0);
         PObj_COW_SET(s);
@@ -134,9 +141,11 @@ Parrot_make_COW_reference(Interp *interpreter, STRING *s)
     }
     return d;
 }
+
 /*
 
-FUNCDOC:
+FUNCDOC: Parrot_reuse_COW_reference
+
 Creates a copy-on-write string by cloning a string header without
 allocating a new buffer. Doesn't allocate a new string header, instead
 using the one passed in and returns it.
@@ -165,7 +174,8 @@ Parrot_reuse_COW_reference(Interp *interpreter, STRING *s, STRING *d /*NN*/)
 
 /*
 
-FUNCDOC:
+FUNCDOC: string_set
+
 Makes the contents of first Parrot string a copy of the contents of
 second.
 
@@ -199,7 +209,8 @@ string_set(Interp *interpreter, STRING *dest /*NN*/, STRING *src)
 
 Creation, enlargement, etc.
 
-FUNCDOC:
+FUNCDOC: string_init
+
 Initializes the Parrot string subsystem.
 
 */
@@ -208,19 +219,12 @@ void
 string_init(Parrot_Interp interpreter)
 {
     size_t i;
+
     /*
      * when string_init is called, the config hash isn't created
      * so we can't get at the runtime path
      * XXX do we still need this --leo
      */
-#if 0
-    char *data_dir;
-    int free_data_dir = 0;
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
-#endif
 
     if (!interpreter->parent_interpreter) {
         /* Load in the basic encodings and charsets
@@ -372,6 +376,9 @@ string_rep_compatible (Interp *interpreter, STRING *a /*NN*/, const STRING *b /*
 
 FUNCDOC:
 Take in two Parrot strings and append the second to the first.
+NOTE THAT RETURN VALUE MAY NOT BE THE FIRST STRING,
+  if the first string is COW'd or read-only.
+So make sure to _use_ the return value.
 
 */
 
@@ -576,11 +583,8 @@ STRING *
 string_make_direct(Interp *interpreter, const void *buffer,
         UINTVAL len, ENCODING *encoding, CHARSET *charset, UINTVAL flags)
 {
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
     STRING * const s = new_string_header(interpreter, flags);
+    DECL_CONST_CAST;
 
     s->encoding = encoding;
     s->charset = charset;
@@ -693,11 +697,7 @@ string_str_index(Interp *interpreter, const STRING *s,
 {
     STRING *src, *search;
     UINTVAL len;
-
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
 
     if (start < 0)
         return -1;
@@ -773,9 +773,11 @@ string_chr(Interp *interpreter, UINTVAL character)
     if (character > 0xff)
         return Parrot_unicode_charset_ptr->string_from_codepoint(interpreter,
                 character);
-    else
+    else if (character > 0x7f)
         return Parrot_iso_8859_1_charset_ptr->string_from_codepoint(interpreter,
                 character);
+    else return Parrot_ascii_charset_ptr->string_from_codepoint(interpreter,
+                 character);
 }
 
 
@@ -855,8 +857,8 @@ string_concat(Interp *interpreter, STRING *a, STRING *b, UINTVAL Uflags)
                         a->bufused + b->bufused,
                         enc, cs, 0);
 
-            string_append(interpreter, result, a, Uflags);
-            string_append(interpreter, result, b, Uflags);
+            result = string_append(interpreter, result, a, Uflags);
+            result = string_append(interpreter, result, b, Uflags);
 
             return result;
         }
@@ -1769,10 +1771,7 @@ FLOATVAL
 string_to_num(Interp *interpreter, const STRING *s)
 {
     FLOATVAL f = 0.0;
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
 
     if (s) {
         /*
@@ -2313,10 +2312,7 @@ TODO - implemented only for ASCII.
 STRING *
 string_upcase(Interp *interpreter, const STRING *s)
 {
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
     STRING * const dest = string_copy(interpreter, const_cast(s));
     string_upcase_inplace(interpreter, dest);
     return dest;
@@ -2349,10 +2345,7 @@ Non-caseable characters are left unchanged.
 STRING *
 string_downcase(Interp *interpreter, const STRING *s)
 {
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
     STRING * const dest = string_copy(interpreter, const_cast(s));
     string_downcase_inplace(interpreter, dest);
     return dest;
@@ -2391,10 +2384,7 @@ Non-caseable characters are left unchanged.
 STRING *
 string_titlecase(Interp *interpreter, const STRING *s)
 {
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
     STRING * const dest = string_copy(interpreter, const_cast(s));
     string_titlecase_inplace(interpreter, dest);
     return dest;

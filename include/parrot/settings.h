@@ -1,7 +1,7 @@
 /* settings.h
  *  Copyright (C) 2001-2004, The Perl Foundation.
  *  SVN Info
- *     $Id: settings.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/settings.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:

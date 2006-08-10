@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: Lua.pm 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/lua/t/Parrot/Test/Lua.pm 13236 2006-07-10T06:47:56.488120Z fperrad  $
 
 package Parrot::Test::Lua;
 
@@ -79,7 +79,6 @@ foreach my $func ( keys %language_test_map ) {
         }
 
         # This does not create byte code, but lua code
-        my $parrotdir = dirname( $self->{parrot} );
         Parrot::Test::write_code_to_file( $code, $lang_fn );
 
         # STDERR is written into same output file

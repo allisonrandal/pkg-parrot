@@ -1,4 +1,4 @@
-# $Id: b2.t 7315 2004-12-18 15:08:22Z rubys $
+# $Id: /local/languages/python/t/pie/b2.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use lib '../../lib';

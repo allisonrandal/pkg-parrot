@@ -1,7 +1,7 @@
 /* stacks.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: intlist.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/intlist.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     Integer list routines. Constant-time push, pop, length operations.
  *     Fast linear-time lookup (requires walking through the chunks).

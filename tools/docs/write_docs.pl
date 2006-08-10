@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: write_docs.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/docs/write_docs.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 NAME
 
@@ -16,6 +16,8 @@ This script writes the HTML documentation for Parrot.
 
 =cut
 
+use strict;
+use warnings;
 use lib 'lib';
 use Getopt::Long;
 use Parrot::Docs::Section::Parrot;

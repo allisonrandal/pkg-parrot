@@ -1,4 +1,4 @@
-# $Id: md5sum.pir 10754 2005-12-29 01:19:55Z particle $
+# $Id: /local/examples/library/md5sum.pir 11501 2006-02-10T18:27:13.457666Z particle  $
 
 =head1 NAME
 

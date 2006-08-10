@@ -1,7 +1,7 @@
-#! perl -w
+#! perl
 
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: Configure.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/Configure.pl 13846 2006-08-03T17:06:49.435642Z chip  $
 
 =head1 NAME
 
@@ -13,8 +13,8 @@ Configure.pl - Parrot's Configuration Script
 
 =head1 DESCRIPTION
 
-This is Parrot's configuration script. It should be run to create the necessary
-system-specific files before building Parrot.
+This is Parrot's configuration program. It should be run to create
+the necessary system-specific files before building Parrot.
 
 =head2 Command-line Options
 
@@ -69,6 +69,13 @@ Debugging is turned on by default. Use this to disable it.
 =item C<--parrot_is_shared>
 
 Link parrot dynamically.
+
+=item C<--m=32>
+
+Create a 32-bit executable on 64-architectures like x86_64. This option
+appends -m32 to compiler and linker programs and does s/lib64/lib/g on link flags.
+
+This option is experimental. See F<config/init/defaults.pm> for more.
 
 =item C<--profile>
 
@@ -238,10 +245,10 @@ F<lib/Parrot/Configure/Step.pm>, F<docs/configuration.pod>
 
 =cut
 
+use 5.006_001;
 use strict;
 use warnings;
 use lib 'lib';
-use 5.006;
 
 use English qw( -no_match_vars );
 use Parrot::BuildUtil;
@@ -262,7 +269,7 @@ for (@ARGV) {
 
   for ($key) {
     m/version/ && do {
-      my $svnid = '$Id: Configure.pl 12841 2006-05-30 15:23:20Z coke $';
+      my $svnid = '$Id: /local/Configure.pl 13846 2006-08-03T17:06:49.435642Z chip  $';
       print <<"END";
 Parrot Version $parrot_version Configure 2.0
 $svnid
@@ -294,6 +301,7 @@ Compile Options:
    --optimize           Optimized compile
    --optimize=flags     Add given optimizer flags
    --parrot_is_shared   Link parrot dynamically
+   --m=32               Build 32bit executable on 64-bit architecture.
    --profile            Turn on profiled compile (gcc only for now)
 
    --cc=(compiler)      Use the given compiler
@@ -369,7 +377,7 @@ how to build Parrot. The process is completely automated, unless you passed in
 the `--ask' flag on the command line, in which case it'll prompt you for a few
 pieces of info.
 
-Since you're running this script, you obviously have Perl 5--I'll be pulling
+Since you're running this program, you obviously have Perl 5--I'll be pulling
 some defaults from its configuration.
 END
 
@@ -382,8 +390,8 @@ my @steps = qw(
     init::headers
     inter::progs
     inter::make
-    inter::lex
-    inter::yacc
+);
+my @steps2 = qw(
     auto::gcc
     auto::msvc
     init::optimize
@@ -426,6 +434,7 @@ my @steps = qw(
     gen::config_h
     gen::core_pmcs
     gen::parrot_include
+    gen::languages
     gen::makefiles
     gen::platform
     gen::config_pm
@@ -438,6 +447,9 @@ my $conf = Parrot::Configure->new;
     $Parrot::Configure::Step::conf = $conf;
 }
 $conf->add_steps(@steps);
+$conf->add_step('inter::lex', require => '2.5.33');
+$conf->add_step('inter::yacc', require => '2.1');
+$conf->add_steps(@steps2);
 $conf->options->set(%args);
 # Run the actual steps
 $conf->runsteps or exit(1);

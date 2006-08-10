@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: headers.pm 12827 2006-05-30 02:28:15Z coke $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /local/config/init/headers.pm 13029 2006-06-26T19:26:45.696181Z bernhard  $
 
 =head1 NAME
 
@@ -14,16 +14,14 @@ Uses C<ExtUtils::Manifest> to determine which headers are nongenerated.
 package init::headers;
 
 use strict;
-use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step;
 use ExtUtils::Manifest qw(maniread);
 
-$description = 'Determining nongenerated header files';
-
-@args = ();
+our $description = 'Determining nongenerated header files';
+our @args;
 
 sub runstep
 {

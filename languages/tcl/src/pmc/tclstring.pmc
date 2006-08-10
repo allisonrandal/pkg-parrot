@@ -1,7 +1,7 @@
 /* TclString.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: tclstring.pmc 12840 2006-05-30 15:08:05Z coke $
+ *     $Id: /local/languages/tcl/src/pmc/tclstring.pmc 12840 2006-05-30T15:08:05.048089Z coke  $
  *  Overview:
  *     These are the vtable functions for the TclString base class
  *  Data Structure and Algorithms:

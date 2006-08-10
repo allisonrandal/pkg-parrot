@@ -1,4 +1,4 @@
-# $Id: nanoforth.pasm 12193 2006-04-12 20:04:06Z bernhard $
+# $Id: /local/examples/pasm/nanoforth.pasm 12193 2006-04-12T20:04:06.066885Z bernhard  $
 
 =pod
 

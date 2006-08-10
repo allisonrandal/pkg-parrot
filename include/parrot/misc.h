@@ -1,7 +1,7 @@
 /* misc.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: misc.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/misc.h 13307 2006-07-15T18:48:43.376667Z leo  $
  *  Overview:
  *     Miscellaneous functions, mainly the Parrot_sprintf family
  *  Data Structure and Algorithms:
@@ -44,6 +44,26 @@ PARROT_API INTVAL Parrot_byte_index(Interp *interpreter, const STRING *base,
         const STRING *search, UINTVAL start_offset);
 PARROT_API INTVAL Parrot_byte_rindex(Interp *interpreter, const STRING *base,
         const STRING *search, UINTVAL start_offset);
+typedef int (*reg_move_func)(Interp*, unsigned char d, unsigned char s, void *);
+
+PARROT_API void Parrot_register_move(Interp *interpreter, int n_regs,
+        unsigned char *dest_regs, unsigned char *src_regs,
+        unsigned char temp_reg, 
+        reg_move_func mov, 
+        reg_move_func mov_alt, 
+        void *info);
+
+/*
+ * IMCC API
+ */
+void *IMCC_compile_file_s(Parrot_Interp interp, const char *s,
+        STRING **error_message);
+void * IMCC_compile_file (Parrot_Interp interp, const char *s);
+PMC * IMCC_compile_pir_s(Parrot_Interp interp, const char *s,
+        STRING **error_message);
+PMC * IMCC_compile_pasm_s(Parrot_Interp interp, const char *s,
+        STRING **error_message);
+
 /*
  * misc.c
  */

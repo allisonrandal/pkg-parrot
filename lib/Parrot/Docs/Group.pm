@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: Group.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/Group.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -25,9 +25,9 @@ C<Parrot::Docs::Group> is a subclass of C<Parrot::Docs::Item>.
 package Parrot::Docs::Group;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Item;
-@Parrot::Docs::Group::ISA = qw(Parrot::Docs::Item);
+use base qw( Parrot::Docs::Item );
 
 =item C<new_group($name, $text, @items)>
 

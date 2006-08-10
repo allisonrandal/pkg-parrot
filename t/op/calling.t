@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: calling.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/op/calling.t 13052 2006-06-29T17:18:34.214485Z chromatic  $
 
 use strict;
 use warnings;
@@ -366,6 +366,36 @@ pir_output_is(<<'CODE', <<'OUTPUT', "type conversion - autobox");
 .end
 CODE
 hello 42 bar
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "more autobox");
+.sub main :main
+	foo( 101, 0.77, 'seven and seven is' )
+.end
+
+.sub foo
+	.param pmc some_int
+	.param pmc some_float
+	.param pmc some_string
+
+	$S0 = typeof some_int
+	print $S0
+	print "\n"
+
+	$S0 = typeof some_float
+	print $S0
+	print "\n"
+
+	$S0 = typeof some_string
+	print $S0
+	print "\n"
+
+	.return()
+.end
+CODE
+Integer
+Float
+String
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "type conversion - fetch");
@@ -2383,5 +2413,5 @@ OUTPUT
 
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 92 }
+BEGIN { plan tests => 93 }
 

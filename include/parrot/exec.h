@@ -2,7 +2,7 @@
  * exec.h
  *
  * SVN Info
- *    $Id: exec.h 12537 2006-05-06 20:06:21Z petdance $
+ *    $Id: /local/include/parrot/exec.h 13327 2006-07-17T16:26:26.368832Z petdance  $
  * Overview:
  *    Exec header file.
  * History:
@@ -92,6 +92,7 @@ typedef struct {
     int                                                 bytecode_header_size;
 } Parrot_exec_objfile_t;
 
+/* HEADERIZER BEGIN: src/exec.c */
 void Parrot_exec(Interp *interpreter, opcode_t *pc,
     opcode_t *code_start, opcode_t *code_end);
 PARROT_API void Parrot_exec_add_text_rellocation_func(Parrot_exec_objfile_t *obj,
@@ -110,6 +111,8 @@ void Parrot_exec_emit_mov_mr(Interp * interpreter, char *mem, int reg);
 void Parrot_exec_emit_mov_mr_n(Interp * interpreter, char *mem, int reg);
 void Parrot_exec_emit_mov_rm(Interp * interpreter, int reg, char *mem);
 void Parrot_exec_emit_mov_rm_n(Interp * interpreter, int reg, char *mem);
+/* HEADERIZER END: src/exec.c */
+
 #  endif /* PARROT_EXEC_H_GUARD */
 #endif /* EXEC_CAPABLE */
 

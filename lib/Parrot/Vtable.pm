@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: Vtable.pm 12836 2006-05-30 13:40:58Z coke $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /local/lib/Parrot/Vtable.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ Parrot::Vtable - Functions for manipulating vtables
 =head1 DESCRIPTION
 
 C<Parrot::Vtable> provides a collection of functions for manipulating
-PMC vtables. It is used by F<tools/build/jit2h.pl>, F<tools/build/pmc2c.pl>,
+PMC vtables. It is used by F<tools/build/jit2c.pl>, F<tools/build/pmc2c.pl>,
 F<tools/build/vtable_h.pl>, F<tools/dev/gen_class.pl>, and
 F<src/pmc/null.pl>.
 
@@ -27,13 +27,13 @@ The following functions are exported:
 package Parrot::Vtable;
 
 use strict;
+use warnings;
 
-use Exporter;
+use base qw( Exporter );
+
 use FileHandle;
 
-@Parrot::Vtable::ISA    = qw(Exporter);
-@Parrot::Vtable::EXPORT =
-    qw( parse_vtable vtbl_defs vtbl_struct vtbl_macros vtbl_embed );
+our @EXPORT = qw(parse_vtable vtbl_defs vtbl_struct vtbl_macros vtbl_embed);
 
 sub make_re {
     my $re = shift;
@@ -102,7 +102,8 @@ vtable array.
 
 sub vtbl_defs {
     my $vtable = shift;
-    my $defs = "";
+
+    my $defs = q{};
     my $entry;
 
     for $entry (@{$vtable}) {
@@ -123,7 +124,8 @@ vtable array.
 
 sub vtbl_struct {
     my $vtable = shift;
-    my $struct = "";
+
+    my $struct = q{};
     my $entry;
 
     $struct = <<"EOF";
@@ -169,6 +171,7 @@ vtable array.
 
 sub vtbl_macros {
     my $vtable = shift;
+
     my $macros = <<"EOM";
 
 /*
@@ -295,8 +298,8 @@ sub vtbl_embed
 {
     my $vtable = shift;
 
-    my $funcs  = '';
-    my $protos = '';
+    my $funcs  = q{};
+    my $protos = q{};
 
     for my $entry (@$vtable)
     {
@@ -395,7 +398,7 @@ sub parse_params
 
 =over 4
 
-=item F<tools/build/jit2h.pl>
+=item F<tools/build/jit2c.pl>
 
 =item F<tools/build/pmc2c.pl>
 

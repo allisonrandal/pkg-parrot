@@ -17,19 +17,16 @@ and registers the compiler under the name 'Perl6'.
 =item C<__onload()>
 
 Loads the PGE libraries needed for running the parser,
-and registers the "parse" subroutine as the "Perl6"
+and registers the "compile" subroutine as the "Perl6"
 compiler.
 
 =cut
 
 .namespace [ 'Perl6' ]
 
-.sub '__loadlib' :immediate
-    $P1 = loadlib 'perl6_group'
-.end
+.loadlib 'perl6_group'
 
 .sub '__onload' :load
-    $P1 = loadlib 'perl6_group'
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Text.pbc'
     load_bytecode 'PGE/Util.pbc'
@@ -44,7 +41,7 @@ compiler.
     $P0 = subclass 'Grammar', 'Perl6::Grammar'
     $P0 = subclass 'ResizablePMCArray', 'Perl6List'
 
-    $P0 = find_global 'Perl6', 'compile' 
+    $P0 = find_global 'Perl6', 'compile'
     compreg 'Perl6', $P0
 
     ##   XXX: this is a scaffold to map Perl 6 types into
@@ -59,9 +56,9 @@ compiler.
 
 =item C<compile(STR code [, 'target' => target])>
 
-Compile the Perl6 C<code>.  The C<target> named parameter 
-allows the caller to specify the degree of compilation to 
-be performed; a value of C<parse> returns the parse tree, 
+Compile the Perl6 C<code>.  The C<target> named parameter
+allows the caller to specify the degree of compilation to
+be performed; a value of C<parse> returns the parse tree,
 C<PAST> returns the abstract syntax tree, C<PIR> returns
 the generated PIR code, and other values return the
 compiled code as a PMC.

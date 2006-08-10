@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: Configure.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Configure.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =pod
 
@@ -37,6 +37,7 @@ I<symbols>.
 package Parrot::Configure;
 
 use strict;
+use warnings;
 
 use lib qw(config);
 use Carp qw(carp);

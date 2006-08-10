@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003, The Perl Foundation.
-$Id: string.pmc 12904 2006-06-07 15:30:53Z mdiep $
+$Id: /local/src/pmc/string.pmc 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -632,7 +632,7 @@ Replace the string at C<key> with the chr of C<value>.
 
 =item C<void replace(STRING* orig, STRING* new)>
 
-Replace every occurence of C<orig> with C<new>.
+Replace every occurrence of C<orig> with C<new>.
 
 =cut
 

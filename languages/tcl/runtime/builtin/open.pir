@@ -1,7 +1,7 @@
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&open"
+.sub '&open'
   .param pmc argv :slurpy
 
   .local pmc channel,next_channel_id,channels
@@ -12,13 +12,13 @@
   if argc != 1 goto error
 
   channel_id = argv[0] 
-  open channel, channel_id, "<"
+  open channel, channel_id, '<'
   $I0 = typeof channel
   if $I0 == .Undef goto file_error
-  channel_id = "file"
-  .get_from_HLL(channels, '_tcl', 'channels')
+  channel_id = 'file'
+  channels = get_root_global ['_tcl'], 'channels'
   # get a new file channel name
-  .get_from_HLL(next_channel_id, '_tcl', 'next_channel_id')
+  next_channel_id = get_root_global ['_tcl'], 'next_channel_id'
   $S0 = next_channel_id
   channel_id .= $S0
   next_channel_id += 1
@@ -26,9 +26,9 @@
   .return(channel_id)
  
 file_error:
-  .throw ("unable to open specified file")
+  .throw ('unable to open specified file')
  
 error:
-  .throw ("XXX: bad call to open")
+  .throw ('XXX: bad call to open')
 
 .end

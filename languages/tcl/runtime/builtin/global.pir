@@ -2,9 +2,9 @@
 # [global]
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&global"
+.sub '&global'
   .param pmc argv :slurpy
 
   .local int argc 
@@ -13,7 +13,7 @@
   if argc == 0 goto badargs
 
   .local int call_level
-  .get_from_HLL($P0, '_tcl', 'call_level')
+  $P0 = get_root_global ['_tcl'], 'call_level'
   call_level = $P0
   unless call_level goto done # global doesn't work when already global.
 
@@ -25,14 +25,14 @@
 loop:
   if ii == argc goto done
   varname = argv[ii]
-  sigil_varname = "$" . varname
+  sigil_varname = '$' . varname
 
   push_eh next
     $P1 = find_global sigil_varname
   clear_eh
 
   .local pmc store_lex_pdd20
-  .get_from_HLL(store_lex_pdd20, '_tcl', 'store_lex_pdd20')
+  store_lex_pdd20 = get_root_global ['_tcl'], 'store_lex_pdd20'
   store_lex_pdd20 (sigil_varname, $P1)
 
 next:
@@ -40,9 +40,8 @@ next:
   goto loop
   
 done:
-  .return("")
+  .return('')
 
 badargs:
-  .throw("wrong # args: should be \"global varName ?varName ...?\"")
-
+  .throw('wrong # args: should be "global varName ?varName ...?"')
 .end

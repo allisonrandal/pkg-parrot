@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: luaio.pir 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/lua/lib/luaio.pir 12840 2006-05-30T15:08:05.048089Z coke  $
 
 =head1 NAME
 

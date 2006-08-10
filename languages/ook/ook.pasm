@@ -1,4 +1,4 @@
-# $Id: ook.pasm 9581 2005-10-26 21:03:54Z bernhard $
+# $Id: /local/languages/ook/ook.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 
 =head1 NAME
 

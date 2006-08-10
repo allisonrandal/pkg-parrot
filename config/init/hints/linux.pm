@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: linux.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/init/hints/linux.pm 13660 2006-07-28T17:05:24.263356Z chip  $
 
 package init::hints::linux;
 
@@ -17,7 +17,7 @@ sub runstep
     my $linkflags = $conf->data->get('linkflags');
 
     # should find g++ in most cases
-    my $link = 'c++';
+    my $link = $conf->data->get('link') || 'c++';
 
     if ($libs !~ /-lpthread/) {
         $libs .= ' -lpthread';

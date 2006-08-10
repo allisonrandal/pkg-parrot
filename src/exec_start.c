@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: exec_start.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/exec_start.c 13810 2006-08-02T16:31:20.828767Z chip  $
 
 =head1 NAME
 
@@ -26,9 +26,9 @@ executables.
 #include "parrot/parrot.h"
 #include "parrot/string.h"
 #include "parrot/exec.h"
-#include "parrot/jit.h"
+#include "jit.h"
 #define JIT_EMIT 1
-#include "parrot/jit_emit.h"
+#include "jit_emit.h"
 #include "parrot/embed.h"
 
 opcode_t* run_compiled(Interp *interpreter,
@@ -106,8 +106,7 @@ main(int argc, char * argv[])
         run_compiled(interpreter,
             (opcode_t *)&((&program_code)[bytecode_offset]));
      */
-    Parrot_exit(0);
-    exit(0);
+    Parrot_exit(interpreter, 0);
 }
 
 /*

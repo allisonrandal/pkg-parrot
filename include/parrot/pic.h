@@ -1,7 +1,7 @@
 /* pic.h
  *  Copyright (C) 2005, The Perl Foundation.
  *  SVN Info
- *     $Id: pic.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/pic.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     This is the api header for the pic subsystem
  *  Data Structure and Algorithms:

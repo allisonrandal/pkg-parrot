@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: CPrederef.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/OpTrans/CPrederef.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -17,15 +17,13 @@ to provide predereferenced register addressing run loop.
 
 =cut
 
-use strict;
-#use warnings;
-
 package Parrot::OpTrans::CPrederef;
 
+use strict;
+use warnings;
+
 use Parrot::OpTrans;
-use vars qw(@ISA);
-use Parrot::OpTrans::C;
-@ISA = qw(Parrot::OpTrans::C);
+use base qw( Parrot::OpTrans::C );
 
 =item C<core_type()>
 

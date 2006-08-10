@@ -1,4 +1,4 @@
-# $Id$
+# $Id: /local/config/gen/platform/netbsd/math.c 13278 2006-07-13T13:40:14.092490Z coke  $
 
 /*
  * math stuff

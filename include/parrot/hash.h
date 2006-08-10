@@ -1,7 +1,7 @@
 /* hash.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: hash.h 12884 2006-06-05 13:29:13Z audreyt $
+ *     $Id: /local/include/parrot/hash.h 12884 2006-06-05T13:29:13.115985Z audreyt  $
  *  Overview:
  *     Hashtable implementation
  *  Data Structure and Algorithms:

@@ -1,19 +1,11 @@
-#!/usr/bin/perl
+#!../../parrot tcl.pbc
 
-use strict;
-use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 2;
-use Test::More;
+source lib/test_more.tcl
+plan 3
 
-language_output_is("tcl",<<'TCL',<<OUT,"no arg failure");
- format
-TCL
-wrong # args: should be "format formatString ?arg arg ...?"
-OUT
+eval_is {format} \
+  {wrong # args: should be "format formatString ?arg arg ...?"} \
+  {format no args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"simple format check");
- set a [format "%05d" 12]
- puts $a
-TCL
-00012
-OUT
+is [format "%05d" 12]              00012              {zero padding}
+is [format "%-*s - %s" 10 foo bar] {foo        - bar} {format width check}

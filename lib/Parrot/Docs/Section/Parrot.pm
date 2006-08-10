@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: Parrot.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/Section/Parrot.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -24,9 +24,9 @@ This is the top-level section for the HTML documentation for Parrot.
 package Parrot::Docs::Section::Parrot;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Section;
-@Parrot::Docs::Section::Parrot::ISA = qw(Parrot::Docs::Section);
+use base qw( Parrot::Docs::Section );
 
 use Parrot::Distribution;
 

@@ -1,5 +1,5 @@
 #! perl -w
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: bool.t 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/pugs/t/pmc/bool.t 12840 2006-05-30T15:08:05.048089Z coke  $
 
 use t::pmc;

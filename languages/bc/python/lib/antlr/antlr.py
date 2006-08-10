@@ -2792,7 +2792,7 @@ def dupTree(t,factory):
     return result
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-### $Id: antlr.py 10933 2006-01-06 01:43:24Z particle $
+### $Id: /local/languages/bc/python/lib/antlr/antlr.py 11501 2006-02-10T18:27:13.457666Z particle  $
 
 # Local Variables:    ***
 # mode: python        ***

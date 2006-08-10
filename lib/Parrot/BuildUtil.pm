@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: BuildUtil.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/BuildUtil.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =head1 NAME
 
@@ -15,10 +15,10 @@ For now only a sub for getting the current version.
 
 =cut
 
+package Parrot::BuildUtil;
+
 use strict;
 use warnings;
-
-package Parrot::BuildUtil;
 
 =item C<parrot_version()>
 

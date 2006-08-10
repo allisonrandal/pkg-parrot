@@ -1,5 +1,5 @@
 # Copyright (C) 2002, The Perl Foundation.
-# $Id: CGoto.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/OpTrans/CGoto.pm 13603 2006-07-26T02:38:24.100453Z chip  $
 
 =head1 NAME
 
@@ -18,14 +18,12 @@ C C<goto> run loop.
 
 =cut
 
-use strict;
-#use warnings;
-
 package Parrot::OpTrans::CGoto;
 
-use Parrot::OpTrans;
-use vars qw(@ISA);
-@ISA = qw(Parrot::OpTrans);
+use strict;
+use warnings;
+
+use base qw( Parrot::OpTrans );
 
 =item C<suffix()>
 
@@ -328,10 +326,7 @@ sub run_core_after_addr_table
     if (!${bs}ops_addr)
 	${bs}ops_addr = l_ops_addr;
     if (cur_opcode == 0) {
-	union {
-	    const void * __c_ptr;
-	    void * __ptr;
-	} __ptr_u;
+        DECL_CONST_CAST;
         return (opcode_t *)const_cast(${bs}ops_addr);
     }
 END_C

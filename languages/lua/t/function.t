@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: function.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: /local/languages/lua/t/function.t 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: Test.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Test.pm 13879 2006-08-04T01:32:13.957323Z chip  $
 
 =head1 NAME
 
@@ -290,7 +290,7 @@ sub run_command {
         chdir $orig_dir;
     }
 
-    my $exit_code = $? >> 8;
+    my $exit_code = $?;
 
     close STDOUT             or die "Can't close    stdout" if $out;
     close STDERR             or die "Can't close    stderr" if $err;
@@ -298,7 +298,7 @@ sub run_command {
     open  STDOUT, ">&OLDOUT" or die "Can't restore  stdout" if $out;
     open  STDERR, ">&OLDERR" or die "Can't restore  stderr" if $err;
 
-    return $exit_code;
+    return ($exit_code & 0xFF) ? "[SIGNAL $exit_code]" : ($? >> 8);
 }
 
 
@@ -432,7 +432,11 @@ sub _generate_functions {
                 write_code_to_file($code, $code_f);
             }
 
+            # honor opt* filename to actually run code with -Ox
             my $args = $ENV{TEST_PROG_ARGS} || '';
+            my $opt = $code_f =~ m!opt(.)! ? "-O$1" : "";
+            $args .= " $opt";
+
             my $run_exec = 0;
             if ( $args =~ s/--run-exec// ) {
                 $run_exec = 1;
@@ -746,7 +750,7 @@ sub _generate_functions {
                                      'STDOUT' => $build_f,
                                      'STDERR' => $build_f);
             $builder->diag("'$cmd' failed with exit code $exit_code")
-        if $exit_code;
+                if $exit_code;
 
             if (! -e $exe_f) {
                 $builder->diag("Failed to build '$exe_f': " . slurp_file($build_f));
@@ -761,7 +765,8 @@ sub _generate_functions {
 
             my $meth = $c_test_map{$func};
             my $pass = $builder->$meth(slurp_file($out_f), $expected, $desc);
-            $builder->diag("'$cmd' failed with exit code $exit_code") if $exit_code and not $pass;
+            $builder->diag("'$cmd' failed with exit code $exit_code")
+                if $exit_code and not $pass;
 
             unless($ENV{POSTMORTEM}) {
                 unlink $out_f;

@@ -1,7 +1,7 @@
 /* sub.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: sub.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/sub.h 13784 2006-08-01T17:54:04.760248Z chip  $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures
@@ -118,6 +118,7 @@ typedef struct Parrot_cont {
     struct Parrot_Context *from_ctx;  /* sub, this cont is returning from */
     opcode_t *current_results;    /* ptr into code with get_results opcode
                                     full continuation only */
+    int runloop_id;                  /* id of the creating runloop. */
 } * parrot_cont_t;
 
 #define PMC_cont(pmc)		  ((parrot_cont_t)PMC_struct_val(pmc))

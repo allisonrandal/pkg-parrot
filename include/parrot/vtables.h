@@ -1,7 +1,7 @@
 /* vtables.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: vtables.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/vtables.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     Vtable manipulation code. Not to be confused with vtable.h
  *  Data Structure and Algorithms:

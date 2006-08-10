@@ -3,7 +3,7 @@
  *  Copyright (C) 2002, The Perl Foundation.
  *  License:  Artistic/GPL, see README and LICENSES for details
  *  SVN Info
- *     $Id: list.h 12821 2006-05-29 13:44:57Z coke $
+ *     $Id: /local/include/parrot/list.h 12821 2006-05-29T13:44:57.786877Z coke  $
  *  Overview:
  *     list aka array routines for Parrot
  *     s. list.c for more

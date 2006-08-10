@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: pdd15_objects.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/pdds/clip/pdd15_objects.pod 13638 2006-07-26T21:52:12.500635Z chip  $
 
 =head1 NAME
 
@@ -211,6 +211,13 @@ includes the attributes in the object's class as well as I<all> the attributes
 defined in all the parent classes. (Multiple inheritance makes this necessary
 -- the offsets of a class' attributes will change from child class to child
 class)
+
+{{ NOTE: one feature I'd like to have is some way to access a list of
+the object's attributes. The particular use I have in mind is dumping
+the attributes of an object a la Data::Dumper. It abuses the notion
+of 'opaque object', so I could be persuaded it's not a good idea. On the
+other hand, it could be an introspective capability offered by Parrot
+but not directly exposed in the HLLs.  }}
 
 ParrotClass PMCs also have the "I am a class" flag set on them.
 

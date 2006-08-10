@@ -1,4 +1,4 @@
-# $Id: 012_eval.t 12273 2006-04-16 10:39:21Z bernhard $
+# $Id: /local/languages/m4/t/basic/012_eval.t 12273 2006-04-16T10:39:21.812297Z bernhard  $
 
 use strict;
 use warnings;

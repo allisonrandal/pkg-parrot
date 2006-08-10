@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: runops_cores.c 12928 2006-06-12 19:33:05Z bernhard $
+$Id: /local/src/runops_cores.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ the faster dispatch of operations.
 
 #include "runops_cores.h"
 #include "parrot/embed.h"
-#include "parrot/trace.h"
+#include "trace.h"
 #include "interp_guts.h"
 
 #ifdef HAVE_COMPUTED_GOTO
@@ -78,7 +78,7 @@ runops_cgoto_core(Interp *interpreter, opcode_t *pc)
 #else
     PIO_eprintf(interpreter,
             "Computed goto unavailable in this configuration.\n");
-    Parrot_exit(1);
+    Parrot_exit(interpreter, 1);
     return NULL;
 #endif
 }

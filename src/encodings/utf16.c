@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: utf16.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/encodings/utf16.c 13029 2006-06-26T19:26:45.696181Z bernhard  $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ UTF-16 encoding with the help of the ICU library.
 */
 
 #include "parrot/parrot.h"
-#include "parrot/unicode.h"
+#include "../unicode.h"
 
 #include "utf16.h"
 

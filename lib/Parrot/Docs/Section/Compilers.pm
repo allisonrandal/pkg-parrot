@@ -1,5 +1,5 @@
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: Compilers.pm 11501 2006-02-10 18:27:13Z particle $
+# $Id: /local/lib/Parrot/Docs/Section/Compilers.pm 13810 2006-08-02T16:31:20.828767Z chip  $
 
 =head1 NAME
 
@@ -22,9 +22,9 @@ A documentation section describing all compilers in Parrot.
 package Parrot::Docs::Section::Compilers;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Section;
-@Parrot::Docs::Section::Compilers::ISA = qw(Parrot::Docs::Section);
+use base qw( Parrot::Docs::Section );
 
 use Parrot::Distribution;
 
@@ -51,6 +51,8 @@ sub new
             'compilers/past' ),
         $self->new_group( 'POST', 'the Parrot/Punie Opcode Syntax Tree',
             'compilers/post' ),
+        $self->new_group( 'BCG', 'Byte Code Generation',
+            'compilers/bcg' ),
     );
 }
 

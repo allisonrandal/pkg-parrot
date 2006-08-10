@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: inter_create.c 12932 2006-06-13 05:12:41Z petdance $
+$Id: /local/src/inter_create.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -22,6 +22,7 @@ Create or destroy a Parrot interpreter.c
 #include <assert.h>
 #include "parrot/parrot.h"
 #include "parrot/oplib/core_ops.h"
+#include "../compilers/imcc/imc.h"
 
 #if EXEC_CAPABLE
 Interp interpre;
@@ -85,7 +86,7 @@ Create the Parrot interpreter. Allocate memory and clear the registers.
 
 */
 
-void Parrot_really_destroy(int exit_code, void *interpreter);
+void Parrot_really_destroy(Interp *, int exit_code, void *);
 
 Parrot_Interp
 make_interpreter(Parrot_Interp parent, Interp_flags flags)
@@ -212,6 +213,8 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
     SET_NULL_P(interpreter->DOD_registry, PMC *);
 
     /* create exceptions list */
+    interpreter->current_runloop_level = 0;
+    interpreter->current_runloop_id = 0;
     Parrot_init_exceptions(interpreter);
 
     /* register assembler/compilers */
@@ -221,6 +224,8 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
     PIO_init(interpreter);
     /* init builtin function struct */
     Parrot_init_builtins(interpreter);
+    /* init IMCC compiler */
+    imcc_init(interpreter);
 
     /* Done. Return and be done with it */
 
@@ -246,7 +251,7 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
      * Threaded interpreters are destructed when the thread ends
      */
     if (!Interp_flags_TEST(interpreter, PARROT_IS_THREAD))
-        Parrot_on_exit(Parrot_really_destroy, (void*)interpreter);
+        Parrot_on_exit(interpreter, Parrot_really_destroy, NULL);
 #endif
 
     return interpreter;
@@ -291,11 +296,10 @@ Note that C<exit_code> is ignored.
 */
 
 void
-Parrot_really_destroy(int exit_code, void *vinterp)
+Parrot_really_destroy(Interp *interpreter, int exit_code, void *arg)
 {
-    Interp *interpreter = (Interp*) vinterp;
-
     UNUSED(exit_code);
+    UNUSED(arg);
 
     /*
      * wait for threads to complete if needed

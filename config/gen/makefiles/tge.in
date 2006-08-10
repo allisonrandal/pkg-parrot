@@ -1,4 +1,4 @@
-# $Id: tge.in 12829 2006-05-30 06:27:31Z allison $
+# $Id: /local/config/gen/makefiles/tge.in 12829 2006-05-30T06:27:31.685683Z allison  $
 
 # Setup some commands
 LN_S     = @lns@

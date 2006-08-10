@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2005, The Perl Foundation.
-$Id: hash.c 12884 2006-06-05 13:29:13Z audreyt $
+$Id: /local/src/hash.c 13858 2006-08-03T20:42:41.309483Z chip  $
 
 =head1 NAME
 
@@ -239,8 +239,8 @@ hash_thaw(Interp *interpreter, Hash *hash, visit_info* info)
     /*
      * during thaw info->extra is the key/value count
      */
-    assert(info->extra_flags == EXTRA_IS_COUNT);
-    n = (size_t) info->extra;
+    n = (size_t) hash->entries;
+    hash->entries = 0;
     for (i = 0; i < n; ++i) {
         switch (hash->key_type) {
             case Hash_key_type_STRING:

@@ -1,4 +1,4 @@
-# $Id: PAST.pir 12462 2006-04-30 09:12:38Z bernhard $
+# $Id: /local/compilers/past/PAST.pir 12462 2006-04-30T09:12:38.605736Z bernhard  $
 
 =head1 NAME
 

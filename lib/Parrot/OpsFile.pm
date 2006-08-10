@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: OpsFile.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/OpsFile.pm 13822 2006-08-03T15:57:14.122427Z chip  $
 
 =head1 NAME
 
@@ -155,15 +155,13 @@ package Parrot::OpsFile;
 use strict;
 use warnings;
 
+use base qw( Exporter );
+
 use Parrot::Op;
 use Parrot::Config;
 
-BEGIN {
-    use Exporter;
-    use vars qw(%op_body @EXPORT @ISA);
-    @ISA = qw(Exporter);
-    @EXPORT = qw(%op_body);
-};
+our %op_body;
+our @EXPORT = qw( %op_body );
 
 # private sub  _trim()
 #
@@ -371,7 +369,7 @@ sub read_ops
 
                 if ($use eq 'in')
                 {
-                    push @temp, ($type eq 'p') ? 'p' : "$type|${type}c";
+                    push @temp, "$type|${type}c";
                     push @argdirs, 'i';
                 }
                 elsif ($use eq 'invar')

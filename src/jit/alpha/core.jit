@@ -2,7 +2,7 @@
 ; alpha/core.jit
 ;
 ;
-; $Id: core.jit 2578 2002-11-20 15:18:55Z grunblatt $
+; $Id: /local/src/jit/alpha/core.jit 11501 2006-02-10T18:27:13.457666Z particle  $
 ;
 
 Parrot_noop {

@@ -1,7 +1,7 @@
-#! perl -w
+#! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: rebuild_miniparrot.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/dev/rebuild_miniparrot.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 ################################################################################
 
 =head1 NAME
@@ -38,6 +38,7 @@ Run the specified subroutine.
 
 use strict;
 no  strict 'refs';
+use warnings;
 use Config;
 use Getopt::Long;
 use File::Copy;

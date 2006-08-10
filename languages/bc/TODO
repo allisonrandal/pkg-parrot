@@ -1,8 +1,14 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: TODO 12958 2006-06-17 10:00:58Z bernhard $
+# $Id: /local/languages/bc/TODO 14023 2006-08-08T22:30:33.732703Z chip  $
 
 # Some tidbits on what is to do for Parrot bc.
 # See docs/parrot_bc.pod for visions.
+
+- Keep track of named variables and initialize them during execution
+
+- Get rid of ANTLR 2
+
+- Switch to C# backend, run with languages/dotnet
 
 - Custom PMCs for Parrot bc
   - Decimal BigNum libraries
@@ -33,5 +39,3 @@
 
 - Testing
   - Find a test suite for bc
-
-- Provide pointers to bc Spec POSIX P1003.2/D11 draft Section 4.3

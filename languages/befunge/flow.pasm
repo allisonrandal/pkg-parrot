@@ -1,4 +1,4 @@
-# $Id: flow.pasm 8214 2005-05-30 19:13:08Z bernhard $
+# $Id: /local/languages/befunge/flow.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 
 # Go north.
 # Befunge stack unchanged.

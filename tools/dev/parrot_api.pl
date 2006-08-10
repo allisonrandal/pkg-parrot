@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
+#! perl
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: parrot_api.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/dev/parrot_api.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 NAME
 
@@ -134,6 +134,7 @@ Author: Jarkko Hietaniemi.
 =cut
 
 use strict;
+use warnings;
 
 my $Obj;
 

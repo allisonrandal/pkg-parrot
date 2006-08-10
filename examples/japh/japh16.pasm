@@ -1,4 +1,4 @@
-# $Id: japh16.pasm 7042 2004-11-17 10:35:30Z leo $
+# $Id: /local/examples/japh/japh16.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 
 # see 'examples/compilers/Makefile' for instructions to generate japhc.$(SO)
 

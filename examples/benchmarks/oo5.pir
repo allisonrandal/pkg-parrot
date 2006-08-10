@@ -1,4 +1,4 @@
-# $Id: oo5.pir 12177 2006-04-11 19:56:05Z bernhard $
+# $Id: /local/examples/benchmarks/oo5.pir 12177 2006-04-11T19:56:05.232596Z bernhard  $
 
 .sub bench :main
     .local pmc cl

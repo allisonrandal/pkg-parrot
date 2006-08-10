@@ -2,9 +2,9 @@
 # [list]
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&lappend"
+.sub '&lappend'
   .param pmc argv :slurpy
 
   .local pmc value, retval
@@ -19,15 +19,15 @@
   cnt = 1
 
   .local pmc read
-  .get_from_HLL(read, '_tcl', '__read')
+  read = get_root_global ['_tcl'], '__read'
   push_eh new_variable
     value = read(listname)
   clear_eh
   
   .local pmc __list
 
-  .get_from_HLL(__list, '_tcl', '__list')
-  value = __list(value)
+  __list = get_root_global ['_tcl'], '__list'
+  value  = __list(value)
   goto loop
 
 new_variable:
@@ -42,10 +42,10 @@ loop:
   goto loop
 loop_done:
   .local pmc set
-  .get_from_HLL(set, '_tcl', '__set')
+  set = get_root_global ['_tcl'], '__set'
   .return set(listname, value)
 
 error:
-  .throw ("wrong # args: should be \"lappend varName ?value value ...?\"")
+  .throw ('wrong # args: should be "lappend varName ?value value ...?"')
 
 .end

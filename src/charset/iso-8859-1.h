@@ -1,7 +1,7 @@
 /* iso_8859_1.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: iso-8859-1.h 12826 2006-05-30 01:36:30Z coke $
+ *     $Id: /local/src/charset/iso-8859-1.h 12826 2006-05-30T01:36:30.308856Z coke  $
  *  Overview:
  *     This is the header for the iso_8859-1 charset functions
  *  Data Structure and Algorithms:

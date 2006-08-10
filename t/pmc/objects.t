@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: objects.t 12938 2006-06-14 11:29:11Z jonathan $
+# $Id: /local/t/pmc/objects.t 13601 2006-07-26T01:22:07.124239Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 76;
+use Parrot::Test tests => 78;
 
 =head1 NAME
 
@@ -63,6 +63,42 @@ CODE
 1
 1
 0
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "find_type nested, with key");
+    newclass P1, ["Foo"; "Bar"]
+
+    find_type I0, ["Foo"; "Bar"]
+    isgt I0, I0, 0
+    print I0
+    print "\n"
+
+    new P3, I0
+    print "new\n"
+    end
+CODE
+1
+new
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "find_type nested, with array [EXPERIMENTAL]");
+    newclass P1, ["Foo"; "Bar"]
+
+    new P2, 'ResizablePMCArray'
+    push P2, "Foo"
+    push P2, "Bar"
+
+    find_type I0, P2
+    isgt I0, I0, 0
+    print I0
+    print "\n"
+
+    new P3, I0
+    print "new\n"
+    end
+CODE
+1
+new
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "classname");
@@ -1881,7 +1917,7 @@ CODE
 ok 1
 ok 2
 OUTPUT
-    
+
 pasm_output_is(<<'CODE', <<'OUTPUT', "newclass [] parsing)");
     newclass P0, ['Foo';'Bar']
     print "ok\n"

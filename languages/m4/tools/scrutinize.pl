@@ -1,4 +1,5 @@
-# $Id$
+#! perl
+# $Id: /local/languages/m4/tools/scrutinize.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 NAME
 

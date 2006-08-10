@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: perldoc.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/auto/perldoc.pm 12827 2006-05-30T02:28:15.110975Z coke  $
 
 =head1 NAME
 

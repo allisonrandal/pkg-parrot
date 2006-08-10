@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004, The Perl Foundation.
-$Id: iso-8859-1.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/charset/iso-8859-1.c 12826 2006-05-30T01:36:30.308856Z coke  $
 
 =head1 NAME
 

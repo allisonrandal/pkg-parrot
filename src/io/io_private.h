@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: io_private.h 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/io/io_private.h 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -269,6 +269,7 @@ struct _ParrotIOLayerAPI {
 
 ParrotIOLayer * PIO_utf8_register_layer(void);
 ParrotIOLayer * PIO_mmap_register_layer(void);
+ParrotIOLayer * PIO_string_register_layer(void);
 
 void PIO_push_layer_str(Interp *interpreter, PMC *pmc, STRING *ls);
 STRING* PIO_pop_layer_str(Interp *interpreter, PMC *pmc);

@@ -3,7 +3,7 @@
  *
  * HPPA
  *
- * $Id: jit_emit.h 11522 2006-02-13 14:17:27Z rafl $
+ * $Id: /local/src/jit/hppa/jit_emit.h 11522 2006-02-13T14:17:27.477425Z rafl  $
  */
 
 /*

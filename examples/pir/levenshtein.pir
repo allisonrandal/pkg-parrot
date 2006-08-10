@@ -4,7 +4,7 @@
 # implementation based on http://www.merriampark.com/ld.htm
 # First implementation by Alberto Simoes (ambs <at> cpan.org)
 #
-# $Id: levenshtein.pir 11325 2006-01-23 20:20:37Z ambs $
+# $Id: /local/examples/pir/levenshtein.pir 11501 2006-02-10T18:27:13.457666Z particle  $
 
 # .sub main :main
 #         $S1 = "purl"

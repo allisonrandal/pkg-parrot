@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: lex.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/inter/lex.pm 14029 2006-08-09T00:47:44.746754Z chip  $
 
 =head1 NAME
 
@@ -28,7 +28,7 @@ $prompt      = "Do you have a lexical analyzer generator like flex or lex?";
 
 sub runstep
 {
-    my ($self, $conf) = @_;
+    my ($self, $conf, %p) = @_;
 
     my $verbose = $conf->options->get('verbose');
 
@@ -52,19 +52,19 @@ sub runstep
     # the user is responsible for the consequences.
     if (defined $prog) {
         $conf->data->set($util => $prog);
-        $self->set_result('yes');
+        $self->set_result('user defined');
         return $self;
     }
 
     $prog = check_progs(['flex', 'lex'], $verbose);
 
     unless ($prog) {
-
-        # fall back to default
-        $self->set_result('no');
-        return $self;
+        $self->set_result('no lex program was found');
+        return;
     }
 
+    # XXX should --ask be handled like the other user defines or checked for
+    # version requirements?
     if ($conf->options->get('ask')) {
         $prog = prompt($prompt, $prog ? $prog : $conf->data->get($util));
     }
@@ -74,20 +74,53 @@ sub runstep
     # don't override the user even if the program they provided appears to be
     # broken
     if ($ret == -1 and !$conf->options->get('ask')) {
-
         # fall back to default
-        $self->set_result('no');
-        return $self;
+        $self->set_result(
+                'lex program does not exist or does not understand --version');
+        return;
     }
 
     # if '--version' returns a string assume that this is flex.
     # flex calls it self by $0 so it will claim to be lex if invoked as `lex`
     if ($stdout =~ /f?lex .*? (\d+) \. (\d+) \. (\d+)/x) {
-        $conf->data->set(flex_version => "$1.$2.$3");
-    }
+        my ($prog_major, $prog_minor, $prog_patch) = ($1, $2, $3);
+        my $prog_version = "$1.$2.$3";
 
-    $conf->data->set($util => $prog);
-    $self->set_result('yes');
+        # is there a version requirement?
+        if (exists $p{require}) {
+            my ($rmajor, $rminor, $rpatch) =
+                $p{require} =~ /(\d+) \. (\d+) \. (\d+)/x;
+            unless ((defined $rmajor)
+                and (defined $rminor)
+                and (defined $rpatch)) {
+                $self->set_result("could not understand version requirement");
+                return;
+            }
+
+            unless (
+		            $prog_major >= $rmajor
+
+		    or (    $prog_major == $rmajor
+			and $prog_minor >= $rminor )
+
+		    or (    $prog_major == $rmajor
+			and $prog_minor == $rminor
+			and $prog_patch >= $rpatch )
+		   ) {
+                $self->set_result("found flex version $prog_version"
+                        . " but at least $rmajor.$rminor.$rpatch is required");
+                return;
+            }
+        }
+
+        $conf->data->set(prog_version => $prog_version);
+        $self->set_result("flex $prog_version");
+        $conf->data->set($util => $prog);
+    } else {
+        $self->set_result(
+                'lex program does not exist or does not understand --version');
+        return;
+    }
 
     return $self;
 }

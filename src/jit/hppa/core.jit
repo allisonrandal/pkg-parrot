@@ -2,7 +2,7 @@
 ; hppa/core.jit
 ;
 ;
-; $Id: core.jit 11521 2006-02-13 14:04:12Z rafl $
+; $Id: /local/src/jit/hppa/core.jit 11521 2006-02-13T14:04:12.716124Z rafl  $
 ;
 
 Parrot_end {

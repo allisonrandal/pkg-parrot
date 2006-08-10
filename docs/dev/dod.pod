@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: dod.pod 11525 2006-02-13 18:40:19Z particle $
+# $Id: /local/docs/dev/dod.pod 13183 2006-07-06T20:05:47.681449Z chip  $
 
 =head1 NAME
 
@@ -122,7 +122,7 @@ Jones and Lins
 
 =back
 
-Also, the L<http://dev.perl.org> web site has an archive of the perl6-internals
-mailing list which contains numerous discussions on the Parrot garbage
-collector.
+Also, the L<http://dev.perl.org> web site has an archive of the
+parrot-porters and old perl6-internals mailing list which contains
+numerous discussions on the Parrot garbage collector.
 

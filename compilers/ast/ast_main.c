@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: ast_main.c 12828 2006-05-30 02:34:44Z coke $
+$Id: /local/compilers/ast/ast_main.c 13676 2006-07-29T19:32:10.957437Z chip  $
 
 =head1 NAME
 
@@ -21,12 +21,14 @@ The AST (Abstract Syntax Tree) represents the code of a HLL source module.
 #include "../../compilers/imcc/imc.h"
 #include "ast.h"
 
+/* TODO: These should be in an external .h file */
 extern FILE* ASTin;
-extern void ASTparse(Interp *);
 extern void ASTparse(Interp *);
 extern void AST_scan_string(const char *yy_str);
 
-PMC *
+static INTVAL eval_nr = 0;
+
+static PMC *
 ast_compile_past(Parrot_Interp interp, const char *src_string)
 {
     char name[64];
@@ -48,7 +50,7 @@ ast_compile_past(Parrot_Interp interp, const char *src_string)
     /* pastc always compiles to interp->code->cur_cs
      * make new, switch and save old cs
      */
-    sprintf(name, "EVAL_" INTVAL_FMT, ++interp->code->base.pf->eval_nr);
+    sprintf(name, "EVAL_" INTVAL_FMT, ++eval_nr);
     new_cs = PF_create_default_segs(interp, name, 0);
     old_cs = Parrot_switch_to_cs(interp, new_cs, 0);
     interp->imc_info->cur_namespace = NULL;

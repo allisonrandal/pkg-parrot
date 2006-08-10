@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: basic.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/src/basic.t 13784 2006-08-01T17:54:04.760248Z chip  $
 
 use strict;
 use warnings;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     Parrot_run_native(interpreter, the_test);
 
     PIO_eprintf(interpreter, "back\n");
-    Parrot_exit(0);
+    Parrot_exit(interpreter, 0);
     return 0;
 }
 

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: jit_debug.c 12826 2006-05-30 01:36:30Z coke $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: /local/src/jit_debug.c 12981 2006-06-20T19:26:31.775154Z bernhard  $
 
 =head1 NAME
 
@@ -30,7 +30,7 @@ http://sources.redhat.com/gdb/current/onlinedocs/stabs_toc.html.
 
 #include <parrot/parrot.h>
 #include "parrot/exec.h"
-#include "parrot/jit.h"
+#include "jit.h"
 
 #define N_GSYM "32"     /* global variable */
 #define N_FNAME "34"

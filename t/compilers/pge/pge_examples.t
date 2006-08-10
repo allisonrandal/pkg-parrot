@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: pge_examples.t 12893 2006-06-06 17:45:12Z bernhard $
+# $Id: /local/t/compilers/pge/pge_examples.t 12893 2006-06-06T17:45:12.755919Z bernhard  $
 
 use strict;
 use warnings;

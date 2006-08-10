@@ -1,11 +1,13 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: root.in 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/gen/makefiles/root.in 14026 2006-08-08T23:06:01.870196Z chip  $
 
 ###############################################################################
-# NOTES:
+#
+# NOTE:
 #
 # This makefile makes use of specific .dummy targets (rather than .PHONY
 # or .VIRTUAL targets) in an effort to work with various flavors of make.
+#
 ###############################################################################
 
 ###############################################################################
@@ -91,7 +93,7 @@ CP         = @cp@
 TOUCH      = @touch@
 YACC       = @yacc@
 LEX        = @lex@
-MKDIR      = @mkdir@
+MKPATH     = @mkpath@
 AS         = @as@
 CC         = @cc@
 CC_INC     = @cc_inc@
@@ -182,6 +184,7 @@ GEN_MAKEFILES = \
     compilers/past/Makefile \
     compilers/pge/Makefile \
     compilers/tge/Makefile \
+    compilers/bcg/Makefile \
     editor/Makefile \
     languages/Makefile \
     languages/amber/Makefile \
@@ -189,7 +192,9 @@ GEN_MAKEFILES = \
     languages/bc/Makefile \
     languages/befunge/Makefile \
     languages/bf/Makefile \
+	languages/cardinal/Makefile \
     languages/cola/Makefile \
+	languages/ecmascript/Makefile \
     languages/HQ9plus/Makefile \
     languages/jako/Makefile \
     languages/lisp/Makefile \
@@ -204,9 +209,11 @@ GEN_MAKEFILES = \
     languages/punie/Makefile \
     languages/regex/Makefile \
     languages/scheme/Makefile \
+	languages/tap/Makefile \
     languages/tcl/Makefile \
     languages/tcl/examples/Makefile \
     languages/urm/Makefile \
+	languages/WMLScript/Makefile \
     languages/Zcode/Makefile \
     src/dynpmc/Makefile \
     src/dynoplibs/Makefile
@@ -219,7 +226,7 @@ GEN_CONFIGS = \
     $(INC_DIR)/feature.h \
     $(INC_DIR)/core_pmcs.h \
     $(SRC_DIR)/exec_dep.h \
-    lib/Parrot/Config.pm \
+    lib/Parrot/Config/Generated.pm \
     lib/Parrot/PMC.pm \
     runtime/parrot/include/config.fpmc \
     $(SRC_DIR)/platform.c \
@@ -313,7 +320,7 @@ GEN_LIBRARY = \
 #    runtime/parrot/library/Data/Replace.pbc \
 #    runtime/parrot/library/postgres.pbc \
 
-# the dependencies of jit_emit.h are done explicitely
+# the dependencies of $(SRC_DIR)/jit_emit.h are done explicitely
 # including this file in GEN_HEADERS causes unnecessary recompile of all
 FLUID_FILES = \
     $(GEN_OPSFILES) \
@@ -321,7 +328,7 @@ FLUID_FILES = \
     $(GEN_SOURCES) \
     $(GEN_MODULES) \
     $(GEN_LIBRARY) \
-    $(INC_DIR)/jit_emit.h \
+    $(SRC_DIR)/jit_emit.h \
     runtime/parrot/include/parrotlib.pbc
 
 
@@ -391,6 +398,7 @@ IO_O_FILES = \
     $(IO_DIR)/io_mmap$(O) \
     $(IO_DIR)/io_win32$(O) \
     $(IO_DIR)/io_stdio$(O) \
+    $(IO_DIR)/io_string$(O) \
     $(IO_DIR)/io_passdown$(O)
 
 INTERP_O_FILES = \
@@ -595,13 +603,13 @@ STR_FILES = \
     $(SRC_DIR)/spf_vtable.str \
     $(CLASS_STR_FILES)
 
-$(INC_DIR)/string_private_cstring.h : $(STR_FILES) $(BUILD_TOOLS_DIR)/c2str.pl
+$(SRC_DIR)/string_private_cstring.h : $(STR_FILES) $(BUILD_TOOLS_DIR)/c2str.pl
 	$(PERL) $(BUILD_TOOLS_DIR)/c2str.pl --all
 
 # classes PMC build utils and rules
 PMC2CD = $(PERL) $(BUILD_TOOLS_DIR)/pmc2c.pl --dump
 PMC2CC = $(PERL) $(BUILD_TOOLS_DIR)/pmc2c.pl --c
-PMC2CV = $(PERL) $(BUILD_TOOLS_DIR)/pmc2c.pl --vt
+PMC2CV = $(PERL) $(BUILD_TOOLS_DIR)/pmc2c.pl --vtable
 
 .pmc.dump :
 	$(PMC2CD) $<
@@ -637,7 +645,10 @@ help :
 	@echo "  $(PBCMERGE):         Merge bytecode files"
 	@echo ""
 	@echo "Installation:"
-	@echo "  install:           Install under '/usr/local/parrot' on Unix systems"
+	@echo "  install:           Install under '$(PREFIX)' on Unix systems"
+	@echo "                      WARNING: Installing Parrot may interfere with"
+	@echo "                               developing Parrot on the same machine."
+	@echo "                               This flaw will be fixed eventually."
 	@echo ""
 	@echo "Documentation:"
 	@echo "  help:              Print this help message."
@@ -796,14 +807,13 @@ PARROT_LIBS: \
 #CONDITIONED_LINE(has_static_linking):  $(LIBPARROT_STATIC) \
 #CONDITIONED_LINE(has_dynamic_linking): $(LIBPARROT_SHARED)
 
-@blib_dir@:
-	$(MKDIR) @blib_dir@
-
-$(LIBPARROT_STATIC) : $(O_FILES) @blib_dir@
+$(LIBPARROT_STATIC) : $(O_FILES)
+	$(MKPATH) @blib_dir@
 	$(AR_CR) @ar_out@$@ @ar_extra@ $(O_FILES)
 	$(RANLIB) $@
 
-$(LIBPARROT_SHARED) : $(O_FILES) @blib_dir@
+$(LIBPARROT_SHARED) : $(O_FILES)
+	$(MKPATH) @blib_dir@
 	$(LD) $(LD_SHARE_FLAGS) $(LDFLAGS) @ld_out@$@ @libparrot_soname@ \
     $(O_FILES) $(C_LIBS) $(ICU_SHARED)
 #CONDITIONED_LINE(libparrot_shared_alias):	( cd @blib_dir@ ; ln -sf @libparrot_shared@ @libparrot_shared_alias@ )
@@ -893,7 +903,7 @@ $(INSTALLABLEPBCMERGE) : $(SRC_DIR)/pbc_merge$(O) $(LIBPARROT)
 $(IMCC_DIR)/main$(O) : $(IMCC_DIR)/main.c $(GENERAL_H_FILES) $(IMCC_H_FILES)
 
 $(INC_DIR)/oplib/ops.h lib/Parrot/OpLib/core.pm : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2pm.pl \
-    lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(OPS_DIR)/ops.num
+    lib/Parrot/OpsFile.pm lib/Parrot/Op.pm $(OPS_DIR)/ops.num $(OPS_DIR)/ops.skip
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2pm.pl $(OPS_FILES)
 
 $(SRC_DIR)/fingerprint.c : $(BUILD_TOOLS_DIR)/fingerprint_c.pl PBC_COMPAT
@@ -954,17 +964,17 @@ $(SRC_DIR)/list$(O) : $(GENERAL_H_FILES)
 
 $(SRC_DIR)/library$(O) : $(GENERAL_H_FILES)
 
-$(SRC_DIR)/jit$(O) : $(GENERAL_H_FILES) @TEMP_jit_h@ $(INC_DIR)/jit_emit.h
+$(SRC_DIR)/jit$(O) : $(GENERAL_H_FILES) $(SRC_DIR)/jit_emit.h
 
-$(SRC_DIR)/jit_debug$(O) : $(GENERAL_H_FILES) @TEMP_jit_h@
+$(SRC_DIR)/jit_debug$(O) : $(GENERAL_H_FILES) 
 
-$(SRC_DIR)/jit_debug_xcoff$(O) : $(GENERAL_H_FILES) @TEMP_jit_h@
+$(SRC_DIR)/jit_debug_xcoff$(O) : $(GENERAL_H_FILES)
 
-$(SRC_DIR)/jit_cpu$(O) : $(GENERAL_H_FILES) @TEMP_jit_h@ $(INC_DIR)/jit_emit.h
+$(SRC_DIR)/jit_cpu$(O) : $(GENERAL_H_FILES) $(SRC_DIR)/jit_emit.h
 
-$(SRC_DIR)/exec$(O) : $(GENERAL_H_FILES) @TEMP_exec_h@ @TEMP_jit_h@ $(INC_DIR)/jit_emit.h
+$(SRC_DIR)/exec$(O) : $(GENERAL_H_FILES) @TEMP_exec_h@ $(SRC_DIR)/jit_emit.h
 
-$(SRC_DIR)/exec_cpu$(O) : $(GENERAL_H_FILES) @TEMP_exec_h@ @TEMP_jit_h@ $(INC_DIR)/jit_emit.h
+$(SRC_DIR)/exec_cpu$(O) : $(GENERAL_H_FILES) @TEMP_exec_h@ $(SRC_DIR)/jit_emit.h
 
 $(INC_DIR)/extend_vtable.h $(SRC_DIR)/extend_vtable.c $(SRC_DIR)/vtable.h : vtable.tbl $(BUILD_TOOLS_DIR)/vtable_extend.pl lib/Parrot/Vtable.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/vtable_extend.pl
@@ -1001,7 +1011,7 @@ $(SRC_DIR)/debug$(O) : $(GENERAL_H_FILES) $(INC_DIR)/debug.h
 
 $(SRC_DIR)/sub$(O) : $(GENERAL_H_FILES)
 
-$(SRC_DIR)/string$(O) : $(GENERAL_H_FILES) $(INC_DIR)/string_private_cstring.h
+$(SRC_DIR)/string$(O) : $(GENERAL_H_FILES) $(SRC_DIR)/string_private_cstring.h
 
 $(SRC_DIR)/string_primitives$(O) : $(GENERAL_H_FILES) 
 
@@ -1017,8 +1027,7 @@ $(SRC_DIR)/thread$(O) : $(GENERAL_H_FILES)
 
 $(SRC_DIR)/extend$(O) : $(GENERAL_H_FILES) $(INC_DIR)/extend.h
 
-$(SRC_DIR)/interpreter$(O) : $(SRC_DIR)/interpreter.c $(GENERAL_H_FILES) \
-    @TEMP_jit_h@
+$(SRC_DIR)/interpreter$(O) : $(SRC_DIR)/interpreter.c $(GENERAL_H_FILES)
 
 $(SRC_DIR)/inter_call$(O) : $(SRC_DIR)/inter_call.c $(GENERAL_H_FILES) \
     $(SRC_DIR)/inter_call.str
@@ -1048,6 +1057,8 @@ $(IO_DIR)/io_mmap$(O) : $(GENERAL_H_FILES) $(IO_DIR)/io_private.h
 $(IO_DIR)/io_win32$(O) : $(GENERAL_H_FILES) $(IO_DIR)/io_private.h
 
 $(IO_DIR)/io_stdio$(O) : $(GENERAL_H_FILES) $(IO_DIR)/io_private.h
+
+$(IO_DIR)/io_string$(O) : $(GENERAL_H_FILES) $(IO_DIR)/io_private.h
 
 $(IO_DIR)/io_passdown$(O) : $(GENERAL_H_FILES) $(IO_DIR)/io_private.h
 
@@ -1146,14 +1157,14 @@ $(OPS_DIR)/core_ops_switch.c : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parr
 $(INC_DIR)/vtable.h : vtable.tbl $(BUILD_TOOLS_DIR)/vtable_h.pl lib/Parrot/Vtable.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/vtable_h.pl
 
-$(INC_DIR)/jit_emit.h : $(SRC_DIR)/jit/@jitcpuarch@/jit_emit.h
-	$(CP) $(SRC_DIR)/jit/@jitcpuarch@/jit_emit.h $(INC_DIR)/jit_emit.h
+$(SRC_DIR)/jit_emit.h : $(SRC_DIR)/jit/@jitcpuarch@/jit_emit.h
+	$(CP) $(SRC_DIR)/jit/@jitcpuarch@/jit_emit.h $(SRC_DIR)/jit_emit.h
 $(SRC_DIR)/exec_dep.h : $(SRC_DIR)/jit/@jitcpuarch@/exec_dep.h
 	$(CP) $(SRC_DIR)/jit/@jitcpuarch@/exec_dep.h $(SRC_DIR)/exec_dep.h
-$(SRC_DIR)/jit_cpu.c : lib/Parrot/OpLib/core.pm $(INC_DIR)/jit_emit.h \
+$(SRC_DIR)/jit_cpu.c : lib/Parrot/OpLib/core.pm $(SRC_DIR)/jit_emit.h \
     $(SRC_DIR)/jit/@jitcpuarch@/core.jit $(JIT_BUILD_TOOL)
 	$(PERL) $(JIT_BUILD_TOOL) @jitcpuarch@ $(SRC_DIR)/jit_cpu.c
-$(SRC_DIR)/exec_cpu.c : lib/Parrot/OpLib/core.pm $(INC_DIR)/jit_emit.h \
+$(SRC_DIR)/exec_cpu.c : lib/Parrot/OpLib/core.pm $(SRC_DIR)/jit_emit.h \
     $(SRC_DIR)/jit/@jitcpuarch@/core.jit @TEMP_exec_h@ $(SRC_DIR)/exec_dep.h $(JIT_BUILD_TOOL)
 	$(PERL) $(JIT_BUILD_TOOL) @jitcpuarch@ $(SRC_DIR)/exec_cpu.c
 
@@ -1290,7 +1301,7 @@ compilers-clean :
 	$(MAKE) compilers/past clean
 	$(MAKE) compilers/pge clean
 	$(MAKE) compilers/tge clean
-
+	
 ###############################################################################
 #
 # editors targets:
@@ -1503,7 +1514,7 @@ prog-clean :
     install_config.fpmc
 	$(PERL) $(BUILD_TOOLS_DIR)/c2str.pl --init
 	$(RM_F) \
-    $(INC_DIR)/string_private_cstring.h \
+    $(SRC_DIR)/string_private_cstring.h \
     "$(SRC_DIR)/*.str" "src/pmc/*.str" \
     "src/pmc/*.c" "src/pmc/*.h" "src/pmc/*.dump" \
     vtable.dump "*.def" "*.lib" "*.exp"
@@ -1531,7 +1542,7 @@ archclean: dynoplibs-clean dynpmc-clean dynext-clean
     $(SRC_DIR)/parrot_config$(O) \
     $(SRC_DIR)/install_config$(O) \
     $(SRC_DIR)/asmfun.s \
-    $(INC_DIR)/jit_emit.h \
+    $(SRC_DIR)/jit_emit.h \
     $(SRC_DIR)/jit_cpu.c \
     $(SRC_DIR)/exec_cpu.c \
     $(SRC_DIR)/exec_start$(O) \
@@ -1658,6 +1669,12 @@ splint2 : $(PARROT)
 ###############################################################################
 
 install : installable
+	@echo "WARNING:"
+	@echo "  Installing Parrot may interfere with developing Parrot"
+	@echo "  on the same machine.  This is a temporary flaw in the"
+	@echo "  Parrot build system.  If you are not sure this is OK,"
+	@echo "  press ^C (or your interrupt key) in the next ten seconds."
+	$(PERL) -e "sleep(10)"
 	$(PERL) tools/dev/install_files.pl \
     --buildprefix=$(BUILDPREFIX) \
     --prefix=$(PREFIX) \
@@ -1677,7 +1694,8 @@ install : installable
 
 release : MANIFEST MANIFEST.generated
 	[ -d parrot-$(VERSION) ] || ln -s $(CUR_DIR) parrot-$(VERSION)
-	cp MANIFEST MANIFEST.real
+	@$(RM_F) MANIFEST.real
+	mv MANIFEST MANIFEST.real
 	grep -v DEVELOPING MANIFEST.real > MANIFEST
 	tar zcvf parrot-$(VERSION).tar.gz $$(perl -lane 'print"parrot-$(VERSION)/$$F[0]"unless!length||/#/' MANIFEST)
 	mv MANIFEST.real MANIFEST

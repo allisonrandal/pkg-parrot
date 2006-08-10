@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: basic.t 12903 2006-06-07 11:23:50Z leo $
+# $Id: /local/t/compilers/tge/basic.t 13684 2006-07-29T21:31:17.363951Z chip  $
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ t/basic.t - testing a few basic components of TGE::Grammar and TGE::Tree
 
 =head1 SYNOPSIS
 
-	$ prove t/basic.t
+	$ prove t/compilers/tge/basic.t
 
 =cut
 

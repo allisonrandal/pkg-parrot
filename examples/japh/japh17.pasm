@@ -1,4 +1,4 @@
-# $Id: japh17.pasm 9150 2005-09-07 19:51:21Z bernhard $
+# $Id: /local/examples/japh/japh17.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 
     newclass P1, "JaPH"
     find_global P2, "get_s"

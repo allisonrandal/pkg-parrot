@@ -1,4 +1,4 @@
-# $Id: japh14.pasm 12193 2006-04-12 20:04:06Z bernhard $
+# $Id: /local/examples/japh/japh14.pasm 12193 2006-04-12T20:04:06.066885Z bernhard  $
 
 # 2 timer subs are alternately spitting out the JaPH
 .include "timer.pasm"

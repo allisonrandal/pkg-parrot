@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: byteorder.pod 11525 2006-02-13 18:40:19Z particle $
+# $Id: /local/docs/dev/byteorder.pod 11525 2006-02-13T18:40:19.965566Z particle  $
 
 =head1 NAME
 

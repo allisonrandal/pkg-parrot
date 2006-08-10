@@ -1,4 +1,4 @@
-# $Id$
+# $Id: /local/lib/Parrot/Test/Perl6.pm 13278 2006-07-13T13:40:14.092490Z coke  $
 
 =head1 NAME
 

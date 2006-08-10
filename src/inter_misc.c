@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: inter_misc.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/inter_misc.c 13660 2006-07-28T17:05:24.263356Z chip  $
 
 =head1 NAME
 
@@ -89,6 +89,54 @@ Parrot_compreg(Parrot_Interp interpreter, STRING *type, Parrot_compiler_func_t f
     VTABLE_set_pointer_keyed_str(interpreter, nci, sc, (void*)func);
 }
 
+/*
+
+=item C<PMC *
+Parrot_compile_string(Parrot_Interp interpreter, STRING *type, 
+                      char *code, String **error)>
+
+Compile code string.
+
+=cut
+
+*/
+
+PMC *
+Parrot_compile_string(Parrot_Interp interpreter, STRING *type, 
+                      char *code, STRING **error)
+{
+    if (!string_compare(interpreter, const_string(interpreter, "PIR"), 
+        type)) {
+        return IMCC_compile_pir_s(interpreter, code, error); 
+    }    
+    else if (!string_compare(interpreter,const_string(interpreter, 
+        "PASM"), type)) {
+        return IMCC_compile_pasm_s(interpreter, code, error);
+    }
+    else {
+        *error=const_string(interpreter, "Invalid interpreter type");
+        return NULL;    
+    }
+}
+
+/*
+
+=item C<void
+Parrot_compile_file(Parrot_Interp interpreter, const char *fullname, 
+                    String **error)>
+
+Compile code file.
+
+=cut
+
+*/
+
+void *
+Parrot_compile_file(Parrot_Interp interpreter, char *fullname, 
+                    String **error)
+{
+    return IMCC_compile_file_s(interpreter, fullname, error);
+}
 
 #ifdef GC_IS_MALLOC
 #  if 0

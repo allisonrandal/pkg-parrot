@@ -1,7 +1,7 @@
 /* objects.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: objects.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/objects.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     Parrot class and object header stuff
  *  Data Structure and Algorithms:

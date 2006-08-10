@@ -2,7 +2,7 @@
  * debug.h
  *
  * SVN Info
- *    $Id: debug.h 11903 2006-03-14 20:49:11Z bernhard $
+ *    $Id: /local/include/parrot/debug.h 11903 2006-03-14T20:49:11.779219Z bernhard  $
  * Overview:
  *    Parrot debugger header files
  * History:

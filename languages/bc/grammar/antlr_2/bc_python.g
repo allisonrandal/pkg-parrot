@@ -1,5 +1,5 @@
-// Copyright (C) 2005, The Perl Foundation.
-// $Id: bc_python.g 12840 2006-05-30 15:08:05Z coke $
+// Copyright (C) 2005-2006, The Perl Foundation.
+// $Id: /local/languages/bc/grammar/antlr_2/bc_python.g 13594 2006-07-25T22:35:08.338062Z chip  $
 
 
 // based on antrltut by javadude

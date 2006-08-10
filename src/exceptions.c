@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: exceptions.c 12921 2006-06-10 19:00:07Z rgrjr $
+$Id: /local/src/exceptions.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -61,7 +61,12 @@ internal_exception(int exitcode, const char *format, ...)
     /* caution against output swap (with PDB_backtrace) */
     fflush(stderr);
     va_end(arglist);
-    Parrot_exit(exitcode);
+/*
+ * XXX TODO get rid of all the internal_exceptions or call them
+ *          with an interpreter arg 
+    Parrot_exit(interpreter, exitcode);
+ */
+    exit(exitcode);
 }
 
 /* Panic handler */
@@ -106,7 +111,7 @@ do_panic(Interp *interpreter, const char *message,
     fprintf(stderr, "\n\
 We highly suggest you notify the Parrot team if you have not been working on\n\
 Parrot.  Use parrotbug (located in parrot's root directory) or send an\n\
-e-mail to perl6-internals@perl.org.\n\
+e-mail to parrot-porters@perl.org.\n\
 Include the entire text of this error message and the text of the script that\n\
 generated the error.  If you've made any modifications to Parrot, please\n\
 describe them as well.\n\n");
@@ -189,7 +194,7 @@ void
 Parrot_pop_mark(Interp * interpreter, INTVAL mark)
 {
     do {
-        Stack_Entry_t * const e = stack_entry(interpreter, CONTEXT(interpreter->ctx)->control_stack, 0);
+        const Stack_Entry_t * const e = stack_entry(interpreter, CONTEXT(interpreter->ctx)->control_stack, 0);
         if (!e)
             internal_exception(1, "mark not found");
         (void)stack_pop(interpreter, &CONTEXT(interpreter->ctx)->control_stack,
@@ -310,7 +315,7 @@ find_exception_handler(Interp * interpreter, PMC *exception)
      * only main should run the destroy functions - exit handler chain
      * is freed during Parrot_exit
      */
-    Parrot_exit(exit_status);
+    Parrot_exit(interpreter, exit_status);
 
     return NULL;
 }

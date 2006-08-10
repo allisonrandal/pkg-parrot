@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: interpreter.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/interpreter.h 13784 2006-08-01T17:54:04.760248Z chip  $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -195,8 +195,7 @@ typedef struct Parrot_Context {
                                  * have been activated */
     UINTVAL errors;            /* fatals that can be turned off */
     UINTVAL trace_flags;
-    UINTVAL recursion_depth;    /* Sub call resursion depth */
-    int runloop_level;                  /* for reentering run loop */
+    UINTVAL recursion_depth;    /* Sub call recursion depth */
     /*
      * new call scheme and introspective variables
      */
@@ -269,6 +268,8 @@ typedef struct _context_mem {
 #endif
 
 } context_mem;
+
+struct _handler_node_t; /* forward def - exit.h */
 /*
  * The actual interpreter structure
  */
@@ -354,12 +355,15 @@ struct parrot_interp_t {
     STRING **const_cstring_table;             /* CONST_STRING(x) items */
 
     struct QUEUE* task_queue;                 /* per interpreter queue */
-
+    struct _handler_node_t *exit_handler_list;   /* exit.c */ 
     int sleeping;                             /* used during sleep in events */
 
     struct parrot_exception_t *exceptions;    /* internal exception stack */
     struct parrot_exception_t *exc_free_list; /* and free list */
     PMC ** exception_list;                    /* precreated exception objects */
+
+    int current_runloop_level;                /* for reentering run loop */
+    int current_runloop_id;
 
     struct _Thread_data *thread_data;         /* thread specific items */
 
@@ -408,15 +412,15 @@ typedef enum {
 #define PCONST(i) PF_CONST(interpreter->code, (i))
 #define PNCONST   PF_NCONST(interpreter->code)
 
-/* Make this a config option */
+/* TODO - Make this a config option */
 #define PARROT_CATCH_NULL 1
 
 #if PARROT_CATCH_NULL
 PARROT_API extern PMC * PMCNULL;   /* Holds single Null PMC */
-#  define PMC_IS_NULL(p) (!(p) || (p) == PMCNULL)
+#  define PMC_IS_NULL(p)  ((p) == PMCNULL || (p) == NULL)
 #else
-#  define PMCNULL NULL
-#  define PMC_IS_NULL(p) (!(p))
+#  define PMCNULL         ((PMC *)NULL)
+#  define PMC_IS_NULL(p)  ((p) == PMCNULL)
 #endif /* PARROT_CATCH_NULL */
 
 /* &gen_from_def(sysinfo.pasm) prefix(SYSINFO_) */
@@ -484,6 +488,12 @@ typedef PMC *(*Parrot_compiler_func_t)(Parrot_Interp interpreter,
                                        const char * program );
 
 PARROT_API void Parrot_compreg(Interp * interpreter, STRING *, Parrot_compiler_func_t func);
+
+PARROT_API PMC *Parrot_compile_string(Parrot_Interp interpreter, 
+        STRING *type, char *code, STRING **error);
+PARROT_API void *Parrot_compile_file(Parrot_Interp interpreter, 
+        char *fullname, String **error);
+
 INTVAL sysinfo_i(Interp * interpreter, INTVAL info_wanted);
 STRING *sysinfo_s(Interp * interpreter, INTVAL info_wanted);
 void exec_init_prederef(Interp *interpreter,

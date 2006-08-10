@@ -1,12 +1,12 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: perlint.t 12937 2006-06-14 06:57:39Z fperrad $
+# $Id: /local/t/dynpmc/perlint.t 13305 2006-07-15T16:09:55.326999Z leo  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 75;
+use Parrot::Test tests => 76;
 use Parrot::Config;
 
 
@@ -1596,6 +1596,16 @@ OK2:  print "ok 2\n"
     print "not "
 OK3:  print "ok 3\n"
 
+    end
+CODE
+ok 1
+ok 2
+ok 3
+OUTPUT
+
+pasm_output_is($load_perl . <<'CODE', <<OUTPUT, "eq_p_i, array", todo => 'unimplemented');
+
+    set I0, 12
     new P0, I21
     eq P0, I0, BAD4
     branch OK4
@@ -1606,11 +1616,8 @@ OK4:  print "ok 4\n"
     eq P0, I0, OK5
     print "not "
 OK5:  print "ok 5\n"
-    end
+    end 
 CODE
-ok 1
-ok 2
-ok 3
 ok 4
 ok 5
 OUTPUT

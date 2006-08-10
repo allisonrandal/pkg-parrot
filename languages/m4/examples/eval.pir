@@ -1,4 +1,4 @@
-# $Id: eval.pir 9723 2005-11-02 20:15:57Z bernhard $
+# $Id: /local/languages/m4/examples/eval.pir 11501 2006-02-10T18:27:13.457666Z particle  $
 
 =head1 NAME
 

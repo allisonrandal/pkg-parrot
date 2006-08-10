@@ -1,7 +1,7 @@
-#! perl -w
+#! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: install_files.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/dev/install_files.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 ################################################################################
 
 =head1 TITLE
@@ -110,10 +110,11 @@ F<tools/dev/mk_manifests.pl>
 
 ################################################################################
 
+use strict;
+use warnings;
 use File::Basename qw(dirname basename);
 use File::Copy;
 use File::Spec;
-use strict;
 
 # When run from the makefile, which is probably the only time this
 # script will ever be used, all of these defaults will get overridden.

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: default.pmc 12884 2006-06-05 13:29:13Z audreyt $
+$Id: /local/src/pmc/default.pmc 13170 2006-07-06T00:31:15.675448Z chip  $
 
 =head1 NAME
 
@@ -385,8 +385,10 @@ Store the method as a global in the namespace of this class.
     }
 
     void add_method(STRING *method_name, PMC *sub_pmc) {
-        STRING *names = DYNSELF.name();
-        Parrot_store_global(INTERP, names, method_name, sub_pmc);
+        /* XXX - multi-level namespaces not supported? */
+        /* Why aren't we using SELF->vtable->_namespace? */
+        STRING *ns_name = DYNSELF.name();
+        Parrot_store_global_s(INTERP, ns_name, method_name, sub_pmc);
     }
 /*
 

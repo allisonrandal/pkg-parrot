@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
+#! perl
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: nm.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/dev/nm.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 NAME
 
@@ -132,6 +132,7 @@ leading dash ("-") can be used instead of two ("--").
 =cut
 
 use strict;
+use warnings;
 use Getopt::Long;
 use File::Basename;
 
@@ -139,10 +140,10 @@ use vars qw($VERSION);
 
 require 5.005;
 
-$VERSION = sprintf "%d.%d", q$Revision: 12841 $ =~ /(\d+)/g; # jhi@iki.fi;
+$VERSION = sprintf "%d.%d", q$Revision: 13529 $ =~ /(\d+)/g; # jhi@iki.fi;
 
 my $ME = basename($0);
-my $RCS_DATE = q$Date: 2006-05-30 17:23:20 +0200 (Di, 30 Mai 2006) $;
+my $RCS_DATE = q$Date: 2006-07-24T17:20:02.191389Z $;
 
 my $nm_cmd = 'nm';
 my $nm_opt = '';

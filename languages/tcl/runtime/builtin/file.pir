@@ -1,5 +1,5 @@
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
 .sub '&file'
   .param pmc argv :slurpy
@@ -13,7 +13,9 @@
   subcommand_name = shift argv
   .local pmc subcommand_proc
 
-  .get_from_HLL(subcommand_proc, '_tcl';'helpers';'file', subcommand_name)
+  push_eh bad_args
+    subcommand_proc = get_root_global ['_tcl';'helpers';'file'], subcommand_name
+  clear_eh
   if_null subcommand_proc, bad_args
 
   .return subcommand_proc(argv)
@@ -31,6 +33,12 @@ few_args:
 .HLL '_Tcl', ''
 .namespace [ 'helpers'; 'file' ]
 
+.sub 'normalize' # XXX Stub for testing
+  .param pmc argv
+  $P0 = argv[0]
+  .return ($P0)
+.end
+
 .sub 'join'
   .param pmc argv
   
@@ -39,7 +47,7 @@ few_args:
   if argc == 0 goto bad_args
 
   .local string dirsep
-  dirsep = "/" # XXX should pull from parrot config.
+  dirsep = '/' # XXX should pull from parrot config.
 
   .local string result
   result = ''
@@ -91,7 +99,7 @@ bad_args:
   clear_eh
 
   .local pmc __set
-  __set = find_global "__set" 
+  __set = find_global '__set' 
 
   $P3 = new .TclArray
   $P1 = $P2[8]
@@ -117,7 +125,7 @@ bad_args:
   $I2 = 0o170000   #S_IFMT
   $I3 = $I1 & $I2
 
-  $P4 = find_global "filetypes"  
+  $P4 = find_global 'filetypes'  
   $S1 = $P4[$I3]
   $P3['type'] = $S1
 
@@ -233,7 +241,7 @@ bad_args:
   $I2 = 0o170000   #S_IFMT
   $I3 = $I1 & $I2
 
-  $P4 = find_global "filetypes"  
+  $P4 = find_global 'filetypes'  
   $S1 = $P4[$I3]
   .return ($S1)
 

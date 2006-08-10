@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: objects.c 12884 2006-06-05 13:29:13Z audreyt $
+$Id: /local/src/objects.c 13603 2006-07-26T02:38:24.100453Z chip  $
 
 =head1 NAME
 
@@ -205,10 +205,7 @@ create_deleg_pmc_vtable(Interp *interpreter, PMC *class,
     int i;
     const char *meth;
     STRING meth_str;
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
 
     PMC * const vtable_pmc = get_attrib_num((SLOTTYPE*)PMC_data(class), PCD_OBJECT_VTABLE);
     VTABLE * const vtable           = PMC_struct_val(vtable_pmc);
@@ -225,10 +222,9 @@ create_deleg_pmc_vtable(Interp *interpreter, PMC *class,
         meth_str.strstart = const_cast(meth);
         meth_str.strlen = meth_str.bufused = strlen(meth);
         meth_str.hashval = 0;
-        if (Parrot_find_global_p(interpreter, class_name, &meth_str)) {
+        if (Parrot_find_global_k(interpreter, class_name, &meth_str)) {
             /*
-             * if the method exists, keep the ParrotObject aka delegate vtable
-             * slot
+             * the method exists; keep the ParrotObject aka delegate vtable slot
              */
             ((void **)vtable)[i] = ((void**)object_vtable)[i];
 #if 0
@@ -238,7 +234,7 @@ create_deleg_pmc_vtable(Interp *interpreter, PMC *class,
         }
         else if (full) {
             /*
-             * if the method doesn't exist, put in the deleg_pmc vtable,
+             * the method doesn't exist; put in the deleg_pmc vtable,
              * but only if ParrotObject hasn't overridden the method
              */
             if (((void **)delegate_vtable)[i] == ((void**)object_vtable)[i])
@@ -569,11 +565,7 @@ parrot_class_register(Interp* interpreter, PMC *name,
     /* XXX nested, use current as base ? */
     if (PMC_IS_NULL(ns)) {
         /* XXX try HLL namespace too XXX */
-        parrot_context_t *ctx = CONTEXT(interpreter->ctx);
-        const INTVAL hll_id = ctx->current_HLL;
-
-        top =  VTABLE_get_pmc_keyed_int(interpreter, 
-                interpreter->HLL_namespace, hll_id);
+        top = Parrot_get_ctx_HLL_namespace(interpreter);
         ns = VTABLE_get_pmc_keyed(interpreter, top, name);
     }
     if (PMC_IS_NULL(ns)) {

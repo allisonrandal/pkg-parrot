@@ -1,4 +1,4 @@
-# $Id: Driver.pm 12463 2006-04-30 14:02:48Z bernhard $
+# $Id: /local/languages/regex/lib/Regex/Driver.pm 12463 2006-04-30T14:02:48.452322Z bernhard  $
 
 package Regex::Driver;
 use strict;

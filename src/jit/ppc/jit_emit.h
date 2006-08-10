@@ -3,7 +3,7 @@
  *
  * PPC
  *
- * $Id: jit_emit.h 11797 2006-03-05 19:49:23Z leo $
+ * $Id: /local/src/jit/ppc/jit_emit.h 11797 2006-03-05T19:49:23.180393Z leo  $
  */
 
 #if !defined(PARROT_PPC_JIT_EMIT_H_GUARD)

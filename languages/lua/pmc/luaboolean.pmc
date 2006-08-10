@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: luaboolean.pmc 12840 2006-05-30 15:08:05Z coke $
+$Id: /local/languages/lua/pmc/luaboolean.pmc 13236 2006-07-10T06:47:56.488120Z fperrad  $
 
 =head1 NAME
 
@@ -41,8 +41,6 @@ pmclass LuaBoolean
 */
     void class_init() {
         if (pass) {
-            PMC *meth;
-
             Parrot_LuaBase_super_init(INTERP, NULL);
             false_string = const_string(INTERP, "false");
             true_string = const_string(INTERP, "true");

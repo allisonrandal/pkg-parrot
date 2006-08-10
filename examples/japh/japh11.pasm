@@ -1,4 +1,4 @@
-# $Id: japh11.pasm 9150 2005-09-07 19:51:21Z bernhard $
+# $Id: /local/examples/japh/japh11.pasm 13099 2006-07-01T21:25:20.974025Z chip  $
 
 # delegated multimethod dispatch and obfuscated
     bsr _init
@@ -67,7 +67,7 @@ _x:
     branch I17
     pack S0, 380, I0, I17
     print S0
-.namespace [""]
+.namespace
 _init:
     dlfunc P0, P1, "mmd_register", "vIiiip"
     dlvar P5, P1, "Parrot_delegate_divide"

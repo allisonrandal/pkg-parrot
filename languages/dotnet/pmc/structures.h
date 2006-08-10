@@ -260,10 +260,10 @@ struct dotnet_managed_ptr
 /* Int64 and UInt64 PMC underlying structs. */
 struct dotnet_int64
 {
-    __int64 x;
+    HUGEINTVAL x;
 };
 
 struct dotnet_uint64
 {
-    unsigned __int64 x;
+    UHUGEINTVAL x;
 };

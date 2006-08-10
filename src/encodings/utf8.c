@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: utf8.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/encodings/utf8.c 13826 2006-08-03T16:39:40.377376Z chip  $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ UTF-8 (L<http://www.utf-8.com/>).
 */
 
 #include "parrot/parrot.h"
-#include "parrot/unicode.h"
+#include "../unicode.h"
 #include "utf8.h"
 
 #define UNIMPL internal_exception(UNIMPLEMENTED, "unimpl utf8")
@@ -151,13 +151,6 @@ utf8_encode(void *ptr, UINTVAL c)
 
     return u8ptr + len;
 }
-
-void *
-Parrot_utf8_encode(void *ptr, UINTVAL c)
-{
-	return utf8_encode(ptr, c);
-}
-
 
 /*
 
@@ -394,10 +387,7 @@ set_codepoint(Interp *interpreter, STRING *src,
 {
     const void *start;
     void *p;
-    union {
-        const void * __c_ptr;
-        void * __ptr;
-    } __ptr_u;
+    DECL_CONST_CAST;
 
     start = utf8_skip_forward(src->strstart, offset);
     p = const_cast(start);

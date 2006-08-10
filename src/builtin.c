@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2006, The Perl Foundation.
-$Id: builtin.c 12852 2006-05-30 20:22:52Z leo $
+$Id: /local/src/builtin.c 13170 2006-07-06T00:31:15.675448Z chip  $
 
 =head1 NAME
 
@@ -220,15 +220,14 @@ PMC*
 Parrot_find_builtin(Interp *interpreter, STRING *func)
 {
     const int i = find_builtin_s(interpreter, func);
-
-    if (i < 0) {
-        STRING * const ns = CONST_STRING(interpreter, "__parrot_core");
-        return Parrot_find_global(interpreter, ns, func);
-    }
-    return
-        Parrot_find_global(interpreter,
-            builtins[i].namespace,
-            builtins[i].meth_name);
+    if (i < 0)
+        return Parrot_find_global_s(interpreter,
+                                    CONST_STRING(interpreter, "__parrot_core"),
+                                    func);
+    else
+        return Parrot_find_global_s(interpreter,
+                                    builtins[i].namespace,
+                                    builtins[i].meth_name);
 }
 
 const char *

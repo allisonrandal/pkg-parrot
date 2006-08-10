@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2002-2005, The Perl Foundation.
 License:  Artistic/GPL, see README and LICENSES for details
-$Id: datatypes.c 12821 2006-05-29 13:44:57Z coke $
+$Id: /local/src/datatypes.c 12821 2006-05-29T13:44:57.786877Z coke  $
 
 =head1 NAME
 

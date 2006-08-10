@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: register.c 12882 2006-06-05 11:05:52Z leo $
+$Id: /local/src/register.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -243,7 +243,6 @@ init_context(Interp *interpreter, parrot_context_t *ctx, parrot_context_t *old)
         ctx->warns = old->warns;
         ctx->errors = old->errors;
         ctx->trace_flags = old->trace_flags;
-        ctx->runloop_level = old->runloop_level;
 	ctx->pred_offset = old->pred_offset;
         ctx->current_HLL = old->current_HLL;
         ctx->current_namespace = old->current_namespace;

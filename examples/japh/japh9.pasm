@@ -1,4 +1,4 @@
-# $Id: japh9.pasm 9150 2005-09-07 19:51:21Z bernhard $
+# $Id: /local/examples/japh/japh9.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 
 # another one with an object
     newclass P0, "Japh"

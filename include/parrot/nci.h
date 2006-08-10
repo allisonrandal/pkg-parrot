@@ -1,7 +1,7 @@
 /* nci.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: nci.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/nci.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     The nci api handles building native call frames
  *  Data Structure and Algorithms:

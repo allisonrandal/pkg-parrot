@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2006, The Perl Foundation.
-$Id: complex.pmc 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pmc/complex.pmc 13925 2006-08-04T15:10:35.798913Z chip  $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ string parsing/generating and basic mathematical operations.
 =cut
 
 Equations used are sometimes listed.  At times, multiple equations are given,
-but those starting with => are the onces used
+but those starting with => are the ones used
 
 */
 
@@ -1345,7 +1345,7 @@ Returns the inverse function of SELF.
 
 
     METHOD PMC* acot() {
-        FLOATVAL a, b, aabb;
+        FLOATVAL a, b;
         PMC *d = pmc_new(INTERP, SELF->vtable->base_type);
         PMC *e = pmc_new(INTERP, SELF->vtable->base_type);
         a = RE(SELF);

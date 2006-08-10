@@ -1,4 +1,4 @@
-// $Id$
+// $Id: /local/languages/bc/Bc.java 13635 2006-07-26T21:43:25.201202Z chip  $
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,10 +21,10 @@ public class Bc
     CommonTokenStream tokens = new CommonTokenStream(lex);
     // System.out.println("tokens="+tokens);
 
-    // Parsing, generating PAST in ANTLT
+    // Parsing, generating PAST in ANTLR
     BcParser parser = new BcParser(tokens);
     BcParser.program_return antlrPast = parser.program();
-    // System.out.println("tree: "+((Tree)antlrPast.tree).toStringTree());
+    //System.out.println("tree: "+((Tree)antlrPast.tree).toStringTree());
     
     // Printing out PIR, that sets up PAST in PIR
     System.setOut( new PrintStream( new FileOutputStream( pirFn ) ) );

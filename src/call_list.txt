@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2005, The Perl Foundation.
-# $Id: call_list.txt 12826 2006-05-30 01:36:30Z coke $
+# $Id: /local/src/call_list.txt 13338 2006-07-18T02:55:32.863041Z chip  $
 
 # Function signature declarations for Parrot Native Call Interface.
 # The first alphanumeric is the type of the return value,
@@ -60,6 +60,8 @@ v       JOSP     # String.trans
 v       JOS      # String.reverse
 P       JOS      # Added for os.stat
 I       JOI      # os.umask
+P       JOPS     # Namespace.get_global
+v       JOPSP	 # Namespace.set_global
 
 v	JPPP	 # infix MMD
 v	JPIP
@@ -269,6 +271,8 @@ i	tpiibi
 p	iiil
 i	ppl
 v	pip
+p	pti
+i	ppp
 
 # Used by SDL::Font
 p	ti
@@ -408,3 +412,6 @@ l ttl	#  unsigned long mysql_escape_string(char *to,const char *from, unsigned l
 l pttl	#  unsigned long mysql_real_escape_string(MYSQL *mysql, char *to,const char *from, unsigned long length)
 v t	#  void mysql_debug(const char *debug)
 # --- end mysqlclient library ---
+
+# win32
+l lttl

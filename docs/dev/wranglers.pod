@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: wranglers.pod 11646 2006-02-18 15:48:34Z bernhard $
+# $Id: /local/docs/dev/wranglers.pod 11646 2006-02-18T15:48:34.339300Z bernhard  $
 
 =pod
 

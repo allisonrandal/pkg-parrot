@@ -1,4 +1,4 @@
-# $Id: parakeet.pir 12598 2006-05-10 15:42:04Z leo $
+# $Id: /local/languages/parakeet/parakeet.pir 12598 2006-05-10T15:42:04.507358Z leo  $
 
 # Parakeet is a stack machine language for the Parrot VM not entirely
 # unlike the Forth programming language.  Parakeet is extremely simple

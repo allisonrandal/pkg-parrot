@@ -1,4 +1,4 @@
-# $Id: oo_attr.t 7273 2004-12-10 03:35:07Z rubys $
+# $Id: /local/languages/python/t/basic/oo_attr.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use lib '../../lib';

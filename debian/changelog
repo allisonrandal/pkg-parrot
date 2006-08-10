@@ -1,3 +1,9 @@
+parrot (0.4.6-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Florian Ragwitz <rafl@debian.org>  Thu, 10 Aug 2006 04:48:00 +0200
+
 parrot (0.4.5-1) unstable; urgency=low
 
   * New upstream release.

@@ -1,7 +1,7 @@
 ;
 ; arm/core.jit
 ;
-; $Id: core.jit 2426 2002-10-19 17:11:30Z nicholas $
+; $Id: /local/src/jit/arm/core.jit 11501 2006-02-10T18:27:13.457666Z particle  $
 ;
 
 Parrot_noop {

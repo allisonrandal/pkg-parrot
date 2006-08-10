@@ -1,4 +1,4 @@
-# $Id: README 11544 2006-02-14 21:00:57Z bernhard $
+# $Id: /local/languages/m4/tools/README 11544 2006-02-14T21:00:57.349319Z bernhard  $
 
 frozen2yaml    - Dumps the contents of a frozen state file as YAML.
 scrutinize.pl  - Test with Perl::Critic

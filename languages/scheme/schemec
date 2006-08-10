@@ -1,5 +1,5 @@
 #! perl -w
-# $Id: schemec 7955 2005-05-02 22:31:55Z bernhard $
+# $Id: /local/languages/scheme/schemec 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use lib 'languages/scheme';

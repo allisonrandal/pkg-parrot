@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: namespace.t 12953 2006-06-16 16:11:10Z leo $
+# $Id: /local/t/pmc/namespace.t 13824 2006-08-03T16:34:20.826014Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 32;
+use Parrot::Test tests => 35;
 use Parrot::Config;
 
 =head1 NAME
@@ -324,8 +324,8 @@ OUTPUT
 pir_output_is(<<'CODE', <<'OUTPUT', "get namespace in Foo::Bar::baz");
 .sub 'main' :main
     $P0 = find_global "Foo"
-    $P1 = find_global $P0, "Bar"
-    $P2 = find_global $P1, "baz"
+    $P1 = $P0["Bar"]
+    $P2 = $P1["baz"]
     print "ok\n"
     $P2()
 .end
@@ -368,7 +368,7 @@ pir_output_is(<<'CODE', <<'OUT', "latin1 namespace, global");
 	print "latin1 namespaces are fun\n"
 .end
 
-.namespace [ "" ]
+.namespace
 
 .sub 'main' :main
 	$P0 = find_global iso-8859-1:"François", '__init'
@@ -385,7 +385,7 @@ pir_output_is(<<'CODE', <<'OUT', "unicode namespace, global");
 	print "unicode namespaces are fun\n"
 .end
 
-.namespace [ "" ]
+.namespace
 
 .sub 'main' :main
 	$P0 = find_global unicode:"Fran\xe7ois", '__init'
@@ -444,17 +444,14 @@ OUTPUT
 pir_output_is(<<'CODE', <<'OUTPUT', "get_namespace_p_p, getnamespace_p_kc");
 .sub main :main
     .include "interpinfo.pasm"
-    $P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT
-    $P1 = $P0["parrot"]
     $P3 = new .NameSpace
-    $P1["Foo"] = $P3
+    set_hll_global "Foo", $P3
     # fetch w array
-    $P1 = new .FixedStringArray
-    $P1 = 2
-    $P1[0] = 'parrot'
-    $P1[1] = 'Foo'
-    $P2 = get_namespace $P1
-    $P2 = $P2.'name'()
+    $P4 = new .FixedStringArray
+    $P4 = 1
+    $P4[0] = 'Foo'
+    $P0 = get_hll_namespace $P4
+    $P2 = $P0.'name'()
     $I2 = elements $P2
     print $I2
     print "\n"
@@ -462,7 +459,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "get_namespace_p_p, getnamespace_p_kc");
     print $S0
     print "\n"
     # fetch w key
-    $P2 = get_namespace ["parrot";"Foo"]
+    $P2 = get_hll_namespace ["Foo"]
     $P2 = $P2.'name'()
     $I2 = elements $P2
     print $I2
@@ -504,9 +501,8 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "check parrot ns");
 .sub 'main' :main
-    $P0 = get_namespace ["parrot"; "String"]
-    $P1 = find_global $P0, "lower"
-    $S0 = $P1("OK\n")
+    $P0 = find_global ["String"], "lower"
+    $S0 = $P0("OK\n")
     print $S0
 .end
 CODE
@@ -645,7 +641,7 @@ SKIP:
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global in current");
 .HLL 'bork', ''
-.namespace [ '' ]
+.namespace
 
 .sub a :immediate
   $P1 = new .String
@@ -702,7 +698,7 @@ OUTPUT
 pir_output_is(<<'CODE', <<'OUTPUT', "get_parent");
 .sub main :main
     .local pmc ns
-    ns = get_namespace ['parrot';'Foo']
+    ns = get_hll_namespace ['Foo']
     ns = ns.'get_parent'()
     print ns
     print "\n"
@@ -727,6 +723,68 @@ pir_output_is(<<'CODE', <<'OUTPUT', "find_global [''], \"print_ok\"");
 .sub main :main
   $P0 = find_global [''], 'print_ok'
   $P0()
+  end
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "find_global with array ('')");
+.namespace ['']
+
+.sub print_ok
+  print "ok\n"
+  .return()
+.end
+
+.namespace ['foo']
+
+.sub main :main
+  $P0 = new .ResizableStringArray
+  $P0[0] = ''
+  $P0 = find_global $P0, 'print_ok'
+  $P0()
+  end
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "find_global with empty array");
+.namespace
+
+.sub print_ok
+  print "ok\n"
+  .return()
+.end
+
+.namespace ['foo']
+
+.sub main :main
+  $P0 = new .ResizablePMCArray
+  $P0 = find_global $P0, 'print_ok'
+  $P0()
+  end
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "Namespace.get_global() with array ('')");
+.namespace ['']
+
+.sub print_ok
+  print "ok\n"
+  .return()
+.end
+
+.namespace ['foo']
+
+.sub main :main
+  $P1 = new .ResizableStringArray
+  $P1[0] = ''
+  $P1 = get_hll_global $P1, 'print_ok'
+  $P1()
   end
 .end
 CODE

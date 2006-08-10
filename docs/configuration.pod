@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: configuration.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/configuration.pod 12839 2006-05-30T14:34:31.126984Z coke  $
 
 =pod
 

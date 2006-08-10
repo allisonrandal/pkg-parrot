@@ -1,4 +1,4 @@
-# $Id: bignum.t 11088 2006-01-11 16:36:43Z bernhard $
+# $Id: /local/t/pmc/bignum.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 =head1 NAME
 

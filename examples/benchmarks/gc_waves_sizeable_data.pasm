@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: gc_waves_sizeable_data.pasm 12973 2006-06-19 15:06:58Z leo $
+# $Id: /local/examples/benchmarks/gc_waves_sizeable_data.pasm 12973 2006-06-19T15:06:58.393576Z leo  $
 
 =head1 NAME
 

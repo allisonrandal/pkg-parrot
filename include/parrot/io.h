@@ -1,7 +1,7 @@
 /* io.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: io.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/io.h 13784 2006-08-01T17:54:04.760248Z chip  $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:
@@ -136,6 +136,7 @@ extern ParrotIOLayer pio_stdio_layer;
 #endif
 extern ParrotIOLayer pio_buf_layer;
 extern ParrotIOLayer pio_mmap_layer;
+extern ParrotIOLayer pio_string_layer;
 
 
 
@@ -189,6 +190,7 @@ PARROT_API extern INTVAL PIO_connect(theINTERP, PMC *pmc, STRING *address);
 PARROT_API extern INTVAL PIO_bind(theINTERP, PMC *pmc, STRING *address);
 PARROT_API extern INTVAL PIO_listen(theINTERP, PMC *pmc, INTVAL backlog);
 PARROT_API extern PMC *PIO_accept(theINTERP, PMC *pmc);
+PARROT_API extern int PIO_softspace(theINTERP, PMC *pmc, int new);
 
 
 PARROT_API extern INTVAL PIO_putps(theINTERP, PMC *io, STRING *s);

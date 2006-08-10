@@ -1,7 +1,7 @@
 /* binary.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: binary.h 12826 2006-05-30 01:36:30Z coke $
+ *     $Id: /local/src/charset/binary.h 12826 2006-05-30T01:36:30.308856Z coke  $
  *  Overview:
  *     This is the header for the binary charset functions
  *  Data Structure and Algorithms:

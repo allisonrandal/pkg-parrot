@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: parrot.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/parrot.c 12826 2006-05-30T01:36:30.308856Z coke  $
 
 =head1 NAME
 

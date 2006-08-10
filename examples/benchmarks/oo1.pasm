@@ -1,4 +1,4 @@
-# $Id: oo1.pasm 12177 2006-04-11 19:56:05Z bernhard $
+# $Id: /local/examples/benchmarks/oo1.pasm 12177 2006-04-11T19:56:05.232596Z bernhard  $
 
 # all timings Athlon 800, gcc 2.95.2
 

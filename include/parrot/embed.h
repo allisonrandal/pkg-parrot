@@ -1,7 +1,7 @@
 /* embed.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: embed.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/embed.h 13784 2006-08-01T17:54:04.760248Z chip  $
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.
@@ -60,7 +60,7 @@ PARROT_API Parrot_Opcode * Parrot_debug(Parrot_Interp, Parrot_Opcode* pc);
 
 PARROT_API void Parrot_disassemble(Parrot_Interp);
 
-PARROT_API void Parrot_exit(int status)
+PARROT_API void Parrot_exit(Parrot_Interp, int status)
                 __attribute__noreturn__;
 
 PARROT_API void Parrot_run_native(Parrot_Interp interpreter, native_func_t func);

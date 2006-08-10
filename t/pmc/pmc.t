@@ -1,12 +1,12 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: pmc.t 12922 2006-06-10 19:02:16Z rgrjr $
+# $Id: /local/t/pmc/pmc.t 13523 2006-07-24T15:49:07.843920Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 19;
+use Parrot::Test tests => 20;
 use Parrot::PMC qw(%pmc_types);
 
 =head1 NAME
@@ -370,4 +370,20 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "new_p_i_s");
 CODE
 Integer
 42
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "pmcinfo_i_p_ic");
+.include "pmcinfo.pasm"
+    new P0, .Integer
+    pmcinfo I0, P0, .PMCINFO_FLAGS
+    shl I2, 1, 9	# PObj_is_PMC_FLAG s. pobj.h
+    band I1, I0, I2
+    if I1, ok
+    print "PMC flag not set\n"
+    end
+ok:
+    print "ok\n"
+    end
+CODE
+ok
 OUTPUT

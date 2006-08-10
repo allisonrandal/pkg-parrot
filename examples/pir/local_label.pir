@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: local_label.pir 12835 2006-05-30 13:32:26Z coke $
+# $Id: /local/examples/pir/local_label.pir 12835 2006-05-30T13:32:26.641316Z coke  $
 
 =head1 NAME
 

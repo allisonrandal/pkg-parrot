@@ -1,7 +1,7 @@
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&lassign"
+.sub '&lassign'
   .param pmc argv :slurpy
 
   .local int argc
@@ -13,12 +13,12 @@
   list = shift argv
 
   .local pmc __list
-  .get_from_HLL(__list, '_tcl', '__list')
-  list = __list(list)
+  __list = get_root_global ['_tcl'], '__list'
+  list   = __list(list)
 
   .local string varname
   .local pmc set, value
-  .get_from_HLL(set, '_tcl', '__set')
+  set = get_root_global ['_tcl'], '__set'
 
 var_loop:
   varname = shift argv
@@ -30,7 +30,7 @@ var_loop:
 
 list_empty:
   value = new .String
-  value = ""
+  value = ''
 null_loop:
   unless argv goto var_end
   varname = shift argv
@@ -41,5 +41,5 @@ var_end:
   .return(list)
 
 bad_args:
-  .throw ("wrong # args: should be \"lassign list varName ?varName ...?\"")
+  .throw ('wrong # args: should be "lassign list varName ?varName ...?"')
 .end

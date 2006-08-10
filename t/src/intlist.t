@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: intlist.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/src/intlist.t 13784 2006-08-01T17:54:04.760248Z chip  $
 
 use strict;
 use warnings;
@@ -44,7 +44,7 @@ c_output_is(<<'CODE', <<'OUTPUT', "creation");
             x = (int) intlist_get(interpreter, list, 0);
 
             printf("The answer is %d.\n", x);
-            Parrot_exit(0);
+            Parrot_exit(interpreter, 0);
             return 0;
         }
 CODE

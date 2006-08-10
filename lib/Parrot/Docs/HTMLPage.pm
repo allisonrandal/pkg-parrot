@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: HTMLPage.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/HTMLPage.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =head1 NAME
 
@@ -23,6 +23,7 @@ C<Parrot::Docs::Section>.
 package Parrot::Docs::HTMLPage;
 
 use strict;
+use warnings;
 
 =item C<header($title, $navigation, $resources)>
 

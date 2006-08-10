@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2006, The Perl Foundation.
-$Id: mmd.c 12864 2006-06-01 19:54:45Z leo $
+$Id: /local/src/mmd.c 13858 2006-08-03T20:42:41.309483Z chip  $
 
 =head1 NAME
 
@@ -126,7 +126,6 @@ get_mmd_dispatch_type(Interp *interpreter, INTVAL func_nr, INTVAL left_type,
             real_exception(interpreter, 0, 1, "MMD function %s not found "
                     "for types (%d, %d)", meth_c, left_type, r);
         if (method->vtable->base_type == enum_class_NCI) {
-            PMC *nci;
             /* C function is at struct_val */
             func = D2FPTR(PMC_struct_val(method));
             *is_pmc = 0;
@@ -1582,7 +1581,7 @@ mmd_search_package(Interp *interpreter, STRING *meth, PMC *arg_tuple, PMC *cl)
 {
     PMC *pmc;
 
-    pmc = Parrot_find_global(interpreter, NULL, meth);
+    pmc = Parrot_find_global_cur(interpreter, meth);
     if (pmc) {
         if (mmd_maybe_candidate(interpreter, pmc, arg_tuple, cl))
             return 1;
@@ -1606,7 +1605,7 @@ mmd_search_global(Interp *interpreter, STRING *meth, PMC *arg_tuple, PMC *cl)
 {
     PMC *pmc;
 
-    pmc = Parrot_find_global_p(interpreter, interpreter->root_namespace, meth);
+    pmc = Parrot_find_global_n(interpreter, interpreter->root_namespace, meth);
     if (pmc) {
         if (mmd_maybe_candidate(interpreter, pmc, arg_tuple, cl))
             return 1;
@@ -1632,25 +1631,18 @@ mmd_get_ns(Interp *interpreter)
     PMC *ns;
 
     ns_name = CONST_STRING(interpreter, "__parrot_core");
-    ns = VTABLE_get_pmc_keyed_str(interpreter, 
-            interpreter->root_namespace, ns_name);
+    ns = Parrot_get_namespace_keyed_str(interpreter, interpreter->root_namespace, ns_name);
     return ns;
 }
 
 static PMC*
-mmd_create_ns(Interp *interpreter) 
+mmd_make_ns(Interp *interpreter) 
 {
     STRING *ns_name;
     PMC *ns;
 
     ns_name = CONST_STRING(interpreter, "__parrot_core");
-    ns = VTABLE_get_pmc_keyed_str(interpreter, 
-            interpreter->root_namespace, ns_name);
-    if (PMC_IS_NULL(ns)) {
-        ns = pmc_new(interpreter, enum_class_NameSpace);
-        VTABLE_set_pmc_keyed_str(interpreter, 
-                interpreter->root_namespace, ns_name, ns);
-    }
+    ns = Parrot_make_namespace_keyed_str(interpreter, interpreter->root_namespace, ns_name);
     return ns;
 }
 
@@ -1659,7 +1651,7 @@ mmd_search_builtin(Interp *interpreter, STRING *meth, PMC *arg_tuple, PMC *cl)
 {
     PMC *pmc, *ns;
     ns = mmd_get_ns(interpreter);
-    pmc = Parrot_find_global_p(interpreter, ns, meth);
+    pmc = Parrot_find_global_n(interpreter, ns, meth);
     if (pmc)
         mmd_maybe_candidate(interpreter, pmc, arg_tuple, cl);
 }
@@ -1763,11 +1755,10 @@ mmd_create_builtin_multi_meth_2(Interp *interpreter, PMC *ns,
      * push method onto core multi_sub
      * TODO cache the namespace
      */
-    multi = Parrot_find_global_p(interpreter, ns,
-            const_string(interpreter, short_name));
+    multi = Parrot_find_global_n(interpreter, ns,
+                                 const_string(interpreter, short_name));
     assert(multi);
     VTABLE_push_pmc(interpreter, multi, method);
-
 }
 
 static void
@@ -1799,7 +1790,7 @@ Parrot_mmd_register_table(Interp* interpreter, INTVAL type,
     PMC *ns;
 
     table = interpreter->binop_mmd_funcs;
-    ns = mmd_create_ns(interpreter);
+    ns = mmd_make_ns(interpreter);
     if ((INTVAL)table->x < type && type < enum_class_core_max) {
         /*
          * pre-allocate the function table

@@ -3,7 +3,7 @@
  *
  * i386
  *
- * $Id: jit_emit.h 12097 2006-04-03 14:39:40Z particle $
+ * $Id: /local/src/jit/i386/jit_emit.h 14039 2006-08-09T02:41:13.737274Z chip  $
  */
 
 #if !defined(PARROT_I386_JIT_EMIT_H_GUARD)
@@ -2548,6 +2548,7 @@ store:
                 break;
 
             case PARROT_ARG_KC:
+            case PARROT_ARG_PC:
 #    if EXEC_CAPABLE
                 if (jit_info->objfile) {
                     emitm_pushl_m(jit_info->native_ptr, CONST(i));

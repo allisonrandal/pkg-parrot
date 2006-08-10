@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2002, The Perl Foundation.
 License:  Artistic/GPL, see README and LICENSES for details
-$Id: list.c 12821 2006-05-29 13:44:57Z coke $
+$Id: /local/src/list.c 13986 2006-08-07T17:04:53.535012Z chip  $
 
 =head1 NAME
 
@@ -1671,7 +1671,7 @@ list_insert(Interp *interpreter, List *list, INTVAL idx, INTVAL n_items)
     if (n_items == 0)
         return;
     /* empty list */
-    if (!list->cap) {
+    if (idx >= (INTVAL)list->cap) {
         idx += n_items;
         list->length = idx;
         while (idx >= (INTVAL)list->cap)

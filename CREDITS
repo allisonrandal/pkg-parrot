@@ -1,4 +1,4 @@
-﻿# $Id: CREDITS 12920 2006-06-10 11:45:56Z jonathan $
+﻿# $Id: /local/CREDITS 13846 2006-08-03T17:06:49.435642Z chip  $
 
 	Following in the steps of other open source projects that
 	eventually take over the world, here is the partial list
@@ -36,7 +36,9 @@ N: Alex Gough
 D: bignum
 
 N: Allison Randal
+D: Lead Designer
 D: TGE, Punie (Perl 1), P6C
+E: allison@perl.org
 
 N: Amir Karger
 D: editor bugfixes
@@ -56,6 +58,10 @@ D: vim syntax files and editor doc
 
 N: Andy Dougherty
 D: Config and building.
+
+N: Andy Lester
+D: consting, cleanups, and Chief Cage Cleaner
+E: andy@petdance.com
 
 N: Angel Faus
 D: CFG and live analysis.
@@ -105,11 +111,17 @@ D: And, yes, {sigh}, *that* Warnock.
 E: bwarnock@raba.com
 
 N: Chip Salzenberg
-D: Designer and demagogue
+D: Pumpking (0.4.6 - ... ) and demagogue
 E: chip@pobox.com
+
+N: Chris Dolan
+D: TAP language author, and Parrot Bug fixes
+E: cdolan@cpan.org
 
 N: chromatic
 D: SDL library and examples; Test::Builder; test suite cleanup; Pheme
+D: lead philosopher -- "Why doesn't this work?"
+E: chromatic@wgz.org
 
 N: Clayton O'Neill
 D: Fix for parrot linking issue on Solaris 8
@@ -162,6 +174,7 @@ N: François Perrad
 D: build fixes for MinGW
 D: a patch to remove slash_exec from config
 D: language Lua
+D: language WMLScript (PIR translator)
 
 N: Garrett Rooney
 D: Fix typo in PARROT_BIGENDIAN case
@@ -226,8 +239,12 @@ S: Lyon, France
 
 N: Jerry Gay a.k.a. particle
 E: Jerry.Gay@gmail.com
-D: Test Suite, general tidiness
+D: test suite, compiler tools, perl6, TAP language, entropy reduction, ECMAScript
 S: Seattle, WA
+
+N: John J. Trammell
+E: trammell@el-swifto.com
+D: coding standard tests
 
 N: John Paul Wallington
 D: pir-mode.el: fix for xemacs plus bugfixes and cleanups
@@ -265,13 +282,16 @@ N: Josh Wilmes
 N: Juergen Boemmels
 D: Parrot I/O; macro stuff in assembler.
 
+N: Kay-Uwe 'kiwi' Hüll
+
 N: Kenneth A Graves
 D: yield and other PIR improvements
 
 N: Kevin Falcone
 
 N: Kevin Tew
-D: Warnings fix
+D: Cardinal(Ruby on Parrot), ECMAScript parser, ECMAScript parser
+D: Various Config Fixes, Compiler Warnings, etc
 
 N: Klaas-Jan Stol
 D: dynpmc and doc updates
@@ -284,7 +304,7 @@ D: FreeBSD and other build fixes
 N: Leon Brocard
 
 N: Leopold Toetsch
-D: Patchmonster & pumpking
+D: Patchmonster & pumpking emeritus (0.0.13 - 0.4.5)
 E: lt@toetsch.at
 S: Herrnbaumgarten, Austria
 
@@ -470,3 +490,7 @@ N: Zach Lipton
 N: Norman Nunley
 D: Shaving a Ponie
 E: nnunley@gmail.com
+
+N: Vishal Soni
+E: vishalrsoni@gmail.com
+D: Bug fixes in IMCC, ECMAScript

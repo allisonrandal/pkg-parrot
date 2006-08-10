@@ -1,4 +1,4 @@
-# $Id: sdl_blue_rectangle.pir 10739 2005-12-28 18:56:46Z particle $
+# $Id: /local/examples/nci/sdl_blue_rectangle.pir 11501 2006-02-10T18:27:13.457666Z particle  $
 
 .sub _main :main
 	_init()

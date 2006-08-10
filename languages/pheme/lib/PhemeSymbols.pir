@@ -7,8 +7,13 @@
 	symbols['car']               = 1
 	symbols['cdr']               = 1
 	symbols['cons']              = 1
+	symbols['cond']              = 1
 	symbols['include_file']      = 1
 	symbols['write']             = 1
+	symbols['+']                 = 1
+	symbols['-']                 = 1
+	symbols['*']                 = 1
+	symbols['/']                 = 1
 
 	store_global 'PhemeCompiler', 'symbols', symbols
 	.return()
@@ -68,6 +73,68 @@
   	.return( result )
 .end
 
+.sub '__evaluate' :multi( [ 'Pheme'; 'Cons' ] )
+	.param pmc cons
+
+	.local pmc cons_eval_order
+	cons_eval_order = new .ResizablePMCArray
+
+	# walk through cons
+	# push onto stack backwards
+	# evaluate that way
+	.local pmc head
+	.local int item_defined
+  get_loop:
+	head = cons.'head'()
+	item_defined = defined head
+	unless item_defined goto end_get_loop
+	unshift cons_eval_order, head
+
+	cons = cons.'tail'()
+	goto get_loop
+  end_get_loop:
+
+	.local pmc cons_list
+	cons_list = new .ResizablePMCArray
+
+	.local pmc item
+  eval_loop:
+	unless cons_eval_order goto end_eval_loop
+	item = shift cons_eval_order
+	item = __evaluate( item )
+	unshift cons_list, item
+	goto eval_loop
+  end_eval_loop:
+
+	.local pmc first
+	first = cons_list[0]
+
+	.local string first_type
+	first_type = typeof first
+
+	if first_type == 'String' goto call_func
+
+	.local pmc result
+	result = __list_to_cons( cons_list :flat )
+	.return( result )
+
+  call_func:
+	first  = shift cons_list
+
+	.local string func_name
+	func_name = first
+
+	.local pmc result
+	result = __resolve_at_runtime( func_name, cons_list :flat )
+
+	.return( result )
+.end
+
+.sub '__evaluate' :multi( pmc )
+	.param pmc atom
+	.return( atom )
+.end
+
 .sub car
 	.param pmc cons
 
@@ -117,6 +184,32 @@
 	result.'tail'( r )
 
 	.return( result )
+.end
+
+.sub 'cond'
+	.param pmc exps :slurpy
+
+	.local pmc iter
+	iter = new .Iterator, exps
+	iter = 0
+
+	.local pmc cond
+	.local pmc action
+
+  iter_loop:
+	unless iter goto iter_end
+	cond   = shift iter
+	action = shift iter
+
+	.local pmc result
+	result = __evaluate( cond )
+	unless result goto iter_loop
+
+	result = __evaluate( action )
+	.return( result )
+	
+  iter_end:
+	.return()
 .end
 
 .sub 'write' :multi()
@@ -199,6 +292,125 @@
 	.return( result )
 .end
 
+# XXX - return #t
+.sub 'atom?' :multi( [ 'Pheme'; 'Atom' ] )
+	.param pmc atom
+
+	.return( 1 )
+.end
+
+# XXX - return #f
+.sub 'atom?' :multi( [ 'Pheme'; 'Cons' ] )
+	.param pmc cons
+
+	.return( 0 )
+.end
+
+# XXX - a cheat for now
+.sub 'atom?' :multi( String )
+	.param pmc val
+	.return( 1 )
+.end
+
+.sub 'null?' :multi( [ 'Pheme'; 'Cons' ] )
+	.param pmc cons
+	.local int count
+	count = cons
+
+	eq count, 0, indeed_empty
+	.return( 0 )
+
+  indeed_empty:
+	.return( 1 )
+.end
+
+.sub '+' :multi( float, float )
+	.param float first
+	.param pmc   rest   :slurpy
+
+	.local float result
+	result   = first
+
+	.local pmc iter
+	iter = new .Iterator, rest
+
+	.local pmc   next
+	.local float next_val
+
+  loop:
+ 	unless iter goto end_loop
+	next     = shift iter
+	next_val = next
+	result  += next_val
+	goto loop
+
+  end_loop:
+	.return( result )
+.end
+
+.sub '*' :multi( float, float )
+	.param float first
+	.param pmc   rest   :slurpy
+
+	.local float result
+	result   = first
+
+	.local pmc iter
+	iter = new .Iterator, rest
+
+	.local pmc   next
+	.local float next_val
+
+  loop:
+ 	unless iter goto end_loop
+	next     = shift iter
+	next_val = next
+	result  *= next_val
+	goto loop
+
+  end_loop:
+	.return( result )
+.end
+
+.sub '-' :multi( float, float )
+	.param float first
+	.param pmc   rest :slurpy
+
+	.local float result
+	result   = first
+
+	.local pmc iter
+	iter = new .Iterator, rest
+
+	.local pmc   next
+	.local float next_val
+
+  loop:
+ 	unless iter goto end_loop
+	next     = shift iter
+	next_val = next
+	result  -= next_val
+	goto loop
+
+  end_loop:
+	.return( result )
+.end
+
+.sub '/' :multi( float, float )
+	.param float l
+	.param float r
+
+	.local float result
+	result = l / r
+
+	.return( result )
+.end
+
+.sub 'null?' :multi( _ )
+	.param pmc dummy
+	.return( 0 )
+.end
+
 .sub 'write' :multi( string )
 	.param string message_string
 
@@ -206,7 +418,7 @@
 	.return()
 .end
 
-.sub __make_empty_cons
+.sub '__make_empty_cons'
 	.local pmc result
 
 	.local int cons_type

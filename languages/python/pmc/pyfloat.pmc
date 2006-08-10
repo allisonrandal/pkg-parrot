@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: pyfloat.pmc 12840 2006-05-30 15:08:05Z coke $
+$Id: /local/languages/python/pmc/pyfloat.pmc 13451 2006-07-24T05:28:54.687646Z chip  $
 
 =head1 NAME
 
@@ -113,7 +113,7 @@ Returns the number as a Parrot string.
                     const_string(INTERP, "."), 0) == -1 &&
                 string_str_index(INTERP, s,
                     const_string(INTERP, "e"), 0) == -1)
-            string_append(INTERP, s, const_string(INTERP, ".0"), 0);
+            s = string_append(INTERP, s, const_string(INTERP, ".0"), 0);
         return s;
     }
 
@@ -140,7 +140,7 @@ Returns the number as a Parrot string.
                     const_string(INTERP, "."), 0) == -1 &&
                 string_str_index(INTERP, s,
                     const_string(INTERP, "e"), 0) == -1)
-            string_append(INTERP, s, const_string(INTERP, ".0"), 0);
+            s = string_append(INTERP, s, const_string(INTERP, ".0"), 0);
         return s;
     }
 

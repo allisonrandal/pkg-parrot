@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004, The Perl Foundation.
-$Id: pic.c 12933 2006-06-13 05:28:20Z petdance $
+Copyright (C) 2004-2006, The Perl Foundation.
+$Id: /local/src/pic.c 12981 2006-06-20T19:26:31.775154Z bernhard  $
 
 =head1 NAME
 
@@ -85,7 +85,7 @@ lookup of the cache has to be done in the opcode itself.
 
 #if HAS_JIT
 #include "parrot/exec.h"
-#include "parrot/jit.h"
+#include "jit.h"
 #endif
 
 #define PIC_TEST 1

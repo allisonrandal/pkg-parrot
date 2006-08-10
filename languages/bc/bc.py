@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: bc.py 12919 2006-06-10 08:54:52Z bernhard $
+# $Id: /local/languages/bc/bc.py 12919 2006-06-10T08:54:52.037606Z bernhard  $
 
 import os
 import sys

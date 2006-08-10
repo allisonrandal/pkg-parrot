@@ -1,4 +1,4 @@
-# $Id: languages.in 12806 2006-05-27 19:01:00Z mdiep $
+# $Id: /local/config/gen/makefiles/languages.in 13846 2006-08-03T17:06:49.435642Z chip  $
 
 # setup of commands
 @make_set_make@
@@ -12,11 +12,15 @@ LANGUAGES = \
     APL \
     BASIC \
     HQ9plus \
+    WMLScript \
     Zcode \
     bc \
     befunge \
     bf \
+    cardinal \
     cola \
+    dotnet \
+    ecmascript \
     jako \
     lisp \
     lua \
@@ -26,6 +30,7 @@ LANGUAGES = \
     punie \
     regex \
     scheme \
+    tap \
     tcl \
     urm
 
@@ -74,11 +79,15 @@ clean: \
     APL.clean \
     BASIC.clean \
     HQ9plus.clean \
+    WMLScript.clean \
     Zcode.clean \
     bc.clean \
     befunge.clean \
     bf.clean \
+    cardinal.clean \
     cola.clean \
+    dotnet.clean \
+    ecmascript.clean \
     jako.clean \
     lisp.clean \
     lua.clean \
@@ -88,6 +97,7 @@ clean: \
     punie.clean \
     regex.clean \
     scheme.clean \
+    tap.clean \
     tcl.clean \
     urm.clean \
     smoke-clean
@@ -114,6 +124,14 @@ BASIC.test:
 # Don't know how to test BASIC
 BASIC.clean:
 # Don't know how to clean BASIC
+
+WMLScript: WMLScript.dummy
+WMLScript.dummy:
+	- $(MAKE) WMLScript
+WMLScript.test:
+	- $(MAKE) WMLScript test
+WMLScript.clean:
+	- $(MAKE) WMLScript clean
 
 Zcode : Zcode.dummy
 Zcode.dummy:
@@ -147,6 +165,14 @@ bf.test:
 bf.clean:
 	- $(MAKE) bf clean
 
+cardinal : cardinal.dummy
+cardinal.dummy:
+	- $(MAKE) cardinal
+cardinal.test:
+	- $(MAKE) cardinal test
+cardinal.clean:
+	- $(MAKE) cardinal clean
+
 cola : cola.dummy
 cola.dummy:
 	- $(MAKE) cola
@@ -154,6 +180,23 @@ cola.test:
 	- $(MAKE) cola test
 cola.clean:
 # don't clean cola, as files in MANIFEST are removed
+
+dotnet : dotnet.dummy
+dotnet.dummy:
+	cd dotnet && $(PERL) Configure.pl
+	- $(MAKE) dotnet
+dotnet.test:
+	- $(MAKE) dotnet test
+dotnet.clean:
+	- $(MAKE) dotnet clean
+
+ecmascript : ecmascript.dummy
+ecmascript.dummy:
+	- $(MAKE) ecmascript
+ecmascript.test:
+	- $(MAKE) ecmascript test
+ecmascript.clean:
+	- $(MAKE) ecmascript clean
 
 HQ9plus: HQ9plus.dummy
 HQ9plus.dummy:
@@ -234,6 +277,14 @@ scheme.test :
 	- $(MAKE) scheme test
 scheme.clean :
 	- $(MAKE) scheme clean
+
+tap: tap.dummy
+tap.dummy:
+	- $(MAKE) tap
+tap.test:
+	$(MAKE) tap test
+tap.clean:
+	$(MAKE) tap clean
 
 tcl: tcl.dummy
 tcl.dummy:

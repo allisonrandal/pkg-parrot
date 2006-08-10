@@ -1,4 +1,4 @@
-# $Id: japh13.pasm 12193 2006-04-12 20:04:06Z bernhard $
+# $Id: /local/examples/japh/japh13.pasm 12193 2006-04-12T20:04:06.066885Z bernhard  $
 
 =head1 NAME
 

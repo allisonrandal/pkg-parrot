@@ -1,4 +1,4 @@
-# $Id: func.t 7256 2004-12-07 21:39:02Z rubys $
+# $Id: /local/languages/python/t/basic/func.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use lib '../../lib';

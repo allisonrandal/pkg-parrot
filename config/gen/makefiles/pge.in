@@ -1,4 +1,4 @@
-# $Id: pge.in 12711 2006-05-17 19:01:16Z pmichaud $
+# $Id: /local/config/gen/makefiles/pge.in 12711 2006-05-17T19:01:16.106631Z pmichaud  $
 
 # Setup some commands
 LN_S     = @lns@

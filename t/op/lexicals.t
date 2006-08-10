@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: lexicals.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/op/lexicals.t 13008 2006-06-23T15:26:10.151998Z particle  $
 
 use strict;
 use warnings;
@@ -1079,5 +1079,20 @@ CODE
 20
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', 'find_lex: (Perl6 OUTER::)', todo => 'not yet implemented');
+.sub main :main
+	.lex '$x', 42
+	get_outer()
+.end
+
+.sub 'get_outer' :outer('main')
+	.lex '$x', 13
+	$P0 = find_lex '$x', 1
+	say $P0
+.end
+CODE
+42
+OUTPUT
+
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 40; }
+BEGIN { plan tests => 41; }

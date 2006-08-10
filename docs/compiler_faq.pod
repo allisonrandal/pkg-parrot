@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: compiler_faq.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/compiler_faq.pod 13382 2006-07-19T15:29:02.658038Z particle  $
 
 =head1 NAME
 
@@ -543,4 +543,25 @@ Create a new C<Env> PMC and access it like a hash.
 
 See F<config_lib.pasm> for all the keys in the config hash - or iterate over
 the config hash.
+
+=head1 Languages
+
+=head2 What files do I need to modify to add my new language compiler?
+
+Aside from the files in your new language directory, you must modify
+
+    CREDITS
+    MANIFEST
+    config/gen/languages.pm
+    config/gen/makefiles/languages.in
+    languages/LANGUAGES.STATUS.pod
+
+Inside your language dir, you may consider adding the following:
+
+    LICENSE
+    MAINTAINER
+    README
+    STATUS
+
+Look to existing languages for some examples.
 

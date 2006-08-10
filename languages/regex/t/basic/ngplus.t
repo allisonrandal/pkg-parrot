@@ -1,4 +1,4 @@
-# $Id: ngplus.t 10768 2005-12-29 18:14:56Z bernhard $
+# $Id: /local/languages/regex/t/basic/ngplus.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use FindBin;

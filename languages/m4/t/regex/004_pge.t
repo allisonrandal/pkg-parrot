@@ -1,4 +1,4 @@
-# $Id: 004_pge.t 12442 2006-04-27 03:57:44Z pmichaud $
+# $Id: /local/languages/m4/t/regex/004_pge.t 12442 2006-04-27T03:57:44.847309Z pmichaud  $
 
 use strict;
 use warnings;

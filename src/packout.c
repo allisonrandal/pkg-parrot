@@ -2,7 +2,7 @@
 Copyright (C) 2001-2006, The Perl Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packout.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/packout.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -174,7 +174,7 @@ PackFile_ConstTable_pack(Interp *interpreter,
 /*
 
 =item C<static int
-find_in_const(PMC *key, int type)>
+find_in_const(Interp *interpreter, PMC *key, int type)>
 
 This is really ugly, we don't know where our C<PARROT_ARG_SC> key
 constant is in constant table, so we have to search for it.
@@ -184,7 +184,7 @@ constant is in constant table, so we have to search for it.
 */
 
 static int
-find_in_const(PMC *key, int type)
+find_in_const(Interp *interpreter, PMC *key, int type)
 {
     int i;
     for (i = 0; i < ct->const_count; i++)
@@ -195,7 +195,7 @@ find_in_const(PMC *key, int type)
                  PMC_num_val(key))
             return i;
     PIO_eprintf(NULL, "find_in_const: couldn't find const for key\n");
-    Parrot_exit(1);
+    Parrot_exit(interpreter, 1);
     return 0;
 }
 
@@ -274,11 +274,11 @@ PackFile_Constant_pack(Interp* interpreter,
                     break;
                 case KEY_number_FLAG:
                     *cursor++ = PARROT_ARG_NC | slice_bits;
-                    *cursor++ = find_in_const(key, PFC_NUMBER);     /* Argh */
+                    *cursor++ = find_in_const(interpreter, key, PFC_NUMBER);     /* Argh */
                     break;
                 case KEY_string_FLAG:
                     *cursor++ = PARROT_ARG_SC | slice_bits;
-                    *cursor++ = find_in_const(key, PFC_STRING);     /* Argh */
+                    *cursor++ = find_in_const(interpreter, key, PFC_STRING);     /* Argh */
                     break;
 
                 case KEY_integer_FLAG | KEY_register_FLAG:
@@ -300,7 +300,7 @@ PackFile_Constant_pack(Interp* interpreter,
                 default:
                     PIO_eprintf(NULL, "PackFile_Constant_pack: "
                             "unsupported constant type\n");
-                    Parrot_exit(1);
+                    Parrot_exit(interpreter, 1);
             }
         }
 
@@ -308,7 +308,7 @@ PackFile_Constant_pack(Interp* interpreter,
 
     default:
         PIO_eprintf(NULL, "PackFile_Constant_pack: unsupported constant\n");
-        Parrot_exit(1);
+        Parrot_exit(interpreter, 1);
         break;
     }
     return cursor;

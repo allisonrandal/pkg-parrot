@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: calc.t 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/lazy-k/t/calc.t 13594 2006-07-25T22:35:08.338062Z chip  $
 
 =head1 NAME
 
@@ -30,11 +30,21 @@ use Test::More tests => 1;
 use Parrot::Config;
 use File::Spec();
 
+my $is_win32  = $^O eq 'MSWin32';
+
 my $parrot    = File::Spec->catfile( File::Spec->updir(), $PConfig{test_prog} );
 my $lazy_k    = $parrot . q{ } . File::Spec->catfile( 'lazy-k', 'lazy.pir' );
 my $calc_lazy = File::Spec->catfile( 'lazy-k', 'calc.lazy' ); 
 
 # XXX This does not look portable.
-my $cmd = qq{echo '1+2*3' | $lazy_k $calc_lazy};
+my $cmd;
+if ($is_win32) {
+    # Don't quote the string on Windows, it is passed on literally
+    $cmd = qq{echo 1+2*3 | $lazy_k $calc_lazy};
+}
+else {
+    $cmd = qq{echo '1+2*3' | $lazy_k $calc_lazy};
+}
+
 # die Dumper( $cmd );
 is( `$cmd`, "7\n", 'calc.lazy' );
