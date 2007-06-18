@@ -1,38 +1,44 @@
-#!perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/t/pmc/random.t 12838 2006-05-30T14:19:10.150135Z coke  $
-
-use strict;
-use warnings;
-use lib qw( . lib ../lib ../../lib );
-use Test::More;
-use Parrot::Test;
+#! parrot
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/random.t 3286 2007-04-24T14:24:35.370224Z coke  $
 
 =head1 NAME
 
-t/pmc/random.t - test the Random PMC
-
+t/pmc/random.t - Random numbers
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/random.t
+        % prove t/pmc/random.t
 
 =head1 DESCRIPTION
 
-Tests the Random PMC.
+Tests random number generation
 
 =cut
 
+.sub main :main
+    # load this library
+    load_bytecode 'library/Test/More.pir'
 
-pir_output_is(<<'CODE', <<'OUT', 'new');
-.sub 'test' :main
-	new P0, .Random
-	print "ok 1\n"
+    # get the testing functions
+    .local pmc exports, curr_namespace, test_namespace
+    curr_namespace = get_namespace
+    test_namespace = get_namespace [ "Test::More" ]
+    exports = split " ", "plan diag ok is is_deeply like isa_ok"
+
+    test_namespace."export_to"(curr_namespace, exports)
+
+    plan(2)
+
+    new P0, .Random
+    ok(1, 'Instantiated .Random')
+    set I0, P0
+    ok(1, 'Got (unknown) random int')
 .end
-CODE
-ok 1
-OUT
 
-
-# remember to change the number of tests :-)
-BEGIN { plan tests => 1; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/docs/tests.pod 12839 2006-05-30T14:34:31.126984Z coke  $
+# $Id: /parrotcode/trunk/docs/tests.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -76,8 +76,8 @@ new test like this:
 
 =head2 Parrot Intermediate Representation
 
-Writing tests  in B<PIR> is more convenient. This is done with C<pir_output_is> and
-friends.
+Writing tests in B<PIR> is more convenient. This is done with
+C<pir_output_is> and friends.
 
     pir_output_is(<<'CODE',<<'OUT','nothing useful');
         .include 'library/config.pir'

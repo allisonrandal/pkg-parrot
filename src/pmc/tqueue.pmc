@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/tqueue.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/pmc/tqueue.pmc 3368 2007-05-03T05:08:51.125791Z chromatic  $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ Initializes the queue.
 
 */
 
-    void init () {
+    void init() {
         PMC_int_val(SELF) = 0;
         PMC_data(SELF) = queue_init(0);
         PObj_custom_mark_destroy_SETALL(SELF);
@@ -76,18 +76,20 @@ Marks all the threads in the queue as live.
 
 */
 
-    void mark () {
-        QUEUE *queue = PMC_data(SELF);
+    void mark() {
+        QUEUE       *queue = PMC_data_typed(SELF, QUEUE *);
         QUEUE_ENTRY *entry;
 
         queue_lock(queue);
         entry = queue->head;
+
         while (entry) {
             pobject_lives(INTERP, (PObj*) entry->data);
             if (entry == queue->tail)
                 break;
             entry = entry->next;
         }
+
         queue_unlock(queue);
     }
 
@@ -101,9 +103,9 @@ Destroys the queue.
 
 */
 
-    void destroy () {
+    void destroy() {
         if (PMC_data(SELF)) {
-            QUEUE *queue = PMC_data(SELF);
+            QUEUE *queue = PMC_data_typed(SELF, QUEUE *);
 #if 0
             /*
              * wait til queue is empty
@@ -131,7 +133,7 @@ Returns whether there are any threads in the queue.
 
 */
 
-    INTVAL defined () {
+    INTVAL defined() {
         return SELF.get_integer() != 0;
     }
 
@@ -143,12 +145,8 @@ Returns whether there are any threads in the queue.
 
 */
 
-    INTVAL get_integer () {
-        INTVAL items;
-        QUEUE *queue = PMC_data(SELF);
-
-        items = PMC_int_val(SELF);
-        return items;
+    INTVAL get_integer() {
+        return PMC_int_val(SELF);
     }
 
 /*
@@ -161,7 +159,7 @@ Returns the number of threads in the queue.
 
 */
 
-    INTVAL elements () {
+    INTVAL elements() {
         return SELF.get_integer();
     }
 
@@ -176,8 +174,8 @@ Adds the thread C<*item> to the end of the queue.
 */
 
     void push_pmc(PMC *item) {
-        QUEUE_ENTRY* entry = mem_sys_allocate(sizeof(QUEUE_ENTRY));
-        QUEUE *queue = PMC_data(SELF);
+        QUEUE_ENTRY *entry = mem_allocate_typed(QUEUE_ENTRY);
+        QUEUE       *queue = PMC_data_typed(SELF, QUEUE *);
 
         /*
          * if item isn't shared nor const, then make
@@ -197,7 +195,8 @@ Adds the thread C<*item> to the end of the queue.
         if (queue->tail) {
             queue->tail->next = entry;
             queue->tail = entry;
-        } else {
+        }
+        else {
             queue->head = entry;
             queue->tail = entry;
         }
@@ -217,18 +216,20 @@ Removes the first thread from the start of the queue.
 
     PMC* shift_pmc() {
         QUEUE_ENTRY *entry;
-        QUEUE *queue = PMC_data(SELF);
-        PMC *ret;
+        QUEUE       *queue = PMC_data_typed(SELF, QUEUE *);
+        PMC         *ret;
 
         queue_lock(queue);
         while (queue->head == NULL) {
             queue_wait(queue);
         }
+
         entry = nosync_pop_entry(queue);
         --PMC_int_val(SELF);
         queue_unlock(queue);
-        ret = entry->data;
+        ret   = (PMC *)entry->data;
         mem_sys_free(entry);
+
         return ret;
     }
 }
@@ -247,10 +248,7 @@ Removes the first thread from the start of the queue.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

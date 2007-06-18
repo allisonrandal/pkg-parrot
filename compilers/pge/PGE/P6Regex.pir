@@ -19,7 +19,7 @@ or the resulting PIR code (target='PIR').
 =cut
 
 .namespace [ 'PGE::P6Regex' ]
- 
+
 .sub 'compile_p6regex'
     .param pmc source
     .param pmc args            :slurpy
@@ -76,6 +76,7 @@ or the resulting PIR code (target='PIR').
 
     .local string target
     target = adverbs['target']
+    target = downcase target
 
     ##   If we're passed the results of a previous parse,  use it.
     .local pmc match, exp
@@ -92,6 +93,7 @@ or the resulting PIR code (target='PIR').
     ##   Let's parse the source as a regex
     $P0 = get_hll_global ['PGE::Grammar'], 'regex'
     match = $P0(source, adverbs :flat :named)
+    if source == '' goto err_null
     if target != 'parse' goto check
     .return (match)
 
@@ -110,35 +112,13 @@ or the resulting PIR code (target='PIR').
     pad = clone adverbs
     $P0 = new .Hash
     pad['lexscope'] = $P0
-    exp = exp.p6exp(pad)
-    if target != 'exp' goto pir
-    .return (exp)
+    exp = exp.'p6exp'(pad)
+    if null exp goto err_null
+    .return exp.'compile'(adverbs :flat :named)
 
-  pir:
-    .local pmc code
-    .local string grammar
-    .local string nsformat
-    grammar = adverbs['grammar']
-    nsformat = ".namespace"
-    if grammar == '' goto pir_emit
-    nsformat = ".namespace [ '%0' ]"
-  pir_emit:
-    code = new 'PGE::CodeString'
-    code.emit(nsformat, grammar)
-    $P0 = exp.root_pir(adverbs :flat :named)
-    code .= $P0
-    if target != 'PIR' goto bytecode
-    .return (code)
-
-  bytecode:
-    $P0 = compreg 'PIR'
-    $P1 = $P0(code)
-  make_grammar:
-    $I0 = find_type grammar
-    if $I0 > 0 goto end
-    $P0 = subclass 'PGE::Grammar', grammar
-  end:
-    .return ($P1)
+  err_null:
+    $I0 = match.'from'()
+    'parse_error'(match, $I0, 'Null pattern illegal')
 .end
 
 
@@ -185,72 +165,74 @@ needed for compiling regexes.
 .sub '__onload' :load
     .local pmc optable
 
-    $P0 = subclass 'PGE::Exp::Subrule', 'PGE::Exp::WS'
-    $P0 = subclass 'PGE::Exp', 'PGE::Exp::Alias'
-
     optable = new 'PGE::OPTable'
     set_global '$optable', optable
 
     $P0 = get_global 'parse_term'
-    optable.newtok('term:', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:',    'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
 
-    optable.newtok('term:^', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:^^', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:$$', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:\b', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:\B', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:<<', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:>>', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:^',   'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:^^',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:$$',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:\b',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:\B',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:<<',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.newtok('term:>>',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
     optable.newtok(unicode:"term:\xab", 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
     optable.newtok(unicode:"term:\xbb", 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
 
-    optable.newtok('term:.', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\d', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\D', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\s', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\S', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\w', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\W', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\N', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\n', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Newline')
+    optable.newtok('term:.',   'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\d',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\D',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\s',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\S',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\w',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\W',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\N',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.newtok('term:\n',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Newline')
 
     $P0 = get_global 'parse_dollar'
-    optable.newtok('term:$', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:$',   'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
     $P0 = get_global 'parse_subrule'
-    optable.newtok('term:<', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('term:<?', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('term:<!', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:<',   'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:<?',  'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:<!',  'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
-    $P0 = get_global 'parse_enumcharlist'
-    optable.newtok('term:<[', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('term:<-[', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('term:<+[', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_global 'parse_enumcharclass'
+    optable.newtok('term:<[',  'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:<+', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:<-', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok('term:<![', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
     $P0 = get_global 'parse_quoted_literal'
-    optable.newtok("term:<'", 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok("term:<'",  'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
-    optable.newtok('term:::', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Cut')
+    optable.newtok('term:::',  'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Cut')
     optable.newtok('term::::', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Cut')
+    optable.newtok('term:<cut>',    'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Cut')
     optable.newtok('term:<commit>', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Cut')
 
     $P0 = get_global 'parse_closure'
-    optable.newtok("term:{{", 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    optable.newtok("term:{{",       'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
     optable.newtok('circumfix:[ ]', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Group')
     optable.newtok('circumfix:( )', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CGroup')
 
     $P0 = get_global 'parse_quant'
-    optable.newtok('postfix:*', 'looser'=>'term:', 'parsed'=>$P0)
-    optable.newtok('postfix:+', 'equiv'=>'postfix:*', 'parsed'=>$P0)
-    optable.newtok('postfix:?', 'equiv'=>'postfix:*', 'parsed'=>$P0)
-    optable.newtok('postfix::', 'equiv'=>'postfix:*', 'parsed'=>$P0)
+    optable.newtok('postfix:*',  'looser'=>'term:', 'parsed'=>$P0)
+    optable.newtok('postfix:+',  'equiv'=>'postfix:*', 'parsed'=>$P0)
+    optable.newtok('postfix:?',  'equiv'=>'postfix:*', 'parsed'=>$P0)
+    optable.newtok('postfix::',  'equiv'=>'postfix:*', 'parsed'=>$P0)
     optable.newtok('postfix:**', 'equiv'=>'postfix:*', 'parsed'=>$P0)
+    $P0 = get_global 'parse_quant_error'
+    optable.newtok('term:*', 'equiv'=>'term:', 'parsed'=>$P0)
+    optable.newtok('term:+', 'equiv'=>'term:', 'parsed'=>$P0)
+    optable.newtok('term:?', 'equiv'=>'term:', 'parsed'=>$P0)
 
-
-    optable.newtok('infix:', 'looser'=>'postfix:*', 'assoc'=>'list', 'nows'=>1, 'match'=>'PGE::Exp::Concat')
-    optable.newtok('infix:&', 'looser'=>'infix:', 'nows'=>1, 'match'=>'PGE::Exp::Conj')
-    optable.newtok('infix:|', 'looser'=>'infix:&', 'nows'=>1, 'match'=>'PGE::Exp::Alt')
+    optable.newtok('infix:',   'looser'=>'postfix:*', 'assoc'=>'list', 'nows'=>1, 'match'=>'PGE::Exp::Concat')
+    optable.newtok('infix:&',  'looser'=>'infix:', 'nows'=>1, 'match'=>'PGE::Exp::Conj')
+    optable.newtok('infix:|',  'looser'=>'infix:&', 'nows'=>1, 'match'=>'PGE::Exp::Alt')
     optable.newtok('prefix:|', 'equiv'=>'infix:|', 'nows'=>1, 'match'=>'PGE::Exp::Alt')
 
     optable.newtok('infix::=', 'tighter'=>'infix:', 'assoc'=>'right', 'match'=>'PGE::Exp::Alias')
@@ -258,7 +240,7 @@ needed for compiling regexes.
     $P0 = get_global 'parse_modifier'
     optable.newtok('prefix::', 'looser'=>'infix:|', 'nows'=>1, 'parsed'=>$P0)
 
-    optable.newtok('close:}', 'precedence'=>'<', 'nows'=>1)
+    optable.newtok('close:}',  'precedence'=>'<', 'nows'=>1)
 
     .local pmc esclist
     esclist = new .Hash
@@ -349,7 +331,7 @@ Return a failed match if the stoptoken is found.
     if $I0 < 2 goto term_literal
   term_charlist:
     (mob, $P99, $P99, $P0) = mob.newfrom(0, 'PGE::Exp::EnumCharList')
-    mob.'value'(initchar)
+    mob.'result_object'(initchar)
     mob['isnegated'] = isnegated
     $P0 = pos
     .return (mob)
@@ -415,7 +397,7 @@ Return a failed match if the stoptoken is found.
     $S0 = substr target, litstart, $I0
     $S0 = concat initchar, $S0
     (mob, $S99, $P99, $P0) = mob.newfrom(0, 'PGE::Exp::Literal')
-    mob.'value'($S0)
+    mob.'result_object'($S0)
     $P0 = pos
     .return (mob)
 
@@ -546,11 +528,11 @@ combinations.
   quant_suffix:
     suffix = substr target, suffixpos, 2
     if suffix == ':?' goto quant_eager
-    if suffix == ':+' goto quant_greedy
+    if suffix == ':!' goto quant_greedy
   quant_suffix_1:
     suffix = substr target, suffixpos, 1
     if suffix == '?' goto quant_eager
-    if suffix == '+' goto quant_greedy
+    if suffix == '!' goto quant_greedy
     if suffix != ':' goto quant_set
   quant_none:
     mob['backtrack'] = PGE_BACKTRACK_NONE
@@ -572,6 +554,20 @@ combinations.
 
   err_closure:
     parse_error(mob, pos, "Error in closure quantifier")
+.end
+
+
+=item parse_quant_error(mob)
+
+Throw an exception for quantifiers in term position.
+
+=cut
+
+.sub 'parse_quant_error'
+    .param pmc mob
+    .local int pos
+    pos = mob.'to'()
+    parse_error(mob, pos, "Quantifier follows nothing in regex")
 .end
 
 
@@ -647,6 +643,38 @@ anchors, and match subscripts.
 .end
 
 
+=item C<parse_subname(STR target, INT pos)>
+
+Scan C<target> starting at C<pos> looking for a subrule name
+(following Perl 6's identifier syntax).  Returns any subrule
+name found, and the ending position of the name.
+
+=cut
+
+
+.sub 'parse_subname'
+    .param string target
+    .param int pos
+    .local int startpos, targetlen
+
+    targetlen = length target
+    startpos = pos
+    $I0 = pos
+  loop:
+    $I1 = find_not_cclass .CCLASS_WORD, target, $I0, targetlen
+    if $I1 == $I0 goto end
+    pos = $I1
+    $S0 = substr target, pos, 2
+    if $S0 != '::' goto end
+    $I0 = pos + 2
+    goto loop
+  end:
+    $I0 = pos - startpos
+    $S0 = substr target, startpos, $I0
+    .return ($S0, pos)
+.end
+
+
 =item C<parse_subrule(PMC mob)>
 
 Parses a subrule token.
@@ -656,38 +684,36 @@ Parses a subrule token.
 .sub 'parse_subrule'
     .param pmc mob
     .local string target
-    .local pmc mfrom, mpos
+    .local pmc mobsave, mfrom, mpos
     .local int pos, lastpos
     .local string key
     key = mob['KEY']
+    mobsave = mob
     (mob, target, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::Subrule')
     pos = mfrom
     lastpos = length target
 
+    .local string subname
+    (subname, pos) = 'parse_subname'(target, pos)
+    mob['subname'] = subname
+    $S0 = substr target, pos, 1
+
+    ##   see what type of subrule this is
+    mob['iscapture'] = 1
     if key == '<?' goto nocapture
     if key == '<!' goto negated
-    mob['iscapture'] = 1
-    goto subrule_name
+
+    ##   if the next character is +/-, this is really an enumcharclass
+    $I0 = index '+-', $S0
+    if $I0 == -1 goto subrule_arg
+    .return 'parse_enumcharclass'(mobsave)
+
   negated:
     mob['isnegated'] = 1
   nocapture:
     mob['iscapture'] = 0
-  subrule_name:
-    $I0 = pos
-  subrule_name_1:
-    pos = find_not_cclass .CCLASS_WORD, target, pos, lastpos
-    $S0 = substr target, pos, 2
-    if $S0 != '::' goto subrule_name_2
-    pos += 2
-    goto subrule_name_1
-  subrule_name_2:
-    $I1 = pos - $I0
-    .local string subname
-    subname = substr target, $I0, $I1
-    mob['subname'] = subname
-    $S0 = substr target, pos, 2
-    if $S0 == ': ' goto subrule_text_arg
-    $S0 = substr target, pos, 1
+  subrule_arg:
+    if $S0 == ':' goto subrule_text_arg
     if $S0 != ' ' goto subrule_end
   subrule_pattern_arg:
     inc pos
@@ -725,80 +751,170 @@ Parses a subrule token.
 .end
 
 
-=item C<parse_enumcharlist(PMC mob)>
+=item C<parse_enumcharclass(PMC mob)>
 
 Extract an enumerated character list.
 
 =cut
 
-.sub "parse_enumcharlist"
+.sub 'parse_enumcharclass'
     .param pmc mob
+    .param pmc adverbs         :slurpy :named
     .local string target
-    .local pmc mfrom, mpos
+    .local pmc term
+    .local string op
     .local int pos, lastpos
-    .local int isrange
-    .local string charlist
-    .local string key
-    key = mob['KEY']
-    (mob, target, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::EnumCharList')
+
+    $P0 = getattribute mob, '$.target'
+    target = $P0
+    pos = mob.to()
     lastpos = length target
-    charlist = ''
-    pos = mfrom
-    isrange = 0
-    mob['isnegated'] = 0
-    if key != '<-[' goto scan
-    mob['isnegated'] = 1
-  scan:
+    op = mob['KEY']
+
+    ##   handle the case of <[, <+[, <-[, and <![ as the token
+    ##   by converting to <, <+, <-, or <! 
+    $S0 = substr op, -1, 1
+    if $S0 != '[' goto parse_loop
+    chopn op, 1
+    goto enum
+
+  parse_loop: 
+    pos = find_not_cclass .CCLASS_WHITESPACE, target, pos, lastpos
     if pos >= lastpos goto err_close
     $S0 = substr target, pos, 1
-    if $S0 == ']' goto endclass
-    if $S0 == '-' goto err_hyphen
-    if $S0 == '.' goto dotrange
-    if $S0 != "\\" goto addchar
-  backslash:
+    if $S0 != '[' goto subrule
     inc pos
+  
+  enum:
+    .local string charlist
+    .local int isrange
+    charlist = ''
+    isrange = 0
+
+  enum_loop:
+    ##   skip leading whitespace and get next character
+    pos = find_not_cclass .CCLASS_WHITESPACE, target, pos, lastpos
+    if pos >= lastpos goto err_close
     $S0 = substr target, pos, 1
-    $I0 = index 'nrtfae0', $S0
-    if $I0 == -1 goto addchar
-    $S0 = substr "\n\r\t\f\a\e\0", $I0, 1
-  addchar:
+    if $S0 == ']' goto enum_close
+    if $S0 == '-' goto err_hyphen
+    if $S0 == '.' goto enum_dotrange
+    if $S0 != "\\" goto enum_addchar
+  enum_backslash:
     inc pos
-    if isrange goto addrange
+    ##   get escaped character
+    $S0 = substr target, pos, 1
+    ##   handle metas such as \n, \t, \r, etc.
+    $I0 = index 'nrtfae0', $S0
+    if $I0 == -1 goto enum_addchar
+    $S0 = substr "\n\r\t\f\a\e\0", $I0, 1
+  enum_addchar:
+    inc pos
+    if isrange goto enum_addrange
     charlist .= $S0
-    goto scan
-  addrange:
+    goto enum_loop
+  enum_dotrange:
+    ##   check if we have a .. range marker
+    if isrange goto enum_addrange
+    $S1 = substr target, pos, 2
+    if $S1 != '..' goto enum_addchar
+    pos += 2
+    isrange = 1
+    goto enum_loop
+  enum_addrange:
+    ##   add character range to charlist
     isrange = 0
     $I2 = ord charlist, -1
     $I0 = ord $S0
-  addrange_1:
+  enum_addrange_1:
     inc $I2
-    if $I2 > $I0 goto scan
+    if $I2 > $I0 goto enum_loop
     $S1 = chr $I2
-    $I99 = $I2
     charlist .= $S1
-    goto addrange_1
-  dotrange:
-    if isrange goto addrange
-    $S1 = substr target, pos, 2
-    if $S1 != ".." goto addchar
-    pos += 2
-    isrange = 1
-    goto scan
-  endclass:
-    $S0 = substr target, pos, 2
-    if $S0 != "]>" goto err_bracket
-    pos += 2
-    mpos = pos
-    mob.'value'(charlist)
+    goto enum_addrange_1
+  enum_close:
+    inc pos
+    ##   create a node for the charlist
+    (term) = mob.'newfrom'(0, 'PGE::Exp::EnumCharList')
+    term.'to'(pos)
+    term.'result_object'(charlist)
+    goto combine
+
+  subrule:
+    $I0 = pos
+    .local string subname
+    (subname, pos) = 'parse_subname'(target, $I0)
+    if pos == $I0 goto err
+    (term) = mob.'newfrom'(0, 'PGE::Exp::Subrule')
+    term.'from'($I0)
+    term.'to'(pos)
+    term['subname'] = subname
+    term['iscapture'] = 0
+
+  combine:
+    ##   find out what operator preceded this term
+    if op == '+' goto combine_plus
+    if op == '-' goto combine_minus
+    if op == '<' goto combine_init
+    if op == '<+' goto combine_init
+    ##   token was '<-' or '<!'
+    term['isnegated'] = 1
+    term['iszerowidth'] = 1
+    if op == '<!' goto combine_init
+    ##   token is '<-', we need to match a char by concat dot
+    $P0 = mob.'newfrom'(0, 'PGE::Exp::CCShortcut')
+    $P0.'to'(pos)
+    $P0.'result_object'('.')
+    mob = mob.'newfrom'(0, 'PGE::Exp::Concat')
+    mob.'to'(pos)
+    mob[0] = term
+    mob[1] = $P0
+    goto next_op
+
+  combine_init:
+    mob = term
+    goto next_op
+
+  combine_plus:
+    ##   <a+b>  ==>   <a> | <b>
+    ($P0) = mob.'newfrom'(0, 'PGE::Exp::Alt')
+    $P0.'to'(pos)
+    $P0[0] = mob
+    $P0[1] = term
+    mob = $P0
+    goto next_op
+
+  combine_minus:
+    ##   <a-b> ==>   <!b> <a>
+    term['isnegated'] = 1
+    term['iszerowidth'] = 1
+    ($P0) = mob.'newfrom'(0, 'PGE::Exp::Concat')
+    $P0.'to'(pos)
+    $P0[0] = term
+    $P0[1] = mob
+    mob = $P0
+    goto next_op
+
+  next_op:
+    pos = find_not_cclass .CCLASS_WHITESPACE, target, pos, lastpos
+    if pos >= lastpos goto err_close
+
+    op = substr target, pos, 1
+    inc pos
+    if op == '+' goto parse_loop
+    if op == '-' goto parse_loop
+    if op != '>' goto err
+    mob.'to'(pos)
     goto end
-  err_bracket:
-    parse_error(mob, pos, "Unescaped ']' in charlist")
+
+  err:
+    parse_error(mob, pos, "Error parsing enumerated character class")
     goto end
   err_hyphen:
     parse_error(mob, pos, "Unescaped '-' in charlist (use '..' or '\-')")
     goto end
   err_close:
-    parse_error(mob, pos, "No closing ']>' for charlist")
+    parse_error(mob, pos, "Missing close '>' or ']>' in enumerated character class")
   end:
     .return (mob)
 .end
@@ -833,8 +949,8 @@ Parses <'...'> literals.
     goto literal_iter
   literal_end:
     pos += 2
-    mob.value(lit)
-    mob.to(pos)
+    mob.'result_object'(lit)
+    mob.'to'(pos)
     .return (mob)
   literal_error:
     parse_error(mob, pos, "No closing '> in quoted literal")
@@ -870,14 +986,14 @@ Parse a modifier.
     $I1 = pos - $I0
     $S0 = substr target, $I0, $I1
     mob['key'] = $S0
-    mob.'value'(value)
+    mob.'result_object'(value)
     $S0 = substr target, pos, 1
     if $S0 != '(' goto end
     $I0 = pos + 1
     pos = index target, ')', pos
     $I1 = pos - $I0
     $S0 = substr target, $I0, $I1
-    mob.'value'($S0)
+    mob.'result_object'($S0)
     inc pos
   end:
     ### XXX pos = find_not_cclass .CCLASS_WHITESPACE, target, pos, lastpos
@@ -908,7 +1024,7 @@ Parse a modifier.
     if $I0 < pos goto err_noclose
     $I1 = $I0 - pos
     $S1 = substr target, pos, $I1
-    mob.'value'($S1)
+    mob.'result_object'($S1)
     pos = $I0 + len
     mpos = pos
     .return (mob)
@@ -1337,7 +1453,7 @@ Parse a modifier.
     closure_fn = closure_pp[lang]
     $S1 = self
     $S1 = closure_fn($S1)
-    self.'value'($S1)
+    self.'result_object'($S1)
   end:
     .return (self)
 .end
@@ -1386,3 +1502,9 @@ already present.
     self['cutmark'] = PGE_CUT_MATCH
     .return (self)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -129,7 +129,7 @@ Returns the TAP-compatible string representation of this test.
 
 .namespace [ 'Test::Builder::Test::Base' ]
 
-.sub __init :method
+.sub init_pmc :vtable :method
 	.param pmc args
 
 	.local int offset
@@ -145,7 +145,7 @@ Returns the TAP-compatible string representation of this test.
 	inc offset
 
 	number = args['number']
-	if number goto SET_NUMBER
+	unless null number goto SET_NUMBER
 	number = new .Integer
 	number = 0
 
@@ -154,7 +154,7 @@ Returns the TAP-compatible string representation of this test.
 	inc offset
 
 	diagnostic = args['diagnostic']
-	if diagnostic goto SET_DIAGNOSTIC
+	unless null diagnostic goto SET_DIAGNOSTIC
 	diagnostic = new .String
 	set diagnostic, '???'
 
@@ -163,7 +163,7 @@ Returns the TAP-compatible string representation of this test.
 	inc offset
 
 	description = args['description']
-	if description goto SET_DESCRIPTION
+	unless null description goto SET_DESCRIPTION
 	description = new .String
 	set description, ''
 
@@ -266,7 +266,7 @@ Returns the TAP-compatible string representation of this test.
 
 .namespace [ 'Test::Builder::Test::WithReason' ]
 
-.sub __init :method
+.sub init_pmc :vtable :method
 	.param pmc args
 
 	.local int offset
@@ -319,7 +319,7 @@ Returns the TAP-compatible string representation of this test.
 
 	number        = self.'number'()
 	reason        = self.'reason'()
-	report        = 'not ok '
+	report        = 'ok '
 	number_string = number
 	reason_string = reason
 
@@ -404,3 +404,9 @@ to the Perl 6 internals mailing list.
 Copyright (C) 2005, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

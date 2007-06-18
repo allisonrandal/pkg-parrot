@@ -12,13 +12,20 @@ Adds -fPIC to x86_64 (AMD64) ccflags, if necessary.
 package gen::cpu::x86_64::auto;
 
 use strict;
+use warnings;
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $ccflags = $conf->data->get('ccflags');
-    $conf->data->add(' ', ccflags => "-fPIC") unless $ccflags =~ /-fPIC/;
+    $conf->data->add( ' ', ccflags => "-fPIC" ) unless $ccflags =~ /-fPIC/;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

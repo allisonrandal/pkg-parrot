@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/t/compilers/pge/01-codestring.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/compilers/pge/01-codestring.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 7;
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ t/compilers/pge/pge_codestring.t - test the CodeString class
 
 =head1 SYNOPSIS
 
-	% prove t/compilers/pge/pge_codestring.t 
+        % prove t/compilers/pge/pge_codestring.t
 
 =head1 DESCRIPTION
 
@@ -23,7 +23,7 @@ Tests the CodeString class directly.
 
 =cut
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'create a CodeString object');
+pir_output_is( <<'CODE', <<'OUTPUT', 'create a CodeString object' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -35,7 +35,7 @@ CODE
 ok 1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'calls to unique');
+pir_output_is( <<'CODE', <<'OUTPUT', 'calls to unique' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -53,8 +53,7 @@ ok 10
 $P12
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'basic emit');
+pir_output_is( <<'CODE', <<'OUTPUT', 'basic emit' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -72,8 +71,7 @@ CODE
     $N0 = 0.1
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'emit with pos args');
+pir_output_is( <<'CODE', <<'OUTPUT', 'emit with pos args' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -89,8 +87,7 @@ CODE
     $I0 = 48
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'emit with %, args');
+pir_output_is( <<'CODE', <<'OUTPUT', 'emit with %, args' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -106,8 +103,7 @@ CODE
     say "Hello, World, of, Parrot"
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'emit with named args');
+pir_output_is( <<'CODE', <<'OUTPUT', 'emit with named args' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -123,8 +119,7 @@ CODE
     say "%d"
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'emit with pos + named args');
+pir_output_is( <<'CODE', <<'OUTPUT', 'emit with pos + named args' );
 .sub main :main
     load_bytecode 'compilers/pge/PGE/CodeString.pir'
     .local pmc code
@@ -140,6 +135,9 @@ CODE
     say "alpha, beta, W"
 OUTPUT
 
-# remember to change the number of tests :-)
-BEGIN { plan tests => 7; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

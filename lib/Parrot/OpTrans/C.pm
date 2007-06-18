@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2006, The Perl Foundation.
-# $Id: /local/lib/Parrot/OpTrans/C.pm 13005 2006-06-22T21:49:11.552283Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/OpTrans/C.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -29,8 +29,7 @@ Returns C<PARROT_FUNCTION_CORE>.
 
 =cut
 
-sub core_type
-{
+sub core_type {
     return 'PARROT_FUNCTION_CORE';
 }
 
@@ -40,8 +39,7 @@ Returns an empty string.
 
 =cut
 
-sub core_prefix
-{
+sub core_prefix {
     return "";
 }
 
@@ -51,17 +49,16 @@ Returns the C C<#define> macros for register access etc.
 
 =cut
 
-sub defines
-{
+sub defines {
     return <<END;
 #undef CONST
-#define REL_PC     ((size_t)(cur_opcode - interpreter->code->base.data))
+#define REL_PC     ((size_t)(cur_opcode - interp->code->base.data))
 #define CUR_OPCODE cur_opcode
 #define IREG(i) REG_INT(cur_opcode[i])
 #define NREG(i) REG_NUM(cur_opcode[i])
 #define PREG(i) REG_PMC(cur_opcode[i])
 #define SREG(i) REG_STR(cur_opcode[i])
-#define CONST(i) CONTEXT(interpreter->ctx)->constants[cur_opcode[i]]
+#define CONST(i) CONTEXT(interp->ctx)->constants[cur_opcode[i]]
 END
 }
 
@@ -71,9 +68,8 @@ Reimplements the superclass method so that C<$where> is suitably cast.
 
 =cut
 
-sub gen_goto
-{
-    my ($self, $where_str) = @_;
+sub gen_goto {
+    my ( $self, $where_str ) = @_;
 
     return "return (opcode_t *)$where_str";
 }
@@ -84,9 +80,8 @@ Returns the C code for C<ADDRESS($address)>. Called by C<goto_address()>.
 
 =cut
 
-sub expr_address
-{
-    my ($self, $addr) = @_;
+sub expr_address {
+    my ( $self, $addr ) = @_;
 
     return $addr;
 }
@@ -97,9 +92,8 @@ Returns the C code for C<OFFSET($offset)>. Called by C<goto_offset()>.
 
 =cut
 
-sub expr_offset
-{
-    my ($self, $offset) = @_;
+sub expr_offset {
+    my ( $self, $offset ) = @_;
 
     return "cur_opcode + $offset";
 }
@@ -110,29 +104,28 @@ Returns the C code for C<POP()>. Called by C<goto_offset()>.
 
 =cut
 
-sub expr_pop
-{
+sub expr_pop {
     my ($self) = @_;
 
-    return "pop_dest(interpreter)";
+    return "pop_dest(interp)";
 }
 
 our %arg_maps = (
-  'op'  => "cur_opcode[%ld]",
+    'op' => "cur_opcode[%ld]",
 
-  'i'   => "IREG(%ld)",
-  'n'   => "NREG(%ld)",
-  'p'   => "PREG(%ld)",
-  's'   => "SREG(%ld)",
-  'k'   => "PREG(%ld)",
-  'ki'  => "IREG(%ld)",
+    'i'  => "IREG(%ld)",
+    'n'  => "NREG(%ld)",
+    'p'  => "PREG(%ld)",
+    's'  => "SREG(%ld)",
+    'k'  => "PREG(%ld)",
+    'ki' => "IREG(%ld)",
 
-  'ic'  => "cur_opcode[%ld]",
-  'nc'  => "CONST(%ld)->u.number",
-  'pc'  => "CONST(%ld)->u.key",
-  'sc'  => "CONST(%ld)->u.string",
-  'kc'  => "CONST(%ld)->u.key",
-  'kic' => "cur_opcode[%ld]"
+    'ic'  => "cur_opcode[%ld]",
+    'nc'  => "CONST(%ld)->u.number",
+    'pc'  => "CONST(%ld)->u.key",
+    'sc'  => "CONST(%ld)->u.string",
+    'kc'  => "CONST(%ld)->u.key",
+    'kic' => "cur_opcode[%ld]"
 );
 
 =item C<access_arg($type, $value, $op)>
@@ -142,14 +135,13 @@ C<Parrot::OpTrans>) and value. C<$op> is an instance of C<Parrot::Op>.
 
 =cut
 
-sub access_arg
-{
-    my ($self, $type, $num, $op) = @_;
+sub access_arg {
+    my ( $self, $type, $num, $op ) = @_;
 
     die "Unrecognized type '$type' for num '$num' in opcode @{[$op->full_name]}"
         unless exists $arg_maps{$type};
 
-    return sprintf($arg_maps{$type}, $num);
+    return sprintf( $arg_maps{$type}, $num );
 }
 
 =item C<restart_offset($offset)>
@@ -158,11 +150,10 @@ Returns the C code for C<restart OFFSET($offset)>.
 
 =cut
 
-sub restart_offset
-{
-    my ($self, $offset) = @_;
+sub restart_offset {
+    my ( $self, $offset ) = @_;
 
-    return "interpreter->resume_offset = REL_PC + $offset; interpreter->resume_flag = 1";
+    return "interp->resume_offset = REL_PC + $offset; interp->resume_flag = 1";
 }
 
 =item C<restart_address($address)>
@@ -171,11 +162,10 @@ Returns the C code for C<restart ADDRESS($address)>.
 
 =cut
 
-sub restart_address
-{
-    my ($self, $addr) = @_;
+sub restart_address {
+    my ( $self, $addr ) = @_;
 
-    return "interpreter->resume_offset = $addr; interpreter->resume_flag = 1";
+    return "interp->resume_offset = $addr; interp->resume_flag = 1";
 }
 
 =back
@@ -202,3 +192,9 @@ sub restart_address
 
 1;
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

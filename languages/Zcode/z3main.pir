@@ -1,4 +1,4 @@
-# $Id: /local/languages/Zcode/z3main.pir 11763 2006-02-27T08:29:19.657607Z bernhard  $
+# $Id: /parrotcode/trunk/languages/Zcode/z3main.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 #####################################################
 #
@@ -6,12 +6,13 @@
 #
 #####################################################
 
+.loadlib "myops_ops"
+
 .sub "zm_init"
   newclass $P0, "Zmachine"
   addattribute $P0, "file"
   addattribute $P0, "image"
   addattribute $P0, "opts"
-  load_bytecode "library/Data/Escape.pir"
   .return($P0)
 .end
 
@@ -228,7 +229,7 @@ vers_ok:
 
 .namespace ["ZComp"]
 
-.sub "__init" :method
+.sub "init" :vtable :method
   $P0 = new Hash
   setattribute self, "ZComp\0labels", $P0
   $P0 = new Hash
@@ -380,13 +381,16 @@ inner:
       self."code"($S1)
   no_emit_l:
     unless deb goto no_deb_3
-      print_item $S0
+      print $S0
+      print " "
   no_deb_3:
     # decode opcode at pc
     (ops, type, pc) = self."decode_op"(im, pc)
     unless deb goto no_deb_4
-      print_item ops
-      print_item type
+      print ops
+      print " "
+      print type
+      print " "
   no_deb_4:
     # collect args encoded in opcode
     args = new ResizablePMCArray
@@ -1037,3 +1041,9 @@ decode_done:
 
 .include "zops.pir"
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

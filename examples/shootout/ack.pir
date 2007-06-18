@@ -1,4 +1,8 @@
 #!./parrot -Oc -Cj
+# OUTPUT="Ack(3, 9) = 4093\n"
+#
+# RQ (Karl)
+# Seems to be an old benchmark, now deprecated by the shootout
 #
 # ackermann - ack(3, 9) is default 
 # shootout runs ack(3, 11)
@@ -51,3 +55,9 @@ a2:
     $I4 = x - 1
     .return ack($I4, $I3)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

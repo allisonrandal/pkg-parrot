@@ -1,27 +1,28 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/init/hints/vms.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/init/hints/vms.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 package init::hints::vms;
 
 use strict;
+use warnings;
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     $conf->data->set(
-        ccflags => qq{/Standard=Relaxed_ANSI/Prefix=All/Obj=.obj/NoList/NOANSI_ALIAS/include="./include"},
-        perl    => "MCR $^X",
-        exe     => "exe"
+        ccflags =>
+            qq{/Standard=Relaxed_ANSI/Prefix=All/Obj=.obj/NoList/NOANSI_ALIAS/include="./include"},
+        perl => "MCR $^X",
+        exe  => "exe"
     );
 
     {
         local $^W;    # no warnings on redefinition
 
         *Parrot::Configure::Step::cc_build = sub {
-            my ($cc, $ccflags) = $conf->data->get(qw(cc ccflags));
+            my ( $cc, $ccflags ) = $conf->data->get(qw(cc ccflags));
             system("$cc $ccflags test.c") and die "C compiler died!";
-            system("link/exe=test test")        and die "Link failed!";
+            system("link/exe=test test")  and die "Link failed!";
         };
 
         *Parrot::Configure::Step::cc_run = sub {
@@ -31,3 +32,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

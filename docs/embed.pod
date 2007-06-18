@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/docs/embed.pod 13053 2006-06-29T17:47:27.794809Z chromatic  $
+# $Id: /parrotcode/trunk/docs/embed.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -25,7 +25,8 @@ embed.pod - Parrot embedding system
         pf = Parrot_readbc(interp, bcfile);
         Parrot_loadbc(interp, pf);
 
-        Parrot_runcode(interp, argc, argv); /* argc and argv as seen by the bytecode file */
+        /* argc and argv as seen by the bytecode file */
+        Parrot_runcode(interp, argc, argv);
 
         Parrot_destroy(interp);
 
@@ -202,7 +203,8 @@ This constant contains the name of your operating system (as the JIT sees it).
 Allocates and returns a new Parrot interpreter. C<parent> is NULL for the main
 interpreter that will be destroyed last.
 
-=item C<void Parrot_setflags(Parrot_Interp, Parrot_Interp_flag, Parrot_Interp_flag_val)>
+=item C<void Parrot_setflags(Parrot_Interp, Parrot_Interp_flag,
+Parrot_Interp_flag_val)>
 
 Sets a flag in the Parrot interpreter.
 

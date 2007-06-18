@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/pmc/boolean.pmc 13170 2006-07-06T00:31:15.675448Z chip  $
+$Id: /parrotcode/local/src/pmc/boolean.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -27,7 +27,7 @@ pmclass Boolean extends Integer does boolean does scalar {
 
 /*
 
-=item C<class_init ()>
+=item C<class_init()>
 
 Define 2 pythonic globals C<True>, C<False>.
 
@@ -66,50 +66,50 @@ C<bool> object according to the passed PMC value.
     PMC* instantiate(PMC* sig) {
         /* XXX other types */
         const int argcP = REG_INT(3);
-        PMC * const res = pmc_new(interpreter, enum_class_Boolean);
+        PMC * const res = pmc_new(interp, enum_class_Boolean);
 
         if (argcP)
-            PMC_int_val(res) = VTABLE_get_bool(interpreter, REG_PMC(5));
+            PMC_int_val(res) = VTABLE_get_bool(interp, REG_PMC(5));
         return PMCNULL; /* TODO */
         return res;
     }
 /*
 
-=item C<STRING* get_string ()>
+=item C<STRING* get_string()>
 
 Return "1" or "0".
 
 =cut
 
 */
-    STRING* get_string () {
+    STRING* get_string() {
         return SUPER();
     }
 
 
 /*
 
-=item C<void set_integer_native (INTVAL value)>
+=item C<void set_integer_native(INTVAL value)>
 
-=item C<void set_bool (INTVAL value)>
+=item C<void set_bool(INTVAL value)>
 
-=item C<void set_pmc (PMC* value)>
+=item C<void set_pmc(PMC* value)>
 
 =cut
 
 */
-    void set_integer_native (INTVAL value) {
+    void set_integer_native(INTVAL value) {
         PMC_int_val(SELF) = (value != 0);
     }
 
 
-    void set_bool (INTVAL value) {
+    void set_bool(INTVAL value) {
         PMC_int_val(SELF) = (value != 0);
     }
 
 /*
 
-=item C<void set_number_native (FLOATVAL value)>
+=item C<void set_number_native(FLOATVAL value)>
 
 Sets the value to C<value> evaluated in a boolean context.
 
@@ -117,13 +117,13 @@ Sets the value to C<value> evaluated in a boolean context.
 
 */
 
-    void set_number_native (FLOATVAL value) {
+    void set_number_native(FLOATVAL value) {
         PMC_int_val(SELF) = (value!=0);
     }
 
 /*
 
-=item C<void set_string_native (STRING* value)>
+=item C<void set_string_native(STRING* value)>
 
 Sets the value to C<*value> evaluated in a boolean context.
 
@@ -131,7 +131,7 @@ Sets the value to C<*value> evaluated in a boolean context.
 
 */
 
-    void set_string_native (STRING* value) {
+    void set_string_native(STRING* value) {
         PMC_int_val(SELF) = string_bool(INTERP, value);
     }
 }
@@ -146,10 +146,7 @@ Sets the value to C<*value> evaluated in a boolean context.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

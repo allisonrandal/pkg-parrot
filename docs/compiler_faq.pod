@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/docs/compiler_faq.pod 13382 2006-07-19T15:29:02.658038Z particle  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/docs/compiler_faq.pod 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -70,7 +70,7 @@ The method name may also be a string variable representing a method name:
   m = "bold"
   curses_obj.m()
 
-=head2 How do I locate or create a subroutine object
+=head2 How do I locate or create a subroutine object?
 
 There are several ways to achieve this, depending on the location of
 the subroutine.
@@ -109,7 +109,7 @@ opcode:
 
 This searches the sub "foo" in the "Foo" namespace.
 
-=head2 How do I create a Closure or Coroutine
+=head2 How do I create a Closure or Coroutine?
 
 Both carry dynamic state, therefore you use one of the above ways to
 locate the sub object, then you just clone it to get a distinct copy
@@ -142,7 +142,8 @@ created as a Coroutine PMC:
 
 The sub C<bar> will return to the caller of C<foo>.
 
-=head2 How do I generate a sub call with a variable-length parameter list in PIR?
+=head2 How do I generate a sub call with a variable-length parameter
+list in PIR?
 
 If you have a variable amounts of arguments in an array, you can
 pass all items of that array with the C<:flat> directive.
@@ -154,7 +155,8 @@ pass all items of that array with the C<:flat> directive.
   foo(ar :flat)
   ...
 
-=head2 How to I retrieve the contents of a variable-length parameter list being passed to me?
+=head2 How to I retrieve the contents of a variable-length parameter
+list being passed to me?
 
 Use a slurpy array:
 
@@ -175,7 +177,7 @@ to get the rest of the arguments
     num_varargs = varargs
     ...
 
-=head2 How do I pass optional arguments
+=head2 How do I pass optional arguments?
 
 Use the C<:optional> and C<:opt_flag> pragmas:
 
@@ -204,28 +206,27 @@ or the C<find_global> op:
 
     find_global $P0, "name_of_the_global"
 
-=head2 How can I delete a global
+=head2 How can I delete a global?
 
-You can retrieve the namespace hash and use the C<delete> opcode.  Nested
-namespace names have a NULL char prepended to their name.
+You can retrieve the namespace hash and use the C<delete> opcode.
 
   .sub main :main
     $P0 = new .Integer
-    store_global "foo", $P0
-    store_global "Bar", "baz", $P0
+    store_hll_global "foo", $P0
+    store_hll_global ["Bar"], "baz", $P0
     # ...
-    .include "interpinfo.pasm"
     .local pmc ns, Bar_ns
-    ns = interpinfo .INTERPINFO_NAMESPACE_ROOT
-    delete ns["foo"]                # delete from top level
-    Bar_ns = ns["\0Bar"]            # get Bar namespace
+    ns = get_hll_namespace
+    delete ns["foo"]              # delete from top level
+    Bar_ns = ns["Bar"]            # get Bar namespace
     delete Bar_ns["baz"]
-    $P0 = find_global "Bar", "baz"
+    $P0 = get_hll_global ["Bar"], "baz"
     print "never\n"
   .end
 
 
-=head2 How do I use lexical pads to have both a function scope and a global scope?
+=head2 How do I use lexical pads to have both a function scope and a
+global scope?
 
 Please refer to L<docs/pdds/pdd20_lexical_vars.pod> for details.
 
@@ -290,17 +291,17 @@ to a class (not to individual objects) like so:
 
 =head2 How do I add instance methods to a class?
 
-Methods are declared as functions in the class namespace with the C<method>
+Methods are declared as functions in the class namespace with the C<:method>
 keyword appended to the function declaration:
 
   .namespace [ "Animal" ]
 
-  .sub __init method
+  .sub __init :method
     $P0 = new .Integer
     setattribute self, "legs", $P0
     ...
   .end
-  .sub run method
+  .sub run :method
     ...
   .end
 
@@ -372,7 +373,7 @@ Just define a method named C<__init> in the namespace of the class.
 
     .namespace ["Dog"]
 
-    .sub __init method
+    .sub __init :method
       # ...
 
 Or you can specify the constructor method by setting the BUILD
@@ -399,7 +400,7 @@ or for short:
 
 During the C<new> opcode the constructor is called.
 
-=head2 How can I pass arguments to an constructor?
+=head2 How can I pass arguments to a constructor?
 
 You can pass only a single argument to a constructor.  By convention,
 a hash PMC is passed to the constructor that contains the arguments as
@@ -452,9 +453,23 @@ An exception handler is called with two arguments: the exception and the
 message.  More information is available inside the exception 'object' (TBD).
 
   handler:
-    get_results '(0,0') P0, S0      # PASM syntax
+    get_results '(0,0)', P0, S0      # PASM syntax
     print "Exception caught!\n"
     exit 1
+
+=head2 How do I let exceptions from C<exit> pass through my handler?
+
+Rethrow the exception if it has a severity of C<EXCEPT_EXIT>.
+
+  handler:
+    .include 'except_severity.pasm'
+    get_results '(0,0)', $P0, $S0
+    $I0 = $P0[2]
+    if $I0 == .EXCEPT_EXIT goto unexceptional
+    print "Exception caught!\n"
+    exit 1
+  unexceptional:
+    rethrow $P0
 
 =head2 How do I access the error message of an exception I've caught?
 
@@ -494,10 +509,10 @@ To build dynamic PMCs, add something like the following to your Makefile:
   PMC_FILES = MyInteger.pmc MyFloat.pmc MyString.pmc MyObject.pmc
 
   dynpmcs : $(PMC_FILES)
-      @cd $(PMCDIR) && $(BUILD) generate $(PMCS)
-      @cd $(PMCDIR) && $(BUILD) compile $(PMCS)
-      @cd $(PMCDIR) && $(BUILD) linklibs $(PMCS)
-      @cd $(PMCDIR) && $(BUILD) copy "--destination=$(DESTDIR)" $(PMCS)
+      @cd $(PMCDIR) && $(PMCBUILD) generate $(PMCS)
+      @cd $(PMCDIR) && $(PMCBUILD) compile $(PMCS)
+      @cd $(PMCDIR) && $(PMCBUILD) linklibs $(PMCS)
+      @cd $(PMCDIR) && $(PMCBUILD) copy "--destination=$(DESTDIR)" $(PMCS)
 
 =head2 How do I add another op to Parrot?
 

@@ -1,4 +1,4 @@
-## $Id: /local/languages/perl6/src/builtins/control.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+## $Id: /parrotcode/trunk/languages/perl6/src/builtins/control.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
 
 =head1 NAME
 
@@ -34,8 +34,12 @@ src/builtins/control.pir - Perl 6 Control functions
     message .= $S0
     goto iter_loop
   iter_end:
+    if message > '' goto have_message
+    message = "Died\n"
+  have_message:
     $P0 = new .Exception
     $P0['_message'] = message
+    set_global '$!', $P0
     throw $P0
     .return ()
 .end
@@ -118,5 +122,8 @@ B<TODO>: Research the exception handling system.
 
 =cut
 
-
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

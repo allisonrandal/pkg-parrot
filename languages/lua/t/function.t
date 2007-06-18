@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/function.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/function.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -12,17 +12,19 @@ t/function.t - Lua functions
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.5.8 "Function Definitions".
+See "Lua 5.1 Reference Manual", section 2.5.9 "Function Definitions",
+L<http://www.lua.org/manual/5.1/manual.html#2.5.9>.
 
 See "Programming in Lua", section 5 "Functions".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 11;
+use Parrot::Test tests => 14;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'add' );
@@ -93,7 +95,7 @@ CODE
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'call by value' );
-function f (n) 
+function f (n)
     n = n - 1
     return n
 end
@@ -112,8 +114,7 @@ OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'call by ref' );
 function f (t)
-    local n = table.getn(t) 
-    t[n+1] = "end"
+    t[#t+1] = "end"
     return t
 end
 
@@ -131,7 +132,7 @@ OUT
 language_output_is( 'lua', <<'CODE', <<'OUT', 'var args' );
 local function g(a, b, ...)
     local arg = {...}
-    print(a, b, #arg, arg[1], arg[2]) 
+    print(a, b, #arg, arg[1], arg[2])
 end
 
 g(3)
@@ -146,7 +147,7 @@ OUT
 language_output_is( 'lua', <<'CODE', <<'OUT', 'var args' );
 local function g(a, b, ...)
     local c, d, e = ...
-    print(a, b, c, d, e) 
+    print(a, b, c, d, e)
 end
 
 g(3)
@@ -160,7 +161,7 @@ OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'var args' );
 local function g(a, b, ...)
-    print(a, b, ...) 
+    print(a, b, ...)
 end
 
 g(3)
@@ -193,12 +194,71 @@ language_output_like( 'lua', <<'CODE', <<'OUT', 'orphan break' );
 function f()
     print "before"
     do
-        print "inner" 
+        print "inner"
         break
     end
     print "after"
 end
 CODE
-/no loop to break/
+/^[^:]+: [^:]+:\d+: no loop to break/
 OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'tail call' );
+local function foo (n)
+    print(n)
+    if n > 0 then
+        return foo(n -1)
+    end
+    return 'end', 0
+end
+
+print(foo(3))
+CODE
+3
+2
+1
+0
+end	0
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'no tail call' );
+local function foo (n)
+    print(n)
+    if n > 0 then
+        return (foo(n -1))
+    end
+    return 'end', 0
+end
+
+print(foo(3))
+CODE
+3
+2
+1
+0
+end
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'no tail call' );
+local function foo (n)
+    print(n)
+    if n > 0 then
+        foo(n -1)
+    end
+end
+
+foo(3)
+CODE
+3
+2
+1
+0
+OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

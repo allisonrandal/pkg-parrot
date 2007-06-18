@@ -4,7 +4,7 @@
 # implementation based on http://www.merriampark.com/ld.htm
 # First implementation by Alberto Simoes (ambs <at> cpan.org)
 #
-# $Id: /local/examples/pir/levenshtein.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/local/examples/pir/levenshtein.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 # .sub main :main
 #         $S1 = "purl"
@@ -134,3 +134,9 @@ other:
         goto c_label
         
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

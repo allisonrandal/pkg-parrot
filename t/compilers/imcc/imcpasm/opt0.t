@@ -1,13 +1,15 @@
 #!perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/imcpasm/opt0.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/imcc/imcpasm/opt0.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
 use Parrot::Test tests => 6;
 
 # these tests are run with -O0 by TestCompiler and show
 # generated PASM code for various optimizations at level 0
-pir_2_pasm_like(<<'CODE', <<'OUT', "add_n_i_n");
+pir_2_pasm_like( <<'CODE', <<'OUT', "add_n_i_n" );
 .emit
    add N0, I0, N1
    mul N0, I0, N1
@@ -20,7 +22,7 @@ CODE
 OUT
 
 ##############################
-pir_2_pasm_is(<<'CODE', <<'OUT', "sub_n_ic_n");
+pir_2_pasm_is( <<'CODE', <<'OUT', "sub_n_ic_n" );
 .emit
    sub N0, 2, N1
    div N0, 2, N1
@@ -33,7 +35,7 @@ CODE
 OUT
 
 ##############################
-pir_2_pasm_like(<<'CODE', <<'OUT', "sub_n_i_n");
+pir_2_pasm_like( <<'CODE', <<'OUT', "sub_n_i_n" );
 .sub _test
    sub N0, I0, N1
    div N0, I0, N1
@@ -49,7 +51,7 @@ CODE
 OUT
 
 ##############################
-pir_2_pasm_is(<<'CODE', <<'OUT', "added return - end");
+pir_2_pasm_is( <<'CODE', <<'OUT', "added return - end" );
 .sub _test
    noop
    end
@@ -63,7 +65,7 @@ _test:
 OUT
 
 ##############################
-pir_2_pasm_is(<<'CODE', <<'OUT', "added return - exit");
+pir_2_pasm_is( <<'CODE', <<'OUT', "added return - exit" );
 .sub _test
    noop
    exit 0
@@ -77,7 +79,7 @@ _test:
 OUT
 
 ##############################
-pir_2_pasm_is(<<'CODE', <<'OUT', "added return - nil");
+pir_2_pasm_is( <<'CODE', <<'OUT', "added return - nil" );
 .sub _test
    noop
 .end
@@ -89,3 +91,10 @@ _test:
   set_returns
   returncc
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

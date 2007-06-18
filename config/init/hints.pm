@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/init/hints.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/init/hints.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ F<config/init/default.pm>.
 package init::hints;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -25,9 +26,8 @@ $description = 'Loading platform and local hints files';
 
 @args = qw( cc verbose define );
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $verbose = $conf->options->get('verbose');
 
@@ -42,18 +42,18 @@ sub runstep
 
     # call the runstep method if it exists.  Otherwise the step must have done
     # it's work when it was loaded.
-    $hints->runstep($conf, @_) if $hints->can('runstep');
+    $hints->runstep( $conf, @_ ) if $hints->can('runstep');
     $hints_used++;
 
     $hints = "init::hints::local";
     print "$hints " if $verbose;
     eval "use $hints";
     unless ($@) {
-        $hints->runstep($conf, @_) if $hints->can('runstep');
+        $hints->runstep( $conf, @_ ) if $hints->can('runstep');
         $hints_used++;
     }
 
-    if ($hints_used == 0) {
+    if ( $hints_used == 0 ) {
         print "(no hints) " if $verbose;
     }
 
@@ -63,3 +63,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

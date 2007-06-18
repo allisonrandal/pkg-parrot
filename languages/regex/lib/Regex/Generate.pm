@@ -1,5 +1,6 @@
 package Regex::Generate;
 use strict;
+use warnings;
 
 ############### SIMPLE OUTPUT ##############
 
@@ -17,7 +18,7 @@ sub output_increment {
 }
 
 sub output_assign {
-    my ($var, $val) = @_;
+    my ( $var, $val ) = @_;
     return "$var := $val";
 }
 
@@ -70,7 +71,7 @@ sub output_fail {
 }
 
 sub output_if {
-    my ($a, $cond, $b, $where) = @_;
+    my ( $a, $cond, $b, $where ) = @_;
     return "if $a $cond $b goto $where->[1]";
 }
 
@@ -80,17 +81,18 @@ sub output_goto {
 }
 
 sub output_label {
-    my ($label, $reachable) = @_;
-    return "$label:" . ($reachable ? "" : " (unreachable)");
+    my ( $label, $reachable ) = @_;
+    return "$label:" . ( $reachable ? "" : " (unreachable)" );
 }
 
 ##################################
 
 use vars qw(%OUTPUT);
+
 sub gather {
-    foreach (keys %Regex::Generate::) {
-	next unless /^output_(\w+)$/;
-	$OUTPUT{$1} = $Regex::Generate::{$_};
+    foreach ( keys %Regex::Generate:: ) {
+        next unless /^output_(\w+)$/;
+        $OUTPUT{$1} = $Regex::Generate::{$_};
     }
 }
 gather();
@@ -99,21 +101,31 @@ sub output {
     my @r;
     my $curlabel = "\t";
     for my $op (@_) {
-	if (! ref($op)) {
-	    push @r, $curlabel . $op;
-	    $curlabel = "\t";
-	} elsif ($op->[0] eq 'label') {
-	    $curlabel = "$op->[1]:" . $curlabel;
-	} elsif (my $outfunc = $OUTPUT{$op->[0]}) {
-	    my @args = @$op;
-	    shift(@args);
-	    push @r, $curlabel . $outfunc->(@args);
-	    $curlabel = "\t";
-	} else {
-	    die "Unable to output $op->[0]";
-	}
+        if ( !ref($op) ) {
+            push @r, $curlabel . $op;
+            $curlabel = "\t";
+        }
+        elsif ( $op->[0] eq 'label' ) {
+            $curlabel = "$op->[1]:" . $curlabel;
+        }
+        elsif ( my $outfunc = $OUTPUT{ $op->[0] } ) {
+            my @args = @$op;
+            shift(@args);
+            push @r, $curlabel . $outfunc->(@args);
+            $curlabel = "\t";
+        }
+        else {
+            die "Unable to output $op->[0]";
+        }
     }
     return @r;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

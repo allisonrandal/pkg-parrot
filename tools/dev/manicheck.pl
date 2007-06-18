@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/tools/dev/manicheck.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/local/tools/dev/manicheck.pl 1502 2007-01-22T17:06:21.889089Z chromatic  $
 ################################################################################
 
 =head1 NAME
@@ -20,7 +20,7 @@ number of I<missing>, I<expected> and I<extra> files, and
 then any extra files are listed.
 
 Files that match the patterns in MANIFEST.SKIP are not reported as extra
-files. 
+files.
 
 =cut
 
@@ -39,13 +39,17 @@ my $manifest  = ExtUtils::Manifest::maniread();
 my $file_list = ExtUtils::Manifest::manifind();
 my @missing   = ExtUtils::Manifest::manicheck();
 my @extra     = ExtUtils::Manifest::filecheck();
+
 # my @ignored   = ExtUtils::Manifest::skipcheck();
 
-printf "Found %d distinct files among MANIFEST and directory contents.\n\n",
-  scalar( keys %{$file_list} );
+# strip '~' backup files from the extra list
+@extra = grep !m/~$/, @extra;
 
-printf "  %5d missing\n",  scalar @missing;
-printf "  %5d extra\n",    scalar @extra;
+printf "Found %d distinct files among MANIFEST and directory contents.\n\n",
+    scalar( keys %{$file_list} );
+
+printf "  %5d missing\n", scalar @missing;
+printf "  %5d extra\n",   scalar @extra;
 
 # TODO: Use Data::Dumper
 if (@missing) {
@@ -65,3 +69,10 @@ if (@extra) {
 }
 
 exit scalar(@missing) or scalar(@extra) ? 1 : 0;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

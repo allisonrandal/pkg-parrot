@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Examples.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Examples.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -35,20 +35,21 @@ Returns a new section.
 
 =cut
 
-sub new
-{
+sub new {
     my $self = shift;
-    
+
     return $self->SUPER::new(
-        'Examples', 'examples.html', '',
-            $self->new_group('PASM and PIR',         '', 'examples/pasm'),
-            $self->new_group('PIR',                  '', 'examples/pir'),
-            $self->new_group('Subroutines',          '', 'examples/subs'),
-            $self->new_group('IO',                   '', 'examples/io'),
-            $self->new_group('Streams',              '', 'examples/streams'),
-            $self->new_group('Benchmarking',         '', 'examples/benchmarks'),
-            $self->new_group('Speed Comparison',     '', 'examples/mops'),
-            $self->new_group('Native Call Interface','', 'examples/nci'),
+        'Examples',
+        'examples.html',
+        '',
+        $self->new_group( 'PASM and PIR',          '', 'examples/pasm' ),
+        $self->new_group( 'PIR',                   '', 'examples/pir' ),
+        $self->new_group( 'Subroutines',           '', 'examples/subs' ),
+        $self->new_group( 'IO',                    '', 'examples/io' ),
+        $self->new_group( 'Streams',               '', 'examples/streams' ),
+        $self->new_group( 'Benchmarking',          '', 'examples/benchmarks' ),
+        $self->new_group( 'Speed Comparison',      '', 'examples/mops' ),
+        $self->new_group( 'Native Call Interface', '', 'examples/nci' ),
     );
 }
 
@@ -57,3 +58,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

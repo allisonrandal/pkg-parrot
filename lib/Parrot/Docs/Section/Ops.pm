@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Ops.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Ops.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Section::Ops - Parrot ops documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Section::Ops;
+        use Parrot::Docs::Section::Ops;
 
 =head1 DESCRIPTION
 
@@ -32,19 +32,22 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'Ops', 'ops.html', '',
-		$self->new_group('Tools', '',
-			$self->new_item('', 'tools/build/ops2c.pl'),
-			$self->new_item('', 'src/ops/ops.num'),
-			$self->new_item('', 'tools/build/ops2pm.pl'),
-		),
-		$self->new_group('Op Libs', '', 'src/ops'),
-	);
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new(
+        'Ops',
+        'ops.html',
+        '',
+        $self->new_group(
+            'Tools',
+            '',
+            $self->new_item( '', 'tools/build/ops2c.pl' ),
+            $self->new_item( '', 'src/ops/ops.num' ),
+            $self->new_item( '', 'tools/build/ops2pm.pl' ),
+        ),
+        $self->new_group( 'Op Libs', '', 'src/ops' ),
+    );
 }
 
 =back
@@ -52,3 +55,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

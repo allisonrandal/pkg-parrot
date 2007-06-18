@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/languages/APL/src/pmc/aplvector.pmc 13435 2006-07-22T15:37:44.759674Z coke  $
+$Id: /parrotcode/trunk/languages/APL/src/pmc/aplvector.pmc 470 2006-12-05T03:30:45.414067Z svm  $
 
 
 =head1 NAME
@@ -31,7 +31,7 @@ size_of_shape(Interp *interpreter, PMC* self, PMC* shape)
     INTVAL length;
     INTVAL pos;
 
-    if (!shape || shape == PMCNULL) { 
+    if (!shape || shape == PMCNULL) {
         /* not set, so a simple 1D */
         return VTABLE_get_integer(interpreter, self);
     }
@@ -41,7 +41,7 @@ size_of_shape(Interp *interpreter, PMC* self, PMC* shape)
     for (pos = 0; pos < dimension; pos++)
     {
         length = VTABLE_get_integer_keyed_int(interpreter, shape, pos);
-        retval *= length; 
+        retval *= length;
     }
     return retval;
 }
@@ -121,14 +121,18 @@ Returns a vector-like PMC containing the shape of this PMC.
             * No shape has been set yet. This means that we are
             * a simple vector
             *
-            * we use our own type here. Perhaps a better way to 
+            * we use our own type here. Perhaps a better way to
             * specify it?
             */
-            //array_t = pmc_type(INTERP, 
-                //string_from_const_cstring(INTERP, "APLVector", 0)
-            //);
+            /*
+            array_t = pmc_type(INTERP,
+                string_from_const_cstring(INTERP, "APLVector", 0)
+            );
+            */
             shape = pmc_new(INTERP,VTABLE_type(INTERP,SELF));
-//#array_t);
+            /*
+#array_t);
+            */
             VTABLE_set_integer_native(INTERP, shape, 1);
             VTABLE_set_integer_keyed_int(INTERP,shape,0,
                 VTABLE_get_integer(INTERP, SELF)
@@ -196,3 +200,10 @@ the end of the APLv.
 
 }
 
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

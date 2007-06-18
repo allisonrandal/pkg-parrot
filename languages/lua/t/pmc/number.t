@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/pmc/number.t 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/lua/t/pmc/number.t 759 2006-12-18T22:22:06.933291Z chromatic  $
 
 =head1 NAME
 
@@ -17,20 +17,23 @@ Tests C<LuaNumber> PMC
 
 =cut
 
+use strict;
+use warnings;
+
 use Parrot::Test tests => 11;
 use Test::More;
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check inheritance' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNumber"
+    loadlib P1, 'lua_group'
+    find_type $I0, 'LuaNumber'
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
-    bool1 = isa pmc1, "LuaBase"
+    bool1 = isa pmc1, 'LuaAny'
     print bool1
     print "\n"
-    bool1 = isa pmc1, "LuaNumber"
+    bool1 = isa pmc1, 'LuaNumber'
     print bool1
     print "\n"
     end
@@ -42,18 +45,18 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check interface' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNumber"
+    loadlib P1, 'lua_group'
+    find_type $I0, 'LuaNumber'
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
-    bool1 = does pmc1, "scalar"
+    bool1 = does pmc1, 'scalar'
     print bool1
     print "\n"
-    bool1 = does pmc1, "float"
+    bool1 = does pmc1, 'float'
     print bool1
     print "\n"
-    bool1 = does pmc1, "no_interface"
+    bool1 = does pmc1, 'no_interface'
     print bool1
     print "\n"
     end
@@ -66,8 +69,8 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check name' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNumber"
+    loadlib P1, 'lua_group'
+    find_type $I0, 'LuaNumber'
     .local pmc pmc1
     pmc1 = new $I0
     .local string str1
@@ -86,8 +89,8 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check set_integer_native' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNumber"
+    loadlib P1, 'lua_group'
+    find_type $I0, 'LuaNumber'
     .local pmc pmc1
     .local string str1
     pmc1 = new $I0
@@ -114,8 +117,8 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check get_bool' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNumber"
+    loadlib P1, 'lua_group'
+    find_type $I0, 'LuaNumber'
     .local pmc pmc1
     pmc1 = new $I0
     pmc1 = 3.14
@@ -136,12 +139,12 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check logical_not' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNumber"
+    loadlib P1, 'lua_group'
+    find_type $I0, 'LuaNumber'
     .local pmc pmc1
     pmc1 = new $I0
     pmc1 = 3.14
-    find_type $I0, "LuaBoolean"
+    find_type $I0, 'LuaBoolean'
     .local pmc pmc2
     pmc2 = new $I0
     pmc2 = not pmc1
@@ -159,7 +162,7 @@ boolean
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
     .local pmc pmc1
     pmc1 = new .LuaNumber
@@ -167,7 +170,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL' );
     print pmc1
     print "\n"
     .local int bool1
-    bool1 = isa pmc1, "LuaNumber"
+    bool1 = isa pmc1, 'LuaNumber'
     print bool1
     print "\n"
     end
@@ -178,14 +181,14 @@ CODE
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL (autoboxing)' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
     .local pmc pmc1
     pmc1 = test()
     print pmc1
     print "\n"
     .local int bool1
-    bool1 = isa pmc1, "LuaNumber"
+    bool1 = isa pmc1, 'LuaNumber'
     print bool1
     print "\n"
 .end
@@ -198,13 +201,13 @@ CODE
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL & .const' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
-    .const .LuaNumber cst1 = "3.14"
+    .const .LuaNumber cst1 = '3.14'
     print cst1
     print "\n"
     .local int bool1
-    bool1 = isa cst1, "LuaNumber"
+    bool1 = isa cst1, 'LuaNumber'
     print bool1
     print "\n"
 .end
@@ -214,12 +217,12 @@ CODE
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check tostring' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
-    .const .LuaNumber cst1 = "3.14"
+    .const .LuaNumber cst1 = '3.14'
     print cst1
     print "\n"
-    $P0 = cst1."tostring"()
+    $P0 = cst1.'tostring'()
     print $P0
     print "\n"
     $S0 = typeof $P0
@@ -233,12 +236,12 @@ string
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check tonumber' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
-    .const .LuaNumber cst1 = "3.14"
+    .const .LuaNumber cst1 = '3.14'
     print cst1
     print "\n"
-    $P0 = cst1."tonumber"()
+    $P0 = cst1.'tonumber'()
     print $P0
     print "\n"
     $S0 = typeof $P0
@@ -250,4 +253,11 @@ CODE
 3.14
 number
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

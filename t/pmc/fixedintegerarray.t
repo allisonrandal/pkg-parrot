@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/fixedintegerarray.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/fixedintegerarray.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 12;
+use Parrot::Test tests => 13;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/pmc/fixedintegerarray.t - FixedIntegerArray PMC
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/FixedIntegerArray.t
+    % prove t/pmc/FixedIntegerArray.t
 
 =head1 DESCRIPTION
 
@@ -24,61 +24,61 @@ out-of-bounds test. Checks INT and PMC keys.
 =cut
 
 my $fp_equality_macro = <<'ENDOFMACRO';
-.macro fp_eq (	J, K, L )
-	save	N0
-	save	N1
-	save	N2
+.macro fp_eq ( J, K, L )
+    save    N0
+    save    N1
+    save    N2
 
-	set	N0, .J
-	set	N1, .K
-	sub	N2, N1,N0
-	abs	N2, N2
-	gt	N2, 0.000001, .$FPEQNOK
+    set     N0, .J
+    set     N1, .K
+    sub     N2, N1,N0
+    abs     N2, N2
+    gt      N2, 0.000001, .$FPEQNOK
 
-	restore N2
-	restore	N1
-	restore	N0
-	branch	.L
+    restore N2
+    restore N1
+    restore N0
+    branch  .L
 .local $FPEQNOK:
-	restore N2
-	restore	N1
-	restore	N0
+    restore N2
+    restore N1
+    restore N0
 .endm
-.macro fp_ne(	J,K,L)
-	save	N0
-	save	N1
-	save	N2
+.macro fp_ne( J,K,L )
+    save    N0
+    save    N1
+    save    N2
 
-	set	N0, .J
-	set	N1, .K
-	sub	N2, N1,N0
-	abs	N2, N2
-	lt	N2, 0.000001, .$FPNENOK
+    set     N0, .J
+    set     N1, .K
+    sub     N2, N1,N0
+    abs     N2, N2
+    lt      N2, 0.000001, .$FPNENOK
 
-	restore	N2
-	restore	N1
-	restore	N0
-	branch	.L
+    restore N2
+    restore N1
+    restore N0
+    branch  .L
 .local $FPNENOK:
-	restore	N2
-	restore	N1
-	restore	N0
+    restore N2
+    restore N1
+    restore N0
 .endm
 ENDOFMACRO
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting array size");
-	new P0,.FixedIntegerArray
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting array size" );
+    new P0,.FixedIntegerArray
 
-	set I0,P0
-	eq I0,0,OK_1
-	print "not "
-OK_1:	print "ok 1\n"
+    set I0,P0
+    eq I0,0,OK_1
+    print "not "
+OK_1:    print "ok 1\n"
 
-	set P0,1
-	set I0,P0
-	eq I0,1,OK_2
-	print "not "
-OK_2:	print "ok 2\n"
+    set P0,1
+    set I0,P0
+    eq I0,1,OK_2
+    print "not "
+OK_2:    print "ok 2\n"
 
         end
 CODE
@@ -86,13 +86,13 @@ ok 1
 ok 2
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "Resetting array size (and getting an exception)");
-	new P0, .FixedIntegerArray
+pasm_error_output_like( <<'CODE', <<'OUTPUT', "Resetting array size (and getting an exception)" );
+    new P0, .FixedIntegerArray
 
-	set I0,P0
-	set P0,1
-	set P0,2
-	print "Should have gotten an exception\n "
+    set I0,P0
+    set P0,1
+    set P0,2
+    print "Should have gotten an exception\n "
 
 
         end
@@ -100,114 +100,113 @@ CODE
 /FixedIntegerArray: Can't resize!
 current instr\.:/
 OUTPUT
+
 #VIM's syntax highlighter needs this line
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting first element");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting first element" );
         new P0, .FixedIntegerArray
         set P0, 1
 
-	set P0[0],-7
-	set I0,P0[0]
-	eq I0,-7,OK_1
-	print "not "
-OK_1:	print "ok 1\n"
+    set P0[0],-7
+    set I0,P0[0]
+    eq I0,-7,OK_1
+    print "not "
+OK_1:    print "ok 1\n"
 
-	set P0[0],3.7
-	set N0,P0[0]
-	eq N0,3.0,OK_2
-	print "not "
-OK_2:	print "ok 2\n"
+    set P0[0],3.7
+    set N0,P0[0]
+    eq N0,3.0,OK_2
+    print "not "
+OK_2:    print "ok 2\n"
 
-	set P0[0],"17"
-	set S0,P0[0]
-	eq S0,"17",OK_3
-	print "not "
-OK_3:	print "ok 3\n"
+    set P0[0],"17"
+    set S0,P0[0]
+    eq S0,"17",OK_3
+    print "not "
+OK_3:    print "ok 3\n"
 
-	end
+    end
 CODE
 ok 1
 ok 2
 ok 3
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting second element");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting second element" );
         new P0, .FixedIntegerArray
         set P0, 2
 
-	set P0[1], -7
-	set I0, P0[1]
-	eq I0,-7,OK_1
-	print "not "
-OK_1:	print "ok 1\n"
+    set P0[1], -7
+    set I0, P0[1]
+    eq I0,-7,OK_1
+    print "not "
+OK_1:    print "ok 1\n"
 
-	set P0[1], 3.7
-	set N0, P0[1]
-	eq N0,3.0,OK_2
-	print "not "
-OK_2:	print "ok 2\n"
+    set P0[1], 3.7
+    set N0, P0[1]
+    eq N0,3.0,OK_2
+    print "not "
+OK_2:    print "ok 2\n"
 
-	set P0[1],"17"
-	set S0, P0[1]
-	eq S0,"17",OK_3
-	print "not "
-OK_3:	print "ok 3\n"
+    set P0[1],"17"
+    set S0, P0[1]
+    eq S0,"17",OK_3
+    print "not "
+OK_3:    print "ok 3\n"
 
-	end
+    end
 CODE
 ok 1
 ok 2
 ok 3
 OUTPUT
 
-
-pasm_output_like(<<'CODE', <<'OUTPUT', "Setting out-of-bounds elements");
+pasm_error_output_like( <<'CODE', <<'OUTPUT', "Setting out-of-bounds elements" );
         new P0, .FixedIntegerArray
         set P0, 1
 
-	set P0[1], -7
+    set P0[1], -7
 
-	end
+    end
 CODE
 /FixedIntegerArray: index out of bounds!
 current instr\.:/
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "Getting out-of-bounds elements");
+pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements" );
         new P0, .FixedIntegerArray
         set P0, 1
 
-	set I0, P0[1]
-	end
+    set I0, P0[1]
+    end
 CODE
 /FixedIntegerArray: index out of bounds!
 current instr\.:/
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "Getting out-of-bounds elements, I");
+pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements, I" );
         new P0, .FixedIntegerArray
         set P0, 1
-	set I1, 1
-	set I0, P0[I1]
-	end
+    set I1, 1
+    set I0, P0[I1]
+    end
 CODE
 /FixedIntegerArray: index out of bounds!
 current instr\.:/
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "Getting out-of-bounds elements, -I");
+pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements, -I" );
         new P0, .FixedIntegerArray
         set P0, 1
-	set I1, -1
-	set I0, P0[I1]
-	end
+    set I1, -1
+    set I0, P0[I1]
+    end
 CODE
 /FixedIntegerArray: index out of bounds!
 current instr\.:/
 OUTPUT
 
-
-pasm_output_is(<<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs");
+pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
 @{[ $fp_equality_macro ]}
      new P0, .FixedIntegerArray
      set P0, 3
@@ -244,7 +243,7 @@ ok 2
 ok 3
 OUTPUT
 
-pasm_output_is(<<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys");
+pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
 @{[ $fp_equality_macro ]}
      new P0, .FixedIntegerArray
      set P0, 1024
@@ -290,7 +289,7 @@ ok 3
 ok 4
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -313,7 +312,7 @@ CODE
 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "new_p_i_s");
+pasm_output_is( <<'CODE', <<'OUTPUT', "new_p_i_s" );
     new P0, .FixedIntegerArray, "(1, 17,42,0,77,0b111,    0Xff)"
     set I0, P0
     print I0
@@ -339,5 +338,26 @@ CODE
 ok
 OUTPUT
 
+pir_output_is( <<'CODE', <<'OUTPUT', "get_repr" );
+.sub main
+    new $P0, .FixedIntegerArray, "(1, 17,42,0,77,0b111,    0Xff)"
+    set $I0, $P0
+    print $I0
+    print "\n"
+    get_repr $S0, $P0
+    print $S0
+    print "\n"
+.end
+CODE
+7
+[ 1, 17, 42, 0, 77, 7, 255 ]
+OUTPUT
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

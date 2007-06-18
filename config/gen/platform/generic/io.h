@@ -1,3 +1,5 @@
+#ifndef PARROT_PLATFORM_GENERIC_IO_H_GUARD
+#define PARROT_PLATFORM_GENERIC_IO_H_GUARD
 /*
  * I/O:
  */
@@ -6,3 +8,12 @@
 #ifndef S_ISREG
 #  define S_ISREG(m) ((m & S_IFMT) == S_IFREG)
 #endif
+
+#endif /* PARROT_PLATFORM_GENERIC_IO_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

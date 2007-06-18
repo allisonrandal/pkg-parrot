@@ -1,0 +1,10 @@
+#! perl
+
+# $Id: /parrotcode/trunk/languages/lisp/t/harness 3466 2007-05-12T12:19:34.157429Z bernhard  $
+
+use strict;
+use warnings;
+
+use lib 'lib', '../../lib';
+
+use Parrot::Test::Harness language => 'lisp';

@@ -467,6 +467,7 @@ text_loop:
 
   unless fin goto text_loop
   .local pmc escape
+  load_bytecode 'Data/Escape.pir'
   escape = find_global "Data::Escape", "String"
   s = escape(s)
   s .= "\""
@@ -847,3 +848,9 @@ done:
   .return (args, pc, 1, 0)
 .end
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

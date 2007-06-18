@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/intlist.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/intlist.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/intlist.t - Integer Array
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/intlist.t
+    % prove t/pmc/intlist.t
 
 =head1 DESCRIPTION
 
@@ -23,7 +23,7 @@ F<t/dynpmc/sparse_perlarray.t>.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "creation");
+pasm_output_is( <<'CODE', <<'OUTPUT', "creation" );
         new P0, .IntList
         set I0, P0
         print "Created IntList with "
@@ -36,7 +36,7 @@ OUTPUT
 
 # This test just runs way too slowly with GC_DEBUG turned on, so lets
 # turn it off for make test runs.
-pasm_output_is(<<'CODE', <<'OUTPUT', "aerobics");
+pasm_output_is( <<'CODE', <<'OUTPUT', "aerobics" );
         new P0, .IntList
         set I10, 10000
 
@@ -168,232 +168,232 @@ CODE
 I need a shower.
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "direct access 2");
+pasm_output_is( <<'CODE', <<'OUTPUT', "direct access 2" );
         new P0, .IntList
-	set I10, 1100000
-	set I0, 1
+    set I10, 1100000
+    set I0, 1
 lp1:
-	add I1, I0, 5
-	set P0[I0], I1
-	add I3, I1, I0
-	push P0, I3
-	shl I0, I0, 1
-	inc I0
-	le I0, I10, lp1
+    add I1, I0, 5
+    set P0[I0], I1
+    add I3, I1, I0
+    push P0, I3
+    shl I0, I0, 1
+    inc I0
+    le I0, I10, lp1
 
-	set I0, 1
+    set I0, 1
 lp2:
-	add I1, I0, 5
-	# check at I0
-	set I2, P0[I0]
-	ne I2, I1, err
-	add I4, I0, 1
-	# and pushed value at I0+1
-	set I4, P0[I4]
-	add I3, I1, I0
-	ne I3, I4, err
+    add I1, I0, 5
+    # check at I0
+    set I2, P0[I0]
+    ne I2, I1, err
+    add I4, I0, 1
+    # and pushed value at I0+1
+    set I4, P0[I4]
+    add I3, I1, I0
+    ne I3, I4, err
 
-	shl I0, I0, 1
-	inc I0
-	le I0, I10, lp2
-	print "ok\n"
-	end
+    shl I0, I0, 1
+    inc I0
+    le I0, I10, lp2
+    print "ok\n"
+    end
 err:
-	print "not ok "
-	print I0
-	print " "
-	print I1
-	print " "
-	print I2
-	print " "
-	print I3
-	print " "
-	print I4
-	print " "
-	print I5
-	print " "
-	print I6
-	print " "
-	print I7
-	print "\n"
+    print "not ok "
+    print I0
+    print " "
+    print I1
+    print " "
+    print I2
+    print " "
+    print I3
+    print " "
+    print I4
+    print " "
+    print I5
+    print " "
+    print I6
+    print " "
+    print I7
+    print "\n"
 
-	end
+    end
 CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "sparse access");
+pasm_output_is( <<'CODE', <<'OUTPUT', "sparse access" );
         new P0, .IntList
-	set I10, 110000
-	set I0, 1
+    set I10, 110000
+    set I0, 1
 lp1:
-	add I1, I0, 5
-	set P0[I0], I1
-	add I3, I1, I0
-	push P0, I3
-	shl I0, I0, 1
-	inc I0
-	le I0, I10, lp1
+    add I1, I0, 5
+    set P0[I0], I1
+    add I3, I1, I0
+    push P0, I3
+    shl I0, I0, 1
+    inc I0
+    le I0, I10, lp1
 
-	set I0, 1
+    set I0, 1
 lp2:
-	add I1, I0, 5
-	# check at I0
-	set I2, P0[I0]
-	ne I2, I1, err
-	add I4, I0, 1
-	# and pushed value at I0+1
-	set I4, P0[I4]
-	add I3, I1, I0
-	ne I3, I4, err
+    add I1, I0, 5
+    # check at I0
+    set I2, P0[I0]
+    ne I2, I1, err
+    add I4, I0, 1
+    # and pushed value at I0+1
+    set I4, P0[I4]
+    add I3, I1, I0
+    ne I3, I4, err
 
-	shl I0, I0, 1
-	inc I0
-	le I0, I10, lp2
-	print "ok 1\n"
+    shl I0, I0, 1
+    inc I0
+    le I0, I10, lp2
+    print "ok 1\n"
 
-	# now repeat and fill some holes
+    # now repeat and fill some holes
 
-	set I0, 777
+    set I0, 777
 lp3:
-	add I1, I0, 5
-	set P0[I0], I1
-	add I0, I0, 666
-	le I0, I10, lp3
+    add I1, I0, 5
+    set P0[I0], I1
+    add I0, I0, 666
+    le I0, I10, lp3
 
-	set I0, 777
+    set I0, 777
 lp4:
-	add I1, I0, 5
-	# check at I0
-	set I2, P0[I0]
-	ne I2, I1, err
+    add I1, I0, 5
+    # check at I0
+    set I2, P0[I0]
+    ne I2, I1, err
 
-	add I0, I0, 666
-	le I0, I10, lp4
-	print "ok 2\n"
-	end
+    add I0, I0, 666
+    le I0, I10, lp4
+    print "ok 2\n"
+    end
 err:
-	print "not ok "
-	print I0
-	print " "
-	print I1
-	print " "
-	print I2
-	print " "
-	print I3
-	print " "
-	print I4
-	print "\n"
+    print "not ok "
+    print I0
+    print " "
+    print I1
+    print " "
+    print I2
+    print " "
+    print I3
+    print " "
+    print I4
+    print "\n"
 
-	end
+    end
 CODE
 ok 1
 ok 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "pop into sparse");
+pasm_output_is( <<'CODE', <<'OUTPUT', "pop into sparse" );
         new P0, .IntList
-	set I10, 100
-	set I0, 0
-	# push some values at start
+    set I10, 100
+    set I0, 0
+    # push some values at start
 lp1:
-	push P0, I0
-	inc I0
-	lt I0, I10, lp1
+    push P0, I0
+    inc I0
+    lt I0, I10, lp1
 
-	# create sparse
-	set I0, 100000
-	set I1, 1000
-	set P0[I0], I1
-	inc I1
+    # create sparse
+    set I0, 100000
+    set I1, 1000
+    set P0[I0], I1
+    inc I1
 lp2:
-	# push some values after hole
-	push P0, I1
-	inc I1
-	le I1, 1100, lp2
-	dec I1
+    # push some values after hole
+    push P0, I1
+    inc I1
+    le I1, 1100, lp2
+    dec I1
 
-	set I3, P0
+    set I3, P0
 lp3:
-	set I4, P0
-	ne I3, I4, err1
-	pop I2, P0
-	dec I3
-	ne I2, I1, err2
-	gt I3, I0, cont1
-	lt I3, I10, cont1
-	set I1, 0
+    set I4, P0
+    ne I3, I4, err1
+    pop I2, P0
+    dec I3
+    ne I2, I1, err2
+    gt I3, I0, cont1
+    lt I3, I10, cont1
+    set I1, 0
 
-	gt I3, I10, lp3
-	set I1, I10
+    gt I3, I10, lp3
+    set I1, I10
 
 cont1:
-	dec I1
-	eq I1, 0, ok
-	branch lp3
+    dec I1
+    eq I1, 0, ok
+    branch lp3
 ok:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 err1:   set S0, "len"
-	branch err
+    branch err
 err2:
-	set S0, "val"
+    set S0, "val"
 err:
-	print "nok "
-	print S0
-	print " "
-	print I0
-	print " "
-	print I1
-	print " "
-	print I2
-	print " "
-	print I3
-	print " "
-	print I4
-	end
+    print "nok "
+    print S0
+    print " "
+    print I0
+    print " "
+    print I1
+    print " "
+    print I2
+    print " "
+    print I3
+    print " "
+    print I4
+    end
 CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "clone");
+pasm_output_is( <<'CODE', <<'OUTPUT', "clone" );
         new P0, .IntList
-	set P0[0], 100
-	set P0[5000], 200
-	clone P1, P0
+    set P0[0], 100
+    set P0[5000], 200
+    clone P1, P0
 
-	set I0, P0[5000]
-	eq I0, 200, ok_1
-	print "nok 1 "
+    set I0, P0[5000]
+    eq I0, 200, ok_1
+    print "nok 1 "
 ok_1:
-	pop I0, P0
-	eq I0, 200, ok_2
-	print "nok 2 "
+    pop I0, P0
+    eq I0, 200, ok_2
+    print "nok 2 "
 ok_2:
-	set I0, P0
-	eq I0, 5000, ok_3
-	print "nok 3 "
+    set I0, P0
+    eq I0, 5000, ok_3
+    print "nok 3 "
 ok_3:
-	set I0, P1[5000]
-	eq I0, 200, ok_4
-	print "nok 4 "
+    set I0, P1[5000]
+    eq I0, 200, ok_4
+    print "nok 4 "
 ok_4:
-	pop I0, P1
-	eq I0, 200, ok_5
-	print "nok 5 "
+    pop I0, P1
+    eq I0, 200, ok_5
+    print "nok 5 "
 ok_5:
-	set I0, P1
-	eq I0, 5000, ok_6
-	print "nok 6 "
-	end
+    set I0, P1
+    eq I0, 5000, ok_6
+    print "nok 6 "
+    end
 ok_6:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "access via a PMC key");
+pasm_output_is( <<'CODE', <<'OUTPUT', "access via a PMC key" );
         new P0, .IntList
         new P1, .Key
         set I0, 0
@@ -439,7 +439,7 @@ ok 1
 ok 2
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -462,3 +462,9 @@ CODE
 0
 OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,7 +1,7 @@
 /* slice.h
  *  Copyright (C) 2001-2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/slice.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/slice.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the api header for slices.
  *  Data Structure and Algorithms:
@@ -10,12 +10,12 @@
  *  References:
  */
 
-#if !defined(PARROT_SLICE_H_GUARD)
+#ifndef PARROT_SLICE_H_GUARD
 #define PARROT_SLICE_H_GUARD
 
 #ifdef PARROT_IN_CORE
 
-typedef struct {
+typedef struct RUnion {
     INTVAL i;
     STRING *s;
 } RUnion;
@@ -37,10 +37,7 @@ typedef struct _parrot_range_t {
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

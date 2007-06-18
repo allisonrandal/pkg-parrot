@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/exec_save.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/exec_save.c 3335 2007-05-01T13:29:35.445138Z bernhard  $
 
 =head1 NAME
 
@@ -53,19 +53,19 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     struct nlist symlst;
 
     fp = fopen(file, "w");
-    
+
     header.a_midmag = 0x07018600;
     header.a_text = obj->text.size;
     header.a_data = obj->data.size;
     header.a_bss = obj->bss.size;
-    header.a_syms = obj->symbol_count * sizeof(struct nlist);
+    header.a_syms = obj->symbol_count * sizeof (struct nlist);
     header.a_entry = 0;
     header.a_trsize = obj->text_rellocation_count
-        * sizeof(struct relocation_info);
+        * sizeof (struct relocation_info);
     header.a_drsize = obj->data_rellocation_count
-        * sizeof(struct relocation_info);
-    save_struct(fp, &header, sizeof(struct exec));
-   /* Text */
+        * sizeof (struct relocation_info);
+    save_struct(fp, &header, sizeof (struct exec));
+    /* Text */
     for (i = 0; i < obj->text.size; i++)
         fprintf(fp, "%c", obj->text.code[i]);
     /* Data */
@@ -73,7 +73,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
         fprintf(fp, "%c", obj->data.code[i]);
     /* Text rellocations */
     for (i = obj->text_rellocation_count - 1; i >= 0; i--) {
-        bzero(&rellocation, sizeof(struct relocation_info));
+        bzero(&rellocation, sizeof (struct relocation_info));
         rellocation.r_address = obj->text_rellocation_table[i].offset;
         rellocation.r_symbolnum = obj->text_rellocation_table[i].symbol_number;
         switch (obj->text_rellocation_table[i].type) {
@@ -93,11 +93,11 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
                         obj->text_rellocation_table[i].type);
                 break;
         }
-        save_struct(fp, &rellocation, sizeof(struct relocation_info));
+        save_struct(fp, &rellocation, sizeof (struct relocation_info));
     }
     /* Symbol table */
     for (i = 0; i < obj->symbol_count; i++) {
-        bzero(&symlst, sizeof(struct nlist));
+        bzero(&symlst, sizeof (struct nlist));
         symlst.n_un.n_strx = obj->symbol_table[i].offset_list;
         switch (obj->symbol_table[i].type) {
             case STYPE_FUNC:
@@ -121,7 +121,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
                     obj->symbol_table[i].type);
                 break;
         }
-        save_struct(fp, &symlst, sizeof(struct nlist));
+        save_struct(fp, &symlst, sizeof (struct nlist));
     }
     /* String table size */
     save_int(fp, obj->symbol_list_size);
@@ -140,15 +140,15 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
 
 #ifdef EXEC_ELF
 
-# if PARROT_EXEC_OS_OPENBSD
-#  define R_386_32 1
-#  define R_386_PC32 2
-#  include <elf_abi.h>
-# else
-#  include <elf.h>
-# endif
+#  if PARROT_EXEC_OS_OPENBSD
+#    define R_386_32 1
+#    define R_386_PC32 2
+#    include <elf_abi.h>
+#  else
+#    include <elf.h>
+#  endif
 
-/* Add a section to the file 
+/* Add a section to the file
  *
  * n = Name
  * t = Type
@@ -160,7 +160,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
  * e = Entry size
  */
 #  define sh_add(n,t,f,s,l,i,a,e) { \
-    bzero(&sechdr, sizeof(Elf32_Ehdr)); \
+    bzero(&sechdr, sizeof (Elf32_Ehdr)); \
     sechdr.sh_name = shste - shst; \
     shste += sprintf(shste, "%s", n); \
     shste++; \
@@ -173,7 +173,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     sechdr.sh_info = i; \
     sechdr.sh_addralign = a; \
     sechdr.sh_entsize = e; \
-    save_struct(fp, &sechdr, sizeof(Elf32_Shdr)); \
+    save_struct(fp, &sechdr, sizeof (Elf32_Shdr)); \
     current_offset += s; \
     if (s % 4) \
       current_offset += (4 - s % 4); \
@@ -200,8 +200,8 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     char shst[SHSTRTABSIZE], *shste;
 
     fp = fopen(file, "w");
-    
-    bzero(&header, sizeof(Elf32_Ehdr));
+
+    bzero(&header, sizeof (Elf32_Ehdr));
     header.e_ident[0] = ELFMAG0;
     header.e_ident[1] = ELFMAG1;
     header.e_ident[2] = ELFMAG2;
@@ -238,25 +238,25 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     header.e_version = EV_CURRENT;
     header.e_entry = 0;
     header.e_phoff = 0;
-    header.e_shoff = sizeof(Elf32_Ehdr);
+    header.e_shoff = sizeof (Elf32_Ehdr);
     header.e_flags = 0;
-    header.e_ehsize = sizeof(Elf32_Ehdr);
+    header.e_ehsize = sizeof (Elf32_Ehdr);
     header.e_phentsize = 0;
     header.e_phnum = 0;
-    header.e_shentsize = sizeof(Elf32_Shdr);
+    header.e_shentsize = sizeof (Elf32_Shdr);
     header.e_shnum = NSECTIONS;
     header.e_shstrndx = 1;
 
-    save_struct(fp, &header, sizeof(Elf32_Ehdr));
+    save_struct(fp, &header, sizeof (Elf32_Ehdr));
 
-    current_offset = sizeof(Elf32_Ehdr) + NSECTIONS * sizeof(Elf32_Shdr);
+    current_offset = sizeof (Elf32_Ehdr) + NSECTIONS * sizeof (Elf32_Shdr);
 
     /* Sections */
     bzero(&shst, SHSTRTABSIZE);
     shste = shst + 1;
     /* NULL */
-    bzero(&sechdr, sizeof(Elf32_Ehdr));
-    save_struct(fp, &sechdr, sizeof(Elf32_Shdr));
+    bzero(&sechdr, sizeof (Elf32_Ehdr));
+    save_struct(fp, &sechdr, sizeof (Elf32_Shdr));
     /* Section Header String Table */
     sh_add(".shstrtab", SHT_STRTAB, 0, SHSTRTABSIZE, 0, 0, 1, 0);
     /* Text */
@@ -268,29 +268,29 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     /* Bss */
     sh_add(".bss", SHT_NOBITS, SHF_WRITE | SHF_ALLOC, obj->bss.size,
         0, 0, 4, 0);
-    /* 
+    /*
      * Text rellocation records.
      * Link must be the symtab section header index.
      * Info is the text section header index.
      */
 #  if PARROT_I386 || PARROT_ARM
     sh_add(".rel.text", SHT_REL, 0, obj->text_rellocation_count *
-        sizeof(Elf32_Rel), 6, 2, 4, sizeof(Elf32_Rel));
+        sizeof (Elf32_Rel), 6, 2, 4, sizeof (Elf32_Rel));
 #  endif
     /*
      * PPC requires rellocation structures with addends.
      */
 #  if PARROT_PPC
     sh_add(".rela.text", SHT_RELA, 0, obj->text_rellocation_count *
-        sizeof(Elf32_Rela), 6, 2, 4, sizeof(Elf32_Rela));
+        sizeof (Elf32_Rela), 6, 2, 4, sizeof (Elf32_Rela));
 #  endif
-    /* 
+    /*
      * Symbol table.
      * Link is the strtab section header index.
      * Info is the index of the first symbol in the symbol table.
      */
     sh_add(".symtab", SHT_SYMTAB, 0, (obj->symbol_count + PDFS) *
-        sizeof(Elf32_Sym), 7, PDFS - 1, 4, sizeof(Elf32_Sym));
+        sizeof (Elf32_Sym), 7, PDFS - 1, 4, sizeof (Elf32_Sym));
     /* String Table */
     obj->symbol_list_size += 1; /* Trailing \0 */
     sh_add(".strtab", SHT_STRTAB, 0, obj->symbol_list_size, 0, 0, 1, 0);
@@ -302,7 +302,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     /* Text rellocations */
     for (i = 0; i < obj->text_rellocation_count; i++) {
 #  if PARROT_I386
-        bzero(&rellocation, sizeof(Elf32_Rel));
+        bzero(&rellocation, sizeof (Elf32_Rel));
         rellocation.r_offset = obj->text_rellocation_table[i].offset;
         switch (obj->text_rellocation_table[i].type) {
             case RTYPE_FUNC:
@@ -324,10 +324,10 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
                         obj->text_rellocation_table[i].type);
                 break;
         }
-        save_struct(fp, &rellocation, sizeof(Elf32_Rel));
+        save_struct(fp, &rellocation, sizeof (Elf32_Rel));
 #  endif
 #  if PARROT_PPC
-        bzero(&rel_addend, sizeof(Elf32_Rela));
+        bzero(&rel_addend, sizeof (Elf32_Rela));
         rel_addend.r_offset = obj->text_rellocation_table[i].offset;
         switch (obj->text_rellocation_table[i].type) {
             case RTYPE_FUNC:
@@ -366,10 +366,10 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
                         obj->text_rellocation_table[i].type);
                 break;
         }
-        save_struct(fp, &rel_addend, sizeof(Elf32_Rela));
+        save_struct(fp, &rel_addend, sizeof (Elf32_Rela));
 #  endif
 #  if PARROT_ARM
-        bzero(&rellocation, sizeof(Elf32_Rel));
+        bzero(&rellocation, sizeof (Elf32_Rel));
         rellocation.r_offset = obj->text_rellocation_table[i].offset;
         switch (obj->text_rellocation_table[i].type) {
             case RTYPE_FUNC:
@@ -390,31 +390,31 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
                         obj->text_rellocation_table[i].type);
                 break;
         }
-        save_struct(fp, &rellocation, sizeof(Elf32_Rel));
+        save_struct(fp, &rellocation, sizeof (Elf32_Rel));
 #  endif
     }
     /* Symbol table */
     /* zero */
-    bzero(&symlst, sizeof(Elf32_Sym));
-    save_struct(fp, &symlst, sizeof(Elf32_Sym));
+    bzero(&symlst, sizeof (Elf32_Sym));
+    save_struct(fp, &symlst, sizeof (Elf32_Sym));
     /* Text */
-    bzero(&symlst, sizeof(Elf32_Sym));
+    bzero(&symlst, sizeof (Elf32_Sym));
     symlst.st_info = ELF32_ST_INFO(STB_LOCAL, STT_SECTION);
     symlst.st_shndx = 2;
-    save_struct(fp, &symlst, sizeof(Elf32_Sym));
+    save_struct(fp, &symlst, sizeof (Elf32_Sym));
     /* Data */
-    bzero(&symlst, sizeof(Elf32_Sym));
+    bzero(&symlst, sizeof (Elf32_Sym));
     symlst.st_info = ELF32_ST_INFO(STB_LOCAL, STT_SECTION);
     symlst.st_shndx = 3;
-    save_struct(fp, &symlst, sizeof(Elf32_Sym));
+    save_struct(fp, &symlst, sizeof (Elf32_Sym));
     /* Bss */
-    bzero(&symlst, sizeof(Elf32_Sym));
+    bzero(&symlst, sizeof (Elf32_Sym));
     symlst.st_info = ELF32_ST_INFO(STB_LOCAL, STT_SECTION);
     symlst.st_shndx = 4;
-    save_struct(fp, &symlst, sizeof(Elf32_Sym));
+    save_struct(fp, &symlst, sizeof (Elf32_Sym));
 
     for (i = 0; i < obj->symbol_count; i++) {
-        bzero(&symlst, sizeof(Elf32_Sym));
+        bzero(&symlst, sizeof (Elf32_Sym));
         symlst.st_name = obj->symbol_table[i].offset_list + 1;
         switch (obj->symbol_table[i].type) {
             case STYPE_FUNC:
@@ -442,7 +442,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
                     obj->symbol_table[i].type);
                 break;
         }
-        save_struct(fp, &symlst, sizeof(Elf32_Sym));
+        save_struct(fp, &symlst, sizeof (Elf32_Sym));
     }
     /* String table */
     save_zero(fp);
@@ -467,7 +467,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     int i;
 
     fp = fopen(file, "w");
-    
+
     fprintf(fp, "\xFE\xED\xFA\xCE"); /* Header for Darwin */
     save_int(fp, 0x12);
     save_int(fp, 0);
@@ -575,11 +575,11 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
 #ifdef EXEC_COFF
 
 /* File offsets */
-#define TEXT_CODE  0x14 + (3 * 0x28)
-#define DATA_CODE  TEXT_CODE + obj->text.size
-#define TEXT_RELOC DATA_CODE + obj->data.size
-#define DATA_RELOC TEXT_RELOC + (obj->text_rellocation_count * 0xA)
-#define SYMTAB     DATA_RELOC + (obj->data_rellocation_count * 0xA)
+#  define TEXT_CODE  0x14 + (3 * 0x28)
+#  define DATA_CODE  TEXT_CODE + obj->text.size
+#  define TEXT_RELOC DATA_CODE + obj->data.size
+#  define DATA_RELOC TEXT_RELOC + (obj->text_rellocation_count * 0xA)
+#  define SYMTAB     DATA_RELOC + (obj->data_rellocation_count * 0xA)
 
 void
 Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
@@ -604,7 +604,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     save_int(fp, TEXT_CODE);
     save_int(fp, TEXT_RELOC);
     save_int(fp, 0);
-    save_short(fp, obj->text_rellocation_count);
+    save_short(fp, (short)obj->text_rellocation_count);
     save_short(fp, 0);
     save_int(fp, 0x20);
 
@@ -615,7 +615,7 @@ Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file)
     save_int(fp, DATA_CODE);
     save_int(fp, DATA_RELOC);
     save_int(fp, 0);
-    save_short(fp, obj->data_rellocation_count);
+    save_short(fp, (short)obj->data_rellocation_count);
     save_short(fp, 0);
     save_int(fp, 0x40);
 
@@ -803,12 +803,10 @@ Initial version by Daniel Grunblatt on 2003.6.9.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

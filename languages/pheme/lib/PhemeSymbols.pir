@@ -312,6 +312,12 @@
 	.return( 1 )
 .end
 
+# XXX - a cheat for now
+.sub 'atom?' :multi( string )
+	.param pmc val
+	.return( 1 )
+.end
+
 .sub 'null?' :multi( [ 'Pheme'; 'Cons' ] )
 	.param pmc cons
 	.local int count
@@ -324,7 +330,7 @@
 	.return( 1 )
 .end
 
-.sub '+' :multi( float, float )
+.sub '+' :multi( _ )
 	.param float first
 	.param pmc   rest   :slurpy
 
@@ -348,7 +354,7 @@
 	.return( result )
 .end
 
-.sub '*' :multi( float, float )
+.sub '*' :multi( _ )
 	.param float first
 	.param pmc   rest   :slurpy
 
@@ -372,7 +378,7 @@
 	.return( result )
 .end
 
-.sub '-' :multi( float, float )
+.sub '-' :multi( _ )
 	.param float first
 	.param pmc   rest :slurpy
 
@@ -396,7 +402,7 @@
 	.return( result )
 .end
 
-.sub '/' :multi( float, float )
+.sub '/'
 	.param float l
 	.param float r
 
@@ -428,3 +434,9 @@
 	result = new cons_type
 	.return( result )
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

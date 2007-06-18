@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/timer.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/timer.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ typedef enum {
 /*
 
 =item C<static void
-add_timer(Interp* interpreter, PMC *pmc)>
+add_timer(Interp* interp, PMC *pmc)>
 
 Adds a new timer event to the event queue.
 
@@ -82,18 +82,19 @@ Adds a new timer event to the event queue.
 */
 
 static void
-add_timer(Interp* interpreter, PMC *pmc)
+add_timer(Interp* interp, PMC *pmc)
 {
-    parrot_timer_event *t = PMC_struct_val(pmc);
+    parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(pmc);
+
     if (!PMC_IS_NULL(t->sub))
-        Parrot_new_timer_event(interpreter, pmc, t->abs_time,
+        Parrot_new_timer_event(interp, pmc, t->abs_time,
             t->interval, t->repeat, t->sub, EVENT_TYPE_TIMER);
 }
 
 /*
 
 =item C<static void
-del_timer(Interp* interpreter, PMC *pmc)>
+del_timer(Interp* interp, PMC *pmc)>
 
 Deletes the timer event.
 
@@ -102,9 +103,9 @@ Deletes the timer event.
 */
 
 static void
-del_timer(Interp* interpreter, PMC *pmc)
+del_timer(Interp* interp, PMC *pmc)
 {
-   Parrot_del_timer_event(interpreter, pmc);
+   Parrot_del_timer_event(interp, pmc);
 }
 
 
@@ -125,9 +126,8 @@ Initializes the timer.
          * t->abs_time actually is relative, its converted to an
          * absolute time, when the timer is started
          */
-        parrot_timer_event *t =
-            mem_sys_allocate_zeroed(sizeof(parrot_timer_event));
-        PMC_struct_val(SELF) = t;
+        parrot_timer_event *t = mem_allocate_zeroed_typed(parrot_timer_event);
+        PMC_struct_val(SELF)  = t;
         PObj_active_destroy_SET(SELF);
         ++INTERP->arena_base->num_early_DOD_PMCs;
     }
@@ -186,7 +186,7 @@ Destroys the timer.
 */
 
     void destroy() {
-        parrot_timer_event *t = PMC_struct_val(SELF);
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
         del_timer(INTERP, SELF);
         mem_sys_free(t);
     }
@@ -202,13 +202,13 @@ Returns the timer info for C<key>.
 */
 
     INTVAL get_integer_keyed_int(INTVAL key) {
-        parrot_timer_event *t = PMC_struct_val(SELF);
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
 
-        switch(key) {
+        switch (key) {
             case PARROT_TIMER_SEC:
                 return (INTVAL)t->abs_time;
             case PARROT_TIMER_USEC:
-                return (INTVAL)( (t->abs_time - (INTVAL)t->abs_time) *1000000.0 );
+                return (INTVAL)((t->abs_time - (INTVAL)t->abs_time) *1000000.0);
             case PARROT_TIMER_REPEAT:
                 return (INTVAL) t->repeat;
             case PARROT_TIMER_RUNNING:
@@ -228,11 +228,13 @@ Returns the PMC associated with C<key>.
 */
 
     PMC* get_pmc_keyed_int(INTVAL key) {
-        parrot_timer_event *t = PMC_struct_val(SELF);
-        switch(key) {
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
+
+        switch (key) {
             case PARROT_TIMER_HANDLER:
                 return t->sub;
         }
+
         return PMCNULL;
     }
 
@@ -247,12 +249,13 @@ Returns the number associated with C<key>.
 */
 
     FLOATVAL get_number_keyed_int(INTVAL key) {
-        parrot_timer_event *t = PMC_struct_val(SELF);
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
 
-        switch(key) {
+        switch (key) {
             case PARROT_TIMER_NSEC:
                 return t->abs_time;
         }
+
         return -1.0;
     }
 
@@ -267,9 +270,9 @@ Sets the value associated with C<key> to C<value>.
 */
 
     void set_integer_keyed_int(INTVAL key, INTVAL value) {
-        parrot_timer_event *t = PMC_struct_val(SELF);
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
 
-        switch(key) {
+        switch (key) {
             case PARROT_TIMER_SEC:
                 t->abs_time = value;
                 break;
@@ -301,8 +304,9 @@ Sets the PMC associated with C<key> to C<*value>.
 */
 
     void set_pmc_keyed_int(INTVAL key, PMC* value) {
-        parrot_timer_event *t = PMC_struct_val(SELF);
-        switch(key) {
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
+
+        switch (key) {
             case PARROT_TIMER_HANDLER:
                 t->sub = value;
                 break;
@@ -311,7 +315,7 @@ Sets the PMC associated with C<key> to C<*value>.
 
 /*
 
-=item C<void *invoke(void *next)>
+=item C<opcode_t *invoke(void *next)>
 
 Adds the timer to the event queue.
 
@@ -319,9 +323,9 @@ Adds the timer to the event queue.
 
 */
 
-    void* invoke(void *next) {
+    opcode_t* invoke(void *next) {
         add_timer(INTERP, SELF);
-        return next;
+        return (opcode_t *)next;
     }
 
 /*
@@ -335,9 +339,9 @@ Sets the floating-point value associated with C<key> to C<value>.
 */
 
     void set_number_keyed_int(INTVAL key, FLOATVAL value) {
-        parrot_timer_event *t = PMC_struct_val(SELF);
+        parrot_timer_event *t = (parrot_timer_event *)PMC_struct_val(SELF);
 
-        switch(key) {
+        switch (key) {
             case PARROT_TIMER_NSEC:
                 t->abs_time = value;
                 break;
@@ -363,10 +367,7 @@ Switch to events 2004.01.07
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

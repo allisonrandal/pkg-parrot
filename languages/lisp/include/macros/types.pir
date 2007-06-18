@@ -1,3 +1,4 @@
+# $Id: /parrotcode/trunk/languages/lisp/include/macros/types.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
 
 =head1 .CONS(R,A,B) 
 
@@ -111,9 +112,9 @@ Create a new function object with label L, placing the result in F.
   .sym pmc _func
 
    .F = new "LispFunction"
-   newsub _func, .Sub, .L
+   # VALID_IN_PARROT_0_2_0 newsub _func, .Sub, .L
 
-   setattribute .F, "LispFunction\0body", _func
+   # VALID_IN_PARROT_0_2_0 setattribute .F, "LispFunction\0body", .L
 .endm
 
 =head1 .MACRO(F,L)
@@ -131,3 +132,9 @@ Create a new macro object with label L, placing the result in F.
    setattribute .F, "LispMacro\0body", _func
 .endm
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

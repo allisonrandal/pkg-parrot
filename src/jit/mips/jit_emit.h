@@ -2,7 +2,7 @@
  * jit_emit.h
  *
  * SVN Info
- *    $Id: /local/src/jit/mips/jit_emit.h 11903 2006-03-14T20:49:11.779219Z bernhard  $
+ *    $Id: /parrotcode/trunk/src/jit/mips/jit_emit.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
  * Overview:
  *    MIPS JIT
  * History:
@@ -11,7 +11,7 @@
  * References:
  */
 
-#if !defined(PARROT_MIPS_JIT_EMIT_H_GUARD)
+#ifndef PARROT_MIPS_JIT_EMIT_H_GUARD
 #define PARROT_MIPS_JIT_EMIT_H_GUARD
 
 #  define BASE_REG s0
@@ -67,8 +67,8 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_r(pc, opcode, rs, rt, rd, re, funct) \
-    *(int *)((pc += 4) - 4) = \
-      opcode << 26 | rs << 21 | rt << 16 | rd << 11 | re << 6 | funct;
+      *(int *)((pc += 4) - 4) = \
+        opcode << 26 | rs << 21 | rt << 16 | rd << 11 | re << 6 | funct;
 
 /*
  * I type
@@ -81,8 +81,8 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_i(pc, opcode, rs, rt, offset) \
-    *(int *)((pc += 4) - 4) = \
-      opcode << 26 | rs << 21 | rt << 16 | ((long)offset & 0xffff);
+      *(int *)((pc += 4) - 4) = \
+        opcode << 26 | rs << 21 | rt << 16 | ((long)offset & 0xffff);
 
 /*
  * J type
@@ -95,7 +95,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_j(pc, opcode, target) \
-    *(int *)((pc += 4) - 4) = opcode << 26 | target;
+      *(int *)((pc += 4) - 4) = opcode << 26 | target;
 
 #  define emit_nop(pc) emit_j(pc, 0, 0)
 
@@ -106,16 +106,16 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_lw(pc, rt, offset, rs) \
-    emit_i(pc, 0x23, rs, rt, offset)
+      emit_i(pc, 0x23, rs, rt, offset)
 
 #  define emit_sw(pc, rt, offset, rs) \
-    emit_i(pc, 0x2b, rs, rt, offset)
+      emit_i(pc, 0x2b, rs, rt, offset)
 
 #  define emit_sw_r(pc, reg, addr) \
-    emit_sw(pc, reg, addr, BASE_REG)
+      emit_sw(pc, reg, addr, BASE_REG)
 
 #  define emit_lw_r(pc, reg, addr) \
-    emit_lw(pc, reg, addr, BASE_REG)
+      emit_lw(pc, reg, addr, BASE_REG)
 
 /*  LUI
  *
@@ -124,7 +124,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_lui(pc, rt, imm) \
-    emit_i(pc, 0xf, 0, rt, imm)
+      emit_i(pc, 0xf, 0, rt, imm)
 
 /*  AND
  *
@@ -133,7 +133,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_and(pc, rd, rs, rt) \
-    emit_r(pc, 0, rs, rt, rd, 0, 0x24)
+      emit_r(pc, 0, rs, rt, rd, 0, 0x24)
 
 /*  OR
  *
@@ -142,7 +142,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_or(pc, rd, rs, rt) \
-    emit_r(pc, 0, rs, rt, rd, 0, 0x25)
+      emit_r(pc, 0, rs, rt, rd, 0, 0x25)
 
 /*  XOR
  *
@@ -151,7 +151,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_xor(pc, rd, rs, rt) \
-    emit_r(pc, 0, rs, rt, rd, 0, 0x26)
+      emit_r(pc, 0, rs, rt, rd, 0, 0x26)
 
 
 /*  ORI
@@ -161,7 +161,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_ori(pc, rs, rt, imm) \
-    emit_i(pc, 0xd, rs, rt, imm)
+      emit_i(pc, 0xd, rs, rt, imm)
 
 /*  ADD
  *
@@ -170,7 +170,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_add(pc, rd, rs, rt) \
-    emit_r(pc, 0, rs, rt, rd, 0, 0x20)
+      emit_r(pc, 0, rs, rt, rd, 0, 0x20)
 
 /*  ADDIU
  *
@@ -179,7 +179,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_addiu(pc, rs, rt, imm) \
-    emit_i(pc, 9, rs, rt, imm)
+      emit_i(pc, 9, rs, rt, imm)
 
 /*  SUB
  *
@@ -188,7 +188,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_sub(pc, rd, rs, rt) \
-    emit_r(pc, 0, rs, rt, rd, 0, 0x22)
+      emit_r(pc, 0, rs, rt, rd, 0, 0x22)
 
 /*  MULT
  *
@@ -197,7 +197,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_mult(pc, rs, rt) \
-    emit_r(pc, 0, rs, rt, 0, 0, 0x18)
+      emit_r(pc, 0, rs, rt, 0, 0, 0x18)
 
 /*  MFLO
  *
@@ -205,7 +205,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_mflo(pc, rd) \
-    emit_r(pc, 0, 0, 0, rd, 0, 0x12)
+      emit_r(pc, 0, 0, 0, rd, 0, 0x12)
 
 /*  MUL (Pseudo instruction)
  *
@@ -214,8 +214,8 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_mul(pc, rd, rs, rt) \
-    emit_mult(pc, rs, rt); \
-    emit_mflo(pc, rd)
+      emit_mult(pc, rs, rt); \
+      emit_mflo(pc, rd)
 
 /*  DIV
  *
@@ -225,7 +225,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_divi(pc, rs, rt) \
-    emit_r(pc, 0, rs, rt, 0, 0, 0x1a)
+      emit_r(pc, 0, rs, rt, 0, 0, 0x1a)
 
 /*  DIV (Pseudo instruction)
  *
@@ -234,8 +234,8 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_div(pc, rd, rs, rt) \
-    emit_divi(pc, rs, rt); \
-    emit_mflo(pc, rd)
+      emit_divi(pc, rs, rt); \
+      emit_mflo(pc, rd)
 
 /*  JR
  *
@@ -244,7 +244,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_jr(pc, rs) \
-    emit_r(pc, 0, rs, 0, 0, 0, 8)
+      emit_r(pc, 0, rs, 0, 0, 0, 8)
 
 /*  JAL
  *
@@ -252,7 +252,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_jal(pc) \
-    emit_j(pc, 3, 0)
+      emit_j(pc, 3, 0)
 
 /*  JALR
  *
@@ -260,7 +260,7 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_jalr(pc, rs, rd) \
-    emit_r(pc, 0, rs,  0, rd, 0, 9)
+      emit_r(pc, 0, rs,  0, rd, 0, 9)
 
 /*  MOVE
  *
@@ -269,26 +269,26 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
  */
 
 #  define emit_move(pc, rs, rd) \
-    emit_r(pc, 0, rs, 0, rd, 0, 0x21)
+      emit_r(pc, 0, rs, 0, rd, 0, 0x21)
 
 #  define emit_mov(pc, rd, rs) \
-    emit_move(pc, rs, rd)
+      emit_move(pc, rs, rd)
 
 /*  NEG
  *  rd = -rt
  */
 
 #  define emit_negu(pc, rd, rt) \
-    emit_r(pc, 0, 0, rt, rd, 0, 0x23)
+      emit_r(pc, 0, 0, rt, rd, 0, 0x23)
 
 #  define emit_neg(pc, rd, rt) \
-    emit_r(pc, 0, 0, rt, rd, 0, 0x22)
+      emit_r(pc, 0, 0, rt, rd, 0, 0x22)
 
 /* Load a constant */
 
 #  define emit_imm32(pc, rd, imm) \
-    emit_lui(pc, rd, ((long)imm >> 16)); \
-    emit_ori(pc, rd, rd, imm)
+      emit_lui(pc, rd, ((long)imm >> 16)); \
+      emit_ori(pc, rd, rd, imm)
 
 
 static void
@@ -328,7 +328,7 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
  */
 
 #  define emit_beq(pc, rs, rt, imm) \
-    emit_if(pc, 4, rs, rt, imm)
+      emit_if(pc, 4, rs, rt, imm)
 
 /*  BNE
  *
@@ -337,7 +337,7 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
  */
 
 #  define emit_bne(pc, rs, rt, imm) \
-    emit_if(pc, 5, rs, rt, imm)
+      emit_if(pc, 5, rs, rt, imm)
 
 /*  BNEZ
  *
@@ -346,7 +346,7 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
  */
 
 #  define emit_bnez(pc, rs, imm) \
-    emit_if(pc, 1, rs, 2, imm)
+      emit_if(pc, 1, rs, 2, imm)
 
 
 /*  BEGZ
@@ -356,7 +356,7 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
  */
 
 #  define emit_begz(pc, rs, imm) \
-    emit_if(pc, 1, rs, 1, imm)
+      emit_if(pc, 1, rs, 1, imm)
 
 /*  SLT
  *
@@ -365,13 +365,13 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
  */
 
 #  define emit_slt(pc, rs, rt, rd) \
-    emit_r(pc, 0, rs, rt, rd, 0, 0x2a)
+      emit_r(pc, 0, rs, rt, rd, 0, 0x2a)
 
 /*  GE (Pseudo-op)
  */
 #  define emit_ge(pc, rs, rt, imm) \
-    emit_slt(pc, rs, rt, at); \
-    emit_beqz(pc, at, imm)
+      emit_slt(pc, rs, rt, at); \
+      emit_beqz(pc, at, imm)
 
 #endif /* JIT_EMIT */
 
@@ -379,19 +379,19 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
 
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-                 Interp * interpreter)
+                 Interp *interp)
 {
     emit_addiu(jit_info->native_ptr, sp, sp, -40);
     emit_sw(jit_info->native_ptr, ra, 32, sp);
     emit_sw(jit_info->native_ptr, fp, 28, sp);
     emit_mov(jit_info->native_ptr, s0, a0);
     emit_imm32(jit_info->native_ptr, s1, jit_info->arena.op_map);
-    emit_imm32(jit_info->native_ptr, s2, interpreter->code->base.data);
+    emit_imm32(jit_info->native_ptr, s2, interp->code->base.data);
 }
 
 void
 Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-    Interp * interpreter)
+    Interp * interp)
 {
     Parrot_jit_fixup_t *fixup;
     char *fixup_ptr;
@@ -420,76 +420,74 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
 }
 
 void
-Parrot_jit_normal_op(Parrot_jit_info_t *jit_info, Interp * interpreter)
+Parrot_jit_normal_op(Parrot_jit_info_t *jit_info, Interp *interp)
 {
 }
 
 void
-Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info, Interp * interpreter)
+Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info, Interp *interp)
 {
 }
 
 /*void
-Parrot_jit_restart_op(Parrot_jit_info_t *jit_info, Interp * interpreter)
+Parrot_jit_restart_op(Parrot_jit_info_t *jit_info, Interp *interp)
 {
 }*/
 
 /* move reg to mem (i.e. intreg) */
 void
-Parrot_jit_emit_mov_mr_offs(Interp * interpreter, int base, size_t offs, int reg)
+Parrot_jit_emit_mov_mr_offs(Interp *interp, int base, size_t offs, int reg)
 {
 }
 
 /* move mem (i.e. intreg) to reg */
 void
-Parrot_jit_emit_mov_rm_offs(Interp * interpreter, int reg, int base, size_t offs)
+Parrot_jit_emit_mov_rm_offs(Interp *interp, int reg, int base, size_t offs)
 {
 }
 
 void
-Parrot_jit_emit_mov_mr_n_offs(Interp * interpreter, int base, size_t offs, int reg)
+Parrot_jit_emit_mov_mr_n_offs(Interp *interp, int base, size_t offs, int reg)
 {
 }
 
 void
-Parrot_jit_emit_mov_rm_n_offs(Interp * interpreter, int reg, int base, size_t offs)
+Parrot_jit_emit_mov_rm_n_offs(Interp *interp, int reg, int base, size_t offs)
 {
 }
 
 
-# endif /* JIT_EMIT == 2 */
+#endif /* JIT_EMIT == 2 */
 
 #if JIT_EMIT == 0
 
 #  define REQUIRES_CONSTANT_POOL 0
 #  define INT_REGISTERS_TO_MAP 24
 
-#ifndef JIT_IMCC
+#  ifndef JIT_IMCC
 static char intval_map[INT_REGISTERS_TO_MAP] =
     { v0, v1, a0, a1, a2, a3, t0, t1, t2, t3, t4, t5, t6, t7, s0, s1, s2, s3,
       s4, s5, s6, s7, t8, t9 };
 
-#  include <asm/cachectl.h>
+#    include <asm/cachectl.h>
 
 extern int cacheflush(char* addr, int nbytes, int cache);
-static void sync_cache (void *_start, void *_end);
+static void sync_cache(void *_start, void *_end);
 
 static void
-sync_cache (void *_start, void *_end)
+sync_cache(void *_start, void *_end)
 {
     cacheflush((char*)_start, (int)((char *)_end - (char *)_start), BCACHE);
 }
 
-#endif /* JIT_IMCC */
+#  endif /* JIT_IMCC */
 #endif /* JIT_EMIT == 0 */
 #endif /* PARROT_MIPS_JIT_EMIT_H_GUARD */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

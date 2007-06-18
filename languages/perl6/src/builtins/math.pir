@@ -1,4 +1,4 @@
-## $Id: /local/languages/perl6/src/builtins/math.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+## $Id: /parrotcode/trunk/languages/perl6/src/builtins/math.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
 
 =head1 NAME
 
@@ -593,5 +593,8 @@ The other alternative would be to remove the default. --law]
 
 =cut
 
-
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

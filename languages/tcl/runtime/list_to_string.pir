@@ -13,22 +13,22 @@
   .local int i
   i = 0
 
+  .local string str
 loop:
   if i >= elems goto done
   $P0 = list[i]
-  $S0 = $P0
-  $S0 = clone $S0
+  str = $P0
 
 check_list:
   .local int count
   .local int chars
-  chars = length $S0
+  chars = length str
   if chars == 0 goto empty
   count = 0
   $I0   = 0
 check_list_loop:
   if $I0 >= chars goto check_list_done
-  $I1 = ord $S0, $I0
+  $I1 = ord str, $I0
   if $I1 == 123 goto left_brace
   if $I1 == 125 goto right_brace
 check_list_next:
@@ -44,64 +44,74 @@ right_brace:
 check_list_done:
   if count != 0 goto escape
 
-  # {}'d constructs
-check_spaces:
-  $I0 = find_cclass .CCLASS_WHITESPACE, $S0, 0, chars
-  # Unlike any other 'find a character' opcode, this returns
-  # length instead of -1 upon failure.
-  if $I0 != chars goto quote
-
 check_left_bracket:
-  $I0 = index $S0, '['
+  $I0 = index str, '['
+  if $I0 != -1 goto quote
+
+check_hash:
+  if i > 0 goto check_dollar_sign # only check hashes on first elem.
+  $I0 = index str, '#'
   if $I0 != -1 goto quote
 
 check_dollar_sign:
-  $I0 = index $S0, '$'
+  $I0 = index str, '$'
   if $I0 != -1 goto quote
 
 check_semi_colon:
-  $I0 = index $S0, ';'
+  $I0 = index str, ';'
   if $I0 != -1 goto quote
 
   # \'d constructs
 check_right_bracket:
-  $I0 = index $S0, ']'
+  $I0 = index str, ']'
   if $I0 != -1 goto escape
 
 check_backslash:
-  $I0 = index $S0, "\\"
+  $I0 = index str, '\'
   if $I0 != -1 goto escape
 
-check_quotes:
-  $I0 = index $S0, '"'
-  if $I0 != -1 goto escape
+
+  # {}'d constructs
+check_spaces:
+  $I0 = find_cclass .CCLASS_WHITESPACE, str, 0, chars
+  # Unlike any other 'find a character' opcode, this returns
+  # length instead of -1 upon failure.
+  if $I0 != chars goto quote
 
   goto append_elem
 
 escape:
   $P0 = new .String
-  $P0 = $S0
+  $P0 = str
   
-  $P0.'replace'("\\", "\\\\")
-  $P0.'replace'('}', "\\}")
-  $P0.'replace'('{', "\\{")
-  $P0.'replace'(' ', "\\ ")
-  $P0.'replace'(']', "\\]")
-  $P0.'replace'('"', "\\\"")
+  $P0.'replace'('\', '\\')
+  $P0.'replace'("\t", '\t')
+  $P0.'replace'("\f", '\f')
+  $P0.'replace'("\n", '\n')
+  $P0.'replace'("\r", '\r')
+  $P0.'replace'("\v", '\v')
+  $P0.'replace'(';', '\;')
+  $P0.'replace'('$', '\$')
+  $P0.'replace'('}', '\}')
+  $P0.'replace'('{', '\{')
+  $P0.'replace'(' ', '\ ')
+  $P0.'replace'('[', '\[')
+  $P0.'replace'(']', '\]')
+  $P0.'replace'('"', '\"')
   
-  $S0 = $P0 
+  str = $P0 
   goto append_elem
 
 empty:
-  $S0 = '{}'
+  str = '{}'
   goto append_elem
 
 quote:
-  $S0 = '{' . $S0
-  $S0 = $S0 . '}'
+  str = '{' . str
+  str = str . '}'
 
 append_elem:
-  retval .= $S0
+  retval .= str
   retval .= ' '
   inc i
   goto loop
@@ -115,3 +125,37 @@ done:
 goback:
   .return(retval)
 .end
+
+=head __dictToString
+
+Given a dictionary, return a string representing it.
+
+=cut
+
+.sub __dictToString
+  .param pmc dict
+  
+  .local pmc list
+  list = new .ResizablePMCArray
+
+  .local pmc iterator
+  iterator = new .Iterator, dict
+
+loop:
+  unless iterator goto done
+  $S1 = shift iterator
+  push list, $S1
+  $S2 = dict[$S1] 
+  push list, $S2
+  goto loop
+done:
+
+  $S1 = __listToString(list)
+  .return ($S1)
+.end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

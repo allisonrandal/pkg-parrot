@@ -1,5 +1,5 @@
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/lib/Parrot/Test/Harness.pm 12836 2006-05-30T13:40:58.862833Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/lib/Parrot/Test/Harness.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -55,22 +55,19 @@ use Carp;
 use File::Spec;
 use Test::Harness;
 
-sub set_flags
-{
-    my %options           = @_;
+sub set_flags {
+    my %options = @_;
     $ENV{HARNESS_VERBOSE} = 1;
-    $ENV{HARNESS_PERL}  ||= '../../parrot ./' . $options{compiler}
+    $ENV{HARNESS_PERL} ||= '../../parrot ./' . $options{compiler}
         if $options{compiler};
 
     # Per Leo on 18APR2005, run the test suite with --gc-debug
-    if ( $ENV{TEST_PROG_ARGS} && $ENV{TEST_PROG_ARGS} !~ /\b--gc-debug\b/ )
-    {
+    if ( $ENV{TEST_PROG_ARGS} && $ENV{TEST_PROG_ARGS} !~ /\b--gc-debug\b/ ) {
         $ENV{TEST_PROG_ARGS} .= " --gc-debug";
     }
 }
 
-sub get_files
-{
+sub get_files {
     my %options = @_;
 
 =pod
@@ -83,48 +80,59 @@ If called with no args, run the suite.
 
 =cut
 
-    if ( grep { /^--files$/ } @{ $options{arguments} } )
-    {
+    if ( grep { /^--files$/ } @{ $options{arguments} } ) {
+
         # --files indicates the 'languages/t/harness' wants a list of test files
-        my $dir   = File::Spec->catfile( $options{language}, 't' );
-        my @files = ( glob( File::Spec->catfile( $dir, '*.t' ) ),
-                      glob( File::Spec->catfile( $dir, '*/*.t' ) )
-                    );
+        my $dir = File::Spec->catfile( $options{language}, 't' );
+        my @files = (
+            glob( File::Spec->catfile( $dir, '*.t' ) ),
+            glob( File::Spec->catfile( $dir, '*/*.t' ) )
+        );
         print join( "\n", @files );
         print "\n" if @files;
         exit;
     }
-    elsif (@{ $options{arguments} })
-    {
+    elsif ( @{ $options{arguments} } ) {
+
         # Someone specified tests for me to run.
         return grep { -f $_ } @{ $options{arguments} };
     }
-    else
-    {
+    else {
+
         # I must be running out of languages/$language
         # You may want a deeper search than this.
-        return ( glob( File::Spec->catfile( 't', '*.t' ) ),
-                 glob( File::Spec->catfile( 't', '*/*.t' ) )
-               );
+        return (
+            glob( File::Spec->catfile( 't', '*.t' ) ),
+            glob( File::Spec->catfile( 't', '*/*.t' ) )
+        );
     }
 }
 
-sub import
-{
-    my ($class, %options) = @_;
+sub import {
+    my ( $class, %options ) = @_;
 
     croak "Need a language\n" unless $options{language};
 
     $options{arguments} ||= \@ARGV;
 
-    exit unless my @files = get_files( %options );
+    exit unless my @files = get_files(%options);
 
-    set_flags( %options );
+    set_flags(%options);
 
     local $Test::Harness::Switches = '';
+
+    no warnings 'redefine';
+    local *Test::Harness::Straps::_INC2PERL5LIB = sub { @INC }
+        if $options{compiler};
+
     runtests(@files);
 }
 
 1;
 
-# vim: expandtab sw=4
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

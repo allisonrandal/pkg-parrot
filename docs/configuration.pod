@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /local/docs/configuration.pod 12839 2006-05-30T14:34:31.126984Z coke  $
+# Copyright (C) 2004-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/configuration.pod 3376 2007-05-04T02:14:52.617268Z jkeenan  $
 
 =pod
 
@@ -21,11 +21,12 @@ name is the same as the basename of the step's F<.pm> file; for example, if
 F<foo.pm> uses F<bar_c.in>, F<bar_c.in> should be in a directory called F<foo>;
 the full path might be F<config/auto/foo/bar_c.in>.
 
-Generally, when adding a new test you should add a new step unless a test
-I<clearly> belongs in a current step. For example, if we added a new
-user-configurable type called C<FOOVAL>, you should add the test for its size
-in F<config/auto/sizes.pm>; however, if you were testing what dynaloading
-capabilities are available, you should create a new step.
+Generally, when adding a new component to the configuration process you should
+add a new step unless that component I<clearly> belongs in a current step. For
+example, if you added a new user-configurable type called C<FOOVAL>, you would
+add the code used to determine its size in F<config/auto/sizes.pm>.  However,
+if you were determining what dynaloading capabilities are available, you would
+create a new step.
 
 =head2 Initialization Steps
 
@@ -84,19 +85,19 @@ automatic step.
 
 =head2 Configuring Configuration
 
-The configuration system gets it's own configuration data from and is invoked
-via the F<Configure.pl> script.  The system is invoked by instantiating a
-L<Parrot::Configure> object, registers one or more steps with that object, and
-then call it's L<Parrot::Configure/runsteps> method.
+The configuration system gets its own configuration data from, and is invoked
+via, the F<Configure.pl> script.  The system is invoked by instantiating a
+L<Parrot::Configure> object, registering one or more steps with that object, 
+and then calling its L<Parrot::Configure/runsteps> method.
 
 =head2 Adding New Steps
 
 New steps should be added in one of the three folders mentioned above.
 
-All steps are really classes; they each exist in a unique namespace.  The
-namespace used depends on the tests relative path in the source tree minus sans
-the F<config> prefix.  For example, the step F<config/init/defaults.pm> uses
-the C<init::defaults> namespace.
+All steps are really classes; each exists in a unique namespace.  The
+namespace used depends on the step's relative path in the source tree sans the
+F<config> prefix.  For example, the step F<config/init/defaults.pm> uses the
+C<init::defaults> namespace.
 
 They should define the following methods:
 
@@ -157,9 +158,9 @@ and there will be a means of passing additional parameters.
 =back
 
 The configuration system won't execute your step by default unless it's
-specifically told to. To do this, edit the F<Configure.pl> files.  Steps are
-run in the order in which that are registered with the L<Parrot::Configure>
-object.
+specifically told to. To do this, edit F<lib/Parrot/Configure/Step/List.pm>.
+Steps are run in the order in which that are registered with the
+L<Parrot::Configure> object.
 
 Various utility functions for configuration steps are provided by the
 L<Parrot::Configure::Step> module.
@@ -191,8 +192,24 @@ the name and the value. If the value is omitted, it's assumed to be 1. The
 options C<--help> and C<--version> are built in to Configure; any others are
 defined by steps.
 
-If you add a new option, don't forget to add it to this documentation and the
-C<--help> listing in F<Configure.pl>.
+Command-line arguments are now processed by C<process_options()>, a subroutine
+exported by L<Parrot::Configure::Options>.  If you add a new option, don't
+forget to add it to this documentation and to two locations in
+F<lib/Parrot/Configure/Options.pm>:
+
+=over 4
+
+=item *
+
+the list of valid command-line arguments in
+C<Parrot::Configure::Options::get_valid_options()>; and
+
+=item *
+
+the description of command-line arguments found in
+C<Parrot::Configure::Options::print_help()>.
+
+=back
 
 Arguments passed to F<Configure.pl> are held in a L<Parrot::Configure::Data>
 object stored inside the L<Parrot::Configure> object.  The options data object
@@ -207,7 +224,7 @@ The second step is F<config/init/defaults.pm>, which sets up some defaults in a
 L<Parrot::Configure::Data> object contained by the main L<Parrot::Configure>
 object.  It can be accessed via the L<Parrot::Configure/data>method.  You get
 and set configuration system's data by interacting with this object.  Some of
-it's methods are summarized below.
+its methods are summarized below.
 
 =over 4
 
@@ -266,7 +283,8 @@ mangled by Joshua Hoblitt.
 
 =head1 SEE ALSO
 
-L<Parrot::Configure>, L<Parrot::Configure::Data>, L<Parrot::Configure::Step>, L<Parrot::Configure::Step::Base>
+L<Parrot::Configure>, L<Parrot::Configure::Data>,
+L<Parrot::Configure::Step>, L<Parrot::Configure::Step::Base>
 
 =cut
 

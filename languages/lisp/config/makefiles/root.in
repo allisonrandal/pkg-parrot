@@ -1,17 +1,23 @@
+# $Id: /parrotcode/trunk/languages/lisp/config/makefiles/root.in 3466 2007-05-12T12:19:34.157429Z bernhard  $
+
+# Setup some commands
 RM_F = @rm_f@
 PERL = @perl@
-PARROT = ..@slash@..@slash@parrot@exe@
+PARROT = ../../parrot@exe@
 
 all: build
 
 test: build
-	$(PARROT) -r lisp.pbc t/test.l
+	$(PERL) -Ilib -I../../lib t/harness
 
 build: lisp.pir
 	$(PARROT) -o lisp.pbc lisp.pir
 
-clean:
+clean: testclean
 	$(RM_F) core "*.pbc" "*~"
+
+testclean:
+	$(RM_F) t/*.out t/*.l
 
 realclean: clean
 	$(RM_F) Makefile

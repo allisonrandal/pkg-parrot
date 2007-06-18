@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/benchmarks/fib.pl 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/local/examples/benchmarks/fib.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -18,11 +18,12 @@ unspecified).
 =cut
 
 use strict;
+use warnings;
 
 sub fib {
-	my $n = shift;
-	return $n if ($n < 2);
-	return fib($n-1) + fib($n-2);
+    my $n = shift;
+    return $n if ( $n < 2 );
+    return fib( $n - 1 ) + fib( $n - 2 );
 }
 my $N = shift || 28;
 
@@ -33,3 +34,10 @@ print "fib($N) = ", fib($N), "\n";
 F<examples/benchmarks/fib.pir>.
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

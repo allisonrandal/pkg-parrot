@@ -1,13 +1,13 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/op/lexicals.t 13008 2006-06-23T15:26:10.151998Z particle  $
+#!perl
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/op/lexicals.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 42;
 
 =head1 NAME
 
@@ -23,8 +23,7 @@ Tests various lexical scratchpad operations, as described in PDD20.
 
 =cut
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (\'$a\') succeeds');
+pasm_output_is( <<'CODE', <<'OUTPUT', '.lex parsing - PASM (\'$a\') succeeds' );
 .pcc_sub main:
     .lex "$a", P0
     print "ok\n"
@@ -33,7 +32,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PIR');
+pir_output_is( <<'CODE', <<'OUTPUT', '.lex parsing - PIR' );
 .sub main
     .lex "$a", P0
     print "ok\n"
@@ -42,7 +41,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PIR, $P');
+pir_output_is( <<'CODE', <<'OUTPUT', '.lex parsing - PIR, $P' );
 .sub main :main
     .lex '$a', $P0
     null $P0
@@ -52,7 +51,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PIR, local var');
+pir_output_is( <<'CODE', <<'OUTPUT', '.lex parsing - PIR, local var' );
 .sub main :main
     .local pmc a
     .lex "$a", a
@@ -62,7 +61,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', '.lex - same PMC twice (PASM)');
+pasm_output_is( <<'CODE', <<'OUTPUT', '.lex - same PMC twice (PASM)' );
 .pcc_sub main:
     .lex '$a', P0
     .lex '$b', P0
@@ -78,7 +77,7 @@ ok
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', '.lex - same PMC twice fails (.local pmc ab)');
+pir_output_is( <<'CODE', <<'OUTPUT', '.lex - same PMC twice fails (.local pmc ab)' );
 .sub main :main
     .local pmc ab, a, b
     .lex '$a', ab
@@ -95,7 +94,17 @@ ok
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'api parsing');
+pir_output_is( <<'CODE', <<'OUTPUT', '.lex - same lex twice' );
+.sub main
+ .lex '$a', $P0
+ .lex '$a', $P1
+ say "ok"
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'api parsing' );
 .sub main :main
     .lex 'a', $P0
     store_lex 'a', $P0
@@ -113,7 +122,7 @@ ok
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexinfo');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexinfo' );
 .sub main :main
     .lex '$a', $P0
     .lex '$b', $P9
@@ -121,16 +130,17 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexinfo');
     interpinfo $P1, .INTERPINFO_CURRENT_SUB
     $P2 = $P1.'get_lexinfo'()
     $S0 = typeof $P2
-    print_item $S0
+    print $S0
+    print ' '
     $I0 = elements $P2
-    print_item $I0
+    print $I0
     print_newline
 .end
 CODE
 LexInfo 2
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexinfo - no lexicals');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexinfo - no lexicals' );
 .sub main :main
 .include "interpinfo.pasm"
     interpinfo $P1, .INTERPINFO_CURRENT_SUB
@@ -145,7 +155,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexpad - no pad');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexpad - no pad' );
 .sub main :main
     .local pmc pad, interp
     interp = getinterp
@@ -161,7 +171,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexpad - no pad inherited in coro');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexpad - no pad inherited in coro' );
 .sub main
      coro()
 .end
@@ -180,7 +190,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexpad - set var via pad');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexpad - set var via pad' );
 .sub main
     .local pmc pad, interp
     interp = getinterp
@@ -203,7 +213,7 @@ ok
 13013
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexpad - set two vars via pad (2 lex -> 2 pmc)');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexpad - set two vars via pad (2 lex -> 2 pmc)' );
 .sub main
     .lex '$a', P0
     .lex '$b', P2
@@ -233,7 +243,7 @@ ok
 42
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'synopsis example');
+pir_output_is( <<'CODE', <<'OUTPUT', 'synopsis example' );
 .sub main
     .lex '$a', P0
     P1 = new .Integer
@@ -247,7 +257,7 @@ CODE
 13013
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', ':lex parsing - PASM');
+pasm_output_is( <<'CODE', <<'OUTPUT', ':lex parsing - PASM' );
 .pcc_sub main:
     print "ok\n"
     end
@@ -257,7 +267,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', ':lex parsing - PIR');
+pir_output_is( <<'CODE', <<'OUTPUT', ':lex parsing - PIR' );
 .sub main
     print "ok\n"
 .end
@@ -267,7 +277,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', ':outer parsing - PASM');
+pasm_output_is( <<'CODE', <<'OUTPUT', ':outer parsing - PASM' );
 .pcc_sub main:
     print "ok\n"
     end
@@ -277,7 +287,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', ':outer parsing - PIR');
+pir_output_is( <<'CODE', <<'OUTPUT', ':outer parsing - PIR' );
 .sub main
     print "ok\n"
 .end
@@ -287,7 +297,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', ':outer parsing - ident');
+pir_output_is( <<'CODE', <<'OUTPUT', ':outer parsing - ident' );
 .sub main
     .local pmc a
     .lex "$a", a
@@ -300,7 +310,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_like(<<'CODE', <<'OUTPUT', ':outer parsing - missing :outer');
+pir_error_output_like( <<'CODE', <<'OUTPUT', ':outer parsing - missing :outer' );
 .sub main
     print "ok\n"
 .end
@@ -310,7 +320,7 @@ CODE
 /Undefined :outer sub 'oops'\./
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_lexinfo from pad');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexinfo from pad' );
 .sub main
     .lex '$a', P0
     .local pmc pad, interp, info
@@ -332,7 +342,7 @@ ok
 LexInfo
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', ':lex parsing - verify info and pad');
+pir_output_is( <<'CODE', <<'OUTPUT', ':lex parsing - verify info and pad' );
 .sub main
     foo()
     print "ok\n"
@@ -361,7 +371,7 @@ LexInfo
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_outer' );
 .sub "main"
     foo()
 .end
@@ -373,10 +383,10 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer');
     print "\n"
 .end
 CODE
-parrot;main
+main
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer 2');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_outer 2' );
 .sub "main"
     foo()
 .end
@@ -394,11 +404,11 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer 2');
     print "\n"
 .end
 CODE
-parrot;foo
-parrot;main
+foo
+main
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer via interp');
+pir_output_is( <<'CODE', <<'OUTPUT', 'get_outer via interp' );
 .sub "main"
     .const .Sub foo = "foo"
     .local pmc foo_cl
@@ -434,14 +444,14 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer via interp');
     pad['a'] = $P0
 .end
 CODE
-parrot;foo
-parrot;foo
-parrot;main
-parrot;main
+foo
+foo
+main
+main
 I messed with your var
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'closure 3');
+pir_output_is( <<'CODE', <<'OUTPUT', 'closure 3' );
 # sub foo {
 #     my ($n) = @_;
 #     sub {$n += shift}
@@ -498,7 +508,7 @@ CODE
 27
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'closure 4');
+pir_output_is( <<'CODE', <<'OUTPUT', 'closure 4' );
 # code by Piers Cawley
 =pod
 
@@ -639,7 +649,7 @@ CODE
 3 * 5 == 15!
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'closure 5');
+pir_output_is( <<'CODE', <<'OUTPUT', 'closure 5' );
 # FIXME - we need to detect the destruction of the P registers
 # associated with the Contexts for the calls of xyzzy and plugh.
 # Otherwise, this test is just a repeat of others
@@ -685,7 +695,7 @@ bar: 2
 bar: 3
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'closure 6');
+pir_output_is( <<'CODE', <<'OUTPUT', 'closure 6' );
 # Leo's version of xyzzy original by particle, p5 by chip     #'
 
 .sub main :main
@@ -745,7 +755,7 @@ bar: 13014
 bar: 46
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'closure 7 - evaled');
+pir_output_is( <<'CODE', <<'OUTPUT', 'closure 7 - evaled' );
 .sub main :main
     .local pmc f,g
     f = xyzzy(42)
@@ -808,7 +818,7 @@ bar: 13014
 bar: 46
 OUTPUT
 
-pir_output_like(<<'CODE', <<'OUT', 'closure 8');
+pir_error_output_like( <<'CODE', <<'OUT', 'closure 8' );
 
 # p6 example from pmichaud
 # { my $x = 5;  { print $x; my $x = 4; print $x; } }
@@ -835,7 +845,7 @@ CODE
 /Null PMC access/
 OUT
 
-pir_output_like(<<'CODE', <<'OUTPUT', 'get non existing');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'get non existing' );
 .sub "main" :main
     .lex 'a', $P0
     foo()
@@ -852,7 +862,7 @@ CODE
 /Lexical 'no_such' not found/
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'find_name on lexicals');
+pir_output_is( <<'CODE', <<'OUTPUT', 'find_name on lexicals' );
 .sub main :main
     .lex 'a', $P0
     $P1 = new .String
@@ -869,7 +879,7 @@ ok
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'multiple names');
+pir_output_is( <<'CODE', <<'OUTPUT', 'multiple names' );
 .sub main :main
     .lex 'a', $P0
     .lex 'b', $P0
@@ -891,7 +901,7 @@ ok
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 1');
+pir_output_is( <<'CODE', <<'OUTPUT', 'package-scoped closure 1' );
 # my $x;
 # sub f{$x++}
 # f()
@@ -924,7 +934,7 @@ CODE
 36
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 2');
+pir_output_is( <<'CODE', <<'OUTPUT', 'package-scoped closure 2' );
 # my $x;
 # sub f{$x++}
 # sub g{f();f()}
@@ -964,7 +974,7 @@ CODE
 -26
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 3 - autoclose');
+pir_output_is( <<'CODE', <<'OUTPUT', 'package-scoped closure 3 - autoclose' );
 #     sub f ($x) { 
 #         sub g ($y) { $x + $y }; g($x); 
 #     } 
@@ -1001,7 +1011,7 @@ CODE
 110
 OUTPUT
 
-pir_output_like(<<'CODE', <<'OUTPUT', 'package-scoped closure 4 - autoclose');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'package-scoped closure 4 - autoclose' );
 #     sub f ($x) { 
 #         sub g () { print $x }; 
 #     } 
@@ -1025,7 +1035,7 @@ CODE
 /Null PMC access/
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 5 - autoclose');
+pir_output_is( <<'CODE', <<'OUTPUT', 'package-scoped closure 5 - autoclose' );
 #     sub f ($x) { 
 #         sub g () { print "$x\n" }; 
 #     } 
@@ -1051,7 +1061,7 @@ CODE
 10
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 6 - autoclose');
+pir_output_is( <<'CODE', <<'OUTPUT', 'package-scoped closure 6 - autoclose' );
 #     sub f ($x) { 
 #         sub g () { print "$x\n" }; 
 #     } 
@@ -1079,7 +1089,7 @@ CODE
 20
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'find_lex: (Perl6 OUTER::)', todo => 'not yet implemented');
+pir_output_is( <<'CODE', <<'OUTPUT', 'find_lex: (Perl6 OUTER::)', todo => 'not yet implemented' );
 .sub main :main
 	.lex '$x', 42
 	get_outer()
@@ -1094,5 +1104,9 @@ CODE
 42
 OUTPUT
 
-## remember to change the number of tests :-)
-BEGIN { plan tests => 41; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2005, The Perl Foundation.
-$Id: /local/src/nci_test.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/nci_test.c 3300 2007-04-24T21:18:22.142154Z mdiep  $
 
 =head1 NAME
 
@@ -36,16 +36,16 @@ The name of a test function is usually 'nci_<signature>'. E.g. the function
 
 /* Declarations of structs */
 
-typedef struct {
+typedef struct Nested {
     int y;
 } Nested;
 
-typedef struct {
+typedef struct Outer {
     int x;
     Nested *nested;
 } Outer;
 
-typedef struct {
+typedef struct Rect_Like {
     int x, y;
     int w, h;
 } Rect_Like;
@@ -162,7 +162,7 @@ nci_fff(float l1, float l2) {
 }
 
 int
-nci_i( void ) {
+nci_i(void) {
    return nci_dlvar_int;
 }
 
@@ -490,7 +490,7 @@ int int_cb_D4 = -55555;
 void
 nci_cb_D4(cb_D4_func times_ten, void* user_data) {
     int cnt;
-    for ( cnt = 0; cnt < 9; cnt++ )
+    for (cnt = 0; cnt < 9; cnt++)
     {
         (times_ten)(user_data, &int_cb_D4);
         int_cb_D4++;
@@ -499,13 +499,13 @@ nci_cb_D4(cb_D4_func times_ten, void* user_data) {
     return;
 }
 
-void 
+void
 nci_pip(int count, Rect_Like *rects) {
     int i;
-    printf( "Count: %d\n", count);
+    printf("Count: %d\n", count);
     for (i = 0; i < 4; ++i)
         printf("X: %d\nY: %d\nW: %d\nH: %d\n",
-        rects[i].x, rects[i].y, rects[i].w, rects[i].h );
+        rects[i].x, rects[i].y, rects[i].w, rects[i].h);
 }
 
 int
@@ -513,7 +513,7 @@ nci_i33(int *double_me, int *triple_me) {
     *double_me *= 2;
     *triple_me *= 3;
 
-    return( *double_me + *triple_me );
+    return (*double_me + *triple_me);
 }
 
 void
@@ -551,12 +551,12 @@ nci_pii(int fac1, int fac2) {
 
 
 void
-nci_v( ) {
+nci_v() {
     nci_dlvar_int *= 10;
 }
 
 void
-nci_vv( void ) {
+nci_vv(void) {
     nci_dlvar_int *= 3;
 }
 
@@ -590,12 +590,10 @@ main() {
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

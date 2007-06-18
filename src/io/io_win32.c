@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/io/io_win32.c 13784 2006-08-01T17:54:04.760248Z chip  $
+$Id: /parrotcode/trunk/src/io/io_win32.c 3493 2007-05-15T16:08:45.769357Z particle  $
 
 =head1 NAME
 
@@ -50,20 +50,20 @@ ParrotIOLayer pio_win32_layer = {
  * file.
  */
 
-static INTVAL    PIO_win32_init(theINTERP, ParrotIOLayer *layer);
-static ParrotIO *PIO_win32_open(theINTERP, ParrotIOLayer *layer,
+static INTVAL    PIO_win32_init(Interp *interp, ParrotIOLayer *layer);
+static ParrotIO *PIO_win32_open(Interp *interp, ParrotIOLayer *layer,
                                 const char *spath, INTVAL flags);
-static ParrotIO *PIO_win32_fdopen(theINTERP, ParrotIOLayer *layer,
+static ParrotIO *PIO_win32_fdopen(Interp *interp, ParrotIOLayer *layer,
                                   PIOHANDLE fd, INTVAL flags);
-static INTVAL PIO_win32_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io);
-static INTVAL PIO_win32_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io);
-static size_t    PIO_win32_read(theINTERP, ParrotIOLayer *layer,
+static INTVAL PIO_win32_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io);
+static INTVAL PIO_win32_flush(Interp *interp, ParrotIOLayer *layer, ParrotIO *io);
+static size_t    PIO_win32_read(Interp *interp, ParrotIOLayer *layer,
                                 ParrotIO *io, STRING **);
-static size_t    PIO_win32_write(theINTERP, ParrotIOLayer *layer,
+static size_t    PIO_win32_write(Interp *interp, ParrotIOLayer *layer,
                                  ParrotIO *io, STRING *);
-static PIOOFF_T  PIO_win32_seek(theINTERP, ParrotIOLayer *l, ParrotIO *io,
+static PIOOFF_T  PIO_win32_seek(Interp *interp, ParrotIOLayer *l, ParrotIO *io,
                                 PIOOFF_T off, INTVAL whence);
-static PIOOFF_T  PIO_win32_tell(theINTERP, ParrotIOLayer *l, ParrotIO *io);
+static PIOOFF_T  PIO_win32_tell(Interp *interp, ParrotIOLayer *l, ParrotIO *io);
 static INTVAL    PIO_win32_isatty(PIOHANDLE fd);
 
 /*
@@ -85,7 +85,7 @@ flags_to_win32(INTVAL flags, DWORD * fdwAccess,
     static DWORD dwDefaultShareMode;
     if (!dwDefaultShareMode) {
         OSVERSIONINFO osvi;
-        osvi.dwOSVersionInfoSize = sizeof(osvi);
+        osvi.dwOSVersionInfoSize = sizeof (osvi);
         GetVersionEx(&osvi);
         if (osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
             dwDefaultShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
@@ -125,7 +125,7 @@ flags_to_win32(INTVAL flags, DWORD * fdwAccess,
 /*
 
 =item C<static INTVAL
-PIO_win32_init(theINTERP, ParrotIOLayer *layer)>
+PIO_win32_init(Interp *interp, ParrotIOLayer *layer)>
 
 Sets up the standard C<std*> IO handles.
 
@@ -134,45 +134,46 @@ Sets up the standard C<std*> IO handles.
 */
 
 static INTVAL
-PIO_win32_init(theINTERP, ParrotIOLayer *layer)
+PIO_win32_init(Interp *interp, ParrotIOLayer *layer)
 {
     HANDLE h;
-#if PARROT_NET_DEVEL
+#  if PARROT_NET_DEVEL
     struct WSAData sockinfo;
     int ret;
-#endif
+#  endif
 
     if ((h = GetStdHandle(STD_INPUT_HANDLE)) != INVALID_HANDLE_VALUE) {
-        PIO_STDIN(interpreter) = new_io_pmc(interpreter,
-            PIO_win32_fdopen(interpreter, layer, h, PIO_F_READ));
+        PIO_STDIN(interp) = new_io_pmc(interp,
+            PIO_win32_fdopen(interp, layer, h, PIO_F_READ));
     }
     else {
         return -1;
     }
     if ((h = GetStdHandle(STD_OUTPUT_HANDLE)) != INVALID_HANDLE_VALUE) {
-        PIO_STDOUT(interpreter) = new_io_pmc(interpreter,
-            PIO_win32_fdopen(interpreter, layer, h, PIO_F_WRITE));
+        PIO_STDOUT(interp) = new_io_pmc(interp,
+            PIO_win32_fdopen(interp, layer, h, PIO_F_WRITE));
     }
     else {
         return -2;
     }
     if ((h = GetStdHandle(STD_ERROR_HANDLE)) != INVALID_HANDLE_VALUE) {
-        PIO_STDERR(interpreter) = new_io_pmc(interpreter,
-            PIO_win32_fdopen(interpreter, layer, h, PIO_F_WRITE));
+        PIO_STDERR(interp) = new_io_pmc(interp,
+            PIO_win32_fdopen(interp, layer, h, PIO_F_WRITE));
     }
     else {
         return -3;
     }
-#if PARROT_NET_DEVEL
+#  if PARROT_NET_DEVEL
     /* Start Winsock
      * no idea where or whether destroy it
      */
-    ret = WSAStartup (2, &sockinfo);
+    ret = WSAStartup(2, &sockinfo);
     if (ret != 0) {
-        fprintf ( stderr, "WSAStartup failed!!\n ErrorCode=%i\n\n", WSAGetLastError());
+        fprintf(stderr, "WSAStartup failed!!\n ErrorCode=%i\n\n",
+                  WSAGetLastError());
         return -4;
     }
-#endif
+#  endif
     return 0;
 }
 
@@ -198,7 +199,7 @@ PIO_win32_getblksize(PIOHANDLE fd)
 /*
 
 =item C<static ParrotIO *
-PIO_win32_open(theINTERP, ParrotIOLayer *layer,
+PIO_win32_open(Interp *interp, ParrotIOLayer *layer,
                const char *spath, INTVAL flags)>
 
 Calls C<CreateFile()> to open C<*spath> with the Win32 translation of
@@ -209,7 +210,7 @@ C<flags>.
 */
 
 static ParrotIO *
-PIO_win32_open(theINTERP, ParrotIOLayer *layer,
+PIO_win32_open(Interp *interp, ParrotIOLayer *layer,
                const char *spath, INTVAL flags)
 {
     ParrotIO *io;
@@ -221,7 +222,7 @@ PIO_win32_open(theINTERP, ParrotIOLayer *layer,
 
     type = PIO_TYPE_FILE;
 #  if 0
-    if ((Interp_flags_TEST(interpreter, PARROT_DEBUG_FLAG)) != 0) {
+    if ((Interp_flags_TEST(interp, PARROT_DEBUG_FLAG)) != 0) {
         fprintf(stderr, "PIO_win32_open: %s\n", spath);
     }
 #  endif
@@ -236,9 +237,10 @@ PIO_win32_open(theINTERP, ParrotIOLayer *layer,
     /* Only files for now */
     flags |= PIO_F_FILE;
 
-    fd = CreateFile(spath, fAcc, fShare, NULL, fCreat, FILE_ATTRIBUTE_NORMAL, NULL);
+    fd = CreateFile(spath, fAcc, fShare, NULL, fCreat,
+                    FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd != INVALID_HANDLE_VALUE) {
-        io = PIO_new(interpreter, type, flags, 0);
+        io = PIO_new(interp, type, flags, 0);
         io->fd = fd;
         return io;
     }
@@ -255,7 +257,7 @@ PIO_win32_open(theINTERP, ParrotIOLayer *layer,
 /*
 
 =item C<static ParrotIO *
-PIO_win32_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)>
+PIO_win32_fdopen(Interp *interp, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)>
 
 Returns a new C<ParrotIO> with C<fd> as its file descriptor.
 
@@ -264,7 +266,7 @@ Returns a new C<ParrotIO> with C<fd> as its file descriptor.
 */
 
 static ParrotIO *
-PIO_win32_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)
+PIO_win32_fdopen(Interp *interp, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)
 {
     ParrotIO *io;
     INTVAL mode;
@@ -278,7 +280,7 @@ PIO_win32_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)
     /* fdopened files are always shared */
     flags |= PIO_F_SHARED;
 
-    io = PIO_new(interpreter, PIO_F_FILE, flags, mode);
+    io = PIO_new(interp, PIO_F_FILE, flags, mode);
     io->fd = fd;
     return io;
 }
@@ -286,7 +288,7 @@ PIO_win32_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)
 /*
 
 =item C<static INTVAL
-PIO_win32_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_win32_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Calls C<CloseHandle()> to close C<*io>'s file descriptor.
 
@@ -295,9 +297,9 @@ Calls C<CloseHandle()> to close C<*io>'s file descriptor.
 */
 
 static INTVAL
-PIO_win32_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_win32_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
     if (io && io->fd != INVALID_HANDLE_VALUE) {
@@ -330,7 +332,7 @@ PIO_win32_isatty(PIOHANDLE fd)
 /*
 
 =item C<static INTVAL
-PIO_win32_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_win32_flush(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Calls C<FlushFileBuffers()> to flush C<*io>'s file descriptor.
 
@@ -339,17 +341,20 @@ Calls C<FlushFileBuffers()> to flush C<*io>'s file descriptor.
 */
 
 static INTVAL
-PIO_win32_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_win32_flush(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
     /*
      * FlushFileBuffers won't work for console handles. From the MS help file:
      *
-     * Windows NT: The function fails if hFile is a handle to console output. That is because console output is not buffered.
-     * The function returns FALSE, and GetLastError returns ERROR_INVALID_HANDLE.
+     * Windows NT: The function fails if hFile is a handle to console
+     * output. That is because console output is not buffered.  The
+     * function returns FALSE, and GetLastError returns
+     * ERROR_INVALID_HANDLE.
      *
-     * Windows 9x: The function does nothing if hFile is a handle to console output. That is because console output is not buffered.
+     * Windows 9x: The function does nothing if hFile is a handle to
+     * console output. That is because console output is not buffered.
      * The function returns TRUE, but it does nothing.
      */
     return FlushFileBuffers(io->fd);
@@ -358,7 +363,7 @@ PIO_win32_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
 /*
 
 =item C<static size_t
-PIO_win32_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_win32_read(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
                STRING ** buf)>
 
 Calls C<ReadFile()> to read up to C<len> bytes from C<*io>'s file
@@ -369,7 +374,7 @@ descriptor to the memory starting at C<buffer>.
 */
 
 static size_t
-PIO_win32_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING **buf)
+PIO_win32_read(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING **buf)
 {
     DWORD countread;
     void *buffer;
@@ -378,7 +383,7 @@ PIO_win32_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING **buf)
 
     UNUSED(layer);
 
-    s = PIO_make_io_string(interpreter, buf, 2048);
+    s = PIO_make_io_string(interp, buf, 2048);
     len = s->bufused;
     buffer = s->strstart;
 
@@ -402,7 +407,7 @@ PIO_win32_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING **buf)
 /*
 
 =item C<static size_t
-PIO_win32_write(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_win32_write(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
                 STRING *)>
 
 Calls C<WriteFile()> to write C<len> bytes from the memory starting at
@@ -413,13 +418,13 @@ C<buffer> to C<*io>'s file descriptor.
 */
 
 static size_t
-PIO_win32_write(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *s)
+PIO_win32_write(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING *s)
 {
     DWORD countwrote = 0;
     void *buffer = s->strstart;
     size_t len = s->bufused;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
     /* do it by hand, Win32 hasn't any specific flag */
@@ -446,7 +451,7 @@ PIO_win32_write(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *s)
 /*
 
 =item C<static PIOOFF_T
-PIO_win32_seek(theINTERP, ParrotIOLayer *l, ParrotIO *io,
+PIO_win32_seek(Interp *interp, ParrotIOLayer *l, ParrotIO *io,
                PIOOFF_T off, INTVAL whence)>
 
 Hard seek.
@@ -460,12 +465,12 @@ C<whence>.
 */
 
 static PIOOFF_T
-PIO_win32_seek(theINTERP, ParrotIOLayer *l, ParrotIO *io,
+PIO_win32_seek(Interp *interp, ParrotIOLayer *l, ParrotIO *io,
                PIOOFF_T off, INTVAL whence)
 {
     LARGE_INTEGER offset;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(l);
 
     offset.QuadPart = off;
@@ -483,7 +488,7 @@ PIO_win32_seek(theINTERP, ParrotIOLayer *l, ParrotIO *io,
 /*
 
 =item C<static PIOOFF_T
-PIO_win32_tell(theINTERP, ParrotIOLayer *l, ParrotIO *io)>
+PIO_win32_tell(Interp *interp, ParrotIOLayer *l, ParrotIO *io)>
 
 Returns the current read/write position of C<*io>'s file descriptor.
 
@@ -492,11 +497,11 @@ Returns the current read/write position of C<*io>'s file descriptor.
 */
 
 static PIOOFF_T
-PIO_win32_tell(theINTERP, ParrotIOLayer *l, ParrotIO *io)
+PIO_win32_tell(Interp *interp, ParrotIOLayer *l, ParrotIO *io)
 {
     LARGE_INTEGER p;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(l);
 
     p.QuadPart = piooffsetzero;
@@ -510,7 +515,7 @@ PIO_win32_tell(theINTERP, ParrotIOLayer *l, ParrotIO *io)
 /*
 
 =item C<STRING *
-PIO_sockaddr_in(theINTERP, unsigned short port, STRING * addr)>
+PIO_sockaddr_in(Interp *interp, unsigned short port, STRING * addr)>
 
 C<PIO_sockaddr_in()> is not part of the layer and so must be C<extern>.
 
@@ -522,15 +527,16 @@ C<inet_aton()>, etc.) and take this out of platform specific compilation
 */
 
 STRING *
-PIO_sockaddr_in(theINTERP, unsigned short port, STRING * addr)
+PIO_sockaddr_in(Interp *interp, unsigned short port, STRING * addr)
 {
     struct sockaddr_in sa;
     struct hostent *he;
+    char * s = string_to_cstring(interp, addr);
     /* Hard coded to IPv4 for now */
     int family = AF_INET;
+    UNUSED(family);
 
-    char * s = string_to_cstring(interpreter, addr);
-    sa.sin_addr.s_addr = inet_addr (s);
+    sa.sin_addr.s_addr = inet_addr(s);
     /* Maybe it is a hostname, try to lookup */
     /* XXX Check PIO option before doing a name lookup,
      * it may have been toggled off.
@@ -542,24 +548,24 @@ PIO_sockaddr_in(theINTERP, unsigned short port, STRING * addr)
         fprintf(stderr, "gethostbyname failure [%s]\n", s);
         return NULL;
     }
-    memcpy((char*)&sa.sin_addr, he->h_addr, sizeof(sa.sin_addr));
+    memcpy((char*)&sa.sin_addr, he->h_addr, sizeof (sa.sin_addr));
 
     string_cstring_free(s);
 
     sa.sin_port = htons(port);
 
-    return string_make(interpreter, &sa, sizeof(struct sockaddr), "binary", 0);
+    return string_make(interp, (char *)&sa, sizeof (struct sockaddr), "binary", 0);
 }
 
 
-/*******************************************************************************************************/
+/****************************************************************************/
 
-#if PARROT_NET_DEVEL
+#  if PARROT_NET_DEVEL
 
 /*
 
 =item C<static ParrotIO *
-PIO_win32_socket(theINTERP, ParrotIOLayer *layer, int fam, int type, int proto)>
+PIO_win32_socket(Interp *interp, ParrotIOLayer *layer, int fam, int type, int proto)>
 
 Uses C<socket()> to create a socket with the specified address family,
 socket type and protocol number.
@@ -569,12 +575,13 @@ socket type and protocol number.
 */
 
 static ParrotIO *
-PIO_win32_socket(theINTERP, ParrotIOLayer *layer, int fam, int type, int proto)
+PIO_win32_socket(Interp *interp, ParrotIOLayer *layer, int fam, int type, int proto)
 {
     int sock;
     ParrotIO * io;
+    UNUSED(layer);
     if ((sock = socket(fam, type, proto)) >= 0) {
-        io = PIO_new(interpreter, PIO_F_SOCKET, 0, PIO_F_READ|PIO_F_WRITE);
+        io = PIO_new(interp, PIO_F_SOCKET, 0, PIO_F_READ|PIO_F_WRITE);
         io->fd = (PIOHANDLE) sock;
         io->remote.sin_family = fam;
         return io;
@@ -586,7 +593,7 @@ PIO_win32_socket(theINTERP, ParrotIOLayer *layer, int fam, int type, int proto)
 /*
 
 =item C<static INTVAL
-PIO_win32_connect(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *r)>
+PIO_win32_connect(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING *r)>
 
 Connects C<*io>'s socket to address C<*r>.
 
@@ -595,19 +602,22 @@ Connects C<*io>'s socket to address C<*r>.
 */
 
 static INTVAL
-PIO_win32_connect(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *r)
+PIO_win32_connect(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING *r)
 {
+    UNUSED(layer);
     if (r) {
         struct sockaddr_in sa;
-        memcpy(&sa, PObj_bufstart(r), sizeof(struct sockaddr));
+        memcpy(&sa, PObj_bufstart(r), sizeof (struct sockaddr));
         io->remote.sin_addr.s_addr = sa.sin_addr.s_addr;
         io->remote.sin_port = sa.sin_port;
     }
 
-/*    PIO_eprintf(interpreter, "connect: fd = %d port = %d\n", io->fd, ntohs(io->remote.sin_port));*/
+    /*    PIO_eprintf(interp, "connect: fd = %d port = %d\n",
+     *    io->fd, ntohs(io->remote.sin_port));*/
     if ((connect((SOCKET)io->fd, (struct sockaddr*)&io->remote,
-                   sizeof(struct sockaddr))) != 0) {
-        PIO_eprintf(interpreter, "PIO_win32_connect: errno = %d\n", WSAGetLastError());
+                   sizeof (struct sockaddr))) != 0) {
+        PIO_eprintf(interp, "PIO_win32_connect: errno = %d\n",
+                    WSAGetLastError());
         return -1;
     }
 
@@ -617,7 +627,7 @@ PIO_win32_connect(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *r)
 /*
 
 =item C<static INTVAL
-PIO_win32_send(theINTERP, ParrotIOLayer *layer, ParrotIO * io, STRING *s)>
+PIO_win32_send(Interp *interp, ParrotIOLayer *layer, ParrotIO * io, STRING *s)>
 
 Send the message C<*s> to C<*io>'s connected socket.
 
@@ -626,10 +636,12 @@ Send the message C<*s> to C<*io>'s connected socket.
 */
 
 static INTVAL
-PIO_win32_send(theINTERP, ParrotIOLayer *layer, ParrotIO * io, STRING *s)
+PIO_win32_send(Interp *interp, ParrotIOLayer *layer, ParrotIO * io, STRING *s)
 {
     int error, bytes, byteswrote, maxwrite;
-    bytes = sizeof(s);
+    UNUSED(interp);
+    UNUSED(layer);
+    bytes = sizeof (s);
     byteswrote = 0;
     maxwrite = 2048;
 AGAIN:
@@ -651,15 +663,15 @@ AGAIN:
         switch (errno) {
             case EINTR:
                 goto AGAIN;
-#ifdef EWOULDBLOCK
-            case EWOULDBLOCK:  
+#    ifdef EWOULDBLOCK
+            case EWOULDBLOCK:
                 goto AGAIN;
-#else
+#    else
             case EAGAIN:
                 goto AGAIN;
-#endif
+#    endif
             case EPIPE:
-                close((SOCKET)io->fd);
+                _close((SOCKET)io->fd);
                 return -1;
             default:
                 return -1;
@@ -670,7 +682,7 @@ AGAIN:
 /*
 
 =item C<static INTVAL
-PIO_win32_recv(theINTERP, ParrotIOLayer *layer, ParrotIO * io, STRING **s)>
+PIO_win32_recv(Interp *interp, ParrotIOLayer *layer, ParrotIO * io, STRING **s)>
 
 Receives a message in C<**s> from C<*io>'s connected socket.
 
@@ -679,12 +691,13 @@ Receives a message in C<**s> from C<*io>'s connected socket.
 */
 
 static INTVAL
-PIO_win32_recv(theINTERP, ParrotIOLayer *layer, ParrotIO * io, STRING **s)
+PIO_win32_recv(Interp *interp, ParrotIOLayer *layer, ParrotIO * io, STRING **s)
 {
     int error;
     int err;
     unsigned int bytesread = 0;
     char buf[2048+1];
+    UNUSED(layer);
 
 AGAIN:
     error = recv((SOCKET)io->fd, buf, 2048, 0);
@@ -693,18 +706,18 @@ AGAIN:
         if (error > 0)
             bytesread += error;
         else {
-            close((SOCKET)io->fd);
+            _close((SOCKET)io->fd);
         }
         /* The charset should probably be 'binary', but right now httpd.imc
          * only works with 'ascii'
          */
-        *s = string_make(interpreter, buf, bytesread, "ascii", 0);
+        *s = string_make(interp, buf, bytesread, "ascii", 0);
         if (!*s) {
             PANIC("PIO_recv: Failed to allocate string");
         }
-#if PIO_TRACE
-        PIO_eprintf(interpreter, "PIO_win32_recv: %d bytes\n", bytesread);
-#endif
+#    if PIO_TRACE
+        PIO_eprintf(interp, "PIO_win32_recv: %d bytes\n", bytesread);
+#    endif
         return bytesread;
     }
     else {
@@ -714,16 +727,16 @@ AGAIN:
             case WSAEWOULDBLOCK:
                 goto AGAIN;
             case WSAECONNRESET:
-                close((SOCKET)io->fd);
-#if PIO_TRACE
-                PIO_eprintf(interpreter, "recv: Connection reset by peer\n");
-#endif
+                _close((SOCKET)io->fd);
+#    if PIO_TRACE
+                PIO_eprintf(interp, "recv: Connection reset by peer\n");
+#    endif
                 return -1;
             default:
-                close((SOCKET)io->fd);
-#if PIO_TRACE
-                PIO_eprintf(interpreter, "recv: errno = %d\n", err);
-#endif
+                _close((SOCKET)io->fd);
+#    if PIO_TRACE
+                PIO_eprintf(interp, "recv: errno = %d\n", err);
+#    endif
                 return -1;
         }
     }
@@ -732,7 +745,7 @@ AGAIN:
 /*
 
 =item C<static INTVAL
-PIO_win32_bind(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *l)>
+PIO_win32_bind(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING *l)>
 
 Binds C<*io>'s socket to the local address and port specified by C<*l>.
 
@@ -741,20 +754,23 @@ Binds C<*io>'s socket to the local address and port specified by C<*l>.
 */
 
 static INTVAL
-PIO_win32_bind(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *l)
+PIO_win32_bind(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING *l)
 {
     struct sockaddr_in sa;
+    UNUSED(layer);
 
     if (!l)
         return -1;
 
-    memcpy(&sa, PObj_bufstart(l), sizeof(struct sockaddr));
+    memcpy(&sa, PObj_bufstart(l), sizeof (struct sockaddr));
     io->local.sin_addr.s_addr = sa.sin_addr.s_addr;
     io->local.sin_port = sa.sin_port;
     io->local.sin_family = AF_INET;
 
-    if ((bind((SOCKET)io->fd, (struct sockaddr *)&io->local, sizeof(struct sockaddr))) == -1) {
-        PIO_eprintf(interpreter, "PIO_win32_bind: errno = %d\n", WSAGetLastError());
+    if ((bind((SOCKET)io->fd, (struct sockaddr *)&io->local,
+              sizeof (struct sockaddr))) == -1) {
+        PIO_eprintf(interp, "PIO_win32_bind: errno = %d\n",
+                    WSAGetLastError());
         return -1;
     }
 
@@ -764,7 +780,7 @@ PIO_win32_bind(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *l)
 /*
 
 =item C<static INTVAL
-PIO_win32_listen(theINTERP, ParrotIOLayer *layer, ParrotIO *io, INTVAL sec)>
+PIO_win32_listen(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, INTVAL sec)>
 
 Listen for new connections. This is only applicable to C<STREAM> or
 C<SEQ> sockets.
@@ -774,11 +790,13 @@ C<SEQ> sockets.
 */
 
 static INTVAL
-PIO_win32_listen(theINTERP, ParrotIOLayer *layer, ParrotIO *io, INTVAL backlog)
+PIO_win32_listen(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, INTVAL backlog)
 {
+    UNUSED(interp);
+    UNUSED(layer);
     if ((listen((SOCKET)io->fd, backlog)) == -1) {
         fprintf(stderr, "listen: errno= ret=%d fd = %d port = %d\n",
-             errno, io->fd, ntohs(io->local.sin_port));
+             errno, (int)io->fd, ntohs(io->local.sin_port));
         return -1;
     }
     return 0;
@@ -787,7 +805,7 @@ PIO_win32_listen(theINTERP, ParrotIOLayer *layer, ParrotIO *io, INTVAL backlog)
 /*
 
 =item C<static ParrotIO *
-PIO_win32_accept(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_win32_accept(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Accept a new connection and return a newly created C<ParrotIO> socket.
 
@@ -796,16 +814,18 @@ Accept a new connection and return a newly created C<ParrotIO> socket.
 */
 
 static ParrotIO *
-PIO_win32_accept(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_win32_accept(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
     int newsock;
     int newsize;
     int err_code;
     ParrotIO *newio;
-    newio = PIO_new(interpreter, PIO_F_SOCKET, 0, PIO_F_READ|PIO_F_WRITE);
+    UNUSED(layer);
+    newio = PIO_new(interp, PIO_F_SOCKET, 0, PIO_F_READ|PIO_F_WRITE);
     newsize = sizeof (struct sockaddr);
 
-    newsock = accept((SOCKET)io->fd, (struct sockaddr *)&(newio->remote), &newsize);
+    newsock = accept((SOCKET)io->fd, (struct sockaddr *)&(newio->remote),
+                     &newsize);
     err_code = WSAGetLastError();
 
     if (err_code != 0) {
@@ -828,10 +848,10 @@ PIO_win32_accept(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
     return newio;
 }
 
-#endif
+#  endif
 
 
-/************************************************************************************************************/
+/******************************************************************************/
 
 
 const ParrotIOLayerAPI pio_win32_layer_api = {
@@ -859,7 +879,7 @@ const ParrotIOLayerAPI pio_win32_layer_api = {
     PIO_null_getcount,
     PIO_null_fill,
     PIO_null_eof,
-#if PARROT_NET_DEVEL
+#  if PARROT_NET_DEVEL
     0,
     PIO_win32_socket,
     PIO_win32_connect,
@@ -868,7 +888,7 @@ const ParrotIOLayerAPI pio_win32_layer_api = {
     PIO_win32_bind,
     PIO_win32_listen,
     PIO_win32_accept
-#else
+#  else
     0, /* no poll */
     0, /* no socket */
     0, /* no connect */
@@ -877,7 +897,7 @@ const ParrotIOLayerAPI pio_win32_layer_api = {
     0, /* no bind */
     0, /* no listen */
     0, /* no accept */
-#endif
+#  endif
 };
 
 #endif /* PIO_OS_WIN32 */
@@ -903,12 +923,10 @@ Initially written by Melvin Smith.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

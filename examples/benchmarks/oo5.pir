@@ -1,4 +1,4 @@
-# $Id: /local/examples/benchmarks/oo5.pir 12177 2006-04-11T19:56:05.232596Z bernhard  $
+# $Id: /parrotcode/local/examples/benchmarks/oo5.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 .sub bench :main
     .local pmc cl
@@ -64,3 +64,9 @@ loop:
     .return r
     .pcc_end_return
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

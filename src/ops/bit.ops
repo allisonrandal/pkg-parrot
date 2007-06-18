@@ -26,11 +26,13 @@ If possible, they use the appropriate language type, specified with C<.HLL>.
 
 =item B<band>(inout INT, in INT)
 
-Set the bits of $1 according to the B<and> of the corresponding bits from $1 and $2.
+Set the bits of $1 according to the B<and> of the corresponding bits
+from $1 and $2.
 
 =item B<band>(out INT, in INT, in INT)
 
-Set the bits of $1 according to the B<and> of the corresponding bits from $2 and $3.
+Set the bits of $1 according to the B<and> of the corresponding bits
+from $2 and $3.
 
 =cut
 
@@ -46,21 +48,23 @@ inline op band(out INT, in INT, in INT) :base_core {
 
 =item B<bands>(inout STR, in STR)
 
-Set the bits of $1 according to the B<and> of the corresponding bits from $1 and $2.
+Set the bits of $1 according to the B<and> of the corresponding bits
+from $1 and $2.
 
 =item B<bands>(out STR, in STR, in STR)
 
-Set the bits of $1 according to the B<and> of the corresponding bits from $2 and $3.
+Set the bits of $1 according to the B<and> of the corresponding bits
+from $2 and $3.
 
 =cut
 
 inline op bands(inout STR, in STR) :base_core {
-  string_bitwise_and(interpreter, $1, $2, &$1);
+  string_bitwise_and(interp, $1, $2, &$1);
   goto NEXT();
 }
 
 inline op bands(out STR, in STR, in STR) :base_core {
-  $1 = string_bitwise_and(interpreter, $2, $3, NULL);
+  $1 = string_bitwise_and(interp, $2, $3, NULL);
   goto NEXT();
 }
 
@@ -93,17 +97,17 @@ inline op bnot(out INT, in INT) :base_core {
 }
 
 inline op bnot(invar PMC) :base_core {
-  $1->vtable->i_bitwise_not(interpreter, $1);
+  $1->vtable->i_bitwise_not(interp, $1);
   goto NEXT();
 }
 
 inline op bnot(out PMC, invar PMC) :base_core {
-  $1 = $2->vtable->bitwise_not(interpreter, $2, $1);
+  $1 = $2->vtable->bitwise_not(interp, $2, $1);
   goto NEXT();
 }
 
 inline op n_bnot(out PMC, invar PMC) :base_core {
-  $1 = $2->vtable->bitwise_not(interpreter, $2, NULL);
+  $1 = $2->vtable->bitwise_not(interp, $2, NULL);
   goto NEXT();
 }
 
@@ -122,27 +126,27 @@ Set the bits of $1 to the B<not> of the corresponding bits from $2.
 =cut
 
 inline op bnots(inout STR) :base_core {
-  string_bitwise_not(interpreter, $1, &$1);
+  string_bitwise_not(interp, $1, &$1);
   goto NEXT();
 }
 
 inline op bnots(out STR, in STR) :base_core {
-  string_bitwise_not(interpreter, $2, &$1);
+  string_bitwise_not(interp, $2, &$1);
   goto NEXT();
 }
 
 inline op bnots(invar PMC) :base_core {
-  $1->vtable->i_bitwise_nots(interpreter, $1);
+  $1->vtable->i_bitwise_nots(interp, $1);
   goto NEXT();
 }
 
 inline op bnots(out PMC, invar PMC) :base_core {
-  $1 = $2->vtable->bitwise_nots(interpreter, $2, $1);
+  $1 = $2->vtable->bitwise_nots(interp, $2, $1);
   goto NEXT();
 }
 
 inline op n_bnots(out PMC, invar PMC) :base_core {
-  $1 = $2->vtable->bitwise_nots(interpreter, $2, NULL);
+  $1 = $2->vtable->bitwise_nots(interp, $2, NULL);
   goto NEXT();
 }
 
@@ -150,11 +154,13 @@ inline op n_bnots(out PMC, invar PMC) :base_core {
 
 =item B<bor>(inout INT, in INT)
 
-Set the bits of $1 according to the B<or> of the corresponding bits from $1 and $2.
+Set the bits of $1 according to the B<or> of the corresponding bits
+from $1 and $2.
 
 =item B<bor>(out INT, in INT, in INT)
 
-Set the bits of $1 according to the B<or> of the corresponding bits from $2 and $3.
+Set the bits of $1 according to the B<or> of the corresponding bits
+from $2 and $3.
 
 =cut
 
@@ -170,21 +176,23 @@ inline op bor(out INT, in INT, in INT) :base_core {
 
 =item B<bors>(inout STR, in STR)
 
-Set the bits of $1 according to the B<or> of the corresponding bits from $1 and $2.
+Set the bits of $1 according to the B<or> of the corresponding bits
+from $1 and $2.
 
 =item B<bors>(out STR, in STR, in STR)
 
-Set the bits of $1 according to the B<or> of the corresponding bits from $2 and $3.
+Set the bits of $1 according to the B<or> of the corresponding bits
+from $2 and $3.
 
 =cut
 
 inline op bors(inout STR, in STR) :base_core {
-  string_bitwise_or(interpreter, $1, $2, &$1);
+  string_bitwise_or(interp, $1, $2, &$1);
   goto NEXT();
 }
 
 inline op bors(out STR, in STR, in STR) :base_core {
-  $1 = string_bitwise_or(interpreter, $2, $3, NULL);
+  $1 = string_bitwise_or(interp, $2, $3, NULL);
   goto NEXT();
 }
 
@@ -289,11 +297,13 @@ inline op rot(out INT, in INT, in INT, inconst INT) {
 
 =item B<bxor>(inout INT, in INT)
 
-Set the bits of $1 according to the B<xor> of the corresponding bits from $1 and $2.
+Set the bits of $1 according to the B<xor> of the corresponding bits
+from $1 and $2.
 
 =item B<bxor>(out INT, in INT, in INT)
 
-Set the bits of $1 according to the B<xor> of the corresponding bits from $2 and $3.
+Set the bits of $1 according to the B<xor> of the corresponding bits
+from $2 and $3.
 
 =cut
 
@@ -309,21 +319,23 @@ inline op bxor(out INT, in INT, in INT) :base_core {
 
 =item B<bxors>(inout STR, in STR)
 
-Set the bits of $1 according to the B<xor> of the corresponding bits from $1 and $2.
+Set the bits of $1 according to the B<xor> of the corresponding bits
+from $1 and $2.
 
 =item B<bxors>(out STR, in STR, in STR)
 
-Set the bits of $1 according to the B<xor> of the corresponding bits from $2 and $3.
+Set the bits of $1 according to the B<xor> of the corresponding bits
+from $2 and $3.
 
 =cut
 
 inline op bxors(inout STR, in STR) :base_core {
-  string_bitwise_xor(interpreter, $1, $2, &$1);
+  string_bitwise_xor(interp, $1, $2, &$1);
   goto NEXT();
 }
 
 inline op bxors(out STR, in STR, in STR) :base_core {
-  $1 = string_bitwise_xor(interpreter, $2, $3, NULL);
+  $1 = string_bitwise_xor(interp, $2, $3, NULL);
   goto NEXT();
 }
 
@@ -343,3 +355,10 @@ This program is free software. It is subject to the same license
 as the Parrot interpreter itself.
 
 =cut
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

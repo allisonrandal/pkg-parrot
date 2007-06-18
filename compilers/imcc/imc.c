@@ -17,23 +17,6 @@ static void imc_free_unit(Parrot_Interp interp, IMC_Unit * unit);
 extern FILE* yyin;
 */
 
-/* AST doesn't honor COMPILE_IMMEDIATE yet. So we need to make sure that
- * the units get compiled.
- */
-void
-imc_compile_all_units_for_ast(Interp *interp)
-{
-    IMC_Unit *unit, *unit_next;
-#if COMPILE_IMMEDIATE
-    for (unit = IMCC_INFO(interp)->imc_units; unit; unit = unit_next) {
-        unit_next = unit->next;
-        imc_compile_unit(interp, unit);
-    }
-#endif
-
-    return;
-}
-
 void
 imc_compile_all_units(Interp *interp)
 {
@@ -69,7 +52,7 @@ imc_compile_all_units(Interp *interp)
 void
 imc_compile_unit(Interp *interp, IMC_Unit * unit) {
     /* Not much here for now except the allocator */
-    cur_unit = unit;
+    IMCC_INFO(interp)->cur_unit = unit;
 
     imc_reg_alloc(interp, unit);
     emit_flush(interp, NULL, unit);
@@ -81,11 +64,12 @@ imc_compile_unit(Interp *interp, IMC_Unit * unit) {
  * ready for a new compiler invocation goes here.
  */
 void
-imc_cleanup(Interp *interp)
+imc_cleanup(Interp *interp, void *yyscanner)
 {
-     clear_globals(interp);
-     mem_sys_free(IMCC_INFO(interp)->ghash.data);
-     IMCC_INFO(interp)->ghash.data = NULL;
+    IMCC_pop_parser_state(interp, yyscanner);
+    clear_globals(interp);
+    mem_sys_free(IMCC_INFO(interp)->ghash.data);
+    IMCC_INFO(interp)->ghash.data = NULL;
 }
 
 
@@ -95,7 +79,7 @@ imc_cleanup(Interp *interp)
 static IMC_Unit *
 imc_new_unit(IMC_Unit_Type t)
 {
-   IMC_Unit * unit = calloc(1, sizeof(IMC_Unit));
+   IMC_Unit * unit = calloc(1, sizeof (IMC_Unit));
    create_symhash(&unit->hash);
    unit->type = t;
    return unit;
@@ -142,7 +126,7 @@ imc_close_unit(Parrot_Interp interp, IMC_Unit * unit)
         imc_compile_unit(interp, unit);
 #endif
     }
-    cur_unit = NULL;
+    IMCC_INFO(interp)->cur_unit = NULL;
 }
 
 static void
@@ -169,10 +153,7 @@ imc_free_unit(Parrot_Interp interp, IMC_Unit * unit)
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

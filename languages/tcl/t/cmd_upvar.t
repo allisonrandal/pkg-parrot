@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 11
+plan 12
 
 eval_is {
  set a 2
@@ -20,12 +26,16 @@ eval_is {
 } 1 {upvar as alias in global scope}
 
 eval_is {
-  set b 1
-  upvar 0 a b
+  proc test {} {
+    set b 1
+    upvar 0 a b
+  }
+  test
 } {variable "b" already exists} \
   {variable already exists}
 
 eval_is {
+  catch {unset a}
   upvar 0 a(b) c
   array set a [list b 3]
   set c
@@ -62,5 +72,13 @@ eval_is {
 
 eval_is {
   upvar -1 a b
-} {wrong # args: should be "upvar ?level? otherVar localVar ?otherVar localVar ...?"} \
+} {bad level "-1"} \
   {no negative level}
+
+eval_is {
+  namespace eval test {
+    set x ok
+    upvar 0 x y
+  }
+  set test::y
+} ok {upvar + namespace eval}

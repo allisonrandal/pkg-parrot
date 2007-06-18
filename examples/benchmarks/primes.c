@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/examples/benchmarks/primes.c 12835 2006-05-30T13:32:26.641316Z coke  $
+$Id: /parrotcode/local/examples/benchmarks/primes.c 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ main(int argc, char *argv[])
   if (I1 <= I2) {goto REDO;}
   printf("%d\n", I6);
   printf("last is: %d\n", I7);
-  
+
   return 0;
 }
 
@@ -61,14 +61,21 @@ main(int argc, char *argv[])
 
 =head1 SEE ALSO
 
-F<examples/benchmarks/primes.c>, 
+F<examples/benchmarks/primes.c>,
 F<examples/benchmarks/primes.pasm>,
-F<examples/benchmarks/primes.pl>, 
+F<examples/benchmarks/primes.pl>,
 F<examples/benchmarks/primes2_p.pasm>,
-F<examples/benchmarks/primes2.c>, 
+F<examples/benchmarks/primes2.c>,
 F<examples/benchmarks/primes2.pasm>,
 F<examples/benchmarks/primes2.py>.
 
 =cut
 
 */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

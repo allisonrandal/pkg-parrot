@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/inter/ops.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/inter/ops.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Asks the user to select which ops files to include.
 package inter::ops;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,19 +25,16 @@ $description = 'Determining what opcode files should be compiled in';
 
 @args = qw(ask ops);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my @ops = (
         sort {
-            if ($a =~ /core\.ops/) { return -1 }
-            if ($b =~ /core\.ops/) { return 1 }
-            return ($a cmp $b)
+            if ( $a =~ /core\.ops/ ) { return -1 }
+            if ( $b =~ /core\.ops/ ) { return 1 }
+            return ( $a cmp $b )
             }
-            grep {
-            !/vtable\.ops/
-            } glob "src/ops/*.ops"
+            grep { !/vtable\.ops/ } glob "src/ops/*.ops"
     );
 
     my $ops = join ' ', grep { !/obscure\.ops/ } @ops;
@@ -45,7 +43,7 @@ sub runstep
 
     # ops selection disabled - until we can build and load
     # opcode subset libs
-    if (0 && $conf->options->get('ask')) {
+    if ( 0 && $conf->options->get('ask') ) {
         print <<"END";
 
 
@@ -53,18 +51,25 @@ The following opcode files are available:
   @ops
 END
         {
-            $ops = prompt('Which opcode files would you like?', $ops);
+            $ops = prompt( 'Which opcode files would you like?', $ops );
 
-            if ($ops !~ m{\bcore\.ops}) {
+            if ( $ops !~ m{\bcore\.ops} ) {
                 print "core.ops must be the first selection.\n";
                 redo;
             }
         }
     }
 
-    $conf->data->set(ops => $ops);
+    $conf->data->set( ops => $ops );
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

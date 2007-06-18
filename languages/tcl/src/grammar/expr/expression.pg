@@ -1,90 +1,144 @@
 grammar TclExpr::Grammar;
 
-# The expression token is the top level expression - it is defined in 
-# XXX-NAME-OF-SUB in XXX-NAME-OF-FILE, which in turn invokes the
-# opcode parser from src/tcl_expr_optok.pg.
+# RT#40688: This began as an [expr] only grammar, and has since grown to
+# encompass the language itself. Either rename the whole thing, or,
+# preferentially, split out the non-expr specific bits into another
+# grammar that this one can then refer to.
 
-# XXX Some of the items here actually belong in the language grammar. 
-# (like command, quoted, etc.) Move them there when we use PGE for everything.
+token ws { \h* }
+
+token program {
+   | <[;\n\r\t\ ]>* <command> [ <?ws> <[\r\n;]> <?ws> <command>? ]*
+   | $<empty>:=[^\s*$]
+}
+
+token command {
+    | \# \N*
+    | [ $<word>:=( <expand>?
+          [ <quoted_word> [ <before [<[;\n\r\t\ ]>|$]>
+                          | <error: extra characters after close-quote> ]
+          | <braced_word> [ <before [<[;\n\r\t\ ]>|$]>
+                          | <error: extra characters after close-brace> ]
+          | $<chunk>:=( <substitution> | \$ | <-[[$\\;\n\r\t\ ]>+ )+
+          ]
+        ) \h*
+      ]+
+}
+
+token substitution {
+    | <command_substitution>
+    | <variable_substitution>
+    | <backslash_substitution>
+}
+
+token quoted_word {
+    " $<chunk>:=( <substitution> | \$ | <-[[$\\"]>+ )* [ " | <error: missing "> ]
+}
+
+token braced_word {
+    <PGE::Text::bracketed: {}>
+  | \{ <error: missing close-brace>
+}
+
+token command_substitution {
+    \[ \]
+  | \[ <[;\n\r\t\ ]>* <subcommand> [ <?ws> <[\r\n;]> <?ws> <subcommand>? ]* \]
+  | \[ <error: missing close-bracket>
+}
+
+token subcommand {
+    | \# \N*
+    | [ $<word>:=( <expand>?
+          [ <quoted_word> [ <before [<[\];\n\r\t\ ]>|$]>
+                          | <error: extra characters after close-quote> ]
+          | <braced_word> [ <before [<[\];\n\r\t\ ]>|$]>
+                          | <error: extra characters after close-brace> ]
+          | $<chunk>:=( <substitution> | \$ | <-[[$\]\\;\n\r\t\ ]>+ )+
+          ]
+        ) \h*
+      ]+
+}
+
+token variable_substitution {
+    \$ [ \{  ( <-[}]>+ )  \}
+       | ([\:\:]?<?name>) [ \( $<index>:=( <substitution> | \$ | <-[[$\\)]>+ )+ \) ]?
+       ]
+}
+
+token backslash_substitution {
+    \\ [ x <[0..9a..fA..F]>+
+       | u <[0..9a..fA..F]>**{1..4}
+       | <[0..7]>**{1..3}
+       | .
+       ]
+}
+
+token expand {
+      \{expand\}<!before:\s>
+    | \{\*\}<!before:\s>
+}
+
+# this is so we can use these rules in [subst]
+token subst_backslash { <backslash_substitution> }
+token subst_command   { <command_substitution> }
+token subst_variable  { <variable_substitution> }
+
+# Actual [expr] items
 
 token term {
-      <subcommand>
-    | <quoted>
-    | <braced>
+      <substitution>
+    | <quoted_word>
+    | <braced_word>
     | <number>
-    | <variable>
-    | <function>
+    | <mathfunc>
     | <nested>
     | <boolean>
-    | <[a..zA..Z]> <syntax_error: variable references require preceding $>
+    | <[a..zA..Z]> <syntax_error_variable_or_function>
 }
 
 ## used by term
 
-rule boolean { ( true | false ) <?wb> }
+rule boolean {
+    (:i true  | tru  | tr  | t
+      | false | fals | fal | fa | f
+      | yes   | ye   | y
+      | no    | n
+      | on
+      | off   | of )
+    <?wb>
+}
 
 rule nested { \( <expression> \) }
-
-# XXX EXTREMELY naive
-rule subcommand  { \[ [<command> ;?]+ \] }
-
-token command {
-      <comment>
-    | <word> [<?ws>? <word>]*
-}
-
-token comment {
-  \# \N* \n?
-}
-
-token word {
-    <subcommand>
-  | <quoted>
-  | <braced>
-  | <variable>
-  | <constant>
-}
-
-token constant {
-    (\w+)
-}
-
-token quoted { " <quoted_literal> " }
-
-# this is defined as a pir sub in src/grammar/expr/parse.pir
-# token quoted_literal { ... }
-
-token braced   { \{ ([ \\. | <braced> | <-[}]> ]*) \} }
-
-# XXX naive
-token variable { \$ (<[a..zA..Z]>+) }
 
 token number { <scientific> | <float> | <integer> }
 
 token float  { (<[+\-]>)? [ <[0..9]>+\.<[0..9]>* | \.<[0..9]>+ ] }
 
-token scientific { (<float> | <integer>) e (<[+\-]>? <[0..9]>+) }
+token scientific { (<float> | <integer>) <[Ee]> (<[+\-]>? <[0..9]>+) }
 
-token decimal { [<[1..9]><[0..9]>*] }
+token decimal { [<[1..9]><[0..9]>*] | 0 }
 
-# XXX squawk about invalid looking octal.
-
-token octal   { 0 [ <[0..7]> | <[89]><[0..9]>* <invalid_octal> ]* }
-token hex     { 0<[xX]> ( <[0..9A..Fa..f]>) + }
-token integer { (<[+\-]>)? [ <decimal> | <hex> | <octal> ] }
+token binary  { 0<[bB]> ( <[01]>+ ) }
+token octal   { 0<[oO]>? ([ <[0..7]> | <[89]><[0..9]>* <invalid_octal> ]+) }
+token raw_hex  { <[0..9A..Fa..f]> + }
+token hex     { 0<[xX]> <raw_hex> }
+token integer { (<[+\-]>)? [ <binary> | <hex> | <octal> | <decimal>] }
 
 token nullary_function { rand }
 
 token unary_function { 
- abs    | acos   | asin      | atan   | ceil   | cosh?  | double | exp    |
- floor  | int    | log[10]?  | round  | sinh?  | sqrt   | srand  | tanh?  |
- wide
+ abs    | acos   | asin  | atan   | bool      | ceil   | cosh?  | double |
+ entier | exp    | floor | int    | log[10]?  | round  | sinh?  | sqrt   |
+ srand  | tanh?  | wide
 }
 
 token binary_function { atan2 | fmod | hypot | pow }
 
-token function {
-  [ <binary_function> | <unary_function> | <nullary_function> 
+token nary_function { max | min }
+
+# XXX This should actually be a PIR rule so we can add more rules.
+token mathfunc {
+  [ <nary_function> | <binary_function> | <unary_function> | <nullary_function> 
   | ( <[a..zA..Z]>\w* )  \(  <unknown_math_function>  ]
         \( [<expression> [, <expression>]*]? \)
 }
@@ -116,23 +170,23 @@ proto 'infix:>'  is precedence('10=') {...}
 proto 'infix:<=' is precedence('10=') {...}
 proto 'infix:>=' is precedence('10=') {...}
 
-proto 'infix:==' is precedence('9=') {...}
-proto 'infix:!=' is precedence('9=') {...}
+proto 'infix:==' is precedence('09=') {...}
+proto 'infix:!=' is precedence('09=') {...}
 
-proto 'infix:eq' is precedence('8=') {...}
-proto 'infix:ne' is precedence('8=') {...}
+proto 'infix:eq' is precedence('08=') {...}
+proto 'infix:ne' is precedence('08=') {...}
 
-proto 'infix:in' is precedence('7=') {...}
-proto 'infix:ni' is precedence('7=') {...}
+proto 'infix:in' is precedence('07=') {...}
+proto 'infix:ni' is precedence('07=') {...}
 
-proto 'infix:&'  is precedence('6=') {...}
+proto 'infix:&'  is precedence('06=') {...}
 
-proto 'infix:^'  is precedence('5=') {...}
+proto 'infix:^'  is precedence('05=') {...}
 
-proto 'infix:|'  is precedence('4=') {...}
+proto 'infix:|'  is precedence('04=') {...}
 
-proto 'infix:&&' is precedence('3=') {...}
+proto 'infix:&&' is precedence('03=') {...}
 
-proto 'infix:||' is precedence('2=') {...}
+proto 'infix:||' is precedence('02=') {...}
 
-proto 'ternary:? :' is precedence('1=') {...}
+proto 'ternary:? :' is precedence('01=') {...}

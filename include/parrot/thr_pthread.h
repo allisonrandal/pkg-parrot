@@ -1,7 +1,7 @@
 /* thr_pthread.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/thr_pthread.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/thr_pthread.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     POSIS pthread interface
  *  Data Structure and Algorithms:
@@ -13,7 +13,7 @@
  *  References:
  */
 
-#if !defined(PARROT_THR_PTHREAD_H_GUARD)
+#ifndef PARROT_THR_PTHREAD_H_GUARD
 #define PARROT_THR_PTHREAD_H_GUARD
 
 #  include <pthread.h>
@@ -65,10 +65,7 @@ typedef void (*Cleanup_Handler)(void *);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

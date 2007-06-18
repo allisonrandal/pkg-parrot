@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
+# Copyright (C) 2005-2007, The Perl Foundation.
 
 =head1 NAME
 
@@ -90,6 +90,14 @@ applies to a child of the current node (generally inherited attributes).
     load_bytecode 'compilers/tge/TGE/Grammar.pbc'
     load_bytecode 'compilers/tge/TGE/Compiler.pbc'
 
+    # import <die> rule from PGE::Util
+    $P0 = get_hll_global ['PGE::Util'], 'die'
+    set_hll_global ['TGE::Parser'], 'die', $P0
+
+    # import <line_number> method from PGE::Util
+    $P0 = get_hll_global ['PGE::Util'], 'line_number'
+    set_hll_global ['TGE::Parser'], 'line_number', $P0
+
     .return ()
 .end
 
@@ -100,3 +108,9 @@ applies to a child of the current node (generally inherited attributes).
 Allison Randal <allison@perl.org>
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,4 +1,4 @@
-# $Id: /local/languages/ecmascript/config/makefiles/root.in 13907 2006-08-04T05:53:16.699881Z chip  $
+# $Id: /parrotcode/trunk/languages/ecmascript/config/makefiles/root.in 470 2006-12-05T03:30:45.414067Z svm  $
 
 # Setup some commands
 LN_S     = @lns@

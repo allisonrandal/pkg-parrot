@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 4;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     public class Test
@@ -43,10 +46,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'ldc.i4.(0..8)');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'ldc.i4.(0..8)' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -59,7 +62,7 @@ PIR
 36
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'minus one');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'minus one' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -72,7 +75,7 @@ PIR
 -1
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'bigger_consts');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'bigger_consts' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -84,3 +87,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'bigger_consts');
 PIR
 2020200
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

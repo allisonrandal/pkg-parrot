@@ -1,9 +1,9 @@
-This is Parrot, version 0.4.6
+This is Parrot, version 0.4.12
 -----------------------------
 
-Parrot is Copyright (C) 2001-2006, The Perl Foundation.
+Parrot is Copyright (C) 2001-2007, The Perl Foundation.
 
-$Id: /local/README 14032 2006-08-09T01:15:23.527431Z chip  $
+$Id: /parrotcode/trunk/README 3510 2007-05-16T02:47:23.785670Z chromatic  $
 
 LICENSE INFORMATION
 -------------------
@@ -110,7 +110,7 @@ This installs a bunch of files in /usr/local. The parrot executable is in
 
 If you want to install Parrot into a non-standard location use:
 
-    perl Configure.pl --prefix=/Users/foo/parrot-0.4.6
+    perl Configure.pl --prefix=/Users/foo/parrot-0.4.12
     make install
 
 But please note that dynamic libs will not be found for non-standard
@@ -155,7 +155,6 @@ The following web sites have all the Parrot information you need:
     http://dev.perl.org/perl6/
     http://bugs6.perl.org/
     http://pugscode.org/
-    http://www.poniecode.org/
 
 Have fun,
    The Parrot Team.

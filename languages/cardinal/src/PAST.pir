@@ -1,4 +1,4 @@
-## $Id: /local/languages/cardinal/src/PAST.pir 13986 2006-08-07T17:04:53.535012Z chip  $
+## $Id: /parrotcode/trunk/languages/cardinal/src/PAST.pir 3076 2007-04-10T07:04:11.810275Z paultcochrane  $
 
 =head1 NAME
 
@@ -16,20 +16,11 @@ needed for Ruby 1.9.  The currently defined ast nodes:
 =over 4
 
 =cut
+
+.include 'languages/cardinal/src/preamble'
+
 .HLL 'Ruby', 'ruby_group'
 .namespace [ 'Cardinal::PAST' ]
-
-.macro kdump ( x )
-    .sym pmc it
-    it = get_root_global ['parrot'], '_dumper'
-    it(.x)
-.endm
-
-.macro kdump2 ( x, d)
-    .sym pmc it
-    it = get_root_global ['parrot'], '_dumper'
-    it(.x, .d)
-.endm
 
 .sub '__onload' :load
     .local pmc base
@@ -40,6 +31,14 @@ needed for Ruby 1.9.  The currently defined ast nodes:
     addattribute base, 'name'
 
     $P0 = subclass base, 'Cardinal::PAST::Op'
+    $P0 = subclass base, 'Cardinal::PAST::Exp'
+    $P0 = subclass base, 'Cardinal::PAST::Stmt'
+    $P0 = subclass base, 'Cardinal::PAST::Stmts'
+    $P0 = subclass base, 'Cardinal::PAST::Sub'
+    $P0 = subclass base, 'Cardinal::PAST::FunctionCall'
+    $P0 = subclass base, 'Cardinal::PAST::MethodCall'
+    $P0 = subclass base, 'Cardinal::PAST::WhileUntil'
+    $P0 = subclass base, 'Cardinal::PAST::For'
 
     $P0 = subclass base, 'Cardinal::PAST::Val'
     addattribute $P0, 'valtype'
@@ -47,15 +46,27 @@ needed for Ruby 1.9.  The currently defined ast nodes:
     $P0 = subclass base, 'Cardinal::PAST::Var'
     addattribute $P0, 'scope'
 
+    $P1 = subclass $P0, 'Cardinal::PAST::PositionalParameter'
+    addattribute $P1, 'type'
+    $P1 = subclass $P0, 'Cardinal::PAST::OptionalParameter'
+    addattribute $P1, 'default_value'
+    $P1 = subclass $P0, 'Cardinal::PAST::RestParameter'
+    $P1 = subclass $P0, 'Cardinal::PAST::BlockParameter'
+
     $P0 = subclass base, 'Cardinal::PAST::Block'
     addattribute $P0, 'outer'
     addattribute $P0, 'blocktype'
     addattribute $P0, 'vardecl'
 
-    $P0 = subclass base, 'Cardinal::PAST::Exp'
-    $P0 = subclass base, 'Cardinal::PAST::Stmt'
-    $P0 = subclass base, 'Cardinal::PAST::Stmts'
-    $P0 = subclass base, 'Cardinal::PAST::Sub'
+    $P1 = subclass $P0, 'Cardinal::PAST::Module'
+    addattribute $P1, 'class_path'
+
+    $P2 = subclass $P1, 'Cardinal::PAST::Class'
+    addattribute $P2, 'superclass'
+
+    $P0 = subclass base, 'Cardinal::PAST::ClassPath'
+    addattribute $P0, 'starting_colons'
+    addattribute $P0, 'class_name'
 
     $P0 = subclass base, 'Cardinal::PAST::Rescue_Stmt'
     addattribute $P0, 'try_stmt'
@@ -129,6 +140,14 @@ needed for Ruby 1.9.  The currently defined ast nodes:
     array = getattribute self, 'children'
     push array, child
     .return ()
+  .end
+
+.sub 'append_children' :method
+    .param pmc children
+    .local pmc array
+    array = getattribute self, 'children'
+    array.'append'(children)
+    .return ()
 .end
 
 
@@ -141,27 +160,17 @@ needed for Ruby 1.9.  The currently defined ast nodes:
     .return ($P0)
 .end
 
+.gen_accessor('source')
+.gen_accessor('pos')
+.gen_accessor('name')
+.gen_get_accessor('children')
 
-.sub 'source' :method
-    .param string source       :optional
-    .param int has_source      :opt_flag
-    .return self.'attr'('source', source, has_source)
+.sub 'children' :method
+#    .param pmc value :optional
+#    .param int has_value        :opt_flag
+    null $P0
+    .return self.'attr'('children', $P0, 0)
 .end
-
-
-.sub 'pos' :method
-    .param int pos             :optional
-    .param int has_pos         :opt_flag
-    .return self.'attr'('pos', pos, has_pos)
-.end
-
-
-.sub 'name' :method
-    .param string name         :optional
-    .param int has_name        :opt_flag
-    .return self.'attr'('name', name, has_name)
-.end
-
 
 .sub 'node' :method
     .param pmc node
@@ -283,40 +292,32 @@ counting at 10 (so that the values 0..9 can be considered "safe").
 
 
 .namespace [ 'Cardinal::PAST::Op' ]
-
-
-.sub '__dumplist' :method
-    .return ('name children')
-.end
-
+.gen_dumplist('name children')
 
 .namespace [ 'Cardinal::PAST::Val' ]
-
-.sub 'valtype' :method
-    .param string valtype      :optional
-    .param int has_valtype     :opt_flag
-    .return self.'attr'('valtype', valtype, has_valtype)
-.end
-
-.sub '__dumplist' :method
-    .return ('name valtype')
-.end
-
+.gen_accessor('valtype')
+.gen_dumplist('name valtype')
 
 .namespace [ 'Cardinal::PAST::Var' ]
+.gen_accessor('scope')
+.gen_dumplist('name scope')
 
-.sub 'scope' :method
-    .param string scope      :optional
-    .param int has_scope     :opt_flag
-    .return self.'attr'('scope', scope, has_scope)
-.end
+.namespace [ 'Cardinal::PAST::PositionalParameter' ]
+.gen_accessor('type')
+.gen_dumplist('name type')
 
-.sub '__dumplist' :method
-    .return ('name scope')
-.end
+.namespace [ 'Cardinal::PAST::OptionalParameter' ]
+.gen_accessor('default_value')
+.gen_dumplist('name default_value')
 
+.namespace [ 'Cardinal::PAST::RestParameter' ]
+
+.namespace [ 'Cardinal::PAST::BlockParameter' ]
 
 .namespace [ 'Cardinal::PAST::Block' ]
+.gen_accessor('outer')
+.gen_accessor('blocktype')
+.gen_dumplist('name outer blocktype children vardecl')
 
 .sub '__init' :method
     null $P0
@@ -324,18 +325,6 @@ counting at 10 (so that the values 0..9 can be considered "safe").
     $P0 = new .Hash
     setattribute self, 'vardecl', $P0
     .return ()
-.end
-
-.sub 'outer' :method
-    .param pmc outer           :optional
-    .param int has_outer       :opt_flag
-    .return self.'attr'('outer', outer, has_outer)
-.end
-
-.sub 'blocktype' :method
-    .param pmc blocktype       :optional
-    .param int has_blocktype   :opt_flag
-    .return self.'attr'('blocktype', blocktype, has_blocktype)
 .end
 
 .sub 'vardecl' :method
@@ -356,24 +345,24 @@ counting at 10 (so that the values 0..9 can be considered "safe").
     .return (value)
 .end
 
-.sub '__dumplist' :method
-    .return ('name outer blocktype children vardecl')
-.end
+
+.namespace [ 'Cardinal::PAST::Module' ]
+.gen_accessor('class_path')
+
+.namespace [ 'Cardinal::PAST::Class' ]
+
+.namespace [ 'Cardinal::PAST::ClassPath' ]
+.gen_accessor('class_name')
+.gen_accessor('starting_colons')
 
 .namespace [ 'Cardinal::PAST::Rescue_Stmt' ]
+.gen_accessor('try_stmt')
+.gen_accessor('rescue_stmt')
+.gen_dumplist('name try_stmt rescue_stmt')
 
-.sub '__dumplist' :method
-    .return ('name try_stmt rescue_stmt')
-.end
 
-.sub 'try_stmt' :method
-    .param pmc outer           :optional
-    .param int has_outer       :opt_flag
-    .return self.'attr'('try_stmt', outer, has_outer)
-.end
-.sub 'rescue_stmt' :method
-    .param pmc outer           :optional
-    .param int has_outer       :opt_flag
-    .return self.'attr'('rescue_stmt', outer, has_outer)
-.end
-
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

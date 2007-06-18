@@ -18,21 +18,21 @@ $macros{DOMAIN_ERROR} = <<'END_OF_PIR';
 END_OF_PIR
 
 my %scalar = (
-    '+' => [ 'Add', '%1 = %1 + %2' ],
-	'*' => [ 'Power', << 'END_PIR' ],
-	# XXX This is too restrictive. Need better tests
+    '+' => [ 'Add',   '%1 = %1 + %2' ],
+    '*' => [ 'Power', << 'END_PIR' ],
+        # XXX This is too restrictive. Need better tests
     if %1 >= 0 goto power_ok
 %% DOMAIN_ERROR %%
 power_ok:
     $N1 = %1
     $N2 = %2
     $N1 = pow $N1, $N2
-	%1 = $N1
+        %1 = $N1
 
 END_PIR
 
     '\x{d7}' => [ 'Multiply', '%1 = %1 * %2' ],
-    '\x{f7}' => [ 'Divide', '%1 = %1 / %2' ],
+    '\x{f7}' => [ 'Divide',   '%1 = %1 / %2' ],
     '\u2212' => [ 'Subtract', '%1 = %1 - %2' ],
     '\u2308' => [ 'Maximum',  <<'END_PIR' ],
     if %1 > %2 goto maximum_done
@@ -47,137 +47,134 @@ minimum_done:
 END_PIR
 );
 
-
 my $template = <<'END_OF_TEMPLATE';
 
-.namespace [ 'APL' ]
+.namespace
 
 # any registers #'d 100 or higher are used here for temporary conversions
 # to other types required by the various opcodes. XXX This should go away
 # Once PMI ports his lovely new perl6 code back into APL.
 
-.sub "__load_pirtable" :load
+.sub "__load_inlinetable" :load :init
     $P0 = new .Hash
     store_global "APL", "%pirtable", $P0
-
-    # these are the 'generic' forms of each op
-    $P0['dyadic:']  =  "    $P0 = find_global 'APL', %0\n    %1 = $P0(%1, %2)"
-    $P0['monadic:'] =  "    $P0 = find_global 'APL', %0\n    %1 = $P0(%1)"
+    .local pmc itable
+    itable = new .Hash
+    set_hll_global ['APL'], '%inlinetable', itable
 
     # special-purpose parrot ops here
-    $P0['dyadic:<']       =  <<"END_PIR"            # less than
-    $I100 = islt %1, %2
-    %1 = $I100
+    itable['dyadic:<']         =  <<'END_PIR'
+    $I1 = islt %0, %1          # dyadic:< (less than)
+    %t = $I1
 END_PIR
 
-    $P0['dyadic:>']       =  <<"END_PIR"            # greater than
-    $I100 = isgt %1, %2
-    %1 = $I100
+    itable['dyadic:>']         =  <<'END_PIR'
+    $I1 = isgt %0, %1          # dyadic:> (greater than)
+    %t = $I1
 END_PIR
 
-    $P0['dyadic:=']       =  <<"END_PIR"            # equal
-    $I100 = iseq %1, %2
-    %1 = $I100
+    itable['dyadic:=']         =  <<'END_PIR'
+    $I1 = iseq %0, %1          # dyadic:= (equals)
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2227"]  =  <<"END_PIR"            # and
-    $I100 = %1
-    $I101 = %2
-    $I100 = and $I100, $I101
-    %1 = $I100
+    itable[unicode:"dyadic:\u2227"]  =  <<'END_PIR'
+    $I0 = %0                   # dyadic:\u2227 (and)
+    $I1 = %1
+    $I1 = and $I0, $I1
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2228"]  = <<"END_PIR"             # or
-    $I100 = %1
-    $I101 = %2
-    $I100 = or $I100, $I101
-    %1 = $I100
+    itable[unicode:"dyadic:\u2228"]  = <<'END_PIR'
+    $I0 = %0                   # dyadic:\u2228 (or)
+    $I1 = %1
+    $I1 = or $I0, $I1
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2260"]  = <<"END_PIR"             # not equal
-    $I100 = isne %1, %2
-    %1 = $I100
+    itable[unicode:"dyadic:\u2260"]  = <<'END_PIR'
+    $I1 = isne %0, %1          # dyadic:\u2260 (not equal)
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2264"]  = <<"END_PIR"             # not greater than
-    $I100 = isle %1, %2
-    %1 = $I100
+    itable[unicode:"dyadic:\u2264"]  = <<'END_PIR'
+    $I1 = isle %0, %1          # dyadic:\u2264 (not greater than)
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2265"]  = <<"END_PIR"             # not less than
-    $I100 = isge %1, %2
-    %1 = $I100
+    itable[unicode:"dyadic:\u2265"]  = <<'END_PIR'
+    $I1 = isge %0, %1          # dyadic:\u2265 (not less than)
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2371"]  = <<"END_PIR"             # nor
-    $I100 = %1
-    $I101 = %2
-    $I100 = or $I100, $I101
-    $I100 = not $I100
-    %1 = $I100
+    itable[unicode:"dyadic:\u2371"]  = <<'END_PIR'
+    $I0 = %0                   # dyadic:\u2371 (nor)
+    $I1 = %1
+    $I1 = or $I0, $I1
+    $I1 = not $I1
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"dyadic:\u2372"]  =  <<"END_PIR"            # nand
-    $I100 = %1
-    $I101 = %2
-    $I100 = and $I100, $I101
-    $I100 = not $I100
-    %1 = $I100
+    itable[unicode:"dyadic:\u2372"]  =  <<'END_PIR'
+    $I0 = %0                   # dyadic:\u2372 (nand)
+    $I1 = %1
+    $I1 = and $I0, $I1
+    $I1 = not $I1
+    %t = $I1
 END_PIR
 
-    $P0['monadic:+']      =  "    noop"             # conjugate
-    $P0['monadic:|']      =  "    %1 = abs %1"      # magnitude
-    $P0['monadic:!']      =  <<"END_PIR"            # factorial
-    $I100 = %1
-    $I100 = fact $I100
-    %1 = $I100
+    itable['monadic:+']      =  "    noop # %v"        # conjugate
+    itable['monadic:|']      =  "    %t = abs %0"      # magnitude
+    itable['monadic:!']      =  <<'END_PIR'
+    $I1 = %0                   # monadic:! (factorial)
+    $I1 = fact $I1
+    %t = $I1
 END_PIR
 
-    $P0['monadic:*']      =  "    %1 = exp %1"      # exp
-    $P0[unicode:"monadic:\x{d7}"] =  <<"END_PIR"            # signum
-    $N100 = %1
-    $I100 = cmp_num $N100, 0.0
-    %1 = $I100
+    itable['monadic:*']      =  "    %t = exp %0"      # exp
+    itable[unicode:"monadic:\x{d7}"] =  <<'END_PIR'
+    $N1 = %0                   # monadic:\x{d7} (signum)
+    $I1 = cmp_num $N1, 0.0
+    %t = $I1
 END_PIR
-    $P0[unicode:"monadic:\x{f7}"] =  <<"END_PIR"            # reciprocal
-    $N100 = %1
-    $N100 = 1.0 / $N100
-    %1 = $N100
-END_PIR
-
-    $P0[unicode:"monadic:\u2212"] =  "    %1 = neg %1"      # negate
-    $P0[unicode:"monadic:\u2308"] =  <<"END_PIR"            # ceiling
-    $N100 = %1
-    $I100 = ceil $N100
-    %1 = $I100
+    itable[unicode:"monadic:\x{f7}"] =  <<'END_PIR'
+    $N1 = %0                   # monadic:\x{f7} (reciprocal)
+    $N1 = 1.0 / $N1
+    %t = $N1
 END_PIR
 
-    $P0[unicode:"monadic:\u230a"] =  <<"END_PIR"            # floor
-    $N100 = %1
-    $I100 = floor $N100
-    %1 = $I100
+    itable[unicode:"monadic:\u2212"] =  "    %t = neg %0"      # negate
+    itable[unicode:"monadic:\u2308"] =  <<'END_PIR'
+    $N1 = %0                   # monadic:\u2308 (ceiling)
+    $I1 = ceil $N1
+    %t = $I1
 END_PIR
 
-    $P0[unicode:"monadic:\u235f"] =  "    %1 = ln %1"
+    itable[unicode:"monadic:\u230a"] =  <<'END_PIR'
+    $N1 = %0                   # monadic:\u230a (floor)
+    $I1 = floor $N1
+    %t = $I1
+END_PIR
+
+    itable[unicode:"monadic:\u235f"] =  "    %t = ln %0"
 
 
-    $P0[unicode:"monadic:\u25cb"] =  "    %1 *= 3.14159265358979323846"
+    itable[unicode:"monadic:\u25cb"] =  "    %t = %0 * 3.14159265358979323846"
                                       # PI
 
-    $P0[unicode:"monadic:\u2373"]  =  <<"END_PIR"            # index of
+    itable[unicode:"monadic:\u2373"]  =  <<'END_PIR'            # index of
     #XXX hack all the _1's need the same, generated unique number.
-    $P100 = new 'APLVector'
-    $I100 = 1
-    $I101 = 0
-    $I102 = %1
+    %r = new 'APLVector'              # monadic:\u2373 (index of)
+    $I0 = 1
+    $I1 = 0
+    $I2 = %0
   loop_begin_1:
-    if $I100 > $I102 goto loop_done_1 
-    $P100[$I101] = $I100
-    inc $I101
-    inc $I100
+    if $I0 > $I2 goto loop_done_1
+    %r[$I1] = $I0
+    inc $I1
+    inc $I0
     goto loop_begin_1
   loop_done_1:
-    %1 = $P100
 END_PIR
 
 .end
@@ -223,7 +220,7 @@ END_PIR
   print_2D:
     .local int row_size, pos, newline
     row_size = shape[1]
-    pos = 1 
+    pos = 1
     iter = new .Iterator, arg
     value_type = 'String'
     unless iter goto loop_end_2d
@@ -254,11 +251,11 @@ END_PIR
     result .= "\n"
 
   continue_2d:
-    inc pos 
+    inc pos
     goto loop_2d
   loop_end_2d:
    .return(result)
- 
+
   print_value:
     if value >= 0.0 goto print_value_1
     result .= unicode:"\u207b"
@@ -275,6 +272,38 @@ END_PIR
     $S0 = aplformat(arg)
     say $S0
 .end
+
+.sub 'aplvector'
+    .param pmc args            :slurpy
+    .local pmc vector, iter
+    vector = new 'APLVector'
+    if null args goto iter_end
+    iter = new .Iterator, args
+  iter_loop:
+    unless iter goto iter_end
+    $P0 = shift iter
+    push vector, $P0
+    goto iter_loop
+  iter_end:
+    .return (vector)
+.end
+
+.sub 'aplstring'
+    .param string s
+    .local pmc vector
+    vector = new 'APLVector'
+    $I1 = length s
+    $I0 = 0
+  loop:
+    unless $I0 < $I1 goto loop_end
+    $S0 = substr s, $I0, 1
+    push vector, $S0
+    inc $I0
+    goto loop
+  loop_end:
+    .return (vector)
+.end
+
 
 # XXX - the first argument to this multi sub should be some variant of
 # integer - but if you set it to Integer or int, the program dies with
@@ -311,21 +340,21 @@ nothing:
     .param pmc op2
     $I1 = op1
     $I2 = op2
-    $I3 = $I2 - $I1   
+    $I3 = $I2 - $I1
 
     $N1 = fact $I1
     $N2 = fact $I2
     $N3 = fact $I3
 
-    $N2 /= $N3 
-    $N2 /= $N1 
+    $N2 /= $N3
+    $N2 /= $N1
     .return($N2)
 .end
 
 .sub unicode:"dyadic:\u2373" :multi(APLVector, APLVector) # index of
     .param pmc op1
     .param pmc op2
- 
+
     .local pmc iter_one, iter_two
     .local pmc item_one, item_two
     .local int pos_one
@@ -340,12 +369,12 @@ nothing:
     iter_two = new .Iterator, op2
 loop_two:
     unless iter_two goto loop_two_end
-    item_two = shift iter_two 
+    item_two = shift iter_two
     iter_one = new .Iterator, op1
     pos_one = 0 # parrot's 0 == APL's 1
 loop_one:
     unless iter_one goto loop_one_end
-    item_one = shift iter_one 
+    item_one = shift iter_one
     inc pos_one
     if item_one != item_two goto loop_one
     push result, pos_one
@@ -355,7 +384,7 @@ loop_one_end:
     # if we get this far, there was no match.
     push result, not_found
 
-    goto loop_two 
+    goto loop_two
 loop_two_end:
 
     .return (result)
@@ -367,7 +396,7 @@ loop_two_end:
 
     .local pmc result
     result = new 'APLVector'
- 
+
     .local int pos
     pos = 0
     .local float value_at
@@ -504,7 +533,7 @@ neg_seven: # arctanh(x) = .5 * (ln (1+x) - ln (1 -x))
     .return($N2)
 zero_LHS:
     if op2 < 0 goto neg_RHS
-    .return(op2) 
+    .return(op2)
 neg_RHS:
     %% DOMAIN_ERROR %%
 .end
@@ -548,7 +577,7 @@ done:
 outer_loop:
     unless iter1 goto outer_done
     $P1 = shift iter1
- 
+
     iter2 = new .Iterator, op2
 inner_loop:
     unless iter2 goto inner_done
@@ -574,7 +603,7 @@ outer_done:
     .param int op1
     .param pmc op2
 
-    .local pmc result 
+    .local pmc result
     result = new 'APLVector'
 
     .local pmc iter
@@ -596,7 +625,7 @@ neg_loop:
 pos_loop:
     if op1 == 0 goto done
     unless iter goto done
-    
+
     $P1 = shift iter
     push result, $P1
 
@@ -672,7 +701,7 @@ done:
     $I0 = 0
     $I1 = length $S0
   loop:
-    if $I0 >= $I1 goto loop_end 
+    if $I0 >= $I1 goto loop_end
     $S1 = substr $S0, $I0, 1
     push result, $S1
     inc $I0
@@ -693,16 +722,16 @@ END_OF_TEMPLATE
 
 # Generate all variants for scalar dyadic ops.
 my @type_pairs = (
-  [ 'Float', 'Float' ],
-  [ 'Float', 'APLVector' ], 
-  [ 'APLVector', 'Float' ], 
-  [ 'APLVector', 'APLVector' ], 
+    [ 'Float',     'Float' ],
+    [ 'Float',     'APLVector' ],
+    [ 'APLVector', 'Float' ],
+    [ 'APLVector', 'APLVector' ],
 );
 
-foreach my $operator (keys %scalar) {
-    my ($name,$code) = @ {$scalar{$operator}};
+foreach my $operator ( keys %scalar ) {
+    my ( $name, $code ) = @{ $scalar{$operator} };
     foreach my $types (@type_pairs) {
-        my ($type1, $type2) = @$types;
+        my ( $type1, $type2 ) = @$types;
 
         $template .= <<"END_PREAMBLE";
 
@@ -713,12 +742,15 @@ foreach my $operator (keys %scalar) {
     .param pmc op2
 END_PREAMBLE
 
-        if ($type1 eq "Float" && $type2 eq "Float") {
-          # scalar to scalar..
-            $template .= interpolate($code, 'op1', 'op2');
-        } elsif ($type1 eq "APLVector" && $type2 eq "APLVector") {
-          # vector to vector
-          $template .= << 'END_PIR';
+        if ( $type1 eq "Float" && $type2 eq "Float" ) {
+
+            # scalar to scalar..
+            $template .= interpolate( $code, 'op1', 'op2' );
+        }
+        elsif ( $type1 eq "APLVector" && $type2 eq "APLVector" ) {
+
+            # vector to vector
+            $template .= << 'END_PIR';
     # Verify Shapes conform.
     $I1 = op1
     $I2 = op2
@@ -726,13 +758,13 @@ END_PREAMBLE
     %% DOMAIN_ERROR %%
   good:
     # Create a result vector
-    .local pmc result 
+    .local pmc result
     result = new 'APLVector'
     # Loop through each vector, doing the ops.
     .local pmc iter1, iter2
     iter1 = new .Iterator, op1
     iter2 = new .Iterator, op2
-  loop:    
+  loop:
     unless iter1 goto loop_done
     $P1 = shift iter1
     $P2 = shift iter2
@@ -745,10 +777,10 @@ END_PREAMBLE
     %% DOMAIN_ERROR %%
   got_args:
 END_PIR
-   
-     $template .= interpolate($code, '$P1', '$P2');
 
-          $template .= << 'END_PIR';
+            $template .= interpolate( $code, '$P1', '$P2' );
+
+            $template .= << 'END_PIR';
 
     push result, $P1
     goto loop
@@ -757,41 +789,44 @@ loop_done:
     .return (result)
 END_PIR
 
-        } else {
-           # Vector to Scalar
-           my ($vector, $scalar, @order);
-           if ($type1 eq 'APLVector') {
-               $vector = "op1";
-               $scalar = "op2";
-			   @order = qw/ $P1 $P2 /;
-           } else {
-               $vector = "op2";
-               $scalar = "op1";
-			   @order = qw/ $P2 $P1 /;
-           }
+        }
+        else {
 
-           $template .= << "END_PIR";
+            # Vector to Scalar
+            my ( $vector, $scalar, @order );
+            if ( $type1 eq 'APLVector' ) {
+                $vector = "op1";
+                $scalar = "op2";
+                @order  = qw/ $P1 $P2 /;
+            }
+            else {
+                $vector = "op2";
+                $scalar = "op1";
+                @order  = qw/ $P2 $P1 /;
+            }
+
+            $template .= << "END_PIR";
     # Create a result vector
-    .local pmc result 
+    .local pmc result
     result = new 'APLVector'
     # Loop through each vector, doing the ops.
     .local pmc iter1
     iter1 = new .Iterator, $vector
-  loop:    
+  loop:
     unless iter1 goto loop_done
     \$P1 = shift iter1
     \$S1 = typeof \$P1
     if \$S1 != 'String' goto got_args
     %% DOMAIN_ERROR %%
   got_args:
-	\$P2 = clone $scalar
+        \$P2 = clone $scalar
 END_PIR
-   
-     $template .= interpolate($code, @order);
 
-     $template .= 'push result, ' . $order[0] . "\n";
+            $template .= interpolate( $code, @order );
 
-          $template .= << 'END_PIR';
+            $template .= 'push result, ' . $order[0] . "\n";
+
+            $template .= << 'END_PIR';
     goto loop
 loop_done:
     # return the result vector
@@ -807,7 +842,7 @@ END_POSTAMBLE
 }
 
 # Substitute all macros
-foreach my $macro (keys %macros) {
+foreach my $macro ( keys %macros ) {
     $template =~ s/%% \s+ $macro \s+ %%/$macros{$macro}/gx;
 }
 
@@ -822,10 +857,10 @@ sub interpolate {
     $code =~ s/%1/$op1/g;
     $code =~ s/%2/$op2/g;
     $code .= "\n";
-    return($code);
+    return ($code);
 }
 
-__END__ 
+__END__
 
 =head1 NAME
 
@@ -841,3 +876,10 @@ it under the same terms as Parrot.
 
 =cut
 
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

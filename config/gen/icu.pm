@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/config/gen/icu.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/gen/icu.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Configures ICU and add appropriate targets to the Makefile.
 package gen::icu;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -27,11 +28,10 @@ $description = "Determining whether ICU is installed";
 
 @args = qw(verbose icushared icuheaders icu-config without-icu);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    my ($verbose, $icushared, $icuheaders, $icuconfig, $without) = $conf->options->get(@args);
+    my ( $verbose, $icushared, $icuheaders, $icuconfig, $without ) = $conf->options->get(@args);
 
     my @icu_headers = qw(ucnv.h utypes.h uchar.h);
     my $autodetect  = !defined($icushared)
@@ -39,22 +39,24 @@ sub runstep
 
     $self->set_result(undef);
     unless ($without) {
-        if (!$autodetect) {
+        if ( !$autodetect ) {
             print "specified a icu config parameter,\nICU autodetection disabled.\n" if $verbose;
-        } elsif (!defined $icuconfig || !$icuconfig) {
-            my (undef, undef, $ret) = capture_output("icu-config", "--exists");
+        }
+        elsif ( !defined $icuconfig || !$icuconfig ) {
+            my ( undef, undef, $ret ) = capture_output( "icu-config", "--exists" );
 
-            if (($ret == -1) || (($ret >> 8) != 0)) {
+            if ( ( $ret == -1 ) || ( ( $ret >> 8 ) != 0 ) ) {
                 undef $icuconfig;
                 $autodetect = 0;
                 $without    = 1;
-            } else {
+            }
+            else {
                 $icuconfig = "icu-config";
                 print "icu-config found... good!\n" if $verbose;
             }
         }
 
-        if (!$without && $autodetect && $icuconfig && $icuconfig ne "none") {
+        if ( !$without && $autodetect && $icuconfig && $icuconfig ne "none" ) {
             my $slash = $conf->data->get('slash');
 
             # icu-config script to use
@@ -62,15 +64,15 @@ sub runstep
 
             # ldflags
             $icushared = capture_output("$icuconfig --ldflags");
-            if (defined $icushared) {
+            if ( defined $icushared ) {
                 chomp $icushared;
-                $icushared =~ s/-licui18n\w*//; # "-licui18n32" too
+                $icushared =~ s/-licui18n\w*//;    # "-licui18n32" too
                 $without = 1 if length $icushared == 0;
             }
 
             # location of header files
             $icuheaders = capture_output("$icuconfig --prefix");
-            if (defined $icuheaders) {
+            if ( defined $icuheaders ) {
                 chomp $icuheaders;
                 $without = 1 unless -d $icuheaders;
                 $icuheaders .= "${slash}include";
@@ -92,7 +94,7 @@ sub runstep
     if ($without) {
         $conf->data->set(
             has_icu    => 0,
-            icu_shared => '', # used for generating src/dynpmc/Makefile
+            icu_shared => '',    # used for generating src/dynpmc/Makefile
             icu_dir    => '',
         );
         $self->set_result("no") unless defined $self->result;
@@ -101,26 +103,27 @@ sub runstep
 
     my $ok = 1;
 
-    unless (defined $icushared) {
+    unless ( defined $icushared ) {
         warn "error: icushared not defined\n";
         $ok = 0;
     }
 
-    unless (defined $icuheaders and -d $icuheaders) {
+    unless ( defined $icuheaders and -d $icuheaders ) {
         warn "error: icuheaders not defined or invalid\n";
         $ok = 0;
-    } else {
+    }
+    else {
         $icuheaders =~ s![\\/]$!!;
         foreach my $header (@icu_headers) {
             $header = "$icuheaders/unicode/$header";
-            unless (-e $header) {
+            unless ( -e $header ) {
                 $ok = 0;
                 warn "error: ICU header '$header' not found\n";
             }
         }
     }
 
-    die <<"HELP" unless $ok; # this text is also in Configure.PL!
+    die <<"HELP" unless $ok;    # this text is also in Configure.PL!
 Something is wrong with your ICU installation!
    
    If you do not have a full ICU installation:
@@ -143,20 +146,21 @@ HELP
 
     # Add -I $Icuheaders if necessary
     my $header = "unicode/ucnv.h";
-    $conf->data->set(testheaders => "#include <$header>\n");
-    $conf->data->set(testheader  => "$header");
+    $conf->data->set( testheaders => "#include <$header>\n" );
+    $conf->data->set( testheader  => "$header" );
     cc_gen('config/auto/headers/test_c.in');
 
-    $conf->data->set(testheaders => undef); # Clean up.
-    $conf->data->set(testheader  => undef);
+    $conf->data->set( testheaders => undef );    # Clean up.
+    $conf->data->set( testheader  => undef );
     eval { cc_build(); };
-    if (!$@ && cc_run() =~ /^$header OK/) {
+    if ( !$@ && cc_run() =~ /^$header OK/ ) {
 
         # Ok, we don't need anything more.
         print "Your compiler found the icu headers... good!\n" if $verbose;
-    } else {
+    }
+    else {
         print "Adding -I $icuheaders to ccflags for icu headers.\n" if $verbose;
-        $conf->data->add(' ', ccflags => "-I $icuheaders");
+        $conf->data->add( ' ', ccflags => "-I $icuheaders" );
     }
     cc_clean();
 
@@ -166,3 +170,10 @@ HELP
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

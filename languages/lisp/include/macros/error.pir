@@ -1,3 +1,4 @@
+# $Id: /parrotcode/trunk/languages/lisp/include/macros/error.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
 
 .macro ERROR_0(T,M)
   _error(.T, .M)
@@ -27,3 +28,9 @@
   sprintf _errmsgs, .M, _errargp
   _error(.T, _errmsgs)  
 .endm
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

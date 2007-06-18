@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/t/compilers/pge/02-match.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/compilers/pge/02-match.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ t/compilers/pge/02-match.t - test the Match class
 
 =head1 SYNOPSIS
 
-	% prove t/compilers/pge/02-match.t
+        % prove t/compilers/pge/02-match.t
 
 =head1 DESCRIPTION
 
@@ -23,7 +23,7 @@ Tests the Match class directly.
 
 =cut
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'concat on a Match object (rt#39135)');
+pir_output_is( <<'CODE', <<'OUTPUT', 'concat on a Match object (rt#39135)' );
 .sub main :main
     load_bytecode 'PGE.pbc'
 
@@ -45,5 +45,29 @@ world
 hello world
 OUTPUT
 
-BEGIN { plan tests => 1; }
+pir_output_is( <<'CODE', <<'OUTPUT', 'push on a Match object' );
+.sub main :main
+    .local pmc match, str, arr
+    load_bytecode 'PGE.pbc'
+    match = new 'PGE::Match'
+    str = new .String
+    str = 'foo'
+    push match, str
+    arr = match.'get_array'()
+    $I0 = elements arr
+    print $I0
+    print "\n"
+    $P3 = match[0]
+    say $P3
+.end
+CODE
+1
+foo
+OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

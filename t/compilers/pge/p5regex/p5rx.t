@@ -1,16 +1,6 @@
-#!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/pge/p5regex/p5rx.t 13784 2006-08-01T17:54:04.760248Z chip  $
-
-use strict;
-use warnings;
-use lib qw( t . lib ../../lib ../../../../lib );
-use Test::More;
-use Parrot::Test;
-use Parrot::Test::PGE;
-use Parrot::Config;
-use File::Spec::Functions qw/ catfile /;
-
+#!./parrot -G
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/compilers/pge/p5regex/p5rx.t 2437 2007-03-19T23:15:20.471876Z particle  $
 
 =head1 NAME
 
@@ -25,28 +15,25 @@ in a separate file in the same directory, named 're_tests'.
 This test harness honors a special environment variable called C<TEST_P5RX>.
 If set to a number, that test will be run alone and unconditionally--even
 if it's designated as SKIP or TODO by the harness. This is quite helpful
-in debugging tests that cause parrot to spiral out of control.
+in debugging tests that cause parrot to spiral out of control. {{ XXX }}
 
-The test harness also has two variables @skip_tests and @todo_tests, which
-provide the reason to todo or skip a test followed by the test numbers
-applicable.
-
-B<NOTE:> Don't add new tests here. This file is strictly for Perl 5's tests.
+B<NOTE:> Don't add new tests to C<re_tests>. That file is strictly for
+Perl 5's tests.
 
 The Perl 5 equivalent file provides the following description of the test
-format. There are 6 columns, separated by tabs.
+format. There are 5-6 columns, separated by tabs.
 
 Column 1 contains the pattern, optionally enclosed in C<''>.
-Modifiers can be put after the closing C<'>. 
+Modifiers can be put after the closing C<'>.
 
 Column 2 contains the string to be matched.
 
 Column 3 contains the expected result:
-    y	expect a match
-    n	expect no match
-    c	expect an error
-    B	test exposes a known bug in Perl, should be skipped
-    b	test exposes a known bug in Perl, should be skipped if noamp
+    y    expect a match
+    n    expect no match
+    c    expect an error
+    B    test exposes a known bug in Perl, should be skipped
+    b    test exposes a known bug in Perl, should be skipped if noamp
 
 Columns 4 and 5 are used only if column 3 contains C<y> or C<c>.
 
@@ -65,286 +52,820 @@ Column 6, if present, contains a description of what is being tested.
 
 =cut
 
+.const int TESTS = 960
 
-my @file_path = split m{/}, 't/compilers/pge/p5regex/re_tests';
-open my $test_file, catfile($PConfig{build_dir}, @file_path)
-	or die "Can't open ".catfile ($PConfig{build_dir}, @file_path);
+.sub main :main
+    load_bytecode 'Test/Builder.pir'
+    load_bytecode 'PGE.pbc'
+    load_bytecode 'PGE/Dumper.pbc'
+    .include 'iglobals.pasm'
 
-## figure out how many tests there are
-1 while (<$test_file>);
-my $numtests = $.;
-seek($test_file,0,0);
-$. = 0;
+    # Variable declarations, initializations
+    .local pmc test       # the test harness object.
+               test = new 'Test::Builder'
 
-plan tests => $numtests;
+    .local pmc todo_tests # keys indicate test file; values test number.
+               todo_tests = new 'Hash'
 
-my @todo_tests = (
-    q{unknown} => qw<99 100 142 172 184 223 232 233 234 236 241 243 244 246
-        247 253 254 256 257 260 261 381 382 396 397 398 419 422 428 429 432
-        435 439 440 444 445 446 447 448 449 452 453 454 455 485 495 498 500
-        501 503 504 505 506 507 508 509 510 511 512 515 522 523 524 527 528
-        536 540 541 543 544 545 548 549 553 554 595 596 600 601 602 603 604
-        605 606 607 621 623 624 625 639 641 642 643 693 695 696 697 747 749
-        750 751 801 832 833 840 859 860 861 862 863 865 866 871 874 875 876
-        882 887 888 890 891 893 894 895 896 897 898 899 900>,
-    q{reuse captured group}  => qw<928 929 930 931 932 933 934 935 936 937
-        938 939 940 941 942>,
-    q{non-greedy/lookbehind} => qw<915 916 918 919 920 921 922>,
-    q{greediness/lookbehind} => qw<901 902 903 904 905>,
-    q{non-greedy/zero-width assertion} => qw<907 908 909 910 912 913 914 960>,
-    q{\d in character class}  => qw<825 826 827>,
-    q{[ID 20010803.016]}      => qw<884>,
-    q{[perl #34195]}          => qw<959>,
-    q{undef [perl #16773]}    => qw<925>,
-    q{unmatched bracket}      => qw<923>,
-    q{16 tests for [perl #23171]} => qw<927>,
-);
+    .local pmc skip_tests # keys indicate tests ID; values reasons.
+               skip_tests = new 'Hash'
 
-my @skip_tests = (
-    q{trailing modifiers}  => qw<264 265 266 267 268 269 270 271 272 273 274
-        275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291
-        292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308
-        309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325
-        326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342
-        343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359
-        360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376
-        377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393
-        394 395 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472
-        473 474 475 476 477 478 479 480 483 484 496 609 610 611 612 613 614
-        615 616 617 627 628 629 630 631 632 633 634 635 645 646 647 648 649
-        650 651 652 653 663 664 665 666 667 668 669 670 671 681 682 683 684
-        685 686 687 688 689 699 700 701 702 703 704 705 706 707 717 718 719
-        720 721 722 723 724 725 735 736 737 738 739 740 741 742 743 753 754
-        755 756 757 758 759 760 761 771 772 773 774 775 776 777 778 779 789
-        790 791 792 793 794 795 796 797 802 803 805 834 835 836 838 859 862
-        877 886>,
-    q{bug or error}        => qw<78 79 80 135 136 138 143 144 148 149 155 167
-        248 249 252 308 309 310 322 323 325 330 331 336 347 408 436 487 488
-        489 490 492 531 532 563 564 566 593 594 598 599 944 945>, 
-    q{kills a parrot}      => qw<81 129 130 131 139 140 141 491 493 556 557
-         568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584
-         585 586 587 588 589 590 591 592 800 828 829 830 957 958>,
-    q{hangs a parrot}      => qw<806 807 808 809 810 811 812 813 814 815 816
-        817 818 819 820 821 822 823 924>,
-    q{unknown} => qw<502 597 944 945>,
-    q{[ID 20010811.006]}   => qw<879>,
-    q{[perl #18019]}       => qw<926>,
-);
+    .local string test_dir # the directory containing tests
+                  test_dir = 't/compilers/pge/p5regex/'
 
-while (<$test_file>) {
-	chomp;
-	s/\r//g;
-    { # ignore message of undefined variable.
-        no warnings;
-	    s/(\$\{\w+\})/$1/eeg;
-    }
-	my ($pattern, $subject, $result, $repl, $expect,  $description ) =
-		split /\t/ => $_, 6;
+    .local pmc test_files # values are test file names to run.
+               test_files = new 'ResizablePMCArray'
 
-	$pattern  =  replace_special_vars( $pattern );
-	$subject  =  replace_special_vars( $subject );
-	$expect   =  replace_special_vars( $expect  );
+    # populate the list of test files
+    push test_files, 're_tests'
+
+    .local pmc file_iterator # iterate over list of files..
+               file_iterator = new 'Iterator', test_files
+
+    .local int test_number   # the number of the test we're running
+               test_number = 0
+
+    # these vars are in the loops below
+    .local pmc file_handle   # currently open file.
+    .local string test_file  # name of the current test file
+    .local string test_line  # one line of one test file, a single test
+    .local int ok            # is this a passing test?
+
+    # for any given test:
+    .local pmc regex          # the regex
+    .local pmc match          # the match
+    .local string pattern     # the regex
+    .local string target      # this string to match against the regex
+    .local string result      # expected result of this test. (y/n/...)
+    .local string testvar     # the value to test against expected results
+    .local string expected    # the expected result of the match, or the error
+    .local string description # user-facing description of the test.
+
+    todo_tests = 'set_todo_info'()
+    skip_tests = 'set_skip_info'()
+
+    # how many tests to run?
+    # XXX: this should be summed automatically from test_files data
+    #      until then, we use the constant above
+    test.'plan'(TESTS)
+
+  outer_loop:
+    unless file_iterator goto end_outer_loop
+    .local string test_name
+                  test_name = shift file_iterator
+    # local test number in test file
+    .local int local_test_number
+               local_test_number = 0
+
+    # append the test directory and filename
+    test_file = test_dir . test_name
+
+    # Open the test file
+    file_handle = open test_file, '<'
+    $S0 = typeof file_handle
+    if $S0 == 'Undef' goto bad_file
+
+    # loop over the file, one at a time.
+
+  loop:
+    # read in the file one line at a time...
+    $I0 = file_handle.'eof'()
+    if $I0 goto end_loop
+
+    test_line = readline file_handle
+
+    # skip lines without tabs
+    $I0 = index test_line, "\t"
+    if $I0 == -1 goto loop
+    inc test_number
+    inc local_test_number
+
+  parse_data:
+    push_eh eh_bad_line
+     ( pattern, target, result, testvar, expected, description ) = 'parse_data'( test_line )
+    clear_eh
+
+    # build the test description
+    #   start with the pattern
+    $S0 = concat '/', pattern
+    $S0 .= '/ '
+    #  add the test description, if it exists
+    $I0 = length description
+    unless $I0 goto no_desc
+    description = concat '-- ', description
+  no_desc:
+    description = concat $S0, description
+    # prepend test filename and line number to description
+    description = 'build_test_desc'( description, test_name, local_test_number )
+
+    if target != "''" goto got_target
+    target = ''
+
+  got_target:
+    target = 'backslash_escape'( target )
+    result = 'backslash_escape'( result )
+
+    # Should this test be skipped?
+    $I0 = exists skip_tests[test_name]
+    unless $I0 goto not_skip
+    $P0 = skip_tests[test_name]
+    $I0 = exists $P0[local_test_number]
+    unless $I0 goto not_skip
+    # extract reason from skip data
+    $S0 = $P0[local_test_number]
+    if $S0 == '1' goto set_skip
+    description = 'build_test_desc'( $S0, test_name, local_test_number )
+  set_skip:
+    test.'skip'(1, description)
+    goto loop
+
+  not_skip:
+    push_eh thrown
+    match = 'match_p5regex'( pattern, target )
+    clear_eh
+
+    if match goto matched
+
+    if result == 'n' goto is_ok
+    if result == 'y' goto is_nok
+    goto check_dump
+
+  matched:
+    if result == 'y' goto is_ok
+    if result == 'n' goto is_nok
+
+  check_dump:
+    $S1 = match.'dump_str'('mob', ' ', '')
+
+    $I0 = index $S1, result
+    if $I0 == -1 goto is_nok
+
+  is_ok:
+    ok = 1
+    goto emit_test
+  is_nok:
+    ok = 0
+
+  emit_test:
+    $I0 = exists todo_tests[test_name]
+    unless $I0 goto not_todo
+    $P0 = todo_tests[test_name]
+    $I0 = exists $P0[local_test_number]
+    unless $I0 goto not_todo
+    # extract reason from todo data
+    $S0 = $P0[local_test_number]
+    if $S0 == '1' goto set_todo
+    description = 'build_test_desc'( $S0, test_name, local_test_number )
+  set_todo:
+    test.'todo'(ok,description)
+    goto loop
+  not_todo:
+    test.'ok'(ok,description)
+    if ok goto loop
+    $S0 = concat 'pattern: /', pattern
+    $S1 = concat '/, target: "', target
+    $S0 .= $S1
+    $S1 = concat '", result: "', result
+    $S0 .= $S1
+    $S1 = concat '", testvar: "', testvar
+    $S0 .= $S1
+    $S1 = concat '", expected: "', expected
+    $S0 .= $S1
+    $S2 = match
+    $S1 = concat '", got: "', $S2
+    $S0 .= $S1
+    $S0 .= '"'
+    test.'diag'($S0)
+
+    goto loop
+  end_loop:
+    close file_handle
+    goto outer_loop
+  end_outer_loop:
+
+    test.'finish'()
+    end
+
+  bad_file:
+    print "Unable to open '"
+    print test_file
+    print "'\n"
+
+  thrown:
+    .local pmc exception
+    .local string message
+    get_results '(0,0)', exception, message
+    # remove /'s
+    # $S0 = substr result, 0, 1
+    # if $S0 != '/' goto bad_error
+    # substr result, 0, 1, ''
+    # substr result, -1, 1, ''
+    $I0 = index message, expected
+    if $I0 == -1 goto bad_error
+    ok = 1
+    goto emit_test
+  bad_error:
+    ok = 0
+    goto emit_test
+  bad_line:
+    $S0 = 'Test not formatted properly!'
+    test.'ok'(0, $S0)
+    goto loop
+  eh_bad_line:
+    $S0 = 'Test not formatted properly!'
+    test.'ok'(0, $S0)
+    goto loop
+.end
 
 
-    my @todo = ();
-    if (grep {$_ eq $.} @todo_tests) {
-        push @todo, todo => find_reason_for(@todo_tests);
-    }
+# set todo information
+.sub 'set_todo_info'
+    .local pmc todo_tests # keys indicate test file; values are just defined
+               todo_tests = new 'Hash'
 
-	if (grep {$_ eq $.} @skip_tests) {
-		skip_test($description, $subject, $pattern, $result, $repl, $expect, find_reason_for(@skip_tests), @todo);
-	} else {
-		do_test($description, $subject, $pattern, $result, $repl, $expect, @todo);
-	}
-}
+    .local pmc todo_info
+               todo_info = new 'Hash'
 
-close $test_file;
+    .local string test_file
 
-exit;
+    test_file = 're_tests'
+    bsr reset_todo_info
 
-sub skip_test {
-	my ($description, $subject, $pattern, $result, $repl, $expect, $skip, @todo) = @_;
-	SKIP: {
-		skip $skip => 1;
-		do_test($description, $subject, $pattern, $result, $repl, $expect, @todo);
-	}
-}
+    $S0 = 'character class in enumeration'
+    todo_info[116] = $S0
+    todo_info[119] = $S0
+    todo_info[120] = $S0
+    todo_info[123] = $S0
+    todo_info[124] = $S0
+    todo_info[127] = $S0
 
-sub do_test {
-	my ($description, $subject, $pattern, $result, $repl, $expect, @todo) = @_;
-	$result =~ s/b//i;
-	if ($result !~ /[cynBb]/) {
-		diag "Ill-formed test case: $subject\t$pattern\t$result\t$repl\t$expect";
-		return;
-	}
-	## create the test from the template
-	my $pir_code = p5rx_template();
+    $S0 = 'unknown reason'
+#    todo_info[172] = $S0
+#    todo_info[184] = $S0
+#    todo_info[223] = $S0
+#    todo_info[232] = $S0
+#    todo_info[233] = $S0
+    todo_info[234] = $S0
+    todo_info[235] = $S0
+    todo_info[236] = $S0
+#    todo_info[241] = $S0
+#    todo_info[243] = $S0
+#    todo_info[244] = $S0
+    todo_info[246] = $S0
+    todo_info[247] = $S0
+#    todo_info[253] = $S0
+    todo_info[254] = $S0
+    todo_info[256] = $S0
+    todo_info[257] = $S0
+#    todo_info[260] = $S0
+#    todo_info[261] = $S0
+    todo_info[381] = $S0
+    todo_info[382] = $S0
+    todo_info[396] = $S0
+    todo_info[397] = $S0
+    todo_info[398] = $S0
+    todo_info[419] = $S0
+    todo_info[422] = $S0
+#    todo_info[428] = $S0
+    todo_info[429] = $S0
+    todo_info[432] = $S0
+    todo_info[434] = $S0
+    todo_info[435] = $S0
+    todo_info[439] = $S0
+#    todo_info[440] = $S0
+#    todo_info[444] = $S0
+#    todo_info[445] = $S0
+    todo_info[446] = $S0
+    todo_info[447] = $S0
+    todo_info[448] = $S0
+    todo_info[449] = $S0
+    todo_info[452] = $S0
+    todo_info[453] = $S0
+    todo_info[454] = $S0
+    todo_info[455] = $S0
+    todo_info[495] = $S0
+    todo_info[498] = $S0
+    todo_info[500] = $S0
+    todo_info[501] = $S0
+    todo_info[503] = $S0
+    todo_info[504] = $S0
+    todo_info[505] = $S0
+    todo_info[506] = $S0
+    todo_info[507] = $S0
+    todo_info[508] = $S0
+    todo_info[509] = $S0
+    todo_info[510] = $S0
+    todo_info[511] = $S0
+    todo_info[512] = $S0
+    todo_info[515] = $S0
+    todo_info[521] = $S0
+    todo_info[522] = $S0
+    todo_info[523] = $S0
+    todo_info[524] = $S0
+    todo_info[527] = $S0
+    todo_info[528] = $S0
+    todo_info[535] = $S0
+    todo_info[536] = $S0
+    todo_info[539] = $S0
+    todo_info[540] = $S0
+    todo_info[541] = $S0
+    todo_info[544] = $S0
+    todo_info[545] = $S0
+    todo_info[559] = $S0
+    todo_info[595] = $S0
+    todo_info[596] = $S0
+    todo_info[600] = $S0
+    todo_info[601] = $S0
+#    todo_info[602] = $S0
+    todo_info[603] = $S0
+    todo_info[604] = $S0
+#    todo_info[605] = $S0
+    todo_info[606] = $S0
+    todo_info[607] = $S0
+    todo_info[621] = $S0
+    todo_info[623] = $S0
+    todo_info[624] = $S0
+    todo_info[625] = $S0
+    todo_info[639] = $S0
+    todo_info[641] = $S0
+    todo_info[642] = $S0
+    todo_info[643] = $S0
+    todo_info[693] = $S0
+    todo_info[695] = $S0
+    todo_info[696] = $S0
+    todo_info[697] = $S0
+    todo_info[747] = $S0
+    todo_info[749] = $S0
+    todo_info[750] = $S0
+    todo_info[751] = $S0
+    todo_info[801] = $S0
+#    todo_info[840] = $S0
+    todo_info[858] = $S0
+    todo_info[859] = $S0
+#    todo_info[860] = $S0
+#    todo_info[861] = $S0
+    todo_info[862] = $S0
+#    todo_info[863] = $S0
+    todo_info[865] = $S0
+    todo_info[866] = $S0
+#    todo_info[874] = $S0
+#    todo_info[875] = $S0
+#    todo_info[876] = $S0
+    todo_info[881] = $S0
+#    todo_info[882] = $S0
+    todo_info[887] = $S0
+    todo_info[888] = $S0
+    todo_info[890] = $S0
+    todo_info[891] = $S0
+    todo_info[893] = $S0
+#    todo_info[894] = $S0
+#    todo_info[895] = $S0
+    todo_info[896] = $S0
+    todo_info[897] = $S0
+    todo_info[898] = $S0
+    todo_info[899] = $S0
+#    todo_info[900] = $S0
 
-	my $results  = generate_pir_for_results( $repl );
+    $S0 = 'reuse captured group'
+    todo_info[928] = $S0
+    todo_info[929] = $S0
+    todo_info[930] = $S0
+    todo_info[931] = $S0
+    todo_info[932] = $S0
+    todo_info[933] = $S0
+    todo_info[934] = $S0
+    todo_info[935] = $S0
+    todo_info[936] = $S0
+    todo_info[937] = $S0
+    todo_info[938] = $S0
+    todo_info[939] = $S0
+    todo_info[940] = $S0
+    todo_info[941] = $S0
+    todo_info[942] = $S0
 
-	$pir_code    =~ s/<<SUBJECT>>/$subject/g;
-	$pir_code    =~ s/<<PATTERN>>/$pattern/g;
-	$pir_code    =~ s/<<EXPECT>>/$expect/g;
-	$pir_code    =~ s/<<REPL>>/$repl/g;
-	$pir_code    =~ s/<<RESULTS>>/$results/g;
+    $S0 = 'non-greedy/lookbehind'
+    todo_info[915] = $S0
+    todo_info[916] = $S0
+    todo_info[918] = $S0
+#    todo_info[919] = $S0
+#    todo_info[920] = $S0
+    todo_info[921] = $S0
+    todo_info[922] = $S0
 
-	pir_output_is( $pir_code, $expect, $description, @todo );
+    $S0 = 'greediness/lookbehind'
+    todo_info[901] = $S0
+#    todo_info[902] = $S0
+#    todo_info[903] = $S0
+    todo_info[904] = $S0
+    todo_info[905] = $S0
 
-}
+    $S0 = 'non-greedy/zero-width assertion'
+    todo_info[907] = $S0
+    todo_info[908] = $S0
+#    todo_info[909] = $S0
+    todo_info[910] = $S0
+#    todo_info[912] = $S0
+    todo_info[913] = $S0
+    todo_info[914] = $S0
+    todo_info[960] = $S0
 
-sub find_reason_for {
-    my $reason;
-    for (@_) {
-        $reason = $_ and next if /\D/;
-        return $reason if $_ == $.;
-    }
-}
+    $S0 = '\d in character class'
+#    todo_info[825] = $S0
+#    todo_info[826] = $S0
+    todo_info[827] = $S0
 
-sub p5rx_template
-{
-	return <<'P5RX';
-.sub 'PGE_Test' :main
-	.local pmc p5rx_compile
-	load_bytecode "PGE.pbc"
-	load_bytecode "PGE/Dumper.pir"
-	load_bytecode "PGE/Text.pir"
-	p5rx_compile = compreg "PGE::P5Regex"
+    $S0 = '[ID 20010803.016]'
+#    todo_info[884] = $S0
 
-	.local string target
-	.local string pattern
-	.local pmc rulesub
-	.local pmc match
-	target = <<"TARGET"
-<<SUBJECT>>
-TARGET
-	chopn target, 1
+    $S0 = '[perl #34195]'
+    todo_info[959] = $S0
 
-	pattern = <<"PATTERN"
-<<PATTERN>>
-PATTERN
-	chopn pattern, 1
+    $S0 = 'undef [perl #16773]'
+#    todo_info[925] = $S0
 
-=for comment
+    $S0 = 'unmatched bracket'
+    todo_info[923] = $S0
 
-target  = <<SUBJECT>>
+    $S0 = '16 tests for [perl #23171]'
+    todo_info[927] = $S0
 
-pattern = <<PATTERN>>
+    todo_tests[test_file] = todo_info
 
-expect  = <<EXPECT>>
+    .return (todo_tests)
 
-repl    = <<REPL>>
+  reset_todo_info:
+    todo_info = new .Hash
+    ret
+
+  set_todo_loop: # for developer testing. not used normally
+    if $I0 > $I1 goto end_loop
+    todo_info[$I0] = 1
+    $I0 += 1
+    goto set_todo_loop
+  end_loop:
+    ret
+.end
+
+
+# set skip information
+.sub 'set_skip_info'
+    .local pmc skip_tests # keys indicate test file; values are just defined
+               skip_tests = new 'Hash'
+
+    .local pmc skip_info
+               skip_info = new 'Hash'
+
+    .local string test_file
+
+    test_file = 're_tests'
+    bsr reset_skip_info
+
+    $S0 = 'trailing modifiers'
+    $I0 = 264
+    $I1 = 395
+    bsr set_range
+    $I0 = 458
+    $I1 = 480
+    bsr set_range
+    skip_info[483] = $S0
+    skip_info[484] = $S0
+    skip_info[496] = $S0
+    $I0 = 609
+    $I1 = 617
+    bsr set_range
+    $I0 = 627
+    $I1 = 635
+    bsr set_range
+    $I0 = 645
+    $I1 = 653
+    bsr set_range
+    $I0 = 663
+    $I1 = 671
+    bsr set_range
+    $I0 = 681
+    $I1 = 689
+    bsr set_range
+    $I0 = 699
+    $I1 = 707
+    bsr set_range
+    $I0 = 717
+    $I1 = 725
+    bsr set_range
+    $I0 = 735
+    $I1 = 743
+    bsr set_range
+    $I0 = 753
+    $I1 = 761
+    bsr set_range
+    $I0 = 771
+    $I1 = 779
+    bsr set_range
+    $I0 = 789
+    $I1 = 797
+    bsr set_range
+    skip_info[802] = $S0
+    skip_info[803] = $S0
+    skip_info[805] = $S0
+    skip_info[834] = $S0
+    skip_info[835] = $S0
+    skip_info[836] = $S0
+    skip_info[838] = $S0
+    skip_info[859] = $S0
+    skip_info[862] = $S0
+    skip_info[877] = $S0
+    skip_info[886] = $S0
+
+    $S0 = 'bug or error'
+    skip_info[143] = $S0
+    skip_info[144] = $S0
+    skip_info[148] = $S0
+    skip_info[149] = $S0
+    skip_info[155] = $S0
+    skip_info[167] = $S0
+    skip_info[248] = $S0
+    skip_info[249] = $S0
+    skip_info[252] = $S0
+    skip_info[308] = $S0
+    skip_info[309] = $S0
+    skip_info[310] = $S0
+    skip_info[322] = $S0
+    skip_info[323] = $S0
+    skip_info[325] = $S0
+    skip_info[330] = $S0
+    skip_info[331] = $S0
+    skip_info[336] = $S0
+    skip_info[347] = $S0
+    skip_info[408] = $S0
+    skip_info[436] = $S0
+    skip_info[487] = $S0
+    skip_info[488] = $S0
+    skip_info[489] = $S0
+    skip_info[490] = $S0
+    skip_info[492] = $S0
+    skip_info[531] = $S0
+    skip_info[532] = $S0
+    skip_info[563] = $S0
+    skip_info[564] = $S0
+    skip_info[566] = $S0
+    skip_info[593] = $S0
+    skip_info[594] = $S0
+    skip_info[598] = $S0
+    skip_info[599] = $S0
+    skip_info[944] = $S0
+    skip_info[945] = $S0
+
+    $S0 = 'broken col 4?'
+    skip_info[139] = $S0
+
+    $S0 = 'kills a parrot'
+    skip_info[491] = $S0
+    skip_info[493] = $S0
+    skip_info[556] = $S0
+    skip_info[557] = $S0
+    $I0 = 568
+    $I1 = 592
+    bsr set_range
+    skip_info[800] = $S0
+    skip_info[828] = $S0
+    skip_info[829] = $S0
+    skip_info[830] = $S0
+    skip_info[957] = $S0
+    skip_info[958] = $S0
+
+    $S0 = 'hangs a parrot'
+    $I0 = 806
+    $I1 = 823
+    bsr set_range
+    skip_info[924] = $S0
+
+    $S0 = 'unknown reason'
+    skip_info[502] = $S0
+    skip_info[597] = $S0
+    skip_info[944] = $S0
+    skip_info[945] = $S0
+
+    $S0 = '[ID 20010811.006]'
+    skip_info[879] = $S0
+
+    $S0 = '[perl #18019]'
+    skip_info[926] = $S0
+
+    $S0 = 'parser bug'
+    skip_info[138] = $S0
+
+    skip_tests[test_file] = skip_info
+
+    .return (skip_tests)
+
+  reset_skip_info:
+    skip_info = new .Hash
+    ret
+
+  set_range:                         # for setting a range of tests
+    if $I0 > $I1 goto end_loop       # put range min in $I0, max in $I1
+    if $S0 != '' goto set_skip_info  # put skip reason in $S0
+    $S0 = 'unknown reason'
+  set_skip_info:
+    skip_info[$I0] = $S0
+    $I0 += 1
+    goto set_range
+  end_loop:
+    $S0 = ''
+    ret
+.end
+
+
+.sub 'parse_data'
+    .param string test_line   # the data record
+
+    .local pmc regex          # the regex matching object
+    .local pmc match          # the match
+    .local string pattern     # the regex
+    .local string target      # this string to match against the regex
+    .local string result      # expected result of this test. (y/n/...)
+    .local string testvar     # the value to test against expected results
+    .local string expected    # the expected result of the match, or the error
+    .local string description # user-facing description of the test.
+
+    # NOTE: there can be multiple tabs between entries, so skip until
+    # we have something.
+    # remove the trailing newline from record
+    chopn test_line, 1
+
+    $P1 = split "\t", test_line
+
+  get_pattern:
+    unless $P1 goto bad_line
+    pattern = shift $P1
+    if pattern == '' goto get_pattern
+  get_target:
+    unless $P1 goto bad_line
+    target = shift $P1
+  get_result:
+    unless $P1 goto bad_line
+    result = shift $P1
+    if result == '' goto get_result
+  get_testvar:
+    unless $P1 goto bad_line
+    testvar = shift $P1
+    if testvar == '' goto get_testvar
+  get_expected:
+    unless $P1 goto bad_line
+    expected = shift $P1
+
+  description = ''
+
+  return:
+    .return ( pattern, target, result, testvar, expected, description )
+
+  bad_line:
+     $P1 = new 'Exception'
+     $P1[0] = 'invalid data format'
+     throw $P1
+.end
+
+
+.sub 'build_test_desc'
+    .param string desc
+    .param string test_name
+    .param string local_test_number
+
+    $S0  = '['
+    $S0 .= test_name
+    $S0 .= ':'
+    $S0 .= local_test_number
+    $S0 .= '] '
+    $S0 .= desc
+
+    .return ($S0)
+.end
+
+
+.sub 'match_p5regex'
+    .param string pattern
+    .param string target
+
+    .local pmc match
+
+    .local pmc p5regex     # the perl5 regex compiler
+               p5regex = compreg 'PGE::P5Regex'
+
+    .local pmc regex
+               regex = p5regex(pattern)
+
+    unless_null regex, match_it
+    $P1 = new 'Exception'
+    $P1[0] = 'regex error'
+    throw $P1
+  match_it:
+    match = regex(target)
+
+    .return (match)
+.end
+
+
+# given a 2 digit string, convert to appropriate chr() value.
+.sub hex_chr
+    .param string hex
+
+    $S0 = substr hex, 0, 1
+    $S1 = substr hex, 1, 1
+
+    $I0 = hex_val($S0)
+    $I1 = hex_val($S1)
+
+    $I0 *=16
+    $I0 += $I1
+
+    $S2 = chr $I0
+
+    .return ($S2)
+.end
+
+
+# given a single digit hex value, return it's int value.
+.sub hex_val
+    .param string digit
+
+    $I0 = ord digit
+    if $I0 < 48 goto bad_digit
+    if $I0 > 57 goto non_numeric
+    $I0 -=48
+    .return ($I0)
+  non_numeric:
+    if $I0 < 65 goto bad_digit
+    if $I0 > 70 goto not_capital
+    $I0 -= 55 # A is ascii 65, so reset to zero, add 10 for hex..
+    .return ($I0)
+  not_capital:
+    if $I0 < 97 goto  bad_digit
+    if $I0 > 102 goto bad_digit
+    $I0 -= 87 # a is ascii 97, so reset to zero, add 10 for hex..
+    .return ($I0)
+
+  bad_digit:
+    $P1 = new 'Exception'
+    $P1[0] = 'invalid hex digit'
+    throw $P1
+.end
+
+
+.sub backslash_escape
+    .param string target
+
+    .local int x_pos         # position in string of last \x escape..
+               x_pos = 0
+
+  target1:
+    $I0 = index target, '\n'
+    if $I0 == -1 goto target2
+    substr target, $I0, 2, "\n"
+    goto target1
+  target2:
+    $I0 = index target, '\r'
+    if $I0 == -1 goto target3
+    substr target, $I0, 2, "\r"
+    goto target2
+  target3:
+    $I0 = index target, '\e'
+    if $I0 == -1 goto target4
+    substr target, $I0, 2, "\e"
+    goto target3
+  target4:
+    $I0 = index target, '\t'
+    if $I0 == -1 goto target5
+    substr target, $I0, 2, "\t"
+    goto target4
+  target5:
+    $I0 = index target, '\f'
+    if $I0 == -1 goto target6
+    substr target, $I0, 2, "\f"
+    goto target5
+  target6:
+    # handle \xHH, hex escape.
+
+    $I0 = index target, '\x', x_pos
+    if $I0 == -1 goto target7
+
+    $I1 = length target
+    $I2 = $I0 + 2
+
+    if $I2 > $I1 goto target7
+    $S0 = substr target, $I2, 2
+    $S1 = hex_chr($S0)
+    substr target, $I0, 4, $S1
+
+    inc x_pos
+    goto target6
+  target7:
+    .return (target)
+.end
+
+=head1 BUGS AND LIMITATIONS
+
+Note that while our job would be easier if we could use regular expressions
+in here, but we want to avoid any dependency on the thing we're testing.
+
+Need to add in test ids, to avoid the precarious line numbering.
 
 =cut
-
-	rulesub = p5rx_compile(pattern)
-	match = rulesub(target)
-	unless match goto Match_fail
-
-  Match_success:
-	eq '-', '<<REPL>>', Match_no_check
-
-<<RESULTS>>
-
-  Match_no_check:
-  Match_fail:
-	print "-"
-  Match_end:
-.end
-P5RX
-}
-
-
-sub generate_pir_for_results
-{
-	my( $repl ) = @_;
-	my $replace_me = $repl;
-	my @results;
-
-	my $tokens = {
-		'\$\&' => <<'Match_whole',
-	$S0 = match
-	print $S0
-Match_whole
-
-		'\$\-\[0\]' => <<'Match_whole_from',
-	$I0 = match.'from'()
-	print $I0
-Match_whole_from
-
-		'\$\+\[0\]' => <<'Match_whole_to',
-	$I0 = match.'to'()
-	print $I0
-Match_whole_to
-
-		'\$(\d+)' => <<"Match_backref",
-	\$P0 = match[<<I>>]
-	\$S0 = \$P0
-	print \$S0
-Match_backref
-
-		'\$\-\[([123456789]+)\]' => <<"Match_backref_from",
-	\$P0 = match[<<I>>]
-	\$I0 = \$P0\.'from'()
-	print \$I0
-Match_backref_from
-
-		'\$\+\[([123456789]+)\]' => <<"Match_backref_to",
-	\$P0 = match[<<I>>]
-	\$I0 = \$P0\.'to'()
-	print \$I0
-Match_backref_to
-
-		'-' => <<'Match_hyphen',
-	print '-'
-Match_hyphen
-	};
-
-
-	## don't process  more than this many tokens (prevent runaway while loop)
-	my $max_tokens = 10;
-	my $tok_count = 0;
-
-	while( length $replace_me and $tok_count < $max_tokens)
-	{
-		for my $tok ( sort {length $b <=> length $a} keys %$tokens )
-		{
-			my $rx = qr/(?x) ^ ( $tok ) /;
-
-			my $tok_code;
-			if( $replace_me   =~ s/$rx// )
-			{
-				my $index     =  defined $2 ? $2 - 1 : 0;
-				my $tok_code  =  $tokens->{$tok};
-				$tok_code     =~ s/<<I>>/$index/g;
-
-				push @results => $tok_code;
-				last;
-			}
-		}
-		$tok_count++;
-		push @results => "## unknown or too many tokens: $replace_me";
-	}
-	push @results    => "\tgoto Match_end";
-
-	return join "\n" => @results;
-}
-
-
-## replacement vars for special characters
-sub replace_special_vars
-{
-	my $string =  shift;
-
-	my $bang   =  sprintf "\\%03o", ord "!"; # \41 would not be portable.
-	my $ffff   =  chr(0xff) x 2;
-	my $nulnul =  "\0" x 2;
-
-	$string    =~ s/(\$\{\w+\})/$1/eeg;
-	$string    =~ s/\\n/\n/g;
-	$string    =~ s/\$\{bang\}/$bang/eeg;
-	$string    =~ s/\$\{ffff\}/$ffff/eeg;
-	$string    =~ s/\$\{nulnul\}/$nulnul/eeg;
-
-	return $string;
-}
-

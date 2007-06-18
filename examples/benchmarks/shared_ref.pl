@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/benchmarks/shared_ref.pl 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/local/examples/benchmarks/shared_ref.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -17,13 +17,14 @@ Shares references between threads.
 =cut
 
 use strict;
+use warnings;
 use threads;
 use threads::shared;
 
-for my $i (0..99_999) {
-    my $r :shared;
-    my $j :shared;
-    $r = \$j;
+for my $i ( 0 .. 99_999 ) {
+    my $r : shared;
+    my $j : shared;
+    $r  = \$j;
     $$r = $i;
 }
 
@@ -32,3 +33,10 @@ for my $i (0..99_999) {
 F<examples/benchmarks/shared_ref.pasm>.
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -2,10 +2,9 @@
 # Stack emulation stack to register mapper. Simple and stupid.
 
 use strict;
+use warnings;
 
 package SRM::Stack;
-
-#use base qw(SRM::Base);
 
 # Constructor. Just base this class on a hash.
 sub new {
@@ -15,9 +14,10 @@ sub new {
 
 # Pre-translation hook.
 sub pre_translation {
+
     # We need to emit PIR that sets up a dummy stack.
     return <<'PIR';
-    ${INS} = concat <<"PIRCODE"
+    ${INS} = concat <<'PIRCODE'
   .local pmc reg0, reg1, reg2
   .local pmc s
   new s, .ResizablePMCArray
@@ -27,12 +27,14 @@ PIR
 
 # Post translation hook.
 sub post_translation {
+
     # Nothing to do.
     return q{};
 }
 
 # Pre intruction (common) hook.
 sub pre_instruction {
+
     # Nothing to do.
     return q{};
 }
@@ -40,13 +42,13 @@ sub pre_instruction {
 # Pre and post stack operation (op class instructions) hooks.
 sub pre_op {
     my $self = shift;
-    my ($pops, $pushes) = @_;
+    my ( $pops, $pushes ) = @_;
     my $register_num = 0;
-    my $pir = q{};
+    my $pir          = q{};
 
     # Do code for each pop. Need to set up mv's and pop stuff off the stack
     # we're maintaining.
-    for my $pop_num (0 .. $pops-1) {
+    for my $pop_num ( 0 .. $pops - 1 ) {
         $pir .= <<"PIR";
     # Assign register name.
     \${STACK$pop_num} = "reg$register_num"
@@ -58,7 +60,7 @@ PIR
         $register_num++;
     }
 
-    for my $push_num (0 .. $pushes-1) {
+    for my $push_num ( 0 .. $pushes - 1 ) {
         $pir .= <<"PIR";
     # Assign register name.
     \${DEST$push_num} = "reg$register_num"
@@ -72,11 +74,11 @@ PIR
 
 sub post_op {
     my $self = shift;
-    my ($pops, $pushes) = @_;
+    my ( $pops, $pushes ) = @_;
     my $pir = q{};
 
     # Emit code to push stuff back onto the stack.
-    for my $push_num (0 .. $pushes-1) {
+    for my $push_num ( 0 .. $pushes - 1 ) {
         $pir .= <<"PIR";
     \${INS} = concat "  push s, "
     \${INS} = concat \${DEST$push_num}
@@ -90,14 +92,14 @@ PIR
 
 # Pre and post branch operation hooks.
 sub pre_branch {
-    my $self = shift;
-    my ($pops) = @_;
+    my $self         = shift;
+    my ($pops)       = @_;
     my $register_num = 0;
-    my $pir = q{};
+    my $pir          = q{};
 
     # Do code for each pop. Need to set up mv's and pop stuff off the stack
     # we're maintaining.
-    for my $pop_num (0 .. $pops-1) {
+    for my $pop_num ( 0 .. $pops - 1 ) {
         $pir .= <<"PIR";
     # Assign register name.
     \${STACK$pop_num} = "reg$register_num"
@@ -114,6 +116,7 @@ PIR
 }
 
 sub post_branch {
+
     # Nothing to do here.
     return q{};
 }
@@ -136,6 +139,7 @@ PIR
 
 # Pre and post store operation hooks.
 sub pre_store {
+
     # Nothing to do here.
     return q{};
 }
@@ -193,3 +197,11 @@ PIR
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
+

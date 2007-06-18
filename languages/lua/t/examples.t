@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/examples.t 12840 2006-05-30T15:08:05.048089Z coke  $
+#! perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/examples.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -17,10 +17,11 @@ First tests in order to check infrastructure.
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 5;
+use Parrot::Test tests => 7;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'hello world' );
@@ -38,11 +39,25 @@ OUT
 language_output_like( 'lua', <<'CODE', <<'OUT', 'version' );
 print(_VERSION)
 CODE
-/Lua 5\.[01]/
+/^Lua 5\.1/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'factorial (recursive)' );
 function factorial (n)
+    if n == 0 then
+        return 1
+    else
+        return n * factorial(n-1)
+    end
+end
+
+print(factorial(7))
+CODE
+5040
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'factorial (recursive)' );
+local function factorial (n)
     if n == 0 then
         return 1
     else
@@ -68,4 +83,19 @@ print(factorial(7))
 CODE
 5040
 OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'with args', params => "abc def"  );
+print(#arg)
+print(...)
+CODE
+2
+abc	def
+OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

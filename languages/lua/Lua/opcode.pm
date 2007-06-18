@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 
 package Lua::opcode;
 {
@@ -39,9 +40,8 @@ package Lua::opcode;
         if ( $visitor->can($func) ) {
             return $visitor->$func( $self, @_ );
         }
-        warn "Please implement a function 'visit", ref $self, "' in '",
-            ref $visitor, "'.\n";
-        return undef;
+        warn "Please implement a function 'visit", ref $self, "' in '", ref $visitor, "'.\n";
+        return;
     }
 
 }
@@ -70,7 +70,7 @@ use base qw(Lua::opcode);
 package NoOp;
 use base qw(Lua::opcode);
 
-package GetGlobalOp;
+package InterpInfoOp;
 use base qw(Lua::opcode);
 
 package FindLexOp;
@@ -97,6 +97,9 @@ use base qw(Lua::opcode);
 package CallMethOp;
 use base qw(Lua::opcode);
 
+package TailCallDir;
+use base qw(Lua::opcode);
+
 package LabelOp;
 use base qw(Lua::opcode);
 
@@ -107,9 +110,6 @@ package BranchIfOp;
 use base qw(Lua::opcode);
 
 package BranchUnlessOp;
-use base qw(Lua::opcode);
-
-package BranchUnlessNullOp;
 use base qw(Lua::opcode);
 
 package SubDir;
@@ -134,4 +134,11 @@ package ConstDir;
 use base qw(Lua::opcode);
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

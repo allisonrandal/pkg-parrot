@@ -3,14 +3,14 @@
  *
  * skeleton example - a stripped down jit/ppc/jit_emit.h
  *
- * $Id: /local/src/jit/skeleton/jit_emit.h 11501 2006-02-10T18:27:13.457666Z particle  $
+ * $Id: /parrotcode/trunk/src/jit/skeleton/jit_emit.h 3440 2007-05-09T12:16:31.622184Z paultcochrane  $
  */
 
-#if !defined(PARROT_PPC_JIT_EMIT_H_GUARD)
-#define PARROT_PPC_JIT_EMIT_H_GUARD
+#ifndef PARROT_JIT_SKELETON_JIT_EMIT_H_GUARD
+#define PARROT_JIT_SKELETON_JIT_EMIT_H_GUARD
 
-#include <unistd.h>
-#include <limits.h>
+#  include <unistd.h>
+#  include <limits.h>
 
 /*
  * define all the available cpu registers
@@ -35,7 +35,7 @@ typedef enum {
     BP   = r13,         /* register base pointer (peristent) */
     OP_MAP = r14,       /* cached op_map (persistent) */
     CODE_START = r15,   /* cached code begint (persistent) */
-    INTERP = r16,       /* cached interpreter register (persistent( */
+    INTERP = r16,       /* cached interpreter register (persistent) */
     r17,
     ...
     r31
@@ -96,19 +96,19 @@ enum { JIT_ARCH_CALL, JIT_ARCH_BRANCH, JIT_ARCH_UBRANCH };
  * this is used to load hardware cpu registers from parrot registers
  */
 #  define jit_emit_mov_rm_i(pc, reg, offs) \
-    jit_emit_lwz(pc, reg, offs, BP)     /* e.g. PPC */
+      jit_emit_lwz(pc, reg, offs, BP)     /* e.g. PPC */
 
 /* load floating point register from Parrot register */
 #  define jit_emit_mov_rm_n(pc, reg, offs) \
-    jit_emit_lfd(pc, reg, offs, BP)     /* e.g. PPC */
+      jit_emit_lfd(pc, reg, offs, BP)     /* e.g. PPC */
 
 /* Store a CPU register back to a Parrot register. */
 
 #  define jit_emit_mov_mr_i(pc, offs, reg) \
-    jit_emit_stw(pc, reg, offs, BP)
+      jit_emit_stw(pc, reg, offs, BP)
 
 #  define jit_emit_mov_mr_n(pc, offs, reg) \
-    jit_emit_stfd(pc, reg,  offs, BP)
+      jit_emit_stfd(pc, reg,  offs, BP)
 
 /*
  * emit a branch and remember the branch target for code fixup,
@@ -117,7 +117,7 @@ enum { JIT_ARCH_CALL, JIT_ARCH_BRANCH, JIT_ARCH_UBRANCH };
 static void
 jit_emit_bc(Parrot_jit_info_t *jit_info, branch_t cond, opcode_t disp)
 {
- /* see other architectures */
+    /* see other architectures */
 }
 
 
@@ -138,8 +138,8 @@ jit_emit_bc(Parrot_jit_info_t *jit_info, branch_t cond, opcode_t disp)
  */
 
 #  define add_disp(pc, D, disp) \
-    jit_emit_mov_ri_i(pc, ISR1, disp); \
-    jit_emit_add_rrr(pc, D, CODE_START, ISR1)
+      jit_emit_mov_ri_i(pc, ISR1, disp); \
+      jit_emit_add_rrr(pc, D, CODE_START, ISR1)
 
 /*
  * emit code that gets interp->code->jit_info->arena->op_map
@@ -175,7 +175,7 @@ jit_emit_bc(Parrot_jit_info_t *jit_info, branch_t cond, opcode_t disp)
  */
 void
 Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp * interpreter)
+                     Interp *interp)
 {
 }
 
@@ -186,9 +186,9 @@ Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
  */
 void
 Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-                   Interp * interpreter)
+                   Interp *interp)
 {
-    Parrot_jit_normal_op(jit_info, interpreter);
+    Parrot_jit_normal_op(jit_info, interp);
 
     /* fix our reserved registers,
      * in case we are branching to a new segment
@@ -203,16 +203,16 @@ Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
 /*
  * release stack frame end exit see core.jit
  */
-static void Parrot_end_jit(Parrot_jit_info_t *, Interp * );
+static void Parrot_end_jit(Parrot_jit_info_t *, Interp *);
 
-#undef Parrot_jit_restart_op
+#  undef Parrot_jit_restart_op
 /*
  * emit code that might leave the JIT runcore
  * see  ppc or i386
  */
 void
 Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
-                      Interp * interpreter)
+                      Interp *interp)
 {
 }
 
@@ -233,7 +233,7 @@ Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
  */
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-                 Interp * interpreter)
+                 Interp *interp)
 {
     ...
 }
@@ -243,7 +243,7 @@ Parrot_jit_begin(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-                   Interp * interpreter)
+                   Interp *interp)
 {
 }
 
@@ -297,7 +297,7 @@ static const char floatval_map[FLOAT_REGISTERS_TO_MAP] =
 static void
 ppc_flush_cache(Parrot_jit_info_t * jit_info, Interp *i)
 {
- ...
+    ...
 }
 
 /*
@@ -349,22 +349,20 @@ static const jit_arch_info arch_info = {
  * and finally you need an interface function to return above structure
  */
 
-const jit_arch_info * 
-Parrot_jit_init(Interp *interpreter)
+const jit_arch_info *
+Parrot_jit_init(Interp *interp)
 {
     return &arch_info;
 }
 
 
 #endif /* JIT_EMIT == 0 */
-#endif /* PARROT_PPC_JIT_EMIT_H_GUARD */
+#endif /* PARROT_JIT_SKELETON_JIT_EMIT_H_GUARD */
+
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

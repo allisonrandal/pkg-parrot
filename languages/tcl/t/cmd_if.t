@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 18
+plan 20
 
 eval_is {
  set a ""
@@ -123,6 +129,23 @@ eval_is {
   if 2 then {set a true}
   set a
 } true {numeric non-0 is true}
+
+
+eval_is {
+  namespace eval lib {
+    set val {}
+    proc a {} {error ok}
+    if {[a]} {}
+  }
+} ok {namespace resolution in cond}
+
+eval_is {
+  namespace eval lib {
+    set val {}
+    proc a {} {error ok}
+    if 1 a
+  }
+} ok {namespace resolution in body}
 
 eval_is {
   if {[error moo]&&1} {error oink} else

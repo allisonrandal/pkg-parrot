@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/config/gen/makefiles/dynpmc_pl.in 13917 2006-08-04T06:50:52.059791Z chip  $
+# $Id: /parrotcode/local/config/gen/makefiles/dynpmc_pl.in 694 2006-12-17T08:35:48.770808Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ dynamic PMCs.
 =cut
 
 use strict;
+use warnings;
 
 use File::Copy qw(copy);
 
@@ -51,38 +52,49 @@ our $PMC2C = "$PERL $PATHQUOTE" . q[@build_dir@@slash@tools@slash@build@slash@pm
 sub compile_cmd {
     my ($target, $source) = @_;
 
+    # XXX Reference to BGC - need long term solution for passing in include paths
     return
-        "$CC $CFLAGS " .
+        "$CC " .
         '@cc_o_out@' . $target . " " .
         "-I" . $PATHQUOTE . '@build_dir@@slash@include' . $PATHQUOTE . " " .
         "-I" . $PATHQUOTE . '@build_dir@@slash@src@slash@pmc' . $PATHQUOTE . " " .
         "-I" . $PATHQUOTE . '@build_dir@@slash@compilers@slash@bcg@slash@include' . $PATHQUOTE . " " .
+        "$CFLAGS " .
         $source;
 };
 
 sub partial_link_cmd {
     my ($target, $libs, $sources) = @_;
-    
+
     my $liblist;
     if ($^O =~ /mswin32/i) {
         # Need to put various libraries in the link line.
         $liblist = join( ' ', map { "$_.lib" } keys %$libs );
         if ($CC =~ /gcc/i) {
-            $liblist =~ s/gdbm\.lib/-llibgdbm/i;
+            $liblist =~ s/libgdbm\.lib/-llibgdbm/i;
         }
         my $extraLibs = '@libs@ @icu_shared@';
         $extraLibs =~ s/blib/..\\blib/g;
         $extraLibs =~ s/\Q$(A)\E/.lib/g;
         $liblist .= ' ' . $extraLibs;
-    } else {
+
+        # Also note that we may need to look in the Parrot blib directory.
+        if ($CC =~ /gcc/i) {
+            $liblist .= qq{ -Wl,-L "@build_dir@/blib/lib"};
+        }
+        else {
+            $liblist .= qq{ /LIBPATH:"@build_dir@/blib/lib"};
+        }
+    }
+    else {
         $liblist = join( ' ', map { "-l$_" } keys %$libs );
     }
 
     return
-        "$LD $LDFLAGS $LD_LOAD_FLAGS ".
+        "$LD ".
         '@ld_out@' . $target . " " .
         join(" ", map {"$PATHQUOTE$_$PATHQUOTE"} @$sources) .
-        " $liblist $PATHQUOTE$LIBPARROT$PATHQUOTE";
+        " $liblist $LDFLAGS $LD_LOAD_FLAGS $PATHQUOTE$LIBPARROT$PATHQUOTE";
 }
 
 our $NOW = time();
@@ -97,7 +109,7 @@ if ($mode eq 'generate') {
     generate_dump($_) foreach (@pmcs);
     generate_c($_) foreach (@pmcs);
 
-    my ($group_files, $group_libs, $pmc_group, $pmc_libs) = 
+    my ($group_files, $group_libs, $pmc_group, $pmc_libs) =
         gather_groups_and_libs(@pmcs);
 
     while (my ($group, $pmcs) = each %$group_files) {
@@ -107,9 +119,9 @@ if ($mode eq 'generate') {
               or die "pmc2c library creation failed ($?)\n";
         }
     }
-} 
+}
 elsif ($mode eq 'compile') {
-    my ($group_files, $group_libs, $pmc_group, $pmc_libs) = 
+    my ($group_files, $group_libs, $pmc_group, $pmc_libs) =
         gather_groups_and_libs(@pmcs);
 
     # Convert X.c -> X.o for all X.c
@@ -122,7 +134,7 @@ elsif ($mode eq 'compile') {
     }
 } 
 elsif ($mode eq 'linklibs') {
-    my ($group_files, $group_libs, $pmc_group, $pmc_libs) = 
+    my ($group_files, $group_libs, $pmc_group, $pmc_libs) =
         gather_groups_and_libs(@pmcs);
 
     # Convert lib-GROUP.so + A.so + B.so ... -> GROUP.so
@@ -142,7 +154,7 @@ elsif ($mode eq 'copy') {
       or die "copy command requires destination";
     my $dest = $1;
 
-    my ($group_files, $group_libs, $pmc_group, $pmc_libs) = 
+    my ($group_files, $group_libs, $pmc_group, $pmc_libs) =
         gather_groups_and_libs(@pmcs);
     my @ungrouped_pmcs = grep { ! exists $pmc_group->{$_} } @pmcs;
 
@@ -179,9 +191,14 @@ sub gather_groups_and_libs {
     for my $pmc (@pmcs) {
         our $class;
         require "$pmc.dump";
- 
+
         # there can be many libs
         my %libs = %{ $class->{flags}{lib} || {} };
+        if ($^O eq 'MSWin32' && $CC =~ /^gcc/i) {
+            my %newlibs = ();
+            $newlibs{"lib$_"} = $libs{$_} for keys %libs;
+            %libs = %newlibs;
+        }
         $pmc_libs{$pmc} = \%libs;
 
         # There should be at most a single group
@@ -204,7 +221,8 @@ sub modtime {
 
     if (defined $ago) {
         return $NOW - $ago;
-    } else {
+    } 
+    else {
         return;
     }
 }
@@ -228,6 +246,8 @@ sub generate_dump {
         run("$PMC2C --dump $pmc.pmc")
           or die "pmc2c dump failed ($?)\n";
     }
+
+    return;
 }
 
 sub generate_c {
@@ -237,6 +257,8 @@ sub generate_c {
         run("$PMC2C --c $pmc.pmc")
           or die "pmc2c code generation failed ($?)\n";
     }
+
+    return;
 }
 
 sub compile {
@@ -244,11 +266,11 @@ sub compile {
 
     $dest_stem ||= $src_stem;
     if (needs_build("$dest_stem$O", "$src_stem.c")) {
-        run(compile_cmd("$dest_stem$O", "$src_stem.c"))
+        return run(compile_cmd("$dest_stem$O", "$src_stem.c"))
           or die "compile $src_stem.c failed ($?)\n";
     }
     else {
-        1;
+        return 1;
     }
 }
 
@@ -257,10 +279,18 @@ sub partial_link {
 
     my @sources = map { "$_$O" } @$stems;
     if (needs_build("$group$LOAD_EXT", @sources)) {
-        run(partial_link_cmd("$group$LOAD_EXT", $libs, \@sources))
+        return run(partial_link_cmd("$group$LOAD_EXT", $libs, \@sources))
           or die "partial link $group$LOAD_EXT failed ($?)\n";
     }
     else {
-        1;
+        return 1;
     }
 }
+
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

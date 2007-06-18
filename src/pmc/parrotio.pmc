@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/parrotio.pmc 13858 2006-08-03T20:42:41.309483Z chip  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/parrotio.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ These are the vtable functions for Parrot IO.
 */
 
 #include "parrot/parrot.h"
+#include <assert.h>
 
 /* This class is actually part of the io subsystem */
 #include "../src/io/io_private.h"
@@ -42,7 +43,7 @@ class method.
 */
 
     METHOD INTVAL say(STRING *s) {
-        PMC *out = SELF == interpreter->vtables[enum_class_ParrotIO]->class ?
+        PMC *out = SELF == interp->vtables[enum_class_ParrotIO]->pmc_class ?
             PIO_STDOUT(INTERP) : SELF;
         INTVAL r = PIO_putps(INTERP, out, s);
         r  += PIO_puts(INTERP, out, "\n");
@@ -60,34 +61,41 @@ Opens the file with the given mode, using the given IO layer.
 
     METHOD PMC* open(STRING* file, STRING *mode, STRING* layer) {
         ParrotIOLayer *l;
-        const char *c_file, *c_mode, *c_layer;
+        char *c_file, *c_mode, *c_layer;
         PMC *pio;
 
-        c_file = string_to_cstring(INTERP, file);
-        c_mode = string_to_cstring(INTERP, mode);
+        c_file  = string_to_cstring(INTERP, file);
+        c_mode  = string_to_cstring(INTERP, mode);
         c_layer = string_to_cstring(INTERP, layer);
-        l = PIO_get_layer(INTERP, c_layer);
-        pio = PIO_open(INTERP, l, c_file, c_mode);
+        l       = PIO_get_layer(INTERP, c_layer);
+        pio     = PIO_open(INTERP, l, c_file, c_mode);
+
+        string_cstring_free(c_file);
+        string_cstring_free(c_mode);
+        string_cstring_free(c_layer);
+
         if (!pio || !PMC_struct_val(pio))
             return pmc_new(INTERP, enum_class_Undef);
         if (l) {
-            ParrotIO *io = PMC_data(pio);
+            ParrotIO *io = (ParrotIO *)PMC_data(pio);
             int is_mmap = strcmp(c_layer, "mmap") == 0;
             /*
              * XXX move this into the layer
              */
             if ((is_mmap && (io->b.flags & PIO_BF_MMAP)) || !is_mmap) {
-                l = interpreter->piodata->default_stack;
+                l = interp->piodata->default_stack;
                 if (!strcmp(l->name, "buf"))
                     l = l->down;
                 /* XXX layer is stored twice - which is used when */
-                io->stack = PMC_struct_val(pio) = l;
+                io->stack           = l;
+                PMC_struct_val(pio) = l;
                 /* push the layer */
                 PIO_push_layer_str(INTERP, pio, layer);
             }
             else {
-                l = interpreter->piodata->default_stack;
-                io->stack = PMC_struct_val(pio) = l;
+                l = interp->piodata->default_stack;
+                io->stack           = l;
+                PMC_struct_val(pio) = l;
             }
         }
         /* XXX leaks as in ops/io.ops: open */
@@ -103,31 +111,31 @@ defined, that is, if the readline library is available.  The return values are:
 
 =over
 
-=item * -1 
+=item * -1
 
 readline isn't configured
 
-=item * -2 
+=item * -2
 
 The file is not open/not input or not a tty, if turning on interactive.
 
-=item * 0 / 1 
+=item * 0 / 1
 
 old interactive setting
 
 =back
 
-=item C<METHOD STRING* readline(STRING* prompt)>
+=item C<METHOD PMC* readline(STRING* prompt)>
 
 Reads a line from the given PIO. If readline is interactive and a prompt
 is not empty, it will be displayed. The interactive feature is not
 available with the C<readline> opcode (which will be removed anyway).
 Interactive mode adds non-empty lines to the readline history.
 
-Returns the line without the newline or NULL, indicating the end of input (for
-example, after ^D or at the end of the file.)
+Returns the line without the newline in a String PMC. If ^D/eof occurred,
+this will return a Null PMC.
 
-SYNOPSIS  
+SYNOPSIS
 
       pio = getstdin
       $I0 = pio.'set_readline_interactive'(1)
@@ -135,8 +143,8 @@ SYNOPSIS
       printerr "set_readline_interactive failed: "
       ...
   loop:
-      s = pio.'readline'('hello polly> ')
-      if null s goto ex
+      $P1 = pio.'readline'('hello polly> ')
+      if null $P1  goto ex
       ..
       goto loop
   ex:
@@ -146,11 +154,11 @@ SYNOPSIS
 */
 
     METHOD INTVAL set_readline_interactive(INTVAL on) {
-        ParrotIO *io = PMC_data(SELF);
+        ParrotIO *io = (ParrotIO *)PMC_data(SELF);
 #ifdef PARROT_HAS_READLINE
         INTVAL flag;
 #endif
-        if (!io) 
+        if (!io)
             return -2;
         if (!(io->flags & PIO_F_READ))
             return -2;
@@ -168,34 +176,38 @@ SYNOPSIS
 #endif
     }
 
-    METHOD STRING* readline(STRING* prompt) {
-        ParrotIO *io = PMC_data(SELF);
+    METHOD PMC* readline(STRING* prompt) {
+        ParrotIO *io = (ParrotIO *)PMC_data(SELF);
+        PMC *pmc_res = NULL;
         STRING *res = NULL;
         UINTVAL len;
 
-        if (!io) 
+        if (!io)
             return NULL;
 #ifdef PARROT_HAS_READLINE
         if (io->flags & PIO_F_READLINE) {
             char *r;
 
-            r = readline (prompt ? prompt->strstart : NULL);
+            r = readline(prompt ? prompt->strstart : NULL);
             if (r) {
                 if (*r)
                     add_history(r);
                 res = string_from_cstring(INTERP, r, 0);
                 free(r);
+                pmc_res = pmc_new(INTERP, enum_class_String);
+                PMC_str_val(pmc_res) = res;
+                return pmc_res;
             }
-            return res;
+            return PMCNULL;
         }
         else
 #endif
         {
             if (!(io->flags & PIO_F_LINEBUF))
-                PIO_setlinebuf(interpreter, SELF);
-            res = PIO_reads(interpreter, SELF, 0);
+                PIO_setlinebuf(interp, SELF);
+            res = PIO_reads(interp, SELF, 0);
             if (!res)
-                return res;
+                return PMCNULL;
             /* readline should better return the string w/o NL */
             len = string_length(INTERP, res);
             while (len && (((char*)res->strstart)[len-1] == '\n'
@@ -204,8 +216,67 @@ SYNOPSIS
                 --res->strlen;
                 --res->bufused;
             }
-            return res;
+            pmc_res = pmc_new(INTERP, enum_class_String);
+            PMC_str_val(pmc_res) = res;
+            return pmc_res;
         }
+    }
+
+/*
+
+=item METHOD STRING* slurp(STRING* name);
+
+Slurp an (existing, disc) file named I<name> into a STRING result.
+
+Please note that this method isn't catching any failures yet.
+
+Usage as class method:
+
+  .local pmc cl
+  cl = getclass 'ParrotIO'
+  $S0 = cl.'slurp'('the_file')
+
+The file will be opened, read, and closed.
+
+Or with an openend file:
+
+  pio = open 'the_file', '<'
+  $S0 = pio.'slurp'('')
+
+This does B<not> close the file.
+
+=cut
+
+*/
+
+    METHOD STRING* slurp(STRING* name) {
+        STRING* result;
+        if (!PMC_data0(SELF)) {
+            /* called as class method - open, slurp, close file */
+            char * const path = string_to_cstring(interp, name);
+            INTVAL size = Parrot_stat_info_intval(INTERP, name, STAT_FILESIZE);
+            PMC* pio = PIO_open(INTERP, NULL, path, "<");
+            string_cstring_free(path);
+            /* TODO handle stdin */
+            result = PIO_reads(INTERP, pio, size);
+            PIO_close(INTERP, pio);
+            return result;
+        }
+        else {
+            /* slurp open file */
+            STRING *part;
+            if (!PMC_data(SELF))
+                real_exception(interp, NULL, PIO_ERROR,
+                        "Cannot slurp from empty filehandle");
+            result = NULL;
+            do {
+                part = PIO_reads(INTERP, SELF, 4096);
+                if (string_length(INTERP, part) == 0)
+                    break;
+                result = string_append(INTERP, result, part);
+            } while (1);
+        }
+        return result;
     }
 
 /*
@@ -234,18 +305,18 @@ XXX TBD
 
 */
 
-    void class_init () {
+    void class_init() {
 
         if (pass) {
-            enter_nci_method(INTERP, enum_class_ParrotIO,
+            register_nci_method(INTERP, enum_class_ParrotIO,
                     F2DPTR(PIO_flush), "flush", "vJO");
-            enter_nci_method(INTERP, enum_class_ParrotIO,
+            register_nci_method(INTERP, enum_class_ParrotIO,
                     F2DPTR(PIO_setbuf), "setbuf", "iJOi");
-            enter_nci_method(INTERP, enum_class_ParrotIO,
+            register_nci_method(INTERP, enum_class_ParrotIO,
                     F2DPTR(PIO_setlinebuf), "setlinebuf", "iJO");
-            enter_nci_method(INTERP, enum_class_ParrotIO,
+            register_nci_method(INTERP, enum_class_ParrotIO,
                     F2DPTR(PIO_puts), "puts", "iJOt");
-            enter_nci_method(INTERP, enum_class_ParrotIO,
+            register_nci_method(INTERP, enum_class_ParrotIO,
                     F2DPTR(PIO_eof), "eof", "iJO");
         }
     }
@@ -260,7 +331,7 @@ Initializes the IO PMC.
 
 */
 
-    void init () {
+    void init() {
         PObj_active_destroy_SET(SELF);
     }
 
@@ -274,8 +345,8 @@ Destroys the IO PMC, flushing and closing as necessary.
 
 */
 
-    void destroy () {
-        ParrotIO *io = PMC_data(SELF);
+    void destroy() {
+        ParrotIO *io = (ParrotIO *)PMC_data(SELF);
         if (io) {
             /* shared filehandles will only get flushed */
             if (io->flags & PIO_F_SHARED) {
@@ -284,6 +355,7 @@ Destroys the IO PMC, flushing and closing as necessary.
             else {
                 PIO_close(INTERP, SELF);
             }
+            PIO_destroy(interp, SELF);
         }
     }
 
@@ -300,7 +372,7 @@ IO layers, we might copy C<data> and C<struct_val>.
 
 */
 
-    PMC* clone () {
+    PMC* clone() {
         PMC* dest = pmc_new(INTERP, SELF->vtable->base_type);
         PMC_data(dest) = PMC_data(SELF);
         PMC_struct_val(dest) = PMC_struct_val(SELF);
@@ -334,7 +406,7 @@ non-existent layers, returns an empty string.
 */
 
     STRING* get_string_keyed_int(INTVAL n) {
-        ParrotIO *io = PMC_data(SELF);
+        ParrotIO *io = (ParrotIO *)PMC_data(SELF);
         ParrotIOLayer *layer;
         if (!io)
             return const_string(INTERP, "");
@@ -358,11 +430,11 @@ non-existent layers, returns an empty string.
     }
 /*
 
-=item C<void push_string (STRING* value)>
+=item C<void push_string(STRING* value)>
 
 Pushes the layer name C<value> onto the PIO's layer stack.
 
-=item C<STRING* pop_string ()>
+=item C<STRING* pop_string()>
 
 Pops a layer off the PIO's layer stack and returns its name.
 
@@ -370,11 +442,11 @@ Pops a layer off the PIO's layer stack and returns its name.
 
 */
 
-    void push_string (STRING* value) {
+    void push_string(STRING* value) {
         PIO_push_layer_str(INTERP, SELF, value);
     }
 
-    STRING* pop_string () {
+    STRING* pop_string() {
         return PIO_pop_layer_str(INTERP, SELF);
     }
 
@@ -394,10 +466,7 @@ Initial version by leo 2003/06/23.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

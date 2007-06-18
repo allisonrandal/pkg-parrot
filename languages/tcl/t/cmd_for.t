@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 8
+plan 10
 
 eval_is {
  set r ""
@@ -23,6 +29,13 @@ eval_is {
   for {set x 11} {$x < 10} {incr x} {set r [append r $x]}
   set r
 } {} {test not met initially}
+
+is [for {set i 1} {$i < 4} {incr i} {}] {} \
+  {[for] returns ''}
+
+eval_is {for {} {"foo"} {} {}} \
+  {expected boolean value but got "foo"} \
+  {boolean test}
 
 eval_is {for} \
   {wrong # args: should be "for start test next command"} \

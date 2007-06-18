@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2005, The Perl Foundation.
-$Id: /local/src/pmc/lexinfo.pmc 13925 2006-08-04T15:10:35.798913Z chip  $
+Copyright (C) 2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/lexinfo.pmc 3368 2007-05-03T05:08:51.125791Z chromatic  $
 
 =head1 NAME
 
@@ -23,23 +23,23 @@ These are the vtable functions for the lexinfo PMC.
 #include "pmc_hash.h"
 
 static size_t
-key_hash_STRING(Interp *interpreter, void *value, size_t seed)
+key_hash_STRING(Interp *interp, void *value, size_t seed)
 {
-    STRING *s = value;
+    STRING *s = (STRING *)value;
 
-    if (s->hashval) {
+    if (s->hashval)
         return s->hashval;
-    }
 
-    return string_hash(interpreter, s, seed);
+    return string_hash(interp, s, seed);
 }
+
 /*
  * LexInfo contains a constant Hash with constant string
  * keys and integer indices - no marking and no pmc_ext
  * needed (except for freeze/thaw
  */
 
-pmclass LexInfo need_ext does hash {
+pmclass LexInfo need_ext does hash no_ro {
 
 /*
 
@@ -95,12 +95,12 @@ Returns the number of elements in the LexInfo hash.
 
 */
 
-    METHOD void declare_lex_preg (STRING* name, INTVAL preg) {
-        parrot_hash_put(INTERP, PMC_struct_val(SELF), name, (void*)preg);
+    METHOD void declare_lex_preg(STRING *name, INTVAL preg) {
+        parrot_hash_put(INTERP, (Hash*)PMC_struct_val(SELF), name, (void*)preg);
     }
 
-    INTVAL elements () {
-        return parrot_hash_size(INTERP, PMC_struct_val(SELF));
+    INTVAL elements() {
+        return parrot_hash_size(INTERP, (Hash *)PMC_struct_val(SELF));
     }
 
 /*
@@ -140,7 +140,7 @@ The implementation of the Hash PMC is called.
              * TODO create hash with needed types in the first place
              */
             SELF.init_pmc(NULL);
-            hash = PMC_struct_val(SELF);
+            hash          = (Hash *)PMC_struct_val(SELF);
             hash->entries = elems;
         }
         else {
@@ -156,7 +156,7 @@ The implementation of the Hash PMC is called.
 
 =head1 SEE ALSO
 
-F<docs/pdds/pdd20_lecical_vars.pod>, F<src/classes/lexpad.pmc>.
+F<docs/pdds/pdd20_lexical_vars.pod>, F<src/classes/lexpad.pmc>.
 
 =cut
 
@@ -164,10 +164,7 @@ F<docs/pdds/pdd20_lecical_vars.pod>, F<src/classes/lexpad.pmc>.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

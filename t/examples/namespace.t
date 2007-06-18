@@ -1,5 +1,6 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/examples/namespace.t 12838 2006-05-30T14:19:10.150135Z coke  $
+#!perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/examples/namespace.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
@@ -31,22 +32,26 @@ Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
 
 =cut
 
-
 # Set up expected output for examples
 
 # cannot test the exact result, just adding one method somewhere
-# changes all. Also namespaces are hashes. While we preserve 
+# changes all. Also namespaces are hashes. While we preserve
 # insert order, we do not gurantee any specific order.
 # test the name of the 2 toplevel names,  parrot is using
-my %expected
-    = (
-    'namespace_dump.pir'        =>  << 'END_EXPECTED',
+my %expected = (
+    'namespace_dump.pir' => << 'END_EXPECTED',
 /^parrot.*
 ^__parrot_core/sm
 END_EXPECTED
-    );
+);
 
 while ( my ( $example, $expected ) = each %expected ) {
     example_output_like( "examples/namespace/$example", $expected );
 }
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

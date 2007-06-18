@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/pmc/config.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/pmc/config.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ t/pmc/config.t - Builtin Config
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/config.t
+    % prove t/pmc/config.t
 
 =head1 DESCRIPTION
 
@@ -24,8 +24,7 @@ Tests the parrot config interface.
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', "get config hash");
+pir_output_is( <<'CODE', <<'OUT', "get config hash" );
 .sub main :main
     .include "iglobals.pasm"
     .local pmc config_hash, interp
@@ -39,7 +38,7 @@ CODE
 Hash
 OUT
 
-pir_output_is(<<'CODE', cwd, "prefix");
+pir_output_is( <<'CODE', cwd, "prefix" );
 .sub main :main
     .include "iglobals.pasm"
     .local pmc config_hash, interp
@@ -50,7 +49,7 @@ pir_output_is(<<'CODE', cwd, "prefix");
 .end
 CODE
 
-pir_output_is(<<'CODE', <<'OUT', "load src/pbc from library path");
+pir_output_is( <<'CODE', <<'OUT', "load src/pbc from library path" );
 .sub main :main
     load_bytecode "config.pir"
     print "ok 1\n"
@@ -61,3 +60,10 @@ CODE
 ok 1
 ok 2
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,4 +1,4 @@
-$Id: /local/examples/pir/queens_r.pir 12193 2006-04-12T20:04:06.066885Z bernhard  $
+$Id: /parrotcode/local/examples/pir/queens_r.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 # recursive queens placement
 # prints all 92 solutions in chess notation
@@ -109,3 +109,9 @@ loop:
     if c < 8 goto loop
     print "\n"
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

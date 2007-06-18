@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/expr.t 12840 2006-05-30T15:08:05.048089Z coke  $
+#! perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/expr.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
 
 =head1 NAME
 
@@ -12,18 +12,27 @@ t/expr.t - Lua expression
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.5 "Expressions".
+See "Lua 5.1 Reference Manual", section 2.5 "Expressions",
+L<http://www.lua.org/manual/5.1/manual.html#2.5>.
 
 See "Programming in Lua", section 3 "Expressions".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 11;
+use Parrot::Test tests => 12;
 use Test::More;
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'modulo' );
+x = math.pi
+print(x - x%0.01)
+CODE
+3.14
+OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'relational op (by reference)' );
 a = {}; a.x = 1; a.y = 0;
@@ -165,4 +174,11 @@ CODE
 34
 37
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

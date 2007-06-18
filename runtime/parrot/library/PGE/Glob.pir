@@ -31,9 +31,12 @@ or the resulting PIR code (target='PIR').
 
     .local string target
     target = adverbs['target']
+    target = downcase target
 
     .local pmc match
-    $P0 = find_global 'PGE::Grammar', 'glob'
+    null match
+    if source == '' goto analyze
+    $P0 = get_global 'glob'
     match = $P0(source)
     if target != 'parse' goto check
     .return (match)
@@ -50,32 +53,39 @@ or the resulting PIR code (target='PIR').
   analyze:
     .local pmc exp, pad
     exp = new 'PGE::Exp::Concat'
+    $I0 = 1
     $P0 = new 'PGE::Exp::Anchor'
-    $P0.'value'('^')
+    $P0.'result_object'('^')
     exp[0] = $P0
+    if null match goto analyze_1
     $P0 = match['expr']
-    exp[1] = $P0
+    exp[$I0] = $P0
+    inc $I0
+  analyze_1:
     $P0 = new 'PGE::Exp::Anchor'
-    $P0.'value'('$')
-    exp[2] = $P0
-    if target != 'exp' goto pir
-    .return (exp)
+    $P0.'result_object'('$')
+    exp[$I0] = $P0
 
-  pir:
-    .local pmc code
-    code = exp.'root_pir'()
-    if target != 'PIR' goto bytecode
-    .return (code)
-
-  bytecode:
-    $P0 = compreg 'PIR'
-    $P1 = $P0(code)
-    .return ($P1)
+    .return exp.'compile'(adverbs :flat :named)
 .end
 
 
-.sub '__onload' :load
+.sub 'main' :main
+    .param pmc args
+
+    load_bytecode 'PGE.pbc'
+    load_bytecode 'PGE/Dumper.pbc'
+
+    $P0 = compreg 'PGE::Glob'
+    .return $P0.'command_line'(args)
+.end
+
+
+.sub '__onload' :load :init
     .local pmc optable
+    load_bytecode 'PGE.pbc'
+    load_bytecode 'Parrot/HLLCompiler.pbc'
+
     optable = new 'PGE::OPTable'
     store_global '$optable', optable
 
@@ -96,8 +106,9 @@ or the resulting PIR code (target='PIR').
 
     optable.newtok('infix:', 'looser'=>'term:', 'assoc'=>'list', 'nows'=>1, 'match'=>'PGE::Exp::Concat')
 
-    $P0 = find_global 'compile_glob'
-    compreg 'PGE::Glob', $P0
+    $P0 = get_global 'compile_glob'
+    $P1 = new [ 'HLLCompiler' ]
+    $P1.'register'('PGE::Glob', $P0)
     .return ()
 .end
 
@@ -105,14 +116,9 @@ or the resulting PIR code (target='PIR').
 =item C<glob(PMC mob, PMC adverbs :slurpy :named)>
 
 Parses a glob expression, returning the corresponding
-parse C<PGE::Match> object.   This is installed as a
-C<< <glob> >> subrule in C<PGE::Grammar>, so one can call
-it from another regex in order to parse a valid glob
-expression.
+parse C<PGE::Match> object.   
 
 =cut
-
-.namespace [ 'PGE::Grammar' ]
 
 .const int GLOB_INF = 2147483647 
 
@@ -126,8 +132,6 @@ expression.
     .return (match)
 .end
 
-
-.namespace [ 'PGE::Glob' ]
 
 .sub 'scan_literal'
     .param string target
@@ -158,7 +162,7 @@ expression.
 =item C<glob_literal(PMC mob, PMC adverbs)>
 
 Scan a literal from a string, stopping at any metacharacters such
-as C<*> or C<[>.  Return the matched portion, with the C<value>
+as C<*> or C<[>.  Return the matched portion, with the C<result_object>
 set to the decoded literal.
 
 =cut
@@ -175,7 +179,7 @@ set to the decoded literal.
     ($S0, $I0) = 'scan_literal'(target, mfrom, '*?[{')
     if $I0 <= pos goto end
     mpos = $I0
-    mob.'value'($S0)
+    mob.'result_object'($S0)
   end:
     .return (mob)
 .end
@@ -195,7 +199,7 @@ return a CCShortcut that is set to '.'
     ##   The '?' is already in mob['KEY'], so we don't need to find it here.
     (mob, mtarget, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::CCShortcut')
     assign mpos, mfrom
-    mob.'value'('.')
+    mob.'result_object'('.')
     .return (mob)
 .end
 
@@ -219,7 +223,7 @@ bit more complex, as we have to return a quantified '.'.
     mob['max'] = GLOB_INF
     ($P0, $P1, $P2, $P3) = mob.newfrom(0, 'PGE::Exp::CCShortcut')
     assign $P3, $P2
-    $P0.'value'('.')
+    $P0.'result_object'('.')
     mob[0] = $P0
     .return (mob)
 .end
@@ -283,7 +287,7 @@ Parse an enumerated character list, such as [abcd],
   scan_end:
     inc pos
     mpos = pos
-    mob.'value'(charlist)
+    mob.'result_object'(charlist)
     .return (mob)
 
   err_noclose:
@@ -309,7 +313,7 @@ Parse an enumerated character list, such as [abcd],
     lastpos = length target
 
     ($S0, pos) = 'scan_literal'(target, pos, ',}')
-    mob.'value'($S0)
+    mob.'result_object'($S0)
     $P3 = pos
   alt_loop:
     if pos >= lastpos goto err_noclose
@@ -323,7 +327,7 @@ Parse an enumerated character list, such as [abcd],
     ($P0, $P1, $P2, $P3) = mob.newfrom(0, 'PGE::Exp::Literal')
     ($S0, pos) = 'scan_literal'(target, pos, ',}')
     $P3 = pos
-    $P0.'value'($S0)
+    $P0.'result_object'($S0)
     mob[1] = $P0
     goto alt_loop
   end:
@@ -346,3 +350,9 @@ It has been updated for later versions of PGE by Patrick R. Michaud
 (pmichaud@pobox.com).
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

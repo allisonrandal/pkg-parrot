@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/nci/win32api.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/examples/nci/win32api.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -61,3 +61,9 @@ Call Interface.  The function is defined as:-
 F<docs/pdds/pdd03_calling_conventions.pod>.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

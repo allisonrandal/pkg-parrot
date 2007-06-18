@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004, The Perl Foundation.
-$Id: /local/src/dynpmc/match.pmc 12884 2006-06-05T13:29:13.115985Z audreyt  $
+$Id: /parrotcode/local/src/dynpmc/match.pmc 1274 2007-01-13T23:01:57.052957Z chromatic  $
 
 =head1 NAME
 
@@ -68,7 +68,8 @@ static STRING* fetch_string(Interp* interp, PMC* matchobj, PMC* val)
 {
     if (val->vtable->base_type == MatchRange_type_id) {
         return match_range(interp, matchobj, val);
-    } else {
+    }
+    else {
         return VTABLE_get_string(interp, val);
     }
 }
@@ -78,7 +79,8 @@ static INTVAL fetch_integer(Interp* interp, PMC* matchobj, PMC* val)
     if (val->vtable->base_type == MatchRange_type_id) {
         STRING* valstr = match_range(interp, matchobj, val);
         return string_to_int(interp, valstr);
-    } else {
+    }
+    else {
         return VTABLE_get_integer(interp, val);
     }
 }
@@ -110,8 +112,7 @@ needs to be done once.
 
 */
 
-    STRING* get_string_keyed_str (STRING* key) {
-        PMC* value;
+    STRING* get_string_keyed_str(STRING* key) {
         Hash* hash = (Hash*) PMC_struct_val(SELF);
         HashBucket *b = parrot_hash_get_bucket(INTERP, hash, key);
         if (b == NULL) {
@@ -132,7 +133,7 @@ Returns the string value for the element at C<*key>.
 
 */
 
-    STRING* get_string_keyed (PMC* key) {
+    STRING* get_string_keyed(PMC* key) {
         PMC* valpmc;
         STRING* keystr;
         HashBucket *b;
@@ -163,7 +164,7 @@ Returns the string value for the element at C<*key>.
         return VTABLE_get_string_keyed(INTERP, valpmc, nextkey);
     }
 
-    INTVAL get_integer_keyed (PMC* key) {
+    INTVAL get_integer_keyed(PMC* key) {
         PMC* valpmc;
         STRING* keystr;
         Hash *hash = PMC_struct_val(SELF);
@@ -214,7 +215,8 @@ has not completed yet.
 
         b = parrot_hash_get_bucket(INTERP, hash, input_key);
         if (!b) {
-            internal_exception(1, "Match: cannot get status of incomplete match");
+            internal_exception(1,
+                               "Match: cannot get status of incomplete match");
             return 0;
         }
 
@@ -236,10 +238,7 @@ F<docs/pdds/pdd08_keys.pod>.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

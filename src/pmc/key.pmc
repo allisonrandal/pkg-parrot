@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/key.pmc 12951 2006-06-16T11:33:13.390109Z leo  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/key.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ static int
 is_hash_iter(PMC *agg, PMC *key)
 {
     if ((PObj_get_FLAGS(key) & KEY_type_FLAGS) ==
-        KEY_hash_iterator_FLAGS )
+        KEY_hash_iterator_FLAGS)
         return 1;
     return 0;
 }
@@ -41,7 +41,7 @@ Initializes the key.
 
 */
 
-    void init () {
+    void init() {
         PObj_custom_mark_SET(SELF);
     }
 
@@ -62,7 +62,7 @@ Creates and returns a clone of the key.
         PMC *p;
 
         PObj_custom_mark_SET(dest);
-        for (; key ; ) {
+        for (; key ;) {
             switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
                 case KEY_integer_FLAG:
                 case KEY_integer_FLAG|KEY_register_FLAG:
@@ -103,7 +103,7 @@ Marks the key as live.
 
 */
 
-    void mark () {
+    void mark() {
         key_mark(INTERP, SELF);
     }
 
@@ -117,7 +117,7 @@ Returns the integer value of the key.
 
 */
 
-    INTVAL get_integer () {
+    INTVAL get_integer() {
         return key_integer(INTERP, SELF);
     }
 
@@ -131,7 +131,7 @@ Returns the floating-point number value of the key.
 
 */
 
-    FLOATVAL get_number () {
+    FLOATVAL get_number() {
         return key_number(INTERP, SELF);
     }
 
@@ -145,7 +145,7 @@ Returns the Parrot string value of the key.
 
 */
 
-    STRING* get_string () {
+    STRING* get_string() {
         return key_string(INTERP, SELF);
     }
 
@@ -159,7 +159,7 @@ Returns the PMC value of the key.
 
 */
 
-    PMC* get_pmc () {
+    PMC* get_pmc() {
         return key_pmc(INTERP, SELF);
     }
 
@@ -171,7 +171,7 @@ Returns the PMC value of the key.
 
 */
 
-    void set_integer_native (INTVAL value) {
+    void set_integer_native(INTVAL value) {
         key_set_integer(INTERP, SELF, value);
     }
 
@@ -185,7 +185,7 @@ Sets the value of the key to C<value>.
 
 */
 
-    void set_number_native (FLOATVAL value) {
+    void set_number_native(FLOATVAL value) {
         key_set_number(INTERP, SELF, value);
     }
 
@@ -198,7 +198,7 @@ Sets the value of the key to C<value>.
 
 */
 
-    void set_string_native (STRING* value) {
+    void set_string_native(STRING* value) {
         key_set_string(INTERP, SELF, value);
     }
 
@@ -212,7 +212,7 @@ Sets the value of the key to C<*value>.
 
 */
 
-    void set_pmc (PMC* value) {
+    void set_pmc(PMC* value) {
         key_set_pmc(INTERP, SELF, value);
     }
 
@@ -226,7 +226,10 @@ Appends C<*value> to the key.
 
 */
 
-    void push_pmc (PMC * value) {
+    void push_pmc(PMC * value) {
+        if (value->vtable->base_type != enum_class_Key)
+            real_exception(interp, NULL, INVALID_OPERATION,
+                "Can only push another Key onto a Key PMC.");
         key_append(INTERP, SELF, value);
     }
 
@@ -263,7 +266,7 @@ Returns the key itself.
 
 */
 
-    PMC* get_pmc_keyed (PMC* key) {
+    PMC* get_pmc_keyed(PMC* key) {
         return key;
     }
 
@@ -278,7 +281,7 @@ PMC_int_val(-1) means end of iteration.
 
 */
 
-    PMC* nextkey_keyed (PMC* agg, INTVAL what) {
+    PMC* nextkey_keyed(PMC* agg, INTVAL what) {
         INTVAL n = VTABLE_elements(INTERP, agg);
         PMC *ret = SELF;
         STRING *_hash;
@@ -304,7 +307,7 @@ PMC_int_val(-1) means end of iteration.
                  * KEY_integer_FLAG alone is an indexed hash lookup
                  * with an Integer KEY
                  */
-                 _hash = CONST_STRING(interpreter, "Hash");
+                 _hash = CONST_STRING(interp, "Hash");
                 if (VTABLE_isa(INTERP, agg, _hash) &&
                      agg->vtable->base_type != enum_class_OrderedHash)
                     PObj_get_FLAGS(ret) |= KEY_hash_iterator_FLAGS;
@@ -430,13 +433,17 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
     }
 
     void thawfinish(visit_info *info) {
-        PMC *key = SELF, *next;
+        PMC *key = SELF;
+        PMC *next;
+
         while (1) {
-            next = PMC_data(key);
+            next = (PMC *)PMC_data(key);
+
             if (PMC_IS_NULL(next)) {
                 PMC_data(key) = NULL;
                 break;
             }
+
             key = next;
         }
     }
@@ -452,10 +459,7 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,10 +1,10 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/coroutine.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/coroutine.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
-t/coroutine.t - Lua coroutines 
+t/coroutine.t - Lua coroutines
 
 =head1 SYNOPSIS
 
@@ -12,21 +12,20 @@ t/coroutine.t - Lua coroutines
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.10 "Coroutines".
+See "Lua 5.1 Reference Manual", section 2.11 "Coroutines",
+L<http://www.lua.org/manual/5.1/manual.html#2.11>.
 
-See "Programming in Lua", section 9 "Coroutines". 
+See "Programming in Lua", section 9 "Coroutines".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 8;
 use Test::More;
-
-TODO: {
-local $TODO = 'coroutine';
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'foo1' );
 function foo1 (a)
@@ -61,36 +60,30 @@ co-body	x	y
 main	true	10	end
 main	false	cannot resume dead coroutine
 OUT
-}
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function ()
         print("hi")
     end)
-    
-print(co)    
+
+print(co)
 CODE
-/(thread: [0-9A-Fa-f]{8}|\s*)/
+/^thread: (0[Xx])?[0-9A-Fa-f]+/
 OUT
-
-
-TODO: {
-local $TODO = 'coroutine';
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function ()
         print("hi")
     end)
-    
+
 print(coroutine.status(co))
-coroutine.resume(co)    
+coroutine.resume(co)
 print(coroutine.status(co))
 CODE
 suspended
 hi
 dead
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function ()
@@ -99,19 +92,19 @@ co = coroutine.create(function ()
             coroutine.yield()
         end
     end)
-    
-coroutine.resume(co)    
+
+coroutine.resume(co)
 print(coroutine.status(co))
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
-coroutine.resume(co)    
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
+coroutine.resume(co)
 print(coroutine.resume(co))
 CODE
 co	1
@@ -128,49 +121,51 @@ co	10
 false	cannot resume dead coroutine
 OUT
 
-
 language_output_is( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function (a,b,c)
         print("co", a,b,c)
     end)
-    
-coroutine.resume(co, 1,2,3)    
+
+coroutine.resume(co, 1,2,3)
 CODE
 co	1	2	3
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function (a,b)
         coroutine.yield(a + b, a - b)
     end)
-    
-print(coroutine.resume(co, 20, 10))    
+
+print(coroutine.resume(co, 20, 10))
 CODE
 true	30	10
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function ()
         print("co", coroutine.yield())
     end)
-    
-coroutine.resume(co)    
-coroutine.resume(co, 4, 5)    
+
+coroutine.resume(co)
+coroutine.resume(co, 4, 5)
 CODE
 co	4	5
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'basics' );
 co = coroutine.create(function ()
         return 6, 7
     end)
-    
-print(coroutine.resume(co))    
+
+print(coroutine.resume(co))
 CODE
 true	6	7
 OUT
-}
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

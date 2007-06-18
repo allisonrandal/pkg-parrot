@@ -7,7 +7,7 @@
 #      3 is a  string
 #      4 is a  PMC
 #
-# $Id: /local/languages/BASIC/interpreter/dumpstack.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/BASIC/interpreter/dumpstack.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 # $Log$
 # Revision 1.1  2003/03/09 23:08:58  clintp
 # Re-organized the languages\BASIC area into two areas, one for the older

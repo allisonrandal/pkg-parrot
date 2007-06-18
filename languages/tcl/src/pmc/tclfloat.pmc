@@ -1,7 +1,7 @@
 /* TclFloat.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/languages/tcl/src/pmc/tclfloat.pmc 13800 2006-08-01T22:33:27.935452Z chip  $
+ *     $Id: /parrotcode/trunk/languages/tcl/src/pmc/tclfloat.pmc 2695 2007-03-31T14:41:44.263652Z paultcochrane  $
  *  Overview:
  *     These are the vtable functions for the TclFloat base class
  *  Data Structure and Algorithms:
@@ -13,27 +13,49 @@
 #include "parrot/parrot.h"
 #include <assert.h>
 
-pmclass TclFloat extends TclObject extends Float dynpmc group tcl_group hll Tcl maps Float {
+pmclass TclFloat
+    dynpmc
+    extends TclObject
+    extends Float
+    does    float
+    group   tcl_group
+    hll     Tcl
+    maps    Float
+{
 
-    STRING* get_string () {
+    STRING* get_string() {
         UINTVAL buflen;
         int check_flag;
-        STRING * buff;
-        STRING * dot;
-        STRING * dot_zero;
+        STRING *buff;
+        STRING *dot;
+        STRING *e;
+        STRING *dot_zero;
+        STRING *_precision = string_from_cstring(INTERP, "$tcl_precision", 14);
+        STRING *_tcl = string_from_cstring(INTERP, "tcl", 3);
 
-        buff = Parrot_sprintf_c(INTERP, "%.16vg",PMC_num_val(SELF));
+        PMC * const root_ns = INTERP->root_namespace;
+        PMC * const hll_ns  = VTABLE_get_pmc_keyed_str(INTERP, root_ns, _tcl);
+        PMC * precision_pmc =
+            Parrot_find_global_op(INTERP, hll_ns, _precision, NULL);
+        INTVAL* precision = VTABLE_get_integer(INTERP, precision_pmc);
 
-        /* 
+        if (precision == 0)
+            precision = 16; /* RT#40639: hack to approximate right output.*/
+
+        buff  = Parrot_sprintf_c(INTERP, "%.*vg", precision, PMC_num_val(SELF));
+
+        /*
          * this sprintf variant will return something that looks like
          * an int if it can : if we have no decimal point then tack on
          * on and return
          */
         dot = string_from_cstring(INTERP,".",1);
+        e   = string_from_cstring(INTERP,"e",1);
 
-        if (string_str_index(INTERP,buff,dot,0) == -1 ) {
+        if (string_str_index(INTERP,buff,dot,0) == -1
+         && string_str_index(INTERP,buff,e,0) == -1) {
             dot_zero = string_from_cstring(INTERP,".0",2);
-            buff = string_append(INTERP, buff, dot_zero,0);
+            buff = string_append(INTERP, buff, dot_zero);
             return buff;
         }
 
@@ -43,7 +65,8 @@ pmclass TclFloat extends TclObject extends Float dynpmc group tcl_group hll Tcl 
                if (string_index(INTERP,buff,buflen-1) == '0') {
                        buflen--;
                        check_flag = 1;
-               } else {
+               }
+               else {
                        break;
                }
         }
@@ -54,19 +77,11 @@ pmclass TclFloat extends TclObject extends Float dynpmc group tcl_group hll Tcl 
         return buff;
     }
 
-    METHOD PMC* interpret() {
-        return SELF;
-    }
 }
-
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
-
+ */

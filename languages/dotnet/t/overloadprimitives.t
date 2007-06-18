@@ -1,15 +1,18 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 9;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
-{   
+{
     public class Test
     {
         public int m(int x)
@@ -104,10 +107,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'int');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'int' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -120,7 +123,7 @@ PIR
 10
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'uint');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'uint' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -133,7 +136,7 @@ PIR
 20
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'sbyte');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'sbyte' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -146,7 +149,7 @@ PIR
 30
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'byte');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'byte' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -159,7 +162,7 @@ PIR
 40
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'short');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'short' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -172,7 +175,7 @@ PIR
 50
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'ushort');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'ushort' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -185,7 +188,7 @@ PIR
 60
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'float');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'float' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -198,7 +201,7 @@ PIR
 70
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'double');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'double' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -210,3 +213,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'double');
 PIR
 80
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/lib/Parrot/Revision.pm 13482 2006-07-24T07:56:15.532316Z chip  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/lib/Parrot/Revision.pm 3386 2007-05-05T17:01:52.799755Z jkeenan  $
 
 =head1 NAME
 
@@ -22,52 +22,53 @@ package Parrot::Revision;
 
 use strict;
 use warnings;
-
-
-our $svn_entries = undef;
+use File::Spec;
 
 sub __get_revision {
-    return 0 unless (-e 'DEVELOPING');
-    my $ent = ".svn/entries";
+    return 0 unless ( -e 'DEVELOPING' );
 
     my $revision;
-    # code taken from pugs/util/version_h.pl rev 859
-    if (-r $ent) {
-        $svn_entries = $ent;
-        open my $FH, '<', $svn_entries or die $!;
-        while (<$FH>) {
-            /^ *committed-rev=.(\d+)./ or next;
-            $revision = $1;
-            last;
-        }
-        close $FH;
-    }
-    elsif (my @info = qx/svk info/ and $? == 0) {
-        if (my ($line) = grep /(?:file|svn|https?)\b/, @info) {
-            ($revision) = $line =~ / (\d+)$/;
-        } else {
-	    my ($source_line) = grep /^(Copied|Merged) From/, @info;
-	    my ($depot_line)  = grep /^Depot Path/, @info;
 
-            if (    my ($source_depot) = $source_line =~ m{From: (.*?), Rev\. \d+}
-		and my ($depot_root)   = $depot_line  =~ m{^Depot Path: (/[^/]*)} )
-	    {
-                $source_depot = $depot_root.$source_depot; # convert /svk/trunk to //svk/trunk
-                if (my @info = qx/svk info $source_depot/ and $? == 0) {
-                    if (my ($line) = grep /(?:file|svn|https?)\b/, @info) {
+    # code taken from pugs/util/version_h.pl rev 14410
+    my $nul = File::Spec->devnull;
+    if ( my @svn_info = qx/svn info 2>$nul/ and $? == 0 ) {
+        if ( my ($line) = grep /^Revision:/, @svn_info ) {
+            ($revision) = $line =~ / (\d+)$/;
+        }
+    }
+    elsif ( my @svk_info = qx/svk info 2>$nul/ and $? == 0 ) {
+        if ( my ($line) = grep /(?:file|svn|https?)\b/, @svk_info ) {
+            ($revision) = $line =~ / (\d+)$/;
+        }
+        elsif ( my ($source_line) = grep /^(Copied|Merged) From/, @svk_info ) {
+            if ( my ($source_depot) = $source_line =~ /From: (.*?), Rev\. \d+/ ) {
+
+                # convert /svk/trunk to //svk/trunk or /depot/svk/trunk
+                my ($depot_root) = map { m{Depot Path: (/[^/]*)} } @svk_info;
+                $depot_root ||= q{/};
+                $source_depot = $depot_root . $source_depot;
+                if ( my @svk_info = qx/svk info $source_depot/ and $? == 0 ) {
+                    if ( my ($line) = grep /(?:file|svn|https?)\b/, @svk_info ) {
                         ($revision) = $line =~ / (\d+)$/;
                     }
                 }
             }
         }
     }
-    return ($revision || 0);
+    return ( $revision || 0 );
 }
 
 our $current = __get_revision();
-our $config = $current;
+our $config  = $current;
 
 # check if Parrot::Config is available
 eval 'use Parrot::Config; $config = $PConfig{revision};';
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

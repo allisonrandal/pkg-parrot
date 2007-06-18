@@ -1,11 +1,15 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
 plan 7
 
-diag "in 8.5a4, this error is for varname. This is probably a bug."
-# https://sourceforge.net/tracker/index.php?func=detail&aid=1534628&group_id=10894&atid=110894
-
+# https://sourceforge.net/tracker/index.php?func=detail&aid=1534628&group_id=10894&atid=110894 {RESOLVED}
 eval_is {lassign} \
   {wrong # args: should be "lassign list varName ?varName ...?"} \
   {no args}
@@ -19,7 +23,7 @@ eval_is {
   list $a $b
 } {x y} {singleton with one leftover}
 
-eval_is { 
+eval_is {
   set b [lassign {x y z} a]
   list $a $b
 } {x {y z}} {singleton with two leftovers}

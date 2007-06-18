@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 5
+plan 6
 
 eval_is {while} \
   {wrong # args: should be "while test command"} \
@@ -14,6 +20,10 @@ eval_is {while we} \
 eval_is {while we wait outside} \
   {wrong # args: should be "while test command"} \
   {while too many args}
+
+eval_is {while {"foo"} {}} \
+  {expected boolean value but got "foo"} \
+  {boolean test}
 
 eval_is {
   set a 3

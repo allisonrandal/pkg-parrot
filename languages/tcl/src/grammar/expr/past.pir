@@ -7,14 +7,15 @@ PAST - Abstract syntax tree nodes for tcl expressions.
 This file implements the various abstract syntax tree nodes
 needed for tcl expressions. The currently defined ast nodes:
 
-    PAST::Node       - base class for all ast nodes
+    PAST::Node           - base class for all ast nodes
 
-    PAST::Command    - a tcl command to be evaluated.
-    PAST::Cond       - a conditional expression.
-    PAST::Op         - a operation
-    PAST::MathFunc   - a math function
-    PAST::Val        - a constant value
-    PAST::Var        - a variable
+    PAST::DynamicCommand - a (dynamic) tcl command to be evaluated
+    PAST::StaticCommand  - a (static) tcl command to be evaluated
+    PAST::Cond           - a conditional expression
+    PAST::Op             - a operation
+    PAST::MathFunc       - a math function
+    PAST::Val            - a constant value
+    PAST::Var            - a variable
 
 The C<PAST::Node> class itself is derived from C<Hash>, so
 that it's easy to store and retrieve attributes from each
@@ -42,15 +43,19 @@ Creates the C<PAST::*> classes.
     addattribute base, '$.source'                  # original source
     addattribute base, '$.pos'                     # offset position
 
-    $P0 = subclass base, 'PAST::Command'
+    $P0 = subclass base, 'PAST::DynamicCommand'
+    $P0 = subclass base, 'PAST::StaticCommand'
     $P0 = subclass base, 'PAST::Cond'
+    $P0 = subclass base, 'PAST::Expand'
+    $P0 = subclass base, 'PAST::Expr'
     $P0 = subclass base, 'PAST::MathFunc'
     $P0 = subclass base, 'PAST::Op'
+    $P0 = subclass base, 'PAST::Program'
     $P0 = subclass base, 'PAST::Val'
     $P0 = subclass base, 'PAST::Var'
 
     $P0 = new .Integer
-    store_global "TclExpr::PAST", "$!serno", $P0
+    store_global 'TclExpr::PAST', '$!serno', $P0
 .end
 
 .namespace [ 'PAST::Node' ]
@@ -67,7 +72,7 @@ Initializes a new C<PAST::Node> object.
 
 =cut
 
-.sub __init :method
+.sub init :vtable :method
     $P0 = new .String
     $P1 = new .Integer
     $P2 = new .ResizablePMCArray
@@ -206,3 +211,9 @@ This is free software; you may redistribute it and/or modify
 it under the same terms as Parrot.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

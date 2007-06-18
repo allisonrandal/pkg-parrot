@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/examples/benchmarks/arriter.pl 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/local/examples/benchmarks/arriter.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -23,24 +23,23 @@ use warnings;
 use Data::Dumper;
 
 # declaration of lexicals
-my (%ha, , $i, @k, @nk, $s);
+my ( %ha,, $i, @k, @nk, $s );
 
-# same as @k = qw( A B C D E F G H I J ); 
-for ($i = 0; $i < 10; $i++) {
-    $s = chr(65 + $i);
+# same as @k = qw( A B C D E F G H I J );
+for ( $i = 0 ; $i < 10 ; $i++ ) {
+    $s = chr( 65 + $i );
     push @k, $s;
 }
 
-
 # set up all 5 element permutations of qw( A B C D E F G H I J )
-for my $e (0..3) {
-    for ($i = 0; $i < 10; $i++) {
-	for $s (@k) {
-	    my $nk = $s . chr(65 + $i);
-	    push @nk, $nk;
-	}
+for my $e ( 0 .. 3 ) {
+    for ( $i = 0 ; $i < 10 ; $i++ ) {
+        for $s (@k) {
+            my $nk = $s . chr( 65 + $i );
+            push @nk, $nk;
+        }
     }
-    @k = @nk;
+    @k  = @nk;
     @nk = ();
 }
 
@@ -66,3 +65,10 @@ F<examples/benchmarks/arriter.pir>,
 F<examples/benchmarks/arriter_o1.pir>.
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

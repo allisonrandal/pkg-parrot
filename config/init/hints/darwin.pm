@@ -1,25 +1,27 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/init/hints/darwin.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/init/hints/darwin.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 package init::hints::darwin;
 
 use strict;
+use warnings;
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    my ($ccflags, $ldflags, $libs) = $conf->data->get(qw(ccflags ldflags libs));
+    my ( $ccflags, $ldflags, $libs ) = $conf->data->get(qw(ccflags ldflags libs));
 
     my $OSVers = `uname -r`;
     chomp $OSVers;
     {
         local $^W;
-        if ($OSVers >= 7) {
+        $OSVers =~ /(\d+)/;
+        if ( $1 >= 7 ) {
             $libs =~ s/-ldl//;
         }
     }
 
+    $ldflags .= " -L" . $conf->data->get('build_dir') . "/blib/lib";
     $ccflags .= " -pipe -fno-common -Wno-long-double ";
     $ccflags =~ s/-flat_namespace\s*//;
     $ldflags =~ s/-flat_namespace\s*//;
@@ -38,21 +40,30 @@ sub runstep
         ld_share_flags      => '-dynamiclib -undefined suppress',
         ld_load_flags       => '-bundle -undefined suppress',
         memalign            => 'some_memalign',
-        has_dynamic_linking     => 1,
+        has_dynamic_linking => 1,
+
         # XXX when built against a dynamic libparrot installable_parrot records
         # the path to the blib version of the library
-        parrot_is_shared     => 0,
-        libparrot_shared        => 'libparrot.$(SOVERSION)$(SHARE_EXT)',
-        libparrot_shared_alias  => 'libparrot$(SHARE_EXT)',
+        parrot_is_shared       => 0,
+        libparrot_shared       => 'libparrot.$(SOVERSION)$(SHARE_EXT)',
+        libparrot_shared_alias => 'libparrot$(SHARE_EXT)',
+
         # This variable needs renaming to be more general
         # XXX ugly hack for rpath_lib in config/inter/libparrot.pm
-        rpath                   => "-L",
-        libparrot_soname    => "-install_name " .
-                               $conf->data->get('lib_dir') .
-                               $conf->data->get('slash') .
-                               "libparrot" .
-                               $conf->data->get('share_ext')
+        rpath            => "-L",
+        libparrot_soname => "-install_name "
+            . $conf->data->get('lib_dir')
+            . $conf->data->get('slash')
+            . "libparrot"
+            . $conf->data->get('share_ext')
     );
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

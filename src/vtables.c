@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/vtables.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/vtables.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ src/vtables.c - Functions to build and manipulate vtables
 /*
 
 =item C<VTABLE *
-Parrot_new_vtable(Parrot_Interp interpreter)>
+Parrot_new_vtable(Parrot_Interp interp)>
 
 Creates and returns a pointer to the new C<VTABLE>.
 
@@ -30,20 +30,20 @@ Creates and returns a pointer to the new C<VTABLE>.
 */
 
 VTABLE *
-Parrot_new_vtable(Parrot_Interp interpreter)
+Parrot_new_vtable(Parrot_Interp interp)
 {
-    return mem_sys_allocate_zeroed(sizeof(VTABLE));
+    return mem_allocate_zeroed_typed(VTABLE);
 }
 
 /*
 
 =item C<VTABLE *
-Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable)>
+Parrot_clone_vtable(Parrot_Interp interp, const VTABLE *base_vtable)>
 
 Clones C<*base_vtable> and returns a pointer to the new C<VTABLE>.
 
 =item C<void
-Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable)>
+Parrot_destroy_vtable(Parrot_Interp interp, VTABLE *vtable)>
 
 Destroys C<*vtable>.
 =cut
@@ -51,56 +51,63 @@ Destroys C<*vtable>.
 */
 
 VTABLE *
-Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable)
+Parrot_clone_vtable(Parrot_Interp interp, const VTABLE *base_vtable)
 {
-    VTABLE * const new_vtable = mem_sys_allocate(sizeof(VTABLE));
+    VTABLE * const new_vtable = mem_allocate_typed(VTABLE);
     if (new_vtable) {
-        memcpy(new_vtable, base_vtable, sizeof(VTABLE));
+        memcpy(new_vtable, base_vtable, sizeof (VTABLE));
     }
     return new_vtable;
 }
 
 
 void
-Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable)
+Parrot_destroy_vtable(Parrot_Interp interp, VTABLE *vtable)
 {
+    /* XXX We sometimes get a type number allocated without any corresponding
+     * vtable. E.g. if you load perl_group, perlscalar is this way.
+     */
+    if (!vtable)
+        return;
+    if (vtable->ro_variant_vtable)
+        mem_sys_free(vtable->ro_variant_vtable);
     mem_sys_free(vtable);
 }
 
-void 
-parrot_alloc_vtables(Interp *interpreter)
+void
+parrot_alloc_vtables(Interp *interp)
 {
-    interpreter->vtables =
-        mem_sys_allocate_zeroed(sizeof(VTABLE *) * PARROT_MAX_CLASSES);
-    interpreter->n_vtable_max = enum_class_core_max;
-    interpreter->n_vtable_alloced = PARROT_MAX_CLASSES;
+    interp->vtables =
+        (VTABLE **)mem_sys_allocate_zeroed(sizeof (VTABLE *) * PARROT_MAX_CLASSES);
+    interp->n_vtable_max = enum_class_core_max;
+    interp->n_vtable_alloced = PARROT_MAX_CLASSES;
 }
 
-void 
-parrot_realloc_vtables(Interp *interpreter)
+void
+parrot_realloc_vtables(Interp *interp)
 {
     /* 16 bigger seems reasonable, though it's only a pointer
        table and we could get bigger without blowing much memory
        */
-    const INTVAL new_max = interpreter->n_vtable_alloced + 16;
-    const INTVAL new_size = new_max * sizeof(VTABLE *);
+    const INTVAL new_max = interp->n_vtable_alloced + 16;
+    const INTVAL new_size = new_max * sizeof (VTABLE *);
     INTVAL i;
-    interpreter->vtables = mem_sys_realloc(interpreter->vtables, new_size);
+    interp->vtables = (VTABLE **)mem_sys_realloc(interp->vtables, new_size);
     /* Should set all the empty slots to the null PMC's
        vtable pointer */
-    for (i = interpreter->n_vtable_max; i < new_max; ++i)
-        interpreter->vtables[i] = NULL;
-    interpreter->n_vtable_alloced = new_max;
+    for (i = interp->n_vtable_max; i < new_max; ++i)
+        interp->vtables[i] = NULL;
+    interp->n_vtable_alloced = new_max;
 }
 
-void 
-parrot_free_vtables(Interp *interpreter)
+void
+parrot_free_vtables(Interp *interp)
 {
     int i;
 
-    for (i = 1; i < interpreter->n_vtable_max; i++)
-        Parrot_destroy_vtable(interpreter, interpreter->vtables[i]);
-    mem_sys_free(interpreter->vtables);
+    for (i = 1; i < interp->n_vtable_max; i++)
+        Parrot_destroy_vtable(interp, interp->vtables[i]);
+    mem_sys_free(interp->vtables);
 }
 
 /*
@@ -115,12 +122,10 @@ F<include/parrot/vtables.h>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

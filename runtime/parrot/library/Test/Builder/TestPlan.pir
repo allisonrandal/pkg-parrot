@@ -44,18 +44,12 @@ Test::Builder::NullPlan object, do not pass the hash.
 
 =cut
 
-.sub __init :method
-	.param pmc args     :optional
-	.param int has_args :opt_flag
-
-	unless has_args goto NULL_PLAN
+.sub init_pmc :vtable :method
+	.param pmc args
 
 	.local int valid_args
 	valid_args = isa args, 'Hash'
 	if valid_args goto CHECK_ARGS
-
-	# hope this is for Test::Builder::NullPlan
-  NULL_PLAN:
 	.return()
 
   CHECK_ARGS:
@@ -177,3 +171,9 @@ to the Perl 6 internals mailing list.
 Copyright (C) 2005, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
-# $Id: /local/TODO 13250 2006-07-11T18:23:08.462449Z particle  $
+# $Id: /parrotcode/local/TODO 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
-All TODO items should be documented in RT. (http://rt.perl.org/)
+All TODO items should be documented in RT. (https://rt.perl.org/)
 
 A listing of all TODO items is available at:
 
@@ -14,10 +14,11 @@ Begin your subject with '[TODO]' so that the bug is automatically marked as a
 TODO ticket.  For reasons of consistency, the encouraged format of the subject
 line is:
 
-'[TODO] <subsystem/component/topic> - <summary of task>'
+ '[TODO] <subsystem/component/topic> - <summary of task>'
 
 An example of this format would be:
 
-'[TODO] IMCC - remove globals'
+ '[TODO] IMCC - remove globals'
 
 See also docs/ROADMAP.pod
+

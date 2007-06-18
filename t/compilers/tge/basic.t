@@ -1,13 +1,12 @@
 #!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/t/compilers/tge/basic.t 13684 2006-07-29T21:31:17.363951Z chip  $
+# $Id: /parrotcode/local/t/compilers/tge/basic.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw(t . lib ../lib ../../lib ../../../lib);
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 3;
 
 =head1 NAME
 
@@ -15,12 +14,11 @@ t/basic.t - testing a few basic components of TGE::Grammar and TGE::Tree
 
 =head1 SYNOPSIS
 
-	$ prove t/compilers/tge/basic.t
+        $ prove t/compilers/tge/basic.t
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', 'build up a basic rule in a grammar');
+pir_output_is( <<'CODE', <<'OUT', 'build up a basic rule in a grammar' );
 
 .sub _main :main
     load_bytecode 'TGE.pbc'
@@ -50,7 +48,7 @@ min
 .
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', 'agid hash');
+pir_output_is( <<'CODE', <<'OUT', 'agid hash' );
 .sub _main :main
     load_bytecode 'compilers/tge/TGE/Tree.pir'
     .local pmc tree
@@ -94,8 +92,7 @@ CODE
 3
 OUT
 
-
-pir_output_is(<<'CODE', <<'OUT', '"Malformed string" in r11890 under Linux i386');
+pir_output_is( <<'CODE', <<'OUT', '"Malformed string" in r11890 under Linux i386' );
 
 .sub test
   load_bytecode "PAST.pbc"
@@ -106,6 +103,9 @@ CODE
 1
 OUT
 
-## remember to change the number of tests :-)
-BEGIN { plan tests => 3; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

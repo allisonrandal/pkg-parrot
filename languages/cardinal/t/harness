@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: /local/languages/cardinal/t/harness 13594 2006-07-25T22:35:08.338062Z chip  $
+# $Id: /parrotcode/trunk/languages/cardinal/t/harness 470 2006-12-05T03:30:45.414067Z svm  $
 
 use FindBin;
 use lib qw( . lib ../lib ../../lib ../../lib );

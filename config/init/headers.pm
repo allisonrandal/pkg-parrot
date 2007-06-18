@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/config/init/headers.pm 13029 2006-06-26T19:26:45.696181Z bernhard  $
+# $Id: /parrotcode/local/config/init/headers.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Uses C<ExtUtils::Manifest> to determine which headers are nongenerated.
 package init::headers;
 
 use strict;
+use warnings;
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -23,20 +24,19 @@ use ExtUtils::Manifest qw(maniread);
 our $description = 'Determining nongenerated header files';
 our @args;
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $inc = 'include/parrot';
 
     my @headers = (
         sort
             map { m{^$inc/(.*\.h)\z} }
-            keys %{maniread()}
+            keys %{ maniread() }
     );
 
     $_ = "\$(INC_DIR)/$_" for @headers;
-    my $TEMP_nongen_headers = join("\\\n	", @headers);
+    my $TEMP_nongen_headers = join( "\\\n        ", @headers );
 
     $conf->data->set(
         inc                 => $inc,
@@ -47,3 +47,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

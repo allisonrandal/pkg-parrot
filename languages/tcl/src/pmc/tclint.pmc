@@ -1,7 +1,7 @@
 /* TclInt.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/languages/tcl/src/pmc/tclint.pmc 13581 2006-07-25T13:40:11.354510Z chip  $
+ *     $Id: /parrotcode/trunk/languages/tcl/src/pmc/tclint.pmc 2695 2007-03-31T14:41:44.263652Z paultcochrane  $
  *  Overview:
  *     These are the vtable functions for the TclInt base class
  *  Data Structure and Algorithms:
@@ -11,13 +11,21 @@
 
 #include "parrot/parrot.h"
 
-pmclass TclInt extends TclObject extends Integer dynpmc group tcl_group hll Tcl maps Integer {
+pmclass TclInt
+    dynpmc
+    extends TclObject
+    extends Integer
+    does    integer
+    group   tcl_group
+    hll     Tcl
+    maps    Integer
+{
 
     /*
      * MMD Override:
-     *   TclInt shouldn't automatically promote division to float. 
+     *   TclInt shouldn't automatically promote division to float.
      */
-    PMC* divide (PMC* value, PMC* dest) {
+    PMC* divide(PMC* value, PMC* dest) {
       MMD_TclInt: {
         INTVAL n = PMC_int_val(SELF);
         INTVAL d = PMC_int_val(value);
@@ -35,7 +43,8 @@ pmclass TclInt extends TclObject extends Integer dynpmc group tcl_group hll Tcl 
         FLOATVAL d = VTABLE_get_number(INTERP, value);
 
         if (d == 0.0)
-            real_exception(INTERP, NULL, E_ZeroDivisionError, "float division by zero");
+            real_exception(INTERP, NULL, E_ZeroDivisionError,
+                           "float division by zero");
 
         if (!dest)
             dest = pmc_new(INTERP, SELF->vtable->base_type);
@@ -44,19 +53,11 @@ pmclass TclInt extends TclObject extends Integer dynpmc group tcl_group hll Tcl 
       }
     }
 
-    METHOD PMC* interpret() {
-        return SELF;
-    }
-    
 }
-
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

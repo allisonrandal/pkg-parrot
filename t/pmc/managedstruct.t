@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/managedstruct.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/managedstruct.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ t/pmc/managedstruct.t - Managed C Structure
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/managedstruct.t
+    % prove t/pmc/managedstruct.t
 
 =head1 DESCRIPTION
 
@@ -23,22 +23,22 @@ Tests the ManagedStruct PMC. Checks element access and memory allocation.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting ManagedStruct size");
-	new P0,.ManagedStruct
-	set I0,P0
-	eq I0,0,OK_1
-	print "not "
-OK_1:	print "ok 1\n"
-	set P0,1
-	set I0,P0
-	eq I0,1,OK_2
-	print "not "
-OK_2:	print "ok 2\n"
-	set P0,2
-	set I0,P0
-	eq I0,2,OK_3
-	print "not "
-OK_3:	print "ok 3\n"
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting ManagedStruct size" );
+    new P0,.ManagedStruct
+    set I0,P0
+    eq I0,0,OK_1
+    print "not "
+OK_1:    print "ok 1\n"
+    set P0,1
+    set I0,P0
+    eq I0,1,OK_2
+    print "not "
+OK_2:    print "ok 2\n"
+    set P0,2
+    set I0,P0
+    eq I0,2,OK_3
+    print "not "
+OK_3:    print "ok 3\n"
         end
 CODE
 ok 1
@@ -46,8 +46,7 @@ ok 2
 ok 3
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "element access - float, double");
+pasm_output_is( <<'CODE', <<'OUTPUT', "element access - float, double" );
     new P2, .ResizablePMCArray
     .include "datatypes.pasm"
     push P2, .DATATYPE_FLOAT
@@ -83,7 +82,7 @@ CODE
 14.300000
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "element access - char, short");
+pasm_output_like( <<'CODE', <<'OUTPUT', "element access - char, short" );
     new P2, .ResizablePMCArray
     .include "datatypes.pasm"
     push P2, .DATATYPE_CHAR
@@ -116,60 +115,60 @@ CODE
 /^ok 12 (513|258)$/
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "named element access int16");
+pir_output_is( <<'CODE', <<'OUTPUT', "named element access int16" );
 
 .include "datatypes.pasm"
 
 .sub _main
-	new $P1, .OrderedHash
-	set  $P1['x'], .DATATYPE_INT16
-	push $P1, 0
-	push $P1, 0
+    new $P1, .OrderedHash
+    set  $P1['x'], .DATATYPE_INT16
+    push $P1, 0
+    push $P1, 0
 
-	set $P1['y'], .DATATYPE_INT16
-	push $P1, 0
-	push $P1, 0
+    set $P1['y'], .DATATYPE_INT16
+    push $P1, 0
+    push $P1, 0
 
-	# need a ManagedStruct to allocate data memory
-	new $P2, .ManagedStruct, $P1
+    # need a ManagedStruct to allocate data memory
+    new $P2, .ManagedStruct, $P1
 
-	# calc allocation size
-	set $I0, 0
-	sizeof $I1, .DATATYPE_INT16
-	add $I0, $I1
-	add $I0, $I1
-	# set size
-	set $P2, $I0
+    # calc allocation size
+    set $I0, 0
+    sizeof $I1, .DATATYPE_INT16
+    add $I0, $I1
+    add $I0, $I1
+    # set size
+    set $P2, $I0
 
-	# set struct values by name
-	set $I0, 2
-	set $P2["x"], $I0
+    # set struct values by name
+    set $I0, 2
+    set $P2["x"], $I0
 
-	set $I1, 16
-	set $S0, "y"
-	set $P2[$S0], $I1
+    set $I1, 16
+    set $S0, "y"
+    set $P2[$S0], $I1
 
-	# get struct values by struct item idx
-	set $I2, $P2[0]
-	set $I3, $P2[1]
+    # get struct values by struct item idx
+    set $I2, $P2[0]
+    set $I3, $P2[1]
 
-	print "x: "
-	print $I2
+    print "x: "
+    print $I2
 
-	print "\ny: "
-	print $I3
+    print "\ny: "
+    print $I3
 
-	# get struct values by name
-	set $I2, $P2["x"]
-	set $I3, $P2["y"]
+    # get struct values by name
+    set $I2, $P2["x"]
+    set $I3, $P2["y"]
 
-	print "\nx: "
-	print $I2
+    print "\nx: "
+    print $I2
 
-	print "\ny: "
-	print $I3
-	print "\n"
-	end
+    print "\ny: "
+    print $I3
+    print "\n"
+    end
 .end
 CODE
 x: 2
@@ -178,7 +177,7 @@ x: 2
 y: 16
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "nested struct offsets");
+pasm_output_is( <<'CODE', <<'OUTPUT', "nested struct offsets" );
   # the nested structure
   .include "datatypes.pasm"
   new P3, .ResizablePMCArray
@@ -243,7 +242,7 @@ CODE
 8
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -262,3 +261,9 @@ CODE
 0
 OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

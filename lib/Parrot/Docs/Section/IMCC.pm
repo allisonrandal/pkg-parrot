@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/IMCC.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/IMCC.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Section::IMCC - IMCC documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Section::IMCC;
+        use Parrot::Docs::Section::IMCC;
 
 =head1 DESCRIPTION
 
@@ -32,16 +32,17 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'IMCC', 'imcc.html', '', 
-		$self->new_group('Documentation', '', 'docs/imcc'),
-		$self->new_group('Examples', '', 'examples/pir'),
-		$self->new_group('Tests', '', 't/compilers/imcc'),
-	);
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new(
+        'IMCC',
+        'imcc.html',
+        '',
+        $self->new_group( 'Documentation', '', 'docs/imcc' ),
+        $self->new_group( 'Examples',      '', 'examples/pir' ),
+        $self->new_group( 'Tests',         '', 't/compilers/imcc' ),
+    );
 }
 
 =back
@@ -49,3 +50,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

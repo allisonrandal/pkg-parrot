@@ -2,7 +2,7 @@
  * exec_dep.h
  *
  * SVN Info
- *    $Id: /local/src/jit/ppc/exec_dep.h 11903 2006-03-14T20:49:11.779219Z bernhard  $
+ *    $Id: /parrotcode/trunk/src/jit/ppc/exec_dep.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
  * Overview:
  *    PPC dependent functions to emit an executable.
  * History:
@@ -12,39 +12,39 @@
  */
 
 #ifndef PARROT_PPC_EXEC_DEP_H_GUARD
-#  define PARROT_PPC_EXEC_DEP_H_GUARD
+#define PARROT_PPC_EXEC_DEP_H_GUARD
 
-#  ifdef JIT_CGP
+#ifdef JIT_CGP
 
 void
 Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp * interpreter)
+                     Interp *interp)
 {
 }
 
-#  else /* JIT_CGP */
+#else /* JIT_CGP */
 
 void
 Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp * interpreter)
+                     Interp *interp)
 {
     add_disp(jit_info->native_ptr, r3,
-        ((long)jit_info->cur_op - (long)interpreter->code->base.data));
+        ((long)jit_info->cur_op - (long)interp->code->base.data));
     jit_emit_mov_rr(jit_info->native_ptr, r4, r13);
 
     Parrot_exec_add_text_rellocation(jit_info->objfile,
         jit_info->native_ptr, RTYPE_FUNC,
-            interpreter->op_info_table[*jit_info->cur_op].func_name, 0);
+            interp->op_info_table[*jit_info->cur_op].func_name, 0);
     _emit_bx(jit_info->native_ptr, 1, 0);
 }
 
-#  endif /* JIT_CGP */
+#endif /* JIT_CGP */
 
 void
 Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
-                   Interp * interpreter)
+                   Interp *interp)
 {
-    Parrot_exec_normal_op(jit_info, interpreter);
+    Parrot_exec_normal_op(jit_info, interp);
     jit_emit_sub_rrr(jit_info->native_ptr, r3, r3, r15);
     jit_emit_add_rrr(jit_info->native_ptr, r3, r14, r3);
     jit_emit_lwz(jit_info->native_ptr, r3, 0, r3);
@@ -54,7 +54,7 @@ Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
 
 void
 Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
-                       Interp * interpreter)
+                       Interp *interp)
 {
 }
 
@@ -66,9 +66,9 @@ offset_fixup(Parrot_exec_objfile_t *obj)
     int i,j;
 
     for (i = 0; i < obj->data_count; i++) {
-#  ifdef EXEC_MACH_O
+#ifdef EXEC_MACH_O
         obj->symbol_table[i].value = obj->text.size;
-#  endif
+#endif
         for (j = 0; j < i; j++)
             obj->symbol_table[i].value += obj->data_size[j];
     }
@@ -76,12 +76,10 @@ offset_fixup(Parrot_exec_objfile_t *obj)
 
 #endif /* PARROT_PPC_EXEC_DEP_H_GUARD */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

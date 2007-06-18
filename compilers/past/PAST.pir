@@ -1,4 +1,4 @@
-# $Id: /local/compilers/past/PAST.pir 12462 2006-04-30T09:12:38.605736Z bernhard  $
+# $Id: /parrotcode/local/compilers/past/PAST.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -31,3 +31,9 @@ tree nodes created by a language compiler.
     addattribute base, "topnode" # the top node of the syntax tree
     .return ()
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

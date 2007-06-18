@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/key.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/key.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 1;
+use Parrot::Test tests => 3;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/pmc/key.t - Keys
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/key.t
+    % prove t/pmc/key.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ Tests the C<Key> PMC.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUT', 'traverse key chain');
+pasm_output_is( <<'CODE', <<'OUT', 'traverse key chain' );
     new P0, .Key
     set P0, "1"
     new P1, .Key
@@ -57,3 +57,39 @@ CODE
 123
 OUT
 
+pasm_output_is( <<'CODE', <<'OUT', 'extract int from string keys' );
+new P0, .ResizableStringArray
+push P0, "ok 1\n"
+push P0, "ok 2\n"
+set S0, 0
+set P1, P0[S0]
+print P1
+set P1, P0["1"]
+print P1
+end
+CODE
+ok 1
+ok 2
+OUT
+
+pasm_output_is( <<'CODE', <<'OUT', 'extract string from int keys' );
+new P0, .Hash
+set P0['1'], "ok 1\n"
+set P0['2'], "ok 2\n"
+set I0, 1
+set P1, P0[I0]
+print P1
+set P1, P0[2]
+print P1
+end
+CODE
+ok 1
+ok 2
+OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

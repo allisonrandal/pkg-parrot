@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/io.t 13784 2006-08-01T17:54:04.760248Z chip  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/io.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 36;
+use Parrot::Test tests => 45;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/pmc/io.t - IO Ops
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/io.t
+    % prove t/pmc/io.t
 
 =head1 DESCRIPTION
 
@@ -23,19 +23,19 @@ Tests the Parrot IO operations.
 =cut
 
 sub file_content_is {
-    my ($file, $content, $name) = @_;
-    local $/=undef; # slurp mode
-    open FOO, "temp.file";
+    my ( $file, $content, $name ) = @_;
+    local $/ = undef;    # slurp mode
+    open my $FOO, '<', "temp.file";
 
-    is(<FOO>, $content, $name);
+    is( <$FOO>, $content, $name );
 
-    close FOO;
+    close $FOO;
 }
 
 TODO: {
-local $TODO = "IO on some invalid types";
+    local $TODO = "IO on some invalid types";
 
-pir_output_is(<<'CODE', <<'OUTPUT', "IO on some invalid types");
+    pir_output_is( <<'CODE', <<'OUTPUT', "IO on some invalid types" );
 .sub main
     $P0 = null
     test($P0, "Undef")
@@ -82,96 +82,96 @@ String ok 1
 String ok 2
 String ok 3
 OUTPUT
-};
+}
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "open/close");
-	open P0, "temp.file", ">"
-	print P0, "a line\n"
-	close P0
-	open P0, "temp.file", "<"
-	read S0, P0, 20
-	print S0
-	end
+pasm_output_is( <<'CODE', <<'OUTPUT', "open/close" );
+    open P0, "temp.file", ">"
+    print P0, "a line\n"
+    close P0
+    open P0, "temp.file", "<"
+    read S0, P0, 20
+    print S0
+    end
 CODE
 a line
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "timely destruction");
-	interpinfo I0, 2	# DOD runs
-	open P0, "temp.file", ">"
+pasm_output_is( <<'CODE', <<'OUTPUT', "timely destruction" );
+    interpinfo I0, 2	# DOD runs
+    open P0, "temp.file", ">"
         needs_destroy P0
-	print P0, "a line\n"
-	null P0			# kill it
-	sweep 0			# a lazy DOD has to close the PIO
-	open P0, "temp.file", "<"
-	read S0, P0, 20
-	print S0
-	end
+    print P0, "a line\n"
+    null P0			# kill it
+    sweep 0			# a lazy DOD has to close the PIO
+    open P0, "temp.file", "<"
+    read S0, P0, 20
+    print S0
+    end
 CODE
 a line
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "getfd/fdopen");
+pasm_output_is( <<'CODE', <<'OUTPUT', "getfd/fdopen" );
         getstdout P0
         getfd I0, P0
-	fdopen P1, I0, ">"
-	defined I0, P1
-	unless I0, nok
-	print P1, "ok\n"
-	close P1
-	end
+    fdopen P1, I0, ">"
+    defined I0, P1
+    unless I0, nok
+    print P1, "ok\n"
+    close P1
+    end
 nok:
-	print "fdopen failed\n"
-	end
+    print "fdopen failed\n"
+    end
 CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "fdopen - no close");
+pasm_output_is( <<'CODE', <<'OUTPUT', "fdopen - no close" );
         getstdout P0
         getfd I0, P0
-	fdopen P1, I0, ">"
-	defined I0, P1
-	unless I0, nok
-	print P1, "ok\n"
-	end
+    fdopen P1, I0, ">"
+    defined I0, P1
+    unless I0, nok
+    print P1, "ok\n"
+    end
 nok:
-	print "fdopen failed\n"
-	end
+    print "fdopen failed\n"
+    end
 CODE
 ok
 OUTPUT
 
-unlink "no_such_file" if (-e "no_such_file");
+unlink "no_such_file" if ( -e "no_such_file" );
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "get_bool");
-	open P0, "no_such_file", "<"
-	unless P0, ok1
-	print "Huh: 'no_such_file' exists? - not "
+pasm_output_is( <<'CODE', <<'OUTPUT', "get_bool" );
+    open P0, "no_such_file", "<"
+    unless P0, ok1
+    print "Huh: 'no_such_file' exists? - not "
 ok1:
-	print "ok 1\n"
-	open P0, "temp.file", "<"
-	if P0, ok2
-	print "not "
-ok2:	print "ok 2\n"
-	read S0, P0, 1024
-	read S0, P0, 1024
-	unless P0, ok3
-	print "not "
-ok3:	print "ok 3\n"
-	defined I0, P0
-	if I0, ok4
-	print "not "
-ok4:	print "ok 4\n"
-	close P0
-	defined I0, P0		# closed file is still defined
-	if I0, ok5
-	print "not "
-ok5:	print "ok 5\n"
-	unless P0, ok6		# but false
-	print "not "
-ok6:	print "ok 6\n"
-	end
+    print "ok 1\n"
+    open P0, "temp.file", "<"
+    if P0, ok2
+    print "not "
+ok2:    print "ok 2\n"
+    read S0, P0, 1024
+    read S0, P0, 1024
+    unless P0, ok3
+    print "not "
+ok3:    print "ok 3\n"
+    defined I0, P0
+    if I0, ok4
+    print "not "
+ok4:    print "ok 4\n"
+    close P0
+    defined I0, P0		# closed file is still defined
+    if I0, ok5
+    print "not "
+ok5:    print "ok 5\n"
+    unless P0, ok6		# but false
+    print "not "
+ok6:    print "ok 6\n"
+    end
 CODE
 ok 1
 ok 2
@@ -181,20 +181,19 @@ ok 5
 ok 6
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "read on invalid fh should throw exception");
-	open P0, "no_such_file", "<"
-	unless P0, ok1
-	print "Huh: 'no_such_file' exists? - not "
+pasm_output_is( <<'CODE', <<'OUTPUT', "read on invalid fh should throw exception" );
+    open P0, "no_such_file", "<"
+    unless P0, ok1
+    print "Huh: 'no_such_file' exists? - not "
 ok1:
-	print "ok 1\n"
+    print "ok 1\n"
 
         push_eh _readline_handler
         readline S0, P0 # Currently segfaults
         print "not "
 _readline_handler:
         print "ok 2\n"
-	branch fin
+    branch fin
 
         push_eh _read_handler
         read S0, P0, 1
@@ -217,40 +216,56 @@ ok 4
 OUTPUT
 
 SKIP: {
-    skip ("clone not finished yet", 1);
-pasm_output_is(<<'CODE', <<'OUTPUT', "clone");
-	open P0, "temp.file", "<"
-	clone P1, P0
-	read S0, P1, 1024
-	print S0
-	end
+    skip( "clone not finished yet", 1 );
+    pasm_output_is( <<'CODE', <<'OUTPUT', "clone" );
+    open P0, "temp.file", "<"
+    clone P1, P0
+    read S0, P1, 1024
+    print S0
+    end
 CODE
 a line
 OUTPUT
 }
 
 # It would be very embarrassing if these didnt work...
-open FOO, ">temp.file";
-print FOO "2\n1\n";
-close FOO;
-pasm_output_is(<<'CODE', <<'OUTPUT', "open and readline");
-	open P0, "temp.file"
-	set S0, ""
-	set S1, ""
-	readline S0, P0
-	readline S1, P0
-	print S1
-	print S0
-	end
+open my $FOO, '>', "temp.file" or die "can't open 'temp.file': $!";
+print $FOO "2\n1\n";
+close $FOO;
+pasm_output_is( <<'CODE', <<'OUTPUT', "open and readline" );
+    open P0, "temp.file"
+    set S0, ""
+    set S1, ""
+    readline S0, P0
+    readline S1, P0
+    print S1
+    print S0
+    end
 CODE
 1
 2
 OUTPUT
 
-open FOO, ">temp.file";  # Clobber previous contents
-close FOO;
+open $FOO, '>', "temp.file" or die "can't open 'temp.file': $!";
+print $FOO "12\n34";
+close $FOO;
+pasm_output_is( <<'CODE', <<'OUTPUT', "open and readline, no final newline" );
+    open P0, "temp.file"
+    set S0, ""
+    set S1, ""
+    readline S0, P0
+    readline S1, P0
+    print S1
+    print S0
+    end
+CODE
+3412
+OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "open & print");
+open $FOO, '>', "temp.file";    # Clobber previous contents
+close $FOO;
+
+pasm_output_is( <<'CODE', <<'OUTPUT', "open & print" );
        set I0, -12
        set N0, 2.2
        set S0, "Foo"
@@ -274,11 +289,11 @@ CODE
 -122.200000FooBar
 OUTPUT
 
-open FOO, ">temp.file";  # Clobber previous contents
-close FOO;
+open $FOO, '>', "temp.file";    # Clobber previous contents
+close $FOO;
 
 # write to file opened for reading
-pasm_output_is(<<'CODE', <<'OUTPUT', "3-arg open");
+pasm_output_is( <<'CODE', <<'OUTPUT', "3-arg open" );
        open P1, "temp.file", "<"
        print P1, "Foobar\n"
        close P1
@@ -296,7 +311,7 @@ OUTPUT
 
 unlink("temp.file");
 
-pasm_output_is(<<'CODE', <<'OUTPUT', 'open and close');
+pasm_output_is( <<'CODE', <<'OUTPUT', 'open and close' );
        open P1, "temp.file"
        print P1, "Hello, World!\n"
        close P1
@@ -306,36 +321,140 @@ CODE
 done
 OUTPUT
 
-file_content_is("temp.file", <<'OUTPUT', 'file contents');
+file_content_is( "temp.file", <<'OUTPUT', 'file contents' );
 Hello, World!
 OUTPUT
 
-pasm_output_is(<<'CODE', '', 'append');
+pasm_output_is( <<'CODE', '', 'append' );
        open P1, "temp.file", ">>"
        print P1, "Parrot flies\n"
        close P1
        end
 CODE
 
-file_content_is("temp.file", <<'OUTPUT', 'append file contents');
+file_content_is( "temp.file", <<'OUTPUT', 'append file contents' );
 Hello, World!
 Parrot flies
 OUTPUT
 
-pasm_output_is(<<'CODE', '', 'write to file');
+pasm_output_is( <<'CODE', '', 'write to file' );
        open P1, "temp.file", ">"
        print P1, "Parrot overwrites\n"
        close P1
        end
 CODE
 
-file_content_is("temp.file", <<'OUTPUT', 'file contents');
+file_content_is( "temp.file", <<'OUTPUT', 'file contents' );
 Parrot overwrites
 OUTPUT
 
 unlink("temp.file");
 
-pasm_output_is(<<'CODE', <<'OUT', 'standard file descriptors');
+pasm_output_is( <<'CODE', '', "PIO_flush on buffer full" );
+       set I0, 0
+       set I1, 10000
+   
+       open P0, "temp.file", ">"
+
+PRINT:
+       ge I0, I1, END
+       print P0, "words\n"
+       inc I0
+       branch PRINT
+
+END:
+       close P0
+       end
+CODE
+
+file_content_is( "temp.file", <<'OUTPUT' x 10000, 'buffered file contents' );
+words
+OUTPUT
+
+unlink("temp.file");
+
+pasm_output_is( <<'CODE', '0', "turn off buffering" );
+       open P0, "temp.file", ">"
+
+#                     PIOCTL_CMDSETBUFTYPE, PIOCTL_NONBUF 
+       pioctl I0, P0, 3, 0 
+#                     PIOCTL_CMDGETBUFTYPE, <dummy value>
+       pioctl I0, P0, 4, 0
+       print I0
+
+       print P0, "Howdy World\n"
+
+       close P0
+       end
+CODE
+
+file_content_is( "temp.file", <<'OUTPUT', 'unbuffered file contents' );
+Howdy World
+OUTPUT
+
+unlink("temp.file");
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'I/O buffering' );
+.sub main
+    .local string filename
+    filename = "temp.file"
+    $P1 = open filename, ">"
+    .local int count, max, nltest
+    count = 0
+    max = 10000
+  LOOP:
+    if count > max goto DONE
+    $S1 = count
+    $S1 = concat $S1, " "
+    print $P1, $S1
+    inc count
+    nltest = mod count, 20
+    if nltest goto LOOP
+    print $P1, "\n"
+    goto LOOP
+  DONE:
+    print $P1, "\n"
+    close $P1
+
+  PART_2:
+    $P1 = open filename
+    $I0 = 0
+  LINE:
+    $S1 = readline $P1
+    unless $S1 goto SUCCESS
+    chopn $S1, 1
+
+  NEXT_NR:
+    $I1 = length $S1
+    if $I1 <= 1 goto LINE
+    $S2 = ""
+  SPLIT:
+    $S3 = substr $S1, 0, 1
+    $S1 = substr 0, 1, ""
+    if $S3 == " " goto GOT_NR
+    $S2 = concat $S2, $S3
+    goto SPLIT
+  GOT_NR:
+    $I1 = $S2
+    if $I0 != $I1 goto FAILED
+    inc $I0
+    goto NEXT_NR
+
+  FAILED:
+    print "Failed\n"
+    goto EXIT
+  SUCCESS:
+    print "Successful\n"
+  EXIT:
+    end
+.end
+CODE
+Successful
+OUTPUT
+
+unlink("temp.file");
+
+pasm_output_is( <<'CODE', <<'OUT', 'standard file descriptors' );
        getstdin P0
        getfd I0, P0
        # I0 is 0 on Unix and non-Null on stdio and win32
@@ -357,7 +476,7 @@ ok 2
 ok 3
 OUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', 'printerr');
+pasm_output_is( <<'CODE', <<'OUTPUT', 'printerr' );
        new P0, .String
        set P0, "This is a test\n"
        printerr 10
@@ -375,7 +494,7 @@ foo
 This is a test
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', 'puts method');
+pasm_output_is( <<'CODE', <<'OUTPUT', 'puts method' );
        getstdout P2
        can I0, P2, "puts"
        if I0, ok1
@@ -389,7 +508,7 @@ ok 1
 ok 2
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'puts method - PIR');
+pir_output_is( <<'CODE', <<'OUTPUT', 'puts method - PIR' );
 
 .sub main :main
        .local string s
@@ -408,7 +527,7 @@ ok 1
 ok 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', 'callmethod puts');
+pasm_output_is( <<'CODE', <<'OUTPUT', 'callmethod puts' );
        getstderr P2	# the object
        set S0, "puts"	# method
        set S5, "ok 1\n"	# 2nd param
@@ -423,7 +542,7 @@ ok 1
 ok 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', 'seek/tell');
+pasm_output_is( <<'CODE', <<'OUTPUT', 'seek/tell' );
        open P0, "temp.file", ">"
        print P0, "Hello "
        tell I0, P0
@@ -441,7 +560,7 @@ ok 1
 Hello Parrot!
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', '32bit seek: exception');
+pasm_error_output_like( <<'CODE', <<'OUTPUT', '32bit seek: exception' );
        open P0, "temp.file", ">"
        seek P0, -1, 0
        print "error!\n"
@@ -450,7 +569,7 @@ CODE
 /seek failed \(32bit\)/
 OUTPUT
 
-pasm_output_like(<<'CODE', <<'OUTPUT', '64bit seek: exception');
+pasm_error_output_like( <<'CODE', <<'OUTPUT', '64bit seek: exception' );
        open P0, "temp.file", ">"
        seek P0, -1, -1, 0
        print "error!\n"
@@ -459,7 +578,7 @@ CODE
 /seek failed \(64bit\)/
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "peek");
+pasm_output_is( <<'CODE', <<'OUTPUT', "peek" );
         open P0, "temp.file", ">"
         print P0, "a line\n"
         close P0
@@ -479,7 +598,7 @@ aa
 l
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "peek on an empty file");
+pasm_output_is( <<'CODE', <<'OUTPUT', "peek on an empty file" );
         open P0, "temp.file", ">"
         close P0
         open P0, "temp.file", "<"
@@ -494,7 +613,7 @@ OUTPUT
 
 unlink "temp.file";
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "layer names");
+pasm_output_like( <<'CODE', <<'OUTPUT', "layer names" );
     getstdin P0
     set S0, P0[0]
     print S0
@@ -516,7 +635,7 @@ CODE
 /^(unix|win32|stdio)-buf-buf-\1--$/
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "layer push, pop");
+pasm_output_is( <<'CODE', <<'OUTPUT', "layer push, pop" );
     getstdin P0
     push P0, "utf8"
     set S0, P0[-1]
@@ -535,7 +654,7 @@ utf8
 buf
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "substr after reading from file");
+pir_output_is( <<'CODE', <<'OUTPUT', "substr after reading from file" );
 
 .sub _main
     # Write something into a file
@@ -562,7 +681,7 @@ CODE
 01234
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "multiple substr after reading from file");
+pir_output_is( <<'CODE', <<'OUTPUT', "multiple substr after reading from file" );
 
 .sub _main
     # Write something into a file
@@ -607,8 +726,8 @@ sub_2: 012
 sub_3: 345
 OUTPUT
 
-
-pir_output_like(<<'CODE', <<'OUT', 'read on null PMC throws exception', todo => 'not yet implemented');
+pir_output_like(
+    <<'CODE', <<'OUT', 'read on null PMC throws exception', todo => 'not yet implemented' );
 .sub main :main
 	null $P1
 	$S0 = read $P1, 1
@@ -618,11 +737,11 @@ CODE
 /some crazy exception/
 OUT
 
-open FOO, ">temp.file";  # write utf8
-print FOO "T\xc3\xb6tsch\n";
-close FOO;
+open $FOO, '>', "temp.file";    # write utf8
+print $FOO "T\xc3\xb6tsch\n";
+close $FOO;
 
-pir_output_is(<<'CODE', <<"OUTPUT", "utf8 read layer");
+pir_output_is( <<'CODE', <<"OUTPUT", "utf8 read layer" );
 .sub main :main
     .local pmc pio
     .local int len
@@ -652,7 +771,7 @@ utf8
 T\xf6tsch
 OUTPUT
 
-pir_output_is(<<'CODE', <<"OUTPUT", "utf8 read layer - readline");
+pir_output_is( <<'CODE', <<"OUTPUT", "utf8 read layer - readline" );
 .sub main :main
     .local pmc pio
     .local string f
@@ -678,7 +797,7 @@ unicode
 utf8
 T\xf6tsch
 OUTPUT
-pir_output_is(<<'CODE', <<"OUTPUT", "utf8 read layer, read parts");
+pir_output_is( <<'CODE', <<"OUTPUT", "utf8 read layer, read parts" );
 .sub main :main
     .local pmc pio
     .local int len
@@ -711,7 +830,7 @@ utf8
 T\xf6tsch
 OUTPUT
 
-pir_output_is(<<'CODE', <<"OUTPUT", "string read/write layer");
+pir_output_is( <<'CODE', <<"OUTPUT", "string read/write layer" );
 .sub main :main
     .local pmc    pio
 	.local string greeting
@@ -736,4 +855,72 @@ Hello, world!
 string
 OUTPUT
 
+pir_output_is( <<'CODE', <<"OUTPUT", "PIO.slurp() - classmeth" );
+.sub main :main
+    $S0 = <<"EOS"
+line 1
+line 2
+line 3
+EOS
+    .local pmc pio, cl
+    pio = open	"temp.file", ">"
+    print pio, $S0
+    close pio
+    cl = getclass 'ParrotIO'
+    $S1 = cl.'slurp'('temp.file')
+    if $S0 == $S1 goto ok
+    print "not "
+ok:
+    print "ok\n"
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is( <<'CODE', <<"OUTPUT", "PIO.slurp() - object" );
+.sub main :main
+    $S0 = <<"EOS"
+line 1
+line 2
+line 3
+EOS
+    .local pmc pio, pio2
+    pio = open	"temp.file", ">"
+    print pio, $S0
+    close pio
+    pio2 = open	"temp.file", "<"
+    $S1 = pio2.'slurp'('dummy')
+    if $S0 == $S1 goto ok
+    print "not "
+ok:
+    print "ok\n"
+.end
+CODE
+ok
+OUTPUT
 unlink("temp.file");
+
+SKIP: {
+    skip 'broken on windows', 1 if $^O eq 'MSWin32';
+
+    pir_error_output_like( <<'CODE', <<"OUTPUT", "stat failed" );
+.sub main :main
+    .local pmc pio
+    .local int len
+    .include "stat.pasm"
+    .local string f
+    f = 'no_such_file'
+    len = stat f, .STAT_FILESIZE
+    print "never\n"
+.end
+CODE
+/stat failed:/
+OUTPUT
+}
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

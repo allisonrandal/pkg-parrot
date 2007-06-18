@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/docs/extend.pod 12839 2006-05-30T14:34:31.126984Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/extend.pod 3349 2007-05-02T00:00:16.325289Z chromatic  $
 
 =head1 NAME
 
@@ -36,8 +36,8 @@ TODO
 
 =over 4
 
-=item C<Parrot_call_method(Parrot_INTERP interp, Parrot_PMC sub
-       Parrot_PMC object, Parrot_STRING method, const char *signature, ...)>
+=item C<Parrot_call_method(Parrot_Interp interp, Parrot_PMC sub
+       Parrot_PMC object, Parrot_String method, const char *signature, ...)>
 
 Calls a method on C<object> with the given signature and arguments. C<sub> is
 the method that's being called, and C<method> is the name of the method in the

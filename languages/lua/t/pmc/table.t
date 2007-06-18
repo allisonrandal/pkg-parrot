@@ -1,10 +1,10 @@
-#! perl -w
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/pmc/table.t 12840 2006-05-30T15:08:05.048089Z coke  $
+#! perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/pmc/table.t 3489 2007-05-15T09:30:43.862337Z fperrad  $
 
 =head1 NAME
 
-t/pmc/table.t - LuaTable
+t/pmc/table.t - Lua Table
 
 =head1 SYNOPSIS
 
@@ -12,28 +12,31 @@ t/pmc/table.t - LuaTable
 
 =head1 DESCRIPTION
 
-Tests C<LuaTable> PMC
+Tests C<table> type
 (implemented in F<languages/lua/pmc/luatable.pmc>).
 
 =cut
+
+use strict;
+use warnings;
 
 use Parrot::Test tests => 12;
 use Test::More;
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check inheritance' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
-    bool1 = isa pmc1, "scalar"
+    bool1 = isa pmc1, 'scalar'
     print bool1
     print "\n"
-    bool1 = isa pmc1, "LuaBase"
+    bool1 = isa pmc1, 'LuaAny'
     print bool1
     print "\n"
-    bool1 = isa pmc1, "LuaTable"
+    bool1 = isa pmc1, 'LuaTable'
     print bool1
     print "\n"
     end
@@ -46,28 +49,28 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check interface' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
-    bool1 = does pmc1, "hash"
+    bool1 = does pmc1, 'scalar'
     print bool1
     print "\n"
-    bool1 = does pmc1, "no_interface"
+    bool1 = does pmc1, 'no_interface'
     print bool1
     print "\n"
     end
 .end
 CODE
-1
+0
 0
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check name' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
     .local string str1
@@ -86,8 +89,8 @@ OUTPUT
 
 pir_output_like( << 'CODE', << 'OUTPUT', 'check get_string' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
     print pmc1
@@ -95,13 +98,13 @@ pir_output_like( << 'CODE', << 'OUTPUT', 'check get_string' );
     end
 .end
 CODE
-/table: [0-9A-Fa-f]{8}/
+/^table: [0-9A-Fa-f]{8}/
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check get_bool' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
@@ -120,11 +123,11 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check logical_not' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
-    find_type $I0, "LuaBoolean"
+    find_type $I0, 'LuaBoolean'
     .local pmc pmc2
     pmc2 = new $I0
     pmc2 = not pmc1
@@ -143,11 +146,11 @@ OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check key PMC' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
-    find_type $I0, "LuaString"
+    find_type $I0, 'LuaString'
     .local pmc val1
     val1 = new $I0
     val1 = "value1"
@@ -174,33 +177,33 @@ value2
 nil
 OUTPUT
 
-pir_output_like( << 'CODE', << 'OUTPUT', 'check key nil' );
+pir_error_output_like( << 'CODE', << 'OUTPUT', 'check key nil' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
-    find_type $I0, "LuaString"
+    find_type $I0, 'LuaString'
     .local pmc val1
     val1 = new $I0
     val1 = "value1"
-    find_type $I0, "LuaNil"
+    find_type $I0, 'LuaNil'
     .local pmc nil
     nil = new $I0
     pmc1[nil] = val1
     end
 .end
 CODE
-/table index is nil/
+/^table index is nil/
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check deletion by assignment of nil' );
 .sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaTable"
+    loadlib $P0, 'lua_group'
+    find_type $I0, 'LuaTable'
     .local pmc pmc1
     pmc1 = new $I0
-    find_type $I0, "LuaString"
+    find_type $I0, 'LuaString'
     .local pmc val1
     val1 = new $I0
     val1 = "value1"
@@ -219,7 +222,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', 'check deletion by assignment of nil' );
     nb1 = elements pmc1
     print nb1
     print "\n"
-    find_type $I0, "LuaNil"
+    find_type $I0, 'LuaNil'
     .local pmc nil
     nil = new $I0
     pmc1[val1] = nil
@@ -236,12 +239,12 @@ CODE
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
     .local pmc pmc1
     pmc1 = new .LuaTable
     .local int bool1
-    bool1 = isa pmc1, "LuaTable"
+    bool1 = isa pmc1, 'LuaTable'
     print bool1
     print "\n"
     end
@@ -251,13 +254,13 @@ CODE
 OUTPUT
 
 pir_output_like( << 'CODE', << 'OUTPUT', 'check tostring' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
     .local pmc pmc1
     pmc1 = new .LuaTable
     print pmc1
     print "\n"
-    $P0 = pmc1."tostring"()
+    $P0 = pmc1.'tostring'()
     print $P0
     print "\n"
     $S0 = typeof $P0
@@ -265,15 +268,15 @@ pir_output_like( << 'CODE', << 'OUTPUT', 'check tostring' );
     print "\n"
 .end
 CODE
-/table: [0-9A-Fa-f]{8}\ntable: [0-9A-Fa-f]{8}\nstring/
+/^table: [0-9A-Fa-f]{8}\ntable: [0-9A-Fa-f]{8}\nstring/
 OUTPUT
 
 pir_output_is( << 'CODE', << 'OUTPUT', 'check tonumber' );
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 .sub _main
     .local pmc pmc1
     pmc1 = new .LuaTable
-    $P0 = pmc1."tonumber"()
+    $P0 = pmc1.'tonumber'()
     print $P0
     print "\n"
     $S0 = typeof $P0
@@ -284,4 +287,11 @@ CODE
 nil
 nil
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

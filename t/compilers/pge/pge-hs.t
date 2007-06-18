@@ -1,13 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/pge/pge-hs.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/pge/pge-hs.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 1;
 
 =head1 NAME
 
@@ -15,13 +14,12 @@ t/library/pge-hs.t - Grammar Engine Haskell Output tests
 
 =head1 SYNOPSIS
 
-	% prove t/library/pge-hs.t
+        % prove t/library/pge-hs.t
 
 =cut
 
-
 # 1
-pir_output_is(<<'CODE', <<'OUT', "PGE::Hs match");
+pir_output_is( <<'CODE', <<'OUT', "PGE::Hs match" );
 .sub _main
     .local pmc match, add_rule
     .local string result
@@ -44,6 +42,9 @@ CODE
 ok 1
 OUT
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 1; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

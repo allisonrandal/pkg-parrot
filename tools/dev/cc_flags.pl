@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/tools/dev/cc_flags.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/local/tools/dev/cc_flags.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $
 ################################################################################
 
 =head1 NAME
@@ -32,7 +32,7 @@ use warnings;
 
 my $cflags = shift;
 
-open F, $cflags or die "open $cflags: $!\n";
+open F, '<', $cflags or die "open $cflags: $!\n";
 
 my @options;
 
@@ -43,71 +43,94 @@ while (<F>) {
 
     my $regex;
     if (s/^\{(.*?)\}\s*//) {
-	next unless $1;
-	$regex = qr/$1/;
+        next unless $1;
+        $regex = qr/$1/;
     }
     elsif (s/^(\S+)\s*//) {
-	$regex = qr/^\Q$1\E$/;
+        $regex = qr/^\Q$1\E$/;
     }
     else {
-	die "syntax error in $cflags: line $., $_\n";
+        die "syntax error in $cflags: line $., $_\n";
     }
 
-    for (;;) {
-	if (s/^([-+])\{(.*?)\}\s*//) {
-	    next unless $2;
-	    my ($sign, $options) = ($1, $2);
-	    foreach my $option (split ' ', $options) {
-		push @options, [ $regex, $sign, $option ];
-	    }
-	}
-	elsif (s{s(.)(.*?)\1(.*?)\1([imsx]*)\s*}{}) {
-	    my $mod = "";
-	    $mod = "(?$4)" if $4;
+    for ( ; ; ) {
+        if (s/^([-+])\{(.*?)\}\s*//) {
+            next unless $2;
+            my ( $sign, $options ) = ( $1, $2 );
+            foreach my $option ( split ' ', $options ) {
+                push @options, [ $regex, $sign, $option ];
+            }
+        }
+        elsif (s{s(.)(.*?)\1(.*?)\1([imsx]*)\s*}{}) {
+            my $mod = "";
+            $mod = "(?$4)" if $4;
 
-	    push @options, [ $regex, 's', "$mod$2", $3 ];
-	}
-	elsif (/\S/) {
-	    die "syntax error in $cflags: line $., $_\n";
-	}
-	else {
-	    last;
-	}
+            push @options, [ $regex, 's', "$mod$2", $3 ];
+        }
+        elsif (/\S/) {
+            die "syntax error in $cflags: line $., $_\n";
+        }
+        else {
+            last;
+        }
     }
 }
 
 my ($cfile) = grep /\.c$/, @ARGV;
 
-my ($inject_point, $where);
+my ( $inject_point, $where );
 
 foreach (@ARGV) {
-  last if $_ eq '';
-  ++$where;
+    last if $_ eq '';
+    ++$where;
 }
 if ($where) {
-  # Found a "" - remove it
-  splice @ARGV, $where, 1;
-  $inject_point = $where;
-} else {
-  $inject_point = 1;
+
+    # Found a "" - remove it
+    splice @ARGV, $where, 1;
+    $inject_point = $where;
+}
+else {
+    $inject_point = 1;
 }
 
-foreach my $option (@options) {
-    if ($cfile =~ $option->[0]) {
-        if ($option->[1] eq '+') {
-            splice @ARGV, $inject_point, 0, $option->[2];
-        }
-        elsif ($option->[1] eq '-') {
-            @ARGV = grep { $_ ne $option->[2] } @ARGV;
-        }
-        else {
-            foreach my $arg (@ARGV) {
-                $arg =~ s/$option->[2]/$option->[3]/;
+if ($cfile) {
+    foreach my $option (@options) {
+        if ( $cfile =~ $option->[0] ) {
+            if ( $option->[1] eq '+' ) {
+                splice @ARGV, $inject_point, 0, $option->[2];
+            }
+            elsif ( $option->[1] eq '-' ) {
+                @ARGV = grep { $_ ne $option->[2] } @ARGV;
+            }
+            else {
+                foreach my $arg (@ARGV) {
+                    $arg =~ s/$option->[2]/$option->[3]/;
+                }
             }
         }
     }
-}
 
-# print "@ARGV\n";
-print "$cfile\n";
-exit system(@ARGV)/256;
+    # print "@ARGV\n";
+
+    # Visual C++ already prints the source file name...
+    if ( $ARGV[0] =~ /cl(?:\.exe)?/i ) {
+
+        # ...but only the file name, so we print the path
+        # to the directory first
+        if ( $cfile =~ /(.*[\/\\])/ ) {
+            print $1;
+        }
+    }
+    else {
+        print "$cfile\n";
+    }
+}
+exit system(@ARGV) / 256;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

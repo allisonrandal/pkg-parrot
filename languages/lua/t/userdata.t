@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/userdata.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/userdata.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ t/userdata.t - Lua userdata & coercion
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -25,14 +26,14 @@ language_output_like( 'lua', <<'CODE', <<'OUT', '- u' );
 local u = io.stdin
 print(- u)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', '# u' );
 local u = io.stdin
 print(# u)
 CODE
-/attempt to get length of/
+/^[^:]+: [^:]+:\d+: attempt to get length of/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'not u' );
@@ -46,49 +47,49 @@ language_output_like( 'lua', <<'CODE', <<'OUT', 'u + 10' );
 local u = io.stdin
 print(u + 10)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u - 2' );
 local u = io.stdin
 print(u - 2)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u * 3.14' );
 local u = io.stdin
 print(u * 3.14)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u / -7' );
 local u = io.stdin
 print(u / -7)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u % 4' );
 local u = io.stdin
 print(u % 4)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u ^ 3' );
 local u = io.stdin
 print(u ^ 3)
 CODE
-/attempt to perform arithmetic on/
+/^[^:]+: [^:]+:\d+: attempt to perform arithmetic on/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u .. "end"' );
 local u = io.stdin
 print(u .. "end")
 CODE
-/attempt to concatenate/
+/^[^:]+: [^:]+:\d+: attempt to concatenate/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'u == u' );
@@ -125,7 +126,7 @@ local u = io.stdin
 local v = io.stdout
 print(u < v)
 CODE
-/attempt to compare two userdata values/
+/^[^:]+: [^:]+:\d+: attempt to compare two userdata values\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u <= v' );
@@ -133,7 +134,7 @@ local u = io.stdin
 local v = io.stdout
 print(u <= v)
 CODE
-/attempt to compare two userdata values/
+/^[^:]+: [^:]+:\d+: attempt to compare two userdata values\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u > v' );
@@ -141,7 +142,7 @@ local u = io.stdin
 local v = io.stdout
 print(u > v)
 CODE
-/attempt to compare two userdata values/
+/^[^:]+: [^:]+:\d+: attempt to compare two userdata values\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u >= v' );
@@ -149,35 +150,35 @@ local u = io.stdin
 local v = io.stdout
 print(u >= v)
 CODE
-/attempt to compare two userdata values/
+/^[^:]+: [^:]+:\d+: attempt to compare two userdata values\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u < 0' );
 local u = io.stdin
 print(u < 0)
 CODE
-/attempt to compare \w+ with \w+/
+/^[^:]+: [^:]+:\d+: attempt to compare \w+ with \w+\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u <= 0' );
 local u = io.stdin
 print(u <= 0)
 CODE
-/attempt to compare \w+ with \w+/
+/^[^:]+: [^:]+:\d+: attempt to compare \w+ with \w+\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u > 0' );
 local u = io.stdin
 print(u > 0)
 CODE
-/attempt to compare \w+ with \w+/
+/^[^:]+: [^:]+:\d+: attempt to compare \w+ with \w+\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'u >= 0' );
 local u = io.stdin
 print(u >= 0)
 CODE
-/attempt to compare \w+ with \w+/
+/^[^:]+: [^:]+:\d+: attempt to compare \w+ with \w+\nstack traceback:\n/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'get_pmc_keyed' );
@@ -191,6 +192,13 @@ language_output_like( 'lua', <<'CODE', <<'OUT', 'set_pmc_keyed' );
 local u = io.stdin
 u[1] = 1
 CODE
-/attempt to index/
+/^[^:]+: [^:]+:\d+: attempt to index/
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

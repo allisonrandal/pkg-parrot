@@ -1,5 +1,7 @@
-#!/usr/bin/perl
+#!perl
 
+use strict;
+use warnings;
 use lib qw(APL . lib ../lib ../../lib ../../../lib);
 use t::APL tests => 44;
 
@@ -55,7 +57,7 @@ __DATA__
 --- out: DREIW SI LPA
 
 === rotate
---- APL: 1⊖6 7 8 9 
+--- APL: 1⊖6 7 8 9
 --- out: 7 8 9 6
 
 === rotate multiple positions

@@ -1,5 +1,5 @@
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Compilers.pm 13810 2006-08-02T16:31:20.828767Z chip  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Compilers.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -34,25 +34,26 @@ Returns a new section.
 
 =cut
 
-sub new
-{
+sub new {
     my $self = shift;
-    
+
     return $self->SUPER::new(
-        'Compilers', 'compilers.html', '',
-        $self->new_group( 'IMCC', 'the Intermediate Code Compiler for Parrot',
-            'compilers/ast',
-            'compilers/imcc' ),
-        $self->new_group( 'PGE', 'the Parrot Grammar Engine',
-            'compilers/pge' ),
-        $self->new_group( 'TGE', 'the Tree Grammar Engine',
-            'compilers/tge' ),
-        $self->new_group( 'PAST', 'the Parrot/Punie Abstract Syntax Tree',
-            'compilers/past' ),
-        $self->new_group( 'POST', 'the Parrot/Punie Opcode Syntax Tree',
-            'compilers/post' ),
-        $self->new_group( 'BCG', 'Byte Code Generation',
-            'compilers/bcg' ),
+        'Compilers',
+        'compilers.html',
+        '',
+        $self->new_group( 'IMCC', 'the Intermediate Code Compiler for Parrot', 'compilers/imcc' ),
+        $self->new_group( 'PGE',  'the Parrot Grammar Engine',                 'compilers/pge' ),
+        $self->new_group( 'TGE',  'the Tree Grammar Engine',                   'compilers/tge' ),
+        $self->new_group( 'PAST', 'the Parrot/Punie Abstract Syntax Tree',     'compilers/past' ),
+        $self->new_group(
+            'Partridge (PAST-pm)',
+            'the Parrot/Punie Abstract Syntax Tree (new implementation)',
+            'compilers/past-pm'
+        ),
+        $self->new_group( 'smop', 'Simple Meta Object Protocol', 'compilers/smop' ),
+        $self->new_group( 'BCG',  'Byte Code Generation',        'compilers/bcg' ),
+        $self->new_group( 'JSON', 'JavaScript Object Notation',  'compilers/json' ),
+        $self->new_group( 'PIRC', 'a PIR Compiler',              'compilers/pirc' ),
     );
 }
 
@@ -61,3 +62,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

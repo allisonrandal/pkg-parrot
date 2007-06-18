@@ -1,4 +1,4 @@
-# $Id: /local/config/gen/makefiles/languages.in 13846 2006-08-03T17:06:49.435642Z chip  $
+# $Id: /parrotcode/local/config/gen/makefiles/languages.in 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 # setup of commands
 @make_set_make@
@@ -12,22 +12,30 @@ LANGUAGES = \
     APL \
     BASIC \
     HQ9plus \
+    PIR \
     WMLScript \
     Zcode \
-    bc \
+    abc \
     befunge \
     bf \
+    c99 \
     cardinal \
     cola \
     dotnet \
     ecmascript \
+    forth \
     jako \
     lisp \
     lua \
     m4 \
     ook \
     parrot_compiler \
+    perl5 \
+    perl6 \
+    pheme \
+    plumhead \
     punie \
+    pynie \
     regex \
     scheme \
     tap \
@@ -79,22 +87,30 @@ clean: \
     APL.clean \
     BASIC.clean \
     HQ9plus.clean \
+    PIR.clean \
     WMLScript.clean \
     Zcode.clean \
-    bc.clean \
+    abc.clean \
     befunge.clean \
     bf.clean \
+    c99.clean \
     cardinal.clean \
     cola.clean \
     dotnet.clean \
     ecmascript.clean \
+    forth.clean \
     jako.clean \
     lisp.clean \
     lua.clean \
     m4.clean \
     ook.clean \
     parrot_compiler.clean \
+    perl5.clean \
+    perl6.clean \
+    pheme.clean \
+    plumhead.clean \
     punie.clean \
+    pynie.clean \
     regex.clean \
     scheme.clean \
     tap.clean \
@@ -125,6 +141,14 @@ BASIC.test:
 BASIC.clean:
 # Don't know how to clean BASIC
 
+PIR: PIR.dummy
+PIR.dummy:
+	- $(MAKE) PIR
+PIR.test:
+	- $(MAKE) PIR test
+PIR.clean:
+	- $(MAKE) PIR clean
+
 WMLScript: WMLScript.dummy
 WMLScript.dummy:
 	- $(MAKE) WMLScript
@@ -141,13 +165,13 @@ Zcode.test:
 Zcode.clean:
 	- $(MAKE) Zcode clean
 
-bc : bc.dummy
-bc.dummy:
-	- $(MAKE) bc
-bc.test:
-	- $(MAKE) bc test
-bc.clean:
-	- $(MAKE) bc clean
+abc : abc.dummy
+abc.dummy:
+	- $(MAKE) abc
+abc.test:
+	- $(MAKE) abc test
+abc.clean:
+	- $(MAKE) abc clean
 
 befunge : befunge.dummy
 befunge.dummy:
@@ -164,6 +188,14 @@ bf.test:
 	- $(MAKE) bf test
 bf.clean:
 	- $(MAKE) bf clean
+
+c99 : c99.dummy
+c99.dummy:
+	- $(MAKE) c99
+c99.test:
+	- $(MAKE) c99 test
+c99.clean:
+	- $(MAKE) c99 clean
 
 cardinal : cardinal.dummy
 cardinal.dummy:
@@ -197,6 +229,14 @@ ecmascript.test:
 	- $(MAKE) ecmascript test
 ecmascript.clean:
 	- $(MAKE) ecmascript clean
+
+forth : forth.dummy
+forth.dummy:
+	- $(MAKE) forth
+forth.test:
+	- $(MAKE) forth test
+forth.clean:
+	- $(MAKE) forth clean
 
 HQ9plus: HQ9plus.dummy
 HQ9plus.dummy:
@@ -254,6 +294,38 @@ parrot_compiler.test:
 parrot_compiler.clean:
 	- $(MAKE) parrot_compiler clean
 
+perl5 : perl5.dummy
+perl5.dummy:
+	- $(MAKE) perl5
+perl5.test:
+	- $(MAKE) perl5 test
+perl5.clean:
+	- $(MAKE) perl5 clean
+
+perl6 : perl6.dummy
+perl6.dummy:
+	- $(MAKE) perl6
+perl6.test:
+	- $(MAKE) perl6 test
+perl6.clean:
+	- $(MAKE) perl6 clean
+
+pheme : pheme.dummy
+pheme.dummy:
+	- $(MAKE) pheme
+pheme.test:
+	- $(MAKE) pheme test
+pheme.clean:
+	- $(MAKE) pheme clean
+
+plumhead : plumhead.dummy
+plumhead.dummy:
+	- $(MAKE) plumhead
+plumhead.test:
+	- $(MAKE) plumhead test
+plumhead.clean:
+	- $(MAKE) plumhead clean
+
 punie : punie.dummy
 punie.dummy:
 	- $(MAKE) punie
@@ -261,6 +333,14 @@ punie.test:
 	- $(MAKE) punie test
 punie.clean:
 	- $(MAKE) punie clean
+
+pynie : pynie.dummy
+pynie.dummy:
+	- $(MAKE) pynie
+pynie.test:
+	- $(MAKE) pynie test
+pynie.clean:
+	- $(MAKE) pynie clean
 
 regex: regex.dummy
 regex.dummy:

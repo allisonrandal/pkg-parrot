@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/sizes.pm 13003 2006-06-22T16:18:58.705067Z jonathan  $
+# $Id: /parrotcode/local/config/auto/sizes.pm 740 2006-12-18T05:00:52.799273Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Determines the sizes of various types.
 package auto::sizes;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,11 +25,10 @@ $description = 'Determining some sizes';
 
 @args = qw(miniparrot);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    if (defined $conf->options->get('miniparrot')) {
+    if ( defined $conf->options->get('miniparrot') ) {
         $conf->data->set(
             doublesize       => 8,
             numvalsize       => 8,
@@ -58,11 +58,11 @@ sub runstep
     my %results = eval cc_run();
     cc_clean();
 
-    for (keys %results) {
-        $conf->data->set($_ => $results{$_});
+    for ( keys %results ) {
+        $conf->data->set( $_ => $results{$_} );
     }
 
-    if ($results{ptrsize} != $results{intvalsize}) {
+    if ( $results{ptrsize} != $results{intvalsize} ) {
         print <<"END";
 
 Hmm, I see your chosen INTVAL isn't the same size as your pointers.  Parrot
@@ -71,24 +71,28 @@ END
     }
 
     # set fixed sized types
-    if ($results{shortsize} == 2) {
-        $conf->data->set(int2_t => 'short');
-    } else {
-        $conf->data->set(int2_t => 'int');
+    if ( $results{shortsize} == 2 ) {
+        $conf->data->set( int2_t => 'short' );
+    }
+    else {
+        $conf->data->set( int2_t => 'int' );
         print <<'END';
 
 Can't find a int type with size 2, conversion ops might fail!
 
 END
     }
-    if ($results{shortsize} == 4) {
-        $conf->data->set(int4_t => 'short');
-    } elsif ($results{intsize} == 4) {
-        $conf->data->set(int4_t => 'int');
-    } elsif ($results{longsize} == 4) {
-        $conf->data->set(int4_t => 'long');
-    } else {
-        $conf->data->set(int4_t => 'int');
+    if ( $results{shortsize} == 4 ) {
+        $conf->data->set( int4_t => 'short' );
+    }
+    elsif ( $results{intsize} == 4 ) {
+        $conf->data->set( int4_t => 'int' );
+    }
+    elsif ( $results{longsize} == 4 ) {
+        $conf->data->set( int4_t => 'long' );
+    }
+    else {
+        $conf->data->set( int4_t => 'int' );
         print <<'END';
 
 Can't find a int type with size 4, conversion ops might fail!
@@ -96,20 +100,22 @@ Can't find a int type with size 4, conversion ops might fail!
 END
     }
 
-    if ($results{floatsize} == 4) {
-        $conf->data->set(float4_t => 'float');
-    } else {
-        $conf->data->set(float4_t => 'double');
+    if ( $results{floatsize} == 4 ) {
+        $conf->data->set( float4_t => 'float' );
+    }
+    else {
+        $conf->data->set( float4_t => 'double' );
         print <<'END';
 
 Can't find a float type with size 4, conversion ops might fail!
 
 END
     }
-    if ($results{doublesize} == 8) {
-        $conf->data->set(float8_t => 'double');
-    } else {
-        $conf->data->set(float8_t => 'double');
+    if ( $results{doublesize} == 8 ) {
+        $conf->data->set( float8_t => 'double' );
+    }
+    else {
+        $conf->data->set( float8_t => 'double' );
         print <<'END';
 
 Can't find a float type with size 8, conversion ops might fail!
@@ -122,9 +128,9 @@ END
     my $intvalsize = $conf->data->get('intvalsize');
 
     # Get HUGEINTVAL, note that we prefer standard types
-    foreach my $type ('long', 'int', 'long long', '__int64') {
+    foreach my $type ( 'long', 'int', 'long long', '__int64' ) {
 
-        $conf->data->set(int8_t => $type);
+        $conf->data->set( int8_t => $type );
         eval {
             cc_gen('config/auto/sizes/test2_c.in');
             cc_build();
@@ -133,19 +139,21 @@ END
         };
 
         # clear int8_t on error
-        if ($@ || !exists $hugeintval{hugeintval}) {
-            $conf->data->set(int8_t => undef);
+        if ( $@ || !exists $hugeintval{hugeintval} ) {
+            $conf->data->set( int8_t => undef );
             next;
         }
 
-        if ($hugeintval{hugeintvalsize} > $intvalsize) {
+        if ( $hugeintval{hugeintvalsize} > $intvalsize ) {
+
             # We found something bigger than intval.
             $conf->data->set(%hugeintval);
             last;
         }
     }
-    if (!defined($hugeintval{hugeintvalsize})
-        || $hugeintval{hugeintvalsize} == $intvalsize) {
+    if ( !defined( $hugeintval{hugeintvalsize} )
+        || $hugeintval{hugeintvalsize} == $intvalsize )
+    {
 
         # Could not find anything bigger than intval.
         $conf->data->set(
@@ -159,8 +167,8 @@ END
     #get HUGEFLOATVAL
     if (
         my $size = eval {
-            open(TEST, ">test.c") or die "Can't open test.c: $!";
-            print TEST <<'END';
+            open( my $TEST, ">", "test.c" ) or die "Can't open test.c: $!";
+            print {$TEST} <<'END';
 #include <stdio.h>
 
 int main() {
@@ -169,17 +177,19 @@ int main() {
     return 0;
 }
 END
-            close TEST;
+            close $TEST;
 
             cc_build();
             cc_run();
         }
-        ) {
+        )
+    {
         $conf->data->set(
             hugefloatval     => 'long double',
             hugefloatvalsize => $size
         );
-        } else {
+    }
+    else {
         $conf->data->set(
             hugefloatval     => 'double',
             hugefloatvalsize => $conf->data->get('doublesize')
@@ -192,3 +202,10 @@ END
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

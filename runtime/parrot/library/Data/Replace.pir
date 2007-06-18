@@ -1,4 +1,4 @@
-# $Id: /local/runtime/parrot/library/Data/Replace.pir 12837 2006-05-30T13:47:57.477012Z coke  $
+# $Id: /parrotcode/local/runtime/parrot/library/Data/Replace.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 TITLE
 
@@ -93,6 +93,7 @@ CANT_REPLACE:
 
     # find a Data::Replace method with the name of the type to replace
     typeof name, where
+    .include 'errors.pasm'
     errorsoff .PARROT_ERRORS_GLOBALS_FLAG
     find_global temp, "Data::Replace", name
     errorson .PARROT_ERRORS_GLOBALS_FLAG
@@ -225,3 +226,9 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/globals.t 13824 2006-08-03T16:34:20.826014Z chip  $
+# $Id: /parrotcode/local/t/pmc/globals.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/globals.t - Globals and Namespaces
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/globals.t
+    % prove t/pmc/globals.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ Tests the globals fetch and store operations.
 
 =cut
 
-pir_output_is(<<'CODE', <<'OUTPUT', "get namespace");
+pir_output_is( <<'CODE', <<'OUTPUT', "get namespace" );
 .sub main
    .local pmc ns, o
    ns = find_global "Foo"
@@ -38,7 +38,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "create namespace");
+pir_output_is( <<'CODE', <<'OUTPUT', "create namespace" );
 .sub main
     .local pmc f, x
     f = find_global "f"
@@ -54,7 +54,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "get namespace - nested");
+pir_output_is( <<'CODE', <<'OUTPUT', "get namespace - nested" );
 .sub main
    .local pmc ns, o
    ns = get_hll_namespace ["Foo"; "Bar"]
@@ -71,7 +71,7 @@ ok
 OUTPUT
 
 # this is pretty much taken from PDD 21
-pir_output_is(<<'CODE', <<'OUTPUT', "get namespace - array");
+pir_output_is( <<'CODE', <<'OUTPUT', "get namespace - array" );
 .namespace ['Foo'; 'Bar']
 .sub test
   print "ok\n"
@@ -93,3 +93,9 @@ CODE
 ok
 OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

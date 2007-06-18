@@ -1,9 +1,12 @@
+#ifndef PARROT_JIT_IA64_JIT_EMIT_H_GUARD
+#define PARROT_JIT_IA64_JIT_EMIT_H_GUARD
+
 /*
  * jit_emit.h
  *
  * IA64
  *
- * $Id: /local/src/jit/ia64/jit_emit.h 11501 2006-02-10T18:27:13.457666Z particle  $
+ * $Id: /parrotcode/trunk/src/jit/ia64/jit_emit.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
  */
 
 #if JIT_EMIT
@@ -23,7 +26,7 @@ long it = 0;
 int inst_size = 0;
 int inst_tmpl = 0;
 
-typedef struct {
+typedef struct  inst_tmp_t {
     char    tmplt;
     char    used;
     unsigned long    inst1;
@@ -109,7 +112,7 @@ enum {
     pc = loadinst(pc, ((long)((imm64 >> 22) & (long)0x1fffffffffff)), IT_L); \
     it = ((long)6 << 37) | \
         ((long)((imm64 >> 63) & 0x1)     << 36) | \
-        ((long)((imm64 >> 7 ) & 0x1ff)     << 27) | \
+        ((long)((imm64 >> 7) & 0x1ff)     << 27) | \
         ((long)((imm64 >> 21) & 0x1)     << 21) | \
         ((long)((imm64 >> 16) & 0x1f)     << 22) | \
         ((long)((imm64           & 0x7f))     << 13) | \
@@ -547,7 +550,7 @@ jit_emit_bc(Parrot_jit_info_t *jit_info, opcode_t disp)
 {
     opcode_t opcode = jit_info->op_i + disp;
     int offset;
-    if(opcode <= jit_info->op_i) {
+    if (opcode <= jit_info->op_i) {
         offset = jit_info->arena.op_map[opcode].offset -
             (jit_info->native_ptr - jit_info->arena.start);
         if (jit_info->optimizer->cur_section->branch_target ==
@@ -622,8 +625,8 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
 
     fixup = jit_info->arena.fixups;
 
-    while(fixup){
-        switch(fixup->type){
+    while (fixup){
+        switch (fixup->type){
             case JIT_IA64_CALL:
                 fixup_ptr = Parrot_jit_fixup_target(jit_info, fixup);
                 d = (((long)fixup->param.fptr - (long)fixup_ptr)) >> 4;
@@ -738,7 +741,7 @@ Parrot_jit_emit_mov_rm_n(Interp * interpreter, int reg,char *mem)
 #  define INT_REGISTERS_TO_MAP 22
 
 #  ifndef JIT_IMCC
-#  define CACHELINESIZE 32
+#    define CACHELINESIZE 32
 
 char intval_map[INT_REGISTERS_TO_MAP] =
     { 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -760,11 +763,19 @@ ia64_sync_cache (void *_start, void *_end)
         "srlz.i\n"
         ";;\n"
         :
-        : "r" ((long)_sync)
-        );
+        : "r" ((long)_sync));
     }
 }
 
 #  endif
 
-#endif
+#endif /* !JIT_EMIT */
+
+#endif /* PARROT_JIT_IA64_JIT_EMIT_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

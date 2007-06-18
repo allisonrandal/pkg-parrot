@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/docs/dev/optimizer.pod 11525 2006-02-13T18:40:19.965566Z particle  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/dev/optimizer.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -103,11 +103,13 @@ The optimizer loop works as follows:
 
 =item 2.  Build basic block info.
 
-=item 3.  Run all cfg_optimize() optimizations.  If one makes a change, go to step 1.
+=item 3.  Run all cfg_optimize() optimizations.  If one makes a
+change, go to step 1.
 
 =item 4.  Build all other CFG info (dominators, loops, life analysis).
 
-=item 5.  Run all optimize() optimizations.  If one makes a change, go to step 1.
+=item 5.  Run all optimize() optimizations.  If one makes a change, go
+to step 1.
 
 =back
 

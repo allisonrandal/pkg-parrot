@@ -22,20 +22,39 @@
   code     = argv[1]
 
   $P1 = compreg language
-  $I1 = typeof $P1
-  if $I1 == .None goto fail
-  $P0 = $P1(code)
-  $P0()
-
-  # XXX Should catch exceptions in the code and return the error message
+  if null $P1 goto fail
+  push_eh compiler_error
+    $P0 = $P1(code)
+  clear_eh
+  push_eh runtime_error
+    $P0()
+  clear_eh
   .return ('')
 
+
+# First pass at RT#40748
+compiler_error:
+  get_results'(0,0)', $P1, $S1
+  $S1 = 'compile error: ' . $S1
+  tcl_error $S1
+
+runtime_error:
+  get_results'(0,0)', $P1, $S1
+  $S1 = 'runtime error: ' . $S1
+  tcl_error $S1
+
 bad_args:
-  .throw ('wrong # args: should be "inline language code"')
+  tcl_error 'wrong # args: should be "inline language code"'
 
 fail:
   $S0 = 'invalid language "'
   $S0 .= language
   $S0 .= '" specified'
-  .throw ($S0)
+  tcl_error $S0
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

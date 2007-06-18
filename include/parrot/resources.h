@@ -1,7 +1,7 @@
 /* resources.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/resources.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/resources.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Defines the resource allocation API
  *  Data Structure and Algorithms:
@@ -10,22 +10,22 @@
  *  References:
  */
 
-#if !defined(PARROT_RESOURCES_H_GUARD)
+#ifndef PARROT_RESOURCES_H_GUARD
 #define PARROT_RESOURCES_H_GUARD
 
 #include "parrot/parrot.h"
 
-struct Memory_Block {
+typedef struct Memory_Block {
     size_t free;
     size_t size;
     struct Memory_Block *prev;
     struct Memory_Block *next;
     char *start;
     char *top;
-};
+} Memory_Block;
 
-struct Memory_Pool {
-    struct Memory_Block *top_block;
+typedef struct Memory_Pool {
+    Memory_Block *top_block;
     void (*compact)(Interp *, struct Memory_Pool *);
     size_t minimum_block_size;
     size_t total_allocated; /* total bytes allocated to this pool */
@@ -33,7 +33,7 @@ struct Memory_Pool {
     size_t possibly_reclaimable;     /* bytes that can possibly be reclaimed
                                       * (above plus COW-freed bytes) */
     FLOATVAL reclaim_factor; /* minimum percentage we will reclaim */
-};
+} Memory_Pool;
 
 
 
@@ -41,17 +41,22 @@ struct Memory_Pool {
 void Parrot_allocate(Interp *, Buffer *, size_t size);
 void Parrot_allocate_aligned(Interp *, Buffer *, size_t size);
 void Parrot_allocate_string(Interp *, STRING *, size_t size);
-void Parrot_reallocate(Interp *interpreter, Buffer *from, size_t tosize);
-void Parrot_reallocate_string(Interp *interpreter, STRING *, size_t tosize);
+void Parrot_reallocate(Interp *interp, Buffer *from, size_t tosize);
+void Parrot_reallocate_string(Interp *interp, STRING *, size_t tosize);
 
 void Parrot_initialize_memory_pools(Interp *);
-void Parrot_destroy_memory_pools(Interp *interpreter);
+void Parrot_destroy_memory_pools(Interp *interp);
+
+void Parrot_merge_memory_pools(Interp *dest, Interp *source);
+
+/* XXX FIXME */
+int Parrot_in_memory_pool(Interp *interp, void *bufstart);
 
 void Parrot_go_collect(Interp *);
 
-struct Arenas {
-    struct Memory_Pool *memory_pool;
-    struct Memory_Pool *constant_string_pool;
+typedef struct Arenas {
+    Memory_Pool *memory_pool;
+    Memory_Pool *constant_string_pool;
     struct Small_Object_Pool *string_header_pool;
     struct Small_Object_Pool *pmc_pool;
     struct Small_Object_Pool *pmc_ext_pool;
@@ -109,7 +114,7 @@ struct Arenas {
      * private data for the GC subsystem
      */
     void *  gc_private;         /* gc subsystem data */
-};
+} Arenas;
 
 /* &gen_from_enum(interpinfo.pasm) prefix(INTERPINFO_) */
 
@@ -132,11 +137,12 @@ typedef enum {
     CURRENT_SUB,
     CURRENT_CONT,
     CURRENT_OBJECT,
-    NAMESPACE_ROOT,
     CURRENT_LEXPAD,
 
     /* interpinfo_s constants */
-    CURRENT_METHOD
+    EXECUTABLE_FULLNAME,
+    EXECUTABLE_BASENAME,
+    RUNTIME_PREFIX
 } Interpinfo_enum;
 
 /* &end_gen */
@@ -145,10 +151,7 @@ typedef enum {
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/docs/vtables.pod 12839 2006-05-30T14:34:31.126984Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/vtables.pod 3187 2007-04-15T03:31:19.509244Z chromatic  $
 
 =head1 NAME
 
@@ -74,15 +74,17 @@ F<src/pmc/> subdirectory; this is where all the built-in PMC classes live. (And
 a good source of examples to plunder even if you're not writing a core data
 type.)
 
-You should almost always start by running F<tools/dev/gen_class.pl> to generate a
-skeleton for the class. Let's generate a number type for the beautifully
-non-existent Fooby language:
+You should almost always start by running F<tools/dev/gen_class.pl> to
+generate a skeleton for the class. Let's generate a number type for
+the beautifully non-existent Fooby language:
 
     % perl tools/dev/gen_class.pl FoobyNumber > src/pmc/foobynumber.pmc
 
 This will produce a skeleton C file (to be preprocessed by the
 F<tools/build/pmc2c.pl> program) with stubs for all the methods you need to
 fill in. The function C<init> allows you to set up anything you need to set up.
+Comment out the C<namespace> method from the automatically generated set
+of methods (otherwise, the compile will fail).
 
 Now you'll have to do something a little different depending on whether you're
 writing a built-in class or an extension class. If you're writing a built-in
@@ -91,8 +93,8 @@ function. For built-in classes, this is automatically defined in F<pmc.h> when
 you run F<Configure.pl>.  If you're not writing a built-in class, you need to
 indicate this by using the 'extension' keyword after the 'pmclass YOURCLASS'
 declaration in F<src/pmc/YOURCLASS.pmc>. Then, change the type of the C<init>
-function to return C<struct _vtable>, and then return C<temp_base_vtable>
-instead of assigning to the interpreter specific C<vtables> array.
+function to return C<VTABLE>, and then return C<temp_base_vtable> instead of
+assigning to the interpreter specific C<vtables> array.
 
 To finish up adding a built-in class:
 
@@ -104,7 +106,8 @@ Add src/pmc/YOURCLASS.pmc to the MANIFEST
 
 =item 2.
 
-Rerun F<Configure.pl> to add your new PMC to the set of built-in PMCs.
+Run C<make realclean>, and rerun F<Configure.pl> to add your new PMC to
+the set of built-in PMCs.
 
 =back
 

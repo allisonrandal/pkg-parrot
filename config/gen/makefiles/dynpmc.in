@@ -1,9 +1,9 @@
-# $Id: /local/config/gen/makefiles/dynpmc.in 12755 2006-05-23T03:38:23.621690Z mdiep  $
+# $Id: /parrotcode/local/config/gen/makefiles/dynpmc.in 1614 2007-01-30T05:55:40.019968Z chromatic  $
 
 PERL        = @perl@
 RM_F        = @rm_f@
 LOAD_EXT    = @load_ext@
-RUNTIME_DIR = @build_dir@@slash@runtime@slash@parrot@slash@dynext
+RUNTIME_DIR = @build_dir@/runtime/parrot/dynext
 O           = @o@
 
 # add your dynamic pmcs here
@@ -15,41 +15,13 @@ O           = @o@
 PMCS = \
   dynlexpad \
   foo \
+  rotest \
 #CONDITIONED_LINE(has_gdbm):gdbmhash \
   match \
   matchrange \
-  perlarray perlhash perlnum perlstring perlenv perlint perlscalar perlundef \
   subproxy 
 
-DISABLED_PMCS = \
-  pybuiltin \
-  pyclass \
-  pyobject \
-  pyboolean \
-  pycomplex \
-  pydict \
-  pyexception \
-  pyfloat \
-  pyfunc \
-  pyboundmeth \
-  pyboundcall \
-  pynci \
-  pystaticmeth \
-  pygen \
-  pyint \
-  pylist \
-  pylong \
-  pymodule \
-  pynone \
-  pytype \
-  pyslice \
-  pystring \
-  pytuple \
-  pyproxytype \
-  pyproxyclass \
-  pyiter
-
-BUILD = $(PERL) @build_dir@@slash@tools@slash@build@slash@dynpmc.pl
+BUILD = $(PERL) @build_dir@/tools/build/dynpmc.pl
 
 all :
 	@$(BUILD) generate $(PMCS)

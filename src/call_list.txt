@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2005, The Perl Foundation.
-# $Id: /local/src/call_list.txt 13338 2006-07-18T02:55:32.863041Z chip  $
+# $Id: /parrotcode/trunk/src/call_list.txt 3477 2007-05-13T20:42:55.058233Z chromatic  $
 
 # Function signature declarations for Parrot Native Call Interface.
 # The first alphanumeric is the type of the return value,
@@ -41,6 +41,7 @@
 # special stuff
 # 0 - insert a NULL (pointer) - doesn't comsume a register
 # J - Parrot_Interp param
+# @ - slurpy array
 
 # Callback Things
 
@@ -254,12 +255,11 @@ i	Jt
 i	Ji
 
 # Oddball ones for postgres
-# p	ptiLTLLi    this should be handled by ManagedStruct
-p	pi33ipi
-p	ptii33i
-p	ptit33i
-i	ptit33i
-i	ptiit33i
+p	ptippppi    PQexecParams
+p	pi33ipi     PQfn
+p	pttip       PQprepage
+p	ptipppi     PQexecPrepared
+p       ppP         PQsetNoticeReceiver
 
 # The following are used by library/pcre.pir
 p	tiB3P
@@ -338,7 +338,17 @@ v      JOI
 
 # Make lua stop panic'ing.
 P      JOI
+S      JOSP
 
+# ParrotThread creation
+i      JOP@
+I      JOP@
+I      JOIP@
+# other ParrotThread
+P      JO
+
+# src/pmc/nci.pmc
+v JOb
 
 # --- start mysqlclient library ---
 # Created from mysql.h using the following manual method:
@@ -415,3 +425,7 @@ v t	#  void mysql_debug(const char *debug)
 
 # win32
 l lttl
+
+i pip
+i piS
+S i

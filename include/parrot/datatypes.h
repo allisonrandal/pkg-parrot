@@ -3,7 +3,7 @@
  *  Copyright (C) 2002, The Perl Foundation.
  *  License:  Artistic/GPL, see README and LICENSES for details
  *  SVN Info
- *     $Id: /local/include/parrot/datatypes.h 12821 2006-05-29T13:44:57.786877Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/datatypes.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *
@@ -12,7 +12,7 @@
  *     Though appending a type and a name should be safe.
  */
 
-#if !defined(PARROT_DATATYPES_H_GUARD)
+#ifndef PARROT_DATATYPES_H_GUARD
 #define PARROT_DATATYPES_H_GUARD
 
 /* &gen_from_enum(datatypes.pasm) subst(s/enum_type_(\w+)/uc("DATATYPE_$1")/e) */
@@ -78,26 +78,26 @@ struct _data_types {
 const struct _data_types data_types[] = {
     { "INTVAL",   INTVAL_SIZE },          /* parrot types */
     { "FLOATVAL", NUMVAL_SIZE },
-    { "STRING", sizeof(void *) },
-    { "PMC",    sizeof(void *) },           /* actual PMCs have positive class numbers */
-    { "BIGINT", sizeof(void *) },
-    { "BIGNUM", sizeof(void *) },          /* might be different */
-    { "DPOINTER",sizeof(void *) },
+    { "STRING", sizeof (void *) },
+    { "PMC",    sizeof (void *) },           /* actual PMCs have positive class numbers */
+    { "BIGINT", sizeof (void *) },
+    { "BIGNUM", sizeof (void *) },          /* might be different */
+    { "DPOINTER",sizeof (void *) },
 
-    { "char",   sizeof(char) },          /* native integer types */
-    { "short",  sizeof(short) },
-    { "int",    sizeof(int)   },
-    { "long",   sizeof(long)  },
+    { "char",   sizeof (char) },          /* native integer types */
+    { "short",  sizeof (short) },
+    { "int",    sizeof (int)   },
+    { "long",   sizeof (long)  },
     { "longlong", 0 },          /* TODO */
 
-    { "uchar",  sizeof(char) },            /* native unsigned types */
-    { "ushort", sizeof(short)},
-    { "uint",   sizeof(int)  },
-    { "ulong",  sizeof(long) },
+    { "uchar",  sizeof (char) },            /* native unsigned types */
+    { "ushort", sizeof (short)},
+    { "uint",   sizeof (int)  },
+    { "ulong",  sizeof (long) },
     { "ulonglong", 0 },         /* TODO */
 
-    { "float",  sizeof(float) },          /* native float types */
-    { "double", sizeof(double) },
+    { "float",  sizeof (float) },          /* native float types */
+    { "double", sizeof (double) },
     { "longdouble", 0 },        /* TODO */
 
     { "int1",   0 },            /*  = bit */
@@ -112,11 +112,11 @@ const struct _data_types data_types[] = {
     { "uint32", 4 },
     { "uint64", 8 },
 
-    { "ptr", sizeof(void*) },
-    { "cstr", sizeof(char *) },
-    { "struct_ptr", sizeof(void*) },
+    { "ptr", sizeof (void*) },
+    { "cstr", sizeof (char *) },
+    { "struct_ptr", sizeof (void*) },
     { "struct", 0 },
-    { "func_ptr", sizeof(void (*)(void)) },
+    { "func_ptr", sizeof (void (*)(void)) },
 
     { "sized", 0 },
 
@@ -134,10 +134,7 @@ PARROT_API STRING * Parrot_get_datatype_name(Parrot_Interp, INTVAL );
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

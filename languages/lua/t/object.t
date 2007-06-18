@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/object.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/object.t 1614 2007-01-30T05:55:40.019968Z chromatic  $
 
 =head1 NAME
 
@@ -17,10 +17,11 @@ See "Programming in Lua", section 16 "Object-Oriented Programming".
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 8;
+use Parrot::Test tests => 9;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'object' );
@@ -163,13 +164,14 @@ CODE
 -100
 OUT
 
-TODO: {
-local $TODO = 'fix me';
+TODO:
+{
+    local $TODO = 'pb with tail call ?';
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'multiple inheritance' );
 -- look up for 'k' in list of tables 'plist'
 local function search (k, plist)
-    for i=1, table.getn(plist) do
+    for i=1, #plist do
         local v = plist[i][k]  -- try 'i'-th superclass
         if v then return v end
     end
@@ -187,17 +189,17 @@ function createClass (...)
 
     -- prepare 'c' to be the metatable of its instance
     c.__index = c
-    
+
     -- define a new constructor for this new class
     function c:new (o)
         o = o or {}
         setmetatable(o, c)
         return o
     end
-    
+
     -- return new class
     return c
-end    
+end
 
 Account = {balance = 0}
 function Account:deposit (v)
@@ -227,10 +229,71 @@ Paul
 OUT
 }
 
+language_output_is( 'lua', <<'CODE', <<'OUT', 'multiple inheritance (patched)' );
+-- look up for 'k' in list of tables 'plist'
+local function search (k, plist)
+    for i=1, #plist do
+        local v = plist[i][k]  -- try 'i'-th superclass
+        if v then return v end
+    end
+end
+
+function createClass (...)
+    local c = {}  -- new class
+    local arg = {...}
+
+    -- class will search for each method in the list of its
+    -- parents ('arg' is the list of parents)
+    setmetatable(c, {__index = function (t, k)
+        -- return search(k, arg)
+        return (search(k, arg))
+    end})
+
+    -- prepare 'c' to be the metatable of its instance
+    c.__index = c
+
+    -- define a new constructor for this new class
+    function c:new (o)
+        o = o or {}
+        setmetatable(o, c)
+        return o
+    end
+
+    -- return new class
+    return c
+end
+
+Account = {balance = 0}
+function Account:deposit (v)
+    self.balance = self.balance + v
+end
+function Account:withdraw (v)
+    self.balance = self.balance - v
+end
+
+Named = {}
+function Named:getname ()
+    return self.name
+end
+function Named:setname (n)
+    self.name = n
+end
+
+NamedAccount = createClass(Account, Named)
+
+account = NamedAccount:new{name = "Paul"}
+print(account:getname())
+account:deposit(100.00)
+print(account.balance)
+CODE
+Paul
+100
+OUT
+
 language_output_is( 'lua', <<'CODE', <<'OUT', 'privacy' );
 function newAccount (initialBalance)
     local self = {balance = initialBalance}
-    
+
     local withdraw = function (v)
                          self.balance = self.balance - v
                      end
@@ -240,7 +303,7 @@ function newAccount (initialBalance)
                     end
 
     local getBalance = function () return self.balance end
-    
+
     return {
         withdraw = withdraw,
         deposit = deposit,
@@ -273,4 +336,11 @@ CODE
 0
 10
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

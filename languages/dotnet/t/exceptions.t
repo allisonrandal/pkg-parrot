@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 9;
 
-## Testing classes for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing classes for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     using System;
@@ -168,10 +171,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'simple no exception');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'simple no exception' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -184,7 +187,7 @@ PIR
 0
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'simple exception');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'simple exception' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -197,7 +200,7 @@ PIR
 1
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'typed exception handler');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'typed exception handler' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -214,7 +217,7 @@ PIR
 1
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'nested 1');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'nested 1' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -231,7 +234,7 @@ PIR
 2
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'nested 2');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'nested 2' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -248,7 +251,7 @@ PIR
 1
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'nested 3');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'nested 3' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -265,7 +268,7 @@ PIR
 2
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'nested 4');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'nested 4' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -282,7 +285,7 @@ PIR
 3
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'nested 5');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'nested 5' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -298,3 +301,10 @@ PIR
 3
 2
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

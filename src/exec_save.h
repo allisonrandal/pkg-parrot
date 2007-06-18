@@ -2,7 +2,7 @@
  * exec.h
  *
  * SVN Info
- *    $Id: /local/src/exec_save.h 12492 2006-05-03T20:53:31.555447Z bernhard  $
+ *    $Id: /parrotcode/trunk/src/exec_save.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
  * Overview:
  *    Exec header file.
  * History:
@@ -11,19 +11,17 @@
  * References:
  */
 
-#if !defined(PARROT_EXEC_SAVE_H_GUARD)
-#  define PARROT_EXEC_SAVE_H_GUARD
+#ifndef PARROT_EXEC_SAVE_H_GUARD
+#define PARROT_EXEC_SAVE_H_GUARD
 
 void Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file);
 
 #endif /* PARROT_EXEC_SAVE_H_GUARD */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

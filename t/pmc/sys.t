@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/sys.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/sys.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/sys.t - System Tests
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/sys.t
+    % prove t/pmc/sys.t
 
 =head1 DESCRIPTION
 
@@ -23,10 +23,10 @@ Tests system dependend stuff
 =cut
 
 END {
-  unlink "temp.pir";
-};
+    unlink "temp.pir";
+}
 
-pir_output_is(<<'CODE', <<OUT, "spawnw, _config");
+pir_output_is( <<'CODE', <<OUT, "spawnw, _config" );
 
 .sub _test :main
      .local pmc O
@@ -57,3 +57,9 @@ Hello, World!
 0
 OUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

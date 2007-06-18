@@ -1,6 +1,6 @@
-/* 
+/*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/bignum.h 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/bignum.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
 
 =head1 NAME
 
@@ -18,14 +18,14 @@ This is currently not used yet. Parrot has no BigNum support yet.
 
 ==head1 SEE ALSO
 
-F<docs/docs/pdds/clip/pdd14_bignum.pod>,
+F<docs/docs/pdds/draft/pdd14_bignum.pod>,
 L<https://rt.perl.org/rt3/Ticket/Display.html?id=36330>
 
 =cut
 
 */
 
-#if !defined(PARROT_TYPES_BIGNUM_H_GUARD)
+#ifndef PARROT_TYPES_BIGNUM_H_GUARD
 #define PARROT_TYPES_BIGNUM_H_GUARD
 
 /* Stuff to be parrot-like in source, even if not being used in parrot */
@@ -68,7 +68,7 @@ typedef UINTVAL BN_NIB;
  nibs == 3, digits == 14
 */
 
-typedef struct {
+typedef struct parrot_bignum_t {
     BN_NIB* buffer; /* string of nibbles */
     UINTVAL nibs;   /* nibs allocated, in sizeof(BN_NIB) */
     UINTVAL flags;  /* private flags store: 001 Inf,  010 qNAN, 110 sNAN */
@@ -100,7 +100,7 @@ typedef enum {
     BN_F_UNDERFLOW = 64
 } parrot_bignum_context_flags;
 
-typedef struct {
+typedef struct parrot_bignum_context {
     INTVAL precision;     /* number of digs to retain */
     INTVAL elimit;        /* maximum exponent allowed */
     BN_ROUNDING rounding; /* rounding type to perform */
@@ -164,15 +164,15 @@ BIGNUM* BN_new(PINTD_ INTVAL length);
 BN_CONTEXT* BN_create_context(PINTD_ INTVAL precision);
 void BN_grow(PINTD_ BIGNUM *in, INTVAL length);
 void BN_destroy(PINTD_ BIGNUM *bn);
-void bn_fatal_error (PINTD_ char* mesg);
+void bn_fatal_error(PINTD_ char* mesg);
 INTVAL BN_set_digit(PINTD_ BIGNUM* bn, INTVAL pos, INTVAL value);
 INTVAL BN_get_digit(PINTD_ BIGNUM* bn, INTVAL pos);
 BIGNUM* BN_copy(PINTD_ BIGNUM*, BIGNUM*);
 BIGNUM* BN_new_from_int(PINTD_ INTVAL value);
 INTVAL BN_to_scientific_string(PINTD_ BIGNUM* bn, char **dest);
 INTVAL BN_to_engineering_string(PINTD_ BIGNUM*bn, char **dest);
-void BN_round (PINTD_ BIGNUM *victim, BN_CONTEXT *context);
-void BN_round_as_integer(PINTD_ BIGNUM *, BN_CONTEXT* );
+void BN_round(PINTD_ BIGNUM *victim, BN_CONTEXT *context);
+void BN_round_as_integer(PINTD_ BIGNUM *, BN_CONTEXT*);
 void BN_EXCEPT(PINTD_ BN_EXCEPTIONS, char*);
 void BN_add(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
 void
@@ -180,20 +180,20 @@ BN_subtract(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context
 void BN_plus(PINTD_ BIGNUM* result, BIGNUM *one, BN_CONTEXT *context);
 void BN_minus(PINTD_ BIGNUM* result, BIGNUM *one, BN_CONTEXT *context);
 void
-BN_compare (PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
+BN_compare(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
 void
-BN_multiply (PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
+BN_multiply(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
 void
-BN_divide (PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
+BN_divide(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
 void
-BN_divide_integer (PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
+BN_divide_integer(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
 void
-BN_remainder (PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
+BN_remainder(PINTD_ BIGNUM* result, BIGNUM *one, BIGNUM *two, BN_CONTEXT *context);
 void BN_rescale(PINTD_ BIGNUM* result, BIGNUM* bignum, BIGNUM* expn, BN_CONTEXT* context);
 INTVAL BN_to_int(PINTD_ BIGNUM* bignum, BN_CONTEXT* context);
 void BN_power(PINTD_ BIGNUM* result, BIGNUM* bignum,
               BIGNUM* expn, BN_CONTEXT* context);
-INTVAL BN_comp (PINTD_ BIGNUM *one, BIGNUM *two, BN_CONTEXT*);
+INTVAL BN_comp(PINTD_ BIGNUM *one, BIGNUM *two, BN_CONTEXT*);
 INTVAL BN_is_zero(PINTD_ BIGNUM* test, BN_CONTEXT *);
 int BN_set_qNAN(PINTD_ BIGNUM* bn);
 int BN_set_sNAN(PINTD_ BIGNUM* bn);
@@ -201,12 +201,10 @@ int BN_set_inf(PINTD_ BIGNUM* bn);
 int BN_really_zero(PINTD_ BIGNUM* bn, int);
 
 #endif /* PARROT_TYPES_BIGNUM_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

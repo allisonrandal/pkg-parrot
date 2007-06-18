@@ -1,29 +1,28 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/syn/pod.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/trunk/t/compilers/imcc/syn/pod.t 3261 2007-04-20T06:08:07.570283Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 3;
+use Parrot::Test tests => 4;
 
 # POD
 
-pir_output_is(<<'CODE', <<'OUT', "simple pod");
+pir_output_is( <<'CODE', <<'OUT', "simple pod" );
 .sub test :main
     print "pass\n"
     end
 .end
 =head1 Some POD
 This should be ignored, incl. digit 1
-=cut
 CODE
 pass
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "pod with decimal digits");
+pir_output_is( <<'CODE', <<'OUT', "pod with decimal digits" );
 .sub test :main
     print "pass\n"
     end
@@ -35,7 +34,7 @@ CODE
 pass
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "pod inside sub");
+pir_output_is( <<'CODE', <<'OUT', "pod inside sub" );
 .sub test :main
      print "pass\n"
      _x()
@@ -53,3 +52,34 @@ pass
 ok
 OUT
 
+open FOO, ">", "include.tempfile";
+print FOO <<'ENDF';
+
+=head1 Foobar
+
+we don't cut out!!!
+
+ENDF
+close FOO;
+
+SKIP: {
+    skip( "Closing out of pod from included files", 1 );
+    pir_output_is( <<'CODE', <<'OUT', "simple pod" );
+.include "include.tempfile"
+.sub test :main
+    print "pass\n"
+    end
+.end
+CODE
+pass
+OUT
+}
+
+unlink('macro.tempfile', 'include.tempfile');
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

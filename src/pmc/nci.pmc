@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/nci.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/pmc/nci.pmc 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -23,7 +23,6 @@ The caller has to preserve registers if needed.
 */
 
 #include "parrot/parrot.h"
-
 pmclass NCI need_ext {
 
 /*
@@ -42,6 +41,21 @@ Return the MMD signature PMC, if any or a Null PMC.
 
 /*
 
+=item C<METHOD PMC* set_raw_nci_ptr(void *func)>
+
+Sets the specified function pointer and raw flag.
+
+=cut
+
+*/
+
+    METHOD void make_raw_nci(void *func) {
+        PMC_struct_val(SELF) = func;
+        PObj_flag_SET(private2, SELF);
+    }
+
+/*
+
 =item C<void init()>
 
 Initializes the NCI with a C<NULL> function pointer.
@@ -53,6 +67,7 @@ Initializes the NCI with a C<NULL> function pointer.
     void init() {
         PMC_struct_val(SELF) = NULL;
         PMC_pmc_val(SELF) = NULL;
+        PObj_flag_CLEAR(private2, SELF);
     }
 
 /*
@@ -96,7 +111,7 @@ Creates and returns a clone of the NCI.
 
 */
 
-    PMC* clone () {
+    PMC* clone() {
         PMC* ret = pmc_new_noinit(INTERP, SELF->vtable->base_type);
         PMC_struct_val(ret) = PMC_struct_val(SELF);
         PMC_pmc_val(ret) = NULL;
@@ -119,13 +134,13 @@ Returns whether the NCI is defined.
 
 */
 
-    INTVAL defined () {
+    INTVAL defined() {
         return PMC_data(SELF) != NULL;
     }
 
 /*
 
-=item C<void *invoke(void *next)>
+=item C<opcode_t *invoke(void *next)>
 
 Calls the associated C function, returning C<*next>. If
 the invocant is a class, the PMC arguments are
@@ -135,9 +150,11 @@ shifted down.
 
 */
 
-    void* invoke (void * next) {
-        typedef INTVAL (*nci_sub_t)(Interp * , PMC * );
-        nci_sub_t func = (nci_sub_t)D2FPTR(PMC_data(SELF));
+    opcode_t* invoke(void * next) {
+        typedef INTVAL(*nci_sub_t)(Interp * , PMC *);
+        nci_sub_t func = PObj_flag_TEST(private2, SELF)
+            ? (nci_sub_t) PMC_struct_val(SELF)
+            : (nci_sub_t) D2FPTR(PMC_data(SELF));
         PMC *cont;
 
         if (!func)
@@ -152,12 +169,12 @@ shifted down.
          * return continuation here, which gets rid of this frame
          * and returns the real return address
          */
-        if (cont && cont != NEED_CONTINUATION && 
+        if (cont && cont != NEED_CONTINUATION &&
                 (PObj_get_FLAGS(cont) & SUB_FLAG_TAILCALL)) {
-            cont = CONTEXT(interpreter->ctx)->current_cont;
+            cont = CONTEXT(interp->ctx)->current_cont;
             next = VTABLE_invoke(INTERP, cont, next);
         }
-        return next;
+        return (opcode_t *)next;
     }
 
 /*
@@ -170,8 +187,8 @@ Returns the function pointer as an integer.
 
 */
 
-    INTVAL get_integer () {
-        return((INTVAL)PMC_data(SELF));
+    INTVAL get_integer() {
+        return ((INTVAL)PMC_data(SELF));
     }
 
 /*
@@ -184,8 +201,8 @@ Returns the boolean value of the pointer.
 
 */
 
-    INTVAL get_bool () {
-        return(0 != (INTVAL)PMC_data(SELF));
+    INTVAL get_bool() {
+        return (0 != (INTVAL)PMC_data(SELF));
     }
 
 }
@@ -208,10 +225,7 @@ Initial revision by sean 2002/08/04.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

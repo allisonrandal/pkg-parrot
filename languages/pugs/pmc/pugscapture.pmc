@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006, The Perl Foundation.
-$Id: /local/languages/pugs/pmc/pugscapture.pmc 12884 2006-06-05T13:29:13.115985Z audreyt  $
+$Id: /parrotcode/trunk/languages/pugs/pmc/pugscapture.pmc 2686 2007-03-31T12:42:12.795704Z paultcochrane  $
 
 =head1 NAME
 
@@ -35,7 +35,9 @@ typedef struct siva {
 } siva;
 
 static PMC* intret;
-// STRING * parrot_hash_get_idx(Interp *interpreter, Hash *hash, PMC * key);
+/*
+STRING * parrot_hash_get_idx(Interp *interpreter, Hash *hash, PMC * key);
+*/
 static PMC* undef_pmc;
 
 /*
@@ -217,7 +219,7 @@ pmclass PugsCapture extends PugsAny
   void init() {
       PObj_custom_mark_SET(SELF);
       siva_set_int(SELF, 0);
-      siva_set_siva(SELF, mem_sys_allocate(sizeof(siva)));    
+      siva_set_siva(SELF, mem_sys_allocate(sizeof(siva)));
       siva_set_ary(SELF, 0);
       siva_set_hash(SELF, 0);
       siva_set_str(SELF, 0);
@@ -251,7 +253,7 @@ pmclass PugsCapture extends PugsAny
         parrot_mark_hash(INTERP, siva_hash(SELF));
     if (siva_ary(SELF))
         list_mark(INTERP, siva_ary(SELF));
-    if(PMC_str_val(SELF))
+    if (PMC_str_val(SELF))
         pobject_lives(INTERP, (PObj *)siva_str(SELF));
 
   }
@@ -518,7 +520,7 @@ pmclass PugsCapture extends PugsAny
 
 
 
-} 
+}
 
 /*
 
@@ -528,3 +530,10 @@ pmclass PugsCapture extends PugsAny
 
 */
 
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

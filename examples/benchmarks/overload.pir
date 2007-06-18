@@ -1,4 +1,4 @@
-# $Id: /local/examples/benchmarks/overload.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/local/examples/benchmarks/overload.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 .sub bench :main
 .include "pmctypes.pasm"
@@ -36,3 +36,9 @@ loop:
    dest = $I2
    .return (dest)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

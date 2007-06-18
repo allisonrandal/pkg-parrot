@@ -18,7 +18,7 @@ This file implements match objects returned by the Parrot Grammar Engine.
     addattribute base, '$.pos'                     # current match position
     addattribute base, '&!corou'                   # match's corou
     addattribute base, '@!capt'                    # subpattern captures
-    addattribute base, '$!value'                   # return value
+    addattribute base, '$!result'                  # result object
 
     .return ()
 .end
@@ -66,6 +66,7 @@ the current position of C<mob>.
     from = clone from
   new_me:
     $I0 = find_type grammar
+    if $I0 == 0 goto err_grammar
     me = new $I0
     setattribute me, '$.target', target
     setattribute me, '$.from', from
@@ -77,6 +78,15 @@ the current position of C<mob>.
     from = fromd
   end:
     .return (me, target, from, pos)
+  err_grammar:
+    .local pmc ex
+    .local string message
+    ex = new .Exception
+    message = "Class '"
+    message .= grammar
+    message .= "' not found"
+    ex['_message'] = message
+    throw ex
 .end
 
 =back
@@ -90,10 +100,10 @@ the current position of C<mob>.
 Creates a new Match object based on C<src>.  If the C<grammar>
 adverb is specified, then the new Match object is of the given
 grammar class, otherwise if C<src> is an instance of C<Match>
-(or a subclass) then that class is used to create the object, 
-otherwise it uses the class of the invocant.  
+(or a subclass) then that class is used to create the object,
+otherwise it uses the class of the invocant.
 
-The C<pos>, C<p>, C<continue>, or C<c> adverbs specify where 
+The C<pos>, C<p>, C<continue>, or C<c> adverbs specify where
 the match object should begin.  If no starting position is
 given, the current position of C<src> is used if it has one,
 otherwise the start position is at offset zero.  The C<from>
@@ -175,6 +185,7 @@ is set or implied.
     ##   create the new match object
     .local pmc mob, mfrom, mpos
     $I0 = find_type grammar
+    if $I0 == 0 goto err_grammar
     mob = new $I0
     setattribute mob, '$.target', target
     mfrom = new .Integer
@@ -185,9 +196,19 @@ is set or implied.
     setattribute mob, '$.pos', mpos
 
     .return (mob, pos, target, mfrom, mpos, iscont)
+
+  err_grammar:
+    .local pmc ex
+    .local string message
+    ex = new .Exception
+    message = "Class '"
+    message .= grammar
+    message .= "' not found"
+    ex['_message'] = message
+    throw ex
 .end
 
-    
+
 =item C<next()>
 
 Tell a Match object to continue the previous match from where
@@ -269,32 +290,62 @@ Returns the portion of the target string matched by this object.
 .end
 
 
-=item C<value([pmc value])>
+=item C<result_object([pmc obj])>
 
-Returns or sets the "return value" for the match object.  If no 
-return value has been explicitly set (by an embedded closure), 
+Returns or sets the "result object" for the match object.  If no
+result object has been explicitly set (by an embedded closure),
 return the substring that was matched by this match object.
 
 =cut
 
-.sub 'value' :method
-    .param pmc value           :optional
-    .param int has_value       :opt_flag
-    if has_value == 0 goto get
-    setattribute self, '$!value', value
+.sub 'result_object' :method
+    .param pmc obj             :optional
+    .param int has_obj         :opt_flag
+    if has_obj == 0 goto get
+    setattribute self, '$!result', obj
   get:
-    value = getattribute self, '$!value'
-    if null value goto value_text
-    .return (value)
-  value_text:
+    obj = getattribute self, '$!result'
+    if null obj goto result_text
+    .return (obj)
+  result_text:
     $S0 = self.'text'()
     .return ($S0)
 .end
 
 
+=item C<find_key([ key1, key2, ... ])>
+
+Find the first of C<key1>, C<key2>, etc. in the current
+Match object, and return it.  Returns '' if none of
+the specified keys are found.  If no keys are specified,
+then simply return the first key found.
+
+=cut
+
+.sub 'find_key' :method
+    .param pmc keys            :slurpy
+    if null keys goto first_key
+    unless keys goto first_key
+  loop:
+    unless keys goto not_found
+    $S0 = shift keys
+    $I0 = exists self[$S0]
+    unless $I0 goto loop
+    .return ($S0)
+  first_key:
+    $P0 = self.'get_hash'()
+    $P1 = new .Iterator, $P0
+    unless $P1 goto not_found
+    $S0 = shift $P1
+    .return ($S0)
+  not_found:
+    .return ('')
+.end
+
+
 =item C<_failcut(int cutvalue)>
 
-Immediately "fail" this Match object, removing any 
+Immediately "fail" this Match object, removing any
 captured entities and coroutine continuation.  Set
 the position of the match object to C<cutvalue>.
 
@@ -308,7 +359,7 @@ the position of the match object to C<cutvalue>.
     setattribute self, '$.target', $P0
     setattribute self, '&!corou', $P0
     setattribute self, '@!capt', $P0
-    setattribute self, '$!value', $P0
+    setattribute self, '$!result', $P0
     .local pmc iter
     iter = new .Iterator, self
   iter_loop:
@@ -319,7 +370,7 @@ the position of the match object to C<cutvalue>.
   iter_end:
     .return ()
 .end
-    
+
 
 =item C<__get_bool()>
 
@@ -328,7 +379,7 @@ Returns 1 if this object successfully matched the target string,
 
 =cut
 
-.sub '__get_bool' :method
+.sub 'get_bool' :vtable :method
     $P1 = getattribute self, '$.pos'
     $I0 = $P1
     $I1 = isge $I0, 0
@@ -341,8 +392,8 @@ Returns the integer value of this match.
 
 =cut
 
-.sub '__get_integer' :method
-    $I0 = self.'value'()
+.sub 'get_integer' :vtable :method
+    $I0 = self.'result_object'()
     .return ($I0)
 .end
 
@@ -352,8 +403,8 @@ Returns the numeric value of this match.
 
 =cut
 
-.sub '__get_number' :method
-    $N0 = self.'value'()
+.sub 'get_number' :vtable :method
+    $N0 = self.'result_object'()
     .return ($N0)
 .end
 
@@ -363,8 +414,8 @@ Returns the portion of the target string matched by this object.
 
 =cut
 
-.sub '__get_string' :method
-    $S0 = self.'value'()
+.sub 'get_string' :vtable :method
+    $S0 = self.'result_object'()
     .return ($S0)
 .end
 
@@ -376,7 +427,7 @@ matches, a space seperated list of matches is returned.
 
 =cut
 
-.sub '__get_string_keyed_int' :method
+.sub 'get_string_keyed_int' :vtable :method
 	.param int key
     $P0 = getattribute self, '@!capt'
 	$S0 = ''
@@ -395,7 +446,7 @@ objects depending on the rule.
 
 =cut
 
-.sub '__get_pmc_keyed_int' :method
+.sub 'get_pmc_keyed_int' :vtable :method
     .param int key
     $P0 = getattribute self, '@!capt'
     if_null $P0, get_1
@@ -404,7 +455,7 @@ objects depending on the rule.
     .return ($P0)
 .end
 
-.sub '__set_pmc_keyed_int' :method
+.sub 'set_pmc_keyed_int' :vtable :method
     .param int key
     .param pmc val
     .local pmc capt
@@ -416,14 +467,14 @@ objects depending on the rule.
     capt[key] = val
 .end
 
-.sub '__delete_keyed_int' :method
+.sub 'delete_keyed_int' :vtable :method
     .param int key
     .local pmc capt
     capt = getattribute self, '@!capt'
     delete capt[key]
 .end
 
-.sub '__defined_keyed_int' :method
+.sub 'defined_keyed_int' :vtable :method
     .param int key
     .local pmc capt
     $I0 = 0
@@ -432,6 +483,18 @@ objects depending on the rule.
     $I0 = defined capt[key]
   end:
     .return ($I0)
+.end
+
+.sub 'push_pmc' :vtable :method
+    .param pmc val
+    .local pmc capt
+    capt = getattribute self, '@!capt'
+    unless null capt goto push_1
+    capt = new .ResizablePMCArray
+    setattribute self, '@!capt', capt
+  push_1:
+    push capt, val
+    .return ()
 .end
 
 
@@ -466,3 +529,9 @@ Patches and suggestions should be sent to the Perl 6 compiler list
 (perl6-compiler@perl.org).
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

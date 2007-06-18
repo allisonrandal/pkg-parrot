@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/config/auto/gdbm.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/gdbm.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ GDBMHash PMC.
 package auto::gdbm;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,13 +25,18 @@ use Parrot::Configure::Step ':auto';
 
 $description = 'Determining if your platform supports gdbm';
 
-@args = qw(verbose);
+@args = qw(verbose without-gmp);
 
-sub runstep
-{
-    my ($self, $conf) = (shift, shift);
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    my $verbose = $conf->options->get('verbose');
+    my ( $verbose, $without ) = $conf->options->get(@args);
+
+    if ($without) {
+        $conf->data->set( has_gdbm => 0 );
+        $self->set_result('no');
+        return $self;
+    }
 
     my $cc        = $conf->data->get('cc');
     my $libs      = $conf->data->get('libs');
@@ -42,46 +48,55 @@ sub runstep
     # On OS X check the presence of the gdbm header in the standard
     # Fink location. TODO: Need a more generalized way for finding
     # where Fink lives.
-    if ($osname =~ /darwin/) {
-        if (-f "/sw/include/gdbm.h") {
-            $conf->data->add(' ', linkflags => '-L/sw/lib');
-            $conf->data->add(' ', dflags    => '-L/sw/lib');
-            $conf->data->add(' ', cflags    => '-I/sw/include');
+    if ( $osname =~ /darwin/ ) {
+        if ( -f "/sw/include/gdbm.h" ) {
+            $conf->data->add( ' ', linkflags => '-L/sw/lib' );
+            $conf->data->add( ' ', dflags    => '-L/sw/lib' );
+            $conf->data->add( ' ', cflags    => '-I/sw/include' );
         }
     }
 
     cc_gen('config/auto/gdbm/gdbm.in');
-    if ($^O =~ /mswin32/i) {
-        if ($cc =~ /^gcc/i) {
-            eval { cc_build('', '-llibgdbm'); };
-        } else {
-            eval { cc_build('', 'gdbm.lib'); };
+    if ( $^O =~ /mswin32/i ) {
+        if ( $cc =~ /^gcc/i ) {
+            eval { cc_build( '', '-llibgdbm' ); };
         }
-    } else {
-        eval { cc_build('', '-lgdbm'); };
+        else {
+            eval { cc_build( '', 'gdbm.lib' ); };
+        }
+    }
+    else {
+        eval { cc_build( '', '-lgdbm' ); };
     }
     my $has_gdbm = 0;
-    if (!$@) {
+    if ( !$@ ) {
         my $test = cc_run();
         unlink "gdbm_test_db";
-        if ($test eq "gdbm is working.\n") {
+        if ( $test eq "gdbm is working.\n" ) {
             $has_gdbm = 1;
             print " (yes) " if $verbose;
-            $self->result('yes');
+            $self->set_result('yes');
         }
     }
     unless ($has_gdbm) {
 
         # The Config::Data settings might have changed for the test
-        $conf->data->set(libs      => $libs);
-        $conf->data->set(ccflags   => $ccflags);
-        $conf->data->set(linkflags => $linkflags);
+        $conf->data->set( libs      => $libs );
+        $conf->data->set( ccflags   => $ccflags );
+        $conf->data->set( linkflags => $linkflags );
         print " (no) " if $verbose;
         $self->set_result('no');
     }
-    $conf->data->set(has_gdbm => $has_gdbm); # for gdbmhash.t and dynpmc.in
+    $conf->data->set( has_gdbm => $has_gdbm );    # for gdbmhash.t and dynpmc.in
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -32,65 +32,74 @@ my %opt;
 &main;
 
 sub get_fp {
+
     # s. also fingerprint_c.pl
     my $compat_file = 'PBC_COMPAT';
-    open IN, $compat_file or die "Can't read $compat_file";
+    open IN, '<', $compat_file or die "Can't read $compat_file";
     my @lines = <IN>;
     close IN;
 
     my $len = 10;
-    my $fingerprint = md5 join "\n", grep { ! /^#/ } @lines;
+    my $fingerprint = md5 join "\n", grep { !/^#/ } @lines;
     return substr $fingerprint, 0, $len;
 }
 
 sub get_version {
     my $version_file = 'VERSION';
-    open IN, $version_file or die "Can't read $version_file";
+    open IN, '<', $version_file or die "Can't read $version_file";
     my $v = <IN>;
     close IN;
     $v =~ /^(\d+)\.(\d+)/;
-    ($1, $2);
+    ( $1, $2 );
 }
 
 sub update_fp {
+    my (@args) = @_;
     my $fp = get_fp;
-    my ($major, $minor)  = get_version;
-    for my $f (@ARGV) {
-	open F, "+<$f" or die "Can't open $f: $!";
-	seek F, 2, 0;	# pos 2: major, minor
-	print F pack "cc", $major, $minor;
-	seek F, 6, 0;	# pos 6: pad = finger_print
-	print F $fp;
-	close F;
+    my ( $major, $minor ) = get_version;
+    for my $f (@args) {
+        open F, "+<", "$f" or die "Can't open $f: $!";
+        seek F, 2, 0;    # pos 2: major, minor
+        print F pack "cc", $major, $minor;
+        seek F, 6, 0;    # pos 6: pad = finger_print
+        print F $fp;
+        close F;
     }
 }
 
 sub pbc_info {
     for my $f (@ARGV) {
-	open F, "<$f" or die "Can't open $f: $!";
-	my $header;
-	read F, $header, 16;
-	my (@fields) = qw( wordsize byteorder major minor
-	    intvalsize floattype );
-	print "$f\n";
-	for my $i (0..5) {
-	    my $c = substr $header, $i, 1;
-	    $c = unpack 'c', $c;
-	    printf "\t%-12s= %s\n", $fields[$i],$c;
-	}
+        open F, "<", "$f" or die "Can't open $f: $!";
+        my $header;
+        read F, $header, 16;
+        my (@fields) = qw( wordsize byteorder major minor
+            intvalsize floattype );
+        print "$f\n";
+        for my $i ( 0 .. 5 ) {
+            my $c = substr $header, $i, 1;
+            $c = unpack 'c', $c;
+            printf "\t%-12s= %s\n", $fields[$i], $c;
+        }
     }
 }
 
 sub main {
-    my ($result, $upd_fp);
-    $result = GetOptions(
-	"update-fingerprint"     => \$upd_fp,
-    );
+    my ( $result, $upd_fp );
+    $result = GetOptions( "update-fingerprint" => \$upd_fp, );
+
+    my (@args) = $^O eq 'MSWin32' ? <@ARGV> : @ARGV;
 
     $upd_fp and do {
-	update_fp;
-	exit;
+        update_fp(@args);
+        exit;
     };
 
     pbc_info;
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

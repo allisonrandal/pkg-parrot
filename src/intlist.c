@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/intlist.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/intlist.c 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -190,7 +190,7 @@ intlist_new(Interp *i)
 /*
 
 =item C<INTVAL
-intlist_length(Interp *interpreter, IntList *list)>
+intlist_length(Interp *interp, IntList *list)>
 
 Returns the length of the list.
 
@@ -199,9 +199,9 @@ Returns the length of the list.
 */
 
 INTVAL
-intlist_length(Interp *interpreter, IntList *list)
+intlist_length(Interp *interp, IntList *list)
 {
-    UNUSED(interpreter);
+    UNUSED(interp);
     return ((List *)list)->length;
 }
 
@@ -344,12 +344,10 @@ F<include/parrot/intlist.h>, F<src/list.c> and F<include/parrot/list.h>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

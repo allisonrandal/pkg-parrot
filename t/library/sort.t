@@ -1,13 +1,13 @@
+#!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/library/sort.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/library/sort.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 9;
 
 =head1 NAME
 
@@ -23,8 +23,7 @@ Tests sorting.
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', "sorting already sorted numbers");
+pir_output_is( <<'CODE', <<'OUT', "sorting already sorted numbers" );
 
 .sub _main
     .local pmc array
@@ -71,7 +70,7 @@ CODE
 9
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting unsorted numbers");
+pir_output_is( <<'CODE', <<'OUT', "sorting unsorted numbers" );
 
 .sub _main
     .local pmc array
@@ -117,7 +116,7 @@ CODE
 9
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting unsorted numbers (2)");
+pir_output_is( <<'CODE', <<'OUT', "sorting unsorted numbers (2)" );
 
 .sub _main
     .local pmc array
@@ -164,7 +163,7 @@ CODE
 9
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting sorted strings");
+pir_output_is( <<'CODE', <<'OUT', "sorting sorted strings" );
 
 .sub _main
     .local pmc array
@@ -207,7 +206,7 @@ golf
 hotel
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting unsorted strings");
+pir_output_is( <<'CODE', <<'OUT', "sorting unsorted strings" );
 
 .sub _main
     .local pmc array
@@ -250,7 +249,7 @@ golf
 hotel
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting different types");
+pir_output_is( <<'CODE', <<'OUT', "sorting different types" );
 
 .sub _main
     .local pmc array
@@ -317,7 +316,7 @@ golf
 hotel
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting letters");
+pir_output_is( <<'CODE', <<'OUT', "sorting letters" );
 
 .sub _main
     .local pmc array
@@ -352,7 +351,7 @@ x
 y
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting String letters");
+pir_output_is( <<'CODE', <<'OUT', "sorting String letters" );
 
 .sub _main
     .local pmc array
@@ -398,7 +397,7 @@ x
 y
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "sorting strings");
+pir_output_is( <<'CODE', <<'OUT', "sorting strings" );
 
 .sub _main
     .local pmc array
@@ -440,7 +439,9 @@ hello
 hello2
 OUT
 
-
-## remember to change the number of tests! :-)
-BEGIN { plan tests => 9; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

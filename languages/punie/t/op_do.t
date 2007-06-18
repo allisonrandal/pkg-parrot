@@ -1,11 +1,12 @@
-#!/usr/bin/perl
+#!perl
 
 use strict;
+use warnings;
 use lib qw(t . lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 2;
+use Parrot::Test tests => 4;
 use Test::More;
 
-language_output_is('punie', <<'CODE', <<'OUT', 'a do block');
+language_output_is( 'punie', <<'CODE', <<'OUT', 'a do block' );
 do{
     print "ok 7\n";
     print "ok 8\n";
@@ -18,9 +19,32 @@ ok 9
 OUT
 
 TODO: {
-local $TODO = 'unimplemented feature';
+    local $TODO = 'unimplemented feature';
 
-language_output_is('punie', <<'EOC', <<'OUT', 'op.do');
+language_output_is( 'punie', <<'CODE', <<'OUT', 'sub call with no arguments' );
+sub foobar {
+    print "ok 10\n";
+}
+
+do foobar();
+CODE
+ok 10
+OUT
+
+language_output_is( 'punie', <<'CODE', <<'OUT', 'sub call with one argument' );
+sub foobar {
+    $x = $_[0];
+    print $x, "\n";
+    print "ok 11\n";
+}
+
+do foobar(5);
+CODE
+5
+ok 11
+OUT
+
+    language_output_is( 'punie', <<'EOC', <<'OUT', 'op.do' );
 #!./perl
 
 # $Header: op.do,v 1.0 87/12/18 13:13:20 root Exp $
@@ -69,3 +93,10 @@ ok 8
 OUT
 
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

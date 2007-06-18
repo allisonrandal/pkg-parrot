@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/cpu_dep.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/cpu_dep.c 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -36,11 +36,11 @@ extern void *flush_reg_store(void);
 
 #endif
 
-static void trace_system_stack(Interp *interpreter);
+static void trace_system_stack(Interp *interp);
 
 /*
 
-=item C<void trace_system_areas(Interp *interpreter)>
+=item C<void trace_system_areas(Interp *interp)>
 
 Traces the system stack and any additional CPU-specific areas.
 
@@ -49,11 +49,11 @@ Traces the system stack and any additional CPU-specific areas.
 */
 
 void
-trace_system_areas(Interp *interpreter)
+trace_system_areas(Interp *interp)
 {
 #if defined(__sparc) /* Flush register windows */
     static union {
-	unsigned int insns[4];
+        unsigned int insns[4];
         double align_hack[2];
     } u = { {
 #  ifdef __sparcv9
@@ -62,7 +62,7 @@ trace_system_areas(Interp *interpreter)
                             0x91d02003, /* ta ST_FLUSH_WINDOWS */
 #  endif
                             0x81c3e008, /* retl */
-			    0x01000000  /* nop */
+                            0x01000000  /* nop */
     } };
 
     static void (*fn_ptr)(void) = (void (*)(void))&u.align_hack[0];
@@ -76,15 +76,15 @@ trace_system_areas(Interp *interpreter)
     getcontext(&ucp);
     current_regstore_top = flush_reg_store();
 
-    trace_mem_block(interpreter, 0x80000fff80000000,
-				(size_t)current_regstore_top);
+    trace_mem_block(interp, 0x80000fff80000000,
+            (size_t)current_regstore_top);
 #else
 
 #  ifdef PARROT_HAS_HEADER_SETJMP
     Parrot_jump_buff env;
 
     /* Zero the Parrot_jump_buff, otherwise you will trace stale objects */
-    memset(&env, 0, sizeof(env));
+    memset(&env, 0, sizeof (env));
 
     /* this should put registers in env, which then get marked in
      * trace_system_stack below
@@ -95,27 +95,27 @@ trace_system_areas(Interp *interpreter)
 #endif
 
 
-    trace_system_stack(interpreter);
+    trace_system_stack(interp);
 }
 
 /*
 
 =item C<static void
-trace_system_stack(Interp *interpreter)>
+trace_system_stack(Interp *interp)>
 
-Traces the memory block starting at C<< interpreter->lo_var_ptr >>.
+Traces the memory block starting at C<< interp->lo_var_ptr >>.
 
 =cut
 
 */
 
 static void
-trace_system_stack(Interp *interpreter)
+trace_system_stack(Interp *interp)
 {
-    size_t lo_var_ptr = (size_t)interpreter->lo_var_ptr;
+    size_t lo_var_ptr = (size_t)interp->lo_var_ptr;
 
-    trace_mem_block(interpreter, (size_t)lo_var_ptr,
-			   (size_t)&lo_var_ptr);
+    trace_mem_block(interp, (size_t)lo_var_ptr,
+            (size_t)&lo_var_ptr);
 }
 
 /*
@@ -130,12 +130,10 @@ F<src/dod.c>, F<include/parrot/dod.h> and F<docs/infant.dev>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

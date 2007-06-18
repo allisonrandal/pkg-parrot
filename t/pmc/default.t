@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/t/pmc/default.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/pmc/default.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 1;
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ t/pmc/default.t - test default PMC
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/default.t
+    % prove t/pmc/default.t
 
 =head1 DESCRIPTION
 
@@ -23,16 +23,18 @@ Tests the default PMC.
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', 'new', todo => 'not implemeted');
+pir_output_is( <<'CODE', <<'OUT', 'new', todo => 'not implemeted' );
 .sub 'test' :main
-	new P0, .default
-	print "ok 1\n"
+    new P0, .default
+    print "ok 1\n"
 .end
 CODE
 ok 1
 OUT
 
-
-# remember to change the number of tests :-)
-BEGIN { plan tests => 1; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

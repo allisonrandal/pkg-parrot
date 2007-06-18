@@ -1,14 +1,13 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/pge/p6regex/builtins.t 13405 2006-07-20T19:40:49.105875Z pmichaud  $
+# $Id: /parrotcode/local/t/compilers/pge/p6regex/builtins.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib ../../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 3;
 use Parrot::Test::PGE;
-
 
 =head1 NAME
 
@@ -22,10 +21,9 @@ B<'Nothing is illegal'> sections
 
 =head1 SYNOPSIS
 
-	% prove t/p6regex/builtins.t
+    % prove t/p6regex/builtins.t
 
 =cut
-
 
 ## setup common code here for less verbose test definitions
 my $PRE = <<PRE;
@@ -49,65 +47,71 @@ NOK:
 OK:
     print "ok"
 END:
-	print "\n"
+    print "\n"
 .end
 POST
 
-my $str = 
-  "\t\n\r !\"#\$%&'()*+,-./:;<=>?@[\\]^`_{|}0123456789ABCDEFGHIJabcdefghij";
-
+my $str = "\t\n\r !\"#\$%&'()*+,-./:;<=>?@[\\]^`_{|}0123456789ABCDEFGHIJabcdefghij";
 
 ## <prior> -- match prior successful rule
-pir_output_is  ($PRE.<<"CODE".$POST, <<OUTPUT, 'prior rule (<prior>) ', todo => 'not yet implemented');
-	rulesub = p6rule('abc')
-	match = rulesub($str)
+# L<S05/Nothing is illegal/"To match whatever the prior successful regex matched, use:" prior>
+pir_output_is(
+    $PRE . <<"CODE". $POST, <<OUTPUT, 'prior rule (<prior>) ', todo => 'not yet implemented' );
+    rulesub = p6rule('abc')
+    match = rulesub($str)
 
-	.local pmc second_match
-	rulesub = p6rule('<prior>')
-	second_match = rulesub($str)
+    .local pmc second_match
+    rulesub = p6rule('<prior>')
+    second_match = rulesub($str)
 
-	if match eq second_match goto OK
+    if match eq second_match goto OK
 CODE
 ok
 OUTPUT
-pir_output_is  ($PRE.<<"CODE".$POST, <<OUTPUT, 'prior rule (<prior>) ', todo => 'not yet implemented');
-	rulesub = p6rule('xxx')
-	match = rulesub($str)
+pir_output_is(
+    $PRE . <<"CODE". $POST, <<OUTPUT, 'prior rule (<prior>) ', todo => 'not yet implemented' );
+    rulesub = p6rule('xxx')
+    match = rulesub($str)
 
-	.local pmc second_match
-	rulesub = p6rule('<prior>')
-	second_match = rulesub($str)
+    .local pmc second_match
+    rulesub = p6rule('<prior>')
+    second_match = rulesub($str)
 
-	if match ne second_match goto OK
+    if match ne second_match goto OK
 CODE
 ok
 OUTPUT
-pir_output_is  ($PRE.<<"CODE".$POST, <<OUTPUT, 'prior rule (<prior>) ', todo => 'not yet implemented');
-	rulesub = p6rule('abc')
-	match = rulesub($str)
+pir_output_is(
+    $PRE . <<"CODE". $POST, <<OUTPUT, 'prior rule (<prior>) ', todo => 'not yet implemented' );
+    rulesub = p6rule('abc')
+    match = rulesub($str)
 
-	.local pmc second_match
-	rulesub = p6rule('xxx')
-	second_match = rulesub($str)
+    .local pmc second_match
+    rulesub = p6rule('xxx')
+    second_match = rulesub($str)
 
-	.local pmc third_match
-	rulesub = p6rule('<prior>')
-	third_match = rulesub($str)
+    .local pmc third_match
+    rulesub = p6rule('<prior>')
+    third_match = rulesub($str)
 
-	if match ne second_match goto OK1
-	print "not "
+    if match ne second_match goto OK1
+    print "not "
 OK1:print "ok 1\n"
 
-	if match eq third_match goto OK2
-	print "not "
+    if match eq third_match goto OK2
+    print "not "
 OK2:print "ok 2\n"
 
-	goto END
+    goto END
 CODE
 ok 1
 ok 2
 OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 
-## remember to change the number of tests :-)
-BEGIN { plan tests => 3; }

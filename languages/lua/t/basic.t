@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/basic.t 12840 2006-05-30T15:08:05.048089Z coke  $
+#! perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/basic.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -15,13 +15,17 @@ t/basic.t - Lua Basic Library
 Tests Lua Basic Library
 (implemented in F<languages/lua/lib/luabasic.pir>).
 
+See "Lua 5.1 Reference Manual", section 5.1 "Basic Functions",
+L<http://www.lua.org/manual/5.1/manual.html#5.1>.
+
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 25;
+use Parrot::Test tests => 54;
 use Test::More;
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function assert' );
@@ -35,20 +39,120 @@ OUTPUT
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function assert(false, msg)' );
 assert(false, "ASSERTION TEST")
 CODE
-/ASSERTION TEST/
+/^[^:]+: [^:]+:\d+: ASSERTION TEST\nstack traceback:\n/
 OUTPUT
 
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function assert(false)' );
 assert(false)
 CODE
-/assertion failed!/
+/^[^:]+: [^:]+:\d+: assertion failed!\nstack traceback:\n/
 OUTPUT
 
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function assert(false, nil)' );
 assert(false, nil)
 CODE
-/assertion failed!/
+/^[^:]+: [^:]+:\d+: assertion failed!\nstack traceback:\n/
 OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function collectgarbage "stop/restart/collect"' );
+print(collectgarbage('stop'))
+print(collectgarbage('restart'))
+print(collectgarbage('collect'))
+print(collectgarbage())
+CODE
+0
+0
+0
+0
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function collectgarbage "count"' );
+print(collectgarbage('count'))
+CODE
+/^\d+(\.\d+)?$/
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function collectgarbage invalid' );
+collectgarbage('unknown')
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'collectgarbage' \(invalid option 'unknown'\)\nstack traceback:\n/
+OUTPUT
+
+unlink('../lib1.lua') if ( -f '../lib1.lua' );
+my $X;
+open $X, '>', '../lib1.lua';
+print {$X} << 'CODE';
+function norm (x, y)
+    return (x^2 + y^2)^0.5
+end
+
+function twice (x)
+    return 2*x
+end
+CODE
+close $X;
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function dofile');
+dofile('lib1.lua')
+n = norm(3.4, 1.0)
+print(twice(n))
+CODE
+7.0880180586677
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function dofile (stdin)', params => "< lib1.lua" );
+dofile()
+n = norm(3.4, 1.0)
+print(twice(n))
+CODE
+7.0880180586677
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function dofile (no file)' );
+dofile("no_file.lua")
+CODE
+/^[^:]+:( [^:]+:\d+:)? cannot open no_file.lua: No such file or directory\nstack traceback:\n/
+OUTPUT
+
+unlink('../foo.lua') if ( -f '../foo.lua' );
+open $X, '>', '../foo.lua';
+print {$X} '?syntax error?';
+close $X;
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function dofile (syntax error)');
+dofile('foo.lua')
+CODE
+/\?/
+OUTPUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'function getfenv' );
+local function f () end
+
+print(type(getfenv(0)))
+assert(getfenv(0) == _G)
+assert(getfenv(1) == _G)
+assert(getfenv() == _G)
+print(type(getfenv(f)))
+assert(getfenv(f) == _G)
+print(type(getfenv(print)))
+assert(getfenv(print) == _G)
+CODE
+table
+table
+table
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'function getfenv (negative)' );
+print(getfenv(-3))
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'getfenv' \(level must be non-negative\)\nstack traceback:\n/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'function getfenv (too depth)' );
+print(getfenv(12))
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'getfenv' \(invalid level\)\nstack traceback:\n/
+OUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function ipairs' );
 a = {"a","b","c"}
@@ -70,20 +174,126 @@ function	table	0
 nil	nil
 OUTPUT
 
+unlink('../foo.lua') if ( -f '../foo.lua' );
+open $X, '>', '../foo.lua';
+print {$X} << 'CODE';
+function foo (x)
+    print(x)
+end
+CODE
+close $X;
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function loadfile');
+f = loadfile('foo.lua')
+print(foo)
+f()
+foo("ok")
+CODE
+nil
+ok
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function loadfile (stdin)', params => "< foo.lua" );
+f = loadfile()
+print(foo)
+f()
+foo("ok")
+CODE
+nil
+ok
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function loadfile (no file)' );
+f, msg = loadfile("no_file.lua")
+print(f, msg)
+CODE
+/^nil\t.*cannot open no_file.lua: No such file or directory/
+OUTPUT
+
+unlink('../foo.lua') if ( -f '../foo.lua' );
+open $X, '>', '../foo.lua';
+print {$X} '?syntax error?';
+close $X;
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function loadfile (syntax error)');
+f, msg = loadfile('foo.lua')
+print(f, msg)
+CODE
+/nil\t.*\?/
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function loadstring' );
+f = loadstring("i = i + 1")
+i = 0
+f(); print(i)
+f(); print(i)
+CODE
+1
+2
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function loadstring' );
+i = 32
+local i = 0
+f = loadstring("i = i + 1; print(i)")
+g = function () i = i + 1; print(i) end
+f()
+g()
+CODE
+33
+1
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function loadstring (syntax error)' );
+f, msg = loadstring("?syntax error?")
+print(f, msg)
+CODE
+/nil\t.*\?/
+OUTPUT
+
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function next (array)' );
 t = {"a","b","c"}
 a = next(t, nil)
 print(a)
-a = next(t, 1) 
+a = next(t, 1)
 print(a)
-a = next(t, 2) 
+a = next(t, 2)
 print(a)
-a = next(t, 3) 
+a = next(t, 3)
 print(a)
 CODE
 1
 2
 3
+nil
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function next (no arg)' );
+a = next()
+print(a)
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'next' \(table expected, got no value\)\nstack traceback:\n/
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function next (invalid key)' );
+t = {"a","b","c"}
+a = next(t, 6)
+print(a)
+CODE
+/^[^:]+:( [^:]+:\d+:)? invalid key to 'next'\nstack traceback:\n/
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function next (unorderer)' );
+t = {"a","b","c"}
+a = next(t, 2)
+print(a)
+a = next(t, 1)
+print(a)
+a = next(t, 3)
+print(a)
+CODE
+3
+2
 nil
 OUTPUT
 
@@ -124,7 +334,7 @@ language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function pcall (incomplete
 r, msg = pcall(assert)
 print(msg)
 CODE
-/value expected/
+/bad argument #1 to '(\?|assert)' \(value expected\)/
 OUTPUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function rawequal (true)' );
@@ -181,7 +391,7 @@ OUTPUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function rawset' );
 t = {}
-rawset(t, "a", "letter a")
+assert(rawset(t, "a", "letter a") == t)
 print(t.a)
 CODE
 letter a
@@ -204,8 +414,94 @@ OUTPUT
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function select (out of range)' );
 print(select(0,"a","b","c"))
 CODE
-/index out of range/
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'select' \(index out of range\)\nstack traceback:\n/
 OUTPUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'function setfenv' );
+t = {}
+function f () end
+
+assert(setfenv(f, t) == f)
+print(type(getfenv(f)))
+assert(getfenv(f) == t)
+CODE
+table
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'function setfenv' );
+a = 1
+setfenv(1, {g = _G})
+g.print(a)
+g.print(g.a)
+CODE
+nil
+1
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'function setfenv' );
+a = 1
+local newgt = {}        -- create new environment
+setmetatable(newgt, {__index = _G})
+setfenv(1, newgt)       -- set it
+print(a)
+a = 10
+print(a)
+print(_G.a)
+_G.a = 20
+print(_G.a)
+CODE
+1
+10
+1
+20
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'function setfenv' );
+function factory ()
+    return function ()
+               return a    -- "global" a
+           end
+end
+
+a = 3
+f1 = factory()
+f2 = factory()
+print(f1())
+print(f2())
+setfenv(f1, {a = 10})
+print(f1())
+print(f2())
+CODE
+3
+3
+10
+3
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'function setfenv (negative)' );
+setfenv(-3, {})
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'setfenv' \(level must be non-negative\)\nstack traceback:\n/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'function setfenv (too depth)' );
+print(setfenv(12, {}))
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'setfenv' \(invalid level\)\nstack traceback:\n/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'function setfenv (bad arg)' );
+t = {}
+setfenv(t, t)
+CODE
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'setfenv' \(number expected, got table\)\nstack traceback:\n/
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'function setfenv (forbidden)' );
+setfenv(print, {})
+CODE
+/^[^:]+: [^:]+:\d+: 'setfenv' cannot change environment of given object\nstack traceback:\n/
+OUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function type' );
 print(type("Hello world"))
@@ -247,7 +543,7 @@ OUTPUT
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function type (no arg)' );
 type()
 CODE
-/value expected/
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'type' \(value expected\)\nstack traceback:\n/
 OUTPUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function type' );
@@ -295,20 +591,20 @@ OUTPUT
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function tonumber (no arg)' );
 tonumber()
 CODE
-/value expected/
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'tonumber' \(value expected\)\nstack traceback:\n/
 OUTPUT
 
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function tonumber (bad base)' );
 r = tonumber("111", 200)
 print(type(r), r)
 CODE
-/base out of range/
+/^[^:]+: [^:]+:\d+: bad argument #2 to 'tonumber' \(base out of range\)\nstack traceback:\n/
 OUTPUT
 
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', 'function tostring (no arg)' );
 tostring()
 CODE
-/value expected/
+/^[^:]+: [^:]+:\d+: bad argument #1 to 'tostring' \(value expected\)\nstack traceback:\n/
 OUTPUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function unpack' );
@@ -333,4 +629,22 @@ print(r)
 CODE
 false
 OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'function xpcall (backtrace)' );
+function backtrace ()
+    return 'not a back trace'
+end
+
+r, m = xpcall(assert, backtrace)
+print(r, m)
+CODE
+false	not a back trace
+OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

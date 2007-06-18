@@ -93,8 +93,19 @@ the same state.
 .sub __fake_init :method
 .end
 
-.sub __init :method
-	.param pmc args :optional
+.sub init :vtable :method
+	.local pmc args
+	.local pmc output
+	.local pmc testplan
+	.local pmc results
+
+    null args
+	(output, testplan, results) = self.'_assign_default_args'( args )
+	self.'_assign_args'( output, testplan, results )
+.end
+
+.sub init_pmc :vtable :method
+    .param pmc args
 	.local pmc output
 	.local pmc testplan
 	.local pmc results
@@ -648,3 +659,9 @@ to the Perl 6 internals mailing list.
 Copyright (C) 2005, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

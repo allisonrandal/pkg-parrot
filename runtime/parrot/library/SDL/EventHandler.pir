@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/EventHandler.pir 13081 2006-07-01T03:36:07.973456Z chromatic  $
+# $Id: /parrotcode/local/runtime/parrot/library/SDL/EventHandler.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -48,8 +48,8 @@ SDL::EventHandler - base class for application-specific SDL event handlers
 	find_type event_type, 'SDL::Event'
 	event = new event_type
 
-	# ... and wait for events
-	event.wait_event( event_handler, handler_args )
+	# ... and process events
+	event.'process_events'( event_handler, handler_args )
 
 =head1 DESCRIPTION
 
@@ -96,6 +96,19 @@ if one exists.  Otherwise, does nothing.
 Override this if you want to change the way dispatching happens or to do
 something different for I<all> key down events.  In general, you will probably
 want to override the C<key_down_*> methods instead.
+
+XXX The I<*> above i.e. the actually key_name isn't really documented.
+But:
+
+  $ perldoc SDL::Event
+
+might be helpful (for now), if you remove I<SDLK_> and lowercase the
+remainder - sorry.
+
+  .sub key_down_q         # 'q' key
+  .sub key_down_down      # <down> arrow key
+  .sub key_down_kp_plus   # <keypad-plus> key
+  ...
 
 =cut
 
@@ -184,6 +197,19 @@ types.
 
 =item * mouse_button_up
 
+Synopsis for mouse event handler:
+  
+  .sub mouse_button_up :method
+    .param pmc event
+    .param pmc args
+
+    .local int b, x, y
+    event = event.'event'( 'MouseButton' )
+    b = event['state']    # 1 = left, 2 = middle, 3 = right
+    x = event['x']
+    y = event['y']
+    ...
+
 =item * joy_axis_motion
 
 =item * joy_ball_motion
@@ -246,9 +272,9 @@ At the very least, you should override C<quit()>.
 
 .end
 
-.sub mouse_button_up
+.sub mouse_button_up :method
+	.param pmc event
 	.param pmc event_args
-
 .end
 
 .sub joy_axis_motion :method
@@ -364,3 +390,10 @@ the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

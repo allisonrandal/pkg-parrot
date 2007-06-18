@@ -1,26 +1,32 @@
-#!/usr/bin/perl
+#!perl
 
-use strict;
-use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 2;
-use Test::More;
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
-language_output_is("tcl",<<'TCL',<<OUT,"simple return with value");
+source lib/test_more.tcl
+plan 3
+
+eval_is {
  proc joe {} {
    set a 10
    return $a
    set a 20
  }
- puts [joe]
-TCL
-10
-OUT
+ joe
+} 10 {simple return with value}
 
-language_output_is("tcl",<<'TCL',<<OUT,"simple return with no value");
+eval_is {
  proc joe {} {
    return
  }
- puts [joe]
-TCL
+ joe
+} {} {simple return with no value}
 
-OUT
+eval_is {
+  proc joe {} { return -code error "bad args" }
+  joe
+  puts foo
+} {bad args} {-code error}

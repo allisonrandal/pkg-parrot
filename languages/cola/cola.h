@@ -8,12 +8,12 @@
  * The giant, hulking header file.
  */
 
-#ifndef _COLA_H
-#define _COLA_H
+#ifndef PARROT_LANGUAGES_COLA_H_GUARD
+#define PARROT_LANGUAGES_COLA_H_GUARD
 
-#define COLA_VERSION "0.0.11.1"
+#  define COLA_VERSION "0.0.11.1"
 
-#define DEBUG 0
+#  define DEBUG 0
 
 void abort(void);
 void exit(int status);
@@ -62,14 +62,14 @@ enum TYPES {
     TYPE_REFERENCE,
     TYPE_ARRAY,
     TYPE_METHOD,
-    TYPE_CLASS  
+    TYPE_CLASS
 };
 
-#define MOD_PUBLIC    (1)
-#define MOD_PRIVATE   (1<<1)
-#define MOD_PROTECTED (1<<2)
-#define MOD_STATIC    (1<<3)
-#define MOD_VIRTUAL   (1<<4)
+#  define MOD_PUBLIC    (1)
+#  define MOD_PRIVATE   (1<<1)
+#  define MOD_PROTECTED (1<<2)
+#  define MOD_STATIC    (1<<3)
+#  define MOD_VIRTUAL   (1<<4)
 
 
 
@@ -92,7 +92,7 @@ typedef struct _Symbol {
      */
     struct _Symbol  *next,
                     *tnext;
-                    
+
     char            *name;
     int             scope;
     int             flags;
@@ -139,12 +139,12 @@ struct _AST {
      * arg2 = _else_ branch
      */
     union {
-	/*
-	struct _EXPR {
-	    struct _AST *arg1;
-	    struct _AST *arg2;
-	} Expr;
-	*/
+        /*
+        struct _EXPR {
+            struct _AST *arg1;
+            struct _AST *arg2;
+        } Expr;
+        */
         struct _CLASS {
             struct _AST *body;
         } Class;
@@ -164,7 +164,7 @@ struct _AST {
     } Attr;
 };
 
-#define HASH_SIZE 109
+#  define HASH_SIZE 109
 
 struct _SymbolTable {
     long            count;
@@ -176,7 +176,7 @@ struct _SymbolTable {
 typedef struct _Rank {
     Node    *next,
             *tnext;
-    int     dim;    
+    int     dim;
 } Rank;
 
 struct _Type {
@@ -199,7 +199,7 @@ typedef struct _Array {
     Type    *type;              /* The type of element */
     Rank    *rank;
     int     dim;                /* Total dim, can be derived from evaluating rank list */
-    int     **bounds;           /* N x 2 dimensional array of bounds where N = dimensions */        
+    int     **bounds;           /* N x 2 dimensional array of bounds where N = dimensions */
 } __Array;
 
 
@@ -385,12 +385,19 @@ char                *make_label();
 char                *op_name(int);
 int                 op_inverse(int);
 
-#define NAME(x) (x->literal == NULL ? x->name : x->literal->name)
-#define IS_LVAL(x)  (x->is_lval)
-#define IS_RVAL(x)  (!x->is_lval)
-#define SWITCH_OR_LOOP() (primary_block > 0 ? 1 : 0)
-#define eval_expr(x) ((x->asttype == ASTT_LITERAL || x->asttype == ASTT_IDENTIFIER) ? (x->targ = x->sym, 1) : 0)
+#  define NAME(x) (x->literal == NULL ? x->name : x->literal->name)
+#  define IS_LVAL(x)  (x->is_lval)
+#  define IS_RVAL(x)  (!x->is_lval)
+#  define SWITCH_OR_LOOP() (primary_block > 0 ? 1 : 0)
+#  define eval_expr(x) ((x->asttype == ASTT_LITERAL || x->asttype == ASTT_IDENTIFIER) ? (x->targ = x->sym, 1) : 0)
 
 extern long         line;
 
-#endif
+#endif /* PARROT_LANGUAGES_COLA_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

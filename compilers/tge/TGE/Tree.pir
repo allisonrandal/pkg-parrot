@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
+# Copyright (C) 2005-2007, The Perl Foundation.
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ constructor parameters.
 
 =cut
 
-.sub __init :method
+.sub init :vtable :method
     $P0 = new .Hash
     $P1 = new .Hash
     $P2 = new .Undef
@@ -243,6 +243,12 @@ error_defined:
     print "Nonlinear attribute: you have two or more ways to "
     print "assign a value to the attribute '"
     print name
+    print "' on node type '"
+    $S1 = typeof node
+    print $S1
+    print "' with rule name '"
+    $P4 = getattribute rule, "action"
+    print $P4
     print "' near grammar line "
     $P7 = getattribute rule, "line"
     print $P7
@@ -281,3 +287,9 @@ got_id:
 Allison Randal <allison@perl.org>
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

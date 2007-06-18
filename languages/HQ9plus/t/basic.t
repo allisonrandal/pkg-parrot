@@ -1,7 +1,7 @@
 #! perl
 
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/HQ9plus/t/basic.t 12840 2006-05-30T15:08:05.048089Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/HQ9plus/t/basic.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -537,3 +537,10 @@ language_output_is( 'HQ9plus', $code, $hello . $code . $song_text, "code: $code"
 
 $code = 'QQQQ';
 language_output_is( 'HQ9plus', $code, $code x length($code), "code: $code" );
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

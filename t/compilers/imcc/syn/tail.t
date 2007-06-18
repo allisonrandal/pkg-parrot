@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/syn/tail.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/imcc/syn/tail.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ use Parrot::Test tests => 6;
 
 $ENV{TEST_PROG_ARGS} = '-Oc';
 
-pir_output_is(<<'CODE', <<'OUT', "tail call optimization, final position");
+pir_output_is( <<'CODE', <<'OUT', "tail call optimization, final position" );
 .sub _main :main
     $P1 = new Integer
     $P1 = 20
@@ -95,7 +95,7 @@ _floor returned 2 values, 6 and 2.
 _fib_step returned 3 values, 23, 20, and 3.
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "tail call optimization, intermediate position");
+pir_output_is( <<'CODE', <<'OUT', "tail call optimization, intermediate position" );
 
 .sub _main :main
 	$P1 = new Integer
@@ -169,7 +169,7 @@ _floor returned 2 values, 6 and 2.
 _fib_step returned 3 values, 23, 20, and 3.
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "tail call optimization, implicit final return");
+pir_output_is( <<'CODE', <<'OUT', "tail call optimization, implicit final return" );
 
 .sub _main :main
 
@@ -248,7 +248,7 @@ _floor returned 2 values, 6 and 2.
 _fib_step returned 3 values, 23, 20, and 3.
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', ":flatten in .return");
+pir_output_is( <<'CODE', <<'OUT', ":flatten in .return" );
 
 .sub _main :main
 
@@ -301,7 +301,7 @@ CODE
 _fib_step returned 3 values, 23, 20, and 3.
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "new tail call syntax");
+pir_output_is( <<'CODE', <<'OUT', "new tail call syntax" );
 .sub main :main
     $S0 = foo()
     print $S0
@@ -319,7 +319,7 @@ CODE
 ok
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "new tail method call syntax");
+pir_output_is( <<'CODE', <<'OUT', "new tail method call syntax" );
 .sub main :main
     .local pmc cl, o, n
     cl = newclass "Foo"
@@ -347,3 +347,10 @@ done:
 CODE
 0
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

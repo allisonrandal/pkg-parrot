@@ -1,4 +1,4 @@
-/* $Id: /local/examples/compilers/japhc.c 11501 2006-02-10T18:27:13.457666Z particle  $ */
+/* $Id: /parrotcode/trunk/examples/compilers/japhc.c 3477 2007-05-13T20:42:55.058233Z chromatic  $ */
 
 /*
  * example compiler used by japh16.pasm
@@ -14,7 +14,7 @@
 #define C_DEBUG 0
 
 #if C_DEBUG
-#include <stdio.h>
+#  include <stdio.h>
 #  define cdebug(x) fprintf x
 #else
 #  define cdebug(x)
@@ -63,8 +63,7 @@ unescape(char *string)
 
 /* add constant string to constant_table */
 static int
-add_const_str(Parrot_Interp interpreter,
-	struct PackFile_ConstTable *consts, char *str)
+add_const_str(Parrot_Interp interpreter, PackFile_ConstTable *consts, char *str)
 {
     int k, l;
     char *o;
@@ -74,35 +73,35 @@ add_const_str(Parrot_Interp interpreter,
      * TODO strip delimiters in lexer, this needs adjustment in printint strings
      */
     if (*buf == '"') {
-	buf++;
-	l = unescape(buf);
-	if (l)
-	    buf[--l] = '\0';
+        buf++;
+        l = unescape(buf);
+        if (l)
+            buf[--l] = '\0';
     }
     else if (*buf == '\'') {
-	buf++;
-	l = strlen(buf);
-	if (l)
-	    buf[--l] = '\0';
+        buf++;
+        l = strlen(buf);
+        if (l)
+            buf[--l] = '\0';
     }
     else {
-	l = unescape(buf);
+        l = unescape(buf);
     }
 
     /* Update the constant count and reallocate */
     k = ++consts->const_count;
     if (consts->constants == NULL)
-	consts->constants = mem_sys_allocate(
-		k * sizeof(struct PackFile_Constant *));
+        consts->constants = mem_sys_allocate(
+                k * sizeof (PackFile_Constant *));
     else
-	consts->constants = mem_sys_realloc(consts->constants,
-		k * sizeof(struct PackFile_Constant *));
+        consts->constants = mem_sys_realloc(consts->constants,
+                k * sizeof (PackFile_Constant *));
 
     /* Allocate a new constant */
     consts->constants[--k] = PackFile_Constant_new(interpreter);
     consts->constants[k]->type = PFC_STRING;
     consts->constants[k]->u.string =
-	string_make(interpreter, buf, (UINTVAL) l, "iso-8859-1", 0 );
+        string_make(interpreter, buf, (UINTVAL) l, "iso-8859-1", 0 );
     free(o);
     return k;
 }
@@ -113,12 +112,12 @@ add_const_str(Parrot_Interp interpreter,
 PMC*
 japh_compiler(Parrot_Interp interpreter, const char *program)
 {
-    struct PackFile_ByteCode *cur_cs, *old_cs;
-    struct PackFile_ConstTable *consts;
+    PackFile_ByteCode *cur_cs, *old_cs;
+    PackFile_ConstTable *consts;
     opcode_t* pc;
     const char *p;
     PMC *sub;
-    parrot_sub_t sub_data;
+    Parrot_sub *sub_data;
 
 #define CODE_SIZE 128
     cdebug((stderr, "japh_compiler '%s'\n", program));
@@ -131,7 +130,7 @@ japh_compiler(Parrot_Interp interpreter, const char *program)
     /*
      * alloc byte code mem
      */
-    cur_cs->base.data = mem_sys_allocate(CODE_SIZE * sizeof(opcode_t));
+    cur_cs->base.data = mem_sys_allocate(CODE_SIZE * sizeof (opcode_t));
     cur_cs->base.size = CODE_SIZE;
     consts = cur_cs->const_table;
     /*
@@ -139,34 +138,34 @@ japh_compiler(Parrot_Interp interpreter, const char *program)
      */
     pc = cur_cs->base.data;
     for (p = program; *p; ++p) {
-	switch (*p) {
-	    case 'p':	/* print_sc */
-		*pc++ = interpreter->op_lib->op_code("print_sc", 1);
-		/* const follows */
-		++p;
-		switch (*p) {
-		    case 'J':
-			*pc++ = add_const_str(interpreter, consts, "Just ");
-			break;
-		    case 'a':
-			*pc++ = add_const_str(interpreter, consts, "another ");
-			break;
-		    case 'P':
-			*pc++ = add_const_str(interpreter, consts, "Parrot ");
-			break;
-		    case 'H':
-			*pc++ = add_const_str(interpreter, consts, "Hacker");
-			break;
-		    case 'n':
-			*pc++ = add_const_str(interpreter, consts, "\n");
-			break;
-		}
-		break;
-	    case 'e':	/* end */
-		*pc++ = interpreter->op_lib->op_code("invoke_p", 1);
-		*pc++ = 1;
-		break;
-	}
+        switch (*p) {
+            case 'p':        /* print_sc */
+                *pc++ = interpreter->op_lib->op_code("print_sc", 1);
+                /* const follows */
+                ++p;
+                switch (*p) {
+                    case 'J':
+                        *pc++ = add_const_str(interpreter, consts, "Just ");
+                        break;
+                    case 'a':
+                        *pc++ = add_const_str(interpreter, consts, "another ");
+                        break;
+                    case 'P':
+                        *pc++ = add_const_str(interpreter, consts, "Parrot ");
+                        break;
+                    case 'H':
+                        *pc++ = add_const_str(interpreter, consts, "Hacker");
+                        break;
+                    case 'n':
+                        *pc++ = add_const_str(interpreter, consts, "\n");
+                        break;
+                }
+                break;
+            case 'e':        /* end */
+                *pc++ = interpreter->op_lib->op_code("invoke_p", 1);
+                *pc++ = 1;
+                break;
+        }
     }
     if (old_cs) {
         /* restore old byte_code, */
@@ -183,3 +182,10 @@ japh_compiler(Parrot_Interp interpreter, const char *program)
     sub_data->name = string_from_cstring(interpreter, "JaPHC", 0);
     return sub;
 }
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

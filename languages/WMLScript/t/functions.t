@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/functions.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/functions.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/functions.t - WMLScript functions
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/functions.t
+    % perl -I../lib WMLScript/t/functions.t
 
 =head1 DESCRIPTION
 
@@ -16,13 +16,14 @@ t/functions.t - WMLScript functions
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 8;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'function call');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'function call' );
 function f()
 {
     Console.println("in");
@@ -31,7 +32,7 @@ function f()
 extern function main()
 {
     Console.println("out");
-    f();    
+    f();
     Console.println("end");
 }
 CODE
@@ -40,7 +41,7 @@ in
 end
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', '1 arg');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', '1 arg' );
 function f(a)
 {
     Console.println(a);
@@ -54,7 +55,7 @@ CODE
 20
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', '3 args');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', '3 args' );
 function f(a, b, c)
 {
     Console.println(a);
@@ -72,7 +73,7 @@ CODE
 30
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'no return');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'no return' );
 function f(a)
 {
     Console.println(a);
@@ -89,7 +90,7 @@ text
 true
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'return');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'return' );
 function f(a)
 {
     Console.println(a);
@@ -107,7 +108,7 @@ text
 true
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'return value');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'return value' );
 function f(a)
 {
     Console.println(a);
@@ -125,7 +126,7 @@ text
 ok
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'passing by value');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'passing by value' );
 function f(val)
 {
     val += 20;
@@ -145,7 +146,7 @@ CODE
 10
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'recursive call');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'recursive call' );
 function fact(n)
 {
     if (n == 0) {
@@ -164,4 +165,10 @@ CODE
 5040
 OUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

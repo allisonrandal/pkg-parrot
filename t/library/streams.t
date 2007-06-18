@@ -1,13 +1,13 @@
+#!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/library/streams.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/library/streams.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 20;
 
 =head1 NAME
 
@@ -23,15 +23,14 @@ Tests string streams.
 
 =cut
 
-
 my @streams = qw[Combiner Coroutine Filter Lines ParrotIO Replay Sub Writer];
 
-for my $a ( @streams ) {
+for my $a (@streams) {
 
-#
-# 1..8
-#
-pir_output_is(<<"CODE", <<"OUT", "load and create a Stream::$a");
+    #
+    # 1..8
+    #
+    pir_output_is( <<"CODE", <<"OUT", "load and create a Stream::$a" );
 
 .sub _main
     print "loading '$a'...\\n"
@@ -59,7 +58,7 @@ OUT
 #
 # 9
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::Sub");
+pir_output_is( <<'CODE', <<'OUT', "Stream::Sub" );
 
 .sub _main :main
     .local pmc stream
@@ -106,7 +105,7 @@ OUT
 #
 # 10
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::read_bytes");
+pir_output_is( <<'CODE', <<'OUT', "Stream::read_bytes" );
 
 .sub _main :main
     .local pmc stream
@@ -183,7 +182,7 @@ OUT
 #
 # 11
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::Combiner");
+pir_output_is( <<'CODE', <<'OUT', "Stream::Combiner" );
 
 .sub _main
     .local pmc counter
@@ -274,7 +273,7 @@ OUT
 #
 # 12
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::Coroutine");
+pir_output_is( <<'CODE', <<'OUT', "Stream::Coroutine" );
 
 .sub _main
     .local pmc stream
@@ -341,7 +340,7 @@ OUT
 #
 # 13
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::ParrotIO");
+pir_output_is( <<'CODE', <<'OUT', "Stream::ParrotIO" );
 
 .sub _main
     .local pmc file
@@ -711,7 +710,7 @@ OUT
 #
 # 14
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::Filter");
+pir_output_is( <<'CODE', <<'OUT', "Stream::Filter" );
 
 .sub _main
     .local pmc stream
@@ -799,7 +798,7 @@ OUT
 #
 # 15
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::include");
+pir_output_is( <<'CODE', <<'OUT', "Stream::include" );
 
 .sub _main
     .local pmc stream
@@ -907,7 +906,7 @@ OUT
 #
 # 16
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::Lines");
+pir_output_is( <<'CODE', <<'OUT', "Stream::Lines" );
 
 .sub _main
     .local pmc stream
@@ -956,7 +955,7 @@ OUT
 #
 # 17
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::ParrotIO");
+pir_output_is( <<'CODE', <<'OUT', "Stream::ParrotIO" );
 
 .sub _main :main
     .local pmc stream
@@ -1271,8 +1270,8 @@ OUT
 
 SKIP:
 {
-    skip("broken method invocation", 1);
-pir_output_is(<<'CODE', <<'OUT', "Stream::Replay");
+    skip( "broken method invocation", 1 );
+    pir_output_is( <<'CODE', <<'OUT', "Stream::Replay" );
 
 .sub _main :main
     .local pmc stream
@@ -1375,7 +1374,7 @@ OUT
 #
 # 19 #'
 #
-pir_output_is(<<'CODE', <<'OUT', "Stream::Sub");
+pir_output_is( <<'CODE', <<'OUT', "Stream::Sub" );
 
 .sub _main
     .local pmc stream
@@ -1437,8 +1436,8 @@ OUT
 #
 SKIP:
 {
-    skip("broken method invocation", 1);
-pir_output_is(<<'CODE', <<'OUT', "Stream::Write");
+    skip( "broken method invocation", 1 );
+    pir_output_is( <<'CODE', <<'OUT', "Stream::Write" );
 
 .sub _main :main
     .local pmc stream
@@ -1484,7 +1483,9 @@ finished
 OUT
 }
 
-
-## remember to change the number of tests! :-)
-BEGIN { plan tests => 20; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

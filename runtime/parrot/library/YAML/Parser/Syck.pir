@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/runtime/parrot/library/YAML/Parser/Syck.pir 12837 2006-05-30T13:47:57.477012Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/runtime/parrot/library/YAML/Parser/Syck.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -220,3 +220,9 @@ Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
   yaml.kwiki.org
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

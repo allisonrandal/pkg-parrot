@@ -1,12 +1,13 @@
+#!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/pmc/iterator.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/trunk/t/pmc/iterator.t 3128 2007-04-11T21:06:01.894856Z paultcochrane  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 40;
+use Parrot::Test tests => 43;
 
 =head1 NAME
 
@@ -22,75 +23,75 @@ Tests the C<Iterator> PMC.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "new iter");
-	new P2, .ResizablePMCArray
-	new P1, .Iterator, P2
-	print "ok 1\n"
-	end
+pasm_output_is( <<'CODE', <<'OUTPUT', "new iter" );
+    new P2, .ResizablePMCArray
+    new P1, .Iterator, P2
+    print "ok 1\n"
+    end
 CODE
 ok 1
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "int test");
+pasm_output_is( <<'CODE', <<'OUTPUT', "int test" );
     .include "iterator.pasm"
-	new P0, .ResizablePMCArray	# empty array
-	new P2, .ResizablePMCArray	# array with 2 elements
-	push P2, 10
-	push P2, 20
-	set I0, P2
-	new P1, .Iterator, P2
-	print "ok 1\n"
-	set I1, P1
-	eq I0, I1, ok2		# iter.length() == array.length()
-	print "not "
-ok2:	print "ok 2\n"
-	new P1, .Iterator, P0
-	set P1, .ITERATE_FROM_START
-	print "ok 3\n"
-	unless P1, ok4		# if(iter) == false on empty
-	print "not "
-ok4:	print "ok 4\n"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_START
-	if P1, ok5		# if(iter) == true on non empty
-	print "not "
-ok5:	print "ok 5\n"
-	# now iterate over P2
-	# while (P1) { element = shift(P1) }
-	unless P1, nok6
+    new P0, .ResizablePMCArray    # empty array
+    new P2, .ResizablePMCArray    # array with 2 elements
+    push P2, 10
+    push P2, 20
+    set I0, P2
+    new P1, .Iterator, P2
+    print "ok 1\n"
+    set I1, P1
+    eq I0, I1, ok2        # iter.length() == array.length()
+    print "not "
+ok2:    print "ok 2\n"
+    new P1, .Iterator, P0
+    set P1, .ITERATE_FROM_START
+    print "ok 3\n"
+    unless P1, ok4        # if(iter) == false on empty
+    print "not "
+ok4:    print "ok 4\n"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_START
+    if P1, ok5        # if(iter) == true on non empty
+    print "not "
+ok5:    print "ok 5\n"
+    # now iterate over P2
+    # while (P1) { element = shift(P1) }
+    unless P1, nok6
         shift I3, P1
-	eq I3, 10, ok6
-nok6:	print "not "
-ok6:	print "ok 6\n"
-	unless P1, nok7
+    eq I3, 10, ok6
+nok6:    print "not "
+ok6:    print "ok 6\n"
+    unless P1, nok7
         shift I3, P1
-	eq I3, 20, ok7
-nok7:	print "not "
-ok7:	print "ok 7\n"
-	unless P1, ok8		# if(iter) == false after last
-	print "not "
-ok8:	print "ok 8\n"
+    eq I3, 20, ok7
+nok7:    print "not "
+ok7:    print "ok 7\n"
+    unless P1, ok8        # if(iter) == false after last
+    print "not "
+ok8:    print "ok 8\n"
 
-	# now iterate from end
-	set P1, .ITERATE_FROM_END
-	if P1, ok9		# if(iter) == true on non empty
-	print "not "
-ok9:	print "ok 9\n"
-	# while (P1) { element = pop(P1) }
-	unless P1, nok10
+    # now iterate from end
+    set P1, .ITERATE_FROM_END
+    if P1, ok9        # if(iter) == true on non empty
+    print "not "
+ok9:    print "ok 9\n"
+    # while (P1) { element = pop(P1) }
+    unless P1, nok10
         pop I3, P1
-	eq I3, 20, ok10
-nok10:	print "not "
-ok10:	print "ok 10\n"
-	unless P1, nok11
+    eq I3, 20, ok10
+nok10:    print "not "
+ok10:    print "ok 10\n"
+    unless P1, nok11
         pop I3, P1
-	eq I3, 10, ok11
-nok11:	print "not "
-ok11:	print "ok 11\n"
-	unless P1, ok12		# if(iter) == false after last
-	print "not "
-ok12:	print "ok 12\n"
-	end
+    eq I3, 10, ok11
+nok11:    print "not "
+ok11:    print "ok 11\n"
+    unless P1, ok12        # if(iter) == false after last
+    print "not "
+ok12:    print "ok 12\n"
+    end
 
 CODE
 ok 1
@@ -107,48 +108,48 @@ ok 11
 ok 12
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Hash iter 1");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Hash iter 1" );
     .include "iterator.pasm"
-	new P0, .Hash	# empty Hash
-	new P2, .Hash	# Hash with 2 elements
-	set P2["ab"], 100
-	set P2["xy"], "value"
-	set I0, P2
-	new P1, .Iterator, P2
-	print "ok 1\n"
-	set I1, P1
-	eq I0, I1, ok2		# iter.length() == hash.length()
-	print "not "
-ok2:	print "ok 2\n"
-	new P1, .Iterator, P0
-	set P1, .ITERATE_FROM_START
-	print "ok 3\n"
-	unless P1, ok4		# if(iter) == false on empty
-	print "not "
-ok4:	print "ok 4\n"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_START
-	if P1, ok5		# if(iter) == true on non empty
-	print "not "
-ok5:	print "ok 5\n"
-	# now iterate over P2
-	# while (P1) { key = shift(P1) }
-	unless P1, nok6
-        shift S3, P1		# get hash.key
-	eq S3, "ab", ok6
-	eq S3, "xy", ok6
-nok6:	print " not "
-ok6:	print "ok 6\n"
-	unless P1, nok7
+    new P0, .Hash    # empty Hash
+    new P2, .Hash    # Hash with 2 elements
+    set P2["ab"], 100
+    set P2["xy"], "value"
+    set I0, P2
+    new P1, .Iterator, P2
+    print "ok 1\n"
+    set I1, P1
+    eq I0, I1, ok2        # iter.length() == hash.length()
+    print "not "
+ok2:    print "ok 2\n"
+    new P1, .Iterator, P0
+    set P1, .ITERATE_FROM_START
+    print "ok 3\n"
+    unless P1, ok4        # if(iter) == false on empty
+    print "not "
+ok4:    print "ok 4\n"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_START
+    if P1, ok5        # if(iter) == true on non empty
+    print "not "
+ok5:    print "ok 5\n"
+    # now iterate over P2
+    # while (P1) { key = shift(P1) }
+    unless P1, nok6
+        shift S3, P1        # get hash.key
+    eq S3, "ab", ok6
+    eq S3, "xy", ok6
+nok6:    print " not "
+ok6:    print "ok 6\n"
+    unless P1, nok7
         shift S3, P1
-	eq S3, "ab", ok7
-	eq S3, "xy", ok7
-nok7:	print "not "
-ok7:	print "ok 7\n"
-	unless P1, ok8		# if(iter) == false after last
-	print "not "
-ok8:	print "ok 8\n"
-	end
+    eq S3, "ab", ok7
+    eq S3, "xy", ok7
+nok7:    print "not "
+ok7:    print "ok 7\n"
+    unless P1, ok8        # if(iter) == false after last
+    print "not "
+ok8:    print "ok 8\n"
+    end
 
 CODE
 ok 1
@@ -161,48 +162,48 @@ ok 7
 ok 8
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Hash iter 1");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Hash iter 1" );
     .include "iterator.pasm"
-	new P0, .Hash	# empty Hash
-	new P2, .Hash	# Hash with 2 elements
-	set P2["ab"], 100
-	set P2["xy"], "value"
-	set I0, P2
-	new P1, .Iterator, P2
-	print "ok 1\n"
-	set I1, P1
-	eq I0, I1, ok2		# iter.length() == hash.length()
-	print "not "
-ok2:	print "ok 2\n"
-	new P1, .Iterator, P0
-	set P1, .ITERATE_FROM_START
-	print "ok 3\n"
-	unless P1, ok4		# if(iter) == false on empty
-	print "not "
-ok4:	print "ok 4\n"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_START
-	if P1, ok5		# if(iter) == true on non empty
-	print "not "
-ok5:	print "ok 5\n"
-	# now iterate over P2
-	# while (P1) { key = shift(P1) }
-	unless P1, nok6
-        shift S3, P1		# get hash.key
-	eq S3, "ab", ok6
-	eq S3, "xy", ok6
-nok6:	print " not "
-ok6:	print "ok 6\n"
-	unless P1, nok7
+    new P0, .Hash    # empty Hash
+    new P2, .Hash    # Hash with 2 elements
+    set P2["ab"], 100
+    set P2["xy"], "value"
+    set I0, P2
+    new P1, .Iterator, P2
+    print "ok 1\n"
+    set I1, P1
+    eq I0, I1, ok2        # iter.length() == hash.length()
+    print "not "
+ok2:    print "ok 2\n"
+    new P1, .Iterator, P0
+    set P1, .ITERATE_FROM_START
+    print "ok 3\n"
+    unless P1, ok4        # if(iter) == false on empty
+    print "not "
+ok4:    print "ok 4\n"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_START
+    if P1, ok5        # if(iter) == true on non empty
+    print "not "
+ok5:    print "ok 5\n"
+    # now iterate over P2
+    # while (P1) { key = shift(P1) }
+    unless P1, nok6
+        shift S3, P1        # get hash.key
+    eq S3, "ab", ok6
+    eq S3, "xy", ok6
+nok6:    print " not "
+ok6:    print "ok 6\n"
+    unless P1, nok7
         shift S3, P1
-	eq S3, "ab", ok7
-	eq S3, "xy", ok7
-nok7:	print "not "
-ok7:	print "ok 7\n"
-	unless P1, ok8		# if(iter) == false after last
-	print "not "
-ok8:	print "ok 8\n"
-	end
+    eq S3, "ab", ok7
+    eq S3, "xy", ok7
+nok7:    print "not "
+ok7:    print "ok 7\n"
+    unless P1, ok8        # if(iter) == false after last
+    print "not "
+ok8:    print "ok 8\n"
+    end
 
 CODE
 ok 1
@@ -215,137 +216,131 @@ ok 7
 ok 8
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Hash iter 2");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Hash iter 2" );
     .include "iterator.pasm"
-	new P0, .Hash	# Hash for iteration
-	new P2, .Hash	# for test
+    new P0, .Hash    # Hash for iteration
+    new P2, .Hash    # for test
 
-	set I0, 65
-	set I1, 35
-	set I10, I1
+    set I0, 65
+    set I1, 35
+    set I10, I1
 fill:
-	chr S0, I0
-	set P0[S0], I0
-	# XXX
-	# swapping the next two lines breaks JIT/i386
-	# the reason is the if/unless optimization: When the
-	# previous opcode sets flags, these are used - but
-	# there is no check, that the same register is used in the "if".
-	inc I0
-	dec I1
-	if I1, fill
+    chr S0, I0
+    set P0[S0], I0
+    inc I0
+    dec I1
+    if I1, fill
 
-	new P1, .Iterator, P0
-	set I0, P1
-	eq I0, I10, ok1
-	print "not "
+    new P1, .Iterator, P0
+    set I0, P1
+    eq I0, I10, ok1
+    print "not "
 ok1:
-	print "ok 1\n"
-	set P1, .ITERATE_FROM_START
+    print "ok 1\n"
+    set P1, .ITERATE_FROM_START
 get:
-	unless P1, done
-        shift S3, P1		# get hash.key
-	set I0, P0[S3]		# and value
-	set P2[S3], I0
-	branch get
+    unless P1, done
+        shift S3, P1        # get hash.key
+    set I0, P0[S3]        # and value
+    set P2[S3], I0
+    branch get
 
 done:
-	set I0, P2
-	eq I0, I10, ok2
-	print "not "
+    set I0, P2
+    eq I0, I10, ok2
+    print "not "
 ok2:
-	print "ok 2\n"
-	end
+    print "ok 2\n"
+    end
 CODE
 ok 1
 ok 2
 OUTPUT
-pasm_output_is(<<'CODE', <<OUTPUT, "string iteration forward");
+pasm_output_is( <<'CODE', <<OUTPUT, "string iteration forward" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_START
+    new P2, .String
+    set P2, "parrot"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_START
 iter_loop:
-        unless P1, iter_end		# while (entries) ...
-	shift S1, P1
-	print S1
-	branch iter_loop
+        unless P1, iter_end        # while (entries) ...
+    shift S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 parrot
 parrot
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "string iteration backward");
+pasm_output_is( <<'CODE', <<OUTPUT, "string iteration backward" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_END
+    new P2, .String
+    set P2, "parrot"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_END
 iter_loop:
-        unless P1, iter_end		# while (entries) ...
-	pop S1, P1
-	print S1
-	branch iter_loop
+        unless P1, iter_end        # while (entries) ...
+    pop S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 torrap
 parrot
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "string iteration forward get ord");
+pasm_output_is( <<'CODE', <<OUTPUT, "string iteration forward get ord" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "ABC"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_START
+    new P2, .String
+    set P2, "ABC"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_START
 iter_loop:
-        unless P1, iter_end		# while (entries) ...
-	shift I1, P1
-	print I1
-	branch iter_loop
+        unless P1, iter_end        # while (entries) ...
+    shift I1, P1
+    print I1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 656667
 ABC
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "string iteration backward get ord");
+pasm_output_is( <<'CODE', <<OUTPUT, "string iteration backward get ord" );
 .include "iterator.pasm"
-	new P2, .String
-	set P2, "ABC"
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_END
+    new P2, .String
+    set P2, "ABC"
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_END
 iter_loop:
-        unless P1, iter_end		# while (entries) ...
-	pop I1, P1
-	print I1
-	branch iter_loop
+        unless P1, iter_end        # while (entries) ...
+    pop I1, P1
+    print I1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 676665
 ABC
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "String iterator in PIR");
+pir_output_is( << 'CODE', << 'OUTPUT', "String iterator in PIR" );
 
 .include "iterator.pasm"
 .sub _main
@@ -382,7 +377,7 @@ abcdefg
 reached end
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "Index access for Iterator on String");
+pir_output_is( <<'CODE', <<'OUTPUT', "Index access for Iterator on String" );
 
 .include "iterator.pasm"
 .sub _main
@@ -432,7 +427,7 @@ Iterator get_integer_keyed_int 0: 98
 Iterator get_integer_keyed_int -1: 97
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Index access for Iterator on ResizablePMCArray");
+pir_output_is( << 'CODE', << 'OUTPUT', "Index access for Iterator on ResizablePMCArray" );
 
 .include "iterator.pasm"
 .sub _main
@@ -539,44 +534,43 @@ Iterator shift_float: -8.800000
 Iterator get_integer: 7
 OUTPUT
 
-
 SKIP: {
-skip("N/Y: length of rest of array ", 1);
-pasm_output_is(<<'CODE', <<'OUTPUT', "shift + index access");
+    skip( "N/Y: length of rest of array ", 1 );
+    pasm_output_is( <<'CODE', <<'OUTPUT', "shift + index access" );
     .include "iterator.pasm"
 
-	new P2, .ResizablePMCArray	# array with 4 elements
-	push P2, 10
-	push P2, 20
-	push P2, 30
-	push P2, 40
-	new P1, .Iterator, P2
-	set P1, .ITERATE_FROM_START
+    new P2, .ResizablePMCArray    # array with 4 elements
+    push P2, 10
+    push P2, 20
+    push P2, 30
+    push P2, 40
+    new P1, .Iterator, P2
+    set P1, .ITERATE_FROM_START
 
-	set I0, P1		# arr.length
-	eq I0, 4, ok1
-	print I0
-	print " not "
-ok1:	print "ok 1\n"
+    set I0, P1        # arr.length
+    eq I0, 4, ok1
+    print I0
+    print " not "
+ok1:    print "ok 1\n"
 
-	shift I0, P1		# get one
-	eq I0, 10, ok2
-	print "not "
-ok2:	print "ok 2\n"
+    shift I0, P1        # get one
+    eq I0, 10, ok2
+    print "not "
+ok2:    print "ok 2\n"
 
-	shift I0, P1		# get one
-	eq I0, 20, ok3
-	print "not "
-ok3:	print "ok 3\n"
+    shift I0, P1        # get one
+    eq I0, 20, ok3
+    print "not "
+ok3:    print "ok 3\n"
 
-	set I0, P1		# arr.length of rest
-	eq I0, 2, ok6
-	print I0
-	print " not "
-ok6:	print "ok 6\n"
+    set I0, P1        # arr.length of rest
+    eq I0, 2, ok6
+    print I0
+    print " not "
+ok6:    print "ok 6\n"
 
         print P1
-	end
+    end
 CODE
 ok 1
 ok 2
@@ -586,7 +580,7 @@ ok 6
 OUTPUT
 }
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice syntax");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice syntax" );
    new P0, .ResizablePMCArray
    slice P2, P0[2 .. 3, 4, 5 ..6]
    slice P2, P0[10 ..]
@@ -600,7 +594,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice creates an iterator");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice creates an iterator" );
    new P0, .ResizablePMCArray
    slice P2, P0[2 .. 3, 4, 5 ..6]
    typeof S0, P2
@@ -611,7 +605,7 @@ CODE
 Iterator
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter simple array elements");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter simple array elements" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -638,7 +632,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter simple array elements - repeat");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter simple array elements - repeat" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -656,7 +650,7 @@ lp:
    branch lp
 ex:
 
-   slice P2, P0[2, 4]		# this is the same PF constant
+   slice P2, P0[2, 4]        # this is the same PF constant
    set P2, .ITERATE_FROM_START
 lp2:
    unless P2, ex2
@@ -675,28 +669,28 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter string");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter string" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot"
-	slice P1, P2[0,1,4,5]
-	set P1, .ITERATE_FROM_START
+    new P2, .String
+    set P2, "parrot"
+    slice P1, P2[0,1,4,5]
+    set P1, .ITERATE_FROM_START
 iter_loop:
-        unless P1, iter_end		# while (entries) ...
-	shift S1, P1
-	print S1
-	branch iter_loop
+        unless P1, iter_end        # while (entries) ...
+    shift S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 paot
 parrot
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter start range");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter start range" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -722,7 +716,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter end range");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter end range" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -748,7 +742,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter start range, value");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter start range, value" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -776,7 +770,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter range, value");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter range, value" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -805,7 +799,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "slice iter range, range");
+pasm_output_is( <<'CODE', <<'OUTPUT', "slice iter range, range" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -837,116 +831,116 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter string range");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter string range" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot rocks"
-	slice P1, P2[1 ..3 ,5, 8 ..9]
-	set P1, .ITERATE_FROM_START
+    new P2, .String
+    set P2, "parrot rocks"
+    slice P1, P2[1 ..3 ,5, 8 ..9]
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	branch iter_loop
+    shift S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 arrtoc
 parrot rocks
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter string range 2");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter string range 2" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot rocks"
-	slice P1, P2[ ..3 ,5, 8 ..]
-	set P1, .ITERATE_FROM_START
+    new P2, .String
+    set P2, "parrot rocks"
+    slice P1, P2[ ..3 ,5, 8 ..]
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	branch iter_loop
+    shift S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 parrtocks
 parrot rocks
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter string variable range");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter string variable range" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot rocks"
-	set I0, 1
-	set I1, 3
-	set I2, 8
-	set I3, 9
-	slice P1, P2[I0 ..I1 ,5, I2 ..I3]
-	set P1, .ITERATE_FROM_START
+    new P2, .String
+    set P2, "parrot rocks"
+    set I0, 1
+    set I1, 3
+    set I2, 8
+    set I3, 9
+    slice P1, P2[I0 ..I1 ,5, I2 ..I3]
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	branch iter_loop
+    shift S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 arrtoc
 parrot rocks
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter hash values");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter hash values" );
     .include "iterator.pasm"
-	new P2, .Hash
-	set P2["a"], 100
-	set P2["b"], 200
-	set P2["c"], 300
-	set P2["d"], 400
-	slice P1, P2["b", "c"]
-	set P1, .ITERATE_FROM_START
+    new P2, .Hash
+    set P2["a"], 100
+    set P2["b"], 200
+    set P2["c"], 300
+    set P2["d"], 400
+    slice P1, P2["b", "c"]
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	print "\n"
-	branch iter_loop
+    shift S1, P1
+    print S1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 CODE
 200
 300
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter hash values 2");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter hash values 2" );
     .include "iterator.pasm"
-	new P2, .Hash
-	set P2["a"], 100
-	set P2["b"], 200
-	set P2["c"], 300
-	set P2["d"], 400
-	set P2["e"], 500
-	slice P1, P2["b", "c", "a", "a", "e"]
-	set P1, .ITERATE_FROM_START
+    new P2, .Hash
+    set P2["a"], 100
+    set P2["b"], 200
+    set P2["c"], 300
+    set P2["d"], 400
+    set P2["e"], 500
+    slice P1, P2["b", "c", "a", "a", "e"]
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	print "\n"
-	branch iter_loop
+    shift S1, P1
+    print S1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 CODE
 200
 300
@@ -956,25 +950,25 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter range");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter range" );
     .include "iterator.pasm"
-	new P2, .Hash
-	set P2["a"], 10
-	set P2["b"], 20
-	set P2["c"], 30
-	set P2["d"], 40
-	set P2["e"], 50
-	slice P1, P2["a".. "c"]
-	set P1, .ITERATE_FROM_START
+    new P2, .Hash
+    set P2["a"], 10
+    set P2["b"], 20
+    set P2["c"], 30
+    set P2["d"], 40
+    set P2["e"], 50
+    slice P1, P2["a".. "c"]
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	print "\n"
-	branch iter_loop
+    shift S1, P1
+    print S1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 CODE
 10
 20
@@ -982,30 +976,30 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter range 2");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter range 2" );
     .include "iterator.pasm"
-	new P2, .Hash
-	set P2["a"], 10
-	set P2["b"], 20
-	set P2["c"], 30
-	set P2["d"], 40
-	set P2["e"], 50
-	set P2["A"], 11
-	set P2["B"], 21
-	set P2["C"], 31
-	set P2["D"], 41
-	set P2["E"], 51
-	slice P1, P2["a".. "c", 'C' .. 'E']
-	set P1, .ITERATE_FROM_START
+    new P2, .Hash
+    set P2["a"], 10
+    set P2["b"], 20
+    set P2["c"], 30
+    set P2["d"], 40
+    set P2["e"], 50
+    set P2["A"], 11
+    set P2["B"], 21
+    set P2["C"], 31
+    set P2["D"], 41
+    set P2["E"], 51
+    slice P1, P2["a".. "c", 'C' .. 'E']
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S1, P1
-	print S1
-	print "\n"
-	branch iter_loop
+    shift S1, P1
+    print S1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 CODE
 10
 20
@@ -1016,34 +1010,34 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "slice iter range - vars");
+pasm_output_is( <<'CODE', <<OUTPUT, "slice iter range - vars" );
     .include "iterator.pasm"
-	new P2, .Hash
-	set P2["a"], 10
-	set P2["b"], 20
-	set P2["c"], 30
-	set P2["d"], 40
-	set P2["e"], 50
-	set P2["A"], 11
-	set P2["B"], 21
-	set P2["C"], 31
-	set P2["D"], 41
-	set P2["E"], 51
-	set S0, 'a'
-	set S1, 'c'
-	set S2, 'C'
-	set S3, 'E'
-	slice P1, P2[S0 .. S1, S2 .. S3, 'A']
-	set P1, .ITERATE_FROM_START
+    new P2, .Hash
+    set P2["a"], 10
+    set P2["b"], 20
+    set P2["c"], 30
+    set P2["d"], 40
+    set P2["e"], 50
+    set P2["A"], 11
+    set P2["B"], 21
+    set P2["C"], 31
+    set P2["D"], 41
+    set P2["E"], 51
+    set S0, 'a'
+    set S1, 'c'
+    set S2, 'C'
+    set S3, 'E'
+    slice P1, P2[S0 .. S1, S2 .. S3, 'A']
+    set P1, .ITERATE_FROM_START
 iter_loop:
         unless P1, iter_end
-	shift S10, P1
-	print S10
-	print "\n"
-	branch iter_loop
+    shift S10, P1
+    print S10
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 CODE
 10
 20
@@ -1055,25 +1049,25 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "xrange iterator");
+pir_output_is( <<'CODE', <<'OUTPUT', "xrange iterator" );
 
 .sub main
     .include "iterator.pasm"
         # xrange(10, 14)
-	new P2, .Slice [10 .. 14]
-	new P1, .Iterator,  P2
+    new P2, .Slice [10 .. 14]
+    new P1, .Iterator,  P2
 
-	set P1, .ITERATE_FROM_START
-#	I0 = P1."len"()
+    set P1, .ITERATE_FROM_START
+#    I0 = P1."len"()
 iter_loop:
         unless P1, iter_end
-	shift I1, P1
-	print I1
-	print "\n"
-	branch iter_loop
+    shift I1, P1
+    print I1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 .end
 CODE
 10
@@ -1083,25 +1077,25 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "xrange iterator ..n");
+pir_output_is( <<'CODE', <<'OUTPUT', "xrange iterator ..n" );
 
 .sub main
     .include "iterator.pasm"
         # xrange(4)
-	new P2, .Slice [ .. 4]
-	new P1, .Iterator,  P2
+    new P2, .Slice [ .. 4]
+    new P1, .Iterator,  P2
 
-	set P1, .ITERATE_FROM_START
-#	I0 = P1."len"()
+    set P1, .ITERATE_FROM_START
+#    I0 = P1."len"()
 iter_loop:
         unless P1, iter_end
-	shift I1, P1
-	print I1
-	print "\n"
-	branch iter_loop
+    shift I1, P1
+    print I1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 .end
 CODE
 0
@@ -1111,8 +1105,7 @@ CODE
 ok
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "slice, get strings from array");
+pir_output_is( <<'CODE', <<'OUTPUT', "slice, get strings from array" );
 
 .sub main :main
     .include "iterator.pasm"
@@ -1127,7 +1120,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "slice, get strings from array");
     iter = slice ar[1 ..]
     iter = .ITERATE_FROM_START
 iter_loop:
-    unless iter, iter_end		# while (entries) ...
+    unless iter, iter_end        # while (entries) ...
     $S0 = shift iter
     print $S0
     goto iter_loop
@@ -1138,7 +1131,7 @@ CODE
 bcdeok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "iter vtable");
+pasm_output_is( <<'CODE', <<'OUTPUT', "iter vtable" );
    .include "iterator.pasm"
    new P0, .ResizablePMCArray
    push P0, 100
@@ -1173,27 +1166,27 @@ ok 1
 ok 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "string iteration with get_iter");
+pasm_output_is( <<'CODE', <<OUTPUT, "string iteration with get_iter" );
     .include "iterator.pasm"
-	new P2, .String
-	set P2, "parrot"
-	iter P1, P2
+    new P2, .String
+    set P2, "parrot"
+    iter P1, P2
 iter_loop:
-        unless P1, iter_end		# while (entries) ...
-	shift S1, P1
-	print S1
-	branch iter_loop
+        unless P1, iter_end        # while (entries) ...
+    shift S1, P1
+    print S1
+    branch iter_loop
 iter_end:
-	print "\n"
-	print P2
-	print "\n"
-	end
+    print "\n"
+    print P2
+    print "\n"
+    end
 CODE
 parrot
 parrot
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "intlist iter vtable");
+pasm_output_is( <<'CODE', <<'OUTPUT', "intlist iter vtable" );
    .include "iterator.pasm"
    new P0, .IntList
    push P0, 100
@@ -1228,23 +1221,23 @@ ok 1
 ok 2
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'xrange iterator, get_iter');
+pir_output_is( <<'CODE', <<'OUTPUT', 'xrange iterator, get_iter' );
 
 .sub main
     .include "iterator.pasm"
         # xrange(10, 14)
-	new P2, .Slice [10 .. 14]
-	P1 = iter  P2
-#	I0 = P1."len"()
+    new P2, .Slice [10 .. 14]
+    P1 = iter  P2
+#    I0 = P1."len"()
 iter_loop:
         unless P1, iter_end
-	shift I1, P1
-	print I1
-	print "\n"
-	branch iter_loop
+    shift I1, P1
+    print I1
+    print "\n"
+    branch iter_loop
 iter_end:
-	print "ok\n"
-	end
+    print "ok\n"
+    end
 .end
 CODE
 10
@@ -1255,9 +1248,9 @@ ok
 OUTPUT
 
 TODO: {
-  local $TODO = "adding keys during iteration";
+    local $TODO = "adding keys during iteration";
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "adding keys during iteration");
+    pir_output_is( << 'CODE', << 'OUTPUT', "adding keys during iteration" );
 .sub main :main
     .local pmc h, it, ar
     .local string k
@@ -1304,7 +1297,7 @@ CODE
 OUTPUT
 }
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "by default, iterate from start");
+pir_output_is( << 'CODE', << 'OUTPUT', "by default, iterate from start" );
 .sub main :main
     .local pmc ar, it
     ar= new ResizablePMCArray
@@ -1326,3 +1319,81 @@ pi
 6.28
 OUTPUT
 
+pir_output_is( << 'CODE', << 'OUTPUT', "iterator can be cloned" );
+.sub main :main
+    .local pmc ar, i1, i2
+    ar = new ResizableIntegerArray
+    push ar, 17
+    new i1, .Iterator, ar
+    clone i2, i1
+.end
+CODE
+OUTPUT
+
+pir_output_is( << 'CODE', << 'OUTPUT', "cloned iterator independent of original" );
+.sub main :main
+    .local pmc ar, i1, i2
+    ar = new ResizableIntegerArray
+    push ar, 17
+    push ar, 42
+
+    new i1, .Iterator, ar
+    clone i2, i1
+
+    .local Integer temp
+
+    shift temp, i1
+    unless temp == 17 goto fail
+
+    shift temp, i1
+    unless temp == 42 goto fail
+
+    shift temp, i2
+    unless temp == 17 goto fail
+
+    shift temp, i2
+    unless temp == 42 goto fail
+
+    say "ok"
+    end
+fail:
+    say "not ok"
+.end
+CODE
+ok
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "clone of partly-advanced iterator" );
+.sub main :main
+    .local pmc ar, i1, i2
+    .local Integer temp
+    ar = new ResizableIntegerArray
+    push ar, 1
+    push ar, 2
+    new i1, .Iterator, ar
+
+    shift temp, i1
+    unless temp == 1 goto fail
+
+    clone i2, i1
+    shift temp, i1
+    unless temp == 2 goto fail
+
+    shift temp, i2
+    unless temp == 2 goto fail
+
+    say "ok"
+    end
+fail:
+    say "not ok"
+.end
+CODE
+ok
+OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

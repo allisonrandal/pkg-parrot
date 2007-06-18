@@ -1,11 +1,10 @@
 #! perl
 
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /local/languages/t/harness 13394 2006-07-20T06:00:01.955543Z fperrad  $
+# Copyright (C) 2004-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/t/harness 2954 2007-04-04T18:41:23.735838Z bernhard  $
 
 use strict;
 use warnings;
-use 5.006;
 use lib qw( lib ../lib );
 
 use File::Spec;
@@ -82,20 +81,18 @@ my $result = GetOptions( 'html'          => \$do_gen_html,
 # forth                No t/harness
 # lisp                 No t/harness
 # miniperl             not maintained, should be removed
-# parakeet             No t/harness
-# perl6                test scrips are written in Perl 6, not Perl 5
-# pheme                test scrips are written in Scheme, not Perl 5
+# perl6                test scripts are written in Perl 6, not Perl 5
+# pheme                test scripts are written in Scheme, not Perl 5
+# pynie                test scripts are written in PIR, not Perl 5
 # python               not maintained
 # ruby                 not maintained, should be removed
-
-
 
 my @unified_testable_languages
     = defined $languages_list ?
           split( /\s*,\s*/, $languages_list )
           : 
-          qw( APL
-              bc
+          qw( abc
+              APL
               befunge
               bf
               cardinal
@@ -107,6 +104,8 @@ my @unified_testable_languages
               m4
               ook
               parrot_compiler
+              PIR
+              plumhead
               punie
               regex
               scheme
@@ -174,7 +173,7 @@ if ( ! $do_gen_html ) {
                 print STDERR "- $file\n";
                 $data = $self->run_test($file);
                 $stats{tests} += $data->{results}{max};
-                $stats{ok}    += $data->{results}{ok};
+                $stats{ok}    += $data->{results}{ok} || 0;
             }
 
             printf STDERR "%s OK from %s tests (%.2f%% ok)\n\n",
@@ -185,9 +184,9 @@ if ( ! $do_gen_html ) {
             $self->{meat}{end_time} = time;
         };
 
-        my $start = time;
+        my $start = time();
         my $model = Test::TAP::Model::Visual->new_with_tests(@tests);
-        my $end = time;
+        my $end   = time();
 
         my $duration = $end - $start;
         my $languages = join( q{ }, @unified_testable_languages );

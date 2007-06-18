@@ -1,4 +1,4 @@
-# $Id: /local/examples/japh/japh11.pasm 13099 2006-07-01T21:25:20.974025Z chip  $
+# $Id: /parrotcode/trunk/examples/japh/japh11.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 # delegated multimethod dispatch and obfuscated
     bsr _init

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/docs/parrot.pod 13183 2006-07-06T20:05:47.681449Z chip  $
+# $Id: /parrotcode/trunk/docs/parrot.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -22,9 +22,6 @@ points are:
 
 An introductory article on what Parrot is and how to do some interesting things
 with it.
-
-(Note that this was originally written around the time of Parrot v0.0.2, and is
-in need of some updating).
 
 =item F<overview.pod>
 

@@ -1,17 +1,15 @@
-# $Id: /local/languages/regex/lib/Regex/CodeGen/Re.pm 12463 2006-04-30T14:02:48.452322Z bernhard  $
+# $Id: /parrotcode/local/languages/regex/lib/Regex/CodeGen/Re.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 package Regex::CodeGen::Re;
 use Regex::RegexOps ();
 use base 'Regex::CodeGen';
 use strict;
+use warnings;
 
 sub output_preamble {
     my $self = shift;
 
-    return (
-            'new P0, PerlRegex',
-            're_bind P0, S0'
-           );
+    return ( 'new P0, PerlRegex', 're_bind P0, S0' );
 }
 
 ############### SIMPLE OUTPUT ##############
@@ -23,31 +21,31 @@ sub output_advance {
 }
 
 sub output_onfail {
-    my ($self, $label) = @_;
-    return "re_onfail P0, ".$self->output_label_use($label);
+    my ( $self, $label ) = @_;
+    return "re_onfail P0, " . $self->output_label_use($label);
 }
 
 sub output_match {
-    my ($self, $byte) = @_;
+    my ( $self, $byte ) = @_;
     my $comment = '';
-    if ($byte =~ /^[\w ]$/) {
+    if ( $byte =~ /^[\w ]$/ ) {
         $comment = " # '$byte'";
     }
-    return "re_match P0, ".ord($byte).$comment;
+    return "re_match P0, " . ord($byte) . $comment;
 }
 
 sub output_classmatch {
-    my ($self, $class) = @_;
+    my ( $self, $class ) = @_;
     return "re_match_class P0, $class";
 }
 
 sub output_start {
-    my ($self, $n) = @_;
+    my ( $self, $n ) = @_;
     return "re_opengroup P0, $n";
 }
 
 sub output_end {
-    my ($self, $n) = @_;
+    my ( $self, $n ) = @_;
     return "re_closegroup P0, $n";
 }
 
@@ -64,3 +62,10 @@ sub output_match_failed {
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

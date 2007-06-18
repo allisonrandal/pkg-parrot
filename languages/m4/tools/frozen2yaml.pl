@@ -1,6 +1,6 @@
 #! perl
 
-# $Id: /local/languages/m4/tools/frozen2yaml.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/local/languages/m4/tools/frozen2yaml.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 DESCRIPTION
 
@@ -21,13 +21,13 @@ use YAML;
 
 # local Modules
 
-
 # Create a parser that outputs an Array
 $::RD_ERRORS = 1;
 $::RD_WARN   = 1;
 $::RD_HINT   = 1;
+
 #$::RD_TRACE  = 1;
-$::RD_TRACE  = undef;
+$::RD_TRACE = undef;
 my $frozen_parser = Parse::RecDescent->new( << 'END_GRAMMAR' );
 
 {
@@ -92,20 +92,27 @@ END_GRAMMAR
 # Slurp in the frozen-state file
 my $frozen;
 {
-  $/ = undef;
-  $frozen = <>;
+    $/      = undef;
+    $frozen = <>;
 }
+
 #print Dump( $frozen );
 
 # Parse the freeze-state
-my $symtab = $frozen_parser->frozen( $frozen );
+my $symtab = $frozen_parser->frozen($frozen);
 
-# Dump the parsed data as YAML 
-print Dump( $symtab );
-
+# Dump the parsed data as YAML
+print Dump($symtab);
 
 =head1 SEE ALSO
 
 =head1 AUTHOR
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

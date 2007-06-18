@@ -1,7 +1,7 @@
 #! perl
 #
-# $Id: /local/languages/BASIC/interpreter/basic.pl 13529 2006-07-24T17:20:02.191389Z chip  $
-# $Log: basic.pl,v 
+# $Id: /parrotcode/local/languages/BASIC/interpreter/basic.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Log: basic.pl,v
 # Revision 1.11  2002/06/16 21:23:28  clint
 # Floating Point BASI
 #
@@ -27,7 +27,7 @@
 use strict;
 use warnings;
 
-open(T, ">merged_basic.pasm") || die;
+open( T, ">", "merged_basic.pasm" ) || die;
 
 print T <<'EOF';
 	branch MAIN
@@ -111,3 +111,10 @@ close(T);
 unlink "basic.pbc";
 system("../../../parrot -o basic.pbc merged_basic.pasm");
 system("../../../parrot basic.pbc");
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

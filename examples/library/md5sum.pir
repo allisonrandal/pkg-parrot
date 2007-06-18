@@ -1,4 +1,4 @@
-# $Id: /local/examples/library/md5sum.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/local/examples/library/md5sum.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -87,3 +87,9 @@ iter_cont:
 iter_done:
 
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

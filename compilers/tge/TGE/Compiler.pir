@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
+# Copyright (C) 2005-2007, The Perl Foundation.
 
 =head1 NAME
 
@@ -33,8 +33,7 @@ structure.
     start_rule = find_global "TGE::Parser", "start"
     match = start_rule(source, 'grammar'=>'TGE::Parser')
     # Verify the parse
-    $I0 = match.__get_bool()
-    unless $I0 goto err_parse    # if parse fails, stop
+    unless match goto err_parse    # if parse fails, stop
 #        say 'parse succeeded'
 #        say 'Match tree dump:'
 #        load_bytecode "dumper.pbc"
@@ -55,7 +54,7 @@ structure.
     end
 .end
 
-.sub __init :method
+.sub init :vtable :method
     self.add_rule("ROOT",       "result", ".", "ROOT_result")
     self.add_rule("statements", "result", ".", "statements_result")
     self.add_rule("statement",  "result", ".", "statement_result")
@@ -238,11 +237,14 @@ err_no_rule:
 .sub action_value :method
     .param pmc tree
     .param pmc node
-    .local pmc value
-    value = new .String
+    .local pmc value, infile
+    .local int lineno
+    value = new 'PGE::CodeString'
+    infile = get_global '$!infile'
     $P2 = node[0]
-    $S1 = $P2
-    value = $S1
+    (lineno) = $P2.'line_number'()
+    value.'emit'('#line %0 %1', lineno, infile)
+    value .= $P2
     .return (value)
 .end
 
@@ -268,9 +270,22 @@ Compile a grammar from a source string.
 
 .sub 'precompile' :method
     .param string source
+    .param string infile          :optional
+    .param int has_infile      :opt_flag
     .local pmc rule_data
     .local string outstring
     .local string header_string
+
+    if has_infile goto quote_infile
+    infile = ''
+    goto have_infile
+  quote_infile:
+    infile = concat '"', infile
+    concat infile, '"'
+  have_infile:
+    $P0 = new .String
+    $P0 = infile
+    set_global '$!infile', $P0
 
     # Unnamed grammars are class 'AnonGrammar'
     .local string grammarname
@@ -299,7 +314,7 @@ loop_start:
           goto loop_start
 loop_end:
 
-    outstring .= "\n.sub __init :method\n"
+    outstring .= "\n.sub init :vtable :method\n"
     outstring .= header_string
     outstring .= "\n.end\n"
 
@@ -394,7 +409,7 @@ loop_end:
     code .= "' ]"
   no_type:
     code .= "\n\n"
-    code .= ".sub '__onload' :load\n"
+    code .= ".sub '__onload' :load :init\n"
     code .= "    load_bytecode 'TGE.pbc'\n"
     code .= "    $I0 = find_type '"
     code .= type
@@ -416,3 +431,9 @@ loop_end:
 Allison Randal <allison@perl.org>
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

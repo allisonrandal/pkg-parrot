@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/tools/build/revision_c.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/trunk/tools/build/revision_c.pl 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -21,6 +21,7 @@ F<include/parrot/config.h>
 
 use warnings;
 use strict;
+use lib qw{lib . ../lib ../../ lib};
 use Parrot::Revision;
 
 print <<"EOF";
@@ -50,4 +51,17 @@ int Parrot_config_revision(void)
     return ${Parrot::Revision::config};
 }
 
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
 EOF
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

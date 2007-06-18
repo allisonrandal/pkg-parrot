@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 Parrot::Config - Parrot Configuration Data
@@ -13,21 +14,30 @@ values loaded from F<lib/Parrot/Config/Generated.pm>.
 
 package Parrot::Config;
 
+use strict;
+use warnings;
+
 eval 'use Parrot::Config::Generated';
 if ($@) {
     die "\nParrot::Config is unavailable until you configure parrot.\n"
-        ."Please run `perl Configure.pl`.\n\n";
+        . "Please run `perl Configure.pl`.\n\n";
 }
 
-use strict;
 use Exporter;
- 
+
 use vars qw(@ISA @EXPORT %PConfig);
 
-@ISA=qw(Exporter);
+@ISA = qw(Exporter);
 
-@EXPORT=qw(%PConfig);
+@EXPORT = qw(%PConfig);
 
 %PConfig = %Parrot::Config::Generated::PConfig;
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/syn/labels.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/compilers/imcc/syn/labels.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
@@ -10,7 +10,7 @@ use Parrot::Config;
 use Parrot::Test tests => 6;
 
 ##############################
-pir_output_is(<<'CODE', <<'OUT', "goto 1");
+pir_output_is( <<'CODE', <<'OUT', "goto 1" );
 .sub test :main
 	goto foo
 	end
@@ -24,7 +24,7 @@ ok 1
 OUT
 
 ##############################
-pir_output_is(<<'CODE', <<'OUT', "goto 2");
+pir_output_is( <<'CODE', <<'OUT', "goto 2" );
 .sub test :main
 	goto foo
 bar:	print "ok 2\n"
@@ -40,7 +40,7 @@ ok 2
 OUT
 
 ##############################
-pir_output_like(<<'CODE', <<'OUT', "illegal label");
+pir_error_output_like( <<'CODE', <<'OUT', "illegal label");
 .sub bogus
          bsr _function
          print "never\n"
@@ -56,7 +56,7 @@ CODE
 /no label offset defined/
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "perlish func label");
+pir_output_is( <<'CODE', <<'OUT', "perlish func label" );
 .sub _main::test
 	print "ok 1\n"
 	end
@@ -66,7 +66,7 @@ CODE
 ok 1
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "perlish func label - .pcc_sub");
+pir_output_is( <<'CODE', <<'OUT', "perlish func label - .pcc_sub" );
 .pcc_sub _main::test
 	print "ok 1\n"
 	end
@@ -76,7 +76,7 @@ CODE
 ok 1
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "perlish func label");
+pir_output_is( <<'CODE', <<'OUT', "perlish func label" );
 .sub _main::test
         _main::sub()
 	print "ok 2\n"
@@ -91,3 +91,10 @@ CODE
 ok 1
 ok 2
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

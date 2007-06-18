@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/benchmarks/stress2.pl 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/examples/benchmarks/stress2.pl 1502 2007-01-22T17:06:21.889089Z chromatic  $
 
 =head1 NAME
 
@@ -15,28 +15,38 @@ Creates 200 arrays of 10000 elements each.
 
 =cut
 
-foreach (1..20) {
+use strict;
+use warnings;
+
+foreach ( 1 .. 20 ) {
     my @arr;
-    foreach (1..10) {
-	$arr[$_] = buildarray();
+    foreach ( 1 .. 10 ) {
+        $arr[$_] = buildarray();
     }
 }
 
 sub buildarray {
     my @foo;
-    foreach (1..10000) {
-	$foo[$_] = $_;
+    foreach ( 1 .. 10000 ) {
+        $foo[$_] = $_;
     }
     return \@foo;
 }
 
 =head1 SEE ALSO
 
-F<examples/benchmarks/stress.pasm>, 
-F<examples/benchmarks/stress.pl>, 
-F<examples/benchmarks/stress1.pasm>, 
-F<examples/benchmarks/stress1.pl>, 
-F<examples/benchmarks/stress2.pasm>, 
+F<examples/benchmarks/stress.pasm>,
+F<examples/benchmarks/stress.pl>,
+F<examples/benchmarks/stress1.pasm>,
+F<examples/benchmarks/stress1.pl>,
+F<examples/benchmarks/stress2.pasm>,
 F<examples/benchmarks/stress3.pasm>.
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

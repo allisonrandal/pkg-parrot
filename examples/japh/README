@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-$Id: /local/examples/japh/README 13870 2006-08-03T23:40:24.624450Z chip  $
+$Id: /parrotcode/trunk/examples/japh/README 470 2006-12-05T03:30:45.414067Z svm  $
 
 XXX
 XXX a lot of the JAPHs are currently broken due to recent core changes

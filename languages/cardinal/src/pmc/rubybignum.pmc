@@ -1,7 +1,7 @@
 /* BignumInteger.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/languages/cardinal/src/pmc/rubybignum.pmc 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/local/languages/cardinal/src/pmc/rubybignum.pmc 1188 2007-01-10T02:54:32.217296Z chromatic  $
  *  Overview:
  *     These are the vtable functions for the BignumInteger base class
  *  Data Structure and Algorithms:
@@ -11,21 +11,22 @@
 
 #include "parrot/parrot.h"
 
-pmclass RubyBignum extends RubyObject extends BigInt dynpmc group ruby_group hll Ruby maps BigInt {
+pmclass RubyBignum
+        extends BigInt
+        dynpmc
+        group ruby_group
+        hll Ruby
+        maps BigInt {
 
     METHOD PMC* interpret() {
         return SELF;
     }
-    
 }
 
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

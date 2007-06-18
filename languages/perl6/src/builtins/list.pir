@@ -1,27 +1,25 @@
-## $Id: /local/languages/perl6/src/builtins/list.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+## $Id: /parrotcode/trunk/languages/perl6/src/builtins/list.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
 
 =head1 NAME
 
-src/builtins/list.pir - Perl 6 List class
+src/builtins/list.pir - Perl 6 list operators
 
 =head1 Functions
 
 =over 4
 
+=item C<list(...)>
+
+Build a List from its arguments.
+
 =cut
 
 .namespace
 
-=item C<list(...)>
-
-Build a Perl6List from its arguments.
-
-=cut
-
 .sub 'list'
     .param pmc args            :slurpy
     .local pmc list
-    list = new 'Perl6List'
+    list = new 'List'
   args_loop:
     unless args goto end
     $P0 = shift args
@@ -47,16 +45,12 @@ Operator form for building a list from its arguments.
 ## TODO: grep join map reduce reverse sort zip
 
 
-.namespace [ 'Perl6List' ]
-
-.sub '__get_string' :method
-    $S0 = join ' ', self
-    .return ($S0)
-.end
-
-
 =back
 
 =cut
 
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

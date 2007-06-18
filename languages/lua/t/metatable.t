@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/metatable.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/metatable.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -12,24 +12,26 @@ t/metatable.t - Lua tables
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.8 "Metatables".
+See "Lua 5.1 Reference Manual", section 2.8 "Metatables",
+L<http://www.lua.org/manual/5.1/manual.html#2.8>.
 
 See "Programming in Lua", section 13 "Metatables and Metamethods".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 28;
+use Parrot::Test tests => 29;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'metatable' );
 t = {}
 print(getmetatable(t))
 t1 = {}
-setmetatable(t, t1)
+assert(setmetatable(t, t1) == t)
 assert(getmetatable(t) == t1)
 CODE
 nil
@@ -43,7 +45,7 @@ setmetatable(t, mt)
 assert(getmetatable(t) == "not your business")
 setmetatable(t, {})
 CODE
-/cannot change a protected metatable/
+/^[^:]+: [^:]+:\d+: cannot change a protected metatable\nstack traceback:\n/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'metatable for string' );
@@ -102,7 +104,7 @@ setmetatable(t, t.mt)
 t.mt.__tostring = "not a function"
 print(tostring(t))
 CODE
-/attempt to call a string value/
+/^[^:]+:( [^:]+:\d+:)? attempt to call a string value\nstack traceback:\n/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'cplx __add' );
@@ -360,7 +362,7 @@ function Cplx.mt.__eq (a, b)
     if type(b) ~= "table" then
         b = Cplx.new(b, 0)
     end
-    return (a.re == b.re) and (b.im == b.im) 
+    return (a.re == b.re) and (b.im == b.im)
 end
 
 c1 = Cplx.new(2, 0)
@@ -406,7 +408,7 @@ function Cplx.mt.__lt (a, b)
     end
     local ra = a.re*a.re + a.im*a.im
     local rb = b.re*b.re + b.im*b.im
-    return ra < rb 
+    return ra < rb
 end
 
 function Cplx.mt.__le (a, b)
@@ -418,7 +420,7 @@ function Cplx.mt.__le (a, b)
     end
     local ra = a.re*a.re + a.im*a.im
     local rb = b.re*b.re + b.im*b.im
-    return ra <= rb 
+    return ra <= rb
 end
 
 function Cplx.mt.__cmp (a, b)
@@ -483,7 +485,7 @@ function Cplx.mt.__lt (a, b)
     end
     local ra = a.re*a.re + a.im*a.im
     local rb = b.re*b.re + b.im*b.im
-    return ra < rb 
+    return ra < rb
 end
 
 c1 = Cplx.new(2, 0)
@@ -499,9 +501,42 @@ true
 OUT
 
 TODO: {
-local $TODO = 'fix me (luabase.pmc:invoke)';
+    local $TODO = 'fix me (luaany.pmc:invoke)';
 
-language_output_is( 'lua', <<'CODE', <<'OUT', 'cplx __call' );
+    language_output_is( 'lua', <<'CODE', <<'OUT', 'cplx __call (without args)' );
+Cplx = {}
+Cplx.mt = {}
+
+function Cplx.new (re, im)
+    local c = {}
+    setmetatable(c, Cplx.mt)
+    c.re = tonumber(re)
+    if im == nil then
+        c.im = 0.0
+    else
+        c.im = tonumber(im)
+    end
+    return c
+end
+
+function Cplx.mt.__tostring (c)
+    return "(" .. c.re .. "," .. c.im .. ")"
+end
+
+function Cplx.mt.__call (obj)
+    print("Cplx.__call " .. tostring(obj))
+    return true
+end
+
+c1 = Cplx.new(2, 0)
+r = c1()
+print(r)
+CODE
+Cplx.__call (2,0)
+true
+OUT
+
+    language_output_is( 'lua', <<'CODE', <<'OUT', 'cplx __call (with args)' );
 Cplx = {}
 Cplx.mt = {}
 
@@ -532,7 +567,7 @@ c1("a")
 r = c1("a", "b", "c")
 print(r)
 CODE
-Cplx.__call (2,0), 
+Cplx.__call (2,0),
 Cplx.__call (2,0), a
 Cplx.__call (2,0), a, b, c
 true
@@ -655,7 +690,7 @@ local mt = {
         print("*access to element " .. tostring(k))
         return _t[k]  -- access the original table
     end,
-   
+
     __newindex = function (t,k,v)
         print("*update of element " .. tostring(k) ..
                              " to " .. tostring(v))
@@ -681,7 +716,7 @@ local mt = {
         print("*access to element " .. tostring(k))
         return t[index][k]  -- access the original table
     end,
-   
+
     __newindex = function (t,k,v)
         print("*update of element " .. tostring(k) ..
                              " to " .. tostring(v))
@@ -722,7 +757,7 @@ end
 days = readOnly{"Sunday", "Monday", "Tuesday", "Wednesday",
         "Thurday", "Friday", "Saturday"}
 
-print(days[1])        
+print(days[1])
 CODE
 Sunday
 OUT
@@ -743,9 +778,9 @@ end
 days = readOnly{"Sunday", "Monday", "Tuesday", "Wednesday",
         "Thurday", "Friday", "Saturday"}
 
-days[2] = "Noday"        
+days[2] = "Noday"
 CODE
-/attempt to update a read-only table/
+/^[^:]+: [^:]+:\d+: attempt to update a read-only table\nstack traceback:\n/
 OUT
 
 language_output_like( 'lua', <<'CODE', <<'OUT', 'declaring global variables' );
@@ -755,12 +790,12 @@ setmetatable(_G, {
     end,
     __index = function (_, n)
         error("attempt to read undeclared variable" .. n, 2)
-    end, 
+    end,
 })
 
 a = 1
 CODE
-/attempt to write to undeclared variable a/
+/^[^:]+: [^:]+:\d+: attempt to write to undeclared variable a\nstack traceback:\n/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'declaring global variables' );
@@ -774,7 +809,7 @@ setmetatable(_G, {
     end,
     __index = function (_, n)
         error("attempt to read undeclared variable" .. n, 2)
-    end, 
+    end,
 })
 
 declare "a"
@@ -783,4 +818,11 @@ print(a)
 CODE
 1
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

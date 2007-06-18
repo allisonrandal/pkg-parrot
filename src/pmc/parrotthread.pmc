@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/parrotthread.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/parrotthread.pmc 3359 2007-05-02T06:53:54.573602Z chromatic  $
 
 =head1 NAME
 
@@ -47,14 +47,70 @@ and these methods:
 static void
 stop_GC(Interp* parent, Interp *thread)
 {
+#if 0
     Parrot_block_DOD(parent);
     Parrot_block_DOD(thread);
     Parrot_block_GC(parent);
     Parrot_block_GC(thread);
+#endif
+}
+
+/* XXX FIXME probably not the best interface [see also list post of
+   coke's]
+ */
+
+static INTVAL do_thread_run(Interp *interp, PMC *thread,
+                            INTVAL clone_flags, PMC *sub, PMC *args) {
+    INTVAL tid;
+
+    tid = VTABLE_get_integer(interp, thread);
+    clone_interpreter(PMC_data_typed(thread, Parrot_Interp),
+                      interp, clone_flags);
+    interp->flags &= ~PARROT_THR_COPY_INTERP; /* XXX */
+    pt_thread_run(interp, thread, sub, args);
+
+    pmc_reuse(interp, thread, enum_class_ParrotRunningThread, 0);
+    PObj_active_destroy_CLEAR(thread);
+    PObj_custom_mark_CLEAR(thread);
+    PMC_int_val(thread) = tid;
+    return tid;
+}
+
+static INTVAL do_thread_run_clone_default(Interp *interp,
+                                          PMC *thread, PMC *sub, PMC *args) {
+    return do_thread_run(interp, thread, PARROT_CLONE_DEFAULT, sub, args);
 }
 
 
-pmclass ParrotThread extends ParrotInterpreter need_ext {
+pmclass ParrotThread extends ParrotInterpreter need_ext no_ro {
+
+/*
+
+=item C<thread_id = thread.'run'(CLONE_FLAGS, sub, args...)>
+
+Run the thread. This object is morphed into an appropriate
+ParrotRunningThread PMC.  The CLONE_FLAGS are or'd together values
+taken from C<cloneflags.pasm>.
+
+=item C<thread_id = thread.'run_clone'(sub, args...)>
+
+Equivalent to calling run with PARROT_CLONE_DEFAULT.
+
+=cut
+
+*/
+
+    void class_init() {
+        int typ = enum_class_ParrotThread;
+
+        if (pass) {
+            register_nci_method(INTERP, typ,
+                    F2DPTR(do_thread_run), "run", "IJOIP@");
+            /* XXX appropriate name given that this won't clone globals? */
+            register_nci_method(INTERP, typ,
+                    F2DPTR(do_thread_run_clone_default), "run_clone", "IJOP@");
+        }
+    }
 
 /*
 
@@ -66,18 +122,17 @@ Initializes the thread.
 
 */
 
-    void init () {
-        /*
-         * protect interpreter creation and list handling
-         */
+    void init() {
+        /* protect interpreter creation and list handling */
         LOCK(interpreter_array_mutex);
+
         SUPER();
-        pt_add_to_interpreters(INTERP, PMC_data(SELF));
+        pt_add_to_interpreters(INTERP, PMC_data_typed(SELF, Parrot_Interp));
+
         UNLOCK(interpreter_array_mutex);
-        /*
-         * can't allow DOD runs for now
-         */
-        stop_GC(INTERP, PMC_data(SELF));
+
+        /* can't allow DOD runs for now */
+        stop_GC(INTERP, PMC_data_typed(SELF, Parrot_Interp));
     }
 
 /*
@@ -90,15 +145,17 @@ Create a new thread by cloning the passed interpreter.
 
 */
 
-    void init_pmc (PMC *parent) {
+    void init_pmc(PMC *parent) {
         LOCK(interpreter_array_mutex);
         SUPER(parent);
-        pt_add_to_interpreters(PMC_data(parent), PMC_data(SELF));
+
+        pt_add_to_interpreters(PMC_data_typed(parent, Parrot_Interp),
+                               PMC_data_typed(SELF, Parrot_Interp));
+
         UNLOCK(interpreter_array_mutex);
-        /*
-         * can't allow DOD runs for now
-         */
-        stop_GC(INTERP, PMC_data(SELF));
+
+        /* can't allow DOD runs for now */
+        stop_GC(INTERP, PMC_data_typed(SELF, Parrot_Interp));
     }
 }
 
@@ -116,10 +173,7 @@ Create a new thread by cloning the passed interpreter.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

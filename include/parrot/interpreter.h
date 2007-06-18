@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/interpreter.h 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/interpreter.h 3477 2007-05-13T20:42:55.058233Z chromatic  $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_INTERPRETER_H_GUARD)
+#ifndef PARROT_INTERPRETER_H_GUARD
 #define PARROT_INTERPRETER_H_GUARD
 
 /* These should be visible to embedders. */
@@ -76,13 +76,42 @@ typedef enum {
     PARROT_SWITCH_JIT_CORE  = 0x12,           /* J P                */
     PARROT_EXEC_CORE      = 0x20          /* TODO Parrot_exec_run variants */
 } Parrot_Run_core_t;
-
 /* &end_gen */
+
+/* &gen_from_enum(cloneflags.pasm) */
+typedef enum {
+    PARROT_CLONE_CODE = 0x1,        /* active code segments
+                                     * XXX interaction with lexicals
+                                     */
+    PARROT_CLONE_GLOBALS = 0x2,     /* global stash */
+    PARROT_CLONE_RUNOPS = 0x4,      /* runops choice */
+    PARROT_CLONE_INTERP_FLAGS = 0x8,/* bounds checking and
+                                     * debugging flags */
+    PARROT_CLONE_HLL = 0x10,        /* clone HLL setting */
+    PARROT_CLONE_CLASSES = 0x20,    /* clone usermade classes */
+    PARROT_CLONE_LIBRARIES = 0x40,  /* clone loaded library set */
+    /* flags that won't be initially implemented */
+    PARROT_CLONE_CC = 0x80,         /* clone current continuation --
+                                     * fork()-like cloning (requires
+                                     * cloned code segments); probably
+                                     * would only work if runloop_level is 1
+                                     */
+
+    /* combinations of flags */
+    PARROT_CLONE_DEFAULT = 0x7f /* everything but CC */
+} Parrot_clone_flags;
+/* &end_gen */
+
 struct parrot_interp_t;
 
-typedef struct parrot_interp_t *Parrot_Interp;
-
 #if defined(PARROT_IN_CORE)
+
+#define Parrot_String   STRING *
+#define Parrot_PMC      PMC *
+#define Parrot_Language Parrot_Int
+#define Parrot_Vtable struct _vtable*
+
+typedef struct parrot_interp_t *Parrot_Interp;
 
 typedef Parrot_Interp_flag Interp_flags;
 typedef Parrot_Run_core_t Run_Cores;
@@ -115,12 +144,6 @@ typedef Parrot_Run_core_t Run_Cores;
 typedef struct warnings_t {
     Warnings_classes classes;
 } *Warnings;
-
-#if 0
-typedef STRING_FUNCS *(str_func_t)();
-typedef opcode_t *(**op_func_table)(); /* Opcode function table */
-typedef STRING_FUNCS *(**string_funcs)();      /* String function table */
-#endif
 
 /*
  * ProfData have these extra items in front followed by
@@ -182,17 +205,16 @@ typedef struct Parrot_Context {
     Regs_ni                bp;          /* pointers to FLOATVAL & INTVAL */
     Regs_ps                bp_ps;       /* pointers to PMC & STR */
     /* end common header */
-    INTVAL *n_regs_used;	        /* INSP in PBC points to Sub */
+    INTVAL *n_regs_used;                /* INSP in PBC points to Sub */
     size_t regs_mem_size;               /* memory occupied by registers */
-    int ref_count;                   /* how often refered to */
+    int ref_count;                      /* how often refered to */
     struct Stack_Chunk *reg_stack;      /* register stack */
 
     struct Stack_Chunk *user_stack;     /* Base of the scratch stack */
-    struct Stack_Chunk *control_stack;  /* Base of the flow control stack */
     PMC      *lex_pad;                  /* LexPad PMC */
     struct Parrot_Context *outer_ctx;   /* outer context, if a closure */
     UINTVAL warns;             /* Keeps track of what warnings
-                                 * have been activated */
+                                * have been activated */
     UINTVAL errors;            /* fatals that can be turned off */
     UINTVAL trace_flags;
     UINTVAL recursion_depth;    /* Sub call recursion depth */
@@ -205,21 +227,20 @@ typedef struct Parrot_Context {
      */
     PMC *current_cont;          /* the return continuation PMC */
     PMC *current_object;        /* current object if a method call */
-    STRING *current_method;     /* name of method */
     opcode_t *current_pc;       /* program counter of Sub invocation */
     PMC *current_namespace;     /* The namespace we're currently in */
     INTVAL current_HLL;         /* see also src/hll.c */
-    opcode_t *current_results;   /* ptr into code with get_results opcode */
+    opcode_t *current_results;  /* ptr into code with get_results opcode */
+    PMC *results_signature;     /* results signature pmc if it is non-const */
     /* deref the constants - we need it all the time */
     struct PackFile_Constant ** constants;
-    /* code->prederefed.code - code->base.data in opcodes 
+    /* code->prederefed.code - code->base.data in opcodes
      * to simplify conversio between code ptrs in e.g. invoke
      */
     size_t pred_offset;
 } parrot_context_t;
 
-#define ALIGNED_CTX_SIZE ( ((sizeof(struct Parrot_Context) + NUMVAL_SIZE - 1) \
-        / NUMVAL_SIZE) * NUMVAL_SIZE )
+typedef parrot_context_t Parrot_Context;
 
 struct _Thread_data;    /* in thread.h */
 struct _Caches;         /* caches .h */
@@ -253,7 +274,7 @@ struct Interp_Context {
 #define CONTEXT(ctx) ((ctx).state)
 
 #define CHUNKED_CTX_MEM 0           /* no longer works, but will be reinstated
-                                       some day; see src/register.c for details.
+                                     * some day; see src/register.c for details.
                                     */
 
 typedef struct _context_mem {
@@ -281,7 +302,7 @@ struct parrot_interp_t {
                                                * arena */
 
     PMC *class_hash;                          /* Hash of classes */
-    VTABLE **vtables;                         /* array of vtable ptrs */ 
+    VTABLE **vtables;                         /* array of vtable ptrs */
     int    n_vtable_max;                      /* highest used type */
     int    n_vtable_alloced;                  /* alloced vtable space */
 
@@ -300,11 +321,13 @@ struct parrot_interp_t {
     int         n_libs;                       /* count of libs below */
     op_lib_t  **all_op_libs;                  /* all loaded opcode libraries */
 
-    Interp_flags flags;                       /* Various interpreter flags that */
+    INTVAL flags;                             /* Various interpreter flags that
+                                               * signal that runops should do
+                                               * something */
 
     UINTVAL debug_flags;                      /* debug settings */
 
-    Run_Cores run_core;                       /* type of core to run the ops */
+    INTVAL run_core;                          /* type of core to run the ops */
 
     /* TODO profile per code segment or global */
     RunProfile *profile;                      /* The structure and array where we keep the
@@ -321,7 +344,9 @@ struct parrot_interp_t {
     const char* output_file;                  /* The file into which output is written */
 
     PDB_t *pdb;                               /* Debug system */
-    Interp * debugger;                        /* trace / debug interpreter */  
+    Interp * debugger;                        /* trace / debug interpreter */
+
+    struct Stack_Chunk *dynamic_env;          /* current dynamic environment */
 
     void *lo_var_ptr;                         /* Pointer to memory on runops system stack */
 
@@ -339,6 +364,8 @@ struct parrot_interp_t {
     /* 5:   PMC *Dyn_libs        Array of dynamically loaded ParrotLibrary  */
     /* 6:   PMC *Config_Hash             Hash of config settings  */
     /* 7:   PMC *Lib_Paths               LoL of search paths  */
+    /* 8:   PMC *PBC_Libs                Hash of load_bytecode cde */
+    /* 9:   PMC *Executable              String PMC with name from argv[0]. */
 
     PMC* DOD_registry;                        /* registered PMCs added to the root set */
 
@@ -355,7 +382,7 @@ struct parrot_interp_t {
     STRING **const_cstring_table;             /* CONST_STRING(x) items */
 
     struct QUEUE* task_queue;                 /* per interpreter queue */
-    struct _handler_node_t *exit_handler_list;   /* exit.c */ 
+    struct _handler_node_t *exit_handler_list;   /* exit.c */
     int sleeping;                             /* used during sleep in events */
 
     struct parrot_exception_t *exceptions;    /* internal exception stack */
@@ -374,12 +401,14 @@ struct parrot_interp_t {
     opcode_t *current_args;                   /* ptr into code with set_args opcode */
     opcode_t *current_params;                 /* ptr into code with get_params opcode */
     opcode_t *current_returns;                /* ptr into code with get_returns opcode */
+    PMC *args_signature;                      /* args signature pmc if it is non-const */
+    PMC *params_signature;                    /* params signature pmc if it is non-const */
+    PMC *returns_signature;                   /* returns signature pmc if it is non-const */
     /* during a call sequencer the caller fills these objects
      * inside the invoke these get moved to the context structure
      */
     PMC *current_cont;                        /* the return continuation PMC */
     PMC *current_object;                      /* current object if a method call */
-    STRING *current_method;                   /* name of method */
 };
 
 /* typedef struct parrot_interp_t Interp;    done in parrot.h so that
@@ -399,18 +428,19 @@ typedef enum {
     IGLOBALS_COMPREG_HASH,
     IGLOBALS_ARGV_LIST,
     IGLOBALS_NCI_FUNCS,
-    IGLOBALS_INTERPRETER,       /* this interpreter as ParrotInterpreter PMC */   
-    IGLOBALS_DYN_LIBS,		/* Hash of ParrotLibrary loaded dynamic ext */
+    IGLOBALS_INTERPRETER,       /* this interpreter as ParrotInterpreter PMC */
+    IGLOBALS_DYN_LIBS,          /* Hash of ParrotLibrary loaded dynamic ext */
     IGLOBALS_CONFIG_HASH,
-    IGLOBALS_LIB_PATHS,		/* LoL of search paths and dynamic ext */
-    IGLOBALS_PBC_LIBS,          /* Hash of load_bytecode cde */    
+    IGLOBALS_LIB_PATHS,         /* LoL of search paths and dynamic ext */
+    IGLOBALS_PBC_LIBS,          /* Hash of load_bytecode cde */
+    IGLOBALS_EXECUTABLE,        /* How Parrot was invoked (from argv[0]) */
 
     IGLOBALS_SIZE
 } iglobals_enum;
 /* &end_gen */
 
-#define PCONST(i) PF_CONST(interpreter->code, (i))
-#define PNCONST   PF_NCONST(interpreter->code)
+#define PCONST(i) PF_CONST(interp->code, (i))
+#define PNCONST   PF_NCONST(interp->code)
 
 /* TODO - Make this a config option */
 #define PARROT_CATCH_NULL 1
@@ -422,6 +452,10 @@ PARROT_API extern PMC * PMCNULL;   /* Holds single Null PMC */
 #  define PMCNULL         ((PMC *)NULL)
 #  define PMC_IS_NULL(p)  ((p) == PMCNULL)
 #endif /* PARROT_CATCH_NULL */
+
+
+#define STRING_IS_NULL(s) ((s) == NULL)
+#define STRING_IS_EMPTY(s) !(int)(s)->strlen
 
 /* &gen_from_def(sysinfo.pasm) prefix(SYSINFO_) */
 
@@ -436,20 +470,21 @@ PARROT_API extern PMC * PMCNULL;   /* Holds single Null PMC */
 
 /* &end_gen */
 
-PARROT_API Interp *make_interpreter(Interp * parent, Interp_flags);
+PARROT_API Interp *make_interpreter(Interp * parent, INTVAL);
 PARROT_API void Parrot_init(Interp *);
 PARROT_API void Parrot_destroy(Interp *);
 
 PARROT_API void Parrot_set_config_hash_internal(const unsigned char*, unsigned int);
 
-PARROT_API INTVAL interpinfo(Interp *interpreter, INTVAL what);
-PARROT_API PMC*   interpinfo_p(Interp *interpreter, INTVAL what);
-PARROT_API STRING*interpinfo_s(Interp *interpreter, INTVAL what);
+PARROT_API INTVAL interpinfo(Interp *interp, INTVAL what);
+PARROT_API PMC*   interpinfo_p(Interp *interp, INTVAL what);
+PARROT_API STRING*interpinfo_s(Interp *interp, INTVAL what);
 
 void runops(Interp *, size_t offset);
 void runops_int(Interp *, size_t offset);
 PARROT_API parrot_context_t* Parrot_runops_fromc(Interp *, PMC *sub);
-PARROT_API void* Parrot_runops_fromc_args(Interp *, PMC *sub, const char *sig, ...);
+PARROT_API PMC* Parrot_runops_fromc_args(Interp *, PMC *sub, const char *sig, ...);
+PARROT_API void* Parrot_runops_fromc_args_event(Interp *, PMC *sub, const char *sig, ...);
 PARROT_API INTVAL Parrot_runops_fromc_args_reti(Interp *, PMC *, const char *, ...);
 PARROT_API FLOATVAL Parrot_runops_fromc_args_retf(Interp *, PMC *, const char *, ...);
 
@@ -473,46 +508,55 @@ PARROT_API INTVAL Parrot_run_meth_fromc_arglist_reti(Interp *, PMC *sub,
 PARROT_API FLOATVAL Parrot_run_meth_fromc_arglist_retf(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, va_list);
 
-PARROT_API void Parrot_callback_C(void *external_data, PMC *callback_info);
-PARROT_API void Parrot_callback_D(PMC *callback_info, void *external_data);
-PARROT_API PMC* Parrot_make_cb(Interp * interpreter, PMC* sub, PMC* user_data,
+PARROT_API void Parrot_callback_C(char *external_data, PMC *callback_info);
+PARROT_API void Parrot_callback_D(PMC *callback_info, char *external_data);
+PARROT_API PMC* Parrot_make_cb(Interp *interp, PMC* sub, PMC* user_data,
         STRING* cb_signature);
 
-typedef opcode_t *(*native_func_t)(Interp * interpreter,
+typedef opcode_t *(*native_func_t)(Interp *interp,
                                    opcode_t * cur_opcode,
                                    opcode_t * start_code);
 
 VAR_SCOPE native_func_t run_native;
 
-typedef PMC *(*Parrot_compiler_func_t)(Parrot_Interp interpreter,
+typedef PMC *(*Parrot_compiler_func_t)(Parrot_Interp interp,
                                        const char * program );
 
-PARROT_API void Parrot_compreg(Interp * interpreter, STRING *, Parrot_compiler_func_t func);
+PARROT_API void Parrot_compreg(Interp *interp, STRING *, Parrot_compiler_func_t func);
 
-PARROT_API PMC *Parrot_compile_string(Parrot_Interp interpreter, 
+PARROT_API PMC *Parrot_compile_string(Parrot_Interp interp,
         STRING *type, char *code, STRING **error);
-PARROT_API void *Parrot_compile_file(Parrot_Interp interpreter, 
+PARROT_API void *Parrot_compile_file(Parrot_Interp interp,
         char *fullname, String **error);
 
-INTVAL sysinfo_i(Interp * interpreter, INTVAL info_wanted);
-STRING *sysinfo_s(Interp * interpreter, INTVAL info_wanted);
-void exec_init_prederef(Interp *interpreter,
+INTVAL sysinfo_i(Interp *interp, INTVAL info_wanted);
+STRING *sysinfo_s(Interp *interp, INTVAL info_wanted);
+void exec_init_prederef(Interp *interp,
     void *prederef_arena);
 
-void prepare_for_run(Interp * interpreter);
-void *init_jit(Interp * interpreter, opcode_t *pc);
-PARROT_API void dynop_register(Interp * interpreter, PMC* op_lib);
-void do_prederef(void **pc_prederef, Interp * interpreter, int type);
+void prepare_for_run(Interp *interp);
+void *init_jit(Interp *interp, opcode_t *pc);
+PARROT_API void dynop_register(Interp *interp, PMC* op_lib);
+void do_prederef(void **pc_prederef, Interp *interp, int type);
 
-void clone_interpreter(PMC* dest, PMC* self);
+void clone_interpreter(Parrot_Interp dest, Parrot_Interp self, INTVAL flags);
 
-PARROT_API void enter_nci_method(Interp *, int type,
-		 void *func, const char *name, const char *proto);
+PARROT_API void enter_nci_method(Interp *, const int type,
+                void *func, const char *name, const char *proto);
+PARROT_API void register_nci_method(Interp *, const int type,
+                void *func, const char *name, const char *proto);
+PARROT_API void register_raw_nci_method_in_ns(Parrot_Interp interp, const int type,
+                void *func, const char *name);
+PARROT_API void Parrot_mark_method_writes(Interp *, int type, const char *name);
 
+void Parrot_setup_event_func_ptrs(Parrot_Interp interp);
 
 #else
 
-typedef void * *(*native_func_t)(Parrot_Interp interpreter,
+struct Parrot_Interp_;
+typedef struct Parrot_Interp_ *Parrot_Interp;
+
+typedef void * *(*native_func_t)(Parrot_Interp interp,
                                  void *cur_opcode,
                                  void *start_code);
 
@@ -521,10 +565,7 @@ typedef void * *(*native_func_t)(Parrot_Interp interpreter,
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

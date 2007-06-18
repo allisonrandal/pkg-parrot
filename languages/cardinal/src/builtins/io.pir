@@ -1,4 +1,4 @@
-## $Id: /local/languages/cardinal/src/builtins/io.pir 13986 2006-08-07T17:04:53.535012Z chip  $
+## $Id: /parrotcode/trunk/languages/cardinal/src/builtins/io.pir 3076 2007-04-10T07:04:11.810275Z paultcochrane  $
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ src/builtins/io.pir - Cardinal builtins for I/O
 
 =cut
 
-.HLL 'Ruby', ''
+.HLL 'Ruby', 'ruby_group'
 .namespace
 
 .sub 'puts'
@@ -56,5 +56,8 @@ src/builtins/io.pir - Cardinal builtins for I/O
 
 =cut
 
-
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

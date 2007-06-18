@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 5;
 
-## Testing classes for this file.
-die unless compile_cs("external.dll", <<'CSHARP');
+## Testing classes for this file.t';
+#
+die unless compile_cs( "external.dll", <<'CSHARP');
 namespace ExportsStuff
 {
     public class Monkey
@@ -22,12 +25,12 @@ namespace ExportsStuff
     }
 }
 CSHARP
-die unless compile_cs("t.dll", <<'CSHARP', '-r:external.dll');
+die unless compile_cs( "t.dll", <<'CSHARP', '-r:external.dll' );
 namespace Testing
 {
     using System;
     using ExportsStuff;
-    
+
     class Test
     {
         public Monkey create_monkey()
@@ -37,7 +40,7 @@ namespace Testing
             x.age = 8;
             return x;
         }
-    
+
         public int monkey_age_doubled(Monkey m)
         {
             return m.age * 2;
@@ -52,11 +55,11 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("external.dll", "external.pbc"), 'translate');
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "external.dll", "external.pbc" ), 'translate' );
+ok( translate( "t.dll",        "t.pbc" ),        'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'create_monkey');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'create_monkey' );
 .sub main
 	.local pmc obj
     load_bytecode "external.pbc"
@@ -72,7 +75,7 @@ PIR
 ok
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'monkey_age_doubled');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'monkey_age_doubled' );
 .sub main
 	.local pmc obj
     load_bytecode "external.pbc"
@@ -87,7 +90,7 @@ PIR
 16
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'monkey_talk');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'monkey_talk' );
 .sub main
 	.local pmc obj
     load_bytecode "external.pbc"
@@ -101,3 +104,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'monkey_talk');
 PIR
 Ook! Ook! Banana! Banana!
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

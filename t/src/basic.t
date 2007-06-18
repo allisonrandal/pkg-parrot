@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/src/basic.t 13784 2006-08-01T17:54:04.760248Z chip  $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /parrotcode/local/t/src/basic.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test;
 
-plan $^O =~ m/MSWin32/ ? (skip_all => 'broken on win32') : (tests => 3);
+plan $^O =~ m/MSWin32/ ? ( skip_all => 'broken on win32' ) : ( tests => 3 );
 
 =head1 NAME
 
@@ -16,7 +16,7 @@ t/src/basic.t - Basics
 
 =head1 SYNOPSIS
 
-	% prove t/src/basic.t
+    % prove t/src/basic.t
 
 =head1 DESCRIPTION
 
@@ -24,64 +24,69 @@ Tests C<printf> and C<internal_exception> functions.
 
 =cut
 
+c_output_is( <<'CODE', <<'OUTPUT', "hello world" );
+    #include <stdio.h>
 
-c_output_is(<<'CODE', <<'OUTPUT', "hello world");
-        #include <stdio.h>
-
-        int main(int argc, char* argv[]) {
-                printf("Hello, World!\n");
-              exit(0);
-        }
+    int
+    main(int argc, char* argv[])
+    {
+        printf("Hello, World!\n");
+        exit(0);
+    }
 CODE
 Hello, World!
 OUTPUT
 
-c_output_is(<<'CODE', <<'OUTPUT', "direct internal_exception call");
-        #include <parrot/parrot.h>
-        #include <parrot/exceptions.h>
+c_output_is( <<'CODE', <<'OUTPUT', "direct internal_exception call" );
+    #include <parrot/parrot.h>
+    #include <parrot/exceptions.h>
 
-        int main(int argc, char* argv[]) {
-                internal_exception(0, "Blow'd Up(tm)"); /* ' */
-        }
+    int
+    main(int argc, char* argv[])
+    {
+         internal_exception(0, "Blow'd Up(tm)"); /* ' */
+    }
 CODE
 Blow'd Up(tm)
 OUTPUT
+
 # vor $EDITOR '
 
-c_output_is(<<'CODE', <<'OUTPUT', "Parrot_run_native");
+c_output_is( <<'CODE', <<'OUTPUT', "Parrot_run_native" );
 
 #include <parrot/parrot.h>
 #include <parrot/embed.h>
 
 static opcode_t *the_test(Parrot_Interp, opcode_t *, opcode_t *);
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
-    Interp *     interpreter;
+    Interp *interp;
 
-    interpreter = Parrot_new(NULL);
-    if (!interpreter) {
+    interp = Parrot_new(NULL);
+    if (!interp) {
         return 1;
     }
 
-    PIO_eprintf(interpreter, "main\n");
+    PIO_eprintf(interp, "main\n");
 
-    Parrot_run_native(interpreter, the_test);
+    Parrot_run_native(interp, the_test);
 
-    PIO_eprintf(interpreter, "back\n");
-    Parrot_exit(interpreter, 0);
+    PIO_eprintf(interp, "back\n");
+    Parrot_exit(interp, 0);
     return 0;
 }
 
 static opcode_t*
-the_test(Interp *interpreter,
-	opcode_t *cur_op, opcode_t *start)
+the_test(Interp *interp,
+         opcode_t *cur_op, opcode_t *start)
 {
     UNUSED(cur_op);
     UNUSED(start);
 
     /* tests go here */
-    PIO_eprintf(interpreter, "ok\n");
+    PIO_eprintf(interp, "ok\n");
 
     return NULL; /* always return 0 or bad things may happen */
 }
@@ -92,4 +97,9 @@ ok
 back
 OUTPUT
 
-1;
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

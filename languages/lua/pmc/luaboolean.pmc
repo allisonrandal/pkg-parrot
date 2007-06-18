@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: /local/languages/lua/pmc/luaboolean.pmc 13236 2006-07-10T06:47:56.488120Z fperrad  $
+$Id: /parrotcode/trunk/languages/lua/pmc/luaboolean.pmc 3101 2007-04-10T17:18:00.975099Z fperrad  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ pmc/luaboolean.pmc - Lua Boolean
 
 =head1 DESCRIPTION
 
-C<LuaBoolean> extends C<LuaBase> to provide a class with the behaviour of
+C<LuaBoolean> extends C<LuaAny> to provide a class with the behaviour of
 the Lua C<Boolean> type.
 
 The value is stored as an Integer.
@@ -26,27 +26,25 @@ The value is stored as an Integer.
 static STRING *false_string;
 static STRING *true_string;
 static STRING *luaboolean_name;
-static INTVAL dynpmc_LuaBoolean;
+extern INTVAL dynpmc_LuaBoolean;
 
 pmclass LuaBoolean
-    extends LuaBase
+    extends LuaAny
     does scalar
     does boolean
     does integer
     dynpmc
     group lua_group
-    hll Lua maps Integer {
+    hll Lua
+    maps Boolean {
 
 /* Class initialization. Caches constant strings that will be used later.
 */
     void class_init() {
         if (pass) {
-            Parrot_LuaBase_super_init(INTERP, NULL);
             false_string = const_string(INTERP, "false");
             true_string = const_string(INTERP, "true");
             luaboolean_name = const_string(INTERP, "boolean");
-            dynpmc_LuaBoolean = pmc_type(INTERP,
-              string_from_const_cstring(INTERP, "LuaBoolean", 0));
         }
     }
 
@@ -87,6 +85,21 @@ Class method to construct an Boolean from the string representation C<rep>.
 
 /*
 
+=item C<void morph(INTVAL type)>
+
+Morphs the scalar to the specified type.
+
+=cut
+
+*/
+    void morph (INTVAL type) {
+        if (SELF->vtable->base_type == type)
+            return;
+        pmc_reuse(INTERP, SELF, type, 0);
+    }
+
+/*
+
 =item C<STRING* name()>
 
 Return the string "boolean".
@@ -96,6 +109,21 @@ Return the string "boolean".
 */
     STRING* name () {
         return luaboolean_name;
+    }
+
+/*
+
+=item C<PMC *clone()>
+
+Creates and returns a clone of the scalar.
+
+=cut
+
+*/
+    PMC* clone () {
+        PMC* dest = pmc_new(INTERP, SELF->vtable->base_type);
+        memcpy(&PMC_union(dest), &PMC_union(SELF), sizeof(UnionVal));
+        return dest;
     }
 
 /*
@@ -204,31 +232,9 @@ Used to unarchive the boolean.
 */
     INTVAL is_equal (PMC* value) {
 MMD_LuaBoolean: {
-            return (INTVAL)(PMC_int_val(SELF) ==
-                VTABLE_get_integer(INTERP, value));
+            return (INTVAL)(PMC_int_val(SELF) == PMC_int_val(value));
         }
 MMD_DEFAULT: {
-            return (INTVAL)0;
-        }
-    }
-
-/*
-
-=item C<INTVAL cmp (PMC *value)>
-
-=cut
-
-*/
-    INTVAL cmp (PMC* value) {
-MMD_LuaBoolean: {
-            real_exception(INTERP, NULL, ILL_INHERIT,
-                    "attempt to compare two boolean values");
-            return (INTVAL)0;
-        }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, ILL_INHERIT,
-                    "attempt to compare boolean with %s",
-                    string_to_cstring(INTERP, VTABLE_name(INTERP, value)));
             return (INTVAL)0;
         }
     }
@@ -248,7 +254,7 @@ MMD_DEFAULT: {
 */
     METHOD PMC* rawequal (PMC* value) {
         PMC *retval;
-       
+
         retval = pmc_new(INTERP, dynpmc_LuaBoolean);
         if (SELF->vtable->base_type == value->vtable->base_type
          && PMC_int_val(SELF) == PMC_int_val(value))
@@ -274,3 +280,10 @@ Klaas-Jan Stol.
 
 */
 
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

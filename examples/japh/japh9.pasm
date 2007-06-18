@@ -1,4 +1,4 @@
-# $Id: /local/examples/japh/japh9.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/examples/japh/japh9.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 # another one with an object
     newclass P0, "Japh"

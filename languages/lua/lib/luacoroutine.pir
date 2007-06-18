@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/lib/luacoroutine.pir 12840 2006-05-30T15:08:05.048089Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/lib/luacoroutine.pir 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -10,7 +10,8 @@ lib/luacoroutine.pir - Lua Coroutine Library
 The operations related to coroutines comprise a sub-library of the basic
 library and come inside the table C<coroutine>.
 
-See "Lua 5.1 Reference Manual", section 5.2 "Coroutine Manipulation".
+See "Lua 5.1 Reference Manual", section 5.2 "Coroutine Manipulation",
+L<http://www.lua.org/manual/5.1/manual.html#5.2>.
 
 =head2 Functions
 
@@ -18,49 +19,58 @@ See "Lua 5.1 Reference Manual", section 5.2 "Coroutine Manipulation".
 
 =cut
 
-.namespace [ "Lua" ]
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 
+.sub 'init_coroutine' :load :anon
 
-.sub init_coroutine :load :anon
-
-#    load_bytecode "languages/lua/lib/luaaux.pbc"
-#    load_bytecode "languages/lua/lib/luabasic.pbc"
+    load_bytecode 'languages/lua/lib/luabasic.pbc'
+    load_bytecode 'Parrot/Coroutine.pbc'
 
 #    print "init Lua Coroutine\n"
 
     .local pmc _lua__GLOBAL
-    _lua__GLOBAL = global "_G"
-    $P1 = new .LuaString
+    _lua__GLOBAL = global '_G'
+    new $P1, .LuaString
 
     .local pmc _coroutine
-    _coroutine = new .LuaTable
-    $P1 = "coroutine"
+    new _coroutine, .LuaTable
+    set $P1, 'coroutine'
     _lua__GLOBAL[$P1] = _coroutine
 
-    .const .Sub _coroutine_create = "_coroutine_create"
-    $P1 = "create"
+    lua_register($P1, _coroutine)
+
+    .const .Sub _coroutine_create = 'create'
+    _coroutine_create.'setfenv'(_lua__GLOBAL)
+    set $P1, 'create'
     _coroutine[$P1] = _coroutine_create
 
-    .const .Sub _coroutine_resume = "_coroutine_resume"
-    $P1 = "resume"
+    .const .Sub _coroutine_resume = 'resume'
+    _coroutine_resume.'setfenv'(_lua__GLOBAL)
+    set $P1, 'resume'
     _coroutine[$P1] = _coroutine_resume
 
-    .const .Sub _coroutine_running = "_coroutine_running"
-    $P1 = "running"
+    .const .Sub _coroutine_running = 'running'
+    _coroutine_running.'setfenv'(_lua__GLOBAL)
+    set $P1, 'running'
     _coroutine[$P1] = _coroutine_running
 
-    .const .Sub _coroutine_status = "_coroutine_status"
-    $P1 = "status"
+    .const .Sub _coroutine_status = 'status'
+    _coroutine_status.'setfenv'(_lua__GLOBAL)
+    set $P1, 'status'
     _coroutine[$P1] = _coroutine_status
 
-    .const .Sub _coroutine_wrap = "_coroutine_wrap"
-    $P1 = "wrap"
+    .const .Sub _coroutine_wrap = 'wrap'
+    _coroutine_wrap.'setfenv'(_lua__GLOBAL)
+    set $P1, 'wrap'
     _coroutine[$P1] = _coroutine_wrap
 
-    .const .Sub _coroutine_yield = "_coroutine_yield"
-    $P1 = "yield"
+    .const .Sub _coroutine_yield = 'yield'
+    _coroutine_yield.'setfenv'(_lua__GLOBAL)
+    set $P1, 'yield'
     _coroutine[$P1] = _coroutine_yield
+
+    new $P0, .ResizablePMCArray
+    global '_COROUTINE_STACK' = $P0
 
 .end
 
@@ -71,10 +81,14 @@ Returns this new coroutine, an object with type C<"thread">.
 
 =cut
 
-.sub _coroutine_create :anon :outer(init_coroutine)
+.sub 'create' :anon
     .param pmc f :optional
     .local pmc ret
-    checktype(f, "function")
+    lua_checktype(1, f, 'function')
+    $I0 = isa f, 'LuaClosure'
+    if $I0 goto L1
+    lua_argerror(1, 'Lua function expected')
+L1:
     ret = new .LuaThread, f
     .return (ret)
 .end
@@ -94,39 +108,68 @@ C<resume> returns B<false> plus the error message.
 
 =cut
 
-.sub _coroutine_resume :anon :outer(init_coroutine)
+.sub 'resume' :anon
     .param pmc co :optional
     .param pmc argv :slurpy
     .local pmc ret
     .local pmc status
+    lua_checktype(1, co, 'thread')
+    ($I0, ret :slurpy) = auxresume(co, argv :flat)
     new status, .LuaBoolean
-    checktype(co, "thread")
-    push_eh _handler
-    (ret :slurpy) = co(argv :flat)
-    status = 1
+    set status, $I0
+    unless $I0 goto L1
     .return (status, ret :flat)
-_handler:
-    .local pmc e
-    .local string s
+L1:
     .local pmc msg
-    .get_results (e, s)
-    status = 0    
+    $S0 = ret[0]
     new msg, .LuaString
-    msg = s
+    set msg, $S0
     .return (status, msg)
 .end
 
+.sub 'auxresume' :anon
+    .param pmc co :optional
+    .param pmc argv :slurpy
+    .local pmc ret
+    .local pmc co_stack
+    co_stack = global '_COROUTINE_STACK'
+    push co_stack, co
+    $P0 = getattribute co, 'co'
+    $P1 = getattribute $P0, 'state'
+    if $P1 goto L1
+    $P0 = pop co_stack
+    .return (0, "cannot resume dead coroutine")
+L1:
+    push_eh _handler
+    (ret :slurpy) = $P0.'resume'(argv :flat)
+    .return (1, ret :flat)
+_handler:
+    .local pmc e
+    .local string s
+    .get_results (e, s)
+    $P0 = pop co_stack
+    .return (0, s)
+.end
 
 =item C<coroutine.running ()>
 
 Returns the running coroutine, or B<nil> when called by the main thread.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
-.sub _coroutine_running :anon :outer(init_coroutine)
-    not_implemented()
+.sub 'running' :anon
+    .local pmc co_stack
+    .local pmc ret
+    co_stack = global '_COROUTINE_STACK'
+    $I0 = elements co_stack
+    if $I0 goto L1
+    new ret, .LuaNil
+    goto L2
+L1:
+    ret = pop co_stack
+    push co_stack, ret
+L2:
+    .return (ret)
 .end
 
 
@@ -136,19 +179,26 @@ Returns the status of coroutine C<co>, as a string: C<"running">, if the
 coroutine is running (that is, it called C<status>); C<"suspended">, if the
 coroutine is suspended in a call to yield, or if it has not started running
 yet; C<"normal"> if the coroutine is active but not running (that is, it has
-resumed another coroutine); and C<"dead"> if the coroutine has finished its 
+resumed another coroutine); and C<"dead"> if the coroutine has finished its
 body function, or if it has stopped with an error.
 
-DUMMY IMPLEMENTATION.
+STILL INCOMPLETE.
 
 =cut
 
-.sub _coroutine_status :anon :outer(init_coroutine)
+.sub 'status' :anon
     .param pmc co :optional
     .local pmc ret
-    checktype(co, "thread")
-    new ret, .LuaString 
-    ret = "suspended"
+    lua_checktype(1, co, 'thread')
+    new ret, .LuaString
+    $P0 = getattribute co, 'co'
+    $P1 = getattribute $P0, 'state'
+    if $P1 goto L1
+    set ret, 'dead'
+    goto L2
+L1:
+    set ret, 'suspended'
+L2:
     .return (ret)
 .end
 
@@ -160,14 +210,31 @@ arguments passed to the function behave as the extra arguments to C<resume>.
 Returns the same values returned by C<resume>, except the first boolean. In
 case of error, propagates the error.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
-.sub _coroutine_wrap :anon :outer(init_coroutine)
+.sub 'wrap' :anon :lex
     .param pmc f :optional
-    checktype(f, "function")
-    not_implemented()
+    .param pmc argv :slurpy
+    .local pmc ret
+    .local pmc co
+    .lex 'upvar_co', co
+    co = create(f)
+    .const .Sub auxwrap = 'auxwrap'
+    ret = newclosure auxwrap
+    .return (ret)
+.end
+
+.sub 'auxwrap' :anon :lex :outer(wrap)
+    .param pmc argv :slurpy
+    .local pmc co
+    .local pmc ret
+    co = find_lex 'upvar_co'
+    ($I0, ret :slurpy) = auxresume(co, argv :flat)
+    unless $I0 goto L1
+    .return (ret :flat)
+L1:
+    $S0 = ret[0]
+    lua_error($S0)
 .end
 
 =item C<coroutine.yield ([val1, ..., valn])>
@@ -178,9 +245,16 @@ Any arguments to C<yield> are passed as extra results to C<resume>.
 
 =cut
 
-.sub _coroutine_yield :anon :outer(init_coroutine)
+.sub 'yield' :anon
     .param pmc argv :slurpy
-    .yield(argv)
+    .local pmc ret
+    .local pmc co
+    .local pmc co_stack
+    co_stack = global '_COROUTINE_STACK'
+    co = pop co_stack
+    $P0 = getattribute co, 'co'
+    (ret :slurpy) = $P0.'yield'(argv :flat)
+    .return (ret :flat)
 .end
 
 =back
@@ -189,5 +263,13 @@ Any arguments to C<yield> are passed as extra results to C<resume>.
 
 Francois Perrad.
 
+Bob Rogers.
+
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

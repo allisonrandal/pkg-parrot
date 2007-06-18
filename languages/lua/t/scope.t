@@ -1,10 +1,10 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/scope.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/scope.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
 
 =head1 NAME
 
-t/scope.t - Lua scope 
+t/scope.t - Lua scope
 
 =head1 SYNOPSIS
 
@@ -12,13 +12,15 @@ t/scope.t - Lua scope
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.6 "Visibility Rules".
+See "Lua 5.1 Reference Manual", section 2.6 "Visibility Rules",
+L<http://www.lua.org/manual/5.1/manual.html#2.6>.
 
-See "Programming in Lua", section 4.2 "Local Variables and Blocks". 
+See "Programming in Lua", section 4.2 "Local Variables and Blocks".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -103,4 +105,11 @@ OUT
 #print(x1, x2)
 #CODE
 #OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

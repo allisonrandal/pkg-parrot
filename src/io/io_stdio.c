@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/io/io_stdio.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/io/io_stdio.c 1551 2007-01-25T19:52:45.793441Z chromatic  $
 
 =head1 NAME
 
@@ -45,22 +45,22 @@ ParrotIOLayer pio_stdio_layer = {
  */
 static const char * flags_to_stdio(INTVAL flags);
 
-static INTVAL    PIO_stdio_init(theINTERP, ParrotIOLayer *layer);
-static ParrotIO *PIO_stdio_open(theINTERP, ParrotIOLayer *layer,
+static INTVAL    PIO_stdio_init(Interp *interp, ParrotIOLayer *layer);
+static ParrotIO *PIO_stdio_open(Interp *interp, ParrotIOLayer *layer,
                                 const char *spath, INTVAL flags);
-static ParrotIO *PIO_stdio_fdopen(theINTERP, ParrotIOLayer *layer,
+static ParrotIO *PIO_stdio_fdopen(Interp *interp, ParrotIOLayer *layer,
                                   PIOHANDLE fd, INTVAL flags);
-static INTVAL PIO_stdio_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io);
-static INTVAL PIO_stdio_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io);
-static size_t    PIO_stdio_read(theINTERP, ParrotIOLayer *layer,
+static INTVAL PIO_stdio_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io);
+static INTVAL PIO_stdio_flush(Interp *interp, ParrotIOLayer *layer, ParrotIO *io);
+static size_t    PIO_stdio_read(Interp *interp, ParrotIOLayer *layer,
                                 ParrotIO *io, STRING **);
-static size_t    PIO_stdio_write(theINTERP, ParrotIOLayer *layer,
+static size_t    PIO_stdio_write(Interp *interp, ParrotIOLayer *layer,
                                  ParrotIO *io, STRING *s);
-static size_t    PIO_stdio_peek(theINTERP, ParrotIOLayer *layer,
+static size_t    PIO_stdio_peek(Interp *interp, ParrotIOLayer *layer,
                                 ParrotIO *io, STRING **);
-static PIOOFF_T  PIO_stdio_seek(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+static PIOOFF_T  PIO_stdio_seek(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
                                 PIOOFF_T offset, INTVAL whence);
-static PIOOFF_T  PIO_stdio_tell(theINTERP, ParrotIOLayer *layer, ParrotIO *io);
+static PIOOFF_T  PIO_stdio_tell(Interp *interp, ParrotIOLayer *layer, ParrotIO *io);
 static INTVAL    PIO_stdio_isatty(PIOHANDLE fd);
 
 
@@ -106,7 +106,7 @@ flags_to_stdio(INTVAL flags)
 /*
 
 =item C<static INTVAL
-PIO_stdio_init(theINTERP, ParrotIOLayer *layer)>
+PIO_stdio_init(Interp *interp, ParrotIOLayer *layer)>
 
 Setup standard streams, etc.
 
@@ -115,23 +115,23 @@ Setup standard streams, etc.
 */
 
 static INTVAL
-PIO_stdio_init(theINTERP, ParrotIOLayer *layer)
+PIO_stdio_init(Interp *interp, ParrotIOLayer *layer)
 {
 #ifdef PIO_OS_STDIO
     /* Only set standard handles if stdio is the OS IO */
-    PIO_STDIN(interpreter)
-        = new_io_pmc(interpreter,
-                     PIO_stdio_fdopen(interpreter, layer, stdin, PIO_F_READ));
+    PIO_STDIN(interp)
+        = new_io_pmc(interp,
+                     PIO_stdio_fdopen(interp, layer, stdin, PIO_F_READ));
 
-    PIO_STDOUT(interpreter)
-        = new_io_pmc(interpreter,
-                     PIO_stdio_fdopen(interpreter, layer, stdout, PIO_F_WRITE));
+    PIO_STDOUT(interp)
+        = new_io_pmc(interp,
+                     PIO_stdio_fdopen(interp, layer, stdout, PIO_F_WRITE));
 
-    PIO_STDERR(interpreter)
-        = new_io_pmc(interpreter,
-                     PIO_stdio_fdopen(interpreter, layer, stderr, PIO_F_WRITE));
+    PIO_STDERR(interp)
+        = new_io_pmc(interp,
+                     PIO_stdio_fdopen(interp, layer, stderr, PIO_F_WRITE));
 #else  /* PIO_OS_STDIO */
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 #endif /* PIO_OS_STDIO */
     return 0;
@@ -140,7 +140,7 @@ PIO_stdio_init(theINTERP, ParrotIOLayer *layer)
 /*
 
 =item C<static ParrotIO *
-PIO_stdio_open(theINTERP, ParrotIOLayer *layer,
+PIO_stdio_open(Interp *interp, ParrotIOLayer *layer,
               const char *spath, INTVAL flags)>
 
 Open modes (read, write, append, etc.) are done in pseudo-Perl style
@@ -151,7 +151,7 @@ using C<< < >>, C<< > >>, etc.
 */
 
 static ParrotIO *
-PIO_stdio_open(theINTERP, ParrotIOLayer *layer,
+PIO_stdio_open(Interp *interp, ParrotIOLayer *layer,
               const char *spath, INTVAL flags)
 {
     ParrotIO *io;
@@ -181,7 +181,7 @@ PIO_stdio_open(theINTERP, ParrotIOLayer *layer,
     if (fptr != NULL) {
         if (PIO_stdio_isatty((PIOHANDLE)fptr))
             flags |= PIO_F_CONSOLE;
-        io = PIO_new(interpreter, type, flags, 0);
+        io = PIO_new(interp, type, flags, 0);
         io->fd = (PIOHANDLE)fptr;
         return io;
     }
@@ -191,7 +191,7 @@ PIO_stdio_open(theINTERP, ParrotIOLayer *layer,
 /*
 
 =item C<static ParrotIO *
-PIO_stdio_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fptr, INTVAL flags)>
+PIO_stdio_fdopen(Interp *interp, ParrotIOLayer *layer, PIOHANDLE fptr, INTVAL flags)>
 
 Desc.
 
@@ -200,7 +200,7 @@ Desc.
 */
 
 static ParrotIO *
-PIO_stdio_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fptr, INTVAL flags)
+PIO_stdio_fdopen(Interp *interp, ParrotIOLayer *layer, PIOHANDLE fptr, INTVAL flags)
 {
     ParrotIO *io;
     INTVAL mode;
@@ -214,7 +214,7 @@ PIO_stdio_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fptr, INTVAL flags)
     /* fdopened files are always shared */
     flags |= PIO_F_SHARED;
 
-    io = PIO_new(interpreter, PIO_F_FILE, flags, mode);
+    io = PIO_new(interp, PIO_F_FILE, flags, mode);
     io->fd = fptr;
     return io;
 }
@@ -222,7 +222,7 @@ PIO_stdio_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fptr, INTVAL flags)
 /*
 
 =item C<static INTVAL
-PIO_stdio_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_stdio_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Desc.
 
@@ -231,11 +231,11 @@ Desc.
 */
 
 static INTVAL
-PIO_stdio_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_stdio_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
     FILE *fptr = (FILE*)io->fd;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
     if (fptr != NULL)
@@ -265,14 +265,14 @@ PIO_stdio_isatty(PIOHANDLE fptr)
 }
 
 static size_t
-PIO_stdio_peek(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING **buf)
+PIO_stdio_peek(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING **buf)
 {
     FILE *fptr = (FILE *)io->fd;
     size_t bytes;
     STRING *s;
 
     UNUSED(layer);
-    s = PIO_make_io_string(interpreter, buf, 1);
+    s = PIO_make_io_string(interp, buf, 1);
 
     /* read the next byte into the buffer */
     bytes = fread(s->strstart, 1, 1, fptr);
@@ -312,7 +312,7 @@ PIO_stdio_getblksize(PIOHANDLE fptr)
 /*
 
 =item C<static INTVAL
-PIO_stdio_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_stdio_flush(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Desc.
 
@@ -321,9 +321,9 @@ Desc.
 */
 
 static INTVAL
-PIO_stdio_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_stdio_flush(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
     return fflush((FILE*)io->fd);
@@ -332,7 +332,7 @@ PIO_stdio_flush(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
 /*
 
 =item C<static size_t
-PIO_stdio_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_stdio_read(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
               STRING **)>
 
 Desc.
@@ -342,7 +342,7 @@ Desc.
 */
 
 static size_t
-PIO_stdio_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_stdio_read(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
               STRING ** buf)
 {
     size_t bytes;
@@ -353,7 +353,7 @@ PIO_stdio_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
 
     UNUSED(layer);
 
-    s = PIO_make_io_string(interpreter, buf, 2048);
+    s = PIO_make_io_string(interp, buf, 2048);
     len = s->bufused;
     buffer = s->strstart;
 
@@ -372,7 +372,7 @@ PIO_stdio_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
 /*
 
 =item C<static size_t
-PIO_stdio_write(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_stdio_write(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
                STRING *s)>
 
 Desc.
@@ -382,20 +382,20 @@ Desc.
 */
 
 static size_t
-PIO_stdio_write(theINTERP, ParrotIOLayer *layer, ParrotIO *io, STRING *s)
+PIO_stdio_write(Interp *interp, ParrotIOLayer *layer, ParrotIO *io, STRING *s)
 {
     void *buffer = s->strstart;
     size_t len = s->bufused;
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
-    return(fwrite(buffer, 1, len, (FILE*)io->fd));
+    return (fwrite(buffer, 1, len, (FILE*)io->fd));
 }
 
 /*
 
 =item C<static PIOOFF_T
-PIO_stdio_seek(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_stdio_seek(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
               PIOOFF_T offset, INTVAL whence)>
 
 Hard seek.
@@ -405,12 +405,12 @@ Hard seek.
 */
 
 static PIOOFF_T
-PIO_stdio_seek(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_stdio_seek(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
               PIOOFF_T offset, INTVAL whence)
 {
     PIOOFF_T pos;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
     errno = 0;
@@ -428,7 +428,7 @@ PIO_stdio_seek(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
 /*
 
 =item C<static PIOOFF_T
-PIO_stdio_tell(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_stdio_tell(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Desc.
 
@@ -437,12 +437,12 @@ Desc.
 */
 
 static PIOOFF_T
-PIO_stdio_tell(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_stdio_tell(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(layer);
 
-    return(ftell((FILE*)io->fd));
+    return (ftell((FILE*)io->fd));
 }
 
 const ParrotIOLayerAPI pio_stdio_layer_api = {
@@ -501,12 +501,10 @@ Adapted from io_unix.c by Josh Wilmes (josh@hitchhiker.org).
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

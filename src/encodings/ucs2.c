@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/encodings/ucs2.c 13029 2006-06-26T19:26:45.696181Z bernhard  $
+$Id: /parrotcode/local/src/encodings/ucs2.c 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ UCS-2 encoding with the help of the ICU library.
 #include "ucs2.h"
 
 #if PARROT_HAS_ICU
-#include <unicode/ustring.h>
+#  include <unicode/ustring.h>
 #endif
 
 #define UNIMPL internal_exception(UNIMPLEMENTED, "unimpl ucs2")
@@ -34,77 +34,78 @@ static void iter_init(Interp *, String *src, String_iter *iter);
 
 
 static STRING *
-to_encoding(Interp *interpreter, STRING *src, STRING *dest)
+to_encoding(Interp *interp, STRING *src, STRING *dest)
 {
-    STRING *result = Parrot_utf16_encoding_ptr->to_encoding(interpreter, src, dest);
+    STRING *result = Parrot_utf16_encoding_ptr->to_encoding(interp,
+                                                            src, dest);
     /*
      * conversion to utf16 downgrads to ucs-2 if possible - check result
      */
     if (result->encoding == Parrot_utf16_encoding_ptr) {
-        real_exception(interpreter, NULL, E_UnicodeError,
+        real_exception(interp, NULL, E_UnicodeError,
             "can't convert string with surrogates to ucs2");
     }
     return result;
 }
 
 static UINTVAL
-get_codepoint(Interp *interpreter, const STRING *src, UINTVAL offset)
+get_codepoint(Interp *interp, const STRING *src, UINTVAL offset)
 {
 #if PARROT_HAS_ICU
     UChar *s = (UChar*) src->strstart;
     return s[offset];
 #else
-    real_exception(interpreter, NULL, E_LibraryNotLoadedError,
+    real_exception(interp, NULL, E_LibraryNotLoadedError,
             "no ICU lib loaded");
     return 0;
 #endif
 }
 
 static void
-set_codepoint(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL codepoint)
+set_codepoint(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL codepoint)
 {
 #if PARROT_HAS_ICU
     UChar *s = (UChar*) src->strstart;
     s[offset] = codepoint;
 #else
-    real_exception(interpreter, NULL, E_LibraryNotLoadedError,
+    real_exception(interp, NULL, E_LibraryNotLoadedError,
             "no ICU lib loaded");
 #endif
 }
 
 static UINTVAL
-get_byte(Interp *interpreter, const STRING *src, UINTVAL offset)
+get_byte(Interp *interp, const STRING *src, UINTVAL offset)
 {
     UNIMPL;
     return 0;
 }
 
 static void
-set_byte(Interp *interpreter, const STRING *src,
-	UINTVAL offset, UINTVAL byte)
+set_byte(Interp *interp, const STRING *src,
+        UINTVAL offset, UINTVAL byte)
 {
     UNIMPL;
 }
 
 static STRING *
-get_codepoints(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count)
+get_codepoints(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL count)
 {
-    STRING *return_string = Parrot_make_COW_reference(interpreter, src);
+    STRING *return_string = Parrot_make_COW_reference(interp, src);
 #if PARROT_HAS_ICU
-    return_string->strstart = (char*)src->strstart + offset * sizeof(UChar);
-    return_string->bufused = count * sizeof(UChar);
+    return_string->strstart = (char*)src->strstart + offset * sizeof (UChar);
+    return_string->bufused = count * sizeof (UChar);
 #else
     {
         String_iter iter;
         UINTVAL start;
 
-        iter_init(interpreter, src, &iter);
-        iter.set_position(interpreter, &iter, offset);
+        iter_init(interp, src, &iter);
+        iter.set_position(interp, &iter, offset);
         start = iter.bytepos;
         return_string->strstart = (char *)return_string->strstart + start;
-        iter.set_position(interpreter, &iter, offset + count);
+        iter.set_position(interp, &iter, offset + count);
         return_string->bufused = iter.bytepos - start;
     }
 #endif
@@ -114,8 +115,8 @@ get_codepoints(Interp *interpreter, STRING *src,
 }
 
 static STRING *
-get_bytes(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count)
+get_bytes(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL count)
 {
     UNIMPL;
     return NULL;
@@ -123,8 +124,8 @@ get_bytes(Interp *interpreter, STRING *src,
 
 
 static STRING *
-get_codepoints_inplace(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count, STRING *dest_string)
+get_codepoints_inplace(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL count, STRING *dest_string)
 {
 
     UNIMPL;
@@ -132,23 +133,23 @@ get_codepoints_inplace(Interp *interpreter, STRING *src,
 }
 
 static STRING *
-get_bytes_inplace(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count, STRING *return_string)
+get_bytes_inplace(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL count, STRING *return_string)
 {
     UNIMPL;
     return NULL;
 }
 
 static void
-set_codepoints(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count, STRING *new_codepoints)
+set_codepoints(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL count, STRING *new_codepoints)
 {
     UNIMPL;
 }
 
 static void
-set_bytes(Interp *interpreter, STRING *src,
-	UINTVAL offset, UINTVAL count, STRING *new_bytes)
+set_bytes(Interp *interp, STRING *src,
+        UINTVAL offset, UINTVAL count, STRING *new_bytes)
 {
     UNIMPL;
 }
@@ -156,67 +157,67 @@ set_bytes(Interp *interpreter, STRING *src,
 /* Unconditionally makes the string be in this encoding, if that's
    valid */
 static void
-become_encoding(Interp *interpreter, STRING *src)
+become_encoding(Interp *interp, STRING *src)
 {
     UNIMPL;
 }
 
 
 static UINTVAL
-codepoints(Interp *interpreter, STRING *src)
+codepoints(Interp *interp, STRING *src)
 {
 #if PARROT_HAS_ICU
-    return src->bufused / sizeof(UChar);
+    return src->bufused / sizeof (UChar);
 #else
-    real_exception(interpreter, NULL, E_LibraryNotLoadedError,
+    real_exception(interp, NULL, E_LibraryNotLoadedError,
             "no ICU lib loaded");
     return 0;
 #endif
 }
 
 static UINTVAL
-bytes(Interp *interpreter, STRING *src)
+bytes(Interp *interp, STRING *src)
 {
     return src->bufused;
 }
 
 #if PARROT_HAS_ICU
 static UINTVAL
-ucs2_decode_and_advance(Interp *interpreter, String_iter *i)
+ucs2_decode_and_advance(Interp *interp, String_iter *i)
 {
     UChar *s = (UChar*) i->str->strstart, c;
     size_t pos;
-    pos = i->bytepos / sizeof(UChar);
+    pos = i->bytepos / sizeof (UChar);
     /* TODO either make sure that we don't go past end or use SAFE
      *      iter versions
      */
     c = s[pos++];
     i->charpos++;
-    i->bytepos = pos * sizeof(UChar);
+    i->bytepos = pos * sizeof (UChar);
     return c;
 }
 
 static void
-ucs2_encode_and_advance(Interp *interpreter, String_iter *i, UINTVAL c)
+ucs2_encode_and_advance(Interp *interp, String_iter *i, UINTVAL c)
 {
     UChar *s = (UChar*) i->str->strstart;
     UINTVAL pos;
-    pos = i->bytepos / sizeof(UChar);
+    pos = i->bytepos / sizeof (UChar);
     s[pos++] = (UChar)c;
     i->charpos++;
-    i->bytepos = pos * sizeof(UChar);
+    i->bytepos = pos * sizeof (UChar);
 }
 
 static void
-ucs2_set_position(Interp *interpreter, String_iter *i, UINTVAL n)
+ucs2_set_position(Interp *interp, String_iter *i, UINTVAL n)
 {
     i->charpos = n;
-    i->bytepos = n * sizeof(UChar);
+    i->bytepos = n * sizeof (UChar);
 }
 
 #endif
 static void
-iter_init(Interp *interpreter, String *src, String_iter *iter)
+iter_init(Interp *interp, String *src, String_iter *iter)
 {
     iter->str = src;
     iter->bytepos = iter->charpos = 0;
@@ -225,37 +226,37 @@ iter_init(Interp *interpreter, String *src, String_iter *iter)
     iter->set_and_advance = ucs2_encode_and_advance;
     iter->set_position =    ucs2_set_position;
 #else
-    real_exception(interpreter, NULL, E_LibraryNotLoadedError,
+    real_exception(interp, NULL, E_LibraryNotLoadedError,
             "no ICU lib loaded");
 #endif
 }
 
 ENCODING *
-Parrot_encoding_ucs2_init(Interp *interpreter)
+Parrot_encoding_ucs2_init(Interp *interp)
 {
-    ENCODING *return_encoding = Parrot_new_encoding(interpreter);
+    ENCODING *return_encoding = Parrot_new_encoding(interp);
 
     static const ENCODING base_encoding = {
-	"ucs2",
-	2, /* Max bytes per codepoint 0 .. 0x10ffff */
-	to_encoding,
-	get_codepoint,
-	set_codepoint,
-	get_byte,
-	set_byte,
-	get_codepoints,
-	get_codepoints_inplace,
-	get_bytes,
-	get_bytes_inplace,
-	set_codepoints,
-	set_bytes,
-	become_encoding,
-	codepoints,
-	bytes,
+        "ucs2",
+        2, /* Max bytes per codepoint 0 .. 0x10ffff */
+        to_encoding,
+        get_codepoint,
+        set_codepoint,
+        get_byte,
+        set_byte,
+        get_codepoints,
+        get_codepoints_inplace,
+        get_bytes,
+        get_bytes_inplace,
+        set_codepoints,
+        set_bytes,
+        become_encoding,
+        codepoints,
+        bytes,
         iter_init
     };
-    memcpy(return_encoding, &base_encoding, sizeof(ENCODING));
-    Parrot_register_encoding(interpreter, "ucs2", return_encoding);
+    memcpy(return_encoding, &base_encoding, sizeof (ENCODING));
+    Parrot_register_encoding(interp, "ucs2", return_encoding);
     return return_encoding;
 }
 
@@ -275,12 +276,10 @@ F<docs/string.pod>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

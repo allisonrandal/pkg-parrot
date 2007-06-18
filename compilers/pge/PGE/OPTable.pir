@@ -1,4 +1,4 @@
-# $Id: /local/compilers/pge/PGE/OPTable.pir 13594 2006-07-25T22:35:08.338062Z chip  $
+# $Id: /parrotcode/trunk/compilers/pge/PGE/OPTable.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 =head1 Title
 
@@ -72,7 +72,7 @@ Adds (or replaces) a syntactic category's defaults.
 .end
 
 
-.sub "__init" :method
+.sub "init" :vtable :method
     .local pmc tokentable, keytable, klentable
     tokentable = self
     keytable = new .Hash
@@ -167,7 +167,8 @@ Adds (or replaces) a syntactic category's defaults.
     if $I0 goto with_expectclose
     $I0 = 0x0202
   with_expectclose:
-    self.'newtok'($S0, 'equiv' => name, 'expect'=>$I0)
+    $I1 = token['nows']
+    self.'newtok'($S0, 'equiv' => name, 'expect'=>$I0, 'nows'=>$I1)
   with_close:
 
   add_key:
@@ -274,8 +275,8 @@ Adds (or replaces) a syntactic category's defaults.
     termstack = new .ResizablePMCArray
 
     newfrom = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = newfrom(mob, 0)
-    pos = mfrom
+    $P0 = getclass 'PGE::Match'
+    (mob, pos, target, mfrom, mpos) = $P0.'new'(mob, adverbs :flat :named)
     lastpos = length target
     circumnest = 0
     expect = PGE_OPTABLE_EXPECT_START
@@ -679,3 +680,9 @@ Deprecated.  Use C<newtok>.
 =back
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,9 +1,10 @@
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/Parrot/Test/WMLScript.pm 13986 2006-08-07T17:04:53.535012Z chip  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/Parrot/Test/WMLScript.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 package Parrot::Test::WMLScript;
 
 use strict;
+use warnings;
 
 use Data::Dumper;
 use File::Basename;
@@ -45,14 +46,14 @@ foreach my $func ( keys %language_test_map ) {
 
         my $count = $self->{builder}->current_test + 1;
 
-        my $cflags = $options{cflags} || q{};
+        my $cflags   = $options{cflags}   || q{};
         my $function = $options{function} || 'main';
-        my $params = $options{params} || q{}; 
+        my $params   = $options{params}   || q{};
 
         # flatten filenames (don't use directories)
-        my $lang_fn = Parrot::Test::per_test( '.wmls', $count );
-        my $bin_fn = Parrot::Test::per_test( '.wmlsc', $count );
-        my $out_fn = Parrot::Test::per_test( '.out', $count );
+        my $lang_fn = Parrot::Test::per_test( '.wmls',  $count );
+        my $bin_fn  = Parrot::Test::per_test( '.wmlsc', $count );
+        my $out_fn  = Parrot::Test::per_test( '.out',   $count );
 
         # This does not create byte code, but WMLScript code
         Parrot::Test::write_code_to_file( $code, $lang_fn );
@@ -65,9 +66,10 @@ foreach my $func ( keys %language_test_map ) {
         );
 
         my @test_prog = (
-#            "wmlsc $cflags languages/${lang_fn}",
-#            "$self->{parrot} languages/WMLScript/src/wmls2pir.pir languages/${bin_fn}",
-            "$self->{parrot} languages/WMLScript/src/wmlsi.pir languages/${bin_fn} $function $params",
+
+            #            "wmlsc $cflags languages/${lang_fn}",
+            #            "$self->{parrot} languages/WMLScript/wmls2pir.pir languages/${bin_fn}",
+            "$self->{parrot} languages/WMLScript/wmlsi.pir languages/${bin_fn} $function $params",
         );
 
         # STDERR is written into same output file
@@ -81,9 +83,8 @@ foreach my $func ( keys %language_test_map ) {
         my $builder_func = $language_test_map{$func};
 
         # That's the reason for:   no strict 'refs';
-        my $pass = $self->{builder}
-            ->$builder_func( Parrot::Test::slurp_file($out_fn),
-            $output, $desc );
+        my $pass =
+            $self->{builder}->$builder_func( Parrot::Test::slurp_file($out_fn), $output, $desc );
         unless ($pass) {
             my $diag = q{};
             my $test_prog = join ' && ', @test_prog;
@@ -114,3 +115,11 @@ Francois Perrad
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
+

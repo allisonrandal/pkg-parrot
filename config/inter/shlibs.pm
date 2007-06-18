@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/inter/shlibs.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/config/inter/shlibs.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ on which compiler is in use.  Thus it should come after the gccversion test.
 package inter::shlibs;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -29,20 +30,26 @@ $description = 'Determining flags for building shared libraries';
 
 @args = qw(ask verbose cc_shared);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $cc_shared = $conf->options->get('cc_shared');
-    $cc_shared = integrate($conf->data->get('cc_shared'), $cc_shared);
-    $cc_shared =
-        prompt("\nWhat flags instruct your compiler to compile code suitable for use in a shared library?",
-        $cc_shared)
-        if $conf->options->get('ask');
-    $conf->data->set(cc_shared => $cc_shared);
-    $self->set_result(($cc_shared =~ m/^ ?$/) ? 'done' : $cc_shared);
+    $cc_shared = integrate( $conf->data->get('cc_shared'), $cc_shared );
+    $cc_shared = prompt(
+        "\nWhat flags instruct your compiler to compile code suitable for use in a shared library?",
+        $cc_shared
+    ) if $conf->options->get('ask');
+    $conf->data->set( cc_shared => $cc_shared );
+    $self->set_result( ( $cc_shared =~ m/^ ?$/ ) ? 'done' : $cc_shared );
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

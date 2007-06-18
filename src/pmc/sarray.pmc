@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/pmc/sarray.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/pmc/sarray.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ Currently SArray's are used for:
 
 =item Global data per interpreter
 
-=item For implementing lists, see F<src/list.c>. 
+=item For implementing lists, see F<src/list.c>.
 
 =item Base class of the Exception PMC, see F<src/exception.pmc>
 
@@ -56,7 +56,7 @@ Currently SArray's are used for:
 /*
 
 =item C<static PARROT_INLINE INTVAL
-ret_int(Interp* interpreter, HashEntry *e)>
+ret_int(Interp* interp, HashEntry *e)>
 
 Processes C<*e>, returning the appropriate integer, or raising an
 exception if necessary.
@@ -66,17 +66,17 @@ exception if necessary.
 */
 
 static PARROT_INLINE INTVAL
-ret_int(Interp* interpreter, HashEntry *e)
+ret_int(Interp* interp, HashEntry *e)
 {
     switch (e->type) {
     case enum_hash_int:
         return UVal_int(e->val);
     case enum_hash_pmc:
-        return VTABLE_get_integer(interpreter, UVal_pmc(e->val));
+        return VTABLE_get_integer(interp, UVal_pmc(e->val));
     default:
         break;
     }
-    real_exception(interpreter, NULL, E_IndexError,
+    real_exception(interp, NULL, E_IndexError,
             "SArray: Entry not an integer!");
     return 0;
 }
@@ -84,7 +84,7 @@ ret_int(Interp* interpreter, HashEntry *e)
 /*
 
 =item C<static PARROT_INLINE FLOATVAL
-ret_num(Interp* interpreter, HashEntry *e)>
+ret_num(Interp* interp, HashEntry *e)>
 
 Processes C<*e>, returning the appropriate floating-point number, or
 raising an exception if necessary.
@@ -94,17 +94,17 @@ raising an exception if necessary.
 */
 
 static PARROT_INLINE FLOATVAL
-ret_num(Interp* interpreter, HashEntry *e)
+ret_num(Interp* interp, HashEntry *e)
 {
     switch (e->type) {
         case enum_hash_num:
             return UVal_num(e->val);
         case enum_hash_pmc:
-            return VTABLE_get_number(interpreter, UVal_pmc(e->val));
+            return VTABLE_get_number(interp, UVal_pmc(e->val));
         default:
             break;
     }
-    real_exception(interpreter, NULL, E_IndexError,
+    real_exception(interp, NULL, E_IndexError,
             "SArray: Entry not a number!");
     return 0;
 }
@@ -112,7 +112,7 @@ ret_num(Interp* interpreter, HashEntry *e)
 /*
 
 =item C<static PARROT_INLINE STRING *
-ret_string(Interp* interpreter, HashEntry *e)>
+ret_string(Interp* interp, HashEntry *e)>
 
 Processes C<*e>, returning the appropriate Parrot string, or raising an
 exception if necessary.
@@ -122,17 +122,17 @@ exception if necessary.
 */
 
 static PARROT_INLINE STRING*
-ret_string(Interp* interpreter, HashEntry *e)
+ret_string(Interp* interp, HashEntry *e)
 {
     switch (e->type) {
         case enum_hash_string:
             return UVal_str(e->val);
         case enum_hash_pmc:
-            return VTABLE_get_string(interpreter, UVal_pmc(e->val));
+            return VTABLE_get_string(interp, UVal_pmc(e->val));
         default:
             break;
     }
-    real_exception(interpreter, NULL, E_IndexError,
+    real_exception(interp, NULL, E_IndexError,
             "SArray: Entry not a string!");
     return 0;
 }
@@ -140,7 +140,7 @@ ret_string(Interp* interpreter, HashEntry *e)
 /*
 
 =item C<static PARROT_INLINE PMC *
-ret_pmc(Interp* interpreter, HashEntry *e)>
+ret_pmc(Interp* interp, HashEntry *e)>
 
 Processes C<*e>, returning the appropriate PMC, or raising an exception
 if necessary.
@@ -150,26 +150,26 @@ if necessary.
 */
 
 static PARROT_INLINE PMC*
-ret_pmc(Interp* interpreter, HashEntry *e)
+ret_pmc(Interp* interp, HashEntry *e)
 {
     PMC *ret;
     switch (e->type) {
         case enum_hash_int:
-            ret = pmc_new(interpreter, enum_class_Undef);
-            VTABLE_set_integer_native(interpreter, ret, UVal_int(e->val));
+            ret = pmc_new(interp, enum_class_Undef);
+            VTABLE_set_integer_native(interp, ret, UVal_int(e->val));
             return ret;
         case enum_hash_num:
-            ret = pmc_new(interpreter, enum_class_Undef);
-            VTABLE_set_number_native(interpreter, ret, UVal_num(e->val));
+            ret = pmc_new(interp, enum_class_Undef);
+            VTABLE_set_number_native(interp, ret, UVal_num(e->val));
             return ret;
         case enum_hash_string:
-            ret = pmc_new(interpreter, enum_class_Undef);
-            VTABLE_set_string_native(interpreter, ret, UVal_str(e->val));
+            ret = pmc_new(interp, enum_class_Undef);
+            VTABLE_set_string_native(interp, ret, UVal_str(e->val));
             return ret;
         case enum_hash_pmc:
             return UVal_pmc(e->val);
         default:
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray: Unknown entry!");
     }
     return NULL;
@@ -250,7 +250,7 @@ Initializes the array.
 
 */
 
-    void init () {
+    void init() {
         PMC_int_val(SELF) = 0;
         PMC_data(SELF) = NULL;
     }
@@ -279,7 +279,7 @@ Marks the array as live.
 
 */
 
-    void mark () {
+    void mark() {
         HashEntry *e;
         int i, start, end;
         if (!PMC_data(SELF))
@@ -314,7 +314,7 @@ Destroys the array.
 
 */
 
-    void destroy () {
+    void destroy() {
         if (PMC_data(SELF))
             mem_sys_free(PMC_data(SELF));
         PMC_data(SELF) = NULL;
@@ -330,7 +330,7 @@ Creates and returns a copy of the array.
 
 */
 
-    PMC* clone () {
+    PMC* clone() {
         HashEntry *e, *d;
         int i, start, end;
         INTVAL size;
@@ -341,7 +341,7 @@ Creates and returns a copy of the array.
         size = PMC_int_val(SELF);
         PMC_int_val(dest) = size;
         PMC_data(dest) = mem_sys_allocate_zeroed((2 + size) *
-            sizeof(HashEntry));
+            sizeof (HashEntry));
         e = (HashEntry *) PMC_data(SELF);
         d = (HashEntry *) PMC_data(dest);
         start = UVal_int(e[0].val);
@@ -383,7 +383,7 @@ Returns whether the array has any elements.
 
 */
 
-    INTVAL get_bool () {
+    INTVAL get_bool() {
         INTVAL size = DYNSELF.elements();
         return (INTVAL)(size != 0);
     }
@@ -396,7 +396,7 @@ Returns whether the array has any elements.
 
 */
 
-    INTVAL elements () {
+    INTVAL elements() {
         HashEntry *e;
         if (!PMC_data(SELF))
             return 0;
@@ -414,7 +414,7 @@ Returns the number of elements in the array.
 
 */
 
-    INTVAL get_integer () {
+    INTVAL get_integer() {
         return DYNSELF.elements();
     }
 
@@ -428,7 +428,7 @@ Returns the type of the element at index C<key>.
 
 */
 
-    INTVAL type_keyed_int (INTVAL key) {
+    INTVAL type_keyed_int(INTVAL key) {
         HashEntry *e = get_entry(SELF, key);
         return e->type;
     }
@@ -443,7 +443,7 @@ Returns the integer value of the element at index C<key>.
 
 */
 
-    INTVAL get_integer_keyed_int (INTVAL key) {
+    INTVAL get_integer_keyed_int(INTVAL key) {
         HashEntry *e = get_entry(SELF, key);
         return ret_int(INTERP, e);
     }
@@ -458,7 +458,7 @@ Returns the integer value of the element at index C<*key>.
 
 */
 
-    INTVAL get_integer_keyed (PMC* key) {
+    INTVAL get_integer_keyed(PMC* key) {
         /* simple int keys only */
         INTVAL k = key_integer(INTERP, key);
         return SELF.get_integer_keyed_int(k);
@@ -489,14 +489,14 @@ Returns the floating-point value of the element at index C<key>.
 
 */
 
-    FLOATVAL get_number_keyed_int (INTVAL key) {
+    FLOATVAL get_number_keyed_int(INTVAL key) {
         HashEntry *e = get_entry(SELF, key);
         return ret_num(INTERP, e);
     }
 
 /*
 
-=item C<FLOATVAL get_number_keyed (PMC* key)>
+=item C<FLOATVAL get_number_keyed(PMC* key)>
 
 Returns the floating-point value of the element at index C<*key>.
 
@@ -504,7 +504,7 @@ Returns the floating-point value of the element at index C<*key>.
 
 */
 
-    FLOATVAL get_number_keyed (PMC* key) {
+    FLOATVAL get_number_keyed(PMC* key) {
         INTVAL k = key_integer(INTERP, key);
         return SELF.get_number_keyed_int(k);
     }
@@ -535,7 +535,7 @@ Returns the Parrot string value of the element at index C<key>.
 
 */
 
-    STRING* get_string_keyed_int (INTVAL key) {
+    STRING* get_string_keyed_int(INTVAL key) {
         HashEntry *e = get_entry(SELF, key);
         return ret_string(INTERP, e);
     }
@@ -581,7 +581,7 @@ Returns the PMC value of the element at index C<key>.
 
 */
 
-    PMC* get_pmc_keyed_int (INTVAL key) {
+    PMC* get_pmc_keyed_int(INTVAL key) {
         HashEntry *e = get_entry(SELF, key);
         return ret_pmc(INTERP, e);
     }
@@ -626,9 +626,9 @@ Resizes the array to C<size> elements.
 
 */
 
-    void set_integer_native (INTVAL size) {
+    void set_integer_native(INTVAL size) {
         if (PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray: Can't resize!");
         PMC_int_val(SELF) = size;
         /* Probably ought to actually copy this... */
@@ -636,7 +636,7 @@ Resizes the array to C<size> elements.
           mem_sys_free(PMC_data(SELF));
         }
         PMC_data(SELF) = mem_sys_allocate_zeroed((2 + size) *
-            sizeof(HashEntry));
+            sizeof (HashEntry));
         PObj_custom_mark_destroy_SETALL(SELF);
     }
 
@@ -650,10 +650,10 @@ Sets the integer value of the element at index C<key> to C<value>.
 
 */
 
-    void set_integer_keyed_int (INTVAL key, INTVAL value) {
+    void set_integer_keyed_int(INTVAL key, INTVAL value) {
         HashEntry *e;
         if (key < 0 || key >= PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + (2 + key);
         e->type = enum_hash_int;
@@ -673,11 +673,11 @@ Adds an element with integer value C<value> to the end of the array.
 
 */
 
-    void push_integer (INTVAL value) {
+    void push_integer(INTVAL value) {
         HashEntry *e;
         INTVAL nextix;
         if (!PMC_data(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + 1;
         nextix = UVal_int(e->val);
@@ -695,10 +695,10 @@ C<value>.
 
 */
 
-    void set_number_keyed_int (INTVAL key, FLOATVAL value) {
+    void set_number_keyed_int(INTVAL key, FLOATVAL value) {
         HashEntry *e;
         if (key < 0 || key >= PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + (2 + key);
         e->type = enum_hash_num;
@@ -718,11 +718,11 @@ Adds an element with floating-point value C<value> to the end of the array.
 
 */
 
-    void push_float (FLOATVAL value) {
+    void push_float(FLOATVAL value) {
         HashEntry *e;
         INTVAL nextix;
         if (!PMC_data(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + 1;
         nextix = UVal_int(e->val);
@@ -739,10 +739,10 @@ Sets the Parrot string value of the element at index C<key> to C<value>.
 
 */
 
-    void set_string_keyed_int (INTVAL key, STRING* value) {
+    void set_string_keyed_int(INTVAL key, STRING* value) {
         HashEntry *e;
         if (key < 0 || key >= PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + (2 + key);
         e->type = enum_hash_string;
@@ -763,11 +763,11 @@ array.
 
 */
 
-    void push_string (STRING* value) {
+    void push_string(STRING* value) {
         HashEntry *e;
         INTVAL nextix;
         if (!PMC_data(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + 1;
         nextix = UVal_int(e->val);
@@ -784,10 +784,10 @@ Sets the PMC value of the element at index C<key> to C<*src>.
 
 */
 
-    void set_pmc_keyed_int (INTVAL key, PMC* src) {
+    void set_pmc_keyed_int(INTVAL key, PMC* src) {
         HashEntry *e;
         if (key < 0 || key >= PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + (2 + key);
         e->type = enum_hash_pmc;
@@ -808,11 +808,11 @@ Adds an element with PMC value C<*value> to the end of the array.
 
 */
 
-    void push_pmc (PMC* value) {
+    void push_pmc(PMC* value) {
         HashEntry *e;
         INTVAL nextix;
         if (!PMC_data(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                     "SArray index out of bounds!");
         e = (HashEntry *) PMC_data(SELF) + 1;
         nextix = UVal_int(e->val);
@@ -840,10 +840,7 @@ Initial version 2003.07.04 by leo
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

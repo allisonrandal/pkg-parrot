@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/config/auto/perldoc.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/perldoc.pm 736 2006-12-18T04:21:02.544079Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Determines whether perldoc exists on the system.
 package auto::perldoc;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,34 +25,36 @@ $description = 'Determining whether perldoc is installed';
 
 @args = qw();
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $version = 0;
-    my $a       = capture_output('perldoc -ud c99da7c4.tmp perldoc') || undef;
+    my $a = capture_output('perldoc -ud c99da7c4.tmp perldoc') || undef;
 
-    if (defined $a) {
-        if ($a =~ m/^Unknown option:/) {
-            $a       = capture_output('perldoc perldoc') || '';
+    if ( defined $a ) {
+        if ( $a =~ m/^Unknown option:/ ) {
+            $a = capture_output('perldoc perldoc') || '';
             $version = 1;
             $self->set_result('yes, old version');
-        } else {
-            if (open FH, "< c99da7c4.tmp") {
+        }
+        else {
+            if ( open my $FH, "<", "c99da7c4.tmp" ) {
                 local $/;
-                $a = <FH>;
-                close FH;
+                $a = <$FH>;
+                close $FH;
                 $version = 2;
                 $self->set_result('yes');
-            } else {
+            }
+            else {
                 $a = undef;
             }
         }
-        unless (defined $a && $a =~ m/perldoc/) {
+        unless ( defined $a && $a =~ m/perldoc/ ) {
             $version = 0;
             $self->set_result('failed');
         }
-    } else {
+    }
+    else {
         $self->set_result('no');
     }
     unlink "c99da7c4.tmp";
@@ -65,3 +68,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,8 +1,14 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
 
-plan 2
+plan 4
 
 eval_is {
  for {set a 0} {$a < 20} {incr a} {
@@ -19,3 +25,15 @@ eval_is {
  }
  set a
 } 9 {break from while}
+
+eval_is {
+  proc test {} {break}
+  test
+} {invoked "break" outside of a loop} \
+  {break outside of a loop}
+
+eval_is {
+  proc test {} {break}
+  for {set i 0} {$i < 5} {incr i} {test}
+} {invoked "break" outside of a loop} \
+  {break in a proc called in a loop}

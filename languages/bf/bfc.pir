@@ -1,4 +1,4 @@
-# $Id: /local/languages/bf/bfc.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/bf/bfc.pir 3045 2007-04-09T20:26:49.634143Z paultcochrane  $
 # A Brainfuck compiler
 # By Leon Brocard <acme@astray.com>
 #
@@ -254,3 +254,9 @@ NEXT:
   P0 = P1( code )
   P0()
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

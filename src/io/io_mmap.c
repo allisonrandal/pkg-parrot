@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005, The Perl Foundation.
-$Id: /local/src/io/io_mmap.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/io/io_mmap.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ PIO_mmap_register_layer(void)
 /*
 
 =item C<static ParrotIO *
-PIO_mmap_open(theINTERP, ParrotIOLayer *layer,
+PIO_mmap_open(Interp *interp, ParrotIOLayer *layer,
                const char *path, INTVAL flags)>
 
 The buffer layer's C<Open> function.
@@ -55,18 +55,18 @@ The buffer layer's C<Open> function.
 */
 
 static ParrotIO *
-PIO_mmap_open(theINTERP, ParrotIOLayer *layer,
+PIO_mmap_open(Interp *interp, ParrotIOLayer *layer,
                const char *path, INTVAL flags)
 {
     ParrotIO *io;
     ParrotIOLayer *l = PIO_DOWNLAYER(layer);
 
     if (!l) {
-        l = interpreter->piodata->default_stack;
+        l = interp->piodata->default_stack;
         if (!strcmp(l->name, "buf"))
             l = PIO_DOWNLAYER(l);
     }
-    io = PIO_open_down(interpreter, l, path, flags);
+    io = PIO_open_down(interp, l, path, flags);
     if (!io) {
         /* error creating IO stream */
         return NULL;
@@ -82,7 +82,7 @@ PIO_mmap_open(theINTERP, ParrotIOLayer *layer,
         status = fstat(io->fd, &statbuf);
         file_size = statbuf.st_size;
         /* TODO verify flags */
-        io->b.startb = mmap(0, file_size, PROT_READ, MAP_SHARED, io->fd, 0);
+        io->b.startb = (unsigned char *)mmap(0, file_size, PROT_READ, MAP_SHARED, io->fd, 0);
         io->b.size = (size_t)file_size;  /* XXX */
         io->b.endb = io->b.startb + io->b.size;
         io->b.flags |= PIO_BF_MMAP;
@@ -94,7 +94,7 @@ PIO_mmap_open(theINTERP, ParrotIOLayer *layer,
 /*
 
 =item C<static size_t
-PIO_mmap_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_mmap_read(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
               STRING ** buf)>
 
 Calls C<read()> to return up to C<len> bytes in the memory starting at
@@ -105,24 +105,25 @@ C<buffer>.
 */
 
 static size_t
-PIO_mmap_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
+PIO_mmap_read(Interp *interp, ParrotIOLayer *layer, ParrotIO *io,
               STRING **buf)
 {
     STRING *s;
     UINTVAL len;
 
     if (!(io->b.flags & PIO_BF_MMAP))
-        return PIO_read_down(interpreter, PIO_DOWNLAYER(layer), io, buf);
+        return PIO_read_down(interp, PIO_DOWNLAYER(layer), io, buf);
 
     if (*buf == NULL) {
-	*buf = new_string_header(interpreter, 0);
+        *buf = new_string_header(interp, 0);
     }
     s = *buf;
     /* TODO create string_free API for reusing string headers */
     if (s->strstart && PObj_sysmem_TEST(s))
         mem_sys_free(PObj_bufstart(s));
     PObj_get_FLAGS(s) |= PObj_external_FLAG;
-    PObj_bufstart(s) = s->strstart = io->b.startb + io->fpos;
+    PObj_bufstart(s) = io->b.startb + io->fpos;
+    s->strstart =  (char *) io->b.startb + io->fpos;
     len = s->bufused ? s->bufused : io->b.size;
     io->fpos += len;
     PObj_buflen(s) = s->strlen = len;
@@ -132,7 +133,7 @@ PIO_mmap_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
 /*
 
 =item C<static INTVAL
-PIO_mmap_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io)>
+PIO_mmap_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)>
 
 Closes C<*io>'s file descriptor.
 
@@ -141,12 +142,12 @@ Closes C<*io>'s file descriptor.
 */
 
 static INTVAL
-PIO_mmap_close(theINTERP, ParrotIOLayer *layer, ParrotIO *io)
+PIO_mmap_close(Interp *interp, ParrotIOLayer *layer, ParrotIO *io)
 {
     INTVAL ret = -1;
 
     if (io->fd >= 0) {
-        ret = PIO_close_down(interpreter, PIO_DOWNLAYER(layer), io);
+        ret = PIO_close_down(interp, PIO_DOWNLAYER(layer), io);
     }
     return ret;
 }
@@ -205,12 +206,10 @@ Initially written by Leo.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

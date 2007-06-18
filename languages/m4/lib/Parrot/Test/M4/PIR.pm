@@ -1,4 +1,4 @@
-# $Id: /local/languages/m4/lib/Parrot/Test/M4/PIR.pm 12415 2006-04-24T19:32:28.634218Z bernhard  $
+# $Id: /parrotcode/local/languages/m4/lib/Parrot/Test/M4/PIR.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 package Parrot::Test::M4::PIR;
 
@@ -13,7 +13,7 @@ our $VERSION = 0.01;
 
 sub get_out_fn {
     my $self = shift;
-    my ( $count ) = @_;
+    my ($count) = @_;
 
     return Parrot::Test::per_test( '.pir_out', $count );
 }
@@ -23,13 +23,22 @@ sub get_test_prog {
     my ( $path_to_parrot, $path_to_language, $count ) = @_;
 
     my $test_prog_args = $ENV{TEST_PROG_ARGS} || q{};
-    my $lang_fn        = Parrot::Test::per_test( '.m4', $count );
+    my $lang_fn = Parrot::Test::per_test( '.m4', $count );
 
-    return ( join( ' ',
-                 File::Spec->join($path_to_parrot,$self->{parrot}), 
-                 File::Spec->join($path_to_language, 'm4.pbc'),
-                 $test_prog_args,
-                 $lang_fn ) );
+    return (
+        join( ' ',
+            File::Spec->join( $path_to_parrot,   $self->{parrot} ),
+            File::Spec->join( $path_to_language, 'm4.pbc' ),
+            $test_prog_args,
+            $lang_fn )
+    );
 }
- 
+
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

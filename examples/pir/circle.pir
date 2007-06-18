@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/examples/pir/circle.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/examples/pir/circle.pir 3066 2007-04-09T22:20:33.243268Z paultcochrane  $
 
 =head1 NAME
 
@@ -116,4 +116,8 @@ LOOP:
 
 .end
 
-# vim: ft=imc sw=4:
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

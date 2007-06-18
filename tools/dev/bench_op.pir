@@ -1,4 +1,4 @@
-# $Id: /local/tools/dev/bench_op.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/local/tools/dev/bench_op.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 TITLE
 
@@ -241,4 +241,8 @@ Leopold Toetsch <lt@toetsch.at>
 
 =cut
 
-# vim: expandtab sw=4 tw=70:
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

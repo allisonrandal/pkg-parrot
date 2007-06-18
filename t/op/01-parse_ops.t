@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id$
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/op/01-parse_ops.t 3509 2007-05-16T02:26:11.809697Z chromatic  $
 
 use strict;
 use warnings;
@@ -8,7 +8,6 @@ use lib qw( . lib ../lib ../../lib );
 use Parrot::Test;
 use Parrot::Op;
 use Parrot::OpLib::core;
-
 
 =head1 NAME
 
@@ -24,7 +23,6 @@ Tests that all parrot opcodes are parsed properly.
 
 =cut
 
-
 my $object_map = {
     i   => q<I0>,
     ic  => q<42>,
@@ -36,17 +34,45 @@ my $object_map = {
     n   => q<N0>,
     nc  => q<13.013>,
     p   => q<P0>,
-    pc  => undef,       ## TODO: figure out how to test this type
+    pc  => undef,                  ## TODO: figure out how to test this type
     s   => q<S0>,
     sc  => q<'foo'>,
 };
 
+my %parse_errors = map { $_ => 1 } qw(
+    abs
+    bnot
+    bnots
+    ceil
+    defined
+    delete
+    downcase
+    eq
+    exists
+    floor
+    ge
+    get_hll_namespace
+    get_namespace
+    get_root_namespace
+    gt
+    le
+    lt
+    ne
+    neg
+    not
+    print
+    set
+    slice
+    titlecase
+    typeof
+    upcase
+    yield
+);
 
 my %cmds;
 
 ## extract the register types from each opcode
-for my $op ( @$Parrot::OpLib::core::ops )
-{
+for my $op (@$Parrot::OpLib::core::ops) {
     my @regtypes = $op->arg_types;
 
     ## for now, avoid opcodes with regtypes i don't know how to represent
@@ -59,20 +85,36 @@ for my $op ( @$Parrot::OpLib::core::ops )
     my $args = join ', ' => map $$object_map{$_}, @regtypes;
 
     ## store the test commands
-    $cmds{$basename}{$basename . ' ' . $args}++;
-    $cmds{$basename}{$op->full_name . ' ' . $args}++;
+    $cmds{$basename}{ $basename . ' ' . $args }++;
+    $cmds{$basename}{ $op->full_name . ' ' . $args }++;
 }
+
+plan skip_all => 'IMCC cannot do parse-only with JIT enabled'
+    if $ENV{TEST_PROG_ARGS} =~ /-j/;
+
+plan skip_all => 'IMCC cannot do parse-only with switched core'
+    if $ENV{TEST_PROG_ARGS} =~ /-S/;
 
 plan tests => scalar keys %cmds;
 
-for my $cmd ( sort keys %cmds )
-{
-    pasm_output_like(
-        ## retrieve the test commands, and trick imcc to parse only
-        join( $/ => 'end', sort(keys %{ $cmds{$cmd} }), '' ),
+for my $cmd ( sort keys %cmds ) {
+    my @args = (
+        ## retrieve the test commands, and trick IMCC to parse only
+        join( $/ => 'end', sort( keys %{ $cmds{$cmd} } ), '' ),
         qr/^(?!error:imcc:syntax error,)/,
-        "parsing: $cmd",
-    );
+        "parsing: $cmd" );
+
+    if ($parse_errors{ $cmd }) {
+        pasm_error_output_like( @args )
+    }
+    else {
+        pasm_output_like( @args );
+    }
 }
 
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

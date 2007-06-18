@@ -84,13 +84,13 @@ CLOSE_OK:
 #	# SPLITLINE	Splits a line into parts
 #	# Outputs:
 #	# 	P1	Array of strings
-.sub _SPLITLINE		# PerlArray splitline (string line, int splitflag)
+.sub _SPLITLINE		# ResizablePMCArray splitline (string line, int splitflag)
 	.param string line
 	.param int splitflag
 	.local string token
 	line  = _CHOMP(line)
 
-	$P1=new PerlArray
+	$P1=new .ResizablePMCArray
 	eq splitflag, 0, SPLITSINGLE
 
 SPLITAGAIN:
@@ -176,3 +176,9 @@ CHOMPOK:.return(line)
 #ERR_BADF:
 #	print "File descriptor is incorrect"
 #	branch GEN_ERROR
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

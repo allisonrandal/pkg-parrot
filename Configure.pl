@@ -1,7 +1,7 @@
 #! perl
 
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/Configure.pl 13846 2006-08-03T17:06:49.435642Z chip  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/Configure.pl 3467 2007-05-12T14:16:07.178849Z jkeenan  $
 
 =head1 NAME
 
@@ -52,9 +52,40 @@ Tells Configure.pl not to run the MANIFEST check.
 
 Sets the location where parrot will be installed.
 
+=item C<--step==>
+
+execute a single configure step
+
 =item C<--ask>
 
 This turns on the user prompts.
+
+=item C<--test>
+
+Run certain tests along with F<Configure.pl>:
+
+=over 4
+
+=item C<--test=configure>
+
+Run tests found in F<t/configure/> I<before> beginning configuration.  These
+tests demonstrate that Parrot's configuration tools will work properly once
+configuration has begun.
+
+=item C<--test=build>
+
+Run tests found in F<t/postconfigure/>, F<t/tools/pmc2cutils/>,
+F<t/tools/ops2cutils/> and F<t/tools/ops2pmutils/> I<after> configuration has
+completed.  These tests demonstrate (a) that certain of Parrot's configuration
+tools are working properly post-configuration; and (b) that certain of
+Parrot's build tools will work properly once you call F<make>.
+
+=item C<--test>
+
+Run the tests described in C<--test=configure>, conduct configuration, then
+run the tests described in C<--test=build>.
+
+=back
 
 =back
 
@@ -72,14 +103,19 @@ Link parrot dynamically.
 
 =item C<--m=32>
 
-Create a 32-bit executable on 64-architectures like x86_64. This option
-appends -m32 to compiler and linker programs and does s/lib64/lib/g on link flags.
+Create a 32-bit executable on 64-architectures like x86_64. This
+option appends -m32 to compiler and linker programs and does
+s/lib64/lib/g on link flags.
 
 This option is experimental. See F<config/init/defaults.pm> for more.
 
 =item C<--profile>
 
 Turn on profiled compile (gcc only for now)
+
+=item C<--cage>
+
+[CAGE] compile includes many additional warnings
 
 =item C<--optimize>
 
@@ -189,7 +225,7 @@ of: C<gc>, C<libc>, C<malloc> or C<malloc-trace>. The default is C<gc>.
 
 =back
 
-ICU Options
+International Components For Unicode (ICU) Options
 
 =over
 
@@ -248,226 +284,97 @@ F<lib/Parrot/Configure/Step.pm>, F<docs/configuration.pod>
 use 5.006_001;
 use strict;
 use warnings;
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
 use lib 'lib';
 
-use English qw( -no_match_vars );
 use Parrot::BuildUtil;
 use Parrot::Configure;
-
-# These globals are accessed in config/init/defaults.pm
-our $parrot_version = Parrot::BuildUtil::parrot_version();
-our @parrot_version = Parrot::BuildUtil::parrot_version();
-
-$OUTPUT_AUTOFLUSH = 1;
-
-# Handle options
-my %args;
-for (@ARGV) {
-  my($key, $value) = m/--([-\w]+)(?:=(.*))?/;
-  $key   = 'help' unless defined $key;
-  $value = 1      unless defined $value;
-
-  for ($key) {
-    m/version/ && do {
-      my $svnid = '$Id: /local/Configure.pl 13846 2006-08-03T17:06:49.435642Z chip  $';
-      print <<"END";
-Parrot Version $parrot_version Configure 2.0
-$svnid
-END
-      exit;
-    };
-
-    m/help/    && do {
-      print <<"EOT";
-$0 - Parrot Configure 2.0
-
-General Options:
-
-   --help               Show this text
-   --version            Show version information
-   --verbose            Output extra information
-   --verbose=2          Output every setting change
-   --verbose-step=N     Set verbose for step N only
-   --verbose-step=regex Set verbose for step matching description
-   --nomanicheck        Don't check the MANIFEST
-   --prefix             Set the installation prefix
-
-   --ask                Have Configure ask for commonly-changed info
-
-Compile Options:
-
-   --debugging=0        Disable debugging, default = 1
-   --inline             Compiler supports inline
-   --optimize           Optimized compile
-   --optimize=flags     Add given optimizer flags
-   --parrot_is_shared   Link parrot dynamically
-   --m=32               Build 32bit executable on 64-bit architecture.
-   --profile            Turn on profiled compile (gcc only for now)
-
-   --cc=(compiler)      Use the given compiler
-   --ccflags=(flags)    Use the given compiler flags
-   --ccwarn=(flags)     Use the given compiler warning flags
-   --cxx=(compiler)     Use the given C++ compiler
-   --libs=(libs)        Use the given libraries
-   --link=(linker)      Use the given linker
-   --linkflags=(flags)  Use the given linker flags
-   --ld=(linker)        Use the given loader for shared libraries
-   --ldflags=(flags)    Use the given loader flags for shared libraries
-   --lex=(lexer)        Use the given lexical analyzer generator
-   --yacc=(parser)      Use the given parser generator
-
-   --define=inet_aton   Quick hack to use inet_aton instead of inet_pton
-
-Parrot Options:
-
-   --intval=(type)      Use the given type for INTVAL
-   --floatval=(type)    Use the given type for FLOATVAL
-   --opcode=(type)      Use the given type for opcodes
-   --ops=(files)        Use the given ops files
-   --pmc=(files)        Use the given PMC files
-
-   --cgoto=0            Don't build cgoto core - recommended when short of mem
-   --jitcapable         Use JIT
-   --execcapable        Use JIT to emit a native executable
-   --gc=(type)          Determine the type of garbage collection
-                        type=(gc|libc|malloc|malloc-trace) default is gc
-
-ICU Options:
-
-   For using a system ICU, these options can be used:
-
-   --icu-config=/path/to/icu-config
-                        Location of the script used for ICU autodetection.
-                        You just need to specify this option if icu-config
-                        is not in you PATH.
-
-   --icu-config=none    can be used to disable the autodetection feature.
-                        It will also be disabled if you specify any other
-                        of the following ICU options.
-
-   If you do not have a full ICU installation:
-
-   --without-icu        Build parrot without ICU support
-   --icuheaders=(path)  Location of ICU headers without /unicode
-   --icushared=(flags)  Full linker command to create shared libraries
-   --icudatadir=(path)  Directory to locate ICU's data file(s)
-
-Other Options (may not be implemented):
-
-   --maintainer         Create imcc's parser and lexer files. Needs a working
-                        parser and lexer.
-   --miniparrot         Build parrot assuming only pure ANSI C is available
-
-EOT
-      exit;
-    };
-    $args{$key} = $value;
-  }
-}
-
-$args{debugging} = 1 unless ((exists $args{debugging}) && !$args{debugging});
-$args{maintainer} = 1 if defined $args{lex} or defined $args{yacc};
-
-print <<"END";
-Parrot Version $parrot_version Configure 2.0
-Copyright (C) 2001-2006, The Perl Foundation.
-
-Hello, I'm Configure. My job is to poke and prod your system to figure out
-how to build Parrot. The process is completely automated, unless you passed in
-the `--ask' flag on the command line, in which case it'll prompt you for a few
-pieces of info.
-
-Since you're running this program, you obviously have Perl 5--I'll be pulling
-some defaults from its configuration.
-END
-
-# EDIT HERE TO ADD NEW TESTS
-my @steps = qw(
-    init::manifest
-    init::defaults
-    init::miniparrot
-    init::hints
-    init::headers
-    inter::progs
-    inter::make
+use Parrot::Configure::Options qw( process_options );
+use Parrot::Configure::Options::Test;
+use Parrot::Configure::Messages qw(
+    print_introduction
+    print_conclusion
 );
-my @steps2 = qw(
-    auto::gcc
-    auto::msvc
-    init::optimize
-    inter::shlibs
-    inter::libparrot
-    inter::charset
-    inter::encoding
-    inter::types
-    inter::ops
-    inter::pmc
-    auto::alignptrs
-    auto::headers
-    auto::sizes
-    auto::byteorder
-    auto::va_ptr
-    auto::pack
-    auto::format
-    auto::isreg
-    auto::jit
-    gen::cpu
-    auto::funcptr
-    auto::cgoto
-    auto::inline
-    auto::gc
-    auto::memalign
-    auto::signal
-    auto::socklen_t
-    auto::env
-    auto::aio
-    auto::gmp
-    auto::readline
-    auto::gdbm
-    auto::snprintf
-    auto::perldoc
-    auto::python
-    auto::bc
-    auto::m4
-    gen::icu
-    gen::revision
-    gen::config_h
-    gen::core_pmcs
-    gen::parrot_include
-    gen::languages
-    gen::makefiles
-    gen::platform
-    gen::config_pm
-);
+use Parrot::Configure::Step::List qw( get_steps_list );
+
+my $parrot_version = Parrot::BuildUtil::parrot_version();
+
+$| = 1; # $OUTPUT_AUTOFLUSH = 1;
+
+# Install Option text was taken from:
+#
+# autoconf (GNU Autoconf) 2.59
+# Written by David J. MacKenzie and Akim Demaille.
+#
+# Copyright (C) 2003 Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.  There is NO
+# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+# from Parrot::Configure::Options
+my $args = process_options( {
+    argv            => [ @ARGV ],
+    script          => $0,
+    parrot_version  => $parrot_version,
+    svnid           => '$Id: /parrotcode/trunk/Configure.pl 3467 2007-05-12T14:16:07.178849Z jkeenan  $',
+} );
+exit unless defined $args;
+
+my $opttest = Parrot::Configure::Options::Test->new($args);
+# configuration tests will only be run if you requested them 
+# as command-line option
+$opttest->run_configure_tests();
+
+# from Parrot::Configure::Messages
+print_introduction($parrot_version);
 
 my $conf = Parrot::Configure->new;
-{
-    # XXX $Parrot::Configure::Step::conf is a temporty hack
-    no warnings qw(once);
-    $Parrot::Configure::Step::conf = $conf;
-}
-$conf->add_steps(@steps);
-$conf->add_step('inter::lex', require => '2.5.33');
-$conf->add_step('inter::yacc', require => '2.1');
-$conf->add_steps(@steps2);
+
+# from Parrot::Configure::Step::List
+$conf->add_steps(get_steps_list());
+
+my %args = %$args;
+# from Parrot::Configure::Data
 $conf->options->set(%args);
-# Run the actual steps
-$conf->runsteps or exit(1);
+
+if ( exists $args{step} ) {
+    # from Parrot::Configure::Data
+    $conf->data()->slurp();
+    # from Parrot::Configure
+    $conf->runstep( $args{step} );
+    print "\n";
+}
+else {
+    # Run the actual steps
+    # from Parrot::Configure
+    $conf->runsteps or exit(1);
+}
 
 # tell users what to do next
-my $make = $conf->data->get('make');
+#if ($run_build_tests) {
+#    print "\n\n";
+#    print "As you requested, I will now run some tests of the build tools.\n\n";
+#    system(qq{prove t/postconfigure/*.t t/tools/pmc2cutils/*.t t/tools/ops2cutils/*.t t/tools/ops2pmutils/*.t})
+#        and die "Unable to execute post-configuration and build tools tests";
+#}
 
-print <<"END";
 
-Okay, we're done!
+# build tests will only be run if you requested them 
+# as command-line option
+$opttest->run_build_tests();
 
-You can now use `$make' to build your Parrot.
-(NOTE: do not use `$make -j <n>'!)
-After that, you can use `$make test' to run the test suite.
-
-Happy Hacking,
-        The Parrot Team
-
-END
+# from Parrot::Configure::Messages
+print_conclusion($conf->data->get('make'));
 
 exit(0);
+
+################### DOCUMENTATION ###################
+
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
+

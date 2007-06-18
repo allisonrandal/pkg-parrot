@@ -1,7 +1,7 @@
 /* pmc_freeze.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/pmc_freeze.h 13925 2006-08-04T15:10:35.798913Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/pmc_freeze.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_PMC_FREEZE_H_GUARD)
+#ifndef PARROT_PMC_FREEZE_H_GUARD
 #define      PARROT_PMC_FREEZE_H_GUARD
 
 struct _visit_info;
@@ -65,10 +65,10 @@ typedef struct _visit_info {
     visit_f             visit_pmc_now;
     visit_f             visit_pmc_later;
     visit_f             visit_action;   /* freeze, thaw ... */
-    visit_enum_type     what;
+    INTVAL              what;
     STRING*             image;
     PMC*                mark_ptr;
-    PMC**               thaw_ptr;       /* where to thaw aa new PMC */
+    PMC**               thaw_ptr;       /* where to thaw a new PMC */
     PMC*                container;      /* when thawing aggregate items */
     INTVAL              last_type;
     PMC*                seen;           /* seen hash */
@@ -76,7 +76,7 @@ typedef struct _visit_info {
     PMC*                id_list;        /* seen list used by thaw */
     UINTVAL             id;             /* freze ID of PMC */
     void*               extra;          /* PMC specific */
-    extra_flags_enum    extra_flags;    /* concerning to extra */
+    INTVAL              extra_flags;    /* concerning to extra */
     PMC*                thaw_result;    /* 1st thawed */
     IMAGE_IO            *image_io;
 } visit_info;
@@ -96,10 +96,7 @@ PARROT_API PMC*    Parrot_clone(Parrot_Interp, PMC*);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

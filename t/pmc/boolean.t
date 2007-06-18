@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/boolean.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/boolean.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/boolean.t - Boolean Ops
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/boolean.t
+    % prove t/pmc/boolean.t
 
 =head1 DESCRIPTION
 
@@ -23,14 +23,13 @@ type combinations.
 
 =cut
 
+pasm_output_is( <<'CODE', <<'OUTPUT', "Initialization, and integer tests" );
+    new P0,.Boolean
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Initialization, and integer tests");
-	new P0,.Boolean
-
-	set I0, P0
-	eq I0,0,OK_1
-	print "not "
-OK_1:	print "ok 1\n"
+    set I0, P0
+    eq I0,0,OK_1
+    print "not "
+OK_1:    print "ok 1\n"
 
         set I0, 1
         set P0, I0
@@ -52,7 +51,7 @@ ok 2
 ok 3
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Number tests");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Number tests" );
         new P0, .Boolean
 
         set N0, 0
@@ -76,7 +75,7 @@ ok 1
 ok 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "String tests");
+pasm_output_is( <<'CODE', <<'OUTPUT', "String tests" );
         new P0, .Boolean
 
         set S0, "0"
@@ -108,7 +107,7 @@ ok 2
 ok 3
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "PMC to PMC");
+pasm_output_is( <<'CODE', <<'OUTPUT', "PMC to PMC" );
         new P0, .Boolean
         new P1, .Boolean
 
@@ -138,7 +137,7 @@ ok 2
 ok 3
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "As boolean");
+pasm_output_is( <<'CODE', <<'OUTPUT', "As boolean" );
         new P0, .Boolean
 
         set P0, 1
@@ -151,7 +150,7 @@ CODE
 ok 1
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Logic operations");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Logic operations" );
         new P0, .Boolean
         new P1, .Boolean
         new P2, .Boolean
@@ -230,8 +229,8 @@ ok 8
 ok 9
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "neg");
-	new P0, .Boolean
+pasm_output_is( <<'CODE', <<'OUTPUT', "neg" );
+    new P0, .Boolean
         new P1, .Boolean
 
         set P0, 1
@@ -266,8 +265,7 @@ ok 3
 ok 4
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -290,7 +288,7 @@ CODE
 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "True and False globals");
+pasm_output_is( <<'CODE', <<'OUTPUT', "True and False globals" );
         find_global P0, "True"
         find_global P1, "False"
 
@@ -307,3 +305,10 @@ CODE
 ok 1
 ok 2
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

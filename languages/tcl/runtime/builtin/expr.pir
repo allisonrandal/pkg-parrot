@@ -25,10 +25,20 @@
   expr = join ' ', argv
 
 loop_done:
-  $P1 = __expr(expr)
+  .local pmc ns
+  $P0 = getinterp
+  ns  = $P0['namespace'; 1]
+
+  $P1 = __expr(expr, 'ns'=>ns)
   $P2 = $P1()
   .return ($P2)
 
 no_args:
-  .throw('wrong # args: should be "expr arg ?arg ...?"')
+  tcl_error 'wrong # args: should be "expr arg ?arg ...?"'
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

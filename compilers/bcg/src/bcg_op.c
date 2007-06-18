@@ -1,8 +1,7 @@
 #include <ctype.h>
 #include <string.h>
-#include "parrot/parrot.h"
-#include "bcg_private.h"
 #include "bcg.h"
+#include "bcg_private.h"
 
 bcg_op_arg *
 bcg_op_arg_create(BCG_info * bcg_info, char *name, bcg_op_arg_type type,
@@ -11,7 +10,7 @@ bcg_op_arg_create(BCG_info * bcg_info, char *name, bcg_op_arg_type type,
     bcg_op_arg *op_arg;
 
     UNUSED(bcg_info);
-    op_arg = (bcg_op_arg *) mem_sys_allocate_zeroed(sizeof(bcg_op_arg));
+    op_arg = (bcg_op_arg *) mem_sys_allocate_zeroed(sizeof (bcg_op_arg));
     op_arg->name = name;
     op_arg->is_constant = type;
     op_arg->data_type = data_type;
@@ -33,7 +32,7 @@ bcg_op_create(BCG_info * bcg_info, char *name, bcg_op_type op_type)
     bcg_op *op;
 
     UNUSED(bcg_info);
-    op = (bcg_op *) mem_sys_allocate_zeroed(sizeof(bcg_op));
+    op = (bcg_op *) mem_sys_allocate_zeroed(sizeof (bcg_op));
     op->name = name;
     op->op_arg_count = 0;
     op->type = op_type;
@@ -57,8 +56,20 @@ bcg_op_destroy(BCG_info * bcg_info, bcg_op * op)
 void
 bcg_op_add_arg(BCG_info * bcg_info, bcg_op * op, bcg_op_arg * op_arg)
 {
-    op->op_args[op->op_arg_count]=op_arg;
+    /* op->op_args[op->op_arg_count]=op_arg; */
     op->op_arg_count++;
+
+    if (op->op_arg_count == 1) {
+        op->op_args =
+            (bcg_op_arg **) mem_sys_allocate_zeroed(sizeof (bcg_op_arg *));
+    }
+    else {
+        op->op_args =
+            (bcg_op_arg **) mem_sys_realloc(op->op_args,
+                                            sizeof (bcg_op_arg *) *
+                                            (op->op_arg_count));
+    }
+    op->op_args[op->op_arg_count - 1] = op_arg;
 }
 
 void
@@ -81,7 +92,7 @@ bcg_op_resolve_full_name(BCG_info * bcg_info, bcg_op * op)
         }
     }
 
-    full_name = (char *)mem_sys_allocate_zeroed(sizeof(char) * strlen(buffer));
+    full_name = (char *)mem_sys_allocate_zeroed(sizeof (char) * strlen(buffer));
     strcpy(full_name, buffer);
     op->full_name = full_name;
 }
@@ -92,3 +103,10 @@ bcg_info_current_op(BCG_info * bcg_info)
     bcg_info_private *bcg_info_priv = BCG_INFO_PRIV(bcg_info);
     return bcg_info_priv->last_unit->last_op;
 }
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

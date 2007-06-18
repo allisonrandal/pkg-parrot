@@ -1,5 +1,5 @@
-#ifndef PLATFORM_INTERFACE_H_GUARD
-#define PLATFORM_INTERFACE_H_GUARD
+#ifndef PARROT_PLATFORM_INTERFACE_H_GUARD
+#define PARROT_PLATFORM_INTERFACE_H_GUARD
 /*
 ** platform_interface.h
 */
@@ -126,13 +126,11 @@ void Parrot_Exec_OS_Command(Interp*, struct parrot_string_t *);
 INTVAL Parrot_Run_OS_Command_Argv(Interp*, struct PMC *);
 void Parrot_Exec_OS_Command_Argv(Interp*, struct PMC *);
 
+#endif /* PARROT_PLATFORM_INTERFACE_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */
-#endif

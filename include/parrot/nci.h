@@ -1,7 +1,7 @@
 /* nci.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/nci.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/nci.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     The nci api handles building native call frames
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_NCI_H_GUARD)
+#ifndef PARROT_NCI_H_GUARD
 #define PARROT_NCI_H_GUARD
 
 #include "parrot/parrot.h"
@@ -21,10 +21,7 @@ void *build_call_func(Interp *, PMC *, String *);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

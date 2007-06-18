@@ -1,31 +1,40 @@
-# $Id: /local/PLATFORMS 14013 2006-08-08T17:52:22.102100Z chip  $
+# $Id: /parrotcode/trunk/PLATFORMS 3494 2007-05-15T16:38:11.621435Z particle  $
 
 Parrot was reported to compile and run tests successfully on the following
 platforms.
 See also http://smoke.parrotcode.org/smoke/ for recent test results.
 See also t/TESTS.STATUS.pod about the status of the test suite.
 
-Platform                B8    Runloops      Feature Comp Test Inst YYYYMMDD
-                           CGoto JIT EXEC   Thr Sig
----------------------------------------------------------------------------
-darwin7.9.0-ppc-3.3     B    Y    Y    -     Y   Y   Y    Y/5   Y  20060808
-darwin8.6.0-ppc-gcc4.0.1     ?    ?    ?     ?   ?   ?    Y/4   ?  20060807
-darwin8.6.0-x86-gcc4.0.1     ?    -    ?     ?   ?   ?    Y     ?  20060607
-linux-x86-gcc3.3.5.2005013   Y    Y    Y     Y   Y   Y    Y     ?  20060618
-linux-x86-gcc4.0.2           Y    Y    Y     Y   Y   Y    Y     ?  20060514
-linux-x86-gcc4.0.3           Y    Y    Y     Y   Y   Y    Y     ?  20060707
-linux-x86-gcc4.1.0           Y    Y    Y     Y   Y   Y    Y     Y  20060306
-linux-x86_64-gcc3.4.3    8   Y    -    -     Y   Y   Y    Y     ?  20060618
-linux-x86_64-gcc4.1.0    8   Y    -    -     Y   Y   Y    Y     ?  20060807
-linux-x86_64-gcc4.1.0    4   Y    -    -     Y   Y   Y    Y/2   ?  20060807
-sol8-sparc-cc           B    -    -    -     -   -   -    Y/997 ?  20060530
-sol10-sparc-cc_5.8      B    Y    -    -     Y   Y   Y    Y/9   ?  20060807
-sol10-sparc-gcc_4.0.2   B    Y    -    -     Y   Y   Y    Y/9   ?  20060807
-tru64-alpha-compaq_c6.5  8   ?    ?    ?     Y   ?   Y    Y/2   ?  20060203
-win32-x86-cygwin_1.5.18      Y    Y    -     Y   Y   Y*1  Y/2   ?  20060108
-win32-x86-mingw-gcc3.4.2     Y    Y    -     -   -   Y    Y/29  Y  20060807
-win32-x86-msvc_7.1           -    Y    -     -   -   Y    Y/6   ?  20060806
-win32-x86-msvc_8.0           -    Y    -     -   -   Y    Y/9   ?  20060807
+Platform                     B8    Runloops      Feature Comp Test Inst YYYYMMDD
+                                CGoto JIT EXEC   Thr Sig
+--------------------------------------------------------------------------------
+darwin7.9.0-ppc-3.3          B    Y    Y    -     Y   Y   Y    Y/5   Y  20060808
+darwin8.6.0-ppc-gcc4.0.1     B    ?    ?    ?     ?   ?   ?    Y/4   ?  20060807
+darwin8.8.0-ppc-gcc4.0.1     B    Y/2  ?    ?     ?   ?   Y    Y     ?  20070116
+darwin8.6.0-x86-gcc4.0.1          ?    -    ?     ?   ?   Y    Y     ?  20060607
+darwin8.8.1-x86-gcc4.0.1          Y/2  ?    ?     ?   ?   Y    Y     ?  20070116
+linux-ps3-gcc4.1.1           B    Y    Y    Y     Y   Y   Y    Y/3   -  20070308
+linux-x86-gcc3.3.3.20040412       Y/2  ?    ?     ?   ?   Y    Y     ?  20070116
+linux-x86-gcc3.3.5.2005013        Y    Y    Y     Y   Y   Y    Y     ?  20060618
+linux-x86-gcc4.0.2                Y    Y    Y     Y   Y   Y    Y     ?  20060514
+linux-x86-gcc4.0.3                Y    Y    Y     Y   Y   Y    Y     ?  20060707
+linux-x86-gcc4.1.0                Y    Y    Y     Y   Y   Y    Y     Y  20060306
+linux-x86-gcc4.1.2                Y    Y    ?     Y   Y   Y    Y     ?  20070320
+linux-x86_64-gcc3.4.3         8   Y    -    -     Y   Y   Y    Y     ?  20060618
+linux-x86_64-gcc4.1.0         8   Y    -    -     Y   Y   Y    Y     ?  20070116
+linux-x86_64-gcc4.1.0         4   Y    -    -     Y   Y   Y    Y/2   ?  20060807
+linux-x86_64-gcc4.1.2         8   Y    -    -     Y   Y   Y    Y     ?  20070116
+openbsd-zaurus-gcc3.3.5           Y    -    -     Y   Y   Y    ?     ?  20070309
+sol8-sparc-cc                B    -    -    -     -   -   -    Y/441 ?  20070427
+sol10-sparc-cc_5.8           B    Y    -    -     Y   Y   Y    Y/9   ?  20060807
+sol10-sparc-gcc_4.0.2        B    Y    -    -     Y   Y   Y    Y/9   ?  20060807
+sol11-x86-cc_5.8                  Y    -    -     -   -   -    -     ?  20070417
+opensolaris-x86-gcc_4.0.3     4   Y    Y    ?     ?   ?   Y    Y/3   ?  20070417
+tru64-alpha-compaq_c6.5       8   ?    ?    ?     Y   ?   Y    Y/2   ?  20060203
+win32-x86-cygwin_1.5.21           -    -    -     -   -   -    -     -  20070221
+win32-x86-mingw-gcc3.4.2          Y    Y    -     -   -   Y    Y/19  Y  20070515
+win32-x86-msvc_7.1                -    Y    -     -   -   Y    Y     ?  20070515
+win32-x86-msvc_8.0                -    Y    -     -   -   Y    Y     ?  20070515
 
 ?   ... unknown or untested
 -   ... no

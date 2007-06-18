@@ -1,11 +1,13 @@
 #!perl
 
 use strict;
+use warnings;
 use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
+
 use Parrot::Test tests => 7;
 use Test::More;
 
-pir_output_is(<<'CODE', <<'OUTPUT', "test tcl compiler, verify double call works");
+pir_output_is( <<'CODE', <<'OUTPUT', "test tcl compiler, verify double call works" );
   .sub main :main
      load_bytecode "languages/tcl/runtime/tcllib.pbc"
      .local pmc tcl_compiler,compiled_sub
@@ -20,8 +22,7 @@ ok 1
 ok 2
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "test tcl compiler global variable interop");
-.loadlib 'dynlexpad'
+pir_output_is( <<'CODE', <<'OUTPUT', "test tcl compiler global variable interop" );
 .HLL 'Tcl', 'tcl_group'
   .sub main :main
      load_bytecode 'languages/tcl/runtime/tcllib.pbc'
@@ -37,8 +38,7 @@ CODE
 ok 1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "pass arguments to a tcl proc from PIR");
-.loadlib 'dynlexpad'
+pir_output_is( <<'CODE', <<'OUTPUT', "pass arguments to a tcl proc from PIR" );
 .HLL 'Tcl', 'tcl_group'
 .sub main :main
 
@@ -58,7 +58,7 @@ CODE
 hello
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "invoke argless tcl proc from PIR");
+pir_output_is( <<'CODE', <<'OUTPUT', "invoke argless tcl proc from PIR" );
 .sub _main :main
   load_bytecode "languages/tcl/runtime/tcllib.pbc"
   $S1 = 'proc hey {} { puts 11 }; hey; '
@@ -70,8 +70,7 @@ CODE
 11
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "Verify HLL autoboxing: Int");
+pir_output_is( <<'CODE', <<'OUTPUT', "Verify HLL autoboxing: Int" );
 .HLL 'Tcl', 'tcl_group'
 .sub _main :main
   $P1 = test()
@@ -86,7 +85,7 @@ CODE
 TclInt
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "Verify HLL autoboxing: String");
+pir_output_is( <<'CODE', <<'OUTPUT', "Verify HLL autoboxing: String" );
 .HLL 'Tcl', 'tcl_group'
 .sub _main :main
   $P1 = test()
@@ -101,7 +100,7 @@ CODE
 TclString
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "Verify HLL autoboxing: Float");
+pir_output_is( <<'CODE', <<'OUTPUT', "Verify HLL autoboxing: Float" );
 .HLL 'Tcl', 'tcl_group'
 .sub _main :main
   $P1 = test()
@@ -115,3 +114,10 @@ pir_output_is(<<'CODE', <<'OUTPUT', "Verify HLL autoboxing: Float");
 CODE
 TclFloat
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

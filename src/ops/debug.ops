@@ -41,11 +41,11 @@ Init the Parrot debugger, must be called before any other debug op.
 op debug_init() :base_debug {
     PDB_t *pdb;
 
-    if (!(interpreter->pdb)) {
-        pdb = (PDB_t *)mem_sys_allocate_zeroed(sizeof(PDB_t));
+    if (!(interp->pdb)) {
+        pdb = (PDB_t *)mem_sys_allocate_zeroed(sizeof (PDB_t));
 
-        interpreter->pdb = pdb;
-        pdb->cur_opcode = interpreter->code->base.data;
+        interp->pdb = pdb;
+        pdb->cur_opcode = interp->code->base.data;
         pdb->state |= PDB_RUNNING;
     }
 
@@ -61,11 +61,12 @@ Load a Parrot source file for the current program.
 =cut
 
 op debug_load(inconst STR) :base_debug {
-    const char *f;
+    char *f;
 
-    if (!(interpreter->pdb->state & PDB_BREAK)) {
-        f = string_to_cstring(interpreter,($1));
-        PDB_load_source(interpreter,f);
+    if (!(interp->pdb->state & PDB_BREAK)) {
+        f = string_to_cstring(interp,($1));
+        PDB_load_source(interp,f);
+        string_cstring_free(f);
     }
 
     goto NEXT();
@@ -82,7 +83,7 @@ called set a breakpoint.
 When you re run/continue the program begin debugged it will pay
 no attention to the debug ops.
 
-TODO: clone the interpreter to allow people to play into the
+RT#42377: clone the interpreter to allow people to play into the
 debugger and then continue the normal execution of the program.
 
 =cut
@@ -90,21 +91,21 @@ debugger and then continue the normal execution of the program.
 op debug_break() :base_debug {
     const char *command;
 
-    if (!(interpreter->pdb->state & PDB_BREAK)) {
-        interpreter->pdb->state |= PDB_BREAK;
-        interpreter->pdb->state |= PDB_STOPPED;
-        interpreter->pdb->cur_opcode = (opcode_t *)cur_opcode + 1;
-        PDB_set_break(interpreter,NULL);
-        while (!(interpreter->pdb->state & PDB_EXIT)) {
-            PDB_get_command(interpreter);
-            command = interpreter->pdb->cur_command;
-            PDB_run_command(interpreter,command);
+    if (!(interp->pdb->state & PDB_BREAK)) {
+        interp->pdb->state |= PDB_BREAK;
+        interp->pdb->state |= PDB_STOPPED;
+        interp->pdb->cur_opcode = (opcode_t *)cur_opcode + 1;
+        PDB_set_break(interp,NULL);
+        while (!(interp->pdb->state & PDB_EXIT)) {
+            PDB_get_command(interp);
+            command = interp->pdb->cur_command;
+            PDB_run_command(interp,command);
         }
-        /* FIXME this is not ok */
+        /* RT#42378 this is not ok */
         exit(0);
     }
-    interpreter->pdb->cur_opcode = (opcode_t *)cur_opcode + 1;
-    PDB_set_break(interpreter,NULL);
+    interp->pdb->cur_opcode = (opcode_t *)cur_opcode + 1;
+    PDB_set_break(interp,NULL);
 
     goto NEXT();
 }
@@ -118,17 +119,17 @@ Print all the Parrot registers at once.
 =cut
 
 op debug_print() :base_debug {
-    if (!(interpreter->pdb->state & PDB_BREAK)) {
+    if (!(interp->pdb->state & PDB_BREAK)) {
 #if 1
-	PIO_eprintf(interpreter, "debug_print is disabled\n");
+        PIO_eprintf(interp, "debug_print is disabled\n");
 #else
-	/*
-	 * XXX adjust register layout
-	 */
-        PDB_print_int(interpreter, &interpreter->int_reg, -1);
-        PDB_print_num(interpreter, &interpreter->num_reg, -1);
-        PDB_print_string(interpreter,&interpreter->string_reg, -1);
-        PDB_print_pmc(interpreter,&interpreter->pmc_reg, -1, NULL);
+        /*
+         * RT#42379 register layout
+         */
+        PDB_print_int(interp, &interp->int_reg, -1);
+        PDB_print_num(interp, &interp->num_reg, -1);
+        PDB_print_string(interp,&interp->string_reg, -1);
+        PDB_print_pmc(interp,&interp->pmc_reg, -1, NULL);
 #endif
     }
     goto NEXT();
@@ -141,7 +142,7 @@ Print a backtrace.
 =cut
 
 op backtrace() :base_debug {
-    PDB_backtrace(interpreter);
+    PDB_backtrace(interp);
     goto NEXT();
 }
 
@@ -154,8 +155,8 @@ Get the current line number.
 =cut
 
 inline op getline(out INT) {
-  struct Parrot_Context_info info;
-  Parrot_Context_info(interpreter, CONTEXT(interpreter->ctx), &info);
+  Parrot_Context_info info;
+  Parrot_Context_get_info(interp, CONTEXT(interp->ctx), &info);
   $1 = info.line;
   goto NEXT();
 }
@@ -167,12 +168,19 @@ Get the name of the current file.
 =cut
 
 inline op getfile(out STR) {
-  struct Parrot_Context_info info;
-  Parrot_Context_info(interpreter, CONTEXT(interpreter->ctx), &info);
-  $1 = string_from_cstring(interpreter, info.file, 0);
+  Parrot_Context_info info;
+  Parrot_Context_get_info(interp, CONTEXT(interp->ctx), &info);
+  $1 = string_from_cstring(interp, info.file, 0);
   goto NEXT();
 }
 
 =back
 
 =cut
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

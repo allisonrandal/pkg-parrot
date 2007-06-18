@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/config/init/defaults.pm 13660 2006-07-28T17:05:24.263356Z chip  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/config/init/defaults.pm 3367 2007-05-03T01:40:40.859036Z jkeenan  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Sets up the configuration system's default values and data structures.
 package init::defaults;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -21,27 +22,32 @@ use base qw(Parrot::Configure::Step::Base);
 use Config;
 use FindBin;    # see build_dir
 use Parrot::Configure::Step;
+use Parrot::BuildUtil;
+use Cwd qw(abs_path);
+use File::Spec;
 
 $description = q{Setting up Configure's default values};
 
-@args = qw(debugging optimize profile verbose prefix m);
+@args = qw(debugging optimize profile verbose m);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+my $parrot_version = Parrot::BuildUtil::parrot_version();
+my @parrot_version = Parrot::BuildUtil::parrot_version();
+
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     # We need a Glossary somewhere!
     $conf->data->set(
         debugging => $conf->options->get('debugging') ? 1 : 0,
         optimize  => '',
         verbose   => $conf->options->get('verbose'),
-        build_dir => $FindBin::Bin,
+        build_dir => abs_path($FindBin::Bin),
 
         # Compiler -- used to turn .c files into object files.
         # (Usually cc or cl, or something like that.)
         cc      => $Config{cc},
         ccflags => $Config{ccflags},
-        ccwarn  => exists($Config{ccwarn}) ? $Config{ccwarn} : '',
+        ccwarn  => exists( $Config{ccwarn} ) ? $Config{ccwarn} : '',
 
         # Flags used to indicate this object file is to be compiled
         # with position-independent code suitable for dynamic loading.
@@ -82,7 +88,7 @@ sub runstep
 
         # Flags to tell ld to build a dynamically loadable module, e.g.
         # -shared for GNU ld.
-        ld_load_flags     => $Config{lddlflags},
+        ld_load_flags => $Config{lddlflags},
 
         libs => $Config{libs},
 
@@ -117,14 +123,14 @@ sub runstep
         sym_import => '',
 
         # Library build directory
-        blib_dir      => 'blib/lib',
+        blib_dir => 'blib/lib',
 
         # libparrot library names
-        libparrot_static => 'libparrot'.$Config{_a},
-        libparrot_shared => 'libparrot.'.$Config{so},
+        libparrot_static => 'libparrot' . $Config{_a},
+        libparrot_shared => 'libparrot.' . $Config{so},
 
         # does the system know about static/dynamic linking?
-        has_static_linking => 1,
+        has_static_linking  => 1,
         has_dynamic_linking => 0,
 
         # default behaviour for linking parrot to a static or shared libparrot
@@ -134,6 +140,7 @@ sub runstep
         libparrot_soname => '',
 
         perl      => $^X,
+        perl_inc  => $self->find_perl_headers(),
         test_prog => 'parrot',
         rm_f      => '$(PERL) -MExtUtils::Command -e rm_f',
         rm_rf     => '$(PERL) -MExtUtils::Command -e rm_rf',
@@ -166,13 +173,13 @@ sub runstep
         lns   => $Config{lns},                          # soft link
         slash => '/',
 
-        VERSION => $main::parrot_version,
-        MAJOR   => $main::parrot_version[0],
-        MINOR   => $main::parrot_version[1],
-        PATCH   => $main::parrot_version[2],
-        DEVEL   => (-e 'DEVELOPING' ? '-devel' : ''),
+        VERSION => $parrot_version,
+        MAJOR   => $parrot_version[0],
+        MINOR   => $parrot_version[1],
+        PATCH   => $parrot_version[2],
+        DEVEL   => ( -e 'DEVELOPING' ? '-devel' : '' ),
 
-        configdate => scalar localtime,
+        configdate => scalar gmtime() . " GMT",
         PQ         => "'",
         dquote     => "\\\"",
 
@@ -187,26 +194,11 @@ sub runstep
 
     );
 
-    my $prefix = $conf->options->get('prefix');
-    unless (defined $prefix) {
-        my $VERSION = $conf->data->get('VERSION');
-        my $DEVEL   = $conf->data->get('DEVEL');
-        $prefix = "/usr/local";
-    }
-    $conf->data->set(
-        prefix      => $prefix,
-        exec_prefix => $prefix,
-        bin_dir     => $prefix . "/bin",
-        lib_dir     => $prefix . "/lib",
-        include_dir => $prefix . "/include",
-        doc_dir     => $prefix . "/share/doc/parrot",
-    );
-
     # add profiling if needed
-    # FIXME gcc syntax
+    # RT#41497 gcc syntax
     # we should have this in the hints files e.g. cc_profile
-    # FIXME move profiling to it's own step
-    if ($conf->options->get('profile')) {
+    # RT#41496 move profiling to it's own step
+    if ( $conf->options->get('profile') ) {
         $conf->data->set(
             cc_debug => " -pg ",
             ld_debug => " -pg ",
@@ -214,30 +206,44 @@ sub runstep
     }
 
     # adjust archname, cc and libs for e.g. --m=32
-    # TODO this is maybe gcc only
-    my $m = $conf->options->get('m');
+    # RT#41499 this is maybe gcc only
+    my $m        = $conf->options->get('m');
     my $archname = $Config{archname};
     if ($m) {
-	if ($archname =~ /x86_64/ && $m eq '32') { 
-	    $archname =~ s/x86_64/i386/;
+        if ( $archname =~ /x86_64/ && $m eq '32' ) {
+            $archname =~ s/x86_64/i386/;
 
-	    # adjust gcc?
-	    for my $cc qw(cc cxx link ld) {
-		$conf->data->add(' ', $cc, '-m32');
-	    }
-	    # and lib flags
-	    for my $lib qw(ld_load_flags ld_share_flags ldflags linkflags) {
-		my $item = $conf->data->get($lib);
-		(my $ni = $item) =~ s/lib64/lib/g;
-		$conf->data->set($lib, $ni);
-	    }
-	}
+            # adjust gcc?
+            for my $cc qw(cc cxx link ld) {
+                $conf->data->add( ' ', $cc, '-m32' );
+            }
+
+            # and lib flags
+            for my $lib qw(ld_load_flags ld_share_flags ldflags linkflags) {
+                my $item = $conf->data->get($lib);
+                ( my $ni = $item ) =~ s/lib64/lib/g;
+                $conf->data->set( $lib, $ni );
+            }
+        }
     }
-    # TODO adjust lib install-path /lib64 vs. lib
+
+    # RT#41500 adjust lib install-path /lib64 vs. lib
     # remember corrected archname - jit.pm was using $Config('archname')
-    $conf->data->set('archname', $archname);
+    $conf->data->set( 'archname', $archname );
 
     return $self;
 }
 
+sub find_perl_headers {
+    my $self = shift;
+    return File::Spec->catdir( $Config::Config{archlib}, 'CORE' );
+}
+
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,3 +1,6 @@
+#ifndef PARROT_PLATFORM_WIN32_STAT_H_GUARD
+#define PARROT_PLATFORM_WIN32_STAT_H_GUARD
+
 #ifndef S_IFMT
 #  ifdef _S_IFMT
 #    define S_IFMT _S_IFMT
@@ -7,7 +10,7 @@
 #endif
 
 #ifndef S_IFBLK
-# define S_IFBLK 0060000
+#  define S_IFBLK 0060000
 #endif
 
 #ifndef S_ISBLK
@@ -21,3 +24,12 @@
 #ifndef S_ISDIR
 #  define S_ISDIR(m) ((m & S_IFMT) == S_IFDIR)
 #endif
+
+#endif /* PARROT_PLATFORM_WIN32_STAT_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

@@ -5,11 +5,11 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Block/Conditional/If.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Block/Conditional/If.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Block::Conditional::If;
 
@@ -21,36 +21,43 @@ use base qw(Jako::Construct::Block::Conditional);
 # new()
 #
 
-sub new
-{
-  my $class = shift;
-  my ($block, $left, $op, $right) = @_;
+sub new {
+    my $class = shift;
+    my ( $block, $left, $op, $right ) = @_;
 
-  confess "Block is not defined!" unless defined $block;
-  confess "Left is not defined!" unless defined $left;
-  confess "Op is not defined!" unless defined $op;
-  confess "Right is not defined!" unless defined $right;
+    confess "Block is not defined!" unless defined $block;
+    confess "Left is not defined!"  unless defined $left;
+    confess "Op is not defined!"    unless defined $op;
+    confess "Right is not defined!" unless defined $right;
 
-  confess "Block is not!" unless UNIVERSAL::isa($block, 'Jako::Construct::Block');
-  confess "Left is not Value!" unless UNIVERSAL::isa($left, 'Jako::Construct::Expression::Value');
-  confess "Op is not scalar!" if ref $op;
-  confess "Right is not Value!" unless UNIVERSAL::isa($right, 'Jako::Construct::Expression::Value');
+    confess "Block is not!" unless UNIVERSAL::isa( $block, 'Jako::Construct::Block' );
+    confess "Left is not Value!"
+        unless UNIVERSAL::isa( $left, 'Jako::Construct::Expression::Value' );
+    confess "Op is not scalar!" if ref $op;
+    confess "Right is not Value!"
+        unless UNIVERSAL::isa( $right, 'Jako::Construct::Expression::Value' );
 
-  my $self = bless {
-    BLOCK     => $block,
+    my $self = bless {
+        BLOCK => $block,
 
-    KIND      => 'if',
-    LEFT      => $left,
-    OP        => $op,
-    RIGHT     => $right,
+        KIND  => 'if',
+        LEFT  => $left,
+        OP    => $op,
+        RIGHT => $right,
 
-    CONTENT   => [ ]
-  }, $class;
+        CONTENT => []
+    }, $class;
 
-  $block->push_content($self);
+    $block->push_content($self);
 
-  return $self;
+    return $self;
 }
 
-
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

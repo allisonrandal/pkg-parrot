@@ -1,4 +1,4 @@
-## $Id: /local/languages/perl6/src/builtins/op.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+## $Id: /parrotcode/trunk/languages/perl6/src/builtins/op.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
 
 =head1 NAME
 
@@ -61,8 +61,13 @@ src/builtins/op.pir - Perl6 builtin operators
 
 .sub 'prefix:+'
     .param pmc a
+    $I0 = does a, 'float'
+    if $I0 == 0 goto return_int
     $N0 = a
     .return ($N0)
+  return_int:
+    $I0 = a
+    .return ($I0)
 .end
 
 
@@ -271,5 +276,8 @@ src/builtins/op.pir - Perl6 builtin operators
 
 =cut
 
-
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

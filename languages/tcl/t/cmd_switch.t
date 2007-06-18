@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 16
+plan 23
 
 eval_is {switch} \
   {wrong # args: should be "switch ?switches? string pattern body ... ?default body?"} \
@@ -14,6 +20,10 @@ eval_is {switch a} \
 eval_is {switch -monkey a} \
   {bad option "-monkey": must be -exact, -glob, -indexvar, -matchvar, -nocase, -regexp, or --} \
   {bad flag, -monkey}
+
+eval_is {switch a {    }} \
+  {wrong # args: should be "switch ?switches? string {pattern body ... ?default body?}"} \
+  {empty body}
 
 eval_is {
  set q 1
@@ -102,7 +112,7 @@ eval_is {
 } 1 {implied exact, no match, no default}
 
 eval_is {
-  set q 1  
+  set q 1
   switch ab {
     b  { set q 2 }
     ab { set q 3 }
@@ -110,6 +120,36 @@ eval_is {
   }
   set q
 } 3 {implied exact, choices in list}
+
+eval_is {
+   switch -nocase C {
+     c       {set ok 1}
+     default {set ok 0}
+   }
+   set ok
+} 1 {implied exact, nocase subject}
+
+eval_is {
+  switch a {
+    a       -
+    b       {set ok 1}
+    default {set ok 0}
+  }
+  set ok
+} 1 {implied exact, fall-through}
+
+eval_is {
+  switch a {
+    a {set ok 1}
+    b -
+    c -
+  }
+} {no body specified for pattern "c"} \
+  {implied exact, fall through the end}
+
+eval_is {switch a {a 1 b}} \
+  {extra switch pattern with no body} \
+  {implied exact, pattern with no body}
 
 eval_is {
   set q 1
@@ -142,4 +182,12 @@ eval_is {
   set q
 } 5 {-glob, no match, default}
 
-# XXX Need -regexp tests 
+eval_is {switch -glob a {a 1 b}} \
+  {extra switch pattern with no body} \
+  {-glob, pattern with no body}
+
+# RT#40619: Need -regexp tests
+
+eval_is {switch -regexp a {a 1 b}} \
+  {extra switch pattern with no body} \
+  {-regexp, pattern with no body}

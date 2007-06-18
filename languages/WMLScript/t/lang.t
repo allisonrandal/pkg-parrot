@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/lang.t 13660 2006-07-28T17:05:24.263356Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/lang.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/lang.t - WMLScript Lang library
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/lang.t
+    % perl -I../lib WMLScript/t/lang.t
 
 =head1 DESCRIPTION
 
@@ -18,13 +18,14 @@ Tests WMLScript Lang Library
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 25;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.abs');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.abs' );
 extern function main()
 {
     var a = -3;
@@ -38,7 +39,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.abs');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.abs' );
 extern function main()
 {
     var a = Lang.abs(-3.14);
@@ -62,7 +63,7 @@ CODE
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.min');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.min' );
 extern function main()
 {
     var a = -3;
@@ -89,7 +90,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.min');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.min' );
 extern function main()
 {
     var a = Lang.min(3, invalid);
@@ -111,7 +112,7 @@ true
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.max');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.max' );
 extern function main()
 {
     var a = -3;
@@ -138,7 +139,7 @@ CODE
 1
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.max');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.max' );
 extern function main()
 {
     var a = Lang.max(3, invalid);
@@ -160,7 +161,7 @@ CODE
 2
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseInt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseInt' );
 extern function main()
 {
     var i = Lang.parseInt("1234");
@@ -178,7 +179,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseInt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseInt' );
 extern function main()
 {
     var a = Lang.parseInt(12);
@@ -202,7 +203,7 @@ CODE
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseFloat');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseFloat' );
 extern function main()
 {
     var a = Lang.parseFloat("123.7");
@@ -250,7 +251,7 @@ CODE
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseFloat');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.parseFloat' );
 extern function main()
 {
     var a = Lang.parseFloat(12);
@@ -276,7 +277,7 @@ CODE
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isInt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isInt' );
 extern function main()
 {
     var a = Lang.isInt(" -123");
@@ -302,7 +303,7 @@ false
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isInt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isInt' );
 extern function main()
 {
     var a = Lang.isInt(12);
@@ -311,7 +312,7 @@ extern function main()
     a = Lang.isInt(3.14);
     Console.println(a);
 
-    a = Lang.isInt(true);          
+    a = Lang.isInt(true);
     Console.println(a);
 
     a = Lang.isInt(invalid);
@@ -324,7 +325,7 @@ false
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isFloat');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isFloat' );
 extern function main()
 {
     var a = Lang.isFloat(" -123");
@@ -350,7 +351,7 @@ false
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isFloat');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.isFloat' );
 extern function main()
 {
     var a = Lang.isFloat(12);
@@ -372,7 +373,7 @@ false
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.maxInt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.maxInt' );
 extern function main()
 {
     var a = Lang.maxInt();
@@ -384,7 +385,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.minInt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.minInt' );
 extern function main()
 {
     var a = Lang.minInt();
@@ -396,7 +397,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.float');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.float' );
 extern function main()
 {
     var a = Lang.float();
@@ -408,7 +409,7 @@ true
 3
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.exit(0)');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.exit(0)' );
 extern function main()
 {
     Console.println("exit");
@@ -420,7 +421,7 @@ exit
 
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.exit("1")');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.exit("1")' );
 extern function main()
 {
     Console.println("exit");
@@ -432,7 +433,7 @@ exit
 
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.exit(invalid)');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.exit(invalid)' );
 extern function main()
 {
     Console.println("exit");
@@ -444,7 +445,7 @@ exit
 
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.abort');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.abort' );
 extern function main()
 {
     Lang.abort("abort");
@@ -454,7 +455,7 @@ CODE
 abort
 OUT
 
-language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'Lang.random');
+language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'Lang.random' );
 extern function main()
 {
     var a = Lang.random(10);
@@ -464,7 +465,7 @@ CODE
 /^\d$/
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.random');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.random' );
 extern function main()
 {
     var a = Lang.random("invalid");
@@ -474,7 +475,7 @@ CODE
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.seed');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.seed' );
 extern function main()
 {
     var a = Lang.seed(3.14);
@@ -486,7 +487,7 @@ CODE
 2
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.characterSet');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Lang.characterSet' );
 extern function main()
 {
     var a = Lang.characterSet();
@@ -497,4 +498,11 @@ CODE
 4
 0
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

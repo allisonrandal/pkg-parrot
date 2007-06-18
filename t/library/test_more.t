@@ -1,10 +1,5 @@
 #!./parrot
 
-.macro IMPORT ( lib, subname )
-	import_sub = find_global .lib, .subname
-	store_global .subname, import_sub
-.endm
-
 .sub _main :main
 	load_bytecode 'library/Test/Builder/Tester.pir'
 	load_bytecode 'library/Test/More.pir'
@@ -18,24 +13,25 @@
 	.local pmc test
 	test = new tb_type, tb_args
 
-	.local pmc import_sub
-	.IMPORT( 'Test::More', 'ok' )
-	.IMPORT( 'Test::More', 'is' )
-	.IMPORT( 'Test::More', 'diag' )
-	.IMPORT( 'Test::More', 'like' )
-	.IMPORT( 'Test::More', 'is_deeply' )
-	.IMPORT( 'Test::Builder::Tester', 'plan' )
-	.IMPORT( 'Test::Builder::Tester', 'test_diag' )
-	.IMPORT( 'Test::Builder::Tester', 'test_fail' )
-	.IMPORT( 'Test::Builder::Tester', 'test_pass' )
-	.IMPORT( 'Test::Builder::Tester', 'test_test' )
+	.local pmc exports, curr_namespace, test_namespace
+	curr_namespace = get_namespace
+	test_namespace = get_namespace [ "Test::More" ]
+	exports = split " ", "ok is diag like skip todo is_deeply isa_ok"
+	test_namespace.export_to(curr_namespace, exports)
 
-	plan( 42 )
+	test_namespace = get_namespace [ "Test::Builder::Tester" ]
+	exports = split " ", "plan test_out test_diag test_fail test_pass test_test"
+	test_namespace.export_to(curr_namespace, exports)
+
+	plan( 58 )
+	test_skip()
+	test_todo()
 	test_ok()
 	test_is()
 	test_like()
 	test_is_deeply()
 	test_diagnostics()
+	test_isa_ok()
 
 	test.'finish'()
 .end
@@ -328,4 +324,100 @@
 	diag( 'rum tum tugger')
 	test_diag( "foo bar baz\nrum tum tugger" )
 	test_test( 'multi line diagnostics' )
+.end
+
+.sub test_skip
+
+    .local pmc test
+    test = new 'Test::Builder'
+
+	test_out( 'ok 1 #skip skipping' )
+	test_out( 'ok 2 #skip skipping' )
+    test.'skip'( 2, 'skipping' )
+	test_test( 'skip test should pass' )
+
+	test_out( 'ok 3 #skip skipped' )
+	skip( 1 )
+	test_test( 'skip(int)' )
+
+	test_out( 'ok 4 #skip jumping' )
+	skip( "jumping" )
+	test_test( 'skip(string)' )
+
+	test_out( 'ok 5 #skip lunch' )
+	test_out( 'ok 6 #skip lunch' )
+	skip( 2, "lunch" )
+	test_test( 'skip(int, string)' )
+
+	test_out( 'ok 7 #skip skipped' )
+	skip()
+	test_test( 'skip()' )
+.end
+
+.sub test_todo
+
+    .local pmc test
+    test = new 'Test::Builder'
+
+    test_out( 'ok 8 # TODO passing test' )
+    test.'todo'( 1, 'passing test', 'todo reason' )
+    test_test( 'todo test should pass, marked as TODO' )
+
+    test_out( 'not ok 9 # TODO failing test' )
+    test.'todo'( 0, 'failing test', 'todo reason' )
+    test_test( 'todo test should fail, marked as TODO' )
+
+    test_out( 'ok 10 # TODO passing test' )
+    todo( 1, 'passing test', 'todo reason' )
+    test_test( 'todo test should pass, marked as TODO' )
+
+    test_out( 'not ok 11 # TODO failing test' )
+    todo( 0, 'failing test', 'todo reason' )
+    test_test( 'todo test should fail, marked as TODO' )
+
+    test_out( 'not ok 12 # TODO' )
+    todo( 0 )
+    test_test( 'todo test with no description or reason' )
+
+.end
+
+.sub test_isa_ok
+	.local pmc dog, terrier, daschund, Spot, Sossy
+
+	dog = newclass "dog"
+	terrier = subclass dog, "terrier"
+	daschund = subclass dog, "daschund"
+
+	Spot = new "terrier"
+	Sossy = new "daschund"
+
+	test_pass( 'Spot isa terrier' )
+	isa_ok(Spot, "terrier", "Spot")
+	test_test( 'passing isa_ok for PMC/string (class =)' )
+
+	test_pass( 'Spot isa dog' )
+	isa_ok(Spot, "dog", "Spot")
+	test_test( 'passing isa_ok for PMC/string (super)')
+
+	test_pass( 'Sossy isa daschund' )
+	$P1 = new String
+        $P1 = "daschund"
+	isa_ok(Sossy, $P1, "Sossy")
+	test_test( 'passing isa_ok for PMC/PMC (class =)' )
+
+	test_pass( 'Sossy isa dog' )
+	$P2 = new String
+        $P2 = "dog"
+	isa_ok(Sossy, $P2, "Sossy")
+	test_test( 'passing isa_ok for PMC/PMC (super)')
+
+	test_pass( 'The object isa terrier' )
+	isa_ok(Spot, "terrier")
+	test_test( 'passing isa_ok with no object description (class =)' )
+
+	test_fail( 'Spot isa daschund' )
+	test_diag( "Spot isn't a daschund it's a terrier" )
+	isa_ok(Spot, 'daschund', "Spot")
+	test_test( 'failing test isnt() for PMC/string')
+
 .end

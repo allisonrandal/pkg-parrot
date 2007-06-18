@@ -1,4 +1,4 @@
-# $Id: /local/languages/m4/examples/eval.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/m4/examples/eval.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 
 =head1 NAME
 
@@ -43,3 +43,9 @@ INVOKE_COMPILED_CODE:
     print "\n"
 
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

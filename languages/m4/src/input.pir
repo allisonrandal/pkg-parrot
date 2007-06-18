@@ -1,4 +1,4 @@
-# $Id: /local/languages/m4/src/input.pir 12442 2006-04-27T03:57:44.847309Z pmichaud  $
+# $Id: /parrotcode/trunk/languages/m4/src/input.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 
 =head1 NAME 
 
@@ -7,7 +7,7 @@ input.pir - Setting up input and reading input
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer. All Rights Reserved.
-SVN Info:   $Id: /local/languages/m4/src/input.pir 12442 2006-04-27T03:57:44.847309Z pmichaud  $
+SVN Info:   $Id: /parrotcode/trunk/languages/m4/src/input.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -99,16 +99,12 @@ TODO: open these files and complain when they don't or pass filehandles
   # TODO: this is badly broken, when there are multiple input files
   state['current_file'] = filename
 
-  .local pmc in
-  in = open filename, '<'
-  if in goto PROCESS_SINGLE_FILE
-    printerr filename
-    printerr " not found\n"
-    end
-  PROCESS_SINGLE_FILE:
   .local string input_string    # input file handle
-  input_string = read in, 50000
-  close in
+  .local pmc    pio
+  .local int    is_defined
+
+  pio = new 'ParrotIO'
+  input_string = pio.slurp( filename )
 
   # state['stack';'input'] has been created in input_init 
   # TODO: seperate input blocks for every file
@@ -238,3 +234,9 @@ Uses regular expressions for finding tokens.
 
   .return ( token_type, token_data )
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

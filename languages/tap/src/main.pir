@@ -1,4 +1,4 @@
-## $Id: /local/languages/tap/src/main.pir 13278 2006-07-13T13:40:14.092490Z coke  $
+## $Id: /parrotcode/trunk/languages/tap/src/main.pir 3061 2007-04-09T22:01:09.122746Z paultcochrane  $
 
 =head1 NAME
 
@@ -136,4 +136,8 @@ it under the same terms as Parrot.
 
 =cut
 
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

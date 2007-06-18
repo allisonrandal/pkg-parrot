@@ -5,11 +5,11 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Block/Loop/Until.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Block/Loop/Until.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Block::Loop::Until;
 
@@ -17,35 +17,39 @@ use Carp;
 
 use base qw(Jako::Construct::Block::Loop);
 
-
 #
 # new()
 #
 
-sub new
-{
-  my $class = shift;
+sub new {
+    my $class = shift;
 
-  confess "Expected 5 args!" unless @_ == 5;
+    confess "Expected 5 args!" unless @_ == 5;
 
-  my ($block, $prefix, $left, $op, $right) = @_;
+    my ( $block, $prefix, $left, $op, $right ) = @_;
 
-  my $self = bless {
-    BLOCK     => $block,
+    my $self = bless {
+        BLOCK => $block,
 
-    PREFIX    => $prefix,
-    KIND      => 'until',
-    LEFT      => $left,
-    OP        => $op,
-    RIGHT     => $right,
+        PREFIX => $prefix,
+        KIND   => 'until',
+        LEFT   => $left,
+        OP     => $op,
+        RIGHT  => $right,
 
-    CONTENT   => [ ]
-  }, $class;
+        CONTENT => []
+    }, $class;
 
-  $block->push_content($self);
+    $block->push_content($self);
 
-  return $self;
+    return $self;
 }
 
-
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

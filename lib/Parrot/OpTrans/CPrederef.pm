@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/OpTrans/CPrederef.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/OpTrans/CPrederef.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -9,7 +9,8 @@ Parrot::OpTrans::CPrederef - C Predereferenced Transform
 =head1 DESCRIPTION
 
 C<Parrot::OpTrans::CPrederef> inherits from C<Parrot::OpTrans::C>
-to provide predereferenced register addressing run loop.
+to provide basic functionality for predereferenced run loops (switch,
+CGP).
 
 =head2 Instance Methods
 
@@ -25,81 +26,22 @@ use warnings;
 use Parrot::OpTrans;
 use base qw( Parrot::OpTrans::C );
 
-=item C<core_type()>
-
-The core type is C<PARROT_PREDEREF_CORE>.
-
-=cut
-
-sub core_type
-{
-    return 'PARROT_PREDEREF_CORE';
-}
-
-=item C<prefix()>
-
-The prefix is C<'Parrot_pred_'>.
-
-This is used in C<Parrot::Op>'s C<func_name()>.
-
-=cut
-
-sub prefix
-{
-    return 'Parrot_pred_';
-}
-
 =item C<defines()>
 
 Returns the C C<#define> macros required by the ops.
 
 =cut
 
-sub defines
-{
+sub defines {
+    my $type = __PACKAGE__;
     return <<END;
-#define REL_PC ((size_t)(cur_opcode - interpreter->code->prederef.code))
-#define CUR_OPCODE ((opcode_t*)cur_opcode + CONTEXT(interpreter->ctx)->pred_offset)
-
-#if 0
-static opcode_t* prederef_to_opcode(Interp* interpreter,
-                                           void** prederef_addr)
-{
-    INTVAL offset_in_ops;
-    if (prederef_addr == NULL) return NULL;
-    offset_in_ops = prederef_addr - interpreter->code->prederef.code;
-    return (opcode_t*) interpreter->code->base.data + offset_in_ops;
-}
-
-static void** opcode_to_prederef(Interp* interpreter,
-                                        opcode_t* opcode_addr)
-{
-    INTVAL offset_in_ops;
-    if (opcode_addr == NULL) return NULL;
-    offset_in_ops = opcode_addr - (opcode_t*) interpreter->code->base.data;
-    return interpreter->code->prederef.code + offset_in_ops;
-}
-#else
-#  define prederef_to_opcode(i, pred) (pred ? \\
-     ((opcode_t*)pred + CONTEXT(i->ctx)->pred_offset) : NULL)
-#  define opcode_to_prederef(i, op)   (op ? \\
-     (void**) (op   - CONTEXT(i->ctx)->pred_offset) : NULL)
-#endif
-
+/* defines - $0 -> $type */
+#define REL_PC ((size_t)(cur_opcode - interp->code->prederef.code))
+#define CUR_OPCODE \\
+    ((opcode_t*)cur_opcode + CONTEXT(interp->ctx)->pred_offset)
 #define OP_AS_OFFS(o) (_reg_base + ((opcode_t*)cur_opcode)[o])
 
 END
-}
-
-=item C<suffix()>
-
-The suffix is C<'_prederef'>.
-
-=cut
-
-sub suffix
-{
-    return "_prederef";
 }
 
 =item C<opsarraytype()>
@@ -108,78 +50,44 @@ The ops array type is C<void *>.
 
 =cut
 
-sub opsarraytype
-{
-    return 'void *'
-};
-
-=item C<gen_goto($where)>
-
-TODO - This is the same implementation as in C<Parrot::OpTrans>. It
-should not be duplicated.
-
-=cut
-
-sub gen_goto
-{
-    my ($self, $where_str) = @_;
-    return "return $where_str";
+sub opsarraytype {
+    return 'void *';
 }
 
-=item C<expr_pop()>
+=item expr_address($addr)
 
-Addresses on the stack are pointers into the bytecode array, and so
-must be converted to pointers into the prederef array.
+=item expr_address($offset)
+
+=item expr_pop()
+
+Create various address parts.
 
 =cut
 
-sub expr_pop
-{
-    my ($self) = @_;
-    return "opcode_to_prederef(interpreter, pop_dest(interpreter))";
+sub expr_address {
+    my ( $self, $addr ) = @_;
+    return "opcode_to_prederef(interp, $addr)";
 }
 
-=item C<expr_address($address)>
-
-Same logic as C<expr_pop()>.
-
-=cut
-
-sub expr_address
-{
-    my ($self, $addr) = @_;
-    return "opcode_to_prederef(interpreter, $addr)";
-}
-
-=item C<expr_offset($offset)>
-
-=item C<goto_offset($offset)>
-
-=item C<goto_address($address)>
-
-CPrederef is funky in that expr OFFSET(n) uses a pointer to the
-original bytecode, but goto OFFSET(n) returns a pointer into the
-prederef array. (see expr_pop(), above, for a description of why this
-works.)
-
-=cut
-
-sub expr_offset
-{
-    my ($self, $offset) = @_;
+sub expr_offset {
+    my ( $self, $offset ) = @_;
     return "CUR_OPCODE + $offset";
 }
 
-sub goto_offset
-{
-    my ($self, $offset) = @_;
-    return "return cur_opcode + $offset";
+sub expr_pop {
+    my ($self) = @_;
+    return "opcode_to_prederef(interp, pop_dest(interp))";
 }
 
-sub goto_address
-{
-    my ($self, $addr) = @_;
-    return "return opcode_to_prederef(interpreter,  (opcode_t *)$addr)";
+sub run_core_func_decl {
+    my ( $self, $core ) = @_;
+
+    my $type   = __PACKAGE__;
+    my $prefix = $self->core_prefix;
+    return <<END;
+/* run_core_func_decl - $0 -> $type */
+void ** $prefix$core(void **cur_op, Parrot_Interp interp)
+END
 }
 
 =item C<access_arg($type, $num, $op)>
@@ -189,32 +97,31 @@ C<Parrot::OpTrans>) and value. C<$op> is an instance of C<Parrot::Op>.
 
 =cut
 
-sub access_arg
-{
-    my ($self, $type, $num, $op) = @_;
+sub access_arg {
+    my ( $self, $type, $num, $op ) = @_;
 
     my %arg_maps = (
         'op' => "cur_opcode[%ld]",
 
         'i'  => "(*(INTVAL *)OP_AS_OFFS(%ld))",
-        'ki'  => "(*(INTVAL *)OP_AS_OFFS(%ld))",
+        'ki' => "(*(INTVAL *)OP_AS_OFFS(%ld))",
         'n'  => "(*(FLOATVAL *)OP_AS_OFFS(%ld))",
         'p'  => "(*(PMC **)OP_AS_OFFS(%ld))",
         's'  => "(*(STRING **)OP_AS_OFFS(%ld))",
         'k'  => "(*(PMC **)OP_AS_OFFS(%ld))",
 
-        'ic' => "((INTVAL)cur_opcode[%ld])",
+        'ic'  => "((INTVAL)cur_opcode[%ld])",
         'kic' => "((INTVAL)cur_opcode[%ld])",
-        'nc' => "(*(FLOATVAL *)cur_opcode[%ld])",
-        'sc' => "((STRING *)cur_opcode[%ld])",
-        'pc' => "((PMC *)cur_opcode[%ld])",
-        'kc' => "((PMC *)cur_opcode[%ld])",
+        'nc'  => "(*(FLOATVAL *)cur_opcode[%ld])",
+        'sc'  => "((STRING *)cur_opcode[%ld])",
+        'pc'  => "((PMC *)cur_opcode[%ld])",
+        'kc'  => "((PMC *)cur_opcode[%ld])",
     );
 
     die "Unrecognized type '$type' for num '$num' in opcode @{[$op->full_name]}"
         unless exists $arg_maps{$type};
 
-    return sprintf($arg_maps{$type}, $num);
+    return sprintf( $arg_maps{$type}, $num );
 }
 
 =back
@@ -241,3 +148,9 @@ sub access_arg
 
 1;
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,122 +1,110 @@
-#!/usr/bin/perl
+#!perl
 
-use strict;
-use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 15;
-use Test::More;
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
-language_output_is("tcl",<<'TCL',<<OUT,"simple");
+source lib/test_more.tcl
+
+plan 15
+
+eval_is {
  set a 2
  incr a
- puts $a
-TCL
-3
-OUT
+ set a
+} 3 simple
 
-language_output_is("tcl",<<'TCL',<<OUT,"offset");
+eval_is {
  set a 1
  incr a 5
- puts $a
-TCL
-6
-OUT
+ set a
+} 6 offset
 
-language_output_is("tcl",<<'TCL',<<OUT,"negative offset");
+eval_is {
  set a 2
  incr a -1
- puts $a
-TCL
-1
-OUT
+ set a
+} 1 {negative offset}
 
-language_output_is("tcl",<<'TCL',<<OUT,"return value");
+eval_is {
  set a 1
- set b [incr a]
- puts $b
-TCL
-2
-OUT
+ incr a
+} 2 {return value}
 
-language_output_is("tcl",<<'TCL',<<OUT,"negative base");
+eval_is {
  set a -2
  incr a
- puts $a
-TCL
--1
-OUT
+ set a
+} -1 {negative base}
 
-language_output_is("tcl",<<'TCL',<<OUT,"explicit positive offset");
+
+eval_is {
  set a 2
  incr a +3
- puts $a
-TCL
-5
-OUT
+ set a
+} 5 {explicit positive offset}
 
-language_output_is("tcl",<<'TCL',<<OUT,"too many args");
+eval_is {
  set a 1
  incr a 3 2
- puts $a
-TCL
-wrong # args: should be "incr varName ?increment?"
-OUT
+ set a
+} {wrong # args: should be "incr varName ?increment?"} {too many args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"too few args");
+eval_is {
  set a 1
  incr
  puts $a
-TCL
-wrong # args: should be "incr varName ?increment?"
-OUT
+} {wrong # args: should be "incr varName ?increment?"} {too few args}
 
-language_output_is("tcl",<<'TCL',<<'OUT',"expected integer, got alpha");
+eval_is {
   set a 1
   incr a a
-TCL
-expected integer but got "a"
-OUT
+} {expected integer but got "a"} {expected integer, got alpha}
 
-language_output_is("tcl",<<'TCL',<<'OUT',"expected integer, got float");
+# This test fails in tclsh8.5a5:
+# https://sourceforge.net/tracker/?func=detail&atid=110894&aid=1602991&group_id=10894
+eval_is {
   set a 1
   incr a 1.5
-TCL
-expected integer but got "1.5"
-OUT
+} {expected integer but got "1.5"} {expected integer, got float}
 
-language_output_is("tcl",<<'TCL',<<'OUT',"no such variable");
+# as of 8.5, this autovivifies the variable
+eval_is {
+  catch {unset a}
   incr a
-TCL
-can't read "a": no such variable
-OUT
+} 1 {no such variable} {TODO {not changed yet. this will require some work}}
 
-# Uses the same parsing mechanism as 
+
+# Uses the same parsing mechanism as
 # [expr <octal>] - all the edge cases are tested there.
-language_output_is("tcl",<<'TCL',<<'OUT',"octal offset");
-  set i 25; incr i 000012345
-  puts $i
-TCL
-5374
-OUT
+eval_is {
+  set i 25
+  incr i 000012345
+  set i
+} 5374 {octal offset}
 
-language_output_is("tcl", <<'TCL', <<'OUT', 'not an int');
+eval_is {
   set x foo
   incr x
-TCL
-expected integer but got "foo"
-OUT
+} {expected integer but got "foo"} {not an int}
 
-language_output_is('tcl', <<'TCL', <<'OUT', 'space padded int');
+eval_is {
   set x {   14   }
   incr x
-  puts $x
-TCL
-15
-OUT
+  set x
+} 15 {space padded int}
 
-language_output_is('tcl', <<'TCL', <<'OUT', 'hex variable');
+eval_is {
   set x 0xff
-  puts [incr x]
-TCL
-256
-OUT
+  incr x
+  set x
+} 256 {hex variable}
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

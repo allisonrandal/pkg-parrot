@@ -1,13 +1,6 @@
-#!perl
+#! parrot
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/info.t 12838 2006-05-30T14:19:10.150135Z coke  $
-
-use strict;
-use warnings;
-use lib qw( . lib ../lib ../../lib );
-use Test::More;
-use Parrot::Test;
-
+# $Id: /parrotcode/local/t/op/info.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -23,17 +16,29 @@ Tests the information finding operations.
 
 =cut
 
+.sub main :main
+    # load this library
+    load_bytecode 'library/Test/More.pir'
 
-pasm_output_is(<<'CODE', 'yes', "find_type");
-	set I0, .ResizablePMCArray
-	find_type I1, "ResizablePMCArray"
-	eq I0, I1, YES
- NO:	print "no"
-	end
- YES:   print "yes"
-	end
-CODE
+    # get the testing functions
+    .local pmc exports, curr_namespace, test_namespace
+    curr_namespace = get_namespace
+    test_namespace = get_namespace [ "Test::More" ]
+    exports = split " ", "plan diag ok is is_deeply like isa_ok"
+
+    test_namespace."export_to"(curr_namespace, exports)
+
+    plan(1)
 
 
-## remember to change the number of tests :-)
-BEGIN { plan tests => 1; }
+    set I0, .ResizablePMCArray
+    find_type I1, "ResizablePMCArray"
+    is (I0, I1, 'find_type matches dot syntax')
+.end
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

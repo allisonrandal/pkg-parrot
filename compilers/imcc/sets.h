@@ -1,4 +1,4 @@
-#if !defined(PARROT_IMCC_SETS_H_GUARD)
+#ifndef PARROT_IMCC_SETS_H_GUARD
 #define PARROT_IMCC_SETS_H_GUARD
 
 typedef struct _Set {
@@ -12,8 +12,8 @@ void set_free(Set*);
 void set_clear(Set *s) ;
 Set* set_copy(Set*);
 
-int set_equal (Set*, Set*);
-void set_add (Set*, int);
+int set_equal(Set*, Set*);
+void set_add(Set*, int);
 int set_contains(Set*, int);
 Set* set_union(Set*, Set*);
 Set* set_intersec(Set*, Set*);
@@ -21,4 +21,12 @@ void set_intersec_inplace(Set*, Set*);
 int set_first_zero(Set *s);
 
 #endif /* PARROT_IMCC_SETS_H_GUARD */
+
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
 

@@ -27,16 +27,17 @@ grammar Cardinal::PIRGrammar is TGE::Grammar;
 
 transform root (Cardinal::POST::Ops) :language('PIR') {
     .local pmc code
-    code = new 'PGE::CodeString'
-    self.'top_level_code'(code)
     $P0 = tree.get('pir', node)
-    $P0 .= code
     .return ($P0)
 }
 
 transform pir (Cardinal::POST::Op) :language('PIR') {
     $P0 = node.'pir'(self)
     .return ($P0)
+}
+
+transform pir (Cardinal::POST::NOP) :language('PIR') {
+    .return ('')
 }
 
 transform pir (Cardinal::POST::Label) :language('PIR') {
@@ -66,6 +67,8 @@ transform pir (Cardinal::POST::Var) :language('PIR') {
     if scope == 'lexical' goto generate_lexical
     if scope == 'parameter' goto generate_parameter
     if scope == 'global' goto generate_global
+    if scope == 'instance' goto generate_instance
+    if scope == 'class' goto generate_class
     goto generate_find
 
   generate_parameter:
@@ -88,6 +91,15 @@ transform pir (Cardinal::POST::Var) :language('PIR') {
   generate_find:
     if islvalue goto end
     code.'emit'("    %0 = find_name '%1'", value, name)
+    goto end
+  generate_instance:
+    if islvalue goto end
+    code.'emit'("    %0 = getattribute self, '%1'", value, name)
+    goto end
+  generate_class:
+    if islvalue goto end
+    code.'emit'("    %0 = self.'_get_class_var'('%1')", value, name)
+    goto end
   end:
     .return (code)
 }
@@ -130,11 +142,19 @@ transform pir (Cardinal::POST::Assign) :language('PIR') {
     if scope == 'outerpackage' goto store_package
     if scope == 'package' goto store_package
     if scope == 'global' goto store_package
+    if scope == 'instance' goto store_instance
+    if scope == 'class' goto store_class
   store_lexical:
     code.'emit'("    store_lex '%0', %1", name, rvalue)
     .return (code)
   store_package:
     code.'emit'("    set_hll_global '%0', %1", name, rvalue)
+    .return (code)
+  store_instance:
+    code.'emit'("    self.'_store_instance_var'('%0', %1) ", name, rvalue)
+    .return (code)
+  store_class:
+    code.'emit'("    self.'_store_class_var'('%0', %1)", name, rvalue)
     .return (code)
 }
 
@@ -142,8 +162,7 @@ transform pir (Cardinal::POST::Call) :language('PIR') {
     .local pmc code
     .local string sub_name
     .local string args
-    $P0 = node[0]
-    sub_name = $P0.'name'()
+    sub_name = node.'name'()
     args = ""
     code = new 'PGE::CodeString'
     code.'emit'("    '%0'(%1)", sub_name, args)
@@ -158,18 +177,40 @@ transform pir (Cardinal::POST::Raw) :language('PIR') {
     .return (code)
     }
 
+transform pir (Cardinal::POST::Namespace) :language('PIR') {
+    .local pmc code
+    .local pmc iter
+
+    code = new 'PGE::CodeString'
+    code .= "\n.namespace [ "
+    $S0 = node.'get_pir_name'()
+    code .= $S0
+    code .= " ]\n"
+
+    iter = node.'child_iter'()
+  iter_loop:
+    unless iter goto iter_end
+    $P0 = shift iter
+    $P1 = tree.'get'('pir', $P0)
+    code .= $P1
+    goto iter_loop
+  iter_end:
+
+    .return (code)
+}
+
+transform pir (Cardinal::POST::NamespaceLookup) :language('PIR') {
+    $P0 = node.'pir'(self)
+    .return ($P0)
+}
+
 transform pir (Cardinal::POST::Sub) :language('PIR') {
-    
-    ##   create a new (empty) variable hash and prologue for this sub
-    .local pmc varhash
     .local pmc prologue
-    .local string subtype
-    
-    subtype = node.'subtype'()
-    varhash = new .Hash
-    node.'varhash'(varhash)
+    .local pmc varhash
     prologue = new 'PGE::CodeString'
     node.'prologue'(prologue)
+    varhash = new .Hash
+    node.'varhash'(varhash)
 
     .local string name
     .local string outerattr
@@ -178,44 +219,43 @@ transform pir (Cardinal::POST::Sub) :language('PIR') {
     outer = node.'outer'()
     outerattr = ''
     $I0 = defined outer
-    if $I0 == 0 goto with_outerattr
+    unless $I0 goto with_outerattr
     outerattr = outer.'name'()
+    eq outerattr, '', with_outerattr
     outerattr = concat ":outer('", outerattr
     outerattr = concat outerattr, "')"
   with_outerattr:
-    .local pmc code, iter, subcode
-    ## build the code for this sub
+
     .local string adverbs
     adverbs = node.'adverbs'()
     prologue.'emit'("\n.sub '%0' %1 %2", name, outerattr, adverbs)
-    subcode = new 'PGE::CodeString'
-
-    $P2 = self.'scope_stack'()
-    push $P2, node
+    
+    .local pmc subcode_parts
+    .local pmc iter
+    subcode_parts = new 'PGE::CodeString'
     iter = node.'child_iter'()
+
+    self.'push_scope_stack'(node)
   iter_loop:
     unless iter goto iter_end
     $P0 = shift iter
     $P1 = tree.'get'('pir', $P0)
-    subcode .= $P1
+    subcode_parts .= $P1
     goto iter_loop
   iter_end:
-    pop $P0, $P2
-    
+    self.'pop_scope_stack'()
+
     .local string value
-    prologue = node.'prologue'()
-    subcode = concat prologue, subcode
     value = node.'value'()
+    prologue = node.'prologue'()
+
+    .local pmc subcode
+    subcode = new 'PGE::CodeString'
+    subcode .= prologue
+    subcode .= subcode_parts
     subcode.'emit'("    .return (%0)\n.end\n", value)
-    self.'add_sub'(subcode)
     
-    ne subtype, 'begin', return
-    ##  generate the pir to locate this sub and return it
-    code = new 'PGE::CodeString'
-    code.'emit'("    '%0'()",  name)
-    .return (code)
-    return:
-    .return ("")
+    .return (subcode)
 }
 
 =head1 LICENSE

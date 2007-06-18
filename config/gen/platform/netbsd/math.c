@@ -1,4 +1,4 @@
-# $Id: /local/config/gen/platform/netbsd/math.c 13278 2006-07-13T13:40:14.092490Z coke  $
+/* $Id: /parrotcode/trunk/config/gen/platform/netbsd/math.c 3335 2007-05-01T13:29:35.445138Z bernhard  $ */
 
 /*
  * math stuff
@@ -23,16 +23,16 @@ _LIB_VERSION_TYPE _LIB_VERSION = _IEEE_;
 PARROT_API extern int
 Parrot_signbit(double x)
 {
-   union {
-       double d;
-       int i[2];
-   } u;
-   u.d = x;
-#if PARROT_BIGENDIAN
-   return u.i[0] < 0;
-#else
-   return u.i[1] < 0;
-#endif
+    union {
+        double d;
+        int i[2];
+    } u;
+    u.d = x;
+#  if PARROT_BIGENDIAN
+    return u.i[0] < 0;
+#  else
+    return u.i[1] < 0;
+#  endif
 }
 #endif
 
@@ -40,11 +40,18 @@ Parrot_signbit(double x)
 int
 Parrot_signbit_l(long double x)
 {
-   union {
-       long double d;
-       int i[3];
-   } u;
-   u.d = x;
-   return u.i[2] < 0;
+    union {
+        long double d;
+        int i[3];
+    } u;
+    u.d = x;
+    return u.i[2] < 0;
 }
 #endif
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

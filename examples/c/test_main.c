@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/examples/c/test_main.c 13810 2006-08-02T16:31:20.828767Z chip  $
+$Id: /parrotcode/trunk/examples/c/test_main.c 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -9,7 +9,7 @@ src/test_main.c - A sample test program
 =head1 DESCRIPTION
 
 C<examples/c/test_main.c> is being retained as an example of a non-trivial, but
-still clean, Parrot embedding. 
+still clean, Parrot embedding.
 
 =head2 Functions
 
@@ -212,7 +212,8 @@ usage(void)
 #ifdef HAVE_COMPUTED_GOTO
     const char* cgoto_info = "Deactivate computed goto";
 #else
-    const char* cgoto_info = "Deactivate computed goto (not available on this platform)";
+    const char* cgoto_info =
+        "Deactivate computed goto (not available on this platform)";
 #endif
 
     fprintf(stderr,
@@ -258,7 +259,8 @@ version(void)
             PARROT_ARCHNAME "\n\
 Copyright (C) 2001-2003, The Perl Foundation.\n\
 \n\
-Parrot may be copied only under the terms of either the Artistic License or the\n\
+Parrot may be copied only under the terms of either the Artistic License or the\
+\n\
 GNU General Public License, which may be found in the Parrot source kit.\n\
 \n\
 This program is distributed in the hope that it will be useful,\n\
@@ -288,11 +290,8 @@ performs that role.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */
 

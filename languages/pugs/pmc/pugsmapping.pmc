@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/languages/pugs/pmc/pugsmapping.pmc 12840 2006-05-30T15:08:05.048089Z coke  $
+$Id: /parrotcode/trunk/languages/pugs/pmc/pugsmapping.pmc 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ C<PugsMapping> extends C<OrderedHash> to provide a Perl 6 C<Mapping>.
 
 #include "parrot/parrot.h"
 
-pmclass PugsMapping extends PugsAny need_ext 
+pmclass PugsMapping extends PugsAny need_ext
     extends OrderedHash
     does array
     does hash
@@ -42,10 +42,7 @@ pmclass PugsMapping extends PugsAny need_ext
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

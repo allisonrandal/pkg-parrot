@@ -1,14 +1,24 @@
-#!/usr/bin/perl
+#!perl
 
 use strict;
+use warnings;
 use lib qw(t . lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 1;
+use Parrot::Test tests => 2;
 use Test::More;
 
-TODO: {
-local $TODO = 'unimplemented feature';
+language_output_is( 'punie', <<'EOC', <<'OUT', 'op.list' );
+@foo = (1, 2, 3, 4);
+print $foo[0], "\n";
+print $foo[3], "\n";
+EOC
+1
+4
+OUT
 
-language_output_is('punie', <<'EOC', <<'OUT', 'op.list');
+TODO: {
+    local $TODO = 'unimplemented feature';
+
+    language_output_is( 'punie', <<'EOC', <<'OUT', 'op.list' );
 #!./perl
 
 # $Header: op.list,v 1.0 87/12/18 13:13:50 root Exp $
@@ -60,3 +70,10 @@ ok 11
 OUT
 
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

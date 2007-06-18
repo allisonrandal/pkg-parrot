@@ -1,7 +1,7 @@
 /* RubyString.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/languages/cardinal/src/pmc/rubystring.pmc 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/trunk/languages/cardinal/src/pmc/rubystring.pmc 470 2006-12-05T03:30:45.414067Z svm  $
  *  Overview:
  *     These are the vtable functions for the RubyString base class
  *  Data Structure and Algorithms:
@@ -15,8 +15,14 @@
 
 static STRING *true, *false, *yes, *no;
 
-pmclass RubyString extends String dynpmc group ruby_group hll Ruby maps String {
-
+pmclass RubyString
+        extends String
+        does string
+        dynpmc
+        group ruby_group
+        hll Ruby
+        maps String
+{
     void class_init () {
         PMC *string_anchor;
         INTVAL fixedstringarray_typenum;
@@ -57,13 +63,10 @@ pmclass RubyString extends String dynpmc group ruby_group hll Ruby maps String {
     }
 }
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
-
+ */

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/multisub.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/pmc/multisub.pmc 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -25,44 +25,43 @@ Sub PMCs with the same short name, but different long names.
 pmclass MultiSub extends ResizablePMCArray need_ext does array {
 
     void push_pmc(PMC* value) {
-        STRING *_sub = CONST_STRING(interpreter, "Sub");
-        STRING *_nci = CONST_STRING(interpreter, "NCI");
-        if (!VTABLE_isa(interpreter, value, _sub) &&
-            !VTABLE_isa(interpreter, value, _nci))
-            real_exception(interpreter, NULL, E_TypeError,
+        STRING *_sub = CONST_STRING(interp, "Sub");
+        STRING *_nci = CONST_STRING(interp, "NCI");
+        if (!VTABLE_isa(interp, value, _sub) &&
+            !VTABLE_isa(interp, value, _nci))
+            real_exception(interp, NULL, E_TypeError,
                     "attempt to push non Sub PMC");
         SUPER(value);
     }
 
-    void set_pmc_keyed_int (INTVAL key, PMC* value) {
-        STRING *_sub = CONST_STRING(interpreter, "Sub");
-        if (!VTABLE_isa(interpreter, value, _sub))
-            real_exception(interpreter, NULL, E_TypeError,
+    void set_pmc_keyed_int(INTVAL key, PMC* value) {
+        STRING *_sub = CONST_STRING(interp, "Sub");
+        if (!VTABLE_isa(interp, value, _sub))
+            real_exception(interp, NULL, E_TypeError,
                     "attempt to set non Sub PMC");
         SUPER(key, value);
     }
 
-    void set_integer_keyed_int (INTVAL key, INTVAL value) {
-        real_exception(interpreter, NULL, E_TypeError,
+    void set_integer_keyed_int(INTVAL key, INTVAL value) {
+        real_exception(interp, NULL, E_TypeError,
                 "attempt to set non Sub PMC");
     }
 
-    void set_string_keyed_int (INTVAL key, STRING* value) {
-        real_exception(interpreter, NULL, E_TypeError,
+    void set_string_keyed_int(INTVAL key, STRING* value) {
+        real_exception(interp, NULL, E_TypeError,
                 "attempt to set non Sub PMC");
     }
 
-    void set_number_keyed_int (INTVAL key, FLOATVAL value) {
-        real_exception(interpreter, NULL, E_TypeError,
+    void set_number_keyed_int(INTVAL key, FLOATVAL value) {
+        real_exception(interp, NULL, E_TypeError,
                 "attempt to set non Sub PMC");
     }
 
-    void* invoke(void *next) {
-        PMC *func = Parrot_MMD_dispatch_func(INTERP, SELF, NULL);
-        if (! func) {
-            real_exception(interpreter, NULL, METH_NOT_FOUND,
-                           "Method not found.");
-        }
+    opcode_t* invoke(void *next) {
+        PMC *list = Parrot_mmd_sort_candidate_list(interp, SELF);
+        PMC *func = PMCNULL;
+        if (!PMC_IS_NULL(list))
+            func = VTABLE_get_pmc_keyed_int(interp, list, 0);
         return VTABLE_invoke(INTERP, func, next);
     }
 }
@@ -87,10 +86,7 @@ Initial version                  - leo 14.03.2005
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

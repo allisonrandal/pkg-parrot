@@ -1,5 +1,5 @@
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/config/auto/socklen_t.pm 13185 2006-07-06T22:40:33.769052Z chip  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/config/auto/socklen_t.pm 1424 2007-01-19T05:42:41.020450Z chromatic  $
 
 =head1 NAME
 
@@ -22,23 +22,28 @@ use Config;
 
 use Parrot::Configure::Step ':auto';
 
-our $description = 'Asking Perl5 whether there is socklen_t';
-our @args = qw();
+our $description = 'Determining whether there is socklen_t';
+our @args        = qw();
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $verbose = $conf->options->get('verbose');
 
-    my $d_socklen_t = $Config{d_socklen_t} || $conf->data->get('has_socklen_t');
-    my $has_socklen_t = ( $d_socklen_t && $d_socklen_t ne 'undef' ) ? 1 : 0; 
+    my $d_socklen_t = $conf->data->get('has_socklen_t');
+    $d_socklen_t = $Config{d_socklen_t} unless defined $d_socklen_t;
+    my $has_socklen_t = ( $d_socklen_t && $d_socklen_t ne 'undef' ) ? 1 : 0;
     $self->set_result( $has_socklen_t ? 'yes' : 'no' );
-    $conf->data->set(
-        has_socklen_t   => $has_socklen_t,
-    );
-    
+    $conf->data->set( has_socklen_t => $has_socklen_t, );
+
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

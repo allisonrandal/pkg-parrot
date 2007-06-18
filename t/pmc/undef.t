@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/undef.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/undef.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 10;
+use Parrot::Test tests => 11;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/pmc/undef.t - Undef PMC
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/undef.t
+    % prove t/pmc/undef.t
 
 =head1 DESCRIPTION
 
@@ -22,20 +22,19 @@ Tests mainly morphing undef to other types.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "morph to string");
+pasm_output_is( <<'CODE', <<'OUTPUT', "morph to string" );
         new P0, .String
         new P1, .Undef
         set P0, "foo"
         concat  P1, P0, P0
-	print P1
-	print "\n"
+    print P1
+    print "\n"
         end
 CODE
 foofoo
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "get_bool");
+pir_output_is( <<'CODE', <<'OUTPUT', "get_bool" );
 
 .sub _main
     .local pmc pmc1
@@ -51,8 +50,7 @@ CODE
 A PMC Undef created by new is not
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "defined");
+pir_output_is( <<'CODE', <<'OUTPUT', "defined" );
 
 .sub _main
     .local pmc pmc1
@@ -70,8 +68,7 @@ CODE
 A PMC Undef is not defined.
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "get_string");
+pir_output_is( <<'CODE', <<'OUTPUT', "get_string" );
 
 .sub _main
     .local pmc pmc1
@@ -85,8 +82,7 @@ CODE
 beforeafter
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "morph to integer");
+pir_output_is( <<'CODE', <<'OUTPUT', "morph to integer" );
 
 .sub _main
     .local pmc pmc1
@@ -104,27 +100,7 @@ CODE
 -7777777
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "morph to float");
-
-.sub _main
-    .local pmc pmc1
-    pmc1 = new Undef
-    .local int int1
-    int1 = pmc1
-    .local num float1
-    float1 = -7777777e-3
-    float1 += int1
-    print float1
-    print "\n"
-    end
-.end
-CODE
--7777.777000
-OUTPUT
-
-
-pir_output_is(<<'CODE', <<'OUTPUT', "morph to float");
+pir_output_is( <<'CODE', <<'OUTPUT', "morph to float" );
 
 .sub _main
     .local pmc pmc1
@@ -142,8 +118,25 @@ CODE
 -7777.777000
 OUTPUT
 
+pir_output_is( <<'CODE', <<'OUTPUT', "morph to float" );
 
-pir_output_is(<<'CODE', <<'OUTPUT', "set_integer_native");
+.sub _main
+    .local pmc pmc1
+    pmc1 = new Undef
+    .local int int1
+    int1 = pmc1
+    .local num float1
+    float1 = -7777777e-3
+    float1 += int1
+    print float1
+    print "\n"
+    end
+.end
+CODE
+-7777.777000
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "set_integer_native" );
 
 .sub _main
     .local pmc pmc1
@@ -167,8 +160,7 @@ CODE
 After assignment pmc1 is an Integer.
 OUTPUT
 
-
-pir_output_is(<<'CODE', <<'OUTPUT', "isa");
+pir_output_is( <<'CODE', <<'OUTPUT', "isa" );
 
 .sub _main
     .local pmc pmc1
@@ -220,8 +212,7 @@ A Undef PMC is not a scalar.
 A Undef PMC is not a Scalar.
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -240,3 +231,22 @@ CODE
 0
 OUTPUT
 
+pir_output_is( << 'CODE', << 'OUTPUT', "verify clone works." );
+
+.sub _main
+    $P1 = new Undef
+    $P2 = clone $P1
+    $S0 = typeof $P2
+    print $S0
+    print "\n"
+.end
+CODE
+Undef
+OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

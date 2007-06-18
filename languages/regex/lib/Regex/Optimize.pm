@@ -1,3 +1,4 @@
+
 =head1 PACKAGE
 
 Regex::Optimize
@@ -17,11 +18,12 @@ package Regex::Optimize;
 use Regex::Ops::List;
 use Regex::State;
 use strict;
+use warnings;
 require 'Regex.pm';
 
 sub new {
-    my ($proto, %options) = @_;
-    my $self = bless \%options, (ref($proto) || $proto);
+    my ( $proto, %options ) = @_;
+    my $self = bless \%options, ( ref($proto) || $proto );
     $self->init();
     return $self;
 }
@@ -37,7 +39,7 @@ sub mklabel {
 }
 
 sub is_label {
-    return UNIVERSAL::isa(shift(), 'Regex::Ops::Label');
+    return UNIVERSAL::isa( shift(), 'Regex::Ops::Label' );
 }
 
 =item method label_indices(op)
@@ -48,11 +50,11 @@ their indices.
 =cut
 
 sub label_indices {
-    my ($self, $op) = @_;
+    my ( $self, $op ) = @_;
     my @indices;
-    for my $i (0..$#{ $op->{args} }) {
+    for my $i ( 0 .. $#{ $op->{args} } ) {
         my $arg = $op->{args}->[$i];
-        push(@indices, $i) if is_label($arg);
+        push( @indices, $i ) if is_label($arg);
     }
     return @indices;
 }
@@ -71,7 +73,7 @@ sub combineLabels {
     my %names;
     @names{@names} = ();
     my $label = $self->mklabel();
-    $self->{_label_comments}{$label->{label}} = join(", ", keys %names);
+    $self->{_label_comments}{ $label->{label} } = join( ", ", keys %names );
     return $label->{label};
 }
 
@@ -111,28 +113,29 @@ But perhaps this should be handled in the Tree -> List rewrite??
 =cut
 
 sub optimize {
-    my ($self, $ops, $ctx) = @_;
+    my ( $self, $ops, $ctx ) = @_;
     die "Wrong #args" if @_ != 3;
 
-    my @equivs; # (labels)
-    my @output; # (ops)
+    my @equivs;    # (labels)
+    my @output;    # (ops)
 
     # Merge adjacent (equivalent) labels, renaming them
     for my $stmt (@$ops) {
-	if (ref $stmt && $stmt->{name} eq 'LABEL') {
-	    push @equivs, $stmt;
-	} else {
-	    if (@equivs) {
-		my $megalabel = $self->combineLabels(@equivs);
-		$_->{label} = $megalabel foreach (@equivs);
-		push @output, $equivs[0];
-		@equivs = ();
-	    }
-	    push @output, $stmt;
-	}
+        if ( ref $stmt && $stmt->{name} eq 'LABEL' ) {
+            push @equivs, $stmt;
+        }
+        else {
+            if (@equivs) {
+                my $megalabel = $self->combineLabels(@equivs);
+                $_->{label} = $megalabel foreach (@equivs);
+                push @output, $equivs[0];
+                @equivs = ();
+            }
+            push @output, $stmt;
+        }
     }
     die "The final 'terminate' is supposed to make this impossible!"
-      if @equivs;
+        if @equivs;
 
     # Jump threading: replace
     #
@@ -151,16 +154,17 @@ sub optimize {
     #  { label => optional_label, code => original_op }
     # and construct a mapping from label names to destination tagged_op
     my $curlabel;
-    my @output2; # ( { label => ?label, code => op } : tagged_op )
-    my %labels; # { label string => tagged_op }
+    my @output2;    # ( { label => ?label, code => op } : tagged_op )
+    my %labels;     # { label string => tagged_op }
     foreach my $stmt (@output) {
-	if ($stmt->{name} eq 'LABEL') {
-	    $curlabel = $stmt;
-	} else {
-	    push @output2, { label => $curlabel, code => $stmt };
-	    $labels{$curlabel->{label}} = $output2[-1] if $curlabel;
-	    undef $curlabel;
-	}
+        if ( $stmt->{name} eq 'LABEL' ) {
+            $curlabel = $stmt;
+        }
+        else {
+            push @output2, { label => $curlabel, code => $stmt };
+            $labels{ $curlabel->{label} } = $output2[-1] if $curlabel;
+            undef $curlabel;
+        }
     }
 
     # Second, scan for label references and follow goto's until the
@@ -168,8 +172,9 @@ sub optimize {
     # reference.
 
     foreach my $stmt (@output2) {
+
         # $stmt : { label => ?label, code => op }
-	my ($label, $actual) = @$stmt{'label','code'};
+        my ( $label, $actual ) = @$stmt{ 'label', 'code' };
 
         # Find statements that can branch to a label
         my @labels;
@@ -178,13 +183,15 @@ sub optimize {
         foreach my $pos (@labels) {
             my $dest = $actual->{args}->[$pos];
             while (1) {
-                my $dest_stmt = $labels{$dest->{label}}; # tagged_op
-                if (! $dest_stmt) {
-                    if ($ctx->{external_labels}{$dest->{label}}) {
+                my $dest_stmt = $labels{ $dest->{label} };    # tagged_op
+                if ( !$dest_stmt ) {
+                    if ( $ctx->{external_labels}{ $dest->{label} } ) {
+
                         # Mark external label as reachable
                         $dest->{reachable} = 1;
-                        last; # Stop tracing through jumps
-                    } else {
+                        last;                                 # Stop tracing through jumps
+                    }
+                    else {
                         die "untargeted label $dest->{label}";
                     }
                 }
@@ -206,110 +213,115 @@ sub optimize {
     # Stick in a next_stmt ref in every statement to make it easier to
     # move around.
     my $next;
-    for my $stmt (reverse @output2) {
-	$stmt->{'next'} = $next;
-	$next = $stmt;
+    for my $stmt ( reverse @output2 ) {
+        $stmt->{'next'} = $next;
+        $next = $stmt;
     }
 
     # Push first statement on the queue
-    my @Q = ($output2[0]);
+    my @Q = ( $output2[0] );
 
-  BBLOCK:
-    while (my $stmt = shift(@Q)) {
-	next if $stmt->{label}->{reachable}; # Already reached here
-	$stmt->{label}->{reachable} = 1;
+BBLOCK:
+    while ( my $stmt = shift(@Q) ) {
+        next if $stmt->{label}->{reachable};    # Already reached here
+        $stmt->{label}->{reachable} = 1;
 
-	# Loop over the basic block starting at $stmt
-	my $prev;
-	do {
-	    if (ref $stmt->{code}) {
-                my @labels = $self->label_indices($stmt->{code});
+        # Loop over the basic block starting at $stmt
+        my $prev;
+        do {
+            if ( ref $stmt->{code} ) {
+                my @labels = $self->label_indices( $stmt->{code} );
                 foreach my $pos (@labels) {
-                    push @Q, $labels{$stmt->{code}->{args}->[$pos]->{label}};
-                    pop @Q if ! defined $Q[-1]; # External label
+                    push @Q, $labels{ $stmt->{code}->{args}->[$pos]->{label} };
+                    pop @Q if !defined $Q[-1];    # External label
                 }
-                if ($stmt->{code}->{name} =~ /^(?:goto|fail)$/) {
+                if ( $stmt->{code}->{name} =~ /^(?:goto|fail)$/ ) {
                     next BBLOCK;
                 }
             }
-	    $prev = $stmt;
-	    $stmt = $stmt->{next};
-	} while ($stmt && ! $stmt->{label});
+            $prev = $stmt;
+            $stmt = $stmt->{next};
+        } while ( $stmt && !$stmt->{label} );
 
-	# Fallthrough reachable
-	push @Q, $stmt if $stmt;
+        # Fallthrough reachable
+        push @Q, $stmt if $stmt;
     }
 
     # Eliminate unreachable code
-    my @output3; # Really should do @output = (), but I hate doing a
-                 # compiler's work for it.
+    my @output3;    # Really should do @output = (), but I hate doing a
+                    # compiler's work for it.
     my $keeping = 1;
     foreach my $stmt (@output2) {
-	if ($stmt->{label}) {
-	    $keeping = $stmt->{label}->{reachable}; # Keep if reachable
-	}
-	push @output3, $stmt if $keeping;
+        if ( $stmt->{label} ) {
+            $keeping = $stmt->{label}->{reachable};    # Keep if reachable
+        }
+        push @output3, $stmt if $keeping;
     }
 
     # Reset the 'next' pointers
     undef $next;
-    for my $stmt (reverse @output3) {
-	$stmt->{next} = $next;
-	$next = $stmt;
+    for my $stmt ( reverse @output3 ) {
+        $stmt->{next} = $next;
+        $next = $stmt;
     }
 
     # Eliminate gotos to the following address
     my @output4;
     foreach my $stmt (@output3) {
-	if (ref $stmt->{code} && $stmt->{code}->{name} eq 'goto') {
-	    if ($stmt->{next}->{label}
-                && $stmt->{code}->{args}->[0] == $stmt->{next}->{label})
+        if ( ref $stmt->{code} && $stmt->{code}->{name} eq 'goto' ) {
+            if (   $stmt->{next}->{label}
+                && $stmt->{code}->{args}->[0] == $stmt->{next}->{label} )
             {
-		# If the label of the goto is the label of the following
-		# block of code:
-		next;
-	    }
-	}
-	push @output4, $stmt;
+
+                # If the label of the goto is the label of the following
+                # block of code:
+                next;
+            }
+        }
+        push @output4, $stmt;
     }
 
     # Delete labels that are not the destination of any jump (these
     # are the ones that were marked reachable because the previous
     # basic block fell through to them.)
-    my %AMDEST; # { label name => boolean }
+    my %AMDEST;    # { label name => boolean }
     foreach (@output4) {
         my $code = $_->{code};
-        foreach (map { $code->{args}->[$_] } $self->label_indices($code)) {
-            $AMDEST{$_->{label}} = 1;
+        foreach ( map { $code->{args}->[$_] } $self->label_indices($code) ) {
+            $AMDEST{ $_->{label} } = 1;
         }
     }
     foreach (@output4) {
-        delete $_->{label} if ($_->{label} && ! $AMDEST{$_->{label}->{label}});
+        delete $_->{label} if ( $_->{label} && !$AMDEST{ $_->{label}->{label} } );
     }
 
-    return (
-            bless($self->{_label_comments}, 'LABEL_COMMENTS'),
-            map { ($_->{label} ? ($_->{label}) : ()), $_->{code} } @output4
-           );
+    return ( bless( $self->{_label_comments}, 'LABEL_COMMENTS' ),
+        map { ( $_->{label} ? ( $_->{label} ) : () ), $_->{code} } @output4 );
 }
 
 sub dbg_render {
-    if (UNIVERSAL::isa($_[0], 'Regex::Ops::List')) {
+    if ( UNIVERSAL::isa( $_[0], 'Regex::Ops::List' ) ) {
         map {
-            if ($_->{name} eq 'LABEL') {
+            if ( $_->{name} eq 'LABEL' )
+            {
                 "$_->{label}: ";
-            } else {
-                $_->{name} . " " . join(", ", map { ref($_) ? $_->{label} : $_ } @{ $_->{args} || [] });
+            }
+            else {
+                $_->{name} . " "
+                    . join( ", ", map { ref($_) ? $_->{label} : $_ } @{ $_->{args} || [] } );
             }
         } @_;
-    } else {
+    }
+    else {
         map {
             my $str;
-            if ($_->{label}) {
+            if ( $_->{label} ) {
                 $str .= "**" if $_->{label}{reachable};
                 $str .= "$_->{label}->{label}: ";
             }
-            $str .= $_->{code}{name} . " " . join(", ", map { ref($_) ? $_->{label} : $_ } @{ $_->{code}{args} || [] });
+            $str .=
+                $_->{code}{name} . " "
+                . join( ", ", map { ref($_) ? $_->{label} : $_ } @{ $_->{code}{args} || [] } );
             $str;
         } @_;
     }
@@ -318,3 +330,10 @@ sub dbg_render {
 1;
 
 =back
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

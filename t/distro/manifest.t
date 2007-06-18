@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/distro/manifest.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/distro/manifest.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -23,12 +23,9 @@ Checks that the distribution and the MANIFEST file agree.
 
 =cut
 
+ok( -e $ExtUtils::Manifest::MANIFEST, 'MANIFEST exists' );
 
-ok(-e $ExtUtils::Manifest::MANIFEST, 'MANIFEST exists');
-
-
-ok(-e $ExtUtils::Manifest::MANIFEST . '.SKIP', 'MANIFEST.SKIP exists');
-
+ok( -e $ExtUtils::Manifest::MANIFEST . '.SKIP', 'MANIFEST.SKIP exists' );
 
 SKIP:
 {
@@ -37,10 +34,16 @@ SKIP:
     $ExtUtils::Manifest::Quiet = 1;
 
     my @missing = ExtUtils::Manifest::manicheck();
-    ok(!@missing, 'manicheck()')
+    ok( !@missing, 'manicheck()' )
         or diag("Missing files:\n\t@missing");
-};
-
+}
 
 # remember to change the number of tests :-)
 BEGIN { plan tests => 3; }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

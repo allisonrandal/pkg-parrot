@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/if.t 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/lua/t/if.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
 
 =head1 NAME
 
@@ -12,13 +12,15 @@ t/if.t - Lua if statement
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.4.4 "Control Structures".
+See "Lua 5.1 Reference Manual", section 2.4.4 "Control Structures",
+L<http://www.lua.org/manual/5.1/manual.html#2.4.4>.
 
 See "Programming in Lua", section 4.3 "Control Structures".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -78,4 +80,11 @@ print(r)
 CODE
 21
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

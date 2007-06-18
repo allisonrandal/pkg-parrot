@@ -1,7 +1,7 @@
 /* oplib.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/oplib.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/oplib.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Header file for op libraries.
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_OPLIB_H_GUARD)
+#ifndef PARROT_OPLIB_H_GUARD
 #define PARROT_OPLIB_H_GUARD
 
 #include "parrot/config.h"
@@ -21,7 +21,7 @@
 ** op_lib_t
 */
 
-typedef struct {
+typedef struct op_lib_t {
     const char *name;
     const char *suffix;
     int      core_type;
@@ -31,7 +31,7 @@ typedef struct {
     int      patch_version;
     size_t      op_count;
     op_info_t * op_info_table;
-    void *      op_func_table;
+    op_func_t * op_func_table;
     int (*op_code)(const char * name, int full);
 } op_lib_t;
 
@@ -61,10 +61,7 @@ typedef enum {
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

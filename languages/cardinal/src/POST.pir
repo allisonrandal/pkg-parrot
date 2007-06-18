@@ -1,4 +1,4 @@
-# $Id: /local/languages/cardinal/src/POST.pir 13986 2006-08-07T17:04:53.535012Z chip  $
+# $Id: /parrotcode/trunk/languages/cardinal/src/POST.pir 3076 2007-04-10T07:04:11.810275Z paultcochrane  $
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ The base class of POST is Cardinal::PAST::Node -- see C<lib/CPAST.pir>
 =over 4
 
 =cut
+.include 'languages/cardinal/src/preamble'
 
 .namespace [ 'Cardinal::POST' ]
 
@@ -27,6 +28,8 @@ The base class of POST is Cardinal::PAST::Node -- see C<lib/CPAST.pir>
     $P0 = getclass 'Cardinal::PAST::Node'
     base = subclass $P0, 'Cardinal::POST::Node'
     addattribute base, 'value'
+    
+    $P0 = subclass base, 'Cardinal::POST::Namespace'
 
     $P0 = subclass base, 'Cardinal::POST::Val'
     addattribute $P0, 'valtype'
@@ -41,6 +44,7 @@ The base class of POST is Cardinal::PAST::Node -- see C<lib/CPAST.pir>
     addattribute $P0, 'varhash'
     addattribute $P0, 'prologue'
     addattribute $P0, 'adverbs'
+    addattribute $P0, 'subs'
 
     $P0 = subclass base, 'Cardinal::POST::Op'
     $P0 = subclass base, 'Cardinal::POST::Ops'
@@ -49,6 +53,9 @@ The base class of POST is Cardinal::PAST::Node -- see C<lib/CPAST.pir>
     $P0 = subclass base, 'Cardinal::POST::Call'
     $P0 = subclass base, 'Cardinal::POST::Raw'
     addattribute $P0, 'raw'
+    $P0 = subclass base, 'Cardinal::POST::NOP'
+    $P0 = subclass base, 'Cardinal::POST::NamespaceLookup'
+    addattribute $P0, 'item'
 
 .end
 
@@ -62,11 +69,7 @@ The base class of POST is Cardinal::PAST::Node -- see C<lib/CPAST.pir>
     .return ()
 .end
 
-.sub 'name' :method
-    .param pmc name            :optional
-    .param int has_name        :opt_flag
-    .return self.'attr'('name', name, has_name)
-.end
+.gen_accessor('name')
   
 =item C<Cardinal::POST::Node::value()>
 
@@ -201,12 +204,35 @@ and that is returned.
 
 
 .namespace [ 'Cardinal::POST::Sub' ]
+.gen_accessor('outer')
+.gen_accessor('subtype')
+.gen_accessor('varhash')
+.gen_accessor('prologue')
 
-.sub 'outer' :method
-    .param pmc outer           :optional
-    .param int has_outer       :opt_flag
-    .return self.'attr'('outer', outer, has_outer)
+.macro gen_adverb_accessor(x)
+.sub .x :method
+    .param pmc value
+    .return self.'add_to_adverbs'(.x)
 .end
+.endm
+
+
+.sub 'add_to_adverbs' :method
+    .param pmc adverb
+    $P0 = self.'adverbs'()
+    $I0 = defined $P0
+    if $I0 goto exists
+    $P0 = new .String
+    goto append
+  exists:
+    $P0 .= " "
+  append:
+    $P0 .= adverb
+.end
+
+.gen_adverb_accessor(':load')
+.gen_adverb_accessor(':main')
+.gen_adverb_accessor(':method')
 
 .sub 'adverbs' :method
     .param pmc subtype         :optional
@@ -214,22 +240,16 @@ and that is returned.
     .return self.'attr'('adverbs', subtype, has_subtype)
 .end
 
-.sub 'subtype' :method
-    .param pmc subtype         :optional
-    .param int has_subtype     :opt_flag
-    .return self.'attr'('subtype', subtype, has_subtype)
+.sub 'subs' :method
+    $P0 = self.'push_sub'()
+    .return ($P0)
 .end
 
-.sub 'varhash' :method
-    .param pmc varhash         :optional
-    .param int has_varhash     :opt_flag
-    .return self.'attr'('varhash', varhash, has_varhash)
-.end
-
-.sub 'prologue' :method
-    .param pmc prologue         :optional
-    .param int has_prologue     :opt_flag
-    .return self.'attr'('prologue', prologue, has_prologue)
+.sub 'append_subs' :method
+    .param pmc arg
+    $P0 = self.'push_sub'()
+    $P0.'append'(arg)
+    .return ()
 .end
 
 .sub 'root_pir' :method
@@ -237,8 +257,6 @@ and that is returned.
     ($P0, $P1) = self.'pir'(self)
     .return ($P0)
 .end
-
-
 
 .sub 'pir_regex' :method
     .local pmc p6regex, regexast, regexpir
@@ -255,42 +273,36 @@ and that is returned.
     .return (regexpir, code)
 .end
 
+.sub 'push_sub'     :method
+    .param pmc value      :optional
+    .param int has_value  :opt_flag
+    .local pmc stack 
+    stack = self.'attr'('subs', 0, 0)
+    $I0 = defined stack
+    if $I0 goto test_value
+    stack = new .ResizablePMCArray
+    stack = self.'attr'('subs', stack, 1)
+  test_value:
+    unless has_value goto end
+    push stack, value
+  end:
+    .return (stack)
+.end
+
 .sub '__dumplist' :method
     .return ('name subtype outer value children')
 .end
 
 .namespace [ 'Cardinal::POST::Val' ]
-
-.sub 'value' :method
-    .param string value        :optional
-    .param int has_value       :opt_flag
-    .return self.'attr'('value', value, has_value)
-.end
-
-.sub 'valtype' :method
-    .param string valtype      :optional
-    .param int has_valtype     :opt_flag
-    .return self.'attr'('valtype', valtype, has_valtype)
-.end
-
-.sub '__dumplist' :method
-    .return ('name value valtype')
-.end
+.gen_accessor('value')
+.gen_accessor('valtype')
+.gen_dumplist('name value valtype')
 
 
 .namespace [ 'Cardinal::POST::Var' ]
-
-.sub 'scope' :method
-    .param string scope        :optional
-    .param int has_scope       :opt_flag
-    .return self.'attr'('scope', scope, has_scope)
-.end
-
-.sub 'islvalue' :method
-    .param int islvalue        :optional
-    .param int has_islvalue    :opt_flag
-    .return self.'attr'('islvalue', islvalue, has_islvalue)
-.end
+.gen_accessor('scope')
+.gen_accessor('islvalue')
+.gen_dumplist('name scope value')
 
 .sub 'paramname' :method
     .local string name
@@ -308,8 +320,6 @@ and that is returned.
 
 .sub 'pir' :method
     .param pmc block
-    ##   if we already generated the code for this
-    ##   variable, we generate nothing here.
     .local string name, scope, value
     .local pmc code
     .local int islvalue
@@ -319,13 +329,16 @@ and that is returned.
     islvalue = self.'islvalue'()
     code = new 'PGE::CodeString'
     if scope == 'lexical' goto generate_lexical
-    if scope == 'package' goto generate_package
+    if scope == 'instance' goto generate_instance
+    if scope == 'class' goto generate_class
     if scope == 'parameter' goto generate_parameter
-    if scope == 'global' goto generate_package
+    if scope == 'global' goto generate_global
     goto generate_find
   generate_parameter:
     .local pmc varhash
     varhash = block.'varhash'()
+    ##   if we already generated the code for this
+    ##   variable, we generate nothing here.
     $I0 = exists varhash[name]
     if $I0 goto generate_find
     .local pmc prologue
@@ -346,7 +359,15 @@ and that is returned.
     code.'emit'("    .lex '%0', %1", name, value)
     varhash[name] = self
     goto end
-  generate_package:
+  generate_global:
+    if islvalue goto end
+    code.'emit'("    %0 = get_hll_global '%1'", value, name)
+    goto end
+  generate_instance:
+    if islvalue goto end
+    code.'emit'("    %0 = get_hll_global '%1'", value, name)
+    goto end
+  generate_class:
     if islvalue goto end
     code.'emit'("    %0 = get_hll_global '%1'", value, name)
     goto end
@@ -372,21 +393,23 @@ and that is returned.
     if $I0 goto with_varhash_name
     varhash[name] = self
   with_varhash_name:
-    if scope == 'outerpackage' goto store_package
-    if scope == 'package' goto store_package
-    if scope == 'global' goto store_package
+    if scope == 'instance' goto store_instance
+    if scope == 'class' goto store_class
+    if scope == 'global' goto store_global
   store_lexical:
     code.'emit'("    store_lex '%0', %1", name, xvalue)
     .return (code)
-  store_package:
+  store_instance:
+    code.'emit'("    set_hll_global '%0', %1", name, xvalue)
+    .return (code)
+  store_class:
+    code.'emit'("    set_hll_global '%0', %1", name, xvalue)
+    .return (code)
+  store_global:
     code.'emit'("    set_hll_global '%0', %1", name, xvalue)
     .return (code)
 .end
     
-
-.sub '__dumplist' :method
-    .return ('name scope value')
-.end
 
 .namespace [ 'Cardinal::POST::Assign' ]
 .sub 'value' :method
@@ -402,10 +425,72 @@ and that is returned.
 .end
 
 .namespace [ 'Cardinal::POST::Raw' ]
-.sub 'raw' :method
-    .param string scope        :optional
-    .param int has_scope       :opt_flag
-    .return self.'attr'('raw', scope, has_scope)
+.gen_accessor('raw')
+
+.namespace [ 'Cardinal::POST::Namespace' ]
+
+.sub 'get_pir_name' :method
+    .local pmc name
+    .local pmc iter
+    .local string code
+    name = self.'name'()
+    iter = new Iterator, name
+    .local int second_flag 
+    second_flag = 0
+  iter_loop1:
+    unless iter goto iter_end1
+    $P0 = shift iter
+    $S0 = $P0 
+    unless second_flag goto first
+    code .= "; "
+    goto emit
+  first:
+    second_flag = 1
+  emit:
+#    code.'emit'("'%0'; ", $S0)
+    code .= "'"
+    code .= $S0
+    code .= "' "
+    goto iter_loop1
+  iter_end1:
+  .return (code)
+.end
+
+.namespace [ 'Cardinal::POST::NamespaceLookup' ]
+.sub 'pir' :method
+    .param pmc block
+    .local pmc item
+    .local pmc name
+    .local pmc value
+    item = self.'item'()
+    name = self.'name'()
+    value = self.'value'()
+
+    .local pmc code
+    code = new 'PGE::CodeString'
+    $S0 = "'"
+    $S1 = item
+    $S0 .= $S1
+    $S0 .= "'"
+    #code.'emit'('    %r = get_hll_namespace [ %n ; %i ]', 'r'=>value, 'n'=>name, 'i'=>$S0)
+    code.'emit'('    %r = get_hll_namespace [ %n]', 'r'=>value, 'n'=>name)
+    code.'emit'('    %r = %r[ %i ]', 'r'=>value, 'i'=>$S0)
+    .return (code)
+.end
+
+.gen_accessor('item')
+.gen_dumplist('name value item')
+
+.sub 'namespace' :method
+    .param pmc namespace
+    $S0 = namespace.'get_pir_name'()
+    self.'name'($S0)
+    .return ()
 .end
 
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

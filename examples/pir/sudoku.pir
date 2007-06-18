@@ -1,4 +1,4 @@
-# $Id: /local/examples/pir/sudoku.pir 13986 2006-08-07T17:04:53.535012Z chip  $
+# $Id: /parrotcode/local/examples/pir/sudoku.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =pod
 
@@ -343,7 +343,8 @@ list_names:
 loop:
     unless it goto fin
     $S0 = shift it
-    print_item $S0
+    print $S0
+    print " "
     goto loop
 fin:
     print_newline
@@ -414,7 +415,7 @@ ok:
     raw_given .= "8....61.9"
     b["san_a0626"] = raw_given
 
-    # sudoku-san 4th aug 2006 - atrocious  - Y-WING 
+    # sudoku-san 4th aug 2006 - atrocious  - Y-WING
     raw_given  = ".....1..."
     raw_given .= "6..7....5"
     raw_given .= ".82..49.."
@@ -461,6 +462,18 @@ ok:
     raw_given .= ".3.....6."
     raw_given .= "..581...."
     b["std018"] = raw_given
+
+    # "unsolvable" 3 - Y-Wing
+    raw_given  = "...8....6"
+    raw_given .= "..162.43."
+    raw_given .= "4...71..2"
+    raw_given .= "..72...8."
+    raw_given .= "....1...."
+    raw_given .= ".1...62.."
+    raw_given .= "1..73...4"
+    raw_given .= ".26.481.."
+    raw_given .= "3....5..."
+    b["uns3"] = raw_given
 
     .return (b)
 .end
@@ -533,7 +546,9 @@ err:
     die 3, 100
 
 len_err:
-    printerr "length != 81\n"
+    printerr "length != 81 found : "
+    printerr i
+    printerr "\n"
     die 3, 100
 .end
 
@@ -791,7 +806,7 @@ nosp:
     if bits == 2 goto isa_pair
     print ".."
     goto nxt_x
-isa_pair:    
+isa_pair:
     i = 1
 bit_loop:
     el >>= 1        # bits start at 1
@@ -1026,11 +1041,12 @@ nxt_x1:
     $I0 = elements empty_2
     unless $I0 goto ret
 done:
-    .local int d1, d2, pos_msk
+    .local int d1, d2, pos_msk, changed
     pos_msk = empty_2[0]   # positions 1 based
     d1 =      empty_2[1]   # 0 based
     d2 =      empty_2[2]   # 0 based
     x = 0
+    changed = 0
 lpx3:
     $I0 = 2 << x
     $I0 &= pos_msk
@@ -1042,7 +1058,12 @@ lpx3:
        if n == d2 goto nxt_n3
        # invalidate all but d1, d2 at the 2 positions
        $I0 = 2 << n
+       $I1 = e1
+       $I1 &= $I0
+       if $I1 goto no_c
        e1 |= $I0
+       changed = 1
+    no_c:
     nxt_n3:
        inc n
        if n < 9 goto lpn3
@@ -1052,6 +1073,7 @@ nxt_x3:
     $I0 = self."debug"()
     unless $I0 goto ret
 
+    unless changed goto ret
     # reuse array for debug reports
     unshift empty_2, y
     unshift empty_2, what
@@ -1161,12 +1183,12 @@ err:
 # 0  ... no change
 # 1  ... changes
 .sub adv_scan :method
-    $I0 = self."y-wing"()
+    $I0 = self."y_wing"()
     # TODO try more stuff
     .return ($I0)
 .end
 
-.sub "y-wing" :method
+.sub "y_wing" :method
     # scan for pairs all over
     .local int x, y, bits, el, res
     .local pmc i_rows, i_row
@@ -1180,7 +1202,7 @@ loop_x:
     el = i_row[x]
     bits = bits0(el)
     if bits != 2 goto nxt_x
-    $I0 = self."check_y-wing"(x, y, el)
+    $I0 = self."check_y_wing"(x, y, el)
     res |= $I0
 nxt_x:
     inc x
@@ -1241,7 +1263,7 @@ next:
 
 # look for another pair AC (A,C != B)
 # return C and the position in i_rcs
-.sub "y-wing-pair" :method
+.sub "y_wing-pair" :method
     .param pmc i_rcs
     .param int A
     .param int not_B
@@ -1264,10 +1286,10 @@ next:
     if x < 9 goto loop
     .return (0,0)
 .end
-    
-# look for another pair BC 
+
+# look for another pair BC
 # return 0/1 and the position in i_rcs
-.sub "y-wing-pair_BC" :method
+.sub "y_wing-pair_BC" :method
     .param pmc i_rcs
     .param int B
     .param int C
@@ -1295,7 +1317,7 @@ next:
 
 # invalidate C from the given [start,end] range#
 # return 1 if something changed
-.sub "y-wing_inv" :method
+.sub "y_wing_inv" :method
     .param pmc i_rcs
     .param int C
     .param int start
@@ -1320,7 +1342,7 @@ next:
 
 # find C for A B
 # and invalidate C if found
-.sub "find_C_y-wing_1" :method
+.sub "find_C_y_wing_1" :method
     .param int x
     .param int y
     .param int A
@@ -1333,7 +1355,7 @@ next:
     sq = square_of(x, y)	# TODO reuse this func
     .local int C, c
     i_rcs = i_rcss[sq]
-    (C, c) = self."y-wing-pair"(i_rcs, A, B)
+    (C, c) = self."y_wing-pair"(i_rcs, A, B)
     unless C goto check_row	# TODO row, col
 	# convert the square coordinate to (x, y)
 	.local int cx, cy, bx, by, has_bc
@@ -1342,29 +1364,32 @@ next:
 	# check col and row at AB for a BC pair
 	i_rcss = getattribute self, "i_cols"
 	i_rcs  = i_rcss[x]
-	(has_bc, c) = self."y-wing-pair_BC"(i_rcs, B, C)
+	(has_bc, c) = self."y_wing-pair_BC"(i_rcs, B, C)
 	unless has_bc goto try_row
 	bx = x
 	by = c
+	# but B have to be in a different square too
+	$I0 = square_of(bx, by)
+	if sq == $I0 goto try_row
 	.local int start, end
 	# invalidate col x in sqr(x,y)
 	sq = square_of(x, y)
 	($I0, start) = square_to_xy(sq, 0)
 	end = start + 2
-	changed = self."y-wing_inv"(i_rcs, C, start, end)
+	changed = self."y_wing_inv"(i_rcs, C, start, end)
 	# invalidate col x at BC
 	i_rcs  = i_rcss[cx]
 	sq = square_of(bx, by)
 	($I0, start) = square_to_xy(sq, 0)
 	end = start + 2
-	$I0 = self."y-wing_inv"(i_rcs, C, start, end)
+	$I0 = self."y_wing_inv"(i_rcs, C, start, end)
 	changed |= $I0
 	goto show_debug
     try_row:
 	if y == cy goto nope
 	i_rcss = getattribute self, "i_rows"
 	i_rcs  = i_rcss[y]
-	(has_bc, c) = self."y-wing-pair_BC"(i_rcs, B, C)
+	(has_bc, c) = self."y_wing-pair_BC"(i_rcs, B, C)
 	unless has_bc goto nope
 	bx = c
 	by = y
@@ -1374,7 +1399,7 @@ next:
 	sq = square_of(bx, by)
 	($I0, start) = square_to_xy(sq, 0)
 	end = start + 2
-	changed = self."y-wing_inv"(i_rcs, C, start, end)
+	changed = self."y_wing_inv"(i_rcs, C, start, end)
     show_debug:
 	$I0 = self."debug"()
 	unless $I0 goto ex
@@ -1382,25 +1407,25 @@ next:
 	    if changed goto chg_ok
 	    $S0 = "noC"
 	chg_ok:
-	    print_item $S0
-	    print_item " Y-WING A "
-	    print_item A
-	    print_item " B "
-	    print_item B
-	    print_item " C "
-	    print_item C
-	    print_item " at x "
-	    print_item x
-	    print_item " y "
-	    print_item y
-	    print_item " cx "
-	    print_item cx
-	    print_item " cy "
-	    print_item cy
-	    print_item " bx "
-	    print_item bx
-	    print_item " by "
-	    print_item by
+	    print $S0
+	    print " Y-WING A "
+	    print A
+	    print " B "
+	    print B
+	    print " C "
+	    print C
+	    print " at x "
+	    print x
+	    print " y "
+	    print y
+	    print " cx "
+	    print cx
+	    print " cy "
+	    print cy
+	    print " bx "
+	    print bx
+	    print " by "
+	    print by
 	    print_newline
 	    self."display"()
 	    goto ex
@@ -1409,18 +1434,18 @@ check_row:
     i_rcss = getattribute self, "i_rows"
     i_rcs = i_rcss[y]
     # XXX TODO check that A is in a forced pair
-    (C, c) = self."y-wing-pair"(i_rcs, A, B)
+    (C, c) = self."y_wing-pair"(i_rcs, A, B)
     cx = c
     cy = y
     unless C goto check_col
 	i_rcss = getattribute self, "i_cols"
 	i_rcs  = i_rcss[x]
 	# XXX TODO check that B is in a forced pair
-	(has_bc, by) = self."y-wing-pair_BC"(i_rcs, B, C)
+	(has_bc, by) = self."y_wing-pair_BC"(i_rcs, B, C)
 	bx = cx
 	unless has_bc goto check_col
 	i_rcs  = i_rcss[cx]
-	changed = self."y-wing_inv"(i_rcs, C, by, by)
+	changed = self."y_wing_inv"(i_rcs, C, by, by)
 	if changed goto show_debug
 
 check_col:
@@ -1431,22 +1456,22 @@ ex:
 .end
 
 # find C for A, or B
-.sub "find_C_y-wing" :method
+.sub "find_C_y_wing" :method
     .param int x
     .param int y
     .param int A
     .param int B
 
     .local int changed
-    changed = self."find_C_y-wing_1"(x, y, A, B)
+    changed = self."find_C_y_wing_1"(x, y, A, B)
     unless changed goto not_A
     .return (changed)
 not_A:
-    .return self."find_C_y-wing_1"(x, y, B, A)
+    .return self."find_C_y_wing_1"(x, y, B, A)
 .end
 
 # check, if we find another pair with 1 digit in common with el
-.sub "check_y-wing" :method
+.sub "check_y_wing" :method
     .param int x
     .param int y
     .param int el
@@ -1459,7 +1484,7 @@ not_A:
     # now find another pair in
     # - another *this* row, col, or square
     # - AC or BC giving another unique element C
-    .return self."find_C_y-wing"(x, y, A, B)
+    .return self."find_C_y_wing"(x, y, A, B)
 .end
 
 # the quare y has a uniq digit at x - set it
@@ -1701,16 +1726,16 @@ not_set:
     if b < 3 goto lpb
     $I0 = self."debug"()
     unless $I0 goto nd
-	print_item "inv_dbl"
-	print_item what
-	print_item "n"
-	print_item n
-	print_item "msk"
-	print_item msk
-	print_item "sx"
-	print_item sx
-	print_item "sy"
-	print_item sy
+	print "inv_dbl "
+	print what
+	print " n "
+	print n
+	print " msk "
+	print msk
+	print " sx "
+	print sx
+	print " sy "
+	print sy
 	print_newline
 	self."display"()
 nd:
@@ -2273,7 +2298,7 @@ that in square 2 we have a unique '7' at row 0, col 7:
   +---------+---------+---------+
 
 Now the tests in "create_inv_n" invalidate illegal positions
-due to multiple-blocking and other tests are likely to proceed.  
+due to multiple-blocking and other tests are likely to proceed.
 
 =head2 Y-WING
 
@@ -2283,13 +2308,13 @@ Given this suduku:
 
 # "unsolvable" 3 - Y-Wing
   . . . 8 . . . . 6
-  . . 1 6 2 . 4 3 . 
-  4 . . . 7 1 . . 2 
-  . . 7 2 . . . 8 . 
-  . . . . 1 . . . . 
-  . 1 . . . 6 2 . . 
-  1 . . 7 3 . . . 4 
-  . 2 6 . 4 8 1 . . 
+  . . 1 6 2 . 4 3 .
+  4 . . . 7 1 . . 2
+  . . 7 2 . . . 8 .
+  . . . . 1 . . . .
+  . 1 . . . 6 2 . .
+  1 . . 7 3 . . . 4
+  . 2 6 . 4 8 1 . .
   3 . . . . 5 . . .
 
 It started backtracking at:
@@ -2374,6 +2399,43 @@ Here is starts backtracking. A possible improvement would be:
 
 See also std331.sud
 
+=head2 TODO Generalization
+
+A Sudoku has 2 dimensions and 3 connected views (row, column, and
+square). There are 1-dim tests, which work for all views. 2-dim tests
+are a bit more tricky to generalize and not yet done properly.
+
+Basically: as only 2 views are independant, all these tests can
+work on 2 of 3 views:
+
+  square, row
+  square, column
+  row, columm
+
+Now the problem is, how to generalize the possible other direction.
+Let's call it the 'neighbour'. A neighbour is always 'towards' the
+second view. A row has 9 column neighbours and 3
+square neighbours. A square has 3 row and 3 column neighbours.
+(Maybe neighbour is a bad term as it does contain itself).
+
+C<scan_dbl> can now easily be reviewed and generalized:
+
+For all neighbours (n): If in the view (v0) a digit is valid in only
+one of (n)'s views: giving (v1), this digit is invalid in the
+complement of the intersection (v0 & v1).
+
+NB: it seems to be simpler to just hack the code as to utter the
+idea in $human_lang.
+
+This is trivial if these views are (row, column) as the intersection
+is just one point, but it is the generalization of the 'inv_1' code.
+
+Another example of a 2-dim test is of course Y-Wing.
+
 =cut
 
-# vim: ft=imc sw=4:
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

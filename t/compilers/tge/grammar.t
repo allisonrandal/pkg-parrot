@@ -1,14 +1,13 @@
+#!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/t/compilers/tge/grammar.t 13684 2006-07-29T21:31:17.363951Z chip  $
+# $Id: /parrotcode/local/t/compilers/tge/grammar.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw(t . lib ../lib ../../lib ../../../lib);
 
 use Test::More;
-use Parrot::Test;
-
-BEGIN { plan tests => 2; };
+use Parrot::Test tests => 3;
 
 =head1 NAME
 
@@ -26,7 +25,7 @@ tree of the specified type.
 
 =cut
 
-pir_output_is(<<'CODE', <<'OUT', 'test compiling anonymous and named grammars');
+pir_output_is( <<'CODE', <<'OUT', 'test compiling anonymous and named grammars' );
 
 .sub _main :main
     load_bytecode 'TGE.pbc'
@@ -65,7 +64,7 @@ TreeMin
 TreeMin
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar');
+pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' );
 
 .sub _main :main
     .param pmc argv
@@ -265,11 +264,67 @@ before transform, the value of the right-most leaf is: 9
 after transform, the value of the right-most leaf is: 1
 OUT
 
+TODO: {
+    local $TODO = "unresolved bug";
+
+    pir_output_is(
+        <<'CODE', <<'OUT', 'two rules of the same name can apply to the same node, when called with a different dummy type' );
+
+.sub _main :main
+    load_bytecode 'TGE.pbc'
+
+    # Load the grammar in a string
+    .local string source
+    source = <<'GRAMMAR'
+    grammar TreeMin is TGE::Grammar;
+
+    transform tiddlywinks (ROOT) :language('PIR') { 
+        say 'in tiddlywinks'
+        tree.'get'('twister', node, 'pingpong')
+        tree.'get'('twister', node, 'pongpong')
+    }
+    transform twister (pingpong) :language('PIR') { 
+        say 'in first twister'
+    }
+    transform twister (pongpong) :language('PIR') { 
+        say 'in second twister'
+    }
+GRAMMAR
+
+
+    .local object testing
+    testing = new .Hash
+
+    # Compile a grammar from the source 
+    .local pmc grammar
+    $P1 = new 'TGE::Compiler'
+    grammar = $P1.'compile'(source)
+
+    # Apply the grammar to the test tree
+    .local pmc AGI
+    AGI = grammar.apply(testing)
+
+    # Retrieve the value of a top level attribute
+    $P4 = AGI.get('tiddlywinks')
+    end
+.end
+
+CODE
+in tiddlywinks
+in first twister
+in second twister
+OUT
+}
+
 =head1 AUTHOR
 
 Allison Randal <allison@perl.org>
 
 =cut
 
-
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

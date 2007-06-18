@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/Surface.pir 13104 2006-07-01T22:28:03.092980Z chromatic  $
+# $Id: /parrotcode/local/runtime/parrot/library/SDL/Surface.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -521,6 +521,38 @@ draw:
 	surface[ 'pixels'; 'array'; offset ] = color
 .end
 
+=item pixels()
+
+Return the raw pixels array of the surface. It can be filled with raw
+colors like this:
+
+  .local pmc surface, pixels
+  .local int offset, x, y, raw_color
+  pixels  = surface.'pixels'()
+  offset  = surface.'width'()
+  ...
+  $I0 = offset * y
+  $I0 .= x
+  pixels[0; $I0] = raw_color       # pixels['array'; $O] = raw_color
+
+Please note that the function returns an UnManagedStruct
+pointing to an array, therefore the double indexing is needed.
+
+See also B<draw_pixels()> above for locking/unlocking the surface and
+how to fetch raw colors.
+
+=cut
+
+.sub pixels :method
+    .param pmc new_pixels   :optional
+    .param int has_pixels   :opt_flag
+
+    .local pmc surface, fetch_layout, pixels_entry, pixels_struct 
+    surface = self.'surface'()
+    $P0 = surface['pixels']
+    .return ($P0)
+.end
+
 =item convert_red()
 
 A helper method to convert the red component of any color to work with this
@@ -591,3 +623,9 @@ the Perl 6 Internals mailing list.
 Copyright (c) 2004, 2006 The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

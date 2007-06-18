@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/eval.t 13660 2006-07-28T17:05:24.263356Z chip  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/eval.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 19;
+use Parrot::Test tests => 17;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/pmc/eval.t - Dynamic Code Evaluation
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/eval.t
+    % prove t/pmc/eval.t
 
 =head1 DESCRIPTION
 
@@ -22,21 +22,20 @@ Tests on-the-fly PASM, PIR and PAST compilation and invocation.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "eval_sc");
-	compreg P1, "PASM"	# get compiler
-	set_args "(0)", "print \"in eval\\n\"\nset_returns \"()\"\nreturncc\n"
-	get_results "(0)", P0
-	invokecc P1			# compile
-	invokecc P0			# eval code P0
-	print "back again\n"
-	end
+pasm_output_is( <<'CODE', <<'OUTPUT', "eval_sc" );
+    compreg P1, "PASM"	# get compiler
+    set_args "(0)", "print \"in eval\\n\"\nset_returns \"()\"\nreturncc\n"
+    get_results "(0)", P0
+    invokecc P1			# compile
+    invokecc P0			# eval code P0
+    print "back again\n"
+    end
 CODE
 in eval
 back again
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "call subs in evaled code ");
+pasm_output_is( <<'CODE', <<'OUTPUT', "call subs in evaled code " );
     set S5, ".pcc_sub _foo:\n"
     concat S5, "print \"foo\\n\"\n"
     concat S5, "set_returns \"()\"\n"
@@ -53,7 +52,7 @@ foo
 back
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "call 2 subs in evaled code ");
+pasm_output_is( <<'CODE', <<'OUTPUT', "call 2 subs in evaled code " );
     set S5, ".pcc_sub _foo:\n"
     concat S5, "print \"foo\\n\"\n"
     concat S5, "set_returns \"()\"\n"
@@ -80,51 +79,7 @@ bar
 fin
 OUTPUT
 
-SKIP: {
-  skip("too much old calling conventions", 1);
-pasm_output_is(<<'CODE', <<'OUTPUT', "nano forth sub");
-_main:
-    load_bytecode "examples/assembly/nanoforth2.pasm"
-    print "ok 1\n"
-    find_global P0, "_nano_forth_compiler"
-    defined I0, P0
-    if I0, ok2
-    print "not "
-ok2:
-    print "ok 2\n"
-    set S5, "1 7 + . 2 3 - .\n"
-    set I0, 1
-    set I1, 0
-    set I2, 1
-    set I3, 0
-    set I4, 0
-    invokecc
-    set S5, ": i 1 + ; 5 i .\n"
-    set I0, 1
-    set I1, 0
-    set I2, 1
-    set I3, 0
-    set I4, 0
-    invokecc
-    set S5, ": i 1 + ; : j i i ; 9 j .\n"
-    set I0, 1
-    set I1, 0
-    set I2, 1
-    set I3, 0
-    set I4, 0
-    # XXX fails with -S
-    # invokecc
-    end
-CODE
-ok 1
-ok 2
-8
--1
-6
-OUTPUT
-}
-
-pir_output_is(<<'CODE', <<'OUTPUT', "PIR compiler sub");
+pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub" );
 
 .sub test :main
     .local NCI compiler
@@ -161,7 +116,7 @@ ok
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "bug #31467");
+pir_output_is( <<'CODE', <<'OUTPUT', "bug #31467" );
 
   .sub main :main
      $P1 = new Hash
@@ -194,92 +149,7 @@ dynamic
 builtin
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "compile PAST in PIR");
-
-.sub main :main
-    .local pmc past_compiler
-    past_compiler = compreg "PAST"
-    .local string past_source
-    past_source = 'Parrot_AST( PCC_Sub( Stmts( Py_Print( Const(7) ) Py_Print_nl() ) ) )'
-    .local pmc past_compiled_sub
-    past_compiled_sub = past_compiler(past_source)
-    print "before\n"
-    past_compiled_sub()
-    print "after\n"
-.end
-CODE
-before
-7
-after
-OUTPUT
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "compile PAST in PASM");
-    compreg P1, "PAST"	# get compiler
-    set_args "(0)", 'Parrot_AST( PCC_Sub( Stmts( Py_Print( Const(8) ) Py_Print_nl() ) ) )'
-    get_results "(0)", P6
-    invokecc P1
-    print "before\n"
-    invokecc P6
-    invokecc P6
-    invokecc P6
-    invokecc P6
-    print "after\n"
-    end
-CODE
-before
-8
-8
-8
-8
-after
-OUTPUT
-
-pir_output_is(<<'CODE', <<'OUTPUT', "compile PAST in PASM in PIR");
-
-.sub test :main
-
-    # PIR
-    .local pmc pasm_compiler
-    pasm_compiler = compreg "PASM"
-
-        # PASM
-        .local string pasm_source
-        pasm_source = "compreg P1, 'PAST'\n"
-
-            # PAST
-            pasm_source .= "set S1, 'Parrot_AST( PCC_Sub( Stmts( Py_Print( Const(8) ) Py_Print_nl() ) ) )'\n"
-	    pasm_source .= "set_args \"(0)\", S1\n"
-            pasm_source .= "get_results \"(0)\", P6\n"
-            pasm_source .= "invokecc P1\n"
-        # PASM
-        pasm_source .= "print \"PASM: before\\n\"\n"
-        pasm_source .= "invokecc P6\n"
-        pasm_source .= "invokecc P6\n"
-        pasm_source .= "invokecc P6\n"
-        pasm_source .= "invokecc P6\n"
-        pasm_source .= "print \"PASM: after\\n\"\n"
-	pasm_source .= "set_returns \"()\"\n"
-        pasm_source .= "returncc\n"
-
-    # PIR
-    .local pmc pasm_compiled_sub
-    pasm_compiled_sub = pasm_compiler( pasm_source )
-    print "PIR: before\n"
-    pasm_compiled_sub()
-    print "PIR: after\n"
-.end
-CODE
-PIR: before
-PASM: before
-8
-8
-8
-8
-PASM: after
-PIR: after
-OUTPUT
-
-pir_output_is(<<'CODE', <<'OUTPUT', "PIR compiler sub PASM");
+pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub PASM" );
 .sub main :main
   register_compiler()
 
@@ -318,7 +188,7 @@ CODE
 ok 1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "PIR compiler sub PIR");
+pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub PIR" );
 .sub main :main
   register_compiler()
 
@@ -368,7 +238,7 @@ CODE
 ok 1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "eval.get_string");
+pir_output_is( <<'CODE', <<'OUTPUT', "eval.get_string" );
 .sub main :main
 
   .local pmc f1, f2
@@ -408,7 +278,7 @@ hello from foo_1
 hello from foo_2
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "check loaded lib hash");
+pir_output_is( <<'CODE', <<'OUTPUT', "check loaded lib hash" );
 .sub main
   load_bytecode "temp.pbc"
   load_bytecode "temp2.pbc"
@@ -417,16 +287,19 @@ pir_output_is(<<'CODE', <<'OUTPUT', "check loaded lib hash");
   interp = getinterp
   pbc_hash = interp[.IGLOBALS_PBC_LIBS]
   $I0 = elements pbc_hash
-  print_item $I0
+  print $I0
+  print ' '
   $I1 = exists pbc_hash['temp']
-  print_item $I1
+  print $I1
+  print ' '
   $I2 = exists pbc_hash['temp2']
-  print_item $I2
+  print $I2
+  print ' '
   $S0 = pbc_hash['temp2']
-  # print_item $S0          not portable
+  # print $S0          not portable
   $I3 = index $S0, 'temp2.pbc'
   $I4 = isgt $I3, -1
-  print_item $I4
+  print $I4
   print_newline
 .end
 CODE
@@ -435,7 +308,7 @@ hello from foo_2
 2 1 1 1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "eval.get_string - same file");
+pir_output_is( <<'CODE', <<'OUTPUT', "eval.get_string - same file" );
 .sub main :main
 
   .local pmc f1, f2
@@ -475,10 +348,10 @@ hello from foo_1
 OUTPUT
 
 END {
-	unlink "temp.pbc", "temp2.pbc", "temp.file";
-};
+    unlink "temp.pbc", "temp2.pbc", "temp.file";
+}
 
-pir_output_is(<<'CODE', <<'OUTPUT', "eval.freeze");
+pir_output_is( <<'CODE', <<'OUTPUT', "eval.freeze" );
 .sub main :main
   .local pmc f, e
   .local pmc io
@@ -511,7 +384,7 @@ CODE
 written
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "eval.thaw");
+pir_output_is( <<'CODE', <<'OUTPUT', "eval.thaw" );
 .sub main :main
     .local pmc io, e
     .local string file
@@ -532,7 +405,7 @@ hello from foo_1
 hello from foo_1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "eval.freeze+thaw");
+pir_output_is( <<'CODE', <<'OUTPUT', "eval.freeze+thaw" );
 .sub main :main
   .local pmc f, e
   .local pmc io
@@ -590,16 +463,16 @@ hello from foo_1
 hello from foo_1
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "get_pmc_keyed_int");
+pir_output_is( <<'CODE', <<'OUTPUT', "get_pmc_keyed_int" );
 .sub main :main
     .local string code
     .local pmc e, s, compi
     code = <<"EOC"
     .sub foo
-	noop
+        noop
     .end
     .sub bar
-	noop
+        noop
     .end
 EOC
     compi = compreg "PIR"
@@ -612,11 +485,11 @@ EOC
     print "\n"
 .end
 CODE
-parrot;foo
-parrot;bar
+foo
+bar
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "catch compile err: RT:#39892");
+pir_output_is( <<'CODE', <<'OUTPUT', "catch compile err: RT:#39892" );
 .sub main :main
      push_eh handler
      $P2 = compreg "PIR"
@@ -634,3 +507,42 @@ handler:
 CODE
 ok
 OUTPUT
+
+open my $TEMP, '>', "temp.pir" or die "can't open 'temp.pir': $!";
+END { unlink "temp.pir" }
+print $TEMP <<PIR;
+  .sub foo
+     print a typo
+  .end
+PIR
+close $TEMP;
+
+pir_error_output_like( <<'CODE', <<'OUTPUT', "compile err in load_bytecode" );
+.sub main :main
+     load_bytecode "temp.pir"
+     print "never\n"
+     end
+.end
+CODE
+/undefined identifier/
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "catch compile err in load_bytecode" );
+.sub main :main
+     push_eh handler
+     load_bytecode "temp.pir"
+     print "never\n"
+     end
+handler:
+     print "ok\n"
+.end
+CODE
+ok
+OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

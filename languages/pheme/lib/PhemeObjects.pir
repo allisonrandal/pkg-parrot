@@ -8,11 +8,11 @@
 	addattribute cons_class, 'tail'
 .end
 
-.sub '__get_bool'
+.sub 'get_bool' :vtable
 	.return( 1 )
 .end
 
-.sub '__get_string' :method
+.sub 'get_string' :vtable :method
 	.local pmc    head
 	.local string output
 	head    = self.'head'()
@@ -50,7 +50,7 @@
 	.return( head )
 .end
 
-.sub __get_integer :method
+.sub get_integer :vtable :method
 	.local pmc elem
 	elem  = self.'head'()
 
@@ -104,3 +104,9 @@
 	.local pmc symbol_class
 	subclass symbol_class, [ 'Pheme'; 'Atom' ], [ 'Pheme'; 'Atom'; 'Symbol' ]
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

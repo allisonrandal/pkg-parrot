@@ -16,7 +16,7 @@ Description: virtual machine to execute bytecode for interpreted languages
  There is already a partial Perl 6 compiler as well as compilers in various
  stages of completion for a wide range of other languages.
 
-Package: libparrot0.4.6
+Package: libparrot0.4.12
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}
@@ -33,7 +33,7 @@ Description: virtual machine to execute bytecode for interpreted languages
 Package: libparrot-dev
 Architecture: any
 Section: libdevel
-Depends: libparrot0.4.6 (= ${Source-Version}), parrot, libicu34-dev
+Depends: libparrot0.4.12 (= ${binary:Version}), parrot, libicu34-dev
 Description: virtual machine to execute bytecode for interpreted languages
  Parrot is a virtual machine designed to execute bytecode for interpreted
  languages efficiently. Parrot will be the target for the Perl 6 compiler.

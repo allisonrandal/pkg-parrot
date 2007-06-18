@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 11
+plan 12
 
 eval_is {
   set a a
@@ -55,7 +61,13 @@ eval_is {
   {list index out of range}
 
 eval_is {
+  set a "a b c d"
+  lset a -1 e
+} {list index out of range} \
+  {list index out of range}
+
+eval_is {
   set a b
   lset a 3.2 b
 } {bad index "3.2": must be integer?[+-]integer? or end?[+-]integer?} \
-  {float index} 
+  {float index}

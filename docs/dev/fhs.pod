@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/docs/dev/fhs.pod 11525 2006-02-13T18:40:19.965566Z particle  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/dev/fhs.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =pod
 

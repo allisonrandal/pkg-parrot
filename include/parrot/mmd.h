@@ -1,7 +1,7 @@
 /* mmd.h
  *  Copyright (C) 2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/mmd.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/mmd.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the api header for the mmd subsystem
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_MMD_H_GUARD)
+#ifndef PARROT_MMD_H_GUARD
 #define PARROT_MMD_H_GUARD
 
 /* inplace */
@@ -58,7 +58,7 @@ typedef struct _MMD_init {
 PARROT_API void Parrot_mmd_register_table(Interp*, INTVAL, const MMD_init *, INTVAL);
 PARROT_API void Parrot_mmd_rebuild_table(Interp*, INTVAL class_enum, INTVAL func_nr);
 
-PARROT_API funcptr_t get_mmd_dispatch_type(Interp *interpreter,
+PARROT_API funcptr_t get_mmd_dispatch_type(Interp *interp,
         INTVAL function, INTVAL left_type, INTVAL right_type, int *is_pmc);
 
 typedef struct _MMD_table {
@@ -68,30 +68,21 @@ typedef struct _MMD_table {
 } MMD_table;
 
 
-PARROT_API PMC *Parrot_MMD_search_default_func(Interp *, STRING *meth);
-PARROT_API PMC *Parrot_MMD_search_default_inline(Interp *, STRING *meth,
-        STRING *signature, ...);
-
-PARROT_API PMC *Parrot_MMD_dispatch_func(Interp *, PMC *multi, STRING *meth);
+PARROT_API PMC *Parrot_mmd_sort_candidate_list(Interp *, PMC *candidates);
 PARROT_API PMC *Parrot_MMD_search_default_infix(Interp *, STRING *meth,
         INTVAL left_type, INTVAL right_type);
 
-PARROT_API int Parrot_run_maybe_mmd_meth(Interp*, PMC *object, STRING *meth);
-PARROT_API int Parrot_run_maybe_mmd_func(Interp*, STRING *meth);
 /*
  * in src/objects.c :
  */
 PARROT_API const char* Parrot_MMD_method_name(Interp* i, INTVAL idx);
-PARROT_API INTVAL Parrot_MMD_method_idx(Interp* interpreter, char *name);
+PARROT_API INTVAL Parrot_MMD_method_idx(Interp *interp, char *name);
 
 #endif /* PARROT_MMD_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

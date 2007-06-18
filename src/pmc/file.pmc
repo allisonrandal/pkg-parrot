@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/pmc/file.pmc 13523 2006-07-24T15:49:07.843920Z chip  $
+$Id: /parrotcode/local/src/pmc/file.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ C<File> is a singleton class which provides access to File functions.
 */
 
 #ifdef WIN32
-#include <direct.h>
+#  include <direct.h>
 #endif
 
 #include "parrot/parrot.h"
@@ -63,7 +63,7 @@ Returns a true value (1) if the supplied file or directory exists.
 
     METHOD INTVAL exists(STRING *path) {
         struct stat info;
-        char *cpath = string_to_cstring(interpreter, path);
+        char *cpath = string_to_cstring(interp, path);
 #ifdef WIN32
         int error = stat(cpath, &info);
 #else
@@ -89,7 +89,7 @@ Returns a true value (1) if the supplied path is a directory.
 
     METHOD INTVAL is_dir(STRING *path) {
         struct stat info;
-        char *cpath = string_to_cstring(interpreter, path);
+        char *cpath = string_to_cstring(interp, path);
 #ifdef WIN32
         int error = stat(cpath, &info);
 #else
@@ -98,12 +98,13 @@ Returns a true value (1) if the supplied path is a directory.
         string_cstring_free(cpath);
         if (error) {
             char *errmsg = strerror(errno);
-            real_exception(interpreter, NULL, E_SystemError, errmsg);
+            real_exception(interp, NULL, E_SystemError, errmsg);
         }
 
         if (S_ISDIR(info.st_mode)) {
             return 1;
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -120,7 +121,7 @@ Returns a true value (1) if the supplied path is a plain file.
 
     METHOD INTVAL is_file(STRING *path) {
         struct stat info;
-        char *cpath = string_to_cstring(interpreter, path);
+        char *cpath = string_to_cstring(interp, path);
 #ifdef WIN32
         int error = stat(cpath, &info);
 #else
@@ -129,12 +130,13 @@ Returns a true value (1) if the supplied path is a plain file.
         string_cstring_free(cpath);
         if (error) {
             char *errmsg = strerror(errno);
-            real_exception(interpreter, NULL, E_SystemError, errmsg);
+            real_exception(interp, NULL, E_SystemError, errmsg);
         }
 
         if (S_ISREG(info.st_mode)) {
             return 1;
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -155,17 +157,18 @@ Returns a true value (1) if the supplied path is a link.
         return 0;
 #else
         struct stat info;
-        char *cpath = string_to_cstring(interpreter, path);
+        char *cpath = string_to_cstring(interp, path);
         int error = lstat(cpath, &info);
         string_cstring_free(cpath);
         if (error) {
             char *errmsg = strerror(errno);
-            real_exception(interpreter, NULL, E_SystemError, errmsg);
+            real_exception(interp, NULL, E_SystemError, errmsg);
         }
 
         if (S_ISLNK(info.st_mode)) {
             return 1;
-        } else {
+        }
+        else {
             return 0;
         }
 #endif
@@ -192,34 +195,36 @@ free to change or give me hints on how to change it. -- ambs
         FILE *source = NULL;
         FILE *target = NULL;
 
-        char *cfrom = string_to_cstring(interpreter, from);
-        char *cto = string_to_cstring(interpreter, to);
+        char *cfrom = string_to_cstring(interp, from);
+        char *cto = string_to_cstring(interp, to);
         source = fopen(cfrom, "rb");
         if (source) {
             target = fopen(cto, "w+b");
             if (target) {
                 char buf[CHUNK_SIZE];
                 int bytes_read, bytes_written;
-                while(!feof(source)) {
+                while (!feof(source)) {
                     bytes_read = fread(buf, 1, CHUNK_SIZE, source);
                     if (bytes_read) {
                         bytes_written = fwrite(buf, 1, bytes_read, target);
                         if (bytes_read != bytes_written) {
-                            real_exception(interpreter, NULL, E_SystemError, 
+                            real_exception(interp, NULL, E_SystemError,
                                            "Error writting file");
                             break;
                         }
                     }
                 }
                 fclose(target);
-            } else {
+            }
+            else {
                 char *errmsg = strerror(errno);
-                real_exception(interpreter, NULL, E_SystemError, errmsg);
+                real_exception(interp, NULL, E_SystemError, errmsg);
             }
             fclose(source);
-        } else {
+        }
+        else {
             char *errmsg = strerror(errno);
-            real_exception(interpreter, NULL, E_SystemError, errmsg);
+            real_exception(interp, NULL, E_SystemError, errmsg);
         }
         string_cstring_free(cfrom);
         string_cstring_free(cto);
@@ -237,14 +242,14 @@ Rename a file C<from> to the path C<to>.
 */
 
     METHOD void rename(STRING *from, STRING *to) {
-        char *cfrom = string_to_cstring(interpreter, from);
-        char *cto = string_to_cstring(interpreter, to);
+        char *cfrom = string_to_cstring(interp, from);
+        char *cto = string_to_cstring(interp, to);
         int error = rename(cfrom, cto);
         string_cstring_free(cfrom);
         string_cstring_free(cto);
         if (error) {
             char *errmsg = strerror(errno);
-            real_exception(interpreter, NULL, E_SystemError, errmsg);
+            real_exception(interp, NULL, E_SystemError, errmsg);
         }
     }
 }
@@ -263,10 +268,7 @@ Rename a file C<from> to the path C<to>.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

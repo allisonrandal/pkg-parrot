@@ -1,3 +1,4 @@
+
 #include <time.h>
 
 /*
@@ -7,7 +8,15 @@
 INTVAL
 Parrot_intval_time(void)
 {
+#if _MSC_VER >= 1400
+#  if INTVAL_SIZE <= 4
+    return _time32(NULL);
+#  else
+    return _time64(NULL);
+#  endif
+#else
     return time(NULL);
+#endif
 }
 
 /*
@@ -24,7 +33,7 @@ Parrot_floatval_time(void)
     GetSystemTime(&sysTime);
     SystemTimeToFileTime(&sysTime, &fileTime);
     /* Documented as the way to get a 64 bit from a FILETIME. */
-    memcpy(&i, &fileTime, sizeof(LARGE_INTEGER));
+    memcpy(&i, &fileTime, sizeof (LARGE_INTEGER));
 
     return (FLOATVAL)i.QuadPart / 10000000.0;   /*1e7 */
 }
@@ -71,3 +80,10 @@ Parrot_asctime_r(const struct tm *tm, char *buffer)
 {
     return strcpy(buffer, asctime(tm));
 }
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

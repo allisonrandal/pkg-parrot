@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: statements.t 13503 2006-07-24 15:26:45Z ambs $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/statements.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/statements.t - WMLScript Statements
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/statements.t
+    % perl -I../lib WMLScript/t/statements.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ use lib "$FindBin::Bin";
 use Parrot::Test tests => 3;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'for');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'for' );
 extern function main()
 {
     var sum = 0;
@@ -40,7 +40,7 @@ CODE
 Sum: 10
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'for break');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'for break' );
 extern function main()
 {
     var sum = 0;
@@ -59,7 +59,7 @@ CODE
 Sum: 10
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'while', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'while', cflags => '-On' );
 extern function main()
 {
     var sum = 0;
@@ -78,4 +78,10 @@ CODE
 Sum: 10
 OUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

@@ -1,14 +1,13 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/library/parrotlib.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/library/parrotlib.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 6;
 use Parrot::Config;
-
 
 =head1 NAME
 
@@ -16,7 +15,7 @@ t/library/parrotlib.t - testing library/parrotlib.pir
 
 =head1 SYNOPSIS
 
-	% prove t/library/parrotlib.t
+        % prove t/library/parrotlib.t
 
 =head1 DESCRIPTION
 
@@ -24,7 +23,6 @@ This test program test whether the library 'parrotlib.pir' returns the
 expected absolute filenames.
 
 =cut
-
 
 # Common code in the test files
 
@@ -44,8 +42,7 @@ my $template_bottom = << 'END_CODE';
 .end
 END_CODE
 
-
-# Testing include_file_location 
+# Testing include_file_location
 
 pir_output_is( << "END_CODE", << 'END_OUT', 'include_file_location' );
 $template_top
@@ -64,7 +61,6 @@ $template_bottom
 END_CODE
 
 END_OUT
-
 
 # Testing imcc_compile_file_location
 
@@ -86,7 +82,6 @@ END_CODE
 
 END_OUT
 
-
 # Testing dynext_location
 
 pir_output_is( << "END_CODE", << "END_OUT", 'dynext_location' );
@@ -107,7 +102,6 @@ END_CODE
 
 END_OUT
 
-
 =head1 AUTHOR
 
 Bernhard Schmalhofer <Bernhard.Schmalhofer@gmx.de>
@@ -118,7 +112,9 @@ F<runtime/parrot/library/parrotlib.pir>
 
 =cut
 
-
-## remember to change the number of tests! :-)
-BEGIN { plan tests => 6; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

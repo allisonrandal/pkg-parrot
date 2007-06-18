@@ -5,148 +5,135 @@
   .param pmc argv :slurpy
   # Requires multiple of 3 args.
 
-  .local pmc compiler,pir_compiler,retval
-
-  .local int call_level
-  $P0 = get_root_global ['_tcl'], 'call_level'
-  call_level = $P0
+  .local int argc
+  argc = elements argv
 
   # Were we passed the right # of arguments? (2n+1)
-  $I1 = argv
-  if $I1 == 0 goto error
-  $I0 = $I1 % 2
-  if $I0 != 1 goto error
+  if argc < 2 goto bad_args
+  $I0 = argc % 2
+  if $I0 != 1 goto bad_args
 
-  .local pmc __list, __set
-  __list = get_root_global ['_tcl'], '__list'
-  __set  = get_root_global ['_tcl'], '__set'
+  .local pmc ns
+  $P0 = getinterp
+  ns  = $P0['namespace'; 1]
 
-  compiler     = get_root_global ['_tcl'], 'compile'
-  pir_compiler = get_root_global ['_tcl'], 'pir_compiler'
+  .local pmc __list, __script, __set
+  __list   = get_root_global ['_tcl'], '__list'
+  __script = get_root_global ['_tcl'], '__script'
+  __set    = get_root_global ['_tcl'], '__set'
 
-  .local int argc
-  argc = argv
+  .local pmc varLists, lists, command
+  varLists = new .TclList
+  lists    = new .TclList
+  command  = pop argv
+  command  = __script(command, 'ns'=>ns)
 
-  # Compartmentalize our arguments
-  .local pmc varnames, arglists
-  .local string body
-  varnames = new .TclList
-  arglists  = new .TclList
-  varnames = argc
-  arglists = argc
-  .local pmc arg_num,arg_max,index_num
-  arg_num = new .Integer
-  arg_max = new .Integer
-  index_num = new .Integer
-  arg_num = 0 
-  index_num = 0
-
-  arg_max = argc
-  dec arg_max
-  body = argv[arg_max]
-  dec arg_max
-  .local pmc max_size
-  max_size = new .Integer
-  max_size = 0
+  .local int iterations
+  iterations = 0
+  .local pmc iter
+  iter = new .Iterator, argv
 arg_loop:
-  if arg_num >= arg_max goto arg_done
+  unless iter goto arg_done
 
-  $P0 = argv[arg_num]
-  varnames[index_num] = $P0
-  inc arg_num
-  $P0 = argv[arg_num]
-  $P0 = __list($P0)
+  .local pmc varList, list
+  varList = shift iter
+  varList = __list(varList)
+  list    = shift iter
+  list    = __list(list)
 
-got_list:
-  arglists[index_num] = $P0
+  $I0 = elements varList
+  if $I0 == 0 goto bad_varlist
 
-  .local int size_of
-  size_of = $P0
+  $I1 = elements list
+  $N0 = $I0
+  $N1 = $I1
+  $N0 = $N1 / $N0
+  $I0 = ceil $N0
 
-  inc arg_num
-
-  inc index_num
-
-  if max_size >= size_of goto arg_loop
-  max_size = size_of
-  goto arg_loop
-arg_done: 
-  .local pmc parsed
-  ($I0,$P0) = compiler(0,body)
-  parsed = pir_compiler($I0,$P0)  
-  register parsed
-
-  .local pmc iterator
-  iterator = new .Integer
-  iterator = 0
-loop_outer:
-  if iterator >= max_size goto done
+  list = new .Iterator, list
+  push varLists, varList
+  push lists, list
   
-  .local int counter,end_counter
+  if $I0 <= iterations goto arg_loop
+  iterations = $I0
+  goto arg_loop
+arg_done:
+
+ .local int iteration
+  iteration = -1
+next_iteration:
+  inc iteration
+  if iteration >= iterations goto done
+  
+  .local int counter, elems
   counter = -1
-  end_counter = index_num
-  .local pmc got_one
-  got_one = new .Integer
-  got_one = 0
-loop_inner:
+  elems   = elements varLists
+next_varList:
   inc counter
-  if counter >= end_counter goto loop_inner_done_good
+  if counter >= elems goto execute_command
+
+  .local pmc varList, list
+  varList = varLists[counter]
+  list    = lists[counter]
+
+  $I0 = -1
+  $I1 = elements varList
+next_variable:
+  inc $I0
+  if $I0 >= $I1 goto next_varList
 
   .local string varname
+  varname = varList[$I0]
+
   .local pmc value
-
-  $I0 = varnames
-  if counter >= $I0 goto loop_inner_done_good
-
-  varname = varnames[counter]
-  $P0 = arglists[counter]
-  $I1 = $P0
-  $I2 = iterator
-  if $I1 <= $I2 goto empty_var
-  value = $P0[$I2]
-  __set(varname, value)
-
-  got_one = 1
-  goto loop_inner
-empty_var:
-  $P0 = new .TclString
-  $P0 = ''
-  __set(varname, $P0)
-  goto loop_inner
-loop_inner_done_good:
-  got_one = 1
-loop_inner_done:
-  if got_one == 1 goto loop_outer_continue
-  # there was nothing in this set of iterators. 
-###   goto loop_outer_done  XXX no such label
-
- 
-  # Loop until all elements are consumed. If any of the lists that were
-  # provided are already consumed, then simply assign the empty string.
-  # create a new pad in which our variables will run.
-  # XXX This should probably not create a new pad, exactly
-  # Handle [break] and [continue]
-loop_outer_continue:
-  push_eh handle_continue
-    retval = parsed()
+  unless list goto empty_var
+  value = shift list
+  value = clone value
+  push_eh couldnt_set
+    __set(varname, value)
   clear_eh
+  goto next_variable
 
-do_next:
-  inc iterator
-  goto loop_outer
+empty_var:
+  value = new .TclString
+  value = ''
+  push_eh couldnt_set
+    __set(varname, value)
+  clear_eh
+  goto next_variable
+
+execute_command:
+  push_eh handle_continue
+    command()
+  clear_eh
+  goto next_iteration
 
 handle_continue:
   .catch()
   .local int return_type
   .get_return_code(return_type)
   if return_type == TCL_BREAK goto done
-  if return_type == TCL_CONTINUE goto do_next
+  if return_type == TCL_CONTINUE goto next_iteration
   .rethrow()
  
 done:
-  .return(retval)
+  .return('')
 
-error:
-  .throw('wrong # args: should be "foreach varList list ?varList list ...? command"')
+couldnt_set:
+  $S0 =  "couldn't set loop variable: \""
+  $S0 .= varname
+  $S0 .= '"'
+  tcl_error $S0
 
+bad_args:
+  tcl_error 'wrong # args: should be "foreach varList list ?varList list ...? command"'
+
+bad_varlist:
+  tcl_error 'foreach varlist is empty'
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

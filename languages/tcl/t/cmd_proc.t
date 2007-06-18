@@ -1,155 +1,136 @@
-#!/usr/bin/perl
+#!perl
 
-use strict;
-use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 16;
-use Test::More;
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
-language_output_is("tcl",<<'TCL',<<OUT,"return value");
+source lib/test_more.tcl
+plan 19
+
+eval_is {
  set a [proc me {} {
-  puts 2
+  return 2
  }]
- me
- puts $a
-TCL
-2
+ list [me] [set a]
+} {2 {}} {return value}
 
-OUT
-
-language_output_is("tcl",<<'TCL',<<'OUT',"return value from user-defined command");
+eval_is {
  proc foo {} {
    append x {foo bar}
  }
- puts [foo]
-TCL
-foo bar
-OUT
+ foo
+} {foo bar} {return value from user-defined command}
 
-language_output_is("tcl",<<'TCL',<<OUT,"noarg");
+eval_is {
  proc me {} {
-  puts 2
+  return 2
  }
  me
-TCL
-2
-OUT
+} 2 {no args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"onearg");
+eval_is {
  proc me {a} {
-  puts $a
+  return $a
  }
  me 2
-TCL
-2
-OUT
+} 2 {one arg}
 
-language_output_is("tcl",<<'TCL',<<OUT,"twoarg");
+eval_is {
  proc me {a b} {
-  puts $a
-  puts $b
+  list $a $b
  }
- me 2  3
-TCL
-2
-3
-OUT
+ me 2 3
+} {2 3} {two args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"too many args");
+eval_is {
  proc me {a b} {
-  puts $a
-  puts $b
+  list $a $b
  }
  me 2 3 4
-TCL
-wrong # args: should be "me a b"
-OUT
+} {wrong # args: should be "me a b"} {too many args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"too few args");
+eval_is {
  proc me {a b} {
-  puts $a
-  puts $b
+  list $a $b
  }
  me 2
-TCL
-wrong # args: should be "me a b"
-OUT
+} {wrong # args: should be "me a b"} {too few args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"bad varargs");
+eval_is {
+  proc test {} {}
+  test foo bar
+} {wrong # args: should be "test"} {bad args - expected none}
+
+eval_is {
  proc me {a b args} {
-  puts $a
-  puts $b
+  list $a $b
  }
  me 2
-TCL
-wrong # args: should be "me a b args"
-OUT
+} {wrong # args: should be "me a b ..."} {bad varargs}
 
-language_output_is("tcl",<<'TCL',<<OUT,"vararg");
+eval_is {
  proc me {a args} {
-  puts $a
-  puts $args
+  list $a $args
  }
  me 2 3 4 5 6
-TCL
-2
-3 4 5 6
-OUT
+} {2 {3 4 5 6}} {vararg}
 
-language_output_is("tcl",<<'TCL',<<OUT,"vararg empty");
+eval_is {
  proc me {a args} {
-  puts $a
-  puts $args
+  list $a $args
  }
  me 2
-TCL
-2
+} {2 {}} {vararg empty}
 
-OUT
-
-language_output_is("tcl", <<'TCL', <<'OUT', "redefined inlinable builtin");
-  proc incr {varName} {puts $varName}
+eval_is {
+  rename incr incr_old
+  proc incr {varName} {return $varName}
   proc test {} { incr a }
-  test
-TCL
-a
-OUT
+  set a [test]
+  rename incr {}
+  rename incr_old incr
+  set a
+} {a} {using a renamed builtin}
 
-language_output_is("tcl", <<'TCL', <<'OUT', "unknown namespace");
+eval_is {
   proc a::b {} {puts a::b}
   a::b
-TCL
-can't create procedure "a::b": unknown namespace
-OUT
+} {can't create procedure "a::b": unknown namespace} {unknown namespace}
 
-language_output_is("tcl",<<'TCL',<<OUT,"default args");
+eval_is {
  proc me {{a 2}} {
-  puts $a
+  return $a
  }
- me
- me 7
-TCL
-2
-7
-OUT
+ list [me] [me 7]
+} {2 7} {default args}
 
-language_output_is("tcl",<<'TCL',<<OUT,"bad default args");
+eval_is {
  proc me {{a 2 3}} {
-  puts $a
+  return $a
  }
-TCL
-too many fields in argument specifier "a 2 3"
-OUT
+} {too many fields in argument specifier "a 2 3"} {bad default arg spec}
 
-language_output_is("tcl", <<'TCL', <<'OUT', "proc test {{a 2} b}");
-  proc test {{a 2} b} {puts $a; puts $b}
+eval_is {
+  proc test {{a 2} b} {list $a $b}
   test 3
-TCL
-wrong # args: should be "test ?a? b"
-OUT
+} {wrong # args: should be "test ?a? b"} {default arg with too few args}
 
-language_output_is("tcl", <<'TCL', <<'OUT', "proc default - too many args");
-  proc test {{a 2}} {puts $a}
+eval_is {
+  proc test {{a 2}} {return $a}
   test 3 4
-TCL
-wrong # args: should be "test ?a?"
-OUT
+} {wrong # args: should be "test ?a?"} {default too many args}
+
+eval_is {
+  proc test {} {}
+  set a 4
+  catch {test foo}
+  set a
+} 4 {reset call_level on bad args}
+
+eval_is {
+ proc nothing {} {
+    # empty proc
+ }
+} {} {empty procs are ok}

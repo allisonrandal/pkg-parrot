@@ -1,7 +1,7 @@
 /* charset.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/charset.h 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/charset.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_CHARSET_H_GUARD)
+#ifndef PARROT_CHARSET_H_GUARD
 #define PARROT_CHARSET_H_GUARD
 
 
@@ -53,9 +53,9 @@ typedef INTVAL (*charset_compare_t)(Interp *, STRING *lhs, STRING *rhs);
 typedef INTVAL (*charset_index_t)(Interp *, STRING *source_string, STRING *search_string, UINTVAL offset);
 typedef INTVAL (*charset_rindex_t)(Interp *, STRING *source_string, STRING *search_string, UINTVAL offset);
 typedef UINTVAL (*charset_validate_t)(Interp *, STRING *source_string);
-typedef INTVAL (*charset_is_cclass_t)(Interp *, PARROT_CCLASS_FLAGS, STRING *source_string, UINTVAL offset);
-typedef INTVAL (*charset_find_cclass_t)(Interp *, PARROT_CCLASS_FLAGS, STRING *source_string, UINTVAL offset, UINTVAL count);
-typedef INTVAL (*charset_find_not_cclass_t)(Interp *, PARROT_CCLASS_FLAGS, STRING *source_string, UINTVAL offset, UINTVAL count);
+typedef INTVAL (*charset_is_cclass_t)(Interp *, INTVAL, STRING *source_string, UINTVAL offset);
+typedef INTVAL (*charset_find_cclass_t)(Interp *, INTVAL, STRING *source_string, UINTVAL offset, UINTVAL count);
+typedef INTVAL (*charset_find_not_cclass_t)(Interp *, INTVAL, STRING *source_string, UINTVAL offset, UINTVAL count);
 typedef INTVAL (*charset_is_wordchar_t)(Interp *, STRING *source_string, UINTVAL offset);
 typedef INTVAL (*charset_find_wordchar_t)(Interp *, STRING *source_string, UINTVAL offset);
 typedef INTVAL (*charset_find_not_wordchar_t)(Interp *, STRING *source_string, UINTVAL offset);
@@ -121,26 +121,26 @@ struct _charset {
     ENCODING *preferred_encoding;
 };
 
-#define CHARSET_GET_GRAPEMES(interp, source, offset, count) ((CHARSET *)source->charset)->get_graphemes(interpreter, source, offset, count)
-#define CHARSET_GET_GRAPHEMES_INPLACE(interp, source, dest, offset, count) ((CHARSET *)source->charset)->get_graphemes(interpreter, source, dest, offset, count)
-#define CHARSET_SET_GRAPHEMES(interp, source, offset, replace_count, insert) ((CHARSET *)source->charset)->set_graphemes(interpreter, source, offset, replace_count, insert)
-#define CHARSET_TO_UNICODE(interp, source, dest) ((CHARSET *)source->charset)->to_unicode(interpreter, source, dest)
-#define CHARSET_COMPOSE(interp, source) ((CHARSET *)source->charset)->compose(interpreter, source)
-#define CHARSET_DECOMPOSE(interp, source) ((CHARSET *)source->charset)->decompose(interpreter, source)
-#define CHARSET_UPCASE(interp, source) ((CHARSET *)source->charset)->upcase(interpreter, source)
-#define CHARSET_DOWNCASE(interp, source) ((CHARSET *)source->charset)->downcase(interpreter, source)
-#define CHARSET_TITLECASE(interp, source) ((CHARSET *)source->charset)->titlecase(interpreter, source)
-#define CHARSET_UPCASE_FIRST(interp, source) ((CHARSET *)source->charset)->upcase_first(interpreter, source)
-#define CHARSET_DOWNCASE_FIRST(interp, source) ((CHARSET *)source->charset)->downcase_first(interpreter, source)
-#define CHARSET_TITLECASE_FIRST(interp, source) ((CHARSET *)source->charset)->titlecase_first(interpreter, source)
-#define CHARSET_COMPARE(interp, lhs, rhs) ((CHARSET *)lhs->charset)->compare(interpreter, lhs, rhs)
-#define CHARSET_INDEX(interp, source, search, offset) ((CHARSET *)source->charset)->index(interpreter, source, search, offset)
-#define CHARSET_RINDEX(interp, source, search, offset) ((CHARSET *)source->charset)->rindex(interpreter, source, search, offset)
-#define CHARSET_VALIDATE(interp, source, offset) ((CHARSET *)source->charset)->validate(interpreter, source)
-#define CHARSET_IS_CCLASS(interp, flags, source, offset) ((CHARSET *)source->charset)->is_cclass(interpreter, flags, source, offset)
-#define CHARSET_FIND_CCLASS(interp, flags, source, offset, count) ((CHARSET *)source->charset)->find_cclass(interpreter, flags, source, offset, count)
-#define CHARSET_FIND_NOT_CCLASS(interp, flags, source, offset, count) ((CHARSET *)source->charset)->find_not_cclass(interpreter, flags, source, offset, count)
-#define CHARSET_COMPUTE_HASH(interp, source, seed) ((CHARSET *)source->charset)->compute_hash(interpreter, source, seed)
+#define CHARSET_GET_GRAPEMES(interp, source, offset, count) ((CHARSET *)source->charset)->get_graphemes(interp, source, offset, count)
+#define CHARSET_GET_GRAPHEMES_INPLACE(interp, source, dest, offset, count) ((CHARSET *)source->charset)->get_graphemes(interp, source, dest, offset, count)
+#define CHARSET_SET_GRAPHEMES(interp, source, offset, replace_count, insert) ((CHARSET *)source->charset)->set_graphemes(interp, source, offset, replace_count, insert)
+#define CHARSET_TO_UNICODE(interp, source, dest) ((CHARSET *)source->charset)->to_unicode(interp, source, dest)
+#define CHARSET_COMPOSE(interp, source) ((CHARSET *)source->charset)->compose(interp, source)
+#define CHARSET_DECOMPOSE(interp, source) ((CHARSET *)source->charset)->decompose(interp, source)
+#define CHARSET_UPCASE(interp, source) ((CHARSET *)source->charset)->upcase(interp, source)
+#define CHARSET_DOWNCASE(interp, source) ((CHARSET *)source->charset)->downcase(interp, source)
+#define CHARSET_TITLECASE(interp, source) ((CHARSET *)source->charset)->titlecase(interp, source)
+#define CHARSET_UPCASE_FIRST(interp, source) ((CHARSET *)source->charset)->upcase_first(interp, source)
+#define CHARSET_DOWNCASE_FIRST(interp, source) ((CHARSET *)source->charset)->downcase_first(interp, source)
+#define CHARSET_TITLECASE_FIRST(interp, source) ((CHARSET *)source->charset)->titlecase_first(interp, source)
+#define CHARSET_COMPARE(interp, lhs, rhs) ((CHARSET *)lhs->charset)->compare(interp, lhs, rhs)
+#define CHARSET_INDEX(interp, source, search, offset) ((CHARSET *)source->charset)->index(interp, source, search, offset)
+#define CHARSET_RINDEX(interp, source, search, offset) ((CHARSET *)source->charset)->rindex(interp, source, search, offset)
+#define CHARSET_VALIDATE(interp, source, offset) ((CHARSET *)source->charset)->validate(interp, source)
+#define CHARSET_IS_CCLASS(interp, flags, source, offset) ((CHARSET *)source->charset)->is_cclass(interp, flags, source, offset)
+#define CHARSET_FIND_CCLASS(interp, flags, source, offset, count) ((CHARSET *)source->charset)->find_cclass(interp, flags, source, offset, count)
+#define CHARSET_FIND_NOT_CCLASS(interp, flags, source, offset, count) ((CHARSET *)source->charset)->find_not_cclass(interp, flags, source, offset, count)
+#define CHARSET_COMPUTE_HASH(interp, source, seed) ((CHARSET *)source->charset)->compute_hash(interp, source, seed)
 #define CHARSET_GET_PREFERRED_ENCODING(interp, source) ((CHARSET *)source->charset)->preferred_encoding
 
 #define CHARSET_TO_ENCODING(interp, source) ((ENCODING *)source->encoding)->to_encoding(interp, source)
@@ -161,12 +161,10 @@ struct _charset {
 
 
 #endif /* PARROT_CHARSET_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

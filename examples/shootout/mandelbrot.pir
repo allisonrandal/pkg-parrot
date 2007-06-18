@@ -1,3 +1,4 @@
+#!./parrot -j
 =head1 NAME
 
 examples/shootout/mandelbrot.pir - Print the Mandelbrot set
@@ -119,3 +120,9 @@ NTSTE:
         if y < h goto YREDO
 	end
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

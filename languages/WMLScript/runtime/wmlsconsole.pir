@@ -1,5 +1,5 @@
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/runtime/wmlsconsole.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/runtime/wmlsconsole.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -13,16 +13,16 @@ See "WMLScript Reference UP.SDK R4.B3 - October 1999".
 
 =cut
 
-.loadlib "wmls_ops"
-.HLL "WMLScript", "wmls_group"
+.loadlib 'wmls_ops'
+.HLL 'WMLScript', 'wmls_group'
 
 
-.sub getConsole
+.sub 'getConsole'
     new $P0, .Hash
-    
-    .const .Sub _console_print = "_console_print"
+
+    .const .Sub _console_print = '_console_print'
     $P0[0]  = _console_print
-    .const .Sub _console_println = "_console_println"
+    .const .Sub _console_println = '_console_println'
     $P0[1]  = _console_println
 
     .return ($P0)
@@ -44,10 +44,10 @@ Number or invalid.
 
 =cut
 
-.sub _console_print :anon
+.sub '_console_print' :anon
     .param pmc str
     .local pmc ret
-    $I0 = isa str, "WmlsInvalid"
+    $I0 = isa str, 'WmlsInvalid'
     if $I0 goto L1
     $S0 = str
     print $S0
@@ -58,7 +58,7 @@ Number or invalid.
 L1:
     new ret, .WmlsInvalid
 L2:
-    .return (ret)    
+    .return (ret)
 .end
 
 
@@ -77,10 +77,10 @@ Number or invalid.
 
 =cut
 
-.sub _console_println :anon
+.sub '_console_println' :anon
     .param pmc str
     .local pmc ret
-    $I0 = isa str, "WmlsInvalid"
+    $I0 = isa str, 'WmlsInvalid'
     if $I0 goto L1
     $S0 = str
     print $S0
@@ -92,7 +92,7 @@ Number or invalid.
 L1:
     new ret, .WmlsInvalid
 L2:
-    .return (ret)    
+    .return (ret)
 .end
 
 
@@ -102,3 +102,9 @@ Francois Perrad.
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

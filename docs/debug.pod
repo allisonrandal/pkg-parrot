@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/docs/debug.pod 13183 2006-07-06T20:05:47.681449Z chip  $
+# $Id: /parrotcode/trunk/docs/debug.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -134,8 +134,9 @@ Step 7: Step into the JITed code
 
   gdb> s
 
-At this point, you can step through the instructions, or print out the various
-Parrot registers. FIXME: C<gdb> will know about I0-I31, N0-N31, S0-S31, and P0-P31.
+At this point, you can step through the instructions, or print out the
+various Parrot registers. FIXME: C<gdb> will know about I0-I31,
+N0-N31, S0-S31, and P0-P31.
 
 
 WARNING: Stepping too far

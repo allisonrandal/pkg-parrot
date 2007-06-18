@@ -3,8 +3,12 @@
  *
  * HPPA
  *
- * $Id: /local/src/jit/hppa/jit_emit.h 11522 2006-02-13T14:17:27.477425Z rafl  $
+ * $Id: /parrotcode/trunk/src/jit/hppa/jit_emit.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  */
+
+#ifndef PARROT_HPPA_JIT_EMIT_H_GUARD
+#define PARROT_HPPA_JIT_EMIT_H_GUARD
+
 
 /*
  *      r0          Zero
@@ -432,10 +436,10 @@ enum { JIT_HPPA_BRANCH, JIT_HPPA_CALL };
     emit_stw(pc, BASE, reg, offs);
 
 #  define jit_emit_mov_mr_n(pc, offs, reg) \
-	emit_std(pc, BASE, reg, offs);
+    emit_std(pc, BASE, reg, offs);
 
 #  define jit_emit_mov_rm_n(pc, offs, reg) \
-	emit_ldd(pc, BASE, reg, offs);
+    emit_ldd(pc, BASE, reg, offs);
 
 /*  emit_cmpbranch
  *
@@ -483,7 +487,7 @@ Parrot_emit_jump_to_ret(Parrot_jit_info_t *jit_info,
     emit_ldw(jit_info->native_ptr, BASE, CIR,
         (offsetof(Interp, code)));
     emit_ldw(jit_info->native_ptr, CIR, ISR2,
-	(offsetof(struct PackFile_Segment, data)));
+    (offsetof(PackFile_Segment, data)));
     jit_emit_sub_rrr(jit_info->native_ptr, CIR, RET0, ISR2);
     /*
      * now we have the offset of the ins in CIR
@@ -590,7 +594,7 @@ Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
 #endif /* JIT_EMIT */
 #if JIT_EMIT == 0
 
-#define FLOAT_REGISTERS_TO_MAP 4
+#  define FLOAT_REGISTERS_TO_MAP 4
 
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
@@ -687,14 +691,14 @@ jit_mov_rm_offs(Parrot_jit_info_t *jit_info, int reg, int base, INTVAL offs)
 static void
 jit_mov_mr_n_offs(Parrot_jit_info_t * jit_info, int base, INTVAL offs, int reg)
 {
-	jit_emit_mov_mr_n(jit_info->native_ptr, offs, reg);
+    jit_emit_mov_mr_n(jit_info->native_ptr, offs, reg);
 }
 
 /* move mem (i.e. numreg) to reg */
 static void
 jit_mov_rm_n_offs(Parrot_jit_info_t * jit_info, int reg, int base, INTVAL offs)
 {
-	jit_emit_mov_rm_n(jit_info->native_ptr, reg, offs);
+    jit_emit_mov_rm_n(jit_info->native_ptr, reg, offs);
 }
 
 
@@ -708,65 +712,74 @@ char intval_map[INT_REGISTERS_TO_MAP] =
     { r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18};
 
 char intval_map_sub[] =
-	{ r0, r1, r2, r3, r4, r5 };
+    { r0, r1, r2, r3, r4, r5 };
 
 static void
-hppa_sync_cache (void *_start, void *_end)
+hppa_sync_cache(void *_start, void *_end)
 {
     char *start = (char*)(((int)_start) &~(CACHELINESIZE));
     char *end = (char *)((((int)_end)+CACHELINESIZE) &~(CACHELINESIZE));
     char *_sync;
 
     for (_sync = start; _sync < end; _sync += CACHELINESIZE) {
-        __asm__ __volatile__ ("fdc %r0(%0)":: "r" ((long)_sync));
+        __asm__ __volatile__("fdc %r0(%0)":: "r" ((long)_sync));
     }
 
-    __asm__ __volatile__ ("sync");
+    __asm__ __volatile__("sync");
 }
 
 static const jit_arch_info arch_info = {
-	jit_mov_rm_offs,
-	jit_mov_rm_n_offs,
-	jit_mov_mr_offs,
-	jit_mov_mr_n_offs,
-	Parrot_jit_dofixup,
-	hppa_sync_cache,
-	{
-		{
-			Parrot_jit_begin,
-			INT_REGISTERS_TO_MAP,
-			INT_REGISTERS_TO_MAP,
-			intval_map,
-			0,
-			0,
-			NULL
-		},
-		{
-			NULL,
-			0,
-			0,
-			NULL,
-			0,
-			0,
-			NULL
-		},
-		{
-			NULL,
-			0,
-			0,
-			NULL,
-			0,
-			0,
-			NULL
-		}
-	}
+    jit_mov_rm_offs,
+    jit_mov_rm_n_offs,
+    jit_mov_mr_offs,
+    jit_mov_mr_n_offs,
+    Parrot_jit_dofixup,
+    hppa_sync_cache,
+    {
+        {
+            Parrot_jit_begin,
+            INT_REGISTERS_TO_MAP,
+            INT_REGISTERS_TO_MAP,
+            intval_map,
+            0,
+            0,
+            NULL
+        },
+        {
+            NULL,
+            0,
+            0,
+            NULL,
+            0,
+            0,
+            NULL
+        },
+        {
+            NULL,
+            0,
+            0,
+            NULL,
+            0,
+            0,
+            NULL
+        }
+    }
 };
 const jit_arch_info*
 Parrot_jit_init(Interp *interpreter)
 {
-	return &arch_info;
+    return &arch_info;
 }
 
 #  endif
 
-#endif
+#endif /* !JIT_EMIT */
+
+#endif /* PARROT_HPPA_JIT_EMIT_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

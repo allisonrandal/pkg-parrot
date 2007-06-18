@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/io/http.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/examples/io/http.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -19,29 +19,31 @@ the network layer won't exist.
 
 =cut
 
-.sub _main
+.sub example :main
     .local pmc sock
     .local string address
     .local string buf
     .local int ret
     .local int len
-    print "Creating socket.\n"
+
     # create the socket handle 
+    print "Creating socket.\n"
     socket sock, 2, 1, 0
     unless sock goto ERR
+
     # Pack a sockaddr_in structure with IP and port
-    #sockaddr address, 80, "129.42.18.99"
     sockaddr address, 80, "www.ibm.com"
     print "Connecting to http://www.ibm.com:80\n"
     connect ret, sock, address 
     print "connect returned "
     print ret 
     print "\n"
-    send ret, sock, "GET /us/ HTTP/1.0\nUser-agent: Parrot\n\n" 
+
+    send ret, sock, "GET /us/en/ HTTP/1.0\nUser-agent: Parrot\n\n"
     poll ret, sock, 1, 5, 0
 MORE:
     recv ret, sock, buf 
-    if ret < 0 goto END
+    if ret <= 0 goto END
     print buf 
     goto MORE 
 ERR:
@@ -57,3 +59,9 @@ END:
 F<io/io_private.h>.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

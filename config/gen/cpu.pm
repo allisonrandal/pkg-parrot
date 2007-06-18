@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/config/gen/cpu.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/gen/cpu.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -22,15 +22,14 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step qw(copy_if_diff);
 use Carp;
 
-$description = 'Running CPU specific stuff';
+$description = 'Generating CPU specific stuff';
 
 @args = qw(miniparrot verbose);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    if ($conf->options->get('miniparrot')) {
+    if ( $conf->options->get('miniparrot') ) {
         $self->set_result('skipped');
         return $self;
     }
@@ -43,8 +42,9 @@ sub runstep
 
     eval "use $hints";
     unless ($@) {
-        $hints->runstep($conf, @_);
-    } else {
+        $hints->runstep( $conf, @_ );
+    }
+    else {
         print "(no cpu specific hints)" if $verbose;
     }
 
@@ -52,3 +52,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,13 +1,12 @@
 #!perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/compilers/tge/parser.t 13684 2006-07-29T21:31:17.363951Z chip  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/compilers/tge/parser.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw(t . lib ../lib ../../lib ../../../lib);
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -15,12 +14,11 @@ t/parser.t - TGE::Parser tests
 
 =head1 SYNOPSIS
 
-	$ prove t/compilers/tge/parser.t
+        $ prove t/compilers/tge/parser.t
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', "parse a basic attribute grammar");
+pir_output_is( <<'CODE', <<'OUT', "parse a basic attribute grammar" );
 
 .sub _main :main
     load_bytecode "compilers/tge/TGE.pir"
@@ -48,8 +46,7 @@ GRAMMAR
     print "matched start rule\n"
 
     # Verify the match
-    $I0 = match.__get_bool()
-    unless $I0 goto match_fail           # if match fails stop
+    unless match goto match_fail           # if match fails stop
     print "parse succeeded\n"
     goto cleanup
 
@@ -66,7 +63,7 @@ matched start rule
 parse succeeded
 OUT
 
-pir_output_like(<<'CODE', qr/Syntax error at line 4, near "transform "/, "parse failure");
+pir_error_output_like( <<'CODE', qr/Syntax error at line 4, near "transform "/, "parse failure" );
 
 .sub _main :main
     load_bytecode "compilers/tge/TGE.pir"
@@ -88,5 +85,9 @@ GRAMMAR
 
 CODE
 
-## remember to change the number of tests :-)
-BEGIN { plan tests => 2; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/auto/msvc.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/config/auto/msvc.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Determines whether the C compiler is actually C<Visual C++>.
 package auto::msvc;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,9 +25,8 @@ $description = 'Determining if your C compiler is actually Visual C++';
 
 @args = qw(verbose);
 
-sub runstep
-{
-    my ($self, $conf) = (shift, shift);
+sub runstep {
+    my ( $self, $conf ) = ( shift, shift );
 
     my $verbose = $conf->options->get('verbose');
 
@@ -42,18 +42,18 @@ sub runstep
     # which should have been caught by the 'die' above.
     # Therefore, test if it's defined to see if MSVC's installed.
     # return 'no' if it's not.
-    unless (defined $msvc{_MSC_VER}) {
+    unless ( defined $msvc{_MSC_VER} ) {
         $self->set_result('no');
-        $conf->data->set(msvcversion => undef);
+        $conf->data->set( msvcversion => undef );
         return $self;
     }
 
-    my $major = int($msvc{_MSC_VER} / 100);
+    my $major = int( $msvc{_MSC_VER} / 100 );
     my $minor = $msvc{_MSC_VER} % 100;
-    unless (defined $major && defined $minor) {
+    unless ( defined $major && defined $minor ) {
         print " (no) " if $verbose;
         $self->set_result('no');
-        $conf->data->set(msvcversion => undef);
+        $conf->data->set( msvcversion => undef );
         return $self;
     }
 
@@ -61,10 +61,10 @@ sub runstep
     print " (yep: $msvcversion )" if $verbose;
     $self->set_result('yes');
 
-    $conf->data->set(msvcversion => $msvcversion);
+    $conf->data->set( msvcversion => $msvcversion );
 
     # Add Visual C++ specifics here
-    if ($msvcversion >= 14.00) {
+    if ( $msvcversion >= 14.00 ) {
 
         # Version 14 (aka Visual C++ 2005) warns about unsafe, deprecated
         # functions with the following message.
@@ -72,10 +72,17 @@ sub runstep
         # This function or variable may be unsafe. Consider using xxx_s instead.
         # To disable deprecation, use _CRT_SECURE_NO_DEPRECATE. See online help
         # for details.
-        $conf->data->add(" ", "ccflags", "-D_CRT_SECURE_NO_DEPRECATE");
+        $conf->data->add( " ", "ccflags", "-D_CRT_SECURE_NO_DEPRECATE" );
     }
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

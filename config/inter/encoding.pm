@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/inter/encoding.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/inter/encoding.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Asks the user to select which encoding files to include.
 package inter::encoding;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,9 +25,8 @@ $description = 'Determining what encoding files should be compiled in';
 
 @args = qw(ask encoding);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my @encoding = (
         sort
@@ -34,9 +34,9 @@ sub runstep
     );
 
     my $encoding_list = $conf->options->get('encoding')
-        || join(' ', grep { defined $_ } @encoding);
+        || join( ' ', grep { defined $_ } @encoding );
 
-    if ($conf->options->get('ask')) {
+    if ( $conf->options->get('ask') ) {
         print <<"END";
 
 
@@ -44,12 +44,12 @@ The following encodings are available:
   @encoding
 END
         {
-            $encoding_list = prompt('Which encodings would you like?', $encoding_list);
+            $encoding_list = prompt( 'Which encodings would you like?', $encoding_list );
         }
     }
 
     # names of class files for src/pmc/Makefile
-    (my $TEMP_encoding_o = $encoding_list) =~ s/\.c/\$(O)/g;
+    ( my $TEMP_encoding_o = $encoding_list ) =~ s/\.c/\$(O)/g;
 
     my $TEMP_encoding_build = <<"E_NOTE";
 
@@ -57,7 +57,7 @@ END
 
 E_NOTE
 
-    foreach my $encoding (split(/\s+/, $encoding_list)) {
+    foreach my $encoding ( split( /\s+/, $encoding_list ) ) {
         $encoding =~ s/\.c$//;
         $TEMP_encoding_build .= <<END
 src/encodings/$encoding\$(O): src/encodings/$encoding.h src/encodings/$encoding.c \$(NONGEN_HEADERS)
@@ -80,3 +80,10 @@ END
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

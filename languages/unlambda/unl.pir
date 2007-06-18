@@ -1,4 +1,4 @@
-# $Id: /local/languages/unlambda/unl.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/unlambda/unl.pir 3065 2007-04-09T22:03:10.733688Z paultcochrane  $
 
 =head1 DESCRIPTION
 
@@ -425,4 +425,9 @@ void:
 .end
 
 .include "library/dumper.pir"
-# vim: ft=imc sw=4:
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

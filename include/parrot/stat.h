@@ -1,7 +1,7 @@
 /* string.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/stat.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/stat.h 3422 2007-05-08T17:04:21.006524Z paultcochrane  $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_STAT_H_GUARD)
+#ifndef PARROT_STAT_H_GUARD
 #define PARROT_STAT_H_GUARD
 
 #include "parrot/config.h"
@@ -45,14 +45,11 @@ PARROT_API INTVAL Parrot_stat_info_intval(Parrot_Interp, STRING *, INTVAL);
 PARROT_API INTVAL Parrot_fstat_info_intval(Parrot_Interp, INTVAL, INTVAL);
 PARROT_API FLOATVAL Parrot_stat_info_floatval(Parrot_Interp, STRING *, INTVAL);
 
-#endif /* PARROT_STRING_H_GUARD */
+#endif /* PARROT_STAT_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

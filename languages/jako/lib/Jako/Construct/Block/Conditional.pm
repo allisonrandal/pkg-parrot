@@ -5,11 +5,11 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Block/Conditional.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Block/Conditional.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Block::Conditional;
 
@@ -18,116 +18,122 @@ use Jako::Compiler;
 
 use base qw(Jako::Construct::Block);
 
-
 #
 # compile()
 #
 
-sub compile
-{
-  my $self = shift;
-  my ($compiler) = @_;
+sub compile {
+    my $self = shift;
+    my ($compiler) = @_;
 
-  my $kind        = $self->kind;
-  my $peer        = $self->peer;
+    my $kind = $self->kind;
+    my $peer = $self->peer;
 
-  my $prefix;
+    my $prefix;
 
-  if ($self->prefix) {
-    $prefix = $self->prefix;
-  }
-  else {
-    $prefix = $self->peer ? $peer->prefix : $compiler->block_label($kind);
-    $self->prefix($prefix);
-  }
-
-  my $namespace = $prefix;
-
-  my $left;
-  my $op;
-  my $right;
-
-  if ($kind eq 'if' or $kind eq 'unless') {
-    $left  = $self->left->compile($compiler);
-    $op    = $self->op;
-    $right = $self->right->compile($compiler);
-  }
-
-  if ($kind eq 'if') {
-    $op = $compiler->invert_relop($op); # Invert the test, since we jump *unless* the condition is true
-  }
-  elsif ($kind eq 'unless') {
-    $kind = 'if';
-  }
-
-  if ($kind eq 'if') {
-    $compiler->emit("${prefix}_TEST:");
-    $compiler->emit("  if $left $op $right goto ${prefix}_ELSE");
-    $compiler->emit("${prefix}_THEN:");
-
-    if ($self->content) {
-      $compiler->emit(".namespace ${namespace}_THEN");
-      $compiler->indent;
-      $self->SUPER::compile($compiler);
-      $compiler->outdent;
-      $compiler->emit(".endnamespace ${namespace}_THEN");
+    if ( $self->prefix ) {
+        $prefix = $self->prefix;
+    }
+    else {
+        $prefix = $self->peer ? $peer->prefix : $compiler->block_label($kind);
+        $self->prefix($prefix);
     }
 
-    $compiler->emit("  goto ${prefix}_LAST");
-  }
-  elsif ($kind eq 'else') {
-    $compiler->emit("${prefix}_ELSE:");
+    my $namespace = $prefix;
 
-    if ($self->content) {
-      $compiler->emit(".namespace ${namespace}_ELSE");
-      $compiler->indent;
-      $self->SUPER::compile($compiler);
-      $compiler->outdent;
-      $compiler->emit(".endnamespace ${namespace}_ELSE");
+    my $left;
+    my $op;
+    my $right;
+
+    if ( $kind eq 'if' or $kind eq 'unless' ) {
+        $left  = $self->left->compile($compiler);
+        $op    = $self->op;
+        $right = $self->right->compile($compiler);
     }
 
-    $compiler->emit("${prefix}_LAST:");
-  }
+    if ( $kind eq 'if' ) {
+        $op =
+            $compiler->invert_relop($op)
+            ;    # Invert the test, since we jump *unless* the condition is true
+    }
+    elsif ( $kind eq 'unless' ) {
+        $kind = 'if';
+    }
 
-  return 1;
+    if ( $kind eq 'if' ) {
+        $compiler->emit("${prefix}_TEST:");
+        $compiler->emit("  if $left $op $right goto ${prefix}_ELSE");
+        $compiler->emit("${prefix}_THEN:");
+
+        if ( $self->content ) {
+            $compiler->emit(".namespace ${namespace}_THEN");
+            $compiler->indent;
+            $self->SUPER::compile($compiler);
+            $compiler->outdent;
+            $compiler->emit(".endnamespace ${namespace}_THEN");
+        }
+
+        $compiler->emit("  goto ${prefix}_LAST");
+    }
+    elsif ( $kind eq 'else' ) {
+        $compiler->emit("${prefix}_ELSE:");
+
+        if ( $self->content ) {
+            $compiler->emit(".namespace ${namespace}_ELSE");
+            $compiler->indent;
+            $self->SUPER::compile($compiler);
+            $compiler->outdent;
+            $compiler->emit(".endnamespace ${namespace}_ELSE");
+        }
+
+        $compiler->emit("${prefix}_LAST:");
+    }
+
+    return 1;
 }
-
 
 #
 # sax()
 #
 
-sub sax
-{
-  my $self = shift;
-  my ($handler) = @_;
+sub sax {
+    my $self = shift;
+    my ($handler) = @_;
 
-  if (not $self->prefix and $self->peer and $self->peer->prefix) {
-    $self->prefix($self->peer->prefix);
-  }
+    if ( not $self->prefix and $self->peer and $self->peer->prefix ) {
+        $self->prefix( $self->peer->prefix );
+    }
 
-  if ($self->prefix) {
-    $handler->start_element({ Name => 'cond', Attributes => { kind => $self->kind, name => $self->prefix } });
-  }
-  else {
-    $handler->start_element({ Name => 'cond', Attributes => { kind => $self->kind } });
-  }
+    if ( $self->prefix ) {
+        $handler->start_element(
+            { Name => 'cond', Attributes => { kind => $self->kind, name => $self->prefix } } );
+    }
+    else {
+        $handler->start_element( { Name => 'cond', Attributes => { kind => $self->kind } } );
+    }
 
-  if ($self->op) {
-    $handler->start_element({ Name => 'block', Attributes => { kind => 'test' } });
-    $handler->start_element({ Name => 'op', Attributes => { kind => 'infix', name => $self->op } });
-    $self->left->sax($handler);
-    $self->right->sax($handler);
-    $handler->end_element({ Name => 'op' });
-    $handler->end_element({ Name => 'block' });
-  }
+    if ( $self->op ) {
+        $handler->start_element( { Name => 'block', Attributes => { kind => 'test' } } );
+        $handler->start_element(
+            { Name => 'op', Attributes => { kind => 'infix', name => $self->op } } );
+        $self->left->sax($handler);
+        $self->right->sax($handler);
+        $handler->end_element( { Name => 'op' } );
+        $handler->end_element( { Name => 'block' } );
+    }
 
-  $handler->start_element({ Name => 'block', Attributes => { kind => 'then' } });
-  $_->sax($handler) foreach $self->content;
-  $handler->end_element({ Name => 'block' });
+    $handler->start_element( { Name => 'block', Attributes => { kind => 'then' } } );
+    $_->sax($handler) foreach $self->content;
+    $handler->end_element( { Name => 'block' } );
 
-  $handler->end_element({ Name => $self->kind });
+    $handler->end_element( { Name => $self->kind } );
 }
 
-
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

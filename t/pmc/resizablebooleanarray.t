@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/resizablebooleanarray.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/resizablebooleanarray.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/resizablebooleanarray.t - testing the ResizableBooleanArray PMC
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/resizablebooleanarray.t
+    % prove t/pmc/resizablebooleanarray.t
 
 =head1 DESCRIPTION
 
@@ -66,8 +66,7 @@ my $fp_equality_macro = <<'ENDOFMACRO';
 .endm
 ENDOFMACRO
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting array size");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting array size" );
 	new P0, .ResizableBooleanArray
 
 	set I0,P0
@@ -107,8 +106,7 @@ ok 4
 ok 5
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting first element");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting first element" );
         new P0, .ResizableBooleanArray
         set P0, 1
 
@@ -137,8 +135,7 @@ ok 2
 ok 3
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting second element");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting second element" );
         new P0, .ResizableBooleanArray
         set P0, 2
 
@@ -169,8 +166,7 @@ OUTPUT
 
 # TODO: Rewrite these properly when we have exceptions
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "Setting out-of-bounds elements");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting out-of-bounds elements" );
         new P0, .ResizableBooleanArray
 
 	set P0[1], -7
@@ -198,8 +194,7 @@ ok 2
 ok 3
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "Getting out-of-bounds elements");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements" );
         new P0, .ResizableBooleanArray
         set P0, 1
 
@@ -210,8 +205,7 @@ CODE
 ok 1
 OUTPUT
 
-
-pasm_output_is(<<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs");
+pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
 @{[ $fp_equality_macro ]}
      new P0, .ResizableBooleanArray
      new P1, .Key
@@ -247,8 +241,7 @@ ok 2
 ok 3
 OUTPUT
 
-
-pasm_output_is(<<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys");
+pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
 @{[ $fp_equality_macro ]}
      new P0, .ResizableBooleanArray
      set P0, 1
@@ -294,8 +287,7 @@ ok 3
 ok 4
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 .sub _main
     .local pmc pmc1
     pmc1 = new ResizableBooleanArray
@@ -317,8 +309,7 @@ CODE
 0
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "push integer");
+pir_output_is( << 'CODE', << 'OUTPUT', "push integer" );
 .sub _main
     .local pmc pmc1
     pmc1 = new ResizableBooleanArray
@@ -339,8 +330,7 @@ CODE
 1
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "creation");
+pasm_output_is( <<'CODE', <<'OUTPUT', "creation" );
         new P0, .ResizableBooleanArray
         set I0, P0
         print "Created ResizableBooleanArray with "
@@ -351,8 +341,7 @@ CODE
 Created ResizableBooleanArray with 0 elements to start with.
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "push and pop");
+pir_output_is( << 'CODE', << 'OUTPUT', "push and pop" );
 .sub test :main
        .local int i, i_elem
        .local pmc pmc_arr
@@ -413,8 +402,7 @@ CODE
 1[63]
 OUTPUT
 
-
-pir_output_like(<< 'CODE', << 'OUTPUT', "pop bounds checking");
+pir_error_output_like( << 'CODE', << 'OUTPUT', "pop bounds checking" );
 .sub 'test' :main
        P0 = new .ResizableBooleanArray
        pop I0, P0
@@ -422,52 +410,82 @@ pir_output_like(<< 'CODE', << 'OUTPUT', "pop bounds checking");
 CODE
 /ResizableBooleanArray: Can't pop from an empty array!.*/
 OUTPUT
+
 #'
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "unshift and shift");
+pir_output_is( << 'CODE', << 'OUTPUT', "unshift and shift" );
 .sub test :main
        .local int i, i_elem
        .local pmc pmc_arr
        .local int elements
 
        i= 1
-       pmc_arr= new ResizableBooleanArray
+       pmc_arr = new ResizableBooleanArray
 
+       # No elements are set
        print_num_elements( pmc_arr )
 
+       # Set two of the first three elements
+       pmc_arr[0] = 1
+       pmc_arr[2] = 1
+       print_num_elements( pmc_arr )
+
+       # Unshift a "1"  element on
        unshift pmc_arr, i
        print i
        print_num_elements( pmc_arr )
 
+       # Unshift a "0"  element on
        unshift pmc_arr, 0
        print 0
        print_num_elements( pmc_arr )
 
-       print_num_elements( pmc_arr )
-
+       # Shift an element off
        i_elem= shift pmc_arr
        print i_elem
        print_num_elements( pmc_arr )
 
+       # Shift an element off
        i_elem= shift pmc_arr
        print i_elem
        print_num_elements( pmc_arr )
 
-    pmc_arr = 62
-    unshift pmc_arr, 0
-    unshift pmc_arr, 1
-    unshift pmc_arr, 0
-    unshift pmc_arr, 1
-    i_elem = shift pmc_arr
-    i_elem = shift pmc_arr
-    i_elem = shift pmc_arr
-    print i_elem
-    print_num_elements(pmc_arr)
+       # Resize the array
+       pmc_arr = 62
+       print_num_elements(pmc_arr)
 
-    # Set same size array is currently
-    pmc_arr = 63
-    print_num_elements(pmc_arr)
+       # Unshift 4 elements on
+       unshift pmc_arr, 1
+       unshift pmc_arr, 1
+       unshift pmc_arr, 0
+       unshift pmc_arr, 1
+       print_num_elements(pmc_arr)
+
+       # Shift 3 elements off
+       i_elem = shift pmc_arr
+       i_elem = shift pmc_arr
+       i_elem = shift pmc_arr
+       print i_elem
+       print_num_elements(pmc_arr)
+
+       # Set same size array is currently
+       pmc_arr = 63
+       print_num_elements(pmc_arr)
+
+       # Set 101th element
+       pmc_arr[100] = 1
+       print_num_elements(pmc_arr)
+
+       # Shift off 99 elements
+      .local int counter
+      counter = 98
+shift_loop:
+       i_elem = shift pmc_arr
+       dec counter
+       if counter > 0 goto shift_loop
+
+       print i_elem
+       print_num_elements(pmc_arr)
 .end
 
 .sub print_num_elements
@@ -477,22 +495,46 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "unshift and shift");
        print '['
        print elements
        print "]\n"
+       $I0 = pmc_arr[0]
+       print $I0
+       print ', '
+       $I0 = pmc_arr[1]
+       print $I0
+       print ', '
+       $I0 = pmc_arr[2]
+       print $I0
+       print "\n"
        .return()
 .end
 
 CODE
 [0]
-1[1]
-0[2]
-[2]
-0[1]
-1[0]
+0, 0, 0
+[3]
+1, 0, 1
+1[4]
+1, 1, 0
+0[5]
+0, 1, 1
+0[4]
+1, 1, 0
+1[3]
+1, 0, 1
+[62]
+1, 0, 1
+[66]
+1, 0, 1
 1[63]
+1, 1, 0
 [63]
+1, 1, 0
+[101]
+1, 1, 0
+0[3]
+0, 0, 1
 OUTPUT
 
-
-pir_output_like(<< 'CODE', << 'OUTPUT', "shift bounds checking");
+pir_error_output_like( << 'CODE', << 'OUTPUT', "shift bounds checking" );
 .sub 'test' :main
        P0 = new .ResizableBooleanArray
        shift I0, P0
@@ -500,10 +542,10 @@ pir_output_like(<< 'CODE', << 'OUTPUT', "shift bounds checking");
 CODE
 /ResizableBooleanArray: Can't shift from an empty array!.*/
 OUTPUT
+
 #'
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "aerobics");
+pasm_output_is( <<'CODE', <<'OUTPUT', "aerobics" );
         new P0, .ResizableBooleanArray
         set I10, 10000
 
@@ -614,8 +656,7 @@ CODE
 I need a shower.
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "direct access 2");
+pasm_output_is( <<'CODE', <<'OUTPUT', "direct access 2" );
     #new P0, .IntList
     new P0, .ResizableBooleanArray
     set I10, 550000
@@ -674,8 +715,7 @@ CODE
 ok
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "sparse access");
+pasm_output_is( <<'CODE', <<'OUTPUT', "sparse access" );
     new P0, .ResizableBooleanArray
        set I10, 110000
        set I0, 1
@@ -750,10 +790,8 @@ ok 1
 ok 2
 OUTPUT
 
-TODO: {
-    local $TODO = "this is broken";
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "check for zeroedness");
+pasm_output_is( <<'CODE', <<'OUTPUT', "check for zeroedness" );
     new P0, .ResizableBooleanArray
     set I0, 0
 lp1:
@@ -782,17 +820,16 @@ CODE
 ok
 OUTPUT
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "pop into sparse");
+pasm_output_is( <<'CODE', <<'OUTPUT', "pop into sparse" );
     new P0, .ResizableBooleanArray
        set I10, 100
        set I0, 0
        # push some values at start
-lp1:
+loop1:
     mod I5, I0, 2
        push P0, I5
        inc I0
-       lt I0, I10, lp1
+       lt I0, I10, loop1
 
        # create sparse
        set I0, 100000
@@ -801,12 +838,12 @@ lp1:
        #set P0[I0], I1
        set P0[I0], I5
        inc I1
-lp2:
+loop2:
        # push some values after hole
     mod I5, I1, 2
        push P0, I5
        inc I1
-       le I1, 1100, lp2
+       le I1, 1100, loop2
        dec I1
 
        set I3, P0
@@ -855,8 +892,10 @@ CODE
 ok
 OUTPUT
 
+TODO: {
+    local $TODO = "this is broken";
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "clone");
+    pasm_output_is( <<'CODE', <<'OUTPUT', "clone" );
     new P0, .ResizableBooleanArray
        set P0[0], 1
        set P0[5000], 1
@@ -893,4 +932,11 @@ CODE
 ok
 OUTPUT
 
-} # TODO
+}    # TODO
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

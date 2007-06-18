@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/docs/glossary.pod 13523 2006-07-24T15:49:07.843920Z chip  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/glossary.pod 3499 2007-05-15T19:17:58.714162Z bernhard  $
 
 =head1 NAME
 
@@ -7,8 +7,8 @@ docs/glossary.pod - Parrot Glossary
 
 =head1 SUMMARY
 
-Short descriptions of words you might need to know that show up in Parrot
-development.
+Short descriptions of words and acronyms you might want to know
+because they show up in Parrot development.
 
 =head1 GLOSSARY
 
@@ -155,6 +155,11 @@ associated DB handle. Finalization reduces active objects down to passive
 blocks of memory, but does not actually reclaim that memory. Memory is
 reclaimed by the related L<"destruction"> operation, as and when necessary.
 
+=head2 fotw
+
+File of the week. A file that is designated to be focus of development for a week,
+aiming for code cleanups and general improvements.
+
 =head2 GC
 
 Garbage Collection is the process of sweeping through all the active objects,
@@ -204,6 +209,10 @@ See also L<"PIR">.
 In the Parrot context a JAPH is a small script that prints the string "Just
 another Parrot Hacker\".
 
+=head2 MRO
+
+Method resolution order
+
 =head2 Native Call Interface
 
 This let's Parrot talk to native "C" libraries, without a C-compiler.
@@ -212,14 +221,14 @@ This let's Parrot talk to native "C" libraries, without a C-compiler.
 
 Acronym for Native Call Interface.
 
-=head2 PAST
-
-Acronym for Parrot Abstract Syntax Tree.
-
 =head2 Packfile
 
 Another name for a PBC file, due to the names used for data structures in one
 of the early implementations in Perl 5.
+
+=head2 PAST
+
+Acronym for Parrot Abstract Syntax Tree.
 
 =head2 PBC
 
@@ -310,6 +319,12 @@ See L<running.pod> on how to tell parrot which run core should be used.
 
 =for TODO
   Add a list of available run cores, or provide pointer to documentation.
+
+=head2 SMOP
+
+Simple Meta Object Protocol
+
+A prototype object model written in PIR.
 
 =head2 TGE
 
