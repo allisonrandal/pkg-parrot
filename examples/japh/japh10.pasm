@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/japh/japh10.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: japh10.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 # 2 threads are alternately printing the JaPH
 # synchronization is done via a TQueue

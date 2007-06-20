@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/vtables.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: vtables.c 18953 2007-06-12 18:17:12Z petdance $
 
 =head1 NAME
 
@@ -10,48 +10,41 @@ src/vtables.c - Functions to build and manipulate vtables
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
+#include "parrot/vtables.h"
+
+/* HEADER: include/parrot/vtables.h */
 
 /*
 
-=item C<VTABLE *
-Parrot_new_vtable(Parrot_Interp interp)>
+FUNCDOC: Parrot_new_vtable
 
 Creates and returns a pointer to the new C<VTABLE>.
 
-=cut
-
 */
 
+PARROT_API
 VTABLE *
-Parrot_new_vtable(Parrot_Interp interp)
+Parrot_new_vtable(Interp *interp)
+    /* MALLOC, WARN_UNUSED */
 {
     return mem_allocate_zeroed_typed(VTABLE);
 }
 
 /*
 
-=item C<VTABLE *
-Parrot_clone_vtable(Parrot_Interp interp, const VTABLE *base_vtable)>
+FUNCDOC: Parrot_clone_vtable
 
 Clones C<*base_vtable> and returns a pointer to the new C<VTABLE>.
 
-=item C<void
-Parrot_destroy_vtable(Parrot_Interp interp, VTABLE *vtable)>
-
-Destroys C<*vtable>.
-=cut
-
 */
 
+PARROT_API
 VTABLE *
-Parrot_clone_vtable(Parrot_Interp interp, const VTABLE *base_vtable)
+Parrot_clone_vtable(Interp *interp, const VTABLE *base_vtable /*NN*/)
+    /* MALLOC, WARN_UNUSED */
 {
     VTABLE * const new_vtable = mem_allocate_typed(VTABLE);
     if (new_vtable) {
@@ -61,8 +54,17 @@ Parrot_clone_vtable(Parrot_Interp interp, const VTABLE *base_vtable)
 }
 
 
+/*
+
+FUNCDOC: Parrot_destroy_vtable
+
+Destroys C<*vtable>.
+
+*/
+
+PARROT_API
 void
-Parrot_destroy_vtable(Parrot_Interp interp, VTABLE *vtable)
+Parrot_destroy_vtable(Interp *interp, VTABLE *vtable /*NULLOK*/)
 {
     /* XXX We sometimes get a type number allocated without any corresponding
      * vtable. E.g. if you load perl_group, perlscalar is this way.
@@ -75,7 +77,7 @@ Parrot_destroy_vtable(Parrot_Interp interp, VTABLE *vtable)
 }
 
 void
-parrot_alloc_vtables(Interp *interp)
+parrot_alloc_vtables(Interp *interp /*NN*/)
 {
     interp->vtables =
         (VTABLE **)mem_sys_allocate_zeroed(sizeof (VTABLE *) * PARROT_MAX_CLASSES);
@@ -84,24 +86,20 @@ parrot_alloc_vtables(Interp *interp)
 }
 
 void
-parrot_realloc_vtables(Interp *interp)
+parrot_realloc_vtables(Interp *interp /*NN*/)
 {
     /* 16 bigger seems reasonable, though it's only a pointer
        table and we could get bigger without blowing much memory
        */
     const INTVAL new_max = interp->n_vtable_alloced + 16;
-    const INTVAL new_size = new_max * sizeof (VTABLE *);
-    INTVAL i;
-    interp->vtables = (VTABLE **)mem_sys_realloc(interp->vtables, new_size);
-    /* Should set all the empty slots to the null PMC's
-       vtable pointer */
-    for (i = interp->n_vtable_max; i < new_max; ++i)
-        interp->vtables[i] = NULL;
+    const INTVAL new_size = new_max              * sizeof (VTABLE *);
+    const INTVAL old_size = interp->n_vtable_max * sizeof (VTABLE *);
+    interp->vtables = (VTABLE **)mem_sys_realloc_zeroed(interp->vtables, new_size, old_size);
     interp->n_vtable_alloced = new_max;
 }
 
 void
-parrot_free_vtables(Interp *interp)
+parrot_free_vtables(Interp *interp /*NN*/)
 {
     int i;
 
@@ -109,19 +107,6 @@ parrot_free_vtables(Interp *interp)
         Parrot_destroy_vtable(interp, interp->vtables[i]);
     mem_sys_free(interp->vtables);
 }
-
-/*
-
-=back
-
-=head1 SEE ALSO
-
-F<include/parrot/vtables.h>.
-
-=cut
-
-*/
-
 
 /*
  * Local variables:

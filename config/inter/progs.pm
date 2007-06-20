@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/inter/progs.pm 2452 2007-03-20T20:13:02.723350Z paultcochrane  $
+# $Id: progs.pm 18877 2007-06-08 14:15:40Z paultcochrane $
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ sub runstep {
     # Find a working version of a program:
     # Try each alternative, until one works.
     # If none work, then set to null command.
-    # XXX need config support for a null command.
+    # RT#43173 need config support for a null command.
     my $null          = 'echo';
     my $first_working = sub {
         foreach (@_) {
@@ -88,13 +88,13 @@ END
     $conf->data->set( ccflags => $ccflags );
 
     $linkflags = $conf->data->get('linkflags');
-    $linkflags =~ s/-libpath:\S+//g;    # XXX No idea why.
+    $linkflags =~ s/-libpath:\S+//g;    # RT#43174 No idea why.
     $linkflags = integrate( $linkflags, $conf->options->get('linkflags') );
     $linkflags = prompt( "And your linker?", $linkflags ) if $ask;
     $conf->data->set( linkflags => $linkflags );
 
     $ldflags = $conf->data->get('ldflags');
-    $ldflags =~ s/-libpath:\S+//g;      # XXX No idea why.
+    $ldflags =~ s/-libpath:\S+//g;      # RT#43174 No idea why.
     $ldflags = integrate( $ldflags, $conf->options->get('ldflags') );
     $ldflags = prompt( "And your $ld for building shared libraries?", $ldflags )
         if $ask;

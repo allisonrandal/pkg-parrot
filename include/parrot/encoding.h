@@ -1,7 +1,7 @@
 /* encoding.h
- *  Copyright (C) 2004-2006, The Perl Foundation.
+ *  Copyright (C) 2004-2007, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/encoding.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: encoding.h 18993 2007-06-14 01:45:10Z petdance $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:
@@ -34,7 +34,7 @@ typedef UINTVAL (*encoding_bytes_t)(Interp*, STRING *src);
 
 struct string_iterator_t;       /* s. parrot/string.h */
 
-typedef void (*encoding_iter_init_t)(Interp *, STRING *src,
+typedef void (*encoding_iter_init_t)(Interp *, const STRING *src,
         struct string_iterator_t *);
 
 struct _encoding {
@@ -71,54 +71,96 @@ PARROT_API extern ENCODING *Parrot_default_encoding_ptr;
 #define PARROT_FIXED_8_ENCODING Parrot_fixed_8_encoding_ptr
 #define PARROT_DEFAULT_FOR_UNICODE_ENCODING NULL
 
-PARROT_API ENCODING *Parrot_new_encoding(Interp*);
-PARROT_API ENCODING *Parrot_load_encoding(Interp*, const char *encoding_name);
-PARROT_API ENCODING *Parrot_find_encoding(Interp *, const char *encodingname);
-PARROT_API INTVAL Parrot_register_encoding(Interp *, const char *encodingname, ENCODING *encoding);
-PARROT_API INTVAL Parrot_make_default_encoding(Interp *, const char *encodingname, ENCODING *encoding);
-PARROT_API ENCODING *Parrot_default_encoding(Interp *);
 typedef INTVAL (*encoding_converter_t)(Interp *, ENCODING *lhs, ENCODING *rhs);
-PARROT_API encoding_converter_t Parrot_find_encoding_converter(Interp *, ENCODING *lhs, ENCODING *rhs);
 
-void parrot_init_encodings_2(Interp *);
-void parrot_deinit_encodings(Interp *);
+/* HEADERIZER BEGIN: src/encoding.c */
 
-PARROT_API INTVAL Parrot_encoding_number(Interp *, STRING *encodingname);
-PARROT_API INTVAL Parrot_encoding_number_of_str(Interp *, STRING *src);
-PARROT_API STRING* Parrot_encoding_name(Interp *, INTVAL number_of_encoding);
-PARROT_API ENCODING* Parrot_get_encoding(Interp *, INTVAL number_of_encoding);
-PARROT_API const char * Parrot_encoding_c_name(Interp *, INTVAL number_of_encoding);
+PARROT_API ENCODING * Parrot_default_encoding( Interp *interp );
+PARROT_API const char * Parrot_encoding_c_name( Interp *interp,
+    INTVAL number_of_encoding )
+        __attribute__warn_unused_result__;
+
+PARROT_API STRING* Parrot_encoding_name( Interp *interp,
+    INTVAL number_of_encoding )
+        __attribute__warn_unused_result__;
+
+PARROT_API INTVAL Parrot_encoding_number( Interp *interp,
+    STRING *encodingname /*NN*/ )
+        __attribute__nonnull__(2)
+        __attribute__warn_unused_result__;
+
+PARROT_API INTVAL Parrot_encoding_number_of_str( Interp *interp,
+    STRING *src /*NN*/ )
+        __attribute__nonnull__(2)
+        __attribute__warn_unused_result__;
+
+PARROT_API ENCODING * Parrot_find_encoding( Interp *interp,
+    const char *encodingname /*NN*/ )
+        __attribute__nonnull__(2)
+        __attribute__warn_unused_result__;
+
+PARROT_API encoding_converter_t Parrot_find_encoding_converter( Interp *interp,
+    ENCODING *lhs,
+    ENCODING *rhs );
+
+PARROT_API ENCODING* Parrot_get_encoding( Interp *interp,
+    INTVAL number_of_encoding )
+        __attribute__warn_unused_result__;
+
+PARROT_API ENCODING * Parrot_load_encoding( Interp *interp,
+    const char *encodingname )
+        __attribute__warn_unused_result__
+        __attribute__noreturn__;
+
+PARROT_API INTVAL Parrot_make_default_encoding( Interp *interp,
+    const char *encodingname,
+    ENCODING *encoding /*NN*/ )
+        __attribute__nonnull__(3);
+
+PARROT_API ENCODING * Parrot_new_encoding( Interp *interp )
+        __attribute__malloc__
+        __attribute__warn_unused_result__;
+
+PARROT_API INTVAL Parrot_register_encoding( Interp *interp,
+    const char *encodingname /*NN*/,
+    ENCODING *encoding /*NN*/ )
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+void parrot_deinit_encodings( Interp *interp );
+void parrot_init_encodings_2( Interp *interp );
+/* HEADERIZER END: src/encoding.c */
 
 #define ENCODING_MAX_BYTES_PER_CODEPOINT(i, src) \
-    ((ENCODING *)src->encoding)->max_bytes_per_codepoint
+    ((const ENCODING *)src->encoding)->max_bytes_per_codepoint
 #define ENCODING_GET_CODEPOINT(i, src, offset) \
-    ((ENCODING *)src->encoding)->get_codepoint(i, src, offset)
+    ((const ENCODING *)src->encoding)->get_codepoint(i, src, offset)
 #define ENCODING_SET_CODEPOINT(i, src, offset, codepoint) \
-    ((ENCODING *)src->encoding)->set_codepoint(i, src, offset, codepoint)
+    ((const ENCODING *)src->encoding)->set_codepoint(i, src, offset, codepoint)
 #define ENCODING_GET_BYTE(i, src, offset) \
-    ((ENCODING *)src->encoding)->get_byte(i, src, offset)
+    ((const ENCODING *)src->encoding)->get_byte(i, src, offset)
 #define ENCODING_SET_BYTE(i, src, offset, value) \
-    ((ENCODING *)src->encoding)->set_byte(i, src, offset, value)
+    ((const ENCODING *)src->encoding)->set_byte(i, src, offset, value)
 #define ENCODING_GET_CODEPOINTS(i, src, offset, count) \
-    ((ENCODING *)src->encoding)->get_codepoints(i, src, offset, count)
+    ((const ENCODING *)src->encoding)->get_codepoints(i, src, offset, count)
 #define ENCODING_GET_CODEPOINTS_INPLACE(i, src, offset, count, dest) \
-    ((ENCODING *)src->encoding)->get_codepoints_inplace(i, src, offset, count, dest)
+    ((const ENCODING *)src->encoding)->get_codepoints_inplace(i, src, offset, count, dest)
 #define ENCODING_GET_BYTES(i, src, offset, count) \
-    ((ENCODING *)src->encoding)->get_bytes(i, src, offset, count)
+    ((const ENCODING *)src->encoding)->get_bytes(i, src, offset, count)
 #define ENCODING_GET_BYTES_INPLACE(i, src, offset, count, dest) \
-    ((ENCODING *)src->encoding)->get_bytes_inplace(i, src, offset, count, dest)
+    ((const ENCODING *)src->encoding)->get_bytes_inplace(i, src, offset, count, dest)
 #define ENCODING_SET_CODEPOINTS(i, src, offset, count, newdata) \
-    ((ENCODING *)src->encoding)->set_codepoints(i, src, offset, count, newdata)
+    ((const ENCODING *)src->encoding)->set_codepoints(i, src, offset, count, newdata)
 #define ENCODING_SET_BYTES(i, src, offset, count, newdata) \
-    ((ENCODING *)src->encoding)->set_bytes(i, src, offset, count, newdata)
+    ((const ENCODING *)src->encoding)->set_bytes(i, src, offset, count, newdata)
 #define ENCODING_BECOME_ENCODING(i, src) \
-    ((ENCODING *)src->encoding)->become_encoding(i, src)
+    ((const ENCODING *)src->encoding)->become_encoding(i, src)
 #define ENCODING_CODEPOINTS(i, src) \
-    ((ENCODING *)src->encoding)->codepoints(i, src)
+    ((const ENCODING *)src->encoding)->codepoints(i, src)
 #define ENCODING_BYTES(i, src) \
-    ((ENCODING *)src->encoding)->bytes(i, src)
+    ((const ENCODING *)src->encoding)->bytes(i, src)
 #define ENCODING_ITER_INIT(i, src, iter) \
-    ((ENCODING *)src->encoding)->iter_init(i, src, iter)
+    ((const ENCODING *)src->encoding)->iter_init(i, src, iter)
 
 #endif /* PARROT_ENCODING_H_GUARD */
 

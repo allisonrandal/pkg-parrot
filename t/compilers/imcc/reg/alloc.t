@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/compilers/imcc/reg/alloc.t 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: alloc.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

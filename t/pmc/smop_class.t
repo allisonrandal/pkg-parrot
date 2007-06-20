@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/pmc/smop_class.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: smop_class.t 17524 2007-03-17 06:15:04Z allison $
 
 =head1 NAME
 

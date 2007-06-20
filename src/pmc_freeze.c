@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc_freeze.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
+$Id: pmc_freeze.c 18727 2007-06-01 20:23:28Z petdance $
 
 =head1 NAME
 
@@ -859,7 +859,7 @@ do_action(Parrot_Interp interp, PMC *pmc, visit_info *info,
                 info->visit_action = pmc->vtable->freeze;
             break;
         default:
-            internal_exception(1, "Illegal action %d", info->what);
+            internal_exception(1, "Illegal action %ld", (long)info->what);
             break;
     }
 }

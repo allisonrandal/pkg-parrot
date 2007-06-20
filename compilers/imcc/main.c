@@ -1,5 +1,5 @@
 /*
- * $Id: /parrotcode/trunk/compilers/imcc/main.c 3266 2007-04-21T04:54:51.264037Z chromatic  $
+ * $Id: main.c 18744 2007-06-02 01:10:38Z chromatic $
  *
  * Intermediate Code Compiler for Parrot.
  *
@@ -21,7 +21,7 @@
 #include "pbc.h"
 #include "parser.h"
 
-static int load_pbc, run_pbc, write_pbc, pre_process, pasm_file;
+static int load_pbc, run_pbc, write_pbc, pre_process_only, pasm_file;
 
 static void
 usage(FILE* fp)
@@ -198,6 +198,7 @@ parseflags(Parrot_Interp interp, int *argc, char **argv[])
 {
     struct longopt_opt_info opt = LONGOPT_OPT_INFO_INIT;
     int   status;
+    extern int yydebug;
     if (*argc == 1) {
         usage(stderr);
         exit(1);
@@ -291,7 +292,7 @@ parseflags(Parrot_Interp interp, int *argc, char **argv[])
                 yydebug = 1;
                 break;
             case 'E':
-                pre_process = 1;
+                pre_process_only = 1;
                 break;
             case 'o':
                 run_pbc = 0;
@@ -379,11 +380,11 @@ parseflags(Parrot_Interp interp, int *argc, char **argv[])
 static void
 do_pre_process(Parrot_Interp interp)
 {
-    int c;
-    YYSTYPE val;
-    void *yyscanner;
+    int       c;
+    YYSTYPE   val;
+    yyscan_t  yyscanner;
 
-    do_yylex_init(interp, &yyscanner);
+    yyscanner   = IMCC_INFO(interp)->yyscanner;
 
     IMCC_push_parser_state(interp);
     while ((c = yylex(&val, yyscanner, interp))) {
@@ -400,8 +401,10 @@ do_pre_process(Parrot_Interp interp)
             case ENDNAMESPACE:  printf(".endnamespace"); break;
             case CONST:         printf(".const "); break;
             case PARAM:         printf(".param "); break;
-            case MACRO:         yylex(&val, interp, yyscanner);
-                                break; /* swallow nl */
+            /* TODO: print out more information about the macro */
+            /* case MACRO:         yylex(&val, interp, yyscanner);
+                                break; */ /* swallow nl */
+            case MACRO:         printf(".macro "); break;
 
             case GOTO:          printf("goto ");break;
             case IF:            printf("if ");break;
@@ -481,7 +484,10 @@ do_pre_process(Parrot_Interp interp)
                 break;
         }
     }
-    yylex_destroy(&yyscanner);
+    printf("\n");
+    fflush(stdout);
+
+    return;
 }
 
 static void
@@ -629,12 +635,13 @@ imcc_run(Interp *interp, const char *sourcefile, int argc, char * argv[])
             }
         }
     }
-    if (pre_process) {
+    if (pre_process_only) {
         do_pre_process(interp);
         Parrot_destroy(interp);
         yylex_destroy(yyscanner);
         IMCC_INFO(interp)->yyscanner = NULL;
-        Parrot_exit(interp, 0);
+
+        return 0;
     }
 
     /* Do we need to produce an output file? If so, what type? */
@@ -703,7 +710,7 @@ imcc_run(Interp *interp, const char *sourcefile, int argc, char * argv[])
         IMCC_INFO(interp)->state->pasm_file = pasm_file;
         IMCC_TRY(IMCC_INFO(interp)->jump_buf,
                  IMCC_INFO(interp)->error_code) {
-            if (yyparse(yyscanner, (void *) interp))
+            if (yyparse(yyscanner, interp))
                 exit(1);
 
             imc_compile_all_units(interp);

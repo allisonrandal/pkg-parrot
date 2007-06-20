@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/urm/t/in_out.t 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: in_out.t 17096 2007-02-20 20:20:48Z paultcochrane $
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";

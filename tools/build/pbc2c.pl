@@ -1,6 +1,6 @@
 #! perl
 # TODO: Resolve copyright. See ADDITIONAL section at end of file.
-# $Id: /parrotcode/trunk/tools/build/pbc2c.pl 3159 2007-04-14T03:15:44.800537Z chromatic  $
+# $Id: pbc2c.pl 18183 2007-04-14 03:15:44Z chromatic $
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/lisp/include/macros/standard.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
+# $Id: standard.pir 18776 2007-06-03 12:20:17Z bernhard $
 
 =head1 MISCELLANEOUS MACROS
 
@@ -48,6 +48,8 @@ Sets R to true (the TRUE symbol).
 
   _specialformp = new "LispSpecialForm"
   # VALID_IN_PARROT_0_2_0 _specialformp._set_body(.L)
+  .const .Sub _special_func = .L
+  _specialformp._set_body(_special_func)
 
   _namep = new "LispString"
   _namep = .N

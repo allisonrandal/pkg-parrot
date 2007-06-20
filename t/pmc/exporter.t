@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/exporter.t 3484 2007-05-14T15:51:01.238457Z particle  $
+# $Id: exporter.t 18538 2007-05-14 15:51:01Z particle $
 
 use strict;
 use warnings;

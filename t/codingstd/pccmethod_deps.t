@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id$
+# $Id: pccmethod_deps.t 18787 2007-06-03 20:03:42Z paultcochrane $
 
 use strict;
 use warnings;
@@ -50,3 +50,10 @@ sub contains_pccmethod
 
     return;
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

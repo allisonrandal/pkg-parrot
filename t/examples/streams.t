@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/examples/streams.t 3094 2007-04-10T12:04:48.372595Z paultcochrane  $
+# $Id: streams.t 18117 2007-04-10 12:04:48Z paultcochrane $
 
 use strict;
 use warnings;

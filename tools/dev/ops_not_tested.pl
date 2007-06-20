@@ -1,6 +1,6 @@
 #! perl
 # # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/tools/dev/ops_not_tested.pl 3123 2007-04-11T21:02:33.355713Z paultcochrane  $
+# $Id: ops_not_tested.pl 18146 2007-04-11 21:02:33Z paultcochrane $
 use strict;
 use warnings;
 use File::Find;

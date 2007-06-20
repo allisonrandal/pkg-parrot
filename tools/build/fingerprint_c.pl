@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/tools/build/fingerprint_c.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: fingerprint_c.pl 18929 2007-06-11 16:51:45Z petdance $
 
 =head1 NAME
 
@@ -46,7 +46,9 @@ print << "EOF";
  */
 
 #include <string.h>
-#include <parrot/packfile.h>
+#include "parrot/packfile.h"
+
+/* HEADER: include/parrot/packfile.h */
 
 EOF
 
@@ -61,14 +63,17 @@ if ( -e 'DEVELOPING' ) {
 
     print << "EOF";
 
+PARROT_API
 int
-PackFile_check_fingerprint (void *cursor)
+PackFile_check_fingerprint(const void *cursor /*NN*/)
+    /* PURE, WARN_UNUSED */
 {
     return memcmp (cursor, fingerprint, $len) == 0;
 }
 
+PARROT_API
 size_t
-PackFile_write_fingerprint (void *cursor)
+PackFile_write_fingerprint(void *cursor /*NN*/)
 {
     memcpy (cursor, fingerprint, $len);
     return $len;
@@ -81,14 +86,17 @@ else {    # !DEVELOPING
     print << "EOF";
 /* fingerprint checking is only enabled in development versions */
 
+PARROT_API
 int
-PackFile_check_fingerprint (void *cursor)
+PackFile_check_fingerprint(const void *cursor /*NN*/)
+    /* PURE, WARN_UNUSED */
 {
     return 1;
 }
 
+PARROT_API
 size_t
-PackFile_write_fingerprint (void *cursor)
+PackFile_write_fingerprint(void *cursor /*NN*/)
 {
     memset (cursor, 0, $len);
     return $len;

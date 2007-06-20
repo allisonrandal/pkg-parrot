@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/codingstd/perlcritic.t 3414 2007-05-08T07:15:49.497744Z paultcochrane  $
+# $Id: perlcritic.t 18459 2007-05-08 07:15:49Z paultcochrane $
 
 use strict;
 use warnings;

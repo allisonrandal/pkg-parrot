@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/local/src/io/io_stdio.c 1551 2007-01-25T19:52:45.793441Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: io_stdio.c 19010 2007-06-14 21:53:44Z petdance $
 
 =head1 NAME
 
@@ -25,7 +25,9 @@ Win32), this is I<buffered> IO, out of necessity.
 #include "parrot/parrot.h"
 #include "io_private.h"
 
-extern INTVAL           PIO_stdio_getblksize(PIOHANDLE fd);
+/* HEADER: none */
+
+extern INTVAL           PIO_stdio_getblksize(PIOHANDLE fd); /* XXX Use a declaration in a header file */
 
 /* Defined at bottom */
 extern const ParrotIOLayerAPI pio_stdio_layer_api;

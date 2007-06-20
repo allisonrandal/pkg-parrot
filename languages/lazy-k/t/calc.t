@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/lazy-k/t/calc.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: calc.t 17181 2007-02-25 15:23:17Z bernhard $
 
 =head1 NAME
 

@@ -3,7 +3,7 @@
  *  Copyright (C) 2002, The Perl Foundation.
  *  License:  Artistic/GPL, see README and LICENSES for details
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/datatypes.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: datatypes.h 18975 2007-06-13 16:48:54Z bernhard $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *
@@ -126,9 +126,18 @@ const struct _data_types data_types[] = {
 extern const struct _data_types data_types[];
 #endif
 
+/* HEADERIZER BEGIN: src/datatypes.c */
 
-PARROT_API INTVAL Parrot_get_datatype_enum(Parrot_Interp, STRING *);
-PARROT_API STRING * Parrot_get_datatype_name(Parrot_Interp, INTVAL );
+PARROT_API INTVAL Parrot_get_datatype_enum( Interp *interp,
+    const STRING *type_name /*NN*/ )
+        __attribute__nonnull__(2)
+        __attribute__pure__
+        __attribute__warn_unused_result__;
+
+PARROT_API STRING * Parrot_get_datatype_name( Interp *interp, INTVAL type )
+        __attribute__warn_unused_result__;
+
+/* HEADERIZER END: src/datatypes.c */
 
 #endif /* PARROT_DATATYPES_H_GUARD */
 

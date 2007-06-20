@@ -4,7 +4,7 @@
 # implementation based on http://www.merriampark.com/ld.htm
 # First implementation by Alberto Simoes (ambs <at> cpan.org)
 #
-# $Id: /parrotcode/local/examples/pir/levenshtein.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: levenshtein.pir 17600 2007-03-18 10:52:17Z paultcochrane $
 
 # .sub main :main
 #         $S1 = "purl"

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/pmc2cutils/01-pmc2cutils.t 3451 2007-05-11T00:50:42.095481Z tewk  $
+# $Id: 01-pmc2cutils.t 18563 2007-05-16 00:53:55Z chromatic $
 # 01-pmc2cutils.t
 
 use strict;

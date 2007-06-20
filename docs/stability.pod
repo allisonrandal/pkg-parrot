@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id$
+# $Id: stability.pod 17085 2007-02-20 20:04:14Z paultcochrane $
 
 =head1 NAME
 

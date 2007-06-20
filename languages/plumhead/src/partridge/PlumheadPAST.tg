@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/plumhead/src/partridge/PlumheadPAST.tg 2724 2007-04-01T14:05:04.730896Z bernhard  $
+# $Id: PlumheadPAST.tg 17928 2007-04-01 14:05:04Z bernhard $
 
 grammar Plumhead::PAST::Grammar is TGE::Grammar;
 

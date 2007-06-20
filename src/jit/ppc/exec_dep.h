@@ -2,7 +2,7 @@
  * exec_dep.h
  *
  * SVN Info
- *    $Id: /parrotcode/trunk/src/jit/ppc/exec_dep.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
+ *    $Id: exec_dep.h 18945 2007-06-12 14:08:35Z fperrad $
  * Overview:
  *    PPC dependent functions to emit an executable.
  * History:

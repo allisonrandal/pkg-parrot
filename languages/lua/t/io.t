@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/io.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
+# $Id: io.t 18702 2007-05-31 15:06:42Z fperrad $
 
 =head1 NAME
 
@@ -377,7 +377,7 @@ OUTPUT
 
 SKIP:
 {
-skip('only with Parrot', 1) if (exists $ENV{PARROT_LUA_TEST_PROG});
+skip('only with Parrot', 1) if (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'file:__gc' );
 function inner ()

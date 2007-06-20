@@ -8,7 +8,7 @@
 #   is two tokens, and the second is "bar hlaghalg"
 # Consecutive non-alphabetic characters are each considered a token
 #
-# $Id: /parrotcode/trunk/languages/BASIC/interpreter/tokenize.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: tokenize.pasm 11501 2006-02-10 18:27:13Z particle $
 # $Log$
 # Revision 1.1  2003/03/09 23:08:58  clintp
 # Re-organized the languages\BASIC area into two areas, one for the older

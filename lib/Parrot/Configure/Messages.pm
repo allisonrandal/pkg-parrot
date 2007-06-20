@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure/Messages.pm 3133 2007-04-11T23:27:33.472805Z jkeenan  $
+# $Id: Messages.pm 18156 2007-04-11 23:27:33Z jkeenan $
 package Parrot::Configure::Messages;
 use strict;
 use warnings;

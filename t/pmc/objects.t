@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/objects.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
+# $Id: objects.t 18811 2007-06-04 21:39:54Z allison $
 
 use strict;
 use warnings;
@@ -69,8 +69,8 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "find_type nested, with key" );
     newclass P1, ["Foo"; "Bar"]
 
     find_type I0, ["Foo"; "Bar"]
-    isgt I0, I0, 0
-    print I0
+    isgt I1, I0, 0
+    print I1
     print "\n"
 
     new P3, I0

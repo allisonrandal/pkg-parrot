@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /parrotcode/local/docs/pdds/draft/pdd09_gc.pod 1506 2007-01-22T20:56:47.027038Z chromatic  $
+# $Id: pdd09_gc.pod 15090 2006-11-02 18:42:07Z bernhard $
 
 =head1 NAME
 

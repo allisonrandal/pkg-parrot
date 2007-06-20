@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/check_source_standards.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: check_source_standards.pl 18810 2007-06-04 20:27:35Z paultcochrane $
 
 =head1 NAME
 
@@ -56,12 +56,12 @@ exit 0;
 ###############################################################################
 
 sub check_manifest {
-    open( F, "<", "MANIFEST" ) || die "Unable to read MANIFEST: $!\n";
+    open( my $F, "<", "MANIFEST" ) || die "Unable to read MANIFEST: $!\n";
 
     my %files_in_dir_nocase;
     my %files_in_dir_8dot3;
     my $line = 0;
-    while (<F>) {
+    while (<$F>) {
         $line++;
 
         chomp;
@@ -98,7 +98,7 @@ sub check_manifest {
         $files_in_dir_nocase{$dirname}{ lc($filename) } = $_;
     }
 
-    close(F);
+    close($F);
 }
 
 sub info {

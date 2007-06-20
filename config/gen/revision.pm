@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/gen/revision.pm 3475 2007-05-13T17:39:21.678075Z jkeenan  $
+# $Id: revision.pm 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

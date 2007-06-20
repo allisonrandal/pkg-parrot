@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/local/src/parrot.c 2657 2007-03-31T01:57:48.733769Z chromatic  $
+$Id: parrot.c 17433 2007-03-11 03:18:43Z coke $
 
 =head1 NAME
 

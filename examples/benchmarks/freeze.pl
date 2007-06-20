@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/local/examples/benchmarks/freeze.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: freeze.pl 16145 2006-12-17 18:44:04Z paultcochrane $
 
 =head1 NAME
 

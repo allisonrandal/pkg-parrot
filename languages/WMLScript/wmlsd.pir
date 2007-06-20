@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/WMLScript/wmlsd.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: wmlsd.pir 18801 2007-06-04 07:53:36Z fperrad $
 
 =head1 NAME
 
@@ -48,15 +48,15 @@ Francois Perrad.
     script['filename'] = filename
     script.dump()
     end
-_handler:
+  _handler:
     .local pmc e
     .local string s
     .get_results (e, s)
     print s
     print "\n"
-L1:
+  L1:
     end
-USAGE:
+  USAGE:
     printerr "Usage: parrot wmlsd.pbc filename\n"
     exit -1
 .end

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/02-messages.t 3263 2007-04-20T22:59:00.949782Z jkeenan  $
+# $Id: 02-messages.t 18291 2007-04-20 22:59:00Z jkeenan $
 # 02-messages.t
 
 use strict;

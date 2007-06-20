@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/trunk/tools/build/revision_c.pl 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: revision_c.pl 17087 2007-02-20 20:04:56Z paultcochrane $
 
 =head1 NAME
 

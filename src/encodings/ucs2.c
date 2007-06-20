@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/local/src/encodings/ucs2.c 930 2006-12-28T23:51:13.748136Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: ucs2.c 19094 2007-06-18 21:45:36Z petdance $
 
 =head1 NAME
 
@@ -12,14 +12,12 @@ UCS-2 encoding with the help of the ICU library.
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
 #include "../unicode.h"
+
+/* HEADER: src/encodings/ucs2.h */
 
 #include "ucs2.h"
 
@@ -30,14 +28,14 @@ UCS-2 encoding with the help of the ICU library.
 #define UNIMPL internal_exception(UNIMPLEMENTED, "unimpl ucs2")
 
 
-static void iter_init(Interp *, String *src, String_iter *iter);
+static void iter_init(Interp *, const STRING *src, String_iter *iter);
 
 
 static STRING *
 to_encoding(Interp *interp, STRING *src, STRING *dest)
 {
-    STRING *result = Parrot_utf16_encoding_ptr->to_encoding(interp,
-                                                            src, dest);
+    STRING * const result =
+        Parrot_utf16_encoding_ptr->to_encoding(interp, src, dest);
     /*
      * conversion to utf16 downgrads to ucs-2 if possible - check result
      */
@@ -217,7 +215,7 @@ ucs2_set_position(Interp *interp, String_iter *i, UINTVAL n)
 
 #endif
 static void
-iter_init(Interp *interp, String *src, String_iter *iter)
+iter_init(Interp *interp, const STRING *src, String_iter *iter)
 {
     iter->str = src;
     iter->bytepos = iter->charpos = 0;
@@ -262,8 +260,6 @@ Parrot_encoding_ucs2_init(Interp *interp)
 
 /*
 
-=back
-
 =head1 SEE ALSO
 
 F<src/encodings/fixed_8.c>,
@@ -271,8 +267,6 @@ F<src/encodings/utf8.c>,
 F<src/string.c>,
 F<include/parrot/string.h>,
 F<docs/string.pod>.
-
-=cut
 
 */
 

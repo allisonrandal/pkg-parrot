@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/inter_cb.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
+$Id: inter_cb.c 19055 2007-06-17 05:42:16Z petdance $
 
 =head1 NAME
 
@@ -28,6 +28,8 @@ the C-library.
 #include "parrot/parrot.h"
 #include "inter_cb.str"
 
+
+/* HEADER: none */ /* XXX Needs to get done at the same time as the other interpreter files */
 
 /*
 
@@ -244,20 +246,17 @@ callback_CD(Parrot_Interp interp, char *external_data, PMC *user_data)
 
 /*
 
-=item C<void
-Parrot_run_callback(Parrot_Interp interp,
-                    PMC* user_data, void* external_data)>
+FUNCDOC: Parrot_run_callback
 
 Run a callback function. The PMC* user_data holds all
 necessary items in its properties.
 
-=cut
-
 */
 
+PARROT_API
 void
-Parrot_run_callback(Parrot_Interp interp,
-                    PMC* user_data, char* external_data)
+Parrot_run_callback(Interp *interp /*NN*/,
+        PMC* user_data, char* external_data)
 {
     PMC *    signature;
     PMC *    sub;

@@ -3,7 +3,7 @@
  *
  * skeleton example - a stripped down jit/ppc/jit_emit.h
  *
- * $Id: /parrotcode/trunk/src/jit/skeleton/jit_emit.h 3440 2007-05-09T12:16:31.622184Z paultcochrane  $
+ * $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
  */
 
 #ifndef PARROT_JIT_SKELETON_JIT_EMIT_H_GUARD

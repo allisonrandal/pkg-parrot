@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/interpreter.h 3477 2007-05-13T20:42:55.058233Z chromatic  $
+ *     $Id: interpreter.h 19094 2007-06-18 21:45:36Z petdance $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -301,8 +301,9 @@ struct parrot_interp_t {
     struct Arenas *arena_base;                /* Pointer to this interpreter's
                                                * arena */
 
-    PMC *class_hash;                          /* Hash of classes */
+    PMC    *class_hash;                       /* Hash of classes */
     VTABLE **vtables;                         /* array of vtable ptrs */
+    PMC    *pmc_proxies;                      /* PMC array of PMC Proxy objects */
     int    n_vtable_max;                      /* highest used type */
     int    n_vtable_alloced;                  /* alloced vtable space */
 
@@ -508,6 +509,8 @@ PARROT_API INTVAL Parrot_run_meth_fromc_arglist_reti(Interp *, PMC *sub,
 PARROT_API FLOATVAL Parrot_run_meth_fromc_arglist_retf(Interp *, PMC *sub,
         PMC* obj, STRING *meth, const char *signature, va_list);
 
+PARROT_API void Parrot_run_callback(Parrot_Interp, PMC* cbi, char *ext);
+
 PARROT_API void Parrot_callback_C(char *external_data, PMC *callback_info);
 PARROT_API void Parrot_callback_D(PMC *callback_info, char *external_data);
 PARROT_API PMC* Parrot_make_cb(Interp *interp, PMC* sub, PMC* user_data,
@@ -527,7 +530,7 @@ PARROT_API void Parrot_compreg(Interp *interp, STRING *, Parrot_compiler_func_t 
 PARROT_API PMC *Parrot_compile_string(Parrot_Interp interp,
         STRING *type, char *code, STRING **error);
 PARROT_API void *Parrot_compile_file(Parrot_Interp interp,
-        char *fullname, String **error);
+        char *fullname, STRING **error);
 
 INTVAL sysinfo_i(Interp *interp, INTVAL info_wanted);
 STRING *sysinfo_s(Interp *interp, INTVAL info_wanted);
@@ -541,8 +544,6 @@ void do_prederef(void **pc_prederef, Interp *interp, int type);
 
 void clone_interpreter(Parrot_Interp dest, Parrot_Interp self, INTVAL flags);
 
-PARROT_API void enter_nci_method(Interp *, const int type,
-                void *func, const char *name, const char *proto);
 PARROT_API void register_nci_method(Interp *, const int type,
                 void *func, const char *name, const char *proto);
 PARROT_API void register_raw_nci_method_in_ns(Parrot_Interp interp, const int type,
@@ -551,6 +552,8 @@ PARROT_API void Parrot_mark_method_writes(Interp *, int type, const char *name);
 
 void Parrot_setup_event_func_ptrs(Parrot_Interp interp);
 
+PARROT_API void disable_event_checking(Interp *interp /*NN*/);
+PARROT_API void enable_event_checking(Interp *interp /*NN*/);
 #else
 
 struct Parrot_Interp_;

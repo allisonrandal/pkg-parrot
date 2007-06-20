@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/WMLScript/t/pmc/invalid.t 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: invalid.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

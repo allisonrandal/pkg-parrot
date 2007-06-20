@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Ops2pm/Utils.pm 3442 2007-05-09T12:17:06.032451Z paultcochrane  $
+# $Id: Utils.pm 18945 2007-06-12 14:08:35Z fperrad $
 package Parrot::Ops2pm::Utils;
 use strict;
 use warnings;

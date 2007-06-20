@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/string_primitives.c 2708 2007-03-31T22:07:50.320977Z paultcochrane  $
+Copyright (C) 2006-2007, The Perl Foundation.
+$Id: string_primitives.c 19071 2007-06-17 22:07:33Z petdance $
 
 =head1 NAME
 
@@ -18,6 +18,8 @@ API.
 =cut
 
 */
+
+/* HEADER: include/parrot/string_funcs.h */
 
 #include "parrot/parrot.h"
 #if PARROT_HAS_ICU
@@ -42,6 +44,7 @@ etc.).
 
 */
 
+PARROT_API
 void
 string_set_data_directory(const char *dir)
 {
@@ -67,20 +70,15 @@ string_set_data_directory(const char *dir)
 
 /*
 
-=item C<void
-string_fill_from_buffer(Interp *interp, const void *buffer,
-            UINTVAL len, const char *encoding_name, STRING *s)>
-
 Creates a Parrot string from an "external" buffer, converting from any
 supported encoding into Parrot string's internal format.
 
-=cut
-
 */
 
+PARROT_API
 void
 string_fill_from_buffer(Interp *interp, const void *buffer,
-            UINTVAL len, const char *encoding_name, STRING *s)
+            UINTVAL len, const char *encoding_name, STRING *s /*NULLOK*/)
 {
 #if PARROT_HAS_ICU
     UErrorCode icuError = U_ZERO_ERROR;
@@ -159,8 +157,9 @@ string_fill_from_buffer(Interp *interp, const void *buffer,
 
 /* Unescape a single character. We assume that we're at the start of a
    sequence, right after the \ */
+PARROT_API
 Parrot_UInt4
-string_unescape_one(Interp *interp, UINTVAL *offset,
+string_unescape_one(Interp *interp, UINTVAL *offset /*NN*/,
         STRING *string)
 {
     UINTVAL workchar = 0;
@@ -174,11 +173,14 @@ string_unescape_one(Interp *interp, UINTVAL *offset,
             codepoint = CHARSET_GET_BYTE(interp, string, *offset);
             if (codepoint >= '0' && codepoint <= '9') {
                 workchar = codepoint - '0';
-            } else if (codepoint >= 'a' && codepoint <= 'f') {
+            }
+            else if (codepoint >= 'a' && codepoint <= 'f') {
                 workchar = codepoint - 'a' + 10;
-            } else if (codepoint >= 'A' && codepoint <= 'F') {
+            }
+            else if (codepoint >= 'A' && codepoint <= 'F') {
                 workchar = codepoint - 'A' + 10;
-            } else if (codepoint == '{') {
+            }
+            else if (codepoint == '{') {
                 int i;
                 ++*offset;
                 workchar = 0;
@@ -191,9 +193,11 @@ string_unescape_one(Interp *interp, UINTVAL *offset,
                     workchar *= 16;
                     if (codepoint >= '0' && codepoint <= '9') {
                         workchar += codepoint - '0';
-                    } else if (codepoint >= 'a' && codepoint <= 'f') {
+                    }
+                    else if (codepoint >= 'a' && codepoint <= 'f') {
                         workchar += codepoint - 'a' + 10;
-                    } else if (codepoint >= 'A' && codepoint <= 'F') {
+                    }
+                    else if (codepoint >= 'A' && codepoint <= 'F') {
                         workchar += codepoint - 'A' + 10;
                     }
                     else {
@@ -214,9 +218,11 @@ string_unescape_one(Interp *interp, UINTVAL *offset,
                 codepoint = CHARSET_GET_BYTE(interp, string, *offset);
                 if (codepoint >= '0' && codepoint <= '9') {
                     workchar += codepoint - '0';
-                } else if (codepoint >= 'a' && codepoint <= 'f') {
+                }
+                else if (codepoint >= 'a' && codepoint <= 'f') {
                     workchar += codepoint - 'a' + 10;
-                } else if (codepoint >= 'A' && codepoint <= 'F') {
+                }
+                else if (codepoint >= 'A' && codepoint <= 'F') {
                     workchar += codepoint - 'A' + 10;
                 }
                 else {
@@ -246,9 +252,11 @@ string_unescape_one(Interp *interp, UINTVAL *offset,
                     codepoint = CHARSET_GET_BYTE(interp, string, *offset);
                     if (codepoint >= '0' && codepoint <= '9') {
                         workchar += codepoint - '0';
-                    } else if (codepoint >= 'a' && codepoint <= 'f') {
+                    }
+                    else if (codepoint >= 'a' && codepoint <= 'f') {
                         workchar += codepoint - 'a' + 10;
-                    } else if (codepoint >= 'A' && codepoint <= 'F') {
+                    }
+                    else if (codepoint >= 'A' && codepoint <= 'F') {
                         workchar += codepoint - 'A' + 10;
                     }
                     else {
@@ -271,9 +279,11 @@ string_unescape_one(Interp *interp, UINTVAL *offset,
                     codepoint = CHARSET_GET_BYTE(interp, string, *offset);
                     if (codepoint >= '0' && codepoint <= '9') {
                         workchar += codepoint - '0';
-                    } else if (codepoint >= 'a' && codepoint <= 'f') {
+                    }
+                    else if (codepoint >= 'a' && codepoint <= 'f') {
                         workchar += codepoint - 'a' + 10;
-                    } else if (codepoint >= 'A' && codepoint <= 'F') {
+                    }
+                    else if (codepoint >= 'A' && codepoint <= 'F') {
                         workchar += codepoint - 'A' + 10;
                     }
                     else {
@@ -373,6 +383,7 @@ C<Parrot_char_is_digit()> returns false.
 
 */
 
+PARROT_API
 UINTVAL
 Parrot_char_digit_value(Interp *interp, UINTVAL character)
 {

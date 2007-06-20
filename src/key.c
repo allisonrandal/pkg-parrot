@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/key.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: key.c 19085 2007-06-18 13:34:35Z petdance $
 
 =head1 NAME
 
@@ -12,48 +12,41 @@ The base vtable calling functions.
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
+#include "parrot/key.h"
+
+/* HEADER: include/parrot/key.h */
 
 /*
 
-=item C<PMC *
-key_new(Interp *interp)>
-
+FUNCDOC: key_new
 Returns a new C<Key> PMC.
-
-=cut
 
 */
 
+PARROT_API
 PMC *
-key_new(Interp *interp)
+key_new(Interp *interp /*NN*/)
 {
-    PMC *key = pmc_new(interp, enum_class_Key);
+    PMC * const key = pmc_new(interp, enum_class_Key);
 
     return key;
 }
 
 /*
 
-=item C<PMC *
-key_new_integer(Interp *interp, INTVAL value)>
-
+FUNCDOC: key_new_integer
 Returns a new integer C<Key> PMC with value C<value>.
-
-=cut
 
 */
 
+PARROT_API
 PMC *
-key_new_integer(Interp *interp, INTVAL value)
+key_new_integer(Interp *interp /*NN*/, INTVAL value)
 {
-    PMC *key = pmc_new(interp, enum_class_Key);
+    PMC * const key = pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_integer_FLAG;
     PMC_int_val(key) = value;
@@ -63,19 +56,16 @@ key_new_integer(Interp *interp, INTVAL value)
 
 /*
 
-=item C<PMC *
-key_new_number(Interp *interp, FLOATVAL value)>
-
+FUNCDOC: key_new_number
 Returns a new number C<Key> PMC with value C<value>.
-
-=cut
 
 */
 
+PARROT_API
 PMC *
-key_new_number(Interp *interp, FLOATVAL value)
+key_new_number(Interp *interp /*NN*/, FLOATVAL value)
 {
-    PMC *key = pmc_new(interp, enum_class_Key);
+    PMC * const key = pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_number_FLAG;
     PMC_num_val(key) = value;
@@ -85,19 +75,16 @@ key_new_number(Interp *interp, FLOATVAL value)
 
 /*
 
-=item C<PMC *
-key_new_string(Interp *interp, STRING *value)>
-
+FUNCDOC:
 Returns a new string C<Key> PMC with value C<value>.
-
-=cut
 
 */
 
+PARROT_API
 PMC *
-key_new_string(Interp *interp, STRING *value)
+key_new_string(Interp *interp /*NN*/, STRING *value)
 {
-    PMC *key = pmc_new(interp, enum_class_Key);
+    PMC * const key = pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_string_FLAG;
     PMC_str_val(key) = value;
@@ -107,18 +94,15 @@ key_new_string(Interp *interp, STRING *value)
 
 /*
 
-=item C<PMC *
-key_new_cstring(Interp *interp, const char *value)>
-
+FUNCDOC:
 Returns a new string C<Key> PMC with value C<value> converted to a
 C<STRING>.
 
-=cut
-
 */
 
+PARROT_API
 PMC *
-key_new_cstring(Interp *interp, const char *value)
+key_new_cstring(Interp *interp /*NN*/, const char *value /*NULLOK*/)
 {
     return key_new_string(interp,
             string_from_cstring(interp, value, 0));
@@ -126,19 +110,16 @@ key_new_cstring(Interp *interp, const char *value)
 
 /*
 
-=item C<PMC *
-key_new_pmc(Interp *interp, PMC *value)>
-
+FUNCDOC:
 Returns a new PMC C<Key> PMC with value C<value>.
-
-=cut
 
 */
 
+PARROT_API
 PMC *
-key_new_pmc(Interp *interp, PMC *value)
+key_new_pmc(Interp *interp /*NN*/, PMC *value)
 {
-    PMC *key = pmc_new(interp, enum_class_Key);
+    PMC * const key = pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_pmc_FLAG;
     internal_exception(1, "this is broken - see slice.pmc");
@@ -149,17 +130,14 @@ key_new_pmc(Interp *interp, PMC *value)
 
 /*
 
-=item C<void
-key_set_integer(Interp *interp, PMC *key, INTVAL value)>
-
+FUNCDOC:
 Set the integer C<value> in C<key>.
-
-=cut
 
 */
 
+PARROT_API
 void
-key_set_integer(Interp *interp, PMC *key, INTVAL value)
+key_set_integer(Interp *interp, PMC *key /*NN*/, INTVAL value)
 {
     PObj_get_FLAGS(key) &= ~KEY_type_FLAGS;
     PObj_get_FLAGS(key) |= KEY_integer_FLAG;
@@ -170,18 +148,14 @@ key_set_integer(Interp *interp, PMC *key, INTVAL value)
 
 /*
 
-=item C<void
-key_set_register(Interp *interp, PMC *key, INTVAL value,
-                 INTVAL flag)>
-
+FUNCDOC:
 Set the register C<value> in C<key>.
-
-=cut
 
 */
 
+PARROT_API
 void
-key_set_register(Interp *interp, PMC *key, INTVAL value,
+key_set_register(Interp *interp, PMC *key /*NN*/, INTVAL value,
                  INTVAL flag)
 {
     PObj_get_FLAGS(key) &= ~KEY_type_FLAGS;
@@ -193,17 +167,14 @@ key_set_register(Interp *interp, PMC *key, INTVAL value,
 
 /*
 
-=item C<void
-key_set_number(Interp *interp, PMC *key, FLOATVAL value)>
-
+FUNCDOC:
 Set the number C<value> in C<key>.
-
-=cut
 
 */
 
+PARROT_API
 void
-key_set_number(Interp *interp, PMC *key, FLOATVAL value)
+key_set_number(Interp *interp, PMC *key /*NN*/, FLOATVAL value)
 {
     PObj_get_FLAGS(key) &= ~KEY_type_FLAGS;
     PObj_get_FLAGS(key) |= KEY_number_FLAG;
@@ -214,17 +185,14 @@ key_set_number(Interp *interp, PMC *key, FLOATVAL value)
 
 /*
 
-=item C<void
-key_set_string(Interp *interp, PMC *key, STRING *value)>
-
+FUNCDOC:
 Set the string C<value> in C<key>.
-
-=cut
 
 */
 
+PARROT_API
 void
-key_set_string(Interp *interp, PMC *key, STRING *value)
+key_set_string(Interp *interp, PMC *key /*NN*/, STRING *value)
 {
     PObj_get_FLAGS(key) &= ~KEY_type_FLAGS;
     PObj_get_FLAGS(key) |= KEY_string_FLAG;
@@ -235,17 +203,14 @@ key_set_string(Interp *interp, PMC *key, STRING *value)
 
 /*
 
-=item C<void
-key_set_pmc(Interp *interp, PMC *key, PMC *value)>
-
+FUNCDOC: key_set_pmc
 Set the PMC C<value> in C<key>.
-
-=cut
 
 */
 
+PARROT_API
 void
-key_set_pmc(Interp *interp, PMC *key, PMC *value)
+key_set_pmc(Interp *interp, PMC *key /*NN*/, PMC *value)
 {
     PObj_get_FLAGS(key) &= ~KEY_type_FLAGS;
     PObj_get_FLAGS(key) |= KEY_pmc_FLAG;
@@ -261,36 +226,22 @@ key_set_pmc(Interp *interp, PMC *key, PMC *value)
 
 /*
 
-=item C<INTVAL
-key_type(Interp *interp, PMC *key)>
-
+FUNCDOC: key_type
 Returns the type of C<key>.
-
-=cut
 
 */
 
+PARROT_API
 INTVAL
-key_type(Interp *interp, PMC *key)
+key_type(Interp *interp, const PMC *key /*NN*/)
 {
     return (PObj_get_FLAGS(key) & KEY_type_FLAGS) & ~KEY_register_FLAG;
 }
 
-/*
-
-=item C<INTVAL
-key_integer(Interp *interp, PMC *key)>
-
-=cut
-
-*/
-
+PARROT_API
 INTVAL
-key_integer(Interp *interp, PMC *key)
+key_integer(Interp *interp, PMC *key /*NN*/)
 {
-    PMC *reg;
-    STRING *s_reg;
-
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
     case KEY_hash_iterator_FLAGS:
     case KEY_integer_FLAG:
@@ -298,33 +249,27 @@ key_integer(Interp *interp, PMC *key)
     case KEY_integer_FLAG | KEY_register_FLAG:
         return REG_INT(PMC_int_val(key));
     case KEY_pmc_FLAG | KEY_register_FLAG:
-        reg = REG_PMC(PMC_int_val(key));
+        {
+        PMC * const reg = REG_PMC(PMC_int_val(key));
         return VTABLE_get_integer(interp, reg);
+        }
     case KEY_string_FLAG:
         return string_to_int(interp, PMC_str_val(key));
     case KEY_string_FLAG | KEY_register_FLAG:
-        s_reg = REG_STR(PMC_int_val(key));
+        {
+        STRING * const s_reg = REG_STR(PMC_int_val(key));
         return string_to_int(interp, s_reg);
+        }
     default:
         /* TODO check for slice_FLAGs */
         return VTABLE_get_integer(interp, key);
     }
 }
 
-/*
-
-=item C<FLOATVAL
-key_number(Interp *interp, PMC *key)>
-
-=cut
-
-*/
-
+PARROT_API
 FLOATVAL
-key_number(Interp *interp, PMC *key)
+key_number(Interp *interp, PMC *key /*NN*/)
 {
-    PMC *reg;
-
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
     case KEY_number_FLAG:
         return PMC_num_val(key);
@@ -334,28 +279,20 @@ key_number(Interp *interp, PMC *key)
         return VTABLE_get_number(interp, key);
                                                  /*  PMC_pmc_val(key)); */
     case KEY_pmc_FLAG | KEY_register_FLAG:
-        reg = REG_PMC(PMC_int_val(key));
+        {
+        PMC * const reg = REG_PMC(PMC_int_val(key));
         return VTABLE_get_number(interp, reg);
+        }
     default:
         internal_exception(INVALID_OPERATION, "Key not a number!\n");
         return 0;
     }
 }
 
-/*
-
-=item C<STRING *
-key_string(Interp *interp, PMC *key)>
-
-=cut
-
-*/
-
+PARROT_API
 STRING *
-key_string(Interp *interp, PMC *key)
+key_string(Interp *interp /*NN*/, PMC *key /*NN*/)
 {
-    PMC *reg;
-
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
     case KEY_string_FLAG:
         return PMC_str_val(key);
@@ -363,8 +300,10 @@ key_string(Interp *interp, PMC *key)
         return REG_STR(PMC_int_val(key));
                                                    /*   PMC_pmc_val(key)); */
     case KEY_pmc_FLAG | KEY_register_FLAG:
-        reg = REG_PMC(PMC_int_val(key));
+        {
+        PMC * const reg = REG_PMC(PMC_int_val(key));
         return VTABLE_get_string(interp, reg);
+        }
     case KEY_integer_FLAG:
         return string_from_int(interp, PMC_int_val(key));
     case KEY_integer_FLAG | KEY_register_FLAG:
@@ -377,18 +316,15 @@ key_string(Interp *interp, PMC *key)
 
 /*
 
-=item C<PMC *
-key_pmc(Interp *interp, PMC *key)>
-
+FUNCDOC: key_pmc
 These functions return the integer/number/string/PMC values of C<key> if
 possible. Otherwise they throws an exceptions.
 
-=cut
-
 */
 
+PARROT_API
 PMC *
-key_pmc(Interp *interp, PMC *key)
+key_pmc(Interp *interp, PMC *key /*NN*/)
 {
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
     case KEY_pmc_FLAG | KEY_register_FLAG:
@@ -400,17 +336,14 @@ key_pmc(Interp *interp, PMC *key)
 
 /*
 
-=item C<PMC *
-key_next(Interp *interp, PMC *key)>
-
+FUNCDOC: key_next
 Returns the next key if C<key> is in a sequence of linked keys.
-
-=cut
 
 */
 
+PARROT_API
 PMC *
-key_next(Interp *interp, PMC *key)
+key_next(Interp *interp, PMC *key /*NN*/)
 {
     if (!key->pmc_ext)
         return NULL;
@@ -419,9 +352,7 @@ key_next(Interp *interp, PMC *key)
 
 /*
 
-=item C<PMC *
-key_append(Interp *interp, PMC *key1, PMC *key2)>
-
+FUNCDOC: key_append
 Appends C<key2> to C<key1>.
 
 Note that if C<key1> is not the last key in a sequence linked keys then
@@ -429,12 +360,11 @@ the last key will be found and C<key2> appended to that.
 
 Returns C<key1>.
 
-=cut
-
 */
 
+PARROT_API
 PMC *
-key_append(Interp *interp, PMC *key1, PMC *key2)
+key_append(Interp *interp, PMC *key1 /*NN*/, PMC *key2 /*NN*/)
 {
     PMC *tail = key1;
 
@@ -449,21 +379,17 @@ key_append(Interp *interp, PMC *key1, PMC *key2)
 
 /*
 
-=item C<void
-key_mark(Interp *interp, PMC *key)>
-
+FUNCDOC: key_mark
 Marks C<key> as live.
-
-=cut
 
 */
 
+PARROT_API
 void
-key_mark(Interp *interp, PMC *key)
+key_mark(Interp *interp /*NN*/, PMC *key /*NN*/)
 {
-    UINTVAL flags;
+    const UINTVAL flags = PObj_get_FLAGS(key) & KEY_type_FLAGS;
 
-    flags = PObj_get_FLAGS(key) & KEY_type_FLAGS;
     if (flags == KEY_string_FLAG)
         pobject_lives(interp, (PObj *)PMC_str_val(key));
     /*
@@ -479,22 +405,13 @@ key_mark(Interp *interp, PMC *key)
 
 }
 
-/*
-
-=item C<STRING *
-key_set_to_string(Interp *interpreter, PMC *key)>
-
-=cut
-
-*/
-
+PARROT_API
 STRING *
-key_set_to_string(Interp *interp, PMC *key)
+key_set_to_string(Interp *interp /*NN*/, PMC *key /*NULLOK*/)
 {
-    PMC *reg;
-    STRING *semicolon = string_from_cstring(interp, " ; ", 3);
-    STRING *quote = string_from_cstring(interp, "'", 1);
-    STRING *value = string_from_cstring(interp, "[ ", 2);
+    STRING * const semicolon = string_from_cstring(interp, " ; ", 3);
+    STRING * const quote = string_from_cstring(interp, "'", 1);
+    STRING * const value = string_from_cstring(interp, "[ ", 2);
 
     for (; key; key = (PMC *)PMC_data(key)) {
         switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
@@ -518,8 +435,10 @@ key_set_to_string(Interp *interp, PMC *key)
                 string_append(interp, value, quote);
                 break;
             case KEY_pmc_FLAG | KEY_register_FLAG:
-                reg = REG_PMC(PMC_int_val(key));
+                {
+                PMC * const reg = REG_PMC(PMC_int_val(key));
                 string_append(interp, value, VTABLE_get_string(interp, reg));
+                }
                 break;
             default:
                 string_append(interp, value, string_from_cstring(interp, "Key type unknown", 0));
@@ -534,8 +453,6 @@ key_set_to_string(Interp *interp, PMC *key)
 }
 
 /*
-
-=back
 
 =head1 SEE ALSO
 

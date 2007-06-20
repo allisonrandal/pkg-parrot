@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/configuration.pod 3376 2007-05-04T02:14:52.617268Z jkeenan  $
+# $Id: configuration.pod 18563 2007-05-16 00:53:55Z chromatic $
 
 =pod
 

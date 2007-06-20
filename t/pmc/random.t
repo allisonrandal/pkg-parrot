@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/random.t 3286 2007-04-24T14:24:35.370224Z coke  $
+# $Id: random.t 18315 2007-04-24 14:24:35Z coke $
 
 =head1 NAME
 

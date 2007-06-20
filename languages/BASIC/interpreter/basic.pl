@@ -1,6 +1,6 @@
 #! perl
 #
-# $Id: /parrotcode/local/languages/BASIC/interpreter/basic.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: basic.pl 16263 2006-12-25 22:24:19Z paultcochrane $
 # $Log: basic.pl,v
 # Revision 1.11  2002/06/16 21:23:28  clint
 # Floating Point BASI

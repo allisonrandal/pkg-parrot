@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/runtime/parrot/library/Test/Builder/Tester.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
+# $Id: Tester.pir 18997 2007-06-14 06:41:07Z chromatic $
 
 =head1 NAME
 
@@ -75,34 +75,29 @@ This module defines the following public functions:
 .end
 
 .sub init :vtable :method
-	.local int offset
-	classoffset offset, self, 'Test::Builder::Tester::Output'
-
 	.local pmc output
 	.local pmc diagnostics
 	output      = new .ResizablePMCArray
 	diagnostics = new .ResizablePMCArray
-	setattribute self, offset, output
-	inc offset
-	setattribute self, offset, diagnostics
+
+	setattribute self, "output", output
+	setattribute self, "diagnostics", diagnostics
+
 .end
 
 .sub get_output :method
-	.local int offset
-	classoffset offset, self, 'Test::Builder::Tester::Output'
-
 	.local pmc output
-	getattribute output, self, offset
+
+	getattribute output, self, "output"
+
 	.return( output )
 .end
 
 .sub get_diagnostics :method
-	.local int offset
-	classoffset offset, self, 'Test::Builder::Tester::Output'
-	inc offset
-
 	.local pmc diagnostics
-	getattribute diagnostics, self, offset
+
+	getattribute diagnostics, self, "diagnostics"
+
 	.return( diagnostics )
 .end
 
@@ -464,7 +459,7 @@ mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005-2006, The Perl Foundation.
+Copyright (C) 2005-2007, The Perl Foundation.
 
 =cut
 

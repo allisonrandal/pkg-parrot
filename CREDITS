@@ -1,4 +1,4 @@
-﻿# $Id: /parrotcode/trunk/CREDITS 3361 2007-05-02T15:16:29.320663Z fperrad  $
+﻿# $Id: CREDITS 18573 2007-05-16 21:24:33Z bernhard $
 
 	Following in the steps of other open source projects that
 	eventually take over the world, here is the partial list
@@ -265,6 +265,7 @@ D: Test system fixes
 
 N: Jens Rieks
 D: Several libraries, examples and patches.
+D: Tetris with SDL
 E: parrot@jensbeimsurfen.de
 S: Wuppertal, Germany
 

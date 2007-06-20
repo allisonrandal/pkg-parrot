@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/runtime/parrot/library/Stream/Sub.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Sub.pir 17613 2007-03-18 10:58:12Z paultcochrane $
 
 =head1 TITLE
 

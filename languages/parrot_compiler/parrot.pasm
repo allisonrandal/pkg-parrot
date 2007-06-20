@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/parrot_compiler/parrot.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: parrot.pasm 12840 2006-05-30 15:08:05Z coke $
 
   # Get the input as a string, don't care about buffer overflow yet
   read S0, 1000000

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/plumhead/src/common/builtins.pir 3032 2007-04-09T08:56:36.930363Z paultcochrane  $
+# $Id: builtins.pir 18055 2007-04-09 08:56:36Z paultcochrane $
 
 # steal builtins from Perl6
 # TODO: put that into php_builtins.pir

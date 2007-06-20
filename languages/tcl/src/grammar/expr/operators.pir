@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/tcl/src/grammar/expr/operators.pir 3023 2007-04-09T07:41:20.576910Z paultcochrane  $
+# $Id: operators.pir 18046 2007-04-09 07:41:20Z paultcochrane $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/codingstd/c_struct.t 3300 2007-04-24T21:18:22.142154Z mdiep  $
+# $Id: c_struct.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

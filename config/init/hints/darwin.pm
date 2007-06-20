@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /parrotcode/local/config/init/hints/darwin.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: darwin.pm 18874 2007-06-08 13:23:19Z paultcochrane $
 
 package init::hints::darwin;
 
@@ -42,14 +42,11 @@ sub runstep {
         memalign            => 'some_memalign',
         has_dynamic_linking => 1,
 
-        # XXX when built against a dynamic libparrot installable_parrot records
+        # RT#43147 when built against a dynamic libparrot installable_parrot records
         # the path to the blib version of the library
         parrot_is_shared       => 0,
         libparrot_shared       => 'libparrot.$(SOVERSION)$(SHARE_EXT)',
         libparrot_shared_alias => 'libparrot$(SHARE_EXT)',
-
-        # This variable needs renaming to be more general
-        # XXX ugly hack for rpath_lib in config/inter/libparrot.pm
         rpath            => "-L",
         libparrot_soname => "-install_name "
             . $conf->data->get('lib_dir')

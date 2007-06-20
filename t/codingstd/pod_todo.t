@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/doc/pod_todo.t 3464 2007-05-12T10:47:57.683564Z paultcochrane  $
+# $Id: pod_todo.t 18780 2007-06-03 14:33:32Z paultcochrane $
 
 =head1 NAME
 
@@ -55,7 +55,7 @@ BEGIN {
     }
 }
 
-plan skip_all => 'Pod TODO tests not required in default test harness';  #  tests => 1;
+plan tests => 1;
 
 # XXX this should really be using src_dir insetad of build_dir but it
 # doesn't exist (yet)

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Pmc2c.pm 3385 2007-05-05T14:41:57.057265Z bernhard  $
+# $Id: Pmc2c.pm 19063 2007-06-17 15:22:46Z paultcochrane $
 
 =head1 NAME
 
@@ -629,15 +629,16 @@ sub methods {
     my ( $self, $line, $out_name ) = @_;
 
     my $cout = "";
+    my %method_used_p;
 
     # vtable methods
     foreach my $method ( @{ $self->{vtable}{methods} } ) {
         my $meth = $method->{meth};
-        next if $meth eq 'class_init';
         if ( $self->implements($meth) ) {
             my $ret = $self->body( $method, $line, $out_name );
             $line += count_newlines($ret);
             $cout .= $ret;
+            $method_used_p{$meth}++;
         }
     }
 
@@ -647,6 +648,14 @@ sub methods {
         my $ret = $self->body( $method, $line, $out_name );
         $line += count_newlines($ret);
         $cout .= $ret;
+        $method_used_p{$method->{meth}}++;
+    }
+
+    # check for misspelled or unimplemented method names.
+    foreach my $method ( @{ $self->{methods} } ) {
+        my $meth = $method->{meth};
+        warn "Cannot generate $out_name code for unknown method '$meth'.\n"
+            unless $method_used_p{$meth} || $meth eq 'class_init';
     }
 
     $cout =~ s/^\s+$//mg;
@@ -667,7 +676,7 @@ sub pmc_is_dynpmc {
 
 # XXX quick hack - to get MMD variants
 sub get_super_mmds {
-    my ( $self, $meth, $right, $func ) = @_;
+    my ( $self, $meth, $right_type, $func ) = @_;
     ## use Data::Dumper;
     ## printf "******* $meth_name **********\n";
     ## print Dumper($self);
@@ -703,12 +712,13 @@ sub get_super_mmds {
 
 Returns three values:
 
-The first is an arrayref of <[ mmd_number, left, right, implementation_func]>
+The first is an arrayref of 
+<[ mmd_number, left_type, right_type, implementation_func]>
 suitable for initializing the MMD list.
 
 The second is a arrayref listing dynamic PMCs which will need to be looked up.
 
-The third is a list of C<[index, dynamic PMC]> pairs of right entries
+The third is a list of C<[index, dynamic PMC]> pairs of right_type entries
 in the MMD table that will need to be resolved at runtime.
 
 =cut
@@ -732,31 +742,31 @@ sub find_mmd_methods {
             $meth_name = "Parrot_${classname}_$meth";
         }
         next unless $method->{mmd} =~ /MMD_/;
-        my ( $func, $left, $right );
+        my ( $func, $left_type, $right_type );
         $func = $method->{mmd};
 
         # dynamic PMCs need the runtime type
         # which is passed in entry to class_init
-        $left  = 0;                 # set to 'entry' below in initialization loop.
-        $right = 'enum_type_PMC';
-        $right = 'enum_type_INTVAL' if ( $func =~ s/_INT$// );
-        $right = 'enum_type_FLOATVAL' if ( $func =~ s/_FLOAT$// );
-        $right = 'enum_type_STRING' if ( $func =~ s/_STR$// );
+        $left_type  = 0;  # set to 'entry' below in initialization loop.
+        $right_type = 'enum_type_PMC';
+        $right_type = 'enum_type_INTVAL' if ( $func =~ s/_INT$// );
+        $right_type = 'enum_type_FLOATVAL' if ( $func =~ s/_FLOAT$// );
+        $right_type = 'enum_type_STRING' if ( $func =~ s/_STR$// );
         if ( exists $self->{super}{$meth} ) {
-            push @mmds, $self->get_super_mmds( $meth, $right, $func );
+            push @mmds, $self->get_super_mmds( $meth, $right_type, $func );
         }
-        push @mmds, [ $func, $left, $right, $meth_name ];
+        push @mmds, [ $func, $left_type, $right_type, $meth_name ];
         foreach my $variant ( @{ $self->{mmd_variants}{$meth} } ) {
             if ( $self->pmc_is_dynpmc( $variant->[0] ) ) {
-                $right = 0;
+                $right_type = 0;
                 push @init_mmds, [ $#mmds + 1, $variant->[0] ];
                 $init_mmds{ $variant->[0] } = 1;
             }
             else {
-                $right = "enum_class_$variant->[0]";
+                $right_type = "enum_class_$variant->[0]";
             }
             $meth_name = $variant->[1] . '_' . $variant->[0];
-            push @mmds, [ $func, $left, $right, $meth_name ];
+            push @mmds, [ $func, $left_type, $right_type, $meth_name ];
         }
         $self->{mmds} = @mmds;    # XXX?
     }
@@ -976,7 +986,6 @@ EOC
     if ( $self->{flags}{hll} && $self->{flags}{maps} ) {
 
         my $hll  = ( keys %{ $self->{flags}{hll} } )[0];
-        my $maps = ( keys %{ $self->{flags}{maps} } )[0];
         $cout .= <<"EOC";
 
         {
@@ -985,9 +994,19 @@ EOC
                 interp, const_string(interp, "$hll")
             );
             if (pmc_id > 0)
+EOC
+
+
+        foreach my $map ( keys %{ $self->{flags}{maps} }) {
+
+        $cout .= <<"EOC";
                 Parrot_register_HLL_type(
-                    interp, pmc_id, enum_class_$maps, entry
+                    interp, pmc_id, enum_class_$map, entry
                 );
+EOC
+        }
+
+        $cout .= <<"EOC";
         } /* Register */
 EOC
     }
@@ -995,6 +1014,8 @@ EOC
     $cout .= <<"EOC";
         /* setup MRO and _namespace */
         Parrot_create_mro(interp, entry);
+        /* create PMC Proxy object */
+        Parrot_create_pmc_proxy(interp, entry);
 EOC
 
     # declare each nci method for this class

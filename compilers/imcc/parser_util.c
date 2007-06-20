@@ -8,7 +8,7 @@
  *
  * parser support functions
  *
- * $Id: /parrotcode/trunk/compilers/imcc/parser_util.c 3509 2007-05-16T02:26:11.809697Z chromatic  $
+ * $Id: parser_util.c 19026 2007-06-15 21:32:14Z chromatic $
  *
  */
 
@@ -227,7 +227,7 @@ maybe_builtin(Interp *interp, IMC_Unit *unit, char *name,
  * Is instruction a parrot opcode?
  */
 int
-is_op(Interp *interp, char *name)
+is_op(Interp *interp, const char *name)
 {
     int (*op_lookup)(const char *, int full) =
         interp->op_lib->op_code;
@@ -1277,6 +1277,11 @@ imcc_init(Parrot_Interp interp)
 void
 imcc_destroy(Parrot_Interp interp)
 {
+    Hash  *macros = IMCC_INFO(interp)->macros;
+
+    if (macros)
+        parrot_chash_destroy(interp, macros);
+
     mem_sys_free(IMCC_INFO(interp));
     IMCC_INFO(interp) = NULL;
 }

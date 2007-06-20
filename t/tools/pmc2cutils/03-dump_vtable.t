@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/pmc2cutils/03-dump_vtable.t 3451 2007-05-11T00:50:42.095481Z tewk  $
+# $Id: 03-dump_vtable.t 18563 2007-05-16 00:53:55Z chromatic $
 # 03-dump_vtable.t
 
 use strict;

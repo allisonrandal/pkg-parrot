@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/languages/plumhead/t/hello.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: hello.t 17815 2007-03-28 18:41:51Z bernhard $
 
 =head1 NAME
 

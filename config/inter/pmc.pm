@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/inter/pmc.pm 3451 2007-05-11T00:50:42.095481Z tewk  $
+# $Id: pmc.pm 18877 2007-06-08 14:15:40Z paultcochrane $
 
 =head1 NAME
 
@@ -117,7 +117,7 @@ END
         }
     }
 
-    # XXX:leo do we really need an interactive step for this
+    # RT#43172 :leo do we really need an interactive step for this
     # user could deactivate vital PMCs like SArray
     # so there would be tests needed, that check for vital classes
 

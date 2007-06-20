@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/compilers/imcc/syn/objects.t 3366 2007-05-02T22:49:45.363630Z mdiep  $
+# $Id: objects.t 18401 2007-05-02 22:49:45Z mdiep $
 
 use strict;
 use warnings;

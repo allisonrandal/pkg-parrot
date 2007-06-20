@@ -22,7 +22,8 @@
           else { \
               if (time_bucket >= TIME_BUCKETS) { \
                   time_bucket = TIME_BUCKETS - 1; \
-              } else if (time_bucket == 0) { \
+              } \
+              else if (time_bucket == 0) { \
                   abort(); \
                   time_bucket = 0; \
               } \
@@ -44,7 +45,7 @@
 #  define PROFILE_ABORTED(profile) \
       ++PROFILE(log).num_aborts
 
-struct STM_profile_data {
+typedef struct STM_profile_data {
     long attempted_commits;
     long failed_commits;
     long num_aborts;
@@ -54,7 +55,7 @@ struct STM_profile_data {
     long wait_time[TIME_BUCKETS];
     double total_wait_time;
     long total_wait_cycles;
-};
+} STM_profile_data;
 
 #else
 
@@ -66,13 +67,13 @@ struct STM_profile_data {
 
 #endif
 
-struct Parrot_STM_PMC_handle_data {
+typedef struct Parrot_STM_PMC_handle_data {
     Buffer buf;
     Parrot_atomic_pointer owner_or_version;
     void * volatile last_version;
     PMC *value;
     STM_waitlist change_waitlist;
-};
+} Parrot_STM_PMC_handle_data;
 
 struct STM_tx_log;
 
@@ -121,7 +122,7 @@ struct STM_tx_log {
     int depth;
 
 #if STM_PROFILE
-    struct STM_profile_data profile;
+    STM_profile_data profile;
 #endif
 
     STM_tx_log_sub inner[STM_MAX_TX_DEPTH];

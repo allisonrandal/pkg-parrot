@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/codingstd/gmt_utc.t 1801 2007-02-15T06:52:47.129138Z chromatic  $
+# $Id: gmt_utc.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

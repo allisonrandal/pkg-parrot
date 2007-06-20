@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/alarm.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
+# $Id: alarm.t 18702 2007-05-31 15:06:42Z fperrad $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ use lib "$FindBin::Bin";
 use Parrot::Test;
 use Test::More;
 
-if ( exists $ENV{PARROT_LUA_TEST_PROG} ) {
+if ( ($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua' ) {
     plan skip_all => "parrot only";
 }
 else {

@@ -1,6 +1,6 @@
 #! perl
 
-# $Id: /parrotcode/local/languages/m4/tools/frozen2yaml.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: frozen2yaml.pl 16254 2006-12-25 22:18:58Z paultcochrane $
 
 =head1 DESCRIPTION
 

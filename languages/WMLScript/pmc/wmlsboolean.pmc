@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/languages/WMLScript/pmc/wmlsboolean.pmc 2985 2007-04-06T08:34:17.047864Z fperrad  $
+$Id: wmlsboolean.pmc 18007 2007-04-06 08:34:17Z fperrad $
 
 =head1 NAME
 

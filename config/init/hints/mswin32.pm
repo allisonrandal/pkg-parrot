@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/init/hints/mswin32.pm 3125 2007-04-11T21:03:52.277971Z paultcochrane  $
+# $Id: mswin32.pm 18847 2007-06-06 22:13:07Z particle $
 
 package init::hints::mswin32;
 
@@ -66,6 +66,7 @@ sub runstep {
             ld_load_flags       => '-dll',
             ld_out              => '-out:',
             ldflags             => '-nologo -nodefaultlib',
+            libs                => 'kernel32.lib ws2_32.lib msvcrt.lib oldnames.lib ',
             libparrot_static    => 'libparrot' . $conf->data->get('a'),
             libparrot_shared    => 'libparrot$(SHARE_EXT)',
             ar_flags            => '',

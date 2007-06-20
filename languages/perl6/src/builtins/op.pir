@@ -1,4 +1,4 @@
-## $Id: /parrotcode/trunk/languages/perl6/src/builtins/op.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
+## $Id: op.pir 18936 2007-06-11 23:39:24Z chromatic $
 
 =head1 NAME
 
@@ -88,8 +88,12 @@ src/builtins/op.pir - Perl6 builtin operators
 
 .sub 'prefix:?'
     .param pmc a
+
+    .local pmc bool
+    bool = new .Perl6Bool
     $I0 = istrue a
-    .return ($I0)
+    assign bool, $I0
+    .return (bool)
 .end
 
 

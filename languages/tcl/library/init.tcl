@@ -3,7 +3,7 @@
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
 #
-# RCS: @(#) $Id: /parrotcode/local/languages/tcl/library/init.tcl 1640 2007-02-01T03:58:19.287027Z chromatic  $
+# RCS: @(#) $Id: init.tcl 17096 2007-02-20 20:20:48Z paultcochrane $
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.

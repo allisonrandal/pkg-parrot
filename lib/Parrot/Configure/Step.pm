@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure/Step.pm 3435 2007-05-09T09:36:09.635748Z paultcochrane  $
+# $Id: Step.pm 18479 2007-05-09 09:36:09Z paultcochrane $
 
 =head1 NAME
 

@@ -1,15 +1,11 @@
 /* dod.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2007, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/dod.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: dod.h 19025 2007-06-15 21:22:33Z petdance $
  *  Overview:
  *     Handles dead object destruction of the various headers
- *  Data Structure and Algorithms:
- *
  *  History:
  *     Initial version by Mike Lambert on 2002.05.27
- *  Notes:
- *  References:
  */
 
 #ifndef PARROT_DOD_H_GUARD
@@ -54,55 +50,101 @@ enum {
                                              set, i.e. registers */
 };
 
-PARROT_API void Parrot_do_dod_run(Interp *, UINTVAL flags);
-void trace_system_areas(Interp *);
-void trace_mem_block(Interp *, size_t, size_t);
+/* HEADERIZER BEGIN: src/gc/dod.c */
 
-void free_unused_pobjects(Interp *interp,
-                    struct Small_Object_Pool *pool);
+PARROT_API void Parrot_do_dod_run( Interp *interp /*NN*/, UINTVAL flags )
+        __attribute__nonnull__(1);
 
-void used_cow(Interp *interp,
-        struct Small_Object_Pool *pool, int cleanup);
-void clear_cow(Interp *interp,
-        struct Small_Object_Pool *pool, int cleanup);
+PARROT_API void Parrot_dod_clear_live_bits( Interp *interp /*NN*/ )
+        __attribute__nonnull__(1);
 
-/* mark a PObj live during DOD */
+PARROT_API void Parrot_dod_ms_run( Interp *interp /*NN*/, int flags )
+        __attribute__nonnull__(1);
 
-#if PARROT_GC_GMS
-#  define pobject_lives(i, o) do { \
-    if (!PObj_live_TEST(o) && \
-            PObj_to_GMSH(o)->gen->gen_no >= i->gc_generation) \
-        parrot_gc_gms_pobject_lives(i, o); \
-  } while (0)
+PARROT_API void Parrot_dod_ms_run_init( Interp *interp /*NN*/ )
+        __attribute__nonnull__(1);
 
-PARROT_API void parrot_gc_gms_pobject_lives(Interp *interp, PObj *obj);
+PARROT_API void Parrot_dod_profile_end( Interp *interp /*NN*/, int what )
+        __attribute__nonnull__(1);
 
-#else
-PARROT_API void pobject_lives(Interp *interp, PObj *buffer);
-#endif
+PARROT_API void Parrot_dod_profile_start( Interp *interp /*NN*/ )
+        __attribute__nonnull__(1);
+
+PARROT_API void Parrot_dod_sweep( Interp *interp /*NN*/,
+    Small_Object_Pool *pool /*NN*/ )
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_API int Parrot_dod_trace_children( Interp *interp /*NN*/,
+    size_t how_many )
+        __attribute__nonnull__(1);
+
+PARROT_API int Parrot_dod_trace_root( Interp *interp /*NN*/, int trace_stack )
+        __attribute__nonnull__(1);
+
+PARROT_API void pobject_lives( Interp *interp /*NN*/, PObj *obj /*NN*/ )
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void clear_cow( Interp *interp, Small_Object_Pool *pool /*NN*/, int cleanup )
+        __attribute__nonnull__(2);
+
+void trace_mem_block( Interp *interp /*NN*/,
+    size_t lo_var_ptr,
+    size_t hi_var_ptr )
+        __attribute__nonnull__(1);
+
+void used_cow( Interp *interp, Small_Object_Pool *pool /*NN*/, int cleanup )
+        __attribute__nonnull__(2);
+
+/* HEADERIZER END: src/gc/dod.c */
+
+
+/* HEADERIZER BEGIN: src/cpu_dep.c */
+
+void trace_system_areas( Interp *interp /*NN*/ )
+        __attribute__nonnull__(1);
+
+/* HEADERIZER END: src/cpu_dep.c */
+
 
 #if ! DISABLE_GC_DEBUG
 /* Set when walking the system stack */
 extern int CONSERVATIVE_POINTER_CHASING;
 #endif
 
-PARROT_API int Parrot_dod_trace_root(Interp *, int trace_stack);
-PARROT_API int Parrot_dod_trace_children(Interp *, size_t how_many);
-PARROT_API void Parrot_dod_sweep(Interp *, struct Small_Object_Pool *pool);
-PARROT_API void Parrot_dod_ms_run_init(Interp *interp);
-PARROT_API void Parrot_dod_clear_live_bits(Interp*);
-
-PARROT_API void Parrot_dod_profile_start(Parrot_Interp interp);
-PARROT_API void Parrot_dod_profile_end(Parrot_Interp interp, int what);
 
 /* GC subsystem init functions */
-PARROT_API void Parrot_gc_ms_init(Interp *interp);
-PARROT_API void Parrot_gc_ims_init(Interp *interp);
-PARROT_API void Parrot_gc_gms_init(Interp *interp);
-/* do_dod_run function for MS */
-PARROT_API void Parrot_dod_ms_run(Interp *interp, int flags);
+/* HEADERIZER BEGIN: src/gc/gc_gms.c */
 
-PARROT_API void Parrot_dod_ims_wb(Interp*, PMC *, PMC *);
+PARROT_API void Parrot_gc_gms_init( Interp* interp /*NN*/ )
+        __attribute__nonnull__(1);
+
+PARROT_API void parrot_gc_gms_pobject_lives( Interp* interp /*NN*/,
+    PObj *obj /*NN*/ )
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void parrot_gc_gms_wb( Interp *interp, PMC *agg, void *old, void *new /*NN*/ )
+        __attribute__nonnull__(4);
+
+void parrot_gc_gms_wb_key( Interp *interp,
+    PMC *agg,
+    void *old,
+    void *old_key,
+    void *new,
+    void *new_key );
+
+/* HEADERIZER END: src/gc/gc_gms.c */
+
+/* HEADERIZER BEGIN: src/gc/gc_ims.c */
+
+PARROT_API void Parrot_dod_ims_wb( Interp* interp, PMC *agg, PMC *_new );
+PARROT_API void Parrot_gc_ims_init( Interp* interp /*NN*/ )
+        __attribute__nonnull__(1);
+
+/* HEADERIZER END: src/gc/gc_ims.c */
+
 /*
  * write barrier
  */
@@ -129,7 +171,7 @@ PARROT_API void Parrot_dod_ims_wb(Interp*, PMC *, PMC *);
 #if PARROT_GC_GMS
 #  define DOD_WRITE_BARRIER(interp, agg, old, new) do { \
     UINTVAL gen_agg, gen_new; \
-    if (!(new) || (new) == (void*)PMCNULL) \
+    if (!(new) || PMC_IS_NULL(new)) \
         break; \
     gen_agg = PObj_to_GMSH(agg)->gen->gen_no; \
     gen_new = PObj_to_GMSH(new)->gen->gen_no; \
@@ -139,7 +181,7 @@ PARROT_API void Parrot_dod_ims_wb(Interp*, PMC *, PMC *);
 
 #  define DOD_WRITE_BARRIER_KEY(interp, agg, old, old_key, new, new_key) do { \
     UINTVAL gen_agg, gen_new, gen_key; \
-    if (!(new) || (new) == (void*)PMCNULL) \
+    if (!(new) || PMC_IS_NULL(new)) \
         break; \
     gen_agg = PObj_to_GMSH(agg)->gen->gen_no; \
     gen_new = PObj_to_GMSH(new)->gen->gen_no; \
@@ -147,10 +189,6 @@ PARROT_API void Parrot_dod_ims_wb(Interp*, PMC *, PMC *);
     if (gen_agg < gen_new || gen_agg < gen_key) \
         parrot_gc_gms_wb_key(interp, agg, old, old_key, new, new_key); \
 } while (0)
-
-void parrot_gc_gms_wb(Interp *, PMC *agg, void *old, void *new);
-void parrot_gc_gms_wb_key(Interp *, PMC *agg,
-        void *old, void *old_key, void *new, void *new_key);
 
 #endif
 

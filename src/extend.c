@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/extend.c 3349 2007-05-02T00:00:16.325289Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: extend.c 19024 2007-06-15 21:00:45Z petdance $
 
 =head1 NAME
 
@@ -61,6 +61,8 @@ can.
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 
+/* HEADER: none */ /* XXX a lie for the headerizer so I can work on others */
+
 /*
 
 =item C<Parrot_String
@@ -73,8 +75,9 @@ Return the integer keyed string value of the passed-in PMC
 
 */
 
-Parrot_String Parrot_PMC_get_string_intkey(Parrot_Interp interp,
-                                           Parrot_PMC pmc, Parrot_Int key) {
+PARROT_API Parrot_String
+Parrot_PMC_get_string_intkey(Parrot_Interp interp,
+                             Parrot_PMC pmc, Parrot_Int key) {
     Parrot_String retval;
     PARROT_CALLIN_START(interp);
     retval = VTABLE_get_string_keyed_int(interp, pmc, key);
@@ -95,8 +98,9 @@ Return the keyed, signed integer value of the value in the PMC.
 
 */
 
-void *Parrot_PMC_get_pointer_intkey(Parrot_Interp interp, Parrot_PMC pmc,
-                                    Parrot_Int key) {
+PARROT_API void *
+Parrot_PMC_get_pointer_intkey(Parrot_Interp interp, Parrot_PMC pmc,
+                              Parrot_Int key) {
     void *retval;
     PARROT_CALLIN_START(interp);
     retval = VTABLE_get_pointer_keyed_int(interp, pmc, key);
@@ -115,7 +119,8 @@ Return the integer keyed PMC value of the passed-in PMC
 
 */
 
-Parrot_PMC Parrot_PMC_get_pmc_intkey(Parrot_Interp interp, Parrot_PMC pmc,
+PARROT_API Parrot_PMC
+Parrot_PMC_get_pmc_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                      Parrot_Int key) {
     Parrot_PMC retval;
     PARROT_CALLIN_START(interp);
@@ -135,7 +140,8 @@ Return the signed integer value of the value in the PMC.
 
 */
 
-Parrot_Int Parrot_PMC_get_intval(Parrot_Interp interp, Parrot_PMC pmc) {
+PARROT_API Parrot_Int
+Parrot_PMC_get_intval(Parrot_Interp interp, Parrot_PMC pmc) {
     Parrot_Int retval;
     PARROT_CALLIN_START(interp);
     retval = VTABLE_get_integer(interp, pmc);
@@ -155,7 +161,8 @@ Return the keyed, signed integer value of the value in the PMC.
 
 */
 
-Parrot_Int Parrot_PMC_get_intval_intkey(Parrot_Interp interp, Parrot_PMC pmc,
+PARROT_API Parrot_Int
+Parrot_PMC_get_intval_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                         Parrot_Int key) {
     Parrot_Int retval;
     PARROT_CALLIN_START(interp);
@@ -176,7 +183,8 @@ Return the keyed, signed integer value of the value in the PMC.
 
 */
 
-Parrot_Int Parrot_PMC_get_intval_pmckey(Parrot_Interp interp, Parrot_PMC pmc,
+PARROT_API Parrot_Int
+Parrot_PMC_get_intval_pmckey(Parrot_Interp interp, Parrot_PMC pmc,
                                         Parrot_PMC key) {
     Parrot_Int retval;
     PARROT_CALLIN_START(interp);
@@ -196,7 +204,8 @@ Return the floating-point value of the PMC.
 
 */
 
-Parrot_Float Parrot_PMC_get_numval(Parrot_Interp interp, Parrot_PMC pmc) {
+PARROT_API Parrot_Float
+Parrot_PMC_get_numval(Parrot_Interp interp, Parrot_PMC pmc) {
     Parrot_Float retval;
     PARROT_CALLIN_START(interp);
     retval =  VTABLE_get_number(interp, pmc);
@@ -216,7 +225,8 @@ Return the keyed, signed integer value of the value in the PMC.
 
 */
 
-Parrot_Float Parrot_PMC_get_numval_intkey(Parrot_Interp interp, Parrot_PMC pmc,
+PARROT_API Parrot_Float
+Parrot_PMC_get_numval_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                           Parrot_Int key) {
     Parrot_Float retval;
     PARROT_CALLIN_START(interp);
@@ -239,7 +249,7 @@ Note that you must free this string with C<string_cstring_free()>!
 
 */
 
-char *
+PARROT_API char *
 Parrot_PMC_get_cstring_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                     Parrot_Int key) {
     STRING *intermediate;
@@ -265,7 +275,7 @@ Note that you must free this string with C<string_cstring_free()>!
 
 */
 
-char *
+PARROT_API char *
 Parrot_PMC_get_cstring(Parrot_Interp interp, Parrot_PMC pmc) {
     STRING *intermediate;
     char   *retval;
@@ -295,7 +305,7 @@ Note that you must free the string with C<string_cstring_free()>.
 
 */
 
-char *
+PARROT_API char *
 Parrot_PMC_get_cstringn(Parrot_Interp interp, Parrot_PMC pmc,
                               Parrot_Int *length) {
     char *retval;
@@ -325,7 +335,7 @@ Note that you must free this string with C<string_cstring_free()>.
 
 */
 
-char *
+PARROT_API char *
 Parrot_PMC_get_cstringn_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                      Parrot_Int *length, Parrot_Int key) {
     char *retval;
@@ -351,7 +361,7 @@ Assign the passed-in Parrot string to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_string(Parrot_Interp interp, Parrot_PMC pmc,
                       Parrot_String value) {
     PARROT_CALLIN_START(interp);
@@ -371,7 +381,7 @@ Assign the passed-in Parrot string to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_string_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                   Parrot_Int key, Parrot_String value)
 {
@@ -392,7 +402,7 @@ Assign the passed-in pmc to the passed-in slot of the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_pmc_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                Parrot_Int key, Parrot_PMC value) {
     PARROT_CALLIN_START(interp);
@@ -412,7 +422,7 @@ Assign the passed-in pmc to the passed-in slot of the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_pmc_pmckey(Parrot_Interp interp, Parrot_PMC pmc,
                                Parrot_PMC key, Parrot_PMC value) {
     PARROT_CALLIN_START(interp);
@@ -432,7 +442,7 @@ Assign the passed-in pointer to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_pointer_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                    Parrot_Int key, void *value) {
     PARROT_CALLIN_START(interp);
@@ -451,7 +461,7 @@ Assign the passed-in Parrot integer to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_intval(Parrot_Interp interp, Parrot_PMC pmc, Parrot_Int value) {
     PARROT_CALLIN_START(interp);
     VTABLE_set_integer_native(interp, pmc, value);
@@ -470,7 +480,7 @@ Assign the passed-in Parrot integer to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_intval_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                   Parrot_Int key, Parrot_Int value) {
     PARROT_CALLIN_START(interp);
@@ -489,7 +499,7 @@ Assign the passed-in Parrot number to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_numval(Parrot_Interp interp, Parrot_PMC pmc, Parrot_Float value){
     PARROT_CALLIN_START(interp);
     VTABLE_set_number_native(interp, pmc, value);
@@ -508,7 +518,7 @@ Assign the passed-in Parrot number to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_numval_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                   Parrot_Int key, Parrot_Float value) {
     PARROT_CALLIN_START(interp);
@@ -527,7 +537,7 @@ Assign the passed-in null-terminated C string to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_cstring(Parrot_Interp interp, Parrot_PMC pmc, const char *value){
     PARROT_CALLIN_START(interp);
     VTABLE_set_string_native(interp, pmc,
@@ -547,7 +557,7 @@ Assign the passed-in null-terminated C string to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_cstring_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                    Parrot_Int key, const char *value) {
     PARROT_CALLIN_START(interp);
@@ -568,7 +578,7 @@ Assign the passed-in length-noted string to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_cstringn(Parrot_Interp interp, Parrot_PMC pmc,
                         const char *value, Parrot_Int length) {
     PARROT_CALLIN_START(interp);
@@ -589,7 +599,7 @@ Push the passed-in Parrot integer onto the passed in PMC
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_push_intval(Parrot_Interp interp, Parrot_PMC pmc,
                        Parrot_Int value) {
     PARROT_CALLIN_START(interp);
@@ -609,7 +619,7 @@ Push the passed-in Parrot number onto the passed in PMC
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_push_numval(Parrot_Interp interp, Parrot_PMC pmc,
                        Parrot_Float value) {
     PARROT_CALLIN_START(interp);
@@ -629,7 +639,7 @@ Deletes the value associated with the passed-in PMC from the PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_delete_pmckey(Parrot_Interp interp, Parrot_PMC pmc,
                               Parrot_PMC key) {
     PARROT_CALLIN_START(interp);
@@ -650,7 +660,7 @@ Assign the passed-in length-noted string to the passed-in PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_cstringn_intkey(Parrot_Interp interp, Parrot_PMC pmc,
                                Parrot_Int key,
                                const char *value, Parrot_Int length) {
@@ -670,7 +680,8 @@ Create and return a new PMC.
 
 */
 
-Parrot_PMC Parrot_PMC_new(Parrot_Interp interp, Parrot_Int type) {
+PARROT_API Parrot_PMC
+Parrot_PMC_new(Parrot_Interp interp, Parrot_Int type) {
     Parrot_PMC newpmc;
     PARROT_CALLIN_START(interp);
     newpmc = pmc_new_noinit(interp, type);
@@ -689,7 +700,8 @@ Returns the internal identifier that represents the named class.
 
 */
 
-Parrot_Int Parrot_PMC_typenum(Parrot_Interp interp, const char *_class) {
+PARROT_API Parrot_Int
+Parrot_PMC_typenum(Parrot_Interp interp, const char *_class) {
     Parrot_Int retval;
     PARROT_CALLIN_START(interp);
     retval = pmc_type(interp, string_from_cstring(interp, _class, 0));
@@ -707,7 +719,7 @@ Returns the special C<NULL> PMC.
 
 */
 
-Parrot_PMC
+PARROT_API Parrot_PMC
 Parrot_PMC_null(void) {
     return PMCNULL;
 }
@@ -722,7 +734,7 @@ Deallocate a C string that the interpreter has handed to you.
 
 */
 
-void
+PARROT_API void
 Parrot_free_cstring(char *string) {
     string_cstring_free(string);
 }
@@ -760,7 +772,7 @@ Like above, with Parrot_Int or Parrot_Float return result.
 
 */
 
-void*
+PARROT_API void*
 Parrot_call_sub(Parrot_Interp interp, Parrot_PMC sub,
                  const char *signature, ...)
 {
@@ -779,7 +791,7 @@ Parrot_call_sub(Parrot_Interp interp, Parrot_PMC sub,
     return result;
 }
 
-Parrot_Int
+PARROT_API Parrot_Int
 Parrot_call_sub_ret_int(Parrot_Interp interp, Parrot_PMC sub,
                  const char *signature, ...)
 {
@@ -798,7 +810,7 @@ Parrot_call_sub_ret_int(Parrot_Interp interp, Parrot_PMC sub,
     return result;
 }
 
-Parrot_Float
+PARROT_API Parrot_Float
 Parrot_call_sub_ret_float(Parrot_Interp interp, Parrot_PMC sub,
                  const char *signature, ...)
 {
@@ -836,7 +848,7 @@ Call a parrot method for the given object.
 
 */
 
-void *
+PARROT_API void *
 Parrot_call_method(Parrot_Interp interp, Parrot_PMC sub, Parrot_PMC obj,
                         Parrot_String method, const char *signature, ...)
 {
@@ -852,7 +864,7 @@ Parrot_call_method(Parrot_Interp interp, Parrot_PMC sub, Parrot_PMC obj,
     return result;
 }
 
-Parrot_Int
+PARROT_API Parrot_Int
 Parrot_call_method_ret_int(Parrot_Interp interp, Parrot_PMC sub,
         Parrot_PMC obj, Parrot_String method, const char *signature, ...)
 {
@@ -868,7 +880,7 @@ Parrot_call_method_ret_int(Parrot_Interp interp, Parrot_PMC sub,
     return result;
 }
 
-Parrot_Float
+PARROT_API Parrot_Float
 Parrot_call_method_ret_float(Parrot_Interp interp, Parrot_PMC sub,
         Parrot_PMC obj, Parrot_String method, const char *signature, ...)
 {
@@ -895,7 +907,7 @@ Return the value of an integer register.
 
 */
 
-Parrot_Int
+PARROT_API Parrot_Int
 Parrot_get_intreg(Parrot_Interp interp, Parrot_Int regnum)
 {
     return REG_INT(regnum);
@@ -912,7 +924,7 @@ Return the value of a numeric register.
 
 */
 
-Parrot_Float
+PARROT_API Parrot_Float
 Parrot_get_numreg(Parrot_Interp interp, Parrot_Int regnum)
 {
     return REG_NUM(regnum);
@@ -929,7 +941,7 @@ Return the value of a string register.
 
 */
 
-Parrot_String
+PARROT_API Parrot_String
 Parrot_get_strreg(Parrot_Interp interp, Parrot_Int regnum)
 {
     return REG_STR(regnum);
@@ -946,7 +958,7 @@ Return the value of a PMC register.
 
 */
 
-Parrot_PMC
+PARROT_API Parrot_PMC
 Parrot_get_pmcreg(Parrot_Interp interp, Parrot_Int regnum)
 {
     return REG_PMC(regnum);
@@ -964,7 +976,7 @@ Set the value of an I register.
 
 */
 
-void
+PARROT_API void
 Parrot_set_intreg(Parrot_Interp interp, Parrot_Int regnum,
                   Parrot_Int value)
 {
@@ -983,7 +995,7 @@ Set the value of an N register.
 
 */
 
-void
+PARROT_API void
 Parrot_set_numreg(Parrot_Interp interp, Parrot_Int regnum,
                   Parrot_Float value)
 {
@@ -1002,7 +1014,7 @@ Set the value of an S register.
 
 */
 
-void
+PARROT_API void
 Parrot_set_strreg(Parrot_Interp interp, Parrot_Int regnum,
                   Parrot_String value)
 {
@@ -1021,7 +1033,7 @@ Set the value of a P register.
 
 */
 
-void
+PARROT_API void
 Parrot_set_pmcreg(Parrot_Interp interp, Parrot_Int regnum,
                   Parrot_PMC value)
 {
@@ -1047,7 +1059,7 @@ A copy of the buffer is made.
 
 */
 
-Parrot_String
+PARROT_API Parrot_String
 Parrot_new_string(Parrot_Interp interp,
                                 char *buffer, int length,
                                 const char * const encoding_name,
@@ -1071,7 +1083,8 @@ Find the magic token for an encoding, by name.
 
 */
 /*
-Parrot_Const_Encoding Parrot_find_encoding(Parrot_Interp interp,
+PARROT_API Parrot_Const_Encoding
+Parrot_find_encoding(Parrot_Interp interp,
                                            char *encoding_name) {
     return Parrot_encoding_lookup(encoding_name);
 }
@@ -1087,7 +1100,7 @@ Find the magic language token for a language, by language name.
 
 */
 
-Parrot_Language
+PARROT_API Parrot_Language
 Parrot_find_language(Parrot_Interp interp, char *language)
 {
     return 0;
@@ -1106,7 +1119,7 @@ runs.
 
 */
 
-void
+PARROT_API void
 Parrot_register_pmc(Parrot_Interp interp, Parrot_PMC pmc)
 {
     PARROT_CALLIN_START(interp);
@@ -1132,7 +1145,7 @@ See also: F<src/pmc/addrregistry.pmc>.
 
 */
 
-void
+PARROT_API void
 Parrot_unregister_pmc(Parrot_Interp interp, Parrot_PMC pmc)
 {
     PARROT_CALLIN_START(interp);
@@ -1140,7 +1153,7 @@ Parrot_unregister_pmc(Parrot_Interp interp, Parrot_PMC pmc)
     PARROT_CALLIN_END(interp);
 }
 
-Parrot_PMC
+PARROT_API Parrot_PMC
 Parrot_get_dod_registry(Parrot_Interp interp)
 {
     PMC *registry = interp->DOD_registry;
@@ -1165,7 +1178,7 @@ Replaces the vtable of the PMC.
 
 */
 
-void
+PARROT_API void
 Parrot_PMC_set_vtable(Parrot_Interp interp, Parrot_PMC pmc,
                       Parrot_VTABLE vtable)
 {
@@ -1183,7 +1196,7 @@ Returns the vtable corresponding to the given PMC ID.
 
 */
 
-Parrot_VTABLE
+PARROT_API Parrot_VTABLE
 Parrot_get_vtable(Parrot_Interp interp, Parrot_Int id)
 {
     return interp->vtables[id];

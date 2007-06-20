@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2006, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/OpTrans/C.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: C.pm 18744 2007-06-02 01:10:38Z chromatic $
 
 =head1 NAME
 
@@ -52,7 +52,7 @@ Returns the C C<#define> macros for register access etc.
 sub defines {
     return <<END;
 #undef CONST
-#define REL_PC     ((size_t)(cur_opcode - interp->code->base.data))
+#define REL_PC     ((size_t)(cur_opcode - (opcode_t *)interp->code->base.data))
 #define CUR_OPCODE cur_opcode
 #define IREG(i) REG_INT(cur_opcode[i])
 #define NREG(i) REG_NUM(cur_opcode[i])

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/config/auto/memalign.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: memalign.pm 16144 2006-12-17 18:42:49Z paultcochrane $
 
 =head1 NAME
 

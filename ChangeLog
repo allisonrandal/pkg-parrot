@@ -1,4 +1,8 @@
-#1 $Id: /parrotcode/trunk/ChangeLog 3510 2007-05-16T02:47:23.785670Z chromatic  $
+#1 $Id: ChangeLog 19137 2007-06-19 18:34:09Z allison $
+
+2007.06.19    allison
+	* Released 0.4.13
+	See NEWS for more.
 
 2007.05.15    chromatic
 	* Released 0.4.12
@@ -3709,9 +3713,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: /parrotcode/trunk/ChangeLog 3510 2007-05-16T02:47:23.785670Z chromatic  $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 19137 2007-06-19 18:34:09Z allison $
 	into generated files
-	   but the $Id: /parrotcode/trunk/ChangeLog 3510 2007-05-16T02:47:23.785670Z chromatic  $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 19137 2007-06-19 18:34:09Z allison $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

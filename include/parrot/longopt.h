@@ -1,7 +1,7 @@
 /* longopt.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/longopt.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: longopt.h 19064 2007-06-17 15:23:33Z petdance $
  *  Overview:
  *     Command line option parsing (for pre-initialized code)
  *  Data Structure and Algorithms:
@@ -44,6 +44,19 @@ struct longopt_opt_info {
 
 #define LONGOPT_OPT_INFO_INIT { 1, 0, NULL, NULL, NULL }
 
+/* HEADERIZER BEGIN: src/longopt.c */
+
+PARROT_API int longopt_get( Interp *interp /*NN*/,
+    int argc,
+    char* argv[] /*NN*/,
+    const struct longopt_opt_decl options[] /*NN*/,
+    struct longopt_opt_info* info_buf /*NN*/ )
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        __attribute__nonnull__(5);
+
+/* HEADERIZER END: src/longopt.c */
 PARROT_API int longopt_get(Parrot_Interp, int argc, char* argv[],
                 const struct longopt_opt_decl options[],
                 struct longopt_opt_info* info_buf);

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/exceptions.c 3477 2007-05-13T20:42:55.058233Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: exceptions.c 18908 2007-06-10 14:00:15Z bernhard $
 
 =head1 NAME
 
@@ -24,21 +24,18 @@ Define the internal interpreter exceptions.
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
 #include "parrot/exceptions.h"
 
+/* HEADER: include/parrot/exceptions.h */
+
 #include <stdarg.h>
 
 /*
 
-=item C<void
-internal_exception(int exitcode, const char *format, ...)>
+FUNCDOC: internal_exception
 
 Signal a fatal exception.  This involves printing an error message to stderr,
 and calling C<Parrot_exit> to invoke exit handlers and exit the process with the
@@ -47,12 +44,12 @@ bytecode to intercept a fatal error (cf. C<real_exception>).  Furthermore, no
 stack unwinding is done, so the exit handlers run in the current dynamic
 environment.
 
-=cut
-
 */
 
+PARROT_API
 void
-internal_exception(int exitcode, const char *format, ...)
+internal_exception(int exitcode, const char *format /*NN*/, ...)
+    /* NORETURN */
 {
     va_list arglist;
     va_start(arglist, format);
@@ -80,19 +77,16 @@ internal_exception(int exitcode, const char *format, ...)
 
 /*
 
-=item C<void
-do_panic(Interp *interp, const char *message,
-         const char *file, int line)>
+FUNCDOC: do_panic
 
 Panic handler.
-
-=cut
 
 */
 
 void
-do_panic(Interp *interp, const char *message,
-         const char *file, int line)
+do_panic(Interp *interp /*NULLOK*/, const char *message /*NULLOK*/,
+         const char *file /*NULLOK*/, int line)
+    /* NORETURN */
 {
     /* Note: we can't format any floats in here--Parrot_sprintf
     ** may panic because of floats.
@@ -132,28 +126,27 @@ describe them as well.\n\n");
 
 /*
 
-=item C<void push_exception(Interp * interp, PMC *handler)>
+FUNCDOC: push_exception
 
 Add the exception handler on the stack.
 
-=item C<void Parrot_push_action(Interp * interp, PMC *sub)>
+FUNCDOC: Parrot_push_action
 
 Push an action handler onto the dynamic environment.
 
-=item C<void Parrot_push_mark(Interp * interp, INTVAL mark)>
+FUNCDOC: Parrot_push_mark
 
 Push a cleanup mark onto the dynamic environment.
 
-=item C<void Parrot_pop_mark(Interp * interp, INTVAL mark)>
+FUNCDOC: Parrot_pop_mark
 
 Pop items off the dynamic environment up to the mark.
 
-=cut
-
 */
 
+PARROT_API
 void
-push_exception(Interp *interp, PMC *handler)
+push_exception(Interp *interp /*NN*/, PMC *handler /*NN*/)
 {
     if (handler->vtable->base_type != enum_class_Exception_Handler)
         PANIC("Tried to set_eh a non Exception_Handler");
@@ -172,8 +165,9 @@ run_cleanup_action(Interp *interp, Stack_Entry_t *e)
     Parrot_runops_fromc_args(interp, sub, "vI", 0);
 }
 
+PARROT_API
 void
-Parrot_push_action(Interp *interp, PMC *sub)
+Parrot_push_action(Interp *interp /*NN*/, PMC *sub)
 {
     if (!VTABLE_isa(interp, sub,
                 const_string(interp, "Sub"))) {
@@ -183,22 +177,24 @@ Parrot_push_action(Interp *interp, PMC *sub)
                STACK_ENTRY_ACTION, run_cleanup_action);
 }
 
+PARROT_API
 void
-Parrot_push_mark(Interp *interp, INTVAL mark)
+Parrot_push_mark(Interp *interp /*NN*/, INTVAL mark)
 {
     stack_push(interp, &interp->dynamic_env, &mark,
                STACK_ENTRY_MARK, STACK_CLEANUP_NULL);
 }
 
+PARROT_API
 void
-Parrot_pop_mark(Interp *interp, INTVAL mark)
+Parrot_pop_mark(Interp *interp /*NN*/, INTVAL mark)
 {
     do {
         const Stack_Entry_t * const e
             = stack_entry(interp, interp->dynamic_env, 0);
         if (!e)
             real_exception(interp, NULL, 1,
-                           "Mark %d not found.", mark);
+                           "Mark %ld not found.", (long)mark);
         (void)stack_pop(interp, &interp->dynamic_env,
                         NULL, e->entry_type);
         if (e->entry_type == STACK_ENTRY_MARK) {
@@ -210,20 +206,15 @@ Parrot_pop_mark(Interp *interp, INTVAL mark)
 
 /*
 
-=item C<static PMC *
-find_exception_handler(Interp * interp, PMC *exception)>
+FUNCDOC: find_exception_handler
 
 Find the exception handler for C<exception>.
-
-=cut
 
 */
 
 static PMC *
-find_exception_handler(Interp *interp, PMC *exception)
+find_exception_handler(Interp *interp /*NN*/, PMC *exception)
 {
-    PMC *handler;
-    STRING *message;
     char *m;
     int exit_status, print_location;
     int depth = 0;
@@ -232,12 +223,13 @@ find_exception_handler(Interp *interp, PMC *exception)
     /* for now, we don't check the exception class and we don't
      * look for matching handlers.  [this is being redesigned anyway.]
      */
-    message = VTABLE_get_string_keyed_int(interp, exception, 0);
+    STRING * const message = VTABLE_get_string_keyed_int(interp, exception, 0);
+
     /* [TODO: replace quadratic search with something linear, hopefully without
        trashing abstraction layers.  -- rgr, 17-Sep-06.] */
     while ((e = stack_entry(interp, interp->dynamic_env, depth)) != NULL) {
         if (e->entry_type == STACK_ENTRY_PMC) {
-            handler = UVal_pmc(e->entry);
+            PMC * const handler = UVal_pmc(e->entry);
             if (handler && handler->vtable->base_type ==
                     enum_class_Exception_Handler) {
                 return handler;
@@ -260,6 +252,7 @@ find_exception_handler(Interp *interp, PMC *exception)
         fputs(m, stderr);
         if (m[strlen(m)-1] != '\n')
             fprintf(stderr, "%c", '\n');
+        string_cstring_free(m);
     }
     else {
         const INTVAL severity =
@@ -272,8 +265,6 @@ find_exception_handler(Interp *interp, PMC *exception)
         else
             fprintf(stderr, "No exception handler and no message\n");
     }
-    if (m)
-        string_cstring_free(m);
     /* caution against output swap (with PDB_backtrace) */
     fflush(stderr);
     if (print_location)
@@ -301,17 +292,15 @@ find_exception_handler(Interp *interp, PMC *exception)
 
 /*
 
-=item C<void
-pop_exception(Interp * interp)>
+FUNCDOC: pop_exception
 
 Pops the topmost exception handler off the stack.
 
-=cut
-
 */
 
+PARROT_API
 void
-pop_exception(Interp *interp)
+pop_exception(Interp *interp /*NN*/)
 {
     Stack_entry_type  type;
     Parrot_cont      *cc;
@@ -336,19 +325,17 @@ pop_exception(Interp *interp)
 
 /*
 
-=item C<PMC*
-new_c_exception_handler(Interp *interp, Parrot_exception *jb)>
+FUNCDOC: new_c_exception_handler
 
 Generate an exception handler, that catches PASM level exceptions inside
 a C function. This could be a separate class too, for now just a private
 flag bit is set.
 
-=cut
-
 */
 
+PARROT_API
 PMC*
-new_c_exception_handler(Interp *interp, Parrot_exception *jb)
+new_c_exception_handler(Interp *interp /*NN*/, Parrot_exception *jb)
 {
     PMC * const handler = pmc_new(interp, enum_class_Exception_Handler);
     /*
@@ -361,32 +348,28 @@ new_c_exception_handler(Interp *interp, Parrot_exception *jb)
 
 /*
 
-=item C<void
-push_new_c_exception_handler(Interp *interp, Parrot_exception *jb)>
+FUNCDOC: push_new_c_exception_handler
 
 Pushes an new C exception handler onto the stack.
 
-=cut
-
 */
 
+PARROT_API
 void
-push_new_c_exception_handler(Interp *interp, Parrot_exception *jb)
+push_new_c_exception_handler(Interp *interp /*NN*/, Parrot_exception *jb)
 {
     push_exception(interp, new_c_exception_handler(interp, jb));
 }
 
 /*
 
-=item C<opcode_t *
-throw_exception(Interp *interp, PMC *exception, void *dest)>
+FUNCDOC: throw_exception
 
 Throw the exception.
 
-=cut
-
 */
 
+PARROT_API
 opcode_t *
 throw_exception(Interp *interp, PMC *exception, void *dest)
 {
@@ -400,7 +383,7 @@ throw_exception(Interp *interp, PMC *exception, void *dest)
     /* address = VTABLE_get_pointer(interp, handler); */
     if (PObj_get_FLAGS(handler) & SUB_FLAG_C_HANDLER) {
         /* its a C exception handler */
-        Parrot_exception *jb = (Parrot_exception *) address;
+        Parrot_exception * const jb = (Parrot_exception *) address;
         longjmp(jb->destination, 1);
     }
     /* return the address of the handler */
@@ -409,17 +392,15 @@ throw_exception(Interp *interp, PMC *exception, void *dest)
 
 /*
 
-=item C<opcode_t *
-rethrow_exception(Interp *interp, PMC *exception)>
+FUNCDOC: rethrow_exception
 
 Rethrow the exception.
 
-=cut
-
 */
 
+PARROT_API
 opcode_t *
-rethrow_exception(Interp *interp, PMC *exception)
+rethrow_exception(Interp *interp /*NN*/, PMC *exception /*NN*/)
 {
     PMC *handler;
     opcode_t *address;
@@ -434,18 +415,16 @@ rethrow_exception(Interp *interp, PMC *exception)
 
 /*
 
-=item C<void
-rethrow_c_exception(Interp *interp)>
+FUNCDOC: rethrow_c_exception
 
 Return back to runloop, assumes exception is still in C<TODO> and
 that this is called from within a handler setup with C<new_c_exception>.
 
-=cut
-
 */
 
 void
-rethrow_c_exception(Interp *interp)
+rethrow_c_exception(Interp *interp /*NN*/)
+    /* NORETURN */
 {
     Parrot_exception * const the_exception = interp->exceptions;
 
@@ -468,18 +447,16 @@ rethrow_c_exception(Interp *interp)
 
 /*
 
-=item C<static size_t
-dest2offset(Interp *interp, const opcode_t *dest)>
+FUNCDOC: dest2offset
 
 Translate an absolute bytecode location to an offset used for resuming
 after an exception had occurred.
 
-=cut
-
 */
 
 static size_t
-dest2offset(Interp *interp, const opcode_t *dest)
+dest2offset(Interp *interp /*NN*/, const opcode_t *dest /*NN*/)
+    /* WARN_UNUSED */
 {
     size_t offset;
     /* translate an absolute location in byte_code to an offset
@@ -499,17 +476,14 @@ dest2offset(Interp *interp, const opcode_t *dest)
 
 /*
 
-=item C<static opcode_t *
-create_exception(Interp *interp)>
+FUNCDOC: create_exception
 
 Create an exception.
-
-=cut
 
 */
 
 static opcode_t *
-create_exception(Interp *interp)
+create_exception(Interp *interp /*NN*/)
 {
     PMC *exception;     /* exception object */
     opcode_t *dest;     /* absolute address of handler */
@@ -546,16 +520,15 @@ create_exception(Interp *interp)
 
 /*
 
-=item C<size_t handle_exception(Interp *interp)>
+FUNCDOC: handle_exception
 
 Handle an exception.
 
-=cut
-
 */
 
+PARROT_API
 size_t
-handle_exception(Interp *interp)
+handle_exception(Interp *interp /*NN*/)
 {
     /* absolute address of handler */
     const opcode_t * const dest = create_exception(interp);
@@ -565,18 +538,16 @@ handle_exception(Interp *interp)
 
 /*
 
-=item C<void
-new_internal_exception(Interp *interp)>
+FUNCDOC: new_internal_exception
 
 Create a new internal exception buffer, either by allocating it or by
 getting one from the free list.
 
-=cut
-
 */
 
+PARROT_API
 void
-new_internal_exception(Interp *interp)
+new_internal_exception(Interp *interp /*NN*/)
 {
     Parrot_exception *the_exception;
 
@@ -594,15 +565,13 @@ new_internal_exception(Interp *interp)
 
 /*
 
-=item C<void
-free_internal_exception(Interp *interp)>
+FUNCDOC: free_internal_exception
 
 Place internal exception buffer back on the free list.
 
-=cut
-
 */
 
+PARROT_API
 void
 free_internal_exception(Interp *interp)
 {
@@ -613,20 +582,17 @@ free_internal_exception(Interp *interp)
 }
 
 void
-destroy_exception_list(Interp *interp)
+destroy_exception_list(Interp *interp /*NN*/)
 {
     really_destroy_exception_list(interp->exceptions);
     really_destroy_exception_list(interp->exc_free_list);
 }
 
 void
-really_destroy_exception_list(Parrot_exception *e)
+really_destroy_exception_list(Parrot_exception *e /*NULLOK*/)
 {
-    Parrot_exception *prev;
-
-    while (e != NULL)
-    {
-        prev = e->prev;
+    while (e != NULL) {
+        Parrot_exception * const prev = e->prev;
         mem_sys_free(e);
         e    = prev;
     }
@@ -634,19 +600,18 @@ really_destroy_exception_list(Parrot_exception *e)
 
 /*
 
-=item C<void
-do_exception(Interp *interp,
-        exception_severity severity, long error)>
+FUNCDOC: do_exception
 
 Called from interrupt code. Does a C<longjmp> in front of the runloop,
 which calls C<handle_exception()>, returning the handler address where
 execution then resumes.
 
-=cut
-
 */
+
+PARROT_API
 void
-do_exception(Interp *interp, INTVAL severity, long error)
+do_exception(Interp *interp /*NN*/, INTVAL severity, long error)
+    /* NORETURN */
 {
     Parrot_exception * const the_exception = interp->exceptions;
 
@@ -659,9 +624,7 @@ do_exception(Interp *interp, INTVAL severity, long error)
 
 /*
 
-=item C<void
-real_exception(Interp *interp, void *ret_addr,
-        int exitcode, const char *format, ...)>
+FUNCDOC: real_exception
 
 Throws a real exception, with an error message constructed from the format
 string and arguments.  C<ret_addr> is the address from which to resume, if some
@@ -671,13 +634,13 @@ C<exitcode> is a C<exception_type_enum> value.
 See also C<internal_exception()>, which signals fatal errors, and
 C<throw_exception>, which calls the handler.
 
-=cut
-
 */
 
+PARROT_API
 void
-real_exception(Interp *interp, void *ret_addr,
-        int exitcode,  const char *format, ...)
+real_exception(Interp *interp /*NN*/, void *ret_addr,
+        int exitcode, const char *format /*NN*/, ...)
+    /* NORETURN */
 {
     STRING *msg;
     Parrot_exception * const the_exception = interp->exceptions;
@@ -686,10 +649,10 @@ real_exception(Interp *interp, void *ret_addr,
      * if profiling remember end time of lastop and
      * generate entry for exception
      */
-    if (interp->profile &&
-            Interp_flags_TEST(interp, PARROT_PROFILE_FLAG)) {
-        RunProfile * const profile = interp->profile;
+    RunProfile * const profile = interp->profile;
+    if (profile && Interp_flags_TEST(interp, PARROT_PROFILE_FLAG)) {
         const FLOATVAL now = Parrot_floatval_time();
+
         profile->data[profile->cur_op].time += now - profile->starttime;
         profile->cur_op = PARROT_PROF_EXCEPTION;
         profile->starttime = now;
@@ -738,14 +701,14 @@ real_exception(Interp *interp, void *ret_addr,
 
 /*
 
-=item C<void Parrot_init_exceptions(Interp *interp)>
+FUNCDOC: Parrot_init_exceptions
 
 Create exception objects.
 
 */
 
 void
-Parrot_init_exceptions(Interp *interp) {
+Parrot_init_exceptions(Interp *interp /*NN*/) {
     int i;
 
     interp->exception_list = (PMC **)mem_sys_allocate(
@@ -759,13 +722,9 @@ Parrot_init_exceptions(Interp *interp) {
 
 /*
 
-=back
-
 =head1 SEE ALSO
 
 F<include/parrot/exceptions.h>.
-
-=cut
 
 */
 

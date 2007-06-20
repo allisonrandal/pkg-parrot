@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2005, The Perl Foundation.
-# $Id: /parrotcode/local/runtime/parrot/library/pcre.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: pcre.pir 17613 2007-03-18 10:58:12Z paultcochrane $
 
 =head1 TITLE
 

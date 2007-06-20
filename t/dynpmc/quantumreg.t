@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/dynpmc/quantumreg.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: quantumreg.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

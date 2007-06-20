@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007, The Perl Foundation
- * $Id: /parrotcode/trunk/include/parrot/imcc.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ * $Id: imcc.h 18945 2007-06-12 14:08:35Z fperrad $
  */
 
 #ifndef PARROT_IMCC_H_GUARD

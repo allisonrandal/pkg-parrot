@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/oo/mro-c3.t 3220 2007-04-17T06:27:57.884261Z chromatic  $
+# $Id: mro-c3.t 18254 2007-04-17 06:27:57Z chromatic $
 
 use strict;
 use warnings;

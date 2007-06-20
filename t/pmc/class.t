@@ -1,12 +1,12 @@
 #!perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/class.t 3239 2007-04-18T02:24:20.291709Z chromatic  $
+# $Id: class.t 18582 2007-05-18 01:59:37Z chromatic $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 15;
+use Parrot::Test tests => 16;
 
 =head1 NAME
 
@@ -551,6 +551,52 @@ Does Red
 Does Green
 Does Blue
 Does Class
+OUT
+
+# L<PDD15/Class PMC API/=item does>
+pir_output_is( <<'CODE', <<'OUT', 'more does() - RT #42974' );
+.const int TESTS = 2
+
+.sub 'main' :main
+    load_bytecode 'Test/More.pir'
+    .local pmc exp, test_ns
+    test_ns = get_namespace ['Test::More']
+    exp     = new 'Exporter'
+    exp.'source'(test_ns)
+    exp.'import'('plan ok is diag isa_ok' :named('globals'))
+
+    plan(TESTS)
+
+    .local pmc attrs
+    attrs = new 'Hash'
+
+    .local pmc red, green, blue
+    attrs['name'] = 'Red'
+    red           = new 'Role', attrs
+
+    attrs['name'] = 'Green'
+    green         = new 'Role', attrs
+
+    attrs['name'] = 'Blue'
+    blue          = new 'Role', attrs
+
+    green.'add_role'( blue )
+
+    .local pmc color
+    color = new 'Class'
+
+    $S0 = 'Red'
+    $I0 = color.'does'($S0)
+    is($I0, 0, 'does not Red')
+
+    color.'add_role'( red )
+    $I0 = color.'does'($S0)
+    is($I0, 1, 'does Red')
+.end
+CODE
+1..2
+ok 1 - does not Red
+ok 2 - does Red
 OUT
 
 # Local Variables:

@@ -59,7 +59,7 @@ open $OUT, '>', 'src/extend_vtable.c' or die $!;
 print $OUT $header, <<'EOF';
 
 /*
-Copyright (C) 2001-2003, 2005, The Perl Foundation.
+Copyright (C) 2001-2007, The Perl Foundation.
 
 =head1 NAME
 
@@ -119,6 +119,8 @@ can.
 
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
+
+/* HEADER: none */ /* XXX Ideally the headerizer can run on this file as well. */
 
 EOF
 

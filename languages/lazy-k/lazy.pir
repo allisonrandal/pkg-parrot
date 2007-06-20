@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/lazy-k/lazy.pir 3059 2007-04-09T22:00:23.617831Z paultcochrane  $
+# $Id: lazy.pir 18082 2007-04-09 22:00:23Z paultcochrane $
 
 =head1 DESCRIPTION
 

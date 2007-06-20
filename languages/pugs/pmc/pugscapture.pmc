@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006, The Perl Foundation.
-$Id: /parrotcode/trunk/languages/pugs/pmc/pugscapture.pmc 2686 2007-03-31T12:42:12.795704Z paultcochrane  $
+$Id: pugscapture.pmc 17887 2007-03-31 12:42:12Z paultcochrane $
 
 =head1 NAME
 

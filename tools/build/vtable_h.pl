@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/trunk/tools/build/vtable_h.pl 3441 2007-05-09T12:16:46.710530Z paultcochrane  $
+# $Id: vtable_h.pl 18945 2007-06-12 14:08:35Z fperrad $
 
 =head1 NAME
 

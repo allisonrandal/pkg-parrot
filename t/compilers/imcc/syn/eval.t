@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/t/compilers/imcc/syn/eval.t 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: eval.t 16244 2006-12-25 22:14:04Z paultcochrane $
 
 use strict;
 use warnings;

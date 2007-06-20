@@ -1,7 +1,7 @@
 /* TclDict.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/languages/tcl/src/pmc/tcldict.pmc 2695 2007-03-31T14:41:44.263652Z paultcochrane  $
+ *     $Id: tcldict.pmc 19012 2007-06-15 01:40:39Z chromatic $
  *  Overview:
  *     These are the vtable functions for the TclDict base class
  *  Data Structure and Algorithms:
@@ -109,7 +109,7 @@ Returns the dict as a string
 
     STRING* get_string() {
         PMC *dictToString, *namespace;
-        STRING *_tcl_namespace, *sub, *value;
+        STRING *_tcl_namespace, *sub;
 
         _tcl_namespace = string_from_const_cstring(INTERP, "_tcl", 4);
         sub            = string_from_const_cstring(INTERP, "__dictToString",14);
@@ -120,8 +120,7 @@ Returns the dict as a string
 
         CONTEXT(INTERP->ctx)->constants =
           PMC_sub(dictToString)->seg->const_table->constants;
-        value = Parrot_runops_fromc_args(INTERP, dictToString, "SP", SELF);
-        return value;
+        return (STRING *)Parrot_runops_fromc_args(INTERP, dictToString, "SP", SELF);
 
     }
 }

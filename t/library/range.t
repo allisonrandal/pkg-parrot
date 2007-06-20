@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/library/range.t 3340 2007-05-01T14:37:45.173854Z coke  $
+# $Id: range.t 18374 2007-05-01 14:37:45Z coke $
 
 =head1 NAME
 

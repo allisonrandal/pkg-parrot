@@ -1,7 +1,7 @@
 /* exit.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2007, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/exit.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: exit.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *
  *  Data Structure and Algorithms:
@@ -24,9 +24,19 @@ typedef struct _handler_node_t {
     struct _handler_node_t *next;
 } handler_node_t;
 
-PARROT_API int Parrot_on_exit(Interp *, exit_handler_f func, void *arg);
-PARROT_API void Parrot_exit(Interp *, int status)
-            __attribute__noreturn__;
+/* HEADERIZER BEGIN: src/exit.c */
+
+PARROT_API void Parrot_exit( Interp *interp /*NN*/, int status )
+        __attribute__nonnull__(1)
+        __attribute__noreturn__;
+
+PARROT_API int Parrot_on_exit( Interp *interp /*NN*/,
+    exit_handler_f function /*NN*/,
+    void *arg )
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+/* HEADERIZER END: src/exit.c */
 
 #endif /* PARROT_EXIT_H_GUARD */
 

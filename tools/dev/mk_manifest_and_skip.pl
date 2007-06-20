@@ -1,5 +1,5 @@
 #! perl
-# $Id: /parrotcode/trunk/tools/dev/mk_manifest_and_skip.pl 3123 2007-04-11T21:02:33.355713Z paultcochrane  $
+# $Id: mk_manifest_and_skip.pl 18146 2007-04-11 21:02:33Z paultcochrane $
 
 =head1 NAME
 

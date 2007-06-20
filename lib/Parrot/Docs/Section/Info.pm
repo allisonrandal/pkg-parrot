@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Docs/Section/Info.pm 3228 2007-04-17T12:35:05.039118Z coke  $
+# $Id: Info.pm 19049 2007-06-16 23:55:25Z chromatic $
 
 =head1 NAME
 
@@ -70,10 +70,10 @@ sub new {
                 'A table showing which aspects of Parrot run on various platforms.', 'PLATFORMS'
             ),
             $self->new_item( 'Contains the version number of the distribution.', 'VERSION' ),
-            $self->new_item(
+            do { -e '../DEVELOPING' ?  $self->new_item(
 'The presence of this file indicates that the distribution is a development version.',
-                'DEVELOPING'
-            ),
+                'DEVELOPING' ) : ()
+            },
             $self->new_item( 'The status of the Parrot test suite.', 't/TESTS.STATUS.pod' ),
         ),
         $self->new_group(

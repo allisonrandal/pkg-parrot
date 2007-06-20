@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/regex/t/basic/optional.t 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: optional.t 11501 2006-02-10 18:27:13Z particle $
 
 use strict;
 use FindBin;

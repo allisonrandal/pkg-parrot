@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/nci.t 3188 2007-04-15T06:11:11.723134Z chromatic  $
+# $Id: nci.t 18217 2007-04-15 06:11:11Z chromatic $
 
 use strict;
 use warnings;

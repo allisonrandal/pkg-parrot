@@ -1,7 +1,7 @@
 /* embed.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/embed.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: embed.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.

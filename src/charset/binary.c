@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004, The Perl Foundation.
-$Id: /parrotcode/trunk/src/charset/binary.c 3315 2007-04-27T20:09:28.886454Z chromatic  $
+Copyright (C) 2004-2007, The Perl Foundation.
+$Id: binary.c 18984 2007-06-13 19:13:35Z petdance $
 
 =head1 NAME
 
@@ -15,8 +15,12 @@ This file implements the charset functions for binary data
 */
 
 #include "parrot/parrot.h"
-#include "binary.h"
+
+/* In local src/charset/ directory */
 #include "ascii.h"
+#include "binary.h"
+
+/* HEADER: src/charset/binary.h */
 
 #ifdef EXCEPTION
 #  undef EXCEPTION
@@ -98,7 +102,7 @@ titlecase_first(Interp *interp, STRING *source_string)
 }
 
 static INTVAL
-compare(Interp *interp, STRING *lhs, STRING *rhs)
+compare(Interp *interp, const STRING *lhs, const STRING *rhs)
 {
   return 0;
 }
@@ -157,7 +161,7 @@ string_from_codepoint(Interp *interp, UINTVAL codepoint)
 CHARSET *
 Parrot_charset_binary_init(Interp *interp)
 {
-    CHARSET *return_set = Parrot_new_charset(interp);
+    CHARSET * const return_set = Parrot_new_charset(interp);
     static const CHARSET base_set = {
         "binary",
         ascii_get_graphemes,

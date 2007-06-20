@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Docs/File.pm 3150 2007-04-13T06:37:16.786108Z chromatic  $
+# $Id: File.pm 19065 2007-06-17 15:24:56Z paultcochrane $
 
 =head1 NAME
 
@@ -380,17 +380,17 @@ sub short_description {
                 last if $line =~ /\S/o;
             }
 
-            my @abstract = $line;
+            my @abstract_text = $line;
 
             while (@lines) {
                 $line = shift @lines;
 
                 last if $line !~ /\S/o;
 
-                push @abstract, $line;
+                push @abstract_text, $line;
             }
 
-            my $desc = join ' ', @abstract;
+            my $desc = join ' ', @abstract_text;
 
             # Joining lines may have created a bit of extra whitespace.
             $desc =~ s/\s+/ /osg;

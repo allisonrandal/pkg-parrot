@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/ook/ook.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: ook.pasm 11501 2006-02-10 18:27:13Z particle $
 
 =head1 NAME
 

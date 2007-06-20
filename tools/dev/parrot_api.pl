@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/parrot_api.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: parrot_api.pl 18810 2007-06-04 20:27:35Z paultcochrane $
 
 =head1 NAME
 
@@ -149,13 +149,13 @@ $| = 1;
 my @H = qw(include/parrot/embed.h include/parrot/extend.h);
 
 for my $h (@H) {
-    if ( open( H, '<', $h ) ) {
-        while (<H>) {
+    if ( open( my $H, '<', $h ) ) {
+        while (<$H>) {
             if (/^\w+\s+(Parrot_\w+)\(/) {
                 $ParrotAPI{$1}++;
             }
         }
-        close(H);
+        close($H);
     }
     else {
         die "$0: Header '$h': $!\n";

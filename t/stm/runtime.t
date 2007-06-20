@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/stm/runtime.t 3362 2007-05-02T16:29:23.841851Z mdiep  $
+# $Id: runtime.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

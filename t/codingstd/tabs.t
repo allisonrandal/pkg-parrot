@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/codingstd/tabs.t 3412 2007-05-08T05:59:28.833014Z paultcochrane  $
+# $Id: tabs.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

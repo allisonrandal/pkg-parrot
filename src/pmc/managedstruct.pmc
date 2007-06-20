@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/managedstruct.pmc 3178 2007-04-14T21:31:11.102782Z chromatic  $
+$Id: managedstruct.pmc 18207 2007-04-14 21:31:11Z chromatic $
 
 =head1 DESCRIPTION
 

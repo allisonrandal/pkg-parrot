@@ -433,7 +433,7 @@ __END__
 
 =head1 VERSION
 
-$Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Block.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+$Id: Block.pm 16160 2006-12-17 18:53:15Z paultcochrane $
 
 =head1 AUTHOR
 

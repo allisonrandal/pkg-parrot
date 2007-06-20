@@ -1,7 +1,7 @@
 ;
 ; sun4/core.jit
 ;
-; $Id: /parrotcode/trunk/src/jit/sun4/core.jit 470 2006-12-05T03:30:45.414067Z svm  $
+; $Id: core.jit 15414 2006-11-12 02:47:59Z chip $
 ;
 
 Parrot_end {

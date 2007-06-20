@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/init/defaults.pm 3367 2007-05-03T01:40:40.859036Z jkeenan  $
+# $Id: defaults.pm 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/24-version.t 3392 2007-05-06T18:26:50.247788Z bernhard  $
+# $Id: 24-version.t 18773 2007-06-03 03:42:47Z rgrjr $
 # 24-version.t
 
 use strict;
@@ -17,7 +17,7 @@ use_ok( 'Make_VERSION_File', qw| make_VERSION_file |);
 my $cwd = cwd();
 my $errstr;
 {
-    my $tdir = tempdir();
+    my $tdir = tempdir(CLEANUP => 1);
     ok(chdir $tdir, "Changed to temporary directory for testing");
     ok((mkdir "lib"), "Able to make directory lib");
     ok((mkdir "lib/Parrot"), "Able to make directory lib/Parrot");

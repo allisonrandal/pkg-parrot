@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/tools/dev/ops_renum.mak 675 2006-12-16T19:47:50.929005Z chromatic  $
+# $Id: ops_renum.mak 17087 2007-02-20 20:04:56Z paultcochrane $
 
 # make -f tools/dev/ops_renum.mak
 # renumbers ops/ops.num according to natural order

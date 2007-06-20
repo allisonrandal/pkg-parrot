@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /parrotcode/local/languages/lua/t/if.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
+# $Id: if.t 18165 2007-04-12 11:42:33Z fperrad $
 
 =head1 NAME
 

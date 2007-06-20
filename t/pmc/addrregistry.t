@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/addrregistry.t 3288 2007-04-24T15:10:04.271847Z coke  $
+# $Id: addrregistry.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

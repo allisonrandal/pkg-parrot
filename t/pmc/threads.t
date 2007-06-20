@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/threads.t 3509 2007-05-16T02:26:11.809697Z chromatic  $
+# $Id: threads.t 19105 2007-06-19 02:20:13Z chromatic $
 
 use strict;
 use warnings;
@@ -805,8 +805,12 @@ ok 2
 OUTPUT
 
 my @todo;
-@todo = ( todo => 'Broken with CGP' ) if $ENV{TEST_PROG_ARGS} =~ /-C/;
-@todo = ( todo => 'Broken with JIT' ) if $ENV{TEST_PROG_ARGS} =~ /-j/;
+
+if ($ENV{TEST_PROG_ARGS}) {
+    push @todo, ( todo => 'Broken with CGP' ) if $ENV{TEST_PROG_ARGS} =~ /-C/;
+    push @todo, ( todo => 'Broken with JIT' ) if $ENV{TEST_PROG_ARGS} =~ /-j/;
+    push @todo, ( todo => 'Broken with -S'  ) if $ENV{TEST_PROG_ARGS} =~ /-S/;
+}
 pir_output_unlike( <<'CODE', qr/not/, "globals + constant table subs issue", @todo );
 .namespace [ 'Foo' ]
 

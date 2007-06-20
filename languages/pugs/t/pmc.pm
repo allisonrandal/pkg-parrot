@@ -1,6 +1,6 @@
 # Pugs-specific PMC testing
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /parrotcode/local/languages/pugs/t/pmc.pm 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: pmc.pm 16755 2007-01-22 17:39:13Z paultcochrane $
 
 package t::pmc;
 use strict;

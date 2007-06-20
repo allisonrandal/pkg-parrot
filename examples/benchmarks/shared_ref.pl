@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/examples/benchmarks/shared_ref.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: shared_ref.pl 16145 2006-12-17 18:44:04Z paultcochrane $
 
 =head1 NAME
 

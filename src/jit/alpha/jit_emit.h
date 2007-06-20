@@ -3,7 +3,7 @@
  *
  * ALPHA
  *
- * $Id: /parrotcode/trunk/src/jit/alpha/jit_emit.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
+ * $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
  */
 
 /*  Register usage:

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/compilers/imcc/syn/pod.t 3261 2007-04-20T06:08:07.570283Z chromatic  $
+# $Id: pod.t 18809 2007-06-04 20:24:05Z paultcochrane $
 
 use strict;
 use warnings;
@@ -52,15 +52,15 @@ pass
 ok
 OUT
 
-open FOO, ">", "include.tempfile";
-print FOO <<'ENDF';
+open my $FOO, ">", "include.tempfile";
+print $FOO <<'ENDF';
 
 =head1 Foobar
 
 we don't cut out!!!
 
 ENDF
-close FOO;
+close $FOO;
 
 SKIP: {
     skip( "Closing out of pod from included files", 1 );

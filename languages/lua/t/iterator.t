@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/lua/t/iterator.t 1355 2007-01-16T13:39:23.661363Z chromatic  $
+# $Id: iterator.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

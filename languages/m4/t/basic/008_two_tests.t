@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/m4/t/basic/008_two_tests.t 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: 008_two_tests.t 12226 2006-04-14 15:02:50Z bernhard $
 
 use strict;
 use warnings;

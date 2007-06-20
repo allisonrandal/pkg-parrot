@@ -1,6 +1,6 @@
 # Copyright (C) 2003-2006, The Perl Foundation.
 
-# $Id: /parrotcode/trunk/t/perl/README 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: README 12838 2006-05-30 14:19:10Z coke $
 
 This directory contains test code for Perl5 modules used as helpers for Parrot.
 See also the documentation in ../../docs/tests.pod.

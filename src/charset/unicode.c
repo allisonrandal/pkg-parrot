@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2005, The Perl Foundation.
-$Id: /parrotcode/trunk/src/charset/unicode.c 3315 2007-04-27T20:09:28.886454Z chromatic  $
+Copyright (C) 2005-2007, The Perl Foundation.
+$Id: unicode.c 18984 2007-06-13 19:13:35Z petdance $
 
 =head1 NAME
 
@@ -10,14 +10,14 @@ src/charset/unicode.c
 
 This file implements the charset functions for unicode data
 
-=cut
-
 */
 
 #include "parrot/parrot.h"
 #include "unicode.h"
 #include "ascii.h"
 #include "tables.h"
+
+/* HEADER: src/charset/unicode.h */
 
 #ifdef EXCEPTION
 #  undef EXCEPTION
@@ -310,7 +310,7 @@ titlecase_first(Interp *interp, STRING *source_string)
 }
 
 static INTVAL
-compare(Interp *interp, STRING *lhs, STRING *rhs)
+compare(Interp *interp, const STRING *lhs, const STRING *rhs)
 {
     String_iter l_iter, r_iter;
     UINTVAL offs, cl, cr, min_len, l_len, r_len;
@@ -531,7 +531,7 @@ compute_hash(Interp *interp, STRING *src, size_t seed)
 CHARSET *
 Parrot_charset_unicode_init(Interp *interp)
 {
-    CHARSET *return_set = Parrot_new_charset(interp);
+    CHARSET * const return_set = Parrot_new_charset(interp);
     static const CHARSET base_set = {
         "unicode",
         get_graphemes,

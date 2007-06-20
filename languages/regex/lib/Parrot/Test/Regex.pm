@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/languages/regex/lib/Parrot/Test/Regex.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Regex.pm 17480 2007-03-14 18:41:53Z bernhard $
 
 require Parrot::Test;
 

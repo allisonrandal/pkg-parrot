@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pdd15oo/grammar.t 3455 2007-05-11T02:28:04.497730Z jkeenan  $
+# $Id: grammar.t 18502 2007-05-11 02:28:04Z jkeenan $
 
 use strict;
 use warnings;

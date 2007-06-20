@@ -1,5 +1,5 @@
-/* Copyright (C) 2001-2006, The Perl Foundation. */
-/* $Id: /parrotcode/trunk/config/gen/config_h/config_h.in 3385 2007-05-05T14:41:57.057265Z bernhard  $ */
+/* Copyright (C) 2001-2007, The Perl Foundation. */
+/* $Id: config_h.in 18813 2007-06-04 22:06:37Z chromatic $ */
 
 /* config.h
  *

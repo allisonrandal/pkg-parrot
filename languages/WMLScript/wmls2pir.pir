@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/WMLScript/wmls2pir.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: wmls2pir.pir 18801 2007-06-04 07:53:36Z fperrad $
 
 =head1 NAME
 
@@ -51,15 +51,15 @@ Francois Perrad.
     gen_pir = script.translate()
     save_pir(gen_pir, filename)
     end
-_handler:
+  _handler:
     .local pmc e
     .local string s
     .get_results (e, s)
     print s
     print "\n"
-L1:
+  L1:
     end
-USAGE:
+  USAGE:
     printerr "Usage: parrot wmls2pir.pbc filename\n"
     exit -1
 .end

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pdd15oo/parrotobject.t 3455 2007-05-11T02:28:04.497730Z jkeenan  $
+# $Id: parrotobject.t 19008 2007-06-14 21:14:41Z allison $
 
 use strict;
 use warnings;
@@ -23,7 +23,7 @@ Tests the ParrotObject PMC.
 
 =cut
 
-pir_output_like( <<'CODE', <<'OUT', 'new' );
+pir_error_output_like( <<'CODE', <<'OUT', 'new' );
 .sub 'test' :main
     new P0, .ParrotObject
     print "ok 1\n"
@@ -77,7 +77,7 @@ OUT
 
 # '
 
-pir_output_like( <<'CODE', <<'OUT', ':vtable with bad name' );
+pir_error_output_like( <<'CODE', <<'OUT', ':vtable with bad name' );
 .namespace [ "Test" ]
 
 .sub monkey :method :vtable("not_in_the_vtable")
@@ -234,7 +234,7 @@ CODE
 3
 OUT
 
-pir_output_like( <<'CODE', <<'OUT', 'RT#41732' );
+pir_error_output_like( <<'CODE', <<'OUT', 'RT#41732' );
 .namespace ['Foo']
 
 .sub invoke :vtable

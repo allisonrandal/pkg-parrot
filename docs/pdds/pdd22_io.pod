@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/docs/pdds/pdd22_io.pod 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: pdd22_io.pod 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Parrot's I/O subsystem.
 
 =head1 VERSION
 
-$Revision: 2657 $
+$Revision: 18563 $
 
 =head1 DEFINITIONS
 

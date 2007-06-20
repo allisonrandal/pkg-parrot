@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /parrotcode/local/config/init/hints/solaris.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: solaris.pm 18877 2007-06-08 14:15:40Z paultcochrane $
 
 package init::hints::solaris;
 
@@ -54,7 +54,7 @@ sub runstep {
     # code for use in shared libraries.  -KPIC for Sun's compiler, -fPIC for
     # gcc.  We don't know which compiler we're using till after the
     # gccversion test.
-    # XXX Should this go into the shlibs.pl Configure.pl unit instead?
+    # RT#43150 Should this go into the shlibs.pl Configure.pl unit instead?
     my $solaris_cc_shared_cb = sub {
         my ( $key, $gccversion ) = @_;
 

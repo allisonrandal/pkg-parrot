@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/embed.pod 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: embed.pod 14308 2006-08-22 17:14:31Z ambs $
 
 =head1 NAME
 

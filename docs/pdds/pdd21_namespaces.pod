@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/pdds/pdd21_namespaces.pod 3348 2007-05-01T23:41:53.406308Z particle  $
+# $Id: pdd21_namespaces.pod 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ docs/pdds/pdd21_namespaces.pod - Parrot Namespaces
 
 =head1 VERSION
 
-$Revision: 3348 $
+$Revision: 18563 $
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/package.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
+# $Id: package.t 18702 2007-05-31 15:06:42Z fperrad $
 
 =head1 NAME
 
@@ -184,7 +184,7 @@ OUTPUT
 
 SKIP:
 {
-skip('only with Parrot', 1) if (exists $ENV{PARROT_LUA_TEST_PROG});
+skip('only with Parrot', 1) if (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 unlink('../mod_foo.pbc') if ( -f '../mod_foo.pbc' );
 unlink('../mod_foo.pir') if ( -f '../mod_foo.pir' );
@@ -262,7 +262,7 @@ OUTPUT
 
 SKIP:
 {
-skip('only with Parrot', 3) if (exists $ENV{PARROT_LUA_TEST_PROG});
+skip('only with Parrot', 3) if (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 delete $ENV{LUA_PBCPATH};
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', 'table package.pbcpath' );

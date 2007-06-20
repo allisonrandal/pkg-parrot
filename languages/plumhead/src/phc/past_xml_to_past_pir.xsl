@@ -6,7 +6,7 @@
 >
 <!--
 
-$Id: /parrotcode/local/languages/plumhead/src/phc/past_xml_to_past_pir.xsl 1801 2007-02-15T06:52:47.129138Z chromatic  $
+$Id: past_xml_to_past_pir.xsl 17096 2007-02-20 20:20:48Z paultcochrane $
 
 This transformation takes an abstract syntax tree as generated 
 by phc_xml_to_past_xml.xsl. It generates a PIR-script that creates

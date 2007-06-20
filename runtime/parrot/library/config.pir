@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/runtime/parrot/library/config.pir 3312 2007-04-27T05:11:59.998768Z mdiep  $
+# $Id: config.pir 18343 2007-04-27 05:11:59Z mdiep $
 
 =head1 TITLE
 

@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/pmc/multisub.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: multisub.t 17523 2007-03-17 06:00:27Z allison $
 
 =head1 NAME
 

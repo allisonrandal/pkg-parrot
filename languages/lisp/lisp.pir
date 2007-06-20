@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/lisp/lisp.pir 3476 2007-05-13T20:36:58.179307Z chromatic  $
+# $Id: lisp.pir 18986 2007-06-13 19:41:30Z bernhard $
 
 .const int INVALID_CHAR     = 0
 .const int CONSTITUENT_CHAR = 1
@@ -37,7 +37,7 @@
 
     # compile a couble of regexes that are needed in validate.pir
     .local pmc p6rule
-    p6rule = compreg "PGE::P6Regex"
+    p6rule = compreg "PGE::Perl6Regex"
 
     .local pmc is_integer
     is_integer = p6rule( '^<[+\-]>?\d+\.?$' )
@@ -49,7 +49,7 @@
 
     .local pmc is_qualified
     # todo keyword, split into qualifier, package and symbol
-    is_qualified = p6rule( "^<[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]>*::<[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]>*" )
+    is_qualified = p6rule( '(<[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]>*)\:(<[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%\-]>*)' )
     set_global 'is_qualified', is_qualified
 
     _init_types()                       # Initialize all the type classes.

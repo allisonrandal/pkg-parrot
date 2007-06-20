@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/lib/Perl/Critic/Policy/CodeLayout/UseParrotCoda.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: UseParrotCoda.pm 17579 2007-03-17 22:52:33Z paultcochrane $
 package Perl::Critic::Policy::CodeLayout::UseParrotCoda;
 
 use strict;

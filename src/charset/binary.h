@@ -1,7 +1,7 @@
 /* binary.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/src/charset/binary.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: binary.h 18984 2007-06-13 19:13:35Z petdance $
  *  Overview:
  *     This is the header for the binary charset functions
  *  Data Structure and Algorithms:
@@ -13,7 +13,10 @@
 #ifndef PARROT_CHARSET_BINARY_H_GUARD
 #define PARROT_CHARSET_BINARY_H_GUARD
 
-CHARSET *Parrot_charset_binary_init(Interp *);
+/* HEADERIZER BEGIN: src/charset/binary.c */
+
+CHARSET * Parrot_charset_binary_init( Interp *interp );
+/* HEADERIZER END: src/charset/binary.c */
 
 #endif /* PARROT_CHARSET_BINARY_H_GUARD */
 

@@ -1,5 +1,5 @@
 // Copyright (C) 2006-2007, The Perl Foundation.
-// $Id: /parrotcode/local/languages/plumhead/src/antlr3/GenPastPir.g 2657 2007-03-31T01:57:48.733769Z chromatic  $
+// $Id: GenPastPir.g 17327 2007-03-04 13:09:35Z bernhard $
 
 // Transform ANTLR PAST to PIR that sets up a PAST data structure
 // Let the Parrot Compiler Tools handle the execution.

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/parrot_compiler/t/basic/hello.t 2956 2007-04-04T19:06:29.280553Z bernhard  $
+# $Id: hello.t 17978 2007-04-04 19:06:29Z bernhard $
 
 use strict;
 use lib 'parrot_compiler/lib';

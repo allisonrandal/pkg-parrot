@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/Ops2c/Auxiliary.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Auxiliary.pm 17579 2007-03-17 22:52:33Z paultcochrane $
 package Parrot::Ops2c::Auxiliary;
 use strict;
 use warnings;

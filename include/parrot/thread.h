@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/thread.h 3422 2007-05-08T17:04:21.006524Z paultcochrane  $
+ *     $Id: thread.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     This is the api header for the thread primitives
  *  Data Structure and Algorithms:
@@ -106,7 +106,7 @@ typedef struct _Thread_data {
     Parrot_cond  interp_cond;
 
     /* STM transaction log */
-    void               *stm_log;
+    struct STM_tx_log   *stm_log;
 
     /* COW'd constant tables */
     Hash             *const_tables;

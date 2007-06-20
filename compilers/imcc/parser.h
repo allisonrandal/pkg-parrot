@@ -1,7 +1,7 @@
 /*
  * XXX - We need a description of the file here
  *
- * $Id: /parrotcode/trunk/compilers/imcc/parser.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ * $Id: parser.h 18945 2007-06-12 14:08:35Z fperrad $
  */
 
 #ifndef PARROT_IMCC_PARSER_H_GUARD
@@ -23,9 +23,6 @@ typedef struct _IdList {
 
 /* short ranged globals for lexer state */
 EXTERN int is_def;
-
-/* bison */
-PARROT_API EXTERN int yydebug;
 
 #define KEY_BIT(argnum) (1 << (argnum))
 

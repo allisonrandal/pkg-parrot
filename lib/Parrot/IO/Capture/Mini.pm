@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/IO/Capture/Mini.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Mini.pm 17579 2007-03-17 22:52:33Z paultcochrane $
 package Parrot::IO::Capture::Mini;
 use strict;
 use warnings;

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/runtime/parrot/library/MIME/Base64.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Base64.pir 17613 2007-03-18 10:58:12Z paultcochrane $
 
 =head1 NAME
 

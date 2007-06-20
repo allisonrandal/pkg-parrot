@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/benchmarks/oo1.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: oo1.pasm 12177 2006-04-11 19:56:05Z bernhard $
 
 # all timings Athlon 800, gcc 2.95.2
 

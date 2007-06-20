@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/docs/pdds/draft/pdd25_concurrency.pod 1506 2007-01-22T20:56:47.027038Z chromatic  $
+# $Id: pdd25_concurrency.pod 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ Parrot's concurrency models.
 
 =head1 VERSION
 
-$Revision: 1506 $
+$Revision: 18563 $
 
 =head1 DEFINITIONS
 

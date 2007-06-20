@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/README.win32.pod 3497 2007-05-15T18:50:08.321272Z fperrad  $
+# $Id: README.win32.pod 18551 2007-05-15 18:50:08Z fperrad $
 
 This file is best viewed with "perldoc README.win32".
 

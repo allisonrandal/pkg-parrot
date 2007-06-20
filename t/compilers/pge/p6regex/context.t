@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/t/compilers/pge/p6regex/context.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: context.t 17577 2007-03-17 22:51:14Z paultcochrane $
 
 use strict;
 use warnings;

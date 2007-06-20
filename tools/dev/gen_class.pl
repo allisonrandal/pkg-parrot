@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/gen_class.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: gen_class.pl 18795 2007-06-04 04:43:16Z chromatic $
 
 =head1 NAME
 
@@ -42,7 +42,7 @@ my $classname = shift
 ## emit file header
 print <<"EOF";
 /* ${classname}.pmc
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2007, The Perl Foundation.
  *  SVN Info
  *     \$Id\$
  *  Overview:
@@ -70,8 +70,10 @@ for (@$vtbl) {
     }
 
     print "    $retval $methname ($args) {\n";
+
     if ( $retval ne 'void' ) {
-        print "        return ($retval)0;\n";
+        print $retval eq 'PMC*' ? "        return PMCNULL;\n"
+                                : "        return ($retval)0;\n";
     }
     print "    }\n\n";
 }

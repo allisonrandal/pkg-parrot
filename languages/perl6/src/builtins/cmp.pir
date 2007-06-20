@@ -1,4 +1,4 @@
-## $Id: /parrotcode/trunk/languages/perl6/src/builtins/cmp.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
+## $Id: cmp.pir 18087 2007-04-09 22:02:45Z paultcochrane $
 
 =head1 NAME
 

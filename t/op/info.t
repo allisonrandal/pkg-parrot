@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/t/op/info.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: info.t 17843 2007-03-29 18:30:16Z coke $
 
 =head1 NAME
 

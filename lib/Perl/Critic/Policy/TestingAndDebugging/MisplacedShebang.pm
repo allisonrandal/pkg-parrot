@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/lib/Perl/Critic/Policy/TestingAndDebugging/MisplacedShebang.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: MisplacedShebang.pm 17579 2007-03-17 22:52:33Z paultcochrane $
 package Perl::Critic::Policy::TestingAndDebugging::MisplacedShebang;
 
 use strict;

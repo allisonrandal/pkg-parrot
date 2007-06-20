@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/Test/Harness.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Harness.pm 19144 2007-06-19 19:40:09Z particle $
 
 =head1 NAME
 
@@ -95,7 +95,7 @@ If called with no args, run the suite.
     elsif ( @{ $options{arguments} } ) {
 
         # Someone specified tests for me to run.
-        return grep { -f $_ } @{ $options{arguments} };
+        return grep { -f $_ } map { glob $_ } @{ $options{arguments} };
     }
     else {
 

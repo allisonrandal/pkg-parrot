@@ -1,4 +1,4 @@
-$Id: /parrotcode/local/examples/pir/queens_r.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+$Id: queens_r.pir 17600 2007-03-18 10:52:17Z paultcochrane $
 
 # recursive queens placement
 # prints all 92 solutions in chess notation

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/dotnet/doc/translatorbuilder.pod 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: translatorbuilder.pod 13278 2006-07-13 13:40:14Z coke $
 
 =head1 The Translator Builder
 

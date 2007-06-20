@@ -1,7 +1,7 @@
 /* gdbmhash.pmc
  *  Copyright (C) 2005, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/src/dynpmc/gdbmhash.pmc 3266 2007-04-21T04:54:51.264037Z chromatic  $
+ *     $Id: gdbmhash.pmc 18294 2007-04-21 04:54:51Z chromatic $
  *  Overview:
  *     These are the vtable functions for the GDBMHash PMC
  *  Data Structure and Algorithms:

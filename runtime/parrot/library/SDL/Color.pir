@@ -1,5 +1,5 @@
 
-# $Id: /parrotcode/trunk/runtime/parrot/library/SDL/Color.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
+# $Id: Color.pir 18401 2007-05-02 22:49:45Z mdiep $
 
 =head1 NAME
 

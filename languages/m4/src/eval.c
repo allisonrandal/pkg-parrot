@@ -1,4 +1,4 @@
-/* $Id: /parrotcode/local/languages/m4/src/eval.c 930 2006-12-28T23:51:13.748136Z chromatic  $ */
+/* $Id: eval.c 16301 2006-12-28 22:26:04Z paultcochrane $ */
 
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.

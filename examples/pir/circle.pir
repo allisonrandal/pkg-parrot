@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/examples/pir/circle.pir 3066 2007-04-09T22:20:33.243268Z paultcochrane  $
+# $Id: circle.pir 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
 
-# $Id: /parrotcode/trunk/languages/pynie/t/harness 2169 2007-03-09T09:00:39.006560Z paultcochrane  $
+# $Id: harness 17401 2007-03-09 09:00:39Z paultcochrane $
 
 use FindBin;
 use lib qw( . lib ../lib ../../lib ../../lib );

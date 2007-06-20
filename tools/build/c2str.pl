@@ -1,5 +1,5 @@
 #! perl
-# $Id: /parrotcode/trunk/tools/build/c2str.pl 3441 2007-05-09T12:16:46.710530Z paultcochrane  $
+# $Id: c2str.pl 18945 2007-06-12 14:08:35Z fperrad $
 
 =head1 NAME
 

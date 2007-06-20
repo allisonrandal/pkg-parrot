@@ -1,5 +1,5 @@
 #! perl
-# $Id: /parrotcode/local/languages/scheme/t/logic/defines.t 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: defines.t 16759 2007-01-22 17:41:26Z paultcochrane $
 
 use strict;
 use warnings;

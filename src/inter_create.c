@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/inter_create.c 3315 2007-04-27T20:09:28.886454Z chromatic  $
+$Id: inter_create.c 19055 2007-06-17 05:42:16Z petdance $
 
 =head1 NAME
 
@@ -24,6 +24,8 @@ Create or destroy a Parrot interpreter
 #include "parrot/oplib/core_ops.h"
 #include "../compilers/imcc/imc.h"
 
+/* HEADER: none */ /* XXX Headerize this at the same time as the other interpreter files */
+
 #if EXEC_CAPABLE
 Interp interpre;
 #endif
@@ -41,10 +43,10 @@ Checks whether the specified environment variable is set.
 */
 
 static int
-is_env_var_set(const char* var)
+is_env_var_set(const char* var /*NN*/)
 {
     int free_it, retval;
-    char* value = Parrot_getenv(var, &free_it);
+    char* const value = Parrot_getenv(var, &free_it);
     if (value == NULL)
         retval = 0;
     else if (*value == '\0')
@@ -69,7 +71,7 @@ Setup default compiler for PASM.
 static void
 setup_default_compreg(Parrot_Interp interp)
 {
-    STRING *pasm1 = string_from_cstring(interp, "PASM1", 0);
+    STRING * const pasm1 = string_from_cstring(interp, "PASM1", 0);
 
     /* register the nci compiler object */
     Parrot_compreg(interp, pasm1, (Parrot_compiler_func_t)PDB_compile);
@@ -77,19 +79,16 @@ setup_default_compreg(Parrot_Interp interp)
 
 /*
 
-=item C<Parrot_Interp
-make_interpreter(Parrot_Interp parent, INTVAL flags)>
+FUNCDOC: make_interpreter
 
 Create the Parrot interpreter. Allocate memory and clear the registers.
-
-=cut
 
 */
 
 void Parrot_really_destroy(Interp *, int exit_code, void *);
 
 Parrot_Interp
-make_interpreter(Parrot_Interp parent, INTVAL flags)
+make_interpreter(Interp *parent /*NULLOK*/, INTVAL flags)
 {
     Interp *interp;
 #if EXEC_CAPABLE
@@ -108,12 +107,12 @@ make_interpreter(Parrot_Interp parent, INTVAL flags)
      * the last interpreter (w/o) parent has to cleanup globals
      * so remember parent if any
      */
-    SET_NULL(interp->lo_var_ptr);
+    interp->lo_var_ptr = NULL;
     if (parent) {
         interp->parent_interpreter = parent;
     }
     else {
-        SET_NULL(interp->parent_interpreter);
+        interp->parent_interpreter = NULL;
         /*
          * we need a global mutex to protect the interpreter array
          */
@@ -130,7 +129,7 @@ make_interpreter(Parrot_Interp parent, INTVAL flags)
     interp->flags = flags;
 
     /* PANIC will fail until this is done */
-    SET_NULL(interp->piodata);
+    interp->piodata = NULL;
     PIO_init(interp);
 
     if (is_env_var_set("PARROT_GC_DEBUG")) {
@@ -163,7 +162,7 @@ make_interpreter(Parrot_Interp parent, INTVAL flags)
     init_object_cache(interp);
 
     /* initialize classes - this needs mmd func table */
-    SET_NULL(interp->HLL_info);
+    interp->HLL_info = NULL;
     Parrot_init(interp);
 
     /* context data */
@@ -193,24 +192,24 @@ make_interpreter(Parrot_Interp parent, INTVAL flags)
     interp->dynamic_env = new_stack(interp, "DynamicEnv");
 
     /* clear context introspection vars */
-    SET_NULL_P(CONTEXT(interp->ctx)->current_sub, PMC*);
-    SET_NULL_P(CONTEXT(interp->ctx)->current_cont, PMC*);
-    SET_NULL_P(CONTEXT(interp->ctx)->current_object, PMC*);
+    CONTEXT(interp->ctx)->current_sub = NULL;
+    CONTEXT(interp->ctx)->current_cont = NULL;
+    CONTEXT(interp->ctx)->current_object = NULL;
 
     /* Load the core op func and info tables */
     interp->op_lib = PARROT_CORE_OPLIB_INIT(1);
     interp->op_count = interp->op_lib->op_count;
     interp->op_func_table = interp->op_lib->op_func_table;
     interp->op_info_table = interp->op_lib->op_info_table;
-    SET_NULL_P(interp->all_op_libs, op_lib_t **);
-    SET_NULL_P(interp->evc_func_table, op_func_t *);
-    SET_NULL_P(interp->save_func_table, op_func_t *);
+    interp->all_op_libs = NULL;
+    interp->evc_func_table = NULL;
+    interp->save_func_table = NULL;
 
-    SET_NULL_P(interp->code, PackFile *);
-    SET_NULL_P(interp->profile, ProfData *);
+    interp->code = NULL;
+    interp->profile = NULL;
 
     /* null out the root set registry */
-    SET_NULL_P(interp->DOD_registry, PMC *);
+    interp->DOD_registry = NULL;
 
     /* create exceptions list */
     interp->current_runloop_level = 0;
@@ -239,8 +238,8 @@ make_interpreter(Parrot_Interp parent, INTVAL flags)
     /* all sys running, init the event and signal stuff
      * the first or "master" interpreter is handling events and signals
      */
-    SET_NULL_P(interp->task_queue, QUEUE*);
-    SET_NULL_P(interp->thread_data, _Thread_data *);
+    interp->task_queue = NULL;
+    interp->thread_data = NULL;
 
     Parrot_init_events(interp);
 
@@ -259,18 +258,16 @@ make_interpreter(Parrot_Interp parent, INTVAL flags)
 
 /*
 
-=item C<void
-Parrot_destroy(Interp *interp)>
+FUNCDOC: Parrot_destroy
 
 Does nothing if C<ATEXIT_DESTROY> is defined. Otherwise calls
 C<Parrot_really_destroy()> with exit code 0.
 
 This function is not currently used.
 
-=cut
-
 */
 
+PARROT_API
 void
 Parrot_destroy(Interp *interp)
 {
@@ -395,18 +392,14 @@ Parrot_really_destroy(Interp *interp, int exit_code, void *arg)
     interp->arena_base = NULL;
     /* cache structure */
     destroy_object_cache(interp);
-    /* packfile */
 
-    if (!Interp_flags_TEST(interp, PARROT_EXTERN_CODE_FLAG))  {
-        PackFile *pf = interp->initial_pf;
-        if (pf)
-            PackFile_destroy(interp, pf);
-    }
+    /* packfile */
+    if (interp->initial_pf)
+        PackFile_destroy(interp, interp->initial_pf);
 
     /* free vtables */
     parrot_free_vtables(interp);
     mmd_destroy(interp);
-
 
     if (interp->profile) {
         mem_sys_free(interp->profile->data);

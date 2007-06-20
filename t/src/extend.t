@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/src/extend.t 3349 2007-05-02T00:00:16.325289Z chromatic  $
+# $Id: extend.t 18383 2007-05-02 00:00:16Z chromatic $
 
 use strict;
 use warnings;

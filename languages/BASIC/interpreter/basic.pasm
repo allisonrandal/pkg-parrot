@@ -8,7 +8,7 @@
 #     I26 - Line number for last READ
 #     I27 - Item number for last READ
 #
-# $Id: /parrotcode/trunk/languages/BASIC/interpreter/basic.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: basic.pasm 11501 2006-02-10 18:27:13Z particle $
 # $Log$
 # Revision 1.2  2004/02/29 13:18:54  leo
 # release 0.1.0 preparation

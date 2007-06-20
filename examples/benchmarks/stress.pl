@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/examples/benchmarks/stress.pl 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: stress.pl 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

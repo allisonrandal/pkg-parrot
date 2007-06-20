@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/languages/c99/lib/Parrot/Test/C99.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: C99.pm 17096 2007-02-20 20:20:48Z paultcochrane $
 
 package Parrot::Test::C99;
 

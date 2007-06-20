@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/config/inter/make.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: make.pm 18877 2007-06-08 14:15:40Z paultcochrane $
 
 =head1 NAME
 
@@ -92,7 +92,7 @@ sub runstep {
         # get the default value
         my $make_c = $conf->data->get('make_c');
 
-        # FIXME this is an ugly hack
+        # RT#43171 this is an ugly hack
         # replace the value for $(MAKE) with the actual path or we'll end up
         # with a variable that recursively refers to itself
         $make_c =~ s/\$\(MAKE\)/$prog/;

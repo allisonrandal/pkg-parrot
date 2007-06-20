@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/bf/bf.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: bf.pasm 11501 2006-02-10 18:27:13Z particle $
 # A Brainfuck interpreter
 # By Leon Brocard <acme@astray.com>
 #

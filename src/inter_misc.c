@@ -1,14 +1,14 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/inter_misc.c 3312 2007-04-27T05:11:59.998768Z mdiep  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: inter_misc.c 19094 2007-06-18 21:45:36Z petdance $
 
 =head1 NAME
 
-src/inter_misc.c - Parrot Interpreter - Misc functions
+src/inter_misc.c - Parrot Interpreter miscellaneous functions
 
 =head1 DESCRIPTION
 
-NCI function setup, C<interpinfo>, and C<sysinfo> opcodes.
+NCI function setup, compiler registration, C<interpinfo>, and C<sysinfo> opcodes.
 
 =head2 Functions
 
@@ -22,6 +22,8 @@ NCI function setup, C<interpinfo>, and C<sysinfo> opcodes.
 #include <assert.h>
 #include "parrot/parrot.h"
 #include "inter_misc.str"
+
+/* HEADER: none */ /* XXX Needs to get done at the same time as the other interpreter files */
 
 /*
 
@@ -38,27 +40,29 @@ class C<type>.
 void Parrot_NCI_nci_make_raw_nci(Interp *interp, PMC *method, void *func);
 
 void
-enter_nci_method(Parrot_Interp interp, const int type, void *func,
-                const char *name, const char *proto)
-{
-    register_nci_method(interp, type, func, name, proto);
-}
-
-void
 register_nci_method(Parrot_Interp interp, const int type, void *func,
                     const char *name, const char *proto)
 {
     PMC * const method = pmc_new(interp, enum_class_NCI);
+    STRING * const method_name = string_make(interp, name, strlen(name),
+        NULL, PObj_constant_FLAG|PObj_external_FLAG);
+    PMC *proxy;
+
     /* create call func */
     VTABLE_set_pointer_keyed_str(interp, method,
             string_make(interp, proto, strlen(proto), NULL,
                 PObj_constant_FLAG|PObj_external_FLAG),
             func);
+
     /* insert it into namespace */
     VTABLE_set_pmc_keyed_str(interp, interp->vtables[type]->_namespace,
-            string_make(interp, name, strlen(name), NULL,
-                PObj_constant_FLAG|PObj_external_FLAG),
-            method);
+            method_name, method);
+
+    /* Also need to list the method in the PMCProxy PMC's method list, so it
+     * can be introspected. */
+    proxy = VTABLE_get_pmc_keyed_int(interp, interp->pmc_proxies, type);
+    VTABLE_set_pmc_keyed_str(interp, PARROT_PMCPROXY(proxy)->methods,
+            method_name, method);
 }
 
 void
@@ -66,13 +70,22 @@ register_raw_nci_method_in_ns(Parrot_Interp interp, const int type, void *func,
         const char *name)
 {
     PMC * const method = pmc_new(interp, enum_class_NCI);
+    STRING * const method_name = string_make(interp, name, strlen(name),
+        NULL, PObj_constant_FLAG|PObj_external_FLAG);
+    PMC *proxy;
+
     /* setup call func */
     Parrot_NCI_nci_make_raw_nci(interp, method, func);
+
     /* insert it into namespace */
     VTABLE_set_pmc_keyed_str(interp, interp->vtables[type]->_namespace,
-            string_make(interp, name, strlen(name), NULL,
-                PObj_constant_FLAG|PObj_external_FLAG),
-            method);
+            method_name, method);
+
+    /* Also need to list the method in the PMCProxy PMC's method list, so it
+     * can be introspected. */
+    proxy = VTABLE_get_pmc_keyed_int(interp, interp->pmc_proxies, type);
+    VTABLE_set_pmc_keyed_str(interp, PARROT_PMCPROXY(proxy)->methods,
+            method_name, method);
 }
 
 /*
@@ -127,7 +140,7 @@ void Parrot_compreg(Parrot_Interp interp, STRING *type,
     }
     nci = pmc_new(interp, enum_class_Compiler);
     VTABLE_set_pmc_keyed_str(interp, hash, type, nci);
-    /* build native call interface fir the C sub in "func" */
+    /* build native call interface for the C sub in "func" */
     sc = CONST_STRING(interp, "PJt");
     VTABLE_set_pointer_keyed_str(interp, nci, sc, (void*)func);
 }
@@ -136,7 +149,7 @@ void Parrot_compreg(Parrot_Interp interp, STRING *type,
 
 =item C<PMC *
 Parrot_compile_string(Parrot_Interp interp, STRING *type,
-                      char *code, String **error)>
+                      char *code, STRING **error)>
 
 Compile code string.
 
@@ -166,7 +179,7 @@ Parrot_compile_string(Parrot_Interp interp, STRING *type,
 
 =item C<void
 Parrot_compile_file(Parrot_Interp interp, const char *fullname,
-                    String **error)>
+                    STRING **error)>
 
 Compile code file.
 
@@ -176,7 +189,7 @@ Compile code file.
 
 void *
 Parrot_compile_file(Parrot_Interp interp, char *fullname,
-                    String **error)
+                    STRING **error)
 {
     return IMCC_compile_file_s(interp, fullname, error);
 }

@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/stm/stm_frontend.pod 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: stm_frontend.pod 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Describes interfaces for Software Transactional Memory within Parrot.
 
 =head1 VERSION
 
-$Revision: 470 $
+$Revision: 18563 $
 
 =head1 SYNOPSIS
 

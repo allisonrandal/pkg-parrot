@@ -1,5 +1,5 @@
 #! perl
-# $Id: /parrotcode/local/languages/befunge/t/basic.t 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: basic.t 16760 2007-01-22 17:41:51Z paultcochrane $
 
 use strict;
 use warnings;

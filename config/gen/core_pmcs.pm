@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/gen/core_pmcs.pm 3443 2007-05-09T12:17:22.636045Z paultcochrane  $
+# $Id: core_pmcs.pm 19016 2007-06-15 02:33:06Z petdance $
 
 =head1 NAME
 
@@ -106,6 +106,9 @@ END_C
 
     print {$OUT} <<"END_C";
 
+/* HEADER: none */
+/* This isn't strictly true, but the headerizer should not bother */
+
 void Parrot_register_core_pmcs(Interp *interp, PMC* registry);
 extern void Parrot_initialize_core_pmcs(Interp *interp);
 void Parrot_initialize_core_pmcs(Interp *interp)
@@ -130,7 +133,7 @@ END_C
 
 static void register_pmc(Interp *interp, PMC* registry, int pmc_id)
 {
-    STRING* key = interp->vtables[pmc_id]->whoami;
+    STRING* const key = interp->vtables[pmc_id]->whoami;
     VTABLE_set_integer_keyed_str(interp, registry, key, pmc_id);
 }
 

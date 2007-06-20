@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/m4/ChangeLog 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: ChangeLog 11501 2006-02-10 18:27:13Z particle $
 
 2005-06-29     Bernhard Schmalhofer
         * Switch from Getopt/Long.pbc to Getopt/Obj.pbc

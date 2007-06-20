@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/pdds/pdd15_objects.pod 3432 2007-05-09T04:09:56.315171Z allison  $
+# $Id: pdd15_objects.pod 18697 2007-05-31 00:54:17Z allison $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ This PDD describes the semantics of Parrot's object and class systems.
 
 =head1 VERSION
 
-$Revision: 3432 $
+$Revision: 18697 $
 
 =head1 DEFINITIONS
 
@@ -306,6 +306,10 @@ class.
 
 Create an (anonymous) clone of the class. Unset the instantiated flag on the
 new class.
+
+=item name(string *)
+
+Returns a simple string name for the class.
 
 =item add_method(string *, method *)
 

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/languages/plumhead/src/perl5re/gen_past_pir.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: gen_past_pir.pl 17401 2007-03-09 09:00:39Z paultcochrane $
 
 =head1 NAME
 

@@ -3,7 +3,7 @@
  *
  * HPPA
  *
- * $Id: /parrotcode/trunk/src/jit/hppa/jit_emit.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ * $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
  */
 
 #ifndef PARROT_HPPA_JIT_EMIT_H_GUARD

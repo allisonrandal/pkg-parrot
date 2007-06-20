@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/delegate.pmc 3278 2007-04-23T16:46:53.513244Z chromatic  $
+$Id: delegate.pmc 18306 2007-04-23 16:46:53Z chromatic $
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/compilers/past/PAST.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: PAST.pir 17605 2007-03-18 10:55:02Z paultcochrane $
 
 =head1 NAME
 

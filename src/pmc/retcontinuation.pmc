@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/retcontinuation.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
+$Id: retcontinuation.pmc 19020 2007-06-15 08:44:38Z chromatic $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ Initializes the continuation.
 
     void init() {
         PMC_struct_val(SELF) = new_ret_continuation(INTERP);
-        PMC_pmc_val(SELF) = NULL;
+        PMC_pmc_val(SELF)    = NULL;
         PObj_custom_mark_destroy_SETALL(SELF);
     }
 
@@ -50,10 +50,9 @@ Initializes the continuation.
 
     void destroy() {
         struct Parrot_cont * cc = PMC_cont(SELF);
-        if (cc) {
+        if (cc)
             mem_sys_free(cc);
-            PMC_struct_val(SELF) = NULL;
-        }
+        PMC_struct_val(SELF) = NULL;
     }
 /*
 

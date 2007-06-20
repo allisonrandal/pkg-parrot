@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/25-options_test.t 3467 2007-05-12T14:16:07.178849Z jkeenan  $
+# $Id: 25-options_test.t 18799 2007-06-04 07:35:02Z paultcochrane $
 # 25-options_test.t
 
 use strict;
@@ -22,7 +22,7 @@ use_ok("Parrot::Configure::Options::Test");
 my ($args, $opttest);
 
 my $parrot_version = '0.4.10';
-my $svnid          = '$Id: /parrotcode/trunk/t/configure/25-options_test.t 3467 2007-05-12T14:16:07.178849Z jkeenan  $';
+my $svnid          = '$Id: 25-options_test.t 18799 2007-06-04 07:35:02Z paultcochrane $';
 $args = process_options(
     {
         argv            => [ q{--test} ],
@@ -50,7 +50,7 @@ use Test::More tests => 1;
 TEST
 
 {
-    my $tdir = tempdir;
+    my $tdir = tempdir(CLEANUP => 1);
     ok( (chdir $tdir), "Changed to temporary directory for testing");
     my $test = q{testfile};
     open my $T, ">", $test
@@ -63,25 +63,25 @@ TEST
 
     my $reason = q{Devel::Cover gags on this test};
 
-    @Parrot::Configure::Options::Test::preconfiguration_tests = 
+    @Parrot::Configure::Options::Test::preconfiguration_tests =
         ( $test );
     {
         $tie = tie *STDOUT, "Parrot::IO::Capture::Mini"
             or croak "Unable to tie";
         SKIP: {
-            skip $reason, 1 if $ENV{PERL5OPT};        
+            skip $reason, 1 if $ENV{PERL5OPT};
             ok($opttest->run_configure_tests(),
                 "Configuration tests are runnable");
         }
     }
 
-    @Parrot::Configure::Options::Test::postconfiguration_tests = 
+    @Parrot::Configure::Options::Test::postconfiguration_tests =
         ( $test );
     {
         $tie = tie *STDOUT, "Parrot::IO::Capture::Mini"
             or croak "Unable to tie";
         SKIP: {
-            skip $reason, 1 if $ENV{PERL5OPT};        
+            skip $reason, 1 if $ENV{PERL5OPT};
             ok($opttest->run_build_tests(),
                 "Build tests are runnable");
         }

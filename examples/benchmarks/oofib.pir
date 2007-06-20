@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/examples/benchmarks/oofib.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: oofib.pir 17599 2007-03-18 10:51:10Z paultcochrane $
 
 .sub bench :main
     .param pmc argv

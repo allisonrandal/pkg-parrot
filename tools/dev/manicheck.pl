@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/manicheck.pl 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: manicheck.pl 16741 2007-01-22 10:49:12Z paultcochrane $
 ################################################################################
 
 =head1 NAME

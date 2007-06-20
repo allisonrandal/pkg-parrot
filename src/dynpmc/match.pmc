@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004, The Perl Foundation.
-$Id: /parrotcode/local/src/dynpmc/match.pmc 1274 2007-01-13T23:01:57.052957Z chromatic  $
+$Id: match.pmc 16599 2007-01-13 21:47:06Z particle $
 
 =head1 NAME
 

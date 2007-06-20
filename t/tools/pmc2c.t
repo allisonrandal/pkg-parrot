@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/pmc2c.t 3187 2007-04-15T03:31:19.509244Z chromatic  $
+# $Id: pmc2c.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /parrotcode/local/config/init/hints/freebsd.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: freebsd.pm 16144 2006-12-17 18:42:49Z paultcochrane $
 
 package init::hints::freebsd;
 

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/japh/japh13.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: japh13.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 =head1 NAME
 

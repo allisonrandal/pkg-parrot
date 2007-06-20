@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/03-steplist.t 3344 2007-05-01T19:48:37.296496Z bernhard  $
+# $Id: 03-steplist.t 18378 2007-05-01 19:48:37Z bernhard $
 # 03-steplist.t
 
 use strict;

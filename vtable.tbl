@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/vtable.tbl 3239 2007-04-18T02:24:20.291709Z chromatic  $
+# $Id: vtable.tbl 18791 2007-06-04 01:47:20Z chromatic $
 # [MAIN] #default section name
 
 # MMD_EQ ... MMD_STRCMP must be in one block
@@ -365,14 +365,7 @@ void remove_method(STRING* method_name) :write
 PMC* inspect()
 PMC* inspect_str(STRING* what)
 
-## Unspecified
-PMC* new_singleton()
-## Unspecified
-PMC* get_anonymous_subclass()
-
-## Deprecated
-void become_parent(PMC* _class)
-## Deprecated
+# Deprecated
 PMC* subclass(PMC* name)
 
 void freeze(visit_info* info)
