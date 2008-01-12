@@ -1,3 +1,10 @@
+parrot (0.4.13-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Replace libicu36-dev with libicu-dev. (Closes: #456835) 
+
+ -- Ana Beatriz Guerrero Lopez <ana@debian.org>  Sat, 12 Jan 2008 19:33:10 +0100
+
 parrot (0.4.13-1) unstable; urgency=low
 
   * New upstream release.
