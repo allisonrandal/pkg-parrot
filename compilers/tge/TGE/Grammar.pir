@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
+# Copyright (C) 2005-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -6,17 +6,18 @@ TGE::Grammar - The base class for all tree grammars.
 
 =head1 SYNOPSIS
 
+(To come.)
 
 =head1 DESCRIPTION
 
 =cut
 
-.namespace [ 'TGE::Grammar' ]
+.namespace [ 'TGE'; 'Grammar' ]
 
 .sub '__onload' :load
     # define the class
     .local pmc base
-    newclass base, 'TGE::Grammar'
+    newclass base, ['TGE';'Grammar']
     addattribute base, 'rules'   # the rules in the grammar (an array)
     addattribute base, 'symbols' # used for tracking symbols parsed
                                  # (often a hash, but grammar chooses
@@ -33,9 +34,9 @@ of TGE::Rule objects, which are the semantics defined by the grammar.
 =cut
 
 .sub init :vtable :method
-    $P1 = new .ResizablePMCArray
+    $P1 = new 'ResizablePMCArray'
     setattribute self, 'rules', $P1
-    $P2 = new .Hash
+    $P2 = new 'Hash'
     setattribute self, 'symbols', $P2
 .end
 
@@ -53,7 +54,7 @@ Add a rule to the current attribute grammar.
 
     # create a new attribute grammar rule
     .local pmc rule
-    rule = new 'TGE::Rule'
+    rule = new ['TGE';'Rule']
     setattribute rule, 'type', type
     setattribute rule, 'name', name
     setattribute rule, 'parent', parent
@@ -68,7 +69,7 @@ Add a rule to the current attribute grammar.
 =head2 apply
 
 Use a precompiled grammar on a data structure. This returns an
-object on which you can call methods to fetch attributes on the 
+object on which you can call methods to fetch attributes on the
 I<top node> of the data structure.
 
 =cut
@@ -77,10 +78,10 @@ I<top node> of the data structure.
     .param pmc tree
     .local pmc newtree
     .local pmc visit
-    newtree = new 'TGE::Tree'
+    newtree = new ['TGE';'Tree']
     setattribute newtree, 'data', tree
     setattribute newtree, 'grammar', self
-    visit = getattribute newtree, 'visit' 
+    visit = getattribute newtree, 'visit'
     # Build up the visit hash
     .local pmc rules
     .local int index
@@ -98,14 +99,14 @@ loop:
     $P2 = visit[typename]
     $I1 = does $P2, 'array'
     if $I1 goto array_exists
-    $P2 = new .ResizablePMCArray
+    $P2 = new 'ResizablePMCArray'
     visit[typename] = $P2
 array_exists:
     push $P2, currule
     goto loop
 end_loop:
 
-    newtree._scan_node(tree, 'ROOT')
+    newtree.'_scan_node'(tree, 'ROOT')
     .return (newtree)
 .end
 
@@ -138,7 +139,7 @@ Return an iterator for the symbol lookup table.
 
 .sub 'symbol_iter' :method
     $P1 = getattribute self, 'symbols'
-    $P2 = new Iterator, $P1
+    $P2 = new 'Iterator', $P1
 
     .return($P2)
 .end
@@ -158,7 +159,7 @@ LOOP:
     dec $I1
     $P1 = $P0[$I1]
     print "\t\t     [\n"
-    $P1.dump()
+    $P1.'dump'()
     print "\t\t     ],\n"
     if $I1 > 0 goto LOOP
 
@@ -166,14 +167,8 @@ LOOP:
     print "\t}\n"
 .end
 
-=head1 AUTHOR
-
-Allison Randal <allison@perl.org>
-
-=cut
-
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

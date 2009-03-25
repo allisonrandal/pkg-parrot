@@ -1,17 +1,17 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: namespace.t 18537 2007-05-14 15:45:23Z particle $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: namespace.t 37344 2009-03-12 05:43:51Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 61;
+use Parrot::Test tests => 67;
 use Parrot::Config;
 
 =head1 NAME
 
-t/pmc/namespace.t - test the NameSpace PMC as described in PDD21.
+t/pmc/namespace.t - test the NameSpace PMC as described in PDD 21.
 
 =head1 SYNOPSIS
 
@@ -26,17 +26,17 @@ Test the NameSpace PMC as described in PDD21.
 # L<PDD21/Namespace PMC API/>
 pir_output_is( <<'CODE', <<'OUT', 'new' );
 .sub 'test' :main
-    new $P0, .NameSpace
-    say 'ok 1 - $P0 = new .NameSpace'
+    new $P0, ['NameSpace']
+    say "ok 1 - $P0 = new ['NameSpace']"
 .end
 CODE
-ok 1 - $P0 = new .NameSpace
+ok 1 - $P0 = new ['NameSpace']
 OUT
 
 # L<PDD21/Namespace PMC API/=head4 Untyped Interface>
 pir_output_is( <<'CODE', <<'OUT', 'NameSpace does "hash"' );
 .sub 'test' :main
-    new $P0, .NameSpace
+    new $P0, ['NameSpace']
     $I0 = does $P0, 'hash'
     if $I0 goto ok_1
     print 'not '
@@ -48,9 +48,9 @@ ok 1 - NameSpace does "hash"
 OUT
 
 # L<PDD21//>
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global bar" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global bar" );
 .sub 'main' :main
-    $P0 = find_global "bar"
+    $P0 = get_global "bar"
     print "ok\n"
     $P0()
 .end
@@ -65,7 +65,7 @@ OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "verify NameSpace type" );
 .sub 'main' :main
-    $P0 = find_global "Foo"
+    $P0 = get_global "Foo"
     typeof $S0, $P0
     print $S0
     print "\n"
@@ -79,9 +79,9 @@ CODE
 NameSpace
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::bar" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::bar" );
 .sub 'main' :main
-    $P0 = find_global "Foo", "bar"
+    $P0 = get_global ["Foo"], "bar"
     print "ok\n"
     $P0()
 .end
@@ -97,7 +97,7 @@ OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "get_namespace Foo::bar" );
 .sub 'main' :main
-    $P0 = find_global "Foo", "bar"
+    $P0 = get_global ["Foo"], "bar"
     print "ok\n"
     $P1 = $P0."get_namespace"()
     print $P1
@@ -112,9 +112,9 @@ ok
 Foo
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::bar ns" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::bar ns" );
 .sub 'main' :main
-    $P1 = find_global ["Foo"], "bar"
+    $P1 = get_global ["Foo"], "bar"
     print "ok\n"
     $P1()
 .end
@@ -128,9 +128,9 @@ ok
 bar
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::bar hash" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::bar hash" );
 .sub 'main' :main
-    $P0 = find_global "Foo"
+    $P0 = get_global "Foo"
     $P1 = $P0["bar"]
     print "ok\n"
     $P1()
@@ -145,9 +145,9 @@ ok
 bar
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::Bar::baz" );
 .sub 'main' :main
-    $P2 = find_global ["Foo";"Bar"], "baz"
+    $P2 = get_global ["Foo";"Bar"], "baz"
     print "ok\n"
     $P2()
 .end
@@ -161,9 +161,9 @@ ok
 baz
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', "find_global Foo::bazz not found" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "get_global Foo::bazz not found" );
 .sub 'main' :main
-    $P2 = find_global ["Foo"], "bazz"
+    $P2 = get_global ["Foo"], "bazz"
     $P2()
     print "ok\n"
 .end
@@ -172,9 +172,9 @@ CODE
 OUTPUT
 
 # [this used to behave differently from the previous case.]
-pir_error_output_like( <<'CODE', <<'OUTPUT', "find_global Foo::Bar::bazz not found" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "get_global Foo::Bar::bazz not found" );
 .sub 'main' :main
-    $P2 = find_global ["Foo";"Bar"], "bazz"
+    $P2 = get_global ["Foo";"Bar"], "bazz"
     $P2()
     print "ok\n"
 .end
@@ -182,9 +182,9 @@ CODE
 /Null PMC access in invoke\(\)/
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz hash" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::Bar::baz hash" );
 .sub 'main' :main
-    $P0 = find_global "Foo"
+    $P0 = get_global "Foo"
     $P1 = $P0["Bar"]
     $P2 = $P1["baz"]
     print "ok\n"
@@ -200,9 +200,9 @@ ok
 baz
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz hash 2" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::Bar::baz hash 2" );
 .sub 'main' :main
-    $P0 = find_global "Foo"
+    $P0 = get_global "Foo"
     $P1 = $P0["Bar" ; "baz"]
     print "ok\n"
     $P1()
@@ -217,12 +217,12 @@ ok
 baz
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz alias" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global Foo::Bar::baz alias" );
 .sub 'main' :main
-    $P0 = find_global "Foo"
+    $P0 = get_global "Foo"
     $P1 = $P0["Bar"]
-    store_global "TopBar", $P1
-    $P2 = find_global "TopBar", "baz"
+    set_global "TopBar", $P1
+    $P2 = get_global ["TopBar"], "baz"
     print "ok\n"
     $P2()
 .end
@@ -241,7 +241,7 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', "func() namespace resolution" );
     print "calling foo\n"
     foo()
     print "calling Foo::foo\n"
-    $P0 = find_global "Foo", "foo"
+    $P0 = get_global ["Foo"], "foo"
     $P0()
     print "calling baz\n"
     baz()
@@ -284,7 +284,7 @@ calling Foo::foo
   Foo::bar
   fie
 calling baz
-Null PMC access in invoke\(\)/
+Could not find non-existent sub baz/
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', 'get namespace of :anon .sub' );
@@ -302,7 +302,7 @@ OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "get namespace in Foo::bar" );
 .sub 'main' :main
-    $P0 = find_global "Foo", "bar"
+    $P0 = get_global ["Foo"], "bar"
     print "ok\n"
     $P0()
 .end
@@ -324,7 +324,7 @@ OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "get namespace in Foo::Bar::baz" );
 .sub 'main' :main
-    $P0 = find_global "Foo"
+    $P0 = get_global "Foo"
     $P1 = $P0["Bar"]
     $P2 = $P1["baz"]
     print "ok\n"
@@ -369,10 +369,10 @@ pir_output_is( <<'CODE', <<'OUT', "latin1 namespace, global" );
     print "latin1 namespaces are fun\n"
 .end
 
-.namespace
+.namespace []
 
 .sub 'main' :main
-    $P0 = find_global iso-8859-1:"François", 'test'
+    $P0 = get_global [iso-8859-1:"François"], 'test'
     $P0()
 .end
 CODE
@@ -386,10 +386,10 @@ pir_output_is( <<'CODE', <<'OUT', "unicode namespace, global" );
     print "unicode namespaces are fun\n"
 .end
 
-.namespace
+.namespace []
 
 .sub 'main' :main
-    $P0 = find_global unicode:"Fran\xe7ois", 'test'
+    $P0 = get_global [unicode:"Fran\xe7ois"], 'test'
     $P0()
 .end
 CODE
@@ -426,7 +426,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "ns.name()" );
     .include "interpinfo.pasm"
     $P0 = get_root_namespace
     $P1 = $P0["parrot"]
-    $P3 = new .NameSpace
+    $P3 = new ['NameSpace']
     $P1["Foo"] = $P3
     $P2 = $P3.'get_name'()
     $I2 = elements $P2
@@ -444,10 +444,10 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', "get_namespace_p_p, getnamespace_p_kc" );
 .sub main :main
     .include "interpinfo.pasm"
-    $P3 = new .NameSpace
+    $P3 = new ['NameSpace']
     set_hll_global "Foo", $P3
     # fetch w array
-    $P4 = new .FixedStringArray
+    $P4 = new ['FixedStringArray']
     $P4 = 1
     $P4[0] = 'Foo'
     $P0 = get_hll_namespace $P4
@@ -477,7 +477,7 @@ OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "Sub.get_namespace, get_namespace" );
 .sub 'main' :main
-    $P0 = find_global "Foo", "bar"
+    $P0 = get_global ["Foo"], "bar"
     print "ok\n"
     $P1 = $P0."get_namespace"()
     $P2 = $P1.'get_name'()
@@ -501,7 +501,7 @@ OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "check parrot ns" );
 .sub 'main' :main
-    $P0 = find_global ["String"], "lower"
+    $P0 = get_global ["String"], "lower"
     $S0 = $P0("OK\n")
     print $S0
 .end
@@ -518,10 +518,10 @@ END {
 
 open my $S, '>', "$temp_a.pir" or die "Can't write $temp_a.pir";
 print $S <<'EOF';
-.HLL "Foo", ""
+.HLL "Foo"
 .namespace ["Foo_A"]
 .sub loada :load
-    $P0 = find_global "Foo_A", "A"
+    $P0 = get_global ["Foo_A"], "A"
     print "ok 1\n"
     load_bytecode "temp_b.pbc"
 .end
@@ -535,7 +535,7 @@ open $S, '>', "$temp_b.pir" or die "Can't write $temp_b.pir";
 print $S <<'EOF';
 .namespace ["Foo_B"]
 .sub loadb :load
-    $P0 = find_global "Foo_B", "B"
+    $P0 = get_global ["Foo_B"], "B"
     print "ok 2\n"
 .end
 
@@ -562,21 +562,21 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', "HLL and vars" );
 # initial storage of _tcl global variable...
 
-.HLL '_Tcl', ''
+.HLL '_Tcl'
 
-.sub huh 
-  $P0 = new .Integer
+.sub huh
+  $P0 = new ['Integer']
   $P0 = 3.14
-  store_global '$variable', $P0
+  set_global '$variable', $P0
 .end
 
 # start running HLL language
-.HLL 'Tcl', ''
+.HLL 'Tcl'
 
 .sub foo :main
   huh()
   $P1 = get_root_namespace ['_tcl']
-  $P2 = $P1['$variable'] 
+  $P2 = $P1['$variable']
   print $P2
   print "\n"
 .end
@@ -585,10 +585,10 @@ CODE
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "HLL and namespace directives" );
-.HLL '_Tcl', ''
+.HLL '_Tcl'
 .namespace ['Foo'; 'Bar']
 
-.HLL 'Tcl', ''
+.HLL 'Tcl'
 
 .sub main :main
   $P0 = get_namespace
@@ -611,23 +611,23 @@ OUTPUT
 
     open $S, '>', $temp_a or die "Can't write $temp_a";
     print $S <<'EOF';
-.HLL 'eek', ''
+.HLL 'eek'
 
 .sub foo :load :anon
-  $P1 = new .String
+  $P1 = new ['String']
   $P1 = "3.14\n"
-  store_global '$whee', $P1
+  set_global '$whee', $P1
 .end
 
 .sub bark
-  $P0 = find_global '$whee'
+  $P0 = get_global '$whee'
   print $P0
 .end
 EOF
     close $S;
 
     pir_output_is( <<'CODE', <<'OUTPUT', ":anon subs still get default namespace" );
-.HLL 'cromulent', ''
+.HLL 'cromulent'
 
 .sub what
    load_bytecode 'temp_a.pir'
@@ -643,32 +643,26 @@ CODE
 OUTPUT
 }
 
-# the test was skipped, the description says:
-# find_global should find from .HLL namespace, not current .namespace
-# but according to pdd21, {find,store}_global are relative to current
-
 SKIP:
 {
-    skip( "immediate test, doesn't with -r (from .pbc)", 1 )
-        if ( exists $ENV{TEST_PROG_ARGS} and $ENV{TEST_PROG_ARGS} =~ m/-r/ );
+    skip( "immediate test, doesn't with --run-pbc", 1 )
+        if ( exists $ENV{TEST_PROG_ARGS} and $ENV{TEST_PROG_ARGS} =~ m/--run-pbc/ );
 
-    pir_output_is( <<'CODE', <<'OUTPUT', "find_global in current" );
-.HLL 'bork', ''
-.namespace
+    pir_output_is( <<'CODE', <<'OUTPUT', "get_global in current" );
+.HLL 'bork'
+.namespace []
 
 .sub a :immediate
-  $P1 = new .String
+  $P1 = new ['String']
   $P1 = "ok\n"
-  store_global 'sub_namespace', "eek", $P1
-## store_global "eek", $P1
+  set_global ['sub_namespace'], "eek", $P1
 .end
 
 .namespace [ 'sub_namespace' ]
 
 .sub whee :main
-
-$P1 = find_global 'eek'
-print $P1
+ $P1 = get_global 'eek'
+ print $P1
 .end
 CODE
 ok
@@ -677,7 +671,7 @@ OUTPUT
 
 open $S, '>', "$temp_b.pir" or die "Can't write $temp_b.pir";
 print $S <<'EOF';
-.HLL 'B', ''
+.HLL 'B'
 .sub b_foo
     print "b_foo\n"
 .end
@@ -688,9 +682,9 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', 'export_to() with null destination 
 .sub 'test' :main
     .local pmc nsa, nsb, ar
 
-    ar = new .ResizableStringArray
+    ar = new ['ResizableStringArray']
     push ar, 'foo'
-    nsa = new .Null
+    nsa = new ['Null']
     nsb = get_namespace ['B']
     nsb.'export_to'(nsa, ar)
 .end
@@ -707,7 +701,7 @@ pir_error_output_like(
 .sub 'test' :main
     .local pmc nsa, nsb, ar
 
-    ar = new .Null
+    ar = new ['Null']
     nsa = get_namespace
     nsb = get_namespace ['B']
     nsb.'export_to'(nsa, ar)
@@ -725,7 +719,7 @@ pir_error_output_like(
 .sub 'test' :main
     .local pmc nsa, nsb, ar
 
-    ar = new .ResizableStringArray
+    ar = new ['ResizableStringArray']
     nsa = get_namespace
     nsb = get_namespace ['B']
     nsb.'export_to'(nsa, ar)
@@ -743,7 +737,7 @@ pir_error_output_like(
 .sub 'test' :main
     .local pmc nsa, nsb, ar
 
-    ar = new .Hash
+    ar = new ['Hash']
     nsa = get_namespace
     nsb = get_namespace ['B']
     nsb.'export_to'(nsa, ar)
@@ -757,12 +751,12 @@ CODE
 OUTPUT
 
 pir_output_is( <<"CODE", <<'OUTPUT', "export_to -- success with array" );
-.HLL 'A', ''
+.HLL 'A'
 .sub main :main
     a_foo()
     load_bytecode "$temp_b.pir"
     .local pmc nsr, nsa, nsb, ar
-    ar = new .ResizableStringArray
+    ar = new ['ResizableStringArray']
     push ar, "b_foo"
     nsr = get_root_namespace
     nsa = nsr['a']
@@ -780,12 +774,12 @@ b_foo
 OUTPUT
 
 pir_output_is( <<"CODE", <<'OUTPUT', "export_to -- success with hash (empty value)" );
-.HLL 'A', ''
+.HLL 'A'
 .sub main :main
     a_foo()
     load_bytecode "$temp_b.pir"
     .local pmc nsr, nsa, nsb, ar
-    ar = new .Hash
+    ar = new ['Hash']
     ar["b_foo"] = ""
     nsr = get_root_namespace
     nsa = nsr['a']
@@ -803,13 +797,13 @@ b_foo
 OUTPUT
 
 pir_output_is( <<"CODE", <<'OUTPUT', "export_to -- success with hash (null value)" );
-.HLL 'A', ''
+.HLL 'A'
 .sub main :main
     a_foo()
     load_bytecode "$temp_b.pir"
     .local pmc nsr, nsa, nsb, ar, nul
-    nul = new .Null
-    ar  = new .Hash
+    nul = new ['Null']
+    ar  = new ['Hash']
     ar["b_foo"] = nul
     nsr = get_root_namespace
     nsa = nsr['a']
@@ -827,12 +821,12 @@ b_foo
 OUTPUT
 
 pir_error_output_like( <<"CODE", <<'OUTPUT', "export_to -- success with hash (and value)" );
-.HLL 'A', ''
+.HLL 'A'
 .sub main :main
     a_foo()
     load_bytecode "$temp_b.pir"
     .local pmc nsr, nsa, nsb, ar
-    ar = new .Hash
+    ar = new ['Hash']
     ar["b_foo"] = "c_foo"
     nsr = get_root_namespace
     nsa = nsr['a']
@@ -848,7 +842,7 @@ pir_error_output_like( <<"CODE", <<'OUTPUT', "export_to -- success with hash (an
 CODE
 /^a_foo
 b_foo
-Null PMC access in invoke\(\)/
+Could not find non-existent sub b_foo/
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "get_parent" );
@@ -866,7 +860,7 @@ CODE
 parrot
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global [''], \"print_ok\"" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global [''], \"print_ok\"" );
 .namespace ['']
 
 .sub print_ok
@@ -877,7 +871,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "find_global [''], \"print_ok\"" );
 .namespace ['foo']
 
 .sub main :main
-  $P0 = find_global [''], 'print_ok'
+  $P0 = get_hll_global [''], 'print_ok'
   $P0()
   end
 .end
@@ -885,7 +879,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global with array ('')" );
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global with array ('')" );
 .namespace ['']
 
 .sub print_ok
@@ -896,9 +890,9 @@ pir_output_is( <<'CODE', <<'OUTPUT', "find_global with array ('')" );
 .namespace ['foo']
 
 .sub main :main
-  $P0 = new .ResizableStringArray
+  $P0 = new ['ResizableStringArray']
   $P0[0] = ''
-  $P0 = find_global $P0, 'print_ok'
+  $P0 = get_hll_global $P0, 'print_ok'
   $P0()
   end
 .end
@@ -906,8 +900,8 @@ CODE
 ok
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "find_global with empty array" );
-.namespace
+pir_output_is( <<'CODE', <<'OUTPUT', "get_global with empty array" );
+.namespace []
 
 .sub print_ok
   print "ok\n"
@@ -917,8 +911,9 @@ pir_output_is( <<'CODE', <<'OUTPUT', "find_global with empty array" );
 .namespace ['foo']
 
 .sub main :main
-  $P0 = new .ResizablePMCArray
-  $P0 = find_global $P0, 'print_ok'
+  $P0 = new ['ResizablePMCArray']
+  $P0 = 0
+  $P0 = get_hll_global $P0, 'print_ok'
   $P0()
   end
 .end
@@ -937,7 +932,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "Namespace.get_global() with array ('')" );
 .namespace ['foo']
 
 .sub main :main
-  $P1 = new .ResizableStringArray
+  $P1 = new ['ResizableStringArray']
   $P1[0] = ''
   $P1 = get_hll_global $P1, 'print_ok'
   $P1()
@@ -977,14 +972,14 @@ pir_output_is( <<'CODE', <<'OUTPUT', "Nested namespace introspection" );
     print "\n"
 
     .local pmc bar_ns
-    bar_ns = foo_ns.find_namespace( 'Bar' )
+    bar_ns = foo_ns.'find_namespace'( 'Bar' )
     $S0    = bar_ns
     print "Found nested namespace: "
     print $S0
     print "\n"
 
     .local pmc baz_ns
-    baz_ns    = bar_ns.find_namespace( 'Baz' )
+    baz_ns    = bar_ns.'find_namespace'( 'Baz' )
     no_symbol = 'Baz'
 
     .local int is_defined
@@ -1000,7 +995,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "Nested namespace introspection" );
 
   find_symbols:
     .local pmc a_sub
-    a_sub = bar_ns.find_sub( 'a_sub' )
+    a_sub = bar_ns.'find_sub'( 'a_sub' )
     $S0   = a_sub
     a_sub()
     print "Found sub: "
@@ -1008,20 +1003,20 @@ pir_output_is( <<'CODE', <<'OUTPUT', "Nested namespace introspection" );
     print "\n"
 
     .local pmc some_sub
-    some_sub  = bar_ns.find_sub( 'some_sub' )
+    some_sub  = bar_ns.'find_sub'( 'some_sub' )
     no_symbol = 'some_sub'
 
     is_defined = defined some_sub
     if is_defined goto oops
 
     .local pmc a_var
-    a_var    = bar_ns.find_var( 'a_var' )
+    a_var    = bar_ns.'find_var'( 'a_var' )
     print "Found var: "
     print a_var
     print "\n"
 
     .local pmc some_var
-    some_var    = bar_ns.find_var( 'some_var' )
+    some_var    = bar_ns.'find_var'( 'some_var' )
     no_symbol = 'some_var'
 
     is_defined = defined some_var
@@ -1038,9 +1033,9 @@ pir_output_is( <<'CODE', <<'OUTPUT', "Nested namespace introspection" );
 
 .sub a_sub
     .local pmc some_var
-    some_var = new .String
+    some_var = new ['String']
     some_var = 'a string PMC'
-    store_global [ 'Foo'; 'Bar' ], 'a_var', some_var
+    set_hll_global [ 'Foo'; 'Bar' ], 'a_var', some_var
 .end
 CODE
 Found namespace: Foo
@@ -1063,6 +1058,20 @@ CODE
 Found root namespace.
 OUTPUT
 
+pir_output_is( <<'CODE', <<'OUTPUT', 'root namespace is not a class' );
+.sub main :main
+    .local pmc root_ns
+    root_ns = get_root_namespace
+    .local pmc root_class
+    root_class = get_class root_ns
+    .local int is_class
+    is_class = defined root_class
+    say is_class
+.end
+CODE
+0
+OUTPUT
+
 pir_output_is( <<'CODE', <<'OUTPUT', 'get_root_namespace "Foo"' );
 .sub main :main
     .local pmc foo_ns
@@ -1073,7 +1082,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'get_root_namespace "Foo"' );
         print "Found root namespace 'foo'.\n"
     NO_NAMESPACE_FOUND:
 .end
-.HLL 'Foo', ''
+.HLL 'Foo'
 .sub dummy
 .end
 CODE
@@ -1102,7 +1111,7 @@ my $create_nested_key = <<'CREATE_NESTED_KEY';
     .param pmc other_names :slurpy
 
     .local pmc key
-    key = new .Key
+    key = new ['Key']
     key = name
 
     .local int elem
@@ -1146,7 +1155,7 @@ $create_nested_key
     .param pmc key
 
     .local pmc get_ns
-    get_ns = find_global key, 'get_namespace'
+    get_ns = get_global key, 'get_namespace'
 
     .local pmc ns
     ns = get_ns()
@@ -1197,15 +1206,15 @@ $create_nested_key
     root_ns = get_namespace
 
     .local pmc child_ns
-    child_ns = new .NameSpace
+    child_ns = new ['NameSpace']
     root_ns.'add_namespace'( 'Nested', child_ns )
 
     .local pmc grandchild_ns
-    grandchild_ns = new .NameSpace
+    grandchild_ns = new ['NameSpace']
     child_ns.'add_namespace'( 'Grandkid', grandchild_ns )
 
     .local pmc great_grandchild_ns
-    great_grandchild_ns = new .NameSpace
+    great_grandchild_ns = new ['NameSpace']
     grandchild_ns.'add_namespace'( 'Greatgrandkid', great_grandchild_ns )
 
     .local pmc parent
@@ -1242,7 +1251,7 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'add_namespace() with error' );
     ns_child = subclass 'NameSpace', 'NSChild'
 
     .local pmc child
-    child = new 'NSChild'
+    child = new ['NSChild']
 
     .local pmc root_ns
     root_ns = get_namespace
@@ -1250,7 +1259,7 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'add_namespace() with error' );
     root_ns.'add_namespace'( 'Really nested', child )
 
     .local pmc not_a_ns
-    not_a_ns = new .Integer
+    not_a_ns = new ['Integer']
 
     push_eh _invalid_ns
     root_ns.'add_namespace'( 'Nested', not_a_ns )
@@ -1259,8 +1268,9 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'add_namespace() with error' );
 _invalid_ns:
     .local pmc exception
     .local string message
-    .get_results( exception, message )
+    .get_results( exception )
 
+    message = exception
     print message
     print "\n"
 .end
@@ -1273,7 +1283,7 @@ $create_nested_key
 
 .sub 'main' :main
     .local pmc report_ns
-    report_ns = find_global 'report_namespace'
+    report_ns = get_global 'report_namespace'
 
     .local pmc key
     key = create_nested_key( 'Parent' )
@@ -1289,10 +1299,10 @@ $create_nested_key
     child_ns.'add_sub'( 'report_ns', report_ns )
 
     .local pmc report_namespace
-    report_namespace = find_global [ 'Parent' ], 'report_ns'
+    report_namespace = get_global [ 'Parent' ], 'report_ns'
     report_namespace()
 
-    report_namespace = find_global [ 'Parent'; 'Child' ], 'report_ns'
+    report_namespace = get_global [ 'Parent'; 'Child' ], 'report_ns'
     report_namespace()
 .end
 
@@ -1323,7 +1333,7 @@ parrot
 parrot
 OUTPUT
 
-pir_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error' );
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error', todo => 'needs full implementation of PDD 17' );
 .sub main :main
     .local pmc s_child
     s_child = subclass 'Sub', 'SubChild'
@@ -1332,7 +1342,7 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error' );
     e_child = subclass 'Closure', 'ClosureChild'
 
     .local pmc child
-    child = new 'SubChild'
+    child = new ['SubChild']
 
     .local pmc root_ns
     root_ns = get_namespace
@@ -1340,24 +1350,24 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error' );
     root_ns.'add_sub'( 'child', child )
     print "Added sub child\n"
 
-    child = new 'Closure'
+    child = new ['Closure']
     root_ns.'add_sub'( 'closure', child )
     print "Added closure\n"
 
-    child = new 'Coroutine'
+    child = new ['Coroutine']
     root_ns.'add_sub'( 'coroutine', child )
     print "Added coroutine\n"
 
-    child = new 'Eval'
+    child = new ['Eval']
     root_ns.'add_sub'( 'eval', child )
     print "Added eval\n"
 
-    child = new 'ClosureChild'
+    child = new ['ClosureChild']
     root_ns.'add_sub'( 'closure_child', child )
     print "Added closure child\n"
 
     .local pmc not_a_sub
-    not_a_sub = new .Integer
+    not_a_sub = new ['Integer']
 
     push_eh _invalid_sub
     root_ns.'add_sub'( 'Nested', not_a_sub )
@@ -1366,8 +1376,9 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error' );
 _invalid_sub:
     .local pmc exception
     .local string message
-    .get_results( exception, message )
+    .get_results( exception )
 
+    message = exception
     print message
     print "\n"
 .end
@@ -1385,11 +1396,11 @@ $create_nested_key
 
 .sub 'main' :main
     .local pmc foo
-    foo = new .String
+    foo = new ['String']
     foo = 'Foo'
 
     .local pmc bar
-    bar = new .String
+    bar = new ['String']
     bar = 'Bar'
 
     .local pmc key
@@ -1406,12 +1417,12 @@ $create_nested_key
     child_ns.'add_var'( 'bar', bar )
 
     .local pmc my_var
-    my_var = find_global [ 'Parent' ], 'foo'
+    my_var = get_global [ 'Parent' ], 'foo'
     print "Foo: "
     print my_var
     print "\\n"
 
-    my_var = find_global [ 'Parent'; 'Child' ], 'bar'
+    my_var = get_global [ 'Parent'; 'Child' ], 'bar'
     print "Bar: "
     print my_var
     print "\\n"
@@ -1449,7 +1460,7 @@ $create_nested_key
     .local pmc grandchild_ns
     grandchild_ns = child_ns.'find_namespace'( key )
 
-    child_ns.'del_namespace'( 'Child' ) 
+    child_ns.'del_namespace'( 'Child' )
 
     key      = create_nested_key( 'Child' )
 
@@ -1510,9 +1521,9 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'del_namespace() with error' );
 
 .sub main :main
     .local pmc not_a_ns
-    not_a_ns = new .Array
+    not_a_ns = new ['Array']
 
-    store_global 'Not_A_NS', not_a_ns
+    set_global 'Not_A_NS', not_a_ns
 
     .local pmc root_ns
     root_ns = get_namespace
@@ -1529,8 +1540,9 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'del_namespace() with error' );
 _invalid_ns:
     .local pmc exception
     .local string message
-    .get_results( exception, message )
+    .get_results( exception )
 
+    message = exception
     print message
     print "\n"
     .return()
@@ -1549,27 +1561,27 @@ pir_output_is( <<"CODE", <<'OUTPUT', 'del_sub()' );
     parent_ns = root_ns.'find_namespace'( 'Parent' )
     parent_ns.'del_sub'( 'dummy' )
 
-    .local pmc my_sub   
-    my_sub = find_global [ 'Parent' ], 'dummy'
+    .local pmc my_sub
+    my_sub = get_global [ 'Parent' ], 'dummy'
     if_null my_sub, PARENT_NO_DUMMY
     print "Parent did not delete dummy\\n"
 
   PARENT_NO_DUMMY:
-    my_sub = find_global [ 'Parent' ], 'no_dummy'
+    my_sub = get_global [ 'Parent' ], 'no_dummy'
     my_sub()
 
     .local pmc child_ns
     child_ns = parent_ns.'find_namespace'( 'Child' )
     child_ns.'del_sub'( 'dummy' )
 
-    .local pmc my_sub   
-    my_sub = find_global [ 'Parent'; 'Child' ], 'dummy'
+    .local pmc my_sub
+    my_sub = get_global [ 'Parent'; 'Child' ], 'dummy'
     if_null my_sub, CHILD_NO_DUMMY
     print "Child did not delete dummy\\n"
     my_sub()
 
   CHILD_NO_DUMMY:
-    my_sub = find_global [ 'Parent'; 'Child' ], 'no_dummy'
+    my_sub = get_global [ 'Parent'; 'Child' ], 'no_dummy'
     my_sub()
 .end
 
@@ -1600,9 +1612,9 @@ OUTPUT
 pir_output_like( <<'CODE', <<'OUTPUT', 'del_sub() with error' );
 .sub main :main
     .local pmc not_a_ns
-    not_a_ns = new .Array
+    not_a_ns = new ['Array']
 
-    store_global 'Not_A_Sub', not_a_ns
+    set_global 'Not_A_Sub', not_a_ns
 
     .local pmc root_ns
     root_ns = get_namespace
@@ -1613,8 +1625,9 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'del_sub() with error' );
 _invalid_sub:
     .local pmc exception
     .local string message
-    .get_results( exception, message )
+    .get_results( exception )
 
+    message = exception
     print message
     print "\n"
     .return()
@@ -1626,15 +1639,15 @@ OUTPUT
 pir_output_is( <<"CODE", <<'OUTPUT', 'del_var()' );
 .sub 'main' :main
     .local pmc foo
-    foo = new .String
+    foo = new ['String']
     foo = 'Foo'
 
     .local pmc bar
-    bar = new .String
+    bar = new ['String']
     bar = 'Bar'
 
-    store_global [ 'Parent' ],          'Foo', foo
-    store_global [ 'Parent'; 'Child' ], 'Bar', bar
+    set_global [ 'Parent' ],          'Foo', foo
+    set_global [ 'Parent'; 'Child' ], 'Bar', bar
 
     .local pmc root_ns
     root_ns = get_namespace
@@ -1648,14 +1661,14 @@ pir_output_is( <<"CODE", <<'OUTPUT', 'del_var()' );
     child_ns.'del_var'( 'Bar' )
 
     .local pmc my_var
-    my_var = find_global [ 'Parent' ], 'Foo'
+    my_var = get_global [ 'Parent' ], 'Foo'
     if_null my_var, TEST_CHILD_VAR
     print "Parent Foo exists: "
     print my_var
     print "\\n"
 
   TEST_CHILD_VAR:
-    my_var = find_global [ 'Parent'; 'Child' ], 'Bar'
+    my_var = get_global [ 'Parent'; 'Child' ], 'Bar'
     if_null my_var, ALL_DONE
     print "Child Bar exists: "
     print my_var
@@ -1677,18 +1690,128 @@ OUTPUT
 pir_error_output_like( <<'CODE', <<'OUTPUT', 'overriding find_method()' );
 .sub 'main' :main
     $P0 = newclass 'Override'
-    $P1 = new 'Override'
+    $P1 = new ['Override']
     $P2 = find_method $P1, 'foo'
 .end
 
 .namespace [ 'Override' ]
 
 .sub 'find_method' :vtable
+    .param string method
     say "Finding method"
 .end
 CODE
 /Finding method/
 OUTPUT
+
+pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC, RT #39978" );
+.sub main :main
+     $P0 = new ['String']
+     $P0 = "Ook...BANG!\n"
+     set_root_global [ "DUMMY"; "X"; "Y" ], "Explosion", $P0
+
+     $P1 = new ['Integer']
+     $P1 = 0
+     set_root_global [ "DUMMY"; "X"; "Y" ], "T0", $P0
+
+     .local pmc dummy_x_y_ns, iter
+     dummy_x_y_ns = get_root_namespace [ "DUMMY"; "X"; "Y" ]
+     iter = new ['Iterator'], dummy_x_y_ns
+loop:
+     unless iter goto loop_end
+     $S0 = shift iter
+     print $S0
+     print "\n"
+     goto loop
+loop_end:
+
+.end
+CODE
+Explosion
+T0
+OUT
+
+pir_error_output_like( <<'CODE', <<OUT, "NameSpace with no class, RT #55620" );
+.sub 'main' :main
+    $P1 = new ['NameSpace']
+    set_args '(0)', $P1
+    tailcallmethod $P1, 'bob'
+.end
+CODE
+/Null PMC access in get_string()/
+OUT
+
+pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC" );
+.namespace [ 'bar' ]
+
+.sub 'main' :main
+    $P0 = get_namespace
+    say $P0
+    $I0 = elements $P0
+    say $I0
+    new $P1 , 'Iterator', $P0
+  L1:
+    unless $P1 goto L2
+    $P2 = shift $P1
+    say $P2
+    goto L1
+  L2:
+    say 'OK'
+.end
+
+.sub 'foo'
+    say 'foo'
+.end
+CODE
+bar
+2
+main
+foo
+OK
+OUT
+
+pir_output_is( <<'CODE', <<'OUT', "make_namespace method");
+.sub 'main' :main
+    $P0 = split ';', 'perl6;Foo;Bar'
+    $P1 = get_root_namespace
+    $P2 = $P1.'make_namespace'($P0)
+    $I0 = isa $P2, 'NameSpace'
+    say $I0
+    $P3 = get_root_namespace ['perl6';'Foo';'Bar']
+    $I0 = isnull $P3
+    say $I0
+    $I0 = issame $P2, $P3
+    say $I0
+.end
+CODE
+1
+0
+1
+OUT
+
+pir_error_output_like( <<'CODE', <<'OUT', 'adding :anon sub to a namespace, TT #56' );
+.namespace ['Foo']
+.sub main :main
+    .const 'Sub' $P0 = 'bar'
+
+    set_global 'ok', $P0
+    $P1 = get_global 'ok'
+    say $P1
+    $S0 = ok()
+    say $S0
+    $S0 = nok()
+    say $S0
+.end
+
+.namespace []
+.sub 'nok' :anon :subid('bar')
+    .return( 'ok 1' )
+.end
+CODE
+/
+ok 1
+Could not find non-existent sub nok/
+OUT
 
 # Local Variables:
 #   mode: cperl

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: manifest.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: manifest.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,23 +15,29 @@ package init::manifest;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
 use Parrot::Configure::Step;
+use Parrot::Configure::Utils ':gen';
 use ExtUtils::Manifest qw(manicheck);
 
-$description = 'Checking MANIFEST';
 
-@args = qw(nomanicheck);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Check MANIFEST};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
+    $conf->append_configure_log('MANIFEST.configure.generated');
     if ( $conf->options->get('nomanicheck') ) {
         $self->set_result('skipped');
-        return $self;
+        return 1;
     }
 
     my @missing = ExtUtils::Manifest::manicheck();
@@ -48,7 +54,7 @@ END
         return;
     }
 
-    return $self;
+    return 1;
 }
 
 1;

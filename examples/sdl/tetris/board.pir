@@ -8,8 +8,7 @@ board.pir - a tetris board class.
     app = global "Tetris::App"
 
     # create a new board
-    find_type $I0, "Tetris::Board"
-    board = new $I0, app
+    board = new "Tetris::Board", app
 
     # let the current block of the board fall down fast
     board."fall"()
@@ -21,15 +20,16 @@ board.pir - a tetris board class.
 .namespace ["Tetris::Board"]
 
 .sub __onload :load
-    find_type $I0, "Tetris::Board"
-    if $I0 > 1 goto END
+    $P0 = get_class "Tetris::Board"
+    unless null $P0 goto END
+
     load_bytecode "examples/sdl/tetris/boarddata.pir"
     load_bytecode "examples/sdl/tetris/blocks.pir"
-    getclass $P0, "Tetris::BoardData"
+    get_class $P0, "Tetris::BoardData"
     subclass $P0, $P0, "Tetris::Board"
 
     # set the BUILD method name
-    $P1 = new .String
+    $P1 = new 'String'
     $P1 = 'BUILD'
     setprop $P0, 'BUILD', $P1
 END:
@@ -37,7 +37,7 @@ END:
 
 =head1 METHODS
 
-A Board object has the folloging methods:
+A Board object has the following methods:
 
 =over 4
 
@@ -67,7 +67,7 @@ Returns the created board.
 
     # blocksize to use
     set blocksize, 20
-    
+
     # field size to use
     set w, 10
     set h, 20
@@ -77,8 +77,7 @@ Returns the created board.
     self."fill"( 0 )
 
     # setup the cache
-    find_type $I0, "Tetris::BoardData"
-    new temp, $I0
+    temp = new "Tetris::BoardData"
     temp."init"( w, h )
     temp."fill"( -1 )
     setprop self, "cache", temp
@@ -86,37 +85,37 @@ Returns the created board.
     #
     # setup some properties
     #
-    
+
     # set the application object
     setprop self, "app", app
     # XXX: register the board and save its ID
     i = app."registerBoard"( self )
-    
+
     # set the 'next fall time'
-    new temp, .Float
+    new temp, 'Float'
     set temp, 0
     setprop self, "NextFallTime", temp
-    
+
     # set the 'fall interval'
-    new temp, .Float
+    new temp, 'Float'
     set temp, 0.5
     setprop self, "FallInterval", temp
-    
+
     # xpos
-    new temp, .Integer
+    new temp, 'Integer'
     set temp, 10
     setprop self, "xpos", temp
 
     # ypos
-    new temp, .Integer
+    new temp, 'Integer'
     set temp, 10
     setprop self, "ypos", temp
-    
+
     # set the blocksize
-    new temp, .Integer
+    new temp, 'Integer'
     set temp, blocksize
     setprop self, "blocksize", temp
-    
+
     # create the preview block
     self."nextBlock"()
 
@@ -137,7 +136,7 @@ Returns the application object to which this board belongs to.
     .local pmc app
 
     getprop app, "app", self
-    
+
     .return (app)
 .end
 
@@ -152,7 +151,7 @@ in the preview window.
     .local pmc block
 
     getprop block, "nextblock", self
-    
+
     # return the block
     .return (block)
 .end
@@ -170,7 +169,7 @@ This method returns nothing.
     .param pmc block
 
     setprop self, "nextblock", block
-    
+
     # return the block
     .return ()
 .end
@@ -191,17 +190,17 @@ This method returns nothing.
     .param pmc block
     .local int width
     .local int size
-    
-    $I0 = typeof block
-    if $I0 == .Undef goto END
-    
+
+    $S0 = typeof block
+    if $S0 == "Undef" goto END
+
     # assign the board to the block
     block."setBoard"( self )
 
     #
     # set the block's x position to the center of the board
     # xpos = (self.width - block.size) / 2
-    # 
+    #
     # get the board's width
     width = self."width"()
     # get the block's size
@@ -242,7 +241,7 @@ This method returns the block that is now falling down.
 
     .local pmc block
     .local pmc temp
-    
+
     if got_id goto SKIP_SET_ID
     # no INT arg => use a random next block
     id = -1
@@ -250,15 +249,15 @@ SKIP_SET_ID:
 
     # get the 'next block' and store it as the current one
     getprop block, "nextblock", self
-    
+
     # create a new 'next block'
-    $I0 = self."blockID"( id )
-    temp = new $I0, self
+    $P0 = self."blockID"( id )
+    temp = new $P0, self
     setprop self, "nextblock", temp
 
     # new currently falling block created, activate it
     self."newCurrentBlock"( block )
-    
+
 END:
     # return the block
     .return (block)
@@ -274,10 +273,10 @@ This method returns nothing.
 
 .sub fall :method
     .local pmc block
-    
+
     getprop block, "block", self
     block."fall"()
-    
+
     .return ()
 .end
 
@@ -291,10 +290,10 @@ Returns 1 if the current block is falling down fast, 0 otherwise.
     .param pmc self
     .local pmc block
     .local int ret
-    
+
     getprop block, "block", self
     ret = block."falling"()
-    
+
     .return (ret)
 .end
 
@@ -306,7 +305,7 @@ Returns the currently falling block.
 
 .sub currentBlock :method
     .local pmc block
-    
+
     getprop block, "block", self
 
     .return (block)
@@ -324,10 +323,10 @@ measured in pixels.
 .sub blockSize :method
     .local pmc temp
     .local int i
-        
+
     getprop temp, "blocksize", self
     set i, temp
-    
+
     .return (i)
 .end
 
@@ -358,11 +357,11 @@ Returns the calculated offset.
     .local int offset
     .local pmc temp
     .local pmc i
-    
+
     offset = self."width"()
     mul offset, y
     add offset, x
-    
+
     .return (offset)
 .end
 
@@ -405,9 +404,9 @@ This method returns nothing.
     .local int s
     .local int offset
     .local int i
-        
+
     s = block."size"()
-    
+
     (xp, yp) = block."position"()
 
     set i, 0
@@ -424,7 +423,7 @@ TRANS_LOOPx:
     offset = self."offset"( xp, yp )
     sub xp, x
     sub yp, y
-    
+
     # set the value at the calculated offset to the specified color value
     set data[offset], value
 
@@ -433,7 +432,7 @@ TRANS_SKIP:
     inc i
     if x >= s goto TRANS_LOOPy
     branch TRANS_LOOPx
-    
+
 TRANS_LOOPend:
     .return ()
 .end
@@ -462,7 +461,7 @@ This method returns nothing.
     value = block."id"()
     inc value # make first id (0) blue
     self."translateBlockData"( block, self, value )
-    
+
     .return ()
 .end
 
@@ -480,9 +479,9 @@ This method returns nothing.
     .local int src
     .local int dst
     .local int temp
-    
+
     w = self."width"()
-    
+
     temp = line
     dst = self."offset"( w, temp )
     dec temp
@@ -530,9 +529,9 @@ This method returns the number of lines removed.
     .local int hits
     .local int offset
     .local int offset2
-    
+
     (w, h) = self."dimensions"()
-    
+
     set hits, 0
     set line, -1
 RFL_NEXTLINE:
@@ -607,13 +606,13 @@ This method returns nothing.
     .local int xp
     .local int yp
     .local pmc rect
-    
-    rect = new .Hash
-    
+
+    rect = new 'Hash'
+
     # get the app's palette
     $P0 = self."application"()
     palette = $P0."palette"()
-    
+
     (xpos, ypos) = self."position"()
     (w, h) = self."dimensions"()
     blocksize = self."blockSize"()
@@ -642,13 +641,12 @@ NO_CLEAR_CACHE:
     add yp, 1
 
     unless full goto NO_FIELDBACKGROUND
-    
+
     rect["x"] = xpos
     rect["y"] = ypos
     rect["width"] = xp
     rect["height"] = yp
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
+    temp = new "SDL::Rect", rect
     color = palette[15]
     surface."fill_rect"( temp, color )
 NO_FIELDBACKGROUND:
@@ -682,8 +680,7 @@ LOOPx:
     rect["y"] = yp
     rect["width"] = $I0
     rect["height"] = $I0
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
+    temp = new "SDL::Rect", rect
 
     $I0 = self[i]
     $I1 = cache[i]
@@ -693,7 +690,7 @@ LOOPx:
     $I1 = palette
     if $I0 >= $I1 goto LOOPend
     color = palette[$I0]
-    
+
     surface."fill_rect"( temp, color )
 
 NO_DRAW:
@@ -710,7 +707,7 @@ LOOPend:
     temp."draw"( surface, xpos, ypos, blocksize )
     # clear the cache at the position of the current block
     self."translateBlockData"( temp, cache, -1 )
-    
+
     #
     # draw the next block
     #
@@ -735,8 +732,7 @@ LOOPend:
     rect["y"] = yp
     rect["width"] = w
     rect["height"] = h
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
+    temp = new "SDL::Rect", rect
     color = palette[15]
     surface."fill_rect"( temp, color )
     inc xp
@@ -747,8 +743,7 @@ LOOPend:
     rect["y"] = yp
     rect["width"] = w
     rect["height"] = h
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
+    temp = new "SDL::Rect", rect
     color = palette[0]
     surface."fill_rect"( temp, color )
     getprop temp, "nextblock", self
@@ -761,7 +756,7 @@ SKIP_NEXTBLOCK:
 
 Has to be called at frequent intervals.
 
-Returns 1 if a redraw is necessay, 0 otherwise.
+Returns 1 if a redraw is necessary, 0 otherwise.
 
 =cut
 
@@ -879,21 +874,21 @@ TDB
 .sub blockID :method
     .param int id
     .local pmc blocks
-    .local int ret
-    
-    blocks = find_global "Tetris::Block", "blocks"
-    
+    .local pmc ret
+
+    blocks = get_hll_global [ "Tetris::Block" ], "blocks"
+
     if id != -1 goto OK
 
     # max id = number of blocks - 1
     $I0 = blocks
 
     # get a random block id
-    $P0 = new .Random
+    $P0 = new 'Random'
     $N0 = $P0
     $N0 = $N0 * $I0
     id = $N0
-    
+
 OK:
     ret = blocks[id]
 
@@ -910,7 +905,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -918,4 +913,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

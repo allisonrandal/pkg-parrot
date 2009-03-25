@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: Section.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: Section.pm 37229 2009-03-09 04:39:01Z allison $
 
 =head1 NAME
 
@@ -71,7 +71,7 @@ C<@contents> is one or more sections, groups and/or items.
 =cut
 
 sub new {
-    my $self       = ref $_[0] ? ref shift: shift;
+    my $self       = ref $_[0] ? ref shift : shift;
     my $name       = shift;
     my $index_path = shift || 'index.html';
     my $text       = shift;
@@ -118,7 +118,9 @@ sub html_link {
         $path = $self->{INDEX_PATH};
     }
 
-    return '<a href="' . $path . '">' . $self->name . '</a>';
+    my $title = $self->{TITLE} || $self->name || 'Untitled';
+
+    return '<a href="' . $path . '">' . $title . '</a>';
 }
 
 =item C<write_html($source, $target, $silent)>
@@ -140,23 +142,17 @@ sub write_html {
 
     return '' unless $index_html;
 
-    if ( $self->{TEXT} ) {
-        $index_html = "<p>$self->{TEXT}</p>\n\n" . $index_html;
-    }
-    elsif ( $index_html !~ /<DIV CLASS="pod">[^<]*<[Hh]/o ) {
-
-        # If there is no heading or text then we have to bump it down a bit.
-        $index_html = "<BR>\n" . $index_html;
-    }
-
     my $index = $target->file_with_name( $self->{INDEX_PATH} );
 
     $index->write(
-        Parrot::Docs::HTMLPage->header( $self->name, $self->html_navigation, '../resources' ) );
+        Parrot::Docs::HTMLPage->header( $self->name,
+                                        $self->html_navigation,
+                                        '../resources',
+                                        $self->version) );
     $index->append($index_html);
-    $index->append( Parrot::Docs::HTMLPage->footer( '', '../resources' ) );
+    $index->append( Parrot::Docs::HTMLPage->footer( '', '../resources', $self->version ) );
 
-    return $self->html_link . "<br>\n";
+    return "<li>" . $self->html_link . "</li>\n";
 }
 
 =back

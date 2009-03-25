@@ -4,7 +4,7 @@
 # implementation based on http://www.merriampark.com/ld.htm
 # First implementation by Alberto Simoes (ambs <at> cpan.org)
 #
-# $Id: levenshtein.pir 17600 2007-03-18 10:52:17Z paultcochrane $
+# $Id: levenshtein.pir 37200 2009-03-08 11:46:01Z fperrad $
 
 # .sub main :main
 #         $S1 = "purl"
@@ -43,10 +43,10 @@
         if n == 0 goto return_m
         if m == 0 goto return_n
 
-        new matrix, .ResizablePMCArray
+        new matrix, 'ResizablePMCArray'
         i = 0
 init_matrix:
-        new $P0, .ResizableIntegerArray
+        new $P0, 'ResizableIntegerArray'
         matrix[i] = $P0
         i += 1
         if i <= m goto init_matrix
@@ -66,7 +66,7 @@ init_matrix_2:
 init_matrix_done:
         i = 1
 
-cycle:  
+cycle:
         j = 1
 inner_cycle:
         $I0 = i - 1
@@ -88,7 +88,7 @@ inner_cycle:
 
         cost = minimum(a,b,c)
         matrix[i;j] = cost
-        
+
         j += 1
         if j <= n goto inner_cycle
         i += 1
@@ -96,7 +96,7 @@ inner_cycle:
 
         cost = matrix[m;n]
         .return(cost)
-        
+
 return_m:
         .return(m)
 
@@ -132,11 +132,11 @@ b_label:
 other:
         if a < c goto a_label
         goto c_label
-        
+
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

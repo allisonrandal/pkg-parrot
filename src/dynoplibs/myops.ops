@@ -1,13 +1,16 @@
 /*
-** myops.ops - sample
+  Copyright (C) 2003-2008, Parrot Foundation.
+  $Id: myops.ops 37385 2009-03-13 19:25:41Z coke $
 */
 
 #include "parrot/dynext.h"
+#include <stdlib.h>
+
 VERSION = PARROT_VERSION;
 
 =head1 NAME
 
-myops.ops - Parrot Sample Ops
+myops.ops - Sample Dynamic Opcodes 2
 
 =cut
 
@@ -35,25 +38,22 @@ imcc to its limits due the lengthy name.
 
 inline op fortytwo(out INT) {
     $1 = 42;
-    goto NEXT();
 }
 
 inline op what_do_you_get_if_you_multiply_six_by_nine(out STR) {
-    $1 = string_from_cstring(interp, "fortytwo", 0);
-    goto NEXT();
+    $1 = string_from_literal(interp, "fortytwo");
 }
 
 =item B<hcf>
 
-Halt and Catch Fire. Tries to crash parrot.
+Halt and Catch Fire. Tries to crash Parrot.  Note that making a segfault here
+is a Bad Thing, so this relies instead on Well Supported end-this-process
+behavior.
 
 =cut
 
-op hcf() {
-    int *a, i;
-    a = NULL;
-    i = *a;
-    goto OFFSET(i) ; /* in case your runtime is very forgiving. */
+op hcf() :flow {
+    abort();
 }
 
 =item B<q>
@@ -62,8 +62,8 @@ Support for writing a very short quine.
 
 =cut
 
-op q() {
-    PIO_printf(interp, ".loadlib \"myops_ops\"\nq\n");
+op q() :flow {
+    Parrot_io_printf(interp, ".loadlib \"myops_ops\"\nq\n");
     HALT();
 }
 
@@ -76,7 +76,6 @@ Binary operator, defined as A and B, but not BOTH.
 op bxand(out INT, in INT, in INT) {
     /* short circuit boolean logic */
     $1 = 0;
-    goto NEXT();
 }
 
 =item B<alarm>(in NUM, in PMC)
@@ -90,37 +89,31 @@ Call alarm handler sub $3 after $1 time has elapsed, repeat after $2.
 =cut
 
 op alarm(in NUM, in PMC) {
-     Parrot_new_timer_event(interp, NULL, $1, 0.0, 0, $2,
-     EVENT_TYPE_TIMER);
-    goto NEXT();
+    Parrot_cx_schedule_timer(interp, NULL, $1, 0.0, 0, $2);
 }
 
 op alarm(in NUM, in NUM, in PMC) {
-     Parrot_new_timer_event(interp, NULL, $1, $2, -1, $3,
-     EVENT_TYPE_TIMER);
-    goto NEXT();
+    Parrot_cx_schedule_timer(interp, NULL, $1, $2, -1, $3);
 }
 
 =item B<conv_u2>(inout INT)
 
 Conversion of a two byte unsigned int to an INT.
-Formerly in dotgnu.ops. Used only in ./languages/Zcode/z3main.pir.
+Formerly in dotgnu.ops.
 
 =item B<conv_i2>(inout INT)
 
 Conversion of a two byte signed int to an INT.
-Formerly in dotgnu.ops. Used only in ./languages/Zcode/z3main.pir.
+Formerly in dotgnu.ops.
 
 =cut
 
 inline op conv_u2(inout INT) :base_core {
-  $1 = (INTVAL)((Parrot_UInt2)($1));
-  goto NEXT();
+  $1 = (INTVAL)((Parrot_UInt2)($1 & 0xffff));
 }
 
 inline op conv_i2(inout INT) :base_core {
-  $1 = (INTVAL)((Parrot_Int2)($1));
-  goto NEXT();
+  $1 = (INTVAL)((Parrot_Int2)($1 & 0xffff));
 }
 
 

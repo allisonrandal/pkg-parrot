@@ -1,6 +1,10 @@
+/*
+ * Copyright (C) 2003-2007, Parrot Foundation.
+ */
+
 /* dynext.h
 *
-* $Id: dynext.h 19018 2007-06-15 03:48:26Z petdance $
+* $Id: dynext.h 37257 2009-03-10 04:22:07Z Util $
 *
 *   Parrot dynamic extensions
 */
@@ -9,18 +13,46 @@
 #define PARROT_DYNEXT_H_GUARD
 
 /* HEADERIZER BEGIN: src/dynext.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API PMC * Parrot_clone_lib_into( Interp *d, Interp *s, PMC *lib_pmc );
-PARROT_API PMC * Parrot_init_lib( Interp *interp,
-    PMC *(*load_func)(Interp *) /*NULLOK*/,
-    void (*init_func)(Interp *,
-    PMC *) /*NULLOK*/ );
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * Parrot_clone_lib_into(
+    ARGMOD(Interp *d),
+    ARGMOD(Interp *s),
+    ARGIN(PMC *lib_pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*d)
+        FUNC_MODIFIES(*s);
 
-PARROT_API PMC * Parrot_load_lib( Interp *interp /*NN*/,
-    STRING *lib /*NULLOK*/,
-    PMC *initializer )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * Parrot_init_lib(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *(*load_func)(PARROT_INTERP)),
+    ARGIN_NULLOK(void (*init_func)(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *))))
         __attribute__nonnull__(1);
 
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * Parrot_load_lib(PARROT_INTERP,
+    ARGIN_NULLOK(STRING *lib),
+    SHIM(PMC *initializer))
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_Parrot_clone_lib_into __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(d) \
+    || PARROT_ASSERT_ARG(s) \
+    || PARROT_ASSERT_ARG(lib_pmc)
+#define ASSERT_ARGS_Parrot_init_lib __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_load_lib __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/dynext.c */
 
 #endif /* PARROT_DYNEXT_H_GUARD */

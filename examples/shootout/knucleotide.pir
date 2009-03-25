@@ -34,7 +34,7 @@ endwhile_2:
 	.param int len
 	.local int i, seqend
 	.local pmc table
-	table = new .Hash
+	table = new 'Hash'
 	i = 0
 	seqend = length seq
 beginfor:
@@ -59,19 +59,19 @@ endfor:
 	.local int i
 
 	.local pmc array
-	array = new .FixedPMCArray
+	array = new 'FixedPMCArray'
 	$I0 = elements table
 	array = $I0
-	
+
 	.local pmc iter
-   	iter = new .Iterator, table
+   	iter = new 'Iterator', table
 	set iter, .ITERATE_FROM_START
 	i = 0
 iter_loop_1:
 	unless iter goto iter_end_1
 	$S0 = shift iter
 	$I0 = table[$S0]
-	$P0 = new .FixedPMCArray
+	$P0 = new 'FixedPMCArray'
 	$P0 = 2
 	array[i] = $P0
 	array[i;0] = $S0
@@ -80,9 +80,9 @@ iter_loop_1:
 	goto iter_loop_1
 iter_end_1:
 
-	$P0 = global "sort"
+	$P0 = get_global "sort"
 	array."sort"($P0)
-	
+
 	$I0 = array
 	i = 0
 beginfor:
@@ -91,7 +91,7 @@ beginfor:
 	$N0 = array[i;1]
 	print $S0
 	print " "
-	$P0 = new .FixedFloatArray
+	$P0 = new 'FixedFloatArray'
 	$P0 = 1
 	$N1 = seqlen
 	$N0 /= $N1
@@ -137,4 +137,4 @@ endwhile:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

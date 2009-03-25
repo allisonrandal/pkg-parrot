@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: addit.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: addit.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -20,27 +20,27 @@ using Parrot calling conventions (PDD 3). It calls an "add it" function
 
 .sub addit :main
         .local pmc a0
-	a0 = new .Integer
-	a0 = 1000
+    a0 = new 'Integer'
+    a0 = 1000
         .local pmc a1
-	a1 = new .Float
-	a1 = 7.100
+    a1 = new 'Float'
+    a1 = 7.100
         .local pmc a2
-	a2 = new .Integer
-	a2 = 87
+    a2 = new 'Integer'
+    a2 = 87
         .local pmc a3
-	a3 = new .String
-	a3 = "3.87"
+    a3 = new 'String'
+    a3 = "3.87"
         .local pmc a4
-	a4 = new .String
+    a4 = new 'String'
         a4 = "21000000"
-	.local pmc x
-	x = new .Integer
+    .local pmc x
+    x = new 'Integer'
         x = 500000
 AGAIN:
         dec x
         lt x, 0, FIN
-	.local pmc result
+    .local pmc result
         result = _varargs_adder(a0, a1, a2, a3, a4)
         branch AGAIN
 FIN:
@@ -51,20 +51,18 @@ FIN:
 
 .sub _varargs_adder
         .param pmc a0
-	.param pmc a1
-	.param pmc a2
-	.param pmc a3
-	.param pmc a4
+    .param pmc a1
+    .param pmc a2
+    .param pmc a3
+    .param pmc a4
         .local pmc sum
-	sum = new .Float
+    sum = new 'Float'
         add sum, a0
         add sum, a1
         add sum, a2
         add sum, a3
         add sum, a4
-        .pcc_begin_return
-	.return sum
-	.pcc_end_return
+    .return (sum)
 .end
 
 =head1 SEE ALSO
@@ -78,4 +76,4 @@ F<examples/benchmarks/addit2.pir>.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

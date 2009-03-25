@@ -1,4 +1,4 @@
-=head1 INFORMATION
+=head1 Combiner Example
 
 This example shows the usage of C<Stream::Combiner>.
 
@@ -7,7 +7,7 @@ of line numbers, the other writes just a few lines.
 
 The Stream::Combiner combines both streams line by line.
 We specify our own combiner sub that concatenates the strings
-read from both streams together, seperated by a space.
+read from both streams together, separated by a space.
 
 If you specify no combiner sub, a default one will be used that
 just concatenates both strings. If the _counter sub would add
@@ -29,34 +29,31 @@ Creates the 3 Stream objects and dumps the combined stream.
     .local pmc text
     .local pmc combined
 
-    load_bytecode "library/Stream/Base.pir"
-    load_bytecode "library/Stream/Combiner.pir"
-    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode "library/Stream/Base.pbc"
+    load_bytecode "library/Stream/Combiner.pbc"
+    load_bytecode "library/Stream/Sub.pbc"
 
     # create the counter stream
-    find_type $I0, "Stream::Sub"
-    new counter, $I0
-    .const .Sub temp = "_counter"
+    counter = new "Stream::Sub"
+    .const 'Sub' temp = "_counter"
     assign counter, temp
-    
+
     # create the text stream
-    find_type $I0, "Stream::Sub"
-    new text, $I0
+    text = new "Stream::Sub"
     # set its source
-    .const .Sub temp = "_text"
+    .const 'Sub' temp = "_text"
     assign text, temp
 
     # create a combiner stream
-    find_type $I0, "Stream::Combiner"
-    new combined, $I0
+    combined = new "Stream::Combiner"
     # add the streams
     assign combined, counter
     assign combined, text
-    
+
     # specify our own combiner sub
-    .const .Sub temp = "_combiner"
+    .const 'Sub' temp = "_combiner"
     combined."combiner"( temp )
-    
+
     # dump the combined stream
     combined."dump"()
 
@@ -75,7 +72,7 @@ time someone reads the stream.
     .param pmc stream
     .local int i
     .local string str
-    
+
     i = 0
 LOOP:
     inc i
@@ -134,7 +131,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -142,4 +139,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

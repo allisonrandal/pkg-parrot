@@ -1,7 +1,7 @@
 /* pic.h
- *  Copyright (C) 2005, The Perl Foundation.
+ *  Copyright (C) 2005, Parrot Foundation.
  *  SVN Info
- *     $Id: pic.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: pic.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This is the api header for the pic subsystem
  *  Data Structure and Algorithms:
@@ -65,55 +65,130 @@ typedef struct Parrot_pic_store_t {
     size_t n_mics;                      /* range check, debugging mainly */
 } Parrot_PIC_store;
 
-typedef int (*arg_pass_f)(Interp *, PMC *sig,
+typedef int (*arg_pass_f)(PARROT_INTERP, PMC *sig,
             char *src_base, void **src_pc, char *dest_base, void **dest_pc);
 
 /* more or less private interfaces */
 
 /* HEADERIZER BEGIN: src/pic.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-Parrot_MIC* parrot_PIC_alloc_mic( Interp *interp, size_t n );
-Parrot_PIC* parrot_PIC_alloc_pic( Interp *interp );
-void parrot_PIC_alloc_store( Interp *interp,
-    struct PackFile_ByteCode *cs /*NN*/,
-    size_t n )
-        __attribute__nonnull__(2);
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+Parrot_MIC* parrot_PIC_alloc_mic(const PARROT_INTERP, size_t n);
 
-int parrot_pic_check_sig( Interp *interp,
-    const PMC *sig1 /*NN*/,
-    const PMC *sig2 /*NN*/,
-    int *type /*NN*/ )
-        __attribute__nonnull__(2)
-        __attribute__nonnull__(3)
-        __attribute__nonnull__(4);
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+Parrot_PIC* parrot_PIC_alloc_pic(PARROT_INTERP)
+        __attribute__nonnull__(1);
 
-void parrot_PIC_destroy( Interp *interp, struct PackFile_ByteCode *cs /*NN*/ )
-        __attribute__nonnull__(2);
+void parrot_PIC_alloc_store(ARGOUT(PackFile_ByteCode *cs), size_t n)
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*cs);
 
-void parrot_pic_find_infix_v_pp( Interp *interp,
-    PMC *left /*NN*/,
-    PMC *right /*NN*/,
-    Parrot_MIC *mic /*NN*/,
-    opcode_t *cur_opcode /*NN*/ )
+PARROT_WARN_UNUSED_RESULT
+int parrot_pic_check_sig(PARROT_INTERP,
+    ARGIN(PMC *sig1),
+    ARGIN(PMC *sig2),
+    ARGOUT(int *type))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3)
         __attribute__nonnull__(4)
-        __attribute__nonnull__(5);
+        FUNC_MODIFIES(*type);
 
-int parrot_PIC_op_is_cached( Interp *interp, int op_code );
-void * parrot_pic_opcode( Interp *interp, INTVAL op );
-void parrot_PIC_prederef( Interp *interp,
+void parrot_PIC_destroy(ARGMOD(PackFile_ByteCode *cs))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*cs);
+
+void parrot_pic_find_infix_v_pp(PARROT_INTERP,
+    ARGIN(PMC *left),
+    ARGIN(PMC *right),
+    ARGOUT(Parrot_MIC *mic),
+    ARGOUT(opcode_t *cur_opcode))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        __attribute__nonnull__(5)
+        FUNC_MODIFIES(*mic)
+        FUNC_MODIFIES(*cur_opcode);
+
+PARROT_CONST_FUNCTION
+int parrot_PIC_op_is_cached(int op_code);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+void * parrot_pic_opcode(PARROT_INTERP, INTVAL op)
+        __attribute__nonnull__(1);
+
+void parrot_PIC_prederef(PARROT_INTERP,
     opcode_t op,
-    void **pc_pred,
-    int core );
+    ARGOUT(void **pc_pred),
+    int core)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*pc_pred);
 
+#define ASSERT_ARGS_parrot_PIC_alloc_mic __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_parrot_PIC_alloc_pic __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_PIC_alloc_store __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(cs)
+#define ASSERT_ARGS_parrot_pic_check_sig __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(sig1) \
+    || PARROT_ASSERT_ARG(sig2) \
+    || PARROT_ASSERT_ARG(type)
+#define ASSERT_ARGS_parrot_PIC_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(cs)
+#define ASSERT_ARGS_parrot_pic_find_infix_v_pp __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(left) \
+    || PARROT_ASSERT_ARG(right) \
+    || PARROT_ASSERT_ARG(mic) \
+    || PARROT_ASSERT_ARG(cur_opcode)
+#define ASSERT_ARGS_parrot_PIC_op_is_cached __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_parrot_pic_opcode __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_PIC_prederef __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pc_pred)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/pic.c */
 
 
-int parrot_pic_is_safe_to_jit(Interp *, PMC *sub,
-        PMC *sig_args, PMC *sig_results, int *flags);
+/* HEADERIZER BEGIN: src/pic_jit.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-funcptr_t  parrot_pic_JIT_sub(Interp *, PMC *sub, int flags);
+PARROT_WARN_UNUSED_RESULT
+int parrot_pic_is_safe_to_jit(PARROT_INTERP,
+    ARGIN(PMC *sub_pmc),
+    ARGIN(PMC *sig_args),
+    ARGIN(PMC *sig_results),
+    ARGOUT(int *flags))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        __attribute__nonnull__(5)
+        FUNC_MODIFIES(*flags);
+
+funcptr_t parrot_pic_JIT_sub(PARROT_INTERP, ARGIN(PMC *sub_pmc), int flags)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+#define ASSERT_ARGS_parrot_pic_is_safe_to_jit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(sub_pmc) \
+    || PARROT_ASSERT_ARG(sig_args) \
+    || PARROT_ASSERT_ARG(sig_results) \
+    || PARROT_ASSERT_ARG(flags)
+#define ASSERT_ARGS_parrot_pic_JIT_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(sub_pmc)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: src/pic_jit.c */
 
 #endif /* PARROT_PIC_H_GUARD */
 

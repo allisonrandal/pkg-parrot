@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: dynpmc_pl.in 16139 2006-12-17 09:38:27Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: dynpmc_pl.in 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,35 +15,31 @@ dynamic PMCs.
 
 use strict;
 use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../..";
+use lib "$FindBin::Bin/../../lib";
 
 use File::Copy qw(copy);
+use Storable;
 
-# q[] isn't guaranteed to work, but it's safer than "" as some platforms
-# (eg FreeBSD) have ""s embedded in their substution values. q[] is used
-# as Win32 paths have \'s in, which qq treats as escape sequences.
 # Config stuff
-our $CC = q[@cc@ -c];
-our $LD = q[@ld@];
-our $LDFLAGS = q[@ldflags@ @ld_debug@];
-our $LD_LOAD_FLAGS = q[@ld_load_flags@];
-our $PERL = q[@perl@];
-our $LOAD_EXT = q[@load_ext@];
-our $O = q[@o@];
-our $CFLAGS = q[@ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@];
+# q[] isn't guaranteed to work, but it's safer than "" as some platforms
+# (eg FreeBSD) have ""s embedded in their substitution values. q[] is used
+# as Win32 paths have \'s in, which qq treats as escape sequences.
+our $CC              = q[@cc@ -c];
+our $LD              = q[@ld@];
+our $LDFLAGS         = q[@ldflags@ @ld_debug@ @rpath_blib@];
+our $LD_LOAD_FLAGS   = q[@ld_load_flags@];
+our $PERL            = q[@perl@];
+our $LOAD_EXT        = q[@load_ext@];
+our $O               = q[@o@];
+our $CFLAGS          = q[@ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@];
 
 our $LIBPARROT = q[];
-#CONDITIONED_LINE(parrot_is_shared):$LIBPARROT = q[@libparrot_ldflags@];
+#IF(parrot_is_shared):$LIBPARROT = q[@libparrot_ldflags@];
 
 # Here comes some stuff for Win32.
-our $PATHQUOTE = '';
-if ($^O eq 'MSWin32') {
-    # Paths need quoting as they may contain spaces.
-    $PATHQUOTE = '"';
-
-    unless ($CC =~ /gcc/i) {
-        $LIBPARROT = '@build_dir@/libparrot@a@';
-    }
-}
+our $PATHQUOTE = $^O eq 'MSWin32' ? q["] : q[];
 
 # PMC2C Config
 our $PMC2C = "$PERL $PATHQUOTE" . q[@build_dir@@slash@tools@slash@build@slash@pmc2c.pl] . $PATHQUOTE;
@@ -52,13 +48,22 @@ our $PMC2C = "$PERL $PATHQUOTE" . q[@build_dir@@slash@tools@slash@build@slash@pm
 sub compile_cmd {
     my ($target, $source) = @_;
 
-    # XXX Reference to BGC - need long term solution for passing in include paths
+    my $dynpmc_include = '';
+    if (defined $ENV{DYNPMC_INCLUDE} )
+    {
+        $dynpmc_include = $ENV{DYNPMC_INCLUDE};
+        $dynpmc_include =~ s/,/$PATHQUOTE -I$PATHQUOTE/g;
+        $dynpmc_include = "-I" . $PATHQUOTE . $dynpmc_include . $PATHQUOTE . " ";
+    }
+
+
+    # TT #288 - need long term solution for passing in include paths
     return
         "$CC " .
         '@cc_o_out@' . $target . " " .
         "-I" . $PATHQUOTE . '@build_dir@@slash@include' . $PATHQUOTE . " " .
         "-I" . $PATHQUOTE . '@build_dir@@slash@src@slash@pmc' . $PATHQUOTE . " " .
-        "-I" . $PATHQUOTE . '@build_dir@@slash@compilers@slash@bcg@slash@include' . $PATHQUOTE . " " .
+        $dynpmc_include . " " .
         "$CFLAGS " .
         $source;
 };
@@ -69,9 +74,12 @@ sub partial_link_cmd {
     my $liblist;
     if ($^O =~ /mswin32/i) {
         # Need to put various libraries in the link line.
-        $liblist = join( ' ', map { "$_.lib" } keys %$libs );
         if ($CC =~ /gcc/i) {
-            $liblist =~ s/libgdbm\.lib/-llibgdbm/i;
+            $liblist = join( ' ', map { "-l$_" } keys %$libs );
+            $liblist =~ s/-lgdbm/-llibgdbm/i;
+        }
+        else {
+            $liblist = join( ' ', map { "$_.lib" } keys %$libs );
         }
         my $extraLibs = '@libs@ @icu_shared@';
         $extraLibs =~ s/blib/..\\blib/g;
@@ -88,6 +96,12 @@ sub partial_link_cmd {
     }
     else {
         $liblist = join( ' ', map { "-l$_" } keys %$libs );
+        my $extraLibs = '@libs@ @icu_shared@';
+        $liblist .= ' ' . $extraLibs;
+    }
+
+    if (defined $ENV{DYNPMC_LINK}) {
+        push @{$sources}, split /,/, $ENV{DYNPMC_LINK};
     }
 
     return
@@ -132,7 +146,7 @@ elsif ($mode eq 'compile') {
         compile("$group", "lib-$group")
           or die "compile $group.c failed ($?)\n";
     }
-} 
+}
 elsif ($mode eq 'linklibs') {
     my ($group_files, $group_libs, $pmc_group, $pmc_libs) =
         gather_groups_and_libs(@pmcs);
@@ -146,7 +160,7 @@ elsif ($mode eq 'linklibs') {
     # Link non-grouped PMCs individually
     my @ungrouped_pmcs = grep { ! exists $pmc_group->{$_} } @pmcs;
     partial_link($_, $pmc_libs->{$_}, [ $_ ] ) foreach (@ungrouped_pmcs);
-} 
+}
 elsif ($mode eq 'copy') {
     # Copy *.so -> destination, where destination is the first
     # argument, given as --destination=DIRECTORY
@@ -183,28 +197,20 @@ sub run {
     return system(@_) == 0;
 }
 
-# XXX: ordering of libs might be crucial
 sub gather_groups_and_libs {
     my @pmcs = @_;
 
     my ( %group_files, %group_libs, %pmc_group, %pmc_libs );
     for my $pmc (@pmcs) {
-        our $class;
-        require "$pmc.dump";
+        our $class = retrieve("$pmc.dump");
 
         # there can be many libs
         my %libs = %{ $class->{flags}{lib} || {} };
-        if ($^O eq 'MSWin32' && $CC =~ /^gcc/i) {
-            my %newlibs = ();
-            $newlibs{"lib$_"} = $libs{$_} for keys %libs;
-            %libs = %newlibs;
-        }
         $pmc_libs{$pmc} = \%libs;
 
         # There should be at most a single group
         my $group = $class->{flags}{group}
           or next;
-        ($group) = keys %$group;
         $pmc_group{$pmc} = $group;
         push @{ $group_files{$group} }, $pmc;
         $group_libs{$group} ||= {};
@@ -221,7 +227,7 @@ sub modtime {
 
     if (defined $ago) {
         return $NOW - $ago;
-    } 
+    }
     else {
         return;
     }
@@ -266,12 +272,10 @@ sub compile {
 
     $dest_stem ||= $src_stem;
     if (needs_build("$dest_stem$O", "$src_stem.c")) {
-        return run(compile_cmd("$dest_stem$O", "$src_stem.c"))
+        run(compile_cmd("$dest_stem$O", "$src_stem.c"))
           or die "compile $src_stem.c failed ($?)\n";
     }
-    else {
-        return 1;
-    }
+    return 1;
 }
 
 sub partial_link {

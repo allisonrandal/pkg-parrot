@@ -1,7 +1,7 @@
 /* parrot.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: parrot.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: parrot.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -17,6 +17,8 @@
 
 #ifndef PARROT_PARROT_H_GUARD
 #define PARROT_PARROT_H_GUARD
+
+#include "parrot/core_types.h"
 
 #if defined(INSIDE_GLOBAL_SETUP)
 #  define VAR_SCOPE
@@ -116,9 +118,7 @@ typedef jmp_buf Parrot_jump_buff;
 #define OPCODE_TYPE_JAVA 4871757
 #define OPCODE_TYPE_MSNET 0x2e4e4554
 
-typedef struct PMC PMC;
 typedef void STRING_FUNCS;
-typedef void BIGNUM;
 typedef struct parrot_interp_t Interp;
 
 /* weird architectures might need this, s. C-FAQ 5.17
@@ -140,33 +140,33 @@ typedef struct parrot_interp_t Interp;
     A. D. Aug. 6, 2002.
 */
 #if PTR_SIZE == INTVAL_SIZE
-#  define INTVAL2PTR(any,d)    (any)(d)
-#  define UINTVAL2PTR(any,d)    (any)(d)
+#  define INTVAL2PTR(any, d)    (any)(d)
+#  define UINTVAL2PTR(any, d)    (any)(d)
 #else
 #  if PTR_SIZE == LONG_SIZE
-#    define INTVAL2PTR(any,d)    (any)(unsigned long)(d)
-#    define UINTVAL2PTR(any,d)    (any)(unsigned long)(d)
+#    define INTVAL2PTR(any, d)    ((any)(unsigned long)(d))
+#    define UINTVAL2PTR(any, d)    ((any)(unsigned long)(d))
 #  else
-#    define INTVAL2PTR(any,d)    (any)(unsigned int)(d)
-#    define UINTVAL2PTR(any,d)    (any)(unsigned int)(d)
+#    define INTVAL2PTR(any, d)    ((any)(unsigned int)(d))
+#    define UINTVAL2PTR(any, d)    ((any)(unsigned int)(d))
 #  endif /* PTR_SIZE == LONG_SIZE */
 #endif /* PTR_SIZE == INTVAL_SIZE */
-#define PTR2INTVAL(p)    INTVAL2PTR(INTVAL,p)
-#define PTR2UINTVAL(p)    UINTVAL2PTR(UINTVAL,p)
+#define PTR2INTVAL(p)    INTVAL2PTR(INTVAL, (p))
+#define PTR2UINTVAL(p)    UINTVAL2PTR(UINTVAL, (p))
 
 /* Use similar macros for casting between pointers and opcode_t.
-   (We can't assume that sizeof(opcode_t) == sizeof(intval).
+   (We can't assume that sizeof (opcode_t) == sizeof (intval).
 */
 #if (OPCODE_T_SIZE == PTR_SIZE)
-#  define OPCODE_T2PTR(any,d)    (any)(d)
+#  define OPCODE_T2PTR(any, d)    (any)(d)
 #else
 #  if PTR_SIZE == LONG_SIZE
-#    define OPCODE_T2PTR(any,d)    (any)(unsigned long)(d)
+#    define OPCODE_T2PTR(any, d)    (any)(unsigned long)(d)
 #  else
-#    define OPCODE_T2PTR(any,d)    (any)(unsigned int)(d)
+#    define OPCODE_T2PTR(any, d)    (any)(unsigned int)(d)
 #  endif /* PTR_SIZE == LONG_SIZE */
 #endif /* OPCODE_T_SIZE == PTR_SIZE */
-#define PTR2OPCODE_T(p)    OPCODE_T2PTR(opcode_t,p)
+#define PTR2OPCODE_T(p)    OPCODE_T2PTR(opcode_t, (p))
 
 /*
  * some compilers don't like lvalue casts, so macroize them
@@ -183,27 +183,21 @@ typedef struct parrot_interp_t Interp;
 #  define LVALUE_CAST(type, val) (*((type *)&(val)))
 #endif /* __GCC__ */
 
-/*
- * assign to a void* in a way that produces compile-time warnings
- * if the type isn't what was expected.
- */
-#define VOIDPTR_ASSIGN(type, p, val) \
-    do { \
-        type _typed_ptr = (val); \
-        (p) = (val); \
-    } while (0)
-
 /* some SGI compilers have an offsetof()
  * definition that doesn't work for us. */
 #if defined(__sgi) && defined(_COMPILER_VERSION) && (_COMPILER_VERSION >= 400)
 #  undef offsetof
-#  define offsetof(s, m) (size_t)(&(((s *)0)->m))
+#  define offsetof(s, m) (size_t)(&((((s) *)0)->(m)))
 #endif
 
 /* work around warning:
  * cast discards qualifiers from pointer target type
  * for usage grep e.g. in string.c
+ * The casted to type must differ only in constness,
+ * to allow a stricter compiler check in C++ builds.
  */
+
+#ifndef __cplusplus
 
 #define DECL_CONST_CAST_OF(CCTYPE) \
     union { const CCTYPE *__c_ptr; CCTYPE *__ptr; } __ptr_u
@@ -211,15 +205,22 @@ typedef struct parrot_interp_t Interp;
 #define DECL_CONST_CAST \
     DECL_CONST_CAST_OF(void)
 
-#define const_cast(b) (__ptr_u.__c_ptr = (b), __ptr_u.__ptr)
+#define PARROT_const_cast(t, b) ((t)(__ptr_u.__c_ptr = (b), __ptr_u.__ptr))
 
+#else
+
+#define DECL_CONST_CAST_OF(CCTYPE)
+#define DECL_CONST_CAST
+#define PARROT_const_cast(t, b) (const_cast<t>(b))
+
+#endif
 
 /* define some shortcuts for dealing with function pointers */
 /* according to ANSI C, casting between function and non-function pointers is
  * no good.  So we should use "funcptr_t" in place of void* when dealing with
  * function pointers and NULLfunc in place of NULL */
 typedef void (*funcptr_t)(void);
-#define NULLfunc (funcptr_t)0
+#define NULLfunc (funcptr_t)NULL
 
 /* define macros for converting between data and function pointers.  As it
  * turns out, ANSI C does appear to permit you to do this conversion if you
@@ -231,7 +232,7 @@ typedef void (*funcptr_t)(void);
  * hold a pointer.
  */
 #define D2FPTR(x) UINTVAL2PTR(funcptr_t, PTR2UINTVAL(x))
-#define F2DPTR(x) UINTVAL2PTR(void *, PTR2UINTVAL((funcptr_t) x))
+#define F2DPTR(x) UINTVAL2PTR(void *, PTR2UINTVAL((funcptr_t) (x)))
 
 /* On Win32 we need the constant O_BINARY for open() (at least for Borland C),
    but on UNIX it doesn't exist, so set it to 0 if it's not defined
@@ -240,10 +241,33 @@ typedef void (*funcptr_t)(void);
 #  define O_BINARY 0
 #endif /* O_BINARY */
 
-/* define a macro to acknowledge an unused argument, and silence a "helpful"
-   compiler warning. gcc will emit a warning on an empty if body unless {} is
-   used to make an empty block.  */
-#define UNUSED(a) if (a) {}
+/* Hide our struct copying behind macros */
+/* Copying to struct pointer from struct pointer */
+#define STRUCT_COPY(d, s)    (PARROT_ASSERT(d), PARROT_ASSERT(s), *(d)=*(s))
+#define STRUCT_COPY_N(d, s, n) (PARROT_ASSERT(d), PARROT_ASSERT(s), PARROT_ASSERT(sizeof (*(d))==sizeof (*(s))), memcpy((d), (s), sizeof (*(d))*(n)))
+/* Copying to struct pointer from struct */
+#define STRUCT_COPY_FROM_STRUCT(d, s)    (PARROT_ASSERT(d), *(d)=(s))
+
+/* internationalization settings */
+#ifdef    PARROT_HAS_GETTEXT
+#  include <libintl.h>
+#  define _(s)                 gettext(s)
+#  define gettext_noop(s)      (s)
+#  define N_(s)                gettext_noop(s)
+#  define PARROT_TEXTDOMAIN(d) textdomain(d)
+#  define PARROT_BINDTEXTDOMAIN(p, d) bindtextdomain((p), (d))
+#else
+#  define _(s)                 (s)
+#  define N_(s)                (s)
+#  define PARROT_TEXTDOMAIN(d)
+#  define PARROT_BINDTEXTDOMAIN(p, d)
+#endif /* PARROT_HAS_GETTEXT */
+
+#define PACKAGE     "parrot"
+#define LOCALEDIR  "."
+
+typedef struct _hash Hash;
+typedef struct PackFile_ByteCode PackFile_ByteCode;
 
 #include "parrot/settings.h"
 #include "parrot/enums.h"
@@ -272,32 +296,30 @@ typedef void (*funcptr_t)(void);
 #include "parrot/op.h"
 #include "parrot/pmc.h"
 #include "parrot/events.h"
-#include "parrot/intlist.h"
-#include "parrot/smallobject.h"
-#include "parrot/headers.h"
-#include "parrot/dod.h"
+#include "parrot/gc_api.h"
+#include "parrot/gc_mark_sweep.h"
+#include "parrot/gc_pools.h"
 #include "parrot/resources.h"
 #include "parrot/string_funcs.h"
 #include "parrot/misc.h"
-#include "parrot/debug.h"
 #include "parrot/sub.h"
-#include "parrot/inter_call.h"
+#include "parrot/call.h"
 #include "parrot/key.h"
 #include "parrot/exit.h"
 #include "parrot/nci.h"
 #include "parrot/thread.h"
+#include "parrot/scheduler.h"
 #include "parrot/tsq.h"
 #include "parrot/longopt.h"
-#include "parrot/objects.h"
+#include "parrot/oo.h"
 #include "parrot/vtables.h"
-#include "parrot/mmd.h"
+#include "parrot/multidispatch.h"
 #include "parrot/library.h"
-#include "parrot/builtin.h"
 #include "parrot/global.h"
 #include "parrot/stat.h"
 #include "parrot/slice.h"
 #include "parrot/hll.h"
-#include "parrot/stm/backend.h"
+#include "parrot/pbcversion.h"
 
 #endif /* PARROT_PARROT_H_GUARD */
 

@@ -1,6 +1,8 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: Messages.pm 18156 2007-04-11 23:27:33Z jkeenan $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: Messages.pm 36833 2009-02-17 20:09:26Z allison $
+
 package Parrot::Configure::Messages;
+
 use strict;
 use warnings;
 use base qw( Exporter );
@@ -15,11 +17,11 @@ sub print_introduction {
     my $parrot_version = shift;
     print <<"END";
 Parrot Version $parrot_version Configure 2.0
-Copyright (C) 2001-2007, The Perl Foundation.
+Copyright (C) 2001-2009, Parrot Foundation.
 
 Hello, I'm Configure. My job is to poke and prod your system to figure out
 how to build Parrot. The process is completely automated, unless you passed in
-the `--ask' flag on the command line, in which case it'll prompt you for a few
+the `--ask' flag on the command line, in which case I'll prompt you for a few
 pieces of info.
 
 Since you're running this program, you obviously have Perl 5--I'll be pulling
@@ -29,20 +31,41 @@ END
 }
 
 sub print_conclusion {
+    my $conf = shift;
     my $make = shift;
-    print <<"END";
+    my @failed_steps = @{ $conf->{log} };
+    my @logged_failed_steps = ();
+    for (my $i = 1; $i <= $#failed_steps; $i++) {
+        if ( defined $failed_steps[$i] ) {
+            push @logged_failed_steps, [ $i, $conf->{log}->[$i] ];
+        }
+    }
+    if ( scalar ( @logged_failed_steps ) ) {
+        print "\nDuring configuration the following steps failed:\n";
+        foreach my $fail (@logged_failed_steps) {
+            my $msg = sprintf "    %02d:  %s\n", (
+                $fail->[0],
+                $fail->[1]->{step},
+            );
+            print $msg;
+        }
+        print "You should diagnose and fix these errors before calling '$make'\n";
+        return;
+    }
+    else {
+        print <<"END";
 
 Okay, we're done!
 
 You can now use `$make' to build your Parrot.
-(NOTE: do not use `$make -j <n>'!)
 After that, you can use `$make test' to run the test suite.
 
 Happy Hacking,
         The Parrot Team
 
 END
-    return 1;
+        return 1;
+    }
 }
 
 1;

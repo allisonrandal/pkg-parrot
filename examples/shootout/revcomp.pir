@@ -1,5 +1,6 @@
-#!parrot -j
+#!parrot
 # Reads from stdin a file in the format made by fasta.pir
+# ./parrot -R jit
 # N = 2500000 for fasta
 
 # 2.2 s on AMD@2000/512K cache
@@ -12,7 +13,7 @@
 
 .sub tr_00_init :immediate
     .local pmc tr_array
-    tr_array = new .FixedIntegerArray   # Todo char array
+    tr_array = new 'FixedIntegerArray'  # Todo char array
     tr_array = 256                      # Python compat ;)
     .local string from, to
     from = 'wsatugcyrkmbdhvnATUGCYRKMBDHVN'
@@ -35,7 +36,7 @@ loop:
 	stdin = getstdin
 	stdout = getstdout
 	# stdout is linebuffered per default - make it block buffered
-	stdout.'setbuf'(8192)
+	stdout.'buffer_size'(8192)
 
 	seq = ''
 
@@ -43,7 +44,7 @@ beginwhile:
 	line = readline stdin
 	unless line goto endwhile
 	$I0 = ord line
-	unless $I0 == 62 goto else   # '>' 
+	unless $I0 == 62 goto else   # '>'
 		if seq == '' goto no_rev
 		print_revcomp(seq)
 		seq = ''
@@ -66,14 +67,15 @@ done:
 	.local int i, linelen, ch
 	linelen = length line
 
-	reverse line
+        $P0 = new 'String'
+        $P0.'reverse'(line)
 
-	.const .Sub tr_00 = 'tr_00_init'
-	trans line, tr_00
+	.const 'Sub' tr_00 = 'tr_00_init'
+	$P0.'trans'(line, tr_00)
 
 	i = 0
 	$S0 = 'x'
-print_loop:	
+print_loop:
 	$S0 = substr_r line, i, 60
 	print $S0
 	print "\n"
@@ -89,4 +91,4 @@ done:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

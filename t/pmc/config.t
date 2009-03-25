@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: config.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: config.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -38,13 +38,19 @@ CODE
 Hash
 OUT
 
-pir_output_is( <<'CODE', cwd, "prefix" );
+pir_output_is( <<'CODE', ($^O eq 'MSWin32' ? lc(cwd) : cwd), "prefix" );
 .sub main :main
+    load_bytecode "config.pbc"
     .include "iglobals.pasm"
-    .local pmc config_hash, interp
+    .local pmc config_hash, interp, cfg
     interp = getinterp
     config_hash = interp[.IGLOBALS_CONFIG_HASH]
     $S0 = config_hash["prefix"]
+    cfg = _config()
+    $S1 = cfg['osname']
+    if $S1 != 'MSWin32' goto sayit
+    downcase $S0
+  sayit:
     print $S0
 .end
 CODE

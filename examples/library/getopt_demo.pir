@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: getopt_demo.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2004-2008, Parrot Foundation.
+# $Id: getopt_demo.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -135,7 +135,7 @@ TODO: Pass a flag for EXIT_FAILURE and EXIT_SUCCESS
 
 =cut
 
-.sub usage 
+.sub usage
   .param string program_name
 
   print "Usage: ./parrot "
@@ -166,4 +166,4 @@ F<runtime/parrot/library/Getopt/Obj.pir>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

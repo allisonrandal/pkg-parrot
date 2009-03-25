@@ -1,11 +1,14 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: eval.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: eval.t 37425 2009-03-15 00:30:30Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
+use Parrot::Test::Util 'create_tempfile';
+
 use Parrot::Test tests => 17;
 
 =head1 NAME
@@ -24,8 +27,8 @@ Tests on-the-fly PASM, PIR and PAST compilation and invocation.
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "eval_sc" );
     compreg P1, "PASM"	# get compiler
-    set_args "(0)", "print \"in eval\\n\"\nset_returns \"()\"\nreturncc\n"
-    get_results "(0)", P0
+    set_args "0", "print \"in eval\\n\"\nset_returns \"()\"\nreturncc\n"
+    get_results "0", P0
     invokecc P1			# compile
     invokecc P0			# eval code P0
     print "back again\n"
@@ -41,9 +44,9 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "call subs in evaled code " );
     concat S5, "set_returns \"()\"\n"
     concat S5, "returncc\n"
     compreg P1, "PASM"
-    set_args "(0)", S5
+    set_args "0", S5
     invokecc P1
-    find_global P0, "_foo"
+    get_global P0, "_foo"
     invokecc P0
     print "back\n"
     end
@@ -62,13 +65,13 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "call 2 subs in evaled code " );
     concat S5, "set_returns \"()\"\n"
     concat S5, "returncc\n"
     compreg P1, "PASM"
-    set_args "(0)", S5
-    get_results "(0)", P6
+    set_args "0", S5
+    get_results "0", P6
     invokecc P1
-    find_global P2, "_foo"
+    get_global P2, "_foo"
     invokecc P2
     print "back\n"
-    find_global P2, "_bar"
+    get_global P2, "_bar"
     invokecc P2
     print "fin\n"
     end
@@ -82,8 +85,8 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub" );
 
 .sub test :main
-    .local NCI compiler
-    find_global compiler, "xcompile"
+    .local pmc compiler
+    get_global compiler, "xcompile"
     compreg "XPASM", compiler
     .local pmc my_compiler
     my_compiler = compreg "XPASM"
@@ -94,7 +97,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub" );
     code .= "returncc\n"
     the_sub = my_compiler("_foo", code)
     the_sub()
-    the_sub = global "_foo"
+    the_sub = get_global "_foo"
     the_sub()
 .end
 
@@ -105,7 +108,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub" );
     $S0 .= sub_name
     $S0 .= ":\n"
     $S0 .= code
-    .local NCI pasm_compiler
+    .local pmc pasm_compiler
     pasm_compiler = compreg "PASM"
     # print $S0
     $P0 = pasm_compiler($S0)
@@ -119,7 +122,7 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', "bug #31467" );
 
   .sub main :main
-     $P1 = new Hash
+     $P1 = new ['Hash']
      $P0 = find_name "_builtin"
      $P1['builtin'] = $P0
 
@@ -128,9 +131,9 @@ pir_output_is( <<'CODE', <<'OUTPUT', "bug #31467" );
      $P0 = $P2($S0)
      $P1['dynamic'] = $P0
 
-     store_global "funcs", $P1
+     set_global "funcs", $P1
 
-     $S0 = ".sub main\n$P1 = find_global\"funcs\"\n"
+     $S0 = ".sub main\n$P1 = get_global\"funcs\"\n"
      $S0 .= "$P0 = $P1['dynamic']\n$P0()\n"
      $S0 .= "$P0 = $P1['builtin']\n$P0()\n"
      $S0 .= ".end\n"
@@ -162,7 +165,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub PASM" );
 .end
 
 .sub register_compiler
-  $P0 = find_global "puts"
+  $P0 = get_global "puts"
   compreg "PUTS", $P0
 .end
 
@@ -202,11 +205,11 @@ pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub PIR" );
 
 .sub register_compiler
  .local pmc counter
- counter = new Integer
+ counter = new ['Integer']
  counter = 0
- store_global "counter", counter
+ set_global "counter", counter
 
-  $P0 = find_global "_puts"
+  $P0 = get_global "_puts"
   compreg "PUTS", $P0
 .end
 
@@ -217,7 +220,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "PIR compiler sub PIR" );
   pir_compiler = compreg "PIR"
 
   .local pmc counter
-  counter = find_global "counter"
+  counter = get_global "counter"
   inc counter
 
   .local string code
@@ -238,22 +241,25 @@ CODE
 ok 1
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "eval.get_string" );
+my (undef, $temp_pbc)  = create_tempfile( SUFFIX => '.pbc', UNLINK => 1 );
+my (undef, $temp2_pbc) = create_tempfile( SUFFIX => '.pbc', UNLINK => 1 );
+
+pir_output_is( <<"CODE", <<'OUTPUT', "eval.get_string" );
 .sub main :main
 
   .local pmc f1, f2
   .local pmc io
   f1 = compi("foo_1", "hello from foo_1")
-  $S0 = f1
-  io = open "temp.pbc", ">"
-  print io, $S0
+  \$S0 = f1
+  io = open "$temp_pbc", 'w'
+  print io, \$S0
   close io
-  load_bytecode "temp.pbc"
+  load_bytecode "$temp_pbc"
   f2 = compi("foo_2", "hello from foo_2")
-  io = open "temp2.pbc", ">"
+  io = open "$temp2_pbc", 'w'
   print io, f2
   close io
-  load_bytecode "temp2.pbc"
+  load_bytecode "$temp2_pbc"
 .end
 
 .sub compi
@@ -264,11 +270,11 @@ pir_output_is( <<'CODE', <<'OUTPUT', "eval.get_string" );
   pir_compiler = compreg "PIR"
   code = ".sub "
   code .= name
-  code .= " :load\n"
-  code .= "print \""
+  code .= " :load\\n"
+  code .= "print \\""
   code .= printme
-  code .= "\\n\"\n"
-  code .= ".end\n"
+  code .= "\\\\n\\"\\n"
+  code .= ".end\\n"
 
   retval = pir_compiler(code)
   .return (retval)
@@ -278,29 +284,31 @@ hello from foo_1
 hello from foo_2
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "check loaded lib hash" );
+(my $temp_name  = $temp_pbc)  =~ s/\.pbc$//;
+(my $temp2_name = $temp2_pbc) =~ s/\.pbc$//;
+
+pir_output_is( <<"CODE", <<'OUTPUT', "check loaded lib hash" );
 .sub main
-  load_bytecode "temp.pbc"
-  load_bytecode "temp2.pbc"
+  load_bytecode "$temp_pbc"
+  load_bytecode "$temp2_pbc"
   .local pmc pbc_hash, interp
   .include 'iglobals.pasm'
   interp = getinterp
   pbc_hash = interp[.IGLOBALS_PBC_LIBS]
-  $I0 = elements pbc_hash
-  print $I0
+  \$I0 = elements pbc_hash
+  print \$I0
   print ' '
-  $I1 = exists pbc_hash['temp']
-  print $I1
+  \$I1 = exists pbc_hash['$temp_name']
+  print \$I1
   print ' '
-  $I2 = exists pbc_hash['temp2']
-  print $I2
+  \$I2 = exists pbc_hash['$temp2_name']
+  print \$I2
   print ' '
-  $S0 = pbc_hash['temp2']
-  # print $S0          not portable
-  $I3 = index $S0, 'temp2.pbc'
-  $I4 = isgt $I3, -1
-  print $I4
-  print_newline
+  \$S0 = pbc_hash['$temp2_name']
+  # print \$S0          not portable
+  \$I3 = index \$S0, '$temp2_name'
+  \$I4 = isgt \$I3, -1
+  say \$I4
 .end
 CODE
 hello from foo_1
@@ -308,22 +316,26 @@ hello from foo_2
 2 1 1 1
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "eval.get_string - same file" );
+(my $fh, $temp_pbc)  = create_tempfile( SUFFIX => '.pbc', UNLINK => 1 ); 
+close $fh;
+        
+pir_output_is( <<"CODE", <<'OUTPUT', "eval.get_string - same file" );
 .sub main :main
-
   .local pmc f1, f2
-  .local pmc io
+  .local pmc io, os
   f1 = compi("foo_1", "hello from foo_1")
-  $S0 = f1
-  io = open "temp.pbc", ">"
-  print io, $S0
+  \$S0 = f1
+  io = open "$temp_pbc", 'w'
+  print io, \$S0
   close io
-  load_bytecode "temp.pbc"
+  load_bytecode "$temp_pbc"
+  os = new ['OS']
+  os.'rm'("$temp_pbc")
   f2 = compi("foo_2", "hello from foo_2")
-  io = open "temp.pbc", ">"
+  io = open "$temp_pbc", 'w'
   print io, f2
   close io
-  load_bytecode "temp.pbc"
+  load_bytecode "$temp_pbc"
 .end
 
 .sub compi
@@ -334,11 +346,11 @@ pir_output_is( <<'CODE', <<'OUTPUT', "eval.get_string - same file" );
   pir_compiler = compreg "PIR"
   code = ".sub "
   code .= name
-  code .= " :load\n"
-  code .= "print \""
+  code .= " :load\\n"
+  code .= "print \\""
   code .= printme
-  code .= "\\n\"\n"
-  code .= ".end\n"
+  code .= "\\\\n\\"\\n"
+  code .= ".end\\n"
 
   retval = pir_compiler(code)
   .return (retval)
@@ -347,20 +359,18 @@ CODE
 hello from foo_1
 OUTPUT
 
-END {
-    unlink "temp.pbc", "temp2.pbc", "temp.file";
-}
+my (undef, $temp_file) = create_tempfile( UNLINK => 1 );
 
-pir_output_is( <<'CODE', <<'OUTPUT', "eval.freeze" );
+pir_output_is( <<"CODE", <<'OUTPUT', "eval.freeze" );
 .sub main :main
   .local pmc f, e
   .local pmc io
   f = compi("foo_1", "hello from foo_1")
-  $S0 = freeze f
-  io = open "temp.file", ">"
-  print io, $S0
+  \$S0 = freeze f
+  io = open "$temp_file", 'w'
+  print io, \$S0
   close io
-  print "written\n"
+  say "written"
 .end
 
 .sub compi
@@ -371,11 +381,11 @@ pir_output_is( <<'CODE', <<'OUTPUT', "eval.freeze" );
   pir_compiler = compreg "PIR"
   code = ".sub "
   code .= name
-  code .= "\n"
-  code .= "print \""
+  code .= "\\n"
+  code .= "print \\""
   code .= printme
-  code .= "\\n\"\n"
-  code .= ".end\n"
+  code .= "\\\\n\\"\\n"
+  code .= ".end\\n"
 
   retval = pir_compiler(code)
   .return (retval)
@@ -384,20 +394,20 @@ CODE
 written
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "eval.thaw" );
+pir_output_is( <<"CODE", <<'OUTPUT', "eval.thaw" );
 .sub main :main
     .local pmc io, e
     .local string file
     .local int size
-    file = "temp.file"
+    file = "$temp_file"
     .include "stat.pasm"
     size = stat file, .STAT_FILESIZE
-    io = open file, "<"
-    $S0 = read io, size
+    io = open file, 'r'
+    \$S0 = read io, size
     close io
-    e = thaw $S0
+    e = thaw \$S0
     e()
-    e = find_global "foo_1"
+    e = get_global "foo_1"
     e()
 .end
 CODE
@@ -405,16 +415,16 @@ hello from foo_1
 hello from foo_1
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "eval.freeze+thaw" );
+pir_output_is( <<"CODE", <<'OUTPUT', "eval.freeze+thaw" );
 .sub main :main
   .local pmc f, e
   .local pmc io
   f = compi("foo_1", "hello from foo_1")
-  $S0 = freeze f
-  io = open "temp.file", ">"
-  print io, $S0
+  \$S0 = freeze f
+  io = open "$temp_file", 'w'
+  print io, \$S0
   close io
-  print "written\n"
+  say "written"
   "read"()
 .end
 
@@ -426,17 +436,17 @@ pir_output_is( <<'CODE', <<'OUTPUT', "eval.freeze+thaw" );
   pir_compiler = compreg "PIR"
   code = ".sub "
   code .= name
-  code .= "\n"
+  code .= "\\n"
   code .= <<"MORE"
   noop
   noop
   noop
   noop
 MORE
-  code .= "print \""
+  code .= "print \\""
   code .= printme
-  code .= "\\n\"\n"
-  code .= ".end\n"
+  code .= "\\\\n\\"\\n"
+  code .= ".end\\n"
 
   retval = pir_compiler(code)
   .return (retval)
@@ -446,15 +456,15 @@ MORE
     .local pmc io, e
     .local string file
     .local int size
-    file = "temp.file"
+    file = "$temp_file"
     .include "stat.pasm"
     size = stat file, .STAT_FILESIZE
-    io = open file, "<"
-    $S0 = read io, size
+    io = open file, 'r'
+    \$S0 = read io, size
     close io
-    e = thaw $S0
+    e = thaw \$S0
     e()
-    e = find_global "foo_1"
+    e = get_global "foo_1"
     e()
 .end
 CODE
@@ -508,8 +518,8 @@ CODE
 ok
 OUTPUT
 
-open my $TEMP, '>', "temp.pir" or die "can't open 'temp.pir': $!";
-END { unlink "temp.pir" }
+my ($TEMP, $filename) = create_tempfile( SUFFIX => '.pir', UNLINK => 1 );
+
 print $TEMP <<PIR;
   .sub foo
      print a typo
@@ -517,10 +527,10 @@ print $TEMP <<PIR;
 PIR
 close $TEMP;
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', "compile err in load_bytecode" );
+pir_error_output_like( <<"CODE", <<'OUTPUT', "compile err in load_bytecode" );
 .sub main :main
-     load_bytecode "temp.pir"
-     print "never\n"
+     load_bytecode "$filename"
+     print "never\\n"
      end
 .end
 CODE
@@ -530,7 +540,7 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', "catch compile err in load_bytecode" );
 .sub main :main
      push_eh handler
-     load_bytecode "temp.pir"
+     load_bytecode "$filename"
      print "never\n"
      end
 handler:

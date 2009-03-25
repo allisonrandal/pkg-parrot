@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: io_status.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: io_status.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -25,17 +25,17 @@ Tests the Status PMC described in PDD22.
 # L<PDD22/Status Object PMC API/=item new>
 pir_output_is( <<'CODE', <<'OUT', 'new', todo => 'not yet implemented' );
 .sub 'test' :main
-    new P0, .Status
-    say 'ok 1 - $P0 = new .Status'
+    new P0, 'Status'
+    say "ok 1 - $P0 = new ['Status']"
 .end
 CODE
-ok 1 - $P0 = new .Status
+ok 1 - $P0 = new ['Status']
 OUT
 
 # L<PDD22/Status Object PMC API/=item get_integer (vtable)>
 pir_output_is( <<'CODE', <<'OUT', 'get_integer (vtable)', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P0 = new .Status
+    $P0 = new ['Status']
 
     # TODO test more return values
     # TODO figure out how to set the values to make testing possible
@@ -65,7 +65,7 @@ OUT
 # L<PDD22/Status Object PMC API/=item get_bool (vtable)>
 pir_output_is( <<'CODE', <<'OUT', 'get_bool (vtable)', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P0 = new .Status
+    $P0 = new ['Status']
 
     # TODO figure out how to set the values to make testing possible
 
@@ -93,7 +93,7 @@ OUT
 # L<PDD22/Status Object PMC API/=item return>
 pir_output_is( <<'CODE', <<'OUT', 'return', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P0 = new .Status
+    $P0 = new ['Status']
 
     # TODO test all return values
     # TODO figure out how to set the values to make testing possible
@@ -126,7 +126,7 @@ OUT
 # L<PDD22/Status Object PMC API/=item error>
 pir_output_is( <<'CODE', <<'OUT', 'error', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P0 = new .Status
+    $P0 = new ['Status']
 
     # TODO test all error values
     # TODO figure out how to set the values to make testing possible
@@ -178,22 +178,22 @@ OUT
 # L<PDD22/Status Object PMC API/=item throw>
 pir_output_is( <<'CODE', <<'OUT', 'throw', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P0 = new .Status
+    $P0 = new ['Status']
 
     # TODO figure out how to set the values to make testing possible
 
     push_eh eh_no_error
     $P0.throw()
-    clear_eh eh_no_error
+    pop_eh eh_no_error
 
     say 'ok 1 - $P0.throw() # no error'
 
   test_2:
-    $P0 = new .Status # need error here
+    $P0 = new ['Status'] # need error here
 
     push_eh eh_error
     $P0.throw()
-    clear_eh
+    pop_eh
 
     say 'not ok 2 - $P0.throw() # error'
 

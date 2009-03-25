@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: jit_i386.pod 13503 2006-07-24 15:26:45Z ambs $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: jit_i386.pod 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ opcode gets executed:
 	                     end (ret)
   inc:
 	inc I0               inc_i
-	new P0, .PerlString  new_p_ic
+	new P0, 'String'     new_p_sc
 	set P0, I0           set_p_i
 	print P0             (call)               print_p
 	print "\n"                                print_sc

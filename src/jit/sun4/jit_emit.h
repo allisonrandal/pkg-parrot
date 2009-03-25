@@ -1,9 +1,13 @@
 /*
+ * Copyright (C) 2002-2008, Parrot Foundation.
+ */
+
+/*
 ** jit_emit.h
 **
 ** SPARC
 **
-** $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
+** $Id: jit_emit.h 37201 2009-03-08 12:07:48Z fperrad $
 **/
 
 #ifndef PARROT_SUN4_JIT_EMIT_H_GUARD
@@ -38,12 +42,12 @@
 #  define emitm_FP emitm_i(6)
 #  define emitm_SP emitm_o(6)
 
-#  define emitm_mask(n, val) ((unsigned)(val) & ((1U << n) - 1))
+#  define emitm_mask(n, val) ((unsigned)(val) & ((1U << (n)) - 1))
 
 #  define emitm_hi30(val)   ((unsigned)(val) >> 2)
 #  define emitm_hi22(val)   ((unsigned)(val) >> 10)
-#  define emitm_lo10(val)   emitm_mask(10, val)
-#  define emitm_simm13(val) emitm_mask(13, val)
+#  define emitm_lo10(val)   emitm_mask(10, (val))
+#  define emitm_simm13(val) emitm_mask(13, (val))
 
 #  define emitm_opval(val)  ((unsigned)(val) << 30)
 #  define emitm_op2val(val) ((unsigned)(val) << 22)
@@ -98,179 +102,179 @@
 /* Miscellaneous instructions */
 
 /* sethi imm22, r[rd] */
-#  define emitm_sethi(pc, imm22, rd) emitm_2a(pc, 0, rd, 04, imm22)
+#  define emitm_sethi(pc, imm22, rd) emitm_2a((pc), 0, (rd), 04, (imm22))
 
 /* NOP */
-#  define emitm_nop(pc) emitm_sethi(pc, 0, 0)
+#  define emitm_nop(pc) emitm_sethi((pc), 0, 0)
 
 /* SAVE */
 
-#  define emitm_save_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 074, rs1, 0, rs2)
-#  define emitm_save_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 074, rs1, i)
+#  define emitm_save_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 074, (rs1), 0, (rs2))
+#  define emitm_save_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 074, (rs1), (i))
 
 /* RESTORE */
-#  define emitm_restore_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 075, rs1, 0, rd)
-#  define emitm_restore_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 075, rs1, i)
+#  define emitm_restore_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 075, (rs1), 0, (rd))
+#  define emitm_restore_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 075, (rs1), (i))
 
 /* MOV */
-#  define emitm_mov_r(pc, rs, rd) emitm_or_r(pc, emitm_g(0), rs, rd)
-#  define emitm_mov_i(pc, i, rd)  emitm_or_i(pc, emitm_g(0), i, rd)
+#  define emitm_mov_r(pc, rs, rd) emitm_or_r((pc), emitm_g(0), (rs), (rd))
+#  define emitm_mov_i(pc, i, rd)  emitm_or_i((pc), emitm_g(0), (i), (rd))
 
 /* Integer Register Loads */
 
 /* ldX[rs1 + simm13], rd */
-#  define emitm_ldsb_i(pc, rs1, i, rd) emitm_3b(pc, 3, rd, 011, rs1, i)
-#  define emitm_ldub_i(pc, rs1, i, rd) emitm_3b(pc, 3, rd, 001, rs1, i)
-#  define emitm_ldsh_i(pc, rs1, i, rd) emitm_3b(pc, 3, rd, 012, rs1, i)
-#  define emitm_lduh_i(pc, rs1, i, rd) emitm_3b(pc, 3, rd, 002, rs1, i)
-#  define emitm_ld_i(pc, rs1, i, rd)   emitm_3b(pc, 3, rd, 000, rs1, i)
-#  define emitm_ldd_i(pc, rs1, i, rd)  emitm_3b(pc, 3, rd, 003, rs1, i)
+#  define emitm_ldsb_i(pc, rs1, i, rd) emitm_3b((pc), 3, (rd), 011, (rs1), (i))
+#  define emitm_ldub_i(pc, rs1, i, rd) emitm_3b((pc), 3, (rd), 001, (rs1), (i))
+#  define emitm_ldsh_i(pc, rs1, i, rd) emitm_3b((pc), 3, (rd), 012, (rs1), (i))
+#  define emitm_lduh_i(pc, rs1, i, rd) emitm_3b((pc), 3, (rd), 002, (rs1), (i))
+#  define emitm_ld_i(pc, rs1, i, rd)   emitm_3b((pc), 3, (rd), 000, (rs1), (i))
+#  define emitm_ldd_i(pc, rs1, i, rd)  emitm_3b((pc), 3, (rd), 003, (rs1), (i))
 
 /* ldX[rs1 + rs2], rd */
-#  define emitm_ldsb_r(pc, rs1, rs2, rd) emitm_3a(pc, 3, rd, 011, rs1, 0, rs2)
-#  define emitm_ldub_r(pc, rs1, rs2, rd) emitm_3a(pc, 3, rd, 001, rs1, 0, rs2)
-#  define emitm_ldsh_r(pc, rs1, rs2, rd) emitm_3a(pc, 3, rd, 012, rs1, 0, rs2)
-#  define emitm_lduh_r(pc, rs1, rs2, rd) emitm_3a(pc, 3, rd, 002, rs1, 0, rs2)
-#  define emitm_ld_r(pc, rs1, rs2, rd)   emitm_3a(pc, 3, rd, 000, rs1, 0, rs2)
-#  define emitm_ldd_r(pc, rs1, rs2, rd)  emitm_3a(pc, 3, rd, 003, rs1, 0, rs2)
+#  define emitm_ldsb_r(pc, rs1, rs2, rd) emitm_3a((pc), 3, (rd), 011, (rs1), 0, (rs2))
+#  define emitm_ldub_r(pc, rs1, rs2, rd) emitm_3a((pc), 3, (rd), 001, (rs1), 0, (rs2))
+#  define emitm_ldsh_r(pc, rs1, rs2, rd) emitm_3a((pc), 3, (rd), 012, (rs1), 0, (rs2))
+#  define emitm_lduh_r(pc, rs1, rs2, rd) emitm_3a((pc), 3, (rd), 002, (rs1), 0, (rs2))
+#  define emitm_ld_r(pc, rs1, rs2, rd)   emitm_3a((pc), 3, (rd), 000, (rs1), 0, (rs2))
+#  define emitm_ldd_r(pc, rs1, rs2, rd)  emitm_3a((pc), 3, (rd), 003, (rs1), 0, (rs2))
 
 /* Integer Register Stores */
 
 /* stX rd, [rs1 + simm13] */
-#  define emitm_stb_i(pc, rd, rs1, i) emitm_3b(pc, 3, rd, 005, rs1, i)
-#  define emitm_sth_i(pc, rd, rs1, i) emitm_3b(pc, 3, rd, 006, rs1, i)
-#  define emitm_st_i(pc, rd, rs1, i)  emitm_3b(pc, 3, rd, 004, rs1, i)
-#  define emitm_std_i(pc, rd, rs1, i) emitm_3b(pc, 3, rd, 007, rs1, i)
+#  define emitm_stb_i(pc, rd, rs1, i) emitm_3b((pc), 3, (rd), 005, (rs1), (i))
+#  define emitm_sth_i(pc, rd, rs1, i) emitm_3b((pc), 3, (rd), 006, (rs1), (i))
+#  define emitm_st_i(pc, rd, rs1, i)  emitm_3b((pc), 3, (rd), 004, (rs1), (i))
+#  define emitm_std_i(pc, rd, rs1, i) emitm_3b((pc), 3, (rd), 007, (rs1), (i))
 
 /* stX rd, [rs1 + rs2] */
-#  define emitm_stb_r(pc, rd, rs1, rs2) emitm_3a(pc, 3, rd, 005, rs1, 0, rs2)
-#  define emitm_sth_r(pc, rd, rs1, rs2) emitm_3a(pc, 3, rd, 006, rs1, 0, rs2)
-#  define emitm_st_r(pc, rd, rs1, rs2)  emitm_3a(pc, 3, rd, 004, rs1, 0, rs2)
-#  define emitm_std_r(pc, rd, rs1, rs2) emitm_3a(pc, 3, rd, 007, rs1, 0, rs2)
+#  define emitm_stb_r(pc, rd, rs1, rs2) emitm_3a((pc), 3, (rd), 005, (rs1), 0, (rs2))
+#  define emitm_sth_r(pc, rd, rs1, rs2) emitm_3a((pc), 3, (rd), 006, (rs1), 0, (rs2))
+#  define emitm_st_r(pc, rd, rs1, rs2)  emitm_3a((pc), 3, (rd), 004, (rs1), 0, (rs2))
+#  define emitm_std_r(pc, rd, rs1, rs2) emitm_3a((pc), 3, (rd), 007, (rs1), 0, (rs2))
 
 /* Floating Point Register Loads */
 
 /* ldX[rs1 + simm13], freg[rd] */
-#  define emitm_ldf_i(pc, rs1, i, rd)   emitm_3b(pc, 3, rd, 040, rs1, i)
-#  define emitm_lddf_i(pc, rs1, i, rd)  emitm_3b(pc, 3, rd, 043, rs1, i)
+#  define emitm_ldf_i(pc, rs1, i, rd)   emitm_3b((pc), 3, (rd), 040, (rs1), (i))
+#  define emitm_lddf_i(pc, rs1, i, rd)  emitm_3b((pc), 3, (rd), 043, (rs1), (i))
 
-#  define emitm_ldfsr_i(pc, rs1, i, rd) emitm_3b(pc, 3, rd, 041, rs1, i)
+#  define emitm_ldfsr_i(pc, rs1, i, rd) emitm_3b((pc), 3, (rd), 041, (rs1), (i))
 
 /* ldX[rs1 + rs2], freg[rd] */
-#  define emitm_ldf_r(pc, rs1, rs2, rd)   emitm_3a(pc, 3, rd, 040, rs1, 0, rs2)
-#  define emitm_lddf_r(pc, rs1, rs2, rd)  emitm_3a(pc, 3, rd, 043, rs1, 0, rs2)
+#  define emitm_ldf_r(pc, rs1, rs2, rd)   emitm_3a((pc), 3, (rd), 040, (rs1), 0, (rs2))
+#  define emitm_lddf_r(pc, rs1, rs2, rd)  emitm_3a((pc), 3, (rd), 043, (rs1), 0, (rs2))
 
-#  define emitm_ldfsr_r(pc, rs1, rs2, rd) emitm_3a(pc, 3, rd, 041, rs1, 0, rs2)
+#  define emitm_ldfsr_r(pc, rs1, rs2, rd) emitm_3a((pc), 3, (rd), 041, (rs1), 0, (rs2))
 
 /* Floating Point Register Stores */
 
 /* stX freg[rd], [rs1 + simm13] */
-#  define emitm_stf_i(pc, rd, rs1, i)   emitm_3b(pc, 3, rd, 044, rs1, i)
-#  define emitm_stdf_i(pc, rd, rs1, i)  emitm_3b(pc, 3, rd, 047, rs1, i)
+#  define emitm_stf_i(pc, rd, rs1, i)   emitm_3b((pc), 3, (rd), 044, (rs1), (i))
+#  define emitm_stdf_i(pc, rd, rs1, i)  emitm_3b((pc), 3, (rd), 047, (rs1), (i))
 
-#  define emitm_stfsr_i(pc, rd, rs1, i) emitm_3b(pc, 3, rd, 045, rs1, i)
+#  define emitm_stfsr_i(pc, rd, rs1, i) emitm_3b((pc), 3, (rd), 045, (rs1), (i))
 
 /* stX freg[rd], [rs1 + rs2] */
-#  define emitm_stf_r_r(pc, rd, rs1, rs2)   emitm_3a(pc, 3, rd, 044, rs1, 0, rs2)
-#  define emitm_stdf_r_r(pc, rd, rs1, rs2)  emitm_3a(pc, 3, rd, 047, rs1, 0, rs2)
-#  define emitm_stfsr_r_r(pc, rd, rs1, rs2) emitm_3a(pc, 3, rd, 045, rs1, 0, rs2)
+#  define emitm_stf_r_r(pc, rd, rs1, rs2)   emitm_3a((pc), 3, (rd), 044, (rs1), 0, (rs2))
+#  define emitm_stdf_r_r(pc, rd, rs1, rs2)  emitm_3a((pc), 3, (rd), 047, (rs1), 0, (rs2))
+#  define emitm_stfsr_r_r(pc, rd, rs1, rs2) emitm_3a((pc), 3, (rd), 045, (rs1), 0, (rs2))
 
 /* Logical instructions */
 
 /* op r[rs1], r[rs2], r[rd] */
 #  define emitm_logic_r(pc, op3, rs1, rs2, rd) \
-    emitm_3a(pc, 2, rd, op3, rs1, 0, rs2)
+    emitm_3a((pc), 2, (rd), (op3), (rs1), 0, (rs2))
 
 /* op r[rs1], simm13, r[rd] */
 #  define emitm_logic_i(pc, op3, rs1, simm13, rd) \
-    emitm_3b(pc, 2, rd, op3, rs1, simm13)
+    emitm_3b((pc), 2, (rd), (op3), (rs1), (simm13))
 
-#  define emitm_and_r(pc, rs1, rs2, rd)    emitm_logic_r(pc, 001, rs1, rs2, rd)
-#  define emitm_andcc_r(pc, rs1, rs2, rd)  emitm_logic_r(pc, 021, rs1, rs2, rd)
-#  define emitm_andn_r(pc, rs1, rs2, rd)   emitm_logic_r(pc, 005, rs1, rs2, rd)
-#  define emitm_andncc_r(pc, rs1, rs2, rd) emitm_logic_r(pc, 025, rs1, rs2, rd)
-#  define emitm_and_i(pc, rs1, i, rd)      emitm_logic_i(pc, 001, rs1, i, rd)
-#  define emitm_andcc_i(pc, rs1, i, rd)    emitm_logic_i(pc, 021, rs1, i, rd)
-#  define emitm_andn_i(pc, rs1, i, rd)     emitm_logic_i(pc, 005, rs1, i, rd)
-#  define emitm_andncc_i(pc, rs1, i, rd)   emitm_logic_i(pc, 025, rs1, i, rd)
-#  define emitm_or_r(pc, rs1, rs2, rd)     emitm_logic_r(pc, 002, rs1, rs2, rd)
-#  define emitm_orcc_r(pc, rs1, rs2, rd)   emitm_logic_r(pc, 022, rs1, rs2, rd)
-#  define emitm_orn_r(pc, rs1, rs2, rd)    emitm_logic_r(pc, 006, rs1, rs2, rd)
-#  define emitm_orncc_r(pc, rs1, rs2, rd)  emitm_logic_r(pc, 026, rs1, rs2, rd)
-#  define emitm_or_i(pc, rs1, i, rd)       emitm_logic_i(pc, 002, rs1, i, rd)
-#  define emitm_orcc_i(pc, rs1, i, rd)     emitm_logic_i(pc, 022, rs1, i, rd)
-#  define emitm_orn_i(pc, rs1, i, rd)      emitm_logic_i(pc, 006, rs1, i, rd)
-#  define emitm_orncc_i(pc, rs1, i, rd)    emitm_logic_i(pc, 026, rs1, i, rd)
-#  define emitm_xor_r(pc, rs1, rs2, rd)    emitm_logic_r(pc, 003, rs1, rs2, rd)
-#  define emitm_xorcc_r(pc, rs1, rs2, rd)  emitm_logic_r(pc, 023, rs1, rs2, rd)
-#  define emitm_xorn_r(pc, rs1, rs2, rd)   emitm_logic_r(pc, 007, rs1, rs2, rd)
-#  define emitm_xorncc_r(pc, rs1, rs2, rd) emitm_logic_r(pc, 027, rs1, rs2, rd)
-#  define emitm_xor_i(pc, rs1, i, rd)      emitm_logic_i(pc, 003, rs1, i, rd)
-#  define emitm_xorcc_i(pc, rs1, i, rd)    emitm_logic_i(pc, 023, rs1, i, rd)
-#  define emitm_xorn_i(pc, rs1, i, rd)     emitm_logic_i(pc, 007, rs1, i, rd)
-#  define emitm_xorncc_i(pc, rs1, i, rd)   emitm_logic_i(pc, 027, rs1, i, rd)
+#  define emitm_and_r(pc, rs1, rs2, rd)    emitm_logic_r((pc), 001, (rs1), (rs2), (rd))
+#  define emitm_andcc_r(pc, rs1, rs2, rd)  emitm_logic_r((pc), 021, (rs1), (rs2), (rd))
+#  define emitm_andn_r(pc, rs1, rs2, rd)   emitm_logic_r((pc), 005, (rs1), (rs2), (rd))
+#  define emitm_andncc_r(pc, rs1, rs2, rd) emitm_logic_r((pc), 025, (rs1), (rs2), (rd))
+#  define emitm_and_i(pc, rs1, i, rd)      emitm_logic_i((pc), 001, (rs1), (i), (rd))
+#  define emitm_andcc_i(pc, rs1, i, rd)    emitm_logic_i((pc), 021, (rs1), (i), (rd))
+#  define emitm_andn_i(pc, rs1, i, rd)     emitm_logic_i((pc), 005, (rs1), (i), (rd))
+#  define emitm_andncc_i(pc, rs1, i, rd)   emitm_logic_i((pc), 025, (rs1), (i), (rd))
+#  define emitm_or_r(pc, rs1, rs2, rd)     emitm_logic_r((pc), 002, (rs1), (rs2), (rd))
+#  define emitm_orcc_r(pc, rs1, rs2, rd)   emitm_logic_r((pc), 022, (rs1), (rs2), (rd))
+#  define emitm_orn_r(pc, rs1, rs2, rd)    emitm_logic_r((pc), 006, (rs1), (rs2), (rd))
+#  define emitm_orncc_r(pc, rs1, rs2, rd)  emitm_logic_r((pc), 026, (rs1), (rs2), (rd))
+#  define emitm_or_i(pc, rs1, i, rd)       emitm_logic_i((pc), 002, (rs1), (i), (rd))
+#  define emitm_orcc_i(pc, rs1, i, rd)     emitm_logic_i((pc), 022, (rs1), (i), (rd))
+#  define emitm_orn_i(pc, rs1, i, rd)      emitm_logic_i((pc), 006, (rs1), (i), (rd))
+#  define emitm_orncc_i(pc, rs1, i, rd)    emitm_logic_i((pc), 026, (rs1), (i), (rd))
+#  define emitm_xor_r(pc, rs1, rs2, rd)    emitm_logic_r((pc), 003, (rs1), (rs2), (rd))
+#  define emitm_xorcc_r(pc, rs1, rs2, rd)  emitm_logic_r((pc), 023, (rs1), (rs2), (rd))
+#  define emitm_xorn_r(pc, rs1, rs2, rd)   emitm_logic_r((pc), 007, (rs1), (rs2), (rd))
+#  define emitm_xorncc_r(pc, rs1, rs2, rd) emitm_logic_r((pc), 027, (rs1), (rs2), (rd))
+#  define emitm_xor_i(pc, rs1, i, rd)      emitm_logic_i((pc), 003, (rs1), (i), (rd))
+#  define emitm_xorcc_i(pc, rs1, i, rd)    emitm_logic_i((pc), 023, (rs1), (i), (rd))
+#  define emitm_xorn_i(pc, rs1, i, rd)     emitm_logic_i((pc), 007, (rs1), (i), (rd))
+#  define emitm_xorncc_i(pc, rs1, i, rd)   emitm_logic_i((pc), 027, (rs1), (i), (rd))
 
 /* Shift Left Logical */
-#  define emitm_sll_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 045, rs1, 0, rs2)
-#  define emitm_sll_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 045, rs1, i)
+#  define emitm_sll_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 045, (rs1), 0, (rs2))
+#  define emitm_sll_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 045, (rs1), (i))
 
 /* Shift Right Logical */
-#  define emitm_srl_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 046, rs1, 0, rs2)
-#  define emitm_srl_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 046, rs1, i)
+#  define emitm_srl_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 046, (rs1), 0, (rs2))
+#  define emitm_srl_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 046, (rs1), (i))
 
 /* Shift Right Arithmetic */
-#  define emitm_sra_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 047, rs1, 0, rs2)
-#  define emitm_sra_i(pc, rs1, i, rd)   emitm_3a(pc, 2, rd, 047, rs1, i)
+#  define emitm_sra_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 047, (rs1), 0, (rs2))
+#  define emitm_sra_i(pc, rs1, i, rd)   emitm_3a((pc), 2, (rd), 047, (rs1), (i))
 
 /* Arithmetic ops */
-#  define emitm_add_r(pc, rs1, rs2, rd)    emitm_3a(pc, 2, rd, 0, rs1, 0, rs2)
-#  define emitm_addcc_r(pc, rs1, rs2, rd)  emitm_3a(pc, 2, rd, 020, rs1, 0, rs2)
-#  define emitm_addX_r(pc, rs1, rs2, rd)   emitm_3a(pc, 2, rd, 010, rs1, 0, rs2)
-#  define emitm_addXcc_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 030, rs1, 0, rs2)
-#  define emitm_add_i(pc, rs1, i, rd)      emitm_3b(pc, 2, rd, 0, rs1, i)
-#  define emitm_addcc_i(pc, rs1, i, rd)    emitm_3b(pc, 2, rd, 020, rs1, i)
-#  define emitm_addX_i(pc, rs1, i, rd)     emitm_3b(pc, 2, rd, 010, rs1, i)
-#  define emitm_addXcc_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 030, rs1, i)
+#  define emitm_add_r(pc, rs1, rs2, rd)    emitm_3a((pc), 2, (rd), 0, (rs1), 0, (rs2))
+#  define emitm_addcc_r(pc, rs1, rs2, rd)  emitm_3a((pc), 2, (rd), 020, (rs1), 0, (rs2))
+#  define emitm_addX_r(pc, rs1, rs2, rd)   emitm_3a((pc), 2, (rd), 010, (rs1), 0, (rs2))
+#  define emitm_addXcc_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 030, (rs1), 0, (rs2))
+#  define emitm_add_i(pc, rs1, i, rd)      emitm_3b((pc), 2, (rd), 0, (rs1), (i))
+#  define emitm_addcc_i(pc, rs1, i, rd)    emitm_3b((pc), 2, (rd), 020, (rs1), (i))
+#  define emitm_addX_i(pc, rs1, i, rd)     emitm_3b((pc), 2, (rd), 010, (rs1), (i))
+#  define emitm_addXcc_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 030, (rs1), (i))
 
 /* Arithmetic ops */
-#  define emitm_sub_r(pc, rs1, rs2, rd)    emitm_3a(pc, 2, rd, 004, rs1, 0, rs2)
-#  define emitm_subcc_r(pc, rs1, rs2, rd)  emitm_3a(pc, 2, rd, 024, rs1, 0, rs2)
-#  define emitm_subX_r(pc, rs1, rs2, rd)   emitm_3a(pc, 2, rd, 014, rs1, 0, rs2)
-#  define emitm_subXcc_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 034, rs1, 0, rs2)
-#  define emitm_sub_i(pc, rs1, i, rd)      emitm_3b(pc, 2, rd, 004, rs1, i)
-#  define emitm_subcc_i(pc, rs1, i, rd)    emitm_3b(pc, 2, rd, 024, rs1, i)
-#  define emitm_subX_i(pc, rs1, i, rd)     emitm_3b(pc, 2, rd, 014, rs1, i)
-#  define emitm_subXcc_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 034, rs1, i)
+#  define emitm_sub_r(pc, rs1, rs2, rd)    emitm_3a((pc), 2, (rd), 004, (rs1), 0, (rs2))
+#  define emitm_subcc_r(pc, rs1, rs2, rd)  emitm_3a((pc), 2, (rd), 024, (rs1), 0, (rs2))
+#  define emitm_subX_r(pc, rs1, rs2, rd)   emitm_3a((pc), 2, (rd), 014, (rs1), 0, (rs2))
+#  define emitm_subXcc_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 034, (rs1), 0, (rs2))
+#  define emitm_sub_i(pc, rs1, i, rd)      emitm_3b((pc), 2, (rd), 004, (rs1), (i))
+#  define emitm_subcc_i(pc, rs1, i, rd)    emitm_3b((pc), 2, (rd), 024, (rs1), (i))
+#  define emitm_subX_i(pc, rs1, i, rd)     emitm_3b((pc), 2, (rd), 014, (rs1), (i))
+#  define emitm_subXcc_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 034, (rs1), (i))
 
 /* Floating point operations */
 
 /* MOV */
-#  define emitm_fmovs(pc, rs, rd) emitm_3c(pc, 2, rd, 064, 0, 0001, rs)
+#  define emitm_fmovs(pc, rs, rd) emitm_3c((pc), 2, (rd), 064, 0, 0001, (rs))
 
 /* Arithmetic operations */
-#  define emitm_faddd(pc, rs1, rs2, rd) emitm_3c(pc, 2, rd, 064, rs1, 0102, rs2)
-#  define emitm_fsubd(pc, rs1, rs2, rd) emitm_3c(pc, 2, rd, 064, rs1, 0106, rs2)
-#  define emitm_fmuld(pc, rs1, rs2, rd) emitm_3c(pc, 2, rd, 064, rs1, 0112, rs2)
-#  define emitm_fdivd(pc, rs1, rs2, rd) emitm_3c(pc, 2, rd, 064, rs1, 0116, rs2)
-#  define emitm_fabss(pc, rs, rd) emitm_3c(pc, 2, rd, 064, 0, 0011, rs)
-#  define emitm_fnegs(pc, rs, rd) emitm_3c(pc, 2, rd, 064, 0, 0005, rs)
+#  define emitm_faddd(pc, rs1, rs2, rd) emitm_3c((pc), 2, (rd), 064, (rs1), 0102, (rs2))
+#  define emitm_fsubd(pc, rs1, rs2, rd) emitm_3c((pc), 2, (rd), 064, (rs1), 0106, (rs2))
+#  define emitm_fmuld(pc, rs1, rs2, rd) emitm_3c((pc), 2, (rd), 064, (rs1), 0112, (rs2))
+#  define emitm_fdivd(pc, rs1, rs2, rd) emitm_3c((pc), 2, (rd), 064, (rs1), 0116, (rs2))
+#  define emitm_fabss(pc, rs, rd) emitm_3c((pc), 2, (rd), 064, 0, 0011, (rs))
+#  define emitm_fnegs(pc, rs, rd) emitm_3c((pc), 2, (rd), 064, 0, 0005, (rs))
 
-#  define emitm_fsqrtd(pc, rs, rd) emitm_3c(pc, 2, rd, 064, 0, 0052, rs)
+#  define emitm_fsqrtd(pc, rs, rd) emitm_3c((pc), 2, (rd), 064, 0, 0052, (rs))
 
 /* Floating <-> Integer Conversion */
-#  define emitm_fitod(pc, rs, rd) emitm_3c(pc, 2, rd, 064, 0, 0310, rs)
-#  define emitm_fdtoi(pc, rs, rd) emitm_3c(pc, 2, rd, 064, 0, 0322, rs)
+#  define emitm_fitod(pc, rs, rd) emitm_3c((pc), 2, (rd), 064, 0, 0310, (rs))
+#  define emitm_fdtoi(pc, rs, rd) emitm_3c((pc), 2, (rd), 064, 0, 0322, (rs))
 
 /* Floating point tests */
-#  define emitm_fcmpd(pc, rs1, rs2) emitm_3c(pc, 2, 0, 065, rs1, 0122, rs2)
+#  define emitm_fcmpd(pc, rs1, rs2) emitm_3c((pc), 2, 0, 065, (rs1), 0122, (rs2))
 
 /* Jump and Link */
 
-#  define emitm_jumpl_r(pc, rs1, rs2, rd) emitm_3a(pc, 2, rd, 070, rs1, 0, rs2)
-#  define emitm_jumpl_i(pc, rs1, i, rd)   emitm_3b(pc, 2, rd, 070, rs1, i)
+#  define emitm_jumpl_r(pc, rs1, rs2, rd) emitm_3a((pc), 2, (rd), 070, (rs1), 0, (rs2))
+#  define emitm_jumpl_i(pc, rs1, i, rd)   emitm_3b((pc), 2, (rd), 070, (rs1), (i))
 
 /* RET */
-#  define emitm_ret(pc) emitm_jumpl_i(pc, emitm_i(7), 8, emitm_g(0))
+#  define emitm_ret(pc) emitm_jumpl_i((pc), emitm_i(7), 8, emitm_g(0))
 
 /* integer conditions */
 #  define emitm_ba   010
@@ -312,15 +316,15 @@
 #  define emitm_fcc   06
 
 /* Branch on integer condition codes */
-#  define emitm_bicc(pc, a, cond, disp22) emitm_2b(pc, a, cond, 02, disp22)
+#  define emitm_bicc(pc, a, cond, disp22) emitm_2b((pc), (a), (cond), 02, (disp22))
 
 /* Branch on floating-point condition codes */
-#  define emitm_fbfcc(pc, a, cond, disp22) emitm_2b(pc, a, cond, 06, disp22)
+#  define emitm_fbfcc(pc, a, cond, disp22) emitm_2b((pc), (a), (cond), 06, (disp22))
 
-#  define jit_emit_mov_rr_i(pc, dst, src) emitm_mov_r(pc, src, dst)
+#  define jit_emit_mov_rr_i(pc, dst, src) emitm_mov_r((pc), (src), (dst))
 #  define jit_emit_mov_rr_n(pc, dst, src) { \
-    emitm_fmovs(pc, src, dst); \
-    emitm_fmovs(pc, (src)+1, (dst)+1); }
+    emitm_fmovs((pc), (src), (dst)); \
+    emitm_fmovs((pc), (src)+1, (dst)+1); }
 
 /*
 void main(){
@@ -364,18 +368,18 @@ enum  {JIT_BRANCH, JIT_CALL30 };
 #  define XSR1 emitm_l(0)
 #  define XSR2 emitm_g(1)
 
-#  define Parrot_jit_regbase_ptr(interp) &REG_INT(0)
+#  define Parrot_jit_regbase_ptr(interp) &REG_INT((interp), 0)
 
 /* The offset of a Parrot register from the base register */
 #  define Parrot_jit_regoff(a, i) (unsigned)(a) - (unsigned)(Parrot_jit_regbase_ptr(i))
 
 /* interp->code */
 #  define jit_emit_load_coderef(pc, reg) \
-    emitm_ld_i(jit_info->native_ptr, Parrot_jit_intrp, offsetof(Interp, code), reg); \
+    emitm_ld_i(jit_info->native_ptr, Parrot_jit_intrp, offsetof(Interp, code), (reg)); \
 
 /* Load op_map address */
 #  define jit_emit_load_op_map(pc, code) \
-    emitm_ld_i(jit_info->native_ptr, code,                                         \
+    emitm_ld_i(jit_info->native_ptr, (code),                                         \
         offsetof(PackFile_ByteCode, jit_info), XSR1);                       \
     emitm_ld_i(jit_info->native_ptr, XSR1,                                         \
       (offsetof(Parrot_jit_arena_t, op_map) + offsetof(Parrot_jit_info_t, arena)), \
@@ -383,7 +387,7 @@ enum  {JIT_BRANCH, JIT_CALL30 };
 
 /* Construct the starting address of the byte code (code start) */
 #  define jit_emit_load_code_start(pc, code) \
-    emitm_ld_i(jit_info->native_ptr, code, offsetof(PackFile_Segment, data), \
+    emitm_ld_i(jit_info->native_ptr, (code), offsetof(PackFile_Segment, data), \
                XSR1);
 
 /* Generate a jump to a bytecode address in reg_num
@@ -391,7 +395,7 @@ enum  {JIT_BRANCH, JIT_CALL30 };
  */
 static void
 Parrot_jit_bytejump(Parrot_jit_info_t *jit_info,
-                    Interp *interp, int reg_num)
+                    PARROT_INTERP, int reg_num)
 {
     jit_emit_load_coderef(jit_info->native_ptr, XSR2);
 
@@ -431,7 +435,7 @@ static void Parrot_jit_branch(Parrot_jit_info_t *jit_info, int branch, int cond,
                     jit_info->optimizer->cur_section->branch_target->load_size;
 
         if ((offset > emitm_branch_max) || (offset < emitm_branch_min))
-            internal_exception(JIT_ERROR,
+            exit_fatal(EXCEPTION_JIT_ERROR,
                            "Branches beyond 8 Megabytes not yet supported\n");
         offset /= 4;
         emitm_2b(jit_info->native_ptr, annul, cond, branch, offset);
@@ -453,15 +457,15 @@ static void Parrot_jit_branch(Parrot_jit_info_t *jit_info, int branch, int cond,
 
 /* Generate branch on integer condition codes */
 #  define Parrot_jit_bicc(jit_info, cond, annul, disp) \
-        Parrot_jit_branch(jit_info, emitm_icc, cond, annul, disp)
+        Parrot_jit_branch((jit_info), emitm_icc, (cond), (annul), (disp))
 
 /* Generate branch on floating-point condition codes */
 #  define Parrot_jit_fbfcc(jit_info, cond, annul, disp) \
-        Parrot_jit_branch(jit_info, emitm_fcc, cond, annul, disp)
+        Parrot_jit_branch((jit_info), emitm_fcc, (cond), (annul), (disp))
 
 /* This function loads a value */
 static void jit_emit_load_i(Parrot_jit_info_t *jit_info,
-                             Interp *interp,
+                             PARROT_INTERP,
                              int param,
                              int hwreg)
 {
@@ -494,38 +498,38 @@ static void jit_emit_load_i(Parrot_jit_info_t *jit_info,
             break;
 
         case PARROT_ARG_I:
-            val = (int)&REG_INT(val);
+            val = (int)&REG_INT(interp, val);
             emitm_ld_i(jit_info->native_ptr, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp), hwreg);
             break;
 
         case PARROT_ARG_P:
-            val = (int)&REG_PMC(val);
+            val = (int)&REG_PMC(interp, val);
             emitm_ld_i(jit_info->native_ptr, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp), hwreg);
             break;
 
         case PARROT_ARG_S:
-            val = (int)&REG_STR(val);
+            val = (int)&REG_STR(interp, val);
             emitm_ld_i(jit_info->native_ptr, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp), hwreg);
             break;
 
         case PARROT_ARG_N:
-            val = (int)&REG_NUM(val);
+            val = (int)&REG_NUM(interp, val);
             emitm_ldd_i(jit_info->native_ptr, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp), hwreg);
             break;
 
         default:
-            internal_exception(JIT_ERROR,
+            exit_fatal(EXCEPTION_JIT_ERROR,
                                "Unsupported op parameter type %d\n",
                                op_type);
     }
 }
 
 static void jit_emit_store_i(Parrot_jit_info_t *jit_info,
-                             Interp *interp,
+                             PARROT_INTERP,
                              int param,
                              int hwreg)
 {
@@ -537,37 +541,37 @@ static void jit_emit_store_i(Parrot_jit_info_t *jit_info,
 
     switch (op_type){
         case PARROT_ARG_I:
-            val = (int)&REG_INT(val);
+            val = (int)&REG_INT(interp, val);
             emitm_st_i(jit_info->native_ptr, hwreg, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp));
             break;
 
         case PARROT_ARG_P:
-            val = (int)&REG_PMC(val);
+            val = (int)&REG_PMC(interp, val);
             emitm_st_i(jit_info->native_ptr, hwreg, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp));
             break;
 
         case PARROT_ARG_S:
-            val = (int)&REG_STR(val);
+            val = (int)&REG_STR(interp, val);
             emitm_st_i(jit_info->native_ptr, hwreg, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp));
             break;
 
         case PARROT_ARG_N:
-            val = (int)&REG_NUM(val);
+            val = (int)&REG_NUM(interp, val);
             emitm_std_i(jit_info->native_ptr, hwreg, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp));
             break;
 
         default:
-            internal_exception(JIT_ERROR,
+            exit_fatal(EXCEPTION_JIT_ERROR,
                             "Unsupported op parameter type %d\n", op_type);
     }
 }
 
 static void jit_emit_load_n(Parrot_jit_info_t *jit_info,
-                             Interp *interp,
+                             PARROT_INTERP,
                              int param,
                              int hwreg)
 {
@@ -597,25 +601,25 @@ static void jit_emit_load_n(Parrot_jit_info_t *jit_info,
             break;
 
         case PARROT_ARG_I:
-            val = (int)&REG_INT(val);
+            val = (int)&REG_INT(interp, val);
             emitm_ldf_i(jit_info->native_ptr, Parrot_jit_regbase,
                         Parrot_jit_regoff(val, interp), hwreg);
             break;
 
         case PARROT_ARG_N:
-            val = (int)&REG_NUM(val);
+            val = (int)&REG_NUM(interp, val);
             emitm_lddf_i(jit_info->native_ptr, Parrot_jit_regbase,
                          Parrot_jit_regoff(val, interp), hwreg);
             break;
 
         default:
-            internal_exception(JIT_ERROR,
+            exit_fatal(EXCEPTION_JIT_ERROR,
                             "Unsupported op parameter type %d\n", op_type);
     }
 }
 
 static void jit_emit_store_n(Parrot_jit_info_t *jit_info,
-                             Interp *interp,
+                             PARROT_INTERP,
                              int param,
                              int hwreg)
 {
@@ -627,26 +631,26 @@ static void jit_emit_store_n(Parrot_jit_info_t *jit_info,
 
     switch (op_type){
         case PARROT_ARG_I:
-            val = (int)&REG_INT(val);
+            val = (int)&REG_INT(interp, val);
             emitm_stf_i(jit_info->native_ptr, hwreg, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp));
             break;
 
         case PARROT_ARG_N:
-            val = (int)&REG_NUM(val);
+            val = (int)&REG_NUM(interp, val);
             emitm_stdf_i(jit_info->native_ptr, hwreg, Parrot_jit_regbase,
                        Parrot_jit_regoff(val, interp));
             break;
 
         default:
-            internal_exception(JIT_ERROR,
+            exit_fatal(EXCEPTION_JIT_ERROR,
                             "Unsupported op parameter type %d\n", op_type);
     }
 }
 
 
 void Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-                        Interp *interp)
+                        PARROT_INTERP)
 {
     Parrot_jit_fixup_t *fixup;
     Parrot_jit_fixup_t *last_fixup;
@@ -672,7 +676,7 @@ void Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
                 break;
 
             default:
-                internal_exception(JIT_ERROR, "Unknown fixup type:%d\n",
+                exit_fatal(EXCEPTION_JIT_ERROR, "Unknown fixup type:%d\n",
                     fixup->type);
             break;
         }
@@ -682,7 +686,7 @@ void Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
 
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-                      Interp *interp)
+                      PARROT_INTERP)
 {
     /* generated code is called as jit_code(interp, pc)
      * so interpreter is in i0 and pc in i1.
@@ -716,7 +720,7 @@ Parrot_jit_begin(Parrot_jit_info_t *jit_info,
 }
 
 void Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-                          Interp *interp)
+                          PARROT_INTERP)
 {
     emitm_sethi(jit_info->native_ptr, emitm_hi22(jit_info->cur_op), emitm_o(0));
     emitm_or_i(jit_info->native_ptr,
@@ -732,7 +736,7 @@ void Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
 }
 
 void Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-                        Interp *interp)
+                        PARROT_INTERP)
 {
     Parrot_jit_normal_op(jit_info, interp);
     Parrot_jit_bytejump(jit_info, interp, emitm_o(0));
@@ -740,7 +744,7 @@ void Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
 
 #  undef Parrot_jit_restart_op
 void Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
-                        Interp *interp)
+                        PARROT_INTERP)
 {
     Parrot_jit_normal_op(jit_info, interp);
 
@@ -760,7 +764,7 @@ void Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
 
 /* move reg to mem (i.e. intreg) */
 void
-Parrot_jit_emit_mov_mr(Interp *interp, char *mem, int reg)
+Parrot_jit_emit_mov_mr(PARROT_INTERP, char *mem, int reg)
 {
     emitm_st_i(((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr,
                reg, Parrot_jit_regbase, Parrot_jit_regoff(mem, interp));
@@ -768,7 +772,7 @@ Parrot_jit_emit_mov_mr(Interp *interp, char *mem, int reg)
 
 /* move mem (i.e. intreg) to reg */
 void
-Parrot_jit_emit_mov_rm(Interp *interp, int reg, char *mem)
+Parrot_jit_emit_mov_rm(PARROT_INTERP, int reg, char *mem)
 {
     emitm_ld_i(((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr,
                Parrot_jit_regbase, Parrot_jit_regoff(mem, interp), reg);
@@ -776,7 +780,7 @@ Parrot_jit_emit_mov_rm(Interp *interp, int reg, char *mem)
 
 /* move reg to mem (i.e. numreg) */
 void
-Parrot_jit_emit_mov_mr_n(Interp *interp, char *mem, int reg)
+Parrot_jit_emit_mov_mr_n(PARROT_INTERP, char *mem, int reg)
 {
     emitm_stdf_i(((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr,
                  reg, Parrot_jit_regbase, Parrot_jit_regoff(mem, interp));
@@ -784,7 +788,7 @@ Parrot_jit_emit_mov_mr_n(Interp *interp, char *mem, int reg)
 
 /* move mem (i.e. numreg) to reg */
 void
-Parrot_jit_emit_mov_rm_n(Interp *interp, int reg, char *mem)
+Parrot_jit_emit_mov_rm_n(PARROT_INTERP, int reg, char *mem)
 {
     emitm_lddf_i(((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr,
                  Parrot_jit_regbase, Parrot_jit_regoff(mem, interp), reg);
@@ -799,22 +803,22 @@ Parrot_jit_emit_mov_rm_n(Interp *interp, int reg, char *mem)
     file.
 */
 void
-Parrot_jit_emit_mov_mr_offs(Interp *interp, int base, size_t offs, int reg)
+Parrot_jit_emit_mov_mr_offs(PARROT_INTERP, int base, size_t offs, int reg)
 {
 }
 
 void
-Parrot_jit_emit_mov_rm_offs(Interp *interp, int reg, int base, size_t offs)
+Parrot_jit_emit_mov_rm_offs(PARROT_INTERP, int reg, int base, size_t offs)
 {
 }
 
 void
-Parrot_jit_emit_mov_mr_n_offs(Interp *interp, int base, size_t offs, int reg)
+Parrot_jit_emit_mov_mr_n_offs(PARROT_INTERP, int base, size_t offs, int reg)
 {
 }
 
 void
-Parrot_jit_emit_mov_rm_n_offs(Interp *interp, int reg, int base, size_t offs)
+Parrot_jit_emit_mov_rm_n_offs(PARROT_INTERP, int reg, int base, size_t offs)
 {
 }
 /* XXX end blind hack for [perl #37819] --but see
@@ -844,7 +848,7 @@ Parrot_jit_emit_mov_rm_n_offs(Interp *interp, int reg, int base, size_t offs)
  */
 static void
 Parrot_jit_vtable_n_op(Parrot_jit_info_t *jit_info,
-                       Interp *interp, int n, int *args)
+                       PARROT_INTERP, int n, int *args)
 {
     int        nvtable = op_jit[*jit_info->cur_op].extcall;
     op_info_t *op_info = &interp->op_info_table[*jit_info->cur_op];
@@ -918,7 +922,7 @@ Parrot_jit_vtable_n_op(Parrot_jit_info_t *jit_info,
                 emitm_ld_i(jit_info->native_ptr, XSR1, 0, emitm_o(rdx));
                 break;
             default:
-                internal_exception(1,
+                exit_fatal(1,
                         "jit_vtable_n_op: unimp type %d, arg %d vtable %d",
                         op_info->types[i - 1], i, nvtable);
                 break;
@@ -936,7 +940,7 @@ Parrot_jit_vtable_n_op(Parrot_jit_info_t *jit_info,
 
 static void
 Parrot_jit_store_retval(Parrot_jit_info_t *jit_info,
-                        Interp *interp)
+                        PARROT_INTERP)
 {
     opcode_t op_type = interp->op_info_table[*jit_info->cur_op].types[0];
     long     val     = jit_info->cur_op[1];
@@ -944,22 +948,22 @@ Parrot_jit_store_retval(Parrot_jit_info_t *jit_info,
     switch (op_type){
         case PARROT_ARG_I:
             emitm_st_i(jit_info->native_ptr, emitm_o(0), Parrot_jit_regbase,
-                       Parrot_jit_regoff((int)&REG_INT(val), interp));
+                       Parrot_jit_regoff((int)&REG_INT(interp, val), interp));
             break;
         case PARROT_ARG_P:
             emitm_st_i(jit_info->native_ptr, emitm_o(0), Parrot_jit_regbase,
-                       Parrot_jit_regoff((int)&REG_PMC(val), interp));
+                       Parrot_jit_regoff((int)&REG_PMC(interp, val), interp));
             break;
         case PARROT_ARG_S:
             emitm_st_i(jit_info->native_ptr, emitm_o(0), Parrot_jit_regbase,
-                       Parrot_jit_regoff((int)&REG_STR(val), interp));
+                       Parrot_jit_regoff((int)&REG_STR(interp, val), interp));
             break;
         case PARROT_ARG_N:
             emitm_stdf_i(jit_info->native_ptr, emitm_f(0), Parrot_jit_regbase,
-                       Parrot_jit_regoff((int)&REG_NUM(val), interp));
+                       Parrot_jit_regoff((int)&REG_NUM(interp, val), interp));
             break;
         default:
-            internal_exception(JIT_ERROR, "jit_vtable1r: ill LHS");
+            exit_fatal(EXCEPTION_JIT_ERROR, "jit_vtable1r: ill LHS");
     }
 }
 
@@ -968,7 +972,7 @@ Parrot_jit_store_retval(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable1_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 1 };
     Parrot_jit_vtable_n_op(jit_info, interp, 1, a);
@@ -991,7 +995,7 @@ Parrot_jit_vtable1r_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_1r223_op(Parrot_jit_info_t *jit_info,
-                      Interp *interp)
+                      PARROT_INTERP)
 {
     int a[] = { 2, 3 };
     Parrot_jit_vtable_n_op(jit_info, interp, 2, a);
@@ -1003,7 +1007,7 @@ Parrot_jit_vtable_1r223_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_1r332_op(Parrot_jit_info_t *jit_info,
-                      Interp *interp)
+                      PARROT_INTERP)
 {
     int a[] = { 3, 2 };
     Parrot_jit_vtable_n_op(jit_info, interp, 2, a);
@@ -1015,7 +1019,7 @@ Parrot_jit_vtable_1r332_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_112_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 1, 2 };
     Parrot_jit_vtable_n_op(jit_info, interp, 2, a);
@@ -1026,7 +1030,7 @@ Parrot_jit_vtable_112_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_111_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 1, 1 };
     Parrot_jit_vtable_n_op(jit_info, interp, 2, a);
@@ -1037,7 +1041,7 @@ Parrot_jit_vtable_111_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_221_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 2, 1 };
     Parrot_jit_vtable_n_op(jit_info, interp, 2, a);
@@ -1048,7 +1052,7 @@ Parrot_jit_vtable_221_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_2231_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 2, 3, 1 };
     Parrot_jit_vtable_n_op(jit_info, interp, 3, a);
@@ -1059,7 +1063,7 @@ Parrot_jit_vtable_2231_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_1123_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 1, 2, 3 };
     Parrot_jit_vtable_n_op(jit_info, interp, 3, a);
@@ -1070,7 +1074,7 @@ Parrot_jit_vtable_1123_op(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_vtable_1121_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     int a[] = { 1, 2, 1 };
     Parrot_jit_vtable_n_op(jit_info, interp, 3, a);
@@ -1079,7 +1083,7 @@ Parrot_jit_vtable_1121_op(Parrot_jit_info_t *jit_info,
 /* if_p_ic, unless_p_ic */
 static void
 Parrot_jit_vtable_if_unless_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp, int unless)
+                     PARROT_INTERP, int unless)
 {
     int ic = *(jit_info->cur_op + 2);  /* branch offset */
 
@@ -1095,14 +1099,14 @@ Parrot_jit_vtable_if_unless_op(Parrot_jit_info_t *jit_info,
 
 static void
 Parrot_jit_vtable_ifp_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     Parrot_jit_vtable_if_unless_op(jit_info, interp, 0);
 }
 
 static void
 Parrot_jit_vtable_unlessp_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     Parrot_jit_vtable_if_unless_op(jit_info, interp, 1);
 }
@@ -1110,7 +1114,7 @@ Parrot_jit_vtable_unlessp_op(Parrot_jit_info_t *jit_info,
 /* new_p_ic */
 static void
 Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
     void *igniter = (void (*)(void))pmc_new_noinit;
     size_t offset = offsetof(VTABLE, init);
@@ -1119,10 +1123,10 @@ Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info,
     int i2 = *(jit_info->cur_op + 2);
 
     if (i2 <= 0 || i2 >= interp->n_vtable_max)
-        internal_exception(1, "Illegal PMC enum (%d) in new", i2);
+        exit_fatal(1, "Illegal PMC enum (%d) in new", i2);
 
     /* get "a" pmc first - calling function:  pmc_new_noinit(...) */
-    /* PMC* pmc_new_noinit(Interp *interp, INTVAL base_type) */
+    /* PMC* pmc_new_noinit(PARROT_INTERP, INTVAL base_type) */
     if (emitm_simm13_const(i2)) {
         emitm_mov_i(jit_info->native_ptr, i2, emitm_o(1));
     }
@@ -1141,7 +1145,7 @@ Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info,
     /* got a new pmc, sync mem and prepare vtable call (regs) */
     emitm_mov_r(jit_info->native_ptr, emitm_o(0), emitm_o(1));
     emitm_st_i(jit_info->native_ptr, emitm_o(0), Parrot_jit_regbase,
-               Parrot_jit_regoff((int)&REG_PMC(p1), interp));
+               Parrot_jit_regoff((int)&REG_PMC(interp, p1), interp));
 
     emitm_ld_i(jit_info->native_ptr, emitm_o(0), offsetof(struct PMC, vtable), XSR1);
     emitm_ld_i(jit_info->native_ptr, XSR1, offset, XSR1);

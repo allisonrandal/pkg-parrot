@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2007, The Perl Foundation
-$Id: main.c 18277 2007-04-18 04:08:32Z chromatic $
+Copyright (C) 2007-2008, Parrot Foundation.
+$Id: main.c 37257 2009-03-10 04:22:07Z Util $
 
 =head1 NAME
 
@@ -31,40 +31,39 @@ Start Parrot
 
 The entry point from the command line into Parrot.
 
+=cut
+
 */
 
 int
 main(int argc, char * argv[])
 {
-    char    *sourcefile;
+    const char *sourcefile;
     Interp  *interp;
-    STRING  *executable_name;
-    PMC     *executable_name_pmc;
     int      status;
+
+    /* internationalization setup */
+    /* setlocale(LC_ALL, ""); */
+    PARROT_BINDTEXTDOMAIN(PACKAGE, LOCALEDIR);
+    PARROT_TEXTDOMAIN(PACKAGE);
 
     Parrot_set_config_hash();
 
-    interp     = Parrot_new(NULL);
-    if (!imcc_initialize(interp))
-        internal_exception(1, "Could not initialize IMCC\n");
+    interp = Parrot_new(NULL);
+    imcc_initialize(interp);
 
     /* We parse the arguments, but first store away the name of the Parrot
        executable, since parsing destroys that and we want to make it
        available. */
-    executable_name     = string_from_cstring(interp, argv[0], 0);
-    executable_name_pmc = pmc_new(interp, enum_class_String);
-    VTABLE_set_string_native(interp, executable_name_pmc, executable_name);
-    VTABLE_set_pmc_keyed_int(interp, interp->iglobals, IGLOBALS_EXECUTABLE,
-        executable_name_pmc);
+    Parrot_set_executable_name(interp, Parrot_str_new(interp, argv[0], 0));
 
     sourcefile = parseflags(interp, &argc, &argv);
     status     = imcc_run(interp, sourcefile, argc, argv);
+    UNUSED(status);
 
     /* Clean-up after ourselves */
     Parrot_destroy(interp);
     Parrot_exit(interp, 0);
-
-    return status;
 }
 
 /*

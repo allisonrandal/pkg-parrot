@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: fixedbooleanarray.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: fixedbooleanarray.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 11;
+use Parrot::Test tests => 13;
 
 =head1 NAME
 
@@ -23,51 +23,8 @@ out-of-bounds test. Checks INT and PMC keys.
 
 =cut
 
-my $fp_equality_macro = <<'ENDOFMACRO';
-.macro fp_eq (	J, K, L )
-    save	N0
-    save	N1
-    save	N2
-
-    set	N0, .J
-    set	N1, .K
-    sub	N2, N1,N0
-    abs	N2, N2
-    gt	N2, 0.000001, .$FPEQNOK
-
-    restore N2
-    restore	N1
-    restore	N0
-    branch	.L
-.local $FPEQNOK:
-    restore N2
-    restore	N1
-    restore	N0
-.endm
-.macro fp_ne(	J,K,L)
-    save	N0
-    save	N1
-    save	N2
-
-    set	N0, .J
-    set	N1, .K
-    sub	N2, N1,N0
-    abs	N2, N2
-    lt	N2, 0.000001, .$FPNENOK
-
-    restore	N2
-    restore	N1
-    restore	N0
-    branch	.L
-.local $FPNENOK:
-    restore	N2
-    restore	N1
-    restore	N0
-.endm
-ENDOFMACRO
-
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting array size" );
-    new P0, .FixedBooleanArray
+    new P0, ['FixedBooleanArray']
 
     set I0,P0
     eq I0,0,OK_1
@@ -87,7 +44,7 @@ ok 2
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Resetting array size (and getting an exception)" );
-    new P0, .FixedBooleanArray
+    new P0, ['FixedBooleanArray']
 
     set I0,P0
     set P0,1
@@ -104,8 +61,8 @@ OUTPUT
 #VIM's syntax highlighter needs this line
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting first element" );
-        new P0, .FixedBooleanArray
-        set P0, 1
+    new P0, ['FixedBooleanArray']
+    set P0, 1
 
     set P0[0],-7
     set I0,P0[0]
@@ -133,8 +90,8 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting second element" );
-        new P0, .FixedBooleanArray
-        set P0, 2
+    new P0, ['FixedBooleanArray']
+    set P0, 2
 
     set P0[1], -7
     set I0, P0[1]
@@ -162,8 +119,8 @@ ok 3
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Setting out-of-bounds elements" );
-        new P0, .FixedBooleanArray
-        set P0, 1
+    new P0, ['FixedBooleanArray']
+    set P0, 1
 
     set P0[1], -7
 
@@ -174,8 +131,8 @@ current instr\.:/
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements" );
-        new P0, .FixedBooleanArray
-        set P0, 1
+    new P0, ['FixedBooleanArray']
+    set P0, 1
 
     set I0, P0[1]
     end
@@ -185,10 +142,10 @@ current instr\.:/
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-@{[ $fp_equality_macro ]}
-     new P0, .FixedBooleanArray
+     .include 'include/fp_equality.pasm'
+     new P0, ['FixedBooleanArray']
      set P0, 3
-     new P1, .Key
+     new P1, ['Key']
 
      set P1, 0
      set P0[P1], 25
@@ -205,7 +162,7 @@ pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
 OK1: print "ok 1\\n"
 
      set N0, P0[1]
-     .fp_eq(N0, 1.0, OK2)
+     .fp_eq_pasm(N0, 1.0, OK2)
      print "not "
 OK2: print "ok 2\\n"
 
@@ -222,18 +179,18 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-@{[ $fp_equality_macro ]}
-     new P0, .FixedBooleanArray
+     .include 'include/fp_equality.pasm'
+     new P0, ['FixedBooleanArray']
      set P0, 1024
 
      set P0[25], 125
      set P0[128], 10.2
      set P0[513], "17"
-     new P1, .Integer
+     new P1, ['Integer']
      set P1, 123456
      set P0[1023], P1
 
-     new P2, .Key
+     new P2, ['Key']
      set P2, 25
      set I0, P0[P2]
      eq I0, 1, OK1
@@ -242,7 +199,7 @@ OK1: print "ok 1\\n"
 
      set P2, 128
      set N0, P0[P2]
-     .fp_eq(N0, 1.0, OK2)
+     .fp_eq_pasm(N0, 1.0, OK2)
      print "not "
 OK2: print "ok 2\\n"
 
@@ -271,7 +228,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
-    pmc1 = new FixedBooleanArray
+    pmc1 = new ['FixedBooleanArray']
     .local int bool1
     does bool1, pmc1, "scalar"
     print bool1
@@ -291,7 +248,7 @@ CODE
 OUTPUT
 
 pasm_output_is( << 'CODE', << 'OUTPUT', "Truth" );
-     new P0, .FixedBooleanArray
+     new P0, ['FixedBooleanArray']
      unless P0, OK1
      print "not "
 OK1: print "ok 1\n"
@@ -311,11 +268,11 @@ ok 3
 OUTPUT
 
 pasm_output_is( << 'CODE', << 'OUTPUT', "PMC keys & values" );
-     new P0, .FixedBooleanArray
+     new P0, ['FixedBooleanArray']
      set P0, 2
-     new P1, .Key
+     new P1, ['Key']
      set P1, 1
-     new P2, .Integer
+     new P2, ['Integer']
      set P2, 1
      set P0[P1], P2
      set I0, P0[P1]
@@ -326,7 +283,62 @@ CODE
 1
 OUTPUT
 
+pir_output_is( <<'CODE', <<'OUTPUT', "freeze/thaw" );
+.sub main :main
+    .local pmc fba
+    .local int i
+    .local string s
+
+    fba = new ['FixedBooleanArray']
+    fba = 17
+
+    fba[1]  = 1
+    fba[4]  = 1
+    fba[8]  = 1
+    fba[12] = 1
+    fba[15] = 1
+
+    say fba
+    s = freeze fba
+    fba.'fill'(0)
+    fba = thaw s
+    say fba
+
+.end
+
+CODE
+01001000100010010
+01001000100010010
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "clone" );
+.sub main :main
+    .local pmc fba1, fba2
+    .local int i
+    .local string s
+
+    fba1 = new ['FixedBooleanArray']
+    fba1 = 17
+
+    fba1[1]  = 1
+    fba1[4]  = 1
+    fba1[8]  = 1
+    fba1[12] = 1
+    fba1[15] = 1
+
+    say fba1
+    fba2 = clone fba1
+    say fba2
+
+.end
+
+CODE
+01001000100010010
+01001000100010010
+OUTPUT
+
 1;
+
 
 # Local Variables:
 #   mode: cperl

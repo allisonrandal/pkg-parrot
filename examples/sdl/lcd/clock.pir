@@ -30,50 +30,45 @@ The main function.
     load_bytecode "library/SDL/Event.pir"
     load_bytecode "library/SDL/EventHandler.pir"
     load_bytecode "library/SDL/LCD.pir"
-    
-    # set some screen properties
-    $P0 = new .Hash
-    $P0["height"] = 21
-    $P0["width"]  = 94
-    $P0["bpp"]    = 16
-    $P0["flags"]  =  5
-    
+
     # create the SDL application object
-    $I0 = find_type "SDL::App"
-    $P0 = new $I0, $P0
-    $P0 = $P0."surface"()
-    global "screen" = $P0
-    
+    .local pmc app
+    app = new 'SDL::App'
+    app.'init'( 'height' => 21, 'width' => 94, 'bpp' => 16, 'flags' => 5 )
+
+    .local pmc screen
+    screen = app.'surface'()
+    set_global 'screen', screen
+
     # create the LCD
-    $I0 = find_type "SDL::LCD"
-    $P0 = new $I0
-    global "LCD" = $P0
+    .local pmc lcd
+    lcd = new 'SDL::LCD'
+    set_global 'LCD', lcd
 
     # draw the watch
     drawWatch()
-    
+
     # create the timer
-    $P1 = global "drawWatch"
-    $P0 = new .Timer
+    $P1 = get_global "drawWatch"
+    $P0 = new 'Timer'
     $P0[.PARROT_TIMER_NSEC] = 0.5
     $P0[.PARROT_TIMER_HANDLER] = $P1
     $P0[.PARROT_TIMER_REPEAT] = -1
     $P0[.PARROT_TIMER_RUNNING] = 1
     # store the timer somewhere, it will be
     # collected and destroyed otherwise
-    global "timer" = $P0
-    
+    set_global "timer", $P0
+
     #
     # event loop
     #
     .local pmc eh
     .local pmc loop
 
-    find_type $I0, "SDL::EventHandler"
-    eh = new $I0
-    find_type $I0, "SDL::Event"
-    loop = new $I0
-    loop."process_events"( 0.1, eh )
+    eh   = new 'SDL::EventHandler'
+    loop = new 'SDL::Event'
+    loop.'init'()
+    loop.'process_events'( 0.1, eh )
 .end
 
 =item drawWatch
@@ -84,8 +79,7 @@ Creates, sets and redraws the LCD display content.
 
 .sub drawWatch
     # decode the current time
-    $N0 = time
-    $I0 = $N0
+    $I0 = time
     $P0 = decodelocaltime $I0
 
     # use a dot or a space?
@@ -94,7 +88,7 @@ Creates, sets and redraws the LCD display content.
     if $N0 < 0.5 goto USE_DOTS
     $S2 = " "
 USE_DOTS:
-    
+
     # hours
     $I0 = $P0[.TM_HOUR]
     $I0 /= 10
@@ -132,11 +126,11 @@ HOUR:
     concat $S0, $S1
 
     # set the time
-    $P0 = global "LCD"
+    $P0 = get_global "LCD"
     $P0 = $S0
 
     # redraw the LCD
-    $P1 = global "screen"
+    $P1 = get_global "screen"
     $P0.'draw'( $P1 )
 .end
 
@@ -150,7 +144,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -158,4 +152,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

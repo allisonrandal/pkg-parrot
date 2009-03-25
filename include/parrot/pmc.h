@@ -1,7 +1,7 @@
 /* pmc.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: pmc.h 19085 2007-06-18 13:34:35Z petdance $
+ *     $Id: pmc.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:
@@ -20,85 +20,137 @@
 #define PARROT_MAX_CLASSES 100
 
 /* HEADERIZER BEGIN: src/pmc.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API PMC * constant_pmc_new( Interp *interp /*NN*/, INTVAL base_type )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * constant_pmc_new(PARROT_INTERP, INTVAL base_type)
         __attribute__nonnull__(1);
 
-PARROT_API PMC * constant_pmc_new_init( Interp *interp /*NN*/,
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * constant_pmc_new_init(PARROT_INTERP,
     INTVAL base_type,
-    PMC *init )
+    ARGIN_NULLOK(PMC *init))
         __attribute__nonnull__(1);
 
-PARROT_API PMC * constant_pmc_new_noinit( Interp *interp /*NN*/,
-    INTVAL base_type )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * constant_pmc_new_noinit(PARROT_INTERP, INTVAL base_type)
         __attribute__nonnull__(1);
 
-PARROT_API void dod_register_pmc( Interp* interp /*NN*/, PMC* pmc )
-        __attribute__nonnull__(1);
-
-PARROT_API void Parrot_create_mro( Interp *interp /*NN*/, INTVAL type )
-        __attribute__nonnull__(1);
-
-PARROT_API void Parrot_create_pmc_proxy( Interp* interp /*NN*/, int type_num )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * pmc_new( Interp *interp /*NN*/, INTVAL base_type )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * pmc_new_init( Interp *interp /*NN*/,
-    INTVAL base_type,
-    PMC *init )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * pmc_new_noinit( Interp *interp /*NN*/, INTVAL base_type )
-        __attribute__nonnull__(1);
-
-PARROT_API INTVAL pmc_register( Interp* interp /*NN*/, STRING *name )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC* pmc_reuse( Interp *interp /*NN*/,
-    PMC *pmc /*NN*/,
-    INTVAL new_type,
-    UINTVAL flags )
+PARROT_EXPORT
+void gc_register_pmc(PARROT_INTERP, ARGIN(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API INTVAL pmc_type( Interp* interp /*NN*/, STRING *name /*NN*/ )
+PARROT_EXPORT
+void Parrot_create_mro(PARROT_INTERP, INTVAL type)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+INTVAL PMC_is_null(SHIM_INTERP, ARGIN_NULLOK(const PMC *pmc));
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * pmc_new(PARROT_INTERP, INTVAL base_type)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * pmc_new_init(PARROT_INTERP, INTVAL base_type, ARGOUT(PMC *init))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*init);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * pmc_new_noinit(PARROT_INTERP, INTVAL base_type)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+INTVAL pmc_register(PARROT_INTERP, ARGIN(STRING *name))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PMC * pmc_reuse(PARROT_INTERP,
+    ARGIN(PMC *pmc),
+    INTVAL new_type,
+    NULLOK(UINTVAL flags))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+INTVAL pmc_type(PARROT_INTERP, ARGIN_NULLOK(STRING *name))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+INTVAL pmc_type_p(PARROT_INTERP, ARGIN(PMC *name))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void gc_unregister_pmc(PARROT_INTERP, ARGIN(PMC *pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+INTVAL get_new_vtable_index(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+void temporary_pmc_free(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__pure__
-        __attribute__warn_unused_result__;
+        FUNC_MODIFIES(*pmc);
 
-PARROT_API INTVAL pmc_type_p( Interp* interp /*NN*/, PMC *name /*NN*/ )
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-void dod_unregister_pmc( Interp* interp /*NN*/, PMC* pmc )
+PARROT_CANNOT_RETURN_NULL
+PMC * temporary_pmc_new(PARROT_INTERP, INTVAL base_type)
         __attribute__nonnull__(1);
 
+#define ASSERT_ARGS_constant_pmc_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_constant_pmc_new_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_constant_pmc_new_noinit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_gc_register_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_create_mro __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_PMC_is_null __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_pmc_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_pmc_new_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(init)
+#define ASSERT_ARGS_pmc_new_noinit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_pmc_register __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(name)
+#define ASSERT_ARGS_pmc_reuse __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_pmc_type __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_pmc_type_p __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(name)
+#define ASSERT_ARGS_gc_unregister_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_get_new_vtable_index __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_temporary_pmc_free __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_temporary_pmc_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/pmc.c */
-
-/* pmcinfo parameters */
-
-/* &gen_from_def(pmcinfo.pasm) */
-
-#define PMCINFO_FLAGS    4      /* see also STRINGINFO_FLAGS */
-
-/* &end_gen */
-
-/* This is the underlying structure for a PMC Proxy object; we need to set it
- * up from outside of the PMC. */
-typedef struct Parrot_PMCProxy {
-    int id;               /* The type number of the PMC. */
-    STRING *name;         /* The name of the PMC. */
-    PMC *_namespace;      /* The namespace it's linked to, if any. */
-    PMC *parents;         /* Proxy PMCs of any immediate parent classes. */
-    PMC *all_parents;     /* Cached list of ourself and all parents, in MRO order. */
-    PMC *methods;         /* PMC's non-vtable methods. Hash of method names to invokables. */
-} Parrot_PMCProxy;
-
-/* Macro to access underlying structure of a PMCProxy PMC. */
-#define PARROT_PMCPROXY(o) ((Parrot_PMCProxy *) PMC_data(o))
 
 #endif /* PARROT_PMC_H_GUARD */
 

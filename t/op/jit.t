@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: jit.t 17574 2007-03-17 22:47:11Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: jit.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -1009,14 +1009,10 @@ ok 4
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "t/op/arithmetic_26: non jit seq w. branch" );
-new P0, .Integer
+new P0, 'Integer'
 set N0, 4000
 set P0, 123
 div P0, P0, N0
-
-save    N0
-save    N1
-save    N2
 
 set     N0, P0
 set     N1, 0.03074969250307496925
@@ -1024,14 +1020,8 @@ sub     N2, N1,N0
 abs     N2, N2
 gt      N2, 0.000001, local__fp_eq__FPEQNOK__1
 
-restore N2
-restore N1
-restore N0
 branch  EQ1
 local__fp_eq__FPEQNOK__1:
-restore N2
-restore N1
-restore N0
 print P0
 print "not "
 EQ1:    print "ok 1"
@@ -1257,7 +1247,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "shr_i_i" );
     j = j + 1
     j = j + 1  # esi
     k = k + 1
-    k = k + 1  # edx 
+    k = k + 1  # edx
     m = m + 32 # ecx
     m >>= l    # opt_shift_rm (count l in memory)
     .return (m)

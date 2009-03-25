@@ -1,15 +1,13 @@
-$Id: queens_r.pir 17600 2007-03-18 10:52:17Z paultcochrane $
+# $Id: queens_r.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 # recursive queens placement
 # prints all 92 solutions in chess notation
 # by leo
 
-# See also: pams/queens.pasm
-
 .sub main :main
     .local pmc queen_row, queen_state
-    queen_row = new .ResizableIntegerArray
-    queen_state = new .ResizableIntegerArray
+    queen_row = new 'ResizableIntegerArray'
+    queen_state = new 'ResizableIntegerArray'
     solve(0, queen_row, queen_state)
 .end
 
@@ -114,4 +112,4 @@ loop:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

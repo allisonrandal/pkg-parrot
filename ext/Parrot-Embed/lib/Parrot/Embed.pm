@@ -1,9 +1,11 @@
 package Parrot::Embed;
 
+# $Id: Embed.pm 37377 2009-03-13 08:48:14Z allison $
+
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '20081006';
 
 use base 'DynaLoader';
 
@@ -19,16 +21,23 @@ Parrot::Embed - use Parrot from Perl 5
 
 =head1 VERSION
 
-Version 0.02
+Version 20081006
 
 =head1 SYNOPSIS
+
+  use Parrot::Embed qw(Parrot_revision);
+
+=head1 DESCRIPTION
 
 This module embeds libparrot in Perl 5 programs.  You can load Parrot bytecode,
 compile your own code, and call Parrot subroutines and send and receive values
 to them.
 
+It provides the core implementation used by the L<Parrot::Interpreter> module.
 Do consider using L<Parrot::Interpreter> first however.  See also
 L<Parrot::PMC>.
+
+This module provides no user-inspectable code.
 
 =head1 AUTHOR
 
@@ -41,7 +50,7 @@ Someday there may be a CPAN version of this code.  Who knows?
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (c) 2006 - 2007 The Perl Foundation / chromatic.
+Copyright (C) 2006-2008, Parrot Foundation / chromatic.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Parrot itself.

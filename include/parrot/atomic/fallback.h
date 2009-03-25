@@ -1,7 +1,7 @@
 /* atomic/fallback.h
- *  Copyright (C) 2006, The Perl Foundation.
+ *  Copyright (C) 2006, Parrot Foundation.
  *  SVN Info
- *     $Id: fallback.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: fallback.h 36833 2009-02-17 20:09:26Z allison $
  *  Overview:
  *     This header provides an implementation of atomic
  *     operations in terms of threading primitives.
@@ -28,55 +28,54 @@ typedef struct Parrot_atomic_integer {
 #  define PARROT_ATOMIC_PTR_GET(result, a) \
     do { \
         LOCK((a).lock); \
-        result = (a).val; \
+        (result) = (a).val; \
         UNLOCK((a).lock); \
     } while (0)
 
 #  define PARROT_ATOMIC_INT_GET(result, a) \
     do { \
         LOCK((a).lock); \
-        result = (a).val; \
+        (result) = (a).val; \
         UNLOCK((a).lock); \
     } while (0)
 
-#  define PARROT_ATOMIC_PTR_SET(a,b) \
+#  define PARROT_ATOMIC_PTR_SET(a, b) \
     do { \
         LOCK((a).lock); \
-        (a).val = b; \
+        (a).val = (b); \
         UNLOCK((a).lock); \
     } while (0)
 
-#  define PARROT_ATOMIC_INT_SET(a,b) \
+#  define PARROT_ATOMIC_INT_SET(a, b) \
     do { \
         LOCK((a).lock); \
-        (a).val = b; \
+        (a).val = (b); \
         UNLOCK((a).lock); \
     } while (0)
 
 #  define PARROT_ATOMIC_INT_INC(result, a) \
     do { \
         LOCK((a).lock); \
-        result = ++(a).val; \
+        (result) = ++(a).val; \
         UNLOCK((a).lock); \
     } while (0)
 
 #  define PARROT_ATOMIC_INT_DEC(result, a) \
     do { \
         LOCK((a).lock); \
-        result = --(a).val; \
+        (result) = --(a).val; \
         UNLOCK((a).lock); \
     } while (0)
 
 #  define PARROT_ATOMIC_PTR_CAS(result, a, expect, update) \
     do { \
         LOCK((a).lock); \
-        if ((a).val == expect) { \
-            void * orig = (a).val; \
-            (a).val = update; \
-            result = 1; \
+        if ((a).val == (expect)) { \
+            (a).val = (update); \
+            (result) = 1; \
         } \
         else { \
-            result = 0; \
+            (result) = 0; \
         } \
         UNLOCK((a).lock); \
     } while (0)
@@ -84,13 +83,12 @@ typedef struct Parrot_atomic_integer {
 #  define PARROT_ATOMIC_INT_CAS(result, a, expect, update) \
     do { \
         LOCK((a).lock); \
-        if ((a).val == expect) { \
-            INTVAL orig = (a).val; \
-            (a).val = update; \
-            result = 1; \
+        if ((a).val == (expect)) { \
+            (a).val = (update); \
+            (result) = 1; \
         } \
         else { \
-            result = 0; \
+            (result) = 0; \
         } \
         UNLOCK((a).lock); \
     } while (0)

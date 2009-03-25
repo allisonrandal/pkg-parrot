@@ -1,4 +1,4 @@
-# $Id: oo6.pir 17599 2007-03-18 10:51:10Z paultcochrane $
+# $Id: oo6.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 .sub bench :main
     .local pmc cl
@@ -9,11 +9,10 @@
     .local int typ
     .local int i
     i = 1
-    typ = find_type "Foo"
     .local pmc o
-    o = new  typ
+    o = new "Foo"
 loop:
-    $P4 = new .Integer
+    $P4 = new 'Integer'
     $P4 = i
     o."i"($P4)
     o."j"($P4)
@@ -27,51 +26,39 @@ loop:
 .end
 
 .namespace ["Foo"]
-.sub __init method
-    .local int ofs
-    ofs = classoffset self, "Foo"
-    new $P10, .Integer
+.sub init :method :vtable
+    new $P10, 'Integer'
     set $P10, 10
-    setattribute self, ofs, $P10
-    inc ofs
-    new $P10, .Integer
+    setattribute self, '.i', $P10
+    new $P10, 'Integer'
     set $P10, 20
-    setattribute self, ofs, $P10
+    setattribute self, '.j', $P10
 .end
 
-.pcc_sub i method
+.sub i :method
     .param pmc v     :optional
     .param int has_v :opt_flag
-    .local int ofs
-    ofs = classoffset self, "Foo"
     .local pmc r
-    r = getattribute self, ofs
+    r = getattribute self, '.i'
     unless has_v goto get
     assign r, v
 get:
-    .pcc_begin_return
-    .return r
-    .pcc_end_return
+    .return( r )
 .end
 
-.pcc_sub j method
+.sub j :method
     .param pmc v     :optional
     .param int has_v :opt_flag
-    .local int ofs
-    ofs = classoffset self, "Foo"
-    inc ofs
     .local pmc r
-    r = getattribute self, ofs
+    r = getattribute self, '.j'
     unless has_v goto get
     assign r, v
 get:
-    .pcc_begin_return
-    .return r
-    .pcc_end_return
+    .return( r )
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

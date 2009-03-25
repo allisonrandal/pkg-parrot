@@ -1,4 +1,8 @@
 #! perl
+
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: parrotbench.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 use strict;
 use warnings;
 use Config::IniFiles;
@@ -59,7 +63,7 @@ Here is an example parrotbench.conf:
     exclude   = waves
 
     [benchmark parrotj]
-    exe       = ../../parrot -j
+    exe       = ../../parrot -R jit
     type      = .pasm
     type      = .pir
 
@@ -96,10 +100,10 @@ Sebastian Riedel, C<sri@oook.de>
 
 # Create Default Configuration
 my %cfg = (
-    config_file  => File::Spec->catdir( $FindBin::Bin, 'parrotbench.conf' ),
-    bench_path   => undef,
-    list_only    => undef,
-    use_times    => undef,
+    config_file => File::Spec->catdir( $FindBin::Bin, 'parrotbench.conf' ),
+    bench_path  => undef,
+    list_only   => undef,
+    use_times   => undef,
     display_help => undef,
     method       => undef,
     run_bench    => [],

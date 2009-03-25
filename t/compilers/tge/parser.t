@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: parser.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: parser.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ t/parser.t - TGE::Parser tests
 pir_output_is( <<'CODE', <<'OUT', "parse a basic attribute grammar" );
 
 .sub _main :main
-    load_bytecode "compilers/tge/TGE.pir"
+    load_bytecode 'TGE.pbc'
 
     .local string source
     source = <<'GRAMMAR'
@@ -40,7 +40,7 @@ GRAMMAR
     # Match against the source
     .local pmc match
     .local pmc start_rule
-    start_rule = find_global "TGE::Parser", "start"
+    start_rule = get_global ['TGE';'Parser'], "start"
     print "loaded start rule\n"
     match = start_rule(source)
     print "matched start rule\n"
@@ -66,7 +66,7 @@ OUT
 pir_error_output_like( <<'CODE', qr/Syntax error at line 4, near "transform "/, "parse failure" );
 
 .sub _main :main
-    load_bytecode "compilers/tge/TGE.pir"
+    load_bytecode 'TGE.pbc'
 
     .local string source
     source = <<'GRAMMAR'
@@ -79,8 +79,8 @@ pir_error_output_like( <<'CODE', qr/Syntax error at line 4, near "transform "/, 
 GRAMMAR
     .local pmc match
     .local pmc start_rule
-    start_rule = find_global "TGE::Parser", "start"
-    match = start_rule(source) # should throw.
+    start_rule = get_global ['TGE';'Parser'], "start"
+    match = start_rule(source, 'grammar'=>'TGE::Parser') # should throw.
 .end
 
 CODE

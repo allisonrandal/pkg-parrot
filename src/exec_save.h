@@ -1,8 +1,12 @@
 /*
+ * Copyright (C) 2003-2007, Parrot Foundation.
+ */
+
+/*
  * exec.h
  *
  * SVN Info
- *    $Id: exec_save.h 18945 2007-06-12 14:08:35Z fperrad $
+ *    $Id: exec_save.h 37201 2009-03-08 12:07:48Z fperrad $
  * Overview:
  *    Exec header file.
  * History:
@@ -14,7 +18,7 @@
 #ifndef PARROT_EXEC_SAVE_H_GUARD
 #define PARROT_EXEC_SAVE_H_GUARD
 
-void Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file);
+void Parrot_exec_save(PARROT_INTERP, Parrot_exec_objfile_t *obj, const char *file);
 
 #endif /* PARROT_EXEC_SAVE_H_GUARD */
 

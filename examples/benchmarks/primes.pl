@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: primes.pl 16178 2006-12-18 05:22:02Z chromatic $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: primes.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -54,7 +54,7 @@ F<examples/benchmarks/primes.c>,
 F<examples/benchmarks/primes.pasm>,
 F<examples/benchmarks/primes2_p.pasm>,
 F<examples/benchmarks/primes2.c>,
-F<examples/benchmarks/primes2.pasm>,
+F<examples/benchmarks/primes2.pir>,
 F<examples/benchmarks/primes2.py>.
 
 =cut

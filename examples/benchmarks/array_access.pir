@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: array_access.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: array_access.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,18 +15,18 @@ Inspired by computer language shootout.
 
 =cut
 
-.sub main :main
+.sub 'main' :main
     .param pmc argv
 
     load_bytecode "Getopt/Obj.pbc"
-    
+
     # name of the program
     .local string program_name
     program_name = shift argv
 
     # Specification of command line arguments.
     .local pmc getopts
-    getopts = new "Getopt::Obj"
+    getopts = new [ 'Getopt::Obj' ]
     push getopts, "arr-size=i"
 
     .local pmc opt
@@ -34,31 +34,32 @@ Inspired by computer language shootout.
 
     .local int arr_size
     arr_size = 100
-    .local int def
-    def = defined opt["arr-size"]
-    unless def goto use_default_arr_size
-        arr_size = opt['arr-size']
-use_default_arr_size:
 
-    _bench( .Array, arr_size )
-    _bench( .FixedFloatArray, arr_size )
-    _bench( .FixedIntegerArray, arr_size )
-    _bench( .FixedPMCArray, arr_size )
-    _bench( .FixedStringArray, arr_size )
-    _bench( .IntList, arr_size )
-    _bench( .ResizableFloatArray, arr_size )
-    _bench( .ResizableIntegerArray, arr_size )
-    _bench( .ResizablePMCArray, arr_size )
-    _bench( .ResizableStringArray, arr_size )
-    _bench( .SArray, arr_size )
+    .local int def
+    def = defined opt['arr-size']
+    unless def goto use_default_arr_size
+
+    arr_size = opt['arr-size']
+  use_default_arr_size:
+
+    _bench( 'Array', arr_size )
+    _bench( 'FixedFloatArray', arr_size )
+    _bench( 'FixedIntegerArray', arr_size )
+    _bench( 'FixedPMCArray', arr_size )
+    _bench( 'FixedStringArray', arr_size )
+    _bench( 'ResizableFloatArray', arr_size )
+    _bench( 'ResizableIntegerArray', arr_size )
+    _bench( 'ResizablePMCArray', arr_size )
+    _bench( 'ResizableStringArray', arr_size )
+    _bench( 'FixedPMCArray', arr_size )
 .end
 
 =head2 void bench( int arr_class, int arr_size )
 
 =cut
 
-.sub _bench 
-    .param int arr_class
+.sub _bench
+    .param string arr_class
     .param int arr_size
 
     # Two arrays with fixed size
@@ -68,7 +69,7 @@ use_default_arr_size:
     arr_2 = new arr_class
     arr_2 = arr_size
 
-    .local float start_time
+    .local num start_time
     start_time = time
 
     # initialize arr_1 and arr_2
@@ -87,7 +88,7 @@ X_DONE:
     .local int max_index, z_index, y_index
     max_index = arr_size - 1
     y_index = 0
-Y_LOOP:   # 1000 iterations 
+Y_LOOP:   # 1000 iterations
     if y_index >= 1000 goto Y_DONE
     z_index = max_index
 Z_LOOP:   # arr_size iterations
@@ -115,7 +116,7 @@ Y_DONE:
     print value
     print "\n"
 
-    .local float start_time, end_time, span_time
+    .local num start_time, end_time, span_time
     end_time = time
     span_time = end_time - start_time
     .local string arr_type
@@ -136,4 +137,4 @@ Computer language shootout. L<http://shootout.alioth.debian.org>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

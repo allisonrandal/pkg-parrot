@@ -1,9 +1,9 @@
 /*
  * list.h
- *  Copyright (C) 2002, The Perl Foundation.
- *  License:  Artistic/GPL, see README and LICENSES for details
+ *  Copyright (C) 2002-2008, Parrot Foundation.
+ *  License:  Artistic 2.0, see README and LICENSE for details
  *  SVN Info
- *     $Id: list.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: list.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     list aka array routines for Parrot
  *     s. list.c for more
@@ -15,35 +15,34 @@
 #define PARROT_LIST_H_GUARD
 
 typedef struct List_chunk {
-    Buffer data;                /* item store */
-    UINTVAL flags;              /* chunk flags */
-    UINTVAL items;              /* items in this chunk */
-    UINTVAL n_chunks;           /* # of chunks with grow policy in flags */
-    UINTVAL n_items;            /* # of items with grow policy in flags */
+    Buffer             data;        /* item store */
     struct List_chunk *next;
     struct List_chunk *prev;
+    UINTVAL            flags;       /* chunk flags */
+    UINTVAL            items;       /* items in this chunk */
+    UINTVAL            n_chunks;    /* # of chunks with grow policy in flags */
+    UINTVAL            n_items;     /* # of items  with grow policy in flags */
 } List_chunk;
 
-#define sparse PObj_private0_FLAG
+#define sparse      PObj_private0_FLAG
 #define no_power_2  PObj_private1_FLAG
 #define fixed_items PObj_private2_FLAG
-#define grow_items PObj_private3_FLAG
+#define grow_items  PObj_private3_FLAG
 
 typedef struct List {
-    Buffer chunk_list;          /* pointers to chunks */
-    UINTVAL length;             /* number of items in list */
-    UINTVAL start;              /* offset, where array[0] is */
-    PMC * container;            /* the Array PMC */
-    int item_type;              /* item type */
-    int item_size;              /* item size */
-    int items_per_chunk;        /* override defaults */
-    UINTVAL cap;                /* list capacity in items */
-    int grow_policy;            /* fixed / variable len */
-    UINTVAL collect_runs;       /* counter, when chunklist was built */
-    UINTVAL n_chunks;           /* number of chunks */
-    PMC * user_data;            /* e.g. multiarray dimensions */
-    List_chunk *first;          /* first chunk holding data */
-    List_chunk *last;           /* last chunk */
+    Buffer           chunk_list;      /* pointers to chunks */
+    PMC             *container;       /* the Array PMC */
+    List_chunk      *first;           /* first chunk holding data */
+    List_chunk      *last;            /* last chunk */
+    UINTVAL          length;          /* number of items in list */
+    UINTVAL          start;           /* offset, where array[0] is */
+    PARROT_DATA_TYPE item_type;       /* item type */
+    UINTVAL          cap;             /* list capacity in items */
+    UINTVAL          collect_runs;    /* counter, when chunklist was built */
+    UINTVAL          n_chunks;        /* number of chunks */
+    int              grow_policy;     /* fixed / variable len */
+    int              items_per_chunk; /* override defaults */
+    int              item_size;       /* item size */
 } List;
 
 typedef enum {
@@ -77,104 +76,208 @@ typedef enum {
 
 
 /* HEADERIZER BEGIN: src/list.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API UINTVAL ld( UINTVAL x )
-        __attribute__const__
-        __attribute__warn_unused_result__;
+PARROT_EXPORT
+PARROT_CONST_FUNCTION
+PARROT_WARN_UNUSED_RESULT
+UINTVAL ld(UINTVAL x);
 
-PARROT_API void list_assign( Interp *interp,
-    List *list /*NN*/,
+PARROT_EXPORT
+void list_assign(PARROT_INTERP,
+    ARGMOD(List *list),
     INTVAL idx,
-    void *item,
-    int type )
-        __attribute__nonnull__(2);
-
-PARROT_API List * list_clone( Interp *interp /*NN*/,
-    const List *other /*NN*/ )
+    ARGIN_NULLOK(void *item),
+    int type)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__warn_unused_result__;
+        FUNC_MODIFIES(*list);
 
-PARROT_API void list_delete( Interp *interp,
-    List *list /*NN*/,
-    INTVAL idx,
-    INTVAL n_items )
-        __attribute__nonnull__(2);
-
-PARROT_API void * list_get( Interp *interp,
-    List *list /*NN*/,
-    INTVAL idx,
-    int type )
-        __attribute__nonnull__(2)
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-
-PARROT_API void list_insert( Interp *interp,
-    List *list /*NN*/,
-    INTVAL idx,
-    INTVAL n_items )
-        __attribute__nonnull__(2);
-
-PARROT_API INTVAL list_length( Interp *interp, const List *list /*NN*/ )
-        __attribute__nonnull__(2)
-        __attribute__pure__
-        __attribute__warn_unused_result__;
-
-PARROT_API void list_mark( Interp *interp /*NN*/, List *list /*NN*/ )
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+List * list_clone(PARROT_INTERP, ARGIN(const List *other))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API List * list_new( Interp *interp, INTVAL type )
-        __attribute__warn_unused_result__;
-
-PARROT_API List * list_new_init( Interp *interp,
-    INTVAL type,
-    PMC *init /*NN*/ )
-        __attribute__nonnull__(3)
-        __attribute__warn_unused_result__;
-
-PARROT_API void list_pmc_new( Interp *interp, PMC *container /*NN*/ )
-        __attribute__nonnull__(2);
-
-PARROT_API void list_pmc_new_init( Interp *interp,
-    PMC *container /*NN*/,
-    PMC *init /*NN*/ )
+PARROT_EXPORT
+void list_delete(PARROT_INTERP,
+    ARGMOD(List *list),
+    INTVAL idx,
+    INTVAL n_items)
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+void * list_get(PARROT_INTERP, ARGMOD(List *list), INTVAL idx, int type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+void list_insert(PARROT_INTERP,
+    ARGMOD(List *list),
+    INTVAL idx,
+    INTVAL n_items)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+void list_mark(PARROT_INTERP, ARGMOD(List *list))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+List * list_new(PARROT_INTERP, PARROT_DATA_TYPE type)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+List * list_new_init(PARROT_INTERP, PARROT_DATA_TYPE type, ARGIN(PMC *init))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(3);
 
-PARROT_API void * list_pop( Interp *interp, List *list /*NN*/, int type )
-        __attribute__nonnull__(2);
+PARROT_EXPORT
+void list_pmc_new(PARROT_INTERP, ARGMOD(PMC *container))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*container);
 
-PARROT_API void list_push( Interp *interp,
-    List *list /*NN*/,
-    void *item,
-    int type )
-        __attribute__nonnull__(2);
+PARROT_EXPORT
+void list_pmc_new_init(PARROT_INTERP,
+    ARGMOD(PMC *container),
+    ARGIN(PMC *init))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*container);
 
-PARROT_API void list_set_length( Interp *interp,
-    List *list /*NN*/,
-    INTVAL len )
-        __attribute__nonnull__(2);
+PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+void * list_pop(PARROT_INTERP, ARGMOD(List *list), int type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
 
-PARROT_API void * list_shift( Interp *interp, List *list /*NN*/, int type )
-        __attribute__nonnull__(2);
+PARROT_EXPORT
+void list_push(PARROT_INTERP,
+    ARGMOD(List *list),
+    ARGIN_NULLOK(void *item),
+    int type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
 
-PARROT_API void list_splice( Interp *interp,
-    List *list /*NN*/,
-    List *value_list /*NULLOK*/,
+PARROT_EXPORT
+void list_set_length(PARROT_INTERP, ARGMOD(List *list), INTVAL len)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+void * list_shift(PARROT_INTERP, ARGMOD(List *list), int type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+void list_splice(PARROT_INTERP,
+    ARGMOD(List *list),
+    ARGIN_NULLOK(List *value_list),
     INTVAL offset,
-    INTVAL count )
+    INTVAL count)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+void list_unshift(PARROT_INTERP,
+    ARGMOD(List *list),
+    ARGIN(void *item),
+    int type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*list);
+
+PARROT_EXPORT
+void list_visit(PARROT_INTERP, ARGIN(List *list), ARGMOD(void *pinfo))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*pinfo);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+INTVAL list_length(SHIM_INTERP, ARGIN(const List *list))
         __attribute__nonnull__(2);
 
-PARROT_API void list_unshift( Interp *interp,
-    List *list /*NN*/,
-    void *item,
-    int type )
-        __attribute__nonnull__(2);
-
-PARROT_API void list_visit( Interp *interp, List *list /*NN*/, void *pinfo )
-        __attribute__nonnull__(2);
-
+#define ASSERT_ARGS_ld __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_list_assign __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_clone __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(other)
+#define ASSERT_ARGS_list_delete __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_get __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_insert __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_mark __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_list_new_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(init)
+#define ASSERT_ARGS_list_pmc_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(container)
+#define ASSERT_ARGS_list_pmc_new_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(container) \
+    || PARROT_ASSERT_ARG(init)
+#define ASSERT_ARGS_list_pop __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_push __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_set_length __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_shift __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_splice __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list)
+#define ASSERT_ARGS_list_unshift __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list) \
+    || PARROT_ASSERT_ARG(item)
+#define ASSERT_ARGS_list_visit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(list) \
+    || PARROT_ASSERT_ARG(pinfo)
+#define ASSERT_ARGS_list_length __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(list)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/list.c */
 
 #endif /* PARROT_LIST_H_GUARD */

@@ -1,90 +1,333 @@
 /*
- * reg_alloc.c
- *
- * Register allocator:
- *
- * This is a brute force register allocator. It uses a graph-coloring
- * algorithm, but the implementation is very kludgy.
- *
- * It is a partial implementation of a Briggs-style register allocator
- * The following parts are just missing:
- *
- * - Renumbering
- * - Coaelesceing
- *
- */
+ * $Id: reg_alloc.c 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2003-2009, Parrot Foundation.
+*/
+
+/*
+
+=head1 NAME
+
+compilers/imcc/reg_alloc.c
+
+=head1 DESCRIPTION
+
+Register allocator:
+
+This is a brute force register allocator. It uses a graph-coloring
+algorithm, but the implementation is very kludgy.
+
+It is a partial implementation of a Briggs-style register allocator
+The following parts are just missing:
+
+ - Renumbering
+ - Coalescing
+
+=head2 Functions
+
+=over 4
+
+=cut
+
+*/
 
 #include <string.h>
-#include <assert.h>
 #include "imc.h"
 #include "optimizer.h"
 
-void graph_coloring_reg_alloc(Interp *interp, IMC_Unit * unit);
-static void make_stat(IMC_Unit *, int *sets, int *cols);
-static void imc_stat_init(IMC_Unit *);
-static void print_stat(Parrot_Interp, IMC_Unit *);
-static void build_reglist(Parrot_Interp, IMC_Unit * unit);
-static void rebuild_reglist(Parrot_Interp, IMC_Unit * unit);
-static void build_interference_graph(Parrot_Interp, IMC_Unit *);
-static void compute_du_chain(IMC_Unit * unit);
-static void compute_one_du_chain(SymReg * r, IMC_Unit * unit);
-static int interferes(Interp *, IMC_Unit *, SymReg * r0, SymReg * r1);
-static void map_colors(IMC_Unit *, int x, unsigned int * graph,
-                       char colors[], int typ, int);
-static int try_allocate(Parrot_Interp, IMC_Unit *);
-static void allocate_lexicals(Parrot_Interp, IMC_Unit *);
-static void vanilla_reg_alloc(Parrot_Interp, IMC_Unit *);
-static void allocate_non_volatile(Parrot_Interp, IMC_Unit *);
-#if 0
-static int neighbours(int node);
-#endif
+/* HEADERIZER HFILE: compilers/imcc/imc.h */
 
-static unsigned int* ig_get_word(int i, int j, int N, unsigned int* graph,
-                                 int* bit_ofs)
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static void allocate_lexicals(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+static void allocate_non_volatile(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+static void allocate_uniq(PARROT_INTERP, ARGMOD(IMC_Unit *unit), int usage)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+static void build_interference_graph(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+static void build_reglist(NULLOK_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+static void compute_du_chain(ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit);
+
+static void compute_one_du_chain(ARGMOD(SymReg *r), ARGIN(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*r);
+
+static int first_avail(
+    ARGIN(const IMC_Unit *unit),
+    int reg_set,
+    ARGOUT_NULLOK(Set **avail))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*avail);
+
+PARROT_CANNOT_RETURN_NULL
+static unsigned int* ig_allocate(int N);
+
+static int ig_find_color(
+    ARGIN(const IMC_Unit *unit),
+    ARGIN(const char *avail))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_CANNOT_RETURN_NULL
+static unsigned int* ig_get_word(
+    int i,
+    int j,
+    int N,
+    ARGIN(unsigned int *graph),
+    ARGMOD(int *bit_ofs))
+        __attribute__nonnull__(4)
+        __attribute__nonnull__(5)
+        FUNC_MODIFIES(*bit_ofs);
+
+static void ig_set(int i, int j, int N, ARGIN(unsigned int *graph))
+        __attribute__nonnull__(4);
+
+static void imc_stat_init(ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit);
+
+static int interferes(PARROT_INTERP,
+    ARGIN(const IMC_Unit *unit),
+    ARGIN(const SymReg *r0),
+    ARGIN(const SymReg *r1))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4);
+
+static void make_stat(
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD_NULLOK(int *sets),
+    ARGMOD_NULLOK(int *cols))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*sets)
+        FUNC_MODIFIES(*cols);
+
+static void map_colors(
+    ARGIN(const IMC_Unit* unit),
+    int x,
+    ARGIN(unsigned int *graph),
+    ARGMOD(char *avail),
+    int typ,
+    int already_allocated)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*avail);
+
+static void print_stat(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+static void rebuild_reglist(ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit);
+
+static int reg_sort_f(ARGIN(const void *a), ARGIN(const void *b))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void sort_reglist(ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit);
+
+static int try_allocate(PARROT_INTERP, ARGIN(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void vanilla_reg_alloc(SHIM_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+#define ASSERT_ARGS_allocate_lexicals __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_allocate_non_volatile __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_allocate_uniq __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_build_interference_graph __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_build_reglist __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_compute_du_chain __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_compute_one_du_chain __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(r) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_first_avail __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_ig_allocate __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_ig_find_color __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(avail)
+#define ASSERT_ARGS_ig_get_word __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(graph) \
+    || PARROT_ASSERT_ARG(bit_ofs)
+#define ASSERT_ARGS_ig_set __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(graph)
+#define ASSERT_ARGS_imc_stat_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_interferes __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(r0) \
+    || PARROT_ASSERT_ARG(r1)
+#define ASSERT_ARGS_make_stat __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_map_colors __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(graph) \
+    || PARROT_ASSERT_ARG(avail)
+#define ASSERT_ARGS_print_stat __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_rebuild_reglist __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_reg_sort_f __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(a) \
+    || PARROT_ASSERT_ARG(b)
+#define ASSERT_ARGS_sort_reglist __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_try_allocate __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_vanilla_reg_alloc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+
+/*
+
+=item C<static unsigned int* ig_get_word>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
+PARROT_CANNOT_RETURN_NULL
+static unsigned int*
+ig_get_word(int i, int j, int N, ARGIN(unsigned int *graph),
+            ARGMOD(int *bit_ofs))
 {
+    ASSERT_ARGS(ig_get_word)
     unsigned int bit = i * N + j;
-    *bit_ofs = bit % sizeof (*graph);
+    *bit_ofs        = bit % sizeof (*graph);
+
     return &graph[bit / sizeof (*graph)];
 }
 
-static void ig_set(int i, int j, int N, unsigned int* graph)
+/*
+
+=item C<static void ig_set>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
+static void
+ig_set(int i, int j, int N, ARGIN(unsigned int *graph))
 {
+    ASSERT_ARGS(ig_set)
     int bit_ofs;
-    unsigned int* word = ig_get_word(i, j, N, graph, &bit_ofs);
+    unsigned int *word = ig_get_word(i, j, N, graph, &bit_ofs);
     *word |= (1 << bit_ofs);
 }
 
-int ig_test(int i, int j, int N, unsigned int* graph);
-int ig_test(int i, int j, int N, unsigned int* graph)
+/*
+
+=item C<unsigned int ig_test>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
+unsigned int
+ig_test(int i, int j, int N, ARGIN(unsigned int *graph))
 {
+    ASSERT_ARGS(ig_test)
     int bit_ofs;
     unsigned int* word = ig_get_word(i, j, N, graph, &bit_ofs);
     return *word & (1 << bit_ofs);
 }
 
-static unsigned int* ig_allocate(int N)
+/*
+
+=item C<static unsigned int* ig_allocate>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
+PARROT_CANNOT_RETURN_NULL
+static unsigned int*
+ig_allocate(int N)
 {
+    ASSERT_ARGS(ig_allocate)
     /* size is N*N bits, but we want don't want to allocate a partial
      * word, so round up to the nearest multiple of sizeof (int).
      */
-    int need_bits = N * N;
-    int num_words = (need_bits + sizeof (int) - 1) / sizeof (int);
-    return (unsigned int*) mem_sys_allocate_zeroed(num_words * sizeof (int));
+    const int need_bits = N * N;
+    const int num_words = (need_bits + sizeof (int) - 1) / sizeof (int);
+    return (unsigned int *)mem_sys_allocate_zeroed(num_words * sizeof (int));
 }
 
-/* imc_reg_alloc is the main loop of the allocation algorithm. It operates
- * on a single compilation unit at a time.
- */
+/*
+
+=item C<void imc_reg_alloc>
+
+imc_reg_alloc is the main loop of the allocation algorithm. It operates
+on a single compilation unit at a time.
+
+=cut
+
+*/
+
 void
-imc_reg_alloc(Interp *interp, IMC_Unit * unit)
+imc_reg_alloc(PARROT_INTERP, ARGIN_NULLOK(IMC_Unit *unit))
 {
-    int first;
-    char *function;
+    ASSERT_ARGS(imc_reg_alloc)
+    const char *function;
 
     if (!unit)
         return;
+
     if (!unit->instructions)
         return;
+
     imc_stat_init(unit);
     if (!(IMCC_INFO(interp)->optimizer_level &
                 (OPT_PRE|OPT_CFG|OPT_PASM)) && unit->pasm_file)
@@ -101,30 +344,29 @@ imc_reg_alloc(Interp *interp, IMC_Unit * unit)
     }
 #endif
 
-    if (unit->instructions->n_r)
-      function = unit->instructions->r[0]->name;
+    if (unit->instructions->symreg_count)
+      function = unit->instructions->symregs[0]->name;
     else
       function = "(not a sub)";
+
     IMCC_debug(interp, DEBUG_IMC, "\n------------------------\n");
     IMCC_debug(interp, DEBUG_IMC, "processing sub %s\n", function);
     IMCC_debug(interp, DEBUG_IMC, "------------------------\n\n");
 
-    if (IMCC_INFO(interp)->optimizer_level == OPT_PRE &&
-            unit->pasm_file) {
+    if (IMCC_INFO(interp)->optimizer_level == OPT_PRE && unit->pasm_file) {
         while (pre_optimize(interp, unit))
             ;
         goto done;
     }
-    /*
-     * all lexicals get a unique register
-     */
+
+    /* all lexicals get a unique register */
     allocate_lexicals(interp, unit);
 
     /* build CFG and life info, and optimize iteratively */
     do {
-        first = 1;
+        int first = 1;
         do {
-            while (pre_optimize(interp, unit));
+            while (pre_optimize(interp, unit)) { };
 
             find_basic_blocks(interp, unit, first);
             build_cfg(interp, unit);
@@ -133,41 +375,57 @@ imc_reg_alloc(Interp *interp, IMC_Unit * unit)
 
         compute_dominators(interp, unit);
         find_loops(interp, unit);
-        if (IMCC_INFO(interp)->optimizer_level) {
+
+        if (IMCC_INFO(interp)->optimizer_level)
             compute_dominance_frontiers(interp, unit);
-        }
 
         build_reglist(interp, unit);
+
         if (IMCC_INFO(interp)->allocator == IMCC_GRAPH_ALLOCATOR)
             life_analysis(interp, unit);
+
         allocate_non_volatile(interp, unit);
-    } while (!IMCC_INFO(interp)->dont_optimize &&
-            optimize(interp, unit));
+    } while (!IMCC_INFO(interp)->dont_optimize && optimize(interp, unit));
 
     if (IMCC_INFO(interp)->debug & DEBUG_IMC)
         dump_symreg(unit);
 
-    rebuild_reglist(interp, unit);
+    rebuild_reglist(unit);
+
+    /*
+     * RT #57028 - graph coloring reg allocator ignores local_branch/local_return
     if (IMCC_INFO(interp)->allocator == IMCC_VANILLA_ALLOCATOR)
+    */
         vanilla_reg_alloc(interp, unit);
+    /*
     else
         graph_coloring_reg_alloc(interp, unit);
+    */
 
     if (IMCC_INFO(interp)->debug & DEBUG_IMC)
         dump_instructions(interp, unit);
-done:
-    if (IMCC_INFO(interp)->verbose  ||
-            (IMCC_INFO(interp)->debug & DEBUG_IMC)) {
+
+  done:
+    if (IMCC_INFO(interp)->verbose  || (IMCC_INFO(interp)->debug & DEBUG_IMC))
         print_stat(interp, unit);
-    }
-    else {
+    else
         make_stat(unit, NULL, unit->n_regs_used);
-    }
 }
 
+/*
+
+=item C<void free_reglist>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
 void
-free_reglist(IMC_Unit * unit)
+free_reglist(ARGMOD(IMC_Unit *unit))
 {
+    ASSERT_ARGS(free_reglist)
 #if IMC_TRACE
     fprintf(stderr, "reg_alloc.c: free_reglist\n");
 #endif
@@ -175,84 +433,140 @@ free_reglist(IMC_Unit * unit)
         free(unit->interference_graph);
         unit->interference_graph =  0;
     }
+
     if (unit->reglist) {
-        int i;
+        unsigned int i;
+
         for (i = 0; i < unit->n_symbols; i++)
             free_life_info(unit, unit->reglist[i]);
+
         free(unit->reglist);
-        unit->reglist = NULL;
+        unit->reglist   = NULL;
         unit->n_symbols = 0;
     }
 }
 
-void
-graph_coloring_reg_alloc(Interp *interp, IMC_Unit * unit)
-{
+/*
 
+=item C<void graph_coloring_reg_alloc>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
+void
+graph_coloring_reg_alloc(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+{
+    ASSERT_ARGS(graph_coloring_reg_alloc)
     build_interference_graph(interp, unit);
 
     try_allocate(interp, unit);
     IMCC_INFO(interp)->allocated = 1;
 }
 
-/* some statistics about register usage
- * printed with --verbose --verbose
- */
+/*
+
+=item C<static void make_stat>
+
+some statistics about register usage
+printed with --verbose --verbose
+
+=cut
+
+*/
+
 static void
-make_stat(IMC_Unit * unit, int *sets, int *cols)
+make_stat(ARGMOD(IMC_Unit *unit), ARGMOD_NULLOK(int *sets), ARGMOD_NULLOK(int *cols))
 {
+    ASSERT_ARGS(make_stat)
     /* register usage summary */
-    char type[] = "INSP";
-    int i, j;
-    SymHash *hsh = &unit->hash;
-    SymReg * r;
+    SymHash * const hsh = &unit->hash;
+    unsigned int    i;
 
     for (i = 0; i < hsh->size; i++) {
+        SymReg *r;
+
         for (r = hsh->data[i]; r; r = r->next) {
+            /* should be fine uninitialized, but analysis tools get confused */
+            int j = 0;
+
             if (r->color > unit->max_color)
                 unit->max_color = r->color;
-            for (j = 0; j < 4; j++)
-                if (r->set == type[j] && (r->type & VTREGISTER)) {
-                    if (sets)
-                        sets[j]++;
-                    if (cols)
-                        if (r->color > cols[j])
-                            cols[j] = r->color;
-                }
+
+            switch (r->set) {
+                case 'I': j = 0; break;
+                case 'N': j = 1; break;
+                case 'S': j = 2; break;
+                case 'P': j = 3; break;
+                default :        continue;
+            }
+
+            if (REG_NEEDS_ALLOC(r)) {
+                if (sets)
+                    sets[j]++;
+
+                if (cols)
+                    if (r->color > cols[j])
+                        cols[j] = r->color;
+            }
         }
     }
+
     if (cols) {
+        int j;
         for (j = 0; j < 4; j++)
             ++cols[j];
     }
 }
 
-/* registes usage of .pir */
+/*
+
+=item C<static void imc_stat_init>
+
+registes usage of .pir
+
+=cut
+
+*/
+
 static void
-imc_stat_init(IMC_Unit * unit)
+imc_stat_init(ARGMOD(IMC_Unit *unit))
 {
+    ASSERT_ARGS(imc_stat_init)
     int j;
 
     make_stat(unit, unit->n_vars_used, NULL);
+
     for (j = 0; j < 4; j++) {
         unit->n_regs_used[j] = -1;
-        unit->first_avail[j] = 0;
+        unit->first_avail[j] =  0;
     }
 
-    memset(&(unit->ostat), 0, sizeof (struct imcc_ostat));
+    memset(&(unit->ostat), 0, sizeof (unit->ostat));
 }
 
-/* and final */
-static void
-print_stat(Parrot_Interp interp, IMC_Unit * unit)
-{
-    int sets[4] = {0,0,0,0};
+/*
 
-    char *function;
-    if (unit->instructions->n_r)
-        function = unit->instructions->r[0]->name;
-    else
-        function = "(not a function)";
+=item C<static void print_stat>
+
+and final
+
+=cut
+
+*/
+
+static void
+print_stat(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+{
+    ASSERT_ARGS(print_stat)
+    int sets[4] = {0, 0, 0, 0};
+
+    const char * const function =
+        unit->instructions->symreg_count
+            ? unit->instructions->symregs[0]->name
+            : "(not a function)";
 
     make_stat(unit, sets, unit->n_regs_used);
     IMCC_info(interp, 1,
@@ -281,71 +595,103 @@ print_stat(Parrot_Interp interp, IMC_Unit * unit)
             unit->n_basic_blocks, edge_count(unit));
 }
 
-/* sort list by line  nr */
-static int
-reg_sort_f(const void *a, const void *b)
-{
-    SymReg *ra = *(SymReg**) a;
-    SymReg *rb = *(SymReg**) b;
-    if (ra->first_ins->index < rb->first_ins->index) {
-        return -1;
-    }
-    else if (ra->first_ins->index == rb->first_ins->index) {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
+/*
 
-static void
-sort_reglist(IMC_Unit *unit)
+=item C<static int reg_sort_f>
+
+sort list by line  nr
+
+=cut
+
+*/
+
+static int
+reg_sort_f(ARGIN(const void *a), ARGIN(const void *b))
 {
-    qsort(unit->reglist, unit->n_symbols, sizeof (SymReg*), reg_sort_f);
+    ASSERT_ARGS(reg_sort_f)
+    const SymReg * const ra = *(SymReg**)a;
+    const SymReg * const rb = *(SymReg**)b;
+
+    if (ra->first_ins->index < rb->first_ins->index)
+        return -1;
+
+    if (ra->first_ins->index == rb->first_ins->index)
+        return 0;
+
+    return 1;
 }
 
 /*
- * Registers are now sorted according to the line on which their usage
- * starts, which means that they are sorted by basic block numbers too.
- *
- * Run through them and allocate all that don't overlap in one bunch.
- */
 
-/* make a linear list of IDENTs and VARs, set n_symbols
- * TODO
- *   split the whole life analysis into 4, one per register kind
- *   registers of different kind never interfere, but the reglist
- *   has them all
- */
+=item C<static void sort_reglist>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
 
 static void
-build_reglist(Parrot_Interp interp, IMC_Unit * unit)
+sort_reglist(ARGMOD(IMC_Unit *unit))
 {
-    int i, count, unused, n_symbols;
-    SymHash *hsh = &unit->hash;
-    SymReg * r;
+    ASSERT_ARGS(sort_reglist)
+    qsort(unit->reglist, unit->n_symbols, sizeof (SymReg *), reg_sort_f);
+}
+
+/*
+
+=item C<static void build_reglist>
+
+make a linear list of IDENTs and VARs, set n_symbols
+TODO
+  split the whole life analysis into 4, one per register kind
+  registers of different kind never interfere, but the reglist
+  has them all
+
+Registers are now sorted according to the line on which their usage
+starts, which means that they are sorted by basic block numbers too.
+
+Run through them and allocate all that don't overlap in one bunch.
+
+=cut
+
+*/
+
+static void
+build_reglist(NULLOK_INTERP, ARGMOD(IMC_Unit *unit))
+{
+    ASSERT_ARGS(build_reglist)
+    SymHash  const *hsh = &unit->hash;
+    unsigned int    i, count, unused, n_symbols;
 
     IMCC_info(interp, 2, "build_reglist\n");
+
     /* count symbols */
     if (unit->reglist)
         free_reglist(unit);
+
     count = unit->hash.entries;
     if (count == 0)
         return;
-    unit->reglist = mem_sys_allocate(count * sizeof (SymReg*));
+
+    unit->reglist = mem_allocate_n_typed(count, SymReg *);
 
     for (i = count = 0; i < hsh->size; i++) {
+        SymReg *r;
         for (r = hsh->data[i]; r; r = r->next) {
             /* Add each symbol to reglist  */
-            if (r->type & VTREGISTER) {
+            if (REG_NEEDS_ALLOC(r))
                 unit->reglist[count++] = r;
-            }
         }
     }
+
     unit->n_symbols = n_symbols = count;
+
     if (IMCC_INFO(interp)->debug & DEBUG_IMC)
         dump_symreg(unit);
+
     compute_du_chain(unit);
+
     /* we might have unused symbols here, from optimizations */
     for (i = count = unused = 0; i < n_symbols; i++) {
         if (!unit->reglist[i]->first_ins)
@@ -355,73 +701,98 @@ build_reglist(Parrot_Interp interp, IMC_Unit * unit)
         else
             unit->reglist[count++] = unit->reglist[i];
     }
-    n_symbols -= unused;
+
+    n_symbols      -= unused;
     unit->n_symbols = n_symbols;
+
     sort_reglist(unit);
 }
 
 /*
- * Exclude all already allocated registers (< first_avail)
- * from reglist. This reduced the size of the interference graph
- * significantly
- */
-static void
-rebuild_reglist(Parrot_Interp interp, IMC_Unit * unit)
-{
-    int i, count, unused, reg_set;
-    SymReg * r;
-    char types[] = "INSP", *p;
 
-    UNUSED(interp);
+=item C<static void rebuild_reglist>
+
+Exclude all already allocated registers (< first_avail)
+from reglist. This reduced the size of the interference graph
+significantly
+
+=cut
+
+*/
+
+static void
+rebuild_reglist(ARGMOD(IMC_Unit *unit))
+{
+    ASSERT_ARGS(rebuild_reglist)
+    unsigned int i, count, unused;
+    static const char types[] = "INSP";
+
     for (i = count = unused = 0; i < unit->n_symbols; i++) {
-        r = unit->reglist[i];
+        SymReg * const r = unit->reglist[i];
+        char *p;
+        int reg_set;
+
         if (r->color == -1)
             goto use_it;
+
         p = strchr(types, r->set);
+
         if (!p)
             goto use_it;
+
         reg_set = p - types;
         if (r->color < unit->first_avail[reg_set]) {
             unused++;
             continue;
         }
-use_it:
+
+  use_it:
         if (i == count)
             count++;
         else
             unit->reglist[count++] = unit->reglist[i];
     }
+
     unit->n_symbols -= unused;
 }
 
-/* Creates the interference graph between the variables.
- *
- * Data structure is a 2-d array 'interference_graph' bitmap where
- * row/column indices represent the same index in the list of all
- * symbols (unit->reglist) in the current compilation unit.
- *
- * Two variables interfere when they are alive at the same time.
- */
+/*
+
+=item C<static void build_interference_graph>
+
+Creates the interference graph between the variables.
+
+Data structure is a 2-d array 'interference_graph' bitmap where
+row/column indices represent the same index in the list of all
+symbols (unit->reglist) in the current compilation unit.
+
+Two variables interfere when they are alive at the same time.
+
+=cut
+
+*/
 
 static void
-build_interference_graph(Parrot_Interp interp, IMC_Unit * unit)
+build_interference_graph(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 {
-    int x, y, n_symbols;
-    unsigned int* interference_graph;
+    ASSERT_ARGS(build_interference_graph)
+    int x;
+    unsigned int *interference_graph;
 
-    n_symbols = unit->n_symbols;
+    const int n_symbols = unit->n_symbols;
+
     if (!n_symbols)
         return;
 
     /* Construct a graph N x N where N = number of symbolics.
-     * This piece can be rewritten without the N x N array
-     */
-    interference_graph = ig_allocate(n_symbols);
+     * This piece can be rewritten without the N x N array */
+    interference_graph       = ig_allocate(n_symbols);
     unit->interference_graph = interference_graph;
 
     /* Calculate interferences between each chain and populate the the Y-axis */
     for (x = 0; x < n_symbols; x++) {
-        /* If symbol was never used in a statment, it can't interfere */
+        /* If symbol was never used in a statement, it can't interfere */
+        int y;
         if (!unit->reglist[x]->first_ins)
             continue;
         for (y = x + 1; y < n_symbols; y++) {
@@ -440,18 +811,26 @@ build_interference_graph(Parrot_Interp interp, IMC_Unit * unit)
 }
 
 
-/* Compute a DU-chain for each symbolic in a compilation unit
- */
-static void
-compute_du_chain(IMC_Unit * unit)
-{
-    Instruction * ins, *lastbranch;
-    int i;
+/*
 
-    lastbranch = 0;
+=item C<static void compute_du_chain>
+
+Compute a DU-chain for each symbolic in a compilation unit
+
+=cut
+
+*/
+
+static void
+compute_du_chain(ARGMOD(IMC_Unit *unit))
+{
+    ASSERT_ARGS(compute_du_chain)
+    Instruction *ins        = unit->instructions;
+    Instruction *lastbranch = NULL;
+    unsigned int i;
 
     /* Compute last branch in this procedure, update instruction index */
-    for (i = 0, ins = unit->instructions; ins; ins = ins->next) {
+    for (i = 0; ins; ins = ins->next) {
         ins->index = i++;
         if (ins->type == ITBRANCH)
             lastbranch = ins;
@@ -459,44 +838,57 @@ compute_du_chain(IMC_Unit * unit)
 
     /* Compute du-chains for all symbolics */
     for (i = 0; i < unit->n_symbols; i++) {
-        SymReg * r = unit->reglist[i];
+        SymReg * const r = unit->reglist[i];
         compute_one_du_chain(r, unit);
+
         /* what is this used for? -lt */
         if (r->type == VTIDENTIFIER
-                && lastbranch
-                && r->last_ins
-                && r->last_ins->index < lastbranch->index)
+        &&  lastbranch
+        &&  r->last_ins
+        &&  r->last_ins->index < lastbranch->index)
             r->last_ins = lastbranch;
     }
 }
 
+/*
+
+=item C<static void compute_one_du_chain>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
 static void
-compute_one_du_chain(SymReg * r, IMC_Unit * unit)
+compute_one_du_chain(ARGMOD(SymReg *r), ARGIN(IMC_Unit *unit))
 {
+    ASSERT_ARGS(compute_one_du_chain)
     Instruction * ins;
 
     /* We cannot rely on computing the value of r->first when parsing,
      * since the situation can be changed at any time by the register
-     * allocation algorithm
-     */
-
+     * allocation algorithm */
     r->first_ins = 0;
     r->use_count = r->lhs_use_count = 0;
+
     for (ins = unit->instructions; ins; ins = ins->next) {
-        int ro, rw;
-        ro = instruction_reads(ins, r);
-        rw = instruction_writes(ins, r);
+        const int ro = instruction_reads(ins, r);
+        const int rw = instruction_writes(ins, r);
+
         if (ro || rw) {
-            if (!r->first_ins) {
+            if (!r->first_ins)
                 r->first_ins = ins;
-            }
+
             r->last_ins = ins;
+
             if (rw)
                 r->lhs_use_count++;
+
             r->use_count++;
+
             /* if this symbol is used in a different scope
-             * assume usage
-             */
+             * assume usage */
             if (r->reg) {
                 r->lhs_use_count++;
                 r->use_count++;
@@ -505,32 +897,41 @@ compute_one_du_chain(SymReg * r, IMC_Unit * unit)
     }
 }
 
-/* See if r0's chain interferes with r1. */
-/* We currently decide that two vars interfere if they are both alive
- * at any point. This could be improved, requiring that one is alive
- * at the point of _definition_ of the other.
- */
+/*
+
+=item C<static int interferes>
+
+See if r0's chain interferes with r1.
+
+We currently decide that two vars interfere if they are both alive
+at any point. This could be improved, requiring that one is alive
+at the point of _definition_ of the other.
+
+=cut
+
+*/
 
 static int
-interferes(Interp *interp, IMC_Unit * unit, SymReg * r0, SymReg * r1)
+interferes(PARROT_INTERP, ARGIN(const IMC_Unit *unit),
+        ARGIN(const SymReg *r0), ARGIN(const SymReg *r1))
 {
+    ASSERT_ARGS(interferes)
+    unsigned int i;
 
-    int i;
-
-    /* Registers don't interfere with themselves
-    */
+    /* Registers don't interfere with themselves */
     if (r0 == r1)
         return 0;
 
     /* Different register sets don't interfere with each other */
     if (r0->set != r1->set)
         return 0;
+
     /* If the first time r0 appears is in the same instruction as the
      * last appearance of r1, or after its last appearance, then they
      * can't interfere.
      *
      * Even if r0 and r1 are called in the same instruction, and even
-     * if this instrucion does modify r0, if its value is never used
+     * if this instruction does modify r0, if its value is never used
      * later, then they can share the same register.
      */
 #if 1
@@ -543,52 +944,46 @@ interferes(Interp *interp, IMC_Unit * unit, SymReg * r0, SymReg * r1)
      * TODO no interferences, if the life range ends in this
      *      basic block, because it's end is e.g. a returncc
      */
-    if (r0->first_ins->index == r1->last_ins->index &&
-            instruction_writes(r0->first_ins, r0) &&
-            instruction_reads(r1->last_ins, r1) &&
-            !instruction_reads(r0->first_ins, r0)) {
-        Basic_block *bb;
-        bb = unit->bb_list[r0->first_ins->bbindex];
+    if (r0->first_ins->index == r1->last_ins->index
+    &&  instruction_writes(r0->first_ins, r0)
+    &&  instruction_reads(r1->last_ins, r1)
+    && !instruction_reads(r0->first_ins, r0)) {
+        const Basic_block * const bb = unit->bb_list[r0->first_ins->bbindex];
         if (bb->loop_depth == 0)
             return 0;
     }
-    if (r1->first_ins->index == r0->last_ins->index &&
-            instruction_writes(r1->first_ins, r1) &&
-            instruction_reads(r0->last_ins, r0) &&
-            !instruction_reads(r1->first_ins, r1)) {
-        Basic_block *bb;
-        bb = unit->bb_list[r1->first_ins->bbindex];
+
+    if (r1->first_ins->index == r0->last_ins->index
+    &&  instruction_writes(r1->first_ins, r1)
+    &&  instruction_reads(r0->last_ins, r0)
+    && !instruction_reads(r1->first_ins, r1)) {
+        const Basic_block * const bb = unit->bb_list[r1->first_ins->bbindex];
         if (bb->loop_depth == 0)
             return 0;
     }
+
 #endif
 
     /* Now: */
 
-    if (r0->life_info == NULL || r1->life_info == NULL) {
-        PANIC("interferes: INTERNAL ERROR: Life range is NULL\n");
-    }
+    if (! r0->life_info || ! r1->life_info)
+        PANIC(interp, "interferes: INTERNAL ERROR: Life range is NULL\n");
 
-    for (i=0; i < unit->n_basic_blocks; i++) {
-        Life_range *l0, *l1;
+    for (i = 0; i < unit->n_basic_blocks; i++) {
+        const Life_range * const l0 = r0->life_info[i];
+        const Life_range * const l1 = r1->life_info[i];
 
-        l0 = r0->life_info[i];
-        l1 = r1->life_info[i];
-
-        /* One or both are not alive in this block, so we have
-         * no conflict
-         */
+        /* One or both are not alive in this block, so we have no conflict */
         if (!l0->first_ins || !l1->first_ins)
             continue;
 
         /* If the registers don't overlap, i.e first_x > last_y
-         * then no interference
-         */
+         * then no interference */
         if (l0->first_ins->index > l1->last_ins->index)
             continue;
+
         if (l1->first_ins->index > l0->last_ins->index)
             continue;
-
 
         return 1;
     }
@@ -597,79 +992,98 @@ interferes(Interp *interp, IMC_Unit * unit, SymReg * r0, SymReg * r1)
 }
 
 /*
- * find available color for register #x in available colors
- */
-static int
-ig_find_color(Interp* interp, IMC_Unit *unit, int x, char *avail)
-{
-    int c;
 
-    UNUSED(interp);
-    UNUSED(x);
+=item C<static int ig_find_color>
+
+find available color for register #x in available colors
+
+=cut
+
+*/
+
+static int
+ig_find_color(ARGIN(const IMC_Unit *unit), ARGIN(const char *avail))
+{
+    ASSERT_ARGS(ig_find_color)
+    unsigned int c;
+
     for (c = 0; c < unit->n_symbols; c++)
         if (avail[c])
             return c;
+
     return -1;
 }
+
 /*
- * Color the graph, assigning registers to each symbol:
- *
- * We just proceed popping items from the stack and assigning
- * a free color to them.
- *
- * If we run out of colors, then we need to spill the top node.
- */
+
+=item C<static int try_allocate>
+
+Color the graph, assigning registers to each symbol:
+
+We just proceed popping items from the stack and assigning
+a free color to them.
+
+If we run out of colors, then we need to spill the top node.
+
+=cut
+
+*/
 
 static int
-try_allocate(Parrot_Interp interp, IMC_Unit * unit)
+try_allocate(PARROT_INTERP, ARGIN(IMC_Unit *unit))
 {
-    int x;
-    int color;
-    char *avail;
-    int t, n;
-    unsigned int *graph = unit->interference_graph;
-    SymReg ** reglist = unit->reglist;
-    SymReg *r;
+    ASSERT_ARGS(try_allocate)
+    unsigned int    i;
+    char           *avail;
+    unsigned int   *graph   = unit->interference_graph;
+    SymReg ** const reglist = unit->reglist;
 
-    /*
-     * unit->n_symbols should be an upper limit of needed colors
-     */
-    n = unit->n_symbols;
-    if (unit->max_color >= n)
+    /* unit->n_symbols should be an upper limit of needed colors */
+    unsigned int n = unit->n_symbols;
+
+    if (unit->max_color >= (int)n)
         n = unit->max_color + 1;
-    avail = mem_sys_allocate(n);
 
-    for (x = 0; x < unit->n_symbols; ++x) {
-        r = reglist[x];
+    if (!n)
+        return -1;
+
+    avail = mem_allocate_n_typed(n, char);
+
+    for (i = 0; i < unit->n_symbols; ++i) {
+        int     already_allocated, color;
+        SymReg *r = reglist[i];
+        int     t = -1;
+
         if (r->color >= 0)
             continue;
-        for (t = 0; t < 4; t++) {
-            int typ = "INSP"[t];
-            int already_allocated = unit->first_avail[t];
-            /*
-             * don't even consider these regs
-             */
-            if (r->set == typ) {
-                memset(avail, 1, n);
-                map_colors(unit, x, graph, avail, typ, already_allocated );
-                color = ig_find_color(interp, unit, x, avail);
-                if (color >= 0) {
-                    color += already_allocated;
-                    r->color = color;
 
-                    IMCC_debug(interp, DEBUG_IMC,
-                            "#[%s] gets color [%d]\n",
-                            r->name, color);
-                    break;
-                }
-
-                if (r->color == -1) {
-                    IMCC_fatal(interp, DEBUG_IMC,
-                            "# no more colors - this should not happen\n");
-
-                }
-            }
+        switch (r->set) {
+            case 'I': t = 0; break;
+            case 'N': t = 1; break;
+            case 'S': t = 2; break;
+            case 'P': t = 3; break;
+            default :        break;
         }
+
+        if (t == -1)
+            continue;
+
+        already_allocated = unit->first_avail[t];
+
+        /* don't even consider these regs */
+        memset(avail, 1, n);
+        map_colors(unit, i, graph, avail, r->set, already_allocated);
+        color = ig_find_color(unit, avail);
+
+        if (color == -1)
+            IMCC_fatal(interp, DEBUG_IMC,
+                    "# no more colors - this should not happen\n");
+
+        color   += already_allocated;
+        r->color = color;
+
+        IMCC_debug(interp, DEBUG_IMC, "#[%s] gets color [%d]\n",
+            r->name, color);
     }
 
     mem_sys_free(avail);
@@ -677,103 +1091,137 @@ try_allocate(Parrot_Interp interp, IMC_Unit * unit)
 }
 
 /*
- * map_colors: calculates what colors can be assigned to the x-th symbol.
- */
-static void
-map_colors(IMC_Unit* unit, int x, unsigned int *graph, char avail[],
-        int typ, int already_allocated)
-{
-    int y = 0, n_symbols;
-    SymReg * r;
 
-    n_symbols = unit->n_symbols;
+=item C<static void map_colors>
+
+map_colors: calculates what colors can be assigned to the x-th symbol.
+
+=cut
+
+*/
+
+static void
+map_colors(ARGIN(const IMC_Unit* unit), int x, ARGIN(unsigned int *graph),
+        ARGMOD(char *avail), int typ, int already_allocated)
+{
+    ASSERT_ARGS(map_colors)
+    const int n_symbols = unit->n_symbols;
+    int       y;
+
     for (y = 0; y < n_symbols; y++) {
-        if (! ig_test(x, y, n_symbols, graph))
-            continue;
-        r = unit->reglist[y];
-        if (   r
-                && r->color != -1
-                && r->set == typ) {
-            assert(r->color - already_allocated >= 0);
-            avail[r->color - already_allocated] = 0;
+        if (ig_test(x, y, n_symbols, graph)) {
+            const SymReg * const r = unit->reglist[y];
+            if (r
+            &&  r->color != -1
+            &&  r->set   == typ) {
+                PARROT_ASSERT(r->color - already_allocated >= 0);
+                avail[r->color - already_allocated] = 0;
+            }
         }
     }
 }
 
 /*
- * find first available register of the given reg_set
- */
+
+=item C<static int first_avail>
+
+find first available register of the given reg_set
+
+=cut
+
+*/
 
 static int
-first_avail(IMC_Unit *unit, int reg_set, Set **avail)
+first_avail(ARGIN(const IMC_Unit *unit), int reg_set, ARGOUT_NULLOK(Set **avail))
 {
-    int i, n, first;
-    SymReg * r;
-    SymHash *hsh;
-    Set *allocated;
+    ASSERT_ARGS(first_avail)
+    int n                     = (int)unit->n_symbols > unit->max_color
+                              ? (int)unit->n_symbols
+                              : unit->max_color;
+    Set         *allocated    = set_make((unsigned int)n + 1);
 
-    n = unit->n_symbols;
-    if (unit->max_color > n)
-        n = unit->max_color;
-    allocated = set_make(n + 1);
-    hsh = &unit->hash;
+    const SymHash * const hsh = &unit->hash;
+
+    unsigned int i, first;
+
+    /* find allocated registers */
     for (i = 0; i < hsh->size; i++) {
+        SymReg *r;
         for (r = hsh->data[i]; r; r = r->next) {
-            if (r->set != reg_set)
-                continue;
-            if (r->type & VTREGISTER) {
-                if (r->color >= 0)
-                    set_add(allocated, r->color);
-            }
+            if (r->set == reg_set)
+                if (REG_NEEDS_ALLOC(r))
+                    if (r->color >= (int)0)
+                        set_add(allocated, (unsigned int)r->color);
         }
     }
+
     first = set_first_zero(allocated);
+
     if (avail)
         *avail = allocated;
     else
         set_free(allocated);
+
     return first;
 }
 
 
 /*
- * allocate lexicals or non-volatile in ascending order
- */
+
+=item C<static void allocate_uniq>
+
+allocate lexicals or non-volatile in ascending order
+
+=cut
+
+*/
 
 static void
-allocate_uniq(Parrot_Interp interp, IMC_Unit *unit, int usage)
+allocate_uniq(PARROT_INTERP, ARGMOD(IMC_Unit *unit), int usage)
 {
-    char type[] = "INSP";
-    int i, j, reg_set, first_reg;
-    SymReg * r;
-    SymHash *hsh;
-    Set *avail;
+    ASSERT_ARGS(allocate_uniq)
+    SymHash     *hsh     = &unit->hash;
+    Set         *sets[4] = { NULL, NULL, NULL, NULL };
+    SymReg      *r;
+    unsigned int i;
 
-    hsh = &unit->hash;
-    for (j = 0; j < 4; j++) {
-        reg_set = type[j];
-        first_reg = first_avail(unit, reg_set, &avail);
-        for (i = 0; i < hsh->size; i++) {
-            for (r = hsh->data[i]; r; r = r->next) {
-                if (r->set != reg_set)
-                    continue;
-                if ((r->type & VTREGISTER) &&
-                        r->color == -1 &&
-                        (r->usage & usage)) {
-                    if (set_contains(avail, first_reg))
-                        first_reg = first_avail(unit, reg_set, NULL);
-                    set_add(avail, first_reg);
-                    r->color = first_reg++;
-                    IMCC_debug(interp, DEBUG_IMC,
-                            "allocate %s sym %c '%s'  color %d\n",
-                            usage & U_LEXICAL ? "Lexical" : "Non-vol",
-                            reg_set, r->name, r->color);
-                }
+    for (i = 0; i < hsh->size; i++) {
+        for (r = hsh->data[i]; r; r = r->next) {
+            int j = -1;
+
+            switch (r->set) {
+                case 'I': j = 0; break;
+                case 'N': j = 1; break;
+                case 'S': j = 2; break;
+                case 'P': j = 3; break;
+                default :        continue;
+            }
+
+            if (REG_NEEDS_ALLOC(r)
+            &&  r->color == -1
+            && (r->usage & usage)
+            && r->use_count) {
+                Set *avail    = sets[j];
+                int first_reg = first_avail(unit, (int)r->set, &avail);
+
+                set_add(avail, first_reg);
+                r->color = first_reg++;
+
+                IMCC_debug(interp, DEBUG_IMC,
+                        "allocate %s sym %c '%s'  color %d\n",
+                        usage & U_LEXICAL ? "Lexical" : "Non-vol",
+                        (int)r->set, r->name, r->color);
+
+                unit->first_avail[j] = first_reg;
             }
         }
-        set_free(avail);
-        unit->first_avail[j] = first_reg;
     }
+
+    for (i = 0; i < 4; ++i) {
+        if (sets[i])
+            set_free(sets[i]);
+    }
+
     /*
      * TODO create allocation_threshold
      *      if there are less registers than threshold
@@ -781,61 +1229,103 @@ allocate_uniq(Parrot_Interp interp, IMC_Unit *unit, int usage)
      */
 }
 
-static void
-vanilla_reg_alloc(Parrot_Interp interp, IMC_Unit *unit)
-{
-    char type[] = "INSP";
-    int i, j, reg_set, first_reg;
-    SymReg * r;
-    SymHash *hsh;
-    Set *avail;
+/*
 
-    UNUSED(interp);
-    hsh = &unit->hash;
+=item C<static void vanilla_reg_alloc>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
+static void
+vanilla_reg_alloc(SHIM_INTERP, ARGMOD(IMC_Unit *unit))
+{
+    ASSERT_ARGS(vanilla_reg_alloc)
+    char         type[] = "INSP";
+    SymHash     *hsh    = &unit->hash;
+    Set         *avail;
+    SymReg      *r;
+    unsigned int i, j;
+    int          reg_set, first_reg;
 
     /* Clear the pre-assigned colors. */
     for (i = 0; i < hsh->size; i++) {
         for (r = hsh->data[i]; r; r = r->next) {
-            if (r->type & VTREGISTER) /* TODO Ignore non-volatiles */
-                r->color=-1;
+            /* TODO Ignore non-volatiles */
+            if (REG_NEEDS_ALLOC(r) && r->use_count)
+                r->color = -1;
         }
     }
 
     /* Assign new colors. */
     for (j = 0; j < 4; j++) {
-        reg_set = type[j];
+        reg_set   = type[j];
         first_reg = first_avail(unit, reg_set, &avail);
+
         for (i = 0; i < hsh->size; i++) {
             for (r = hsh->data[i]; r; r = r->next) {
                 if (r->set != reg_set)
                     continue;
-                if ((r->type & VTREGISTER) && (r->color == -1 )
-                        ) {
+                if (REG_NEEDS_ALLOC(r) && (r->color == -1) && r->use_count) {
                     if (set_contains(avail, first_reg))
                         first_reg = first_avail(unit, reg_set, NULL);
+
                     set_add(avail, first_reg);
                     r->color = first_reg++;
                 }
             }
         }
+
         set_free(avail);
         unit->first_avail[j] = first_reg;
     }
 }
 
+/*
+
+=item C<static void allocate_lexicals>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
 static void
-allocate_lexicals(Parrot_Interp interp, IMC_Unit *unit)
+allocate_lexicals(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 {
+    ASSERT_ARGS(allocate_lexicals)
     IMCC_debug(interp, DEBUG_IMC, "allocate lexicals\n");
     allocate_uniq(interp, unit, U_LEXICAL);
 }
 
+/*
+
+=item C<static void allocate_non_volatile>
+
+RT #48260: Not yet documented!!!
+
+=cut
+
+*/
+
 static void
-allocate_non_volatile(Parrot_Interp interp, IMC_Unit *unit)
+allocate_non_volatile(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 {
+    ASSERT_ARGS(allocate_non_volatile)
     IMCC_debug(interp, DEBUG_IMC, "allocate non_volatile\n");
     allocate_uniq(interp, unit, U_NON_VOLATILE);
 }
+
+/*
+
+=back
+
+=cut
+
+*/
 
 /*
  * Local variables:

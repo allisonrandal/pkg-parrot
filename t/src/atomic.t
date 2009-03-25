@@ -1,6 +1,6 @@
 #!perl
-# Copyright 2006 The Perl Foundation.
-# $Id: atomic.t 17094 2007-02-20 20:10:40Z paultcochrane $
+# Copyright (C) 2006, Parrot Foundation.
+# $Id: atomic.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -27,7 +27,7 @@ Tests atomic operation support.
 
 # generic tests
 
-plan $^O =~ m/MSWin32/ ? ( skip_all => 'broken on win32' ) : tests => 4;
+plan tests => 4;
 
 c_output_is( <<'CODE', <<'OUTPUT', "PARROT_ATOMIC_PTR_GET/SET" );
 
@@ -41,13 +41,13 @@ int main(int argc, char* argv[])
     void * result;
     Parrot_atomic_pointer a_ptr;
 
-    dummy = "somewhere";
-    result = "somewhere else";
+    dummy = (void *) "somewhere";
+    result = (void *) "somewhere else";
 
     PARROT_ATOMIC_PTR_INIT(a_ptr);
 
     PARROT_ATOMIC_PTR_SET(a_ptr, dummy);
-    
+
     PARROT_ATOMIC_PTR_GET(result, a_ptr);
 
     if (result != dummy) {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
     }
 
     fputs("ok 2\n", stdout);
-    
+
     PARROT_ATOMIC_PTR_DESTROY(a_ptr);
 
     return EXIT_SUCCESS;
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     PARROT_ATOMIC_INT_INIT(a_int);
 
     PARROT_ATOMIC_INT_SET(a_int, 0x7fff);
-    
+
     PARROT_ATOMIC_INT_GET(result, a_int);
 
     if (result != 0x7fff) {
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     }
 
     fputs("ok 2\n", stdout);
-    
+
     PARROT_ATOMIC_INT_DESTROY(a_int);
 
     return EXIT_SUCCESS;
@@ -131,15 +131,15 @@ int main(int argc, char *argv[])
     void *tmp_a;
     void *tmp_b;
 
-    tmp_a = "string a";
-    tmp_b = "string b";
+    tmp_a = (void *) "string a";
+    tmp_b = (void *) "string b";
 
     PARROT_ATOMIC_PTR_INIT(a_ptr);
 
     PARROT_ATOMIC_PTR_SET(a_ptr, NULL);
 
     PARROT_ATOMIC_PTR_CAS(success_p, a_ptr, tmp_a, tmp_b);
-    
+
     if (success_p) {
         fputs("not ", stdout);
     }
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         fputs("not ", stdout);
     }
     fputs("ok 2\n", stdout);
-    
+
     PARROT_ATOMIC_PTR_CAS(success_p, a_ptr, tmp_a, tmp_b);
 
     if (!success_p) {

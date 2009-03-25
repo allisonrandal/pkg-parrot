@@ -4,11 +4,11 @@ examples/shootout/harmonic.pir - Partial sum of Harmonic series
 
 =head1 SYNOPSIS
 
-    % ./parrot examples/shootout/harmonic.pir -j 10000000
+    % ./parrot examples/shootout/harmonic.pir -R jit 10000000
 
 =head1 DESCRIPTION
 
-Seemed to be deprecated, no longer found on shootout site (Karl), 
+Seemed to be deprecated, no longer found on shootout site (Karl),
 so could not find an expected output file.
 
 Translated from C code by Greg Buchholz into PIR
@@ -38,7 +38,7 @@ NREDO:	$N1 = 1 / i
 	dec n
 	if n goto NREDO
 
-      	$P0 = new .FixedFloatArray
+      	$P0 = new 'FixedFloatArray'
 	$P0 = 1
 	$P0[0] = sum
 	$S0 = sprintf "%.9f\n", $P0
@@ -50,4 +50,4 @@ NREDO:	$N1 = 1 / i
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,6 +1,6 @@
-#!./parrot -j
+#!./parrot
 #
-# nsieve-bits-2 N  (N = 9 for shootout)
+# ./parrot -R jit nsieve-bits-2.pir N  (N = 9 for shootout)
 # by Leopold Toetsch
 # reset bits
 # modified by Karl Forner to accept shootout default value of N=2
@@ -10,7 +10,7 @@
     .param int M
     .local pmc flags
     .local int i, count
-    flags = new .FixedBooleanArray
+    flags = new 'FixedBooleanArray'
     flags = M
     i = 2
 lp0:
@@ -54,7 +54,7 @@ loop:
     $I1 = 1 << $I0
     M = $I1 * 10000
     count = primes_in_range(M)
-    $P0 = new .FixedIntegerArray
+    $P0 = new 'FixedIntegerArray'
     $P0 = 2
     $P0[0] = M
     $P0[1] = count
@@ -63,10 +63,10 @@ loop:
     inc i
     if i < 3 goto loop
 .end
-    
+
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

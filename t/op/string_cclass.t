@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: string_cclass.t 17094 2007-02-20 20:10:40Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: string_cclass.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -329,9 +329,9 @@ loop:
    result = is_cclass .CCLASS_WHITESPACE, s, i
    print result
    if result goto ok
-   \$S0 = s[i]
+   \$S0 = substr s, i
    \$I0 = ord \$S0
-   \$P0 = new .ResizablePMCArray
+   \$P0 = new 'ResizablePMCArray'
    push \$P0, \$I0
    \$S0 = sprintf "\\nchar %#x not reported as ws\\n", \$P0
    print \$S0

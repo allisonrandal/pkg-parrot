@@ -23,7 +23,7 @@
     .return (opts)
 
   help:
-    .return 'help'(prog)
+    .tailcall 'help'(prog)
 .end
 
 
@@ -31,7 +31,7 @@
     .param string prog
 
     .local pmc data
-    data = new .Hash
+    data = new 'Hash'
     data['prog'] = prog
 
     .local string template
@@ -62,7 +62,7 @@ END_HELP
     .local pmc newsfile
     .local string buf, news, start
 
-    newsfile = open 'NEWS', '<'
+    newsfile = open 'NEWS', 'r'
 
     ## find the start of the news item for this version
     start    = concat 'New in ', version
@@ -95,10 +95,10 @@ END_HELP
     .return (news)
 
   err_news:
-    $P0 = new .Exception
+    $P0 = new 'Exception'
     $S0 = concat "error: can't find news on version ", version
     $S0 .= " in 'NEWS'\n"
-    $P0['_message'] = $S0
+    $P0 = $S0
     throw $P0
 .end
 
@@ -108,7 +108,7 @@ END_HELP
     .param pmc    data
 
     .local pmc    iter
-    iter = new .Iterator, data
+    iter = new 'Iterator', data
 
     .local string symbol, value
 
@@ -143,4 +143,4 @@ END_HELP
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

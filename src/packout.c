@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
+Copyright (C) 2001-2007, Parrot Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packout.c 18922 2007-06-11 06:47:08Z petdance $
+$Id: packout.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -10,33 +10,55 @@ src/packout.c - Functions for writing out packfiles
 
 =head1 DESCRIPTION
 
+This file implements various functions for creating and writing packfiles.
+
 =head2 Functions
+
+=over 4
+
+=cut
 
 */
 
 #include "parrot/parrot.h"
 #include "parrot/packfile.h"
-#include <assert.h>
+#include "pmc/pmc_key.h"
 
-/* HEADER: include/parrot/packfile.h */
+/* HEADERIZER HFILE: include/parrot/packfile.h */
 
-/***************************************
-Determine the size of the buffer needed in order to pack the PackFile into a
-contiguous region of memory.
-***************************************/
+/*
 
-#define TRACE_PACKFILE_PMC 0
+=item C<opcode_t PackFile_pack_size>
 
-PARROT_API
+Determine the size of the buffer needed in order to pack the PackFile
+into a contiguous region of memory.
+
+Must be run before C<PackFile_pack()>, so it will allocate an adequate
+buffer.
+
+=cut
+
+*/
+
+PARROT_EXPORT
 opcode_t
-PackFile_pack_size(Interp *interp, PackFile *self /*NN*/)
+PackFile_pack_size(PARROT_INTERP, ARGMOD(PackFile *self))
 {
-    opcode_t size;
+    ASSERT_ARGS(PackFile_pack_size)
+    size_t size;
+    size_t header_size = 0;
     PackFile_Directory * const dir = &self->directory;
 
-    size = PACKFILE_HEADER_BYTES / sizeof (opcode_t);
+    header_size = PACKFILE_HEADER_BYTES;
+    header_size += self->header->uuid_size;
+    header_size +=
+        header_size % 16
+            ? 16 - header_size % 16
+            : 0;
 
-    size += 4; /* magic + opcode type + directory type + pad */
+    size = header_size / sizeof (opcode_t);
+
+    size += 4; /* directory type + 3 padding zeros */
 
     dir->base.file_offset = size;
     size += PackFile_Segment_packed_size(interp, (PackFile_Segment *) dir);
@@ -46,7 +68,7 @@ PackFile_pack_size(Interp *interp, PackFile *self /*NN*/)
 
 /*
 
-FUNCDOC: PackFile_pack
+=item C<void PackFile_pack>
 
 Pack the PackFile into a contiguous region of memory.
 
@@ -58,30 +80,58 @@ C<PackFile_pack()>
 
 Other pack routines are in F<src/packfile.c>.
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-PackFile_pack(Interp *interp, PackFile *self /*NN*/, opcode_t *cursor /*NN*/)
+PackFile_pack(PARROT_INTERP, ARGMOD(PackFile *self), ARGOUT(opcode_t *cursor))
 {
+    ASSERT_ARGS(PackFile_pack)
     opcode_t *ret;
 
     size_t size;
     PackFile_Directory * const dir = &self->directory;
     PackFile_Segment *seg;
+    int padding_size;
+    char *byte_cursor = (char*)cursor;
 
     self->src = cursor;
 
-    /* Pack the header */
+    /* Pack the fixed part of the header */
     mem_sys_memcopy(cursor, self->header, PACKFILE_HEADER_BYTES);
-    cursor += PACKFILE_HEADER_BYTES / sizeof (opcode_t);
-    *cursor++ = PARROT_MAGIC;           /* Pack the magic */
-    *cursor++ = OPCODE_TYPE_PERL;       /* Pack opcode type */
-    *cursor++ = PF_DIR_FORMAT;          /* dir format */
-    *cursor++ = 0;                      /* pad */
+    byte_cursor += PACKFILE_HEADER_BYTES;
+
+    /* Pack the UUID. */
+    if (self->header->uuid_size > 0)
+        mem_sys_memcopy(byte_cursor, self->header->uuid_data,
+            self->header->uuid_size);
+
+    /* Padding. */
+    padding_size = 16 - (PACKFILE_HEADER_BYTES + self->header->uuid_size) % 16;
+    if (padding_size < 16) {
+        int i;
+        for (i = 0; i < padding_size; i++)
+            *byte_cursor++ = 0;
+    }
+    else {
+        padding_size = 0;
+    }
+
+    /* Set cursor. */
+    cursor += (PACKFILE_HEADER_BYTES + self->header->uuid_size + padding_size)
+        / sizeof (opcode_t);
+
+    /* Directory format and padding. */
+    *cursor++ = PF_DIR_FORMAT;
+    *cursor++ = 0;
+    *cursor++ = 0;
+    *cursor++ = 0;
 
     /* pack the directory */
     seg = (PackFile_Segment *) dir;
+
     /* dir size */
     size = seg->op_count;
     ret = PackFile_Segment_pack(interp, seg, cursor);
@@ -93,19 +143,22 @@ PackFile_pack(Interp *interp, PackFile *self /*NN*/, opcode_t *cursor /*NN*/)
 
 /*
 
-PackFile_ConstTable_pack_size
+=item C<size_t PackFile_ConstTable_pack_size>
 
 Determine the size of the buffer needed in order to pack the PackFile
 constant table into a contiguous region of memory.
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
 size_t
-PackFile_ConstTable_pack_size(Interp *interp, PackFile_Segment *seg /*NN*/)
+PackFile_ConstTable_pack_size(PARROT_INTERP, ARGIN(PackFile_Segment *seg))
 {
+    ASSERT_ARGS(PackFile_ConstTable_pack_size)
     opcode_t i;
-    PackFile_ConstTable* const self = (PackFile_ConstTable *) seg;
+    const PackFile_ConstTable* const self = (const PackFile_ConstTable *) seg;
     size_t size = 1;    /* const_count */
 
     for (i = 0; i < self->const_count; i++)
@@ -115,7 +168,7 @@ PackFile_ConstTable_pack_size(Interp *interp, PackFile_Segment *seg /*NN*/)
 
 /*
 
-FUNCDOC: PackFile_ConstTable_pack
+=item C<opcode_t * PackFile_ConstTable_pack>
 
 Pack the PackFile ConstTable into a contiguous region of memory.
 
@@ -125,55 +178,66 @@ indicated by C<PackFile_pack_size()>.
 This means that you MUST call C<PackFile_pack_size()> before
 C<PackFile_ConstTable_pack()>
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 opcode_t *
-PackFile_ConstTable_pack(Interp *interp,
-        PackFile_Segment *seg /*NN*/, opcode_t *cursor)
+PackFile_ConstTable_pack(PARROT_INTERP,
+        ARGIN(PackFile_Segment *seg), ARGMOD(opcode_t *cursor))
 {
-    PackFile_ConstTable * const self = (PackFile_ConstTable *)seg;
+    ASSERT_ARGS(PackFile_ConstTable_pack)
+    const PackFile_ConstTable * const self = (const PackFile_ConstTable *)seg;
     opcode_t i;
 
     *cursor++ = self->const_count;
 
-    for (i = 0; i < self->const_count; i++) {
+    for (i = 0; i < self->const_count; i++)
         cursor = PackFile_Constant_pack(interp, self, self->constants[i], cursor);
-    }
 
     return cursor;
 }
 
 /*
 
-FUNCDOC: find_in_const
+=item C<int PackFile_find_in_const>
 
 This is really ugly, we don't know where our C<PARROT_ARG_SC> key
 constant is in constant table, so we have to search for it.
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
 int
-PackFile_find_in_const(Interp *interp, PackFile_ConstTable *ct /*NN*/, PMC *key /*NN*/,
-                       int type)
+PackFile_find_in_const(PARROT_INTERP,
+        ARGIN(const PackFile_ConstTable *ct), ARGIN(PMC *key), int type)
 {
-    int i;
-    for (i = 0; i < ct->const_count; i++)
-        if (type == PFC_STRING && ct->constants[i]->u.string ==
-            PMC_str_val(key))
+    ASSERT_ARGS(PackFile_find_in_const)
+    int      i;
+    FLOATVAL key_num;
+    STRING  *key_str;
+
+    GETATTR_Key_str_key(interp, key, key_str);
+    GETATTR_Key_num_key(interp, key, key_num);
+
+    for (i = 0; i < ct->const_count; i++) {
+        if (type == PFC_STRING && ct->constants[i]->u.string == key_str)
             return i;
-        else if (type == PFC_NUMBER && ct->constants[i]->u.number ==
-                 PMC_num_val(key))
+        if (type == PFC_NUMBER && ct->constants[i]->u.number == key_num)
             return i;
-    PIO_eprintf(NULL, "find_in_const: couldn't find const for key\n");
+    }
+    Parrot_io_eprintf(NULL, "find_in_const: couldn't find const for key\n");
     Parrot_exit(interp, 1);
-    return 0;
 }
 
 /*
 
-FUNCDOC: PackFile_Constant_pack
+=item C<opcode_t * PackFile_Constant_pack>
 
 Pack a PackFile Constant into a contiguous region of memory.
 
@@ -186,13 +250,19 @@ C<PackFile_Constant_pack()>
 The data is zero-padded to an opcode_t-boundary, so pad bytes may be added.
 (Note this padding is not yet implemented for FLOATVALs.)
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 opcode_t *
-PackFile_Constant_pack(Interp* interp, PackFile_ConstTable * const_table,
-        PackFile_Constant *self, opcode_t *cursor /*NN*/)
+PackFile_Constant_pack(PARROT_INTERP,
+        ARGIN(const PackFile_ConstTable *const_table),
+        ARGIN(const PackFile_Constant *self), ARGOUT(opcode_t *cursor))
 {
+    ASSERT_ARGS(PackFile_Constant_pack)
     PMC *key;
     size_t i;
     opcode_t slice_bits;
@@ -217,13 +287,15 @@ PackFile_Constant_pack(Interp* interp, PackFile_ConstTable * const_table,
         break;
 
     case PFC_KEY:
-        for (i = 0, key = self->u.key; key; key = (PMC *)PMC_data(key), i++)
-            ;
+        for (i = 0, key = self->u.key; key; i++){
+            GETATTR_Key_next_key(interp, key, key);
+        }
+
         /* number of key components */
         *cursor++ = i;
         /* and now type / value per component */
-        for (key = self->u.key; key; key = (PMC *)PMC_data(key)) {
-            opcode_t type = PObj_get_FLAGS(key);
+        for (key = self->u.key; key;) {
+            const opcode_t type = PObj_get_FLAGS(key);
             slice_bits = 0;
             if ((type & (KEY_start_slice_FLAG|KEY_inf_slice_FLAG)) ==
                     (KEY_start_slice_FLAG|KEY_inf_slice_FLAG))
@@ -236,11 +308,10 @@ PackFile_Constant_pack(Interp* interp, PackFile_ConstTable * const_table,
             if (type & KEY_end_slice_FLAG)
                 slice_bits |= PF_VT_END_SLICE;
 
-            type &= KEY_type_FLAGS;
-            switch (type) {
+            switch (type & KEY_type_FLAGS) {
                 case KEY_integer_FLAG:
                     *cursor++ = PARROT_ARG_IC | slice_bits;
-                    *cursor++ = PMC_int_val(key);
+                    GETATTR_Key_int_key(interp, key, *cursor++);
                     break;
                 case KEY_number_FLAG:
                     *cursor++ = PARROT_ARG_NC | slice_bits;
@@ -255,31 +326,32 @@ PackFile_Constant_pack(Interp* interp, PackFile_ConstTable * const_table,
 
                 case KEY_integer_FLAG | KEY_register_FLAG:
                     *cursor++ = PARROT_ARG_I | slice_bits;
-                    *cursor++ = PMC_int_val(key);
+                    GETATTR_Key_int_key(interp, key, *cursor++);
                     break;
                 case KEY_number_FLAG | KEY_register_FLAG:
                     *cursor++ = PARROT_ARG_N | slice_bits;
-                    *cursor++ = PMC_int_val(key);
+                    GETATTR_Key_int_key(interp, key, *cursor++);
                     break;
                 case KEY_string_FLAG | KEY_register_FLAG:
                     *cursor++ = PARROT_ARG_S | slice_bits;
-                    *cursor++ = PMC_int_val(key);
+                    GETATTR_Key_int_key(interp, key, *cursor++);
                     break;
                 case KEY_pmc_FLAG | KEY_register_FLAG:
                     *cursor++ = PARROT_ARG_P | slice_bits;
-                    *cursor++ = PMC_int_val(key);
+                    GETATTR_Key_int_key(interp, key, *cursor++);
                     break;
                 default:
-                    PIO_eprintf(NULL, "PackFile_Constant_pack: "
+                    Parrot_io_eprintf(NULL, "PackFile_Constant_pack: "
                             "unsupported constant type\n");
                     Parrot_exit(interp, 1);
             }
+            GETATTR_Key_next_key(interp, key, key);
         }
 
         break;
 
     default:
-        PIO_eprintf(NULL, "PackFile_Constant_pack: unsupported constant\n");
+        Parrot_io_eprintf(NULL, "PackFile_Constant_pack: unsupported constant\n");
         Parrot_exit(interp, 1);
         break;
     }
@@ -288,12 +360,16 @@ PackFile_Constant_pack(Interp* interp, PackFile_ConstTable * const_table,
 
 /*
 
+=back
+
 =head1 HISTORY
 
 Rework by Melvin; new bytecode format, make bytecode portable. (Do
 endian conversion and wordsize transforms on the fly.)
 
 leo: rewrite to use new directory-based format.
+
+=cut
 
 */
 

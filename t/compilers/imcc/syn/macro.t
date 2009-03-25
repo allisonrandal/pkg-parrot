@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: macro.t 18809 2007-06-04 20:24:05Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: macro.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 33;
+use Parrot::Test tests => 38;
 
 # macro tests
 
@@ -43,8 +43,8 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'macro, one unused parameter, register term
 .macro answer(A)
     print    42
 .endm
-    set    I0, 43
-    .answer(I0)
+    set    $I0, 43
+    .answer($I0)
     print    "\n"
     end
 .end
@@ -70,8 +70,8 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'macro, one used parameter, register' );
 .macro answer(A)
     print    .A
 .endm
-    set    I0,42
-    .answer(I0)
+    set    $I0,42
+    .answer($I0)
     print    "\n"
     end
 .end
@@ -86,9 +86,9 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'macro, one used parameter, called twice' )
     print    "\n"
     inc    .A
 .endm
-    set    I0,42
-    .answer(I0)
-    .answer(I0)
+    set    $I0,42
+    .answer($I0)
+    .answer($I0)
     end
 .end
 CODE
@@ -99,13 +99,13 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', 'macro, one used parameter, label' );
 .sub test :main
 .macro answer(A)
-    ne    I0,42,.$done
+    ne    $I0,42,.$done
     print    .A
     print    "\n"
-.local $done:
+.label $done:
 .endm
-    set    I0,42
-    .answer(I0)
+    set    $I0,42
+    .answer($I0)
     end
 .end
 CODE
@@ -115,16 +115,16 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', 'macro, one used parameter run thrice, label' );
 .sub test :main
 .macro answer(A)
-    ne    I0,42,.$done
+    ne    $I0,42,.$done
     print    .A
     print    "\n"
-.local $done:
+.label $done:
 .endm
-    set    I0,42
-    .answer(I0)
-    .answer(I0)
-    inc I0
-    .answer(I0)
+    set    $I0,42
+    .answer($I0)
+    .answer($I0)
+    inc $I0
+    .answer($I0)
 .end
 CODE
 42
@@ -148,7 +148,7 @@ pir_output_is( <<'CODE', 'foo', 'constant defined and used' );
 CODE
 
 pasm_output_is( <<'CODE', 'foo', 'constant defined, used in a macro call' );
-.constant FOO S0
+.macro_const FOO S0
 .macro answer (bar)
   print .bar
 .endm
@@ -157,18 +157,49 @@ pasm_output_is( <<'CODE', 'foo', 'constant defined, used in a macro call' );
   end
 CODE
 
-open my $FOO, '>', 'macro.tempfile';
+
+pir_output_is( <<'CODE', '42', 'macro_const int in PIR' );
+.macro_const theanswer 42
+.sub main :main
+    print .theanswer
+.end
+CODE
+
+pir_output_is( <<'CODE', 'Hello', 'macro_const string in PIR' );
+.macro_const sayhello "Hello"
+.sub main :main
+    print .sayhello
+.end
+CODE
+
+pir_output_is( <<'CODE', 'Hello', 'macro_const register in PIR' );
+.macro_const firstreg $S0
+.sub main :main
+    .firstreg = "Hello"
+    print .firstreg
+.end
+CODE
+
+pir_output_like( <<'CODE', '/3\.14/', 'macro_const num in PIR' );
+.macro_const pi 3.14
+.sub main :main
+    print .pi
+    print "\n"
+.end
+CODE
+
+open my $FOO, '>', "macro.tempfile_$$";
 print $FOO <<'ENDF';
   set S0, "Betelgeuse\n"
 ENDF
 close $FOO;
 
-pasm_output_is( <<'CODE', <<'OUTPUT', 'basic include macro' );
-.include "macro.tempfile"
+pasm_output_is( <<"CODE", <<'OUTPUT', 'basic include macro' );
+.include "macro.tempfile_$$"
   print S0
 
   set S0, "Rigel"
-.include "macro.tempfile"
+.include "macro.tempfile_$$"
   print S0
   end
 CODE
@@ -176,38 +207,38 @@ Betelgeuse
 Betelgeuse
 OUTPUT
 
-open $FOO, '>', 'macro.tempfile';    # Clobber previous
+open $FOO, '>', "macro.tempfile_$$";    # Clobber previous
 print $FOO <<'ENDF';
 .macro multiply(A,B)
-    new P0, .Float
+    new P0, 'Float'
     set P0, .A
-    new P1, .Float
+    new P1, 'Float'
     set P1, .B
-    new P2, .Float
+    new P2, 'Float'
     mul P2, P1, P0
 .endm
 ENDF
 close $FOO;
 
-pasm_output_is( <<'CODE', <<'OUTPUT', 'include a file defining a macro' );
-.include "macro.tempfile"
+pasm_output_is( <<"CODE", <<'OUTPUT', 'include a file defining a macro' );
+.include "macro.tempfile_$$"
  .multiply(12,13)
  print P2
- print "\n"
+ print "\\n"
  end
 CODE
 156
 OUTPUT
 
-unlink('macro.tempfile');
+unlink("macro.tempfile_$$");
 
 pir_output_is( <<'CODE', <<'OUTPUT', '.newid' );
 .sub test :main
 .macro newid(ID, CLASS)
-    .sym .CLASS .ID
+    .local pmc .ID
     .ID = new .CLASS
 .endm
-    .newid(var, Undef)
+    .newid(var, 'Undef')
     var = 10
     print var
     print "\n"
@@ -220,11 +251,11 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', '.newlex' );
 .sub test :main
 .macro newlex(ID, CLASS)
-    .sym .CLASS .ID
+    .local pmc .ID
     .ID = new .CLASS
     # store_lex -1, .ID , .ID    # how to stringify .ID
 .endm
-    .newlex(var, Undef)
+    .newlex(var, 'Undef')
     var = 10
     print var
     print "\n"
@@ -234,7 +265,7 @@ CODE
 10
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'too few params');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'too few params' );
 .sub test :main
 .macro M(A, B)
     print .A
@@ -247,7 +278,7 @@ CODE
 /Macro 'M' requires 2 arguments, but 1 given/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'too many params');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'too many params' );
 .sub test :main
 .macro M(A, B)
     print .A
@@ -273,7 +304,7 @@ CODE
 fine
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'macro name is no ident');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'macro name is no ident' );
 .sub test :main
 .macro 42(A, B)
     print .A
@@ -286,7 +317,7 @@ CODE
 /Macro names must be identifiers/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'unterminated macro');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'unterminated macro' );
 .sub test :main
 .macro M(
 
@@ -295,7 +326,8 @@ CODE
 /End of file reached/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'unterminated macro 2');
+my @todo = (($^O =~ /darwin/i) ? (todo => 'Darwin segfault -- RT #60926') : ());
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'unterminated macro 2', @todo );
 .sub test :main
 .macro M(A, B)
   print .A
@@ -306,7 +338,7 @@ CODE
 /End of file reached/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'ill param def');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'ill param def' );
 .sub test :main
 .macro M(A, B
   print .A
@@ -317,7 +349,7 @@ CODE
 /Parameter definition in 'M' must be IDENT/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'no params');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'no params' );
 .sub test :main
 .macro M(A, B)
     print .A
@@ -330,7 +362,7 @@ CODE
 /Macro 'M' needs 2 arguments/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'unknown macro');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'unknown macro' );
 .sub test :main
 .macro M(A, B)
     print .A
@@ -343,7 +375,7 @@ CODE
 /(unknown macro|unexpected DOT)/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'unexpected IDENTIFIER');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'unexpected IDENTIFIER' );
 .sub test :main
 .macro M()
     this gives a parse error
@@ -355,10 +387,10 @@ CODE
 /error, unexpected IDENTIFIER/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'unknown macro');
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'unknown macro' );
 .sub test :main
 .macro M(A)
-    .arg .A
+    .set_arg .A
 .endm
     .M(a)
     end
@@ -415,7 +447,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'test that macros labels names can have the
 .macro test_label_names()
     branch .$jump
     print 'do not print this'
-  .local $jump:
+  .label $jump:
     print 'print this'
     print "\n"
 .endm
@@ -428,11 +460,24 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', 'test that macros labels names can have the prefix $' );
 .sub test :main
 .macro SpinForever (Count)
-    .local $LOOP: dec .COUNT # ".local $LOOP" defines a local label.
+    .label $LOOP: dec .COUNT # ".label $LOOP" defines a local label.
     branch .$LOOP # Jump to said label.
 .endm
 .end
 CODE
+OUTPUT
+
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'invalid label syntax' );
+.sub test :main
+    .macro m()
+        .local $iter_loop:
+        print "ok\n"
+    .endm
+
+    .m()
+.end
+CODE
+/syntax error(, unexpected LABEL)?/
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', 'call a sub in a macro' );
@@ -462,7 +507,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'set a sub as an attribute, in a macro' );
 .macro create_inst(inst_name,M)
     print "entering macro create_inst\n"
     .inst_name = new 'MyClass'
-    .const .Sub c3 = .M
+    .const 'Sub' c3 = .M
     setattribute .inst_name, 'MyFuncInMyClass', c3
     print "leaving macro create_inst\n"
 .endm

@@ -1,13 +1,17 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: readline.pm 19060 2007-06-17 14:21:35Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: readline.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
-config/auto/readline.pm - Test for readline lib
+config/auto/readline.pm - Probe for readline library
 
 =head1 DESCRIPTION
 
-Determines whether the platform supports readline.
+Determines whether the platform supports readline.  The GNU Project describes
+its version of the readline library as providing "... a set of functions for
+use by applications that allow users to edit command lines as they are typed
+in" (L<http://directory.fsf.org/project/readline/>).  Other readline libraries
+are, however, available and usable with Parrot.
 
 =cut
 
@@ -15,86 +19,86 @@ package auto::readline;
 
 use strict;
 use warnings;
-use vars qw($description @args);
+use File::Spec;
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Config;
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining if your platform supports readline';
-
-@args = qw(verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does your platform support readline};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
     my $verbose = $conf->options->get('verbose');
 
-    my $cc        = $conf->data->get('cc');
-    my $libs      = $conf->data->get('libs');
-    my $linkflags = $conf->data->get('linkflags');
-    my $ccflags   = $conf->data->get('ccflags');
-    if ( $^O =~ /mswin32/i ) {
-        if ( $cc =~ /^gcc/i ) {
-            $conf->data->add( ' ',
-                libs => '-lreadline -lgw32c -lole32 -luuid -lwsock32 -lmsvcp60' );
-        }
-        else {
-            $conf->data->add( ' ', libs => 'readline.lib' );
-        }
-    }
-    elsif ( $^O =~ /linux/i ) {
-        $conf->data->add( ' ', libs => '-lreadline -lncurses' );
-    }
-    else {
-        $conf->data->add( ' ', libs => '-lreadline' );
-    }
+    my $cc     = $conf->data->get('cc');
+    my $osname = $conf->data->get_p5('OSNAME');
 
-    my $osname = $Config{osname};
+    my $extra_libs = $self->_select_lib( {
+        conf            => $conf,
+        osname          => $osname,
+        cc              => $cc,
+        win32_nongcc    => 'readline.lib',
+        default         => '-lreadline',
+    } );
 
     # On OS X check the presence of the readline header in the standard
-    # Fink/macports location.
-    # RT#43134: Need a more generalized way for finding
-    # where Fink lives.
-    if ( $osname =~ /darwin/ ) {
-        if ( -f "/sw/include/readline/readline.h" ) {
-            $conf->data->add( ' ', linkflags => '-L/sw/lib' );
-            $conf->data->add( ' ', ldflags   => '-L/sw/lib' );
-            $conf->data->add( ' ', ccflags   => '-I/sw/include' );
-        }
-        if ( -f "/opt/local/include/readline/readline.h" ) {
-            $conf->data->add( ' ', linkflags => '-L/opt/local/lib' );
-            $conf->data->add( ' ', ldflags   => '-L/opt/local/lib' );
-            $conf->data->add( ' ', ccflags   => '-I/opt/local/include' );
-        }
-    }
+    # Fink/macports locations.
+    $self->_handle_darwin_for_fink($conf, $osname, 'readline/readline.h');
+    $self->_handle_darwin_for_macports($conf, $osname, q{readline/readline.h});
 
-    cc_gen('config/auto/readline/readline.in');
+    $conf->cc_gen('config/auto/readline/readline_c.in');
     my $has_readline = 0;
-    eval { cc_build() };
+    eval { $conf->cc_build( q{}, $extra_libs ) };
     if ( !$@ ) {
-        if ( cc_run() ) {
-            $has_readline = 1;
-            print " (yes) " if $verbose;
-            $self->set_result('yes');
+        if ( $conf->cc_run() ) {
+            $has_readline = $self->_evaluate_cc_run($verbose);
         }
-        $conf->data->set(
-            readline     => 'define',
-            HAS_READLINE => $has_readline,
-        );
+        _handle_readline($conf, $extra_libs);
     }
-    unless ($has_readline) {
-
-        # The Config::Data settings might have changed for the test
-        $conf->data->set( 'libs',      $libs );
-        $conf->data->set( 'ccflags',   $ccflags );
-        $conf->data->set( 'linkflags', $linkflags );
-        print " (no) " if $verbose;
-        $self->set_result('no');
+    else {
+        # a second chance with ncurses
+        $extra_libs .= ' ';
+        $extra_libs .= $self->_select_lib( {
+            conf            => $conf,
+            osname          => $osname,
+            cc              => $cc,
+            win32_nongcc    => 'ncurses.lib',
+            default         => '-lncurses',
+        } );
+        eval { $conf->cc_build( q{}, $extra_libs) };
+        if ( !$@ ) {
+            if ( $conf->cc_run() ) {
+                $has_readline = $self->_evaluate_cc_run($verbose);
+            }
+            _handle_readline($conf, $extra_libs);
+        }
     }
+    $conf->data->set( HAS_READLINE => $has_readline );
 
-    return $self;
+    return 1;
+}
+
+sub _evaluate_cc_run {
+    my ($self, $verbose) = @_;
+    my $has_readline = 1;
+    print " (yes) " if $verbose;
+    $self->set_result('yes');
+    return $has_readline;
+}
+
+sub _handle_readline {
+    my ($conf, $libs) = @_;
+    $conf->data->set( readline => 'define' );
+    $conf->data->add( ' ', libs => $libs );
+    return 1;
 }
 
 1;

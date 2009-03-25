@@ -7,13 +7,13 @@ eventhandler.pir - a tetris event handler class
 .namespace ["Tetris::EventHandler"]
 
 .sub __onload :load
-    find_type $I0, "Tetris::EventHandler"
-    if $I0 > 1 goto END
+    $P0 = get_class "Tetris::EventHandler"
+    unless null $P0 goto END
     load_bytecode "library/SDL/EventHandler.pir"
-    
-    getclass $P0, "SDL::EventHandler"
+
+    get_class $P0, "SDL::EventHandler"
     subclass $P0, $P0, "Tetris::EventHandler"
-    $P1 = new .String
+    $P1 = new 'String'
     $P1 = "BUILD"
     setprop $P0, "BUILD", $P1
     addattribute $P0, "app"
@@ -23,29 +23,24 @@ END:
 .sub BUILD :method
     .param pmc app
 
-    classoffset $I0, self, "Tetris::EventHandler"
-    setattribute self, $I0, app
+    setattribute self, 'app', app
 .end
 
 .sub app :method
     .local pmc app
-    
-    classoffset $I0, self, "Tetris::EventHandler"
-    getattribute app, self, $I0
+
+    getattribute app, self, 'app'
     .return (app)
 .end
 
 .sub dispatch_event :method
     .local pmc app
     .local int ret
-    
+
     app = self."app"()
     app."setTimer"( 0 )
-    save app
-    $P0 = find_global "SDL::Event", "disptach_event"
-    invokecc $P0
-    restore app
-    ret = I5
+    $P0 = get_hll_global [ "SDL::Event" ], "disptach_event"
+    ret = $P0()
     app."setTimer"( 1 )
     .return (ret)
 .end
@@ -62,7 +57,7 @@ END:
     print " is "
     print blockID
     print "\n"
-    
+
     app = self."app"()
     board = app."board"( boardID )
 
@@ -157,7 +152,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -165,4 +160,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

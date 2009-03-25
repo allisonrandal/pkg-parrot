@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: 07-make_incdir.t 18501 2007-05-11 02:04:29Z jkeenan $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: 07-make_incdir.t 37200 2009-03-08 11:46:01Z fperrad $
 # 07-make_incdir.t
 
 use strict;
@@ -19,22 +19,19 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 8;
+use Test::More tests => 7;
 use Carp;
 use Cwd;
 use File::Copy;
 use File::Temp (qw| tempdir |);
-use_ok('Parrot::Ops2pm::Utils');
+use_ok('Parrot::Ops2pm');
 use lib ( "$main::topdir/t/tools/ops2cutils/testlib", "./lib" );
-use_ok( "GenerateCore", qw| generate_core | );
-
-my @srcopsfiles = qw( src/ops/core.ops src/ops/bit.ops src/ops/cmp.ops
-    src/ops/debug.ops src/ops/experimental.ops src/ops/io.ops src/ops/math.ops
-    src/ops/object.ops src/ops/pic.ops src/ops/pmc.ops src/ops/set.ops
-    src/ops/stack.ops src/ops/stm.ops src/ops/string.ops src/ops/sys.ops
-    src/ops/var.ops );
-my $num  = "src/ops/ops.num";
-my $skip = "src/ops/ops.skip";
+use GenerateCore qw|
+    generate_core
+    @srcopsfiles
+    $num
+    $skip
+|;
 
 ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
 my $cwd = cwd();
@@ -60,7 +57,7 @@ my $cwd = cwd();
     mkdir qq{$tdir/include};
     mkdir qq{$tdir/include/parrot};
 
-    my $o2p = Parrot::Ops2pm::Utils->new(
+    my $o2p = Parrot::Ops2pm->new(
         {
             argv   => [@opsfiles],
             script => "tools/build/ops2pm.pl",

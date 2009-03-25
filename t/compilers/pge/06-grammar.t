@@ -1,5 +1,5 @@
 #!./parrot
-# Copyright (C) 2006-2007, The Perl Foundation.
+# Copyright (C) 2006-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -18,25 +18,30 @@ Test some simple grammars.
 .sub main :main
     load_bytecode 'Test/Builder.pir'
     load_bytecode 'PGE.pbc'
-    load_bytecode 'PGE/P6Grammar.pbc'
+    load_bytecode 'PGE/Perl6Grammar.pbc'
     .include "iglobals.pasm"
 
-    .local pmc test, todo_tests, todo_desc, grammar, expr, description
+    .local pmc test, todo_tests, todo_desc, grammar, expr, description, test_num
+
+    # avoid name clashes in grammars with fatal method redefinition
+    test_num  = new 'Integer'
+    test_num  = 0
+    set_global 'test_num', test_num
 
     # the test builder
-    test = new 'Test::Builder'
+    test = new [ 'Test'; 'Builder' ]
 
     # PMCs to store TODO tests and reasons/descriptions
-    todo_tests = new .Hash
-    todo_desc = new .Hash
+    todo_tests = new 'Hash'
+    todo_desc  = new 'Hash'
 
     # PMCs to store grammars and expressions to test for each grammar
     # also set description for that grammar
-    grammar = new .ResizableStringArray
-    expr = new .ResizablePMCArray
-    description = new .ResizableStringArray
+    grammar     = new 'ResizableStringArray'
+    expr        = new 'ResizablePMCArray'
+    description = new 'ResizableStringArray'
 
-    .local int ok,n_grammars,n_tests
+    .local int ok, n_grammars, n_tests
 
     # plan tests to run
     test.'plan'(16)
@@ -45,67 +50,68 @@ Test some simple grammars.
 
     .local pmc targets
 
-    targets = new .ResizableStringArray
+    targets = new 'ResizableStringArray'
     push targets, '1313'                    # n1
     push targets, ' 1414 '                  # n2
 
     'test_grammar_against_targets'( <<'EOF_SIMPLE_GRAMMAR', targets, 'simple token/rule match' )
-grammar Simple::Test;
+grammar Simple::Test1;
 rule main { <number> }
 token number { \d+ }
 EOF_SIMPLE_GRAMMAR
 
 
-    targets = new .ResizableStringArray
+    targets = new 'ResizableStringArray'
     push targets, '[1313]'                  # n3
     push targets, '[ 1313 ]'                # n4
     push targets, '[    1313  ]'            # n5
     'test_grammar_against_targets'( <<'EOF_SIMPLE_GRAMMAR', targets, 'simple token/rule match with constant chars' )
-grammar Simple::Test;
+grammar Simple::Test2;
 rule main { \[ <number> \] }
 token number { \d+ }
 EOF_SIMPLE_GRAMMAR
 
 
-    targets = new .ResizableStringArray
+    targets = new 'ResizableStringArray'
     push targets, ''                        # n6
     push targets, '11'                      # n7
     push targets, '11 12 13'                # n8
     push targets, ' 11     12  13   14'     # n9
     'test_grammar_against_targets'( <<'EOF_SIMPLE_GRAMMAR', targets, 'simple token/rule match with repetition using *' )
-grammar Simple::Test;
-rule main { [<number> <?ws>]* }
+grammar Simple::Test3;
+rule main { [<number> <.ws>]* }
 token number { \d+ }
 EOF_SIMPLE_GRAMMAR
 
 
-    targets = new .ResizableStringArray
+    targets = new 'ResizableStringArray'
     push targets, '11 12 13'                # n10
     'test_grammar_against_targets'( <<'EOF_SIMPLE_GRAMMAR', targets, 'another simple token/rule match with repetition using *' )
-grammar Simple::Test;
+grammar Simple::Test4;
 rule main { [<number> ]* }
 token number { \d+ }
 EOF_SIMPLE_GRAMMAR
 
-    targets = new .ResizableStringArray
+    targets = new 'ResizableStringArray'
     push targets, '11'                      # n11
     push targets, '11 12 13'                # n12
     push targets, ' 11     12  13   14'     # n13
     'test_grammar_against_targets'( <<'EOF_SIMPLE_GRAMMAR', targets, 'simple token/rule match with repetition using +' )
-grammar Simple::Test;
-rule main { [<number> <?ws>]+ }
+grammar Simple::Test5;
+rule main { [<number> <.ws>]+ }
 token number { \d+ }
 EOF_SIMPLE_GRAMMAR
 
-    targets = new .ResizableStringArray
+    targets = new 'ResizableStringArray'
     push targets, '11'                      # n14
     push targets, '11 12 13'                # n15
     push targets, '  11     12  13  '       # n16
     'test_grammar_against_targets'( <<'EOF_SIMPLE_GRAMMAR', targets, 'simple token/rule match with repetition using *' )
-grammar Simple::Test;
+grammar Simple::Test6;
 rule main { [ <number>]* }
 token number { \d+ }
 EOF_SIMPLE_GRAMMAR
+
 .end
 
 
@@ -116,40 +122,66 @@ EOF_SIMPLE_GRAMMAR
 
     load_bytecode 'Test/Builder.pir'
     .local pmc    test
-                  test = new 'Test::Builder'
+                  test = new [ 'Test'; 'Builder' ]
 
     .local int    ok
                   ok = 0
-    .local string target
+    .local pmc    compiler
+                  compiler = '_compile_grammar'(grammar)
+
+    .local pmc    test_num
+                  test_num  = get_global 'test_num'
+
+    # it starts at zero
+    inc test_num
+
+    .local string test_num_str
+                  test_num_str = test_num
+    .local string test_name
+                  test_name    = 'Simple::Test' . test_num_str
+
+    $P0 = split '::', test_name
+    .local pmc parser
+               parser = get_hll_global $P0, 'main'
 
   next_target:
-    target = shift targets
+    .local string target
+                  target = shift targets
 
-    ok = '_match_expr'( grammar, target )
+    ok = '_match_expr'( parser, target )
     test.'ok'( ok, description )
     $I0 = targets
     if $I0 goto next_target
 .end
 
+.sub '_compile_grammar'
+    .param string grammar
+
+    .local pmc p6grammar, code, pir_compiler, parser
+
+    p6grammar    = compreg 'PGE::Perl6Grammar'
+    code         = p6grammar.'compile'(grammar, 'target'=>'PIR')
+    pir_compiler = compreg 'PIR'
+    parser       = pir_compiler(code)
+
+    .return( parser )
+.end
+
 
 .sub '_match_expr'
-    .param string grammar
+    .param pmc    parser
     .param string expr
+
     .local int ok
-    .local string result
-    .local pmc p6grammar, code, parse, match
+    .local string result, test_name, test_num_str
+    .local pmc p6grammar, code, parse, match, test_num
 
+  do_match:
     load_bytecode 'PGE.pbc'
-    load_bytecode 'compilers/pge/pgc.pir'
+    load_bytecode 'PGE/Perl6Grammar.pbc'
 
-    ok = 1
-    p6grammar = compreg 'PGE::P6Grammar'
-    code = p6grammar.'compile'(grammar, 'target'=>'PIR')
-    $P0 = compreg 'PIR'
-    $P1 = $P0(code)
-    parse = find_global "Simple::Test", "main"
-    match = parse(expr)
-    result = match
+    match     = parser(expr)
+    result    = match
 
     if result == expr goto match_ok
     ok = 0
@@ -164,3 +196,8 @@ Nuno 'smash' Carvalho <mestre.smash@gmail.com>
 
 =cut
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

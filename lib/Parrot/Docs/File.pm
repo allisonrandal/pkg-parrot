@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: File.pm 19065 2007-06-17 15:24:56Z paultcochrane $
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: File.pm 37326 2009-03-11 20:56:14Z coke $
 
 =head1 NAME
 
@@ -33,6 +33,13 @@ use base qw( Parrot::IO::File );
 use Pod::Simple::Checker;
 use Parrot::Docs::POD2HTML;
 
+# wrapped here to reset the error timestamp to speed up check_pod()
+sub write {
+    my $self                 = shift;
+    $self->{POD_ERRORS_TIME} = 0;
+    return $self->SUPER::write(@_);
+}
+
 my $UNDEFINED = 'Undefined';
 
 # These are the Parrot file types excluding the ICU specifc ones.
@@ -43,7 +50,6 @@ my %type_for_suffix = (
     'Log'          => 'SVN Entries file',                  # probably obsolete
     'PL'           => 'Perl script',
     'SKIP'         => 'MANIFEST skip file',
-    'STATUS'       => 'Languages status file',
     'TXT'          => 'Text file',
     'txt'          => 'Text file',
     'a'            => 'Library file',
@@ -52,7 +58,6 @@ my %type_for_suffix = (
     'bf'           => 'BF code',
     'bnf'          => 'Grammar file',
     'c'            => 'C code',
-    'cola'         => 'Cola code',
     'cs'           => 'C# code',
     'declarations' => 'Library declarations file',
     'def'          => 'Library definitions file',
@@ -84,14 +89,13 @@ my %type_for_suffix = (
     'prd'          => 'Parse::RecDescent grammar file',
     'ps'           => 'Postscript code',
     'py'           => 'Python code',
-    'rb'           => 'Ryby code',
+    'rb'           => 'Ruby code',
     's'            => 'Some kind of configuration file',
     'scheme'       => 'Scheme code',
     'sh'           => 'Shell script',
     'spec'         => 'RPM build specification',
     't'            => 'Test file',
     'tbl'          => 'Vtable file',
-    'tcl'          => 'TCL code',
     'txt'          => 'Text file',
     'urm'          => 'URM code',
     'vim'          => 'Vim file',
@@ -288,6 +292,7 @@ sub pod_as_html {
 
     if ( $self->contains_pod ) {
         my $formatter = Parrot::Docs::POD2HTML->new;
+        $formatter->no_errata_section(1); # don't dump errors into HTML output
 
         $self->{POD_HTML} = $formatter->html_for_file($self);
     }
@@ -306,7 +311,7 @@ If a file contains plain text rather than POD it may be directly linked to.
 sub is_docs_link {
     my $self = shift;
 
-    # TODO - This needs more thought. I'm trying to work out which files
+    # RT#43681 - This needs more thought. I'm trying to work out which files
     # it's sensible to link directly to. Suffixes other than txt are a
     # problem (for me at least) because the browser thinks it should
     # download the file.
@@ -333,6 +338,12 @@ sub title {
     return $self->name unless $self->contains_pod;
 
     my $text = $self->read;
+
+    return ''
+        unless $text =~ /^=head1\s+([^\n\r]+)\s*[\n\r]+/smo;
+
+    return $1
+        if ($1 ne 'NAME' and $1 ne 'TITLE');
 
     return ''
         unless $text =~ /^=head1\s+(?:NAME|TITLE)\s*[\n\r]+([^\n\r]+)/smo;
@@ -398,7 +409,7 @@ sub short_description {
             $desc =~ s/\s+$//os;
 
             # Remove any POD.
-            # TODO - Decide whether we want to do this or convert
+            # RT#43683 - Decide whether we want to do this or convert
             # to HTML in the documentation item.
             $desc =~ s/[CFL]<([^>]+)>/$1/osg;
 
@@ -406,7 +417,7 @@ sub short_description {
         }
     }
 
-    # TODO - The abstract section above was added later. The two searches
+    # RT#43687 - The abstract section above was added later. The two searches
     # could be combined.
 
     return $self->title;

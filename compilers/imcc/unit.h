@@ -1,3 +1,8 @@
+/*
+ * $Id: unit.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2003-2009, Parrot Foundation.
+ */
+
 #ifndef PARROT_IMCC_UNIT_H_GUARD
 #define PARROT_IMCC_UNIT_H_GUARD
 
@@ -27,47 +32,53 @@ struct imcc_ostat {
     int used_once;
 } ;
 
-typedef struct _IMC_Unit {
-    INTVAL type;
-    Instruction * instructions;
-    Instruction * last_ins;
-    SymHash hash;
-    int bb_list_size;
-    int n_basic_blocks;
-    Basic_block **bb_list;
-    Set** dominators;
-    int* idoms;
-    Set** dominance_frontiers;
-    int n_loops;
-    Loop_info ** loop_info;
-    Edge * edge_list;
+struct _IMC_Unit {
+    INTVAL            type;
+    Instruction      *instructions;
+    Instruction      *last_ins;
+    SymHash           hash;
+    int               bb_list_size;
+    unsigned int      n_basic_blocks;
+    Basic_block     **bb_list;
+    Set             **dominators;
+    int              *idoms;
+    Set             **dominance_frontiers;
+    int               n_loops;
+    Loop_info       **loop_info;
+    Edge             *edge_list;
 
     /* register allocation */
-    unsigned int* interference_graph;
-    SymReg** reglist;
-    int n_symbols;
-    int max_color;
-    struct _IMC_Unit * prev;
-    struct _IMC_Unit * next;
+    unsigned int     *interference_graph;
+    SymReg          **reglist;
+    unsigned int      n_symbols;
+    int               max_color;
+    struct _IMC_Unit *prev;
+    struct _IMC_Unit *next;
 
-    SymReg *_namespace;
-    int pasm_file;
-    const char *file;
-    int n_vars_used[4]; /* INSP in PIR */
-    int n_regs_used[4]; /* INSP in PBC */
-    int first_avail[4]; /* INSP */
-    SymReg *outer;
-    PMC *sub_pmc;       /* this sub */
-    int is_vtable_method; /* 1 if a v-table method */
-    char *vtable_name;  /* v-table method name, if any */
+    SymReg           *_namespace;
+    int               pasm_file;
+    const char       *file;
+    int               n_vars_used[4];   /* INSP in PIR */
+    int               n_regs_used[4];   /* INSP in PBC */
+    int               first_avail[4];   /* INSP */
+    SymReg           *outer;
+    PMC              *sub_pmc;          /* this sub */
+    int               is_vtable_method; /* 1 if a v-table method */
+    int               is_method;        /* 1 if a method */
+    int               has_ns_entry_name;/* 1 if in ns */
+    char             *vtable_name;      /* v-table method name, if any */
+    char             *method_name;      /* method name, if any */
+    char             *ns_entry_name;    /* ns entry name, if any */
+    char             *instance_of;      /* PMC or class this is an instance of
+                                         * if any */
+    SymReg           *subid;            /* Unique subroutine id */
 
-    struct imcc_ostat ostat;
+    struct            imcc_ostat ostat;
+};
 
-} IMC_Unit;
 
-
-IMC_Unit * imc_open_unit(Parrot_Interp, IMC_Unit_Type);
-void imc_close_unit(Parrot_Interp, IMC_Unit *);
+/* HEADERIZER BEGIN: compilers/imcc/unit.c */
+/* HEADERIZER END: compilers/imcc/unit.c */
 
 #endif /* PARROT_IMCC_UNIT_H_GUARD */
 
@@ -78,4 +89,3 @@ void imc_close_unit(Parrot_Interp, IMC_Unit *);
  * End:
  * vim: expandtab shiftwidth=4:
  */
-

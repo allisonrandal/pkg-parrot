@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2007, The Perl Foundation.
-$Id: lexinfo.pmc 18747 2007-06-02 01:33:07Z petdance $
+Copyright (C) 2008, Parrot Foundation.
+$Id: lexinfo.pmc 37415 2009-03-14 18:16:20Z fperrad $
 
 =head1 NAME
 
@@ -19,19 +19,9 @@ These are the vtable functions for the lexinfo PMC.
 */
 
 #include "parrot/parrot.h"
-#include <assert.h>
+
+/* included manually to prevent breaking C++ builds -- see RT #56534*/
 #include "pmc_hash.h"
-
-static size_t
-key_hash_STRING(Interp *interp, void *value, size_t seed)
-{
-    STRING * const s = (STRING *)value;
-
-    if (s->hashval)
-        return s->hashval;
-
-    return string_hash(interp, s, seed);
-}
 
 /*
  * LexInfo contains a constant Hash with constant string
@@ -39,7 +29,7 @@ key_hash_STRING(Interp *interp, void *value, size_t seed)
  * needed (except for freeze/thaw
  */
 
-pmclass LexInfo need_ext does hash no_ro {
+pmclass LexInfo need_ext provides hash no_ro {
 
 /*
 
@@ -59,30 +49,49 @@ subroutine.
 */
 
     void class_init() {
-        if (pass == 1) {
-            /* there is no pmclass const_pmc flag yet */
+
+        /* there is no pmclass const_pmc flag yet */
+        if (pass == 1)
             interp->vtables[entry]->flags |= VTABLE_IS_CONST_PMC_FLAG;
-        }
 
     }
-    void init() {
-        real_exception(INTERP, NULL, INVALID_OPERATION,
-                "don't create me like this");
+
+    VTABLE void init() {
+        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot create a LexInfo PMC without an initializer");
     }
 
-    void init_pmc(PMC* sub) {
-        assert(PObj_constant_TEST(SELF));
+    VTABLE void init_pmc(PMC *sub) {
+        PARROT_ASSERT(PObj_constant_TEST(SELF));
         PMC_pmc_val(SELF) = sub;
+
         parrot_new_pmc_hash_x(INTERP, SELF,
-            (PARROT_DATA_TYPES)enum_hash_int,
+            (PARROT_DATA_TYPE)enum_hash_int,
             Hash_key_type_STRING,
-            (hash_comp_fn)string_equal,     /* STRING compare */
-            key_hash_STRING);    /*        hash */
+            (hash_comp_fn)Parrot_str_not_equal,     /* STRING compare */
+            (hash_hash_key_fn)Parrot_str_to_hashval); /*        hash    */
+
+        PObj_active_destroy_SET(SELF);
     }
 
 /*
 
-=item C<METHOD void declare_lex_preg(STRING *name, INTVAL preg)>
+=item C<void destroy()>
+
+Frees any malloced memory held by this PMC.
+
+=cut
+
+*/
+
+    void destroy() {
+        if (PMC_struct_val(SELF))
+            parrot_hash_destroy(INTERP, (Hash *)PMC_struct_val(SELF));
+    }
+
+/*
+
+=item C<void declare_lex_preg(STRING *name, INTVAL preg)>
 
 Declare a lexical variable that is an alias for a PMC register.  The PIR
 compiler calls this method in response to a ".lex STRING, PREG" directive.
@@ -95,12 +104,54 @@ Returns the number of elements in the LexInfo hash.
 
 */
 
-    METHOD void declare_lex_preg(STRING *name, INTVAL preg) {
+    METHOD declare_lex_preg(STRING *name, INTVAL preg) {
         parrot_hash_put(INTERP, (Hash*)PMC_struct_val(SELF), name, (void*)preg);
     }
 
-    INTVAL elements() {
+    VTABLE INTVAL elements() {
         return parrot_hash_size(INTERP, (Hash *)PMC_struct_val(SELF));
+    }
+
+
+/*
+
+=item C<PMC *inspect_str(STRING *what)>
+
+Introspects this LexInfo structure. The only valid introspection key is
+C<symbols>, which gets an array of the names of the symbols in this lexpad.
+
+=cut
+
+*/
+
+    VTABLE PMC *inspect_str(STRING *what) {
+        if (Parrot_str_equal(interp, what, CONST_STRING(interp, "symbols"))) {
+            PMC *result     = pmc_new(interp, enum_class_ResizableStringArray);
+            Hash *hash      = (Hash *)PMC_struct_val(SELF);
+            UINTVAL entries = hash->entries;
+            UINTVAL found   = 0;
+            INTVAL  i;
+
+            for (i = hash->mask; i >= 0; --i) {
+                HashBucket *bucket = hash->bi[i];
+                while (bucket) {
+                    if (++found > entries)
+                        Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                            "Detected corruption at LexInfo hash %p entries %d",
+                            hash, (int)entries);
+
+                    PARROT_ASSERT(bucket->key);
+                    VTABLE_push_string(interp, result, (STRING *)bucket->key);
+
+                    bucket = bucket->next;
+                }
+            }
+
+            return result;
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Unknown introspection value '%S'", what);
     }
 
 /*
@@ -118,27 +169,31 @@ The implementation of the Hash PMC is called.
 
 */
 
-    void visit(visit_info *info) {
+    VTABLE void visit(visit_info *info) {
         Parrot_Hash_visit(INTERP, SELF, info);
     }
 
-    void freeze(visit_info *info) {
+    VTABLE void freeze(visit_info *info) {
         Parrot_Hash_freeze(INTERP, SELF, info);
     }
 
-    void thaw(visit_info *info) {
+    VTABLE void thaw(visit_info *info) {
         IMAGE_IO * const io = info->image_io;
 
         if (info->extra_flags == EXTRA_IS_NULL) {
-            const INTVAL elems = io->vtable->shift_integer(INTERP, io);
-            const INTVAL k_type = io->vtable->shift_integer(INTERP, io);
-            const INTVAL v_type = io->vtable->shift_integer(INTERP, io);
-            Hash *hash;
+            const INTVAL elems  = VTABLE_shift_integer(INTERP, io);
+            const INTVAL k_type = VTABLE_shift_integer(INTERP, io);
+            const INTVAL v_type = VTABLE_shift_integer(INTERP, io);
+            Hash        *hash;
 
-            assert(v_type == enum_hash_int);
+            UNUSED(k_type);
+            UNUSED(v_type);
+
+            PARROT_ASSERT(v_type == enum_hash_int);
             /* TODO make a better interface for hash creation
              * TODO create hash with needed types in the first place
              */
+
             SELF.init_pmc(NULL);
             hash          = (Hash *)PMC_struct_val(SELF);
             hash->entries = elems;

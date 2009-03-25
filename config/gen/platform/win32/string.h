@@ -1,3 +1,8 @@
+/*
+ * $Id: string.h 36833 2009-02-17 20:09:26Z allison $
+ * Copyright (C) 2007, Parrot Foundation.
+ */
+
 #ifndef PARROT_PLATFORM_WIN32_STRING_H_GUARD
 #define PARROT_PLATFORM_WIN32_STRING_H_GUARD
 

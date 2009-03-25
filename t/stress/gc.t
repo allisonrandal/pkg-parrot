@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: gc.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: gc.t 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ use Parrot::PMC qw(%pmc_types);
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "arraystress" );
     print "starting\n"
-    new P0, .Integer
+    new P0, 'Integer'
     print "ending\n"
     end
 CODE

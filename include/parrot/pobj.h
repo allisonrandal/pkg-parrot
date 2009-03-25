@@ -1,7 +1,7 @@
 /* pobj.h
- *  Copyright (C) 2001-2005, The Perl Foundation.
+ *  Copyright (C) 2001-2005, Parrot Foundation.
  *  SVN Info
- *     $Id: pobj.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: pobj.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:
@@ -47,19 +47,20 @@ typedef struct pobj_t {
 
 /* plain Buffer is the smallest Parrot Obj */
 typedef struct Buffer {
-    pobj_t obj;
+    UnionVal    cache;
+    Parrot_UInt flags;
 } Buffer;
 
 typedef Buffer PObj;
 
-#define PObj_bufstart(pmc)    (pmc)->obj.u._b._bufstart
-#define PObj_buflen(pmc)      (pmc)->obj.u._b._buflen
-#define PMC_struct_val(pmc)   (pmc)->obj.u._ptrs._struct_val
-#define PMC_pmc_val(pmc)      (pmc)->obj.u._ptrs._pmc_val
-#define PMC_int_val(pmc)      (pmc)->obj.u._i._int_val
-#define PMC_int_val2(pmc)     (pmc)->obj.u._i._int_val2
-#define PMC_num_val(pmc)      (pmc)->obj.u._num_val
-#define PMC_str_val(pmc)      (pmc)->obj.u._string_val
+#define PObj_bufstart(pmc)    (pmc)->cache._b._bufstart
+#define PObj_buflen(pmc)      (pmc)->cache._b._buflen
+#define PMC_struct_val(pmc)   (pmc)->cache._ptrs._struct_val
+#define PMC_pmc_val(pmc)      (pmc)->cache._ptrs._pmc_val
+#define PMC_int_val(pmc)      (pmc)->cache._i._int_val
+#define PMC_int_val2(pmc)     (pmc)->cache._i._int_val2
+#define PMC_num_val(pmc)      (pmc)->cache._num_val
+#define PMC_str_val(pmc)      (pmc)->cache._string_val
 
 /* See src/gc/resources.c. the basic idea is that buffer memory is
    set up as follows:
@@ -103,18 +104,11 @@ typedef struct Buffer_alloc_unit {
 #  define PObj_bufrefcount(b)    (((Buffer_alloc_unit *)PObj_bufallocstart(b))->ref_count)
 #  define PObj_bufrefcountptr(b) (&PObj_bufrefcount(b))
 #else                     /* see src/gc/resources.c */
-#  define Buffer_alloc_offset sizeof(INTVAL)
+#  define Buffer_alloc_offset sizeof (INTVAL)
 #  define PObj_bufallocstart(b)  ((char *)PObj_bufstart(b) - Buffer_alloc_offset)
 #  define PObj_bufrefcount(b)    (*(INTVAL *)PObj_bufallocstart(b))
 #  define PObj_bufrefcountptr(b) ((INTVAL *)PObj_bufallocstart(b))
 #endif
-
-/* BEGIN DEPRECATED BUFFER ACCESSORS */
-/* macros for accessing old buffer members
- * #define bufstart obj.u._b._bufstart
- * #define buflen   obj.u._b._buflen
- * END DEPRECATED BUFFER ACCESSORS
- */
 
 typedef enum {
     enum_stringrep_unknown = 0,
@@ -124,26 +118,28 @@ typedef enum {
 } parrot_string_representation_t;
 
 struct parrot_string_t {
-    pobj_t obj;
-    UINTVAL bufused;
-    char *strstart;
-    UINTVAL strlen;
+    UnionVal    cache;
+    Parrot_UInt flags;
+    char       *strstart;
+    UINTVAL     bufused;
+    UINTVAL     strlen;
+    UINTVAL     hashval; /* cached hash value computation */
+
     /*    parrot_string_representation_t representation;*/
-    struct _encoding *encoding;
-    struct _charset *charset;
-    UINTVAL hashval; /* cached hash value computation; not yet used */
+    const struct _encoding *encoding;
+    const struct _charset  *charset;
 };
 
 
 /* put data into the PMC_EXT structure */
-#define PMC_DATA_IN_EXT 1
+#define PMC_DATA_IN_EXT 0
 
+/* note that cache and flags are isomorphic with Buffer and PObj */
 struct PMC {
-    pobj_t obj;
-    VTABLE *vtable;
-#if ! PMC_DATA_IN_EXT
-    DPOINTER *data;
-#endif /* ! PMC_DATA_IN_EXT */
+    UnionVal        cache;
+    Parrot_UInt     flags;
+    VTABLE         *vtable;
+    DPOINTER       *data;
     struct PMC_EXT *pmc_ext;
 };
 
@@ -182,13 +178,13 @@ typedef struct PMC_EXT {
 #ifdef NDEBUG
 #  define PMC_ext_checked(pmc)             (pmc)->pmc_ext
 #else
-#  define PMC_ext_checked(pmc)             (assert((pmc)->pmc_ext), (pmc)->pmc_ext)
+#  define PMC_ext_checked(pmc)             (PARROT_ASSERT((pmc)->pmc_ext), (pmc)->pmc_ext)
 #endif /* NDEBUG */
 #if PMC_DATA_IN_EXT
 #  define PMC_data(pmc)                   PMC_ext_checked(pmc)->data
 #  define PMC_data_typed(pmc, type) (type)PMC_ext_checked(pmc)->data
 #  define PMC_data0(pmc)      ((pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
-#  define PMC_data0_typed(pmc, type) (type)(pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
+#  define PMC_data0_typed(pmc, type) (type)((pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
 #else
 #  define PMC_data(pmc)                   (pmc)->data
 #  define PMC_data_typed(pmc, type) (type)(pmc)->data
@@ -199,100 +195,94 @@ typedef struct PMC_EXT {
 #define PMC_metadata(pmc)     PMC_ext_checked(pmc)->_metadata
 #define PMC_next_for_GC(pmc)  PMC_ext_checked(pmc)->_next_for_GC
 #define PMC_sync(pmc)         PMC_ext_checked(pmc)->_synchronize
-#define PMC_union(pmc)        (pmc)->obj.u
+#define PMC_union(pmc)        (pmc)->cache
 
+#define POBJ_FLAG(n) ((UINTVAL)1 << (n))
 /* PObj flags */
 typedef enum PObj_enum {
     /* This first 8 flags may be used privately by a Parrot Object.
-     * It is suggested that you alias these within an individual
-     * class's header file
+     * You should alias these within an individual class's header file.
+     *
+     * Note:  If the meanings of these flags are changed, then the symbolic
+     * names kept in flag_bit_names (see src/packdump.c) must also be updated.
      */
-    PObj_private0_FLAG = 1 << 0,
-    PObj_private1_FLAG = 1 << 1,
-    PObj_private2_FLAG = 1 << 2,
-    PObj_private3_FLAG = 1 << 3,
-    PObj_private4_FLAG = 1 << 4,
-    PObj_private5_FLAG = 1 << 5,
-    PObj_private6_FLAG = 1 << 6,
-    PObj_private7_FLAG = 1 << 7,
+    PObj_private0_FLAG          = POBJ_FLAG(0),
+    PObj_private1_FLAG          = POBJ_FLAG(1),
+    PObj_private2_FLAG          = POBJ_FLAG(2),
+    PObj_private3_FLAG          = POBJ_FLAG(3),
+    PObj_private4_FLAG          = POBJ_FLAG(4),
+    PObj_private5_FLAG          = POBJ_FLAG(5),
+    PObj_private6_FLAG          = POBJ_FLAG(6),
+    PObj_private7_FLAG          = POBJ_FLAG(7),
 
-    /* Object specification FLAGs */
-
+/* Object specification FLAGs */
     /* PObj is a string */
-    PObj_is_string_FLAG = 1 << 8,
+    PObj_is_string_FLAG         = POBJ_FLAG(8),
     /* PObj is a PMC */
-    PObj_is_PMC_FLAG = 1 << 9,
+    PObj_is_PMC_FLAG            = POBJ_FLAG(9),
     /* the PMC has a PMC_EXT structure appended */
-    PObj_is_PMC_EXT_FLAG = 1 << 10,
+    PObj_is_PMC_EXT_FLAG        = POBJ_FLAG(10),
     /* the PMC is a shared PMC */
-    PObj_is_PMC_shared_FLAG = 1 << 11,
-
+    PObj_is_PMC_shared_FLAG     = POBJ_FLAG(11), /* Same as PObj_is_shared_FLAG */
     /* PObj is otherwise shared */
-    PObj_is_shared_FLAG = 1 << 11,
+    PObj_is_shared_FLAG         = POBJ_FLAG(11), /* Same as PObj_is_PMC_shared_FLAG */
 
-    /* Memory management FLAGs */
-
+/* Memory management FLAGs */
     /* This is a constant--don't kill it! */
-    PObj_constant_FLAG = 1 << 12,
+    PObj_constant_FLAG          = POBJ_FLAG(12),
     /* Marks the contents as coming from a non-Parrot source */
-    PObj_external_FLAG = 1 << 13,
+    PObj_external_FLAG          = POBJ_FLAG(13),
     /* the Buffer is aligned to BUFFER_ALIGNMENT boundaries */
-    PObj_aligned_FLAG = 1 << 14,
+    PObj_aligned_FLAG           = POBJ_FLAG(14),
     /* Mark the buffer as pointing to system memory */
-    PObj_sysmem_FLAG = 1 << 15,
+    PObj_sysmem_FLAG            = POBJ_FLAG(15),
 
-    /* PObj usage FLAGs, COW & GC */
-
+/* PObj usage FLAGs, COW & GC */
     /* Mark the contents as Copy on write */
-    PObj_COW_FLAG = 1 << 16,
+    PObj_COW_FLAG               = POBJ_FLAG(16),
     /* the Buffer may have COW copies */
-    PObj_is_COWable_FLAG = 1 << 17,
+    PObj_is_COWable_FLAG        = POBJ_FLAG(17),
     /* Private flag for the GC system. Set if the PObj's in use as
      * far as the GC's concerned */
-    b_PObj_live_FLAG = 1 << 18,
+    b_PObj_live_FLAG            = POBJ_FLAG(18),
     /* Mark the object as on the free list */
-    b_PObj_on_free_list_FLAG = 1 << 19,
+    b_PObj_on_free_list_FLAG    = POBJ_FLAG(19),
 
-    /* DOD/GC FLAGS */
-
+/* GC FLAGS */
     /* Set to true if the PObj has a custom mark routine */
-    PObj_custom_mark_FLAG = 1 << 20,
+    PObj_custom_mark_FLAG       = POBJ_FLAG(20),
     /* Mark the buffer as needing GC */
-    PObj_custom_GC_FLAG = 1 << 21,
+    PObj_custom_GC_FLAG         = POBJ_FLAG(21),
     /* Set if the PObj has a destroy method that must be called */
-    PObj_active_destroy_FLAG = 1 << 22,
+    PObj_active_destroy_FLAG    = POBJ_FLAG(22),
     /* For debugging, report when this buffer gets moved around */
-    PObj_report_FLAG = 1 << 23,
+    PObj_report_FLAG            = POBJ_FLAG(23),
 
-    /* PMC specific FLAGs */
-
-    /* Set to true if the PMC data pointer points to a malloced
-     * array of PObjs
-     */
-    PObj_data_is_PMC_array_FLAG = 1 << 24,
+/* PMC specific FLAGs */
     /* call object finalizer */
-    PObj_need_finalize_FLAG = 1 << 25,
-    /* a PMC that needs special handling in DOD, i.e one that has either:
+    PObj_need_finalize_FLAG     = POBJ_FLAG(25),
+    /* a PMC that needs special handling in GC, i.e one that has either:
      * - metadata
      * - data_is_PMC_array_FLAG
      * - custom_mark_FLAG
      */
-    b_PObj_is_special_PMC_FLAG = 1 << 26,
+    b_PObj_is_special_PMC_FLAG  = POBJ_FLAG(26),
 
-    /* true if this is connected by some route to a needs_early_DOD object */
-    PObj_high_priority_DOD_FLAG = 1 << 27,
-    PObj_needs_early_DOD_FLAG = (1 << 27 | 1 << 28),
+    /* true if this is connected by some route to a needs_early_gc object */
+    PObj_high_priority_gc_FLAG  = POBJ_FLAG(27),
+    PObj_needs_early_gc_FLAG    = (POBJ_FLAG(27) | POBJ_FLAG(28)),
 
     /* True if the PMC is a class */
-    PObj_is_class_FLAG = 1 << 29,
+    PObj_is_class_FLAG          = POBJ_FLAG(29),
     /* True if the PMC is a parrot object */
-    PObj_is_object_FLAG = 1 << 30
+    PObj_is_object_FLAG         = POBJ_FLAG(30)
 
 } PObj_flags;
+#undef POBJ_FLAG
 
 /*
  * flag access macros:
- * directly using any flags is strongly deprecated, please use
+ * directly using any flags is STRONGLY discouraged, please use
  * these macros
  */
 
@@ -300,11 +290,11 @@ typedef enum PObj_enum {
 #  define PObj_on_free_list_FLAG      b_PObj_on_free_list_FLAG
 #  define PObj_is_special_PMC_FLAG    b_PObj_is_special_PMC_FLAG
 
-#  define DOD_flag_TEST(flag, o)      PObj_flag_TEST(flag, o)
-#  define DOD_flag_SET(flag, o)       PObj_flag_SET(flag, o)
-#  define DOD_flag_CLEAR(flag, o)     PObj_flag_CLEAR(flag, o)
+#  define gc_flag_TEST(flag, o)      PObj_flag_TEST(flag, o)
+#  define gc_flag_SET(flag, o)       PObj_flag_SET(flag, o)
+#  define gc_flag_CLEAR(flag, o)     PObj_flag_CLEAR(flag, o)
 
-#define PObj_get_FLAGS(o) ((o)->obj.flags)
+#define PObj_get_FLAGS(o) ((o)->flags)
 
 #define PObj_flag_TEST(flag, o) (PObj_get_FLAGS(o) & PObj_ ## flag ## _FLAG)
 #define PObj_flag_SET(flag, o) (PObj_get_FLAGS(o) |= PObj_ ## flag ## _FLAG)
@@ -312,7 +302,7 @@ typedef enum PObj_enum {
         (PObj_get_FLAGS(o) &= ~(UINTVAL)(PObj_ ## flag ## _FLAG))
 
 #define PObj_flags_SETTO(o, f) PObj_get_FLAGS(o) = (f)
-#define PObj_flags_CLEARALL(o) PObj_flags_SETTO(o, 0)
+#define PObj_flags_CLEARALL(o) PObj_flags_SETTO((o), 0)
 
 #define PObj_COW_TEST(o) PObj_flag_TEST(COW, o)
 #define PObj_COW_SET(o) PObj_flag_SET(COW, o)
@@ -337,13 +327,13 @@ typedef enum PObj_enum {
 #define PObj_report_CLEAR(o) PObj_flag_CLEAR(report, o)
 
 
-#define PObj_on_free_list_TEST(o) DOD_flag_TEST(on_free_list, o)
-#define PObj_on_free_list_SET(o) DOD_flag_SET(on_free_list, o)
-#define PObj_on_free_list_CLEAR(o) DOD_flag_CLEAR(on_free_list, o)
+#define PObj_on_free_list_TEST(o) gc_flag_TEST(on_free_list, o)
+#define PObj_on_free_list_SET(o) gc_flag_SET(on_free_list, o)
+#define PObj_on_free_list_CLEAR(o) gc_flag_CLEAR(on_free_list, o)
 
-#define PObj_live_TEST(o) DOD_flag_TEST(live, o)
-#define PObj_live_SET(o) DOD_flag_SET(live, o)
-#define PObj_live_CLEAR(o) DOD_flag_CLEAR(live, o)
+#define PObj_live_TEST(o) gc_flag_TEST(live, o)
+#define PObj_live_SET(o) gc_flag_SET(live, o)
+#define PObj_live_CLEAR(o) gc_flag_CLEAR(live, o)
 
 #define PObj_is_string_TEST(o) PObj_flag_TEST(is_string, o)
 #define PObj_is_string_SET(o) PObj_flag_SET(is_string, o)
@@ -356,7 +346,7 @@ typedef enum PObj_enum {
 
 #define PObj_special_SET(flag, o) do { \
     PObj_flag_SET(flag, o); \
-    DOD_flag_SET(is_special_PMC, o); \
+    gc_flag_SET(is_special_PMC, o); \
 } while (0)
 
 #define PObj_special_CLEAR(flag, o) do { \
@@ -364,37 +354,23 @@ typedef enum PObj_enum {
     if ((PObj_get_FLAGS(o) & \
                 (PObj_active_destroy_FLAG | \
                  PObj_custom_mark_FLAG | \
-                 PObj_data_is_PMC_array_FLAG  | \
                  PObj_is_PMC_EXT_FLAG | \
-                 PObj_needs_early_DOD_FLAG))) \
-        DOD_flag_SET(is_special_PMC, o); \
+                 PObj_needs_early_gc_FLAG))) \
+        gc_flag_SET(is_special_PMC, o); \
     else \
-        DOD_flag_CLEAR(is_special_PMC, o); \
+        gc_flag_CLEAR(is_special_PMC, o); \
 } while (0)
 
-#define PObj_is_special_PMC_TEST(o) DOD_flag_TEST(is_special_PMC, o)
-#define PObj_is_special_PMC_SET(o) DOD_flag_SET(is_special_PMC, o)
+#define PObj_is_special_PMC_TEST(o) gc_flag_TEST(is_special_PMC, o)
+#define PObj_is_special_PMC_SET(o) gc_flag_SET(is_special_PMC, o)
 
-#define PObj_data_is_PMC_array_SET(o) do { \
-    PObj_special_SET(data_is_PMC_array, o); \
-    PObj_flag_SET(active_destroy, o); \
-    } while (0)
+#define PObj_needs_early_gc_TEST(o) PObj_flag_TEST(needs_early_gc, o)
+#define PObj_needs_early_gc_SET(o) PObj_special_SET(needs_early_gc, o)
+#define PObj_needs_early_gc_CLEAR(o) PObj_special_CLEAR(needs_early_gc, o)
 
-#define PObj_data_is_PMC_array_CLEAR(o) do {\
-    PObj_special_CLEAR(data_is_PMC_array, o); \
-    PObj_flag_CLEAR(active_destroy, o); \
-    } while (0)
-
-#define PObj_data_is_PMC_array_TEST(o) \
-    PObj_flag_TEST(data_is_PMC_array, o)
-
-#define PObj_needs_early_DOD_TEST(o) PObj_flag_TEST(needs_early_DOD, o)
-#define PObj_needs_early_DOD_SET(o) PObj_special_SET(needs_early_DOD, o)
-#define PObj_needs_early_DOD_CLEAR(o) PObj_special_CLEAR(needs_early_DOD, o)
-
-#define PObj_high_priority_DOD_TEST(o)   PObj_flag_TEST(high_priority_DOD, o)
-#define PObj_high_priority_DOD_SET(o)     PObj_special_SET(high_priority_DOD, o)
-#define PObj_high_priority_DOD_CLEAR(o) PObj_special_CLEAR(high_priority_DOD, o)
+#define PObj_high_priority_gc_TEST(o)   PObj_flag_TEST(high_priority_gc, o)
+#define PObj_high_priority_gc_SET(o)     PObj_special_SET(high_priority_gc, o)
+#define PObj_high_priority_gc_CLEAR(o) PObj_special_CLEAR(high_priority_gc, o)
 
 #define PObj_custom_mark_SET(o)   PObj_special_SET(custom_mark, o)
 #define PObj_custom_mark_CLEAR(o)   PObj_special_CLEAR(custom_mark, o)

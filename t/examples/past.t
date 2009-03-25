@@ -1,14 +1,12 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: past.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: past.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
-use Test::More;
-use Parrot::Test tests => 1;
-use Parrot::Config;
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -17,6 +15,7 @@ t/examples/past.t - Test examples in F<examples/past>
 =head1 SYNOPSIS
 
     % prove t/examples/past.t
+    % prove -v t/examples/past.t
 
 =head1 DESCRIPTION
 
@@ -34,19 +33,15 @@ Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
 
 # Set up expected output for examples
 
-# A stub for future PAST-pm example
-my %expected = ();
+# A stub for future PAST examples
+my %expected = (
+    '01-sub.pir'        => "5\n",
+    'four_plus_one.pir' => "5\n",
+);
 
 while ( my ( $example, $expected ) = each %expected ) {
     example_output_is( "examples/past/$example", $expected );
 }
-
-# 01-sub.pir prints PIR source code and the result 5
-# Test with a regex, in order to avoid trailing whitespace
-# and insignificant changes in generated PIR.
-example_output_like( "examples/past/01-sub.pir", <<'OUTPUT' );
-/ \A \s* \.sub .* foo.* 5 \s* \z/xms
-OUTPUT
 
 # Local Variables:
 #   mode: cperl

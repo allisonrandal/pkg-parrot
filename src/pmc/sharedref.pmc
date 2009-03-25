@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: sharedref.pmc 18207 2007-04-14 21:31:11Z chromatic $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: sharedref.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -35,10 +35,9 @@ we can relax that a bit.
 #define LOCK_PMC(interp, pmc) LOCK(PMC_sync(pmc)->pmc_lock);
 #define UNLOCK_PMC(interp, pmc) UNLOCK(PMC_sync(pmc)->pmc_lock);
 
-pmclass SharedRef does ref need_ext is_shared extends Ref {
+pmclass SharedRef provides ref need_ext is_shared extends Ref {
 
-
-    void init() {
+    VTABLE void init() {
         SUPER();
     }
 
@@ -71,7 +70,7 @@ shouldn't leak unshared PMCs into different threads.
 
 */
 
-    void init_pmc(PMC* initializer) {
+    VTABLE void init_pmc(PMC *initializer) {
         SUPER(initializer);
         PObj_active_destroy_SET(SELF);
     }
@@ -80,13 +79,13 @@ shouldn't leak unshared PMCs into different threads.
 
 =item C<void share()>
 
-We do already sharing - so just ignore.
+We already share, so just ignore.
 
 =cut
 
 */
 
-    void share() {
+    VTABLE void share() {
     }
 
 /*
@@ -99,7 +98,7 @@ Marks the reference as live.
 
 */
 
-    void mark() {
+    VTABLE void mark() {
         SUPER();
     }
 
@@ -109,7 +108,7 @@ Marks the reference as live.
 
 Sets the referenced PMC to C<*other>.
 
-=item C<PMC* get_pmc()>
+=item C<PMC *get_pmc()>
 
 Catch dereferencing. This would unshare the referred PMC.
 
@@ -117,15 +116,14 @@ Catch dereferencing. This would unshare the referred PMC.
 
 */
 
-    void set_pmc(PMC* other) {
+    VTABLE void set_pmc(PMC *other) {
         SUPER(other);
         PObj_active_destroy_SET(SELF);
     }
 
-    PMC* get_pmc() {
-        real_exception(INTERP, NULL, E_ReferenceError,
-                "deref not allowed");
-        return NULL;
+    VTABLE PMC *get_pmc() {
+        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
+            "deref not allowed");
     }
 
 /*
@@ -139,12 +137,15 @@ or at least a detection if the referred PMC is already destroyed.
 
 */
 
-    void destroy() {
+    VTABLE void destroy() {
         PMC * const ref = PMC_pmc_val(SELF);
-        if (PObj_active_destroy_TEST(ref))
+
+        if (ref && PObj_active_destroy_TEST(ref))
             VTABLE_destroy(INTERP, ref);
+
         if (PMC_sync(SELF)->owner != INTERP)
-            PANIC("SharedRef destroyed by wrong interpreter");
+            PANIC(INTERP, "SharedRef destroyed by wrong interpreter");
+
         SUPER();
     }
 }

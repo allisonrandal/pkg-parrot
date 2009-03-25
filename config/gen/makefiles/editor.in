@@ -1,15 +1,17 @@
-# $Id: editor.in 17095 2007-02-20 20:11:27Z paultcochrane $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: editor.in 37201 2009-03-08 12:07:48Z fperrad $
 
-OPS_DIR     = ../src/ops
-VIM_DIR     = $(HOME)/.vim
-VIM_FT_DIR  = $(VIM_DIR)/plugin
-VIM_IN_DIR  = $(VIM_DIR)/indent
-VIM_SYN_DIR = $(VIM_DIR)/syntax
+OPS_DIR     := ../src/ops
+#IF(win32):VIM_DIR     := $(USERPROFILE)/vimfiles
+#ELSE:VIM_DIR     := $(HOME)/.vim
+VIM_FT_DIR  := $(VIM_DIR)/plugin
+VIM_IN_DIR  := $(VIM_DIR)/indent
+VIM_SYN_DIR := $(VIM_DIR)/syntax
 
-PERL   = @perl@
-CP     = @cp@
-MKPATH = @mkpath@
-RM_F   = @rm_f@
+PERL   := @perl@
+CP     := @cp@
+MKPATH := @mkpath@
+RM_F   := @rm_f@
 
 default: all
 
@@ -31,8 +33,8 @@ help :
 	@echo "  realclean:         clean up local files including Makefile"
 	@echo ""
 
-pir.vim: pir.vim.in $(OPS_DIR)/*.ops ops2vim.pl
-	$(CP) pir.vim.in pir.vim
+pir.vim: pir_vim.in $(OPS_DIR)//*.ops ops2vim.pl
+	$(CP) pir_vim.in pir.vim
 	$(PERL) ops2vim.pl $(OPS_DIR)/*.ops >> pir.vim
 
 vim-install: pir.vim
@@ -65,3 +67,8 @@ clean:
 
 realclean: clean
 	$(RM_F) Makefile
+
+# Local variables:
+#   mode: makefile
+# End:
+# vim: ft=make:

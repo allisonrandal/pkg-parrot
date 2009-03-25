@@ -1,7 +1,7 @@
 /* caches.h
- *  Copyright (C) 2001-2004, The Perl Foundation.
+ *  Copyright (C) 2001-2004, Parrot Foundation.
  *  SVN Info
- *     $Id: caches.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: caches.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Cache and direct freelist handling for various items.
  *  Data Structure and Algorithms:
@@ -35,10 +35,6 @@ typedef struct _Caches {
     Meth_cache_entry ***idx;    /* bufstart idx */
     /* PMC **hash */            /* for non-constant keys */
 } Caches;
-
-void init_object_cache(Parrot_Interp interp);
-void mark_object_cache(Parrot_Interp);
-void destroy_object_cache(Parrot_Interp);
 
 #endif   /* PARROT_CACHES_H_GUARD */
 

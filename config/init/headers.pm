@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: headers.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: headers.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -7,7 +7,8 @@ config/init/headers.pm - Nongenerated Headers
 
 =head1 DESCRIPTION
 
-Uses C<ExtUtils::Manifest> to determine which headers are nongenerated.
+Uses C<ExtUtils::Manifest> to find the C header files that are
+distributed with Parrot.
 
 =cut
 
@@ -16,13 +17,19 @@ package init::headers;
 use strict;
 use warnings;
 
-use base qw(Parrot::Configure::Step::Base);
+
+use base qw(Parrot::Configure::Step);
 
 use Parrot::Configure::Step;
 use ExtUtils::Manifest qw(maniread);
 
-our $description = 'Determining nongenerated header files';
-our @args;
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Find header files distributed with Parrot};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
@@ -43,7 +50,7 @@ sub runstep {
         TEMP_nongen_headers => $TEMP_nongen_headers,
     );
 
-    return $self;
+    return 1;
 }
 
 1;

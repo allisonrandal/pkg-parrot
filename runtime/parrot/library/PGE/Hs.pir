@@ -9,7 +9,7 @@ PGE::Hs - Match and display PGE rules as Haskell expressions
     .sub _main
         load_bytecode "PGE.pbc"
         load_bytecode "PGE/Hs.pir"
-        $P0 = find_global "PGE::Hs", "match"
+        $P0 = get_hll_global ["PGE";"Hs"], "match"
         $S0 = $P0("Hello", "(...)*$")
         print $S0   # PGE_Match 2 5 [PGE_Array [PGE_Match 2 5 [] []]] []
     .end
@@ -48,15 +48,13 @@ whole thing may be taken out or refactored away at any moment.
 
 =cut
 
-.namespace [ "PGE::Hs" ]
+.namespace [ "PGE";"Hs" ]
 
 .const string PGE_FAIL = "PGE_Fail"
-.const string PGE_SUB_POS = "@!capt"
-.const string PGE_SUB_NAMED = "%!capt"
 
 .sub "__onload" :load
     .local pmc load
-    load_bytecode "Data/Escape.pir"
+    $P0 = get_class ['PGE';'Match']
 .end
 
 .sub "add_rule"
@@ -65,7 +63,7 @@ whole thing may be taken out or refactored away at any moment.
     .param pmc adverbs :slurpy :named
     .local pmc p6rule_compile, rulesub
 
-    p6rule_compile = compreg 'PGE::P6Regex'
+    p6rule_compile = compreg 'PGE::Perl6Regex'
     null rulesub
 
     # adverbs['grammar'] = 'PGE::Grammar'
@@ -74,7 +72,9 @@ whole thing may be taken out or refactored away at any moment.
 
     $I0 = exists adverbs["grammar"]
     if $I0 goto done
-    store_global "PGE::Grammar", name, rulesub
+    $P0 = get_class ["PGE";"Grammar"]
+    if null $P0 goto done
+    addmethod $P0, name, rulesub
 
   done:
     .return (name)
@@ -90,7 +90,7 @@ whole thing may be taken out or refactored away at any moment.
     .local pmc p6rule_compile
     .local pmc capt
 
-    p6rule_compile = compreg 'PGE::P6Regex'
+    p6rule_compile = compreg 'PGE::Perl6Regex'
     null rulesub
 
     push_eh match_error
@@ -108,7 +108,7 @@ whole thing may be taken out or refactored away at any moment.
     goto end_match
 
   match_error:
-    get_results "(0, 0)", match, out
+    get_results "0, 0", match, out
 
   end_match:
     out .= "\n"
@@ -127,7 +127,7 @@ whole thing may be taken out or refactored away at any moment.
     i = 0
 
 LOOP:
-    tmp = str[i]
+    substr tmp, str, i, 1
     inc i
     if i >= j goto FIN
 
@@ -136,7 +136,7 @@ LOOP:
     goto LOOP
 
 ESC:
-    tmp = str[i]
+    substr tmp, str, i, 1
     inc i
     eq tmp, "n", LF
     concat ret, tmp
@@ -153,7 +153,7 @@ END:
     .return(ret)
 .end
 
-.namespace [ "PGE::Match" ]
+.namespace [ "PGE";"Match" ]
 
 .sub "dump_hs" :method
     .local string out
@@ -161,10 +161,9 @@ END:
     .local int ari, arc
     .local int tmpi, cond
     .local string tmps, key
-    .local pmc capt, iter, subelm, elm, escape
+    .local pmc capt, iter, subelm, elm
 
     out = ""
-    escape = find_global "Data::Escape", "String"
 
   start:
     out .= "PGE_Match "
@@ -178,8 +177,8 @@ END:
     out .= " ["
 
   subpats:
-    capt = getattribute self, PGE_SUB_POS
-    if_null capt, subrules
+    capt = self.'list'()
+    unless capt goto subrules
     spi = 0
     spc = elements capt
     goto subpats_body
@@ -200,9 +199,9 @@ END:
 
   subrules:
     out .= "] ["
-    capt = self."get_hash"()
+    capt = self.'hash'()
     if_null capt, end
-    iter = new .Iterator, capt
+    iter = new 'Iterator', capt
     iter = 0
     unless iter goto end
   subrules_body:
@@ -211,7 +210,7 @@ END:
     unless cond goto subrules_fail
     elm = capt[key]
     out .= '("'
-    tmps = escape(key)
+    tmps = escape key
     out .= tmps
     out .= '", '
     bsr dumper
@@ -234,7 +233,8 @@ END:
     out .= tmps
     ret
   dumper_string:
-    tmps = escape(elm)
+    $S0 = elm
+    tmps = escape $S0
     out .= 'PGE_String "'
     out .= tmps
     out .= '"'
@@ -270,4 +270,4 @@ END:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

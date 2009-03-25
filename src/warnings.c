@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: warnings.c 15414 2006-11-12 02:47:59Z chip $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: warnings.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -20,34 +20,46 @@ messages.
 #include "parrot/parrot.h"
 
 #include <stdarg.h>
-#include <assert.h>
+
+/* HEADERIZER HFILE: include/parrot/warnings.h */
+
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static INTVAL print_warning(PARROT_INTERP, ARGIN_NULLOK(STRING *msg))
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_print_warning __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
 
 /*
 
-=item C<void
-print_pbc_location(Parrot_Interp interp)>
+=item C<void print_pbc_location>
 
-Prints the bytecode location of the warning or error to C<PIO_STDERR>.
+Prints the bytecode location of the warning or error to C<Parrot_io_STDERR>.
 
 =cut
 
 */
 
+PARROT_EXPORT
 void
-print_pbc_location(Parrot_Interp interp)
+print_pbc_location(PARROT_INTERP)
 {
-    Interp * const tracer =
-        interp->debugger ?
-            interp->debugger : interp;
-    PIO_eprintf(tracer, "%Ss\n",
+    ASSERT_ARGS(print_pbc_location)
+    Interp * const tracer = (interp->pdb && interp->pdb->debugger) ?
+        interp->pdb->debugger :
+        interp;
+    Parrot_io_eprintf(tracer, "%Ss\n",
             Parrot_Context_infostr(interp,
-                CONTEXT(interp->ctx)));
+                CONTEXT(interp)));
 }
 
 /*
 
-=item C<static INTVAL
-print_warning(Interp *interp, STRING *msg)>
+=item C<static INTVAL print_warning>
 
 Prints the warning message and the bytecode location.
 
@@ -56,15 +68,15 @@ Prints the warning message and the bytecode location.
 */
 
 static INTVAL
-print_warning(Interp *interp, STRING *msg)
+print_warning(PARROT_INTERP, ARGIN_NULLOK(STRING *msg))
 {
-
+    ASSERT_ARGS(print_warning)
     if (!msg)
-        PIO_puts(interp, PIO_STDERR(interp), "Unknown warning\n");
+        Parrot_io_puts(interp, Parrot_io_STDERR(interp), "Unknown warning\n");
     else {
-        PIO_putps(interp, PIO_STDERR(interp), msg);
+        Parrot_io_putps(interp, Parrot_io_STDERR(interp), msg);
         if (string_ord(interp, msg, -1) != '\n')
-            PIO_eprintf(interp, "%c", '\n');
+            Parrot_io_eprintf(interp, "%c", '\n');
     }
     print_pbc_location(interp);
     return 1;
@@ -76,11 +88,9 @@ print_warning(Interp *interp, STRING *msg)
 
 =head2 Parrot Warnings Interface
 
-=over
+=over 4
 
-=item C<INTVAL
-Parrot_warn(Interp *interp, INTVAL warnclass,
-            const char *message, ...)>
+=item C<INTVAL Parrot_warn>
 
 The Parrot C string warning/error reporter.
 
@@ -92,57 +102,23 @@ C<message, ..> can be a C<Parrot_vsprintf_c()> format with arguments.
 
 */
 
+PARROT_EXPORT
 INTVAL
-Parrot_warn(Interp *interp, INTVAL warnclass,
-            const char *message, ...)
+Parrot_warn(PARROT_INTERP, INTVAL warnclass,
+            ARGIN(const char *message), ...)
 {
-    STRING *targ;
-
-    va_list args;
-
-    assert(interp);
+    ASSERT_ARGS(Parrot_warn)
     if (!PARROT_WARNINGS_test(interp, warnclass))
         return 2;
+    else {
+        STRING *targ;
+        va_list args;
 
-    va_start(args, message);
-    targ = Parrot_vsprintf_c(interp, message, args);
-    va_end(args);
-    return print_warning(interp, targ);
-
-}
-
-/*
-
-=item C<INTVAL
-Parrot_warn_s(Interp *interp, INTVAL warnclass,
-              STRING *message, ...)>
-
-The Parrot C<STRING> warning/error reporter.
-
-Returns 2 on error, 1 on success.
-
-C<message, ..> can be a C<Parrot_vsprintf_s()> format with arguments.
-
-=cut
-
-*/
-
-INTVAL
-Parrot_warn_s(Interp *interp, INTVAL warnclass,
-              STRING *message, ...)
-{
-    STRING *targ;
-
-    va_list args;
-
-    if (!interp || !PARROT_WARNINGS_test(interp, warnclass))
-        return 2;
-
-    va_start(args, message);
-    targ = Parrot_vsprintf_s(interp, message, args);
-    va_end(args);
-
-    return print_warning(interp, targ);
+        va_start(args, message);
+        targ = Parrot_vsprintf_c(interp, message, args);
+        va_end(args);
+        return print_warning(interp, targ);
+    }
 }
 
 /*

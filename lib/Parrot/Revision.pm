@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: Revision.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: Revision.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -10,7 +10,6 @@ Parrot::Revision - SVN Revision
     use Parrot::Revision;
 
     print $Parrot::Revision::current;
-    print $Parrot::Revision::config;
 
 =head1 DESCRIPTION
 
@@ -24,45 +23,76 @@ use strict;
 use warnings;
 use File::Spec;
 
-sub __get_revision {
-    return 0 unless ( -e 'DEVELOPING' );
+our $cache = q{.parrot_current_rev};
 
-    my $revision;
+our $current = _get_revision();
 
-    # code taken from pugs/util/version_h.pl rev 14410
-    my $nul = File::Spec->devnull;
-    if ( my @svn_info = qx/svn info 2>$nul/ and $? == 0 ) {
-        if ( my ($line) = grep /^Revision:/, @svn_info ) {
-            ($revision) = $line =~ / (\d+)$/;
-        }
-    }
-    elsif ( my @svk_info = qx/svk info 2>$nul/ and $? == 0 ) {
-        if ( my ($line) = grep /(?:file|svn|https?)\b/, @svk_info ) {
-            ($revision) = $line =~ / (\d+)$/;
-        }
-        elsif ( my ($source_line) = grep /^(Copied|Merged) From/, @svk_info ) {
-            if ( my ($source_depot) = $source_line =~ /From: (.*?), Rev\. \d+/ ) {
-
-                # convert /svk/trunk to //svk/trunk or /depot/svk/trunk
-                my ($depot_root) = map { m{Depot Path: (/[^/]*)} } @svk_info;
-                $depot_root ||= q{/};
-                $source_depot = $depot_root . $source_depot;
-                if ( my @svk_info = qx/svk info $source_depot/ and $? == 0 ) {
-                    if ( my ($line) = grep /(?:file|svn|https?)\b/, @svk_info ) {
-                        ($revision) = $line =~ / (\d+)$/;
-                    }
-                }
-            }
-        }
-    }
-    return ( $revision || 0 );
+sub update {
+    my $prev = _get_revision();
+    my $revision = _analyze_sandbox();
+    $current = _handle_update( {
+        prev        => $prev,
+        revision    => $revision,
+        cache       => $cache,
+        current     => $current,
+    } );
 }
 
-our $current = __get_revision();
-our $config  = $current;
+sub _handle_update {
+    my $args = shift;
+    if (! defined $args->{revision}) {
+        $args->{revision} = 'unknown';
+        _print_to_cache($args->{cache}, $args->{revision});
+        return $args->{revision};
+    }
+    else {
+        if (defined ($args->{prev}) && ($args->{revision} ne $args->{prev})) {
+            _print_to_cache($args->{cache}, $args->{revision});
+            return $args->{revision};
+        }
+        else {
+            return $args->{current};
+        }
+    }
+}
 
-# check if Parrot::Config is available
-eval 'use Parrot::Config; $config = $PConfig{revision};';
+sub _print_to_cache {
+    my ($cache, $revision) = @_;
+    open my $FH, ">", $cache
+        or die "Unable to open handle to $cache for writing: $!";
+    print {$FH} "$revision\n";
+    close $FH or die "Unable to close handle to $cache after writing: $!";
+}
+
+sub _get_revision {
+    my $revision;
+    if (-f $cache) {
+        open my $FH, '<', $cache
+            or die "Unable to open $cache for reading: $!";
+        chomp($revision = <$FH>);
+        close $FH or die "Unable to close $cache after reading: $!";
+    }
+    else {
+        $revision = _analyze_sandbox();
+        _print_to_cache($cache, $revision);
+    }
+    return $revision;
+}
+
+sub _analyze_sandbox {
+    my $revision = 0;
+    # code taken from pugs/util/version_h.pl rev 14410
+    # modified because in xml output commit and entry revision
+    # are difficult to distinguih in a simplified parsing
+    my $nul = File::Spec->devnull;
+    local $ENV{LANG} = 'C';
+    if ( my @svn_info = qx/svn info 2>$nul/ and $? == 0 ) {
+        if ( my ($line) = grep /^Revision:/, @svn_info ) {
+            ($revision) = $line =~ /(\d+)/;
+        }
+    }
+    return $revision;
+}
 
 1;
 

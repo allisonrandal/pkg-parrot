@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: types.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: types.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -16,15 +16,19 @@ package inter::types;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':inter';
+use Parrot::Configure::Utils ':inter';
 
-$description = 'Determining what types Parrot should use';
 
-@args = qw(ask intval opcode floatval);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{What types should Parrot use};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
@@ -46,7 +50,7 @@ sub runstep {
         opcode_t => $opcode
     );
 
-    return $self;
+    return 1;
 }
 
 1;

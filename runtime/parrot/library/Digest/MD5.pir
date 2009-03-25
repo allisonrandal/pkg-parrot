@@ -1,3 +1,5 @@
+# $Id: MD5.pir 37201 2009-03-08 12:07:48Z fperrad $
+#
 # Parrot MD5 library; Nick Glencross <nickg@glencros.demon.co.uk>
 #                     Improvements from Leo and Jens Rieks
 #
@@ -52,12 +54,12 @@ consumption which should be resolved soon.
 .sub onload :load
 
     .local pmc f
-    f = find_global "Digest", "_md5sum"
-    global "_md5sum"    = f
-    f = find_global "Digest", "_md5_hex"
-    global "_md5_hex"   = f
-    f = find_global "Digest", "_md5_print"
-    global "_md5_print" = f
+    f = get_hll_global ['Digest'], '_md5sum'
+    set_global "_md5sum", f
+    f = get_hll_global ['Digest'], '_md5_hex'
+    set_global "_md5_hex", f
+    f = get_hll_global ['Digest'], '_md5_print'
+    set_global "_md5_print", f
 .end
 
 ###########################################################################
@@ -69,7 +71,7 @@ consumption which should be resolved soon.
     .param string str
 
     .local pmc context
-    context = new FixedIntegerArray
+    context = new 'FixedIntegerArray'
     context = 4
 
     .local pmc buffer
@@ -183,7 +185,7 @@ consumption which should be resolved soon.
     .param string str
 
     .local pmc buffer
-    buffer = new FixedIntegerArray
+    buffer = new 'FixedIntegerArray'
 
     .local int counter
     .local int subcounter
@@ -393,7 +395,7 @@ loop:
     .param int C
     .param int D
 
-    $P0 = new FixedIntegerArray
+    $P0 = new 'FixedIntegerArray'
     $P0 = 4
 
     $P0[0] = A
@@ -443,4 +445,4 @@ loop:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

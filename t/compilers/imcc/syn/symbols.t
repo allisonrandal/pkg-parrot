@@ -1,12 +1,13 @@
 #!perl
-# Copyright (C) 2007, The Perl Foundation.
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: symbols.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 4;
+use Parrot::Test tests => 6;
 
 # 1 ##########################
 pir_error_output_like( <<'CODE', <<'OUT', "register names with one letter only are invalid" );
@@ -43,6 +44,25 @@ pir_error_output_like( <<'CODE', <<'OUT', "register names with more than letter 
 CODE
 /^error:imcc:'\$str' is not a valid register name.*\n.*in file .*? line 2.*\n/
 OUT
+
+# 5 ##########################
+pir_output_is( <<'CODE', <<'OUT', "RT #42769 register name 'object' is valid" );
+.sub main :main
+    .local int object
+    object = 1
+    say object
+.end
+CODE
+1
+OUT
+
+# 6 ##########################
+pasm_error_output_like(<<'CODE', <<'OUT', q|#52858: "$" vars in PASM don't work, but aren't disallowed either| );
+    say $S0
+CODE
+/error:imcc:'\$S0' is not a valid register name in pasm mode/
+OUT
+
 
 # Local Variables:
 #   mode: cperl

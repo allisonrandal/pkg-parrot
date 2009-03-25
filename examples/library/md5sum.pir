@@ -1,4 +1,4 @@
-# $Id: md5sum.pir 17600 2007-03-18 10:52:17Z paultcochrane $
+# $Id: md5sum.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ examples/library/md5sum.pir - calculate MD5 checksums
 The main purpose of this script is testing the Digest/MD5.pir library.
 It should behave very much like md5sum(1).
 
-Running parrot with -j will give a significant performance boost (often
+Running parrot with C<-R jit> will give a significant performance boost (often
 about ten-fold).
 
 =head1 AUTHOR
@@ -51,20 +51,12 @@ next_iter:
     # Get size of file
     size = stat file, .STAT_FILESIZE
     .local pmc pio, cl
-    cl = getclass "ParrotIO"
+    cl = new 'FileHandle'
     # slurp the file into memory
-    pio = cl."open"(file, "<", "mmap")
-    # pio = open file, "<"
-    defined $I2, pio
-    if $I2 goto found
-    printerr file
-    printerr ": Cannot find\n"
-    goto iter_cont
-found:
-    read $S1, pio, size
-    close pio
+    .local string contents
+    contents = cl.'readall'(file)
 
-    $I2 = length $S1
+    $I2 = length contents
     if $I2 == size goto size_ok
 
     printerr file
@@ -73,7 +65,7 @@ found:
 
 size_ok:
 
-    $P0 = _md5sum ($S1)
+    $P0 = _md5sum (contents)
     _md5_print ($P0)
     print "\t"
     print file
@@ -92,4 +84,4 @@ iter_done:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

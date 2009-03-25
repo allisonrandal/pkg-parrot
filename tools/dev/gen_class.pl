@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: gen_class.pl 18795 2007-06-04 04:43:16Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: gen_class.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -20,6 +20,7 @@ To see what a minimal PMC looks like, create a PMC template and compile
 it to C.
 
     % perl tools/dev/gen_class.pl Foo > src/pmc/foo.pmc
+    % perl tools/build/pmc2c.pl --dump src/pmc/foo.pmc
     % perl tools/build/pmc2c.pl -c src/pmc/foo.pmc
 
 =head1 SEE ALSO
@@ -34,15 +35,17 @@ use FindBin;
 use lib "$FindBin::Bin/../../lib";
 use Parrot::Vtable;
 
-my $vtbl = parse_vtable("$FindBin::Bin/../../vtable.tbl");
+my $vtbl = parse_vtable("$FindBin::Bin/../../src/vtable.tbl");
 
 my $classname = shift
     or die "No classname given!\n";
 
+my $year = (localtime())[5] + 1900; # get current year.
+
 ## emit file header
 print <<"EOF";
 /* ${classname}.pmc
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) $year, Parrot Foundation.
  *  SVN Info
  *     \$Id\$
  *  Overview:
@@ -60,26 +63,35 @@ pmclass $classname {
 
 EOF
 
+my %skip_bodies = map { $_ => 1 } qw( type name get_namespace );
+
 ## emit method bodies
 for (@$vtbl) {
     my ( $retval, $methname, $args ) = @$_;
-    if ( $methname eq 'type' || $methname eq 'name' || $methname =~ /prop/ ) {
 
-        # default.pmc handles these
-        next;
-    }
+    # default.pmc handles these
+    next if exists $skip_bodies{$methname};
+    next if $methname =~ /prop/;
 
-    print "    $retval $methname ($args) {\n";
+    print "    $retval $methname($args) {\n";
 
     if ( $retval ne 'void' ) {
-        print $retval eq 'PMC*' ? "        return PMCNULL;\n"
-                                : "        return ($retval)0;\n";
+        print $retval eq 'PMC*'
+            ? "        return PMCNULL;\n"
+            : "        return ($retval)0;\n";
     }
     print "    }\n\n";
 }
 
 ## emit file footer
-print "}\n";
+print qq|}
+
+/*
+ * Local Variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */|;
 
 # Local Variables:
 #   mode: cperl

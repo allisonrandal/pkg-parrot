@@ -1,9 +1,9 @@
 /* nci.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: nci.h 19094 2007-06-18 21:45:36Z petdance $
+ *     $Id: nci.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
- *     The nci api handles building native call frames
+ *     The nci API handles building native call frames
  *  Data Structure and Algorithms:
  *  History:
  *  Notes:
@@ -15,7 +15,7 @@
 
 #include "parrot/parrot.h"
 
-void *build_call_func(Interp *, PMC *, STRING *);
+void *build_call_func(PARROT_INTERP, SHIM(PMC *pmc_nci), NOTNULL(STRING *signature), NOTNULL(int *jitted));
 
 #endif /* PARROT_NCI_H_GUARD */
 

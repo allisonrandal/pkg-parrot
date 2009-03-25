@@ -1,29 +1,28 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: pmc2c.pl 18748 2007-06-02 01:50:00Z petdance $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: pmc2c.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
-use FindBin;
-use lib "$FindBin::Bin/../..";
-use lib "$FindBin::Bin/../../lib";
-use Getopt::Long;
-use Parrot::Pmc2c::Pmc2cMain;
+use Getopt::Long ();
+use FindBin qw($Bin);
+use lib "$Bin/../lib";    # install location
+use lib "$Bin/../../lib"; # build location
+use Parrot::Pmc2c::Pmc2cMain ();
 
 my ( %action, %options, @pmc_include_paths );
 
-GetOptions(
+Getopt::Long::GetOptions(
     #pmc include paths
     "include=s" => \@pmc_include_paths,
+
     #program actions
-    "vtable"    => \$action{default},
-    "dump"      => \$action{dump},
-    "c|gen-c"   => \$action{gen_c},
-    "tree"      => \$action{tree},
+    "vtable"  => \$action{default},
+    "dump"    => \$action{dump},
+    "c|gen-c" => \$action{gen_c},
+
     #command line options
     "no-lines"  => \$options{nolines},
-    "debug+"    => \$options{debug},
-    "verbose+"  => \$options{verbose},
     "library=s" => \$options{library},
     "testing"   => \$options{testing},
 ) or exit 1;
@@ -39,11 +38,12 @@ my $self = Parrot::Pmc2c::Pmc2cMain->new(
         include => \@pmc_include_paths,
         opt     => \%options,
         args    => \@args,
+        bin     => $Bin,
     }
 );
 
 if ( $action{default} ) {
-    $self->dump_vtable("$FindBin::Bin/../../vtable.tbl");
+    $self->dump_vtable("$Bin/../../src/vtable.tbl");
     exit;
 }
 
@@ -52,8 +52,8 @@ if ( $action{dump} ) {
     exit;
 }
 
-if ( $action{tree} ) {
-    $self->print_tree();
+if ( $options{library} ) {
+    $self->gen_library( $options{library} );
     exit;
 }
 
@@ -63,6 +63,7 @@ if ( $action{gen_c} ) {
 }
 
 __END__
+
 =head1 NAME
 
 tools/build/pmc2c.pl - PMC definition to C compiler
@@ -85,10 +86,6 @@ Create F<src/pmc/foo.c> and C<pmc_foo.h> from F<src/pmc/foo.dump>:
 
 =head2 Other Options
 
-Print a class tree for the specified PMCs:
-
-    % perl tools/build/pmc2c.pl --tree src/pmc/*.pmc
-
 Create fooX.c and pmc_fooX.h from fooX.dump files, also create libfoo.c
 containing the initialization function for all fooX PMCs.
 
@@ -104,18 +101,9 @@ that can be compiled for use with the Parrot interpreter.
 
 =over 4
 
-=item C<--debug>
-
-Increase debug level
-
-=item C<--verbose>
-
-Increase verbose level
-
 =item C<--no-lines>
 
 Omit source line info
-
 
 =item C<--include=/path/to/pmc>
 
@@ -129,6 +117,7 @@ after libname and will initialize all PMCs in the library.
 
 =back
 
+=cut
 
 # Local Variables:
 #   mode: cperl

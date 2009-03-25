@@ -1,42 +1,23 @@
-# $Id: tge.in 17095 2007-02-20 20:11:27Z paultcochrane $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: tge.in 37201 2009-03-08 12:07:48Z fperrad $
 
 # Setup some commands
-LN_S     = @lns@
-PERL     = @perl@
-RM_RF    = @rm_rf@
-PARROT   = ../../parrot@exe@
-PGE_DIR   = ../../compilers/pge
-CP       = @cp@
+PERL     := @perl@
+RM_F     := @rm_f@
+PARROT   := ../../parrot@exe@
 
 # Where to put things
-PARROT_LIBRARY    = ../../runtime/parrot/library
+PARROT_LIBRARY    := ../../runtime/parrot/library
+PERL6GRAMMAR      := $(PARROT_LIBRARY)/PGE/Perl6Grammar.pbc
 
 # the default target
 all: $(PARROT_LIBRARY)/TGE.pbc
 
-$(PARROT_LIBRARY)/TGE.pbc: TGE.pbc
-	$(CP) TGE.pbc $(PARROT_LIBRARY)
-
-TGE.pbc: TGE.pir TGE/Rule.pbc TGE/Parser.pbc TGE/Grammar.pbc TGE/Compiler.pbc TGE/Tree.pbc
-	$(PARROT) -o TGE.pbc --output-pbc TGE.pir
-
-TGE/Rule.pbc: TGE/Rule.pir
-	$(PARROT) -o TGE/Rule.pbc --output-pbc TGE/Rule.pir
-
-TGE/Tree.pbc: TGE/Tree.pir
-	$(PARROT) -o TGE/Tree.pbc --output-pbc TGE/Tree.pir
-
-TGE/Grammar.pbc: TGE/Grammar.pir
-	$(PARROT) -o TGE/Grammar.pbc --output-pbc TGE/Grammar.pir
-
-TGE/Compiler.pbc: TGE/Compiler.pir
-	$(PARROT) -o TGE/Compiler.pbc --output-pbc TGE/Compiler.pir
-
-TGE/Parser.pbc: TGE/Parser.pir
-	$(PARROT) -o TGE/Parser.pbc --output-pbc TGE/Parser.pir
+$(PARROT_LIBRARY)/TGE.pbc: TGE.pir TGE/Rule.pir TGE/Parser.pir TGE/Grammar.pir TGE/Compiler.pir TGE/Tree.pir
+	$(PARROT) -o $(PARROT_LIBRARY)/TGE.pbc --output-pbc TGE.pir
 
 TGE/Parser.pir: TGE/Parser.pg
-	$(PARROT) $(PGE_DIR)/pgc.pir --output=TGE//Parser.pir TGE//Parser.pg
+	$(PARROT) $(PERL6GRAMMAR) --output=TGE/Parser.pir TGE/Parser.pg
 
 # This is a listing of all targets, that are meant to be called by users
 help:
@@ -62,19 +43,19 @@ test: all
 	prove -r ../../t/compilers/tge
 
 testclean:
-	$(RM_RF) "../../t/compilers/tge/*.pir"
+	$(RM_F) "../../t/compilers/tge/*.pir"
 
 clean: testclean
-	$(RM_RF) TGE.pbc \
-	TGE/Rule.pbc \
-	TGE/Parser.pir \
-	TGE/Parser.pbc \
-	TGE/Tree.pbc \
-	TGE/Grammar.pbc \
-	TGE/Compiler.pbc \
-	$(PARROT_LIBRARY)/TGE.pbc
+	$(RM_F) \
+	    $(PARROT_LIBRARY)/TGE.pbc \
+	    TGE/Parser.pir
 
 realclean: clean
-	$(RM_RF) Makefile
+	$(RM_F) Makefile
 
 distclean: realclean
+
+# Local variables:
+#   mode: makefile
+# End:
+# vim: ft=make:

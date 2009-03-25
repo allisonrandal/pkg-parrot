@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007 The Perl Foundation.
-# $Id: auto.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: auto.pm 37257 2009-03-10 04:22:07Z Util $
 
 =head1 NAME
 
@@ -16,8 +16,6 @@ package auto::cpu::sun4::auto;
 use strict;
 use warnings;
 
-use Parrot::Configure::Step qw(cc_gen cc_build cc_run cc_clean);
-
 sub build_asm {
     my ( $self, $conf ) = @_;
     my $file = 'src/atomic/sparc_v9.s';
@@ -28,7 +26,7 @@ sub build_asm {
         $conf->data->get(qw(cc ccflags ld_out o link linkflags cc_exe_out exe libs));
 
     $successp =
-        Parrot::Configure::Step::_run_command( "$cc -c $ccflags -I./include -o sparcasm$o $file",
+        Parrot::Configure::Utils::_run_command( "$cc -c $ccflags -I./include -o sparcasm$o $file",
         'test.cco', 'test.cco', $conf->options->get('verbose') );
 
     return $successp;
@@ -46,18 +44,18 @@ sub runstep {
 
     build_asm( $self, $conf );
 
-    my @files = qw( test_atomic.in );
+    my @files = qw( test_atomic_c.in );
     for my $f (@files) {
         print " $f " if $verbose;
         my ($suffix) = $f =~ /test_(\w+)/;
         $f = "config/auto/cpu/sun4/$f";
-        cc_gen($f);
-        eval { cc_build( "-DPARROT_CONFIG_TEST", "sparcasm" . $conf->data->get('o') ) };
+        $conf->cc_gen($f);
+        eval { $conf->cc_build("-DPARROT_CONFIG_TEST", "sparcasm" . $conf->data->get('o') ) };
         if ($@) {
             print " $@ " if $verbose;
         }
         else {
-            if ( cc_run() =~ /ok/ ) {
+            if ( $conf->cc_run() =~ /ok/ ) {
                 $conf->data->set(
                     "sparc_has_$suffix" => '1',
                     "HAS_SPARC_$suffix" => '1',
@@ -66,7 +64,7 @@ sub runstep {
                 $conf->data->add( ' ', TEMP_atomic_o => 'src/atomic/sparc_v9.o' );
             }
         }
-        cc_clean();
+        $conf->cc_clean();
     }
 
     cleanup( $self, $conf );

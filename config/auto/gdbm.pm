@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: gdbm.pm 19060 2007-06-17 14:21:35Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: gdbm.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -10,87 +10,83 @@ config/auto/gdbm.pm - Test for GNU dbm (gdbm) library
 Determines whether the platform supports gdbm. This is needed for the dynamic
 GDBMHash PMC.
 
+From L<http://www.gnu.org/software/gdbm/>:  "GNU dbm is a set of database
+routines that use extensible hashing. It works similar to the standard Unix
+dbm routines."
+
 =cut
 
 package auto::gdbm;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Config;
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining if your platform supports gdbm';
 
-@args = qw(verbose without-gmp);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does your platform support gdbm};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my ( $verbose, $without ) = $conf->options->get(@args);
+    my ( $verbose, $without ) = $conf->options->get(
+        qw|
+            verbose
+            without-gdbm
+        |
+    );
 
     if ($without) {
         $conf->data->set( has_gdbm => 0 );
         $self->set_result('no');
-        return $self;
+        return 1;
     }
 
-    my $cc        = $conf->data->get('cc');
-    my $libs      = $conf->data->get('libs');
-    my $linkflags = $conf->data->get('linkflags');
-    my $ccflags   = $conf->data->get('ccflags');
+    my $osname = $conf->data->get_p5('OSNAME');
 
-    my $osname = $Config{osname};
+    my $extra_libs = $self->_select_lib( {
+        conf            => $conf,
+        osname          => $osname,
+        cc              => $conf->data->get('cc'),
+        win32_gcc       => '-llibgdbm',
+        win32_nongcc    => 'gdbm.lib',
+        default         => '-lgdbm',
+    } );
 
     # On OS X check the presence of the gdbm header in the standard
     # Fink location.
-    # RT#43134: Need a more generalized way for finding
-    # where Fink lives.
-    if ( $osname =~ /darwin/ ) {
-        if ( -f "/sw/include/gdbm.h" ) {
-            $conf->data->add( ' ', linkflags => '-L/sw/lib' );
-            $conf->data->add( ' ', dflags    => '-L/sw/lib' );
-            $conf->data->add( ' ', cflags    => '-I/sw/include' );
-        }
-    }
+    $self->_handle_darwin_for_fink($conf, $osname, 'gdbm.h');
 
-    cc_gen('config/auto/gdbm/gdbm.in');
-    if ( $^O =~ /mswin32/i ) {
-        if ( $cc =~ /^gcc/i ) {
-            eval { cc_build( '', '-llibgdbm' ); };
-        }
-        else {
-            eval { cc_build( '', 'gdbm.lib' ); };
-        }
-    }
-    else {
-        eval { cc_build( '', '-lgdbm' ); };
-    }
+    $conf->cc_gen('config/auto/gdbm/gdbm_c.in');
+    eval { $conf->cc_build( q{}, $extra_libs ); };
     my $has_gdbm = 0;
     if ( !$@ ) {
-        my $test = cc_run();
+        my $test = $conf->cc_run();
         unlink "gdbm_test_db";
-        if ( $test eq "gdbm is working.\n" ) {
-            $has_gdbm = 1;
-            print " (yes) " if $verbose;
-            $self->set_result('yes');
-        }
-    }
-    unless ($has_gdbm) {
-
-        # The Config::Data settings might have changed for the test
-        $conf->data->set( libs      => $libs );
-        $conf->data->set( ccflags   => $ccflags );
-        $conf->data->set( linkflags => $linkflags );
-        print " (no) " if $verbose;
-        $self->set_result('no');
+        $has_gdbm = $self->_evaluate_cc_run($test, $has_gdbm, $verbose);
     }
     $conf->data->set( has_gdbm => $has_gdbm );    # for gdbmhash.t and dynpmc.in
 
-    return $self;
+    return 1;
+}
+
+sub _evaluate_cc_run {
+    my $self = shift;
+    my ($test, $has_gdbm, $verbose) = @_;
+    if ( $test eq "gdbm is working.\n" ) {
+        $has_gdbm = 1;
+        print " (yes) " if $verbose;
+        $self->set_result('yes');
+    }
+    return $has_gdbm;
 }
 
 1;

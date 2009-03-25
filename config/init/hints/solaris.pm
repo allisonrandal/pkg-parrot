@@ -1,12 +1,10 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: solaris.pm 18877 2007-06-08 14:15:40Z paultcochrane $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: solaris.pm 37368 2009-03-13 00:33:00Z rurban $
 
 package init::hints::solaris;
 
 use strict;
 use warnings;
-
-use Parrot::Configure::Step qw(cc_gen cc_run);
 
 sub runstep {
     my ( $self, $conf ) = @_;
@@ -31,18 +29,23 @@ sub runstep {
         my ( $key, $cc ) = @_;
         my %gnuc;
         my $link = $conf->data->get('link');
-        cc_gen("config/auto/gcc/test_c.in");
+        $conf->cc_gen("config/auto/gcc/test_c.in");
 
         # Can't call cc_build since we haven't set all the flags yet.
         # This should suffice for this test.
-        Parrot::Configure::Step::_run_command( "$cc -o test test.c", 'test.cco', 'test.cco' )
-            and confess "C compiler failed (see test.cco)";
-        %gnuc = eval cc_run() or die "Can't run the test program: $!";
+        my $cc_inc = $conf->data->get('cc_inc');
+        Parrot::Configure::Utils::_run_command( "$cc -o test_$$ test_$$.c",
+            "test_$$.cco", "test_$$.cco" )
+            and confess "C compiler failed (see test_$$.cco)";
+        %gnuc = eval $conf->cc_run() or die "Can't run the test program: $!";
         if ( defined $gnuc{__GNUC__} ) {
             $link = 'g++';
         }
         else {
             $link =~ s/\bcc\b/CC/;
+        }
+        unless ($conf->data->get('rpath')) {
+            $conf->data->set( 'rpath', '-R' );
         }
         $conf->data->set( link => $link );
         $conf->data->deltrigger( "cc", "solaris_link" );
@@ -64,9 +67,12 @@ sub runstep {
         else {
             $conf->data->set( cc_shared => '-KPIC' );
         }
+        $conf->data->set( 'has_dynamic_linking', '1' );
+        $conf->data->set( 'parrot_is_shared', '1' );
         $conf->data->deltrigger( "gccversion", "solaris_cc_shared" );
     };
-    $conf->data->settrigger( "gccversion", "solaris_cc_shared", $solaris_cc_shared_cb );
+    $conf->data->settrigger(
+        "gccversion", "solaris_cc_shared", $solaris_cc_shared_cb );
 
     ################################################################
     # Parrot usually aims for IEEE-754 compliance.
@@ -75,9 +81,9 @@ sub runstep {
     # return 0, when they should return +PI and -PI respectively.
     # For Sun's compilers, fix this with the -xlibmieee flag.
     # I don't know of an equivalent flag for gcc.
-    # (Alternatively, and more generally, perhahs we should run an
+    # (Alternatively, and more generally, perhaps we should run an
     # ieee-conformance test and then call back into a hints-file trigger
-    # to set platform-specific flags.
+    # to set platform-specific flags.)
     #   A. Dougherty  7 March 2005
     # We don't know which compiler we're using till after the gccversion test.
     my $solaris_ieee_cb = sub {
@@ -95,6 +101,7 @@ sub runstep {
         $conf->data->deltrigger( "gccversion", "solaris_ieee" );
     };
     $conf->data->settrigger( "gccversion", "solaris_ieee", $solaris_ieee_cb );
+
 }
 
 1;

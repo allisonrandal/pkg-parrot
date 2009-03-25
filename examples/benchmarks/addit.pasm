@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: addit.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: addit.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ prints the result (21001097.970000).
 =cut
 
 _main:
-        new P5, .ResizablePMCArray
+        new P5, 'ResizablePMCArray'
         push P5, 1000
         push P5, 7.100
         push P5, 87
@@ -36,7 +36,7 @@ FIN:
         end
 
 _varargs_adder:
-        new P2, .Float
+        new P2, 'Float'
         set I1, P5
 LOOP:
         dec I1

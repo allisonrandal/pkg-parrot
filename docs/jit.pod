@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: jit.pod 12981 2006-06-20 19:26:31Z bernhard $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: jit.pod 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -517,7 +517,7 @@ the symbol file, after it got built in F<parrot_build_asm>.
     # gdb confirmations should be off
     parrot -o $1.pbc -d1 $1.pasm
     echo "b runops_jit
-    r -D4 -j $1.pbc
+    r -D4 -R jit $1.pbc
     n
     add-symbol-file $1.o 0
     s

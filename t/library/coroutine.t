@@ -1,6 +1,6 @@
-#!./parrot 
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: coroutine.t 18563 2007-05-16 00:53:55Z chromatic $
+#!./parrot
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: coroutine.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -39,12 +39,12 @@ L<http://swiss.csail.mit.edu/classes/symbolic/spring06/psets/ps6/samefringe.scm>
 
 	.local pmc result
 	if depth goto deeper
-	result = new .Undef
+	result = new 'Undef'
 	result = start
 	inc start
 	goto done
 deeper:
-	result = new .ResizablePMCArray
+	result = new 'ResizablePMCArray'
 	dec depth
 	.local int i
 	i = 0
@@ -144,16 +144,16 @@ done:
 	.param pmc tree1
 	.param pmc tree2
 
-	.local int coro_class
-	coro_class = find_type 'Parrot::Coroutine'
-	if coro_class goto found
+	.local pmc coro_class
+    coro_class = get_class 'Parrot::Coroutine'
+    unless null coro_class goto found
 	printerr "Bug:  Can't find 'Parrot::Coroutine' class.\n"
 	die 5, 1
 found:
 	.local pmc coro1, coro2
-	.const .Sub coro_sub = "coro_enumerate_tree"
-	coro1 = new coro_class, coro_sub
-	coro2 = new coro_class, coro_sub
+	.const 'Sub' coro_sub = "coro_enumerate_tree"
+	coro1 = coro_class.'new'('initial_sub' => coro_sub)
+	coro2 = coro_class.'new'('initial_sub' => coro_sub)
 	($P0 :optional, $I0 :opt_flag) = coro1.'resume'(coro1, tree1)
 	($P1 :optional, $I1 :opt_flag) = coro2.'resume'(coro2, tree2)
 
@@ -183,13 +183,13 @@ equal:
 
 .sub main :main
 	load_bytecode 'Test/Builder.pir'
-	.local pmc test	   
-	test = new 'Test::Builder'
+	.local pmc test
+	test = new [ 'Test'; 'Builder' ]
 	test.'plan'(N_TESTS)
 
 	push_eh cant_load
 	load_bytecode 'Parrot/Coroutine.pir'
-	clear_eh
+	pop_eh
 	test.'ok'(1, 'loaded bytecode')
 
 	## grow some trees for traversal.
@@ -221,3 +221,9 @@ cant_load:
 	test.'ok'(0, 'Load failed')
 	test.'finish'()
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

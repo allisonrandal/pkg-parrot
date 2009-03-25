@@ -1,7 +1,7 @@
 /* tsq.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: tsq.h 19030 2007-06-16 03:51:02Z petdance $
+ *     $Id: tsq.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Defines the thread-safe queue system
  *  Data Structure and Algorithms:
@@ -41,75 +41,121 @@ struct QUEUE {
 };
 
 /* HEADERIZER BEGIN: src/tsq.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-void insert_entry( QUEUE *queue /*NN*/, QUEUE_ENTRY *entry /*NN*/ )
+void insert_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*queue);
 
-void nosync_insert_entry( QUEUE *queue /*NN*/, QUEUE_ENTRY *entry /*NN*/ )
+void nosync_insert_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*queue);
 
-QUEUE_ENTRY * nosync_pop_entry( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-QUEUE_ENTRY * peek_entry( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-QUEUE_ENTRY * pop_entry( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-void push_entry( QUEUE *queue /*NN*/, QUEUE_ENTRY *entry )
-        __attribute__nonnull__(1);
-
-void queue_broadcast( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-void queue_destroy( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-QUEUE* queue_init( UINTVAL prio );
-void queue_lock( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-void queue_signal( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
-
-void queue_timedwait( QUEUE *queue /*NN*/, struct timespec *abs_time /*NN*/ )
+PARROT_CANNOT_RETURN_NULL
+QUEUE_ENTRY * nosync_pop_entry(ARGMOD(QUEUE *queue))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+        FUNC_MODIFIES(*queue);
 
-void queue_unlock( QUEUE *queue /*NN*/ )
+PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+QUEUE_ENTRY * peek_entry(ARGIN(const QUEUE *queue))
         __attribute__nonnull__(1);
 
-void queue_wait( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
+PARROT_CAN_RETURN_NULL
+QUEUE_ENTRY * pop_entry(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
 
-void unshift_entry( QUEUE *queue /*NN*/, QUEUE_ENTRY *entry )
-        __attribute__nonnull__(1);
+void push_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*queue);
 
-QUEUE_ENTRY * wait_for_entry( QUEUE *queue /*NN*/ )
-        __attribute__nonnull__(1);
+void queue_broadcast(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
 
-/* HEADERIZER END: src/tsq.c */
+void queue_destroy(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
 
-QUEUE_ENTRY *pop_entry(QUEUE *);
-QUEUE_ENTRY *nosync_pop_entry(QUEUE *queue);
-QUEUE_ENTRY *peek_entry(QUEUE *);
-QUEUE_ENTRY *wait_for_entry(QUEUE *);
-void push_entry(QUEUE *, QUEUE_ENTRY *);
-void unshift_entry(QUEUE *, QUEUE_ENTRY *);
-void nosync_insert_entry(QUEUE *, QUEUE_ENTRY *);
-void insert_entry(QUEUE *, QUEUE_ENTRY *);
-void queue_lock(QUEUE *);
-void queue_unlock(QUEUE *);
-void queue_signal(QUEUE *);
-void queue_broadcast(QUEUE *);
-void queue_wait(QUEUE *);
-void queue_timedwait(QUEUE *, struct timespec*);
+PARROT_CAN_RETURN_NULL
+PARROT_MALLOC
 QUEUE* queue_init(UINTVAL prio);
-void queue_destroy(QUEUE *);
 
+void queue_lock(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
+
+void queue_signal(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
+
+void queue_timedwait(
+    ARGMOD(QUEUE *queue),
+    ARGIN(const struct timespec *abs_time))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*queue);
+
+void queue_unlock(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
+
+void queue_wait(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
+
+void unshift_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*queue);
+
+PARROT_CAN_RETURN_NULL
+QUEUE_ENTRY * wait_for_entry(ARGMOD(QUEUE *queue))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*queue);
+
+#define ASSERT_ARGS_insert_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue) \
+    || PARROT_ASSERT_ARG(entry)
+#define ASSERT_ARGS_nosync_insert_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue) \
+    || PARROT_ASSERT_ARG(entry)
+#define ASSERT_ARGS_nosync_pop_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_peek_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_pop_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_push_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue) \
+    || PARROT_ASSERT_ARG(entry)
+#define ASSERT_ARGS_queue_broadcast __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_queue_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_queue_init __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_queue_lock __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_queue_signal __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_queue_timedwait __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue) \
+    || PARROT_ASSERT_ARG(abs_time)
+#define ASSERT_ARGS_queue_unlock __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_queue_wait __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+#define ASSERT_ARGS_unshift_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue) \
+    || PARROT_ASSERT_ARG(entry)
+#define ASSERT_ARGS_wait_for_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(queue)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: src/tsq.c */
 
 #endif /* PARROT_TSQ_H_GUARD */
 

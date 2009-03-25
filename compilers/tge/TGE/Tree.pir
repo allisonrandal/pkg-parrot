@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
+# Copyright (C) 2005-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -16,12 +16,12 @@ eventually handle indexing for faster tree searches.
 
 =cut
 
-.namespace [ "TGE::Tree" ]
+.namespace [ 'TGE'; 'Tree' ]
 
 .sub "__onload" :load
     # define the class
     .local pmc base
-    newclass base, "TGE::Tree"
+    newclass base, ['TGE';'Tree']
     addattribute base, "cell"    # a hash for storing values of tree nodes
     addattribute base, "visit"   # arrays of rules that apply to each node type
     addattribute base, "data"    # the original unmodified tree
@@ -38,13 +38,13 @@ constructor parameters.
 =cut
 
 .sub init :vtable :method
-    $P0 = new .Hash
-    $P1 = new .Hash
-    $P2 = new .Undef
+    $P0 = new 'Hash'
+    $P1 = new 'Hash'
+    $P2 = new 'Undef'
     setattribute self, "cell", $P0
     setattribute self, "visit", $P1
     setattribute self, "data", $P2
-    $P3 = new .AddrRegistry 
+    $P3 = new 'AddrRegistry'
     setattribute self, "agid", $P3
 .end
 
@@ -77,7 +77,7 @@ loop:
     dec index
     if index < 0 goto end_loop
     currule = actions[index]
-    self._install_action(node, currule)
+    self.'_install_action'(node, currule)
     goto loop
 end_loop:
     .return()
@@ -121,7 +121,7 @@ node_exists:
     $P2 = $P1[name]
     $I1 = exists $P1[name]
     if $I1 goto name_hash_exists
-    $P2 = new .Hash
+    $P2 = new 'Hash'
     $P1[name] = $P2
     goto scan_name
 name_hash_exists:
@@ -130,10 +130,10 @@ name_hash_exists:
     if $I0 goto eval_cell
 scan_name:
     if got_type goto scan_with_type
-    self._scan_node(node)
+    self.'_scan_node'(node)
     goto done_scan
 scan_with_type:
-    self._scan_node(node,type)
+    self.'_scan_node'(node,type)
 done_scan:
     # Second check to see if _scan_node defined the cell
     cell = $P2[id]
@@ -152,7 +152,7 @@ done_scan:
     print ") that you asked for.\n"
     .return ()
 eval_cell:
-    $P3 = self._eval_cell(cell,node)
+    $P3 = self.'_eval_cell'(cell,node)
     .return($P3)
 .end
 
@@ -172,7 +172,7 @@ run_thunk_action:
     $P1 = cell['node']
     $S0 = cell['action']
     # the action is a method on the grammar object
-    value = grammar.$S0(self, $P1) 
+    value = grammar.$S0(self, $P1)
     cell['value'] = value
     cell['thunk'] = 0
 
@@ -198,7 +198,7 @@ return_value:
     cellattr = cell_hash[name]
     $I1 = exists cell_hash[name]
     if $I1 goto name_hash_exists
-    cellattr = new .Hash
+    cellattr = new 'Hash'
     cell_hash[name] = cellattr
 name_hash_exists:
 
@@ -210,7 +210,7 @@ name_hash_exists:
     parent = getattribute rule, 'parent'
     if parent == '.' goto use_parent_id
     .local pmc child_node
-    child_node = self._lookup_child(node, parent)
+    child_node = self.'_lookup_child'(node, parent)
     id = self.'_lookup_id'(child_node)
     goto use_child_id
 use_parent_id:
@@ -229,11 +229,11 @@ use_child_id:
     # store an empty space for the value after it has been calculated,
     # and a flag ("thunk") noting whether the action has been run.
     .local pmc thunk
-    thunk = new .Hash
+    thunk = new 'Hash'
     thunk['thunk'] = 1
     $P4 = getattribute rule, "action"
     thunk['action'] = $P4
-    $P5 = new .Undef
+    $P5 = new 'Undef'
     thunk['value'] = $P5
     thunk['node'] = node
     cellattr[id] = thunk
@@ -281,15 +281,8 @@ got_id:
     .return (id)
 .end
 
-
-=head1 AUTHOR
-
-Allison Randal <allison@perl.org>
-
-=cut
-
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

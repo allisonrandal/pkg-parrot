@@ -1,4 +1,8 @@
 #! perl
+
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: oo5.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 use strict;
 use warnings;
 
@@ -12,20 +16,20 @@ print $o->i, "\n";
 package Foo;
 
 sub new {
-    my $self = ref $_[0] ? ref shift: shift;
+    my $self = ref $_[0] ? ref shift : shift;
     return bless [ 10, 20 ], $self;
 }
 
 sub i {
     my $self = shift;
-    if (@_) { $self->[0] = shift }
-    else { $self->[0] }
+    if (@_) { return $self->[0] = shift }
+    else    { return $self->[0] }
 }
 
 sub j {
     my $self = shift;
-    if (@_) { $self->[1] = shift }
-    else { $self->[1] }
+    if (@_) { return $self->[1] = shift }
+    else    { return $self->[1] }
 }
 
 1;

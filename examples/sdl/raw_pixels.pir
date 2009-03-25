@@ -24,8 +24,7 @@ To run this file, run the following command from the Parrot directory:
 	.local pmc app
 	.local int app_type
 
-	find_type app_type, 'SDL::App'
-	app = new app_type
+	app = new 'SDL::App'
 	app.'init'( 'height' => 480, 'width' => 640, 'bpp' => 0, 'flags' => 1 )
 
 	# fetch the SDL::Surface representing the main window
@@ -36,21 +35,17 @@ To run this file, run the following command from the Parrot directory:
 	# create an SDL::Rect representing the entire main screen
 	.local pmc rect
 	.local int rect_type
-	find_type  rect_type, 'SDL::Rect'
-	rect = new rect_type
+	rect = new 'SDL::Rect'
 	rect.'init'( 'height' => 480, 'width' => 640, 'x' => 0, 'y' => 0 )
-
-	.local int color_type
-	find_type  color_type, 'SDL::Color'
 
 	# create a white color to paint the background; make new pixels show up
 	.local pmc white
-	white = new color_type
+	white = new 'SDL::Color'
 	white.'init'( 'r' => 255, 'g' => 255, 'b' => 255 )
 
 	# create a blue color to paint the new pixels
 	.local pmc blue
-	blue = new color_type
+	blue = new 'SDL::Color'
 	blue.'init'( 'r' => 0, 'g' => 0, 'b' => 255 )
 
 	# draw the background
@@ -74,7 +69,7 @@ loop_x:
 
 loop_y:
 	main_screen.'draw_pixel'( x, y, converted_blue )
-	
+
 	inc y
 	if y < 480 goto loop_y
 	inc x
@@ -101,7 +96,7 @@ chromatic, E<lt>chromatic at wgz dot orgE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004 - 2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -109,4 +104,4 @@ Copyright (c) 2004 - 2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

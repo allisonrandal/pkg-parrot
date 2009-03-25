@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: alpha.pm 18405 2007-05-03 01:40:40Z jkeenan $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: alpha.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -10,19 +10,22 @@ t/configure/testlib/init/alpha.pm - Module used in configuration tests
 package init::alpha;
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step;
-
-$description = undef;
-@args = ();
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = undef;
+    $data{args}        = [ qw( ) ];
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
     print "\nYou've got alpha\n";
-    return $self;
+    return 1;
 }
 
 1;

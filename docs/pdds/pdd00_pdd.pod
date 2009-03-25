@@ -1,20 +1,22 @@
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: pdd00_pdd.pod 18781 2007-06-03 14:38:04Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: pdd00_pdd.pod 37220 2009-03-09 01:25:49Z allison $
 
-=head1 NAME
+=head1 PDD 0: Design Document Format
 
-docs/pdds/pdd00_pdd.pod - Parrot Design Documents
+=head2 Version
 
-=head1 VERSION
+$Revision: 37220 $
 
-$Revision: 18781 $
-
-=head1 ABSTRACT
+=head2 Abstract
 
 This document defines the content and format of Parrot Design Documents
 (PDDs).
 
-=head1 DESCRIPTION
+=head2 Synopsis
+
+Not applicable.
+
+=head2 Description
 
 PDDs are living documents, which should be maintained to reflect the current
 and contemplated design of Parrot.
@@ -46,26 +48,25 @@ More? - FIXME
 
 =back
 
-PDDS B<should not> discuss the implementation details or trade-offs, unless
-they absolutely have to.  Such implementation documentation should go in the
-relevant F<docs/dev/*.pod> file.  On the other hand, PDDs B<should> document
-design trade-offs, i.e. the paths not chosen.
+PDDs don't generally discuss the implementation details.  Low-level
+implementation documentation, the maintainer's guides, should go in the
+relevant F<docs/dev/*.pod> file.
 
-These guidelines may seem fuzzy.  The line between "design" and
-"implementation" is a murky one.  Still, please try to adhere to this design
-for Parrot design documentation.  How you implement it is up to you.  :-)
+PDDs may document design trade-offs, i.e. the paths not chosen. In many cases
+they don't, just to keep the PDDs relatively short and readable. The history
+of Parrot's design is retrievable from the source repository.
 
-=head1 IMPLEMENTATION
+=head2 Implementation
 
 All newly created PDDs will adhere to the PDD standard current as of the time
 of proposal. An example of the currently accepted layout is given in
 F<docs/pdds/pdd_template.pod>, which should be used as a template for any
 future PDDs.
 
-=head2 FORMAT
+=head3 Format
 
 All PDDs will be written in POD parseable by the current stable release of
-Perl.  Although XML is a viable solution and has its vocal supporters, and
+Perl 5. Although XML is a viable solution and has its vocal supporters, and
 although Parrot is intended to be used by many groups outside of the Perl
 community, we have chosen POD for its simplicity and ease of reading in
 plaintext form.  Conversion to other formats (e.g. HTML) is encouraged, but
@@ -87,44 +88,44 @@ sections:
 
 =over 4
 
-=item NAME:
+=item I<name>:
 
 A short, general description of a specific part of the Parrot design. This may
 be a particular subsystem (e.g. the garbage collector), or a more general
 topic (e.g. basic Parrot datatypes).
 
-=item VERSION:
+=item Version:
 
 Document version.  Since Parrot is currently kept in a Subversion repository,
 the $$-delimited keyword "Revision" will do nicely.
 
-=item MAINTAINER I<(optional)>:
+=item Maintainer I<(optional)>:
 
 The name and current email address for the point of contact for the PDD. This
 is the person to whom questions, comments, and patches should generally be
 addressed. This need not be the author of the document.  By default, all PDDs
 are maintained by the Parrot Architect.
 
-=item ABSTRACT:
+=item Abstract:
 
 A quick blurb explaining the purpose of the PDD.
 
-=item SYNOPSIS:
+=item Synopsis I<(optional)>:
 
 Code snippets showing the semantics of the PDD (if applicable).
 
-=item DESCRIPTION:
+=item Description:
 
 A description of the general nature of the PDD and how it relates to
 Parrot.
 
-=item IMPLEMENTATION:
+=item Implementation:
 
 A major section of the PDD that encapsulates a free-form discussion of any and
 all applicable information related to the final observations, conclusions, and
 what-have-you that required writing the document in the first place.
 
-=item ATTACHMENTS:
+=item Attachments:
 
 References to supporting files that should be considered part of the PDD.
 Text files and image files may be in any widely accepted format, which is
@@ -134,7 +135,7 @@ Text files and image files should only provide supplemental information; no
 fair hiding all the info in an attachment just to not have to write an
 implementation section.
 
-=item REFERENCES:
+=item References:
 
 References to additional sources of information, but not those necessary for
 the PDD itself.
@@ -143,13 +144,14 @@ the PDD itself.
 
 The PDD author may add any additional sections he or she wishes.
 
-=head2 SUBMISSION CRITERIA
+=head3 Submission Criteria
 
-Proposed PDDs should be submitted to the parrot-porters mailing list (located
-at parrot-porters@perl.org) for discussion, criticism and general kibitzing.
+Proposed PDDs should be submitted to the parrot-dev mailing list (located
+at parrot-dev@lists.parrot.org) for discussion, criticism and general
+kibitzing.
 Acceptance of a particular PDD is ultimately up to the Parrot Architect.
 
-=head2 PDD TRANSLATIONS
+=head3 PDD Translations
 
 Translations of PDDs into other languages should meet these guidelines:
 
@@ -157,20 +159,20 @@ Translations of PDDs into other languages should meet these guidelines:
 
 =item *
 
-The C<MAINTAINER> section should record who made the translation.
+The C<Maintainer> section should record who made the translation.
 
 =item *
 
-The C<VERSION> section should include an additional note of the translation
+The C<Version> section should include an additional note of the translation
 version.
 
 =back
 
-=head1 ATTACHMENTS
+=head2 Attachments
 
 (none)
 
-=head1 REFERENCES
+=head2 References
 
 (none)
 

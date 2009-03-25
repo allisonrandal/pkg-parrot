@@ -1,4 +1,4 @@
-# $Id: ParrotIO.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: ParrotIO.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -22,17 +22,17 @@ TDB
 
 =cut
 
-.sub onload :load, :anon
+.sub onload :load :anon
     .local int i
     .local pmc base
     .local pmc io
 
-    find_type i, "Stream::ParrotIO"
-    if i > 1 goto END
+    $P0 = get_class 'Stream::ParrotIO'
+    unless null $P0 goto END
 
     load_bytecode "library/Stream/Base.pir"
 
-    getclass base, "Stream::Base"
+    get_class base, "Stream::Base"
     subclass io, base, "Stream::ParrotIO"
 
     addattribute io, "blocksize"
@@ -73,15 +73,14 @@ Sets or returns the current block size.
     .local pmc temp
     .local int ret
 
-    classoffset $I0, self, "Stream::ParrotIO"
     unless has_bs goto GET
 
-    temp = new .Integer
+    temp = new 'Integer'
     temp = bs
-    setattribute self, $I0, temp
+    setattribute self, 'blocksize', temp
     branch RET
 GET:
-    getattribute temp, self, $I0
+    getattribute temp, self, 'blocksize'
 RET:
     ret = temp
 
@@ -120,7 +119,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -128,4 +127,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

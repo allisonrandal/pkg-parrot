@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: slice.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: slice.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ Tests the Slice PMC.
 
 pir_output_is( <<'CODE', <<'OUT', 'new' );
 .sub 'test' :main
-    new P0, .Slice
+    new $P0, ['Slice']
     print "ok 1\n"
 .end
 CODE
@@ -39,9 +39,9 @@ pir_output_is( <<'CODE', <<'OUT', 'bug with slice bits', todo => 'parser' );
 
 .sub main :main
     .local pmc b, bj
-    b = new FixedPMCArray
+    b = new ['FixedPMCArray']
     b = 4
-    bj = new .FixedFloatArray
+    bj = new ['FixedFloatArray']
     bj = 5
     b[3] = bj
     $N0 = b[3 .. vx]

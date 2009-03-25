@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: opt0.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2005, Parrot Foundation.
+# $Id: opt0.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -9,36 +9,45 @@ use Parrot::Test tests => 6;
 
 # these tests are run with -O0 by TestCompiler and show
 # generated PASM code for various optimizations at level 0
+
+SKIP: {
+    skip("disabled graph coloring register allocator, RT #57028", 1);
 pir_2_pasm_like( <<'CODE', <<'OUT', "add_n_i_n" );
-.emit
-   add N0, I0, N1
-   mul N0, I0, N1
-.eom
+.sub _ :anon
+   add $N0, $I0, $N1
+   mul $N0, $I0, $N1
+.end
 CODE
 /set (N\d+), I0
   add N0, \1, N1
   set (N\d+), I0
   mul N0, \2, N1/
 OUT
+}
 
 ##############################
 pir_2_pasm_is( <<'CODE', <<'OUT', "sub_n_ic_n" );
-.emit
-   sub N0, 2, N1
-   div N0, 2, N1
-.eom
+.sub _ :anon
+   sub $N0, 2, $N1
+   div $N0, 2, $N1
+.end
 CODE
 # IMCC does produce b0rken PASM files
 # see http://guest@rt.perl.org/rt3/Ticket/Display.html?id=32392
+_:
   sub N0, 2, N1
   div N0, 2, N1
+  set_returns
+  returncc
 OUT
 
 ##############################
+SKIP: {
+    skip("disabled graph coloring register allocator, RT #57028", 1);
 pir_2_pasm_like( <<'CODE', <<'OUT', "sub_n_i_n" );
 .sub _test
-   sub N0, I0, N1
-   div N0, I0, N1
+   sub $N0, $I0, $N1
+   div $N0, $I0, $N1
 .end
 CODE
 /_test:
@@ -49,6 +58,7 @@ CODE
   set_returns
   returncc/
 OUT
+}
 
 ##############################
 pir_2_pasm_is( <<'CODE', <<'OUT', "added return - end" );

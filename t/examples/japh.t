@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: japh.t 18564 2007-05-16 02:26:11Z chromatic $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: japh.t 37404 2009-03-14 03:10:14Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 17;
+use Parrot::Test tests => 5;
 use Parrot::Config;
 
 =head1 NAME
@@ -28,38 +28,16 @@ Some JAPH are not really suitable for inclusion in automated tests.
 
 Get the TODO JAPHs working or decide that they are not suitable for testing.
 
-=head1 SEE ALSO
-
-[perl #37082] in the Parrot RT
-
 =cut
 
 # known reasons for failure
-my %todo = (
-    1  => 'deleted, opcode "pack" is gone',
-    2  => 'deleted, opcode "pack" is gone',
-    9  => 'P1 is no longer special',
-    10 => 'core dump',
-    11 => 'opcode "pack" is gone, other reasons',
-    12 => '{{deleted}}',
-    13 => 'unreliable, but often succeeds',
-    14 => 'unknown reason',
-    15 => 'unknown reason',
-    16 => 'unknown reason',
-    17 => 'unknown reason',
-);
-if ( $PConfig{bigendian} ) {
-    $todo{8} = 'works only on little endian';
-}
-if ( $PConfig{intvalsize} == 8 ) {
-    $todo{8} = 'works only with 32-bit integer values';
-}
-if ( $ENV{TEST_PROG_ARGS} =~ /-j/) {
-    $todo{4} = 'broken with -j';
+my %todo = ();
+if ( defined( $ENV{TEST_PROG_ARGS}) && $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/ ) {
+    $todo{4} = 'broken with JIT';
 }
 
 # run all tests and tell about todoness
-foreach ( 1 .. 17 ) {
+foreach ( 1..5 ) {
     my $pasm_fn = "examples/japh/japh$_.pasm";
     unless ( -e $pasm_fn ) {
         pass("deleted");

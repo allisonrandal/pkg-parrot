@@ -1,6 +1,6 @@
-#!./parrot -j
+#!./parrot
 #
-# nsieve N  (N = 9 for shootout)
+# ./parrot -R jit nsieve.pir N  (N = 9 for shootout)
 # by Leopold Toetsch
 # modified by Joshua Isom
 # modified by Karl Forner to accept shootout default value of N=2
@@ -35,10 +35,10 @@ not_p:
 	.local pmc flags
 	.local int argc, i, j, N, M, count
 
-	flags = new .FixedBooleanArray
+	flags = new 'FixedBooleanArray'
 	N = 2
 	argc = argv
-	if argc == 1 goto default 
+	if argc == 1 goto default
     $S0 = argv[1]
 	N = $S0
 default:
@@ -53,7 +53,7 @@ loop:
     $I1 = 1 << $I0
     M = $I1 * 10000
 	count = primes_in_range(M, flags)
-    $P0 = new .FixedIntegerArray
+    $P0 = new 'FixedIntegerArray'
     $P0 = 2
     $P0[0] = M
     $P0[1] = count
@@ -68,4 +68,4 @@ loop:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

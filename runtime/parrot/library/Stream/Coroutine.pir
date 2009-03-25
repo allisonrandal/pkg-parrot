@@ -20,19 +20,18 @@ TBD
 
 =cut
 
-.sub onload :load, :anon
+.sub onload :load :anon
     .local pmc base
     .local pmc coro
     .local int i
-    
-    find_type i, "Stream::Coroutine"
-    if i > 1 goto END
-    
+
+    $P0 = get_class "Stream::Coroutine"
+    unless null $P0 goto END
+
     load_bytecode "library/Stream/Base.pir"
 
-    getclass base, "Stream::Base"
+    get_class base, "Stream::Base"
     subclass coro, base, "Stream::Coroutine"
-    
 END:
 .end
 
@@ -50,8 +49,8 @@ END:
 
     null str
     coro = self."source"()
-    typeof $I0, coro
-    if $I0 == .Undef goto END
+    $I0 = defined coro
+    unless $I0 goto END
 
     str = coro( self )
 END:
@@ -69,7 +68,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -77,4 +76,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: stress3.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: stress3.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ Creates a lot of PMCs, and then prints out some statistics indicating:
 
 =over 4
 
-=item * the total number of DOD runs made
+=item * the total number of GC runs made
 
 =item * the number of active PMCs
 
@@ -27,7 +27,7 @@ Note that a command-line argument of 1 is supposed to cause the PMCs to
 be destroyed before a 2nd loop is run. However, this seems to be broken
 at the moment:
 
-    SArray: Entry not an integer!
+    FixedPMCArray: Entry not an integer!
 
 =cut
 
@@ -39,7 +39,7 @@ at the moment:
 	set I11, 0
 noarg:
 	set I0, 100
-	new P0, .ResizablePMCArray
+	new P0, 'ResizablePMCArray'
 
 ol:	bsr buildarray
 	set P0[I0], P1
@@ -48,12 +48,12 @@ ol:	bsr buildarray
 
 # now check reusage, destroy them depending on I11
 	unless I11, no_dest
-	new P0, .Undef
+	new P0, 'Undef'
 no_dest:
 	set I0, 5000000
-	new P3, .ResizablePMCArray
+	new P3, 'ResizablePMCArray'
 l2:
-	new P1, .Integer
+	new P1, 'Integer'
 	set P3[0], P1
 	dec I0
 	if I0, l2
@@ -61,7 +61,7 @@ l2:
 	interpinfo I1, 2
 	print "A total of "
 	print I1
-	print " DOD runs were made\n"
+	print " GC runs were made\n"
 	interpinfo I1, 4
 	print I1
 	print " active PMCs\n"
@@ -75,8 +75,8 @@ l2:
 	# Our inner loop, 10000 times
 buildarray:
 	set I1, 10000
-	new P1, .ResizablePMCArray
-loop1:	new P9, .Integer
+	new P1, 'ResizablePMCArray'
+loop1:	new P9, 'Integer'
 	set P9, I1
 	set P1[I1], P9
 	dec I1

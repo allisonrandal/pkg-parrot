@@ -1,4 +1,4 @@
-# $Id: Filter.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# $Id: Filter.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -22,17 +22,17 @@ TBD
 
 =cut
 
-.sub onload :load, :anon
+.sub onload :load :anon
     .local int i
     .local pmc base
     .local pmc filter
 
-    find_type i, "Stream::Filter"
-    if i > 1 goto END
+    $P0 = get_class 'Stream::Filter'
+    unless null $P0 goto END
 
     load_bytecode "library/Stream/Base.pir"
 
-    getclass base, "Stream::Base"
+    get_class base, "Stream::Base"
     subclass filter, base, "Stream::Filter"
 
     addattribute filter, "filter"
@@ -52,13 +52,12 @@ Sets or returns the filter sub.
     .param int has_filter :opt_flag
     .local pmc ret
 
-    classoffset $I0, self, "Stream::Filter"
     unless has_filter goto GET
     ret = _filter
-    setattribute self, $I0, _filter
+    setattribute self, 'filter', _filter
     branch END
 GET:
-    getattribute ret, self, $I0
+    getattribute ret, self, 'filter'
 END:
     .return(ret)
 .end
@@ -95,7 +94,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -103,4 +102,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

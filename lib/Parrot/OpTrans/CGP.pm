@@ -1,5 +1,5 @@
-# Copyright (C) 2002, The Perl Foundation.
-# $Id: CGP.pm 18744 2007-06-02 01:10:38Z chromatic $
+# Copyright (C) 2002, Parrot Foundation.
+# $Id: CGP.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -68,7 +68,7 @@ sub defines {
     return $pred_def . <<END;
 /* defines - $0 -> $type */
 #  define opcode_to_prederef(i, op)   \\
-     (opcode_t *) (op   - CONTEXT(i->ctx)->pred_offset)
+     (opcode_t *) (op   - CONTEXT(i)->pred_offset)
 END
 }
 
@@ -90,8 +90,9 @@ sub goto_address {
     else {
         return "if ($addr == 0)
           return 0;
+   Parrot_cx_handle_tasks(interp, interp->scheduler);
    _reg_base = (char*)interp->ctx.bp.regs_i;
-   goto **(cur_opcode = opcode_to_prederef(interp, $addr))";
+   goto **(void **)(cur_opcode = opcode_to_prederef(interp, $addr))";
     }
 }
 
@@ -105,7 +106,9 @@ relevant C code.
 sub goto_offset {
     my ( $self, $offset ) = @_;
 
-    return "goto **(cur_opcode += $offset)";
+    # this must be a single expression, in case it's in a single-statement if
+    return "do {\nCONTEXT(interp)->current_pc = CUR_OPCODE + $offset;\n"
+    .      "goto **(void **)(cur_opcode += $offset);\n} while (1)";
 }
 
 =item C<goto_pop()>
@@ -118,7 +121,7 @@ code.
 sub goto_pop {
     my ($self) = @_;
 
-    return "goto **(cur_opcode = opcode_to_prederef(interp,
+    return "goto **(void **)(cur_opcode = opcode_to_prederef(interp,
         (opcode_t*)pop_dest(interp)))";
 }
 

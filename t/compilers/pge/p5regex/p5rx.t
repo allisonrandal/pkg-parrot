@@ -1,6 +1,7 @@
-#!./parrot -G
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: p5rx.t 17649 2007-03-19 23:15:20Z particle $
+#!./parrot
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: p5rx.t 37201 2009-03-08 12:07:48Z fperrad $
+# vi: ft=pir
 
 =head1 NAME
 
@@ -62,7 +63,7 @@ Column 6, if present, contains a description of what is being tested.
 
     # Variable declarations, initializations
     .local pmc test       # the test harness object.
-               test = new 'Test::Builder'
+               test = new [ 'Test'; 'Builder' ]
 
     .local pmc todo_tests # keys indicate test file; values test number.
                todo_tests = new 'Hash'
@@ -121,7 +122,7 @@ Column 6, if present, contains a description of what is being tested.
     test_file = test_dir . test_name
 
     # Open the test file
-    file_handle = open test_file, '<'
+    file_handle = open test_file, 'r'
     $S0 = typeof file_handle
     if $S0 == 'Undef' goto bad_file
 
@@ -143,7 +144,7 @@ Column 6, if present, contains a description of what is being tested.
   parse_data:
     push_eh eh_bad_line
      ( pattern, target, result, testvar, expected, description ) = 'parse_data'( test_line )
-    clear_eh
+    pop_eh
 
     # build the test description
     #   start with the pattern
@@ -182,7 +183,7 @@ Column 6, if present, contains a description of what is being tested.
   not_skip:
     push_eh thrown
     match = 'match_p5regex'( pattern, target )
-    clear_eh
+    pop_eh
 
     if match goto matched
 
@@ -254,7 +255,8 @@ Column 6, if present, contains a description of what is being tested.
   thrown:
     .local pmc exception
     .local string message
-    get_results '(0,0)', exception, message
+    get_results '0', exception
+    message = exception
     # remove /'s
     # $S0 = substr result, 0, 1
     # if $S0 != '/' goto bad_error
@@ -494,7 +496,7 @@ Column 6, if present, contains a description of what is being tested.
     .return (todo_tests)
 
   reset_todo_info:
-    todo_info = new .Hash
+    todo_info = new 'Hash'
     ret
 
   set_todo_loop: # for developer testing. not used normally
@@ -658,7 +660,7 @@ Column 6, if present, contains a description of what is being tested.
     .return (skip_tests)
 
   reset_skip_info:
-    skip_info = new .Hash
+    skip_info = new 'Hash'
     ret
 
   set_range:                         # for setting a range of tests
@@ -866,6 +868,12 @@ Column 6, if present, contains a description of what is being tested.
 Note that while our job would be easier if we could use regular expressions
 in here, but we want to avoid any dependency on the thing we're testing.
 
-Need to add in test ids, to avoid the precarious line numbering.
+Need to add in test IDs, to avoid the precarious line numbering.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

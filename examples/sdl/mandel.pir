@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: mandel.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: mandel.pir 37337 2009-03-12 02:02:54Z Util $
 
 =head1 TITLE
 
@@ -14,7 +14,7 @@ To run this file, run the following command from the Parrot directory:
 =head2 Options
 
   --quit, -q      ... quit immediately (useful for benchmarking)
-  --threads       ... non-working code to run 2 calculation threads 
+  --threads       ... non-working code to run 2 calculation threads
 
 =head1 KEYBOARD/MOUSE COMMANDS
 
@@ -42,10 +42,10 @@ To run this file, run the following command from the Parrot directory:
     event.'process_events'(handler, app)
 ex:
     app.'quit'()
-.end    
+.end
 
 # utils
-.sub 'load_libs'    
+.sub 'load_libs'
     # load the necessary libraries
     load_bytecode "library/SDL/App.pir"
     load_bytecode "library/SDL/Rect.pir"
@@ -88,15 +88,15 @@ ex:
     app = new 'Mandel'
     setattribute app, 'opts', opts
     .return (app)
-.end    
+.end
 
 .namespace ['Mandel']
 
 # init the Mandel app instance
 .sub __init :method
     .local int w, h
-    .local float scale, xstart, ystart
-    # mandelbrot set is witdh [-2, 0.25] heigth [ -1, 1]
+    .local num scale, xstart, ystart
+    # mandelbrot set is width [-2, 0.25] height [ -1, 1]
     # round up, scale *200
     xstart = -2.0
     ystart = -1.0
@@ -104,22 +104,22 @@ ex:
     w = 600
     h = 400
     self.'init'( 'height' => h, 'width' => w, 'bpp' => 0, 'flags' => 1 )
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = xstart
     setattribute self, 'xstart', $P0
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = ystart
     setattribute self, 'ystart', $P0
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = 1.0 # XXX calc from above
     setattribute self, 'xend', $P0
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = 1.0
     setattribute self, 'yend', $P0
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = scale
     setattribute self, 'scale', $P0
-    $P0 = new .Integer
+    $P0 = new 'Integer'
     $P0 = 200
     setattribute self, 'limit', $P0
 
@@ -146,7 +146,7 @@ ex:
 
 # accessors for some attribs
 .sub 'xstart' :method
-    .param float x     :optional
+    .param num x     :optional
     .param int has_x   :opt_flag
     $P0 = getattribute self, 'xstart'
     unless has_x goto get
@@ -157,7 +157,7 @@ get:
 .end
 
 .sub 'ystart' :method
-    .param float y     :optional
+    .param num y     :optional
     .param int has_y   :opt_flag
     $P0 = getattribute self, 'ystart'
     unless has_y goto get
@@ -168,7 +168,7 @@ get:
 .end
 
 .sub 'xend' :method
-    .param float x     :optional
+    .param num x     :optional
     .param int has_x   :opt_flag
     $P0 = getattribute self, 'xend'
     unless has_x goto get
@@ -179,7 +179,7 @@ get:
 .end
 
 .sub 'yend' :method
-    .param float y     :optional
+    .param num y     :optional
     .param int has_y   :opt_flag
     $P0 = getattribute self, 'yend'
     unless has_y goto get
@@ -190,7 +190,7 @@ get:
 .end
 
 .sub 'scale' :method
-    .param float s     :optional
+    .param num s     :optional
     .param int has_s   :opt_flag
     $P0 = getattribute self, 'scale'
     unless has_s goto get
@@ -214,7 +214,7 @@ get:
 .sub 'calc' :method
     .local pmc main_screen, raw_palette, rect, pixels
     .local int w, h, x, y, pal_elems, raw_c, k, limit
-    .local float xstart, ystart, scale
+    .local num xstart, ystart, scale
     # fetch the SDL::Surface representing the main window
     main_screen = self.'surface'()
     h = main_screen.'height'()
@@ -231,7 +231,7 @@ get:
     pixels = main_screen.'pixels'()
     # start calculation
     .local pmc args
-    args = new .FixedPMCArray
+    args = new 'FixedPMCArray'
     set args, 10
     args[0] = w
     args[1] = xstart
@@ -250,15 +250,15 @@ get:
     .local pmc thr
     .local int h2
     h2 = h / 2
-    thr = new .ParrotThread
-    .const .Sub raw_calc_f = 'raw_calc'
+    thr = new 'ParrotThread'
+    .const 'Sub' raw_calc_f = 'raw_calc'
     .include 'cloneflags.pasm'
     .local int flags
     flags  = .PARROT_CLONE_CODE
     flags |= .PARROT_CLONE_CLASSES
     thr.'run'(flags, raw_calc_f, h2, h, args)
     raw_calc(0, h2, args)
-    thr.join()
+    thr.'join'()
     main_screen.'unlock'()
     .return()
 plain:
@@ -273,9 +273,9 @@ plain:
     .param pmc args
 
     .local int w, x, y, pal_elems, raw_c, k, limit, offs_y
-    .local float xstart, ystart, scale
+    .local num xstart, ystart, scale
     .local pmc raw_palette, pixels, main_screen, rect
-    .local float z, Z, t, c, C, zz, ZZ
+    .local num z, Z, t, c, C, zz, ZZ
     w = args[0]
     xstart = args[1]
     ystart = args[2]
@@ -294,7 +294,7 @@ loop_y:
     x = 0
 loop_x:
     c = x / scale   # re c part
-    c += xstart 
+    c += xstart
     z = 0.0
     Z = 0.0   # Z(0) = 0
     k = 0
@@ -328,7 +328,7 @@ set_pix:
     $I0 = k % pal_elems
     raw_c = raw_palette[$I0]
     $I0 = offs_y + x
-    # main_screen.'draw_pixel'(x, y, raw_c) --> 
+    # main_screen.'draw_pixel'(x, y, raw_c) -->
     pixels[0; $I0] = raw_c
     inc x
     if x < w goto loop_x
@@ -344,8 +344,8 @@ set_pix:
     .param int y
     .param int but
     .local int w, h
-    .local float xstart, ystart, xend, yend, scale, fx, fy, dx, dy
-    .local float ds, mx, my, dx2, dy2
+    .local num xstart, ystart, xend, yend, scale, fx, fy, dx, dy
+    .local num ds, mx, my, dx2, dy2
     .local pmc main_screen
     main_screen = self.'surface'()
     h = main_screen.'height'()
@@ -376,7 +376,7 @@ set_pix:
     if but == 2 goto done
     ds = 0.5
     goto done
-zoom_in:    
+zoom_in:
     ds = 2.0
 done:
     dx2 /= ds
@@ -436,16 +436,15 @@ done:
 .sub create_palette :method
     .local pmc palette, col, main_screen
     main_screen = self.'surface'()
-    .local int r, g, b, color_type
-    find_type  color_type, 'SDL::Color'
-    palette = new .ResizablePMCArray
+    .local int r, g, b
+    palette = new 'ResizablePMCArray'
     r = 0
 loop_r:
     g = 0
-loop_g:    
+loop_g:
     b = 0
-loop_b:    
-    col = new color_type
+loop_b:
+    col = new 'SDL::Color'
     col.'init'( 'r' => r, 'g' => g, 'b' => b )
     push palette, col
     b += 36
@@ -454,7 +453,7 @@ loop_b:
     if g <= 255 goto loop_g
     r += 36
     if r <= 255 goto loop_r
-    .const .Sub by_bright = "bright"
+    .const 'Sub' by_bright = "bright"
     palette.'sort'(by_bright)
     .return (palette)
 .end
@@ -466,10 +465,10 @@ loop_b:
     .local pmc raw_palette, col, main_screen
     main_screen = self.'surface'()
     n = elements palette
-    raw_palette = new .FixedIntegerArray
+    raw_palette = new 'FixedIntegerArray'
     raw_palette = n
     i = 0
-loop:    
+loop:
     col = palette[i]
     raw_c = col.'color_for_surface'( main_screen )
     raw_palette[i] = raw_c
@@ -549,26 +548,26 @@ Plain runcore and unoptimized parrot:
   Original version based on sdl/raw_pixels   21s
   Create raw_palette                         12s
   Prefetch raw_surface                       10s        [1]
-  Optimize calculation loop (zz, ZZ)          9s        [2] 
-  use raw pixels array                                  [3]  
+  Optimize calculation loop (zz, ZZ)          9s        [2]
+  use raw pixels array                                  [3]
 
 =head2 Parrot based optimizations
 
 Optimized build
 
-  [2] plain runcore 64 bit                    3.0s
-  [2] -C    runcore 64 bit                    1.5s
-  [2] plain runcore 32 bit                    3.6s
-  [2] -C    runcore 32 bit                    1.6s
-  [1] -j                                      1.1s
-  [2] -j                                      0.8s
-  [3] -j                                      0.5s
+  [2] plain  runcore 64 bit                  3.0s
+  [2] -R cgp runcore 64 bit                  1.5s
+  [2] plain  runcore 32 bit                  3.6s
+  [2] -R cgp runcore 32 bit                  1.6s
+  [1] -R jit                                 1.1s
+  [2] -R jit                                 0.8s
+  [3] -R jit                                 0.5s
 
 =head1 SEE ALSO
 
 L<http://en.wikipedia.org/wiki/Mandelbrot_set>
 
-If you want faster mandelbrot with iteractive zooming use Xaos:
+If you want faster mandelbrot with interactive zooming use Xaos:
 
 L<http://xaos.sourceforge.net/english.php>
 
@@ -578,4 +577,4 @@ L<http://xaos.sourceforge.net/english.php>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

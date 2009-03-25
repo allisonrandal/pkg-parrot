@@ -1,12 +1,14 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: header.t 17094 2007-02-20 20:10:40Z paultcochrane $
+# Copyright (C) 2001-2005, 2009 Parrot Foundation.
+# $Id: header.t 37518 2009-03-17 13:04:11Z rurban $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 8;
+
+use Parrot::Test skip_all => 'pending robust testing strategy, TT #357';
+#use Parrot::Test tests => 9;
 
 use File::Temp;
 use Parrot::Config;
@@ -25,43 +27,52 @@ Tests the layout of the PBC header.
 
 =cut
 
-SKIP: {
-    skip "new header format not yet implemented", 8;
-
-    # idea stolen from t/pmc/sub.t
-    my $tmppasm = File::Temp->new( UNLINK => 1, SUFFIX => '.pasm' );
-    print $tmppasm <<END;
-    set I0, 0
+# idea stolen from t/pmc/sub.t
+my $tmppasm = File::Temp->new( UNLINK => 1, SUFFIX => '.pasm', CLEANUP => 1 );
+print $tmppasm <<END;
+set I0, 0
 END
-    $tmppasm->flush;
-    my $tmppbc = File::Temp->new( UNLINK => 1, SUFFIX => '.pbc' );
-    system(".$PConfig{slash}parrot$PConfig{exe} -o $tmppbc $tmppasm");
-    my $pbc = slurp_file($tmppbc);
+$tmppasm->flush;
+my $out_f = File::Temp->new( UNLINK => 1, SUFFIX => '.pbc', CLEANUP => 1 );
+my $path_to_parrot = Parrot::Test::path_to_parrot();
+my $parrot = File::Spec->join( File::Spec->curdir(), 'parrot' . $PConfig{exe} );
+my $args = $ENV{TEST_PROG_ARGS} || '';
+Parrot::Test::run_command
+  (
+   qq{$parrot $args -o $out_f $tmppasm},
+   CD     => $path_to_parrot,
+   STDOUT => $out_f,
+   STDERR => $out_f,
+  );
+my $pbc = slurp_file($out_f);
 
-    my @fields = qw(
-        magic
-        wordsize
-        byteorder
-        major
-        minor
-        intval
-        floattype
-        fingerprint
-        padding
-    );
+my @fields = qw(
+    magic
+    wordsize
+    byteorder
+    floattype
+    major
+    minor
+    patch
+    bc_major
+    bc_minor
+    uuid_type
+    uuid_size
+);
 
-    my %h;
-    @h{@fields} = unpack "a8CCCCCCa10a8", $pbc;
+my %h;
+@h{@fields} = unpack "a7CCCCCCCCCC", $pbc;
 
-    is( $h{magic}, "\xfe\x50\x42\x43\x0d\x0a\x1a\x0a", "magic string" );
-    ok( $h{wordsize} < 2,  "wordsize" );
-    ok( $h{byteorder} < 2, "byteorder" );
-    is( $h{major}, $PConfig{MAJOR}, "major version" );
-    is( $h{minor}, $PConfig{MINOR}, "minor version" );
-    ok( $h{intval} == 4 || $h{intval} == 8, "intval" );
-    ok( $h{floattype} < 2, "floattype" );
-    is( $h{padding}, pack "x8", "NULL padding" );
-}
+is( $h{magic}, "\xfe\x50\x42\x43\x0a\x1a\x0a", "magic string 0xfePBC0x0a0x1a0x0a len=7" );
+ok( $h{wordsize} == 2 || $h{wordsize} == 4 || $h{wordsize} == 8,  "wordsize: $h{wordsize}" );
+ok( $h{byteorder} < 2, "byteorder: $h{byteorder}" );
+ok( $h{floattype} < 3, "floattype: $h{floattype}" );
+is( $h{major}, $PConfig{MAJOR}, "major version: $h{major} vs $PConfig{MAJOR}" );
+is( $h{minor}, $PConfig{MINOR}, "minor version: $h{minor} vs $PConfig{MINOR}" );
+is( $h{patch}, $PConfig{PATCH}, "patch version: $h{patch} vs $PConfig{PATCH}" );
+# see pbcversion.h or PBC_COMPAT
+ok( $h{bc_major} > 0,           "bc major version: $h{bc_major}" );
+ok( $h{bc_minor} >= 0,          "bc minor version: $h{bc_minor}" );
 
 # Local Variables:
 #   mode: cperl

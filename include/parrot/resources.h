@@ -1,7 +1,7 @@
 /* resources.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: resources.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: resources.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Defines the resource allocation API
  *  Data Structure and Algorithms:
@@ -26,7 +26,7 @@ typedef struct Memory_Block {
 
 typedef struct Memory_Pool {
     Memory_Block *top_block;
-    void (*compact)(Interp *, struct Memory_Pool *);
+    void (*compact)(PARROT_INTERP, struct Memory_Pool *);
     size_t minimum_block_size;
     size_t total_allocated; /* total bytes allocated to this pool */
     size_t guaranteed_reclaimable;     /* bytes that can definitely be reclaimed*/
@@ -37,56 +37,88 @@ typedef struct Memory_Pool {
 
 
 /* HEADERIZER BEGIN: src/gc/resources.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-void Parrot_allocate( Interp *interp /*NN*/,
-    Buffer *buffer /*NN*/,
-    size_t size )
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-void Parrot_allocate_aligned( Interp *interp /*NN*/,
-    Buffer *buffer /*NN*/,
-    size_t size )
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-void Parrot_allocate_string( Interp *interp /*NN*/,
-    STRING *str /*NN*/,
-    size_t size )
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-void Parrot_destroy_memory_pools( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-void Parrot_go_collect( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-int Parrot_in_memory_pool( Interp *interp /*NN*/, void *bufstart /*NN*/ )
+void Parrot_allocate(PARROT_INTERP, ARGOUT(Buffer *buffer), size_t size)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__warn_unused_result__;
+        FUNC_MODIFIES(*buffer);
 
-void Parrot_initialize_memory_pools( Interp *interp /*NN*/ )
+void Parrot_allocate_aligned(PARROT_INTERP,
+    ARGOUT(Buffer *buffer),
+    size_t size)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*buffer);
+
+void Parrot_allocate_string(PARROT_INTERP, ARGOUT(STRING *str), size_t size)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*str);
+
+void Parrot_destroy_memory_pools(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-void Parrot_merge_memory_pools( Interp *dest_interp /*NN*/,
-    Interp *source_interp /*NN*/ )
+void Parrot_go_collect(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_WARN_UNUSED_RESULT
+int Parrot_in_memory_pool(PARROT_INTERP, ARGIN(void *bufstart))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-void Parrot_reallocate( Interp *interp /*NN*/,
-    Buffer *buffer /*NN*/,
-    size_t tosize )
+void Parrot_initialize_memory_pools(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+void Parrot_merge_memory_pools(
+    ARGIN(Interp *dest_interp),
+    ARGIN(Interp *source_interp))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-void Parrot_reallocate_string( Interp *interp /*NN*/,
-    STRING *str /*NN*/,
-    size_t tosize )
+void Parrot_reallocate(PARROT_INTERP,
+    ARGMOD(Buffer *buffer),
+    size_t newsize)
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*buffer);
 
+void Parrot_reallocate_string(PARROT_INTERP,
+    ARGMOD(STRING *str),
+    size_t newsize)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*str);
+
+#define ASSERT_ARGS_Parrot_allocate __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(buffer)
+#define ASSERT_ARGS_Parrot_allocate_aligned __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(buffer)
+#define ASSERT_ARGS_Parrot_allocate_string __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(str)
+#define ASSERT_ARGS_Parrot_destroy_memory_pools __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_go_collect __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_in_memory_pool __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(bufstart)
+#define ASSERT_ARGS_Parrot_initialize_memory_pools \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_merge_memory_pools __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(dest_interp) \
+    || PARROT_ASSERT_ARG(source_interp)
+#define ASSERT_ARGS_Parrot_reallocate __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(buffer)
+#define ASSERT_ARGS_Parrot_reallocate_string __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(str)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/gc/resources.c */
 
 typedef struct Arenas {
@@ -103,17 +135,16 @@ typedef struct Arenas {
     /*
      * function slots that each subsystem must provide
      */
-    void (*do_dod_run)(Interp*, int flags);
-    void (*de_init_gc_system) (Interp*);
-    void (*init_pool)(Interp *, struct Small_Object_Pool *);
+    void (*do_gc_mark)(PARROT_INTERP, UINTVAL flags);
+    void (*finalize_gc_system) (PARROT_INTERP);
+    void (*init_pool)(PARROT_INTERP, struct Small_Object_Pool *);
     /*
-     * statistics for DOD and GC
+     * statistics for GC
      */
-    size_t  dod_runs;           /* Number of times we've done a DOD sweep */
-    size_t  lazy_dod_runs;      /* Number of successful lazy DOD sweep */
-    size_t  collect_runs;       /* Number of times we've
-                                 * done a memory compaction
-                                 */
+    size_t  gc_mark_runs;       /* Number of times we've done a mark run*/
+    size_t  gc_lazy_mark_runs;  /* Number of successful lazy mark runs */
+    size_t  gc_collect_runs;    /* Number of times we've done a memory
+                                   compaction */
     size_t  mem_allocs_since_last_collect;      /* The number of memory
                                                  * allocations from the
                                                  * system since the last
@@ -121,42 +152,42 @@ typedef struct Arenas {
     size_t  header_allocs_since_last_collect;   /* The number of header
                                                  * blocks allocated from
                                                  * the system since the last
-                                                 * DOD run */
-    size_t  memory_allocated;   /* The total amount of
-                                 * allocatable memory
-                                 * allocated. Doesn't count
-                                 * memory for headers or
-                                 * internal structures or
-                                 * anything */
-    UINTVAL memory_collected;   /* Total amount of memory copied
-                                   during collection */
-    UINTVAL num_early_DOD_PMCs; /* how many PMCs want immediate destruction */
-    UINTVAL num_early_PMCs_seen;/* how many such PMCs has DOD seen */
-    UINTVAL num_extended_PMCs;  /* active PMCs having pmc_ext */
-    PMC* dod_mark_start;        /* first PMC marked during a DOD run */
-    PMC* dod_mark_ptr;          /* last PMC marked during a DOD run */
-    PMC* dod_trace_ptr;         /* last PMC trace_children was called on */
-    int lazy_dod;               /* flag that indicates whether we should stop
-                                   when we've seen all impatient PMCs */
+                                                 * GC run */
+    size_t  memory_allocated;     /* The total amount of
+                                   * allocatable memory
+                                   * allocated. Doesn't count
+                                   * memory for headers or
+                                   * internal structures or
+                                   * anything */
+    UINTVAL memory_collected;     /* Total amount of memory copied
+                                     during collection */
+    UINTVAL num_early_gc_PMCs;    /* how many PMCs want immediate destruction */
+    UINTVAL num_early_PMCs_seen;  /* how many such PMCs has GC seen */
+    UINTVAL num_extended_PMCs;    /* active PMCs having pmc_ext */
+    PMC* gc_mark_start;           /* first PMC marked during a GC run */
+    PMC* gc_mark_ptr;             /* last PMC marked during a GC run */
+    PMC* gc_trace_ptr;            /* last PMC trace_children was called on */
+    int lazy_gc;                  /* flag that indicates whether we should stop
+                                     when we've seen all impatient PMCs */
     /*
-     * DOD, GC blocking
+     * GC blocking
      */
-    UINTVAL DOD_block_level;    /* How many outstanding DOD block
-                                   requests are there? */
-    UINTVAL GC_block_level;     /* How many outstanding GC block
-                                   requests are there? */
+    UINTVAL gc_mark_block_level;  /* How many outstanding GC block
+                                     requests are there? */
+    UINTVAL gc_sweep_block_level; /* How many outstanding GC block
+                                     requests are there? */
     /*
      * private data for the GC subsystem
      */
-    void *  gc_private;         /* gc subsystem data */
+    void *  gc_private;           /* gc subsystem data */
 } Arenas;
 
 /* &gen_from_enum(interpinfo.pasm) prefix(INTERPINFO_) */
 
 typedef enum {
     TOTAL_MEM_ALLOC = 1,
-    DOD_RUNS,
-    COLLECT_RUNS,
+    GC_MARK_RUNS,
+    GC_COLLECT_RUNS,
     ACTIVE_PMCS,
     ACTIVE_BUFFERS,
     TOTAL_PMCS,
@@ -165,8 +196,9 @@ typedef enum {
     MEM_ALLOCS_SINCE_COLLECT,
     TOTAL_COPIED,
     IMPATIENT_PMCS,
-    LAZY_DOD_RUNS,
+    GC_LAZY_MARK_RUNS,
     EXTENDED_PMCS,
+    CURRENT_RUNCORE,
 
     /* interpinfo_p constants */
     CURRENT_SUB,

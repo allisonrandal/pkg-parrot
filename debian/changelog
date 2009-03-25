@@ -1,9 +1,99 @@
-parrot (0.4.13-1.1) unstable; urgency=low
+parrot (1.0.0-1) unstable; urgency=low
+  * New upstream release
+  * debian/control.in:
+    - Updated Description of all packages.
+    - Bumped Standards-Version to 3.8.1
+    - Add new packages parrot-minimal and parrot-devel
+  * debian/rules:
+    - Integrate Ubuntu packaging changes to automatically generate
+      debian/control.
+    - Re-order dh_installdeb in binary-arch to run after dh_makeshlibs and
+      shlibdeps so that the library gets installed properly (patch from David
+      Nusinow)
+    - Move manpage generation to new packages. Rename parrot-debugger.1 to
+      parrot_debugger.1 to match executable name. Generate parrot_config
+      manpage from .pir source files (patch from David Nusinow)
+  * parrot.install.in, parrot-doc.install.in, libparrot.install.in,
+    libparrot-dev.install.in
+    - Added template files, replace parrot.install, parrot-doc.install, 
+      libparrot.install, and libparrot-dev.install
+  * parrot-minimal.install.in, parrot-devel.install.in
+    - Added template files for new packages
+  * parrot-doc.docs, libparrot-dev.dirs
+    - Removed
+  * libparrot.postinst
+    - Added so ldconfig gets called properly by dh_makeshlibs (patch from
+      David Nusinow)
+  * debian/copyright:
+    - Changed copyright holder to Parrot Foundation, reflecting change in
+      distribution.
+    - Removed copyright info for files no longer in distribution.
 
-  * Non-maintainer upload.
-  * Replace libicu36-dev with libicu-dev. (Closes: #456835) 
+ -- Allison Randal <allison@parrot.org>  Wed, 25 Mar 2009 00:45:40 -0500
 
- -- Ana Beatriz Guerrero Lopez <ana@debian.org>  Sat, 12 Jan 2008 19:33:10 +0100
+parrot (0.9.0-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/control.in:
+    - Build-Depends removed optional library libicu-dev.
+      Removed optional library libgmp3-dev.
+    - Depends for libparrot-dev removed optional library
+      libicu-dev.
+  * debian/rules
+    - Removed --optimize flag from configure, known problems
+      on 64-bit architectures.
+    - Changed 'reallyinstall' target to 'install', matching
+      change in source makefile.
+  * debian/parrot-doc.docs
+    - Updated to sync with doc files in distribution.
+  * debian/copyright:
+    - Updated copyright years.
+
+ -- Allison Randal <allison@parrot.org>  Fri, 23 Jan 2009 15:16:25 -0800
+
+parrot (0.7.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Nuno Carvalho <mestre.smash@gmail.com>  Tue, 02 Sep 2008 13:05:31 +0100
+
+parrot (0.6.4-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/copyright:
+    - Added license link.
+    - Updated copyright years.
+    - Removed copyright info for files no longer in distribution.
+
+ -- Nuno Carvalho <mestre.smash@gmail.com>  Sat, 16 Aug 2008 14:15:14 +0200
+
+parrot (0.5.1-1) unstable; urgency=low
+
+  * New upstream release (Closes: #444707).
+  * debian/control.in:
+    - Build-Depends updated to libicu-dev from libicu36-dev
+      (Closes: #456835).
+    - Depends for libparrot-dev updated to libicu-dev from
+      libicu34-dev (Closes: #431289).
+    - New maintainer: Parrot Debian Maintainers
+      (Closes: #444708)
+    - New uploaders: Allison Randal, Nuno Carvalho,
+      Patrick Michaud
+    - Updated long and short package descriptions.
+  * debian/rules
+    - Removed install of install_config.o file, no longer in
+      distribution.
+  * debian/libparrot0.4.12.install
+    - Deleted, replaced by debian/libparrot.install.
+  * debian/parrot-doc.docs
+    - Updated to sync with doc files in distribution.
+    - Sorted for easier diffs between generated file lists.
+  * debian/copyright:
+    - Added license link.
+    - Updated copyright years.
+    - Removed copyright info for files no longer in distribution.
+
+ -- Allison Randal <allison@perl.org>  Sun, 30 Dec 2007 17:21:45 +0000
 
 parrot (0.4.13-1) unstable; urgency=low
 
@@ -49,7 +139,7 @@ parrot (0.4.3-1) unstable; urgency=low
   * New upstream release.
   * Changed Section of parrot-doc to `docs'.
 
- -- Florian Ragwitz <rafl@debian.org>  Mon,  3 Apr 2006 03:48:47 +0200
+ -- Florian Ragwitz <rafl@debian.org>  Mon,  3 Apr 2006 04:25:56 +0200
 
 parrot (0.4.2-1) unstable; urgency=low
 

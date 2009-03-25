@@ -1,10 +1,10 @@
 /*
+ * $Id: pic.ops 37225 2009-03-09 03:16:29Z allison $
 ** pic.ops
 */
 
-#define DEPRECATED internal_exception(UNIMPLEMENTED, "you shouldn't see this")
-
 #include "parrot/oplib/ops.h"
+#include "../src/pmc/pmc_fixedintegerarray.h"
 
 typedef opcode_t* (*interface_f)(Interp*, INTVAL*, void **);
 
@@ -12,7 +12,7 @@ VERSION = PARROT_VERSION;
 
 =head1 NAME
 
-pic.ops - PIC (Polymorphic Inline Cache) opcode variants
+pic.ops - PIC (Polymorphic Inline Cache) Opcodes [deprecated]
 
 =cut
 
@@ -22,13 +22,9 @@ During predereferencing opcodes that allow caching are rewritten so that
 equivalent opcodes in this file are used. User code MUST never emit these
 opcodes directly.
 
-###############################################################################
-
 =head2 General infix operations
 
 These operations take an infix operation number and PMC arguments.
-
-########################################
 
 =cut
 
@@ -40,7 +36,7 @@ One for fun and MOPS.
 
 =cut
 
-inline op pic_infix__(inconst INT, invar PMC, invar PMC) :pic {
+inline op pic_infix__(inconst INT, invar PMC, invar PMC) :pic :flow {
     Parrot_MIC *mic;
     Parrot_PIC_lru *lru;
     PMC *left, *right;
@@ -106,14 +102,16 @@ inline op pic_inline_sub__(inconst INT, invar PMC, invar PMC) :pic {
                 VTABLE_set_integer_native(interp, left, c);
         }
         else {
-            if (PARROT_ERRORS_test(interp,PARROT_ERRORS_OVERFLOW_FLAG)) {
-                real_exception(interp, NULL, ERR_OVERFLOW,
+            if (PARROT_ERRORS_test(interp, PARROT_ERRORS_OVERFLOW_FLAG)) {
+                opcode_t *handler = Parrot_ex_throw_from_op_args(interp, NULL,
+                        EXCEPTION_ERR_OVERFLOW,
                         "Integer overflow");
+                goto ADDRESS(handler);
             }
             /* #RT42354 preserve type system */
-            VTABLE_morph(interp, left, enum_class_BigInt);
+            VTABLE_morph(interp, left, interp->vtables[enum_class_BigInt]->pmc_class);
             VTABLE_set_integer_native(interp, left, a);
-            mmd_dispatch_p_pip(interp, left, b, left, MMD_SUBTRACT);
+            $2 = VTABLE_subtract_int(interp, left, b, left);
         }
     }
     else {
@@ -121,7 +119,6 @@ inline op pic_inline_sub__(inconst INT, invar PMC, invar PMC) :pic {
             parrot_pic_opcode(interp, PARROT_OP_pic_infix___ic_p_p);
         goto OFFSET(0);
     }
-    goto NEXT();
 }
 
 =item B<pic_get_params__>(inconst PMC /* , ... */)
@@ -134,19 +131,19 @@ Return values to caller.
 
 =cut
 
-inline op pic_get_params__(inconst PMC) :pic {
+inline op pic_get_params__(inconst PMC) :pic :flow {
     Parrot_MIC *mic;
     Parrot_PIC_lru *lru;
     PMC *sig, *ccont;
     opcode_t *src_pc;
     void **src_pred;
-    parrot_context_t *caller_ctx, *ctx;
+    Parrot_Context *caller_ctx, *ctx;
     int n;
 
     /* avoid load dependencies - intermix derefs
      * - yes, confusing but faster
      */
-    ctx = CONTEXT(interp->ctx);
+    ctx = CONTEXT(interp);
     src_pc = interp->current_args;
     mic = (Parrot_MIC *) cur_opcode[1];
     caller_ctx = ctx->caller_ctx;
@@ -172,7 +169,7 @@ inline op pic_get_params__(inconst PMC) :pic {
             PObj_get_FLAGS(ccont) &= ~SUB_FLAG_TAILCALL;
             --ctx->recursion_depth;
             ctx->caller_ctx = caller_ctx->caller_ctx;
-            Parrot_free_context(interp, caller_ctx, 0);
+            Parrot_free_context(interp, caller_ctx, 1);
             interp->current_args = NULL;
         }
 
@@ -185,17 +182,17 @@ inline op pic_get_params__(inconst PMC) :pic {
     goto OFFSET(0);
 }
 
-inline op pic_set_returns__(inconst PMC) :pic {
+inline op pic_set_returns__(inconst PMC) :pic :flow {
     Parrot_MIC *mic;
     Parrot_PIC_lru *lru;
     PMC *sig, *ccont;
     opcode_t *dest_pc;
     void **dest_pred;
-    parrot_context_t *caller_ctx, *ctx;
+    Parrot_Context *caller_ctx, *ctx;
     Parrot_cont *cc;
     int n;
 
-    ctx = CONTEXT(interp->ctx);
+    ctx = CONTEXT(interp);
     mic = (Parrot_MIC *) cur_opcode[1];
     ccont = ctx->current_cont;
     cc = PMC_cont(ccont);
@@ -243,17 +240,17 @@ C<pc> of the next opcode and is usually just returned.
 
 =cut
 
-inline op pic_callr__(inconst PMC) :pic {
+inline op pic_callr__(inconst PMC) :pic :flow {
     Parrot_MIC *mic;
     Parrot_PIC_lru *lru;
     void *args[6];      /* RT#42355 ARG_MAX */
-    parrot_context_t *ctx;
+    Parrot_Context *ctx;
     opcode_t *pc;
     void **pred_pc;
     INTVAL i, n_args, *sig_bits;
     PMC *sig;
 
-    ctx = CONTEXT(interp->ctx);
+    ctx = CONTEXT(interp);
     mic = (Parrot_MIC *) cur_opcode[1];
     /* get_results */
     pc = ctx->current_results;
@@ -261,8 +258,8 @@ inline op pic_callr__(inconst PMC) :pic {
         pred_pc = (void**) pc - ctx->pred_offset;
         sig = (PMC*)(pred_pc[1]);
         ASSERT_SIG_PMC(sig);
-        assert(SIG_ELEMS(sig) <= 1);
-        args[0] = SIG_ELEMS(sig) ?
+        PARROT_ASSERT(VTABLE_elements(interp, sig) <= 1);
+        args[0] = VTABLE_elements(interp, sig) ?
             (_reg_base + ((opcode_t*)pred_pc)[2]) : NULL;
     }
     else
@@ -271,8 +268,8 @@ inline op pic_callr__(inconst PMC) :pic {
     n_args = 0;
     sig = mic->m.sig;
     ASSERT_SIG_PMC(sig);
-    n_args = SIG_ELEMS(sig);
-    sig_bits = SIG_ARRAY(sig);
+    n_args = VTABLE_elements(interp, sig);
+    GETATTR_FixedIntegerArray_int_array(interp, sig, sig_bits);
     for (i = 0; i < n_args; ++i) {
         switch (sig_bits[i]) {
             case PARROT_ARG_INTVAL:
@@ -288,10 +285,15 @@ inline op pic_callr__(inconst PMC) :pic {
                         ((opcode_t*)cur_opcode)[2 + i]);
                 break;
             default:
-                internal_exception(1, "unhandled sig_bits");
+                {
+                    opcode_t *handler = Parrot_ex_throw_from_op_args(interp, NULL,
+                        EXCEPTION_INVALID_OPERATION,
+                        "unhandled sig_bits");
+                    goto ADDRESS(handler);
+                }
         }
     }
-    /* set_args (); set_p_pc; get_results (1), x; invokecc_p */
+    /* set_args(); set_p_pc; get_results(1), x; invokecc_p */
     pc = CUR_OPCODE + 2 + n_args + 3 + 3 + 2;
     args[1 + n_args] = pc;
     lru = &mic->lru;
@@ -308,7 +310,7 @@ inline op pic_callr__(inconst PMC) :pic {
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005, The Perl Foundation.
+Copyright (C) 2005-2008, Parrot Foundation.
 
 =head1 LICENSE
 

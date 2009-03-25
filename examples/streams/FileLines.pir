@@ -1,10 +1,15 @@
-=head1 INFORMATION
+=head1 Advanced Lines Example
 
 This is an advanced example.
 
 It uses a file stream (Stream::ParrotIO) that is processed linewise with
 Stream::Lines. A counter stream creates line numbers, both are combined to
 one stream and then dumped.
+
+=head1 NOTE
+
+When updating this file, be sure to verify L<t/examples/streams.t>, as its
+tests rely on the content of this file.
 
 =head1 FUNCTIONS
 
@@ -39,24 +44,20 @@ NO_NAME:
     load_bytecode "library/Stream/Combiner.pir"
 
     # create a file stream
-    find_type $I0, "Stream::ParrotIO"
-    new file, $I0
-    file."open"( name, "<" )
+    file = new "Stream::ParrotIO"
+    file."open"( name, 'r' )
 
     # process it one line per read
-    find_type $I0, "Stream::Lines"
-    new lines, $I0
+    lines = new "Stream::Lines"
     assign lines, file
 
     # endless counter
-    find_type $I0, "Stream::Sub"
-    new counter, $I0
-    .const .Sub temp = "_counter"
+    counter = new "Stream::Sub"
+    .const 'Sub' temp = "_counter"
     assign counter, temp
 
     # combine the counter and the file's lines
-    find_type $I0, "Stream::Combiner"
-    new combiner, $I0
+    combiner = new "Stream::Combiner"
     assign combiner, counter
     assign combiner, lines
 
@@ -80,7 +81,7 @@ line numbers followed by a space to its stream.
     .local pmc array
 
     i = 0
-    array = new .ResizablePMCArray
+    array = new 'ResizablePMCArray'
 
 LOOP:
     inc i
@@ -100,7 +101,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -108,4 +109,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

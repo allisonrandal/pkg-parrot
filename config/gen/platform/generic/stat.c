@@ -1,31 +1,84 @@
 /*
- * File stat stuff
+ * $Id: stat.c 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2007-2008, Parrot Foundation.
  */
 
+/*
+
+=head1 NAME
+
+config/gen/platform/generic/stat.c
+
+=head1 DESCRIPTION
+
+File stat stuff
+
+=head2 Functions
+
+=over 4
+
+=cut
+
+*/
+
+
+/*
+
+=item C<PMC *
+Parrot_stat_file(PARROT_INTERP, STRING *filename)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 PMC *
-Parrot_stat_file(Interp* interpreter, STRING *filename)
+Parrot_stat_file(PARROT_INTERP, STRING *filename)
 {
     return NULL;
 }
 
+/*
+
+=item C<PMC *
+Parrot_stat_info_pmc(PARROT_INTERP, STRING *filename, INTVAL thing)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 PMC *
-Parrot_stat_info_pmc(Interp* interpreter, STRING *filename, INTVAL thing)
+Parrot_stat_info_pmc(PARROT_INTERP, STRING *filename, INTVAL thing)
 {
     return NULL;
 }
+
+/*
+
+=item C<static INTVAL
+stat_common(PARROT_INTERP, struct stat *statbuf, INTVAL thing, int status)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
 
 static INTVAL
-stat_common(Interp *interpreter, struct stat *statbuf,
-        INTVAL thing, int status)
+stat_common(PARROT_INTERP, struct stat *statbuf, INTVAL thing, int status)
 {
     INTVAL result = -1;
 
     if (thing == STAT_EXISTS)
         return status == 0;
+
     if (status == -1) {
         const char *err = strerror(errno);
-        real_exception(interpreter, NULL, E_IOError,
-                "stat failed: %s", err);
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_EXTERNAL_ERROR,
+            "stat failed: %s", err);
     }
 
     switch (thing) {
@@ -34,6 +87,9 @@ stat_common(Interp *interpreter, struct stat *statbuf,
             break;
         case STAT_ISDIR:
             result = S_ISDIR(statbuf->st_mode);
+            break;
+        case STAT_ISREG:
+            result = S_ISREG(statbuf->st_mode);
             break;
         case STAT_ISDEV:
             result = S_ISCHR(statbuf->st_mode) || S_ISBLK(statbuf->st_mode);
@@ -80,49 +136,101 @@ stat_common(Interp *interpreter, struct stat *statbuf,
         case STAT_PLATFORM_BLOCKS:
             result = statbuf->st_blocks;
             break;
+        default:
+            break;
     }
 
     return result;
 }
 
+/*
+
+=item C<INTVAL
+Parrot_stat_info_intval(PARROT_INTERP, STRING *file, INTVAL thing)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 INTVAL
-Parrot_stat_info_intval(Interp* interpreter, STRING *file, INTVAL thing)
+Parrot_stat_info_intval(PARROT_INTERP, STRING *file, INTVAL thing)
 {
     struct stat statbuf;
-    char *filename;
-    int status;
 
     /* Get the name of the file as something we can use */
-    filename = string_to_cstring(interpreter, file);
+    char * const filename = Parrot_str_to_cstring(interp, file);
 
     /* Everything needs the result of stat, so just go do it */
-    status = stat(filename, &statbuf);
-    string_cstring_free(filename);
-    return stat_common(interpreter, &statbuf, thing, status);
+    const int status = stat(filename, &statbuf);
+    Parrot_str_free_cstring(filename);
+    return stat_common(interp, &statbuf, thing, status);
 }
 
+/*
+
+=item C<INTVAL
+Parrot_fstat_info_intval(PARROT_INTERP, INTVAL file, INTVAL thing)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 INTVAL
-Parrot_fstat_info_intval(Interp* interpreter, INTVAL file, INTVAL thing)
+Parrot_fstat_info_intval(PARROT_INTERP, INTVAL file, INTVAL thing)
 {
     struct stat statbuf;
     int status;
 
     /* Everything needs the result of stat, so just go do it */
     status = fstat(file, &statbuf);
-    return stat_common(interpreter, &statbuf, thing, status);
+    return stat_common(interp, &statbuf, thing, status);
 }
+
+/*
+
+=item C<FLOATVAL
+Parrot_stat_info_floatval(PARROT_INTERP, STRING *filename, INTVAL thing)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
 
 FLOATVAL
-Parrot_stat_info_floatval(Interp* interpreter, STRING *filename, INTVAL thing)
+Parrot_stat_info_floatval(PARROT_INTERP, STRING *filename, INTVAL thing)
 {
-    return -1;
+    return (FLOATVAL)-1;
 }
 
+/*
+
+=item C<STRING *
+Parrot_stat_info_string(PARROT_INTERP, STRING *filename, INTVAL thing)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 STRING *
-Parrot_stat_info_string(Interp* interpreter, STRING *filename, INTVAL thing)
+Parrot_stat_info_string(PARROT_INTERP, STRING *filename, INTVAL thing)
 {
     return NULL;
 }
+
+/*
+
+=back
+
+=cut
+
+*/
 
 /*
  * Local variables:

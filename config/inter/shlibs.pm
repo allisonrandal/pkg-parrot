@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: shlibs.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: shlibs.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -20,15 +20,19 @@ package inter::shlibs;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':inter';
+use Parrot::Configure::Utils ':inter';
 
-$description = 'Determining flags for building shared libraries';
 
-@args = qw(ask verbose cc_shared);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determine flags for building shared libraries};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
@@ -42,7 +46,7 @@ sub runstep {
     $conf->data->set( cc_shared => $cc_shared );
     $self->set_result( ( $cc_shared =~ m/^ ?$/ ) ? 'done' : $cc_shared );
 
-    return $self;
+    return 1;
 }
 
 1;

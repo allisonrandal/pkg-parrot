@@ -1,5 +1,5 @@
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: Auxiliary.pm 17579 2007-03-17 22:52:33Z paultcochrane $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: Auxiliary.pm 36833 2009-02-17 20:09:26Z allison $
 package Parrot::Ops2pm::Auxiliary;
 use strict;
 use warnings;
@@ -48,11 +48,11 @@ Parrot::Ops2pm::Auxiliary - Non-method subroutines holding functionality for F<t
 Parrot::Ops2pm::Auxiliary provides subroutines called by F<tools/build/ops2pm.pl>, a
 program which is called at the very beginning of the Parrot F<make> process.
 This package is intended to hold subroutines used by that program I<other
-than> the object-oriented methods provided by Parrot::Ops2pm::Utils.
+than> the object-oriented methods provided by Parrot::Ops2pm.
 
 Extraction of the subroutines exported by this package from
 F<tools/build/ops2pm.pl> facilitates the testing of their functionality by the
-tests in F<t/tools/ops2pmutils/*.t>.
+tests in F<t/tools/ops2pm/*.t>.
 
 =head1 SUBROUTINES
 
@@ -109,7 +109,7 @@ Jim Keenan (refactoring code originally found in F<tools/build/ops2pm.pl>).
 
 =head1 SEE ALSO
 
-Parrot::Ops2pm::Utils.  F<tools/build/ops2pm.pl>.
+Parrot::Ops2pm.  F<tools/build/ops2pm.pl>.
 
 =cut
 

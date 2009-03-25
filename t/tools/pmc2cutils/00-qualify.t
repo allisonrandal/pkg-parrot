@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: 00-qualify.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: 00-qualify.t 36833 2009-02-17 20:09:26Z allison $
 # 00-qualify.t
 
 use strict;
@@ -26,20 +26,19 @@ for my $f (@files) {
 # In src/pmc, we should have only .pmc files (81+ of them), 1 .num file,
 # and >= .h files none of whose names may begin 'pmc_' (lest they be left over
 # from a previous build).
-my $suffixqty = scalar(keys %sfx);
-ok( ((2 <= $suffixqty) and ($suffixqty <= 3)),
-    "only 2 or 3 file suffixes in src/pmc");
+my $suffixqty = scalar( keys %sfx );
+ok( ( ( 2 <= $suffixqty ) and ( $suffixqty <= 3 ) ), "only 2 or 3 file suffixes in src/pmc" );
 
 ok( $sfx{'num'}, ".num suffix correctly located" );
 ok( $sfx{'pmc'}, ".pmc suffix correctly located" );
-if( $sfx{'h'}) {
+if ( $sfx{'h'} ) {
     my $pmc_leftovers = 0;
     foreach my $f (@files) {
         $pmc_leftovers++ if $f =~ m/^pmc_.*\.h$/;
     }
-    is($pmc_leftovers, 0,
-        "No left-over 'pmc_*.h' files in src/pmc/");
-} else {
+    is( $pmc_leftovers, 0, "No left-over 'pmc_*.h' files in src/pmc/" );
+}
+else {
     pass("No .h files in src/pmc/");
 }
 

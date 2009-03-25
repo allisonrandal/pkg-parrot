@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: exec_start.c 18183 2007-04-14 03:15:44Z chromatic $
+Copyright (C) 2001-2006, Parrot Foundation.
+$Id: exec_start.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -31,7 +31,7 @@ executables.
 #include "jit_emit.h"
 #include "parrot/embed.h"
 
-opcode_t* run_compiled(Interp *interp,
+opcode_t* run_compiled(PARROT_INTERP,
     opcode_t *cur_opcode, opcode_t *code_start);
 
 /*
@@ -81,7 +81,7 @@ main(int argc, char * argv[])
         printf("Can't unpack.\n");
         return 1;
     }
-    Parrot_loadbc(interp, pf);
+    Parrot_pbc_load(interp, pf);
     PackFile_fixup_subs(interp, PBC_PBC, NULL);
 
     /* opcode_map has the offset of each opcode in the compiled code

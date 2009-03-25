@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: time.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: time.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 5;
+use Parrot::Test tests => 7;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/op/time.t - Time and Sleep
 
 =head1 SYNOPSIS
 
-        % prove t/op/time.t
+    % prove t/op/time.t
 
 =head1 DESCRIPTION
 
@@ -93,7 +93,7 @@ CODE
 OUT
 
 my $year;
-( undef, undef, undef, undef, undef, $year ) = gmtime(time);
+( undef, undef, undef, undef, undef, $year ) = localtime();
 $year += 1900;
 
 # don't run this test 1 tick before the year changes #'
@@ -106,6 +106,45 @@ pasm_output_is( <<'CODE', $year, "decodelocaltime" );
     print I0
     end
 CODE
+
+pir_output_is(<<'CODE', "Tue Jan  1 00:00:00 2008\n25", "gmtime string length");
+.sub _ :main
+$I0 = 1199145600
+$S0 = gmtime $I0
+print $S0
+$I1 = length $S0
+print $I1
+.end
+CODE
+
+pir_output_is(<<'CODE', <<OUTPUT, "time(FLOATVAL) vs time(INTVAL)");
+.sub main :main
+    .local int time_int
+    time time_int
+
+    .local num time_float
+    time time_float
+
+    # check if time_float is within [time_int - 5;time_int + 5]
+    .local int time_int_lower
+    time_int_lower = time_int - 5
+    if time_float < time_int_lower goto FAIL
+    .local int time_int_upper
+    time_int_upper = time_int + 5
+    if time_float > time_int_upper goto FAIL
+
+    print "ok\n"
+    goto END
+
+FAIL: print "not ok\n"
+    goto END
+
+END:
+.end
+CODE
+ok
+OUTPUT
+
 
 # Local Variables:
 #   mode: cperl

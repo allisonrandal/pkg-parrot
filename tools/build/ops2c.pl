@@ -1,14 +1,17 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: ops2c.pl 17580 2007-03-17 22:53:00Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: ops2c.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 use warnings;
 use strict;
-use lib 'lib';
+use FindBin qw($Bin);
+use lib "$Bin/../lib";    # install location
+use lib "$Bin/../../lib"; # build location
 use Parrot::Ops2c::Auxiliary qw( Usage getoptions );
-use Parrot::Ops2c::Utils;
+use Parrot::Ops2c::Utils ();
 
 my $flagref = getoptions();
-if (   ( not defined $flagref )
+if ( ( not defined $flagref )
     or $flagref->{help}
     or ( not @ARGV ) )
 {
@@ -30,9 +33,7 @@ if ( not defined $self ) {
 
 $self->print_c_header_file();
 
-my $SOURCE = $self->print_c_source_top();
-
-my $c_source_final = $self->print_c_source_bottom($SOURCE);
+$self->print_c_source_file();
 
 exit 0;
 

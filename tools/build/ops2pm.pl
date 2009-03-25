@@ -1,13 +1,12 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: ops2pm.pl 18571 2007-05-16 20:48:17Z bernhard $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: ops2pm.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 
-use Getopt::Long;
 use lib 'lib';
-use Parrot::Ops2pm::Utils;
+use Parrot::Ops2pm;
 use Parrot::Ops2pm::Auxiliary qw( Usage getoptions );
 
 my $flagref = getoptions();
@@ -17,7 +16,7 @@ if ( $flagref->{help} or !@ARGV ) {
     exit;
 }
 
-my $self = Parrot::Ops2pm::Utils->new(
+my $self = Parrot::Ops2pm->new(
     {
         argv    => [@ARGV],
         nolines => $flagref->{nolines},
@@ -31,12 +30,6 @@ my $self = Parrot::Ops2pm::Utils->new(
 );
 
 $self->prepare_ops();
-
-if ( $flagref->{renum} ) {
-    $self->renum_op_map_file();
-    exit 0;
-}
-
 $self->load_op_map_files();
 $self->sort_ops();
 $self->prepare_real_ops();
@@ -63,8 +56,8 @@ F<Parrot::OpLib::core> module containing information about the ops.
 Also outputs F<include/parrot/oplib/ops.h>.  This program is called by Parrot's
 F<make>.
 
-If called with the C<--renum> flag, checks the numbering of ops against
-F<src/opts/opts.num>.
+If called with the C<--renum> flag, renumbers the file F<src/ops/ops.num>.
+This is mandatory when adding or removing opcodes.
 
 =head1 OPTIONS
 
@@ -89,7 +82,7 @@ Most of the functionality in this program is now held in Parrot::Ops2pm::Util
 methods and a small number of Parrot::Ops2pm::Auxiliary subroutines.
 See those modules' documentation for discussion of those functions.
 Revisions to the functionality should be made in those packages and tested
-against tests found in F<t/tools/ops2pmutils/>.
+against tests found in F<t/tools/ops2pm/>.
 
 =head1 WARNING
 
@@ -126,7 +119,7 @@ modified so that it doesn't need to concatenate separate ops files.
 
 =item F<tools/build/ops2c.pl>.
 
-=item F<lib/Parrot/Ops2pm/Utils.pm>.
+=item F<lib/Parrot/Ops2pm.pm>.
 
 =item F<lib/Parrot/Ops2pm/Auxiliary.pm>.
 

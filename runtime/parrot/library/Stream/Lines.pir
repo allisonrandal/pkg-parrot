@@ -1,4 +1,4 @@
-# $Id: Lines.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: Lines.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -22,22 +22,20 @@ TBD
 
 =cut
 
-.include "library/Data/Escape.pir"
-
-.sub onload :load, :anon
+.sub onload :load :anon
     .local int i
     .local pmc base
     .local pmc lines
 
-    find_type i, "Stream::Lines"
-    if i > 1 goto END
+    $P0 = get_class 'Stream::Lines'
+    unless null $P0 goto END
 
     load_bytecode "library/Stream/Base.pir"
 
-    getclass base, "Stream::Base"
+    get_class base, "Stream::Base"
     subclass lines, base, "Stream::Lines"
 
-    addattribute lines, "buffer"
+    addattribute lines, "line_buffer"
 END:
 .end
 
@@ -46,9 +44,8 @@ END:
 .sub init :vtable :method
     .local pmc temp
 
-    classoffset $I0, self, "Stream::Lines"
-    temp = new .String
-    setattribute self, $I0, temp
+    temp = new 'String'
+    setattribute self, 'line_buffer', temp
 .end
 
 =item is = stream."connected"()
@@ -59,11 +56,10 @@ END:
 
 .sub connected :method
     # XXX: check if the buffer is empty if the source stream is not connected
-    classoffset $I0, self, "Stream::Base"
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'source'
     if_null $P0, NOT_CONNECTED
-    typeof $I0, $P0
-    if $I0 == .Undef goto NOT_CONNECTED
+    $I0 = defined $P0
+    unless $I0 goto NOT_CONNECTED
     $I0 = $P0."connected"()
     .return($I0)
 NOT_CONNECTED:
@@ -118,8 +114,7 @@ BUFFER_END:
     .local pmc temp
     .local string _buffer
 
-    classoffset $I0, self, "Stream::Lines"
-    getattribute temp, self, $I0
+    getattribute temp, self, 'line_buffer'
     _buffer = temp
 
     .return(temp,_buffer)
@@ -135,10 +130,9 @@ BUFFER_END:
     .param string buffer
     .local pmc temp
 
-    new temp, .String
+    new temp, 'String'
     temp = buffer
-    classoffset $I0, self, "Stream::Lines"
-    setattribute self, $I0, temp
+    setattribute self, 'line_buffer', temp
 .end
 
 =item stream."fillBuffer"() (B<internal>)
@@ -157,8 +151,7 @@ BUFFER_END:
     temp = self."source"()
     str = temp."read"()
 
-    classoffset $I0, self, "Stream::Lines"
-    getattribute temp, self, $I0
+    getattribute temp, self, 'line_buffer'
     buffer = temp
     code = 0
 
@@ -167,7 +160,7 @@ BUFFER_END:
     # concat to the buffer
     concat buffer, str
     temp = buffer
-    setattribute self, $I0, temp
+    setattribute self, 'line_buffer', temp
     code = 1
 
 END:
@@ -190,7 +183,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -198,4 +191,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

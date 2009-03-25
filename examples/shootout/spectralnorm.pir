@@ -1,6 +1,6 @@
-#!./parrot -j
+#!./parrot
 #
-# spectralnorm.pir N         (N = 100 for shootout)
+# ./parrot -R jit spectralnorm.pir N         (N = 100 for shootout)
 # by Michal Jurosz
 # modified by Karl Forner to accept shootout default value of N=100
 
@@ -81,7 +81,7 @@ beginfor_i:
 	inc i
 	goto beginfor_i
 endfor_i:
-.end	
+.end
 
 
 .sub eval_AtA_times_u
@@ -90,7 +90,7 @@ endfor_i:
 	.param pmc AtAu
 
 	.local pmc v
-	v = new .FixedFloatArray
+	v = new 'FixedFloatArray'
 	v = N
 
 	eval_A_times_u(N,u,v)
@@ -109,9 +109,9 @@ endfor_i:
 	N = $S0
 default:
 	.local pmc u, v
-	u = new .FixedFloatArray
+	u = new 'FixedFloatArray'
 	u = N
-	v = new .FixedFloatArray
+	v = new 'FixedFloatArray'
 	v = N
 
 	.local int i
@@ -134,7 +134,7 @@ beginfor_eval:
 	goto beginfor_eval
 endfor_eval:
 
-	.local float vBv, vv
+	.local num vBv, vv
   	vBv = 0.0
   	vv = 0.0
 
@@ -152,12 +152,12 @@ beginfor_calc:
 	inc i
 	goto beginfor_calc
 endfor_calc:
-  	
+
 	# print "%0.9f" % (sqrt(vBv/vv))
 	$N0 = vBv / vv
 	$N0 = sqrt $N0
 	.local pmc spf
-	spf = new .FixedFloatArray
+	spf = new 'FixedFloatArray'
 	spf = 1
 	spf[0] = $N0
 	$S0 = sprintf "%.9f\n", spf
@@ -169,4 +169,4 @@ endfor_calc:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

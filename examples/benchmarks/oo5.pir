@@ -1,4 +1,4 @@
-# $Id: oo5.pir 17599 2007-03-18 10:51:10Z paultcochrane $
+# $Id: oo5.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 .sub bench :main
     .local pmc cl
@@ -9,18 +9,17 @@
     .local int typ
     .local int i
     i = 1
-    typ = find_type "Foo"
     .local pmc o
-    o = new  typ
+    o = new "Foo"
 loop:
     $P4 = o."i"()
     .local pmc x
-    x = new .Integer
+    x = new 'Integer'
     assign x, $P4
 
     $P5 = o."j"()
     .local pmc y
-    y = new .Integer
+    y = new 'Integer'
     assign y, $P5
     inc i
     if i <= 500000 goto loop
@@ -32,41 +31,29 @@ loop:
 .end
 
 .namespace ["Foo"]
-.sub __init method
-    .local int ofs
-    ofs = classoffset self, "Foo"
-    new $P10, .Integer
+.sub init :method :vtable
+    new $P10, 'Integer'
     set $P10, 10
-    setattribute self, ofs, $P10
-    inc ofs
-    new $P10, .Integer
+    setattribute self, ".i", $P10
+    new $P10, 'Integer'
     set $P10, 20
-    setattribute self, ofs, $P10
+    setattribute self, ".j", $P10
 .end
 
-.pcc_sub i method
-    .local int ofs
-    ofs = classoffset self, "Foo"
+.sub i :method
     .local pmc r
-    r = getattribute self, ofs
-    .pcc_begin_return
-    .return r
-    .pcc_end_return
+    r = getattribute self, ".i"
+    .return( r )
 .end
 
-.pcc_sub j method
-    .local int ofs
-    ofs = classoffset self, "Foo"
-    inc ofs
+.sub j :method
     .local pmc r
-    r = getattribute self, ofs
-    .pcc_begin_return
-    .return r
-    .pcc_end_return
+    r = getattribute self, ".j"
+    .return( r )
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

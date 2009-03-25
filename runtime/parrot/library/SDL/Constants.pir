@@ -1,5 +1,5 @@
 
-# $Id: Constants.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# $Id: Constants.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -45,15 +45,15 @@ For example, C<8> corresponds to C<backspace>.
 .sub _load_key_names
 	.local pmc key_names
 
-	key_names = new SArray
+	key_names = new 'FixedPMCArray'
 	key_names = 323
-	store_global 'SDL::Constants', 'key_names', key_names
+	set_hll_global ['SDL::Constants'], 'key_names', key_names
 
 	# list created with:
 	# $ cat /usr/include/SDL/SDL_keysym.h |
 	#   perl -wne 'next unless /SDLK_/; m/_F\d/ || tr/A-Z/a-z/;
 	#		/_(.*?)\s+=\s(\d*)/ && print qq{\tkey_names[ $2 ] = \'$1\'\n}'
-	
+
 	key_names[   0 ] = 'unknown'
 	key_names[   0 ] = 'first'
 	key_names[   8 ] = 'backspace'
@@ -301,7 +301,7 @@ Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -309,4 +309,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

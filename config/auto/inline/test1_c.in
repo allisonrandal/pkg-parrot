@@ -1,0 +1,25 @@
+/*
+Copyright (C) 2003-2009, Parrot Foundation.
+$Id: test1_c.in 37201 2009-03-08 12:07:48Z fperrad $
+
+test to check if compiler supports inline
+*/
+
+#include <stdio.h>
+
+inline f(void) {
+    puts("inline");
+}
+
+int
+main() {
+    f();
+    return 0;
+}
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2006-2007, The Perl Foundation.
-$Id: io_string.c 19010 2007-06-14 21:53:44Z petdance $
+Copyright (C) 2006-2007, Parrot Foundation.
+$Id: io_string.c 36832 2009-02-17 19:58:58Z allison $
 
 =head1 NAME
 
@@ -21,12 +21,32 @@ Capture output to a string PMC.
 #include "parrot/parrot.h"
 #include "io_private.h"
 
-/* HEADER: none */
+/* HEADERIZER HFILE: none */
 
-static size_t
-PIO_string_read(Interp *interp, ParrotIOLayer *l, ParrotIO *io, STRING **buf);
-static size_t
-PIO_string_write(Interp *interp, ParrotIOLayer *l, ParrotIO *io, STRING *s);
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static size_t PIO_string_read(SHIM_INTERP,
+    ARGMOD(ParrotIOLayer *l),
+    SHIM(ParrotIO *io),
+    ARGOUT(STRING **buf))
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*l)
+        FUNC_MODIFIES(*buf);
+
+static size_t PIO_string_write(PARROT_INTERP,
+    ARGMOD(ParrotIOLayer *l),
+    SHIM(ParrotIO *io),
+    ARGMOD(STRING *s))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*l)
+        FUNC_MODIFIES(*s);
+
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
 
 static const ParrotIOLayerAPI pio_string_layer_api = {
     PIO_null_init,
@@ -53,14 +73,14 @@ static const ParrotIOLayerAPI pio_string_layer_api = {
     PIO_null_getcount,
     PIO_null_fill,
     PIO_null_eof,
-    0, /* no poll */
-    0, /* no socket */
-    0, /* no connect */
-    0, /* no send */
-    0, /* no recv */
-    0, /* no bind */
-    0, /* no listen */
-    0  /* no accept */
+    NULL, /* no poll */
+    NULL, /* no socket */
+    NULL, /* no connect */
+    NULL, /* no send */
+    NULL, /* no recv */
+    NULL, /* no bind */
+    NULL, /* no listen */
+    NULL  /* no accept */
 };
 
 ParrotIOLayer pio_string_layer = {
@@ -68,43 +88,71 @@ ParrotIOLayer pio_string_layer = {
     "string",
     0,
     &pio_string_layer_api,
-    0, 0
+    NULL, NULL
 };
 
+/*
+
+=item C<ParrotIOLayer * PIO_string_register_layer>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 ParrotIOLayer *
 PIO_string_register_layer(void)
 {
     return &pio_string_layer;
 }
 
-static size_t
-PIO_string_read(Interp *interp, ParrotIOLayer *l, ParrotIO *io, STRING **buf)
-{
-    UNUSED(io);
-    UNUSED(interp);
+/*
 
-    if (l->self == 0)
+=item C<static size_t PIO_string_read>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
+static size_t
+PIO_string_read(SHIM_INTERP, ARGMOD(ParrotIOLayer *l), SHIM(ParrotIO *io), ARGOUT(STRING **buf))
+{
+    if (!l->self)
         return 0;
 
     *buf    = (STRING *)l->self;
-    l->self = 0;
+    l->self = NULL;
 
     return (*buf)->strlen;
 }
 
-static size_t
-PIO_string_write(Interp *interp, ParrotIOLayer *l, ParrotIO *io, STRING *s)
-{
-    STRING *old_string = (STRING *)l->self;
-    UNUSED(io);
+/*
 
-    if (old_string == 0) {
+=item C<static size_t PIO_string_write>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
+static size_t
+PIO_string_write(PARROT_INTERP, ARGMOD(ParrotIOLayer *l), SHIM(ParrotIO *io), ARGMOD(STRING *s))
+{
+    STRING * const old_string = (STRING *)l->self;
+
+    if (!old_string) {
         l->self = s;
         return s->strlen;
     }
 
-    l->self = string_append(interp, old_string, s);
-    return string_length(interp, (STRING *)l->self);
+    l->self = Parrot_str_append(interp, old_string, s);
+    return Parrot_str_byte_length(interp, (STRING *)l->self);
 }
 
 /*

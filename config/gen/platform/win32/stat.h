@@ -1,3 +1,8 @@
+/*
+ * $Id: stat.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2004-2008, Parrot Foundation.
+ */
+
 #ifndef PARROT_PLATFORM_WIN32_STAT_H_GUARD
 #define PARROT_PLATFORM_WIN32_STAT_H_GUARD
 
@@ -14,15 +19,19 @@
 #endif
 
 #ifndef S_ISBLK
-#  define S_ISBLK(m) ((m & S_IFMT) == S_IFBLK)
+#  define S_ISBLK(m) (((m) & S_IFMT) == S_IFBLK)
 #endif
 
 #ifndef S_ISCHR
-#  define S_ISCHR(m) ((m & S_IFMT) == S_IFCHR)
+#  define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
 #endif
 
 #ifndef S_ISDIR
-#  define S_ISDIR(m) ((m & S_IFMT) == S_IFDIR)
+#  define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
+#ifndef S_ISREG
+#  define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
 #endif /* PARROT_PLATFORM_WIN32_STAT_H_GUARD */

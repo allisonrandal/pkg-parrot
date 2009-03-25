@@ -1,10 +1,11 @@
-" Description:	imcc indenter
-" Author:	Andrew Rodland <arodland@entermail.net>
-" Last Change: 2004 Aug 3
+" Description:  PIR indenter
+" Author:   Andrew Rodland <arodland@entermail.net>
+" Maintainer: Jimmy Zhuo <zhuomingliang@yahoo.com.cn>
+" Last Change: 2009 Jan 16
 
 " As usual, we want to be alone
 if exists("b:did_indent")
-	finish
+    finish
 endif
 let b:did_indent=1
 
@@ -12,63 +13,72 @@ setlocal indentexpr=PIRIndent()
 setlocal indentkeys=o,O,*<Return>,<bs>,:,=.end,0#
 
 fun! InPOD(lnum)
-	return synIDattr(synID(a:lnum, 1, 1), "name") =~? '^myPod$\|^pod[A-Z]'
+    return synIDattr(synID(a:lnum, 1, 1), "name") =~? '^myPod$\|^pod[A-Z]'
 endfun
 
 fun! PIRIndent()
-	let thisline = getline(v:lnum)
+    let thisline = getline(v:lnum)
 
-	let POD_START = '^=[a-z]'
+    let POD_START = '^=[a-z]'
 
-	if thisline =~? POD_START
-		return 0
-	endif
+    if thisline =~? POD_START
+        return 0
+    endif
 
-	
-	if InPOD(v:lnum)
-		return -1
-	endif
 
-	let LABEL_OR_COMMENT = '^\s*\k\+:\s*$\|^#'
-	if thisline =~? LABEL_OR_COMMENT
-		return 0
-	endif
+    if InPOD(v:lnum)
+        return -1
+    endif
 
-	let lnum=v:lnum
-	while lnum > 0
-		let lnum = prevnonblank(lnum-1)
-		let prevline = getline(lnum)
-		
-		if prevline !~? LABEL_OR_COMMENT
-			if !InPOD(lnum)
-				break
-			endif
-		endif
-	endwhile
+    let COMMENT = '^#'
+    if thisline =~? COMMENT
+        return 0
+    endif
 
-	if lnum < 1
-		return 0
-	endif
+    let lnum=v:lnum
+    while lnum > 0
+        let lnum = prevnonblank(lnum-1)
+        let prevline = getline(lnum)
 
-	let ind = indent(lnum)
-	
-	let SUB = '^\s*\.pcc_sub\s\+\|^\s*\.sub\s\+'
-	let RETURNBLOCK = '\s*\.pcc_begin_return\s*$'
-	let END = '^\s*\.end\s*$\|^\s*\.pcc_end_return\s*$'
+        if prevline !~? COMMENT
+            if !InPOD(lnum)
+                break
+            endif
+        endif
+    endwhile
 
-	if prevline =~? SUB
-		let ind = ind + &sw
-	endif
+    if lnum < 1
+        return 0
+    endif
 
-	if prevline =~? RETURNBLOCK
-		let ind = ind + &sw
-	endif
+    let ind = indent(lnum)
 
-	if thisline =~? END
-		let ind = ind - &sw
-	endif
+    let SUB = '^\s*\.pcc_sub\s\+\|^\s*\.sub\s\+\|^\s*\.macro\s\+'
+    let RETURNBLOCK = '\s*\.begin_return\s*$'
+    let END = '^\s*\.end\s*$\|^\s*\.end_return\s*\|^\s*\.endm$'
+    let LABEL = '^\s*\k\+:'
 
-	return ind
+    if prevline =~? SUB
+        let ind = ind + &sw
+    endif
+
+    if prevline =~? RETURNBLOCK
+        let ind = ind + &sw
+    endif
+
+    if prevline =~? LABEL
+        let ind = ind + 2
+    endif
+
+    if thisline =~? END
+        let ind = ind - &sw
+    endif
+
+    if thisline =~? LABEL
+        let ind = ind - 2
+    endif
+
+    return ind
 
 endfun
 

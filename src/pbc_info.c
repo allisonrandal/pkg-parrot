@@ -1,10 +1,10 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: pbc_info.c 18183 2007-04-14 03:15:44Z chromatic $
+Copyright (C) 2001-2003, Parrot Foundation.
+$Id: pbc_info.c 37212 2009-03-08 23:02:22Z rurban $
 
 =head1 NAME
 
-pbc_info - PacFile demo
+pbc_info - PackFile demo
 
 =head1 SYNOPSIS
 
@@ -14,6 +14,8 @@ pbc_info - PacFile demo
 
 Sample program for dumping PackFile segment names by iterating
 over the main directory.
+
+=head2 Functions
 
 =over 4
 
@@ -26,7 +28,7 @@ over the main directory.
 
 /*
 
-=item C<static INTVAL iter(Interp*, PackFile_Segment *seg, void
+=item C<static INTVAL iter(PARROT_INTERP, PackFile_Segment *seg, void
  *user_data)>
 
 This function is passed the callback to PackFile_map_segments() to print out
@@ -37,10 +39,11 @@ the name of each segment in the directory.
 */
 
 static INTVAL
-iter(Interp* interp, PackFile_Segment *seg, void *user_data)
+iter(PARROT_INTERP, PackFile_Segment *seg, void *user_data)
 {
-    int ident = (int)user_data;
-    printf("%*.0s%s\n", ident, "", seg->name);
+    long ident = (long)user_data;
+    int length = ident;
+    printf("%*.0s%s\n", length, "", seg->name);
     if (seg->type == PF_DIR_SEG)
         PackFile_map_segments(interp, (PackFile_Directory*)seg,
                 iter, (void*)(ident+2));
@@ -49,7 +52,7 @@ iter(Interp* interp, PackFile_Segment *seg, void *user_data)
 
 /*
 
-=item C<int main(int argc, char **argv)>
+=item C<int main(int argc, char *argv[])>
 
 Reads the PBC from argv[1], adds a few extra sections, and then iterates over
 the directory using PackFile_map_segments() and iter().
@@ -59,7 +62,7 @@ the directory using PackFile_map_segments() and iter().
 */
 
 int
-main(int argc, char * argv[])
+main(int argc, char *argv[])
 {
     PackFile *pf;
     Interp *interp;
@@ -67,7 +70,7 @@ main(int argc, char * argv[])
 
     interp = Parrot_new(NULL);
 
-    pf = Parrot_readbc(interp, argv[1]);
+    pf = Parrot_pbc_read(interp, argv[1], PFOPT_UTILS);
 
     /*
      * add some more segments
@@ -86,7 +89,6 @@ main(int argc, char * argv[])
     PackFile_map_segments(interp, &pf->directory, iter, (void*)2);
 
     Parrot_exit(interp, 0);
-    return 0;
 }
 
 /*
@@ -95,7 +97,7 @@ main(int argc, char * argv[])
 
 =head1 SEE ALSO
 
-F<src/pbc.c>, F<include/parrot/pbc.h>.
+F<src/packfile.c>, F<include/parrot/packfile.h>.
 
 =cut
 

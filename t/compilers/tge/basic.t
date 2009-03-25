@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: basic.t 17577 2007-03-17 22:51:14Z paultcochrane $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: basic.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -24,8 +24,8 @@ pir_output_is( <<'CODE', <<'OUT', 'build up a basic rule in a grammar' );
     load_bytecode 'TGE.pbc'
 
     .local pmc AG
-    AG = new 'TGE::Grammar'
-    AG.add_rule('Leaf', 'min', '.', '.return(1)')
+    AG = new ['TGE';'Grammar']
+    AG.'add_rule'('Leaf', 'min', '.', '.return(1)')
 
     $P1 = getattribute AG, 'rules'
     .local pmc rule_obj
@@ -50,23 +50,23 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', 'agid hash' );
 .sub _main :main
-    load_bytecode 'compilers/tge/TGE/Tree.pir'
+    load_bytecode 'TGE.pbc'
     .local pmc tree
-    tree = new 'TGE::Tree'
+    tree = new ['TGE';'Tree']
     .local int id
-    
-    $P0 = new .Integer
+
+    $P0 = new 'Integer'
     id = tree.'_lookup_id'($P0)
     print id
     print "\n"
-    $P1 = new .Integer
+    $P1 = new 'Integer'
     id = tree.'_lookup_id'($P1)
     print id
     print "\n"
     id = tree.'_lookup_id'($P0)
     print id
     print "\n"
-    $P2 = new .Integer
+    $P2 = new 'Integer'
     id = tree.'_lookup_id'($P2)
     print id
     print "\n"
@@ -95,7 +95,6 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', '"Malformed string" in r11890 under Linux i386' );
 
 .sub test
-  load_bytecode "PAST.pbc"
   load_bytecode "TGE.pbc"
   print "1\n"
 .end

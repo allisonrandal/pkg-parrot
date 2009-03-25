@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: gc.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: gc.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -10,27 +10,33 @@ config/auto/gc.pm - Garbage Collection
 Checks whether the C<--gc> command-line option was passed to F<Configure.pl>
 and sets the memory allocator accordingly.
 
-C<--gc> can take the values:
+Eventually, C<--gc> will be able to take any of the following values:
 
 =over
 
 =item C<gc>
 
-The default. Use the memory allocator in F<src/recources.c>.
+The default. Use the memory allocator in F<src/resources.c>.
 
 =item C<libc>
 
-Use the C library C<malloc>.
+Use the C library C<malloc> along with F<src/gc/res_lea.c>.
+This doesn't currently work.  See [perl #42774].
 
 =item C<malloc>
 
-Use the malloc in F<src/res_lea.c>.
+Use the malloc in F<src/malloc.c> along with F<src/gc/res_lea.c>.
+Since this uses res_lea.c, it doesn't currently work either.  See [perl #42774].
 
 =item C<malloc-trace>
 
-Use the malloc in F<src/res_lea.c> with tracing enabled.
+Use the malloc in F<src/malloc-trace.c> with tracing enabled, along
+with F<src/gc/res_lea.c>.
+Since this uses res_lea.c, it doesn't work currently either.  See [perl #42774].
 
 =back
+
+So, for the time being, only the default value works.
 
 =cut
 
@@ -38,63 +44,36 @@ package auto::gc;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining what allocator to use';
 
 # valid libc/malloc/malloc-trace/gc
-@args = qw(gc verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determine allocator to use};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
     my $gc = $conf->options->get('gc');
 
-    if ( !defined($gc) ) {
-
-        # default is GC in resources.c
-        $gc = 'gc';
-    }
-    elsif ( $gc eq 'libc' ) {
-
-        # tests mallinfo after allocation of 128 bytes
-        if ( $conf->data->get('i_malloc') ) {
-            $conf->data->set( malloc_header => 'malloc.h' );
-        }
-        else {
-            $conf->data->set( malloc_header => 'stdlib.h' );
-        }
-
-=for nothing
-
-    cc_gen('config/auto/gc/test_c.in');
-    eval { cc_build(); };
-    my $test = 0;
-    unless ($@) {
-      $test = cc_run();
-    }
-    cc_clean();
-    # used size should be somewhere here
-    unless ($test >= 128 && $test < 155) {
-      # if not, use own copy of malloc
-      $gc = 'malloc';
-    }
-
-=cut
-
-    }
+    # default is GC in resources.c
+    $gc = 'gc' unless defined $gc;
 
     if ( $gc =~ /^malloc(?:-trace)?$/ ) {
         $conf->data->set(
             TEMP_gc_c => <<"EOF",
 \$(SRC_DIR)/$gc\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/$gc.c
-\$(SRC_DIR)/res_lea\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/res_lea.c
+\$(SRC_DIR)/gc/res_lea\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/gc/res_lea.c
 EOF
-            TEMP_gc_o => "\$(SRC_DIR)\/$gc\$(O) \$(SRC_DIR)/res_lea\$(O)",
+            TEMP_gc_o => "\$(SRC_DIR)\/$gc\$(O) \$(SRC_DIR)/gc/res_lea\$(O)",
             gc_flag   => '-DGC_IS_MALLOC',
         );
     }
@@ -106,6 +85,13 @@ EOF
             TEMP_gc_o => "\$(SRC_DIR)/gc/res_lea\$(O)",
             gc_flag   => '-DGC_IS_MALLOC',
         );
+        # tests mallinfo after allocation of 128 bytes
+        if ( $conf->data->get('i_malloc') ) {
+            $conf->data->set( malloc_header => 'malloc.h' );
+        }
+        else {
+            $conf->data->set( malloc_header => 'stdlib.h' );
+        }
     }
     else {
         $gc = 'gc';
@@ -119,7 +105,7 @@ EOF
     }
     print(" ($gc) ") if $conf->options->get('verbose');
 
-    return $self;
+    return 1;
 }
 
 1;

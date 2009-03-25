@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: 03-dump_vtable.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: 03-dump_vtable.t 36833 2009-02-17 20:09:26Z allison $
 # 03-dump_vtable.t
 
 use strict;
@@ -19,7 +19,7 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 12;
+use Test::More tests => 8;
 use_ok('Parrot::Pmc2c::Pmc2cMain');
 use_ok('File::Basename');
 use_ok( 'File::Temp', qw| tempdir | );
@@ -41,39 +41,13 @@ my $cwd;
             include => \@include,
             opt     => \%opt,
             args    => [@args],
+            bin     => $Bin,
         }
     );
-    $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
+    $dump_file = $self->dump_vtable("$main::topdir/src/vtable.tbl");
     ok( -e $dump_file, "dump_vtable created vtable.dump" );
 
     is( dirname($dump_file), realpath($tdir1), "vtable.dump created in expected directory" );
-
-    ok( chdir $cwd, "changed back to original directory" );
-}
-
-# test verbose option
-{
-    $cwd = cwd();
-    my $tdir2 = tempdir( CLEANUP => 1 );
-    ok( chdir $tdir2, 'changed to temp directory for testing' );
-
-    %opt = ( verbose => 1 );
-    $self = Parrot::Pmc2c::Pmc2cMain->new(
-        {
-            include => \@include,
-            opt     => \%opt,
-            args    => [@args],
-        }
-    );
-    my ( $fh, $msg );
-    {
-        my $currfh = select($fh);
-        open( $fh, '>', \$msg ) or die "Unable to open handle: $!";
-        $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
-        select($currfh);
-    }
-    ok( -e $dump_file, "dump_vtable created dump file" );
-    like( $msg, qr/^Writing/, "verbose output is as expected" );
 
     ok( chdir $cwd, "changed back to original directory" );
 }
@@ -104,7 +78,7 @@ When all of F<pmc2c.pl>'s functionality was contained within that program,
 C<dump_vtable()> was a subroutine named C<dump_default()>.  That name was
 confusing, because it suggested that what was being 'dumped' was
 F<src/pmc/default.pmc> -- which was not the case.  The file which this method
-takes as an argument is F<vtable.tbl>; hence, the method's renaming.
+takes as an argument is F<src/vtable.tbl>; hence, the method's renaming.
 
 So as not to pollute the Parrot build directories with files created
 during the testing process, all functions which create or modify

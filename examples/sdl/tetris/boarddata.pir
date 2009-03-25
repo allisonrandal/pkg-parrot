@@ -5,8 +5,7 @@ boarddata.pir - a tetris board data class
 =head1 SYNOPSIS
 
     # create the board data
-    find_type $I0, "BoardData"
-    new data, $I0
+    data = new "BoardData"
     data."new"( 10, 20 )
 
     # fill the board
@@ -20,13 +19,9 @@ This is the base class of the Board class.
 
 .namespace ["Tetris::BoardData"]
 
-.const int bData   = 0
-.const int bWidth  = 1
-.const int bHeight = 2
-
 .sub __onload :load
-    find_type $I0, "Tetris::BoardData"
-    if $I0 > 1 goto END
+    $P0 = get_class "Tetris::BoardData"
+    unless null $P0 goto END
     newclass $P0, "Tetris::BoardData"
     addattribute $P0, "data"
     addattribute $P0, "width"
@@ -64,14 +59,11 @@ Returns the created data object.
     .local pmc data
     .local pmc temp
     .local int i
-    .local int id
-    
-    classoffset id, self, "Tetris::BoardData"
-    
+
     # create the data array
-    new data, .ResizablePMCArray
-    setattribute self, id, data
-    
+    new data, 'ResizablePMCArray'
+    setattribute self, 'data', data
+
     # calculate the array size
     set i, w
     mul i, h
@@ -79,16 +71,14 @@ Returns the created data object.
     set data, i
 
     # store the width
-    new temp, .Integer
+    new temp, 'Integer'
     set temp, w
-    inc id
-    setattribute self, id, temp
+    setattribute self, 'width', temp
 
     # store the height
-    new temp, .Integer
+    new temp, 'Integer'
     set temp, h
-    inc id
-    setattribute self, id, temp
+    setattribute self, 'height', temp
 .end
 
 =back
@@ -118,10 +108,9 @@ This method returns nothing.
     .local pmc data
     .local int i
 
-    classoffset $I0, self, "Tetris::BoardData"
-    getattribute data, self, $I0
-    
-    # get data size    
+    getattribute data, self, 'data'
+
+    # get data size
     set i, data
     # fill the data
 WHILE:
@@ -133,17 +122,15 @@ END:
 .end
 
 .sub __get_integer :method
-    classoffset $I0, self, "Tetris::BoardData"
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'data'
     $I0 = $P0
     .return ($I0)
 .end
 
 .sub __get_integer_keyed :method
     .param pmc key
-    
-    classoffset $I0, self, "Tetris::BoardData"
-    getattribute $P0, self, $I0
+
+    getattribute $P0, self, 'data'
     $I0 = key
     $I1 = $P0
     if $I0 < $I1 goto OK
@@ -155,7 +142,7 @@ END:
     sleep 0.1
 OK:
     $I0 = $P0[$I0]
-    
+
     .return ($I0)
 .end
 
@@ -163,24 +150,21 @@ OK:
     .param pmc key
     .param int val
 
-    classoffset $I0, self, "Tetris::BoardData"
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'data'
     $P0[key] = val
 .end
 
 .sub __set_integer_native :method
     .param int val
 
-    classoffset $I0, self, "Tetris::BoardData"
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'data'
     $P0 = val
 .end
 
 .sub __push_integer :method
     .param int val
 
-    classoffset $I0, self, "Tetris::BoardData"
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'data'
     push $P0, val
 .end
 
@@ -191,9 +175,7 @@ Returns the width (number of blocks in one row) of the board.
 =cut
 
 .sub width :method
-    classoffset $I0, self, "Tetris::BoardData"
-    add $I0, bWidth
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'width'
     $I0 = $P0
     .return ($I0)
 .end
@@ -205,9 +187,7 @@ Returns the height (number of blocks in one column) of the board.
 =cut
 
 .sub height :method
-    classoffset $I0, self, "Tetris::BoardData"
-    add $I0, bHeight
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'height'
     $I0 = $P0
     .return ($I0)
 .end
@@ -223,16 +203,12 @@ Returns the width and height of the board.
     .local int h
     .local pmc temp
 
-    classoffset $I0, self, "Tetris::BoardData"
-    add $I0, bWidth
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'width'
     w = $P0
-    sub $I0, bWidth
 
-    add $I0, bHeight
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'height'
     h = $P0
-    
+
     .return (w, h)
 .end
 
@@ -246,7 +222,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -254,4 +230,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

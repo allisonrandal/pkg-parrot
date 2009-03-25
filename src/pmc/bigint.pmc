@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004-2007, The Perl Foundation.
-$Id: bigint.pmc 18435 2007-05-06 15:11:30Z rgrjr $
+Copyright (C) 2004-2009, Parrot Foundation.
+$Id: bigint.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -14,9 +14,9 @@ C<BigInt> provides arbitrary precision integer mathematic functions.
 
 =over 4
 
-=item C<static void bigint_set_long(Interp*, PMC*, long value)>
+=item C<static void bigint_set_long(Interp*, PMC *, long value)>
 
-=item C<static void bigint_set_double(Interp*, PMC*, double value)>
+=item C<static void bigint_set_double(Interp*, PMC *, double value)>
 
 =cut
 
@@ -24,9 +24,11 @@ C<BigInt> provides arbitrary precision integer mathematic functions.
 
 #include "parrot/parrot.h"
 
-/*
- * TODO split that out into a separate file
- */
+/* TODO split that out into a separate file */
+
+#ifdef S_SPLINT_S
+#  undef PARROT_HAS_GMP /* splint barfs on the gmp.h header */
+#endif /* S_SPLINT_S */
 
 #ifdef PARROT_HAS_GMP
 #  include <gmp.h>
@@ -34,463 +36,538 @@ typedef struct BIGINT {
     mpz_t b;
 } BIGINT;
 
-#  define BN(x) ((BIGINT*)PMC_struct_val(x))->b
 
 static void
-bigint_init(Interp *interp, PMC *self) {
-    PMC_struct_val(self) = malloc(sizeof (BIGINT));
-    mpz_init(BN(self));
-}
-static void
-bigint_clear(Interp *interp, PMC *self) {
-    mpz_clear(BN(self));
+bigint_init(PARROT_INTERP, PMC *self) {
+    Parrot_BigInt_attributes *attrs =
+        mem_allocate_zeroed_typed(Parrot_BigInt_attributes);
+    attrs->bi = mem_allocate_zeroed_typed(BIGINT);
+    mpz_init(attrs->bi->b);
+    PMC_data(self) = attrs;
 }
 
 static void
-bigint_set(Interp *interp, PMC *dest, PMC *src) {
-    mpz_set(BN(dest), BN(src));
+bigint_clear(PARROT_INTERP, PMC *self) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    mpz_clear(bi->b);
 }
 
 static void
-bigint_set_long(Interp *interp, PMC *self, long value) {
-    mpz_set_si(BN(self), value);
+bigint_set(PARROT_INTERP, PMC *dest, PMC *src) {
+    BIGINT *bi_dest, *bi_src;
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    GETATTR_BigInt_bi(interp, src,  bi_src);
+    mpz_clear(bi_dest->b);
+    mpz_init(bi_dest->b);
+    mpz_set(bi_dest->b, bi_src->b);
 }
 
 static void
-bigint_set_double(Interp *interp, PMC *self, double value) {
-    mpz_set_d(BN(self), value);
+bigint_set_long(PARROT_INTERP, PMC *self, long value) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    mpz_set_si(bi->b, value);
 }
 
 static void
-bigint_set_str(Interp *interp, PMC *self, char* value, int base) {
-    mpz_set_str(BN(self), value, base);
-}
-
-static BIGNUM*
-bigint_get_self(Interp *interp, PMC *self) {
-    return PMC_struct_val(self);
+bigint_set_double(PARROT_INTERP, PMC *self, double value) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    mpz_set_d(bi->b, value);
 }
 
 static void
-bigint_set_self(Interp *interp, PMC *self, BIGNUM *value) {
-    mpz_set(BN(self), (mpz_srcptr)value);
+bigint_set_str(PARROT_INTERP, PMC *self, char *value, int base) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    mpz_set_str(bi->b, value, base);
+}
+
+static BIGINT*
+bigint_get_self(PARROT_INTERP, PMC *self) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    return bi;
+}
+
+static void
+bigint_set_self(PARROT_INTERP, PMC *self, BIGINT *value) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    mpz_set(bi->b, (mpz_srcptr)((BIGINT*)value)->b);
 }
 
 static long
-bigint_get_long(Interp *interp, PMC *self) {
-    if (mpz_fits_slong_p(BN(self)))
-        return mpz_get_si(BN(self));
-    real_exception(interp, NULL, 1, "bigint_get_long: number too big");
-    return 0;
+bigint_get_long(PARROT_INTERP, PMC *self) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    if (mpz_fits_slong_p(bi->b))
+        return mpz_get_si(bi->b);
+
+    Parrot_ex_throw_from_c_args(interp, NULL, 1, "bigint_get_long: number too big");
 }
 
 static int
-bigint_get_bool(Interp *interp, PMC *self) {
-    if (mpz_sgn(BN(self)) != 0) {
+bigint_get_bool(PARROT_INTERP, PMC *self) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    if (mpz_sgn(bi->b) != 0)
         return 1;
-    }
-    else {
+    else
         return 0;
-    }
 }
+
 static char *
-bigint_get_string(Interp *interp, PMC *self, int base) {
-    size_t n = mpz_sizeinbase(BN(self), base) + 2;
-    char  *s  = (char *)mem_sys_allocate(n);
-    return mpz_get_str(s, base, BN(self));
+bigint_get_string(PARROT_INTERP, PMC *self, int base) {
+    BIGINT *bi;
+    size_t  n;
+    char   *s;
+
+    GETATTR_BigInt_bi(interp, self, bi);
+    n = mpz_sizeinbase(bi->b, base) + 2;
+    s = (char *)mem_sys_allocate(n);
+    return mpz_get_str(s, base, bi->b);
 }
 
 static double
-bigint_get_double(Interp *interp, PMC *self) {
-    return mpz_get_d(BN(self));
+bigint_get_double(PARROT_INTERP, PMC *self) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    return mpz_get_d(bi->b);
 }
 
 static void
-bigint_add_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    mpz_add(BN(dest), BN(self), BN(value));
+bigint_add_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    BIGINT *bi_self, *bi_value, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_add(bi_dest->b, bi_self->b, bi_value->b);
 }
 
 static void
-bigint_add_bigint_int(Interp *interp, PMC* self, INTVAL value,
-        PMC *dest)
-{
-    int n = value < 0;
-    if (n) {
-        mpz_sub_ui(BN(dest), BN(self), -value);
-    }
+bigint_add_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    if (value < 0)
+        mpz_sub_ui(bi_dest->b, bi_self->b, (unsigned long int)-value);
     else
-        mpz_add_ui(BN(dest), BN(self), value);
-}
-static void
-bigint_sub_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    mpz_sub(BN(dest), BN(self), BN(value));
+        mpz_add_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
 }
 
 static void
-bigint_sub_bigint_int(Interp *interp, PMC* self, INTVAL value,
-        PMC *dest)
-{
-    int n = value < 0;
-    if (n)
-        mpz_add_ui(BN(dest), BN(self), -value);
+bigint_sub_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    BIGINT *bi_self, *bi_value, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_sub(bi_dest->b, bi_self->b, bi_value->b);
+}
+
+static void
+bigint_sub_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    if (value < 0)
+        mpz_add_ui(bi_dest->b, bi_self->b, (unsigned long int)-value);
     else
-        mpz_sub_ui(BN(dest), BN(self), value);
-}
-static void
-bigint_mul_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    mpz_mul(BN(dest), BN(self), BN(value));
+        mpz_sub_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
 }
 
 static void
-bigint_mul_bigint_int(Interp *interp, PMC* self, INTVAL value,
-        PMC *dest)
-{
-    mpz_mul_si(BN(dest), BN(self), value);
+bigint_mul_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    BIGINT *bi_self, *bi_value, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_mul(bi_dest->b, bi_self->b, bi_value->b);
 }
 
 static void
-bigint_pow_bigint_int(Interp *interp, PMC* self, INTVAL value,
-        PMC *dest)
-{
-    mpz_pow_ui(BN(dest), BN(self), value);
+bigint_mul_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_mul_si(bi_dest->b, bi_self->b, value);
 }
 
 static void
-int_check_divide_zero(Interp *interp, INTVAL value)
-{
-    if (value == 0) {
-        real_exception(interp, NULL, E_ZeroDivisionError,
-                       "Divide by zero");
-    }
+bigint_pow_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_pow_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
 }
 
 static void
-bigint_check_divide_zero(Interp *interp, PMC *value)
-{
+int_check_divide_zero(PARROT_INTERP, INTVAL value) {
+    if (value == 0)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_DIV_BY_ZERO,
+            "Divide by zero");
+}
+
+static void
+bigint_check_divide_zero(PARROT_INTERP, PMC *value) {
     /* Throw an exception if we are dividing by zero. */
-    if (mpz_cmp_si(BN(value), 0) == 0) {
-        real_exception(interp, NULL, E_ZeroDivisionError,
-                       "Divide by zero");
-    }
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, value, bi);
+    if (mpz_cmp_si(bi->b, 0) == 0)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_DIV_BY_ZERO,
+            "Divide by zero");
 }
 
 static void
-bigint_div_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
+bigint_div_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    BIGINT *bi_self, *bi_value, *bi_dest;
     bigint_check_divide_zero(interp, value);
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     /* this is mpz_fdiv_q */
-    mpz_div(BN(dest), BN(self), BN(value));
+    mpz_div(bi_dest->b, bi_self->b, bi_value->b);
 }
+
 static void
-bigint_div_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    int n;
+bigint_div_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     int_check_divide_zero(interp, value);
+
     /* this is mpz_fdiv_q */
-    n = value < 0;
-    if (n) {
-        mpz_div_ui(BN(dest), BN(self), -value);
-        mpz_neg(BN(dest), BN(dest));
+    if (value < 0) {
+        mpz_div_ui(bi_dest->b, bi_self->b, (unsigned long int)-value);
+        mpz_neg(bi_dest->b, bi_dest->b);
     }
     else
-        mpz_div_ui(BN(dest), BN(self), value);
+        mpz_div_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
 }
+
 static void
-bigint_fdiv_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
+bigint_fdiv_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    BIGINT *bi_self, *bi_value, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     bigint_check_divide_zero(interp, value);
-    mpz_fdiv_q(BN(dest), BN(self), BN(value));
-}
-static void
-bigint_fdiv_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    int n;
-    int_check_divide_zero(interp, value);
-    n = value < 0;
-    if (n) {
-        mpz_fdiv_q_ui(BN(dest), BN(self), -value);
-        mpz_neg(BN(dest), BN(dest));
-    }
-    else
-        mpz_fdiv_q_ui(BN(dest), BN(self), value);
+    mpz_fdiv_q(bi_dest->b, bi_self->b, bi_value->b);
 }
 
 static void
-bigint_mod_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
+bigint_fdiv_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    int_check_divide_zero(interp, value);
+
+    if (value < 0) {
+        mpz_fdiv_q_ui(bi_dest->b, bi_self->b, (unsigned long int)-value);
+        mpz_neg(bi_dest->b, bi_dest->b);
+    }
+    else
+        mpz_fdiv_q_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
+}
+
+static void
+bigint_mod_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    BIGINT *bi_self, *bi_value, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     bigint_check_divide_zero(interp, value);
-    mpz_mod(BN(dest), BN(self), BN(value));
+    mpz_mod(bi_dest->b, bi_self->b, bi_value->b);
 }
 
 static void
-bigint_mod_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    int n;
+bigint_mod_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     int_check_divide_zero(interp, value);
-    n = value < 0;
-    if (n) {
-        mpz_mod_ui(BN(dest), BN(self), -value);
+
+    if (value < 0) {
+        mpz_mod_ui(bi_dest->b, bi_self->b, (unsigned long int)-value);
     }
     else
-        mpz_mod_ui(BN(dest), BN(self), value);
-}
-static INTVAL
-bigint_cmp(Interp *interp, PMC* self, PMC *value)
-{
-    return mpz_cmp(BN(self), BN(value));
+        mpz_mod_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
 }
 
 static INTVAL
-bigint_cmp_int(Interp *interp, PMC* self, INTVAL value)
-{
-    return mpz_cmp_si(BN(self), value);
+bigint_cmp(PARROT_INTERP, PMC *self, PMC *value) {
+    BIGINT *bi_self, *bi_value;
+    GETATTR_BigInt_bi(interp, self,  bi_self);
+    GETATTR_BigInt_bi(interp, value, bi_value);
+    return mpz_cmp(bi_self->b, bi_value->b);
+}
+
+static INTVAL
+bigint_cmp_int(PARROT_INTERP, PMC *self, INTVAL value) {
+    BIGINT *bi;
+    GETATTR_BigInt_bi(interp, self, bi);
+    return mpz_cmp_si(bi->b, value);
 }
 
 static void
-bigint_abs(Interp *interp, PMC* self, PMC *dest)
-{
-    VTABLE_morph(interp, dest, enum_class_BigInt);
-    mpz_abs(BN(dest), BN(self));
+bigint_abs(PARROT_INTERP, PMC *self, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    pmc_reuse(interp, dest, enum_class_BigInt, 0);
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_abs(bi_dest->b, bi_self->b);
 }
 
 static void
-bigint_neg(Interp *interp, PMC* self, PMC *dest)
-{
-    VTABLE_morph(interp, dest, enum_class_BigInt);
-    mpz_neg(BN(dest), BN(self));
+bigint_neg(PARROT_INTERP, PMC *self, PMC *dest) {
+    BIGINT *bi_self, *bi_dest;
+    pmc_reuse(interp, dest, enum_class_BigInt, 0);
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
+    mpz_neg(bi_dest->b, bi_self->b);
 }
 
 static void
-bigint_bitwise_shl_bigint_int(Interp *interp, PMC* self,
+bigint_bitwise_shl_bigint_int(PARROT_INTERP, PMC *self,
                               INTVAL value, PMC *dest)
 {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     /* The third args to mpz_mul_2exp and mpz_tdiv_q_2exp are unsigned, so we
        need to do something sensible with negative values. */
     if (value >= 0)
-        mpz_mul_2exp(BN(dest), BN(self), value);
+        mpz_mul_2exp(bi_dest->b, bi_self->b, (unsigned long int)value);
     else
-        mpz_tdiv_q_2exp(BN(dest), BN(self), -value);
+        mpz_tdiv_q_2exp(bi_dest->b, bi_self->b, (unsigned long int)-value);
 }
+
 static void
-bigint_bitwise_shr_bigint_int(Interp *interp, PMC* self,
+bigint_bitwise_shr_bigint_int(PARROT_INTERP, PMC *self,
                               INTVAL value, PMC *dest)
 {
+    BIGINT *bi_self, *bi_dest;
+    GETATTR_BigInt_bi(interp, self, bi_self);
+    GETATTR_BigInt_bi(interp, dest, bi_dest);
     /* The third args to mpz_mul_2exp and mpz_tdiv_q_2exp are unsigned, so we
        need to do something sensible with negative values. */
     if (value >= 0)
-        mpz_tdiv_q_2exp(BN(dest), BN(self), value);
+        mpz_tdiv_q_2exp(bi_dest->b, bi_self->b, (unsigned long int)value);
     else
-        mpz_mul_2exp(BN(dest), BN(self), -value);
+        mpz_mul_2exp(bi_dest->b, bi_self->b, (unsigned long int)-value);
 }
 
 #else /* ifdef PARROT_HAS_GMP */
 
+typedef struct BIGINT {
+    INTVAL b; /* bogus definition for users without libgmp*/
+} BIGINT;
+
 static void
-bigint_init(Interp *interp, PMC *self) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_init(PARROT_INTERP, PMC *self) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_clear(Interp *interp, PMC *self) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_clear(PARROT_INTERP, PMC *self) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_set_long(Interp *interp, PMC *self, long value) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_set_long(PARROT_INTERP, PMC *self, long value) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_set(Interp *interp, PMC *dest, PMC *src) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_set(PARROT_INTERP, PMC *dest, PMC *src) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_set_double(Interp *interp, PMC *self, double value) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_set_double(PARROT_INTERP, PMC *self, double value) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_set_str(Interp *interp, PMC *self, char* value, int base) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_set_str(PARROT_INTERP, PMC *self, char *value, int base) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_set_self(Interp *interp, PMC *self, BIGNUM *value) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_set_self(PARROT_INTERP, PMC *self, BIGINT *value) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
-static BIGNUM*
-bigint_get_self(Interp *interp, PMC *self) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+
+static BIGINT*
+bigint_get_self(PARROT_INTERP, PMC *self) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
-    return NULL;
 }
 
 static char *
-bigint_get_string(Interp *interp, PMC *self, int base) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_get_string(PARROT_INTERP, PMC *self, int base) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
-    return NULL;
 }
 
 static long
-bigint_get_long(Interp *interp, PMC *self) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_get_long(PARROT_INTERP, PMC *self) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
-    return 0L;
 }
+
 static long
-bigint_get_bool(Interp *interp, PMC *self) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_get_bool(PARROT_INTERP, PMC *self) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
-    return 0L;
 }
+
 static double
-bigint_get_double(Interp *interp, PMC *self) {
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-    return 0.0;
-}
-static void
-bigint_add_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_add_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_sub_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_sub_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_mul_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_mul_bigint_int(Interp *interp, PMC* self, INTVAL value,
-        PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_pow_bigint_int(Interp *interp, PMC* self, INTVAL value,
-        PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_div_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_div_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_fdiv_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_fdiv_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_mod_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_mod_bigint_int(Interp *interp, PMC* self, INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static INTVAL
-bigint_cmp(Interp *interp, PMC* self, PMC *value)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-    return 0;
-}
-static INTVAL
-bigint_cmp_int(Interp *interp, PMC* self, INTVAL value)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-    return 0;
-}
-static void
-bigint_abs(Interp *interp, PMC* self, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_neg(Interp *interp, PMC* self, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_bitwise_shl_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
-        "no bigint lib loaded");
-}
-static void
-bigint_bitwise_shl_bigint_int(Interp *interp, PMC* self,
-                              INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_get_double(PARROT_INTERP, PMC *self) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_bitwise_shr_bigint(Interp *interp, PMC* self, PMC *value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_add_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
 static void
-bigint_bitwise_shr_bigint_int(Interp *interp, PMC* self,
-                              INTVAL value, PMC *dest)
-{
-    real_exception(interp, NULL, E_LibraryNotLoadedError,
+bigint_add_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
+
+static void
+bigint_sub_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_sub_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_mul_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_mul_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_pow_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_div_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_div_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_fdiv_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_fdiv_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_mod_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_mod_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static INTVAL
+bigint_cmp(PARROT_INTERP, PMC *self, PMC *value) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static INTVAL
+bigint_cmp_int(PARROT_INTERP, PMC *self, INTVAL value) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_abs(PARROT_INTERP, PMC *self, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_neg(PARROT_INTERP, PMC *self, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_bitwise_shl_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_bitwise_shl_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest)
+{
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_bitwise_shr_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
+static void
+bigint_bitwise_shr_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest)
+{
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
+        "no bigint lib loaded");
+}
+
 #endif /* ifdef PARROT_HAS_GMP */
 
 pmclass BigInt {
+    ATTR struct BIGINT * bi; /*bigint val*/
 
 /*
 
@@ -500,7 +577,7 @@ pmclass BigInt {
 
 =over 4
 
-=item C<METHOD STRING* version()>
+=item C<METHOD version()>
 
 Return GMP version string "x.y.z".
 
@@ -508,17 +585,19 @@ Return GMP version string "x.y.z".
 
 */
 
-    METHOD STRING* version() {
+    METHOD version() {
+        STRING *version;
 #ifdef PARROT_HAS_GMP
-        return string_from_cstring(INTERP, gmp_version, 0);
+        version = Parrot_str_new(INTERP, gmp_version, 0);
 #else
-        return const_string(INTERP, "0.0.0");
+        version = CONST_STRING(INTERP, "0.0.0");
 #endif
+        RETURN(STRING *version);
     }
 
 /*
 
-=item C<PMC* instantiate(PMC* sig)>
+=item C<PMC *instantiate(PMC *sig)>
 
 Object constructor. SELF is a BigInt Class object. Return a new
 BigInt object.
@@ -526,13 +605,15 @@ BigInt object.
 =cut
 
 */
-    PMC* instantiate(PMC* sig) {
-        int argcP = REG_INT(3);
+    VTABLE PMC *instantiate(PMC *sig) {
+        return PMCNULL;
+
+        /* TODO -- actually build this thing */
+#if 0
+        int argcP = REG_INT(interp, 3);
         int base;
         PMC *res;
         STRING *num;
-
-        return PMCNULL;  /* TODO */
 
         res = pmc_new(INTERP, enum_class_BigInt);
         if (!argcP) {
@@ -540,31 +621,33 @@ BigInt object.
         }
         base = 10;
         if (argcP == 2)
-            base = VTABLE_get_integer(INTERP, REG_PMC(6));
-        num = VTABLE_get_string(INTERP, REG_PMC(5));
+            base = VTABLE_get_integer(INTERP, REG_PMC(interp, 6));
+        num = VTABLE_get_string(INTERP, REG_PMC(interp, 5));
         VTABLE_set_string_keyed_int(INTERP, res, base, num);
         return res;
+#endif
     }
 
-    void morph(INTVAL new_type) {
-        pmc_reuse(INTERP, SELF, new_type, 0);
-    }
-
-    void init() {
+    VTABLE void init() {
         bigint_init(INTERP, SELF);
         PObj_active_destroy_SET(SELF);
     }
 
-    PMC* clone() {
-        PMC *res;
-        res = pmc_new(INTERP, SELF->vtable->base_type);
+    VTABLE PMC *clone() {
+        PMC *res = pmc_new(INTERP, SELF->vtable->base_type);
         bigint_set(INTERP, res, SELF);
         return res;
     }
 
-    void destroy() {
+    VTABLE void destroy() {
+        BIGINT                   *bi;
+        Parrot_BigInt_attributes *attrs;
+
         bigint_clear(INTERP, SELF);
-        mem_sys_free(PMC_struct_val(SELF));
+
+        attrs = (Parrot_BigInt_attributes*)PMC_data(SELF);
+        mem_sys_free(attrs->bi);
+        mem_sys_free(attrs);
     }
 
 /*
@@ -575,7 +658,7 @@ BigInt object.
 
 */
 
-    void set_integer_native(INTVAL value) {
+    VTABLE void set_integer_native(INTVAL value) {
         bigint_set_long(INTERP, SELF, (long)value);
     }
 
@@ -589,18 +672,18 @@ Sets the value of the bigint to C<value>.
 
 */
 
-    void set_number_native(FLOATVAL value) {
+    VTABLE void set_number_native(FLOATVAL value) {
         bigint_set_double(INTERP, SELF, (double)value);
     }
 
 /*
 
-=item C<void set_string_native(STRING* value)>
+=item C<void set_string_native(STRING *value)>
 
 Sets the value of the integer to the result of converting C<*value> to a
 number.
 
-=item C<void set_string_keyed_int(INTVAL base, STRING* value)>
+=item C<void set_string_keyed_int(INTVAL base, STRING *value)>
 
 Same assume number base C<base>.
 
@@ -608,16 +691,16 @@ Same assume number base C<base>.
 
 */
 
-    void set_string_native(STRING* value) {
-        char *s = string_to_cstring(INTERP, value);
+    VTABLE void set_string_native(STRING *value) {
+        char * const s = Parrot_str_to_cstring(INTERP, value);
         bigint_set_str(INTERP, SELF, s, 10);
-        string_cstring_free(s);
+        Parrot_str_free_cstring(s);
     }
 
-    void set_string_keyed_int(INTVAL base, STRING* value) {
-        char *s = string_to_cstring(INTERP, value);
+    VTABLE void set_string_keyed_int(INTVAL base, STRING *value) {
+        char * const s = Parrot_str_to_cstring(INTERP, value);
         bigint_set_str(INTERP, SELF, s, base);
-        string_cstring_free(s);
+        Parrot_str_free_cstring(s);
     }
 /*
 
@@ -629,7 +712,7 @@ Sets the value of the integer to the integer value of C<*value>.
 
 */
 
-    void set_pmc(PMC *value) {
+    VTABLE void set_pmc(PMC *value) {
         bigint_set_self(INTERP, SELF, bigint_get_self(INTERP, value));
     }
 
@@ -643,7 +726,7 @@ Returns the value of the integer as a floating point number.
 
 */
 
-    FLOATVAL get_number() {
+    VTABLE FLOATVAL get_number() {
         return bigint_get_double(INTERP, SELF);
     }
 
@@ -657,13 +740,13 @@ Returns the value of the integer.
 
 */
 
-    INTVAL get_integer() {
+    VTABLE INTVAL get_integer() {
         return bigint_get_long(INTERP, SELF);
     }
 
 /*
 
-=item C<PMC* get_bignum()>
+=item C<PMC *get_bignum()>
 
 Returns SELF
 
@@ -671,7 +754,7 @@ Returns SELF
 
 */
 
-    PMC* get_bignum() {
+    VTABLE PMC *get_bignum() {
         return SELF;
     }
 
@@ -685,21 +768,21 @@ Returns the boolean value of the integer.
 
 */
 
-    INTVAL get_bool() {
+    VTABLE INTVAL get_bool() {
         return bigint_get_bool(INTERP, SELF);
     }
 
 /*
 
-=item C<STRING* get_string()>
+=item C<STRING *get_string()>
 
 Returns the string representation of the integer.
 
-=item C<STRING* get_string_keyed_int(INTVAL base)>
+=item C<STRING *get_string_keyed_int(INTVAL base)>
 
 Returns the string representation of the integer in base C<base>.
 
-=item C<STRING* get_repr()>
+=item C<STRING *get_repr()>
 
 Returns the string representation of the integer with the letter 'L'
 appended.
@@ -708,22 +791,23 @@ appended.
 
 */
 
-    STRING* get_string() {
-        char *s = bigint_get_string(INTERP, SELF, 10);
-        STRING *ps = string_from_cstring(INTERP, s, 0);
+    VTABLE STRING *get_string() {
+        char   * const s  = bigint_get_string(INTERP, SELF, 10);
+        STRING * const ps = Parrot_str_new(INTERP, s, 0);
         mem_sys_free(s);
         return ps;
     }
 
-    STRING* get_string_keyed_int(INTVAL base) {
-        char *s = bigint_get_string(INTERP, SELF, base);
-        STRING *ps = string_from_cstring(INTERP, s, 0);
+    VTABLE STRING *get_string_keyed_int(INTVAL base) {
+        char   * const s  = bigint_get_string(INTERP, SELF, base);
+        STRING * const ps = Parrot_str_new(INTERP, s, 0);
         mem_sys_free(s);
         return ps;
     }
-    STRING* get_repr() {
-        STRING *s = SELF.get_string();
-        return string_append(INTERP, s, const_string(INTERP, "L"));
+
+    VTABLE STRING *get_repr() {
+        STRING * const s = SELF.get_string();
+        return Parrot_str_append(INTERP, s, CONST_STRING(INTERP, "L"));
     }
 /*
 
@@ -735,7 +819,7 @@ Increments the integer.
 
 */
 
-    void increment() {
+    VTABLE void increment() {
         bigint_add_bigint_int(INTERP, SELF, 1, SELF);
     }
 
@@ -749,376 +833,384 @@ Decrements the integer.
 
 */
 
-    void decrement() {
+    VTABLE void decrement() {
         bigint_sub_bigint_int(INTERP, SELF, 1, SELF);
     }
 
-    PMC* add(PMC* value, PMC* dest) {
-MMD_BigInt: {
-                if (dest)
-                    VTABLE_morph(interp, dest, SELF->vtable->base_type);
-                else
-                    dest = pmc_new(INTERP, SELF->vtable->base_type);
-                bigint_add_bigint(INTERP, SELF, value, dest);
-                return dest;
-            }
-MMD_Integer: {
-                if (dest)
-                    VTABLE_morph(interp, dest, SELF->vtable->base_type);
-                else
-                    dest = pmc_new(INTERP, SELF->vtable->base_type);
-                bigint_add_bigint_int(INTERP, SELF, PMC_int_val(value), dest);
-                return dest;
-            }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp add");
-            return dest;
-        }
+    MULTI PMC *add(BigInt value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_add_bigint(INTERP, SELF, value, dest);
+        return dest;
     }
 
-    PMC* add_int(INTVAL value, PMC* dest) {
-        if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
-        else
-            dest = pmc_new(INTERP, SELF->vtable->base_type);
+    MULTI PMC *add(Integer value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_add_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+
+    MULTI PMC *add(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'add' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *add_int(INTVAL value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_add_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
-    void i_add(PMC* value) {
-MMD_BigInt: {
-                bigint_add_bigint(INTERP, SELF, value, SELF);
-            }
-MMD_Integer: {
-                bigint_add_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-             }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp add");
-        }
+    MULTI void i_add(BigInt value) {
+        bigint_add_bigint(INTERP, SELF, value, SELF);
     }
 
-    void i_add_int(INTVAL value) {
+    MULTI void i_add(Integer value) {
+        bigint_add_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), SELF);
+    }
+
+    MULTI void i_add(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_add' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE void i_add_int(INTVAL value) {
         bigint_add_bigint_int(INTERP, SELF, value, SELF);
     }
 
-    void i_add_float(FLOATVAL value) {
-        real_exception(INTERP, NULL, E_NotImplementedError, "unimp add");
+    VTABLE void i_add_float(FLOATVAL value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_add_float' for FLOATVAL");
     }
 
 
-    PMC* subtract(PMC* value, PMC* dest) {
-MMD_BigInt: {
-                if (dest)
-                    VTABLE_morph(interp, dest, SELF->vtable->base_type);
-                else
-                    dest = pmc_new(INTERP, SELF->vtable->base_type);
-                bigint_sub_bigint(INTERP, SELF, value, dest);
-                return dest;
-            }
-MMD_Integer: {
-                if (dest)
-                    VTABLE_morph(interp, dest, SELF->vtable->base_type);
-                else
-                    dest = pmc_new(INTERP, SELF->vtable->base_type);
-                bigint_sub_bigint_int(INTERP, SELF, PMC_int_val(value), dest);
-                return dest;
-            }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp sub");
-            return dest;
-        }
-    }
-
-    PMC* subtract_int(INTVAL value, PMC* dest) {
+    MULTI PMC *subtract(BigInt value, PMC *dest) {
         if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
         else
             dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_sub_bigint(INTERP, SELF, value, dest);
+        return dest;
+    }
+
+    MULTI PMC *subtract(Integer value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_sub_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+
+    MULTI PMC *subtract(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'subtract' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *subtract_int(INTVAL value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_sub_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
-    void i_subtract(PMC* value) {
-MMD_BigInt: {
-                bigint_sub_bigint(INTERP, SELF, value, SELF);
-            }
-MMD_Integer: {
-                bigint_sub_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-             }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp sub");
-        }
+    MULTI void i_subtract(BigInt value) {
+        bigint_sub_bigint(INTERP, SELF, value, SELF);
     }
 
-    void i_subtract_int(INTVAL value) {
+    MULTI void i_subtract(Integer value) {
+        bigint_sub_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), SELF);
+    }
+
+    MULTI void i_subtract(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_subtract' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE void i_subtract_int(INTVAL value) {
         bigint_sub_bigint_int(INTERP, SELF, value, SELF);
     }
 
-    void i_subtract_float(FLOATVAL value) {
-        real_exception(INTERP, NULL, E_NotImplementedError, "unimp sub");
+    VTABLE void i_subtract_float(FLOATVAL value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_subtract_float' for FLOATVAL");
     }
 
 
-    PMC* multiply(PMC* value, PMC* dest) {
-MMD_BigInt: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_mul_bigint(INTERP, SELF, value, dest);
-            return dest;
-        }
-MMD_Integer: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_mul_bigint_int(INTERP, SELF, PMC_int_val(value), dest);
-            return dest;
-         }
-MMD_DEFAULT: {
-             real_exception(INTERP, NULL, E_NotImplementedError, "unimp mul");
-            return dest;
-         }
+    MULTI PMC *multiply(BigInt value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_mul_bigint(INTERP, SELF, value, dest);
+        return dest;
     }
 
-    PMC* multiply_int(INTVAL value, PMC* dest) {
-        if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
-        else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
+    MULTI PMC *multiply(Integer value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_mul_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+
+    MULTI PMC *multiply(DEFAULT value, PMC *dest) {
+         Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'multiply' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *multiply_int(INTVAL value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_mul_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
-    void i_multiply(PMC* value) {
-MMD_BigInt: {
-                bigint_mul_bigint(INTERP, SELF, value, SELF);
-            }
-MMD_Integer: {
-                bigint_mul_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-             }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp mul");
-        }
+    MULTI void i_multiply(BigInt value) {
+        bigint_mul_bigint(INTERP, SELF, value, SELF);
+    }
+    MULTI void i_multiply(Integer value) {
+        bigint_mul_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), SELF);
+    }
+    MULTI void i_multiply(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_multiply' for %Ss",
+            VTABLE_name(interp, value));
     }
 
-    void i_multiply_int(INTVAL value) {
+    VTABLE void i_multiply_int(INTVAL value) {
         bigint_mul_bigint_int(INTERP, SELF, value, SELF);
     }
 
-    void i_multiply_float(FLOATVAL value) {
-        real_exception(INTERP, NULL, E_NotImplementedError, "unimp mul");
+    VTABLE void i_multiply_float(FLOATVAL value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_multiply_float' for FLOATVAL");
     }
 
-    PMC* pow_int(INTVAL value, PMC* dest) {
+    VTABLE PMC *pow_int(INTVAL value, PMC *dest) {
         if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
         else
             dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_pow_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
-    PMC* pow(PMC* value, PMC* dest) {
+    MULTI PMC *pow(PMC *value, PMC *dest) {
         /* XXX only Integer RHS currently */
-        INTVAL r = VTABLE_get_integer(INTERP, value);
-        return SELF.pow_int(r, dest);
+        const INTVAL r = VTABLE_get_integer(INTERP, value);
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_pow_bigint_int(INTERP, SELF, r, dest);
+        return dest;
     }
 
-    PMC* divide(PMC* value, PMC* dest) {
-MMD_BigInt: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_div_bigint(INTERP, SELF, value, dest);
-#if 0
-            /* to downgrade or not that's the question */
-            if (mpz_fits_slong_p(BN(dest))) {
-                long iresult = mpz_get_si(BN(dest));
-                VTABLE_morph(interp, dest, enum_class_Integer);
-                VTABLE_set_integer_native(interp, dest, iresult);
-            }
-#endif
-            return dest;
-        }
-MMD_Integer: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_div_bigint_int(INTERP, SELF, PMC_int_val(value), dest);
-            return dest;
-        }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp div");
-            return dest;
-         }
-    }
-
-    PMC* divide_int(INTVAL value, PMC* dest) {
+    MULTI PMC *divide(BigInt value, PMC *dest) {
+        BIGINT *bi;
         if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
         else
             dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_div_bigint(INTERP, SELF, value, dest);
+#if 0
+        /* to downgrade or not that's the question */
+        GETATTR_BigInt_bi(interp, dest, bi);
+        if (mpz_fits_slong_p(bi->b)) {
+            long iresult = mpz_get_si(bi->b);
+            VTABLE_morph(interp, dest, enum_class_Integer);
+            VTABLE_set_integer_native(interp, dest, iresult);
+        }
+#endif
+        return dest;
+    }
+
+    MULTI PMC *divide(Integer value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_div_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+
+    MULTI PMC *divide(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'divide' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *divide_int(INTVAL value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_div_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
-    void i_divide(PMC* value) {
-MMD_BigInt: {
-            bigint_div_bigint(INTERP, SELF, value, SELF);
-        }
-MMD_Integer: {
-            bigint_div_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-        }
-MMD_DEFAULT: {
-             real_exception(INTERP, NULL, E_NotImplementedError, "unimp fdiv");
-        }
+    MULTI void i_divide(BigInt value) {
+        bigint_div_bigint(INTERP, SELF, value, SELF);
+    }
+    MULTI void i_divide(Integer value) {
+        bigint_div_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), SELF);
+    }
+    MULTI void i_divide(DEFAULT value) {
+         Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_divide' for %Ss",
+            VTABLE_name(interp, value));
     }
 
-    void i_divide_int(INTVAL value) {
+    VTABLE void i_divide_int(INTVAL value) {
         bigint_div_bigint_int(INTERP, SELF, value, SELF);
     }
 
-    PMC* floor_divide(PMC* value, PMC* dest) {
-MMD_BigInt: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_fdiv_bigint(INTERP, SELF, value, dest);
-            return dest;
-        }
-MMD_Integer: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_fdiv_bigint_int(INTERP, SELF, PMC_int_val(value), dest);
-            return dest;
-        }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp fdiv");
-            return dest;
-        }
+    MULTI PMC *floor_divide(BigInt value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_fdiv_bigint(INTERP, SELF, value, dest);
+        return dest;
     }
 
-    PMC* floor_divide_int(INTVAL value, PMC* dest) {
+    MULTI PMC *floor_divide(Integer value, PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_fdiv_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+
+    MULTI PMC *floor_divide(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'floor_divide' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *floor_divide_int(INTVAL value, PMC *dest) {
         if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
         else
             dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_fdiv_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
-    void i_floor_divide(PMC* value) {
-MMD_BigInt: {
-            bigint_fdiv_bigint(INTERP, SELF, value, SELF);
-        }
-MMD_Integer: {
-            bigint_fdiv_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-        }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp fdiv");
-        }
+    MULTI void i_floor_divide(BigInt value) {
+        bigint_fdiv_bigint(INTERP, SELF, value, SELF);
     }
 
-    void i_floor_divide_int(INTVAL value) {
+    MULTI void i_floor_divide(Integer value) {
+        bigint_fdiv_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), SELF);
+    }
+
+    MULTI void i_floor_divide(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_floor_divide' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE void i_floor_divide_int(INTVAL value) {
         bigint_fdiv_bigint_int(INTERP, SELF, value, SELF);
     }
 
-    PMC* modulus(PMC* value, PMC* dest) {
-MMD_BigInt: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_mod_bigint(INTERP, SELF, value, dest);
-            return dest;
-        }
-MMD_Integer: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_mod_bigint_int(INTERP, SELF, PMC_int_val(value), dest);
-            return dest;
-         }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp mod");
-            return dest;
-        }
+    MULTI PMC *modulus(BigInt value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_mod_bigint(INTERP, SELF, value, dest);
+        return dest;
     }
 
-    PMC* cmodulus(PMC* value, PMC* dest) {
-MMD_BigInt: {
-                return Parrot_BigInt_modulus_BigInt(INTERP, SELF, value, dest);
-            }
-MMD_Integer: {
-                return Parrot_BigInt_modulus_Integer(INTERP, SELF, value, dest);
-             }
-MMD_DEFAULT: {
-                return Parrot_BigInt_modulus(INTERP, SELF, value, dest);
-             }
+    MULTI PMC *modulus(Integer value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_mod_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
+        return dest;
     }
 
-    void i_modulus(PMC* value) {
-MMD_BigInt: {
-                bigint_mod_bigint(INTERP, SELF, value, SELF);
-            }
-MMD_Integer: {
-                bigint_mod_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-             }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp mod");
-        }
+    MULTI PMC *modulus(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'modulus' for %Ss",
+            VTABLE_name(interp, value));
     }
 
-    void i_cmodulus(PMC* value) {
-MMD_BigInt: {
-                bigint_mod_bigint(INTERP, SELF, value, SELF);
-            }
-MMD_Integer: {
-                bigint_mod_bigint_int(INTERP, SELF, PMC_int_val(value), SELF);
-             }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp cmod");
-        }
+    MULTI void i_modulus(BigInt value) {
+        bigint_mod_bigint(INTERP, SELF, value, SELF);
+    }
+    MULTI void i_modulus(Integer value) {
+        bigint_mod_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), SELF);
+    }
+    MULTI void i_modulus(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_modulus' for %Ss",
+            VTABLE_name(interp, value));
     }
 
-
-    INTVAL cmp(PMC* value) {
-MMD_BigInt: {
+    MULTI INTVAL cmp(BigInt value) {
         return bigint_cmp(INTERP, SELF, value);
-            }
-MMD_Integer: {
-        return bigint_cmp_int(INTERP, SELF, PMC_int_val(value));
-            }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp cmp");
-            return 0;
-        }
     }
 
-    INTVAL is_equal(PMC* value) {
-MMD_BigInt: {
+    MULTI INTVAL cmp(Integer value) {
+        return bigint_cmp_int(INTERP, SELF, VTABLE_get_integer(interp, value));
+    }
+
+    MULTI INTVAL cmp(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'cmp' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    MULTI INTVAL is_equal(BigInt value) {
         return bigint_cmp(INTERP, SELF, value) == 0;
-            }
-MMD_Integer: {
-        return bigint_cmp_int(INTERP, SELF, PMC_int_val(value)) == 0;
-            }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp eq");
-            return 0;
-        }
+    }
+
+    MULTI INTVAL is_equal(Integer value) {
+        return bigint_cmp_int(INTERP, SELF, VTABLE_get_integer(interp, value)) == 0;
+    }
+
+    MULTI INTVAL is_equal(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'is_equal' for %Ss",
+            VTABLE_name(interp, value));
     }
 
 /*
 
-=item C<PMC* absolute(PMC* dest)>
+=item C<PMC *absolute(PMC *dest)>
 
 =item C<void i_absolute()>
 
@@ -1128,21 +1220,21 @@ Sets C<dest> to the absolute value of SELF.
 
 */
 
-    PMC* absolute(PMC *dest) {
-        if (!dest)
-            dest = pmc_new(INTERP, SELF->vtable->base_type);
+    VTABLE PMC *absolute(PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_abs(INTERP, SELF, dest);
         return dest;
     }
 
-    void i_absolute() {
+    VTABLE void i_absolute() {
         bigint_abs(INTERP, SELF, SELF);
     }
 
 
 /*
 
-=item C<PMC* neg(PMC *dest)>
+=item C<PMC *neg(PMC *dest)>
 
 =item C<void i_neg()>
 
@@ -1152,22 +1244,22 @@ Set C<dest> to the negated value of C<SELF>.
 
 */
 
-    PMC* neg(PMC* dest) {
-        if (!dest)
-            dest = pmc_new(INTERP, SELF->vtable->base_type);
+    VTABLE PMC *neg(PMC *dest) {
+        dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_neg(INTERP, SELF, dest);
         return dest;
     }
 
-    void i_neg() {
+    VTABLE void i_neg() {
         bigint_neg(INTERP, SELF, SELF);
     }
 
 /*
 
-=item C<PMC* bitwise_shl(PMC *value, PMC *dest)>
+=item C<PMC *bitwise_shl(PMC *value, PMC *dest)>
 
-=item C<PMC* bitwise_shl_int(INTVAL value, PMC *dest)>
+=item C<PMC *bitwise_shl_int(INTVAL value, PMC *dest)>
 
 Returns in C<*dest> the shift left of the BigInt by C<*value>.
 
@@ -1181,66 +1273,73 @@ Inplace shift left.
 
 */
 
-    PMC* bitwise_shl(PMC* value, PMC* dest) {
-MMD_BigInt: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_bitwise_shl_bigint_int(INTERP, SELF,
-                                          VTABLE_get_integer(INTERP, value),
-                                          dest);
-            return dest;
-        }
-MMD_Integer: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_bitwise_shl_bigint_int(INTERP, SELF, PMC_int_val(value),
-                                          dest);
-            return dest;
-         }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp shl");
-            return dest;
-         }
-    }
-
-    PMC* bitwise_shl_int(INTVAL value, PMC* dest) {
+    MULTI PMC *bitwise_shl(BigInt value, PMC *dest) {
         if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
         else
             dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_bitwise_shl_bigint_int(INTERP, SELF,
+                                      VTABLE_get_integer(INTERP, value),
+                                      dest);
+        return dest;
+    }
+
+    MULTI PMC *bitwise_shl(Integer value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_bitwise_shl_bigint_int(INTERP, SELF,
+                VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+    MULTI PMC *bitwise_shl(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'bitwise_shl' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *bitwise_shl_int(INTVAL value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_bitwise_shl_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
 
-    void i_bitwise_shl(PMC* value) {
-MMD_BigInt: {
-            bigint_bitwise_shl_bigint_int(INTERP, SELF,
-                                          VTABLE_get_integer(INTERP, value),
-                                          SELF);
-            }
-MMD_Integer: {
-            bigint_bitwise_shl_bigint_int(INTERP, SELF, PMC_int_val(value),
-                                          SELF);
-             }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp shl");
-        }
+    MULTI void i_bitwise_shl(BigInt value) {
+        bigint_bitwise_shl_bigint_int(INTERP, SELF,
+                                      VTABLE_get_integer(INTERP, value),
+                                      SELF);
     }
 
-    void i_bitwise_shl_int(INTVAL value) {
+    MULTI void i_bitwise_shl(Integer value) {
+        bigint_bitwise_shl_bigint_int(INTERP, SELF,
+                VTABLE_get_integer(interp, value), SELF);
+    }
+
+    MULTI void i_bitwise_shl(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_bitwise_shl' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE void i_bitwise_shl_int(INTVAL value) {
         bigint_bitwise_shl_bigint_int(INTERP, SELF, value, SELF);
     }
 
 /*
 
-=item C<PMC* bitwise_shr(PMC *value, PMC *dest)>
+=item C<PMC *bitwise_shr(PMC *value, PMC *dest)>
 
-=item C<PMC* bitwise_shr_int(INTVAL value, PMC *dest)>
+=item C<PMC *bitwise_shr_int(INTVAL value, PMC *dest)>
 
 Returns in C<*dest> the shift right of the BigInt by C<*value>.
 
@@ -1254,61 +1353,68 @@ Inplace shift left.
 
 */
 
-    PMC* bitwise_shr(PMC* value, PMC* dest) {
-MMD_BigInt: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_bitwise_shr_bigint_int(INTERP, SELF,
-                                          VTABLE_get_integer(INTERP, value),
-                                          dest);
-            return dest;
-        }
-MMD_Integer: {
-            if (dest)
-                VTABLE_morph(interp, dest, SELF->vtable->base_type);
-            else
-                dest = pmc_new(INTERP, SELF->vtable->base_type);
-            bigint_bitwise_shr_bigint_int(INTERP, SELF, PMC_int_val(value),
-                                          dest);
-            return dest;
-         }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp shr");
-            return dest;
-         }
-    }
-
-    PMC* bitwise_shr_int(INTVAL value, PMC* dest) {
+    MULTI PMC *bitwise_shr(BigInt value, PMC *dest) {
         if (dest)
-            VTABLE_morph(interp, dest, SELF->vtable->base_type);
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
         else
             dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_bitwise_shr_bigint_int(INTERP, SELF,
+                                      VTABLE_get_integer(INTERP, value),
+                                      dest);
+        return dest;
+    }
+
+    MULTI PMC *bitwise_shr(Integer value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
+        bigint_bitwise_shr_bigint_int(INTERP, SELF,
+                VTABLE_get_integer(interp, value), dest);
+        return dest;
+    }
+
+    MULTI PMC *bitwise_shr(DEFAULT value, PMC *dest) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'bitwise_shr' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE PMC *bitwise_shr_int(INTVAL value, PMC *dest) {
+        if (dest)
+            pmc_reuse(interp, dest, SELF->vtable->base_type, 0);
+        else
+            dest = pmc_new(INTERP, SELF->vtable->base_type);
+
         bigint_bitwise_shr_bigint_int(INTERP, SELF, value, dest);
         return dest;
     }
 
 
-    void i_bitwise_shr(PMC* value) {
-MMD_BigInt: {
-            bigint_bitwise_shr_bigint_int(INTERP, SELF,
-                                          VTABLE_get_integer(INTERP, value),
-                                          SELF);
-            }
-MMD_Integer: {
-            bigint_bitwise_shr_bigint_int(INTERP, SELF, PMC_int_val(value),
-                                          SELF);
-        }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, E_NotImplementedError, "unimp shr");
-        }
+    MULTI void i_bitwise_shr(BigInt value) {
+        bigint_bitwise_shr_bigint_int(INTERP, SELF,
+                                      VTABLE_get_integer(INTERP, value),
+                                      SELF);
     }
 
-    void i_bitwise_shr_int(INTVAL value) {
+    MULTI void i_bitwise_shr(Integer value) {
+        bigint_bitwise_shr_bigint_int(INTERP, SELF,
+                VTABLE_get_integer(interp, value), SELF);
+    }
+
+    MULTI void i_bitwise_shr(DEFAULT value) {
+        Parrot_ex_throw_from_c_args(INTERP, NULL,
+            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
+            "BigInt: no multiple dispatch variant 'i_bitwise_shr' for %Ss",
+            VTABLE_name(interp, value));
+    }
+
+    VTABLE void i_bitwise_shr_int(INTVAL value) {
         bigint_bitwise_shr_bigint_int(INTERP, SELF, value, SELF);
     }
-
 }
 
 /*

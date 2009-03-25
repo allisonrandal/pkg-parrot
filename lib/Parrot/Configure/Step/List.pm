@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: List.pm 18157 2007-04-12 00:32:35Z jkeenan $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: List.pm 37397 2009-03-13 21:45:55Z allison $
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;
@@ -11,7 +11,6 @@ my @steps = qw(
     init::manifest
     init::defaults
     init::install
-    init::miniparrot
     init::hints
     init::headers
     inter::progs
@@ -19,25 +18,31 @@ my @steps = qw(
     inter::lex
     inter::yacc
     auto::gcc
+    auto::glibc
+    auto::backtrace
+    auto::fink
+    auto::macports
     auto::msvc
+    auto::attributes
+    auto::warnings
     init::optimize
     inter::shlibs
     inter::libparrot
     inter::charset
     inter::encoding
     inter::types
-    inter::ops
-    inter::pmc
+    auto::ops
+    auto::pmc
     auto::alignptrs
     auto::headers
     auto::sizes
     auto::byteorder
     auto::va_ptr
-    auto::pack
     auto::format
     auto::isreg
+    auto::arch
     auto::jit
-    gen::cpu
+    auto::cpu
     auto::funcptr
     auto::cgoto
     auto::inline
@@ -45,22 +50,27 @@ my @steps = qw(
     auto::memalign
     auto::signal
     auto::socklen_t
+    auto::neg_0
     auto::env
-    auto::aio
     auto::gmp
     auto::readline
     auto::gdbm
+    auto::pcre
+    auto::opengl
+    auto::crypto
+    auto::gettext
     auto::snprintf
     auto::perldoc
-    auto::python
-    auto::m4
-    auto::cpu
-    gen::icu
-    gen::revision
+    auto::pod2man
+    auto::ctags
+    auto::revision
+    auto::icu
     gen::config_h
     gen::core_pmcs
+    gen::crypto
     gen::parrot_include
-    gen::languages
+    gen::opengl
+    gen::call_list
     gen::makefiles
     gen::platform
     gen::config_pm

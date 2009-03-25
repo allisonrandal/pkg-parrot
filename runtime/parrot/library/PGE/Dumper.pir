@@ -7,7 +7,7 @@ PGE::Dumper - various methods for displaying PGE structures
 .sub __onload
 .end
 
-.namespace [ "PGE::Match" ]
+.namespace [ "PGE";"Match" ]
 
 =head2 C<PGE::Match> Methods
 
@@ -27,18 +27,18 @@ This method enables Data::Dumper to work on Match objects.
     .local string key
     .local pmc hash, array
     .local int hascapts
-  
+
     (subindent, indent) = dumper."newIndent"()
     print "=> "
     $S0 = self
     dumper."genericString"("", $S0)
     print " @ "
-    $I0 = self.from()
+    $I0 = self.'from'()
     print $I0
     hascapts = 0
-    hash = self."get_hash"()
+    hash = self.'hash'()
     if_null hash, dump_array
-    iter = new .Iterator, hash
+    iter = new 'Iterator', hash
   dump_hash_1:
     unless iter goto dump_array
     if hascapts goto dump_hash_2
@@ -55,7 +55,7 @@ This method enables Data::Dumper to work on Match objects.
     dumper."dump"(label, val)
     goto dump_hash_1
   dump_array:
-    array = self."get_array"()
+    array = self.'list'()
     if_null array, dump_end
     $I1 = elements array
     $I0 = 0
@@ -123,7 +123,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     $S0 = $I0
     out .= $S0
     out .= "\n"
-    capt = getattribute self, "PGE::Match\x0@!capt"
+    capt = self.'list'()
     if_null capt, subrules
     spi = 0
     spc = elements capt
@@ -142,9 +142,9 @@ An alternate dump output for a Match object and all of its subcaptures.
     goto subpats_1
 
   subrules:
-    capt = self.get_hash()
+    capt = self.'hash'()
     if_null capt, end
-    iter = new .Iterator, capt
+    iter = new 'Iterator', capt
   subrules_1:
     unless iter goto end
     $S0 = shift iter
@@ -158,7 +158,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     goto subrules_1
 
   dumper:
-    $I0 = isa $P0, 'PGE::Match'
+    $I0 = isa $P0, ['PGE';'Match']
     unless $I0 goto dumper_0
     $S0 = $P0.'dump_str'(prefix1, b1, b2)
     out .= $S0
@@ -234,7 +234,7 @@ obsoleted in favor of a Data::Dumper method.
 
 =cut
 
-.namespace [ "PGE::Exp" ]
+.namespace [ "PGE";"Exp" ]
 
 .sub "dumpindent" :method
     .param int indent
@@ -253,7 +253,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::Start" ]
+.namespace [ "PGE";"Exp";"Start" ]
 
 .sub dump :method
     .param int indent
@@ -267,7 +267,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::End" ]
+.namespace [ "PGE";"Exp";"End" ]
 
 .sub dump :method
     .param int indent
@@ -276,7 +276,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::Literal" ]
+.namespace [ "PGE";"Exp";"Literal" ]
 
 .sub "dump" :method
     .param int indent
@@ -292,7 +292,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::Scalar" ]
+.namespace [ "PGE";"Exp";"Scalar" ]
 
 .sub "dump" :method
     .param int indent
@@ -308,7 +308,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::Dot" ]
+.namespace [ "PGE";"Exp";"Dot" ]
 
 .sub "dump" :method
     .param int indent
@@ -320,7 +320,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::CharClass" ]
+.namespace [ "PGE";"Exp";"CharClass" ]
 
 .sub dump :method
     .param int indent
@@ -328,7 +328,7 @@ obsoleted in favor of a Data::Dumper method.
     print "CharClass "
     $S0 = self["charmatch"]
     print $S0
-    print " <<" 
+    print " <<"
     $S0 = self["charclass"]
     print $S0
     print ">> "
@@ -338,7 +338,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::WS" ]
+.namespace [ "PGE";"Exp";"WS" ]
 
 .sub "dump" :method
     .param int indent
@@ -350,7 +350,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::Anchor" ]
+.namespace [ "PGE";"Exp";"Anchor" ]
 
 .sub "dump" :method
     .param int indent
@@ -364,7 +364,7 @@ obsoleted in favor of a Data::Dumper method.
 .end
 
 
-.namespace [ "PGE::Exp::Concat" ]
+.namespace [ "PGE";"Exp";"Concat" ]
 
 .sub "dump" :method
     .param int indent
@@ -375,7 +375,7 @@ obsoleted in favor of a Data::Dumper method.
     .return ()
 .end
 
-.namespace [ "PGE::Exp::Alt" ]
+.namespace [ "PGE";"Exp";"Alt" ]
 
 .sub "dump" :method
     .param int indent
@@ -384,7 +384,7 @@ obsoleted in favor of a Data::Dumper method.
 
     exp = self["exp1"]
     $I1 = indent
-    $I0 = isa exp, "PGE::Exp::Alt"
+    $I0 = isa exp, ["PGE";"Exp";"Alt"]
     if $I0 goto print_exp1
     $I1 += 4
   print_exp1:
@@ -393,7 +393,7 @@ obsoleted in favor of a Data::Dumper method.
     print "ALT\n"
     exp = self["exp2"]
     $I1 = indent
-    $I0 = isa exp, "PGE::Exp::Alt"
+    $I0 = isa exp, ["PGE";"Exp";"Alt"]
     if $I0 goto print_exp2
     $I1 += 4
   print_exp2:
@@ -402,7 +402,7 @@ obsoleted in favor of a Data::Dumper method.
 .end
 
 
-.namespace [ "PGE::Exp::Group" ]
+.namespace [ "PGE";"Exp";"Group" ]
 
 .sub "dump" :method
     .param int indent
@@ -437,13 +437,13 @@ obsoleted in favor of a Data::Dumper method.
     print " cscope"
   dump_3:
     print "\n"
-    exp = self["exp1"] 
+    exp = self["exp1"]
     indent += 4
     exp."dump"(indent)
     .return ()
 .end
 
-.namespace [ "PGE::OPTable" ]
+.namespace [ "PGE";"OPTable" ]
 
 =head2 C<PGE::OPTable> Methods
 
@@ -462,12 +462,12 @@ This method enables Data::Dumper to work on PGE::OPTable objects.
     .local pmc iter, val
     .local string key
     .local pmc hash, array
-  
+
     (subindent, indent) = dumper."newIndent"()
     print " {"
     hash = self
     if_null hash, dump_rest
-    iter = new .Iterator, hash
+    iter = new 'Iterator', hash
   dump_hash:
     unless iter goto dump_rest
     print "\n"
@@ -481,11 +481,11 @@ This method enables Data::Dumper to work on PGE::OPTable objects.
     goto dump_hash
   dump_rest:
     print "\n"
-    $P0 = getattribute self, "PGE::OPTable\x0%!key"
+    $P0 = getattribute self, '%!key'
     print subindent
     dumper."dump"(label, $P0)
     print "\n"
-    $P0 = getattribute self, "PGE::OPTable\x0%!klen"
+    $P0 = getattribute self, '%!klen'
     print subindent
     dumper."dump"(label, $P0)
     print indent
@@ -495,8 +495,10 @@ This method enables Data::Dumper to work on PGE::OPTable objects.
 
 =back
 
+=cut
+
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

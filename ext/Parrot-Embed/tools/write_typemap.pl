@@ -1,5 +1,8 @@
 #!perl
 
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: write_typemap.pl 36833 2009-02-17 20:09:26Z allison $
+
 use strict;
 use warnings;
 

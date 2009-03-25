@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: nm.pl 16243 2006-12-25 22:11:13Z paultcochrane $
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: nm.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -140,10 +140,10 @@ use vars qw($VERSION);
 
 require 5.005;
 
-$VERSION = sprintf "%d.%d", q$Revision: 16243 $ =~ /(\d+)/g;    # jhi@iki.fi;
+$VERSION = sprintf "%d.%d", q$Revision: 37201 $ =~ /(\d+)/g;    # jhi@iki.fi;
 
 my $ME       = basename($0);
-my $RCS_DATE = q$Date: 2006-12-25 14:11:13 -0800 (Mon, 25 Dec 2006) $;
+my $RCS_DATE = q$Date: 2009-03-08 05:07:48 -0700 (Sun, 08 Mar 2009) $;
 
 my $nm_cmd = 'nm';
 my $nm_opt = '';
@@ -286,7 +286,7 @@ my %Type;
 @Type{qw(bsd long)} = ();
 $Type = 'bsd'
     if $BSD
-    || ( defined $Type && $Type eq '1' );    # So they used --t.
+        || ( defined $Type && $Type eq '1' );    # So they used --t.
 $Type = 'long' if $Long;
 die "$ME: --type=$Type unknown\n"
     if defined $Type && $Type ne '' && !exists $Type{$Type};
@@ -298,8 +298,8 @@ for my $f (@ARGV) {
         warn "$ME: No such file: $f\n";
         next;
     }
-    if ( open( my $NM, "$nm_cmd $nm_opt $f |" ) ) {
-        my $o = "?";
+    if ( open( my $NM, '<', "$nm_cmd $nm_opt $f |" ) ) {
+        my $o = '?';
         $o = $f if $f =~ /\.o$/;
         my $file;
         while (<$NM>) {

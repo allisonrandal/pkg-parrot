@@ -1,7 +1,7 @@
 /* exit.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: exit.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: exit.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *
  *  Data Structure and Algorithms:
@@ -16,7 +16,7 @@
 
 #include "parrot/compiler.h"    /* compiler capabilities */
 
-typedef void (*exit_handler_f)(Interp *, int , void *);
+typedef void (*exit_handler_f)(PARROT_INTERP, int , void *);
 
 typedef struct _handler_node_t {
     exit_handler_f function;
@@ -25,17 +25,26 @@ typedef struct _handler_node_t {
 } handler_node_t;
 
 /* HEADERIZER BEGIN: src/exit.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API void Parrot_exit( Interp *interp /*NN*/, int status )
-        __attribute__nonnull__(1)
-        __attribute__noreturn__;
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+void Parrot_exit(PARROT_INTERP, int status)
+        __attribute__nonnull__(1);
 
-PARROT_API int Parrot_on_exit( Interp *interp /*NN*/,
-    exit_handler_f function /*NN*/,
-    void *arg )
+PARROT_EXPORT
+void Parrot_on_exit(PARROT_INTERP,
+    NOTNULL(exit_handler_f function),
+    ARGIN_NULLOK(void *arg))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
+#define ASSERT_ARGS_Parrot_exit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_on_exit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(function)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/exit.c */
 
 #endif /* PARROT_EXIT_H_GUARD */

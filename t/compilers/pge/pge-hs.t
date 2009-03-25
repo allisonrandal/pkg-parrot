@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: pge-hs.t 17577 2007-03-17 22:51:14Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: pge-hs.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -27,8 +27,8 @@ pir_output_is( <<'CODE', <<'OUT', "PGE::Hs match" );
     load_bytecode "PGE.pbc"
     load_bytecode "PGE/Hs.pir"
 
-    match = find_global "PGE::Hs", "match"
-    add_rule = find_global "PGE::Hs", "add_rule"
+    match = get_global ['PGE';'Hs'], "match"
+    add_rule = get_global ['PGE';'Hs'], "add_rule"
     add_rule("foo", "s")
     result = match("test", "t(.<foo>)t")
     eq result, "PGE_Match 0 4 [PGE_Match 1 3 [] [(\"foo\", PGE_Match 2 3 [] [])]] []\n", OK

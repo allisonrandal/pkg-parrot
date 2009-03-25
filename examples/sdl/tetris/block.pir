@@ -5,8 +5,7 @@ block.pir - a tetris block class
 =head1 SYNOPSIS
 
     # create a new block
-    find_type $I0, "Tetris::Block"
-    new block, $I0
+    block = new "Tetris::Block"
     block."init"( board )
 
     # let the block fall down fast
@@ -21,17 +20,11 @@ is not subclassed further.
 
 .namespace ["Tetris::Block"]
 
-.const int xPos      = 0
-.const int xPosDiff  = 1
-.const int yPos      = 2
-.const int Fall      = 3
-.const int Board     = 4
-
 .sub __onload :load
-    find_type $I0, "Tetris::Block"
-    if $I0 > 1 goto END
+    $P0 = get_class "Tetris::Block"
+    unless null $P0 goto END
     load_bytecode "examples/sdl/tetris/blockdata.pir"
-    getclass $P0, "Tetris::BlockData"
+    get_class $P0, "Tetris::BlockData"
     subclass $P0, $P0, "Tetris::Block"
 
     addattribute $P0, "xpos"
@@ -41,7 +34,7 @@ is not subclassed further.
     addattribute $P0, "board"
 
     # set the BUILD method name
-    $P1 = new .String
+    $P1 = new 'String'
     $P1 = 'BUILD'
     setprop $P0, 'BUILD', $P1
 END:
@@ -68,40 +61,27 @@ The board the new block will belong to.
 .sub BUILD :method
     .param pmc board
     .local pmc prop
-    .local int id
 
-    classoffset id, self, "Tetris::Block"
-    
-    #
     # set some properties
-    #
 
-    # xpos
-    new prop, .Integer
+    new prop, 'Integer'
     set prop, 0
-    setattribute self, id, prop
-    inc id
-    
-    # xposdiff
-    new prop, .Integer
-    set prop, 0
-    setattribute self, id, prop
-    inc id
-    
-    # ypos
-    new prop, .Integer
-    set prop, 0
-    setattribute self, id, prop
-    inc id
+    setattribute self, 'xpos', prop
 
-    # fall
-    new prop, .Integer
+    new prop, 'Integer'
     set prop, 0
-    setattribute self, id, prop
-    inc id
-    
+    setattribute self, 'xposdiff', prop
+
+    new prop, 'Integer'
+    set prop, 0
+    setattribute self, 'ypos', prop
+
+    new prop, 'Integer'
+    set prop, 0
+    setattribute self, 'fall', prop
+
     # set the board the block blongs to
-    setattribute self, id, board
+    setattribute self, 'board', board
 
     # return the block
     .return (self)
@@ -116,9 +96,7 @@ This method returns nothing.
 =cut
 
 .sub fall :method
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, Fall
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'fall'
     $P0 = 1
 .end
 
@@ -129,11 +107,9 @@ Returns whether the block is falling down fast.
 =cut
 
 .sub falling :method
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, Fall
-    getattribute $P0, self, $I0
+    getattribute $P0, self, 'fall'
     $I0 = $P0
-        
+
     .return ($I0)
 .end
 
@@ -150,28 +126,19 @@ Returns the x and y position of the block.
     .local pmc xposP
     .local pmc xposdiffP
     .local pmc yposP
-    
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, xPos
-    getattribute xposP, self, $I0
-    sub $I0, xPos
 
-    add $I0, xPosDiff
-    getattribute xposdiffP, self, $I0
-    sub $I0, xPosDiff
+    getattribute xposP,     self, 'xpos'
+    getattribute xposdiffP, self, 'xposdiff'
+    getattribute yposP,     self, 'ypos'
 
-    add $I0, yPos
-    getattribute yposP, self, $I0
-    sub $I0, yPos
-    
     # calculate the ypos
-    $I0 = self."vfree"()
+    $I0  = self."vfree"()
     ypos = yposP
     sub ypos, $I0
 
     # calculate the xpos
     xpos = xposP
-    $I0 = xposdiffP
+    $I0  = xposdiffP
     add xpos, $I0
 
     .return (xpos, ypos)
@@ -204,10 +171,10 @@ Returns 1 if the rotation was possible, 0 otherwise.
     .local int i
     .local int j
     .local int ret
-    
+
     size = self."size"()
     ret = self."validPosition"()
-    
+
     unless ret goto END
 
     # rotate the block
@@ -222,9 +189,7 @@ Returns 1 if the rotation was possible, 0 otherwise.
 
     # no => can i move the block?
     i = self."hfree"()
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, xPosDiff
-    getattribute temp, self, $I0
+    getattribute temp, self, 'xposdiff'
     set temp, i
 
     # is the position of the rotated block still valid?
@@ -249,10 +214,8 @@ Returns the board associated with this block.
 
 .sub board :method
     # get the board
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, Board
-    getattribute $P0, self, $I0
-    
+    getattribute $P0, self, 'board'
+
     .return ($P0)
 .end
 
@@ -264,11 +227,9 @@ Set the board associated with this block.
 
 .sub setBoard :method
     .param pmc board
-    
+
     # get the board
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, Board
-    setattribute self, $I0, board
+    setattribute self, 'board', board
 .end
 
 =item valid = block."validPosition"()
@@ -331,11 +292,11 @@ xLOOP:
     add yp, y
     if yp < 0 goto ERROR
     if yp >= height goto ERROR
-    
+
     i = board."offset"( xp, yp )
     i = board[i]
     if i goto ERROR
-    
+
 SKIP:
     inc x
     if x >= size goto yLOOP
@@ -368,14 +329,9 @@ This method returns 1 on success, 0 otherwise.
     .local int yold
     .local int valid
 
-    classoffset $I0, self, "Tetris::Block"
-    add $I0, xPos
-    getattribute xpos, self, $I0
-    sub $I0, xPos
+    getattribute xpos, self, 'xpos'
+    getattribute ypos, self, 'ypos'
 
-    add $I0, yPos
-    getattribute ypos, self, $I0
-    
     set xold, xpos
     set yold, ypos
     add xpos, xval
@@ -409,7 +365,7 @@ XXX continue
 
 =item parameter C<extent>
 
-The size of the block's subblocks, in pixels.
+The size of the block's sub-blocks, in pixels.
 
 =back
 
@@ -437,11 +393,11 @@ This method returns nothing.
     .local pmc app
     .local pmc rect
 
-    rect = new .Hash
-    
+    rect = new 'Hash'
+
     # get the application
     app = self."application"()
-    
+
     # get the block's width/height
     size = self."size"()
     # get the block's id
@@ -450,8 +406,8 @@ This method returns nothing.
     add $I0, 9 # +1 = make first block id blue; +8 = make it bright
     # lookup the color value
     color = app."color"( $I0 )
-    $I0 = typeof color
-    if $I0 == .Undef goto END
+    $S0 = typeof color
+    if $S0 == "Undef" goto END
 
     # get the x/y position in board coordinates
     (xp, yp) = self."position"()
@@ -471,19 +427,18 @@ This method returns nothing.
     mul yp, extent
     add xp, xshift
     add yp, yshift
-    
+
     i = app."flag"( "show blocksize" )
     unless i goto NO_BLOCKSIZE
     set i, size
     mul i, extent
-    
+
     rect["x"] = xp
     rect["y"] = yp
     rect["width"] = i
     rect["height"] = i
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
-    
+    temp = new "SDL::Rect", rect
+
     surface."fill_rect"( temp, color )
     sub i, 2
     inc xp
@@ -493,8 +448,7 @@ This method returns nothing.
     rect["y"] = yp
     rect["width"] = i
     rect["height"] = i
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
+    temp = new "SDL::Rect", rect
 
     # lookup the color value
     $P0 = app."color"( 0 )
@@ -516,14 +470,13 @@ LOOPx:
 
     $I0 = self[i]
     if $I0 == 0 goto SKIP
-    
+
     dec extent
     rect["x"] = xp
     rect["y"] = yp
     rect["width"] = extent
     rect["height"] = extent
-    find_type $I0, "SDL::Rect"
-    temp = new $I0, rect
+    temp = new "SDL::Rect", rect
     inc extent
     surface."fill_rect"( temp, color )
 SKIP:
@@ -557,7 +510,7 @@ Returns 1 if the screen has to be redrawn.
     redraw = 0
     app = self."application"()
     board = self."board"()
-    
+
     fall = self."falling"()
     if fall goto FALL
 
@@ -572,13 +525,13 @@ FALL:
     diff = board."fallInterval"()
     add curtime, diff
     board."setNextFallTime"( curtime )
-    
+
     # let the block fall down one unit
     self."moveDown"()
-    
+
     # is it not falling fast?
     unless fall goto NOFALL
-    
+
     # let the block fall down fast
 AGAIN:
     app."drawScreen"( 0 )
@@ -606,7 +559,7 @@ the C<next block> has been prepared.
 
     okay = self."move"( 0, +1 )
     if okay goto BLOCK_MOVEDOWN_OKAY
-    
+
     # get the board
     board = self."board"()
     # lock the block
@@ -622,7 +575,7 @@ BLOCK_MOVEDOWN_OKAY:
 
 =item app = block."application"()
 
-Returns the application object assosicated with the block's board.
+Returns the application object associated with the block's board.
 
 =cut
 
@@ -637,7 +590,7 @@ Returns the application object assosicated with the block's board.
 
 .sub setXPosition :method
     .param int pos
-    
+
     getprop $P0, "xpos", self
     $P0 = pos
 .end
@@ -652,7 +605,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -660,4 +613,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: gmt_utc.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: gmt_utc.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -8,6 +8,7 @@ use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use ExtUtils::Manifest qw(maniread);
+use Parrot::Distribution;
 
 # set up how many tests to run
 plan tests => 1;
@@ -33,25 +34,16 @@ GMT or UTC.
 
 L<docs/pdds/pdd07_codingstd.pod>
 
-CAGE task #39878
-
 =cut
 
-my @files = @ARGV ? @ARGV : source_files();
+my $DIST = Parrot::Distribution->new;
+my @files = @ARGV ? <@ARGV> : source_files();
 my @failures;
 
 foreach my $file (@files) {
-    my $buf;
+    my $buf = $DIST->slurp($file);
 
-    # slurp in the file
-    open( my $fh, '<', $file )
-        or die "Cannot open '$file' for reading: $!\n";
-    {
-        local $/;
-        $buf = <$fh>;
-    }
-
-    # trim out svn and svk Id lines
+    # trim out SVN Id line
     $buf =~ s{\$Id:.*}{}g;
 
     # if we have a timezone, check to see if it is GMT/UTC

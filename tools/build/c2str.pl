@@ -1,5 +1,7 @@
 #! perl
-# $Id: c2str.pl 18945 2007-06-12 14:08:35Z fperrad $
+# $Id: c2str.pl 37201 2009-03-08 12:07:48Z fperrad $
+
+# Copyright (C) 2004-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -11,25 +13,37 @@ use warnings;
 use strict;
 use lib 'lib';
 
+use Fcntl qw( :DEFAULT :flock );
 use Text::Balanced qw(extract_delimited);
-use Math::BigInt;
-use Getopt::Long;
+use Math::BigInt ();
+use Getopt::Long ();
+use IO::File ();
 
 my $outfile          = 'all_cstring.str';
-my $string_private_h = 'src/string_private_cstring.h';
+my $string_private_h = 'src/string/private_cstring.h';
+
+# add read/write permissions even if we don't read/write the file
+# for example, Solaris requires write permissions for exclusive locks
+my $ALL = IO::File->new($outfile, O_CREAT | O_RDWR)
+    or die "Can't open '$outfile': $!\n";
+
+flock( $ALL, LOCK_EX ) or die "Can't lock '$outfile': $!\n";
+
+$ALL->seek(2, 0); # in case its been appended to while we waited for the lock
 
 my ( $result, $do_all, $do_init, $file );
-$result = GetOptions(
+$result = Getopt::Long::GetOptions(
     "all"  => \$do_all,
     "init" => \$do_init,
 );
 
 $do_all and do {
-    &read_all;
-    &create_c_include;
+    read_all();
+    create_c_include();
     exit;
 };
 $do_init and do {
+    close $ALL;
     unlink $outfile;
     exit;
 };
@@ -39,13 +53,20 @@ $file =~ s/\.c$//;
 my $infile = $file . '.c';
 die "$0: $infile: $!" unless -e $infile;
 
-my %known_strings = ();
+my %known_strings;
 my @all_strings;
 
-&read_all;
-open my $ALL, '>>', $outfile or die "Can't write '$outfile': $!";
+read_all();
 process_cfile();
-close $ALL;
+
+# the literal length of the string in source code is NOT its length in C terms
+sub get_length {
+    my $s = shift;
+    $s    =~ s{\\x\d+}{.}g;
+    $s    =~ s{\\.}{.}g;
+
+    return length $s;
+}
 
 sub hash_val {
     my $h = Math::BigInt->new('+0');
@@ -60,17 +81,14 @@ sub hash_val {
 }
 
 sub read_all {
-    if ( -e $outfile ) {
-        open my $IN, '<', $outfile;
-        while (<$IN>) {
+    $ALL->seek(0, 0);
+    while (<$ALL>) {
 
-            # len hashval "string"
-            if (/(\d+)\s+(0x[\da-hA-H]+)\s+"(.*)"/) {
-                push @all_strings, [ $1, $2, $3 ];
-                $known_strings{$3} = scalar @all_strings;
-            }
+        # len hashval "string"
+        if (/(\d+)\s+(0x[\da-hA-H]+)\s+"(.*)"/) {
+            push @all_strings, [ $1, $2, $3 ];
+            $known_strings{$3} = @all_strings;
         }
-        close($IN);
     }
     return;
 }
@@ -90,57 +108,85 @@ sub process_cfile {
  *
  */
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER STOP */
+
 #define CONCAT(a,b) a##b
 #define _CONST_STRING(i, l) (i)->const_cstring_table[CONCAT(_CONST_STRING_, l)]
 #define CONST_STRING(i, s) _CONST_STRING(i, __LINE__)
+#define CONST_STRING_GEN(i, s) _CONST_STRING_GEN(i, __LINE__)
+#define _CONST_STRING_GEN(i, l) \\
+    (i)->const_cstring_table[CONCAT(_CONST_STRING_GEN_, l)]
 
 HEADER
     print $ALL "# $infile\n";
     my %this_file_seen;
 
+    # NOTE: when CONST_STRING gets used it and any macro invocations
+    # that it is used in *should not* be split across more than one
+    # line, because some compilers generate line numbers in such cases
+    # differently from the way gcc does this (a case in point is
+    # Intel's C compiler, icc) and hence the #defined CONST_STRING
+    # won't be found by the compiler.
+
     # There is a chance that the same __LINE__ will reoccur if #line directives
     # are used.
+    my $prev_line;
     my %lines_seen;
+
     while (<$IN>) {
         if (m/^\s*#\s*line\s+(\d+)/) {
 
             # #line directive
             $line = $1 - 1;
+            $prev_line = $_;
             next;
         }
         $line++;
-        next if m/^\s*#/;    # otherwise ignore preprocessor
-        next unless s/.*\bCONST_STRING\s*\(\w+\s*,//;
+        # otherwise ignore preprocessor
 
-        if ( $lines_seen{$line}++ ) {
+        do { $prev_line = $_; next } if m/^\s*#/;
+        do { $prev_line = $_; next }
+            unless s/.*\bCONST_STRING(_GEN)?\s*\(\w+\s*,//;
+
+        my $const_string = defined $1 ? 'CONST_STRING_GEN' : 'CONST_STRING';
+
+        if ( $lines_seen{"$line:$const_string"}++ ) {
             die "Seen line $line before in $infile - can't continue";
         }
 
-        # TODO maybe cope with escaped \"
-        my $cnt = tr/"/"/;
-        die "bogus CONST_STRING at line $line" unless $cnt == 2;
+        # semicolons, blank lines, opening braces, closing parens, #directives
+        # comments, labels, else keyword
+        if ($prev_line !~ /([{});:]|\*\/|\w+:|else)$/
+        &&  $prev_line !~ /^\s*(#.*)?$/) {
+            die "CONST_STRING split across lines at $line in $infile\n";
+        }
 
         my $str = extract_delimited;    # $_, '"';
-        $str = substr $str, 1, -1;
+        $str    = substr $str, 1, -1;
         ## print STDERR "** '$str' $line\n";
         my $n;
         if ( $n = $known_strings{$str} ) {
-            if ( $this_file_seen{$str} ) {
-                print "#define _CONST_STRING_$line _CONST_STRING_", $this_file_seen{$str}, "\n";
+            if ( $this_file_seen{"$const_string:$str"} ) {
+                print "#define _${const_string}_$line _${const_string}_",
+                    $this_file_seen{"$const_string:$str"}, "\n";
             }
             else {
-                print "#define _CONST_STRING_$line $n\n";
+                print "#define _${const_string}_$line $n\n";
             }
-            $this_file_seen{$str} = $line;
+            $this_file_seen{"$const_string:$str"} = $line;
+            $prev_line = $_;
             next;
         }
-        my $len     = length $str;
-        my $hashval = hash_val($str);
+
+        my $len               = get_length($str);
+        my $hashval           = hash_val($str);
         push @all_strings, [ $len, $hashval, $str ];
-        $n                    = scalar @all_strings;
+
+        $n                    = @all_strings;
         $known_strings{$str}  = $n;
-        $this_file_seen{$str} = $line;
-        print "#define _CONST_STRING_$line $n\n";
+        $this_file_seen{"$const_string:$str"} = $line;
+        print "#define _${const_string}_$line $n\n";
         print $ALL qq!$len\t$hashval\t"$str"\n!;
     }
     close($IN);
@@ -160,6 +206,9 @@ sub create_c_include {
  * Any changes made here will be lost!
  *
  */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER STOP */
 
 #ifndef PARROT_SRC_STRING_PRIVATE_CSTRING_H_GUARD
 #define PARROT_SRC_STRING_PRIVATE_CSTRING_H_GUARD
@@ -190,6 +239,7 @@ HEADER
 /*
  * Local variables:
  *   c-file-style: "parrot"
+ *   buffer-read-only: t
  * End:
  * vim: expandtab shiftwidth=4:
  */
@@ -199,81 +249,7 @@ HEADER
     return;
 }
 
-=for never
-
-print <<"HEADER";
-/*
- * !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
- *
- * This file is generated automatically from '$infile'
- * by $0.
- *
- * Any changes made here will be lost!
- *
- */
-
-#define CONCAT(a,b) a##b
-#define _S(name) (__PARROT_STATIC_STR(__LINE__))
-#define __PARROT_STATIC_STR(line) CONCAT(&static_string_, line)
-
-#if ! DISABLE_GC_DEBUG
-#  define GC_DEBUG_VERSION ,0
-#else
-#  define GC_DEBUG_VERSION
-#endif
-
-HEADER
-
-# currently unused true const strings
-sub output_string {
-  my ($text, $line) = @_;
-
-  if (exists $known_strings{$text}) {
-    <<"DATA";
-#define static_string_${line} static_string_$known_strings{$text}
-
-DATA
-  }
-  else {
-    $known_strings{$text} = $line;
-    my $h = hash_val($text);
-    <<"DATA";
-static /*const*/ char static_string_${line}_data\[\] = $text;
-static /*const*/ struct parrot_string_t static_string_${line} = {
-  { /* pobj_t */
-    {{
-      static_string_${line}_data,
-      sizeof(static_string_${line}_data)
-    }},
-    (PObj_constant_FLAG|PObj_external_FLAG)
-    GC_DEBUG_VERSION
-  },
-  sizeof(static_string_${line}_data),
-  static_string_${line}_data,
-  sizeof(static_string_${line}_data) - 1,
-  1,
-  $h
-};
-
-DATA
-  }
-}
-
-open IN, '<', $infile;
-
-my $line = 0;
-while (<IN>) {
-  $line++;
-  next if m/^\s*#/; # ignore preprocessor
-  next unless s/.*\b_S\b//;
-
-  my $str = extract_bracketed $_, '(")';
-
-  print output_string (substr($str,1,-1), $line);
-}
-
-=cut
-
+
 # Local Variables:
 #   mode: cperl
 #   cperl-indent-level: 4

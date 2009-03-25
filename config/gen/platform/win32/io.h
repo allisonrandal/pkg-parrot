@@ -1,3 +1,8 @@
+/*
+ * $Id: io.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2004-2008, Parrot Foundation.
+ */
+
 #ifndef PARROT_PLATFORM_WIN32_IO_H_GUARD
 #define PARROT_PLATFORM_WIN32_IO_H_GUARD
 
@@ -7,7 +12,7 @@ typedef void* Parrot_WIN32_HANDLE;
 typedef HUGEINTVAL Parrot_OFF_T;
 
 #ifndef S_ISREG
-#  define S_ISREG(m) ((m & S_IFMT) == S_IFREG)
+#  define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
 #endif /* PARROT_PLATFORM_WIN32_IO_H_GUARD */

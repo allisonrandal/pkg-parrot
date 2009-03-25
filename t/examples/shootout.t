@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: shootout.t 19146 2007-06-19 20:59:42Z allison $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: shootout.t 37508 2009-03-17 01:48:13Z chromatic $
 
 use strict;
 use warnings;
@@ -11,9 +11,9 @@ use vars qw($EXT $DIR @shootouts);
 
 # find dynamically all shootouts from dir listing
 BEGIN {    # to be run before declaring the number of tests
-    $EXT = '.output';
+    $EXT = '_output';
     $DIR = "examples/shootout";
-    opendir( DIR, $DIR ) or die "can’t opendir $DIR: $!";
+    opendir( DIR, $DIR ) or die "can't opendir $DIR: $!";
     @shootouts = grep { -e "$DIR/$_$EXT" } sort grep { /\.pir$/ } readdir(DIR);
     closedir DIR;
 }
@@ -35,17 +35,17 @@ Test the PIR shootout examples in 'examples/shootout/*.pir'.
 To add a new test, you do not have to modify this script:
 
  1. add your script (toto.pir) to examples/shootout
- 2. put parrot options in the first line (e.g  "#!./parrot -Oc -Cj")
+ 2. put parrot options in the first line (e.g  "#!./parrot -Oc -R cgp-jit")
  3. make sure you have default argument values
- 4. put the expected output as a file : toto.pir.output
- 5. if you need an input file (to be read from stdin), call it toto.pir.input
+ 4. put the expected output as a file : toto.pir_output
+ 5. if you need an input file (to be read from stdin), call it toto.pir_input
 
 See the explanation of benchmarks and sample data for reduced N benches at
 http://shootout.alioth.debian.org/sandbox/
 
 =head1 SEE ALSO
 
-#40064: [TODO] shootout example testing in Parrot RT
+#40064: shootout example testing in Parrot RT
 
 L<"https://rt.perl.org/rt3/Public/Bug/Display.html?id=40064">
 
@@ -55,9 +55,9 @@ my %skips = (
     'pidigits.pir'    => [ 'not exists $PConfig{HAS_GMP}', 'needs GMP' ],
     'recursive.pir'   => [ '$PConfig{cpuarch} !~ /86/',    'float JIT broken on non-x86' ],
     'recursive-2.pir' => [ '$PConfig{cpuarch} !~ /86/',    'float JIT broken on non-x86' ],
-    'fannkuch.pir'    => [ '$^O eq "darwin"',              'fannkuch benchmark failure on darwin' ],
+    'revcomp.pir'     => [ '1',              'string buffering segfault, TT #445' ],
 );
-my $INPUT_EXT = '.input';
+my $INPUT_EXT = '_input';
 foreach my $script (@shootouts) {
     my $skip = $skips{$script};
     if ($skip) {
@@ -100,7 +100,12 @@ foreach my $script (@shootouts) {
     }
 
     $ENV{TEST_PROG_ARGS} = $args;
-    example_output_is( $file, $expected );
+    warn "$file $args\n" if $ENV{TEST_VERBOSE};
+    my @todo;
+
+    # this is an example of todo syntax
+    # @todo = ( todo => 'known GC segfault' ) if $file =~ /regexdna.pir/;
+    example_output_is( $file, $expected, @todo );
 }
 
 # Local Variables:

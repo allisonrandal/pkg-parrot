@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: manifest.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: manifest.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use ExtUtils::Manifest;
 
 =head1 NAME
 
-t/distro/manifest.t - sanity check the MANIFEST file
+t/distro/manifest.t - check sanity of the MANIFEST file
 
 =head1 SYNOPSIS
 
@@ -27,16 +27,13 @@ ok( -e $ExtUtils::Manifest::MANIFEST, 'MANIFEST exists' );
 
 ok( -e $ExtUtils::Manifest::MANIFEST . '.SKIP', 'MANIFEST.SKIP exists' );
 
-SKIP:
-{
-    diag "this may take a while...";
+diag "this may take a while...";
 
-    $ExtUtils::Manifest::Quiet = 1;
+$ExtUtils::Manifest::Quiet = 1;
 
-    my @missing = ExtUtils::Manifest::manicheck();
-    ok( !@missing, 'manicheck()' )
-        or diag("Missing files:\n\t@missing");
-}
+my @missing = ExtUtils::Manifest::manicheck();
+ok( !@missing, 'manicheck()' )
+    or diag("Missing files:\n\t@missing");
 
 # remember to change the number of tests :-)
 BEGIN { plan tests => 3; }

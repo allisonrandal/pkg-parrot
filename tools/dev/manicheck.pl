@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: manicheck.pl 16741 2007-01-22 10:49:12Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: manicheck.pl 37201 2009-03-08 12:07:48Z fperrad $
 ################################################################################
 
 =head1 NAME
@@ -31,7 +31,6 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../../lib";
 
-use Data::Dumper;
 use ExtUtils::Manifest;
 
 $ExtUtils::Manifest::Quiet = 1;
@@ -51,7 +50,6 @@ printf "Found %d distinct files among MANIFEST and directory contents.\n\n",
 printf "  %5d missing\n", scalar @missing;
 printf "  %5d extra\n",   scalar @extra;
 
-# TODO: Use Data::Dumper
 if (@missing) {
     print "\n";
     print "Missing files:\n";

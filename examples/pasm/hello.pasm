@@ -1,4 +1,4 @@
-# $Id: hello.pasm 12064 2006-03-28 19:08:48Z bernhard $
+# $Id: hello.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ for showing how to create an executable from PASM.
 =cut
 
     # Get @ARGV as a ResizableStringArray
-    get_params "(0)", P0
+    get_params "0", P0
 
     # Discard the program name
     shift S0, P0

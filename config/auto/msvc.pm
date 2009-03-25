@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: msvc.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: msvc.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ config/auto/msvc.pm - Microsoft Visual C++ Compiler
 
 =head1 DESCRIPTION
 
-Determines whether the C compiler is actually C<Visual C++>.
+Determines whether the C compiler is actually Visual C++.
 
 =cut
 
@@ -15,26 +15,49 @@ package auto::msvc;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining if your C compiler is actually Visual C++';
 
-@args = qw(verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Is your C compiler actually Visual C++};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = ( shift, shift );
 
+    if ($conf->data->get('gccversion')) {
+        my $verbose = $conf->options->get('verbose');
+        print " (skipped) " if $verbose;
+        $self->set_result('skipped');
+        $conf->data->set( msvcversion => undef );
+        return 1;
+    }
+    my $msvcref = _probe_for_msvc($conf);
+
+    $self->_evaluate_msvc($conf, $msvcref);
+
+    return 1;
+}
+
+sub _probe_for_msvc {
+    my $conf = shift;
+    $conf->cc_gen("config/auto/msvc/test_c.in");
+    $conf->cc_build();
+    my %msvc = eval $conf->cc_run() or die "Can't run the test program: $!";
+    $conf->cc_clean();
+    return \%msvc;
+}
+
+sub _evaluate_msvc {
+    my ($self, $conf, $msvcref) = @_;
     my $verbose = $conf->options->get('verbose');
-
-    cc_gen("config/auto/msvc/test_c.in");
-    cc_build();
-    my %msvc = eval cc_run() or die "Can't run the test program: $!";
-    cc_clean();
-
     # Set msvcversion to undef.  This will also trigger any hints-file
     # callbacks that depend on knowing whether or not we're using Visual C++.
 
@@ -42,24 +65,18 @@ sub runstep {
     # which should have been caught by the 'die' above.
     # Therefore, test if it's defined to see if MSVC's installed.
     # return 'no' if it's not.
-    unless ( defined $msvc{_MSC_VER} ) {
+    unless ( defined $msvcref->{_MSC_VER} ) {
         $self->set_result('no');
         $conf->data->set( msvcversion => undef );
-        return $self;
+        return 1;
     }
 
-    my $major = int( $msvc{_MSC_VER} / 100 );
-    my $minor = $msvc{_MSC_VER} % 100;
-    unless ( defined $major && defined $minor ) {
-        print " (no) " if $verbose;
-        $self->set_result('no');
-        $conf->data->set( msvcversion => undef );
-        return $self;
-    }
+    my $major = int( $msvcref->{_MSC_VER} / 100 );
+    my $minor = $msvcref->{_MSC_VER} % 100;
+    my $status = $self->_handle_not_msvc($conf, $major, $minor, $verbose);
+    return 1 if $status;
 
-    my $msvcversion = "$major.$minor";
-    print " (yep: $msvcversion )" if $verbose;
-    $self->set_result('yes');
+    my $msvcversion = $self->_compose_msvcversion($major, $minor, $verbose);
 
     $conf->data->set( msvcversion => $msvcversion );
 
@@ -74,8 +91,28 @@ sub runstep {
         # for details.
         $conf->data->add( " ", "ccflags", "-D_CRT_SECURE_NO_DEPRECATE" );
     }
+    return 1;
+}
 
-    return $self;
+sub _handle_not_msvc {
+    my $self = shift;
+    my ($conf, $major, $minor, $verbose) = @_;
+    my $status;
+    unless ( defined $major && defined $minor ) {
+        print " (no) " if $verbose;
+        $self->set_result('no');
+        $conf->data->set( msvcversion => undef );
+        $status++;
+    }
+    return $status;
+}
+
+sub _compose_msvcversion {
+    my $self = shift;
+    my ($major, $minor, $verbose) = @_;
+    my $msvcversion = "$major.$minor";
+    $self->set_result("yes, $msvcversion");
+    return $msvcversion;
 }
 
 1;

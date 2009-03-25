@@ -1,4 +1,4 @@
-# $Id: Sub.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# $Id: Sub.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -11,11 +11,10 @@ version 0.1
 =head1 SYNOPSIS
 
     # create the stream
-    find_type $I0, "Stream::Sub"
-    new stream, $I0
+    new stream, "Stream::Sub"
 
     # set the source sub
-    .const .Sub temp = "_test"
+    .const 'Sub' temp = "_test"
     stream."source"( temp )
 
     ...
@@ -54,17 +53,17 @@ The stream will be disconnected automatically if the provided sub returns.
 
 =cut
 
-.sub onload :load, :anon
+.sub onload :load :anon
     .local int i
     .local pmc base
     .local pmc sub
 
-    find_type i, "Stream::Sub"
-    if i > 1 goto END
+    $P0 = get_class "Stream::Sub"
+    unless null $P0 goto END
 
     load_bytecode "library/Stream/Base.pir"
 
-    getclass base, "Stream::Base"
+    get_class base, "Stream::Base"
     subclass sub, base, "Stream::Sub"
 
     addattribute sub, "write_cont"
@@ -90,8 +89,7 @@ END:
     .local pmc _write
     .local pmc ret
 
-    classoffset $I0, self, "Stream::Sub"
-    getattribute _write, self, $I0
+    getattribute _write, self, 'write_cont'
 
     $P0 =self."_call_writer"(_write, str)
 .end
@@ -117,12 +115,11 @@ END:
     .local string str
 
     temp = self."source"()
-    typeof $I0, temp
-    if $I0 == .Undef goto END
-    classoffset $I0, self, "Stream::Sub"
+    $I0 = defined temp
+    unless $I0 goto END
     .include "interpinfo.pasm"
     $P0 = interpinfo .INTERPINFO_CURRENT_CONT
-    setattribute self, $I0, $P0
+    setattribute self, 'write_cont', $P0
 
     str = temp( self )
 
@@ -155,7 +152,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -163,4 +160,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

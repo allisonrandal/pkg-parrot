@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: progs.pm 18877 2007-06-08 14:15:40Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: progs.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -17,35 +17,53 @@ package inter::progs;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':inter';
+use Parrot::Configure::Utils ':inter', ':auto';
 
-$description = 'Determining what C compiler and linker to use';
 
-@args = qw(ask cc cxx link ld ccflags ccwarn linkflags ldflags libs debugging
-    lex yacc maintainer);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determine what C compiler and linker to use};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my ( $cc, $cxx, $link, $ld, $ccflags, $ccwarn, $linkflags, $ldflags, $libs, $lex, $yacc );
+    my $verbose = _get_verbose($conf);
 
-    # Find a working version of a program:
-    # Try each alternative, until one works.
-    # If none work, then set to null command.
-    # RT#43173 need config support for a null command.
-    my $null          = 'echo';
-    my $first_working = sub {
-        foreach (@_) {
-            `$_ -h 2>&1`;
-            return $_ if not $?;
-        }
-        return $null;
-    };
+    my $ask = _prepare_for_interactivity($conf);
 
+    my $cc;
+    ($conf, $cc) = _get_programs($conf, $verbose, $ask);
+
+    my $debug = _get_debug($conf, $ask);
+
+    my $debug_validity = _is_debug_setting_valid($debug);
+    return unless defined $debug_validity;
+
+    $conf = _set_debug_and_warn($conf, $debug);
+
+    # Beware!  Inside test_compiler(), cc_build() and cc_run() both silently
+    # reference the Parrot::Configure object ($conf) at its current state.
+    test_compiler($conf, $cc);
+
+    return 1;
+}
+
+sub _get_verbose {
+    my $conf = shift;
+    my $verbose = $conf->options->get('verbose');
+    print "\n" if $verbose;
+    return $verbose;
+}
+
+sub _prepare_for_interactivity {
+    my $conf = shift;
     my $ask = $conf->options->get('ask');
     if ($ask) {
         print <<'END';
@@ -59,10 +77,14 @@ sub runstep {
 
 END
     }
+    return $ask;
+}
 
+sub _get_programs {
+    my ($conf, $verbose, $ask) = @_;
     # Set each variable individually so that hints files can use them as
     # triggers to help pick the correct defaults for later answers.
-
+    my ( $cc, $cxx, $link, $ld, $ccflags, $linkflags, $ldflags, $libs, $lex, $yacc );
     $cc = integrate( $conf->data->get('cc'), $conf->options->get('cc') );
     $cc = prompt( "What C compiler do you want to use?", $cc )
         if $ask;
@@ -76,47 +98,64 @@ END
     $ld = prompt( "What program do you want to use to build shared libraries?", $ld ) if $ask;
     $conf->data->set( ld => $ld );
 
-    $ccflags = $conf->data->get('ccflags');
+    $ccflags = integrate( $conf->data->get('ccflags'),
+        $conf->options->get('ccflags') );
 
     # Remove some perl5-isms.
     $ccflags =~ s/-D((PERL|HAVE)_\w+\s*|USE_PERLIO)//g;
     $ccflags =~ s/-fno-strict-aliasing//g;
     $ccflags =~ s/-fnative-struct//g;
-    $ccflags = integrate( $ccflags, $conf->options->get('ccflags') );
     $ccflags = prompt( "What flags should your C compiler receive?", $ccflags )
         if $ask;
     $conf->data->set( ccflags => $ccflags );
 
+    $verbose and print " ccflags: $ccflags\n";
+
     $linkflags = $conf->data->get('linkflags');
     $linkflags =~ s/-libpath:\S+//g;    # RT#43174 No idea why.
     $linkflags = integrate( $linkflags, $conf->options->get('linkflags') );
-    $linkflags = prompt( "And your linker?", $linkflags ) if $ask;
+    $linkflags = prompt( "And flags for your linker?", $linkflags ) if $ask;
     $conf->data->set( linkflags => $linkflags );
 
     $ldflags = $conf->data->get('ldflags');
     $ldflags =~ s/-libpath:\S+//g;      # RT#43174 No idea why.
     $ldflags = integrate( $ldflags, $conf->options->get('ldflags') );
-    $ldflags = prompt( "And your $ld for building shared libraries?", $ldflags )
+    $ldflags = prompt( "And your $ld flags for building shared libraries?", $ldflags )
         if $ask;
     $conf->data->set( ldflags => $ldflags );
 
     $libs = $conf->data->get('libs');
-    $libs = join ' ', grep { $^O =~ /VMS|MSWin/ || !/^-l(c|gdbm(_compat)?|dbm|ndbm|db)$/ }
-        split( ' ', $libs );
+    $libs = join q{ },
+        grep { $conf->data->get_p5('OSNAME') =~ /VMS|MSWin/ || !/^-l(c|gdbm(_compat)?|dbm|ndbm|db)$/ }
+        split( q{ }, $libs );
     $libs = integrate( $libs, $conf->options->get('libs') );
-    $libs = prompt( "What libraries should your C compiler use?", $libs ) if $ask;
+    $libs = prompt( "What libraries should your C compiler use?", $libs )
+        if $ask;
     $conf->data->set( libs => $libs );
 
     $cxx = integrate( $conf->data->get('cxx'), $conf->options->get('cxx') );
     $cxx = prompt( "What C++ compiler do you want to use?", $cxx ) if $ask;
     $conf->data->set( cxx => $cxx );
+    return ($conf, $cc);
+}
 
+sub _get_debug {
+    my ($conf, $ask) = @_;
     my $debug = 'n';
     $debug = 'y' if $conf->options->get('debugging');
     $debug = prompt( "Do you want a debugging build of Parrot?", $debug )
         if $ask;
+    return $debug;
+}
 
-    if ( !$debug || $debug =~ /n/i ) {
+sub _is_debug_setting_valid {
+    my $debug = shift;
+    ( $debug =~ /^[yn]$/i ) ? return 1 : return;
+}
+
+sub _set_debug_and_warn {
+    my ($conf, $debug) = @_;
+    if ( $debug =~ /n/i ) {
         $conf->data->set(
             cc_debug   => '',
             link_debug => '',
@@ -125,10 +164,32 @@ END
     }
 
     # This one isn't prompted for above.  I don't know why.
-    $ccwarn = integrate( $conf->data->get('ccwarn'), $conf->options->get('ccwarn') );
+    my $ccwarn = integrate( $conf->data->get('ccwarn'), $conf->options->get('ccwarn') );
     $conf->data->set( ccwarn => $ccwarn );
+    return $conf;
+}
 
-    return $self;
+sub test_compiler {
+    my ($conf, $cc) = @_;
+
+    open( my $out_fh, '>', "test_$$.c" )
+        or die "Unable to open 'test_$$.c': $@\n";
+    print {$out_fh} <<END_C;
+int main() {
+    return 0;
+}
+END_C
+    close $out_fh;
+
+    unless ( eval { $conf->cc_build(); 1 } ) {
+        warn "Compilation failed with '$cc'\n";
+        exit 1;
+    }
+
+    unless ( eval { $conf->cc_run(); 1 } ) {
+        warn $@ if $@;
+        exit 1;
+    }
 }
 
 1;

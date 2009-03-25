@@ -1,8 +1,11 @@
 /*
+  Copyright (C) 2003-2008, Parrot Foundation.
+  $Id: exec_dep.h 37385 2009-03-13 19:25:41Z coke $
+*/
+
+/*
  * exec_dep.h
  *
- * SVN Info
- *    $Id: exec_dep.h 18945 2007-06-12 14:08:35Z fperrad $
  * Overview:
  *    ARM dependent functions to emit an executable.
  * History:
@@ -11,85 +14,30 @@
  * References:
  */
 
+#include "jit.h"
+#include "jit_emit.h"
+
 #ifndef PARROT_ARM_EXEC_DEP_H_GUARD
 #define PARROT_ARM_EXEC_DEP_H_GUARD
 
-#ifdef JIT_CGP
+/* HEADERIZER BEGIN: src/exec_dep.c */
 
 void
-Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
-{
-}
-
-#else /* JIT_CGP */
+Parrot_exec_normal_op(Parrot_jit_info_t *jit_info, PARROT_INTERP);
 
 void
-Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
-{
-    jit_info->native_ptr = emit_mov(jit_info->native_ptr, r1, r4);
-#  ifndef ARM_K_BUG
-    jit_info->native_ptr = emit_mov(jit_info->native_ptr, REG14_lr, REG15_pc);
-    jit_info->native_ptr = emit_ldmstm(jit_info->native_ptr,
-                                        cond_AL, is_load, dir_IA,
-                                        is_writeback,
-                                        REG14_lr,
-                                        reg2mask(0) | reg2mask(REG15_pc));
-#  else
-    jit_info->native_ptr = emit_arith_immediate(jit_info->native_ptr, cond_AL,
-                                                 ADD, 0, REG14_lr, REG15_pc,
-                                                 4, 0);
-    jit_info->native_ptr = emit_ldmstm(jit_info->native_ptr,
-                                        cond_AL, is_load, dir_IA,
-                                        is_writeback,
-                                        REG14_lr,
-                                        reg2mask(0) | reg2mask(REG12_ip));
-    jit_info->native_ptr = emit_mov(jit_info->native_ptr, REG15_pc, REG12_ip);
-#  endif /* ARM_K_BUG */
-    Parrot_exec_add_text_rellocation(jit_info->objfile,
-        jit_info->native_ptr, RTYPE_DATA, "program_code", 0);
-    jit_info->native_ptr
-        = emit_word(jit_info->native_ptr, ((int)jit_info->cur_op) -
-            ((int)interp->code->base.data) +
-                (jit_info->objfile->bytecode_header_size));
-    Parrot_exec_add_text_rellocation(jit_info->objfile,
-        jit_info->native_ptr, RTYPE_FUNC,
-            interp->op_info_table[*jit_info->cur_op].func_name, 0);
-    jit_info->native_ptr
-        = emit_word(jit_info->native_ptr, 0);
-}
-
-#endif /* JIT_CGP */
+Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info, PARROT_INTERP);
 
 void
-Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
-                   Interp *interp)
-{
-    Parrot_exec_normal_op(jit_info, interp);
-    Parrot_jump_to_op_in_reg(jit_info, interp, r0);
-}
+Parrot_exec_restart_op(Parrot_jit_info_t *jit_info, PARROT_INTERP);
 
+/* Assign the offset of the program_code */
 void
-Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
-                       Interp *interp)
-{
-}
+offset_fixup(Parrot_exec_objfile_t *obj);
 
-/* Assign the offset of the progra_code */
-static void
-offset_fixup(Parrot_exec_objfile_t *obj)
-{
-    int i,j;
-
-    for (i = 0; i < obj->data_count; i++) {
-        for (j = 0; j < i; j++)
-            obj->symbol_table[i].value += obj->data_size[j];
-    }
-}
+/* HEADERIZER END: src/exec_dep.c */
 
 #endif /* PARROT_ARM_EXEC_DEP_H_GUARD */
-
 
 /*
  * Local variables:

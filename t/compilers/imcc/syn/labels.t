@@ -1,22 +1,22 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: labels.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: labels.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 6;
+use Parrot::Test tests => 3;
 
 ##############################
 pir_output_is( <<'CODE', <<'OUT', "goto 1" );
 .sub test :main
-	goto foo
-	end
+    goto foo
+    end
 foo:
-	print "ok 1\n"
-	end
+    print "ok 1\n"
+    end
 .end
 
 CODE
@@ -26,12 +26,12 @@ OUT
 ##############################
 pir_output_is( <<'CODE', <<'OUT', "goto 2" );
 .sub test :main
-	goto foo
-bar:	print "ok 2\n"
-	end
+    goto foo
+bar:    print "ok 2\n"
+    end
 foo:
-	print "ok 1\n"
-	goto bar
+    print "ok 1\n"
+    goto bar
 .end
 
 CODE
@@ -40,7 +40,7 @@ ok 2
 OUT
 
 ##############################
-pir_error_output_like( <<'CODE', <<'OUT', "illegal label");
+pir_error_output_like( <<'CODE', <<'OUT', "illegal label" );
 .sub bogus
          bsr _function
          print "never\n"
@@ -56,41 +56,6 @@ CODE
 /no label offset defined/
 OUT
 
-pir_output_is( <<'CODE', <<'OUT', "perlish func label" );
-.sub _main::test
-	print "ok 1\n"
-	end
-.end
-
-CODE
-ok 1
-OUT
-
-pir_output_is( <<'CODE', <<'OUT', "perlish func label - .pcc_sub" );
-.pcc_sub _main::test
-	print "ok 1\n"
-	end
-.end
-
-CODE
-ok 1
-OUT
-
-pir_output_is( <<'CODE', <<'OUT', "perlish func label" );
-.sub _main::test
-        _main::sub()
-	print "ok 2\n"
-	end
-.end
-.sub _main::sub
-	print "ok 1\n"
-.end
-
-
-CODE
-ok 1
-ok 2
-OUT
 
 # Local Variables:
 #   mode: cperl

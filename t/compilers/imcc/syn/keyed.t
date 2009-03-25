@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: keyed.t 16244 2006-12-25 22:14:04Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: keyed.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -15,9 +15,9 @@ SKIP: {
 
     pir_output_is( <<'CODE', <<'OUTPUT', "add_keyed" );
 .sub test :main
-    new P0, .Array
-    new P1, .Array
-    new P2, .Array
+    new P0, 'Array'
+    new P1, 'Array'
+    new P2, 'Array'
     P0 = 1
     P1 = 2
     P2 = 11

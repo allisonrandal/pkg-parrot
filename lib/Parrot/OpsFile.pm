@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: OpsFile.pm 16245 2006-12-25 22:15:39Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: OpsFile.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ F<tools/build/ops2pm.pl> and F<tools/build/pbc2c.pl>.
 For ops that have trivial bodies (such as just a call to some other
 function and a C<return> statement), opcode functions are in the format:
 
-    inline op opname (args) :class,flags {
+    inline op opname (args) :flags {
         ... body of function ...
     }
 
@@ -32,13 +32,15 @@ Note that currently the C<inline> op type is ignored.
 Alternately, for opcode functions that have more internal complexity the
 format is:
 
-    op opname (args) :class,flags {
+    op opname (args) :flags {
         ... body of function ...
     }
 
 There may be more than one C<return>.
 
 In both cases the closing brace B<must> be on its own line.
+
+When specifying multiple flags, each flag gets its own prefixing colon.
 
 =head2 Op Arguments
 
@@ -51,9 +53,6 @@ Argument direction is one of:
     inout         the argument passes a value into and out of the op
     inconst       the argument passes a constant value into the op
     invar         the argument passes a variable value into the op
-    label         an in argument containing a branch offset or address
-    labelconst    an invar argument containing a branch offset or address
-    labelvar      an inconst argument containing a branch offset or address
 
 Argument direction is used to determine the life times of symbols and
 their related register allocations. When an argument is passed into an
@@ -68,17 +67,33 @@ Argument type is one of:
     PMC       the argument is an PMC
     KEY       the argument is an aggregate PMC key
     INTKEY    the argument is an aggregate PMC integer key
+    LABEL     the argument is an integer branch offset or address
 
 The size of the return offset is determined from the op function's
 signature.
 
-=head2 Op Classification and Flags
+=head2 Op Flags
 
-The op classification and flags are optional hints which provide
-information about the op.
+The flags are of two types:
+
+=over 4
+
+=item 1 class
 
 The classification of ops is intended to facilitate the selection of
-suitable ops for a Parrot safe mode, or for inclusion in miniparrot.
+suitable ops for a Parrot safe mode.
+
+=item 2 behavior
+
+The presence (or absence) of certain flags will change how the op
+behaviors. For example, the lack of the C<flow> flag will cause the
+op to be implicitly terminated with C<goto NEXT()>. (See next section).
+
+The :deprecated flag will generate a diagnostic to standard error at
+runtime when a deprecated opcode is invoked and
+C<PARROT_WARNINGS_DEPRECATED_FLAG> has been set.
+
+=back
 
 =head2 Op Body (Macro Substitutions)
 
@@ -309,7 +324,22 @@ sub read_ops {
         #   kic  Integer Key constant index (in-line)
         #
 
-        if (/^(inline\s+)?op\s+([a-zA-Z]\w*)\s*\((.*)\)\s*(\S*)?\s*{/) {
+        my $op_sig_RE = qr/
+            ^
+            (inline\s+)?  # optional keywords
+            op
+            \s+
+            ([a-zA-Z]\w*) # op name
+            \s*
+            \((.*)\)      # argument signature
+            \s*
+            ((?: \:\w+\s*)*)         # :flags
+            \s*
+            {
+            $
+        /x;
+
+        if ($_ =~ $op_sig_RE) {
             if ($seen_op) {
                 die "$ops_file [$.]: Cannot define an op within an op definition!\n";
             }
@@ -325,33 +355,33 @@ sub read_ops {
             $seen_op    = 1;
             $line       = $. + 1;
 
-            my @temp = ();
+            $flags = { map { $_ => undef } (split(/[ :]+/, $flags)) };
 
-            foreach my $arg (@args) {
+            my @temp;
+
+            for my $arg (@args) {
                 my ( $use, $type ) =
-                    $arg =~ m/^(in|out|inout|inconst|invar|label|labelconst|labelvar)
+                    $arg =~ m/^(in|out|inout|inconst|invar)
                     \s+
-                    (INT|NUM|STR|PMC|KEY|INTKEY)$/ix;
+                    (INT|NUM|STR|PMC|KEY|INTKEY|LABEL)$/ix;
 
                 die "Unrecognized arg format '$arg' in '$_'!"
-                    unless defined($use)
-                    and defined($type);
+                    unless defined($use) and defined($type);
 
-                if ( $type =~ /^INTKEY$/i ) {
-                    $type = "ki";
-                }
-                else {
-                    $type = lc substr( $type, 0, 1 );
-                }
-
-                # convert e.g. "labelvar" to "invar" and remember labels
-
-                if ( $use =~ /label(\w*)/ ) {
+                # remember it's a label, then turn it to an int
+                if ( $type =~ /^LABEL$/i ) {
+                    $type = 'i';
                     push @labels, 1;
-                    $use = "in$1";
                 }
                 else {
                     push @labels, 0;
+                }
+
+                if ( $type =~ /^INTKEY$/i ) {
+                    $type = 'ki';
+                }
+                else {
+                    $type = lc substr( $type, 0, 1 );
                 }
 
                 if ( $use eq 'in' ) {
@@ -452,6 +482,16 @@ sub make_op {
     my $next     = 0;
     my $restart  = 0;
 
+    if (exists($$flags{deprecated})) {
+        $body = <<"END_CODE" . $body;
+INTVAL unused = PARROT_WARNINGS_test(interp,PARROT_WARNINGS_DEPRECATED_FLAG) &&
+  fprintf(stderr,"Warning: instruction '$short_name' is deprecated\\n");
+END_CODE
+}
+    unless (exists($$flags{flow})) {
+        $body .= "\ngoto NEXT();";
+    }
+
     foreach my $variant ( expand_args(@$args) ) {
         my (@fixedargs) = split( /,/, $variant );
         my $op =
@@ -494,8 +534,6 @@ sub make_op {
         # on the mode of operation (function calls, switch statements, gotos
         # with labels, etc.).
         #
-        # TODO: Complain about using, e.g. $3 in an op with only 2 args.
-        #
 
         $branch   ||= $body =~ s/\bgoto\s+OFFSET\(\( (.*?) \)\)/{{+=$1}}/mg;
         $absolute ||= $body =~ s/\bgoto\s+ADDRESS\(\( (.*?) \)\)/{{=$1}}/mg;
@@ -535,15 +573,23 @@ sub make_op {
 
         $body =~ s/\$(\d+)/{{\@$1}}/mg;
 
+        # We can only reference as many parameters as we declare
+        my $max_arg_num = @$args;
+        my @found_args = ($body =~ m/{{@(\d+)}}/g);
+        foreach my $arg (@found_args) {
+          die "opcode '$short_name' uses '\$$arg' but only has $max_arg_num parameters.\n" if $arg > $max_arg_num;
+        }
+
+
         my $file_escaped = $file;
         $file_escaped =~ s|(\\)|$1$1|g;    # escape backslashes
         $op->body( $nolines ? $body : qq{#line $line "$file_escaped"\n$body} );
 
         # Constants here are defined in include/parrot/op.h
-        or_flag( \$jumps, "PARROT_JUMP_RELATIVE" ) if ($branch);
-        or_flag( \$jumps, "PARROT_JUMP_ADDRESS" )  if ($absolute);
-        or_flag( \$jumps, "PARROT_JUMP_POP" )      if ($pop);
-        or_flag( \$jumps, "PARROT_JUMP_ENEXT" )    if ($next);
+        or_flag( \$jumps, "PARROT_JUMP_RELATIVE" ) if $branch;
+        or_flag( \$jumps, "PARROT_JUMP_ADDRESS"  ) if $absolute;
+        or_flag( \$jumps, "PARROT_JUMP_POP"      ) if $pop;
+        or_flag( \$jumps, "PARROT_JUMP_ENEXT"    ) if $next;
 
         # I'm assuming the op branches to the value in the last argument.
         or_flag( \$jumps, "PARROT_JUMP_GNEXT" )
@@ -640,7 +686,7 @@ sub preamble {
         s/goto\s+POP\(\)/{{=*}}/mg;
         s/HALT\(\)/{{=0}}/mg;
 
-        # FIXME: This ought to throw errors when attempting to rewrite $n
+        # RT#43721: This ought to throw errors when attempting to rewrite $n
         # argument accesses and other things that make no sense in the
         # preamble.
         $_ = Parrot::Op->rewrite_body( $_, $trans );

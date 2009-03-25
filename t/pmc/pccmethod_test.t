@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: pccmethod_test.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: pccmethod_test.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: no_retval.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: no_retval.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -41,4 +41,4 @@ F<docs/imcc/calling_conventions.pod>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

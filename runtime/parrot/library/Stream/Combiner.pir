@@ -1,4 +1,4 @@
-# $Id: Combiner.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: Combiner.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -24,17 +24,17 @@ TBD
 
 =cut
 
-.sub onload :load, :anon
+.sub onload :load :anon
     .local int i
     .local pmc base
     .local pmc comb
 
-    find_type i, "Stream::Combiner"
-    if i > 1 goto END
+    $P0 = get_class 'Stream::Combiner'
+    unless null $P0 goto END
 
     load_bytecode "library/Stream/Base.pir"
 
-    getclass base, "Stream::Base"
+    get_class base, "Stream::Base"
     subclass comb, base, "Stream::Combiner"
 
     addattribute comb, "combiner"
@@ -56,10 +56,10 @@ END:
 
 .sub init :vtable :method
 
-    .const .Sub temp = "_default_combiner"
+    .const 'Sub' temp = "_default_combiner"
     self."combiner"( temp )
 
-    temp = new .ResizablePMCArray
+    temp = new 'ResizablePMCArray'
     self."setSource"( temp )
 .end
 
@@ -74,13 +74,12 @@ Sets (or just returns) the combiner sub.
     .param int has_combiner :opt_flag
     .local pmc ret
 
-    classoffset $I0, self, "Stream::Combiner"
     unless has_combiner goto GET
-    setattribute self, $I0, _combiner
+    setattribute self, 'combiner', _combiner
     ret = _combiner
     branch END
 GET:
-    getattribute ret, self, $I0
+    getattribute ret, self, 'combiner'
 END:
     .return(ret)
 .end
@@ -119,7 +118,7 @@ Returns 1 if all assigned sources are connected, 0 otherwise.
     if i == 0 goto NOT_CONNECTED
 
     # create an iterator for the sources
-    new sources, .Iterator, sources
+    new sources, 'Iterator', sources
     set sources, .ITERATE_FROM_START
 
 LOOP:
@@ -163,11 +162,11 @@ Reads from all assigned sources and calls the combiner.
     if i == 0 goto END_OF_STREAM
 
     # create an iterator for the sources
-    new sources, .Iterator, sources
+    new sources, 'Iterator', sources
     set sources, .ITERATE_FROM_START
 
     # create the string array
-    new args, .ResizableStringArray
+    new args, 'ResizableStringArray'
 
 READ_LOOP:
     unless sources goto CALL
@@ -184,8 +183,7 @@ READ_LOOP:
     branch READ_LOOP
 
 CALL:
-    classoffset i, self, "Stream::Combiner"
-    getattribute combiner, self, i
+    getattribute combiner, self, 'combiner'
 
     ret = combiner( args )
     .return(ret)
@@ -206,7 +204,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -214,4 +212,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

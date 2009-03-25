@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: Group.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: Group.pm 37229 2009-03-09 04:39:01Z allison $
 
 =head1 NAME
 
@@ -55,15 +55,17 @@ relative paths.
 =cut
 
 sub new {
-    my $self = ref $_[0] ? ref shift: shift;
+    my $self = ref $_[0] ? ref shift : shift;
     my $name     = shift || die "No name.\n";
     my $text     = shift;
     my @contents = @_;
 
-    # TODO - Groups should only contain items or paths.
+    # RT#43709 - Groups should only contain items or paths.
 
     $self = $self->SUPER::new( $text, @contents );
-    $self->{NAME} = $name;
+    $self->{NAME}  = $name;
+    $self->{TITLE} = $name;
+    $self->{PATH}  = $text;
 
     return $self;
 }
@@ -84,6 +86,18 @@ sub name {
     my $self = shift;
 
     return $self->{NAME};
+}
+
+=item C<version()>
+
+Returns the documentation version number.
+
+=cut
+
+sub version {
+    my $self = shift;
+
+    return $self->{VERSION};
 }
 
 =item C<html_link()>
@@ -110,17 +124,7 @@ sub write_html {
     my $index_html = $self->write_contents_html(@_);
 
     if ($index_html) {
-
-        # If none of the items are in a para then the whole group is.
-
-        if ( $index_html !~ /<p>/ ) {
-            $index_html = "<p>\n" . $index_html . "</p>\n\n";
-        }
-
-        $index_html = "<p>$self->{TEXT}</p>\n\n" . $index_html if $self->{TEXT};
-        $index_html =
-qq(<h2>$self->{NAME}  <a href="#_top"><img alt="^" border=0 src="../resources/up.gif"></a></h2>\n\n)
-            . $index_html;
+        $index_html = "<h2>$self->{TITLE}</h2>\n\n<ul>$index_html</ul>\n\n";
     }
 
     return $index_html;
@@ -188,6 +192,56 @@ sub contents_relative_to_source {
     }
 
     return @contents;
+}
+
+sub build_toc_chm {
+    my $self = shift;
+    my $source = shift;
+    my $indent = shift || q{ } x 6;
+
+    my $toc = q{};
+    $toc .= qq{$indent<LI> <OBJECT type="text/sitemap">\n};
+    $toc .= qq{$indent    <param name="Name" value="$self->{NAME}">\n};
+    $toc .= qq{$indent    <param name="Local" value="$self->{INDEX_PATH}">\n}
+        if ( exists $self->{INDEX_PATH} );
+    $indent .= q{ } x 2;
+    $toc .= qq{$indent</OBJECT>\n};
+    $toc .= qq{$indent<UL>\n};
+    foreach my $content ( @{ $self->{CONTENTS} } ) {
+        if ( ref $content ) {
+            if ( $content->isa( 'Parrot::Docs::Group' ) ) {
+                $toc .= $content->build_toc_chm( $source, $indent );
+            }
+            else {
+                foreach my $item ( @{ $content->{CONTENTS} } ) {
+                    my @rel_paths  = $self->file_paths_relative_to_source( $source, $item );
+                    foreach my $rel_path (@rel_paths) {
+                        my $file = $source->file_with_relative_path( $rel_path );
+                        next if ( !$file->contains_pod && !$file->is_docs_link );
+                        my $title = $file->title || $rel_path;
+                        $toc .= qq{$indent  <LI> <OBJECT type="text/sitemap">\n};
+                        $toc .= qq{$indent      <param name="Name" value="$title">\n};
+                        $toc .= qq{$indent      <param name="Local" value="$rel_path.html">\n};
+                        $toc .= qq{$indent    </OBJECT>\n};
+                    }
+                }
+            }
+        }
+        else {
+            my @rel_paths  = $self->file_paths_relative_to_source( $source, $content );
+            foreach my $rel_path (@rel_paths) {
+                my $file = $source->file_with_relative_path( $rel_path );
+                next if ( !$file->contains_pod && !$file->is_docs_link );
+                my $title = $file->title || $rel_path;
+                $toc .= qq{$indent  <LI> <OBJECT type="text/sitemap">\n};
+                $toc .= qq{$indent      <param name="Name" value="$title">\n};
+                $toc .= qq{$indent      <param name="Local" value="$rel_path.html">\n};
+                $toc .= qq{$indent    </OBJECT>\n};
+            }
+        }
+    }
+    $toc .= qq{$indent</UL>\n};
+    return $toc;
 }
 
 =back

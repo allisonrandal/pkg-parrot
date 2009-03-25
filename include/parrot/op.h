@@ -1,7 +1,7 @@
 /* op.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: op.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: op.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Header file for op functions.
  *  Data Structure and Algorithms:
@@ -61,8 +61,8 @@ typedef enum {
 
 /* NOTE: Sure wish we could put the types here... */
 
-typedef opcode_t *(*op_func_t)(opcode_t *, Interp *);
-typedef void **(*op_func_prederef_t)(void **, Interp *);
+typedef opcode_t *(*op_func_t)(opcode_t *, PARROT_INTERP);
+typedef void **(*op_func_prederef_t)(void **, PARROT_INTERP);
 
 
 /*

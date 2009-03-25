@@ -1,10 +1,13 @@
 #! perl
-# # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: ops_not_tested.pl 18146 2007-04-11 21:02:33Z paultcochrane $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: ops_not_tested.pl 37342 2009-03-12 04:52:54Z Util $
+
 use strict;
 use warnings;
-use File::Find;
 use lib qw/ lib /;
+
+use File::Find;
+
 use Parrot::Config qw/ %PConfig /;
 use Parrot::Op;
 use Parrot::OpLib::core;
@@ -16,13 +19,13 @@ use Parrot::OpLib::core;
              tested? (yes, maybe I want to write some tests :p)
 
 10:25 <@leo> toor: run 'make testr', then create a script that runs
-             disasseble $_.pbc for all @pbcs,
+             disassemble [sic] $_.pbc for all @pbcs,
              extract the opcode, sort, uniq and compare with
              lib/Parrot/OpLib/core.pm
 10:26 <@leo> disassemble even
 10:26 <@leo> $ make disassemble
 10:28 <toor> leo: and if I make a perl5 script that does that
-             automagicly, is it usefull for the
+             automagically, is it usefull [sic] for the
              project?
 10:28 <@leo> very useful
 10:28 <toor> ok, looks that I've got something to start :)
@@ -33,7 +36,7 @@ use Parrot::OpLib::core;
 my @dirs = @ARGV ? @ARGV : 't/';
 
 my $make        = $PConfig{make};
-my $disassemble = $PConfig{build_dir} . $PConfig{slash} . 'disassemble' . $PConfig{exe};
+my $disassemble = "$PConfig{build_dir}$PConfig{slash}pbc_disassemble$PConfig{exe}";
 
 # First of all we need the disassemble program
 system( $make, $disassemble ) == 0
@@ -41,8 +44,8 @@ system( $make, $disassemble ) == 0
 
 # Parse 'lib/Parrot/OpLib/core.pm' to find all defined opcodes
 # Extract the full name from the opcode data
-my $opcodes;
-$$opcodes{ $_->full_name }++ for @$Parrot::OpLib::core::ops;
+my $opcodes = {};
+$opcodes->{ $_->full_name }++ for @$Parrot::OpLib::core::ops;
 
 # Count the number of opcodes
 my $opcount = scalar keys %$opcodes;
@@ -52,7 +55,9 @@ print "$opcount opcodes found$/";
 my $pbcfiles;
 File::Find::find(
     {
-        wanted => sub { m/\.pbc$/i and push @$pbcfiles => $File::Find::name },
+        wanted => sub { m/\.pbc$/i
+                        and $File::Find::dir !~ m/native_pbc/
+                        and push @$pbcfiles => $File::Find::name },
         nochdir => 1,
     },
     @dirs,
@@ -75,9 +80,9 @@ exit;
 
 sub check_opcodes {
     my ( $file, $opcodes ) = @_;
+
     my @data = qx/$disassemble $file/
-        or warn "<$disassemble $file> failed: $!$/"
-        and return;
+        or warn "<$disassemble $file> failed: $!$/" and return;
     for (@data) {
         s/L\w+\:\s+//;     # Remove the Lxx marks
         s/^(\w+).*/$1/;    # Extract the opcode

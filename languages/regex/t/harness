@@ -1,8 +1,0 @@
-#! perl
-
-# $Id: harness 17480 2007-03-14 18:41:53Z bernhard $
-
-use FindBin;
-use lib qw( . lib ../lib ../../lib ../../lib );
-
-use Parrot::Test::Harness language => 'regex';

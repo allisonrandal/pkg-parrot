@@ -1,5 +1,8 @@
 #! perl
 
+# Copyright (C) 2003-2007, Parrot Foundation.
+# $Id: ncidef2pasm.pl 37342 2009-03-12 04:52:54Z Util $
+
 =head1 ncidef2asm.pl
 
 Take an NCI library definition file and turn it into a
@@ -47,7 +50,7 @@ will be exposed to subsequent defs.
 =head2 defs
 
 This section holds the definitions of functions. Each function is
-assumed to be in the immediate preceeding library. The definition of
+assumed to be in the immediate preceding library. The definition of
 the function is:
 
   return_type name [param [param [param ...]]]

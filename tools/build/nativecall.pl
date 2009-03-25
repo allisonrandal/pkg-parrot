@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: nativecall.pl 18793 2007-06-04 03:23:20Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: nativecall.pl 37342 2009-03-12 04:52:54Z Util $
 
 =head1 NAME
 
@@ -33,162 +33,67 @@ use warnings;
 my $opt_warndups = 0;
 
 # This file will eventually be compiled
-open my $NCI, ">", "src/nci.c" or die "Can't open nci.c!";
+open my $NCI, '>', 'src/nci.c' or die "Can't create nci.c: $!";
 
 print_head( \@ARGV );
 
-my %ret_type = (
-    p => "void *",
-    i => "int",
-    3 => "int *",
-    l => "long",
-    4 => "long *",
-    c => "char",
-    s => "short",
-    2 => "short *",
-    f => "float",
-    d => "double",
-    t => "char *",
-    v => "void",
 
-    #      b => "void *",
-    #      B => "void **",
-    P => "PMC *",
-    S => "STRING *",
-    I => "INTVAL",
-    N => "FLOATVAL",
+my %sig_table = (
+    p => {
+        as_proto => "void *",
+        other_decl => "PMC * const final_destination = pmc_new(interp, enum_class_UnManagedStruct);",
+        sig_char => "P",
+        ret_assign => "PMC_data(final_destination) = return_data;    set_nci_P(interp, &st, final_destination);",
+    },
+    i => { as_proto => "int",    sig_char => "I" },
+    l => { as_proto => "long",   sig_char => "I" },
+    c => { as_proto => "char",   sig_char => "I" },
+    s => { as_proto => "short",  sig_char => "I" },
+    f => { as_proto => "float",  sig_char => "N" },
+    d => { as_proto => "double", sig_char => "N" },
+    t => { as_proto => "char *",
+           other_decl => "STRING *final_destination;",
+           ret_assign => "final_destination = Parrot_str_new(interp, return_data, 0);\n    set_nci_S(interp, &st, final_destination);",
+           sig_char => "S" },
+    v => { as_proto => "void",
+           return_type => "void *",
+           sig_char => "v",
+           ret_assign => "",
+           func_call_assign => ""
+         },
+    P => { as_proto => "PMC *", sig_char => "P" },
+    O => { as_proto => "PMC *", returns => "", sig_char => "P" },
+    J => { as_proto => "PARROT_INTERP", returns => "", sig_char => "" },
+    S => { as_proto => "STRING *", sig_char => "S" },
+    I => { as_proto => "INTVAL", sig_char => "I" },
+    N => { as_proto => "FLOATVAL", sig_char => "N" },
+    b => { as_proto => "void *", as_return => "", sig_char => "S" },
+    B => { as_proto => "void **", as_return => "", sig_char => "S" },
+    # These should be replaced by modifiers in the future
+    2 => { as_proto => "short *",  sig_char => "P", return_type => "short",
+           ret_assign => "set_nci_I(interp, &st, *return_data);" },
+    3 => { as_proto => "int *",  sig_char => "P", return_type => "int",
+           ret_assign => "set_nci_I(interp, &st, *return_data);" },
+    4 => { as_proto => "long *",  sig_char => "P", return_type => "long",
+           ret_assign => "set_nci_I(interp, &st, *return_data);" },
+    L => { as_proto => "long *", as_return => "" },
+    T => { as_proto => "char **", as_return => "" },
+    V => { as_proto => "void **", as_return => "", sig_char => "P" },
+    '@' => { as_proto => "PMC *", as_return => "", cname => "xAT_", sig_char => '@' },
 );
 
-my %proto_type = (
-    p   => "void *",
-    i   => "int",
-    3   => "int *",
-    l   => "long",
-    4   => "long *",
-    c   => "char",
-    s   => "short",
-    2   => "short *",
-    f   => "float",
-    d   => "double",
-    t   => "char *",
-    v   => "void",
-    J   => "Interp *",
-    P   => "PMC *",
-    O   => "PMC *",      # object
-    S   => "STRING *",
-    I   => "INTVAL",
-    N   => "FLOATVAL",
-    b   => "void *",
-    B   => "void **",
-    L   => "long *",
-    T   => "char **",
-    '@' => "PMC *",      # slurpy array
-);
+for (values %sig_table) {
+    if (not exists $_->{as_return}) { $_->{as_return} = $_->{as_proto} }
+    if (not exists $_->{return_type}) { $_->{return_type} = $_->{as_proto} }
+    if (not exists $_->{return_type_decl}) { $_->{return_type_decl} = $_->{return_type} }
+    if (not exists $_->{ret_assign} and exists $_->{sig_char}) {
+        $_->{ret_assign} = "set_nci_".$_->{sig_char}."(interp, &st, return_data);";
+    }
+    if (not exists $_->{func_call_assign}) {
+        $_->{func_call_assign} = "return_data = "
+    }
+}
 
-# to fix up signatures that don't translate directly
-# to C function names
-my %fix_name = ( '@' => 'xAT_' );
-
-my %other_decl = (
-    p => "PMC *final_destination = pmc_new(interp, enum_class_UnManagedStruct);",
-    t => "STRING *final_destination;"
-
-        #     b => "Buffer *final_destination =
-        #     new_buffer_header(interp);\nPObj_external_SET(final_destination)",
-        #     B => "Buffer *final_destination =
-        #     new_buffer_header(interp);\nPObj_external_SET(final_destination)",
-);
-
-my %ret_type_decl = (
-    p => "void *",
-    i => "int",
-    3 => "int *",
-    l => "long",
-    4 => "long *",
-    c => "char",
-    s => "short",
-    2 => "short *",
-    f => "float",
-    d => "double",
-    t => "char *",
-    v => "void *",
-
-    #      b => "void *",
-    #      B => "void **",
-    P => "PMC *",
-    S => "STRING *",
-    I => "INTVAL",
-    N => "FLOATVAL",
-);
-
-my %ret_assign = (
-    p => "PMC_data(final_destination) = return_data;    set_nci_P(interp, &st, final_destination);",
-    i => "set_nci_I(interp, &st, return_data);",
-    I => "set_nci_I(interp, &st, return_data);",
-    l => "set_nci_I(interp, &st, return_data);",
-    s => "set_nci_I(interp, &st, return_data);",
-    c => "set_nci_I(interp, &st, return_data);",
-    4 => "set_nci_I(interp, &st, *return_data);",
-    3 => "set_nci_I(interp, &st, *return_data);",
-    2 => "set_nci_I(interp, &st, *return_data);",
-    f => "set_nci_N(interp, &st, return_data);",
-    d => "set_nci_N(interp, &st, return_data);",
-    N => "set_nci_N(interp, &st, return_data);",
-    P => "set_nci_P(interp, &st, return_data);",
-    S => "set_nci_S(interp, &st, return_data);",
-    v => "",
-    t =>
-"final_destination = string_from_cstring(interp, return_data, 0);\n    set_nci_S(interp, &st, final_destination);",
-
-#      b => "PObj_bufstart(final_destination) = return_data;\n    set_nci_S(interp, &st, final_destination);",
-#      B => "PObj_bufstart(final_destination) = *return_data;\n    set_nci_S(interp, &st, final_destination);",
-);
-
-my %func_call_assign = (
-    p => "return_data = ",
-    i => "return_data = ",
-    3 => "return_data = ",
-    2 => "return_data = ",
-    4 => "return_data = ",
-    l => "return_data = ",
-    c => "return_data = ",
-    s => "return_data = ",
-    f => "return_data = ",
-    d => "return_data = ",
-    b => "return_data = ",
-    t => "return_data = ",
-    P => "return_data = ",
-    S => "return_data = ",
-    I => "return_data = ",
-    N => "return_data = ",
-
-    #      B => "return_data = ",
-    v => "",
-);
-
-my %sig_char = (
-    p   => "P",
-    i   => "I",
-    3   => "P",
-    2   => "P",
-    4   => "P",
-    l   => "I",
-    c   => "I",
-    s   => "I",
-    f   => "N",
-    d   => "N",
-    b   => "S",
-    t   => "S",
-    P   => "P",
-    O   => "P",
-    S   => "S",
-    I   => "I",
-    N   => "N",
-    B   => "S",
-    v   => "v",
-    J   => "",
-    '@' => '@',
-);
 
 my $temp_cnt = 0;
 my @put_pointer;
@@ -201,14 +106,12 @@ while (<>) {
     s/\s*$//;
     next unless $_;
 
-    my ( $ret, $args ) = split /\s+/, $_;
+    my ( $ret, $args ) = split m/\s+/, $_;
 
     $args = '' if not defined $args;
-    warn "Removed deprecated 'v' argument signature on line $. of $ARGV\n"
-        if $args =~ s/^v$//;
 
     die "Invalid return signature char '$ret' on line $. of $ARGV\n"
-        unless exists $ret_assign{$ret};
+        unless exists $sig_table{$ret}{ret_assign};
 
     if ( ( $seen{"$ret$args"} ||= $. ) != $. ) {
         warn sprintf "Ignored signature '%s' on line %d (previously seen on line %d) of $ARGV",
@@ -225,24 +128,27 @@ while (<>) {
     my $sig     = '';
 
     if ( defined $args and not $args =~ m/^\s*$/ ) {
-        foreach ( split //, $args ) {
+        foreach ( split m//, $args ) {
             die "Invalid argument signature char '$_' on line $. of $ARGV"
-                unless exists $sig_char{$_};
-            push @arg, make_arg( $_, $reg_num++, \$temp_cnt, \@temps, \@extra_preamble,
+                unless exists $sig_table{$_}{sig_char};
+            push @arg,
+                make_arg( $_, $reg_num++, \$temp_cnt, \@temps, \@extra_preamble,
                 \@extra_postamble );
-            $sig .= $sig_char{$_};
+            $sig .= $sig_table{$_}{sig_char};
             $_ eq 'J' && $reg_num--;
         }
     }
 
+    my $ret_sig = $sig_table{$ret};
+
     print_function(
         $sig, $ret,
         $args, [@arg],
-        $ret_type{$ret},         $ret_type_decl{$ret},
-        $func_call_assign{$ret}, $other_decl{$ret},
-        $ret_assign{$ret},       \@temps,
-        \@extra_preamble,        \@extra_postamble,
-        \@put_pointer,           \%proto_type
+        $ret_sig->{as_return}, $ret_sig->{return_type_decl},
+        $ret_sig->{func_call_assign}, $ret_sig->{other_decl},
+        $ret_sig->{ret_assign}, \@temps,
+        \@extra_preamble, \@extra_postamble,
+        \@put_pointer
     );
 }
 
@@ -264,7 +170,7 @@ close $NCI;
 sub print_head {
     my ($definitions) = @_;
     print $NCI <<"HEAD";
-/* ex: set ro:
+/* ex: set ro ft=c:
  * !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
  *
  * This file is generated automatically by tools/build/nativecall.pl
@@ -275,7 +181,7 @@ sub print_head {
  */
 
 /* nci.c
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
  *     \$Id\$
  *  Overview:
@@ -289,6 +195,11 @@ sub print_head {
 #include "parrot/parrot.h"
 #include "parrot/hash.h"
 #include "parrot/oplib/ops.h"
+#include "pmc/pmc_nci.h"
+#include "nci.str"
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER STOP */
 
 /*
  * if the architecture can build some or all of these signatures
@@ -300,54 +211,58 @@ sub print_head {
 #if defined(HAS_JIT) && defined(I386)
 #  include "parrot/exec.h"
 #  include "jit.h"
-/*#  define CAN_BUILD_CALL_FRAMES*/
+#  define CAN_BUILD_CALL_FRAMES
 #endif
 
 /*
  * helper funcs - get argument n
  */
 static INTVAL
-get_nci_I(Interp *interp, call_state *st, int n)
+get_nci_I(PARROT_INTERP, ARGMOD(call_state *st), int n)
 {
-    if (n >= st->src.n) {
-        real_exception(interp, NULL, E_ValueError,
-                    "too few arguments passed to NCI function");
-    }
+    if (n >= st->src.n)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "too few arguments passed to NCI function");
+
     Parrot_fetch_arg_nci(interp, st);
 
     return UVal_int(st->val);
 }
 
 static FLOATVAL
-get_nci_N(Interp *interp, call_state *st, int n)
+get_nci_N(PARROT_INTERP, ARGMOD(call_state *st), int n)
 {
-    if (n >= st->src.n) {
-        real_exception(interp, NULL, E_ValueError,
-                    "too few arguments passed to NCI function");
-    }
+    if (n >= st->src.n)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "too few arguments passed to NCI function");
+
     Parrot_fetch_arg_nci(interp, st);
 
     return UVal_num(st->val);
 }
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 static STRING*
-get_nci_S(Interp *interp, call_state *st, int n)
+get_nci_S(PARROT_INTERP, ARGMOD(call_state *st), int n)
 {
     /* TODO or act like below? */
-    if (n >= st->src.n) {
-        real_exception(interp, NULL, E_ValueError,
-                    "too few arguments passed to NCI function");
-    }
+    if (n >= st->src.n)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "too few arguments passed to NCI function");
+
     Parrot_fetch_arg_nci(interp, st);
 
     return UVal_str(st->val);
 }
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 static PMC*
-get_nci_P(Interp *interp, call_state *st, int n)
+get_nci_P(PARROT_INTERP, ARGMOD(call_state *st), int n)
 {
     /*
-     * exessive args are passed as NULL
+     * excessive args are passed as NULL
      * used by e.g. MMD infix like __add
      */
     if (n < st->src.n)
@@ -367,7 +282,7 @@ get_nci_P(Interp *interp, call_state *st, int n)
  * set return value
  */
 static void
-set_nci_I(Interp *interp, call_state *st, INTVAL val)
+set_nci_I(PARROT_INTERP, ARGOUT(call_state *st), INTVAL val)
 {
     Parrot_init_ret_nci(interp, st, "I");
     if (st->dest.i < st->dest.n) {
@@ -378,7 +293,7 @@ set_nci_I(Interp *interp, call_state *st, INTVAL val)
 }
 
 static void
-set_nci_N(Interp *interp, call_state *st, FLOATVAL val)
+set_nci_N(PARROT_INTERP, ARGOUT(call_state *st), FLOATVAL val)
 {
     Parrot_init_ret_nci(interp, st, "N");
     if (st->dest.i < st->dest.n) {
@@ -389,7 +304,7 @@ set_nci_N(Interp *interp, call_state *st, FLOATVAL val)
 }
 
 static void
-set_nci_S(Interp *interp, call_state *st, STRING *val)
+set_nci_S(PARROT_INTERP, ARGOUT(call_state *st), STRING *val)
 {
     Parrot_init_ret_nci(interp, st, "S");
     if (st->dest.i < st->dest.n) {
@@ -400,7 +315,7 @@ set_nci_S(Interp *interp, call_state *st, STRING *val)
 }
 
 static void
-set_nci_P(Interp *interp, call_state *st, PMC* val)
+set_nci_P(PARROT_INTERP, ARGOUT(call_state *st), PMC* val)
 {
     Parrot_init_ret_nci(interp, st, "P");
     if (st->dest.i < st->dest.n) {
@@ -433,66 +348,31 @@ sub make_arg {
         push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_P($reg_num);";
         return "PMC_data(t_$temp_num)";
     };
-    /i/ && do {
-        push @{$temps_ref},          "int t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = (int)GET_NCI_I($reg_num);";
-        return "t_$temp_num";
-    };
-    /3/ && do {
+    /V/ && do {
         push @{$temps_ref},          "PMC *t_$temp_num;";
         push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_P($reg_num);";
-        return "(int*)&PMC_int_val(t_$temp_num)";
+        return "(void**)&PMC_data(t_$temp_num)";
     };
-    /l/ && do {
-        push @{$temps_ref},          "long t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = (long)GET_NCI_I($reg_num);";
+    /[ilIscfdNS]/ && do {
+        my $ret_type = $sig_table{$_}{return_type};
+        push @{$temps_ref},          "$ret_type t_$temp_num;";
+        push @{$extra_preamble_ref}, "t_$temp_num = ($ret_type)GET_NCI_$sig_table{$_}{sig_char}($reg_num);";
         return "t_$temp_num";
     };
-    /I/ && do {
-        push @{$temps_ref},          "INTVAL t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_I($reg_num);";
-        return "t_$temp_num";
-    };
-    /4/ && do {
+    /[234]/ && do {
+        my $ret_type = $sig_table{$_}{return_type};
         push @{$temps_ref},          "PMC *t_$temp_num;";
+        push @{$temps_ref},          "$ret_type i_$temp_num;";
         push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_P($reg_num);";
-        return "(long*)&PMC_int_val(t_$temp_num)";
-    };
-    /s/ && do {
-        push @{$temps_ref},          "short t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = (short)GET_NCI_I($reg_num);";
-        return "t_$temp_num";
-    };
-    /c/ && do {
-        push @{$temps_ref},          "char t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = (char)GET_NCI_I($reg_num);";
-        return "t_$temp_num";
-    };
-    /2/ && do {
-        push @{$temps_ref},          "PMC* t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_P($reg_num);";
-        return "(short*)&PMC_int_val(t_$temp_num)";
-    };
-    /f/ && do {
-        push @{$temps_ref},          "float t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = (float)GET_NCI_N($reg_num);";
-        return "t_$temp_num";
-    };
-    /d/ && do {
-        push @{$temps_ref},          "double t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = (double)GET_NCI_N($reg_num);";
-        return "t_$temp_num";
-    };
-    /N/ && do {
-        push @{$temps_ref},          "FLOATVAL t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_N($reg_num);";
-        return "t_$temp_num";
+        push @{$extra_preamble_ref}, "i_$temp_num = ($ret_type) VTABLE_get_integer(interp, t_$temp_num);";
+        push @{$extra_postamble_ref}, "VTABLE_set_integer_native(interp, t_$temp_num, i_$temp_num);";
+        return "&i_$temp_num";
     };
     /t/ && do {
         push @{$temps_ref}, "char *t_$temp_num;";
         push @{$extra_preamble_ref},
-            "t_$temp_num = string_to_cstring(interp, GET_NCI_S($reg_num));";
-        push @{$extra_postamble_ref}, "string_cstring_free(t_$temp_num);";
+            "{STRING * s= GET_NCI_S($reg_num); t_$temp_num = s ? Parrot_str_to_cstring(interp, s) : (char *) NULL;}";
+        push @{$extra_postamble_ref}, "do { if (t_$temp_num) Parrot_str_free_cstring(t_$temp_num); } while (0);";
         return "t_$temp_num";
     };
     /b/ && do {
@@ -501,9 +381,11 @@ sub make_arg {
         return "PObj_bufstart(t_$temp_num)";
     };
     /B/ && do {
-        push @{$temps_ref},          "STRING *t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_S($reg_num);";
-        return "&PObj_bufstart(t_$temp_num)";
+        push @{$temps_ref}, "char *s_$temp_num;\n    char *t_$temp_num;\n    void** v_$temp_num = (void **) &t_$temp_num;";
+        push @{$extra_preamble_ref},
+            "{STRING * s= GET_NCI_S($reg_num); t_$temp_num = s ? Parrot_str_to_cstring(interp, s) : (char *) NULL; s_$temp_num = t_$temp_num;}";
+        push @{$extra_postamble_ref}, "do { if (s_$temp_num) Parrot_str_free_cstring(s_$temp_num); } while (0);";
+        return "v_$temp_num";
     };
     /J/ && do {
         return "interp";
@@ -513,20 +395,15 @@ sub make_arg {
         push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_P($reg_num);";
         return "PMC_IS_NULL(t_$temp_num) ? NULL : t_$temp_num";
     };
-    /S/ && do {
-        push @{$temps_ref},          "STRING *t_$temp_num;";
-        push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_S($reg_num);";
-        return "t_$temp_num";
-    };
     return;
 }
 
 sub print_function {
     my (
-        $sig,             $return,        $params,             $args,
-        $ret_type,        $ret_type_decl, $return_assign,      $other_decl,
-        $final_assign,    $temps_ref,     $extra_preamble_ref, $extra_postamble_ref,
-        $put_pointer_ref, $proto_type_ref
+        $sig,          $return,        $params,             $args,
+        $ret_type,     $ret_type_decl, $return_assign,      $other_decl,
+        $final_assign, $temps_ref,     $extra_preamble_ref, $extra_postamble_ref,
+        $put_pointer_ref,
     ) = @_;
 
     $other_decl ||= "";
@@ -536,52 +413,32 @@ sub print_function {
     my $extra_preamble  = join( "\n    ", @{$extra_preamble_ref} );
     my $extra_postamble = join( "\n    ", @{$extra_postamble_ref} );
     my $return_data =
-          "$return_assign $final_assign" =~ /return_data/
+        "$return_assign $final_assign" =~ /return_data/
         ? qq{$ret_type_decl return_data;}
         : q{};
-    my $fix_params = join '', map { $fix_name{$_} || $_ } split //, $params;
+    my $fix_params = join '', map { $sig_table{$_}{cname} || $_ } split m//, $params;
 
     if ( length $params ) {
-        my $proto = join ', ', map { $proto_type_ref->{$_} } split( '', $params );
+        my $proto = join ', ', map { $sig_table{$_}{as_proto} } split( m//, $params );
 
-        # This is an after-the-fact hack: real fix would be in make_arg
-        # or somewhere at that level.  The main point being that one cannot
-        # just cast pointers and expect things to magically align.  Instead
-        # of trying to: (int*)&something_not_int, one HAS to use temporary
-        # variables.  We detect and collect those to "temp".
-        my @temp;
-        for my $i ( 0 .. $#$args ) {
-            if ( $args->[$i] =~ /^\((.+)\*\)&(.+)$/ ) {
-                $temp[$i] = [ $1, $2 ];
-                $args->[$i] = "&arg$i";
-            }
-        }
         my $call_params = join( ",", @$args );
-        my @tempi = grep { defined $temp[$_] } 0 .. $#$args;
-        my $temp_decl = join( "\n    ", map { "$temp[$_]->[0] arg$_;" } @tempi );
-        ## shorts need to be properly cast
-        my $temp_in = join( "\n    ",
-            map { "arg$_ = " . ( 'short' eq $temp[$_]->[0] ? '(short)' : '' ) . "$temp[$_]->[1];" }
-                @tempi );
-        my $temp_out = join( "\n    ", map { "$temp[$_]->[1] = arg$_;" } @tempi );
 
         print $NCI <<"HEADER";
 static void
-pcf_${return}_$fix_params(Interp *interp, PMC *self)
+pcf_${return}_$fix_params(PARROT_INTERP, PMC *self)
 {
     typedef $ret_type (*func_t)($proto);
     func_t pointer;
+    void *orig_func;
     $call_state
     $return_data
-    $temp_decl
     $other_decl
     Parrot_init_arg_nci(interp, &st, \"$sig\");
     $extra_preamble
 
-    pointer =  (func_t)D2FPTR(PMC_struct_val(self));
-    $temp_in
+    GETATTR_NCI_orig_func(interp, self, orig_func);
+    pointer = (func_t)D2FPTR(orig_func);
     $return_assign ($ret_type)(*pointer)($call_params);
-    $temp_out
     $final_assign
     $extra_postamble
 }
@@ -594,15 +451,17 @@ HEADER
         $call_state = '' if 'v' eq $return;
         print $NCI <<"HEADER";
 static void
-pcf_${return}_(Interp *interp, PMC *self)
+pcf_${return}_(PARROT_INTERP, PMC *self)
 {
     $ret_type (*pointer)(void);
+    void *orig_func;
     $return_data
     $other_decl
     $call_state
     $extra_preamble
 
-    pointer =  ($ret_type (*)(void))D2FPTR(PMC_struct_val(self));
+    GETATTR_NCI_orig_func(interp, self, orig_func);
+    pointer = ($ret_type (*)(void))D2FPTR(orig_func);
     $return_assign ($ret_type)(*pointer)();
     $final_assign
     $extra_postamble
@@ -618,8 +477,8 @@ HEADER
 
     push @{$put_pointer_ref}, <<"PUT_POINTER";
         temp_pmc = pmc_new(interp, enum_class_UnManagedStruct);
-        PMC_data(temp_pmc) = (void*)$value;
-        VTABLE_set_pmc_keyed_str(interp, HashPointer, string_from_cstring(interp, "$key", 0), temp_pmc);
+        PMC_data(temp_pmc) = (void *)$value;
+        VTABLE_set_pmc_keyed_str(interp, HashPointer, CONST_STRING(interp, "$key"), temp_pmc);
 PUT_POINTER
 
     #        qq|        parrot_hash_put( interp, known_frames, const_cast("$key"), $value );|;
@@ -637,47 +496,40 @@ sub print_tail {
    signature for a C function we want to call and returns a pointer
    to a function that can call it. */
 void *
-build_call_func(Interp *interp, PMC *pmc_nci,
-                STRING *signature)
+build_call_func(PARROT_INTERP,
+#if defined(CAN_BUILD_CALL_FRAMES)
+PMC *pmc_nci,
+#else
+SHIM(PMC *pmc_nci),
+#endif
+NOTNULL(STRING *signature), NOTNULL(int *jitted))
 {
     char       *c;
     STRING     *ns, *message;
+    STRING     *jit_key_name;
     PMC        *b;
     PMC        *iglobals;
     PMC        *temp_pmc;
     UINTVAL    signature_len;
 
-    void       *result        = NULL;
     PMC        *HashPointer   = NULL;
-
-#if defined(CAN_BUILD_CALL_FRAMES)
-
-    /* Try if JIT code can build that signature,
-     * if yes, we are done
-     */
-
-     result = Parrot_jit_build_call_func(interp, pmc_nci, signature);
-
-#endif
-    if (result)
-        return result;
 
     /* And in here is the platform-independent way. Which is to say
        "here there be hacks" */
-    UNUSED(pmc_nci);
-    signature_len = string_length(interp, signature);
-    if (0 == signature_len) return F2DPTR(pcf_v_);
+    signature_len = Parrot_str_byte_length(interp, signature);
+    if (0 == signature_len)
+       return F2DPTR(pcf_v_);
     /* remove deprecated void argument 'v' character */
-    if (2 == signature_len && 'v' == string_index(interp, signature, 1)) {
+    if (2 == signature_len && 'v' == Parrot_str_indexed(interp, signature, 1)) {
        Parrot_warn(interp, PARROT_WARNINGS_ALL_FLAG, "function signature argument character 'v' ignored");
-       signature = string_chopn(interp, signature, 1, 1);
-       signature_len = string_length(interp, signature);
+       Parrot_str_chopn_inplace(interp, signature, 1);
+       signature_len = Parrot_str_byte_length(interp, signature);
     }
 
     iglobals = interp->iglobals;
 
     if (PMC_IS_NULL(iglobals))
-        PANIC("iglobals isn't created yet");
+        PANIC(interp, "iglobals isn't created yet");
     HashPointer = VTABLE_get_pmc_keyed_int(interp, iglobals,
             IGLOBALS_NCI_FUNCS);
 
@@ -690,6 +542,30 @@ $put_pointer
 
     }
 
+#if defined(CAN_BUILD_CALL_FRAMES)
+    /* Try if JIT code can build that signature. If yes, we are done */
+
+    jit_key_name = CONST_STRING(interp, "_XJIT_");
+    jit_key_name = Parrot_str_concat(interp, jit_key_name, signature, 0);
+    b            = VTABLE_get_pmc_keyed_str(interp, HashPointer, jit_key_name);
+
+    if (b && b->vtable->base_type == enum_class_ManagedStruct) {
+        *jitted = 1;
+        return F2DPTR(VTABLE_get_pointer(interp, b));
+    }
+    else {
+        void * const result = Parrot_jit_build_call_func(interp, pmc_nci, signature);
+        if (result) {
+            *jitted = 1;
+            temp_pmc = pmc_new(interp, enum_class_ManagedStruct);
+            VTABLE_set_pointer(interp, temp_pmc, (void *)result);
+            VTABLE_set_pmc_keyed_str(interp, HashPointer, jit_key_name, temp_pmc);
+            return result;
+        }
+    }
+
+#endif
+
     b = VTABLE_get_pmc_keyed_str(interp, HashPointer, signature);
 
     if (b && b->vtable->base_type == enum_class_UnManagedStruct)
@@ -701,22 +577,21 @@ $put_pointer
       with a neater way to do this.
      */
     ns = string_make(interp, " is an unknown signature type", 29, "ascii", 0);
-    message = string_concat(interp, signature, ns, 0);
+    message = Parrot_str_concat(interp, signature, ns, 0);
 
 #if defined(CAN_BUILD_CALL_FRAMES)
     ns = string_make(interp, ".\\nCAN_BUILD_CALL_FRAMES is enabled, this should not happen", 58, "ascii", 0);
 #else
     ns = string_make(interp, ".\\nCAN_BUILD_CALL_FRAMES is disabled, add the signature to src/call_list.txt", 75, "ascii", 0);
 #endif
-    message = string_concat(interp, message, ns, 0);
+    message = Parrot_str_concat(interp, message, ns, 0);
 
     /*
      * I think there may be memory issues with this but if we get to here we are
      * aborting.
      */
-    c = string_to_cstring(interp, message);
-    PANIC(c);
-    return NULL;
+    c = Parrot_str_to_cstring(interp, message);
+    PANIC(interp, c);
 }
 
 TAIL
@@ -727,18 +602,18 @@ TAIL
 
 This is the template thing
 
-static void pcf_$funcname(Interp *interp, PMC *self) {
+static void pcf_$funcname(PARROT_INTERP, PMC *self) {
     $ret_type (*pointer)();
     $ret_type return_data;
 
     pointer = PMC_struct_val(self);
     return_data = ($ret_type)(*pointer)($params);
     $ret_reg  = return_data;
-    REG_INT(0) = $stack_returns;
-    REG_INT(1) = $int_returns;
-    REG_INT(2) = $string_returns;
-    REG_INT(3) = $pmc_returns;
-    REG_INT(4) = $num_returns;
+    REG_INT(interp, 0) = $stack_returns;
+    REG_INT(interp, 1) = $int_returns;
+    REG_INT(interp, 2) = $string_returns;
+    REG_INT(interp, 3) = $pmc_returns;
+    REG_INT(interp, 4) = $num_returns;
     return;
 }
 

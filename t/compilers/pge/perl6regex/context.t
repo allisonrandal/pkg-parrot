@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: context.t 18192 2007-04-14 14:42:03Z pmichaud $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: context.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use Parrot::Test::PGE;
 
 =head1 NAME
 
-t/p6regex/context.t - PGE return value tests
+t/compilers/pge/perl6regex/context.t - PGE return value tests
 
 =head1 DESCRIPTION
 
@@ -20,7 +20,7 @@ ver. 8, in the B<'Return values from matches'> section
 
 =head1 SYNOPSIS
 
-        % prove t/p6regex/context.t
+        % prove t/compilers/pge/perl6regex/context.t
 
 =cut
 
@@ -188,7 +188,7 @@ pir_output_is( $PRE . <<'CODE'. $POST, <<OUT, 'as array ([2,1,0] => "cba")' );
 CODE
 cba
 OUT
-## TODO: more
+## RT #44445: more
 
 ## as hash
 pir_output_is( $PRE . <<'CODE'. $POST, <<OUT, 'as hash (A => "a")' );
@@ -276,7 +276,7 @@ pir_output_is( $PRE . <<'CODE'. $POST, <<OUT, 'isa PGE::Match (success)' );
         print $S0
         print "\n"
 
-        isa_match = isa match, 'PGE::Match'
+        isa_match = isa match, ['PGE';'Match']
         if isa_match goto OK1
         print "not "
 OK1:print "ok 1\n"
@@ -287,7 +287,7 @@ OK1:print "ok 1\n"
         print $S0
         print "\n"
 
-        isa_match = isa $P0, 'PGE::Match'
+        isa_match = isa $P0, ['PGE';'Match']
         if isa_match goto OK2
         print "not "
 OK2:print "ok 2\n"
@@ -309,7 +309,7 @@ pir_output_is( $PRE . <<'CODE'. $POST, <<OUT, 'isa PGE::Match (failure)' );
         print $S0
         print "\n"
 
-        isa_match = isa match, 'PGE::Match'
+        isa_match = isa match, ['PGE';'Match']
         if isa_match goto OK1
         print "not "
 OK1:print "ok 1\n"

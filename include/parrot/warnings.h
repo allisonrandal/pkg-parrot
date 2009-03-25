@@ -1,3 +1,8 @@
+/*
+ * $Id: warnings.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2002-2007, Parrot Foundation.
+ */
+
 #ifndef PARROT_WARNINGS_H_GUARD
 #define PARROT_WARNINGS_H_GUARD
 
@@ -6,12 +11,13 @@
 /* Warning flags */
 /* &gen_from_enum(warnings.pasm)  */
 typedef enum {
-    PARROT_WARNINGS_ALL_FLAG      = 0xFF,
-    PARROT_WARNINGS_NONE_FLAG     = 0x00,
-    PARROT_WARNINGS_UNDEF_FLAG    = 0x01,
-    PARROT_WARNINGS_IO_FLAG       = 0x02,
-    PARROT_WARNINGS_PLATFORM_FLAG = 0x04,
-    PARROT_WARNINGS_DYNEXT_FLAG   = 0x08
+    PARROT_WARNINGS_ALL_FLAG        = 0xFF,
+    PARROT_WARNINGS_NONE_FLAG       = 0x00,
+    PARROT_WARNINGS_UNDEF_FLAG      = 0x01,
+    PARROT_WARNINGS_IO_FLAG         = 0x02,
+    PARROT_WARNINGS_PLATFORM_FLAG   = 0x04,
+    PARROT_WARNINGS_DYNEXT_FLAG     = 0x08,
+    PARROT_WARNINGS_DEPRECATED_FLAG = 0x10
 } Warnings_classes;
 
 /* &end_gen */
@@ -19,40 +25,56 @@ typedef enum {
 /* error flags */
 /* &gen_from_enum(errors.pasm)  */
 typedef enum {
-    PARROT_ERRORS_NONE_FLAG     = 0x00,
-    PARROT_ERRORS_GLOBALS_FLAG  = 0x01,
-    PARROT_ERRORS_OVERFLOW_FLAG = 0x02,
-    PARROT_ERRORS_PARAM_COUNT_FLAG = 0x04,
+    PARROT_ERRORS_NONE_FLAG         = 0x00,
+    PARROT_ERRORS_GLOBALS_FLAG      = 0x01,
+    PARROT_ERRORS_OVERFLOW_FLAG     = 0x02,
+    PARROT_ERRORS_PARAM_COUNT_FLAG  = 0x04,
     PARROT_ERRORS_RESULT_COUNT_FLAG = 0x08,
-    PARROT_ERRORS_ALL_FLAG      = 0xFF
+    PARROT_ERRORS_ALL_FLAG          = 0xFF
 } Errors_classes;
 
 /* &end_gen */
 
-#define PARROT_we_on(we, interp, flag) do { \
-    CONTEXT((interp)->ctx)->we |= (flag); } while (0)
-#define PARROT_we_off(we, interp, flag) do { \
-    CONTEXT((interp)->ctx)->we &= ~(flag); } while (0)
-#define PARROT_we_test(we, interp, flag)  \
-    (CONTEXT((interp)->ctx)->we & (flag))
+#define PARROT_WARNINGS_on(interp, flag) do { \
+    CONTEXT((interp))->warns |= (flag); } while (0)
+#define PARROT_WARNINGS_off(interp, flag) do { \
+    CONTEXT((interp))->warns &= ~(flag); } while (0)
+#define PARROT_WARNINGS_test(interp, flag)  \
+    (CONTEXT((interp))->warns & (flag))
 
-#define PARROT_WARNINGS_on(interp, flag) PARROT_we_on(warns, interp, flag)
-#define PARROT_WARNINGS_off(interp, flag) PARROT_we_off(warns, interp, flag)
-#define PARROT_WARNINGS_test(interp, flag) PARROT_we_test(warns, interp, flag)
-
-#define PARROT_ERRORS_on(interp, flag) PARROT_we_on(errors, interp, flag)
-#define PARROT_ERRORS_off(interp, flag) PARROT_we_off(errors, interp, flag)
-#define PARROT_ERRORS_test(interp, flag) PARROT_we_test(errors, interp, flag)
+#define PARROT_ERRORS_on(interp, flag) do { \
+    CONTEXT((interp))->errors |= (flag); } while (0)
+#define PARROT_ERRORS_off(interp, flag) do { \
+    CONTEXT((interp))->errors &= ~(flag); } while (0)
+#define PARROT_ERRORS_test(interp, flag)  \
+    (CONTEXT((interp))->errors & (flag))
 
 #if defined(PARROT_IN_CORE)
 
 #include "parrot/parrot.h"
 
-void print_pbc_location(Parrot_Interp);
+/* HEADERIZER BEGIN: src/warnings.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API INTVAL Parrot_warn(Parrot_Interp, INTVAL warnclass, const char *message, ...);
+PARROT_EXPORT
+INTVAL Parrot_warn(PARROT_INTERP,
+    INTVAL warnclass,
+    ARGIN(const char *message),
+    ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
 
-PARROT_API INTVAL Parrot_warn_s(Parrot_Interp, INTVAL warnclass, STRING *message, ...);
+PARROT_EXPORT
+void print_pbc_location(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_Parrot_warn __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(message)
+#define ASSERT_ARGS_print_pbc_location __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: src/warnings.c */
 
 #endif /* PARROT_IN_CORE */
 #endif /* PARROT_WARNINGS_H_GUARD */

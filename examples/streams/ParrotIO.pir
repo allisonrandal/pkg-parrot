@@ -1,4 +1,4 @@
-=head1 INFORMATION
+=head1 Filehandle Object Example
 
 This small example shows the usage of C<Stream::ParrotIO>.
 
@@ -21,19 +21,18 @@ PMC to the stream with the C<assign> op.
 
     load_bytecode "library/Stream/ParrotIO.pir"
 
-    # create the ParrotIO stream    
-    find_type $I0, "Stream::ParrotIO"
-    new stream, $I0
+    # create the ParrotIO stream
+    stream = new "Stream::ParrotIO"
 
     # open this file
-    stream."open"( "examples/streams/ParrotIO.pir", "<" )
-    
-    # you can specifiy a custom block size with
+    stream."open"( "examples/streams/ParrotIO.pir", 'r' )
+
+    # you can specify a custom block size with
     # stream."blockSize"( 10 )
-    
+
     # dump the stream
     stream."dump"()
-    
+
     end
 .end
 
@@ -45,7 +44,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -53,4 +52,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,10 +1,12 @@
 #! perl
 
-# $Id: as2c.pl 18810 2007-06-04 20:27:35Z paultcochrane $
+# Copyright (C) 2004-2007, Parrot Foundation.
+
+# $Id: as2c.pl 37342 2009-03-12 04:52:54Z Util $
 
 =head1 NAME
 
-as2c.pl - convert gas assember listing to i386 code array
+as2c.pl - convert gas assembler listing to i386 code array
 
 =head1 DESCRIPTION
 
@@ -23,7 +25,7 @@ use warnings;
 
 my $src = $ARGV[0];
 my $cmd = "cc -c $src.c -Wall -O3 -fomit-frame-pointer -DNDEBUG -Wa,-a > $src.s";
-my ( $func );
+my ($func);
 
 print_header($src);
 create_s($cmd);

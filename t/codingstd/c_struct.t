@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: c_struct.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: c_struct.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -30,10 +30,8 @@ L<docs/pdds/pdd07_codingstd.pod>
 
 =cut
 
-my $DIST  = Parrot::Distribution->new;
-my @files = @ARGV
-    ? $^O eq 'MSWin32' ? <@ARGV> : @ARGV
-    :   $DIST->get_c_language_files();
+my $DIST = Parrot::Distribution->new;
+my @files = @ARGV ? <@ARGV> : $DIST->get_c_language_files();
 my @struct;
 
 for my $file (@files) {
@@ -45,6 +43,7 @@ for my $file (@files) {
     my $count   = 0;
     my $message = qq<  $path:>;
     while (<$fh>) {
+
         # we're only interested in lines with structs
         next unless /\btypedef\s+struct\s+{/;
 

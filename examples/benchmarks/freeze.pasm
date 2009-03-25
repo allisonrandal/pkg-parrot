@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: freeze.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: freeze.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ Freeze/thaw an ResizablePMCArray.
 
 =cut
 
-    new P0, .ResizablePMCArray
+    new P0, 'ResizablePMCArray'
     set I0, 100000
     time N0
 lp1:

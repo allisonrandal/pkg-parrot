@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: socklen_t.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: socklen_t.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -16,27 +16,41 @@ package auto::socklen_t;
 use strict;
 use warnings;
 
-use base qw(Parrot::Configure::Step::Base);
 
-use Config;
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-our $description = 'Determining whether there is socklen_t';
-our @args        = qw();
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determine whether there is socklen_t};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $verbose = $conf->options->get('verbose');
+    my $d_socklen_t = _probe_for_socklen_t($conf);
 
-    my $d_socklen_t = $conf->data->get('has_socklen_t');
-    $d_socklen_t = $Config{d_socklen_t} unless defined $d_socklen_t;
-    my $has_socklen_t = ( $d_socklen_t && $d_socklen_t ne 'undef' ) ? 1 : 0;
+    $self->_evaluate_socklen_t($conf, $d_socklen_t);
+
+    return 1;
+}
+
+sub _probe_for_socklen_t {
+    my $conf = shift;
+    return $conf->data->get('has_socklen_t')
+            ||
+           $conf->data->get_p5('d_socklen_t');
+}
+
+sub _evaluate_socklen_t {
+    my ($self, $conf, $d_socklen_t) = @_;
+    my $has_socklen_t = $d_socklen_t ? 1 : 0;
     $self->set_result( $has_socklen_t ? 'yes' : 'no' );
-    $conf->data->set( has_socklen_t => $has_socklen_t, );
-
-    return $self;
+    $conf->data->set( has_socklen_t => $has_socklen_t );
 }
 
 1;

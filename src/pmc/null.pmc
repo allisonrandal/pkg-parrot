@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: null.pmc 18755 2007-06-02 03:49:27Z petdance $
+Copyright (C) 2001-2007, Parrot Foundation.
+$Id: null.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -33,20 +33,34 @@ Overrides the default to do nothing.
 
 */
 
-    void init() {
+    VTABLE void init() {
     }
 
-    void* get_pointer() {
+    PARROT_CAN_RETURN_NULL
+    VTABLE void *get_pointer() {
         return PMCNULL;
     }
 
-    void set_pointer(void *p) {
+    VTABLE void set_pointer(void *p) {
         PMCNULL = (PMC *)p;
     }
 
-    INTVAL does(STRING* what) {
+    VTABLE INTVAL does(STRING *what) {
         /* XXX maybe a hack to get TGE running again */
         return 0;
+    }
+
+/*
+
+=item C<INTVAL is_same(PMC *value)>
+
+Returns true if value is also a null PMC, false otherwise.
+
+=cut
+
+*/
+    VTABLE INTVAL is_same(PMC *value) {
+        return PMC_IS_NULL(value);
     }
 
 }

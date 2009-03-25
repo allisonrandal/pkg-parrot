@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: streams.t 17575 2007-03-17 22:49:07Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: streams.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -37,11 +37,10 @@ for my $a (@streams) {
     load_bytecode "library/Stream/$a.pir"
     print "loaded\\n"
 
-    find_type \$I0, "Stream::$a"
-    \$P0 = new \$I0
+    \$P0 = new "Stream::$a"
 
-    \$S0 = classname \$P0
-    print "classname: '"
+    \$S0 = typeof \$P0
+    print "class name: '"
     print \$S0
     print "'\\ndone\\n"
     end
@@ -49,7 +48,7 @@ for my $a (@streams) {
 CODE
 loading '$a'...
 loaded
-classname: 'Stream::$a'
+class name: 'Stream::$a'
 done
 OUT
 
@@ -65,11 +64,10 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::Sub" );
 
     load_bytecode "library/Stream/Sub.pir"
 
-    find_type I0, "Stream::Sub"
-    new stream, I0
+    stream = new "Stream::Sub"
 
     # set the stream's source sub   #'
-    .const .Sub temp = "_hello"
+    .const 'Sub' temp = "_hello"
     assign stream, temp
 
     # dump the stream
@@ -113,14 +111,12 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::read_bytes" );
     load_bytecode "library/Stream/Sub.pir"
     load_bytecode "library/Stream/Replay.pir"
 
-    find_type $I0, "Stream::Sub"
-    new $P0, $I0
+    $P0 = new "Stream::Sub"
     # set the stream's source sub      #'
-    .const .Sub temp = "_hello"
+    .const 'Sub' temp = "_hello"
     assign $P0, temp
 
-    find_type $I0, "Stream::Replay"
-    stream = new $I0
+    stream = new "Stream::Replay"
     assign stream, $P0
 
     $S0 = stream."read_bytes"( 3 )
@@ -129,9 +125,9 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::read_bytes" );
     print "]\n"
 
     stream = clone stream
-    $P0 = clone stream
+    $P0    = clone stream
 
-    $S0 = stream."read_bytes"( 4 )
+    $S0    = stream."read_bytes"( 4 )
     print "2: ["
     print $S0
     print "] = "
@@ -194,27 +190,24 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::Combiner" );
     load_bytecode "library/Stream/Sub.pir"
 
     # create the counter stream
-    find_type I0, "Stream::Sub"
-    new counter, I0
-    .const .Sub ct = "_counter"
+    counter = new "Stream::Sub"
+    .const 'Sub' ct = "_counter"
     assign counter, ct
 
     # create the text stream
-    find_type I0, "Stream::Sub"
-    new text, I0
+    text = new "Stream::Sub"
     # set its source
-    .const .Sub src = "_text"
+    .const 'Sub' src = "_text"
     assign text, src
 
     # create a combiner stream
-    find_type I0, "Stream::Combiner"
-    new combined, I0
+    combined = new "Stream::Combiner"
     # add the streams
     assign combined, counter
     assign combined, text
 
     # specify our own combiner sub
-    .const .Sub cb = "_combiner"
+    .const 'Sub' cb = "_combiner"
     combined."combiner"( cb )
 
     # dump the combined stream
@@ -282,11 +275,10 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::Coroutine" );
     load_bytecode "library/Stream/Coroutine.pir"
 
     # create the coroutine stream
-    find_type I0, "Stream::Coroutine"
-    new stream, I0
+    stream = new "Stream::Coroutine"
 
     # set the stream's source coroutine #'
-    .const .Sub temp = "_coro"
+    .const 'Sub' temp = "_coro"
     assign stream, temp
     #stream."source"( temp )
 
@@ -357,24 +349,20 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::ParrotIO" );
     load_bytecode "library/Stream/Combiner.pir"
 
     # create a file stream
-    find_type $I0, "Stream::ParrotIO"
-    new file, $I0
-    file."open"( name, "<" )
+    file = new "Stream::ParrotIO"
+    file."open"( name, 'r' )
 
     # process it one line per read
-    find_type $I0, "Stream::Lines"
-    new lines, $I0
+    lines = new "Stream::Lines"
     assign lines, file
 
     # endless counter
-    find_type $I0, "Stream::Sub"
-    new counter, $I0
-    .const .Sub temp = "_counter"
+    counter = new "Stream::Sub"
+    .const 'Sub' temp = "_counter"
     assign counter, temp
 
     # combine the counter and the file's lines   #'
-    find_type $I0, "Stream::Combiner"
-    new combiner, $I0
+    combiner = new "Stream::Combiner"
     assign combiner, counter
     assign combiner, lines
 
@@ -395,7 +383,7 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::ParrotIO" );
     .local pmc array
 
     i = 0
-    array = new .ResizablePMCArray
+    array = new 'ResizablePMCArray'
 
 LOOP:
     inc i
@@ -671,7 +659,7 @@ read:[  263                  5.6.0         2000-Mar-22]
 read:[  264         Sarathy  5.6.1-TRIAL1  2000-Dec-18     The 5.6 maintenance track.]
 read:[  265                  5.6.1-TRIAL2  2001-Jan-31]
 read:[  266                  5.6.1-TRIAL3  2001-Mar-19]
-read:[  267                  5.6.1-foolish 2001-Apr-01     The "fools-gold" release.]
+read:[  267                  5.6.1-foolish 2001-Apr-01     The \"fools-gold\" release.]
 read:[  268                  5.6.1         2001-Apr-08]
 read:[  269         Rafael   5.6.2-RC1     2003-Nov-08]
 read:[  270                  5.6.2         2003-Nov-15     Fix new build issues]
@@ -720,19 +708,17 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::Filter" );
     load_bytecode "library/Stream/Filter.pir"
 
     # create the counter stream
-    find_type I0, "Stream::Sub"
-    new stream, I0
+    stream = new "Stream::Sub"
     # assign its source
-    .const .Sub temp = "_counter"
+    .const 'Sub' temp = "_counter"
     assign stream, temp
 
     # create the filter stream
-    find_type I0, "Stream::Filter"
-    new filter, I0
+    filter = new "Stream::Filter"
     # assign its source
     assign filter, stream
     # set the filter sub
-    .const .Sub ft = "_filter"
+    .const 'Sub' ft = "_filter"
     filter."filter"( ft )
 
     # dump the stream
@@ -805,10 +791,9 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::include" );
 
     load_bytecode "library/Stream/Sub.pir"
 
-    find_type I0, "Stream::Sub"
-    new stream, I0
+    stream = new "Stream::Sub"
 
-    .const .Sub temp = "_counter"
+    .const 'Sub' temp = "_counter"
     assign stream, temp
 
     # dump the stream
@@ -836,10 +821,9 @@ LOOP:
     if i != 4 goto SKIP
     .local pmc temp
 
-    find_type I0, "Stream::Sub"
-    new temp, I0
+    temp = new "Stream::Sub"
 
-    .const .Sub func = "_included"
+    .const 'Sub' func = "_included"
     assign temp, func
 
     # include it
@@ -856,9 +840,8 @@ SKIP:
     self."write"( "hello" )
 
     # create another stream
-    find_type I0, "Stream::Sub"
-    new temp, I0
-    .const .Sub func = "_counter2"
+    temp = new "Stream::Sub"
+    .const 'Sub' func = "_counter2"
     assign temp, func
 
     # include it
@@ -874,9 +857,9 @@ SKIP:
 LOOP:
     self."write"( str )
 
-    ord I0, str
-    inc I0
-    chr str, I0
+    ord $I0, str
+    inc $I0
+    chr str, $I0
 
     if str != "G" goto LOOP
 .end
@@ -916,15 +899,13 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::Lines" );
     load_bytecode "library/Stream/Lines.pir"
 
     # create a text stream
-    find_type I0, "Stream::Sub"
-    new stream, I0
+    stream = new "Stream::Sub"
     # set the source
-    .const .Sub temp = "_text"
+    .const 'Sub' temp = "_text"
     assign stream, temp
 
     # create a lines stream
-    find_type I0, "Stream::Lines"
-    new lines, I0
+    lines = new "Stream::Lines"
     # set the source
     assign lines, stream
 
@@ -964,11 +945,10 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::ParrotIO" );
     load_bytecode "library/Stream/ParrotIO.pir"
 
     # create the ParrotIO stream
-    find_type I0, "Stream::ParrotIO"
-    new stream, I0
+    stream = new "Stream::ParrotIO"
 
     # open this file
-    stream."open"( "t/library/perlhist.txt", "<" )
+    stream."open"( "t/library/perlhist.txt", 'r' )
 
     # you can specifiy a custom block size with
     # stream."blockSize"( 10 )
@@ -1231,7 +1211,7 @@ read:[ Sarathy  5.6.1-TRIAL1  2000-Dec-18     The 5.6 ma]
 read:[intenance track.\n                 5.6.1-TRIAL2  20]
 read:[01-Jan-31\n                 5.6.1-TRIAL3  2001-Mar-]
 read:[19\n                 5.6.1-foolish 2001-Apr-01     ]
-read:[The "fools-gold" release.\n                 5.6.1  ]
+read:[The \"fools-gold\" release.\n                 5.6.1  ]
 read:[       2001-Apr-08\n        Rafael   5.6.2-RC1     ]
 read:[2003-Nov-08\n                 5.6.2         2003-No]
 read:[v-15     Fix new build issues\n        Jarkko   5.7]
@@ -1279,8 +1259,7 @@ SKIP:
     load_bytecode "library/Stream/Writer.pir"
     load_bytecode "library/Stream/Replay.pir"
 
-    find_type I0, "Stream::Writer"
-    new stream, I0
+    stream = new "Stream::Writer"
     P0 = global "_reader"
     assign stream, P0
 
@@ -1306,8 +1285,7 @@ SKIP:
     .local pmc stream3
     .local string str
 
-    find_type I0, "Stream::Replay"
-    new stream1, I0
+    stream1 = new "Stream::Replay"
     assign stream1, self
 
     print "reader start\n"
@@ -1383,10 +1361,9 @@ pir_output_is( <<'CODE', <<'OUT', "Stream::Sub" );
     load_bytecode "library/Stream/Base.pir"
     load_bytecode "library/Stream/Sub.pir"
 
-    find_type I0, "Stream::Sub"
-    new stream, I0
+    stream = new "Stream::Sub"
 
-    .const .Sub temp = "_counter"
+    .const 'Sub' temp = "_counter"
     assign stream, temp
 
     # dump the stream
@@ -1444,11 +1421,10 @@ SKIP:
 
     load_bytecode "library/Stream/Writer.pir"
 
-    find_type I0, "Stream::Writer"
-    new stream, I0
+    stream = new "Stream::Writer"
 
     # set the stream's source sub
-    .const .Sub temp = "_reader"
+    .const 'Sub' temp = "_reader"
     assign stream, temp
 
     print "main start\n"

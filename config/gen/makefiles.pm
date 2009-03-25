@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: makefiles.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: makefiles.pm 37488 2009-03-16 18:14:39Z allison $
 
 =head1 NAME
 
@@ -16,12 +16,63 @@ package gen::makefiles;
 use strict;
 use warnings;
 
-use base qw(Parrot::Configure::Step::Base);
 
-use Parrot::Configure::Step ':gen';
+use base qw(Parrot::Configure::Step);
 
-our $description = 'Generating makefiles and other build files';
-our @args        = ();
+use Parrot::Configure::Utils ':gen';
+
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Generate makefiles and other build files};
+    $data{result}      = q{};
+    $data{makefiles}   = {
+        'Makefile' => { SOURCE => 'config/gen/makefiles/root.in' },
+        'ext/Makefile' => { SOURCE => 'config/gen/makefiles/ext.in', },
+
+        'ext/Parrot-Embed/Makefile.PL' => {
+            SOURCE            => 'config/gen/makefiles/parrot_embed_pl.in',
+            replace_slashes   => 0,
+            conditioned_lines => 1,
+        },
+
+        'compilers/ncigen/Makefile'  =>
+            { SOURCE => 'compilers/ncigen/config/makefiles/ncigen.in' },
+        'compilers/nqp/Makefile'     =>
+            { SOURCE => 'config/gen/makefiles/nqp.in' },
+        'compilers/pct/Makefile'     =>
+            { SOURCE => 'config/gen/makefiles/pct.in' },
+        'compilers/pge/Makefile'     =>
+            { SOURCE => 'config/gen/makefiles/pge.in' },
+        'compilers/tge/Makefile'     =>
+            { SOURCE => 'config/gen/makefiles/tge.in' },
+        'compilers/json/Makefile'    =>
+            { SOURCE => 'config/gen/makefiles/json.in' },
+        'compilers/pirc/Makefile'    =>
+            { SOURCE => 'config/gen/makefiles/pirc.in' },
+        'src/dynpmc/Makefile'        =>
+            { SOURCE => 'config/gen/makefiles/dynpmc.in' },
+        'src/dynoplibs/Makefile'     =>
+            { SOURCE => 'config/gen/makefiles/dynoplibs.in' },
+        'editor/Makefile'            =>
+            { SOURCE => 'config/gen/makefiles/editor.in' },
+
+        'tools/build/dynpmc.pl' => {
+            SOURCE            => 'config/gen/makefiles/dynpmc_pl.in',
+            replace_slashes   => 0,
+            conditioned_lines => 1,
+        },
+        'tools/build/dynoplibs.pl' => {
+            SOURCE            => 'config/gen/makefiles/dynoplibs_pl.in',
+            replace_slashes   => 0,
+            conditioned_lines => 1,
+        },
+        'parrot.pc'     => { SOURCE => 'config/gen/makefiles/parrot_pc.in' },
+        'docs/Makefile' => { SOURCE => 'config/gen/makefiles/docs.in' },
+    };
+    $data{CFLAGS_source} = 'config/gen/makefiles/CFLAGS.in';
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
@@ -29,14 +80,13 @@ sub runstep {
     $self->makefiles($conf);
     $self->cflags($conf);
 
-    return $self;
+    return 1;
 }
 
 sub cflags {
     my ( $self, $conf ) = @_;
 
-    genfile(
-        'config/gen/makefiles/CFLAGS.in' => 'CFLAGS',
+    $conf->genfile( $self->{CFLAGS_source} => 'CFLAGS',
         comment_type                     => '#'
     );
 
@@ -54,91 +104,27 @@ EOF
     }
 
     close $CFLAGS;
+
+    return;
 }
 
 sub makefiles {
     my ( $self, $conf ) = @_;
 
-    genfile( 'config/gen/makefiles/root.in' => 'Makefile' );
+    my $targets = $conf->options->get('target');
+    my @targets =
+        defined $targets
+        ? split ' ', $targets
+        : keys %{ $self->{makefiles} };
 
-    genfile(
-        'config/gen/makefiles/ext.in' => 'ext/Makefile',
-        commentType                   => '#',
-        replace_slashes               => 1,
-        conditioned_lines             => 1
-    );
-    genfile(
-        'config/gen/makefiles/parrot_embed.in' => 'ext/Parrot-Embed/Makefile.PL',
-        replace_slashes                        => 0,
-        conditioned_lines                      => 1
-    );
+    foreach my $target (@targets) {
+        $target =~ s/\\/\//g if $^O eq 'MSWin32';
+        my $args   = $self->{makefiles}->{$target};
+        my $source = delete $args->{SOURCE};
 
-    genfile( 'config/gen/makefiles/past.in'      => 'compilers/past/Makefile' );
-    genfile( 'config/gen/makefiles/past-pm.in'   => 'compilers/past-pm/Makefile' );
-    genfile( 'config/gen/makefiles/pge.in'       => 'compilers/pge/Makefile' );
-    genfile( 'config/gen/makefiles/tge.in'       => 'compilers/tge/Makefile' );
-    genfile( 'config/gen/makefiles/bcg.in'       => 'compilers/bcg/Makefile' );
-    genfile( 'config/gen/makefiles/json.in'      => 'compilers/json/Makefile' );
-    genfile( 'config/gen/makefiles/pirc.in'      => 'compilers/pirc/Makefile' );
-    genfile( 'config/gen/makefiles/dynpmc.in'    => 'src/dynpmc/Makefile' );
-    genfile( 'config/gen/makefiles/dynoplibs.in' => 'src/dynoplibs/Makefile' );
-    genfile( 'config/gen/makefiles/editor.in'    => 'editor/Makefile' );
-
-    genfile(
-        'config/gen/makefiles/dynpmc_pl.in' => 'tools/build/dynpmc.pl',
-        comment_type                        => '#',
-        replace_slashes                     => 0,
-        conditioned_lines                   => 1
-    );
-    genfile(
-        'config/gen/makefiles/dynoplibs_pl.in' => 'tools/build/dynoplibs.pl',
-        comment_type                           => '#',
-        replace_slashes                        => 0,
-        conditioned_lines                      => 1
-    );
-    genfile( 'config/gen/makefiles/parrot.pc.in' => 'parrot.pc' );
-
-    if ( $conf->data->get('has_perldoc') ) {
-
-        # set up docs/Makefile, partly based on the .ops in the root dir
-
-        opendir OPS, "src/ops" or die "opendir ops: $!";
-        my @ops = sort grep { !/^\./ && /\.ops$/ } readdir OPS;
-        closedir OPS;
-
-        my $pod = join " ", map { my $t = $_; $t =~ s/\.ops$/.pod/; "ops/$t" } @ops;
-
-        $conf->data->set( pod => $pod );
-
-        genfile( 'config/gen/makefiles/docs.in' => 'docs/Makefile' );
-
-        $conf->data->set( pod => undef );
-
-        open my $MAKEFILE, ">>", "docs/Makefile"
-            or die "open >> docs/Makefile: $!";
-
-        my $slash       = $conf->data->get('slash');
-        my $new_perldoc = $conf->data->get('new_perldoc');
-
-        foreach my $ops (@ops) {
-            my $pod = $ops;
-            $pod =~ s/\.ops$/.pod/;
-            print {$MAKEFILE} "ops$slash$pod: ..${slash}src${slash}ops${slash}$ops\n";
-            if ( $new_perldoc == 1 ) {
-                print {$MAKEFILE}
-                    "\tperldoc -ud ops${slash}$pod ..${slash}src${slash}ops${slash}$ops\n";
-                print {$MAKEFILE} "\t\$(CHMOD) 0644 ops${slash}$pod\n\n";
-            }
-            else {
-                print {$MAKEFILE} "\tperldoc -u ..${slash}ops${slash}$ops > ops${slash}$pod\n";
-                print {$MAKEFILE} "\t\$(CHMOD) 0644 ..${slash}ops${slash}$pod\n\n";
-            }
-        }
-
+        $conf->genfile($source => $target, %$args );
     }
-    else {
-        print "\nNo Perldoc, not generating a docs makefile.\n";
-    }
+    return;
 }
 
 1;

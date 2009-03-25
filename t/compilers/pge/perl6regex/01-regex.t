@@ -1,6 +1,6 @@
-#!./parrot -G
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: 01-regex.t 18199 2007-04-14 16:52:28Z pmichaud $
+#!./parrot
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: 01-regex.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ columns (separated by one *or more* tabs):
 
 =item pattern
 
-The Perl6 regex to test.
+The Perl 6 regex to test.
 
 =item target
 
@@ -63,7 +63,7 @@ Description of the test.
 
     # Variable declarations, initializations
     .local pmc test       # the test harness object.
-               test = new 'Test::Builder'
+               test = new [ 'Test'; 'Builder' ]
 
     .local string test_dir # the directory containing tests
                   test_dir = 't/compilers/pge/perl6regex/'
@@ -73,6 +73,7 @@ Description of the test.
 
     # populate the list of test files
     push test_files, 'rx_metachars'
+    push test_files, 'rx_quantifiers'
     push test_files, 'rx_backtrack'
     push test_files, 'rx_charclass'
     push test_files, 'rx_subrules'
@@ -80,6 +81,7 @@ Description of the test.
     push test_files, 'rx_captures'
     push test_files, 'rx_modifiers'
     push test_files, 'rx_syntax'
+    push test_files, 'rx_goal'
 
     .local pmc interp     # a handle to our interpreter object.
                interp = getinterp
@@ -135,7 +137,7 @@ Description of the test.
     test_file = test_dir . test_name
 
     # Open the test file
-    file_handle = open test_file, '<'
+    file_handle = open test_file, 'r'
     $S0 = typeof file_handle
     if $S0 == 'Undef' goto bad_file
 
@@ -196,7 +198,7 @@ Description of the test.
   parse_data:
     push_eh eh_bad_line
     ( pattern, target, result, description ) = parse_data( test_line )
-    clear_eh
+    pop_eh
 
     # prepend test filename and line number to description
     description = 'build_test_desc'( description, test_name, local_line_number )
@@ -216,7 +218,7 @@ Description of the test.
   not_skip:
     push_eh thrown
     match = 'match_perl6regex'( pattern, target )
-    clear_eh
+    pop_eh
 
     if match goto matched
 
@@ -270,9 +272,10 @@ Description of the test.
     print "'\n"
 
   thrown:
-    .sym pmc exception
-    .sym string message
-    get_results '(0,0)', exception, message
+    .local pmc exception
+    .local string message
+    get_results '0', exception
+    message = exception
     say message
     # remove /'s
     $S0 = substr result, 0, 1
@@ -341,7 +344,7 @@ Description of the test.
 
   bad_line:
       $P1 = new 'Exception'
-      $P1[0] = 'invalid data format'
+      $P1 = 'invalid data format'
       throw $P1
 .end
 
@@ -377,7 +380,7 @@ Description of the test.
 
     unless_null rule, match_it
     $P1 = new 'Exception'
-    $P1[0] = 'rule error'
+    $P1 = 'rule error'
     throw $P1
   match_it:
     match = rule(target)
@@ -411,9 +414,9 @@ Description of the test.
 
   $I0 = ord digit
   if $I0 < 48 goto bad_digit
-  if $I0 > 57 goto non_numeric 
+  if $I0 > 57 goto non_numeric
   $I0 -=48
-  .return ($I0) 
+  .return ($I0)
 non_numeric:
   if $I0 < 65 goto bad_digit
   if $I0 > 70 goto not_capital
@@ -427,7 +430,7 @@ not_capital:
 
 bad_digit:
   $P1 = new 'Exception'
-  $P1[0] = 'invalid hex digit'
+  $P1 = 'invalid hex digit'
   throw $P1
 .end
 
@@ -486,3 +489,8 @@ Need to add in test ids, to avoid the precarious line numbering.
 
 =cut
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

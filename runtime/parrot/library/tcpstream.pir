@@ -7,25 +7,25 @@ TCPStream
 
   .sub main :main
       load_bytecode 'library/tcpstream.pir'
-      
+
       .local pmc stream
       stream = new 'TCPStream'
       stream.'connect'("www.google.com", 80)
-      
+
       stream.'say'("GET / HTTP/1.0")
       stream.'say'("User-agent: Parrot")
       stream.'say'("")
-      
+
       $S0 = stream.'slurp'()
       print $S0
-      
+
       stream.'close'()
   .end
 
 =head1 DESCRIPTION
 
 This is a high-level sockets library designed to mimic Tcl's socket builtins. As
-such, it uses C<print> and C<say> instaed of C<send> and C<readline> and
+such, it uses C<print> and C<say> instead of C<send> and C<readline> and
 C<slurp> instead of C<recv>.
 
 =head1 VTABLE FUNCTIONS
@@ -48,13 +48,13 @@ C<slurp> instead of C<recv>.
 
 =item C<init>
 
-Iniitialize a TCPStream object (create a socket and a buffer).
+Initialize a TCPStream object (create a socket and a buffer).
 
 =cut
 
 .sub init :anon :vtable :method
     .local pmc buffer
-    buffer = new .String
+    buffer = new 'String'
     buffer = ''
 
     .local pmc sock
@@ -75,7 +75,7 @@ use to create servers, among other things.
     .param pmc sock
 
     .local pmc buffer
-    buffer = new .String
+    buffer = new 'String'
     buffer = ''
 
     setattribute self, '$.buffer', buffer
@@ -134,7 +134,7 @@ Connects to a host/port.
 Throws an exception if unable to connect.
 
 =cut
-    
+
 .sub connect :method
     .param string host
     .param int    port
@@ -152,7 +152,7 @@ Throws an exception if unable to connect.
 
 cant_connect:
     .local pmc excep
-    excep    = new .Exception
+    excep    = new 'Exception'
     excep[0] = "Can't connect socket"
     throw excep
 .end
@@ -230,7 +230,7 @@ Print C<msg> and an end-of-line character to the socket.
 
 cant_send:
     .local pmc excep
-    excep    = new .Exception
+    excep    = new 'Exception'
     excep[0] = "Can't send to socket"
     throw excep
 .end
@@ -273,4 +273,4 @@ Matt Diephouse <matt@diephouse.com>.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

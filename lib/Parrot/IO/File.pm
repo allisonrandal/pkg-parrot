@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: File.pm 16739 2007-01-22 10:48:23Z paultcochrane $
+# Copyright (C) 2004-2006, Parrot Foundation.
+# $Id: File.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -27,6 +27,7 @@ use warnings;
 use base qw( Parrot::IO::Path );
 
 use FileHandle;
+use File::Spec ();
 use Parrot::IO::Directory;
 
 =item C<tmp_file($path)>
@@ -263,10 +264,9 @@ sub is_generated {
 
     return 1
         if $self->suffix =~ /^(?:dump|html|flag|o)$/o
-        or $self->name =~
+            or $self->name =~
 /^(?:perl6-config|libparrot.def|CFLAGS|myconfig|(?:core_pmcs|exec_(?:cpu|dep)|fingerprint|jit_(?:cpu|emit)|nci|platform(?:_interface)?)\.[ch]|(?:charclass|feature)\.h)$/o
-        or $self->parent->name eq 'ops'
-        and $self->suffix =~ /^(?:c|pod)$/;
+            or $self->parent->name eq 'ops' and $self->suffix =~ /^(?:c|pod)$/;
 
     return 0;
 }

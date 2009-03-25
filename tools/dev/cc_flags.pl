@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: cc_flags.pl 18810 2007-06-04 20:27:35Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: cc_flags.pl 37201 2009-03-08 12:07:48Z fperrad $
 ################################################################################
 
 =head1 NAME
@@ -17,7 +17,7 @@ tools/dev/cc_flags.pl - Process compiler flags
 This script is used in a F<Makefile> to process the flags to pass to the
 compiler for each C file.
 
-See F<config/gen/cflags/root.in> for the transformation file format.
+See F<config/gen/makefiles/CFLAGS.in> for the transformation file format.
 
 =head1 SEE ALSO
 
@@ -29,6 +29,19 @@ F<config/gen/cflags/root.in>.
 
 use strict;
 use warnings;
+
+my $return_only;
+my $verbose;
+
+if ($ARGV[0] eq '--return-only') {
+    $return_only = 1;
+    shift;
+}
+
+if ($ARGV[0] eq '-v') {
+    $verbose = 1;
+    shift;
+}
 
 my $cflags = shift;
 
@@ -126,6 +139,16 @@ if ($cfile) {
         print "$cfile\n";
     }
 }
+
+if ($return_only) {
+    print join ' ', @ARGV;
+    exit;
+}
+
+if ($verbose) {
+    print join ' ', @ARGV;
+}
+
 exit system(@ARGV) / 256;
 
 # Local Variables:

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: stress2.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: stress2.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Creates 200 arrays of 10000 elements each.
 
     set I3, 20
 ol:	set I0, 10
-	new P0, .ResizablePMCArray
+	new P0, 'ResizablePMCArray'
 
 ol1: bsr buildarray
 	set P0[I0], P1
@@ -31,8 +31,8 @@ ol1: bsr buildarray
 
 buildarray:
 	set I1, 10000
-	new P1, .ResizablePMCArray
-loop1:	new P2, .Integer
+	new P1, 'ResizablePMCArray'
+loop1:	new P2, 'Integer'
 	set P2, I1
 	set P1[I1], P2
 	dec I1

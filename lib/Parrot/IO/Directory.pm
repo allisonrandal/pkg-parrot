@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: Directory.pm 16739 2007-01-22 10:48:23Z paultcochrane $
+# Copyright (C) 2004-2006, Parrot Foundation.
+# $Id: Directory.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -28,7 +28,7 @@ use base qw( Parrot::IO::Path );
 
 use DirHandle;
 use File::Path;
-use File::Spec;
+use File::Spec ();
 use Parrot::IO::File;
 
 =item C<directory_class()>
@@ -184,12 +184,14 @@ directory.
 
 =cut
 
-sub file_and_directory_names() {
+sub file_and_directory_names {
     my $self = shift;
     my $dh   = DirHandle->new( $self->path )
         or die "can't opendir $self->{PATH}: $!";
 
-    return sort grep { $_ ne '.' and $_ ne '..' } $dh->read();
+    my @files = sort grep { $_ ne '.' and $_ ne '..' } $dh->read();
+
+    return @files;
 }
 
 =item C<file_and_directory_paths()>
@@ -198,7 +200,7 @@ These are the full paths of all the files and subdirectories in the directory.
 
 =cut
 
-sub file_and_directory_paths() {
+sub file_and_directory_paths {
     my $self = shift;
 
     return map { File::Spec->catfile( $self->{PATH}, $_ ) } $self->file_and_directory_names;
@@ -210,10 +212,12 @@ These are the full paths of all the files in the directory.
 
 =cut
 
-sub file_paths() {
+sub file_paths {
     my $self = shift;
 
-    return sort grep { -f } $self->file_and_directory_paths;
+    my @paths = sort grep { -f } $self->file_and_directory_paths;
+
+    return @paths;
 }
 
 =item C<directory_paths()>
@@ -225,7 +229,9 @@ These are the full paths of all the subdirectories in the directory.
 sub directory_paths {
     my $self = shift;
 
-    return sort grep { -d } $self->file_and_directory_paths;
+    my @paths = sort grep { -d } $self->file_and_directory_paths;
+
+    return @paths;
 }
 
 =item C<file_exists_with_name($name)>
@@ -324,7 +330,9 @@ sub file_suffixes {
         $suffixes{ $file->suffix } = 1;
     }
 
-    return sort keys %suffixes;
+    my @suffixes = sort keys %suffixes;
+
+    return @suffixes;
 }
 
 =item C<files_with_suffix($suffix, $recursive, $ignore)>

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: CSwitch.pm 18744 2007-06-02 01:10:38Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: CSwitch.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -76,18 +76,7 @@ sub defines {
     return $pred_def . <<END;
 /* defines - $0 -> $type */
 #  define opcode_to_prederef(i, op)   (op ? \\
-     (opcode_t*) (op   - CONTEXT(i->ctx)->pred_offset) : (opcode_t*)NULL)
-/*
- * if we are using CHECK_EVENTS elsewhere this macro should (again)
- * be in includes/parrot/event.h
- *
- * This gives +50 % performance
- */
-
-#undef  CHECK_EVENTS
-#define CHECK_EVENTS(i, n)   \\
-        interp->task_queue->head ?  \\
-                (opcode_t*)Parrot_do_check_events(i, n) : n
+     (opcode_t*) (op   - CONTEXT(i)->pred_offset) : (opcode_t*)NULL)
 END
 }
 
@@ -142,6 +131,24 @@ sub goto_pop {
               goto SWITCH_AGAIN; }";
 }
 
+=item C<init_func_init1($base)>
+
+Returns the C code for the init function.
+
+=cut
+
+sub init_func_init1 {
+    my ( $self, $base ) = @_;
+    my $cg_func = $self->core_prefix . $base;
+    my $bs      = $base . $self->suffix . '_';
+
+    return <<END_C;
+        if (!${bs}op_lib.op_func_table)
+            ${bs}op_lib.op_func_table = (op_func_t *)&${bs}op_lib;
+END_C
+}
+
+
 =item C<run_core_func_start()>
 
 Returns the C code prior to the run core function.
@@ -164,7 +171,7 @@ SWITCH_RELOAD:
     _reg_base = (char*)interp->ctx.bp.regs_i;
     do {
 SWITCH_AGAIN:
-    cur_opcode = CHECK_EVENTS(interp, cur_opcode);
+    Parrot_cx_handle_tasks(interp, interp->scheduler);
     if (!cur_opcode)
         break;
     switch (*(opcode_t*)cur_opcode) {
@@ -203,7 +210,8 @@ sub run_core_finish {
                 *(opcode_t*)cur_opcode = CORE_OPS_wrapper__;
                 continue;
             }
-            internal_exception(1, "illegal opcode in switch core\\n");
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                "illegal opcode in switch core\\n");
             break;
         } /* switch */
 END_C

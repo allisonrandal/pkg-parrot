@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: parrot_coverage.pl 18810 2007-06-04 20:27:35Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: parrot_coverage.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -35,7 +35,7 @@ my $DEBUG   = 1;
 
 if ( $ARGV[0] && $ARGV[0] =~ /recompile/ ) {
 
-    # clean up remnants of prior biulds
+    # clean up remnants of prior builds
     File::Find::find(
         {
             wanted => sub {
@@ -127,7 +127,7 @@ foreach my $da_file (@dafiles) {
 
         print "Processing $gcov_file ($source_file)\n";
 
-        foreach ( split "\n", $generated_files{$gcov_file} ) {
+        foreach ( split m/\n/, $generated_files{$gcov_file} ) {
             my ( $percent, $total_lines, $real_filename ) =
                 /\s*([^%]+)% of (\d+)(?: source)? lines executed in file (.*)/;
             if ($total_lines) {
@@ -333,7 +333,7 @@ sub filter_gcov {
 
     my $outfile = "$outfile_base.lines.html";
     print "Writing $outfile..\n" if $DEBUG;
-    our ($IN, $OUT);
+    our ( $IN, $OUT );
     open( $IN,  "<", "$infile" )  or die "Can't read $infile: $!\n";
     open( $OUT, ">", "$outfile" ) or die "Can't write $outfile: $!\n";
 

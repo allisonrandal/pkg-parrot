@@ -1,62 +1,118 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: Test.pm 18803 2007-06-04 14:03:54Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: Test.pm 36833 2009-02-17 20:09:26Z allison $
 package Parrot::Configure::Options::Test;
 use strict;
 use warnings;
-
-our @preconfiguration_tests = qw(
-    t/configure/*.t
-);
-
-our @postconfiguration_tests = qw(
-    t/postconfigure/*.t
-    t/tools/pmc2cutils/*.t
-    t/tools/ops2cutils/*.t
-    t/tools/ops2pmutils/*.t
-);
+use Carp;
+use Test::Harness;
+use lib qw(lib);
+use Parrot::Configure::Step::List qw( get_steps_list );
 
 sub new {
-    my ($class, $argsref) = @_;
+    my ( $class, $argsref ) = @_;
     my $self = {};
-    my ($run_configure_tests, $run_build_tests);
-    if (defined $argsref->{test}) {
-        if ($argsref->{test} eq '1') {
-            $self->{run_configure_tests} = 1;
-            $self->{run_build_tests} = 1;
-        } elsif ($argsref->{test} eq 'configure') {
-            $self->{run_configure_tests} = 1;
-        } elsif ($argsref->{test} eq 'build') {
-            $self->{run_build_tests} = 1;
-        } else {
+    bless $self, $class;
+    my ( $run_configure_tests, $run_build_tests );
+    if ( defined $argsref->{test} ) {
+        if ( $argsref->{test} eq '1' ) {
+            $self->set_run('run_configure_tests', 1);
+            $self->set_run('run_build_tests', 1);
+        }
+        elsif ( $argsref->{test} eq 'configure' ) {
+            $self->set_run('run_configure_tests', 1);
+        }
+        elsif ( $argsref->{test} eq 'build' ) {
+            $self->set_run('run_build_tests', 1);
+        }
+        else {
             die "'$argsref->{test}' is a bad value for command-line option 'test'";
         }
     }
-    return bless $self, $class;
+    my %excluded_options = map {$_ => 1} qw|
+        ask
+        configure_trace
+        debugging
+        fatal
+        fatal-step
+        help
+        script
+        silent
+        verbose
+        verbose-step
+    |;
+    for my $k (grep { ! $excluded_options{$_} } keys %{$argsref}) {
+        $self->set($k, $argsref->{$k});
+    }
+    my $sto = '.configure_parallel.sto';
+    if (-e $sto) {
+        unlink $sto or die "Unable to unlink $sto: $!";
+    }
+    return $self;
+}
+
+sub set {
+    my $self = shift;
+    die "Need 2 arguments to Parrot::Configure::Options::Test::set()"
+        unless @_ == 2;
+    my ($option, $value) = @_;
+    $self->{options}{$option} = $value;
+}
+
+sub get {
+    my $self = shift;
+    die "Need 1 argument to Parrot::Configure::Options::Test::get()"
+        unless @_ == 1;
+    my $option = shift;
+    return $self->{options}{$option} || undef;
+}
+
+sub set_run {
+    my $self = shift;
+    die "Need 2 arguments to Parrot::Configure::Options::Test::set_run()"
+        unless @_ == 2;
+    my ($option, $value) = @_;
+    $self->{run}{$option} = $value;
+}
+
+sub get_run {
+    my $self = shift;
+    die "Need 1 argument to Parrot::Configure::Options::Test::get_run()"
+        unless @_ == 1;
+    my $option = shift;
+    return $self->{run}{$option} || undef;
 }
 
 sub run_configure_tests {
     my $self = shift;
-    if ($self->{run_configure_tests}) {
+    my @preconfiguration_tests = @_;
+    if ( $self->get_run('run_configure_tests') ) {
+        my $start = time();
         print "As you requested, we'll start with some tests of the configuration tools.\n\n";
-        system(qq{prove @preconfiguration_tests})
-            and die "Unable to execute configuration tests";
+
+        runtests(@preconfiguration_tests) or die
+            "Pre-configuration tests did not complete successfully; Configure.pl will not continue.";
         print <<"TEST";
 
 I just ran some tests to demonstrate that
 Parrot's configuration tools will work as intended.
 
 TEST
+        my $end =time();
+        print scalar(@preconfiguration_tests),
+            " t/configure and t/step tests took ",
+            ($end - $start), " seconds.\n";
     }
     return 1;
 }
 
 sub run_build_tests {
     my $self = shift;
-    if ($self->{run_build_tests}) {
+    my @postconfiguration_tests = @_;
+    if ( $self->get_run('run_build_tests') ) {
         print "\n\n";
         print "As you requested, I will now run some tests of the build tools.\n\n";
-        system(qq{prove @postconfiguration_tests})
-            and die "Unable to execute post-configuration and build tools tests";
+        runtests(@postconfiguration_tests) or die
+            "Post-configuration and build tools tests did not complete successfully; running 'make' might be dubious.";
     }
     return 1;
 }
@@ -75,19 +131,21 @@ In F<Configure.pl>:
 
     use Parrot::Configure::Options;
     use Parrot::Configure::Options::Test;
+    use Parrot::Configure::Options::Test::Prepare qw(
+        get_preconfiguration_tests
+        get_postconfiguration_tests
+    );
 
     $args = process_options( {
         argv            => [ @ARGV ],
-        script          => $0,
-        parrot_version  => $parrot_version,
-        svnid           => '$Id: Test.pm 18803 2007-06-04 14:03:54Z paultcochrane $',
+        mode            => q{configure},
     } );
 
     $opttest = Parrot::Configure::Options::Test->new($args);
 
-    $opttest->run_configure_tests();
+    $opttest->run_configure_tests( get_preconfiguration_tests() );
 
-    $opttest->run_build_tests();
+    $opttest->run_build_tests( get_postconfiguration_tests() );
 
 On command line:
 
@@ -150,18 +208,12 @@ Run tests of Parrot's configuration tools.
 
 =item * Arguments
 
-None.
+List of test files, typically supplied by
+C<Parrot::Configure::Options::Test::Prepare::get_preconfiguration_tests()>.
 
 =item * Return Value
 
 None.
-
-=item * Comments
-
-The tests to be executed are listed in
-C<@Parrot::Configure::Options::Test::preconfiguration_tests>.  Edit that list
-to run different tests.  Currently, that array runs all tests in
-F<t/configure/*.t>.
 
 =back
 
@@ -177,22 +229,12 @@ F<Configure.pl> has completed execution.
 
 =item * Arguments
 
-None.
+List of test files, typically supplied by
+C<Parrot::Configure::Options::Test::Prepare::get_postconfiguration_tests()>.
 
 =item * Return Value
 
 None.
-
-=item * Comments
-
-The tests to be executed are listed in
-C<@Parrot::Configure::Options::Test::postconfiguration_tests>.  Edit that list
-to run different tests.  Currently, that array runs all tests in:
-
-    t/postconfigure/*.t
-    t/tools/pmc2cutils/*.t
-    t/tools/ops2cutils/*.t
-    t/tools/ops2pmutils/*.t
 
 =back
 

@@ -1,7 +1,7 @@
 /* library.h
- *  Copyright (C) 2004, The Perl Foundation.
+ *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id: library.h 19058 2007-06-17 06:45:14Z petdance $
+ *     $Id: library.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:
@@ -34,39 +34,86 @@ typedef enum {
 } enum_lib_paths;
 
 /* HEADERIZER BEGIN: src/library.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API char* Parrot_get_runtime_prefix( Interp *interp /*NN*/,
-    STRING **prefix_str /*NULLOK*/ )
+PARROT_EXPORT
+void Parrot_add_library_path(PARROT_INTERP,
+    ARGIN(const char *path),
+    enum_lib_paths which)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+STRING * Parrot_get_runtime_path(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-PARROT_API char* Parrot_locate_runtime_file( Interp *interp /*NN*/,
-    const char *file_name /*NN*/,
-    enum_runtime_ft type )
+PARROT_EXPORT
+PARROT_MALLOC
+PARROT_CANNOT_RETURN_NULL
+char* Parrot_get_runtime_prefix(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+PARROT_MALLOC
+char* Parrot_locate_runtime_file(PARROT_INTERP,
+    ARGIN(const char *file_name),
+    enum_runtime_ft type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+STRING* Parrot_locate_runtime_file_str(PARROT_INTERP,
+    ARGMOD(STRING *file),
+    enum_runtime_ft type)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__warn_unused_result__;
+        FUNC_MODIFIES(*file);
 
-PARROT_API STRING* Parrot_locate_runtime_file_str( Interp *interp /*NN*/,
-    STRING *file /*NN*/,
-    enum_runtime_ft type )
+void parrot_init_library_paths(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_IGNORABLE_RESULT
+PARROT_CANNOT_RETURN_NULL
+STRING * parrot_split_path_ext(PARROT_INTERP,
+    ARGMOD(STRING *in),
+    ARGOUT(STRING **wo_ext),
+    ARGOUT(STRING **ext))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__warn_unused_result__;
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*in)
+        FUNC_MODIFIES(*wo_ext)
+        FUNC_MODIFIES(*ext);
 
-void parrot_init_library_paths( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-STRING * parrot_split_path_ext( Interp* interp /*NN*/,
-    STRING *in,
-    STRING **wo_ext,
-    STRING **ext )
-        __attribute__nonnull__(1);
-
+#define ASSERT_ARGS_Parrot_add_library_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(path)
+#define ASSERT_ARGS_Parrot_get_runtime_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_get_runtime_prefix __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_locate_runtime_file __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(file_name)
+#define ASSERT_ARGS_Parrot_locate_runtime_file_str \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(file)
+#define ASSERT_ARGS_parrot_init_library_paths __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_split_path_ext __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(in) \
+    || PARROT_ASSERT_ARG(wo_ext) \
+    || PARROT_ASSERT_ARG(ext)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/library.c */
-
-
-STRING * parrot_split_path_ext(Interp* , STRING *in,
-        STRING **wo_ext, STRING **ext);
 
 #endif /* PARROT_LIBRARY_H_GUARD */
 

@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: C.pm 18262 2007-04-17 12:35:05Z coke $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: C.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -118,7 +118,6 @@ sub new {
         $self->new_group(
             'General',
             '',
-            $self->c_source_item( 'This file is unused.', 'parrot' ),
             $self->c_header_item( '', 'parrot' ),
             $self->c_pair_item( '', 'warnings' ),
             $self->c_pair_item( '', 'longopt' ),
@@ -131,7 +130,7 @@ sub new {
             $self->c_item(
 'Parrot Interpreter: Callback Function Handling; Creation and Destruction; Misc functions; Run Ops and Methods.',
                 'pairs'   => ['interpreter'],
-                'sources' => [ 'inter_cb', 'inter_create', 'inter_misc', 'inter_run' ],
+                'sources' => [ 'inter_cb', 'inter_create', 'inter_misc' ],
                 'headers' => ['interp_guts']
             ),
             $self->c_pair_item( '', 'exit' ),
@@ -139,15 +138,8 @@ sub new {
         $self->new_group(
             'Registers and Stacks',
             '',
-            $self->c_item(
-                '',
-                'pairs'   => ['register'],
-            ),
-            $self->c_item(
-                '',
-                'pairs'   => ['stacks'],
-                'sources' => ['stack_common']
-            ),
+            $self->c_item( '', 'pairs' => ['register'], ),
+            $self->c_item( '', 'pairs'   => ['stacks'], ),
             $self->c_header_item( '', 'enums' ),
         ),
         $self->new_group(
@@ -167,7 +159,6 @@ sub new {
             '',
             $self->c_pair_item( '', 'datatypes' ),
             $self->c_pair_item( '', 'hash' ),
-            $self->c_pair_item( '', 'intlist' ),
             $self->c_pair_item( '', 'list' ),
         ),
         $self->new_group(
@@ -180,24 +171,24 @@ sub new {
             $self->c_header_item( '', 'pobj' ),
             $self->c_pair_item( '', 'pmc_freeze' ),
         ),
-        $self->new_group( 'Objects', '', $self->c_pair_item( '', 'objects' ), ),
+        $self->new_group( 'Objects', '', $self->c_pair_item( '', 'oo' ), ),
         $self->new_group(
             'Strings',
             '',
             $self->c_item(
                 '',
-                'pairs'   => [ 'string_primitives', 'string' ],
-                'headers' => ['string_funcs']
+                'sources' => [ 'string/primitives', 'string/api' ],
+                'headers' => [ 'string', 'string_funcs', 'string_primitives' ]
             ),
-            $self->c_item( 'String encodings', 'contents' => ['src/encodings'] ),
-            $self->c_item( 'String charset',   'contents' => ['src/charset'] ),
+            $self->c_item( 'String encodings', 'contents' => ['src/string/encoding'] ),
+            $self->c_item( 'String charset',   'contents' => ['src/string/charset'] ),
             $self->c_item(
                 'Miscellaneous, <code>sprintf</code> and utility functions.',
                 'pairs'   => ['misc'],
                 'sources' => [ 'spf_render', 'spf_vtable', 'utils' ]
             ),
         ),
-        $self->new_group( 'Multi-methods', '', $self->c_pair_item( '', 'mmd' ), ),
+        $self->new_group( 'Multi-methods', '', $self->c_pair_item( '', 'multidispatch' ), ),
         $self->new_group( 'Extensions',    '', $self->c_pair_item( '', 'extend' ), ),
         $self->new_group(
             'JIT', '',
@@ -243,8 +234,7 @@ sub new {
                 'pairs'   => ['resources'],
                 'sources' => ['res_lea']
             ),
-            $self->c_pair_item( '', 'smallobject' ),
-            $self->c_pair_item( '', 'headers' ),
+            $self->c_source_item( '', 'mark_sweep' ),
         ),
         $self->new_group(
             'Garbage Collection',
@@ -257,9 +247,9 @@ sub new {
             $self->c_item(
                 '',
                 'pairs'   => ['debug'],
-                'sources' => ['pdb']
+                'sources' => ['parrot_debugger']
             ),
-            $self->c_source_item( '', 'disassemble' ),
+            $self->c_source_item( '', 'pbc_disassemble' ),
             $self->c_pair_item( '', 'trace' ),
             $self->c_source_item( '', 'test_main' ),
         ),

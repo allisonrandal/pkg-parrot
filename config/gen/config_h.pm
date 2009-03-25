@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: config_h.pm 18945 2007-06-12 14:08:35Z fperrad $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: config_h.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -18,34 +18,39 @@ package gen::config_h;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':gen';
+use Parrot::Configure::Utils ':gen';
 
-$description = 'Generating C headers';
 
-@args = ('define');
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Generate C headers};
+    $data{result}      = q{};
+    $data{templates}    = {
+        config_h    => 'config/gen/config_h/config_h.in',
+        feature_h   => 'config/gen/config_h/feature_h.in',
+    };
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    genfile(
-        'config/gen/config_h/config_h.in', 'include/parrot/config.h',
-        comment_type      => '/*',
+    $conf->genfile($self->{templates}->{config_h}, 'include/parrot/config.h',
         ignore_pattern    => 'PARROT_CONFIG_DATE',
         conditioned_lines => 1
     );
 
-    genfile(
-        'config/gen/config_h/feature_h.in', 'include/parrot/feature.h',
-        comment_type   => '/*',
+    $conf->genfile($self->{templates}->{feature_h}, 'include/parrot/feature.h',
         ignore_pattern => 'PARROT_CONFIG_DATE',
         feature_file   => 1
     );
 
     my $hh = "include/parrot/has_header.h";
+    $conf->append_configure_log($hh);
     open( my $HH, ">", "$hh.tmp" )
         or die "Can't open has_header.h: $!";
 
@@ -75,24 +80,10 @@ EOF
         }
     }
 
-    print {$HH} "\n#define BUILD_OS_NAME \"$^O\"\n";
+    my $osname = $conf->data->get_p5('OSNAME');
+    print {$HH} "\n#define BUILD_OS_NAME \"$osname\"\n";
 
-    my $define = $conf->options->get('define');
-
-    if ($define) {
-        my @vals = split /,/, $define;
-        print {$HH} <<EOF;
-
-/*
- * defines from commandline
- */
-
-EOF
-        for (@vals) {
-            print {$HH} "#define PARROT_DEF_" . uc($_), " 1\n";
-        }
-
-    }
+    _handle_define_option($conf, $HH);
 
     print {$HH} <<EOF;
 
@@ -139,7 +130,26 @@ EOF
 
     move_if_diff( "$hh.tmp", $hh );
 
-    return $self;
+    return 1;
+}
+
+sub _handle_define_option {
+    my ($conf, $HH) = @_;
+    my $define = $conf->options->get('define');
+
+    if ($define) {
+        my @vals = split /,/, $define;
+        print {$HH} <<EOF;
+
+/*
+ * defines from commandline
+ */
+
+EOF
+        for my $v (@vals) {
+            print {$HH} "#define PARROT_DEF_" . uc($v), " 1\n";
+        }
+    }
 }
 
 1;

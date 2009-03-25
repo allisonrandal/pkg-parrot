@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: vms.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2005, Parrot Foundation.
+# $Id: vms.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 package init::hints::vms;
 
@@ -10,22 +10,23 @@ sub runstep {
     my ( $self, $conf ) = @_;
 
     $conf->data->set(
-        ccflags =>
-            qq{/Standard=Relaxed_ANSI/Prefix=All/Obj=.obj/NoList/NOANSI_ALIAS/include="./include"},
-        perl => "MCR $^X",
-        exe  => "exe"
+        ccflags => qq{/Prefix=All/Obj=.obj/NoList/include="./include"/nowarn},
+        perl    => "MCR $^X",
+        exe     => ".exe"
     );
 
     {
         local $^W;    # no warnings on redefinition
 
-        *Parrot::Configure::Step::cc_build = sub {
+        *Parrot::Configure::Compiler::cc_build = sub {
+            my $conf = shift;
             my ( $cc, $ccflags ) = $conf->data->get(qw(cc ccflags));
             system("$cc $ccflags test.c") and die "C compiler died!";
             system("link/exe=test test")  and die "Link failed!";
         };
 
-        *Parrot::Configure::Step::cc_run = sub {
+        *Parrot::Configure::Compiler::cc_run = sub {
+            my $conf = shift;
             `mcr []test`;
         };
     }

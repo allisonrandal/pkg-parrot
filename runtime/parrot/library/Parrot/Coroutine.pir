@@ -4,77 +4,76 @@ Parrot::Coroutine - A pure PIR implementation of coroutines
 
 =head1 VERSION
 
- $Id: Coroutine.pir 18401 2007-05-02 22:49:45Z mdiep $
+ $Id: Coroutine.pir 36833 2009-02-17 20:09:26Z allison $
 
 =head1 SYNOPSIS
 
-	.sub __onload :load
-		load_bytecode 'Parrot/Coroutine.pir'
-	.end
+    .sub onload :load
+        load_bytecode 'Parrot/Coroutine.pir'
+    .end
 
-	## Recursive coroutine to enumerate tree elements.  Each element that is
-	## not a FixedPMCArray is yielded in turn.
-	.sub enumerate_tree
-		.param pmc coro
-		.param pmc tree_node
-		.param int depth :optional
-		.param int depth_p :opt_flag
+    ## Recursive coroutine to enumerate tree elements.  Each element that is
+    ## not a FixedPMCArray is yielded in turn.
+    .sub enumerate_tree
+        .param pmc coro
+        .param pmc tree_node
+        .param int depth :optional
+        .param int depth_p :opt_flag
 
-		if depth_p goto have_depth
-		depth = 0
-	have_depth:
-		inc depth
+        if depth_p goto have_depth
+        depth = 0
+    have_depth:
+        inc depth
 
-		$I0 = isa tree_node, 'FixedPMCArray'
-		if $I0 goto recur
-		print "[leaf "
-		print tree_node
-		print "]\n"
-		coro.'yield'(tree_node)
-		.return ()
+        $I0 = isa tree_node, 'FixedPMCArray'
+        if $I0 goto recur
+        print "[leaf "
+        print tree_node
+        print "]\n"
+        coro.'yield'(tree_node)
+        .return ()
 
-	recur:
-		## Loop through array elements, recurring on each.
-		.local int size, i
-		i = 0
-		size = tree_node
-	again:
-		if i >= size goto done
-		print "[recur: depth "
-		print depth
-		print ' elt '
-		print i
-		print "]\n"
-		$P1 = tree_node[i]
-		enumerate_tree(coro, $P1, depth)
-		inc i
-		goto again
-	done:
-		.return ()
-	.end
+    recur:
+        ## Loop through array elements, recurring on each.
+        .local int size, i
+        i = 0
+        size = tree_node
+    again:
+        if i >= size goto done
+        print "[recur: depth "
+        print depth
+        print ' elt '
+        print i
+        print "]\n"
+        $P1 = tree_node[i]
+        enumerate_tree(coro, $P1, depth)
+        inc i
+        goto again
+    done:
+        .return ()
+    .end
 
-	.sub print_tree
-		.param pmc tree
+    .sub print_tree
+        .param pmc tree
 
-		.local int coro_class, idx
-		coro_class = find_type 'Parrot::Coroutine'
-		.local pmc coro
-		.const .Sub coro_sub = "enumerate_tree"
-		coro = new coro_class, coro_sub
-		($P0 :optional, $I0 :opt_flag) = coro.'resume'(coro, tree)
-		idx = 0
+        .local int coro_class, idx
+        .local pmc coro
+        .const 'Sub' coro_sub = "enumerate_tree"
+        coro = new 'Parrot::Coroutine', coro_sub
+        ($P0 :optional, $I0 :opt_flag) = coro.'resume'(coro, tree)
+        idx = 0
 
-	loop:
-		unless $I0 goto done
-		print 'print_tree:  '
-		print idx
-		print ' => '
-		print $P0
-		print "\n"
-		($P0 :optional, $I0 :opt_flag) = coro.'resume'()
-		goto loop
-	done:
-	.end
+    loop:
+        unless $I0 goto done
+        print 'print_tree:  '
+        print idx
+        print ' => '
+        print $P0
+        print "\n"
+        ($P0 :optional, $I0 :opt_flag) = coro.'resume'()
+        goto loop
+    done:
+    .end
 
 =head1 DESCRIPTION
 
@@ -83,21 +82,16 @@ in pure PIR using continuations.
 
 =cut
 
-.const int slot_state       = 0 ## State:  1 is new/valid, 0 is dead.
-.const int slot_initial_sub = 1 ## Initial sub.
-.const int slot_yield_cont  = 2 ## Continuation to for yielding.
-.const int slot_resume_cont = 3 ## Continuation from which to resume.
-
-.sub __loadtime_create_class :load
-	find_type $I0, "Parrot::Coroutine"
-	if $I0 > 1 goto END
-	newclass $P0, "Parrot::Coroutine"
-	addattribute $P0, "state"
-	addattribute $P0, "initial_sub"
-	addattribute $P0, "yield_cont"
-	addattribute $P0, "resume_cont"
+.sub onload_create_class :load
+    $P0 = get_class "Parrot::Coroutine"
+    unless null $P0 goto END
+    $P0 = newclass "Parrot::Coroutine"
+    addattribute $P0, "state"       ## State:  1 is new/valid, 0 is dead.
+    addattribute $P0, "initial_sub" ## Initial sub.
+    addattribute $P0, "yield_cont"  ## Continuation to for yielding.
+    addattribute $P0, "resume_cont" ## Continuation from which to resume.
 END:
-	.return ()
+    .return ()
 .end
 
 .namespace ["Parrot::Coroutine"]
@@ -106,35 +100,33 @@ END:
 
 =head2 METHODS
 
-=head3 B<__init_pmc(sub)>
+=head3 B<init_pmc(sub)>
 
 This method is normally called via the C<new> op:
 
-	.local int coro_class
-	coro_class = find_type 'Parrot::Coroutine'
-	.local pmc coro
-	.const .Sub coro_sub = "enumerate_tree"
-	coro = new coro_class, coro_sub
+    .local pmc coro
+    .const 'Sub' coro_sub = "enumerate_tree"
+    coro_class = get_class 'Parrot::Coroutine'
+    coro = coro_class.'new'('initial_sub' => coro_sub)
 
 Given a sub, it initializes a new C<Parrot::Coroutine> object.
 
 =cut
 
 .sub init_pmc :vtable :method
-	.param pmc sub
+    .param pmc init_args
 
-	## [should complain if sub is not a sub or closure.  -- rgr, 8-Oct-06.]
-	.local pmc state
-	state = new .Undef
-	state = 1
-	setattribute self, slot_state, state
-	setattribute self, slot_initial_sub, sub
+    ## [should complain if sub is not a sub or closure.  -- rgr, 8-Oct-06.]
+    .local pmc state
+    state = new 'Undef'
+    state = 1
+    setattribute self, 'state', state
 .end
 
 ## [it would be nice to include a pointer value.  -- rgr, 8-Oct-06.]
 .sub get_string :vtable :method
-	$S0 = '<Parrot::Coroutine ?>'
-	.return ($S0)
+    $S0 = '<Parrot::Coroutine ?>'
+    .return ($S0)
 .end
 
 =head3 B<coro.resume(args...)>
@@ -154,44 +146,44 @@ marked as dead, in which case it is an error to attempt to resume it again.
 =cut
 
 .sub resume :method
-	.param pmc args :slurpy
+    .param pmc args :slurpy
 
-	## Decide whether we're dead.
-	.local pmc state
-	state = getattribute self, slot_state
-	unless state goto dead
+    ## Decide whether we're dead.
+    .local pmc state
+    state = getattribute self, 'state'
+    unless state goto dead
 
-	## Decide where to go.  If we've never been invoked before, we need to
-	## call the sub.
-	.local pmc entry
-	entry = getattribute self, slot_resume_cont
-	unless null entry goto doit
-	entry = getattribute self, slot_initial_sub
+    ## Decide where to go.  If we've never been invoked before, we need to
+    ## call the sub.
+    .local pmc entry
+    entry = getattribute self, 'resume_cont'
+    unless null entry goto doit
+    entry = getattribute self, 'initial_sub'
 
 doit:
-	## Remember where to return when we yield.
-	.local pmc cc
-	cc = interpinfo .INTERPINFO_CURRENT_CONT
-	setattribute self, slot_yield_cont, cc
+    ## Remember where to return when we yield.
+    .local pmc cc
+    cc = interpinfo .INTERPINFO_CURRENT_CONT
+    setattribute self, 'yield_cont', cc
 
-	## Call the entry with our args.  Most of the time, it will yield (by
-	## calling our continuation for us) instead of returning directly.
-	.local pmc result
-	(result :slurpy) = entry(args :flat)
-	## If we returned normally, then the coroutine is dead.
-	state = 0
-	## Note that the value of the yield_cont slot will normally have been
-	## changed magically behind our backs by a subsequent yield/resume, so
-	## we can't just return directly.
-	cc = getattribute self, slot_yield_cont
-	.return cc(result :flat)
+    ## Call the entry with our args.  Most of the time, it will yield (by
+    ## calling our continuation for us) instead of returning directly.
+    .local pmc result
+    (result :slurpy) = entry(args :flat)
+    ## If we returned normally, then the coroutine is dead.
+    state = 0
+    ## Note that the value of the yield_cont slot will normally have been
+    ## changed magically behind our backs by a subsequent yield/resume, so
+    ## we can't just return directly.
+    cc = getattribute self, 'yield_cont'
+    .tailcall cc(result :flat)
 
 dead:
-	## Complain about attempted zombie creation.
-	.local pmc error
-	error = new .Exception
-	error['_message'] = "Can't reanimate a dead coroutine.\n"
-	throw error
+    ## Complain about attempted zombie creation.
+    .local pmc error
+    error = new 'Exception'
+    error = "Can't reanimate a dead coroutine.\n"
+    throw error
 .end
 
 =head3 B<coro.yield(args...)>
@@ -206,16 +198,16 @@ passed to C<resume> are returned as the values from C<yield>.
 
 ## Return values to the calling thread.
 .sub yield :method
-	.param pmc args :slurpy
+    .param pmc args :slurpy
 
-	## Remember where to go when we are resumed.
-	.local pmc cc
-	cc = interpinfo .INTERPINFO_CURRENT_CONT
-	setattribute self, slot_resume_cont, cc
+    ## Remember where to go when we are resumed.
+    .local pmc cc
+    cc = interpinfo .INTERPINFO_CURRENT_CONT
+    setattribute self, 'resume_cont', cc
 
-	## Return to the coro caller.
-	cc = getattribute self, slot_yield_cont
-	.return cc(args :flat)
+    ## Return to the coro caller.
+    cc = getattribute self, 'yield_cont'
+    .tailcall cc(args :flat)
 .end
 
 =head1 BUGS
@@ -231,7 +223,7 @@ to 'yielded' ..., except that one might at any time transition to
 
 =back
 
-Please report any others you find to C<E<lt>parrot-porters@perl.orgE<gt>>.
+Please report any others you find to C<E<lt>parrot-dev@lists.parrot.orgE<gt>>.
 
 =head1 SEE ALSO
 
@@ -255,7 +247,7 @@ Bob Rogers C<E<lt>rogers-perl6@rgrjr.dyndns.orgE<gt>>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, The Perl Foundation.
+Copyright (C) 2006-2008, Parrot Foundation.
 This program is free software. It is subject to the same
 license as The Parrot Interpreter.
 
@@ -265,4 +257,4 @@ license as The Parrot Interpreter.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

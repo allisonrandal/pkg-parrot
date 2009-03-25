@@ -1,11 +1,11 @@
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: Utils.pir 17988 2007-04-05 03:20:48Z pmichaud $
+# Copyright (C) 2007-2008, Parrot Foundation.
+# $Id: Utils.pir 36833 2009-02-17 20:09:26Z allison $
 
 .namespace ['String';'Utils']
 
 =head1 NAME
 
-['String';'Utils'] - Utilities for string processing
+String;Utils - Utilities for string processing
 
 =head1 SYNOPSIS
 
@@ -129,8 +129,8 @@ according to C<radix>.
   err_radix:
     $S0 = "Invalid radix: "
     concat $S0, radix
-    $P0 = new .Exception
-    $P0['_message'] = $S0
+    $P0 = new 'Exception'
+    $P0 = $S0
     throw $P0
     .return (0, 0)
 .end
@@ -192,12 +192,12 @@ conversion.
     $S1 = substr source, pos, 1
     $S0 .= $S1
     $S0 .= "'"
-    $P0 = new .Exception
-    $P0['_message'] = $S0
+    $P0 = new 'Exception'
+    $P0 = $S0
     throw $P0
     .return ('', 0)
 .end
-    
+
 =back
 
 =head1 AUTHORS
@@ -211,4 +211,4 @@ conversion.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

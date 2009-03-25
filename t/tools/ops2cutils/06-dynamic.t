@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: 06-dynamic.t 17576 2007-03-17 22:50:07Z paultcochrane $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: 06-dynamic.t 37200 2009-03-08 11:46:01Z fperrad $
 # 06-dynamic.t
 
 use strict;
@@ -19,23 +19,21 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 72;
+use Test::More tests => 43;
 use Carp;
 use Cwd;
 use File::Copy;
 use File::Temp (qw| tempdir |);
-use_ok('Parrot::Ops2pm::Utils');
-use_ok('Parrot::IO::Capture::Mini');
+use_ok('Parrot::Ops2pm');
 use lib ("$main::topdir/t/tools/ops2cutils/testlib");
-use_ok( "GenerateCore", qw| generate_core | );
+use GenerateCore qw|
+    generate_core
+    @srcopsfiles
+    $num
+    $skip
+|;
+use IO::CaptureOutput qw | capture |;
 
-my @srcopsfiles = qw( src/ops/core.ops src/ops/bit.ops src/ops/cmp.ops
-    src/ops/debug.ops src/ops/experimental.ops src/ops/io.ops src/ops/math.ops
-    src/ops/object.ops src/ops/pic.ops src/ops/pmc.ops src/ops/set.ops
-    src/ops/stack.ops src/ops/stm.ops src/ops/string.ops src/ops/sys.ops
-    src/ops/var.ops );
-my $num         = "src/ops/ops.num";
-my $skip        = "src/ops/ops.skip";
 my @dynopsfiles = qw( src/dynoplibs/dan.ops src/dynoplibs/myops.ops );
 
 ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
@@ -67,33 +65,29 @@ my ( $msg, $tie );
     test_dynops( [qw( CSwitch  dan.ops )] );
 
     {
-        $tie = tie *STDERR, "Parrot::IO::Capture::Mini"
-            or croak "Unable to tie";
-        my $self = Parrot::Ops2c::Utils->new(
-            {
-                argv => [qw( CSwitch  dan.ops dan.ops )],
-                flag => { dynamic => 1 },
-            }
+        my ($self, $stdout, $stderr);
+        capture(
+            sub { $self = Parrot::Ops2c::Utils->new( {
+                        argv => [qw( CSwitch  dan.ops dan.ops )],
+                        flag => { dynamic => 1 },
+                } ); },
+            \$stdout,
+            \$stderr,
         );
-        $msg = $tie->READLINE;
-        untie *STDERR or croak "Unable to untie";
-        ok( defined $self, "Constructor correctly returned when provided >= 1 arguments" );
-        like( $msg, qr/Ops file 'dan\.ops' mentioned more than once!/, "Error message is correct" );
+        ok( defined $self,
+            "Constructor correctly returned when provided >= 1 arguments" );
+        like( $stderr,
+            qr/Ops file 'dan\.ops' mentioned more than once!/, "Error message is correct" );
 
         my $c_header_file = $self->print_c_header_file();
         ok( -e $c_header_file, "$c_header_file created" );
         ok( -s $c_header_file, "$c_header_file has non-zero size" );
 
-        my $SOURCE = $self->print_c_source_top();
-        is( ref($SOURCE), q{GLOB}, "Argument type is filehandle (typeglob)" );
-
-        my $c_source_final;
-        ok(
-            $c_source_final = $self->print_c_source_bottom($SOURCE),
-            "print_c_source_bottom() returned successfully"
-        );
-        ok( -e $c_source_final, "$c_source_final created" );
-        ok( -s $c_source_final, "$c_source_final has non-zero size" );
+        my $source = IO::File->new('>' . $$self{source});
+        $self->print_c_source_top($source);
+        $self->print_c_source_bottom($source);
+        $source->close();
+        ok( -s $$self{source}, "file was written" );
     }
 
     ok( chdir($cwd), "returned to starting directory" );
@@ -114,16 +108,11 @@ sub test_dynops {
         ok( -e $c_header_file, "$c_header_file created" );
         ok( -s $c_header_file, "$c_header_file has non-zero size" );
 
-        my $SOURCE = $self->print_c_source_top();
-        is( ref($SOURCE), q{GLOB}, "Argument type is filehandle (typeglob)" );
-
-        my $c_source_final;
-        ok(
-            $c_source_final = $self->print_c_source_bottom($SOURCE),
-            "print_c_source_bottom() returned successfully"
-        );
-        ok( -e $c_source_final, "$c_source_final created" );
-        ok( -s $c_source_final, "$c_source_final has non-zero size" );
+        my $source = IO::File->new('>' . $$self{source});
+        $self->print_c_source_top($source);
+        $self->print_c_source_bottom($source);
+        $source->close();
+        ok( -s $$self{source}, "file was written" );
     }
 }
 

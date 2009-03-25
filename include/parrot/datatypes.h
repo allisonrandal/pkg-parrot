@@ -1,9 +1,9 @@
 /*
  * datatypes.h
- *  Copyright (C) 2002, The Perl Foundation.
- *  License:  Artistic/GPL, see README and LICENSES for details
+ *  Copyright (C) 2002-2008, Parrot Foundation.
+ *  License:  Artistic 2.0, see README and LICENSE for details
  *  SVN Info
- *     $Id: datatypes.h 18975 2007-06-13 16:48:54Z bernhard $
+ *     $Id: datatypes.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *
@@ -25,7 +25,6 @@ typedef enum {
     enum_type_STRING,
     enum_type_PMC,              /* actual PMCs have positive class numbers */
     enum_type_BIGINT,
-    enum_type_BIGNUM,           /* might be different */
     enum_type_DPOINTER,
 
     enum_type_char,             /* native integer types */
@@ -66,7 +65,7 @@ typedef enum {
     enum_type_sized,            /* arbitrary size type for list_new */
     enum_last_type              /* + one */
 
-} PARROT_DATA_TYPES;
+} PARROT_DATA_TYPE;
 
 /* &end_gen */
 struct _data_types {
@@ -74,6 +73,7 @@ struct _data_types {
     int size;
 };
 
+extern const struct _data_types data_types[];
 #if defined(INSIDE_GLOBAL_SETUP)
 const struct _data_types data_types[] = {
     { "INTVAL",   INTVAL_SIZE },          /* parrot types */
@@ -81,8 +81,7 @@ const struct _data_types data_types[] = {
     { "STRING", sizeof (void *) },
     { "PMC",    sizeof (void *) },           /* actual PMCs have positive class numbers */
     { "BIGINT", sizeof (void *) },
-    { "BIGNUM", sizeof (void *) },          /* might be different */
-    { "DPOINTER",sizeof (void *) },
+    { "DPOINTER", sizeof (void *) },
 
     { "char",   sizeof (char) },          /* native integer types */
     { "short",  sizeof (short) },
@@ -122,21 +121,45 @@ const struct _data_types data_types[] = {
 
     { "illegal", 0 }
 };
-#else
-extern const struct _data_types data_types[];
-#endif
+#endif /* INSIDE_GLOBAL_SETUP */
+
+#define PARROT_FLOATVAL_INF_POSITIVE  floatval_divide_by_zero(interp, 1.0)
+#define PARROT_FLOATVAL_INF_NEGATIVE  floatval_divide_by_zero(interp, -1.0)
+#define PARROT_FLOATVAL_NAN_QUIET     floatval_divide_by_zero(interp, 0.0)
+
+#define PARROT_CSTRING_INF_POSITIVE    "Inf"
+#define PARROT_CSTRING_INF_NEGATIVE    "-Inf"
+#define PARROT_CSTRING_NAN_QUIET       "NaN"
+
 
 /* HEADERIZER BEGIN: src/datatypes.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API INTVAL Parrot_get_datatype_enum( Interp *interp,
-    const STRING *type_name /*NN*/ )
-        __attribute__nonnull__(2)
-        __attribute__pure__
-        __attribute__warn_unused_result__;
+PARROT_EXPORT
+FLOATVAL floatval_divide_by_zero(PARROT_INTERP, FLOATVAL num)
+        __attribute__nonnull__(1);
 
-PARROT_API STRING * Parrot_get_datatype_name( Interp *interp, INTVAL type )
-        __attribute__warn_unused_result__;
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+INTVAL Parrot_get_datatype_enum(PARROT_INTERP,
+    ARGIN(const STRING *type_name))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
 
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+STRING * Parrot_get_datatype_name(PARROT_INTERP, INTVAL type)
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_floatval_divide_by_zero __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_get_datatype_enum __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(type_name)
+#define ASSERT_ARGS_Parrot_get_datatype_name __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/datatypes.c */
 
 #endif /* PARROT_DATATYPES_H_GUARD */

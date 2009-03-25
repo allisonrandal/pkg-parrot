@@ -1,4 +1,9 @@
 /*
+ * $Id: dan.ops 37409 2009-03-14 11:08:39Z rurban $
+ * Copyright (C) 2004-2006, Parrot Foundation.
+ */
+
+/*
 ** dan.ops
 */
 
@@ -7,7 +12,7 @@ VERSION = PARROT_VERSION;
 
 =head1 NAME
 
-dan.ops - Parrot ops emitted by Dan's compiler
+dan.ops - Sample Dynamic Opcodes 1
 
 =head1 DESCRIPTION
 
@@ -22,10 +27,11 @@ A dynamic oplib loadable at demand.
 inline op mul(out INT, in INT, in NUM) :base_core {
   FLOATVAL lhs = $2 * $3;
   $1 = (INTVAL)lhs;
-  goto NEXT();
 }
 
 =back
+
+=cut
 
 /*
  * Local variables:

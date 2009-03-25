@@ -1,19 +1,15 @@
 
 
-.namespace [ "PGE::P5Regex" ]
+.namespace [ "PGE";"P5Regex" ]
 
 .sub "compile_p5regex"
     .param pmc source
     .param pmc adverbs         :slurpy :named
 
-    $I0 = exists adverbs['name']
-    if $I0 goto adverbs_1
-    adverbs['name'] = '_p5regex'
-  adverbs_1:
     $I0 = exists adverbs['grammar']
-    if $I0 goto adverbs_2
+    if $I0 goto have_grammar
     adverbs['grammar'] = 'PGE::Grammar'
-  adverbs_2:
+  have_grammar:
 
     .local string target
     target = adverbs['target']
@@ -37,17 +33,17 @@
   analyze:
     .local pmc exp, pad
     exp = match['expr']
-    pad = new .Hash
+    pad = new 'Hash'
     pad['subpats'] = 0
     exp = exp.'p5analyze'(pad)
-    .return exp.'compile'(adverbs :flat :named)
+    .tailcall exp.'compile'(adverbs :flat :named)
 .end
 
 
 .sub "p5regex"
     .param pmc mob
     .local pmc optable
-    optable = get_hll_global ["PGE::P5Regex"], "$optable"
+    optable = get_hll_global ["PGE";"P5Regex"], "$optable"
     $P0 = optable."parse"(mob)
     .return ($P0)
 .end
@@ -60,44 +56,43 @@
 .sub "__onload" :load
     .local pmc optable
 
-    $I0 = find_type "PGE::OPTable"
-    optable = new $I0
-    set_hll_global ["PGE::P5Regex"], "$optable", optable
+    optable = new ['PGE';'OPTable']
+    set_hll_global ["PGE";"P5Regex"], "$optable", optable
 
-    $P0 = get_hll_global ["PGE::P5Regex"], "parse_lit"
-    optable.newtok('term:', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_hll_global ["PGE";"P5Regex"], "parse_lit"
+    optable.'newtok'('term:', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
 
-    optable.newtok('term:\b', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:\B', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:^',   'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
-    optable.newtok('term:$',   'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.'newtok'('term:\b', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.'newtok'('term:\B', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.'newtok'('term:^',   'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
+    optable.'newtok'('term:$',   'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::Anchor')
 
-    optable.newtok('term:\d', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\D', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\s', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\S', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\w', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
-    optable.newtok('term:\W', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.'newtok'('term:\d', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.'newtok'('term:\D', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.'newtok'('term:\s', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.'newtok'('term:\S', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.'newtok'('term:\w', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
+    optable.'newtok'('term:\W', 'equiv'=>'term:', 'nows'=>1, 'match'=>'PGE::Exp::CCShortcut')
 
-    optable.newtok('circumfix:( )',   'equiv'=>'term:', 'nows'=>1, 'nullterm'=>1, 'match'=>'PGE::Exp::CGroup')
-    optable.newtok('circumfix:(?: )', 'equiv'=>'term:', 'nows'=>1, 'nullterm'=>1, 'match'=>'PGE::Exp::Group')
+    optable.'newtok'('circumfix:( )',   'equiv'=>'term:', 'nows'=>1, 'nullterm'=>1, 'match'=>'PGE::Exp::CGroup')
+    optable.'newtok'('circumfix:(?: )', 'equiv'=>'term:', 'nows'=>1, 'nullterm'=>1, 'match'=>'PGE::Exp::Group')
 
-    $P0 = get_hll_global ['PGE::P5Regex'], 'parse_enumclass'
-    optable.newtok('term:[', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('term:.', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_hll_global ['PGE';'P5Regex'], 'parse_enumclass'
+    optable.'newtok'('term:[', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
+    optable.'newtok'('term:.', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
 
-    $P0 = get_hll_global ['PGE::P5Regex'], 'parse_quant'
-    optable.newtok('postfix:*', 'looser'=>'term:', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('postfix:+', 'equiv'=>'postfix:*', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('postfix:?', 'equiv'=>'postfix:*', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
-    optable.newtok('postfix:{', 'equiv'=>'postfix:*', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_hll_global ['PGE';'P5Regex'], 'parse_quant'
+    optable.'newtok'('postfix:*', 'looser'=>'term:', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
+    optable.'newtok'('postfix:+', 'equiv'=>'postfix:*', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
+    optable.'newtok'('postfix:?', 'equiv'=>'postfix:*', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
+    optable.'newtok'('postfix:{', 'equiv'=>'postfix:*', 'left'=>1, 'nows'=>1, 'parsed'=>$P0)
 
-    optable.newtok('infix:',  'looser'=>'postfix:*', 'right'=>1, 'nows'=>1, 'match'=>'PGE::Exp::Concat')
-    optable.newtok('infix:|', 'looser'=>'infix:',    'left'=>1,  'nows'=>1, 'match'=>'PGE::Exp::Alt')
+    optable.'newtok'('infix:',  'looser'=>'postfix:*', 'right'=>1, 'nows'=>1, 'match'=>'PGE::Exp::Concat')
+    optable.'newtok'('infix:|', 'looser'=>'infix:',    'left'=>1,  'nows'=>1, 'match'=>'PGE::Exp::Alt')
 
-    optable.newtok('close:}', 'looser'=>'infix:|', 'nows'=>1)            # XXX: hack
+    optable.'newtok'('close:}', 'looser'=>'infix:|', 'nows'=>1)            # XXX: hack
 
-    $P0 = get_hll_global ["PGE::P5Regex"], "compile_p5regex"
+    $P0 = get_hll_global ["PGE";"P5Regex"], "compile_p5regex"
     compreg "PGE::P5Regex", $P0
 .end
 
@@ -108,7 +103,7 @@
     .param string message
     $P0 = getattribute mob, '$.pos'
     $P0 = pos
-    $P0 = new .Exception
+    $P0 = new 'Exception'
     $S0 = 'p5regex parse error: '
     $S0 .= message
     $S0 .= ' at offset '
@@ -120,7 +115,7 @@
     $S1 = substr $S1, pos, 1
     $S0 .= $S1
     $S0 .= "'"
-    $P0['_message'] = $S0
+    $P0 = $S0
     throw $P0
     .return ()
 .end
@@ -128,14 +123,11 @@
 
 .sub "parse_lit"
     .param pmc mob
-    .local pmc newfrom
     .local string target
     .local int pos, lastpos
     .local int litstart, litlen
     .local string initchar
-    newfrom = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, $P0, $P1) = newfrom(mob, 0, "PGE::Exp::Literal")
-    pos = $P0
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::Literal')
     lastpos = length target
     initchar = substr target, pos, 1
     unless initchar == '*' goto initchar_ok
@@ -176,8 +168,7 @@
     mob.'result_object'($S0)
     goto end
   end:
-    $P0 = getattribute mob, "PGE::Match\x0$.pos"
-    $P0 = pos
+    mob.'to'(pos)
     .return (mob)
 .end
 
@@ -186,12 +177,9 @@
     .local string target
     .local int min, max, backtrack
     .local int pos, lastpos
-    .local pmc mfrom, mpos
     .local string key
     key = mob['KEY']
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob, 0, "PGE::Exp::Quant")
-    pos = mfrom
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::Quant')
     lastpos = length target
     min = 0
     max = PGE_INF
@@ -233,7 +221,7 @@
     mob["min"] = min
     mob["max"] = max
     mob["backtrack"] = backtrack
-    mpos = pos
+    mob.'to'(pos)
     .return (mob)
   err_range:
     parse_error(mob, pos, "Error in quantified range")
@@ -243,11 +231,8 @@
 .sub parse_group
     .param pmc mob
     .local string target
-    .local pmc mfrom, mpos
     .local int pos, lastpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob, 0, "PGE::Exp::CGroup")
-    pos = mfrom
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::CGroup')
     inc pos
     $S0 = substr target, pos, 2
     if $S0 == "?:" goto nocapture
@@ -255,22 +240,19 @@
   nocapture:
     pos += 2
   end:
-    mpos = pos
+    mob.'to'(pos)
     .return (mob)
 .end
 
 .sub "parse_enumclass"
     .param pmc mob
     .local string target
-    .local pmc mfrom, mpos
     .local int pos, lastpos
     .local int isrange
     .local string charlist
     .local string key
     key = mob['KEY']
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob, 0, "PGE::Exp::EnumCharList")
-    pos = mfrom
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::EnumCharList')
     if key == '.' goto dot
     lastpos = length target
     charlist = ""
@@ -326,7 +308,7 @@
     charlist = "\n"
     mob["isnegated"] = 1
   end:
-    mpos = pos
+    mob.'to'(pos)
     mob.'result_object'(charlist)
     .return (mob)
 
@@ -344,7 +326,7 @@
 .end
 
 
-.namespace [ "PGE::Exp" ]
+.namespace [ "PGE";"Exp" ]
 
 .sub "p5analyze" :method
     .param pmc pad
@@ -362,7 +344,7 @@
     .return (self)
 .end
 
-.namespace [ "PGE::Exp::CGroup" ]
+.namespace [ "PGE";"Exp";"CGroup" ]
 
 .sub "p5analyze" :method
     .param pmc pad
@@ -390,4 +372,4 @@
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

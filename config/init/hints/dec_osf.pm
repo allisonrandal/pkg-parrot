@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: dec_osf.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: dec_osf.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 package init::hints::dec_osf;
 
@@ -14,8 +14,10 @@ sub runstep {
     if ( $ccflags !~ /-pthread/ ) {
         $ccflags .= ' -pthread';
     }
+    if ( $ccflags !~ /-D_REENTRANT/ ) {
+        $ccflags .= ' -D_REENTRANT';
+    }
     if ( $ccflags !~ /-D_XOPEN_SOURCE=/ ) {
-
         # Request all POSIX visible (not automatic for cxx, as it is for cc)
         $ccflags .= ' -D_XOPEN_SOURCE=500';
     }
@@ -24,9 +26,6 @@ sub runstep {
     my $libs = $conf->data->get('libs');
     if ( $libs !~ /-lpthread/ ) {
         $libs .= ' -lpthread';
-    }
-    if ( $libs !~ /-laio/ ) {
-        $libs .= ' -laio';
     }
     $conf->data->set( libs => $libs );
 
@@ -43,8 +42,9 @@ sub runstep {
         $conf->data->set( linkflags => $linkflags );
     }
 
-    # Required because of ICU using c++.
-    $conf->data->set( link => "cxx" );
+    unless ( $conf->data->get("gccversion") ) {
+        $conf->data->set( link => "cxx" );
+    }
 
     # Perl 5 hasn't been compiled with this visible.
     $conf->data->set( has_socklen_t => 1 );

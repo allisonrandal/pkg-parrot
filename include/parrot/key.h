@@ -1,7 +1,7 @@
 /* key.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: key.h 19085 2007-06-18 13:34:35Z petdance $
+ *     $Id: key.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This is the API header for the PMC subsystem
  *  Data Structure and Algorithms:
@@ -36,84 +36,200 @@ typedef enum {
 
 } KEY_flags;
 
+#define KEY_IS_HASH_ITERATOR(k) \
+    ((PObj_get_FLAGS((k)) & KEY_type_FLAGS) == KEY_hash_iterator_FLAGS)
+
 /* HEADERIZER BEGIN: src/key.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API PMC * key_append( Interp *interp,
-    PMC *key1 /*NN*/,
-    PMC *key2 /*NN*/ )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_IGNORABLE_RESULT
+PMC * key_append(PARROT_INTERP, ARGMOD(PMC *key1), ARGIN(PMC *key2))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__nonnull__(3);
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*key1);
 
-PARROT_API INTVAL key_integer( Interp *interp, PMC *key /*NN*/ )
-        __attribute__nonnull__(2);
-
-PARROT_API void key_mark( Interp *interp /*NN*/, PMC *key /*NN*/ )
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+INTVAL key_integer(PARROT_INTERP, ARGIN(PMC *key))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API PMC * key_new( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * key_new_cstring( Interp *interp /*NN*/,
-    const char *value /*NULLOK*/ )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * key_new_integer( Interp *interp /*NN*/, INTVAL value )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * key_new_number( Interp *interp /*NN*/, FLOATVAL value )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * key_new_pmc( Interp *interp /*NN*/, PMC *value )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * key_new_string( Interp *interp /*NN*/, STRING *value )
-        __attribute__nonnull__(1);
-
-PARROT_API PMC * key_next( Interp *interp, PMC *key /*NN*/ )
+PARROT_EXPORT
+void key_mark(PARROT_INTERP, ARGIN(PMC *key))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API FLOATVAL key_number( Interp *interp, PMC *key /*NN*/ )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_new(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_new_cstring(PARROT_INTERP, ARGIN_NULLOK(const char *value))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_new_integer(PARROT_INTERP, INTVAL value)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_new_number(PARROT_INTERP, FLOATVAL value)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_new_pmc(PARROT_INTERP, ARGIN(PMC *value))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API PMC * key_pmc( Interp *interp, PMC *key /*NN*/ )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_new_string(PARROT_INTERP, ARGIN(STRING *value))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API void key_set_integer( Interp *interp,
-    PMC *key /*NN*/,
-    INTVAL value )
+PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_next(PARROT_INTERP, ARGIN(PMC *key))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API void key_set_number( Interp *interp,
-    PMC *key /*NN*/,
-    FLOATVAL value )
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+FLOATVAL key_number(PARROT_INTERP, ARGIN(PMC *key))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API void key_set_pmc( Interp *interp, PMC *key /*NN*/, PMC *value )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC * key_pmc(PARROT_INTERP, ARGIN(PMC *key))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API void key_set_register( Interp *interp,
-    PMC *key /*NN*/,
+PARROT_EXPORT
+void key_set_integer(PARROT_INTERP, ARGMOD(PMC *key), INTVAL value)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*key);
+
+PARROT_EXPORT
+void key_set_number(PARROT_INTERP, ARGMOD(PMC *key), FLOATVAL value)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*key);
+
+PARROT_EXPORT
+void key_set_pmc(PARROT_INTERP, ARGMOD(PMC *key), ARGIN(PMC *value))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*key);
+
+PARROT_EXPORT
+void key_set_register(PARROT_INTERP,
+    ARGMOD(PMC *key),
     INTVAL value,
-    INTVAL flag )
-        __attribute__nonnull__(2);
+    INTVAL flag)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*key);
 
-PARROT_API void key_set_string( Interp *interp,
-    PMC *key /*NN*/,
-    STRING *value )
-        __attribute__nonnull__(2);
+PARROT_EXPORT
+void key_set_string(PARROT_INTERP, ARGMOD(PMC *key), ARGIN(STRING *value))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*key);
 
-PARROT_API STRING * key_set_to_string( Interp *interp /*NN*/,
-    PMC *key /*NULLOK*/ )
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+STRING * key_set_to_string(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
         __attribute__nonnull__(1);
 
-PARROT_API STRING * key_string( Interp *interp /*NN*/, PMC *key /*NN*/ )
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+INTVAL key_type(SHIM_INTERP, ARGIN(const PMC *key))
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+STRING * key_string(PARROT_INTERP, ARGIN(PMC *key))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API INTVAL key_type( Interp *interp, const PMC *key /*NN*/ )
-        __attribute__nonnull__(2);
-
+#define ASSERT_ARGS_key_append __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key1) \
+    || PARROT_ASSERT_ARG(key2)
+#define ASSERT_ARGS_key_integer __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_mark __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_key_new_cstring __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_key_new_integer __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_key_new_number __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_key_new_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(value)
+#define ASSERT_ARGS_key_new_string __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(value)
+#define ASSERT_ARGS_key_next __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_number __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_set_integer __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_set_number __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_set_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key) \
+    || PARROT_ASSERT_ARG(value)
+#define ASSERT_ARGS_key_set_register __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_set_string __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key) \
+    || PARROT_ASSERT_ARG(value)
+#define ASSERT_ARGS_key_set_to_string __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_key_type __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(key)
+#define ASSERT_ARGS_key_string __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(key)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/key.c */
 
 #endif /* PARROT_KEY_H_GUARD */

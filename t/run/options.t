@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: options.t 18799 2007-06-04 07:35:02Z paultcochrane $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: options.t 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -19,8 +19,8 @@ Tests C<parrot> command line options.
 use strict;
 use warnings;
 use lib qw( lib . ../lib ../../lib );
-use Test::More;
-use Parrot::Test tests => 12;
+
+use Test::More tests => 26;
 use Parrot::Config;
 use File::Temp 0.13 qw/tempfile/;
 use File::Spec;
@@ -33,54 +33,84 @@ is( substr( $help_message, 0, 23 ), 'parrot [Options] <file>', 'Start of help me
 ok( index( $help_message, '-t --trace [flags]' ) > 0, 'help for --trace' );
 
 # setup PIR files for tests below
-my $first  = create_pir_file('first');
-my $second = create_pir_file('second');
+my $first_pir_file  = create_pir_file('first');
+my $second_pir_file = create_pir_file('second');
 
 # executing a PIR file
-is( `"$PARROT" "$first"`,  "first\n",  'running first.pir' );
-is( `"$PARROT" "$second"`, "second\n", 'running second.pir' );
+is( `"$PARROT" "$first_pir_file"`,  "first\n",  'running first.pir' );
+is( `"$PARROT" "$second_pir_file"`, "second\n", 'running second.pir' );
 
 # Ignore further arguments
-is( `"$PARROT" "$first" "$second"`, "first\n", 'ignore a pir-file' );
-is( `"$PARROT" "$first" "asdf"`,    "first\n", 'ignore nonsense' );
+is( `"$PARROT" "$first_pir_file" "$second_pir_file"`, "first\n", 'ignore a pir-file' );
+is( `"$PARROT" "$first_pir_file" "asdf"`,             "first\n", 'ignore nonsense' );
 
 # redirect STDERR to avoid warnings
-my $redir = '2>' . File::Spec->devnull;
+my $redir = '2>' . File::Spec->devnull();
 
 # --pre-process-only
 # This is just sanity testing
-# Coredumps after the output has been written are ignored
-is( `"$PARROT" -E "$first" $redir`, <<'END_EXPECTED', 'option -E' );
-.sub main :main
-print "first\n" 
-.end
-END_EXPECTED
+my $expected_preprocesses_pir = <<'END_PIR';
 
-is( `"$PARROT" --pre-process-only "$first" $redir`, <<'END_EXPECTED', 'option --pre-process-only' );
+.macro 
+
 .sub main :main
-print "first\n" 
+
+say "first" 
+
 .end
-END_EXPECTED
+
+END_PIR
+is( `"$PARROT" -E "$first_pir_file" $redir`, $expected_preprocesses_pir, 'option -E' );
+is( `"$PARROT" --pre-process-only "$first_pir_file" $redir`,
+    $expected_preprocesses_pir, 'option --pre-process-only' );
 
 # Test the trace option
-is( `"$PARROT" -t "$first" $redir`, "first\n", 'option -t' );
-TODO:
+is( `"$PARROT" -t "$first_pir_file" $redir`, "first\n", 'option -t' );
+is( `"$PARROT" --trace "$first_pir_file" $redir`, "first\n", 'option --trace' );
+is( `"$PARROT" -t "$first_pir_file" "$second_pir_file" $redir`, "second\n",
+    'option -t with flags' );
+is( `"$PARROT" --trace "$first_pir_file" "$second_pir_file" $redir`,
+    "second\n", 'option --trace with flags' );
+
+## test the -R & --runcore options
 {
-    local $TODO = '--trace behaves not like -t';
-    is( `"$PARROT" --trace "$first" $redir`, "first\n", 'option --trace' );
+    my $cmd;
+
+    ## this test assumes these cores work on all platforms (a safe assumption)
+    for my $val (qw/ slow fast bounds trace /) {
+        for my $opt ( '-R ', '--runcore ', '--runcore=' ) {
+            $cmd = qq{"$PARROT" $opt$val "$second_pir_file" $redir};
+            is( qx{$cmd}, "second\n", "<$opt$val> option" );
+        }
+    }
+
+    $cmd = qq{"$PARROT" -D 8 -R slow "$second_pir_file" $redir};
+    is( qx{$cmd}, "second\n", "-r option <$cmd>" );
+
+    $cmd = qq{"$PARROT" -D 8 -R slow "$second_pir_file" 2>&1};
+    like( qx{$cmd}, qr/Parrot VM: Slow core/, "-r option <$cmd>" );
 }
-is( `"$PARROT" -t "$first" "$second" $redir`,      "second\n", 'option -t with flags' );
-is( `"$PARROT" --trace "$first" "$second" $redir`, "second\n", 'option --trace with flags' );
+
+## RT#46815 test remaining options
 
 # clean up temporary files
-unlink $first;
-unlink $second;
+unlink $first_pir_file;
+unlink $second_pir_file;
 
 sub create_pir_file {
     my $word = shift;
 
-    my ( $fh, $filename ) = tempfile( UNLINK => 0, SUFFIX => '.pir' );
-    print $fh qq{.sub main :main\n\tprint "$word\\n"\n.end};
+    my ( $fh, $filename ) = tempfile( UNLINK => 0, SUFFIX => '.pir', UNLINK => 1 );
+    print $fh <<"END_PIR";
+
+.macro println(word)
+   say .word
+.endm
+
+.sub main :main
+  .println( "$word" )
+.end
+END_PIR
     close $fh;
 
     return $filename;

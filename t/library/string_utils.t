@@ -1,6 +1,6 @@
-#!./parrot -G
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: string_utils.t 17988 2007-04-05 03:20:48Z pmichaud $
+#!./parrot
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: string_utils.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ t/library/string_utils.t  -- Tests for String/Utils.pbc
     load_bytecode 'Test/Builder.pir'
 
     .local pmc test       # the test harness object.
-               test = new 'Test::Builder'
+               test = new [ 'Test'; 'Builder' ]
 
     set_global '$test', test
 
@@ -131,3 +131,8 @@ t/library/string_utils.t  -- Tests for String/Utils.pbc
     .return ()
 .end
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

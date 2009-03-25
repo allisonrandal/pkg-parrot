@@ -1,18 +1,17 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: Daemon.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: Daemon.pir 37466 2009-03-16 05:41:07Z cotto $
 
 =head1 NAME
 
-['HTTP' ; 'Daemon'] - A Simple HTTPD Server
+HTTP;Daemon - A Simple HTTPD Server
 
 =head1 SYNOPSIS
 
   load_bytecode "HTTP/Daemon.pir"
-  opts = new .Hash
+  opts = new 'Hash'
   opts['LocalPort'] = 1234
   opts['LocalAddr'] = 'localhost'
-  clid = find_type ['HTTP'; 'Daemon']
-  d = new clid, opts
+  d = new ['HTTP';'Daemon'], opts
   unless d goto err
   d.'run'()
 
@@ -22,7 +21,7 @@ A lot. The code is by now just an objectified version of httpd.pir.
 
 =head1 SEE ALSO
 
-RFC2616, F<examples/io/httpd2.pir>
+RFC2616
 
 =head1 AUTHOR
 
@@ -58,9 +57,9 @@ at the pio.
     addattribute cl, 'active'   # list of active ClientConns
     addattribute cl, 'to_log'   # list of strings to be logged
     addattribute cl, 'doc_root' # where to serve files from
-    
+
     # client connection
-    # XXX this should subclass ParrotIO but opcode or PIO code 
+    # XXX this should subclass ParrotIO but opcode or PIO code
     # just doesn't work with classes
     cl = newclass ['HTTP'; 'Daemon'; 'ClientConn']
     addattribute cl, 'socket'	# the connected pio
@@ -125,13 +124,13 @@ Redirect to and serve files from F<docs/html>.
     .param pmc args
 
     .local pmc active
-    
+
     setattribute self, 'opts', args
-    active = new .ResizablePMCArray
+    active = new 'ResizablePMCArray'
     setattribute self, 'active', active
-    $P0 = new .ResizableStringArray
+    $P0 = new 'ResizableStringArray'
     setattribute self, 'to_log', $P0
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = '.'
     setattribute self, 'doc_root', $P0
 
@@ -161,7 +160,7 @@ Redirect to and serve files from F<docs/html>.
     self.'new_conn'(sock)
     .return()
 
-err_listen:    
+err_listen:
 err_bind:
     err $I0
     err $S0, $I0
@@ -169,7 +168,7 @@ err_bind:
     printerr "\n"
     close sock
 err_sock:
-    $P0 = new .Undef
+    $P0 = new 'Undef'
     setattribute self, 'socket', $P0
 .end
 
@@ -283,7 +282,7 @@ do_debug:
     n = elements args
     fmt = repeat "%Ss", n
     res = sprintf fmt, args
-    printerr res	
+    printerr res
 .end
 
 =item log(...)
@@ -301,7 +300,7 @@ Concat passed arguments and schedule the string for logging.
     n += 3
     now = time
     $S0 = gmtime now
-    chopn $S0, 2	# XXX why 2?
+    chopn $S0, 1	# XXX why 1? asctime is \n terminated
     unshift args, ", "
     unshift args, $S0
     push args, "\n"
@@ -326,14 +325,15 @@ runnloop.
 .sub '_select_active' :method
     .local pmc active, conn, sock
     .local int i, n
-    .const .Sub req_handler = "req_handler"
+    .const 'Sub' req_handler = "req_handler"
     active = getattribute self, 'active'
     n = elements active
     i = 0
 add_lp:
     conn = active[i]
     sock = conn.'socket'()
-    add_io_event sock, req_handler, conn, .IO_THR_MSG_ADD_SELECT_RD 
+    # XXX: this opcode is long gone; need something else
+    # add_io_event sock, req_handler, conn, .IO_THR_MSG_ADD_SELECT_RD
     ## self.'debug'('**select ', i, "\n")
     inc i
     if i < n goto add_lp
@@ -350,7 +350,7 @@ Called from server runnloop.
     .local int n, now, last
     .local pmc active, conn, sock
 
-    now = time 
+    now = time
     active = getattribute self, 'active'
     n = elements active
     dec n
@@ -394,8 +394,7 @@ Return true, if the given connection is already active.
     .param pmc sock
     .local pmc active, conn
     active = getattribute self, 'active'
-    $I0 = find_type ['HTTP'; 'Daemon'; 'ClientConn']
-    conn = new $I0, sock
+    conn = new ['HTTP'; 'Daemon'; 'ClientConn'], sock
     conn.'server'(self)
     push active, conn
     self.'debug'("new conn\n")
@@ -460,7 +459,7 @@ yes:
 .end
 
 
-# reguest handler sub - not a method
+# request handler sub - not a method
 # this is called from the async select code, i.e from the event
 # subsystem
 .sub req_handler
@@ -472,9 +471,9 @@ yes:
     srv = conn.'server'()
     $I0 = srv.'exists_conn'(conn)
     if $I0 goto do_read
-    .return srv.'accept_conn'()
+    .tailcall srv.'accept_conn'()
 
-do_read:    
+do_read:
     req = conn.'get_request'()
     unless req goto close_it
     $S0 = req.'method'()
@@ -515,9 +514,9 @@ Create a new connection object with the given socket pio.
 .sub init_pmc :vtable :method
     .param pmc sock
     setattribute self, 'socket', sock
-    $P0 = new .Boolean
+    $P0 = new 'Boolean'
     setattribute self, 'close', $P0
-    $P0 = new .Integer
+    $P0 = new 'Integer'
     time $I0
     $P0 = $I0
     setattribute self, 'time_stamp', $P0
@@ -584,8 +583,7 @@ supported.
     srv = self.'server'()
     srv.'debug'("reading from work\n")
     req_str = self.'_read'()
-    $I0 = find_type ['HTTP'; 'Request']
-    req = new $I0
+    req = new ['HTTP'; 'Request']
     req.'parse'(req_str)
     .return (req)
 .end
@@ -642,7 +640,7 @@ TODO doc CGI urls.
 
 =item check_cgi(url)
 
-Check if a request url is a CGI request. If yes, return the reulst of the
+Check if a request url is a CGI request. If yes, return the result of the
 CGI invocation.
 
 =cut
@@ -684,8 +682,7 @@ SERVE_GET:
 
     srv.'debug'("req url: ", url, "\n")
 
-    $I0 = find_type ['HTTP'; 'Response']
-    resp = new $I0
+    resp = new ['HTTP'; 'Response']
 
     opts = srv.'opts'()
     $I0 = opts['parrot-docs']
@@ -717,7 +714,7 @@ normal:
 
 SERVE_file:
     # try to open the file in url
-    fp = open url, "<"
+    fp = open url, 'r'
     unless fp goto SERVE_404
     len = stat url, .STAT_FILESIZE
     read file_content, fp, len
@@ -788,11 +785,11 @@ The hash keys and values are urldecoded already.
     .param pmc args :slurpy
 
     .local string ret
-    ret = sprintf "%d", args 
+    ret = sprintf "%d", args
     .return( ret )
 .end
 
-# convert %xx to char 
+# convert %xx to char
 .sub urldecode
     .param string in
 
@@ -825,7 +822,7 @@ END:
 
 .sub hex_to_int
     .param pmc hex
-    .return hex.'to_int'(16)
+    .tailcall hex.'to_int'(16)
 .end
 
 # if file is *.pir or *.pbc run it as CGI
@@ -863,10 +860,10 @@ cgi_1:
 
 # split query at '&', make hash from foo=bar items
 .sub make_query_hash
-    .param string query		# the unescapced one
+    .param string query                # the unescapced one
     .local pmc query_hash, items
     .local string kv, k, v
-    query_hash = new .Hash
+    query_hash = new 'Hash'
     items = split '&', query
     .local int i, n
     i = 0
@@ -929,9 +926,9 @@ attributes of the Message object.
 =cut
 
 .sub init :vtable :method
-    $P0 = new .OrderedHash
+    $P0 = new 'OrderedHash'
     setattribute self, 'headers', $P0
-    $P0 = new .String
+    $P0 = new 'String'
     setattribute self, 'content', $P0
 .end
 
@@ -1066,7 +1063,7 @@ create header response items.
 =cut
 
 .sub 'code' :method
-    .param string ccc 
+    .param string ccc
     .const string proto = 'HTTP/1.1 '
 
     .local string line
@@ -1078,7 +1075,7 @@ create header response items.
     goto fin
 no_200:
     if ccc != '301' goto no_301
-    line .= ' Moved Permamently'
+    line .= ' Moved Permanently'
     goto fin
 no_301:
     if ccc != '404' goto no_404
@@ -1094,7 +1091,7 @@ fin:
 
 =item header(h => v, ...)
 
-Append the given keyed items to the response headers. 
+Append the given keyed items to the response headers.
 
 XXX shall this be actually push_header?
 
@@ -1156,4 +1153,4 @@ done:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

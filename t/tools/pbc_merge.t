@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: pbc_merge.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: pbc_merge.t 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

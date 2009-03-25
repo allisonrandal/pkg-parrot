@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007 The Perl Foundation.
-# $Id: auto.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2004-2006, Parrot Foundation.
+# $Id: auto.pm 36853 2009-02-18 06:16:14Z rurban $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ sub runstep {
     my $verbose = $conf->options->get('verbose');
     my $gcc     = $conf->data->get('gccversion');
 
-    # whenn running on gcc, we just define the config item
+    # when running on gcc, we just define the config item
     if ( defined $gcc ) {
 
         # HAS_foo defines PARROT_HAS_`uc foo`

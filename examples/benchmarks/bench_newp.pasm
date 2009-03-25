@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: bench_newp.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: bench_newp.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ prints out some statistics indicating:
 
 =item * the total number of bytes allocated
 
-=item * the total of DOD runs made
+=item * the total of GC runs made
 
 =item * the total number of collection runs made
 
@@ -38,10 +38,10 @@ prints out some statistics indicating:
 	set I3, 1000
 	set I0, I2
 	time N5
-loop:	new P0, .ResizablePMCArray
+loop:	new P0, 'ResizablePMCArray'
 	set P0, I3
 	set I1, 0
-fill:	new P1, .Integer
+fill:	new P1, 'Integer'
 	set P1, I1
 	set P0[I1], P1
 	inc I1
@@ -64,7 +64,7 @@ fill:	new P1, .Integer
 	interpinfo I1, 2
 	print "A total of "
 	print I1
-	print " DOD runs were made\n"
+	print " GC runs were made\n"
 	interpinfo I1, 3
 	print "A total of "
 	print I1

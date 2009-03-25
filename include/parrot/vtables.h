@@ -1,7 +1,7 @@
 /* vtables.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: vtables.h 18953 2007-06-12 18:17:12Z petdance $
+ *     $Id: vtables.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Vtable manipulation code. Not to be confused with vtable.h
  *  Data Structure and Algorithms:
@@ -15,29 +15,55 @@
 
 
 /* HEADERIZER BEGIN: src/vtables.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API VTABLE * Parrot_clone_vtable( Interp *interp,
-    const VTABLE *base_vtable /*NN*/ )
+PARROT_EXPORT
+PARROT_MALLOC
+PARROT_CANNOT_RETURN_NULL
+VTABLE * Parrot_clone_vtable(PARROT_INTERP,
+    ARGIN(const VTABLE *base_vtable))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+void Parrot_destroy_vtable(PARROT_INTERP, ARGMOD(VTABLE *vtable))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__malloc__
-        __attribute__warn_unused_result__;
+        FUNC_MODIFIES(*vtable);
 
-PARROT_API void Parrot_destroy_vtable( Interp *interp,
-    VTABLE *vtable /*NULLOK*/ );
+PARROT_EXPORT
+PARROT_MALLOC
+PARROT_CANNOT_RETURN_NULL
+VTABLE * Parrot_new_vtable(SHIM_INTERP);
 
-PARROT_API VTABLE * Parrot_new_vtable( Interp *interp )
-        __attribute__malloc__
-        __attribute__warn_unused_result__;
-
-void parrot_alloc_vtables( Interp *interp /*NN*/ )
+void mark_vtables(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-void parrot_free_vtables( Interp *interp /*NN*/ )
+void parrot_alloc_vtables(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-void parrot_realloc_vtables( Interp *interp /*NN*/ )
+void parrot_free_vtables(PARROT_INTERP)
         __attribute__nonnull__(1);
 
+void parrot_realloc_vtables(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_Parrot_clone_vtable __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(base_vtable)
+#define ASSERT_ARGS_Parrot_destroy_vtable __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(vtable)
+#define ASSERT_ARGS_Parrot_new_vtable __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_mark_vtables __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_alloc_vtables __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_free_vtables __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_realloc_vtables __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/vtables.c */
 
 #endif /* PARROT_VTABLES_H_GUARD */

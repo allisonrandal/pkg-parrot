@@ -1,6 +1,6 @@
-#!./parrot 
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: pg.t 18563 2007-05-16 00:53:55Z chromatic $
+#!./parrot
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: pg.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -28,22 +28,25 @@ table, which should be created by your sysadmin.
 
 .sub main :main
     load_bytecode 'Test/Builder.pir'
-    .local pmc test       
-    test = new 'Test::Builder'
+    .local pmc test
+    test = new [ 'Test'; 'Builder' ]
     test.'plan'(N_TESTS)
     push_eh no_pg
 
     # TODO: fix when exception handling works again
     loadlib $P0, 'libpq'
+    if $P0 goto have_lib
+    loadlib $P0, 'pq'
     unless $P0 goto no_pg
+ have_lib:
     load_bytecode 'postgres.pir'
-    clear_eh
+    pop_eh
     test.'ok'(1, 'load_bytecode')
     load_bytecode 'Pg.pir'
     test.'ok'(1, 'load_bytecode Pg')
 
     .local pmc cl, con, res
-    cl = getclass 'Pg'
+    cl = new 'Pg'
     test.'ok'(1, 'Pg class exists')
     con = cl.'connectdb'('')           # assume table = user is present
     $I0 = isa con, ['Pg'; 'Conn']
@@ -57,14 +60,14 @@ table, which should be created by your sysadmin.
   have_connected:
     test.'ok'($I0, 'con is true after connect')
     $I0 = con.'status'()
-    $I1 = iseq $I0, CONNECTION_OK 
+    $I1 = iseq $I0, CONNECTION_OK
     test.'ok'($I1, 'con.status() == CONNECTION_OK ')
     # PGconn
     $P0 = con.'PGconn'()
     $P1 = get_root_global ['parrot';'Pg'], 'PQstatus'
     $I0 = $P1($P0)
 
-    $I1 = iseq $I0, CONNECTION_OK 
+    $I1 = iseq $I0, CONNECTION_OK
     test.'ok'($I1, 'status(PGconn) == CONNECTION_OK ')
     # exec
     res = con.'exec'('BEGIN')
@@ -76,7 +79,7 @@ table, which should be created by your sysadmin.
     test.'ok'($I1, 'res.resultStatus() == PGRES_COMMAND_OK ')
     res.'clear'()
     # install a notice receiver to silent the CREATE
-    .const .Sub cb = 'notice'
+    .const 'Sub' cb = 'notice'
     $P0 = con.'setNoticeReceiver'(cb, test)
     # create a temp table
     res = con.'exec'(<<'EOT')
@@ -226,7 +229,8 @@ EOT
 no_pg:	
     .local pmc ex
     .local string msg
-    .get_results(ex, msg)
+    .get_results(ex)
+    msg = ex
     test.'skip'(N_TESTS)
     test.'finish'()
 .end
@@ -237,15 +241,19 @@ no_pg:
     .param pmc res
     test.'ok'(1, 'notice receiver called')
     # res ought to be a PGresult struct
-    $I0 = typeof res
-    $I1 = iseq $I0, .UnManagedStruct
-    test.'ok'($I1, 'notice callback got a struct')
+    $S0 = typeof res
+    $I0 = $S0 == 'UnManagedStruct'
+    test.'ok'($I0, 'notice callback got a struct')
 
     .local pmc st
     st = get_root_global ['parrot';'Pg'], 'PQresultStatus'
     $I0 = st(res)
-# XXX for some strange reason it is PGRES_EMPTY_QUERY sometimes
-# actually it seems to depend on the timing, when the cb is called
     $I1 = iseq $I0, PGRES_COMMAND_OK
-    test.'todo'($I1, 'notice result is still ok')
+    test.'ok'($I1, 'notice result is still ok')
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

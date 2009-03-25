@@ -1,6 +1,10 @@
+/*
+ * Copyright (C) 2005-2007, Parrot Foundation.
+ */
+
 /* cclass.h
 *
-* $Id: cclass.h 18945 2007-06-12 14:08:35Z fperrad $
+* $Id: cclass.h 37201 2009-03-08 12:07:48Z fperrad $
 *
 *   Parrot character classes
 */

@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: irix.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2005, Parrot Foundation.
+# $Id: irix.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 package init::hinits::irix;
 

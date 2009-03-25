@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: substr.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: substr.pir 37337 2009-03-12 02:02:54Z Util $
 
 =head1 NAME
 
@@ -11,33 +11,33 @@ examples/pir/substr.pir - playing with substr
 
 =head1 DESCRIPTION
 
-A excuberating C<substr> version of "Hello World".
+A exuberating C<substr> version of "Hello World".
 
 =cut
 
 .sub "example" :main
-        I2 = 1
-        I1 = 0
-        S1 = "Hello World"
-        I3 = 0
-        I4 = 0
-        I5 = length S1
-WAX:    S2 = substr S1, I3, I4
-        print  S2
+        $I2 = 1
+        $I1 = 0
+        $S1 = "Hello World"
+        $I3 = 0
+        $I4 = 0
+        $I5 = length $S1
+WAX:    $S2 = substr $S1, $I3, $I4
+        print  $S2
         print  "\n"
-        I4 = I4 + I2
-        if I4 == I5 goto WANE
+        $I4 = $I4 + $I2
+        if $I4 == $I5 goto WANE
 	branch WAX
-WANE:   I1 = length S1
-        print  S1
+WANE:   $I1 = length $S1
+        print  $S1
         print  "\n"
-        chopn  S1, 1
-        unless I1 == I3 goto WANE
-DONE:   
+        chopn  $S1, 1
+        unless $I1 == $I3 goto WANE
+DONE:
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,7 +1,7 @@
 /*
-Copyright (C) 2002-2007, The Perl Foundation.
-License:  Artistic/GPL, see README and LICENSES for details
-$Id: datatypes.c 18975 2007-06-13 16:48:54Z bernhard $
+Copyright (C) 2002-2009, Parrot Foundation.
+License:  Artistic 2.0, see README and LICENSE for details
+$Id: datatypes.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,51 +15,64 @@ F<include/parrot/datatypes.h>.
 
 =head2 Functions
 
+=over 4
+
+=cut
+
 */
 
 #include "parrot/parrot.h"
 
-/* HEADER: include/parrot/datatypes.h */
+/* HEADERIZER HFILE: include/parrot/datatypes.h */
 
 /*
 
-FUNCDOC: Parrot_get_datatype_enum
+=item C<INTVAL Parrot_get_datatype_enum>
+
 Return datatype C<enum> for C<STRING*> type_name.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL
-Parrot_get_datatype_enum(Interp *interp, const STRING *type_name /*NN*/)
-    /* PURE, WARN_UNUSED */
+Parrot_get_datatype_enum(PARROT_INTERP, ARGIN(const STRING *type_name))
 {
-    char * const type = string_to_cstring(interp, type_name);
+    ASSERT_ARGS(Parrot_get_datatype_enum)
+    char * const type = Parrot_str_to_cstring(interp, type_name);
     int i;
 
     for (i = enum_first_type; i < enum_last_type; i++) {
-        if (strcmp(data_types[i - enum_first_type].name, type) == 0) {
-            string_cstring_free(type);
+        if (STREQ(data_types[i - enum_first_type].name, type)) {
+            Parrot_str_free_cstring(type);
             return i;
         }
     }
 
-    string_cstring_free(type);
+    Parrot_str_free_cstring(type);
 
     return enum_type_undef;
 }
 
 /*
 
-FUNCDOC:
+=item C<STRING * Parrot_get_datatype_name>
+
 Return datatype name for C<type>.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 STRING *
-Parrot_get_datatype_name(Interp *interp, INTVAL type)
-    /* WARN_UNUSED */
+Parrot_get_datatype_name(PARROT_INTERP, INTVAL type)
 {
+    ASSERT_ARGS(Parrot_get_datatype_name)
     const char * const s =
         (type < enum_first_type || type >= enum_last_type)
             ? "illegal"
@@ -68,11 +81,26 @@ Parrot_get_datatype_name(Interp *interp, INTVAL type)
     return string_make(interp, s, strlen(s), NULL, PObj_external_FLAG);
 }
 
+
+PARROT_EXPORT
+FLOATVAL
+floatval_divide_by_zero(PARROT_INTERP, FLOATVAL num)
+{
+    ASSERT_ARGS(floatval_divide_by_zero)
+    FLOATVAL zero = 0.0;
+    return num / zero;
+}
+
+
 /*
+
+=back
 
 =head1 SEE ALSO
 
 F<include/parrot/datatypes.h>.
+
+=cut
 
 */
 

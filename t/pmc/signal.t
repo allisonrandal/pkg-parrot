@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: signal.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: signal.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -134,7 +134,7 @@ SKIP: {
 _handler:
 .include "signal.pasm"
     print "catched "
-    set I0, P5["_type"]
+    set I0, P5["type"]
     neg I0, I0
     ne I0, .SIGHUP, nok
     print "SIGHUP\n"

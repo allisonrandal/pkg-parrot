@@ -1,7 +1,7 @@
 # This line will be printed by ./parrot examples/pir/readline.t
 
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: readline.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: readline.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -29,12 +29,12 @@ received the buffer is printed and the program is terminated.
 
 AGAIN:
 	line = readline stdin
-	I1 = length line
-	if I1 <= 1 goto MAINLOOP
+	$I1 = length line
+	if $I1 <= 1 goto MAINLOOP
 	# test for multi-char newlines
-	if I1 >=3 goto CONCAT
-	I2 = is_cclass .CCLASS_NEWLINE, line, 0
-	if I2, MAINLOOP
+	if $I1 >=3 goto CONCAT
+	$I2 = is_cclass .CCLASS_NEWLINE, line, 0
+	if $I2, MAINLOOP
 
 CONCAT:
 	concat buffer, line
@@ -48,4 +48,4 @@ MAINLOOP:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

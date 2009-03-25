@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: Path.pm 16245 2006-12-25 22:15:39Z paultcochrane $
+# Copyright (C) 2004-2006, Parrot Foundation.
+# $Id: Path.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ use strict;
 use warnings;
 
 use File::Path;
-use File::Spec;
+use File::Spec ();
 
 # qw() to avoid the export because we have a stat() method.
 use File::stat qw();
@@ -40,7 +40,7 @@ created and cached. A relative path is made absolute.
 =cut
 
 sub new {
-    my $self = ref $_[0] ? ref shift: shift;
+    my $self = ref $_[0] ? ref shift : shift;
     my $path = shift;
 
     return unless defined $path;

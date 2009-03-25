@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2005, The Perl Foundation.
-# $Id: pcre.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# Copyright (C) 2004-2008, Parrot Foundation.
+# $Id: pcre.pir 37343 2009-03-12 05:22:02Z Util $
 
 =head1 TITLE
 
@@ -10,13 +10,13 @@ pcre.pir - user interface to Perl-Compatible Regular Expression library
     load_bytecode 'library/pcre.pir'
     lib = pcre_init()
 
-    func = find_global 'PCRE', 'compile'
+    func = get_hll_global ['PCRE'], 'compile'
     ( regex, error, errptr )= func( pat, options )
 
-    func = find_global 'PCRE', 'match'
+    func = get_hll_global ['PCRE'], 'match'
     ( ok, result )= func( regex, string, start, options )
 
-    func = find_global 'PCRE', 'dollar'
+    func = get_hll_global ['PCRE'], 'dollar'
     match = func( string, ok, result, i )
 
 =head1 DESCRIPTION
@@ -25,7 +25,7 @@ This is the user interface to PCRE. Use this to initialize the library,
 compile regexes, match against strings, and return the results.
 All functions are found in the 'PCRE' namespace.
 
-The NCI interface is contained in libpcre.pir. 
+The NCI interface is contained in libpcre.pir.
 
 =cut
 
@@ -37,36 +37,49 @@ The NCI interface is contained in libpcre.pir.
 
 =item sub init()
 
-Intialize the pcre library. The library handle is returned as a PMC 
+Initialize the pcre library. The library handle is returned as a PMC
 and is additionally stored as global 'PCRE', 'lib'.
 
 =cut
 
+.include "sysinfo.pasm"
+
 .sub init
     .local pmc libpcre
     .local pmc pcre_function
-    .local pmc config
     .local string osname
+    .local int loaded
 
-    config = _config()
-    osname = config['osname']
+    osname = sysinfo .SYSINFO_PARROT_OS
 
     if 'MSWin32' == osname goto LIB_WIN32
     if 'cygwin'  == osname goto LIB_CYGWIN
 
 LIB_DEFAULT:
     loadlib libpcre, 'libpcre'
-    branch LIB_LOADED
+    loaded = defined libpcre
+    if loaded goto LIB_LOADED
+    branch LIB_FAILED
 
 LIB_WIN32:
+    # Usually it's pcre.dll
     loadlib libpcre, 'pcre'
-    branch LIB_LOADED
+    loaded = defined libpcre
+    if loaded goto LIB_LOADED
+    # But maybe you have GnuWin32 pcre3.dll?
+    loadlib libpcre, 'pcre3'
+    loaded = defined libpcre
+    if loaded goto LIB_LOADED
+    branch LIB_FAILED
 
 LIB_CYGWIN:
     loadlib libpcre, 'cygpcre-0'
+    loaded = defined libpcre
+    if loaded goto LIB_LOADED
+    branch LIB_FAILED
 
 LIB_LOADED:
-    store_global 'PCRE', 'lib', libpcre
+    set_hll_global ['PCRE'], 'lib', libpcre
 
     load_bytecode 'library/libpcre.pir'
 
@@ -74,27 +87,34 @@ LIB_LOADED:
     #            const char **errptr, int *erroffset,
     #            const unsigned char *tableptr
     dlfunc pcre_function, libpcre, 'pcre_compile', 'ptiB3P'
-    store_global 'PCRE::NCI', 'PCRE_compile', pcre_function
+    set_hll_global ['PCRE::NCI'], 'PCRE_compile', pcre_function
 
     #int pcre_exec(const pcre *code, const pcre_extra *extra,
     #        const char *subject, int length, int startoffset,
     #        int options, int *ovector, int ovecsize);
     dlfunc pcre_function, libpcre, 'pcre_exec', 'ipPtiiipi'
-    store_global 'PCRE::NCI', 'PCRE_exec', pcre_function
+    set_hll_global ['PCRE::NCI'], 'PCRE_exec', pcre_function
 
     #int pcre_copy_substring(const char *subject, int *ovector,
     #        int stringcount, int stringnumber, char *buffer,
     #        int buffersize);
     dlfunc pcre_function, libpcre, 'pcre_copy_substring', 'itpiibi'
-    store_global 'PCRE::NCI', 'PCRE_copy_substring', pcre_function
+    set_hll_global ['PCRE::NCI'], 'PCRE_copy_substring', pcre_function
+
+    # const char *pcre_version(void);
+    dlfunc pcre_function, libpcre, 'pcre_version', 't'
+    set_hll_global ['PCRE::NCI'], 'PCRE_version', pcre_function
 
     .return( libpcre )
+
+LIB_FAILED:
+    die "Failed to load libpcre"
 .end
 
 
 =item sub ( regex, error, errptr )= compile( pattern, options )
 
-Compile the string B<pattern> with int B<options>. 
+Compile the string B<pattern> with int B<options>.
 Returns pmc B<regex>, string B<error> and int B<errptr>.
 
 =cut
@@ -104,7 +124,7 @@ Returns pmc B<regex>, string B<error> and int B<errptr>.
     .param int options
     .local pmc pcre_function
 
-    pcre_function= find_global 'PCRE::NCI', 'compile'
+    pcre_function= get_hll_global ['PCRE::NCI'], 'compile'
 
     .local pmc regex
     .local string error
@@ -132,7 +152,7 @@ in pmc B<result>.
     .param int options
     .local pmc pcre_function
 
-    pcre_function= find_global 'PCRE::NCI', 'exec'
+    pcre_function= get_hll_global ['PCRE::NCI'], 'exec'
 
     .local int ok
     .local pmc res
@@ -157,7 +177,7 @@ Returns the match.
     .param int n
     .local pmc pcre_function
 
-    pcre_function= find_global 'PCRE::NCI', 'result'
+    pcre_function= get_hll_global ['PCRE::NCI'], 'result'
 
     .local string matched
 
@@ -167,15 +187,29 @@ Returns the match.
 .end
 
 
-.include "library/config.pir"
+=item sub (string)= version()
+
+=cut
+
+.sub version
+    .local pmc pcre_function
+
+    pcre_function= get_hll_global ['PCRE::NCI'], 'PCRE_version'
+
+    .local string ver
+
+    ver = pcre_function()
+
+    .return( ver )
+.end
 
 =back
 
 =head1 BUGS
 
-None known, but this hasn't been well tested. This interface 
-is designed to work on all platforms where PCRE and parrot 
-are supported, but has not been tested on all of them. 
+None known, but this hasn't been well tested. This interface
+is designed to work on all platforms where PCRE and parrot
+are supported, but has not been tested on all of them.
 Send bug reports to E<lt>parrotbug@parrotcode.org<gt>
 
 =cut
@@ -190,7 +224,7 @@ pcre(3)
 
 =head1 AUTHORS
 
-Original code by Leo Toetsch, updated by Jerry Gay 
+Original code by Leo Toetsch, updated by Jerry Gay
 E<lt>jerry dot gay at gmail dot com<gt>
 
 =cut
@@ -200,4 +234,4 @@ E<lt>jerry dot gay at gmail dot com<gt>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

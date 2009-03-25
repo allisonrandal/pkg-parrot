@@ -12,13 +12,11 @@ unit, calling the subroutines marked with the C<:load> subpragma for each.
 
 .namespace [ "PGE" ]
 
-.include "compilers/pge/PGE/CodeString.pir"
 .include "compilers/pge/PGE/Match.pir"
 .include "compilers/pge/PGE/OPTable.pir"
 .include "compilers/pge/PGE/Regex.pir"
 .include "compilers/pge/PGE/Exp.pir"
 .include "compilers/pge/PGE/Perl6Regex.pir"
-.include "compilers/pge/PGE/P6Regex.pir"
 .include "compilers/pge/PGE/P5Regex.pir"
 .include "compilers/pge/PGE/builtins_gen.pir"
 
@@ -27,4 +25,4 @@ unit, calling the subroutines marked with the C<:load> subpragma for each.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

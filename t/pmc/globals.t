@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: globals.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: globals.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ Tests the globals fetch and store operations.
 pir_output_is( <<'CODE', <<'OUTPUT', "get namespace" );
 .sub main
    .local pmc ns, o
-   ns = find_global "Foo"
+   ns = get_global "Foo"
    o = ns["f"]
    o()
 .end
@@ -41,9 +41,9 @@ OUTPUT
 pir_output_is( <<'CODE', <<'OUTPUT', "create namespace" );
 .sub main
     .local pmc f, x
-    f = find_global "f"
-    store_global "Foo", "x", f
-    x = find_global "Foo", "x"
+    f = get_global "f"
+    set_global ["Foo"], "x", f
+    x = get_global ["Foo"], "x"
     x()
 .end
 
@@ -78,7 +78,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "get namespace - array" );
   .return()
 .end
 
-.namespace
+.namespace []
 .sub main :main
   $P0 = split "::", "Foo::Bar::test"
   $S0 = pop $P0

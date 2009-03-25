@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: bound_nci.pmc 18407 2007-05-03 05:08:51Z chromatic $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: bound_nci.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -29,7 +29,7 @@ pmclass Bound_NCI extends NCI need_ext {
 
 Bind the object C<obj> to this call instance.
 
-=item C<PMC* get_pmc(void)>
+=item C<PMC *get_pmc(void)>
 
 Return the bound object.
 
@@ -45,17 +45,17 @@ Set the bound object live.
 
 */
 
-    void set_pmc(PMC *obj) {
+    VTABLE void set_pmc(PMC *obj) {
         PMC_pmc_val(SELF) = obj;
         if (!PMC_IS_NULL(obj))
             PObj_custom_mark_SET(SELF);
     }
 
-    PMC* get_pmc() {
+    VTABLE PMC *get_pmc() {
         return PMC_pmc_val(SELF);
     }
 
-    opcode_t* invoke(void *next) {
+    VTABLE opcode_t *invoke(void *next) {
         if (PObj_get_FLAGS(SELF) & PObj_private0_FLAG) {
             /* bound multi sub
              * XXX maybe create separate PMC class
@@ -65,16 +65,39 @@ Set the bound object live.
             next       = VTABLE_invoke(INTERP, multi, next);
         }
         else {
-            PMC *p2                = REG_PMC(2);
-            INTERP->current_object = REG_PMC(2) = PMC_pmc_val(SELF);
-            SUPER(next);
-            REG_PMC(2)             = p2;
+            /* Locate register holding invocant. */
+            int  sig_const = interp->current_args[1];
+            PMC *sig       = CONTEXT(interp)->constants[sig_const]->u.key;
+
+            if (PMC_IS_NULL(sig))
+                Parrot_ex_throw_from_c_args(interp, NULL,
+                    EXCEPTION_INVALID_OPERATION,
+                    "Bound NCI call made, but no current signature found.");
+
+            ASSERT_SIG_PMC(sig);
+
+            /* Get invocant register. */
+            if (VTABLE_elements(INTERP, sig) > 0 &&
+                    VTABLE_get_integer_keyed_int(INTERP, sig, 0) &
+                    PARROT_ARG_PMC) {
+                int  invocant_reg      = interp->current_args[2];
+                PMC *p2                = REG_PMC(interp, invocant_reg);
+                INTERP->current_object = REG_PMC(interp, invocant_reg)
+                                           = PMC_pmc_val(SELF);
+                SUPER(next);
+                REG_PMC(interp, invocant_reg)  = p2;
+            }
+            else {
+                Parrot_ex_throw_from_c_args(interp, NULL,
+                    EXCEPTION_INVALID_OPERATION, "Bound NCI call made, "
+                        "but the current call has no invocant.");
+            }
         }
 
         return (opcode_t *)next;
     }
 
-    void mark() {
+    VTABLE void mark() {
         if (PMC_pmc_val(SELF))
             pobject_lives(INTERP, (PObj *)PMC_pmc_val(SELF));
         if (PObj_get_FLAGS(SELF) & PObj_private0_FLAG) {

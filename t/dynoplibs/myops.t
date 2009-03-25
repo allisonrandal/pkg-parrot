@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: myops.t 19131 2007-06-19 14:57:20Z particle $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: myops.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 8;
+use Parrot::Test tests => 10;
 use Parrot::Config;
 
 =head1 NAME
@@ -23,8 +23,11 @@ Tests the sample dynamic op library "myops".
 
 =cut
 
+$ENV{TEST_PROG_ARGS} ||= '';
+
 my $is_ms_win32 = $^O =~ m!MSWin32!;
-my $is_mingw = $is_ms_win32 && grep { $PConfig{cc} eq $_ } qw(gcc gcc.exe);
+my $is_mingw    = $is_ms_win32
+    && grep { $PConfig{cc} =~ /\b$_\b/ } qw(gcc gcc.exe);
 
 pir_output_is( <<'CODE', <<'OUTPUT', 'fortytwo' );
 .loadlib "myops_ops"
@@ -63,8 +66,8 @@ OUTPUT
 {
     my @todo;
 
-    if ($ENV{TEST_PROG_ARGS}) {
-        @todo = ( todo => 'broken with -j' ) if $ENV{TEST_PROG_ARGS} =~ /-j/;
+    if ( $ENV{TEST_PROG_ARGS} ) {
+        @todo = ( todo => 'broken with JIT' ) if $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/;
     }
 
     my $quine = <<'END_PASM';
@@ -74,18 +77,21 @@ END_PASM
     pasm_output_is( $quine, $quine, 'a short cheating quine', @todo );
 }
 
-pir_output_is( << 'CODE', << 'OUTPUT', "one alarm" );
+    my @todo = $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/ ?
+       ( todo => 'RT #49718, add scheduler features to JIT' ) : ();
+
+pir_output_is( << 'CODE', << 'OUTPUT', "one alarm", @todo );
 .loadlib "myops_ops"
 
 .sub main :main
-    find_global P0, "_alarm"
-    alarm 2.0, P0
-    sleep 1
+    get_global $P0, "_alarm"
+    alarm 0.1, $P0
     print "1\n"
 
     # alarm should be triggered half-way
     # during this sleep
-    sleep 2
+    sleep 1
+    sleep 1
     print "2\n"
 
     sleep 1
@@ -105,56 +111,86 @@ done.
 OUTPUT
 
 SKIP: {
-    skip "three alarms, infinite loop under mingw32", 1 if $is_mingw;
+    skip "three alarms, infinite loop under mingw32", 2 if $is_mingw;
+    skip "dynops weird in CGP with events", 2 if $ENV{TEST_PROG_ARGS} =~ /--runcore=cgoto/;
 
-    pir_output_is( << 'CODE', << 'OUTPUT', "three alarm" );
+    my @todo = $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/ ?
+       ( todo => 'RT #49718, add scheduler features to JIT' ) : ();
+
+    pir_output_like( << 'CODE', << 'OUTPUT', "three alarm", @todo );
 
 .loadlib "myops_ops"
 .sub main :main
-    find_global P0, "_alarm3"
-    alarm 3.3, 0.4, P0
-    find_global P0, "_alarm2"
-    alarm 2.2, P0
-    find_global P0, "_alarm1"
-    alarm 1.5, 2.0, P0
-    set I0, 1
+    $P1 = new 'Integer'
+    set $P1, 0
+    set_global "flag", $P1
+    get_global $P0, "_alarm3"
+    alarm 0.3, $P0
+    get_global $P0, "_alarm2"
+    alarm 0.2, $P0
+    get_global $P0, "_alarm1"
+    alarm 0.1, $P0
+
+    set $I0, 1
 loop:
-    sleep 1
-    print I0
-    print "\n"
-    inc I0
+    sleep 0.1
+    inc $I0
     # check_events
-    le I0, 5, loop
-    print "done.\n"
+    get_global $P1, "flag"
+    ge $P1, 7, done
+    le $I0, 40, loop
+
+done:
+    get_global $P1, "flag"
+    $I1 = $P1
+    print $I1
+    print "\n"
 .end
 
 .sub _alarm1
-    print "alarm1\n"
+    get_global $P0, "flag"
+    add $P0, 1
+    set_global "flag", $P0
 .end
 
 .sub _alarm2
-    print "alarm2\n"
+    get_global $P0, "flag"
+    add $P0, 2
+    set_global "flag", $P0
 .end
 
 .sub _alarm3
-    print "alarm3\n"
+    get_global $P0, "flag"
+    add $P0, 4
+    set_global "flag", $P0
 .end
 
 CODE
-1
-alarm1
-2
-alarm2
-3
-alarm3
-alarm1
-alarm3
-4
-alarm3
-alarm3
-alarm3
-5
-done.
+/7/
+OUTPUT
+
+    pir_output_like( << 'CODE', << 'OUTPUT', "repeating alarm", @todo );
+
+.loadlib "myops_ops"
+.sub main :main
+    get_global $P0, "_alarm"
+    alarm 0.5, 0.4, $P0
+    set $I0, 1
+loop:
+    sleep 1
+    inc $I0
+    # check_events
+    le $I0, 4, loop
+.end
+
+.sub _alarm
+    print "alarm\n"
+.end
+
+CODE
+/alarm
+alarm
+alarm/
 OUTPUT
 }
 
@@ -220,10 +256,42 @@ CODE
 65535
 OUTPUT
 
+pasm_output_is( <<'CODE', <<OUTPUT, "conv_i2_i" );
+
+.loadlib "myops_ops"
+
+    set I0, 32767       # 2 ^ 15 -1
+    conv_i2 I0
+    print I0
+    print "\n"
+    inc I0              # 2 ^ 15
+    conv_i2 I0
+    print I0
+    print "\n"
+    set I0, 65535       # 2 ^ 16 -1
+    conv_i2 I0
+    print I0
+    print "\n"
+    inc I0              # -1 + 1
+    conv_i2 I0
+    print I0
+    print "\n"
+    dec I0              # 0 - 1
+    conv_i2 I0
+    print I0
+    print "\n"
+    end
+CODE
+32767
+-32768
+-1
+0
+-1
+OUTPUT
+
 # Local Variables:
 #   mode: cperl
 #   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4:
-

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: byteorder.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: byteorder.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,25 +15,42 @@ package auto::byteorder;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
 use Parrot::Configure::Step qw(:auto);
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-$description = q{Computing native byteorder for Parrot's wordsize};
 
-@args = ();
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Compute native byteorder for wordsize};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    cc_gen('config/auto/byteorder/test_c.in');
-    cc_build();
-    my $byteorder = cc_run() or die "Can't run the byteorder testing program: $!";
-    cc_clean();
+    my $byteorder = _probe_for_byteorder($conf);
 
+    $self->_evaluate_byteorder($conf, $byteorder);
+
+    return 1;
+}
+
+sub _probe_for_byteorder {
+    my $conf = shift;
+    $conf->cc_gen('config/auto/byteorder/test_c.in');
+    $conf->cc_build();
+    my $byteorder = $conf->cc_run()
+        or die "Can't run the byteorder testing program: $!";
+    $conf->cc_clean();
     chomp $byteorder;
+    return $byteorder;
+}
 
+sub _evaluate_byteorder {
+    my ($self, $conf, $byteorder) = @_;
     if ( $byteorder =~ /^1234/ ) {
         $conf->data->set(
             byteorder => $byteorder,
@@ -51,8 +68,7 @@ sub runstep {
     else {
         die "Unsupported byte-order [$byteorder]!";
     }
-
-    return $self;
+    return 1;
 }
 
 1;

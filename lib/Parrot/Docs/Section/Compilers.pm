@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: Compilers.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: Compilers.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -44,16 +44,10 @@ sub new {
         $self->new_group( 'IMCC', 'the Intermediate Code Compiler for Parrot', 'compilers/imcc' ),
         $self->new_group( 'PGE',  'the Parrot Grammar Engine',                 'compilers/pge' ),
         $self->new_group( 'TGE',  'the Tree Grammar Engine',                   'compilers/tge' ),
-        $self->new_group( 'PAST', 'the Parrot/Punie Abstract Syntax Tree',     'compilers/past' ),
-        $self->new_group(
-            'Partridge (PAST-pm)',
-            'the Parrot/Punie Abstract Syntax Tree (new implementation)',
-            'compilers/past-pm'
-        ),
-        $self->new_group( 'smop', 'Simple Meta Object Protocol', 'compilers/smop' ),
-        $self->new_group( 'BCG',  'Byte Code Generation',        'compilers/bcg' ),
-        $self->new_group( 'JSON', 'JavaScript Object Notation',  'compilers/json' ),
-        $self->new_group( 'PIRC', 'a PIR Compiler',              'compilers/pirc' ),
+        $self->new_group( 'PCT',  'Parrot Compiler Toolkit',    'compilers/pct' ),
+        $self->new_group( 'JSON', 'JavaScript Object Notation', 'compilers/json' ),
+        $self->new_group( 'PIRC', 'a PIR Compiler',             'compilers/pirc' ),
+        $self->new_group( 'NCIGEN', 'Native Call Interface Generator', 'compilers/ncigen' ),
     );
 }
 

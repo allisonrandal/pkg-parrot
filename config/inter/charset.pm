@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: charset.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: charset.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,26 +15,33 @@ package inter::charset;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use File::Basename qw/basename/;
 
-use Parrot::Configure::Step ':inter';
+use base qw(Parrot::Configure::Step);
 
-$description = 'Determining what charset files should be compiled in';
+use Parrot::Configure::Utils ':inter';
 
-@args = qw(ask charset);
+
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Which charset files should be compiled in};
+    $data{result}      = q{};
+    return \%data;
+}
+
+my @charsets_defaults =
+    defined( $ENV{TEST_CHARSET} )
+    ? $ENV{TEST_CHARSET}
+    : sort map { basename($_) } glob "./src/string/charset/*.c";
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my @charset = (
-        sort
-            map { m{\./src/charset/(.*)} } glob "./src/charset/*.c"
-    );
+    my @charset = @charsets_defaults;
 
-    my $charset_list = $conf->options->get('charset')
-        || join( ' ', grep { defined $_ } @charset );
+    my $charset_list = join ( ' ', grep { defined $_ } @charset );
 
     if ( $conf->options->get('ask') ) {
         print <<"END";
@@ -43,9 +50,10 @@ sub runstep {
 The following charsets are available:
   @charset
 END
-        {
-            $charset_list = prompt( 'Which charsets would you like?', $charset_list );
-        }
+        $charset_list = prompt(
+            'Which charsets would you like?',
+            $charset_list
+        );
     }
 
     # names of class files for src/pmc/Makefile
@@ -60,7 +68,7 @@ E_NOTE
     foreach my $charset ( split( /\s+/, $charset_list ) ) {
         $charset =~ s/\.c$//;
         $TEMP_charset_build .= <<END
-src/charset/$charset\$(O): src/charset/$charset.h src/charset/ascii.h src/charset/$charset.c \$(NONGEN_HEADERS)
+src/string/charset/$charset\$(O): src/string/charset/$charset.h src/string/charset/ascii.h src/string/charset/$charset.c \$(NONGEN_HEADERS)
 
 
 END
@@ -68,7 +76,7 @@ END
 
     # build list of libraries for link line in Makefile
     my $slash = $conf->data->get('slash');
-    $TEMP_charset_o =~ s/^| / src${slash}charset${slash}/g;
+    $TEMP_charset_o =~ s/^| / src${slash}string${slash}charset${slash}/g;
 
     $conf->data->set(
         charset            => $charset_list,
@@ -76,7 +84,7 @@ END
         TEMP_charset_build => $TEMP_charset_build,
     );
 
-    return $self;
+    return 1;
 }
 
 1;

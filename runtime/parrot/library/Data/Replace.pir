@@ -1,4 +1,4 @@
-# $Id: Replace.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# $Id: Replace.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -12,7 +12,7 @@ Data::Replace - data replacing implemented in PIR
 
     .local pmc replace
 
-    replace = find_global "Data::Replace", "replace"
+    replace = get_hll_global ['Data::Replace'], 'replace'
 
     replace( array, old, new )
 
@@ -45,8 +45,8 @@ Replaces every "old" with "new" inside the aggregate "where".
     .param pmc oldVal
     .param pmc newVal
     .local pmc cache
-    
-    new cache, .ResizablePMCArray
+
+    new cache, 'ResizablePMCArray'
     __do_replace( where, oldVal, newVal, cache )
 .end
 
@@ -56,7 +56,7 @@ Replaces every "old" with "new" inside the aggregate "where".
     .param pmc cache
     .local int i
     .local pmc temp
-    
+
     set i, cache
 LOOP:
     dec i
@@ -65,15 +65,15 @@ LOOP:
     eq_addr val, temp, IS
     branch LOOP
 END:
-    .pcc_begin_return
-    .return 0
-    .pcc_end_return
+    .begin_return
+    .set_return 0
+    .end_return
 IS:
-    .pcc_begin_return
-    .return 1
-    .pcc_end_return
+    .begin_return
+    .set_return 1
+    .end_return
 .end
-    
+
 .sub __do_replace
     .param pmc where
     .param pmc oldVal
@@ -81,9 +81,9 @@ IS:
     .param pmc cache
     .local pmc temp
     .local string name
-    
+
     if_null where, END
-    
+
     # call __replace if the PMC supports it
     can $I0, where, "__replace"
     unless $I0 goto CANT_REPLACE
@@ -95,11 +95,11 @@ CANT_REPLACE:
     typeof name, where
     .include 'errors.pasm'
     errorsoff .PARROT_ERRORS_GLOBALS_FLAG
-    find_global temp, "Data::Replace", name
+    temp = get_hll_global ['"Data::Replace'], name
     errorson .PARROT_ERRORS_GLOBALS_FLAG
     # invoke it if found
-    typeof $I0, temp
-    if $I0 == .Undef goto REPLACE_PROPS
+    $I0 = defined temp
+    unless $I0 goto REPLACE_PROPS
     temp( where, oldVal, newVal, cache )
 
 REPLACE_PROPS:
@@ -111,9 +111,9 @@ END:
 .end
 
 .sub __onload :load
-    $P0 = find_global "Data::Replace", "ResizablePMCArray"
-    store_global "Data::Replace", "PMCArray", $P0
-    store_global "Data::Replace", "StringArray", $P0
+    $P0 = get_hll_global ['Data::Replace'], 'ResizablePMCArray'
+    set_hll_global ['Data::Replace'], 'PMCArray', $P0
+    set_hll_global ['Data::Replace'], 'StringArray', $P0
 .end
 
 .sub ResizablePMCArray
@@ -123,29 +123,29 @@ END:
     .param pmc cache
     .local int i
     .local pmc val
-    
+
     set i, where
 LOOP:
     dec i
     if i < 0 goto END
 
     val = where[i]
-    
+
     ne_addr val, oldVal, SKIP
     where[i] = newVal
 SKIP:
-    I0 = __in_cache( val, cache )
-    if I0 goto LOOP
-    
+    $I0 = __in_cache( val, cache )
+    if $I0 goto LOOP
+
     push cache, val
     __do_replace( val, oldVal, newVal, cache )
     branch LOOP
 END:
-    .pcc_begin_return
-    .pcc_end_return
+    .begin_return
+    .end_return
 .end
 
-.sub Hash method
+.sub Hash :method
     .param pmc where
     .param pmc oldVal
     .param pmc newVal
@@ -153,33 +153,33 @@ END:
     .local pmc iter
     .local string key
     .local pmc val
-    
-    new iter, .Iterator, where
+
+    new iter, 'Iterator', where
     set iter, 0
-    
+
 LOOP:
     unless iter, END
 
     shift key, iter
-    
+
     val = where[key]
-    
+
     ne_addr val, oldVal, SKIP
     where[key] = newVal
 SKIP:
-    I0 = __in_cache( val, cache )
-    if I0 goto LOOP
-    
+    $I0 = __in_cache( val, cache )
+    if $I0 goto LOOP
+
     push cache, val
     __do_replace( val, oldVal, newVal, cache )
     branch LOOP
-    
+
 END:
-    .pcc_begin_return
-    .pcc_end_return
+    .begin_return
+    .end_return
 .end
 
-.sub Hash method
+.sub Hash :method
     .param pmc where
     .param pmc oldVal
     .param pmc newVal
@@ -187,30 +187,30 @@ END:
     .local pmc iter
     .local string key
     .local pmc val
-    
-    new iter, .Iterator, where
+
+    new iter, 'Iterator', where
     set iter, 0
-    
+
 LOOP:
     unless iter, END
 
     shift key, iter
-    
+
     val = where[key]
-    
+
     ne_addr val, oldVal, SKIP
     where[key] = newVal
 SKIP:
-    I0 = __in_cache( val, cache )
-    if I0 goto LOOP
-    
+    $I0 = __in_cache( val, cache )
+    if $I0 goto LOOP
+
     push cache, val
     __do_replace( val, oldVal, newVal, cache )
     branch LOOP
-    
+
 END:
-    .pcc_begin_return
-    .pcc_end_return
+    .begin_return
+    .end_return
 .end
 
 =back
@@ -223,7 +223,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -231,4 +231,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: parrot_api.pl 18810 2007-06-04 20:27:35Z paultcochrane $
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: parrot_api.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -175,7 +175,7 @@ my %DataR;
 my %Undef;
 my %API;
 
-if ( open( my $NM, "perl tools/dev/nm.pl -BDo '$Obj' |" ) ) {
+if ( open( my $NM, '<', "perl tools/dev/nm.pl -BDo '$Obj' |" ) ) {
     while (<$NM>) {
         my ( $o, $s, $v ) = split;
         $API{$s} = $o;
