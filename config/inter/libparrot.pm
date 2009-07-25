@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: libparrot.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: libparrot.pm 39871 2009-07-03 14:40:18Z jkeenan $
 
 =head1 NAME
 
@@ -34,6 +34,7 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
     my $parrot_is_shared = $conf->options->get('parrot_is_shared');
+    my $disable_rpath    = $conf->options->get('disable-rpath');
 
     $parrot_is_shared = integrate(
         $conf->data->get('parrot_is_shared'),
@@ -90,15 +91,16 @@ sub runstep {
     $conf->data->set(
         parrot_is_shared => $parrot_is_shared,
 
-        libparrot => $parrot_is_shared
-        ? '$(LIBPARROT_SHARED)'
-        : '$(LIBPARROT_STATIC)',
+        libparrot_for_makefile_only => $parrot_is_shared
+            ? '$(LIBPARROT_SHARED)'
+            : '$(LIBPARROT_STATIC)',
     );
 
     # Set -rpath (or equivalent) for executables to find the
     # shared libparrot in the build directory.
-    $conf->data->set(
-        rpath_blib => ( $parrot_is_shared && $conf->data->get('rpath') )
+    $conf->data->set( rpath_blib => ( ! $disable_rpath
+                                     && $parrot_is_shared
+                                     && $conf->data->get('rpath') )
         ? $conf->data->get('rpath')
             . $conf->data->get('build_dir')
             . $conf->data->get('slash')
@@ -108,19 +110,49 @@ sub runstep {
 
     # Set -rpath (or equivalent) for the installed executables to find the
     # installed shared libparrot.
-    $conf->data->set(
-        rpath_lib => ( $parrot_is_shared && $conf->data->get('rpath') )
+    $conf->data->set( rpath_lib => ( ! $disable_rpath
+                                    && $parrot_is_shared
+                                    && $conf->data->get('rpath') )
         ? $conf->data->get('rpath')
             . $conf->data->get('libdir')
         : ''
     );
 
+    # When building shared libraries and dynamically loadable
+    # modules with 'ld', do we need to include -lparrot?  If so
+    # this variable contains the necessary flags.  (This is normally
+    # empty, but may be overridden by various hints files for
+    # specific platforms.)
+
+    # This version works in the build directory.
     unless ( defined( $conf->data->get('libparrot_ldflags') ) ) {
-        $conf->data->set(libparrot_ldflags =>
+        $conf->data->set(libparrot_ldflags => '');
+    }
+
+    # This version refers to the installed library.
+    unless ( defined( $conf->data->get('inst_libparrot_ldflags') ) ) {
+        $conf->data->set(inst_libparrot_ldflags => '');
+    }
+
+    # When linking an executable to -lparrot, this variable
+    # contains the necessary flags to find and use -lparrot.
+
+    # This version uses the -lparrot in the build directory.
+    unless ( defined( $conf->data->get('libparrot_linkflags') ) ) {
+        $conf->data->set(libparrot_linkflags =>
         '-L'
         . $conf->data->get('build_dir')
         . $conf->data->get('slash')
         . $conf->data->get('blib_dir')
+        . ' -lparrot'
+        );
+    }
+
+    # This version uses the installed -lparrot.
+    unless ( defined( $conf->data->get('inst_libparrot_linkflags') ) ) {
+        $conf->data->set(inst_libparrot_linkflags =>
+        '-L'
+        . $conf->data->get('libdir')
         . ' -lparrot'
         );
     }

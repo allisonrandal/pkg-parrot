@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: fixedpmcarray.t 37384 2009-03-13 17:37:55Z barney $
+# $Id: fixedpmcarray.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
@@ -214,7 +214,7 @@ caught an exception
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedPMCArray']
      set P0, 3
      new P1, ['Key']
@@ -251,7 +251,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedPMCArray']
      set P0, 1024
 

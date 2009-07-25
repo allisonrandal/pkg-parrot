@@ -1,33 +1,30 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: OpsRenumber.pm 37525 2009-03-17 17:45:00Z allison $
+# $Id: OpsRenumber.pm 39806 2009-06-27 03:26:36Z jkeenan $
 package Parrot::OpsRenumber;
 use strict;
 use warnings;
 use lib qw ( lib );
 use base qw( Parrot::Ops2pm::Base );
-#use Parrot::OpsFile;
 
 =head1 NAME
 
-Parrot::OpsRenumber - Methods holding functionality for F<tools/build/opsrenumber.pl>.
+Parrot::OpsRenumber - Methods holding functionality for F<tools/dev/opsrenumber.pl>.
 
 =head1 SYNOPSIS
 
-    use Parrot::Config qw( %PConfig );
     use Parrot::OpsRenumber;
 
     $self = Parrot::OpsRenumber->new( {
         argv            => [ @ARGV ],
-        nolines         => $nolines_flag,
         moddir          => "lib/Parrot/OpLib",
         module          => "core.pm",
         inc_dir         => "include/parrot/oplib",
         inc_f           => "ops.h",
-        script          => "tools/build/opsrenumber.pl",
+        script          => "tools/dev/opsrenumber.pl",
     } );
 
     $self->prepare_ops();
-    $self->renum_op_map_file( $PConfig{MAJOR} );
+    $self->renum_op_map_file();
 
 =cut
 
@@ -73,9 +70,8 @@ Returns true value upon success.
 
 sub renum_op_map_file {
     my $self = shift;
-    my $major_version = shift;
 
-    my $file = scalar(@_) ? shift : $self->{num_file};
+    my $file = $self->{num_file};
 
     # We open up the currently existing ops.num and file and read it
     # line-by-line.  That file is basically divided into two halves
@@ -124,7 +120,7 @@ sub renum_op_map_file {
     # Parrot::Ops2pm::Base.  prepare_ops(), in turn, works off
     # Parrot::OpsFile.
 
-    # So whether a particular opcode will appear in the *new* ops.num
+    # So whether a particular opcode will continue to appear in ops.num
     # depends entirely on whether or not it's found in
     # @{ $self->{ops}->{OPS} }.  If a particular opcode has been deleted or
     # gone missing from that array, then it won't appear in the new

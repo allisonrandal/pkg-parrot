@@ -1,3 +1,5 @@
+# $Id: clock.pir 38115 2009-04-15 14:41:32Z fperrad $
+
 =head1 NAME
 
 clock.pir - LCD clock

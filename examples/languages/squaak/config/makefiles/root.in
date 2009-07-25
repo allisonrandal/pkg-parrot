@@ -1,14 +1,14 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-## $Id: root.in 37360 2009-03-12 19:45:17Z fperrad $
+## $Id: root.in 39165 2009-05-25 01:15:28Z jkeenan $
 
 ## arguments we want to run parrot with
 PARROT_ARGS   :=
 
 ## configuration settings
 VERSION       := @versiondir@
-BIN_DIR       := @bin_dir@
-LIB_DIR       := @lib_dir@$(VERSION)
-DOC_DIR       := @doc_dir@$(VERSION)
+BIN_DIR       := @bindir@
+LIB_DIR       := @libdir@$(VERSION)
+DOC_DIR       := @docdir@$(VERSION)
 MANDIR        := @mandir@$(VERSION)
 
 # Set up extensions

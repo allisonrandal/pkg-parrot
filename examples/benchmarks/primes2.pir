@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: primes2.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: primes2.pir 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ of primes and the last one found. Use PMCs, not ints.
   i   = new 'Integer'
   i   = 0
   max = new 'Integer'
-  max = 5000
+  max = 500
   i6  = new 'Integer'
   i6  = 0
   i7  = new 'Integer'

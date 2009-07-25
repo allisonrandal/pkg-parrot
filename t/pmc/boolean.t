@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: boolean.t 37393 2009-03-13 19:56:52Z Util $
+# $Id: boolean.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ type combinations.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
     plan(28)
     init_int_tests()
     num_tests()

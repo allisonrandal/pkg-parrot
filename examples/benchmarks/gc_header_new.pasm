@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: gc_header_new.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: gc_header_new.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -123,3 +123,9 @@ getout:	time N6
 	print " total Buffer structs\n"
 
 	end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

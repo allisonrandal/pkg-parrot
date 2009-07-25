@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: random.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: random.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -19,8 +19,6 @@ This is a singleton (monadic) class - only one instance exists.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 static PMC *Rand_PMC;
 

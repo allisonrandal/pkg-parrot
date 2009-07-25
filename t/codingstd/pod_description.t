@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, The Perl Foundation.
-# $Id: pod_description.t 37316 2009-03-11 19:23:52Z coke $
+# $Id: pod_description.t 37889 2009-04-03 13:36:30Z coke $
 
 use strict;
 use warnings;
@@ -47,11 +47,15 @@ foreach my $file ( @{ $need_testing_ref } ) {
 my $empty_description_files = join( "\n", sort @empty_description);
 my $nempty_description      = scalar( @empty_description );
 
+TODO: {
+    local $TODO = 'POD requirements in flux: TT #292';
+
 is(
     $empty_description_files,
     q{},
     'All Pod files have non-empty DESCRIPTION sections'
 );
+}
 
 diag("\nFound $nempty_description files without DESCRIPTION sections.\n")
     if $nempty_description;

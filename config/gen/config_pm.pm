@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: config_pm.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: config_pm.pm 38962 2009-05-20 04:44:22Z Infinoid $
 
 =head1 NAME
 
@@ -97,9 +97,18 @@ END
 
 END
 
+    my %p5_keys = map { $_ => 1 } $conf->data->keys_p5();
+    # A few of these keys are still useful.
+    my @p5_keys_whitelist = qw(archname ccflags longsize optimize);
+    foreach my $key (@p5_keys_whitelist) {
+        delete($p5_keys{$key});
+    }
+
     while (<$IN>) {
         if (/\@PCONFIG\@/) {
             for my $k ( sort { lc $a cmp lc $b || $a cmp $b } $conf->data->keys ) {
+                next if exists $p5_keys{$k};
+
                 my $v = $conf->data->get($k);
                 if ( defined $v ) {
                     my $type = ref $v;

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: bigint.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: bigint.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
@@ -96,7 +96,7 @@ CODE
 OUT
 
 pasm_output_is( <<"CODE", <<'OUT', "set int, get double" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['BigInt']
      set P0, 999999
      set N1, P0

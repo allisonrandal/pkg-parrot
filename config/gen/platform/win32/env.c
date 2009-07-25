@@ -1,5 +1,5 @@
 /*
- * $Id: env.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: env.c 39935 2009-07-07 17:14:49Z fperrad $
  * Copyright (C) 2004-2008, Parrot Foundation.
  */
 
@@ -54,7 +54,7 @@ Parrot_setenv(const char *name, const char *value)
         const int value_len = strlen(value);
 
         {
-            char * const envstring = mem_internal_allocate(
+            char * const envstring = (char * const)mem_internal_allocate(
                     name_len     /* name  */
                     + 1          /* '='   */
                     + value_len  /* value */
@@ -81,8 +81,7 @@ Parrot_setenv(const char *name, const char *value)
 
 /*
 
-=item C<char *
-Parrot_getenv(ARGIN(const char *name), NOTNULL(int *free_it))>
+=item C<char * Parrot_getenv(const char *name, int *free_it)>
 
 Gets the environment variable C<name>, if it exists. Returns status in
 C<free_it>. C<free_it> must be a non-null pointer to an integer to receive the
@@ -107,7 +106,7 @@ Parrot_getenv(ARGIN(const char *name), NOTNULL(int *free_it))
     else {
         *free_it = 1;
     }
-    buffer = mem_sys_allocate(size);
+    buffer = (char *)mem_sys_allocate(size);
     GetEnvironmentVariable(name, buffer, size);
 
     return buffer;

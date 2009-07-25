@@ -1,5 +1,5 @@
 /*
- * $Id: cmp.ops 37225 2009-03-09 03:16:29Z allison $
+ * $Id: cmp.ops 39629 2009-06-17 15:25:11Z NotFound $
 ** cmp.ops
 */
 
@@ -614,7 +614,6 @@ These ops do comparisons and truth testing without doing flow control.
 
 =item B<cmp_num>(out INT, invar PMC, invar PMC)
 
-
 Sets $1 to -1 if $2 < $3, +1 if $2 > $3, and 0 otherwise.
 
 =cut
@@ -666,6 +665,18 @@ inline op cmp_num(out INT, invar PMC, invar PMC) :base_core {
   $1 = VTABLE_cmp_num(interp, $2, $3);
 }
 
+=item B<cmp_pmc>(out PMC, invar PMC, invar PMC)
+
+Does the same thing as the other cmp_* variants, but puts a PMC in $1.  This is
+useful for avoiding the semipredicate problem in HLLs where two aggregate PMCs
+are not always comparable.
+
+=cut
+
+inline op cmp_pmc(out PMC, invar PMC, invar PMC) :base_core {
+  $1 = VTABLE_cmp_pmc(interp, $2, $3);
+}
+
 ########################################
 
 =item B<issame>(out INT, invar PMC, invar PMC)
@@ -692,6 +703,10 @@ Sets $1 to 1 or 0, depending on whether $2 is false or not.
 =item B<isnull>(out INT, in PMC)
 
 Sets $1 to 1 if the object is null, 0 otherwise.
+
+=item B<isnull>(out INT, in STR)
+
+Sets $1 to 1 if the string is null, 0 otherwise.
 
 =cut
 
@@ -727,6 +742,10 @@ inline op isfalse(out INT, invar PMC) {
 
 inline op isnull(out INT, in PMC) {
     $1 = PMC_IS_NULL($2);
+}
+
+inline op isnull(out INT, in STR) {
+    $1 = STRING_IS_NULL($2);
 }
 
 =item B<isgt>(out INT, in INT, in INT)

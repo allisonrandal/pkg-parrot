@@ -1,16 +1,28 @@
-# $Id: DEPRECATED.pod 37512 2009-03-17 06:55:09Z allison $
+# $Id: DEPRECATED.pod 40182 2009-07-21 04:57:50Z pmichaud $
 
-=head1 Deprecation in Parrot
+=head1 Purpose
+
+Provide a list of deprecated and experimental items in parrot.
+All items in this list should have a corresponding Trac ticket[1].
+
+=head1 Experimental Status
+
+These features are not considered stable, even though they may
+have shipped in a stable release of parrot[2]. Use them at your own
+risk, as they can be removed or changed in any release. These
+items are marked below with C<[experimental]>.
+
+=head1 Deprecated Status
 
 Please see F<docs/project/support_policy.pod> for the parrot
 project's policy regarding deprecated features.
 
-This is a list of currently deprecated features of Parrot.  Every deprecation
-has an associated Trac ticket [1].  Each item indicates the first release
-in which it is eligible for removal. If the release listed is one that
-has already occurred, this feature may be removed at any time.
+Each item shows the first release in which it is eligible for removal, e.g.
+C<[eligible in 1.5]>.  If the release listed is one that has already
+shipped, this feature may be removed in B<any> upcoming release, and
+you should no longer rely on it.
 
-Following the 1.0 release, whenever deprecated items are removed, information
+Whenever deprecated items are removed, information
 regarding how to cope with the removal will be added to
 L<https://trac.parrot.org/parrot/wiki/Deprecation>.
 
@@ -18,16 +30,19 @@ When running parrot, you can receive warnings about deprecated opcodes.
 Either run parrot with the C<-w> option to enable all warnings, or
 specifically by including this C<PIR> code:
 
- .include 'include/warnings.pasm'
+ .include 'warnings.pasm'
  warningson .PARROT_WARNINGS_DEPRECATED_FLAG
 
 =head1 Configuration
 
 =over 4
 
-=item Always build with core PMC set (remove config option) [eligible in 1.1]
+=item Alternate GC configurations [eligible in 1.5]
 
-L<https://trac.parrot.org/parrot/ticket/310>
+C<malloc>, C<malloc-trace> and C<libc> will be removed as potential
+options for the C<--gc> config option.
+
+L<https://trac.parrot.org/parrot/ticket/490>
 
 =back
 
@@ -35,25 +50,13 @@ L<https://trac.parrot.org/parrot/ticket/310>
 
 =over 4
 
-=item pointer [eligible in 1.1]
+=item pair (dynamic PMC) [eligible in 1.5]
 
 L<https://trac.parrot.org/parrot/ticket/187>
 
 =item random [eligible in 1.1]
 
 L<https://trac.parrot.org/parrot/ticket/189>
-
-=item ref [eligible in 1.1]
-
-L<https://trac.parrot.org/parrot/ticket/190>
-
-=item slice [eligible in 1.1]
-
-L<https://trac.parrot.org/parrot/ticket/372>
-
-=item bound_nci [eligible in 1.1]
-
-L<https://trac.parrot.org/parrot/ticket/373>
 
 =item moved to dynpmc [eligible in 1.1]
 
@@ -66,26 +69,79 @@ L<https://trac.parrot.org/parrot/ticket/448>
 
 L<https://trac.parrot.org/parrot/ticket/452>
 
+=item Hash changes to AssociativePMCArray [eligible in 1.5]
+
+Also OrderedHash to OrderedAssociativePMCArray.
+
+L<https://trac.parrot.org/parrot/ticket/679>
+
+=item Method stdhandle in ParrotInterpreter [experimental]
+
+L<https://trac.parrot.org/parrot/ticket/264>
+
+=item Direct creation of Iterator [eligible in 1.5]
+
+Iterator PMC became pure interface class and direct creation of them is
+deprecated. Use C<iter> opcode instead.
+
+Code will become runtime error:
+
+  $P0 = new 'Iterator', aggr
+
+Proper invocation:
+
+  $P0 = iter arrg
+
+L<https://trac.parrot.org/parrot/ticket/811>
+
+=item VTABLE nomenclature. [eligible in 1.5]
+
+Current list of VTABLE functions will be reviewed and cleaned.
+
+L<https://trac.parrot.org/parrot/ticket/866>
+
 =back
 
 =head1 Opcodes
 
 =over 4
 
+=item ops file format [eligible in 1.5]
+
+The ops file format has some cruft in the form of the "VERSION =
+PARROT_VERSION;" line and is hard to parse when several ops files are
+concatenated together.   This item covers the removal of the VERSION line and
+an improved syntax for ops preambles.
+
+L<https://trac.parrot.org/parrot/ticket/836>
+
 =item moved to dynop [eligible in 1.1]
 
-Parts or all of: bit.ops, debug.ops, io.ops, math.ops, obscure.ops, set.ops
+Parts or all of: bit.ops, debug.ops, io.ops, math.ops, set.ops
 (the obscure and rarely used parts), sys.ops.
 
 L<https://trac.parrot.org/parrot/ticket/449>
 
 =item experimental ops [eligible in 1.1]
 
-F<src/ops/experimental.ops>
+F<src/ops/experimental.ops> - only the C<trap> opcode remains
 
-=item myops & dan ops [eligible in 1.1]
+=item get_addr and set_addr [eligible in 1.5]
 
-L<https://trac.parrot.org/parrot/ticket/450>
+L<https://trac.parrot.org/parrot/ticket/218>
+
+These opcodes are being repurposed. They will always return a unique memory
+address of the PMC. Uses of get_addr and set_addr that would set label values
+for Sub, Exception, and related PMC types will instead be handled by
+get_label and set_label.
+
+=item C<bsr>, C<jsr>, and C<ret> [eligible in 1.5]
+
+L<https://trac.parrot.org/parrot/ticket/702>
+
+=item C<branch_cs> [eligible in 1.5]
+
+L<https://trac.parrot.org/parrot/ticket/470>
 
 =back
 
@@ -110,20 +166,6 @@ L<https://trac.parrot.org/parrot/ticket/451>
 =head1 Class Features
 
 =over 4
-
-=item PMC union struct [eligible in 1.1]
-
-This will be removed once all core PMCs have been updated.
-
-L<http://rt.perl.org/rt3/Ticket/Display.html?id=48014>
-
-=item :anon and :vtable named parameters to add_method [eligible in 1.1]
-
-If you want to override a vtable method/function when building a Class, then
-use the method C<add_vtable_override> instead of calling C<add_method> with
-one or both of these flags.
-
-L<https://trac.parrot.org/parrot/ticket/158>
 
 =back
 
@@ -165,14 +207,10 @@ if the arg is a Namespace or Class PMC
 
 L<https://trac.parrot.org/parrot/ticket/159>
 
-=item C<.HLL_map> [eligible in 1.1]
+=item load or include paths prefixed with 'library/' or 'include/'
+[eligible in 1.5]
 
-Languages should use this instead:
-
-  $P0 = getinterp
-  $P0.'hll_map'(TypeA, TypeB)
-
-L<https://trac.parrot.org/parrot/ticket/314>
+L<https://trac.parrot.org/parrot/ticket/511>
 
 =back
 
@@ -200,13 +238,6 @@ to happen.
 
 L<http://rt.perl.org/rt3/Ticket/Display.html?id=53302>
 
-=item Parrot_readbc, Parrot_loadbc. [eligible in 1.1]
-
-They have been renamed to C<Parrot_pbc_read>, C<Parrot_pbc_load>.
-C<Parrot_pbc_read> has one third int argument.
-
-L<https://trac.parrot.org/parrot/ticket/266>
-
 =item C API coding standards cleanup [eligible in 1.1]
 
 All C API functions that aren't currently named according to the
@@ -216,75 +247,80 @@ check in 1.4 or 2.0 for the new names.
 
 L<https://trac.parrot.org/parrot/ticket/443>
 
-=item src/hash.c API cleanup [eligible in 1.1]
+=item parrot_new_pmc_hash [eligible in 1.5]
 
-The following functions will be changed to return a C<Hash*> instead of
-taking a C<Hash**> as an argument:
+This function will be removed.  parrot_new_hash should be used in its place.
 
-=over 4
+L<https://trac.parrot.org/parrot/ticket/494>
 
-=item * parrot_new_hash_x
+=item Parrot_get_namespace_autobase [eligible in 1.5]
 
-=item * parrot_new_cstring_hash
+L<https://trac.parrot.org/parrot/ticket/155>
 
-=item * parrot_new_pointer_hash
+=item Parrot_find_global_k [eligible in 1.5]
 
-=back
+L<https://trac.parrot.org/parrot/ticket/156>
 
-L<https://trac.parrot.org/parrot/ticket/447>
+=item Parrot_MMD_method_name [eligible in 1.5]
 
-C<Parrot_new_INTVAL_hash> will also be rewritten to return a Hash* and will be
-renamed to C<parrot_new_intval_hash> for consistency with other similar
-functions.
+L<https://trac.parrot.org/parrot/ticket/625>
 
-L<https://trac.parrot.org/parrot/ticket/456>
+=item pobject_lives [eligible in 1.5]
 
-=item Parrot_add_library_path [eligible in 1.1]
+L<https://trac.parrot.org/parrot/ticket/664>
 
-Will be renamed to C<Parrot_lib_add_path_from_cstring>.
+=item functions in src/stack.c [eligible in 1.5]
 
-L<https://trac.parrot.org/parrot/ticket/455>
+L<https://trac.parrot.org/parrot/ticket/702>
+Here is a list of functions in this file which are currently being exported:
+
+  stack_system_init
+  cst_new_stack_chunk
+  new_stack
+  mark_stack
+  stack_height
+  stack_entry
+  stack_prepare_push
+  stack_push
+  stack_prepare_pop
+  stack_pop
+  pop_dest
+  stack_peep
+  Parrot_dump_dynamic_environment
+  Parrot_push_action*
+  Parrot_push_mark*
+  Parrot_pop_mark*
+
+* = item may be kept but reimplemented.
+
+=item Parrot_str_free [eligible in 1.5]
+
+L<https://trac.parrot.org/parrot/ticket/826>
+
+This function was an attempt of optimization, but is error prone. Let the
+garbage collector take care.
 
 =back
 
 =head1 Compiler tools
 
-=head2 P6object
+=head2 Parrot Grammar Engine (PGE)
 
 =over 4
 
-=item P6protoobject stringification [eligible in 1.1]
+=item Action methods in rules
 
-Stringification of protoobjects will return the full name of the type
-and parentheses, per Synopsis 12.
+Per Synopsis 5, all regexes will have an implied {*} token at the
+end which cause invocation of an action method if a C<:action>
+object is supplied.
 
-L<https://trac.parrot.org/parrot/ticket/168>
+L<https://trac.parrot.org/parrot/ticket/843>
 
-=back
+=item C<find_key> method on PGE::Match [eligible in 1.5]
 
-=head2 Parrot Grammar Engine
+The C<find_key> method on PGE::Match objects will be removed.
 
-=over 4
-
-=item Deprecated rules and methods [eligible in 1.1]
-
-The following "built-in" PGE rules and methods are from previous 
-versions of Synopsis 5.
-
-Deprecated rules:
-    C<null>, C<fail>, C<sp>, C<lt>, C<gt>, C<dot>
-
-Deprecated methods:
-    C<.text>, C<.item>, C<.result_object>
-
-L<https://trac.parrot.org/parrot/ticket/460>
-
-=item Stringification, numification [eligible in 1.1]
-
-C< PGE::Match > objects will stringify or numify based on
-the text that is matched, not the result object.
-
-L<https://trac.parrot.org/parrot/ticket/461>
+L<https://trac.parrot.org/parrot/ticket/851>
 
 =back
 
@@ -312,6 +348,14 @@ use a different detection mechanism or eliminate it altogether.
 
 L<https://trac.parrot.org/parrot/ticket/463>
 
+=item PAST::Val node generation [eligible in 1.5]
+
+The PAST::Compiler may generate the code for PAST::Val nodes
+(i.e., constants) at the beginning of the block (Parrot sub) instead
+of the location where they occur in the PAST tree.
+
+L<https://trac.parrot.org/parrot/ticket/868>
+
 =back
 
 =head2 Not Quite Perl (NQP)
@@ -321,9 +365,30 @@ L<https://trac.parrot.org/parrot/ticket/463>
 =item C< $(...) > syntax  [eligible in 1.5]
 
 The C< $(...) > syntax for obtaining a result object from a Match
-object will no longer work.  The new syntax is yet to be determined.
+object will no longer work.  The new syntax is to invoke the 
+C<.ast> method on the Match object.
 
 L<https://trac.parrot.org/parrot/ticket/459>
+
+=item Quoted items [eligible in 1.5]
+
+Double-quoted strings will interpret unescaped $-names
+as interpolated variables in the string.  Bare slashes 
+will introduce regular expressions.  The C<< <foo bar> >>
+syntax will produce an array of strings instead of a single
+string.
+
+L<https://trac.parrot.org/parrot/ticket/837>
+
+=item C<< PIR q:to:<xyz> >> inline PIR [eligible in 1.5]
+
+The C<< PIR q:to:<xyz> >> form of inline PIR in NQP scripts is
+deprecated.  Use C< Q:PIR { ... } >  or C< Q:PIR {{ ... }} >
+instead.
+
+L<https://trac.parrot.org/parrot/ticket/842>
+
+=cut
 
 =back
 
@@ -341,6 +406,47 @@ L<https://trac.parrot.org/parrot/ticket/338>
 
 =back
 
+=head1 pmc2c syntax
+
+=over 4
+
+=item "pmclass" with name not matching file's basename [eligible in 1.5]
+
+When foo.pmc contains a the line "pmclass bar", pmc2c generates a pmc_foo.h
+but tries to include pmc_bar.h.  This is a bug, but it's possible someone out
+there is using it.  This usage will result in a warning for now; after
+the 1.4 release, this warning will be upgraded to an error.
+
+L<https://trac.parrot.org/parrot/ticket/665>
+
+=back
+
+=head1 Parrot library
+
+=over 4
+
+=item Data::Replace [eligible in 1.5]
+
+L<https://trac.parrot.org/parrot/ticket/108>
+
+=item JSON, JSON, and Config;JSON [eligible in 1.5]
+
+L<https://trac.parrot.org/parrot/ticket/508>
+
+=item NCI::call_toolkit_init [eligible in 1.5]
+
+L<https://trac.parrot.org/parrot/ticket/753>
+
+=item Cross-HLL library loading [experimental]
+
+L<https://trac.parrot.org/parrot/ticket/754>
+
+=item OpenGL bindings and libraries [experimental]
+
+L<https://trac.parrot.org/parrot/ticket/852>
+
+=back
+
 =head1 Footnotes
 
 =over 4
@@ -350,6 +456,12 @@ L<https://trac.parrot.org/parrot/ticket/338>
 L<Trac|http://trac.parrot.org/> is parrot's primary issue tracking system.
 
 Older tickets may be listed at L<RT|https://rt.perl.org/rt3>.
+
+=item 2
+
+For an item to be considered experimental, it can B<never> have shipped in
+a stable release without the C<[experimental]> tag; otherwise, it must be
+deprecated normally before removal or incompatible change.
 
 =back
 

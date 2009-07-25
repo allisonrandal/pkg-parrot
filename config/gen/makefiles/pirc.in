@@ -1,23 +1,19 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: pirc.in 37108 2009-03-04 13:38:24Z fperrad $
+# $Id: pirc.in 39045 2009-05-22 16:17:19Z Infinoid $
 
 .SUFFIXES : .c @o@
 
 # Setup some commands
 PERL          := @perl@
 RM_F          := @rm_f@
-PARROT        := ../../parrot@exe@
-TOOL_DIR      := ../..
-CC            := @cc@
 CP            := @cp@
-BUILD         := $(PERL) @build_dir@/tools/build/dynpmc.pl
-O             := @o@
-EXE           := @exe@
+PARROT        := ../../parrot@exe@
 BUILD_DIR     := @build_dir@
 RECONFIGURE   := $(PERL) @build_dir@/tools/dev/reconfigure.pl
 
-LIBPARROT     := @libparrot@
-
+CC            := @cc@
+O             := @o@
+EXE           := @exe@
 CC_INC        := -I../../include
 C_LIBS        := @libs@
 CC_SHARED     := @cc_shared@
@@ -72,7 +68,7 @@ all: pirc$(EXE)
 pirc$(EXE): $(OBJS)
 	$(LINK) @ld_out@$@ \
 	    $(OBJS) \
-	    @rpath_blib@ @libparrot_ldflags@ $(C_LIBS) $(LINKFLAGS) $(LINK_DYNAMIC)
+	    @rpath_blib@ @libparrot_linkflags@ $(C_LIBS) $(LINKFLAGS) $(LINK_DYNAMIC)
 
 src/pirparser$(O): src/pirparser.c src/pirparser.h
 src/pirlexer$(O): src/pirlexer.c src/pirlexer.h
@@ -90,7 +86,6 @@ src/pircapi$(O): src/pircapi.c src/pircapi.h
 src/pirop$(O): src/pirop.c src/pirop.h
 
 test: all
-	podchecker $(SOURCES) README.pod
 	perl t/harness
 
 # regenerate the Makefile

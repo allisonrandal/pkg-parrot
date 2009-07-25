@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: portable.c 37201 2009-03-08 12:07:48Z fperrad $
+$Id: portable.c 37854 2009-04-01 20:00:45Z coke $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ static INTVAL io_is_tty_portable(PIOHANDLE fptr);
 
 /*
 
-=item C<static const char * convert_flags_to_stdio>
+=item C<static const char * convert_flags_to_stdio(INTVAL flags)>
 
 Returns a C string representation of C<flags> suitable for passing to
 C<fopen()> in C<Parrot_io_open_portable()>.
@@ -86,7 +86,7 @@ convert_flags_to_stdio(INTVAL flags)
 
 /*
 
-=item C<INTVAL Parrot_io_init_portable>
+=item C<INTVAL Parrot_io_init_portable(PARROT_INTERP)>
 
 Sets up standard streams, etc.
 
@@ -117,7 +117,8 @@ Parrot_io_init_portable(PARROT_INTERP)
 
 /*
 
-=item C<PMC * Parrot_io_open_portable>
+=item C<PMC * Parrot_io_open_portable(PARROT_INTERP, PMC *filehandle, STRING
+*path, INTVAL flags)>
 
 Opens a new FileHandle PMC from a given STRING path with the provided modes.
 
@@ -176,7 +177,8 @@ Parrot_io_open_portable(PARROT_INTERP, ARGMOD(PMC *filehandle),
 
 /*
 
-=item C<PMC * Parrot_io_fdopen_portable>
+=item C<PMC * Parrot_io_fdopen_portable(PARROT_INTERP, PMC *filehandle,
+PIOHANDLE fptr, INTVAL flags)>
 
 Associates an IO PMC with a file descriptor.
 
@@ -212,7 +214,7 @@ Parrot_io_fdopen_portable(PARROT_INTERP, ARGMOD(PMC *filehandle),
 
 /*
 
-=item C<INTVAL Parrot_io_close_portable>
+=item C<INTVAL Parrot_io_close_portable(PARROT_INTERP, PMC *filehandle)>
 
 Closes the underlying filehandle of a given IO PMC.
 
@@ -240,7 +242,7 @@ Parrot_io_close_portable(PARROT_INTERP, ARGMOD(PMC *filehandle))
 
 /*
 
-=item C<INTVAL Parrot_io_is_closed_portable>
+=item C<INTVAL Parrot_io_is_closed_portable(PARROT_INTERP, PMC *filehandle)>
 
 Tests whether the filehandle has been closed.
 
@@ -261,7 +263,7 @@ Parrot_io_is_closed_portable(PARROT_INTERP, ARGIN(PMC *filehandle))
 
 /*
 
-=item C<static INTVAL io_is_tty_portable>
+=item C<static INTVAL io_is_tty_portable(PIOHANDLE fptr)>
 
 Tests whether the given file descriptor is attached to a tty.
 
@@ -282,7 +284,8 @@ io_is_tty_portable(PIOHANDLE fptr)
 
 /*
 
-=item C<size_t Parrot_io_peek_portable>
+=item C<size_t Parrot_io_peek_portable(PARROT_INTERP, PMC *filehandle, STRING
+**buf)>
 
 Retrieves the next character in the stream without modifying the stream.
 
@@ -316,7 +319,7 @@ Parrot_io_peek_portable(PARROT_INTERP,
 
 /*
 
-=item C<INTVAL Parrot_io_getblksize_portable>
+=item C<INTVAL Parrot_io_getblksize_portable(PIOHANDLE fptr)>
 
 Returns the block size of the given file descriptor.
 
@@ -337,7 +340,7 @@ Parrot_io_getblksize_portable(PIOHANDLE fptr)
 
 /*
 
-=item C<INTVAL Parrot_io_flush_portable>
+=item C<INTVAL Parrot_io_flush_portable(PARROT_INTERP, PMC *filehandle)>
 
 Flushes the underlying file descriptor of the given IO PMC.
 
@@ -355,7 +358,8 @@ Parrot_io_flush_portable(SHIM_INTERP, SHIM(PMC *filehandle))
 
 /*
 
-=item C<size_t Parrot_io_read_portable>
+=item C<size_t Parrot_io_read_portable(PARROT_INTERP, PMC *filehandle, STRING
+**buf)>
 
 Reads from the given filehandle into the provided STRING, returning the number
 of bytes read.
@@ -389,7 +393,8 @@ Parrot_io_read_portable(PARROT_INTERP, SHIM(PMC *filehandle),
 
 /*
 
-=item C<size_t Parrot_io_write_portable>
+=item C<size_t Parrot_io_write_portable(PARROT_INTERP, PMC *filehandle, STRING
+*s)>
 
 Writes the given STRING to the provided IO PMC.
 
@@ -409,7 +414,8 @@ Parrot_io_write_portable(PARROT_INTERP, ARGIN(PMC *filehandle), ARGMOD(STRING *s
 
 /*
 
-=item C<PIOOFF_T Parrot_io_seek_portable>
+=item C<PIOOFF_T Parrot_io_seek_portable(PARROT_INTERP, PMC *filehandle,
+PIOOFF_T offset, INTVAL whence)>
 
 Seeks to the given offset and position within the provided IO PMC.
 
@@ -439,7 +445,7 @@ Parrot_io_seek_portable(PARROT_INTERP, ARGMOD(PMC *filehandle),
 
 /*
 
-=item C<PIOOFF_T Parrot_io_tell_portable>
+=item C<PIOOFF_T Parrot_io_tell_portable(PARROT_INTERP, PMC *filehandle)>
 
 Returns the current position of the given IO PMC.
 
@@ -457,7 +463,8 @@ Parrot_io_tell_portable(PARROT_INTERP, ARGIN(PMC *filehandle))
 
 /*
 
-=item C<PMC * Parrot_io_open_pipe_portable>
+=item C<PMC * Parrot_io_open_pipe_portable(PARROT_INTERP, PMC *filehandle,
+STRING *command, int flags)>
 
 Opens a pipe. Not implemented for this platform.
 

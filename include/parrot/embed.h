@@ -1,7 +1,7 @@
 /* embed.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: embed.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: embed.h 39418 2009-06-06 01:37:41Z jkeenan $
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.
@@ -83,12 +83,6 @@ PARROT_EXPORT void Parrot_run_native(PARROT_INTERP, native_func_t func);
 void Parrot_set_config_hash(void);
 
 int Parrot_revision(void);
-
-/* Deprecated */
-
-/* with 0.9.1 TT #266 */
-#define Parrot_readbc(i, c)  Parrot_pbc_read((i), (c), 0)
-#define Parrot_loadbc(i, pf) Parrot_pbc_load((i), (pf))
 
 #endif /* PARROT_EMBED_H_GUARD */
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Compiler.pm 37129 2009-03-05 18:43:38Z rurban $
+# $Id: Compiler.pm 38867 2009-05-17 10:27:28Z fperrad $
 
 =head1 NAME
 
@@ -52,6 +52,9 @@ our %file_types_info = (
         comment_type    => '/*',
     },
     perl => {
+        comment_type    => '#',
+    },
+    pir => {
         comment_type    => '#',
     },
 );
@@ -358,6 +361,9 @@ sub genfile {
         }
         elsif ($target =~ m/\.pmc$/ ) {
             $options{file_type} = 'pmc';
+        }
+        elsif ($target =~ m/\.pir$/ ) {
+            $options{file_type} = 'pir';
         }
     } elsif ( $options{file_type} eq 'none' ) {
         delete $options{file_type};

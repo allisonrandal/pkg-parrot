@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: pge_examples.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pge_examples.t 38955 2009-05-20 03:20:58Z Infinoid $
 
 use strict;
 use warnings;
@@ -52,7 +52,8 @@ ok2
 OUT
 
 # 2
-pir_output_is( <<'CODE', <<'OUT', "parse FASTA" );
+my @todo = (($^O =~ /darwin/i) ? (todo => 'Darwin segfault -- TT #479') : ());
+pir_output_is( <<'CODE', <<'OUT', "parse FASTA", @todo );
 
 # Grok fasta files, which usually contain DNA, RNA or protein sequences.
 # http://en.wikipedia.org/wiki/FASTA_format

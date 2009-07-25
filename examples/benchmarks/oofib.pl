@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: oofib.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: oofib.pl 38923 2009-05-19 06:07:42Z cotto $
 
 use strict;
 use warnings;
@@ -33,7 +33,7 @@ sub fibB {
 
 package main;
 
-my $N = shift || 28;
+my $N = shift || 24;
 
 my $b = B->new();
 

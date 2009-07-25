@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: to_parrot.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: to_parrot.t 38691 2009-05-11 17:41:35Z NotFound $
 
 use strict;
 use warnings;
@@ -690,7 +690,7 @@ sub json_dump_is {
 
 .sub test :main
     load_bytecode 'compilers/json/JSON.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
 
     .local pmc JSON, result
     JSON = compreg "JSON"

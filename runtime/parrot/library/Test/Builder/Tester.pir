@@ -1,4 +1,4 @@
-# $Id: Tester.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Tester.pir 38693 2009-05-11 18:45:05Z NotFound $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Test::Builder::Tester - Parrot extension for testing test modules
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/Test/Builder/Tester.pbc'
+    load_bytecode 'Test/Builder/Tester.pbc'
 
     # grab the subroutines you want to use
     .local pmc plan
@@ -154,7 +154,7 @@ This module defines the following public functions:
 .namespace [ 'Test'; 'Builder'; 'Tester' ]
 
 .sub _initialize :load
-    load_bytecode 'library/Test/Builder.pbc'
+    load_bytecode 'Test/Builder.pbc'
 
     .local pmc test
     .local pmc output

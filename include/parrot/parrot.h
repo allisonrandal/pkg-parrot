@@ -1,7 +1,7 @@
 /* parrot.h
- *  Copyright (C) 2001-2008, Parrot Foundation.
+ *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: parrot.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: parrot.h 40104 2009-07-15 13:55:49Z NotFound $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -102,10 +102,6 @@
 typedef jmp_buf Parrot_jump_buff;
 #endif /* PARROT_HAS_HEADER_SETJMP */
 
-#ifdef PARROT_HAS_HEADER_PTHREAD
-#  include <pthread.h>
-#endif /* PARROT_HAS_HEADER_PTHREAD */
-
 #ifdef PARROT_HAS_HEADER_LIMITS
 #  include <limits.h>
 #endif /* PARROT_HAS_HEADER_LIMITS */
@@ -140,8 +136,8 @@ typedef struct parrot_interp_t Interp;
     A. D. Aug. 6, 2002.
 */
 #if PTR_SIZE == INTVAL_SIZE
-#  define INTVAL2PTR(any, d)    (any)(d)
-#  define UINTVAL2PTR(any, d)    (any)(d)
+#  define INTVAL2PTR(any, d)    ((any)(d))
+#  define UINTVAL2PTR(any, d)    ((any)(d))
 #else
 #  if PTR_SIZE == LONG_SIZE
 #    define INTVAL2PTR(any, d)    ((any)(unsigned long)(d))
@@ -153,20 +149,6 @@ typedef struct parrot_interp_t Interp;
 #endif /* PTR_SIZE == INTVAL_SIZE */
 #define PTR2INTVAL(p)    INTVAL2PTR(INTVAL, (p))
 #define PTR2UINTVAL(p)    UINTVAL2PTR(UINTVAL, (p))
-
-/* Use similar macros for casting between pointers and opcode_t.
-   (We can't assume that sizeof (opcode_t) == sizeof (intval).
-*/
-#if (OPCODE_T_SIZE == PTR_SIZE)
-#  define OPCODE_T2PTR(any, d)    (any)(d)
-#else
-#  if PTR_SIZE == LONG_SIZE
-#    define OPCODE_T2PTR(any, d)    (any)(unsigned long)(d)
-#  else
-#    define OPCODE_T2PTR(any, d)    (any)(unsigned int)(d)
-#  endif /* PTR_SIZE == LONG_SIZE */
-#endif /* OPCODE_T_SIZE == PTR_SIZE */
-#define PTR2OPCODE_T(p)    OPCODE_T2PTR(opcode_t, (p))
 
 /*
  * some compilers don't like lvalue casts, so macroize them
@@ -297,9 +279,6 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 #include "parrot/pmc.h"
 #include "parrot/events.h"
 #include "parrot/gc_api.h"
-#include "parrot/gc_mark_sweep.h"
-#include "parrot/gc_pools.h"
-#include "parrot/resources.h"
 #include "parrot/string_funcs.h"
 #include "parrot/misc.h"
 #include "parrot/sub.h"

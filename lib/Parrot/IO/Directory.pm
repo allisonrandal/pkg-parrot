@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: Directory.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Directory.pm 39955 2009-07-09 00:02:26Z jkeenan $
 
 =head1 NAME
 
@@ -131,7 +131,7 @@ sub create_path {
     unless ( -e $self->path ) {
 
         # This dies if it fails.
-        mkpath( $self->path );
+        mkpath( [ $self->path ], 0, 0777 );
     }
 
     return -d $self->path;

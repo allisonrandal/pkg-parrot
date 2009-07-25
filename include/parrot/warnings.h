@@ -1,5 +1,5 @@
 /*
- * $Id: warnings.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: warnings.h 38481 2009-05-05 04:47:13Z petdance $
  * Copyright (C) 2002-2007, Parrot Foundation.
  */
 
@@ -57,7 +57,9 @@ typedef enum {
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
-INTVAL Parrot_warn(PARROT_INTERP,
+PARROT_IGNORABLE_RESULT
+INTVAL /*@alt void@*/
+Parrot_warn(PARROT_INTERP,
     INTVAL warnclass,
     ARGIN(const char *message),
     ...)

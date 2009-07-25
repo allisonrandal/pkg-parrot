@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 52_if_compare.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 Comparison Branching
 
 A simple C<goto> is the most simple version of flow control, but its

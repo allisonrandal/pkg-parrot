@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: fixedstringarray.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: fixedstringarray.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
@@ -142,7 +142,7 @@ current instr\.:/
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedStringArray']
      set P0, 3
      new P1, ['Key']
@@ -179,7 +179,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedStringArray']
      set P0, 1024
 

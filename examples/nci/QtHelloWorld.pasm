@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: QtHelloWorld.pasm 37422 2009-03-14 23:50:46Z allison $
+# $Id: QtHelloWorld.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -61,3 +61,9 @@ F<src/call_list.txt> and rebuilding Parrot.
 F<examples/nci/PQt.C>, F<docs/pdds/pdd03_calling_conventions.pod>.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

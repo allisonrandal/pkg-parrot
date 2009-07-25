@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: Base.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: Base.pm 37561 2009-03-18 21:18:30Z cotto $
 package Parrot::Ops2pm::Base;
 use strict;
 use warnings;
@@ -148,9 +148,20 @@ sub prepare_ops {
         my $temp_ops = Parrot::OpsFile->new( [$f], $self->{nolines} );
         die "$self->{script}: Could not read ops file '$f'!\n"
             unless defined $temp_ops;
-        die "OPS invalid for $f" unless ref $temp_ops->{OPS};
 
         my $experimental = $f =~ /experimental/;
+
+        if (! ref $temp_ops->{OPS}) {
+            my $message = "OPS invalid for $f";
+            if ($experimental) {
+                # empty experimental.ops file is OK.
+                warn $message;
+                next;
+            }
+            else {
+                die $message;
+            }
+        }
 
         # mark experimental ops
         if ($experimental) {

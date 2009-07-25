@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: pmcproxy.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: pmcproxy.t 39122 2009-05-24 00:42:07Z NotFound $
 
 =head1 NAME
 
@@ -17,8 +17,8 @@ Tests the PMCProxy PMC.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
-    plan(44)
+    .include 'test_more.pir'
+    plan(45)
 
     new_tests()
     get_class_tests()
@@ -36,6 +36,9 @@ Tests the PMCProxy PMC.
     new $P0, ['PMCProxy']
     ok(1, "new PMCProxy didn't explode")
     isa_ok($P0, "PMCProxy")
+
+    $I0 = isa $P0, 'Foo'
+    is($I0, 0, "non-default isa on PMCProxy works")
 .end
 
 
@@ -143,7 +146,7 @@ Tests the PMCProxy PMC.
 
     #We will override the add_role vtable method.
     $P2 = get_global 'no_add_role'
-    $P0.'add_method'('add_role', $P2, 'vtable' => 1)
+    $P0.'add_vtable_override'('add_role', $P2)
     ok(1, 'overrode a vtable method')
 
     $P2 = $P0.'new'()
@@ -177,7 +180,7 @@ Tests the PMCProxy PMC.
 
     #We will override the inspect_str vtable method.
     $P2 = get_global 'always42'
-    $P0.'add_method'('inspect_str', $P2, 'vtable' => 1)
+    $P0.'add_vtable_override'('inspect_str', $P2)
     ok(1, 'overrode inspect_str method')
 
     $P2 = $P0.'new'()

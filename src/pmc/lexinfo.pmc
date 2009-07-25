@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008, Parrot Foundation.
-$Id: lexinfo.pmc 37415 2009-03-14 18:16:20Z fperrad $
+$Id: lexinfo.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -18,8 +18,6 @@ These are the vtable functions for the lexinfo PMC.
 
 */
 
-#include "parrot/parrot.h"
-
 /* included manually to prevent breaking C++ builds -- see RT #56534*/
 #include "pmc_hash.h"
 
@@ -29,7 +27,7 @@ These are the vtable functions for the lexinfo PMC.
  * needed (except for freeze/thaw
  */
 
-pmclass LexInfo need_ext provides hash no_ro {
+pmclass LexInfo extends Hash need_ext provides hash no_ro {
 
 /*
 
@@ -62,31 +60,20 @@ subroutine.
     }
 
     VTABLE void init_pmc(PMC *sub) {
+        Hash                      *hash;
+        Parrot_LexInfo_attributes *attrs =
+            mem_allocate_zeroed_typed(Parrot_LexInfo_attributes);
         PARROT_ASSERT(PObj_constant_TEST(SELF));
-        PMC_pmc_val(SELF) = sub;
 
-        parrot_new_pmc_hash_x(INTERP, SELF,
+        hash = parrot_create_hash(INTERP,
             (PARROT_DATA_TYPE)enum_hash_int,
             Hash_key_type_STRING,
             (hash_comp_fn)Parrot_str_not_equal,     /* STRING compare */
             (hash_hash_key_fn)Parrot_str_to_hashval); /*        hash    */
 
+        PMC_data(SELF) = attrs;
+        SELF.set_pointer(hash);
         PObj_active_destroy_SET(SELF);
-    }
-
-/*
-
-=item C<void destroy()>
-
-Frees any malloced memory held by this PMC.
-
-=cut
-
-*/
-
-    void destroy() {
-        if (PMC_struct_val(SELF))
-            parrot_hash_destroy(INTERP, (Hash *)PMC_struct_val(SELF));
     }
 
 /*
@@ -105,11 +92,11 @@ Returns the number of elements in the LexInfo hash.
 */
 
     METHOD declare_lex_preg(STRING *name, INTVAL preg) {
-        parrot_hash_put(INTERP, (Hash*)PMC_struct_val(SELF), name, (void*)preg);
+        parrot_hash_put(INTERP, (Hash *)SELF.get_pointer(), name, (void*)preg);
     }
 
     VTABLE INTVAL elements() {
-        return parrot_hash_size(INTERP, (Hash *)PMC_struct_val(SELF));
+        return parrot_hash_size(INTERP, (Hash *)SELF.get_pointer());
     }
 
 
@@ -127,7 +114,7 @@ C<symbols>, which gets an array of the names of the symbols in this lexpad.
     VTABLE PMC *inspect_str(STRING *what) {
         if (Parrot_str_equal(interp, what, CONST_STRING(interp, "symbols"))) {
             PMC *result     = pmc_new(interp, enum_class_ResizableStringArray);
-            Hash *hash      = (Hash *)PMC_struct_val(SELF);
+            Hash *hash      = (Hash *)SELF.get_pointer();
             UINTVAL entries = hash->entries;
             UINTVAL found   = 0;
             INTVAL  i;
@@ -169,13 +156,6 @@ The implementation of the Hash PMC is called.
 
 */
 
-    VTABLE void visit(visit_info *info) {
-        Parrot_Hash_visit(INTERP, SELF, info);
-    }
-
-    VTABLE void freeze(visit_info *info) {
-        Parrot_Hash_freeze(INTERP, SELF, info);
-    }
 
     VTABLE void thaw(visit_info *info) {
         IMAGE_IO * const io = info->image_io;
@@ -195,7 +175,7 @@ The implementation of the Hash PMC is called.
              */
 
             SELF.init_pmc(NULL);
-            hash          = (Hash *)PMC_struct_val(SELF);
+            hash          = (Hash *)SELF.get_pointer();
             hash->entries = elems;
         }
         else {

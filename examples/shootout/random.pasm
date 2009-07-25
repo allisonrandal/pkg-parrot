@@ -1,4 +1,6 @@
 #!./parrot -R jit
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: random.pasm 38369 2009-04-26 12:57:09Z fperrad $
 #
 # random.pasm N         (N = 900000 for shootout)
 # by Joshua Isom
@@ -45,3 +47,8 @@ gen_random:
     div N3, .IM
     ret
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,4 +1,5 @@
-# $Id: say.pir 30480 2008-08-23 14:26:06Z jkeenan $
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: say.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 =head1
 

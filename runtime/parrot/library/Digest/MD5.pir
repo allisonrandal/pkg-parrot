@@ -1,4 +1,5 @@
-# $Id: MD5.pir 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: MD5.pir 38693 2009-05-11 18:45:05Z NotFound $
 #
 # Parrot MD5 library; Nick Glencross <nickg@glencros.demon.co.uk>
 #                     Improvements from Leo and Jens Rieks
@@ -12,13 +13,13 @@ MD5.pir - calculates MD5 checksums
 
 =head1 SYNOPSIS
 
-  load_bytecode "Digest/MD5.pir"
+  load_bytecode "Digest/MD5.pbc"
   $P0 = _md5sum("foo")
   _md5_print($P0)
 
 or
 
-  load_bytecode "Digest/MD5.pir"
+  load_bytecode "Digest/MD5.pbc"
   $P0 = _md5sum("bar")
   $S0 = _md5_hex($P0)
 

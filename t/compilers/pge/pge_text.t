@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pge_text.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pge_text.t 38705 2009-05-11 22:13:04Z NotFound $
 
 use strict;
 use warnings;
@@ -30,7 +30,7 @@ pir_output_is( <<'CODE', <<'OUT', "bracketed" );
     .local pmc bracketed
 
     load_bytecode 'PGE.pbc'
-    load_bytecode 'PGE/Text.pir'
+    load_bytecode 'PGE/Text.pbc'
 
     bracketed = get_global ['PGE';'Text'], "bracketed"
 

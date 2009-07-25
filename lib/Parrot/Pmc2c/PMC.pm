@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: PMC.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: PMC.pm 39660 2009-06-18 21:42:24Z cotto $
 #
 
 =head1 NAME
@@ -204,6 +204,11 @@ sub parents {
     return $self->{parents};
 }
 
+sub direct_parents {
+    my ($self) = @_;
+    return $self->{direct_parents};
+}
+
 sub mixins {
     my ($self) = @_;
     return $self->{mixins};
@@ -235,7 +240,10 @@ sub get_flags {
 sub set_parents {
     my ( $self, $value ) = @_;
     $value             ||= [];
-    $self->{parents}     = $value;
+    $self->{parents}        = $value;
+    for my $dp (@{ $value }) {
+        push @{$self->{direct_parents}}, $dp;
+    }
     return 1;
 }
 

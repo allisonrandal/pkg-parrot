@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
+Copyright (C) 2001-2009, Parrot Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packdump.c 37201 2009-03-08 12:07:48Z fperrad $
+$Id: packdump.c 39812 2009-06-28 06:35:41Z petdance $
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ static void PackFile_Constant_dump(PARROT_INTERP,
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);
 
-static void pobj_flag_dump(PARROT_INTERP, ARGIN_NULLOK(long flags))
+static void pobj_flag_dump(PARROT_INTERP, long flags)
         __attribute__nonnull__(1);
 
 #define ASSERT_ARGS_PackFile_Constant_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = \
@@ -52,7 +52,8 @@ static void pobj_flag_dump(PARROT_INTERP, ARGIN_NULLOK(long flags))
 
 /*
 
-=item C<void PackFile_ConstTable_dump>
+=item C<void PackFile_ConstTable_dump(PARROT_INTERP, const PackFile_ConstTable
+*self)>
 
 Dumps the constant table C<self>.
 
@@ -75,7 +76,8 @@ PackFile_ConstTable_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *self))
 
 /*
 
-=item C<static void PackFile_Constant_dump>
+=item C<static void PackFile_Constant_dump(PARROT_INTERP, const
+PackFile_ConstTable *ct, const PackFile_Constant *self)>
 
 Dumps the constant C<self>.
 
@@ -86,7 +88,7 @@ Dumps the constant C<self>.
 /* [this desperately needs better abstraction, so we're not duplicating the enum
  * PObj_enum definition in the include/parrot/pobj.h file.  -- rgr, 1-Mar-08.]
  */
-static const char *flag_bit_names[] =
+PARROT_OBSERVER static const char * const flag_bit_names[] =
 {
     "private0",
     "private1",
@@ -121,11 +123,19 @@ static const char *flag_bit_names[] =
     "is_object"
 };
 
-/* Given a word of flags, generate a dump line of the whole word in hex,
- * followed by individual bits.
- */
+/*
+
+=item C<static void pobj_flag_dump(PARROT_INTERP, long flags)>
+
+Given a word of flags, generate a dump line of the whole word in hex,
+followed by individual bits.
+
+=cut
+
+*/
+
 static void
-pobj_flag_dump(PARROT_INTERP, ARGIN_NULLOK(long flags))
+pobj_flag_dump(PARROT_INTERP, long flags)
 {
     ASSERT_ARGS(pobj_flag_dump)
     INTVAL idx = 0;
@@ -200,7 +210,8 @@ PackFile_Constant_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *ct),
             switch (type) {
                 case KEY_integer_FLAG:
                     Parrot_io_printf(interp, "        TYPE        => INTEGER\n");
-                    Parrot_io_printf(interp, "        DATA        => %ld\n", PMC_int_val(key));
+                    Parrot_io_printf(interp, "        DATA        => %ld\n",
+                            VTABLE_get_integer(interp, key));
                     Parrot_io_printf(interp, "       },\n");
                     break;
                 case KEY_number_FLAG:
@@ -233,22 +244,26 @@ PackFile_Constant_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *ct),
                     break;
                 case KEY_integer_FLAG | KEY_register_FLAG:
                     Parrot_io_printf(interp, "        TYPE        => I REGISTER\n");
-                    Parrot_io_printf(interp, "        DATA        => %ld\n", PMC_int_val(key));
+                    Parrot_io_printf(interp, "        DATA        => %ld\n",
+                            VTABLE_get_integer(interp, key));
                     Parrot_io_printf(interp, "       },\n");
                     break;
                 case KEY_number_FLAG | KEY_register_FLAG:
                     Parrot_io_printf(interp, "        TYPE        => N REGISTER\n");
-                    Parrot_io_printf(interp, "        DATA        => %ld\n", PMC_int_val(key));
+                    Parrot_io_printf(interp, "        DATA        => %ld\n",
+                            VTABLE_get_integer(interp, key));
                     Parrot_io_printf(interp, "       },\n");
                     break;
                 case KEY_string_FLAG | KEY_register_FLAG:
                     Parrot_io_printf(interp, "        TYPE        => S REGISTER\n");
-                    Parrot_io_printf(interp, "        DATA        => %ld\n", PMC_int_val(key));
+                    Parrot_io_printf(interp, "        DATA        => %ld\n",
+                            VTABLE_get_integer(interp, key));
                     Parrot_io_printf(interp, "       },\n");
                     break;
                 case KEY_pmc_FLAG | KEY_register_FLAG:
                     Parrot_io_printf(interp, "        TYPE        => P REGISTER\n");
-                    Parrot_io_printf(interp, "        DATA        => %ld\n", PMC_int_val(key));
+                    Parrot_io_printf(interp, "        DATA        => %ld\n",
+                            VTABLE_get_integer(interp, key));
                     Parrot_io_printf(interp, "       },\n");
                     break;
                 default:
@@ -360,7 +375,7 @@ PackFile_Constant_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *ct),
 
 /*
 
-=item C<void PackFile_Fixup_dump>
+=item C<void PackFile_Fixup_dump(PARROT_INTERP, const PackFile_FixupTable *ft)>
 
 Dumps the fix-up table C<ft>.
 

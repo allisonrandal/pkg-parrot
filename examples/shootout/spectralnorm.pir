@@ -1,4 +1,6 @@
 #!./parrot
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: spectralnorm.pir 38369 2009-04-26 12:57:09Z fperrad $
 #
 # ./parrot -R jit spectralnorm.pir N         (N = 100 for shootout)
 # by Michal Jurosz

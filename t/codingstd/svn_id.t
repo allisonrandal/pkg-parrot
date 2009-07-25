@@ -1,11 +1,12 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: svn_id.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: svn_id.t 38235 2009-04-20 18:58:55Z fperrad $
 
 use strict;
 use warnings;
+use Cwd;
+use File::Spec ();
 use lib qw( . lib ../lib ../../lib );
-
 use Parrot::Distribution;
 use Test::More            tests => 1;
 
@@ -34,22 +35,35 @@ L<docs/pdds/pdd07_codingstd.pod>
 =cut
 
 my $DIST = Parrot::Distribution->new;
+my $cwd = cwd();
 
-my @c_files    = $DIST->get_c_language_files();
-my @perl_files = $DIST->get_perl_language_files();
-my @make_files = $DIST->get_make_language_files();
-my @all_files  = ( @c_files, @perl_files, @make_files );
+# Certain files, for various reasons, cannot have an
+# SVN Id tag.  We exclude them from examination by this test.
 
-my @files = @ARGV ? <@ARGV> : @all_files;
+my %known_exceptions = map {
+        $_ => 1,
+        ( File::Spec->catdir( $cwd, $_ ) ) => 1,
+    } qw(
+        examples/pir/quine_ord.pir
+        examples/streams/FileLines.pir
+        examples/streams/ParrotIO.pir
+    );
+
+my @files = grep { ! $known_exceptions{$_} }
+    ( @ARGV
+        ? <@ARGV>
+        : map { $_->path } (
+            $DIST->get_c_language_files(),
+            $DIST->get_make_language_files(),
+            $DIST->get_perl_language_files(),
+            $DIST->get_pir_language_files(),
+        )
+);
 my @no_id_files;
 
 foreach my $file (@files) {
 
-    # if we have command line arguments, the file is the full path
-    # otherwise, use the relevant Parrot:: path method
-    my $path = @ARGV ? $file : $file->path;
-
-    my $buf = $DIST->slurp($path);
+    my $buf = $DIST->slurp($file);
 
     if ( $buf !~ m/\$Id
                    (?:
@@ -58,7 +72,7 @@ foreach my $file (@files) {
                     :.*\$    # expanded tag, colon required
                    )
                   /xm ) {
-        push @no_id_files, $path;
+        push @no_id_files, $file;
         next;
     }
 }

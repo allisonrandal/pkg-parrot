@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: fixedintegerarray.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: fixedintegerarray.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 11;
+use Parrot::Test tests => 12;
 
 =head1 NAME
 
@@ -164,7 +164,7 @@ current instr\.:/
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedIntegerArray']
      set P0, 3
      new P1, ['Key']
@@ -201,7 +201,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedIntegerArray']
      set P0, 1024
 
@@ -268,6 +268,28 @@ CODE
 1
 0
 OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "get_iter" );
+.sub 'main' :main
+    new $P0, ['FixedIntegerArray']
+    set $P0, 3
+    $P0[0] = 42
+    $P0[1] = 43
+    $P0[2] = 44
+    $P1 = iter $P0
+loop:
+    unless $P1 goto loop_end
+    $S2 = shift $P1
+    say $S2
+    goto loop
+loop_end:
+.end
+CODE
+42
+43
+44
+OUTPUT
+
 
 1;
 

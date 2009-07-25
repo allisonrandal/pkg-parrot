@@ -1,4 +1,5 @@
-# $Id: sudoku.pir 37337 2009-03-12 02:02:54Z Util $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: sudoku.pir 38693 2009-05-11 18:45:05Z NotFound $
 
 =pod
 
@@ -2148,7 +2149,7 @@ out:
 
 .sub nc_start
     .local pmc stdscr
-    load_bytecode "library/ncurses.pasm"
+    load_bytecode 'ncurses.pbc'
     stdscr = _init_curses()
     .return(stdscr)
 .end

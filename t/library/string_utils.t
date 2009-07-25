@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: string_utils.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: string_utils.t 38699 2009-05-11 20:09:47Z NotFound $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ t/library/string_utils.t  -- Tests for String/Utils.pbc
 .const string TESTS = '29'
 
 .sub main :main
-    load_bytecode 'Test/Builder.pir'
+    load_bytecode 'Test/Builder.pbc'
 
     .local pmc test       # the test harness object.
                test = new [ 'Test'; 'Builder' ]

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: spf_vtable.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: spf_vtable.c 37854 2009-04-01 20:00:45Z coke $
 
 =head1 NAME
 
@@ -161,7 +161,7 @@ static UHUGEINTVAL getuint_va(PARROT_INTERP,
 
 /*
 
-=item C<static STRING * getchr_va>
+=item C<static STRING * getchr_va(PARROT_INTERP, INTVAL size, SPRINTF_OBJ *obj)>
 
 Gets a C<char> out of the C<va_list> in C<obj> and returns it as a
 Parrot C<STRING>.
@@ -188,7 +188,8 @@ getchr_va(PARROT_INTERP, SHIM(INTVAL size), ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static HUGEINTVAL getint_va>
+=item C<static HUGEINTVAL getint_va(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Gets an integer out of the C<va_list> in C<obj> and returns it as a
 Parrot C<STRING>.
@@ -238,7 +239,8 @@ getint_va(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static UHUGEINTVAL getuint_va>
+=item C<static UHUGEINTVAL getuint_va(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Gets an unsigned integer out of the C<va_list> in C<obj> and returns it
 as a Parrot C<STRING>.
@@ -288,7 +290,8 @@ getuint_va(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static HUGEFLOATVAL getfloat_va>
+=item C<static HUGEFLOATVAL getfloat_va(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Gets an floating-point number out of the C<va_list> in C<obj> and
 returns it as a Parrot C<STRING>.
@@ -334,7 +337,8 @@ getfloat_va(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static STRING * getstring_va>
+=item C<static STRING * getstring_va(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Gets an string out of the C<va_list> in C<obj> and returns it as a
 Parrot C<STRING>.
@@ -385,7 +389,7 @@ getstring_va(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static void * getptr_va>
+=item C<static void * getptr_va(PARROT_INTERP, INTVAL size, SPRINTF_OBJ *obj)>
 
 Gets a C<void *> out of the C<va_list> in C<obj> and returns it.
 
@@ -419,7 +423,8 @@ const SPRINTF_OBJ va_core = {
 
 =over 4
 
-=item C<static STRING * getchr_pmc>
+=item C<static STRING * getchr_pmc(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Same as C<getchr_va()> except that a vtable is used to get the value
 from C<obj>.
@@ -447,7 +452,8 @@ getchr_pmc(PARROT_INTERP, SHIM(INTVAL size), ARGMOD(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static HUGEINTVAL getint_pmc>
+=item C<static HUGEINTVAL getint_pmc(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Same as C<getint_va()> except that a vtable is used to get the value
 from C<obj>.
@@ -486,7 +492,8 @@ getint_pmc(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static UHUGEINTVAL getuint_pmc>
+=item C<static UHUGEINTVAL getuint_pmc(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Same as C<getuint_va()> except that a vtable is used to get the value
 from C<obj>.
@@ -525,7 +532,8 @@ getuint_pmc(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static HUGEFLOATVAL getfloat_pmc>
+=item C<static HUGEFLOATVAL getfloat_pmc(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Same as C<getfloat_va()> except that a vtable is used to get the value
 from C<obj>.
@@ -561,7 +569,8 @@ getfloat_pmc(PARROT_INTERP, INTVAL size, ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static STRING * getstring_pmc>
+=item C<static STRING * getstring_pmc(PARROT_INTERP, INTVAL size, SPRINTF_OBJ
+*obj)>
 
 Same as C<getstring_va()> except that a vtable is used to get the value
 from C<obj>.
@@ -588,7 +597,7 @@ getstring_pmc(PARROT_INTERP, SHIM(INTVAL size), ARGIN(SPRINTF_OBJ *obj))
 
 /*
 
-=item C<static void * getptr_pmc>
+=item C<static void * getptr_pmc(PARROT_INTERP, INTVAL size, SPRINTF_OBJ *obj)>
 
 Same as C<getptr_va()> except that a vtable is used to get the value
 from C<obj>.

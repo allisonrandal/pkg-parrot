@@ -1,3 +1,6 @@
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: Match.pir 40143 2009-07-18 14:10:54Z fperrad $
+
 =head1 NAME
 
 PGE::Match - implementation of PGE match objects
@@ -15,7 +18,7 @@ This file implements match objects returned by the Parrot Grammar Engine.
     load_bytecode 'PGE/Dumper.pir'                 # FIXME, XXX, etc.
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('PGE::Match', 'parent'=>'Capture', 'attr'=>'$.target $.from $.pos &!corou $!item')
+    $P0 = p6meta.'new_class'('PGE::Match', 'parent'=>'Capture', 'attr'=>'$.target $.from $.pos &!corou $!ast')
     set_hll_global ['PGE'], '$!MATCH', $P0
     .return ()
 .end
@@ -61,9 +64,8 @@ is set or implied.
     .local pmc target, grammar_class
     issrcmatch = isa src, ['PGE';'Match']
     if issrcmatch goto target_from_src
-    .local pmc target
-    target = new 'String'
-    target = src
+    target = new 'CodeString'
+    assign target, src
     pos = 0
     iscont = 1
     $P0 = self.'HOW'()
@@ -212,13 +214,13 @@ Returns C<.to()> - C<.from()>.
 .end
 
 
-=item C<text()>
+=item C<Str()>
 
 Returns the portion of the target string matched by this object.
 
 =cut
 
-.sub 'text' :method
+.sub 'Str' :method
     $P0 = getattribute self, '$.target'
     $P1 = getattribute self, '$.from'
     $P2 = getattribute self, '$.pos'
@@ -234,38 +236,45 @@ Returns the portion of the target string matched by this object.
 .end
 
 
-=item C<item()>
+=item C<orig()>
 
-Returns the scalar value of this match -- the "result object"
-if there is one, otherwise the substring matched by this match
-object.
+Return the original item being matched.
 
 =cut
 
-.sub 'item' :method
-    .tailcall self.'result_object'()
+.sub 'orig' :method
+    $P0 = getattribute self, '$!target'
+    .return ($P0)
 .end
 
 
-=item C<result_object([pmc obj])>
+=item C<!make(pmc obj)>
 
-Returns or sets the "result object" for the match object.
+Sets the "ast object" for the Match invocant.
 
 =cut
 
-.sub 'result_object' :method
-    .param pmc obj             :optional
-    .param int has_obj         :opt_flag
-    if has_obj == 0 goto get_obj
-    setattribute self, '$!item', obj
-    goto ret_obj
-  get_obj:
-    obj = getattribute self, '$!item'
-  ret_obj:
+.sub '!make' :method
+    .param pmc obj
+    setattribute self, '$!ast', obj
+    .return (obj)
+.end
+
+
+=item C<ast([pmc obj])>
+
+Returns the "ast object" for the match object.  If no ast object
+has been set, then it returns the string between C<.from> and C<.to>.
+
+=cut
+
+.sub 'ast' :method
+    .local pmc obj
+    obj = getattribute self, '$!ast'
     if null obj goto ret_null
     .return (obj)
   ret_null:
-    .tailcall self.'text'()
+    .tailcall self.'Str'()
 .end
 
 
@@ -290,9 +299,13 @@ then simply return the first key found.
     .return ($S0)
   first_key:
     $P0 = self.'hash'()
-    $P1 = new 'Iterator', $P0
+    $P1 = iter $P0
     unless $P1 goto not_found
+  next:
     $S0 = shift $P1
+    $P2 = $P0[$S0]
+    $I0 = isa $P2, 'Capture'
+    unless $I0 goto next
     .return ($S0)
   not_found:
     .return ('')
@@ -314,7 +327,7 @@ the position of the match object to C<cutvalue>.
     null $P0
     setattribute self, '$.target', $P0
     setattribute self, '&!corou', $P0
-    setattribute self, '$!item', $P0
+    setattribute self, '$!ast', $P0
     setref self, $P0
     .return ()
 .end
@@ -340,8 +353,8 @@ Returns the integer value of this match.
 
 =cut
 
-.sub 'get_integer' :vtable :method
-    $I0 = self.'result_object'()
+.sub '' :vtable('get_integer') :method
+    $I0 = self.'Str'()
     .return ($I0)
 .end
 
@@ -351,8 +364,8 @@ Returns the numeric value of this match.
 
 =cut
 
-.sub 'get_number' :vtable :method
-    $N0 = self.'result_object'()
+.sub '' :vtable('get_number') :method
+    $N0 = self.'Str'()
     .return ($N0)
 .end
 
@@ -362,8 +375,8 @@ Returns the portion of the target string matched by this object.
 
 =cut
 
-.sub 'get_string' :vtable :method
-    $S0 = self.'result_object'()
+.sub '' :vtable('get_string') :method
+    $S0 = self.'Str'()
     .return ($S0)
 .end
 

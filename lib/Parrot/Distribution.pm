@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Distribution.pm 37407 2009-03-14 07:34:48Z fperrad $
+# $Id: Distribution.pm 39899 2009-07-06 17:48:48Z fperrad $
 
 =head1 NAME
 
@@ -202,7 +202,7 @@ BEGIN {
         source => {
             c   => { file_exts => ['c'] },
             pmc => { file_exts => ['pmc'] },
-            pir => { file_exts => ['pir', 't'] },
+            pir => { file_exts => ['pir', 'pasm', 't'] },
             ops => { file_exts => ['ops'] },
             lex => {
                 file_exts   => ['l'],
@@ -371,9 +371,7 @@ sub get_c_language_files {
         $self->c_header_files,
         $self->pmc_source_files,
         $self->yacc_source_files,
-
-        #$self->lex_source_files,
-        map( $_->files_of_type('Lex file'), $self->lex_source_file_directories ),
+        $self->lex_source_files,
         $self->ops_source_files,
     );
 
@@ -385,7 +383,6 @@ sub get_c_language_files {
 
     return @c_language_files;
 
-    # RT #43691: lex_source_files() collects lisp files as well.
     # RT #50046: pir_source_files() fails to collect PIR .t files.
 }
 
@@ -407,7 +404,6 @@ This is to exclude automatically generated C-language files Parrot might have.
             config/auto/cpu/i386/memcpy_mmx_in.c
             config/auto/cpu/i386/memcpy_sse.c
             config/auto/cpu/i386/memcpy_sse_in.c
-            config/gen/config_h/config_h.in
             config/gen/config_h/feature_h.in
             compilers/imcc/imclexer.c
             compilers/imcc/imcparser.c
@@ -434,7 +430,9 @@ This is to exclude automatically generated C-language files Parrot might have.
             compilers/pirc/macro/macrolexer.h
             compilers/pirc/macro/macroparser.c
             compilers/pirc/macro/macroparser.h
-            src/malloc.c
+            include/parrot/config.h
+            include/parrot/has_header.h
+            src/gc/malloc.c
             } unless @exemptions;
 
         my $path = -f $file ? $file : $file->path;
@@ -592,7 +590,8 @@ sub is_pir {
     return 0 unless -f $filename;
 
     # .pir files should always be tested
-    return 1 if $filename =~ /\.pir$/;
+    return 1 if $filename =~ /\.(?:pir|pasm)$/;
+    return 1 if $filename =~ /_(?:pir|pasm)\.in$/;
 
     # test files (.t) files might need testing.
     # ignore everything else.

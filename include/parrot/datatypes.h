@@ -3,7 +3,7 @@
  *  Copyright (C) 2002-2008, Parrot Foundation.
  *  License:  Artistic 2.0, see README and LICENSE for details
  *  SVN Info
- *     $Id: datatypes.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: datatypes.h 39491 2009-06-10 06:47:25Z petdance $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *
@@ -69,7 +69,7 @@ typedef enum {
 
 /* &end_gen */
 struct _data_types {
-    const char *name;
+    PARROT_OBSERVER const char *name;
     int size;
 };
 
@@ -123,9 +123,16 @@ const struct _data_types data_types[] = {
 };
 #endif /* INSIDE_GLOBAL_SETUP */
 
-#define PARROT_FLOATVAL_INF_POSITIVE  floatval_divide_by_zero(interp, 1.0)
-#define PARROT_FLOATVAL_INF_NEGATIVE  floatval_divide_by_zero(interp, -1.0)
-#define PARROT_FLOATVAL_NAN_QUIET     floatval_divide_by_zero(interp, 0.0)
+#if defined(__NetBSD__) && defined(__alpha__)
+#  include <math.h>
+#  define PARROT_FLOATVAL_INF_POSITIVE	INFINITY
+#  define PARROT_FLOATVAL_INF_NEGATIVE	-INFINITY
+#  define PARROT_FLOATVAL_NAN_QUIET	NAN
+#else
+#  define PARROT_FLOATVAL_INF_POSITIVE  floatval_divide_by_zero(interp, 1.0)
+#  define PARROT_FLOATVAL_INF_NEGATIVE  floatval_divide_by_zero(interp, -1.0)
+#  define PARROT_FLOATVAL_NAN_QUIET     floatval_divide_by_zero(interp, 0.0)
+#endif
 
 #define PARROT_CSTRING_INF_POSITIVE    "Inf"
 #define PARROT_CSTRING_INF_NEGATIVE    "-Inf"
@@ -136,8 +143,7 @@ const struct _data_types data_types[] = {
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
-FLOATVAL floatval_divide_by_zero(PARROT_INTERP, FLOATVAL num)
-        __attribute__nonnull__(1);
+FLOATVAL floatval_divide_by_zero(SHIM_INTERP, FLOATVAL num);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
@@ -152,8 +158,7 @@ PARROT_CANNOT_RETURN_NULL
 STRING * Parrot_get_datatype_name(PARROT_INTERP, INTVAL type)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_floatval_divide_by_zero __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_floatval_divide_by_zero __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_Parrot_get_datatype_enum __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(type_name)

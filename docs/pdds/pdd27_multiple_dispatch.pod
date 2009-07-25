@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: pdd27_multiple_dispatch.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id: pdd27_multiple_dispatch.pod 39694 2009-06-22 02:49:35Z cotto $
 
 =head1 PDD 27: Multiple Dispatch
 
@@ -9,7 +9,7 @@ This PDD defines Parrot's multiple dispatch system.
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision: 39694 $
 
 =head2 Definitions
 
@@ -105,7 +105,7 @@ Return an array of matching candidates, sorted from best matching to worst
 matching, for a passed in signature. The signature passed in is an array of
 PMCs, and the types are extracted from the types of the array elements.
 
-=item get_pmc_keyed_string
+=item get_pmc_keyed_str
 
 Return an array of matching candidates, sorted from best matching to worst
 matching, for a passed in signature. The signature passed in is a simple type
@@ -157,14 +157,26 @@ The following attributes are used when declaring a MultiSub in PIR.
 
 =item :multi
 
+=begin PIR
+
   .sub mymultisub :multi(Integer, Integer)
+    # ...
+  .end
+
+=end PIR
 
 The C<:multi> attribute marks a subroutine or method as participating in
 multiple dispatch.
 
 =item :invocant
 
+=begin PIR_INVALID
+
+  .sub mymultisub
   .param pmc first :invocant
+  .end
+
+=end PIR_INVALID
 
 Not all elements of a multi-sub's signature are relevant for the purposes of
 multiple dispatch. The subroutine parameters that participate in dispatch are

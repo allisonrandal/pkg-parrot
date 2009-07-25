@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: c_functions.pod 37142 2009-03-06 02:30:33Z Util $
+# $Id: c_functions.pod 39599 2009-06-16 22:54:02Z whiteknight $
 
 =head1 NAME
 
@@ -83,10 +83,10 @@ pointer is an input only, an output only, or is modified.
 Input pointers are pointers which are read, but the data they point to is
 not changed. The data after the function call is the same as the data you
 had before it. If you specify a parameter is an input parameter, and the
-function tries to modify it's contents anyway, you'll get a warning. Also,
+function tries to modify its contents anyway, you'll get a warning. Also,
 if you pass in an uninitialized pointer, the compiler will throw a warning.
 
-Output pointers are pointers that are passed into a function, it's existing
+Output pointers are pointers that are passed into a function, its existing
 contents are ignored, and new contents are created for it. It's called an
 output because the data in the pointed-to structure are populated inside
 the function and passed back out to the caller. If you have a pointer that
@@ -96,6 +96,11 @@ uninitialized pointer as an ARGOUT parameter.
 
 Modifiable, or "in-out" parameters are parameters that have both behaviors.
 Some fields in it are read, some fields in it are changed.
+
+Please note that these are only to be used on pointer types.  If you're
+not absolutely sure that the argument is a pointer, don't use them.
+(The "va_list" builtin type is sometimes a pointer, sometimes a struct,
+depending on platform and compiler.)
 
 Here's a simple example of a function that uses these modifiers:
 

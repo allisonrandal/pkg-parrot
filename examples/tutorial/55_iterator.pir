@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 55_iterator.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1 iterators
 
 An iterator is a type of PMC that helps with looping operations
@@ -18,7 +21,7 @@ opcode on it.
 
     myarray = split " ", "foo bar baz boz"
 
-    iter = new 'Iterator', myarray
+    iter = new ['Iterator'], myarray
   iter_loop:
     unless iter goto iter_end
 

@@ -1,7 +1,7 @@
 /* stacks.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: stacks.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: stacks.h 39765 2009-06-25 04:30:44Z petdance $
  *  Overview:
  *     Stack handling routines for Parrot
  *  Data Structure and Algorithms:
@@ -21,15 +21,12 @@
 typedef struct Stack_Entry {
     UnionVal entry;
     Stack_entry_type  entry_type;
-    void (*cleanup)(PARROT_INTERP, struct Stack_Entry *);
+    void (*cleanup)(PARROT_INTERP, ARGIN(struct Stack_Entry *));
 } Stack_Entry_t;
-
-struct Small_Object_Pool; /* forward decl */
 
 typedef struct Stack_Chunk {
     UnionVal            cache;
     Parrot_UInt         flags;
-    struct Small_Object_Pool  *pool;
     const char         *name;
     struct Stack_Chunk *prev;
     Parrot_UInt         refcount;
@@ -40,7 +37,7 @@ typedef struct Stack_Chunk {
 /* #define STACK_ITEMSIZE(chunk) PObj_buflen(chunk) */
 
 
-typedef void (*Stack_cleanup_method)(Interp*, Stack_Entry_t *);
+typedef void (*Stack_cleanup_method)(PARROT_INTERP, ARGIN(struct Stack_Entry *));
 
 #define STACK_CLEANUP_NULL ((Stack_cleanup_method)NULLfunc)
 
@@ -92,9 +89,6 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 void * pop_dest(PARROT_INTERP)
         __attribute__nonnull__(1);
-
-PARROT_EXPORT
-void stack_destroy(SHIM(Stack_Chunk_t *top));
 
 PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
@@ -189,7 +183,6 @@ Stack_entry_type get_entry_type(ARGIN(const Stack_Entry_t *entry))
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_pop_dest __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_stack_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_stack_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(stack)
 #define ASSERT_ARGS_stack_height __attribute__unused__ int _ASSERT_ARGS_CHECK = \

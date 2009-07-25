@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: thread.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: thread.h 39976 2009-07-10 08:20:13Z fperrad $
  *  Overview:
  *     This is the api header for the thread primitives
  *  Data Structure and Algorithms:
@@ -14,14 +14,9 @@
 #define PARROT_THREAD_H_GUARD
 
 #  include "parrot/parrot.h"
-
-#  define PARROT_HAS_THREADS 1
 #  include "parrot/atomic.h"
 
-#ifndef PARROT_SYNC_PRIMITIVES_DEFINED
-
-#  undef  PARROT_HAS_THREADS
-#  define PARROT_HAS_THREADS 0
+#ifndef PARROT_HAS_THREADS
 
 #  define LOCK(m)
 #  define UNLOCK(m)
@@ -51,15 +46,15 @@
 
 typedef void (*Cleanup_Handler)(void *);
 
-#  ifndef _STRUCT_TIMESPEC
-#    define _STRUCT_TIMESPEC
+#  ifndef __timespec_defined
+#    define __timespec_defined
 struct timespec {
     time_t tv_sec;
     long tv_nsec;
 };
-#  endif /* _STRUCT_TIMESPEC */
+#  endif /* __timespec_defined */
 
-#endif /* PARROT_SYNC_PRIMITIVES_DEFINED */
+#endif /* PARROT_HAS_THREADS */
 
 #ifndef YIELD
 #  define YIELD
@@ -205,7 +200,7 @@ PMC* pt_thread_join(NOTNULL(Parrot_Interp parent), UINTVAL tid)
         __attribute__nonnull__(1);
 
 void pt_thread_kill(UINTVAL tid);
-void pt_thread_prepare_for_run(Parrot_Interp d, Parrot_Interp s);
+void pt_thread_prepare_for_run(Parrot_Interp d, NULLOK(Parrot_Interp s));
 int pt_thread_run(PARROT_INTERP,
     ARGOUT(PMC *dest_interp),
     ARGIN(PMC *sub),

@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: pdd28_strings.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id: pdd28_strings.pod 40088 2009-07-14 20:24:28Z NotFound $
 
 =head1 PDD 28: Strings
 
@@ -11,7 +11,7 @@ encodings, and languages.
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision: 40088 $
 
 =head2 Definitions
 
@@ -39,7 +39,7 @@ given character set. So in ASCII, the character C<A> has codepoint 0x41.
 An encoding determines how a codepoint is represented inside a computer.
 Simple encodings like ASCII define that the codepoints 0-127 simply
 live as their numeric equivalents inside an eight-bit bytes. Other
-fixed-width encodings like UTF-16 use more bytes to encode more
+fixed-width encodings like UCS-2 use more bytes to encode more
 codepoints. Variable-width encodings like UTF-8 use one byte for
 codepoints 0-127, two bytes for codepoints 127-2047, and so on.
 
@@ -575,10 +575,6 @@ collection.
 Terminate and clean up Parrot's string subsystem, including string allocation
 and garbage collection.
 
-=head4 Parrot_str_free (was string_free)
-
-Free the string's header.
-
 =head4 string_max_bytes
 
 Calculate the number of bytes needed to hold a given number of characters in a
@@ -641,6 +637,10 @@ Unsafe, and behavior handled by Parrot_str_to_cstring.
 =head4 Parrot_string_split
 
 Is the same as Parrot_str_split.
+
+=head4 Parrot_str_free (was string_free)
+
+Unsafe and unuseful, let the garbage collector take care.
 
 =head3 String PMC API
 

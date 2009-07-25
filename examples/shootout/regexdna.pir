@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: regexdna.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 .sub main :main
 	load_bytecode "PGE.pbc"
 	.local pmc p6rule_compile, rulesub, match, variants, variants_p5, iub, iter, matches, capt

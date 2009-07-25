@@ -1,3 +1,5 @@
+# $Id: Include.pir 38689 2009-05-11 17:22:23Z NotFound $
+
 =head1 Include Example
 
 This example demonstrates how to include another stream inside a stream.
@@ -15,9 +17,9 @@ Creates a counter stream and dumps it.
 .sub _main
     .local pmc stream
 
-    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode 'Stream/Sub.pbc'
 
-    stream = new "Stream::Sub"
+    stream = new ['Stream'; 'Sub']
 
     # set the stream's source sub
     .const 'Sub' temp = "_counter"
@@ -54,7 +56,7 @@ LOOP:
     if i != 4 goto SKIP
     .local pmc temp
 
-    temp = new "Stream::Sub"
+    temp = new ['Stream'; 'Sub']
 
     .const 'Sub' func = "_included"
     assign temp, func
@@ -83,7 +85,7 @@ writes "world".
     self."write"( "hello" )
 
     # create another stream
-    temp = new "Stream::Sub"
+    temp = new ['Stream'; 'Sub']
     .const 'Sub' func = "_counter2"
     assign temp, func
 
@@ -125,7 +127,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2008, Parrot Foundation.
+Copyright (C) 2004-2009, Parrot Foundation.
 
 =cut
 

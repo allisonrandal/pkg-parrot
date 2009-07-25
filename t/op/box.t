@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: box.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: box.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ Tests all box operators.
 
 .const int TESTS = 24
 
-# must set these up before the .HLL_map statements later
+# must set these up before the hll_map calls later
 .sub '__setup' :immediate
     $P0 = subclass 'Integer', 'MyInt'
     $P0 = subclass 'String',  'MyString'
@@ -26,7 +26,7 @@ Tests all box operators.
 .end
 
 .sub 'main' :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     'plan'(TESTS)
 
@@ -49,6 +49,7 @@ Tests all box operators.
 .end
 
 .sub 'box_int'
+
     $P0 = box 100
     $I0 = $P0
     is( $I0, 100, 'value preserved when boxing int' )
@@ -93,13 +94,29 @@ Tests all box operators.
 .end
 
 .HLL 'for_test'
+.sub anon :anon :init
+  .local pmc interp
+  .local pmc cint, myint
+  .local pmc cstr, mystr
+  .local pmc cnum, mynum
+  interp = getinterp
 
-.HLL_map 'Integer' = 'MyInt'
-.HLL_map 'String'  = 'MyString'
-.HLL_map 'Float'   = 'MyFloat'
+  cint  = get_class 'Integer'
+  myint = get_class 'MyInt'
+  interp.'hll_map'(cint,myint)
+
+  cstr  = get_class 'String'
+  mystr = get_class 'MyString'
+  interp.'hll_map'(cstr,mystr)
+
+  cnum  = get_class 'Float'
+  mynum = get_class 'MyFloat'
+  interp.'hll_map'(cnum,mynum)
+.end
 
 .sub 'box_int'
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
+
     $P0 = box -100
     $I0 = $P0
     is( $I0, -100, 'value preserved when boxing int in HLL' )

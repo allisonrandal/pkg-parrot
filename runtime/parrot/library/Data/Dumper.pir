@@ -1,3 +1,6 @@
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: Dumper.pir 38693 2009-05-11 18:45:05Z NotFound $
+
 .sub __library_data_dumper_onload :load
     .local pmc dd_class
     dd_class = get_class "Data::Dumper"
@@ -6,7 +9,7 @@
     goto END
 
   load_library:
-        load_bytecode "library/Data/Dumper/Default.pir"
+        load_bytecode "Data/Dumper/Default.pbc"
         newclass $P0, "Data::Dumper"
 END:
     .return ()

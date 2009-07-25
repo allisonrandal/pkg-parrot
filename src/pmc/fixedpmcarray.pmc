@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: fixedpmcarray.pmc 37267 2009-03-10 10:01:14Z cotto $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: fixedpmcarray.pmc 40100 2009-07-15 13:15:25Z bacek $
 
 =head1 NAME
 
@@ -24,8 +24,6 @@ never be set for user arrays.
 
 */
 
-#include "parrot/parrot.h"
-
 #define PMC_size(x)  ((Parrot_FixedPMCArray_attributes *)PMC_data(x))->size
 #define PMC_array(x) ((Parrot_FixedPMCArray_attributes *)PMC_data(x))->pmc_array
 
@@ -44,7 +42,7 @@ Sort this array, optionally using the provided cmp_func
 */
 
     METHOD sort(PMC *cmp_func :optional) {
-        const UINTVAL n = (UINTVAL) PMC_size(SELF);
+        const INTVAL n = SELF.elements();
 
         if (n > 1)
            Parrot_quicksort(interp, (void **)PMC_array(SELF), n, cmp_func);
@@ -338,7 +336,7 @@ Returns the PMC value of the element at index C<*key>.
 */
 
     VTABLE PMC *get_pmc_keyed(PMC *key) {
-        const INTVAL k        = key_integer(INTERP, key);
+        const INTVAL k        = VTABLE_get_integer(INTERP, key);
         PMC   * const nextkey = key_next(INTERP, key);
         PMC   *box;
 
@@ -375,7 +373,7 @@ array.
             return;
 
         PMC_size(SELF) = size;
-        data           = mem_allocate_n_zeroed_typed(size, PMC *);
+        data           = mem_allocate_n_typed(size, PMC *);
 
         for (i = 0; i < size; i++)
             data[i] = PMCNULL;
@@ -474,7 +472,7 @@ C<value>.
 */
 
     VTABLE void set_number_keyed(PMC *key, FLOATVAL value) {
-        const INTVAL k        = key_integer(INTERP, key);
+        const INTVAL k        = VTABLE_get_integer(INTERP, key);
         PMC   * const nextkey = key_next(INTERP, key);
 
         if (nextkey == NULL) {
@@ -563,7 +561,7 @@ Sets the PMC at index C<key> to C<value>.
 */
 
     VTABLE void set_pmc_keyed(PMC *key, PMC *value) {
-        const INTVAL k = key_integer(INTERP, key);
+        const INTVAL k = VTABLE_get_integer(INTERP, key);
         PMC   *nextkey = key_next(INTERP, key);
 
         if (!nextkey) {
@@ -648,19 +646,7 @@ Return a new iterator for SELF.
     }
 
     VTABLE PMC *get_iter() {
-        STRING     *name     = CONST_STRING(interp, "set_key");
-        PMC * const iter     = pmc_new_init(INTERP, enum_class_Iterator, SELF);
-        PMC * const key      = pmc_new(INTERP, enum_class_Key);
-
-        Parrot_PCCINVOKE(interp, iter, name, "P->", key);
-        PObj_get_FLAGS(key) |= KEY_integer_FLAG;
-
-        if (PMC_size(SELF) == 0)
-            VTABLE_set_integer_native(INTERP, key, -1);
-        else
-            VTABLE_set_integer_native(INTERP, key, 0);
-
-        return iter;
+        return pmc_new_init(INTERP, enum_class_ArrayIterator, SELF);
     }
 
 /*
@@ -685,7 +671,7 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
     }
 
     VTABLE INTVAL exists_keyed(PMC *key) {
-        const INTVAL ix = key_integer(INTERP, key);
+        const INTVAL ix = VTABLE_get_integer(INTERP, key);
         return SELF.exists_keyed_int(ix);
     }
 
@@ -705,7 +691,7 @@ of this array.
 
 */
 
-    void splice(PMC *value, INTVAL offset, INTVAL count) {
+    VTABLE void splice(PMC *value, INTVAL offset, INTVAL count) {
         if (count + offset > PMC_size(SELF))
             Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
                 _("FixedPMCArray: index out of bounds!"));
@@ -800,7 +786,7 @@ Mark the array.
 
         for (i = PMC_size(SELF) - 1; i >= 0; --i)
             if (data[i])
-                pobject_lives(interp, (PObj *)data[i]);
+                Parrot_gc_mark_PObj_alive(interp, (PObj *)data[i]);
     }
 
 

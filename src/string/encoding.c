@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004-2008, Parrot Foundation.
-$Id: encoding.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2004-2009, Parrot Foundation.
+$Id: encoding.c 38888 2009-05-18 04:59:21Z petdance $
 
 =head1 NAME
 
@@ -24,16 +24,14 @@ These are parrot's generic encoding handling functions
 /* HEADERIZER BEGIN: static */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-static INTVAL register_encoding(PARROT_INTERP,
+static INTVAL register_encoding(SHIM_INTERP,
     ARGIN(const char *encodingname),
     ARGIN(ENCODING *encoding))
-        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);
 
 #define ASSERT_ARGS_register_encoding __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(encodingname) \
+       PARROT_ASSERT_ARG(encodingname) \
     || PARROT_ASSERT_ARG(encoding)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
@@ -58,7 +56,7 @@ static All_encodings *all_encodings;
 
 /*
 
-=item C<void parrot_deinit_encodings>
+=item C<void parrot_deinit_encodings(void)>
 
 Deinitialize encodings and free all memory used by them.
 
@@ -83,7 +81,7 @@ parrot_deinit_encodings(void)
 
 /*
 
-=item C<ENCODING * Parrot_new_encoding>
+=item C<ENCODING * Parrot_new_encoding(PARROT_INTERP)>
 
 Allocates the memory for a new C<ENCODING> from the system.
 
@@ -103,7 +101,8 @@ Parrot_new_encoding(SHIM_INTERP)
 
 /*
 
-=item C<const ENCODING * Parrot_find_encoding>
+=item C<const ENCODING * Parrot_find_encoding(PARROT_INTERP, const char
+*encodingname)>
 
 Finds an encoding with the name C<encodingname>. Returns the encoding
 if it is successfully found, returns NULL otherwise.
@@ -130,7 +129,8 @@ Parrot_find_encoding(SHIM_INTERP, ARGIN(const char *encodingname))
 
 /*
 
-=item C<const ENCODING * Parrot_load_encoding>
+=item C<const ENCODING * Parrot_load_encoding(PARROT_INTERP, const char
+*encodingname)>
 
 Loads an encoding. Currently throws an exception because we cannot load
 encodings. See RT #58186.
@@ -161,7 +161,8 @@ Parrot_load_encoding(PARROT_INTERP, ARGIN(const char *encodingname))
 
 /*
 
-=item C<INTVAL Parrot_encoding_number>
+=item C<INTVAL Parrot_encoding_number(PARROT_INTERP, const STRING
+*encodingname)>
 
 Return the number of the encoding or -1 if not found.
 
@@ -187,7 +188,7 @@ Parrot_encoding_number(PARROT_INTERP, ARGIN(const STRING *encodingname))
 
 /*
 
-=item C<INTVAL Parrot_encoding_number_of_str>
+=item C<INTVAL Parrot_encoding_number_of_str(PARROT_INTERP, const STRING *src)>
 
 Return the number of the encoding of the given string or -1 if not found.
 
@@ -213,7 +214,7 @@ Parrot_encoding_number_of_str(SHIM_INTERP, ARGIN(const STRING *src))
 
 /*
 
-=item C<STRING* Parrot_encoding_name>
+=item C<STRING* Parrot_encoding_name(PARROT_INTERP, INTVAL number_of_encoding)>
 
 Returns the name of a character encoding based on the INTVAL index
 C<number_of_encoding> to the All_encodings array.
@@ -229,14 +230,16 @@ STRING*
 Parrot_encoding_name(SHIM_INTERP, INTVAL number_of_encoding)
 {
     ASSERT_ARGS(Parrot_encoding_name)
-    if (number_of_encoding >= all_encodings->n_encodings)
+    if (number_of_encoding >= all_encodings->n_encodings ||
+        number_of_encoding < 0)
         return NULL;
     return all_encodings->enc[number_of_encoding].name;
 }
 
 /*
 
-=item C<const ENCODING* Parrot_get_encoding>
+=item C<const ENCODING* Parrot_get_encoding(PARROT_INTERP, INTVAL
+number_of_encoding)>
 
 Returns the encoding given by the INTVAL index C<number_of_encoding>.
 
@@ -251,14 +254,16 @@ const ENCODING*
 Parrot_get_encoding(SHIM_INTERP, INTVAL number_of_encoding)
 {
     ASSERT_ARGS(Parrot_get_encoding)
-    if (number_of_encoding >= all_encodings->n_encodings)
+    if (number_of_encoding >= all_encodings->n_encodings ||
+        number_of_encoding < 0)
         return NULL;
     return all_encodings->enc[number_of_encoding].encoding;
 }
 
 /*
 
-=item C<const char * Parrot_encoding_c_name>
+=item C<const char * Parrot_encoding_c_name(PARROT_INTERP, INTVAL
+number_of_encoding)>
 
 Returns the NULL-terminated C string representation of the encodings name
 given by the C<number_of_encoding>.
@@ -274,14 +279,16 @@ const char *
 Parrot_encoding_c_name(SHIM_INTERP, INTVAL number_of_encoding)
 {
     ASSERT_ARGS(Parrot_encoding_c_name)
-    if (number_of_encoding >= all_encodings->n_encodings)
+    if (number_of_encoding >= all_encodings->n_encodings ||
+        number_of_encoding < 0)
         return NULL;
     return all_encodings->enc[number_of_encoding].encoding->name;
 }
 
 /*
 
-=item C<static INTVAL register_encoding>
+=item C<static INTVAL register_encoding(PARROT_INTERP, const char *encodingname,
+ENCODING *encoding)>
 
 Registers a new character encoding C<encoding> with the given name
 C<encodingname>. Returns 1 if successful, returns 0 otherwise.
@@ -291,7 +298,7 @@ C<encodingname>. Returns 1 if successful, returns 0 otherwise.
 */
 
 static INTVAL
-register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
+register_encoding(SHIM_INTERP, ARGIN(const char *encodingname),
         ARGIN(ENCODING *encoding))
 {
     ASSERT_ARGS(register_encoding)
@@ -320,7 +327,7 @@ register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
 
 /*
 
-=item C<void Parrot_str_internal_register_encoding_names>
+=item C<void Parrot_str_internal_register_encoding_names(PARROT_INTERP)>
 
 Helper function for initializing characterset encoding names. We can't create
 the STRING names until the default encodings and charsets are already initted,
@@ -343,7 +350,8 @@ Parrot_str_internal_register_encoding_names(PARROT_INTERP)
 
 /*
 
-=item C<INTVAL Parrot_register_encoding>
+=item C<INTVAL Parrot_register_encoding(PARROT_INTERP, const char *encodingname,
+ENCODING *encoding)>
 
 Registers a character encoding C<encoding> with name C<encodingname>.
 Only allows one of 4 possibilities: fixed_8, utf8, utf16, and ucs2.
@@ -388,7 +396,8 @@ Parrot_register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
 
 /*
 
-=item C<INTVAL Parrot_make_default_encoding>
+=item C<INTVAL Parrot_make_default_encoding(PARROT_INTERP, const char
+*encodingname, ENCODING *encoding)>
 
 Sets the default encoding to C<encoding> with name C<encodingname>.
 
@@ -408,7 +417,7 @@ Parrot_make_default_encoding(SHIM_INTERP, SHIM(const char *encodingname),
 
 /*
 
-=item C<const ENCODING * Parrot_default_encoding>
+=item C<const ENCODING * Parrot_default_encoding(PARROT_INTERP)>
 
 Gets the default encoding.
 
@@ -428,7 +437,8 @@ Parrot_default_encoding(SHIM_INTERP)
 
 /*
 
-=item C<encoding_converter_t Parrot_find_encoding_converter>
+=item C<encoding_converter_t Parrot_find_encoding_converter(PARROT_INTERP,
+ENCODING *lhs, ENCODING *rhs)>
 
 Finds a converter from encoding C<rhs> to C<lhs>. Not yet implemented, so
 throws an exception.

@@ -1,3 +1,6 @@
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: Dumper.pir 38693 2009-05-11 18:45:05Z NotFound $
+
 .sub __library_data_dumper_onload :load
     .local pmc yd_class
     yd_class = get_class "YAML::Dumper"
@@ -6,7 +9,7 @@
     goto END
 
   load_library:
-        load_bytecode "library/YAML/Dumper/Default.pir"
+        load_bytecode 'YAML/Dumper/Default.pbc'
         newclass $P0, "YAML::Dumper"
 END:
     .return ()

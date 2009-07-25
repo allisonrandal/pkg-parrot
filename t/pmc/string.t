@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: string.t 37393 2009-03-13 19:56:52Z Util $
+# $Id: string.t 39310 2009-06-01 23:01:58Z NotFound $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ Tests the C<String> PMC.
 .sub main :main
     .include 'test_more.pir'
 
-    plan(164)
+    plan(165)
 
     set_or_get_strings()
     setting_integers()
@@ -70,6 +70,7 @@ Tests the C<String> PMC.
     out_of_bounds_substr_negative_offset()
     exception_to_int_2()
     exception_to_int_3()
+    assign_null_string()
 
     # END_OF_TESTS
 
@@ -131,7 +132,7 @@ Tests the C<String> PMC.
 .end
 
 # Macro to ease testing of floating point comparisons
-# borrowed from fp_eq in include/fp_equality.pasm
+# borrowed from fp_eq in fp_equality.pasm
 .macro fp_eq_ok (  J, K, L )
     set $N10, .J
     set $N11, .K
@@ -146,7 +147,7 @@ Tests the C<String> PMC.
 .endm
 
 .sub setting_numbers
-        .include 'include/fp_equality.pasm'
+        .include 'fp_equality.pasm'
         new $P0, ['String']
         set $P0, "1"
         set $N0, $P0
@@ -1017,6 +1018,20 @@ handler:
     .exception_is( 'invalid conversion to int - bad base 37' )
 .end
 
+.sub assign_null_string
+    .local pmc s
+    .local string m
+    s = new ['String']
+    null m
+    assign s, m
+    m = 'Any other thing'
+    m = s
+    $I0 = 0
+    if null m goto check
+    inc $I0
+check:
+    is( $I0, 0, 'assign null string, TT #729' )
+.end
 
 # Local Variables:
 #   mode: cperl

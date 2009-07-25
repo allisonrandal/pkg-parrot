@@ -1,11 +1,11 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: pdd07_codingstd.pod 37253 2009-03-10 02:27:26Z allison $
+# $Id: pdd07_codingstd.pod 38145 2009-04-16 02:39:56Z jkeenan $
 
 =head1 PDD 7: Conventions and Guidelines for Parrot Source Code
 
 =head2 Version
 
-$Revision: 37253 $
+$Revision: 38145 $
 
 =head2 Abstract
 
@@ -133,7 +133,7 @@ Cuddled C<else>s are forbidden: i.e. avoid  C<} else {> .
 C macro parameters must be parenthesized in macro bodies, to allow expressions
 passed as arguments; e.g.:
 
-  #define PMC_pmc_val(pmc)      (pmc)->obj.u._ptrs._pmc_val
+    #define POBJ_FLAG(n) ((UINTVAL)1 << (n))
 
 =back
 
@@ -853,6 +853,8 @@ Don't include author information in individual files. Author information
 can be added to the CREDITS file. (Languages are an exception to this rule,
 and may follow whatever convention they choose.)
 
+Don't include Pod sections for License or Copyright in individual files.
+
 =item Per-section comments
 
 If there is a collection of functions, structures or whatever which are
@@ -923,6 +925,21 @@ branch, e.g.
         /* we're in baz mode: self-destruct */
         ....
     }
+
+=item Copyright notice
+
+The first line of every file (or the second line if the first line is a
+I<shebang> line such as C<#!/usr/bin/perl>) should be a copyright notice, in
+the comment style appropriate to the file type. It should list the first year
+the file was created and the last year the file was modified.  (This isn't
+necessarily the current year, the file might not have been modified this
+year.)
+
+    /* Copyright (C) 2001-2008, Parrot Foundation. */
+
+For files that were newly added this year, just list the current year.
+
+    /* Copyright (C) 2009, Parrot Foundation. */
 
 =back
 

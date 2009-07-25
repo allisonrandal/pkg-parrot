@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id: library.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: library.h 40111 2009-07-15 22:14:37Z NotFound $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:
@@ -17,31 +17,28 @@ typedef enum {
     PARROT_RUNTIME_FT_LIBRARY = 0x0001,
     PARROT_RUNTIME_FT_INCLUDE = 0x0002,
     PARROT_RUNTIME_FT_DYNEXT  = 0x0004,
-    PARROT_RUNTIME_FT_PBC     = 0x0010,
+    PARROT_RUNTIME_FT_LANG    = 0x0010,
+    PARROT_RUNTIME_FT_PBC     = 0x0020,
     PARROT_RUNTIME_FT_PASM    = 0x0100,
     PARROT_RUNTIME_FT_PIR     = 0x0200,
     PARROT_RUNTIME_FT_PAST    = 0x0400,
     PARROT_RUNTIME_FT_SOURCE  = 0x0F00
 } enum_runtime_ft;
 
+/* &gen_from_enum(libpaths.pasm) */
 typedef enum {
     PARROT_LIB_PATH_INCLUDE,            /* .include "foo" */
     PARROT_LIB_PATH_LIBRARY,            /* load_bytecode "bar" */
     PARROT_LIB_PATH_DYNEXT,             /* loadlib "baz" */
+    PARROT_LIB_PATH_LANG,               /* load_language "buz" */
     PARROT_LIB_DYN_EXTS,                /* ".so", ".dylib" .. */
     /* must be last: */
     PARROT_LIB_PATH_SIZE
 } enum_lib_paths;
+/* &end_gen */
 
 /* HEADERIZER BEGIN: src/library.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-
-PARROT_EXPORT
-void Parrot_add_library_path(PARROT_INTERP,
-    ARGIN(const char *path),
-    enum_lib_paths which)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
@@ -53,6 +50,20 @@ PARROT_MALLOC
 PARROT_CANNOT_RETURN_NULL
 char* Parrot_get_runtime_prefix(PARROT_INTERP)
         __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_lib_add_path(PARROT_INTERP,
+    ARGIN(STRING *path_str),
+    enum_lib_paths which)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+void Parrot_lib_add_path_from_cstring(PARROT_INTERP,
+    ARGIN(const char *path),
+    enum_lib_paths which)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
@@ -91,13 +102,17 @@ STRING * parrot_split_path_ext(PARROT_INTERP,
         FUNC_MODIFIES(*wo_ext)
         FUNC_MODIFIES(*ext);
 
-#define ASSERT_ARGS_Parrot_add_library_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(path)
 #define ASSERT_ARGS_Parrot_get_runtime_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_get_runtime_prefix __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_lib_add_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(path_str)
+#define ASSERT_ARGS_Parrot_lib_add_path_from_cstring \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(path)
 #define ASSERT_ARGS_Parrot_locate_runtime_file __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(file_name)

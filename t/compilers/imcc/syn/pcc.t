@@ -1,13 +1,13 @@
 #!perl
-# Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pcc.t 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: pcc.t 39417 2009-06-06 00:16:18Z chromatic $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 22;
+use Parrot::Test tests => 23;
 
 ##############################
 # Parrot Calling Conventions
@@ -258,7 +258,7 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', ".set_arg :flat" );
 .sub _main
-    .local pmc x, y, z, ar, ar2, s
+    .local pmc x, y, z, ar, ar2
     x = new 'String'
     x = "first\n"
     y = new 'String'
@@ -541,6 +541,27 @@ my $too_many_params_params = join map { "    .param pmc xx$_\n" } 1 .. 20_000;
 $too_many_params =~ s/_PARAMS_/$too_many_params_params/;
 
 pir_output_is( $too_many_params, "didn't segfault\n", "calling a sub with way too many params" );
+
+pir_output_is( <<'CODE', <<'OUT', 'Unicode allowed in method names, TT #730' );
+.sub 'main' :main
+    $P0 = newclass 'Foo'
+    $P1 = new $P0
+    $S0 = unicode:"foo\x{b1}"
+    $P1.$S0(1)
+    $P1.unicode:"foo\x{b1}"(2)
+.end
+
+.namespace ['Foo']
+.sub unicode:"foo\x{b1}" :method
+    .param int count
+    print 'ok '
+    print count
+    say ' - Unicode method names allowed'
+.end
+CODE
+ok 1 - Unicode method names allowed
+ok 2 - Unicode method names allowed
+OUT
 
 # Local Variables:
 #   mode: cperl

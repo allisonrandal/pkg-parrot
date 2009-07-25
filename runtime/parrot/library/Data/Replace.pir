@@ -1,4 +1,4 @@
-# $Id: Replace.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Replace.pir 38693 2009-05-11 18:45:05Z NotFound $
 
 =head1 TITLE
 
@@ -8,7 +8,7 @@ Data::Replace - data replacing implemented in PIR
 
     ...
 
-    load_bytecode "library/Data/Replace.pir"
+    load_bytecode "Data/Replace.pbc"
 
     .local pmc replace
 

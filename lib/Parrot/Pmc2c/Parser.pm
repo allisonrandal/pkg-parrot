@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: Parser.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: Parser.pm 38932 2009-05-19 14:40:19Z Infinoid $
 
 package Parrot::Pmc2c::Parser;
 
@@ -15,6 +15,7 @@ use Parrot::Pmc2c::Method ();
 use Parrot::Pmc2c::Emitter ();
 use Parrot::Pmc2c::UtilFunctions qw(count_newlines filename slurp);
 use Text::Balanced 'extract_bracketed';
+use File::Basename qw(basename);
 
 =head1 NAME
 
@@ -65,6 +66,11 @@ sub parse_pmc {
     my ( $preamble, $pmcname, $flags, $parents, $pmcbody, $post, $chewed_lines ) =
         parse_top_level($code);
 
+    my $filebase = basename($filename);
+    $filebase =~ s/\.pmc$//;
+    # Note: this can be changed to a die() after the 1.4 release. (TT #665)
+    warn("PMC filename $filebase.pmc does not match pmclass name $pmcname!\n")
+        unless lc($filebase) eq lc($pmcname);
     my $pmc = Parrot::Pmc2c::PMC->create($pmcname);
     $pmc->preamble( Parrot::Pmc2c::Emitter->text( $preamble, $filename, 1 ) );
     $pmc->name($pmcname);
@@ -135,7 +141,10 @@ sub find_attrs {
 
         # name
         \s*
-        (\w+)
+        (
+            \w+
+          | \(\*\w*\)\(.*?\)
+        )
 
         # modifiers
         \s*
@@ -156,7 +165,7 @@ sub find_attrs {
         @modifiers = split /\s/, $4;
         $comment = $5;
 
-        $lineno++;
+        $lineno += count_newlines($1);
 
         $pmc->add_attribute(Parrot::Pmc2c::Attribute->new(
             {
@@ -218,6 +227,7 @@ sub find_methods {
         }
 
         ( my $methodblock, $pmcbody ) = extract_balanced($pmcbody);
+        my $block_lines = count_newlines($methodblock);
 
         $methodblock = strip_outer_brackets($methodblock);
 
@@ -285,8 +295,13 @@ sub find_methods {
             $pmc->add_method($method);
         }
 
-        $lineno += count_newlines($methodblock);
+        $lineno += $block_lines;
     }
+
+    # include the remainder in the line count, minus the last one
+    # (the last one is included in the postamble directly)
+    chomp $pmcbody;
+    $lineno += count_newlines($pmcbody);
 
     return ($lineno, $class_init);
 }

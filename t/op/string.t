@@ -1,13 +1,13 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: string.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: string.t 39854 2009-07-01 13:50:14Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 161;
+use Parrot::Test tests => 166;
 use Parrot::Config;
 
 =head1 NAME
@@ -1279,6 +1279,39 @@ pasm_error_output_like( <<'CODE', qr/Cannot repeat with negative arg\n/, 'repeat
     end
 CODE
 
+pir_error_output_like( <<'CODE', qr/Cannot repeat with negative arg\n/, 'repeat OOB, repeat_p_p_p' );
+.sub main
+    $P0 = new ['String']
+    $P1 = new ['String']
+    $P2 = new ['Integer']
+
+    $P2 = -1
+
+    repeat $P1, $P0, $P2
+.end
+CODE
+
+pir_error_output_like( <<'CODE', qr/Cannot repeat with negative arg\n/, 'repeat OOB, repeate_p_p_i' );
+.sub main
+    $P0 = new ['String']
+    $P1 = new ['String']
+
+    repeat $P1, $P0, -1
+.end
+CODE
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'encodingname OOB' );
+.sub main
+    $I0 = -1
+
+    $S0 = encodingname -1
+    $S0 = encodingname $I0
+    say 'ok'
+.end
+CODE
+ok
+OUTPUT
+
 pasm_output_is( <<'CODE', <<'OUTPUT', 'index, 3-arg form' );
       set S0, "Parrot"
       set S1, "Par"
@@ -2031,32 +2064,6 @@ ok 4
 OUTPUT
 }
 
-pasm_output_is( <<'CODE', <<'OUTPUT', 'experimental opcode substr_r_s_s|sc_i|ic_i|ic' );
-    set S4, "12345JAPH01"
-    set I4, 5
-    set I5, 4
-    substr_r    S5, S4, I4, I5
-    print   S5
-    substr_r S5, S4, I4, 4
-    print  S5
-    substr_r S5, S4, 5, I5
-    print  S5
-    substr_r S5, S4, 5, 4
-    print  S5
-    substr_r S5, "12345JAPH01", I4, I5
-    print  S5
-    substr_r S5, "12345JAPH01", I4, 4
-    print  S5
-    substr_r S5, "12345JAPH01", 5, I5
-    print  S5
-    substr_r S5, "12345JAPH01", 5, 4
-    print  S5
-    print  "\n"
-    end
-CODE
-JAPHJAPHJAPHJAPHJAPHJAPHJAPHJAPH
-OUTPUT
-
 pasm_output_is( <<'CODE', <<'OUTPUT', 'assign' );
     set S4, "JAPH\n"
     assign  S5, S4
@@ -2632,6 +2639,41 @@ r
 
 OUTPUT
 
+pir_output_is( <<'CODE', <<'OUTPUT', 'split HLL mapped' );
+.HLL 'foohll'
+.sub main
+    .local pmc RSA, fooRSA
+    RSA = get_class ['ResizableStringArray']
+    fooRSA = subclass ['ResizableStringArray'], 'fooRSA'
+    .local pmc interp
+    interp = getinterp
+    interp.'hll_map'(RSA, fooRSA)
+    .local pmc a
+    split a, "a", "afooabara"
+    .local string t
+    t = typeof a
+    say t
+    .local int n, i
+    n = a
+    say n
+    i = 0
+loop:
+    .local string s
+    s = a[i]
+    say s
+    inc i
+    if i != n goto loop
+.end
+CODE
+fooRSA
+5
+
+foo
+b
+r
+
+OUTPUT
+
 pasm_output_is( <<'CODE', <<'OUTPUT', 'join' );
 _main:
     new P0, 'ResizablePMCArray'
@@ -2918,6 +2960,38 @@ Foo::Bar
 Foo/Bar
 Foo/Bar
 OUT
+
+pir_output_is( <<'CODE', <<'OUT', 'Corner cases of numification' );
+.sub main :main
+    say 2147483647.0
+    say -2147483648.0
+.end
+CODE
+2147483647
+-2147483648
+OUT
+pir_output_is( <<'CODE', <<'OUT', 'Non canonical nan and inf' );
+.sub main :main
+    $N0 = 'nan'
+    say $N0
+    $N0 = 'iNf'
+    say $N0
+    $N0 = 'INFINITY'
+    say $N0
+    $N0 = '-INF'
+    say $N0
+    $N0 = '-Infinity'
+    say $N0
+.end
+CODE
+NaN
+Inf
+Inf
+-Inf
+-Inf
+OUT
+
+
 
 # Local Variables:
 #   mode: cperl

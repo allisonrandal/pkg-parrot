@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: resizableintegerarray.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: resizableintegerarray.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 17;
+use Parrot::Test tests => 18;
 
 =head1 NAME
 
@@ -177,7 +177,7 @@ ok 1
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableIntegerArray']
      new P1, ['Key']
 
@@ -213,7 +213,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableIntegerArray']
      set P0, 1
 
@@ -423,6 +423,29 @@ pir_output_is( << 'CODE', << 'OUTPUT', "unshift integer" );
 CODE
 2 20 10
 OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "get_iter" );
+.sub 'main' :main
+    $P0 = new ['ResizableIntegerArray']
+    $P0[0] = 42
+    $P0[1] = 43
+    $P0[2] = 44
+    push $P0, 999
+    $P1 = iter $P0
+loop:
+    unless $P1 goto loop_end
+    $S2 = shift $P1
+    say $S2
+    goto loop
+loop_end:
+.end
+CODE
+42
+43
+44
+999
+OUTPUT
+
 
 # Local Variables:
 #   mode: cperl

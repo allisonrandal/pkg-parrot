@@ -1,12 +1,12 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pair.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pair.t 39599 2009-06-16 22:54:02Z whiteknight $
 
 .const int NUM_OF_TESTS = 8
 
 .sub main :main
     loadlib $P1, 'pair'
-    load_bytecode 'library/Test/More.pir'
+    load_bytecode 'Test/More.pbc'
 
     .local pmc plan, is, ok
     plan = get_hll_global [ 'Test'; 'More' ], 'plan'

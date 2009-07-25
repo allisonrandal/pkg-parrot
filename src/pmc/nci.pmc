@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: nci.pmc 37393 2009-03-13 19:56:52Z Util $
+$Id: nci.pmc 38993 2009-05-20 22:27:18Z chromatic $
 
 =head1 NAME
 
@@ -18,92 +18,92 @@ The vtable functions for the native C call functions.
 
 */
 
-#include "parrot/parrot.h"
-
 typedef INTVAL (*nci_sub_t)(PARROT_INTERP, PMC *);
 typedef INTVAL (*nci_jit_sub_t)(PARROT_INTERP, PMC *, char *);
 
 void pcc_params(PARROT_INTERP, STRING *sig, Parrot_NCI_attributes * const nci_info);
 void pcc_params(PARROT_INTERP, STRING *sig, Parrot_NCI_attributes * const nci_info) {
-        char   *sig_c      = Parrot_str_to_cstring(interp, sig);
-        size_t  sig_length = strlen(sig_c);
-        char   *param_sig  = mem_allocate_n_zeroed_typed(sig_length, char);
-        size_t  j          = 0;
-        size_t  i;
+    size_t  sig_length = Parrot_str_byte_length(interp, sig);
+    char   *param_sig  = mem_allocate_n_typed(sig_length, char);
+    size_t  j          = 0;
+    size_t  i;
 
-        for (i = 1; i < sig_length; i++) {
-            switch (sig_c[i]) {
-                case '0':    /* null ptr or such - doesn't consume a reg */
-                    break;
-                case 'f':
-                case 'N':
-                case 'd':
-                    param_sig[j++] = 'N';
-                    break;
-                case 'I':   /* INTVAL */
-                case 'l':   /* long */
-                case 'i':   /* int */
-                case 's':   /* short */
-                case 'c':   /* char */
-                    param_sig[j++] = 'I';
-                    break;
-                case 'S':
-                case 't':   /* string, pass a cstring */
-                    param_sig[j++] = 'S';
-                    break;
-                case 'J':   /* interpreter */
-                    break;
-                case 'p':   /* push pmc->data */
-                case 'O':   /* push PMC * object in P2 */
-                case 'P':   /* push PMC * */
-                case 'V':   /* push PMC * */
-                    param_sig[j++] = 'P';
-                case 'v':
-                    break;
-                    /* I have no idea how to handle these */
-                case '2':
-                case '3':
-                case '4':
-                    param_sig[j++] = 'I';
-                    break;
-                case '@':
-                    param_sig[j++] = '@';
-                    break;
-                case 'b':   /* buffer (void*) pass PObj_bufstart(SReg) */
-                case 'B':   /* buffer (void**) pass &PObj_bufstart(SReg) */
-                    param_sig[j++] = 'S';
-                    break;
-                default:
-                    Parrot_ex_throw_from_c_args(interp, NULL,
-                        EXCEPTION_JIT_ERROR,
-                        "Unknown param Signature %c\n", sig_c[i]);
-                    break;
-            }
+    for (i = 1; i < sig_length; i++) {
+        INTVAL c = Parrot_str_indexed(interp, sig, i);
+
+        switch (c) {
+            case (INTVAL)'0':    /* null ptr or such - doesn't consume a reg */
+                break;
+            case (INTVAL)'f':
+            case (INTVAL)'N':
+            case (INTVAL)'d':
+                param_sig[j++] = 'N';
+                break;
+            case (INTVAL)'I':   /* INTVAL */
+            case (INTVAL)'l':   /* long */
+            case (INTVAL)'i':   /* int */
+            case (INTVAL)'s':   /* short */
+            case (INTVAL)'c':   /* char */
+                param_sig[j++] = 'I';
+                break;
+            case (INTVAL)'S':
+            case (INTVAL)'t':   /* string, pass a cstring */
+                param_sig[j++] = 'S';
+                break;
+            case (INTVAL)'J':   /* interpreter */
+                break;
+            case (INTVAL)'p':   /* push pmc->data */
+            case (INTVAL)'O':   /* push PMC * object in P2 */
+            case (INTVAL)'P':   /* push PMC * */
+            case (INTVAL)'V':   /* push PMC * */
+                param_sig[j++] = 'P';
+            case (INTVAL)'v':
+                break;
+                /* I have no idea how to handle these */
+            case (INTVAL)'2':
+            case (INTVAL)'3':
+            case (INTVAL)'4':
+                param_sig[j++] = 'I';
+                break;
+            case (INTVAL)'@':
+                param_sig[j++] = '@';
+                break;
+            case (INTVAL)'b':   /* buffer (void*) pass PObj_bufstart(SReg) */
+            case (INTVAL)'B':   /* buffer (void**) pass &PObj_bufstart(SReg) */
+                param_sig[j++] = 'S';
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL,
+                    EXCEPTION_JIT_ERROR,
+                    "Unknown param Signature %c\n", (char)c);
+                break;
         }
-
-        PARROT_ASSERT(j <= sig_length);
-
-        /* use only the signature-significant part of the string buffer */
-        if (j) {
-            nci_info->pcc_params_signature = string_make(interp, param_sig, j,
-                NULL, PObj_constant_FLAG);
-        }
-        else
-            nci_info->pcc_params_signature = CONST_STRING(interp, "");
-
-        mem_sys_free(param_sig);
-        Parrot_str_free_cstring(sig_c);
     }
+
+    PARROT_ASSERT(j <= sig_length);
+
+    /* use only the signature-significant part of the string buffer */
+    if (j) {
+        nci_info->pcc_params_signature = string_make(interp, param_sig, j,
+            NULL, PObj_constant_FLAG);
+    }
+    else
+        nci_info->pcc_params_signature = CONST_STRING(interp, "");
+
+    mem_sys_free(param_sig);
+}
 
 
 pmclass NCI need_ext {
     ATTR STRING    *signature;              /* The signature. */
-    ATTR void      *func;                   /* Function pointer to what we'll call. */
-    ATTR void      *orig_func;              /* Function pointer used to create func*/
+    ATTR void      *func;                   /* Function pointer to call. */
+    ATTR void      *orig_func;              /* Function pointer
+                                             * used to create func */
     ATTR STRING    *pcc_params_signature;   /* The signature. */
+    ATTR STRING    *long_signature;         /* The full signature. */
+    ATTR PMC       *multi_sig;              /* type tuple array (?) */
     ATTR INTVAL     arity;                  /* Cached arity of the NCI. */
     ATTR INTVAL     jitted;                 /* Is this a jitted NCI stub. */
-    ATTR PMC       *multi_sig;              /* type tuple array (?) */
 
 /*
 
@@ -118,7 +118,7 @@ Return the MMD signature PMC, if any or a Null PMC.
     METHOD get_multisig() {
         PMC *sig;
         GET_ATTR_multi_sig(INTERP, SELF, sig);
-        if (sig == PMCNULL)
+        if (PMC_IS_NULL(sig))
             sig = PMCNULL;
         RETURN(PMC *sig);
     }
@@ -171,16 +171,26 @@ Sets the specified function pointer and signature (C<*key>).
         PObj_flag_SET(private2, SELF);
     }
 
+    VTABLE void *get_pointer() {
+        return PARROT_NCI(SELF)->orig_func;
+    }
+
     VTABLE void set_pointer_keyed_str(STRING *key, void *func) {
         Parrot_NCI_attributes * const nci_info = PARROT_NCI(SELF);
         int                             jitted = 0;
-        char                     * const key_c = Parrot_str_to_cstring(INTERP, key);
 
         /* Store the original function and signature. */
         SET_ATTR_orig_func(INTERP, SELF, func);
-        nci_info->signature  = string_make(interp, key_c, strlen(key_c),
+
+        /* ensure that the STRING signature is constant */
+        if (!PObj_constant_TEST(key)) {
+            char * const key_c = Parrot_str_to_cstring(INTERP, key);
+            key                = string_make(interp, key_c, strlen(key_c),
                                     NULL, PObj_constant_FLAG);
-        Parrot_str_free_cstring(key_c);
+            Parrot_str_free_cstring(key_c);
+        }
+
+        nci_info->signature  = key;
         pcc_params(INTERP, key, nci_info);
 
         /* Arity is length of that string minus one (the return type). */
@@ -206,9 +216,9 @@ Mark any referenced strings and PMCs.
             Parrot_NCI_attributes * const nci_info = PARROT_NCI(SELF);
 
             if (nci_info->signature)
-                pobject_lives(interp, (PObj*)nci_info->signature);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)nci_info->signature);
             if (nci_info->pcc_params_signature)
-                pobject_lives(interp, (PObj*)nci_info->pcc_params_signature);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)nci_info->pcc_params_signature);
         }
     }
 
@@ -260,7 +270,7 @@ Creates and returns a clone of the NCI.
         nci_info_ret->pcc_params_signature  = nci_info_self->pcc_params_signature;
         nci_info_ret->arity                 = nci_info_self->arity;
         nci_info_ret->jitted                = nci_info_self->jitted;
-        PObj_get_FLAGS(ret)    |= (PObj_get_FLAGS(SELF) & 0x7);
+        PObj_get_FLAGS(ret)                |= (PObj_get_FLAGS(SELF) & 0x7);
 
         return ret;
     }
@@ -312,13 +322,8 @@ shifted down.
 
             nci_jit_sub_t jit_func = (nci_jit_sub_t) D2FPTR(nci_info->func);
 
-            /* TT #365 - Some i386 jit code depends on this.  If t/pmc/nci.t
-             * passes without it, the next line is safe to remove. */
-            PMC_struct_val(SELF) = nci_info->orig_func;
-
             /* Parrot_eprintf(interp, "JITTED %S\n", nci_info->signature); */
-            jit_func(INTERP, SELF,
-                (char *) nci_info->pcc_params_signature->strstart);
+            jit_func(INTERP, SELF, (char *) nci_info->pcc_params_signature->strstart);
         }
         else {
             if (PObj_flag_TEST(private2, SELF)) {

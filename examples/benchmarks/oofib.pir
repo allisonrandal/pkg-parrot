@@ -1,4 +1,5 @@
-# $Id: oofib.pir 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: oofib.pir 38923 2009-05-19 06:07:42Z cotto $
 
 .sub bench :main
     .param pmc argv
@@ -6,7 +7,7 @@
     argc = argv
     .local pmc N
     N = new 'Integer'
-    N = 28
+    N = 24
     if argc <= 1 goto noarg
     $S0 = argv[1]
     N = $S0

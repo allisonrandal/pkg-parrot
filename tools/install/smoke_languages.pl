@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: smoke_languages.pl 37382 2009-03-13 13:47:34Z fperrad $
+# $Id: smoke_languages.pl 39434 2009-06-06 15:41:26Z fperrad $
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use 5.008;
 use Getopt::Long;
 use File::Spec::Functions;
 
-use Test::More tests => 30;
+use Test::More tests => 32;
 
 =head1 NAME
 
@@ -159,10 +159,10 @@ skip("EcmaScript", 1) unless (-d "$langdir/ecmascript");
 $filename = 'test.js';
 open $FH, '>', $filename
         or die "Can't open $filename ($!).\n";
-print $FH "print(\"Hello World from JS\\n\");";
+print $FH "print(\"Hello World from JS\");";
 close $FH;
 $out = `$parrot $langdir/ecmascript/js.pbc $filename`;
-ok($out eq "Hello World from JS\n\n", "check ecmascript");
+ok($out eq "Hello World from JS\n", "check ecmascript");
 unlink($filename);
 }
 
@@ -258,7 +258,7 @@ open $FH, '>', $filename
 print $FH "Hello, World!\n\n";
 close $FH;
 $out = `$parrot $langdir/markdown/markdown.pbc $filename`;
-ok($out eq "<p>Hello, World!</p>\n\n", "check markdown");
+ok($out eq "<p>Hello, World!</p>\n", "check markdown");
 unlink($filename);
 }
 
@@ -316,13 +316,31 @@ unlink($filename);
 
 SKIP:
 {
+skip("porcupine", 1) unless (-d "$langdir/porcupine");
+$filename = 'test.pas';
+open $FH, '>', $filename
+        or die "Can't open $filename ($!).\n";
+print $FH <<'CODE';
+program hello;
+begin
+    writeln('Hello, world!');
+end.
+CODE
+close $FH;
+$out = `$parrot $langdir/porcupine/porcupine.pbc $filename`;
+ok($out eq "Hello, world!\n", "check porcupine");
+unlink($filename);
+}
+
+SKIP:
+{
 skip("primitivearc", 1) unless (-d "$langdir/primitivearc");
 $filename = 'test.arc';
 open $FH, '>', $filename
         or die "Can't open $filename ($!).\n";
 print $FH q{"Hello, world!\n"};
 close $FH;
-$out = `$parrot $langdir/primitivearc/arc.pbc $filename`;
+$out = `$parrot $langdir/primitivearc/primitivearc.pbc $filename`;
 ok($out eq "Hello, world!\n\n", "check primitivearc");
 unlink($filename);
 }
@@ -333,10 +351,10 @@ skip("Punie", 1) unless (-d "$langdir/punie");
 $filename = 'test.p1';
 open $FH, '>', $filename
         or die "Can't open $filename ($!).\n";
-print $FH "print \"Hello, World!\\n\";\n";
+print $FH "print \"Hello, World!\";\n";
 close $FH;
 $out = `$parrot $langdir/punie/punie.pbc $filename`;
-ok($out eq "Hello, World!\n", "check punie");
+ok($out eq "Hello, World!", "check punie");
 unlink($filename);
 }
 
@@ -346,7 +364,7 @@ skip("Pynie", 1) unless (-d "$langdir/pynie");
 $filename = 'test.py';
 open $FH, '>', $filename
         or die "Can't open $filename ($!).\n";
-print $FH "print 'Hello, World!'\n";
+print $FH "print('Hello, World!')\n";
 close $FH;
 $out = `$parrot $langdir/pynie/pynie.pbc $filename`;
 ok($out eq "Hello, World!\n", "check pynie");
@@ -466,6 +484,19 @@ CODE
 close $FH;
 $out = `$parrot $langdir/shakespeare/shakespeare.pbc $filename`;
 ok($out eq "Hello World!\n", "check shakespeare");
+unlink($filename);
+}
+
+SKIP:
+{
+skip("steme", 1) unless (-d "$langdir/steme");
+$filename = 'test.scm';
+open $FH, '>', $filename
+        or die "Can't open $filename ($!).\n";
+print $FH "( say \"Hello, World!\" )\n";
+close $FH;
+$out = `$parrot $langdir/steme/steme.pbc $filename`;
+ok($out eq "Hello, World!\n", "check steme");
 unlink($filename);
 }
 

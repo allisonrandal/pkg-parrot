@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: object-meths.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: object-meths.t 39122 2009-05-24 00:42:07Z NotFound $
 
 use strict;
 use warnings;
@@ -728,7 +728,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "method cache invalidation" );
     o = new ['Bar']
     print o
     $P0 = get_global "ok2"
-    cl.'add_method'('get_string', $P0, 'vtable' => 1)
+    cl.'add_vtable_override'('get_string', $P0)
     print o
 .end
 .sub ok2

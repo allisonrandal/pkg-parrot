@@ -1,5 +1,5 @@
 # Copyright (C) 2003-2009, Parrot Foundation.
-# $Id: dynoplibs.in 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: dynoplibs.in 40130 2009-07-17 05:19:37Z allison $
 
 PERL          := @perl@
 RM_F          := @rm_f@
@@ -10,15 +10,12 @@ BUILD_DIR     := @build_dir@
 RECONFIGURE   := $(PERL) $(BUILD_DIR)/tools/dev/reconfigure.pl
 INSTALL_DIR   := $(BUILD_DIR)/runtime/parrot/dynext
 O             := @o@
-CC            := @cc@ -c
+CC            := @cc@
 LD            := @ld@
 LDFLAGS       := @ldflags@ @ld_debug@ @rpath_blib@ @linkflags@
 LD_LOAD_FLAGS := @ld_load_flags@
 CFLAGS        := @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@
-CC_OUT        := @cc_o_out@
-LD_OUT        := @ld_out@
-#IF(parrot_is_shared):LIBPARROT     := @libparrot_ldflags@
-#ELSE:LIBPARROT     :=
+LIBPARROT     := @libparrot_ldflags@
 
 BUILD_TOOLS_DIR := $(BUILD_DIR)@slash@tools@slash@build
 OPS2C           := $(PERL) -I$(BUILD_DIR)@slash@lib $(BUILD_TOOLS_DIR)@slash@ops2c.pl
@@ -26,14 +23,10 @@ INCLUDES        := -I$(BUILD_DIR)@slash@include -I@build_dir@@slash@src@slash@pm
 LINKARGS        := $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @icu_shared@ @libs@
 
 OPS_TARGETS := \
-#IF(cg_flag):  myops_ops_cg$(LOAD_EXT) \
-#IF(cg_flag):  myops_ops_cgp$(LOAD_EXT) \
-  myops_ops$(LOAD_EXT) \
-  myops_ops_switch$(LOAD_EXT) \
-#IF(cg_flag):  dan_ops_cg$(LOAD_EXT) \
-#IF(cg_flag):  dan_ops_cgp$(LOAD_EXT) \
-  dan_ops$(LOAD_EXT) \
-  dan_ops_switch$(LOAD_EXT)
+#IF(cg_flag):  obscure_ops_cg$(LOAD_EXT) \
+#IF(cg_flag):  obscure_ops_cgp$(LOAD_EXT) \
+  obscure_ops$(LOAD_EXT) \
+  obscure_ops_switch$(LOAD_EXT)
 
 CLEANUPS := \
   "*.c" \
@@ -56,77 +49,41 @@ all : $(OPS_TARGETS)
 Makefile: ../../config/gen/makefiles/dynoplibs.in
 	cd $(BUILD_DIR) && $(RECONFIGURE) --step=gen::makefiles --target=src/dynoplibs/Makefile
 
-myops_ops$(LOAD_EXT): myops_ops$(O)
-	$(LD) $(LD_OUT)myops_ops$(LOAD_EXT) myops_ops$(O) $(LINKARGS)
+obscure_ops$(LOAD_EXT): obscure_ops$(O)
+	$(LD) @ld_out@obscure_ops$(LOAD_EXT) obscure_ops$(O) $(LINKARGS)
 
-myops_ops$(O): myops_ops.c
-	$(CC) $(CC_OUT)myops_ops$(O) $(INCLUDES) $(CFLAGS) myops_ops.c
+obscure_ops$(O): obscure_ops.c
+	$(CC) -c @cc_o_out@obscure_ops$(O) $(INCLUDES) $(CFLAGS) obscure_ops.c
 
-myops_ops.c: myops.ops
-	$(OPS2C) C --dynamic myops.ops
+obscure_ops.c: obscure.ops
+	$(OPS2C) C --dynamic obscure.ops
 
-myops_ops_switch$(LOAD_EXT): myops_ops_switch$(O)
-	$(LD) $(LD_OUT)myops_ops_switch$(LOAD_EXT) myops_ops_switch$(O) $(LINKARGS)
+obscure_ops_switch$(LOAD_EXT): obscure_ops_switch$(O)
+	$(LD) @ld_out@obscure_ops_switch$(LOAD_EXT) obscure_ops_switch$(O) $(LINKARGS)
 
-myops_ops_switch$(O): myops_ops_switch.c
-	$(CC) $(CC_OUT)myops_ops_switch$(O) $(INCLUDES) $(CFLAGS) myops_ops_switch.c
+obscure_ops_switch$(O): obscure_ops_switch.c
+	$(CC) -c @cc_o_out@obscure_ops_switch$(O) $(INCLUDES) $(CFLAGS) obscure_ops_switch.c
 
-myops_ops_switch.c: myops.ops
-	$(OPS2C) CSwitch --dynamic myops.ops
+obscure_ops_switch.c: obscure.ops
+	$(OPS2C) CSwitch --dynamic obscure.ops
 
-myops_ops_cg$(LOAD_EXT): myops_ops_cg$(O)
-	$(LD) $(LD_OUT)myops_ops_cg$(LOAD_EXT) myops_ops_cg$(O) $(LINKARGS)
+obscure_ops_cg$(LOAD_EXT): obscure_ops_cg$(O)
+	$(LD) @ld_out@obscure_ops_cg$(LOAD_EXT) obscure_ops_cg$(O) $(LINKARGS)
 
-myops_ops_cg$(O): myops_ops_cg.c
-	$(CC) $(CC_OUT)myops_ops_cg$(O) $(INCLUDES) $(CFLAGS) myops_ops_cg.c
+obscure_ops_cg$(O): obscure_ops_cg.c
+	$(CC) -c @cc_o_out@obscure_ops_cg$(O) $(INCLUDES) $(CFLAGS) obscure_ops_cg.c
 
-myops_ops_cg.c: myops.ops
-	$(OPS2C) CGoto --dynamic myops.ops
+obscure_ops_cg.c: obscure.ops
+	$(OPS2C) CGoto --dynamic obscure.ops
 
-myops_ops_cgp$(LOAD_EXT): myops_ops_cgp$(O)
-	$(LD) $(LD_OUT)myops_ops_cgp$(LOAD_EXT) myops_ops_cgp$(O) $(LINKARGS)
+obscure_ops_cgp$(LOAD_EXT): obscure_ops_cgp$(O)
+	$(LD) @ld_out@obscure_ops_cgp$(LOAD_EXT) obscure_ops_cgp$(O) $(LINKARGS)
 
-myops_ops_cgp$(O): myops_ops_cgp.c
-	$(CC) $(CC_OUT)myops_ops_cgp$(O) $(INCLUDES) $(CFLAGS) myops_ops_cgp.c
+obscure_ops_cgp$(O): obscure_ops_cgp.c
+	$(CC) -c @cc_o_out@obscure_ops_cgp$(O) $(INCLUDES) $(CFLAGS) obscure_ops_cgp.c
 
-myops_ops_cgp.c: myops.ops
-	$(OPS2C) CGP --dynamic myops.ops
-
-dan_ops$(LOAD_EXT): dan_ops$(O)
-	$(LD) $(LD_OUT)dan_ops$(LOAD_EXT) dan_ops$(O) $(LINKARGS)
-
-dan_ops$(O): dan_ops.c
-	$(CC) $(CC_OUT)dan_ops$(O) $(INCLUDES) $(CFLAGS) dan_ops.c
-
-dan_ops.c: dan.ops
-	$(OPS2C) C --dynamic dan.ops
-
-dan_ops_switch$(LOAD_EXT): dan_ops_switch$(O)
-	$(LD) $(LD_OUT)dan_ops_switch$(LOAD_EXT) dan_ops_switch$(O) $(LINKARGS)
-
-dan_ops_switch$(O): dan_ops_switch.c
-	$(CC) $(CC_OUT)dan_ops_switch$(O) $(INCLUDES) $(CFLAGS) dan_ops_switch.c
-
-dan_ops_switch.c: dan.ops
-	$(OPS2C) CSwitch --dynamic dan.ops
-
-dan_ops_cg$(LOAD_EXT): dan_ops_cg$(O)
-	$(LD) $(LD_OUT)dan_ops_cg$(LOAD_EXT) dan_ops_cg$(O) $(LINKARGS)
-
-dan_ops_cg$(O): dan_ops_cg.c
-	$(CC) $(CC_OUT)dan_ops_cg$(O) $(INCLUDES) $(CFLAGS) dan_ops_cg.c
-
-dan_ops_cg.c: dan.ops
-	$(OPS2C) CGoto --dynamic dan.ops
-
-dan_ops_cgp$(LOAD_EXT): dan_ops_cgp$(O)
-	$(LD) $(LD_OUT)dan_ops_cgp$(LOAD_EXT) dan_ops_cgp$(O) $(LINKARGS)
-
-dan_ops_cgp$(O): dan_ops_cgp.c
-	$(CC) $(CC_OUT)dan_ops_cgp$(O) $(INCLUDES) $(CFLAGS) dan_ops_cgp.c
-
-dan_ops_cgp.c: dan.ops
-	$(OPS2C) CGP --dynamic dan.ops
+obscure_ops_cgp.c: obscure.ops
+	$(OPS2C) CGP --dynamic obscure.ops
 
 test : all
 	cd ../.. && $(PERL) -Ilib t/harness t/dynoplibs/*.t

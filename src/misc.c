@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: misc.c 37201 2009-03-08 12:07:48Z fperrad $
+$Id: misc.c 38107 2009-04-14 23:41:32Z coke $
 
 =head1 NAME
 
@@ -46,7 +46,7 @@ the type for the format.
 
 /*
 
-=item C<STRING * Parrot_vsprintf_s>
+=item C<STRING * Parrot_vsprintf_s(PARROT_INTERP, STRING *pat, va_list args)>
 
 Almost all the other sprintf variants in this file are implemented in
 terms of this function (see C<Parrot_psprintf()> for the exception). It
@@ -71,7 +71,8 @@ Parrot_vsprintf_s(PARROT_INTERP, ARGIN(STRING *pat), va_list args)
 
 /*
 
-=item C<STRING * Parrot_vsprintf_c>
+=item C<STRING * Parrot_vsprintf_c(PARROT_INTERP, const char *pat, va_list
+args)>
 
 C string version of C<Parrot_vsprintf_s()>.
 
@@ -95,7 +96,8 @@ Parrot_vsprintf_c(PARROT_INTERP, ARGIN(const char *pat), va_list args)
 
 /*
 
-=item C<void Parrot_vsnprintf>
+=item C<void Parrot_vsnprintf(PARROT_INTERP, char *targ, size_t len, const char
+*pat, va_list args)>
 
 Similar to C<Parrot_vsprintf()> but with an option to specify the length
 (C<len>) of the returned C string.
@@ -129,7 +131,7 @@ Parrot_vsnprintf(PARROT_INTERP, ARGOUT(char *targ),
 
 /*
 
-=item C<STRING * Parrot_sprintf_s>
+=item C<STRING * Parrot_sprintf_s(PARROT_INTERP, STRING *pat, ...)>
 
 Calls C<Parrot_vsprintf_s()> with the C<va_list> obtained from C<...>.
 
@@ -158,7 +160,7 @@ Parrot_sprintf_s(PARROT_INTERP, ARGIN(STRING *pat), ...)
 
 /*
 
-=item C<STRING * Parrot_sprintf_c>
+=item C<STRING * Parrot_sprintf_c(PARROT_INTERP, const char *pat, ...)>
 
 C string version of C<Parrot_sprintf_s()>.
 
@@ -187,7 +189,8 @@ Parrot_sprintf_c(PARROT_INTERP, ARGIN(const char *pat), ...)
 
 /*
 
-=item C<void Parrot_snprintf>
+=item C<void Parrot_snprintf(PARROT_INTERP, char *targ, size_t len, const char
+*pat, ...)>
 
 Similar to C<Parrot_sprintf()> but with an option to specify the length
 (C<len>) of the returned C string.
@@ -213,7 +216,7 @@ Parrot_snprintf(PARROT_INTERP, ARGOUT(char *targ), size_t len,
 
 /*
 
-=item C<STRING * Parrot_psprintf>
+=item C<STRING * Parrot_psprintf(PARROT_INTERP, STRING *pat, PMC *ary)>
 
 Calls C<Parrot_sprintf_format()> with the insertion arguments in an
 C<Array> PMC.
@@ -237,7 +240,8 @@ Parrot_psprintf(PARROT_INTERP, ARGIN(STRING *pat), ARGOUT(PMC *ary))
 
 /*
 
-=item C<int Parrot_secret_snprintf>
+=item C<int Parrot_secret_snprintf(char *buffer, const size_t len, const char
+*format, ...)>
 
 A simulation of C<snprintf> for systems that do not support it.
 
@@ -248,7 +252,8 @@ A simulation of C<snprintf> for systems that do not support it.
 
 PARROT_EXPORT
 int
-Parrot_secret_snprintf(ARGOUT(char *buffer), const size_t len, ARGIN(const char *format), ...)
+Parrot_secret_snprintf(ARGOUT(char *buffer), SHIM(const size_t len),
+        ARGIN(const char *format), ...)
 {
     ASSERT_ARGS(Parrot_secret_snprintf)
     int retval;

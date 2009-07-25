@@ -1,5 +1,5 @@
 /*
- * $Id: time.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: time.c 37786 2009-03-28 01:09:22Z coke $
  * Copyright (C) 2007, Parrot Foundation.
  */
 
@@ -27,8 +27,6 @@ RT#48264
 
 =item C<INTVAL Parrot_intval_time(void)>
 
-RT#48260: Not yet documented!!!
-
 =cut
 
 */
@@ -43,8 +41,6 @@ Parrot_intval_time(void)
 /*
 
 =item C<FLOATVAL Parrot_floatval_time(void)>
-
-RT#48260: Not yet documented!!!
 
 =cut
 
@@ -63,8 +59,6 @@ Parrot_floatval_time(void)
 /*
 
 =item C<void Parrot_sleep(unsigned int seconds)>
-
-RT#48260: Not yet documented!!!
 
 =cut
 

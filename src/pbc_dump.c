@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, Parrot Foundation.
-$Id: pbc_dump.c 37212 2009-03-08 23:02:22Z rurban $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: pbc_dump.c 37845 2009-04-01 18:19:56Z coke $
 
 =head1 NAME
 
@@ -219,8 +219,7 @@ static struct longopt_opt_decl opt_options[] = {
 
 /*
 
-=item C<int
-main(int argc, char **argv)>
+=item C<int main(int argc, const char **argv)>
 
 The run loop. Process the command-line arguments and dump accordingly.
 

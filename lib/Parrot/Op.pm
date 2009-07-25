@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Op.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Op.pm 39997 2009-07-11 08:36:05Z cotto $
 
 =head1 NAME
 
@@ -323,7 +323,6 @@ sub _substitute {
     local $_ = shift;
     my $trans = shift;
 
-    s/{{([a-z]+)\@([^{]*?)}}/ $trans->access_arg($1, $2, $self); /me;
     s/{{\@([^{]*?)}}/   $trans->access_arg($self->arg_type($1 - 1), $1, $self); /me;
 
     s/{{=0,=([^{]*?)}}/   $trans->restart_address($1) . "; {{=0}}"; /me;
@@ -438,19 +437,9 @@ Author: Gregor N. Purdy E<lt>gregor@focusresearch.comE<gt>
 
 1;
 
-__END__
-
-=begin TODO
-
-=head1 LICENSE
-
-This program is free software. It is subject to the same
-license as Parrot itself.
-
-=head1 COPYRIGHT
-
-Copyright (C) 2001-2008, Parrot Foundation.
-
-=end TODO
-
-=cut
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

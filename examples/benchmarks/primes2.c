@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id: primes2.c 37201 2009-03-08 12:07:48Z fperrad $
+$Id: primes2.c 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 
@@ -26,8 +26,7 @@ of primes and the last one found.
 
 /*
 
-=item C<int
-main(int argc, char *argv[])>
+=item C<int main(int argc, char *argv[])>
 
 Main function to run the example.
 
@@ -38,7 +37,7 @@ Main function to run the example.
 int
 main(int argc, char *argv[])
 {
-        int i=0, max=10000;
+        int i=0, max=500;
         int i6 = 0;
         int i7;
 

@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 81_continuation.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1 Continuations
 
 Continuations are tricky and amazing things. Parrot uses continuations for
@@ -12,7 +15,7 @@ point in your code that you want by invoking it.
 
 .sub main :main
     .local pmc cont
-    cont = new 'Continuation'
+    cont = new ['Continuation']
     set_addr cont, continued
 
     test_call(4, cont)

@@ -1,6 +1,6 @@
 package samples;
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: samples.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
 
 use strict;
 use warnings;
@@ -13,13 +13,13 @@ our @EXPORT_OK = qw($core $debug $mangled $string);
 
 $core = q{
 /*
- * $Id: samples.pm 36833 2009-02-17 20:09:26Z allison $
+ * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
 ** pseudo-core.ops
 */
 
 #include "parrot/dynext.h"
 #include "parrot/embed.h"
-#include "../interp_guts.h"
+#include "../interp/interp_guts.h"
 
 VERSION = PARROT_VERSION;
 
@@ -143,7 +143,7 @@ as the Parrot interpreter itself.
 
  $debug = q{
 /*
- * $Id: samples.pm 36833 2009-02-17 20:09:26Z allison $
+ * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
  * Copyright (C) 2002-2008, Parrot Foundation.
  */
 
@@ -208,7 +208,7 @@ op debug_load(inconst STR) :base_debug {
 
  $mangled = q{
 /*
- * $Id: samples.pm 36833 2009-02-17 20:09:26Z allison $
+ * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
 ** string.ops
 */
 
@@ -266,7 +266,7 @@ as the Parrot interpreter itself.
 
 $string = q{
 /*
- * $Id: samples.pm 36833 2009-02-17 20:09:26Z allison $
+ * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
 ** pseudo-string.ops
 */
 

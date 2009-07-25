@@ -1,7 +1,7 @@
 /* pmc_freeze.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: pmc_freeze.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: pmc_freeze.h 39033 2009-05-22 06:32:33Z petdance $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:
@@ -14,7 +14,7 @@
 #define      PARROT_PMC_FREEZE_H_GUARD
 
 struct _visit_info;
-typedef void (*visit_f)(PARROT_INTERP, PMC*, struct _visit_info*);
+typedef void (*visit_f)(PARROT_INTERP, ARGIN_NULLOK(PMC*), ARGIN(struct _visit_info*));
 
 typedef enum {
     VISIT_FREEZE_NORMAL,

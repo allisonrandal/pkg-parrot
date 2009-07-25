@@ -1,6 +1,9 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 40_file_ops.pir 40124 2009-07-16 21:36:57Z allison $
+
 =head1 File Operations
 
-This example demonstrates basic file operations. Note the readmode.
+This example demonstrates basic file operations.
 
 =cut
 
@@ -17,7 +20,7 @@ This example demonstrates basic file operations. Note the readmode.
     close filein
 
     # Be nice and remove the temporary file we created.
-    $P1 = new 'OS'
+    $P1 = new ['OS']
     $P1.'rm'('40_file_ops_data.txt')
 .end
 

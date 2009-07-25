@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: HLLCompiler.pir 40063 2009-07-13 22:19:10Z pmichaud $
+
 =head1 NAME
 
 PCT::HLLCompiler - base class for compiler objects
@@ -29,7 +32,7 @@ running compilers from a command line.
     $P0 = split ' ', 'parse past post pir evalpmc'
     setattribute self, '@stages', $P0
 
-    $P0 = split ' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v'
+    $P0 = split ' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v'
     setattribute self, '@cmdoptions', $P0
 
     $P1 = box <<'    USAGE'
@@ -323,13 +326,31 @@ to any options and return the resulting parse tree.
     .local string tcode
     tcode = adverbs['transcode']
     unless tcode goto transcode_done
-    push_eh transcode_skip
+    .local pmc tcode_it
+    $P0 = split ' ', tcode
+    tcode_it = iter $P0
+  tcode_loop:
+    unless tcode_it goto transcode_done
+    tcode = shift tcode_it
+    push_eh tcode_enc
     $I0 = find_charset tcode
     $S0 = source
     $S0 = trans_charset $S0, $I0
     assign source, $S0
-  transcode_skip:
     pop_eh
+    goto transcode_done
+  tcode_enc:
+    pop_eh
+    push_eh tcode_fail
+    $I0 = find_encoding tcode
+    $S0 = source
+    $S0 = trans_encoding $S0, $I0
+    assign source, $S0
+    pop_eh
+    goto transcode_done
+  tcode_fail:
+    pop_eh
+    goto tcode_loop
   transcode_done:
 
     .local string target
@@ -450,14 +471,14 @@ resulting ast.
   compile_match:
     #push_eh err_past
     .local pmc ast
-    ast = source.'item'()
+    ast = source.'ast'()
     #pop_eh
     $I0 = isa ast, ['PAST';'Node']
     unless $I0 goto err_past
     .return (ast)
 
   err_past:
-    pop_eh
+    #pop_eh
     $S0 = typeof source
     .tailcall self.'panic'('Unable to obtain PAST from ', $S0)
 .end
@@ -580,7 +601,7 @@ specifies the encoding to use for the input (e.g., "utf8").
     if null $P0 goto interactive_loop
     unless target goto interactive_loop
     if target == 'pir' goto target_pir
-    '_dumper'($P0, target)
+    self.'dumper'($P0, target, adverbs :flat :named)
     goto interactive_loop
   target_pir:
     say $P0
@@ -685,10 +706,13 @@ options are passed to the evaluator.
     close ifh
     goto iter_loop
   iter_end:
+    $S0 = join ' ', files
+    $P1 = box $S0
+    .lex '$?FILES', $P1
     $P0 = self.'eval'(code, args :flat, adverbs :flat :named)
     if target == '' goto end
     if target == 'pir' goto end
-    '_dumper'($P0, target)
+    self.'dumper'($P0, target, adverbs :flat :named)
   end:
     .return ($P0)
 
@@ -799,7 +823,8 @@ Generic method for compilers invoked from a shell command line.
 
   save_output:
     if null result goto end
-    unless result goto end
+    $I0 = defined result
+    unless $I0 goto end
     .local string target
     target = adverbs['target']
     target = downcase target
@@ -841,6 +866,28 @@ based on double-colon separators.
     .param string name
     $P0 = split '::', name
     .return ($P0)
+.end
+
+=item dumper(obj, name, options)
+
+Dump C<obj> with C<name> according to C<options>.
+
+=cut
+
+.sub 'dumper' :method
+    .param pmc obj
+    .param string name
+    .param pmc options         :slurpy :named
+
+    $S0 = options['dumper']
+    if $S0 goto load_dumper
+    .tailcall '_dumper'(obj, name)
+
+  load_dumper:
+    load_bytecode 'PCT/Dumper.pbc'
+    downcase $S0
+    $P0 = get_hll_global ['PCT';'Dumper'], $S0
+    .tailcall $P0(obj, name)
 .end
 
 

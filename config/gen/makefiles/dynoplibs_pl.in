@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: dynoplibs_pl.in 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: dynoplibs_pl.in 38231 2009-04-20 16:03:13Z Infinoid $
 
 =head1 NAME
 
@@ -83,7 +83,7 @@ sub partial_link_cmd {
         "$LD ".
         "@ld_out@" . $target . " " .
         join(" ", map {"$PATHQUOTE$_$PATHQUOTE"} @$sources) .
-        " $liblist $LDFLAGS $LD_LOAD_FLAGS $PATHQUOTE$LIBPARROT$PATHQUOTE";
+        " $liblist $LDFLAGS $LD_LOAD_FLAGS $LIBPARROT";
 }
 
 our $NOW = time();

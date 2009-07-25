@@ -1,12 +1,12 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 10_math_ops.pir 40124 2009-07-16 21:36:57Z allison $
+
 =head1 Math Operations
 
-Many common math operations have simple operator syntax in PIR. Operators
-like C<+>, C<->, C</> and C<*> are all implemented in PIR, but so are a
-few others: C<<< << >>>, C<<< >> >>>, C<|>, C<&>, C<^>  and C<%> are some
-examples.
-
-These math operation symbols are all I<infix operators> and are used the
-way most people would expect.
+Many common math operations have simple operator syntax in
+PIR. Operators like C<+>, C<->, C</> and C<*> are all
+implemented in PIR, but so are a few less common ones such
+as C<<< << >>>, C<<< >> >>>, C<|>, C<&>, C<^>  and C<%>.
 
 =cut
 

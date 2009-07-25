@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd_format.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: pdd_format.t 38524 2009-05-07 03:20:31Z jkeenan $
 
 use strict;
 use warnings;
@@ -65,7 +65,7 @@ sub check_pdd_formatting {
         if (
             ( length( $lines[$i] ) > 78 )
             and
-            ( $lines[$i] !~ m/(^(?:L?<)?http|\$Id:\s+)/ )
+            ( $lines[$i] !~ m/^(?:F|L)<|<http|\$Id:\s+/ )
         ) {
             push @toolong, ($i + 1);
         }

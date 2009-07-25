@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Rand.pir 37343 2009-03-12 05:22:02Z Util $
+# $Id: Rand.pir 39599 2009-06-16 22:54:02Z whiteknight $
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ Portage of the following C implementation, given as example by ISO/IEC 9899:1999
 
 =head1 USAGE
 
-    load_bytecode 'library/Math/Rand.pbc'
+    load_bytecode 'Math/Rand.pbc'
     .local pmc rand
     rand = get_global [ 'Math'; 'Rand' ], 'rand'
     .local pmc srand

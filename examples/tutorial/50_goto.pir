@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 50_goto.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1
 
 The unconditional jump is the simplest of all flow control devices in any

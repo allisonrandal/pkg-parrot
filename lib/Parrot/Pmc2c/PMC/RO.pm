@@ -1,6 +1,6 @@
-# Copyright (C) 2004-2008, Parrot Foundation.
+# Copyright (C) 2004-2009, Parrot Foundation.
 
-# $Id: RO.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: RO.pm 40165 2009-07-20 08:29:26Z chromatic $
 
 =head1 NAME
 
@@ -43,11 +43,16 @@ sub new {
 
     my $self = bless Parrot::Pmc2c::PMC->new(
         {
-            parents => [ $parent->name, @{ $parent->parents } ],    # prepend self to parrent
-            flags => { ( %{ $parent->get_flags } ), 'is_ro' => 1 }, # copy flags, set is_const
-            name       => $parent->name . "_ro",                    # set pmcname
-            vtable     => $parent->vtable,                          # and alias vtable
-            parentname => $parent->name,                            # set parentname
+            # prepend self to parent
+            parents => [ $parent->name, @{ $parent->parents } ],
+            # copy flags, set is_ro
+            flags => { ( %{ $parent->get_flags } ), 'is_ro' => 1 },
+            # set pmcname
+            name       => $parent->name . "_ro",
+            # and alias vtable
+            vtable     => $parent->vtable,
+            # set parentname
+            parentname => $parent->name,
         }
     ), $classname;
 
@@ -56,7 +61,8 @@ sub new {
     {
 
       # autogenerate for nonstandard types
-      # (RT#44433 is this appropriate or do we want them to each be explicitly cleared to have RO ?)
+      # (RT #44433: is this appropriate or do we want them to each be
+      # explicitly cleared to have RO ?)
         no strict 'refs';
         if ( !@{ ref($self) . '::ISA' } ) {
             @{ ref($self) . '::ISA' } = "Parrot::Pmc2c::PMC::RO";
@@ -64,75 +70,44 @@ sub new {
     }
 
     foreach my $vt_method ( @{ $self->vtable->methods } ) {
-        my $vt_method_name = $vt_method->name;
-        if ( $vt_method_name eq 'find_method' ) {
-            my $ro_method = Parrot::Pmc2c::Method->new(
-                {
-                    name        => $vt_method_name,
-                    parent_name => $parent->name,
-                    return_type => $vt_method->return_type,
-                    parameters  => $vt_method->parameters,
-                    type        => Parrot::Pmc2c::Method::VTABLE,
-                }
-            );
-            my $find_method_parent;
-            if ( $parent->implements_vtable($vt_method_name) ) {
-                $find_method_parent = $parent->name;
-            }
-            else {
-                $find_method_parent = $parent->{super}{$vt_method_name};
-            }
-            my $real_findmethod = 'Parrot_' . $find_method_parent . '_find_method';
-            my $body            = <<"EOC";
-    PMC *const method = $real_findmethod(interp, pmc, method_name);
-    if (!PMC_IS_NULL(VTABLE_getprop(interp, method, CONST_STRING_GEN(interp, "write"))))
-        return PMCNULL;
-    else
-        return method;
-EOC
-            $ro_method->body( Parrot::Pmc2c::Emitter->text($body) );
-            $self->add_method($ro_method);
-        }
-        elsif ( $parent->vtable_method_does_write($vt_method_name) ) {
-            # All parameters passed in are shims, because we're
-            # creating an exception-thrower.
-            my @parameters = split( /\s*,\s*/, $vt_method->parameters );
-            @parameters = map { "SHIM($_)" } @parameters;
+        my $name = $vt_method->name;
 
-            my $ro_method = Parrot::Pmc2c::Method->new(
-                {
-                    name        => $vt_method_name,
-                    parent_name => $parent->name,
-                    return_type => $vt_method->return_type,
-                    parameters  => join( ', ', @parameters ),
-                    type        => Parrot::Pmc2c::Method::VTABLE,
-                    pmc_unused  => 1,
-                }
-            );
-            my $pmcname = $parent->name;
-            my $ret     = return_statement($ro_method);
-            my $body    = <<EOC;
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_WRITE_TO_CONSTCLASS,
-            "$vt_method_name() in read-only instance of $pmcname");
+        # Generate RO variant only if we override method constantness
+        # with ":write"
+        next unless $parent->{has_method}{$name}
+                    && $parent->vtable_method_does_write($name)
+                    && !$parent->vtable->attrs($name)->{write};
+
+        # All parameters passed in are shims, because we're
+        # creating an exception-thrower.
+        my @parameters = map { "SHIM($_)" }
+                         split( /\s*,\s*/, $vt_method->parameters );
+
+        my $ro_method = Parrot::Pmc2c::Method->new(
+            {
+                name        => $name,
+                parent_name => $parent->name,
+                return_type => $vt_method->return_type,
+                parameters  => join( ', ', @parameters ),
+                type        => Parrot::Pmc2c::Method::VTABLE,
+                pmc_unused  => 1,
+            }
+        );
+        my $pmcname = $parent->name;
+        my $ret     = return_statement($ro_method);
+        my $body    = <<EOC;
+Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_WRITE_TO_CONSTCLASS,
+        "$name() in read-only instance of $pmcname");
 EOC
 
-            # don't return after a Parrot_ex_throw_from_c_args
-            $ro_method->body( Parrot::Pmc2c::Emitter->text($body) );
-            $self->add_method($ro_method);
-        }
-        else {
-            if ( $parent->implements_vtable($vt_method_name) ) {
-                my $parent_method = $parent->get_method($vt_method_name);
-                $self->{super}{$vt_method_name} = $parent_method->parent_name;
-            }
-            else {
-                $self->{super}{$vt_method_name} = $parent->{super}{$vt_method_name};
-            }
-        }
+        # don't return after a Parrot_ex_throw_from_c_args
+        $ro_method->body( Parrot::Pmc2c::Emitter->text($body) );
+        $self->add_method($ro_method);
     }
 
     return $self;
 }
+
 
 1;
 

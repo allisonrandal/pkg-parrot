@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: filenames.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: filenames.t 37712 2009-03-25 14:17:35Z coke $
 
 use strict;
 use warnings;
@@ -44,7 +44,7 @@ Filenames are restricted to the characters C<a-zA-Z0-9_-.>
 
 =item Filenames length restriction
 
-Filenames are restricted to 32 characters.  Test currently "todoed".
+Filenames are restricted to 32 characters.
 
 =back
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2008, Parrot Foundation.
-$Id: main.c 37257 2009-03-10 04:22:07Z Util $
+$Id: main.c 39628 2009-06-17 14:39:27Z NotFound $
 
 =head1 NAME
 
@@ -19,7 +19,6 @@ Start Parrot
 */
 
 #include <stdio.h>
-#include <string.h>
 
 #include "parrot/parrot.h"
 #include "parrot/embed.h"
@@ -39,8 +38,8 @@ int
 main(int argc, char * argv[])
 {
     const char *sourcefile;
-    Interp  *interp;
-    int      status;
+    Interp     *interp;
+    int         status;
 
     /* internationalization setup */
     /* setlocale(LC_ALL, ""); */

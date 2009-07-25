@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 56_defined.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1 defined
 
 The C<defined> opcode tells you if the contents of a PMC is defined or not.
@@ -12,7 +15,7 @@ been defined may throw an exception or cause a bigger problem.
 
 .sub main :main
 
-    $P1 = new 'String'
+    $P1 = new ['String']
     $I0 = defined $P1
     if $I0 goto defined_P1
         say "$P1 is undefined"
@@ -29,7 +32,7 @@ For example the C<Undef> PMC always returns false (0) for C<defined>.
 =cut
 
   end_defined_P1:
-    $P3 = new 'Undef'
+    $P3 = new ['Undef']
     $I0 = defined $P3
     if $I0 goto defined_P3
         say "$P3 is undefined"

@@ -1,5 +1,5 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: Developer.pm 37256 2009-03-10 03:10:29Z Util $
+# $Id: Developer.pm 39163 2009-05-25 00:43:09Z jkeenan $
 
 =head1 NAME
 
@@ -51,8 +51,14 @@ sub new {
             $self->new_item( '', 'docs/native_exec.pod' ),
             $self->new_item( '', 'docs/porting_intro.pod' ),
         ),
-        $self->new_group( 'Development Notes',     '', 'docs/dev' ),
-        $self->new_group( 'Articles',                      '', 'docs/user/pir' ),
+        $self->new_group( 'Development Notes',     '', 'docs/dev',
+            $self->new_item( 'Documenting PMCs', 'docs/pmc/documentation.pod'),
+        ),
+        $self->new_group( 'Articles',                      '', 'docs/user/pir',
+            $self->new_item( 'Array base class', 'docs/pmc/array.pod'),
+            $self->new_item( 'Accesing C Structs from Parrot', 'docs/pmc/struct.pod'),
+            $self->new_item( 'Parrot Subroutines', 'docs/pmc/subs.pod'),
+        ),
     );
 }
 

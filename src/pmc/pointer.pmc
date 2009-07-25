@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: pointer.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: pointer.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -20,9 +20,9 @@ The actual pointer is in C<PMC_data>.
 
 */
 
-#include "parrot/parrot.h"
-
 pmclass Pointer need_ext {
+    ATTR void * mark_function;
+    ATTR void * pointer;
 
 /*
 
@@ -35,8 +35,24 @@ Initializes the pointer.
 */
 
     VTABLE void init() {
-        PObj_custom_mark_SET(SELF);
+        PObj_custom_mark_destroy_SETALL(SELF);
+        PMC_data(SELF) = mem_allocate_zeroed_typed(Parrot_Pointer_attributes);
     }
+
+/*
+
+=item C<void destroy()>
+
+Destroy the Pointer and free associated memory
+
+=cut
+
+*/
+
+    VTABLE void destroy() {
+        mem_sys_free(PARROT_POINTER(SELF));
+    }
+
 
 /*
 
@@ -50,10 +66,10 @@ Marks the pointer as live.
 
     VTABLE void mark() {
         void (*mark_function)(Interp *, void *) =
-            (void (*)(Interp *, void *))D2FPTR(PMC_struct_val(SELF));
-
-        if (PMC_data(SELF) && PMC_struct_val(SELF))
-            (*mark_function)(INTERP, PMC_data(SELF));
+            (void (*)(Interp *, void *))D2FPTR(PARROT_POINTER(SELF)->mark_function);
+        void * data = PARROT_POINTER(SELF)->pointer;
+        if (data && mark_function)
+            (*mark_function)(INTERP, data);
     }
 
 /*
@@ -75,6 +91,34 @@ Creates and returns a clone of the pointer.
 
 /*
 
+=item C<void set_pointer(void *)>
+
+Sets the pointer value.
+
+=cut
+
+*/
+
+    VTABLE void set_pointer(void *ptr) {
+        PARROT_POINTER(SELF)->pointer = ptr;
+    }
+
+/*
+
+=item C<void *get_pointer()>
+
+Returns the pointer value.
+
+=cut
+
+*/
+
+    VTABLE void *get_pointer() {
+        return PARROT_POINTER(SELF)->pointer;
+    }
+
+/*
+
 =item C<INTVAL get_integer()>
 
 Returns the pointer value as an integer.
@@ -84,7 +128,7 @@ Returns the pointer value as an integer.
 */
 
     VTABLE INTVAL get_integer() {
-        return (INTVAL)PMC_data(SELF);
+        return (INTVAL)(PARROT_POINTER(SELF)->pointer);
     }
 
 /*
@@ -98,7 +142,7 @@ Returns the pointer value as a floating-point number.
 */
 
     VTABLE FLOATVAL get_number() {
-        return (FLOATVAL)(INTVAL)PMC_data(SELF);
+        return (FLOATVAL)(INTVAL)(PARROT_POINTER(SELF)->pointer);
     }
 
 /*
@@ -112,7 +156,7 @@ Returns the pointer value as a Parrot string.
 */
 
     VTABLE STRING *get_repr() {
-        return Parrot_sprintf_c(INTERP, "Pointer = 0x%p", PMC_data(SELF));
+        return Parrot_sprintf_c(INTERP, "Pointer = 0x%p", PARROT_POINTER(SELF)->pointer);
     }
 
 
@@ -127,7 +171,7 @@ Returns the pointer value as a Parrot string.
 */
 
     VTABLE STRING *get_string() {
-        return Parrot_sprintf_c(INTERP, "%s", PMC_data(SELF));
+        return Parrot_sprintf_c(INTERP, "%s", PARROT_POINTER(SELF)->pointer);
     }
 
 /*
@@ -156,7 +200,7 @@ Returns whether the pointer has the same value as C<*pmc2>.
 
     VTABLE INTVAL is_same(PMC *pmc2) {
         return (INTVAL)(SELF->vtable   == pmc2->vtable &&
-                        PMC_data(SELF) == PMC_data(pmc2));
+                        PARROT_POINTER(SELF)->pointer == PARROT_POINTER(pmc2)->pointer);
     }
 }
 

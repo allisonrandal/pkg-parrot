@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: Regex.pir 40072 2009-07-14 00:24:03Z pmichaud $
+
 =head1 TITLE
 
 Regex - base class for grammars and built-in rules
@@ -56,30 +59,31 @@ Match an identifier.
 .end
 
 
-=item C<null()>
+=item C<alpha()>
 
-Match a null string (always returns true on first match).
+Match a single alphabetic character.
 
 =cut
 
-.sub "null" :method
-    .local pmc mob
-    .local int pos
+.sub 'alpha' :method
+    .param pmc adverbs         :slurpy :named
+    .local string target
+    .local pmc mob, mfrom, mpos
+    .local int pos, lastpos
+
     $P0 = get_hll_global ['PGE'], 'Match'
-    (mob, pos) = $P0.'new'(self)
+    (mob, pos, target) = $P0.'new'(self)
+
+    lastpos = length target
+    $S0 = substr target, pos, 1
+    if $S0 == '_' goto ident_1
+    $I0 = is_cclass .CCLASS_ALPHABETIC, target, pos
+    if $I0 == 0 goto end
+  ident_1:
+    inc pos
     mob.'to'(pos)
+  end:
     .return (mob)
-.end
-
-=item C<fail()>
-
-Force a backtrack.  (Taken from A05.)
-
-=cut
-
-.sub "fail" :method
-    $P0 = get_hll_global ['PGE'], 'Match'
-    .tailcall $P0.'new'(self)
 .end
 
 
@@ -104,16 +108,6 @@ Match a single lowercase character.
     .tailcall '!cclass'(self, .CCLASS_LOWERCASE)
 .end
 
-
-=item C<alpha()>
-
-Match a single alphabetic character.
-
-=cut
-
-.sub "alpha" :method
-    .tailcall '!cclass'(self, .CCLASS_ALPHABETIC)
-.end
 
 =item C<digit()>
 
@@ -205,45 +199,6 @@ Match a single alphanumeric character.
     .tailcall '!cclass'(self, .CCLASS_ALPHANUMERIC)
 .end
 
-=item C<sp()>
-
-Match a single space character.  (Taken from E05.)
-
-=cut
-
-.sub "sp" :method
-    .tailcall '!literal'(self, ' ')
-.end
-
-=item C<lt()>
-
-Match a single left angle bracket.  (Taken from E05.)
-
-=cut
-
-.sub "lt" :method
-    .tailcall '!literal'(self, '<')
-.end
-
-=item C<gt()>
-
-Match a single right angle bracket. (Taken from E05.)
-
-=cut
-
-.sub "gt" :method
-    .tailcall '!literal'(self, '>')
-.end
-
-=item C<dot()>
-
-Match a single dot ('.').  (Taken from E05.)
-
-=cut
-
-.sub "dot" :method
-    .tailcall '!literal'(self, '.')
-.end
 
 =item C<ws()>
 
@@ -352,7 +307,7 @@ success.
     .local pmc mob, cache, rule
 
     if has_pattern goto lookahead
-    mob = 'fail'(self)
+    mob = '!fail'(self)
     .return (mob)
   lookahead:
     cache = get_global '%!cache'
@@ -401,7 +356,7 @@ potentially very inefficient, but it "works" for now.
 
     mob = self
     if has_pattern goto lookbehind
-    mob = fail(mob)
+    mob = '!fail'(mob)
     .return (mob)
   lookbehind:
     pattern = concat '[', pattern
@@ -462,13 +417,27 @@ Throw an exception when parsing fails in goal matching.
 
 =over 4
 
+
+=item C<!fail>
+
+Force a backtrack.  (Taken from A05.)
+
+=cut
+
+.sub "!fail" :anon
+    .param pmc mob
+    $P0 = get_hll_global ['PGE'], 'Match'
+    .tailcall $P0.'new'(mob)
+.end
+
+
 =item C<!cclass(mob, cclass)>
 
 Match according to character class C<cclass>.
 
 =cut
 
-.sub '!cclass'
+.sub '!cclass' :anon
     .param pmc mob
     .param int cclass
 
@@ -489,7 +458,7 @@ Match according to C<literal>.
 
 =cut
 
-.sub '!literal'
+.sub '!literal' :anon
     .param pmc mob
     .param string literal
     .local string target

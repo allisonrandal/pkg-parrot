@@ -1,7 +1,7 @@
 /* multidispatch.h
  *  Copyright (C) 2003-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: multidispatch.h 36833 2009-02-17 20:09:26Z allison $
+ *     $Id: multidispatch.h 39986 2009-07-11 02:16:56Z petdance $
  *  Overview:
  *     This is the API header for the mmd subsystem
  *  Data Structure and Algorithms:
@@ -45,9 +45,13 @@ typedef struct _MMD_table {
 } MMD_table;
 
 typedef struct _multi_func_list {
-        const char *multi_name;
-        const char *short_sig;
-        const char *full_sig;
+/* TT #646
+ * This STRING ideally must be const but actually can't.
+ */
+        STRING *multi_name;
+        STRING *short_sig;
+        STRING *full_sig;
+        STRING *ns_name;
         funcptr_t func_ptr;
 } multi_func_list;
 
@@ -105,7 +109,8 @@ void Parrot_mmd_cache_destroy(PARROT_INTERP, ARGMOD(MMD_Cache *cache))
         FUNC_MODIFIES(*cache);
 
 PARROT_EXPORT
-PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
 PMC * Parrot_mmd_cache_lookup_by_types(PARROT_INTERP,
     ARGMOD(MMD_Cache *cache),
     ARGIN(const char *name),
@@ -117,7 +122,8 @@ PMC * Parrot_mmd_cache_lookup_by_types(PARROT_INTERP,
         FUNC_MODIFIES(*cache);
 
 PARROT_EXPORT
-PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
 PMC * Parrot_mmd_cache_lookup_by_values(PARROT_INTERP,
     ARGMOD(MMD_Cache *cache),
     ARGIN(const char *name),
@@ -161,7 +167,7 @@ void Parrot_mmd_cache_store_by_values(PARROT_INTERP,
         FUNC_MODIFIES(*cache);
 
 PARROT_EXPORT
-PARROT_CANNOT_RETURN_NULL
+PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 PMC * Parrot_mmd_find_multi_from_long_sig(PARROT_INTERP,
     ARGIN(STRING *name),

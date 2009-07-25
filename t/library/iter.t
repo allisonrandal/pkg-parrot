@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: iter.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: iter.t 38703 2009-05-11 21:55:44Z NotFound $
 
 .const int TESTS = 47
 
@@ -14,7 +14,7 @@
     set_global 'TEST_VERBOSE', $P0
 
   import:
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     'plan'( TESTS )
 
@@ -32,7 +32,7 @@
 
   T1:
     push_eh err_load_bytecode
-    $S0 = 'Iter.pir'
+    $S0 = 'Iter.pbc'
     load_bytecode $S0
     pop_eh
     $S1 = 'loaded '

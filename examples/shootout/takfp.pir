@@ -1,4 +1,6 @@
 #!./parrot -R cgp
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: takfp.pir 38369 2009-04-26 12:57:09Z fperrad $
 #
 # ./parrot -R cgp takfp.pir N         (N = 10 for shootout)
 # by Joshua Isom

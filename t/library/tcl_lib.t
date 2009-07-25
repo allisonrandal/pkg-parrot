@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: tcl_lib.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: tcl_lib.t 38695 2009-05-11 19:42:10Z NotFound $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ t/library/tcl_lib.t - test parrot to external Tcl connection
 .const int TESTS = 1
 
 .sub 'main' :main
-    load_bytecode 'library/Test/More.pbc'
+    load_bytecode 'Test/More.pbc'
 
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
@@ -28,7 +28,7 @@ t/library/tcl_lib.t - test parrot to external Tcl connection
 
     plan(TESTS)
 
-    load_bytecode 'TclLibrary.pir' # TBD pbc
+    load_bytecode 'TclLibrary.pbc' # TBD pbc
     'ok'(1, 'loaded TclLibrary')
 
     goto skip_all    # this is TEMPORARY untill the case of missing libtcl is fixed

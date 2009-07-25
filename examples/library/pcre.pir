@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: pcre.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pcre.pir 39302 2009-06-01 16:06:20Z NotFound $
 
 =head1 NAME
 
@@ -21,10 +21,6 @@ E<lt>jerry dot gay at gmail dot com<gt>
 
 =cut
 
-
-.include 'library/pcre.pir'
-
-
 .sub main :main
     .param pmc argv
 
@@ -35,6 +31,7 @@ E<lt>jerry dot gay at gmail dot com<gt>
     .local pmc func
     .local pmc lib
 
+    load_bytecode 'pcre.pbc'
     func= get_hll_global ['PCRE'], 'init'
     lib= func()
 

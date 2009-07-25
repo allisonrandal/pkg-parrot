@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2008, Parrot Foundation.
+ * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
 /*
@@ -7,7 +7,7 @@
  *
  * i386
  *
- * $Id: jit_emit.h 37392 2009-03-13 19:51:47Z Util $
+ * $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
  */
 
 #ifndef PARROT_I386_JIT_EMIT_H_GUARD
@@ -1584,8 +1584,8 @@ void Parrot_emit_jump_to_eax(Parrot_jit_info_t *jit_info, PARROT_INTERP);
 
 #  include "parrot/oplib/ops.h"
 
-EXTERN INTVAL Parrot_FixedIntegerArray_get_integer_keyed_int(Interp*, PMC*, INTVAL);
-EXTERN void Parrot_FixedIntegerArray_set_integer_keyed_int(Interp*, PMC*, INTVAL, INTVAL);
+INTVAL Parrot_FixedIntegerArray_get_integer_keyed_int(Interp*, PMC*, INTVAL);
+void Parrot_FixedIntegerArray_set_integer_keyed_int(Interp*, PMC*, INTVAL, INTVAL);
 
 char * jit_set_i_p_ki(Parrot_jit_info_t *jit_info, PARROT_INTERP,
     size_t offset);
@@ -1879,7 +1879,7 @@ int count_regs(PARROT_INTERP, char *sig, char *sig_start);
 size_t calc_signature_needs(const char *sig, int *strings);
 
 void * Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci,
-    STRING *signature);
+    STRING *signature, int *sizeptr);
 
 /*
  * register usage
@@ -1897,6 +1897,8 @@ extern const char i_map_sub[];
 
 extern const jit_arch_info arch_info;
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 const jit_arch_info * Parrot_jit_init(PARROT_INTERP);
 
 #undef INT_REGISTERS_TO_MAP

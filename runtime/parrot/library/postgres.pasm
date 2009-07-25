@@ -1,3 +1,6 @@
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: postgres.pasm 38369 2009-04-26 12:57:09Z fperrad $
+
 .pcc_sub __postgres_init :load
 
 loadlib $P1, 'libpq'
@@ -188,3 +191,8 @@ store_global 'PostgreSQL::PQenv2encoding', $P2
 .end_return
 .end
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

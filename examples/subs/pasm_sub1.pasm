@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pasm_sub1.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pasm_sub1.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -43,3 +43,8 @@ F<docs/pdds/pdd03_calling_conventions.pod>
     # Call the return continuation
     returncc
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

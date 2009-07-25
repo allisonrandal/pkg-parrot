@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: ucs2.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: ucs2.c 38853 2009-05-16 23:28:14Z Infinoid $
 
 =head1 NAME
 
@@ -21,6 +21,16 @@ UCS-2 encoding with the help of the ICU library.
 #include "parrot/parrot.h"
 #include "../unicode.h"
 
+#if !PARROT_HAS_ICU
+PARROT_DOES_NOT_RETURN
+static void no_ICU_lib(PARROT_INTERP) /* HEADERIZER SKIP */
+{
+    Parrot_ex_throw_from_c_args(interp, NULL,
+        EXCEPTION_LIBRARY_ERROR,
+        "no ICU lib loaded");
+}
+#endif
+
 /* HEADERIZER HFILE: src/string/encoding/ucs2.h */
 
 /* HEADERIZER BEGIN: static */
@@ -39,25 +49,36 @@ static UINTVAL codepoints(PARROT_INTERP, ARGIN(STRING *src))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
+PARROT_WARN_UNUSED_RESULT
+static UINTVAL find_cclass(PARROT_INTERP,
+    ARGIN(STRING *s),
+    ARGIN(const INTVAL *typetable),
+    INTVAL flags,
+    UINTVAL pos,
+    UINTVAL end)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
 static UINTVAL get_byte(PARROT_INTERP,
     SHIM(const STRING *src),
-    UINTVAL offset)
+    SHIM(UINTVAL offset))
         __attribute__nonnull__(1);
 
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING * get_bytes(PARROT_INTERP,
     SHIM(STRING *src),
-    UINTVAL offset,
-    UINTVAL count)
+    SHIM(UINTVAL offset),
+    SHIM(UINTVAL count))
         __attribute__nonnull__(1);
 
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING * get_bytes_inplace(PARROT_INTERP,
     SHIM(STRING *src),
-    UINTVAL offset,
-    UINTVAL count,
+    SHIM(UINTVAL offset),
+    SHIM(UINTVAL count),
     SHIM(STRING *return_string))
         __attribute__nonnull__(1);
 
@@ -80,8 +101,8 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING * get_codepoints_inplace(PARROT_INTERP,
     SHIM(STRING *src),
-    UINTVAL offset,
-    UINTVAL count,
+    SHIM(UINTVAL offset),
+    SHIM(UINTVAL count),
     SHIM(STRING *dest_string))
         __attribute__nonnull__(1);
 
@@ -95,14 +116,14 @@ static void iter_init(PARROT_INTERP,
 
 static void set_byte(PARROT_INTERP,
     SHIM(const STRING *src),
-    UINTVAL offset,
-    UINTVAL byte)
+    SHIM(UINTVAL offset),
+    SHIM(UINTVAL byte))
         __attribute__nonnull__(1);
 
 static void set_bytes(PARROT_INTERP,
     SHIM(STRING *src),
-    UINTVAL offset,
-    UINTVAL count,
+    SHIM(UINTVAL offset),
+    SHIM(UINTVAL count),
     SHIM(STRING *new_bytes))
         __attribute__nonnull__(1);
 
@@ -115,8 +136,8 @@ static void set_codepoint(PARROT_INTERP,
 
 static void set_codepoints(PARROT_INTERP,
     SHIM(STRING *src),
-    UINTVAL offset,
-    UINTVAL count,
+    SHIM(UINTVAL offset),
+    SHIM(UINTVAL count),
     SHIM(STRING *new_codepoints))
         __attribute__nonnull__(1);
 
@@ -157,6 +178,10 @@ static void ucs2_set_position(SHIM_INTERP,
 #define ASSERT_ARGS_codepoints __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(src)
+#define ASSERT_ARGS_find_cclass __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s) \
+    || PARROT_ASSERT_ARG(typetable)
 #define ASSERT_ARGS_get_byte __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_get_bytes __attribute__unused__ int _ASSERT_ARGS_CHECK = \
@@ -210,7 +235,7 @@ static void ucs2_set_position(SHIM_INTERP,
 
 /*
 
-=item C<static STRING * to_encoding>
+=item C<static STRING * to_encoding(PARROT_INTERP, STRING *src, STRING *dest)>
 
 Converts the string C<src> to this particular encoding.  If C<dest> is
 provided, it will contain the result.  Otherwise this function operates in
@@ -239,7 +264,8 @@ to_encoding(PARROT_INTERP, ARGIN(STRING *src), ARGMOD(STRING *dest))
 
 /*
 
-=item C<static UINTVAL get_codepoint>
+=item C<static UINTVAL get_codepoint(PARROT_INTERP, const STRING *src, UINTVAL
+offset)>
 
 Returns the codepoint in string C<src> at position C<offset>.
 
@@ -255,14 +281,15 @@ get_codepoint(PARROT_INTERP, ARGIN(const STRING *src), UINTVAL offset)
     UChar * const s = (UChar*) src->strstart;
     return s[offset];
 #else
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no ICU lib loaded");
+    UNUSED(offset)
+    no_ICU_lib(interp);
 #endif
 }
 
 /*
 
-=item C<static void set_codepoint>
+=item C<static void set_codepoint(PARROT_INTERP, STRING *src, UINTVAL offset,
+UINTVAL codepoint)>
 
 Sets, in string C<src> at position C<offset>, the codepoint C<codepoint>.
 
@@ -278,15 +305,38 @@ set_codepoint(PARROT_INTERP, ARGIN(STRING *src), UINTVAL offset, UINTVAL codepoi
     UChar * const s = (UChar*) src->strstart;
     s[offset] = codepoint;
 #else
-    UNUSED(src);
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no ICU lib loaded");
+    UNUSED(src)
+    UNUSED(offset)
+    UNUSED(codepoint)
+    no_ICU_lib(interp);
 #endif
 }
 
 /*
 
-=item C<static UINTVAL get_byte>
+=item C<static UINTVAL find_cclass(PARROT_INTERP, STRING *s, const INTVAL
+*typetable, INTVAL flags, UINTVAL pos, UINTVAL end)>
+
+Stub, the charset level handles this for unicode strings.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+static UINTVAL
+find_cclass(PARROT_INTERP, ARGIN(STRING *s), ARGIN(const INTVAL *typetable),
+INTVAL flags, UINTVAL pos, UINTVAL end)
+{
+    Parrot_ex_throw_from_c_args(interp, NULL,
+        EXCEPTION_UNIMPLEMENTED,
+        "No find_cclass support in unicode encoding plugins");
+}
+
+/*
+
+=item C<static UINTVAL get_byte(PARROT_INTERP, const STRING *src, UINTVAL
+offset)>
 
 Returns the byte in string C<src> at position C<offset>.
 
@@ -295,7 +345,7 @@ Returns the byte in string C<src> at position C<offset>.
 */
 
 static UINTVAL
-get_byte(PARROT_INTERP, SHIM(const STRING *src), UINTVAL offset)
+get_byte(PARROT_INTERP, SHIM(const STRING *src), SHIM(UINTVAL offset))
 {
     ASSERT_ARGS(get_byte)
     UNIMPL;
@@ -303,7 +353,8 @@ get_byte(PARROT_INTERP, SHIM(const STRING *src), UINTVAL offset)
 
 /*
 
-=item C<static void set_byte>
+=item C<static void set_byte(PARROT_INTERP, const STRING *src, UINTVAL offset,
+UINTVAL byte)>
 
 Sets, in string C<src> at position C<offset>, the byte C<byte>.
 
@@ -312,7 +363,8 @@ Sets, in string C<src> at position C<offset>, the byte C<byte>.
 */
 
 static void
-set_byte(PARROT_INTERP, SHIM(const STRING *src), UINTVAL offset, UINTVAL byte)
+set_byte(PARROT_INTERP, SHIM(const STRING *src), SHIM(UINTVAL offset),
+        SHIM(UINTVAL byte))
 {
     ASSERT_ARGS(set_byte)
     UNIMPL;
@@ -320,7 +372,8 @@ set_byte(PARROT_INTERP, SHIM(const STRING *src), UINTVAL offset, UINTVAL byte)
 
 /*
 
-=item C<static STRING * get_codepoints>
+=item C<static STRING * get_codepoints(PARROT_INTERP, STRING *src, UINTVAL
+offset, UINTVAL count)>
 
 Returns the codepoints in string C<src> at position C<offset> and length
 C<count>.
@@ -359,7 +412,8 @@ get_codepoints(PARROT_INTERP, ARGIN(STRING *src), UINTVAL offset, UINTVAL count)
 
 /*
 
-=item C<static STRING * get_bytes>
+=item C<static STRING * get_bytes(PARROT_INTERP, STRING *src, UINTVAL offset,
+UINTVAL count)>
 
 Returns the bytes in string C<src> at position C<offset> and length C<count>.
 
@@ -370,7 +424,8 @@ Returns the bytes in string C<src> at position C<offset> and length C<count>.
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING *
-get_bytes(PARROT_INTERP, SHIM(STRING *src), UINTVAL offset, UINTVAL count)
+get_bytes(PARROT_INTERP, SHIM(STRING *src), SHIM(UINTVAL offset),
+        SHIM(UINTVAL count))
 {
     ASSERT_ARGS(get_bytes)
     UNIMPL;
@@ -379,7 +434,8 @@ get_bytes(PARROT_INTERP, SHIM(STRING *src), UINTVAL offset, UINTVAL count)
 
 /*
 
-=item C<static STRING * get_codepoints_inplace>
+=item C<static STRING * get_codepoints_inplace(PARROT_INTERP, STRING *src,
+UINTVAL offset, UINTVAL count, STRING *dest_string)>
 
 Gets from string C<src> at position C<offset> C<count> codepoints and returns
 them in C<return_string>.
@@ -392,7 +448,7 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING *
 get_codepoints_inplace(PARROT_INTERP, SHIM(STRING *src),
-        UINTVAL offset, UINTVAL count, SHIM(STRING *dest_string))
+        SHIM(UINTVAL offset), SHIM(UINTVAL count), SHIM(STRING *dest_string))
 {
     ASSERT_ARGS(get_codepoints_inplace)
     UNIMPL;
@@ -400,7 +456,8 @@ get_codepoints_inplace(PARROT_INTERP, SHIM(STRING *src),
 
 /*
 
-=item C<static STRING * get_bytes_inplace>
+=item C<static STRING * get_bytes_inplace(PARROT_INTERP, STRING *src, UINTVAL
+offset, UINTVAL count, STRING *return_string)>
 
 Gets from string C<src> at position C<offset> C<count> bytes and returns them
 in C<return_string>.
@@ -413,7 +470,7 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING *
 get_bytes_inplace(PARROT_INTERP, SHIM(STRING *src),
-        UINTVAL offset, UINTVAL count, SHIM(STRING *return_string))
+        SHIM(UINTVAL offset), SHIM(UINTVAL count), SHIM(STRING *return_string))
 {
     ASSERT_ARGS(get_bytes_inplace)
     UNIMPL;
@@ -421,7 +478,8 @@ get_bytes_inplace(PARROT_INTERP, SHIM(STRING *src),
 
 /*
 
-=item C<static void set_codepoints>
+=item C<static void set_codepoints(PARROT_INTERP, STRING *src, UINTVAL offset,
+UINTVAL count, STRING *new_codepoints)>
 
 Replaces in string C<src> at position C<offset> for C<count> codepoints with
 the contents of string C<new_codepoints>.
@@ -432,7 +490,7 @@ the contents of string C<new_codepoints>.
 
 static void
 set_codepoints(PARROT_INTERP, SHIM(STRING *src),
-        UINTVAL offset, UINTVAL count, SHIM(STRING *new_codepoints))
+        SHIM(UINTVAL offset), SHIM(UINTVAL count), SHIM(STRING *new_codepoints))
 {
     ASSERT_ARGS(set_codepoints)
     UNIMPL;
@@ -440,7 +498,8 @@ set_codepoints(PARROT_INTERP, SHIM(STRING *src),
 
 /*
 
-=item C<static void set_bytes>
+=item C<static void set_bytes(PARROT_INTERP, STRING *src, UINTVAL offset,
+UINTVAL count, STRING *new_bytes)>
 
 Replaces in string C<src> at position C<offset> for C<count> bytes with the
 contents of string C<new_bytes>.
@@ -451,7 +510,7 @@ contents of string C<new_bytes>.
 
 static void
 set_bytes(PARROT_INTERP, SHIM(STRING *src),
-        UINTVAL offset, UINTVAL count, SHIM(STRING *new_bytes))
+        SHIM(UINTVAL offset), SHIM(UINTVAL count), SHIM(STRING *new_bytes))
 {
     ASSERT_ARGS(set_bytes)
     UNIMPL;
@@ -459,7 +518,7 @@ set_bytes(PARROT_INTERP, SHIM(STRING *src),
 
 /*
 
-=item C<static void become_encoding>
+=item C<static void become_encoding(PARROT_INTERP, STRING *src)>
 
 Unconditionally makes the string be in this encoding, if that's valid
 
@@ -477,7 +536,7 @@ become_encoding(PARROT_INTERP, SHIM(STRING *src))
 
 /*
 
-=item C<static UINTVAL codepoints>
+=item C<static UINTVAL codepoints(PARROT_INTERP, STRING *src)>
 
 Returns the number of codepoints in string C<src>.
 
@@ -493,14 +552,13 @@ codepoints(PARROT_INTERP, ARGIN(STRING *src))
 #if PARROT_HAS_ICU
     return src->bufused / sizeof (UChar);
 #else
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no ICU lib loaded");
+    no_ICU_lib(interp);
 #endif
 }
 
 /*
 
-=item C<static UINTVAL bytes>
+=item C<static UINTVAL bytes(PARROT_INTERP, STRING *src)>
 
 Returns the number of bytes in string C<src>.
 
@@ -518,7 +576,7 @@ bytes(PARROT_INTERP, ARGIN(STRING *src))
 
 /*
 
-=item C<static UINTVAL ucs2_decode_and_advance>
+=item C<static UINTVAL ucs2_decode_and_advance(PARROT_INTERP, String_iter *i)>
 
 Moves the string iterator C<i> to the next UCS-2 codepoint.
 
@@ -526,11 +584,12 @@ Moves the string iterator C<i> to the next UCS-2 codepoint.
 
 */
 
-#if PARROT_HAS_ICU
 static UINTVAL
 ucs2_decode_and_advance(PARROT_INTERP, ARGMOD(String_iter *i))
 {
     ASSERT_ARGS(ucs2_decode_and_advance)
+
+#if PARROT_HAS_ICU
     UChar * const s = (UChar*) i->str->strstart;
     size_t pos = i->bytepos / sizeof (UChar);
 
@@ -541,11 +600,18 @@ ucs2_decode_and_advance(PARROT_INTERP, ARGMOD(String_iter *i))
     i->charpos++;
     i->bytepos = pos * sizeof (UChar);
     return c;
+#else
+    /* This function must never be called if compiled without ICU.
+     * See TT #557
+     */
+    PARROT_ASSERT(0);
+#endif
 }
 
 /*
 
-=item C<static void ucs2_encode_and_advance>
+=item C<static void ucs2_encode_and_advance(PARROT_INTERP, String_iter *i,
+UINTVAL c)>
 
 With the string iterator C<i>, appends the codepoint C<c> and advances to the
 next position in the string.
@@ -558,16 +624,24 @@ static void
 ucs2_encode_and_advance(PARROT_INTERP, ARGMOD(String_iter *i), UINTVAL c)
 {
     ASSERT_ARGS(ucs2_encode_and_advance)
+
+#if PARROT_HAS_ICU
     UChar * const s = (UChar*) i->str->strstart;
     UINTVAL pos = i->bytepos / sizeof (UChar);
     s[pos++] = (UChar)c;
     i->charpos++;
     i->bytepos = pos * sizeof (UChar);
+#else
+    /* This function must never be called if compiled without ICU.
+     * See TT #557
+     */
+    PARROT_ASSERT(0);
+#endif
 }
 
 /*
 
-=item C<static void ucs2_set_position>
+=item C<static void ucs2_set_position(PARROT_INTERP, String_iter *i, UINTVAL n)>
 
 Moves the string iterator C<i> to the position C<n> in the string.
 
@@ -579,15 +653,23 @@ static void
 ucs2_set_position(SHIM_INTERP, ARGMOD(String_iter *i), UINTVAL n)
 {
     ASSERT_ARGS(ucs2_set_position)
+
+#if PARROT_HAS_ICU
     i->charpos = n;
     i->bytepos = n * sizeof (UChar);
+#else
+    /* This function must never be called if compiled without ICU.
+     * See TT #557
+     */
+    PARROT_ASSERT(0);
+#endif
 }
 
-#endif
 
 /*
 
-=item C<static void iter_init>
+=item C<static void iter_init(PARROT_INTERP, const STRING *src, String_iter
+*iter)>
 
 Initializes for string C<src> the string iterator C<iter>.
 
@@ -607,14 +689,13 @@ iter_init(PARROT_INTERP, ARGIN(const STRING *src), ARGOUT(String_iter *iter))
     iter->set_and_advance = ucs2_encode_and_advance;
     iter->set_position    = ucs2_set_position;
 #else
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no ICU lib loaded");
+    no_ICU_lib(interp);
 #endif
 }
 
 /*
 
-=item C<ENCODING * Parrot_encoding_ucs2_init>
+=item C<ENCODING * Parrot_encoding_ucs2_init(PARROT_INTERP)>
 
 Initializes the UCS-2 encoding.
 
@@ -646,7 +727,8 @@ Parrot_encoding_ucs2_init(PARROT_INTERP)
         become_encoding,
         codepoints,
         bytes,
-        iter_init
+        iter_init,
+        find_cclass
     };
     STRUCT_COPY_FROM_STRUCT(return_encoding, base_encoding);
     Parrot_register_encoding(interp, "ucs2", return_encoding);

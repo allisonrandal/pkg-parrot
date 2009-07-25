@@ -1,4 +1,5 @@
-# $Id: overload.pir 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: overload.pir 38923 2009-05-19 06:07:42Z cotto $
 
 .sub bench :main
 .include "pmctypes.pasm"
@@ -16,7 +17,7 @@
 loop:
    r = a * b
    inc i
-   if i <= 500000 goto loop
+   if i <= 50000 goto loop
    print r
    print "\n"
    end

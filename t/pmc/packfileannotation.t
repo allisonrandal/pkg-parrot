@@ -1,12 +1,5 @@
-#!perl
+#!parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-
-use strict;
-use warnings;
-use lib qw( . lib ../lib ../../lib );
-use Test::More;
-use Parrot::Test tests => 1;
-use Parrot::Config;
 
 =head1 NAME
 
@@ -23,16 +16,35 @@ Tests the PackfileAnnotation PMC.
 
 =cut
 
-
-# Packfile constructor
-
-pir_output_is( <<'CODE', <<'OUT', 'new' );
+# PackfileAnnotation constructor
 .sub 'test' :main
-    .local pmc pf
-    pf = new ['PackfileAnnotation']
-    $I0 = defined pf
-    say $I0
+.include 'test_more.pir'
+    .local pmc pa
+
+    plan(5)
+
+    pa = new ['PackfileAnnotation']
+    $I0 = defined pa
+    ok($I0, 'PackfileAnnotation created')
+
+    pa.'set_name'('line')
+    pa.'set_offset'(115200)
+    pa = 42
+
+    $S0 = pa.'get_name'()
+    is($S0, 'line',  'Name stored and fetched')
+    $I0 = pa.'get_offset'()
+    is($I0, 115200, 'Offset stored and fetched')
+    $I0 = pa
+    is($I0, 42, 'Value stored and fetched')
+
+    # We can't fetch string from integer annotation
+    push_eh check
+    $I1 = 1
+    $S0 = pa
+    $I0 = 0
+  check:
+    pop_eh
+    ok($I0, "Can't fetch wrong value from Annotation")
+
 .end
-CODE
-1
-OUT

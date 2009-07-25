@@ -1,13 +1,13 @@
 #!perl
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: stringhandle.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: stringhandle.t 37622 2009-03-21 18:56:20Z cotto $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 18;
+use Parrot::Test tests => 19;
 
 =head1 NAME
 
@@ -581,6 +581,16 @@ pir_output_is( <<"CODE", <<"OUTPUT", "readall() - utf8 on opened stringhandle" )
 .end
 CODE
 utf8
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "clone an uninitialized stringhandle" );
+.sub 'main'
+    $P0 = new ['StringHandle']
+    $P1 = clone $P0
+    say "ok"
+.end
+CODE
+ok
 OUTPUT
 
 # RT #46843

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: resizablestringarray.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: resizablestringarray.pmc 39412 2009-06-05 23:08:10Z chromatic $
 
 =head1 NAME
 
@@ -17,8 +17,6 @@ method called.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 pmclass ResizableStringArray extends FixedStringArray need_ext provides array {
     ATTR UINTVAL resize_threshold; /*max capacity before resizing */
@@ -38,7 +36,6 @@ Initializes the array.
 */
 
     VTABLE void init() {
-
         Parrot_ResizableStringArray_attributes *attrs =
             mem_allocate_zeroed_typed(Parrot_ResizableStringArray_attributes);
 
@@ -372,7 +369,7 @@ the array.
 
 */
 
-    void push_pmc(PMC *value) {
+    VTABLE void push_pmc(PMC *value) {
         STRING *strvalue = VTABLE_get_string(INTERP, value);
         SELF.push_string(strvalue);
     }
@@ -484,7 +481,7 @@ the array.
 
 */
 
-    void unshift_pmc(PMC *value) {
+    VTABLE void unshift_pmc(PMC *value) {
         STRING *strvalue = VTABLE_get_string(INTERP, value);
         SELF.unshift_string(strvalue);
     }
@@ -563,7 +560,7 @@ Removes the element at C<*key>.
 */
 
     VTABLE void delete_keyed(PMC *key) {
-        INTVAL    idx  = key_integer(INTERP, key);
+        INTVAL    idx  = VTABLE_get_integer(INTERP, key);
         STRING  **str_array;
         UINTVAL   size, i;
 
@@ -592,7 +589,7 @@ everything via the VTABLE api.
 
 */
 
-    void splice(PMC *value, INTVAL offset, INTVAL count) {
+    VTABLE void splice(PMC *value, INTVAL offset, INTVAL count) {
 
         INTVAL length, elems, shift, i;
 
@@ -652,12 +649,12 @@ end of the array.
 
 */
 
-    METHOD PMC* shift() {
+    METHOD shift() {
         PMC *value = SELF.shift_pmc();
         RETURN(PMC *value);
     }
 
-    METHOD PMC* pop() {
+    METHOD pop() {
         PMC *value = SELF.pop_pmc();
         RETURN(PMC *value);
     }

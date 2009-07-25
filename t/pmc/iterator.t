@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: iterator.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: iterator.t 40100 2009-07-15 13:15:25Z bacek $
 
 use strict;
 use warnings;
@@ -507,7 +507,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', "Index access for Iterator on ResizablePM
 
     print 'Iterator shift_float: '
     .local num felem_2
-    shift felem_2, iter_2
+    pop felem_2, iter_2
     print felem_2
     print "\n"
 
@@ -534,9 +534,8 @@ Iterator shift_float: -8.8
 Iterator get_integer: 7
 OUTPUT
 
-SKIP: {
-    skip( "N/Y: length of rest of array ", 1 );
-    pasm_output_is( <<'CODE', <<'OUTPUT', "shift + index access" );
+TODO: {
+    pasm_output_is( <<'CODE', <<'OUTPUT', "shift + index access", todo => "N/Y: length of rest of array ");
     .include "iterator.pasm"
 
     new P2, ['ResizablePMCArray']    # array with 4 elements

@@ -1,9 +1,9 @@
 #!./parrot
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: test_builder_tester.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: test_builder_tester.t 38695 2009-05-11 19:42:10Z NotFound $
 
 .sub _main :main
-   load_bytecode 'library/Test/Builder/Tester.pir'
+   load_bytecode 'Test/Builder/Tester.pbc'
 
    .local pmc tb_args
    tb_args = new 'Hash'

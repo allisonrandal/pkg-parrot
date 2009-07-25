@@ -3,7 +3,7 @@
  *  Copyright (C) 2002-2008, Parrot Foundation.
  *  License:  Artistic 2.0, see README and LICENSE for details
  *  SVN Info
- *     $Id: list.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: list.h 39896 2009-07-06 04:30:07Z petdance $
  *  Overview:
  *     list aka array routines for Parrot
  *     s. list.c for more
@@ -192,12 +192,13 @@ void * list_shift(PARROT_INTERP, ARGMOD(List *list), int type)
 PARROT_EXPORT
 void list_splice(PARROT_INTERP,
     ARGMOD(List *list),
-    ARGIN_NULLOK(List *value_list),
+    ARGMOD_NULLOK(List *value_list),
     INTVAL offset,
     INTVAL count)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        FUNC_MODIFIES(*list);
+        FUNC_MODIFIES(*list)
+        FUNC_MODIFIES(*value_list);
 
 PARROT_EXPORT
 void list_unshift(PARROT_INTERP,

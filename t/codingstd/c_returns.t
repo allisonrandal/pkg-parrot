@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_returns.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: c_returns.t 38868 2009-05-17 13:51:48Z jkeenan $
 
 use strict;
 use warnings;
@@ -29,7 +29,8 @@ than C<return (foo);>
 =head1 NOTES
 
 This test was hacked from the C<check_returns> sub in
-C<tools/dev/check_source_standards.pl>
+C<tools/dev/check_source_standards.pl>, which is no longer part of the Parrot
+distribution.
 
 =head1 SEE ALSO
 

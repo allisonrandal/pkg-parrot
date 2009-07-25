@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: embed.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: embed.t 39599 2009-06-16 22:54:02Z whiteknight $
 
 use strict;
 use warnings;

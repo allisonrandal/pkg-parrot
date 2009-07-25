@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: List.pm 37397 2009-03-13 21:45:55Z allison $
+# $Id: List.pm 39976 2009-07-10 08:20:13Z fperrad $
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;
@@ -52,6 +52,7 @@ my @steps = qw(
     auto::socklen_t
     auto::neg_0
     auto::env
+    auto::thread
     auto::gmp
     auto::readline
     auto::gdbm

@@ -1,5 +1,5 @@
-# Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Shared.pm 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: Shared.pm 39976 2009-07-10 08:20:13Z fperrad $
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -21,6 +21,7 @@ our @shared_valid_options = qw{
     datadir
     debugging
     define
+    disable-rpath
     exec-prefix
     execcapable
     fatal
@@ -51,12 +52,12 @@ our @shared_valid_options = qw{
     maintainer
     mandir
     nomanicheck
+    no-line-directives
     oldincludedir
     opcode
     ops
     optimize
     parrot_is_shared
-    pmc
     prefix
     profile
     sbindir
@@ -71,9 +72,10 @@ our @shared_valid_options = qw{
     without-gdbm
     without-gettext
     without-gmp
+    without-icu
     without-opengl
     without-pcre
-    without-icu
+    without-threads
     yacc
 };
 

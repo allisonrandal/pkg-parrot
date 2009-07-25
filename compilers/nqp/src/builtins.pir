@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: builtins.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 .namespace []
 
 =over 4
@@ -32,9 +35,7 @@ a newline to the end of what is printed.
 
 .sub 'say'
     .param pmc list            :slurpy
-    'print'(list :flat)
-    print "\n"
-    .return (1)
+    .tailcall 'print'(list :flat, "\n")
 .end
 
 

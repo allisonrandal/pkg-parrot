@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd16_native_call.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id: pdd16_native_call.pod 38816 2009-05-16 04:08:22Z coke $
 
 =head1 [DRAFT] PDD 16: Native Call Interface (NCI)
 
@@ -99,18 +99,15 @@ type which Parrot does I<no> management of.
 
 =item 2
 
-A pointer to a short, taken from an P register of an int-like PMC. On return
-from NCI, the PMC_int_val will hold the new value.
+A pointer to a short, taken from an P register of an int-like PMC.
 
 =item 3
 
-A pointer to an int, taken from an P register of an int-like PMC. On return
-from NCI, the PMC_int_val will hold the new value.
+A pointer to an int, taken from an P register of an int-like PMC.
 
 =item 4
 
-A pointer to a long, taken from an P register of an int-like PMC. On return
-from NCI, the PMC_int_val will hold the new value.
+A pointer to a long, taken from an P register of an int-like PMC.
 
 =item t
 
@@ -238,11 +235,15 @@ Register the callback
 When the callback function is invoked by the external library, the function
 itself should look like:
 
+=begin PIR
+
   .sub _my_callback
     .param pmc my_data
     .param pmc library_data   # type depends on signature
     # Do something with the passed in data
   .end
+
+=end PIR
 
 Parrot itself handles all the nasty bits involved in collecting up the
 interpreter pointer, creating the wrapping PMCs, stuffing data various places,
@@ -252,6 +253,8 @@ and generally dealing with the bookkeeping.
 
 This section contains an example to register a callback function and have
 it call back into Parrot.
+
+=begin PIR
 
   .sub main
 
@@ -282,6 +285,8 @@ it call back into Parrot.
     .param pmc udata
     print "Foo callback\n"
   .end
+
+=end PIR
 
 The C code contains the function to be invoked through NCI. In the function
 C<sayhello> a function call is done to a Parrot subroutine. The C<sayhello>

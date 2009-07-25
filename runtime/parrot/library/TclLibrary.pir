@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: TclLibrary.pir 37343 2009-03-12 05:22:02Z Util $
+# $Id: TclLibrary.pir 39337 2009-06-02 16:50:55Z NotFound $
 # vkon
 
 =head1 TITLE
@@ -204,6 +204,8 @@ standard_names:
     push libnames, 'tcl84'
     push libnames, 'libtcl8.5'
     push libnames, 'libtcl8.4'
+    push libnames, 'libtcl8.5.so'
+    push libnames, 'libtcl8.4.so'
 standard_names_e:
 
     .local pmc libtcl

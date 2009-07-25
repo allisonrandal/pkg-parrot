@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: Headerizer.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: Headerizer.pm 38890 2009-05-18 05:35:29Z petdance $
 
 =head1 NAME
 
@@ -62,6 +62,7 @@ my %valid_macros = map { ( $_, 1 ) } qw(
     PARROT_CONST_FUNCTION
     PARROT_DOES_NOT_RETURN
     PARROT_MALLOC
+    PARROT_OBSERVER
 );
 
 =item C<extract_function_declarations($text)>
@@ -118,6 +119,9 @@ sub extract_function_declarations {
 
     # If it's got a semicolon, it's not a function header
     @funcs = grep { !/;/ } @funcs;
+
+    # remove any remaining }'s
+    @funcs = grep {! /^}/} @funcs;
 
     chomp @funcs;
 
@@ -219,6 +223,66 @@ sub function_components_from_declaration {
         is_api      => $parrot_api,
         return_type => $return_type,
     };
+}
+
+=item C<generate_documentation_signature>
+
+Given an extracted function signature, return a modified
+version suitable for inclusion in POD documentation.
+
+=cut
+
+sub generate_documentation_signature {
+    my $self = shift;
+    my $function_decl = shift;
+
+    # strip out any PARROT_* function modifiers
+    foreach my $key (%valid_macros) {
+        $function_decl =~ s/^$key$//m;
+    }
+
+    $function_decl =~ s/^\s+//g;
+    $function_decl =~ s/\s+/ /g;
+
+    # strip out any ARG* modifiers
+    $function_decl =~ s/ARG(?:IN|IN_NULLOK|OUT|OUT_NULLOK|MOD|MOD_NULLOK|FREE)\((.*?)\)/$1/g;
+
+    # strip out the SHIM modifier
+    $function_decl =~ s/SHIM\((.*?)\)/$1/g;
+
+    # strip out the NULL modifiers
+    $function_decl =~ s/(?:NULLOK|NOTNULL)\((.*?)\)/$1/g;
+
+    # SHIM_INTERP is still a PARROT_INTERP
+    $function_decl =~ s/SHIM_INTERP/PARROT_INTERP/g;
+
+    # wrap with POD
+    $function_decl = "=item C<$function_decl>";
+
+    # Wrap long lines.
+    my $line_len = 80;
+    return $function_decl if length($function_decl)<= $line_len;
+
+    my @doc_chunks = split /\s+/, $function_decl;
+    my $split_decl = '';
+    my @line;
+    while (@doc_chunks) {
+        my $chunk = shift @doc_chunks;
+        if (length(join(' ', @line, $chunk)) <= $line_len) {
+            push @line, $chunk;
+        }
+        else {
+            $split_decl .= join(' ', @line) . "\n";
+            @line=($chunk);
+        }
+    }
+    if (@line) {
+        $split_decl .= join(' ', @line) . "\n";
+    }
+
+    $split_decl =~ s/\n$//;
+
+    return $split_decl;
 }
 
 =item C<squawk($file, $func, $error)>

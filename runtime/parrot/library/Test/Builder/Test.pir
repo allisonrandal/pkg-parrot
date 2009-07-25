@@ -1,3 +1,5 @@
+# $Id: Test.pir 38115 2009-04-15 14:41:32Z fperrad $
+
 =head1 NAME
 
 Test::Builder::Test - base class for all Test::Builder test objects

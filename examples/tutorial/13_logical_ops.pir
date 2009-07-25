@@ -1,13 +1,17 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 13_logical_ops.pir 40124 2009-07-16 21:36:57Z allison $
+
 =head1 Logical Operations
 
-The logical operations are short-circuiting, so if the first argument to an
-'or' is true, the second will never be evaluated because it never needs to
-be. If the first argument to an 'and' operation is false, the other
-arguments are never evaluated either. This is a common logical optimization
-used by compiler designers. PIR only allows variables as arguments to
-operations, so the short-circuiting is only relevant if the argument is a
-PMC that has side-effects on access to the boolean value. We'll talk about
-these side effects later.
+The logical operations are short-circuiting, so if the first
+argument to an 'or' is true, the second will never be
+evaluated. If the first argument to an 'and' operation is
+false, the other arguments are never evaluated either. This
+is a common logical optimization used by compiler designers.
+PIR only allows variables as arguments to operations, so the
+short-circuiting is only relevant if the argument is a PMC
+that has side-effects on access to the boolean value. We'll
+talk about these side effects later.
 
 =cut
 

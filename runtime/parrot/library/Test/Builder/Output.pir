@@ -1,3 +1,5 @@
+# $Id: Output.pir 39631 2009-06-17 20:30:30Z NotFound $
+
 =head1 NAME
 
 Test::Builder::Output - manages output for Test::Builder
@@ -136,7 +138,6 @@ unescaped newlines.
 	i = 0
 
 	.local string first_char
-	.local string line
 
   LOOP:
     if i == 0 goto LINE_OK

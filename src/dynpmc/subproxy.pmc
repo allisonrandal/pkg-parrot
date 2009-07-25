@@ -1,5 +1,5 @@
 /*
- * $Id: subproxy.pmc 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: subproxy.pmc 38336 2009-04-25 04:53:29Z bacek $
  * Copyright (C) 2003-2008, Parrot Foundation.
  */
 
@@ -25,7 +25,7 @@ pmclass SubProxy dynpmc need_ext extends Sub {
         PMC_data(SELF) = key;
     }
 
-    opcode_t* invoke(void* next) {
+    VTABLE opcode_t* invoke(void* next) {
         if (PObj_get_FLAGS(SELF) & PObj_private0_FLAG) {
 
             PMC         *key = PMC_data_typed(SELF, PMC *);

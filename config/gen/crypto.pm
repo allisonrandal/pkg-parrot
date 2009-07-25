@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: crypto.pm 36868 2009-02-18 21:00:09Z fperrad $
+# $Id: crypto.pm 39802 2009-06-26 20:25:11Z jkeenan $
 
 =head1 NAME
 
@@ -95,6 +95,7 @@ sub runstep {
         $conf->genfile( $self->{digest_pmc_template} => "src/dynpmc/${file}.pmc" );
         $conf->genfile( $self->{digest_t_template} => "t/dynpmc/${file}.t" );
     }
+    $conf->cc_clean();
 
     return 1;
 }

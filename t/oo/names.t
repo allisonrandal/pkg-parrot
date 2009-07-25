@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: names.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: names.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ Tests OO features related to names and namespaces.
 .namespace []
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     plan(2)
 

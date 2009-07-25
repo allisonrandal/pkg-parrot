@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: os.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: os.pmc 40158 2009-07-19 17:58:53Z jkeenan $
 
 =head1 NAME
 
@@ -28,8 +28,6 @@ files and directories.
 #else
 #  include <dirent.h>
 #endif
-
-#include "parrot/parrot.h"
 
 /* XXX Check if we need to deallocate strerror strings */
 /* XXX apparently, strerror_r is thread-safe and should be used instead.*/
@@ -220,6 +218,9 @@ Stats a file, and returns a 13 position array as in Perl:
 11 and 12 are not available under Windows.
 
 =cut
+
+TT #849:  Provide a mechanism for setting 'mtime' and 'atime':
+https://trac.parrot.org/parrot/ticket/849
 
 */
 
@@ -511,6 +512,7 @@ This method is a wrapper for rename(2). On error a SystemError exception is
 thrown.
 
 =cut
+
 */
     METHOD rename(STRING *oldpath, STRING *newpath) {
         char * const coldpath = Parrot_str_to_cstring(interp, oldpath);

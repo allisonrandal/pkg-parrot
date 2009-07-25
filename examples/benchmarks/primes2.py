@@ -1,6 +1,6 @@
 """
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id: primes2.py 37201 2009-03-08 12:07:48Z fperrad $
+$Id: primes2.py 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ def main():
     l = 0
     i6 = 0
     i7 = 0
-    max = 5000
+    max = 500
 
     while 1:
 

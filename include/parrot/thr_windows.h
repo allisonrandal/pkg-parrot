@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: thr_windows.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: thr_windows.h 39976 2009-07-10 08:20:13Z fperrad $
  *  Overview:
  *     This is the api header for the windows thread primitives
  *  Data Structure and Algorithms:
@@ -13,13 +13,9 @@
 #ifndef PARROT_THR_WINDOWS_H_GUARD
 #define PARROT_THR_WINDOWS_H_GUARD
 
-#  undef CONST
-#  include <windows.h>
 #  undef FASTCALL
 #  include <process.h>
 #  include <limits.h>
-
-#  define PARROT_SYNC_PRIMITIVES_DEFINED
 
 typedef CRITICAL_SECTION Parrot_mutex;
 typedef struct Windows_cond
@@ -123,15 +119,13 @@ typedef HANDLE Parrot_thread;
 
 typedef void (*Cleanup_Handler)(void *);
 
-#ifndef _STRUCT_TIMESPEC
-#  define _STRUCT_TIMESPEC
+#ifndef HAVE_STRUCT_TIMESPEC
+#  define HAVE_STRUCT_TIMESPEC
 struct timespec {
     time_t tv_sec;
     long tv_nsec;
 };
-#endif /* _STRUCT_TIMESPEC */
-
-#  undef CONST
+#endif /* HAVE_STRUCT_TIMESPEC */
 
 #endif /* PARROT_THR_WINDOWS_H_GUARD */
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: cygwin.pm 37433 2009-03-15 11:20:46Z rurban $
+# $Id: cygwin.pm 39045 2009-05-22 16:17:19Z Infinoid $
 
 package init::hints::cygwin;
 
@@ -19,6 +19,8 @@ sub runstep {
 
     my $build_dir = $conf->data->get('build_dir');
     $build_dir =~ s/ /\\ /g;
+    my $bindir = $conf->data->get('bindir');
+    $bindir =~ s/ /\\ /g;
     my $libparrot_shared = $conf->data->get('libparrot_shared');
     # force cyg prefix
     $libparrot_shared =~ s/^lib/cyg/g;
@@ -49,6 +51,9 @@ sub runstep {
         libparrot_shared    => $libparrot_shared,
         blib_dir            => '.',
         libparrot_ldflags   => '-L' . $build_dir . ' -lparrot',
+        inst_libparrot_ldflags => '-L' . $bindir . ' -lparrot',
+        libparrot_linkflags   => '-L' . $build_dir . ' -lparrot',
+        inst_libparrot_linkflags => '-L' . $bindir . ' -lparrot',
     );
 
     # inet_aton needs to be defined on Cygwin.

@@ -1,7 +1,7 @@
 #! perl
 
-# Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: post.t 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: post.t 40100 2009-07-15 13:15:25Z bacek $
 
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ foreach my $name (qw(Op Ops Sub Label)) {
     my $code   = <<'CODE'
 .sub _main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     .local pmc node2
 CODE
@@ -47,10 +47,15 @@ OUT
 
 }
 
+SKIP: {
+    skip('Hash keys order dependency', 1);
+
+# Next tests marked as "skip" instead of "todo" to prevent false-positives in case
+# when Hash keys order occationally can be same as in test.
 pir_output_is( <<'CODE', <<'OUT', 'dump POST::Op node in visual format' );
 .sub _main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     node = new ['POST';'Op']
     node.'pirop'('add')
@@ -67,10 +72,12 @@ CODE
 }
 OUT
 
+}
+
 pir_output_is( <<'CODE', <<'OUT', 'dump POST::Label node in visual format' );
 .sub _main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     node = new ['POST';'Label']
     node.'name'('labeler')

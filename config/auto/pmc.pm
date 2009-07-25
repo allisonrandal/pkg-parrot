@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: pmc.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pmc.pm 38471 2009-05-04 22:47:15Z cotto $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ config/auto/pmc.pm - PMC Files
 
 =head1 DESCRIPTION
 
-Asks the user to select which PMC files to include.
+Prepare PMC files for inclusion.
 
 =cut
 
@@ -38,9 +38,7 @@ sub runstep {
 
     my @pmc = sort_pmcs( @{ $self->{srcpmc} } );
 
-    my $pmc_list = $conf->options->get('pmc')
-        ? $conf->options->get('pmc')
-        : join( ' ', grep { defined $_ } @pmc );
+    my $pmc_list = join( ' ', grep { defined $_ } @pmc );
 
     # names of class files for src/pmc/Makefile
     ( my $TEMP_pmc_o   = $pmc_list ) =~ s/\.pmc/\$(O)/g;
@@ -68,8 +66,6 @@ PMC2C_FILES = \\
     lib/Parrot/Pmc2c/UtilFunctions.pm \\
     lib/Parrot/Pmc2c/PMC/default.pm \\
     lib/Parrot/Pmc2c/PMC/Null.pm \\
-    lib/Parrot/Pmc2c/PMC/Ref.pm \\
-    lib/Parrot/Pmc2c/PMC/SharedRef.pm \\
     lib/Parrot/Pmc2c/PMC/RO.pm
 END
 
@@ -166,7 +162,7 @@ PMC: for my $pmc_file ( split( /\s+/, $pmc_list ) ) {
             unless defined $name;
     }
 
-    my @names = $self->order_pmcs_by_hierarchy( \%parents );
+    my @names = ('default', $self->order_pmcs_by_hierarchy( \%parents ));
 
     $conf->data->set(
         pmc                  => $pmc_list,

@@ -1,12 +1,12 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: stringu.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: stringu.t 39572 2009-06-15 17:21:39Z pmichaud $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 27;
+use Parrot::Test tests => 32;
 use Parrot::Config;
 
 =head1 NAME
@@ -435,22 +435,146 @@ AB
 OUTPUT
 }
 
-pasm_output_is( <<'CODE', <<OUTPUT, "UTF-8 and Unicode literals", todo => 'TT #24' );
-    set S0, unicode:"\u00ab"
-    length I0, S0
-    say I0
-    say S0
-    set S0, iso-8859-1:"\xab"
-    length I0, S0
-    say I0
-    say S0
-    end
+pir_output_is( <<'CODE', <<OUTPUT, "UTF-8 and Unicode hash keys");
+.sub 'main'
+    .local string str0, str1
+    str0 = unicode:"\u00ab"
+    str1 = iso-8859-1:"\xab"
+
+    .local pmc hash
+    hash = new 'Hash'
+    hash[str0] = 'hello'
+
+    $I0 = iseq str0, str1
+    say $I0
+
+    $S0 = hash[str0]
+    $S1 = hash[str1]
+    $I0 = iseq $S0, $S1
+    say $I0
+    say $S0
+    say $S1
+.end
 CODE
 1
-\xc2\xab
 1
-\xc2\xab
+hello
+hello
 OUTPUT
+
+pir_output_is( <<'CODE', <<OUTPUT, "UTF-8 and Unicode hash keys, full bucket" );
+.sub 'main'
+    .local string str0, str1
+    str0 = unicode:"infix:\u00b1"
+    str1 = iso-8859-1:"infix:\xb1"
+
+    .local pmc hash
+    hash = new 'Hash'
+    hash[str0] = 'hello'
+
+    $I0 = 0
+  fill_loop:
+    unless $I0 < 200 goto fill_done
+    inc $I0
+    $S0 = $I0
+    $S0 = concat 'infix:', $S0
+    hash[$S0] = 'foo'
+    goto fill_loop
+  fill_done:
+
+    $I0 = iseq str0, str1
+    #print "iseq str0, str1               => "
+    say $I0
+
+    $S0 = hash[str0]
+    $S1 = hash[str1]
+    $I0 = iseq $S0, $S1
+    #print "iseq hash[str0], hash[str1]   => "
+    say $I0
+    say $S0
+    say $S1
+.end
+CODE
+1
+1
+hello
+hello
+OUTPUT
+
+
+SKIP: {
+    skip( 'no ICU lib', 3 ) unless $PConfig{has_icu};
+pir_output_is( <<'CODE', <<'OUT', 'numification of unicode strings to int' );
+.sub main :main
+     $S0 = "140"
+     $I0 = $S0
+     say $I0
+     $I0 = find_encoding 'ucs2'
+     $S0 = trans_encoding $S0, $I0
+     $I0 = $S0
+     say $I0
+.end
+CODE
+140
+140
+OUT
+
+pir_output_is( <<'CODE', <<'OUT', 'numification of unicode strings to float' );
+.sub main :main
+     $S0 = "140"
+     $N0 = $S0
+     say $N0
+     $I0 = find_encoding 'ucs2'
+     $S0 = trans_encoding $S0, $I0
+     $N0 = $S0
+     say $N0
+.end
+CODE
+140
+140
+OUT
+
+pir_output_is( <<'CODE', <<'OUT', 'numification of unicode strings float mixed' );
+.sub main :main
+    $S0 = unicode:"140 r\x{e9}sum\x{e9}s"
+    $N0 = $S0
+    say $N0
+    $I0 = find_encoding 'ucs2'
+    $S0 = trans_encoding $S0, $I0
+    $N0 = $S0
+    say $N0
+.end
+CODE
+140
+140
+OUT
+}
+
+pir_output_is( <<'CODE', <<'OUT', 'concatenation of utf8 and iso-8859-1 (TT#752)' );
+.sub 'main'
+
+    $S1 = chr 0xe5
+    $S2 = chr 0x263b
+
+    $S0 = unicode:"\u00e5\u263b"
+    $S3 = concat $S1, $S2
+    if $S0 == $S3 goto equal_1
+    print "not "
+  equal_1:
+    say "equal"
+
+    $S0 = unicode:"\u263b\u00e5"
+    $S3 = concat $S2, $S1
+    if $S0 == $S3 goto equal_2
+    print "not "
+  equal_2:
+    say "equal"
+.end
+CODE
+equal
+equal
+OUT
+
 
 # Local Variables:
 #   mode: cperl

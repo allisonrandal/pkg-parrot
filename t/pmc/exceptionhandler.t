@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: exceptionhandler.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: exceptionhandler.t 39633 2009-06-17 21:31:46Z NotFound $
 
 =head1 NAME
 
@@ -16,11 +16,11 @@ Tests the ExceptionHandler PMC.
 
 =cut
 
-.include 'include/except_severity.pasm'
-.include 'include/except_types.pasm'
+.include 'except_severity.pasm'
+.include 'except_types.pasm'
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     plan(8)
 
@@ -60,7 +60,6 @@ Tests the ExceptionHandler PMC.
     eh = 0
     c()
   error_handler_one:
-    .local pmc e, c
     .get_results (e)
     ok(1, 'Min and Max severity for exception handlers')
     c = e['resume']
@@ -93,14 +92,12 @@ Tests the ExceptionHandler PMC.
     goto subclass_handler
 
   typed_handler_one:
-    .local pmc e, c
     .get_results (e)
     ok(1, 'Exception Handler type checks work')
     c = e['resume']
     eh = 0
     c()
   typed_handler_two:
-    .local pmc e, c
     .get_results (e)
     ok(0, 'Exception Handler type checks work')
     c = e['resume']

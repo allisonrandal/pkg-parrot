@@ -1,3 +1,5 @@
+# $Id: Lines.pir 38689 2009-05-11 17:22:23Z NotFound $
+
 =head1 Lines Example
 
 This example demonstrates what C<Stream::Lines> does.
@@ -16,17 +18,17 @@ Creates a stream and pipes it through a Stream::Lines stream.
     .local pmc stream
     .local pmc lines
 
-    load_bytecode "library/Stream/Sub.pir"
-    load_bytecode "library/Stream/Lines.pir"
+    load_bytecode 'Stream/Sub.pbc'
+    load_bytecode 'Stream/Lines.pbc'
 
     # create a text stream
-    stream = new "Stream::Sub"
+    stream = new ['Stream'; 'Sub']
     # set the source
     .const 'Sub' temp = "_text"
     assign stream, temp
 
     # create a lines stream
-    lines = new "Stream::Lines"
+    lines = new ['Stream'; 'Lines']
     # set the source
     assign lines, stream
 
@@ -61,7 +63,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2008, Parrot Foundation.
+Copyright (C) 2004-2009, Parrot Foundation.
 
 =cut
 

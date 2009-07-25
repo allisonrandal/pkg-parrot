@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Pod.pm 37283 2009-03-10 23:23:27Z jkeenan $
+# $Id: Pod.pm 37615 2009-03-21 16:20:27Z Util $
 package Parrot::Test::Pod;
 use strict;
 use warnings;
@@ -124,7 +124,7 @@ sub new {
         unless -d $args->{build_dir};
     croak "Test cannot be run unless MANIFEST exists in build dir"
         unless -f "$args->{build_dir}/MANIFEST";
-    croak "Test cannot be run unless MANIFEST exists in build dir"
+    croak "Test cannot be run unless MANIFEST.generated exists in build dir"
         unless -f "$args->{build_dir}/MANIFEST.generated";
 
     $args->{manifest}     = maniread("$args->{build_dir}/MANIFEST");
@@ -176,7 +176,7 @@ sub identify_files_for_POD_testing {
         if ($@) {
             croak "$sto exists on disk but could not retrieve from it";
         }
-        else {
+        elsif (exists $args->{second_analysis}) {
             # go to second-level analysis
             $files_needing_analysis =
                 $second_analysis_subs{$args->{second_analysis}}(
@@ -227,11 +227,13 @@ sub identify_files_for_POD_testing {
         }
         nstore $files_needing_analysis, $sto;
         # go to second-level analysis
-        $files_needing_analysis =
-            $second_analysis_subs{$args->{second_analysis}}(
-                $files_needing_analysis,
-                $self->{build_dir},
-            );
+        if (exists $args->{second_analysis}) {
+            $files_needing_analysis =
+                $second_analysis_subs{$args->{second_analysis}}(
+                    $files_needing_analysis,
+                    $self->{build_dir},
+                );
+        }
     }
 
     return [ keys %{ $files_needing_analysis } ];

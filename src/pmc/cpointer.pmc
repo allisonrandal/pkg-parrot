@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008-2009, Parrot Foundation.
-$Id: cpointer.pmc 37099 2009-03-03 18:23:12Z Util $
+$Id: cpointer.pmc 38913 2009-05-18 21:47:33Z NotFound $
 
 =head1 NAME
 
@@ -46,8 +46,6 @@ These are the vtable functions for the CPointer class.
 
 */
 
-#include "parrot/parrot.h"
-
 pmclass CPointer need_ext {
     ATTR void   *pointer; /* The stored pointer. */
     ATTR STRING *sig;     /* A string signature for the pointer. */
@@ -87,19 +85,20 @@ pointer.
     VTABLE void mark() {
         Parrot_CPointer_attributes * const data = PARROT_CPOINTER(SELF);
 
-        if (data->sig)
-            pobject_lives(interp, (PObj *)data->sig);
+        if (data->sig) {
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)data->sig);
 
-        if (data->pointer) {
-            if (Parrot_str_equal(interp, data->sig, CONST_STRING(interp, "P"))) {
-                PMC ** const pmc_pointer = (PMC **) data->pointer;
-                PARROT_ASSERT(*pmc_pointer);
-                pobject_lives(interp, (PObj *) *pmc_pointer);
-            }
-            else if (Parrot_str_equal(interp, data->sig, CONST_STRING(interp, "S"))) {
-                STRING ** const str_pointer = (STRING **) data->pointer;
-                PARROT_ASSERT(*str_pointer);
-                pobject_lives(interp, (PObj *) *str_pointer);
+            if (data->pointer) {
+                if (Parrot_str_equal(interp, data->sig, CONST_STRING(interp, "P"))) {
+                    PMC ** const pmc_pointer = (PMC **) data->pointer;
+                    PARROT_ASSERT(*pmc_pointer);
+                    Parrot_gc_mark_PObj_alive(interp, (PObj *) *pmc_pointer);
+                }
+                else if (Parrot_str_equal(interp, data->sig, CONST_STRING(interp, "S"))) {
+                    STRING ** const str_pointer = (STRING **) data->pointer;
+                    PARROT_ASSERT(*str_pointer);
+                    Parrot_gc_mark_PObj_alive(interp, (PObj *) *str_pointer);
+                }
             }
         }
     }
@@ -182,6 +181,8 @@ Returns the string signature.
 
     VTABLE STRING *get_string_keyed_str(STRING *key) {
         Parrot_CPointer_attributes * const data = PARROT_CPOINTER(SELF);
+        UNUSED(key)
+
         return data->sig;
     }
 
@@ -197,6 +198,8 @@ Sets the string signature.
 
     VTABLE void set_string_keyed_str(STRING *key, STRING *value) {
         Parrot_CPointer_attributes * const data = PARROT_CPOINTER(SELF);
+        UNUSED(key)
+
         data->sig = value;
     }
 

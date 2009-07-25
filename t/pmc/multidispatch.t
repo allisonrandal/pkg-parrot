@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: multidispatch.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: multidispatch.t 39251 2009-05-30 01:15:48Z bacek $
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ Tests the multi-method dispatch.
 
 =cut
 
-pir_output_is( <<'CODE', <<'OUTPUT', 'Integer_divide_Integer  10 / 3 = 1003' );
+pir_output_is( <<'CODE', <<'OUTPUT', 'Integer_divide_Integer  10 / 3 = 1003', todo => 'TT #452' );
 
 .sub 'test' :main
     .local pmc divide
@@ -57,7 +57,7 @@ CODE
 1003
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "1+1=3" );
+pir_output_is( <<'CODE', <<'OUTPUT', "1+1=3", todo => 'TT #452' );
 
 .sub _main
     .local pmc add
@@ -89,7 +89,7 @@ CODE
 3
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "PASM divide - override builtin 10 / 3 = 42" );
+pir_output_is( <<'CODE', <<'OUTPUT', "PASM divide - override builtin 10 / 3 = 42", todo => 'TT #452' );
 
 .sub _main
     .local pmc divide
@@ -117,7 +117,7 @@ CODE
 42
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "INTVAL return numeq" );
+pir_output_is( <<'CODE', <<'OUTPUT', "INTVAL return numeq", todo => 'TT #452' );
 
 .sub _main
     .local pmc comp
@@ -220,7 +220,7 @@ print $TEMP <<'EOF';
 EOF
 close $TEMP;
 
-pir_output_is( <<"CODE", <<'OUTPUT', "PASM MMD divide - loaded sub" );
+pir_output_is( <<"CODE", <<'OUTPUT', "PASM MMD divide - loaded sub", todo => 'TT #452' );
 .sub _main
     .local pmc divide
     load_bytecode "$temp_pir"
@@ -239,7 +239,7 @@ CODE
 42
 OUTPUT
 
-pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - new result" );
+pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - new result", todo => 'TT #452' );
 .include "datatypes.pasm"
     get_global P10, "Integer_bxor_Intval"
     add_multi "bitwise_xor_int", "Integer,INTVAL,PMC", P10
@@ -264,7 +264,7 @@ ok
 1
 OUTPUT
 
-pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - existing result" );
+pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - existing result", todo => 'TT #452' );
 .include "datatypes.pasm"
     get_global P10, "Integer_bxor_Intval"
     add_multi "bitwise_xor_int", "Integer,INTVAL,PMC", P10
@@ -289,7 +289,7 @@ ok
 1
 OUTPUT
 
-pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - mixed" );
+pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - mixed", todo => 'TT #452' );
 .include "datatypes.pasm"
     get_global P10, "Integer_bxor_Intval"
     add_multi "bitwise_xor_int", "Integer,INTVAL,PMC", P10

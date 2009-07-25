@@ -1,4 +1,4 @@
-# $Id: config_pir.in 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: config_pir.in 40097 2009-07-15 03:25:10Z allison $
 
 =head1 TITLE
 
@@ -8,6 +8,7 @@ config.pir - Access Parrot configuration data
 
   .sub _some
   ...
+  load_bytecode 'config.pbc'
   # store the config data into $P0
   $P0 = _config()
   # Retrieve and print a key
@@ -18,7 +19,6 @@ config.pir - Access Parrot configuration data
   ...
 
  .end
- .include "library/config.pir"
 
 =head1 DESCRIPTION
 
@@ -49,7 +49,7 @@ undefined values) is undefined, and may be rather funky.
     $S0 = concat prefix, "/runtime"
     $I0 = stat $S0, .STAT_EXISTS
     if $I0 goto L1
-    conf_file = prefix . "/lib@versiondir@/include/config.fpmc"
+    conf_file = "@libdir@@versiondir@/include/config.fpmc"
     goto L2
   L1:
     conf_file = prefix . "/runtime/parrot/include/config.fpmc"

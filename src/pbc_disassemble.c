@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, Parrot Foundation.
-$Id: pbc_disassemble.c 37212 2009-03-08 23:02:22Z rurban $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: pbc_disassemble.c 37845 2009-04-01 18:19:56Z coke $
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ static struct longopt_opt_decl options[] = {
 
 /*
 
-=item C<int main(int argc, char *argv[])>
+=item C<int main(int argc, const char *argv[])>
 
 The run-loop. Starts up an interpreter, loads the bytecode from the
 command-line and disassembles it.
@@ -145,7 +145,7 @@ main(int argc, const char *argv[])
 
 /*
 
-=item C<static void do_dis(PARROT_INTERP, outfile, option)>
+=item C<static void do_dis(PARROT_INTERP, const char *outfile, int options)>
 
 Do the disassembling.
 

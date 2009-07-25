@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 11-print_h.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: 11-print_h.t 39955 2009-07-09 00:02:26Z jkeenan $
 # 11-print_h.t
 
 use strict;
@@ -120,7 +120,7 @@ are as yet uncovered:
 Directory failure:  can it be provoked?
 
   if ( !-d $fulldir ) {
-    File::Path::mkpath( $fulldir, 0, 0755 )
+    File::Path::mkpath( [ $fulldir ], 0, 0755 )
       or die "$self->{script}: Could not mkdir $fulldir: $!!\n";
   }
 

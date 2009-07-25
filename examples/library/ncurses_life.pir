@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: ncurses_life.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: ncurses_life.pir 39952 2009-07-08 22:38:10Z moritz $
 
 =head1 NAME
 
@@ -7,11 +7,11 @@ examples/library/ncurses_life.pir - Conway's Game of Life (ncurses version)
 
 =head1 SYNOPSIS
 
-    % ./parrot examples/library/ncurses_life.pir examples/library/acorn.l
+    % ./parrot examples/library/ncurses_life.pir examples/library/acorn.life
 
 =head1 DESCRIPTION
 
-An C<ncurses> version of Conway's Life. F<acorn.l> is a I<life> file.
+An C<ncurses> version of Conway's Life. F<acorn.life> is a I<life> file.
 
 This version can load F<life.l> files (#P, #A, #R formats only). You get
 a lot of .l files by installing C<xlife>.
@@ -59,7 +59,7 @@ Run faster.
 .sub _MAIN :main
     .param pmc argv
     # the command line
-    load_bytecode "library/ncurses.pasm"
+    load_bytecode 'ncurses.pbc'
 
     # should autogenerate these
     .globalconst int KEY_DOWN = 258
@@ -280,7 +280,7 @@ printloop:
     # TODO skip unprintable out of screen
     if CHARACTER_OFFSET >= total goto dumpend
 
-    substr_r $S0, world, CHARACTER_OFFSET, 1
+    substr $S0, world, CHARACTER_OFFSET, 1
     if $S0 != "*" goto incit
 
     X_COORD = CHAR_POS % size
@@ -391,7 +391,7 @@ NW:
     check %= len
 
     # $S0 is always overwritten, so reuse it
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto North
     inc count
 
@@ -401,7 +401,7 @@ North:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto NE
     inc count
 
@@ -412,7 +412,7 @@ NE:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto West
     inc count
 West:
@@ -421,7 +421,7 @@ West:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto East
     inc count
 
@@ -431,7 +431,7 @@ East:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto SW
     inc count
 
@@ -441,7 +441,7 @@ SW:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto South
     inc count
 
@@ -451,7 +451,7 @@ South:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto SE
     inc count
 SE:
@@ -460,12 +460,12 @@ SE:
     check += pos
     check %= len
 
-    substr_r $S0, world, check, 1
+    substr $S0, world, check, 1
     if $S0 != "*" goto checkl
     inc count
 
 checkl:
-    substr_r $S0, world, pos, 1
+    substr $S0, world, pos, 1
     if $S0 == "*" goto check_alive
 
 # If eq 3, put a star in else a space
@@ -883,8 +883,14 @@ key_done:
 
 =head1 SEE ALSO
 
-F<examples/library/acorn.l>, F<examples/pasm/life.pasm>,
-F<library/ncurses.pasm>, F<library/ncurses.declarations>.
+F<examples/library/acorn.life>, F<examples/pasm/life.pasm>,
+F<runtime/parrot/library/ncurses.pasm>,
+F<runtime/parrot/library/ncurses.declarations>.
+
+=head1 NOTE
+
+The normal extension for life files is C<.l> - Parrot treats these
+as C<lex> files, however, so we use a more verbose extension
 
 =cut
 

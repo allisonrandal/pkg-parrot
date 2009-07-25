@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: multisub.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: multisub.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ Tests the creation and invocation of Perl6 multi subs.
 
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     plan( 8 )
 

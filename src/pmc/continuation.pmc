@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: continuation.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: continuation.pmc 39234 2009-05-29 09:52:20Z chromatic $
 
 =head1 NAME
 
@@ -21,7 +21,6 @@ more information.
 */
 
 
-#include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
 #include "pmc_sub.h"
 
@@ -135,11 +134,17 @@ Creates and returns a clone of the continuation.
 */
 
     VTABLE PMC *clone() {
-        Parrot_cont * const cc_self = PMC_cont(SELF);
-        Parrot_cont * const cc      = new_continuation(INTERP, cc_self);
-        PMC         * const ret     = pmc_new(INTERP, enum_class_Continuation);
+        Parrot_cont * const cc_self  = PMC_cont(SELF);
+        Parrot_cont * const cc       = new_continuation(INTERP, cc_self);
+        PMC         * const ret      = pmc_new(INTERP, enum_class_Continuation);
+        Parrot_cont * const ret_cont = PMC_cont(ret);
 
         PObj_custom_mark_destroy_SETALL(ret);
+
+        /* free ret's PMC_cont */
+        Parrot_free_context(interp, ret_cont->from_ctx, 1);
+        mem_sys_free(ret_cont);
+
         cc->runloop_id = cc_self->runloop_id;
         PMC_cont(ret)  = cc;
 
@@ -234,6 +239,7 @@ destination to continue execution.
         Parrot_Context   *from_ctx     = CONTEXT(interp);
         Parrot_Context   *to_ctx       = cc->to_ctx;
         opcode_t         *pc           = cc->address;
+        UNUSED(next)
 
         Parrot_continuation_check(interp, SELF, cc);
         Parrot_continuation_rewind_environment(interp, SELF, cc);

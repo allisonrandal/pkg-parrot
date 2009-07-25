@@ -1,4 +1,6 @@
 #!parrot
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: revcomp.pir 38369 2009-04-26 12:57:09Z fperrad $
 # Reads from stdin a file in the format made by fasta.pir
 # ./parrot -R jit
 # N = 2500000 for fasta
@@ -76,7 +78,7 @@ done:
 	i = 0
 	$S0 = 'x'
 print_loop:
-	$S0 = substr_r line, i, 60
+	$S0 = substr line, i, 60
 	print $S0
 	print "\n"
 	i += 60

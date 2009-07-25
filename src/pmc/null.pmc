@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: null.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: null.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -19,8 +19,6 @@ really slowing down the bytecode execution.
 
 */
 
-#include "parrot/parrot.h"
-
 pmclass Null singleton {
 
 /*
@@ -36,7 +34,6 @@ Overrides the default to do nothing.
     VTABLE void init() {
     }
 
-    PARROT_CAN_RETURN_NULL
     VTABLE void *get_pointer() {
         return PMCNULL;
     }
@@ -46,6 +43,7 @@ Overrides the default to do nothing.
     }
 
     VTABLE INTVAL does(STRING *what) {
+        UNUSED(what)
         /* XXX maybe a hack to get TGE running again */
         return 0;
     }

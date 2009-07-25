@@ -1,4 +1,5 @@
-# $Id: oo4.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: oo4.pasm 38369 2009-04-26 12:57:09Z fperrad $
 
 .namespace [ "Foo" ]
 
@@ -34,3 +35,9 @@ loop:
     set P10, 20
     setattribute P2, ".j", P10
     returncc
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

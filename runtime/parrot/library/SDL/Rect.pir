@@ -1,5 +1,5 @@
 
-# $Id: Rect.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Rect.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ SDL::Rect - Parrot class representing rectangles in Parrot SDL
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/SDL/Rect.pir'
+    load_bytecode 'SDL/Rect.pir'
 
     # create a new SDL::Rect object
     .local pmc rect

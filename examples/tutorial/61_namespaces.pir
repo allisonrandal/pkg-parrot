@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 61_namespaces.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1 Namespaces
 
 Subroutines all have a unique name, which is how the software recognizes
@@ -17,7 +20,7 @@ and access variables in a different namespace.
 
 .sub main :main
 
-   $P0 = new 'String'
+   $P0 = new ['String']
    $P0 = "Hello"
    set_global ["Different"; "Namespace"], "foo", $P0
 

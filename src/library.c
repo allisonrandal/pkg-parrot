@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: library.c 37210 2009-03-08 21:11:33Z allison $
+$Id: library.c 39939 2009-07-07 23:04:08Z pmichaud $
 
 =head1 NAME
 
@@ -126,7 +126,7 @@ static STRING* try_load_path(PARROT_INTERP, ARGMOD(STRING* path))
 
 /*
 
-=item C<void parrot_init_library_paths>
+=item C<void parrot_init_library_paths(PARROT_INTERP)>
 
 Create an array of StringArrays with library searchpaths and shared
 extension used for loading various files at runtime. The created
@@ -136,6 +136,7 @@ structures looks like this:
     [ "runtime/parrot/include", ... ],   # paths for .include 'file'
     [ "runtime/parrot/library", ... ],   # paths for load_bytecode
     [ "runtime/parrot/dynext", ... ],    # paths for loadlib
+    [ "languages", ... ],                # paths for languages
     [ ".so", ... ]                       # list of shared extensions
   ]
 
@@ -143,7 +144,7 @@ If the platform defines
 
   #define PARROT_PLATFORM_LIB_PATH_INIT_HOOK the_init_hook
 
-if will be called as a function with this prototype:
+it will be called as a function with this prototype:
 
   void the_init_hook(PARROT_INTERP, PMC *lib_paths);
 
@@ -209,18 +210,31 @@ parrot_init_library_paths(PARROT_INTERP)
         VTABLE_push_string(interp, paths, entry);
     }
 
+    /* define languages paths */
+    paths = pmc_new(interp, enum_class_ResizableStringArray);
+    VTABLE_set_pmc_keyed_int(interp, lib_paths,
+            PARROT_LIB_PATH_LANG, paths);
+    entry = CONST_STRING(interp, "runtime/parrot/languages/");
+    VTABLE_push_string(interp, paths, entry);
+    entry = CONST_STRING(interp, "./");
+    VTABLE_push_string(interp, paths, entry);
+    if (!STRING_IS_NULL(versionlib)) {
+        entry = Parrot_str_concat(interp, versionlib, CONST_STRING(interp, "/languages/"), 0);
+        VTABLE_push_string(interp, paths, entry);
+    }
+
     /* define dynext paths */
     paths = pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_set_pmc_keyed_int(interp, lib_paths,
             PARROT_LIB_PATH_DYNEXT, paths);
     entry = CONST_STRING(interp, "runtime/parrot/dynext/");
     VTABLE_push_string(interp, paths, entry);
+    entry = CONST_STRING(interp, "dynext/");
+    VTABLE_push_string(interp, paths, entry);
     if (!STRING_IS_NULL(versionlib)) {
         entry = Parrot_str_concat(interp, versionlib, CONST_STRING(interp, "/dynext/"), 0);
         VTABLE_push_string(interp, paths, entry);
     }
-    entry = CONST_STRING(interp, "dynext/");
-    VTABLE_push_string(interp, paths, entry);
 
     /* shared exts */
     paths = pmc_new(interp, enum_class_ResizableStringArray);
@@ -242,7 +256,7 @@ parrot_init_library_paths(PARROT_INTERP)
 
 /*
 
-=item C<static PMC* get_search_paths>
+=item C<static PMC* get_search_paths(PARROT_INTERP, enum_lib_paths which)>
 
 Return lib_paths as array of StringArrays with library searchpaths and shared
 extension used for loading various files at runtime.
@@ -252,6 +266,7 @@ The structure looks like this:
     [ "runtime/parrot/include", ... ],   # paths for .include 'file'
     [ "runtime/parrot/library", ... ],   # paths for load_bytecode
     [ "runtime/parrot/dynext", ... ],    # paths for loadlib
+    [ "languages", ... ],                # paths for languages
     [ ".so", ... ]                       # list of shared extensions
   ]
 
@@ -281,7 +296,7 @@ static const char win32_path_separator = '\\';
 
 /*
 
-=item C<static int is_abs_path>
+=item C<static int is_abs_path(const STRING *file)>
 
 Determines whether a file name given by a fixed-8 or utf8 C<STRING> is an
 absolute file name. Returns C<1> if the filename is absolute, returns C<0>
@@ -322,7 +337,7 @@ is_abs_path(ARGIN(const STRING *file))
 
 /*
 
-=item C<static void cnv_to_win32_filesep>
+=item C<static void cnv_to_win32_filesep(STRING *path)>
 
 Converts a path with forward slashes to one with backward slashes.
 
@@ -348,7 +363,7 @@ cnv_to_win32_filesep(ARGMOD(STRING *path))
 
 /*
 
-=item C<static STRING* path_finalize>
+=item C<static STRING* path_finalize(PARROT_INTERP, STRING *path)>
 
 Ensures the given STRING C<path> has a C-style NULL character at the end. The
 length of the string is not increased to account for this NULL, however. In
@@ -386,7 +401,8 @@ path_finalize(PARROT_INTERP, ARGMOD(STRING *path))
 
 /*
 
-=item C<static STRING* path_guarantee_trailing_separator>
+=item C<static STRING* path_guarantee_trailing_separator(PARROT_INTERP, STRING
+*path)>
 
 unary path argument. the path string will have a
 trailing path-separator appended if it is not
@@ -414,7 +430,8 @@ path_guarantee_trailing_separator(PARROT_INTERP, ARGMOD(STRING *path))
 
 /*
 
-=item C<static STRING* path_append>
+=item C<static STRING* path_append(PARROT_INTERP, STRING *l_path, STRING
+*r_path)>
 
 binary path arguments, the left arg is modified.
 a trailing separator is guaranteed for the left
@@ -438,7 +455,8 @@ path_append(PARROT_INTERP, ARGMOD(STRING *l_path), ARGMOD(STRING *r_path))
 
 /*
 
-=item C<static STRING* path_concat>
+=item C<static STRING* path_concat(PARROT_INTERP, STRING *l_path, STRING
+*r_path)>
 
 binary path arguments. A new string is created
 that is the concatenation of the two path components
@@ -465,7 +483,7 @@ path_concat(PARROT_INTERP, ARGMOD(STRING *l_path), ARGMOD(STRING *r_path))
 
 /*
 
-=item C<static STRING* try_load_path>
+=item C<static STRING* try_load_path(PARROT_INTERP, STRING* path)>
 
 Attempts to load a file with name C<path>. If the file is successfully located,
 the finalized name of the file is returned as a STRING. Otherwise, returns
@@ -496,7 +514,7 @@ try_load_path(PARROT_INTERP, ARGMOD(STRING* path))
 
 /*
 
-=item C<static STRING* try_bytecode_extensions>
+=item C<static STRING* try_bytecode_extensions(PARROT_INTERP, STRING* path)>
 
 Guess extensions, so that the user can drop the extensions
 leaving it up to the build process/install whether or not
@@ -576,12 +594,10 @@ try_bytecode_extensions(PARROT_INTERP, ARGMOD(STRING* path))
 
 /*
 
-=item C<void Parrot_add_library_path>
+=item C<void Parrot_lib_add_path(PARROT_INTERP, STRING *path_str, enum_lib_paths
+which)>
 
-Add a path to the library searchpath of the given type.
-
-TODO:
-  - allow path to be a list of paths.
+Add a path to the library searchpath of the given type (passing in a STRING).
 
 =cut
 
@@ -589,33 +605,48 @@ TODO:
 
 PARROT_EXPORT
 void
-Parrot_add_library_path(PARROT_INTERP,
-        ARGIN(const char *path),
+Parrot_lib_add_path(PARROT_INTERP,
+        ARGIN(STRING *path_str),
         enum_lib_paths which)
 {
-    ASSERT_ARGS(Parrot_add_library_path)
+    ASSERT_ARGS(Parrot_lib_add_path)
     PMC * const iglobals = interp->iglobals;
     PMC * const lib_paths = VTABLE_get_pmc_keyed_int(interp, iglobals,
         IGLOBALS_LIB_PATHS);
     PMC * const paths = VTABLE_get_pmc_keyed_int(interp, lib_paths, which);
-    STRING * const path_str = Parrot_str_new(interp, path, 0);
     VTABLE_push_string(interp, paths, path_str);
 }
 
 /*
 
-=item C<char* Parrot_locate_runtime_file>
+=item C<void Parrot_lib_add_path_from_cstring(PARROT_INTERP, const char *path,
+enum_lib_paths which)>
+
+Add a path to the library searchpath of the given type (passing in a C string).
+
+=cut
+
+*/
+
+PARROT_EXPORT
+void
+Parrot_lib_add_path_from_cstring(PARROT_INTERP,
+        ARGIN(const char *path),
+        enum_lib_paths which)
+{
+    ASSERT_ARGS(Parrot_lib_add_path_from_cstring)
+    STRING * const path_str = Parrot_str_new(interp, path, 0);
+    Parrot_lib_add_path(interp, path_str, which);
+}
+
+/*
+
+=item C<STRING* Parrot_locate_runtime_file_str(PARROT_INTERP, STRING *file,
+enum_runtime_ft type)>
 
 Locate the full path for C<file_name> and the given file type(s). If
 successful, returns a C-string allocated with C<Parrot_str_to_cstring> or
 NULL otherwise.  Remember to free the string with C<Parrot_str_free_cstring()>.
-
-=item C<STRING* Parrot_locate_runtime_file_str>
-
-Like above but use and return STRINGs. If successful, the returned STRING
-is 0-terminated so that C<result-E<gt>strstart> is usable as B<const char*>
-c-string for C library functions like fopen(3).
-This is the preferred API function.
 
 The C<enum_runtime_ft type> is one or more of the types defined in
 F<include/parrot/library.h>.
@@ -641,7 +672,9 @@ Parrot_locate_runtime_file_str(PARROT_INTERP, ARGMOD(STRING *file),
     if (is_abs_path(file))
         return file;
 
-    if (type & PARROT_RUNTIME_FT_DYNEXT)
+    if (type & PARROT_RUNTIME_FT_LANG)
+        paths = get_search_paths(interp, PARROT_LIB_PATH_LANG);
+    else if (type & PARROT_RUNTIME_FT_DYNEXT)
         paths = get_search_paths(interp, PARROT_LIB_PATH_DYNEXT);
     else if (type & (PARROT_RUNTIME_FT_PBC | PARROT_RUNTIME_FT_SOURCE))
         paths = get_search_paths(interp, PARROT_LIB_PATH_LIBRARY);
@@ -687,6 +720,27 @@ Parrot_locate_runtime_file_str(PARROT_INTERP, ARGMOD(STRING *file),
     return full_name;
 }
 
+/*
+
+=item C<char* Parrot_locate_runtime_file(PARROT_INTERP, const char *file_name,
+enum_runtime_ft type)>
+
+Locate the full path for C<file_name> and the given file type(s). If
+successful, returns a C-string allocated with C<Parrot_str_to_cstring> or
+NULL otherwise.  Remember to free the string with C<Parrot_str_free_cstring()>.
+
+If successful, the returned STRING is 0-terminated so that
+C<result-E<gt>strstart> is usable as B<const char*> c-string for C library
+functions like fopen(3).  This is the preferred API function.
+
+The C<enum_runtime_ft type> is one or more of the types defined in
+F<include/parrot/library.h>.
+
+=cut
+
+*/
+
+
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
@@ -711,7 +765,7 @@ Parrot_locate_runtime_file(PARROT_INTERP, ARGIN(const char *file_name),
 
 /*
 
-=item C<char* Parrot_get_runtime_prefix>
+=item C<char* Parrot_get_runtime_prefix(PARROT_INTERP)>
 
 Return a malloced C-string for the runtime prefix.  The calling function
 must free it.
@@ -734,7 +788,7 @@ Parrot_get_runtime_prefix(PARROT_INTERP)
     char * const env = Parrot_getenv("PARROT_RUNTIME", &free_it);
 
     if (env)
-        return free_it ? env : str_dup(env);
+        return free_it ? env : mem_sys_strdup(env);
     else {
         PMC    * const config_hash =
             VTABLE_get_pmc_keyed_int(interp, interp->iglobals, (INTVAL) IGLOBALS_CONFIG_HASH);
@@ -745,13 +799,13 @@ Parrot_get_runtime_prefix(PARROT_INTERP)
             return Parrot_str_to_cstring(interp, s);
         }
         else
-            return str_dup(".");
+            return mem_sys_strdup(".");
     }
 }
 
 /*
 
-=item C<STRING * Parrot_get_runtime_path>
+=item C<STRING * Parrot_get_runtime_path(PARROT_INTERP)>
 
 Return a string for the runtime prefix.
 
@@ -791,7 +845,8 @@ Parrot_get_runtime_path(PARROT_INTERP)
 
 /*
 
-=item C<STRING * parrot_split_path_ext>
+=item C<STRING * parrot_split_path_ext(PARROT_INTERP, STRING *in, STRING
+**wo_ext, STRING **ext)>
 
 Split the pathstring C<in> into <path><filestem><ext>. Return the
 C<filestem> of the pathstring. Set C<wo_ext> to the part without

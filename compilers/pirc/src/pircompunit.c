@@ -1,5 +1,5 @@
 /*
- * $Id: pircompunit.c 37143 2009-03-06 03:28:51Z Util $
+ * $Id: pircompunit.c 37783 2009-03-28 00:57:38Z tene $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -256,6 +256,8 @@ set_sub_methodname(lexer_state * const lexer, char const * const methodname) {
         CURRENT_SUB(lexer)->methodname = methodname;
     else /* :method without a value defaults to the subname. */
         CURRENT_SUB(lexer)->methodname = CURRENT_SUB(lexer)->info.subname;
+    
+    CURRENT_SUB(lexer)->info.methodname = CURRENT_SUB(lexer)->methodname;
 
     /* :methods have an automatic "self" parameter */
     add_self_parameter(lexer);

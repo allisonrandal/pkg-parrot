@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id: OpTrans.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: OpTrans.pm 39866 2009-07-02 07:07:07Z cotto $
 
 =head1 NAME
 
@@ -16,9 +16,9 @@ to all transforms.
 The subclass hierarchy is as follows:
 
     OpTrans
-       |_________________________
-       |           |             |
-       C         CGoto       Compiled
+       |___________
+       |           |
+       C         CGoto
        |           |
     CPrederef      |
        | |         |
@@ -258,8 +258,6 @@ Called by C<goto_address()>.
 =item C<Parrot::OpTrans::CPrederef>
 
 =item C<Parrot::OpTrans::CSwitch>
-
-=item C<Parrot::OpTrans::Compiled>
 
 =back
 

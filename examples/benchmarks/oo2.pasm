@@ -1,4 +1,5 @@
-# $Id: oo2.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: oo2.pasm 38923 2009-05-19 06:07:42Z cotto $
 
 # all timings Athlon 800, gcc 2.95.2
 
@@ -30,7 +31,7 @@
     addattribute P1, ".j"
 
     set I10, 0
-    set I11, 500000
+    set I11, 50000
 loop:
     new P3, "Foo"
     inc I10
@@ -52,3 +53,9 @@ loop:
     set P10, 20
     setattribute P2, ".j", P10
     returncc
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

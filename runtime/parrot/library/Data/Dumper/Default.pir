@@ -1,3 +1,5 @@
+# $Id: Default.pir 38693 2009-05-11 18:45:05Z NotFound $
+
 =head1 TITLE
 
 Data::Dumper::Default - The default output module of Data::Dumper.
@@ -23,7 +25,7 @@ This module provides the default output style of C<Data::Dumper>.
     goto END
 
   create_ddb:
-    load_bytecode "library/Data/Dumper/Base.pir"
+    load_bytecode 'Data/Dumper/Base.pbc'
     get_class $P0, "Data::Dumper::Base"
     subclass $P0, $P0, "Data::Dumper::Default"
 END:

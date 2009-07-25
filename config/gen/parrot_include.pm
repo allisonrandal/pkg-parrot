@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: parrot_include.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: parrot_include.pm 40111 2009-07-15 22:14:37Z NotFound $
 
 =head1 NAME
 
@@ -33,15 +33,18 @@ sub _init {
         include/parrot/events.h
         include/parrot/scheduler.h
         include/parrot/exceptions.h
+        include/parrot/hash.h
         include/parrot/interpreter.h
         include/parrot/io.h
+        include/parrot/library.h
         include/parrot/longopt.h
         include/parrot/multidispatch.h
-        include/parrot/resources.h
+        include/parrot/packfile.h
         include/parrot/stat.h
         include/parrot/string.h
         include/parrot/pmc.h
         include/parrot/warnings.h
+        include/parrot/gc_api.h
         src/pmc/timer.pmc
         src/utils.c
     ) ];

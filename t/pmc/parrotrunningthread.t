@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: parrotrunningthread.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: parrotrunningthread.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Tests the ParrotRunningThread PMC.
 =cut
 
 .sub 'main' :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     plan(2)
 

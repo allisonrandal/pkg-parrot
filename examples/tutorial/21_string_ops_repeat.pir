@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 21_string_ops_repeat.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 String Operations (continued)
 
 PIR has a string repeat opcode, that concatenates a string with

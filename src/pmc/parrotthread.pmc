@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: parrotthread.pmc 37410 2009-03-14 11:13:34Z rurban $
+$Id: parrotthread.pmc 39675 2009-06-20 20:24:17Z Infinoid $
 
 =head1 NAME
 
@@ -36,7 +36,6 @@ and these methods:
 
 */
 
-#include "parrot/parrot.h"
 #include "parrot/embed.h"
 
 #define PMC_interp(x) ((Parrot_ParrotInterpreter_attributes *)PMC_data(x))->interp
@@ -71,7 +70,6 @@ static INTVAL do_thread_run(PARROT_INTERP, PMC *thread,
 
     pmc_reuse(interp, thread, enum_class_ParrotRunningThread, 0);
 
-    PObj_active_destroy_CLEAR(thread);
     PObj_custom_mark_CLEAR(thread);
     VTABLE_set_integer_native(interp, thread, tid);
 

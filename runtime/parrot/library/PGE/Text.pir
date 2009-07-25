@@ -1,3 +1,6 @@
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: Text.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 TITLE
 
 PGE::Text - rules for extracting delimited text sequences from strings

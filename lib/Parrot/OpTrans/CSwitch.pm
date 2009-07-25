@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: CSwitch.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: CSwitch.pm 39866 2009-07-02 07:07:07Z cotto $
 
 =head1 NAME
 
@@ -246,8 +246,6 @@ END_C
 =item C<Parrot::OpTrans::CGoto>
 
 =item C<Parrot::OpTrans::CPrederef>
-
-=item C<Parrot::OpTrans::Compiled>
 
 =back
 

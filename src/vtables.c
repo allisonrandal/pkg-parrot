@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, Parrot Foundation.
-$Id: vtables.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: vtables.c 39076 2009-05-23 10:38:31Z chromatic $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ src/vtables.c - Functions to build and manipulate vtables
 
 /*
 
-=item C<VTABLE * Parrot_new_vtable>
+=item C<VTABLE * Parrot_new_vtable(PARROT_INTERP)>
 
 Creates and returns a pointer to the new C<VTABLE>.
 
@@ -43,7 +43,7 @@ Parrot_new_vtable(SHIM_INTERP)
 
 /*
 
-=item C<VTABLE * Parrot_clone_vtable>
+=item C<VTABLE * Parrot_clone_vtable(PARROT_INTERP, const VTABLE *base_vtable)>
 
 Clones C<*base_vtable> and returns a pointer to the new C<VTABLE>.
 
@@ -65,7 +65,7 @@ Parrot_clone_vtable(PARROT_INTERP, ARGIN(const VTABLE *base_vtable))
     /* when called from global PMC initialization, not all vtables have isa_hash
      * when called at runtime, they do */
     if (base_vtable->isa_hash) {
-        parrot_new_hash(interp, &new_vtable->isa_hash);
+        new_vtable->isa_hash = parrot_new_hash(interp);
         parrot_hash_clone(interp, base_vtable->isa_hash, new_vtable->isa_hash);
     }
 
@@ -76,7 +76,7 @@ Parrot_clone_vtable(PARROT_INTERP, ARGIN(const VTABLE *base_vtable))
 
 /*
 
-=item C<void Parrot_destroy_vtable>
+=item C<void Parrot_destroy_vtable(PARROT_INTERP, VTABLE *vtable)>
 
 Destroys C<*vtable>.
 
@@ -117,7 +117,7 @@ Parrot_destroy_vtable(PARROT_INTERP, ARGMOD(VTABLE *vtable))
 
 /*
 
-=item C<void parrot_alloc_vtables>
+=item C<void parrot_alloc_vtables(PARROT_INTERP)>
 
 Allocate memory for the vtables for all known classes (PMC types).
 
@@ -136,7 +136,7 @@ parrot_alloc_vtables(PARROT_INTERP)
 
 /*
 
-=item C<void parrot_realloc_vtables>
+=item C<void parrot_realloc_vtables(PARROT_INTERP)>
 
 Reallocate memory for vtables, increasing the number of vtables by 16.
 
@@ -163,7 +163,7 @@ parrot_realloc_vtables(PARROT_INTERP)
 
 /*
 
-=item C<void parrot_free_vtables>
+=item C<void parrot_free_vtables(PARROT_INTERP)>
 
 Free memory allocated for the vtables. Each vtable is destroyed
 through its destructor Parrot_destroy_vtable, after which the list
@@ -179,7 +179,7 @@ parrot_free_vtables(PARROT_INTERP)
     ASSERT_ARGS(parrot_free_vtables)
     int i;
 
-    for (i = 1; i < interp->n_vtable_max; i++)
+    for (i = 0; i < interp->n_vtable_max; i++)
         Parrot_destroy_vtable(interp, interp->vtables[i]);
 
     mem_sys_free(interp->vtables);
@@ -187,7 +187,7 @@ parrot_free_vtables(PARROT_INTERP)
 
 /*
 
-=item C<void mark_vtables>
+=item C<void mark_vtables(PARROT_INTERP)>
 
 Mark all vtables as being alive for the garbage collector.
 
@@ -209,15 +209,15 @@ mark_vtables(PARROT_INTERP)
             continue;
 
         if (vtable->mro)
-            pobject_lives(interp, (PObj *)vtable->mro);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->mro);
         if (vtable->_namespace)
-            pobject_lives(interp, (PObj *)vtable->_namespace);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->_namespace);
         if (vtable->whoami)
-            pobject_lives(interp, (PObj *)vtable->whoami);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->whoami);
         if (vtable->provides_str)
-            pobject_lives(interp, (PObj *)vtable->provides_str);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->provides_str);
         if (vtable->pmc_class)
-            pobject_lives(interp, (PObj *)vtable->pmc_class);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->pmc_class);
     }
 }
 

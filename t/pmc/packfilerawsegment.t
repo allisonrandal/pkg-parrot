@@ -1,13 +1,6 @@
-#!perl
+#!parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: packfilerawsegment.t 36833 2009-02-17 20:09:26Z allison $
-
-use strict;
-use warnings;
-use lib qw( . lib ../lib ../../lib );
-use Test::More;
-use Parrot::Test tests => 2;
-use Parrot::Config;
+# $Id: packfilerawsegment.t 40100 2009-07-15 13:15:25Z bacek $
 
 =head1 NAME
 
@@ -28,55 +21,31 @@ Tests the PackfileRawSegment PMC.
 # the value returned by elements() is greater than zero, and that
 # get_integer_keyed_int doesn't return all zeroes either.
 
-
-# common setup code for later tests
-
-my $get_uuid_pbc = <<'EOF';
-
-.sub _pbc
-    .include "stat.pasm"
-    .include "interpinfo.pasm"
-    .local pmc pf, pio
-    pf   = new ['Packfile']
-    $S0  = interpinfo .INTERPINFO_RUNTIME_PREFIX
-    $S0 .= "/runtime/parrot/library/uuid.pbc"
-    $I0  = stat $S0, .STAT_FILESIZE
-    pio  = open $S0, 'r'
-    $S0  = read pio, $I0
-    close pio
-    pf   = $S0
-    .return(pf)
+.include 't/pmc/testlib/packfile_common.pir'
+.sub 'main' :main
+.include 'test_more.pir'
+    plan(2)
+    test_elements()
+    test_get_integer()
 .end
-EOF
-
 
 # PackfileRawSegment.elements
-
-pir_output_is( <<'CODE' . $get_uuid_pbc, <<'OUT', 'elements' );
-.sub 'test' :main
+.sub 'test_elements'
     .local pmc pf, pfdir, pfseg
     pf    = _pbc()
     pfdir = pf.'get_directory'()
-    pfseg = pfdir[0]
+    pfseg = '_find_segment_by_prefix'(pf, 'BYTECODE')
     $I0   = elements pfseg
-    gt $I0, 0, DONE
-    say 'not '
-    DONE:
-    say 'greater'
+    ok($I0, 'PackfileRawSegment contains some data')
 .end
-CODE
-greater
-OUT
-
 
 # PackfileRawSegment.get_integer_keyed_int
-
-pir_output_is( <<'CODE' . $get_uuid_pbc, <<'OUT', 'get_integer_keyed_int' );
-.sub 'test' :main
+.sub 'test_get_integer'
     .local pmc pf, pfdir, pfseg
     pf    = _pbc()
     pfdir = pf.'get_directory'()
-    pfseg = pfdir[0]
+    pfseg = '_find_segment_by_prefix'(pf, 'BYTECODE')
+
     $I0   = 0
     $I1   = pfseg[0]
     $I0   = $I0 + $I1
@@ -88,14 +57,8 @@ pir_output_is( <<'CODE' . $get_uuid_pbc, <<'OUT', 'get_integer_keyed_int' );
     $I0   = $I0 + $I1
     $I1   = pfseg[4]
     $I0   = $I0 + $I1
-    gt $I0, 0, DONE
-    say 'not '
-    DONE:
-    say 'greater'
+    ok($I0, "PackfileRawSegment.get_integer_keyed_int returns some data")
 .end
-CODE
-greater
-OUT
 
 
 # Local Variables:

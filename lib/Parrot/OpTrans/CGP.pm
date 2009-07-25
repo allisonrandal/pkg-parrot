@@ -1,5 +1,5 @@
 # Copyright (C) 2002, Parrot Foundation.
-# $Id: CGP.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: CGP.pm 39866 2009-07-02 07:07:07Z cotto $
 
 =head1 NAME
 
@@ -161,8 +161,6 @@ END_C
 =item C<Parrot::OpTrans::CPrederef>
 
 =item C<Parrot::OpTrans::CSwitch>
-
-=item C<Parrot::OpTrans::Compiled>
 
 =back
 

@@ -1,7 +1,7 @@
 /* io_portable.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: io_portable.h 36833 2009-02-17 20:09:26Z allison $
+ *     $Id: io_portable.h 39472 2009-06-09 15:07:24Z whiteknight $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:
@@ -15,6 +15,8 @@
 
 typedef FILE* PIOHANDLE;
 typedef long PIOOFF_T;
+
+#define PIO_INVALID_HANDLE NULL
 
 /* HEADERIZER BEGIN: src/io/portable.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */

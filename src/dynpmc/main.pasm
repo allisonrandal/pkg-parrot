@@ -1,4 +1,5 @@
-# $Id: main.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2003-2009, Parrot Foundation.
+# $Id: main.pasm 38369 2009-04-26 12:57:09Z fperrad $
 
 # experimental subproxy class test
 # the bytecode loading is deferred until the subproxy object is
@@ -12,7 +13,7 @@
 _main:
 	loadlib P1, "subproxy"
 
-        # set up which Sub should eventually be called 
+        # set up which Sub should eventually be called
 	new P3, 'Key'
 	set P3, "src/dynpmc/ext.pir"	# file - FIXME path handling
 	new P4, 'Key'
@@ -27,3 +28,9 @@ _main:
 	invokecc P0
 	print "back\n"
 end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

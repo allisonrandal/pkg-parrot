@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Pg.pir 37343 2009-03-12 05:22:02Z Util $
+# $Id: Pg.pir 38702 2009-05-11 21:42:56Z NotFound $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ by 'Pg', 'Pg;Conn', and 'Pg;Result' classes.
 
 .sub __load :load
     .local pmc cl
-    load_bytecode "postgres.pir"         # TODO .pbc
+    load_bytecode 'postgres.pbc'
     cl = newclass 'Pg'       # Pg connection constructor
 
     # XXX the hasa 'con' is suboptimal

@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Utils.pm 37218 2009-03-09 00:27:46Z NotFound $
+# $Id: Utils.pm 38502 2009-05-06 06:20:50Z chromatic $
 package Parrot::Ops2c::Utils;
 use strict;
 use warnings;
@@ -133,7 +133,7 @@ sub new {
     my $sym_export =
         $flagref->{dynamic}
         ? 'PARROT_DYNEXT_EXPORT'
-        : 'PARROT_EXPORT';
+        : '';
 
     my $ops;
     if ( $flagref->{core} ) {

@@ -1,3 +1,5 @@
+# $Id: More.pir 39874 2009-07-04 12:20:46Z bacek $
+
 =head1 NAME
 
 Test::More - Parrot extension for testing modules
@@ -5,7 +7,7 @@ Test::More - Parrot extension for testing modules
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/Test/More.pbc'
+    load_bytecode 'Test/More.pbc'
 
     # get the testing functions
     .local pmc exports, curr_namespace, test_namespace
@@ -64,7 +66,7 @@ This class defines the following functions:
 .namespace [ 'Test'; 'More' ]
 
 .sub _initialize :load
-    load_bytecode 'library/Test/Builder.pbc'
+    load_bytecode 'Test/Builder.pbc'
 
     .local pmc test
     test = new [ 'Test'; 'Builder' ]
@@ -466,8 +468,7 @@ structures are passed, C<is_deeply> does a deep comparison by walking each
 structure.  It passes if they are equal and fails otherwise.  This will
 report the results with the optional test description in C<description>.
 
-This only handles comparisons of array-like structures.  It shouldn't be too
-hard to extend it for hash-like structures, too.
+This handles comparisons of array-like and hash-like structures.
 
 =cut
 
@@ -515,10 +516,10 @@ hard to extend it for hash-like structures, too.
   report_diagnostic:
     ne diagnosis, '', return_it
 
-    .local string left
-    .local string right
-    right = pop position
-    left  = pop position
+    .local string left_value
+    .local string right_value
+    right_value = pop position
+    left_value  = pop position
 
     .local string nested_path
     nested_path = join '][', position
@@ -532,9 +533,9 @@ hard to extend it for hash-like structures, too.
 
   show_expected:
     diagnosis  .= ': expected '
-    diagnosis  .= left
+    diagnosis  .= left_value
     diagnosis  .= ', received '
-    diagnosis  .= right
+    diagnosis  .= right_value
 
   return_it:
     test.'diag'( diagnosis )
@@ -638,27 +639,22 @@ hard to extend it for hash-like structures, too.
 
   compare_contents:
     .local pmc l_iter
-    .local pmc r_iter
     .local int count
 
     l_iter = new 'Iterator', l_hash
-    r_iter = new 'Iterator', r_hash
     l_iter = 0
-    r_iter = 0
     count  = 0
 
-    .local pmc l_key
-    .local pmc r_key
+    .local pmc key
     .local pmc l_elem
     .local pmc r_elem
     .local int elems_equal
 
   iter_start:
     unless l_iter goto iter_end
-    l_key  = shift l_iter
-    r_key  = shift r_iter
-    l_elem = l_hash[ l_key ]
-    r_elem = r_hash[ r_key ]
+    key  = shift l_iter
+    l_elem = l_hash[ key ]
+    r_elem = r_hash[ key ]
 
     elems_equal = compare_elements( l_elem, r_elem, position )
     unless elems_equal goto elems_not_equal
@@ -667,7 +663,7 @@ hard to extend it for hash-like structures, too.
     goto iter_start
 
   elems_not_equal:
-    unshift position, l_key
+    unshift position, key
     .return( 0 )
 
   iter_end:

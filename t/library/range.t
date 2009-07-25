@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: range.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: range.t 38697 2009-05-11 19:59:22Z NotFound $
 
 =head1 NAME
 
@@ -17,8 +17,8 @@ Tests the Range class.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
-    load_bytecode 'Range.pir'
+    .include 'test_more.pir'
+    load_bytecode 'Range.pbc'
 
     plan(78)
 

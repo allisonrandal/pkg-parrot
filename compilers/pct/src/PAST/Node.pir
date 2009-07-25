@@ -1,3 +1,5 @@
+# $Id: Node.pir 39894 2009-07-06 03:33:42Z pmichaud $
+
 =head1 NAME
 
 PAST - Parrot abstract syntax tree
@@ -160,7 +162,7 @@ Throw an exception if we try to make a PAST::Val into an lvalue.
     unless value goto normal
     die "Unable to set lvalue on PAST::Val node"
   normal:
-    .tailcall self.'attr'('value', value, has_value)
+    .tailcall self.'attr'('lvalue', value, has_value)
 .end
 
 =back

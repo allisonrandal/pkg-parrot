@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 09-dynamic_nolines.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: 09-dynamic_nolines.t 39944 2009-07-08 02:48:40Z coke $
 # 09-dynamic_nolines.t
 
 use strict;
@@ -19,7 +19,7 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 38;
+use Test::More tests => 22;
 use Carp;
 use Cwd;
 use File::Copy;
@@ -32,7 +32,7 @@ use GenerateCore qw|
     $num
     $skip
 |;
-my @dynopsfiles = qw( src/dynoplibs/dan.ops src/dynoplibs/myops.ops );
+my @dynopsfiles = qw( src/dynoplibs/obscure.ops );
 
 ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
 my $cwd = cwd();
@@ -52,14 +52,10 @@ my $cwd = cwd();
     }
     chdir "src/dynoplibs" or croak "Unable to change to src/dynoplibs: $!";
 
-    test_dynops_nolines( [qw( CGoto    myops.ops )] );
-    test_dynops_nolines( [qw( CGP      myops.ops )] );
-    test_dynops_nolines( [qw( C        myops.ops )] );
-    test_dynops_nolines( [qw( CSwitch  myops.ops )] );
-    test_dynops_nolines( [qw( CGoto    dan.ops )] );
-    test_dynops_nolines( [qw( CGP      dan.ops )] );
-    test_dynops_nolines( [qw( C        dan.ops )] );
-    test_dynops_nolines( [qw( CSwitch  dan.ops )] );
+    test_dynops_nolines( [qw( CGoto    obscure.ops )] );
+    test_dynops_nolines( [qw( CGP      obscure.ops )] );
+    test_dynops_nolines( [qw( C        obscure.ops )] );
+    test_dynops_nolines( [qw( CSwitch  obscure.ops )] );
 
     ok( chdir($cwd), "returned to starting directory" );
 }

@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 62_namespaces.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 Subroutines in a Namespace
 
 Subroutines created in one namespace can be accessed from another

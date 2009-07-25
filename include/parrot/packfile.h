@@ -4,7 +4,7 @@
 
 /* packfile.h
 *
-* $Id: packfile.h 37257 2009-03-10 04:22:07Z Util $
+* $Id: packfile.h 39123 2009-05-24 03:08:38Z petdance $
 *
 * History:
 *  Rework by Melvin; new bytecode format, make bytecode portable.
@@ -173,17 +173,21 @@ typedef struct PackFile_funcs {
     PackFile_Segment_dump_func_t        dump;
 } PackFile_funcs;
 
-typedef enum {
-    PF_DIR_SEG,
-    PF_UNKNOWN_SEG,
-    PF_FIXUP_SEG,
-    PF_CONST_SEG,
-    PF_BYTEC_SEG,
-    PF_DEBUG_SEG,
-    PF_ANNOTATIONS_SEG,
+/* &gen_from_enum(packfile_segments.pasm) */
 
-    PF_MAX_SEG
+typedef enum {
+    PF_DIR_SEG          = 0,
+    PF_UNKNOWN_SEG      = 1,
+    PF_FIXUP_SEG        = 2,
+    PF_CONST_SEG        = 3,
+    PF_BYTEC_SEG        = 4,
+    PF_DEBUG_SEG        = 5,
+    PF_ANNOTATIONS_SEG  = 6,
+
+    PF_MAX_SEG          = 7
 } pack_file_types;
+
+/* &end_gen */
 
 #define PF_DIR_FORMAT 1
 
@@ -229,12 +233,18 @@ typedef struct PackFile_FixupTable {
     PackFile_ByteCode           *code;   /* where this segment belongs to */
 } PackFile_FixupTable;
 
-#define PFC_NONE    '\0'
+
+
+/* &gen_from_def(packfile_constants.pasm) */
+
 /* no ascii chars use numbers: for n, s, k, p */
-#define PFC_NUMBER  '\156'
-#define PFC_STRING  '\163'
-#define PFC_KEY     '\153'
-#define PFC_PMC     '\160'
+#define PFC_NONE    0x0
+#define PFC_NUMBER  0x6E
+#define PFC_STRING  0x73
+#define PFC_PMC     0x70
+#define PFC_KEY     0x6B
+
+/* &end_gen */
 
 enum PF_VARTYPE {                  /* s. also imcc/symreg.h */
     PF_VT_START_SLICE = 1 << 10,   /* x .. y slice range */
@@ -276,11 +286,14 @@ typedef struct PackFile_Debug {
     PackFile_ByteCode      *code;   /* where this segment belongs to */
 } PackFile_Debug;
 
+/* &gen_from_def(packfile_annotation_key_type.pasm) */
 
 /* Key types for annotation segment. */
 #define PF_ANNOTATION_KEY_TYPE_INT 0
 #define PF_ANNOTATION_KEY_TYPE_STR 1
 #define PF_ANNOTATION_KEY_TYPE_NUM 2
+
+/* &end_gen */
 
 typedef struct PackFile_Annotations_Key {
     opcode_t name;
@@ -451,7 +464,7 @@ void do_sub_pragmas(PARROT_INTERP,
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
-INTVAL PackFile_add_segment(SHIM_INTERP,
+void PackFile_add_segment(SHIM_INTERP,
     ARGMOD(PackFile_Directory *dir),
     ARGIN(PackFile_Segment *seg))
         __attribute__nonnull__(2)
@@ -470,21 +483,18 @@ void PackFile_Annotations_add_entry(PARROT_INTERP,
         FUNC_MODIFIES(*self);
 
 PARROT_EXPORT
-void PackFile_Annotations_add_group(PARROT_INTERP,
+void PackFile_Annotations_add_group(SHIM_INTERP,
     ARGMOD(PackFile_Annotations *self),
     opcode_t offset)
-        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*self);
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
-PackFile_Segment * PackFile_Annotations_new(PARROT_INTERP,
-    ARGIN(struct PackFile *pf),
+PackFile_Segment * PackFile_Annotations_new(SHIM_INTERP,
+    SHIM(struct PackFile *pf),
     SHIM(const char *name),
-    NULLOK(int add))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+    NULLOK(int add));
 
 PARROT_EXPORT
 void PackFile_Constant_destroy(SHIM_INTERP,
@@ -553,12 +563,11 @@ PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const opcode_t * PackFile_ConstTable_unpack(PARROT_INTERP,
-    ARGOUT(PackFile_Segment *seg),
+    ARGIN(PackFile_Segment *seg),
     ARGIN(const opcode_t *cursor))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__nonnull__(3)
-        FUNC_MODIFIES(*seg);
+        __attribute__nonnull__(3);
 
 PARROT_EXPORT
 void PackFile_destroy(PARROT_INTERP, ARGMOD_NULLOK(PackFile *pf))
@@ -606,7 +615,7 @@ void PackFile_FixupTable_new_entry(PARROT_INTERP,
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
-INTVAL PackFile_funcs_register(SHIM_INTERP,
+void PackFile_funcs_register(SHIM_INTERP,
     ARGOUT(PackFile *pf),
     UINTVAL type,
     const PackFile_funcs funcs)
@@ -742,6 +751,10 @@ void Parrot_load_bytecode(PARROT_INTERP, ARGIN_NULLOK(STRING *file_str))
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
+void Parrot_load_language(PARROT_INTERP, ARGIN_NULLOK(STRING *lang_name))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 PackFile_Debug * Parrot_new_debug_seg(PARROT_INTERP,
@@ -798,6 +811,7 @@ PMC * PackFile_Annotations_lookup(PARROT_INTERP,
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
+PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 opcode_t * PackFile_Annotations_pack(PARROT_INTERP,
     ARGIN(PackFile_Segment *seg),
@@ -807,9 +821,9 @@ opcode_t * PackFile_Annotations_pack(PARROT_INTERP,
         __attribute__nonnull__(3)
         FUNC_MODIFIES(*cursor);
 
-size_t PackFile_Annotations_packed_size(PARROT_INTERP,
+PARROT_WARN_UNUSED_RESULT
+size_t PackFile_Annotations_packed_size(SHIM_INTERP,
     ARGIN(PackFile_Segment *seg))
-        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_CANNOT_RETURN_NULL
@@ -836,11 +850,8 @@ void Parrot_trace_eprintf(ARGIN(const char *s), ...)
     || PARROT_ASSERT_ARG(self)
 #define ASSERT_ARGS_PackFile_Annotations_add_group \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(self)
-#define ASSERT_ARGS_PackFile_Annotations_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pf)
+       PARROT_ASSERT_ARG(self)
+#define ASSERT_ARGS_PackFile_Annotations_new __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_PackFile_Constant_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_PackFile_Constant_new __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_PackFile_Constant_pack_size __attribute__unused__ int _ASSERT_ARGS_CHECK = \
@@ -935,6 +946,8 @@ void Parrot_trace_eprintf(ARGIN(const char *s), ...)
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_load_bytecode __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_load_language __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_new_debug_seg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(cs)
@@ -965,8 +978,7 @@ void Parrot_trace_eprintf(ARGIN(const char *s), ...)
     || PARROT_ASSERT_ARG(cursor)
 #define ASSERT_ARGS_PackFile_Annotations_packed_size \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(seg)
+       PARROT_ASSERT_ARG(seg)
 #define ASSERT_ARGS_PackFile_Annotations_unpack __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(seg) \

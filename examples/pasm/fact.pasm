@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: fact.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: fact.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -29,12 +29,12 @@ of the now missing C<clonei>.
 main:
 	set 	I1,0
 	## P9 is used as a stack for temporaries.
-	new     P9, 'ResizableIntegerArray'
+	new	P9, 'ResizableIntegerArray'
 loop:
 	print	"fact of "
 	print	I1
 	print	" is: "
-    new P0, 'Integer'
+	new P0, 'Integer'
 	set	P0,I1
 	bsr	fact
 	print	P0
@@ -54,8 +54,14 @@ fact:
 	dec	P0
 	bsr	fact
 	mul	P0,P0,I2
-	pop     I2,P9
+	pop	I2,P9
 	ret
 is_one:
 	set	P0,1
 	ret
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

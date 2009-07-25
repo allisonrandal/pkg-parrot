@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id: CGoto.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: CGoto.pm 39868 2009-07-02 19:32:17Z cotto $
 
 =head1 NAME
 
@@ -62,7 +62,9 @@ Returns the C C<#define> macros required by the ops.
 =cut
 
 sub defines {
+    my $type = __PACKAGE__;
     return <<END;
+/* defines - $0 -> $type */
 #undef CONST
 #define REL_PC     ((size_t)(cur_opcode - (opcode_t*)interp->code->base.data))
 #define CUR_OPCODE cur_opcode
@@ -366,8 +368,6 @@ END_C
 =item C<Parrot::OpTrans::CPrederef>
 
 =item C<Parrot::OpTrans::CSwitch>
-
-=item C<Parrot::OpTrans::Compiled>
 
 =back
 

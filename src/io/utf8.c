@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, Parrot Foundation.
-$Id: utf8.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: utf8.c 38654 2009-05-09 20:02:23Z whiteknight $
 
 =head1 NAME
 
@@ -33,7 +33,8 @@ representation.
 
 /*
 
-=item C<size_t Parrot_io_read_utf8>
+=item C<size_t Parrot_io_read_utf8(PARROT_INTERP, PMC *filehandle, STRING
+**buf)>
 
 Read a string from a filehandle in UTF-8 format and convert it to a Parrot
 string.
@@ -99,7 +100,7 @@ ok:
 
 /*
 
-=item C<size_t Parrot_io_write_utf8>
+=item C<size_t Parrot_io_write_utf8(PARROT_INTERP, PMC *filehandle, STRING *s)>
 
 Write a Parrot string to a filehandle in UTF-8 format.
 
@@ -118,7 +119,7 @@ Parrot_io_write_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle),
         return Parrot_io_write_buffer(interp, filehandle, s);
 
     dest = Parrot_utf8_encoding_ptr->to_encoding(interp, s,
-            new_string_header(interp, 0));
+            Parrot_gc_new_string_header(interp, 0));
     return Parrot_io_write_buffer(interp, filehandle, dest);
 }
 

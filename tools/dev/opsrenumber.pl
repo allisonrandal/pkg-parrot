@@ -1,12 +1,11 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: opsrenumber.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: opsrenumber.pl 38825 2009-05-16 13:13:27Z jkeenan $
 
 use strict;
 use warnings;
 
 use lib 'lib';
-use Parrot::Config qw( %PConfig );
 use Parrot::OpsRenumber;
 
 my $self = Parrot::OpsRenumber->new(
@@ -21,7 +20,7 @@ my $self = Parrot::OpsRenumber->new(
 );
 
 $self->prepare_ops();
-$self->renum_op_map_file($PConfig{MAJOR});
+$self->renum_op_map_file();
 
 exit 0;
 
@@ -39,12 +38,17 @@ tools/dev/opsrenumber.pl - Renumber F<src/ops/ops.num>.
 
 This program should be used when adding or removing opcodes.
 
-This program will behave differently depending on whether Parrot has reached
-major version 1 or not.  In the current period (major version 0), all the
-opcodes except the first seven are potentially deletable and the opcodes'
-order may be rearranged.  Once a production version of Parrot has been
-released, all then existing opcodes and their numbers will be deemed
-immutable, though new opcodes may be added at the end of the list.
+All opcodes except the first seven are potentially deletable and the opcodes'
+order may be rearranged.  However, in and after Parrot 1.0.0, deletion of
+opcodes should be a rare event.  The program will automatically detect which
+opcodes have been deleted and will renumber the remaining codes appropriately.
+
+The program, however, will B<not> automatically detect new opcodes.   This is
+a feature, not a bug, as it is intended to require someone to think about why
+new opcodes should be added.  Once a decision to add new opcodes has been
+made, those opcodes should be entered manually at the endc of
+F<src/ops/ops.num>, then F<tools/dev/opsrenumber.pl> (or F<make opsrenumber>)
+should be run.
 
 =head1 SEE ALSO
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Smoke.pm 37183 2009-03-07 20:50:30Z rurban $
+# $Id: Smoke.pm 38498 2009-05-06 00:59:52Z jkeenan $
 
 =head1 NAME
 
@@ -131,6 +131,7 @@ sub send_archive_to_smolder {
             password     => $SMOLDER_CONFIG{password},
             tags         => $tags,
             report_file  => $report_file,
+            revision     => $PConfig{revision},
         ]
     );
 
@@ -191,7 +192,6 @@ sub collect_test_environment_data {
         'Optimize'     => ($PConfig{optimize} || 'none'),
         'Perl Version' => (sprintf('%vd', $^V) . " $PConfig{archname}"),
         'Platform'     => $PConfig{osname},
-        'SVN Revision' => $PConfig{revision},
         'Version'      => $PConfig{VERSION},
         'Submitter'    => $ENV{"SMOLDER_SUBMITTER"} || "$me\@$domain"
     );

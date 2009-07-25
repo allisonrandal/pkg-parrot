@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: pmc2c.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: pmc2c.t 39159 2009-05-24 18:08:15Z NotFound $
 
 =head1 NAME
 
@@ -28,7 +28,7 @@ use lib qw( . lib ../lib ../../lib );
 
 use Fatal qw{open close};
 use Test::More;
-use Parrot::Test tests => 11;
+use Parrot::Test tests => 13;
 use Parrot::Config;
 
 my $pmc2c = join $PConfig{slash}, qw(. tools build pmc2c.pl);
@@ -87,6 +87,8 @@ END_PMC
 #include "a.str"
 END_C
 
+TODO: {
+    local $TODO = "needs fixing after vtinit merge";
 pmc2c_output_like( <<'END_PMC', <<'END_C', 'class initialization' );
 pmclass a { }
 END_PMC
@@ -97,6 +99,7 @@ Parrot_a_class_init(PARROT_INTERP, int entry, int pass)
         "";
     const VTABLE temp_base_vtable = {
 END_C
+}
 
 pmc2c_output_like( <<'END_PMC', <<'END_C', 'comment passthrough' );
 pmclass a { }
@@ -121,6 +124,9 @@ Documentation
 =cut
 END_C
 
+TODO: {
+    local $TODO = 'needs fixing after vtinit merge';
+
 pmc2c_output_like( <<'END_PMC', <<'END_C', 'provides' );
 pmclass a provides nothing { }
 END_PMC
@@ -137,11 +143,13 @@ END_PMC
         0|VTABLE_PMC_NEEDS_EXT|VTABLE_IS_READONLY_FLAG, /* flags */
 END_C
 
+}
+
+
 pmc2c_output_like( <<'END_PMC', <<'END_C', 'maps' );
 pmclass a hll dale maps Integer { }
 END_PMC
-            const INTVAL pmc_id = Parrot_get_HLL_id( interp, CONST_STRING_GEN(interp, "dale")
-            );
+            const INTVAL pmc_id = Parrot_get_HLL_id( interp, CONST_STRING_GEN(interp, "dale"));
             if (pmc_id > 0) {
                 Parrot_register_HLL_type( interp, pmc_id, enum_class_Integer, entry);
             }
@@ -150,8 +158,7 @@ END_C
 pmc2c_output_like( <<'END_PMC', <<'END_C', 'maps, more than one.' );
 pmclass a hll dale maps Integer maps Float { }
 END_PMC
-            const INTVAL pmc_id = Parrot_get_HLL_id( interp, CONST_STRING_GEN(interp, "dale")
-            );
+            const INTVAL pmc_id = Parrot_get_HLL_id( interp, CONST_STRING_GEN(interp, "dale"));
             if (pmc_id > 0) {
                 Parrot_register_HLL_type( interp, pmc_id, enum_class_Float, entry);
                 Parrot_register_HLL_type( interp, pmc_id, enum_class_Integer, entry);
@@ -180,6 +187,53 @@ END_PMC
 Parrot_a_init(PARROT_INTERP, PMC *pmc)
 {
 #line 4
+END_C
+
+# test attr/comment line numbering
+pmc2c_output_like( <<'END_PMC', <<'END_C', 'line+pod' );
+pmclass a {
+    ATTR int foo;
+
+    /* Comment comment comment.
+     * Blah blah blah.
+     */
+
+    VTABLE void init() {
+        Parrot_a_attributes * attrs =
+                mem_allocate_zeroed_typed(Parrot_a_attributes);
+
+        attrs->hash = pmc_new(interp, enum_class_Hash);
+
+        PMC_data(SELF) = attrs;
+    }
+}
+END_PMC
+static  void 
+Parrot_a_init(PARROT_INTERP, PMC *pmc)
+{
+#line 8
+END_C
+
+# test EOF/coda line numbering
+# Note: We can't test the whole thing, as the filename component varies
+pmc2c_output_like( <<'END_PMC', <<'END_C', 'line+pod' );
+pmclass a {
+    ATTR int foo;
+
+    /* Comment comment comment.
+     * Blah blah blah.
+     */
+
+    VTABLE void init() {
+        PMC_data(SELF) = NULL;
+    }
+
+}
+
+/* foo bar */
+END_PMC
+} /* Parrot_a_class_init */
+#line 11
 END_C
 
 # Local Variables:

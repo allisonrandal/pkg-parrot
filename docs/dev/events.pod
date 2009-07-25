@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: events.pod 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: events.pod 39944 2009-07-08 02:48:40Z coke $
 
 =head1 NAME
 
@@ -31,8 +31,7 @@ responsible for signal and IO related events.
 =head2 Events
 
 Events can be either timed (they are due after some elapsed time) or untimed.
-For the former there is one API call: B<Parrot_new_timer_event>, used by the
-F<src/dynoplibs/myops.ops>:B<alarm> opcode for testing.
+For the former there is one API call: B<Parrot_new_timer_event>
 
 =head2 The B<event_thread>
 

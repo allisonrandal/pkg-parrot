@@ -1,7 +1,7 @@
 #! perl
 
-# Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: past.t 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: past.t 40100 2009-07-15 13:15:25Z bacek $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ foreach my $name (qw(Node Val Var Op Block Stmts)) {
     my $code   = <<'CODE'
 .sub _main :main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     .local pmc node2
 CODE
@@ -48,10 +48,15 @@ OUT
 
 }
 
+# Next tests marked as "skip" instead of "todo" to prevent false-positives in case
+# when Hash keys order occationally can be same as in test.
+SKIP: {
+skip('Hash keys order dependency', 4);
+
 pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Val node in visual format' );
 .sub _main :main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     node = new ['PAST';'Val']
     node.'value'(1)
@@ -78,7 +83,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Var node in visual format' );
 .sub _main :main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     node = new ['PAST';'Var']
     node.'scope'('foo')
@@ -98,7 +103,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Op node in visual format' );
 .sub _main :main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     node = new ['PAST';'Op']
     node.'pasttype'('pirop')
@@ -120,7 +125,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Block node in visual format' );
 .sub _main :main
     load_bytecode 'PCT.pbc'
-    load_bytecode 'library/dumper.pbc'
+    load_bytecode 'dumper.pbc'
     .local pmc node
     node = new ['PAST';'Block']
     node.'blocktype'('declaration')
@@ -132,6 +137,8 @@ CODE
     <blocktype> => "declaration"
 }
 OUT
+
+}
 
 # Local Variables:
 #   mode: cperl

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: OpsFile.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: OpsFile.pm 40059 2009-07-13 18:13:30Z cotto $
 
 =head1 NAME
 
@@ -85,9 +85,9 @@ suitable ops for a Parrot safe mode.
 
 =item 2 behavior
 
-The presence (or absence) of certain flags will change how the op
-behaviors. For example, the lack of the C<flow> flag will cause the
-op to be implicitly terminated with C<goto NEXT()>. (See next section).
+The presence (or absence) of certain flags will change how the op behaves. For
+example, the lack of the C<flow> flag will cause the op to be implicitly
+terminated with C<goto NEXT()>. (See next section).
 
 The :deprecated flag will generate a diagnostic to standard error at
 runtime when a deprecated opcode is invoked and
@@ -518,8 +518,8 @@ END_CODE
         #
         #   HALT()             {{=0}}   PC' = 0       Halts run_ops loop, no resume
         #
-        #   restart OFFSET(X)  {{=0,+=X}}   PC' = 0       Restarts at PC + X
-        #   restart NEXT()     {{=0,+=S}}   PC' = 0       Restarts at PC + S
+        #   restart OFFSET(X)  {{=0,+=X}}   PC' = 0   Restarts at PC + X
+        #   restart NEXT()     {{=0,+=S}}   PC' = 0   Restarts at PC + S
         #
         #   $X                 {{@X}}   Argument X    $0 is opcode, $1 is first arg
         #
@@ -535,25 +535,26 @@ END_CODE
         # with labels, etc.).
         #
 
-        $branch   ||= $body =~ s/\bgoto\s+OFFSET\(\( (.*?) \)\)/{{+=$1}}/mg;
         $absolute ||= $body =~ s/\bgoto\s+ADDRESS\(\( (.*?) \)\)/{{=$1}}/mg;
-        $body =~ s/\bexpr\s+OFFSET\(\( (.*?) \)\)/{{^+$1}}/mg;
-        $body =~ s/\bexpr\s+ADDRESS\(\( (.*?) \)\)/{{^$1}}/mg;
-        $body =~ s/\bOP_SIZE\b/{{^$op_size}}/mg;
-
-        $branch ||= $body =~ s/\bgoto\s+OFFSET\((.*?)\)/{{+=$1}}/mg;
-        $body =~ s/\bgoto\s+NEXT\(\)/{{+=$op_size}}/mg;
+                      $body =~ s/\bexpr\s+ADDRESS\(\( (.*?) \)\)/{{^$1}}/mg;
         $absolute ||= $body =~ s/\bgoto\s+ADDRESS\((.*?)\)/{{=$1}}/mg;
+                      $body =~ s/\bexpr\s+ADDRESS\((.*?)\)/{{^$1}}/mg;
+
+        $branch   ||= $short_name =~ /runinterp/;
+        $branch   ||= $body =~ s/\bgoto\s+OFFSET\(\( (.*?) \)\)/{{+=$1}}/mg;
+                      $body =~ s/\bexpr\s+OFFSET\(\( (.*?) \)\)/{{^+$1}}/mg;
+        $branch   ||= $body =~ s/\bgoto\s+OFFSET\((.*?)\)/{{+=$1}}/mg;
+                      $body =~ s/\bexpr\s+OFFSET\((.*?)\)/{{^+$1}}/mg;
+
         $pop      ||= $body =~ s/\bgoto\s+POP\(\)/{{=*}}/mg;
-        $body =~ s/\bexpr\s+OFFSET\((.*?)\)/{{^+$1}}/mg;
-        $next ||= $body =~ s/\bexpr\s+NEXT\(\)/{{^+$op_size}}/mg;
-        $body =~ s/\bexpr\s+ADDRESS\((.*?)\)/{{^$1}}/mg;
-        $body =~ s/\bexpr\s+POP\(\)/{{^*}}/mg;
+                      $body =~ s/\bexpr\s+POP\(\)/{{^*}}/mg;
+
+        $next     ||= $short_name =~ /runinterp/;
+        $next     ||= $body =~ s/\bexpr\s+NEXT\(\)/{{^+$op_size}}/mg;
+                      $body =~ s/\bgoto\s+NEXT\(\)/{{+=$op_size}}/mg;
 
         $body =~ s/\bHALT\(\)/{{=0}}/mg;
-
-        $branch ||= $short_name =~ /runinterp/;
-        $next   ||= $short_name =~ /runinterp/;
+        $body =~ s/\bOP_SIZE\b/{{^$op_size}}/mg;
 
         if ( $body =~ s/\brestart\s+OFFSET\((.*?)\)/{{=0,+=$1}}/mg ) {
             $branch  = 1;
@@ -577,7 +578,7 @@ END_CODE
         my $max_arg_num = @$args;
         my @found_args = ($body =~ m/{{@(\d+)}}/g);
         foreach my $arg (@found_args) {
-          die "opcode '$short_name' uses '\$$arg' but only has $max_arg_num parameters.\n" if $arg > $max_arg_num;
+            die "opcode '$short_name' uses '\$$arg' but only has $max_arg_num parameters.\n" if $arg > $max_arg_num;
         }
 
 
@@ -586,17 +587,18 @@ END_CODE
         $op->body( $nolines ? $body : qq{#line $line "$file_escaped"\n$body} );
 
         # Constants here are defined in include/parrot/op.h
-        or_flag( \$jumps, "PARROT_JUMP_RELATIVE" ) if $branch;
         or_flag( \$jumps, "PARROT_JUMP_ADDRESS"  ) if $absolute;
+        or_flag( \$jumps, "PARROT_JUMP_RELATIVE" ) if $branch;
         or_flag( \$jumps, "PARROT_JUMP_POP"      ) if $pop;
         or_flag( \$jumps, "PARROT_JUMP_ENEXT"    ) if $next;
+        or_flag( \$jumps, "PARROT_JUMP_RESTART"  ) if $restart;
 
         # I'm assuming the op branches to the value in the last argument.
-        or_flag( \$jumps, "PARROT_JUMP_GNEXT" )
-            if ( ($jumps)
+        if ( ($jumps)
             && ( $fixedargs[ @fixedargs - 1 ] )
-            && ( $fixedargs[ @fixedargs - 1 ] eq 'i' ) );
-        or_flag( \$jumps, "PARROT_JUMP_RESTART" ) if ($restart);
+            && ( $fixedargs[ @fixedargs - 1 ] eq 'i' ) ) {
+            or_flag( \$jumps, "PARROT_JUMP_GNEXT" );
+        }
 
         $op->jump($jumps);
         $self->push_op($op);

@@ -1,5 +1,5 @@
 
-# $Id: Sprite.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Sprite.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ SDL::Sprite - Parrot class representing sprites in Parrot SDL
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/SDL/Sprite.pir'
+    load_bytecode 'SDL/Sprite.pir'
 
     # ... load a new SDL::Image into image
 

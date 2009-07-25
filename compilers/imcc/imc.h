@@ -1,9 +1,9 @@
 /*
- * $Id: imc.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: imc.h 39837 2009-06-30 04:30:24Z petdance $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
-/* $Id: imc.h 37201 2009-03-08 12:07:48Z fperrad $ */
+/* $Id: imc.h 39837 2009-06-30 04:30:24Z petdance $ */
 
 #ifndef PARROT_IMCC_IMC_H_GUARD
 #define PARROT_IMCC_IMC_H_GUARD
@@ -27,20 +27,18 @@
 
 /* For people without unistd.h to compile Flex lexer
  * unistd.h probably isn't required on most if any
- * platforms anyway.
- */
+ * platforms anyway.  */
 #ifndef PARROT_HAS_HEADER_UNISTD
 #  define YY_NO_UNISTD_H 1
 #endif
 
 #define IMCC_MAX_FIX_REGS PARROT_MAX_ARGS
 #if IMCC_MAX_FIX_REGS > 16
- #  error: flags wont fit
+#  error: flags wont fit
 #endif
 
-/* IMCC reserves this character for internally generated labels
- * and identifiers that won't collide with high level compiler generated names.
- */
+/* IMCC reserves this character for internally generated labels and identifiers
+ * that won't collide with high level compiler generated names.  */
 #define IMCC_INTERNAL_CHAR '@'
 
 typedef struct _IMC_Unit IMC_Unit;
@@ -66,6 +64,7 @@ typedef struct _IMC_Unit IMC_Unit;
 /* HEADERIZER BEGIN: compilers/imcc/imcc.y */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
+PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 Instruction * IMCC_create_itcall_label(PARROT_INTERP)
         __attribute__nonnull__(1);
@@ -74,6 +73,7 @@ void IMCC_itcall_sub(PARROT_INTERP, ARGIN(SymReg *sub))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
+PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 Instruction * INS_LABEL(PARROT_INTERP,
     ARGMOD_NULLOK(IMC_Unit *unit),
@@ -150,6 +150,7 @@ void graph_coloring_reg_alloc(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*unit);
 
+PARROT_WARN_UNUSED_RESULT
 unsigned int ig_test(int i, int j, int N, ARGIN(unsigned int *graph))
         __attribute__nonnull__(4);
 
@@ -295,13 +296,16 @@ PMC * IMCC_compile_pir_s(PARROT_INTERP,
         __attribute__nonnull__(3)
         FUNC_MODIFIES(*error_message);
 
-int imcc_vfprintf(PARROT_INTERP,
-    ARGIN(PMC *io),
+PARROT_IGNORABLE_RESULT
+int /*@alt void@*/
+imcc_vfprintf(PARROT_INTERP,
+    ARGMOD(PMC *io),
     ARGIN(const char *format),
     va_list ap)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__nonnull__(3);
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*io);
 
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
@@ -527,9 +531,8 @@ struct nodeType_t;
 struct parser_state_t {
     struct parser_state_t *next;
     Interp                *interp;
-    const char            *file;
+    char                  *file;
     FILE                  *handle;
-    int                    file_needs_free; /* is *file malloced? */
     int                    line;
     int                    pasm_file;       /* pasm_file mode of this frame */
 };
@@ -594,7 +597,7 @@ typedef struct _imc_info_t {
     /* some values that were global... */
     SymReg               *cur_call;
     SymReg               *cur_obj;
-    const char           *adv_named_id;
+    SymReg               *adv_named_id;
 
     /* Lex globals */
     char                 *heredoc_end;

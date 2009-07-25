@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: lexpad.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: lexpad.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ Tests the LexPad PMC.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
     plan(1)
 
     new_test()

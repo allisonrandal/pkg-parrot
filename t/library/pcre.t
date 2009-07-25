@@ -1,10 +1,11 @@
 #!perl
-# Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pcre.t 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: pcre.t 40111 2009-07-15 22:14:37Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Test tests => 1;
 
@@ -26,28 +27,29 @@ the installed PCRE library, and matches patterns successfully.
 # if we keep pcre, we need a config test
 my $cmd = ( $^O =~ /MSWin32/ ) ? "pcregrep --version" : "pcre-config --version";
 my $has_pcre = !Parrot::Test::run_command( $cmd, STDERR => File::Spec->devnull, );
-my $pcre_libpath = "";
+my $pcre_libpath = '';
 
 # It's possible that libpcre is installed in some non-standard path...
 if ($has_pcre && ($^O !~ /MSWin32/)) {
     # Extract the library path for non-windows platforms (in case it isn't in
     # the normal lookup locations)
-    my $outfile = "pcre-config.out";
-    Parrot::Test::run_command("pcre-config --prefix", STDOUT => $outfile);
+    my $outfile = 'pcre-config.out';
+    Parrot::Test::run_command('pcre-config --prefix', STDOUT => $outfile);
     my $out = Parrot::Test::slurp_file($outfile);
     unlink $outfile;
     chomp $out;
-    $pcre_libpath="$out/lib";
+    $pcre_libpath = "$out/lib";
 }
 
 SKIP: {
-    skip( "no pcre-config", Test::Builder->new()->expected_tests() )
+    skip( 'no pcre-config', Test::Builder->new()->expected_tests() )
         unless $has_pcre;
 
 ## 1
     pir_output_is( <<"CODE", <<'OUT', 'soup to nuts' );
 
 .include 'iglobals.pasm'
+.include 'libpaths.pasm'
 
 .sub main :main
     .local pmc interp
@@ -56,15 +58,13 @@ SKIP: {
     .local pmc lib_paths
     lib_paths = interp[.IGLOBALS_LIB_PATHS]
 
-    # XXX - hard-coded magic constant (should be PARROT_LIB_PATH_DYNEXT)
-    .local pmc include_paths
-    include_paths = lib_paths[2]
-    unshift include_paths, '$pcre_libpath'
+    .local pmc dynext_path
+    dynext_path = lib_paths[.PARROT_LIB_PATH_DYNEXT]
+    unshift dynext_path, '$pcre_libpath'
 
-    load_bytecode "library/pcre.pir"
+    load_bytecode 'pcre.pbc'
     .local pmc func
     .local pmc lib
-
 
     get_global func, ['PCRE'], 'init'
     if_null func, NOK1
@@ -72,15 +72,15 @@ SKIP: {
 NOK1:
     print 'not '
 OK1:
-    say "ok 1"
+    say 'ok 1'
 
-    lib= func()
+    lib = func()
     if_null lib, NOK2
     branch OK2
 NOK2:
     print 'not '
 OK2:
-    say "ok 2"
+    say 'ok 2'
 
 
     .local string s
@@ -101,7 +101,7 @@ OK2:
     if is_code_defined goto OK3
     print 'not '
 OK3:
-    say "ok 3"
+    say 'ok 3'
 
     .local int ok
     .local pmc result
@@ -112,18 +112,18 @@ OK3:
     unless ok < 0 goto OK4
     print 'not '
 OK4:
-    say "ok 4"
+    say 'ok 4'
 
     .local int i
-    i= 0
+    i = 0
     .local string match
 
-    func= get_global ['PCRE'], 'dollar'
-    match= func( s, ok, result, i )
+    func = get_global ['PCRE'], 'dollar'
+    match = func( s, ok, result, i )
     if 'a' == match goto OK5
     print 'not '
 OK5:
-    say "ok 5"
+    say 'ok 5'
 
 .end
 CODE

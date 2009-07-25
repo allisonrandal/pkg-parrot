@@ -1,4 +1,4 @@
-# $Id: Base64.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: Base64.pir 39631 2009-06-17 20:30:30Z NotFound $
 
 =head1 NAME
 
@@ -200,7 +200,7 @@ then a warning is generated if perl is running under -w.
     goto START_5
     END_5:
 
-    .local int len, len_mod_4
+    .local int len_mod_4
     len = length base64_cleaned
     len_mod_4 = len % 4
 
