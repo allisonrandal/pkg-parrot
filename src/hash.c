@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: hash.c 40107 2009-07-15 15:06:53Z NotFound $
+$Id: hash.c 40983 2009-09-05 01:05:05Z cotto $
 
 =head1 NAME
 
@@ -206,7 +206,7 @@ STRING_compare(PARROT_INTERP, ARGIN(const void *search_key), ARGIN_NULLOK(const 
         return 1;
 
     /* COWed strings */
-    if (s1->strstart == s2->strstart && s1->bufused == s2->bufused)
+    if (Buffer_bufstart(s1) == Buffer_bufstart(s2) && s1->bufused == s2->bufused)
         return 0;
 
     return CHARSET_COMPARE(interp, s1, s2);
@@ -769,7 +769,7 @@ expand_hash(PARROT_INTERP, ARGMOD(Hash *hash))
     hash->mask = new_size - 1;
 
     /* clear freshly allocated bucket index */
-    memset(new_bi + old_size, 0, sizeof (HashBucket *) * (new_size - old_size));
+    memset(new_bi + old_size, 0, sizeof (HashBucket *) * old_size);
 
     /*
      * reloc pointers - this part would be also needed, if we
@@ -838,26 +838,6 @@ parrot_new_hash(PARROT_INTERP)
             Hash_key_type_STRING,
             STRING_compare,
             (hash_hash_key_fn)key_hash_STRING);
-}
-
-
-/*
-
-=item C<void parrot_new_pmc_hash(PARROT_INTERP, PMC *container)>
-
-Creates a new Parrot STRING hash in C<container>.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-void
-parrot_new_pmc_hash(PARROT_INTERP, ARGOUT(PMC *container))
-{
-    ASSERT_ARGS(parrot_new_pmc_hash)
-    Hash * const hash = parrot_new_hash(interp);
-    VTABLE_set_pointer(interp, container, hash);
 }
 
 

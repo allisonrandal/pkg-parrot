@@ -1,5 +1,5 @@
 #! perl -pi.bak
-# $Id: vtablize.pl 36833 2009-02-17 20:09:26Z allison $
+# $Id: vtablize.pl 40193 2009-07-21 13:11:18Z bacek $
 # Copyright (C) 2008-2009, Parrot Foundation.
 
 =head1 NAME
@@ -243,9 +243,6 @@ s/^(\s*)(INTVAL\s+defined_keyed_str\(STRING\s+\*\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+delete_keyed\(PMC\s+\*\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+delete_keyed_int\(INTVAL\s+\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+delete_keyed_str\(STRING\s+\*\w*\)\s+{)/$1VTABLE $2/;
-s/^(\s*)(PMC\s+\*nextkey_keyed\(PMC\s+\*\w*,\s+INTVAL\s+\w*\)\s+{)/$1VTABLE $2/;
-s/^(\s*)(PMC\s+\*nextkey_keyed_int\(INTVAL\s+\w*,\s+INTVAL\s+\w*\)\s+{)/$1VTABLE $2/;
-s/^(\s*)(PMC\s+\*nextkey_keyed_str\(STRING\s+\*\w*,\s+INTVAL\s+\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(PMC\s+\*get_iter\(\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(opcode_t\s+\*invoke\(void\s+\*\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(INTVAL\s+can\(STRING\s+\*\w*\)\s+{)/$1VTABLE $2/;

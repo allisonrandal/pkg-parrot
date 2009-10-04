@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pmc2c.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pmc2c.pl 41209 2009-09-11 14:14:07Z coke $
 
 use strict;
 use warnings;
@@ -86,8 +86,8 @@ Create F<src/pmc/foo.c> and C<pmc_foo.h> from F<src/pmc/foo.dump>:
 
 =head2 Other Options
 
-Create fooX.c and pmc_fooX.h from fooX.dump files, also create libfoo.c
-containing the initialization function for all fooX PMCs.
+Create foo.c and pmc_foo.h from foo.dump files, also create libfoo.c
+containing the initialization function for all foo PMCs.
 
     % perl tools/build/pmc2c.pl --library libfoo -c \
            src/pmc/foo1.pmc src/pmc/foo2.pmc ...
@@ -116,6 +116,11 @@ F<pmc_E<lt>libnameE<gt>.h>. The initialization function will be named
 after libname and will initialize all PMCs in the library.
 
 =back
+
+=head1 NOTES
+
+You must use lowercase filenames for C<.pmc> files, and lowercase group
+names in the PMC specification in those files.
 
 =cut
 

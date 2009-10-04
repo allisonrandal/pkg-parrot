@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: key.t 38387 2009-04-28 08:16:26Z chromatic $
+# $Id: key.t 40506 2009-08-13 01:38:06Z allison $
 
 =head1 NAME
 
@@ -169,7 +169,6 @@ code
 .namespace []
 
 .sub prepare_lib :init
-  load_bytecode 'PGE.pbc'
   $P0 = get_class 'Sub'
   $P1 = subclass $P0, 'TclProc'
   $P1 = new ['ResizablePMCArray']

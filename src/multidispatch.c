@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2009, Parrot Foundation.
-$Id: multidispatch.c 39986 2009-07-11 02:16:56Z petdance $
+$Id: multidispatch.c 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -816,8 +816,8 @@ Parrot_mmd_get_cached_multi_sig(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 {
     ASSERT_ARGS(Parrot_mmd_get_cached_multi_sig)
     if (VTABLE_isa(interp, sub_pmc, CONST_STRING(interp, "Sub"))) {
-        Parrot_sub *sub;
-        PMC        *multi_sig;
+        Parrot_Sub_attributes *sub;
+        PMC                   *multi_sig;
 
         PMC_get_sub(interp, sub_pmc, sub);
         multi_sig = sub->multi_signature;
@@ -856,7 +856,7 @@ mmd_distance(PARROT_INTERP, ARGIN(PMC *pmc), ARGIN(PMC *arg_tuple))
 {
     ASSERT_ARGS(mmd_distance)
     PMC        *multi_sig, *mro;
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     INTVAL      args, dist, i, j, n, m;
 
     /* has to be a builtin multi method */
@@ -1229,7 +1229,8 @@ mmd_add_multi_to_namespace(PARROT_INTERP, ARGIN(STRING *ns_name),
 {
     ASSERT_ARGS(mmd_add_multi_to_namespace)
     PMC * const hll_ns = VTABLE_get_pmc_keyed_int(interp,
-                        interp->HLL_namespace, CONTEXT(interp)->current_HLL);
+                        interp->HLL_namespace,
+                        Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
     PMC * const ns     = Parrot_make_namespace_keyed_str(interp, hll_ns, ns_name);
     PMC        *multi_sub = Parrot_get_global(interp, ns, sub_name);
 
@@ -1261,7 +1262,7 @@ Parrot_mmd_add_multi_from_long_sig(PARROT_INTERP,
         ARGIN(STRING *sub_name), ARGIN(STRING *long_sig), ARGIN(PMC *sub_obj))
 {
     ASSERT_ARGS(Parrot_mmd_add_multi_from_long_sig)
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     STRING     *sub_str     = CONST_STRING(interp, "Sub");
     STRING     *closure_str = CONST_STRING(interp, "Closure");
     PMC        *type_list   = Parrot_str_split(interp, CONST_STRING(interp, ","), long_sig);

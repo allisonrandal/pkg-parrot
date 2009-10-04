@@ -1,12 +1,12 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: jit.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: jit.t 40268 2009-07-25 19:53:04Z whiteknight $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 62;
+use Parrot::Test tests => 61;
 
 =head1 NAME
 
@@ -876,13 +876,14 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "2 non jit, non JITed branch to JIT" );
         set I0, 42
         print I0
         print "\n"
-        bsr sub
+        new P0, 'ResizableIntegerArray'
+        local_branch P0, sub
         end
 sub:
         set I0, 43
         print I0
         print "\n"
-        ret
+        local_return P0
 CODE
 42
 43
@@ -907,11 +908,12 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "2 non jit, non JITed branch to non JIT" )
         set I0, 42
         print I0
         print "\n"
-        bsr sub
+        new P0, 'ResizableIntegerArray'
+        local_branch P0, sub
         end
 sub:
         print "ok\n"
-        ret
+        local_return P0
 CODE
 42
 ok
@@ -927,19 +929,6 @@ FOO:   print "Jump succeeded\n"
        end
 CODE
 Jump succeeded
-OUTPUT
-
-pasm_output_is( <<'CODE', <<'OUTPUT', "jsr" );
-     set_addr I1, FOO
-     jsr I1
-     print "and back again\n"
-     end
-
-FOO: print "There "
-     ret
-
-CODE
-There and back again
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "last is branch" );

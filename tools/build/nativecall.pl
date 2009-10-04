@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: nativecall.pl 40181 2009-07-21 02:57:11Z chromatic $
+# $Id: nativecall.pl 41251 2009-09-13 16:40:46Z NotFound $
 
 =head1 NAME
 
@@ -370,7 +370,7 @@ sub make_arg {
     /p/ && do {
         push @{$temps_ref},          "PMC *t_$temp_num;";
         push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_P($reg_num);";
-        return "VTABLE_get_pointer(interp, t_$temp_num)";
+        return "(PMC_IS_NULL(t_$temp_num) ? NULL : VTABLE_get_pointer(interp, t_$temp_num))";
     };
     /V/ && do {
         push @{$temps_ref},          "PMC *t_$temp_num;";
@@ -405,7 +405,7 @@ sub make_arg {
     /b/ && do {
         push @{$temps_ref},          "STRING *t_$temp_num;";
         push @{$extra_preamble_ref}, "t_$temp_num = GET_NCI_S($reg_num);";
-        return "PObj_bufstart(t_$temp_num)";
+        return "Buffer_bufstart(t_$temp_num)";
     };
     /B/ && do {
         push @{$temps_ref}, "char *s_$temp_num;\n    char *t_$temp_num;\n    void** v_$temp_num = (void **) &t_$temp_num;";

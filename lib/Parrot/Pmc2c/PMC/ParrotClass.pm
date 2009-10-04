@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: ParrotClass.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: ParrotClass.pm 40193 2009-07-21 13:11:18Z bacek $
 
 =head1 Parrot::Pmc2c::ParrotClass Instance Methods
 
@@ -43,7 +43,6 @@ our @dont_delegate = qw(
     getprops
     is_same
     morph
-    nextkey_keyed_int
     set_integer_keyed_int
     set_number_keyed_int
     set_pmc_keyed_int

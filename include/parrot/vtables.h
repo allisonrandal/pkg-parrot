@@ -1,7 +1,7 @@
 /* vtables.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: vtables.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: vtables.h 40673 2009-08-20 11:05:41Z NotFound $
  *  Overview:
  *     Vtable manipulation code. Not to be confused with vtable.h
  *  Data Structure and Algorithms:
@@ -32,6 +32,10 @@ void Parrot_destroy_vtable(PARROT_INTERP, ARGMOD(VTABLE *vtable))
         FUNC_MODIFIES(*vtable);
 
 PARROT_EXPORT
+void Parrot_initialize_core_vtables(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
 PARROT_MALLOC
 PARROT_CANNOT_RETURN_NULL
 VTABLE * Parrot_new_vtable(SHIM_INTERP);
@@ -54,6 +58,9 @@ void parrot_realloc_vtables(PARROT_INTERP)
 #define ASSERT_ARGS_Parrot_destroy_vtable __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(vtable)
+#define ASSERT_ARGS_Parrot_initialize_core_vtables \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_new_vtable __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_mark_vtables __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)

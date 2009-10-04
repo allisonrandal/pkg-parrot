@@ -1,5 +1,5 @@
 /*
- * $Id: pircompunit.c 37783 2009-03-28 00:57:38Z tene $
+ * $Id: pircompunit.c 40278 2009-07-26 10:32:35Z whiteknight $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -2476,7 +2476,6 @@ close_sub(lexer_state * const lexer) {
             case PARROT_OP_end:
             case PARROT_OP_returncc:
             case PARROT_OP_yield:
-            case PARROT_OP_ret:
             case PARROT_OP_branch_ic:
             case PARROT_OP_exit_ic:
                 need_epilogue = 0;

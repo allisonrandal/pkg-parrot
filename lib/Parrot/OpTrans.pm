@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id: OpTrans.pm 39866 2009-07-02 07:07:07Z cotto $
+# $Id: OpTrans.pm 40288 2009-07-26 22:03:33Z whiteknight $
 
 =head1 NAME
 
@@ -218,19 +218,6 @@ sub goto_offset {
     my $self = shift;
 
     return $self->gen_goto( $self->expr_offset(@_) );
-}
-
-=item C<goto_pop()>
-
-Transforms the C<goto POP($address)> macro in an ops file into the
-relevant C code.
-
-=cut
-
-sub goto_pop {
-    my ($self) = @_;
-
-    return $self->gen_goto( $self->expr_pop(@_) );
 }
 
 =item C<expr_offset($offset)>

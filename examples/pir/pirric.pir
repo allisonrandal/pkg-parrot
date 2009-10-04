@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pirric.pir 37337 2009-03-12 02:02:54Z Util $
+# $Id: pirric.pir 40200 2009-07-21 21:51:54Z bacek $
 #
 # pirric.pir
 # A rudimentary old style Basic interpreter for parrot
@@ -2452,7 +2452,7 @@ endline:
 .sub begin :method
     .local pmc text
     text = getattribute self, 'lines'
-    new $P0, 'Iterator', text
+    iter $P0, text
     set $P0, .ITERATE_FROM_START
     .return($P0)
 .end

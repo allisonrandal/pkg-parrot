@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: irix.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: irix.pm 40811 2009-08-26 04:57:21Z dukeleto $
 
 package init::hinits::irix;
 
@@ -21,7 +21,7 @@ sub runstep {
     $conf->data->set( ccflags => $ccflags );
 
     my $libs = $conf->data->get('libs');
-    if ( $libs !~ /-lpthread/ ) {
+    if ( $libs !~ /-lpthread\b/ ) {
         $libs .= ' -lpthread';
     }
     $conf->data->set( libs => $libs );

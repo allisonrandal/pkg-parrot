@@ -1,4 +1,4 @@
-# $Id: README.pod 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: README.pod 40772 2009-08-25 06:39:28Z dukeleto $
 
 =head1 NAME
 
@@ -85,11 +85,19 @@ using tabs in the pasm mode.
 =head2 TAGS file
 
 There is a script here to automatically generate a TAGS file, which works with
-Vim and other editors that recognize ctags-format files. The tool "exuberant
-ctags" is required. Run
+Vim and other editors that recognize ctags-format files. Run
 
-  make tags
+  make tags-vi
 
-in the parrot root directory to build the tags file.
+for Vim-compatible tags or
+
+  make tags-emacs
+
+for Emacs-style tags.  The tool "exuberant ctags" is required for both. There
+is also the
+
+  make tags-xemacs
+
+target which will work with older XEmacs etags (21.5*).
 
 =cut

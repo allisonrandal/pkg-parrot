@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: array.t 39453 2009-06-08 16:55:48Z barney $
+# $Id: array.t 40274 2009-07-26 04:40:36Z petdance $
 
 =head1 NAME
 
@@ -146,7 +146,7 @@ end:
 .sub defined_sub
     .local pmc foo, bar, baz
     .local int ival
-    
+
     foo = new ['Array']
     defined ival, foo
     is(ival, 1, 'newed array is defined')
@@ -218,7 +218,7 @@ end:
     .local int ival
     .local num nval
     .local string sval, inner
-   
+
     foo = new ['Array']
     foo = 4
     bar = new ['Key']
@@ -387,7 +387,7 @@ end:
 
     p = new ['Array']
     is(p, 0, 'newed array is not true correctly')
-    
+
     p = 4
     is(p, 4, 'resized array is true correctly')
 
@@ -497,4 +497,4 @@ end:
 #   cperl-indent-level: 4
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

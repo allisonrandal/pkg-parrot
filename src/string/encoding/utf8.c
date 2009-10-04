@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: utf8.c 38853 2009-05-16 23:28:14Z Infinoid $
+$Id: utf8.c 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -525,7 +525,7 @@ utf8_encode_and_advance(PARROT_INTERP, ARGMOD(String_iter *i), UINTVAL c)
 
     i->bytepos += (new_pos - pos);
     /* XXX possible buffer overrun exception? */
-    PARROT_ASSERT(i->bytepos <= PObj_buflen(s));
+    PARROT_ASSERT(i->bytepos <= Buffer_buflen(s));
     i->charpos++;
 }
 

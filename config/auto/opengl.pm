@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: opengl.pm 37202 2009-03-08 12:18:47Z rurban $
+# $Id: opengl.pm 40189 2009-07-21 12:15:55Z jkeenan $
 
 
 =head1 NAME
@@ -178,12 +178,6 @@ sub runstep {
             darwin          => '-framework OpenGL -framework GLUT',
             default         => '-lglut -lGLU -lGL',
     } );
-
-    # On OS X check the presence of the OpenGL headers in the standard
-    # Fink/macports locations.
-    # Mindlessly morphed from readline ... may need to be fixed
-    $self->_handle_darwin_for_fink    ($conf, $osname, 'GL/glut.h');
-    $self->_handle_darwin_for_macports($conf, $osname, 'GL/glut.h');
 
     $conf->cc_gen('config/auto/opengl/opengl_c.in');
     my $has_glut = 0;

@@ -1,4 +1,4 @@
-# $Id: README.pod 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: README.pod 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 Parrot Grammar Engine (PGE)
 
@@ -118,8 +118,7 @@ Perl 6 regex.  The parse tree then goes through semantic analysis
 and reduction phases before being sent to code generation to
 produce a PIR subroutine.
 
-The generated PIR code uses bsr/ret for its internal backtracking
-(optimized for tailcalls) and uses Parrot calling conventions for
+The generated PIR code uses Parrot calling conventions for
 all interfaces with external callers/callees such as subrules.
 
 PGE also uses Parrot coroutines for the matching

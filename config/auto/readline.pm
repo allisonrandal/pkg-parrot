@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: readline.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: readline.pm 41071 2009-09-06 16:53:22Z NotFound $
 
 =head1 NAME
 
@@ -49,11 +49,6 @@ sub runstep {
         default         => '-lreadline',
     } );
 
-    # On OS X check the presence of the readline header in the standard
-    # Fink/macports locations.
-    $self->_handle_darwin_for_fink($conf, $osname, 'readline/readline.h');
-    $self->_handle_darwin_for_macports($conf, $osname, q{readline/readline.h});
-
     $conf->cc_gen('config/auto/readline/readline_c.in');
     my $has_readline = 0;
     eval { $conf->cc_build( q{}, $extra_libs ) };
@@ -82,6 +77,7 @@ sub runstep {
         }
     }
     $conf->data->set( HAS_READLINE => $has_readline );
+    $self->set_result($has_readline ? 'yes' : 'no');
 
     return 1;
 }

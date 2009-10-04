@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: default.pm 38604 2009-05-08 13:25:42Z Infinoid $
+# $Id: default.pm 40350 2009-07-31 00:12:14Z NotFound $
 
 =head1 Parrot::Pmc2c::PMC::default Instance Methods
 
@@ -79,8 +79,8 @@ sub _generate_default_method {
         $param =~ s/.*\b(\w+)/$1/;
         $body .= "    UNUSED($param)\n";
     }
-    my $vt_method_name = $method->name;
-    $body .= qq{    $stub_func(interp, pmc, "$vt_method_name");\n};
+    my $vt_method_name = uc $method->name;
+    $body .= qq{    $stub_func(interp, pmc, PARROT_VTABLE_SLOT_$vt_method_name);\n};
 
     $clone->body( Parrot::Pmc2c::Emitter->text($body));
 

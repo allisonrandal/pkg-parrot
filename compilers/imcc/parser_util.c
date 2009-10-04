@@ -8,7 +8,7 @@
  *
  * parser support functions
  *
- * $Id: parser_util.c 39834 2009-06-30 03:40:29Z petdance $
+ * $Id: parser_util.c 41242 2009-09-12 21:20:12Z chromatic $
  *
  */
 
@@ -555,9 +555,7 @@ INS(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *name),
         ||  STREQ(name, "returncc"))
             ins->type |= IF_goto;
         else if (STREQ(fullname, "jump_i")
-             ||  STREQ(fullname, "jsr_i")
-             ||  STREQ(fullname, "branch_i")
-             ||  STREQ(fullname, "bsr_i"))
+             ||  STREQ(fullname, "branch_i"))
             IMCC_INFO(interp)->dont_optimize = 1;
     }
     else if (STREQ(name, "set") && n == 2) {
@@ -628,7 +626,7 @@ imcc_compile(PARROT_INTERP, ARGIN(const char *s), int pasm_file,
     struct _imc_info_t    *imc_info = NULL;
     struct parser_state_t *next;
     void                  *yyscanner;
-    Parrot_Context        *ignored;
+    PMC                   *ignored;
     INTVAL regs_used[4] = {3, 3, 3, 3};
     INTVAL eval_number;
 
@@ -695,7 +693,7 @@ imcc_compile(PARROT_INTERP, ARGIN(const char *s), int pasm_file,
     IMCC_pop_parser_state(interp, yyscanner);
 
     if (!IMCC_INFO(interp)->error_code) {
-        Parrot_sub *sub_data;
+        Parrot_Sub_attributes *sub_data;
 
         /*
          * create sub PMC
@@ -716,13 +714,14 @@ imcc_compile(PARROT_INTERP, ARGIN(const char *s), int pasm_file,
     }
 
     if (imc_info) {
+        SymReg *ns                  = IMCC_INFO(interp)->cur_namespace;
         IMCC_INFO(interp)           = imc_info->prev;
         mem_sys_free(imc_info);
         imc_info                    = IMCC_INFO(interp);
         IMCC_INFO(interp)->cur_unit = imc_info->last_unit;
 
-        if (IMCC_INFO(interp)->cur_namespace)
-            free_sym(IMCC_INFO(interp)->cur_namespace);
+        if (ns && ns != imc_info->cur_namespace)
+            free_sym(ns);
 
         IMCC_INFO(interp)->cur_namespace = imc_info->cur_namespace;
     }
@@ -871,10 +870,10 @@ imcc_compile_pir_ex(PARROT_INTERP, ARGIN(const char *s))
      * Continuations (this happens when something is the target of a :outer)
      * trying to return values using them when invoked. (See TT#500 for the
      * report of the bug this fixes). */
-    opcode_t *save_results = CONTEXT(interp)->current_results;
-    CONTEXT(interp)->current_results = NULL;
+    opcode_t *save_results = Parrot_pcc_get_results(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_results(interp, CURRENT_CONTEXT(interp), NULL);
     sub = imcc_compile(interp, s, 0, &error_message);
-    CONTEXT(interp)->current_results = save_results;
+    Parrot_pcc_set_results(interp, CURRENT_CONTEXT(interp), save_results);
 
     if (sub)
         return sub;
@@ -906,7 +905,7 @@ imcc_compile_file(PARROT_INTERP, ARGIN(const char *fullname),
     const char                *ext;
     FILE                      *fp;
     STRING                    *fs;
-    Parrot_Context            *ignored;
+    PMC                       *ignored;
 
     /* need at least 3 regs for compilation of constant math e.g.
      * add_i_ic_ic - see also IMCC_subst_constants() */

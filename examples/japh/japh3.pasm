@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: japh3.pasm 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: japh3.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 # the substr JaPH
     set S0, "Hacker\n"
@@ -10,11 +10,8 @@
     substr S3, 5,  1, S2
     substr S3, 13, 1, S1
     substr S3, 20, 1, S0
-    set I3, 3
-    bsr I3
-    end
     print S3
-    ret
+    end
 
 # Local Variables:
 #   mode: pir

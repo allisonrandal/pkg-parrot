@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: install_dev_files.pl 39228 2009-05-28 23:00:35Z jkeenan $
+# $Id: install_dev_files.pl 41137 2009-09-07 21:07:11Z japhb $
 ################################################################################
 
 =head1 TITLE
@@ -80,7 +80,7 @@ my %options = (
     srcdir      => '/usr/src/',      # parrot/ subdir added below
     versiondir  => '',
     'dry-run'   => 0,
-    packages    => 'devel|pct|tge|nqp',
+    packages    => 'devel|pct|tge|nqp|data_json',
 );
 
 my @manifests;

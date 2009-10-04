@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: packfiledirectory.t 38874 2009-05-17 19:47:52Z Infinoid $
+# $Id: packfiledirectory.t 40926 2009-09-02 13:08:09Z bacek $
 
 =head1 NAME
 
@@ -136,7 +136,7 @@ Tests the PackfileDirectory PMC.
   delete_seg:
     delete pfdir[$S0]
     dec $I0
-    $I1   = elements pfdir
+    $I1 = elements pfdir
     is($I0, $I1, "segment deleted")
 
   done:

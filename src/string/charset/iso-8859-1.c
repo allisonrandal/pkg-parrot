@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: iso-8859-1.c 38853 2009-05-16 23:28:14Z Infinoid $
+$Id: iso-8859-1.c 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -268,12 +268,12 @@ to_unicode(PARROT_INTERP, ARGIN(STRING *src), ARGMOD_NULLOK(STRING *dest))
         for (offs = 0; offs < src->strlen; ++offs) {
             const UINTVAL c = ENCODING_GET_BYTE(interp, src, offs);
 
-            if (iter.bytepos >= PObj_buflen(dest) - 4) {
+            if (iter.bytepos >= Buffer_buflen(dest) - 4) {
                 UINTVAL need = (UINTVAL)((src->strlen - offs) * 1.5);
                 if (need < 16)
                     need = 16;
                 Parrot_gc_reallocate_string_storage(interp, dest,
-                        PObj_buflen(dest) + need);
+                        Buffer_buflen(dest) + need);
             }
             iter.set_and_advance(interp, &iter, c);
         }

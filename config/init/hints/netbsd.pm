@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: netbsd.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: netbsd.pm 40811 2009-08-26 04:57:21Z dukeleto $
 
 package init::hints::netbsd;
 
@@ -10,13 +10,13 @@ sub runstep {
     my ( $self, $conf ) = @_;
 
     my $ccflags = $conf->data->get('ccflags');
-    if ( $ccflags !~ /-pthread/ ) {
+    if ( $ccflags !~ /-pthread\b/ ) {
         $ccflags .= ' -pthread';
     }
     $conf->data->set( ccflags => $ccflags );
 
     my $libs = $conf->data->get('libs');
-    if ( $libs !~ /-lpthread/ ) {
+    if ( $libs !~ /-lpthread\b/ ) {
         $libs .= ' -lpthread';
     }
     $conf->data->set( libs => $libs );

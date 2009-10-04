@@ -39,7 +39,7 @@ typedef size_t yy_size_t;
 %{
 
 /*
- * $Id: pir.l 36665 2009-02-13 10:20:10Z kjs $
+ * $Id: pir.l 40384 2009-08-02 13:45:00Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -416,6 +416,11 @@ REGISTER       "$"[SNIP]{DIGITS}
                     char *str = Parrot_str_to_cstring(lexer->interp, pstr);
 
                     yylval->sval = str;
+                    
+                    /* store the STRING in lexer's sval buffer; once PIRC is doing
+                    only STRINGs, it can be stored in yylval.sval. */
+                    lexer->sval = pstr;
+                    
                     return TK_STRINGC;
                   }
 

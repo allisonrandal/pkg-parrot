@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: Attribute.pm 39697 2009-06-22 04:12:51Z petdance $
+# $Id: Attribute.pm 40643 2009-08-18 22:57:11Z bacek $
 
 package Parrot::Pmc2c::Attribute;
 
@@ -10,9 +10,10 @@ sub new {
     my ( $class, $self_hash ) = @_;
     my $self = {
         (
-            name      => "",
-            type      => "",
-            modifiers => [],
+            name       => "",
+            type       => "",
+            array_size => "",
+            modifiers  => [],
             %{ $self_hash || {} }
         )
     };
@@ -36,7 +37,7 @@ Generate and emit the C code for an attribute declaration.
 sub generate_declaration {
     my ( $self, $pmc ) = @_;
     my $h              = $pmc->{emitter};
-    my $decl           = '    ' . $self->{type} . ' ' . $self->{name} . ";\n";
+    my $decl           = '    ' . $self->{type} . ' ' . $self->{name} . $self->{array_size} . ";\n";
 
     $h->emit($decl);
 

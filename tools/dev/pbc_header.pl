@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: pbc_header.pl 37342 2009-03-12 04:52:54Z Util $
+# $Id: pbc_header.pl 40204 2009-07-21 23:30:33Z jkeenan $
 
 use strict;
 use warnings;
@@ -94,18 +94,6 @@ sub update_fp {
         print $F $fp;
       SKIP:
         close $F;
-    }
-
-    return;
-}
-
-sub pbc_info {
-    for my $f (@ARGV) {
-        open my $F, "<", "$f" or die "Can't open $f: $!";
-        binmode $F;
-        print "$f\n";
-
-        show_pbc_file_info($F);
     }
 
     return;

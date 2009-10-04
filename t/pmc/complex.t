@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: complex.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: complex.t 40481 2009-08-11 06:09:35Z dukeleto $
 
 =head1 NAME
 
@@ -89,19 +89,6 @@ Tests the Complex PMC.
 
     message = exception['message']
     is( message, .M, .M )
-.endm
-
-.macro fp_eq_ok( J, K, L )
-    set $N10, .J
-    set $N11, .K
-    sub $N12, $N11, $N10
-    abs $N12, $N12
-
-    set $I0, 0
-    gt  $N12, 0.000001, .$FPEQNOK
-    set $I0, 1
-.label $FPEQNOK:
-    ok( $I0, .L )
 .endm
 
 .sub string_parsing

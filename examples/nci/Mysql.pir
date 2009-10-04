@@ -1,5 +1,5 @@
-# Copyright (C) 2008, Parrot Foundation.
-# $Id: Mysql.pir 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: Mysql.pir 41237 2009-09-12 16:57:44Z NotFound $
 
 =head1 TITLE
 
@@ -79,6 +79,9 @@ This is an initial version, be careful and not expect too much.
     $I0 = defined clientlib
     if $I0 goto haslib
     clientlib = loadlib 'libmysqlclient'
+    $I0 = defined clientlib
+    if $I0 goto libloaded
+    clientlib = loadlib 'libmysqlclient.so.15'
     $I0 = defined clientlib
     if $I0 goto libloaded
     fail('Cannot load mysql client lib')

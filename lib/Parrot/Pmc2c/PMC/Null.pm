@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Null.pm 38107 2009-04-14 23:41:32Z coke $
+# $Id: Null.pm 40350 2009-07-31 00:12:14Z NotFound $
 
 =head1 Parrot::Pmc2c::Null Instance Methods
 
@@ -47,10 +47,10 @@ EOC
             $param =~ s/.*\b(\w+)/$1/;
             $body .= "    UNUSED($param)\n";
         }
+        my $vtname = uc $vt_method_name;
         $body .= <<"EOC";
 
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NULL_REG_ACCESS,
-        "Null PMC access in $vt_method_name()");
+    null_pmc_access(interp, PARROT_VTABLE_SLOT_$vtname);
 EOC
 
         $new_default_method->body( Parrot::Pmc2c::Emitter->text($body) );

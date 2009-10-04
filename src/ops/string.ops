@@ -1,9 +1,7 @@
 /*
- * $Id: string.ops 38654 2009-05-09 20:02:23Z whiteknight $
+ * $Id: string.ops 40726 2009-08-23 01:18:17Z whiteknight $
 ** string.ops
 */
-
-VERSION = PARROT_VERSION;
 
 =head1 NAME
 
@@ -394,7 +392,7 @@ inline op stringinfo(out INT, in STR, in INT) :base_core {
                 $1 = PTR2UINTVAL($2->strstart);
                 break;
             case STRINGINFO_BUFLEN:
-                $1 = PObj_buflen($2);
+                $1 = Buffer_buflen($2);
                 break;
             case STRINGINFO_FLAGS:
                 $1 = PObj_get_FLAGS($2);

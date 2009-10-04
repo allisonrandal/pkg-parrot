@@ -1,9 +1,7 @@
 /*
- * $Id: cmp.ops 39629 2009-06-17 15:25:11Z NotFound $
+ * $Id: cmp.ops 40198 2009-07-21 20:49:40Z cotto $
 ** cmp.ops
 */
-
-VERSION = PARROT_VERSION;
 
 =head1 NAME
 

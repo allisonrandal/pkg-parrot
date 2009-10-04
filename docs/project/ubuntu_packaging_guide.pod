@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: ubuntu_packaging_guide.pod 38943 2009-05-19 22:03:25Z allison $
+# $Id: ubuntu_packaging_guide.pod 40439 2009-08-07 01:58:49Z allison $
 
 =head1 Ubuntu Packaging Guide
 
@@ -67,7 +67,7 @@ use the target Ubuntu distribution ('intrepid').
 
 The changelog entry for the Ubuntu release is generally:
 
-  * Resynchronize with Debian unstable.
+  * Synchronize with Debian unstable.
 
 Add any custom changes for Ubuntu packaging (rare). The final line gives the
 maintainer's name, email address, and the date. The date must be in RFC822

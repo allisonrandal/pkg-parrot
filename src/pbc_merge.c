@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2009, Parrot Foundation.
-$Id: pbc_merge.c 39775 2009-06-25 19:55:05Z NotFound $
+$Id: pbc_merge.c 40643 2009-08-18 22:57:11Z bacek $
 
 =head1 NAME
 
@@ -457,7 +457,7 @@ pbc_merge_constants(PARROT_INTERP, ARGMOD(pbc_merge_input **inputs),
                     case enum_class_Sub:
                     case enum_class_Coroutine:
                         {
-                        Parrot_sub *sub;
+                        Parrot_Sub_attributes *sub;
                         PMC_get_sub(interp, copy->u.key, sub);
                         sub->start_offs += inputs[i]->code_start;
                         sub->end_offs += inputs[i]->code_start;

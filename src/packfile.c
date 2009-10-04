@@ -2,7 +2,7 @@
 Copyright (C) 2001-2009, Parrot Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packfile.c 40100 2009-07-15 13:15:25Z bacek $
+$Id: packfile.c 41212 2009-09-11 15:12:29Z mikehh $
 
 =head1 NAME
 
@@ -26,7 +26,9 @@ about the structure of the frozen bytecode.
 
 #include "parrot/parrot.h"
 #include "parrot/embed.h"
+#include "parrot/extend.h"
 #include "parrot/packfile.h"
+#include "parrot/runcore_api.h"
 #include "jit.h"
 #include "../compilers/imcc/imc.h"
 #include "packfile.str"
@@ -618,7 +620,7 @@ sub_pragma(PARROT_INTERP, pbc_action_enum_t action, ARGIN(const PMC *sub_pmc))
      * These casts are a quick fix to allow parrot build with c++,
      * a refactor of the macros will be a cleaner solution.  */
     DECL_CONST_CAST;
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     int         todo    = 0;
     const int   pragmas = PObj_get_FLAGS(sub_pmc) &  SUB_FLAG_PF_MASK
                                                   & ~SUB_FLAG_IS_OUTER;
@@ -671,20 +673,20 @@ static PMC*
 run_sub(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 {
     ASSERT_ARGS(run_sub)
-    const INTVAL old = interp->run_core;
-    PMC *retval;
+    Parrot_runcore_t *old_core = interp->run_core;
+    PMC              *retval;
 
     /* turn off JIT and prederef - both would act on the whole
      * PackFile which probably isn't worth the effort */
-    if (interp->run_core != PARROT_CGOTO_CORE
-    &&  interp->run_core != PARROT_SLOW_CORE
-    &&  interp->run_core != PARROT_FAST_CORE)
-            interp->run_core = PARROT_FAST_CORE;
+    if (PARROT_RUNCORE_JIT_OPS_TEST(interp->run_core)
+    ||  PARROT_RUNCORE_PREDEREF_OPS_TEST(interp->run_core))
+        Parrot_runcore_switch(interp, CONST_STRING(interp, "fast"));
 
-    CONTEXT(interp)->constants = interp->code->const_table->constants;
+    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp),
+            interp->code->const_table->constants);
 
     retval           = (PMC *)Parrot_runops_fromc_args(interp, sub_pmc, "P");
-    interp->run_core = old;
+    interp->run_core = old_core;
 
     return retval;
 }
@@ -707,7 +709,7 @@ static PMC*
 do_1_sub_pragma(PARROT_INTERP, ARGMOD(PMC *sub_pmc), pbc_action_enum_t action)
 {
     ASSERT_ARGS(do_1_sub_pragma)
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     PMC_get_sub(interp, sub_pmc, sub);
 
     switch (action) {
@@ -759,7 +761,7 @@ do_1_sub_pragma(PARROT_INTERP, ARGMOD(PMC *sub_pmc), pbc_action_enum_t action)
                                           / sizeof (opcode_t *);
 
                     PObj_get_FLAGS(sub_pmc)      &= ~SUB_FLAG_PF_MAIN;
-                    CONTEXT(interp)->current_sub  = sub_pmc;
+                    Parrot_pcc_set_sub(interp, CURRENT_CONTEXT(interp), sub_pmc);
                 }
                 else {
                     Parrot_warn(interp, PARROT_WARNINGS_ALL_FLAG,
@@ -922,7 +924,7 @@ do_sub_pragmas(PARROT_INTERP, ARGIN(PackFile_ByteCode *self),
             {
                 /* offset is an index into const_table holding the Sub PMC */
                 PMC           *sub_pmc;
-                Parrot_sub    *sub;
+                Parrot_Sub_attributes    *sub;
                 const opcode_t ci = ft->fixups[i]->offset;
 
                 if (ci < 0 || ci >= ct->const_count)
@@ -1005,8 +1007,9 @@ PackFile_unpack(PARROT_INTERP, ARGMOD(PackFile *self),
     /* Ensure the bytecode version is one we can read. Currently, we only
      * support bytecode versions matching the current one.
      *
-     * tools/dev/pbc_header.pl --upd t/native_pbc/ *.pbc
-     * stamps version and fingerprint in the native tests. */
+     * tools/dev/pbc_header.pl --upd t/native_pbc/(ASTERISK).pbc
+     * stamps version and fingerprint in the native tests.
+     * NOTE: (ASTERISK) is *, we don't want to fool the C preprocessor. */
     if (header->bc_major != PARROT_PBC_MAJOR
     ||  header->bc_minor != PARROT_PBC_MINOR) {
         Parrot_io_eprintf(NULL, "PackFile_unpack: This Parrot cannot read "
@@ -2048,6 +2051,7 @@ directory_unpack(PARROT_INTERP, ARGMOD(PackFile_Segment *segp), ARGIN(const opco
     size_t                     i;
     int                        offs;
 
+    PARROT_ASSERT(pf);
     dir->num_segments = PF_fetch_opcode(pf, &cursor);
     TRACE_PRINTF(("directory_unpack: %ld num_segments\n", dir->num_segments));
     mem_realloc_n_typed(dir->segments, dir->num_segments, PackFile_Segment *);
@@ -2197,12 +2201,24 @@ directory_destroy(PARROT_INTERP, ARGMOD(PackFile_Segment *self))
     PackFile_Directory * const dir = (PackFile_Directory *)self;
     size_t i;
 
-    for (i = 0; i < dir->num_segments; i++)
-        PackFile_Segment_destroy(interp, dir->segments[i]);
+    for (i = 0; i < dir->num_segments; i++) {
+        PackFile_Segment *segment = dir->segments[i];
+        /* Prevent repeated destruction */
+        dir->segments[i] = NULL;
+
+        /* XXX Black magic here.
+         * There are some failures that looks like a segment directory
+         * inserted into another. Until that problems gets fixed,
+         * these checks are a workaround.
+         */
+        if (segment && segment != self && segment->type != PF_DIR_SEG)
+            PackFile_Segment_destroy(interp, segment);
+    }
 
     if (dir->segments) {
         mem_sys_free(dir->segments);
         dir->segments = NULL;
+        dir->num_segments = 0;
     }
 }
 
@@ -3082,13 +3098,13 @@ Parrot_switch_to_cs(PARROT_INTERP, ARGIN(PackFile_ByteCode *new_cs), int really)
     }
 
     interp->code               = new_cs;
-    CONTEXT(interp)->constants = really
+    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp), really
                                ? find_constants(interp, new_cs->const_table)
-                               : new_cs->const_table->constants;
+                               : new_cs->const_table->constants);
 
     /* new_cs->const_table->constants; */
-    CONTEXT(interp)->pred_offset =
-        new_cs->base.data - (opcode_t*) new_cs->prederef.code;
+    Parrot_pcc_set_pred_offset(interp, CURRENT_CONTEXT(interp),
+        new_cs->base.data - (opcode_t*) new_cs->prederef.code);
 
     if (really)
         prepare_for_run(interp);
@@ -3119,7 +3135,7 @@ clone_constant(PARROT_INTERP, ARGIN(PackFile_Constant *old_const))
     if (old_const->type == PFC_PMC
     &&  VTABLE_isa(interp, old_const->u.key, _sub)) {
         PMC        *old_sub_pmc, *new_sub_pmc;
-        Parrot_sub *old_sub,     *new_sub;
+        Parrot_Sub_attributes *old_sub,     *new_sub;
         PackFile_Constant * const ret = mem_allocate_typed(PackFile_Constant);
 
         ret->type = old_const->type;
@@ -4106,15 +4122,6 @@ PackFile_Constant_unpack_key(PARROT_INTERP, ARGIN(PackFile_ConstTable *constt),
             default:
                 return NULL;
         }
-
-        if (slice_bits) {
-            if (slice_bits & PF_VT_START_SLICE)
-                PObj_get_FLAGS(tail) |= KEY_start_slice_FLAG;
-            if (slice_bits & PF_VT_END_SLICE)
-                PObj_get_FLAGS(tail) |= KEY_end_slice_FLAG;
-            if (slice_bits & (PF_VT_START_ZERO | PF_VT_END_INF))
-                PObj_get_FLAGS(tail) |= KEY_inf_slice_FLAG;
-        }
     }
 
     self->type  = PFC_KEY;
@@ -4717,6 +4724,13 @@ compile_or_load_file(PARROT_INTERP, ARGIN(STRING *path),
     ASSERT_ARGS(compile_or_load_file)
     char * const filename = Parrot_str_to_cstring(interp, path);
 
+    INTVAL regs_used[] = { 2, 2, 2, 2 }; /* Arbitrary values */
+    const int parrot_hll_id = 0;
+    PMC * context = Parrot_push_context(interp, regs_used);
+    Parrot_pcc_set_HLL(interp, context, parrot_hll_id);
+    Parrot_pcc_set_namespace(interp, context,
+            Parrot_get_HLL_namespace(interp, parrot_hll_id));
+
     if (file_type == PARROT_RUNTIME_FT_PBC) {
         PackFile * const pf = PackFile_append_pbc(interp, filename);
         Parrot_str_free_cstring(filename);
@@ -4744,6 +4758,8 @@ compile_or_load_file(PARROT_INTERP, ARGIN(STRING *path),
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
                 "compiler returned NULL ByteCode '%Ss' - %Ss", path, err);
     }
+
+    Parrot_pop_context(interp);
 }
 
 /*
@@ -4804,6 +4820,8 @@ Parrot_load_language(PARROT_INTERP, ARGIN_NULLOK(STRING *lang_name))
             PARROT_LIB_PATH_INCLUDE);
     Parrot_lib_add_path(interp, Parrot_str_append(interp, found_path, CONST_STRING(interp, "dynext/")),
             PARROT_LIB_PATH_DYNEXT);
+    Parrot_lib_add_path(interp, Parrot_str_append(interp, found_path, CONST_STRING(interp, "library/")),
+            PARROT_LIB_PATH_LIBRARY);
 
 
     /* Check if the file found was actually a bytecode file (.pbc extension) or
@@ -4929,7 +4947,9 @@ void
 PackFile_fixup_subs(PARROT_INTERP, pbc_action_enum_t what, ARGIN_NULLOK(PMC *eval))
 {
     ASSERT_ARGS(PackFile_fixup_subs)
+    PARROT_CALLIN_START(interp);
     do_sub_pragmas(interp, interp->code, what, eval);
+    PARROT_CALLIN_END(interp);
 }
 
 

@@ -6,7 +6,7 @@
  * exec_dep.c
  *
  * SVN Info
- *    $Id: exec_dep.c 36832 2009-02-17 19:58:58Z allison $
+ *    $Id: exec_dep.c 41172 2009-09-09 10:40:42Z bacek $
  * Overview:
  *    i386 dependent functions to emit an executable.
  * History:
@@ -26,7 +26,7 @@
 #ifdef JIT_CGP
 
 void
-Parrot_exec_normal_op(Parrot_jit_info_t *jit_info, PARROT_INTERP)
+Parrot_exec_normal_op(ARGIN(Parrot_jit_info_t *jit_info), PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_exec_normal_op)
     Parrot_jit_optimizer_section_ptr cur_section =
@@ -111,7 +111,7 @@ Parrot_exec_normal_op(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 #else /* JIT_CGP */
 
 void
-Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
+Parrot_exec_normal_op(ARGIN(Parrot_jit_info_t *jit_info),
                      PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_exec_normal_op)
@@ -131,7 +131,7 @@ Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
 #endif /* JIT_CGP */
 
 void
-Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
+Parrot_exec_cpcf_op(ARGIN(Parrot_jit_info_t *jit_info),
                    PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_exec_cpcf_op)
@@ -140,7 +140,7 @@ Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
 }
 
 void
-Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
+Parrot_exec_restart_op(ARGIN(Parrot_jit_info_t *jit_info),
                    PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_exec_restart_op)
@@ -171,7 +171,7 @@ Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
 
 /* Assign the offset of the program_code */
 void
-offset_fixup(Parrot_exec_objfile_t *obj)
+offset_fixup(ARGIN(Parrot_exec_objfile_t *obj))
 {
     ASSERT_ARGS(offset_fixup)
     int i;

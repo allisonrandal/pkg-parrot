@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, Parrot Foundation.
-# $Id: gmp.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: gmp.pm 41071 2009-09-06 16:53:22Z NotFound $
 
 =head1 NAME
 
@@ -66,11 +66,6 @@ sub runstep {
         default         => '-lgmp',
     } );
 
-    # On OS X check the presence of the gmp header in the standard
-    # Fink location.
-    $self->_handle_darwin_for_fink($conf, $osname, 'gmp.h');
-    $self->_handle_darwin_for_macports($conf, $osname, 'gmp.h');
-
     $conf->cc_gen('config/auto/gmp/gmp_c.in');
     eval { $conf->cc_build( q{}, $extra_libs); };
     my $has_gmp = 0;
@@ -81,6 +76,7 @@ sub runstep {
     if ($has_gmp) {
         $conf->data->add( ' ', libs => $extra_libs );
     }
+    $self->set_result($has_gmp ? 'yes' : 'no');
 
     return 1;
 }

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: warnings.c 38481 2009-05-05 04:47:13Z petdance $
+$Id: warnings.c 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -53,8 +53,7 @@ print_pbc_location(PARROT_INTERP)
         interp->pdb->debugger :
         interp;
     Parrot_io_eprintf(tracer, "%Ss\n",
-            Parrot_Context_infostr(interp,
-                CONTEXT(interp)));
+            Parrot_Context_infostr(interp, CURRENT_CONTEXT(interp)));
 }
 
 /*

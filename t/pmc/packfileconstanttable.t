@@ -1,11 +1,10 @@
 #!parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: packfileconstanttable.t 38965 2009-05-20 04:55:05Z bacek $
+# $Id: packfileconstanttable.t 40273 2009-07-26 04:33:45Z petdance $
 
 =head1 NAME
 
 t/pmc/packfileconstanttable.t - test the PackfileConstantTable PMC
-
 
 =head1 SYNOPSIS
 
@@ -120,7 +119,7 @@ Tests the PackfileConstantTable PMC.
     ct[0] = "string"
     $I0 = elements ct
     is($I0, 1, "String element added")
-    
+
     ct[1] = 1.0
     $I0 = elements ct
     is($I0, 2, "Number elements added")
@@ -147,7 +146,7 @@ Tests the PackfileConstantTable PMC.
     $I1 = pfc.'get_or_create_constant'('foo')
     $I2 = pfc.'get_or_create_constant'('foo')
     is($I1, $I2, "get_or_create_constant returs same string value for same key")
-    
+
     $I2 = pfc.'get_or_create_constant'('bar')
     $I0 = $I1 != $I2
     ok($I0, "get_or_create_constant returs different string values for different keys")
@@ -156,7 +155,7 @@ Tests the PackfileConstantTable PMC.
     $I1 = pfc.'get_or_create_constant'(1.0)
     $I2 = pfc.'get_or_create_constant'(1.0)
     is($I1, $I2, "get_or_create_constant returs same number value for same key")
-    
+
     $I2 = pfc.'get_or_create_constant'(42.1)
     $I0 = $I1 != $I2
     ok($I0, "get_or_create_constant returs different number values for different keys")
@@ -184,4 +183,4 @@ Tests the PackfileConstantTable PMC.
 #   cperl-indent-level: 4
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

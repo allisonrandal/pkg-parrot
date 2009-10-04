@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: pdd09_gc.pod 38656 2009-05-09 21:58:21Z Infinoid $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: pdd09_gc.pod 40936 2009-09-03 00:21:51Z chromatic $
 
 =head1 PDD 9: Garbage Collection Subsystem
 
@@ -9,7 +9,7 @@ This PDD specifies Parrot's garbage collection subsystems.
 
 =head2 Version
 
-$Revision: 38656 $
+$Revision: 40936 $
 
 =head2 Definitions
 
@@ -299,8 +299,7 @@ an Arenas struct.
 The Arenas structure contains pointers to a variety of memory pools, each used
 for a specific purpose. Two are Memory_Pool pointers (memory_pool,
 constant_string_pool), and six are Small_Object_Pool structures (pmc_pool,
-pmc_ext_pool, constant_pmc_pool, buffer_header_pool,
-constant_string_header_pool).
+constant_pmc_pool, constant_string_header_pool).
 
 The Arenas structure holds function pointers for the core defined interface of
 the currently active GC subsystem: C<init_pool>, C<do_gc_mark>,
@@ -561,7 +560,7 @@ Always use these provided macros when you need to test or set these flags.
 
 =over 4
 
-=item PObj_active_destroy_FLAG
+=item PObj_custom_destroy_FLAG
 
 The PMC has some sort of active destructor, and will have that destructor
 called when the PMC is destroyed. The destructor is typically called from
@@ -620,6 +619,9 @@ None.
 None.
 
 =head2 References
+
+"Uniprocessor Garbage Collection Techniques"
+http://www.cs.rice.edu/~javaplt/311/Readings/wilson92uniprocessor.pdf
 
 "A unified theory of garbage collection":
 http://portal.acm.org/citation.cfm?id=1028982

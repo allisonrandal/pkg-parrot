@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: dynlexpad.t 37579 2009-03-19 04:57:31Z coke $
+# $Id: dynlexpad.t 40191 2009-07-21 12:56:20Z bacek $
 
 use strict;
 use warnings;
@@ -228,7 +228,7 @@ pir_output_is( $loadlib . << 'CODE', << 'OUTPUT', "dynlexpad - iterator" );
     dlp    = interp['lexpad']
 
     say "Getting iterator"
-    it = new 'Iterator', dlp
+    it = iter dlp
     say "Have iterator"
 iter_loop:
     unless it goto iter_done

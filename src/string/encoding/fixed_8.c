@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: fixed_8.c 38853 2009-05-16 23:28:14Z Infinoid $
+$Id: fixed_8.c 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -634,7 +634,7 @@ fixed8_set_position(SHIM_INTERP, ARGMOD(String_iter *iter), UINTVAL pos)
 {
     ASSERT_ARGS(fixed8_set_position)
     iter->bytepos = iter->charpos = pos;
-    PARROT_ASSERT(pos <= PObj_buflen(iter->str));
+    PARROT_ASSERT(pos <= Buffer_buflen(iter->str));
 }
 
 

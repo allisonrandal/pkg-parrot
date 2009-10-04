@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: boolean.pmc 38794 2009-05-15 16:12:33Z coke $
+$Id: boolean.pmc 41227 2009-09-12 11:57:57Z bacek $
 
 =head1 NAME
 
@@ -21,27 +21,24 @@ it doesn't morph to other types. Only its value is changed.
 
 */
 
-pmclass Boolean extends Integer provides boolean provides scalar {
+pmclass Boolean extends Integer provides boolean provides scalar auto_attrs {
 
 /*
 
-=item C<PMC *instantiate(PMC *sig)>
+=item C<void init_pmc(PMC *value)>
 
-Object constructor. SELF is a Boolean Class object. Return a new
-C<bool> object according to the passed PMC value.
+Initialises SELF value according to the boolean value of the passed PMC.
 
 =cut
 
 */
-    VTABLE PMC *instantiate(PMC *sig) {
-        /* XXX other types */
-        const int argcP = REG_INT(interp, 3);
-        PMC * const res = pmc_new(interp, enum_class_Boolean);
-
-        if (argcP)
-            SELF.set_bool(VTABLE_get_bool(interp, REG_PMC(interp, 5)));
-
-        return PMCNULL; /* TODO */
+    VTABLE void init_pmc(PMC *value) {
+        if (!PMC_IS_NULL(value)) {
+            SELF.set_bool(VTABLE_get_bool(INTERP, value));
+        }
+        else {
+            SELF.set_bool(0);
+        }
     }
 /*
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2009, Parrot Foundation.
- * $Id: parser.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: parser.h 40345 2009-07-30 18:29:24Z NotFound $
  */
 
 #ifndef PARROT_IMCC_PARSER_H_GUARD
@@ -13,9 +13,6 @@ typedef struct _IdList {
 } IdList;
 
 #include "imcparser.h"
-
-/* short ranged globals for lexer state */
-extern int pesky_global__is_def;
 
 #define KEY_BIT(argnum) (1 << (argnum))
 

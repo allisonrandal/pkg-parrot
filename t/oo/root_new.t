@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: root_new.t 39599 2009-06-16 22:54:02Z whiteknight $
+# $Id: root_new.t 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 

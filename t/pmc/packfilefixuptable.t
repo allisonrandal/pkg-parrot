@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: packfilefixuptable.t 38172 2009-04-17 11:22:38Z bacek $
+# $Id: packfilefixuptable.t 40273 2009-07-26 04:33:45Z petdance $
 
 =head1 NAME
 
@@ -66,4 +66,4 @@ Tests the PackfileFixupTable PMC.
 #   cperl-indent-level: 4
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

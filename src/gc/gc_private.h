@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: gc_private.h 40023 2009-07-12 20:48:40Z whiteknight $
+$Id: gc_private.h 41144 2009-09-08 00:02:36Z whiteknight $
 
 =head1 NAME
 
@@ -36,6 +36,44 @@ extern void *flush_reg_store(void);
 
 #endif /* __ia64__ */
 
+/* the percent of used Arena items at which to trace next time through */
+#define GC_DEBUG_REPLENISH_LEVEL_FACTOR        0.0
+#define GC_DEBUG_UNITS_PER_ALLOC_GROWTH_FACTOR 1
+#define REPLENISH_LEVEL_FACTOR                 0.3
+
+/* this factor is totally arbitrary, but gives good timings for stress.pasm */
+#define UNITS_PER_ALLOC_GROWTH_FACTOR          1.75
+
+#define POOL_MAX_BYTES                         65536 * 128
+
+#ifndef GC_IS_MALLOC
+#  define PMC_HEADERS_PER_ALLOC    10240 / sizeof (PMC)
+#  define BUFFER_HEADERS_PER_ALLOC  5120 / sizeof (Buffer)
+#  define STRING_HEADERS_PER_ALLOC  5120 / sizeof (STRING)
+#else /* GC_IS_MALLOC */
+#  define PMC_HEADERS_PER_ALLOC    10240 / sizeof (PMC)
+#  define BUFFER_HEADERS_PER_ALLOC 10240 / sizeof (Buffer)
+#  define STRING_HEADERS_PER_ALLOC 10240 / sizeof (STRING)
+#endif /* GC_IS_MALLOC */
+
+#define CONSTANT_PMC_HEADERS_PER_ALLOC 64
+#define GET_SIZED_POOL_IDX(x) ((x) / sizeof (void *))
+
+
+/* these values are used for the attribute allocator */
+#define GC_ATTRIB_POOLS_HEADROOM 8
+#define GC_FIXED_SIZE_POOL_SIZE 4096
+
+/* Use the lazy allocator. Since it amortizes arena allocation costs, turn
+   this on at the same time that you increase the size of allocated arenas.
+   increase *_HEADERS_PER_ALLOC and GC_FIXED_SIZE_POOL_SIZE to be large
+   enough to satisfy most startup costs. */
+#define GC_USE_LAZY_ALLOCATOR 1
+
+/* Set to 1 if we want to use the fixed-size allocator. Set to 0 if we want
+   to allocate these things using mem_sys_allocate instead */
+#define GC_USE_FIXED_SIZE_ALLOCATOR 1
+
 /* We're using this here to add an additional pointer to a PObj without
    having to actually add an entire pointer to every PObj-alike structure
    in Parrot. Astute observers may notice that if the PObj is comprised of
@@ -43,9 +81,9 @@ extern void *flush_reg_store(void);
    larger then sizeof(PObj), thus creating overflow. However PObjs are never
    used by themselves, things like PMCs and STRINGs are cast to PObj in the
    GC, so we should have plenty of space. */
-typedef union GC_MS_PObj_Wrapper {
-    PObj obj;
-    PObj *next_ptr;
+typedef struct GC_MS_PObj_Wrapper {
+    size_t flags;
+    struct GC_MS_PObj_Wrapper * next_ptr;
 } GC_MS_PObj_Wrapper;
 
 typedef struct Small_Object_Arena {
@@ -55,6 +93,15 @@ typedef struct Small_Object_Arena {
     struct Small_Object_Arena *next;
     void                      *start_objects;
 } Small_Object_Arena;
+
+typedef struct PMC_Attribute_Free_List {
+    struct PMC_Attribute_Free_List * next;
+} PMC_Attribute_Free_List;
+
+typedef struct PMC_Attribute_Arena {
+    struct PMC_Attribute_Arena * next;
+    struct PMC_Attribute_Arena * prev;
+} PMC_Attribute_Arena;
 
 #if PARROT_GC_GMS
 /*
@@ -111,6 +158,19 @@ typedef struct _gc_gms_gen {
 
 #endif /* PARROT_GC_GMS */
 
+typedef struct PMC_Attribute_Pool {
+    size_t attr_size;
+    size_t total_objects;
+    size_t objects_per_alloc;
+    size_t num_free_objects;
+    PMC_Attribute_Free_List * free_list;
+    PMC_Attribute_Arena     * top_arena;
+#if GC_USE_LAZY_ALLOCATOR
+    PMC_Attribute_Free_List * newfree;
+    PMC_Attribute_Free_List * newlast;
+#endif
+} PMC_Attribute_Pool;
+
 /* Tracked resource pool */
 typedef struct Small_Object_Pool {
     Small_Object_Arena *last_Arena;
@@ -124,7 +184,7 @@ typedef struct Small_Object_Pool {
     size_t num_free_objects;    /* number of resources in the free pool */
     int skip;
     size_t replenish_level;
-    void *free_list;
+    GC_MS_PObj_Wrapper * free_list;
     /* adds a free object to the pool's free list  */
     add_free_object_fn_type     add_free_object;
     get_free_object_fn_type     get_free_object;
@@ -137,6 +197,10 @@ typedef struct Small_Object_Pool {
     size_t start_arena_memory;
     size_t end_arena_memory;
     PARROT_OBSERVER const char *name;
+#if GC_USE_LAZY_ALLOCATOR
+    void *newfree;
+    void *newlast;
+#endif
 #if PARROT_GC_GMS
     struct _gc_gms_hdr marker;          /* limit of list */
     struct _gc_gms_hdr *black;          /* alive */
@@ -156,12 +220,14 @@ typedef struct Arenas {
     Memory_Pool *constant_string_pool;
     struct Small_Object_Pool *string_header_pool;
     struct Small_Object_Pool *pmc_pool;
-    struct Small_Object_Pool *pmc_ext_pool;
     struct Small_Object_Pool *constant_pmc_pool;
-    struct Small_Object_Pool *buffer_header_pool;
     struct Small_Object_Pool *constant_string_header_pool;
     struct Small_Object_Pool **sized_header_pools;
     size_t num_sized;
+
+    PMC_Attribute_Pool **attrib_pools;
+    size_t num_attribs;
+
     /*
      * function slots that each subsystem must provide
      */
@@ -193,7 +259,6 @@ typedef struct Arenas {
                                      during collection */
     UINTVAL num_early_gc_PMCs;    /* how many PMCs want immediate destruction */
     UINTVAL num_early_PMCs_seen;  /* how many such PMCs has GC seen */
-    UINTVAL num_extended_PMCs;    /* active PMCs having pmc_ext */
     PMC* gc_mark_start;           /* first PMC marked during a GC run */
     PMC* gc_mark_ptr;             /* last PMC marked during a GC run */
     PMC* gc_trace_ptr;            /* last PMC trace_children was called on */
@@ -358,11 +423,26 @@ void Parrot_gc_clear_live_bits(PARROT_INTERP,
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-void Parrot_gc_profile_end(PARROT_INTERP, int what)
+void Parrot_gc_free_attributes_from_pool(PARROT_INTERP,
+    ARGMOD(PMC_Attribute_Pool * pool),
+    ARGMOD(void *data))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(* pool)
+        FUNC_MODIFIES(*data);
+
+PARROT_CANNOT_RETURN_NULL
+PMC_Attribute_Pool * Parrot_gc_get_attribute_pool(PARROT_INTERP,
+    size_t attrib_size)
         __attribute__nonnull__(1);
 
-void Parrot_gc_profile_start(PARROT_INTERP)
-        __attribute__nonnull__(1);
+PARROT_CANNOT_RETURN_NULL
+void * Parrot_gc_get_attributes_from_pool(PARROT_INTERP,
+    ARGMOD(PMC_Attribute_Pool * pool))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(* pool);
 
 void Parrot_gc_run_init(PARROT_INTERP)
         __attribute__nonnull__(1);
@@ -402,10 +482,17 @@ int Parrot_gc_trace_root(PARROT_INTERP, Parrot_gc_trace_type trace)
 #define ASSERT_ARGS_Parrot_gc_clear_live_bits __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pool)
-#define ASSERT_ARGS_Parrot_gc_profile_end __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_Parrot_gc_free_attributes_from_pool \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pool) \
+    || PARROT_ASSERT_ARG(data)
+#define ASSERT_ARGS_Parrot_gc_get_attribute_pool __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_gc_profile_start __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_gc_get_attributes_from_pool \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pool)
 #define ASSERT_ARGS_Parrot_gc_run_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_gc_sweep_pool __attribute__unused__ int _ASSERT_ARGS_CHECK = \
@@ -466,6 +553,12 @@ PARROT_CONST_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 size_t aligned_string_size(size_t len);
 
+void check_buffer_ptr(ARGMOD(Buffer * pobj), ARGMOD(Memory_Pool * pool))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(* pobj)
+        FUNC_MODIFIES(* pool);
+
 void compact_pool(PARROT_INTERP, ARGMOD(Memory_Pool *pool))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
@@ -493,6 +586,9 @@ void merge_pools(ARGMOD(Memory_Pool *dest), ARGMOD(Memory_Pool *source))
 #define ASSERT_ARGS_aligned_size __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(buffer)
 #define ASSERT_ARGS_aligned_string_size __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_check_buffer_ptr __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(pobj) \
+    || PARROT_ASSERT_ARG(pool)
 #define ASSERT_ARGS_compact_pool __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pool)
@@ -588,15 +684,9 @@ void Parrot_gc_ims_wb(PARROT_INTERP, ARGMOD(PMC *agg), ARGMOD(PMC *_new))
 /* HEADERIZER BEGIN: src/gc/gc_ms.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-void gc_ms_pmc_ext_pool_init(ARGMOD(Small_Object_Pool *pool))
-        __attribute__nonnull__(1)
-        FUNC_MODIFIES(*pool);
-
 void Parrot_gc_ms_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_gc_ms_pmc_ext_pool_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(pool)
 #define ASSERT_ARGS_Parrot_gc_ms_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */

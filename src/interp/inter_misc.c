@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: inter_misc.c 39599 2009-06-16 22:54:02Z whiteknight $
+$Id: inter_misc.c 41188 2009-09-10 22:27:49Z chromatic $
 
 =head1 NAME
 
@@ -195,8 +195,7 @@ extern struct mallinfo mallinfo(void);
 
 =item C<INTVAL interpinfo(PARROT_INTERP, INTVAL what)>
 
-C<what> specifies the type of information you want about the
-interpreter.
+C<what> specifies the type of information you want about the interpreter.
 
 =cut
 
@@ -252,13 +251,38 @@ interpinfo(PARROT_INTERP, INTVAL what)
         case IMPATIENT_PMCS:
             ret = Parrot_gc_impatient_pmcs(interp);
             break;
-        case EXTENDED_PMCS:
-            ret = Parrot_gc_extended_pmcs(interp);
-            break;
         case CURRENT_RUNCORE:
-            ret = interp->run_core;
+        {
+            STRING *name = interp->run_core->name;
+
+            if (Parrot_str_equal(interp, name, CONST_STRING(interp, "slow")))
+                ret = PARROT_SLOW_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "fast")))
+                ret = PARROT_FAST_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "switch")))
+                ret = PARROT_SWITCH_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "cgp")))
+                ret = PARROT_CGP_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "cgoto")))
+                ret = PARROT_CGOTO_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "jit")))
+                ret = PARROT_JIT_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "cgp_jit")))
+                ret = PARROT_CGP_JIT_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "switch_jit")))
+                ret = PARROT_SWITCH_JIT_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "exec")))
+                ret = PARROT_EXEC_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "gc_debug")))
+                ret = PARROT_GC_DEBUG_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "debugger")))
+                ret = PARROT_DEBUGGER_CORE;
+            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "profiling")))
+                ret = PARROT_PROFILING_CORE;
             break;
+        }
         default:        /* or a warning only? */
+            ret = -1;
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
                 "illegal argument in interpinfo");
     }
@@ -285,19 +309,19 @@ interpinfo_p(PARROT_INTERP, INTVAL what)
     ASSERT_ARGS(interpinfo_p)
     switch (what) {
         case CURRENT_SUB:
-            return CONTEXT(interp)->current_sub;
+            return Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
         case CURRENT_CONT:
             {
-            PMC * const cont = CONTEXT(interp)->current_cont;
+            PMC * const cont = Parrot_pcc_get_continuation(interp, CURRENT_CONTEXT(interp));
             if (!PMC_IS_NULL(cont) && cont->vtable->base_type ==
                     enum_class_RetContinuation)
                 return VTABLE_clone(interp, cont);
             return cont;
             }
         case CURRENT_OBJECT:
-            return CONTEXT(interp)->current_object;
+            return Parrot_pcc_get_object(interp, CURRENT_CONTEXT(interp));
         case CURRENT_LEXPAD:
-            return CONTEXT(interp)->lex_pad;
+            return Parrot_pcc_get_lex_pad(interp, CURRENT_CONTEXT(interp));
         default:        /* or a warning only? */
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
                 "illegal argument in interpinfo");

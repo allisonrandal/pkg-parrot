@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: io.t 39864 2009-07-02 01:02:48Z Infinoid $
+# $Id: io.t 40508 2009-08-13 02:25:41Z allison $
 
 =head1 NAME
 
@@ -96,7 +96,8 @@ Tests various io opcodes.
     unless pipe goto open_pipe_for_reading_failed
     .local string line
     line = readline pipe
-    like('This is Parrot', ":s This is Parrot", 'open pipe for reading')
+    line = substr line, 0, 14
+    is('This is Parrot', line, 'open pipe for reading')
     .return ()
 
   open_pipe_for_reading_failed:

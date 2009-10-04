@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2008, Parrot Foundation.
-$Id: dynlexpad.pmc 38654 2009-05-09 20:02:23Z whiteknight $
+$Id: dynlexpad.pmc 40740 2009-08-23 15:20:12Z whiteknight $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ lexicals at runtime.
 
 */
 
-pmclass DynLexPad dynpmc provides lexpad need_ext {
+pmclass DynLexPad dynpmc provides lexpad auto_attrs {
     ATTR Hash *hash;
     ATTR PMC  *init; /* the PMC used to initialize this DynLexPad */
 
@@ -42,8 +42,7 @@ lexinfo.
         Hash *hash;
 
         Parrot_DynLexPad_attributes *attrs =
-            mem_allocate_zeroed_typed(Parrot_DynLexPad_attributes);
-        PMC_data(SELF) = attrs;
+            (Parrot_DynLexPad_attributes *) PMC_data(SELF);
 
         if (VTABLE_elements(interp, lexinfo)) {
             attrs->init = pmc_new_init(interp, enum_class_LexPad, lexinfo);
@@ -188,7 +187,6 @@ Return the LexInfo PMC, if any or a Null PMC.
             parrot_hash_destroy(interp, PARROT_DYNLEXPAD(SELF)->hash);
             PARROT_DYNLEXPAD(SELF)->hash = NULL;
         }
-        mem_sys_free(PMC_data(SELF));
     }
 /*
 

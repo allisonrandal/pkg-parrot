@@ -1,10 +1,10 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: pbc_to_exe.pir 40039 2009-07-12 23:02:29Z allison $
+# $Id: pbc_to_exe.pir 40852 2009-08-29 16:09:15Z NotFound $
 
 =head1 NAME
 
-pbc_to_exe
+pbc_to_exe - compile bytecode to executable
 
 =head2 SYNOPSIS
 
@@ -79,6 +79,7 @@ HEADER
             if (!interp)
                 return 1;
 
+            Parrot_init_stacktop(interp, &interp);
             Parrot_set_executable_name(interp,
                 Parrot_str_new(interp, argv[0], 0));
             Parrot_set_flag(interp, PARROT_DESTROY_FLAG);

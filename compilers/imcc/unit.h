@@ -1,5 +1,5 @@
 /*
- * $Id: unit.h 39492 2009-06-10 07:28:01Z chromatic $
+ * $Id: unit.h 40340 2009-07-30 14:30:51Z NotFound $
  * Copyright (C) 2003-2009, Parrot Foundation.
  */
 
@@ -32,7 +32,7 @@ struct imcc_ostat {
     int used_once;
 } ;
 
-struct _IMC_Unit {
+struct IMC_Unit {
     INTVAL            type;
     Instruction      *instructions;
     Instruction      *last_ins;
@@ -52,8 +52,8 @@ struct _IMC_Unit {
     SymReg          **reglist;
     unsigned int      n_symbols;
     int               max_color;
-    struct _IMC_Unit *prev;
-    struct _IMC_Unit *next;
+    IMC_Unit         *prev;
+    IMC_Unit         *next;
 
     SymReg           *_namespace;
     int               owns_namespace;   /* should this unit free *_namespace */

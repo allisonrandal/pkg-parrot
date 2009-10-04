@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: options.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: options.t 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -88,7 +88,7 @@ is( `"$PARROT" --trace "$first_pir_file" "$second_pir_file" $redir`,
     is( qx{$cmd}, "second\n", "-r option <$cmd>" );
 
     $cmd = qq{"$PARROT" -D 8 -R slow "$second_pir_file" 2>&1};
-    like( qx{$cmd}, qr/Parrot VM: Slow core/, "-r option <$cmd>" );
+    like( qx{$cmd}, qr/Parrot VM: slow core/, "-r option <$cmd>" );
 }
 
 ## RT#46815 test remaining options

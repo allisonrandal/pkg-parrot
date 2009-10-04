@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: dragonfly.pm 39871 2009-07-03 14:40:18Z jkeenan $
+# $Id: dragonfly.pm 40811 2009-08-26 04:57:21Z dukeleto $
 
 package init::hints::dragonfly;
 
@@ -13,7 +13,7 @@ sub runstep {
     my $version   = $conf->option_or_data('VERSION');
     my $libs = $conf->data->get('libs');
 
-    $libs .= ' -pthread' unless $libs =~ /pthread/;
+    $libs .= ' -pthread' unless $libs =~ /pthread\b/;
 
     $conf->data->set(
         libs  => $libs,

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: Grammar.pir 38115 2009-04-15 14:41:32Z fperrad $
+# $Id: Grammar.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 NAME
 
@@ -140,7 +140,7 @@ Return an iterator for the symbol lookup table.
 
 .sub 'symbol_iter' :method
     $P1 = getattribute self, 'symbols'
-    $P2 = new 'Iterator', $P1
+    $P2 = iter $P1
 
     .return($P2)
 .end

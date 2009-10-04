@@ -7,7 +7,7 @@
  *
  * i386
  *
- * $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
+ * $Id: jit_emit.h 40677 2009-08-20 20:53:03Z chromatic $
  */
 
 #ifndef PARROT_I386_JIT_EMIT_H_GUARD
@@ -1660,9 +1660,6 @@ void Parrot_jit_vtable_unlessp_op(Parrot_jit_info_t *jit_info, PARROT_INTERP);
 
 /* if_p_ic */
 void Parrot_jit_vtable_ifp_op(Parrot_jit_info_t *jit_info, PARROT_INTERP);
-
-/* new_p_ic */
-void Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info, PARROT_INTERP);
 
 #endif /* JIT_VTABLE_OPS */
 

@@ -1,5 +1,5 @@
 /*
- * $Id: pircompiler.h 36665 2009-02-13 10:20:10Z kjs $
+ * $Id: pircompiler.h 40382 2009-08-02 13:35:33Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -146,6 +146,12 @@ typedef struct lexer_state {
 
     annotation               *annotations;
     unsigned                  num_annotations;
+    
+    /* XXX Temporary STRING pointer, for the conversion of all lexer code to use
+    STRINGs instead of c strings (char pointers). Cannot change yylval union yet,
+    as it's better to have duplicated functionality, then removing the old c strings 
+    stuff*/
+    STRING    *sval;
 
 } lexer_state;
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: makefiles.pm 37488 2009-03-16 18:14:39Z allison $
+# $Id: makefiles.pm 41137 2009-09-07 21:07:11Z japhb $
 
 =head1 NAME
 
@@ -48,6 +48,8 @@ sub _init {
             { SOURCE => 'config/gen/makefiles/tge.in' },
         'compilers/json/Makefile'    =>
             { SOURCE => 'config/gen/makefiles/json.in' },
+        'compilers/data_json/Makefile' =>
+            { SOURCE => 'config/gen/makefiles/data_json.in' },
         'compilers/pirc/Makefile'    =>
             { SOURCE => 'config/gen/makefiles/pirc.in' },
         'src/dynpmc/Makefile'        =>

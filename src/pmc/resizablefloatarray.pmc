@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: resizablefloatarray.pmc 38794 2009-05-15 16:12:33Z coke $
+$Id: resizablefloatarray.pmc 40739 2009-08-23 15:04:07Z whiteknight $
 
 =head1 NAME
 
@@ -20,25 +20,8 @@ which stores FLOATVALs. It uses Float PMCs to do all necessary conversions.
 
 */
 
-pmclass ResizableFloatArray extends FixedFloatArray need_ext provides array {
+pmclass ResizableFloatArray extends FixedFloatArray auto_attrs provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs resizing */
-
-
-
-/*
-
-=item C<void init()>
-
-Initializes this array.
-
-=cut
-
-*/
-    VTABLE void init() {
-        Parrot_ResizableFloatArray_attributes* attrs =
-            mem_allocate_zeroed_typed(Parrot_ResizableFloatArray_attributes);
-        PMC_data(SELF) = attrs;
-    }
 
 /*
 

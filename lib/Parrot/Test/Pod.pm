@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Pod.pm 37615 2009-03-21 16:20:27Z Util $
+# $Id: Pod.pm 40470 2009-08-09 23:22:04Z jkeenan $
 package Parrot::Test::Pod;
 use strict;
 use warnings;
@@ -45,13 +45,13 @@ our %second_analysis_subs = (
                 if ($full_file =~ m{
                         t/tools/dev/searchops/samples\.pm
                         | languages/pod/test\.pod
-                        | xconf/samples/yourfoobar
+                        | examples/config/file/configcompiler
                         | t/configure/testlib/verbosefoobar
                         | t/configure/testlib/ddefectivefoobar
                         | t/configure/testlib/adefectivefoobar
                         | t/configure/testlib/cdefectivefoobar
                         | t/configure/testlib/bdefectivefoobar
-                        | xconf/samples/testfoobar
+                        | examples/config/file/configwithfatalstep
                     }x
                 ) {
                     delete $files_needing_analysis->{ $file };

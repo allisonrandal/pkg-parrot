@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pcre.pm 37144 2009-03-06 04:26:29Z Util $
+# $Id: pcre.pm 40189 2009-07-21 12:15:55Z jkeenan $
 
 =head1 NAME
 
@@ -55,11 +55,6 @@ sub runstep {
         win32_nongcc    => 'pcre.lib',
         default         => '-lpcre',
     } );
-
-    # On OS X check the presence of the pcre headers in the standard
-    # Fink/macports locations.
-    $self->_handle_darwin_for_fink    ($conf, $osname, 'pcre.h');
-    $self->_handle_darwin_for_macports($conf, $osname, 'pcre.h');
 
     $conf->cc_gen('config/auto/pcre/pcre_c.in');
     eval { $conf->cc_build( q{}, $extra_libs ) };

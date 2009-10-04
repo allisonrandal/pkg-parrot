@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: crypto.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: crypto.pm 41071 2009-09-06 16:53:22Z NotFound $
 
 =head1 NAME
 
@@ -65,6 +65,7 @@ sub runstep {
         $has_crypto = $self->_evaluate_cc_run($conf, $test, $has_crypto, $verbose);
     }
     $conf->data->set( has_crypto => $has_crypto );    # for dynpmc.in & digest.t
+    $self->set_result($has_crypto ? 'yes' : 'no');
 
     return 1;
 }

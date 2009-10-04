@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008-2009, Parrot Foundation.
-$Id: jit_defs.c 40181 2009-07-21 02:57:11Z chromatic $
+$Id: jit_defs.c 41250 2009-09-13 11:25:08Z NotFound $
 */
 
 /* HEADERIZER HFILE: none */
@@ -872,7 +872,11 @@ Parrot_emit_jump_to_eax(Parrot_jit_info_t *jit_info,
 #endif
     /* get base pointer */
     emitm_movl_m_r(interp, jit_info->native_ptr, emit_EBX, emit_EBX, 0, 1,
-            offsetof(Interp, ctx.bp));
+            offsetof(Interp, ctx));
+    emitm_movl_m_r(interp, jit_info->native_ptr, emit_EBX, emit_EBX, 0, 1,
+            offsetof(PMC, data));
+    emitm_movl_m_r(interp, jit_info->native_ptr, emit_EBX, emit_EBX, 0, 1,
+            offsetof(Parrot_Context, bp));
 
     /* This jumps to the address in op_map[EDX + sizeof (void *) * INDEX] */
     emitm_jumpm(jit_info->native_ptr, emit_EDX, emit_EAX,
@@ -1214,55 +1218,6 @@ Parrot_jit_vtable_ifp_op(Parrot_jit_info_t *jit_info,
        jit_info->native_ptr, (f)); \
        emitm_calll(jit_info->native_ptr, EXEC_CALLDISP);
 
-/* new_p_ic */
-void
-Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info,
-                     PARROT_INTERP)
-{
-    int p1, i2;
-    op_info_t *op_info = &interp->op_info_table[*jit_info->cur_op];
-    size_t offset = offsetof(VTABLE, init);
-
-    PARROT_ASSERT(op_info->types[0] == PARROT_ARG_P);
-    p1 = *(jit_info->cur_op + 1);
-    i2 = *(jit_info->cur_op + 2);
-
-    if (i2 <= 0 || i2 >= interp->n_vtable_max)
-        Parrot_ex_throw_from_c_args(interp, NULL, 1,
-            "Illegal PMC enum (%d) in new", i2);
-
-    /* get interpreter */
-    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
-
-    /* push pmc enum and interpreter */
-    emitm_pushl_i(jit_info->native_ptr, i2);
-    emitm_pushl_r(jit_info->native_ptr, emit_ECX);
-#if EXEC_CAPABLE
-    if (jit_info->objfile) {
-        CALL("pmc_new_noinit");
-    }
-    else
-#endif
-    {
-        call_func(jit_info, (void (*) (void))pmc_new_noinit);
-    }
-    /* result = eax push pmc */
-    emitm_pushl_r(jit_info->native_ptr, emit_EAX);
-    /* store in PMC too */
-    emitm_movl_r_m(interp, jit_info->native_ptr,
-            emit_EAX, emit_EBX, emit_None, 1, REG_OFFS_PMC(p1));
-    /* push interpreter */
-    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
-    emitm_pushl_r(jit_info->native_ptr, emit_ECX);
-    /* mov (offs)%eax, %eax i.e. $1->vtable */
-    emitm_movl_m_r(interp, jit_info->native_ptr, emit_EAX, emit_EAX, emit_None, 1,
-            offsetof(struct PMC, vtable));
-    /* call *(offset)eax */
-    emitm_callm(jit_info->native_ptr, emit_EAX, emit_None, emit_None, offset);
-    /* adjust 4 args pushed */
-    emitm_addb_i_r(jit_info->native_ptr, 16, emit_ESP);
-}
-
 #  undef IREG
 #  undef NREG
 #  undef SREG
@@ -1280,7 +1235,7 @@ jit_get_params_pc(Parrot_jit_info_t *jit_info, PARROT_INTERP)
     PMC *sig_pmc;
     INTVAL *sig_bits, i, n;
 
-    sig_pmc = CONTEXT(interp)->constants[CUR_OPCODE[1]]->u.key;
+    sig_pmc = Parrot_pcc_get_pmc_constant(interp, CURRENT_CONTEXT(interp), CUR_OPCODE[1]);
     GETATTR_FixedIntegerArray_int_array(interp, sig_pmc, sig_bits);
     n = VTABLE_elements(interp, sig_pmc);
     jit_info->n_args = n;
@@ -1316,7 +1271,7 @@ jit_save_regs(Parrot_jit_info_t *jit_info, PARROT_INTERP)
     int i, used_i, save_i;
     const jit_arch_regs *reg_info;
 
-    used_i = CONTEXT(interp)->n_regs_used[REGNO_INT];
+    used_i = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_INT);
     reg_info = &jit_info->arch_info->regs[jit_info->code_type];
     save_i = reg_info->n_preserved_I;
     for (i = save_i; i < used_i; ++i) {
@@ -1332,7 +1287,7 @@ jit_restore_regs(Parrot_jit_info_t *jit_info, PARROT_INTERP)
     int i, used_i, save_i;
     const jit_arch_regs *reg_info;
 
-    used_i = CONTEXT(interp)->n_regs_used[REGNO_INT];
+    used_i = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_INT);
     reg_info = &jit_info->arch_info->regs[jit_info->code_type];
     save_i = reg_info->n_preserved_I;
     /* note - reversed order of jit_save_regs  */
@@ -1356,8 +1311,8 @@ jit_save_regs_call(Parrot_jit_info_t *jit_info, PARROT_INTERP, int skip)
     int i, used_i, used_n;
     const jit_arch_regs *reg_info;
 
-    used_i = CONTEXT(interp)->n_regs_used[REGNO_INT];
-    used_n = CONTEXT(interp)->n_regs_used[REGNO_NUM];
+    used_i = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_INT);
+    used_n = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_NUM);
     jit_emit_sub_ri_i(interp, jit_info->native_ptr, emit_ESP,
             (used_i * sizeof (INTVAL) + used_n * sizeof (FLOATVAL)));
     reg_info = &jit_info->arch_info->regs[jit_info->code_type];
@@ -1387,8 +1342,8 @@ jit_restore_regs_call(Parrot_jit_info_t *jit_info, PARROT_INTERP,
     int i, used_i, used_n;
     const jit_arch_regs *reg_info;
 
-    used_i = CONTEXT(interp)->n_regs_used[REGNO_INT];
-    used_n = CONTEXT(interp)->n_regs_used[REGNO_NUM];
+    used_i = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_INT);
+    used_n = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_NUM);
     reg_info = &jit_info->arch_info->regs[jit_info->code_type];
 
     for (i = 0; i < used_i; ++i) {
@@ -1417,7 +1372,7 @@ jit_set_returns_pc(Parrot_jit_info_t *jit_info, PARROT_INTERP,
     PMC *sig_pmc;
     INTVAL *sig_bits, sig;
 
-    sig_pmc = CONTEXT(interp)->constants[CUR_OPCODE[1]]->u.key;
+    sig_pmc = Parrot_pcc_get_pmc_constant(interp, CURRENT_CONTEXT(interp), CUR_OPCODE[1]);
     if (!VTABLE_elements(interp, sig_pmc))
         return;
     GETATTR_FixedIntegerArray_int_array(interp, sig_pmc, sig_bits);
@@ -1477,7 +1432,6 @@ jit_set_args_pc(Parrot_jit_info_t *jit_info, PARROT_INTERP,
 {
     PMC *sig_args, *sig_params, *sig_result;
     INTVAL *sig_bits, sig, i, n;
-    PackFile_Constant ** constants;
     opcode_t *params, *result;
     char params_map;
     int skip, used_n;
@@ -1491,13 +1445,12 @@ jit_set_args_pc(Parrot_jit_info_t *jit_info, PARROT_INTERP,
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "set_args_jit - can't do that yet ");
 
-    constants = CONTEXT(interp)->constants;
-    sig_args  = constants[CUR_OPCODE[1]]->u.key;
+    sig_args  = Parrot_pcc_get_pmc_constant(interp, CURRENT_CONTEXT(interp), CUR_OPCODE[1]);
 
     if (!VTABLE_elements(interp, sig_args))
         return;
     params = jit_info->optimizer->sections->begin;
-    sig_params = constants[params[1]]->u.key;
+    sig_params = Parrot_pcc_get_pmc_constant(interp, CURRENT_CONTEXT(interp), params[1]);
     ASSERT_SIG_PMC(sig_params);
     GETATTR_FixedIntegerArray_int_array(interp, sig_args, sig_bits);
     n = VTABLE_elements(interp, sig_args);
@@ -1507,7 +1460,7 @@ jit_set_args_pc(Parrot_jit_info_t *jit_info, PARROT_INTERP,
      */
     result = CUR_OPCODE + 2 + n + 3; /* set_args, set_p_pc */
     PARROT_ASSERT(*result == PARROT_OP_get_results_pc);
-    sig_result = constants[result[1]]->u.key;
+    sig_result = Parrot_pcc_get_pmc_constant(interp, CURRENT_CONTEXT(interp), result[1]);
     ASSERT_SIG_PMC(sig_result);
 
     if (!VTABLE_elements(interp, sig_result))
@@ -1787,7 +1740,6 @@ Parrot_jit_begin_sub_regs(Parrot_jit_info_t *jit_info,
      */
     if (jit_info->flags & JIT_CODE_RECURSIVE) {
         char * L1;
-        PackFile_Constant ** constants;
         PMC *sig_result;
         opcode_t *result;
 
@@ -1796,9 +1748,8 @@ Parrot_jit_begin_sub_regs(Parrot_jit_info_t *jit_info,
         L1 = NATIVECODE;
         emitm_calll(NATIVECODE, 0);
         /* check type of return value */
-        constants = CONTEXT(interp)->constants;
-        result = CONTEXT(interp)->current_results;
-        sig_result = constants[result[1]]->u.key;
+        result      = Parrot_pcc_get_results(interp, CURRENT_CONTEXT(interp));
+        sig_result  = Parrot_pcc_get_pmc_constant(interp, CURRENT_CONTEXT(interp), result[1]);
         if (!VTABLE_elements(interp, sig_result))
             goto no_result;
         /* fetch args to %edx */
@@ -2133,8 +2084,9 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
     const int ST_SIZE_OF           = 124;
     const int JIT_ALLOC_SIZE       = 1024;
 
+    char      *signature_str      = Parrot_str_to_cstring(interp, signature);
     /* skip over the result */
-    char      *sig                = (char *)signature->strstart + 1;
+    char      *sig                = signature_str + 1;
     size_t     stack_space_needed = calc_signature_needs(sig,
                                         &string_buffer_count);
 
@@ -2158,6 +2110,9 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
      * should free the function pointer returned here
      */
     pc = jit_info.native_ptr = jit_info.arena.start = (char *)mem_alloc_executable(JIT_ALLOC_SIZE);
+    if (! pc)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_JIT_ERROR,
+                "Cannot allocate executable memory");
 
 
     /* this generated jit function will be called as (INTERP (EBP 8), func_ptr
@@ -2265,16 +2220,16 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
                 break;
             case 'v':
                 break;
-            case 'b':   /* buffer (void*) pass PObj_bufstart(SReg) */
+            case 'b':   /* buffer (void*) pass Buffer_bufstart(SReg) */
                 emitm_call_cfunc(pc, get_nci_S);
                 emitm_movl_m_r(interp, pc, emit_EAX, emit_EAX, 0, 1,
-                               (size_t) &PObj_bufstart((STRING *) NULL));
+                               (size_t) &Buffer_bufstart((STRING *) NULL));
                 emitm_movl_r_m(interp, pc, emit_EAX, emit_EBP, 0, 1, args_offset);
                 break;
-            case 'B':   /* buffer (void**) pass &PObj_bufstart(SReg) */
+            case 'B':   /* buffer (void**) pass &Buffer_bufstart(SReg) */
                 emitm_call_cfunc(pc, get_nci_S);
                 emitm_lea_m_r(interp, pc, emit_EAX, emit_EAX, 0, 1,
-                              (size_t) &PObj_bufstart((STRING *) NULL));
+                              (size_t) &Buffer_bufstart((STRING *) NULL));
                 emitm_movl_r_m(interp, pc, emit_EAX, emit_EBP, 0, 1, args_offset);
                 break;
             case 'S':
@@ -2289,6 +2244,7 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
             case '4':
             case 'V':
                 mem_free_executable(jit_info.native_ptr, JIT_ALLOC_SIZE);
+                Parrot_str_free_cstring(signature_str);
                 return NULL;
                 break;
             default:
@@ -2299,6 +2255,7 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
                  * cleanup and try nci.c
                  */
                 mem_free_executable(jit_info.native_ptr, JIT_ALLOC_SIZE);
+                Parrot_str_free_cstring(signature_str);
                 return NULL;
         }
         args_offset +=4;
@@ -2343,7 +2300,7 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
 
     /* now place return value in registers */
     /* first in signature is the return value */
-    sig = (char *)signature->strstart; /* the result */
+    sig = signature_str; /* the result */
     switch (*sig) {
         /* I have no idea how to handle these */
         case '2':
@@ -2442,6 +2399,7 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
              * oops unknown signature:
              * cleanup and try nci.c
              */
+            Parrot_str_free_cstring(signature_str);
             mem_free_executable(jit_info.native_ptr, JIT_ALLOC_SIZE);
             return NULL;
     }
@@ -2458,10 +2416,12 @@ Parrot_jit_build_call_func(PARROT_INTERP, PMC *pmc_nci, STRING *signature, int *
     jit_emit_stack_frame_leave(pc);
     emitm_ret(pc);
     PARROT_ASSERT(pc - jit_info.arena.start <= JIT_ALLOC_SIZE);
+
     /* could shrink arena.start here to used size */
-    PObj_active_destroy_SET(pmc_nci);
+
     if (sizeptr)
         *sizeptr = JIT_ALLOC_SIZE;
+    Parrot_str_free_cstring(signature_str);
     return (void *)D2FPTR(jit_info.arena.start);
 }
 

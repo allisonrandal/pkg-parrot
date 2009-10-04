@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Match.pir 40143 2009-07-18 14:10:54Z fperrad $
+# $Id: Match.pir 40786 2009-08-25 15:36:00Z pmichaud $
 
 =head1 NAME
 
@@ -243,7 +243,7 @@ Return the original item being matched.
 =cut
 
 .sub 'orig' :method
-    $P0 = getattribute self, '$!target'
+    $P0 = getattribute self, '$.target'
     .return ($P0)
 .end
 
@@ -275,40 +275,6 @@ has been set, then it returns the string between C<.from> and C<.to>.
     .return (obj)
   ret_null:
     .tailcall self.'Str'()
-.end
-
-
-=item C<find_key([ key1, key2, ... ])>
-
-Find the first of C<key1>, C<key2>, etc. in the current
-Match object, and return it.  Returns '' if none of
-the specified keys are found.  If no keys are specified,
-then simply return the first key found.
-
-=cut
-
-.sub 'find_key' :method
-    .param pmc keys            :slurpy
-    if null keys goto first_key
-    unless keys goto first_key
-  loop:
-    unless keys goto not_found
-    $S0 = shift keys
-    $I0 = exists self[$S0]
-    unless $I0 goto loop
-    .return ($S0)
-  first_key:
-    $P0 = self.'hash'()
-    $P1 = iter $P0
-    unless $P1 goto not_found
-  next:
-    $S0 = shift $P1
-    $P2 = $P0[$S0]
-    $I0 = isa $P2, 'Capture'
-    unless $I0 goto next
-    .return ($S0)
-  not_found:
-    .return ('')
 .end
 
 

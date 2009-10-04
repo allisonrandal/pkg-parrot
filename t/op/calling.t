@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: calling.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: calling.t 41258 2009-09-14 09:56:40Z bacek $
 
 use strict;
 use warnings;
@@ -1406,7 +1406,10 @@ CODE
 ok
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "clone_key_arg" );
+my @todo = ( todo => 'broken with JIT (TT #983)' )
+    if ( defined $ENV{TEST_PROG_ARGS} and
+        $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/ );
+pir_output_is( <<'CODE', <<'OUTPUT', "clone_key_arg", @todo );
 .sub main :main
     foo()
     print "ok\n"

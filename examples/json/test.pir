@@ -1,30 +1,29 @@
 #!../../parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: test.pir 39149 2009-05-24 12:42:07Z NotFound $
+# $Id: test.pir 41138 2009-09-07 21:53:09Z japhb $
 
 .sub main :main
-  .param pmc argv
+   .param pmc argv
 
-  .local int argc
-  argc = elements argv
+   .local int argc
+   argc = elements argv
 
-  if argc != 2 goto bad_args
+   if argc != 2 goto bad_args
 
-  load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pbc'
-  load_bytecode 'compilers/json/JSON.pbc'
-
-  .local pmc JSON
-  JSON = compreg "JSON"
-  $S0 = argv[1]
-  $P1 = JSON($S0)
+   .local pmc    json, code, data
+   .local string text
+   load_language  'data_json'
+   json = compreg 'data_json'
+   text = argv[1]
+   code = json.'compile'(text)
+   data = code()
 
    load_bytecode 'dumper.pbc'
-   _dumper($P1, "JSON")
+   _dumper(data, 'JSON')
    end
 
   bad_args:
-   say "must specify a single arg."
+   say "Must specify a single arg."
    end
 .end
 

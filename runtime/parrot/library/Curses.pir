@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Curses.pir 40153 2009-07-19 07:20:51Z tene $
+# $Id: Curses.pir 40256 2009-07-24 19:37:52Z tene $
 
 .macro export_dl_func(lib, name, sig)
     .local pmc edlftmp
@@ -687,6 +687,8 @@ dlfunc $P2, $P1, 'mcprint', 'iti'
 set_global 'mcprint', $P2
 dlfunc $P2, $P1, 'has_key', 'ii'
 set_global 'has_key', $P2
+.export_dl_func($P1, 'getmaxx', 'ip')
+.export_dl_func($P1, 'getmaxy', 'ip')
 
 .begin_return
 .end_return

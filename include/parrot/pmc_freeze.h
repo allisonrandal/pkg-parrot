@@ -1,7 +1,7 @@
 /* pmc_freeze.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: pmc_freeze.h 39033 2009-05-22 06:32:33Z petdance $
+ *     $Id: pmc_freeze.h 41146 2009-09-08 00:16:54Z whiteknight $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:
@@ -91,35 +91,28 @@ typedef struct _visit_info {
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
-PMC* Parrot_clone(PARROT_INTERP, ARGIN(PMC* pmc))
+PMC* Parrot_clone(PARROT_INTERP, ARGIN(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
-STRING* Parrot_freeze(PARROT_INTERP, ARGIN(PMC* pmc))
+STRING* Parrot_freeze(PARROT_INTERP, ARGIN(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
-STRING* Parrot_freeze_at_destruct(PARROT_INTERP, ARGIN(PMC* pmc))
+PMC* Parrot_thaw(PARROT_INTERP, ARGIN(STRING *image))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
-PMC* Parrot_thaw(PARROT_INTERP, ARGIN(STRING* image))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-PMC* Parrot_thaw_constants(PARROT_INTERP, ARGIN(STRING* image))
+PMC* Parrot_thaw_constants(PARROT_INTERP, ARGIN(STRING *image))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
@@ -127,9 +120,6 @@ PMC* Parrot_thaw_constants(PARROT_INTERP, ARGIN(STRING* image))
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_freeze __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pmc)
-#define ASSERT_ARGS_Parrot_freeze_at_destruct __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_thaw __attribute__unused__ int _ASSERT_ARGS_CHECK = \

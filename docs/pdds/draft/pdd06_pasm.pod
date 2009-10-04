@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd06_pasm.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id: pdd06_pasm.pod 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 [DRAFT] PDD 6: Parrot Assembly Language (PASM)
 
@@ -202,20 +202,6 @@ Jump to the address held in register x (Px, Sx, or Ix).
 
 Branch forward or backward by the amount in register x. (X may be either Ix,
 Nx, or Px) Branch offset may also be an integer constant.
-
-=item jsr tx
-
-Jump to the location specified by register X. Push the current location onto
-the call stack for later returning.
-
-=item bsr ix
-
-Branch to the location specified by X (either register or label). Push the
-current location onto the call stack for later returning.
-
-=item ret
-
-Pop the location off the top of the stack and go there.
 
 =back
 

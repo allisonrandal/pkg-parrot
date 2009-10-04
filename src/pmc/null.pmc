@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: null.pmc 38794 2009-05-15 16:12:33Z coke $
+$Id: null.pmc 40350 2009-07-31 00:12:14Z NotFound $
 
 =head1 NAME
 
@@ -18,6 +18,15 @@ really slowing down the bytecode execution.
 =cut
 
 */
+
+PARROT_DOES_NOT_RETURN
+static void
+null_pmc_access(PARROT_INTERP, int index)
+{
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NULL_REG_ACCESS,
+            "Null PMC access in %s()",
+            Parrot_get_vtable_name(interp, index));
+}
 
 pmclass Null singleton {
 

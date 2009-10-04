@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: four_plus_one.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: four_plus_one.pir 40200 2009-07-21 21:51:54Z bacek $
 
 # Set up a PAST data structure that represents a sub and run it.
 
@@ -116,11 +116,11 @@
 .sub 'say'
     .param pmc args :slurpy
     if null args goto end
-    .local pmc iter
-    iter = new 'Iterator', args
+    .local pmc it
+    it = iter args
   loop:
-    unless iter goto end
-    $P0 = shift iter
+    unless it goto end
+    $P0 = shift it
     print $P0
     goto loop
   end:

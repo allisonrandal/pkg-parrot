@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: cygwin.pm 39045 2009-05-22 16:17:19Z Infinoid $
+# $Id: cygwin.pm 41094 2009-09-07 05:18:19Z cotto $
 
 package init::hints::cygwin;
 
@@ -73,6 +73,7 @@ sub runstep {
         $conf->data->set(cc => 'gcc-4') unless $conf->options->get('cc');
         $conf->data->set(ld => 'g++-4') unless $conf->options->get('ld');
     }
+    $conf->data->set( clock_best => '-DCLOCK_BEST=CLOCK_REALTIME' );
 }
 
 1;

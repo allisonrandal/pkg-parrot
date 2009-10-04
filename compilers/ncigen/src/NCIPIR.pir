@@ -1,4 +1,4 @@
-# $Id: NCIPIR.pir 38115 2009-04-15 14:41:32Z fperrad $
+# $Id: NCIPIR.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 NAME
 
@@ -134,14 +134,14 @@ Return generated PIR for C<node> and all of its children.
 
 .sub 'pir_children' :method
     .param pmc node
-    .local pmc code, iter
+    .local pmc code, it
     code = new 'CodeString'
-    iter = new 'Iterator', node
+    it   = iter node
   iter_loop:
-    unless iter goto iter_end
+    unless it goto iter_end
     .local string key
     .local pmc cast
-    key = shift iter
+    key = shift it
     cast = node[key]
     $P0 = self.'pir'(cast)
     code .= $P0

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: pic.c 39168 2009-05-25 02:57:18Z petdance $
+$Id: pic.c 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -78,6 +78,7 @@ lookup of the cache has to be done in the opcode itself.
 
 #include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
+#include "parrot/runcore_api.h"
 #include "pmc/pmc_fixedintegerarray.h"
 #include "pmc/pmc_continuation.h"
 #ifdef HAVE_COMPUTED_GOTO
@@ -109,10 +110,11 @@ extern void Parrot_Integer_i_subtract_Integer(Interp* , PMC* pmc, PMC* value);
 static int is_pic_func(PARROT_INTERP,
     ARGIN(void **pc),
     ARGOUT(Parrot_MIC *mic),
-    int core_type)
+    ARGIN(Parrot_runcore_t *runcore))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
         FUNC_MODIFIES(*mic);
 
 static int is_pic_param(PARROT_INTERP,
@@ -197,7 +199,8 @@ static int pass_str(PARROT_INTERP,
 #define ASSERT_ARGS_is_pic_func __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pc) \
-    || PARROT_ASSERT_ARG(mic)
+    || PARROT_ASSERT_ARG(mic) \
+    || PARROT_ASSERT_ARG(runcore)
 #define ASSERT_ARGS_is_pic_param __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pc) \
@@ -417,9 +420,10 @@ parrot_pic_opcode(PARROT_INTERP, INTVAL op)
 #ifdef HAVE_COMPUTED_GOTO
     op_lib_t *cg_lib;
 #endif
-    const int core = interp->run_core;
+    const Parrot_runcore_t *core = interp->run_core;
 
-    if (core == PARROT_SWITCH_CORE || core == PARROT_SWITCH_JIT_CORE)
+    if (PARROT_RUNCORE_PREDEREF_OPS_TEST(core)
+    && !PARROT_RUNCORE_CGOTO_OPS_TEST(core))
         return (void *)op;
 #ifdef HAVE_COMPUTED_GOTO
     cg_lib = PARROT_CORE_CGP_OPLIB_INIT(1);
@@ -427,6 +431,7 @@ parrot_pic_opcode(PARROT_INTERP, INTVAL op)
 #else
     return NULL;
 #endif
+
 }
 
 /*
@@ -694,24 +699,24 @@ static int
 is_pic_param(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), opcode_t op)
 {
     ASSERT_ARGS(is_pic_param)
-    PMC                           *sig2;
-    Parrot_Context                *caller_ctx;
-    opcode_t                      *args;
-    PMC                    * const sig1 = (PMC *)(pc[1]);
-    const Parrot_Context   * const ctx  = CONTEXT(interp);
-    int                            type = 0;
+    PMC                *sig2;
+    PMC                *caller_ctx;
+    opcode_t           *args;
+    PMC         * const sig1 = (PMC *)(pc[1]);
+    PMC                *ctx  = CURRENT_CONTEXT(interp);
+    int                 type = 0;
 
     /* check params */
 
     if (op == PARROT_OP_set_returns_pc) {
-        PMC * const ccont = ctx->current_cont;
+        PMC * const ccont = Parrot_pcc_get_continuation(interp, ctx);
         if (!PMC_cont(ccont)->address)
             return 0;
         caller_ctx = PMC_cont(ccont)->to_ctx;
-        args       = caller_ctx->current_results;
+        args       = Parrot_pcc_get_results(interp, caller_ctx);
     }
     else {
-        caller_ctx = ctx->caller_ctx;
+        caller_ctx = Parrot_pcc_get_caller_ctx(interp, ctx);
         args       = interp->current_args;
     }
 
@@ -720,7 +725,7 @@ is_pic_param(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), opcode_t 
         int          n;
 
         /* check current_args signature */
-        sig2 = caller_ctx->constants[const_nr]->u.key;
+        sig2 = Parrot_pcc_get_pmc_constant(interp, caller_ctx, const_nr);
         n    = parrot_pic_check_sig(interp, sig1, sig2, &type);
 
         if (n == -1)
@@ -766,15 +771,16 @@ is_pic_param(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), opcode_t 
 
 /*
 
-=item C<static int is_pic_func(PARROT_INTERP, void **pc, Parrot_MIC *mic, int
-core_type)>
+=item C<static int is_pic_func(PARROT_INTERP, void **pc, Parrot_MIC *mic,
+Parrot_runcore_t *runcore)>
 
 =cut
 
 */
 
 static int
-is_pic_func(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), int core_type)
+is_pic_func(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic),
+            ARGIN(Parrot_runcore_t *runcore))
 {
     ASSERT_ARGS(is_pic_func)
     /*
@@ -799,19 +805,19 @@ is_pic_func(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), int core_t
     opcode_t *op, n;
     int flags;
 
-    Parrot_Context * const ctx      = CONTEXT(interp);
-    PMC            * const sig_args = (PMC *)(pc[1]);
+    PMC * const ctx      = CURRENT_CONTEXT(interp);
+    PMC * const sig_args = (PMC *)(pc[1]);
 
     ASSERT_SIG_PMC(sig_args);
     n                    = VTABLE_elements(interp, sig_args);
-    interp->current_args = (opcode_t*)pc + ctx->pred_offset;
+    interp->current_args = (opcode_t*)pc + Parrot_pcc_get_pred_offset(interp, ctx);
     pc                  += 2 + n;
-    op                   = (opcode_t*)pc + ctx->pred_offset;
+    op                   = (opcode_t*)pc + Parrot_pcc_get_pred_offset(interp, ctx);
 
     if (*op != PARROT_OP_set_p_pc)
         return 0;
 
-    do_prederef(pc, interp, core_type);
+    do_prederef(pc, interp, runcore);
     sub = (PMC *)(pc[2]);
 
     PARROT_ASSERT(PObj_is_PMC_TEST(sub));
@@ -820,16 +826,16 @@ is_pic_func(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), int core_t
         return 0;
 
     pc += 3;    /* results */
-    op  = (opcode_t *)pc + ctx->pred_offset;
+    op  = (opcode_t *)pc + Parrot_pcc_get_pred_offset(interp, ctx);
 
     if (*op != PARROT_OP_get_results_pc)
         return 0;
 
-    do_prederef(pc, interp, core_type);
+    do_prederef(pc, interp, runcore);
     sig_results = (PMC *)(pc[1]);
     ASSERT_SIG_PMC(sig_results);
 
-    ctx->current_results = (opcode_t *)pc + ctx->pred_offset;
+    Parrot_pcc_set_results(interp, ctx, (opcode_t *)pc + Parrot_pcc_get_pred_offset(interp, ctx));
     if (!parrot_pic_is_safe_to_jit(interp, sub, sig_args, sig_results, &flags))
         return 0;
 
@@ -841,8 +847,8 @@ is_pic_func(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), int core_t
 
 /*
 
-=item C<void parrot_PIC_prederef(PARROT_INTERP, opcode_t op, void **pc_pred, int
-core)>
+=item C<void parrot_PIC_prederef(PARROT_INTERP, opcode_t op, void **pc_pred,
+Parrot_runcore_t *core)>
 
 Define either the normal prederef function or the PIC stub, if PIC for
 this opcode function is available. Called from C<do_prederef>.
@@ -852,7 +858,8 @@ this opcode function is available. Called from C<do_prederef>.
 */
 
 void
-parrot_PIC_prederef(PARROT_INTERP, opcode_t op, ARGOUT(void **pc_pred), int core)
+parrot_PIC_prederef(PARROT_INTERP, opcode_t op, ARGOUT(void **pc_pred),
+    ARGIN(Parrot_runcore_t *core))
 {
     ASSERT_ARGS(parrot_PIC_prederef)
     op_func_t * const prederef_op_func = interp->op_lib->op_func_table;
@@ -897,7 +904,8 @@ parrot_PIC_prederef(PARROT_INTERP, opcode_t op, ARGOUT(void **pc_pred), int core
     }
 
     /* rewrite opcode */
-    if (core == PARROT_SWITCH_CORE || core == PARROT_SWITCH_JIT_CORE)
+    if (PARROT_RUNCORE_PREDEREF_OPS_TEST(core)
+    && !PARROT_RUNCORE_CGOTO_OPS_TEST(core))
         *pc_pred = (void **)op;
     else
         *pc_pred = ((void **)prederef_op_func)[op];

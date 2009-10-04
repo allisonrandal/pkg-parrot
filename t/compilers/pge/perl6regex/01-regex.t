@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: 01-regex.t 38705 2009-05-11 22:13:04Z NotFound $
+# $Id: 01-regex.t 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 NAME
 
@@ -93,7 +93,7 @@ Description of the test.
                has_icu = config['has_icu']
 
     .local pmc file_iterator # iterate over list of files..
-               file_iterator = new 'Iterator', test_files
+               file_iterator = iter test_files
 
     .local int test_number   # the number of the test we're running
                test_number = 0

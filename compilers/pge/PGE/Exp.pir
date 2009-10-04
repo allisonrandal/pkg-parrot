@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Exp.pir 40175 2009-07-20 23:45:12Z pmichaud $
+# $Id: Exp.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 TITLE
 
@@ -443,15 +443,15 @@ tree as a PIR code object that can be compiled.
     .param string label
     .param string next
 
-    .local pmc iter, exp
+    .local pmc it, exp
     code.'emit'('        %0: # concat', label)
     $P0 = self.'list'()
-    iter = new 'Iterator', $P0
-    exp = shift iter
+    it  = iter $P0
+    exp = shift it
     $S0 = code.'unique'('R')
   iter_loop:
-    unless iter goto iter_end
-    $P1 = shift iter
+    unless it goto iter_end
+    $P1 = shift it
     $S1 = code.'unique'('R')
     exp.'pir'(code, $S0, $S1)
     exp = $P1

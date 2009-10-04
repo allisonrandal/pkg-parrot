@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2009, Parrot Foundation.
-$Id: float.pmc 39241 2009-05-29 22:03:13Z chromatic $
+$Id: float.pmc 41229 2009-09-12 13:14:55Z bacek $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ C<Float> extends C<scalar> to provide floating-point number operations.
 
 */
 
-pmclass Float extends scalar provides float provides scalar {
+pmclass Float extends scalar provides float provides scalar auto_attrs {
     ATTR FLOATVAL fv;
 
 /*
@@ -32,26 +32,9 @@ Initializes the number to zero.
 */
 
     VTABLE void init() {
-        Parrot_Float_attributes * const fattr = mem_allocate_zeroed_typed(Parrot_Float_attributes);
-
-        fattr->fv      = 0.0;
-        PMC_data(SELF) = fattr;
-
-        PObj_active_destroy_SET(SELF);
+        SET_ATTR_fv(INTERP, SELF, 0.0);
     }
-/*
 
-=item C<void destroy()>
-
-Destroy this PMC.
-
-=cut
-
-*/
-
-    VTABLE void destroy() {
-        mem_sys_free(PMC_data(SELF));
-    }
 /*
 
 =item C<PMC *clone()>
@@ -192,22 +175,6 @@ Sets the value of the number to C<value>.
 
     VTABLE void set_number_native(FLOATVAL value) {
         SET_ATTR_fv(INTERP, SELF, value);
-    }
-
-/*
-
-=item C<void set_number_same(PMC *value)>
-
-Sets the value of the number to the value of C<*value>.
-
-=cut
-
-*/
-
-    VTABLE void set_number_same(PMC *value) {
-        FLOATVAL fv;
-        GET_ATTR_fv(INTERP, value, fv);
-        SET_ATTR_fv(INTERP, SELF, fv);
     }
 
 /*

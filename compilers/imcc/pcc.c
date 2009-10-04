@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2009, Parrot Foundation.
- * $Id: pcc.c 39725 2009-06-22 21:39:26Z NotFound $
+ * $Id: pcc.c 40270 2009-07-25 21:30:05Z chromatic $
  */
 
 /*
@@ -783,7 +783,7 @@ expand_pcc_sub_call(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction *i
 
             /* insert set_p_pc with the sub as constant */
             the_sub->set    = 'p';
-            the_sub->usage  = U_FIXUP;
+            the_sub->usage |= U_FIXUP;
             the_sub->type  &= ~VTADDRESS;
             the_sub->type  |= VTCONST;   /* preserve VT_ENCODED */
             regs[0]         = reg;

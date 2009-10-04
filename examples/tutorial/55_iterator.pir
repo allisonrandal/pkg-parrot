@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 55_iterator.pir 39674 2009-06-20 14:09:03Z cotto $
+# $Id: 55_iterator.pir 40200 2009-07-21 21:51:54Z bacek $
 
 =head1 iterators
 
@@ -17,15 +17,15 @@ opcode on it.
 =cut
 
 .sub main :main
-    .local pmc myarray, iter
+    .local pmc myarray, it
 
     myarray = split " ", "foo bar baz boz"
 
-    iter = new ['Iterator'], myarray
+    it = iter myarray
   iter_loop:
-    unless iter goto iter_end
+    unless it goto iter_end
 
-    $P0 = shift iter
+    $P0 = shift it
     say $P0
 
     goto iter_loop

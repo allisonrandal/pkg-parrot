@@ -1,9 +1,8 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: overload.pir 38923 2009-05-19 06:07:42Z cotto $
+# $Id: overload.pir 40199 2009-07-21 21:51:08Z bacek $
 
 .sub bench :main
 .include "pmctypes.pasm"
-.include "mmd.pasm"
    .local int i
    .local pmc r
    .local pmc a

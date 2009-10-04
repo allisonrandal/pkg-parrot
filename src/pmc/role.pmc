@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: role.pmc 38794 2009-05-15 16:12:33Z coke $
+$Id: role.pmc 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -102,7 +102,7 @@ static void init_role_from_hash(PARROT_INTERP, PMC *self, PMC *info)
         /* Namespace is nested in the current namespace and with the name of
          * the role. */
         role->_namespace = Parrot_make_namespace_keyed_str(interp,
-            CONTEXT(interp)->current_namespace, role->name);
+            Parrot_pcc_get_namespace(interp, CURRENT_CONTEXT(interp)), role->name);
     }
 
     /* Otherwise, we may just have a namespace. */
@@ -198,7 +198,7 @@ static void init_role_from_hash(PARROT_INTERP, PMC *self, PMC *info)
 
 */
 
-pmclass Role need_ext {
+pmclass Role auto_attrs {
     ATTR STRING *name;            /* The name of the role. */
     ATTR PMC    *_namespace;      /* The namespace it's linked to, if any. */
     ATTR PMC    *roles;           /* Roles from which this role is composed. */
@@ -221,12 +221,11 @@ C<init_data>.
 */
 
     VTABLE void init() {
-        Parrot_Role_attributes * const role = mem_allocate_zeroed_typed(Parrot_Role_attributes);
-        PMC_data(SELF)        = role;
+        Parrot_Role_attributes * const role =
+                (Parrot_Role_attributes *) PMC_data(SELF);
 
-        /* Set flags for custom GC mark and destroy. */
+        /* Set flags for custom GC mark. */
         PObj_custom_mark_SET(SELF);
-        PObj_active_destroy_SET(SELF);
 
         /* Set up the object. */
         role->name            = CONST_STRING(interp, "");
@@ -242,20 +241,6 @@ C<init_data>.
 
         /* Initialize the role with the supplied data. */
         init_role_from_hash(interp, SELF, init_data);
-    }
-
-/*
-
-=item C<void destroy()>
-
-Free the memory associated with the object's underlying struct.
-
-=cut
-
-*/
-
-    VTABLE void destroy() {
-        mem_sys_free(PMC_data(SELF));
     }
 
 /*

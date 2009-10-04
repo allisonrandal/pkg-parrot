@@ -1,5 +1,5 @@
 
-# $Id: StopWatch.pir 37870 2009-04-02 18:58:28Z barney $
+# $Id: StopWatch.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 NAME
 
@@ -282,8 +282,7 @@ It is drawn onto the screen consigned to the constructor.
     $I0 = array
     if $I0 == 0 goto DISABLE
 
-    array = new 'Iterator', array
-    array = .ITERATE_FROM_START
+    array = iter array
 LOOP:
     unless array goto END
     $P0 = shift array

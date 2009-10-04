@@ -2,7 +2,7 @@
 Copyright (C) 2001-2009, Parrot Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packdump.c 39812 2009-06-28 06:35:41Z petdance $
+$Id: packdump.c 40965 2009-09-04 01:05:05Z cotto $
 
 =head1 NAME
 
@@ -100,7 +100,6 @@ PARROT_OBSERVER static const char * const flag_bit_names[] =
     "private7",
     "is_string",
     "is_PMC",
-    "is_PMC_EXT",
     "is_shared",
     "constant",
     "external",
@@ -112,11 +111,10 @@ PARROT_OBSERVER static const char * const flag_bit_names[] =
     "on_free_list",
     "custom_mark",
     "custom_GC",
-    "active_destroy",
+    "custom_destroy",
     "report",
     "data_is_PMC_array",
     "need_finalize",
-    "is_special_PMC",
     "high_priority_gc",
     "needs_early_gc",
     "is_class",
@@ -194,16 +192,6 @@ PackFile_Constant_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *ct),
             opcode_t type = PObj_get_FLAGS(key);
 
             Parrot_io_printf(interp, "       {\n");
-            if ((type & (KEY_start_slice_FLAG|KEY_inf_slice_FLAG)) ==
-                (KEY_start_slice_FLAG|KEY_inf_slice_FLAG))
-                Parrot_io_printf(interp, "        SLICE_BITS  => PF_VT_END_INF\n");
-            if ((type & (KEY_end_slice_FLAG|KEY_inf_slice_FLAG)) ==
-                (KEY_end_slice_FLAG|KEY_inf_slice_FLAG))
-                Parrot_io_printf(interp, "        SLICE_BITS  => PF_VT_START_ZERO\n");
-            if (type & KEY_start_slice_FLAG)
-                Parrot_io_printf(interp, "        SLICE_BITS  => PF_VT_START_SLICE\n");
-            if (type & KEY_end_slice_FLAG)
-                Parrot_io_printf(interp, "        SLICE_BITS  => PF_VT_END_SLICE\n");
 
             type &= KEY_type_FLAGS;
             pobj_flag_dump(interp, (long)PObj_get_FLAGS(key));
@@ -236,9 +224,8 @@ PackFile_Constant_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *ct),
                     ct_index = PackFile_find_in_const(interp, ct, key, PFC_STRING);
                     Parrot_io_printf(interp, "        PFC_OFFSET  => %ld\n", ct_index);
                     detail = ct->constants[ct_index];
-                    Parrot_io_printf(interp, "        DATA        => '%.*s'\n",
-                              (int)detail->u.string->bufused,
-                              (char *)detail->u.string->strstart);
+                    Parrot_io_printf(interp, "        DATA        => '%Ss'\n",
+                              detail->u.string);
                     Parrot_io_printf(interp, "       },\n");
                     }
                     break;
@@ -279,7 +266,7 @@ PackFile_Constant_dump(PARROT_INTERP, ARGIN(const PackFile_ConstTable *ct),
         Parrot_io_printf(interp, "    [ 'PFC_PMC', {\n");
         {
             PMC * const pmc = self->u.key;
-            Parrot_sub *sub;
+            Parrot_Sub_attributes *sub;
             STRING * const null = Parrot_str_new_constant(interp, "(null)");
             STRING *namespace_description;
 

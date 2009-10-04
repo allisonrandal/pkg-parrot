@@ -1,4 +1,4 @@
-# $Id: vtable.tbl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: vtable.tbl 41229 2009-09-12 13:14:55Z bacek $
 # [MAIN] #default section name
 
 # MMD_EQ ... MMD_STRCMP must be in one block
@@ -66,13 +66,11 @@ void* get_pointer_keyed_str(STRING* key)
 
 [STORE] :write
 void set_integer_native(INTVAL value)
-void set_integer_same(PMC* value)
 void set_integer_keyed(PMC* key, INTVAL value)
 void set_integer_keyed_int(INTVAL key, INTVAL value)
 void set_integer_keyed_str(STRING* key, INTVAL value)
 
 void set_number_native(FLOATVAL value)
-void set_number_same(PMC* value)
 void set_number_keyed(PMC* key, FLOATVAL value)
 void set_number_keyed_int(INTVAL key, FLOATVAL value)
 void set_number_keyed_str(STRING* key, FLOATVAL value)
@@ -83,7 +81,6 @@ void set_bignum_str(STRING* value)
 
 void set_string_native(STRING* value)
 void assign_string_native(STRING* value)
-void set_string_same(PMC* value)
 void set_string_keyed(PMC* key, STRING* value)
 void set_string_keyed_int(INTVAL key, STRING* value)
 void set_string_keyed_str(STRING* key, STRING* value)
@@ -316,9 +313,6 @@ void delete_keyed_int(INTVAL key)
 void delete_keyed_str(STRING* key)
 
 [MAIN]
-PMC* nextkey_keyed(PMC* key, INTVAL what)
-PMC* nextkey_keyed_int(INTVAL key, INTVAL what)
-PMC* nextkey_keyed_str(STRING* key, INTVAL what)
 PMC* get_iter()
 
 opcode_t* invoke(void* next)

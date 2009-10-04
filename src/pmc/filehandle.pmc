@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008-2009, Parrot Foundation.
-$Id: filehandle.pmc 40139 2009-07-18 04:54:10Z petdance $
+$Id: filehandle.pmc 40936 2009-09-03 00:21:51Z chromatic $
 
 =head1 NAME
 
@@ -31,7 +31,7 @@ extern "C" {
 #endif
 #endif
 
-pmclass FileHandle extends Handle {
+pmclass FileHandle extends Handle auto_attrs {
     ATTR INTVAL flags;                /* Filehandle flags             */
     ATTR STRING *filename;            /* The opened path and filename */
     ATTR STRING *mode;                /* The mode string used in open */
@@ -64,9 +64,8 @@ Initializes a newly created FileHandle object.
 
     VTABLE void init() {
         Parrot_FileHandle_attributes * const data_struct =
-                mem_allocate_typed(Parrot_FileHandle_attributes);
+                (Parrot_FileHandle_attributes *) PMC_data(SELF);
 
-        PMC_data(SELF)             = data_struct;
         data_struct->flags         = 0;
         data_struct->filename      = NULL;
         data_struct->mode          = NULL;
@@ -85,7 +84,7 @@ Initializes a newly created FileHandle object.
         data_struct->os_handle     = (PIOHANDLE) PIO_INVALID_HANDLE;
 
         PObj_custom_mark_SET(SELF);
-        PObj_active_destroy_SET(SELF);
+        PObj_custom_destroy_SET(SELF);
     }
 
 /*
@@ -150,9 +149,6 @@ Free structures.
 
             if (data_struct->buffer_start)
                 mem_sys_free(data_struct->buffer_start);
-
-            mem_sys_free(PARROT_FILEHANDLE(SELF));
-            PMC_data(SELF) = NULL;
         }
     }
 
@@ -663,9 +659,11 @@ platforms that use integer file descriptors).
 
     METHOD get_fd() {
 #ifndef PIO_OS_STDIO
-        INTVAL os_handle;
+        PIOHANDLE os_handle;
+        INTVAL fd;
         GET_ATTR_os_handle(INTERP, SELF, os_handle);
-        RETURN(INTVAL os_handle);
+        fd = (INTVAL)os_handle;
+        RETURN(INTVAL fd);
 #endif /*PIO_OS_STDIO*/
 
         RETURN(INTVAL -1);

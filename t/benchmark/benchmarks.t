@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006, Parrot Foundation.
-# $Id: benchmarks.t 38923 2009-05-19 06:07:42Z cotto $
+# $Id: benchmarks.t 40603 2009-08-16 23:38:26Z mikehh $
 
 use strict;
 use warnings;
@@ -161,8 +161,8 @@ FixedPMCArray:\s\d+\.\d+s\n
     q{oo6.pir}      => qq(500000\n),
     q{oofib.pir}    => qr/^fib\(24\)\s=\s46368\s\d+\.\d+s$/x,
     q{overload.pir} => qq(42\n),
-    q{primes.pasm}  => qr/^N\sprimes\sup\sto\s1000\sis:\s168\n
-        last\sis:\s1001\n
+    q{primes.pasm}  => qr/^N\sprimes\sup\sto\s5000\sis:\s669\n
+        last\sis:\s5001\n
         Elapsed\stime:\s\d+\.\d+\n$/x,
     q{primes2.pir} => qr/^N\sprimes\scalculated\sto\s500\sis\s96\n
         last\sis:\s499\n$/x,

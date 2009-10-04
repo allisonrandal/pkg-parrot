@@ -1,11 +1,11 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: svn_id.t 38235 2009-04-20 18:58:55Z fperrad $
+# $Id: svn_id.t 40475 2009-08-10 03:02:23Z dukeleto $
 
 use strict;
 use warnings;
 use Cwd;
-use File::Spec ();
+use File::Spec::Functions;
 use lib qw( . lib ../lib ../../lib );
 use Parrot::Distribution;
 use Test::More            tests => 1;
@@ -35,18 +35,18 @@ L<docs/pdds/pdd07_codingstd.pod>
 =cut
 
 my $DIST = Parrot::Distribution->new;
-my $cwd = cwd();
+my $cwd  = getcwd(); # cwd() has some bugs when parent directory is a symbolic link
 
 # Certain files, for various reasons, cannot have an
 # SVN Id tag.  We exclude them from examination by this test.
 
 my %known_exceptions = map {
         $_ => 1,
-        ( File::Spec->catdir( $cwd, $_ ) ) => 1,
-    } qw(
-        examples/pir/quine_ord.pir
-        examples/streams/FileLines.pir
-        examples/streams/ParrotIO.pir
+        ( catdir( $cwd, $_ ) ) => 1,
+    } (
+        catfile(qw/ examples pir quine_ord.pir/),
+        catfile(qw/ examples streams FileLines.pir/),
+        catfile(qw/ examples streams ParrotIO.pir/),
     );
 
 my @files = grep { ! $known_exceptions{$_} }
@@ -59,6 +59,7 @@ my @files = grep { ! $known_exceptions{$_} }
             $DIST->get_pir_language_files(),
         )
 );
+
 my @no_id_files;
 
 foreach my $file (@files) {

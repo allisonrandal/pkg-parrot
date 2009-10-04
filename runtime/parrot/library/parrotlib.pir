@@ -1,4 +1,4 @@
-# $Id: parrotlib.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: parrotlib.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 INFORMATION
 
@@ -165,16 +165,15 @@ END:
     .param string name
     .param pmc array
     .local string ret
-    .local pmc iter
+    .local pmc it
 
-    iter = new 'Iterator', array
-    iter = 0 #ITERATE_FROM_START
+    it = iter array
 
 NEXT:
     null ret
-    unless iter goto END
+    unless it goto END
 
-    $P0 = shift iter
+    $P0 = shift it
     ret = $P0( name )
     if_null ret, NEXT
 END:
