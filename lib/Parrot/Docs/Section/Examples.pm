@@ -1,5 +1,5 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: Examples.pm 37466 2009-03-16 05:41:07Z cotto $
+# $Id$
 
 =head1 NAME
 

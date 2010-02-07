@@ -1,7 +1,7 @@
 #!perl
 
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: nopaste.pl 38612 2009-05-08 18:30:25Z Infinoid $
+# $Id$
 
 use 5.008;
 use strict;

@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: exceptionhandler.t 40958 2009-09-03 11:56:50Z bacek $
+# $Id$
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/pmc/exception_handler.t - test ExceptionHandler PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/exception_handler.t
+    % prove t/pmc/exceptionhandler.t
 
 =head1 DESCRIPTION
 

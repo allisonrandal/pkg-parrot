@@ -1,5 +1,5 @@
 
-# $Id: Font.pir 40110 2009-07-15 19:34:47Z NotFound $
+# $Id$
 
 =head1 NAME
 

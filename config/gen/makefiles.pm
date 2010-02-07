@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: makefiles.pm 41137 2009-09-07 21:07:11Z japhb $
+# $Id$
 
 =head1 NAME
 
@@ -35,6 +35,8 @@ sub _init {
             replace_slashes   => 0,
             conditioned_lines => 1,
         },
+
+        'ext/nqp-rx/Makefile' => { SOURCE => 'config/gen/makefiles/nqp-rx.in' },
 
         'compilers/ncigen/Makefile'  =>
             { SOURCE => 'compilers/ncigen/config/makefiles/ncigen.in' },

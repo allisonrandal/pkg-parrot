@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: install_dev_files.pl 41137 2009-09-07 21:07:11Z japhb $
+# $Id$
 ################################################################################
 
 =head1 TITLE
@@ -65,8 +65,8 @@ use Parrot::Install qw(
     lines_to_files
 );
 
-# When run from the makefile, which is probably the only time this
-# script will ever be used, all of these defaults will get overridden.
+# When run from the makefile, or from a test script, which are probably the only times
+# this script will ever be used, all of these defaults will get overridden.
 my %options = (
     buildprefix => '',
     prefix      => '/usr',
@@ -143,7 +143,6 @@ my(%metatransforms) = (
         optiondir => 'doc',
         transform => sub {
             my($filehash) = @_;
-            $filehash->{Dest} =~ s/^docs/pod/; # other docs are actually raw Pod
             $filehash->{DestDirs} = [$parrotdir];
             return($filehash);
         },

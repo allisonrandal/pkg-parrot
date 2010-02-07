@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: irix.pm 40811 2009-08-26 04:57:21Z dukeleto $
+# $Id$
 
 package init::hinits::irix;
 

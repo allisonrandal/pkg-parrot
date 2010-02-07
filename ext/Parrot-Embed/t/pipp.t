@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: pipp.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;

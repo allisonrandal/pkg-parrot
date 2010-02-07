@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: debian_packaging_guide.pod 40438 2009-08-07 01:58:14Z allison $
+# $Id$
 
 =head1 Debian Packaging Guide
 

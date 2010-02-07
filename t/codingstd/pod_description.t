@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, The Perl Foundation.
-# $Id: pod_description.t 37889 2009-04-03 13:36:30Z coke $
+# $Id$
 
 use strict;
 use warnings;
@@ -62,11 +62,11 @@ diag("\nFound $nempty_description files without DESCRIPTION sections.\n")
 
 #################### SUBROUTINES ####################
 
-=head1 t/codingstd/pod_description.t
+=head1 NAME
 
-Identify files lacking 'Description' section in their POD
+t/codingstd/pod_description.t - Identify files lacking 'DESCRIPTION' in POD
 
-=head2 SYNOPSIS
+=head1 SYNOPSIS
 
     # test all files
     % prove t/codingstd/pod_description.t
@@ -74,7 +74,7 @@ Identify files lacking 'Description' section in their POD
     # test specific files
     % perl t/codingstd/pod_description.t perl_module.pm perl_file.pl
 
-=head2 DESCRIPTION
+=head1 DESCRIPTION
 
 Tests the Pod syntax for all files listed in F<MANIFEST> and
 F<MANIFEST.generated> that appear to contain Pod markup. If any files

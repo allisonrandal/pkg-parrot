@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: triangle.pir 39521 2009-06-12 07:51:40Z japhb $
+# $Id$
 
 =head1 TITLE
 

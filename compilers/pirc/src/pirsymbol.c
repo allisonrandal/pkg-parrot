@@ -1,5 +1,5 @@
 /*
- * $Id: pirsymbol.c 37821 2009-03-30 22:58:47Z coke $
+ * $Id$
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 #include "pircompiler.h"

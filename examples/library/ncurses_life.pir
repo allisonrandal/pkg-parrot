@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: ncurses_life.pir 39952 2009-07-08 22:38:10Z moritz $
+# $Id$
 
 =head1 NAME
 

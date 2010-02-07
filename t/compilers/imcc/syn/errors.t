@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: errors.t 40227 2009-07-23 15:23:56Z NotFound $
+# $Id$
 
 use strict;
 use warnings;
@@ -67,7 +67,7 @@ END_PIR
 /^error:imcc:syntax error, unexpected IDENTIFIER, expecting/
 END_EXPECTED
 
-pir_error_output_like( <<'END_PIR', <<'END_EXPECTED', 'Array is on type, RT #42769' );
+pir_error_output_like( <<'END_PIR', <<'END_EXPECTED', 'Array is on type' );
 .sub main :main
   .local Array my_string
   my_string = new String

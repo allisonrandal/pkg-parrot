@@ -1,5 +1,5 @@
 
-# $Id: App.pir 37870 2009-04-02 18:58:28Z barney $
+# $Id$
 
 =head1 NAME
 

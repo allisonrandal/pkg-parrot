@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Replay.pir 38689 2009-05-11 17:22:23Z NotFound $
+# $Id$
 
 .sub _main :main
     .local pmc stream

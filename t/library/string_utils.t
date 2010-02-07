@@ -1,10 +1,14 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: string_utils.t 38699 2009-05-11 20:09:47Z NotFound $
+# $Id$
 
 =head1 NAME
 
-t/library/string_utils.t  -- Tests for String/Utils.pbc
+t/library/string_utils.t
+
+=head1 DESCRIPTION
+
+Tests for String/Utils.pbc
 
 =head1 SYNOPSIS
 

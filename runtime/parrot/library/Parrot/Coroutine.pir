@@ -4,7 +4,7 @@ Parrot::Coroutine - A pure PIR implementation of coroutines
 
 =head1 VERSION
 
- $Id: Coroutine.pir 38693 2009-05-11 18:45:05Z NotFound $
+ $Id$
 
 =head1 SYNOPSIS
 

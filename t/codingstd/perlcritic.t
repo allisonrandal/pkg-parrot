@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: perlcritic.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 NAME
 

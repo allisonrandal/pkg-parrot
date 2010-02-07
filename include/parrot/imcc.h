@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2008, Parrot Foundation.
- * $Id: imcc.h 39498 2009-06-10 18:36:20Z NotFound $
+ * $Id$
  */
 
 #ifndef PARROT_IMCC_H_GUARD

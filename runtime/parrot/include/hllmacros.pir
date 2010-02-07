@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: hllmacros.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 
 =head1 High Level Language Macros
 
@@ -149,7 +149,7 @@ work with in C<code>.
 
 =cut
 
-# RT #55808 - the unlikely to conflict variable names here must be
+# TT #911 - the unlikely to conflict variable names here must be
 # replaced with the .macro_local syntax.
 .macro Foreach(name, array, code)
     .local int __Foreach__local__i

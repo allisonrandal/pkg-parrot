@@ -1,7 +1,7 @@
 /* charset.h
  *  Copyright (C) 2009, Parrot Foundation.
  *  SVN Info
- *     $Id: charset.h 39139 2009-05-24 04:31:23Z jkeenan $
+ *     $Id$
  */
 
 #ifndef PARROT_TEST_INSTALL_CHARSET_H_GUARD

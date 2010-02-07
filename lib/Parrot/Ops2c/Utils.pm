@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Utils.pm 40958 2009-09-03 11:56:50Z bacek $
+# $Id$
 package Parrot::Ops2c::Utils;
 use strict;
 use warnings;
@@ -550,7 +550,8 @@ sub _print_preamble_source {
     print $fh $self->{preamble};
     print $fh <<END_C;
 #include "$self->{include}"
-#include "../pmc/pmc_parrotlibrary.h"
+#include "pmc/pmc_parrotlibrary.h"
+#include "pmc/pmc_callcontext.h"
 
 $self->{defines}
 

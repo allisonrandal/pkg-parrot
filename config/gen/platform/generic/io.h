@@ -1,5 +1,5 @@
 /*
- * $Id: io.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id$
  * Copyright (C) 2004-2008, Parrot Foundation.
  */
 

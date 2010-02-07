@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: capture.t 40511 2009-08-13 03:16:27Z allison $
+# $Id$
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/pmc/capture.t - Test the Capture PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/capture.t
+    % parrot t/pmc/capture.t
 
 =head1 DESCRIPTION
 
@@ -226,6 +226,7 @@ a variety of keys and values.
     .return ()
 
   test_get_integer_catch:
+    pop_eh
     .local pmc exception
     .local string message
     .get_results (exception)

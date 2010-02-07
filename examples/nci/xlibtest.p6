@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: xlibtest.p6 41264 2009-09-14 19:34:53Z NotFound $
+# $Id$
 
 use v6;
 

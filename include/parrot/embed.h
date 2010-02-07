@@ -1,7 +1,7 @@
 /* embed.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: embed.h 39418 2009-06-06 01:37:41Z jkeenan $
+ *     $Id$
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.

@@ -1,5 +1,5 @@
 # Copyright (C) 2003-2009, Parrot Foundation.
-# $Id: main.pasm 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 
 # experimental subproxy class test
 # the bytecode loading is deferred until the subproxy object is

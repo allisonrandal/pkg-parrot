@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: Headerizer.pm 38890 2009-05-18 05:35:29Z petdance $
+# $Id$
 
 =head1 NAME
 

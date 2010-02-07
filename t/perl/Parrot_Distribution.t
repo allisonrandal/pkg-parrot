@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: Parrot_Distribution.t 37280 2009-03-10 21:35:20Z allison $
+# $Id$
 
 use strict;
 use warnings;
@@ -18,6 +18,8 @@ t/perl/Parrot_Distribution.t - Parrot::Distribution unit tests
     % prove t/perl/Parrot_Distribution.t
 
 =head1 DESCRIPTION
+
+Test individual Parrot::Distribution methods.
 
 =cut
 

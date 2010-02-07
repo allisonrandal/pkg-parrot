@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pmc.t 40812 2009-08-26 06:09:41Z dukeleto $
+# $Id$
 
 use strict;
 use warnings;

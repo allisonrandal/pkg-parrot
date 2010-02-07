@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: pct.in 38208 2009-04-19 13:56:34Z pmichaud $
+# $Id$
 
 # Setup some commands
 PERL     := @perl@

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: darwin.pm 40291 2009-07-27 13:40:24Z coke $
+# $Id$
 
 package init::hints::darwin;
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: ubuntu_packaging_guide.pod 40439 2009-08-07 01:58:49Z allison $
+# $Id$
 
 =head1 Ubuntu Packaging Guide
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: past_building_blocks.pod 38819 2009-05-16 05:33:03Z coke $
+# $Id$
 
 =head1 NAME
 

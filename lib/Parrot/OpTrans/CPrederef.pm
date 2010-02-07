@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: CPrederef.pm 40958 2009-09-03 11:56:50Z bacek $
+# $Id$
 
 =head1 NAME
 

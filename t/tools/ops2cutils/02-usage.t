@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 02-usage.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id$
 # 02-usage.t
 
 use strict;

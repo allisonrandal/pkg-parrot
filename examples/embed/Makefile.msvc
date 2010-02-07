@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-## $Id: Makefile.msvc 40311 2009-07-28 19:35:41Z NotFound $
+## $Id$
 
 # Microsoft Visual C++ Makefile
 # To build this example in a parrot development environment:

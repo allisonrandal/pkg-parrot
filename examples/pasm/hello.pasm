@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: hello.pasm 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 
 =head1 NAME
 

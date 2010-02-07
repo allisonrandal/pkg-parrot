@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 90_writing_tests.pir 38693 2009-05-11 18:45:05Z NotFound $
+# $Id$
 
 =head1 Writing Tests
 

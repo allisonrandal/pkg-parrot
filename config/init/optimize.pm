@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: optimize.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -51,7 +51,7 @@ sub runstep {
 
             # use perl5's value
             # gcc 4.1 doesn't like -mcpu=xx, i.e. it's deprecated
-            my $opts = $conf->data->get_p5('optimize');
+            my $opts = $conf->data->get('optimize_provisional');
             my $gccversion = $conf->data->get( 'gccversion' );
             my $arch_opt = 'cpu';
             if ( defined $gccversion and $gccversion > 3.3 ) {

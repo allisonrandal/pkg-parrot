@@ -1,6 +1,6 @@
 package Parrot::PMC;
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: PMC.pm 38763 2009-05-14 02:16:03Z jkeenan $
+# $Id$
 
 use strict;
 use warnings;

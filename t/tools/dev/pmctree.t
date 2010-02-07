@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 202007, Parrot Foundation.
-# $Id: pmctree.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # pmctree.t
 
 use strict;

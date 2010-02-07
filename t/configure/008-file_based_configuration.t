@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 008-file_based_configuration.t 40470 2009-08-09 23:22:04Z jkeenan $
+# $Id$
 # 008-file_based_configuration.t
 
 use strict;
@@ -12,7 +12,7 @@ BEGIN {
     our $topdir = realpath($Bin) . "/../..";
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More qw(no_plan); # tests => 29;
+use Test::More tests => 31;
 use Carp;
 use Parrot::Configure::Options qw| process_options |;
 

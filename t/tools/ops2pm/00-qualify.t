@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 00-qualify.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 00-qualify.t
 
 use strict;

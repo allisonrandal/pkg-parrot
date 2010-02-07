@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: exception.pmc 41224 2009-09-12 10:54:48Z chromatic $
+$Id$
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ These arguments can be retrieved with the C<get_results> opcode.
 */
 
 #include "parrot/exceptions.h"
-#include "pmc_sub.h"
+#include "pmc/pmc_sub.h"
 
 pmclass Exception auto_attrs {
 
@@ -149,20 +149,13 @@ Mark any active exception data as live.
 
     VTABLE void mark() {
         Parrot_Exception_attributes * const core_struct = PARROT_EXCEPTION(SELF);
-        if (core_struct->message)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->message);
-        if (core_struct->payload)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->payload);
-        if (core_struct->resume)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->resume);
-        if (core_struct->backtrace)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->backtrace);
-        if (core_struct->handler_iter)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->handler_iter);
-        if (core_struct->handler_ctx)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->handler_ctx);
-        if (core_struct->thrower)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->thrower);
+        Parrot_gc_mark_STRING_alive(interp, core_struct->message);
+        Parrot_gc_mark_PMC_alive(interp, core_struct->payload);
+        Parrot_gc_mark_PMC_alive(interp, core_struct->resume);
+        Parrot_gc_mark_PMC_alive(interp, core_struct->backtrace);
+        Parrot_gc_mark_PMC_alive(interp, core_struct->handler_iter);
+        Parrot_gc_mark_PMC_alive(interp, core_struct->handler_ctx);
+        Parrot_gc_mark_PMC_alive(interp, core_struct->thrower);
     }
 
 /*
@@ -640,7 +633,7 @@ Set an attribute value for the exception object.
         }
         else if (Parrot_str_equal(INTERP, name, CONST_STRING(INTERP, "thrower"))) {
             /* Ensure it's a ret cont, and extract the from_ctx.
-             * XXX TT#596 - when we have Context PMCs, just take and set that. */
+             * XXX TT #596 - when we have Context PMCs, just take and set that. */
             if (!PMC_IS_NULL(value) && VTABLE_isa(interp, value, CONST_STRING(interp, "Continuation"))) {
                 PMC *ctx = PMC_cont(value)->from_ctx;
                 if (!PMC_IS_NULL(ctx))
@@ -738,7 +731,7 @@ sub, or for the point of the call a level deeper for the rest.
 */
 
     METHOD backtrace() {
-        PMC *result = pmc_new(interp, enum_class_ResizablePMCArray);
+        PMC *result = PMCNULL;
         PMC *resume;
         PMC *cur_ctx;
         Parrot_Continuation_attributes    *cont;
@@ -749,53 +742,13 @@ sub, or for the point of the call a level deeper for the rest.
             /* We have a resume continuation, so we can get the address from
              * that. */
             cont    = PARROT_CONTINUATION(resume);
-            cur_ctx = cont->to_ctx;
+            Parrot_pcc_invoke_method_from_c_args(INTERP, cont->to_ctx, CONST_STRING(interp, "backtrace"), "P->P", resume, &result);
         }
         else {
             /* No return continuation. Assuming we're being called  */
             cont = NULL;
             GET_ATTR_thrower(interp, SELF, cur_ctx);
-        }
-
-        {
-            while (cur_ctx) {
-                PMC        *frame       = pmc_new(interp, enum_class_Hash);
-                PMC        *annotations = NULL;
-                Parrot_Sub_attributes *sub;
-
-                /* Get sub and put it in the hash. */
-                PMC *sub_pmc = Parrot_pcc_get_sub(interp, cur_ctx);
-
-                if (!sub_pmc)
-                    sub_pmc = PMCNULL;
-
-                VTABLE_set_pmc_keyed_str(interp, frame, CONST_STRING(interp, "sub"), sub_pmc);
-
-                /* Look up any annotations and put them in the hash. */
-                if (!PMC_IS_NULL(sub_pmc)) {
-                    PMC_get_sub(interp, sub_pmc, sub);
-
-                    if (sub->seg->annotations) {
-                        PackFile_ByteCode *seg = sub->seg;
-                        opcode_t          *pc  = cont && cur_ctx == cont->to_ctx
-                                               ? cont->address
-                                               : Parrot_pcc_get_pc(interp, cur_ctx);
-
-                        annotations = PackFile_Annotations_lookup(interp,
-                                        seg->annotations, pc - seg->base.data,
-                                        NULL);
-                    }
-                }
-
-                if (!annotations)
-                    annotations = pmc_new(interp, enum_class_Hash);
-
-                VTABLE_set_pmc_keyed_str(interp, frame, CONST_STRING(interp, "annotations"), annotations);
-
-                /* Push frame and go to next caller. */
-                VTABLE_push_pmc(interp, result, frame);
-                cur_ctx = Parrot_pcc_get_caller_ctx(interp, cur_ctx);
-            }
+            Parrot_pcc_invoke_method_from_c_args(INTERP, CURRENT_CONTEXT(INTERP), CONST_STRING(interp, "backtrace"), "->P", &result);
         }
 
         RETURN(PMC *result);

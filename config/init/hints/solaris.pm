@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: solaris.pm 41081 2009-09-06 20:40:14Z bacek $
+# $Id$
 
 package init::hints::solaris;
 
@@ -17,7 +17,6 @@ sub runstep {
         $libs .= ' -lrt';    # Needed for sched_yield.
     }
     $conf->data->set( libs => $libs );
-    $conf->data->set( clock_best => '-DCLOCK_BEST=CLOCK_PROCESS_CPUTIME_ID' );
 
     ################################################################
     # If we're going to be using ICU (or any other C++-compiled library) we
@@ -58,7 +57,6 @@ sub runstep {
     # code for use in shared libraries.  -KPIC for Sun's compiler, -fPIC for
     # gcc.  We don't know which compiler we're using till after the
     # gccversion test.
-    # RT#43150 Should this go into the shlibs.pl Configure.pl unit instead?
     my $solaris_cc_shared_cb = sub {
         my ( $key, $gccversion ) = @_;
 

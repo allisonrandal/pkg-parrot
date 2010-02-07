@@ -1,4 +1,4 @@
-# $Id: field.pir 40200 2009-07-21 21:51:54Z bacek $
+# $Id$
 
 =head1 NAME
 

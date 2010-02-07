@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-$Id: README 37337 2009-03-12 02:02:54Z Util $
+$Id$
 
 These programs show very different ways how to print a simple
 string. Some are obfuscated, some are horribly platform dependent.

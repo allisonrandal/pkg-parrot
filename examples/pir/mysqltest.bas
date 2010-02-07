@@ -1,5 +1,5 @@
 1 rem Copyright (C) 2008, Parrot Foundation.
-2 rem $Id: mysqltest.bas 36833 2009-02-17 20:09:26Z allison $
+2 rem $Id$
 3 rem
 10 rem +----------------------------------------------------------------------+
 20 rem + mysqltest.bas                                                        +

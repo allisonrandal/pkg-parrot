@@ -1,5 +1,5 @@
 /*
- * $Id: pirdefines.h 36665 2009-02-13 10:20:10Z kjs $
+ * $Id$
  * Copyright (C) 2008, Parrot Foundation.
  */
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: knucleotide.pir 40200 2009-07-21 21:51:54Z bacek $
+# $Id$
 
 .sub main :main
 	.local pmc stdin

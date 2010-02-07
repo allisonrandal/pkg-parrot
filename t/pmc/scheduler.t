@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: scheduler.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 NAME
 

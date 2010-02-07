@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: embed.c 41081 2009-09-06 20:40:14Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -22,6 +22,7 @@ This file implements the Parrot embedding interface.
 #include "parrot/embed.h"
 #include "parrot/oplib/ops.h"
 #include "pmc/pmc_sub.h"
+#include "pmc/pmc_callcontext.h"
 #include "parrot/runcore_api.h"
 
 #include "../compilers/imcc/imc.h"
@@ -51,17 +52,17 @@ static PMC* setup_argv(PARROT_INTERP, int argc, ARGIN(char **argv))
         __attribute__nonnull__(1)
         __attribute__nonnull__(3);
 
-#define ASSERT_ARGS_op_name __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_print_constant_table __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_print_debug __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_set_current_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_setup_argv __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_op_name __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_print_constant_table __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_print_debug __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_set_current_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_setup_argv __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(argv)
+    , PARROT_ASSERT_ARG(argv))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -79,13 +80,6 @@ to get destroyed.
 =cut
 
 */
-
-#ifdef JIT_CAPABLE
-#  if EXEC_CAPABLE
-#    include "parrot/exec.h"
-#  endif /* EXEC_CAPABLE */
-#  include "jit.h"
-#endif
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
@@ -149,12 +143,12 @@ Parrot_set_flag(PARROT_INTERP, INTVAL flag)
 
     Interp_flags_SET(interp, flag);
     switch (flag) {
-        case PARROT_BOUNDS_FLAG:
-        case PARROT_PROFILE_FLAG:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "slow"));
-            break;
-        default:
-            break;
+      case PARROT_BOUNDS_FLAG:
+      case PARROT_PROFILE_FLAG:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "slow"));
+        break;
+      default:
+        break;
     }
 }
 
@@ -341,44 +335,35 @@ void
 Parrot_set_run_core(PARROT_INTERP, Parrot_Run_core_t core)
 {
     switch (core) {
-        case PARROT_SLOW_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "slow"));
-            break;
-        case PARROT_FAST_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "fast"));
-            break;
-        case PARROT_SWITCH_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "switch"));
-            break;
-        case PARROT_CGP_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgp"));
-            break;
-        case PARROT_CGOTO_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgoto"));
-            break;
-        case PARROT_JIT_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "jit"));
-            break;
-        case PARROT_CGP_JIT_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgp_jit"));
-            break;
-        case PARROT_SWITCH_JIT_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "switch_jit"));
-            break;
-        case PARROT_EXEC_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "exec"));
-            break;
-        case PARROT_GC_DEBUG_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "gc_debug"));
-            break;
-        case PARROT_DEBUGGER_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "debugger"));
-            break;
-        case PARROT_PROFILING_CORE:
-            Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "profiling"));
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
+      case PARROT_SLOW_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "slow"));
+        break;
+      case PARROT_FAST_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "fast"));
+        break;
+      case PARROT_SWITCH_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "switch"));
+        break;
+      case PARROT_CGP_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgp"));
+        break;
+      case PARROT_CGOTO_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgoto"));
+        break;
+      case PARROT_EXEC_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "exec"));
+        break;
+      case PARROT_GC_DEBUG_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "gc_debug"));
+        break;
+      case PARROT_DEBUGGER_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "debugger"));
+        break;
+      case PARROT_PROFILING_CORE:
+        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "profiling"));
+        break;
+      default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
                 "Invalid runcore requested\n");
     }
 }
@@ -580,16 +565,13 @@ again:
     if (!(pf->options & PFOPT_HEADERONLY))
         do_sub_pragmas(interp, pf->cur_cs, PBC_PBC, NULL);
 
-    /* JITting and/or prederefing the sub/the bytecode is done
-     * in switch_to_cs before actual usage of the segment */
+    /* Prederefing the sub/the bytecode is done in switch_to_cs before
+     * actual usage of the segment */
 
 #ifdef PARROT_HAS_HEADER_SYSMMAN
     /* the man page states that it's ok to close a mmaped file */
     if (fd >= 0)
         close(fd);
-#else
-    /* RT #46155 Parrot_exec uses this
-    mem_sys_free(program_code); */
 #endif
 
     return pf;
@@ -823,15 +805,6 @@ Parrot_runcode(PARROT_INTERP, int argc, ARGIN(char **argv))
     /* Set up @ARGS (or whatever this language calls it) in userargv. */
     userargv = setup_argv(interp, argc, argv);
 
-#if EXEC_CAPABLE
-
-    /* s. runops_exec interpreter.c */
-    if (Parrot_str_equal(interp, interp->run_core->name,
-        Parrot_str_new_constant(interp, "exec")))
-        Parrot_exec_run = 1;
-
-#endif
-
     /*
      * If any profile information was gathered, print it out
      * before exiting, then print debug infos if turned on.
@@ -849,7 +822,7 @@ Parrot_runcode(PARROT_INTERP, int argc, ARGIN(char **argv))
     Parrot_pcc_set_sub(interp, CURRENT_CONTEXT(interp), NULL);
     Parrot_pcc_set_constants(interp, interp->ctx, interp->code->const_table->constants);
 
-    Parrot_runops_fromc_args(interp, main_sub, "vP", userargv);
+    Parrot_pcc_invoke_sub_from_c_args(interp, main_sub, "P->", userargv);
 }
 
 
@@ -918,31 +891,33 @@ print_constant_table(PARROT_INTERP)
         const PackFile_Constant * const c = interp->code->const_table->constants[i];
 
         switch (c->type) {
-            case PFC_NUMBER:
-                Parrot_io_printf(interp, "PMC_CONST(%d): %f\n", i, c->u.number);
-                break;
-            case PFC_STRING:
-                Parrot_io_printf(interp, "PMC_CONST(%d): %S\n", i, c->u.string);
-                break;
-            case PFC_KEY:
-                Parrot_io_printf(interp, "PMC_CONST(%d): ", i);
-                /* XXX */
-                /* Parrot_print_p(interp, c->u.key); */
-                Parrot_io_printf(interp, "(PMC constant)");
-                Parrot_io_printf(interp, "\n");
-                break;
-            case PFC_PMC: {
+          case PFC_NUMBER:
+            Parrot_io_printf(interp, "PMC_CONST(%d): %f\n", i, c->u.number);
+            break;
+          case PFC_STRING:
+            Parrot_io_printf(interp, "PMC_CONST(%d): %S\n", i, c->u.string);
+            break;
+          case PFC_KEY:
+            Parrot_io_printf(interp, "PMC_CONST(%d): ", i);
+            /* XXX */
+            /* Parrot_print_p(interp, c->u.key); */
+            Parrot_io_printf(interp, "(PMC constant)");
+            Parrot_io_printf(interp, "\n");
+            break;
+          case PFC_PMC:
+            {
                 Parrot_io_printf(interp, "PMC_CONST(%d): ", i);
 
                 switch (c->u.key->vtable->base_type) {
                     /* each PBC file has a ParrotInterpreter, but it can't
                      * stringify by itself */
-                    case enum_class_ParrotInterpreter:
-                        Parrot_io_printf(interp, "'ParrotInterpreter'");
-                        break;
+                  case enum_class_ParrotInterpreter:
+                    Parrot_io_printf(interp, "'ParrotInterpreter'");
+                    break;
 
                     /* FixedIntegerArrays used for signatures, handy to print */
-                    case enum_class_FixedIntegerArray: {
+                  case enum_class_FixedIntegerArray:
+                    {
                         INTVAL n = VTABLE_elements(interp, c->u.key);
                         INTVAL i;
                         Parrot_io_printf(interp, "[");
@@ -956,32 +931,32 @@ print_constant_table(PARROT_INTERP)
                         Parrot_io_printf(interp, "]");
                         break;
                     }
-                    case enum_class_NameSpace:
-                    case enum_class_String:
-                    case enum_class_Key:
-                    case enum_class_ResizableStringArray:
-                        {
-                            /*Parrot_print_p(interp, c->u.key);*/
-                            STRING * const s = VTABLE_get_string(interp, c->u.key);
-                            if (s)
-                                Parrot_io_printf(interp, "%Ss", s);
-                            break;
-                        }
-                    case enum_class_Sub:
-                        Parrot_io_printf(interp, "%S", VTABLE_get_string(interp, c->u.key));
+                  case enum_class_NameSpace:
+                  case enum_class_String:
+                  case enum_class_Key:
+                  case enum_class_ResizableStringArray:
+                    {
+                        /*Parrot_print_p(interp, c->u.key);*/
+                        STRING * const s = VTABLE_get_string(interp, c->u.key);
+                        if (s)
+                            Parrot_io_printf(interp, "%Ss", s);
                         break;
-                    default:
-                        Parrot_io_printf(interp, "(PMC constant)");
-                        break;
+                    }
+                  case enum_class_Sub:
+                    Parrot_io_printf(interp, "%S", VTABLE_get_string(interp, c->u.key));
+                    break;
+                  default:
+                    Parrot_io_printf(interp, "(PMC constant)");
+                    break;
                 }
 
                 Parrot_io_printf(interp, "\n");
                 break;
             }
-            default:
-                Parrot_io_printf(interp, "wrong constant type in constant table!\n");
-                /* XXX throw an exception? Is it worth the trouble? */
-                break;
+          default:
+            Parrot_io_printf(interp, "wrong constant type in constant table!\n");
+            /* XXX throw an exception? Is it worth the trouble? */
+            break;
         }
     }
 
@@ -1107,7 +1082,8 @@ Parrot_run_native(PARROT_INTERP, native_func_t func)
     program_code[1] = 0; /* end */
 
     pf->cur_cs = (PackFile_ByteCode *)
-        (pf->PackFuncs[PF_BYTEC_SEG].new_seg)(interp, pf, "code", 1);
+        (pf->PackFuncs[PF_BYTEC_SEG].new_seg)(interp, pf,
+                Parrot_str_new_constant(interp, "code"), 1);
     pf->cur_cs->base.data = program_code;
     pf->cur_cs->base.size = 2;
 
@@ -1142,7 +1118,8 @@ Parrot_compile_string(PARROT_INTERP, Parrot_String type,
      * before compiling a string */
 
     if (!interp->initial_pf) {
-        PackFile * const pf = PackFile_new_dummy(interp, "compile_string");
+        PackFile * const pf = PackFile_new_dummy(interp,
+                Parrot_str_new_constant(interp, "compile_string"));
         /* Assumption: there is no valid reason to fail to create it.
          * If the assumption changes, replace the assertion with a
          * runtime check */

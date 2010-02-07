@@ -1,5 +1,5 @@
 #! perl
-# $Id: basic.t 37261 2009-03-10 08:01:43Z jquelin $
+# $Id$
 # Copyright (C) 2001-2007, Parrot Foundation.
 
 use strict;

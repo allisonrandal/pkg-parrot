@@ -22,7 +22,7 @@
 %{
 
 /*
- * $Id: macro.l 36666 2009-02-13 10:23:23Z kjs $
+ * $Id$
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -690,6 +690,13 @@ is_pir_directive(char const * const name) {
         iter++;
     }
     return 0;
+}
+
+
+int
+main(int argc, char **argv) {
+    
+    return 0;   
 }
 
 /*

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: libpcre.pir 39301 2009-06-01 13:07:05Z barney $
+# $Id$
 
 =head1 TITLE
 

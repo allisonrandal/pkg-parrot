@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: Revision.pm 40307 2009-07-28 14:44:07Z NotFound $
+# $Id$
 
 =head1 NAME
 

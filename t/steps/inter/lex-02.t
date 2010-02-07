@@ -1,20 +1,18 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: lex-02.t 39967 2009-07-10 00:16:41Z jkeenan $
+# $Id$
 # inter/lex-02.t
 
 use strict;
 use warnings;
-use Test::More tests =>  12;
+use Test::More tests =>   7;
 use Carp;
 use lib qw( lib t/configure/testlib );
-use_ok('config::init::defaults');
 $ENV{TEST_LEX} = 'foobar';
 use_ok('config::inter::lex');
-use Parrot::Configure;
 use Parrot::Configure::Options qw( process_options );
+use Parrot::Configure::Step::Test;
 use Parrot::Configure::Test qw(
-    test_step_thru_runstep
     test_step_constructor_and_description
 );
 
@@ -27,9 +25,8 @@ my ($args, $step_list_ref) = process_options(
     }
 );
 
-my $conf = Parrot::Configure->new();
-
-test_step_thru_runstep( $conf, q{init::defaults}, $args );
+my $conf = Parrot::Configure::Step::Test->new;
+$conf->include_config_results( $args );
 
 my $pkg = q{inter::lex};
 

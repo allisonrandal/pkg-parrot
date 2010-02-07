@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: mandel.pir 37871 2009-04-02 19:08:06Z barney $
+# $Id$
 
 =head1 TITLE
 
@@ -59,7 +59,7 @@ ex:
 .sub 'get_opts'
     .param pmc argv
     .local pmc opts, getopts
-    getopts = new 'Getopt::Obj'
+    getopts = new ['Getopt';'Obj']
     push getopts, "quit|q"
     push getopts, "threads"
     $S0 = shift argv

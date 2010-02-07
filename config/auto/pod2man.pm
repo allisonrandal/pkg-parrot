@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pod2man.pm 37150 2009-03-07 00:54:44Z jkeenan $
+# $Id$
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $cmd = $conf->data->get_p5('scriptdirexp') . q{/pod2man};
+    my $cmd = $conf->data->get('scriptdirexp_provisional') . q{/pod2man};
     my $content = capture_output("$cmd docs/parrot.pod") || undef;
 
     return 1 unless defined( $self->_initial_content_check($conf, $content) );

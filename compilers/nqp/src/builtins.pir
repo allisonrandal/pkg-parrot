@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: builtins.pir 41127 2009-09-07 18:49:54Z japhb $
+# $Id$
 
 .namespace []
 

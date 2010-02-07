@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd01_overview.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id$
 
 =head1 [DRAFT] PDD 1: Overview
 
@@ -9,7 +9,7 @@ A high-level overview of the Parrot virtual machine.
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision$
 
 =head2 Description
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: OPTable.pir 40467 2009-08-09 20:12:38Z moritz $
+# $Id$
 
 =head1 Title
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pirric.pir 40200 2009-07-21 21:51:54Z bacek $
+# $Id$
 #
 # pirric.pir
 # A rudimentary old style Basic interpreter for parrot

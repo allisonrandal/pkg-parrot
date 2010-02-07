@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 11-print_h.t 39955 2009-07-09 00:02:26Z jkeenan $
+# $Id$
 # 11-print_h.t
 
 use strict;

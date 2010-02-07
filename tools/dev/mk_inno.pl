@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: mk_inno.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 TITLE
 
@@ -10,9 +10,10 @@ tools/dev/mk_inno.pl - Create a script for Inno Setup
 
     % perl tools/dev/mk_inno.pl
 
-=head1 SEE ALSO
+=head1 DESCRIPTION
 
-http://www.jrsoftware.org/
+From L<http://www.jrsoftware.org/>:  Inno Setup is a free installer for
+Windows programs.
 
 =cut
 

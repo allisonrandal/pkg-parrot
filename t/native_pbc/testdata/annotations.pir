@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: annotations.pir 38183 2009-04-17 21:58:24Z bacek $
+# $Id$
 
 .sub 'main'
 .annotate "file", "annotations.pir"

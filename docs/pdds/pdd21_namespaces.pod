@@ -1,11 +1,11 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: pdd21_namespaces.pod 38816 2009-05-16 04:08:22Z coke $
+# $Id$
 
 =head1 PDD 21: Namespaces
 
 =head2 Version
 
-$Revision: 38816 $
+$Revision$
 
 =head2 Abstract
 

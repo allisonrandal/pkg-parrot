@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pcre.pm 40189 2009-07-21 12:15:55Z jkeenan $
+# $Id$
 
 =head1 NAME
 
@@ -46,7 +46,7 @@ sub runstep {
         return 1;
     }
 
-    my $osname = $conf->data->get_p5('OSNAME');
+    my $osname = $conf->data->get('osname');
 
     my $extra_libs = $self->_select_lib( {
         conf            => $conf,

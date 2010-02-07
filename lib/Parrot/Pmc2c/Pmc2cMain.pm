@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Pmc2cMain.pm 38940 2009-05-19 15:21:44Z Infinoid $
+# $Id$
 
 package Parrot::Pmc2c::Pmc2cMain;
 

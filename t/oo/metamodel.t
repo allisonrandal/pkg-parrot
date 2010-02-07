@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: metamodel.t 40191 2009-07-21 12:56:20Z bacek $
+# $Id$
 
 =head1 NAME
 
@@ -90,6 +90,11 @@ NEXT:
 #    $I0 = defined $P0
 #    isa_ok($P0, "Dog", "new opcode makes working objects")
 
+.end
+
+.sub fail
+    .param string desc
+    'ok'(0, desc)
 .end
 
 .namespace['Dog']

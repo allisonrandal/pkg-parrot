@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2006, Parrot Foundation.
-# $Id: C.pm 40980 2009-09-04 23:18:14Z chromatic $
+# $Id$
 
 =head1 NAME
 
@@ -52,6 +52,8 @@ Returns the C C<#define> macros for register access etc.
 sub defines {
     my $type = __PACKAGE__;
     return <<END;
+#include "pmc/pmc_callcontext.h"
+
 /* defines - $0 -> $type */
 #undef CONST
 #define REL_PC     ((size_t)(cur_opcode - (opcode_t *)interp->code->base.data))
@@ -60,7 +62,7 @@ sub defines {
 #define NREG(i) (CUR_CTX->bp.regs_n[-1L - cur_opcode[i]])
 #define PREG(i) (CUR_CTX->bp_ps.regs_p[-1L - cur_opcode[i]])
 #define SREG(i) (CUR_CTX->bp_ps.regs_s[cur_opcode[i]])
-#define CONST(i) Parrot_pcc_constants(interp, interp->ctx)[cur_opcode[i]]
+#define CONST(i) Parrot_pcc_get_constants(interp, interp->ctx)[cur_opcode[i]]
 END
 }
 

@@ -1,4 +1,4 @@
-# $Id: SubHello.pir 38689 2009-05-11 17:22:23Z NotFound $
+# $Id$
 
 =head1 Hello Example
 

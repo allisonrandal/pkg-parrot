@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: cpu.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 NAME
 
@@ -18,7 +18,6 @@ use warnings;
 
 use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Utils qw(copy_if_diff);
 use Carp;
 
 

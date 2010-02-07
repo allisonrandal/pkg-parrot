@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: fetch_languages.pl 40839 2009-08-28 08:45:02Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -84,6 +84,12 @@ my @hlls = (
     },
 
     {
+        name       => 'close',
+        scm        => 'SVN',
+        repository => 'http://close.googlecode.com/svn/trunk/'
+    },
+
+    {
         name       => 'dotnet',
         scm        => 'SVN',
         repository => 'https://svn.parrot.org/languages/dotnet/trunk'
@@ -138,6 +144,12 @@ my @hlls = (
     },
 
     {
+        name       => 'kea',
+        scm        => 'GIT',
+        repository => 'git://github.com/leto/kea.git'
+    },
+
+    {
         name       => 'kea-cl',
         scm        => 'SVN',
         repository => 'https://rgrjr.dyndns.org/svn/kea-cl/trunk'
@@ -181,8 +193,8 @@ my @hlls = (
 
     {
         name       => 'matrixy',
-        scm        => 'SVN',
-        repository => 'http://matrixy.googlecode.com/svn/trunk'
+        scm        => 'GIT',
+        repository => 'git://github.com/Whiteknight/matrixy.git'
     },
 
     {
@@ -283,8 +295,8 @@ my @hlls = (
 
     {
         name       => 'tcl',
-        scm        => 'SVN',
-        repository => 'http://partcl.googlecode.com/svn/trunk'
+        scm        => 'GIT',
+        repository => 'git://github.com/partcl/partcl.git'
     },
 
     {
@@ -297,6 +309,12 @@ my @hlls = (
         name       => 'urm',
         scm        => 'SVN',
         repository => 'https://svn.parrot.org/languages/urm/trunk'
+    },
+
+    {
+        name       => 'winexd',
+        scm        => 'SVN',
+        repository => 'http://winxed.googlecode.com/svn/trunk/'
     },
 
     {

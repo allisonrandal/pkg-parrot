@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: packfile.t 40273 2009-07-26 04:33:45Z petdance $
+# $Id$
 
 =head1 NAME
 
@@ -32,7 +32,7 @@ Tests the Packfile PMC.
     'test_load'()
     'test_pack_fresh_packfile'()
     'test_pack'()
-    # This test will crash on many platforms. See TT#545.
+    # This test will crash on many platforms. See TT #545.
     #'test_synonyms'()
 .end
 

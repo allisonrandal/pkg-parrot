@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: namespace.t 40133 2009-07-17 10:19:17Z bacek $
+# $Id$
 
 use strict;
 use warnings;

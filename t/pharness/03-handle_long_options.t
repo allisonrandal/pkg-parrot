@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 03-handle_long_options.t 37146 2009-03-06 13:07:12Z jkeenan $
+# $Id$
 # 03-handle_long_options.t
 
 use strict;

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: undef.pmc 41260 2009-09-14 11:59:59Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ from there.
 
 */
 
-#include "pmc_object.h"
+#include "pmc/pmc_object.h"
 #define UNDEF_STRING_CLASS enum_class_String
 
 pmclass Undef no_ro {
@@ -49,11 +49,11 @@ appropriate type.
             PMC        *clone   = VTABLE_clone(interp, other);
             void       *attrs   = PMC_data(clone);
             PMC        *meta    = PMC_metadata(clone);
-            pmc_reuse_by_class(INTERP, SELF, class_, PObj_is_object_FLAG);
 
             /* now swap memory without leaking it */
             PMC_data(clone)     = PMC_data(SELF);
             PMC_data(SELF)      = attrs;
+            SELF->vtable        = clone->vtable;
 
             /* Restore metadata. */
             if (!PMC_IS_NULL(meta)) {

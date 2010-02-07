@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: bench_op.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 
 =head1 TITLE
 
@@ -81,7 +81,7 @@ Print program version and exit.
 
     # Specification of command line arguments.
     .local pmc getopts
-    getopts = new "Getopt::Obj"
+    getopts = new ["Getopt";"Obj"]
     # getopts."notOptStop"(1)
     push getopts, "version"
     push getopts, "verbose=i"

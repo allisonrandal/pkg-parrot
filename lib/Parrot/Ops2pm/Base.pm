@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: Base.pm 37561 2009-03-18 21:18:30Z cotto $
+# $Id$
 package Parrot::Ops2pm::Base;
 use strict;
 use warnings;

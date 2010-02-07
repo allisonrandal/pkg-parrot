@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: pdd28_strings.pod 40935 2009-09-03 00:10:54Z chromatic $
+# $Id$
 
 =head1 PDD 28: Strings
 
@@ -11,7 +11,7 @@ encodings, and languages.
 
 =head2 Version
 
-$Revision: 40935 $
+$Revision$
 
 =head2 Definitions
 
@@ -648,10 +648,6 @@ The String PMC implements the following vtable functions.
 =item init
 
 Initialize a new String PMC.
-
-=item instantiate_str
-
-Create a new String PMC from a Parrot string argument.
 
 =item clone
 

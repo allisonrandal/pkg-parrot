@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: PMCEmitter.pm 40738 2009-08-23 14:54:55Z whiteknight $
+# $Id$
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ sub generate {
     $emitter->write_to_file;
 
     $emitter = $self->{emitter} =
-        Parrot::Pmc2c::Emitter->new( $self->filename(".h") );
+        Parrot::Pmc2c::Emitter->new( $self->filename(".h", $self->is_dynamic) );
 
     $self->generate_h_file;
     $emitter->write_to_file;
@@ -76,7 +76,8 @@ sub generate_c_file {
     $self->gen_includes;
 
     # The PCC code needs Continuation-related macros from these headers.
-    $c->emit("#include \"pmc_continuation.h\"\n");
+    $c->emit("#include \"pmc/pmc_continuation.h\"\n");
+    $c->emit("#include \"pmc/pmc_callcontext.h\"\n");
 
     $c->emit( $self->preamble );
 
@@ -90,7 +91,7 @@ sub generate_c_file {
         $ro->gen_methods;
     }
 
-    $c->emit("#include \"pmc_default.h\"\n");
+    $c->emit("#include \"pmc/pmc_default.h\"\n");
 
     $c->emit( $self->update_vtable_func );
     $c->emit( $self->get_vtable_func );
@@ -275,8 +276,6 @@ my %calltype = (
     "void"     => "v",
     "void*"    => "b",
     "void**"   => "B",
-
-    #"BIGNUM*" => "???" # RT#43731
 );
 
 sub proto {
@@ -292,13 +291,9 @@ sub proto {
     # type method(interp, self, parameters...)
     my $ret = $calltype{ $type or "void" }
         . "JO"
-        . join( '', map { $calltype{$_} or "?" } split( /,/, $parameters ) );
-
-    # RT #43733
-    # scan src/call_list.txt if the generated signature is available
-
-    # RT #43735 report errors for "?"
-    # --leo
+        . join( '',
+            map { $calltype{$_} or die "Unknown signature type '$_'" }
+            split( /,/, $parameters ) );
 
     return $ret;
 }

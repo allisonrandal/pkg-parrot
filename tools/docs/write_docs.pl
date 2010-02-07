@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: write_docs.pl 37230 2009-03-09 04:41:02Z allison $
+# $Id$
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-# $Id: board.pir 40557 2009-08-15 10:41:06Z dukeleto $
+# $Id$
 
 =head1 TITLE
 

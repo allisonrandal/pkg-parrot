@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: pgegrep.t 40263 2009-07-25 08:11:48Z fperrad $
+# $Id$
 
 =head1 NAME
 

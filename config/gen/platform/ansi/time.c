@@ -1,5 +1,5 @@
 /*
- * $Id: time.c 37786 2009-03-28 01:09:22Z coke $
+ * $Id$
  * Copyright (C) 2007, Parrot Foundation.
  */
 
@@ -11,7 +11,7 @@ config/gen/platform/ansi/time.c
 
 =head1 DESCRIPTION
 
-RT#48264
+Time-related functions.
 
 =head2 Functions
 

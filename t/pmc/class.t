@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: class.t 38704 2009-05-11 22:03:32Z NotFound $
+# $Id$
 
 =head1 NAME
 
@@ -565,7 +565,7 @@ t_class_meth:
 
 
 # L<PDD15/Class PMC API/=item does>
-.sub 'more does' # RT #42974
+.sub 'more does'
     .local pmc attrs
     attrs = new ['Hash']
 

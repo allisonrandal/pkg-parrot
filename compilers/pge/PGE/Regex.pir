@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Regex.pir 40072 2009-07-14 00:24:03Z pmichaud $
+# $Id$
 
 =head1 TITLE
 

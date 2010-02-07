@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: encoding.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -68,7 +68,7 @@ E_NOTE
     foreach my $encoding ( split( /\s+/, $encoding_list ) ) {
         $encoding =~ s/\.c$//;
         $TEMP_encoding_build .= <<END
-src/string/encoding/$encoding\$(O): src/string/encoding/$encoding.h src/string/encoding/$encoding.c \$(NONGEN_HEADERS)
+src/string/encoding/$encoding\$(O): src/string/encoding/$encoding.h src/string/encoding/$encoding.c src/string/unicode.h \$(NONGEN_HEADERS)
 
 
 END

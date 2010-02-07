@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id: CGoto.pm 40958 2009-09-03 11:56:50Z bacek $
+# $Id$
 
 =head1 NAME
 
@@ -72,7 +72,7 @@ sub defines {
 #define NREG(i) REG_NUM(interp, cur_opcode[i])
 #define PREG(i) REG_PMC(interp, cur_opcode[i])
 #define SREG(i) REG_STR(interp, cur_opcode[i])
-#define CONST(i) Parrot_pcc_constants(interp, interp->ctx)[cur_opcode[i]]
+#define CONST(i) Parrot_pcc_get_constants(interp, interp->ctx)[cur_opcode[i]]
 END
 }
 

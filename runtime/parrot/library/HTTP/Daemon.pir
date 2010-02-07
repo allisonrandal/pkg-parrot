@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Daemon.pir 38693 2009-05-11 18:45:05Z NotFound $
+# $Id$
 
 =head1 NAME
 

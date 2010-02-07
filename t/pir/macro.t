@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: macro.t 40499 2009-08-12 06:53:19Z dukeleto $
+# $Id$
 
 =head1 NAME
 

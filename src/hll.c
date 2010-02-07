@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2009, Parrot Foundation.
-$Id: hll.c 41031 2009-09-06 01:57:17Z jkeenan $
+$Id$
 
 =head1 NAME
 
@@ -31,6 +31,7 @@ feature.
 
 #include "parrot/parrot.h"
 #include "parrot/dynext.h"
+#include "pmc/pmc_callcontext.h"
 #include "hll.str"
 
 /* HEADERIZER HFILE: include/parrot/hll.h */
@@ -43,8 +44,8 @@ PARROT_WARN_UNUSED_RESULT
 static PMC* new_hll_entry(PARROT_INTERP, ARGIN_NULLOK(STRING *entry_name))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_new_hll_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_new_hll_entry __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -90,14 +91,7 @@ new_hll_entry(PARROT_INTERP, ARGIN_NULLOK(STRING *entry_name))
     PMC * const entry = constant_pmc_new(interp, enum_class_FixedPMCArray);
 
     if (entry_name && !STRING_IS_EMPTY(entry_name)) {
-        char   * const cstring    = Parrot_str_to_cstring(interp, entry_name);
-        const  UINTVAL len        = Parrot_str_byte_length(interp, entry_name);
-        STRING *const_name        = Parrot_str_new_init(interp, cstring,
-            len, PARROT_DEFAULT_ENCODING, PARROT_DEFAULT_CHARSET,
-            PObj_constant_FLAG);
-
-        Parrot_str_free_cstring(cstring);
-        VTABLE_set_pmc_keyed_str(interp, hll_info, const_name, entry);
+        VTABLE_set_pmc_keyed_str(interp, hll_info, entry_name, entry);
     }
     else
         VTABLE_push_pmc(interp, hll_info, entry);

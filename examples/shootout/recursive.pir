@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: recursive.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 #
 # Ack by Leopold Toetsch
 # Fib and Tak by Joshua Isom

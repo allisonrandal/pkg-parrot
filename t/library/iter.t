@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: iter.t 38703 2009-05-11 21:55:44Z NotFound $
+# $Id$
 
 .const int TESTS = 47
 

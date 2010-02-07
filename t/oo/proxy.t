@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: proxy.t 39239 2009-05-29 16:36:02Z pmichaud $
+# $Id$
 
 =head1 NAME
 

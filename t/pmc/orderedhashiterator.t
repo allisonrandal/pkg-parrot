@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: orderedhashiterator.t 40125 2009-07-16 21:54:32Z NotFound $
+# $Id$
 
 =head1 NAME
 

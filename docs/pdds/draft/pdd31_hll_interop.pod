@@ -1,11 +1,11 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: pdd31_hll_interop.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id$
 
 =head1 [DRAFT] PDD 31: Inter-Language Calling
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision$
 
 =head2 Abstract
 

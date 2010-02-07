@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id: library.h 40111 2009-07-15 22:14:37Z NotFound $
+ *     $Id$
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:
@@ -102,31 +102,31 @@ STRING * parrot_split_path_ext(PARROT_INTERP,
         FUNC_MODIFIES(*wo_ext)
         FUNC_MODIFIES(*ext);
 
-#define ASSERT_ARGS_Parrot_get_runtime_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_get_runtime_prefix __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_lib_add_path __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_Parrot_get_runtime_path __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_Parrot_get_runtime_prefix __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_Parrot_lib_add_path __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(path_str)
+    , PARROT_ASSERT_ARG(path_str))
 #define ASSERT_ARGS_Parrot_lib_add_path_from_cstring \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(path)
-#define ASSERT_ARGS_Parrot_locate_runtime_file __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(path))
+#define ASSERT_ARGS_Parrot_locate_runtime_file __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(file_name)
+    , PARROT_ASSERT_ARG(file_name))
 #define ASSERT_ARGS_Parrot_locate_runtime_file_str \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(file)
-#define ASSERT_ARGS_parrot_init_library_paths __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_parrot_split_path_ext __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(file))
+#define ASSERT_ARGS_parrot_init_library_paths __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_parrot_split_path_ext __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(in) \
-    || PARROT_ASSERT_ARG(wo_ext) \
-    || PARROT_ASSERT_ARG(ext)
+    , PARROT_ASSERT_ARG(in) \
+    , PARROT_ASSERT_ARG(wo_ext) \
+    , PARROT_ASSERT_ARG(ext))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/library.c */
 

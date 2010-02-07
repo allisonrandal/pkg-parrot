@@ -1,7 +1,7 @@
-usr/lib/parrot/1.6.0/include/*
-usr/lib/parrot/1.6.0/dynext/*
-usr/lib/parrot/1.6.0/library/Test/*
-usr/lib/parrot/1.6.0/library/Data/*
-usr/lib/parrot/1.6.0/library/dumper.pir
-usr/lib/parrot/1.6.0/library/dumper.pbc
-usr/lib/parrot/1.6.0/library/Getopt/Obj.pbc
+usr/lib/parrot/2.0.0/include/*
+usr/lib/parrot/2.0.0/dynext/*
+usr/lib/parrot/2.0.0/library/Test/*
+usr/lib/parrot/2.0.0/library/Data/*
+usr/lib/parrot/2.0.0/library/dumper.pir
+usr/lib/parrot/2.0.0/library/dumper.pbc
+usr/lib/parrot/2.0.0/library/Getopt/Obj.pbc

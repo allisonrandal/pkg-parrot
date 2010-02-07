@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: VTable.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 package Parrot::Pmc2c::VTable;
 use strict;
 use warnings;

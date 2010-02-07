@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2009, Parrot Foundation.
- * $Id: debug.c 37854 2009-04-01 20:00:45Z coke $
+ * $Id$
  */
 
 /*

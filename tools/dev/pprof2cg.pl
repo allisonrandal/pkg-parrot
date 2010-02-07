@@ -1,27 +1,25 @@
 #! perl
 
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: pprof2cg.pl 41192 2009-09-10 22:56:08Z cotto $
+# $Id$
 
 use strict;
 use warnings;
 
-use Data::Dumper;
-
-=head1 Name
+=head1 NAME
 
 tools/dev/pprof2cg.pl
 
-=head1 Description
+=head1 DESCRIPTION
 
 Convert the output of Parrot's profiling runcore to a Callgrind-compatible
 format.
 
-=head1 Synopsis
+=head1 SYNOPSIS
 
 perl tools/dev/pprof2cg.pl parrot.pprof.1234
 
-=head1 Usage
+=head1 USAGE
 
 Generate a profile by passing C<-Rprofiling> to parrot, for example C<./parrot
 -Rprofiling perl6.pbc hello.p6>.  Once execution completes, C<parrot> will
@@ -34,7 +32,7 @@ To generate a Callgrind-compatible profile, run this script with the pprof
 filename as the first argument.  The output file usable by kcachegrind will be
 in parrot.out.XXXX, where XXXX again is the PID of the original parrot process.
 
-=head1 Environment Variables
+=head1 ENVIRONMENT VARIABLES
 
 =head2 PARROT_PROFILING_OUTPUT
 
@@ -47,7 +45,7 @@ existing files.
 
 main(\@ARGV);
 
-=head1 Internal Data Structures
+=head1 INTERNAL DATA STRUCTURES
 
 =over 4
 
@@ -59,11 +57,11 @@ Callgrind-compatible tools expect.  For this reason, the profiling runcore
 captures information about context switches (CS lines in the pprof file) and
 pprof2cg.pl maintains a context stack that functions similarly to a typical
 call stack.  pprof2cg.pl then maps these context switches as if they were
-function calls and returns.  See C<$ctx_stack> for more information.
+function calls and returns.  See C<$call_stack> for more information.
 
-=item C<$ctx_stack>
+=item C<$call_stack>
 
-Variables which are named C<$ctx_stack> hold a reference to an array of hashes
+Variables which are named C<$call_stack> hold a reference to an array of hashes
 which contain information about the currently active contexts.  When collecting
 timing information about an op, it is necessary to add that information to all
 function calls on the stack because Callgrind-compatible tools expect the cost
@@ -79,7 +77,7 @@ has been switched to.  When C<process_line> detects a new context, it adds a
 fake op representing a function call to C<$stats> and unshifts a new context
 onto the stack.
 
-Each element of C<@$ctx_stack> contains the information needed to uniquely
+Each element of C<@$call_stack> contains the information needed to uniquely
 identify the site of the original context switch.
 
 =item C<$stats>
@@ -106,7 +104,7 @@ contained in C<$stats>.
 
 =back
 
-=head1 Functions
+=head1 FUNCTIONS
 
 =over 4
 
@@ -121,14 +119,14 @@ similarly-named file.
 sub main {
     my $argv      = shift;
     my $stats     = {};
-    my $ctx_stack = [];
     my $filename  = $argv->[0];
+
+    $stats->{global_stats}{total_time} = 0;
 
     open(my $in_fh, '<', $filename) or die "couldn't open $filename for reading: $!";
 
-    while (my $line = <$in_fh>) {
-        process_line($line, $stats, $ctx_stack);
-    }
+    process_input($in_fh, $stats);
+
     close($in_fh) or die "couldn't close $filename: $!";
 
     #print_stats($stats);
@@ -144,97 +142,114 @@ sub main {
     print "$filename can now be used with kcachegrind or other callgrind-compatible tools.\n";
 }
 
-=item C<process_line>
+=item C<process_input>
 
-This function takes a string containing a single line from a Parrot profile, a
-reference to a hash of fine-grained statistics about the current PIR program
-and a reference to the current context stack.  It modifies the statistics and
-context stack according to the information from the Parrot profile.
+This function takes a file handle open to a Parrot profile and a reference
+to a hash of fine-grained statistics about the current PIR program.  It
+modifies the statistics according to the information from the Parrot profile.
 
 =cut
 
-sub process_line {
+sub process_input {
+    my ($input, $stats) = @_;
+    my $call_stack = [];
 
-    my $line      = shift;
-    my $stats     = shift;
-    my $ctx_stack = shift;
+    while(my $line = <$input>) {
+        if ($line =~ /^OP:(.*)$/) {
+            # Decode string in the format C<{x{key1:value1}x}{x{key2:value2}x}>
+            my %op_hash = $1 =~ /{x{([^:]+):(.*?)}x}/g
+                or die "invalidly formed line '$line'";
 
-    for ($line) {
-        if (/^#/) {
-            #comments are always ignored
+            my $cur_ctx = $call_stack->[0]
+                or die "input file did not specify an initial context";
+
+            # If we've already seen this line, bump the op number.  Otherwise reset it.
+            if (exists $cur_ctx->{line} && $op_hash{line} == $cur_ctx->{line}) {
+                $cur_ctx->{op_num}++;
+            }
+            else {
+                $cur_ctx->{op_num} = 0;
+            }
+
+            $cur_ctx->{line} = $op_hash{line};
+            my $extra = { op_name => $op_hash{op} };
+            my $time  = $op_hash{time};
+
+            $stats->{global_stats}{total_time} += $time;
+            store_stats($stats, $cur_ctx, $time, $extra);
+
+            # Add the time spent by this op to each op on the call "stack".
+            $stats->{ $_->{file} }{ $_->{ns} }{ $_->{line} }[ $_->{op_num} ]{time} += $time
+                for @$call_stack[1 .. $#$call_stack];
         }
-        elsif (/^VERSION:(\d+)$/) {
+        #context switch
+        elsif ($line =~ /^CS:(.*)$/) {
+
+            # Decode string in the format C<{x{key1:value1}x}{x{key2:value2}x}>
+            my %cs_hash = $1 =~ /{x{([^:]+):(.*?)}x}/g
+                or die "invalidly formed line '$line'";
+
+            if (!@$call_stack) {
+                $call_stack->[0] = \%cs_hash;
+            }
+            else {
+                my $cur_ctx      = $call_stack->[0];
+                my $hash_ctx     = $cs_hash{ctx};
+                my $is_redundant = $cur_ctx->{ctx} eq $hash_ctx;
+                my $reused_ctx   = $is_redundant && $cur_ctx->{sub} ne $cs_hash{sub};
+
+                # If we're calling a new sub with the same context, modify the
+                # current context to have the name and address of the new sub.
+                if ($reused_ctx) {
+                    $cur_ctx->{ns}  = $cs_hash{ns};
+                    $cur_ctx->{sub} = $cs_hash{sub};
+                }
+
+                # The new context is the same as the old one, so don't modify the call stack.
+                elsif ($is_redundant) {
+                    # This space intentionally left blank.
+                }
+
+                # If the new context isn't in the current call stack, unshift
+                # it onto the start of the stack.
+                elsif (!grep {$_->{ctx} eq $hash_ctx} @$call_stack) {
+                    $cur_ctx->{op_num}++;
+                    my $extra = {
+                                 op_name => "CALL",
+                                 target  => $cs_hash{ns}
+                                };
+                    store_stats($stats, $call_stack->[0], 0, $extra);
+                    unshift @$call_stack, \%cs_hash;
+                }
+                else {
+                    #shift contexts off the stack until one matches the current ctx
+                    shift @$call_stack while $call_stack->[0]{ctx} ne $hash_ctx;
+                }
+            }
+            #print Dumper($call_stack);
+        }
+        elsif ($line =~ /^VERSION:(\d+)$/) {
             my $version = $1;
-            if ($version != 1) {
+            if ($version != 2) {
                 die "profile was generated by an incompatible version of the profiling runcore.";
             }
         }
-        elsif (/^CLI:(.*)$/) {
+        elsif ($line =~ /^CLI:(.*)$/) {
             $stats->{'global_stats'}{'cli'} = $1;
         }
-        #context switch
-        elsif (/^CS:(.*)$/) {
-
-            my $cs_hash      = split_vars($1);
-            my $is_first     = scalar(@$ctx_stack) == 0;
-            my $is_redundant = !$is_first && ($ctx_stack->[0]{'ctx'} eq $cs_hash->{'ctx'});
-            my $reused_ctx   = $is_redundant && ($ctx_stack->[0]{'sub'} ne $cs_hash->{'sub'});
-            my $is_call      = scalar(grep {$_->{'ctx'} eq $cs_hash->{'ctx'}} @$ctx_stack) == 0;
-
-            if ($is_first) {
-                $ctx_stack->[0] = $cs_hash;
-            }
-            elsif ($reused_ctx) {
-                $ctx_stack->[0]{'sub'} = $cs_hash->{'sub'};
-                $ctx_stack->[0]{'ns'}  = $cs_hash->{'ns'};
-            }
-            elsif ($is_redundant) {
-                #don't do anything
-            }
-            elsif ($is_call) {
-                $ctx_stack->[0]{'op_num'}++;
-                my $extra = {
-                    op_name => "CALL",
-                    target  => $cs_hash->{'ns'}
-                };
-                store_stats($stats, $ctx_stack->[0], 0, $extra );
-                unshift @$ctx_stack, $cs_hash;
-            }
-            else {
-                #shift contexts off the stack until one matches the current ctx
-                while ($ctx_stack->[0]->{'ctx'} ne $cs_hash->{'ctx'}) {
-                    my $ctx = shift @$ctx_stack;
-                }
-            }
-            #print Dumper($ctx_stack);
+        elsif ($line =~ /^END_OF_RUNLOOP:(.*)$/) {
+            # This is the end of an outermost runloop.  Several of these can
+            # occur during the execution of a script, e.g. for :init subs.
+            @$call_stack = ();
         }
-        elsif (/^END_OF_RUNLOOP$/) {
-            #end of loop
-            @$ctx_stack = ();
+        elsif ($line =~ /^AN:/) {
+            #ignore annotations for now
         }
-        elsif (/^OP:(.*)$/) {
-            my $op_hash = split_vars($1);
-
-            die "input file did not specify an initial context" if (@$ctx_stack == 0);
-
-            if (exists $ctx_stack->[0]{'line'} && $op_hash->{'line'} == $ctx_stack->[0]{'line'}) {
-                $ctx_stack->[0]{'op_num'}++;
-            }
-            else {
-                $ctx_stack->[0]{'op_num'} = 0;
-            }
-
-            $ctx_stack->[0]{'line'} = $op_hash->{'line'};
-            my $extra = { op_name => $op_hash->{'op'} };
-            store_stats($stats, $ctx_stack->[0], $op_hash->{'time'}, $extra);
-
-            $extra->{'no_hits'} = 1;
-            for my $frame (@$ctx_stack[1 .. scalar(@$ctx_stack)-1 ]) {
-                store_stats($stats, $frame, $op_hash->{'time'}, $extra);
-            }
+        elsif ($line =~ /^#/) {
+            #comments are always ignored
         }
         else {
-            die "Unrecognized line format: \"$line\"";
+            die "Unrecognized line format: '$line'";
         }
     }
 }
@@ -269,29 +284,10 @@ sub print_stats {
     }
 }
 
-=item C<split_vars>
-
-This function takes a string specifying 1 or more key/value mappings and
-returns a reference to a hash containing those keys and values.  The string
-must be in the format C<{x{key1:value1}x}{x{key2:value2}x}>.
-
-=cut
-
-sub split_vars {
-    my $href;
-    my $str = shift;
-    die "invalidly formed line '$str'"
-        unless $str =~ /({x{  [^:]+  : (.*?) }x})+/x;
-    while ($str =~ /\G   {x{ ([^:]+) : (.*?) }x} /cxg) {
-        $href->{$1} = $2;
-    }
-    return $href;
-}
-
 =item C<store_stats>
 
 This function adds statistical data to the C<$stats> hash reference.  The
-C<$locator> argument specifies information such as the namespace, file, line
+C<$loc> argument specifies information such as the namespace, file, line
 and op number where the data should go.  C<$time> is an integer representing
 the amount of time spent at the specified location.  C<$extra> contains any
 ancillary data that should be stored in the hash.  This includes data on
@@ -300,34 +296,19 @@ ancillary data that should be stored in the hash.  This includes data on
 =cut
 
 sub store_stats {
-    my $stats   = shift;
-    my $locator = shift;
-    my $time    = shift;
-    my $extra   = shift;
+    my ($stats, $loc, $time, $extra) = @_;
 
-    my $file   = $locator->{'file'};
-    my $ns     = $locator->{'ns'};
-    my $line   = $locator->{'line'};
-    my $op_num = $locator->{'op_num'};
+    my $by_op = ( $stats->{ $loc->{file} }{ $loc->{ns} }{ $loc->{line} }[ $loc->{op_num} ] ||= {} );
 
-    if (exists $stats->{'global_stats'}{'total_time'}) {
-        $stats->{'global_stats'}{'total_time'} += $time;
+    if ($by_op->{hits}) {
+        $by_op->{hits} ++;
+        $by_op->{time} += $time;
     }
     else {
-        $stats->{'global_stats'}{'total_time'} = $time;
-    }
+        $by_op->{hits} = 1;
+        $by_op->{time} = $time;
 
-    if (exists $stats->{$file}{$ns}{$line}[$op_num]) {
-        $stats->{$file}{$ns}{$line}[$op_num]{'hits'}++
-            unless exists $extra->{no_hits};
-        $stats->{$file}{$ns}{$line}[$op_num]{'time'} += $time;
-    }
-    else {
-        $stats->{$file}{$ns}{$line}[$op_num]{'hits'} = 1;
-        $stats->{$file}{$ns}{$line}[$op_num]{'time'} = $time;
-        for my $key (keys %{$extra}) {
-            $stats->{$file}{$ns}{$line}[$op_num]{$key} = $extra->{$key};
-        }
+        $by_op->{$_} = $extra->{$_} for keys %$extra;
     }
 }
 

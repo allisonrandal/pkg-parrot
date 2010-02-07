@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: float.t 41097 2009-09-07 05:38:23Z dukeleto $
+# $Id$
 
 =head1 NAME
 
@@ -116,8 +116,7 @@ Tests the Float PMC.
     is($S0, '123.45', 'get string')
 
     $P0 = "12.49"
-    $P1 = get_class ['Float']
-    is($P0, 12.49, 'setting value from string', PRECISION)
+    is($P0, 12.49, 'setting value from String', PRECISION)
 .end
 
 .sub 'add_number_to_self'
@@ -168,10 +167,7 @@ Tests the Float PMC.
     .return ()
 
   divide_by_zero_handler:
-    .get_results ($P1)
-    $S1 = $P1
-    say $S1
-    like($S1, ':s division by zero', 'divide by zero')
+    ok(1, "divide by zero throws exception")
 .end
 
 .sub 'truth_positive_float'
@@ -346,11 +342,11 @@ Tests the Float PMC.
     neg $P0
 
     $S0 = $P0
-    like($S0, '^\-0', 'negative zero')
+    is($S0, "-0")
     .return ()
 
   negative_zero_todoed:
-    todo(1, '-0.0 not implemented, TT#313')
+    todo(0, '-0.0 not implemented, TT #313')
 .end
 
 .sub 'equality'

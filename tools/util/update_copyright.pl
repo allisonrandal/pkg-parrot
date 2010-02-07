@@ -1,5 +1,5 @@
 #! perl
-# $Id: update_copyright.pl 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 # Copyright (C) 2008, Parrot Foundation.
 
@@ -7,7 +7,11 @@ use strict;
 use warnings;
 use Fatal qw( open close );
 
-=head1 PURPOSE
+=head1 NAME
+
+F<tools/util/update_copyright.pl>
+
+=head1 DESCRIPTION
 
 Given a list of files as command line arguments, update the copyright
 notice to go from the earliest year noted to the current year.

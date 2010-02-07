@@ -1,11 +1,11 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: pdd29_compiler_tools.pod 38816 2009-05-16 04:08:22Z coke $
+# $Id$
 
 =head1 [DRAFT] PDD 29: Compiler Tools
 
 =head2 Version
 
-$Revision: 38816 $
+$Revision$
 
 =head2 Maintainer
 

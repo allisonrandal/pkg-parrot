@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: file.t 40123 2009-07-16 20:05:06Z NotFound $
+# $Id$
 
 use strict;
 use warnings;
@@ -19,7 +19,7 @@ use Parrot::Test tests => 14;
 
 syn/file.t - test inclusion of files
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 A test script which is supposed to be called by Test::Harness.
 

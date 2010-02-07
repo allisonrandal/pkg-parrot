@@ -1,4 +1,4 @@
-# $Id: CaptureOutput.pm 23890 2007-12-14 16:58:20Z jkeenan $
+# $Id$
 package IO::CaptureOutput;
 use strict;
 use vars qw/$VERSION @ISA @EXPORT_OK %EXPORT_TAGS/;
@@ -7,6 +7,16 @@ use Exporter;
 @EXPORT_OK = qw/capture capture_exec qxx capture_exec_combined qxy/;
 %EXPORT_TAGS = (all => \@EXPORT_OK);
 $VERSION = '1.06';
+
+=head1 NAME
+
+IO::CaptureOutput - capture STDOUT and STDERR from Perl code, subprocesses or XS
+
+=head1 DESCRIPTION
+
+Included from CPAN.  Thanks to David Golden for reviving this useful module.
+
+=cut
 
 sub capture (&@) { ## no critic
     my ($code, $output, $error) = @_;

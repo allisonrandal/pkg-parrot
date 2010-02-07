@@ -1,5 +1,5 @@
 /*
- * $Id: pirregalloc.c 37143 2009-03-06 03:28:51Z Util $
+ * $Id$
  * Copyright (C) 2008-2009, Parrot Foundation.
  */
 #include <stdio.h>
@@ -379,10 +379,10 @@ get_free_reg(lsr_allocator * const lsr, pir_type type) {
          * and parrot register numbering starts at 0, substract 1 here.
          * (initializing r to 0 will make the algorithm stop working properly.)
          */
-         unsigned reg = lsr->r[type] - 1;
-         lsr->r[type]++;
-         fprintf(stderr, "get_free_reg(): non-cached: %d\n", reg);
-         return reg;
+        unsigned reg = lsr->r[type] - 1;
+        lsr->r[type]++;
+        fprintf(stderr, "get_free_reg(): non-cached: %d\n", reg);
+        return reg;
     }
 }
 

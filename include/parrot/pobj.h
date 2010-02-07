@@ -1,7 +1,7 @@
 /* pobj.h
  *  Copyright (C) 2001-2005, Parrot Foundation.
  *  SVN Info
- *     $Id: pobj.h 40936 2009-09-03 00:21:51Z chromatic $
+ *     $Id$
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:
@@ -41,36 +41,25 @@ The actual set-up is more involved because of padding.  obj->bufstart must
 be suitably aligned. The start of the memory region (as returned by malloc())
 is suitably aligned for any use.  If, for example, malloc() returns
 objects aligned on 8-byte boundaries, and obj->bufstart is also aligned
-on 8-byte boundaries, then there should be 4 bytes of padding.  It is
-handled differently in the two files alloc_resources.c and res_lea.c.
-In alloc_resources.c, the buffer is carved out of a larger memory pool.  In
-res_lea.c, each buffer is individually allocated.
+on 8-byte boundaries, then there should be 4 bytes of padding.
 
-               src/gc/alloc_resources.c:       src/gc/res_lea.c:
-
-ptr from malloc ->  +------------------+      +------------------+
-                      [other blocks?]         | INTVAL ref_count |
-                    | INTVAL ref_count |      | possible padding |
-obj->bufstart   ->  +------------------+      +------------------+
-                    |     data         |      |      data        |
-                    v                  v      v                  v
+ptr from malloc ->  +------------------+
+                      [other blocks?]  |
+                    | INTVAL ref_count |
+obj->bufstart   ->  +------------------+
+                    |     data         |
+                    v                  v
 
 */
 
 /* Given a pointer to the buffer, find the ref_count and the actual start of
    the allocated space. Setting ref_count is clunky because we avoid lvalue
    casts. */
-#ifdef GC_IS_MALLOC       /* see src/gc/res_lea.c */
-#  define Buffer_alloc_offset    (offsetof(Buffer_alloc_unit, buffer))
-#  define Buffer_bufallocstart(b)  ((char *)Buffer_bufstart(b) - Buffer_alloc_offset)
-#  define Buffer_bufrefcount(b)    (((Buffer_alloc_unit *)Buffer_bufallocstart(b))->ref_count)
-#  define Buffer_bufrefcountptr(b) (&Buffer_bufrefcount(b))
-#else                     /* see src/gc/alloc_resources.c */
-#  define Buffer_alloc_offset sizeof (INTVAL)
-#  define Buffer_bufallocstart(b)  ((char *)Buffer_bufstart(b) - Buffer_alloc_offset)
-#  define Buffer_bufrefcount(b)    (*(INTVAL *)Buffer_bufallocstart(b))
-#  define Buffer_bufrefcountptr(b) ((INTVAL *)Buffer_bufallocstart(b))
-#endif
+#define Buffer_alloc_offset sizeof (INTVAL)
+#define Buffer_bufallocstart(b)  ((char *)Buffer_bufstart(b) - Buffer_alloc_offset)
+#define Buffer_bufrefcount(b)    (*(INTVAL *)Buffer_bufallocstart(b))
+#define Buffer_bufrefcountptr(b) ((INTVAL *)Buffer_bufallocstart(b))
+
 
 typedef enum {
     enum_stringrep_unknown = 0,
@@ -107,33 +96,11 @@ struct PMC {
      * s. parrot/thread.h
      */
     struct _Sync *_synchronize;
-
-    /* This flag determines the next PMC in the 'used' list during
-       dead object detection in the GC. It is a linked list, which is
-       only valid in trace_active_PMCs. Also, the linked list is
-       guaranteed to have the tail element's _next_for_GC point to itself,
-       which makes much of the logic and checks simpler. We then have to
-       check for PMC->_next_for_GC == PMC to find the end of list. */
-    PMC *_next_for_GC;
-
-    /* Yeah, the GC data should be out of
-       band, but that makes things really slow when actually marking
-       things for the GC runs. Unfortunately putting this here makes
-       marking things clear for the GC pre-run slow as well, as we need
-       to touch all the PMC structs. (Though we will for flag setting
-       anyway) We can potentially make this a pointer to the real GC
-       stuff, which'd merit an extra dereference when setting, but let
-       us memset the actual GC data in a big block
-    */
 };
 
 #define PMC_data(pmc)                   (pmc)->data
 #define PMC_data_typed(pmc, type) (type)(pmc)->data
-/* do not allow PMC_data2 as lvalue */
-#define PMC_data0(pmc)            (1 ? (pmc)->data : 0)
-#define PMC_data0_typed(pmc)      (type)(1 ? (pmc)->data : 0)
 #define PMC_metadata(pmc)         ((pmc)->_metadata)
-#define PMC_next_for_GC(pmc)      ((pmc)->_next_for_GC)
 #define PMC_sync(pmc)             ((pmc)->_synchronize)
 
 #define POBJ_FLAG(n) ((UINTVAL)1 << (n))
@@ -316,14 +283,6 @@ typedef enum PObj_enum {
 #define PObj_custom_destroy_TEST(o)  PObj_flag_TEST(custom_destroy,  o)
 #define PObj_custom_destroy_CLEAR(o) PObj_flag_CLEAR(custom_destroy, o)
 
-/*******************************************************
- * DEPRECATED -- use PObj_custom_destroy_FOO() instead *
- *******************************************************/
-#define PObj_active_destroy_FLAG     PObj_custom_destroy_FLAG
-#define PObj_active_destroy_SET(o)   PObj_flag_SET(custom_destroy,   o)
-#define PObj_active_destroy_TEST(o)  PObj_flag_TEST(custom_destroy,  o)
-#define PObj_active_destroy_CLEAR(o) PObj_flag_CLEAR(custom_destroy, o)
-
 #define PObj_is_class_SET(o) PObj_flag_SET(is_class, o)
 #define PObj_is_class_TEST(o) PObj_flag_TEST(is_class, o)
 #define PObj_is_class_CLEAR(o) PObj_flag_CLEAR(is_class, o)
@@ -366,6 +325,20 @@ typedef enum PObj_enum {
         PObj_custom_mark_SET(o); \
         PObj_custom_destroy_SET(o); \
 } while (0)
+
+#define PObj_gc_CLEAR(o) (PObj_get_FLAGS(o) \
+    &= ~PObj_custom_destroy_FLAG \
+     | ~PObj_custom_mark_FLAG \
+     | ~PObj_live_FLAG)
+
+/*******************************************************
+ * DEPRECATED -- use PObj_custom_destroy_FOO() instead *
+ *******************************************************/
+#define PObj_active_destroy_FLAG     PObj_custom_destroy_FLAG
+#define PObj_active_destroy_SET(o)   PObj_flag_SET(custom_destroy,   o)
+#define PObj_active_destroy_TEST(o)  PObj_flag_TEST(custom_destroy,  o)
+#define PObj_active_destroy_CLEAR(o) PObj_flag_CLEAR(custom_destroy, o)
+
 
 #endif /* PARROT_POBJ_H_GUARD */
 

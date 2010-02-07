@@ -1,11 +1,11 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: pdd00_pdd.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id$
 
 =head1 PDD 0: Design Document Format
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision$
 
 =head2 Abstract
 

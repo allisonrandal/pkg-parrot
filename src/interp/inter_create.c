@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: inter_create.c 41210 2009-09-11 14:27:06Z NotFound $
+$Id$
 
 =head1 NAME
 
@@ -23,6 +23,7 @@ Create or destroy a Parrot interpreter
 #include "parrot/runcore_api.h"
 #include "parrot/oplib/core_ops.h"
 #include "../compilers/imcc/imc.h"
+#include "pmc/pmc_callcontext.h"
 #include "inter_create.str"
 
 /* HEADERIZER HFILE: include/parrot/interpreter.h */
@@ -31,32 +32,26 @@ Create or destroy a Parrot interpreter
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_WARN_UNUSED_RESULT
-static int is_env_var_set(ARGIN(const char* var))
-        __attribute__nonnull__(1);
+static int is_env_var_set(PARROT_INTERP, ARGIN(STRING* var))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
 
 static void setup_default_compreg(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_is_env_var_set __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(var)
-#define ASSERT_ARGS_setup_default_compreg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_is_env_var_set __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(var))
+#define ASSERT_ARGS_setup_default_compreg __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
-
-#if EXEC_CAPABLE
-    extern int Parrot_exec_run;
-#endif
-
-#if EXEC_CAPABLE
-Interp interpre;
-#endif
 
 #define ATEXIT_DESTROY
 
 /*
 
-=item C<static int is_env_var_set(const char* var)>
+=item C<static int is_env_var_set(PARROT_INTERP, STRING* var)>
 
 Checks whether the specified environment variable is set.
 
@@ -66,19 +61,17 @@ Checks whether the specified environment variable is set.
 
 PARROT_WARN_UNUSED_RESULT
 static int
-is_env_var_set(ARGIN(const char* var))
+is_env_var_set(PARROT_INTERP, ARGIN(STRING* var))
 {
     ASSERT_ARGS(is_env_var_set)
-    int free_it, retval;
-    char* const value = Parrot_getenv(var, &free_it);
+    int retval;
+    char* const value = Parrot_getenv(interp, var);
     if (value == NULL)
         retval = 0;
     else if (*value == '\0')
         retval = 0;
     else
         retval = !STREQ(value, "0");
-    if (free_it)
-        mem_sys_free(value);
     return retval;
 }
 
@@ -122,12 +115,7 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
     Interp *interp;
 
     /* Get an empty interpreter from system memory */
-#if EXEC_CAPABLE
-    if (Parrot_exec_run)
-        interp = &interpre;
-    else
-#endif
-        interp = mem_allocate_zeroed_typed(Interp);
+    interp = mem_allocate_zeroed_typed(Interp);
 
     interp->lo_var_ptr = NULL;
 
@@ -161,7 +149,13 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
     interp->piodata = NULL;
     Parrot_io_init(interp);
 
-    if (is_env_var_set("PARROT_GC_DEBUG")) {
+    /*
+     * Set up the string subsystem
+     * This also generates the constant string tables
+     */
+    Parrot_str_init(interp);
+
+    if (is_env_var_set(interp, CONST_STRING(interp, "PARROT_GC_DEBUG"))) {
 #if ! DISABLE_GC_DEBUG
         Interp_flags_SET(interp, PARROT_GC_DEBUG_FLAG);
 #else
@@ -170,18 +164,9 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
 #endif
     }
 
-    /*
-     * Set up the string subsystem
-     * This also generates the constant string tables
-     */
-    Parrot_str_init(interp);
-
     Parrot_initialize_core_vtables(interp);
 
-    /* Set up the MMD struct */
-    interp->binop_mmd_funcs = NULL;
-
-    /* MMD cache for builtins. */
+    /* Set up MMD; MMD cache for builtins. */
     interp->op_mmd_cache = Parrot_mmd_cache_create(interp);
 
     /* create caches structure */
@@ -413,8 +398,10 @@ Parrot_really_destroy(PARROT_INTERP, SHIM(int exit_code), SHIM(void *arg))
     Parrot_gc_destroy_memory_pools(interp);
 
     /* mem subsystem is dead now */
-    mem_sys_free(interp->arena_base);
-    interp->arena_base = NULL;
+    mem_sys_free(interp->mem_pools);
+    interp->mem_pools = NULL;
+    mem_sys_free(interp->gc_sys);
+    interp->gc_sys = NULL;
 
     /* cache structure */
     destroy_object_cache(interp);

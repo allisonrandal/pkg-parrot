@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 01-options.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 01-options.t
 
 use strict;

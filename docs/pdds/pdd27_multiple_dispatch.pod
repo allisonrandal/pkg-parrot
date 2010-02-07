@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: pdd27_multiple_dispatch.pod 39694 2009-06-22 02:49:35Z cotto $
+# $Id$
 
 =head1 PDD 27: Multiple Dispatch
 
@@ -9,7 +9,7 @@ This PDD defines Parrot's multiple dispatch system.
 
 =head2 Version
 
-$Revision: 39694 $
+$Revision$
 
 =head2 Definitions
 

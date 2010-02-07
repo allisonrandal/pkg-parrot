@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: yaml_dumper.pir 38702 2009-05-11 21:42:56Z NotFound $
+# $Id$
 
 =head1 TITLE
 

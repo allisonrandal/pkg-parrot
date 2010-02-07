@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: hashiterator.pmc 40672 2009-08-20 09:28:47Z chromatic $
+$Id$
 
 =head1 NAME
 
@@ -46,8 +46,8 @@ Generic iterator for traversing Hash.
 
 */
 
-#include "pmc_hash.h"
-#include "pmc_hashiteratorkey.h"
+#include "pmc/pmc_hash.h"
+#include "pmc/pmc_hashiteratorkey.h"
 
 /*
 
@@ -126,8 +126,7 @@ Marks the hash as live.
 
     VTABLE void mark() {
         PMC *hash = PARROT_HASHITERATOR(SELF)->pmc_hash;
-        if (hash)
-             Parrot_gc_mark_PObj_alive(INTERP, (PObj *)hash);
+        Parrot_gc_mark_PMC_alive(INTERP, hash);
         /* We don't mark underlying parrot_hash. Hash PMC will mark it */
     }
 
@@ -231,9 +230,8 @@ the next one.
                 "StopIteration");
 
         ret = pmc_new(INTERP, enum_class_HashIteratorKey);
-        /* Poke directly into HIK. We don't want to create any kind of public API for this */
-        PARROT_HASHITERATORKEY(ret)->parrot_hash = attrs->parrot_hash;
-        PARROT_HASHITERATORKEY(ret)->bucket      = attrs->bucket;
+        VTABLE_set_pointer_keyed_int(INTERP, ret, 0, attrs->parrot_hash);
+        VTABLE_set_pointer_keyed_int(INTERP, ret, 1, attrs->bucket);
 
         /* Move to next bucket */
         advance_to_next(INTERP, SELF);

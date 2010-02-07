@@ -1,7 +1,7 @@
 /* string.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: string.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id$
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:

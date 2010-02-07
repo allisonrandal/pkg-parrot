@@ -1,11 +1,15 @@
 #! perl
-# $Id: c2str.pl 38889 2009-05-18 05:05:30Z petdance $
+# $Id$
 
 # Copyright (C) 2004-2008, Parrot Foundation.
 
 =head1 NAME
 
-tools/build/c2str.pl - constant string support
+tools/build/c2str.pl
+
+=head1 DESCRIPTION
+
+constant string support
 
 =cut
 

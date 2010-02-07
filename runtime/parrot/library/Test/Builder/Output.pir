@@ -1,4 +1,4 @@
-# $Id: Output.pir 39631 2009-06-17 20:30:30Z NotFound $
+# $Id$
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: multisub.t 37842 2009-04-01 17:56:47Z barney $
+# $Id$
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ Tests the creation and invocation of Perl6 multi subs.
     push $P0, "goodbye"
     $S0 = foo($P0 :flat)
     is($S0, "testing 42, goodbye", "Int and String :flat")
-    ## Now try double :flat (regression test for RT #43869).
+    ## Now try double :flat
     $P1 = new ['ResizablePMCArray']
     push $P1, 42
     $P2 = new ['ResizablePMCArray']

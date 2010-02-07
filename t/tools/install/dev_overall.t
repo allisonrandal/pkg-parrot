@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: dev_overall.t 39955 2009-07-09 00:02:26Z jkeenan $
+# $Id$
 # dev_overall.t
 
 use strict;
@@ -49,17 +49,6 @@ my $full_gen_pseudo = File::Spec->catfile( $cwd, $gen_pseudo );
                         qw| .  compilers nqp bootstrap actions.pm | ),
             end     => File::Spec->catfile(
                         $libdir, $versiondir, 'languages', 'nqp', 'bootstrap', 'actions.pm' ),
-        },
-        'docs/compiler_faq.pod' => {
-            start   => File::Spec->catfile( qw| . docs compiler_faq.pod | ),
-            end     => File::Spec->catfile(
-                        $docdir,  $versiondir, 'pod', 'compiler_faq.pod' ),
-        },
-        'docs/pct/past_building_blocks.pod' => {
-            start   => File::Spec->catfile(
-                        qw| . docs pct past_building_blocks.pod | ),
-            end     => File::Spec->catfile(
-                        $docdir,  $versiondir, 'pod', 'pct', 'past_building_blocks.pod' ),
         },
         'lib/Parrot/Configure.pm' => {
             start   => File::Spec->catfile(

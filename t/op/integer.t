@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: integer.t 39848 2009-06-30 21:37:52Z Infinoid $
+# $Id$
 
 =head1 NAME
 

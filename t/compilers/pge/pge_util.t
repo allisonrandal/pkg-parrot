@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pge_util.t 38705 2009-05-11 22:13:04Z NotFound $
+# $Id$
 
 use strict;
 use warnings;
@@ -11,11 +11,15 @@ use Parrot::Test::PGE;
 
 =head1 NAME
 
-t/library/pge_util.t - Parrot Grammar Engine tests of utility rules
+t/library/pge_util.t
 
 =head1 SYNOPSIS
 
         % prove -Ilib t/library/pge_util.t
+
+=head1 DESCRIPTION
+
+Parrot Grammar Engine tests of utility rules
 
 =cut
 

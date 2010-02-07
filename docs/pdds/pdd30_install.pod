@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: pdd30_install.pod 40726 2009-08-23 01:18:17Z whiteknight $
+# $Id$
 
 =head1 PDD 30: Installation
 
@@ -12,7 +12,7 @@ installables.
 
 =head2 Version
 
-$Revision: 40726 $
+$Revision$
 
 =head2 Synopsis
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: warnings.c 40958 2009-09-03 11:56:50Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -29,8 +29,8 @@ messages.
 static INTVAL print_warning(PARROT_INTERP, ARGIN_NULLOK(STRING *msg))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_print_warning __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_print_warning __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 

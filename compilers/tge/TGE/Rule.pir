@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: Rule.pir 38115 2009-04-15 14:41:32Z fperrad $
+# $Id$
 
 =head1 NAME
 

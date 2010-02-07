@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: TclLibrary.pir 39337 2009-06-02 16:50:55Z NotFound $
+# $Id$
 # vkon
 
 =head1 TITLE

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: const.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;
@@ -574,7 +574,7 @@ CODE
 10
 OUT
 
-pir_output_is( <<'CODE', <<'OUT', "RT # 34991" );
+pir_output_is( <<'CODE', <<'OUT', "const int" );
 .const int c = 12
 .sub test
     .local num a

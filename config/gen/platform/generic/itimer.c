@@ -1,5 +1,5 @@
 /*
- * $Id: itimer.c 38707 2009-05-12 06:30:55Z petdance $
+ * $Id$
  * Copyright (C) 2004-2009, Parrot Foundation.
  */
 

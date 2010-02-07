@@ -1,12 +1,28 @@
-#1 $Id: ChangeLog 41266 2009-09-15 05:29:09Z particle $
+#1 $Id$
+
+2010.01.19     chromatic
+	* Released 2.0.0
+	See NEWS for more.
+
+2009.12.15     Gerd
+	* Released 1.9.0
+	See NEWS for more.
+
+2009.11.17     barney
+	* Released 1.8.0
+	See NEWS for more.
+
+2009.10.20     dukeleto
+	* Released 1.7.0
+	See NEWS for more.
 
 2009.9.15     particle
-    * Released 1.6.0
-    See NEWS for more.
+	* Released 1.6.0
+	See NEWS for more.
 
 2009.8.18     Whiteknight
-    * Released 1.5.0
-    See NEWS for more.
+	* Released 1.5.0
+	See NEWS for more.
 
 2009.7.21     cotto
 	* Released 1.4.0
@@ -14,7 +30,7 @@
 
 2009.06.16    Whiteknight
 	* Released 1.3.0
-	Ses NEWS for more.
+	See NEWS for more.
 
 2009.05.19    Infinoid
 	* Released 1.2.0
@@ -3821,9 +3837,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 41266 2009-09-15 05:29:09Z particle $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id$
 	into generated files
-	   but the $Id: ChangeLog 41266 2009-09-15 05:29:09Z particle $ string gets mangled when it's committed.
+	   but the $Id$ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

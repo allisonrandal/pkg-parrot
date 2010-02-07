@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: opcode_doc.t 37320 2009-03-11 19:31:57Z coke $
+# $Id$
 
 use strict;
 use warnings;

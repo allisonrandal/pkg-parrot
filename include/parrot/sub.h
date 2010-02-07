@@ -1,7 +1,7 @@
 /* sub.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: sub.h 41213 2009-09-11 15:17:49Z cotto $
+ *     $Id$
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures
@@ -21,7 +21,7 @@
  * Subroutine flags
  */
 typedef enum {
-     /* runtime usage flags */
+    /* runtime usage flags */
     SUB_FLAG_CORO_FF      = PObj_private0_FLAG,
     SUB_FLAG_C_HANDLER    = PObj_private0_FLAG, /* C exceptions only */
     SUB_FLAG_TAILCALL     = PObj_private2_FLAG,
@@ -177,6 +177,12 @@ PMC * new_ret_continuation_pmc(PARROT_INTERP,
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
+void Parrot_capture_lex(PARROT_INTERP, ARGMOD(PMC *sub_pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*sub_pmc);
+
+PARROT_EXPORT
 int Parrot_Context_get_info(PARROT_INTERP,
     ARGIN(PMC *ctx),
     ARGOUT(Parrot_Context_info *info))
@@ -217,11 +223,6 @@ void invalidate_retc_context(PARROT_INTERP, ARGMOD(PMC *cont))
         FUNC_MODIFIES(*cont);
 
 void mark_context_start(void);
-void Parrot_capture_lex(PARROT_INTERP, ARGMOD(PMC *sub_pmc))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        FUNC_MODIFIES(*sub_pmc);
-
 void Parrot_continuation_check(PARROT_INTERP, ARGIN(const PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
@@ -259,51 +260,51 @@ INTVAL Parrot_Sub_get_line_from_pc(PARROT_INTERP,
     ARGIN_NULLOK(opcode_t *pc))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_new_ret_continuation_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_Context_get_info __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_new_ret_continuation_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_Parrot_capture_lex __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(ctx) \
-    || PARROT_ASSERT_ARG(info)
-#define ASSERT_ARGS_Parrot_Context_infostr __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(sub_pmc))
+#define ASSERT_ARGS_Parrot_Context_get_info __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(ctx)
-#define ASSERT_ARGS_Parrot_full_sub_name __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+    , PARROT_ASSERT_ARG(ctx) \
+    , PARROT_ASSERT_ARG(info))
+#define ASSERT_ARGS_Parrot_Context_infostr __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(ctx))
+#define ASSERT_ARGS_Parrot_full_sub_name __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_get_sub_pmc_from_subclass \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(subclass)
-#define ASSERT_ARGS_parrot_new_closure __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(subclass))
+#define ASSERT_ARGS_parrot_new_closure __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(sub_pmc)
-#define ASSERT_ARGS_invalidate_retc_context __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(sub_pmc))
+#define ASSERT_ARGS_invalidate_retc_context __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(cont)
-#define ASSERT_ARGS_mark_context_start __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
-#define ASSERT_ARGS_Parrot_capture_lex __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(cont))
+#define ASSERT_ARGS_mark_context_start __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_Parrot_continuation_check __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(sub_pmc)
-#define ASSERT_ARGS_Parrot_continuation_check __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pmc)
+    , PARROT_ASSERT_ARG(pmc))
 #define ASSERT_ARGS_Parrot_continuation_rewind_environment \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pmc)
-#define ASSERT_ARGS_Parrot_find_dynamic_pad __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(pmc))
+#define ASSERT_ARGS_Parrot_find_dynamic_pad __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(lex_name) \
-    || PARROT_ASSERT_ARG(ctx)
-#define ASSERT_ARGS_Parrot_find_pad __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(lex_name) \
+    , PARROT_ASSERT_ARG(ctx))
+#define ASSERT_ARGS_Parrot_find_pad __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(lex_name) \
-    || PARROT_ASSERT_ARG(ctx)
+    , PARROT_ASSERT_ARG(lex_name) \
+    , PARROT_ASSERT_ARG(ctx))
 #define ASSERT_ARGS_Parrot_Sub_get_filename_from_pc \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_Sub_get_line_from_pc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_Parrot_Sub_get_line_from_pc __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/sub.c */
 

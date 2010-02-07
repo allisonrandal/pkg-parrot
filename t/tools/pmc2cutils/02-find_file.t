@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: 02-find_file.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 02-find_file.t
 
 use strict;

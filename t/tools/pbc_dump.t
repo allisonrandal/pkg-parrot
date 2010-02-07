@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: pbc_dump.t 40586 2009-08-16 07:21:58Z dukeleto $
+# $Id$
 
 =head1 NAME
 
@@ -46,10 +46,10 @@ BEGIN {
         plan skip_all => "pbc_dump hasn't been built. Run make parrot_utils";
         exit(0);
     }
-    plan tests => 7;
+    plan tests => 6;
 }
 
-dump_output_like( <<PIR, "pir", [qr/FIXUP_t/, qr/PIC_idx/, qr/CONSTANT_t/, qr/BYTECODE_t/], 'pbc_dump basic sanity');
+dump_output_like( <<PIR, "pir", [qr/FIXUP_t/, qr/CONSTANT_t/, qr/BYTECODE_t/], 'pbc_dump basic sanity');
 .sub main :main
     \$I0 = 42
 .end

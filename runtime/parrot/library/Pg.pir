@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Pg.pir 38702 2009-05-11 21:42:56Z NotFound $
+# $Id$
 
 =head1 NAME
 

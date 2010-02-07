@@ -1,4 +1,4 @@
-;;; $Id: parrot.el 26068 2008-02-26 10:31:45Z fperrad $
+;;; $Id$
 ;;; Emacs support for working on the source code of the Parrot virtual
 ;;; machine.
 ;;

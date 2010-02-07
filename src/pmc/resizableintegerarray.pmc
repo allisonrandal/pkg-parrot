@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: resizableintegerarray.pmc 40946 2009-09-03 05:30:53Z NotFound $
+$Id$
 
 =head1 NAME
 
@@ -35,12 +35,15 @@ Returns the integer value of the element at index C<key>.
 
     VTABLE INTVAL get_integer_keyed_int(INTVAL key) {
         INTVAL *int_array;
+        INTVAL  size;
 
         if (key < 0)
             Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
                 "ResizableIntegerArray: index out of bounds!");
 
-        if (key >= SELF.get_integer())
+        GET_ATTR_size(interp, SELF, size);
+
+        if (key >= size)
             return 0;
 
         GET_ATTR_int_array(INTERP, SELF, int_array);
@@ -65,7 +68,7 @@ Sets the integer value of the element at index C<key> to C<value>.
                 "ResizableIntegerArray: index out of bounds!");
 
         if (key >= SELF.get_integer())
-            SELF.set_integer_native(key+1);
+            SELF.set_integer_native(key + 1);
 
         GET_ATTR_int_array(INTERP, SELF, int_array);
         int_array[key] = value;
@@ -82,7 +85,6 @@ Resizes the array to C<size> elements.
 */
 
     VTABLE void set_integer_native(INTVAL size) {
-
         INTVAL *int_array;
         INTVAL  resize_threshold;
 
@@ -122,7 +124,7 @@ Resizes the array to C<size> elements.
             }
 
             GET_ATTR_int_array(INTERP, SELF, int_array);
-            int_array = (INTVAL*) mem_sys_realloc((void*) int_array, cur * sizeof (INTVAL));
+            mem_realloc_n_typed(int_array, cur, INTVAL);
             SET_ATTR_int_array(INTERP, SELF, int_array);
             SET_ATTR_size(INTERP, SELF, size);
             SET_ATTR_resize_threshold(INTERP, SELF, cur);
@@ -141,8 +143,22 @@ of the array.
 */
 
     VTABLE void push_integer(INTVAL value) {
-        INTVAL nextix = SELF.get_integer();
-        SELF.set_integer_keyed_int(nextix, value);
+        INTVAL *int_array;
+        INTVAL  nextix;
+        INTVAL  resize_threshold;
+
+        GET_ATTR_size(interp, SELF, nextix);
+        GET_ATTR_resize_threshold(interp, SELF, resize_threshold);
+
+        /* can't always avoid the resize, but don't duplicate the code */
+        if ((nextix && (nextix >= resize_threshold)) || !nextix)
+            SELF.set_integer_native(nextix + 1);
+        else
+            SET_ATTR_size(interp, SELF, nextix + 1);
+
+        /* fetch the array only after resize check; realloc may move it */
+        GET_ATTR_int_array(interp, SELF, int_array);
+        int_array[nextix] = value;
     }
 
 /*
@@ -198,7 +214,7 @@ Removes and returns an item from the start of the array.
 
 =item C<void unshift_integer(INTVAL value)>
 
-Add and integer to the start of the array.
+Add an integer to the start of the array.
 
 =cut
 
@@ -276,7 +292,6 @@ Used to unarchive the array.
 */
 
     VTABLE void freeze(visit_info *info) {
-        IMAGE_IO *io = info->image_io;
         INTVAL   *int_array;
         INTVAL    i, n, rt;
 
@@ -284,38 +299,33 @@ Used to unarchive the array.
 
         n  = SELF.get_integer();
         GET_ATTR_resize_threshold(INTERP, SELF, rt);
-        VTABLE_push_integer(INTERP, io, n);
-        VTABLE_push_integer(INTERP, io, rt);
+        VTABLE_push_integer(INTERP, info, n);
+        VTABLE_push_integer(INTERP, info, rt);
 
         GET_ATTR_int_array(INTERP, SELF, int_array);
 
         for (i = 0; i < n; ++i)
-            VTABLE_push_integer(INTERP, io, int_array[i]);
+            VTABLE_push_integer(INTERP, info, int_array[i]);
     }
 
     VTABLE void thaw(visit_info *info) {
-        if (info->extra_flags == EXTRA_IS_NULL) {
-            IMAGE_IO * const io = info->image_io;
-            const INTVAL n = VTABLE_shift_integer(INTERP, io);
-            const INTVAL rt = VTABLE_shift_integer(INTERP, io);
+        const INTVAL n = VTABLE_shift_integer(INTERP, info);
+        const INTVAL rt = VTABLE_shift_integer(INTERP, info);
 
-            SET_ATTR_size(INTERP, SELF, 0);
-            SET_ATTR_resize_threshold(INTERP, SELF, rt);
-            SET_ATTR_int_array(INTERP, SELF, NULL);
+        SET_ATTR_size(INTERP, SELF, 0);
+        SET_ATTR_resize_threshold(INTERP, SELF, rt);
+        SET_ATTR_int_array(INTERP, SELF, NULL);
 
-            if (n) {
-                INTVAL  i;
-                INTVAL *int_array;
+        if (n) {
+            INTVAL  i;
+            INTVAL *int_array;
 
-                SELF.set_integer_native(n);
-                GET_ATTR_int_array(INTERP, SELF, int_array);
+            SELF.set_integer_native(n);
+            GET_ATTR_int_array(INTERP, SELF, int_array);
 
-                for (i = 0; i < n; ++i)
-                    int_array[i] = VTABLE_shift_integer(INTERP, io);
-            }
+            for (i = 0; i < n; ++i)
+                int_array[i] = VTABLE_shift_integer(INTERP, info);
         }
-        else
-            SUPER(info);
     }
 
 

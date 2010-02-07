@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: symbols.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;
@@ -46,7 +46,7 @@ CODE
 OUT
 
 # 5 ##########################
-pir_output_is( <<'CODE', <<'OUT', "RT #42769 register name 'object' is valid" );
+pir_output_is( <<'CODE', <<'OUT', "register name 'object' is valid" );
 .sub main :main
     .local int object
     object = 1

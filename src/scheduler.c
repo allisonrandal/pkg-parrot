@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2009, Parrot Foundation.
-$Id: scheduler.c 40958 2009-09-03 11:56:50Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -44,12 +44,12 @@ static void scheduler_process_wait_list(PARROT_INTERP,
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*scheduler);
 
-#define ASSERT_ARGS_scheduler_process_messages __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_scheduler_process_messages __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(scheduler)
-#define ASSERT_ARGS_scheduler_process_wait_list __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(scheduler))
+#define ASSERT_ARGS_scheduler_process_wait_list __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(scheduler)
+    , PARROT_ASSERT_ARG(scheduler))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -140,8 +140,8 @@ Parrot_cx_handle_tasks(PARROT_INTERP, ARGMOD(PMC *scheduler))
                 PMC * const handler = Parrot_cx_find_handler_for_task(interp, task);
                 if (!PMC_IS_NULL(handler)) {
                     PMC * const handler_sub = VTABLE_get_attr_str(interp, handler, CONST_STRING(interp, "code"));
-                    Parrot_runops_fromc_args_event(interp, handler_sub,
-                            "vPP", handler, task);
+                    Parrot_pcc_invoke_sub_from_c_args(interp, handler_sub,
+                            "PP->", handler, task);
                 }
             }
             else {
@@ -483,7 +483,7 @@ Parrot_cx_add_handler_local(PARROT_INTERP, ARGIN(PMC *handler))
 {
     ASSERT_ARGS(Parrot_cx_add_handler_local)
     if (PMC_IS_NULL(Parrot_pcc_get_handlers(interp, interp->ctx)))
-        Parrot_pcc_set_handers(interp, interp->ctx, pmc_new(interp, enum_class_ResizablePMCArray));
+        Parrot_pcc_set_handlers(interp, interp->ctx, pmc_new(interp, enum_class_ResizablePMCArray));
 
     VTABLE_unshift_pmc(interp, Parrot_pcc_get_handlers(interp, interp->ctx), handler);
 
@@ -536,20 +536,20 @@ Parrot_cx_delete_handler_local(PARROT_INTERP, ARGIN(STRING *handler_type))
             PMC *handler = VTABLE_get_pmc_keyed_int(interp, handlers, index);
             if (!PMC_IS_NULL(handler)) {
                 switch (htype) {
-                    case Hexception:
-                        if (VTABLE_isa(interp, handler, handler_name)) {
-                            VTABLE_set_pmc_keyed_int(interp, handlers, index, PMCNULL);
-                            return;
-                        }
-                        break;
-                    case Hevent:
-                        if (handler->vtable->base_type == enum_class_EventHandler) {
-                            VTABLE_set_pmc_keyed_int(interp, handlers, index, PMCNULL);
-                            return;
-                        }
-                        break;
-                    default:
-                        break;
+                  case Hexception:
+                    if (VTABLE_isa(interp, handler, handler_name)) {
+                        VTABLE_set_pmc_keyed_int(interp, handlers, index, PMCNULL);
+                        return;
+                    }
+                    break;
+                  case Hevent:
+                    if (handler->vtable->base_type == enum_class_EventHandler) {
+                        VTABLE_set_pmc_keyed_int(interp, handlers, index, PMCNULL);
+                        return;
+                    }
+                    break;
+                  default:
+                    break;
                 }
             }
         }
@@ -610,16 +610,16 @@ Parrot_cx_count_handlers_local(PARROT_INTERP, ARGIN(STRING *handler_type))
             PMC *handler = VTABLE_get_pmc_keyed_int(interp, handlers, index);
             if (!PMC_IS_NULL(handler)) {
                 switch (htype) {
-                case Hexception:
-                        if (VTABLE_isa(interp, handler, handler_name))
-                            count++;
-                        break;
-                    case Hevent:
-                        if (handler->vtable->base_type == enum_class_EventHandler)
-                            count++;
-                        break;
-                    default:
-                        break;
+                  case Hexception:
+                    if (VTABLE_isa(interp, handler, handler_name))
+                        count++;
+                    break;
+                  case Hevent:
+                    if (handler->vtable->base_type == enum_class_EventHandler)
+                        count++;
+                    break;
+                  default:
+                    break;
                 }
             }
         }
@@ -648,7 +648,7 @@ Parrot_cx_add_handler(PARROT_INTERP, ARGIN(PMC *handler))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Scheduler was not initialized for this interpreter.\n");
 
-    Parrot_PCCINVOKE(interp, interp->scheduler, add_handler, "P->", handler);
+    Parrot_pcc_invoke_method_from_c_args(interp, interp->scheduler, add_handler, "P->", handler);
 }
 
 /*
@@ -672,7 +672,7 @@ Parrot_cx_delete_handler_typed(PARROT_INTERP, ARGIN(STRING *handler_type))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Scheduler was not initialized for this interpreter.\n");
 
-    Parrot_PCCINVOKE(interp, interp->scheduler, CONST_STRING(interp, "delete_handler"), "S->", handler_type);
+    Parrot_pcc_invoke_method_from_c_args(interp, interp->scheduler, CONST_STRING(interp, "delete_handler"), "S->", handler_type);
 }
 
 /*
@@ -698,7 +698,7 @@ Parrot_cx_count_handlers_typed(PARROT_INTERP, ARGIN(STRING *handler_type))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Scheduler was not initialized for this interpreter.\n");
 
-    Parrot_PCCINVOKE(interp, interp->scheduler, CONST_STRING(interp, "count_handlers"), "S->I", handler_type, &count);
+    Parrot_pcc_invoke_method_from_c_args(interp, interp->scheduler, CONST_STRING(interp, "count_handlers"), "S->I", handler_type, &count);
 
     return count;
 }
@@ -816,7 +816,7 @@ Parrot_cx_find_handler_for_task(PARROT_INTERP, ARGIN(PMC *task))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Scheduler was not initialized for this interpreter.\n");
 
-    Parrot_PCCINVOKE(interp, interp->scheduler, CONST_STRING(interp, "find_handler"), "P->P", task, &handler);
+    Parrot_pcc_invoke_method_from_c_args(interp, interp->scheduler, CONST_STRING(interp, "find_handler"), "P->P", task, &handler);
 
 #if CX_DEBUG
     fprintf(stderr, "done searching for handler\n");
@@ -901,7 +901,7 @@ Parrot_cx_find_handler_local(PARROT_INTERP, ARGIN(PMC *task))
                     Parrot_pcc_invoke_method_from_c_args(interp, handler, CONST_STRING(interp, "can_handle"),
                         "P->I", task, &valid_handler);
                 else
-                    Parrot_PCCINVOKE(interp, handler, CONST_STRING(interp, "can_handle"),
+                    Parrot_pcc_invoke_method_from_c_args(interp, handler, CONST_STRING(interp, "can_handle"),
                         "P->I", task, &valid_handler);
 
                 if (valid_handler) {
@@ -952,8 +952,8 @@ Parrot_cx_timer_invoke(PARROT_INTERP, ARGIN(PMC *timer))
                     Parrot_floatval_time());
 #endif
     if (!PMC_IS_NULL(timer_struct->codeblock)) {
-        Parrot_runops_fromc_args_event(interp,
-                timer_struct->codeblock, "v");
+        Parrot_pcc_invoke_sub_from_c_args(interp,
+                timer_struct->codeblock, "->");
     }
 }
 

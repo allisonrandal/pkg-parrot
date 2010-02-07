@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: sprintf.t 40505 2009-08-13 01:36:15Z allison $
+# $Id$
 
 =head1 NAME
 

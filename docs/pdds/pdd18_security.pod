@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: pdd18_security.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id$
 
 =head1 PDD 18: Security Model
 
@@ -9,7 +9,7 @@ This PDD describes the security infrastructure of Parrot.
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision$
 
 =head2 Description
 

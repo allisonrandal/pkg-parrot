@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: data_json.pir 41138 2009-09-07 21:53:09Z japhb $
+# $Id$
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ the documentation at L<http://www.json.org/>.
     $P1['\r'] = "\r"
     $P1['\t'] = "\t"
 
-    set_hll_global '$escapes', $P1
+    set_root_global ['parrot'; 'data_json'], '$escapes', $P1
 .end
 
 

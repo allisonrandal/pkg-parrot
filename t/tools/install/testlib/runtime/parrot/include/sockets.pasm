@@ -1,4 +1,4 @@
-# $Id: sockets.pasm 39141 2009-05-24 04:39:25Z jkeenan $
+# $Id$
 # Copyright (C) 2001-2009, Parrot Foundation.
 
 

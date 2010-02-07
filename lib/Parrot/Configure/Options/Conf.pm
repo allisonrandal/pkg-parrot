@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Conf.pm 40208 2009-07-22 00:41:45Z whiteknight $
+# $Id$
 package Parrot::Configure::Options::Conf;
 
 use strict;
@@ -18,7 +18,7 @@ use FindBin qw($Bin);
 
 our $script         = q{Configure.pl};
 our $parrot_version = Parrot::BuildUtil::parrot_version("$Bin/../../");
-our $svnid          = '$Id: Conf.pm 40208 2009-07-22 00:41:45Z whiteknight $';
+our $svnid          = '$Id$';
 
 sub print_version {
     print "Parrot Version $parrot_version Configure 2.0\n";
@@ -95,6 +95,7 @@ Parrot Options:
    --jitcapable         Use JIT
    --execcapable        Use JIT to emit a native executable
    --without-threads    Build parrot without thread support
+   --buildframes        Dynamically build NCI call frames
 
 External Library Options:
 

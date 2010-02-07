@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: debugging_with_msvc.pod 37142 2009-03-06 02:30:33Z Util $
+# $Id$
 
 =head1 NAME
 

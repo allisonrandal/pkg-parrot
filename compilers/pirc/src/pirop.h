@@ -1,5 +1,5 @@
 /*
- * $Id: pirop.h 38479 2009-05-05 04:15:26Z petdance $
+ * $Id$
  * Copyright (C) 2009, Parrot Foundation.
  */
 
@@ -16,8 +16,8 @@ int /*@alt void@*/
 get_opinfo(ARGIN(lexer_state * const lexer))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_get_opinfo __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(lexer)
+#define ASSERT_ARGS_get_opinfo __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lexer))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: compilers/pirc/src/pirop.c */
 

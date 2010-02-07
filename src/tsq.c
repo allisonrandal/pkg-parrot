@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: tsq.c 37848 2009-04-01 18:29:18Z Infinoid $
+$Id$
 
 =head1 NAME
 

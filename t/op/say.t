@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: say.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;
@@ -86,7 +86,7 @@ CODE
 3.14159
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'say with PMCNULL argument (RT #59532)' );
+pir_error_output_like( <<'CODE', <<'OUTPUT', 'say with PMCNULL argument' );
 .sub 'main'
     null $P0
     say $P0

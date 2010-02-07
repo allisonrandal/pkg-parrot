@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: to_parrot.t 38691 2009-05-11 17:41:35Z NotFound $
+# $Id$
 
 use strict;
 use warnings;
@@ -676,7 +676,7 @@ JSON
 ]
 OUT
 
-# RT #44443 Need many more tests, exercising all aspects of http://www.json.org/
+# TT #1226 Need many more tests, exercising all aspects of http://www.json.org/
 
 sub json_dump_is {
     my ( $code, $dumped, $reason, %args ) = @_;

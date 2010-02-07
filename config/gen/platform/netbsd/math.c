@@ -1,4 +1,4 @@
-/* $Id: math.c 40837 2009-08-28 08:00:44Z cotto $ */
+/* $Id$ */
 
 /*
  * Copyright (C) 2006-2007, Parrot Foundation.

@@ -665,7 +665,7 @@ static yyconst flex_int16_t yy_rule_linenum[21] =
 #line 28 "hdocprep.l"
 
 /*
- * $Id: hdocprep.c 37143 2009-03-06 03:28:51Z Util $
+ * $Id$
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -685,7 +685,6 @@ static yyconst flex_int16_t yy_rule_linenum[21] =
 #include <stdlib.h>
 #include <stdarg.h>
 #include "parrot/parrot.h"
-#include "parrot/string_funcs.h"
 #include "parrot/embed.h"
 #include "pirheredoc.h"
 

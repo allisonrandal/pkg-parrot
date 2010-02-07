@@ -1,5 +1,5 @@
 /*
- * $Id: memexec.c 37991 2009-04-09 02:03:12Z Infinoid $
+ * $Id$
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
@@ -11,7 +11,7 @@ memexec.c
 
 =head1 DESCRIPTION
 
-RT#48264
+Memory protection functions.
 
 =head2 Functions
 

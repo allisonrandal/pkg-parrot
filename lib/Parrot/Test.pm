@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Test.pm 40658 2009-08-19 16:03:57Z dukeleto $
+# $Id$
 
 =head1 NAME
 
@@ -264,7 +264,6 @@ Writes C<$code> into the file C<$code_f>.
 
 Generate functions that are only used by a couple of
 Parrot::Test::<lang> modules.
-See RT#43266.
 This implementation is experimental and currently only works
 for languages/pipp.
 
@@ -1045,6 +1044,10 @@ sub _generate_test_functions {
                     . "$PConfig{ld_out}$exe_f "
                     . "$obj_f $cfg "
                     . "$PConfig{libparrot_linkflags} "
+            # If rpath is defined (and therefore rpath_blib), use it to get at the build libraries
+            . ( defined($PConfig{rpath_blib})
+            ? (  $PConfig{rpath_blib} . " " )
+            : "" )
                     . "$PConfig{linkflags} $PConfig{ld_debug} "
                     . "$iculibs $PConfig{libs}";
                 my $exit_code = run_command(
@@ -1120,7 +1123,7 @@ sub _handle_test_options {
 
     my $out = $options->{'STDOUT'} || '';
     my $err = $options->{'STDERR'} || '';
-    ##  File::Temp overloads 'eq' here, so we need the quotes. RT #58840
+    ##  File::Temp overloads 'eq' here, so we need the quotes.
     if ( $out and $err and "$out" eq "$err" ) {
         $err = '&STDOUT';
     }

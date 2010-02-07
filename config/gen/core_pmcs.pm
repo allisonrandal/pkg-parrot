@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: core_pmcs.pm 40651 2009-08-19 08:55:58Z NotFound $
+# $Id$
 
 =head1 NAME
 

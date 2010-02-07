@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: retcontinuation.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id$
 
 =head1 NAME
 

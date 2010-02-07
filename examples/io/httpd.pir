@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: httpd.pir 37827 2009-03-31 16:34:25Z Infinoid $
+# $Id$
 
 =head1 NAME
 

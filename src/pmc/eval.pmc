@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: eval.pmc 41212 2009-09-11 15:12:29Z mikehh $
+$Id$
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ evaluation and execution.
 
 */
 
-#include "pmc_sub.h"
+#include "pmc/pmc_sub.h"
 
 static void
 clear_fixups(PARROT_INTERP, Parrot_Sub_attributes *sub_data)
@@ -119,8 +119,7 @@ mark_subs(PARROT_INTERP, PMC *self)
             opcode_t  ci  = e->offset;
             PMC      *sub = ct->constants[ci]->u.key;
 
-            if (!PMC_IS_NULL(sub))
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)sub);
+            Parrot_gc_mark_PMC_alive(interp, sub);
         }
     }
 }
@@ -159,8 +158,8 @@ Invokes the first subroutine in the eval code.
          * These globals still exist, calling them will segfault
          * as the segment is destroyed now.
          *
-         * RT#46683 walk the fixups for this segment, locate globals
-         *      and nullify the Sub PMC.
+         * TT # 1230:
+         * Walk the fixups, locate globals and nullify the Sub PMC
          * This probably needs a pointer into the globals.
          *
          * OTOH - if the global exists - this eval pmc ought
@@ -192,7 +191,7 @@ Invokes the first subroutine in the eval code.
             return;
         }
 
-        /* RT#46685 create PF API, move it there */
+        /* TT #1315 create PF API, move it there */
         seg = (PackFile_Segment *)cur_cs->const_table;
         if (seg) {
             PackFile_Segment_destroy(INTERP, seg);
@@ -209,12 +208,6 @@ Invokes the first subroutine in the eval code.
         if (seg) {
             PackFile_Segment_destroy(INTERP, seg);
             cur_cs->fixups = NULL;
-        }
-
-        seg = cur_cs->pic_index;
-        if (seg) {
-            PackFile_Segment_destroy(INTERP, seg);
-            cur_cs->pic_index = NULL;
         }
 
 /* XXX Commenting out this to fix TT #995 and related problems.
@@ -271,10 +264,6 @@ for writing to disc and later loading via C<load_bytecode>.
             PackFile_add_segment(INTERP, &pf->directory,
                     (PackFile_Segment *)seg->fixups);
 
-        if (seg->pic_index)
-            PackFile_add_segment(INTERP, &pf->directory,
-                    (PackFile_Segment *)seg->pic_index);
-
         size = PackFile_pack_size(INTERP, pf) * sizeof (opcode_t);
 
         /*
@@ -300,7 +289,8 @@ for writing to disc and later loading via C<load_bytecode>.
 
         /* We block GC while doing the packing, since GC run during a pack
            has been observed to cause problems. There may be a Better Fix.
-           See RT #40410 for example of the problem (note on line that
+           See http://rt.perl.org/rt3/Ticket/Display.html?id=40410
+           for example of the problem (note on line that
            segfaults, it is *cursor that is pointing to dealloced memory). */
         Parrot_block_GC_mark(INTERP);
         PackFile_pack(INTERP, pf, (opcode_t *)res->strstart);
@@ -343,16 +333,14 @@ Unarchives the code.
 */
 
     VTABLE void freeze(visit_info *info) {
-        IMAGE_IO *io     = info->image_io;
         STRING   *packed = SELF.get_string();
-        VTABLE_push_string(INTERP, io, packed);
+        VTABLE_push_string(INTERP, info, packed);
 
         SUPER(info);
     }
 
     VTABLE void thaw(visit_info *info) {
-        IMAGE_IO         *io     = info->image_io;
-        STRING           *packed = VTABLE_shift_string(INTERP, io);
+        STRING           *packed = VTABLE_shift_string(INTERP, info);
         PackFile         *pf;
         PackFile_Segment *seg;
         Parrot_Sub_attributes *sub;
@@ -381,7 +369,7 @@ Unarchives the code.
         pf->directory.num_segments = 0;
 
         /*
-         * RT#46687 this isn't ok - it seems that the packfile
+         * TT #1292 this isn't ok - it seems that the packfile
          *     gets attached to interp->code and is
          *     destroyed again during interpreter destruction
          */

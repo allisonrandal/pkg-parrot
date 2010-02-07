@@ -1,5 +1,5 @@
 /*
- * $Id: math.c 38218 2009-04-20 01:53:36Z coke $
+ * $Id$
  * Copyright (C) 2006-2007, Parrot Foundation.
  */
 

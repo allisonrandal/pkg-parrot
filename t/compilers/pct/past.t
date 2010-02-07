@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: past.t 40100 2009-07-15 13:15:25Z bacek $
+# $Id$
 
 use strict;
 use warnings;
@@ -48,11 +48,6 @@ OUT
 
 }
 
-# Next tests marked as "skip" instead of "todo" to prevent false-positives in case
-# when Hash keys order occationally can be same as in test.
-SKIP: {
-skip('Hash keys order dependency', 4);
-
 pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Val node in visual format' );
 .sub _main :main
     load_bytecode 'PCT.pbc'
@@ -72,8 +67,8 @@ CODE
 1
 Integer
 "ast" => PMC 'PAST;Val'  {
-    <value> => 1
     <returns> => "Integer"
+    <value> => 1
 }
 OUT
 
@@ -94,9 +89,9 @@ pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Var node in visual format' );
 .end
 CODE
 "ast" => PMC 'PAST;Var'  {
+    <lvalue> => "buz"
     <scope> => "foo"
     <viviself> => "baz"
-    <lvalue> => "buz"
 }
 OUT
 
@@ -115,10 +110,10 @@ pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Op node in visual format' );
 .end
 CODE
 "ast" => PMC 'PAST;Op'  {
+    <inline> => "%r = add %0, %1"
+    <lvalue> => "foo"
     <pasttype> => "pirop"
     <pirop> => "add"
-    <lvalue> => "foo"
-    <inline> => "%r = add %0, %1"
 }
 OUT
 
@@ -137,8 +132,6 @@ CODE
     <blocktype> => "declaration"
 }
 OUT
-
-}
 
 # Local Variables:
 #   mode: cperl

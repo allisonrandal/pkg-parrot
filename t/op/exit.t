@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: exit.t 40662 2009-08-19 18:02:12Z mikehh $
+# $Id$
 
 use strict;
 use warnings;

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: HTMLPage.pm 37498 2009-03-16 20:24:55Z allison $
+# $Id$
 
 =head1 NAME
 

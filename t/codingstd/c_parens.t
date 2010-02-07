@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_parens.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id$
 
 use strict;
 use warnings;
@@ -90,7 +90,8 @@ sub check_parens {
 
         my @lines = split( /\n/, $buf );
         for my $line (@lines) {
-            next if $line =~ m{#\s*define};    # skip #defines
+            # skip #defines and typedefs
+            next if $line =~ m{(?:(#\s*define|^\s*typedef))};
             if ( $line =~ m{ ( (?<!\w) (?:$keywords) (?: \( | \ \s+ \( ) ) }xo ) {
                 my $paren = $1;
 

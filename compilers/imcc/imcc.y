@@ -9,7 +9,7 @@
  *
  * Grammar of the PIR language parser.
  *
- * $Id: imcc.y 41225 2009-09-12 10:54:53Z chromatic $
+ * $Id$
  *
  */
 
@@ -21,6 +21,7 @@
 #define PARSER_MAIN
 #include "imc.h"
 #include "parrot/dynext.h"
+#include "pmc/pmc_callcontext.h"
 #include "pbc.h"
 #include "parser.h"
 #include "optimizer.h"
@@ -249,91 +250,91 @@ static void set_lexical(PARROT_INTERP,
         FUNC_MODIFIES(*r)
         FUNC_MODIFIES(*name);
 
-#define ASSERT_ARGS_add_pcc_named_arg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_add_pcc_named_arg __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(cur_call) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(value)
-#define ASSERT_ARGS_add_pcc_named_arg_var __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_add_pcc_named_arg_var __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(cur_call) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(value)
-#define ASSERT_ARGS_add_pcc_named_param __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_add_pcc_named_param __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(cur_call) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(value)
-#define ASSERT_ARGS_add_pcc_named_result __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_add_pcc_named_result __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(cur_call) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(value)
-#define ASSERT_ARGS_add_pcc_named_return __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_add_pcc_named_return __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(cur_call) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(value)
-#define ASSERT_ARGS_adv_named_set __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_adv_named_set __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_adv_named_set_u __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_adv_named_set_u __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_begin_return_or_yield __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_clear_state __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_do_loadlib __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_begin_return_or_yield __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_clear_state __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_do_loadlib __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(lib)
-#define ASSERT_ARGS_func_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(lib))
+#define ASSERT_ARGS_func_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(lhs) \
-    || PARROT_ASSERT_ARG(op) \
-    || PARROT_ASSERT_ARG(r)
-#define ASSERT_ARGS_iINDEXFETCH __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(lhs) \
+    , PARROT_ASSERT_ARG(op) \
+    , PARROT_ASSERT_ARG(r))
+#define ASSERT_ARGS_iINDEXFETCH __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(r0) \
-    || PARROT_ASSERT_ARG(r1) \
-    || PARROT_ASSERT_ARG(r2)
-#define ASSERT_ARGS_iINDEXSET __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(r0) \
+    , PARROT_ASSERT_ARG(r1) \
+    , PARROT_ASSERT_ARG(r2))
+#define ASSERT_ARGS_iINDEXSET __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(r0) \
-    || PARROT_ASSERT_ARG(r1) \
-    || PARROT_ASSERT_ARG(r2)
-#define ASSERT_ARGS_iLABEL __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(r0) \
+    , PARROT_ASSERT_ARG(r1) \
+    , PARROT_ASSERT_ARG(r2))
+#define ASSERT_ARGS_iLABEL __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(r0)
-#define ASSERT_ARGS_inv_op __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(op)
-#define ASSERT_ARGS_iSUBROUTINE __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(r0))
+#define ASSERT_ARGS_inv_op __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(op))
+#define ASSERT_ARGS_iSUBROUTINE __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(r)
-#define ASSERT_ARGS_MK_I __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(r))
+#define ASSERT_ARGS_MK_I __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(fmt)
-#define ASSERT_ARGS_mk_pmc_const __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(fmt))
+#define ASSERT_ARGS_mk_pmc_const __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(type) \
-    || PARROT_ASSERT_ARG(left) \
-    || PARROT_ASSERT_ARG(constant)
-#define ASSERT_ARGS_mk_pmc_const_named __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(type) \
+    , PARROT_ASSERT_ARG(left) \
+    , PARROT_ASSERT_ARG(constant))
+#define ASSERT_ARGS_mk_pmc_const_named __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(left) \
-    || PARROT_ASSERT_ARG(constant)
-#define ASSERT_ARGS_mk_sub_address_fromc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(left) \
+    , PARROT_ASSERT_ARG(constant))
+#define ASSERT_ARGS_mk_sub_address_fromc __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_mk_sub_address_u __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_mk_sub_address_u __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_set_lexical __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_set_lexical __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(r) \
-    || PARROT_ASSERT_ARG(name)
+    , PARROT_ASSERT_ARG(r) \
+    , PARROT_ASSERT_ARG(name))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -451,18 +452,18 @@ mk_pmc_const(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *type),
     }
 
     switch (type_enum) {
-        case enum_class_Sub:
-        case enum_class_Coroutine:
-            rhs = mk_const(interp, name, 'p');
+      case enum_class_Sub:
+      case enum_class_Coroutine:
+        rhs = mk_const(interp, name, 'p');
 
-            if (!ascii)
-                rhs->type |= VT_ENCODED;
+        if (!ascii)
+            rhs->type |= VT_ENCODED;
 
-            rhs->usage    |= U_FIXUP | U_SUBID_LOOKUP;
-            break;
-        default:
-            rhs = mk_const(interp, name, 'P');
-            break;
+        rhs->usage    |= U_FIXUP | U_SUBID_LOOKUP;
+        break;
+      default:
+        rhs = mk_const(interp, name, 'P');
+        break;
     }
 
     r[1]          = rhs;
@@ -771,10 +772,19 @@ mk_sub_address_fromc(PARROT_INTERP, ARGIN(const char *name))
     ASSERT_ARGS(mk_sub_address_fromc)
     /* name is a quoted sub name */
     SymReg *r;
-    char *name_copy                  = mem_sys_strdup(name + 1);
-    name_copy[strlen(name_copy) - 1] = 0;
+    char   *name_copy;
 
-    r = mk_sub_address(interp, name_copy);
+    /* interpolate only if the first character is a double-quote */
+    if (*name == '"') {
+        STRING *unescaped = Parrot_str_unescape(interp, name, '"', NULL);
+        name_copy         = Parrot_str_to_cstring(interp, unescaped);
+    }
+    else {
+        name_copy = mem_sys_strdup(name);
+        name_copy[ strlen(name) - 1 ] = 0;
+    }
+
+    r = mk_sub_address(interp, name_copy + 1);
     mem_sys_free(name_copy);
 
     return r;
@@ -1062,7 +1072,7 @@ do_loadlib(PARROT_INTERP, ARGIN(const char *lib))
 %token <t> HLL TK_LINE TK_FILE
 %token <t> GOTO ARG IF UNLESS PNULL SET_RETURN SET_YIELD
 %token <t> ADV_FLAT ADV_SLURPY ADV_OPTIONAL ADV_OPT_FLAG ADV_NAMED ADV_ARROW
-%token <t> NEW ADV_INVOCANT
+%token <t> NEW ADV_INVOCANT ADV_CALL_SIG
 %token <t> NAMESPACE DOT_METHOD
 %token <t> SUB SYM LOCAL LEXICAL CONST ANNOTATE
 %token <t> INC DEC GLOBAL_CONST
@@ -1395,6 +1405,18 @@ sub_param_type_def:
          {
            if ($3 & VT_UNIQUE_REG)
                $$ = mk_ident_ur(interp, $2, $1);
+           else if ($3 & VT_OPT_FLAG && $1 != 'I') {
+               char *type;
+               switch ($1) {
+                    case 'N': type = "num";     break;
+                    case 'S': type = "string";  break;
+                    case 'P': type = "pmc";     break;
+                    default:  type = "strange"; break;
+               }
+
+               IMCC_fataly(interp, EXCEPTION_SYNTAX_ERROR,
+                   ":opt_flag parameter must be of type 'I', not '%s'", type);
+           }
            else
                $$ = mk_ident(interp, $2, $1);
            $$->type |= $3;
@@ -1697,6 +1719,7 @@ paramtype:
    | ADV_NAMED '(' STRINGC ')'  { adv_named_set(interp, $3);   $$ = 0; mem_sys_free($3); }
    | ADV_NAMED '(' USTRINGC ')' { adv_named_set_u(interp, $3); $$ = 0; mem_sys_free($3); }
    | UNIQUE_REG                 { $$ = VT_UNIQUE_REG; }
+   | ADV_CALL_SIG               { $$ = VT_CALL_SIG; }
    ;
 
 
@@ -1919,19 +1942,33 @@ labeled_inst:
          }
    | LEXICAL STRINGC COMMA target
          {
-           SymReg *n;
-           char   *name = mem_sys_strdup($2 + 1);
-           name[strlen(name) - 1] = 0;
-           n = mk_const(interp, name, 'S');
-           set_lexical(interp, $4, n); $$ = 0;
-           mem_sys_free($2);
-           mem_sys_free(name);
+            if ($4->set != 'P') {
+                mem_sys_free($2);
+                IMCC_fataly(interp, EXCEPTION_SYNTAX_ERROR,
+                    "Cannot use %c register with .lex", $4->set);
+            }
+            else {
+               SymReg *n;
+               char   *name = mem_sys_strdup($2 + 1);
+               name[strlen(name) - 1] = 0;
+               n = mk_const(interp, name, 'S');
+               set_lexical(interp, $4, n); $$ = 0;
+               mem_sys_free($2);
+               mem_sys_free(name);
+            }
          }
    | LEXICAL USTRINGC COMMA target
          {
-           SymReg *n = mk_const(interp, $2, 'U');
-           set_lexical(interp, $4, n); $$ = 0;
-           mem_sys_free($2);
+            if ($4->set != 'P') {
+                mem_sys_free($2);
+                IMCC_fataly(interp, EXCEPTION_SYNTAX_ERROR,
+                    "Cannot use %c register with .lex", $4->set);
+            }
+            else {
+               SymReg *n = mk_const(interp, $2, 'U');
+               set_lexical(interp, $4, n); $$ = 0;
+               mem_sys_free($2);
+            }
          }
    | CONST { IMCC_INFO(interp)->is_def = 1; } type IDENTIFIER '=' const
          {
@@ -2003,7 +2040,7 @@ assignment:
    | target '=' un_op var
             { $$ = MK_I(interp, IMCC_INFO(interp)->cur_unit, $3, 2, $1, $4);  }
    | target '=' var bin_op var
-            { IMCC_INFO(interp)->line++; $$ = MK_I(interp, IMCC_INFO(interp)->cur_unit, $4, 3, $1, $3, $5); IMCC_INFO(interp)->line--; }
+            { $$ = MK_I(interp, IMCC_INFO(interp)->cur_unit, $4, 3, $1, $3, $5); }
    | target '=' var '[' keylist ']'
             { $$ = iINDEXFETCH(interp, IMCC_INFO(interp)->cur_unit, $1, $3, $5); }
    | target '[' keylist ']' '=' var
@@ -2086,9 +2123,7 @@ get_results:
 
 op_assign:
      target assign_op var
-         {
-           IMCC_INFO(interp)->line++; $$ = MK_I(interp, IMCC_INFO(interp)->cur_unit, $2, 2, $1, $3); IMCC_INFO(interp)->line--;
-         }
+         { $$ = MK_I(interp, IMCC_INFO(interp)->cur_unit, $2, 2, $1, $3); }
    ;
 
 assign_op:
@@ -2221,8 +2256,9 @@ argtype_list:
    ;
 
 argtype:
-     ADV_FLAT                  { $$ = VT_FLAT; }
-   | ADV_NAMED                 { $$ = VT_NAMED; }
+     ADV_FLAT                  { $$ = VT_FLAT;     }
+   | ADV_NAMED                 { $$ = VT_NAMED;    }
+   | ADV_CALL_SIG              { $$ = VT_CALL_SIG; }
 
    /* don't free $3 here; adv_named_set uses the pointer directly */
    | ADV_NAMED '(' USTRINGC ')' { adv_named_set_u(interp, $3); $$ = 0; }

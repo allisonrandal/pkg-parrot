@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: 10-print_c_source_file.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 10-print_c_source_file.t
 
 use strict;

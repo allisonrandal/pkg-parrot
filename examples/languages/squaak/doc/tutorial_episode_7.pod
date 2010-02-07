@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: tutorial_episode_7.pod 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 Episode 7: Operators and Precedence
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Dumper.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 package Parrot::Pmc2c::Dumper;
 
 use strict;
@@ -11,6 +11,18 @@ use Carp;
 
 use base 'Exporter';
 @Parrot::Pmc2c::Dumper::EXPORT_OK = 'dump_pmc';
+
+=head1 NAME
+
+Parrot::Pmc2c::Dumper
+
+=head1 DESCRIPTION
+
+Create dump file for PMCs.
+
+=head1 FUNCTIONS
+
+=head2 Public Functions
 
 =head3 C<dump_pmc()>
 

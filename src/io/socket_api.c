@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: socket_api.c 39888 2009-07-05 05:15:50Z petdance $
+$Id$
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ These are the primary interface functions for working with socket objects.
 #include "parrot/parrot.h"
 #include "io_private.h"
 #include "api.str"
-#include "../pmc/pmc_socket.h"
+#include "pmc/pmc_socket.h"
 
 #include <stdarg.h>
 

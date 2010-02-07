@@ -1,6 +1,6 @@
 package Parrot::SearchOps;
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: SearchOps.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;

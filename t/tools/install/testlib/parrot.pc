@@ -1,2 +1,2 @@
-# $Id: parrot.pc 39135 2009-05-24 04:08:25Z jkeenan $
+# $Id$
 

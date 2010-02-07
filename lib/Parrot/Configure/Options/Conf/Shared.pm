@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Shared.pm 40208 2009-07-22 00:41:45Z whiteknight $
+# $Id$
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -38,6 +38,7 @@ our @shared_valid_options = qw{
     inline
     intval
     jitcapable
+    buildframes
     languages
     ld
     ldflags

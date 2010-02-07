@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: subflags.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use lib "../../lib";
 use Parrot::Test tests => 1;

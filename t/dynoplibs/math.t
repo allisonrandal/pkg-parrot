@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: math.t 40556 2009-08-15 07:53:01Z dukeleto $
+# $Id$
 
 =head1 NAME
 

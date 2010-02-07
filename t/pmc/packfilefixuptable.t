@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: packfilefixuptable.t 40273 2009-07-26 04:33:45Z petdance $
+# $Id$
 
 =head1 NAME
 

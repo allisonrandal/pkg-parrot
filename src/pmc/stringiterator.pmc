@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: stringiterator.pmc 40628 2009-08-18 17:24:24Z NotFound $
+$Id$
 
 =head1 NAME
 
@@ -59,8 +59,7 @@ Marks the current idx/key and the aggregate as live.
     VTABLE void mark() {
         PMC *string;
         GET_ATTR_string(INTERP, SELF, string);
-        if (string)
-             Parrot_gc_mark_PObj_alive(INTERP, (PObj *)string);
+        Parrot_gc_mark_PMC_alive(INTERP, string);
     }
 
 /*

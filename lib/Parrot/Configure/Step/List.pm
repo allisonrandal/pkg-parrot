@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: List.pm 40189 2009-07-21 12:15:55Z jkeenan $
+# $Id$
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;
@@ -40,8 +40,8 @@ my @steps = qw(
     auto::isreg
     auto::arch
     auto::jit
+    auto::frames
     auto::cpu
-    auto::funcptr
     auto::cgoto
     auto::inline
     auto::gc

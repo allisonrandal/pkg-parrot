@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: coroutine.t 38696 2009-05-11 19:47:58Z NotFound $
+# $Id$
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: coroutine.t 41244 2009-09-13 01:05:35Z NotFound $
+# $Id$
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/coroutines.t - Coroutines
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/coroutines.t
+    % prove t/pmc/coroutine.t
 
 =head1 DESCRIPTION
 

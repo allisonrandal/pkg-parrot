@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: regression.t 40514 2009-08-13 04:33:29Z mikehh $
+# $Id$
 
 use strict;
 use warnings;
@@ -10,15 +10,19 @@ use Parrot::Test tests => 2;
 
 =head1 NAME
 
-t/compilers/pge/regression.t - PGE regression tests
+t/compilers/pge/regression.t
 
 =head1 SYNOPSIS
 
         % prove t/compilers/pge/regression.t
 
+=head1 DESCRIPTION
+
+PGE regression tests
+
 =cut
 
-pir_output_is( <<'CODE', <<'OUTPUT', 'load_bytecode with .pir (RT #39807)' );
+pir_output_is( <<'CODE', <<'OUTPUT', 'load_bytecode with .pir' );
 .sub main :main
     load_bytecode 'PGE.pbc'
     load_bytecode 'dumper.pir'
@@ -34,7 +38,7 @@ CODE
 "VAR1" => PMC 'PGE;Match' => "aabbb" @ 3
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', 'load_bytecode with .pbc (RT #39807)' );
+pir_output_is( <<'CODE', <<'OUTPUT', 'load_bytecode with .pbc' );
 .sub main :main
     load_bytecode 'PGE.pbc'
     load_bytecode 'dumper.pbc'

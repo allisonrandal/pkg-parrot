@@ -1,11 +1,11 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: pdd20_lexical_vars.pod 38816 2009-05-16 04:08:22Z coke $
+# $Id$
 
 =head1 PDD 20: Lexical Variables
 
 =head2 Version
 
-$Revision: 38816 $
+$Revision$
 
 =head2 Abstract
 

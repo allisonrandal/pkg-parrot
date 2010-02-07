@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: io.t 39472 2009-06-09 15:07:24Z whiteknight $
+# $Id$
 
 use strict;
 use warnings;
@@ -68,7 +68,7 @@ CODE
 a line
 OUTPUT
 
-# RT #46843
+# TT #1178
 pir_output_is( <<'CODE', <<'OUTPUT', "get_fd()/fdopen" );
 .sub main :main
     getstdout $P0
@@ -86,7 +86,7 @@ CODE
 ok
 OUTPUT
 
-# RT #46843
+# TT #1178
 pir_output_is( <<'CODE', <<'OUTPUT', 'fdopen - no close' );
 .sub main :main
     getstdout $P0
@@ -437,7 +437,7 @@ CODE
 Successful
 OUTPUT
 
-# RT #46843
+# TT #1178
 pir_output_is( <<'CODE', <<'OUT', 'standard file descriptors' );
 .sub main :main
     getstdin $P0

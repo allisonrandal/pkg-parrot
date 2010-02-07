@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: ro.t 38684 2009-05-11 11:24:58Z cotto $
+# $Id$
 
 =head1 NAME
 
@@ -225,7 +225,7 @@ eh_label:
 
 =pod
 
-RT #46821: should this work? 
+TT #1036: should this work? 
 
 .sub resizablepmcarray_recursive
     .local pmc foo

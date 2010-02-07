@@ -1,7 +1,7 @@
 /* atomic/gcc_x86.c
  *  Copyright (C) 2006, Parrot Foundation.
  *  SVN Info
- *     $Id: gcc_x86.c 36832 2009-02-17 19:58:58Z allison $
+ *     $Id$
  */
 
 #include "parrot/parrot.h"

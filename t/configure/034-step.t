@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: 034-step.t 36953 2009-02-24 08:06:00Z fperrad $
+# $Id$
 
 use strict;
 use warnings;

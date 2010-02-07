@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: check_toxxx.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;

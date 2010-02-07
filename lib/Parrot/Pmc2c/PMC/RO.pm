@@ -1,6 +1,6 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
 
-# $Id: RO.pm 40165 2009-07-20 08:29:26Z chromatic $
+# $Id$
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ sub new {
     {
 
       # autogenerate for nonstandard types
-      # (RT #44433: is this appropriate or do we want them to each be
+      # (TT #1240: is this appropriate or do we want them to each be
       # explicitly cleared to have RO ?)
         no strict 'refs';
         if ( !@{ ref($self) . '::ISA' } ) {

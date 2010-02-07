@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: test_more.t 41093 2009-09-07 05:08:01Z dukeleto $
+# $Id$
 
 .sub _main :main
     load_bytecode 'Test/Builder/Tester.pbc'
@@ -15,27 +15,106 @@
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
     test_namespace = get_namespace [ 'Test'; 'More' ]
-    exports = split " ", "ok is diag like skip todo is_deeply isa_ok isnt throws_like"
+    exports = split " ", "ok nok is diag like skip todo is_deeply isa_ok isnt throws_like lives_ok dies_ok"
     test_namespace.'export_to'(curr_namespace, exports)
 
     test_namespace = get_namespace [ 'Test'; 'Builder'; 'Tester' ]
     exports = split " ", "plan test_out test_diag test_fail test_pass test_test"
     test_namespace.'export_to'(curr_namespace, exports)
 
-    plan( 81 )
+    plan( 108 )
 
     test_skip()
     test_todo()
     test_ok()
+    test_nok()
     test_is()
     test_isnt()
     test_like()
     test_is_deeply()
     test_diagnostics()
+    test_lives_ok()
+    test_dies_ok()
     test_throws_like()
     test_isa_ok()
 
     test.'finish'()
+.end
+
+.sub test_dies_ok
+    test_pass( 'dies_ok passes when there is an error' )
+    dies_ok( <<'CODE', 'dies_ok passes when there is an error' )
+.sub main
+    die 'I did it for the lulz'
+.end
+CODE
+    test_test( 'dies_ok passes when there is an error' )
+
+    test_fail( 'dies_ok fails when there is no error' )
+    dies_ok( <<'CODE', 'dies_ok fails when there is no error' )
+.sub main
+    $I0 = 42
+.end
+CODE
+    test_diag( 'no error thrown' )
+    test_test( 'dies_ok fails when there is no error' )
+
+    test_pass( 'dies_ok passes when there is an error with diagnostic message' )
+    dies_ok( <<'CODE', 'dies_ok passes when there is an error with diagnostic message' )
+.sub main
+    die 'I did it for the lulz'
+.end
+CODE
+    test_diag( '' )
+    test_test( 'dies_ok passes when there is an error with diagnostic message' )
+
+    test_fail( 'dies_ok fails when there is no error with diagnostic message' )
+    dies_ok( <<'CODE', 'dies_ok fails when there is no error with diagnostic message' )
+.sub main
+    $I0 = 42
+.end
+CODE
+    test_diag( 'no error thrown' )
+    test_test( 'dies_ok fails when there is no error with diagnostic message' )
+
+.end
+
+.sub test_lives_ok
+
+    test_pass( 'lives_ok passes when there is no error' )
+    lives_ok( <<'CODE', 'lives_ok passes when there is no error' )
+.sub main
+    $I0 = 42
+.end
+CODE
+    test_test( 'lives_ok passes when there is no error' )
+
+    test_fail( 'lives_ok fails when there is an error')
+    lives_ok( <<'CODE', 'lives_ok fails when there is an error')
+.sub main
+    die 'I did it for the lulz'
+.end
+CODE
+    test_diag( 'I did it for the lulz' )
+    test_test( 'lives_ok fails when there is an error' )
+
+    test_pass( 'lives_ok passes when there is no error (with diagnostic message)' )
+    lives_ok( <<'CODE', 'lives_ok passes when there is no error (with diagnostic message)' )
+.sub main
+    $I0 = 42
+.end
+CODE
+    test_diag( '' )
+    test_test( 'lives_ok passes when there is no error (with diagnostic message)' )
+
+    test_fail( 'lives_ok fails when there is an error (with diagnostic message)' )
+    lives_ok( <<'CODE', 'lives_ok fails when there is an error (with diagnostic message)' )
+.sub main
+    die 'I did it for the lulz'
+.end
+CODE
+    test_diag( 'I did it for the lulz' )
+    test_test( 'lives_ok fails when there is an error' )
 .end
 
 .sub test_throws_like
@@ -72,6 +151,36 @@ CODE
 
 .end
 
+.namespace ['MyFalseClass']
+
+.sub '' :anon :load :init
+    $P0 = newclass ['MyFalseClass']
+.end
+
+.sub 'get_bool' :vtable
+    .return(0)
+.end
+
+.sub 'get_integer' :vtable
+    .return(1)
+.end
+
+.namespace ['MyTrueClass']
+
+.sub '' :anon :load :init
+    $P0 = newclass ['MyTrueClass']
+.end
+
+.sub 'get_bool' :vtable
+    .return(1)
+.end
+
+.sub 'get_integer' :vtable
+    .return(0)
+.end
+
+.namespace []
+
 .sub test_ok
     test_pass()
     ok( 1 )
@@ -88,6 +197,44 @@ CODE
     test_fail( 'with description' )
     ok( 0, 'with description' )
     test_test( 'failing test ok() with description')
+
+    $P0 = new ['MyFalseClass']
+    test_fail()
+    ok( $P0 )
+    test_test( 'failing ok() calls get_bool')
+
+    $P0 = new ['MyTrueClass']
+    test_pass()
+    ok( $P0 )
+    test_test( 'passing ok() calls get_bool')
+.end
+
+.sub test_nok
+    test_fail()
+    nok( 1 )
+    test_test( 'failing test nok()')
+
+    test_pass()
+    nok( 0 )
+    test_test( 'passing test nok()')
+
+    test_fail( 'with description' )
+    nok( 1, 'with description' )
+    test_test( 'failing test nok() with description')
+
+    test_pass( 'with description' )
+    nok( 0, 'with description' )
+    test_test( 'passing test nok() with description')
+
+    $P0 = new ['MyFalseClass']
+    test_pass()
+    nok( $P0 )
+    test_test( 'passing nok() calls get_bool')
+
+    $P0 = new ['MyTrueClass']
+    test_fail()
+    nok( $P0 )
+    test_test( 'failing nok() calls get_bool')
 .end
 
 .sub test_is
@@ -130,6 +277,41 @@ CODE
     test_diag( 'Have: 777.1' )
     test_diag( 'Want: 888.8' )
     test_test( 'failing test is() for floats with description')
+
+    test_fail( 'comparing two floats with precision, failure' )
+    is( 777.1, 888.8, 'comparing two floats with precision, failure', 1e-6)
+    test_diag( 'Have: 777.1' )
+    test_diag( 'Want: 888.8' )
+    test_test( 'failing test is() for floats with precision')
+
+    test_pass( 'comparing two floats with precision, success' )
+    is( 666.222, 666.223, 'comparing two floats with precision, success', 1e-2)
+    test_test( 'passing test is() for floats with precision')
+
+    test_fail( 'comparing Float PMC and a float with precision, failure' )
+    $P0 = new 'Float'
+    $P0 = 888.81
+    is( $P0, 888.82, 'comparing Float PMC and a float with precision, failure', 1e-2)
+    test_diag( 'Have: 888.81' )
+    test_diag( 'Want: 888.82' )
+    test_test( 'failing test is() for comparing a Float PMC and float with precision')
+
+    test_pass( 'comparing Float PMC and a float with precision, success' )
+    $P0 = 666.222
+    is( $P0, 666.223, 'comparing Float PMC and a float with precision, success', 1e-2)
+    test_test( 'passing test is() for comparing Float PMC and float with precision')
+
+    test_pass( 'comparing integer and a Float PMC with precision, success' )
+    $I0 = 42
+    is( $I0, 41.99, 'comparing integer and a Float PMC with precision, success', 0.1)
+    test_test( 'passing test is() for comparing Integer PMC and float with precision')
+
+    test_fail( 'comparing integer and a Float PMC with precision, failure' )
+    $I0 = 42
+    is( $I0, 41.99, 'comparing integer and a Float PMC with precision, failure', 1e-3)
+    test_diag( 'Have: 42' )
+    test_diag( 'Want: 41.99' )
+    test_test( 'failing test is() for comparing Integer PMC and float with precision')
 
     test_pass()
     is( 'bob', 'bob' )
@@ -324,6 +506,7 @@ CODE
 .sub test_is_deeply
     test_is_deeply_array()
     test_is_deeply_hash()
+    test_is_deeply_hash_tt763()
     test_is_deeply_mismatch()
     test_is_deeply_nested()
 .end
@@ -374,9 +557,13 @@ CODE
 .sub test_is_deeply_hash
     .local pmc left
     .local pmc right
+    .local pmc undef1
+    .local pmc undef2
 
-    left  = new 'Hash'
-    right = new 'Hash'
+    left   = new 'Hash'
+    right  = new 'Hash'
+    undef1 = new 'Undef'
+    undef2 = new 'Undef'
 
     test_pass()
     is_deeply( left, right )
@@ -417,6 +604,49 @@ CODE
     test_pass()
     is_deeply( left, right )
     test_test( 'passing test is_deeply() for hashes created in different orders' )
+.end
+
+.sub test_is_deeply_hash_tt763
+    .local pmc left
+    .local pmc right
+    .local pmc undef1
+    .local pmc undef2
+
+    left   = new 'Hash'
+    right  = new 'Hash'
+    undef1 = new 'Undef'
+    undef2 = new 'Undef'
+    right['undef1'] = undef1
+    left['undef2']  = undef2
+
+    test_fail()
+    is_deeply( left, right )
+    test_diag( 'Mismatch at [undef2]: expected (undef), received nonexistent' )
+    test_test( 'failing is_deeply() for undef in left, nonexistent in right' )
+
+    test_fail()
+    is_deeply( right, left )
+    test_diag( 'Mismatch at [undef1]: expected (undef), received nonexistent' )
+    test_test( 'failing is_deeply() for undef in left, nonexistent in right' )
+
+    right['undef2'] = undef2
+    left['undef1']  = undef1
+
+    test_pass()
+    is_deeply( left, right )
+    test_test( 'passing is_deeply() with undef values' )
+
+    left['foo'] = undef1
+    test_fail()
+    is_deeply( left, right )
+    test_diag( 'Mismatch: expected 3 elements, received 2')
+    test_test( 'failing is_deeply() for hashes differing by keys with undef values' )
+
+    right['bar'] = undef1
+    test_fail()
+    is_deeply( left, right )
+    test_diag( 'Mismatch at [foo]: expected (undef), received nonexistent')
+    test_test( 'failing is_deeply() for hashes differing by keys with undef values' )
 .end
 
 .sub test_is_deeply_mismatch

@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pct_optable_guide.pod 39229 2009-05-29 00:28:36Z jkeenan $
+# $Id$
 
 =head1 NAME
 

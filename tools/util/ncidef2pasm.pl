@@ -1,13 +1,15 @@
 #! perl
 
 # Copyright (C) 2003-2007, Parrot Foundation.
-# $Id: ncidef2pasm.pl 37342 2009-03-12 04:52:54Z Util $
+# $Id$
 
-=head1 ncidef2asm.pl
+=head1 NAME
 
-Take an NCI library definition file and turn it into a
+F<tools/util/ncidef2asm.pl>
 
-=head1 Sections
+=head1 DESCRIPTION
+
+Take an NCI library definition file and turn it into PASM.
 
 An NCI library definition file provides the information needed to
 generate a parrot wrapper for the named library (or libraries). Its

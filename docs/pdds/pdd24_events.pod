@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pdd24_events.pod 39011 2009-05-21 11:11:13Z jkeenan $
+# $Id$
 
 =head1 PDD 24: Events
 
@@ -10,7 +10,7 @@ Parrot's event subsystem.
 
 =head2 Version
 
-$Revision: 39011 $
+$Revision$
 
 =head2 Description
 

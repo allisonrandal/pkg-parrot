@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: Parser.pm 40643 2009-08-18 22:57:11Z bacek $
+# $Id$
 
 package Parrot::Pmc2c::Parser;
 
@@ -68,8 +68,7 @@ sub parse_pmc {
 
     my $filebase = basename($filename);
     $filebase =~ s/\.pmc$//;
-    # Note: this can be changed to a die() after the 1.4 release. (TT #665)
-    warn("PMC filename $filebase.pmc does not match pmclass name $pmcname!\n")
+    die("PMC filename $filebase.pmc does not match pmclass name $pmcname!\n")
         unless lc($filebase) eq lc($pmcname);
     my $pmc = Parrot::Pmc2c::PMC->create($pmcname);
     $pmc->preamble( Parrot::Pmc2c::Emitter->text( $preamble, $filename, 1 ) );

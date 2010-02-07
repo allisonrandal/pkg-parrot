@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd11_extending.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id$
 
 =head1 [DRAFT] PDD 11: Extending
 

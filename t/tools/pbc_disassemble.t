@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation
-# $Id: pbc_disassemble.t 40586 2009-08-16 07:21:58Z dukeleto $
+# $Id$
 
 =head1 NAME
 
