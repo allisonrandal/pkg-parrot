@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: c_cppcomments.t 44419 2010-02-23 23:10:14Z mikehh $
 
 use strict;
 use warnings;
@@ -50,7 +50,7 @@ Parrot::Test::Util::Runloop->testloop(
 );
 
 # TT # 414 (https://trac.parrot.org/parrot/ticket/414):
-# In the POD inside a C source code file, a hyperlink such as 
+# In the POD inside a C source code file, a hyperlink such as
 # https://trac.parrot.org will be inaccurately reported as a C++-style
 # comment.
 # Quick fix added
@@ -60,9 +60,9 @@ sub check_cppcomments {
                    (?: ' (?: \\\\ | \\' | [^'] )* ' )  # remove ' string
                  | (?: " (?: \\\\ | \\" | [^"] )* " )  # remove " string
                  | /\* .*? \*/                         # remove C comment
-		 | https?:\/\/                         # TT # 414 quick fix
+                 | https?:\/\/                         # TT # 414 quick fix
                )
-            }{}gsx;
+             }{}gsx;
 
     return $buf !~ m{ ( .*? // .* ) }x;
 }

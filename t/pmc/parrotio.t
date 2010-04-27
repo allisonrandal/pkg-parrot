@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: parrotio.t 42690 2009-11-21 13:49:45Z jkeenan $
 
 use strict;
 use warnings;

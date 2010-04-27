@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: makefiles-01.t 44649 2010-03-05 16:20:00Z tene $
 # gen/makefiles-01.t
 
 use strict;
@@ -68,16 +68,10 @@ BEGIN {
        #["IF(value == xx)",                 0], # invalid op error
        #["IF(value = xx)",                  0], # invalid op error
        ["IF(value=xx)",                     0], # also invalid, no warning. checks for key value=xx
-
-       # Legacy syntax                 true or false
-       ["CONDITIONED_LINE(true)",           1],
-       ["INVERSE_CONDITIONED_LINE(true)",   0],
-       ["CONDITIONED_LINE(false)",          0],
-       ["INVERSE_CONDITIONED_LINE(false)",  1],
       );
 }
 
-use Test::More tests => (8 + @cond_tests);
+use Test::More tests => (7 + @cond_tests);
 use Carp;
 use lib qw( . lib );
 
@@ -114,7 +108,6 @@ foreach my $k ( keys %makefiles ) {
 }
 
 is($missing_SOURCE, 0, "No Makefile source file missing");
-ok(-f $step->{CFLAGS_source}, "CFLAGS source file located");
 
 my $index = undef;
 sub result {

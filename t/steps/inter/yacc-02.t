@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: yacc-02.t 42575 2009-11-19 01:00:42Z jkeenan $
 # inter/yacc-02.t
 
 use strict;

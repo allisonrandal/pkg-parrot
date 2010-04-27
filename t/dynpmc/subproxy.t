@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2005-2010, Parrot Foundation.
+# $Id: subproxy.t 44366 2010-02-23 04:58:57Z mikehh $
 
 =head1 NAME
 
@@ -65,8 +65,7 @@ happens to be a Sub.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

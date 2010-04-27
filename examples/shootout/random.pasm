@@ -1,6 +1,6 @@
 #!./parrot -R jit
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: random.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 #
 # random.pasm N         (N = 900000 for shootout)
 # by Joshua Isom

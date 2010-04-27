@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id$
+# $Id: libpcre.pir 44546 2010-02-28 05:12:29Z coke $
 
 =head1 TITLE
 
@@ -12,7 +12,7 @@ See 'library/pcre.pir' for details on the user interface.
 =cut
 
 
-.namespace ['PCRE::NCI']
+.namespace ['PCRE'; 'NCI']
 
 
 .sub compile
@@ -35,7 +35,7 @@ See 'library/pcre.pir' for details on the user interface.
     ## allocate space in string for error message
     repeat error, " ", error_size
 
-    PCRE_NCI_compile = get_hll_global ['PCRE::NCI'], 'PCRE_compile'
+    PCRE_NCI_compile = get_hll_global ['PCRE'; 'NCI'], 'PCRE_compile'
 
     .local pmc code
 
@@ -81,7 +81,7 @@ RETURN:
 
     ## on 32 bit systems
     .local pmc PCRE_NCI_exec
-    PCRE_NCI_exec = get_hll_global ['PCRE::NCI'], 'PCRE_exec'
+    PCRE_NCI_exec = get_hll_global ['PCRE'; 'NCI'], 'PCRE_exec'
 
     .local int ok
 

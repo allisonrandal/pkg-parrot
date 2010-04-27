@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# $Id: operation.pod 38816 2009-05-16 04:08:22Z coke $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: pdd03_calling_conventions.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 3: Calling Conventions
 
@@ -9,7 +9,7 @@ Parrot's inter-routine calling conventions.
 
 =head2 Version
 
-$Revision$
+$Revision: 45652 $
 
 =head2 Synopsis
 
@@ -391,13 +391,9 @@ Specific exceptions to throw for specific errors.
 
 =end PIR_FRAGMENT
 
-=head2 Attachments
-
-None.
-
 =head2 References
 
-L<pdd23_exceptions.pod>
+F<pdd23_exceptions.pod>
 
 =cut
 

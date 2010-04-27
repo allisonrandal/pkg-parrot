@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: ops2c.pl 39866 2009-07-02 07:07:07Z cotto $
 
 use warnings;
 use strict;

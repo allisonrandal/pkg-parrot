@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: Range.pir 43695 2010-02-01 21:11:43Z bacek $
 
 =head1 Range
 
@@ -131,7 +131,7 @@ Return the min and max attributes as a 2 element list.
 =cut
 
 .sub get_minmax :method
-  $P1 = new 'Array'
+  $P1 = new 'ResizablePMCArray'
   $P1 = 2
   .local pmc min, max
   min = self.'get_min'()

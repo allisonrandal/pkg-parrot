@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id$
+# $Id: irix.pm 45323 2010-03-30 16:45:07Z bubaflub $
 
 package init::hinits::irix;
 
@@ -27,15 +27,12 @@ sub runstep {
     $conf->data->set( libs => $libs );
 
     my $cc   = $conf->data->get('cc');
-    my $cxx  = $conf->data->get('cxx');
     my $ld   = $conf->data->get('ld');
     my $link = $conf->data->get('link');
     if ( $cc =~ /cc -64/ ) {
-        $cxx  = 'CC -64';
         $ld   = 'CC -64';
         $link = 'CC -64';
         $conf->data->set(
-            cxx  => $cxx,
             ld   => $ld,
             link => $link,
         );

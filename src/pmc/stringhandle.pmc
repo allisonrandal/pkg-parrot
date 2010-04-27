@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008, Parrot Foundation.
-$Id$
+$Id: stringhandle.pmc 45425 2010-04-07 13:38:10Z bacek $
 
 =head1 NAME
 
@@ -17,8 +17,18 @@ than an external file. Commonly used as a mock FileHandle for testing.
 
 #include "../src/io/io_private.h"
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
 PARROT_INLINE
-static int encoding_is_utf8(PARROT_INTERP, ARGIN_NULLOK(STRING *s));
+static int encoding_is_utf8(PARROT_INTERP, ARGIN_NULLOK(STRING *s))
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_encoding_is_utf8 __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
 
 /*
 
@@ -26,7 +36,7 @@ static int encoding_is_utf8(PARROT_INTERP, ARGIN_NULLOK(STRING *s));
 
 =over 4
 
-=item C<static int encoding_is_utf8()>
+=item C<static int encoding_is_utf8(PARROT_INTERP, STRING *s)>
 
 Helper function for internal usage. Return 1 if the string argument is
 not null and has utf8 encoding, 0 otherwise.
@@ -38,8 +48,10 @@ not null and has utf8 encoding, 0 otherwise.
 */
 
 PARROT_INLINE
-static int encoding_is_utf8(PARROT_INTERP, ARGIN_NULLOK(STRING *s))
+static int
+encoding_is_utf8(PARROT_INTERP, ARGIN_NULLOK(STRING *s))
 {
+    ASSERT_ARGS(encoding_is_utf8)
     if (STRING_IS_NULL(s))
         return 0;
     else
@@ -94,7 +106,7 @@ Create a copy of the stringhandle.
 
     VTABLE PMC *clone() {
         Parrot_StringHandle_attributes * const old_struct  = PARROT_STRINGHANDLE(SELF);
-        PMC * const copy = pmc_new(INTERP, enum_class_StringHandle);
+        PMC * const copy = Parrot_pmc_new(INTERP, enum_class_StringHandle);
         Parrot_StringHandle_attributes * const data_struct = PARROT_STRINGHANDLE(copy);
 
         if (old_struct->stringhandle != NULL)

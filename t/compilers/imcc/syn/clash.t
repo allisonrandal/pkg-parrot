@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: clash.t 42722 2009-11-21 14:48:37Z jkeenan $
 
 use strict;
 use warnings;

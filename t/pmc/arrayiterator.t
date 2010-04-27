@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: arrayiterator.t 44377 2010-02-23 10:54:07Z mikehh $
 
 =head1 NAME
 
@@ -132,10 +132,8 @@ CATCH:
 DONE:
 .end
 
-
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

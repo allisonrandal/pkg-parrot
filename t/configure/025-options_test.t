@@ -1,13 +1,12 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: 025-options_test.t 44538 2010-02-28 02:46:06Z coke $
 # 025-options_test.t
 
 use strict;
 use warnings;
 use Carp;
 use Cwd;
-use Data::Dumper;
 use File::Temp qw( tempdir );
 use Test::More tests =>  7;
 use lib qw( lib );

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: copyright.t 44198 2010-02-19 20:51:15Z mikehh $
 
 use strict;
 use warnings;
@@ -133,10 +133,6 @@ my @permitted_duplicate_copyright_files = (
     {
         file    => 't/tools/dev/searchops/samples.pm',
         reason  => 'sample code used in testing',
-    },
-    {
-        file    => 'tools/build/nativecall.pl',
-        reason  => 'heredoc text for generated file',
     },
     {
         file    => 'tools/build/vtable_extend.pl',

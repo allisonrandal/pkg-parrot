@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: p5rx.t 40268 2009-07-25 19:53:04Z whiteknight $
 # vi: ft=pir
 
 =head1 NAME

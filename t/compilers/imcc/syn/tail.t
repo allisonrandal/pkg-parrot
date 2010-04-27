@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id$
+# $Id: tail.t 45108 2010-03-22 20:53:12Z chromatic $
 
 use strict;
 use warnings;
@@ -23,8 +23,8 @@ pir_output_is( <<'CODE', <<'OUT', "tail call optimization, final position" );
     .const 'Sub' f = "_floor"
     .const 'Sub' c = "_funcall"
     set_args "0,0,0", f, $P1, $P2
-    get_results "0,0", $P3, $P4
     invokecc c
+    get_results "0,0", $P3, $P4
     print "_floor returned "
     print 2      # TODO argcP
     print " values, "
@@ -34,8 +34,8 @@ pir_output_is( <<'CODE', <<'OUT', "tail call optimization, final position" );
     print ".\n"
     .const 'Sub' s = "_fib_step"
     set_args "0,0,0", s, $P1, $P2
-    get_results "0,0,0", $P3, $P4, $P5
     invokecc c
+    get_results "0,0,0", $P3, $P4, $P5
     print "_fib_step returned "
     print 3    # TODO argcP
     print " values, "

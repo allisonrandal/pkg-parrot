@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: dumper.t 37812 2009-03-29 11:36:54Z barney $
 
 use strict;
 use warnings;

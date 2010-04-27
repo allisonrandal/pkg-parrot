@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: utils.c 45609 2010-04-12 17:16:24Z darbelo $
 
 =head1 NAME
 
@@ -120,6 +120,7 @@ Mathematics*, Second Edition. Addison-Wesley, 1994.
 */
 
 PARROT_CONST_FUNCTION
+PARROT_WARN_UNUSED_RESULT
 INTVAL
 intval_mod(INTVAL i2, INTVAL i3)
 {
@@ -167,6 +168,7 @@ Includes a workaround for buggy code generation in the C<lcc> compiler.
 */
 
 PARROT_CONST_FUNCTION
+PARROT_WARN_UNUSED_RESULT
 FLOATVAL
 floatval_mod(FLOATVAL n2, FLOATVAL n3)
 {
@@ -412,15 +414,17 @@ _srand48(long seed)
 
 =item C<FLOATVAL Parrot_float_rand(INTVAL how_random)>
 
-Returns a C<FLOATVAL> in the interval C<[0.0, 1.0)>.
+Returns a C<FLOATVAL> uniformly distributed in the in the interval
+C<[0.0, 1.0]>.
 
-C<how_random> is ignored.
+C<how_random> is currently ignored.
 
 =cut
 
 */
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 FLOATVAL
 Parrot_float_rand(INTVAL how_random)
 {
@@ -434,7 +438,7 @@ Parrot_float_rand(INTVAL how_random)
 
 =item C<INTVAL Parrot_uint_rand(INTVAL how_random)>
 
-Returns an C<INTVAL> in the interval C<[0, 2^31)>.
+Returns an C<INTVAL> uniformly distributed in the interval C<[0, 2^31)>.
 
 C<how_random> is ignored.
 
@@ -443,6 +447,7 @@ C<how_random> is ignored.
 */
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_uint_rand(INTVAL how_random)
 {
@@ -465,6 +470,7 @@ C<how_random> is ignored.
 */
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_int_rand(INTVAL how_random)
 {
@@ -487,12 +493,16 @@ C<how_random> is ignored.
 */
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_range_rand(INTVAL from, INTVAL to, INTVAL how_random)
 {
     ASSERT_ARGS(Parrot_range_rand)
-    return (INTVAL)(from + ((double)(to - from))
-                     * Parrot_float_rand(how_random));
+    const double spread = (double)(to - from + 1);
+    const double randpart = Parrot_float_rand(how_random);
+    const INTVAL raw = from + (INTVAL)(spread * randpart);
+
+    return raw;
 }
 
 /*
@@ -544,10 +554,11 @@ PMC*
 tm_to_array(PARROT_INTERP, ARGIN(const struct tm *tm))
 {
     ASSERT_ARGS(tm_to_array)
-    /* TT #1270 Should make this a FixedIntegerArray instead of an Array */
-    PMC * const Array = pmc_new(interp, enum_class_Array);
 
+    PMC * const Array = Parrot_pmc_new(interp,
+        Parrot_get_ctx_HLL_type(interp, enum_class_FixedIntegerArray));
     VTABLE_set_integer_native(interp, Array, 9);
+
     VTABLE_set_integer_keyed_int(interp, Array, 0, tm->tm_sec);
     VTABLE_set_integer_keyed_int(interp, Array, 1, tm->tm_min);
     VTABLE_set_integer_keyed_int(interp, Array, 2, tm->tm_hour);
@@ -577,6 +588,7 @@ Returns an offset value if it is found, or -1 if no match.
 */
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_byte_index(SHIM_INTERP, ARGIN(const STRING *base),
         ARGIN(const STRING *search), UINTVAL start_offset)
@@ -632,7 +644,7 @@ Parrot_byte_rindex(SHIM_INTERP, ARGIN(const STRING *base),
 {
     ASSERT_ARGS(Parrot_byte_rindex)
     const INTVAL searchlen          = search->strlen;
-    const char * const search_start = (const char *)Buffer_bufstart(search);
+    const char * const search_start = (const char *)(search->strstart);
     UINTVAL max_possible_offset     = (base->strlen - search->strlen);
     INTVAL current_offset;
 
@@ -641,7 +653,7 @@ Parrot_byte_rindex(SHIM_INTERP, ARGIN(const STRING *base),
 
     for (current_offset = max_possible_offset; current_offset >= 0;
             current_offset--) {
-        const char * const base_start = (char *)Buffer_bufstart(base) + current_offset;
+        const char * const base_start = (char *)(base->strstart) + current_offset;
         if (memcmp(base_start, search_start, searchlen) == 0) {
             return current_offset;
         }
@@ -844,9 +856,9 @@ Parrot_register_move(PARROT_INTERP,
 
     /* allocate space for data structures */
     /* NOTA: data structures could be kept allocated somewhere waiting to get reused...*/
-    c.nb_succ      = nb_succ      = mem_allocate_n_zeroed_typed(n_regs, int);
-    c.backup       = backup       = mem_allocate_n_zeroed_typed(n_regs, int);
-    c.reg_to_index = reg_to_index = mem_allocate_n_zeroed_typed(max_reg, int);
+    c.nb_succ      = nb_succ      = mem_gc_allocate_n_zeroed_typed(interp, n_regs, int);
+    c.backup       = backup       = mem_gc_allocate_n_zeroed_typed(interp, n_regs, int);
+    c.reg_to_index = reg_to_index = mem_gc_allocate_n_zeroed_typed(interp, max_reg, int);
 
     /* init backup array */
     for (i = 0; i < n_regs; i++)
@@ -882,9 +894,9 @@ Parrot_register_move(PARROT_INTERP,
         }
     }
 
-    mem_sys_free(nb_succ);
-    mem_sys_free(reg_to_index);
-    mem_sys_free(backup);
+    mem_gc_free(interp, nb_succ);
+    mem_gc_free(interp, reg_to_index);
+    mem_gc_free(interp, backup);
 }
 
 typedef INTVAL (*sort_func_t)(PARROT_INTERP, void *, void *);
@@ -984,12 +996,6 @@ Parrot_quicksort(PARROT_INTERP, ARGMOD(void **data), UINTVAL n, ARGIN(PMC *cmp))
 /*
 
 =back
-
-=head1 HISTORY
-
-Initial version by leo 2003.09.09.
-
-=cut
 
 */
 

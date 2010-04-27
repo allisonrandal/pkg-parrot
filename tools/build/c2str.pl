@@ -1,5 +1,5 @@
 #! perl
-# $Id$
+# $Id: c2str.pl 42772 2009-11-21 20:21:37Z jkeenan $
 
 # Copyright (C) 2004-2008, Parrot Foundation.
 

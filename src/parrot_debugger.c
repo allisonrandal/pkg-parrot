@@ -1,10 +1,10 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: parrot_debugger.c 45796 2010-04-19 07:42:50Z mikehh $
 
 =head1 NAME
 
-parrot_debugger
+parrot_debugger - The Parrot Debugger
 
 =head1 DESCRIPTION
 
@@ -147,11 +147,11 @@ and C<debug_break> ops in F<ops/debug.ops>.
 #include "parrot/runcore_api.h"
 
 static void PDB_printwelcome(void);
-static void PDB_run_code(PARROT_INTERP, int argc, char *argv[]);
+static void PDB_run_code(PARROT_INTERP, int argc, const char *argv[]);
 
 /*
 
-=item C<int main(int argc, char *argv[])>
+=item C<int main(int argc, const char *argv[])>
 
 Reads the PIR, PASM or PBC file from argv[1], loads it, and then calls
 Parrot_debug().
@@ -161,7 +161,7 @@ Parrot_debug().
 */
 
 int
-main(int argc, char *argv[])
+main(int argc, const char *argv[])
 {
     int nextarg;
     Parrot_Interp     interp;
@@ -249,9 +249,9 @@ main(int argc, char *argv[])
         STRING *compiler = Parrot_str_new_constant(interp, "PIR");
         STRING *errstr = NULL;
         const char source []= ".sub aux :main\nexit 0\n.end\n";
-        PMC *code = Parrot_compile_string(interp, compiler, source, &errstr);
+        Parrot_compile_string(interp, compiler, source, &errstr);
 
-        if (!STRING_is_null(interp, errstr))
+        if (!Parrot_str_is_null(interp, errstr))
             Parrot_io_eprintf(interp, "%Ss\n", errstr);
     }
 
@@ -271,7 +271,7 @@ main(int argc, char *argv[])
 
 /*
 
-=item C<static void PDB_run_code(PARROT_INTERP, int argc, char *argv[])>
+=item C<static void PDB_run_code(PARROT_INTERP, int argc, const char *argv[])>
 
 Run the code, catching exceptions if they are left unhandled.
 
@@ -280,7 +280,7 @@ Run the code, catching exceptions if they are left unhandled.
 */
 
 static void
-PDB_run_code(PARROT_INTERP, int argc, char *argv[])
+PDB_run_code(PARROT_INTERP, int argc, const char *argv[])
 {
     new_runloop_jump_point(interp);
     if (setjmp(interp->current_runloop->resume)) {

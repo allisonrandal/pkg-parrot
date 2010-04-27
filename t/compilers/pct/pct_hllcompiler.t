@@ -1,7 +1,7 @@
 #!perl
 
 # Copyright (C) 2005-2006, Parrot Foundation.
-# $Id$
+# $Id: pct_hllcompiler.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

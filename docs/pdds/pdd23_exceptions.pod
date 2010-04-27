@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: pdd23_exceptions.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 23: Exceptions
 
@@ -10,7 +10,7 @@ Parrot's exception system.
 
 =head2 Version
 
-$Revision$
+$Revision: 45652 $
 
 =head2 Description
 
@@ -447,20 +447,10 @@ in the 'resume' attribute of the exception.
 
 =end PIR_FRAGMENT
 
-=head2 Attachments
-
-None.
-
-=head2 Footnotes
-
-None.
-
 =head2 References
 
-  src/ops/core.ops
-  src/exceptions.c
-  src/pmc/exception.pmc
-  src/pmc/exceptionhandler.pmc
+F<src/ops/core.ops>, F<src/exceptions.c>, F<src/pmc/exception.pmc>,
+F<src/pmc/exceptionhandler.pmc>
 
 =cut
 

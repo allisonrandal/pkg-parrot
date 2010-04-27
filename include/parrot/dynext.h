@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2003-2007, Parrot Foundation.
+ * Copyright (C) 2003-2010, Parrot Foundation.
  */
 
 /* dynext.h
 *
-* $Id$
+* $Id: dynext.h 45117 2010-03-22 23:42:16Z petdance $
 *
 *   Parrot dynamic extensions
 */
@@ -41,7 +41,7 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 PMC * Parrot_load_lib(PARROT_INTERP,
     ARGIN_NULLOK(STRING *lib),
-    SHIM(PMC *initializer))
+    ARGIN_NULLOK(PMC *parameters))
         __attribute__nonnull__(1);
 
 #define ASSERT_ARGS_Parrot_clone_lib_into __attribute__unused__ int _ASSERT_ARGS_CHECK = (\

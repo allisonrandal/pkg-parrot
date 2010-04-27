@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: threads.h 39976 2009-07-10 08:20:13Z fperrad $
  * Copyright (C) 2004-2007, Parrot Foundation.
  */
 

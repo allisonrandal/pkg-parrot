@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: exception-old.t 45297 2010-03-30 01:33:45Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 28;
+use Parrot::Test tests => 27;
 
 =head1 NAME
 
@@ -50,61 +50,6 @@ main
 caught it
 Exception
 just pining
-OUTPUT
-
-pasm_output_is( <<'CODE', <<'OUTPUT', "exception attributes" );
-    print "main\n"
-    push_eh handler
-    new P1, ['Exception']
-    new P2, ['String']
-    set P2, "just pining"
-    setattribute P1, 'message', P2
-    new P3, ['Integer']
-    set P3, 5
-    setattribute P1, 'severity', P3
-    new P4, ['String']
-    set P4, "additional payload"
-    setattribute P1, 'payload', P4
-    new P5, ['Array']
-    set P5, 2
-    set P5[0], 'backtrace line 1'
-    set P5[1], 'backtrace line 2'
-    setattribute P1, 'backtrace', P5
-
-    throw P1
-    print "not reached\n"
-    end
-handler:
-    get_results "0", P0
-    set S0, P0
-    print "caught it\n"
-    getattribute P16, P0, 'message'
-    print P16
-    print "\n"
-    getattribute P17, P0, 'severity'
-    print P17
-    print "\n"
-    getattribute P18, P0, 'payload'
-    print P18
-    print "\n"
-    getattribute P19, P0, 'backtrace'
-    set P20, P19[0]
-    print P20
-    print "\n"
-    set P20, P19[1]
-    print P20
-    print "\n"
-    null P5
-    end
-
-CODE
-main
-caught it
-just pining
-5
-additional payload
-backtrace line 1
-backtrace line 2
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', 'Exception initialized with String' );
@@ -414,7 +359,7 @@ CODE
 /Mark 500 not found/
 OUTPUT
 
-# stringification is handled by a vtable method, which runs in a second
+# stringification is handled by a vtable, which runs in a second
 # runloop. when an error in the method tries to go to a Error_Handler defined
 # outside it, it winds up going to the inner runloop, giving strange results.
 pir_output_is( <<'CODE', <<'OUTPUT', 'pop_eh out of context (2)', todo => 'runloop shenanigans' );
@@ -503,6 +448,14 @@ $ENV{TEST_PROG_ARGS} ||= '';
 my @todo = $ENV{TEST_PROG_ARGS} =~ /--run-pbc/
     ? ( todo => '.tailcall and lexical maps not thawed from PBC, TT #1172' )
     : ();
+#
+# this test is hanging in testr since pcc_hackathon_6Mar10 branch merge at r45108
+# converting to skip at the moment
+#
+
+SKIP: {
+    skip ".tailcall and lexical maps not thawed from PBC - hangs", 1 if @todo;
+
 pir_output_is( <<'CODE', <<'OUTPUT', "exit_handler via exit exception", @todo );
 .sub main :main
     .local pmc a
@@ -526,6 +479,8 @@ CODE
 at_exit
 a = 42
 OUTPUT
+
+}
 
 ## Regression test for r14697.  This probably won't be needed when PDD23 is
 ## fully implemented.

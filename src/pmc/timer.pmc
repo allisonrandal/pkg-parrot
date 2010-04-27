@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+$Id: timer.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -56,6 +56,10 @@ initializer.
 */
 
 #include "parrot/scheduler_private.h"
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass Timer extends Task provides event auto_attrs {
     ATTR FLOATVAL duration;  /* The duration of the timer pause */

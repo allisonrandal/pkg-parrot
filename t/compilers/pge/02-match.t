@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: 02-match.t 44368 2010-02-23 05:19:04Z mikehh $
 
 =head1 NAME
 
@@ -56,8 +56,7 @@ Tests the Match class directly.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

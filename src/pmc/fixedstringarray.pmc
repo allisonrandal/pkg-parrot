@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: fixedstringarray.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -18,6 +18,10 @@ stores Parrot strings.
 =cut
 
 */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass FixedStringArray auto_attrs provides array {
     ATTR STRING **str_array; /* where the STRINGs are stored */
@@ -45,6 +49,26 @@ Initializes the array.
 
 /*
 
+=item C<void init_int(INTVAL size)>
+
+Initializes the array.
+
+=cut
+
+*/
+
+    VTABLE void init_int(INTVAL size) {
+        if (size < 0)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                _("FixedStringArray: Cannot set array size to a negative number (%d)"), size);
+        SET_ATTR_size(INTERP, SELF, size);
+        SET_ATTR_str_array(INTERP, SELF, mem_gc_allocate_n_zeroed_typed(INTERP, size, STRING *));
+        PObj_custom_mark_destroy_SETALL(SELF);
+    }
+
+
+/*
+
 =item C<void destroy()>
 
 Destroys the array.
@@ -60,7 +84,7 @@ Destroys the array.
         GET_ATTR_str_array(INTERP, SELF, str_array);
 
         if (str_array)
-            mem_sys_free(str_array);
+            mem_gc_free(INTERP, str_array);
     }
 
 /*
@@ -76,7 +100,7 @@ Creates and returns a copy of the array.
     VTABLE PMC *clone() {
 
         STRING    **my_str_array, **dest_str_array;
-        PMC        *const dest = pmc_new(INTERP, SELF->vtable->base_type);
+        PMC        *const dest = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
 
         GET_ATTR_str_array(INTERP, SELF, my_str_array);
 
@@ -87,7 +111,7 @@ Creates and returns a copy of the array.
             GET_ATTR_size(INTERP, SELF, size);
             mem_size = size * sizeof (STRING *);
 
-            dest_str_array = mem_allocate_n_zeroed_typed(size, STRING *);
+            dest_str_array = mem_gc_allocate_n_zeroed_typed(INTERP, size, STRING *);
             mem_sys_memcopy(dest_str_array, my_str_array, mem_size);
             SET_ATTR_str_array(INTERP, dest, dest_str_array);
             SET_ATTR_size(INTERP, dest, size);
@@ -150,7 +174,7 @@ Gets an iterator for the array.
 
 */
     VTABLE PMC *get_iter() {
-        return pmc_new_init(INTERP, enum_class_ArrayIterator, SELF);
+        return Parrot_pmc_new_init(INTERP, enum_class_ArrayIterator, SELF);
     }
 
 /*
@@ -183,6 +207,20 @@ Returns the number of elements in the array.
         return SELF.elements();
     }
 
+/*
+
+=item C<FLOATVAL get_number()>
+
+Returns the number of elements in the array.
+
+=cut
+
+*/
+
+    VTABLE FLOATVAL get_number() {
+        const INTVAL e = SELF.elements();
+        return (FLOATVAL)e;
+    }
 
 /*
 
@@ -296,7 +334,7 @@ Returns the PMC value of the element at index C<key>.
 */
 
     VTABLE PMC *get_pmc_keyed_int(INTVAL key) {
-        PMC    * const ret = pmc_new(INTERP, enum_class_String);
+        PMC    * const ret = Parrot_pmc_new(INTERP, enum_class_String);
         STRING * const val = SELF.get_string_keyed_int(key);
 
         VTABLE_set_string_native(INTERP, ret, val);
@@ -341,7 +379,7 @@ cause an exception to be thrown.
 
         SET_ATTR_size(INTERP, SELF, new_size);
         SET_ATTR_str_array(INTERP, SELF,
-                (STRING**)mem_sys_allocate_zeroed(new_size * sizeof (STRING*)));
+                mem_gc_allocate_n_zeroed_typed(INTERP, new_size, STRING*));
 
         PObj_custom_mark_destroy_SETALL(SELF);
     }
@@ -559,14 +597,14 @@ The C<==> operation. Compares two array to hold equal elements.
 
 =over 4
 
-=item C<void freeze(visit_info *info)>
+=item C<void freeze(PMC *info)>
 
 Used to archive the string.
 
 =cut
 
 */
-    VTABLE void freeze(visit_info *info) {
+    VTABLE void freeze(PMC *info) {
         STRING           **str_array;
         UINTVAL            size, i;
 
@@ -580,14 +618,14 @@ Used to archive the string.
 
 /*
 
-=item C<void thaw(visit_info *info)>
+=item C<void thaw(PMC *info)>
 
 Used to unarchive the string.
 
 =cut
 
 */
-    VTABLE void thaw(visit_info *info) {
+    VTABLE void thaw(PMC *info) {
         UINTVAL  i, size;
         STRING **str_array;
 

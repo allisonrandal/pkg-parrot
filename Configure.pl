@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: Configure.pl 44151 2010-02-19 01:21:14Z plobsing $
 
 use 5.008;
 use strict;
@@ -183,11 +183,7 @@ configuration has begun.
 
 =item C<--test=build>
 
-Run tests found in F<t/postconfigure/>, F<t/tools/pmc2cutils/>,
-F<t/tools/ops2cutils/> and F<t/tools/ops2pm/> I<after> configuration has
-completed.  These tests demonstrate (a) that certain of Parrot's configuration
-tools are working properly post-configuration; and (b) that certain of
-Parrot's build tools will work properly once you call F<make>.
+Run tests found in F<t/steps/>,  F<t/postconfigure/> and F<t/pharness>.
 
 =item C<--test>
 
@@ -204,6 +200,10 @@ disk, for later analysis by F<Parrot::Configure::Trace> methods.
 =item Operating system-specific configuration options
 
 =over 4
+
+=item C<--hintsfile=filename>
+
+Use filename as the hints file.
 
 =item C<--darwin_no_fink>
 
@@ -645,9 +645,7 @@ configuration file.
     gen::config_h
     gen::core_pmcs
     gen::crypto
-    gen::parrot_include
     gen::opengl
-    gen::call_list
     gen::makefiles
     gen::platform
     gen::config_pm

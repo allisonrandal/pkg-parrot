@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: PMCEmitter.pm 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 
@@ -97,6 +97,7 @@ sub generate_c_file {
     $c->emit( $self->get_vtable_func );
     $c->emit( $self->get_mro_func );
     $c->emit( $self->get_isa_func );
+    $c->emit( $self->pmc_class_init_func );
     $c->emit( $self->init_func );
     $c->emit( $self->postamble );
 
@@ -166,7 +167,7 @@ sub hdecls {
     my $name    = $self->name;
     my $lc_name = $self->name;
 
-    # generate decls for all vtable methods in this PMC
+    # generate decls for all vtables in this PMC
     foreach my $vt_method_name ( @{ $self->vtable->names } ) {
         if ( $self->implements_vtable($vt_method_name) ) {
             $hout .=
@@ -250,54 +251,6 @@ EOC
         unless $self->is_dynamic;
 }
 
-=item C<proto($type,$parameters)>
-
-Determines the prototype (argument signature) for a method body
-(see F<src/call_list>).
-
-=cut
-
-my %calltype = (
-    "char"     => "c",
-    "short"    => "s",
-    "char"     => "c",
-    "short"    => "s",
-    "int"      => "i",
-    "INTVAL"   => "I",
-    "float"    => "f",
-    "FLOATVAL" => "N",
-    "double"   => "d",
-    "STRING*"  => "S",
-    "char*"    => "t",
-    "PMC*"     => "P",
-    "short*"   => "2",
-    "int*"     => "3",
-    "long*"    => "4",
-    "void"     => "v",
-    "void*"    => "b",
-    "void**"   => "B",
-);
-
-sub proto {
-    my ( $type, $parameters ) = @_;
-
-    # reduce to a comma separated set of types
-    $parameters =~ s/\w+(,|$)/,/g;
-    $parameters =~ s/ //g;
-
-    # flatten whitespace before "*" in return value
-    $type =~ s/\s+\*$/\*/ if defined $type;
-
-    # type method(interp, self, parameters...)
-    my $ret = $calltype{ $type or "void" }
-        . "JO"
-        . join( '',
-            map { $calltype{$_} or die "Unknown signature type '$_'" }
-            split( /,/, $parameters ) );
-
-    return $ret;
-}
-
 =item C<pre_method_gen>
 
 Generate switch-bases VTABLE for MULTI
@@ -321,7 +274,7 @@ Returns the C code for the pmc methods.
 sub gen_methods {
     my ($self) = @_;
 
-    # vtable methods
+    # vtables
     foreach my $method ( @{ $self->vtable->methods } ) {
         my $vt_method_name = $method->name;
         next if $vt_method_name eq 'class_init';
@@ -331,7 +284,7 @@ sub gen_methods {
         }
     }
 
-    # non-vtable methods
+    # methods
     foreach my $method ( @{ $self->methods } ) {
         next if $method->is_vtable;
         $method->generate_body($self);
@@ -474,6 +427,34 @@ sub gen_multi_name
     return $cache->{$name} = "mfl_$count";
 }
 
+=item C<pmc_class_init_func()>
+
+Returns the C code for the PMC's class_init function as a static
+function to be called from the exported class_init.
+
+=cut
+
+sub pmc_class_init_func {
+    my ($self) = @_;
+    my $class_init_code = "";
+
+    if ($self->has_method('class_init')) {
+        $class_init_code .= $self->get_method('class_init')->body;
+
+        $class_init_code =~ s/INTERP/interp/g;
+
+        # fix indenting
+        $class_init_code =~ s/^/    /mg;
+        $class_init_code = <<ENDOFCODE
+static void thispmc_class_init(PARROT_INTERP, int entry)
+{
+$class_init_code
+}
+ENDOFCODE
+    }
+    return $class_init_code;
+}
+
 =item C<init_func()>
 
 Returns the C code for the PMC's initialization method, or an empty
@@ -528,12 +509,7 @@ END_MULTI_LIST
     my $class_init_code = "";
 
     if ($self->has_method('class_init')) {
-        $class_init_code    = $self->get_method('class_init')->body;
-
-        $class_init_code =~ s/INTERP/interp/g;
-
-        # fix indenting
-        $class_init_code =~ s/^/        /mg;
+        $class_init_code .= "        thispmc_class_init(interp, entry);\n";
     }
 
     my %extra_vt;
@@ -679,7 +655,7 @@ EOC
         }
 
         /* set up MRO and _namespace */
-        Parrot_create_mro(interp, entry);
+        Parrot_pmc_create_mro(interp, entry);
 EOC
 
     # declare each nci method for this class
@@ -703,10 +679,10 @@ EOC
     # include any class specific init code from the .pmc file
     if ($class_init_code) {
         $cout .= <<"EOC";
+
         /* class_init */
-        {
 $class_init_code
-        }
+
 EOC
     }
 
@@ -742,7 +718,7 @@ EOC
 
 =item C<update_vtable_func()>
 
-Returns the C code for the PMC's update_vtable method.
+Returns the C code for the PMC's update_vtable.
 
 =cut
 
@@ -754,16 +730,25 @@ sub update_vtable_func {
     my $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : 'PARROT_EXPORT';
 
     # Sets the attr_size field:
-    # If the auto_attrs flag is set, use the current data,
-    # else check if this PMC has init or init_pmc vtable functions,
+    # - If the auto_attrs flag is set, use the current data.
+    # - If manual_attrs is set, set to 0.
+    # - If none is set, check if this PMC has init or init_pmc vtable functions,
     # setting it to 0 in that case, and keeping the value from the
     # parent otherwise.
     my $set_attr_size = '';
-    if ( @{$self->attributes} && $self->{flags}{auto_attrs} ) {
+    my $flag_auto_attrs = $self->{flags}{auto_attrs};
+    my $flag_manual_attrs = $self->{flags}{manual_attrs};
+    die 'manual_attrs and auto_attrs can not be used together'
+        if ($flag_auto_attrs && $flag_manual_attrs);
+    warn 'PMC has attributes but no auto_attrs or manual_attrs'
+        if (@{$self->attributes} && ! ($flag_auto_attrs || $flag_manual_attrs));
+
+    if ( @{$self->attributes} &&  $flag_auto_attrs) {
         $set_attr_size .= "sizeof(Parrot_${classname}_attributes)";
     }
     else {
-        $set_attr_size .= "0" if exists($self->{has_method}{init}) ||
+        $set_attr_size .= "0" if $flag_manual_attrs ||
+                                 exists($self->{has_method}{init}) ||
                                  exists($self->{has_method}{init_pmc});
     }
     $set_attr_size =     "    vt->attr_size = " . $set_attr_size . ";\n"
@@ -846,7 +831,7 @@ PARROT_CANNOT_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 PMC* Parrot_${classname}_get_mro(PARROT_INTERP, PMC* mro) {
     if (PMC_IS_NULL(mro)) {
-        mro = pmc_new(interp, enum_class_ResizableStringArray);
+        mro = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     }
 $get_mro
     VTABLE_unshift_string(interp, mro,
@@ -902,7 +887,7 @@ EOC
 
 =item C<get_vtable_func()>
 
-Returns the C code for the PMC's update_vtable method.
+Returns the C code for the PMC's update_vtable.
 
 =cut
 
@@ -1004,7 +989,7 @@ sub gen_switch_vtable {
         push @{ $multi_methods{ $name } }, [ $sig[1], $ssig, $fsig, $ns, $func, $method ];
     }
 
-    # vtable methods
+    # vtables
     foreach my $method ( @{ $self->vtable->methods } ) {
         my $vt_method_name = $method->name;
         next if $vt_method_name eq 'class_init';

@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# $Id: parrot_config_c.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 use warnings;
 use strict;
 
 my ($svnid) =
-    '$Id$' =~ /^\$[iI][dD]:\s(.*)\$$/;
+    '$Id: parrot_config_c.pl 37201 2009-03-08 12:07:48Z fperrad $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 

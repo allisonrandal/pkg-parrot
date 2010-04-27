@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: 01-parse_ops.t 42754 2009-11-21 18:09:49Z jkeenan $
 
 use strict;
 use warnings;

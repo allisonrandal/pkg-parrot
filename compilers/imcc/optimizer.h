@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: optimizer.h 41533 2009-09-27 17:30:32Z NotFound $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 

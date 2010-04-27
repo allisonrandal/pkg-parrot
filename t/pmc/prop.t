@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: prop.t 44382 2010-02-23 11:41:28Z mikehh $
 
 =head1 NAME
 
@@ -134,7 +134,6 @@ end:
 
 # Local Variables:
 #   mode: pir
-#   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:

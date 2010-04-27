@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Bytes.pir 39171 2009-05-25 18:35:28Z NotFound $
 
 =head1 Bytes Example
 

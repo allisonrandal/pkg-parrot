@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: demo.pir 45619 2010-04-12 22:44:02Z plobsing $
 
 .include "errors.pasm"
 .sub _main

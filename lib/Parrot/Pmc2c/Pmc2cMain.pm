@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: Pmc2cMain.pm 45388 2010-04-02 23:13:07Z jkeenan $
 
 package Parrot::Pmc2c::Pmc2cMain;
 
@@ -240,8 +240,11 @@ sub find_file {
         return $path if -e $path;
     }
 
-    print Carp::longmess;
-    die "cannot find file '$file' in path '", join( "', '", @includes ), "'" if $die_unless_found;
+    if ($die_unless_found) {
+        my $includes_list = join q|', '| => @includes;
+        Carp::confess("cannot find file '$file' in path '$includes_list'");
+    }
+
     return;
 }
 

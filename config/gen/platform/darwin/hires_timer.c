@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: hires_timer.c 41530 2009-09-27 16:32:06Z NotFound $
  * Copyright (C) 2009, Parrot Foundation.
  */
 

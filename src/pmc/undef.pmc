@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id$
+$Id: undef.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -26,6 +26,10 @@ from there.
 #include "pmc/pmc_object.h"
 #define UNDEF_STRING_CLASS enum_class_String
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
+
 pmclass Undef no_ro {
 
 /*
@@ -41,7 +45,7 @@ appropriate type.
 
     VTABLE void set_pmc(PMC *other) {
         if (!PObj_is_object_TEST(other)) {
-            pmc_reuse(INTERP, SELF, other->vtable->base_type, 0);
+            Parrot_pmc_reuse(INTERP, SELF, other->vtable->base_type, 0);
             VTABLE_set_pmc(INTERP, SELF, other);
         }
         else {
@@ -127,7 +131,7 @@ Morphs the current PMC to an C<Integer> and sets the value from C<value>.
 */
 
     VTABLE void set_integer_native(INTVAL value) {
-        pmc_reuse(INTERP, SELF, enum_class_Integer, 0);
+        Parrot_pmc_reuse(INTERP, SELF, enum_class_Integer, 0);
         VTABLE_set_integer_native(INTERP, SELF, value);
     }
 
@@ -156,7 +160,7 @@ Morphs the current PMC to a C<Float> and sets the value from C<value>.
 */
 
     VTABLE void set_number_native(FLOATVAL value) {
-        pmc_reuse(INTERP, SELF, enum_class_Float, 0);
+        Parrot_pmc_reuse(INTERP, SELF, enum_class_Float, 0);
         VTABLE_set_number_native(INTERP, SELF, value);
     }
 
@@ -188,7 +192,7 @@ Morphs the current PMC to a C<String> and sets the value from C<value>.
 */
 
     VTABLE void set_string_native(STRING *value) {
-        pmc_reuse(interp, SELF, enum_class_String, 0);
+        Parrot_pmc_reuse(interp, SELF, enum_class_String, 0);
         VTABLE_set_string_native(INTERP, SELF, value);
     }
 
@@ -217,7 +221,7 @@ Returns 1.
 */
 
     VTABLE PMC *logical_not(PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
         VTABLE_set_bool(INTERP, dest, 1);
         return dest;
     }
@@ -264,7 +268,7 @@ Clones the current Undef PMC.
 */
 
     VTABLE PMC *clone() {
-        return pmc_new(INTERP, SELF->vtable->base_type);
+        return Parrot_pmc_new(INTERP, SELF->vtable->base_type);
     }
 
 /*

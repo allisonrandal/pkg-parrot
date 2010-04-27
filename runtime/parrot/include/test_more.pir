@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: test_more.pir 44058 2010-02-17 02:49:11Z Austin_Hastings $
 
 =head1 Purpose
 
@@ -20,7 +20,7 @@ simple test file written in parrot.
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
     test_namespace = get_root_namespace [ 'parrot'; 'Test'; 'More' ]
-    exports = split ' ', 'plan diag ok nok is is_deeply like substring isa_ok skip isnt todo throws_like lives_ok dies_ok throws_substring'
+    exports = split ' ', 'plan diag ok nok is is_deeply is_null like substring isa_ok skip isnt todo throws_like lives_ok dies_ok throws_substring'
 
     test_namespace.'export_to'(curr_namespace, exports)
 

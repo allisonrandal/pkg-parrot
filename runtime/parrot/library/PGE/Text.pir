@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: Text.pir 40667 2009-08-19 23:36:58Z coke $
 
 =head1 TITLE
 

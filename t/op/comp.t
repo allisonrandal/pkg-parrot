@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: comp.t 44386 2010-02-23 12:18:39Z mikehh $
 
 =head1 NAME
 
@@ -160,8 +160,7 @@ Tests various conditional branch operations.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

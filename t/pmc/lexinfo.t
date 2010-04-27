@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2006-2007, Parrot Foundation.
-# $Id$
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: lexinfo.t 44380 2010-02-23 11:22:28Z mikehh $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ end:
 .sub inspect_test
     .lex "$a", $P0
     .lex "$b", $P1
-    
+
     $P2 = new 'ParrotInterpreter'
     $P2 = $P2['sub']
     $P2 = $P2.'get_lexinfo'()
@@ -72,7 +72,6 @@ end:
 
 # Local Variables:
 #   mode: pir
-#   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# $Id: Test.pm 42580 2009-11-19 03:14:19Z jkeenan $
 package Parrot::Configure::Options::Test;
 use strict;
 use warnings;

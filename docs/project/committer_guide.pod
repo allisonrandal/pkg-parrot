@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: committer_guide.pod 36833 2009-02-17 20:09:26Z allison $
 
 =head1 Committer Guide
 
@@ -65,7 +65,7 @@ C<Author Date Id Revision>.  The command being:
 Also, text files should have the following line somewhere near the beginning
 of the file (usually after the Copyright notice):
 
-  # $Id$
+  # $Id: committer_guide.pod 36833 2009-02-17 20:09:26Z allison $
 
 (of course for C-language files you want to wrap this in C-style comments).
 

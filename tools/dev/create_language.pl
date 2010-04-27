@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: create_language.pl 42892 2009-12-04 20:05:00Z mikehh $
 
 =head1 NAME
 
@@ -122,7 +122,7 @@ while (<DATA>) {
 
 ## generate build/PARROT_REVISION
 start_new_file("$path/build/PARROT_REVISION");
-my $rev = '$Revision$';
+my $rev = '$Revision: 42892 $';
 $rev =~ s/^\D*(\d+)\D*$/$1/;
 print $fh "$rev\n";
 close($fh) if $fh;
@@ -474,7 +474,7 @@ END
 # vim: expandtab shiftwidth=4:
 __build/Makefile.in__
 # Copyright (C) 2006-2009, The Perl Foundation.
-# $Id$
+# $Id: create_language.pl 42892 2009-12-04 20:05:00Z mikehh $
 
 PARROT_ARGS      =
 

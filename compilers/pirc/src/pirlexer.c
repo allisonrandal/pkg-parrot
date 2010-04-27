@@ -1439,7 +1439,7 @@ static yyconst flex_int16_t yy_rule_linenum[209] =
 #line 40 "pir.l"
 
 /*
- * $Id$
+ * $Id: pirlexer.c 41681 2009-10-04 11:07:09Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

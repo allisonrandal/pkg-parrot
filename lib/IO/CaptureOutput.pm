@@ -1,4 +1,4 @@
-# $Id$
+# $Id: CaptureOutput.pm 42768 2009-11-21 19:29:07Z jkeenan $
 package IO::CaptureOutput;
 use strict;
 use vars qw/$VERSION @ISA @EXPORT_OK %EXPORT_TAGS/;

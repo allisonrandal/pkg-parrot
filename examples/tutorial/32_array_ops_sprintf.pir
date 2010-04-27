@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: 32_array_ops_sprintf.pir 39674 2009-06-20 14:09:03Z cotto $
 
 =head1
 

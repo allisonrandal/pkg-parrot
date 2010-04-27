@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: byteorder.c 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ src/byteorder.c - Byteordering functions
 
 These are assigned to a vtable when the PBC file is loaded.
 
-If the vtable method for conversion from the native byteorder is called,
+If the vtable function for conversion from the native byteorder is called,
 it is a I<no op> and will work, but the caller should know if the
 byteorder in the PBC file is native and skip the conversion and just map
 it in.

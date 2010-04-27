@@ -1,7 +1,7 @@
 /* ucs2.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: ucs2.h 41533 2009-09-27 17:30:32Z NotFound $
  *  Overview:
  *     This is the header for the ucs2 fixed-width encoding.
  *  Data Structure and Algorithms:

@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: composition.t 45665 2010-04-14 12:12:08Z allison $
 
 =head1 NAME
 
@@ -34,16 +34,16 @@ Tests role composition in the OO implementation.
     multi_composition()
 .end
 
-.sub badger :method
+.sub badger :method :nsentry('badger')
     .return('Badger!')
 .end
-.sub badger2 :method
+.sub badger2 :method :nsentry('badger2')
     .return('Second Badger!')
 .end
-.sub mushroom :method
+.sub mushroom :method :nsentry('mushroom')
     .return('Mushroom!')
 .end
-.sub snake :method
+.sub snake :method :nsentry('snake')
     .return('Snake!')
 .end
 .sub fire
@@ -173,7 +173,7 @@ Tests role composition in the OO implementation.
     eh = new 'ExceptionHandler'
     eh.'handle_types'(.EXCEPTION_ROLE_COMPOSITION_METHOD_CONFLICT)
     set_addr eh, catch
-    
+
     push_eh eh
     $P1.'add_role'($P0)
     $I0 = 1

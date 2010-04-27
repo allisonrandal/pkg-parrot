@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: exporter.t 44445 2010-02-24 03:08:37Z jkeenan $
 
 use strict;
 use warnings;
@@ -405,7 +405,7 @@ CODE
 ok 1
 OUT
 
-# TODO: Test exporting mmd subs: TT #1205
+# Test exporting mmd subs: TT #1205
 # https://trac.parrot.org/parrot/ticket/1205
 
 # Local Variables:

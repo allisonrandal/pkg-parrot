@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2007 - 2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: methods.t 44317 2010-02-22 21:46:41Z mikehh $
 
 =head1 NAME
 

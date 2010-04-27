@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: null.t 41506 2009-09-27 00:47:57Z coke $
 
 =head1 NAME
 

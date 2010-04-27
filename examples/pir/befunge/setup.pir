@@ -1,6 +1,6 @@
 #! ../../../parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: setup.pir 45697 2010-04-15 14:33:21Z fperrad $
 
 =head1 NAME
 
@@ -54,6 +54,9 @@ SOURCES
     $P3['parrot-befunge'] = 'befunge.pbc'
     $P0['exe_pbc'] = $P3
     $P0['installable_pbc'] = $P3
+
+    # test
+    $P0['test_exec'] = 'perl'
 
     # dist
     $P4 = glob('*.bef')

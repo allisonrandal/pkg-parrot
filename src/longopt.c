@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id$
+$Id: longopt.c 43258 2009-12-27 05:15:10Z coke $
 
 =head1 NAME
 

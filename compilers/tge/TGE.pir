@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: TGE.pir 43593 2010-01-26 02:39:50Z jkeenan $
 
 =head1 NAME
 
@@ -16,7 +16,7 @@ TGE - A tree grammar engine.
     # and elsewhere...
 
     .sub _main :main
-        load_bytecode 'TGE.pir'
+        load_bytecode 'TGE.pbc'
 
         # Compile a grammar from the source grammar file
         .local pmc compiler

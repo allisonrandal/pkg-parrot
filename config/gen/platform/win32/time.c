@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: time.c 40155 2009-07-19 15:43:37Z whiteknight $
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 

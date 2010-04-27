@@ -1,7 +1,7 @@
 %{
 
 /*
- * $Id$
+ * $Id: pir.y 43971 2010-02-15 21:26:20Z bacek $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -87,6 +87,14 @@ int yypirlex(YYSTYPE *yylval, yyscan_t yyscanner);
 
 
 #endif
+
+/* HEADERIZER HFILE: none */
+
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
 
 char *expand_macro(yyscan_t yyscanner, macro_def * const macro, macro_param * args);
 

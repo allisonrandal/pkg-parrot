@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: array_access.pir 43695 2010-02-01 21:11:43Z bacek $
 
 =head1 NAME
 
@@ -42,7 +42,6 @@ Inspired by computer language shootout.
     arr_size = opt['arr-size']
   use_default_arr_size:
 
-    _bench( 'Array', arr_size )
     _bench( 'FixedFloatArray', arr_size )
     _bench( 'FixedIntegerArray', arr_size )
     _bench( 'FixedPMCArray', arr_size )

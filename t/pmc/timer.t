@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: timer.t 42681 2009-11-21 13:31:42Z jkeenan $
 
 use strict;
 use warnings;

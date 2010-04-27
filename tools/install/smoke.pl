@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: smoke.pl 42947 2009-12-08 20:13:48Z fperrad $
 
 use strict;
 use warnings;

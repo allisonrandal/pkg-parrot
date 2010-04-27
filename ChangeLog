@@ -1,4 +1,16 @@
-#1 $Id$
+#1 $Id: ChangeLog 45819 2010-04-20 09:48:04Z gerd $
+
+2010.04.20     Gerd
+	* Released 2.3.0
+	See NEWS for more.
+
+2010.03.16     cotto
+	* Released 2.2.0
+	See NEWS for more.
+
+2010.02.16     darbelo
+	* Released 2.1.0
+	See NEWS for more.
 
 2010.01.19     chromatic
 	* Released 2.0.0
@@ -3837,9 +3849,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id$
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 45819 2010-04-20 09:48:04Z gerd $
 	into generated files
-	   but the $Id$ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 45819 2010-04-20 09:48:04Z gerd $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

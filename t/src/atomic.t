@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006, Parrot Foundation.
-# $Id$
+# $Id: atomic.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

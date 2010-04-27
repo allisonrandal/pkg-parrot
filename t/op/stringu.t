@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: stringu.t 44352 2010-02-23 02:11:14Z jkeenan $
 
 use strict;
 use warnings;
@@ -96,7 +96,7 @@ pir_output_is( <<'CODE', <<OUTPUT, "MATHEMATICAL BOLD CAPITAL A" );
     print $S0
     print "\n"
     end
-.end 
+.end
 CODE
 aaaaaa\xf0\x9d\x90\x80-aaaaaa
 OUTPUT

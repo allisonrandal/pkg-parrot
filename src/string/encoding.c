@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2004-2010, Parrot Foundation.
+$Id: encoding.c 45404 2010-04-05 05:07:38Z petdance $
 
 =head1 NAME
 
@@ -24,14 +24,16 @@ These are parrot's generic encoding handling functions
 /* HEADERIZER BEGIN: static */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-static INTVAL register_encoding(SHIM_INTERP,
+static INTVAL register_encoding(PARROT_INTERP,
     ARGIN(const char *encodingname),
     ARGIN(ENCODING *encoding))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);
 
 #define ASSERT_ARGS_register_encoding __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(encodingname) \
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(encodingname) \
     , PARROT_ASSERT_ARG(encoding))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
@@ -56,7 +58,7 @@ static All_encodings *all_encodings;
 
 /*
 
-=item C<void parrot_deinit_encodings(void)>
+=item C<void parrot_deinit_encodings(PARROT_INTERP)>
 
 Deinitialize encodings and free all memory used by them.
 
@@ -65,17 +67,17 @@ Deinitialize encodings and free all memory used by them.
 */
 
 void
-parrot_deinit_encodings(void)
+parrot_deinit_encodings(PARROT_INTERP)
 {
     ASSERT_ARGS(parrot_deinit_encodings)
     const int n = all_encodings->n_encodings;
     int i;
 
     for (i = 0; i < n; ++i) {
-        mem_sys_free(all_encodings->enc[i].encoding);
+        mem_gc_free(interp, all_encodings->enc[i].encoding);
     }
-    mem_sys_free(all_encodings->enc);
-    mem_sys_free(all_encodings);
+    mem_gc_free(interp, all_encodings->enc);
+    mem_gc_free(interp, all_encodings);
     all_encodings = NULL;
 }
 
@@ -93,10 +95,10 @@ PARROT_EXPORT
 PARROT_MALLOC
 PARROT_CANNOT_RETURN_NULL
 ENCODING *
-Parrot_new_encoding(SHIM_INTERP)
+Parrot_new_encoding(PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_new_encoding)
-    return mem_allocate_typed(ENCODING);
+    return mem_gc_allocate_typed(interp, ENCODING);
 }
 
 /*
@@ -112,6 +114,7 @@ if it is successfully found, returns NULL otherwise.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const ENCODING *
@@ -171,6 +174,7 @@ Return the number of the encoding or -1 if not found.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_encoding_number(PARROT_INTERP, ARGIN(const STRING *encodingname))
@@ -197,6 +201,7 @@ Return the number of the encoding of the given string or -1 if not found.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_encoding_number_of_str(SHIM_INTERP, ARGIN(const STRING *src))
@@ -224,6 +229,7 @@ C<number_of_encoding> to the All_encodings array.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 STRING*
@@ -248,6 +254,7 @@ Returns the encoding given by the INTVAL index C<number_of_encoding>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const ENCODING*
@@ -273,6 +280,7 @@ given by the C<number_of_encoding>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const char *
@@ -298,7 +306,7 @@ C<encodingname>. Returns 1 if successful, returns 0 otherwise.
 */
 
 static INTVAL
-register_encoding(SHIM_INTERP, ARGIN(const char *encodingname),
+register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
         ARGIN(ENCODING *encoding))
 {
     ASSERT_ARGS(register_encoding)
@@ -315,10 +323,10 @@ register_encoding(SHIM_INTERP, ARGIN(const char *encodingname),
      * loading of encodings from inside threads
      */
     if (!n)
-        all_encodings->enc = mem_allocate_typed(One_encoding);
+        all_encodings->enc = mem_gc_allocate_zeroed_typed(interp, One_encoding);
     else
-        all_encodings->enc = (One_encoding*)mem_sys_realloc(all_encodings->enc,
-                (n + 1) * sizeof (One_encoding));
+        all_encodings->enc = mem_gc_realloc_n_typed_zeroed(interp,
+                all_encodings->enc, n + 1, n, One_encoding);
     all_encodings->n_encodings++;
     all_encodings->enc[n].encoding = encoding;
 
@@ -367,7 +375,7 @@ Parrot_register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
 {
     ASSERT_ARGS(Parrot_register_encoding)
     if (!all_encodings) {
-        all_encodings = mem_allocate_typed(All_encodings);
+        all_encodings = mem_gc_allocate_zeroed_typed(interp, All_encodings);
         all_encodings->n_encodings = 0;
         all_encodings->enc = NULL;
     }
@@ -426,6 +434,7 @@ Gets the default encoding.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 const ENCODING *

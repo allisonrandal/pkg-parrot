@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: exceptionhandler.t 41769 2009-10-09 02:54:33Z jkeenan $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: pirop.c 42918 2009-12-06 15:03:28Z fperrad $
  * Copyright (C) 2009, Parrot Foundation.
  */
 

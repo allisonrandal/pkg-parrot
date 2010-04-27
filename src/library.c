@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id$
+$Id: library.c 45425 2010-04-07 13:38:10Z bacek $
 
 =head1 NAME
 
@@ -168,9 +168,8 @@ parrot_init_library_paths(PARROT_INTERP)
                                 (INTVAL)IGLOBALS_CONFIG_HASH);
 
     /* create the lib_paths array */
-    PMC * const lib_paths   = pmc_new(interp, enum_class_FixedPMCArray);
-
-    VTABLE_set_integer_native(interp, lib_paths, PARROT_LIB_PATH_SIZE);
+    PMC * const lib_paths   = Parrot_pmc_new_init_int(interp,
+            enum_class_FixedPMCArray, PARROT_LIB_PATH_SIZE);
     VTABLE_set_pmc_keyed_int(interp, iglobals,
             IGLOBALS_LIB_PATHS, lib_paths);
 
@@ -191,9 +190,17 @@ parrot_init_library_paths(PARROT_INTERP)
 
     /* each is an array of strings */
     /* define include paths */
-    paths = pmc_new(interp, enum_class_ResizableStringArray);
+    paths = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_set_pmc_keyed_int(interp, lib_paths,
             PARROT_LIB_PATH_INCLUDE, paths);
+    { /* EXPERIMENTAL: add include path from environment */
+        const char *envvar = Parrot_getenv(interp,
+                                           Parrot_str_new_constant(interp, "PARROT_INCLUDE"));
+        if (envvar != NULL  && envvar[0]) {
+            entry = Parrot_str_new(interp, envvar, 0);
+            VTABLE_push_string(interp, paths, entry);
+        }
+    }
     if (!STRING_IS_NULL(builddir)) {
         entry = Parrot_str_concat(interp, builddir, CONST_STRING(interp, "/"), 0);
         VTABLE_push_string(interp, paths, entry);
@@ -207,11 +214,18 @@ parrot_init_library_paths(PARROT_INTERP)
         VTABLE_push_string(interp, paths, entry);
     }
 
-
     /* define library paths */
-    paths = pmc_new(interp, enum_class_ResizableStringArray);
+    paths = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_set_pmc_keyed_int(interp, lib_paths,
             PARROT_LIB_PATH_LIBRARY, paths);
+    { /* EXPERIMENTAL: add library path from environment */
+        const char *envvar = Parrot_getenv(interp,
+                                           Parrot_str_new_constant(interp, "PARROT_LIBRARY"));
+        if (envvar != NULL && envvar[0]) {
+            entry = Parrot_str_new(interp, envvar, 0);
+            VTABLE_push_string(interp, paths, entry);
+        }
+    }
     if (!STRING_IS_NULL(builddir)) {
         entry = Parrot_str_concat(interp, builddir, CONST_STRING(interp, "/runtime/parrot/library/"), 0);
         VTABLE_push_string(interp, paths, entry);
@@ -224,7 +238,7 @@ parrot_init_library_paths(PARROT_INTERP)
     }
 
     /* define languages paths */
-    paths = pmc_new(interp, enum_class_ResizableStringArray);
+    paths = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_set_pmc_keyed_int(interp, lib_paths,
             PARROT_LIB_PATH_LANG, paths);
     if (!STRING_IS_NULL(builddir)) {
@@ -239,7 +253,7 @@ parrot_init_library_paths(PARROT_INTERP)
     }
 
     /* define dynext paths */
-    paths = pmc_new(interp, enum_class_ResizableStringArray);
+    paths = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_set_pmc_keyed_int(interp, lib_paths,
             PARROT_LIB_PATH_DYNEXT, paths);
     if (!STRING_IS_NULL(builddir)) {
@@ -254,7 +268,7 @@ parrot_init_library_paths(PARROT_INTERP)
     }
 
     /* shared exts */
-    paths = pmc_new(interp, enum_class_ResizableStringArray);
+    paths = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
     VTABLE_set_pmc_keyed_int(interp, lib_paths,
             PARROT_LIB_DYN_EXTS, paths);
     /* no CONST_STRING here - the c2str.pl preprocessor needs "real strs" */

@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2009-2010, Parrot Foundation.
+# $Id: obscure.t 44365 2010-02-23 04:51:12Z mikehh $
 
 =head1 NAME
 
@@ -99,8 +99,7 @@ Tests obscure.ops
 
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

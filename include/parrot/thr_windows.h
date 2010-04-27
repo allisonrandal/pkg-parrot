@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: thr_windows.h 39976 2009-07-10 08:20:13Z fperrad $
  *  Overview:
  *     This is the api header for the windows thread primitives
  *  Data Structure and Algorithms:

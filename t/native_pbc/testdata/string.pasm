@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: string.pasm 42885 2009-12-03 19:31:31Z mikehh $
 
     set S1, "abc"
     set S2, "EE"

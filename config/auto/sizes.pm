@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id$
+# $Id: sizes.pm 38377 2009-04-27 01:37:12Z jkeenan $
 
 =head1 NAME
 

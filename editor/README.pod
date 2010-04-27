@@ -1,4 +1,4 @@
-# $Id$
+# $Id: README.pod 40772 2009-08-25 06:39:28Z dukeleto $
 
 =head1 NAME
 

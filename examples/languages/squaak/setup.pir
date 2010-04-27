@@ -1,6 +1,6 @@
 #! ../../../parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: setup.pir 43157 2009-12-19 13:05:02Z fperrad $
 
 =head1 NAME
 

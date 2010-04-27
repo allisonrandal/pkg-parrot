@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: orderedhashiterator.t 44380 2010-02-23 11:22:28Z mikehh $
 
 =head1 NAME
 
@@ -41,8 +41,7 @@ t/pmc/orderedhash.t.
 
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

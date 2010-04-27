@@ -1,6 +1,6 @@
 =pod
 
-﻿# $Id$
+﻿# $Id: CREDITS 45819 2010-04-20 09:48:04Z gerd $
 
     Following in the steps of other open source projects that
     eventually take over the world, here is the partial list
@@ -136,10 +136,12 @@ D: Pugs, a Perl6->Parrot implementation.
 
 N: Austin Hastings
 U: Austin
+U: Austin_Hastings
 A: austin_hastings@yahoo.com
 A: austin_h...@yahoo.com
 E: austin_hastings@yahoo.com
 D: Close
+D: Kakapo
 
 N: Benjamin Goldberg
 D: Numerous improvements and proposals.
@@ -328,6 +330,14 @@ D: PGE tests and fixes
 D: POD for the Undef PMC
 E: david.romano+p6i@gmail.com
 
+N: David E. Wheeler
+E: david@justatheory.com
+W: http://justatheory.com/
+U: theory
+A: theory
+A: David Wheeler
+S: Portland, OR
+
 N: Dennis Rieks
 D: Win32 config and build
 
@@ -392,7 +402,7 @@ D: Documentation patch for Parrot_PMC_get_pointer_intkey()
 
 N: Gerd Pokorra
 E: pokorra@uni-siegen.de
-D: Release manager for 1.9.0
+D: Release manager for 1.9.0 and 2.3.0
 
 N: Goplat
 D: Win98 and other fixes.
@@ -563,7 +573,8 @@ U: jisom
 D: Getopt/Obj.pir
 
 N: Julian Albo
-U: julianalbo
+U: NotFound
+A: julianalbo
 E: julian.notfound@gmail.com
 
 N: Julian Fondren
@@ -692,7 +703,10 @@ D: README.win32 spelling patch
 
 N: Michael H. Hind
 U: mikehh
-D: codingstd patches
+D: testing parrot and some HLL's
+D: fixing codetest failures
+D: adding function documentation
+D: tracwiki additions
 E: mike.hind@gmail.com
 
 N: Michael G. Schwern
@@ -753,10 +767,6 @@ E: nnunley@gmail.com
 
 N: Nigelsandever
 D: Win32 patches
-
-N: Notfound
-D: Bugfixing and cage cleaning.
-E: julian.notfound@gmail.com
 
 N: Nuno 'smash' Carvalho
 U: smash
@@ -908,6 +918,11 @@ D: Fix for string_to_num
 
 N: Stefan Lidman
 D: sqrt ops
+
+N: Stefan O'Rear
+E: stefanor@cox.net
+D: Perl 5 interoperability, Blizkost
+U: sorear
 
 N: Stéphane Payrard
 D: Various code fixes and improvements

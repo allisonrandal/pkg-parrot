@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: default.pmc 45482 2010-04-09 05:47:21Z chromatic $
 
 =head1 NAME
 
@@ -26,9 +26,92 @@ generated from F<src/vtable.tbl> by F<tools/build/pmc2c.pl>.
 /* undef 'interface' to keep MSVC happy */
 #undef interface
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+static STRING * caller(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc))
+        __attribute__nonnull__(1);
+
+PARROT_DOES_NOT_RETURN
+static void cant_do_method(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc), int index)
+        __attribute__nonnull__(1);
+
+PARROT_DOES_NOT_RETURN
+static void cant_do_write_method(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *pmc),
+    int index)
+        __attribute__nonnull__(1);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+static PMC* check_get_std_props(PARROT_INTERP,
+    ARGIN(const PMC *self),
+    ARGIN(const STRING *key))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+PARROT_WARN_UNUSED_RESULT
+static INTVAL check_set_std_props(PARROT_INTERP,
+    ARGMOD(PMC *pmc),
+    ARGIN(const STRING *key),
+    ARGIN(PMC *value))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*pmc);
+
+static INTVAL has_pending_std_props(ARGIN(const PMC *self))
+        __attribute__nonnull__(1);
+
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+static PMC* make_prop_hash(PARROT_INTERP, ARGMOD(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*self);
+
+static void propagate_std_props(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGIN(PMC *prop_hash))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+#define ASSERT_ARGS_caller __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_cant_do_method __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_cant_do_write_method __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_check_get_std_props __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(key))
+#define ASSERT_ARGS_check_set_std_props __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(pmc) \
+    , PARROT_ASSERT_ARG(key) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_has_pending_std_props __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_make_prop_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_propagate_std_props __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(prop_hash))
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+
 /*
 
-=item C<static STRING *caller(PARROT_INTERP, PMC *pmc)>
+=item C<static STRING * caller(PARROT_INTERP, PMC *pmc)>
 
 Returns a C string for the name of C<*pmc>.
 
@@ -36,19 +119,21 @@ Returns a C string for the name of C<*pmc>.
 
 */
 
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 static STRING *
-caller(PARROT_INTERP, PMC *pmc /*NULLOK*/)
+caller(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc))
 {
-    STRING * const null_str = CONST_STRING(interp, "(null)");
+    ASSERT_ARGS(caller)
 
-    return pmc && pmc->vtable && pmc->vtable->whoami
-                ? VTABLE_name(interp, pmc) : null_str;
+    return !PMC_IS_NULL(pmc) && pmc->vtable && pmc->vtable->whoami
+                ? VTABLE_name(interp, pmc)
+                : CONST_STRING(interp, "(null)");
 }
 
 /*
 
-=item C<static void cant_do_method(PARROT_INTERP, PMC *pmc,
-                                   int index)>
+=item C<static void cant_do_method(PARROT_INTERP, PMC *pmc, int index)>
 
 Throws an exception "$methname() not implemented in class '$class'", used by
 all unimplemented messages.
@@ -59,8 +144,10 @@ all unimplemented messages.
 
 PARROT_DOES_NOT_RETURN
 static void
-cant_do_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, int index)
+cant_do_method(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc), int index)
 {
+    ASSERT_ARGS(cant_do_method)
+
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_ILL_INHERIT,
             "%s() not implemented in class '%Ss'",
             Parrot_get_vtable_name(interp, index),
@@ -70,8 +157,7 @@ cant_do_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, int index)
 
 /*
 
-=item C<static void cant_do_write_method(PARROT_INTERP, PMC *pmc,
-                                   int index)>
+=item C<static void cant_do_write_method(PARROT_INTERP, PMC *pmc, int index)>
 
 Throws an exception "$methname() on read-only instance of '$class'", used by
 all updating messages on read-only instances.
@@ -82,8 +168,10 @@ all updating messages on read-only instances.
 
 PARROT_DOES_NOT_RETURN
 static void
-cant_do_write_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, int index)
+cant_do_write_method(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc), int index)
 {
+    ASSERT_ARGS(cant_do_write_method)
+
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_WRITE_TO_CONSTCLASS,
             "%s() in read-only instance of '%Ss'",
             Parrot_get_vtable_name(interp, index),
@@ -92,8 +180,8 @@ cant_do_write_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, int index)
 
 /*
 
-=item C<static INTVAL
-check_set_std_props(PARROT_INTERP, PMC *pmc, STRING *key, PMC *value)>
+=item C<static INTVAL check_set_std_props(PARROT_INTERP, PMC *pmc, const STRING
+*key, PMC *value)>
 
 Called from C<setprop()>.
 
@@ -105,9 +193,12 @@ in a future call to C<propagate_std_props()>
 
 */
 
+PARROT_WARN_UNUSED_RESULT
 static INTVAL
-check_set_std_props(PARROT_INTERP, PMC *pmc, STRING *key, PMC *value)
+check_set_std_props(PARROT_INTERP, ARGMOD(PMC *pmc), ARGIN(const STRING *key), ARGIN(PMC *value))
 {
+    ASSERT_ARGS(check_set_std_props)
+
     /*
      * s2 in Parrot_str_equal is freed here
      */
@@ -136,8 +227,8 @@ check_set_std_props(PARROT_INTERP, PMC *pmc, STRING *key, PMC *value)
 
 /*
 
-=item C<static void
-propagate_std_props(PARROT_INTERP, PMC *self, PMC *prop_hash)>
+=item C<static void propagate_std_props(PARROT_INTERP, PMC *self, PMC
+*prop_hash)>
 
 Set pending standard properties in C<prop_hash>.
 
@@ -146,9 +237,12 @@ Set pending standard properties in C<prop_hash>.
 */
 
 static void
-propagate_std_props(PARROT_INTERP, PMC *self, PMC *prop_hash) {
+propagate_std_props(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *prop_hash))
+{
+    ASSERT_ARGS(propagate_std_props)
+
     if (self->vtable->flags & (VTABLE_IS_CONST_FLAG | VTABLE_IS_READONLY_FLAG)){
-        PMC * const pmc_true  = pmc_new(interp, enum_class_Integer);
+        PMC * const pmc_true  = Parrot_pmc_new(interp, enum_class_Integer);
         VTABLE_set_integer_native(interp, pmc_true, 1);
         VTABLE_set_pmc_keyed_str(interp, prop_hash, CONST_STRING(interp, "_ro"), pmc_true);
     }
@@ -156,8 +250,7 @@ propagate_std_props(PARROT_INTERP, PMC *self, PMC *prop_hash) {
 
 /*
 
-=item C<static INTVAL
-has_pending_std_props(ARGIN(const PMC *self))>
+=item C<static INTVAL has_pending_std_props(const PMC *self)>
 
 Returns true if propagate_std_props() would create a non-empty prophash.
 
@@ -166,7 +259,10 @@ Returns true if propagate_std_props() would create a non-empty prophash.
 */
 
 static INTVAL
-has_pending_std_props(ARGIN(const PMC *self)) {
+has_pending_std_props(ARGIN(const PMC *self))
+{
+    ASSERT_ARGS(has_pending_std_props)
+
     if (self->vtable->flags & (VTABLE_IS_CONST_FLAG | VTABLE_IS_READONLY_FLAG))
         return 1;
     else
@@ -176,8 +272,8 @@ has_pending_std_props(ARGIN(const PMC *self)) {
 
 /*
 
-=item C<static PMC*
-check_get_std_props(PARROT_INTERPeter, PMC *self, STRING *key)>
+=item C<static PMC* check_get_std_props(PARROT_INTERP, const PMC *self, const
+STRING *key)>
 
 Checks if we can infer the value of C<key> property from C<self> without
 looking at its prophash. Returns C<PMCNULL> if not, returns the value otherwise.
@@ -185,11 +281,16 @@ looking at its prophash. Returns C<PMCNULL> if not, returns the value otherwise.
 =cut
 */
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
 static PMC*
-check_get_std_props(PARROT_INTERP, PMC *self, STRING *key) {
+check_get_std_props(PARROT_INTERP, ARGIN(const PMC *self), ARGIN(const STRING *key))
+{
+    ASSERT_ARGS(check_get_std_props)
+
     if ((self->vtable->flags & (VTABLE_IS_CONST_FLAG | VTABLE_IS_READONLY_FLAG))
        && Parrot_str_equal(interp, key, CONST_STRING(interp, "_ro"))) {
-        PMC * const ret_val  = pmc_new(interp, enum_class_Integer);
+        PMC * const ret_val  = Parrot_pmc_new(interp, enum_class_Integer);
         VTABLE_set_integer_native(interp, ret_val, 1);
         return ret_val;
     }
@@ -199,70 +300,25 @@ check_get_std_props(PARROT_INTERP, PMC *self, STRING *key) {
 
 /*
 
-=item C<static PMC *
-make_prop_hash(PARROT_INTERP, PMC *self)>
+=item C<static PMC* make_prop_hash(PARROT_INTERP, PMC *self)>
 
 Create a property hash for C<self>. Returns the created hash. Inferred
-properties will be added to the hash and it will be set as
-C<PMC_metadata(self)>.
+properties will be added to the hash.
 
 =cut
 
 */
 
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 static PMC*
-make_prop_hash(PARROT_INTERP, PMC *self) {
-    PMC *prop;
+make_prop_hash(PARROT_INTERP, ARGMOD(PMC *self))
+{
+    ASSERT_ARGS(make_prop_hash)
 
-    PMC_metadata(self) = prop = pmc_new(interp, enum_class_Hash);
+    PMC * const prop = Parrot_pmc_new(interp, enum_class_Hash);
     propagate_std_props(interp, self, prop);
     return prop;
-}
-
-/*
-
-=item C<static INTVAL
-does_isa(PARROT_INTERP, STRING *method, STRING *what)>
-
-Compares C<*method> and C<*what>.
-Returns true (1) if B<method> is found in B<what>, false (0) otherwise.
-
-=cut
-
-*/
-
-static INTVAL
-does_isa(PARROT_INTERP, const STRING *method, const STRING *what)
-{
-    INTVAL  pos    = 0;
-    INTVAL  length = Parrot_str_byte_length(interp, what);
-
-    do {
-        INTVAL len;
-        INTVAL idx = Parrot_str_find_index(interp, what, method, (INTVAL)pos);
-
-        if (idx < 0)
-            return 0;
-
-        pos = idx;
-
-        if (pos >= length)
-            return 0;
-
-        len = Parrot_str_byte_length(interp, method);
-
-        if (pos && Parrot_str_indexed(interp, what, pos - 1) != 32) {
-            pos += len;
-            continue;
-        }
-
-        if (pos + len < length && Parrot_str_indexed(interp, what, pos + len) != 32) {
-            pos += len;
-            continue;
-        }
-
-        return 1;
-    } while (1);
 }
 
 pmclass default abstract {
@@ -332,16 +388,16 @@ calls init().
     VTABLE PMC *instantiate(PMC *init) {
         const INTVAL type = VTABLE_type(INTERP, SELF);
 
-        /* Ensure no looping, as pmc_new calls the instantiate vtable entry for
+        /* Ensure no looping, as Parrot_pmc_new calls the instantiate vtable entry for
          * classes. */
         if (PObj_is_class_TEST(SELF))
             Parrot_ex_throw_from_c_args(interp, NULL, 1,
                     "All high-level classes should override instantiate");
 
         if (!PMC_IS_NULL(init))
-            return pmc_new_init(INTERP, type, init);
+            return Parrot_pmc_new_init(INTERP, type, init);
 
-        return pmc_new(INTERP, type);
+        return Parrot_pmc_new(INTERP, type);
     }
 
 /*
@@ -391,7 +447,7 @@ Sets the property for C<*key> to C<*value>.
             return;
 
         if (PMC_IS_NULL(PMC_metadata(SELF)))
-            make_prop_hash(INTERP, SELF);
+            PMC_metadata(SELF) = make_prop_hash(INTERP, SELF);
 
         VTABLE_set_pmc_keyed_str(INTERP, PMC_metadata(SELF), key, value);
     }
@@ -424,7 +480,7 @@ Returns the PMC's properties or the NULL PMC if no properties exist.
     VTABLE PMC *getprops() {
         if (PMC_IS_NULL(PMC_metadata(SELF))) {
             if (has_pending_std_props(SELF))
-                return make_prop_hash(INTERP, SELF);
+                PMC_metadata(SELF) = make_prop_hash(INTERP, SELF);
             else
                 return PMCNULL;
         }
@@ -612,7 +668,7 @@ Defaults fall back to C<set_pmc> and C<set_string_native>.
         STRING * const undef = CONST_STRING(INTERP, "Undef");
 
         if (VTABLE_isa(INTERP, value, undef))
-            pmc_reuse(INTERP, SELF, value->vtable->base_type, 0);
+            Parrot_pmc_reuse(INTERP, SELF, value->vtable->base_type, 0);
         else
             SELF.set_pmc(value);
     }
@@ -632,7 +688,7 @@ Changes the PMC to a PMC of a new type
 */
 
     VTABLE void morph(PMC* type) {
-        pmc_reuse(INTERP, SELF, VTABLE_get_integer(interp, type), 0);
+        Parrot_pmc_reuse(INTERP, SELF, VTABLE_get_integer(interp, type), 0);
     }
 
 /*
@@ -858,7 +914,7 @@ true (1) is returned; otherwise, false (0) is returned.
 */
 
     VTABLE INTVAL does(STRING *_interface) {
-        return does_isa(INTERP, _interface, SELF->vtable->provides_str);
+        return Parrot_pmc_type_does(INTERP, _interface, SELF->vtable->base_type);
     }
 
 /*
@@ -917,7 +973,7 @@ true (1) is returned; otherwise, false (0) is returned.
 */
 
     VTABLE INTVAL isa(STRING *_class) {
-        Hash * const isa_hash = SELF->vtable->isa_hash;
+        const Hash * const isa_hash = SELF->vtable->isa_hash;
         if (!isa_hash)
             return Parrot_str_equal(interp, SELF->vtable->whoami, _class);
 
@@ -936,7 +992,7 @@ Provides introspection of a specific piece of information about the PMC.
 
     VTABLE PMC *inspect_str(STRING *name) {
         if (Parrot_str_equal(interp, name, CONST_STRING(interp, "flags"))) {
-            PMC *found = pmc_new(interp, enum_class_Integer);
+            PMC *found = Parrot_pmc_new(interp, enum_class_Integer);
             VTABLE_set_integer_native(interp, found,
                     (INTVAL)PObj_get_FLAGS(SELF));
             return found;
@@ -960,7 +1016,7 @@ inspect_str.
 
 */
     VTABLE PMC *inspect() {
-        PMC    *metadata           = pmc_new(interp, enum_class_Hash);
+        PMC    * const metadata    = Parrot_pmc_new(interp, enum_class_Hash);
         STRING * const flags_str   = CONST_STRING(interp, "flags");
 
         VTABLE_set_pmc_keyed_str(interp, metadata, flags_str,
@@ -979,17 +1035,18 @@ Returns SELF. A PMC is its own class.
 
 */
     VTABLE PMC *get_class() {
-        PMC *ns     = VTABLE_get_namespace(interp, SELF);
+        PMC * const ns     = VTABLE_get_namespace(interp, SELF);
         PMC *_class = PMCNULL;
 
         if (!PMC_IS_NULL(ns))
             _class = VTABLE_get_class(interp, ns);
 
         if (PMC_IS_NULL(_class)) {
-            INTVAL type      = VTABLE_type(interp, SELF);
-            PMC   *type_num  = pmc_new(interp, enum_class_Integer);
+            const INTVAL type      = VTABLE_type(interp, SELF);
+            PMC   * const type_num = Parrot_pmc_new(interp, enum_class_Integer);
+
             VTABLE_set_integer_native(interp, type_num, type);
-            return pmc_new_init(interp, enum_class_PMCProxy, type_num);
+            return Parrot_pmc_new_init(interp, enum_class_PMCProxy, type_num);
         }
 
         return _class;
@@ -1043,7 +1100,7 @@ Add class C<parent> to the list of our parents.
 
 /*
 
-=item C<void visit(visit_info *info)>
+=item C<void visit(PMC *info)>
 
 Used by GC to mark the PMC.
 
@@ -1051,7 +1108,7 @@ Used by GC to mark the PMC.
 
 */
 
-    VTABLE void visit(visit_info *info) {
+    VTABLE void visit(PMC *info) {
     }
 
 /*
@@ -1070,7 +1127,7 @@ Clones this PMC.  By default, this just does a freeze and thaw.
 
 /*
 
-=item C<void freeze(visit_info *info)>
+=item C<void freeze(PMC *info)>
 
 Does nothing.
 
@@ -1078,14 +1135,14 @@ Does nothing.
 
 */
 
-    VTABLE void freeze(visit_info *info) {
+    VTABLE void freeze(PMC *info) {
         UNUSED(info)
         /* default - no action */
     }
 
 /*
 
-=item C<void thaw(visit_info *info)>
+=item C<void thaw(PMC *info)>
 
 Initializes the PMC during unarchiving.
 
@@ -1093,14 +1150,14 @@ Initializes the PMC during unarchiving.
 
 */
 
-    VTABLE void thaw(visit_info *info) {
+    VTABLE void thaw(PMC *info) {
         /* default - initialize the PMC */
         SELF.init();
     }
 
 /*
 
-=item C<void thawfinish(visit_info *info)>
+=item C<void thawfinish(PMC *info)>
 
 Does nothing.
 
@@ -1108,7 +1165,7 @@ Does nothing.
 
 */
 
-    VTABLE void thawfinish(visit_info *info) {
+    VTABLE void thawfinish(PMC *info) {
         UNUSED(info)
         /* default - no action */
     }
@@ -1158,7 +1215,7 @@ Default fallback. Performs a multiple dispatch call for 'add_float'.
 */
 
     VTABLE PMC *add_float(FLOATVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         VTABLE_set_number_native(INTERP, dest,
                 SELF.get_number() + value);
@@ -1692,678 +1749,6 @@ Default fallback. Performs a multiple dispatch call for 'i_modulus_float'.
 
 /*
 
-=item C<PMC *pow(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'pow'.
-
-=cut
-
-*/
-
-    VTABLE PMC *pow(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "pow", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *pow_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'pow_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *pow_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "pow_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *pow_float(FLOATVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'pow_float'.
-
-=cut
-
-*/
-
-    VTABLE PMC *pow_float(FLOATVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "pow_float", "PNP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_pow(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_pow'.
-
-=cut
-
-*/
-
-    VTABLE void i_pow(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_pow", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_pow_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_pow_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_pow_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_pow_int", "PI", SELF, value);
-    }
-
-/*
-
-=item C<void i_pow_float(FLOATVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_pow_float'.
-
-=cut
-
-*/
-
-    VTABLE void i_pow_float(FLOATVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_pow_float", "PN", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_or(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_or'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_or(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_or", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_or_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_or_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_or_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_or_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_or(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_or'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_or(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_or", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_or_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_or_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_or_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_or_int", "PI", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_and(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_and'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_and(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_and", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_and_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_and_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_and_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_and_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_and(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_and'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_and(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_and", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_and_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_and_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_and_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_and_int", "PI", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_xor(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_xor'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_xor(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_xor", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_xor_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_xor_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_xor_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_xor_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_xor(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_xor'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_xor(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_xor", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_xor_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_xor_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_xor_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_xor_int", "PI", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_ors(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_ors'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_ors(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_ors", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_ors_str(STRING *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_ors_str'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_ors_str(STRING *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_ors_str", "PSP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_ors(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_ors'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_ors(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_ors", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_ors_str(STRING *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_ors_str'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_ors_str(STRING *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_ors_str", "PS", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_ands(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_ands'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_ands(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_ands", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_ands_str(STRING *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_ands_str'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_ands_str(STRING *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_ands_str", "PSP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_ands(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_ands'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_ands(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_ands", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_ands_str(STRING *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_ands_str'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_ands_str(STRING *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_ands_str", "PS", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_xors(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_xors'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_xors(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_xors", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_xors_str(STRING *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_xors_str'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_xors_str(STRING *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_xors_str", "PSP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_xors(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_xors'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_xors(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_xors", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_xors_str(STRING *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_xors_str'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_xors_str(STRING *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_xors_str", "PS", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_shl(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_shl'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_shl(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_shl", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_shl_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_shl_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_shl_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_shl_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_shl(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_shl'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_shl(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_shl", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_shl_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_shl_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_shl_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_shl_int", "PI", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_shr(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_shr'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_shr(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_shr", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_shr_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_shr_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_shr_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_shr_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_shr(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_shr'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_shr(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_shr", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_shr_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_shr_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_shr_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_shr_int", "PI", SELF, value);
-    }
-
-/*
-
-=item C<PMC *bitwise_lsr(PMC *value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_lsr'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_lsr(PMC *value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_lsr", "PPP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<PMC *bitwise_lsr_int(INTVAL value, PMC *dest)>
-
-Default fallback. Performs a multiple dispatch call for 'bitwise_lsr_int'.
-
-=cut
-
-*/
-
-    VTABLE PMC *bitwise_lsr_int(INTVAL value, PMC *dest) {
-        PMC *result = PMCNULL;
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "bitwise_lsr_int", "PIP->P", SELF, value, dest, &result);
-        return result;
-    }
-
-/*
-
-=item C<void i_bitwise_lsr(PMC *value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_lsr'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_lsr(PMC *value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_lsr", "PP", SELF, value);
-    }
-
-/*
-
-=item C<void i_bitwise_lsr_int(INTVAL value)>
-
-Default fallback. Performs a multiple dispatch call for 'i_bitwise_lsr_int'.
-
-=cut
-
-*/
-
-    VTABLE void i_bitwise_lsr_int(INTVAL value) {
-        Parrot_mmd_multi_dispatch_from_c_args(interp,
-                "i_bitwise_lsr_int", "PI", SELF, value);
-    }
-
-/*
-
 =item C<INTVAL cmp(PMC *value)>
 
 Default fallback. Performs a multiple dispatch call for 'cmp'.
@@ -2438,7 +1823,7 @@ Default fallback. Performs a multiple dispatch call for 'cmp_pmc'.
         /* Don't multidispatch if you've got two pointers to the same PMC. They
          * are equal. */
         if (SELF == value)
-            return 0;
+            return NULL;
 
         Parrot_mmd_multi_dispatch_from_c_args(interp,
                 "cmp_pmc", "PP->P", SELF, value, &retval);

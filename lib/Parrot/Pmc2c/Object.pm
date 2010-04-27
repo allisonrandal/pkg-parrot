@@ -1,7 +1,7 @@
 package Parrot::Pmc2c::Object;
 
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: Object.pm 45297 2010-03-30 01:33:45Z coke $
 
 use base 'Parrot::Pmc2c';
 use strict;
@@ -37,8 +37,8 @@ the number of lines, C<$out_name> is the name of the output file we are
 generating.
 
 Overrides the default implementation to direct all unknown methods to
-first check if there is an implementation of the vtable method in the
-vtable methods hash of this class of any others, and delegates up to
+first check if there is an implementation of the vtable function in the
+vtable function hash of this class of any others, and delegates up to
 any PMCs in the MRO.
 
 =back

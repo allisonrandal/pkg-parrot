@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2006-2007, Parrot Foundation.
-# $Id$
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: lexpad.t 44380 2010-02-23 11:22:28Z mikehh $
 
 =head1 NAME
 
@@ -70,7 +70,6 @@ iter_done:
 
 # Local Variables:
 #   mode: pir
-#   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:

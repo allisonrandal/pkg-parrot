@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id$
+# $Id: optable.pod 36833 2009-02-17 20:09:26Z allison $
 
 =head1 ***** WARNING *****
 
@@ -11,7 +11,7 @@ docs/optable.pod - PGE operator precedence table and parser
 
 =head1 VERSION
 
-$Revision$
+$Revision: 36833 $
 
 =head1 DESCRIPTION
 

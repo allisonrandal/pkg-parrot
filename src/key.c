@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: key.c 45438 2010-04-08 01:54:33Z petdance $
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ PMC *
 key_new(PARROT_INTERP)
 {
     ASSERT_ARGS(key_new)
-    return pmc_new(interp, enum_class_Key);
+    return Parrot_pmc_new(interp, enum_class_Key);
 }
 
 
@@ -64,7 +64,7 @@ PMC *
 key_new_integer(PARROT_INTERP, INTVAL value)
 {
     ASSERT_ARGS(key_new_integer)
-    PMC * const key = pmc_new(interp, enum_class_Key);
+    PMC * const key = Parrot_pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_integer_FLAG;
     SETATTR_Key_int_key(interp, key, value);
@@ -90,7 +90,7 @@ PMC *
 key_new_number(PARROT_INTERP, FLOATVAL value)
 {
     ASSERT_ARGS(key_new_number)
-    PMC * const key = pmc_new(interp, enum_class_Key);
+    PMC * const key = Parrot_pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_number_FLAG;
     SETATTR_Key_num_key(interp, key, value);
@@ -116,7 +116,7 @@ PMC *
 key_new_string(PARROT_INTERP, ARGIN(STRING *value))
 {
     ASSERT_ARGS(key_new_string)
-    PMC * const key = pmc_new(interp, enum_class_Key);
+    PMC * const key = Parrot_pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_string_FLAG;
     SETATTR_Key_str_key(interp, key, value);
@@ -164,7 +164,7 @@ PMC *
 key_new_pmc(PARROT_INTERP, ARGIN(PMC *value))
 {
     ASSERT_ARGS(key_new_pmc)
-    PMC * const key = pmc_new(interp, enum_class_Key);
+    PMC * const key = Parrot_pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_pmc_FLAG;
     Parrot_ex_throw_from_c_args(interp, NULL, 1, "this is broken - see slice.pmc");
@@ -301,6 +301,7 @@ Returns the type of C<key>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL
 key_type(SHIM_INTERP, ARGIN(const PMC *key))
@@ -450,12 +451,8 @@ key_string(PARROT_INTERP, ARGIN(PMC *key))
       case KEY_string_FLAG | KEY_register_FLAG:
         {
             INTVAL int_key;
-            STRING *s;
             GETATTR_Key_int_key(interp, key, int_key);
-            s = REG_STR(interp, int_key);
-            if (s)
-                s = Parrot_str_new_COW(interp, s);
-            return s;
+            return REG_STR(interp, int_key);
         }
       case KEY_pmc_FLAG | KEY_register_FLAG:
         {
@@ -543,9 +540,9 @@ PMC *
 key_next(PARROT_INTERP, ARGIN(PMC *key))
 {
     ASSERT_ARGS(key_next)
-    PMC *next_key;
 
     if (VTABLE_isa(interp, key, CONST_STRING(interp, "Key"))) {
+        PMC *next_key;
         GETATTR_Key_next_key(interp, key, next_key);
         return next_key;
     }
@@ -724,10 +721,6 @@ key_set_to_string(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
 =head1 SEE ALSO
 
 F<include/parrot/key.h>.
-
-=head1 HISTORY
-
-Initial version by Jeff G. on 2001.12.05.
 
 =cut
 

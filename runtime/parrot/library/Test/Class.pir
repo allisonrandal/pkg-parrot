@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Class.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 NAME
 
@@ -303,7 +303,7 @@ internals mailing list.
 
 Copyright (C) 2008, Parrot Foundation.
 
-# $Id$
+# $Id: Class.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =cut
 

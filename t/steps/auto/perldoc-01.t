@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: perldoc-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # auto/perldoc-01.t
 
 use strict;

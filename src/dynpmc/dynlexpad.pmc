@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2008, Parrot Foundation.
-$Id$
+$Id: dynlexpad.pmc 44190 2010-02-19 19:48:48Z whiteknight $
 
 =head1 NAME
 
@@ -45,7 +45,7 @@ lexinfo.
             (Parrot_DynLexPad_attributes *) PMC_data(SELF);
 
         if (VTABLE_elements(interp, lexinfo)) {
-            attrs->init = pmc_new_init(interp, enum_class_LexPad, lexinfo);
+            attrs->init = Parrot_pmc_new_init(interp, enum_class_LexPad, lexinfo);
         }
         else
             attrs->init = NULL;

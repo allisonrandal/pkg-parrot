@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: gcc.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -85,14 +85,15 @@ sub _evaluate_gcc {
     $gccversion .= ".$minor" if defined $minor;
     $self->set_result("yes, $gccversion");
 
-    my $ccwarn = $conf->data->get('ccwarn');
-
     $conf->data->set( sym_export => '__attribute__ ((visibility("default")))' )
         if $gccversion >= 4.0 && !$conf->data->get('sym_export');
 
+    # sneaky check for g++
+    my $gpp = (index($conf->data->get('cc'), '++') > 0) ? 1 : 0;
+
     $conf->data->set(
-        ccwarn              => "$ccwarn",
-        gccversion          => $gccversion,
+        gccversion => $gccversion,
+        'g++'      => $gpp,
     );
     return 1;
 }

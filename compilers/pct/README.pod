@@ -1,4 +1,4 @@
-# $Id$
+# $Id: README.pod 28952 2008-07-02 13:38:36Z bernhard $
 
 =head1 Parrot Compiler Toolkit (PCT)
 

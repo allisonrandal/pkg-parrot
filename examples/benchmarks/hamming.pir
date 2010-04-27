@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: hamming.pir 42921 2009-12-07 06:09:36Z dukeleto $
 
 =head1 NAME
 

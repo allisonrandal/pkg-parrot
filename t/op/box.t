@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: box.t 44386 2010-02-23 12:18:39Z mikehh $
 
 =head1 NAME
 
@@ -176,8 +176,7 @@ Tests all box operators.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

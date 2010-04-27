@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: core_pmcs.pm 45616 2010-04-12 21:56:53Z petdance $
 
 =head1 NAME
 
@@ -103,21 +103,14 @@ sub generate_c {
 /* HEADERIZER STOP */
 
 #include "parrot/parrot.h"
+#include "parrot/global_setup.h"
+
 
 END_C
 
     print {$OUT} "extern void Parrot_${_}_class_init(PARROT_INTERP, int, int);\n" foreach (@pmcs);
 
     print {$OUT} <<'END_C';
-
-/* This isn't strictly true, but the headerizer should not bother */
-
-void Parrot_register_core_pmcs(PARROT_INTERP, NOTNULL(PMC *registry))
-    __attribute__nonnull__(1)
-    __attribute__nonnull__(2);
-
-extern void Parrot_initialize_core_pmcs(PARROT_INTERP, int pass)
-    __attribute__nonnull__(1);
 
 void Parrot_initialize_core_pmcs(PARROT_INTERP, int pass)
 {
@@ -132,14 +125,14 @@ END_C
     print {$OUT} <<'END_C';
 }
 
-static void register_pmc(PARROT_INTERP, NOTNULL(PMC *registry), int pmc_id)
+static void register_pmc(PARROT_INTERP, ARGIN(PMC *registry), int pmc_id)
 {
     STRING * const key = interp->vtables[pmc_id]->whoami;
     VTABLE_set_integer_keyed_str(interp, registry, key, pmc_id);
 }
 
 void
-Parrot_register_core_pmcs(PARROT_INTERP, NOTNULL(PMC *registry))
+Parrot_register_core_pmcs(PARROT_INTERP, ARGIN(PMC *registry))
 {
 END_C
 

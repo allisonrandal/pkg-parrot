@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Node.pir 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 
@@ -82,7 +82,7 @@ as the result of the current node.
 .end
 
 
-=item get_string()   # vtable method
+=item get_string()
 
 Returns the result of the current node as a string.
 

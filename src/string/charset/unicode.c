@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2009, Parrot Foundation.
-$Id$
+$Id: unicode.c 42618 2009-11-21 02:24:36Z jkeenan $
 
 =head1 NAME
 

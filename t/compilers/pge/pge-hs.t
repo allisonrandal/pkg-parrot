@@ -1,6 +1,6 @@
-#!parrot 
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+#!parrot
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: pge-hs.t 44368 2010-02-23 05:19:04Z mikehh $
 
 =head1 NAME
 
@@ -43,8 +43,7 @@ Grammar Engine Haskell Output tests
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

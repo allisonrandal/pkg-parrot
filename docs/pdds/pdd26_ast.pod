@@ -1,5 +1,5 @@
-# Copyright (C) 2007, Parrot Foundation
-# $Id$
+# Copyright (C) 2007-2010, Parrot Foundation
+# $Id: pdd26_ast.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 26: Compiler Tools - Abstract Syntax Tree
 
@@ -10,7 +10,7 @@ Abstract Syntax Tree representation.
 
 =head2 Version
 
-$Revision$
+$Revision: 45652 $
 
 =head2 Description
 
@@ -561,7 +561,7 @@ yet to be determined.
 
 =head2 References
 
-NA.
+None.
 
 =cut
 

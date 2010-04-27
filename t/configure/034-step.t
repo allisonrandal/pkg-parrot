@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: 034-step.t 44649 2010-03-05 16:20:00Z tene $
 
 use strict;
 use warnings;
@@ -114,7 +114,7 @@ END_DUMMY
         \$stderr
     );
     ok($rv, "genfile() returned true when warning expected" );
-    like( $stderr, qr/value for 'foobar'/, "got expected warning" );
+    like( $stderr, qr/value for '\@foobar\@'/, "got expected warning" );
 
     unlink $dummy or croak "Unable to delete file after testing";
     chdir $cwd    or croak "Unable to change back to starting directory";

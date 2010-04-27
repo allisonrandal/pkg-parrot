@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: sudoku.pir 43141 2009-12-18 07:27:22Z tene $
 
 =pod
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: regexdna.pir 40200 2009-07-21 21:51:54Z bacek $
 
 .sub main :main
 	load_bytecode "PGE.pbc"

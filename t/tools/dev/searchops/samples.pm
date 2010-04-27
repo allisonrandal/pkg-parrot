@@ -1,6 +1,6 @@
 package samples;
 # Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# $Id: samples.pm 42736 2009-11-21 17:48:16Z jkeenan $
 
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ our @EXPORT_OK = qw($core $debug $mangled $string);
 
 $core = q{
 /*
- * $Id$
+ * $Id: samples.pm 42736 2009-11-21 17:48:16Z jkeenan $
 ** pseudo-core.ops
 */
 
@@ -145,7 +145,7 @@ as the Parrot interpreter itself.
 
  $debug = q{
 /*
- * $Id$
+ * $Id: samples.pm 42736 2009-11-21 17:48:16Z jkeenan $
  * Copyright (C) 2002-2008, Parrot Foundation.
  */
 
@@ -208,7 +208,7 @@ op debug_load(inconst STR) :base_debug {
 
  $mangled = q{
 /*
- * $Id$
+ * $Id: samples.pm 42736 2009-11-21 17:48:16Z jkeenan $
 ** string.ops
 */
 
@@ -266,7 +266,7 @@ as the Parrot interpreter itself.
 
 $string = q{
 /*
- * $Id$
+ * $Id: samples.pm 42736 2009-11-21 17:48:16Z jkeenan $
 ** pseudo-string.ops
 */
 

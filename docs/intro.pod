@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: intro.pod 45172 2010-03-25 03:36:18Z coke $
 
 =head1 NAME
 
@@ -145,7 +145,7 @@ Parrot has an extensive regression test suite. This can be run by typing:
 Substituting make for the name of the make program on your platform. The output
 will look something like this:
 
- C:\Perl\bin\perl.exe t\harness --gc-debug --running-make-test
+ C:\Perl\bin\perl.exe t\harness --gc-debug 
    t\library\*.t  t\op\*.t  t\pmc\*.t  t\run\*.t  t\native_pbc\*.t
    imcc\t\*\*.t  t\dynpmc\*.t  t\p6rules\*.t t\src\*.t t\perl\*.t
  t\library\dumper...............ok
@@ -391,7 +391,7 @@ reading:
 
 =begin PIR_FRAGMENT
 
-  .local pmc result, factorial
+  .local int result
   result = factorial($I0)
 
 =end PIR_FRAGMENT

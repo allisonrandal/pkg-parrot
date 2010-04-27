@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: Makefile.PL 36658 2009-02-13 05:22:59Z allison $
 
 =head1 NAME
 

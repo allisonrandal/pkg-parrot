@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: role.pmc 45425 2010-04-07 13:38:10Z bacek $
 
 =head1 NAME
 
@@ -50,9 +50,29 @@ An empty Hash PMC is allocated during initialization.
 
 #include "pmc/pmc_namespace.h"
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static void init_role_from_hash(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGIN(PMC *info))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+#define ASSERT_ARGS_init_role_from_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(info))
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+
 /* Takes a hash and initializes the role based on it. */
-static void init_role_from_hash(PARROT_INTERP, PMC *self, PMC *info)
+static void
+init_role_from_hash(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *info))
 {
+    ASSERT_ARGS(init_role_from_hash)
     Parrot_Role_attributes * const role     = PARROT_ROLE(self);
     STRING * const ns_string     = CONST_STRING(interp, "NameSpace");
     STRING * const name_str      = CONST_STRING(interp, "name");
@@ -127,13 +147,13 @@ static void init_role_from_hash(PARROT_INTERP, PMC *self, PMC *info)
      * need to unset ourselves in the old namespace. */
     if (!PMC_IS_NULL(old_ns) && role->_namespace != old_ns) {
         STRING * const set_class_str = CONST_STRING(interp, "set_class");
-        Parrot_PCCINVOKE(interp, old_ns, set_class_str, "P->", PMCNULL);
+        Parrot_pcc_invoke_method_from_c_args(interp, old_ns, set_class_str, "P->", PMCNULL);
     }
 
     /* Link namespace to this role, if there is one. */
     if (!PMC_IS_NULL(role->_namespace)) {
         STRING * const set_class_str = CONST_STRING(interp, "set_class");
-        Parrot_PCCINVOKE(interp, role->_namespace, set_class_str, "P->", self);
+        Parrot_pcc_invoke_method_from_c_args(interp, role->_namespace, set_class_str, "P->", self);
     }
 
     /* Initialize roles, if we have any. */
@@ -230,9 +250,9 @@ C<init_data>.
         /* Set up the object. */
         role->name            = CONST_STRING(interp, "");
         role->_namespace      = PMCNULL;
-        role->roles           = pmc_new(interp, enum_class_ResizablePMCArray);
-        role->methods         = pmc_new(interp, enum_class_Hash);
-        role->attrib_metadata = pmc_new(interp, enum_class_Hash);
+        role->roles           = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        role->methods         = Parrot_pmc_new(interp, enum_class_Hash);
+        role->attrib_metadata = Parrot_pmc_new(interp, enum_class_Hash);
     }
 
     VTABLE void init_pmc(PMC *init_data) {
@@ -276,7 +296,7 @@ Enters the attribute in the C<attributes> array.
 
     VTABLE void add_attribute(STRING *name, PMC *type) {
         Parrot_Role_attributes * const role  = PARROT_ROLE(SELF);
-        PMC           * const new_attribute  = pmc_new(interp, enum_class_Hash);
+        PMC           * const new_attribute  = Parrot_pmc_new(interp, enum_class_Hash);
 
         /* Set name and type. */
         VTABLE_set_string_keyed_str(interp, new_attribute, CONST_STRING(interp, "name"), name);
@@ -388,7 +408,7 @@ composed into this role.
         PMC         *found;
 
         if (Parrot_str_equal(interp, what, CONST_STRING(interp, "name"))) {
-            found = pmc_new(interp, enum_class_String);
+            found = Parrot_pmc_new(interp, enum_class_String);
             VTABLE_set_string_native(interp, found, role->name);
         }
         else if (Parrot_str_equal(interp, what, CONST_STRING(interp, "namespace"))) {
@@ -414,7 +434,7 @@ composed into this role.
         if (found->vtable->base_type == enum_class_Hash) {
             /* for Hash return values, create and return a shallow
              * clone because the VTABLE_clone does a deep clone */
-            PMC * const hash = pmc_new(interp, enum_class_Hash);
+            PMC * const hash = Parrot_pmc_new(interp, enum_class_Hash);
             PMC * const iter = VTABLE_get_iter(interp, found);
             while (VTABLE_get_bool(interp, iter)) {
                 STRING * key = VTABLE_shift_string(interp, iter);
@@ -441,7 +461,7 @@ inspect_str.
     VTABLE PMC *inspect() {
         /* Create a hash, then use inspect_str to get all of the data to
          * fill it up with. */
-        PMC * const metadata = pmc_new(interp, enum_class_Hash);
+        PMC * const metadata = Parrot_pmc_new(interp, enum_class_Hash);
 
         STRING * const name       = CONST_STRING(interp, "name");
         STRING * const _namespace = CONST_STRING(interp, "namespace");
@@ -553,7 +573,7 @@ Returns whether the class does the givne C<*role>.
     }
 
     /*
-     * Below here are non-vtable methods that eventually will go in a role
+     * Below here are methods that eventually will go in a role
      * that is composed into here to optionally give a nice interface from
      * PIR (ParrotRole isa Role does RoleMethods or something like this).
      */
@@ -583,7 +603,7 @@ Sets the name of the role, and updates the namespace accordingly.
         if (got_name) {
             /* We'll build a hash just containing the name, then give this to
              * init_role_from_hash - saves some code duplication. */
-            PMC *naming_hash = pmc_new(interp, enum_class_Hash);
+            PMC *naming_hash = Parrot_pmc_new(interp, enum_class_Hash);
             VTABLE_set_string_keyed_str(interp, naming_hash, CONST_STRING(interp, "name"), name);
             init_role_from_hash(interp, SELF, naming_hash);
         }
@@ -750,7 +770,7 @@ parameter is supplied, a particular item of introspection data.
     METHOD inspect(STRING *what :optional, int got_what :opt_flag) {
         PMC *found;
 
-        /* Just delegate to the appropriate vtable method. */
+        /* Just delegate to the appropriate vtable. */
         if (got_what)
             found = VTABLE_inspect_str(interp, SELF, what);
         else

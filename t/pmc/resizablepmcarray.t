@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: resizablepmcarray.t 43695 2010-02-01 21:11:43Z bacek $
 
 =head1 NAME
 
@@ -806,7 +806,7 @@ loop_end:
     is($S0, "123ABCDE", "splice, replace at end")
 
     $P1 = clone ar1
-    $P2 = new ['Array']
+    $P2 = new ['FixedStringArray']
     $P2 = 5
     $P2[0] = 'A'
     $P2[1] = 'B'
@@ -979,12 +979,12 @@ end:
     push array, 2
     push array, 5
     push array, 1
-   
-    .local string unsorted 
+
+    .local string unsorted
     unsorted = join ' ', array
     is(unsorted,"4 5 3 2 5 1", "unsorted array")
 
-    ## sort using a non-tailcall function 
+    ## sort using a non-tailcall function
     .const 'Sub' cmp_normal = 'cmp_normal_tailcall'
     $P1 = clone array
     $P1.'sort'(cmp_normal)

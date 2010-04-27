@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: past.t 44438 2010-02-24 02:13:06Z jkeenan $
 
 use strict;
 use warnings;
@@ -72,9 +72,9 @@ Integer
 }
 OUT
 
-## TODO: test that return() is taken from the type of value when not specified
+## TT #1476: test that return() is taken from the type of value when not specified
 
-## TODO: check the rest of the PAST::Var attributes
+## TT #1476: check the rest of the PAST::Var attributes
 pir_output_is( <<'CODE', <<'OUT', 'dump PAST::Var node in visual format' );
 .sub _main :main
     load_bytecode 'PCT.pbc'

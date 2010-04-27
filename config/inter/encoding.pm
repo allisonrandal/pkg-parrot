@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id$
+# $Id: encoding.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -75,8 +75,7 @@ END
     }
 
     # build list of libraries for link line in Makefile
-    my $slash = $conf->data->get('slash');
-    $TEMP_encoding_o =~ s/^| / src${slash}string${slash}encoding${slash}/g;
+    $TEMP_encoding_o =~ s{^| }{ src/string/encoding/}g;
 
     $conf->data->set(
         encoding            => $encoding_list,

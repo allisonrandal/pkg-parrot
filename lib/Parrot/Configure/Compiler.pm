@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: Compiler.pm 44681 2010-03-06 01:52:41Z coke $
 
 =head1 NAME
 
@@ -197,9 +197,14 @@ sub cc_clean {    ## no critic Subroutines::RequireFinalReturn
 
     $conf->genfile($source, $target, %options);
 
-Takes the specified source file, replacing entries like C<@FOO@> with
-C<FOO>'s value from the configuration system's data, and writes the results
+Takes the specified source file, replacing entries like C<@key@> with
+C<key>'s value from the configuration system's data, and writes the results
 to specified target file.
+
+If a C<::> is present in the C<@key@>, the replaced value will first try to
+use the full key, but if that is not present, the key up to the C<::> is used.
+For example, if C<@cc_warn::src/embed.c@> is used, and that key doesn't
+exist, the fallback key would be C<@cc_warn@>.
 
 Respects the following options when manipulating files (Note: most of the
 replacement syntax assumes the source text is on a single line.)
@@ -210,8 +215,8 @@ replacement syntax assumes the source text is on a single line.)
 
 If set to a C<makefile>, C<c> or C<perl> value, C<comment_type> will be set
 to corresponding value.
-Moreover, when set to a C<makefile> value, it will set C<replace_slashes> to
-enabled, and C<conditioned_lines> to enabled.
+Moreover, when set to a C<makefile> value, it will enable
+C<conditioned_lines>.
 
 Its value will be detected automatically by target file name unless you set
 it to a special value C<none>.
@@ -250,30 +255,25 @@ C<AND> and C<OR> is undefined.
 
 For instance:
 
-  #IF(win32): $(SRC_DIR)/atomic/gcc_x86$(O)
+  #IF(win32): src/atomic/gcc_x86$(O)
 
 will be included if the platform is win32.
 
-  #IF(cpuarch==i386): $(SRC_DIR)/atomic/gcc_x86$(O)
+  #IF(cpuarch==i386): src/atomic/gcc_x86$(O)
 
 will be included if the value of the config key "cpuarch" is "i386".
 
-  #IF(cpuarch==i386): $(SRC_DIR)/atomic/gcc_x86$(O)
-  #ELSIF(cpuarch==sparcv9): $(SRC_DIR)/atomic/sparc_v9.s
+  #IF(cpuarch==i386): src/atomic/gcc_x86$(O)
+  #ELSIF(cpuarch==sparcv9): src/atomic/sparc_v9.s
   #ELSE:
 
-will include " $(SRC_DIR)/atomic/gcc_x86$(O)" if the config key "cpuarch" is
-ste to "i386", will include " $(SRC_DIR)/atomic/sparc_v9.s" instead if
+will include " src/atomic/gcc_x86$(O)" if the config key "cpuarch" is
+ste to "i386", will include " src/atomic/sparc_v9.s" instead if
 "cpuarch" is set to "sparcv9", and will include an empty line otherwise.
 
   #IF(win32 and glut and not cygwin):
 
 will be used on "win32" and if "glut" is defined, but not on "cygwin".
-
-B<Legacy Syntax:>
-
-The old syntax #CONDITIONED_LINE(var): and
-#INVERSE_CONDITIONED_LINE(var): is still supported, but is deprecated.
 
 =item comment_type
 
@@ -293,12 +293,6 @@ When feature_file is set to a true value, a lines beginning with C<#perl>
 forces the remaining lines of the file to be evaluated as perl code. Before
 this evaluation occurs, any substitution of @@ values is performed on the
 original text.
-
-=item replace_slashes
-
-If set to a true value, this causes any C</>s in the file to automatically
-be replaced with an architecture appropriate slash. C</> or C<\>. This is
-a very helpful option when writing Makefiles.
 
 =item expand_gmake_syntax
 
@@ -350,7 +344,7 @@ sub genfile {
     open my $out, '>', "$target.tmp" or die "Can't open $target.tmp: $!";
 
     if ( !exists $options{file_type}) {
-        if ( $target =~ m/makefile$/i ) {
+        if ( $target =~ m/makefile$/i || $target =~ m/\.mak/) {
             $options{file_type} = 'makefile';
         }
         elsif ($target =~ m/\.p[lm]$/i ) {
@@ -378,9 +372,7 @@ sub genfile {
                 $file_types_info{$options{file_type}}{comment_type};
         }
         if ( $options{file_type} eq 'makefile' ) {
-            $options{replace_slashes}   = 1;
             $options{conditioned_lines} = 1;
-            $options{no_simply_expanded_var} = ! $conf->data->get('gmake_version');
         }
     }
 
@@ -462,16 +454,6 @@ sub genfile {
                 next LINE if $former_truth;
                 $line = $1;
             }
-            # Legacy, DEPRECATED.
-            elsif (($expr,$rest)=($line =~ m/^#CONDITIONED_LINE\(([^)]+)\):(.*)/s)) {
-                next LINE unless cond_eval($conf, $expr);
-                $line = $rest;
-            }
-            elsif (($expr,$rest)=($line =~ m/^#INVERSE_CONDITIONED_LINE\(([^)]+)\):(.*)/s )) {
-                next LINE if cond_eval($conf, $expr);
-                $line = $rest;
-            }
-
             else { # reset
                 $former_truth = -1; # ELSE must immediately follow a conditional.
             }
@@ -540,34 +522,29 @@ sub genfile {
         # interpolate @foo@ values
         $line =~ s{ \@ (\w+) \@ }{
             if(defined(my $val=$conf->data->get($1))) {
-                #use Data::Dumper;warn Dumper("val for $1 is ",$val);
                 $val;
             }
             else {
-                warn "value for '$1' in $source is undef";
+                warn "value for '\@$1\@' in $source is undef";
                 '';
             }
         }egx;
 
-        if ( $options{replace_slashes} ) {
-            if ( $line =~ m{/$} ) {
-                croak "$source:$.: line ends in a slash\n";
+        # interpolate @foo::bar@ values
+        $line =~ s{ \@ (\w+) :: ([^\@]+) \@ }{
+            my $full = $1 . '::' . $2;
+            my $base = $1;
+            if(defined(my $val=$conf->data->get($full))) {
+                $val;
             }
-
-            $line =~ s{(/+)}{
-                my $len = length $1;
-                my $slash = $conf->data->get('slash');
-                '/' x ($len/2) . ($len%2 ? $slash : '');
-            }eg;
-
-            # replace \* with \\*, so make will not eat the \
-            $line =~ s{(\\\*)}{\\$1}g;
-        }
-
-        if ( $options{no_simply_expanded_var} ) {
-            # replace := with =
-            $line =~ s{:=}{=};
-        }
+            elsif(defined($val=$conf->data->get($base))) {
+                $val;
+            }
+            else {
+                warn "value for '\@$full\@' in $source is undef, no fallback";
+                '';
+            }
+        }egx;
 
         print $out $line;
     }
@@ -625,8 +602,6 @@ sub cond_eval_single {
             : $key eq $conf->data()->get('osname');
     }
 }
-
-sub truth { $_[0] ? "true" : "false"; }
 
 # Recursively evaluate boolean expressions with multiple keys and | & ! ops.
 # Order of precedence: Just "!" and "NOT" binds tighter than AND and OR.

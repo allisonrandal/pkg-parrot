@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: oo3.pir 42192 2009-10-31 14:59:43Z mikehh $
 
 .namespace [ "Foo" ]
 .sub 'main'

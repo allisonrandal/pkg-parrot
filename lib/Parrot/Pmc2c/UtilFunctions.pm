@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: UtilFunctions.pm 45284 2010-03-29 20:02:54Z fperrad $
 
 package Parrot::Pmc2c::UtilFunctions;
 use strict;
@@ -9,7 +9,7 @@ use Fatal qw(open close);
 
 use base qw( Exporter );
 our @EXPORT_OK = qw( count_newlines return_statement dont_edit dynext_load_code
-    c_code_coda slurp spew filename escape_filename
+    c_code_coda slurp spew filename
     args_from_parameter_list
     passable_args_from_parameter_list
 );
@@ -72,11 +72,6 @@ Returns the number of newlines (C<\n>) in C<$string>.
 
 sub count_newlines {
     return scalar $_[0] =~ tr/\n//;
-}
-
-sub escape_filename {
-    ( my $filename = shift ) =~ s|(\\)|$1$1|g;
-    return $filename;
 }
 
 =item C<dont_edit($pmcfile)>
@@ -163,7 +158,7 @@ EOC
     int pass;
 
     /* create a library PMC */
-    pmc = constant_pmc_new(interp, enum_class_ParrotLibrary);
+    pmc = Parrot_pmc_new_constant(interp, enum_class_ParrotLibrary);
 
     /* TODO: stuff some info into this PMC's props */
 
@@ -173,7 +168,7 @@ EOC
         my $lhs = $info->{flags}{no_init} ? "" : "type$class = ";
         $cout .= <<"EOC";
     whoami = CONST_STRING_GEN(interp, "$class");
-    ${lhs}pmc_register(interp, whoami);
+    ${lhs}Parrot_pmc_register_new_type(interp, whoami);
 EOC
     }
     $cout .= <<"EOC";

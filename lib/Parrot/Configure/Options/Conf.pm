@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: Conf.pm 44984 2010-03-17 17:09:04Z gerd $
 package Parrot::Configure::Options::Conf;
 
 use strict;
@@ -18,7 +18,7 @@ use FindBin qw($Bin);
 
 our $script         = q{Configure.pl};
 our $parrot_version = Parrot::BuildUtil::parrot_version("$Bin/../../");
-our $svnid          = '$Id$';
+our $svnid          = '$Id: Conf.pm 44984 2010-03-17 17:09:04Z gerd $';
 
 sub print_version {
     print "Parrot Version $parrot_version Configure 2.0\n";
@@ -157,6 +157,8 @@ Install Options:
     --oldincludedir=DIR   C header files for non-gcc [/usr/include]
     --infodir=DIR         info documentation [PREFIX/info]
     --mandir=DIR          man documentation [PREFIX/man]
+    --pkgconfigdir=DIR    subdirectory of <libdir> for pkgconfig
+                              [<libdir>/pkgconfig/<version>]
 
 EOT
     return 1;

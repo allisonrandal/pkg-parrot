@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: memory_internals.pod 43352 2010-01-01 09:41:40Z gerd $
 
 =head1 NAME
 

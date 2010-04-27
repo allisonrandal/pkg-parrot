@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2007-2008, Parrot Foundation.
-# $Id $
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: eventhandler.t 44324 2010-02-22 22:22:45Z mikehh $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: from_parrot.t 44368 2010-02-23 05:19:04Z mikehh $
 
 =head1 NAME
 
@@ -139,7 +139,7 @@ Tests JSON->Parrot conversions.
 .sub test_create_json_of_an_array
     .local pmc array
 
-    new array, 'Array'
+    new array, 'ResizablePMCArray'
     array = 10
     array[0] = 0
     array[1] = 1
@@ -162,7 +162,7 @@ Tests JSON->Parrot conversions.
 .sub test_create_pretty_json_of_an_array
     .local pmc array
 
-    new array, 'Array'
+    new array, 'ResizablePMCArray'
     array = 10
     array[0] = 0
     array[1] = 1
@@ -198,7 +198,7 @@ OUTPUT
 .sub test_create_json_of_array_keep_element_ordering
     .local pmc array
 
-    new array, 'Array'
+    new array, 'ResizablePMCArray'
     array = 6
     array[0] = 35
     array[1] = 1
@@ -226,7 +226,7 @@ OUTPUT
 .sub test_create_json_of_a_mixed_array
     .local pmc array
 
-    new array, 'Array'
+    new array, 'ResizablePMCArray'
     array = 6
     array[0] = 0
     array[1] = 1500e-2
@@ -452,8 +452,7 @@ OUTPUT
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

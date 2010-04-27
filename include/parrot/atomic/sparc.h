@@ -1,7 +1,7 @@
 /* atomic/sparc.h
  *  Copyright (C) 2006-2008, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: sparc.h 36833 2009-02-17 20:09:26Z allison $
  *  Overview:
  *     This header provides an implementation of atomic
  *     operations on Sparc V8plus and better platforms.

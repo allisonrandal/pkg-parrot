@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: pdd13_bytecode.pod 43225 2009-12-23 07:04:10Z mikehh $
 
 =head1 PDD 13: Bytecode
 
@@ -10,7 +10,7 @@ interface through which they may be manipulated programmatically.
 
 =head2 Version
 
-$Revision$
+$Revision: 43225 $
 
 =head2 Synopsis
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: threads.t 45260 2010-03-29 00:49:40Z jkeenan $
 
 use strict;
 use warnings;
@@ -56,8 +56,6 @@ CODE
 ok 1
 ok 2
 OUTPUT
-
-# TT #1249:  rework tests since we don't really have thread types?
 
 SKIP: {
     skip 'busted on win32' => 2 if $^O eq 'MSWin32';

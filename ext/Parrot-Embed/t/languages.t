@@ -1,7 +1,7 @@
 #!perl
 
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: languages.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

@@ -1,7 +1,7 @@
 /* runcore_api.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: runcore_api.h 45619 2010-04-12 22:44:02Z plobsing $
  *  Overview:
  *     Functions and macros to dispatch opcodes.
  */
@@ -83,6 +83,11 @@ void disable_event_checking(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
+void dynop_register(PARROT_INTERP, ARGIN(PMC *lib_pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
 void enable_event_checking(PARROT_INTERP)
         __attribute__nonnull__(1);
 
@@ -94,18 +99,6 @@ INTVAL Parrot_runcore_register(PARROT_INTERP,
 
 PARROT_EXPORT
 void Parrot_runcore_switch(PARROT_INTERP, ARGIN(STRING *name))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-void do_prederef(
-    ARGIN(void **pc_prederef),
-    PARROT_INTERP,
-    ARGIN(Parrot_runcore_t *runcore))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        __attribute__nonnull__(3);
-
-void dynop_register(PARROT_INTERP, ARGIN(PMC *lib_pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
@@ -126,6 +119,9 @@ void runops_int(PARROT_INTERP, size_t offset)
 
 #define ASSERT_ARGS_disable_event_checking __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_dynop_register __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(lib_pmc))
 #define ASSERT_ARGS_enable_event_checking __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_runcore_register __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -134,13 +130,6 @@ void runops_int(PARROT_INTERP, size_t offset)
 #define ASSERT_ARGS_Parrot_runcore_switch __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(name))
-#define ASSERT_ARGS_do_prederef __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(pc_prederef) \
-    , PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(runcore))
-#define ASSERT_ARGS_dynop_register __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(lib_pmc))
 #define ASSERT_ARGS_Parrot_runcore_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_runcore_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -159,9 +148,8 @@ void runops_int(PARROT_INTERP, size_t offset)
 
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
-oplib_init_f get_core_op_lib_init(PARROT_INTERP,
+oplib_init_f get_core_op_lib_init(SHIM_INTERP,
     ARGIN(Parrot_runcore_t *runcore))
-        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_CAN_RETURN_NULL
@@ -198,8 +186,7 @@ void Parrot_runcore_switch_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 #define ASSERT_ARGS_get_core_op_lib_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(runcore))
+       PARROT_ASSERT_ARG(runcore))
 #define ASSERT_ARGS_init_prederef __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(runcore))

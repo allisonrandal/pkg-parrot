@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+$Id: resizableintegerarray.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -19,6 +19,10 @@ conversions.
 =cut
 
 */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass ResizableIntegerArray extends FixedIntegerArray auto_attrs provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs to be resized */
@@ -124,7 +128,7 @@ Resizes the array to C<size> elements.
             }
 
             GET_ATTR_int_array(INTERP, SELF, int_array);
-            mem_realloc_n_typed(int_array, cur, INTVAL);
+            int_array = mem_gc_realloc_n_typed(INTERP, int_array, cur, INTVAL);
             SET_ATTR_int_array(INTERP, SELF, int_array);
             SET_ATTR_size(INTERP, SELF, size);
             SET_ATTR_resize_threshold(INTERP, SELF, cur);
@@ -279,11 +283,11 @@ Creates and returns a copy of the array.
 
 /*
 
-=item C<void freeze(visit_info *info)>
+=item C<void freeze(PMC *info)>
 
 Used to archive the array.
 
-=item C<void thaw(visit_info *info)>
+=item C<void thaw(PMC *info)>
 
 Used to unarchive the array.
 
@@ -291,7 +295,7 @@ Used to unarchive the array.
 
 */
 
-    VTABLE void freeze(visit_info *info) {
+    VTABLE void freeze(PMC *info) {
         INTVAL   *int_array;
         INTVAL    i, n, rt;
 
@@ -308,7 +312,7 @@ Used to unarchive the array.
             VTABLE_push_integer(INTERP, info, int_array[i]);
     }
 
-    VTABLE void thaw(visit_info *info) {
+    VTABLE void thaw(PMC *info) {
         const INTVAL n = VTABLE_shift_integer(INTERP, info);
         const INTVAL rt = VTABLE_shift_integer(INTERP, info);
 

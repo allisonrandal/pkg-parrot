@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: freeze.t 45619 2010-04-12 22:44:02Z plobsing $
 
 use strict;
 use warnings;
@@ -52,9 +52,19 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "freeze/thaw a String" );
     print " "
     print P10
     print "\n"
+
+    null S1
+    new P1, ['String']
+    set P1, S1
+    freeze S0, P1
+    thaw P10, S0
+    set S10, P10
+    isnull I0, S10
+    say I0
     end
 CODE
 String foo
+1
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "freeze/thaw a Float" );

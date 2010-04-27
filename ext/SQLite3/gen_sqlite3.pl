@@ -1,6 +1,6 @@
 #!/home/tewk/srcs/parrot/perl6
 
-# $Id$
+# $Id: gen_sqlite3.pl 41085 2009-09-06 22:11:15Z tene $
 # Copyright (C) 2008, Parrot Foundation.
 
 use v6;

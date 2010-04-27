@@ -1,7 +1,7 @@
 /* extend.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: extend.h 45496 2010-04-10 02:51:54Z petdance $
  *  Overview:
  *     This is the Parrot extension mechanism, the face we present to
  *     extension modules and whatnot
@@ -62,64 +62,6 @@ typedef const void * Parrot_VTABLE;
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-void * Parrot_call_method(PARROT_INTERP,
-    Parrot_PMC sub_pmc,
-    Parrot_PMC obj,
-    Parrot_String method,
-    ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(5);
-
-PARROT_EXPORT
-Parrot_Float Parrot_call_method_ret_float(PARROT_INTERP,
-    Parrot_PMC sub_pmc,
-    Parrot_PMC obj,
-    Parrot_String method,
-    ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(5);
-
-PARROT_EXPORT
-Parrot_Int Parrot_call_method_ret_int(PARROT_INTERP,
-    Parrot_PMC sub_pmc,
-    Parrot_PMC obj,
-    Parrot_String method,
-    ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(5);
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-void * Parrot_call_sub(PARROT_INTERP,
-    Parrot_PMC sub_pmc,
-    ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3);
-
-PARROT_EXPORT
-Parrot_Float Parrot_call_sub_ret_float(PARROT_INTERP,
-    Parrot_PMC sub_pmc,
-    ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3);
-
-PARROT_EXPORT
-Parrot_Int Parrot_call_sub_ret_int(PARROT_INTERP,
-    Parrot_PMC sub_pmc,
-    ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3);
-
-PARROT_EXPORT
 int Parrot_eprintf(NULLOK_INTERP, ARGIN(const char *s), ...)
         __attribute__nonnull__(2);
 
@@ -146,7 +88,7 @@ int Parrot_fprintf(PARROT_INTERP,
         __attribute__nonnull__(3);
 
 PARROT_EXPORT
-void Parrot_free_cstring(ARGIN_NULLOK(char *string));
+void Parrot_free_cstring(ARGFREE(char *string));
 
 PARROT_EXPORT
 Parrot_Int Parrot_get_intreg(PARROT_INTERP, Parrot_Int regnum)
@@ -189,13 +131,15 @@ void Parrot_PMC_delete_pmckey(PARROT_INTERP, Parrot_PMC pmc, Parrot_PMC key)
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 char * Parrot_PMC_get_cstring(PARROT_INTERP, Parrot_PMC pmc)
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 char * Parrot_PMC_get_cstring_intkey(PARROT_INTERP,
     Parrot_PMC pmc,
     Parrot_Int key)
@@ -203,7 +147,8 @@ char * Parrot_PMC_get_cstring_intkey(PARROT_INTERP,
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 char * Parrot_PMC_get_cstringn(PARROT_INTERP,
     ARGIN(Parrot_PMC pmc),
     ARGOUT(Parrot_Int *length))
@@ -214,7 +159,8 @@ char * Parrot_PMC_get_cstringn(PARROT_INTERP,
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 char * Parrot_PMC_get_cstringn_intkey(PARROT_INTERP,
     ARGIN(Parrot_PMC pmc),
     ARGOUT(Parrot_Int *length),
@@ -452,24 +398,6 @@ int Parrot_vfprintf(PARROT_INTERP,
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);
 
-#define ASSERT_ARGS_Parrot_call_method __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
-#define ASSERT_ARGS_Parrot_call_method_ret_float __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
-#define ASSERT_ARGS_Parrot_call_method_ret_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
-#define ASSERT_ARGS_Parrot_call_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
-#define ASSERT_ARGS_Parrot_call_sub_ret_float __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
-#define ASSERT_ARGS_Parrot_call_sub_ret_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
 #define ASSERT_ARGS_Parrot_eprintf __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(s))
 #define ASSERT_ARGS_Parrot_ext_call __attribute__unused__ int _ASSERT_ARGS_CHECK = (\

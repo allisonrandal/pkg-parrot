@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: 004-configure.t 36833 2009-02-17 20:09:26Z allison $
 # 004-configure.t
 
 use strict;

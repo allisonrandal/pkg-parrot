@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: extend.c 45496 2010-04-10 02:51:54Z petdance $
 
 =head1 NAME
 
@@ -417,10 +417,10 @@ Note that you must free this string with C<Parrot_str_free_cstring()>!
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 char *
-Parrot_PMC_get_cstring_intkey(PARROT_INTERP,
-        Parrot_PMC pmc, Parrot_Int key)
+Parrot_PMC_get_cstring_intkey(PARROT_INTERP, Parrot_PMC pmc, Parrot_Int key)
 {
     ASSERT_ARGS(Parrot_PMC_get_cstring_intkey)
     STRING *intermediate;
@@ -448,7 +448,8 @@ Note that you must free this string with C<Parrot_str_free_cstring()>!
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 char *
 Parrot_PMC_get_cstring(PARROT_INTERP, Parrot_PMC pmc)
 {
@@ -482,10 +483,10 @@ Note that you must free the string with C<Parrot_str_free_cstring()>.
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 char *
-Parrot_PMC_get_cstringn(PARROT_INTERP, ARGIN(Parrot_PMC pmc),
-        ARGOUT(Parrot_Int *length))
+Parrot_PMC_get_cstringn(PARROT_INTERP, ARGIN(Parrot_PMC pmc), ARGOUT(Parrot_Int *length))
 {
     ASSERT_ARGS(Parrot_PMC_get_cstringn)
     char *retval;
@@ -516,7 +517,8 @@ Note that you must free this string with C<Parrot_str_free_cstring()>.
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 char *
 Parrot_PMC_get_cstringn_intkey(PARROT_INTERP, ARGIN(Parrot_PMC pmc),
         ARGOUT(Parrot_Int *length), Parrot_Int key)
@@ -832,8 +834,7 @@ Push the passed-in Parrot integer onto the passed in PMC
 
 PARROT_EXPORT
 void
-Parrot_PMC_push_intval(PARROT_INTERP,
-        Parrot_PMC pmc, Parrot_Int value)
+Parrot_PMC_push_intval(PARROT_INTERP, Parrot_PMC pmc, Parrot_Int value)
 {
     ASSERT_ARGS(Parrot_PMC_push_intval)
     PARROT_CALLIN_START(interp);
@@ -945,7 +946,7 @@ Parrot_PMC_new(PARROT_INTERP, Parrot_Int type)
     ASSERT_ARGS(Parrot_PMC_new)
     Parrot_PMC newpmc;
     PARROT_CALLIN_START(interp);
-    newpmc = pmc_new_noinit(interp, type);
+    newpmc = Parrot_pmc_new_noinit(interp, type);
     VTABLE_init(interp, newpmc);
     PARROT_CALLIN_END(interp);
     return newpmc;
@@ -968,7 +969,7 @@ Parrot_PMC_typenum(PARROT_INTERP, ARGIN_NULLOK(const char *_class))
     ASSERT_ARGS(Parrot_PMC_typenum)
     Parrot_Int retval;
     PARROT_CALLIN_START(interp);
-    retval = pmc_type(interp, Parrot_str_new(interp, _class, 0));
+    retval = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, _class, 0));
     PARROT_CALLIN_END(interp);
     return retval;
 }
@@ -1003,7 +1004,7 @@ Deallocate a C string that the interpreter has handed to you.
 
 PARROT_EXPORT
 void
-Parrot_free_cstring(ARGIN_NULLOK(char *string))
+Parrot_free_cstring(ARGFREE(char *string))
 {
     ASSERT_ARGS(Parrot_free_cstring)
     Parrot_str_free_cstring(string);
@@ -1047,321 +1048,25 @@ Parrot_ext_call(PARROT_INTERP, ARGIN(Parrot_PMC sub_pmc),
 {
     ASSERT_ARGS(Parrot_ext_call)
     va_list args;
-    PMC  *sig_object;
+    PMC  *call_obj;
+    const char *arg_sig, *ret_sig;
+
+    PMC  * const old_call_obj = Parrot_pcc_get_signature(interp,
+        CURRENT_CONTEXT(interp));
+    Parrot_pcc_split_signature_string(signature, &arg_sig, &ret_sig);
 
     va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, PMCNULL, signature, args);
-    va_end(args);
+    call_obj = Parrot_pcc_build_call_from_varargs(interp, PMCNULL,
+        arg_sig, &args);
 
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
+    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, call_obj);
+    call_obj = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_fill_params_from_varargs(interp, call_obj, ret_sig, &args,
+            PARROT_ERRORS_RESULT_COUNT_FLAG);
+    va_end(args);
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_call_obj);
 }
 
-/*
-
-=item C<void * Parrot_call_sub(PARROT_INTERP, Parrot_PMC sub_pmc, const char
-*signature, ...)>
-
-Call a parrot subroutine with the given function signature. The first char in
-C<signature> denotes the return value. Next chars are arguments.
-
-The return value of this function can be void or a pointer type.
-
-Signature chars are:
-
-    v ... void return
-    I ... Parrot_Int
-    N ... Parrot_Float
-    S ... Parrot_String
-    P ... Parrot_PMC
-
-=cut
-
-*/
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-void *
-Parrot_call_sub(PARROT_INTERP, Parrot_PMC sub_pmc,
-                 ARGIN(const char *signature), ...)
-{
-    ASSERT_ARGS(Parrot_call_sub)
-    va_list     args;
-    PMC        *sig_object;
-    Parrot_sub *sub;
-    void       *result     = NULL;
-    const char *arg_sig    = signature;
-    char        return_sig = signature[0];
-
-    arg_sig++;
-    va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, PMCNULL,
-        arg_sig, args);
-    va_end(args);
-
-    /* Add the return argument onto the call signature object (a bit
-     * hackish, added for backward compatibility in deprecated API function,
-     * see TT #1145). */
-    switch (return_sig) {
-        case 'v':
-        {
-            Parrot_String full_sig = VTABLE_get_string(interp, sig_object);
-            Parrot_str_concat(interp, full_sig,
-                    Parrot_str_new_constant(interp, "->"), 0);
-            break;
-        }
-        case 'V':
-        case 'P':
-        {
-            Parrot_pcc_append_result(interp, sig_object, Parrot_str_new_constant(interp, "P"),
-                    &result);
-            break;
-        }
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL,
-                EXCEPTION_INVALID_OPERATION,
-                "Dispatch: invalid return type %c!", return_sig);
-    }
-
-    PMC_get_sub(interp, sub_pmc, sub);
-    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp),
-        sub->seg->const_table->constants);
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
-
-    return result;
-}
-
-
-/*
-
-=item C<Parrot_Int Parrot_call_sub_ret_int(PARROT_INTERP, Parrot_PMC sub_pmc,
-const char *signature, ...)>
-
-Like C<Parrot_call_sub>, with Parrot_Int return result.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-Parrot_Int
-Parrot_call_sub_ret_int(PARROT_INTERP, Parrot_PMC sub_pmc,
-                 ARGIN(const char *signature), ...)
-{
-    ASSERT_ARGS(Parrot_call_sub_ret_int)
-    va_list     args;
-    PMC        *sig_object;
-    Parrot_Int  result;
-    char        return_sig  = signature[0];
-    const char *arg_sig     = signature;
-    Parrot_sub *sub;
-
-    arg_sig++;
-    va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, PMCNULL, arg_sig, args);
-    va_end(args);
-
-    /* Add the return argument onto the call signature object (a bit
-     * hackish, added for backward compatibility in deprecated API function,
-     * see TT #1145). */
-    Parrot_pcc_append_result(interp, sig_object, Parrot_str_new_constant(interp, "I"), &result);
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
-
-    return result;
-}
-
-/*
-
-=item C<Parrot_Float Parrot_call_sub_ret_float(PARROT_INTERP, Parrot_PMC
-sub_pmc, const char *signature, ...)>
-
-Like C<Parrot_call_sub>, with Parrot_Float return result.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-Parrot_Float
-Parrot_call_sub_ret_float(PARROT_INTERP, Parrot_PMC sub_pmc,
-                 ARGIN(const char *signature), ...)
-{
-    ASSERT_ARGS(Parrot_call_sub_ret_float)
-    va_list         args;
-    PMC            *sig_object;
-    Parrot_Float    result;
-    char            return_sig  = signature[0];
-    const char     *arg_sig     = signature;
-    Parrot_sub     *sub;
-
-    arg_sig++;
-    va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, PMCNULL, arg_sig, args);
-    va_end(args);
-
-    /* Add the return argument onto the call signature object (a bit
-     * hackish, added for backward compatibility in deprecated API function,
-     * see TT #1145). */
-    Parrot_pcc_append_result(interp, sig_object, Parrot_str_new_constant(interp, "N"), &result);
-    PMC_get_sub(interp, sub_pmc, sub);
-    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp), sub->seg->const_table->constants);
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
-
-    return result;
-}
-
-/*
-
-=item C<void * Parrot_call_method(PARROT_INTERP, Parrot_PMC sub_pmc, Parrot_PMC
-obj, Parrot_String method, const char *signature, ...)>
-
-Call the parrot subroutine C<sub> as a method on PMC object C<obj>. The method
-should have the name C<method> as a Parrot_string, and should have a function
-signature C<signature>. Any arguments to the method can be passed at the end
-as a variadic argument list.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-void *
-Parrot_call_method(PARROT_INTERP, Parrot_PMC sub_pmc, Parrot_PMC obj,
-                        Parrot_String method, ARGIN(const char *signature), ...)
-{
-    ASSERT_ARGS(Parrot_call_method)
-    va_list args;
-    PMC  *sig_object;
-    void *result = NULL;
-    char  return_sig = signature[0];
-    char *arg_sig = (char*)malloc(strlen(signature)+2);
-    Parrot_sub *sub;
-    arg_sig[0] = 'P';
-    arg_sig[1] = 'i';
-    arg_sig[2] = 0;
-    strcat(arg_sig, signature);
-
-    va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, obj, arg_sig, args);
-    va_end(args);
-    free(arg_sig);
-
-    /* Add the return argument onto the call signature object (a bit
-     * hackish, added for backward compatibility in deprecated API function,
-     * see TT #1145). */
-    switch (return_sig) {
-        case 'v':
-        {
-            Parrot_String full_sig = VTABLE_get_string(interp, sig_object);
-            Parrot_str_concat(interp, full_sig,
-                    Parrot_str_new_constant(interp, "->"), 0);
-            break;
-        }
-        case 'V':
-        case 'P':
-        {
-            Parrot_pcc_append_result(interp, sig_object, Parrot_str_new_constant(interp, "P"),
-                    &result);
-            break;
-        }
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "Dispatch: invalid return type %c!", return_sig);
-    }
-
-    PMC_get_sub(interp, sub_pmc, sub);
-    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp), sub->seg->const_table->constants);
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
-
-    return result;
-}
-
-/*
-
-=item C<Parrot_Int Parrot_call_method_ret_int(PARROT_INTERP, Parrot_PMC sub_pmc,
-Parrot_PMC obj, Parrot_String method, const char *signature, ...)>
-
-Call the parrot subroutine C<sub> as a method on PMC object C<obj>. The method
-should have the name C<method> as a Parrot_string, and should have a function
-signature C<signature>. Any arguments to the method can be passed at the end
-as a variadic argument list.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-Parrot_Int
-Parrot_call_method_ret_int(PARROT_INTERP, Parrot_PMC sub_pmc,
-        Parrot_PMC obj, Parrot_String method, ARGIN(const char *signature), ...)
-{
-    ASSERT_ARGS(Parrot_call_method_ret_int)
-    va_list args;
-    PMC  *sig_object;
-    Parrot_Int result = 0;
-    char  return_sig = signature[0];
-    char *arg_sig = (char*)malloc(strlen(signature)+2);
-    Parrot_sub *sub;
-    arg_sig[0] = 'P';
-    arg_sig[1] = 'i';
-    arg_sig[2] = 0;
-    strcat(arg_sig, signature);
-
-    va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, obj, arg_sig, args);
-    va_end(args);
-    free(arg_sig);
-
-    Parrot_pcc_append_result(interp, sig_object, Parrot_str_new_constant(interp, "I"), &result);
-    PMC_get_sub(interp, sub_pmc, sub);
-    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp), sub->seg->const_table->constants);
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
-
-    return result;
-}
-
-/*
-
-=item C<Parrot_Float Parrot_call_method_ret_float(PARROT_INTERP, Parrot_PMC
-sub_pmc, Parrot_PMC obj, Parrot_String method, const char *signature, ...)>
-
-Call a parrot method for the given object.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-Parrot_Float
-Parrot_call_method_ret_float(PARROT_INTERP, Parrot_PMC sub_pmc,
-        Parrot_PMC obj, Parrot_String method, ARGIN(const char *signature), ...)
-{
-    ASSERT_ARGS(Parrot_call_method_ret_float)
-    va_list args;
-    PMC  *sig_object;
-    Parrot_Float result = 0.0;
-    char  return_sig = signature[0];
-    char *arg_sig = (char*)malloc(strlen(signature)+2);
-    Parrot_sub *sub;
-    arg_sig[0] = 'P';
-    arg_sig[1] = 'i';
-    arg_sig[2] = 0;
-    strcat(arg_sig, signature);
-
-    va_start(args, signature);
-    sig_object = Parrot_pcc_build_sig_object_from_varargs(interp, obj, arg_sig, args);
-    va_end(args);
-    free(arg_sig);
-
-    Parrot_pcc_append_result(interp, sig_object, Parrot_str_new_constant(interp, "N"), &result);
-    PMC_get_sub(interp, sub_pmc, sub);
-    Parrot_pcc_set_constants(interp, CURRENT_CONTEXT(interp), sub->seg->const_table->constants);
-    Parrot_pcc_invoke_from_sig_object(interp, sub_pmc, sig_object);
-
-    return result;
-}
 
 /*
 
@@ -1584,7 +1289,7 @@ Parrot_register_pmc(PARROT_INTERP, Parrot_PMC pmc)
 {
     ASSERT_ARGS(Parrot_register_pmc)
     PARROT_CALLIN_START(interp);
-    gc_register_pmc(interp, pmc);
+    Parrot_pmc_gc_register(interp, pmc);
     PARROT_CALLIN_END(interp);
 }
 
@@ -1605,7 +1310,7 @@ Parrot_unregister_pmc(PARROT_INTERP, Parrot_PMC pmc)
 {
     ASSERT_ARGS(Parrot_unregister_pmc)
     PARROT_CALLIN_START(interp);
-    gc_unregister_pmc(interp, pmc);
+    Parrot_pmc_gc_unregister(interp, pmc);
     PARROT_CALLIN_END(interp);
 }
 
@@ -1666,9 +1371,8 @@ Parrot_sub_new_from_c_func(PARROT_INTERP,
     ASSERT_ARGS(Parrot_sub_new_from_c_func)
     Parrot_String sig = Parrot_new_string(interp, signature, strlen(signature),
         (char *) NULL, 0);
-    Parrot_PMC sub = pmc_new(interp, enum_class_NCI);
+    Parrot_PMC sub = Parrot_pmc_new(interp, enum_class_NCI);
     VTABLE_set_pointer_keyed_str(interp, sub, sig, F2DPTR(func));
-    PObj_get_FLAGS(sub) |= PObj_private1_FLAG;
     return sub;
 }
 
@@ -1690,7 +1394,7 @@ Parrot_PMC_newclass(PARROT_INTERP, Parrot_PMC classtype)
     Parrot_PMC result;
     PARROT_CALLIN_START(interp);
 
-    result = pmc_new_init(interp, enum_class_Class, classtype);
+    result = Parrot_pmc_new_init(interp, enum_class_Class, classtype);
 
     PARROT_CALLIN_END(interp);
     return result;

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2009, Parrot Foundation.
-$Id$
+$Id: test_c.in 45410 2010-04-07 04:58:51Z petdance $
 
 figure out if the compiler supports attributes.
 see parrot/compiler.h for attribute value definitions.
@@ -30,6 +30,16 @@ constfunc(int x);
 __attribute__pure__
 int
 purefunc(int x);
+
+
+__attribute__hot__
+int
+hotfunc(int x);
+
+
+__attribute__cold__
+int
+coldfunc(int x);
 
 
 static int

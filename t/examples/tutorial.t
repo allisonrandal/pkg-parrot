@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2007-2008 Parrot Foundation.
-# $Id$
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: tutorial.t 45772 2010-04-18 01:41:59Z mikehh $
 
 use strict;
 use warnings;
@@ -27,7 +27,7 @@ Test the examples in F<examples/tutorial>.
 my $manifest = maniread('MANIFEST');
 my %files;
 foreach my $file (keys %$manifest) {
-  next unless $file =~ m{examples/tutorial/.*pir$}; 
+  next unless $file =~ m{examples/tutorial/.*pir$};
   $files{$file}=undef;
 }
 
@@ -220,7 +220,7 @@ END_EXPECTED
 ok 1 - first test
 ok 2 - second test
 ok 3 #skip skipped test
-ok 4 # TODO 42
+ok 4 # TODO todo test
 END_EXPECTED
 
 );
@@ -244,7 +244,8 @@ foreach my $tutorial (sort keys %files) {
             @todo = (todo => $reason) if defined $reason;
         }
         example_output_is( $tutorial, $expected, @todo );
-    } else {
+    }
+    else {
         fail($tutorial);
     }
 }

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# $Id: byteorder.pod 38813 2009-05-16 02:22:57Z coke $
 
 =head1 NAME
 

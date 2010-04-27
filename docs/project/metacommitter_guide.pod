@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: metacommitter_guide.pod 37200 2009-03-08 11:46:01Z fperrad $
 
 =head1 Metacommitter Guide
 

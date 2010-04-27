@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: README.pod 36666 2009-02-13 10:23:23Z kjs $
 
 =head1 NAME
 

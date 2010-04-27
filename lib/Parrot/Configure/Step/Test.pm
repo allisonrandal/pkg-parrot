@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: Test.pm 45619 2010-04-12 22:44:02Z plobsing $
 
 package Parrot::Configure::Step::Test;
 

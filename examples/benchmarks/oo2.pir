@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: oo2.pir 42186 2009-10-31 12:59:17Z bacek $
 
 # all timings Athlon 800, gcc 2.95.2
 

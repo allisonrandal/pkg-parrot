@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: platform_limits.h 40634 2009-08-18 21:23:45Z mikehh $
  * Copyright (C) 2009, Parrot Foundation.
  */
 

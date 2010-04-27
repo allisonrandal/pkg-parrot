@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: float.t 44840 2010-03-10 01:43:52Z whiteknight $
 
 =head1 NAME
 
@@ -342,7 +342,7 @@ Tests the Float PMC.
     neg $P0
 
     $S0 = $P0
-    is($S0, "-0")
+    is($S0, "-0", "negative 0.0 to string")
     .return ()
 
   negative_zero_todoed:

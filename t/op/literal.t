@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: literal.t 44387 2010-02-23 12:36:16Z mikehh $
 
 =head1 NAME
 
@@ -33,7 +33,6 @@ aoudad book (page 127).
 
 # Local Variables:
 #   mode: pir
-#   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:

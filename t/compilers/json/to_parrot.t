@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: to_parrot.t 42330 2009-11-07 14:24:39Z kjs $
 
 use strict;
 use warnings;

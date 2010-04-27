@@ -1,5 +1,6 @@
 #!./parrot
-# Copyright (C) 2006-2008, Parrot Foundation.
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: 06-grammar.t 44327 2010-02-22 22:35:45Z mikehh $
 
 =head1 NAME
 

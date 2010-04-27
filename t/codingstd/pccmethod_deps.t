@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: pccmethod_deps.t 43764 2010-02-07 22:10:56Z plobsing $
 
 use strict;
 use warnings;
@@ -33,7 +33,7 @@ sub contains_pccmethod {
 
     local $_;
     while (<$fh>) {
-        next unless /PCCMETHOD/;
+        next unless /METHOD/;
         return 1;
     }
 

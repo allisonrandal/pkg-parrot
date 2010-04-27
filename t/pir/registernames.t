@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: registernames.t 41488 2009-09-26 01:59:40Z dukeleto $
 
 =head1 NAME
 

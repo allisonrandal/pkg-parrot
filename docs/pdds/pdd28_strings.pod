@@ -1,5 +1,5 @@
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: pdd28_strings.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 28: Strings
 
@@ -11,7 +11,7 @@ encodings, and languages.
 
 =head2 Version
 
-$Revision$
+$Revision: 45652 $
 
 =head2 Definitions
 
@@ -626,9 +626,9 @@ strings, and not terribly useful even there.
 Unsafe, and behavior handled by Parrot_str_to_cstring.
 
 
-=head4 Parrot_string_split
+=head4 Parrot_str_split
 
-Is the same as Parrot_str_split.
+Splits the string C<str> at the delimiter C<delim>.
 
 =head4 Parrot_str_free (was string_free)
 
@@ -665,10 +665,6 @@ Return the integer representation of the string.
 =item get_number
 
 Return the floating-point representation of the string.
-
-=item get_bignum
-
-Return the big number representation of the string.
 
 =item get_string
 
@@ -830,15 +826,15 @@ ASCII strings, fix or deprecate. }}
 
 =head2 References
 
-http://sirviente.9grid.es/sources/plan9/sys/doc/utf.ps - Plan 9's Runes are
+L<http://sirviente.9grid.es/sources/plan9/sys/doc/utf.ps> - Plan 9's Runes are
 not dissimilar to NFG strings, and this is a good introduction to the Unicode
 world.
 
-http://www.unicode.org/reports/tr15/ - The Unicode Consortium's
+L<http://www.unicode.org/reports/tr15/> - The Unicode Consortium's
 explanation of different normalization forms.
 
-http://unicode.org/reports/tr29/ - "grapheme clusters" in the Unicode Standard
-Annex
+L<http://unicode.org/reports/tr29/> - "grapheme clusters" in the Unicode
+Standard Annex
 
 "Unicode: A Primer", Tony Graham - Arguably the most readable book on
 how Unicode works.

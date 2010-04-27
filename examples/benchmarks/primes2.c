@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id$
+$Id: primes2.c 42918 2009-12-06 15:03:28Z fperrad $
 
 =head1 NAME
 

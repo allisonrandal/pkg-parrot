@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: Test.pm 36833 2009-02-17 20:09:26Z allison $
 package Parrot::Configure::Test;
 use strict;
 use warnings;
@@ -91,7 +91,7 @@ Set-up for C<test_step_thru_runstep()>:
     argv            => [ ],
     script          => $0,
     parrot_version  => $parrot_version,
-    svnid           => '$Id$',
+    svnid           => '$Id: Test.pm 36833 2009-02-17 20:09:26Z allison $',
 } );
 
     $conf = Parrot::Configure->new;

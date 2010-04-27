@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: pmc2c.pl 41209 2009-09-11 14:14:07Z coke $
 
 use strict;
 use warnings;

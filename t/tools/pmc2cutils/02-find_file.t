@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id$
+# $Id: 02-find_file.t 43720 2010-02-05 02:26:43Z jkeenan $
 # 02-find_file.t
 
 use strict;
@@ -37,7 +37,7 @@ $self    = Parrot::Pmc2c::Pmc2cMain->new(
 );
 
 my ( $file, $path );
-$file = q{array.pmc};
+$file = q{resizablepmcarray.pmc};
 
 $path = $self->find_file($file);
 ok( -f $path, "$file found" );

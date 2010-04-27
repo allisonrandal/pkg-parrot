@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# $Id: bsr_ret.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: pbc_info.c 44167 2010-02-19 11:46:40Z mikehh $
 
 =head1 NAME
 
@@ -27,6 +27,8 @@ over the main directory.
 #include "parrot/embed.h"
 
 /*
+=item C<static INTVAL iter(PARROT_INTERP, PackFile_Segment *seg, void
+*user_data)>
 
 =item C<static INTVAL iter(PARROT_INTERP, PackFile_Segment *seg, void *user_data)>
 

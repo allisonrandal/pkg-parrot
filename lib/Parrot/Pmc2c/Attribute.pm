@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# $Id: Attribute.pm 45108 2010-03-22 20:53:12Z chromatic $
 
 package Parrot::Pmc2c::Attribute;
 
@@ -140,7 +140,10 @@ sub generate_accessor {
 /* Generated macro accessors for '$attrname' attribute of $pmcname PMC. */
 #define GETATTR_${pmcname}_${attrname}(interp, pmc, dest) \\
     do { \\
-        if (PObj_is_object_TEST(pmc)) { \\
+        if (!PObj_is_object_TEST(pmc)) { \\
+            (dest) = ((Parrot_${pmcname}_attributes *)PMC_data(pmc))->$attrname; \\
+        } \\
+        else { \\
 EOA
 
     if ($isfuncptr == 1) {
@@ -189,8 +192,6 @@ EOA
 
     $decl .= <<"EOA";
         } \\
-        else \\
-            (dest) = ((Parrot_${pmcname}_attributes *)PMC_data(pmc))->$attrname; \\
     } while (0)
 
 #define SETATTR_${pmcname}_${attrname}(interp, pmc, value) \\
@@ -207,7 +208,7 @@ EOA
     }
     elsif ($attrtype eq "INTVAL") {
         $decl .= <<"EOA";
-            PMC * const attr_value = pmc_new(interp, enum_class_Integer); \\
+            PMC * const attr_value = Parrot_pmc_new(interp, enum_class_Integer); \\
             VTABLE_set_integer_native(interp, attr_value, value); \\
             VTABLE_set_attr_str(interp, pmc, \\
                               Parrot_str_new_constant(interp, "$attrname"), attr_value); \\
@@ -215,7 +216,7 @@ EOA
     }
     elsif ($attrtype eq "FLOATVAL") {
         $decl .= <<"EOA";
-            PMC * const attr_value = pmc_new(interp, enum_class_Float); \\
+            PMC * const attr_value = Parrot_pmc_new(interp, enum_class_Float); \\
             VTABLE_set_number_native(interp, attr_value, value); \\
             VTABLE_set_attr_str(interp, pmc, \\
                               Parrot_str_new_constant(interp, "$attrname"), attr_value); \\
@@ -223,7 +224,7 @@ EOA
     }
     elsif ($attrtype =~ $isptrtostring) {
         $decl .= <<"EOA";
-            PMC * const attr_value = pmc_new(interp, enum_class_String); \\
+            PMC * const attr_value = Parrot_pmc_new(interp, enum_class_String); \\
             VTABLE_set_string_native(interp, attr_value, value); \\
             VTABLE_set_attr_str(interp, pmc, \\
                               Parrot_str_new_constant(interp, "$attrname"), attr_value); \\

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: c_parens.t 45038 2010-03-18 22:25:09Z Util $
 
 use strict;
 use warnings;
@@ -33,7 +33,7 @@ L<docs/pdds/pdd07_codingstd.pod>
 
 =cut
 
-my $keywords = join '|' => sort { length $a cmp length $b } qw/
+my $keywords = join '|' => sort { length $a <=> length $b } qw/
     auto      double    int       struct    INTVAL
     break     else      long      switch    UINTVAL
     case      enum      register  typedef   FLOATVAL
@@ -92,7 +92,7 @@ sub check_parens {
         for my $line (@lines) {
             # skip #defines and typedefs
             next if $line =~ m{(?:(#\s*define|^\s*typedef))};
-            if ( $line =~ m{ ( (?<!\w) (?:$keywords) (?: \( | \ \s+ \( ) ) }xo ) {
+            if ( $line =~ m{ ( (?<!\w) (?:$keywords) (?: \( ) ) }xo ) {
                 my $paren = $1;
 
                 # ops use the same names as some C keywords, so skip

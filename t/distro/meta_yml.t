@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: meta_yml.t 44420 2010-02-23 23:33:33Z mikehh $
 
 =head1 NAME
 
@@ -30,3 +30,10 @@ eval "use Test::CPAN::Meta 0.08";
 plan skip_all => "Test::CPAN::Meta 0.08 required for testing META.yml" if $@;
 
 meta_yaml_ok();
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

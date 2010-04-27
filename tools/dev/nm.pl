@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id$
+# $Id: nm.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -140,10 +140,10 @@ use vars qw($VERSION);
 
 require 5.005;
 
-$VERSION = sprintf "%d.%d", q$Revision$ =~ /(\d+)/g;    # jhi@iki.fi;
+$VERSION = sprintf "%d.%d", q$Revision: 37201 $ =~ /(\d+)/g;    # jhi@iki.fi;
 
 my $ME       = basename($0);
-my $RCS_DATE = q$Date$;
+my $RCS_DATE = q$Date: 2009-03-08 13:07:48 +0100 (So, 08. Mär 2009) $;
 
 my $nm_cmd = 'nm';
 my $nm_opt = '';

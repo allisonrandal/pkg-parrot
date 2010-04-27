@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: sprintf.t 44637 2010-03-05 05:16:10Z dukeleto $
 
 =head1 NAME
 
@@ -106,8 +106,6 @@ tag C<all> is allowed for todo tests that should fail on any system.
     skip_tests = 'set_skip_info'()
 
     # how many tests to run?
-    # XXX: this should be summed automatically from test_files data
-    #      until then, it's set to no plan
     test.'plan'(TESTS)
 
   outer_loop:

@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: GenerateCore.pm 42769 2009-11-21 19:53:17Z jkeenan $
 package GenerateCore;
 use strict;
 use warnings;

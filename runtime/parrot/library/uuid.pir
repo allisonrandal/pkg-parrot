@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# $Id: uuid.pir 37044 2009-02-28 12:06:45Z fperrad $
 
 =head1 NAME
 

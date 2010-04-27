@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: time_old.t 42520 2009-11-14 20:46:05Z mikehh $
 
 use strict;
 use warnings;

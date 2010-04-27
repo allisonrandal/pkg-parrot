@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: C.pm 44631 2010-03-04 20:42:24Z coke $
 
 =head1 NAME
 
@@ -218,11 +218,10 @@ sub new {
             'Threads', '',
             $self->c_pair_item( '', 'thread' ),
             $self->c_header_item( '', 'thr_pthread' ),
-            $self->c_pair_item( '', 'tsq' ),
         ),
         $self->new_group(
             'Exceptions', '',
-            $self->c_pair_item( '', 'exceptions' ), $self->c_pair_item( '', 'events' ),
+            $self->c_pair_item( '', 'exceptions' )
         ),
         $self->new_group(
             'Memory', '',

@@ -39,7 +39,7 @@ typedef size_t yy_size_t;
 %{
 
 /*
- * $Id$
+ * $Id: pir.l 41681 2009-10-04 11:07:09Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

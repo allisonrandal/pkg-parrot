@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, 2009 Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: header.t 44330 2010-02-22 23:14:26Z mikehh $
 
 use strict;
 use warnings;

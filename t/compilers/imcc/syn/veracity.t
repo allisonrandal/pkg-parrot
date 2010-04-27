@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: veracity.t 44367 2010-02-23 05:07:43Z mikehh $
 
 .sub test :main
     .include 'test_more.pir'
@@ -21,7 +21,7 @@
     ok(1, "1 is true")
     .return()
   not_one:
-    ok(0, "1 is true")  
+    ok(0, "1 is true")
 .end
 
 .sub test_negative_integers
@@ -88,7 +88,7 @@
     goto neg_zero
   not_zero:
     ok(0, "0.0 is false")
-  neg_zero: 
+  neg_zero:
     $N0 = -0.0
     if $N0 goto not_neg_zero
     ok(1, "-0.0 is false")
@@ -108,8 +108,7 @@
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

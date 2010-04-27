@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: hash.pmc 45538 2010-04-10 17:40:07Z mikehh $
 
 =head1 NAME
 
@@ -47,6 +47,10 @@ These are the vtable functions for the Hash PMC.
 #include "pmc/pmc_iterator.h"
 #include "pmc/pmc_key.h"
 #include "pmc/pmc_hashiteratorkey.h"
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass Hash provides hash auto_attrs {
     ATTR Hash *hash;
@@ -106,7 +110,7 @@ Creates and returns a clone of the hash.
 */
 
     VTABLE PMC *clone() {
-        PMC * const dest = pmc_new(INTERP, SELF->vtable->base_type);
+        PMC * const dest = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
 
         parrot_hash_clone(INTERP, (Hash *)SELF.get_pointer(),
                    (Hash *)VTABLE_get_pointer(INTERP, dest));
@@ -229,6 +233,9 @@ NB: this method will destroy all old data!
         It will create STRING* keys hash. Because we can't use STRING_compare
         directly - it declared static in F<src/hash.c>
         */
+        if (old_hash && old_hash->entry_type == type)
+            return;
+
         if (!old_hash)
             old_hash = parrot_new_hash(INTERP);
 
@@ -445,7 +452,7 @@ Returns the integer value for the element at C<*key>.
             box = hash_value_to_pmc(INTERP, hash, b->value);
         else {
             /* autovivify an Hash */
-            box = pmc_new(INTERP, SELF.type());
+            box = Parrot_pmc_new(INTERP, SELF.type());
             parrot_hash_put(INTERP, hash, keystr,
                     hash_value_from_pmc(INTERP, hash, box));
         }
@@ -625,7 +632,7 @@ Returns the string value for the element at C<*key>.
             box = hash_value_to_pmc(INTERP, hash, b->value);
         else {
             /* autovivify an Hash */
-            box = pmc_new(INTERP, SELF.type());
+            box = Parrot_pmc_new(INTERP, SELF.type());
             parrot_hash_put(INTERP, hash, keystr,
                     hash_value_from_pmc(INTERP, hash, box));
         }
@@ -753,7 +760,7 @@ Returns the PMC value for the element at C<*key>.
 
         /* autovivify an Hash */
         if (PMC_IS_NULL(box))
-            box = pmc_new(INTERP, SELF.type());
+            box = Parrot_pmc_new(INTERP, SELF.type());
 
         VTABLE_set_number_keyed(INTERP, box, nextkey, value);
     }
@@ -799,7 +806,7 @@ Sets C<value> as the value for C<*key>.
             box = hash_value_to_pmc(INTERP, hash, b->value);
         else {
             /* autovivify an Hash */
-            box = pmc_new(INTERP, SELF.type());
+            box = Parrot_pmc_new(INTERP, SELF.type());
             parrot_hash_put(INTERP, hash, keystr,
                     hash_value_from_pmc(INTERP, hash, box));
         }
@@ -994,7 +1001,7 @@ Return a new iterator.
 */
 
     VTABLE PMC *get_iter() {
-        return pmc_new_init(INTERP, enum_class_HashIterator, SELF);
+        return Parrot_pmc_new_init(INTERP, enum_class_HashIterator, SELF);
     }
 
 /*
@@ -1078,7 +1085,7 @@ Return a new iterator for the slice PMC C<key>
 
 /*
 
-=item C<void visit(visit_info *info)>
+=item C<void visit(PMC *info)>
 
 Used during archiving to visit the elements in the hash.
 
@@ -1086,14 +1093,14 @@ Used during archiving to visit the elements in the hash.
 
 */
 
-    VTABLE void visit(visit_info *info) {
+    VTABLE void visit(PMC *info) {
         parrot_hash_visit(INTERP, (Hash *)SELF.get_pointer(), info);
         SUPER(info);
     }
 
 /*
 
-=item C<void freeze(visit_info *info)>
+=item C<void freeze(PMC *info)>
 
 Used to archive the hash.
 
@@ -1101,7 +1108,7 @@ Used to archive the hash.
 
 */
 
-    VTABLE void freeze(visit_info *info) {
+    VTABLE void freeze(PMC *info) {
         Hash     * const hash = (Hash *)SELF.get_pointer();;
 
         SUPER(info);
@@ -1112,7 +1119,7 @@ Used to archive the hash.
 
 /*
 
-=item C<void thaw(visit_info *info)>
+=item C<void thaw(PMC *info)>
 
 Used to unarchive the hash.
 
@@ -1120,7 +1127,7 @@ Used to unarchive the hash.
 
 */
 
-    VTABLE void thaw(visit_info *info) {
+    VTABLE void thaw(PMC *info) {
         SUPER(info);
 
         {
@@ -1129,8 +1136,31 @@ Used to unarchive the hash.
             const INTVAL v_type = VTABLE_shift_integer(INTERP, info);
             Hash        *hash;
 
-            if (k_type == Hash_key_type_int && v_type == enum_hash_int) {
-                SELF.set_pointer(parrot_new_intval_hash(INTERP));
+            if (k_type != Hash_key_type_STRING || v_type != enum_hash_pmc) {
+                hash_comp_fn cmp_fn;
+                hash_hash_key_fn key_fn;
+
+                switch (k_type) {
+                  case Hash_key_type_int:
+                    key_fn = (hash_hash_key_fn)key_hash_int;
+                    cmp_fn = (hash_comp_fn)int_compare;
+                    break;
+                  case Hash_key_type_STRING:
+                    key_fn = (hash_hash_key_fn)key_hash_STRING;
+                    cmp_fn = (hash_comp_fn)STRING_compare;
+                    break;
+                  case Hash_key_type_PMC:
+                    key_fn = (hash_hash_key_fn)key_hash_PMC;
+                    cmp_fn = (hash_comp_fn)PMC_compare;
+                    break;
+                  default:
+                    Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                            "unimplemented key type");
+                    break;
+                }
+
+                SELF.set_pointer(parrot_create_hash(INTERP, (PARROT_DATA_TYPE)v_type,
+                                                    (Hash_key_type)k_type, cmp_fn, key_fn));
             }
 
             hash = (Hash *)SELF.get_pointer();

@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2001-2005, Parrot Foundation.
-  $Id$
+  $Id: gmp_c.in 42756 2009-11-21 18:12:20Z jkeenan $
 */
 
 #include <stdio.h>

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id$
+# $Id: dynlexpad.t 41388 2009-09-21 00:54:44Z coke $
 
 use strict;
 use warnings;

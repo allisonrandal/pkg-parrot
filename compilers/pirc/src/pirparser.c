@@ -318,7 +318,7 @@
 
 
 /*
- * $Id$
+ * $Id: pirparser.c 45130 2010-03-23 14:32:56Z petdance $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -404,6 +404,126 @@ int yypirlex(YYSTYPE *yylval, yyscan_t yyscanner);
 
 
 #endif
+
+/* HEADERIZER HFILE: none */
+
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static void check_first_arg_direction(
+    ARGMOD(lexer_state *lexer),
+    ARGIN(char const *opname))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*lexer);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PARROT_MALLOC
+static char * concat_strings(
+    ARGMOD(lexer_state *lexer),
+    ARGIN(const char * a),
+    ARGIN(const char * b))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*lexer);
+
+static void create_if_instr(
+    ARGMOD(lexer_state *lexer),
+    int invert,
+    int hasnull,
+    ARGIN(const char *name),
+    ARGIN(const char *label))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(4)
+        __attribute__nonnull__(5)
+        FUNC_MODIFIES(*lexer);
+
+static void do_strength_reduction(ARGMOD(lexer_state *lexer))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*lexer);
+
+PARROT_WARN_UNUSED_RESULT
+static int evaluate_i_i(int a, pir_rel_operator op, int b);
+
+PARROT_WARN_UNUSED_RESULT
+static int evaluate_i_n(int a, pir_rel_operator op, double b);
+
+PARROT_WARN_UNUSED_RESULT
+static int evaluate_n_i(double a, pir_rel_operator op, int b);
+
+static void undeclared_symbol(
+    ARGMOD(lexer_state *lexer),
+    ARGIN(char const *symbol))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*lexer);
+
+static void yy_reduce_print (
+    YYSTYPE *yyvsp,
+    int yyrule,
+    yyscan_t yyscanner,
+    struct lexer_state * const lexer);
+
+static void yy_stack_print (yytype_int16 *bottom, yytype_int16 *top);
+static void yy_symbol_print (
+    FILE *yyoutput,
+    int yytype,
+    YYSTYPE const * const yyvaluep,
+    yyscan_t yyscanner,
+    struct lexer_state * const lexer);
+
+static void yy_symbol_value_print (
+    FILE *yyoutput,
+    int yytype,
+    YYSTYPE const * const yyvaluep,
+    yyscan_t yyscanner,
+    struct lexer_state * const lexer);
+
+static void yydestruct (
+    const char *yymsg,
+    int yytype,
+    YYSTYPE *yyvaluep,
+    yyscan_t yyscanner,
+    struct lexer_state * const lexer);
+
+static int YYID (int i);
+static char * yystpcpy (char *yydest, const char *yysrc);
+static YYSIZE_T yystrlen (const char *yystr);
+static YYSIZE_T yysyntax_error (char *yyresult, int yystate, int yychar);
+static YYSIZE_T yytnamerr (char *yyres, const char *yystr);
+#define ASSERT_ARGS_check_first_arg_direction __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lexer) \
+    , PARROT_ASSERT_ARG(opname))
+#define ASSERT_ARGS_concat_strings __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lexer) \
+    , PARROT_ASSERT_ARG(a) \
+    , PARROT_ASSERT_ARG(b))
+#define ASSERT_ARGS_create_if_instr __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lexer) \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(label))
+#define ASSERT_ARGS_do_strength_reduction __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lexer))
+#define ASSERT_ARGS_evaluate_i_i __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_evaluate_i_n __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_evaluate_n_i __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_undeclared_symbol __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lexer) \
+    , PARROT_ASSERT_ARG(symbol))
+#define ASSERT_ARGS_yy_reduce_print  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yy_stack_print  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yy_symbol_print  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yy_symbol_value_print  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yydestruct  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_YYID  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yystpcpy  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yystrlen  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yysyntax_error  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_yytnamerr  __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
 
 char *expand_macro(yyscan_t yyscanner, macro_def * const macro, macro_param * args);
 
@@ -5405,8 +5525,8 @@ other operators will result in an error.
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static constant *
-fold_s_s(yyscan_t yyscanner, NOTNULL(char const *a), pir_math_operator op, NOTNULL(char const *b)) {
-    lexer_state *lexer = (lexer_state *)yypirget_extra(yyscanner);
+fold_s_s(yyscan_t yyscanner, ARGIN(const char *a), pir_math_operator op, ARGIN(char const *b)) {
+    lexer_state * const lexer = (lexer_state *)yypirget_extra(yyscanner);
     switch (op) {
         case OP_CONCAT:
             return new_const(lexer, STRING_VAL, concat_strings(lexer, a, b));
@@ -5450,8 +5570,7 @@ fold_s_s(yyscan_t yyscanner, NOTNULL(char const *a), pir_math_operator op, NOTNU
 
 /*
 
-=item C<static int
-evaluate_i_i(int a, pir_rel_operator op, double b)>
+=item C<static int evaluate_i_i(int a, pir_rel_operator op, int b)>
 
 Compare C<a> with C<b> according to the relational operator C<op>.
 Wrapper for C<evaluate_n_n>, which takes arguments of type double.
@@ -5467,8 +5586,7 @@ evaluate_i_i(int a, pir_rel_operator op, int b) {
 
 /*
 
-=item C<static int
-evaluate_n_i(int a, pir_rel_operator op, double b)>
+=item C<static int evaluate_n_i(double a, pir_rel_operator op, int b)>
 
 Compare C<a> with C<b> according to the relational operator C<op>.
 Wrapper for C<evaluate_n_n>, which takes arguments of type double.
@@ -5484,8 +5602,7 @@ evaluate_n_i(double a, pir_rel_operator op, int b) {
 
 /*
 
-=item C<static int
-evaluate_i_n(int a, pir_rel_operator op, double b)>
+=item C<static int evaluate_i_n(int a, pir_rel_operator op, double b)>
 
 Compare C<a> with C<b> according to the relational operator C<op>.
 Wrapper for C<evaluate_n_n>, which takes arguments of type double.
@@ -5548,8 +5665,8 @@ Parrot source code; this function uses the result of C<strcmp()>.
 */
 PARROT_WARN_UNUSED_RESULT
 static int
-evaluate_s_s(NOTNULL(char const * const a), pir_rel_operator op, NOTNULL(char const * const b)) {
-    int result = strcmp(a, b); /* do /not/ use STREQ; we're interested in the result. */
+evaluate_s_s(ARGIN(const char *a), pir_rel_operator op, ARGIN(const char *b)) {
+    const int result = strcmp(a, b); /* do /not/ use STREQ; we're interested in the result. */
 
     switch (op) {
         case OP_NE:
@@ -5583,8 +5700,8 @@ Otherwise, it's true.
 */
 PARROT_WARN_UNUSED_RESULT
 static int
-evaluate_s(NOTNULL(char const * const s)) {
-    int strlen_s = strlen(s);
+evaluate_s(ARGIN(char const *s)) {
+    const size_t strlen_s = strlen(s);
 
     if (strlen_s > 0) {
         if (strlen_s <= 3) { /* if strlen > 3, (max. nr of characters to represent "0")
@@ -5615,7 +5732,7 @@ to evaluate the string.
 */
 PARROT_WARN_UNUSED_RESULT
 static int
-evaluate_c(NOTNULL(lexer_state * const lexer), NOTNULL(constant * const c)) {
+evaluate_c(ARGIN(lexer_state * const lexer), ARGIN(const constant *c)) {
     switch (c->type) {
         case INT_VAL:
             return (c->val.ival != 0);
@@ -5633,8 +5750,8 @@ evaluate_c(NOTNULL(lexer_state * const lexer), NOTNULL(constant * const c)) {
 
 /*
 
-=item C<static char *
-concat_strings(lexer_state * const lexer, char const *a, char const *b)>
+=item C<static char * concat_strings(lexer_state *lexer, const char * a, const
+char * b)>
 
 Concatenates two strings into a new buffer. The new string is returned.
 
@@ -5643,12 +5760,13 @@ Concatenates two strings into a new buffer. The new string is returned.
 */
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
+PARROT_MALLOC
 static char *
-concat_strings(NOTNULL(lexer_state * const lexer), NOTNULL(char const * a),
-               NOTNULL(char const * b))
+concat_strings(ARGMOD(lexer_state *lexer), ARGIN(const char * a),
+               ARGIN(const char * b))
 {
-    int strlen_a = strlen(a);
-    char *newstr = (char *)pir_mem_allocate_zeroed(lexer, (strlen_a + strlen(b) + 1)
+    const size_t strlen_a = strlen(a);
+    const char * const newstr = (char *)pir_mem_allocate_zeroed(lexer, (strlen_a + strlen(b) + 1)
                                                           * sizeof (char));
     strcpy(newstr, a);
     strcpy(newstr + strlen_a, b);
@@ -5659,9 +5777,8 @@ concat_strings(NOTNULL(lexer_state * const lexer), NOTNULL(char const * a),
 
 /*
 
-=item C<static void
-create_if_instr(lexer_state *lexer, int invert, int hasnull,
-                char * const name, char * const label)>
+=item C<static void create_if_instr(lexer_state *lexer, int invert, int hasnull,
+const char *name, const char *label)>
 
 Create an C<if> or C<unless> instruction; if C<invert> is non-zero (true), the
 C<if> instruction is inverted, effectively becoming C<unless>.
@@ -5675,9 +5792,8 @@ C<name> is the name of the variable that is checked during this instruction
 
 */
 static void
-create_if_instr(NOTNULL(lexer_state * const lexer), int invert, int hasnull,
-                NOTNULL(char const * const name),
-                NOTNULL(char const * const label))
+create_if_instr(ARGMOD(lexer_state *lexer), int invert, int hasnull,
+                ARGIN(const char *name), ARGIN(const char *label))
 {
     /* try to find the symbol; if it was declared it will be found; otherwise emit an error. */
     symbol *sym = find_symbol(lexer, name);
@@ -5908,8 +6024,7 @@ convert_3_to_2_args(int opcode, NOTNULL(int *second_op_index)) {
 
 /*
 
-=item C<static void
-do_strength_reduction(lexer_state * const lexer)>
+=item C<static void do_strength_reduction(lexer_state *lexer)>
 
 Implement strength reduction for the math operators C<add>, C<sub>, C<mul>, C<div> and C<fdiv>.
 If the current instruction is any of these, then the first two operands are checked; if both
@@ -5934,7 +6049,7 @@ becomes:
 
 */
 static void
-do_strength_reduction(lexer_state * const lexer) {
+do_strength_reduction(ARGMOD(lexer_state *lexer)) {
     instruction *instr;
     expression  *arg1;
     expression  *arg2;
@@ -6038,13 +6153,13 @@ do_strength_reduction(lexer_state * const lexer) {
             break;
     }
 
-
+    return;
 }
 
 /*
 
-=item C<static void
-check_first_arg_direction(lexer_state * const lexer, char * const opname)>
+=item C<static void check_first_arg_direction(lexer_state *lexer, char const
+*opname)>
 
 This function checks the first argument's  direction of the op C<opname>.
 If the direction is not C<OUT>, a syntax error is emitted. This function assumes
@@ -6064,7 +6179,7 @@ not be allowed.
 
 */
 static void
-check_first_arg_direction(lexer_state * const lexer, NOTNULL(char const * const opname)) {
+check_first_arg_direction(ARGMOD(lexer_state *lexer), ARGIN(char const *opname)) {
     int dir_first_arg;
 
     /* op_count also counts the instruction itself, so must be at least 2 */
@@ -6074,7 +6189,7 @@ check_first_arg_direction(lexer_state * const lexer, NOTNULL(char const * const 
     if (!CURRENT_INSTRUCTION(lexer)->opinfo->dirs)
         fprintf(stderr, "no opinfo->dirs!\n");
     else {
-        op_info_t *opinfo = CURRENT_INSTRUCTION(lexer)->opinfo;
+        const op_info_t * const opinfo = CURRENT_INSTRUCTION(lexer)->opinfo;
 
         if (opinfo)
             dir_first_arg = CURRENT_INSTRUCTION(lexer)->opinfo->dirs[0];
@@ -6088,7 +6203,6 @@ check_first_arg_direction(lexer_state * const lexer, NOTNULL(char const * const 
     if (dir_first_arg != PARROT_ARGDIR_OUT)
         yypirerror(lexer->yyscanner, lexer, "cannot write first arg of op '%s' as a target "
                                             "(direction of argument is IN/INOUT).", opname);
-
 }
 
 
@@ -6114,12 +6228,10 @@ If there are errors, FALSE is returned; if successful, TRUE is returned.
 */
 PARROT_WARN_UNUSED_RESULT
 static int
-check_op_args_for_symbols(lexer_state * const lexer) {
+check_op_args_for_symbols(ARGMOD(lexer_state *lexer)) {
     struct op_info_t  * opinfo;
     unsigned short      i;
     short               opcount;
-    unsigned            num_operands;
-    char               *fullopname;
     int                 opcode;
     int                 result;
     int                 label_bitmask = 0; /* an int is at least 32 bits;
@@ -6129,9 +6241,10 @@ check_op_args_for_symbols(lexer_state * const lexer) {
                                             */
 
     /* iterate over all operands to set the type and PASM register on all target nodes, if any */
-    num_operands = get_operand_count(lexer);
+    const unsigned int num_operands = get_operand_count(lexer);
+
     for (i = 0; i < num_operands; i++) {
-        expression *operand = get_operand(lexer, i + 1); /* get_operand counts from 1 */
+        expression * const operand = get_operand(lexer, i + 1); /* get_operand counts from 1 */
 
         if (operand->type == EXPR_IDENT) { /* op_arg ::= identifier */
             /* the operand is an identifier, check now whether it was a symbol. If so,
@@ -6217,8 +6330,7 @@ check_op_args_for_symbols(lexer_state * const lexer) {
 
 /*
 
-=item C<static void
-undeclared_symbol(lexer_state * const lexer, char * const symbol)>
+=item C<static void undeclared_symbol(lexer_state *lexer, char const *symbol)>
 
 Report an error message saying that C<symbol> was not declared. Then test
 whether the symbol is perhaps a PASM register identifier. The user may have
@@ -6228,7 +6340,7 @@ mistakenly tried to use a PASM register in PIR mode.
 
 */
 static void
-undeclared_symbol(lexer_state * const lexer, char const * const symbol) {
+undeclared_symbol(ARGMOD(lexer_state *lexer), ARGIN(char const *symbol)) {
     if (TEST_FLAG(lexer->flags, LEXER_FLAG_PASMFILE)) {
         yypirerror(lexer->yyscanner, lexer,
                    "cannot use symbols in PASM mode ('%s')", symbol);

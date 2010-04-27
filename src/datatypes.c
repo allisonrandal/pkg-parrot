@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2002-2009, Parrot Foundation.
 License:  Artistic 2.0, see README and LICENSE for details
-$Id$
+$Id: datatypes.c 39173 2009-05-26 05:52:21Z petdance $
 
 =head1 NAME
 

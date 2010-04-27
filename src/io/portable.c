@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+$Id: portable.c 41753 2009-10-07 19:59:25Z darbelo $
 
 =head1 NAME
 

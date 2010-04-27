@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006, Parrot Foundation.
-# $Id$
+# $Id: benchmarks.t 43695 2010-02-01 21:11:43Z bacek $
 
 use strict;
 use warnings;
@@ -30,10 +30,6 @@ my %outputs = (
     q{addit.pasm}       => qq(21001097.97\n),
     q{addit2.pir}       => qq(21001097.97\n),
     q{array_access.pir} => qr/
-1\s\*\s1000\s=\s1000\n
-100\s\*\s1000\s=\s100000\n
-Array:\s\d+\.\d+s\n
-\n
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
 FixedFloatArray:\s\d+\.\d+s\n

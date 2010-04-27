@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id$
+# $Id: 08-pmc-pm.t 42769 2009-11-21 19:53:17Z jkeenan $
 # 08-pmc-pm.t
 
 use strict;

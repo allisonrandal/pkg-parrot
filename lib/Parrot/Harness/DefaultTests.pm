@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: DefaultTests.pm 45320 2010-03-30 16:00:01Z cotto $
 
 =head1 NAME
 
@@ -72,8 +72,8 @@ our @EXPORT_OK = qw(
 # core tests are run unless --runcore-tests is present.  Typically
 # this list and the list above are run in response to --core-tests
 @core_tests = qw(
-    t/run/*.t
     t/src/*.t
+    t/run/*.t
     t/perl/*.t
 );
 
@@ -86,6 +86,7 @@ our @EXPORT_OK = qw(
     t/compilers/tge/*.t
     t/library/*.t
     t/tools/*.t
+    t/profiling/*.t
 );
 
 # configure tests are tests to be run at the beginning of 'make test';

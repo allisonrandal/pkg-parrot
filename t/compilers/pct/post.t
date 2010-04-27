@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: post.t 41430 2009-09-23 12:16:12Z bacek $
 
 use strict;
 use warnings;

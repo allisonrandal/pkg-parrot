@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: Methods.pm 40189 2009-07-21 12:15:55Z jkeenan $
 
 package Parrot::Configure::Step::Methods;
 use strict;

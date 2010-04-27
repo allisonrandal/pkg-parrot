@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: nqp.pir 43593 2010-01-26 02:39:50Z jkeenan $
 
 .namespace [ 'NQP';'Compiler' ]
 
@@ -22,11 +22,11 @@
     .tailcall $P0.'command_line'(args, 'encoding'=>'utf8', 'transcode'=>'ascii')
 .end
 
-.include 'src/Grammar_gen.pir'
+.include 'compilers/nqp/src/Grammar_gen.pir'
 
-.include 'src/Grammar/Actions.pir'
+.include 'compilers/nqp/src/Grammar/Actions.pir'
 
-.include 'src/builtins.pir'
+.include 'compilers/nqp/src/builtins.pir'
 
 # Local Variables:
 #   mode: pir

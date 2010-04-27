@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: Tools.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -45,8 +45,6 @@ sub new {
             'Configuration',
             '',
             $self->new_item( '', 'tools/dev/as2c.pl' ),
-            $self->new_item( '', 'tools/dev/cc_flags.pl' ),
-            $self->new_item( '', 'tools/build/nativecall.pl' ),
             $self->new_item( '', 'tools/build/vtable_h.pl' ),
             $self->new_item( '', 'tools/build/vtable_extend.pl' ),
         ),
@@ -55,8 +53,6 @@ sub new {
             '',
             $self->new_item( '', 'docs/configuration.pod' ),
             $self->new_item( '', 'tools/build/c2str.pl' ),
-            $self->new_item( '', 'tools/build/dynoplibs.pl' ),
-            $self->new_item( '', 'tools/build/dynpmc.pl' ),
             $self->new_item( '', 'tools/build/ops2c.pl' ),
             $self->new_item( '', 'tools/build/ops2pm.pl' ),
             $self->new_item( '', 'tools/build/parrot_config_c.pl' ),

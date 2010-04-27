@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: number.t 44387 2010-02-23 12:36:16Z mikehh $
 
 =head1 NAME
 
@@ -935,7 +935,6 @@ Tests the use of Parrot floating-point number registers.
 
 # Local Variables:
 #   mode: pir
-#   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:

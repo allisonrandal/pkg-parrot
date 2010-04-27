@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# $Id: hllmacros.t 37840 2009-04-01 17:19:14Z barney $
 
 .include 'hllmacros.pir'
 .sub main :main

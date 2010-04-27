@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2006-2009, Parrot Foundation.
- * $Id$
+ * $Id: math.c 37877 2009-04-02 20:20:22Z coke $
  */
 
 /*

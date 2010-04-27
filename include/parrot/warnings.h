@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: warnings.h 41533 2009-09-27 17:30:32Z NotFound $
  * Copyright (C) 2002-2007, Parrot Foundation.
  */
 

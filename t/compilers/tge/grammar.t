@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, Parrot Foundation.
-# $Id$
+# $Id: grammar.t 42166 2009-10-30 00:14:47Z coke $
 
 use strict;
 use warnings;

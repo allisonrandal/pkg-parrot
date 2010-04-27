@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: gettingstarted.pod 37226 2009-03-09 04:08:08Z allison $
 
 =head1 NAME
 

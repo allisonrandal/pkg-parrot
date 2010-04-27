@@ -1,15 +1,15 @@
 #! perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# $Id: harness 43593 2010-01-26 02:39:50Z jkeenan $
 
 use strict;
 use warnings;
 
-use lib '../../lib';
+use lib qw(lib);
 
 use Test::Harness;
 
-my @tests = @ARGV ? @ARGV : <t/*.t>;
+my @tests = @ARGV ? @ARGV : <compilers/pirc/t/*.t>;
 
 eval { require TAP::Harness };
 if ($@) {

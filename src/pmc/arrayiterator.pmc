@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: arrayiterator.pmc 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ Generic iterator for traversing arrays.
 
 NB: for different direction you have to use different ops!
 
-TODO: Discuss idea of having separate get_iter/get_reverse_iter VTABLE methods
+TODO: Discuss idea of having separate get_iter/get_reverse_iter VTABLEs
 to avoid this caveat.
 
 =head1 Methods
@@ -50,6 +50,10 @@ to avoid this caveat.
 =cut
 
 */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass ArrayIterator extends Iterator no_ro auto_attrs {
     ATTR PMC    *array;     /* the array which this Iterator iterates */
@@ -128,7 +132,7 @@ Marks the current idx/key and the aggregate as live.
         GET_ATTR_pos(interp, SELF, pos);
         GET_ATTR_reverse(interp, SELF, reverse);
 
-        clone = pmc_new_init(INTERP, enum_class_ArrayIterator, array);
+        clone = Parrot_pmc_new_init(INTERP, enum_class_ArrayIterator, array);
 
         SET_ATTR_pos(interp, clone, pos);
         SET_ATTR_reverse(interp, clone, reverse);

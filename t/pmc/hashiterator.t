@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: hashiterator.t 44379 2010-02-23 11:15:03Z mikehh $
 
 =head1 NAME
 

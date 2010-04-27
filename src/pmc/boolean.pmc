@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id$
+$Id: boolean.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -20,6 +20,8 @@ it doesn't morph to other types. Only its value is changed.
 =cut
 
 */
+
+/* HEADERIZER HFILE: none */
 
 pmclass Boolean extends Integer provides boolean provides scalar auto_attrs {
 

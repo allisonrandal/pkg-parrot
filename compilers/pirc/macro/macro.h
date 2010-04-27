@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: macro.h 36666 2009-02-13 10:23:23Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 #ifndef PARROT_PIR_MACRO_H_GUARD

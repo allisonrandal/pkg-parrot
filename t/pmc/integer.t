@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: integer.t 44379 2010-02-23 11:15:03Z mikehh $
 
 =head1 NAME
 
@@ -416,8 +416,7 @@ fin:
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

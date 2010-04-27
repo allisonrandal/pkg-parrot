@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: string.h 36833 2009-02-17 20:09:26Z allison $
  * Copyright (C) 2007, Parrot Foundation.
  */
 

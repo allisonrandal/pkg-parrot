@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: progs-03.t 42594 2009-11-20 02:41:47Z jkeenan $
 # inter/progs-03.t
 
 use strict;

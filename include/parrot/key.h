@@ -1,7 +1,7 @@
 /* key.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: key.h 45406 2010-04-05 07:01:14Z petdance $
  *  Overview:
  *     This is the API header for the PMC subsystem
  *  Data Structure and Algorithms:
@@ -161,6 +161,7 @@ STRING * key_set_to_string(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL key_type(SHIM_INTERP, ARGIN(const PMC *key))
         __attribute__nonnull__(2);

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: io.t 43488 2010-01-20 00:18:10Z plobsing $
 
 use strict;
 use warnings;
@@ -665,15 +665,14 @@ sub_2: 012
 sub_3: 345
 OUTPUT
 
-pir_output_like(
-    <<'CODE', <<'OUT', 'read on null PMC throws exception', todo => 'not yet implemented TT #433' );
+pir_error_output_like( <<'CODE', <<'OUT', 'read on null PMC throws exception');
 .sub main :main
     null $P1
     $S0 = read $P1, 1
     end
 .end
 CODE
-/some crazy exception/
+/read from null/
 OUT
 
 ($FOO, $temp_file) = create_tempfile( UNLINK => 1 );

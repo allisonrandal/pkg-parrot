@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: object-meths.t 42708 2009-11-21 14:26:46Z jkeenan $
 
 use strict;
 use warnings;

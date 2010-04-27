@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: darwin.pm 44649 2010-03-05 16:20:00Z tene $
 
 package init::hints::darwin;
 
@@ -90,8 +90,7 @@ sub runstep {
         rpath                  => "-L",
         libparrot_soname       => "-install_name "
             . $lib_dir
-            . $conf->data->get('slash')
-            . "libparrot"
+            . '/libparrot'
             . $conf->data->get('share_ext')
     );
 }

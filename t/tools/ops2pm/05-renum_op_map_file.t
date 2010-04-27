@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: 05-renum_op_map_file.t 45048 2010-03-18 23:31:42Z jkeenan $
 # 05-renum_op_map_file.t
 
 use strict;
@@ -33,6 +33,8 @@ ok(-d $samplesdir, "Able to locate samples directory");
     chdir $tdir or croak "Unable to change to testing directory: $!";
     my $opsdir = File::Spec->catdir ( $tdir, 'src', 'ops' );
     mkpath( [ $opsdir ], 0, 0755 ) or croak "Unable to make testing directory";
+    my $incpardir = File::Spec->catdir ( $tdir, 'include', 'parrot' );
+    mkpath( [ $incpardir ], 0, 0755 ) or croak "Unable to make testing directory";
 
     ##### Stage 1:  Generate ops.num de novo #####
 
@@ -126,4 +128,11 @@ sub get_last_opcode {
         unless (defined $lastcode and defined $lastnumber);
     return ($lastcode, $lastnumber);
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

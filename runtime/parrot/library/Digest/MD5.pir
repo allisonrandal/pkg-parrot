@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: MD5.pir 38693 2009-05-11 18:45:05Z NotFound $
 #
 # Parrot MD5 library; Nick Glencross <nickg@glencros.demon.co.uk>
 #                     Improvements from Leo and Jens Rieks

@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2009-2010, Parrot Foundation.
+# $Id: exit.t 44424 2010-02-24 00:21:37Z mikehh $
 
 use strict;
 use warnings;
@@ -65,6 +65,7 @@ TODO: {
     pbc_exit_code_is($pbc, 0, 'pbc exits with 0 by default');
 }
 
+# Local Variables:
 #   mode: cperl
 #   cperl-indent-level: 4
 #   fill-column: 100

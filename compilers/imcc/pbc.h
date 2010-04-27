@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: pbc.h 44649 2010-03-05 16:20:00Z tene $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -28,7 +28,7 @@ int e_pbc_new_sub(PARROT_INTERP, SHIM(void *param), ARGIN(IMC_Unit *unit))
         __attribute__nonnull__(1)
         __attribute__nonnull__(3);
 
-int e_pbc_open(PARROT_INTERP, SHIM(void *param))
+int e_pbc_open(PARROT_INTERP, SHIM(const char *param))
         __attribute__nonnull__(1);
 
 PARROT_WARN_UNUSED_RESULT

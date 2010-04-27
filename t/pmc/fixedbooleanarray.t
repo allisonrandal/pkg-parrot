@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: fixedbooleanarray.t 44877 2010-03-11 14:38:10Z dukeleto $
 
 =head1 NAME
 
@@ -17,12 +17,10 @@ out-of-bounds test. Checks INT and PMC keys.
 
 =cut
 
-.const int TESTS = 36
-
 .sub 'test' :main
     .include 'test_more.pir'
 
-    plan(TESTS)
+    plan(41)
 
     setting_array_size()
     resizing_not_allowed()
@@ -36,9 +34,11 @@ out-of-bounds test. Checks INT and PMC keys.
     truth()
     pmc_keys_and_values()
     freeze_thaw()
-    'clone'()
+    test_clone()
     get_iter()
     fill()
+    test_new_style_init()
+    test_invalid_init_tt1509()
 .end
 
 .sub 'setting_array_size'
@@ -244,7 +244,7 @@ out-of-bounds test. Checks INT and PMC keys.
     is($S0, '01001000100010010', 'FixedBooleanArray after thaw')
 .end
 
-.sub 'clone'
+.sub test_clone
     .local pmc fba1, fba2
     .local int i
     .local string s
@@ -292,18 +292,17 @@ out-of-bounds test. Checks INT and PMC keys.
     size = 1564
     $P0 = size
 
-    $P0.'fill'(0)
+    # Fresh array is empty.
     i = 0
     result = 0
-    $I1 = 0
-  fill_false_loop:
-    unless i < size goto fill_false_end
+  initial_false_loop:
+    unless i < size goto initial_false_end
     $I0 = $P0[i]
     result = or result, $I0
     inc i
-    goto fill_false_loop
-  fill_false_end:
-    nok(result, "Fill with 0")
+    goto initial_false_loop
+  initial_false_end:
+    nok(result, "Fresh array filled with 0")
 
     $P0.'fill'(1)
     i = 0
@@ -317,12 +316,50 @@ out-of-bounds test. Checks INT and PMC keys.
     goto fill_true_loop
   fill_true_end:
     ok(result, "Fill with 1")
+
+    $P0.'fill'(0)
+    i = 0
+    result = 0
+    $I1 = 0
+  fill_false_loop:
+    unless i < size goto fill_false_end
+    $I0 = $P0[i]
+    result = or result, $I0
+    inc i
+    goto fill_false_loop
+  fill_false_end:
+    nok(result, "Fill with 0")
+
 .end
 
+.sub test_new_style_init
+    $P0 = new 'FixedBooleanArray', 10
+
+    $I0 = $P0
+    is($I0, 10, "New style init creates the correct # of elements")
+
+    $P0 = new ['FixedBooleanArray'], 10
+
+    $I0 = $P0
+    is($I0, 10, "New style init creates the correct # of elements for a key constant")
+.end
+
+.sub test_invalid_init_tt1509
+    throws_substring(<<'CODE', 'FixedBooleanArray: Cannot set array size to a negative number (-10)', 'New style init does not dump core for negative array lengths')
+    .sub main
+        $P0 = new ['FixedBooleanArray'], -10
+    .end
+CODE
+
+    throws_substring(<<'CODE', 'FixedBooleanArray: Cannot set array size to a negative number (-10)', 'New style init (key constant) does not dump core for negative array lengths')
+    .sub main
+        $P0 = new 'FixedBooleanArray', -10
+    .end
+CODE
+.end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

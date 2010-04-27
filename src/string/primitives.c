@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006-2009, Parrot Foundation.
-$Id$
+$Id: primitives.c 44291 2010-02-22 09:28:39Z bacek $
 
 =head1 NAME
 
@@ -357,7 +357,7 @@ str_dup_remove_quotes(ARGIN(const char *old))
 
     /* 2 for the beginning and ending quote chars */
     const size_t newlen = oldlen - 2;
-    char * const copy   = (char *)mem_sys_allocate(newlen);
+    char * const copy   = (char *)mem_internal_allocate(newlen);
 
     memcpy(copy, old + 1, newlen);
     copy[newlen - 1] = 0;

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: spf_vtable.c 42917 2009-12-06 14:56:10Z fperrad $
 
 =head1 NAME
 

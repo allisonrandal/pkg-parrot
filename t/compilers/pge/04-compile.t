@@ -1,5 +1,6 @@
 #!parrot
-# $Id$
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 04-compile.t 44368 2010-02-23 05:19:04Z mikehh $
 
 # Copyright (C) 2007-2009, Parrot Foundation.
 
@@ -76,10 +77,8 @@ Tests various arguments to the compiler.
     is($P3, 'ok 1', 'compile into a new grammar, 2x')
 .end
 
-
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:
