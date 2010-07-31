@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: perlcritic.t 44630 2010-03-04 20:39:13Z coke $
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: perlcritic.t 46922 2010-05-23 21:38:28Z bacek $
 
 =head1 NAME
 
@@ -85,6 +85,7 @@ if ( !@ARGV ) {
     @files = grep {! m/$filter_languages/}
              map  { $_->path }
              grep { $_->read !~ m/use v6;/ }
+             grep { $_->read !~ m/#! nqp/ }
              $dist->get_perl_language_files();
 }
 else {

@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: namespace-subs.t 45541 2010-04-10 21:46:35Z allison $
+# $Id: namespace-subs.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 
@@ -73,8 +73,7 @@ specified behavior for :method, :vtable, :nsentry, and :anon.
     is($I1, 75, "Invoked stored method")
 
     $P2 = get_hll_global ['MethodTest'], 'methodtest'
-    todo(0, "Method not stored in namespace", "see TT #389")
-#    is_null($P2, "Method not stored in namespace")
+    is_null($P2, "Method not stored in namespace")
 .end
 
 .sub 'store_nsentry'

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: packfilefixupentry.pmc 45219 2010-03-28 01:11:50Z petdance $
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: packfilefixupentry.pmc 47722 2010-06-20 08:51:14Z bacek $
 
 =head1 NAME
 
@@ -42,7 +42,24 @@ Initialize PackfileFixupEntry.
         Parrot_PackfileFixupEntry_attributes * attrs =
                 PMC_data_typed(SELF, Parrot_PackfileFixupEntry_attributes*);
 
-        attrs->name = Parrot_str_new_noinit(interp, enum_stringrep_one, 0);
+        attrs->name = Parrot_str_new_noinit(INTERP, enum_stringrep_one, 0);
+
+        PObj_custom_mark_SET(SELF);
+    }
+
+    VTABLE void init_pmc(PMC *init) {
+        Parrot_PackfileFixupEntry_attributes * attrs =
+                PMC_data_typed(SELF, Parrot_PackfileFixupEntry_attributes*);
+        STRING *name    = CONST_STRING_GEN(INTERP, "name");
+        STRING *type    = CONST_STRING_GEN(INTERP, "type");
+        STRING *offset  = CONST_STRING_GEN(INTERP, "offset");
+
+        attrs->name = VTABLE_get_string(INTERP,
+                        VTABLE_get_pmc_keyed_str(INTERP, init, name));
+        attrs->type = VTABLE_get_integer(INTERP,
+                        VTABLE_get_pmc_keyed_str(INTERP, init, type));
+        attrs->offset = VTABLE_get_integer(INTERP,
+                        VTABLE_get_pmc_keyed_str(INTERP, init, offset));
 
         PObj_custom_mark_SET(SELF);
     }
@@ -58,10 +75,10 @@ Marks the object as live.
 */
 
     VTABLE void mark() {
-        Parrot_PackfileFixupEntry_attributes * attrs =
+        Parrot_PackfileFixupEntry_attributes * const attrs =
                 PARROT_PACKFILEFIXUPENTRY(SELF);
 
-        Parrot_gc_mark_STRING_alive(interp, attrs->name);
+        Parrot_gc_mark_STRING_alive(INTERP, attrs->name);
     }
 
 /*
@@ -75,12 +92,12 @@ Initialize from PackFile_FixupEntry pointer.
 */
 
     VTABLE void set_pointer(void * pointer) {
-        Parrot_PackfileFixupEntry_attributes * attrs =
+        Parrot_PackfileFixupEntry_attributes * const attrs =
                 PARROT_PACKFILEFIXUPENTRY(SELF);
         PackFile_FixupEntry *entry = (PackFile_FixupEntry*)pointer;
 
         attrs->type     = entry->type;
-        attrs->name     = Parrot_str_new_init(interp, entry->name,
+        attrs->name     = Parrot_str_new_init(INTERP, entry->name,
                 strlen(entry->name), PARROT_FIXED_8_ENCODING,
                 PARROT_BINARY_CHARSET, 0);
         attrs->offset   = entry->offset;
@@ -96,13 +113,13 @@ Create PackFile_FixupEntry* from self.
 
 */
     VTABLE void *get_pointer() {
-        Parrot_PackfileFixupEntry_attributes * attrs =
+        Parrot_PackfileFixupEntry_attributes * const attrs =
                 PARROT_PACKFILEFIXUPENTRY(SELF);
-        PackFile_FixupEntry                  * entry =
+        PackFile_FixupEntry                  * const entry =
                 mem_gc_allocate_zeroed_typed(INTERP, PackFile_FixupEntry);
 
         entry->type     = attrs->type;
-        entry->name     = strdup(Parrot_string_cstring(interp, attrs->name));
+        entry->name     = strdup(Parrot_str_cstring(INTERP, attrs->name));
         entry->offset   = attrs->offset;
         return entry;
     }
@@ -173,7 +190,7 @@ Fetch the type field of the fixup entry.
 
 */
     METHOD get_type() {
-        INTVAL rv = PARROT_PACKFILEFIXUPENTRY(SELF)->type;
+        const INTVAL rv = PARROT_PACKFILEFIXUPENTRY(SELF)->type;
         RETURN(INTVAL rv);
     }
 

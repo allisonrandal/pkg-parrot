@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: vtables.c 45585 2010-04-12 05:24:17Z petdance $
+$Id: vtables.c 46192 2010-04-30 08:27:15Z jimmy $
 
 =head1 NAME
 
@@ -184,7 +184,7 @@ parrot_free_vtables(PARROT_INTERP)
     ASSERT_ARGS(parrot_free_vtables)
     int i;
 
-    for (i = 0; i < interp->n_vtable_max; i++)
+    for (i = 0; i < interp->n_vtable_max; ++i)
         Parrot_destroy_vtable(interp, interp->vtables[i]);
 
     mem_internal_free(interp->vtables);
@@ -206,7 +206,7 @@ mark_vtables(PARROT_INTERP)
     ASSERT_ARGS(mark_vtables)
     INTVAL i;
 
-    for (i = 1; i < interp->n_vtable_max; i++) {
+    for (i = 1; i < interp->n_vtable_max; ++i) {
         const VTABLE * const vtable = interp->vtables[i];
 
         /* XXX dynpmc groups have empty slots for abstract objects */

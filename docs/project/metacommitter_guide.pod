@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: metacommitter_guide.pod 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: metacommitter_guide.pod 46118 2010-04-28 19:31:05Z coke $
 
 =head1 Metacommitter Guide
 
@@ -66,10 +66,12 @@ permissions.)
 Congratulate the new member publicly by sending an email to
 parrot-dev@lists.parrot.org, and copying the new committer.
 
-
 The steps for the "languages" repository and Trac instance are the same,
 except the URLs are L<https://trac.parrot.org/languages/...> and the
 committer group is "languages_committers".
+
+Note that commit messages from the new member will be automatically held
+pending list-admin approval.
 
 =head2 To manage the list of Metacommitters
 

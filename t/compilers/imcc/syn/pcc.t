@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pcc.t 42729 2009-11-21 17:39:59Z jkeenan $
+# $Id: pcc.t 46433 2010-05-09 07:03:16Z plobsing $
 
 use strict;
 use warnings;
@@ -562,7 +562,7 @@ ok 1 - Unicode method names allowed
 ok 2 - Unicode method names allowed
 OUT
 
-pir_output_is( <<'CODE', <<'OUT', 'named parameters', todo => 'long version fails, TT #1030');
+pir_output_is( <<'CODE', <<'OUT', 'named parameters');
 .sub main
 .local pmc foo
 foo = get_global 'foo'
@@ -621,7 +621,7 @@ xyz:<\>
 xyz:<\>
 OUT
 
-pir_output_is( <<'CODE', <<'OUT', ':named should default to param name', todo=>'TT #1152');
+pir_output_is( <<'CODE', <<'OUT', ':named should default to param name');
 .sub main
   $I0 = 'incr'('value'=>3)
   say $I0

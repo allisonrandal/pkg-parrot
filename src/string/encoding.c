@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2010, Parrot Foundation.
-$Id: encoding.c 45404 2010-04-05 05:07:38Z petdance $
+$Id: encoding.c 46998 2010-05-25 22:43:21Z darbelo $
 
 =head1 NAME
 
@@ -43,6 +43,7 @@ ENCODING *Parrot_fixed_8_encoding_ptr = NULL;
 ENCODING *Parrot_utf8_encoding_ptr    = NULL;
 ENCODING *Parrot_ucs2_encoding_ptr    = NULL;
 ENCODING *Parrot_utf16_encoding_ptr   = NULL;
+ENCODING *Parrot_ucs4_encoding_ptr    = NULL;
 
 typedef struct One_encoding {
     NOTNULL(ENCODING *encoding);
@@ -327,7 +328,7 @@ register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
     else
         all_encodings->enc = mem_gc_realloc_n_typed_zeroed(interp,
                 all_encodings->enc, n + 1, n, One_encoding);
-    all_encodings->n_encodings++;
+    ++all_encodings->n_encodings;
     all_encodings->enc[n].encoding = encoding;
 
     return 1;
@@ -351,7 +352,7 @@ Parrot_str_internal_register_encoding_names(PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_str_internal_register_encoding_names)
     int n;
-    for (n = 0; n < all_encodings->n_encodings; n++)
+    for (n = 0; n < all_encodings->n_encodings; ++n)
         all_encodings->enc[n].name =
             Parrot_str_new_constant(interp, all_encodings->enc[n].encoding->name);
 }
@@ -362,7 +363,7 @@ Parrot_str_internal_register_encoding_names(PARROT_INTERP)
 ENCODING *encoding)>
 
 Registers a character encoding C<encoding> with name C<encodingname>.
-Only allows one of 4 possibilities: fixed_8, utf8, utf16, and ucs2.
+Only allows one of 5 possibilities: fixed_8, utf8, utf16, ucs2 and ucs4.
 
 =cut
 
@@ -397,6 +398,10 @@ Parrot_register_encoding(PARROT_INTERP, ARGIN(const char *encodingname),
     }
     if (STREQ("ucs2", encodingname)) {
         Parrot_ucs2_encoding_ptr = encoding;
+        return register_encoding(interp, encodingname, encoding);
+    }
+    if (STREQ("ucs4", encodingname)) {
+        Parrot_ucs4_encoding_ptr = encoding;
         return register_encoding(interp, encodingname, encoding);
     }
     return 0;

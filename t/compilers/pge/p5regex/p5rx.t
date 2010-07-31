@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: p5rx.t 40268 2009-07-25 19:53:04Z whiteknight $
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: p5rx.t 47051 2010-05-27 08:45:23Z plobsing $
 # vi: ft=pir
 
 =head1 NAME
@@ -54,6 +54,8 @@ Column 6, if present, contains a description of what is being tested.
 =cut
 
 .const int TESTS = 960
+
+.loadlib 'io_ops'
 
 .sub main :main
     load_bytecode 'Test/Builder.pbc'
@@ -696,7 +698,7 @@ Column 6, if present, contains a description of what is being tested.
     # NOTE: there can be multiple tabs between entries, so skip until
     # we have something.
     # remove the trailing newline from record
-    chopn test_line, 1
+    test_line = chopn test_line, 1
 
     $P1 = split "\t", test_line
 
@@ -789,7 +791,7 @@ Column 6, if present, contains a description of what is being tested.
 .end
 
 
-# given a single digit hex value, return it's int value.
+# given a single digit hex value, return its int value.
 .sub hex_val
     .param string digit
 
@@ -825,27 +827,27 @@ Column 6, if present, contains a description of what is being tested.
   target1:
     $I0 = index target, '\n'
     if $I0 == -1 goto target2
-    substr target, $I0, 2, "\n"
+    target = replace target, $I0, 2, "\n"
     goto target1
   target2:
     $I0 = index target, '\r'
     if $I0 == -1 goto target3
-    substr target, $I0, 2, "\r"
+    target = replace target, $I0, 2, "\r"
     goto target2
   target3:
     $I0 = index target, '\e'
     if $I0 == -1 goto target4
-    substr target, $I0, 2, "\e"
+    target = replace target, $I0, 2, "\e"
     goto target3
   target4:
     $I0 = index target, '\t'
     if $I0 == -1 goto target5
-    substr target, $I0, 2, "\t"
+    target = replace target, $I0, 2, "\t"
     goto target4
   target5:
     $I0 = index target, '\f'
     if $I0 == -1 goto target6
-    substr target, $I0, 2, "\f"
+    target = replace target, $I0, 2, "\f"
     goto target5
   target6:
     # handle \xHH, hex escape.
@@ -859,7 +861,7 @@ Column 6, if present, contains a description of what is being tested.
     if $I2 > $I1 goto target7
     $S0 = substr target, $I2, 2
     $S1 = hex_chr($S0)
-    substr target, $I0, 4, $S1
+    target = replace target, $I0, 4, $S1
 
     inc x_pos
     goto target6

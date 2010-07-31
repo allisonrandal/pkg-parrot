@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2010, Parrot Foundation.
- * $Id: platform_interface.h 45146 2010-03-24 04:42:39Z petdance $
+ * $Id: platform_interface.h 47066 2010-05-27 21:53:29Z bacek $
  */
 
 #ifndef PARROT_PLATFORM_INTERFACE_H_GUARD
@@ -57,8 +57,14 @@ void Parrot_sleep(unsigned int seconds);
 void Parrot_usleep(unsigned int microseconds);
 INTVAL Parrot_intval_time(void);
 FLOATVAL Parrot_floatval_time(void);
+
+PARROT_EXPORT
 struct tm * Parrot_gmtime_r(const time_t *, struct tm *);
+
+PARROT_EXPORT
 struct tm * Parrot_localtime_r(const time_t *, struct tm *);
+
+PARROT_EXPORT
 char* Parrot_asctime_r(const struct tm*, char *);
 
 /*

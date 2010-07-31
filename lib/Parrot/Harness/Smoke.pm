@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Smoke.pm 43400 2010-01-06 21:55:09Z mikehh $
+# $Id: Smoke.pm 45830 2010-04-20 21:09:46Z dukeleto $
 
 =head1 NAME
 
@@ -116,6 +116,7 @@ sub send_archive_to_smolder {
           . '/app/projects/process_add_report/'
           . $project_id;
     my $ua = LWP::UserAgent->new();
+    $ua->timeout(360);
     $ua->agent( 'Parrot::Harness::Smoke' );
     $ua->env_proxy();
 

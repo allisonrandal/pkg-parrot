@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: coroutine.t 41769 2009-10-09 02:54:33Z jkeenan $
+# $Id: coroutine.t 46700 2010-05-16 12:30:35Z bacek $
 
 use strict;
 use warnings;
@@ -336,7 +336,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
     .local pmc pmc1
     pmc1 = new ['Coroutine']
     .local int bool1
-    does bool1, pmc1, "scalar"      # XXX WTF
+    does bool1, pmc1, "invokable"
     print bool1
     print "\n"
     does bool1, pmc1, "no_interface"

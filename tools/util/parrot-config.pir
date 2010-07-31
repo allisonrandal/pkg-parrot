@@ -1,5 +1,5 @@
 #!/usr/bin/env parrot
-# $Id: parrot-config.pir 37751 2009-03-26 20:01:38Z coke $
+# $Id: parrot-config.pir 47623 2010-06-14 16:42:15Z coke $
 
 =head1 NAME
 
@@ -46,17 +46,31 @@ loop:
     if key == '--help' goto usage
     if key == '--dump' goto dump
     $I0 = defined conf_hash[key]
-    if $I0 goto ok2
-    print " no such key: '"
-    print key
-    print "'\n"
-    end
-ok2:
+    unless $I0 goto failkey
+    dec argc
+    if i < argc goto dumpsome
     $S0 = conf_hash[key]
     print $S0
     inc i
     if i < argc goto loop
     print "\n"
+    end
+dumpsome:
+    key = argv[i]
+    $I0 = defined conf_hash[key]
+    unless $I0 goto failkey
+    print key
+    print " => '"
+    $S1 = conf_hash[key]
+    print $S1
+    say "'"
+    inc i
+    if i <= argc goto dumpsome
+    end
+failkey:
+    print " no such key: '"
+    print key
+    print "'\n"
     end
 dump:
    .local pmc iterator
@@ -74,8 +88,11 @@ iter_end:
     end
 usage:
     $S0 = argv[0]
-    printerr $S0
-    printerr " [ <config-key> | --dump | --help ]\n"
+    $P0 = getinterp
+    .include 'stdio.pasm'
+    $P1 = $P0.'stdhandle'(.PIO_STDERR_FILENO)
+    $P1.'print'($S0)
+    $P1.'print'(" [ <config-key> [ <config-key> ... ] | --dump | --help ]\n")
     exit 1
 .end
 

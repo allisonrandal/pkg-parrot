@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: List.pm 44649 2010-03-05 16:20:00Z tene $
+# $Id: List.pm 47318 2010-06-03 01:36:45Z jkeenan $
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;
@@ -41,7 +41,6 @@ my @steps = qw(
     auto::isreg
     auto::jit
     auto::frames
-    auto::cgoto
     auto::inline
     auto::gc
     auto::memalign
@@ -52,10 +51,9 @@ my @steps = qw(
     auto::thread
     auto::gmp
     auto::readline
-    auto::gdbm
     auto::pcre
     auto::opengl
-    auto::crypto
+    auto::zlib
     auto::gettext
     auto::snprintf
     auto::perldoc
@@ -65,7 +63,6 @@ my @steps = qw(
     auto::icu
     gen::config_h
     gen::core_pmcs
-    gen::crypto
     gen::opengl
     gen::makefiles
     gen::platform

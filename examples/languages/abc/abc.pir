@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: abc.pir 43107 2009-12-16 15:12:00Z fperrad $
+# $Id: abc.pir 47303 2010-06-02 14:06:11Z fperrad $
 
 =head1 TITLE
 
@@ -55,8 +55,6 @@ object.
 .include 'src/gen_grammar.pir'
 
 .namespace [ 'abc'; 'Compiler' ]
-
-.loadlib 'abc_group'
 
 .sub '' :anon :load :init
     .local pmc abc

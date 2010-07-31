@@ -1,6 +1,6 @@
 ;;;; pasm.el
 ;;;;
-;;;; $Id: pasm.el 37201 2009-03-08 12:07:48Z fperrad $
+;;;; $Id: pasm.el 46569 2010-05-13 05:03:48Z cotto $
 ;;;;
 ;;;; this is a simple major mode for working with parrot assembler
 ;;;; (and, to a certain extent, parrot imcc) files.
@@ -12,7 +12,7 @@
 ;;;;
 ;;;; 1) highlighting for labels, comments and ops which modify program
 ;;;; flow (if, bsr, jsr, etc.). I have intentionally kept the
-;;;; highlighting to a minimum (highlighitng loses it's point when you
+;;;; highlighting to a minimum (highlighitng loses its point when you
 ;;;; highlight _everything_), however if someone wants i'll add in
 ;;;; different highlighting levels ala cperl-mode.
 ;;;;

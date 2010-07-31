@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd20_lexical_vars.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd20_lexical_vars.pod 47324 2010-06-03 06:55:51Z plobsing $
 
 =head1 PDD 20: Lexical Variables
 
@@ -10,11 +10,11 @@ lexically scoped variables.
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 47324 $
 
 =head2 Synopsis
 
-=begin PIR
+=begin PIR_INVALID
 
     .sub 'foo'
         .lex "$a", $P0
@@ -52,7 +52,7 @@ $Revision: 45652 $
         $P0 = find_lex "x"   # SUCCEEDS
     .end
 
-=end PIR
+=end PIR_INVALID
 
 =head2 Description
 

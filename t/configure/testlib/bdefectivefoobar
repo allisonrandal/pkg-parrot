@@ -1,4 +1,4 @@
-# $Id: bdefectivefoobar 43593 2010-01-26 02:39:50Z jkeenan $
+# $Id: bdefectivefoobar 45949 2010-04-24 01:14:23Z cotto $
 
 =variables
 
@@ -50,7 +50,6 @@ auto::arch
 auto::jit
 auto::cpu
 auto::funcptr
-auto::cgoto
 auto::inline
 auto::gc
 auto::memalign

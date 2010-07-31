@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: Xlib.pir 42795 2009-11-23 22:12:55Z NotFound $
+# $Id: Xlib.pir 46067 2010-04-27 17:22:14Z NotFound $
 
 =head1 TITLE
 
@@ -67,10 +67,12 @@ alignment.
     if xlib goto store
 check2:
     xlib = loadlib 'libX11.so'
+    $I0 = defined xlib
     unless $I0 goto check3
     if xlib goto store
 check3:
     xlib = loadlib 'libX11.so.6'
+    $I0 = defined xlib
     unless $I0 goto check4
     if xlib goto store
 check4:

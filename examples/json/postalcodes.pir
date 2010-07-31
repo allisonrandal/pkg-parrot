@@ -1,6 +1,6 @@
 #!../../parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: postalcodes.pir 41138 2009-09-07 21:53:09Z japhb $
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: postalcodes.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -18,6 +18,7 @@ places with that code from around the world.
 =cut
 
 .include 'socket.pasm'
+.loadlib 'io_ops'
 
 .sub _main :main
     .param pmc argv
@@ -64,11 +65,11 @@ END:
     close sock
 
     $I1 = find_charset 'unicode'
-    trans_charset json_result, $I1
+    json_result = trans_charset json_result, $I1
 
     # Strip off http headers.
     $I0 = index json_result, "\r\n\r\n"
-    substr json_result, 0, $I0, ""
+    json_result = replace json_result, 0, $I0, ""
 
     load_language 'data_json'
     $P1 = compreg 'data_json'

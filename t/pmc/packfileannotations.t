@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: packfileannotations.t 44381 2010-02-23 11:32:28Z mikehh $
+# $Id: packfileannotations.t 47224 2010-05-31 13:58:11Z bacek $
 
 
 =head1 NAME
@@ -40,11 +40,21 @@ Tests the PackfileAnnotations PMC.
 .sub 'test_unpack'
     .local pmc pf
 
-    $P0 = open 't/native_pbc/annotations.pbc'
+    push_eh load_error
+    $P0 = new ['FileHandle']
+    $P0.'open'('t/native_pbc/annotations.pbc', 'r')
+    $P0.'encoding'('binary')
     $S0 = $P0.'readall'()
     pf = new 'Packfile'
     pf = $S0
+    pop_eh
     .tailcall '!test_unpack'(pf)
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, "PackfileAnnotations unpack failed to load test file")
+    skip(7, "PackfileAnnotations unpack tests failed")
+    .return()
 .end
 
 # Programatically create PBC same as t/native_pbc/annotations.pbc and check unpack of it.
@@ -146,7 +156,7 @@ Tests the PackfileAnnotations PMC.
   fail:
     nok(1, "PackfileAnnotations wasn't found in Directory")
     # BAIL_OUT
-    skip(9, "PackfileAnnotations tests failed")
+    skip(7, "PackfileAnnotations tests failed")
 .end
 
 # Local Variables:

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: embed.c 45791 2010-04-19 05:45:56Z petdance $
+$Id: embed.c 46840 2010-05-21 06:12:16Z petdance $
 
 =head1 NAME
 
@@ -27,7 +27,9 @@ This file implements the Parrot embedding interface.
 
 #include "../compilers/imcc/imc.h"
 
-/* HEADERIZER HFILE: none */ /* The visible types are different than what we use in here */
+#include "embed.str"
+
+/* HEADERIZER HFILE: include/parrot/embed.h */
 
 /* HEADERIZER BEGIN: static */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
@@ -78,9 +80,11 @@ to get destroyed.
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
+PARROT_MALLOC
 Parrot_Interp
 Parrot_new(ARGIN_NULLOK(Parrot_Interp parent))
 {
+    ASSERT_ARGS(Parrot_new)
     /* inter_create.c:make_interpreter builds a new Parrot_Interp. */
     return make_interpreter(parent, PARROT_NO_FLAGS);
 }
@@ -106,8 +110,9 @@ Use this function when you call into Parrot before entering a run loop.
 
 PARROT_EXPORT
 void
-Parrot_init_stacktop(PARROT_INTERP, void *stack_top)
+Parrot_init_stacktop(PARROT_INTERP, ARGIN(void *stack_top))
 {
+    ASSERT_ARGS(Parrot_init_stacktop)
     interp->lo_var_ptr = stack_top;
     init_world_once(interp);
 }
@@ -115,16 +120,13 @@ Parrot_init_stacktop(PARROT_INTERP, void *stack_top)
 
 /*
 
-=item C<void Parrot_set_flag(PARROT_INTERP, INTVAL flag)>
+=item C<void Parrot_set_flag(PARROT_INTERP, Parrot_Int flag)>
 
 Sets on any of the following flags, specified by C<flag>, in the interpreter:
 
 Flag                    Effect
 C<PARROT_BOUNDS_FLAG>   enable bounds checking
 C<PARROT_PROFILE_FLAG>  enable profiling,
-C<PARROT_THR_TYPE_1>    disable variable sharing and thread communication
-C<PARROT_THR_TYPE_2>    disable variable sharing but enable thread communication
-C<PARROT_THR_TYPE_3>    enable variable sharing.
 
 =cut
 
@@ -132,8 +134,9 @@ C<PARROT_THR_TYPE_3>    enable variable sharing.
 
 PARROT_EXPORT
 void
-Parrot_set_flag(PARROT_INTERP, INTVAL flag)
+Parrot_set_flag(PARROT_INTERP, Parrot_Int flag)
 {
+    ASSERT_ARGS(Parrot_set_flag)
     /* These two macros (from interpreter.h) do exactly what they look like. */
 
     Interp_flags_SET(interp, flag);
@@ -150,7 +153,7 @@ Parrot_set_flag(PARROT_INTERP, INTVAL flag)
 
 /*
 
-=item C<void Parrot_set_debug(PARROT_INTERP, UINTVAL flag)>
+=item C<void Parrot_set_debug(PARROT_INTERP, Parrot_UInt flag)>
 
 Set a debug flag: C<PARROT_DEBUG_FLAG>.
 
@@ -160,8 +163,9 @@ Set a debug flag: C<PARROT_DEBUG_FLAG>.
 
 PARROT_EXPORT
 void
-Parrot_set_debug(PARROT_INTERP, UINTVAL flag)
+Parrot_set_debug(PARROT_INTERP, Parrot_UInt flag)
 {
+    ASSERT_ARGS(Parrot_set_debug)
     interp->debug_flags |= flag;
 }
 
@@ -181,6 +185,7 @@ PARROT_EXPORT
 void
 Parrot_set_executable_name(PARROT_INTERP, Parrot_String name)
 {
+    ASSERT_ARGS(Parrot_set_executable_name)
     PMC * const name_pmc = Parrot_pmc_new(interp, enum_class_String);
     VTABLE_set_string_native(interp, name_pmc, name);
     VTABLE_set_pmc_keyed_int(interp, interp->iglobals, IGLOBALS_EXECUTABLE,
@@ -190,7 +195,7 @@ Parrot_set_executable_name(PARROT_INTERP, Parrot_String name)
 
 /*
 
-=item C<void Parrot_set_trace(PARROT_INTERP, UINTVAL flag)>
+=item C<void Parrot_set_trace(PARROT_INTERP, Parrot_UInt flag)>
 
 Set a trace flag: C<PARROT_TRACE_FLAG>
 
@@ -200,8 +205,9 @@ Set a trace flag: C<PARROT_TRACE_FLAG>
 
 PARROT_EXPORT
 void
-Parrot_set_trace(PARROT_INTERP, UINTVAL flag)
+Parrot_set_trace(PARROT_INTERP, Parrot_UInt flag)
 {
+    ASSERT_ARGS(Parrot_set_trace)
     Parrot_pcc_trace_flags_on(interp, interp->ctx, flag);
     Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "slow"));
 }
@@ -209,7 +215,7 @@ Parrot_set_trace(PARROT_INTERP, UINTVAL flag)
 
 /*
 
-=item C<void Parrot_clear_flag(PARROT_INTERP, INTVAL flag)>
+=item C<void Parrot_clear_flag(PARROT_INTERP, Parrot_Int flag)>
 
 Clears a flag in the interpreter.
 
@@ -219,15 +225,16 @@ Clears a flag in the interpreter.
 
 PARROT_EXPORT
 void
-Parrot_clear_flag(PARROT_INTERP, INTVAL flag)
+Parrot_clear_flag(PARROT_INTERP, Parrot_Int flag)
 {
+    ASSERT_ARGS(Parrot_clear_flag)
     Interp_flags_CLEAR(interp, flag);
 }
 
 
 /*
 
-=item C<void Parrot_clear_debug(PARROT_INTERP, UINTVAL flag)>
+=item C<void Parrot_clear_debug(PARROT_INTERP, Parrot_UInt flag)>
 
 Clears a flag in the interpreter.
 
@@ -237,15 +244,16 @@ Clears a flag in the interpreter.
 
 PARROT_EXPORT
 void
-Parrot_clear_debug(PARROT_INTERP, UINTVAL flag)
+Parrot_clear_debug(PARROT_INTERP, Parrot_UInt flag)
 {
+    ASSERT_ARGS(Parrot_clear_debug)
     interp->debug_flags &= ~flag;
 }
 
 
 /*
 
-=item C<void Parrot_clear_trace(PARROT_INTERP, UINTVAL flag)>
+=item C<void Parrot_clear_trace(PARROT_INTERP, Parrot_UInt flag)>
 
 Clears a flag in the interpreter.
 
@@ -255,15 +263,16 @@ Clears a flag in the interpreter.
 
 PARROT_EXPORT
 void
-Parrot_clear_trace(PARROT_INTERP, UINTVAL flag)
+Parrot_clear_trace(PARROT_INTERP, Parrot_UInt flag)
 {
+    ASSERT_ARGS(Parrot_clear_trace)
     Parrot_pcc_trace_flags_off(interp, interp->ctx, flag);
 }
 
 
 /*
 
-=item C<Parrot_Int Parrot_test_flag(PARROT_INTERP, INTVAL flag)>
+=item C<Parrot_Int Parrot_test_flag(PARROT_INTERP, Parrot_Int flag)>
 
 Test the interpreter flags specified in C<flag>.
 
@@ -272,16 +281,18 @@ Test the interpreter flags specified in C<flag>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 Parrot_Int
-Parrot_test_flag(PARROT_INTERP, INTVAL flag)
+Parrot_test_flag(PARROT_INTERP, Parrot_Int flag)
 {
+    ASSERT_ARGS(Parrot_test_flag)
     return Interp_flags_TEST(interp, flag);
 }
 
 
 /*
 
-=item C<UINTVAL Parrot_test_debug(PARROT_INTERP, UINTVAL flag)>
+=item C<Parrot_UInt Parrot_test_debug(PARROT_INTERP, Parrot_UInt flag)>
 
 Test the interpreter flags specified in C<flag>.
 
@@ -290,16 +301,18 @@ Test the interpreter flags specified in C<flag>.
 */
 
 PARROT_EXPORT
-UINTVAL
-Parrot_test_debug(PARROT_INTERP, UINTVAL flag)
+PARROT_PURE_FUNCTION
+Parrot_UInt
+Parrot_test_debug(PARROT_INTERP, Parrot_UInt flag)
 {
+    ASSERT_ARGS(Parrot_test_debug)
     return interp->debug_flags & flag;
 }
 
 
 /*
 
-=item C<UINTVAL Parrot_test_trace(PARROT_INTERP, UINTVAL flag)>
+=item C<Parrot_UInt Parrot_test_trace(PARROT_INTERP, Parrot_UInt flag)>
 
 Test the interpreter flags specified in C<flag>.
 
@@ -308,9 +321,11 @@ Test the interpreter flags specified in C<flag>.
 */
 
 PARROT_EXPORT
-UINTVAL
-Parrot_test_trace(PARROT_INTERP, UINTVAL flag)
+PARROT_PURE_FUNCTION
+Parrot_UInt
+Parrot_test_trace(PARROT_INTERP, Parrot_UInt flag)
 {
+    ASSERT_ARGS(Parrot_test_trace)
     return Parrot_pcc_trace_flags_test(interp, interp->ctx, flag);
 }
 
@@ -329,21 +344,13 @@ PARROT_EXPORT
 void
 Parrot_set_run_core(PARROT_INTERP, Parrot_Run_core_t core)
 {
+    ASSERT_ARGS(Parrot_set_run_core)
     switch (core) {
       case PARROT_SLOW_CORE:
         Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "slow"));
         break;
       case PARROT_FAST_CORE:
         Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "fast"));
-        break;
-      case PARROT_SWITCH_CORE:
-        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "switch"));
-        break;
-      case PARROT_CGP_CORE:
-        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgp"));
-        break;
-      case PARROT_CGOTO_CORE:
-        Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgoto"));
         break;
       case PARROT_EXEC_CORE:
         Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "exec"));
@@ -378,6 +385,7 @@ PARROT_EXPORT
 void
 Parrot_setwarnings(PARROT_INTERP, Parrot_warnclass wc)
 {
+    ASSERT_ARGS(Parrot_setwarnings)
     /* Activates the given warnings.  (Macro from warnings.h.) */
     PARROT_WARNINGS_on(interp, wc);
 }
@@ -385,8 +393,8 @@ Parrot_setwarnings(PARROT_INTERP, Parrot_warnclass wc)
 
 /*
 
-=item C<PackFile * Parrot_pbc_read(PARROT_INTERP, const char *fullname, const
-int debug)>
+=item C<Parrot_PackFile Parrot_pbc_read(PARROT_INTERP, const char *fullname,
+const int debug)>
 
 Read in a bytecode, unpack it into a C<PackFile> structure, and do fixups.
 
@@ -396,9 +404,10 @@ Read in a bytecode, unpack it into a C<PackFile> structure, and do fixups.
 
 PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
-PackFile *
+Parrot_PackFile
 Parrot_pbc_read(PARROT_INTERP, ARGIN_NULLOK(const char *fullname), const int debug)
 {
+    ASSERT_ARGS(Parrot_pbc_read)
     PackFile *pf;
     char     *program_code;
     FILE     *io        = NULL;
@@ -576,7 +585,7 @@ again:
 
 /*
 
-=item C<void Parrot_pbc_load(PARROT_INTERP, PackFile *pf)>
+=item C<void Parrot_pbc_load(PARROT_INTERP, Parrot_PackFile pf)>
 
 Loads the C<PackFile> returned by C<Parrot_pbc_read()>.
 
@@ -586,8 +595,9 @@ Loads the C<PackFile> returned by C<Parrot_pbc_read()>.
 
 PARROT_EXPORT
 void
-Parrot_pbc_load(PARROT_INTERP, ARGIN(PackFile *pf))
+Parrot_pbc_load(PARROT_INTERP, ARGIN(Parrot_PackFile pf))
 {
+    ASSERT_ARGS(Parrot_pbc_load)
     if (!pf) {
         Parrot_io_eprintf(interp, "Invalid packfile\n");
         return;
@@ -612,6 +622,7 @@ PARROT_EXPORT
 void
 Parrot_pbc_fixup_loaded(PARROT_INTERP)
 {
+    ASSERT_ARGS(Parrot_pbc_fixup_loaded)
     PackFile_fixup_subs(interp, PBC_LOADED, NULL);
 }
 
@@ -644,7 +655,7 @@ setup_argv(PARROT_INTERP, int argc, ARGIN(const char **argv))
     VTABLE_set_pmc_keyed_int(interp, interp->iglobals,
             (INTVAL)IGLOBALS_ARGV_LIST, userargv);
 
-    for (i = 0; i < argc; i++) {
+    for (i = 0; i < argc; ++i) {
         /* Run through argv, adding everything to @ARGS. */
         STRING * const arg =
             string_make(interp, argv[i], strlen(argv[i]), "unicode",
@@ -715,9 +726,9 @@ set_current_sub(PARROT_INTERP)
      * entry point with the address at our resume_offset.
      */
 
-    for (i = 0; i < ft->fixup_count; i++) {
-        if (ft->fixups[i]->type == enum_fixup_sub) {
-            const opcode_t ci      = ft->fixups[i]->offset;
+    for (i = 0; i < ft->fixup_count; ++i) {
+        if (ft->fixups[i].type == enum_fixup_sub) {
+            const opcode_t ci      = ft->fixups[i].offset;
             PMC    * const sub_pmc = ct->constants[ci]->u.key;
             Parrot_Sub_attributes *sub;
 
@@ -760,6 +771,7 @@ PARROT_EXPORT
 void
 Parrot_runcode(PARROT_INTERP, int argc, ARGIN(const char **argv))
 {
+    ASSERT_ARGS(Parrot_runcode)
     PMC *userargv, *main_sub;
 
     /* Debugging mode nonsense. */
@@ -802,8 +814,8 @@ Parrot_runcode(PARROT_INTERP, int argc, ARGIN(const char **argv))
 
 /*
 
-=item C<opcode_t * Parrot_debug(PARROT_INTERP, Parrot_Interp debugger, opcode_t
-*pc)>
+=item C<Parrot_Opcode * Parrot_debug(PARROT_INTERP, Parrot_Interp debugger,
+Parrot_Opcode *pc)>
 
 Runs the interpreter's bytecode in debugging mode.
 
@@ -813,9 +825,10 @@ Runs the interpreter's bytecode in debugging mode.
 
 PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
-opcode_t *
-Parrot_debug(PARROT_INTERP, ARGIN(Parrot_Interp debugger), ARGIN(opcode_t *pc))
+Parrot_Opcode *
+Parrot_debug(PARROT_INTERP, ARGIN(Parrot_Interp debugger), ARGIN(Parrot_Opcode *pc))
 {
+    ASSERT_ARGS(Parrot_debug)
     PDB_t      * const pdb = debugger->pdb;
 
     pdb->cur_opcode        = pc;
@@ -954,10 +967,12 @@ This is used by the Parrot disassembler.
 
 PARROT_EXPORT
 void
-Parrot_disassemble(PARROT_INTERP, ARGIN(const char *outfile), Parrot_disassemble_options options)
+Parrot_disassemble(PARROT_INTERP,
+                   ARGIN_NULLOK(const char *outfile), Parrot_disassemble_options options)
 {
+    ASSERT_ARGS(Parrot_disassemble)
     PDB_line_t *line;
-    PDB_t * const pdb   = mem_gc_allocate_typed(interp, PDB_t);
+    PDB_t * const pdb   = mem_gc_allocate_zeroed_typed(interp, PDB_t);
     int num_mappings    = 0;
     int curr_mapping    = 0;
     int op_code_seq_num = 0;
@@ -1001,15 +1016,15 @@ Parrot_disassemble(PARROT_INTERP, ARGIN(const char *outfile), Parrot_disassemble
 
         /* Parrot_io_fprintf(interp, output, "%i < %i %i == %i \n", curr_mapping,
          * num_mappings, op_code_seq_num,
-         * interp->code->debugs->mappings[curr_mapping]->offset); */
+         * interp->code->debugs->mappings[curr_mapping].offset); */
 
         if (debugs && curr_mapping < num_mappings) {
-            if (op_code_seq_num == interp->code->debugs->mappings[curr_mapping]->offset) {
+            if (op_code_seq_num == interp->code->debugs->mappings[curr_mapping].offset) {
                 const int filename_const_offset =
-                    interp->code->debugs->mappings[curr_mapping]->filename;
+                    interp->code->debugs->mappings[curr_mapping].filename;
                 Parrot_io_fprintf(interp, output, "# Current Source Filename '%Ss'\n",
                         interp->code->const_table->constants[filename_const_offset]->u.string);
-                curr_mapping++;
+                ++curr_mapping;
             }
         }
 
@@ -1034,7 +1049,7 @@ Parrot_disassemble(PARROT_INTERP, ARGIN(const char *outfile), Parrot_disassemble
 
         Parrot_io_fprintf(interp, output, "\n");
         line = line->next;
-        op_code_seq_num++;
+        ++op_code_seq_num;
     }
     if (outfile != NULL)
         Parrot_io_close(interp, output);
@@ -1061,6 +1076,7 @@ PARROT_EXPORT
 void
 Parrot_run_native(PARROT_INTERP, native_func_t func)
 {
+    ASSERT_ARGS(Parrot_run_native)
     PackFile * const pf = PackFile_new(interp, 0);
     static opcode_t program_code[2];
 
@@ -1097,26 +1113,26 @@ Compiles a code string.
 
 PARROT_EXPORT
 Parrot_PMC
-Parrot_compile_string(PARROT_INTERP, Parrot_String type,
-        const char *code, Parrot_String *error)
+Parrot_compile_string(PARROT_INTERP, Parrot_String type, ARGIN(const char *code),
+        ARGOUT(Parrot_String *error))
 {
+    ASSERT_ARGS(Parrot_compile_string)
     /* For the benefit of embedders that do not load any pbc
      * before compiling a string */
 
     if (!interp->initial_pf) {
         /* SIDE EFFECT: PackFile_new_dummy sets interp->initial_pf */
-        interp->initial_pf = PackFile_new_dummy(interp,
-            Parrot_str_new_constant(interp, "compile_string"));
+        interp->initial_pf = PackFile_new_dummy(interp, CONST_STRING(interp, "compile_string"));
         /* Assumption: there is no valid reason to fail to create it.
          * If the assumption changes, replace the assertion with a
          * runtime check */
         PARROT_ASSERT(interp->initial_pf);
     }
 
-    if (Parrot_str_compare(interp, Parrot_str_new(interp, "PIR", 3), type) == 0)
+    if (Parrot_str_compare(interp, CONST_STRING(interp, "PIR"), type) == 0)
         return IMCC_compile_pir_s(interp, code, error);
 
-    if (Parrot_str_compare(interp, Parrot_str_new(interp, "PASM", 4), type) == 0)
+    if (Parrot_str_compare(interp, CONST_STRING(interp, "PASM"), type) == 0)
         return IMCC_compile_pasm_s(interp, code, error);
 
     *error = Parrot_str_new(interp, "Invalid interpreter type", 0);

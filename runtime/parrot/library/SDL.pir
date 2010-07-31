@@ -1,4 +1,4 @@
-# $Id: SDL.pir 44547 2010-02-28 06:02:31Z coke $
+# $Id: SDL.pir 47790 2010-06-23 21:06:15Z coke $
 
 =head1 NAME
 
@@ -91,7 +91,6 @@ In fact, don't count on it sticking around.  It may not.  Then again, it might.
     .local pmc env
     env = new 'Env'
     .local string sdlpath
-    say'Hu'
     sdlpath = env['SDLLIBPATH']
     if sdlpath == '' goto default_locations
     say sdlpath

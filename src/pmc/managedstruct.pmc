@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: managedstruct.pmc 45219 2010-03-28 01:11:50Z petdance $
+$Id: managedstruct.pmc 46300 2010-05-05 03:58:50Z jimmy $
 
 =head1 DESCRIPTION
 
@@ -148,9 +148,9 @@ of knowing how to make a deep copy of the pointer contents.
         PMC *dest;
         if (clone_func) {
             void *clone_data = PARROT_MANAGEDSTRUCT(SELF)->custom_clone_priv;
-            return clone_func(interp, SELF, clone_data);
+            return clone_func(INTERP, SELF, clone_data);
         }
-        dest = Parrot_pmc_new_init(interp, SELF->vtable->base_type,
+        dest = Parrot_pmc_new_init(INTERP, SELF->vtable->base_type,
             PARROT_MANAGEDSTRUCT(SELF)->init);
 
         if (PARROT_MANAGEDSTRUCT(SELF)->ptr)

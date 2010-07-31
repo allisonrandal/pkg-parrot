@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: trace.c 45788 2010-04-18 21:57:20Z mikehh $
+$Id: trace.c 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 NAME
 
@@ -34,12 +34,18 @@ src/test_main.c
 /* HEADERIZER BEGIN: static */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
+PARROT_CANNOT_RETURN_NULL
+static Interp * debugger_or_interp(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING* trace_class_name(PARROT_INTERP, ARGIN(const PMC* pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
+#define ASSERT_ARGS_debugger_or_interp __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_trace_class_name __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(pmc))
@@ -48,15 +54,17 @@ static STRING* trace_class_name(PARROT_INTERP, ARGIN(const PMC* pmc))
 
 /*
 
-=item C<Interp * debugger_or_interp(PARROT_INTERP)>
+=item C<static Interp * debugger_or_interp(PARROT_INTERP)>
 
 Get debugger if available
 
 =cut
 */
+
 PARROT_CANNOT_RETURN_NULL
-Interp *
-debugger_or_interp(PARROT_INTERP) {
+static Interp *
+debugger_or_interp(PARROT_INTERP)
+{
     ASSERT_ARGS(debugger_or_interp)
 
     return interp->pdb && interp->pdb->debugger
@@ -231,15 +239,18 @@ trace_key_dump(PARROT_INTERP, ARGIN(PMC *key))
             break;
           case KEY_string_FLAG|KEY_register_FLAG:
             {
-            const STRING * const s = REG_STR(interp,
-                 VTABLE_get_integer(interp, key));
-            STRING * const escaped = Parrot_str_escape_truncate(interp, s, 20);
-            if (escaped)
-                len += Parrot_io_eprintf(debugger, "S%vd=\"%Ss\"",
-                    VTABLE_get_integer(interp, key), escaped);
+            const INTVAL keynum = VTABLE_get_integer(interp, key);
+            if (keynum < Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), REGNO_STR)) {
+                const STRING * const s = REG_STR(interp, keynum);
+                STRING * const escaped = Parrot_str_escape_truncate(interp, s, 20);
+                if (escaped)
+                    len += Parrot_io_eprintf(debugger, "S%vd=\"%Ss\"",
+                            keynum, escaped);
+                else
+                    len += Parrot_io_eprintf(debugger, "S%vd=\"(null)\"", keynum);
+            }
             else
-                len += Parrot_io_eprintf(debugger, "S%vd=\"(null)\"",
-                        VTABLE_get_integer(interp, key));
+                len += Parrot_io_eprintf(debugger, "**WRONG KEY STRING REG %d**", keynum);
             }
             break;
           case KEY_pmc_FLAG|KEY_register_FLAG:
@@ -316,7 +327,7 @@ trace_op_dump(PARROT_INTERP,
         INTVAL i;
         len += Parrot_io_eprintf(debugger, " ");
         /* pass 1 print arguments */
-        for (i = s; i < n; i++) {
+        for (i = s; i < n; ++i) {
             const opcode_t o = pc[i];
 
             if (i < info->op_count)
@@ -415,7 +426,7 @@ trace_op_dump(PARROT_INTERP,
             Parrot_io_eprintf(debugger, "\t");
 
         /* pass 2 print argument details if needed */
-        for (i = 1; i < n; i++) {
+        for (i = 1; i < n; ++i) {
             const opcode_t o = pc[i];
             if (i < info->op_count)
                 type = info->types[i - 1];

@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: eventhandler.t 44324 2010-02-22 22:22:45Z mikehh $
+# $Id: eventhandler.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

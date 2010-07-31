@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: spill.t 44394 2010-02-23 18:17:05Z bubaflub $
+# $Id: spill.t 46007 2010-04-25 11:44:15Z fperrad $
 
 .sub main :main
     .include 'test_more.pir'

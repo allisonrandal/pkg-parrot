@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: win32.c 43189 2009-12-22 03:24:03Z jkeenan $
+$Id: win32.c 47583 2010-06-13 01:02:26Z coke $
 
 =head1 NAME
 
@@ -134,10 +134,8 @@ Parrot_io_init_win32(PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_io_init_win32)
     HANDLE h;
-#  if PARROT_NET_DEVEL
     struct WSAData sockinfo;
     int ret;
-#  endif
 
     if ((h = GetStdHandle(STD_INPUT_HANDLE)) != INVALID_HANDLE_VALUE) {
         _PIO_STDIN(interp) = Parrot_io_fdopen_win32(interp, PMCNULL, h, PIO_F_READ);
@@ -157,7 +155,6 @@ Parrot_io_init_win32(PARROT_INTERP)
     else {
         _PIO_STDERR(interp) = PMCNULL;
     }
-#  if PARROT_NET_DEVEL
     /* Start Winsock
      * no idea where or whether destroy it
      */
@@ -167,7 +164,6 @@ Parrot_io_init_win32(PARROT_INTERP)
                   WSAGetLastError());
         return -4;
     }
-#  endif
     return 0;
 }
 
@@ -472,7 +468,8 @@ Parrot_io_read_win32(PARROT_INTERP,
 
 /*
 
-=item C<size_t Parrot_io_write_win32(PARROT_INTERP, PMC *filehandle, STRING *s)>
+=item C<size_t Parrot_io_write_win32(PARROT_INTERP, PMC *filehandle, const
+STRING *s)>
 
 Calls C<WriteFile()> to write C<len> bytes from the memory starting at
 C<buffer> to C<*io>'s file descriptor. Returns C<(size_t)-1> on
@@ -483,9 +480,7 @@ failure.
 */
 
 size_t
-Parrot_io_write_win32(PARROT_INTERP,
-        ARGIN(PMC *filehandle),
-        ARGIN(STRING *s))
+Parrot_io_write_win32(PARROT_INTERP, ARGIN(PMC *filehandle), ARGIN(const STRING *s))
 {
     ASSERT_ARGS(Parrot_io_write_win32)
     DWORD countwrote = 0;
@@ -660,8 +655,8 @@ Parrot_io_open_pipe_win32(PARROT_INTERP, ARGMOD(PMC *filehandle),
     if (comspec == NULL)
         comspec = "cmd";
     auxcomm = Parrot_str_new(interp, comspec, 0);
-    auxcomm = Parrot_str_append(interp, auxcomm, Parrot_str_new(interp, " /c ", 0));
-    auxcomm = Parrot_str_append(interp, auxcomm, command);
+    auxcomm = Parrot_str_concat(interp, auxcomm, Parrot_str_new(interp, " /c ", 0));
+    auxcomm = Parrot_str_concat(interp, auxcomm, command);
     cmd = Parrot_str_to_cstring(interp, auxcomm);
     start.cb = sizeof start;
     GetStartupInfo(&start);

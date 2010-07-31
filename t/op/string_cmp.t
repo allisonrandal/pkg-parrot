@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: string_cmp.t 44388 2010-02-23 12:39:51Z mikehh $
+# $Id: string_cmp.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

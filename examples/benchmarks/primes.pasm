@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: primes.pasm 42611 2009-11-20 22:02:37Z NotFound $
+# $Id: primes.pasm 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -42,6 +42,7 @@ REDO:
     div     P4, P1, 2
     # Check if P3 is a factor of P1
 LOOP:
+.loadlib 'math_ops' # cmod is a dynop
     cmod    P5, P1, P3
     if      P5, OK
 

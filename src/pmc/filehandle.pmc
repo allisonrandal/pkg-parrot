@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2008-2009, Parrot Foundation.
-$Id: filehandle.pmc 45425 2010-04-07 13:38:10Z bacek $
+Copyright (C) 2008-2010, Parrot Foundation.
+$Id: filehandle.pmc 47784 2010-06-23 15:19:57Z NotFound $
 
 =head1 NAME
 
@@ -106,7 +106,7 @@ Create a copy of the filehandle.
     VTABLE PMC *clone() {
         Parrot_FileHandle_attributes * const old_struct
             = PARROT_FILEHANDLE(SELF);
-        PMC * const copy = Parrot_io_new_pmc(interp, old_struct->flags);
+        PMC * const copy = Parrot_io_new_pmc(INTERP, old_struct->flags);
         Parrot_FileHandle_attributes * const data_struct
             = PARROT_FILEHANDLE(copy);
 
@@ -130,9 +130,9 @@ Mark active filehandle data as live.
         Parrot_FileHandle_attributes * const data_struct
             = PARROT_FILEHANDLE(SELF);
 
-        Parrot_gc_mark_STRING_alive(interp, data_struct->mode);
-        Parrot_gc_mark_STRING_alive(interp, data_struct->filename);
-        Parrot_gc_mark_STRING_alive(interp, data_struct->encoding);
+        Parrot_gc_mark_STRING_alive(INTERP, data_struct->mode);
+        Parrot_gc_mark_STRING_alive(INTERP, data_struct->filename);
+        Parrot_gc_mark_STRING_alive(INTERP, data_struct->encoding);
     }
 
 
@@ -249,21 +249,21 @@ filehandle, rather than modifying the invocant).
         STRING *open_filename, *open_mode;
 
         if (!Parrot_io_is_closed_filehandle(INTERP, SELF))
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_PIO_ERROR,
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_PIO_ERROR,
                                 "Cannot reopen already open filehandle");
 
         if (got_mode && !STRING_IS_NULL(mode))
-            SET_ATTR_mode(INTERP, SELF, Parrot_str_copy(INTERP, mode));
+            SET_ATTR_mode(INTERP, SELF, mode);
 
         if (got_filename && !STRING_IS_NULL(filename))
-            SET_ATTR_filename(INTERP, SELF, Parrot_str_copy(INTERP, filename));
+            SET_ATTR_filename(INTERP, SELF, filename);
 
         /* Open the file. With no options, reopen the same file as before */
         GET_ATTR_filename(INTERP, SELF, open_filename);
         GET_ATTR_mode(INTERP, SELF, open_mode);
 
         if (STRING_IS_NULL(open_filename))
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_PIO_ERROR,
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_PIO_ERROR,
                             "Cannot open filehandle, no filename");
 
         if (STRING_IS_NULL(open_mode)) {
@@ -281,12 +281,14 @@ filehandle, rather than modifying the invocant).
 
 =item C<METHOD isatty()>
 
+Returns a boolean value indicating whether C<SELF> is a console/tty.
+
 =cut
 
 */
+
     METHOD isatty() {
-        const INTVAL isatty =
-            (PARROT_FILEHANDLE(SELF)->flags & PIO_F_CONSOLE) == PIO_F_CONSOLE;
+        const INTVAL isatty = Parrot_io_is_tty(INTERP, SELF);
         RETURN(INTVAL isatty);
     }
 
@@ -317,7 +319,7 @@ Test if the filehandle is closed.
 */
 
     METHOD is_closed() {
-        const INTVAL status = Parrot_io_is_closed(interp, SELF);
+        const INTVAL status = Parrot_io_is_closed(INTERP, SELF);
         RETURN(INTVAL status);
     }
 
@@ -447,7 +449,7 @@ filehandle when finished.
             GET_ATTR_encoding(INTERP, SELF, encoding);
 
             if (!Parrot_io_is_closed_filehandle(INTERP, SELF))
-                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_PIO_ERROR,
+                Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_PIO_ERROR,
                     "Cannot readall on a new file from an already open filehandle");
 
             filehandle  = Parrot_io_open(INTERP, PMCNULL, name, NULL);
@@ -459,27 +461,23 @@ filehandle when finished.
 
             result = Parrot_io_reads(INTERP, filehandle, size);
             Parrot_io_close(INTERP, filehandle);
-            RETURN(STRING *result);
         }
         else {
             /* slurp open file */
             if (Parrot_io_is_closed_filehandle(INTERP, SELF))
-                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_PIO_ERROR,
+                Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_PIO_ERROR,
                     "Cannot readall without a file name or open filehandle");
-
-            result = Parrot_str_new_noinit(INTERP, enum_stringrep_one, 0);
 
             /* Do line buffering on the filehandle */
             if (!(PARROT_FILEHANDLE(SELF)->flags & PIO_F_LINEBUF))
                 Parrot_io_setlinebuf(INTERP, SELF);
 
+            result = STRINGNULL;
             do {
                 STRING * const part = Parrot_io_reads(INTERP, SELF, 0);
-                result = Parrot_str_append(INTERP, result, part);
-
-                if (Parrot_io_eof(INTERP, SELF))
-                    break;
-            } while (1);
+                result = STRING_IS_NULL(result) ? part :
+                        Parrot_str_concat(INTERP, result, part);
+            } while (!Parrot_io_eof(INTERP, SELF));
         }
 
         RETURN(STRING *result);
@@ -514,7 +512,7 @@ Print the passed in integer, number, string, or PMC to the filehandle.
     METHOD print(PMC *to_print) {
         STRING * const string_to_print = VTABLE_get_string(INTERP, to_print);
 
-        Parrot_io_putps(interp, SELF, string_to_print);
+        Parrot_io_putps(INTERP, SELF, string_to_print);
     }
 
 
@@ -618,12 +616,9 @@ Retrieve the read mode string for the filehandle.
 */
 
     METHOD mode() {
-        STRING *mode, *mode_copy;
-
+        STRING *mode;
         GET_ATTR_mode(INTERP, SELF, mode);
-        mode_copy = Parrot_str_copy(INTERP, mode);
-
-        RETURN(STRING *mode_copy);
+        RETURN(STRING *mode);
     }
 
 
@@ -640,20 +635,14 @@ scheme) for the filehandle.
 
     METHOD encoding(STRING *new_encoding :optional, INTVAL got_encoding :opt_flag) {
         STRING *encoding;
-        STRING *encoding_copy = NULL;
 
         if (got_encoding) {
-            if (!STRING_IS_NULL(new_encoding))
-                encoding_copy = Parrot_str_copy(INTERP, new_encoding);
-            SET_ATTR_encoding(INTERP, SELF, encoding_copy);
+            SET_ATTR_encoding(INTERP, SELF, new_encoding);
             RETURN(STRING *new_encoding);
         }
 
         GET_ATTR_encoding(INTERP, SELF, encoding);
-        if (!STRING_IS_NULL(encoding))
-            encoding_copy = Parrot_str_copy(INTERP, encoding);
-
-        RETURN(STRING *encoding_copy);
+        RETURN(STRING *encoding);
     }
 
 
@@ -711,6 +700,70 @@ platforms that use integer file descriptors).
         RETURN(INTVAL -1);
     }
 
+/*
+
+=item C<METHOD tell()>
+
+Get the file position of the stream. 2 C<INTVAL>s are returned. The first is
+the position. The second is the position shifted down by 32 bits to handle
+overflows on 32-bit systems.
+
+=cut
+
+*/
+
+    METHOD tell() {
+        PIOOFF_T pos;
+        GET_ATTR_file_pos(INTERP, SELF, pos);
+        RETURN(INTVAL pos, INTVAL pos >> 32);
+    }
+
+/*
+
+=item C<METHOD seek(INTVAL whence, INTVAL offs, INTVAL offs_overflow)>
+
+Set the file position to an offset specified by C<offs> (and optionally
+C<offs_overflow>). C<whence> determines from where in the file the offset is
+taken.
+
+ Whence Value      Meaning
+ 0                 Seek from the beginning of the file
+ 1                 Seek from the current position
+ 2                 Seek from the end of the file
+
+C<offs_overflow> is optional and is used to handle offsets higher than 2Gb on
+32bit systems.
+
+=cut
+
+*/
+
+    METHOD seek(INTVAL whence, INTVAL offs, INTVAL offs_overflow :optional,
+                int has_overflow :opt_flag) {
+        const PIOOFF_T pio_offs = has_overflow ?
+                                    Parrot_io_make_offset32(offs_overflow, offs) :
+                                    offs;
+        if (0 > Parrot_io_seek(INTERP, SELF, pio_offs, whence))
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_PIO_ERROR, "seek failed");
+    }
+
+/*
+
+=item C<METHOD peek()>
+
+Returns the next byte from the stream, but does not remove it.
+
+=cut
+
+*/
+
+    METHOD peek() {
+        STRING *s = NULL;
+        if (Parrot_io_peek(INTERP, SELF, &s) < 0)
+            RETURN(STRING* STRINGNULL);
+        else
+            RETURN(STRING* s);
+    }
 
 /*
 

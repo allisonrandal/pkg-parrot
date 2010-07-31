@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: pcre.pir 44546 2010-02-28 05:12:29Z coke $
+# $Id: pcre.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 TITLE
 
@@ -45,6 +45,7 @@ and is additionally stored as global 'PCRE', 'lib'.
 
 =cut
 
+.loadlib 'sys_ops'
 .include "sysinfo.pasm"
 
 .sub init

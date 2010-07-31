@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: warnings.pm 45816 2010-04-20 05:35:15Z petdance $
+# $Id: warnings.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -139,7 +139,6 @@ sub _init {
         -Wpointer-sign
         -Wreturn-type
         -Wsequence-point
-        -Wno-shadow
         -Wsign-compare
         -Wstrict-aliasing
         -Wstrict-aliasing=2
@@ -183,6 +182,8 @@ sub _init {
         -Wdeprecated-declarations
         -Wno-format-extra-args
         -Wno-import
+        -Wsuggest-attribute=pure
+        -Wsuggest-attribute=const
         -Wunreachable-code
         -Wunused
         -Wunused-function
@@ -273,8 +274,7 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $verbose = $conf->options->get('verbose');
-    print "\n" if $verbose;
+    $conf->debug("\n");
 
     my $compiler = '';
     if ( defined $conf->data->get('gccversion') ) {
@@ -288,8 +288,7 @@ sub runstep {
     }
 
     if ($compiler eq '') {
-        print "We do not (yet) probe for warnings for your compiler\n"
-            if $verbose;
+        $conf->debug("We do not (yet) probe for warnings for your compiler\n");
         $self->set_result('skipped');
         return 1;
     }
@@ -356,12 +355,10 @@ on previous options.
 sub valid_warning {
     my ( $self, $conf, $warning ) = @_;
 
-    my $verbose = $conf->options->get('verbose');
-
     # This should be using a temp file name.
     my $output_file = 'test.cco';
 
-    $verbose and print "trying attribute '$warning'\n";
+    $conf->debug("trying attribute '$warning'\n");
 
     my $cc = $conf->option_or_data('cc');
     $conf->cc_gen('config/auto/warnings/test_c.in');
@@ -371,7 +368,7 @@ sub valid_warning {
     my $tryflags = "$ccflags $warnings $warning";
 
     my $command_line = Parrot::Configure::Utils::_build_compile_command( $cc, $tryflags );
-    $verbose and print '  ', $command_line, "\n";
+    $conf->debug("  ", $command_line, "\n");
 
     # Don't use cc_build, because failure is expected.
     my $exit_code = Parrot::Configure::Utils::_run_command(
@@ -389,15 +386,15 @@ sub valid_warning {
     my $output = Parrot::BuildUtil::slurp_file($output_file);
     unlink $output_file or die "Unable to unlink $output_file: $!";
 
-    $verbose and print "  output: $output\n";
+    $conf->debug("  output: $output\n");
 
     if ( $output !~ /\berror|warning|not supported|ignoring (unknown )?option\b/i ) {
         push @{$self->{'validated'}}, $warning;
-        $verbose and print "    valid warning: '$warning'\n";
+        $conf->debug("    valid warning: '$warning'\n");
         return 1;
     }
     else {
-        $verbose and print "  invalid warning: '$warning'\n";
+        $conf->debug("  invalid warning: '$warning'\n");
         return 0;
     }
 }

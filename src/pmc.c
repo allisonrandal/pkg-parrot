@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: pmc.c 45642 2010-04-13 20:33:16Z petdance $
+$Id: pmc.c 47001 2010-05-26 00:42:22Z whiteknight $
 
 =head1 NAME
 
@@ -80,6 +80,7 @@ Tests if the given pmc is null.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_HOT
 INTVAL
@@ -118,9 +119,6 @@ Parrot_pmc_destroy(PARROT_INTERP, ARGMOD(PMC *pmc))
         VTABLE_destroy(interp, pmc);
 
     PObj_gc_CLEAR(pmc);
-
-    if (PObj_is_PMC_shared_TEST(pmc) && PMC_sync(pmc))
-        Parrot_gc_free_pmc_sync(interp, pmc);
 
     if (pmc->vtable->attr_size)
         Parrot_gc_free_pmc_attributes(interp, pmc);
@@ -190,8 +188,7 @@ PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
 PARROT_IGNORABLE_RESULT
 PMC *
-Parrot_pmc_reuse(PARROT_INTERP, ARGIN(PMC *pmc), INTVAL new_type,
-    SHIM(UINTVAL flags))
+Parrot_pmc_reuse(PARROT_INTERP, ARGIN(PMC *pmc), INTVAL new_type, SHIM(UINTVAL flags))
 {
     ASSERT_ARGS(Parrot_pmc_reuse)
     pmc = Parrot_pmc_reuse_noinit(interp, pmc, new_type);
@@ -295,8 +292,7 @@ PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
 PARROT_IGNORABLE_RESULT
 PMC *
-Parrot_pmc_reuse_by_class(PARROT_INTERP, ARGMOD(PMC *pmc), ARGIN(PMC *class_),
-    UINTVAL flags)
+Parrot_pmc_reuse_by_class(PARROT_INTERP, ARGMOD(PMC *pmc), ARGIN(PMC *class_), UINTVAL flags)
 {
     ASSERT_ARGS(Parrot_pmc_reuse_by_class)
     const INTVAL   new_type   = PARROT_CLASS(class_)->id;
@@ -441,9 +437,6 @@ get_new_pmc_header(PARROT_INTERP, INTVAL base_type, UINTVAL flags)
          * const PMC is const too
          * see e.g. t/pmc/sarray_13.pir
          */
-#if 0
-        flags |= PObj_constant_FLAG;
-#endif
         --base_type;
         vtable = interp->vtables[base_type];
     }
@@ -501,6 +494,7 @@ Creates a new constant PMC of type C<base_type>.
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 PMC *
 Parrot_pmc_new_constant_noinit(PARROT_INTERP, INTVAL base_type)
 {
@@ -649,7 +643,7 @@ Creates a new temporary PMC of type C<base_type>, then call C<init>. Cannot
 be used to create PMC Objects which have been defined from PIR.
 
 B<You> are responsible for freeing this PMC when it goes out of scope with
-C<free_temporary_pmc()>.  B<Do not> store this PMC in any other PMCs, or
+C<Parrot_pmc_free_temporary()>.  B<Do not> store this PMC in any other PMCs, or
 allow it to be stored.  B<Do not> store any regular PMC in this PMC, or
 allow the storage of any regular PMC in this PMC. Temporary PMCs do not
 participate in garbage collection, and mixing them with PMCs that are
@@ -777,7 +771,7 @@ INTVAL
 Parrot_pmc_get_type_str(PARROT_INTERP, ARGIN_NULLOK(STRING *name))
 {
     ASSERT_ARGS(Parrot_pmc_get_type_str)
-    if (!name)
+    if (STRING_IS_NULL(name))
         return enum_type_undef;
     else {
         PMC * const classname_hash = interp->class_hash;
@@ -786,7 +780,7 @@ Parrot_pmc_get_type_str(PARROT_INTERP, ARGIN_NULLOK(STRING *name))
 
         if (!PMC_IS_NULL(item)) {
             /* nested namespace with same name */
-            if (item->vtable->base_type == enum_class_NameSpace)
+            if (PMC_IS_TYPE(item, NameSpace))
                 return enum_type_undef;
             else
                 return VTABLE_get_integer(interp, item);
@@ -855,7 +849,6 @@ create_class_pmc(PARROT_INTERP, INTVAL type)
     &&  (_class == _class->vtable->pmc_class))
         interp->vtables[type]->pmc_class = _class;
     else {
-        Parrot_gc_free_pmc_sync(interp, _class);
         gc_flag_CLEAR(is_special_PMC, _class);
         PObj_is_PMC_shared_CLEAR(_class);
         interp->vtables[type]->pmc_class = _class;

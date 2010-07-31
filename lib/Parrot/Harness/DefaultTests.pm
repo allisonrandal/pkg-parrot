@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: DefaultTests.pm 45320 2010-03-30 16:00:01Z cotto $
+# $Id: DefaultTests.pm 47561 2010-06-12 01:47:47Z whiteknight $
 
 =head1 NAME
 
@@ -64,9 +64,8 @@ our @EXPORT_OK = qw(
     t/op/*.t
     t/pmc/*.t
     t/oo/*.t
+    t/pir/*.t
     t/native_pbc/*.t
-    t/dynpmc/*.t
-    t/dynoplibs/*.t
 );
 
 # core tests are run unless --runcore-tests is present.  Typically
@@ -77,6 +76,7 @@ our @EXPORT_OK = qw(
     t/perl/*.t
 );
 
+
 # library tests are run unless --runcore-tests or --core-tests is present.
 @library_tests = qw(
     t/compilers/pct/*.t
@@ -84,6 +84,9 @@ our @EXPORT_OK = qw(
     t/compilers/pge/p5regex/*.t
     t/compilers/pge/perl6regex/*.t
     t/compilers/tge/*.t
+    t/compilers/opsc/*.t
+    t/compilers/data_json/*.t
+    t/dynoplibs/*.t
     t/library/*.t
     t/tools/*.t
     t/profiling/*.t

@@ -1,7 +1,15 @@
 /*
- * $Id: experimental.ops 44882 2010-03-11 18:31:31Z mikehh $
+ * $Id: experimental.ops 47678 2010-06-18 00:29:10Z whiteknight $
 ** experimental.ops
 */
+
+BEGIN_OPS_PREAMBLE
+
+#if PARROT_HAS_ICU
+#  include <unicode/uchar.h>
+#endif
+
+END_OPS_PREAMBLE
 
 =head1 NAME
 
@@ -19,6 +27,8 @@ may be removed in any release.
 If you rely on any of these opcodes, please open a
 Trac ticket at L<https://trac.parrot.org/>.
 
+When making changes to any ops file, run C<make bootstrap-ops> to regenerate
+all generated ops files.
 
 =cut
 
@@ -304,8 +314,6 @@ op new(out PMC, in PMC, in INT) {
 
 =item B<root_new>(out PMC, in PMC, in INT)
 
-=back
-
 =cut
 
 op root_new(out PMC, in PMC, in INT) {
@@ -317,7 +325,7 @@ op root_new(out PMC, in PMC, in INT) {
     /* if it's clearly a PIR-level PMC */
     if (type > enum_class_core_max) {
         PMC * const root_ns  = interp->root_namespace;
-        PMC * const ns       = Parrot_get_namespace_keyed(interp, root_ns, name_key);
+        PMC * const ns       = Parrot_ns_get_namespace_keyed(interp, root_ns, name_key);
         PMC * const _class   = Parrot_oo_get_class(interp, ns);
         if (!PMC_IS_NULL(_class)) {
             PMC *initial = Parrot_pmc_new(interp,
@@ -339,6 +347,75 @@ op root_new(out PMC, in PMC, in INT) {
         goto ADDRESS(dest);
     }
 }
+
+=item B<find_codepoint>(out INT, in STR)
+
+Set $1 to the codepoint with the name given in $2, or -1 if there is none.
+Requires ICU lib, otherwise exception is thrown.
+
+=cut
+
+op find_codepoint(out INT, in STR) {
+#if PARROT_HAS_ICU
+    UErrorCode   err       = U_ZERO_ERROR;
+    char * const cstr      = Parrot_str_to_cstring(interp, $2);
+    UChar32      codepoint = u_charFromName(U_EXTENDED_CHAR_NAME, cstr, &err);
+    Parrot_str_free_cstring(cstr);
+    $1 = U_SUCCESS(err) ? (INTVAL) codepoint : -1;
+#else
+    opcode_t * const dest = expr NEXT();
+    Parrot_ex_throw_from_op_args(interp, dest, EXCEPTION_LIBRARY_ERROR,
+        "no ICU lib loaded");
+#endif
+}
+
+=item B<finalize>(in PMC)
+
+Finalize exception handling, freeing any information needed to resume
+the handled exception, like inner runloops.
+$1 is the Exception handled or the ExceptionHandler that is handling it.
+EXPERIMENTAL. Handle with care.
+
+=cut
+
+op finalize(in PMC) {
+    /* Go to the next op after loop unrolling */
+    opcode_t * const dest = expr NEXT();
+    PMC *eh = PMCNULL;
+    if (!PMC_IS_NULL($1)) {
+        /* If isa ExceptionHandler, use it. If isa Exception, get its active handler */
+        if (VTABLE_isa(interp, $1, Parrot_str_new_constant(interp, "ExceptionHandler")))
+            eh = $1;
+        else if (VTABLE_isa(interp, $1, Parrot_str_new_constant(interp, "Exception"))) {
+            PMC *iter = VTABLE_get_attr_str(interp,
+                                            $1, Parrot_str_new_constant(interp, "handler_iter"));
+            if (!PMC_IS_NULL(iter))
+                eh = VTABLE_get_pmc_keyed_int(interp, iter, -1);
+        }
+    }
+    if (!PMC_IS_NULL(eh)) {
+        /* Get the runloop_id from the continuation and jump to it. */
+        Parrot_runloop *rl = interp->current_runloop;
+        INTVAL rid;
+        Parrot_pcc_invoke_method_from_c_args(interp,
+                                             eh, Parrot_str_new_constant(interp, "rid"),
+                                             "->I", &rid);
+        while (rl && rl->id != rid)
+            rl = rl->prev;
+        if (rl) {
+            if (rl != interp->current_runloop) {
+                rl->handler_start = dest;
+                longjmp(rl->resume, 3);
+            }
+        }
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL,
+                    EXCEPTION_INVALID_OPERATION, "missing runloop");
+    }
+}
+
+
+=back
 
 =head1 COPYRIGHT
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2009, Parrot Foundation.
-$Id: profiling.c 45619 2010-04-12 22:44:02Z plobsing $
+$Id: profiling.c 48028 2010-07-07 12:45:50Z Util $
 
 =head1 NAME
 
@@ -334,7 +334,7 @@ ARGIN(opcode_t *pc))
         preop_ctx->current_pc = pc;
         preop_pc              = pc;
 
-        runcore->level++;
+        ++runcore->level;
         Profiling_exit_check_CLEAR(runcore);
 
         runcore->op_start  = Parrot_hires_get_time();
@@ -349,7 +349,7 @@ ARGIN(opcode_t *pc))
         else
             op_time = runcore->op_finish - runcore->op_start;
 
-        runcore->level--;
+        --runcore->level;
 
         /* if current context changed since the last printing of a CS line... */
         /* Occasionally the ctx stays the same while the sub changes, possible
@@ -375,7 +375,7 @@ ARGIN(opcode_t *pc))
                 ns_separator = Parrot_str_new(interp, ";", 1);
 
                 i = MAX_NS_DEPTH - 1;
-                for (;ns ; i--) {
+                for (;ns ; --i) {
                     if (i < 0) {
                         /* should probably warn about truncated namespace here */
                         break;
@@ -384,15 +384,14 @@ ARGIN(opcode_t *pc))
                     GETATTR_NameSpace_parent(interp, ns, ns);
                 }
 
-                i++;
-                i++; /* the root namespace has an empty name, so ignore it */
-                for (;i < MAX_NS_DEPTH; i++) {
-                    full_ns = Parrot_str_concat(interp, full_ns, ns_names[i], 0);
-                    full_ns = Parrot_str_concat(interp, full_ns, ns_separator, 0);
+                i += 2; /* the root namespace has an empty name, so ignore it */
+                for (;i < MAX_NS_DEPTH; ++i) {
+                    full_ns = Parrot_str_concat(interp, full_ns, ns_names[i]);
+                    full_ns = Parrot_str_concat(interp, full_ns, ns_separator);
                 }
 
                 GETATTR_Sub_name(interp, preop_ctx->current_sub, sub_name);
-                full_ns = Parrot_str_concat(interp, full_ns, sub_name, 0);
+                full_ns = Parrot_str_concat(interp, full_ns, sub_name);
                 full_ns_cstr = Parrot_str_to_cstring(interp, full_ns);
 
                 pprof_data[PPROF_DATA_NAMESPACE] = (PPROF_DATA) full_ns_cstr;
@@ -473,7 +472,7 @@ ARGIN(opcode_t *pc))
     }
 
     Profiling_exit_check_SET(runcore);
-    runcore->runcore_finish = Parrot_hires_get_time();;
+    runcore->runcore_finish = Parrot_hires_get_time();
     return pc;
 }
 
@@ -511,7 +510,7 @@ add_bogus_parent_runloop(ARGIN(Parrot_profiling_runcore_t * runcore))
     pprof_data[PPROF_DATA_OPNAME] = (PPROF_DATA) "noop";
     runcore->output_fn(runcore, pprof_data, PPROF_LINE_OP);
 
-    runcore->runloop_count++;
+    ++runcore->runloop_count;
 }
 
 /*

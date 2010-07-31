@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: pf_items.c 45648 2010-04-14 02:26:40Z coke $
+$Id: pf_items.c 46944 2010-05-24 06:04:42Z petdance $
 
 =head1 NAME
 
@@ -153,14 +153,6 @@ PARROT_WARN_UNUSED_RESULT
 static opcode_t fetch_op_le_8(ARGIN(const unsigned char *b))
         __attribute__nonnull__(1);
 
-PARROT_WARN_UNUSED_RESULT
-static opcode_t fetch_op_mixed_be(ARGIN(const unsigned char *b))
-        __attribute__nonnull__(1);
-
-PARROT_WARN_UNUSED_RESULT
-static opcode_t fetch_op_mixed_le(ARGIN(const unsigned char *b))
-        __attribute__nonnull__(1);
-
 #define ASSERT_ARGS_cvt_num12_num16 __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(dest) \
     , PARROT_ASSERT_ARG(src))
@@ -210,10 +202,6 @@ static opcode_t fetch_op_mixed_le(ARGIN(const unsigned char *b))
 #define ASSERT_ARGS_fetch_op_le_4 __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(b))
 #define ASSERT_ARGS_fetch_op_le_8 __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(b))
-#define ASSERT_ARGS_fetch_op_mixed_be __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(b))
-#define ASSERT_ARGS_fetch_op_mixed_le __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(b))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
@@ -323,7 +311,7 @@ nul:
         dest[7] |= 0x80;
     /* long double frac 63 bits => 52 bits
        src[7] &= 0x7f; reset integer bit */
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < 6; ++i) {
         dest[i+1] |= (i==5 ? src[7]&0x7f : src[i+2]) >> 3;
         dest[i] |= (src[i+2] & 0x1f) << 5;
     }
@@ -552,7 +540,7 @@ cvt_num16_num8(ARGOUT(unsigned char *dest), ARGIN(const unsigned char *src))
             dest[7] |= 0x80;
         /* long double frac 112 bits => 52 bits
            src[13] &= 0x7f; reset integer bit */
-        for (i = 0; i < 6; i++) {
+        for (i = 0; i < 6; ++i) {
             dest[i+1] |= (i==5 ? src[13]&0x7f : src[i+7]) >> 3;
             dest[i] |= (src[i+7] & 0x1f) << 5;
         }
@@ -817,86 +805,6 @@ cvt_num8_num16_be(ARGOUT(unsigned char *dest), ARGIN(const unsigned char *src))
     fetch_buf_be_8(b, src);
     cvt_num8_num16(dest, b);
 }
-#endif
-
-#if 0
-
-/*
-
-=item C<static opcode_t fetch_op_mixed_le(const unsigned char *b)>
-
-opcode fetch helper function
-
-This is mostly wrong or at least untested
-
-Fetch an opcode and convert to LE
-
-=cut
-
-*/
-
-PARROT_WARN_UNUSED_RESULT
-static opcode_t
-fetch_op_mixed_le(ARGIN(const unsigned char *b))
-{
-    ASSERT_ARGS(fetch_op_mixed_le)
-#  if OPCODE_T_SIZE == 4
-    union {
-        unsigned char buf[8];
-        opcode_t o[2];
-    } u;
-    /* wordsize = 8 then */
-    fetch_buf_le_8(u.buf, b);
-    return u.o[0]; /* or u.o[1] */
-#  else
-    union {
-        unsigned char buf[4];
-        opcode_t o;
-    } u;
-
-    /* wordsize = 4 */
-    u.o = 0;
-    fetch_buf_le_4(u.buf, b);
-    return u.o;
-#  endif
-}
-
-/*
-
-=item C<static opcode_t fetch_op_mixed_be(const unsigned char *b)>
-
-Fetch an opcode and convert to BE. Determines size of opcode from
-C<OPCODE_T_SIZE> macro, and proceeds accordingly.
-
-=cut
-
-*/
-
-PARROT_WARN_UNUSED_RESULT
-static opcode_t
-fetch_op_mixed_be(ARGIN(const unsigned char *b))
-{
-    ASSERT_ARGS(fetch_op_mixed_be)
-#  if OPCODE_T_SIZE == 4
-    union {
-        unsigned char buf[8];
-        opcode_t o[2];
-    } u;
-    /* wordsize = 8 then */
-    fetch_buf_be_8(u.buf, b);
-    return u.o[1]; /* or u.o[0] */
-#  else
-    union {
-        unsigned char buf[4];
-        opcode_t o;
-    } u;
-    /* wordsize = 4 */
-    u.o = 0;
-    fetch_buf_be_4(u.buf, b);
-    return u.o;
-#  endif
-}
-
 #endif
 
 /*
@@ -1307,32 +1215,43 @@ PF_fetch_string(PARROT_INTERP, ARGIN_NULLOK(PackFile *pf), ARGIN(const opcode_t 
 {
     ASSERT_ARGS(PF_fetch_string)
     STRING   *s;
-    opcode_t  flag_charset_word;
     UINTVAL   flags;
+    UINTVAL   encoding_nr;
     UINTVAL   charset_nr;
+    const ENCODING *encoding;
+    const CHARSET  *charset;
     size_t    size;
-    const int wordsize = pf ? pf->header->wordsize : sizeof (opcode_t);
+    const int wordsize          = pf ? pf->header->wordsize : sizeof (opcode_t);
+    opcode_t  flag_charset_word = PF_fetch_opcode(pf, cursor);
 
-    flag_charset_word = PF_fetch_opcode(pf, cursor);
-
-    if (flag_charset_word == -1) {
+    if (flag_charset_word == -1)
         return STRINGNULL;
-    }
 
-    /* decode flags and charset */
+    /* decode flags, charset and encoding */
     flags         = (flag_charset_word & 0x1 ? PObj_constant_FLAG : 0) |
                     (flag_charset_word & 0x2 ? PObj_private7_FLAG : 0) ;
-    charset_nr    = flag_charset_word >> 8;
+    encoding_nr   = (flag_charset_word >> 16);
+    charset_nr    = (flag_charset_word >> 8) & 0xFF;
 
 
     size = (size_t)PF_fetch_opcode(pf, cursor);
 
     TRACE_PRINTF(("PF_fetch_string(): flags=0x%04x, ", flags));
+    TRACE_PRINTF(("encoding_nr=%ld, ", encoding_nr));
     TRACE_PRINTF(("charset_nr=%ld, ", charset_nr));
     TRACE_PRINTF(("size=%ld.\n", size));
 
-    s = string_make_from_charset(interp, (const char *)*cursor,
-                        size, charset_nr, flags);
+    encoding = Parrot_get_encoding(interp, encoding_nr);
+    charset  = Parrot_get_charset(interp, charset_nr);
+    if (!encoding)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
+                    "Invalid encoding number '%d' specified", encoding_nr);
+    if (!charset)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
+                    "Invalid charset number '%d' specified", charset_nr);
+
+    s = Parrot_str_new_init(interp, (const char *)*cursor, size,
+            encoding, charset, flags);
 
     /* print only printable characters */
     TRACE_PRINTF_VAL(("PF_fetch_string(): string is '%s' at 0x%x\n",
@@ -1393,8 +1312,9 @@ PF_store_string(ARGOUT(opcode_t *cursor), ARGIN(const STRING *s))
      * see also PF_fetch_string
      */
 
-    /* encode charset_nr and flags into the same word for a 33% savings on constant overhead */
-    *cursor++ = (Parrot_charset_number_of_str(NULL, s) << 8)         |
+    /* encode charset_nr, encoding_nr and flags into the same word */
+    *cursor++ = (Parrot_encoding_number_of_str(NULL, s) << 16)       |
+                (Parrot_charset_number_of_str(NULL, s) << 8)         |
                 (PObj_get_FLAGS(s) & PObj_constant_FLAG ? 0x1 : 0x0) |
                 (PObj_get_FLAGS(s) & PObj_private7_FLAG ? 0x2 : 0x0) ;
     *cursor++ = s->bufused;
@@ -1450,7 +1370,8 @@ Reports stored size of C<STRING> in C<opcode_t> units given its in-memory byte l
 
 */
 
-PARROT_PURE_FUNCTION
+PARROT_CONST_FUNCTION
+PARROT_WARN_UNUSED_RESULT
 size_t
 PF_size_strlen(const UINTVAL len)
 {

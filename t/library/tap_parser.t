@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: tap_parser.t 45818 2010-04-20 08:44:06Z fperrad $
+# $Id: tap_parser.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

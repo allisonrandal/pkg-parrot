@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: pbc_disassemble.t 44331 2010-02-22 23:25:15Z mikehh $
+# $Id: pbc_disassemble.t 47893 2010-06-28 02:57:19Z petdance $
 
 =head1 NAME
 
@@ -32,7 +32,6 @@ use warnings;
 use lib qw(lib);
 
 use Test::More;
-use IO::File ();
 use Parrot::Config;
 use File::Spec;
 use Parrot::Test;

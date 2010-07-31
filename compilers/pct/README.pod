@@ -1,13 +1,8 @@
-# $Id: README.pod 28952 2008-07-02 13:38:36Z bernhard $
+# $Id: README.pod 46612 2010-05-14 15:25:05Z coke $
 
 =head1 Parrot Compiler Toolkit (PCT)
 
 This is an implementation of an abstract tree representation
-and compiler for Parrot.  This version is a redesign based
-on PAST-pm.  Only simple nodes are available, but it will
-expand rapidly.
-
-PCT is used for example by F<compilers/nqp>, F<languages/abc>, F<languages/perl6>
-and F<languages/pipp>.
+and compiler for Parrot. 
 
 =cut

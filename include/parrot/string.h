@@ -1,7 +1,7 @@
 /* string.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: string.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: string.h 46020 2010-04-26 05:43:32Z bacek $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -24,7 +24,8 @@
 typedef struct parrot_string_t STRING;
 
 typedef enum Forward_flag {
-    Buffer_moved_FLAG = 1 << 0
+    Buffer_moved_FLAG   = 1 << 0,
+    Buffer_shared_FLAG  = 1 << 1
 } Forward_flags;
 
 /* String iterator */

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: cpu.pm 43393 2010-01-06 02:59:16Z jkeenan $
+# $Id: cpu.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -32,20 +32,18 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $verbose = $conf->options->get('verbose');
-
     $conf->data->add( ' ', TEMP_atomic_o => '' );    # assure a default
 
     my $hints = "auto::cpu::" . $conf->data->get('cpuarch') . "::auto";
 
-    print "\t(cpu hints = '$hints') " if $verbose;
+    $conf->debug("\t(cpu hints = '$hints') ");
 
     eval "use $hints";
     unless ($@) {
         $hints->runstep( $conf, @_ );
     }
     else {
-        print "(no cpu specific hints)" if $verbose;
+        $conf->debug("(no cpu specific hints)");
     }
 
     return 1;

@@ -1,10 +1,12 @@
-#!./parrot -R cgp
+#!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: binarytrees.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: binarytrees.pir 47051 2010-05-27 08:45:23Z plobsing $
 #
 # binarytrees.pir N         (N = 16 for shootout)
 # by Joshua Isom, modified by Leopold Toetsch
 # modified by karl : default value of N=10 to match shootout output
+
+.loadlib 'trans_ops'
 
 .sub itemcheck
 	.param pmc node

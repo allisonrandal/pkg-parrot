@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: c_functions.pod 45619 2010-04-12 22:44:02Z plobsing $
+# $Id: c_functions.pod 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 NAME
 

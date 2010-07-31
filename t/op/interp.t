@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: interp.t 45324 2010-03-30 17:06:22Z NotFound $
+# $Id: interp.t 47220 2010-05-31 13:44:07Z bacek $
 
 use strict;
 use warnings;
@@ -47,8 +47,6 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'runinterp - works with printing' );
     .local string actual
     .local pmc test_interp
                test_interp = new 'ParrotInterpreter'
-    .local pmc stdout
-               stdout = getstdout
 
     print "uno\n"
     runinterp test_interp, pasm
@@ -70,14 +68,14 @@ OUTPUT
 # the test fail.
 pasm_output_like(
     <<'CODE', <<'OUTPUT', "restart trace" );
-    printerr "ok 1\n"
+    print "ok 1\n"
     sweepoff
     set I0, 1
     trace I0
     dec I0
     trace I0
     sweepon
-    printerr "ok 2\n"
+    print "ok 2\n"
     end
 CODE
 /^ok\s1\n
@@ -89,7 +87,7 @@ OUTPUT
 pasm_output_is( <<'CODE', 'nada:', 'interp - warnings' );
     new P0, 'Undef'
     set I0, P0
-    printerr "nada:"
+    print "nada:"
     warningson 1
     new P1, 'Undef'
     set I0, P1
@@ -154,9 +152,6 @@ pir_output_is( <<'CODE', <<'OUTPUT', "interpinfo & getinterp: current runcore" )
     $I0 = interpinfo .INTERPINFO_CURRENT_RUNCORE
     if $I0 == .PARROT_FUNCTION_CORE   goto ok1
     if $I0 == .PARROT_FAST_CORE       goto ok1
-    if $I0 == .PARROT_SWITCH_CORE     goto ok1
-    if $I0 == .PARROT_CGOTO_CORE      goto ok1
-    if $I0 == .PARROT_CGP_CORE        goto ok1
     if $I0 == .PARROT_EXEC_CORE       goto ok1
     if $I0 == .PARROT_GC_DEBUG_CORE   goto ok1
     print 'not '

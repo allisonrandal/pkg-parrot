@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: env.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: env.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -57,26 +57,25 @@ sub runstep {
 
 sub _evaluate_env {
     my ($self, $conf, $setenv, $unsetenv) = @_;
-    my $verbose = $conf->options->get('verbose');
     $conf->data->set(
         setenv   => $setenv,
         unsetenv => $unsetenv
     );
 
     if ( $setenv && $unsetenv ) {
-        print " (both) " if $verbose;
+        $conf->debug(" (both) ");
         $self->set_result('both');
     }
     elsif ($setenv) {
-        print " (setenv) " if $verbose;
+        $conf->debug(" (setenv) ");
         $self->set_result('setenv');
     }
     elsif ($unsetenv) {
-        print " (unsetenv) " if $verbose;
+        $conf->debug(" (unsetenv) ");
         $self->set_result('unsetenv');
     }
     else {
-        print " (no) " if $verbose;
+        $conf->debug(" (no) ");
         $self->set_result('no');
     }
 }

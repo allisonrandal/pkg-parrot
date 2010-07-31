@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: subflags.t 44367 2010-02-23 05:07:43Z mikehh $
+# $Id: subflags.t 45827 2010-04-20 19:04:53Z allison $
 
 =head1 NAME
 
@@ -69,7 +69,7 @@ test flags on PIR subs
     isa_ok($P30, 'Sub', ":method sub found w/.const")
     $P0 = get_global 'method1'
     $I0 = isnull $P0
-    todo($I0, ":method sub not found in namespace")
+    ok($I0, ":method sub not found in namespace")
 
     ## :subid subs
     .const 'Sub' $P40 = 'subid1'

@@ -1,15 +1,13 @@
 /*
  * Copyright (C) 2007-2010, Parrot Foundation.
- * $Id: imcc.h 45791 2010-04-19 05:45:56Z petdance $
+ * $Id: imcc.h 46919 2010-05-23 20:30:36Z plobsing $
  */
 
 #ifndef PARROT_IMCC_H_GUARD
 #define PARROT_IMCC_H_GUARD
 
-PARROT_EXPORT void imcc_initialize(PARROT_INTERP);
-PARROT_EXPORT void imcc_start_handling_flags(PARROT_INTERP);
-PARROT_EXPORT int imcc_handle_flag(PARROT_INTERP, struct longopt_opt_info *opt, Parrot_Run_core_t *core);
-PARROT_EXPORT int imcc_run(PARROT_INTERP, const char *sourcefile, int argc, const char **argv);
+PARROT_EXPORT int  imcc_run(PARROT_INTERP, const char *sourcefile, int argc, const char **argv);
+PARROT_EXPORT void imcc_run_pbc(PARROT_INTERP, const char *outputfile, int argc, const char **argv);
 
 #endif /* PARROT_IMCC_H_GUARD */
 

@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
+Copyright (C) 2001-2010, Parrot Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packout.c 42917 2009-12-06 14:56:10Z fperrad $
+$Id: packout.c 46646 2010-05-15 05:29:04Z plobsing $
 
 =head1 NAME
 
@@ -112,7 +112,7 @@ PackFile_pack(PARROT_INTERP, ARGMOD(PackFile *self), ARGOUT(opcode_t *cursor))
     padding_size = 16 - (PACKFILE_HEADER_BYTES + self->header->uuid_size) % 16;
     if (padding_size < 16) {
         int i;
-        for (i = 0; i < padding_size; i++)
+        for (i = 0; i < padding_size; ++i)
             *byte_cursor++ = 0;
     }
     else {
@@ -159,11 +159,18 @@ PackFile_ConstTable_pack_size(PARROT_INTERP, ARGIN(PackFile_Segment *seg))
 {
     ASSERT_ARGS(PackFile_ConstTable_pack_size)
     opcode_t i;
-    const PackFile_ConstTable* const self = (const PackFile_ConstTable *) seg;
+    PackFile_ConstTable* const self = (PackFile_ConstTable *) seg;
+    const opcode_t n_constants = self->const_count;
     size_t size = 1;    /* const_count */
 
-    for (i = 0; i < self->const_count; i++)
-        size += PackFile_Constant_pack_size(interp, self->constants[i]);
+    for (i = 0; i < n_constants; ++i) {
+        /* only constants up to the current one will be valid on unpack */
+        self->const_count = i;
+        size += PackFile_Constant_pack_size(interp, self->constants[i], self);
+    }
+
+    self->const_count = i;
+
     return size;
 }
 
@@ -192,13 +199,19 @@ PackFile_ConstTable_pack(PARROT_INTERP,
         ARGIN(PackFile_Segment *seg), ARGMOD(opcode_t *cursor))
 {
     ASSERT_ARGS(PackFile_ConstTable_pack)
-    const PackFile_ConstTable * const self = (const PackFile_ConstTable *)seg;
+    PackFile_ConstTable * const self = (PackFile_ConstTable *)seg;
+    const opcode_t n_constants = self->const_count;
     opcode_t i;
 
     *cursor++ = self->const_count;
 
-    for (i = 0; i < self->const_count; i++)
+    for (i = 0; i < n_constants; ++i) {
+        /* only constants up to the current one will be valid on unpack */
+        self->const_count = i;
         cursor = PackFile_Constant_pack(interp, self, self->constants[i], cursor);
+    }
+
+    self->const_count = n_constants;
 
     return cursor;
 }
@@ -218,24 +231,87 @@ constant is in constant table, so we have to search for it.
 PARROT_EXPORT
 int
 PackFile_find_in_const(PARROT_INTERP,
-        ARGIN(const PackFile_ConstTable *ct), ARGIN(PMC *key), int type)
+    ARGIN(const PackFile_ConstTable *ct), ARGIN(PMC *key), int type)
 {
     ASSERT_ARGS(PackFile_find_in_const)
-    int      i;
+    int i = PackFile_ConstTable_rlookup(interp, ct, key, type);
+
+    if (i < 0) {
+        Parrot_io_eprintf(NULL, "find_in_const: couldn't find const for key\n");
+        Parrot_exit(interp, 1);
+    }
+
+    return i;
+}
+
+/*
+
+=item C<int PackFile_ConstTable_rlookup(PARROT_INTERP, const PackFile_ConstTable
+*ct, PMC *key, int type)>
+
+Reverse lookup a constant in the constant table.
+
+TODO: use a hash to make these O(1) for strings
+
+=cut
+
+*/
+
+PARROT_EXPORT
+int
+PackFile_ConstTable_rlookup(PARROT_INTERP,
+    ARGIN(const PackFile_ConstTable *ct), ARGIN(PMC *key), int type)
+{
+    ASSERT_ARGS(PackFile_ConstTable_rlookup)
+    int      i, strings;
     FLOATVAL key_num;
     STRING  *key_str;
+    PMC     *string_list;
+
+    PARROT_ASSERT(type == PFC_STRING || type == PFC_NUMBER);
 
     GETATTR_Key_str_key(interp, key, key_str);
     GETATTR_Key_num_key(interp, key, key_num);
 
-    for (i = 0; i < ct->const_count; i++) {
-        if (type == PFC_STRING && ct->constants[i]->u.string == key_str)
-            return i;
-        if (type == PFC_NUMBER && ct->constants[i]->u.number == key_num)
-            return i;
+    if (type == PFC_STRING && !PMC_IS_NULL(ct->string_hash)) {
+        if (VTABLE_exists_keyed_str(interp, ct->string_hash, key_str)) {
+            i = VTABLE_get_integer_keyed_str(interp, ct->string_hash, key_str);
+            if (i < ct->const_count) /* only consider constants that have already occured */
+                return i;
+        }
+        return -1;
     }
-    Parrot_io_eprintf(NULL, "find_in_const: couldn't find const for key\n");
-    Parrot_exit(interp, 1);
+
+    for (i = 0; i < ct->const_count; ++i) {
+        PackFile_Constant *constant = ct->constants[i];
+
+        switch (type) {
+          case PFC_STRING:
+            if (constant->type == PFC_STRING) {
+                STRING * const sc = constant->u.string;
+                if (Parrot_str_equal(interp, key_str, sc)
+                &&  Parrot_charset_number_of_str(interp, key_str)
+                ==  Parrot_charset_number_of_str(interp, sc)
+                &&  Parrot_encoding_number_of_str(interp, key_str)
+                ==  Parrot_encoding_number_of_str(interp, sc)) {
+                    return i;
+                }
+            }
+            break;
+
+          case PFC_NUMBER:
+            if (constant->type == PFC_NUMBER)
+                if (constant->u.number == key_num)
+                    return i;
+            break;
+
+          default:
+            PANIC(interp, "Universe imploded. Did you divide by zero?");
+        }
+    }
+
+    /* not found */
+    return -1;
 }
 
 /*
@@ -286,12 +362,12 @@ PackFile_Constant_pack(PARROT_INTERP,
 
       case PFC_PMC:
         key = self->u.key;      /* the (Sub) PMC */
-        image = Parrot_freeze(interp, key);
+        image = Parrot_freeze_pbc(interp, key, const_table);
         cursor = PF_store_string(cursor, image);
         break;
 
       case PFC_KEY:
-        for (i = 0, key = self->u.key; key; i++){
+        for (i = 0, key = self->u.key; key; ++i){
             GETATTR_Key_next_key(interp, key, key);
         }
 

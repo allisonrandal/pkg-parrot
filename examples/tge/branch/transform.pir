@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: transform.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: transform.pir 47421 2010-06-06 04:41:48Z plobsing $
 
 =head1 NAME
 
@@ -105,21 +105,24 @@ specified type.
     $I0 = argv
     if $I0 == 2 goto fromfile
 
-    filehandle = getstdin
+    $P0 = getinterp
+    .include 'stdio.pasm'
+    filehandle = $P0.'stdhandle'(.PIO_STDIN_FILENO)
     goto grabline
 
   fromfile:
     # Read in the source file
     filename = argv[1]
-    filehandle = open filename, 'r'
+    filehandle = new ['FileHandle']
+    filehandle.'open'(filename, 'r')
 
   grabline:
-    $S1 = read filehandle, 65535
+    $S1 = filehandle.'read'(65535)
 #    $S1 = readline filehandle
 #    print $S1
 
     if $I0 != 2 goto finished
-    close filehandle
+    filehandle.'close'()
 
   finished:
     .return ($S1)

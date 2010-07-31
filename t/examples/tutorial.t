@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: tutorial.t 45772 2010-04-18 01:41:59Z mikehh $
+# $Id: tutorial.t 46108 2010-04-28 15:43:41Z mikehh $
 
 use strict;
 use warnings;
@@ -97,8 +97,8 @@ END_EXPECTED
 bc
 bc
 abcde
-bc
 aXYZde
+abcde
 END_EXPECTED
 
     '24_string_ops_clone.pir' => << 'END_EXPECTED',

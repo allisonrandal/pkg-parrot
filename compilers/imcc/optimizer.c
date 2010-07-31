@@ -1,5 +1,5 @@
 /*
- * $Id: optimizer.c 45804 2010-04-19 14:00:14Z mikehh $
+ * $Id: optimizer.c 46906 2010-05-23 03:48:40Z plobsing $
  * Copyright (C) 2002-2010, Parrot Foundation.
  */
 
@@ -824,18 +824,19 @@ eval_ins(PARROT_INTERP, ARGIN(const char *op), size_t ops, ARGIN(SymReg **r))
           case PARROT_ARG_S:
             eval[i + 1] = i;        /* regs used are I0, I1, I2 */
             if (ops <= 2 || i) { /* fill source regs */
+                SymReg *r_ = r[i]->type & VT_CONSTP ? r[i]->reg : r[i];
                 switch (r[i]->set) {
                   case 'I':
-                    REG_INT(interp, i) = IMCC_int_from_reg(interp, r[i]);
+                    REG_INT(interp, i) = IMCC_int_from_reg(interp, r_);
                     break;
                   case 'N':
                     {
-                        STRING * const s = Parrot_str_new(interp, r[i]->name, 0);
+                        STRING * const s = Parrot_str_new(interp, r_->name, 0);
                         REG_NUM(interp, i) = Parrot_str_to_num(interp, s);
                     }
                     break;
                   case 'S':
-                    REG_STR(interp, i) = IMCC_string_from_reg(interp, r[i]);
+                    REG_STR(interp, i) = IMCC_string_from_reg(interp, r_);
                     break;
                   default:
                     break;
@@ -1416,7 +1417,7 @@ unused_label(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
         Instruction *ins = unit->bb_list[i]->start;
         if ((ins->type & ITLABEL) && *ins->symregs[0]->name != '_') {
             const SymReg * const lab = ins->symregs[0];
-            used = IMCC_INFO(interp)->has_compile ? 1 : 0;
+            used = 0;
 
             if (!lab->first_ins)
                 continue;

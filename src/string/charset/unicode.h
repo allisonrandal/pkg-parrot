@@ -1,7 +1,7 @@
 /* unicode.h
  *  Copyright (C) 2005-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: unicode.h 41533 2009-09-27 17:30:32Z NotFound $
+ *     $Id: unicode.h 45852 2010-04-21 10:06:00Z bacek $
  *  Overview:
  *     This is the header for the unicode charset functions
  *  Data Structure and Algorithms:
@@ -21,8 +21,7 @@
 /* HEADERIZER BEGIN: src/string/charset/unicode.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_CANNOT_RETURN_NULL
-const CHARSET * Parrot_charset_unicode_init(PARROT_INTERP)
+void Parrot_charset_unicode_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 #define ASSERT_ARGS_Parrot_charset_unicode_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\

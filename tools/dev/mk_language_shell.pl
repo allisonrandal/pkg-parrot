@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: mk_language_shell.pl 44549 2010-02-28 14:13:41Z barney $
+# $Id: mk_language_shell.pl 47087 2010-05-28 13:17:32Z fperrad $
 
 =head1 NAME
 
@@ -90,7 +90,7 @@ my $uclang = uc $lang;
 
 ## the name and revision of the script, for use in the generated README
 my $script = $0;
-my $rev = '$Revision: 44549 $';
+my $rev = '$Revision: 47087 $';
 $rev =~ s/^\D*(\d+)\D*$/$1/;
 
 my $no_doc = $with_doc ? '' : '#';
@@ -210,14 +210,16 @@ No Configure step, no Makefile generated.
     load_bytecode 'distutils.pbc'
 
     .local int reqsvn
-    $P0 = open 'PARROT_REVISION', 'r'
-    $S0 = readline $P0
+    $P0 = new 'FileHandle'
+    $P0.'open'('PARROT_REVISION', 'r')
+    $S0 = $P0.'readline'()
     reqsvn = $S0
-    close $P0
+    $P0.'close'()
 
     .local pmc config
     config = get_config()
     $I0 = config['revision']
+    unless $I0 goto L1
     unless reqsvn > $I0 goto L1
     $S1 = "Parrot revision r"
     $S0 = reqsvn
@@ -226,7 +228,7 @@ No Configure step, no Makefile generated.
     $S0 = $I0
     $S1 .= $S0
     $S1 .= ")\n"
-    printerr $S1
+    print $S1
     end
   L1:
 
@@ -614,7 +616,7 @@ pmclass @lang@
     extends ResizablePMCArray
     provides array
     group   @lclang@_group
-
+    auto_attrs
     dynpmc
     {
 /*

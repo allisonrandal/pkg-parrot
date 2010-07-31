@@ -1,4 +1,4 @@
-# $Id: ParrotIO.pir 38689 2009-05-11 17:22:23Z NotFound $
+# $Id: ParrotIO.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 TITLE
 
@@ -56,7 +56,8 @@ Uses the open op to create a ParrotIO which is used as the source.
     .param string mode
     .local pmc pio
 
-    open pio, name, mode
+    pio = new ['FileHandle']
+    pio.'open'(name, mode)
     assign self, pio
 .end
 
@@ -100,7 +101,7 @@ RET:
 
     bs = self."blockSize"()
     pio = self."source"()
-    read str, pio, bs
+    str = pio.'read'(bs)
     length $I0, str
     if $I0 > 0 goto OK
     self."close"()

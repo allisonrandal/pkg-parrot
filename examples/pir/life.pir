@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: life.pir 40268 2009-07-25 19:53:04Z whiteknight $
+# $Id: life.pir 47421 2010-06-06 04:41:48Z plobsing $
 
 =head1 NAME
 
@@ -86,7 +86,10 @@ loop:	ge $I0, $I2, getout
 	inc $I0
 	mod $I31,$I0,100
 	if $I31, skip
-	printerr "."
+        $P0 = getinterp
+        .include 'stdio.pasm'
+        $P1 = $P0.'stdhandle'(.PIO_STDERR_FILENO)
+	print $P1, "."
 skip:
 
 	local_branch jmpstack,  generate

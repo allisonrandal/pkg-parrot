@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: format-01.t 42575 2009-11-19 01:00:42Z jkeenan $
+# $Id: format-01.t 48028 2010-07-07 12:45:50Z Util $
 # auto/format-01.t
 
 use strict;
@@ -99,7 +99,7 @@ $step = test_step_constructor_and_description($conf);
 }
 {
     my $p5format = '%.15' . $conf->data->get('sPRIgldbl_provisional');
-    $p5format =~ s/"//g;; # Perl 5's Config value has embedded double quotes
+    $p5format =~ s/"//g; # Perl 5's Config value has embedded double quotes
     $conf->data->set( nv => 'long double' );
     eval {
     auto::format::_set_floatvalfmt_nvsize($conf);

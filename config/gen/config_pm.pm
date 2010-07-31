@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: config_pm.pm 45624 2010-04-13 00:52:45Z plobsing $
+# $Id: config_pm.pm 47588 2010-06-13 02:41:12Z coke $
 
 =head1 NAME
 
@@ -108,6 +108,7 @@ END
         if (/\@PCONFIG\@/) {
             for my $k ( sort { lc $a cmp lc $b || $a cmp $b } $conf->data->keys ) {
                 next if exists $p5_keys{$k};
+                next if $k =~ /_provisional$/;
 
                 my $v = $conf->data->get($k);
                 if ( defined $v ) {
@@ -118,7 +119,11 @@ END
                     # String
                     $v =~ s/(["\\])/\\$1/g;
                     $v =~ s/\n/\\n/g;
-                    print {$OUT} qq(    set \$P0["$k"], "$v"\n);
+                    my $charset = q{};
+                    if ($v =~ /[^[:ascii:]]/) {
+                        $charset = 'binary:';
+                    }
+                    print {$OUT} qq(    set \$P0["$k"], $charset"$v"\n);
                 }
                 else {
                     # Null

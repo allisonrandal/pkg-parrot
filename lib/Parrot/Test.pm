@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Test.pm 42664 2009-11-21 03:38:37Z jkeenan $
+# $Id: Test.pm 47888 2010-06-27 03:50:51Z petdance $
 
 =head1 NAME
 
@@ -280,6 +280,7 @@ use Cwd;
 use File::Spec;
 use File::Basename;
 use Memoize ();
+use IO::File ();
 
 use lib qw( lib );
 use Parrot::BuildUtil ();
@@ -443,7 +444,7 @@ sub generate_languages_functions {
             # set a todo-item for Test::Builder to find
             my $call_pkg = $self->{builder}->exported_to() || '';
 
-            no strict 'refs';
+            no strict 'refs';  ## no critic Variables::ProhibitConditionalDeclarations
 
             local *{ $call_pkg . '::TODO' } = ## no critic Variables::ProhibitConditionalDeclarations
                 \$options{todo}
@@ -500,10 +501,20 @@ sub generate_languages_functions {
 
         my ($package) = caller();
 
-        no strict 'refs';
-
-        *{ $package . '::' . $func } = $test_sub;
+        create_sub($package, $func, $test_sub);
     }
+}
+
+sub create_sub {
+    my $package = shift;
+    my $func    = shift;
+    my $sub     = shift;
+
+    no strict 'refs';
+
+    *{ $package . '::' . $func } = $sub;
+
+    return;
 }
 
 =over
@@ -766,9 +777,7 @@ sub _generate_test_functions {
             return $pass;
         };
 
-        no strict 'refs';
-
-        *{ $package . '::' . $func } = $test_sub;
+        create_sub($package, $func, $test_sub);
     }
 
     ##### 2: PIR-to-PASM test map #####
@@ -860,9 +869,7 @@ sub _generate_test_functions {
             return $pass;
         };
 
-        no strict 'refs';
-
-        *{ $package . '::' . $func } = $test_sub;
+        create_sub($package, $func, $test_sub);
     }
 
     ##### 3: Language test map #####
@@ -926,9 +933,7 @@ sub _generate_test_functions {
             }
         };
 
-        no strict 'refs';
-
-        *{ $package . '::' . $func } = $test_sub;
+        create_sub($package, $func, $test_sub);
     }
 
     ##### 4:  Example test map #####
@@ -973,9 +978,7 @@ sub _generate_test_functions {
             }
         };
 
-        no strict 'refs';
-
-        *{ $package . '::' . $func } = $test_sub;
+        create_sub($package, $func, $test_sub);
     }
 
     ##### 5: C test map #####
@@ -1100,9 +1103,7 @@ sub _generate_test_functions {
             return $pass;
         };
 
-        no strict 'refs';
-
-        *{ $package . '::' . $func } = $test_sub;
+        create_sub($package, $func, $test_sub);
     }
 
     return;

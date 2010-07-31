@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: embed.t 45790 2010-04-19 05:43:49Z petdance $
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: embed.t 47917 2010-06-29 23:18:38Z jkeenan $
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test;
 
-plan tests => 6;
+plan tests => 10;
 
 =head1 NAME
 
@@ -24,7 +24,15 @@ Embedding parrot in C
 
 =cut
 
-c_output_is( <<'CODE', <<'OUTPUT', "Minimal embed, using just the embed.h header" );
+sub linedirective
+{
+    # Provide a #line directive for the C code in the heredoc
+    # starting immediately after where this sub is called.
+    my $linenum = shift() + 1;
+    return "#line " . $linenum . ' "' . __FILE__ . '"' . "\n";
+}
+
+c_output_is(linedirective(__LINE__) . <<'CODE', <<'OUTPUT', "Minimal embed, using just the embed.h header" );
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,21 +62,103 @@ CODE
 Done
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "Hello world from main" );
-
+my $common = linedirective(__LINE__) . <<'CODE';
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include "parrot/embed.h"
 #include "parrot/extend.h"
 
-void fail(const char *msg);
+static void fail(const char *msg);
+static Parrot_String createstring(Parrot_Interp interp, const char * value);
 
-void fail(const char *msg)
+static void fail(const char *msg)
 {
     fprintf(stderr, "failed: %s\n", msg);
     exit(EXIT_FAILURE);
 }
+
+static Parrot_String createstring(Parrot_Interp interp, const char * value)
+{
+    return Parrot_new_string(interp, value, strlen(value), (const char*)NULL, 0);
+}
+
+CODE
+
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', 'Parrot_compile_string populates the error string when an opcode is given improper arguments');
+
+int main(int argc, const char **argv)
+{
+    Parrot_Interp interp;
+    Parrot_String err, lang;
+    Parrot_PMC func_pmc;
+    char *str;
+
+    interp = Parrot_new(NULL);
+    if (! interp)
+        fail("Cannot create parrot interpreter");
+    lang = createstring(interp, "PIR");
+
+    func_pmc = Parrot_compile_string(interp, lang, ".sub foo\n copy\n.end", &err);
+    Parrot_printf(interp, "%Ss\n", err);
+    Parrot_destroy(interp);
+    return 0;
+}
+CODE
+The opcode 'copy' (copy<0>) was not found. Check the type and number of the arguments
+OUTPUT
+
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', 'Parrot_compile_string populates the error string when given invalid language string');
+
+int main(int argc, const char **argv)
+{
+    Parrot_Interp interp;
+    Parrot_String err, lang;
+    Parrot_PMC func_pmc;
+    char *str;
+
+    interp = Parrot_new(NULL);
+    if (! interp)
+        fail("Cannot create parrot interpreter");
+    lang = createstring(interp, "Foo");
+
+    func_pmc = Parrot_compile_string(interp, lang, "This doesn't matter", &err);
+    Parrot_printf(interp, "%Ss\n", err);
+    Parrot_destroy(interp);
+    return 0;
+}
+CODE
+Invalid interpreter type
+OUTPUT
+
+
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', 'Parrot_compile_string populates the error string when there is an IMCC syntax error', 'todo' => 'TT #1610 : does not properly catch IMCC errors');
+
+int main(int argc, const char **argv)
+{
+    Parrot_Interp interp;
+    Parrot_String err, lang;
+    Parrot_PMC func_pmc;
+    char *str;
+
+    interp = Parrot_new(NULL);
+    if (! interp)
+        fail("Cannot create parrot interpreter");
+    lang = createstring(interp, "PIR");
+
+    func_pmc = Parrot_compile_string(interp, lang, "The sleeper must awake", &err);
+    Parrot_printf(interp,"Caught exception\n");
+    Parrot_printf(interp, "%Ss\n", err);
+    Parrot_destroy(interp);
+    return 0;
+}
+CODE
+Caught exception
+error:imcc:syntax error, unexpected IDENTIFIER ('The')
+OUTPUT
+
+
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', "Hello world from main" );
 
 int main(void)
 {
@@ -84,7 +174,7 @@ int main(void)
     Parrot_printf(interp, "Hello, parrot\n");
 
     /* Compile and execute a pir sub */
-    compiler = Parrot_new_string(interp, "PIR", 3, (const char *)NULL, 0);
+    compiler = createstring(interp, "PIR");
     code = Parrot_compile_string(interp, compiler,
 ".sub main :main\n"
 "  say 'Hello, pir'\n"
@@ -103,21 +193,7 @@ Hello, parrot
 Hello, pir
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "Hello world from a sub" );
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "parrot/embed.h"
-#include "parrot/extend.h"
-
-void fail(const char *msg);
-
-void fail(const char *msg)
-{
-    fprintf(stderr, "failed: %s\n", msg);
-    exit(EXIT_FAILURE);
-}
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', "Hello world from a sub" );
 
 int main(void)
 {
@@ -137,7 +213,7 @@ int main(void)
         fail("Cannot create parrot interpreter");
 
     /* Compile pir code */
-    compiler = Parrot_new_string(interp, "PIR", 3, (const char *)NULL, 0);
+    compiler = createstring(interp, "PIR");
     code = Parrot_compile_string(interp, compiler,
 ".sub main :main\n"
 "  say 'Must not be seen!'\n"
@@ -154,11 +230,11 @@ int main(void)
 
     /* Get parrot namespace */
     rootns = Parrot_get_root_namespace(interp);
-    parrotname = Parrot_new_string(interp, "parrot", 6, (const char *)NULL, 0);
-    parrotns = Parrot_PMC_get_pmc_strkey(interp, rootns,  parrotname);
+    parrotname = createstring(interp, "parrot");
+    parrotns = Parrot_PMC_get_pmc_keyed_str(interp, rootns,  parrotname);
     /* Get the sub */
-    subname = Parrot_new_string(interp, "hello", 5, (const char *)NULL, 0);
-    sub = Parrot_PMC_get_pmc_strkey(interp, parrotns,  subname);
+    subname = createstring(interp, "hello");
+    sub = Parrot_PMC_get_pmc_keyed_str(interp, parrotns,  subname);
     /* Execute it */
     Parrot_ext_call(interp, sub, "->");
 
@@ -169,22 +245,68 @@ CODE
 Hello, sub
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "External sub" );
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', "calling a sub with argument and return" );
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "parrot/embed.h"
-#include "parrot/extend.h"
-
-void fail(const char *msg);
-void hello(Parrot_Interp interp);
-
-void fail(const char *msg)
+int main(void)
 {
-    fprintf(stderr, "failed: %s\n", msg);
-    exit(EXIT_FAILURE);
+    Parrot_Interp interp;
+    Parrot_String compiler;
+    Parrot_String errstr;
+    Parrot_PMC code;
+    Parrot_PMC rootns;
+    Parrot_String parrotname;
+    Parrot_PMC parrotns;
+    Parrot_String subname;
+    Parrot_PMC sub;
+    Parrot_String msg;
+    Parrot_String retstr;
+
+    /* Create the interpreter */
+    interp = Parrot_new(NULL);
+    if (! interp)
+        fail("Cannot create parrot interpreter");
+
+    /* Compile pir code */
+    compiler = createstring(interp, "PIR");
+    code = Parrot_compile_string(interp, compiler,
+".sub main :main\n"
+"  say 'Must not be seen!'\n"
+"\n"
+".end\n"
+"\n"
+".sub hello\n"
+"  .param string s\n"
+"  print s\n"
+"  .return('world!')\n"
+"\n"
+".end\n"
+"\n",
+        &errstr
+    );
+
+    /* Get parrot namespace */
+    rootns = Parrot_get_root_namespace(interp);
+    parrotname = createstring(interp, "parrot");
+    parrotns = Parrot_PMC_get_pmc_keyed_str(interp, rootns,  parrotname);
+    /* Get the sub */
+    subname = createstring(interp, "hello");
+    sub = Parrot_PMC_get_pmc_keyed_str(interp, parrotns,  subname);
+
+    /* Execute it */
+    msg = createstring(interp, "Hello, ");
+    Parrot_ext_call(interp, sub, "S->S", msg, &retstr);
+    Parrot_printf(interp, "%Ss\n", retstr);
+
+    Parrot_destroy(interp);
+    return 0;
 }
+CODE
+Hello, world!
+OUTPUT
+
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', "External sub" );
+
+void hello(Parrot_Interp interp);
 
 void hello(Parrot_Interp interp)
 {
@@ -205,7 +327,7 @@ int main(void)
         fail("Cannot create parrot interpreter");
 
     /* Compile pir */
-    compiler = Parrot_new_string(interp, "PIR", 3, (const char *)NULL, 0);
+    compiler = createstring(interp, "PIR");
     code = Parrot_compile_string(interp, compiler,
 ".sub externcall\n"
 "  .param pmc ec\n"
@@ -225,22 +347,9 @@ CODE
 Hello from C
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "Insert external sub in namespace" );
+c_output_is($common . linedirective(__LINE__) . <<'CODE', <<'OUTPUT', "Insert external sub in namespace" );
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "parrot/embed.h"
-#include "parrot/extend.h"
-
-void fail(const char *msg);
 void hello(Parrot_Interp interp);
-
-void fail(const char *msg)
-{
-    fprintf(stderr, "failed: %s\n", msg);
-    exit(EXIT_FAILURE);
-}
 
 void hello(Parrot_Interp interp)
 {
@@ -266,7 +375,7 @@ int main(void)
         fail("Cannot create parrot interpreter");
 
     /* Compile pir */
-    compiler = Parrot_new_string(interp, "PIR", 3, (const char *)NULL, 0);
+    compiler = createstring(interp, "PIR");
     code = Parrot_compile_string(interp, compiler,
 ".sub externcall\n"
 "  hello()\n"
@@ -278,11 +387,11 @@ int main(void)
 
     /* Create extern sub and insert in parrot namespace */
     rootns = Parrot_get_root_namespace(interp);
-    parrotname = Parrot_new_string(interp, "parrot", 6, (const char *)NULL, 0);
-    parrotns = Parrot_PMC_get_pmc_strkey(interp, rootns, parrotname);
+    parrotname = createstring(interp, "parrot");
+    parrotns = Parrot_PMC_get_pmc_keyed_str(interp, rootns, parrotname);
     hellosub = Parrot_sub_new_from_c_func(interp, (void (*)())& hello, "vJ");
-    helloname = Parrot_new_string(interp, "hello", 5, (const char *)NULL, 0);
-    Parrot_PMC_set_pmc_strkey(interp, parrotns, helloname, hellosub);
+    helloname = createstring(interp, "hello");
+    Parrot_PMC_set_pmc_keyed_str(interp, parrotns, helloname, hellosub);
 
     /* Call it */
     Parrot_ext_call(interp, code, "->");
@@ -342,7 +451,7 @@ run(PARROT_INTERP, int argc, cosnt char *argv[])
 
     /* locate function to run */
     smain = Parrot_str_new_constant(interp, "main");
-    entry = Parrot_find_global_cur(interp, smain);
+    entry = Parrot_ns_find_current_namespace_global(interp, smain);
 
     /* location of the entry */
     interp->current_cont = new_ret_continuation_pmc(interp, NULL);
@@ -407,7 +516,7 @@ compile_run(PARROT_INTERP, const char *src, Parrot_String *type, int argc,
 
     /* locate function to run */
     smain = Parrot_str_new_constant(interp, "main");
-    entry = Parrot_find_global_cur(interp, smain);
+    entry = Parrot_ns_find_current_namespace_global(interp, smain);
 
     /* location of the entry */
     interp->current_cont = new_ret_continuation_pmc(interp, NULL);
@@ -498,7 +607,7 @@ compile_run(PARROT_INTERP, const char *src, Parrot_String *type, int argc,
 
     /* locate function to run */
     smain = Parrot_str_new_constant(interp, "main");
-    entry = Parrot_find_global_cur(interp, smain);
+    entry = Parrot_ns_find_current_namespace_global(interp, smain);
 
     /* location of the entry */
     interp->current_cont = new_ret_continuation_pmc(interp, NULL);
@@ -589,7 +698,7 @@ compile_run(PARROT_INTERP, const char *src, Parrot_String *type, int argc,
 
     /* locate function to run */
     smain = Parrot_str_new_constant(interp, "main");
-    entry = Parrot_find_global_cur(interp, smain);
+    entry = Parrot_ns_find_current_namespace_global(interp, smain);
 
     /* location of the entry */
     interp->current_cont = new_ret_continuation_pmc(interp, NULL);
@@ -679,7 +788,7 @@ compile_run(PARROT_INTERP, const char *src, Parrot_String *type, int argc,
 
     /* locate function to run */
     smain = Parrot_str_new_constant(interp, "main");
-    entry = Parrot_find_global_cur(interp, smain);
+    entry = Parrot_ns_find_current_namespace_global(interp, smain);
 
     /* location of the entry */
     interp->current_cont = new_ret_continuation_pmc(interp, NULL);

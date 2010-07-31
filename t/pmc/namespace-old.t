@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: namespace-old.t 45619 2010-04-12 22:44:02Z plobsing $
+# $Id: namespace-old.t 47917 2010-06-29 23:18:38Z jkeenan $
 
 use strict;
 use warnings;

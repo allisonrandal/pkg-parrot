@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: inline.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: inline.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -79,13 +79,12 @@ sub _second_probe_for_inline {
 
 sub _evaluate_inline {
     my ($self, $conf, $test) = @_;
-    my $verbose = $conf->options->get(qw(verbose));
     if ($test) {
-        print " ($test) " if $verbose;
+        $conf->debug(" ($test) ");
         $self->set_result('yes');
     }
     else {
-        print " no " if $verbose;
+        $conf->debug(" no ");
         $self->set_result('no');
         $test = '';
     }

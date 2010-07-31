@@ -1,7 +1,7 @@
 /* stat.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: stat.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: stat.h 46790 2010-05-19 13:02:00Z fperrad $
  *  Overview:
  *     This is the api header for abstracting stat calls
  *  Data Structure and Algorithms:
@@ -29,13 +29,13 @@
 #define STAT_BACKUPTIME           9
 #define STAT_UID                 10
 #define STAT_GID                 11
-#define STAT_PLATFORM_DEV       - 1
-#define STAT_PLATFORM_INODE     - 2
-#define STAT_PLATFORM_MODE      - 3
-#define STAT_PLATFORM_NLINKS    - 4
-#define STAT_PLATFORM_DEVTYPE   - 5
-#define STAT_PLATFORM_BLOCKSIZE - 6
-#define STAT_PLATFORM_BLOCKS    - 7
+#define STAT_PLATFORM_DEV        -1
+#define STAT_PLATFORM_INODE      -2
+#define STAT_PLATFORM_MODE       -3
+#define STAT_PLATFORM_NLINKS     -4
+#define STAT_PLATFORM_DEVTYPE    -5
+#define STAT_PLATFORM_BLOCKSIZE  -6
+#define STAT_PLATFORM_BLOCKS     -7
 
 /* &end_gen */
 

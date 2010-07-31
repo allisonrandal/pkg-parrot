@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: sudoku.pir 43141 2009-12-18 07:27:22Z tene $
+# $Id: sudoku.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =pod
 
@@ -150,6 +150,9 @@ Same as parrot.
 =cut
 
 .const string VERSION="0.2.3"
+
+.loadlib 'bit_ops'
+.loadlib 'io_ops'
 
 .sub _main :main
     .param pmc argv

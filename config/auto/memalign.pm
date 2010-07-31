@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: memalign.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: memalign.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -95,7 +95,8 @@ sub _set_memalign {
         : $test  ? 'memalign'
         :          '';
     $conf->data->set( memalign => $f );
-    print( $test ? " (Yep:$f) " : " (no) " ) if $conf->options->get('verbose');
+    my $test_str = $test ? " (Yep:$f) " : " (no) ";
+    $conf->debug($test_str);
     $self->set_result( $test ? 'yes' : 'no' );
 }
 

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, Parrot Foundation.
-$Id: boolean.pmc 45219 2010-03-28 01:11:50Z petdance $
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: boolean.pmc 47354 2010-06-04 15:52:18Z NotFound $
 
 =head1 NAME
 
@@ -35,12 +35,8 @@ Initialises SELF value according to the boolean value of the passed PMC.
 
 */
     VTABLE void init_pmc(PMC *value) {
-        if (!PMC_IS_NULL(value)) {
-            SELF.set_bool(VTABLE_get_bool(INTERP, value));
-        }
-        else {
-            SELF.set_bool(0);
-        }
+        INTVAL v = PMC_IS_NULL(value) ? (INTVAL) 0 : VTABLE_get_bool(INTERP, value);
+        SELF.set_bool(v);
     }
 /*
 

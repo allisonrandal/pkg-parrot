@@ -1,12 +1,12 @@
 #!./parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: recursive-2.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: recursive-2.pir 45949 2010-04-24 01:14:23Z cotto $
 #
 # Ack by Leopold Toetsch
 # Fib and Tak by Joshua Isom
 
 # use less registers (leo)
-# time ./parrot -Oc -R cgp-jit recursive-2.pir 11
+# time ./parrot -Oc recursive-2.pir 11
 # real 2.32 s   (AMD X2@2000)
 # modified default value to n=3. Karl Forner
 

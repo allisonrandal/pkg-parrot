@@ -6,7 +6,7 @@
  * debugger.h
  *
  * SVN Info
- *    $Id: debugger.h 44291 2010-02-22 09:28:39Z bacek $
+ *    $Id: debugger.h 47059 2010-05-27 18:09:27Z fperrad $
  * Overview:
  *    Parrot debugger header files
  * History:
@@ -200,12 +200,21 @@ void Parrot_debugger_load(PARROT_INTERP, ARGIN_NULLOK(STRING *filename))
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
-void Parrot_debugger_start(PARROT_INTERP, ARGIN(opcode_t * cur_opcode))
+void Parrot_debugger_start(PARROT_INTERP,
+    ARGIN_NULLOK(opcode_t * cur_opcode))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void PDB_backtrace(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void PDB_load_source(PARROT_INTERP, ARGIN(const char *command))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
-void PDB_load_source(PARROT_INTERP, ARGIN(const char *command))
+void PDB_print(PARROT_INTERP, ARGIN(const char *command))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
@@ -226,9 +235,6 @@ long PDB_add_label(PARROT_INTERP,
 void PDB_assign(PARROT_INTERP, ARGIN(const char *command))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
-
-void PDB_backtrace(PARROT_INTERP)
-        __attribute__nonnull__(1);
 
 PARROT_WARN_UNUSED_RESULT
 char PDB_break(PARROT_INTERP)
@@ -330,10 +336,6 @@ void PDB_list(PARROT_INTERP, ARGIN(const char *command))
 void PDB_next(PARROT_INTERP, ARGIN_NULLOK(const char *command))
         __attribute__nonnull__(1);
 
-void PDB_print(PARROT_INTERP, ARGIN(const char *command))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
 char PDB_program_end(PARROT_INTERP)
         __attribute__nonnull__(1);
 
@@ -371,9 +373,13 @@ void PDB_watchpoint(PARROT_INTERP, ARGIN(const char *command))
 #define ASSERT_ARGS_Parrot_debugger_load __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_debugger_start __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(cur_opcode))
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_PDB_backtrace __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_PDB_load_source __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(command))
+#define ASSERT_ARGS_PDB_print __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(command))
 #define ASSERT_ARGS_PDB_script_file __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -386,8 +392,6 @@ void PDB_watchpoint(PARROT_INTERP, ARGIN(const char *command))
 #define ASSERT_ARGS_PDB_assign __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(command))
-#define ASSERT_ARGS_PDB_backtrace __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_PDB_break __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_PDB_check_condition __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -444,9 +448,6 @@ void PDB_watchpoint(PARROT_INTERP, ARGIN(const char *command))
     , PARROT_ASSERT_ARG(command))
 #define ASSERT_ARGS_PDB_next __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
-#define ASSERT_ARGS_PDB_print __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(command))
 #define ASSERT_ARGS_PDB_program_end __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_PDB_run_command __attribute__unused__ int _ASSERT_ARGS_CHECK = (\

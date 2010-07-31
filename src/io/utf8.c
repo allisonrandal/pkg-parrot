@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: utf8.c 45645 2010-04-13 21:16:26Z mikehh $
+$Id: utf8.c 46193 2010-04-30 08:53:15Z jimmy $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ Parrot_io_read_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle),
                     goto ok;
 
                 /* need len - 1 more chars */
-                len2--;
+                --len2;
                 s2 = Parrot_str_new_init(interp, NULL, len2, Parrot_utf8_encoding_ptr,
                                          Parrot_unicode_charset_ptr, 0);
                 s2->bufused  = len2;
@@ -83,7 +83,10 @@ Parrot_io_read_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle),
                 UNUSED(read);
 
                 s->strlen    = iter.charpos;
-                s            = Parrot_str_append(interp, s, s2);
+                s            = Parrot_str_concat(interp, s, s2);
+                /* String is updated. Poke into iterator to replace old string */
+                iter.str     = s;
+                *buf         = s;
                 len         += len2 + 1;
 
                 /* check last char */
@@ -98,7 +101,8 @@ ok:
 
 /*
 
-=item C<size_t Parrot_io_write_utf8(PARROT_INTERP, PMC *filehandle, STRING *s)>
+=item C<size_t Parrot_io_write_utf8(PARROT_INTERP, PMC *filehandle, const STRING
+*s)>
 
 Write a Parrot string to a filehandle in UTF-8 format.
 
@@ -107,8 +111,7 @@ Write a Parrot string to a filehandle in UTF-8 format.
 */
 
 size_t
-Parrot_io_write_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle),
-        ARGMOD(STRING *s))
+Parrot_io_write_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle), ARGIN(const STRING *s))
 {
     ASSERT_ARGS(Parrot_io_write_utf8)
     STRING *dest;
@@ -116,8 +119,7 @@ Parrot_io_write_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle),
     if (s->encoding == Parrot_utf8_encoding_ptr)
         return Parrot_io_write_buffer(interp, filehandle, s);
 
-    dest = Parrot_utf8_encoding_ptr->to_encoding(interp, s,
-            Parrot_gc_new_string_header(interp, 0));
+    dest = Parrot_utf8_encoding_ptr->to_encoding(interp, s);
     return Parrot_io_write_buffer(interp, filehandle, dest);
 }
 
@@ -131,10 +133,6 @@ F<src/io/io_passdown.c>,
 F<src/io/io.c>,
 F<src/io/io_layers.c>,
 F<src/io/io_private.h>.
-
-=head1 HISTORY
-
-Initially written by Leo.
 
 =cut
 

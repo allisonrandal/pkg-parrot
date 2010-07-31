@@ -1,7 +1,7 @@
 /* io_win32.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: io_win32.h 41533 2009-09-27 17:30:32Z NotFound $
+ *     $Id: io_win32.h 46109 2010-04-28 15:52:24Z petdance $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:
@@ -110,7 +110,7 @@ PIOOFF_T Parrot_io_tell_win32(PARROT_INTERP, ARGIN(PMC *filehandle))
 
 size_t Parrot_io_write_win32(PARROT_INTERP,
     ARGIN(PMC *filehandle),
-    ARGIN(STRING *s))
+    ARGIN(const STRING *s))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);

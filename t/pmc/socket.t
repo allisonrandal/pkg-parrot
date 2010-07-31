@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: socket.t 37805 2009-03-28 17:15:53Z Util $
+# $Id: socket.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

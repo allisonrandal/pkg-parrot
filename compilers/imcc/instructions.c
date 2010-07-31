@@ -1,5 +1,5 @@
 /*
- * $Id: instructions.c 45800 2010-04-19 13:15:18Z mikehh $
+ * $Id: instructions.c 46903 2010-05-23 02:02:22Z plobsing $
  * Copyright (C) 2002-2010, Parrot Foundation.
  */
 
@@ -115,78 +115,6 @@ _mk_instruction(ARGIN(const char *op), ARGIN(const char *fmt), int n,
     ins->opnum = -1;
 
     return ins;
-}
-
-
-/*
- * Some instructions don't have a hint in op_info that they work
- * on all registers or all registers of a given type (e.g., cleari)
- * These instructions need special handling at various points in the code.
- */
-
-static int w_special[1+4*3];
-
-/*
-
-=item C<void imcc_init_tables(PARROT_INTERP)>
-
-Initializes IMCC's table of opcodes, based on the list maintained
-by the Parrot interpreter. Stores the results in global variable
-C<w_special>.
-
-=cut
-
-*/
-
-void
-imcc_init_tables(PARROT_INTERP)
-{
-    ASSERT_ARGS(imcc_init_tables)
-    const char *writes[] = {
-        "cleari", "clearn", "clearp", "clears",
-    };
-    /* init opnums */
-    if (!w_special[0]) {
-        size_t i;
-        for (i = 0; i < N_ELEMENTS(writes); i++) {
-            const int n = interp->op_lib->op_code(interp, writes[i], 1);
-            PARROT_ASSERT(n);
-            w_special[i] = n;
-        }
-    }
-}
-
-/*
-
-=item C<int ins_writes2(const Instruction *ins, int t)>
-
-Returns TRUE if instruction ins writes to a register of type t
-
-=cut
-
-*/
-
-int
-ins_writes2(ARGIN(const Instruction *ins), int t)
-{
-    ASSERT_ARGS(ins_writes2)
-    const char *p;
-
-    if (ins->opnum == w_special[0])
-        return 1;
-
-    p = strchr(types, t);
-
-    if (p) {
-        const size_t idx = p - types;
-        size_t i;
-
-        for (i = 1; i < N_ELEMENTS(w_special); i += 4)
-            if (ins->opnum == w_special[i + idx])
-                return 1;
-    }
-
-    return 0;
 }
 
 /*
@@ -674,10 +602,6 @@ ins_print(PARROT_INTERP, ARGIN(PMC *io), ARGIN(const Instruction *ins))
     int i;
     int len;
 
-#if IMC_TRACE
-    Parrot_io_eprintf(NULL, "ins_print\n");
-#endif
-
     /* comments, labels and such */
     if (!ins->symregs[0] || !strchr(ins->format, '%'))
         return Parrot_io_fprintf(interp, io, "%s", ins->format);
@@ -847,9 +771,7 @@ e_file_emit(PARROT_INTERP,
         ARGIN(const Instruction *ins))
 {
     ASSERT_ARGS(e_file_emit)
-#if IMC_TRACE
-    Parrot_io_eprintf(NULL, "e_file_emit\n");
-#endif
+
     if ((ins->type & ITLABEL) || ! *ins->opname)
         ins_print(interp, Parrot_io_STDOUT(interp), ins);
     else {
@@ -872,13 +794,11 @@ the C<param> to the open function.
 
 */
 
-PARROT_EXPORT
 int
 emit_open(PARROT_INTERP, int type, ARGIN_NULLOK(const char *param))
 {
     ASSERT_ARGS(emit_open)
     IMCC_INFO(interp)->emitter       = type;
-    IMCC_INFO(interp)->has_compile   = 0;
     IMCC_INFO(interp)->dont_optimize = 0;
 
     return (emitters[IMCC_INFO(interp)->emitter]).open(interp, param);
@@ -895,7 +815,6 @@ IMC_Unit C<unit>.
 
 */
 
-PARROT_EXPORT
 int
 emit_flush(PARROT_INTERP, ARGIN_NULLOK(void *param), ARGIN(IMC_Unit *unit))
 {
@@ -927,7 +846,6 @@ Closes the given emitter.
 
 */
 
-PARROT_EXPORT
 int
 emit_close(PARROT_INTERP, ARGIN_NULLOK(void *param))
 {

@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: fixedpmcarray.t 45360 2010-03-31 19:47:07Z NotFound $
+# $Id: fixedpmcarray.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: File.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: File.pm 46569 2010-05-13 05:03:48Z cotto $
 
 =head1 NAME
 
@@ -229,7 +229,7 @@ sub svn_version {
 
 =item C<is_hidden()>
 
-Returns whether the file is "hidden", i.e. it's name starts with a dot.
+Returns whether the file is "hidden", i.e. its name starts with a dot.
 
 =cut
 

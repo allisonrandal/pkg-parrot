@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: coroutine.pmc 45425 2010-04-07 13:38:10Z bacek $
+$Id: coroutine.pmc 47005 2010-05-26 02:04:07Z petdance $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ print_sub_name(PARROT_INTERP, ARGIN(PMC *sub_pmc))
     print_pbc_location(interp);
 }
 
-pmclass Coroutine extends Sub auto_attrs {
+pmclass Coroutine extends Sub provides invokable auto_attrs {
     ATTR INTVAL             yield;      /* yield in process */
     ATTR opcode_t          *address;    /* next address to run - toggled each time */
     ATTR PackFile_ByteCode *caller_seg; /* bytecode segment */
@@ -111,7 +111,6 @@ Clones the coroutine.
 */
 
     VTABLE PMC *clone() {
-        STRING     *name;
         PMC * const ret = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
 
         PObj_custom_mark_destroy_SETALL(ret);
@@ -119,9 +118,6 @@ Clones the coroutine.
         memcpy((Parrot_Coroutine_attributes *)PMC_data(ret),
                 (Parrot_Coroutine_attributes *)PMC_data(SELF),
                 sizeof (Parrot_Coroutine_attributes));
-
-        GET_ATTR_name(INTERP, ret, name);
-        SET_ATTR_name(INTERP, ret, Parrot_str_copy(INTERP, name));
 
         return ret;
     }
@@ -155,8 +151,8 @@ Swaps the "context".
         opcode_t          *dest;
         PackFile_ByteCode *wanted_seg;
         opcode_t * const   next_op = (opcode_t *)next;
-        PMC      * const signature = Parrot_pcc_get_signature(interp,
-                                            CURRENT_CONTEXT(interp));
+        PMC      * const signature = Parrot_pcc_get_signature(INTERP,
+                                            CURRENT_CONTEXT(INTERP));
 
         if (Interp_trace_TEST(INTERP, PARROT_TRACE_SUB_CALL_FLAG))
             print_sub_name(INTERP, SELF);
@@ -172,8 +168,10 @@ Swaps the "context".
             PMC               *ctx        = Parrot_pcc_get_signature(INTERP, caller_ctx);
             PMC               *ccont      = INTERP->current_cont;
 
-            if (ccont == NEED_CONTINUATION)
-                ccont = (PMC *)new_ret_continuation_pmc(INTERP, next_op);
+            if (ccont == NEED_CONTINUATION) {
+                ccont = pmc_new(INTERP, enum_class_Continuation);
+                VTABLE_set_pointer(INTERP, ccont, next_op);
+            }
 
             if (PObj_get_FLAGS(ccont) & SUB_FLAG_TAILCALL)
                 Parrot_ex_throw_from_c_args(INTERP, NULL, CONTROL_ERROR,
@@ -283,7 +281,7 @@ Swaps the "context".
             CURRENT_CONTEXT(INTERP) = to_ctx;
         }
 
-        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), signature);
+        Parrot_pcc_set_signature(INTERP, CURRENT_CONTEXT(INTERP), signature);
 
         /* toggle address */
         GET_ATTR_address(INTERP, SELF, dest);

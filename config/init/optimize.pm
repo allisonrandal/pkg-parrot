@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: optimize.pm 44649 2010-03-05 16:20:00Z tene $
+# $Id: optimize.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -27,16 +27,12 @@ sub _init {
     };
 }
 
-our $verbose;
-
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    $verbose = $conf->options->get( 'verbose' );
-    print "\n" if $verbose;
+    $conf->debug("\n");
 
-    print "(optimization options: init::optimize)\n"
-        if $verbose;
+    $conf->debug("(optimization options: init::optimize)\n");
 
     # A plain --optimize means use perl5's $Config{optimize}.  If an argument
     # is given, however, use that instead.
@@ -44,7 +40,7 @@ sub runstep {
 
     if (! defined $optimize) {
         $self->set_result('no');
-        print "(none requested) " if $conf->options->get('verbose');
+        $conf->debug("(none requested) ");
         return 1;
     }
 
@@ -68,22 +64,11 @@ sub runstep {
 
     # save the options, however we got them.
     $conf->data->set( optimize => $options );
-    print "optimize options: ", $options, "\n" if $verbose;
+    $conf->debug("optimize options: ", $options, "\n");
 
     # disable debug flags.
     $conf->data->set( cc_debug => '' );
     $conf->data->add( ' ', ccflags => "-DDISABLE_GC_DEBUG=1 -DNDEBUG" );
-
-    # per file overrides - not every compiler can optimize every file.
-
-    # The src/ops/core_ops*.c files are challenging to optimize.
-    # gcc can usually handle it, but don't assume any other compilers can,
-    # until there is specific evidence otherwise.
-    if ( ! defined($gccversion)) {
-        $conf->data->set('optimize::src/ops/core_ops_cg.c','');
-        $conf->data->set('optimize::src/ops/core_ops_cgp.c','');
-        $conf->data->set('optimize::src/ops/core_ops_switch.c','');
-    }
 
     # TT #405
     if ($conf->data->get('cpuarch') eq 'amd64') {

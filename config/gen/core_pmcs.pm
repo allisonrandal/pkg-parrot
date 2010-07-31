@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: core_pmcs.pm 45616 2010-04-12 21:56:53Z petdance $
+# $Id: core_pmcs.pm 48028 2010-07-07 12:45:50Z Util $
 
 =head1 NAME
 
@@ -76,7 +76,7 @@ END_H
 END_H
     print {$OUT} coda();
 
-    close $OUT or die "Can't close file: $!";;
+    close $OUT or die "Can't close file: $!";
 
     move_if_diff( "$file.tmp", $file );
 

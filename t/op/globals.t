@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: globals.t 39817 2009-06-29 02:05:49Z Infinoid $
+# $Id: globals.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

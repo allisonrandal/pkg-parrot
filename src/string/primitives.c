@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006-2009, Parrot Foundation.
-$Id: primitives.c 44291 2010-02-22 09:28:39Z bacek $
+$Id: primitives.c 45852 2010-04-21 10:06:00Z bacek $
 
 =head1 NAME
 
@@ -70,8 +70,8 @@ string_set_data_directory(PARROT_INTERP, ARGIN(const char *dir))
 
 /*
 
-=item C<Parrot_UInt4 string_unescape_one(PARROT_INTERP, UINTVAL *offset, STRING
-*string)>
+=item C<Parrot_UInt4 string_unescape_one(PARROT_INTERP, UINTVAL *offset, const
+STRING *string)>
 
 Unescape a single character. We assume that we're at the start of a
 sequence, right after the \.
@@ -83,7 +83,7 @@ sequence, right after the \.
 PARROT_EXPORT
 Parrot_UInt4
 string_unescape_one(PARROT_INTERP, ARGMOD(UINTVAL *offset),
-        ARGMOD(STRING *string))
+        ARGIN(const STRING *string))
 {
     ASSERT_ARGS(string_unescape_one)
     UINTVAL workchar  = 0;

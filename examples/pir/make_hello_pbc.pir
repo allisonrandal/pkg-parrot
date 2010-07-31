@@ -1,5 +1,5 @@
 #Copyright (C) 2009, Parrot Foundation.
-#$Id: make_hello_pbc.pir 44158 2010-02-19 03:20:35Z jkeenan $
+#$Id: make_hello_pbc.pir 47745 2010-06-21 23:09:32Z bacek $
 # Sample creating of "Hello World" program using Packfile PMCs.
 .sub 'main'
     .local pmc pf, pfdir, pffixup, pfbc, pfconst, oplib
@@ -66,6 +66,7 @@
     $P0['ns_entry_name']= 'hello'
     $P0['method']       = ''
     $P0['HLL_id']       = 0
+    $P0['vtable_index'] = -1 # It required to store sub in namespace
 
     $P1 = new 'Sub', $P0
     # and store it in PackfileConstantTable
@@ -78,15 +79,16 @@
 
     $P1 = new 'PackfileFixupEntry'
     $P1 = 'hello'
-    $P1.'set_type'(2)
+    $P1.'set_type'(1)
     $P1 = 5 # offset
     pffixup[0] = $P1
 
     # Now pack Packfile and save it
     $S0 = pf
-    $P1 = open "generated_hello.pbc", "w"
+    $P1 = new ['FileHandle']
+    $P1.'open'("generated_hello.pbc", "w")
     $P1.'puts'($S0)
-    close $P1
+    $P1.'close'()
 
     # And check it!
     load_bytecode 'generated_hello.pbc'

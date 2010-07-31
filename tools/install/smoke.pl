@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: smoke.pl 42947 2009-12-08 20:13:48Z fperrad $
+# $Id: smoke.pl 47350 2010-06-04 11:46:17Z fperrad $
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use 5.008;
 use Getopt::Long;
 use File::Spec::Functions;
 
-use Test::More tests => 8;
+use Test::More tests => 7;
 
 =head1 NAME
 
@@ -108,12 +108,19 @@ my $compdir = ($bindir eq 'bin')
 $filename = 'test.pg';
 open $FH, '>', $filename
         or die "Can't open $filename ($!).\n";
-print $FH "token TOP { \\s* }\n";
+print $FH <<'PGE';
+grammar WSpace
+
+token TOP { \s* }
+PGE
 close $FH;
-$out = `$parrot $libdir/PGE/Perl6Grammar.pir $filename`;
-ok($out =~ /^\n## <::TOP>/, "check PGE");
+$out = `$parrot $libdir/PGE/Perl6Grammar.pbc $filename`;
+ok($out =~ /## <WSpace::TOP>/, "check PGE");
 unlink($filename);
 
+SKIP:
+{
+skip("pirc", 1) unless (-e $pirc);
 $filename = 'test.pir';
 open $FH, '>', $filename
         or die "Can't open $filename ($!).\n";
@@ -126,6 +133,7 @@ close $FH;
 $out = `$pirc -n $filename`;
 ok($out eq "ok\n", "check pirc");
 unlink($filename);
+}
 
 $filename = 'test.nqp';
 open $FH, '>', $filename
@@ -144,16 +152,6 @@ print $FH "transform past (ROOT) { }\n";
 close $FH;
 $out = `$parrot $compdir/tge/tgc.pir $filename`;
 ok($out =~ /^\n\.sub '_ROOT_past'/, "check TGE");
-unlink($filename);
-
-# compilers/nqp is typically not installed
-$filename = 'test.nqp';
-open $FH, '>', $filename
-        or die "Can't open $filename ($!).\n";
-print $FH "say('hello world!');\n";
-close $FH;
-$out = `$parrot $compdir/nqp/nqp.pbc $filename`;
-ok($out eq "hello world!\n", "check nqp");
 unlink($filename);
 
 # Local Variables:

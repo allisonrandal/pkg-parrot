@@ -1,7 +1,7 @@
 /* exceptions.h
  *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *     $Id: exceptions.h 45412 2010-04-07 05:21:25Z petdance $
+ *     $Id: exceptions.h 47425 2010-06-06 07:57:55Z pmichaud $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:
@@ -51,7 +51,6 @@ typedef enum {
     EXCEPTION_JIT_UNAVAILABLE,
     EXCEPTION_EXEC_UNAVAILABLE,
     EXCEPTION_INTERP_ERROR,
-    EXCEPTION_PREDEREF_LOAD_ERROR,
     EXCEPTION_PARROT_USAGE_ERROR,
     EXCEPTION_PIO_ERROR,
     EXCEPTION_PARROT_POINTER_ERROR,
@@ -91,6 +90,7 @@ typedef enum {
     CONTROL_ERROR,
     CONTROL_TAKE,
     CONTROL_LEAVE,
+    CONTROL_EXIT,
 
     CONTROL_LOOP_NEXT,
     CONTROL_LOOP_LAST,
@@ -115,6 +115,15 @@ typedef enum {
 
 /* HEADERIZER BEGIN: src/exceptions.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+PARROT_COLD
+void do_panic(
+    NULLOK_INTERP,
+    ARGIN_NULLOK(const char *message),
+    ARGIN_NULLOK(const char *file),
+    unsigned int line);
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
@@ -216,15 +225,8 @@ void die_from_exception(PARROT_INTERP, ARGIN(PMC *exception))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_DOES_NOT_RETURN
-PARROT_COLD
-void do_panic(
-    NULLOK_INTERP,
-    ARGIN_NULLOK(const char *message),
-    ARGIN_NULLOK(const char *file),
-    unsigned int line);
-
 void Parrot_print_backtrace(void);
+#define ASSERT_ARGS_do_panic __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_exit_fatal __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(format))
 #define ASSERT_ARGS_Parrot_assert __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -262,7 +264,6 @@ void Parrot_print_backtrace(void);
 #define ASSERT_ARGS_die_from_exception __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(exception))
-#define ASSERT_ARGS_do_panic __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_Parrot_print_backtrace __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/exceptions.c */

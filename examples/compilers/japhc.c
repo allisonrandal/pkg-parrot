@@ -1,4 +1,4 @@
-/* $Id: japhc.c 42918 2009-12-06 15:03:28Z fperrad $ */
+/* $Id: japhc.c 47917 2010-06-29 23:18:38Z jkeenan $ */
 
 /*
  * Copyright (C) 2004-2008, Parrot Foundation.
@@ -68,6 +68,8 @@ Parrot_lib_japhc_init(PARROT_INTERP, PMC* lib)
 /*
 
 =item C<static int unescape(char *string)>
+
+Unescape a string.
 
 =cut
 

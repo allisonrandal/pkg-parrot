@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2009, Parrot Foundation.
-# $Id: load.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: load.pir 46105 2010-04-28 05:59:10Z jimmy $
 
 #
 # playfield = load( file )
@@ -34,7 +34,7 @@
 
     newline = index line, "\n"
     if newline < 0 goto LOAD__SKIP_CHOP
-    chopn line, 1
+    line = chopn line, 1
     LOAD__SKIP_CHOP:
     line     = _load__fit_str_to_80(line)
     playline = _load__str_to_array(line)
@@ -86,7 +86,7 @@
     concat str, $S0
 
     # truncate to 80 chars
-    substr str, 80, -1, ''
+    str = replace str, 80, -1, ''
 
     .return(str)
 .end

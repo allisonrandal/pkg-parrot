@@ -1,5 +1,5 @@
 /*
- * $Id: unit.h 45304 2010-03-30 02:12:02Z chromatic $
+ * $Id: unit.h 46423 2010-05-09 01:18:37Z plobsing $
  * Copyright (C) 2003-2010, Parrot Foundation.
  */
 
@@ -48,7 +48,6 @@ struct IMC_Unit {
     Edge             *edge_list;
 
     /* register allocation */
-    unsigned int     *interference_graph;
     SymReg          **reglist;
     unsigned int      n_symbols;
     int               max_color;

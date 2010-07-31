@@ -1,5 +1,5 @@
 /*
- * $Id: cmp.ops 45268 2010-03-29 05:39:37Z petdance $
+ * $Id: cmp.ops 47428 2010-06-06 08:32:34Z cotto $
 ** cmp.ops
 */
 
@@ -14,6 +14,9 @@ cmp.ops - Comparison Opcodes
 Operations that compare two registers against each other.
 Some of these operations affect control flow directly; others
 do not.
+
+When making changes to any ops file, run C<make bootstrap-ops> to regenerate
+all generated ops files.
 
 =cut
 

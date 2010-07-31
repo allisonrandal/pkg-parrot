@@ -1,7 +1,7 @@
 /* oplib.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: oplib.h 44846 2010-03-10 02:52:57Z cotto $
+ *     $Id: oplib.h 47655 2010-06-16 15:26:43Z NotFound $
  *  Overview:
  *     Header file for op libraries.
  *  Data Structure and Algorithms:
@@ -50,8 +50,7 @@ typedef enum {
     CORE_OPS_check_events,      /* explicit event check */
     CORE_OPS_check_events__,    /* inserted into op dispatch when an event
                                    got scheduled */
-    CORE_OPS_wrapper__,         /* inserted by dynop_register for new ops */
-    CORE_OPS_prederef__         /* inserted by dynop_register for new ops */
+    CORE_OPS_wrapper__          /* inserted by dynop_register for new ops */
         /* 2 more reserved */
 } special_core_ops_enum;
 

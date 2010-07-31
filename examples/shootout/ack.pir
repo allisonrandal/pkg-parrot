@@ -1,9 +1,9 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: ack.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: ack.pir 45949 2010-04-24 01:14:23Z cotto $
 # OUTPUT="Ack(3, 9) = 4093\n"
 #
-# ./parrot -Oc -R cgp-jit
+# ./parrot -Oc
 # RQ (Karl)
 # Seems to be an old benchmark, now deprecated by the shootout
 #

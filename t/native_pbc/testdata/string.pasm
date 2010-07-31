@@ -1,9 +1,9 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: string.pasm 42885 2009-12-03 19:31:31Z mikehh $
+# $Id: string.pasm 47061 2010-05-27 21:12:15Z bacek $
 
     set S1, "abc"
     set S2, "EE"
-    bors S0, S1, S2
+    concat S0, S1, S2
     print S0
     print "\n"
     print S1

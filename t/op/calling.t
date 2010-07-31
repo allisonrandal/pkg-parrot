@@ -1,13 +1,13 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: calling.t 45665 2010-04-14 12:12:08Z allison $
+# $Id: calling.t 47476 2010-06-08 20:22:00Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 97;
+use Parrot::Test tests => 98;
 
 =head1 NAME
 
@@ -1408,15 +1408,7 @@ CODE
 ok
 OUTPUT
 
-my @todo = (
-    defined $ENV{TEST_PROG_ARGS}
-        and
-    $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/
-)
-    ? ( todo => 'broken with JIT (TT #983)' )
-    : ();
-
-pir_output_is( <<'CODE', <<'OUTPUT', "clone_key_arg", @todo );
+pir_output_is( <<'CODE', <<'OUTPUT', "clone_key_arg" );
 .sub main :main
     foo()
     print "ok\n"
@@ -1860,9 +1852,9 @@ OUTPUT
 pasm_output_is( <<'CODE', <<'OUTPUT', "named - 5 slurpy array -> named" );
 .pcc_sub main:
     set_args  "0, 0, 0, 0x200, 0, 0x200, 0", 10, 20, 30, 'a', 40, 'b', 50
-    get_results ""
     find_name P1, "foo"
     invokecc P1
+    get_results ""
     print "ok\n"
     end
 .pcc_sub foo:
@@ -2529,6 +2521,37 @@ $I1 = 2
 .end
 CODE
 2
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "methodtailcall 1 TT#133" );
+
+.sub main
+    say "main"
+    $P0 = foo() ## fails :-(
+    $P0 = bar()
+    say "done"
+.end
+
+.sub foo
+    .local pmc p
+    say "foo"
+    p = new "Class"
+    .tailcall p."attributes"()
+.end
+
+.sub bar
+    .local pmc  p
+    say "bar"
+    p = new "Class"
+    $P0 = p."attributes"()
+    .return ($P0)
+.end
+
+CODE
+main
+foo
+bar
+done
 OUTPUT
 
 # Local Variables:

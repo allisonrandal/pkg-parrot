@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2010, Parrot Foundation.
- * $Id: pcc.c 45108 2010-03-22 20:53:12Z chromatic $
+ * $Id: pcc.c 47416 2010-06-06 01:16:26Z plobsing $
  */
 
 /*
@@ -258,9 +258,9 @@ pcc_get_args(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(Instruction *ins),
     static const char item[] = {'0', 'x', 'f', 'f', 'f', 'f', ','};
     /* The list suffix includes the '\0' terminator */
     static const char subf[] = {')', '"', '\0'};
-    static unsigned int lenpref = sizeof pref;
-    static unsigned int lenitem = sizeof item;
-    static unsigned int lensubf = sizeof subf;
+    static const unsigned int lenpref = sizeof pref;
+    static const unsigned int lenitem = sizeof item;
+    static const unsigned int lensubf = sizeof subf;
     int i, flags;
     char s[16];
 
@@ -442,7 +442,7 @@ expand_pcc_sub(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(Instruction *ins))
     &&  sub->pcc_sub
     && !sub->pcc_sub->object
        /* s. src/inter_call.c:119 */
-    && (sub->pcc_sub->flags & isTAIL_CALL))
+    && sub->pcc_sub->tailcall)
         return;
 
     if (unit->last_ins->type != (ITPCCSUB|ITLABEL)
@@ -526,6 +526,9 @@ typedef struct move_info_t {
 =item C<static int pcc_reg_mov(PARROT_INTERP, unsigned char d, unsigned char s,
 void *vinfo)>
 
+Callback for C<Parrot_register_move>. Inserts move instructions in stead of
+actually moving the registers.
+
 =cut
 
 */
@@ -535,6 +538,7 @@ pcc_reg_mov(PARROT_INTERP, unsigned char d, unsigned char s, ARGMOD(void *vinfo)
 {
     ASSERT_ARGS(pcc_reg_mov)
     static const char types[] = "INSP";
+    /* XXX non-reentrant */
     static SymReg    *temps[4];
     move_info_t      *info    = (move_info_t *)vinfo;
     SymReg           *src     = NULL;
@@ -596,6 +600,8 @@ pcc_reg_mov(PARROT_INTERP, unsigned char d, unsigned char s, ARGMOD(void *vinfo)
 
 =item C<static Instruction * move_regs(PARROT_INTERP, IMC_Unit *unit,
 Instruction *ins, size_t n, SymReg **dest, SymReg **src)>
+
+Insert instructions for moving C<n> registers from C<src> to C<dest>.
 
 =cut
 
@@ -719,6 +725,9 @@ recursive_tail_call(PARROT_INTERP, ARGIN(IMC_Unit *unit),
 =item C<static void insert_tail_call(PARROT_INTERP, IMC_Unit *unit, Instruction
 *ins, SymReg *sub, SymReg *meth)>
 
+Creates and inserts an appropriate tailcall instruction for either a sub call
+or a method call.
+
 =cut
 
 */
@@ -780,7 +789,7 @@ expand_pcc_sub_call(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction *i
         return;
     }
 
-    tail_call = (sub->pcc_sub->flags & isTAIL_CALL);
+    tail_call = sub->pcc_sub->tailcall;
 
     if (tail_call && IMCC_INFO(interp)->optimizer_level & OPT_SUB)
         if (recursive_tail_call(interp, unit, ins, sub))

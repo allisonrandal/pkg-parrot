@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: snprintf.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: snprintf.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ sub _evaluate_snprintf {
     elsif ( $res =~ /^old snprintf/ ) {
         $conf->data->set( HAS_OLD_SNPRINTF => 1 );
     }
-    print " ($res) " if $conf->options->get('verbose');
+    $conf->debug(" ($res) ");
     return 1;
 }
 

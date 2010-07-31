@@ -1,5 +1,5 @@
 /*
- * $Id: imc.c 44291 2010-02-22 09:28:39Z bacek $
+ * $Id: imc.c 46897 2010-05-22 20:50:13Z plobsing $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -63,7 +63,6 @@ afterwards.
 
 */
 
-PARROT_EXPORT
 void
 imc_compile_all_units(PARROT_INTERP)
 {
@@ -113,7 +112,6 @@ on a single compilation unit at a time.
 
 */
 
-PARROT_EXPORT
 void
 imc_compile_unit(PARROT_INTERP, ARGIN(IMC_Unit *unit))
 {
@@ -136,7 +134,6 @@ Cleans up the compiler state in preparation for another compiler invocation.
 
 */
 
-PARROT_EXPORT
 void
 imc_cleanup(PARROT_INTERP, ARGIN_NULLOK(void *yyscanner))
 {
@@ -256,10 +253,6 @@ imc_free_unit(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 {
     ASSERT_ARGS(imc_free_unit)
     imc_info_t * const imc = IMCC_INFO(interp);
-
-#if IMC_TRACE_HIGH
-    fprintf(stderr, "imc_free_unit()\n");
-#endif
 
     free_reglist(unit);
 

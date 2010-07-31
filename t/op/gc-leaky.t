@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: gc-leaky.t 44386 2010-02-23 12:18:39Z mikehh $
+# $Id: gc-leaky.t 45945 2010-04-23 20:46:46Z fperrad $
 
 =head1 NAME
 
@@ -48,7 +48,7 @@ TT1465 - http://trac.parrot.org/parrot/ticket/1465 .
         if counter > 1e6 goto done
         goto loop
     done:
-        say ""
+        diag("")
         $I1 = interpinfo.INTERPINFO_GC_COLLECT_RUNS
         $I2 = interpinfo.INTERPINFO_GC_MARK_RUNS
 

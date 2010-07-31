@@ -1,4 +1,4 @@
-# $Id: field.pir 44547 2010-02-28 06:02:31Z coke $
+# $Id: field.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -35,6 +35,7 @@ An Mines::Field object has the following methods:
 =cut
 
 .include "iterator.pasm"
+.loadlib 'math_ops'
 .namespace ["Mines::Field"]
 
 # size of a single mine field, in pixels

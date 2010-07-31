@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: pbc_to_exe.pir 45791 2010-04-19 05:45:56Z petdance $
+# $Id: pbc_to_exe.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -55,7 +55,8 @@ Warning! With --install there must be no directory prefix in the first arg yet.
 
   open_outfile:
     .local pmc outfh
-    outfh = open cfile, 'w'
+    outfh = new ['FileHandle']
+    outfh.'open'(cfile, 'w')
     unless outfh goto err_outfh
     print outfh, <<'HEADER'
 #include "parrot/parrot.h"
@@ -215,18 +216,22 @@ MAIN
 .sub 'generate_code'
     .param string infile
     .local pmc ifh
-    ifh = open infile, 'r'
+    ifh = new ['FileHandle']
+    ifh.'open'(infile, 'r')
     unless ifh goto err_infile
-    .local string codestring
+
+    .local pmc codestring
     .local int size
-    codestring = "const Parrot_UInt1 program_code[] = {"
+
+    codestring = new [ 'StringBuilder' ]
+    push codestring, "const Parrot_UInt1 program_code[] = {"
     size = 0
 
   read_loop:
     .local string pbcstring
     .local int pbclength
 
-    pbcstring = read ifh, 16384
+    pbcstring = ifh.'read'(16384)
     pbclength = length pbcstring
     unless pbclength > 0 goto read_done
 
@@ -236,33 +241,33 @@ MAIN
     unless pos < pbclength goto code_done
     $I0 = ord pbcstring, pos
     $S0 = $I0
-    codestring .= $S0
-    codestring .= ','
+    push codestring, $S0
+    push codestring, ','
     inc pos
     inc size
     $I0 = size % 32
     unless $I0 == 0 goto code_loop
-    codestring .= "\n"
+    push codestring, "\n"
     goto code_loop
   code_done:
     goto read_loop
 
   read_done:
-    close ifh
+    ifh.'close'()
 
-    codestring .= "\n};\n\n"
-    codestring .= "const int bytecode_size = "
+    push codestring, "\n};\n\nconst int bytecode_size = "
     $S0 = size
-    codestring .= $S0
-    codestring .= ";\n"
-    codestring .= <<'END_OF_FUNCTION'
+    push codestring, $S0
+    push codestring, ";\n"
+    push codestring, <<'END_OF_FUNCTION'
         const void * get_program_code(void)
         {
             return program_code;
         }
 END_OF_FUNCTION
 
-    .return (codestring)
+    $S0 = codestring
+    .return ($S0)
 
   err_infile:
     die "cannot open infile"
@@ -301,23 +306,27 @@ END_OF_FUNCTION
 .sub 'generate_code_gcc'
     .param string infile
     .local pmc ifh
-    ifh = open infile, 'r'
+    ifh = new ['FileHandle']
+    ifh.'open'(infile, 'r')
     unless ifh goto err_infile
 
     .local pmc encoding_table
     encoding_table = 'generate_encoding_table'()
 
-    .local string codestring
+    .local pmc codestring
     .local int size
-    codestring = "const char * program_code =\n"
-    codestring .= '"'
+
+    codestring = new ['StringBuilder']
+
+    push codestring, "const char * program_code =\n"
+    push codestring, '"'
     size = 0
 
   read_loop:
     .local string pbcstring
     .local int pbclength
 
-    pbcstring = read ifh, 16384
+    pbcstring = ifh.'read'(16384)
     pbclength = length pbcstring
     unless pbclength > 0 goto read_done
 
@@ -327,36 +336,37 @@ END_OF_FUNCTION
     unless pos < pbclength goto code_done
     $I0 = ord pbcstring, pos
     $S0 = encoding_table[$I0]
-    codestring .= $S0
+    push codestring, $S0
     inc pos
     inc size
     $I0 = size % 32
     unless $I0 == 0 goto code_loop
-    codestring .= '"'
-    codestring .= "\n"
-    codestring .= '"'
+    push codestring, '"'
+    push codestring, "\n"
+    push codestring, '"'
     goto code_loop
   code_done:
     goto read_loop
 
   read_done:
-    close ifh
+    ifh.'close'()
 
-    codestring .= '"'
-    codestring .= "\n;\n\n"
-    codestring .= "const int bytecode_size = "
+    push codestring, '"'
+    push codestring, "\n;\n\n"
+    push codestring, "const int bytecode_size = "
     $S0 = size
-    codestring .= $S0
-    codestring .= ";\n"
+    push codestring, $S0
+    push codestring, ";\n"
 
-    codestring .= <<'END_OF_FUNCTION'
+    push codestring, <<'END_OF_FUNCTION'
         const void * get_program_code(void)
         {
             return program_code;
         }
 END_OF_FUNCTION
 
-    .return (codestring)
+    $S0 = codestring
+    .return ($S0)
 
   err_infile:
     die "cannot open infile"
@@ -371,11 +381,10 @@ END_OF_FUNCTION
     .param string new_extension
 
     $S0 = substr pbc_path, -4
-    downcase $S0
+    $S0 = downcase $S0
     if $S0 != '.pbc' goto err_pbc_path_not_pbc
     .local string base_path
-     base_path = substr pbc_path, 0
-     substr base_path, -4, 4, ''
+     base_path = replace pbc_path, -4, 4, ''
 
     .local string new_path
     new_path = substr base_path, 0
@@ -424,7 +433,8 @@ END_OF_DEFINES
     rc_contents .= "\"\n"
 
     .local pmc rc_fh
-    rc_fh = open rc_path, 'w'
+    rc_fh = new ['FileHandle']
+    rc_fh.'open'(rc_path, 'w')
     unless rc_fh goto err_rc_open
     print rc_fh, rc_contents
     $I0 = rc_fh.'close'()
@@ -432,22 +442,22 @@ END_OF_DEFINES
 
 
     .local int pbc_size
+    $P0 = loadlib 'os'
     $P1 = new ['OS']
     $P2 = $P1.'stat'(pbc_path)
     pbc_size = $P2[7]
 
 
-    .local string codestring
-    codestring  = ''
-    codestring .= '#include <windows.h>'
-    codestring .= "\n"
-    codestring .= rc_constant_defines
-    codestring .= "const unsigned int bytecode_size = "
+    .local pmc codestring
+    codestring  = new [ 'StringBuilder' ]
+    push codestring, "#include <windows.h>\n"
+    push codestring, rc_constant_defines
+    push codestring, "const unsigned int bytecode_size = "
     $S0 = pbc_size
-    codestring .= $S0
-    codestring .= ";\n"
+    push codestring, $S0
+    push codestring, ";\n"
 
-    codestring .= <<'END_OF_FUNCTION'
+    push codestring, <<'END_OF_FUNCTION'
         const void * get_program_code(void)
         {
             HRSRC   hResource;
@@ -489,9 +499,10 @@ END_OF_FUNCTION
     unless status goto rc_ok
 
     die "RC command failed"
-  rc_ok:
 
-    .return (codestring)
+  rc_ok:
+    $S0 = codestring
+    .return ($S0)
 
   err_h_open:
     die "cannot open .h file"
@@ -654,6 +665,7 @@ END_OF_FUNCTION
   check_manifest:
     # Check if there is a MSVC app manifest
     .local pmc file
+    $P0 = loadlib 'file'
     file = new 'File'
     .local string manifest_file_name
     manifest_file_name  = clone exefile

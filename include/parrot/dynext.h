@@ -4,13 +4,16 @@
 
 /* dynext.h
 *
-* $Id: dynext.h 45117 2010-03-22 23:42:16Z petdance $
+* $Id: dynext.h 48009 2010-07-05 14:33:31Z NotFound $
 *
 *   Parrot dynamic extensions
 */
 
 #ifndef PARROT_DYNEXT_H_GUARD
 #define PARROT_DYNEXT_H_GUARD
+
+typedef PMC *(*dynext_load_func)(PARROT_INTERP);
+typedef void (*dynext_init_func)(PARROT_INTERP, ARGIN_NULLOK(PMC *));
 
 /* HEADERIZER BEGIN: src/dynext.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
@@ -29,11 +32,17 @@ PMC * Parrot_clone_lib_into(
         FUNC_MODIFIES(*s);
 
 PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+void * Parrot_dlsym_str(PARROT_INTERP,
+    ARGIN_NULLOK(void *handle),
+    ARGIN_NULLOK(STRING *symbol))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
 PMC * Parrot_init_lib(PARROT_INTERP,
-    ARGIN_NULLOK(PMC *(*load_func)(PARROT_INTERP)),
-    ARGIN_NULLOK(void (*init_func)(PARROT_INTERP,
-    ARGIN_NULLOK(PMC *))))
+    NULLOK(dynext_load_func load_func),
+    NULLOK(dynext_init_func init_func))
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
@@ -48,6 +57,8 @@ PMC * Parrot_load_lib(PARROT_INTERP,
        PARROT_ASSERT_ARG(d) \
     , PARROT_ASSERT_ARG(s) \
     , PARROT_ASSERT_ARG(lib_pmc))
+#define ASSERT_ARGS_Parrot_dlsym_str __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_init_lib __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_load_lib __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
