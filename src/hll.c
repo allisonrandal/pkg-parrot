@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2009, Parrot Foundation.
-$Id: hll.c 47678 2010-06-18 00:29:10Z whiteknight $
+$Id: hll.c 49416 2010-10-02 22:25:15Z nwellnhof $
 
 =head1 NAME
 
@@ -209,7 +209,7 @@ Parrot_register_HLL_lib(PARROT_INTERP, ARGIN(STRING *hll_lib))
 
         if (!PMC_IS_NULL(lib_name)) {
             const STRING * const lib_name_str = VTABLE_get_string(interp, lib_name);
-            if (Parrot_str_equal(interp, lib_name_str, hll_lib))
+            if (STRING_equal(interp, lib_name_str, hll_lib))
                 break;
         }
     }
@@ -329,21 +329,26 @@ Parrot_register_HLL_type(PARROT_INTERP, INTVAL hll_id,
         INTVAL core_type, INTVAL hll_type)
 {
     ASSERT_ARGS(Parrot_register_HLL_type)
-    PMC  *entry, *type_hash;
-    PMC  *hll_info = interp->HLL_info;
-    const INTVAL n = VTABLE_elements(interp, hll_info);
 
-    if (hll_id >= n)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_GLOBAL_NOT_FOUND,
-            "no such HLL ID (%vd)", hll_id);
+    if (hll_id == Parrot_get_HLL_id(interp, CONST_STRING(interp, "parrot")))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot map without an HLL");
+    else {
+        PMC *hll_info = interp->HLL_info;
+        const INTVAL n = VTABLE_elements(interp, hll_info);
+        if (hll_id >= n)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_GLOBAL_NOT_FOUND,
+                "no such HLL ID (%vd)", hll_id);
+        else {
+            PMC  *type_hash;
+            PMC  *entry = VTABLE_get_pmc_keyed_int(interp, hll_info, hll_id);
+            PARROT_ASSERT(!PMC_IS_NULL(entry));
+            type_hash = VTABLE_get_pmc_keyed_int(interp, entry, e_HLL_typemap);
+            PARROT_ASSERT(!PMC_IS_NULL(type_hash));
 
-    entry     = VTABLE_get_pmc_keyed_int(interp, hll_info, hll_id);
-    PARROT_ASSERT(!PMC_IS_NULL(entry));
-
-    type_hash = VTABLE_get_pmc_keyed_int(interp, entry, e_HLL_typemap);
-    PARROT_ASSERT(!PMC_IS_NULL(type_hash));
-
-    VTABLE_set_integer_keyed_int(interp, type_hash, core_type, hll_type);
+            VTABLE_set_integer_keyed_int(interp, type_hash, core_type, hll_type);
+        }
+    }
 }
 
 /*
@@ -364,8 +369,6 @@ INTVAL
 Parrot_get_HLL_type(PARROT_INTERP, INTVAL hll_id, INTVAL core_type)
 {
     ASSERT_ARGS(Parrot_get_HLL_type)
-    PMC    *entry, *type_hash, *hll_info;
-    INTVAL  n, id;
 
     if (hll_id == PARROT_HLL_NONE || hll_id == 0)
         return core_type;
@@ -373,26 +376,28 @@ Parrot_get_HLL_type(PARROT_INTERP, INTVAL hll_id, INTVAL core_type)
     if (hll_id < 0)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_GLOBAL_NOT_FOUND,
             "no such HLL ID (%vd)", hll_id);
+    else {
+        PMC * const hll_info = interp->HLL_info;
+        INTVAL  id;
+        PMC    *entry, *type_hash;
 
-    hll_info = interp->HLL_info;
-    n        = VTABLE_elements(interp, hll_info);
+        START_READ_HLL_INFO(interp, hll_info);
+        entry     = VTABLE_get_pmc_keyed_int(interp, hll_info, hll_id);
+        END_READ_HLL_INFO(interp, hll_info);
 
-    if (hll_id >= n)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_GLOBAL_NOT_FOUND,
-            "no such HLL ID (%vd)", hll_id);
+        if (PMC_IS_NULL(entry))
+            Parrot_ex_throw_from_c_args(interp, NULL,
+                EXCEPTION_GLOBAL_NOT_FOUND, "no such HLL ID (%vd)", hll_id);
 
-    START_READ_HLL_INFO(interp, hll_info);
-    entry     = VTABLE_get_pmc_keyed_int(interp, hll_info, hll_id);
-    END_READ_HLL_INFO(interp, hll_info);
+        type_hash = VTABLE_get_pmc_keyed_int(interp, entry, e_HLL_typemap);
 
-    type_hash = VTABLE_get_pmc_keyed_int(interp, entry, e_HLL_typemap);
+        if (PMC_IS_NULL(type_hash))
+            return core_type;
 
-    if (PMC_IS_NULL(type_hash))
-        return core_type;
+        id = VTABLE_get_integer_keyed_int(interp, type_hash, core_type);
 
-    id = VTABLE_get_integer_keyed_int(interp, type_hash, core_type);
-
-    return id ? id : core_type;
+        return id ? id : core_type;
+    }
 }
 
 /*
@@ -412,6 +417,8 @@ Parrot_get_ctx_HLL_type(PARROT_INTERP, INTVAL core_type)
 {
     ASSERT_ARGS(Parrot_get_ctx_HLL_type)
     const INTVAL hll_id = Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp));
+    if (!hll_id || hll_id == PARROT_HLL_NONE)
+        return core_type;
 
     return Parrot_get_HLL_type(interp, hll_id, core_type);
 }

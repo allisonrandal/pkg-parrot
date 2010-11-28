@@ -1,5 +1,5 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Escape.pir 47730 2010-06-20 14:42:37Z NotFound $
+# $Id: Escape.pir 49002 2010-09-14 19:11:14Z nwellnhof $
 
 =head1 NAME
 
@@ -40,13 +40,12 @@ present in the except string.
     .param string s
     .param string except
 
-    .local int asciicharset, utf8enc, scharset, senc
-    asciicharset = find_charset 'ascii'
-    scharset = charset s
-    if scharset == asciicharset goto encodeit
+    .local int asciienc, utf8enc, senc
+    senc = encoding s
+    asciienc = find_encoding 'ascii'
+    if senc == asciienc goto encodeit
 
     utf8enc = find_encoding 'utf8'
-    senc = encoding s
     if utf8enc == senc goto encodeit
     s = trans_encoding s, utf8enc
 

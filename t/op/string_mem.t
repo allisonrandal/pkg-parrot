@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: string_mem.t 44388 2010-02-23 12:39:51Z mikehh $
+# $Id: string_mem.t 49269 2010-09-23 08:34:38Z bacek $
 
 =head1 NAME
 
@@ -41,12 +41,11 @@ pin/unpin
 
     test_stringinfo()
     $S0 = interpinfo .INTERPINFO_GC_SYS_NAME
-    if $S0 == "inf" goto dont_run_hanging_tests
+    if $S0 != "ms" goto dont_run_hanging_tests
     test_pin_unpin()
     goto test_end
   dont_run_hanging_tests:
-    ok(1, "#TODO - Test disabled on gc_inf")
-    ok(1, "#TODO - Test disabled on gc_inf")
+    skip(2, "Test disabled on not GC MS")
   test_end:
 .end
 

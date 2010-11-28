@@ -1,7 +1,7 @@
 /* nci.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: nci.h 46597 2010-05-14 05:31:37Z plobsing $
+ *     $Id: nci.h 48790 2010-09-04 20:06:03Z plobsing $
  *  Overview:
  *     The nci API handles building native call frames
  *  Data Structure and Algorithms:
@@ -17,6 +17,7 @@
 
 typedef PMC *(*nci_fb_func_t)(PARROT_INTERP, PMC *user_data, STRING *signature);
 typedef void (*nci_thunk_t)(PARROT_INTERP, PMC *, PMC *);
+typedef void (*native_pcc_method_t)(PARROT_INTERP);
 
 void Parrot_nci_load_core_thunks(PARROT_INTERP);
 void Parrot_nci_load_extra_thunks(PARROT_INTERP);

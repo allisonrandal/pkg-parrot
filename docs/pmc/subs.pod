@@ -4,7 +4,7 @@ Subs - Parrot Subroutines
 
 =head1 VERSION
 
-$Revision: 43438 $
+$Revision: 48948 $
 
 =head1 ABSTRACT
 
@@ -27,7 +27,6 @@ These are all of the built-in classes that are directly callable, or
     Coroutine
     Eval
   Continuation
-    RetContinuation
     ExceptionHandler
 
 By "invokable" we mean that they can be supplied as the first argument to the

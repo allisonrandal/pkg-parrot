@@ -1,5 +1,5 @@
 #! ./parrot-nqp
-# $Id: ops2c.nqp 47428 2010-06-06 08:32:34Z cotto $
+# $Id: ops2c.nqp 48736 2010-08-31 15:49:14Z cotto $
 
 pir::load_bytecode("opsc.pbc");
 pir::load_bytecode("Getopt/Obj.pbc");
@@ -75,7 +75,7 @@ normal options:
  -h --help                print this usage information
  -n --no-lines            do not print #line directives in generated C code (line numbers are not currently supported)
 
-#debugging options:
+debugging options:
  -g --debug               perform all processing but do not write to any files
 ");
     pir::exit(0);

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: const.t 47301 2010-06-02 13:21:07Z coke $
+# $Id: const.t 48766 2010-09-02 13:38:04Z nwellnhof $
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use vars qw($TODO);
 
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 34;
+use Parrot::Test tests => 35;
 
 pir_output_is( <<'CODE', <<'OUT', "globalconst 1" );
 
@@ -590,6 +590,17 @@ pir_output_is( <<'CODE', <<'OUT', "const int" );
 CODE
 108
 12
+OUT
+
+pir_error_output_like( <<'CODE', <<'OUT', "" );
+.sub 'bus_error'
+    .local string hello
+    hello = "'Allo, 'allo, 'allo."
+    .const string hello = "Hello, Polly."
+    say hello
+.end
+CODE
+/^error:imcc:syntax error, duplicated IDENTIFIER/
 OUT
 
 # Local Variables:

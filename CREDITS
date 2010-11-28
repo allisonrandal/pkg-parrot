@@ -1,6 +1,6 @@
 =pod
 
-﻿# $Id: CREDITS 48145 2010-07-21 00:42:45Z coke $
+﻿# $Id: CREDITS 49575 2010-10-19 08:31:46Z gerd $
 
     Following in the steps of other open source projects that
     eventually take over the world, here is the partial list
@@ -248,7 +248,7 @@ D: Range check in Env PMC
 A: christoph_googleacct@mksig.org
 A: christop...@mksig.org
 A: Christoph Otto
-D: Pipp
+D: Pipp, Lorito taskmaster
 E: christoph@mksig.org
 
 N: chromatic
@@ -400,9 +400,15 @@ D: Miscellaneous fixes
 N: Gerard Goossen
 D: Documentation patch for Parrot_PMC_get_pointer_intkey()
 
+N: Géraud Continsouzas
+U: GeJ
+A: geraud
+D: Perl2Pir tests conversion
+D: Miscellaneous codingstd fixes
+
 N: Gerd Pokorra
 E: pokorra@uni-siegen.de
-D: Release manager for 1.9.0, 2.3.0 and 2.5.0
+D: Release manager for 1.9.0, 2.3.0, 2.5.0, 2.8.0 and 2.9.0
 
 N: Goplat
 D: Win98 and other fixes.
@@ -450,7 +456,7 @@ D: string.pmc, complex.pmc
 N: isop
 D: various Pynie patches
 
-N: James E Keenan (Jim)
+N: James E Keenan (Jim) (aka kid51)
 E: jkeenan@cpan.org
 U: jkeenan
 D: Testing of configuration and build tools
@@ -642,6 +648,10 @@ D: Patchmonster & release manager emeritus (0.0.13 - 0.4.5)
 E: lt@toetsch.at
 S: Herrnbaumgarten, Austria
 
+N: Luben Karavelov
+U: luben
+E: karavelov@spnet.net
+
 N: Luca Barbato
 D: fix to make installable
 E: lu_zero@gentoo.org
@@ -769,6 +779,11 @@ U: nickg
 N: Nick Kostirya
 D: Win32, FreeBSD build fixes
 
+N: Nick Wellnhofer
+D: String iterator rewrite, GC fixes
+E: wellnhofer@aevum.de
+U: nwellnhof
+
 N: Nikolay Ananiev
 D: Win32 build fix
 
@@ -809,6 +824,12 @@ D: NQP, PCT, PAST, POST
 D: APL
 D: Pynie
 E: pmichaud@pobox.com
+
+N: Paul C. Anagnostopoulos
+U: Paul_the_Greek
+A: Paul C. Anagnostopoulos
+E: paul@windfall.com
+D: Improving memory management documentation
 
 N: Paul Cochrane
 U: paultcochrane

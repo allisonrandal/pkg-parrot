@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: progs-01.t 42594 2009-11-20 02:41:47Z jkeenan $
+# $Id: progs-01.t 49440 2010-10-04 12:54:05Z plobsing $
 # inter/progs-01.t
 
 use strict;
@@ -54,6 +54,8 @@ foreach my $p (
         ld
         ccflags
         linkflags
+        ar
+        arflags
         ldflags
         libs
         cxx

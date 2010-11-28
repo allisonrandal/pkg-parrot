@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: List.pm 47318 2010-06-03 01:36:45Z jkeenan $
+# $Id: List.pm 49454 2010-10-05 23:38:50Z plobsing $
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;
@@ -28,8 +28,6 @@ my @steps = qw(
     init::optimize
     inter::shlibs
     inter::libparrot
-    inter::charset
-    inter::encoding
     inter::types
     auto::ops
     auto::pmc
@@ -41,13 +39,16 @@ my @steps = qw(
     auto::isreg
     auto::jit
     auto::frames
+    auto::llvm
     auto::inline
     auto::gc
     auto::memalign
     auto::signal
     auto::socklen_t
+    auto::stat
     auto::neg_0
     auto::env
+    auto::timespec
     auto::thread
     auto::gmp
     auto::readline

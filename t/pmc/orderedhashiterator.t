@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: orderedhashiterator.t 47799 2010-06-24 06:14:22Z NotFound $
+# $Id: orderedhashiterator.t 48821 2010-09-07 18:06:42Z NotFound $
 
 =head1 NAME
 
@@ -23,12 +23,13 @@ t/pmc/orderedhash.t.
 .sub 'main'
     .include 'test_more.pir'
 
-    plan(6)
+    plan(7)
 
     'test_init'()
     'test_bad_type'()
     'test_shift'()
     'test_pop'()
+    'test_clone'()
 .end
 
 .sub 'test_init'
@@ -111,6 +112,18 @@ t/pmc/orderedhash.t.
     finalize eh
     pop_eh
     ok(i, 'pop_pmc in empty OH throws')
+.end
+
+.sub 'test_clone'
+    .local pmc oh, it, cl
+    .local int result
+    oh = new ['OrderedHash']
+    it = iter oh
+
+    # This chekcs the de facto behavior for code coverage purposes.
+    cl = clone it
+    result = isnull cl
+    ok(result, 'clone of OHI gives null')
 .end
 
 # Local Variables:

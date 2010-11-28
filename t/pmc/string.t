@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: string.t 47102 2010-05-29 06:50:09Z plobsing $
+# $Id: string.t 49540 2010-10-15 06:49:31Z cotto $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ Tests the C<String> PMC.
 .sub main :main
     .include 'test_more.pir'
 
-    plan(120)
+    plan(124)
 
     set_or_get_strings()
     setting_integers()
@@ -45,6 +45,7 @@ Tests the C<String> PMC.
     test_string_replace()
     set_i0__p0__string_to_int()
     test_string_trans()
+    reverse_string()
     is_integer__check_integer()
     instantiate_str()
     get_string_returns_cow_string()
@@ -566,6 +567,21 @@ loop:
     .return(tr_array)
 .end
 
+.sub reverse_string
+    $P0 = box 'torrap'
+    $P0.'reverse'()
+    is( $P0, "parrot", 'reverse string' )
+
+    $P0 = box 'x'
+    $P0.'reverse'('hsifyllej')
+    is( $P0, 'jellyfish', "reverse string with optional arg")
+
+    $P0 = box unicode:"科ムウオ"
+    $P0.'reverse'()
+    is( $P0, unicode:"オウム科", 'reverse unicode string')
+
+.end
+
 .sub is_integer__check_integer
   $P0 = new ['String']
 
@@ -586,6 +602,11 @@ loop:
 
   $I0 = $P0.'is_integer'('+1')
   ok( $I0, '... +1' )
+
+  $S0 = 'abc123abc'
+  $S1 = substr $S0, 3, 3
+  $I0 = $P0.'is_integer'($S1)
+  ok( $I0, '... substr' )
 .end
 
 .sub instantiate_str

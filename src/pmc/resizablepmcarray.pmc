@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: resizablepmcarray.pmc 47697 2010-06-19 02:03:31Z NotFound $
+$Id: resizablepmcarray.pmc 48446 2010-08-13 07:25:41Z NotFound $
 
 =head1 NAME
 
@@ -88,20 +88,6 @@ do_unshift(PARROT_INTERP, ARGIN(PMC *arr), ARGIN(PMC *val))
 
 pmclass ResizablePMCArray extends FixedPMCArray auto_attrs provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs resizing */
-
-
-/*
-=item C<void init()>
-
-Initializes the array.
-
-=cut
-
-*/
-
-    VTABLE void init() {
-        PObj_custom_mark_destroy_SETALL(SELF);
-    }
 
 /*
 

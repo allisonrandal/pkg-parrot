@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: socket_api.c 45034 2010-03-18 22:01:23Z petdance $
+$Id: socket_api.c 48551 2010-08-17 15:52:29Z petdance $
 
 =head1 NAME
 
@@ -107,6 +107,7 @@ static int pio_sock[PIO_SOCK_MAX+1] = {
 
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 INTVAL

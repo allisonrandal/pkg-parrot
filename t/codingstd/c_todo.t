@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_todo.t 37688 2009-03-24 20:55:58Z coke $
+# $Id: c_todo.t 48723 2010-08-30 01:07:21Z jkeenan $
 
 use strict;
 use warnings;
@@ -60,7 +60,7 @@ foreach my $file (@files) {
 
 my $num_failed_files = scalar keys %failed_files;
 TODO: {
-    local $TODO = 'some todos remain';
+    local $TODO = scalar(@fixme) . ' todos remain';
 
 ok( !scalar(@fixme), 'FIXME strings' )
     or diag( "FIXME strings found in "

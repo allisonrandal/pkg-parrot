@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: cores.c 47917 2010-06-29 23:18:38Z jkeenan $
+$Id: cores.c 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -675,7 +675,7 @@ runops_gc_debug_core(PARROT_INTERP, SHIM(Parrot_runcore_t *runcore), ARGIN(opcod
             Parrot_ex_throw_from_c_args(interp, NULL, 1,
                 "attempt to access code outside of current code segment");
 
-        Parrot_gc_mark_and_sweep(interp, GC_TRACE_FULL);
+        Parrot_gc_mark_and_sweep(interp, GC_trace_stack_FLAG);
         Parrot_pcc_set_pc(interp, CURRENT_CONTEXT(interp), pc);
 
         DO_OP(pc, interp);
@@ -717,7 +717,7 @@ runops_debugger_core(PARROT_INTERP, SHIM(Parrot_runcore_t *runcore), ARGIN(opcod
                     "attempt to access code outside of current code segment");
 
         if (interp->pdb->state & PDB_GCDEBUG)
-            Parrot_gc_mark_and_sweep(interp, 0);
+            Parrot_gc_mark_and_sweep(interp, GC_trace_stack_FLAG);
 
         if (interp->pdb->state & PDB_TRACING) {
             trace_op(interp,

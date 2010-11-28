@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: lexicals.t 46450 2010-05-10 01:14:23Z plobsing $
+# $Id: lexicals.t 48721 2010-08-30 01:04:08Z Paul C. Anagnostopoulos $
 
 use strict;
 use warnings;
@@ -840,7 +840,7 @@ CODE
 /Null PMC access/
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'get non existing' );
+pir_output_is( <<'CODE', <<'OUTPUT', 'get undefined lexical' );
 .sub "main" :main
     .lex 'a', $P0
     foo()
@@ -852,9 +852,14 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', 'get non existing' );
 .sub bar   :outer('foo')
     .lex 'c', $P0
     $P2 = find_lex 'no_such'
+    if null $P2 goto ok
+    print "Undefined name not NULL\n"
+    end
+ok:
+    print "ok\n"
 .end
 CODE
-/Lexical 'no_such' not found/
+ok
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', 'find_name on lexicals' );

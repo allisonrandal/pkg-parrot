@@ -1,5 +1,5 @@
 #! perl
-# $Id: faces.pl 44935 2010-03-15 13:25:15Z coke $
+# $Id: faces.pl 48593 2010-08-21 21:22:59Z jkeenan $
 # Copyright (C) 2010, Parrot Foundation.
 
 use strict;
@@ -7,9 +7,21 @@ use warnings;
 
 use Gravatar::URL;
 
-=for usage
+=head1 NAME
 
-use to generate source for http://trac.parrot.org/parrot/wiki/ParrotFaces
+faces.pl - Generate source for Parrot wiki ParrotFaces page
+
+=head1 SYNOPSIS
+
+    perl tools/dev/faces.pl
+
+=head1 DESCRIPTION
+
+Used to create L<http://trac.parrot.org/parrot/wiki/ParrotFaces>
+
+=head1 PREREQUISITE
+
+Gravatar::URL (L<http://search.cpan.org/dist/Gravatar-URL/>).
 
 =cut
 

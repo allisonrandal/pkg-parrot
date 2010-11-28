@@ -17,6 +17,9 @@
 #  define __STDC_VERSION__ 0
 #endif
 
+#include "imc.h"
+#include "parser.h"
+
 }
 
 %{
@@ -30,16 +33,9 @@
  *
  * The tokenizer.
  *
- * $Id: imcc.l 46899 2010-05-22 21:18:30Z plobsing $
+ * $Id: imcc.l 49376 2010-09-29 03:08:39Z plobsing $
  *
  */
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "imc.h"
-#include "parser.h"
 
 typedef struct parser_state_t parser_state_t;
 
@@ -1457,7 +1453,7 @@ handle_identifier(PARROT_INTERP, YYSTYPE *valp, const char *text)
             if (((r->pcc_sub->pragma & P_METHOD)
             ||   (IMCC_INFO(interp)->cur_unit->is_vtable_method))
             &&   !strcmp(text, "self")) {
-                valp->sr = mk_ident(interp, "self", 'P');
+                valp->sr = mk_ident(interp, "self", 'P', VTIDENTIFIER);
                 IMCC_INFO(interp)->cur_unit->type |= IMC_HAS_SELF;
                 return VAR;
             }

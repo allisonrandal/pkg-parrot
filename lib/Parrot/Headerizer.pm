@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2010, Parrot Foundation.
-# $Id: Headerizer.pm 46820 2010-05-20 17:22:03Z petdance $
+# $Id: Headerizer.pm 48896 2010-09-10 00:46:07Z nwellnhof $
 
 package Parrot::Headerizer;
 
@@ -45,6 +45,7 @@ sub new {
     $self->{valid_macros} = { map { ( $_, 1 ) } qw(
         PARROT_EXPORT
         PARROT_INLINE
+        PARROT_NOINLINE
 
         PARROT_CAN_RETURN_NULL
         PARROT_CANNOT_RETURN_NULL

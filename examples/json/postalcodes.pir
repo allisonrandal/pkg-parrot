@@ -1,6 +1,6 @@
 #!../../parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: postalcodes.pir 47051 2010-05-27 08:45:23Z plobsing $
+# $Id: postalcodes.pir 48979 2010-09-13 18:55:26Z nwellnhof $
 
 =head1 NAME
 
@@ -64,8 +64,8 @@ ERR:
 END:
     close sock
 
-    $I1 = find_charset 'unicode'
-    json_result = trans_charset json_result, $I1
+    $I1 = find_encoding 'utf8'
+    json_result = trans_encoding json_result, $I1
 
     # Strip off http headers.
     $I0 = index json_result, "\r\n\r\n"

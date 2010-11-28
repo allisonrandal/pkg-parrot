@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd23_exceptions.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd23_exceptions.pod 48980 2010-09-13 18:55:52Z nwellnhof $
 
 =head1 PDD 23: Exceptions
 
@@ -10,7 +10,7 @@ Parrot's exception system.
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 48980 $
 
 =head2 Description
 
@@ -309,16 +309,6 @@ C<exception;math;division_by_zero>.
 The C<ord> opcode throws C<exception;domain> when it's passed an empty
 argument or a string index that's outside the length of the string.  Payload
 is an array, first element being the string 'ord'.
-
-The C<find_charset> opcode throws C<exception;domain> if the charset name it's
-looking up doesn't exist.  Payload is an array: [0] string 'find_charset', [1]
-charset name that was not found.
-
-The C<trans_charset> opcode throws C<exception;domain> on "information loss"
-(presumably, this means when one charset doesn't have a one-to-one
-correspondence in the other charset).  Payload is an array: [0] string
-'trans_charset', [1] source charset name, [2] destination charset name, [3]
-untranslatable code point.
 
 The C<find_encoding> opcode throws C<exception;domain> if the encoding name
 it's looking up doesn't exist.  Payload is an array: [0] string

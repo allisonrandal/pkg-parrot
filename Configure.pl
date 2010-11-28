@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: Configure.pl 46620 2010-05-15 01:17:03Z plobsing $
+# $Id: Configure.pl 49433 2010-10-04 03:19:11Z plobsing $
 
 use 5.008;
 use strict;
@@ -284,6 +284,14 @@ Specify which linker to use.
 =item C<--linkflags=(flags)>
 
 Use the given linker flags
+
+=item C<--ar=(archiver)>
+
+Specify which librarian to use for static libraries
+
+=item C<--arflags=(flags)>
+
+Use the given librarian flags for static libraris
 
 =item C<--ld=(linker)>
 
@@ -604,8 +612,6 @@ configuration file.
     init::optimize
     inter::shlibs
     inter::libparrot
-    inter::charset
-    inter::encoding
     inter::types
     auto::ops
     auto::alignptrs

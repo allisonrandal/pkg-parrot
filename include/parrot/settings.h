@@ -1,7 +1,7 @@
 /* settings.h
  *  Copyright (C) 2001-2004, Parrot Foundation.
  *  SVN Info
- *     $Id: settings.h 43017 2009-12-12 13:50:40Z darbelo $
+ *     $Id: settings.h 49269 2010-09-23 08:34:38Z bacek $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:
@@ -37,8 +37,10 @@
  * GC_DEFAULT_TYPE selection
  * MS  -- stop-the-world mark & sweep
  * INF -- infinite memory "collector"
+ * TMS -- TriColor Mark & Sweep
+ * MS2 -- new style mark & sweep
  */
-#define PARROT_GC_DEFAULT_TYPE MS
+#define PARROT_GC_DEFAULT_TYPE MS2
 
 /*
  * JIT/i386 can use the CGP run core for external functions instead

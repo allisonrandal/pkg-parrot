@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2010, Parrot Foundation.
-$Id: imageiostrings.pmc 46776 2010-05-19 02:57:10Z plobsing $
+$Id: imageiostrings.pmc 48697 2010-08-27 17:31:30Z nwellnhof $
 
 =head1 NAME
 
@@ -50,6 +50,8 @@ Initializes the PMC.
             parrot_new_intval_hash(INTERP));
 
         PARROT_IMAGEIOSTRINGS(SELF)->list = Parrot_pmc_new(INTERP, enum_class_ResizableStringArray);
+
+        PObj_custom_mark_SET(SELF);
     }
 
 /*

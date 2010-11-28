@@ -1,5 +1,5 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Zip.pir 47421 2010-06-06 04:41:48Z plobsing $
+# $Id: Zip.pir 48955 2010-09-12 13:27:17Z fperrad $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ See L<http://search.cpan.org/~adamk/Archive-Zip/>
 
 .loadlib 'sys_ops'
 .loadlib 'io_ops'
+.include 'iglobals.pasm'
 .include 'stat.pasm'
 .include 'tm.pasm'
 
@@ -25,6 +26,12 @@ See L<http://search.cpan.org/~adamk/Archive-Zip/>
 .namespace ['Archive';'Zip';'Base']
 
 .sub '' :init :load :anon
+    $P0 = getinterp
+    $P1 = $P0[.IGLOBALS_CONFIG_HASH]
+    $I0 = $P1['has_zlib']
+    if $I0 goto L1
+    die "Need a parrot built with zlib"
+  L1:
     $P0 = loadlib 'gziphandle'
     $P0 = newclass ['Archive';'Zip';'Base']
     .globalconst int AZ_OK = 0

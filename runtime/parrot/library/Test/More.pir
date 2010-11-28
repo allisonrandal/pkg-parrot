@@ -1,4 +1,4 @@
-# $Id: More.pir 47208 2010-05-31 10:38:11Z bacek $
+# $Id: More.pir 48951 2010-09-12 09:25:53Z fperrad $
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ Test::More - Parrot extension for testing modules
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
     test_namespace = get_namespace [ 'Test'; 'More' ]
-    exports        = split ' ', 'plan diag ok nok is is_deeply like isa_ok skip isnt todo throws_like lives_ok dies_ok'
+    exports        = split ' ', 'plan diag ok nok is is_deeply like isa_ok skip skip_all isnt todo throws_like lives_ok dies_ok'
 
     test_namespace.'export_to'(curr_namespace, exports)
 
@@ -1316,6 +1316,18 @@ actually skipped.  Arguments are optional.
     .local pmc test
     get_hll_global test, [ 'Test'; 'More' ], '_test'
     test.'skip'()
+.end
+
+=item C<skip_all( reason )>
+
+=cut
+
+.sub skip_all
+    .param string reason :optional
+
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+    test.'skip_all'(reason)
 .end
 
 =item C<todo( passed, description, reason )>

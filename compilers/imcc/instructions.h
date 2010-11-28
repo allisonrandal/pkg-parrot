@@ -1,5 +1,5 @@
 /*
- * $Id: instructions.h 46897 2010-05-22 20:50:13Z plobsing $
+ * $Id: instructions.h 48923 2010-09-10 23:34:18Z plobsing $
  * Copyright (C) 2002-2010, Parrot Foundation.
  */
 
@@ -16,10 +16,9 @@ enum INSTYPE {    /*instruction type can be   */
     ITALIAS    =  0x100000, /*  set P,P  */
     ITADDR     =  0x200000, /*  set_addr P, addr*/
     ITRESULT   =  0x400000, /*  .get_results */
-    ITEXT      =  0x800000, /*  instruction is extcall in JIT */
-    ITSAVES    = 0x1000000, /*  saveall/restoreall in a bsr */
-    ITPCCSUB   = 0x2000000, /*  PCC sub call */
-    ITPCCYIELD = 0x4000000  /*  yield from PCC call instead of return */
+    ITSAVES    =  0x800000, /*  saveall/restoreall in a bsr */
+    ITPCCSUB   = 0x1000000, /*  PCC sub call */
+    ITPCCYIELD = 0x2000000  /*  yield from PCC call instead of return */
 };
 
 
@@ -35,7 +34,7 @@ typedef struct _Instruction {
     struct _Instruction *prev;
     struct _Instruction *next;
 
-    int     opnum;         /* parrot op number */
+    op_info_t *op;         /* parrot opcode */
     int     opsize;        /* parrot op size   */
     int     line;          /* source code line number */
     int     symreg_count;  /* count of regs in **symregs */

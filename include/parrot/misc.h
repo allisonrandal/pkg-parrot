@@ -1,7 +1,7 @@
 /* misc.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: misc.h 47051 2010-05-27 08:45:23Z plobsing $
+ *     $Id: misc.h 48873 2010-09-08 23:43:44Z Paul C. Anagnostopoulos $
  *  Overview:
  *     Miscellaneous functions, mainly the Parrot_sprintf family
  *  Data Structure and Algorithms:
@@ -259,8 +259,15 @@ STRING * Parrot_vsprintf_s(PARROT_INTERP, ARGIN(STRING *pat), va_list args)
      */
 #  define PARROT_SPRINTF_MAX_PREC 3 * PARROT_SPRINTF_BUFFER_SIZE / 4
 
-#  define cstr2pstr(cstr) string_make(interp, (cstr), strlen(cstr), "ascii", 0)
-#  define char2pstr(ch)   string_make(interp, &(ch), 1, "ascii", 0)
+    /* Floats formatted in exponent notation should have this number
+     * of exponent digits unless they need more.
+     */
+#  define PARROT_SPRINTF_EXP_DIGITS 2
+
+#  define cstr2pstr(cstr) Parrot_str_new_init(interp, (cstr), strlen(cstr), \
+        Parrot_ascii_encoding_ptr, 0)
+#  define char2pstr(ch)   Parrot_str_new_init(interp, &(ch), 1, \
+        Parrot_ascii_encoding_ptr, 0)
 
     /* SPRINTF DATA STRUCTURE AND FLAGS */
 

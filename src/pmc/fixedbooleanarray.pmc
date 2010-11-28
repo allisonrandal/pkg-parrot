@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: fixedbooleanarray.pmc 46300 2010-05-05 03:58:50Z jimmy $
+$Id: fixedbooleanarray.pmc 49416 2010-10-02 22:25:15Z nwellnhof $
 
 =head1 NAME
 
@@ -274,7 +274,7 @@ Returns the Parrot string representation of the array.
 
     VTABLE STRING *get_string() {
         STRING *zero, *one;
-        STRING *str   = NULL;
+        STRING *str   = STRINGNULL;
         UINTVAL i;
         UINTVAL elems = SELF.elements();
 
@@ -334,10 +334,8 @@ Returns the PMC value of the element at index C<key>.
 */
 
     VTABLE PMC *get_pmc_keyed_int(INTVAL key) {
-        PMC  * const ret = Parrot_pmc_new(INTERP, enum_class_Boolean);
-        const INTVAL val = SELF.get_integer_keyed_int(key);
-        VTABLE_set_integer_native(INTERP, ret, val);
-        return ret;
+        return Parrot_pmc_new_init_int(INTERP, enum_class_Boolean,
+                SELF.get_integer_keyed_int(key));
     }
 
 /*

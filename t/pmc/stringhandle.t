@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: stringhandle.t 47809 2010-06-24 14:27:52Z NotFound $
+# $Id: stringhandle.t 48949 2010-09-12 01:05:04Z NotFound $
 
 use strict;
 use warnings;
@@ -665,14 +665,10 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'StringHandle is not a tty' );
     .local int i
     sh = new ['StringHandle']
 
-    # See TT #1689
-    i = sh.'is_tty'()
-    say i
     i = sh.'isatty'()
     say i
 .end
 CODE
-0
 0
 OUTPUT
 

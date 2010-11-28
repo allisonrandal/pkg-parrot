@@ -1,5 +1,5 @@
 /*
- * $Id: set.ops 47428 2010-06-06 08:32:34Z cotto $
+ * $Id: set.ops 48564 2010-08-19 02:03:11Z cotto $
 ** set.ops
 */
 
@@ -39,6 +39,9 @@ inline op clone(out STR, in STR) :base_mem {
 =item B<set>(out INT, in INT)
 
 =item B<set>(out INT, in NUM)
+
+A floating-point number is truncated (rounded toward zero) when assigned
+to an integer register.
 
 =item B<set>(out INT, invar PMC)
 

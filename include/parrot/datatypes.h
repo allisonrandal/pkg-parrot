@@ -3,7 +3,7 @@
  *  Copyright (C) 2002-2008, Parrot Foundation.
  *  License:  Artistic 2.0, see README and LICENSE for details
  *  SVN Info
- *     $Id: datatypes.h 41533 2009-09-27 17:30:32Z NotFound $
+ *     $Id: datatypes.h 49454 2010-10-05 23:38:50Z plobsing $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *

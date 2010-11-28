@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: harness.pir 47054 2010-05-27 13:47:20Z fperrad $
+# $Id: harness.pir 49036 2010-09-16 08:18:24Z fperrad $
 
 .sub 'main' :main
     .param pmc argv
@@ -353,7 +353,7 @@ TEST
     push contents, 'username'
     push contents, 'parrot-autobot'
     push contents, 'password'
-    push contents, 'squ@wk'
+    push contents, 'qa_rocks'
     push contents, 'comments'
     push contents, "EXPERIMENTAL t/harness.pir with LWP.pir"
     push contents, 'report_file'
@@ -362,7 +362,7 @@ TEST
     $P0[0] = 'parrot_test_run.tar.gz'
     push contents, $P0
     load_bytecode 'LWP/UserAgent.pir'
-    .const string url = 'http://smolder.plusthree.com/app/projects/process_add_report/8'
+    .const string url = 'http://smolder.parrot.org/app/projects/process_add_report/1'
     .local pmc ua, response
     ua = new ['LWP';'UserAgent']
     ua.'env_proxy'()

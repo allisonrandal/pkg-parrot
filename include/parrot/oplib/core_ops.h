@@ -1,5 +1,5 @@
 
-/* $Id: core_ops.h 48146 2010-07-21 00:49:08Z coke $ */
+/* $Id: core_ops.h 49584 2010-10-19 22:15:03Z cotto $ */
 
 #ifndef PARROT_OPLIB_CORE_OPS_H_GUARD
 #define PARROT_OPLIB_CORE_OPS_H_GUARD
@@ -12,7 +12,7 @@
  * .ops files). by ops2c.nqp.
  *
  * Any changes made here will be lost!  To regenerate this file after making
- * changes to any ops, use the bootstap-ops makefile target.
+ * changes to any ops, use the bootstrap-ops makefile target.
  *
  */
 
@@ -20,7 +20,8 @@
 #include "parrot/oplib.h"
 #include "parrot/runcore_api.h"
 
- op_lib_t *Parrot_DynOp_core_2_6_0(PARROT_INTERP, long init);
+PARROT_EXPORT
+op_lib_t *Parrot_DynOp_core_2_9_1(PARROT_INTERP, long init);
 
  opcode_t * Parrot_end(opcode_t *, PARROT_INTERP);
  opcode_t * Parrot_noop(opcode_t *, PARROT_INTERP);

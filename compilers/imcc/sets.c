@@ -1,5 +1,5 @@
 /*
- * $Id: sets.c 46486 2010-05-11 04:11:44Z plobsing $
+ * $Id: sets.c 48551 2010-08-17 15:52:29Z petdance $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -154,6 +154,7 @@ elements.
 
 */
 
+PARROT_PURE_FUNCTION
 int
 set_equal(ARGIN(const Set *s1), ARGIN(const Set *s2))
 {

@@ -1,5 +1,5 @@
 
-/* $Id: opsenum.h 47428 2010-06-06 08:32:34Z cotto $ */
+/* $Id$ */
 
 #ifndef PARROT_OPSENUM_H_GUARD
 #define PARROT_OPSENUM_H_GUARD
@@ -12,7 +12,7 @@
  * .ops files). by ops2c.nqp.
  *
  * Any changes made here will be lost!  To regenerate this file after making
- * changes to any ops, use the bootstap-ops makefile target.
+ * changes to any ops, use the bootstrap-ops makefile target.
  *
  */
 enum OPS_ENUM {

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: filehandle.c 45852 2010-04-21 10:06:00Z bacek $
+$Id: filehandle.c 49416 2010-10-02 22:25:15Z nwellnhof $
 
 =head1 NAME
 
@@ -52,7 +52,7 @@ Parrot_io_parse_open_flags(PARROT_INTERP, ARGIN_NULLOK(const STRING *mode_str))
     mode_len = Parrot_str_byte_length(interp, mode_str);
 
     for (i = 0; i < mode_len; ++i) {
-        const INTVAL s = Parrot_str_indexed(interp, mode_str, i);
+        const INTVAL s = STRING_ord(interp, mode_str, i);
         switch (s) {
           case 'r':
             flags |= PIO_F_READ;
@@ -121,7 +121,7 @@ Parrot_io_make_string(PARROT_INTERP, ARGMOD(STRING **buf), size_t len)
      * when we get a NULL string, we read a default len
      */
     if (*buf == NULL) {
-        *buf = Parrot_str_new_noinit(interp, enum_stringrep_one, len);
+        *buf = Parrot_str_new_noinit(interp, len);
         return *buf;
     }
     else {
@@ -674,7 +674,7 @@ Parrot_io_is_encoding(PARROT_INTERP, ARGIN(const PMC *filehandle), ARGIN(STRING 
     if (STRING_IS_NULL(handle_struct->encoding))
         return 0;
 
-    if (Parrot_str_equal(interp, value, handle_struct->encoding))
+    if (STRING_equal(interp, value, handle_struct->encoding))
         return 1;
 
     return 0;

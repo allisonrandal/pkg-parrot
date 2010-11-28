@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Shared.pm 47020 2010-05-26 08:56:38Z gerd $
+# $Id: Shared.pm 49433 2010-10-04 03:19:11Z plobsing $
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -10,6 +10,8 @@ our @EXPORT_OK = qw(
 );
 
 our @shared_valid_options = qw{
+    ar
+    arflags
     bindir
     cage
     cc
@@ -77,6 +79,7 @@ our @shared_valid_options = qw{
     without-gmp
     without-icu
     without-opengl
+    without-readline
     without-pcre
     without-threads
     without-zlib

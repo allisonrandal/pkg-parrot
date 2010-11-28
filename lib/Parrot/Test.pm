@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Test.pm 47888 2010-06-27 03:50:51Z petdance $
+# $Id: Test.pm 48947 2010-09-12 00:32:05Z NotFound $
 
 =head1 NAME
 
@@ -298,7 +298,6 @@ use base qw( Exporter );
 Memoize::memoize('path_to_parrot');
 
 # Tell parrot it's being tested--disables searching of installed libraries.
-# (see Parrot_get_runtime_prefix in src/library.c).
 $ENV{PARROT_TEST} = 1 unless defined $ENV{PARROT_TEST};
 
 my $builder = Test::Builder->new();

@@ -1,0 +1,26 @@
+/*
+Copyright (C) 2008-2009, Parrot Foundation.
+$Id: test_c.in 49380 2010-09-29 05:39:46Z mikehh $
+
+seeing if struct timespec exists
+
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+
+int
+main()
+{
+    struct timespec ts;
+    printf("OK: %d", sizeof ts);
+    return EXIT_SUCCESS;
+}
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

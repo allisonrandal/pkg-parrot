@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: linux-01.t 47917 2010-06-29 23:18:38Z jkeenan $
+# $Id: linux-01.t 49492 2010-10-10 14:40:36Z jkeenan $
 # init/hints/linux-01.t
 
 use strict;

@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: 64bit.t 46007 2010-04-25 11:44:15Z fperrad $
+# $Id: 64bit.t 48240 2010-07-31 17:55:52Z mikehh $
 
 =head1 NAME
 
@@ -36,7 +36,18 @@ Tests are skipped on other platforms.
     goto end
 
   is_64_bit:
-    bitops64()
+
+    # setup TODO for platform 'MSWin32'
+    .local string osname
+    osname = config['osname']
+    .local int todo_1
+    todo_1 = 0
+    unless  osname == "MSWin32" goto do_test
+    todo_1 = 1
+
+  do_test:
+
+    bitops64(todo_1)
 
   end:
 .end
@@ -44,10 +55,22 @@ Tests are skipped on other platforms.
 
 .sub bitops64
         # check bitops for 8-byte ints
+        .param int todo_1
 
         set $I0, 0xffffffffffffffff
-        is( $I0, -1, 'bitops64' )
 
+        if todo_1 goto do_todo
+        is( $I0, -1, 'bitops64' )
+        goto test_2
+
+      do_todo:
+        if $I0 == -1 goto todo_pass
+        todo ( 0, 'bitops64', 'not working on MSWin32, amd64' )
+        goto test_2
+      todo_pass:
+        todo ( 1, 'bitops64', 'not working on MSWin32, amd64' )
+
+      test_2:
         set $I1, 0x00000000ffffffff
         is( $I1, 4294967295, 'bitops64' )
 

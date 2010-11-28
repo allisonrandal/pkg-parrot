@@ -1,4 +1,4 @@
-# $Id: Manifest.pm 45977 2010-04-24 06:25:08Z gerd $
+# $Id: Manifest.pm 48848 2010-09-08 01:29:00Z jkeenan $
 # Copyright (C) 2007-2010, Parrot Foundation.
 
 =head1 NAME
@@ -112,9 +112,9 @@ sub new {
 
     $manifest_lines_ref = $mani->prepare_manifest();
 
-Prepares the manifest from the read in by the C<new()> method, and returns a
-hash of the files.  The keys of the hash are the filenames, and the values are
-strings representing the package and a list of the meta flags.
+Prepares the manifest from the data read in by the C<new()> method, and
+returns a hash of the files.  The keys of the hash are the filenames, and the
+values are strings representing the package and a list of the meta flags.
 
 =cut
 
@@ -275,10 +275,11 @@ sub _get_special {
         src/vtable.tbl                                  [devel]src
         tools/build/ops2c.pl                            [devel]
         tools/build/pmc2c.pl                            [devel]
-        tools/dev/mk_language_shell.pl                  [devel]
         tools/dev/create_language.pl                    [devel]
-        tools/dev/pbc_to_exe.pir                        [devel]
         tools/dev/gen_makefile.pl                       [devel]
+        tools/dev/mk_language_shell.pl                  [devel]
+        tools/dev/pbc_to_exe.pir                        [devel]
+        tools/dev/pprof2cg.pl                           [devel]
         tools/dev/reconfigure.pl                        [devel]
     );
 

@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: packfilerawsegment.t 46140 2010-04-29 14:52:22Z NotFound $
+# $Id: packfilerawsegment.t 49313 2010-09-25 01:27:42Z plobsing $
 
 =head1 NAME
 
@@ -9,6 +9,7 @@ t/pmc/packfilerawsegment.t - test the PackfileRawSegment PMC
 
 =head1 SYNOPSIS
 
+    % make test_prep
     % prove t/pmc/packfilerawsegment.t
 
 =head1 DESCRIPTION
@@ -113,7 +114,7 @@ load_error:
 
   done:
     $I0 = elements hash
-    is($I0, 4, "Got all types of Packfile segments")
+    is($I0, 3, "Got all types of Packfile segments")
 
     # Now create RawSegment and set type.
     $P0 = new ['PackfileRawSegment']

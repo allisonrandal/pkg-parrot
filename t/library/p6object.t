@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: p6object.t 46410 2010-05-08 13:03:42Z jkeenan $
+# $Id: p6object.t 48244 2010-08-01 06:29:50Z pmichaud $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ Testing Perl 6 objects.
     test_namespace.'export_to'(curr_namespace, exports)
 
     ##  set our plan
-    plan(295)
+    plan(303)
 
     ##  make sure we can load the P6object library
     push_eh load_fail
@@ -78,6 +78,20 @@ Testing Perl 6 objects.
     ##  make sure abcobj didn't get a .new method
     $I0 = can abcobj, 'new'
     nok($I0, '! <can ABC_obj, "new" >')
+
+    ## verify .ACCEPTS method
+    $P0 = hashproto.'ACCEPTS'(hashobj)
+    ok($P0, 'Hash.ACCEPTS(Hash_obj)')
+    isa_ok($P0, 'Boolean', 'Boolean')
+    $P0 = hashproto.'ACCEPTS'(abcobj)
+    nok($P0, 'Hash.ACCEPTS(Abc_obj)')
+    isa_ok($P0, 'Boolean', 'Boolean')
+    $P0 = abcproto.'ACCEPTS'(hashobj)
+    nok($P0, 'ABC.ACCEPTS(Hash_obj)')
+    isa_ok($P0, 'Boolean', 'Boolean')
+    $P0 = abcproto.'ACCEPTS'(abcobj)
+    ok($P0, 'ABCh.ACCEPTS(Abc_obj)')
+    isa_ok($P0, 'Boolean', 'Boolean')
 
     ##  create new class by namespace
     .local pmc ghins, ghiproto, ghiobj

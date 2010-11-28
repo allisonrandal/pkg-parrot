@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd22_io.pod 47051 2010-05-27 08:45:23Z plobsing $
+# $Id: pdd22_io.pod 49499 2010-10-10 18:07:25Z dukeleto $
 
 =head1 PDD 22: I/O
 
@@ -9,7 +9,7 @@ Parrot's I/O subsystem.
 
 =head2 Version
 
-$Revision: 47051 $
+$Revision: 49499 $
 
 =head2 Definitions
 
@@ -863,7 +863,7 @@ network-specific opcodes.
 
 C<socket> returns a new socket object from a given address family,
 socket type, and protocol number (all integers). The socket object's
-boolean value can be tested for whether the socket was created.
+boolean value can be tested to see if the socket is open or closed.
 
 The asynchronous version takes an additional final PMC callback
 argument, and only returns a status object. When the socket operation is
@@ -872,7 +872,7 @@ socket object.
 
 =item *
 
-C<sockaddr> returns an object representing a socket address, generated
+C<sockaddr> returns a SockAddr object representing a socket address, generated
 from a port number (integer) and an address (string).
 
 No asynchronous version.

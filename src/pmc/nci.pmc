@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: nci.pmc 46922 2010-05-23 21:38:28Z bacek $
+$Id: nci.pmc 49415 2010-10-02 22:23:59Z nwellnhof $
 
 =head1 NAME
 
@@ -49,6 +49,14 @@ static void pcc_params(PARROT_INTERP,
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
+/*
+
+=item C<static void pcc_params(PARROT_INTERP, STRING *sig, Parrot_NCI_attributes
+*nci_info, size_t sig_length)>
+
+=cut
+
+*/
 
 static void
 pcc_params(PARROT_INTERP, ARGIN(STRING *sig), ARGMOD(Parrot_NCI_attributes *nci_info),
@@ -70,7 +78,7 @@ pcc_params(PARROT_INTERP, ARGIN(STRING *sig), ARGMOD(Parrot_NCI_attributes *nci_
     size_t i;
 
     for (i = 0; i < sig_length; ++i) {
-        const INTVAL c = Parrot_str_indexed(interp, sig, i);
+        const INTVAL c = STRING_ord(interp, sig, i);
 
         PARROT_ASSERT(j < buf_length - 1);
 
@@ -135,7 +143,7 @@ pcc_params(PARROT_INTERP, ARGIN(STRING *sig), ARGMOD(Parrot_NCI_attributes *nci_
     nci_info->pcc_return_signature =
         Parrot_str_new(interp, sig_buf, 1);
 
-    nci_info->pcc_params_signature = j ?
+    nci_info->pcc_params_signature = j > 1 ?
         Parrot_str_new(interp, sig_buf + 1, j - 1) :
         CONST_STRING(interp, "");
 
@@ -143,7 +151,16 @@ pcc_params(PARROT_INTERP, ARGIN(STRING *sig), ARGMOD(Parrot_NCI_attributes *nci_
         mem_sys_free(sig_buf);
 }
 
-/* actually build the NCI thunk */
+/*
+
+=item C<static nci_thunk_t build_func(PARROT_INTERP, Parrot_NCI_attributes
+*nci_info)>
+
+Actually build the NCI thunk.
+
+=cut
+
+*/
 
 PARROT_IGNORABLE_RESULT
 static nci_thunk_t
@@ -204,20 +221,6 @@ Return the MMD signature PMC, if any or a Null PMC.
 
 /*
 
-=item C<METHOD set_raw_nci_ptr(void *func)>
-
-Sets the specified function pointer and raw flag.
-
-=cut
-
-*/
-
-    METHOD make_raw_nci(PMC *func) {
-        VTABLE_set_pointer(interp, SELF, (void *)func);
-    }
-
-/*
-
 =item C<void init()>
 
 Initializes the NCI with a C<NULL> function pointer.
@@ -227,9 +230,11 @@ Initializes the NCI with a C<NULL> function pointer.
 */
 
     VTABLE void init() {
-        /* Mark that we're not a raw NCI. */
-        PObj_flag_CLEAR(private2, SELF);
         PObj_custom_mark_SET(SELF);
+    }
+
+    VTABLE void *get_pointer() {
+        return PARROT_NCI(SELF)->orig_func;
     }
 
 /*
@@ -242,15 +247,6 @@ Sets the specified function pointer and signature (C<*key>).
 
 */
 
-    VTABLE void set_pointer(void *ptr) {
-        SET_ATTR_orig_func(INTERP, SELF, ptr);
-        PObj_flag_SET(private2, SELF);
-    }
-
-    VTABLE void *get_pointer() {
-        return PARROT_NCI(SELF)->orig_func;
-    }
-
     VTABLE void set_pointer_keyed_str(STRING *key, void *func) {
         Parrot_NCI_attributes * const nci_info   = PARROT_NCI(SELF);
 
@@ -261,8 +257,8 @@ Sets the specified function pointer and signature (C<*key>).
         if (!PObj_constant_TEST(key)) {
             char * const key_c      = Parrot_str_to_cstring(INTERP, key);
             const size_t key_length = Parrot_str_byte_length(interp, key);
-            key                     = string_make(interp, key_c, key_length,
-                                        NULL, PObj_constant_FLAG);
+            key                     = Parrot_str_new_init(interp, key_c, key_length,
+                                        Parrot_default_encoding_ptr, PObj_constant_FLAG);
             Parrot_str_free_cstring(key_c);
         }
 
@@ -283,11 +279,12 @@ Mark any referenced strings and PMCs.
             Parrot_NCI_attributes * const nci_info = PARROT_NCI(SELF);
 
             Parrot_gc_mark_PMC_alive(interp, nci_info->fb_info);
-            Parrot_gc_mark_STRING_alive(interp, nci_info->signature);
-            Parrot_gc_mark_STRING_alive(interp, nci_info->pcc_params_signature);
-            Parrot_gc_mark_STRING_alive(interp, nci_info->pcc_params_signature);
-            Parrot_gc_mark_STRING_alive(interp, nci_info->long_signature);
             Parrot_gc_mark_PMC_alive(interp, nci_info->multi_sig);
+
+            Parrot_gc_mark_STRING_alive(interp, nci_info->signature);
+            Parrot_gc_mark_STRING_alive(interp, nci_info->long_signature);
+            Parrot_gc_mark_STRING_alive(interp, nci_info->pcc_params_signature);
+            Parrot_gc_mark_STRING_alive(interp, nci_info->pcc_return_signature);
         }
     }
 
@@ -320,7 +317,7 @@ Creates and returns a clone of the NCI.
         nci_info_ret->pcc_params_signature  = nci_info_self->pcc_params_signature;
         nci_info_ret->pcc_return_signature  = nci_info_self->pcc_params_signature;
         nci_info_ret->arity                 = nci_info_self->arity;
-        PObj_get_FLAGS(ret)                |= (PObj_get_FLAGS(SELF) & 0x7);
+        PObj_get_FLAGS(ret)                 = PObj_get_FLAGS(SELF);
 
         return ret;
     }
@@ -360,9 +357,7 @@ class, the PMC arguments are shifted down.
         PMC                          *cont;
 
         GET_ATTR_orig_func(INTERP, SELF, orig_func);
-        func = PObj_flag_TEST(private2, SELF)
-            ? (nci_thunk_t) D2FPTR(orig_func)
-            : (nci_thunk_t) D2FPTR(nci_info->func);
+        func = (nci_thunk_t)D2FPTR(nci_info->func);
 
         GET_ATTR_fb_info(INTERP, SELF, fb_info);
 

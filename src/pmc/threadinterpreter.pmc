@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: threadinterpreter.pmc 46272 2010-05-04 04:50:16Z petdance $
+$Id: threadinterpreter.pmc 48435 2010-08-12 19:37:47Z chromatic $
 
 =head1 NAME
 
@@ -44,6 +44,15 @@ static void stop_GC(ARGMOD(Interp *parent), ARGMOD(Interp *thread))
  * can't do multi-threaded GC yet
  * XXX a quick hack to pass the few tests
  */
+
+/*
+
+=item C<static void stop_GC(Interp *parent, Interp *thread)>
+
+=cut
+
+*/
+
 static void
 stop_GC(ARGMOD(Interp *parent), ARGMOD(Interp *thread))
 {

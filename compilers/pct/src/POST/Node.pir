@@ -1,4 +1,4 @@
-# $Id: Node.pir 47791 2010-06-23 23:24:33Z tcurtis $
+# $Id: Node.pir 49325 2010-09-25 22:46:43Z jonathan $
 
 =head1 NAME
 
@@ -191,6 +191,13 @@ Get/set the opcode type for this node.
     .param pmc value           :optional
     .param int has_value       :opt_flag
     .tailcall self.'attr'('hll', value, has_value)
+.end
+
+
+.sub 'loadlibs' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('loadlibs', value, has_value)
 .end
 
 
