@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: install.pm 39165 2009-05-25 01:15:28Z jkeenan $
 
 =head1 NAME
 

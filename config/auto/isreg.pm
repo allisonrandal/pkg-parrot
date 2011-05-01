@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: isreg.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: Info.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -83,7 +82,7 @@ sub new {
             'People',
             '',
             $self->new_item(
-                'A list of some of the Parrot developers with SVN commit access.',
+                'A list of some of the Parrot developers with Git commit access.',
                 'RESPONSIBLE_PARTIES'
             ),
             $self->new_item(

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: headers-01.t 42578 2009-11-19 02:48:42Z jkeenan $
 # auto/headers-01.t
 
 use strict;

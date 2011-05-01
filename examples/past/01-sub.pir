@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: 01-sub.pir 40200 2009-07-21 21:51:54Z bacek $
 
 =for doc
 

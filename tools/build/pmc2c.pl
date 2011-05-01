@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pmc2c.pl 41209 2009-09-11 14:14:07Z coke $
 
 use strict;
 use warnings;
@@ -22,7 +21,7 @@ Getopt::Long::GetOptions(
     "c|gen-c" => \$action{gen_c},
 
     #command line options
-    "no-lines"  => \$options{nolines},
+    "no-lines"  => \$options{nolines}, # Configure.pl --no-line-directives
     "library=s" => \$options{library},
     "testing"   => \$options{testing},
 ) or exit 1;

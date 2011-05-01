@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: tutorial_episode_9.pod 48132 2010-07-20 18:33:27Z tcurtis $
 
 =head1 Episode 9: Wrap up and Conclusion
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: OPTable.pir 46060 2010-04-27 13:39:27Z bacek $
 
 =head1 Title
 

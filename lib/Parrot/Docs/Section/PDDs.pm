@@ -1,5 +1,4 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: PDDs.pm 37256 2009-03-10 03:10:29Z Util $
 
 =head1 NAME
 

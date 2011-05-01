@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: cgi_query_hash.t 44325 2010-02-22 22:28:47Z mikehh $
 
 =head1 NAME
 

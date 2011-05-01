@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: 03-dump_vtable.t 44538 2010-02-28 02:46:06Z coke $
 # 03-dump_vtable.t
 
 use strict;

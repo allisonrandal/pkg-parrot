@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 #
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: parrotbug 46793 2010-05-19 15:08:34Z coke $
 #
 
 eval 'exec perl -w -S $0 ${1+"$@"}'
@@ -48,7 +47,7 @@ in parrot, and e-mail it to the parrot developers.
 
 It is *NOT* intended for:
   - sending test messages,
-  - or reporting bugs in languages targetting parrot,
+  - or reporting bugs in languages targeting parrot,
   - or reporting bugs in some library bindings for parrot,
   - or simply verifying that parrot works.
 
@@ -198,7 +197,7 @@ sub init {
         $report{severity} = $opts{severity} || "";
     };
 
-    # Test message, shortcuting recipent.
+    # Test message, shortcutting recipient.
     $report{to} = $opts{to} if $opts{to};
 
     ## 
@@ -629,7 +628,7 @@ __END__
 
 =head1 NAME
 
-parrotbug - Parrot Bug Reporter
+Parrot Bug Reporter
 
 =head1 SYNOPSIS
 

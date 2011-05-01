@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: resizableintegerarray.t 47534 2010-06-10 13:34:22Z NotFound $
 
 =head1 NAME
 

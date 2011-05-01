@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_indent.t 44321 2010-02-22 22:08:59Z mikehh $
 
 use strict;
 use warnings;

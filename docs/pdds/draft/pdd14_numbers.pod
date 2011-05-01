@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd14_numbers.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 [DRAFT] PDD 14: Numbers
 
@@ -7,9 +6,9 @@
 
 This PDD describes Parrot's numeric data types.
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Description
 

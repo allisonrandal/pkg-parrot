@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: shapes.pir 40571 2009-08-15 19:06:51Z dukeleto $
 
 =head1 TITLE
 
@@ -68,7 +67,7 @@ ASCII key.
     .param int    display_mode
     .param string window_title
 
-    # Load OpenGL libary and a helper library for calling glutInit
+    # Load OpenGL library and a helper library for calling glutInit
     load_bytecode 'OpenGL.pbc'
     load_bytecode 'NCI/Utils.pbc'
 

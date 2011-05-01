@@ -1,16 +1,11 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 061-revision_from_cache.t 48002 2010-07-05 01:53:17Z jkeenan $
 # 061-revision_from_cache.t
 
 use strict;
 use warnings;
 
 use Test::More;
-#plan( skip_all =>
-#    "\nRelevant only when working in checkout from repository and during configuration" )
-#    unless (-e 'DEVELOPING' and ! -e 'Makefile');
-#plan( tests => 25 );
 if (-e 'DEVELOPING' and ! -e 'Makefile') {
     plan tests => 25;
 }
@@ -25,6 +20,7 @@ use File::Path ();
 use File::Temp qw| tempdir |;
 use lib qw( lib );
 use Parrot::Revision ();
+use Parrot::Configure::Utils qw( :cache );
 
 my $cwd = cwd();
 {   # revision undef
@@ -115,10 +111,7 @@ sub setup_cache {
     ok( (copy qq{$cwd/lib/Parrot/Revision.pm},
             qq{$libdir/Parrot}), "Able to copy Parrot::Revision");
     my $cache = q{.parrot_current_rev};
-    open my $FH, ">", $cache
-        or croak "Unable to open $cache for writing";
-    print $FH qq{$rev\n};
-    close $FH or croak "Unable to close $cache after writing";
+    print_to_cache($cache, $rev);
     return ($cache, $libdir);
 }
 

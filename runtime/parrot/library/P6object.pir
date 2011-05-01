@@ -1,4 +1,3 @@
-# $Id: P6object.pir 48908 2010-09-10 15:27:53Z pmichaud $
 
 =head1 NAME
 

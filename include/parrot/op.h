@@ -1,7 +1,5 @@
 /* op.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
- *  SVN Info
- *     $Id: op.h 48923 2010-09-10 23:34:18Z plobsing $
  *  Overview:
  *     Header file for op functions.
  *  Data Structure and Algorithms:
@@ -90,5 +88,5 @@ typedef struct op_info_t {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

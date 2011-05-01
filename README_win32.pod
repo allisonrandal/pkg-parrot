@@ -1,4 +1,3 @@
-# $Id: README_win32.pod 45826 2010-04-20 18:39:13Z darbelo $
 
 This file is best viewed with "perldoc README_win32".
 

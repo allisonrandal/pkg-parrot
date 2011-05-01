@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: sumcol.pir 47421 2010-06-06 04:41:48Z plobsing $
 #
 # ./parrot -R jit sumcol.pir < sum8M
 # by Joshua Isom
@@ -12,8 +11,7 @@
 	.local int count, tmp, linelen
 	count  = 0
 	interp = getinterp
-        .include 'stdio.pasm'
-	stdin  = interp.'stdhandle'(.PIO_STDIN_FILENO)
+	stdin  = interp.'stdin_handle'()
 beginwhile:
 	line    = stdin.'readline'()
 	linelen = length line

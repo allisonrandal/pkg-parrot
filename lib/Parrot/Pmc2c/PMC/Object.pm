@@ -1,7 +1,6 @@
 package Parrot::Pmc2c::PMC::Object;
 
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: Object.pm 48232 2010-07-30 21:44:11Z NotFound $
 
 use base 'Parrot::Pmc2c::PMC';
 use strict;

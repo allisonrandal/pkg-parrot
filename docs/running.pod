@@ -1,13 +1,12 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: running.pod 47265 2010-06-01 20:49:16Z moritz $
 
 =head1 NAME
 
-Parrot - Running
+docs/running.pod - Running
 
 =head1 VERSION
 
-$Revision: 47265 $
+$Revision$
 
 =head1 OVERVIEW
 

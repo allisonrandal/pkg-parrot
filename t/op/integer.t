@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: integer.t 48986 2010-09-14 04:30:56Z plobsing $
 
 =head1 NAME
 

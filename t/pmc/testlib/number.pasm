@@ -1,5 +1,4 @@
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: number.pasm 48562 2010-08-18 13:09:42Z NotFound $
 
 # This file is used from Packfile PMCs tests
 

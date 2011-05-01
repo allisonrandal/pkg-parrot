@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: mk_inno_language.pl 42772 2009-11-21 20:21:37Z jkeenan $
 
 =head1 TITLE
 

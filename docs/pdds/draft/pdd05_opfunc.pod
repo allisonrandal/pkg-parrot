@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd05_opfunc.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 [DRAFT] PDD 5: Opcodes
 
@@ -13,9 +12,9 @@ Parrot. }}
 
 {{ NOTE: standardize on underscores or no underscores? }}
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Description
 

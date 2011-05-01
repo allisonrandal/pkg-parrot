@@ -1,6 +1,5 @@
 #!@perl@
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: mk_language_shell.in 48659 2010-08-25 23:16:08Z gerd $
 
 =head1 NAME
 
@@ -90,7 +89,7 @@ my $uclang = uc $lang;
 
 ## the name and revision of the script, for use in the generated README
 my $script = $0;
-my $rev = '$Revision: 48659 $';
+my $rev = '$Revision$';
 $rev =~ s/^\D*(\d+)\D*$/$1/;
 
 my $no_doc = $with_doc ? '' : '#';
@@ -447,7 +446,7 @@ This is the grammar for @lang@ in Perl 6 rules.
 grammar @lang@::Grammar is HLL::Grammar;
 
 token TOP {
-    <statementlist>
+    <statement_list>
     [ $ || <.panic: "Syntax error"> ]
 }
 
@@ -461,7 +460,7 @@ token ws {
 
 ## Statements
 
-rule statementlist { [ <statement> | <?> ] ** ';' }
+rule statement_list { [ <statement> | <?> ] ** ';' }
 
 rule statement {
     | <statement_control>
@@ -499,10 +498,10 @@ __src/@lang@/Actions.pm__
 class @lang@::Actions is HLL::Actions;
 
 method TOP($/) {
-    make PAST::Block.new( $<statementlist>.ast , :hll<@lclang@>, :node($/) );
+    make PAST::Block.new( $<statement_list>.ast , :hll<@lclang@>, :node($/) );
 }
 
-method statementlist($/) {
+method statement_list($/) {
     my $past := PAST::Stmts.new( :node($/) );
     for $<statement> { $past.push( $_.ast ); }
     make $past;

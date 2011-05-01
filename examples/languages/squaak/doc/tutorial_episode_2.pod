@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: tutorial_episode_2.pod 48510 2010-08-15 10:40:47Z barney $
 
 =head1 Episode 2: Poking in Compiler Guts
 

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: isa.t 48683 2010-08-27 04:04:00Z cotto $
 
 =head1 NAME
 

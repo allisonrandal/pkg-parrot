@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: tutorial_episode_1.pod 48601 2010-08-23 00:26:58Z jkeenan $
 
 =head1 PCT Tutorial Episode 1: Introduction
 

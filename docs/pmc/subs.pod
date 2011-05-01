@@ -1,10 +1,10 @@
 =head1 NAME
 
-Subs - Parrot Subroutines
+Parrot Subroutines
 
 =head1 VERSION
 
-$Revision: 48948 $
+$Revision$
 
 =head1 ABSTRACT
 

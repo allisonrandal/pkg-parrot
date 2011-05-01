@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: inter_misc.c 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -21,11 +20,11 @@ NCI function setup, compiler registration, C<interpinfo>, and C<sysinfo> opcodes
 
 #include "parrot/parrot.h"
 #include "inter_misc.str"
-#include "../compilers/imcc/imc.h"
 #include "parrot/runcore_api.h"
 #include "pmc/pmc_callcontext.h"
-
+#include "pmc/pmc_parrotinterpreter.h"
 #include "parrot/has_header.h"
+#include "imcc/embed.h"
 
 /* HEADERIZER HFILE: include/parrot/interpreter.h */
 
@@ -131,7 +130,7 @@ Parrot_compreg(PARROT_INTERP, ARGIN(STRING *type), ARGIN(Parrot_compiler_func_t 
     ASSERT_ARGS(Parrot_compreg)
     PMC    * const iglobals = interp->iglobals;
     PMC    * const nci      = Parrot_pmc_new(interp, enum_class_NCI);
-    STRING * const sc       = CONST_STRING(interp, "PJt");
+    STRING * const sc       = CONST_STRING(interp, "PJS");
     PMC    * hash           = VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
                               IGLOBALS_COMPREG_HASH);
 
@@ -148,10 +147,69 @@ Parrot_compreg(PARROT_INTERP, ARGIN(STRING *type), ARGIN(Parrot_compiler_func_t 
     VTABLE_set_pointer_keyed_str(interp, nci, sc, (void *)func);
 }
 
+
+
 /*
 
-=item C<void * Parrot_compile_file(PARROT_INTERP, const char *fullname, STRING
-**error)>
+=item C<PMC * Parrot_get_compiler(PARROT_INTERP, STRING *type)>
+
+Get a compiler PMC.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC *
+Parrot_get_compiler(PARROT_INTERP, ARGIN(STRING *type))
+{
+    ASSERT_ARGS(Parrot_get_compiler)
+    PMC * const  hash = VTABLE_get_pmc_keyed_int(interp, interp->iglobals, IGLOBALS_COMPREG_HASH);
+
+    if (PMC_IS_NULL(hash)) {
+        /* No compiler has been registered yet */
+        return PMCNULL;
+    }
+
+    /* Fetch the compiler */
+    return VTABLE_get_pmc_keyed_str(interp, hash, type);
+}
+
+/*
+
+=item C<void Parrot_set_compiler(PARROT_INTERP, STRING *type, PMC *compiler)>
+
+Register a parser/compiler PMC.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+void
+Parrot_set_compiler(PARROT_INTERP, ARGIN(STRING *type), ARGIN(PMC *compiler))
+{
+    ASSERT_ARGS(Parrot_set_compiler)
+    PMC    * const iglobals = interp->iglobals;
+    PMC    * hash           = VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
+                              IGLOBALS_COMPREG_HASH);
+
+    if (PMC_IS_NULL(hash)) {
+        hash = Parrot_pmc_new_noinit(interp, enum_class_Hash);
+        VTABLE_init(interp, hash);
+        VTABLE_set_pmc_keyed_int(interp, iglobals,
+                (INTVAL)IGLOBALS_COMPREG_HASH, hash);
+    }
+
+    VTABLE_set_pmc_keyed_str(interp, hash, type, compiler);
+}
+
+/*
+
+=item C<PMC * Parrot_compile_file(PARROT_INTERP, STRING *fullname, INTVAL
+is_pasm)>
 
 Compile code file.
 
@@ -161,11 +219,34 @@ Compile code file.
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
-void *
-Parrot_compile_file(PARROT_INTERP, ARGIN(const char *fullname), ARGOUT(STRING **error))
+PMC *
+Parrot_compile_file(PARROT_INTERP, ARGIN(STRING *fullname), INTVAL is_pasm)
 {
     ASSERT_ARGS(Parrot_compile_file)
-    return imcc_compile_file(interp, fullname, error);
+    PMC *result               = NULL;
+    UINTVAL regs_used[4]      = {3, 3, 3, 3};
+    PMC * const newcontext    = Parrot_push_context(interp, regs_used);
+    STRING * const compiler_s = is_pasm ? CONST_STRING(interp, "PASM") : CONST_STRING(interp, "PIR");
+    PMC * compiler   = Parrot_get_compiler(interp, compiler_s);
+    imc_info_t *imcc = (imc_info_t *) VTABLE_get_pointer(interp, compiler);
+
+    Parrot_block_GC_mark(interp);
+    Parrot_pcc_set_HLL(interp, newcontext, 0);
+    Parrot_pcc_set_sub(interp, newcontext, 0);
+
+
+    imcc_reset(imcc);
+    result = imcc_compile_file(imcc, fullname, is_pasm);
+    if (PMC_IS_NULL(result)) {
+        STRING * const msg = imcc_last_error_message(imcc);
+        INTVAL code = imcc_last_error_code(imcc);
+        Parrot_ex_throw_from_c_args(interp, NULL, code, "%Ss", msg);
+    }
+
+    Parrot_pop_context(interp);
+    Parrot_unblock_GC_mark(interp);
+
+    return result;
 }
 
 /*
@@ -189,6 +270,9 @@ interpinfo(PARROT_INTERP, INTVAL what)
     switch (what) {
       case TOTAL_MEM_ALLOC:
         ret = Parrot_gc_total_memory_allocated(interp);
+        break;
+      case TOTAL_MEM_USED:
+        ret = Parrot_gc_total_memory_used(interp);
         break;
       case GC_MARK_RUNS:
         ret = Parrot_gc_count_mark_runs(interp);
@@ -255,6 +339,9 @@ interpinfo_p(PARROT_INTERP, INTVAL what)
 
     PMC *result;
     switch (what) {
+      case CURRENT_CTX:
+        result = CURRENT_CONTEXT(interp);
+        break;
       case CURRENT_SUB:
         result = Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
         break;
@@ -283,7 +370,7 @@ interpinfo_p(PARROT_INTERP, INTVAL what)
 Takes an interpreter name and an information type as arguments.
 Returns corresponding information strings about the interpreter:
 the full pathname, executable name, or the file stem,
-(or throws an error exception, if the type is not recognised).
+(or throws an error exception, if the type is not recognized).
 Valid types are EXECUTABLE_FULLNAME, EXECUTABLE_BASENAME,
 and RUNTIME_PREFIX.
 
@@ -315,29 +402,27 @@ interpinfo_s(PARROT_INTERP, INTVAL what)
 
             else {
                 /* Need to strip back to what follows the final / or \. */
-                STRING * const fullname   = VTABLE_get_string(interp, exe_name);
-                char   * const fullname_c = Parrot_str_to_cstring(interp, fullname);
-                int            pos        = strlen(fullname_c) - 1;
-                STRING *basename;
+                STRING * const fullname = VTABLE_get_string(interp, exe_name);
+                const int      len      = STRING_length(fullname);
+                int            pos;
 
-                while (pos              >  0
-                &&     fullname_c[pos] != '/'
-                &&     fullname_c[pos] != '\\')
-                    --pos;
+                for (pos = len - 1; pos > 0; --pos) {
+                    const INTVAL c = STRING_ord(interp, fullname, pos);
 
-                if (pos > 0)
-                    ++pos;
+                    if (c == '/' || c == '\\') {
+                        ++pos;
+                        break;
+                    }
+                }
 
-                basename = Parrot_str_new(interp, fullname_c + pos, 0);
-                Parrot_str_free_cstring(fullname_c);
-
-                return basename;
+                return Parrot_str_substr(interp, fullname, pos, len - pos);
             }
         }
         case RUNTIME_PREFIX:
             return Parrot_get_runtime_path(interp);
         case GC_SYS_NAME: {
             STRING * name = Parrot_gc_sys_name(interp);
+            Parrot_warn_experimental(interp, "GC_SYS_NAME option is experimental");
             return name;
         }
       default:
@@ -347,8 +432,32 @@ interpinfo_s(PARROT_INTERP, INTVAL what)
 }
 
 /*
+
+=item C<Interp * Parrot_int_get_interp_from_pmc(PMC * interp_pmc)>
+
+C<interp_pmc> is a ParrotInterpreter PMC. Extract the raw C<Interp*> from it
+without needing an existing C<Interp *> reference.
+
+Do not use with any other type of PMC.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+Interp *
+Parrot_int_get_interp_from_pmc(ARGIN(PMC * interp_pmc))
+{
+    ASSERT_ARGS(Parrot_int_get_interp_from_pmc)
+    PARROT_ASSERT(interp_pmc->vtable->base_type == enum_class_ParrotInterpreter);
+    return ((Parrot_ParrotInterpreter_attributes*)interp_pmc->data)->interp;
+}
+
+
+/*
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

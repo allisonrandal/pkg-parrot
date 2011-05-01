@@ -1,4 +1,3 @@
-# $Id: Obj.pir 46571 2010-05-13 05:28:38Z cotto $
 
 =head1 NAME
 

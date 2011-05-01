@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: hello.pasm 38119 2009-04-15 16:30:07Z fperrad $
+.pcc_sub :main main:
 
     # Get @ARGV as a ResizableStringArray
     get_params "0", P0

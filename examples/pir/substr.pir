@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: substr.pir 46105 2010-04-28 05:59:10Z jimmy $
 
 =head1 NAME
 

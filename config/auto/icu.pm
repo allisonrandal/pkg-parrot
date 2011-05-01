@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: icu.pm 48227 2010-07-30 07:07:00Z NotFound $
 
 =head1 NAME
 

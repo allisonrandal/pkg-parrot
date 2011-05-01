@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 003-steplist.t 36833 2009-02-17 20:09:26Z allison $
 # 003-steplist.t
 
 use strict;

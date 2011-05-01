@@ -1,5 +1,4 @@
-# Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Dumper.pm 45138 2010-03-23 23:36:45Z plobsing $
+# Copyright (C) 2004-2011, Parrot Foundation.
 package Parrot::Pmc2c::Dumper;
 
 use strict;
@@ -144,7 +143,6 @@ sub gen_parent_lookup_info {
 }
 
 =head2 Subroutines
-
 
 =head3 C<gen_parent_reverse_lookup_info()>
 

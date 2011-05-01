@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: Test.pm 49539 2010-10-15 06:29:59Z jkeenan $
 package Parrot::Configure::Options::Test;
 use strict;
 use warnings;
@@ -13,7 +12,6 @@ sub new {
     my ( $class, $argsref ) = @_;
     my $self = {};
     bless $self, $class;
-    my ( $run_configure_tests, $run_build_tests );
     if ( defined $argsref->{test} ) {
         if ( $argsref->{test} eq '1' ) {
             $self->set_run('run_configure_tests', 1);

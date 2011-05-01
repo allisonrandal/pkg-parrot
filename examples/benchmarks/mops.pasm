@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: mops.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 

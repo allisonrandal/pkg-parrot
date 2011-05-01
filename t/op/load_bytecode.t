@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: load_bytecode.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

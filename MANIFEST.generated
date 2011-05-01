@@ -1,12 +1,11 @@
-# $Id: MANIFEST.generated 49584 2010-10-19 22:15:03Z cotto $
 # See tools/dev/install_files.pl for documentation on the
 # format of this file.
 # Please re-sort this file after *EVERY* modification
-blib/lib/libparrot.2.9.1.dylib                   [main]lib
+blib/lib/libparrot.3.3.0.dylib                   [main]lib
 blib/lib/libparrot.a                             [main]lib
 blib/lib/libparrot.dylib                         [main]lib
 blib/lib/libparrot.so                            [main]lib
-blib/lib/libparrot.so.2.9.1                      [main]lib
+blib/lib/libparrot.so.3.3.0                      [main]lib
 compilers/data_json/data_json.pbc                [data_json]
 config/gen/call_list/opengl.in                   []
 docs/ops/bit.pod                                 [doc]
@@ -34,8 +33,6 @@ include/parrot/extend_vtable.h                   [main]include
 include/parrot/feature.h                         [main]include
 include/parrot/has_header.h                      [main]include
 include/parrot/pbcversion.h                      [devel]include
-include/parrot/platform.h                        [main]include
-include/parrot/platform_limits.h                 [devel]include
 include/parrot/vtable.h                          [main]include
 include/pmc/pmc_addrregistry.h                   [devel]include
 include/pmc/pmc_arrayiterator.h                  [devel]include
@@ -73,12 +70,14 @@ include/pmc/pmc_imageiofreeze.h                  [devel]include
 include/pmc/pmc_imageiosize.h                    [devel]include
 include/pmc/pmc_imageiostrings.h                 [devel]include
 include/pmc/pmc_imageiothaw.h                    [devel]include
+include/pmc/pmc_imccompiler.h                    [devel]include
 include/pmc/pmc_integer.h                        [devel]include
 include/pmc/pmc_iterator.h                       [devel]include
 include/pmc/pmc_key.h                            [devel]include
 include/pmc/pmc_lexinfo.h                        [devel]include
 include/pmc/pmc_lexpad.h                         [devel]include
 include/pmc/pmc_managedstruct.h                  [devel]include
+include/pmc/pmc_mappedbytearray.h                [devel]include
 include/pmc/pmc_multisub.h                       [devel]include
 include/pmc/pmc_namespace.h                      [devel]include
 include/pmc/pmc_nativepccmethod.h                [devel]include
@@ -92,11 +91,13 @@ include/pmc/pmc_orderedhashiterator.h            [devel]include
 include/pmc/pmc_packfile.h                       [devel]include
 include/pmc/pmc_packfileannotation.h             [devel]include
 include/pmc/pmc_packfileannotations.h            [devel]include
+include/pmc/pmc_packfilebytecodesegment.h        [devel]include
 include/pmc/pmc_packfileconstanttable.h          [devel]include
 include/pmc/pmc_packfiledebug.h                  [devel]include
 include/pmc/pmc_packfiledirectory.h              [devel]include
 include/pmc/pmc_packfilefixupentry.h             [devel]include
 include/pmc/pmc_packfilefixuptable.h             [devel]include
+include/pmc/pmc_packfileopmap.h                  [devel]include
 include/pmc/pmc_packfilerawsegment.h             [devel]include
 include/pmc/pmc_packfilesegment.h                [devel]include
 include/pmc/pmc_parrotinterpreter.h              [devel]include
@@ -104,6 +105,9 @@ include/pmc/pmc_parrotlibrary.h                  [devel]include
 include/pmc/pmc_parrotthread.h                   [devel]include
 include/pmc/pmc_pmcproxy.h                       [devel]include
 include/pmc/pmc_pointer.h                        [devel]include
+include/pmc/pmc_ptr.h                            [devel]include
+include/pmc/pmc_ptrbuf.h                         [devel]include
+include/pmc/pmc_ptrobj.h                         [devel]include
 include/pmc/pmc_resizablebooleanarray.h          [devel]include
 include/pmc/pmc_resizablefloatarray.h            [devel]include
 include/pmc/pmc_resizableintegerarray.h          [devel]include
@@ -113,12 +117,14 @@ include/pmc/pmc_role.h                           [devel]include
 include/pmc/pmc_scalar.h                         [devel]include
 include/pmc/pmc_scheduler.h                      [devel]include
 include/pmc/pmc_schedulermessage.h               [devel]include
+include/pmc/pmc_select.h                         [devel]include
 include/pmc/pmc_sockaddr.h                       [devel]include
 include/pmc/pmc_socket.h                         [devel]include
 include/pmc/pmc_string.h                         [devel]include
 include/pmc/pmc_stringbuilder.h                  [devel]include
 include/pmc/pmc_stringhandle.h                   [devel]include
 include/pmc/pmc_stringiterator.h                 [devel]include
+include/pmc/pmc_structview.h                     [devel]include
 include/pmc/pmc_sub.h                            [devel]include
 include/pmc/pmc_task.h                           [devel]include
 include/pmc/pmc_threadinterpreter.h              [devel]include
@@ -152,7 +158,6 @@ lib/Parrot/PMC.pm                                [devel]lib
 lib/Parrot/Pmc2c/PCCMETHOD_BITS.pm               [devel]lib
 libparrot.dll                                    [main]bin
 libparrot.lib                                    [main]bin
-parrot.pc                                        [main]pkgconfig
 runtime/parrot/dynext/bit_ops.bundle             [library]
 runtime/parrot/dynext/bit_ops.dll                [library]
 runtime/parrot/dynext/bit_ops.dylib              [library]
@@ -241,6 +246,7 @@ runtime/parrot/include/timer.pasm                [main]
 runtime/parrot/include/tm.pasm                   [main]
 runtime/parrot/include/vtable_methods.pasm       [main]
 runtime/parrot/include/warnings.pasm             [main]
+runtime/parrot/languages/JSON/JSON.pir           [data_json]
 runtime/parrot/library/Archive/Tar.pbc           [main]
 runtime/parrot/library/Archive/Zip.pbc           [main]
 runtime/parrot/library/CGI/QueryHash.pbc         [main]
@@ -252,6 +258,7 @@ runtime/parrot/library/Data/Dumper/Base.pbc      [main]
 runtime/parrot/library/Data/Dumper/Default.pbc   [main]
 runtime/parrot/library/Data/Replace.pbc          [main]
 runtime/parrot/library/Digest/MD5.pbc            [main]
+runtime/parrot/library/Digest/sha256.pbc         [main]
 runtime/parrot/library/Getopt/Obj.pbc            [main]
 runtime/parrot/library/HLL.pbc                   [main]
 runtime/parrot/library/HTTP/Daemon.pbc           [main]
@@ -312,6 +319,7 @@ runtime/parrot/library/URI.pbc                   [main]
 runtime/parrot/library/YAML/Dumper.pbc           [main]
 runtime/parrot/library/YAML/Dumper/Base.pmc      [main]
 runtime/parrot/library/YAML/Dumper/Default.pmc   [main]
+runtime/parrot/library/YAML/Tiny.pbc             [main]
 runtime/parrot/library/config.pbc                [main]
 runtime/parrot/library/config.pir                [main]
 runtime/parrot/library/distutils.pbc             [main]
@@ -369,12 +377,14 @@ src/pmc/imageiofreeze.dump                       [devel]src
 src/pmc/imageiosize.dump                         [devel]src
 src/pmc/imageiostrings.dump                      [devel]src
 src/pmc/imageiothaw.dump                         [devel]src
+src/pmc/imccompiler.dump                         [devel]src
 src/pmc/integer.dump                             [devel]src
 src/pmc/iterator.dump                            [devel]src
 src/pmc/key.dump                                 [devel]src
 src/pmc/lexinfo.dump                             [devel]src
 src/pmc/lexpad.dump                              [devel]src
 src/pmc/managedstruct.dump                       [devel]src
+src/pmc/mappedbytearray.dump                     [devel]src
 src/pmc/multisub.dump                            [devel]src
 src/pmc/namespace.dump                           [devel]src
 src/pmc/nativepccmethod.dump                     [devel]src
@@ -388,11 +398,13 @@ src/pmc/orderedhashiterator.dump                 [devel]src
 src/pmc/packfile.dump                            [devel]src
 src/pmc/packfileannotation.dump                  [devel]src
 src/pmc/packfileannotations.dump                 [devel]src
+src/pmc/packfilebytecodesegment.dump             [devel]src
 src/pmc/packfileconstanttable.dump               [devel]src
 src/pmc/packfiledebug.dump                       [devel]src
 src/pmc/packfiledirectory.dump                   [devel]src
 src/pmc/packfilefixupentry.dump                  [devel]src
 src/pmc/packfilefixuptable.dump                  [devel]src
+src/pmc/packfileopmap.dump                       [devel]src
 src/pmc/packfilerawsegment.dump                  [devel]src
 src/pmc/packfilesegment.dump                     [devel]src
 src/pmc/parrotinterpreter.dump                   [devel]src
@@ -400,6 +412,9 @@ src/pmc/parrotlibrary.dump                       [devel]src
 src/pmc/parrotthread.dump                        [devel]src
 src/pmc/pmcproxy.dump                            [devel]src
 src/pmc/pointer.dump                             [devel]src
+src/pmc/ptr.dump                                 [devel]src
+src/pmc/ptrbuf.dump                              [devel]src
+src/pmc/ptrobj.dump                              [devel]src
 src/pmc/resizablebooleanarray.dump               [devel]src
 src/pmc/resizablefloatarray.dump                 [devel]src
 src/pmc/resizableintegerarray.dump               [devel]src
@@ -409,12 +424,14 @@ src/pmc/role.dump                                [devel]src
 src/pmc/scalar.dump                              [devel]src
 src/pmc/scheduler.dump                           [devel]src
 src/pmc/schedulermessage.dump                    [devel]src
+src/pmc/select.dump                              [devel]src
 src/pmc/sockaddr.dump                            [devel]src
 src/pmc/socket.dump                              [devel]src
 src/pmc/string.dump                              [devel]src
 src/pmc/stringbuilder.dump                       [devel]src
 src/pmc/stringhandle.dump                        [devel]src
 src/pmc/stringiterator.dump                      [devel]src
+src/pmc/structview.dump                          [devel]src
 src/pmc/sub.dump                                 [devel]src
 src/pmc/task.dump                                [devel]src
 src/pmc/threadinterpreter.dump                   [devel]src
@@ -424,4 +441,5 @@ src/pmc/unmanagedstruct.dump                     [devel]src
 src/string_private_cstring.h                     []
 tools/build/dynpmc.pl                            []
 tools/dev/mk_language_shell.pl                   [devel]
+tools/dev/ncidef2pir.pl                          [devel]
 vtable.dump                                      [devel]src

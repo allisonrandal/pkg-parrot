@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: scope.t 46007 2010-04-25 11:44:15Z fperrad $
 
 .sub main :main
     .include 'test_more.pir'

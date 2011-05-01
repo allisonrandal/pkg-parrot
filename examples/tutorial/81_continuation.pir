@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 81_continuation.pir 39674 2009-06-20 14:09:03Z cotto $
 
 =head1 Continuations
 

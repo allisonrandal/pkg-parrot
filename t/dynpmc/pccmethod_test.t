@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: pccmethod_test.t 43764 2010-02-07 22:10:56Z plobsing $
 
 use strict;
 use warnings;

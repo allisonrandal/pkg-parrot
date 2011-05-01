@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: packfiledirectory.pmc 49313 2010-09-25 01:27:42Z plobsing $
 
 =head1 NAME
 
@@ -107,6 +106,8 @@ Initialize PackfileDirectory from PackFile_Directory.
                 pmc_type = enum_class_PackfileDebug;
                 break;
               case PF_BYTEC_SEG:
+                pmc_type = enum_class_PackfileBytecodeSegment;
+                break;
               case PF_UNKNOWN_SEG:
               default:
                 pmc_type = enum_class_PackfileRawSegment;
@@ -279,5 +280,5 @@ Delete the specified segment from the directory.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: test_strings.pir 49513 2010-10-11 18:40:23Z nwellnhof $
 
 .sub 'get_hellos'
     $P0 = new ['ResizableStringArray']

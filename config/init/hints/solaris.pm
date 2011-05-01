@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: solaris.pm 42595 2009-11-20 02:49:02Z jkeenan $
 
 package init::hints::solaris;
 

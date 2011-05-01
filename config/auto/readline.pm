@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: readline.pm 48925 2010-09-11 01:21:55Z jkeenan $
 
 =head1 NAME
 

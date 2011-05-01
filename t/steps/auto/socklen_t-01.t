@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: socklen_t-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # auto/socklen_t-01.t
 
 use strict;
@@ -38,7 +37,7 @@ $conf->options->set( %{$args} );
 my $step = test_step_constructor_and_description($conf);
 my $ret = $step->runstep($conf);
 ok( $ret, "runstep() returned true value" );
-ok(defined($step->result()), "A result has been defiined");
+ok(defined($step->result()), "A result has been defined");
 
 $conf->replenish($serialized);
 

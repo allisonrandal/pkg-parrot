@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: stress2.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 NAME
 
@@ -14,6 +13,8 @@ examples/benchmarks/stress2.pasm - Brief
 Creates 200 arrays of 10000 elements each.
 
 =cut
+
+.pcc_sub :main main:
 
     set I3, 20
     new P10, 'ResizableIntegerArray'

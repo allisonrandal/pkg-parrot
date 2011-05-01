@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: parrot.pir 39532 2009-06-13 06:03:55Z tene $
 
 .HLL 'parrot'
 .namespace ['Parrot';'Compiler']

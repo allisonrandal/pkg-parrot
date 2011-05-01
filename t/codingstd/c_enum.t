@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: c_enum.t 49377 2010-09-29 04:45:39Z mikehh $
 
 use strict;
 use warnings;

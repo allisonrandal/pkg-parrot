@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id: primes.c 42918 2009-12-06 15:03:28Z fperrad $
 
 =head1 NAME
 
@@ -93,5 +92,5 @@ F<examples/benchmarks/primes2.py>.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

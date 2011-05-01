@@ -1,7 +1,5 @@
 /* thr_pthread.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
- *  SVN Info
- *     $Id: thr_pthread.h 39976 2009-07-10 08:20:13Z fperrad $
  *  Overview:
  *     POSIS pthread interface
  *  Data Structure and Algorithms:
@@ -55,6 +53,13 @@
 #  define CLEANUP_PUSH(f, a) pthread_cleanup_push((f), (a))
 #  define CLEANUP_POP(a)     pthread_cleanup_pop(a)
 
+#ifdef PARROT_HAS_HEADER_UNISTD
+#  include <unistd.h>
+#  ifdef _POSIX_PRIORITY_SCHEDULING
+#    define YIELD sched_yield()
+#  endif
+#endif /* PARROT_HAS_HEADER_UNISTD */
+
 typedef pthread_mutex_t Parrot_mutex;
 typedef pthread_cond_t Parrot_cond;
 typedef pthread_t Parrot_thread;
@@ -67,5 +72,5 @@ typedef void (*Cleanup_Handler)(void *);
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -2,7 +2,6 @@
 
 # Copyright (C) 2004-2007, Parrot Foundation.
 
-# $Id: as2c.pl 48605 2010-08-23 00:52:05Z jkeenan $
 
 =head1 NAME
 

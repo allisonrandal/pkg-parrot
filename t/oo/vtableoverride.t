@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: vtableoverride.t 47647 2010-06-15 21:36:22Z NotFound $
 
 =head1 NAME
 

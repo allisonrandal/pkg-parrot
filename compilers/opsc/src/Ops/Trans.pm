@@ -1,6 +1,5 @@
 #! nqp
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Trans.pm 46923 2010-05-23 22:04:01Z cotto $
 
 class Ops::Trans is Hash;
 

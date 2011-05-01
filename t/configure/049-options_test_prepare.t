@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 049-options_test_prepare.t 49492 2010-10-10 14:40:36Z jkeenan $
 # 049-options_test_prepare.t
 
 use strict;

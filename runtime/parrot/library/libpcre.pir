@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: libpcre.pir 46459 2010-05-10 05:43:57Z plobsing $
 
 =head1 TITLE
 

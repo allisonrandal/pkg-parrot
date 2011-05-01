@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: c_functions.pod 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -15,7 +14,7 @@ macros and our existing configuration system, we can instruct the
 compiler to search for and prevent certain types of errors.
 
 The net result is that errors (or potential errors) can be detected early
-at compile-rime instead of later an runtime or during "make test".
+at compile-time instead of later an runtime or during "make test".
 
 Headerizer creates function declarations based on function
 definitions. It scans the source files passed to it and extracts the
@@ -168,7 +167,7 @@ C<strchr()>.
 
 =head2 PARROT_DOES_NOT_RETURN
 
-For functions that can't return, like C<Parrot_exit()> or functions that
+For functions that can't return, like C<Parrot_x_exit()> or functions that
 cause exceptions to be thrown. This helps the compiler's flow analysis
 which can help detect unreachable code, or opportunities for optimization.
 
@@ -213,7 +212,7 @@ without wanting to know its value.
     PARROT_EXPORT
     PARROT_PURE_FUNCTION
     INTVAL
-    parrot_hash_size(SHIM_INTERP, NOTNULL(const Hash *hash))
+    Parrot_hash_size(SHIM_INTERP, NOTNULL(const Hash *hash))
     {
         return hash->entries;
     }

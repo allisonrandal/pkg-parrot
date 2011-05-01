@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2010, Parrot Foundation.
-# $Id: knucleotide.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 .loadlib 'io_ops'
 

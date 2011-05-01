@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: makefiles-01.t 44649 2010-03-05 16:20:00Z tene $
 # gen/makefiles-01.t
 
 use strict;

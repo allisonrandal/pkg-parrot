@@ -1,4 +1,3 @@
-# $Id: blue_rect.pl 36833 2009-02-17 20:09:26Z allison $
 
 =head1 TITLE
 

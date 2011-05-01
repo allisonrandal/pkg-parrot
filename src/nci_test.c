@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: nci_test.c 47852 2010-06-26 04:05:31Z petdance $
 
 =head1 NAME
 
@@ -136,14 +135,23 @@ PARROT_DYNEXT_EXPORT void nci_cb_D4(cb_D4_func, void*);
 
 /* Variable definitions */
 
-PARROT_DYNEXT_EXPORT int    int_cb_D4           = -55555;
-PARROT_DYNEXT_EXPORT int    nci_dlvar_char      = 22;
-PARROT_DYNEXT_EXPORT int    nci_dlvar_short     = 333;
-PARROT_DYNEXT_EXPORT int    nci_dlvar_int       = -4444;
-PARROT_DYNEXT_EXPORT long   nci_dlvar_long      = -7777777;
-PARROT_DYNEXT_EXPORT float  nci_dlvar_float     = -333.0;
-PARROT_DYNEXT_EXPORT double nci_dlvar_double    = -55555.55555;
-PARROT_DYNEXT_EXPORT char   nci_dlvar_cstring[] = "This is a C-string.\n";
+PARROT_DYNEXT_EXPORT int    int_cb_D4;
+PARROT_DYNEXT_EXPORT int    nci_dlvar_char;
+PARROT_DYNEXT_EXPORT int    nci_dlvar_short;
+PARROT_DYNEXT_EXPORT int    nci_dlvar_int;
+PARROT_DYNEXT_EXPORT long   nci_dlvar_long;
+PARROT_DYNEXT_EXPORT float  nci_dlvar_float;
+PARROT_DYNEXT_EXPORT double nci_dlvar_double;
+PARROT_DYNEXT_EXPORT char   nci_dlvar_cstring[];
+
+int    int_cb_D4           = -55555;
+int    nci_dlvar_char      = 22;
+int    nci_dlvar_short     = 333;
+int    nci_dlvar_int       = -4444;
+long   nci_dlvar_long      = -7777777;
+float  nci_dlvar_float     = -333.0;
+double nci_dlvar_double    = -55555.55555;
+char   nci_dlvar_cstring[] = "This is a C-string.\n";
 
 
 /* Function definitions */
@@ -937,8 +945,8 @@ PARROT_DYNEXT_EXPORT
 void
 nci_cb_D4(cb_D4_func times_ten, void* user_data)
 {
-    int cnt;
-    for (cnt = 0; cnt < 9; ++cnt)
+    int count;
+    for (count = 0; count < 9; ++count)
     {
         (times_ten)(user_data, &int_cb_D4);
         ++int_cb_D4;
@@ -1289,5 +1297,5 @@ main(void)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2001-2010, Parrot Foundation.
-$Id: coroutine.pmc 48435 2010-08-12 19:37:47Z chromatic $
+Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -50,6 +49,8 @@ static void print_sub_name(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 
 =item C<static void print_sub_name(PARROT_INTERP, PMC *sub_pmc)>
 
+static function to print coroutine information (for tracing/debugging)
+
 =cut
 
 */
@@ -68,11 +69,11 @@ print_sub_name(PARROT_INTERP, ARGIN(PMC *sub_pmc))
     Parrot_io_eprintf(tracer, "# %s coroutine '%Ss'",
         !(PObj_get_FLAGS(sub_pmc) & SUB_FLAG_CORO_FF) ?
         "Calling" : "yielding from",
-        Parrot_full_sub_name(interp, sub_pmc));
+        Parrot_sub_full_sub_name(interp, sub_pmc));
 
     if (!PMC_IS_NULL(ctx) && (PObj_get_FLAGS(sub_pmc) & SUB_FLAG_CORO_FF)) {
         Parrot_io_eprintf(tracer, " to '%Ss'",
-                Parrot_full_sub_name(interp,
+                Parrot_sub_full_sub_name(interp,
                     Parrot_pcc_get_sub(interp, Parrot_pcc_get_caller_ctx(interp, ctx))));
     }
 
@@ -188,7 +189,7 @@ Swaps the "context".
             if (PMC_IS_NULL(ctx))
                 ctx = Parrot_pmc_new(INTERP, enum_class_CallContext);
 
-            CURRENT_CONTEXT(INTERP) = ctx;
+            Parrot_pcc_set_context(INTERP, ctx);
 
             GET_ATTR_n_regs_used(INTERP, SELF, n_regs_used);
             Parrot_pcc_allocate_registers(INTERP, ctx, n_regs_used);
@@ -209,7 +210,7 @@ Swaps the "context".
 
             /* create pad if needed */
             if (!PMC_IS_NULL(lex_info)) {
-                const INTVAL hlltype = Parrot_get_ctx_HLL_type(INTERP, enum_class_LexPad);
+                const INTVAL hlltype = Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_LexPad);
                 PMC * const lexpad = Parrot_pmc_new_init(INTERP, hlltype, lex_info);
                 Parrot_pcc_set_lex_pad(INTERP, ctx, lexpad);
                 VTABLE_set_pointer(INTERP, lexpad, ctx);
@@ -248,7 +249,7 @@ Swaps the "context".
             Parrot_pcc_set_caller_ctx(INTERP, ctx, CURRENT_CONTEXT(INTERP));
 
             /* set context to coroutine context */
-            CURRENT_CONTEXT(INTERP) = ctx;
+            Parrot_pcc_set_context(INTERP, ctx);
         }
         else {
             INTVAL             yield;
@@ -285,7 +286,7 @@ Swaps the "context".
                                "Cannot resume dead coroutine.");
             }
 
-            CURRENT_CONTEXT(INTERP) = to_ctx;
+            Parrot_pcc_set_context(INTERP, to_ctx);
         }
 
         Parrot_pcc_set_signature(INTERP, CURRENT_CONTEXT(INTERP), signature);
@@ -314,5 +315,5 @@ Swaps the "context".
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

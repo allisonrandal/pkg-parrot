@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: Runloop.pm 47997 2010-07-05 01:21:58Z jkeenan $
 
 =head1 NAME
 

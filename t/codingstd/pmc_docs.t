@@ -1,6 +1,5 @@
 #! perl
-# Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: pmc_docs.t 49492 2010-10-10 14:40:36Z jkeenan $
+# Copyright (C) 2006-2011, Parrot Foundation.
 
 use strict;
 use warnings;
@@ -125,15 +124,10 @@ src/pmc/bigint.pmc
 src/pmc/callcontext.pmc
 src/pmc/class.pmc
 src/pmc/complex.pmc
-src/pmc/coroutine.pmc
 src/pmc/eval.pmc
 src/pmc/imageio.pmc
 src/pmc/namespace.pmc
-src/pmc/nci.pmc
 src/pmc/object.pmc
-src/pmc/sub.pmc
-src/pmc/threadinterpreter.pmc
-src/pmc/unmanagedstruct.pmc
 
 # Local Variables:
 #   mode: cperl

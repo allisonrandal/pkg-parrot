@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2003-2009, Parrot Foundation.
-$Id: test_unsetenv_c.in 42918 2009-12-06 15:03:28Z fperrad $
 
 test for unsetenv
 
@@ -23,5 +22,5 @@ int main(int argc, char **argv)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

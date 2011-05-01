@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 044-slurp_file.t 36833 2009-02-17 20:09:26Z allison $
 # 044-slurp_file.t
 
 use strict;

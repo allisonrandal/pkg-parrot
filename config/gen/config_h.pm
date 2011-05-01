@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: config_h.pm 42586 2009-11-20 00:15:55Z jkeenan $
 
 =head1 NAME
 

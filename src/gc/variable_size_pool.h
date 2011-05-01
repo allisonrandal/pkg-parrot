@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: variable_size_pool.h 49272 2010-09-23 11:18:21Z mikehh $
 
 =head1 NAME
 
@@ -54,5 +53,5 @@ typedef struct Variable_Size_Pool {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: TGE.pir 43593 2010-01-26 02:39:50Z jkeenan $
 
 =head1 NAME
 

@@ -1,6 +1,5 @@
 
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Matcher.nqp 45660 2010-04-14 09:39:23Z cotto $
 
 class ProfTest::Matcher is Hash;
 

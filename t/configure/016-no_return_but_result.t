@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 016-no_return_but_result.t 36833 2009-02-17 20:09:26Z allison $
 # 016-no_return_but_result.t
 
 use strict;

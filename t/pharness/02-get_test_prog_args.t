@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 02-get_test_prog_args.t 45949 2010-04-24 01:14:23Z cotto $
 # 02-get_test_prog_args.t
 
 use strict;

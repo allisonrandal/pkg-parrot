@@ -1,10 +1,9 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: install_files.pl 44984 2010-03-17 17:09:04Z gerd $
 ################################################################################
 
-=head1 TITLE
+=head1 NAME
 
 tools/dev/install_files.pl - Copy files to their correct locations
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Test.pm 48947 2010-09-12 00:32:05Z NotFound $
 
 =head1 NAME
 
@@ -176,21 +175,6 @@ code.
 Runs the Parrot Bytecode and passes the test if the exit code equals $exit_code,
 fails the test otherwise.
 
-=item C<pir_2_pasm_is($code, $expected, $description)>
-
-Compile the Parrot Intermediate Representation and generate Parrot Assembler Code.
-Pass if the generated PASM is $expected.
-
-=item C<pir_2_pasm_like($code, $expected, $description)>
-
-Compile the Parrot Intermediate Representation and generate Parrot Assembler Code.
-Pass if the generated PASM matches $expected.
-
-=item C<pir_2_pasm_isnt($code, $unexpected, $description)>
-
-Compile the Parrot Intermediate Representation and generate Parrot Assembler
-Code.  Pass unless the generated PASM is $expected.
-
 =item C<c_output_is($code, $expected, $description, %options)>
 
 Compiles and runs the C code, passing the test if a string comparison of output
@@ -285,12 +269,14 @@ use IO::File ();
 use lib qw( lib );
 use Parrot::BuildUtil ();
 use Parrot::Config;
+use Parrot::Test::Util 'create_tempfile';
 
 require Exporter;
 require Test::Builder;
 require Test::More;
 
-our @EXPORT = qw( plan run_command skip slurp_file pbc_postprocess_output_like );
+our @EXPORT = qw( plan run_command skip slurp_file pbc_postprocess_output_like
+                  pir_stdin_output_is pir_stdin_output_like );
 
 use base qw( Exporter );
 
@@ -401,10 +387,14 @@ sub write_code_to_file {
     return;
 }
 
+{
+    no warnings 'once';
 # We can inherit from other modules, so we do so.
 *plan = \&Test::More::plan;
 *skip = \&Test::More::skip;
 *slurp_file = \&Parrot::BuildUtil::slurp_file;
+
+}
 
 sub convert_line_endings {
     my ($text) = @_;
@@ -493,7 +483,7 @@ sub generate_languages_functions {
             }
 
             # The generated files are left in the t/* directories.
-            # Let 'make clean' and 'svn:ignore' take care of them.
+            # Let 'make clean' and '.gitignore' take care of them.
 
             return;
         };
@@ -569,6 +559,68 @@ sub pbc_postprocess_output_like {
 
 }
 
+sub _pir_stdin_output_slurp {
+    my ($input_string, $code, $expected_ouptut) = @_;
+
+    my $stuff = sub {
+        # Put the string on a file.
+        my $string = shift;
+
+        my (undef, $file) = create_tempfile(UNLINK => 1);
+        open(my $out, '>', $file) or die "bug";
+        binmode $out;
+        print $out $string;
+        return $file;
+    };
+
+    # Write the input and code strings.
+    my $input_file = $stuff->($input_string);
+    my $code_file = $stuff->($code);
+
+    my $parrot = ".$PConfig{slash}parrot$PConfig{exe}";
+    # Slurp and compare the output.
+    my $result = do {
+        local $/;
+        open(my $in, '-|', "$parrot $code_file 2>&1 < $input_file")
+            or die "bug";
+        <$in>;
+    };
+
+    return $result;
+}
+
+=over
+
+=item C<pir_stdin_output_is($input_string, $code, $expected, $description)>
+
+Runs the PIR code while piping data into its standard input and passes the test
+if a string comparison of output with the expected result is true.
+
+=cut
+
+sub pir_stdin_output_is {
+    my ($input_string, $code, $expected_output, $description) = @_;
+
+    my $result = _pir_stdin_output_slurp($input_string, $code, $expected_output);
+    Test::More::is($result, $expected_output, $description);
+}
+
+=item C<pir_stdin_output_like($input_string, $code, $expected, $description)>
+
+Runs the PIR code while piping data into its standard input and passes the test
+if the output matches the expected result.
+
+=back
+
+=cut
+
+sub pir_stdin_output_like {
+    my ($input_string, $code, $expected_output, $description) = @_;
+
+    my $result = _pir_stdin_output_slurp($input_string, $code, $expected_output);
+    Test::More::like($result, $expected_output, $description);
+}
+
 # The following methods are private.  They should not be used by modules
 # inheriting from Parrot::Test.
 
@@ -633,10 +685,10 @@ sub _run_test_file {
         $run_exec = 1;
         my $pbc_f = per_test( '.pbc', $test_no );
         my $o_f = per_test( '_pbcexe' . $PConfig{o}, $test_no );
-        my $exe_f =
-            per_test( '_pbcexe' . $PConfig{exe}, $test_no )
-            ;    # Make cleanup and svn:ignore more simple
-        my $exec_f = per_test( '_pbcexe', $test_no );    # Make cleanup and svn:ignore more simple
+
+        # make cleanup and .gitignore more simple
+        my $exe_f = per_test( '_pbcexe' . $PConfig{exe}, $test_no );
+        my $exec_f = per_test( '_pbcexe', $test_no );
         $exe_f =~ s@[\\/:]@$PConfig{slash}@g;
 
         run_command(
@@ -701,8 +753,6 @@ sub _generate_test_functions {
     my $path_to_parrot = path_to_parrot();
     my $parrot         = File::Spec->join( File::Spec->curdir(),
                             'parrot' . $PConfig{exe} );
-    my $pirc           = File::Spec->join( File::Spec->curdir(),
-                            qw( compilers pirc ), "pirc$PConfig{exe}" );
 
     ##### 1: Parrot test map #####
     my %parrot_test_map = map {
@@ -779,99 +829,7 @@ sub _generate_test_functions {
         create_sub($package, $func, $test_sub);
     }
 
-    ##### 2: PIR-to-PASM test map #####
-    my %pir_2_pasm_test_map = (
-        pir_2_pasm_is      => 'is_eq',
-        pir_2_pasm_isnt    => 'isnt_eq',
-        pir_2_pasm_like    => 'like',
-        pir_2_pasm_unlike  => 'unlike',
-
-        pirc_2_pasm_is     => 'is_eq',
-        pirc_2_pasm_isnt   => 'isnt_eq',
-        pirc_2_pasm_like   => 'like',
-        pirc_2_pasm_unlike => 'unlike',
-    );
-
-    foreach my $func ( keys %pir_2_pasm_test_map ) {
-        push @EXPORT, $func;
-        no strict 'refs';
-
-        my $test_sub = sub {
-            local *__ANON__                        = $func;
-            my ( $code, $expected, $desc, %extra ) = @_;
-
-            # Strange Win line endings
-            convert_line_endings($expected);
-
-            # set up default description
-            unless ($desc) {
-                ( undef, my $file, my $line ) = caller();
-                $desc = "($file line $line)";
-            }
-
-            # $test_no will be part of temporary file
-            my $test_no = $builder->current_test() + 1;
-
-            # Name of the file with test code.
-            my $code_f = File::Spec->rel2abs( per_test( '.pir', $test_no ) );
-            my $code_basef = basename($code_f);
-
-            # output file
-            my $out_f = per_test( '.pasm', $test_no );
-
-            my $cmd;
-
-            if ($func =~ /^pir_/) {
-                my $opt  = $code_basef =~ m!opt(.)! ? "-O$1" : "-O1";
-                my $args = $ENV{TEST_PROG_ARGS} || '';
-                $args   .= " $opt --output=$out_f";
-                $args    =~ s/--run-exec//;
-                $cmd       = qq{$parrot $args "$code_f"};
-            } elsif ($func =~ /^pirc_/) {
-                $cmd       = qq{$pirc -b -x "$code_f"};
-            }
-
-            write_code_to_file( $code, $code_f );
-
-            my $exit_code = run_command(
-                $cmd,
-                CD     => $path_to_parrot,
-                STDOUT => $out_f,
-                STDERR => $out_f
-            );
-
-            my $meth        = $pir_2_pasm_test_map{$func};
-            my $real_output = slurp_file($out_f);
-            {
-
-                # The parrot open '--outfile=file.pasm' seems to create unnecessary whitespace
-                $real_output =~ s/^\s*$//gm;
-                $real_output =~ s/[\t ]+/ /gm;
-                $real_output =~ s/ +$//gm;
-
-                $expected =~ s/[\t ]+/ /gm;
-            }
-
-            # set a todo-item for Test::Builder to find
-            my $call_pkg = $builder->exported_to() || '';
-
-            local *{ $call_pkg . '::TODO' } = ## no critic Variables::ProhibitConditionalDeclarations
-                \$extra{todo}
-                if defined $extra{todo};
-
-            my $pass = $builder->$meth( $real_output, $expected, $desc );
-            $builder->diag("'$cmd' failed with exit code $exit_code")
-                if $exit_code and not $pass;
-
-            _unlink_or_retain( $out_f );
-
-            return $pass;
-        };
-
-        create_sub($package, $func, $test_sub);
-    }
-
-    ##### 3: Language test map #####
+    ##### 2: Language test map #####
     my %builtin_language_prefix = (
         PIR_IMCC  => 'pir',
         PASM_IMCC => 'pasm',
@@ -935,7 +893,7 @@ sub _generate_test_functions {
         create_sub($package, $func, $test_sub);
     }
 
-    ##### 4:  Example test map #####
+    ##### 3:  Example test map #####
     my %example_test_map = (
         example_output_is   => 'language_output_is',
         example_output_like => 'language_output_like',
@@ -980,7 +938,7 @@ sub _generate_test_functions {
         create_sub($package, $func, $test_sub);
     }
 
-    ##### 5: C test map #####
+    ##### 4: C test map #####
     my %c_test_map = (
         c_output_is     => 'is_eq',
         c_output_isnt   => 'isnt_eq',

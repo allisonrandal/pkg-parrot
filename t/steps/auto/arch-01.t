@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: arch-01.t 45380 2010-04-02 11:09:23Z jkeenan $
 # auto/arch-01.t
 
 use strict;

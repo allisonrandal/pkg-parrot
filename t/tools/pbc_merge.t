@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: pbc_merge.t 43767 2010-02-08 00:15:53Z cotto $
 
 =head1 NAME
 

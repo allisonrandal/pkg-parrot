@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: metamodel.t 46465 2010-05-10 09:13:22Z bacek $
 
 =head1 NAME
 

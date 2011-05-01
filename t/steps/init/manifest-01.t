@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: manifest-01.t 39967 2009-07-10 00:16:41Z jkeenan $
 # init/manifest-01.t
 
 use strict;

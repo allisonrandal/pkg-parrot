@@ -1,5 +1,4 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: Ops.pm 46946 2010-05-24 08:15:45Z cotto $
 
 =head1 NAME
 

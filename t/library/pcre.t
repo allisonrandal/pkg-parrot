@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pcre.t 48056 2010-07-08 21:32:09Z mikehh $
 
 use strict;
 use warnings;

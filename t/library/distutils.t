@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: distutils.t 47104 2010-05-29 07:05:24Z fperrad $
 
 =head1 NAME
 

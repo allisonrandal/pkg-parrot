@@ -1,5 +1,4 @@
 /* Copyright (C) 2001-2009, Parrot Foundation.
- * $Id: imageio.h 49374 2010-09-29 02:23:16Z plobsing $
  */
 #ifndef PARROT_IMAGEIO_H_GUARD
 #define PARROT_IMAGEIO_H_GUARD
@@ -19,8 +18,9 @@
 #define FREEZE_BYTES_PER_ITEM 9
 
 enum {
-    enum_PackID_normal     = 0,
-    enum_PackID_seen       = 1
+    enum_PackID_normal      = 0,
+    enum_PackID_seen        = 1,
+    enum_PackID_pbc_backref = 2
 };
 
 #endif /* PARROT_IMAGEIO_H_GUARD */
@@ -29,5 +29,5 @@ enum {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

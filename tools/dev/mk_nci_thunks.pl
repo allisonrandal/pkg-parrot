@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: mk_nci_thunks.pl 44243 2010-02-20 18:42:28Z plobsing $
 
 =head1 NAME
 
@@ -29,6 +28,7 @@ foreach (qw( core_thunks extra_thunks )) {
             "--core " .
             "--loader-name=$loader_name " .
             "--output=$c_file " .
+            "--no-warn-dups " .
             "<$nci_file "
     );
 }

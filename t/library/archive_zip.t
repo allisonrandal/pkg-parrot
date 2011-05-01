@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: archive_zip.t 49066 2010-09-16 18:29:40Z fperrad $
 
 =head1 NAME
 

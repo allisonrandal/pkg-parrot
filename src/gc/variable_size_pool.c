@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2010, Parrot Foundation.
-$Id: variable_size_pool.c 49272 2010-09-23 11:18:21Z mikehh $
 
 =head1 NAME
 
@@ -31,6 +30,6 @@ TODO Add it.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */
 

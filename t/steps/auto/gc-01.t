@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: gc-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # auto/gc-01.t
 
 use strict;
@@ -19,7 +18,7 @@ use IO::CaptureOutput qw| capture |;
 
 my ($args, $step_list_ref) = process_options(
     {
-        argv => [ q{--verbose} ],
+        argv => [ '--verbose', '--gc=ms2' ],
         mode => q{configure},
     }
 );
@@ -41,10 +40,10 @@ my $step = test_step_constructor_and_description($conf);
         sub { $ret = $step->runstep($conf); },
         \$stdout,
     );
-    ok( $ret, "runstep() returned true value" );
-    like( $stdout, qr/\(gc\)/, "Got expected verbose output");
-    is($conf->data->get('gc_flag'), q{},
-        "Got expected value for 'gc_flag'");
+    ok($ret, "runstep() returned true value");
+    like($stdout, qr/\(ms2\)/, "Got expected verbose output");
+    is($conf->data->get('gc_type'), 'MS2',
+          "Got expected value for 'gc_type'");
 }
 
 pass("Completed all tests in $0");

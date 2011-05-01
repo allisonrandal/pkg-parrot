@@ -1,0 +1,46 @@
+/*
+
+Copyright (C) 2010, Parrot Foundation.
+
+*/
+
+#ifdef _WIN32
+#  include <ws2tcpip.h>
+#else
+#  include <sys/types.h>
+#  include <sys/socket.h>
+#  include <netdb.h>
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+#ifdef _WIN32
+    struct WSAData sockinfo;
+#endif
+    struct addrinfo  hints;
+    struct addrinfo *ai;
+
+#ifdef _WIN32
+    WSAStartup(2, &sockinfo);
+#endif
+
+    memset(&hints, 0, sizeof (struct addrinfo));
+    hints.ai_family   = PF_INET6;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    getaddrinfo(NULL, "1234", &hints, &ai);
+
+    printf("OK\n");
+
+    return EXIT_SUCCESS;
+}
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

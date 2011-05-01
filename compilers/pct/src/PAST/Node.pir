@@ -1,4 +1,3 @@
-# $Id: Node.pir 49325 2010-09-25 22:46:43Z jonathan $
 
 =head1 NAME
 

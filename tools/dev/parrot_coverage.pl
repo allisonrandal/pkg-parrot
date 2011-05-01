@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: parrot_coverage.pl 46569 2010-05-13 05:03:48Z cotto $
 
 =head1 NAME
 

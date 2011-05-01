@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: 05-gen_c.t 48028 2010-07-07 12:45:50Z Util $
 # 05-gen_c.t
 
 use strict;

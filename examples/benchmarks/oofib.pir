@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: oofib.pir 42175 2009-10-30 23:44:50Z japhb $
 
 .sub bench :main
     .param pmc argv

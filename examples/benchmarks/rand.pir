@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: rand.pir 40559 2009-08-15 10:51:21Z mikehh $
 
 =head1 NAME
 

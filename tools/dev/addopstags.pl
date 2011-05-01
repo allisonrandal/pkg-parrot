@@ -1,7 +1,6 @@
 #!perl
 
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: addopstags.pl 49492 2010-10-10 14:40:36Z jkeenan $
 
 use strict;
 use warnings;

@@ -170,7 +170,7 @@ newline or semicolon after an end keyword."
     "collecton" "compile" "compose" "compreg" "concat" "connect" "cos" "cosh"
     "debug" "dec" "decodelocaltime" "decodetime" "defined" "delete"
     "delprop" "depth" "deref" "die" "div" "dlfunc" "dlvar" "does" "downcase"
-    "elements" "encoding" "encodingname" "enternative" "entrytype" "eq"
+    "elements" "encoding" "encodingname" "entrytype" "eq"
     "err" "errorsoff" "errorson" "escape" "exchange" "exists" "exit" "exp"
     "fact" "fdiv" "fdopen" "find_cclass" "find_charset" "find_encoding"
     "find_lex" "find_method" "find_not_cclass" "find_type" "floor" "freeze"
@@ -223,12 +223,12 @@ newline or semicolon after an end keyword."
 (defvar pir-directives
   '(":anon" ":flat" ":init" ":lex" ":subid" ":load" ":main" ":method" ":multi"
     ":named" ":opt_count" ":opt_flag" ":optional" ":outer" ":postcomp"
-    ":slurpy" ":unique_reg" ":vtable" ":wrap"))
+    ":slurpy" ":vtable" ":wrap"))
 
 (defvar pir-dotted-directives
   '(".HLL" ".arg" ".const" ".constant" ".emit" ".end" ".endm"
     ".endnamespace" ".eom" ".get_results" ".global" ".globalconst"
-    ".include" ".invocant" ".lex" ".line" ".loadlib" ".macro" ".meth_call"
+    ".include" ".invocant" ".lex" ".line" ".loadlib" ".macro"
     ".namespace" ".nci_call" ".pcc_begin" ".pcc_begin_return"
     ".pcc_begin_yield" ".pcc_call" ".pcc_end" ".pcc_end_return"
     ".pcc_end_yield" ".pcc_sub" ".result" ".return" ".sub"

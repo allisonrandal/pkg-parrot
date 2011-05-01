@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: addit.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 NAME
 
@@ -17,7 +16,7 @@ prints the result (21001097.970000).
 
 =cut
 
-_main:
+.pcc_sub :main _main:
         new P10, 'ResizableIntegerArray'
         new P5, 'ResizablePMCArray'
         push P5, 1000

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: takfp.pir 45949 2010-04-24 01:14:23Z cotto $
 #
 # ./parrot takfp.pir N         (N = 10 for shootout)
 # by Joshua Isom

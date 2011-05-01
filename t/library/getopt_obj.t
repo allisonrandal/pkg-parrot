@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: getopt_obj.t 46571 2010-05-13 05:28:38Z cotto $
 
 =head1 NAME
 
@@ -278,7 +277,7 @@ module F<runtime/parrot/library/Getopt/Obj.pir>.
         $S0 = $P1["foo"]
         is($S0, 1, 'double dash stop')
 
-        # Hash sets an nonexistant value to ''
+        # Hash sets an nonexistent value to ''
         $S0 = $P1["bar"]
         is($S0, '', 'double dash stop')
 

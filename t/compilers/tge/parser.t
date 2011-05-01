@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2005-2010, Parrot Foundation.
-# $Id: parser.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: timespec.pm 49550 2010-10-15 16:39:58Z jkeenan $
 
 =head1 NAME
 

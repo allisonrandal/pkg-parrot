@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 10_math_ops.pir 40124 2009-07-16 21:36:57Z allison $
 
 =head1 Math Operations
 

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 05-trace.t 48000 2010-07-05 01:37:52Z jkeenan $
 # 05-trace.t
 
 use strict;

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: object-mro.t 40191 2009-07-21 12:56:20Z bacek $
 
 use strict;
 use warnings;

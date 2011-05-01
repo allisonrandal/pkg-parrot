@@ -1,6 +1,5 @@
 #! perl
-# Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: create_language.pl 42892 2009-12-04 20:05:00Z mikehh $
+# Copyright (C) 2007-2010, Parrot Foundation.
 
 =head1 NAME
 
@@ -122,7 +121,7 @@ while (<DATA>) {
 
 ## generate build/PARROT_REVISION
 start_new_file("$path/build/PARROT_REVISION");
-my $rev = '$Revision: 42892 $';
+my $rev = '$Revision$';
 $rev =~ s/^\D*(\d+)\D*$/$1/;
 print $fh "$rev\n";
 close($fh) if $fh;
@@ -178,7 +177,7 @@ This is @lang@, a compiler for the Parrot virtual machine.
 
 For building @lang@ you need at least a C compiler, a C<make> utility,
 and Perl 5.8 or newer.  To automatically obtain and build Parrot
-you may also need a subversion (svn) client.
+you also need a git client.
 
 =head2 Building and invoking @lang@
 
@@ -474,7 +473,6 @@ END
 # vim: expandtab shiftwidth=4:
 __build/Makefile.in__
 # Copyright (C) 2006-2009, The Perl Foundation.
-# $Id: create_language.pl 42892 2009-12-04 20:05:00Z mikehh $
 
 PARROT_ARGS      =
 
@@ -488,7 +486,7 @@ PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 HAS_ICU            = @has_icu@
 
 CC            = @cc@
-CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@
+CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cg_flag@
 EXE           = @exe@
 LD            = @ld@
 LDFLAGS       = @ldflags@ @ld_debug@
@@ -647,10 +645,15 @@ close $REQ;
     }
 }
 
-print "Checking out Parrot r$reqsvn via svn...\n";
-system(qw(svn checkout -r),  $reqsvn , qw(https://svn.parrot.org/parrot/trunk parrot));
+print "Cloning the Parrot git repo...\n";
+system(qw(git clone), qw(http://github.com/parrot/parrot.git));
 
-chdir('parrot');
+chdir('parrot') or die "Can't chdir to parrot: $!";
+
+system("git checkout $reqsvn");
+
+# TODO: error checking
+
 
 
 ##  If we have a Makefile from a previous build, do a 'make realclean'

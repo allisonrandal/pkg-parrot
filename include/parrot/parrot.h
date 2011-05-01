@@ -1,7 +1,5 @@
 /* parrot.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
- *  SVN Info
- *     $Id: parrot.h 48833 2010-09-07 22:58:38Z nwellnhof $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -40,31 +38,9 @@
 
 /* Other headers, where available */
 
-/* FreeBSD wants this order:
-
-     #include <sys/types.h>
-     #include <sys/socket.h>
-     #include <netinet/in.h>
-     #include <arpa/inet.h>
-
-   as netinet/in.h relies on things defined earlier
-*/
-
 #ifdef PARROT_HAS_HEADER_SYSTYPES
 #  include <sys/types.h>
 #endif /* PARROT_HAS_HEADER_SYSTYPES */
-
-#ifdef PARROT_HAS_HEADER_SYSSOCKET
-#  include <sys/socket.h>
-#endif /* PARROT_HAS_HEADER_SYSSOCKET */
-
-#ifdef PARROT_HAS_HEADER_NETINETIN
-#  include <netinet/in.h>
-#endif /* PARROT_HAS_HEADER_NETINETIN */
-
-#ifdef PARROT_HAS_HEADER_ARPAINET
-#  include <arpa/inet.h>
-#endif /* PARROT_HAS_HEADER_ARPAINET */
 
 #ifdef PARROT_HAS_HEADER_UNISTD
 #  include <unistd.h>
@@ -89,10 +65,6 @@
 #  include <fcntl.h>
 #endif /* PARROT_HAS_HEADER_FCNTL */
 
-#ifdef PARROT_HAS_HEADER_NETDB
-#  include <netdb.h>
-#endif /* PARROT_HAS_HEADER_NETDB */
-
 #ifdef PARROT_HAS_HEADER_SYSSTAT
 #  include <sys/stat.h>
 #endif /* PARROT_HAS_HEADER_SYSSTAT */
@@ -105,6 +77,10 @@ typedef jmp_buf Parrot_jump_buff;
 #ifdef PARROT_HAS_HEADER_LIMITS
 #  include <limits.h>
 #endif /* PARROT_HAS_HEADER_LIMITS */
+
+#ifdef PARROT_HAS_LIBFFI
+#  include <ffi.h>
+#endif
 
 #define NUM_REGISTERS 32
 #define PARROT_MAGIC 0x13155a1
@@ -149,7 +125,7 @@ typedef struct parrot_interp_t Interp;
  * some compilers don't like lvalue casts, so macroize them
  *
  * NOTE: Under no circumstances is it permitted to use this macro on types
- *       that are not effectivly guaranteed to be compatible.
+ *       that are not effectively guaranteed to be compatible.
  *       Good:  int->unsigned; long->unsigned long; struct*->struct*; char*->void*
  *       Bad:   integral->pointer;  struct*->char*
  */
@@ -248,7 +224,6 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 
 #include "parrot/settings.h"
 #include "parrot/enums.h"
-#include "parrot/platform.h"
 #include "parrot/platform_interface.h"
 #include "parrot/global_setup.h"
 #include "parrot/caches.h"
@@ -256,7 +231,6 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 #include "parrot/datatypes.h"
 #include "parrot/encoding.h"
 #include "parrot/string.h"
-#include "parrot/string_primitives.h"
 #include "parrot/hash.h"
 #include "parrot/pmc_freeze.h"
 #include "parrot/vtable.h"
@@ -278,13 +252,11 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 #include "parrot/nci.h"
 #include "parrot/thread.h"
 #include "parrot/scheduler.h"
-#include "parrot/longopt.h"
 #include "parrot/oo.h"
 #include "parrot/vtables.h"
 #include "parrot/multidispatch.h"
 #include "parrot/library.h"
 #include "parrot/namespace.h"
-#include "parrot/stat.h"
 #include "parrot/hll.h"
 #include "parrot/pbcversion.h"
 
@@ -294,5 +266,5 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

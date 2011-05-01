@@ -2,7 +2,6 @@
 package Foo;
 
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: overload.pl 38923 2009-05-19 06:07:42Z cotto $
 
 use strict;
 use warnings;

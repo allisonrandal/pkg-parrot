@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: misc.c 48837 2010-09-07 23:48:07Z nwellnhof $
 
 =head1 NAME
 
@@ -103,13 +102,15 @@ Parrot_vsprintf_c(PARROT_INTERP, ARGIN(const char *pat), va_list args)
 Similar to C<Parrot_vsprintf()> but with an option to specify the length
 (C<len>) of the returned C string.
 
+If len is zero, then C<targ> is unchanged.
+
 =cut
 
 */
 
 PARROT_EXPORT
 void
-Parrot_vsnprintf(PARROT_INTERP, ARGOUT(char *targ),
+Parrot_vsnprintf(PARROT_INTERP, ARGMOD(char *targ),
                  size_t len, ARGIN(const char *pat), va_list args)
 {
     ASSERT_ARGS(Parrot_vsnprintf)
@@ -295,5 +296,5 @@ lines long, I split it into three. --BD
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

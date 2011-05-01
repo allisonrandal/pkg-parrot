@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: mk_skeleton.pir 47749 2010-06-22 00:12:13Z whiteknight $
 
 # Generate a skeleton PIR file that adheres to parrot developer standards.
 # intended for people who hack on parrot itself, not users of parrot.
@@ -14,12 +13,10 @@
     timeArray = decodetime epoch
     year = timeArray[.TM_YEAR]
 
-    # split up to avoid various svn/codingstd issues.
+    # split up to avoid various codingstd issues.
     print '# Copyright (C) '
     print year
     say   ' Parrot Foundation.'
-    print '# $'
-    say   'Id: $'
     say ''
     say ".sub 'main' :main"
     say '    # For Parrot developers.'

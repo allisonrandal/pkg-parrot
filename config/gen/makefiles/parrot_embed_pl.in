@@ -1,5 +1,4 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: parrot_embed_pl.in 39045 2009-05-22 16:17:19Z Infinoid $
 #
 
 use strict;

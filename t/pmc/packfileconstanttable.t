@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: packfileconstanttable.t 49322 2010-09-25 10:49:40Z plobsing $
 
 =head1 NAME
 

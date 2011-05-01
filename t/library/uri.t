@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: uri.t 46856 2010-05-21 13:01:32Z fperrad $
 
 =head1 NAME
 

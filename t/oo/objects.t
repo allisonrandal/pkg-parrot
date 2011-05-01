@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: objects.t 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -1055,7 +1054,7 @@ l1:
 
     a = a * b
     set $S0, a
-    is( $S0, '1', 'multip and reasign to subclassed Integer is 1' )
+    is( $S0, '1', 'multiply and reassign to subclassed Integer is 1' )
 .end
 
 .sub equality_of_subclassed_Integer
@@ -1504,7 +1503,7 @@ end:
     ok(0, "'Parent isn\'t a Class' exception not thrown")
     goto end
 handler:
-    .exception_is( "Parent isn't a Class." )
+    .exception_is( "Parent 'Not a class' of 'Astronomical Object 2' isn't a Class." )
 end:
 .end
 

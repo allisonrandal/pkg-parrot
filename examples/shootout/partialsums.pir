@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: partialsums.pir 47051 2010-05-27 08:45:23Z plobsing $
 #
 # partialsums N  (N = 2500000 for shootout)
 #

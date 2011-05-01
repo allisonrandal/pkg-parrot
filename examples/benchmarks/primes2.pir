@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: primes2.pir 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 

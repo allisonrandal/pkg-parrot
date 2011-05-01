@@ -1,4 +1,3 @@
-# $Id: Default.pir 44543 2010-02-28 05:02:25Z coke $
 
 =head1 TITLE
 
@@ -103,7 +102,7 @@ A YAML::Dumper::Default object has the following methods:
 
     print " with-properties: "
     clone name, paramName
-    concat name, ".properties()"
+    name = concat name, ".properties()"
     ret = self."yaml"( name, prop )
 
 END:

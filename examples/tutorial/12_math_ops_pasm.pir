@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 12_math_ops_pasm.pir 46782 2010-05-19 08:55:32Z plobsing $
 
 =head1 Math Operations (continued)
 

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: signal-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # auto/signal-01.t
 
 use strict;

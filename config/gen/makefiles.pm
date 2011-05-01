@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: makefiles.pm 48659 2010-08-25 23:16:08Z gerd $
 
 =head1 NAME
 
@@ -57,7 +56,6 @@ sub _init {
         'editor/Makefile'            =>
             { SOURCE => 'config/gen/makefiles/editor.in' },
 
-        'parrot.pc'     => { SOURCE => 'config/gen/makefiles/parrot_pc.in' },
         'docs/Makefile' => { SOURCE => 'config/gen/makefiles/docs.in' },
     };
     return \%data;

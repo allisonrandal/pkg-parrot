@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: boolean.t 49488 2010-10-10 06:26:39Z dukeleto $
 
 =head1 NAME
 

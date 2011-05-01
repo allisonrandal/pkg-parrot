@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: make-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # inter/make-01.t
 
 use strict;
@@ -67,11 +66,11 @@ $step = test_step_constructor_and_description($conf);
 $conf->data->set('gmake_version' => '4.1');
 my $prog = 'gmake';
 inter::make::_set_make_c($conf, $prog);
-is($conf->data->get('make_c'), 'gmake -C',
+is($conf->data->get('make_c'), '+gmake -C',
     "make_c correctly set when gmake");
 
 $conf->data->set('gmake_version' => undef);
-my $str = q|$(PERL) -e 'chdir shift @ARGV; system q{$(MAKE)}, @ARGV; exit $$?  >> 8;'|;
+my $str = q|$(PERL) -e 'chdir shift @ARGV; system q{make}, @ARGV; exit $$?  >> 8;'|;
 $conf->data->set(make_c => $str);
 $prog = 'make';
 inter::make::_set_make_c($conf, $prog);

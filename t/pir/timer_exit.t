@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: timer_exit.t 47563 2010-06-12 01:59:55Z mikehh $
 
 .include 'timer.pasm'
 

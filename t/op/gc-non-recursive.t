@@ -1,6 +1,5 @@
 #!./parrot
-# Copyright (C) 2010, Parrot Foundation.
-# $Id: gc-non-recursive.t 49370 2010-09-28 20:56:46Z nwellnhof $
+# Copyright (C) 2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -22,6 +21,15 @@ See http://trac.parrot.org/parrot/ticket/1723
 
     .local pmc iterclass, intclass
 
+    .local pmc config
+    .local string optimize
+
+    load_bytecode 'config.pbc'
+    config = '_config'()
+    optimize = config['optimize']
+    # with a non-optimized build do not this test
+    if optimize == '' goto non_optimized
+
     iterclass = newclass ['RangeIter']
     addattribute iterclass, '$!value'
     addattribute iterclass, '$!nextIter'
@@ -39,6 +47,12 @@ See http://trac.parrot.org/parrot/ticket/1723
     sweep 1
     ok(1, "Marking of large list doesn't exhaust C stack")
     done_testing()
+    .return ()
+
+  non_optimized:
+    skip("Disabled in non-optimized builds")
+    done_testing()
+    .return ()
 .end
 
 

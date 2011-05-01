@@ -1,5 +1,4 @@
 /*
- * $Id: sys.ops 48837 2010-09-07 23:48:07Z nwellnhof $
 ** sys.ops
 */
 
@@ -163,5 +162,5 @@ as the Parrot interp itself.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

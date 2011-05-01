@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: resizablestringarray.t 46932 2010-05-24 00:34:02Z NotFound $
 
 =head1 NAME
 

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: hash.t 49513 2010-10-11 18:40:23Z nwellnhof $
 
 =head1 NAME
 
@@ -24,8 +23,6 @@ well.
 
 .sub main :main
     .include 'test_more.pir'
-
-    plan(174)
 
     initial_hash_tests()
     more_than_one_hash()
@@ -78,6 +75,8 @@ well.
     equality_tests()
 
     pmc_keys()
+
+    'done_testing'()
 .end
 
 .sub initial_hash_tests
@@ -185,7 +184,7 @@ end:
 
     $P2 = new ['ExceptionHandler']
     $P2.'handle_types'(.EXCEPTION_UNEXPECTED_NULL)
-    set_addr $P2, null_ex_eh
+    set_label $P2, null_ex_eh
     push_eh $P2
 
     $P1 = $P0[$S0]
@@ -272,6 +271,9 @@ check:
     set $P0["0"], 1
     set $I0, $P0
     is( $I0, 2, 'hash size of 2' )
+
+    $I1 = elements $P0
+    is( $I1, $I0, "'elements' gives the same result" )
 .end
 
 .sub stress_test_loop_set_check
@@ -1197,11 +1199,11 @@ lp:
     set $S1, $P0[$S0]
     is( $S1, "one", 'lookup via str in reg' )
 
-    concat $S0, "b"
+    $S0 = concat $S0, "b"
     set $S1, $P0[$S0]
     is( $S1, "two", 'lookup via concated str in reg' )
 
-    concat $S0, "c"
+    $S0 = concat $S0, "c"
     set $S1, $P0[$S0]
     is( $S1, "three", 'lookup via concated^2 str in reg' )
 .end
@@ -1351,6 +1353,11 @@ postit_end:
     # '42 parrots' numifies to '42'. So check it
     $S0 = hash[42]
     is($S0, 'Wins!', 'Key was numified again')
+
+    # delete key 0
+    delete hash[0]
+    $S0 = hash[0]
+    is($S0, '', 'Item with key 0 deleted')
 .end
 
 # Check that we can set various value types and they properly converted
@@ -1360,7 +1367,7 @@ postit_end:
 
     # PMC is first value type
     hash.'set_value_type'(.DATATYPE_PMC)
-    $P0 = new 'Env' # arbitary choice. Just to prevent possible casting.
+    $P0 = new 'Env' # arbitrary choice. Just to prevent possible casting.
     hash['env'] = $P0
     hash['foo'] = 42
     hash['bar'] = 21285.06
@@ -1494,6 +1501,23 @@ postit_end:
     is($I0, 3, "Got 3 different types of PMC keys")
     $I0 = types['ResizableStringArray']
     ok($I0, "Including ResizableStringArray")
+
+
+    # Check custom hashvalue vtable.
+    $P0 = newclass ['Foo']
+    addattribute $P0, "invoked"
+
+    $P0 = new ['Foo']
+    hash[$P0] = "answer"
+    $P1 = getattribute $P0, "invoked"
+    is ($P1, 42, "hashvalue was invoked")
+.end
+
+.namespace ['Foo']
+.sub '' :method :vtable('hashvalue')
+    $P0 = box 42
+    setattribute self, "invoked", $P0
+    .return (42)
 .end
 
 # Local Variables:

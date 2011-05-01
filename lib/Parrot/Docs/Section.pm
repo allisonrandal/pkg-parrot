@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: Section.pm 37229 2009-03-09 04:39:01Z allison $
 
 =head1 NAME
 

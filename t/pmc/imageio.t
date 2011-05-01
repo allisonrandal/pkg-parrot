@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: imageio.t 49130 2010-09-18 03:47:34Z plobsing $
 
 =head1 NAME
 

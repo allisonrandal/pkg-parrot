@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: PCT_Tutorial.pm 46611 2010-05-14 15:05:41Z mikehh $
 
 =head1 NAME
 

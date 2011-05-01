@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 038-run_single_step.t 36833 2009-02-17 20:09:26Z allison $
 # 038-run_single_step.t
 
 use strict;

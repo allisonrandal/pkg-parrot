@@ -1,6 +1,5 @@
 #! nqp
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Renumberer.pm 46923 2010-05-23 22:04:01Z cotto $
 
 INIT {
     pir::load_bytecode("dumper.pbc");

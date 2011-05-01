@@ -1,7 +1,6 @@
 #! perl
 
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: pbc_header.pl 40204 2009-07-21 23:30:33Z jkeenan $
 
 use strict;
 use warnings;

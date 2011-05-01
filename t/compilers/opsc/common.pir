@@ -1,6 +1,5 @@
 #! parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: common.pir 47062 2010-05-27 21:23:04Z bacek $
 
 =head1 COMMON FUNCTIONS FOR TESTING
 
@@ -28,9 +27,10 @@
 .sub '_slurp'
     .param string file
     .local pmc pio
-    pio  = open file
+    pio  = new ['FileHandle']
+    pio.'open'(file)
     $S0  = pio.'readall'()
-    close pio
+    pio.'close'()
     .return ($S0)
 .end
 

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: binarytrees.pir 47051 2010-05-27 08:45:23Z plobsing $
 #
 # binarytrees.pir N         (N = 16 for shootout)
 # by Joshua Isom, modified by Leopold Toetsch

@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: harness 49347 2010-09-27 00:27:47Z dukeleto $
 
 use strict;
 use warnings;

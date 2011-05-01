@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd00_pdd.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 0: Design Document Format
 
@@ -8,9 +7,9 @@
 This document defines the content and format of Parrot Design Documents
 (PDDs).
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Synopsis
 
@@ -93,11 +92,6 @@ sections:
 A short, general description of a specific part of the Parrot design. This may
 be a particular subsystem (e.g. the garbage collector), or a more general
 topic (e.g. basic Parrot datatypes).
-
-=item Version:
-
-Document version.  Since Parrot is currently kept in a Subversion repository,
-the $$-delimited keyword "Revision" will do nicely.
 
 =item Abstract:
 

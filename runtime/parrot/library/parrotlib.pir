@@ -1,4 +1,3 @@
-# $Id: parrotlib.pir 47283 2010-06-02 06:00:12Z plobsing $
 
 =head1 INFORMATION
 

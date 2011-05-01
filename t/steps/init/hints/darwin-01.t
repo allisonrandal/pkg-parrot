@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: darwin-01.t 47318 2010-06-03 01:36:45Z jkeenan $
 # init/hints/darwin-01.t
 
 use strict;

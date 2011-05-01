@@ -1,5 +1,4 @@
 /*
- * $Id: math.ops 48675 2010-08-26 19:54:37Z chromatic $
 ** math.ops
 */
 
@@ -73,9 +72,9 @@ If the denominator is zero, a 'Divide by zero' exception is thrown.
 =cut
 
 inline op cmod(out INT, in INT, in INT) :base_core {
-    INTVAL den = $3;
+    const INTVAL den = $3;
     if ($3 == 0) {
-        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
+        opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
             EXCEPTION_DIV_BY_ZERO,
             "Divide by zero");
         goto ADDRESS(handler);
@@ -87,7 +86,7 @@ inline op cmod(invar PMC, invar PMC, in INT) :base_core {
     INTVAL result;
 
     if ($3 == 0) {
-        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
+        opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
             EXCEPTION_DIV_BY_ZERO,
             "Divide by zero");
         goto ADDRESS(handler);
@@ -100,10 +99,10 @@ inline op cmod(invar PMC, invar PMC, in INT) :base_core {
 
 inline op cmod(invar PMC, invar PMC, invar PMC) :base_core {
     INTVAL result;
-    INTVAL value = VTABLE_get_integer(interp, $3);
+    const INTVAL value = VTABLE_get_integer(interp, $3);
 
     if (value == 0) {
-        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
+        opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
             EXCEPTION_DIV_BY_ZERO,
             "Divide by zero");
         goto ADDRESS(handler);
@@ -148,9 +147,9 @@ If the denominator is zero, a 'Divide by zero' exception is thrown.
 =cut
 
 inline op cmod(out NUM, in NUM, in NUM) :base_core {
-    FLOATVAL den = $3;
+    const FLOATVAL den = $3;
     if (FLOAT_IS_ZERO($3)) {
-        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
+        opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
             EXCEPTION_DIV_BY_ZERO,
             "Divide by zero");
         goto ADDRESS(handler);
@@ -160,10 +159,10 @@ inline op cmod(out NUM, in NUM, in NUM) :base_core {
 
 inline op cmod(invar PMC, invar PMC, in NUM) :base_core {
     FLOATVAL result;
-    FLOATVAL value = $3;
+    const FLOATVAL value = $3;
 
     if (FLOAT_IS_ZERO(value)) {
-        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
+        opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
             EXCEPTION_DIV_BY_ZERO,
             "Divide by zero");
         goto ADDRESS(handler);
@@ -194,7 +193,7 @@ Set $1 to a random floating point number between 0 and 1, inclusive.
 =cut
 
 inline op rand(out NUM) {
-    $1 = Parrot_float_rand(0);
+    $1 = Parrot_util_float_rand(0);
 }
 
 =item B<rand>(out INT)
@@ -204,7 +203,7 @@ Set $1 to a random integer between C<[-2^31, 2^31)> .
 =cut
 
 inline op rand(out INT) {
-    $1 = Parrot_int_rand(0);
+    $1 = Parrot_util_int_rand(0);
 }
 
 =item B<rand>(out NUM, in NUM)
@@ -214,7 +213,7 @@ Set $1 to a random floating point number between 0 and and $2, inclusive.
 =cut
 
 inline op rand(out NUM, in NUM) {
-    $1 = $2 * Parrot_float_rand(0);
+    $1 = $2 * Parrot_util_float_rand(0);
 }
 
 =item B<rand>(out INT, in INT)
@@ -224,7 +223,7 @@ Set $1 to a integer between 0 and and $2, inclusive.
 =cut
 
 inline op rand(out INT, in INT) {
-    $1 = Parrot_range_rand(0, $2, 0);
+    $1 = Parrot_util_range_rand(0, $2, 0);
 }
 
 =item B<rand>(out NUM, in NUM, in NUM)
@@ -234,7 +233,7 @@ Set $1 to a random floating point number between $2 and and $3, inclusive.
 =cut
 
 inline op rand(out NUM, in NUM, in NUM) {
-    $1 = $2 + ($3 - $2) * Parrot_float_rand(0);
+    $1 = $2 + ($3 - $2) * Parrot_util_float_rand(0);
 }
 
 =item B<srand>(in NUM)
@@ -244,7 +243,7 @@ Set the random number seed to $1. $1 is casted to an INTVAL.
 =cut
 
 inline op srand(in NUM) {
-    Parrot_srand((INTVAL)$1);
+    Parrot_util_srand((INTVAL)$1);
 }
 
 =item B<srand>(in INT)
@@ -254,7 +253,7 @@ Set the random number seed to $1.
 =cut
 
 inline op srand(in INT) {
-    Parrot_srand((INTVAL)$1);
+    Parrot_util_srand((INTVAL)$1);
 }
 
 =item B<rand>(out INT, in INT, in INT)
@@ -264,7 +263,7 @@ Set $1 to a integer between $2 and and $3, inclusive.
 =cut
 
 inline op rand(out INT, in INT, in INT) {
-    $1 = Parrot_range_rand($2, $3, 0);
+    $1 = Parrot_util_range_rand($2, $3, 0);
 }
 
 =back
@@ -273,7 +272,7 @@ inline op rand(out INT, in INT, in INT) {
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2009, Parrot Foundation.
+Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 LICENSE
 
@@ -287,5 +286,5 @@ as the Parrot interpreter itself.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_header_guards.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -92,11 +91,6 @@ F: foreach my $file (@_) {
             $line =~ s/^ //;
 
             if ( $line =~ m{ifndef (PARROT_.+_GUARD)$} ) {
-
-                # allow include/parrot/platform.h to have redundant guards;
-                # it contains verbatim copies of other header files (which
-                # have their own guards).
-                next L if ( defined($ifndef) && $ifndef eq 'PARROT_PLATFORM_H_GUARD' );
 
                 # check for multiple guards in the same file
                 $redundants{$file} = $1 if defined $ifndef;

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: random.pir 45949 2010-04-24 01:14:23Z cotto $
 #
 # random.pir N         (N = 900000 for shootout)
 # by Joshua Isom

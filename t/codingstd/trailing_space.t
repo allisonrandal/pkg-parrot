@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: trailing_space.t 44390 2010-02-23 13:48:39Z mikehh $
 
 use strict;
 use warnings;

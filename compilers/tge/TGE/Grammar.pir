@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: Grammar.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 NAME
 

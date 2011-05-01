@@ -1,6 +1,5 @@
 #! nqp
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Runtime.pm 48133 2010-07-20 18:42:27Z mikehh $
 
 # language-specific runtime functions go here
 

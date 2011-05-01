@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: pipp.t 44437 2010-02-24 02:07:33Z jkeenan $
 
 use strict;
 use warnings;
@@ -24,7 +23,7 @@ isa_ok( $interp, $module );
 my $result = eval { $interp->load_file($pipp_pbc) };
 my $except = $@;
 ok( $result, '... returning true if it could load the file' );
-is( $except, '', '... throwing no exeption if so' );
+is( $except, '', '... throwing no exception if so' );
 
 # What is 'Pipp' in hll namespace 'parrot' ?
 my $pipp_x = $interp->find_global( 'Pipp' );

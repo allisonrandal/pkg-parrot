@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 017-revision_from_cache.t 48002 2010-07-05 01:53:17Z jkeenan $
 # 017-revision_from_cache.t
 
 use strict;
@@ -8,7 +7,7 @@ use warnings;
 
 use Test::More;
 if (-e 'DEVELOPING' and ! -e 'Makefile') {
-    plan tests =>  7;
+    plan tests => 12;
 }
 else {
     plan skip_all =>
@@ -20,6 +19,7 @@ use File::Copy;
 use File::Path ();
 use File::Temp qw| tempdir |;
 use lib qw( lib );
+use Parrot::Configure::Utils qw( print_to_cache );
 
 my $cwd = cwd();
 {
@@ -47,14 +47,28 @@ sub setup_cache {
     ok( (File::Path::mkpath( [ $libdir ], 0, 0777 )), "Able to make libdir");
     local @INC;
     unshift @INC, $libdir;
-    ok( (File::Path::mkpath( [ qq{$libdir/Parrot} ], 0, 0777 )), "Able to make Parrot dir");
+
+    ok( (File::Path::mkpath( [ qq{$libdir/Parrot} ], 0, 0777 )),
+        "Able to make Parrot dir");
     ok( (copy qq{$cwd/lib/Parrot/Revision.pm},
-            qq{$libdir/Parrot}), "Able to copy Parrot::Revision");
+        qq{$libdir/Parrot}),
+        "Able to copy Parrot::Revision");
+    ok( (File::Path::mkpath( [ qq{$libdir/File} ], 0, 0777 )),
+        "Able to make File dir");
+    ok( (copy qq{$cwd/lib/File/Which.pm},
+        qq{$libdir/File/Which.pm}),
+        "Able to copy File::Which");
+    ok( (File::Path::mkpath( [ qq{$libdir/Parrot/Configure} ], 0, 0777 )),
+        "Able to make Parrot dir");
+    ok( (copy qq{$cwd/lib/Parrot/Configure/Utils.pm},
+        qq{$libdir/Parrot/Configure/Utils.pm}),
+        "Able to copy Parrot::Configure::Utils");
+    ok( (copy qq{$cwd/lib/Parrot/BuildUtil.pm},
+        qq{$libdir/Parrot/BuildUtil.pm}),
+        "Able to copy Parrot::BuildUtil");
+
     my $cache = q{.parrot_current_rev};
-    open my $FH, ">", $cache
-        or croak "Unable to open $cache for writing";
-    print $FH qq{$rev\n};
-    close $FH or croak "Unable to close $cache after writing";
+    print_to_cache($cache, $rev);
     return ($cache, $libdir);
 }
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pcre.pm 48972 2010-09-13 07:38:06Z mikehh $
 
 =head1 NAME
 

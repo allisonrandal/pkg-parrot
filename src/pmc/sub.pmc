@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2001-2010, Parrot Foundation.
-$Id: sub.pmc 49420 2010-10-02 22:28:04Z nwellnhof $
+Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -38,6 +37,8 @@ static void print_sub_name(PARROT_INTERP, ARGIN_NULLOK(PMC *sub))
 
 =item C<static void print_sub_name(PARROT_INTERP, PMC *sub)>
 
+static function to print the name of the sub (for tracing/debugging)
+
 =cut
 
 */
@@ -52,7 +53,7 @@ print_sub_name(PARROT_INTERP, ARGIN_NULLOK(PMC *sub))
 
     /* sub was located via globals */
     Parrot_io_eprintf(tracer, "# Calling sub '%Ss'\n# ",
-        Parrot_full_sub_name(interp, sub));
+        Parrot_sub_full_sub_name(interp, sub));
 
     print_pbc_location(interp);
 }
@@ -425,7 +426,7 @@ Invokes the subroutine.
         if (PMC_IS_NULL(context))
             context = Parrot_pmc_new(INTERP, enum_class_CallContext);
 
-        CURRENT_CONTEXT(INTERP) = context;
+        Parrot_pcc_set_context(INTERP, context);
         Parrot_pcc_set_caller_ctx(INTERP, context, caller_ctx);
         Parrot_pcc_allocate_registers(INTERP, context, sub->n_regs_used);
         /* Preserve object */
@@ -443,11 +444,13 @@ Invokes the subroutine.
                     "maximum recursion depth exceeded");
 
         /* and copy set context variables */
+        PARROT_GC_WRITE_BARRIER(interp, ccont);
         PARROT_CONTINUATION(ccont)->from_ctx = context;
 
         /* if this is an outer sub, then we need to set sub->ctx
-         * to the new context (refcounted) */
+         * to the new context */
         if (PObj_get_FLAGS(SELF) & SUB_FLAG_IS_OUTER) {
+            PARROT_GC_WRITE_BARRIER(interp, SELF);
             sub->ctx = context;
         }
 
@@ -457,7 +460,7 @@ Invokes the subroutine.
          */
         if (!PMC_IS_NULL(sub->lex_info)) {
             Parrot_pcc_set_lex_pad(INTERP, context, Parrot_pmc_new_init(INTERP,
-                    Parrot_get_ctx_HLL_type(INTERP, enum_class_LexPad),
+                    Parrot_hll_get_ctx_HLL_type(INTERP, enum_class_LexPad),
                     sub->lex_info));
             VTABLE_set_pointer(INTERP, Parrot_pcc_get_lex_pad(INTERP, context), context);
         }
@@ -470,7 +473,9 @@ Invokes the subroutine.
             PMC *c       = context;
             PMC *outer_c = Parrot_pcc_get_outer_ctx(INTERP, c);
 
-            for (c = context; PMC_IS_NULL(outer_c); c = outer_c) {
+            for (c = context;
+                 PMC_IS_NULL(outer_c);
+                 c = outer_c, outer_c = Parrot_pcc_get_outer_ctx(INTERP, c)) {
 
                 PMC *outer_pmc;
                 Parrot_Sub_attributes *current_sub, *outer_sub;
@@ -485,13 +490,13 @@ Invokes the subroutine.
 
                 if (PMC_IS_NULL(outer_sub->ctx)) {
                     PMC * const dummy = Parrot_alloc_context(INTERP,
-                                                outer_sub->n_regs_used, NULL);
+                                                outer_sub->n_regs_used, PMCNULL);
                     Parrot_pcc_set_sub(INTERP, dummy, outer_pmc);
 
                     if (!PMC_IS_NULL(outer_sub->lex_info)) {
                         Parrot_pcc_set_lex_pad(INTERP, dummy,
                             Parrot_pmc_new_init(INTERP,
-                                Parrot_get_ctx_HLL_type(INTERP,
+                                Parrot_hll_get_ctx_HLL_type(INTERP,
                                     enum_class_LexPad), outer_sub->lex_info));
 
                         VTABLE_set_pointer(INTERP,
@@ -502,6 +507,7 @@ Invokes the subroutine.
                         Parrot_pcc_set_outer_ctx(INTERP, dummy,
                             outer_sub->outer_ctx);
 
+                    PARROT_GC_WRITE_BARRIER(interp, outer_pmc);
                     outer_sub->ctx = dummy;
                 }
 
@@ -710,7 +716,7 @@ Archives the subroutine.
             sub->ns_entry_name = CONST_STRING(INTERP, "");
         VTABLE_push_string(INTERP, info, sub->ns_entry_name);
 
-        hll_name = Parrot_get_HLL_name(INTERP, sub->HLL_id);
+        hll_name = Parrot_hll_get_HLL_name(INTERP, sub->HLL_id);
         if (!hll_name)
             hll_name = CONST_STRING(INTERP, "");
         VTABLE_push_string(INTERP, info, hll_name);
@@ -757,7 +763,8 @@ Unarchives the subroutine.
         sub->name           = VTABLE_shift_string(INTERP, info);
         sub->method_name    = VTABLE_shift_string(INTERP, info);
         sub->ns_entry_name  = VTABLE_shift_string(INTERP, info);
-        sub->HLL_id         = Parrot_get_HLL_id(INTERP,
+        /* lookup or create HLL */
+        sub->HLL_id         = Parrot_hll_register_HLL(INTERP,
             VTABLE_shift_string(INTERP, info));
         sub->comp_flags     = VTABLE_shift_integer(INTERP, info);
         sub->vtable_index   = VTABLE_shift_integer(INTERP, info);
@@ -1097,7 +1104,7 @@ slurpy arguments).
 
         /* Ensure we have lex info. */
         if (PMC_IS_NULL(sub->lex_info)) {
-            const INTVAL lex_info_id = Parrot_get_ctx_HLL_type(INTERP,
+            const INTVAL lex_info_id = Parrot_hll_get_ctx_HLL_type(INTERP,
                                            enum_class_LexInfo);
             sub->lex_info = Parrot_pmc_new_init(INTERP, lex_info_id, SELF);
         }
@@ -1181,5 +1188,5 @@ slurpy arguments).
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -1,9 +1,8 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: bench_op.pir 43141 2009-12-18 07:27:22Z tene $
 
-=head1 TITLE
+=head1 NAME
 
-bench_op - Benchmark one or more opcodes
+tools/dev/bench_op.pir - Benchmark one or more opcodes
 
 =head1 SYNOPSIS
 

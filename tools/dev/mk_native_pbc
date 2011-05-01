@@ -144,7 +144,7 @@ if [ "$enable_long_double" = "1" ]; then
       exit
     fi
     make -s prog-clean
-    perl Configure.pl --floatval="long double" --jitcapable=0 --nomanicheck
+    perl Configure.pl --floatval="long double" --nomanicheck
     tail myconfig
     make -s || exit 1
     hugefloatvalsize=$(./parrot_config hugefloatvalsize)
@@ -163,6 +163,7 @@ if [ "$enable_long_double" = "1" ]; then
       perl t/harness t/native_pbc/string.t
 fi
 
-echo ""
+echo "You should run these commands to update the PBC files in your repo:"
 echo "cd t/native_pbc"
-echo "svn commit -m 'native_pbc platform updates'"
+echo "git add *.pbc"
+echo "git commit -m 'native_pbc platform updates'"

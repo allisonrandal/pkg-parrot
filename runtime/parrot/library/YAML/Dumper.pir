@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: Dumper.pir 44543 2010-02-28 05:02:25Z coke $
 
 .sub __library_data_dumper_onload :load
     .local pmc yd_class

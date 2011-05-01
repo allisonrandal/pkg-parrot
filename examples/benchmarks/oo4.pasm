@@ -1,8 +1,8 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: oo4.pasm 38369 2009-04-26 12:57:09Z fperrad $
 
 .namespace [ "Foo" ]
 
+.pcc_sub :main main:
     newclass P1, "Foo"
     addattribute P1, ".i"
     addattribute P1, ".j"

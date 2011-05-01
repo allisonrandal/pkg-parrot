@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: lexinfo.t 48902 2010-09-10 02:49:54Z NotFound $
 
 =head1 NAME
 

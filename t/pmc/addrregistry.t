@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: addrregistry.t 47245 2010-06-01 06:13:10Z NotFound $
 
 =head1 NAME
 

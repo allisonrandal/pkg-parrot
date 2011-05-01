@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: squaak.pir 48557 2010-08-17 21:19:30Z coke $
 
 =head1 TITLE
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: zlib.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 

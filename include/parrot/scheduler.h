@@ -1,7 +1,5 @@
 /* scheduler.h
  *  Copyright (C) 2007, Parrot Foundation.
- *  SVN Info
- *     $Id: scheduler.h 41533 2009-09-27 17:30:32Z NotFound $
  *  Overview:
  *     Parrot concurrency scheduler header stuff
  *  Data Structure and Algorithms:
@@ -49,9 +47,8 @@ INTVAL Parrot_cx_count_handlers_typed(PARROT_INTERP,
 
 PARROT_EXPORT
 void Parrot_cx_delete_handler_local(PARROT_INTERP,
-    ARGIN(STRING *handler_type))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+    ARGIN_NULLOK(STRING *handler_type))
+        __attribute__nonnull__(1);
 
 PARROT_EXPORT
 void Parrot_cx_delete_handler_typed(PARROT_INTERP,
@@ -187,8 +184,7 @@ void Parrot_cx_timer_invoke(PARROT_INTERP, ARGIN(PMC *timer))
     , PARROT_ASSERT_ARG(handler_type))
 #define ASSERT_ARGS_Parrot_cx_delete_handler_local \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(handler_type))
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_cx_delete_handler_typed \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
@@ -274,5 +270,5 @@ typedef enum {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

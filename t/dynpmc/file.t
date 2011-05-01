@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: file.t 46259 2010-05-04 00:27:02Z coke $
 
 use strict;
 use warnings;
@@ -27,7 +26,7 @@ t/pmc/file.t - Files functions
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/file.t
+    % prove t/dynpmc/file.t
 
 =head1 DESCRIPTION
 
@@ -94,7 +93,7 @@ loop:
         end
 .end
 CODE
-/^[\\w \t\r\n]+current instr\.:/
+/stat failed/
 OUT
 
 # test is_file
@@ -147,7 +146,7 @@ loop:
         end
 .end
 CODE
-/^[\\w \t\r\n]+current instr\.:/
+/stat failed/
 OUT
 
 SKIP: {

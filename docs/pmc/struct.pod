@@ -1,9 +1,8 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: struct.pod 38815 2009-05-16 03:50:07Z coke $
 
 =head1 NAME
 
-Structures - Accessing C Structs from Parrot
+Accessing C Structs from Parrot
 
 =head1 DESCRIPTION
 

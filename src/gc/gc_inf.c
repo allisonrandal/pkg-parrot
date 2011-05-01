@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: gc_inf.c 49426 2010-10-03 00:46:35Z mikehh $
 
 =head1 NAME
 
@@ -92,9 +91,7 @@ static void gc_inf_free_bufferlike_header(SHIM_INTERP,
 
 static void gc_inf_free_fixed_size_storage(SHIM_INTERP,
     SHIM(size_t size),
-    ARGMOD(void *data))
-        __attribute__nonnull__(3)
-        FUNC_MODIFIES(*data);
+    ARGFREE(void *data));
 
 static void gc_inf_free_memory_chunk(SHIM_INTERP, ARGFREE(void *data));
 static void gc_inf_free_pmc_attributes(SHIM_INTERP, ARGMOD(PMC *pmc))
@@ -103,7 +100,9 @@ static void gc_inf_free_pmc_attributes(SHIM_INTERP, ARGMOD(PMC *pmc))
 
 static void gc_inf_free_pmc_header(SHIM_INTERP, ARGFREE(PMC *pmc));
 static void gc_inf_free_string_header(SHIM_INTERP, ARGFREE(STRING *s));
+PARROT_WARN_UNUSED_RESULT
 static size_t gc_inf_get_gc_info(SHIM_INTERP, SHIM(Interpinfo_enum what));
+
 static void gc_inf_mark_and_sweep(SHIM_INTERP, UINTVAL flags);
 static void gc_inf_reallocate_buffer_storage(SHIM_INTERP,
     ARGMOD(Buffer *buffer),
@@ -152,8 +151,7 @@ static void gc_inf_reallocate_string_storage(SHIM_INTERP,
 #define ASSERT_ARGS_gc_inf_compact_memory_pool __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_gc_inf_free_bufferlike_header __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_gc_inf_free_fixed_size_storage \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(data))
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_gc_inf_free_memory_chunk __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_gc_inf_free_pmc_attributes __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(pmc))
@@ -398,11 +396,11 @@ gc_inf_allocate_fixed_size_storage(SHIM_INTERP, size_t size)
 }
 
 static void
-gc_inf_free_fixed_size_storage(SHIM_INTERP, SHIM(size_t size), ARGMOD(void *data))
+gc_inf_free_fixed_size_storage(SHIM_INTERP, SHIM(size_t size), ARGFREE(void *data))
 {
     ASSERT_ARGS(gc_inf_free_fixed_size_storage)
-    if (data)
-        mem_internal_free(data);
+
+    mem_internal_free(data);
 }
 
 /*
@@ -414,6 +412,8 @@ Stub for GC introspection function.
 =cut
 
 */
+
+PARROT_WARN_UNUSED_RESULT
 static size_t
 gc_inf_get_gc_info(SHIM_INTERP, SHIM(Interpinfo_enum what))
 {
@@ -424,7 +424,7 @@ gc_inf_get_gc_info(SHIM_INTERP, SHIM(Interpinfo_enum what))
 
 /*
 
-=item C<void Parrot_gc_inf_init(PARROT_INTERP)>
+=item C<void Parrot_gc_inf_init(PARROT_INTERP, Parrot_GC_Init_Args *args)>
 
 Initializes the infinite memory collector. Installs the necessary function
 pointers into the Memory_Pools structure. The two most important are the
@@ -438,7 +438,7 @@ finalization is necessary.
 */
 
 void
-Parrot_gc_inf_init(PARROT_INTERP)
+Parrot_gc_inf_init(PARROT_INTERP, SHIM(Parrot_GC_Init_Args *args))
 {
     ASSERT_ARGS(Parrot_gc_inf_init)
 
@@ -607,5 +607,5 @@ failed_allocation(unsigned int line, unsigned long size)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

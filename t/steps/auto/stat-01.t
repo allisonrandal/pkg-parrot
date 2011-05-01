@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: stat-01.t 49548 2010-10-15 15:41:10Z jkeenan $
 # auto/stat-01.t
 
 use strict;

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pge_globs.t 42773 2009-11-21 20:41:51Z jkeenan $
 
 use strict;
 use warnings;
@@ -61,7 +60,7 @@ pgeglob_isnt( '', '[^0]', 'glob empty string' );
 ## alternate
 pir_output_is( <<'CODE', <<'OUT', "Glob, alternate" );
 
-.sub _main
+.sub _main :main
   load_bytecode "PGE.pbc"
   load_bytecode "PGE/Glob.pbc"
 

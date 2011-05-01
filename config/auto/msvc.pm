@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: msvc.pm 48890 2010-09-09 20:54:16Z nwellnhof $
 
 =head1 NAME
 

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: schedulermessage.t 47725 2010-06-20 09:31:44Z NotFound $
 
 =head1 NAME
 
@@ -36,7 +35,7 @@ Tests the SchedulerMessage PMC.
     .local pmc eh
     eh = new ['ExceptionHandler']
     eh.'handle_types'(.EXCEPTION_INVALID_OPERATION)
-    set_addr eh, catch
+    set_label eh, catch
     push_eh eh
     $I0 = 1
     $P1 = new ['Integer']

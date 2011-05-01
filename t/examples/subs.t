@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: subs.t 40282 2009-07-26 12:49:21Z whiteknight $
 
 use strict;
 use warnings;

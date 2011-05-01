@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: frames.pm 42017 2009-10-22 10:06:13Z mikehh $
 
 =head1 NAME
 

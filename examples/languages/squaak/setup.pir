@@ -1,6 +1,5 @@
 #!/usr/bin/env parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: setup.pir 48489 2010-08-14 09:13:56Z fperrad $
 
 =head1 NAME
 

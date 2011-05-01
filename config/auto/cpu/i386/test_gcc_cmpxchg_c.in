@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2007-2009, Parrot Foundation.
-$Id: test_gcc_cmpxchg_c.in 36833 2009-02-17 20:09:26Z allison $
 
 test for cmpxchg support with gcc-style inline ASM
 */
@@ -55,5 +54,5 @@ main(void)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

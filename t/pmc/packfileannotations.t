@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: packfileannotations.t 49313 2010-09-25 01:27:42Z plobsing $
 
 
 =head1 NAME
@@ -90,11 +89,13 @@ load_error:
 
     $P5 = new 'PackfileAnnotation'
     $P5.'set_name'('line')
+    $P5.'set_offset'(0)
     $P5 = 1
     anns[2] = $P5
 
     $P6 = new 'PackfileAnnotation'
     $P6.'set_name'('line')
+    $P6.'set_offset'(1)
     $P6 = 2
     anns[3] = $P6
 

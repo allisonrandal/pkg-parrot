@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: Utils.pir 39534 2009-06-13 06:12:50Z tene $
 
 =head1 TITLE
 
@@ -97,6 +96,10 @@ this will tend to make the toolkit init function much happier.
     unshift orig_argv, program_name
   argv_includes_program_name:
 
+    # UnmanagedStruct assumes zero-delimited strings
+    .local string cnul
+    cnul = chr 0
+
     # Calculate argc
     .local int count
     .local pmc argc
@@ -124,6 +127,7 @@ this will tend to make the toolkit init function much happier.
     unless i < count goto add_null
     # It seems like this should be possible in one op
     $S0 = orig_argv[i]
+    concat $S0, $S0, cnul
     argv[0;i] = $S0
     inc i
     goto argv_loop

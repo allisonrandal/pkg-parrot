@@ -1,5 +1,8 @@
 # Parrot is Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: DONORS.pod 37520 2009-03-17 16:31:54Z particle $
+
+=head1 NAME
+
+DONORS
 
 =head1 DONORS
 

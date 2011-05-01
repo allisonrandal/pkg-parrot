@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2004, Parrot Foundation.
-# $Id: exit.t 46013 2010-04-25 16:05:56Z fperrad $
 
 =head1 NAME
 

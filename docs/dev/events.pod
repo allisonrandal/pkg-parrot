@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: events.pod 41356 2009-09-19 08:10:11Z bacek $
 
 =head1 NAME
 

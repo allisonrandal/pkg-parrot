@@ -1,7 +1,6 @@
 /*
 
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: PQt.cpp 37422 2009-03-14 23:50:46Z allison $
 
 =head1 NAME
 

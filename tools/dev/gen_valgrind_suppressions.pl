@@ -1,7 +1,6 @@
 #! perl
 
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: gen_valgrind_suppressions.pl 39496 2009-06-10 15:26:37Z Infinoid $
 
 use strict;
 use warnings;

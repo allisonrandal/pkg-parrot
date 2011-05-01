@@ -15,7 +15,6 @@ sub perl_test_prefix {
 my $temp = <<'EOT';
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: nci_test_gen.pl 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

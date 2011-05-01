@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: opengl.pm 47747 2010-06-21 23:20:46Z japhb $
 
 =head1 NAME
 
@@ -761,7 +760,8 @@ sub gen_opengl_wrappers {
                     $param =~ s/ \w+$// unless $NCI_TYPE{$param};
                     unless ($NCI_TYPE{$param}) {
                         $fail{$file}++;
-                        warn "In OpenGL header '$file', prototype '$name', can't handle type '$param'; original prototype:\n  $orig\n";
+                        warn "In OpenGL header '$file', prototype '$name', can't handle type '$param'; original prototype:\n  $orig\n"
+                          if $verbose;
                         next PROTO;
                     }
                     $nci_sig .= $NCI_TYPE{$param};
@@ -769,7 +769,8 @@ sub gen_opengl_wrappers {
 
                 if ($nci_sig =~ /.v/) {
                     $fail{$file}++;
-                    warn "In OpenGL header '$file', prototype '$name', there is a void parameter; original prototype:\n  $orig\n";
+                    warn "In OpenGL header '$file', prototype '$name', there is a void parameter; original prototype:\n  $orig\n"
+                      if $verbose;
                     next PROTO;
                 }
             }

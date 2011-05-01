@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 03-lines_to_files.t 44353 2010-02-23 02:12:58Z jkeenan $
 # 03-lines_to_files.t
 
 use strict;

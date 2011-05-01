@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: parrotthread.t 46170 2010-04-30 03:48:43Z tewk $
 
 =head1 NAME
 

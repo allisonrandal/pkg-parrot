@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Null.pm 46010 2010-04-25 12:17:42Z bacek $
 
 package Parrot::Pmc2c::PMC::Null;
 use base 'Parrot::Pmc2c::PMC';

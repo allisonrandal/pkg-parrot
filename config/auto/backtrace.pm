@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: backtrace.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 

@@ -1,4 +1,3 @@
-# $Id: cdefectivefoobar 45949 2010-04-24 01:14:23Z cotto $
 
 =variables
 
@@ -9,7 +8,6 @@ CX=/usr/bin/g++
 
 foobar
 cc=$CC
-cxx=$CX
 link=$CX
 ld=/usr/bin/g++
 
@@ -19,7 +17,6 @@ init::manifest nomanicheck
 init::defaults
 init::install
 init::hints verbose-step
-init::headers
 inter::progs
 inter::make
 inter::lex
@@ -69,6 +66,7 @@ auto::snprintf
 auto::ctags
 auto::revision
 auto::icu
+auto::platform
 gen::config_h
 gen::core_pmcs
 gen::crypto
@@ -76,7 +74,6 @@ gen::opengl
 gen::call_list
 gen::languages
 gen::makefiles
-gen::platform
 gen::config_pm
 
 =cut

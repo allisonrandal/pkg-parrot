@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2009, Parrot Foundation.
-$Id: test_dlinfo_c.in 37626 2009-03-21 21:36:23Z cotto $
 
 check that Dl_info is avaible
 */
@@ -23,5 +22,5 @@ main(int argc, char **argv)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

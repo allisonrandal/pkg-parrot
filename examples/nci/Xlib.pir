@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: Xlib.pir 46067 2010-04-27 17:22:14Z NotFound $
 
 =head1 TITLE
 

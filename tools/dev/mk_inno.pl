@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: mk_inno.pl 47604 2010-06-13 16:46:59Z fperrad $
 
 =head1 TITLE
 

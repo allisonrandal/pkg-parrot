@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: pdd29_compiler_tools.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 [DRAFT] PDD 29: Compiler Tools
 
@@ -7,9 +6,9 @@
 
 This PDD specifies the Parrot Compiler Tools (PCT).
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Definitions
 

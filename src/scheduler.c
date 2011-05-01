@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2007-2010, Parrot Foundation.
-$Id: scheduler.c 49432 2010-10-03 19:08:09Z plobsing $
 
 =head1 NAME
 
@@ -9,7 +8,7 @@ src/scheduler.c - The core routines for the concurrency scheduler
 =head1 DESCRIPTION
 
 Each interpreter has a concurrency scheduler element in its core struct. The
-scheduler is responsible for receiveing, dispatching, and monitoring events,
+scheduler is responsible for receiving, dispatching, and monitoring events,
 exceptions, async I/O, and concurrent tasks (threads).
 
 =cut
@@ -65,7 +64,7 @@ Functions to interface with the concurrency scheduler.
 
 =item C<void Parrot_cx_init_scheduler(PARROT_INTERP)>
 
-Initalize the concurrency scheduler for the interpreter.
+Initialize the concurrency scheduler for the interpreter.
 
 =cut
 
@@ -490,11 +489,12 @@ void
 Parrot_cx_add_handler_local(PARROT_INTERP, ARGIN(PMC *handler))
 {
     ASSERT_ARGS(Parrot_cx_add_handler_local)
-    if (PMC_IS_NULL(Parrot_pcc_get_handlers(interp, interp->ctx)))
-        Parrot_pcc_set_handlers(interp, interp->ctx, Parrot_pmc_new(interp,
-                                                                    enum_class_ResizablePMCArray));
-
-    VTABLE_unshift_pmc(interp, Parrot_pcc_get_handlers(interp, interp->ctx), handler);
+    PMC *handlers = Parrot_pcc_get_handlers(interp, interp->ctx);
+    if (PMC_IS_NULL(handlers)) {
+        handlers = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        Parrot_pcc_set_handlers(interp, interp->ctx, handlers);
+    }
+    VTABLE_unshift_pmc(interp, handlers, handler);
 
 }
 
@@ -512,7 +512,7 @@ handlers.
 
 PARROT_EXPORT
 void
-Parrot_cx_delete_handler_local(PARROT_INTERP, ARGIN(STRING *handler_type))
+Parrot_cx_delete_handler_local(PARROT_INTERP, ARGIN_NULLOK(STRING *handler_type))
 {
     ASSERT_ARGS(Parrot_cx_delete_handler_local)
     PMC *handlers  = Parrot_pcc_get_handlers(interp, interp->ctx);
@@ -862,6 +862,8 @@ Parrot_cx_find_handler_local(PARROT_INTERP, ARGIN(PMC *task))
     PMC            *iter             = PMCNULL;
     STRING * const  handled_str      = CONST_STRING(interp, "handled");
     STRING * const  handler_iter_str = CONST_STRING(interp, "handler_iter");
+    STRING * const  exception_str    = CONST_STRING(interp, "Exception");
+    const Parrot_Int is_exception = VTABLE_does(interp, task, exception_str);
 
     if (already_doing) {
         Parrot_io_eprintf(interp,
@@ -874,25 +876,28 @@ Parrot_cx_find_handler_local(PARROT_INTERP, ARGIN(PMC *task))
          */
         context = Parrot_pcc_get_caller_ctx(interp, keep_context);
         keep_context = NULL;
-        if (context && !PMC_IS_NULL(Parrot_pcc_get_handlers(interp, context)))
-            iter = VTABLE_get_iter(interp, Parrot_pcc_get_handlers(interp, context));
-        else
-            iter = PMCNULL;
+        if (context) {
+            PMC * const handlers = Parrot_pcc_get_handlers(interp, context);
+            if (!PMC_IS_NULL(handlers))
+                iter = VTABLE_get_iter(interp, handlers);
+        }
     }
     else {
         ++already_doing;
 
         /* Exceptions store the handler iterator for rethrow, other kinds of
          * tasks don't (though they could). */
-        if (task->vtable->base_type == enum_class_Exception
-        && VTABLE_get_integer_keyed_str(interp, task, handled_str) == -1) {
+        if (is_exception &&
+            VTABLE_get_integer_keyed_str(interp, task, handled_str) == -1) {
             iter    = VTABLE_get_attr_str(interp, task, handler_iter_str);
             context = (PMC *)VTABLE_get_pointer(interp, task);
         }
         else {
+            PMC * handlers;
             context = CURRENT_CONTEXT(interp);
-            if (!PMC_IS_NULL(Parrot_pcc_get_handlers(interp, context)))
-                iter = VTABLE_get_iter(interp, Parrot_pcc_get_handlers(interp, context));
+            handlers = Parrot_pcc_get_handlers(interp, context);
+            if (!PMC_IS_NULL(handlers))
+                iter = VTABLE_get_iter(interp, handlers);
         }
     }
 
@@ -908,7 +913,7 @@ Parrot_cx_find_handler_local(PARROT_INTERP, ARGIN(PMC *task))
                         "P->I", task, &valid_handler);
 
                 if (valid_handler) {
-                    if (task->vtable->base_type == enum_class_Exception) {
+                    if (is_exception) {
                         /* Store iterator and context for a later rethrow. */
                         VTABLE_set_attr_str(interp, task, handler_iter_str, iter);
                         VTABLE_set_pointer(interp, task, context);
@@ -922,8 +927,11 @@ Parrot_cx_find_handler_local(PARROT_INTERP, ARGIN(PMC *task))
 
         /* Continue the search in the next context up the chain. */
         context = Parrot_pcc_get_caller_ctx(interp, context);
-        if (context && !PMC_IS_NULL(Parrot_pcc_get_handlers(interp, context)))
-            iter = VTABLE_get_iter(interp, Parrot_pcc_get_handlers(interp, context));
+        if (context) {
+            PMC * const handlers = Parrot_pcc_get_handlers(interp, context);
+            iter = PMC_IS_NULL(handlers) ? PMCNULL :
+                    VTABLE_get_iter(interp, handlers);
+        }
         else
             iter = PMCNULL;
     }
@@ -1159,5 +1167,5 @@ scheduler_process_messages(PARROT_INTERP, ARGMOD(PMC *scheduler))
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

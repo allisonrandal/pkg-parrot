@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: config.t 46060 2010-04-27 13:39:27Z bacek $
 
 use strict;
 use warnings;

@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: pccmethod_test.pmc 46300 2010-05-05 03:58:50Z jimmy $
 
 =head1 NAME
 
@@ -73,5 +72,5 @@ pmclass PCCMETHOD_Test dynpmc provides hash {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

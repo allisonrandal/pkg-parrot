@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: parrot_debugger.t 49021 2010-09-15 17:44:16Z Paul C. Anagnostopoulos $
 
 =head1 NAME
 

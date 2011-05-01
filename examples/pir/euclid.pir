@@ -1,7 +1,6 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
 # This program is free software. It is subject to the same
 # license as Perl itself.
-# $Id: euclid.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

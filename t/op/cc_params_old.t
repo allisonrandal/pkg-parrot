@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: cc_params_old.t 42035 2009-10-23 08:04:24Z fperrad $
 
 use strict;
 use warnings;

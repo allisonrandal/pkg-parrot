@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: optable.pod 36833 2009-02-17 20:09:26Z allison $
 
 =head1 ***** WARNING *****
 
@@ -11,7 +10,7 @@ docs/optable.pod - PGE operator precedence table and parser
 
 =head1 VERSION
 
-$Revision: 36833 $
+$Revision$
 
 =head1 DESCRIPTION
 
@@ -219,8 +218,7 @@ None.
 
 =head1 EXAMPLES
 
-  languages/perl6/src/grammar_optok.pg
-  languages/cardinal/src/cardinal_optok.pg
+None.
 
 =head1 ATTACHMENTS
 
@@ -236,12 +234,10 @@ None.
   http://en.wikipedia.org/wiki/Associativity
   http://en.wikipedia.org/wiki/Bottom-up_parsing
   http://www.ozonehouse.com/mark/blog/code/PeriodicTable.html
-  http://dev.perl.org/perl6/doc/design/syn/S03.html
+  http://perlcabal.org/syn/S03.html
 
   compilers/tge
   compilers/past
-  languages/perl6/src/PAST.pir
-  languages/perl6/src/POST.pir
 
 =cut
 

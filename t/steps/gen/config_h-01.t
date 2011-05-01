@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: config_h-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # gen/config_h-01.t
 
 use strict;

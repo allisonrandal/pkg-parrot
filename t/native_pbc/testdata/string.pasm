@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: string.pasm 47061 2010-05-27 21:12:15Z bacek $
 
     set S1, "abc"
     set S2, "EE"

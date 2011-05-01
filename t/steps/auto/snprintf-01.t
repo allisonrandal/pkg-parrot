@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: snprintf-01.t 44425 2010-02-24 00:26:00Z jkeenan $
 # auto/snprintf-01.t
 
 use strict;

@@ -1,6 +1,5 @@
 # perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: search-ops.pl 42770 2009-11-21 20:00:08Z jkeenan $
 use strict;
 use warnings;
 use Carp;

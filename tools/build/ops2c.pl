@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: ops2c.pl 46938 2010-05-24 03:29:22Z bacek $
 
 use strict;
 use warnings;

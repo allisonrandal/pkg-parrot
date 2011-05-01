@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: 23_string_ops_substr.pir 46108 2010-04-28 15:43:41Z mikehh $
 
 =head1 String Operations (continued)
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 61_namespaces.pir 39674 2009-06-20 14:09:03Z cotto $
 
 =head1 Namespaces
 

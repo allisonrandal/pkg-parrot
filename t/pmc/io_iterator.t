@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: io_iterator.t 42371 2009-11-08 17:46:04Z jkeenan $
 
 use strict;
 use warnings;

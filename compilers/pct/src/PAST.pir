@@ -1,4 +1,3 @@
-# $Id: PAST.pir 43593 2010-01-26 02:39:50Z jkeenan $
 
 =head1 NAME
 

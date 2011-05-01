@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2009, Parrot Foundation.
-  $Id: test_c.in 37385 2009-03-13 19:25:41Z coke $
+  Copyright (C) 2009-2011, Parrot Foundation.
+
 */
 
 #include <stdio.h>
@@ -16,5 +16,5 @@ main(int argc, char* argv[])
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

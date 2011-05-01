@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Shared.pm 49433 2010-10-04 03:19:11Z plobsing $
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -18,6 +17,7 @@ our @shared_valid_options = qw{
     ccflags
     ccwarn
     configure_trace
+    coveragedir
     cxx
     darwin_no_fink
     darwin_no_macports
@@ -26,10 +26,10 @@ our @shared_valid_options = qw{
     define
     disable-rpath
     exec-prefix
-    execcapable
     fatal
     fatal-step
     floatval
+    gc
     help
     hintsfile
     icu-config
@@ -39,7 +39,6 @@ our @shared_valid_options = qw{
     infodir
     inline
     intval
-    jitcapable
     buildframes
     ld
     ldflags
@@ -72,13 +71,16 @@ our @shared_valid_options = qw{
     verbose
     verbose-step
     version
+    with-llvm
     without-crypto
+    without-core-nci-thunks
     without-extra-nci-thunks
     without-gdbm
     without-gettext
     without-gmp
     without-icu
     without-opengl
+    without-libffi
     without-readline
     without-pcre
     without-threads
