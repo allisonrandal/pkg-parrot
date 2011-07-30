@@ -1,3 +1,20 @@
+parrot (3.6.0-1) unstable; urgency=low
+  * New upstream release
+  * debian/watch:
+    - Modified regular expression to capture numbered directory name
+      (patch from Dominique Dumont).
+  * debian/rules:
+    - Split build-arch and build-indep, resolving lintian warning.
+    - Update path to pbc_disassemble for manpage generation (patch
+      from Dominique Dumont).
+  * debian/patches:
+    - Added patch 02_fix_perl_interpreter_path.patch, resolving
+      lintian warnings.
+  * debian/control:
+    - Added DM-Upload-Allowed field.
+
+ -- Allison Randal <allison@parrot.org>  Sat, 30 Jul 2011 18:45:03 +0200
+
 parrot (3.3.0-1) unstable; urgency=low
   * New upstream release (Closes: #612664)
   * debian/control.in:

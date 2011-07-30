@@ -34,21 +34,25 @@ configure-stamp: debian-control-stamp $(QUILT_STAMPFN)
 	perl Configure.pl --prefix=/usr --mandir=/usr/share/man --disable-rpath
 	touch configure-stamp
 
-build: build-stamp
+build: build-arch build-indep
 
-build-stamp: configure-stamp 
-	dh_testdir
+build-arch: build-arch-stamp
+build-arch-stamp: configure-stamp 
 	$(MAKE) installable LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}`pwd`/blib/lib
+	touch build-arch-stamp
+
+build-indep: build-indep-stamp
+build-indep-stamp: configure-stamp 
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/running.pod debian/parrot.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/parrot-config.pir debian/parrot_config.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_dump/main.c debian/pbc_dump.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" src/pbc_disassemble.c debian/pbc_disassemble.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_disassemble/main.c debian/pbc_disassemble.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/parrot_debugger/main.c debian/parrot_debugger.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_merge/main.c debian/pbc_merge.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/pbc_to_exe.pir debian/pbc_to_exe.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" ext/nqp-rx/parrot-nqp.pod debian/parrot-nqp.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" compilers/opsc/README.pod debian/ops2c.1
-	touch build-stamp
+	touch build-indep-stamp
 
 clean: debian-control-stamp
 	dh_testdir

@@ -1,5 +1,7 @@
-package Parrot::Pmc2c::Parser;
 # Copyright (C) 2004-2011, Parrot Foundation.
+
+package Parrot::Pmc2c::Parser;
+
 use strict;
 use warnings;
 use base qw( Exporter );
@@ -8,8 +10,9 @@ use Parrot::Pmc2c::PMC ();
 use Parrot::Pmc2c::Attribute ();
 use Parrot::Pmc2c::Method ();
 use Parrot::Pmc2c::Emitter ();
+use Parrot::Pmc2c::PCCMETHOD ();
+use Parrot::Pmc2c::MULTI ();
 use Parrot::Pmc2c::UtilFunctions qw(count_newlines filename slurp);
-use Text::Balanced 'extract_bracketed';
 use File::Basename qw(basename);
 
 =head1 NAME

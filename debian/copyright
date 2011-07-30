@@ -3,7 +3,7 @@ Upstream-Name: Parrot
 Upstream-Contact: Parrot Developers <parrot-dev@lists.parrot.org>
 Source: http://ftp.parrot.org/releases/supported/
 
-Files: *
+Files: .*
 Copyright: 2001-2011, Parrot Foundation
 License: Artistic-2.0
 

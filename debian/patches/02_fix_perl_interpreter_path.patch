@@ -1,0 +1,41 @@
+Description: This patch fixes debian-rules-missing-recommended-target warnings from lintian
+Index: parrot-3.6.0/tools/dev/create_language.pl
+===================================================================
+--- parrot-3.6.0.orig/tools/dev/create_language.pl	2011-07-28 22:55:17.000000000 +0000
++++ parrot-3.6.0/tools/dev/create_language.pl	2011-07-28 22:57:08.000000000 +0000
+@@ -1,4 +1,4 @@
+-#! perl
++#!/usr/bin/perl
+ # Copyright (C) 2007-2010, Parrot Foundation.
+ 
+ =head1 NAME
+Index: parrot-3.6.0/tools/dev/gen_makefile.pl
+===================================================================
+--- parrot-3.6.0.orig/tools/dev/gen_makefile.pl	2011-07-28 22:55:09.000000000 +0000
++++ parrot-3.6.0/tools/dev/gen_makefile.pl	2011-07-28 22:57:32.000000000 +0000
+@@ -1,4 +1,4 @@
+-#! perl
++#!/usr/bin/perl
+ 
+ # Copyright (C) 2009, Parrot Foundation.
+ 
+Index: parrot-3.6.0/tools/dev/pprof2cg.pl
+===================================================================
+--- parrot-3.6.0.orig/tools/dev/pprof2cg.pl	2011-07-28 22:54:28.000000000 +0000
++++ parrot-3.6.0/tools/dev/pprof2cg.pl	2011-07-28 22:57:58.000000000 +0000
+@@ -1,4 +1,4 @@
+-#! perl
++#!/usr/bin/perl
+ 
+ # Copyright (C) 2009, Parrot Foundation.
+ 
+Index: parrot-3.6.0/tools/dev/reconfigure.pl
+===================================================================
+--- parrot-3.6.0.orig/tools/dev/reconfigure.pl	2011-07-28 22:54:01.000000000 +0000
++++ parrot-3.6.0/tools/dev/reconfigure.pl	2011-07-28 22:56:22.000000000 +0000
+@@ -1,4 +1,4 @@
+-#! perl
++#!/usr/bin/perl
+ 
+ # Copyright (C) 2007, Parrot Foundation.
+ 
