@@ -31,7 +31,7 @@ debian-control-stamp: $(CONTROL_FILES) VERSION
 configure: configure-stamp
 configure-stamp: debian-control-stamp $(QUILT_STAMPFN)
 	dh_testdir
-	perl Configure.pl --prefix=/usr --mandir=/usr/share/man --disable-rpath
+	perl Configure.pl --prefix=/usr --mandir=/usr/share/man --disable-rpath --without-libffi
 	touch configure-stamp
 
 build: build-arch build-indep
@@ -47,7 +47,6 @@ build-indep-stamp: configure-stamp
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/parrot-config.pir debian/parrot_config.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_dump/main.c debian/pbc_dump.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_disassemble/main.c debian/pbc_disassemble.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/parrot_debugger/main.c debian/parrot_debugger.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_merge/main.c debian/pbc_merge.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/pbc_to_exe.pir debian/pbc_to_exe.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" ext/nqp-rx/parrot-nqp.pod debian/parrot-nqp.1
@@ -57,7 +56,7 @@ build-indep-stamp: configure-stamp
 clean: debian-control-stamp
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp configure-stamp debian-control-stamp debian/parrot.1 debian/parrot_config.1 debian/pbc_dump.1 debian/pbc_disassemble.1 debian/parrot-debugger.1 debian/pbc_merge.1 debian/libparrot$(SOVERSION).install src/main.o installable_pbc_to_exe ext/Parrot-Embed/Makefile.PL test.c test.ldo
+	rm -f build-stamp build-arch-stamp build-indep-stamp configure-stamp debian-control-stamp debian/parrot.1 debian/parrot_config.1 debian/pbc_dump.1 debian/pbc_disassemble.1 debian/pbc_merge.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1 debian/libparrot$(SOVERSION).install src/main.o installable_pbc_to_exe ext/Parrot-Embed/Makefile.PL test.c test.ldo
 	[ ! -f Makefile ] || $(MAKE) distclean
 	dh_clean 
 
@@ -97,7 +96,7 @@ binary-arch: build install
 	dh_testroot -a
 	dh_installchangelogs -a ChangeLog
 	dh_installman -pparrot-minimal debian/parrot.1
-	dh_installman -pparrot-devel debian/parrot_debugger.1 debian/pbc_disassemble.1 debian/pbc_dump.1 debian/pbc_merge.1 debian/parrot_config.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1
+	dh_installman -pparrot-devel debian/pbc_disassemble.1 debian/pbc_dump.1 debian/pbc_merge.1 debian/parrot_config.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1
 	dh_installdocs -a
 	dh_strip -a
 	dh_compress -a

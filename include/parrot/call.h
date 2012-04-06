@@ -122,6 +122,9 @@ void new_runloop_jump_point(PARROT_INTERP)
 void destroy_runloop_jump_points(PARROT_INTERP)
         __attribute__nonnull__(1);
 
+void reset_runloop_id_counter(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
 void runops(PARROT_INTERP, size_t offs)
         __attribute__nonnull__(1);
 
@@ -130,6 +133,8 @@ void runops(PARROT_INTERP, size_t offs)
 #define ASSERT_ARGS_new_runloop_jump_point __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_destroy_runloop_jump_points __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_reset_runloop_id_counter __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_runops __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
@@ -432,13 +437,6 @@ void Parrot_pcc_set_regs_ps(PARROT_INTERP,
         __attribute__nonnull__(3);
 
 PARROT_EXPORT
-void Parrot_pcc_set_regs_used(PARROT_INTERP,
-    ARGIN(PMC *ctx),
-    int type,
-    INTVAL num)
-        __attribute__nonnull__(2);
-
-PARROT_EXPORT
 void Parrot_pcc_set_sub(PARROT_INTERP,
     ARGIN(PMC *ctx),
     ARGIN_NULLOK(PMC *sub))
@@ -526,8 +524,6 @@ PMC * Parrot_set_new_context(PARROT_INTERP,
 #define ASSERT_ARGS_Parrot_pcc_set_regs_ps __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(ctx) \
     , PARROT_ASSERT_ARG(bp_ps))
-#define ASSERT_ARGS_Parrot_pcc_set_regs_used __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(ctx))
 #define ASSERT_ARGS_Parrot_pcc_set_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(ctx))

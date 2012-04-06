@@ -25,6 +25,7 @@ members, beside setting C<bufstart>/C<buflen> for external strings.
 #include <stdio.h>
 
 #include "parrot/parrot.h"
+#include "parrot/events.h"
 #include "private_cstring.h"
 #include "api.str"
 
@@ -558,8 +559,8 @@ Parrot_str_new(PARROT_INTERP, ARGIN_NULLOK(const char *buffer), const UINTVAL le
 
 /*
 
-=item C<STRING * Parrot_str_new_from_buffer(PARROT_INTERP, Buffer *buffer, const
-UINTVAL len)>
+=item C<STRING * Parrot_str_new_from_buffer(PARROT_INTERP, Parrot_Buffer
+*buffer, const UINTVAL len)>
 
 Makes a Parrot string from a Buffer.
 
@@ -575,7 +576,7 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_MALLOC
 PARROT_CANNOT_RETURN_NULL
 STRING *
-Parrot_str_new_from_buffer(PARROT_INTERP, ARGMOD(Buffer *buffer), const UINTVAL len)
+Parrot_str_new_from_buffer(PARROT_INTERP, ARGMOD(Parrot_Buffer *buffer), const UINTVAL len)
 {
     ASSERT_ARGS(Parrot_str_new_from_buffer)
 
@@ -629,15 +630,13 @@ Parrot_str_new_constant(PARROT_INTERP, ARGIN(const char *buffer))
     return s;
 }
 
-
 /*
 
 =item C<STRING * Parrot_str_new_init(PARROT_INTERP, const char *buffer, UINTVAL
 len, const STR_VTABLE *encoding, UINTVAL flags)>
 
-Given a buffer, its length, an encoding, a character set, and STRING flags,
-creates and returns a new string. If buffer is NULL and len >= 0, allocates
-len bytes.
+Given a buffer, its length, an encoding, and STRING flags, creates and returns
+a new string. If buffer is NULL and len >= 0, allocates len bytes.
 
 =cut
 
@@ -689,6 +688,45 @@ Parrot_str_new_init(PARROT_INTERP, ARGIN_NULLOK(const char *buffer), UINTVAL len
 
 /*
 
+=item C<STRING * Parrot_str_new_from_cstring(PARROT_INTERP, const char *buffer,
+STRING *encodingname)>
+
+Given a buffer and an encoding, creates and returns a new string. If buffer is
+NULL the result is a null string. Otherwise, the buffer should be a zero
+terminated c-style string and its content must be valid for the encoding
+specified. If encoding is null, assume plaftorm encoding.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+STRING *
+Parrot_str_new_from_cstring(PARROT_INTERP, ARGIN_NULLOK(const char *buffer),
+        ARGIN_NULLOK(STRING *encodingname))
+{
+    ASSERT_ARGS(Parrot_str_new_from_cstring)
+    STRING *result = STRINGNULL;
+    if (buffer) {
+        const STR_VTABLE *encoding = STRING_IS_NULL(encodingname) ?
+                Parrot_platform_encoding_ptr :
+                Parrot_find_encoding_by_string(interp, encodingname);
+        if (encoding == NULL)
+            Parrot_ex_throw_from_c_args(interp, NULL,
+                    EXCEPTION_INVALID_ENCODING,
+                    "Invalid encoding");
+        else {
+            int size = strlen(buffer);
+            result = Parrot_str_new_init(interp, buffer, size, encoding, 0);
+        }
+    }
+    return result;
+}
+
+
+/*
+
 =item C<STRING * Parrot_str_from_platform_cstring(PARROT_INTERP, const char *c)>
 
 Convert a C string, encoded in the platform's assumed encoding, to a Parrot
@@ -712,7 +750,7 @@ Parrot_str_from_platform_cstring(PARROT_INTERP, ARGIN_NULLOK(const char *c))
 
         if (setjmp(jmp.resume)) {
             /* catch */
-            Parrot_cx_delete_handler_local(interp, STRINGNULL);
+            Parrot_cx_delete_handler_local(interp);
             retv =  Parrot_str_new_init(interp, c, strlen(c),
                                         Parrot_binary_encoding_ptr, 0);
         }
@@ -721,7 +759,7 @@ Parrot_str_from_platform_cstring(PARROT_INTERP, ARGIN_NULLOK(const char *c))
             Parrot_ex_add_c_handler(interp, &jmp);
             retv = Parrot_str_new_init(interp, c, Parrot_str_platform_strlen(interp, c),
                                         Parrot_platform_encoding_ptr, 0);
-            Parrot_cx_delete_handler_local(interp, STRINGNULL);
+            Parrot_cx_delete_handler_local(interp);
         }
 
         return retv;

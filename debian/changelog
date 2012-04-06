@@ -1,3 +1,36 @@
+parrot (4.0.0-1) unstable; urgency=low
+
+  [ Allison Randal ]
+  * New upstream release
+  * debian/patches:
+    - Removed 01_fix_spelling_errors.patch, change included upstream.
+  * debian/parrot.docs:
+    - Removed NEWS, no longer exists upstream.
+  * debian/parrot-devel.install:
+    - Removed binary parrot_debugger, no longer installed upstream.
+  * debian/rules
+    - Removed manpage generation and installation for parrot_debugger,
+      no longer installed upstream.
+    - Added files to the clean list, revealed in new git packaging
+      workflow: build-arch-stamp, build-indep-stamp, pbc_to_exe.1,
+      parrot-nqp.1, ops2c.1.
+    - Added configure flag to explicitly exclude libffi from build
+      dependencies (Closes: #636944)
+  * debian/control.in:
+    - Bumped Standards-Version to 3.9.3.
+  * debian/copyright:
+    - Updated copyright format to 1.0
+    - Updated copyright years to 2012
+  * Dropped debian/libparrot*.symbols file (library exports private
+    symbols, API/ABI not stable)
+
+  [ Alessandro Ghedini ]
+  * Enable ICU support
+    - Build depend on libicu-dev
+  * parrot-minimal Breaks rakudo (<< 0.1~2012.01)
+
+ -- Allison Randal <allison@parrot.org>  Fri, 06 Apr 2012 20:59:51 +0200
+
 parrot (3.6.0-1) unstable; urgency=low
   * New upstream release
   * debian/watch:

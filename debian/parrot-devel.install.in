@@ -1,5 +1,4 @@
 usr/bin/ops2c
-usr/bin/parrot_debugger
 usr/bin/pbc_disassemble
 usr/bin/pbc_dump
 usr/bin/pbc_merge
