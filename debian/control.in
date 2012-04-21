@@ -24,6 +24,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: parrot ( << 1.0.0 )
 Replaces: parrot ( << 1.0.0 )
+Provides: parrotapi-@SOVERSION@
 Description: minimal install of the Parrot VM
  This package contains the core Parrot virtual machine. It's all that you need
  to get up and running in the average use case, and is sufficient to run most
@@ -58,7 +59,7 @@ Description: Parrot documentation
 Package: parrot-devel
 Architecture: any
 Section: devel
-Depends: ${shlibs:Depends}, ${misc:Depends}, parrot, libparrot-dev, perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, parrot, parrotapi-@SOVERSION@, libparrot-dev, perl
 Provides: parrot-pge, parrot-tge, parrot-pct, parrot-nqp
 Conflicts: parrot ( << 1.0.0 ), libparrot-dev ( << 1.0.0 )
 Replaces: parrot ( << 1.0.0 ), libparrot-dev ( << 1.0.0 )

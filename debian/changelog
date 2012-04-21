@@ -1,3 +1,13 @@
+parrot (4.0.0-2) unstable; urgency=low
+
+  * Team upload
+  * parrot-minimal Provides parrotapi-X.Y.Z
+    - parrot-devel Depends on parrotapi-X.Y.Z
+  * Add 01_fix_alignment_issues_on_ia64_sparc_and_mipsel.patch to fix FTBFS
+    on ia64, sparc and mipsel
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 21 Apr 2012 13:11:47 +0200
+
 parrot (4.0.0-1) unstable; urgency=low
 
   [ Allison Randal ]
