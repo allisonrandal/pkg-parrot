@@ -31,7 +31,7 @@ debian-control-stamp: $(CONTROL_FILES) VERSION
 configure: configure-stamp
 configure-stamp: debian-control-stamp $(QUILT_STAMPFN)
 	dh_testdir
-	perl Configure.pl --prefix=/usr --mandir=/usr/share/man --disable-rpath --without-libffi
+	perl Configure.pl --prefix=/usr --mandir=/usr/share/man --disable-rpath --without-libffi --without-gmp --without-opengl --without-pcre --without-zlib
 	touch configure-stamp
 
 build: build-arch build-indep

@@ -1,3 +1,11 @@
+parrot (4.0.0-3) unstable; urgency=low
+
+  * Team upload
+  * Added configure flag to explicitly exclude gmp, opengl, pcre and zlib from
+    build dependencies
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 23 Apr 2012 13:23:45 +0200
+
 parrot (4.0.0-2) unstable; urgency=low
 
   * Team upload
