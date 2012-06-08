@@ -28,3 +28,5 @@ usr/lib/parrot/@VERSION@/VERSION
 usr/lib/parrot/@VERSION@/parrot_config.o
 usr/include/parrot/@VERSION@/pmc/*
 usr/src/parrot/@VERSION@/*
+../dh_parrot usr/bin
+../parrot.pm usr/share/perl5/Debian/Debhelper/Sequence

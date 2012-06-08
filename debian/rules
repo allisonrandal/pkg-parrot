@@ -1,14 +1,10 @@
 #!/usr/bin/make -f
 
-CFLAGS = -Wall -g
+CFLAGS  = $(shell dpkg-buildflags --get CFLAGS)
+CFLAGS += $(shell dpkg-buildflags --get CPPFLAGS)
+LDFLAGS = $(shell dpkg-buildflags --get LDFLAGS)
 VERSION = $(shell cat VERSION)
 SOVERSION = $(VERSION)
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
 
 CONTROL_FILES = \
   debian/control.in \
@@ -31,7 +27,10 @@ debian-control-stamp: $(CONTROL_FILES) VERSION
 configure: configure-stamp
 configure-stamp: debian-control-stamp $(QUILT_STAMPFN)
 	dh_testdir
-	perl Configure.pl --prefix=/usr --mandir=/usr/share/man --disable-rpath --without-libffi --without-gmp --without-opengl --without-pcre --without-zlib
+	perl Configure.pl --ccflags="$(CFLAGS)" --ldflags="$(LDFLAGS)"	\
+		--prefix=/usr --mandir=/usr/share/man --disable-rpath	\
+		--without-libffi --without-gmp --without-opengl		\
+		--without-pcre --without-zlib
 	touch configure-stamp
 
 build: build-arch build-indep
@@ -51,12 +50,13 @@ build-indep-stamp: configure-stamp
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/pbc_to_exe.pir debian/pbc_to_exe.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" ext/nqp-rx/parrot-nqp.pod debian/parrot-nqp.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" compilers/opsc/README.pod debian/ops2c.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" debian/dh_parrot debian/dh_parrot.1
 	touch build-indep-stamp
 
 clean: debian-control-stamp
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp build-arch-stamp build-indep-stamp configure-stamp debian-control-stamp debian/parrot.1 debian/parrot_config.1 debian/pbc_dump.1 debian/pbc_disassemble.1 debian/pbc_merge.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1 debian/libparrot$(SOVERSION).install src/main.o installable_pbc_to_exe ext/Parrot-Embed/Makefile.PL test.c test.ldo
+	rm -f build-stamp build-arch-stamp build-indep-stamp configure-stamp debian-control-stamp debian/parrot.1 debian/parrot_config.1 debian/pbc_dump.1 debian/pbc_disassemble.1 debian/pbc_merge.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1 debian/dh_parrot.1 debian/libparrot$(SOVERSION).install src/main.o installable_pbc_to_exe ext/Parrot-Embed/Makefile.PL test.c test.ldo
 	[ ! -f Makefile ] || $(MAKE) distclean
 	dh_clean 
 
@@ -96,7 +96,7 @@ binary-arch: build install
 	dh_testroot -a
 	dh_installchangelogs -a ChangeLog
 	dh_installman -pparrot-minimal debian/parrot.1
-	dh_installman -pparrot-devel debian/pbc_disassemble.1 debian/pbc_dump.1 debian/pbc_merge.1 debian/parrot_config.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1
+	dh_installman -pparrot-devel debian/pbc_disassemble.1 debian/pbc_dump.1 debian/pbc_merge.1 debian/parrot_config.1 debian/pbc_to_exe.1 debian/parrot-nqp.1 debian/ops2c.1 debian/dh_parrot.1
 	dh_installdocs -a
 	dh_strip -a
 	dh_compress -a

@@ -1,3 +1,17 @@
+parrot (4.3.0-1) unstable; urgency=low
+
+  * Team upload
+  * New upstream release
+  * Drop 01_fix_alignment_issues_on_ia64_sparc_and_mipsel.patch
+    (merged upstream)
+  * Provide debhelper plugin
+  * Remove Breaks on rakudo (no more needed)
+  * Build with security hardening flags
+  * Add 01_use_icu-config_ldflags-libsonly.patch to fix a FTBFS
+    (Closes: #675895)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 08 Jun 2012 12:05:14 +0200
+
 parrot (4.0.0-3) unstable; urgency=low
 
   * Team upload

@@ -13,7 +13,6 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, parrot-minimal (= ${binary:Version})
 Suggests: parrot-doc
 Provides: parrot-test, parrot-data-dumper
-Breaks: rakudo ( << 0.1~2012.01 )
 Description: virtual machine for dynamic languages
  Parrot is a bytecode-based virtual machine designed for dynamic languages.
  Parrot hosts a variety of language implementations, including Tcl, Javascript,

@@ -1,0 +1,21 @@
+Description: Avoid spurious build flags from icu-config
+Origin: vendor
+Bug-Debian: http://bugs.debian.org/675895
+Forwarded: not-needed
+Author: Alessandro Ghedini <ghedo@debian.org>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2012-06-04
+
+--- a/config/auto/icu.pm
++++ b/config/auto/icu.pm
+@@ -278,8 +278,8 @@
+         $arg->{icuconfig}
+     ) {
+         # ldflags
+-        $conf->debug("Trying $arg->{icuconfig} with '--ldflags'\n");
+-        $icushared = capture_output("$arg->{icuconfig} --ldflags");
++        $conf->debug("Trying $arg->{icuconfig} with '--ldflags-libsonly'\n");
++        $icushared = capture_output("$arg->{icuconfig} --ldflags-libsonly");
+         chomp $icushared;
+         $conf->debug("icushared:  captured $icushared\n");
+         ($icushared, $arg->{without}) =

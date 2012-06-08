@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+dh_parrot - generates Parrot dependencies
+
+=cut
+
+use strict;
+use warnings;
+
+use Debian::Debhelper::Dh_Lib;
+
+=head1 SYNOPSIS
+
+B<dh_parrot>
+
+=head1 DESCRIPTION
+
+B<dh_parrot> is a debhelper program that is responsible for generating
+the B<${parrot:Depends}> substitutions and adding them to substvars files.
+
+=cut
+
+init();
+
+my $parrot = 'parrot';
+
+foreach my $package (@{$dh{DOPACKAGES}}) {
+	my $version =`dpkg -s $parrot` =~ /^Version:\s*(\S+)-\S+/m;
+
+	addsubstvar($package, 'parrot:Depends', $parrot, ">= $1");
+	addsubstvar($package, 'parrot:Depends', "parrotapi-$1");
+}
+
+=head1 SEE ALSO
+
+L<debhelper(7)>
+
+=head1 AUTHOR
+
+Alessandro Ghedini <ghedo@debian.org>
+
+=cut

@@ -13,7 +13,6 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, parrot-minimal (= ${binary:Version})
 Suggests: parrot-doc
 Provides: parrot-test, parrot-data-dumper
-Breaks: rakudo ( << 0.1~2012.01 )
 Description: virtual machine for dynamic languages
  Parrot is a bytecode-based virtual machine designed for dynamic languages.
  Parrot hosts a variety of language implementations, including Tcl, Javascript,
@@ -24,13 +23,13 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: parrot ( << 1.0.0 )
 Replaces: parrot ( << 1.0.0 )
-Provides: parrotapi-4.0.0
+Provides: parrotapi-4.3.0
 Description: minimal install of the Parrot VM
  This package contains the core Parrot virtual machine. It's all that you need
  to get up and running in the average use case, and is sufficient to run most
  language implementations.
 
-Package: libparrot4.0.0
+Package: libparrot4.3.0
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -41,7 +40,7 @@ Description: Parrot shared library
 Package: libparrot-dev
 Architecture: any
 Section: libdevel
-Depends: ${misc:Depends}, libparrot4.0.0 (= ${binary:Version}), parrot
+Depends: ${misc:Depends}, libparrot4.3.0 (= ${binary:Version}), parrot
 Description: Parrot shared library development files
  This package contains header files and a static library, needed to develop
  applications which embed Parrot.
@@ -59,7 +58,7 @@ Description: Parrot documentation
 Package: parrot-devel
 Architecture: any
 Section: devel
-Depends: ${shlibs:Depends}, ${misc:Depends}, parrot, parrotapi-4.0.0, libparrot-dev, perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, parrot, parrotapi-4.3.0, libparrot-dev, perl
 Provides: parrot-pge, parrot-tge, parrot-pct, parrot-nqp
 Conflicts: parrot ( << 1.0.0 ), libparrot-dev ( << 1.0.0 )
 Replaces: parrot ( << 1.0.0 ), libparrot-dev ( << 1.0.0 )
