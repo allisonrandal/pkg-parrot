@@ -1,3 +1,4 @@
 01_use_icu-config_ldflags-libsonly.patch
 02_fix_perl_interpreter_path.patch
 03_fix_nqp_man.patch
+04-replace-sysctl-call

@@ -1,0 +1,18 @@
+Description: replace flaky sysctl call with uname -r
+ Try to fix buildd failure on ia64. This patch will get rid of 
+ a configuraiton warning which hopefully will fix the FTBS.
+ .
+ For more details, see 
+ http://lists.alioth.debian.org/pipermail/pkg-parrot-devel/2012-July/000327.html
+Author: dod
+--- a/config/init/hints/linux.pm
++++ b/config/init/hints/linux.pm
+@@ -68,7 +68,7 @@
+         $ccflags .= ' -D_GNU_SOURCE';
+     }
+ 
+-    my $osvers = `/sbin/sysctl -n kernel.osrelease`;
++    my $osvers = `/bin/uname -r`;
+     chomp $osvers;
+ 
+     my %linux_selections = (
