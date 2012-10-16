@@ -2,10 +2,12 @@ Source: parrot
 Section: interpreters
 Priority: optional
 Maintainer: Debian Parrot Maintainers <pkg-parrot-devel@lists.alioth.debian.org>
-Uploaders: Allison Randal <allison@parrot.org>, Nuno Carvalho <mestre.smash@gmail.com>, Patrick Michaud <pmichaud@pobox.com>
+Uploaders: Allison Randal <allison@parrot.org>,
+ Alessandro Ghedini <ghedo@debian.org>,
+ Dominique Dumont <dod@debian.org>
 DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 5.0.0), perl, perl-doc, libicu-dev, libreadline-dev
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Homepage: http://parrot.org
 
 Package: parrot
@@ -36,7 +38,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Parrot shared library
  This package contains the Parrot shared library, used by the Parrot virtual
  machine and by programs that embed Parrot.
- 
+
 Package: libparrot-dev
 Architecture: any
 Section: libdevel

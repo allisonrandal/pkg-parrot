@@ -278,9 +278,10 @@ sub _try_icuconfig {
         $arg->{icuconfig}
     ) {
         # ldflags
-        $conf->debug("Trying $arg->{icuconfig} with '--ldflags'\n");
-        $icushared = capture_output("$arg->{icuconfig} --ldflags");
+        $conf->debug("Trying $arg->{icuconfig} with '--ldflags-searchpath --ldflags-libsonly'\n");
+        $icushared = capture_output("$arg->{icuconfig} --ldflags-searchpath --ldflags-libsonly");
         chomp $icushared;
+        $icushared =~ s/\n/ /g;
         $conf->debug("icushared:  captured $icushared\n");
         ($icushared, $arg->{without}) =
             $self->_handle_icushared($icushared, $arg->{without});
@@ -387,8 +388,11 @@ sub _handle_ccflags_status {
     }
     else {
         my $icuheaders = $arg->{icuheaders};
+        my $incflag = defined $conf->data->get('gccversion')
+            ? '-isystem'
+            : '-I';
 
-        my $icuflags = qq{-isystem "$icuheaders"};
+        my $icuflags = qq{$incflag "$icuheaders"};
         $conf->debug( "Adding $icuflags to ccflags for icu headers.\n");
         $conf->data->add( ' ', ccflags => $icuflags );
     }

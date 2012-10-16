@@ -42,15 +42,15 @@ build-arch-stamp: configure-stamp
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp 
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/running.pod debian/parrot.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/parrot-config.pir debian/parrot_config.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_dump/main.c debian/pbc_dump.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/binaries/parrot.pod        debian/parrot.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/binaries/parrot_config.pod debian/parrot_config.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/binaries/parrot-nqp.pod    debian/parrot-nqp.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/binaries/pbc_to_exe.pod    debian/pbc_to_exe.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" docs/binaries/ops2c.pod         debian/ops2c.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_dump/main.c        debian/pbc_dump.1
 	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_disassemble/main.c debian/pbc_disassemble.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_merge/main.c debian/pbc_merge.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" tools/dev/pbc_to_exe.pir debian/pbc_to_exe.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" ext/nqp-rx/parrot-nqp.pod debian/parrot-nqp.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" compilers/opsc/README.pod debian/ops2c.1
-	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" debian/dh_parrot debian/dh_parrot.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" frontend/pbc_merge/main.c       debian/pbc_merge.1
+	pod2man --section=1 --release="Debian Project" --center="Debian GNU/Linux manual" debian/dh_parrot                debian/dh_parrot.1
 	touch build-indep-stamp
 
 clean: debian-control-stamp

@@ -1,3 +1,16 @@
+parrot (4.6.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Revert "Add patch to fix ia64 ftbs (hopefully)" since it didn't work
+  * Add 04_fix_hurd_ftbfs.patch to fix build on hurd-i386.
+    Thanks to Svante Signell (Closes: #686266)
+  * Drop 01_use_icu-config_ldflags-libsonly.patch (merged upstream)
+  * Generate binaries manpages from docs/binaries/ directory
+  * Bump Standards-Version to 3.9.4 (no changes needed)
+  * Add myself and Dominique to Uploaders, remove Nuno and Patrick
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 16 Oct 2012 14:33:28 +0200
+
 parrot (4.3.0-2) unstable; urgency=low
 
   * Team upload

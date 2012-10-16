@@ -1,0 +1,20 @@
+Description: Fix build on hurd-i386
+Origin: vendor
+Bug-Debian: http://bugs.debian.org/686266
+Forwarded: https://github.com/parrot/parrot/pull/822
+Author: Svante Signell <svante.signell@telia.com>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2012-09-03
+Applied-Upstream: https://github.com/parrot/parrot/commit/72b4ef0d
+
+--- a/config/init/hints.pm
++++ b/config/init/hints.pm
+@@ -36,7 +36,7 @@
+     my $hints_file;
+ 
+     my $osname = lc( $conf->data->get('OSNAME_provisional') );
+-    $osname = 'linux' if ($osname eq 'gnukfreebsd');
++    $osname = 'linux' if $osname =~ m/^gnu(kfreebsd)?$/;
+ 
+     my $hints_file_name = $conf->options->get('hintsfile') || $osname ;
+     $hints_file = catfile('config', 'init', 'hints', "$hints_file_name.pm");

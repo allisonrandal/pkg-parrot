@@ -1,5 +1,5 @@
 
-=head1 TITLE
+=head1 DESCRIPTION
 
 Stream;Writer - a PIR sub as target for a Stream
 
@@ -24,8 +24,6 @@ version 0.1
         .local string str
         str = self."read"()
     .end
-
-=head1 DESCRIPTION
 
 =cut
 
@@ -68,7 +66,6 @@ END:
 
     # mark it as closed
     .local pmc status
-    interpinfo self, .INTERPINFO_CURRENT_OBJECT
     getattribute status, self, 'status'
     status = 0
 .end

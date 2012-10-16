@@ -2,10 +2,12 @@ Source: parrot
 Section: interpreters
 Priority: optional
 Maintainer: Debian Parrot Maintainers <pkg-parrot-devel@lists.alioth.debian.org>
-Uploaders: Allison Randal <allison@parrot.org>, Nuno Carvalho <mestre.smash@gmail.com>, Patrick Michaud <pmichaud@pobox.com>
+Uploaders: Allison Randal <allison@parrot.org>,
+ Alessandro Ghedini <ghedo@debian.org>,
+ Dominique Dumont <dod@debian.org>
 DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 5.0.0), perl, perl-doc, libicu-dev, libreadline-dev
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Homepage: http://parrot.org
 
 Package: parrot
@@ -23,24 +25,24 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: parrot ( << 1.0.0 )
 Replaces: parrot ( << 1.0.0 )
-Provides: parrotapi-4.3.0
+Provides: parrotapi-4.6.0
 Description: minimal install of the Parrot VM
  This package contains the core Parrot virtual machine. It's all that you need
  to get up and running in the average use case, and is sufficient to run most
  language implementations.
 
-Package: libparrot4.3.0
+Package: libparrot4.6.0
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Parrot shared library
  This package contains the Parrot shared library, used by the Parrot virtual
  machine and by programs that embed Parrot.
- 
+
 Package: libparrot-dev
 Architecture: any
 Section: libdevel
-Depends: ${misc:Depends}, libparrot4.3.0 (= ${binary:Version}), parrot
+Depends: ${misc:Depends}, libparrot4.6.0 (= ${binary:Version}), parrot
 Description: Parrot shared library development files
  This package contains header files and a static library, needed to develop
  applications which embed Parrot.
@@ -58,7 +60,7 @@ Description: Parrot documentation
 Package: parrot-devel
 Architecture: any
 Section: devel
-Depends: ${shlibs:Depends}, ${misc:Depends}, parrot, parrotapi-4.3.0, libparrot-dev, perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, parrot, parrotapi-4.6.0, libparrot-dev, perl
 Provides: parrot-pge, parrot-tge, parrot-pct, parrot-nqp
 Conflicts: parrot ( << 1.0.0 ), libparrot-dev ( << 1.0.0 )
 Replaces: parrot ( << 1.0.0 ), libparrot-dev ( << 1.0.0 )
