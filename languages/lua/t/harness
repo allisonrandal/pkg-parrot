@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/harness 13236 2006-07-10T06:47:56.488120Z fperrad  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/harness 3356 2007-05-02T05:51:30.685110Z fperrad  $
 
 =head1 NAME
 
@@ -28,7 +28,7 @@ in order to valid of the test suite.
 
 If I'm called with "--use-monkey", I run with C<monkey>.
 
-If I'm called with "--use-lua2pir", I run with C<lua2pir> (and just after 
+If I'm called with "--use-lua2pir", I run with C<lua2pir> (and just after
 C<luac>).
 
 Otherwise I run the tests that were passed on the command line.
@@ -36,34 +36,39 @@ Otherwise I run the tests that were passed on the command line.
 =cut
 
 use strict;
+use warnings;
 use lib '..';
 
 use Cwd();
 use Data::Dumper;
 use File::Spec;
+use Getopt::Long;
 use Test::Harness();
 
 my $language = 'lua';
 
-if ( grep {m/^--files$/} @ARGV ) {
+my $opt_files;
+my ($use_orig_lua, $use_monkey, $use_lua2pir);
+GetOptions(
+    'files' => \$opt_files,
+    'use-lua' => \$use_orig_lua,
+    'use-monkey' => \$use_monkey,
+    'use-lua2pir' => \$use_lua2pir,
+);
+
+if ( $opt_files ) {
 
     # Only the Makefile in 'parrot/languages' uses --files
     my $dir = File::Spec->catfile( $language, 't' );
-    my @files = glob( File::Spec->catfile( $dir, '*.t' ) );
-    push @files, glob( File::Spec->catfile( $dir, '*', '*.t' ) );
+    my @files = glob( File::Spec->catfile( $dir, 'pmc', '*.t' ) );
+    push @files, glob( File::Spec->catfile( $dir, 'type', '*.t' ) );
+    push @files, glob( File::Spec->catfile( $dir, '*.t' ) );
     print join( "\n", @files );
     print "\n" if scalar(@files);
 }
 else {
     my @files;
 
-    # TODO: use Getopt::Long or such
-    my $use_orig_lua = ( grep {m/^--use-lua$/} @ARGV )     ? 1 : 0;
-    my $use_monkey   = ( grep {m/^--use-monkey$/} @ARGV )  ? 1 : 0;
-    my $use_lua2pir  = ( grep {m/^--use-lua2pir$/} @ARGV ) ? 1 : 0;
-    @ARGV = grep { !m/^--use-lua$/ } @ARGV;
-    @ARGV = grep { !m/^--use-monkey$/ } @ARGV;
-    @ARGV = grep { !m/^--use-lua2pir$/ } @ARGV;
     if ( scalar(@ARGV) ) {
 
         # Someone specified tests for me to run.
@@ -72,35 +77,35 @@ else {
     else {
         ( undef, undef, my $current_dir )
             = File::Spec->splitpath( Cwd::getcwd() );
+        my $dir;
         if ( $current_dir eq 'languages' ) {
-            @files = glob( File::Spec->catfile( $language, 't', '*.t' ) );
-            push @files,
-                glob( File::Spec->catfile( $language, 't', '*', '*.t' ) )
-                unless ($use_orig_lua);
+            $dir = File::Spec->catfile( $language, 't' );
         }
         elsif ( $current_dir eq $language ) {
-            @files = glob( File::Spec->catfile( 't', '*.t' ) );
-            push @files, glob( File::Spec->catfile( 't', '*', '*.t' ) )
+            $dir = 't';
+        }
+        if ($dir) {
+            @files = glob( File::Spec->catfile( $dir, '*.t' ) );
+            push @files, glob( File::Spec->catfile( $dir, 'pmc', '*.t' ) )
+                unless ($use_orig_lua);
+            push @files, glob( File::Spec->catfile( $dir, 'type', '*.t' ) )
                 unless ($use_orig_lua);
         }
     }
 
     if ($use_orig_lua) {
         $ENV{PARROT_LUA_TEST_PROG} = 'lua';
-        Test::Harness::runtests(@files) if scalar(@files);
     }
     elsif ($use_monkey) {
         $ENV{PARROT_LUA_TEST_PROG} = 'monkey';
-        Test::Harness::runtests(@files) if scalar(@files);
     }
     elsif ($use_lua2pir) {
         $ENV{PARROT_LUA_TEST_PROG} = 'lua2pir';
-        Test::Harness::runtests(@files) if scalar(@files);
     }
     else {
         $ENV{PARROT_LUA_TEST_PROG} = q{};
-        Test::Harness::runtests(@files) if scalar(@files);
     }
+    Test::Harness::runtests(@files) if scalar(@files);
 }
 
 =head1 HISTORY
@@ -116,4 +121,11 @@ F<languages/tcl/t/harness>, F<languages/scheme/t/harness>, F<languages/m4/t/harn
 Francois Perrad
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

@@ -1,4 +1,4 @@
-# $Id: /local/examples/pasm/hello.pasm 12064 2006-03-28T19:08:48.197307Z bernhard  $
+# $Id: /parrotcode/trunk/examples/pasm/hello.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 

@@ -18,17 +18,17 @@
 void
 push_namespace(char * name)
 {
-    Namespace * ns = (Namespace *) malloc(sizeof(*ns));
-    ns->parent = namespace;
+    Namespace * ns = (Namespace *) malloc(sizeof (*ns));
+    ns->parent = _namespace;
     ns->name = name;
     ns->idents = NULL;
-    namespace = ns;
+    _namespace = ns;
 }
 
 void
 pop_namespace(char * name)
 {
-    Namespace * ns = namespace;
+    Namespace * ns = _namespace;
     if (ns == NULL) {
         fprintf(stderr, "pop() on empty namespace stack\n");
         abort();
@@ -46,7 +46,7 @@ pop_namespace(char * name)
         free(ident);
     }
 
-    namespace = ns->parent;
+    _namespace = ns->parent;
     free(ns);
 }
 
@@ -57,8 +57,8 @@ _get_sym_typed(SymHash * hsh, const char * name, int t)
     SymReg * p;
     int i = hash_str(name) % hsh->size;
     for (p = hsh->data[i]; p; p = p->next) {
-	if (!strcmp(name, p->name) && t == p->set)
-	    return p;
+        if (!strcmp(name, p->name) && t == p->set)
+            return p;
     }
     return 0;
 }
@@ -77,13 +77,13 @@ _mk_symreg(SymHash* hsh, char * name, int t)
 {
     SymReg * r;
     if ((r = _get_sym_typed(hsh, name, t))) {
-	free(name);
+        free(name);
         return r;
     }
-    r = calloc(1, sizeof(SymReg));
+    r = calloc(1, sizeof (SymReg));
     if (r==NULL) {
-	fprintf(stderr, "Memory error at mk_symreg\n");
-	abort();
+        fprintf(stderr, "Memory error at mk_symreg\n");
+        abort();
     }
     r->name = name;
     r->color = -1;
@@ -109,7 +109,9 @@ mk_symreg(Interp *interp, char * name, int t)
 char *
 symreg_to_str(SymReg * s)
 {
-    char buf[8192];
+    /* NOTE: the below magic number encompasses all the quoted strings which may be included in the
+     * sprintf output */
+    char *buf = (char *) malloc(250 + strlen(s->name));
     int t = s->type;
     sprintf(buf, "symbol [%s]  set [%c]  color [" INTVAL_FMT "]  type [",
                  s->name, s->set, s->color);
@@ -125,7 +127,7 @@ symreg_to_str(SymReg * s)
     if (t & VT_OPTIONAL)  { strcat(buf, "VT_OPTIONAL ");  }
     if (t & VT_NAMED)     { strcat(buf, "VT_NAMED ");  }
     strcat(buf, "]");
-    return str_dup(buf);
+    return buf;
 }
 
 
@@ -143,7 +145,7 @@ mk_pcc_sub(Interp *interp, char * name, int proto) {
     IMC_Unit *unit = IMCC_INFO(interp)->last_unit;
     SymReg *r = _mk_symreg(&unit->hash, name, proto);
     r->type = VT_PCC_SUB;
-    r->pcc_sub = calloc(1, sizeof(struct pcc_sub_t));
+    r->pcc_sub = calloc(1, sizeof (struct pcc_sub_t));
     return r;
 }
 
@@ -158,13 +160,13 @@ add_namespace(Parrot_Interp interp, IMC_Unit *unit)
 
     if (!ns)
         return;
-    if (unit->namespace)
+    if (unit->_namespace)
         return;
-    if (unit->prev && unit->prev->namespace == ns)
-        unit->namespace = ns;
+    if (unit->prev && unit->prev->_namespace == ns)
+        unit->_namespace = ns;
     else {
         g = dup_sym(ns);
-        unit->namespace = g;
+        unit->_namespace = g;
         g->reg = ns;
         g->type = VT_CONSTP;
         if (! (r = _get_sym(&IMCC_INFO(interp)->ghash, g->name)) ||
@@ -180,9 +182,9 @@ void
 add_pcc_arg(SymReg *r, SymReg * arg)
 {
     int n = r->pcc_sub->nargs;
-    r->pcc_sub->args = realloc(r->pcc_sub->args, (n + 1) * sizeof(SymReg *));
+    r->pcc_sub->args = realloc(r->pcc_sub->args, (n + 1) * sizeof (SymReg *));
     r->pcc_sub->args[n] = arg;
-    r->pcc_sub->arg_flags = realloc(r->pcc_sub->arg_flags, (n + 1) * sizeof(int));
+    r->pcc_sub->arg_flags = realloc(r->pcc_sub->arg_flags, (n+1) * sizeof (int));
     r->pcc_sub->arg_flags[n] = arg->type;
     arg->type &= ~(VT_FLAT|VT_OPTIONAL|VT_OPT_FLAG|VT_NAMED);
     r->pcc_sub->nargs++;
@@ -198,12 +200,12 @@ void
 add_pcc_result(SymReg *r, SymReg * arg)
 {
     int n = r->pcc_sub->nret;
-    r->pcc_sub->ret = realloc(r->pcc_sub->ret, (n + 1) * sizeof(SymReg *));
+    r->pcc_sub->ret = realloc(r->pcc_sub->ret, (n + 1) * sizeof (SymReg *));
     r->pcc_sub->ret[n] = arg;
     /* we can't keep the flags in the SymReg as the SymReg
      * maybe used with different flags for different calls
      */
-    r->pcc_sub->ret_flags = realloc(r->pcc_sub->ret_flags, (n + 1) * sizeof(int));
+    r->pcc_sub->ret_flags = realloc(r->pcc_sub->ret_flags, (n+1) * sizeof (int));
     r->pcc_sub->ret_flags[n] = arg->type;
     arg->type &= ~(VT_FLAT|VT_OPTIONAL|VT_OPT_FLAG|VT_NAMED);
     r->pcc_sub->nret++;
@@ -213,7 +215,7 @@ void
 add_pcc_multi(SymReg *r, SymReg * arg)
 {
     int n = r->pcc_sub->nmulti;
-    r->pcc_sub->multi = realloc(r->pcc_sub->multi, (n + 1) * sizeof(SymReg *));
+    r->pcc_sub->multi = realloc(r->pcc_sub->multi, (n + 1) * sizeof (SymReg *));
     r->pcc_sub->multi[n] = arg;
     r->pcc_sub->nmulti++;
 }
@@ -240,8 +242,8 @@ SymReg *
 mk_pasm_reg(Interp *interp, char * name)
 {
     SymReg * r;
-    if ((r = _get_sym(&cur_unit->hash, name))) {
-	free(name);
+    if ((r = _get_sym(&IMCC_INFO(interp)->cur_unit->hash, name))) {
+        free(name);
         return r;
     }
     r = mk_symreg(interp, name, *name);
@@ -267,29 +269,28 @@ _mk_fullname(Namespace * ns, const char * name)
 char *
 mk_fullname(const char * name)
 {
-    return _mk_fullname(namespace, name);
+    return _mk_fullname(_namespace, name);
 }
 
-extern int cur_pmc_type;
 /* Makes a new identifier */
 SymReg *
 mk_ident(Interp *interp, char * name, int t)
 {
-    char * fullname = _mk_fullname(namespace, name);
+    char * fullname = _mk_fullname(_namespace, name);
     Identifier * ident;
     SymReg * r;
-    if (namespace) {
-        ident = calloc(1, sizeof(struct ident_t));
+    if (_namespace) {
+        ident = calloc(1, sizeof (struct ident_t));
         ident->name = fullname;
-        ident->next = namespace->idents;
-        namespace->idents = ident;
+        ident->next = _namespace->idents;
+        _namespace->idents = ident;
     }
     r = mk_symreg(interp, fullname, t);
     r->type = VTIDENTIFIER;
     free(name);
     if (t == 'P') {
-        r->pmc_type = cur_pmc_type;
-        cur_pmc_type = 0;
+        r->pmc_type = IMCC_INFO(interp)->cur_pmc_type;
+        IMCC_INFO(interp)->cur_pmc_type = 0;
     }
     return r;
 }
@@ -366,7 +367,7 @@ mk_const_ident(Interp *interp,
     else {
         if (t == 'P') {
             r = mk_ident(interp, name, t);
-            return mk_pmc_const_2(interp, cur_unit, r, val);
+            return mk_pmc_const_2(interp, IMCC_INFO(interp)->cur_unit, r, val);
         }
         r = mk_ident(interp, name, t);
     }
@@ -399,23 +400,21 @@ mk_const(Interp *interp, char * name, int t)
     return _mk_const(h, name, t);
 }
 
-extern SymReg *cur_namespace; /* ugly hack for mk_address */
-
 /*
  * add namespace to sub if any
  * */
 static char *
-add_ns(char *name)
+add_ns(Interp *interp, char *name)
 {
     int len, l;
     char *ns_name, *p;
 
-    if (!cur_namespace || (l = strlen(cur_namespace->name)) <= 2)
+    if (!IMCC_INFO(interp)->cur_namespace || (l = strlen(IMCC_INFO(interp)->cur_namespace->name)) <= 2)
         return name;
     /* TODO keyed syntax */
     len = strlen(name) + l  + 4;
     ns_name = mem_sys_allocate(len);
-    strcpy(ns_name, cur_namespace->name);
+    strcpy(ns_name, IMCC_INFO(interp)->cur_namespace->name);
     *ns_name = '_';
     ns_name[l - 1] = '\0';
     strcat(ns_name, "@@@");
@@ -438,14 +437,14 @@ _mk_address(Interp *interp, SymHash *hsh, char * name, int uniq)
     SymReg * r;
     if (uniq == U_add_all) {
 
-        r = calloc(1, sizeof(SymReg));
+        r = calloc(1, sizeof (SymReg));
         r->type = VTADDRESS;
         r->name = name;
         _store_symreg(hsh,r);
         return r;
     }
     if (uniq == U_add_uniq_sub)
-        name = add_ns(name);
+        name = add_ns(interp, name);
 
     if (uniq && (r = _get_sym(hsh, name)) &&
             r->type == VTADDRESS &&
@@ -470,7 +469,7 @@ SymReg *
 mk_address(Interp *interp, char * name, int uniq)
 {
     SymReg * s;
-    SymHash *h = *name == '_' ? &IMCC_INFO(interp)->ghash : &cur_unit->hash;
+    SymHash *h = *name == '_' ? &IMCC_INFO(interp)->ghash : &IMCC_INFO(interp)->cur_unit->hash;
     s = _mk_address(interp, h, name, uniq);
     if (*name == '_')
        s->usage |= U_FIXUP;
@@ -564,10 +563,10 @@ mk_label_address(Interp *interp, char * name)
 SymReg *
 dup_sym(SymReg *r)
 {
-    SymReg * new = mem_sys_allocate(sizeof(SymReg));
-    memcpy(new, r, sizeof(SymReg));
-    new->name = str_dup(r->name);
-    return new;
+    SymReg * new_sym = mem_allocate_typed(SymReg);
+    memcpy(new_sym, r, sizeof (SymReg));
+    new_sym->name = str_dup(r->name);
+    return new_sym;
 }
 
 SymReg *
@@ -577,7 +576,8 @@ link_keys(Interp *interp, int nargs, SymReg * keys[], int force)
     int i, len, any_slice;
     char *key_str;
     /* namespace keys are global consts - no cur_unit */
-    SymHash *h = cur_unit ? &cur_unit->hash : &IMCC_INFO(interp)->ghash;
+    SymHash *h = IMCC_INFO(interp)->cur_unit ?
+        &IMCC_INFO(interp)->cur_unit->hash : &IMCC_INFO(interp)->ghash;
 
     if (nargs == 0)
         IMCC_fataly(interp, E_SyntaxError,
@@ -612,7 +612,7 @@ link_keys(Interp *interp, int nargs, SymReg * keys[], int force)
         return keychain;
     }
     /* no, need a new one */
-    keychain = mem_sys_allocate_zeroed(sizeof(SymReg));
+    keychain = mem_sys_allocate_zeroed(sizeof (SymReg));
     keychain->type = VTCONST;
     ++keychain->use_count;
     key = keychain;
@@ -668,7 +668,7 @@ free_sym(SymReg *r)
 void
 create_symhash(SymHash *hash)
 {
-   hash->data = mem_sys_allocate_zeroed(16 * sizeof(SymReg*));
+   hash->data = mem_sys_allocate_zeroed(16 * sizeof (SymReg*));
    hash->size = 16;
    hash->entries = 0;
 }
@@ -683,9 +683,9 @@ resize_symhash(SymHash *hsh)
     SymReg ** next_r;
     int n_next, j, k;
 
-    nh.data = mem_sys_allocate_zeroed(new_size * sizeof(SymReg*));
+    nh.data = mem_sys_allocate_zeroed(new_size * sizeof (SymReg*));
     n_next = 16;
-    next_r =  mem_sys_allocate_zeroed(n_next   * sizeof(SymReg*));
+    next_r =  mem_sys_allocate_zeroed(n_next   * sizeof (SymReg*));
     for (i = 0; i < hsh->size; i++) {
         j = 0;
         for (r = hsh->data[i]; r; r = next) {
@@ -696,7 +696,7 @@ resize_symhash(SymHash *hsh)
              */
             if (j >= n_next) {
                 n_next <<= 1;
-                next_r = mem_sys_realloc(next_r, n_next * sizeof(SymReg*));
+                next_r = mem_sys_realloc(next_r, n_next * sizeof (SymReg*));
             }
             r->next = NULL;
             next_r[j++] = r;
@@ -730,9 +730,9 @@ _store_symreg(SymHash *hsh, SymReg * r)
 }
 
 void
-store_symreg(SymReg * r)
+store_symreg(Interp * interp, SymReg * r)
 {
-    _store_symreg(&cur_unit->hash, r);
+    _store_symreg(&IMCC_INFO(interp)->cur_unit->hash, r);
 }
 
 /* Gets a symbol from the hash */
@@ -745,17 +745,17 @@ _get_sym(SymHash * hsh, const char * name)
 #if IMC_TRACE_HIGH
         printf("   [%s]\n", p->name);
 #endif
-	if (!strcmp(name, p->name))
-	    return p;
+        if (!strcmp(name, p->name))
+            return p;
     }
     return 0;
 }
 
 /* Gets a symbol from the current unit symbol table */
 SymReg *
-get_sym(const char * name)
+get_sym(Interp *interp, const char * name)
 {
-    return _get_sym(&cur_unit->hash, name);
+    return _get_sym(&IMCC_INFO(interp)->cur_unit->hash, name);
 }
 
 /* find a symbol hash or ghash */
@@ -786,8 +786,8 @@ _find_sym(Interp *interp, Namespace * nspace, SymHash * hsh,
 SymReg *
 find_sym(Interp *interp, const char * name)
 {
-    if (cur_unit)
-        return _find_sym(interp, namespace, &cur_unit->hash, name);
+    if (IMCC_INFO(interp)->cur_unit)
+        return _find_sym(interp, _namespace, &IMCC_INFO(interp)->cur_unit->hash, name);
     return NULL;
 }
 
@@ -797,15 +797,15 @@ clear_sym_hash(SymHash *hsh)
 {
     int i;
     SymReg * p, *next;
-    if (!hsh->data) 
-	return;
+    if (!hsh->data)
+        return;
     for (i = 0; i < hsh->size; i++) {
-	for (p = hsh->data[i]; p; ) {
-	    next = p->next;
-	    free_sym(p);
-	    p = next;
-	}
-	hsh->data[i] = NULL;
+        for (p = hsh->data[i]; p; ) {
+            next = p->next;
+            free_sym(p);
+            p = next;
+        }
+        hsh->data[i] = NULL;
     }
     mem_sys_free(hsh->data);
     hsh->data = NULL;
@@ -819,7 +819,7 @@ debug_dump_sym_hash(SymHash *hsh)
     int i;
     SymReg * p;
     for (i = 0; i < hsh->size; i++) {
-	for (p = hsh->data[i]; p; p = p->next) {
+        for (p = hsh->data[i]; p; p = p->next) {
             fprintf(stderr, "%s ", p->name);
         }
     }
@@ -833,14 +833,14 @@ clear_locals(IMC_Unit * unit)
     SymReg * p, *next;
     SymHash *hsh = &unit->hash;
     for (i = 0; i < hsh->size; i++) {
-	for (p = hsh->data[i]; p; ) {
-	    next = p->next;
+        for (p = hsh->data[i]; p; ) {
+            next = p->next;
             if (unit && p->life_info) {
                 free_life_info(unit, p);
             }
-	    free_sym(p);
-	    p = next;
-	}
+            free_sym(p);
+            p = next;
+        }
         hsh->data[i] = NULL;
     }
     hsh->entries = 0;
@@ -872,11 +872,8 @@ hash_str(const char * str)
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */
 

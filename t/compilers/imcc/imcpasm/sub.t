@@ -1,12 +1,14 @@
 #!perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/imcpasm/sub.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/imcc/imcpasm/sub.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
 use Parrot::Test tests => 2;
 
 ##############################
-pir_2_pasm_like(<<'CODE', <<'OUT', "non-constant dest bsr, invoke");
+pir_2_pasm_like( <<'CODE', <<'OUT', "non-constant dest bsr, invoke" );
 .sub _main
     $P26 = new Sub
     $I15 = addr _sub1
@@ -29,7 +31,7 @@ _sub1:
  ret/
 OUT
 
-pir_2_pasm_like(<<'CODE', <<'OUT', "nonlocal bsr");
+pir_2_pasm_like( <<'CODE', <<'OUT', "nonlocal bsr" );
 .sub _main
     $P26 = new Sub
     $I15 = addr _f
@@ -52,3 +54,10 @@ _main:
 _f:
  ret/
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

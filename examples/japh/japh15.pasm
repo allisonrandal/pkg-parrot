@@ -1,4 +1,4 @@
-# $Id: /local/examples/japh/japh15.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/examples/japh/japh15.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 # a JapH compiler "_japhc" compiles this program:
     set S5, "pJ pa pP pH pn e "

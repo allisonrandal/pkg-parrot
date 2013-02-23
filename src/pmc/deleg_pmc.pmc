@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004, The Perl Foundation.
-$Id: /local/src/pmc/deleg_pmc.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+Copyright (C) 2004-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/deleg_pmc.pmc 3369 2007-05-03T06:56:51.563174Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ src/pmc/deleg_pmc.pmc - Delegate PMC
 
 =head1 DESCRIPTION
 
-Delegate functions to the PMC in attribute slote #0.
+Delegate functions to the PMC in attribute slot #0.
 
 Almost all methods are auto-generated in lib/Parrot/Pmc2c.pm
 
@@ -24,7 +24,7 @@ Almost all methods are auto-generated in lib/Parrot/Pmc2c.pm
 #include "parrot/parrot.h"
 #include <assert.h>
 
-pmclass deleg_pmc {
+pmclass deleg_pmc no_ro {
 
 /*
 
@@ -36,10 +36,10 @@ pmclass deleg_pmc {
 
 */
 
-    void init () {
+    void init() {
     }
 
-    void init_pmc (PMC* class) {
+    void init_pmc(PMC* _class) {
     }
 
     void mark() {
@@ -55,19 +55,18 @@ pmclass deleg_pmc {
     }
 
     PMC* clone() {
-        PMC* res = pmc_new(INTERP, SELF->vtable->base_type);
-        INTVAL i;
-        SLOTTYPE *attrib_array = PMC_data(res);
-        for (i = POD_FIRST_ATTRIB; i < PMC_int_val(SELF); ++i)
+        PMC      *res          = pmc_new(INTERP, SELF->vtable->base_type);
+        SLOTTYPE *attrib_array = PMC_data_typed(res, SLOTTYPE *);
+        INTVAL    i;
+
+        for (i = 0; i < PMC_int_val(SELF); ++i)
             attrib_array[i] = VTABLE_clone(INTERP, attrib_array[i]);
+
         return res;
     }
 
     STRING* name() {
-        PMC **class_data;
-        class_data = (PMC **)PMC_data(SELF);
-
-        return VTABLE_get_string(INTERP, class_data[PCD_CLASS_NAME]);
+        return SELF->vtable->whoami;
     }
 
     INTVAL type() {
@@ -82,7 +81,7 @@ pmclass deleg_pmc {
         return SUPER(method_name);
     }
 
-    PMC* namespace() {
+    PMC* pmc_namespace() {
         return SELF->vtable->_namespace;
     }
 
@@ -98,10 +97,7 @@ pmclass deleg_pmc {
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

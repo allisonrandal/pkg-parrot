@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 4;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     public class Test
@@ -19,7 +22,7 @@ namespace Testing
     	{
 	    	Test.x = x;
     	}
-    
+
 	    public void set_y(int y)
     	{
 	    	Test.y = y;
@@ -34,10 +37,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'set_x');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'set_x' );
 .HLL 'dotnet', ''
 .sub main
 	.local pmc obj
@@ -45,7 +48,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'set_x');
 	obj = new [ "Testing" ; "Test" ]
 	obj.set_x(26)
     $P0 = new Integer
-    $P0 = find_global [ "Testing" ; "Test" ], "x"
+    $P0 = get_hll_global [ "Testing" ; "Test" ], "x"
 	print $P0
 	print "\n"
 .end
@@ -53,7 +56,7 @@ PIR
 26
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'set_y');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'set_y' );
 .HLL 'dotnet', ''
 .sub main
 	.local pmc obj
@@ -61,7 +64,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'set_y');
 	obj = new [ "Testing" ; "Test" ]
 	obj.set_y(16)
     $P0 = new Integer
-    $P0 = find_global [ "Testing" ; "Test" ], "y"
+    $P0 = get_hll_global [ "Testing" ; "Test" ], "y"
 	print $P0
 	print "\n"
 .end
@@ -69,7 +72,7 @@ PIR
 16
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'add');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'add' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -83,3 +86,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'add');
 PIR
 42
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

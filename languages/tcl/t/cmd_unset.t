@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 13
+plan 21
 
 eval_is {unset a} \
   {can't unset "a": no such variable} \
@@ -72,3 +78,72 @@ eval_is {
   unset foo bar
   list [catch {puts $foo}] [catch {puts $bar}]
 } {1 1} {unset multiple variables}
+
+eval_is {
+  catch {unset a}
+  set a [list 1 2 3 4]
+  unset a
+  set a
+} {can't read "a": no such variable} \
+  {unset list}
+
+eval_is {
+  catch {unset a}
+  set a 1
+  upvar 0 a b
+  unset b
+  set a
+} {can't read "a": no such variable} \
+  {unset upvar}
+
+eval_is {
+  catch {unset a}
+  proc test {} {global a; unset a}
+  set a 1
+  test
+  set a
+} {can't read "a": no such variable} \
+  {unset global}
+
+eval_is {
+  catch {unset a}
+  set a 1
+  upvar 0 a b
+  unset b
+  set b 2
+  set a
+} 2 {reset an unset upvar}
+
+eval_is {
+  catch {unset array}
+  array set array {a 1 b 2}
+  upvar 0 array(a) elem
+  unset elem
+  set elem 7
+  set array(a)
+} 7 {reset an unset array elem upvar}
+
+eval_is {
+  catch {unset array}
+  array set array {a 1 b 2}
+  upvar 0 array(a) elem
+  unset elem
+  set array(a)
+} {can't read "array(a)": no such element in array} \
+  {unset array elem upvar}
+
+eval_is {
+  catch {unset array}
+  upvar 0 array(b) c
+  set c 4
+  unset array(b)
+  set c
+} {variable "c" already exists} \
+  {unset an aliased array elem} {TODO {not fixed yet}}
+
+eval_is {
+  catch {unset a}
+  set a 55
+  unset a(f)
+} {can't unset "a(f)": variable isn't array} \
+  {variable isn't array}

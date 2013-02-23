@@ -1,13 +1,3 @@
-=head1 Deprecated opcodes
-
-=over 4
-
-=item fetchmethod
-
-Use the C<find_method> opcode instead.
-
-=back
-
 =head1 .imc file extension
 
 http://xrl.us/jc4u
@@ -19,14 +9,14 @@ http://xrl.us/jc4u
  /me giggles
  -- Chip Salzenberg
 
-=head1 Deprecated APIs
+=head1 Deprecated C APIs
 
 =over 4
 
-=item *
+=item enter_nci_method
 
-All Parrot_char_is_* functions from src/string_primitives.c will
-be removed. Please use Parrot_string_is_cclass() instead.
+This function is being renamed to register_nci_method. The original name was
+confusing (see #40801).
 
 =back
 
@@ -43,17 +33,56 @@ PGE::P6Regex is now a registered compiler, and should be used like so:
 
 This syntax is also true for PGE::Glob and PGE::P5Regex
 
-=item Subpragma syntax
+=back
 
-Subroutine attributes now use the colon syntax:
+=head1 Deprecated ops
 
-  .sub foo method, @MULTI(x,y)    => .sub foo :method :multi(x,y)
-  .sub foo @ANON, @LOAD           => .sub foo :anon :load
+From http://www.parrotcode.org/docs/ops/var.html, the following ops are 
+deprecated:
 
-The new syntax uses no comma separators and all sub attributes are lower
-case and prefixed by a colon.
+=over 4
+
+=item store_global
+
+=item find_global
+
+=item find_name
 
 =back
+
+There are several variants of some of the above ops; all are deprecated,
+and are replaced by the ops {set,get}_[hll,root]_global. See also
+http://www.parrotcode.org/docs/ops/var.html.
+
+Additionally, the following (unimplemented) ops are going to be removed:
+
+=over 4
+
+=item adddoes
+
+=item removedoes
+
+=item singleton
+
+=back
+
+
+=head1 Deprecated vtable methods
+
+The following vtable methods are deprecated:
+
+=over 4
+
+=item void become_parent(PMC* class)
+
+=item PMC* subclass(PMC* name)
+
+=item PMC* get_anonymous_subclass()
+
+=item PMC* new_singleton()
+
+=back
+
 
 =head1 FUTURE changes
 
@@ -62,7 +91,7 @@ gradually change the old.
 
 =over 4
 
-=item Class name IDs
+=item PMC Class name IDs [#41237]
 
 ... will require a dot in front
 

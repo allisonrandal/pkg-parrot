@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/delegate.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/trunk/t/pmc/delegate.t 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/delegate.t - Method Delegation
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/delegate.t
+    % prove t/pmc/delegate.t
 
 =head1 DESCRIPTION
 
@@ -24,7 +24,7 @@ Tests method delegation.
 
 # basic functionality - setting and getting types
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate set_integer_native");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate set_integer_native" );
     new P0, .delegate
     set P0, 42
     end
@@ -41,7 +41,7 @@ CODE
 42
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate get_integer");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate get_integer" );
     new P0, .delegate
     set I0, P0
     print I0
@@ -57,7 +57,7 @@ CODE
 42
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate set_string_native");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate set_string_native" );
     new P0, .delegate
     set P0, "fortytwo"
     end
@@ -71,7 +71,7 @@ CODE
 fortytwo
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate get_string");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate get_string" );
     new P0, .delegate
     set S0, P0
     print S0
@@ -87,7 +87,7 @@ CODE
 fortytwo
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate set_number_native");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate set_number_native" );
     new P0, .delegate
     set P0, 47.11
     end
@@ -101,7 +101,7 @@ CODE
 47.110000
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate get_number");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate get_number" );
     new P0, .delegate
     set N0, P0
     print N0
@@ -117,7 +117,7 @@ CODE
 47.110000
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delegate assign_pmc");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delegate assign_pmc" );
     new P0, .delegate
     new P1, .Integer
     set P1, 42
@@ -135,7 +135,7 @@ CODE
 OUTPUT
 
 # math
-pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_i");
+pir_output_is( <<'CODE', <<'OUTPUT', "delegate add_p_p_i" );
 .sub main
     new P0, .delegate
     set P0, 1
@@ -146,7 +146,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_i");
     end
 .end
 .namespace ["delegate"]
-.sub __set_integer_native :method
+.sub set_integer_native :vtable :method
     .param int i
     # just return
     print i
@@ -170,7 +170,7 @@ CODE
 OUTPUT
 
 # math
-pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_p");
+pir_output_is( <<'CODE', <<'OUTPUT', "delegate add_p_p_p" );
 .sub main
     new P0, .delegate
     set P0, 1
@@ -184,7 +184,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_p");
     end
 .end
 .namespace ["delegate"]
-.sub __set_integer_native :method
+.sub set_integer_native :vtable :method
     .param int i
     # cant keep state yet
     # just print arg and return
@@ -205,7 +205,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_p");
     d = 3
     .return (d)
 .end
-.sub __get_string :method
+.sub get_string :vtable :method
     .return("one")
 .end
 CODE
@@ -216,3 +216,10 @@ one
 777
 3
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -123,39 +123,41 @@
      INVOCANT = 339,
      MAIN = 340,
      LOAD = 341,
-     IMMEDIATE = 342,
-     POSTCOMP = 343,
-     METHOD = 344,
-     ANON = 345,
-     OUTER = 346,
-     NEED_LEX = 347,
-     MULTI = 348,
-     LOADLIB = 349,
-     UNIQUE_REG = 350,
-     LABEL = 351,
-     EMIT = 352,
-     EOM = 353,
-     IREG = 354,
-     NREG = 355,
-     SREG = 356,
-     PREG = 357,
-     IDENTIFIER = 358,
-     REG = 359,
-     MACRO = 360,
-     ENDM = 361,
-     STRINGC = 362,
-     INTC = 363,
-     FLOATC = 364,
-     USTRINGC = 365,
-     PARROT_OP = 366,
-     VAR = 367,
-     LINECOMMENT = 368,
-     FILECOMMENT = 369,
-     DOT = 370,
-     CONCAT = 371,
-     POINTY = 372
+     INIT = 342,
+     IMMEDIATE = 343,
+     POSTCOMP = 344,
+     METHOD = 345,
+     ANON = 346,
+     OUTER = 347,
+     NEED_LEX = 348,
+     MULTI = 349,
+     VTABLE_METHOD = 350,
+     LOADLIB = 351,
+     UNIQUE_REG = 352,
+     LABEL = 353,
+     EMIT = 354,
+     EOM = 355,
+     IREG = 356,
+     NREG = 357,
+     SREG = 358,
+     PREG = 359,
+     IDENTIFIER = 360,
+     REG = 361,
+     MACRO = 362,
+     ENDM = 363,
+     STRINGC = 364,
+     INTC = 365,
+     FLOATC = 366,
+     USTRINGC = 367,
+     PARROT_OP = 368,
+     VAR = 369,
+     LINECOMMENT = 370,
+     FILECOMMENT = 371,
+     DOT = 372,
+     CONCAT = 373,
+     POINTY = 374
    };
-#endif
+#endif /* YYTOKENTYPE */
 /* Tokens.  */
 #define LOW_PREC 258
 #define PARAM 259
@@ -241,44 +243,46 @@
 #define INVOCANT 339
 #define MAIN 340
 #define LOAD 341
-#define IMMEDIATE 342
-#define POSTCOMP 343
-#define METHOD 344
-#define ANON 345
-#define OUTER 346
-#define NEED_LEX 347
-#define MULTI 348
-#define LOADLIB 349
-#define UNIQUE_REG 350
-#define LABEL 351
-#define EMIT 352
-#define EOM 353
-#define IREG 354
-#define NREG 355
-#define SREG 356
-#define PREG 357
-#define IDENTIFIER 358
-#define REG 359
-#define MACRO 360
-#define ENDM 361
-#define STRINGC 362
-#define INTC 363
-#define FLOATC 364
-#define USTRINGC 365
-#define PARROT_OP 366
-#define VAR 367
-#define LINECOMMENT 368
-#define FILECOMMENT 369
-#define DOT 370
-#define CONCAT 371
-#define POINTY 372
+#define INIT 342
+#define IMMEDIATE 343
+#define POSTCOMP 344
+#define METHOD 345
+#define ANON 346
+#define OUTER 347
+#define NEED_LEX 348
+#define MULTI 349
+#define VTABLE_METHOD 350
+#define LOADLIB 351
+#define UNIQUE_REG 352
+#define LABEL 353
+#define EMIT 354
+#define EOM 355
+#define IREG 356
+#define NREG 357
+#define SREG 358
+#define PREG 359
+#define IDENTIFIER 360
+#define REG 361
+#define MACRO 362
+#define ENDM 363
+#define STRINGC 364
+#define INTC 365
+#define FLOATC 366
+#define USTRINGC 367
+#define PARROT_OP 368
+#define VAR 369
+#define LINECOMMENT 370
+#define FILECOMMENT 371
+#define DOT 372
+#define CONCAT 373
+#define POINTY 374
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 395 "compilers/imcc/imcc.y"
+#line 390 "compilers/imcc/imcc.y"
 {
     IdList * idlist;
     int t;
@@ -287,12 +291,12 @@ typedef union YYSTYPE
     Instruction *i;
 }
 /* Line 1529 of yacc.c.  */
-#line 291 "compilers/imcc/imcparser.h"
+#line 295 "compilers/imcc/imcparser.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
-#endif
+#endif /* !YYSTYPE && !YYSTYPE_IS_DECLARED */
 
 
 

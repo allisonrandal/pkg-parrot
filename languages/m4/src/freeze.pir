@@ -1,4 +1,4 @@
-# $Id: /local/languages/m4/src/freeze.pir 11903 2006-03-14T20:49:11.779219Z bernhard  $
+# $Id: /parrotcode/trunk/languages/m4/src/freeze.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ freeze.pir - reading and writing of state files
 =head1 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: /local/languages/m4/src/freeze.pir 11903 2006-03-14T20:49:11.779219Z bernhard  $
+SVN Info:   $Id: /parrotcode/trunk/languages/m4/src/freeze.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -240,3 +240,9 @@ CHECK_PARSING_FINISHED:
 
   FINISHED:
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

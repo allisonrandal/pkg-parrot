@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/pir/thr-primes.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/examples/pir/thr-primes.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -82,15 +82,7 @@ no_arg:
     kid = new ParrotThread
     $P2 = new Integer
     $P2 = 2
-    .sym pmc Thread_new
-    find_method Thread_new, kid, "thread3"
-    .pcc_begin
-    .arg Check_num
-    .arg stream
-    .arg $P2
-    .invocant kid
-    .nci_call Thread_new
-    .pcc_end
+    kid.'run_clone'(Check_num, Check_num, stream, $P2)
 
 #       12 for my $i ( 3 .. 1000 ) {
     .sym int i
@@ -109,15 +101,7 @@ lp:
     push stream, $P4
 
 #       17 $kid->join;
-    .sym int tid
-    tid = kid
-    .sym pmc Thread_join
-    find_method Thread_join, kid, "join"
-    .pcc_begin
-    .arg tid
-    .nci_call Thread_join
-    .pcc_end
-    end
+    kid.'join'()
 .end
 
 #       19 sub check_num {
@@ -159,15 +143,7 @@ no_kid1:
 
 #       29                $kid = new threads(\&check_num, $downstream, $num);
     kid = new ParrotThread
-    .sym pmc Thread_new
-    find_method Thread_new, kid, "thread3"
-    .pcc_begin
-    .arg sub
-    .arg downstream
-    .arg Num
-    .invocant kid
-    .nci_call Thread_new
-    .pcc_end
+    kid.'run_clone'(sub, sub, downstream, Num)
     goto lp
 #       31     }
 ewhile:
@@ -180,14 +156,7 @@ ewhile:
     push downstream, $P4
 
 #       33     $kid->join           if $kid;
-    .sym int tid
-    tid = kid
-    .sym pmc Thread_join
-    find_method Thread_join, kid, "join"
-    .pcc_begin
-    .arg tid
-    .nci_call Thread_join
-    .pcc_end
+    kid.'join'()
 
 no_kid2:
 #       34 }
@@ -195,3 +164,9 @@ no_kid2:
    .pcc_begin_return
    .pcc_end_return
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

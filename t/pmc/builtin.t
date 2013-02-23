@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/builtin.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/builtin.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/builtin.t - Builtin Methods
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/builtin.t
+    % prove t/pmc/builtin.t
 
 =head1 DESCRIPTION
 
@@ -22,8 +22,7 @@ Tests builtin opcode-like methods.
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', "three ways to call a method");
+pir_output_is( <<'CODE', <<'OUT', "three ways to call a method" );
 .sub main :main
     .local pmc x, y, cl, m
     x = new Float
@@ -50,7 +49,7 @@ function      0.540302
 method        0.540302
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "say");
+pir_output_is( <<'CODE', <<'OUT', "say" );
 .sub main :main
     .local pmc io
     $I0 = say "ok 1"
@@ -77,8 +76,8 @@ ok 7
 OUT
 
 SKIP: {
-    skip("bound methods - n/y", 2);
-pir_output_is(<<'CODE', <<'OUT', "bound methods");
+    skip( "bound methods - n/y", 2 );
+    pir_output_is( <<'CODE', <<'OUT', "bound methods" );
 .sub main :main
     .local pmc x, y, cl, m
     x = new Float
@@ -108,7 +107,7 @@ class method  0.540302
 bound class m 0.540302
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "ParrotIO.puts");
+    pir_output_is( <<'CODE', <<'OUT', "ParrotIO.puts" );
 .sub main :main
     .local pmc o, m, cl
     o = getstdout
@@ -130,3 +129,9 @@ OUT
 
 }
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

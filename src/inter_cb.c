@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/inter_cb.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/inter_cb.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -9,7 +9,7 @@ src/inter_cb.c - Parrot Interpreter - Callback Function Handling
 =head1 DESCRIPTION
 
 NCI callback functions may run whenever the C code executes the callback.
-To be prepared for asynchronous callbacks these are converted to callback 
+To be prepared for asynchronous callbacks these are converted to callback
 events.
 
 Often callbacks should run synchronously. This can only happen when
@@ -31,7 +31,7 @@ the C-library.
 
 /*
 
-=item C<PMC* Parrot_make_cb(Parrot_Interp interpreter, PMC* sub, PMC* user
+=item C<PMC* Parrot_make_cb(Parrot_Interp interp, PMC* sub, PMC* user
         STRING* cb_signature)>
 
 Create a callback function according to pdd16.
@@ -41,7 +41,7 @@ Create a callback function according to pdd16.
 */
 
 PMC*
-Parrot_make_cb(Parrot_Interp interpreter, PMC* sub, PMC* user_data,
+Parrot_make_cb(Parrot_Interp interp, PMC* sub, PMC* user_data,
         STRING *cb_signature)
 {
     PMC* interp_pmc, *cb, *cb_sig;
@@ -52,21 +52,21 @@ Parrot_make_cb(Parrot_Interp interpreter, PMC* sub, PMC* user_data,
      * we stuff all the information into the user_data PMC and pass that
      * on to the external sub
      */
-    interp_pmc = VTABLE_get_pmc_keyed_int(interpreter, interpreter->iglobals,
+    interp_pmc = VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
             (INTVAL) IGLOBALS_INTERPRETER);
     /* be sure __LINE__ is consistent */
-    sc = CONST_STRING(interpreter, "_interpreter");
-    VTABLE_setprop(interpreter, user_data, sc, interp_pmc);
-    sc = CONST_STRING(interpreter, "_sub");
-    VTABLE_setprop(interpreter, user_data, sc, sub);
+    sc = CONST_STRING(interp, "_interpreter");
+    VTABLE_setprop(interp, user_data, sc, interp_pmc);
+    sc = CONST_STRING(interp, "_sub");
+    VTABLE_setprop(interp, user_data, sc, sub);
     /* only ASCII signatures are supported */
     sig_str = cb_signature->strstart;
 
-    if (strlen (sig_str) != 3) {
+    if (strlen(sig_str) != 3) {
         internal_exception(1, "unhandled signature '%s' in make_cb",
               cb_signature->strstart);
     }
-    
+
     ++sig_str;     /* Skip callback return type */
 
     if (*sig_str == 'U') {
@@ -83,26 +83,26 @@ Parrot_make_cb(Parrot_Interp interpreter, PMC* sub, PMC* user_data,
         }
     }
 
-    cb_sig = pmc_new(interpreter, enum_class_String);
-    VTABLE_set_string_native(interpreter, cb_sig, cb_signature);
-    sc = CONST_STRING(interpreter, "_signature");
-    VTABLE_setprop(interpreter, user_data, sc, cb_sig);
+    cb_sig = pmc_new(interp, enum_class_String);
+    VTABLE_set_string_native(interp, cb_sig, cb_signature);
+    sc = CONST_STRING(interp, "_signature");
+    VTABLE_setprop(interp, user_data, sc, cb_sig);
     /*
-     * We are going to be passing the user_data PMC to external code, but 
-     * it may go out of scope until the callback is called -- we don't know 
-     * for certain as we don't know when the callback will be called. 
-     * Therefore, to prevent the PMC from being destroyed by a DOD sweep, 
+     * We are going to be passing the user_data PMC to external code, but
+     * it may go out of scope until the callback is called -- we don't know
+     * for certain as we don't know when the callback will be called.
+     * Therefore, to prevent the PMC from being destroyed by a DOD sweep,
      * we need to anchor it.
      *
      */
-    dod_register_pmc(interpreter, user_data);
+    dod_register_pmc(interp, user_data);
 
     /*
      * Finally, the external lib awaits a function pointer.
      * Create a PMC that points to Parrot_callback_C (or _D);
      * it can be passed on with signature 'p'.
      */
-    cb = pmc_new(interpreter, enum_class_UnManagedStruct);
+    cb = pmc_new(interp, enum_class_UnManagedStruct);
     /*
      * Currently, we handle only 2 types:
      * _C ... user_data is 2nd parameter
@@ -112,14 +112,14 @@ Parrot_make_cb(Parrot_Interp interpreter, PMC* sub, PMC* user_data,
         PMC_data(cb) = F2DPTR(Parrot_callback_C);
     else
         PMC_data(cb) = F2DPTR(Parrot_callback_D);
-    dod_register_pmc(interpreter, cb);
+    dod_register_pmc(interp, cb);
 
     return cb;
 }
 
 /*
 
-=item C<static void verify_CD(void *external_data, PMC *user_data)>
+=item C<static void verify_CD(char *external_data, PMC *user_data)>
 
 Verify user_data PMC then continue with callback_CD
 
@@ -127,12 +127,12 @@ Verify user_data PMC then continue with callback_CD
 
 */
 
-static void callback_CD(Parrot_Interp, void *, PMC *user_data);
+static void callback_CD(Parrot_Interp, char *, PMC *user_data);
 
 static void
-verify_CD(void *external_data, PMC *user_data)
+verify_CD(char *external_data, PMC *user_data)
 {
-    Parrot_Interp interpreter = NULL;
+    Parrot_Interp interp = NULL;
     size_t i;
 
     /*
@@ -147,21 +147,21 @@ verify_CD(void *external_data, PMC *user_data)
 
     /*
      * We don't yet know which interpreter this PMC is from, so run
-     * through all of the existing interpreters and check their PMC 
+     * through all of the existing interpreters and check their PMC
      * pools
      */
     LOCK(interpreter_array_mutex);
     for (i = 0; i < n_interpreters; ++i) {
         if (interpreter_array[i] == NULL)
             continue;
-        interpreter = interpreter_array[i];
-        if (interpreter)
-            if (contained_in_pool(interpreter,
-                        interpreter->arena_base->pmc_pool, user_data))
+        interp = interpreter_array[i];
+        if (interp)
+            if (contained_in_pool(interp,
+                        interp->arena_base->pmc_pool, user_data))
                 break;
     }
     UNLOCK(interpreter_array_mutex);
-    if (!interpreter)
+    if (!interp)
         PANIC("interpreter not found for callback");
 
     /*
@@ -179,7 +179,7 @@ verify_CD(void *external_data, PMC *user_data)
     /*
      * ok fine till here
      */
-    callback_CD(interpreter, external_data, user_data);
+    callback_CD(interp, external_data, user_data);
 }
 
 /*
@@ -194,24 +194,26 @@ Common callback function handler. See pdd16.
 */
 
 static void
-callback_CD(Parrot_Interp interpreter, void *external_data, PMC *user_data)
+callback_CD(Parrot_Interp interp, char *external_data, PMC *user_data)
 {
 
     PMC *passed_interp;       /* the interp that originated the CB */
     PMC *passed_synchronous;  /* flagging synchronous execution */
-    int synchronous = 0;      /* cb is hitting this sub somewhen inmidst, or not */
+    int synchronous = 0;      /* cb is hitting this sub somewhen
+                               * inmidst, or not */
     STRING *sc;
     /*
      * 3) check interpreter ...
      */
-    sc = CONST_STRING(interpreter, "_interpreter");
-    passed_interp = VTABLE_getprop(interpreter, user_data, sc);
-    if (PMC_data(passed_interp) != interpreter)
+    sc = CONST_STRING(interp, "_interpreter");
+    passed_interp = VTABLE_getprop(interp, user_data, sc);
+    if (PMC_data(passed_interp) != interp)
         PANIC("callback gone to wrong interpreter");
 
-    sc = CONST_STRING(interpreter, "_synchronous");
-    passed_synchronous = VTABLE_getprop(interpreter, user_data, sc);
-    if (passed_synchronous && VTABLE_get_bool(interpreter, passed_synchronous))
+    sc = CONST_STRING(interp, "_synchronous");
+    passed_synchronous = VTABLE_getprop(interp, user_data, sc);
+    if (!PMC_IS_NULL(passed_synchronous) &&
+            VTABLE_get_bool(interp, passed_synchronous))
         synchronous = 1;
 
     /*
@@ -221,11 +223,11 @@ callback_CD(Parrot_Interp interpreter, void *external_data, PMC *user_data)
      *    - if no, and that's always safe, post a CALLBACK_EVENT
      */
 
-    if ( synchronous ) {
+    if (synchronous) {
         /*
          * just call the sub
          */
-        Parrot_run_callback(interpreter, user_data, external_data);
+        Parrot_run_callback(interp, user_data, external_data);
     }
     else {
         /*
@@ -236,14 +238,15 @@ callback_CD(Parrot_Interp interpreter, void *external_data, PMC *user_data)
          * then wait for the CB_EVENT_xx to finish and return the
          * result
          */
-        Parrot_new_cb_event(interpreter, user_data, external_data);
+        Parrot_new_cb_event(interp, user_data, external_data);
     }
 }
 
 /*
 
 =item C<void
-Parrot_run_callback(Parrot_Interp interpreter, PMC* user_data, void* external_data)>
+Parrot_run_callback(Parrot_Interp interp,
+                    PMC* user_data, void* external_data)>
 
 Run a callback function. The PMC* user_data holds all
 necessary items in its properties.
@@ -253,7 +256,8 @@ necessary items in its properties.
 */
 
 void
-Parrot_run_callback(Parrot_Interp interpreter, PMC* user_data, void* external_data)
+Parrot_run_callback(Parrot_Interp interp,
+                    PMC* user_data, char* external_data)
 {
     PMC *    signature;
     PMC *    sub;
@@ -265,12 +269,12 @@ Parrot_run_callback(Parrot_Interp interpreter, PMC* user_data, void* external_da
     void*    param = NULL;      /* avoid -Ox warning */
     STRING * sc;
 
-    sc = CONST_STRING(interpreter, "_sub");
-    sub = VTABLE_getprop(interpreter, user_data, sc);
-    sc = CONST_STRING(interpreter, "_signature");
-    signature = VTABLE_getprop(interpreter, user_data, sc);
+    sc = CONST_STRING(interp, "_sub");
+    sub = VTABLE_getprop(interp, user_data, sc);
+    sc = CONST_STRING(interp, "_signature");
+    signature = VTABLE_getprop(interp, user_data, sc);
 
-    sig_str = VTABLE_get_string(interpreter, signature);
+    sig_str = VTABLE_get_string(interp, signature);
     p = sig_str->strstart;
     ++p;     /* Skip return type */
 
@@ -312,7 +316,7 @@ case_I:
 #endif
         case 'p':
             /* created a UnManagedStruct */
-            p_param = pmc_new(interpreter, enum_class_UnManagedStruct);
+            p_param = pmc_new(interp, enum_class_UnManagedStruct);
             PMC_data(p_param) = external_data;
             pasm_sig[2] = 'P';
             param = (void*) p_param;
@@ -324,13 +328,14 @@ case_I:
 #endif
         case 't':
             pasm_sig[2] = 'S';
-            param = string_from_cstring(interpreter, external_data, 0);
+            param = string_from_cstring(interp, external_data, 0);
             break;
         default:
-            internal_exception(1, "unhandled signature char '%c' in run_cb", *p);
+            internal_exception(1, "unhandled signature char '%c' in run_cb",
+                               *p);
     }
     pasm_sig[3] = '\0';
-    Parrot_runops_fromc_args(interpreter, sub, pasm_sig,
+    Parrot_runops_fromc_args_event(interp, sub, pasm_sig,
             user_data, param);
 }
 /*
@@ -346,13 +351,13 @@ NCI callback functions. See pdd16.
 */
 
 void
-Parrot_callback_C(void *external_data, PMC *user_data)
+Parrot_callback_C(char *external_data, PMC *user_data)
 {
     verify_CD(external_data, user_data);
 }
 
 void
-Parrot_callback_D(PMC *user_data, void *external_data)
+Parrot_callback_D(PMC *user_data, char *external_data)
 {
     verify_CD(external_data, user_data);
 }
@@ -369,12 +374,10 @@ F<include/parrot/interpreter.h>, F<docs/pdds/pdd16_native_call.pod>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

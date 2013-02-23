@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/config/init/optimize.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/init/optimize.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ the C<CCFLAGS>. Should this be part of config/inter/progs.pm ? XXX
 package init::optimize;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -26,34 +27,40 @@ $description = 'Enabling optimization';
 
 @args = qw(verbose optimize);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     # A plain --optimize means use perl5's $Config{optimize}.  If an argument
-    # is given, however, use that instead. 
+    # is given, however, use that instead.
     my $optimize = $conf->options->get('optimize');
-    if (defined $optimize) {
+    if ( defined $optimize ) {
         $self->set_result('yes');
+
         # disable debug flags
-        $conf->data->set(cc_debug => '');
-        $conf->data->add(' ', ccflags => "-DDISABLE_GC_DEBUG=1 -DNDEBUG");
-        if ($optimize eq "1") {
+        $conf->data->set( cc_debug => '' );
+        $conf->data->add( ' ', ccflags => "-DDISABLE_GC_DEBUG=1 -DNDEBUG" );
+        if ( $optimize eq "1" ) {
+
             # use perl5's value
-	    # gcc 4.1 doesn't like -mcpu=xx, i.e. it's deprecated
-	    # XXX do we know compiler (version) already?
-	    my $opts = $Config{optimize};
-	    $opts =~ s/-mcpu=\S+//;
-            $conf->data->add(' ', ccflags => $opts);
+            # gcc 4.1 doesn't like -mcpu=xx, i.e. it's deprecated
+            # XXX do we know compiler (version) already?
+            my $opts = $Config{optimize};
+            $opts =~ s/-mcpu=\S+//;
+            $conf->data->add( ' ', ccflags => $opts );
+
             # record what optimization was enabled
-            $conf->data->set(optimize => $opts);
-        } else {
-            # use what was passed to --optimize on the CLI
-            $conf->data->add(' ', ccflags => $optimize);
-            # record what optimization was enabled
-            $conf->data->set(optimize => $optimize);
+            $conf->data->set( optimize => $opts );
         }
-    } else {
+        else {
+
+            # use what was passed to --optimize on the CLI
+            $conf->data->add( ' ', ccflags => $optimize );
+
+            # record what optimization was enabled
+            $conf->data->set( optimize => $optimize );
+        }
+    }
+    else {
         $self->set_result('no');
         print "(none requested) " if $conf->options->get('verbose');
     }
@@ -62,3 +69,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,13 +1,13 @@
 /*
  * jit.h
  *
- * $Id: /local/src/jit.h 12981 2006-06-20T19:26:31.775154Z bernhard  $
+ * $Id: /parrotcode/trunk/src/jit.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  */
 
-#if !defined(PARROT_JIT_H_GUARD)
+#ifndef PARROT_JIT_H_GUARD
 #define PARROT_JIT_H_GUARD
 
-typedef void (*jit_f)(Interp *interpreter, opcode_t *pc);
+typedef void (*jit_f)(Interp *interp, opcode_t *pc);
 
 
 void Parrot_destroy_jit(void *);
@@ -29,8 +29,8 @@ typedef struct Parrot_jit_fixup {
     char                        skip;
     char                        dummy[3]; /* For alignment ??? XXX */
     union {                               /* What has to align with what? */
-        opcode_t                opcode;
-        void                    (*fptr)(void);
+        opcode_t opcode;
+        void (*fptr)(void);
     } param;
 
     Parrot_jit_fixup_ptr        next;
@@ -65,7 +65,7 @@ enum {
  *  fixups:         List of fixupes.
  */
 
-typedef struct {
+typedef struct Parrot_jit_arena_t {
     char                            *start;
     ptrdiff_t                        size;
     Parrot_jit_opmap_t              *op_map;
@@ -102,7 +102,7 @@ typedef struct Parrot_jit_optimizer_section *Parrot_jit_optimizer_section_ptr;
  *  reg_dir:        If the register needs to be loaded or saved.
  *  registers_used: count of used registers
  */
-typedef struct {
+typedef struct Parrot_jit_register_usage_t {
     int                                 reg_count[NUM_REGISTERS];
     unsigned int                        reg_usage[NUM_REGISTERS];
     char                                reg_dir[NUM_REGISTERS];
@@ -142,7 +142,7 @@ typedef struct Parrot_jit_optimizer_section {
  *  has_unpredictable_jump: XXX need to define how to handle this.
  */
 
-typedef struct {
+typedef struct Parrot_jit_optimizer_t {
     Parrot_jit_optimizer_section_t  *sections;
     Parrot_jit_optimizer_section_t  *cur_section;
     char                            *map_branch;
@@ -155,7 +155,7 @@ typedef struct {
  *      Constants pool information.
  *
  */
-typedef struct {
+typedef struct Parrot_jit_constant_pool_t {
     long                             frames_used;
     long                             cur_used;
     char                            *cur_const;
@@ -169,7 +169,7 @@ typedef enum {
 
     /* size */
     JIT_CODE_TYPES,
-    /* special cases */  
+    /* special cases */
     JIT_CODE_RECURSIVE     = 0x10,
     JIT_CODE_SUB_REGS_ONLY_REC = JIT_CODE_SUB_REGS_ONLY|JIT_CODE_RECURSIVE
 } enum_jit_code_type;
@@ -187,7 +187,7 @@ typedef enum {
  *  constant_pool:  The constant pool information.
  */
 
-typedef struct {
+typedef struct Parrot_jit_info_t {
     opcode_t                        *prev_op;
     opcode_t                        *cur_op;
     opcode_t                         op_i;
@@ -195,22 +195,22 @@ typedef struct {
     Parrot_jit_arena_t               arena;
     Parrot_jit_optimizer_t          *optimizer;
     Parrot_jit_constant_pool_t      *constant_pool;
-    enum_jit_code_type              code_type; 
+    INTVAL                          code_type;
     int                             flags;
     const struct jit_arch_info_t    *arch_info;
     int                              n_args;
-#  if EXEC_CAPABLE
+#if EXEC_CAPABLE
     Parrot_exec_objfile_t           *objfile;
-#  else
+#else
     void                            *objfile;
-#  endif /* EXEC_CAPABLE */
+#endif /* EXEC_CAPABLE */
 } Parrot_jit_info_t;
 
 #define Parrot_jit_fixup_target(jit_info, fixup) \
     ((jit_info)->arena.start + (fixup)->native_offset)
 
 typedef void (*jit_fn_t)(Parrot_jit_info_t *jit_info,
-                         Interp *interpreter);
+                         Interp *interp);
 
 /*  Parrot_jit_fn_info_t
  *      The table of opcodes.
@@ -221,7 +221,7 @@ typedef void (*jit_fn_t)(Parrot_jit_info_t *jit_info,
  *                  also used for vtable functions, extcall is #of vtable func
  */
 
-typedef struct {
+typedef struct Parrot_jit_fn_info_t {
     jit_fn_t                        fn;
     int                            extcall;
 } Parrot_jit_fn_info_t;
@@ -232,22 +232,22 @@ extern Parrot_jit_fn_info_t op_exec[];
 PARROT_API void Parrot_jit_newfixup(Parrot_jit_info_t *jit_info);
 
 void Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-                        Interp *interpreter);
+                        Interp *interp);
 
 void Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-                          Interp *interpreter);
+                          Interp *interp);
 
 void Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
-                          Interp *interpreter);
+                          Interp *interp);
 
 void Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
-                        Interp *interpreter);
+                        Interp *interp);
 
 void Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
-                          Interp *interpreter);
+                          Interp *interp);
 
 void Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
-                          Interp *interpreter);
+                          Interp *interp);
 
 /*
  * interface functions for the register save/restore code
@@ -268,9 +268,9 @@ void Parrot_jit_emit_mov_rm_offs(
  */
 typedef void (*jit_arch_f)(Parrot_jit_info_t *, Interp *);
 
-typedef struct {
+typedef struct jit_arch_regs {
     /*
-     * begin function - emit ABI call prologue 
+     * begin function - emit ABI call prologue
      */
     jit_arch_f jit_begin;
 
@@ -282,11 +282,11 @@ typedef struct {
     const char *map_F;
 } jit_arch_regs;
 
-typedef void (*mov_RM_f)(Parrot_jit_info_t *, 
+typedef void (*mov_RM_f)(Parrot_jit_info_t *,
         int cpu_reg, int base_reg, INTVAL offs);
-typedef void (*mov_MR_f)(Parrot_jit_info_t *, 
+typedef void (*mov_MR_f)(Parrot_jit_info_t *,
         int base_reg, INTVAL offs, int cpu_reg);
-        
+
 typedef struct jit_arch_info_t {
     /* CPU <- Parrot reg move functions */
     mov_RM_f mov_RM_i;
@@ -312,9 +312,9 @@ const jit_arch_info * Parrot_jit_init(Interp *);
  * interface to create JIT code
  */
 Parrot_jit_info_t *
-parrot_build_asm(Interp *interpreter, 
+parrot_build_asm(Interp *interp,
                 opcode_t *code_start, opcode_t *code_end,
-                void *objfile, enum_jit_code_type);
+                void *objfile, INTVAL);
 /*
  * NCI interface
  */
@@ -322,12 +322,10 @@ void *Parrot_jit_build_call_func(Interp *, PMC *, String *);
 
 #endif /* PARROT_JIT_H_GUARD */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

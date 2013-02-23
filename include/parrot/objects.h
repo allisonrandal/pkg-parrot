@@ -1,7 +1,7 @@
 /* objects.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/objects.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/objects.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Parrot class and object header stuff
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_OBJECTS_H_GUARD)
+#ifndef PARROT_OBJECTS_H_GUARD
 #define PARROT_OBJECTS_H_GUARD
 
 #include "parrot/parrot.h"
@@ -21,19 +21,12 @@
 typedef enum {
     PCD_PARENTS,        /* An array of immediate parents */
     PCD_CLASS_NAME,     /* A String PMC */
-    PCD_ATTRIB_OFFS,    /* class => offset hash */
     PCD_ATTRIBUTES,      /* class::attrib => offset hash */
     PCD_CLASS_ATTRIBUTES, /* Class attribute array */
     PCD_OBJECT_VTABLE,   /* Vtable PMC that holds the vtable for
                             objects of this class */
     PCD_MAX
 } PARROT_CLASS_DATA_ENUM;
-
-typedef enum {
-    POD_CLASS,          /* class PMC of object */
-    POD_CLASS_NAME,     /* A String PMC */
-    POD_FIRST_ATTRIB    /* attributes start here */
-} PARROT_OBJECT_DATA_ENUM;
 
 PARROT_API PMC *Parrot_single_subclass(Parrot_Interp, PMC *, PMC *);
 PARROT_API void Parrot_new_class(Parrot_Interp, PMC *, PMC *);
@@ -44,7 +37,7 @@ PARROT_API PMC *Parrot_remove_parent(Parrot_Interp, PMC *, PMC *);
 PARROT_API PMC *Parrot_multi_subclass(Parrot_Interp, PMC *, STRING *);
 PARROT_API void Parrot_instantiate_object(Parrot_Interp, PMC *);
 PARROT_API void Parrot_instantiate_object_init(Parrot_Interp, PMC *, PMC *);
-PARROT_API INTVAL Parrot_object_isa(Parrot_Interp interpreter, PMC *, PMC *);
+PARROT_API INTVAL Parrot_object_isa(Parrot_Interp interp, PMC *, PMC *);
 PARROT_API PMC *Parrot_new_method_cache(Parrot_Interp);
 PARROT_API PMC *Parrot_find_method_with_cache(Parrot_Interp, PMC *, STRING *);
 PARROT_API PMC *Parrot_find_method_direct(Parrot_Interp, PMC *, STRING *);
@@ -62,50 +55,67 @@ PARROT_API PMC *Parrot_find_class_fallback(Parrot_Interp, STRING *, INTVAL);
 PARROT_API void Parrot_set_class_constructor(Parrot_Interp, STRING *, INTVAL, STRING *);
 PARROT_API void Parrot_set_class_destructor(Parrot_Interp, STRING *, INTVAL, STRING *);
 PARROT_API void Parrot_set_class_fallback(Parrot_Interp, STRING *, INTVAL, STRING *);
-PARROT_API void Parrot_invalidate_method_cache(Interp*, STRING *class, STRING *meth);
+PARROT_API void Parrot_invalidate_method_cache(Interp*, STRING *_class, STRING *meth);
 PARROT_API STRING *readable_name(Parrot_Interp, PMC *);
+PARROT_API INTVAL Parrot_get_vtable_index(Interp *, STRING *name);
+PARROT_API PMC *Parrot_find_vtable_meth(Interp* interp, PMC *pmc, STRING *meth);
 
 /* Objects, classes and PMCarrays all use the same data scheme:
  * PMC_data() holds a malloced array, PMC_int_val() is the size of it
  * this simplifies DOD mark a lot
+ *
+ * The active destroy flag is necessary to free the malloced array.
  */
 #define SLOTTYPE PMC*
 #define get_attrib_num(x, y)    ((PMC **)x)[y]
 #define set_attrib_num(o, x, y, z) \
     do { \
-        DOD_WRITE_BARRIER(interpreter, o, ((PMC **)x)[y], z); \
+        DOD_WRITE_BARRIER(interp, o, ((PMC **)x)[y], z); \
         ((PMC **)x)[y] = z; \
     } while (0)
 #define get_attrib_count(x)     PMC_int_val2(x)
 #define new_attrib_array() Dont_use
-#define set_attrib_flags(x) PObj_data_is_PMC_array_SET(x)
+#define set_attrib_flags(x) do { \
+        PObj_data_is_PMC_array_SET(x); \
+        PObj_active_destroy_SET(x); \
+    } while (0)
 #define set_attrib_array_size(o, y) do { \
-    PMC_data(o) = mem_sys_allocate_zeroed((sizeof(PMC *)*(y))); \
+    PMC_data(o) = mem_sys_allocate_zeroed((sizeof (PMC *)*(y))); \
     PMC_int_val(o) = y; \
 } while (0)
 
 #define resize_attrib_array(o, y) do { \
-    PMC_data(o) = mem_sys_realloc(PMC_data(o), (sizeof(PMC *)*(y))); \
+    PMC_data(o) = mem_sys_realloc(PMC_data(o), (sizeof (PMC *)*(y))); \
     PMC_int_val(o) = y; \
 } while (0)
 
 /*
- * class = 1st element in object array
+ * class marocs
  */
 
-#  define ATTRIB_COUNT(obj) PMC_int_val2(obj)
-#  define SET_CLASS(arr, obj, class) \
-       set_attrib_num(obj, arr, POD_CLASS, class)
+#  define CLASS_ATTRIB_COUNT(cl) PMC_int_val2(cl)
+#  define SET_CLASS(arr, obj, cl) \
+       obj->vtable->pmc_class = cl
 #  define GET_CLASS(arr, obj) \
-       get_attrib_num(arr, POD_CLASS)
+       obj->vtable->pmc_class
+
+
+/* ************************************************************************ */
+/* ********* BELOW HERE IS NEW PPD15 IMPLEMENTATION RELATED STUFF ********* */
+/* ************************************************************************ */
+
+PARROT_API PMC* Parrot_ComputeMRO_C3(Interp *interp, PMC *_class);
+
+PARROT_API void Parrot_ComposeRole(Interp *interp, PMC *role,
+                                   PMC *without, int got_without,
+                                   PMC *alias, int got_alias,
+                                   PMC *methods_hash, PMC *roles_list);
 
 #endif /* PARROT_OBJECTS_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

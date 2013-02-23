@@ -1,32 +1,33 @@
-#!/usr/bin/perl
+#!perl
 
-use strict;
-use lib qw(tcl/lib ./lib ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 4;
-use Test::More;
-use vars qw($TODO);
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
-language_output_is("tcl",<<'TCL',<<'OUT',"command: global explicit");
-  ::puts ok
-TCL
-ok
-OUT
+source lib/test_more.tcl
+plan 6
 
-language_output_is("tcl",<<'TCL',<<'OUT',"command: global explicit (extra colons)");
-  :::::::puts ok
-TCL
-ok
-OUT
+is [::set a ok]      {ok} {explicit global command}
+is [:::::::set b ok] {ok} {explicit global command, extra colons}
 
-language_output_is("tcl",<<'TCL',<<'OUT',"command: all colons");
-  proc ::: {} {puts ok}
-  {}
-TCL
-ok
-OUT
+proc ::: {} {return ok}
+is [{}] ok {command name, all colons}
 
-language_output_is("tcl",<<'TCL',<<'OUT',"command: global explicit (not enough colons)");
-  :puts ok
-TCL
-invalid command name ":puts"
-OUT
+eval_is {
+  :set c ok
+} {invalid command name ":set"}\
+{not enough colons, explicit global command}
+
+eval_is {
+  foo::bar
+} {invalid command name "foo::bar"} \
+{invalid ns command}
+
+eval_is {
+  proc test {} {return ok1}
+  set a [namespace eval lib {test}]
+  proc ::lib::test {} {return ok2}
+  list $a [namespace eval lib {test}]
+} {ok1 ok2} {relative namespace}

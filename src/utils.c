@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/utils.c 13370 2006-07-18T20:49:51.409376Z ambs  $
+$Id: /parrotcode/trunk/src/utils.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -22,10 +22,23 @@ Opcode helper functions that don't really fit elsewhere.
 
 #include "parrot/parrot.h"
 
-#define GRAPH_ELEMENT(PTR,REGS,X,Y)  (PTR)[((Y) * ((REGS) + 3)) + (X)]
-#define ROOT_VERTEX(PTR,REGS,Y)      GRAPH_ELEMENT(PTR,REGS,REGS+0,Y)
-#define REG_MOVE_VAL(PTR,REGS,Y)     GRAPH_ELEMENT(PTR,REGS,REGS+1,Y)
-#define CYCLE_NODE(PTR,REGS,Y)        GRAPH_ELEMENT(PTR,REGS,REGS+2,Y)
+/* Parrot_register_move companion functions i and data */
+typedef struct parrot_prm_context {
+    unsigned char *dest_regs;
+    unsigned char *src_regs;
+    unsigned char temp_reg;
+    int* nb_succ;
+    int* backup;
+    int* reg_to_index;
+    Interp *interp;
+    reg_move_func mov;
+    reg_move_func mov_alt;
+    void *info;
+} parrot_prm_context;
+
+void rec_climb_back_and_mark(int regindex, parrot_prm_context* c);
+void process_cycle_without_exit(int regindex, parrot_prm_context* c);
+void move_reg(int from, int dest, parrot_prm_context* c);
 
 /*
 
@@ -62,7 +75,7 @@ intval_mod(INTVAL i2, INTVAL i3)
     INTVAL r;
 
     if (z == 0)
-	return i2;
+        return i2;
 
     y = i2;
 
@@ -143,11 +156,11 @@ typedef unsigned short _rand_buf[3];
  * X(n+1) = ( aX(n) + c ) mod 2^48
  *
  */
-#define A_lo  0xE66D
-#define A_mid 0xDEEC
-#define A_hi  0x5
-#define C     0xB
-#define SEED_LO 0x330E
+#  define A_lo  0xE66D
+#  define A_mid 0xDEEC
+#  define A_hi  0x5
+#  define C     0xB
+#  define SEED_LO 0x330E
 
 static _rand_buf a = { A_lo, A_mid, A_hi };
 static _rand_buf last_rand;
@@ -202,7 +215,7 @@ _erand48(_rand_buf buf)
 {
     FLOATVAL r;
     next_rand(buf);
-    r = (( buf[0] / 65536.0 + buf[1] ) / 65536.0 + buf[2]) / 65536.0;
+    r = ((buf[0] / 65536.0 + buf[1]) / 65536.0 + buf[2]) / 65536.0;
     return r;
 }
 
@@ -317,10 +330,10 @@ _srand48(long seed)
      */
 }
 
-#undef A_lo
-#undef A_mid
-#undef A_hi
-#undef C
+#  undef A_lo
+#  undef A_mid
+#  undef A_hi
+#  undef C
 
 #else
 
@@ -410,7 +423,8 @@ C<how_random> is ignored.
 INTVAL
 Parrot_range_rand(INTVAL from, INTVAL to, INTVAL how_random)
 {
-    return (INTVAL)( from + ((double)(to - from)) * Parrot_float_rand(how_random) );
+    return (INTVAL)(from + ((double)(to - from))
+                     * Parrot_float_rand(how_random));
 }
 
 /*
@@ -439,7 +453,7 @@ Parrot_srand(INTVAL seed)
 =over
 
 =item C<void *
-Parrot_make_la(Interp *interpreter, PMC *array)>
+Parrot_make_la(Interp *interp, PMC *array)>
 
 Creates a C array of C<long>s with one more element than the number of
 elements in C<*array>. The elements are then copied from C<*array> to
@@ -452,8 +466,8 @@ Used in C<src/nci.c>.
 */
 
 void *
-Parrot_make_la(Interp *interpreter, PMC *array) {
-    const INTVAL arraylen = VTABLE_elements(interpreter, array);
+Parrot_make_la(Interp *interp, PMC *array) {
+    const INTVAL arraylen = VTABLE_elements(interp, array);
     INTVAL cur;
 
     /* Allocate the array and set the last element to 0. Since we
@@ -461,11 +475,11 @@ Parrot_make_la(Interp *interpreter, PMC *array) {
        to actually have an array, even if the inbound array is
        completely empty
     */
-    long * const out_array = mem_sys_allocate((sizeof(long)) * (arraylen + 1));
+    long * const out_array = (long *)mem_sys_allocate((sizeof (long)) * (arraylen + 1));
     out_array[arraylen] = 0;
     /*    printf("Long array has %i elements\n", arraylen);*/
     for (cur = 0; cur < arraylen; cur++) {
-        out_array[cur] = VTABLE_get_integer_keyed_int(interpreter, array, cur);
+        out_array[cur] = VTABLE_get_integer_keyed_int(interp, array, cur);
     }
 
     return out_array;
@@ -490,7 +504,7 @@ Parrot_destroy_la(long *array) {
 /*
 
 =item C<void *
-Parrot_make_cpa(Interp *interpreter, PMC *array)>
+Parrot_make_cpa(Interp *interp, PMC *array)>
 
 Creates a C array of C<char *>s with one more element than the number of
 elements in C<*array>. The elements are then copied from C<*array> to
@@ -498,13 +512,15 @@ the new array, and the last (extra) element is set to 0.
 
 Currently unused.
 
+Note that you need to free this array with C<Parrot_destroy_cpa()>.
+
 =cut
 
 */
 
 void *
-Parrot_make_cpa(Interp *interpreter, PMC *array) {
-    const INTVAL arraylen = VTABLE_elements(interpreter, array);
+Parrot_make_cpa(Interp *interp, PMC *array) {
+    const INTVAL arraylen = VTABLE_elements(interp, array);
     INTVAL cur;
 
     /* Allocate the array and set the last element to 0. Since we
@@ -512,12 +528,16 @@ Parrot_make_cpa(Interp *interpreter, PMC *array) {
        to actually have an array, even if the inbound array is
        completely empty
     */
-    char ** const out_array = mem_sys_allocate((sizeof(char *)) * (arraylen + 1));
+    char ** const out_array = (char **)mem_sys_allocate((sizeof (char *))
+                                               * (arraylen + 1));
     out_array[arraylen] = 0;
 
     /*    printf("String array has %i elements\n", arraylen);*/
     for (cur = 0; cur < arraylen; cur++) {
-        out_array[cur] = string_to_cstring(interpreter, VTABLE_get_string_keyed_int(interpreter, array, cur));
+        out_array[cur] =
+            string_to_cstring(interp,
+                              VTABLE_get_string_keyed_int(interp,
+                                                          array, cur));
         /*        printf("Offset %i is %s\n", cur, out_array[cur]);*/
     }
 
@@ -570,24 +590,24 @@ typedef enum {
 /* &end_gen */
 
 PMC*
-tm_to_array(Parrot_Interp interpreter, const struct tm *tm)
+tm_to_array(Parrot_Interp interp, const struct tm *tm)
 {
-  PMC * const Array = pmc_new(interpreter, enum_class_Array);
-  VTABLE_set_integer_native(interpreter, Array, 9);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 0, tm->tm_sec);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 1, tm->tm_min);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 2, tm->tm_hour);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 3, tm->tm_mday);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 4, tm->tm_mon + 1);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 5, tm->tm_year + 1900);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 6, tm->tm_wday);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 7, tm->tm_yday);
-  VTABLE_set_integer_keyed_int(interpreter, Array, 8, tm->tm_isdst);
+  PMC * const Array = pmc_new(interp, enum_class_Array);
+  VTABLE_set_integer_native(interp, Array, 9);
+  VTABLE_set_integer_keyed_int(interp, Array, 0, tm->tm_sec);
+  VTABLE_set_integer_keyed_int(interp, Array, 1, tm->tm_min);
+  VTABLE_set_integer_keyed_int(interp, Array, 2, tm->tm_hour);
+  VTABLE_set_integer_keyed_int(interp, Array, 3, tm->tm_mday);
+  VTABLE_set_integer_keyed_int(interp, Array, 4, tm->tm_mon + 1);
+  VTABLE_set_integer_keyed_int(interp, Array, 5, tm->tm_year + 1900);
+  VTABLE_set_integer_keyed_int(interp, Array, 6, tm->tm_wday);
+  VTABLE_set_integer_keyed_int(interp, Array, 7, tm->tm_yday);
+  VTABLE_set_integer_keyed_int(interp, Array, 8, tm->tm_isdst);
   return Array;
 }
 
 INTVAL
-Parrot_byte_index(Interp *interpreter, const STRING *base,
+Parrot_byte_index(Interp *interp, const STRING *base,
         const STRING *search, UINTVAL start_offset)
 {
     char *base_start, *search_start;
@@ -609,7 +629,7 @@ Parrot_byte_index(Interp *interpreter, const STRING *base,
 }
 
 INTVAL
-Parrot_byte_rindex(Interp *interpreter, const STRING *base,
+Parrot_byte_rindex(Interp *interp, const STRING *base,
         const STRING *search, UINTVAL start_offset)
 {
     char *base_start, *search_start;
@@ -633,136 +653,113 @@ Parrot_byte_rindex(Interp *interpreter, const STRING *base,
 }
 
 /*
-  
-=item C<static int
-find_first_indegree(int *graph,int node_count, int dest)>
-  
-Finds the first indegree for the given node.
-   
-=cut
-      
-*/
-static int
-find_first_indegree(int *graph, int node_count, int dest)
-{
-    int i = 0;
-    for (i = 0; i < node_count; i++) {
-        if (GRAPH_ELEMENT(graph, node_count, i, dest) > 0) {
-            return i;
-        }
-    }
-    return -1;
-}
 
-/*
- 
-=item C<static int
-find_root(int *graph ,int node_count, int src, int dest)>
-          
-Finds the root vertex of the graph.
+=item C<void rec_climb_back_and_mark(int node_index, parrot_prm_context* c)>
+
+Recursive function, used by Parrot_register_move to
+climb back the graph of register moves operations.
+
+The node must have a predecessor: it is implicit because if a node has
+a node_index, it must have a predecessor because the node_index are the
+index of registers in dest_regs[] array, so by definition they have
+a corrsponding src_regs register.
+
+Then it emits the move operation with its predecessor, or its backup
+if already used/visited.
+
+Then continues the climbing if the predecessor was not modified, anf in that
+case marks it, and set node_index as its backup.
+
+  node_index  ... the index of a destination (i.e. with a pred.) register
+  c           ... the graph and all the needed params : the context
 
 =cut
 
 */
-static int
-find_root(int *graph, int node_count, int src, int dest)
-{
-    int in_degree;
-    if (GRAPH_ELEMENT(graph, node_count, src, dest) == 2) {
-        CYCLE_NODE(graph, node_count, dest) = 1;    
-        GRAPH_ELEMENT(graph, node_count, src, dest) = 1;
-        return dest;
+void
+rec_climb_back_and_mark(int node_index, parrot_prm_context* c) {
+    int pred, pred_index, src, node;
+
+    node = c->dest_regs[node_index];
+    pred = c->src_regs[node_index];
+    pred_index = c->reg_to_index[pred];
+
+    if (pred_index < 0) { /* pred has no predecessor */
+        move_reg(pred, node, c);
     }
-    ROOT_VERTEX(graph, node_count, src) = 0;
-    GRAPH_ELEMENT(graph, node_count, src, dest) = 2;
-    in_degree = find_first_indegree(graph, node_count, src);
-    if (in_degree == -1) {
-        ROOT_VERTEX(graph, node_count, dest) = 0;
-        GRAPH_ELEMENT(graph, node_count, src, dest) = 1;
-        return src;
+    else { /* pred has a predecessor, so may be processed */
+        src = c->backup[pred_index];
+        if (src < 0) { /* not visited */
+            move_reg(pred, node, c);
+            c->backup[pred_index] = node; /* marks pred*/
+            rec_climb_back_and_mark(pred_index, c);
+        }
+        else { /* already visited, use backup instead */
+            move_reg(src, node, c);
+        }
     }
-    return find_root(graph, node_count, in_degree, src);
 }
+
 
 /*
 
-=item C<static void
-emit_mov(reg_move_func mov, Interp *interpreter, void *info, int emit,
-          int emit_temp, int dest, int src, int temp, int * map)>
-          
-   
-Emit the move instructions
-  
+=item C<void process_cycle_without_exit(int node_index, parrot_prm_context* c)>
+
+Recursive function, used by Parrot_register_move to handle the case
+of cycles without exits, that are cycles of move ops between registers
+where each register has exactly one predecessor and one successor
+
+For instance: 1-->2, 2-->3, 3-->1
+
+  node_index  ... the index of a destination (i.e. with a pred.) register
+  c           ... the graph and all the needed params : the context
+
 =cut
-       
-*/
-static void
-emit_mov(reg_move_func mov, Interp * interpreter, void *info, int emit,
-         int emit_temp, int dest, int src, int temp)
-{
-    if (emit > -1) {
-        if (emit_temp) {
-            mov(interpreter, dest, temp, info);
-        }
-        else if (src != dest) {
-            mov(interpreter, dest, src, info);
-        }
-    }
+ */
+
+void
+process_cycle_without_exit(int node_index, parrot_prm_context* c) {
+    int pred, pred_index;
+    int alt = 0;
+
+    pred = c->src_regs[node_index];
+    /* pred_index has to be defined cause we are in a cycle so each node has a pred*/
+    pred_index = c->reg_to_index[pred];
+
+    /* let's try the alternate move function*/
+    if (NULL != c->mov_alt)
+        alt = c->mov_alt(c->interp, c->dest_regs[node_index], pred, c->info);
+
+    if (0 == alt) { /* use temp reg */
+        move_reg(c->dest_regs[node_index],c->temp_reg, c);
+        c->backup[node_index] = c->temp_reg;
+    } else
+        c->backup[node_index] = c->dest_regs[node_index];
+
+    rec_climb_back_and_mark(node_index, c);
 }
 
 /*
- 
-=item C<static int
-reorder_move(int *graph, INT node_count, int *map, INT * val,
-             int src, int prev, int depth, reg_move_func mov,
-             Interp *interpreter, void *info, int temp)>
-                          
-   
-This method reorders the move operations.OA
-   
-=cut
-       
-*/
-static int
-reorder_move(int *graph, int node_count, int src, int prev, int depth, 
-            reg_move_func mov, Interp * interpreter, void *info, int temp)
-{
-    int i, x;
-    REG_MOVE_VAL(graph, node_count, src) = 1;
-  
-    for (i = 0; i < node_count; i++) {
-        if (GRAPH_ELEMENT(graph, node_count, src, i) > 0) {
-            if (REG_MOVE_VAL(graph, node_count, i) == 1) {
-                emit_mov(mov, interpreter, info, prev, 0, i, src, temp);
-                emit_mov(mov, interpreter, info, prev, depth <= 1, src, prev,
-                         temp);
-                return 1;
-            }
-            if (REG_MOVE_VAL(graph, node_count, i) != 2) {
-                depth++;
-                x = reorder_move(graph, node_count, i, src, depth,
-                                     mov, interpreter, info, temp);
-                depth--;
-                emit_mov(mov, interpreter, info, prev,
-                         x && (depth <= 1), src, prev, temp);
-                return x;
-            }
-        }
-    }
-    REG_MOVE_VAL(graph, node_count, src) = 2;
-    emit_mov(mov, interpreter, info, prev, 0, src, prev, temp);
-    return 0;
+ should be self-speaking
+ */
+
+void
+move_reg(int from, int dest, parrot_prm_context* c) {
+   /* fprintf(stderr,"move %i ==> %i\n",from,dest);*/
+    c->mov(c->interp, dest, from, c->info);
 }
+
 
 /*
 
-=item C<typedef int (*reg_move_func)(Interp*, unsigned char d, unsigned char s, void *);>
+=item C<typedef int (*reg_move_func)(Interp*, unsigned char d,
+                                     unsigned char s, void *);>
 
 =item C<void Parrot_register_move(Interp *, int n_regs,
         unsigned char *dest_regs, unsigned char *src_regs,
-        unsigned char temp_reg, 
-        reg_move_func mov, 
-        reg_move_func mov_alt, 
+        unsigned char temp_reg,
+        reg_move_func mov,
+        reg_move_func mov_alt,
         void *info)>
 
 Move C<n_regs> from the given register list C<src_regs> to C<dest_regs>.
@@ -774,11 +771,11 @@ Move C<n_regs> from the given register list C<src_regs> to C<dest_regs>.
   mov       ... a register move function to be called to move one register
   mov_alt   ... a register move function to be called to move one register
                 which triese fetching from an alternate src (or NULLfunc):
-    
-    (void)  (mov)(interp, dest, src, info);       
+
+    (void)  (mov)(interp, dest, src, info);
     moved = (mov_alt)(interp, dest, src, info);
 
-Some C<dest_regs> might be the same as C<src_regs>, which makes this a bit 
+Some C<dest_regs> might be the same as C<src_regs>, which makes this a bit
 non-trivial, because if the destination is already clobbered, using it
 later as source doesn"t work. E.g.
 
@@ -798,9 +795,9 @@ To handle such cases, we do:
   b) if an alternate move function is available, it may fetch the
      source from a different (non-clobbered) location - call it.
      if the function returns 0 also use c)
-  c) if no alternate move function is available, use the temp reg   
+  c) if no alternate move function is available, use the temp reg
 
-The amount of register moves should of course be minimal.  
+The amount of register moves should of course be minimal.
 
 TODO The current implementation will not work for following cases
 
@@ -809,62 +806,93 @@ Talked to Leo and he said those cases are not likely (Vishal Soni).
 2. I1->I2 I3->I2
 
 TODO: Add tests for the above conditions.
+
 =cut
-  
+
 */
 void
-Parrot_register_move(Interp * interpreter, int n_regs,
+Parrot_register_move(Interp *interp, int n_regs,
                      unsigned char *dest_regs, unsigned char *src_regs,
                      unsigned char temp_reg,
                      reg_move_func mov, reg_move_func mov_alt, void *info)
 {
-    int i, uniq_reg_cnt;
-    int *reg_move_graph;
-    uniq_reg_cnt=0;
+    int i,index;
+    int max_reg = 0;
+    int* nb_succ = NULL;
+    int* backup = NULL;
+    int* reg_to_index = NULL;
+    parrot_prm_context c;
 
     if (n_regs == 0)
         return;
 
-    for (i = 0; i < n_regs; i++) {
-        if (src_regs[i] > uniq_reg_cnt) {
-            uniq_reg_cnt=src_regs[i];
-        }
-        
-        if (dest_regs[i] > uniq_reg_cnt) {
-            uniq_reg_cnt=dest_regs[i];
-        }   
-    }
-    uniq_reg_cnt++;
-    
-    reg_move_graph = (int *)
-        mem_sys_allocate_zeroed(sizeof(int) * uniq_reg_cnt *
-                                (uniq_reg_cnt + 3));
-
-    for (i = 0; i < n_regs; i++) {
-        GRAPH_ELEMENT(reg_move_graph, uniq_reg_cnt, src_regs[i],
-                      dest_regs[i]) = 1;
-        ROOT_VERTEX(reg_move_graph, uniq_reg_cnt,
-                    find_root(reg_move_graph, uniq_reg_cnt, src_regs[i],
-                              dest_regs[i])) = 1;
-        GRAPH_ELEMENT(reg_move_graph, uniq_reg_cnt, src_regs[i],
-                      dest_regs[i]) = 1;
-    }
-    for (i = 0; i < uniq_reg_cnt; i++) {
-        if (ROOT_VERTEX(reg_move_graph, uniq_reg_cnt, i) > 0) {
-            if (GRAPH_ELEMENT(reg_move_graph, uniq_reg_cnt, i, i) == 1) {
-                /* mov(interpreter, i, i, info); */
-            }
-            else {
-                if (CYCLE_NODE(reg_move_graph, uniq_reg_cnt, i)) {
-                    mov(interpreter, temp_reg, i, info);
-                }
-                reorder_move(reg_move_graph, uniq_reg_cnt, i, -1, 0, mov,
-                         interpreter, info, temp_reg);
-            }
-        }
+    if (n_regs == 1) {
+        if (src_regs[0] != dest_regs[0])
+            mov(interp, dest_regs[0], src_regs[0], info);
+        return;
     }
 
-    mem_sys_free(reg_move_graph);
+    c.interp = interp;
+    c.info = info;
+    c.mov = mov;
+    c.mov_alt = mov_alt;
+    c.src_regs = src_regs;
+    c.dest_regs = dest_regs;
+    c.temp_reg = temp_reg;
+
+    /* compute max_reg, the max reg number + 1 */
+    for (i = 0; i < n_regs; i++) {
+        if (src_regs[i] > max_reg)
+            max_reg = src_regs[i];
+        if (dest_regs[i] > max_reg)
+            max_reg = dest_regs[i];
+    }
+    ++max_reg;
+
+
+    /* allocate space for data structures */
+    /* NOTA: data structures could be kept allocated somewhere waiting to get reused...*/
+    c.nb_succ = nb_succ = (int*)mem_sys_allocate_zeroed(sizeof (int) * n_regs);
+    c.backup = backup = (int*)mem_sys_allocate(sizeof (int) * n_regs);
+    c.reg_to_index = reg_to_index = (int*)mem_sys_allocate(sizeof (int) * max_reg);
+
+    /* init backup array */
+    for (i = 0; i < n_regs; i++)
+        backup[i] = -1;
+
+    /* fill in the conversion array between a register number and its index */
+    for (i = 0; i < max_reg; i++)
+        reg_to_index[i] = -1;
+    for (i = 0; i < n_regs; i++) {
+        index = dest_regs[i];
+        if (index != src_regs[i]) /* get rid of self-assignment */
+            reg_to_index[index] = i;
+    }
+
+    /* count the nb of successors for each reg index */
+    for (i = 0; i < n_regs; i++) {
+        index = reg_to_index[ src_regs[i] ];
+        if (index >= 0) /* not interested in the wells that have no preds */
+            nb_succ[ index ]++;
+    }
+    /* process each well if any */
+    for (i = 0; i < n_regs; i++) {
+        if (0 == nb_succ[i]) { /* a well */
+            rec_climb_back_and_mark(i, &c);
+        }
+    }
+
+    /* process remaining dest registers not processed */
+    /* remaining nodes are members of cycles without exits */
+    for (i = 0; i < n_regs; i++) {
+        if (0 < nb_succ[i] && 0 > backup[i]) { /* not a well nor visited*/
+            process_cycle_without_exit(i, &c);
+        }
+    }
+
+    mem_sys_free(nb_succ);
+    mem_sys_free(reg_to_index);
+    mem_sys_free(backup);
 }
 
 
@@ -880,12 +908,10 @@ Initial version by leo 2003.09.09.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

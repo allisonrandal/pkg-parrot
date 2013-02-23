@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/t/run/exit.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/run/exit.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -26,16 +26,14 @@ use Parrot::Test tests => 8;
 use Parrot::Config;
 use File::Spec;
 
-
 my $PARROT = ".$PConfig{slash}$PConfig{test_prog}";
-my $redir = File::Spec->devnull;
+my $redir  = File::Spec->devnull;
 
 # copy file descriptors
-open OLDOUT, ">&STDOUT";
-open OLDERR, ">&STDERR";
+open *OLDOUT, ">&STDOUT" or die qq|Cannot dup STDOUT: $!|;    ## no critic
+open *OLDERR, ">&STDERR" or die qq|Cannot dup STDERR: $!|;    ## no critic
 
-sub exits
-{
+sub exits {
     my $pre = shift;
     $pre ||= '';
 
@@ -44,24 +42,30 @@ sub exits
 }
 
 # all open
-exits( 'STDERR & STDOUT open' );
+exits('STDERR & STDOUT open');
 
 # close stderr
-close STDERR or die qq|Cannot close STDERR: $!|;
-exits( 'STDERR closed' );
+close *STDERR or die qq|Cannot close STDERR: $!|;
+exits('STDERR closed');
 
 # close stdout too
-close STDOUT or die qq|Cannot close STDOUT: $!|;
-exits( 'STDERR & STDOUT closed' );
+close *STDOUT or die qq|Cannot close STDOUT: $!|;
+exits('STDERR & STDOUT closed');
 
 # restore stderr
-open STDERR, ">&OLDERR" or die qq|Cannot restore stderr: $!|;
-exits( 'STDOUT closed' );
+open *STDERR, ">&OLDERR" or die qq|Cannot restore stderr: $!|;    ## no critic
+exits('STDOUT closed');
 
 # restore stdout
-open STDOUT, ">&OLDOUT" or die qq|Cannot restore stdout: $!|;
+open *STDOUT, ">&OLDOUT" or die qq|Cannot restore stdout: $!|;    ## no critic
 
 # close copies
-close OLDOUT or die qq|Cannot close OLDOUT: $!|;
-close OLDERR or die qq|Cannot close OLDERR: $!|;
+close *OLDOUT or die qq|Cannot close OLDOUT: $!|;
+close *OLDERR or die qq|Cannot close OLDERR: $!|;
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

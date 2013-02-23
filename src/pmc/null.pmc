@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/null.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/null.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ really slowing down the bytecode execution.
 static void
 show_backtrace(int ret, void *interp)
 {
-    PDB_backtrace( (Interp*)interp );
+    PDB_backtrace((Interp*)interp);
 }
 
 pmclass Null singleton {
@@ -39,15 +39,20 @@ Overrides the default to do nothing.
 
 */
 
-    void init () {
+    void init() {
     }
 
     void* get_pointer() {
         return PMCNULL;
     }
 
-    void set_pointer(void* p) {
-        PMCNULL = p;
+    void set_pointer(void *p) {
+        PMCNULL = (PMC *)p;
+    }
+
+    INTVAL does(STRING* what) {
+        /* XXX maybe a hack to get TGE running again */
+        return 0;
     }
 
 }
@@ -62,10 +67,7 @@ Overrides the default to do nothing.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

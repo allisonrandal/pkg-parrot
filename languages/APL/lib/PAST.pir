@@ -34,7 +34,7 @@ Creates the C<PAST::*> classes.
 
 =cut
 
-.sub '__onload' :load
+.sub '__onload' :load :init
     .local pmc base
     $P0 = getclass 'Hash'
     base = subclass $P0, 'PAST::Node'
@@ -183,3 +183,9 @@ This is free software; you may redistribute it and/or modify
 it under the same terms as Parrot.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

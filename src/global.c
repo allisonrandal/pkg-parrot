@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004, The Perl Foundation.
-$Id: /local/src/global.c 13359 2006-07-18T17:27:46.554567Z chip  $
+$Id: /parrotcode/trunk/src/global.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -34,12 +34,12 @@ tdb
 /* flags for internal_ns_keyed */
 #define INTERN_NS_CREAT 1       /* I'm a fan of the classics */
 
-static PMC *
-internal_ns_keyed(Interp *interp, PMC *base_ns, PMC *pmc_key, STRING *str_key, int flags)
+static PMC * internal_ns_keyed(Interp *interp, PMC *base_ns, PMC *pmc_key,
+                               STRING *str_key, int flags)
 {
     PMC *ns, *sub_ns;
     INTVAL i, n;
-    static const INTVAL max_intval = (INTVAL)( (~(UINTVAL)0) >> 1); /* 2s comp */
+    static const INTVAL max_intval = (INTVAL)((~(UINTVAL)0) >> 1); /*2s comp*/
 
     ns = base_ns;
 
@@ -78,7 +78,9 @@ internal_ns_keyed(Interp *interp, PMC *base_ns, PMC *pmc_key, STRING *str_key, i
                 return PMCNULL;
 
             /* TODO - match HLL of enclosing namespace? */
-            sub_ns = pmc_new(interp, Parrot_get_ctx_HLL_type(interp, enum_class_NameSpace));
+            sub_ns = pmc_new(interp,
+                             Parrot_get_ctx_HLL_type(interp,
+                                                     enum_class_NameSpace));
             if (PMC_IS_NULL(sub_ns))
                 return PMCNULL;
             VTABLE_set_pmc_keyed_str(interp, ns, part, sub_ns);
@@ -156,6 +158,54 @@ Parrot_make_namespace_keyed_str(Interp *interp, PMC *base_ns, STRING *str_key)
 /*
 
 =item C<PMC *
+Parrot_get_namespace_autobase(Interp *, PMC *key)>
+
+Find a namespace with the key C<key>, which may be a String, a Key, or an
+array of strings. If it is a String, then the lookup is relative to the
+current namespace. Otherwise, it is relative to the current HLL root
+namespace. Return the namespace, or NULL if not found.
+
+=item C<PMC *
+Parrot_make_namespace_autobase(Interp *, PMC *pmc_key)>
+
+Find, or create if necessary, a namespace with the key C<key>, which may be a
+String, a Key, or an array of strings. If it is a String, then the lookup is
+relative to the current namespace. Otherwise, it is relative to the current HLL
+root namespace. Return the namespace.  Errors will result in exceptions.
+
+=cut
+
+*/
+
+
+PMC *
+Parrot_make_namespace_autobase(Interp *interp, PMC *key)
+{
+    PMC *base_ns;
+    if (VTABLE_isa(interp, key, string_from_const_cstring(interp, "String", 0)))
+        base_ns = CONTEXT(interp->ctx)->current_namespace;
+    else
+        base_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
+            CONTEXT(interp->ctx)->current_HLL);
+    return Parrot_make_namespace_keyed(interp, base_ns, key);
+}
+
+PMC *
+Parrot_get_namespace_autobase(Interp *interp, PMC *key)
+{
+    PMC *base_ns;
+    if (VTABLE_isa(interp, key, string_from_const_cstring(interp, "String", 0)))
+        base_ns = CONTEXT(interp->ctx)->current_namespace;
+    else
+        base_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
+            CONTEXT(interp->ctx)->current_HLL);
+    return Parrot_get_namespace_keyed(interp, base_ns, key);
+}
+
+
+/*
+
+=item C<PMC *
 Parrot_get_global(Interp *, PMC *ns, STRING *globalname)>
 
 Look up the global named C<globalname> in the namespace C<ns>.  Return the
@@ -178,7 +228,7 @@ Parrot_get_global(Interp *interp, PMC *ns, STRING *globalname)
     if (PMC_IS_NULL(ns))
         return PMCNULL;
 
-    return VTABLE_get_pointer_keyed_str(interp, ns, globalname);
+    return (PMC *)VTABLE_get_pointer_keyed_str(interp, ns, globalname);
 }
 
 void
@@ -193,43 +243,44 @@ Parrot_set_global(Interp *interp, PMC *ns, STRING *globalname, PMC *val)
 =item C<PMC *
 Parrot_find_global_n(Interp *, PMC *ns, STRING *globalname)>
 
-Search the namespace PMC C<ns> for an object with name C<globalname>.  Return the object,
-or NULL if not found.
+Search the namespace PMC C<ns> for an object with name C<globalname>.
+Return the object, or NULL if not found.
 
-XXX - For now this function prefers non-namespaces, it will eventually entirely use the
-untyped interface.
+XXX - For now this function prefers non-namespaces, it will eventually
+entirely use the untyped interface.
 
 =item C<PMC *
 Parrot_find_global_k(Interp *, PMC *pmc_key, STRING *globalname)>
 
-Search the namespace designated by C<pmc_key>, which may be a key PMC, an array of
-namespace name strings, or a string PMC, for an object with name C<globalname>.  Return
-the object, or NULL if not found.
+Search the namespace designated by C<pmc_key>, which may be a key PMC,
+an array of namespace name strings, or a string PMC, for an object
+with name C<globalname>.  Return the object, or NULL if not found.
 
-XXX - For now this function prefers non-namespaces, it will eventually entirely use the
-untyped interface.
+XXX - For now this function prefers non-namespaces, it will eventually
+entirely use the untyped interface.
 
 =item C<PMC *
 Parrot_find_global_s(Interp *, STRING *str_key, STRING *globalname)>
 
-Search the namespace designated by C<str_key>, or the HLL root if C<str_key> is NULL,
-for an object with name C<globalname>.  Return the object, or NULL if not found.
+Search the namespace designated by C<str_key>, or the HLL root if
+C<str_key> is NULL, for an object with name C<globalname>.  Return the
+object, or NULL if not found.
 
-XXX - For now this function prefers non-namespaces, it will eventually entirely use the
-untyped interface.
+XXX - For now this function prefers non-namespaces, it will eventually
+entirely use the untyped interface.
 
 =cut
 
 */
 
 PMC *
-Parrot_find_global_n(Interp *interpreter, PMC *ns, STRING *globalname)
+Parrot_find_global_n(Interp *interp, PMC *ns, STRING *globalname)
 {
     PMC *res;
 
 #if DEBUG_GLOBAL
     if (globalname)
-        PIO_printf(interpreter, "find_global name '%Ss'\n", globalname);
+        PIO_printf(interp, "find_global name '%Ss'\n", globalname);
 #endif
 
     if (PMC_IS_NULL(ns))
@@ -242,35 +293,37 @@ Parrot_find_global_n(Interp *interpreter, PMC *ns, STRING *globalname)
          * distinguishes 'get_pmc_keyed' from 'get_pointer_keyed';
          * the former is for NS and the latter is for non-NS.
          */
-        res = VTABLE_get_pointer_keyed_str(interpreter, ns, globalname);
+        res = (PMC *)VTABLE_get_pointer_keyed_str(interp, ns, globalname);
     }
 
     return PMC_IS_NULL(res) ? NULL : res;
 }
 
 PMC *
-Parrot_find_global_cur(Interp *interpreter, STRING *globalname)
+Parrot_find_global_cur(Interp *interp, STRING *globalname)
 {
-    PMC * const ns = CONTEXT(interpreter->ctx)->current_namespace;
-    return Parrot_find_global_n(interpreter, ns, globalname);
+    PMC * const ns = CONTEXT(interp->ctx)->current_namespace;
+    return Parrot_find_global_n(interp, ns, globalname);
 }
 
 PMC *
-Parrot_find_global_k(Interp *interpreter, PMC *pmc_key, STRING *globalname)
+Parrot_find_global_k(Interp *interp, PMC *pmc_key, STRING *globalname)
 {
-    PMC * const ns = Parrot_get_namespace_keyed(interpreter,
-                                                Parrot_get_ctx_HLL_namespace(interpreter),
-                                                pmc_key);
-    return Parrot_find_global_n(interpreter, ns, globalname);
+    PMC * const ns =
+        Parrot_get_namespace_keyed(interp,
+                                   Parrot_get_ctx_HLL_namespace(interp),
+                                   pmc_key);
+    return Parrot_find_global_n(interp, ns, globalname);
 }
 
 PMC *
-Parrot_find_global_s(Interp *interpreter, STRING *str_key, STRING *globalname)
+Parrot_find_global_s(Interp *inter, STRING *str_key, STRING *globalname)
 {
-    PMC * const ns = Parrot_get_namespace_keyed_str(interpreter,
-                                                    Parrot_get_ctx_HLL_namespace(interpreter),
-                                                    str_key);
-    return Parrot_find_global_n(interpreter, ns, globalname);
+    PMC *const ns =
+        Parrot_get_namespace_keyed_str(inter,
+                                       Parrot_get_ctx_HLL_namespace(inter),
+                                       str_key);
+    return Parrot_find_global_n(inter, ns, globalname);
 }
 
 /*
@@ -283,48 +336,51 @@ Store the PMC C<val> into the namespace PMC C<ns> with name C<globalname>.
 =item C<PMC *
 Parrot_store_global_k(Interp *, PMC *pmc_key, STRING *globalname, PMC *val)>
 
-Store the PMC C<val> into the namespace designated by C<pmc_key>, which may be a key PMC,
-an array of namespace name strings, or a string PMC, with name C<globalname>.
+Store the PMC C<val> into the namespace designated by C<pmc_key>,
+which may be a key PMC, an array of namespace name strings, or a
+string PMC, with name C<globalname>.
 
-XXX - For now this function prefers non-namespaces, it will eventually entirely use the
-untyped interface.
+XXX - For now this function prefers non-namespaces, it will eventually
+entirely use the untyped interface.
 
 =item C<PMC *
 Parrot_store_global_s(Interp *, STRING *str_key, STRING *globalname, PMC *val)>
 
-Store the PMC C<val> into the namespace designated by C<str_key>, or the HLL root if
-C<str_key> is NULL, with the name C<globalname>.
+Store the PMC C<val> into the namespace designated by C<str_key>, or
+the HLL root if C<str_key> is NULL, with the name C<globalname>.
 
 =cut
 
 */
 
 void
-Parrot_store_global_n(Interp *interpreter, PMC *ns, STRING *globalname, PMC *val)
+Parrot_store_global_n(Interp *interp, PMC *ns,
+                      STRING *globalname, PMC *val)
 {
 #if DEBUG_GLOBAL
     if (globalname)
-        PIO_printf(interpreter, "store_global name '%Ss'\n", globalname);
+        PIO_printf(interp, "store_global name '%Ss'\n", globalname);
 #endif
 
     if (PMC_IS_NULL(ns))
         return;
 
-    VTABLE_set_pmc_keyed_str(interpreter, ns, globalname, val);
+    VTABLE_set_pmc_keyed_str(interp, ns, globalname, val);
 }
 
 void
-Parrot_store_global_cur(Interp *interpreter, STRING *globalname, PMC *val)
+Parrot_store_global_cur(Interp *interp, STRING *globalname, PMC *val)
 {
-    Parrot_store_global_n(interpreter,
-                          CONTEXT(interpreter->ctx)->current_namespace,
+    Parrot_store_global_n(interp,
+                          CONTEXT(interp->ctx)->current_namespace,
                           globalname, val);
 
     /* FIXME - method cache invalidation should occur */
 }
 
 void
-Parrot_store_global_k(Interp *interpreter, PMC *pmc_key, STRING *globalname, PMC *val)
+Parrot_store_global_k(Interp *interp, PMC *pmc_key,
+                      STRING *globalname, PMC *val)
 {
     PMC *ns;
 
@@ -334,32 +390,34 @@ Parrot_store_global_k(Interp *interpreter, PMC *pmc_key, STRING *globalname, PMC
      * not good enough but it avoids regressesions for now
      */
     if (pmc_key->vtable->base_type == enum_class_String) {
-        Parrot_store_global_s(interpreter, PMC_str_val(pmc_key), globalname, val);
+        Parrot_store_global_s(interp, PMC_str_val(pmc_key),
+                              globalname, val);
         return;
     }
 
-    ns = Parrot_make_namespace_keyed(interpreter,
-                                     Parrot_get_ctx_HLL_namespace(interpreter),
+    ns = Parrot_make_namespace_keyed(interp,
+                                     Parrot_get_ctx_HLL_namespace(interp),
                                      pmc_key);
 
-    Parrot_store_global_n(interpreter, ns, globalname, val);
+    Parrot_store_global_n(interp, ns, globalname, val);
 
     /* FIXME - method cache invalidation should occur */
 }
 
 void
-Parrot_store_global_s(Interp *interpreter, STRING *str_key, STRING *globalname, PMC *val)
+Parrot_store_global_s(Interp *inter, STRING *str_key,
+                      STRING *globalname, PMC *val)
 {
     PMC *ns;
 
-    ns = Parrot_make_namespace_keyed_str(interpreter,
-                                         Parrot_get_ctx_HLL_namespace(interpreter),
+    ns = Parrot_make_namespace_keyed_str(inter,
+                                         Parrot_get_ctx_HLL_namespace(inter),
                                          str_key);
 
-    Parrot_store_global_n(interpreter, ns, globalname, val);
+    Parrot_store_global_n(inter, ns, globalname, val);
 
     /* FIXME - method cache invalidation should be a namespace function */
-    Parrot_invalidate_method_cache(interpreter, str_key, globalname);
+    Parrot_invalidate_method_cache(inter, str_key, globalname);
 }
 
 
@@ -368,272 +426,156 @@ Parrot_store_global_s(Interp *interpreter, STRING *str_key, STRING *globalname, 
 =item C<PMC *
 Parrot_find_global_op(Interp *, PMC *ns, STRING *globalname, void *next)>
 
-If the global exists in the given namespace PMC, return it.  If not, either throw an
-exception or return a C<Null> PMC, depending on the interpreter's error settings.
+If the global exists in the given namespace PMC, return it.  If not, return
+PMCNULL.
 
 =cut
 
 */
 
 PMC *
-Parrot_find_global_op(Interp *interpreter, PMC *ns, STRING *globalname, void *next)
+Parrot_find_global_op(Interp *interp, PMC *ns,
+                      STRING *globalname, void *next)
 {
     PMC *res;
 
     if (!globalname)
-	internal_exception(1, "Tried to find null global.");
+        real_exception(interp, next, E_NameError,
+                       "Tried to get null global");
 
-    res = Parrot_find_global_n(interpreter, ns, globalname);
-    if (!res) {
-        if (PARROT_ERRORS_test(interpreter, PARROT_ERRORS_GLOBALS_FLAG))
-            real_exception(interpreter, next, E_NameError,
-                           "Global '%Ss' not found",
-                           globalname);
+    res = Parrot_find_global_n(interp, ns, globalname);
+    if (!res)
         res = PMCNULL;
-    }
 
     return res;
 }
+
 
 /*
 
 =item C<PMC *
 Parrot_find_name_op(Interp *, STRING *name, void *next)>
 
-Find the given C<name> in lexicals, then the current namespace, then the HLL root
-namespace, and finally Parrot builtins.  If the name isn't found anywhere, then depending
-on the interpreter's errors setting, either throw an exception or return a C<Null> PMC .
+TODO - THIS IS BROKEN - it doesn't walk up the scopes yet - TODO
+
+Find the given C<name> in lexicals, then the current namespace, then the HLL
+root namespace, and finally Parrot builtins.  If the name isn't found
+anywhere, return PMCNULL.
 
 =cut
 
 */
 
-
 PMC *
-Parrot_find_name_op(Interp *interpreter, STRING *name, void *next)
+Parrot_find_name_op(Interp *interp, STRING *name, void *next)
 {
-    parrot_context_t * const ctx = CONTEXT(interpreter->ctx);
+    parrot_context_t * const ctx = CONTEXT(interp->ctx);
     PMC *g, *lex_pad;
 
     g = PMCNULL;
 
-    lex_pad = Parrot_find_pad(interpreter, name, ctx);
+    lex_pad = Parrot_find_pad(interp, name, ctx);
     if (!PMC_IS_NULL(lex_pad))
-        g = VTABLE_get_pmc_keyed_str(interpreter, lex_pad, name);
+        g = VTABLE_get_pmc_keyed_str(interp, lex_pad, name);
 
     /* TODO TODO TODO - walk up the scopes!  duh!! */
 
     if (PMC_IS_NULL(g))
-        g = Parrot_find_global_cur(interpreter, name);
+        g = Parrot_find_global_cur(interp, name);
 
     if (PMC_IS_NULL(g))
-        g = Parrot_find_global_n(interpreter,
-                                 Parrot_get_ctx_HLL_namespace(interpreter),
+        g = Parrot_find_global_n(interp,
+                                 Parrot_get_ctx_HLL_namespace(interp),
                                  name);
 
     if (PMC_IS_NULL(g))
-        g = Parrot_find_builtin(interpreter, name);
+        g = Parrot_find_builtin(interp, name);
 
-    if (! PMC_IS_NULL(g)) {
-        if (g->vtable->base_type == enum_class_MultiSub &&
-                interpreter->current_args) {
-            /*
-             * inside a function call, we have an args signature
-             */
-            g = Parrot_MMD_search_default_func(interpreter, name);
-            if (! PMC_IS_NULL(g))
-                return g;
-        }
-        else
-            return g;
-    }
-
-    if (PARROT_ERRORS_test(interpreter, PARROT_ERRORS_GLOBALS_FLAG))
-        real_exception(interpreter, next, E_NameError,
-                "Name '%Ss' not found", name);
-
-    return PMCNULL;
-}
-
-/*
- * store a subroutine
- *
- * FIXME - This should not be here!
- * It's generic logic that should apply whenever a Sub is stored anywhere,
- *  and since lots of things can be invoked, maybe more than just Subs.
- * Where it _should_ be, I don't know for sure.
- *
- * if pmc_key is provided, it wins.
- * else if str_key is provided, it is used.
- * if neither is provided, the HLL namespace is used.
- */
-
-static void
-store_sub(Interp *interpreter, PMC *pmc_key, STRING *str_key, STRING *sub_name, PMC *sub_pmc)
-{
-    int hll_id;
-    PMC *ns;
-
-    if (sub_pmc->vtable->base_type == enum_class_MultiSub) {
-        PMC *one_sub;
-
-        one_sub = VTABLE_get_pmc_keyed_int(interpreter, sub_pmc, 0);
-        hll_id = PMC_sub(one_sub)->HLL_id;
-    }
+    if (! PMC_IS_NULL(g))
+        return g;
     else
-        hll_id = PMC_sub(sub_pmc)->HLL_id;
+        return PMCNULL;
+}
 
-    ns = Parrot_get_HLL_namespace(interpreter, hll_id);
-    if (!PMC_IS_NULL(pmc_key))
-        ns = Parrot_make_namespace_keyed(interpreter, ns, pmc_key);
-    else if (str_key)
-        ns = Parrot_make_namespace_keyed_str(interpreter, ns, str_key);
+static PMC *
+get_namespace_pmc(Parrot_Interp interp, PMC *sub)
+{
+    PMC *nsname = PMC_sub(sub)->namespace_name;
+    PMC *nsroot = Parrot_get_HLL_namespace(interp, PMC_sub(sub)->HLL_id);
 
-    Parrot_store_global_n(interpreter, ns, sub_name, sub_pmc);
-
-    /* TEMPORARY HACK - cache invalidation should be a namespace function */
-    if (! PMC_IS_NULL(pmc_key)) {
-        if (pmc_key->vtable->base_type == enum_class_String)
-            Parrot_invalidate_method_cache(interpreter, PMC_str_val(pmc_key), sub_name);
-    }
-    else if (str_key)
-        Parrot_invalidate_method_cache(interpreter, str_key, sub_name);
-
-    /* MultiSub isa R*PMCArray and doesn't have a PMC_sub structure 
-     * MultiSub could also contain subs from various namespaces,
-     * so it doesn't make much sense to associate a namespace
-     * with a multi.
-     */
-    if (sub_pmc->vtable->base_type != enum_class_MultiSub)
-        PMC_sub(sub_pmc)->namespace_stash = ns;
+    /* If we have a NULL, return the HLL namespace */
+    if (PMC_IS_NULL(nsname))
+        return nsroot;
+    /* If we have a String, do a string lookup */
+    else if (nsname->vtable->base_type == enum_class_String)
+        return Parrot_make_namespace_keyed_str(interp, nsroot, PMC_str_val(nsname));
+    /* Otherwise, do a PMC lookup */
+    else
+        return Parrot_make_namespace_keyed(interp, nsroot, nsname);
 }
 
 static void
-store_sub_in_namespace(Parrot_Interp interpreter, PMC* sub_pmc, PMC *pmc_key, STRING *sub_name)
+store_sub_in_multi(Parrot_Interp interp, PMC *sub, PMC *ns)
 {
-    /*
-     * pmc_key is either a String, or a Key, or NULL
-     */
-    if (PMC_IS_NULL(pmc_key))
-        store_sub(interpreter, PMCNULL, NULL, sub_name, sub_pmc);
-    else {
-        INTVAL type = pmc_key->vtable->base_type;
-        switch (type) {
-            case enum_class_String:
-                store_sub(interpreter, PMCNULL, PMC_str_val(pmc_key), sub_name, sub_pmc);
-                break;
-            case enum_class_Key:
-                store_sub(interpreter, pmc_key, NULL, sub_name, sub_pmc);
-                break;
-            default:
-                internal_exception(1, "Namespace constant is neither String nor Key");
-        }
-    }
-}
-
-/* XXX in mmd.c ? */
-STRING* Parrot_multi_long_name(Parrot_Interp interpreter, PMC* sub_pmc);
-
-STRING*
-Parrot_multi_long_name(Parrot_Interp interpreter, PMC* sub_pmc)
-{
-    PMC *multi_sig;
-    STRING* sub_name, *sig;
-    INTVAL i, n;
-
-    sub_name = PMC_sub(sub_pmc)->name;
-    multi_sig = PMC_sub(sub_pmc)->multi_signature;
-    n = VTABLE_elements(interpreter, multi_sig);
-    /*
-     * foo :multi(STRING, Integer) =>
-     *
-     * foo_@STRING_@Integer
-     */
-    for (i = 0; i < n; ++i) {
-        sig = VTABLE_get_string_keyed_int(interpreter, multi_sig, i);
-        sub_name = string_concat(interpreter, sub_name,
-                const_string(interpreter, "_@"), 0);
-        sub_name = string_concat(interpreter, sub_name, sig, 0);
-    }
-    return sub_name;
-}
-
-static void
-store_named_in_namespace(Parrot_Interp interpreter, PMC* sub_pmc)
-{
-    STRING* sub_name;
-    PMC *multi_sig;
-    PMC *namespace;
     INTVAL func_nr;
     char *c_meth;
+    STRING *subname = PMC_sub(sub)->name;
+    PMC   *multisub = VTABLE_get_pmc_keyed_str(interp, ns, subname);
 
-    sub_name  = PMC_sub(sub_pmc)->name;
-    namespace = PMC_sub(sub_pmc)->namespace;
-    multi_sig = PMC_sub(sub_pmc)->multi_signature;
-    
-    if (PMC_IS_NULL(multi_sig)) {
-        store_sub_in_namespace(interpreter, sub_pmc, namespace, sub_name);
+    /* is there an existing MultiSub PMC? or do we need to create one? */
+    if (PMC_IS_NULL(multisub)) {
+        multisub = pmc_new(interp, enum_class_MultiSub);
+        /* we have to push the sub onto the MultiSub before we try to store
+        it because storing requires information from the sub */
+        VTABLE_push_pmc(interp, multisub, sub);
+        VTABLE_set_pmc_keyed_str(interp, ns, subname, multisub);
     }
-    else {
-        STRING *long_name;
-        PMC *multi_sub;
-        PMC *stash;
-        
-        /* If namespace is NULL, we need to look in the root HLL namespace. But
-           since we haven't actually run code yet, the context hasn't been set
-           to include the HLL, so we have to do the work ourselves. */
-        stash = Parrot_get_HLL_namespace(interpreter, PMC_sub(sub_pmc)->HLL_id);
-        if (! PMC_IS_NULL(namespace))
-            stash = VTABLE_get_pmc_keyed(interpreter, stash, namespace);
-        multi_sub = PMC_IS_NULL(stash)
-            ? PMCNULL
-            : VTABLE_get_pmc_keyed_str(interpreter, stash, sub_name);
-        
-        /* is there an existing MultiSub PMC? or do we need to create one? */
-        if (PMC_IS_NULL(multi_sub)) {
-            multi_sub = pmc_new(interpreter, enum_class_MultiSub);
-            /* we have to push the sub onto the MultiSub before we try to store
-               it because storing requires information from the sub */
-            VTABLE_push_pmc(interpreter, multi_sub, sub_pmc);
-            store_sub_in_namespace(interpreter, multi_sub,
-                    namespace, sub_name);
-        }
-        else
-            VTABLE_push_pmc(interpreter, multi_sub, sub_pmc);
-        
-        long_name = Parrot_multi_long_name(interpreter, sub_pmc);
-        store_sub_in_namespace(interpreter, sub_pmc, namespace, long_name);
+    else
+        VTABLE_push_pmc(interp, multisub, sub);
 
-        c_meth = string_to_cstring(interpreter, sub_name);
-        if ( (func_nr = Parrot_MMD_method_idx(interpreter, c_meth))  >= 0) {
-            Parrot_mmd_rebuild_table(interpreter, -1, func_nr);
-        }
-        string_cstring_free(c_meth);
+    c_meth = string_to_cstring(interp, subname);
+    if ((func_nr = Parrot_MMD_method_idx(interp, c_meth))  >= 0) {
+        Parrot_mmd_rebuild_table(interp, -1, func_nr);
     }
+    string_cstring_free(c_meth);
 }
 
-/* TODO - this looks like it doesn't understand nested namespaces */
-
 void
-Parrot_store_sub_in_namespace(Parrot_Interp interpreter, PMC *sub)
+Parrot_store_sub_in_namespace(Parrot_Interp interp, PMC *sub)
 {
-    if (!(PObj_get_FLAGS(sub) & SUB_FLAG_PF_ANON)) {
-        INTVAL cur_id = CONTEXT(interpreter->ctx)->current_HLL;
-        /* PF structures aren't fully constructed yet */
-        Parrot_block_DOD(interpreter);
-        /* store relative to HLL namespace */
-        CONTEXT(interpreter->ctx)->current_HLL = PMC_sub(sub)->HLL_id;
-        
-        store_named_in_namespace(interpreter, sub);
-        
-        /* restore HLL_id */
-        CONTEXT(interpreter->ctx)->current_HLL = cur_id;
-        Parrot_unblock_DOD(interpreter);
+    INTVAL cur_id = CONTEXT(interp->ctx)->current_HLL;
+    PMC *ns;
+    /* PF structures aren't fully constructed yet */
+    Parrot_block_DOD(interp);
+    /* store relative to HLL namespace */
+    CONTEXT(interp->ctx)->current_HLL = PMC_sub(sub)->HLL_id;
+
+    ns = get_namespace_pmc(interp, sub);
+
+    /* attach a namespace to the sub for lookups */
+    PMC_sub(sub)->namespace_stash = ns;
+
+    /* store a :multi sub */
+    if (!PMC_IS_NULL(PMC_sub(sub)->multi_signature))
+        store_sub_in_multi(interp, sub, ns);
+    /* store other subs (as long as they're not :anon) */
+    else if (!(PObj_get_FLAGS(sub) & SUB_FLAG_PF_ANON)) {
+        STRING *name   = PMC_sub(sub)->name;
+        PMC    *nsname = PMC_sub(sub)->namespace_name;
+
+        Parrot_store_global_n(interp, ns, name, sub);
+
+        /* TEMPORARY HACK - cache invalidation should be a namespace function */
+        if (!PMC_IS_NULL(nsname))
+        {
+            STRING *nsname_s = VTABLE_get_string(interp, nsname);
+            Parrot_invalidate_method_cache(interp, nsname_s, name);
+        }
     }
-    else {
-        PMC *stash = Parrot_get_HLL_namespace(interpreter, PMC_sub(sub)->HLL_id);
-        PMC_sub(sub)->namespace_stash = stash;
-    }
+
+    /* restore HLL_id */
+    CONTEXT(interp->ctx)->current_HLL = cur_id;
+    Parrot_unblock_DOD(interp);
 }
 /*
 
@@ -647,12 +589,10 @@ F<include/parrot/global.h>
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

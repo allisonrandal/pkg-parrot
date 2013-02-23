@@ -1,24 +1,27 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 9;
 
-# Testing class for the managed pointer PMC and related ops. Note that this
+# Testing class for the managed pointer PMC and related ops. Note that thist';
+#
 # does not consider translating any .NET code, just tests the functionality.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'int reg');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'int reg' );
 .loadlib "dotnet_ops"
 .sub main :main
 	.local int the_test
     .local pmc ptr
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Get the pointer.
     the_test = 20
     ptr = net_reg_ptr the_test
-    
+
     # Call function, passing the pointer.
     inc_reg_indirect(ptr)
 
@@ -41,17 +44,17 @@ PIR
 Jonathan will be 21 years old tomorrow! :-O
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'float reg');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'float reg' );
 .loadlib "dotnet_ops"
 .sub main :main
 	.local num the_test
     .local pmc ptr
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Get the pointer.
     the_test = 2.4
     ptr = net_reg_ptr the_test
-    
+
     # Call function, passing the pointer.
     double_reg_indirect(ptr)
 
@@ -73,18 +76,18 @@ PIR
 4.800000
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'pmc reg');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'pmc reg' );
 .loadlib "dotnet_ops"
 .sub main :main
 	.local pmc the_test
     .local pmc ptr
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Get the pointer.
     the_test = new Float
     the_test = 42.2
     ptr = net_reg_ptr the_test
-    
+
     # Call function, passing the pointer.
     change_to_Integer(ptr)
 
@@ -109,13 +112,13 @@ PIR
 42
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'int element');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'int element' );
 .loadlib "dotnet_ops"
 .sub main :main
 	.local int the_test
     .local pmc ptr, arr
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Set up an array.
     arr = new FixedIntegerArray
     arr = 3
@@ -125,7 +128,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'int element');
 
     # Get pointer to second element.
     ptr = net_ldelema arr, 1
-    
+
     # Use the pointer to get value, increment it, store it again.
     the_test = ptr.load_int()
     print the_test
@@ -143,13 +146,13 @@ PIR
 42
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'float element');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'float element' );
 .loadlib "dotnet_ops"
 .sub main :main
 	.local num the_test
     .local pmc ptr, arr
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Set up an array.
     arr = new FixedFloatArray
     arr = 3
@@ -159,7 +162,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'float element');
 
     # Get pointer to second element.
     ptr = net_ldelema arr, 1
-    
+
     # Use the pointer to get value, increment it, store it again.
     the_test = ptr.load_float()
     print the_test
@@ -177,12 +180,12 @@ PIR
 11.800000
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'pmc element');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'pmc element' );
 .loadlib "dotnet_ops"
 .sub main :main
     .local pmc ptr, arr, the_test
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Set up an array.
     arr = new FixedFloatArray
     arr = 3
@@ -198,7 +201,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'pmc element');
 
     # Get pointer to second element.
     ptr = net_ldelema arr, 1
-    
+
     # Use the pointer to get value, increment it, store it again.
     the_test = ptr.load_pmc()
     print the_test
@@ -217,13 +220,13 @@ PIR
 11.8
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'int field');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'int field' );
 .loadlib "dotnet_ops"
 .sub main :main
     .local int the_test
     .local pmc ptr, obj
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Set up an object with an integer field.
     $P0 = newclass "monkey"
     addattribute $P0, "age"
@@ -234,7 +237,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'int field');
 
     # Get pointer to name field.
     ptr = net_ldflda obj, "age"
-    
+
     # Use the pointer to get the age attribute and change it.
     the_test = ptr.load_int()
     print "The monkey was "
@@ -254,13 +257,13 @@ The monkey was 20 years old.
 The monkey is now 21 years old.
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'float field');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'float field' );
 .loadlib "dotnet_ops"
 .sub main :main
     .local num the_test
     .local pmc ptr, obj
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Set up an object with a float field.
     $P0 = newclass "monkey"
     addattribute $P0, "height"
@@ -271,7 +274,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'float field');
 
     # Get pointer to name field.
     ptr = net_ldflda obj, "height"
-    
+
     # Use the pointer to get the height attribute and change it.
     the_test = ptr.load_float()
     print "The monkey was "
@@ -291,12 +294,12 @@ The monkey was 1.790000 meters tall.
 The monkey is now 1.82 meters tall.
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'pmc field');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'pmc field' );
 .loadlib "dotnet_ops"
 .sub main :main
     .local pmc the_test, ptr, obj
     $P0 = loadlib "dotnet_runtime"
-    
+
     # Set up an object with a field.
     $P0 = newclass "monkey"
     addattribute $P0, "name"
@@ -307,7 +310,7 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'pmc field');
 
     # Get pointer to name field.
     ptr = net_ldflda obj, "name"
-    
+
     # Use the pointer to get the name attribute and change it.
     the_test = ptr.load_pmc()
     print "The monkey was called "
@@ -327,3 +330,10 @@ PIR
 The monkey was called Derek.
 The monkey is now called Bradley.
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -6,7 +6,7 @@
 #
 # There are external dependancies on stackops, basicvars, and alpha.
 #
-# $Id: /local/languages/BASIC/interpreter/expr.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/BASIC/interpreter/expr.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 # $Log: expr.pasm,v
 # Revision 1.9  2002/06/16 21:23:28  clint
 # Floating Point BASI

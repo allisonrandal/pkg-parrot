@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/init/manifest.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/init/manifest.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Uses C<ExtUtils::Manifest> to check that the distribution is complete.
 package init::manifest;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -25,11 +26,10 @@ $description = 'Checking MANIFEST';
 
 @args = qw(nomanicheck);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    if ($conf->options->get('nomanicheck')) {
+    if ( $conf->options->get('nomanicheck') ) {
         $self->set_result('skipped');
         return $self;
     }
@@ -52,3 +52,10 @@ END
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,4 +1,4 @@
-# $Id: /local/examples/benchmarks/oo2.pasm 12177 2006-04-11T19:56:05.232596Z bernhard  $
+# $Id: /parrotcode/trunk/examples/benchmarks/oo2.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 # all timings Athlon 800, gcc 2.95.2
 

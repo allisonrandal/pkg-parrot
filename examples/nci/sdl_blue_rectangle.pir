@@ -1,4 +1,4 @@
-# $Id: /local/examples/nci/sdl_blue_rectangle.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/local/examples/nci/sdl_blue_rectangle.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 .sub _main :main
 	_init()
@@ -94,3 +94,9 @@
 	.pcc_begin_return
 	.pcc_end_return
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

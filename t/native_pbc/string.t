@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/native_pbc/string.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/native_pbc/string.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
 use warnings;
@@ -8,21 +8,19 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test tests => 1;
 
-
 =head1 NAME
 
 t/native_pbc/string.t - PBC string tests
 
 =head1 SYNOPSIS
 
-	% prove t/native_pbc/string.t
+        % prove t/native_pbc/string.t
 
 =head1 DESCRIPTION
 
 Tests word-size/string/endian-ness for different architectures.
 
 =cut
-
 
 =begin comment
 
@@ -33,27 +31,33 @@ For adding tests, see the comments in t/native_pbc/number.t
 
 =cut
 
-
 SKIP: {
-  skip("string changes", 1);
+    skip( "string changes", 1 );
 
-my $output = << 'END_OUTPUT';
+    my $output = << 'END_OUTPUT';
 a2c
 Í
 Í
 a2c
 END_OUTPUT
 
-# execute t/native_pbc/string_1.pbc
-#
-# HEADER => [
-#         wordsize  = 4   (interpreter's wordsize    = 4)
-#         int_size  = 4   (interpreter's INTVAL size = 4)
-#         byteorder = 0   (interpreter's byteorder   = 0)
-#         floattype = 0   (interpreter's NUMVAL_SIZE = 8)
-#         no endianize, no opcode, no numval transform
-#         dirformat = 1
-# ]
-pbc_output_is( undef, $output, "i386 32 bit opcode_t, 32 bit intval");
+    # execute t/native_pbc/string_1.pbc
+    #
+    # HEADER => [
+    #         wordsize  = 4   (interpreter's wordsize    = 4)
+    #         int_size  = 4   (interpreter's INTVAL size = 4)
+    #         byteorder = 0   (interpreter's byteorder   = 0)
+    #         floattype = 0   (interpreter's NUMVAL_SIZE = 8)
+    #         no endianize, no opcode, no numval transform
+    #         dirformat = 1
+    # ]
+    pbc_output_is( undef, $output, "i386 32 bit opcode_t, 32 bit intval" );
 
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

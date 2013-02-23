@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: /local/languages/lua/pmc/luanil.pmc 13236 2006-07-10T06:47:56.488120Z fperrad  $
+$Id: /parrotcode/trunk/languages/lua/pmc/luanil.pmc 2769 2007-04-03T06:04:44.542626Z fperrad  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ pmc/luanil.pmc - Lua Nil
 
 =head1 DESCRIPTION
 
-C<LuaNil> extends C<LuaBase> to provide a class with the behaviour of
+C<LuaNil> extends C<LuaAny> to provide a class with the behaviour of
 the Lua C<Nil> type.
 
 =for rational
@@ -31,24 +31,41 @@ troublesome (if not possible?).
 #include "parrot/parrot.h"
 
 static STRING *string_representation;
-static INTVAL dynpmc_LuaBoolean;
+INTVAL dynpmc_LuaBoolean;
+INTVAL dynpmc_LuaClosure;
+INTVAL dynpmc_LuaFunction;
+INTVAL dynpmc_LuaNil;
+INTVAL dynpmc_LuaNumber;
+INTVAL dynpmc_LuaString;
+INTVAL dynpmc_LuaTable;
 
 pmclass LuaNil
-    extends LuaBase   
+    extends LuaAny
     does scalar
     dynpmc
     group lua_group
     hll Lua {
 
-/* 
+/*
 * Class initialization. Caches constant strings that will be used later.
 */
     void class_init() {
         if (pass) {
-            Parrot_LuaBase_super_init(INTERP, NULL);
             string_representation = const_string(INTERP, "nil");
             dynpmc_LuaBoolean = pmc_type(INTERP,
-              string_from_const_cstring(INTERP, "LuaBoolean", 0));
+              const_string(INTERP, "LuaBoolean"));
+            dynpmc_LuaClosure = pmc_type(INTERP,
+              const_string(INTERP, "LuaClosure"));
+            dynpmc_LuaFunction = pmc_type(INTERP,
+              const_string(INTERP, "LuaFunction"));
+            dynpmc_LuaNil = pmc_type(INTERP,
+              const_string(INTERP, "LuaNil"));
+            dynpmc_LuaNumber = pmc_type(INTERP,
+              const_string(INTERP, "LuaNumber"));
+            dynpmc_LuaString = pmc_type(INTERP,
+              const_string(INTERP, "LuaString"));
+            dynpmc_LuaTable = pmc_type(INTERP,
+              const_string(INTERP, "LuaTable"));
         }
     }
 
@@ -78,6 +95,21 @@ Allow :
 
 /*
 
+=item C<void morph(INTVAL type)>
+
+Morphs the scalar to the specified type.
+
+=cut
+
+*/
+    void morph (INTVAL type) {
+        if (SELF->vtable->base_type == type)
+            return;
+        pmc_reuse(INTERP, SELF, type, 0);
+    }
+
+/*
+
 =item C<STRING* name()>
 
 Return the string "nil".
@@ -87,6 +119,21 @@ Return the string "nil".
 */
     STRING* name () {
         return string_representation;
+    }
+
+/*
+
+=item C<PMC *clone()>
+
+Creates and returns a clone of the scalar.
+
+=cut
+
+*/
+    PMC* clone () {
+        PMC* dest = pmc_new(INTERP, SELF->vtable->base_type);
+        memcpy(&PMC_union(dest), &PMC_union(SELF), sizeof(UnionVal));
+        return dest;
     }
 
 /*
@@ -112,7 +159,7 @@ Return always C<false>.
 
 */
     INTVAL get_bool () {
-        return 0;
+        return (INTVAL)0;
     }
 
 /*
@@ -125,7 +172,7 @@ Return always C<false>.
 
 */
     INTVAL defined() {
-        return 0;
+        return (INTVAL)0;
     }
 
 /*
@@ -152,27 +199,6 @@ MMD_DEFAULT: {
 
 /*
 
-=item C<INTVAL cmp(PMC *value)>
-
-=cut
-
-*/
-    INTVAL cmp (PMC* value) {
-MMD_LuaNil: {
-            real_exception(INTERP, NULL, ILL_INHERIT,
-                    "attempt to compare two nil values");
-            return (INTVAL)0;
-        }
-MMD_DEFAULT: {
-            real_exception(INTERP, NULL, ILL_INHERIT,
-                    "attempt to compare nil with %s",
-                    string_to_cstring(INTERP, VTABLE_name(INTERP, value)));
-            return (INTVAL)0;
-        }
-    }
-
-/*
-
 =back
 
 =head2 Specific Methods
@@ -186,7 +212,7 @@ MMD_DEFAULT: {
 */
     METHOD PMC* rawequal (PMC* value) {
         PMC *retval;
-       
+
         retval = pmc_new(INTERP, dynpmc_LuaBoolean);
         if (SELF->vtable->base_type == value->vtable->base_type)
             PMC_int_val(retval) = 1;
@@ -208,3 +234,10 @@ Original code by Klaas-Jan Stol.
 =cut
 
 */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

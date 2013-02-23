@@ -1,12 +1,20 @@
-# $Id: /local/MANIFEST.generated 14027 2006-08-08T23:06:28.947579Z chip  $
+# $Id: /parrotcode/trunk/MANIFEST.generated 3510 2007-05-16T02:47:23.785670Z chromatic  $
 # See tools/dev/install_files.pl for documentation on the
 # format of this file.
 # Please re-sort this file after *EVERY* modification
-blib/lib/libparrot.0.4.6.dylib                    [main]lib
+blib/lib/libparrot.0.4.12.dylib                   [main]lib
 blib/lib/libparrot.a                              [main]lib
 blib/lib/libparrot.dylib                          [main]lib
 blib/lib/libparrot.so                             [main]lib
-blib/lib/libparrot.so.0.4.6                       [main]lib
+blib/lib/libparrot.so.0.4.12                      [main]lib
+compilers/imcc/imclexer.c                         [main]
+config/gen/cpu/i386/memcpy_mmx.c                  [main]
+config/gen/cpu/i386/memcpy_sse.c                  [main]
+config/gen/platform/ansi/dl.c                     [main]
+config/gen/platform/ansi/time.c                   [main]
+config/gen/platform/darwin/memalign.c             [main]
+config/gen/platform/generic/stat.c                [main]
+config/gen/platform/win32/stat.c                  [main]
 disassemble                                       [main]bin
 disassemble.exe                                   [main]bin
 docs/ops/bit.pod                                  [main]doc
@@ -205,5 +213,10 @@ runtime/parrot/library/ncurses.pbc                [main]
 runtime/parrot/library/parrotlib.pbc              [main]
 runtime/parrot/library/pcre.pbc                   [main]
 src/jit_emit.h                                    [main]include
+src/nci.c                                         [main]
+src/null_config.c                                 [main]
+src/ops/core_ops_cgp.c                            [main]
+src/ops/core_ops_switch.c                         [main]
+src/parrot_config.c                               [main]
 src/string_private_cstring.h                      [main]include
 tools/build/dynpmc.pl                             [devel]

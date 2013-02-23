@@ -1,4 +1,4 @@
-# $Id: /local/lib/Parrot/Test/Punie.pm 12039 2006-03-26T19:46:16.084129Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Test/Punie.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 package Parrot::Test::Punie;
 
@@ -20,13 +20,13 @@ sub new {
     return bless {};
 }
 
-sub output_is() {
-    my ($self, $code, $output, $desc) = @_;
-  
+sub output_is {
+    my ( $self, $code, $output, $desc ) = @_;
+
     my $count = $self->{builder}->current_test + 1;
 
-    my $lang_f    = Parrot::Test::per_test('.p1',$count);
-    my $out_f     = Parrot::Test::per_test('.out',$count);
+    my $lang_f = Parrot::Test::per_test( '.p1',  $count );
+    my $out_f  = Parrot::Test::per_test( '.out', $count );
     my $parrotdir = dirname $self->{parrot};
 
     my $args = $ENV{TEST_PROG_ARGS} || '';
@@ -37,20 +37,24 @@ sub output_is() {
 
     my $cmd;
     my $exit_code = 0;
-    my $pass = 0;
+    my $pass      = 0;
 
     $cmd = "$self->{parrot} $args languages/punie/punie.pbc $lang_f";
 
-    $exit_code = Parrot::Test::run_command($cmd, CD => $self->{relpath},
-                                           STDOUT => $out_f, STDERR => $out_f );
+    $exit_code = Parrot::Test::run_command(
+        $cmd,
+        CD     => $self->{relpath},
+        STDOUT => $out_f,
+        STDERR => $out_f
+    );
     unless ($pass) {
         my $file = Parrot::Test::slurp_file($out_f);
-        $pass =$self->{builder}->is_eq( Parrot::Test::slurp_file($out_f), $output, $desc );
+        $pass = $self->{builder}->is_eq( Parrot::Test::slurp_file($out_f), $output, $desc );
         $self->{builder}->diag("'$cmd' failed with exit code $exit_code")
-        if $exit_code and not $pass;
+            if $exit_code and not $pass;
     }
 
-    unless($ENV{POSTMORTEM}) {
+    unless ( $ENV{POSTMORTEM} ) {
         unlink $lang_f;
         unlink $out_f;
     }
@@ -59,3 +63,10 @@ sub output_is() {
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

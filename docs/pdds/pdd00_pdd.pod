@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/docs/pdds/pdd00_pdd.pod 13183 2006-07-06T20:05:47.681449Z chip  $
+# $Id: /parrotcode/trunk/docs/pdds/pdd00_pdd.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ docs/pdds/pdd00_pdd.pod - Parrot Design Documents
 
 =head1 VERSION
 
-$Revision: 13183 $
+$Revision: 470 $
 
 =head1 ABSTRACT
 

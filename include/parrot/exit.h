@@ -1,9 +1,9 @@
 /* exit.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/exit.h 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/exit.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
- *     
+ *
  *  Data Structure and Algorithms:
  *  History:
  *  Notes:
@@ -11,7 +11,7 @@
  *      exit.c
  */
 
-#if !defined(PARROT_EXIT_H_GUARD)
+#ifndef PARROT_EXIT_H_GUARD
 #define PARROT_EXIT_H_GUARD
 
 #include "parrot/compiler.h"    /* compiler capabilities */
@@ -32,10 +32,7 @@ PARROT_API void Parrot_exit(Interp *, int status)
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

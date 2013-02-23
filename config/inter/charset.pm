@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/inter/charset.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/inter/charset.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Asks the user to select which charset files to include.
 package inter::charset;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,9 +25,8 @@ $description = 'Determining what charset files should be compiled in';
 
 @args = qw(ask charset);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my @charset = (
         sort
@@ -34,9 +34,9 @@ sub runstep
     );
 
     my $charset_list = $conf->options->get('charset')
-        || join(' ', grep { defined $_ } @charset);
+        || join( ' ', grep { defined $_ } @charset );
 
-    if ($conf->options->get('ask')) {
+    if ( $conf->options->get('ask') ) {
         print <<"END";
 
 
@@ -44,12 +44,12 @@ The following charsets are available:
   @charset
 END
         {
-            $charset_list = prompt('Which charsets would you like?', $charset_list);
+            $charset_list = prompt( 'Which charsets would you like?', $charset_list );
         }
     }
 
     # names of class files for src/pmc/Makefile
-    (my $TEMP_charset_o = $charset_list) =~ s/\.c/\$(O)/g;
+    ( my $TEMP_charset_o = $charset_list ) =~ s/\.c/\$(O)/g;
 
     my $TEMP_charset_build = <<"E_NOTE";
 
@@ -57,7 +57,7 @@ END
 
 E_NOTE
 
-    foreach my $charset (split(/\s+/, $charset_list)) {
+    foreach my $charset ( split( /\s+/, $charset_list ) ) {
         $charset =~ s/\.c$//;
         $TEMP_charset_build .= <<END
 src/charset/$charset\$(O): src/charset/$charset.h src/charset/ascii.h src/charset/$charset.c \$(NONGEN_HEADERS)
@@ -80,3 +80,10 @@ END
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

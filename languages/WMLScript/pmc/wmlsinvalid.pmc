@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006, The Perl Foundation.
-$Id: /local/languages/WMLScript/pmc/wmlsinvalid.pmc 13523 2006-07-24T15:49:07.843920Z chip  $
+$Id: /parrotcode/trunk/languages/WMLScript/pmc/wmlsinvalid.pmc 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ static INTVAL dynpmc_WmlsInteger;
 static INTVAL dynpmc_WmlsInvalid;
 
 pmclass WmlsInvalid
-    extends Undef 
+    extends Undef
     does scalar
     dynpmc
     group wmls_group
@@ -405,3 +405,10 @@ Francois Perrad.
 
 */
 
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

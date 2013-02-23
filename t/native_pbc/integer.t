@@ -1,15 +1,15 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/native_pbc/integer.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/native_pbc/integer.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
+
 # use Parrot::Test tests => 1;
 use Parrot::Test;
- plan  skip_all => 'Ongoing PBC format changes';
-
+plan skip_all => 'Ongoing PBC format changes';
 
 =head1 NAME
 
@@ -17,14 +17,13 @@ t/native_pbc/integer.t - Integers
 
 =head1 SYNOPSIS
 
-	% prove t/native_pbc/integer.t
+        % prove t/native_pbc/integer.t
 
 =head1 DESCRIPTION
 
 Tests word-size/float-type/endian-ness for different architectures.
 
 =cut
-
 
 =begin comment
 
@@ -46,7 +45,6 @@ should be included for reference.
 
 =cut
 
-
 # execute the file t/native_pbc/integer_1.pbc
 #
 # HEADER => [
@@ -57,9 +55,16 @@ should be included for reference.
 #         no endianize, no opcode, no numval transform
 #         dirformat = 1
 # ]
-pbc_output_is(undef, '270544960', "i386 32 bit opcode_t, 32 bit intval");
+pbc_output_is( undef, '270544960', "i386 32 bit opcode_t, 32 bit intval" );
 
 # Formerly following tests had been set up:
 # pasm_output_is(undef, '270544960', "PPC BE 32 bit opcode_t, 32 bit intval");
 # pasm_output_is(undef, '270544960', "little-endian 64-bit tru64");
 # pasm_output_is(undef, '270544960', "big-endian 64-bit irix");
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

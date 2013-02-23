@@ -1,7 +1,7 @@
 /* unicode.h
  *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/src/unicode.h 13029 2006-06-26T19:26:45.696181Z bernhard  $
+ *     $Id: /parrotcode/trunk/src/unicode.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Unicode support header
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_UNICODE_H_GUARD)
+#ifndef PARROT_UNICODE_H_GUARD
 #define PARROT_UNICODE_H_GUARD
 
 typedef unsigned char utf8_t;
@@ -42,11 +42,11 @@ typedef unsigned long utf32_t;
   ((((high) - UNICODE_HIGH_SURROGATE_FIRST) << UNICODE_HIGH_SURROGATE_SHIFT) + \
     ((low) - UNICODE_LOW_SURROGATE_FIRST) + 0x10000u)
 
-#define UNISKIP(uv) ( (uv) < 0x80    ? 1 : \
+#define UNISKIP(uv) ((uv) < 0x80    ? 1 : \
                       (uv) < 0x800   ? 2 : \
-                      (uv) < 0x10000 ? 3 : 4 )
+                      (uv) < 0x10000 ? 3 : 4)
 
-#define UTF16SKIP(s) ( UNICODE_IS_HIGH_SURROGATE(*(s)) ? 2 : 1 )
+#define UTF16SKIP(s) (UNICODE_IS_HIGH_SURROGATE(*(s)) ? 2 : 1)
 
 /*
 
@@ -85,12 +85,10 @@ extern const char Parrot_utf8skip[256];
 
 #endif /* PARROT_UNICODE_H_GUARD */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

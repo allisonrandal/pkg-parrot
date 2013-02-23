@@ -1,4 +1,4 @@
-## $Id: /local/languages/perl6/src/builtins/string.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+## $Id: /parrotcode/trunk/languages/perl6/src/builtins/string.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
 
 =head1 NAME
 
@@ -142,6 +142,43 @@ B<Note:> partial implementation only
 .end
 
 
+=item join
+
+B<Note:> partial implementation only
+
+=cut
+
+.sub 'join'
+    .param pmc args            :slurpy
+    .local pmc flatargs
+    .local string sep
+
+    flatargs = new 'List'
+    sep = ''
+    unless args goto have_flatargs
+    $P0 = args[0]
+    $I0 = isa $P0, 'List'
+    if $I0 goto have_sep
+    $P0 = shift args
+    sep = $P0
+  have_sep:
+  arg_loop:
+    unless args goto have_flatargs
+    $P0 = shift args
+    $I0 = isa $P0, 'List'
+    if $I0 goto arg_array
+    push flatargs, $P0
+    goto arg_loop
+  arg_array:
+    $I0 = elements flatargs
+    splice flatargs, $P0, $I0, 0
+    goto arg_loop
+  have_flatargs:
+    $S0 = join sep, flatargs
+    .return ($S0)
+.end
+
+
 =item substr
 
  multi substr (Str $s, StrPos $start  : StrPos $end,      $replace)
@@ -237,5 +274,8 @@ Should replace vec with declared arrays of bit, uint2, uint4, etc.
 
 =cut
 
-
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

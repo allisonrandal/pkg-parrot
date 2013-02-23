@@ -1,4 +1,4 @@
-## $Id: /local/languages/perl6/src/builtins/cmp.pir 13523 2006-07-24T15:49:07.843920Z chip  $
+## $Id: /parrotcode/trunk/languages/perl6/src/builtins/cmp.pir 3064 2007-04-09T22:02:45.461387Z paultcochrane  $
 
 =head1 NAME
 
@@ -67,55 +67,49 @@ src/builtins/cmp.pir - Perl6 comparison builtins
 
 
 .sub 'infix:eq'
-    .param pmc a
-    .param pmc b
-    $I0 = cmp_str a, b
-    $I0 = iseq $I0, 0
+    .param string a
+    .param string b
+    $I0 = iseq a, b
     .return ($I0)
 .end
 
 
 .sub 'infix:ne'
-    .param pmc a
-    .param pmc b
-    $I0 = cmp_str a, b
-    $I0 = isne $I0, 0
+    .param string a
+    .param string b
+    $I0 = isne a, b
     .return ($I0)
 .end
 
 
 .sub 'infix:lt'
-    .param pmc a
-    .param pmc b
-    $I0 = cmp_str a, b
-    $I0 = islt $I0, 0
+    .param string a
+    .param string b
+    $I0 = islt a, b
     .return ($I0)
 .end
 
 
 .sub 'infix:le'
-    .param pmc a
-    .param pmc b
-    $I0 = cmp_str a, b
-    $I0 = isle $I0, 0
+    .param string a
+    .param string b
+    $I0 = isle a, b
     .return ($I0)
 .end
 
 
 .sub 'infix:gt'
-    .param pmc a
-    .param pmc b
-    $I0 = cmp_str a, b
-    $I0 = isgt $I0, 0
+    .param string a
+    .param string b
+    $I0 = isgt a, b
     .return ($I0)
 .end
 
 
 .sub 'infix:ge'
-    .param pmc a
-    .param pmc b
-    $I0 = cmp_str a, b
-    $I0 = isge $I0, 0
+    .param string a
+    .param string b
+    $I0 = isge a, b
     .return ($I0)
 .end
 
@@ -127,5 +121,8 @@ src/builtins/cmp.pir - Perl6 comparison builtins
 
 =cut
 
-
-## vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

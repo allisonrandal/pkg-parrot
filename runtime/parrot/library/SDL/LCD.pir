@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/LCD.pir 13081 2006-07-01T03:36:07.973456Z chromatic  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/SDL/LCD.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 =head1 NAME
 
@@ -60,7 +60,7 @@ An SDL::LCD object has the following methods:
 END:
 .end
 
-.sub __init :method
+.sub init :vtable :method
     $I0 = classoffset self, "SDL::LCD"
 
     $P0 = new .String
@@ -97,13 +97,13 @@ Adjusts the minimum number of digits to display.
     $P0 = val
 .end
 
-=item __set_integer_native( val )
+=item set_integer_native( val )
 
 Sets the LCD content to display.
 
 =cut
 
-.sub __set_integer_native :method
+.sub set_integer_native :vtable :method
     .param int val
 
     $I0 = classoffset self, "SDL::LCD"
@@ -111,13 +111,13 @@ Sets the LCD content to display.
     $P0 = val
 .end
 
-=item __set_string_native( val )
+=item set_string_native( val )
 
 Sets the LCD content to display.
 
 =cut
 
-.sub __set_string_native :method
+.sub set_string_native :vtable :method
     .param string val
 
     $I0 = classoffset self, "SDL::LCD"
@@ -298,3 +298,9 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

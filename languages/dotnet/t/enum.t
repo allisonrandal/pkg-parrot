@@ -1,17 +1,20 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 7;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     using System;
-    
+
     public enum emotion {
         Delighted,
         Devestated,
@@ -20,7 +23,7 @@ namespace Testing
         Happy,
         Hurt
     }
-    
+
     public class Test
     {
         public int value()
@@ -65,7 +68,7 @@ namespace Testing
         }
 
         public int arg_test(emotion em)
-        { 
+        {
             return em == emotion.Happy ? 1 : 0;
         }
 
@@ -83,10 +86,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'value');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'value' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -99,7 +102,7 @@ PIR
 2
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'or');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'or' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -112,7 +115,7 @@ PIR
 7
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'or_int');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'or_int' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -125,7 +128,7 @@ PIR
 7
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'cond_1');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'cond_1' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -142,7 +145,7 @@ PIR
 1
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'cond_2');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'cond_2' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -159,7 +162,7 @@ PIR
 0
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'argument');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'argument' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -175,3 +178,10 @@ PIR
 0
 1
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

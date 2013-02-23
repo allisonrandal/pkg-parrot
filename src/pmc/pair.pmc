@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: /local/src/pmc/pair.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/pmc/pair.pmc 3369 2007-05-03T06:56:51.563174Z chromatic  $
 
 =head1 NAME
 
@@ -41,20 +41,21 @@ Class method to construct an Integer according to passed arguments.
 
 */
 
-    void init () {
+    void init() {
         PMC_struct_val(SELF) = NULL;  /* key */
         PMC_pmc_val(SELF)    = NULL;  /* value */
         PObj_custom_mark_SET(SELF);
     }
 
     PMC* instantiate(PMC* sig) {
-        PMC * const class = REG_PMC(2);
+        PMC * const _class = REG_PMC(2);
         const int argcP = REG_INT(3);
         const int argcS = REG_INT(2);
 
-        return PMCNULL; /* XXX This looks wrong, since we skip all the following code */
+        return PMCNULL; /* XXX This looks wrong, since we skip all the
+                         * following code */
 
-        SELF = pmc_new(INTERP, class->vtable->base_type);
+        SELF = pmc_new(INTERP, _class->vtable->base_type);
         if (argcS == 1 && argcP == 1) {
             PMC_struct_val(SELF) = REG_STR(5);
             PObj_key_is_string_SET(SELF);
@@ -79,7 +80,7 @@ Marks the hash as live.
 
 */
 
-    void mark () {
+    void mark() {
         if (PMC_struct_val(SELF))
             pobject_lives(INTERP, (PObj*)PMC_struct_val(SELF));
         if (PMC_pmc_val(SELF))
@@ -96,12 +97,12 @@ Marks the hash as live.
 
 */
 
-    PMC* get_pmc_keyed_str (STRING* key) {
+    PMC* get_pmc_keyed_str(STRING* key) {
         /* check key ? */
         return PMC_pmc_val(SELF);
     }
 
-    PMC* get_pmc_keyed (PMC* key) {
+    PMC* get_pmc_keyed(PMC* key) {
         /* check key ? */
         return PMC_pmc_val(SELF);
     }
@@ -115,7 +116,7 @@ Marks the hash as live.
 
 Set key and value. The key can only set once.
 
-=item C<void assign_pmc (PMC* value)>
+=item C<void assign_pmc(PMC* value)>
 
 Set the value of the Pair.
 
@@ -123,7 +124,7 @@ Set the value of the Pair.
 
 */
 
-    void set_pmc_keyed (PMC* key, PMC* value) {
+    void set_pmc_keyed(PMC* key, PMC* value) {
         if (PMC_struct_val(SELF))
             real_exception(INTERP, NULL, E_IndexError,
                     "attempt to set existing Pair key");
@@ -132,7 +133,7 @@ Set the value of the Pair.
     }
 
 
-    void set_pmc_keyed_str (STRING* key, PMC* value) {
+    void set_pmc_keyed_str(STRING* key, PMC* value) {
         if (PMC_struct_val(SELF))
             real_exception(INTERP, NULL, E_IndexError,
                     "attempt to set existing Pair key");
@@ -141,7 +142,7 @@ Set the value of the Pair.
         PMC_pmc_val(SELF)    = value;
     }
 
-    void assign_pmc (PMC* value) {
+    void assign_pmc(PMC* value) {
         PMC_pmc_val(SELF) = value;
     }
 
@@ -157,39 +158,51 @@ Check if two Pairs hold the same keys and values.
 
 */
 
-    INTVAL is_equal (PMC* value) {
+    INTVAL is_equal(PMC *value) {
         STRING *s1, *s2;
         PMC *k1, *k2, *p1, *p2;
+
         if (value->vtable->base_type != SELF->vtable->base_type)
             return 0;
-        s1 = PMC_struct_val(SELF);
-        s2 = PMC_struct_val(value);
+
+        s1 = (STRING *)PMC_struct_val(SELF);
+        s2 = (STRING *)PMC_struct_val(value);
+
         if (PObj_key_is_string_TEST(SELF) && PObj_key_is_string_TEST(value)) {
             if (string_equal(INTERP, s1, s2))
                 return 0;
         }
+
         if (PObj_key_is_string_TEST(SELF)) {
-            k1 = pmc_new(INTERP, enum_class_String);
-            PMC_str_val(k1) = PMC_struct_val(SELF);
+            k1              = pmc_new(INTERP, enum_class_String);
+            PMC_str_val(k1) = (STRING *)PMC_struct_val(SELF);
         }
         else
-            k1 = PMC_struct_val(SELF);
+            k1 = (PMC *)PMC_struct_val(SELF);
+
         if (PObj_key_is_string_TEST(value)) {
-            k2 = pmc_new(INTERP, enum_class_String);
-            PMC_str_val(k2) = PMC_struct_val(value);
+            k2              = pmc_new(INTERP, enum_class_String);
+            PMC_str_val(k2) = (STRING *)PMC_struct_val(value);
         }
+
         else
-            k2 = PMC_struct_val(value);
+            k2 = (PMC *)PMC_struct_val(value);
+
         if (!mmd_dispatch_i_pp(INTERP, k1, k2, MMD_EQ))
             return 0;
+
         p1 = PMC_pmc_val(SELF);
         p2 = PMC_pmc_val(value);
+
         if (!p1 && !p2)
             return 1;
+
         if (p1 || p2)
             return 0;
+
         if (!mmd_dispatch_i_pp(INTERP, p1, p2, MMD_EQ))
             return 0;
+
         return 1;
     }
 
@@ -216,16 +229,18 @@ Used to unarchive the Pair.
 
         io->vtable->push_integer(INTERP, io, PObj_key_is_string_TEST(SELF));
         if (PObj_key_is_string_TEST(SELF)) {
-            io->vtable->push_string(INTERP, io, PMC_struct_val(SELF));
+            io->vtable->push_string(INTERP, io, (STRING *)PMC_struct_val(SELF));
         }
         else {
             PMC ** const temp_pos = (PMC**)&PMC_struct_val(SELF);
-            info->thaw_ptr = temp_pos;
+            info->thaw_ptr        = temp_pos;
             (info->visit_pmc_now)(INTERP, *temp_pos, info);
         }
-        pos = &PMC_pmc_val(SELF);
+        pos            = &PMC_pmc_val(SELF);
         info->thaw_ptr = pos;
+
         (info->visit_pmc_now)(INTERP, *pos, info);
+
         SUPER(info);
     }
 
@@ -234,7 +249,7 @@ Used to unarchive the Pair.
         SUPER(info);
         io->vtable->push_integer(INTERP, io, PObj_key_is_string_TEST(SELF));
         if (PObj_key_is_string_TEST(SELF)) {
-            io->vtable->push_string(INTERP, io, PMC_struct_val(SELF));
+            io->vtable->push_string(INTERP, io, (STRING *)PMC_struct_val(SELF));
         }
     }
 
@@ -272,12 +287,14 @@ Return the key, the value, or a tuple of (key, value) respectively.
 
     METHOD PMC* key() {
         if (PObj_key_is_string_TEST(SELF)) {
-            PMC * const k = pmc_new(INTERP,
+            PMC * const k  = pmc_new(INTERP,
                 Parrot_get_ctx_HLL_type(INTERP, enum_class_String));
-            PMC_str_val(k) = PMC_struct_val(SELF);
+
+            PMC_str_val(k) = (STRING *)PMC_struct_val(SELF);
+
             return k;
         }
-        return PMC_struct_val(SELF);
+        return (PMC *)PMC_struct_val(SELF);
     }
 
     METHOD PMC* value() {
@@ -288,9 +305,11 @@ Return the key, the value, or a tuple of (key, value) respectively.
             Parrot_get_ctx_HLL_type(INTERP, enum_class_FixedPMCArray));
         VTABLE_set_integer_native(INTERP, t, 2);
         if (PObj_key_is_string_TEST(SELF))
-            VTABLE_set_string_keyed_int(INTERP, t, 0, PMC_struct_val(SELF));
+            VTABLE_set_string_keyed_int(INTERP, t, 0,
+                (STRING *)PMC_struct_val(SELF));
         else
-            VTABLE_set_pmc_keyed_int(INTERP, t, 0, PMC_struct_val(SELF));
+            VTABLE_set_pmc_keyed_int(INTERP, t, 0, (PMC *)PMC_struct_val(SELF));
+
         VTABLE_set_pmc_keyed_int(INTERP, t, 1, PMC_pmc_val(SELF));
         return t;
     }
@@ -307,10 +326,7 @@ Return the key, the value, or a tuple of (key, value) respectively.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

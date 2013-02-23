@@ -1,4 +1,4 @@
-# $Id: /local/runtime/parrot/library/Stream/Lines.pir 12837 2006-05-30T13:47:57.477012Z coke  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/Stream/Lines.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 =head1 TITLE
 
@@ -43,7 +43,7 @@ END:
 
 .namespace ["Stream::Lines"]
 
-.sub __init :method
+.sub init :vtable :method
     .local pmc temp
 
     classoffset $I0, self, "Stream::Lines"
@@ -193,3 +193,9 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

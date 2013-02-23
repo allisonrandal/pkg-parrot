@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/debug.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/debug.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -15,16 +15,36 @@ t/debug.t - Lua Debug Library
 Tests Lua Debug Library
 (implemented in F<languages/lua/lib/luadebug.pir>).
 
+See "Lua 5.1 Reference Manual", section 5.9 "The Debug Library",
+L<http://www.lua.org/manual/5.1/manual.html#5.9>.
+
+See "Programming in Lua", section 23 "The Debug Library".
+
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 2;
+use Parrot::Test tests => 6;
 use Test::More;
 
-language_output_is( 'lua', <<'CODE', <<'OUT', 'getmetatable' );
+language_output_is( 'lua', <<'CODE', <<'OUT', 'debug.getfenv' );
+local function f () end
+
+print(debug.getfenv(3.14))
+print(type(debug.getfenv(f)))
+assert(debug.getfenv(f) == _G)
+print(type(debug.getfenv(print)))
+assert(debug.getfenv(print) == _G)
+CODE
+nil
+table
+table
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'debug.getmetatable' );
 t = {}
 print(debug.getmetatable(t))
 t1 = {}
@@ -34,13 +54,51 @@ CODE
 nil
 OUT
 
-language_output_is( 'lua', <<'CODE', <<'OUT', 'setmetatable' );
+language_output_is( 'lua', <<'CODE', <<'OUT', 'debug.getregistry' );
+local reg = debug.getregistry()
+print(type(reg))
+print(type(reg._LOADED))
+CODE
+table
+table
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'debug.setfenv' );
+t = {}
+function f () end
+
+assert(debug.setfenv(f, t) == f)
+print(type(debug.getfenv(f)))
+assert(debug.getfenv(f) == t)
+assert(debug.setfenv(print, t) == print)
+print(type(debug.getfenv(print)))
+assert(debug.getfenv(print) == t)
+CODE
+table
+table
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'debug.setfenv (forbidden)' );
+t = {}
+debug.setfenv(t, t)
+CODE
+/^[^:]+: [^:]+:\d+: 'setfenv' cannot change environment of given object\nstack traceback:\n/
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'debug.setmetatable' );
 t = {}
 t1 = {}
-debug.setmetatable(t, t1)
+assert(debug.setmetatable(t, t1) == true)
 assert(getmetatable(t) == t1)
 print "ok"
 CODE
 ok
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

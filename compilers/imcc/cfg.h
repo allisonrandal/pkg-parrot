@@ -2,7 +2,7 @@
 /* Data structures: */
 
 /* Two-way linked list of predecessors and successors */
-#if !defined(PARROT_CFG_H_GUARD)
+#ifndef PARROT_CFG_H_GUARD
 #define PARROT_CFG_H_GUARD
 
 typedef struct _edge {
@@ -26,34 +26,34 @@ typedef struct _basic_block {
 } Basic_block;
 
 EXTERN enum {
-	BB_IS_SUB = 1 << 0
+    BB_IS_SUB = 1 << 0
 } block_enum_flags;
 
 
 typedef struct _loop_info {
-	Set * loop;		/* loop set containg bb's */
-	Set * exits;		/* blocks that exit the loop */
-	int depth;		/* depth of this loop */
-	int n_entries;		/* nr of entries to this loop */
-	int header;		/* header block of loop */
-	int preheader;		/* preheader block of loop, if 1 entry point */
-	int size;		/* no of blocks in loop */
+    Set * loop;     /* loop set containg bb's */
+    Set * exits;    /* blocks that exit the loop */
+    int depth;      /* depth of this loop */
+    int n_entries;  /* nr of entries to this loop */
+    int header;     /* header block of loop */
+    int preheader;  /* preheader block of loop, if 1 entry point */
+    int size;       /* no of blocks in loop */
 } Loop_info;
 
 
 /* Functions: */
 struct _IMC_Unit;
 
-void find_basic_blocks (Parrot_Interp, struct _IMC_Unit *, int first);
+void find_basic_blocks(Parrot_Interp, struct _IMC_Unit *, int first);
 void build_cfg(Parrot_Interp, struct _IMC_Unit *);
 
 void compute_dominators(Parrot_Interp, struct _IMC_Unit *);
 void compute_dominance_frontiers(Parrot_Interp, struct _IMC_Unit *);
-int natural_preheader (struct _IMC_Unit *, Loop_info*);
+int natural_preheader(struct _IMC_Unit *, Loop_info*);
 void find_loops(Parrot_Interp, struct _IMC_Unit *);
 void search_predecessors_not_in(Basic_block*, Set*);
 
-void life_analysis(Parrot_Interp interpreter, struct _IMC_Unit *);
+void life_analysis(Parrot_Interp interp, struct _IMC_Unit *);
 void add_life_interval(Life_range*, int, int);
 void free_life_info(struct _IMC_Unit *, SymReg *r);
 
@@ -63,4 +63,12 @@ int blocks_are_connected(Basic_block *from, Basic_block *to);
 int edge_count(struct _IMC_Unit *);
 
 #endif /* PARROT_CFG_H_GUARD */
+
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
 

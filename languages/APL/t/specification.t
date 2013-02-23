@@ -1,5 +1,7 @@
-#!/usr/bin/perl
+#!perl
 
+use strict;
+use warnings;
 use lib qw(APL . lib ../lib ../../lib ../../../lib);
 use t::APL tests => 6;
 

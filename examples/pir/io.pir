@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/examples/pir/io.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/examples/pir/io.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -47,3 +47,9 @@ You should check where the file is going to be before you run this.
 F<examples/io>.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/configure/config_steps.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/configure/config_steps.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -26,9 +26,20 @@ Regressions tests for configure steps that live under the config directory.
 
 my @steps;
 sub wanted { /^.*\.pm\z/s && push @steps, $File::Find::name; }
-find({wanted => \&wanted}, 'config'); 
+find( { wanted => \&wanted }, 'config' );
+
+if ( $^O !~ /win32/i ) {
+    @steps = grep { $_ !~ /win32/i } @steps;
+}
 
 plan tests => scalar @steps;
 foreach my $step (@steps) {
     require_ok($step);
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,13 +1,12 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/debuginfo.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/op/debuginfo.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 6;
 
 =head1 NAME
 
@@ -15,7 +14,7 @@ t/op/debuginfo.t - Debugging Info
 
 =head1 SYNOPSIS
 
-	% prove t/op/debuginfo.t
+        % prove t/op/debuginfo.t
 
 =head1 DESCRIPTION
 
@@ -24,7 +23,7 @@ as well as backtrace tests.
 
 =cut
 
-pasm_output_like(<<'CODE', <<'OUTPUT', "getline, getfile");
+pasm_output_like( <<'CODE', <<'OUTPUT', "getline, getfile" );
 .pcc_sub main:
     getfile S0
     getline I0
@@ -38,7 +37,7 @@ CODE
 \d/
 OUTPUT
 
-pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - Null PMC access" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - Null PMC access");
 .sub main
     print "ok 1\n"
     a()
@@ -79,7 +78,7 @@ called from Sub 'a' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
-pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - method not found" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - method not found");
 .namespace ["Test1"]
 .sub main
     print "ok 1\n"
@@ -102,7 +101,7 @@ current instr.: 'parrot;Test1;foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'parrot;Test1;main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
-pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - fetch of unknown lexical" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - fetch of unknown lexical");
 .namespace ["Test2"]
 .sub main
     print "ok 1\n"
@@ -127,7 +126,7 @@ OUTPUT
 # other run-loops report 998
 # TODO investigate this after interpreter strtup is done
 # see also TODO in src/embed.c
-pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 1" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 1" );
 .sub main
     main()
 .end
@@ -138,7 +137,7 @@ called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)
 \.\.\. call repeated 1000 times/
 OUTPUT
 
-pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 2" );
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 2");
 .sub main
     rec(91)
 .end
@@ -160,7 +159,9 @@ called from Sub 'rec' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 6; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

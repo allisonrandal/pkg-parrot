@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/docs/running.pod 12839 2006-05-30T14:34:31.126984Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/running.pod 2715 2007-04-01T07:45:52.364223Z paultcochrane  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot - running
 
 =head1 VERSION
 
-$Revision: 12839 $
+$Revision: 2715 $
 
 =head1 OVERVIEW
 
@@ -118,8 +118,9 @@ Optimize
  -O2 optimizations with life info
  -Op rewrite I and N PASM registers most used first
  -Ot select fastest run core (default with -O1 and -O2)
+ -Oc turns on the optional/experimental tail call optimizations
 
-See F<imcc/docs/operation.pod> for more information on the optimizer.  NB.
+See F<docs/imcc/operation.pod> for more information on the optimizer.  NB.
 Optimization is currently experimental and these options are likely to change.
 
 =item -E, --pre-process-only

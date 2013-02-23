@@ -1,12 +1,12 @@
 /* compiler.h
  *  Copyright (C) 2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/compiler.h 13523 2006-07-24T15:49:07.843920Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/compiler.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     defines compiler capabilities
  */
 
-#if !defined(PARROT_COMPILER_H_GUARD)
+#ifndef PARROT_COMPILER_H_GUARD
 #define PARROT_COMPILER_H_GUARD
 
 /*
@@ -62,3 +62,10 @@
 #endif
 
 #endif /* PARROT_COMPILER_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

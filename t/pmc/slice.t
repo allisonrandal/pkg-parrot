@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/t/pmc/slice.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/pmc/slice.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ t/pmc/slice.t - test Slice PMC
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/slice.t
+    % prove t/pmc/slice.t
 
 =head1 DESCRIPTION
 
@@ -23,17 +23,16 @@ Tests the Slice PMC.
 
 =cut
 
-
-pir_output_is(<<'CODE', <<'OUT', 'new');
+pir_output_is( <<'CODE', <<'OUT', 'new' );
 .sub 'test' :main
-	new P0, .Slice
-	print "ok 1\n"
+    new P0, .Slice
+    print "ok 1\n"
 .end
 CODE
 ok 1
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', 'bug with slice bits', todo => 'parser');
+pir_output_is( <<'CODE', <<'OUT', 'bug with slice bits', todo => 'parser' );
 # the VT_CONSTP status gets destroyed, if this constant is
 # used somewhere else as slice index
 .const int vx = 3
@@ -57,5 +56,9 @@ CODE
 1.000000
 OUT
 
-# remember to change the number of tests :-)
-BEGIN { plan tests => 2; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

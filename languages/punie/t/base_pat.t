@@ -1,14 +1,15 @@
-#!/usr/bin/perl
+#!perl
 
 use strict;
+use warnings;
 use lib qw(t . lib ../lib ../../lib ../../../lib);
 use Parrot::Test tests => 1;
 use Test::More;
 
 TODO: {
-local $TODO = 'unimplemented feature';
+    local $TODO = 'unimplemented feature';
 
-language_output_is('punie', <<'EOC', <<'OUT', 'base.pat');
+    language_output_is( 'punie', <<'EOC', <<'OUT', 'base.pat' );
 #!./perl
 
 # $Header: base.pat,v 1.0 87/12/18 13:11:56 root Exp $
@@ -28,3 +29,10 @@ ok 2
 OUT
 
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

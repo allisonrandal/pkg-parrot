@@ -1,4 +1,4 @@
-# $Id: /local/languages/befunge/debug.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/befunge/debug.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 # Initialize the debug structure.
 # P3 = [ 1, { "<" => 1, "10,10" => 1, "r:6" => 1, "c:3" => 1, ... } ]

@@ -1,7 +1,7 @@
 /* stacks.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/intlist.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/intlist.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Integer list routines. Constant-time push, pop, length operations.
  *     Fast linear-time lookup (requires walking through the chunks).
@@ -12,7 +12,7 @@
  *  References:
  */
 
-#if !defined(PARROT_INTLIST_H_GUARD)
+#ifndef PARROT_INTLIST_H_GUARD
 #define PARROT_INTLIST_H_GUARD
 
 #include "parrot/parrot.h"
@@ -38,17 +38,17 @@ struct IntList_chunk_t {
 
 typedef IntList_Chunk IntList;
 
-void intlist_mark(Interp*, IntList*);
+void intlist_mark(Interp *, IntList*);
 
-IntList *intlist_clone(Interp*i, IntList *list);
+IntList *intlist_clone(Interp *i, IntList *list);
 
-IntList *intlist_new(Interp*);
+IntList *intlist_new(Interp *);
 
-INTVAL intlist_length(Interp* interpreter, IntList* list);
+INTVAL intlist_length(Interp *interp, IntList* list);
 
-void intlist_assign(Interp*, IntList*, INTVAL idx, INTVAL val);
+void intlist_assign(Interp *, IntList*, INTVAL idx, INTVAL val);
 
-void intlist_push(Interp*, IntList*, INTVAL);
+void intlist_push(Interp *, IntList*, INTVAL);
 
 INTVAL intlist_pop(Interp*, IntList*);
 
@@ -65,10 +65,7 @@ void intlist_dump(FILE* fp, IntList* list, int verbose);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

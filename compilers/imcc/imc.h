@@ -1,6 +1,6 @@
-/* $Id: /local/compilers/imcc/imc.h 13676 2006-07-29T19:32:10.957437Z chip  $ */
+/* $Id: /parrotcode/trunk/compilers/imcc/imc.h 3385 2007-05-05T14:41:57.057265Z bernhard  $ */
 
-#if !defined(PARROT_IMCC_IMC_H_GUARD)
+#ifndef PARROT_IMCC_IMC_H_GUARD
 #define PARROT_IMCC_IMC_H_GUARD
 
 #include <stdio.h>
@@ -30,13 +30,13 @@
 
 #define IMCC_MAX_FIX_REGS PARROT_MAX_ARGS
 #if IMCC_MAX_FIX_REGS > 16
-#error: flags wont fit
+#  error: flags wont fit
 #endif
 
 #ifdef MAIN
-#define EXTERN
+#  define EXTERN
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /* IMCC reserves this character for internally generated labels
@@ -51,9 +51,9 @@
 #include "unit.h"
 #include "debug.h"
 
-#define IMCC_TRY(a,e)     do{ e=0; switch(setjmp(a)){ case 0:
+#define IMCC_TRY(a,e)     do{ e=0; switch (setjmp(a)){ case 0:
 #define IMCC_CATCH(x)     break; case x:
-#define IMCC_END_TRY      } }while(0)
+#define IMCC_END_TRY      } }while (0)
 
 #define IMCC_THROW(a,x)  longjmp(a,x)
 
@@ -64,9 +64,8 @@
  * imc.c
  */
 PARROT_API void imc_compile_all_units(Interp *);
-PARROT_API void imc_compile_all_units_for_ast(Interp *);
 PARROT_API void imc_compile_unit(Interp *, IMC_Unit * unit);
-PARROT_API void imc_cleanup(Interp *);
+PARROT_API void imc_cleanup(Interp *, void *yyscanner);
 PARROT_API void imc_pragma(char * str);
 PARROT_API FILE* imc_yyin_set(FILE*, void*);
 PARROT_API FILE* imc_yyin_get(void*);
@@ -90,9 +89,9 @@ void free_reglist(IMC_Unit *);
 /*
  * parser_util.c
  */
-PARROT_API void imcc_init(Parrot_Interp interpreter);
-int check_op(Interp *, char * fullname, char *op, SymReg *r[],
-    int narg, int keyvec);
+PARROT_API void imcc_init(Parrot_Interp interp);
+PARROT_API void imcc_destroy(Parrot_Interp interp);
+int check_op(Interp *, char * fullname, char *op, SymReg *r[], int narg, int keyvec);
 int is_op(Interp *, char *);
 char *str_dup(const char *);
 char *str_cat(const char *, const char *);
@@ -111,9 +110,9 @@ PMC *imcc_compile_pasm_ex(Parrot_Interp interp, const char *s);
 void *IMCC_compile_file(Parrot_Interp interp, const char *s);
 void *IMCC_compile_file_s(Parrot_Interp interp, const char *s,
       STRING **error_message);
-PMC * IMCC_compile_pir_s(Parrot_Interp interp, const char *s, 
+PMC * IMCC_compile_pir_s(Parrot_Interp interp, const char *s,
       STRING **error_message);
-PMC * IMCC_compile_pasm_s(Parrot_Interp interp, const char *s, 
+PMC * IMCC_compile_pasm_s(Parrot_Interp interp, const char *s,
       STRING **error_message);
 
 /* Call convention independant API */
@@ -121,44 +120,27 @@ PMC * IMCC_compile_pasm_s(Parrot_Interp interp, const char *s,
 /*
  * pcc.c
  */
-void expand_pcc_sub(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void expand_pcc_sub_ret(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void expand_pcc_sub_call(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
+void expand_pcc_sub(Parrot_Interp interp, IMC_Unit *, Instruction *ins);
+void expand_pcc_sub_ret(Parrot_Interp interp, IMC_Unit *, Instruction *ins);
+void expand_pcc_sub_call(Parrot_Interp interp, IMC_Unit *, Instruction *ins);
 
 /* pragmas avialable: */
 typedef enum {
   PR_N_OPERATORS = 0x01
 } _imc_pragmas;
 
-/* globals XXX */
-PARROT_API EXTERN int        line;	/* and line */
+#define PARROT_MAX_RECOVER_ERRORS 40 /* this is the number of times
+                                      * parrot will try to retry while
+                                      * compiling. */
 
-EXTERN enum {
-	OPT_NONE,
-	OPT_PRE,
-	OPT_CFG = 	0x002,
-	OPT_SUB = 	0x004,
-	OPT_PASM =      0x100,
-	OPT_J = 	0x200
-} enum_opt;
-
-/*
- * Optimization statistics -- we track the number of times each of these
- * optimizations is performed.
- *
- * XXX: Should this be part of the imc_info struct?
- */
-struct imcc_ostat {
-	int deleted_labels;
-	int if_branch;
-	int branch_branch;
-  int branch_cond_loop;
-	int invariants_moved;
-	int deleted_ins;
-	int used_once;
-} ;
-
-EXTERN struct imcc_ostat ostat;
+typedef enum _enum_opt {
+    OPT_NONE,
+    OPT_PRE,
+    OPT_CFG  = 0x002,
+    OPT_SUB  = 0x004,
+    OPT_PASM = 0x100,
+    OPT_J    = 0x200
+} enum_opt_t;
 
 struct nodeType_t;
 
@@ -167,7 +149,7 @@ struct nodeType_t;
  */
 struct parser_state_t {
     struct parser_state_t *next;
-    Interp *interpreter;
+    Interp *interp;
     const char *file;
     FILE *handle;
     int line;
@@ -182,6 +164,11 @@ typedef enum _AsmState {
     AsmInYield
 } AsmState;
 
+typedef enum _imcc_reg_allocator_t {
+    IMCC_VANILLA_ALLOCATOR = 0,
+    IMCC_GRAPH_ALLOCATOR
+} imcc_reg_allocator;
+
 PARROT_API void IMCC_push_parser_state(Interp*);
 PARROT_API void IMCC_pop_parser_state(Interp*, void *yyscanner);
 
@@ -189,6 +176,7 @@ typedef struct _imc_info_t {
     struct _imc_info_t *prev;
     IMC_Unit * imc_units;
     IMC_Unit * last_unit;
+    IMC_Unit * cur_unit;
     int n_comp_units;
     int imcc_warn;
     int verbose;
@@ -196,6 +184,7 @@ typedef struct _imc_info_t {
     int IMCC_DEBUG;
     int gc_off;
     int write_pbc;
+    int allocator;
     SymReg* sr_return;
     AsmState asm_state;
     int optimizer_level;
@@ -209,6 +198,46 @@ typedef struct _imc_info_t {
     jmp_buf jump_buf;               /* The jump for error  handling */
     int error_code;                 /* The Error code. */
     STRING * error_message;         /* The Error message */
+
+    /* some values that were global... */
+    int line;                   /* current line number */
+    int cur_pmc_type;
+    SymReg *cur_call;
+    SymReg *cur_obj;
+    char *adv_named_id;
+
+    /* Lex globals */
+    int in_pod;
+    char *heredoc_end;
+    char *heredoc_content;
+    char *cur_macro_name;
+
+    int expect_pasm;
+    struct macro_frame_t *frames;
+
+    /* this is just a sign that we suck.  that's all. */
+    char temp_buffer[4096];
+    /* I really do not like this temporary buffer. It makes the
+     * structure big. -- ambs */
+
+    /*
+     * XXX: The use of a cstring hash is good, pretty much.  But we're never
+     * clearing the hash, ever, which is bad, pretty much.
+     */
+    Hash *macros;
+
+    /*
+     * these are used for constructing one INS
+     */
+#define IMCC_MAX_STATIC_REGS 100
+    SymReg *regs[IMCC_MAX_STATIC_REGS];
+    int nkeys;
+    SymReg *keys[IMCC_MAX_FIX_REGS]; /* TODO key overflow check */
+    int keyvec;
+    int cnr;
+    int nargs;
+    int in_slice;
+    void *yyscanner;
 } imc_info_t;
 
 #define IMCC_INFO(i) (((Parrot_Interp)(i))->imc_info)
@@ -216,20 +245,11 @@ typedef struct _imc_info_t {
 #define IMC_TRACE 0
 #define IMC_TRACE_HIGH 0
 
-
-extern IMC_Unit * cur_unit;
-
-/*
- * ast interface
- */
-
-PARROT_API void IMCC_ast_init(Interp* interpreter);
-PARROT_API void IMCC_ast_compile(Interp *interpreter, FILE *fp);
 PARROT_API Instruction * IMCC_create_itcall_label(Interp *);
-PARROT_API void IMCC_itcall_sub(Interp* interpreter, SymReg* sub);
+PARROT_API void IMCC_itcall_sub(Interp* interp, SymReg* sub);
 
-STRING * IMCC_string_from_reg(Interp *interpreter, SymReg *r);
-INTVAL   IMCC_int_from_reg(Interp *interpreter, SymReg *r);
+STRING * IMCC_string_from_reg(Interp *interp, SymReg *r);
+INTVAL   IMCC_int_from_reg(Interp *interp, SymReg *r);
 Instruction * IMCC_subst_constants_umix(Interp *, IMC_Unit * unit, char *name,
         SymReg **r, int n);
 Instruction * IMCC_subst_constants(Interp *, IMC_Unit * unit, char *name,
@@ -240,10 +260,7 @@ Instruction * IMCC_subst_constants(Interp *, IMC_Unit * unit, char *name,
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

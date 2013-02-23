@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/pmc/sharedref.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/pmc/sharedref.pmc 3178 2007-04-14T21:31:11.102782Z chromatic  $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ we can relax that a bit.
 pmclass SharedRef does ref need_ext is_shared extends Ref {
 
 
-    void init () {
+    void init() {
         SUPER();
     }
 
@@ -86,7 +86,7 @@ We do already sharing - so just ignore.
 
 */
 
-    void share () {
+    void share() {
     }
 
 /*
@@ -99,7 +99,7 @@ Marks the reference as live.
 
 */
 
-    void mark () {
+    void mark() {
         SUPER();
     }
 
@@ -122,7 +122,7 @@ Catch dereferencing. This would unshare the referred PMC.
         PObj_active_destroy_SET(SELF);
     }
 
-    PMC* get_pmc () {
+    PMC* get_pmc() {
         real_exception(INTERP, NULL, E_ReferenceError,
                 "deref not allowed");
         return NULL;
@@ -145,8 +145,7 @@ or at least a detection if the referred PMC is already destroyed.
             VTABLE_destroy(INTERP, ref);
         if (PMC_sync(SELF)->owner != INTERP)
             PANIC("SharedRef destroyed by wrong interpreter");
-        MUTEX_DESTROY(PMC_sync(SELF)->pmc_lock);
-        mem_sys_free(PMC_sync(SELF));
+        SUPER();
     }
 }
 
@@ -164,10 +163,7 @@ Initial revision by leo 2004.01.14.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

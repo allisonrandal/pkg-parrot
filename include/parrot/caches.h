@@ -1,7 +1,7 @@
 /* caches.h
  *  Copyright (C) 2001-2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/caches.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/caches.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Cache and direct freelist handling for various items.
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_CACHES_H_GUARD)
+#ifndef PARROT_CACHES_H_GUARD
 #define PARROT_CACHES_H_GUARD
 
 #define DISABLE_METH_CACHE 0
@@ -36,17 +36,15 @@ typedef struct _Caches {
     /* PMC **hash */            /* for non-constant keys */
 } Caches;
 
-void init_object_cache(Parrot_Interp interpreter);
+void init_object_cache(Parrot_Interp interp);
 void mark_object_cache(Parrot_Interp);
+void destroy_object_cache(Parrot_Interp);
 
 #endif   /* PARROT_CACHES_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,7 +1,7 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
+# Copyright (C) 2001-2007, The Perl Foundation.
 # This program is free software. It is subject to the same
 # license as Perl itself.
-# $Id: /local/examples/pir/euclid.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/local/examples/pir/euclid.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -44,3 +44,9 @@ done:   print "The greatest common denominator of 96 and 64 is "
         print  I2
         print  ".\n"
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

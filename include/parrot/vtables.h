@@ -1,7 +1,7 @@
 /* vtables.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/vtables.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/vtables.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Vtable manipulation code. Not to be confused with vtable.h
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_VTABLES_H_GUARD)
+#ifndef PARROT_VTABLES_H_GUARD
 #define PARROT_VTABLES_H_GUARD
 
 PARROT_API VTABLE *Parrot_new_vtable(Interp*);
@@ -25,10 +25,7 @@ void parrot_free_vtables(Interp *);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

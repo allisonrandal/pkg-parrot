@@ -44,6 +44,54 @@ PGE::Exp - base class for expressions
 
 =over 4
 
+=item C<compile(PMC source, PMC adverbs :slurpy :named)>
+
+Compile the C<source> expression into PIR or a subroutine,
+according to the C<target> adverb.  
+
+=cut
+
+.sub 'compile'
+    .param pmc source
+    .param pmc adverbs         :slurpy :named
+
+    .local string target
+    target = adverbs['target']
+    target = downcase target
+    if target == 'parse' goto return_exp
+    if target == 'pge::exp' goto return_exp
+
+    .local string grammar
+    .local string nsformat
+    nsformat = '.namespace'
+    grammar = adverbs['grammar']
+    if grammar == '' goto pir
+    nsformat = ".namespace [ '%0' ]"
+  pir:
+    .local pmc code
+    code = new 'PGE::CodeString'
+    code.'emit'(nsformat, grammar)
+    $P0 = source.'root_pir'(adverbs :flat :named)
+    code .= $P0
+    if target != 'pir' goto bytecode
+    .return (code)
+
+  bytecode:
+    $P0 = compreg 'PIR'
+    $P1 = $P0(code)
+  make_grammar:
+    if grammar == '' goto end
+    $I0 = find_type grammar
+    if $I0 > 0 goto end
+    $P0 = subclass 'PGE::Grammar', grammar
+  end:
+    .return ($P1)
+
+  return_exp:
+    .return (source)
+.end
+
+
 =item C<root_pir(PMC adverbs)>
 
 Return a CodeString object containing the entire expression
@@ -338,7 +386,7 @@ tree as a PIR code object that can be compiled.
     $S0 = exp0
     $S1 = exp1
     concat $S0, $S1
-    exp0.'value'($S0)
+    exp0.'result_object'($S0)
     goto concat_lit_loop
   concat_lit_shift:
     inc j
@@ -1048,7 +1096,7 @@ tree as a PIR code object that can be compiled.
           rep = $I0 - pos
           %Mif rep < %m goto fail
           %Nif rep <= %n goto %L_1
-          %Nrep = max
+          %Nrep = %n
         %L_1:
         CODE
 
@@ -1203,15 +1251,21 @@ tree as a PIR code object that can be compiled.
     if $I0 == 0 goto negated_end
     test = '>='
   negated_end:
+    .local string incpos
+    incpos = 'inc pos'
+    $I0 = self['iszerowidth']
+    if $I0 == 0 goto zerowidth_end
+    incpos = '###   zero width'
+  zerowidth_end:
 
-    code.emit(<<"        CODE", label, charlist, test, next)
+    code.emit(<<"        CODE", label, charlist, test, incpos, next)
         %0: # enumcharlist %1
           if pos >= lastpos goto fail
           $S0 = substr target, pos, 1
           $I0 = index %1, $S0
           if $I0 %2 0 goto fail
-          inc pos
-          goto %3
+          %3
+          goto %4
         CODE
     .return ()
 .end
@@ -1332,14 +1386,20 @@ tree as a PIR code object that can be compiled.
           mpos = pos
           ($P0 :optional, $I0 :opt_flag) = $P1(mob)
           if $I0 == 0 goto %1
-          mob.'value'($P0)
+          mob.'result_object'($P0)
           push ustack, pos
           bsr succeed
           pos = pop ustack
           null $P0
-          mob.'value'($P0)
+          mob.'result_object'($P0)
           goto fail
         CODE
     .return ()
 .end
  
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

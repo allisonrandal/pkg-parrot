@@ -34,7 +34,7 @@ opcode.
     .return self.'accessor'('dest', dest, passed_dest)
 .end
 
-.sub __clone :method
+.sub 'clone' :method :anon :vtable
     .local pmc result
     result = new 'POST::Label'
     $P1 = self.'name'()
@@ -90,3 +90,9 @@ loop:
     self.'name'($S1)
     .return ()
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

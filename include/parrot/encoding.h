@@ -1,7 +1,7 @@
 /* encoding.h
  *  Copyright (C) 2004-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/encoding.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/encoding.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_ENCODING_H_GUARD)
+#ifndef PARROT_ENCODING_H_GUARD
 #define PARROT_ENCODING_H_GUARD
 
 #include "parrot/parrot.h"
@@ -34,7 +34,7 @@ typedef UINTVAL (*encoding_bytes_t)(Interp*, STRING *src);
 
 struct string_iterator_t;       /* s. parrot/string.h */
 
-typedef void    (*encoding_iter_init_t)(Interp *, STRING *src,
+typedef void (*encoding_iter_init_t)(Interp *, STRING *src,
         struct string_iterator_t *);
 
 struct _encoding {
@@ -121,12 +121,10 @@ PARROT_API const char * Parrot_encoding_c_name(Interp *, INTVAL number_of_encodi
     ((ENCODING *)src->encoding)->iter_init(i, src, iter)
 
 #endif /* PARROT_ENCODING_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

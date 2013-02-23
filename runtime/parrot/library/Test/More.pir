@@ -8,19 +8,12 @@ Test::More - Parrot extension for testing modules
     load_bytecode 'library/Test/More.pir'
 
     # get the testing functions
-    .local pmc plan
-    .local pmc diag
-    .local pmc ok
-    .local pmc is
-    .local pmc is_deeply
-    .local pmc like
+    .local pmc exports, curr_namespace, test_namespace
+    curr_namespace = get_namespace
+    test_namespace = get_namespace [ "Test::More" ]
+    exports = split " ", "plan diag ok is is_deeply like isa_ok"
 
-    plan      = find_global 'Test::More', 'plan'
-    diag      = find_global 'Test::More', 'diag'
-    ok        = find_global 'Test::More', 'ok'
-    is        = find_global 'Test::More', 'is'
-    is_deeply = find_global 'Test::More', 'is_deeply'
-    like      = find_global 'Test::More', 'like'
+    test_namespace."export_to"(curr_namespace, exports)
 
     # set a test plan
     plan( 12 )
@@ -44,6 +37,13 @@ Test::More - Parrot extension for testing modules
     is_deeply( some_deep_pmc, another_deep_pmc, 'deep structure comparison' )
 
     like( 'foo', 'f o**{2}', 'passing regex compare with diagnostic' )
+    skip(1, 'reason for skipping')
+    todo(0, 'this is a failed test', 'reason for todo')
+
+    $P0 = getclass "Squirrel"
+    $P0.new()
+
+    isa_ok($P0, "Squirrel", "new Squirrel")
 
 =head1 DESCRIPTION
 
@@ -260,11 +260,11 @@ add more.
     .local int pass
     pass = 0
 
-	.local string l_type
-	l_type = typeof left
+	.local string r_type
+	r_type = typeof right
 
-	if l_type == 'Float' goto num_compare
-	if l_type == 'Int'   goto num_compare
+	if r_type == 'Float' goto num_compare
+	if r_type == 'Int'   goto num_compare
 	goto string_compare
 
   num_compare:
@@ -737,6 +737,106 @@ optional test description in C<description>.
   done:
 .end
 
+=item C<skip( how_many, why )>
+
+Pass a number of tests, but with a comment that marks the test was
+actually skipped.  Arguments are optional.
+
+=cut
+
+.sub skip :multi(int, string)
+    .param int how_many
+    .param string description
+
+    .local pmc test
+    find_global test, 'Test::More', '_test'
+    test.'skip'(how_many, description)
+.end
+
+.sub skip :multi(int)
+    .param int how_many
+
+    .local pmc test
+    find_global test, 'Test::More', '_test'
+    test.'skip'(how_many)
+.end
+
+.sub skip :multi(string)
+    .param string description
+
+    .local pmc test
+    find_global test, 'Test::More', '_test'
+    test.'skip'(1, description)
+.end
+
+.sub skip :multi()
+    .local pmc test
+    find_global test, 'Test::More', '_test'
+    test.'skip'()
+.end
+
+=item C<todo( passed, description, reason )>
+
+Records a test as pass or fail (like C<ok>, but marks it as TODO so it always
+appears as a success. This also records the optional C<description> of the test
+and the C<reason> you have marked it as TODO.
+
+=cut
+
+.sub todo
+    .param pmc args :slurpy
+
+    .local pmc test
+    find_global test, 'Test::More', '_test'
+
+    test.todo( args :flat )
+.end
+
+=item C<isa_ok( object, class_name, object_name )>
+
+Pass if the object C<isa> class of the given class name.  The object
+name passed in is not a full description, but a name to be included in
+the description. The description is presented as "<object_name> isa
+<class>".
+
+Good input: "C<new MyObject>", "C<return from bar()>"
+
+Bad input: "C<test that the return from Foo is correct type>"
+
+=cut
+
+.sub isa_ok
+    .param pmc thingy
+    .param pmc class_name
+    .param pmc object_name :optional
+    .param int got_name :opt_flag
+
+    .local pmc test
+    find_global test, 'Test::More', '_test'
+
+    .local string description, diagnostic
+    description = "The object"
+    unless got_name goto keep_default
+    description = object_name
+  keep_default:
+    diagnostic = description
+    description .= " isa "
+    $S0 = class_name
+    description .= $S0
+
+    $I0 = isa thingy, class_name
+    test.'ok'($I0, description)
+    if $I0 goto out
+    diagnostic .= " isn't a "
+    $S1 = class_name
+    diagnostic .= $S1
+    diagnostic .= " it's a "
+    $S2 = typeof thingy
+    diagnostic .= $S2
+    test.'diag'(diagnostic)
+  out:
+.end
+
 .sub _make_diagnostic
     .param string received
     .param string expected
@@ -765,4 +865,8 @@ Copyright (C) 2005 - 2006 The Perl Foundation.
 
 =cut
 
-# vim: expandtab sw=4
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

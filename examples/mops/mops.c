@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/examples/mops/mops.c 12835 2006-05-30T13:32:26.641316Z coke  $
+$Id: /parrotcode/trunk/examples/mops/mops.c 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -23,11 +23,11 @@ Prints out:
 
 =over 4
 
-=item * the number of look iterations, 
+=item * the number of look iterations,
 
 =item * the estimated number of ops performed,
 
-=item * the elapsed time, and 
+=item * the elapsed time, and
 
 =item * the number of M op/s.
 
@@ -116,10 +116,7 @@ F<examples/mops/mops.scheme>.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

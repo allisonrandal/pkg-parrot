@@ -1,14 +1,14 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/parrot.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/parrot.c 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
-src/parrot.c - 
+src/parrot.c -
 
 =head1 DESCRIPTION
 
-THIS FILE IS NOT USED.  
+THIS FILE IS NOT USED. (RT#41783)
 The main function for parrot is found in ../compilers/imcc/main.c.
 
 =cut
@@ -29,12 +29,10 @@ know." -- Brent Dax
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil 
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

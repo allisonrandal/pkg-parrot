@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/prop.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/prop.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/prop.t - Properties
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/prop.t
+    % prove t/pmc/prop.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ Tests property access on PMCs.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "set/getprop");
+pasm_output_is( <<'CODE', <<'OUTPUT', "set/getprop" );
     new P0, .Integer
     set P0, 10
     new P1, .String
@@ -46,7 +46,7 @@ ten
 zehn
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Property values are references");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Property values are references" );
     new P0, .String
     new P1, .String
     set P0, "Dog"
@@ -74,7 +74,7 @@ No
 No
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "resetting a property");
+pasm_output_is( <<'CODE', <<'OUTPUT', "resetting a property" );
     new P0, .ResizablePMCArray
     new P1, .String
     new P2, .String
@@ -99,7 +99,7 @@ Integer
 Float
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "getting a unset property");
+pasm_output_is( <<'CODE', <<'OUTPUT', "getting a unset property" );
     new P1, .Float
     new P2, .Integer
 
@@ -113,7 +113,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "delprop");
+pasm_output_is( <<'CODE', <<'OUTPUT', "delprop" );
     new P0, .Integer
     set P0, 10
     new P1, .String
@@ -132,7 +132,9 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "delprop");
     print "\n"
     delprop P0, "de"
     getprop P3, "de", P0
-    print P3
+    if_null P3, ok
+    print "not deleted 'de' "
+ok:
     print "-\n"
     end
 CODE
@@ -142,7 +144,7 @@ zehn
 -
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "prophash");
+pasm_output_is( <<'CODE', <<'OUTPUT', "prophash" );
     new P0, .Integer
     set P0, 10
     new P1, .String
@@ -167,3 +169,10 @@ ten
 zehn
 -
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

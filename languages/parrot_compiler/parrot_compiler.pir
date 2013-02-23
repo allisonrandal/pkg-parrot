@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2006, The Perl Foundation.
-# $Id: /local/languages/parrot_compiler/parrot_compiler.pir 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/trunk/languages/parrot_compiler/parrot_compiler.pir 3058 2007-04-09T21:55:49.686616Z paultcochrane  $
 
 .sub main :main
   .param pmc argv
@@ -59,3 +59,9 @@
   P0()
 
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

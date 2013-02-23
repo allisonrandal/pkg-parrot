@@ -8,12 +8,9 @@ providing a compreg-compatible method.
 
 =cut
 
-# XXX It would be nice to be able to reduce the # of times we call
-# .HLL here and in the .included files to a minimum.
-
 .HLL 'parrot', ''
 
-.loadlib 'dynlexpad'
+.loadlib 'tcl_ops'
 .include 'languages/tcl/src/macros.pir'
 .include 'cclass.pasm'
 
@@ -33,12 +30,14 @@ providing a compreg-compatible method.
 .include 'languages/tcl/runtime/list_to_string.pir'
 .include 'languages/tcl/runtime/string_to_list.pir'
 .include 'languages/tcl/runtime/variables.pir'
-.include 'languages/tcl/src/compiler.pir'
-.include 'languages/tcl/src/parser.pir'
+.include 'languages/tcl/runtime/options.pir'
 
+# class files (HLL: _Tcl)
+.include 'languages/tcl/src/class/tclconst.pir'
+.include 'languages/tcl/src/class/tclproc.pir'
 
 # create the 'tcl' namespace -- see RT #39852
-# http://rt.perl.org/rt3/Ticket/Display.html?id=39852
+# https://rt.perl.org/rt3/Ticket/Display.html?id=39852
 .HLL 'Tcl', ''
 .namespace ['tcl']
 .sub foo
@@ -60,6 +59,7 @@ providing a compreg-compatible method.
   load_bytecode 'Getopt/Obj.pbc'
   load_bytecode 'PGE.pbc'
   load_bytecode 'PGE/Glob.pbc'
+  load_bytecode 'PGE/Text.pbc'                                                                                                                                  
   load_bytecode 'PGE/Util.pbc'
   load_bytecode 'TGE.pbc'
 
@@ -82,6 +82,67 @@ env_loop:
 
 env_loop_done:
   set_root_global ['tcl'], '$env', tcl_env
+
+  # set tcl_interactive
+  push_eh non_interactive
+    $P1 = get_root_global ['tcl'], '$tcl_interactive'
+  clear_eh
+  goto set_tcl_library 
+ non_interactive:
+  $P1 = new .TclInt
+  $P1 = 0
+  set_root_global ['tcl'], '$tcl_interactive', $P1
+
+ set_tcl_library:
+  # Set tcl_library:
+  .local pmc    interp, config
+  .local string slash
+  interp = getinterp
+  .include 'iglobals.pasm'
+
+  config = interp[.IGLOBALS_CONFIG_HASH]
+  $S0 = config['build_dir']
+  slash = config['slash']
+  $S0 .= slash
+  $S0 .= 'languages' 
+  $S0 .= slash
+  $S0 .= 'tcl' 
+  $S0 .= slash
+  $S0 .= 'library' 
+  .local pmc tcl_library
+  tcl_library = new 'TclString'
+  tcl_library = $S0
+  set_root_global ['tcl'], '$tcl_library', tcl_library
+
+  # get the name of the executable
+  $P1 = interp[.IGLOBALS_EXECUTABLE]
+  set_root_global [ '_tcl' ], 'nameofexecutable', $P1
+
+  # set tcl_platform
+  $P1 = new 'TclArray'
+  $P1['platform'] = 'parrot'
+  set_root_global ['tcl'], '$tcl_platform', $P1
+  $I1 = config['bigendian']
+  if $I1 goto big_endian
+  $P1['byteOrder'] = 'littleEndian'
+  goto done_endian
+ big_endian:
+  $P1['byteOrder'] = 'bigEndian'
+
+ done_endian: 
+  $I1 = config['intsize']
+  $P1['wordSize'] = $I1
+
+  $S1 = config['osname']
+  $P1['os'] = $S1
+
+  $S1 = config['cpuarch'] # XXX first approximation
+  $P1['machine'] = $S1
+ 
+  # Set default precision.
+  $P1 = new 'TclInt'
+  $P1 = 0
+  set_root_global ['tcl'], '$tcl_precision', $P1
 
   # keep track of names of file types.
   .local pmc filetypes
@@ -122,11 +183,11 @@ env_loop_done:
   # Eventually, we'll need to register MMD for the various Tcl PMCs
   # (Presuming we don't do this from the .pmc definitions.)
 
-  $P1 = new .TclArray
-  store_global 'proc_body', $P1
+  $P1 = new .ResizablePMCArray
+  store_global 'info_level', $P1
 
-  $P1 = new .TclArray
-  store_global 'proc_args', $P1
+  $P1 = new .ResizablePMCArray
+  store_global 'events', $P1
 
   # Global variable initialization
 
@@ -161,14 +222,9 @@ env_loop_done:
   $P1 = 1
   store_global 'next_channel_id', $P1
 
-  # calling level (for upvar, uplevel, globals vs. lex)
-  $P1 = new .Integer
-  $P1 = 0
-  store_global 'call_level', $P1
-  # call level diff (for skipping lex pads in upvar and uplevel)
-  $P1 = new .Integer
-  $P1 = 0
-  store_global 'call_level_diff', $P1
+  # call chain of lex pads (for upvar and uplevel)
+  $P1 = new .ResizablePMCArray
+  store_global 'call_chain', $P1
 
   # Change counter: when something is compiled, it is compared to
   # This counter: if the counter hasn't changed since it was compiled,
@@ -180,12 +236,12 @@ env_loop_done:
 
   # the regex used for namespaces
   .local pmc p6rule, colons
-  p6rule = compreg "PGE::P6Regex"
+  p6rule = compreg 'PGE::P6Regex'
   colons = p6rule('\:\:+')
   set_hll_global 'colons', colons
 
   # register the TCL compiler.
-  $P1 = find_global '_tcl_compile'
+  $P1 = get_root_global ['_tcl'], '__script'
   compreg 'TCL', $P1
   
   # Setup a global to keep a unique id for compiled subs.
@@ -195,22 +251,45 @@ env_loop_done:
 
 .end
 
-.sub _tcl_compile
-  .param string tcl_code
-
-  .local pmc compiled_num
-  compiled_num = find_global 'compiled_num'
-  inc compiled_num
-
-  .local pmc compiler,pir_compiler
-  compiler = find_global 'compile'
-  pir_compiler = find_global 'pir_compiler'
-
-  ($I0,$S0) = compiler(0,tcl_code)
-  .return pir_compiler($I0,$S0)
-.end
-
+.HLL 'parrot', ''
 .include 'languages/tcl/src/grammar/expr/expression.pir'
 .include 'languages/tcl/src/grammar/expr/parse.pir'
 .include 'languages/tcl/src/grammar/expr/functions.pir'
 .include 'languages/tcl/src/grammar/expr/operators.pir'
+
+# Load the standard library
+.HLL 'Tcl', ''
+.namespace
+
+.sub __load_stdlib :load :anon
+  .include 'iglobals.pasm'
+  .local pmc interp
+  interp = getinterp
+  $P1 = interp[.IGLOBALS_CONFIG_HASH]
+
+  .local string slash
+  slash = $P1['slash']
+  $P2 = $P1['slash']
+  set_root_global ['_tcl'], 'slash', $P2
+
+  .local pmc tcl_library
+  tcl_library = get_global '$tcl_library'
+
+  $S0 = tcl_library
+  $S0 .= slash
+  $S0 .= 'parray.tcl'
+
+  .local pmc io, script
+  io = getclass 'ParrotIO'
+  $S0 = io.'slurp'($S0)
+
+  script = get_root_global ['_tcl'], '__script'
+  $P1 = script($S0)
+  $P1()
+.end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

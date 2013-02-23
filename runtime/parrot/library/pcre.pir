@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2005, The Perl Foundation.
-# $Id: /local/runtime/parrot/library/pcre.pir 12837 2006-05-30T13:47:57.477012Z coke  $
+# $Id: /parrotcode/local/runtime/parrot/library/pcre.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 TITLE
 
@@ -195,3 +195,9 @@ E<lt>jerry dot gay at gmail dot com<gt>
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

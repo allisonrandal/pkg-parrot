@@ -5,25 +5,31 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Expression/Suffix.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Expression/Suffix.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Expression::Suffix;
 
 use base qw(Jako::Construct::Expression);
 
-sub new
-{
-  my $class = shift;
-  my ($left, $op);
+sub new {
+    my $class = shift;
+    my ( $left, $op );
 
-  return bless {
-    LEFT  => $left,
-    OP    => $op
-  }, $class;
+    return bless {
+        LEFT => $left,
+        OP   => $op
+    }, $class;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

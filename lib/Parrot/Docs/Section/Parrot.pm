@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Parrot.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Parrot.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -54,31 +54,20 @@ Returns a new section.
 
 =cut
 
-sub new
-{
+sub new {
     my $self = shift;
 
     return $self->SUPER::new(
-        'Contents', 
-        'index.html', 
-        'What\'s in the Parrot distribution?',
-        Parrot::Docs::Section::Info->new,
-        Parrot::Docs::Section::Docs->new,
-        Parrot::Docs::Section::Examples->new,
-        Parrot::Docs::Section::PMCs->new,
-        Parrot::Docs::Section::DynaPMCs->new,
-        Parrot::Docs::Section::C->new,
-        Parrot::Docs::Section::Ops->new,
-        Parrot::Docs::Section::IMCC->new,
-        Parrot::Docs::Section::Perl->new,
-        Parrot::Docs::Section::Libs->new,
-        Parrot::Docs::Section::Tools->new,
-        Parrot::Docs::Section::BigNum->new,
-        Parrot::Docs::Section::Compilers->new,
-        Parrot::Docs::Section::Languages->new,
-        Parrot::Docs::Section::Config->new,
-        Parrot::Docs::Section::Tests->new,
-        Parrot::Docs::Section::EditorPlugins->new,
+        'Contents',                            'index.html',
+        'What\'s in the Parrot distribution?', Parrot::Docs::Section::Info->new,
+        Parrot::Docs::Section::Docs->new,      Parrot::Docs::Section::Examples->new,
+        Parrot::Docs::Section::PMCs->new,      Parrot::Docs::Section::DynaPMCs->new,
+        Parrot::Docs::Section::C->new,         Parrot::Docs::Section::Ops->new,
+        Parrot::Docs::Section::IMCC->new,      Parrot::Docs::Section::Perl->new,
+        Parrot::Docs::Section::Libs->new,      Parrot::Docs::Section::Tools->new,
+        Parrot::Docs::Section::BigNum->new,    Parrot::Docs::Section::Compilers->new,
+        Parrot::Docs::Section::Languages->new, Parrot::Docs::Section::Config->new,
+        Parrot::Docs::Section::Tests->new,     Parrot::Docs::Section::EditorPlugins->new,
     );
 }
 
@@ -100,16 +89,15 @@ once by the root section, it is not passed to subsections.
 
 =cut
 
-sub write_docs
-{
-    my $self = shift;
+sub write_docs {
+    my $self   = shift;
     my $silent = shift || 0;
     my $delete = shift || 0;
-    my $dist = Parrot::Distribution->new;
+    my $dist   = Parrot::Distribution->new;
 
     $dist->delete_html_docs if $delete;
 
-    $self->write_html($dist, $dist->html_docs_directory, $silent);
+    $self->write_html( $dist, $dist->html_docs_directory, $silent );
 }
 
 =back
@@ -157,3 +145,10 @@ sub write_docs
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

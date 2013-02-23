@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/benchmarks/addit.pl 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/local/examples/benchmarks/addit.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -19,12 +19,14 @@ prints the result (21001097.97).
 =cut
 
 use strict;
+use warnings;
+
 sub varargs_adder {
     my $sum = 0;
-    for (my $a = $#_; $a >= 0; --$a) {
+    for ( my $a = $#_ ; $a >= 0 ; --$a ) {
         $sum += $_[$a];
     }
-    return $sum
+    return $sum;
 }
 my $result = 0;
 my @args;
@@ -33,7 +35,8 @@ $args[1] = 7.100;
 $args[2] = 87;
 $args[3] = "3.87";
 $args[4] = "21000000";
-for (my $x = 500000; $x >= 0; --$x) {
+
+for ( my $x = 500000 ; $x >= 0 ; --$x ) {
     $result = varargs_adder(@args);
 }
 print "$result\n";
@@ -44,3 +47,10 @@ F<examples/benchmarks/addit.pasm>, F<examples/benchmarks/addit.pir>,
 F<examples/benchmarks/addit2.pir>.
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

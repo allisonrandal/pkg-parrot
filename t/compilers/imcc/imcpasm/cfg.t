@@ -1,11 +1,13 @@
 #!perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/imcpasm/cfg.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/imcc/imcpasm/cfg.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
 use Parrot::Test tests => 3;
 
-pir_2_pasm_is(<<'CODE', <<'OUT', "unreachable 1");
+pir_2_pasm_is( <<'CODE', <<'OUT', "unreachable 1" );
 .sub _test
    bsr L
    print "ok\n"
@@ -27,7 +29,7 @@ L:
    ret
 OUT
 
-pir_2_pasm_is(<<'CODE', <<'OUT', "unreachable 2");
+pir_2_pasm_is( <<'CODE', <<'OUT', "unreachable 2" );
 .sub _test
   print "ok\n"
   end
@@ -42,7 +44,7 @@ _test:
   end
 OUT
 
-pir_2_pasm_is(<<'CODE', <<'OUT', "unreachable 3");
+pir_2_pasm_is( <<'CODE', <<'OUT', "unreachable 3" );
 .sub _test
   goto L
   print "ok\n"
@@ -57,3 +59,10 @@ CODE
 _test:
   end
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

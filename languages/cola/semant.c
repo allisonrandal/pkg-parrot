@@ -21,10 +21,10 @@
  * 3) Check for invalid assignments and operations
  */
 void build_ast(AST * tree) {
-    if(!tree) return;
-    switch(tree->asttype) {
-    	case ASTT_CLASS_DECL:
-    	    build_class_decl(tree);
+    if (!tree) return;
+    switch (tree->asttype) {
+        case ASTT_CLASS_DECL:
+            build_class_decl(tree);
             break;
         default:
             fprintf(stderr, "build_ast: Invalid asttype [%d]\n", tree->asttype);
@@ -35,27 +35,27 @@ void build_ast(AST * tree) {
 }
 
 void build_class_decl(AST * c) {
-    if(!c) return;
+    if (!c) return;
 #if DEBUG
     fprintf(stderr, "Pass 2: class [%s]\n", c->sym->name);
 #endif
     push_namespace(c->sym);
-    if(c->Attr.Class.body)
-	    build_class_body(c->Attr.Class.body);
+    if (c->Attr.Class.body)
+            build_class_body(c->Attr.Class.body);
     pop_namespace();
 }
 
 void build_class_body(AST * b) {
-    if(!b) return;
+    if (!b) return;
     fprintf(stderr, "Pass 2: class body\n");
-    while(b) {
-        switch(b->asttype) {
+    while (b) {
+        switch (b->asttype) {
             case ASTT_CONSTANT_DECL:
                 build_field_decl(b);
-        	    break;
+                    break;
             case ASTT_FIELD_DECL:
                 build_field_decl(b);
-        	    break;
+                    break;
             case ASTT_METHOD_DECL:
 #if DEBUG
                 fprintf(stderr, "Pass 2: Method [%s]\n", b->sym->name);
@@ -69,7 +69,7 @@ void build_class_body(AST * b) {
                 fprintf(stderr, "build_class_body: Invalid asttype [%d]\n", b->asttype);
                 abort();
         }
-	    b = b->next;
+            b = b->next;
     }
 }
 
@@ -78,7 +78,7 @@ void build_class_body(AST * b) {
  */
 void build_field_decl(AST * d) {
 #if DEBUG
-    if(d->asttype == ASTT_CONSTANT_DECL)
+    if (d->asttype == ASTT_CONSTANT_DECL)
         fprintf(stderr, "Pass 2: class const [%s]\n", d->arg1->sym->name);
     else
         fprintf(stderr, "Pass 2: class field [%s]\n", d->arg1->sym->name);
@@ -98,23 +98,23 @@ void build_method_decl(AST * m) {
     fprintf(stderr, "build_method_decl\n");
 #endif
     push_scope();
-    if(m->Attr.Method.params) {
+    if (m->Attr.Method.params) {
         Symbol * s = m->Attr.Method.params;
-        while(s) {
+        while (s) {
             declare_local(s);
             s = s->tnext;
         }
     }
-    if(m->Attr.Method.body) {
+    if (m->Attr.Method.body) {
         push_scope();
         build_statement_list(m->Attr.Method.body);
         m->Attr.Method.body->vars = pop_scope();
         {
             Symbol * s = m->vars;
             fprintf(stderr, "\tPopped locals:\n");
-            while(s) {
+            while (s) {
                 fprintf(stderr, "\t[%s]\n", s->name);
-                s = s->tnext;          
+                s = s->tnext;
             }
         }
     }
@@ -131,7 +131,7 @@ void build_method_decl(AST * m) {
  */
 void build_var_decl(AST * d) {
 #if DEBUG
-    if(d->asttype == ASTT_CONSTANT_DECL)
+    if (d->asttype == ASTT_CONSTANT_DECL)
         fprintf(stderr, "Pass 2: Local const [%s]\n", d->arg1->sym->name);
     else
         fprintf(stderr, "Pass 2: Local var [%s]\n", d->arg1->sym->name);
@@ -163,9 +163,9 @@ void build_conditional(AST * c) {
     build_expr(c->arg1);
     /* ELSE */
     build_expr(c->arg2);
-    if(c->arg1->type != c->arg2->type) {
+    if (c->arg1->type != c->arg2->type) {
         fprintf(stderr, "Error: expression types not equivalent in ternary expression\n");
-	exit(0);
+        exit(0);
     }
     c->typename = c->arg1->typename;
     c->type = c->arg1->type;
@@ -182,7 +182,7 @@ void build_method_call(AST * c) {
 
 void build_new_expr(AST * n) {
     n->type = lookup_type_symbol(n->typename);
-    if(!n->type) {
+    if (!n->type) {
         fprintf(stderr, "Internal error: new called for unknown type [%s]\n",
             n->typename->name);
         abort();
@@ -200,13 +200,13 @@ void build_loop(AST * l) {
 }
 
 void build_return(AST * r) {
-    if(r->arg1)
+    if (r->arg1)
         build_expr(r->arg1);
 }
 
 void build_expr_list(AST * e) {
     AST * p = e;
-    while(p) {
+    while (p) {
         build_expr(p);
         p = p->next;
     }
@@ -216,28 +216,28 @@ void build_expr(AST * e) {
 #if DEBUG
     fprintf(stderr, "build_expr\n");
 #endif
-    if(!e) return;
-    switch(e->asttype) {
+    if (!e) return;
+    switch (e->asttype) {
         case ASTT_LITERAL:
             e->type = e->sym->type;
             e->typename = e->sym->typename;
             return;
 
-    	case ASTT_IDENTIFIER:
+        case ASTT_IDENTIFIER:
             resolve_identifier(&e->sym);
             e->type = e->sym->type;
             e->typename = e->sym->typename;
             return;
 
-    	case ASTT_METHOD_CALL:
+        case ASTT_METHOD_CALL:
             build_method_call(e);
             break;
 
-    	case ASTT_NEW_OBJECT:
+        case ASTT_NEW_OBJECT:
             build_new_expr(e);
             break;
 
-    	case ASTT_ASSIGN:
+        case ASTT_ASSIGN:
             build_expr(e->arg1);
             build_expr(e->arg2);
             break;
@@ -249,7 +249,7 @@ void build_expr(AST * e) {
         case ASTT_OP:
             build_expr(e->arg1);
             build_expr(e->arg2);
-            if(e->arg1->type == t_string) {
+            if (e->arg1->type == t_string) {
                 /* Implicitly convert + operator on string types to
                  * . concat operator until the compiler can handle class
                  * operators.
@@ -273,8 +273,8 @@ void build_expr(AST * e) {
             fprintf(stderr, "build_expr: Invalid expr asttype [%d]\n", e->asttype);
             abort();
     }
-    
-    if(e->arg1) {
+
+    if (e->arg1) {
         e->type = e->arg1->type;
         e->typename = e->arg1->typename;
     }
@@ -282,32 +282,32 @@ void build_expr(AST * e) {
 
 void build_statement_list(AST * s) {
     static int statements;
-    if(!s) return;
+    if (!s) return;
 #if DEBUG
     fprintf(stderr, "statements parsed [%d]\n", statements++);
 #endif
-    if(s->kind == KIND_EXPR) {
+    if (s->kind == KIND_EXPR) {
         build_expr(s);
         goto END;
     }
 
-    switch(s->asttype) {
+    switch (s->asttype) {
         case ASTT_IF:
             build_if(s);
             break;
         case ASTT_CONSTANT_DECL:
             build_var_decl(s);
-    	    break;
+            break;
         case ASTT_FIELD_DECL:
             build_var_decl(s);
-    	    break;
+            break;
         case ASTT_WHILE:
         case ASTT_FOR:
             build_loop(s);
             break;
         case ASTT_BREAK:
         case ASTT_CONTINUE:
-	    break;
+            break;
         case ASTT_RETURN:
             build_return(s);
             break;
@@ -321,3 +321,10 @@ END:
 }
 
 
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

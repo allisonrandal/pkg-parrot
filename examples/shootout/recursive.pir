@@ -2,12 +2,13 @@
 #
 # Ack by Leopold Toetsch
 # Fib and Tak by Joshua Isom
+# modified default value to n=3. Karl Forner
 
 .sub main :main
 	.param pmc argv
 	.local int argc, n
 	argc = argv
-	n = 1
+	n = 3 
 	unless argc == 2 goto argsok
 	$S0 = argv[1]
 	n = $S0
@@ -135,3 +136,9 @@ endif:
 	.return TakInt($I0, $I1, $I2)
 .end
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

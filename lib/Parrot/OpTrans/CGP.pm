@@ -1,5 +1,5 @@
 # Copyright (C) 2002, The Perl Foundation.
-# $Id: /local/lib/Parrot/OpTrans/CGP.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/OpTrans/CGP.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -30,8 +30,7 @@ Returns C<PARROT_CGP_CORE>.
 
 =cut
 
-sub core_type
-{
+sub core_type {
     return 'PARROT_CGP_CORE';
 }
 
@@ -41,8 +40,7 @@ The suffix is C<'_cgp'>.
 
 =cut
 
-sub suffix
-{
+sub suffix {
     return "_cgp";
 }
 
@@ -52,8 +50,7 @@ The core prefix is C<'cgp_'>.
 
 =cut
 
-sub core_prefix
-{
+sub core_prefix {
     return "cgp_";
 }
 
@@ -63,17 +60,15 @@ Returns the C C<#define> macros required by the ops.
 
 =cut
 
-sub defines
-{
-    return <<END;
-#define REL_PC ((size_t)((opcode_t*)cur_opcode - (opcode_t*)interpreter->code->prederef.code))
-#define CUR_OPCODE ((opcode_t*)cur_opcode + CONTEXT(interpreter->ctx)->pred_offset)
-
-#  define opcode_to_prederef(i, op) \\
-     ((void**) (op - CONTEXT(i->ctx)->pred_offset))
-
-#define OP_AS_OFFS(o) (_reg_base + ((opcode_t*)cur_opcode)[o])
-
+sub defines {
+    my ( $self, $pred_def );
+    $self     = shift;
+    $pred_def = $self->SUPER::defines();
+    my $type = __PACKAGE__;
+    return $pred_def . <<END;
+/* defines - $0 -> $type */
+#  define opcode_to_prederef(i, op)   \\
+     (void**) (op   - CONTEXT(i->ctx)->pred_offset)
 END
 }
 
@@ -84,24 +79,20 @@ relevant C code.
 
 =cut
 
-sub goto_address
-{
-    my ($self, $addr) = @_;
+sub goto_address {
+    my ( $self, $addr ) = @_;
 
     #print STDERR "pbcc: map_ret_abs($addr)\n";
 
-    if ($addr eq '0')
-    {
-        return "return (0);"
+    if ( $addr eq '0' ) {
+        return "return (0);";
     }
-    else
-    {
-        return "if ((opcode_t *) $addr == 0)
-	  return 0;
-   _reg_base = (char*)interpreter->ctx.bp.regs_i;
-   goto *((void*)*(cur_opcode = (opcode_t *)
-	opcode_to_prederef(interpreter, $addr)))";
-  }
+    else {
+        return "if ($addr == 0)
+          return 0;
+   _reg_base = (char*)interp->ctx.bp.regs_i;
+   goto **(cur_opcode = opcode_to_prederef(interp, $addr))";
+    }
 }
 
 =item C<goto_offset($offset)>
@@ -111,11 +102,10 @@ relevant C code.
 
 =cut
 
-sub goto_offset
-{
-    my ($self, $offset) = @_;
+sub goto_offset {
+    my ( $self, $offset ) = @_;
 
-    return "goto *((void*)*(cur_opcode += $offset))";
+    return "goto **(cur_opcode += $offset)";
 }
 
 =item C<goto_pop()>
@@ -125,27 +115,27 @@ code.
 
 =cut
 
-sub goto_pop
-{
+sub goto_pop {
     my ($self) = @_;
 
-    return "goto *((void*)* (cur_opcode = (opcode_t*)opcode_to_prederef(interpreter,
-	(opcode_t*)pop_dest(interpreter))))";
+    return "goto **(cur_opcode = opcode_to_prederef(interp,
+        (opcode_t*)pop_dest(interp)))";
 }
 
-sub run_core_func_start
-{
+sub run_core_func_start {
+    my $type = __PACKAGE__;
     return <<END_C;
+/* run_core_func_start - $0 -> $type */
     /* at least gcc 2.95.2 miscompiles set_args - %edi
      * is used for the vtable call and _reg_base is clobbered
      * # if 1191 := PARROT_OP_set_args_pc
      * (gdb) disas l_ops_addr[1191] l_ops_addr[1192]
      */
 #if defined(__GNUC__) && defined(I386) && defined(PARROT_CGP_REGS)
-    register opcode_t *cur_opcode asm ("esi") = cur_op;
+    register void **   cur_opcode asm ("esi") = cur_op;
     register char *   _reg_base   asm ("edi");
 #else
-    opcode_t *cur_opcode = cur_op;
+    void **cur_opcode = cur_op;
     char * _reg_base;
 #endif
 
@@ -176,3 +166,10 @@ END_C
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

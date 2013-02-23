@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/assign.t 12840 2006-05-30T15:08:05.048089Z coke  $
+#! perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/assign.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
 
 =head1 NAME
 
@@ -12,13 +12,15 @@ t/assign.t - Lua assignment
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.4.3 "Assignment".
+See "Lua 5.1 Reference Manual", section 2.4.3 "Assignment",
+L<http://www.lua.org/manual/5.1/manual.html#2.4.3>.
 
 See "Programming in Lua", section 4.1 "Assignment".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -108,4 +110,11 @@ CODE
 4
 4
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

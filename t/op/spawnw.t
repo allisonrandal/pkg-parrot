@@ -1,13 +1,12 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/spawnw.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/op/spawnw.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 7;
 
 =head1 NAME
 
@@ -15,7 +14,7 @@ t/op/spawnw.t - Run OS commands and tell about the exit code
 
 =head1 SYNOPSIS
 
-	% prove t/op/spawnw.t
+        % prove t/op/spawnw.t
 
 =head1 DESCRIPTION
 
@@ -26,7 +25,7 @@ So only the exit code can be tested.
 
 The returned value is actually returned from the 'waitpid' system call.
 In order to get the exit code from the spawned process, it needs to be right
-shifted by 8 bit. 
+shifted by 8 bit.
 
 =head1 TODO
 
@@ -42,17 +41,16 @@ Nigel Sandever - L<nigelsandever@btconnect.com>
 
 =cut
 
-
-# perl command coded this way to avoid platform 
+# perl command coded this way to avoid platform
 # quoting issue.
 
 # test string version of spawnw
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 0");
+pasm_output_is( <<'CODE', <<'OUTPUT', "exit code: 0" );
         set     S1, 'perl -e "exit(0)"'
         set     I1, 99
         spawnw  I1, S1
-	shr	I2, I1, 8
+        shr     I2, I1, 8
         print   "return code: "
         print   I2
         print   "\n"
@@ -61,11 +59,11 @@ CODE
 return code: 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 123");
+pasm_output_is( <<'CODE', <<'OUTPUT', "exit code: 123" );
         set     S1, 'perl -e "exit(123)"'
         set     I1, 99
         spawnw  I1, S1
-	shr	I2, I1, 8
+        shr     I2, I1, 8
         print   "return code: "
         print   I2
         print   "\n"
@@ -74,11 +72,11 @@ CODE
 return code: 123
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 3");
+pasm_output_is( <<'CODE', <<'OUTPUT', "exit code: 3" );
         set     S1, 'perl -e "exit(3)"'
         set     I1, 99
         spawnw  I1, S1
-	shr	I2, I1, 8
+        shr     I2, I1, 8
         print   "return code: "
         print   I2
         print   "\n"
@@ -89,7 +87,7 @@ OUTPUT
 
 # test array version of spawnw
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 0");
+pasm_output_is( <<'CODE', <<'OUTPUT', "exit code: 0" );
         new     P0, .Array
         set     P0, 3
         set     P0[0], "perl"
@@ -97,7 +95,7 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 0");
         set     P0[2], "exit(0)"
         set     I1, 99
         spawnw  I1, P0
-	shr	I2, I1, 8
+        shr     I2, I1, 8
         print   "return code: "
         print   I2
         print   "\n"
@@ -106,7 +104,7 @@ CODE
 return code: 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 123");
+pasm_output_is( <<'CODE', <<'OUTPUT', "exit code: 123" );
         new     P0, .Array
         set     P0, 3
         set     P0[0], "perl"
@@ -114,7 +112,7 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 123");
         set     P0[2], "exit(123)"
         set     I1, 99
         spawnw  I1, P0
-	shr	I2, I1, 8
+        shr     I2, I1, 8
         print   "return code: "
         print   I2
         print   "\n"
@@ -123,7 +121,7 @@ CODE
 return code: 123
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 3");
+pasm_output_is( <<'CODE', <<'OUTPUT', "exit code: 3" );
         new     P0, .Array
         set     P0, 3
         set     P0[0], "perl"
@@ -131,7 +129,7 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "exit code: 3");
         set     P0[2], "exit(3)"
         set     I1, 99
         spawnw  I1, P0
-	shr	I2, I1, 8
+        shr     I2, I1, 8
         print   "return code: "
         print   I2
         print   "\n"
@@ -140,7 +138,7 @@ CODE
 return code: 3
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "grow argv buffer");
+pir_output_is( <<'CODE', <<'OUTPUT', "grow argv buffer" );
 .sub test :main
         .local pmc args
 
@@ -168,7 +166,9 @@ CODE
 return code: 10
 OUTPUT
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 7; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

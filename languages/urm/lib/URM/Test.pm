@@ -1,8 +1,9 @@
-# $Id: /local/languages/urm/lib/URM/Test.pm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/local/languages/urm/lib/URM/Test.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 package URM::Test;
 
 use strict;
+use warnings;
 use vars qw(@EXPORT @ISA);
 
 use Parrot::Config;
@@ -14,7 +15,7 @@ require Parrot::Test;
 @ISA = qw(Exporter Test::More);
 
 sub import {
-    my( $class, $plan, @args ) = @_;
+    my ( $class, $plan, @args ) = @_;
 
     Test::More->import( $plan, @args );
 
@@ -23,69 +24,82 @@ sub import {
 
 my $count;
 
-foreach my $meth ( qw(is isnt like) ) {
+foreach my $meth (qw(is isnt like)) {
     no strict 'refs';
 
     *{"URM::Test::output_$meth"} = sub {
-        my( $lang_code, $output, $desc, @other ) = @_;
+        my ( $lang_code, $output, $desc, @other ) = @_;
 
         ++$count;
-        my( $lang_f, $pasm_f, $by_f, $out_f ) = map { # JMG
-            my $t = $0; $t =~ s/\.t$/_$count\.$_/; $t
-        } ( qw(urm pasm pbc out) ); # JMG
+        my ( $lang_f, $pasm_f, $by_f, $out_f ) = map {    # JMG
+            my $t = $0;
+            $t =~ s/\.t$/_$count\.$_/;
+            $t
+        } (qw(urm pasm pbc out));    # JMG
 
         # STDERR is written into same output file
-        open LANG, "> $lang_f" or die "Unable to open '$lang_f'"; # JMG
-        binmode LANG; # JMG
-        print LANG $lang_code; # JMG
-        close LANG; # JMG
+        open LANG, ">", "$lang_f" or die "Unable to open '$lang_f'";    # JMG
+        binmode LANG;                                                   # JMG
+        print LANG $lang_code;                                          # JMG
+        close LANG;                                                     # JMG
 
-        Parrot::Test::run_command( 
+        Parrot::Test::run_command(
             "$PConfig{perl} languages/urm/urmc -s languages/$lang_f",
-            CD => '..', # $self->{relpath}, 
-            STDOUT => $pasm_f, STDERR => $pasm_f,
+            CD     => '..',                                             # $self->{relpath},
+            STDOUT => $pasm_f,
+            STDERR => $pasm_f,
         );
-        Parrot::Test::run_command( 
+        Parrot::Test::run_command(
             "./parrot languages/$pasm_f @other",
-            CD => '..', # $self->{relpath}, 
-            STDOUT => $out_f, STDERR => $out_f, 
+            CD     => '..',                                             # $self->{relpath},
+            STDOUT => $out_f,
+            STDERR => $out_f,
         );
-        my $prog_output = Parrot::Test::slurp_file( "$out_f" );
+        my $prog_output = Parrot::Test::slurp_file("$out_f");
 
         @_ = ( $prog_output, $output, $desc );
+
         #goto &{"Test::More::$meth"};
-        my $ok = &{"Test::More::$meth"}( @_ );
+        my $ok = &{"Test::More::$meth"}(@_);
+
         # if( $ok ) { foreach my $meth ( $lang_f, $pasm_f, $by_f, $out_f ) { unlink $meth } } # JMG
-    }
+        }
 }
 
 1;
 
-my $urmc = "$PConfig{perl} $FindBin::RealBin$PConfig{slash}..$PConfig{slash}urmc";
+my $urmc    = "$PConfig{perl} $FindBin::RealBin$PConfig{slash}..$PConfig{slash}urmc";
 my $compile = "-c -s";
-my $run = "-s";
+my $run     = "-s";
 
 sub compile_test {
     my $file = shift;
 
-    my $ret = system ("$urmc $compile $FindBin::RealBin$PConfig{slash}$file");
+    my $ret = system("$urmc $compile $FindBin::RealBin$PConfig{slash}$file");
     if ($ret) {
-	print STDERR "TEST FAILED: $file ($ret)\n";
-	return;
-	}
+        print STDERR "TEST FAILED: $file ($ret)\n";
+        return;
+    }
     print "OK: $file\n";
 }
 
 sub run_test {
-    my ($file, $expect) = @_;
+    my ( $file, $expect ) = @_;
     my $ret = `$urmc $run $FindBin::RealBin$PConfig{slash}$file`;
-    if (!$ret) {
-	print STDERR "TEST FAILED: $file didn't return a value, Parrot crashed?\n";
-	return;
+    if ( !$ret ) {
+        print STDERR "TEST FAILED: $file didn't return a value, Parrot crashed?\n";
+        return;
     }
-    if ($ret != $expect) {
-	print STDERR "TEST FAILED: $file (got $ret expected $expect)\n";
-	return;
+    if ( $ret != $expect ) {
+        print STDERR "TEST FAILED: $file (got $ret expected $expect)\n";
+        return;
     }
     print "OK: $file\n";
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

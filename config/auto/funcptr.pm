@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/funcptr.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/funcptr.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Verifies that the compiler supports function pointer casts.
 package auto::funcptr;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,9 +25,8 @@ $description = 'Verifying that the compiler supports function pointer casts';
 
 @args = qw(verbose);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $jitcapable = $conf->data->get('jitcapable');
 
@@ -34,7 +34,7 @@ sub runstep
         cc_gen('config/auto/funcptr/test_c.in');
         eval { cc_build(); };
 
-        if ($@ || cc_run() !~ /OK/) {
+        if ( $@ || cc_run() !~ /OK/ ) {
             print <<"END";
 Although it is not required by the ANSI C standard,
 Parrot requires the ability to cast from void pointers to function
@@ -58,3 +58,10 @@ END
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

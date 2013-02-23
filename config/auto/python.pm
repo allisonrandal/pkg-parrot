@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/auto/python.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/python.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -18,6 +18,7 @@ Store version of Python.
 package auto::python;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -28,28 +29,35 @@ $description = 'Determining whether python is installed';
 
 @args = qw();
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    my ($out, $err) = capture_output('python', '-V');
-    my $output = join('', $out || '', $err || '');
-    my ($python, $major, $minor, $revision) = $output =~ m/(Python)\s+(\d+).(\d+)(?:.(\d+))?/;
+    my ( $out, $err ) = capture_output( 'python', '-V' );
+    my $output = join( '', $out || '', $err || '' );
+    my ( $python, $major, $minor, $revision ) = $output =~ m/(Python)\s+(\d+).(\d+)(?:.(\d+))?/;
     $revision = 0 unless defined $revision;
     my $has_python = $python ? 1 : 0;
 
-    $conf->data->set(has_python => $has_python);
+    $conf->data->set( has_python => $has_python );
 
     my $has_python_2_4 = 0;
     if ($has_python) {
-        $has_python_2_4 = ($major eq '2' && $minor eq '4') ? 1 : 0;
+        $has_python_2_4 = ( $major eq '2' && $minor eq '4' ) ? 1 : 0;
         $self->set_result("yes, $major.$minor.$revision");
-    } else {
+    }
+    else {
         $self->set_result('no');
     }
-    $conf->data->set(has_python_2_4 => $has_python_2_4);
+    $conf->data->set( has_python_2_4 => $has_python_2_4 );
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

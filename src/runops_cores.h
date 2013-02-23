@@ -1,7 +1,7 @@
 /* runops_cores.h
  *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/src/runops_cores.h 12826 2006-05-30T01:36:30.308856Z coke  $
+ *     $Id: /parrotcode/trunk/src/runops_cores.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Header for runops cores.
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_RUNOPS_CORES_H_GUARD)
+#ifndef PARROT_RUNOPS_CORES_H_GUARD
 #define PARROT_RUNOPS_CORES_H_GUARD
 
 #include "parrot/parrot.h"
@@ -26,12 +26,10 @@ opcode_t *runops_profile_core(Interp *, opcode_t *);
 
 #endif /* PARROT_RUNOPS_CORES_H_GUARD */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

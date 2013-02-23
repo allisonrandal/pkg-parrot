@@ -2,7 +2,7 @@
 # This program is free software. It is subject to the same
 # license as Perl itself.
 #
-# $Id: /local/examples/subs/jsr_ret.pasm 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/trunk/examples/subs/jsr_ret.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 

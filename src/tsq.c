@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/tsq.c 12933 2006-06-13T05:28:20.267948Z petdance  $
+$Id: /parrotcode/trunk/src/tsq.c 3326 2007-04-30T20:49:28.885188Z chromatic  $
 
 =head1 NAME
 
@@ -82,7 +82,8 @@ nosync_pop_entry(QUEUE *queue)
     if (queue->head == queue->tail) {
         queue->head = NULL;
         queue->tail = NULL;
-    } else {
+    }
+    else {
         queue->head = queue->head->next;
     }
     returnval->next = NULL;
@@ -134,7 +135,8 @@ push_entry(QUEUE *queue, QUEUE_ENTRY *entry)
     if (queue->tail) {
         queue->tail->next = entry;
         queue->tail = entry;
-    } else {
+    }
+    else {
         queue->head = entry;
         queue->tail = entry;
     }
@@ -202,11 +204,12 @@ nosync_insert_entry(QUEUE *queue, QUEUE_ENTRY *entry)
         return;
     }
 
-    prev = NULL;
-    event = entry->data;
+    prev     = NULL;
+    event    = (parrot_event *)entry->data;
     abs_time = event->u.timer_event.abs_time;
+
     while (cur && cur->type == QUEUE_ENTRY_TYPE_TIMED_EVENT) {
-        const parrot_event * const cur_event = cur->data;
+        const parrot_event * const cur_event = (parrot_event *)cur->data;
         if (abs_time > cur_event->u.timer_event.abs_time) {
             prev = cur;
             cur = cur->next;
@@ -360,7 +363,7 @@ Initializes the queue, setting C<prio> as the queue's priority.
 QUEUE*
 queue_init(UINTVAL prio)
 {
-    QUEUE * const queue = mem_sys_allocate(sizeof(QUEUE));
+    QUEUE * const queue = mem_allocate_typed(QUEUE);
     queue->head = queue->tail = NULL;
     queue->max_prio = prio;
     COND_INIT(queue->queue_condition);
@@ -401,12 +404,10 @@ F<include/parrot/tsq.h>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

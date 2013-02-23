@@ -5,11 +5,11 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Expression/Value.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Expression/Value.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Expression::Value;
 
@@ -20,25 +20,25 @@ use Jako::Token;
 use Jako::Construct::Expression::Value::Literal;
 use Jako::Construct::Expression::Value::Identifier;
 
-sub new
-{
-  my $class = shift;
-  my ($block, $token) = @_;
+sub new {
+    my $class = shift;
+    my ( $block, $token ) = @_;
 
-  confess "Block undefined." unless defined $block;
-  confess "Token undefined." unless defined $token;
+    confess "Block undefined." unless defined $block;
+    confess "Token undefined." unless defined $token;
 
-  return Jako::Construct::Expression::Value::Identifier->new($block, $token) if $token->kind eq 'ident';
-  return Jako::Construct::Expression::Value::Literal->new($block, $token)    if $token->kind eq 'literal';
+    return Jako::Construct::Expression::Value::Identifier->new( $block, $token )
+        if $token->kind eq 'ident';
+    return Jako::Construct::Expression::Value::Literal->new( $block, $token )
+        if $token->kind eq 'literal';
 
-  return undef;
+    return undef;
 }
 
 sub block { return shift->{BLOCK}; }
 sub token { return shift->{TOKEN}; }
-sub type  { return shift->{TYPE};  }
+sub type  { return shift->{TYPE}; }
 sub value { return shift->{VALUE}; }
-
 
 #
 # compile()
@@ -46,12 +46,18 @@ sub value { return shift->{VALUE}; }
 # Essentially a no-op for values (except string literals... q.v.).
 #
 
-sub compile
-{
-  my $self = shift;
-  my ($compiler) = @_;
+sub compile {
+    my $self = shift;
+    my ($compiler) = @_;
 
-  return $self->value;
+    return $self->value;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

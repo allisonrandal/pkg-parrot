@@ -1,15 +1,15 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/native_pbc/number.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/native_pbc/number.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
+
 # use Parrot::Test tests => 1;
 use Parrot::Test;
- plan  skip_all => 'Ongoing PBC format changes';
-
+plan skip_all => 'Ongoing PBC format changes';
 
 =head1 NAME
 
@@ -17,14 +17,13 @@ t/native_pbc/number.t - Floating-Point Numbers
 
 =head1 SYNOPSIS
 
-	% prove t/native_pbc/number.t
+        % prove t/native_pbc/number.t
 
 =head1 DESCRIPTION
 
 Tests word-size/float-type/endian-ness for different architectures.
 
 =cut
-
 
 =begin comment
 
@@ -46,7 +45,6 @@ $ mv n.pbc t/native_pbc/number_$(N).pbc
 # thanks -leo
 
 =cut
-
 
 my $output = << 'END_OUTPUT';
 1.000000
@@ -87,11 +85,17 @@ END_OUTPUT
 #         no endianize, no opcode, no numval transform
 #         dirformat = 1
 # ]
-pbc_output_is(undef, $output, "i386 double float 32 bit opcode_t");
-
+pbc_output_is( undef, $output, "i386 double float 32 bit opcode_t" );
 
 # Formerly there were tests for:
 # pbc_output_is(undef, <<OUTPUT, "i386 long double float 32 bit opcode_t");
 # pbc_output_is(undef, <<OUTPUT, "PPC double float 32 bit BE opcode_t");
 # pbc_output_is(undef, <<OUTPUT, "little-endian 64-bit tru64");
 # pbc_output_is(undef, <<OUTPUT, "big-endian 64-bit irix");
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/parrot.h 13603 2006-07-26T02:38:24.100453Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/parrot.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -15,7 +15,7 @@
    Programs embedding parrot should include <parrot/embed.h>.
 */
 
-#if !defined(PARROT_PARROT_H_GUARD)
+#ifndef PARROT_PARROT_H_GUARD
 #define PARROT_PARROT_H_GUARD
 
 #if defined(INSIDE_GLOBAL_SETUP)
@@ -53,7 +53,7 @@
 #endif /* PARROT_HAS_HEADER_SYSTYPES */
 
 #ifdef PARROT_HAS_HEADER_SYSSOCKET
-#include <sys/socket.h>
+#  include <sys/socket.h>
 #endif /* PARROT_HAS_HEADER_SYSSOCKET */
 
 #ifdef PARROT_HAS_HEADER_NETINETIN
@@ -186,9 +186,9 @@ typedef struct parrot_interp_t Interp;
  */
 
 #ifdef __GCC__
-#define LVALUE_CAST(type, val) ((type)(val))
+#  define LVALUE_CAST(type, val) ((type)(val))
 #else
-#define LVALUE_CAST(type, val) (*((type *)&(val)))
+#  define LVALUE_CAST(type, val) (*((type *)&(val)))
 #endif /* __GCC__ */
 
 /*
@@ -204,8 +204,8 @@ typedef struct parrot_interp_t Interp;
 /* some SGI compilers have an offsetof()
  * definition that doesn't work for us. */
 #if defined(__sgi) && defined(_COMPILER_VERSION) && (_COMPILER_VERSION >= 400)
-#undef offsetof
-#define offsetof(s, m) (size_t)(&(((s *)0)->m))
+#  undef offsetof
+#  define offsetof(s, m) (size_t)(&(((s *)0)->m))
 #endif
 
 /* work around warning:
@@ -305,15 +305,13 @@ typedef void (*funcptr_t)(void);
 #include "parrot/stat.h"
 #include "parrot/slice.h"
 #include "parrot/hll.h"
+#include "parrot/stm/backend.h"
 
 #endif /* PARROT_PARROT_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2005, The Perl Foundation.
-$Id: /local/src/pmc/resizablepmcarray.pmc 13381 2006-07-19T15:27:54.209810Z leo  $
+$Id: /parrotcode/trunk/src/pmc/resizablepmcarray.pmc 3368 2007-05-03T05:08:51.125791Z chromatic  $
 
 =head1 NAME
 
@@ -35,7 +35,7 @@ Resizes the array to C<size> elements.
 
 */
 
-    void set_integer_native (INTVAL size) {
+    void set_integer_native(INTVAL size) {
 
         if (size < 0)
             real_exception(INTERP, NULL, E_IndexError,
@@ -69,7 +69,7 @@ Resizes the array to C<size> elements.
                 cur &= ~0xfff;
             }
             PMC_data(SELF) = mem_sys_realloc(PMC_data(SELF),
-                    cur * sizeof(PMC*));
+                    cur * sizeof (PMC*));
             for (; i < cur; i++)
                 ((PMC**)PMC_data(SELF))[i] = PMCNULL;
             PMC_int_val2(SELF) = cur;
@@ -97,7 +97,7 @@ TODO: Check whether there is already an element that can be shifted
 
 */
 
-    FLOATVAL shift_float () {
+    FLOATVAL shift_float() {
         INTVAL size= PMC_int_val(SELF);
         PMC* data;
         PMC** item;
@@ -113,13 +113,13 @@ TODO: Check whether there is already an element that can be shifted
         PMC_int_val(SELF)= --size;
 
         item= (PMC**)PMC_data(SELF);
-        mem_sys_memmove(item, item + 1, size * sizeof(PMC*));
+        mem_sys_memmove(item, item + 1, size * sizeof (PMC*));
         item[size]= PMCNULL;
 
         return value;
     }
 
-    INTVAL shift_integer () {
+    INTVAL shift_integer() {
         INTVAL size= PMC_int_val(SELF);
         PMC* data;
         PMC** item;
@@ -135,13 +135,13 @@ TODO: Check whether there is already an element that can be shifted
         PMC_int_val(SELF)= --size;
 
         item= (PMC**)PMC_data(SELF);
-        mem_sys_memmove(item, item + 1, size * sizeof(PMC*));
+        mem_sys_memmove(item, item + 1, size * sizeof (PMC*));
         item[size]= PMCNULL;
 
         return value;
     }
 
-    PMC* shift_pmc () {
+    PMC* shift_pmc() {
         INTVAL size= PMC_int_val(SELF);
         PMC* data;
         PMC** item;
@@ -155,13 +155,13 @@ TODO: Check whether there is already an element that can be shifted
         PMC_int_val(SELF)= --size;
 
         item= (PMC**)PMC_data(SELF);
-        mem_sys_memmove(item, item + 1, size * sizeof(PMC*));
+        mem_sys_memmove(item, item + 1, size * sizeof (PMC*));
         item[size]= PMCNULL;
 
         return data;
     }
 
-    STRING* shift_string () {
+    STRING* shift_string() {
         INTVAL size= PMC_int_val(SELF);
         PMC* data;
         PMC** item;
@@ -177,7 +177,7 @@ TODO: Check whether there is already an element that can be shifted
         PMC_int_val(SELF)= --size;
 
         item= (PMC**)PMC_data(SELF);
-        mem_sys_memmove(item, item + 1, size * sizeof(PMC*));
+        mem_sys_memmove(item, item + 1, size * sizeof (PMC*));
         item[size]= PMCNULL;
 
         return value;
@@ -194,19 +194,24 @@ Returns the PMC value of the element at index C<key>.
 
 */
 
-    PMC* get_pmc_keyed_int (INTVAL key) {
+    PMC* get_pmc_keyed_int(INTVAL key) {
         PMC **data;
 
         if (key < 0)
             key += PMC_int_val(SELF);
+
         if (key < 0)
             real_exception(INTERP, NULL, E_IndexError,
                 "ResizablePMCArray: index out of bounds!");
+
         if (key >= PMC_int_val(SELF))
             DYNSELF.set_integer_native(key+1);
-        data = PMC_data(SELF);
-        if (data[key] == PMCNULL)
+
+        data = PMC_data_typed(SELF, PMC **);
+
+        if ( PMC_IS_NULL(data[key]) )
             data[key] = pmc_new(INTERP, enum_class_Undef);
+
         return data[key];
     }
 
@@ -224,7 +229,7 @@ If key is a slice, do a splice as set that item.
 
 */
 
-    void set_pmc_keyed_int (INTVAL key, PMC* src) {
+    void set_pmc_keyed_int(INTVAL key, PMC* src) {
         PMC **data;
 
         /*
@@ -242,18 +247,19 @@ If key is a slice, do a splice as set that item.
         data[key] = src;
     }
 
-    void set_pmc_keyed (PMC* key, PMC* src) {
+    void set_pmc_keyed(PMC* key, PMC* src) {
         SUPER(key, src);
     }
 
-    void delete_keyed (PMC* key) {
-        PMC **data;
-        INTVAL idx = key_integer(INTERP, key);
-        INTVAL i;
-        INTVAL n = PMC_int_val(SELF);
-        data = PMC_data(SELF);
+    void delete_keyed(PMC* key) {
+        INTVAL  i;
+        INTVAL  idx  = key_integer(INTERP, key);
+        INTVAL  n    = PMC_int_val(SELF);
+        PMC   **data = PMC_data_typed(SELF, PMC **);
+
         for (i = idx; i < n - 1; ++i)
             data[i] = data[i + 1];
+
         PMC_int_val(SELF)--;
     }
 
@@ -268,7 +274,7 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
 =cut
 
 */
-    INTVAL exists_keyed_int (INTVAL key) {
+    INTVAL exists_keyed_int(INTVAL key) {
         PMC **data;
 
         if (key < 0)
@@ -280,7 +286,7 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
         return !PMC_IS_NULL(data[key]);
     }
 
-    INTVAL exists_keyed (PMC* key) {
+    INTVAL exists_keyed(PMC* key) {
         INTVAL ix = key_integer(INTERP, key);
         return SELF.exists_keyed_int(ix);
     }
@@ -295,7 +301,7 @@ Returns TRUE is the element at C<key> is defined; otherwise returns false.
 
 */
 
-    INTVAL defined_keyed_int (INTVAL key) {
+    INTVAL defined_keyed_int(INTVAL key) {
         PMC* val;
 
         if (key < 0)
@@ -303,7 +309,7 @@ Returns TRUE is the element at C<key> is defined; otherwise returns false.
         if (key < 0 || key >= PMC_int_val(SELF))
             return 0;
         val = DYNSELF.get_pmc_keyed_int(key);
-        if(PMC_IS_NULL(val))
+        if (PMC_IS_NULL(val))
             return 0;
 
         return VTABLE_defined(INTERP, val);
@@ -455,13 +461,13 @@ Removes and returns the last element in the array.
 
 /*
 
-=item C<void unshift_float (FLOATVAL value)>
+=item C<void unshift_float(FLOATVAL value)>
 
-=item C<void unshift_integer (INTVAL value)>
+=item C<void unshift_integer(INTVAL value)>
 
-=item C<void unshift_pmc (PMC* value)>
+=item C<void unshift_pmc(PMC* value)>
 
-=item C<void unshift_string (STRING* value)>
+=item C<void unshift_string(STRING* value)>
 
 Extends the array by adding an element of value C<*value> to the begin of
 the array.
@@ -556,7 +562,7 @@ Creates and returns a copy of the array.
 
 */
 
-    PMC* clone () {
+    PMC* clone() {
         PMC *copy = SUPER();
         /* copy trimmed extra space */
         PMC_int_val2(copy) = PMC_int_val(SELF);
@@ -565,7 +571,7 @@ Creates and returns a copy of the array.
 
 /*
 
-=item C<INTVAL is_equal (PMC* value)>
+=item C<INTVAL is_equal(PMC* value)>
 
 The C<==> operation. Compares two array to hold equal elements.
 
@@ -573,7 +579,7 @@ The C<==> operation. Compares two array to hold equal elements.
 
 */
 
-    INTVAL is_equal (PMC* value) {
+    INTVAL is_equal(PMC* value) {
         INTVAL j, n;
 
         if (value->vtable->base_type != enum_class_ResizablePMCArray)
@@ -615,21 +621,100 @@ Append the other array to this array.
                 other->vtable->base_type == enum_class_FixedPMCArray) {
             PMC **other_data, **this_data;
 
-            other_data = PMC_data(other);
-            this_data =  PMC_data(SELF);
-            for (i = 0; i < m; ++i) {
+            other_data = PMC_data_typed(other, PMC **);
+            this_data  = PMC_data_typed(SELF, PMC **);
+
+            for (i = 0; i < m; ++i)
                 this_data[n + i] = other_data[i];
-            }
         }
         else {
             PMC **this_data;
-            this_data = PMC_data(SELF);
-            for (i = 0; i < m; ++i) {
+            this_data = PMC_data_typed(SELF, PMC **);
+
+            for (i = 0; i < m; ++i)
                 this_data[n + i] = VTABLE_get_pmc_keyed_int(INTERP, other, i);
-            }
         }
     }
+/*
 
+=item C<STRING *get_repr()>
+
+Returns the Parrot string representation C<ResizablePMCArray>.
+
+=cut
+
+*/
+
+    STRING* get_repr() {
+        STRING *res;
+        INTVAL j, n;
+        PMC *val;
+
+        res = string_from_cstring(INTERP, "[ ", 0);
+        n = VTABLE_elements(INTERP, SELF);
+        for (j = 0; j < n; ++j) {
+            val = SELF.get_pmc_keyed_int(j);
+            res = string_append(INTERP, res, VTABLE_get_repr(INTERP, val));
+            if (j < n - 1)
+                res = string_append(INTERP, res, const_string(INTERP, ", "));
+        }
+        res = string_append(INTERP, res, const_string(INTERP, " ]"));
+        return res;
+    }
+
+/*
+
+=item C<void splice(PMC* value, INTVAL offset, INTVAL count)>
+
+Replaces C<count> elements starting at C<offset> with the elements in
+C<value>.
+
+Note that the C<value> PMC can be of any of the various array types.
+
+Note that this implementation can be *VERY* inefficient as it manipulates
+everything via the VTABLE api.
+
+=cut
+
+*/
+
+    void splice(PMC* value, INTVAL offset, INTVAL count) {
+        INTVAL length = VTABLE_elements(INTERP, SELF);
+        INTVAL elems  = VTABLE_elements(INTERP, value);
+        INTVAL shift  = elems - count;
+        INTVAL i;
+
+        /* start from end? */
+        if (offset < 0)
+            offset += length;
+        if (offset < 0)
+            internal_exception(OUT_OF_BOUNDS, "illegal splice offset\n");
+
+        /* shrink the array */
+        if (shift < 0) {
+            /* start at offset so we don't overwrite values we'll need */
+            for (i=offset+count; i<length; i++)
+                VTABLE_set_pmc_keyed_int(INTERP, SELF, i + shift,
+                    VTABLE_get_pmc_keyed_int(INTERP, SELF, i));
+
+            DYNSELF.set_integer_native(length + shift);
+        }
+        /* grow the array */
+        else if (shift > 0) {
+            DYNSELF.set_integer_native(length + shift);
+
+            /* move the existing values */
+            /* start at length-1 so we don't overwrite values we'll need */
+            for (i=length-1; i>=offset; i--)
+                VTABLE_set_pmc_keyed_int(INTERP, SELF, i + shift,
+                    VTABLE_get_pmc_keyed_int(INTERP, SELF, i));
+        }
+
+        /* copy the new values */
+        for (i=0; i<elems; i++)
+            VTABLE_set_pmc_keyed_int(INTERP, SELF, i + offset,
+                VTABLE_get_pmc_keyed_int(INTERP, value, i));
+    }
 }
 
 /*
@@ -651,10 +736,7 @@ Changed allocator to double size - Matt Fowles 2004-06-15
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

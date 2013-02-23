@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/io/io_layers.c 13784 2006-08-01T17:54:04.760248Z chip  $
+$Id: /parrotcode/trunk/src/io/io_layers.c 3371 2007-05-03T07:57:59.749245Z chromatic  $
 
 =head1 NAME
 
@@ -39,16 +39,16 @@ will be copied to the new instance.
 ParrotIOLayer *
 PIO_base_new_layer(ParrotIOLayer *proto)
 {
-    ParrotIOLayer * const new_layer = mem_sys_allocate(sizeof(ParrotIOLayer));
+    ParrotIOLayer * const new_layer = mem_allocate_typed(ParrotIOLayer);
 
     /*
      * XXX use managed memory here ?
      */
     if (proto) {
         /* FIXME: Flag here to indicate whether to free strings */
-        new_layer->name = proto->name;
+        new_layer->name  = proto->name;
         new_layer->flags = proto->flags;
-        new_layer->api = proto->api;
+        new_layer->api   = proto->api;
     }
     else {
         new_layer->name = NULL;
@@ -83,12 +83,12 @@ PIO_base_delete_layer(ParrotIOLayer *layer)
 /*
 
 =item C<INTVAL
-PIO_push_layer(theINTERP,  PMC *pmc, ParrotIOLayer *layer)>
+PIO_push_layer(Interp *interp,  PMC *pmc, ParrotIOLayer *layer)>
 
 Push a layer onto an IO object (C<*pmc>) or the default stack.
 
 =item C<void
-PIO_push_layer_str(theINTERP, PMC *pmc, STRING *layer_name)>
+PIO_push_layer_str(Interp *interp, PMC *pmc, STRING *layer_name)>
 
 Push a layer onto an IO object (C<*pmc>).
 
@@ -97,20 +97,22 @@ Push a layer onto an IO object (C<*pmc>).
 */
 
 INTVAL
-PIO_push_layer(theINTERP,  PMC *pmc, ParrotIOLayer *layer)
+PIO_push_layer(Interp *interp,  PMC *pmc, ParrotIOLayer *layer)
 {
-
     if (layer == NULL)
         return -1;
+
     if (!PMC_IS_NULL(pmc)) {
-        ParrotIOLayer *t;
-        ParrotIO * const io = PMC_data(pmc);
+        ParrotIOLayer    *t;
+        ParrotIO * const io = PMC_data_typed(pmc, ParrotIO *);
+
         if (!io)
             return -1;
-        if (io->stack == NULL && (layer->flags & PIO_L_TERMINAL) == 0) {
-            /* Error( 1st layer must be terminal) */
+
+        /* Error( 1st layer must be terminal) */
+        if (io->stack == NULL && (layer->flags & PIO_L_TERMINAL) == 0)
             return -1;
-        }
+
         /* Check and see if this layer already is on stack
          * This is a internals sanity check not a user level
          * check, at least until I fix copy-on-write stacks.
@@ -120,24 +122,26 @@ PIO_push_layer(theINTERP,  PMC *pmc, ParrotIOLayer *layer)
             if (t == layer)
                 return -1;
         }
-        /*
-         * if this is a global layer create a copy first
-         */
-        if (!(io->stack->flags & PIO_L_LAYER_COPIED)) {
+
+        /* if this is a global layer create a copy first */
+        if (!(io->stack->flags & PIO_L_LAYER_COPIED))
             io->stack = PIO_copy_stack(io->stack);
-        }
 
         layer->down = io->stack;
+
         if (io->stack)
             io->stack->up = layer;
+
         io->stack = layer;
+
         PMC_struct_val(pmc) = layer;
+
         if (layer->api->Pushed)
             (*layer->api->Pushed) (layer, io);
     }
     else {
         ParrotIOLayer *t;
-        ParrotIOData * const d = interpreter->piodata;
+        ParrotIOData * const d = interp->piodata;
         if (d->default_stack == NULL && (layer->flags & PIO_L_TERMINAL) == 0) {
             /* Error( 1st layer must be terminal) */
             return -1;
@@ -157,11 +161,11 @@ PIO_push_layer(theINTERP,  PMC *pmc, ParrotIOLayer *layer)
     return -1;
 }
 ParrotIOLayer *
-PIO_get_layer(Interp *interpreter, const char *name)
+PIO_get_layer(Interp *interp, const char *name)
 {
     ParrotIOLayer **t;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     for (t = pio_registered_layers; *t; ++t)
         if (strcmp(name, (*t)->name) == 0)
             return *t;
@@ -169,10 +173,10 @@ PIO_get_layer(Interp *interpreter, const char *name)
 }
 
 void
-PIO_push_layer_str(Interp *interpreter, PMC *pmc, STRING *ls)
+PIO_push_layer_str(Interp *interp, PMC *pmc, STRING *ls)
 {
-    char * const cls = string_to_cstring(interpreter, ls);
-    ParrotIOLayer * const l = PIO_get_layer(interpreter, cls);
+    char * const cls = string_to_cstring(interp, ls);
+    ParrotIOLayer * const l = PIO_get_layer(interp, cls);
     ParrotIOLayer * newlayer;
 
     string_cstring_free(cls);
@@ -182,18 +186,18 @@ PIO_push_layer_str(Interp *interpreter, PMC *pmc, STRING *ls)
     /* make private copy */
     newlayer = PIO_base_new_layer(l);
     newlayer->flags |= PIO_L_LAYER_COPIED;
-    PIO_push_layer(interpreter, pmc, newlayer);
+    PIO_push_layer(interp, pmc, newlayer);
 }
 
 /*
 
 =item C<ParrotIOLayer *
-PIO_pop_layer(theINTERP, PMC *pmc)>
+PIO_pop_layer(Interp *interp, PMC *pmc)>
 
 Pop a layer from an IO object (C<*pmc>) or the default stack.
 
 =item C<STRING *
-PIO_pop_layer_str(theINTERP, PMC *pmc)>
+PIO_pop_layer_str(Interp *interp, PMC *pmc)>
 
 Pop a layer from an IO object (C<*pmc>) and return the name of the
 popped layer. The layer gets freed.
@@ -203,42 +207,48 @@ popped layer. The layer gets freed.
 */
 
 ParrotIOLayer *
-PIO_pop_layer(theINTERP, PMC *pmc)
+PIO_pop_layer(Interp *interp, PMC *pmc)
 {
-    ParrotIO * const io = PMC_data(pmc);
+    ParrotIO * const io = PMC_data_typed(pmc, ParrotIO *);
 
     if (!PMC_IS_NULL(pmc)) {
         ParrotIOLayer *layer;
+
         if (!io)
             return 0;
-        /*
-         * if this is a global layer create a copy first
-         */
-        if (!(io->stack->flags & PIO_L_LAYER_COPIED)) {
+
+        /* if this is a global layer create a copy first */
+        if (!(io->stack->flags & PIO_L_LAYER_COPIED))
             io->stack = PIO_copy_stack(io->stack);
-        }
+
         layer = io->stack;
+
         if (layer) {
-            io->stack = layer->down;
+            io->stack           = layer->down;
             PMC_struct_val(pmc) = io->stack;
-            io->stack->up = 0;
-            layer->up = 0;
-            layer->down = 0;
+            io->stack->up       = 0;
+            layer->up           = 0;
+            layer->down         = 0;
+
             if (layer->api->Popped)
                 (*layer->api->Popped) (layer, io);
+
             return layer;
         }
+
         return layer;
     }
     /* Null io object - use default stack */
     else {
-        ParrotIOData * const d = interpreter->piodata;
+        ParrotIOData  * const d     = interp->piodata;
         ParrotIOLayer * const layer = d->default_stack;
+
         if (layer) {
-            d->default_stack = layer->down;
+            d->default_stack     = layer->down;
             d->default_stack->up = NULL;
-            layer->up = 0;
-            layer->down = 0;
+            layer->up            = 0;
+            layer->down          = 0;
+
             return layer;
         }
     }
@@ -247,11 +257,11 @@ PIO_pop_layer(theINTERP, PMC *pmc)
 }
 
 STRING *
-PIO_pop_layer_str(Interp *interpreter, PMC *pmc)
+PIO_pop_layer_str(Interp *interp, PMC *pmc)
 {
-    ParrotIOLayer * const layer = PIO_pop_layer(interpreter, pmc);
-    STRING * const ls = string_make(interpreter, layer->name, strlen(layer->name),
-            "iso-8859-1", 0);
+    ParrotIOLayer * const layer = PIO_pop_layer(interp, pmc);
+    STRING * const ls = string_make(interp, layer->name,
+                                    strlen(layer->name), "iso-8859-1", 0);
     mem_sys_free(layer);
     return ls;
 }
@@ -296,12 +306,10 @@ PIO_copy_stack(ParrotIOLayer *stack)
 */
 
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

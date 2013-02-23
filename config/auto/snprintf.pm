@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/snprintf.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/snprintf.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Tests if snprintf is present and if it's C99 compliant.
 package auto::snprintf;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,22 +25,22 @@ $description = 'Testing snprintf';
 
 @args = qw(verbose);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     cc_gen('config/auto/snprintf/test.in');
     cc_build();
     my $res = cc_run() or die "Can't run the snprintf testing program: $!";
     cc_clean();
 
-    if ($res =~ /snprintf/) {
-        $conf->data->set(HAS_SNPRINTF => 1);
+    if ( $res =~ /snprintf/ ) {
+        $conf->data->set( HAS_SNPRINTF => 1 );
     }
-    if ($res =~ /^C99 snprintf/) {
-        $conf->data->set(HAS_C99_SNPRINTF => 1);
-    } elsif ($res =~ /^old snprintf/) {
-        $conf->data->set(HAS_OLD_SNPRINTF => 1);
+    if ( $res =~ /^C99 snprintf/ ) {
+        $conf->data->set( HAS_C99_SNPRINTF => 1 );
+    }
+    elsif ( $res =~ /^old snprintf/ ) {
+        $conf->data->set( HAS_OLD_SNPRINTF => 1 );
     }
     print " ($res) " if $conf->options->get('verbose');
 
@@ -47,3 +48,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

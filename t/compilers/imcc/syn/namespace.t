@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/syn/namespace.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/imcc/syn/namespace.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
@@ -10,7 +10,7 @@ use Parrot::Config;
 use Parrot::Test tests => 3;
 
 ##############################
-pir_output_is(<<'CODE', <<'OUT', "namespace 1");
+pir_output_is( <<'CODE', <<'OUT', "namespace 1" );
 .sub _foo
     .local int x
     x = 5
@@ -30,7 +30,7 @@ CODE
 OUT
 
 ##############################
-pir_output_is(<<'CODE', <<'OUT', "namespace 2");
+pir_output_is( <<'CODE', <<'OUT', "namespace 2" );
 .sub _foo
     .local int x
     .local int y
@@ -58,7 +58,7 @@ CODE
 OUT
 
 ##############################
-pir_output_is(<<'CODE', <<'OUT', "namespace 3");
+pir_output_is( <<'CODE', <<'OUT', "namespace 3" );
 .sub _foo
     .local int x
     .local int y
@@ -117,3 +117,9 @@ CODE
 20
 OUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

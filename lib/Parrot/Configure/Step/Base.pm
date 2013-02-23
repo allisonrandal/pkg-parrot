@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/lib/Parrot/Configure/Step/Base.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Configure/Step/Base.pm 1502 2007-01-22T17:06:21.889089Z chromatic  $
 
 =pod
 
@@ -8,7 +8,7 @@
 Parrot::Configure::Step::Base - Configuration Step Base Class
 
 =head1 SYNOPSIS
-    
+
     use base qw(Parrot::Configure::Step::Base);
 
 =head1 DESCRIPTION
@@ -44,8 +44,7 @@ Accepts no arguments and returns a L<Parrot::Configure::Step::> object.
 
 =cut
 
-sub new
-{
+sub new {
     my $class = shift;
 
     return bless {}, ref $class || $class;
@@ -64,8 +63,7 @@ classes namespace.
 
 =cut
 
-sub result
-{
+sub result {
     my $self = shift;
 
     return $self->{result};
@@ -78,9 +76,8 @@ variable.  Returns the inheriting classes name.
 
 =cut
 
-sub set_result
-{
-    my ($self, $result) = @_;
+sub set_result {
+    my ( $self, $result ) = @_;
 
     $self->{result} = $result;
 
@@ -102,13 +99,12 @@ This method also works as an object method.
 
 =cut
 
-sub description
-{
+sub description {
     my $class = shift;
     $class = ref $class || $class;
     {
         no strict 'refs';
-        return ${$class . "::description"};
+        return ${ $class . "::description" };
     }
 }
 
@@ -121,13 +117,12 @@ This method also works as an object method.
 
 =cut
 
-sub args
-{
+sub args {
     my $class = shift;
     $class = ref $class || $class;
     {
         no strict 'refs';
-        return @{$class . "::args"};
+        return @{ $class . "::args" };
     }
 }
 
@@ -145,3 +140,10 @@ L<Parrot::Configure::Step>
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

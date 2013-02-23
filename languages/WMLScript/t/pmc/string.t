@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/pmc/string.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/pmc/string.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -17,6 +17,8 @@ Tests C<WmlsString> PMC
 
 =cut
 
+use strict;
+use warnings;
 use Parrot::Test tests => 12;
 use Test::More;
 
@@ -187,9 +189,9 @@ simple string
 OUTPUT
 
 TODO: {
-local $TODO = 'empty string not handled by PIR.';
+    local $TODO = 'empty string not handled by PIR.';
 
-pir_output_is( << 'CODE', << 'OUTPUT', '.const & empty string' );
+    pir_output_is( << 'CODE', << 'OUTPUT', '.const & empty string' );
 .HLL "WMLScript", "wmls_group"
 .sub _main
     .const .WmlsString cst1 = ""
@@ -265,4 +267,11 @@ simple string
 true
 WmlsBoolean
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

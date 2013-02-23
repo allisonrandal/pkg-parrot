@@ -1,5 +1,5 @@
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/HTMLPage.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
+# Copyright (C) 2004-2007, The Perl Foundation.
+# $Id: /parrotcode/local/lib/Parrot/Docs/HTMLPage.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -33,14 +33,14 @@ F<docs/resources>, the image and CSS file directory.
 
 =cut
 
-sub header
-{
+sub header {
     my $self = shift;
+
     # Default values to keep warnings quiet in tests.
-    my $title = shift || 'Untitled';
+    my $title      = shift || 'Untitled';
     my $navigation = shift || '';
-    my $resources = shift || '';
-    
+    my $resources  = shift || '';
+
     <<"HEADER";
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
     "http://www.w3.org/TR/REC-html40/loose.dtd">
@@ -78,12 +78,11 @@ F<docs/resources>, the image and CSS file directory.
 
 =cut
 
-sub footer
-{
-    my $self = shift;
+sub footer {
+    my $self       = shift;
     my $navigation = shift || '';
-    my $resources = shift || '';
-    
+    my $resources  = shift || '';
+
     <<"FOOTER";
         </DIV>
         <P>
@@ -114,4 +113,9 @@ FOOTER
 
 1;
 
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

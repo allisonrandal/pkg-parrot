@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/dynpmc/sub.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/dynpmc/sub.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
 use warnings;
@@ -9,14 +9,13 @@ use Test::More;
 use Parrot::Test tests => 2;
 use Parrot::Config;
 
-
 =head1 NAME
 
 t/dynpmc/sub.t - test if Sub is overridable by .HLL_map
 
 =head1 SYNOPSIS
 
-	% prove t/dynpmc/sub.t
+        % prove t/dynpmc/sub.t
 
 =head1 DESCRIPTION
 
@@ -25,8 +24,7 @@ happens to be a .Sub.
 
 =cut
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "loadlib");
+pir_output_is( << 'CODE', << 'OUTPUT', "loadlib" );
 .sub main :main
     .local pmc lib
     lib = loadlib "subproxy"
@@ -40,7 +38,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "test type of HLL_mapped .Sub");
+pir_output_is( << 'CODE', << 'OUTPUT', "test type of HLL_mapped .Sub" );
 .sub main :main
     .const .Sub b = 'bar'
     $S0 = typeof b
@@ -66,3 +64,10 @@ CODE
 Sub
 SubProxy
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

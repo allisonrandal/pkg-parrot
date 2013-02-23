@@ -5,7 +5,7 @@ CodeString - object to build (PIR) code segments
 =head1 SYNOPSIS
 
     .local pmc code
-    code = new 'CodeString'
+    code = new 'PGE::CodeString'
 
     code.emit("   $P0 = %0 * %1", '$P21', '3')
     code.emit("  %l:", 'l' => 'label')
@@ -195,3 +195,9 @@ Patches and suggestions should be sent to the Perl 6 compiler list
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

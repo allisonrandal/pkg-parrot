@@ -1,7 +1,7 @@
 /* misc.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/misc.h 13307 2006-07-15T18:48:43.376667Z leo  $
+ *     $Id: /parrotcode/trunk/include/parrot/misc.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Miscellaneous functions, mainly the Parrot_sprintf family
  *  Data Structure and Algorithms:
@@ -17,7 +17,7 @@
  *  References: misc.c, spf_vtable.c, spf_render.c
  */
 
-#if !defined(PARROT_MISC_H_GUARD)
+#ifndef PARROT_MISC_H_GUARD
 #define PARROT_MISC_H_GUARD
 
 #include "parrot/parrot.h"
@@ -39,18 +39,18 @@ PARROT_API void *Parrot_make_la(Interp *, PMC *);
 PARROT_API void *Parrot_make_cpa(Interp *, PMC *);
 PARROT_API void Parrot_destroy_la(long *);
 PARROT_API void Parrot_destroy_cpa(char **);
-PMC* tm_to_array(Parrot_Interp interpreter, const struct tm *tm);
-PARROT_API INTVAL Parrot_byte_index(Interp *interpreter, const STRING *base,
+PMC* tm_to_array(Parrot_Interp interp, const struct tm *tm);
+PARROT_API INTVAL Parrot_byte_index(Interp *interp, const STRING *base,
         const STRING *search, UINTVAL start_offset);
-PARROT_API INTVAL Parrot_byte_rindex(Interp *interpreter, const STRING *base,
+PARROT_API INTVAL Parrot_byte_rindex(Interp *interp, const STRING *base,
         const STRING *search, UINTVAL start_offset);
 typedef int (*reg_move_func)(Interp*, unsigned char d, unsigned char s, void *);
 
-PARROT_API void Parrot_register_move(Interp *interpreter, int n_regs,
+PARROT_API void Parrot_register_move(Interp *interp, int n_regs,
         unsigned char *dest_regs, unsigned char *src_regs,
-        unsigned char temp_reg, 
-        reg_move_func mov, 
-        reg_move_func mov_alt, 
+        unsigned char temp_reg,
+        reg_move_func mov,
+        reg_move_func mov_alt,
         void *info);
 
 /*
@@ -58,7 +58,7 @@ PARROT_API void Parrot_register_move(Interp *interpreter, int n_regs,
  */
 void *IMCC_compile_file_s(Parrot_Interp interp, const char *s,
         STRING **error_message);
-void * IMCC_compile_file (Parrot_Interp interp, const char *s);
+void * IMCC_compile_file(Parrot_Interp interp, const char *s);
 PMC * IMCC_compile_pir_s(Parrot_Interp interp, const char *s,
         STRING **error_message);
 PMC * IMCC_compile_pasm_s(Parrot_Interp interp, const char *s,
@@ -87,7 +87,7 @@ PARROT_API void Parrot_sprintf(Interp *, char *targ, const char *pat, ...);
 PARROT_API void Parrot_snprintf(Interp *, char *targ, size_t len,
                      const char *pat, ...);
 
-PARROT_API STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
+PARROT_API STRING *Parrot_psprintf(Interp *interp, STRING *pat,
                         PMC * ary);
 
 
@@ -103,8 +103,8 @@ PARROT_API STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
      */
 #  define PARROT_SPRINTF_MAX_PREC 3 * PARROT_SPRINTF_BUFFER_SIZE / 4
 
-#  define cstr2pstr(cstr) string_make(interpreter, cstr, strlen(cstr), "ascii", 0)
-#  define char2pstr(ch)   string_make(interpreter, &ch , 1, "ascii", 0)
+#  define cstr2pstr(cstr) string_make(interp, cstr, strlen(cstr), "ascii", 0)
+#  define char2pstr(ch)   string_make(interp, &ch , 1, "ascii", 0)
 
     /* SPRINTF DATA STRUCTURE AND FLAGS */
 
@@ -141,9 +141,9 @@ PARROT_API STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
     typedef struct spfinfo_t {
         UINTVAL width;
         UINTVAL prec;
-        FLAG flags;
-        TYPE type;
-        PHASE phase;
+        INTVAL flags;
+        INTVAL type;
+        INTVAL phase;
     } *SpfInfo;
 
     /* SPRINTF ARGUMENT OBJECT */
@@ -178,7 +178,7 @@ PARROT_API STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
     extern SPRINTF_OBJ pmc_core;
     extern SPRINTF_OBJ va_core;
 
-    STRING *Parrot_sprintf_format(Interp *interpreter,
+    STRING *Parrot_sprintf_format(Interp *interp,
                                   STRING *pat, SPRINTF_OBJ * obj);
 
 #endif /* IN_SPF_SYSTEM */
@@ -193,10 +193,7 @@ PARROT_API int Parrot_config_revision(void);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

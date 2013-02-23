@@ -8,7 +8,8 @@
     if $I0 == 0 goto error
     $P0 = getclass 'Cardinal::PIRGrammar'
     addattribute $P0, 'scope_stack'
-    addattribute $P0, 'top_level_code'
+    addattribute $P0, 'subs'
+    addattribute $P0, 'namespaces'
     .return ()
 error:
     print "Cardinal::PIRGrammar class not found\n"
@@ -30,20 +31,6 @@ error:
     .return (value)
 .end
 
-.sub 'add_sub' :method
-    .param pmc subcode
-    $P0 = self.'top_level_code'()
-    $P0 .= subcode
-    .return ()
-.end
-
-.sub 'top_level_code' :method
-    .param pmc attr           :optional
-    .param int has_attr       :opt_flag
-    $P0 = self.'attr'('top_level_code', attr, has_attr)
-    .return ($P0)
-.end
-
 .sub 'scope_stack' :method
     .param pmc attr           :optional
     .param int has_attr       :opt_flag
@@ -57,9 +44,20 @@ error:
     .return (value)
 .end
 
+.sub 'push_scope_stack' :method
+    .param pmc value
+    $P0 = self.'scope_stack'()
+    push $P0, value
+.end
+
+.sub 'pop_scope_stack' :method
+    $P0 = self.'scope_stack'()
+    pop $P1, $P0
+.end
+
 .sub 'top_scope_stack' :method
     .local pmc value
-    value = self.'attr'('scope_stack', $P0, 0)
+    value = self.'scope_stack'()
     $I0 = elements value
     unless $I0 goto end
     $I0 -= 1
@@ -69,3 +67,9 @@ error:
     print "Error: top_scope_stack is empty"
     end
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

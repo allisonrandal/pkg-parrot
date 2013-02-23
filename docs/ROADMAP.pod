@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/docs/ROADMAP.pod 14030 2006-08-09T01:14:25.172617Z chip  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/ROADMAP.pod 3510 2007-05-16T02:47:23.785670Z chromatic  $
 
 =head1 NAME
 
@@ -34,9 +34,9 @@ This is the B<highest> priority.
 
 =back
 
-=head1 CURRENT RELEASE (0.4.6)
+=head1 CURRENT RELEASE (0.4.12)
 
-Parrot 0.4.6 was released on August 8th, 2006. For a list of new and fixed
+Parrot 0.4.12 was released on May 15, 2007. For a list of new and fixed
 feature see L<NEWS>.
 
 =head1 OVERVIEW
@@ -97,7 +97,6 @@ The intention was to comb through the various sources of things to be done and
 collate them in some fashion. At the time of that writing, none of the tasks
 documented in those directories were documented in a central area.  Something a
 little nicer than grep -r 'XXX', but that would certainly do for a start.
-See also L<docs/BROKEN.pod> --Coke
 
 =back
 
@@ -123,9 +122,7 @@ with someone who should know.)
 
 =item *
 
-Document project goals and priorities, based on Chip's talk to APW as found at
-L<http://feather.perl6.nl/~chip/Chip_APW.sxi> or
-L<http://feather.perl6.nl/~chip/Chip_APW.pdf>.
+Document project goals and priorities.
 
 =item *
 
@@ -382,7 +379,8 @@ Portable fcntl() replacement for platforms without it
 
 =item *
 
-See L<PORTABILITY>. Test suite should have no failure on supported platforms.
+See L<pdds/draft/pdd01_overview.pod>. Test suite should have no
+failure on supported platforms.
 
 =item *
 
@@ -414,14 +412,6 @@ dynamic library loading
 =item *
 
 Items in languages/tcl/TODO must be completed.
-
-=item *
-
-Get python bytecode translator done
-
-=item *
-
-Pass the pie-thon test suite.
 
 =back
 

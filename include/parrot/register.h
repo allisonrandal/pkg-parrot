@@ -1,7 +1,7 @@
 /* register.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/register.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/register.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Defines the register api
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_REGISTER_H_GUARD)
+#ifndef PARROT_REGISTER_H_GUARD
 #define PARROT_REGISTER_H_GUARD
 
 #include "parrot/string.h"
@@ -31,7 +31,7 @@
 /*
  * and a set of macros to access a register by offset, used
  * in JIT emit prederef code
- * The offsets are relative to interpreter->ctx.bp.
+ * The offsets are relative to interp->ctx.bp.
  *
  * Reg order in imcc/reg_alloc.c is "INSP"   TODO make defines
  */
@@ -41,26 +41,26 @@
 #define REGNO_STR 2
 #define REGNO_PMC 3
 
-#  define __CTX interpreter->ctx.state
-#  define _SIZEOF_INTS    (sizeof(INTVAL) * __CTX->n_regs_used[REGNO_INT])
-#  define _SIZEOF_NUMS    (sizeof(FLOATVAL) * __CTX->n_regs_used[REGNO_NUM])
-#  define _SIZEOF_PMCS    (sizeof(PMC*) * __CTX->n_regs_used[REGNO_PMC])
-#  define _SIZEOF_STRS    (sizeof(STRING*) * __CTX->n_regs_used[REGNO_STR])
+#  define __CTX interp->ctx.state
+#  define _SIZEOF_INTS    (sizeof (INTVAL) * __CTX->n_regs_used[REGNO_INT])
+#  define _SIZEOF_NUMS    (sizeof (FLOATVAL) * __CTX->n_regs_used[REGNO_NUM])
+#  define _SIZEOF_PMCS    (sizeof (PMC*) * __CTX->n_regs_used[REGNO_PMC])
+#  define _SIZEOF_STRS    (sizeof (STRING*) * __CTX->n_regs_used[REGNO_STR])
 
-#  define REG_OFFS_NUM(x) (sizeof(FLOATVAL) * (-1L - (x)))
-#  define REG_OFFS_INT(x) (sizeof(INTVAL) * (x))
-#  define REG_OFFS_PMC(x) (_SIZEOF_INTS + sizeof(PMC*) * \
+#  define REG_OFFS_NUM(x) (sizeof (FLOATVAL) * (-1L - (x)))
+#  define REG_OFFS_INT(x) (sizeof (INTVAL) * (x))
+#  define REG_OFFS_PMC(x) (_SIZEOF_INTS + sizeof (PMC*) * \
         (__CTX->n_regs_used[REGNO_PMC] - 1L - (x)))
-#  define REG_OFFS_STR(x) (sizeof(STRING*) * (x) + _SIZEOF_INTS + _SIZEOF_PMCS )
+#  define REG_OFFS_STR(x) (sizeof (STRING*) * (x) + _SIZEOF_INTS + _SIZEOF_PMCS)
 
 
 /*
  * same with the default name interpreter
  */
-#define REG_INT(x) INTERP_REG_INT(interpreter, x)
-#define REG_NUM(x) INTERP_REG_NUM(interpreter, x)
-#define REG_STR(x) INTERP_REG_STR(interpreter, x)
-#define REG_PMC(x) INTERP_REG_PMC(interpreter, x)
+#define REG_INT(x) INTERP_REG_INT(interp, x)
+#define REG_NUM(x) INTERP_REG_NUM(interp, x)
+#define REG_STR(x) INTERP_REG_STR(interp, x)
+#define REG_PMC(x) INTERP_REG_PMC(interp, x)
 
 
 struct Stack_Chunk;
@@ -77,8 +77,8 @@ struct Parrot_Context;        /* parrot/interpreter.h */
 
 struct Parrot_Context * Parrot_alloc_context(Interp *, INTVAL *n_regs_used);
 struct Parrot_Context * Parrot_dup_context(Interp *, struct Parrot_Context *old);
-struct Parrot_Context * Parrot_push_context(Interp *, INTVAL *n_regs_used);
-void   Parrot_pop_context(Interp *);
+PARROT_API struct Parrot_Context * Parrot_push_context(Interp *, INTVAL *n_regs_used);
+PARROT_API void   Parrot_pop_context(Interp *);
 PARROT_API void Parrot_free_context(Interp *, struct Parrot_Context *, int re_use);
 PARROT_API void Parrot_set_context_threshold(Interp *, struct Parrot_Context *);
 void parrot_gc_context(Interp *);
@@ -87,17 +87,14 @@ void create_initial_context(Interp *);
 void destroy_context(Interp *);
 
 void setup_register_stacks(Interp*);
-void mark_register_stack(Interp* interpreter,
+void mark_register_stack(Interp* interp,
                              struct Stack_Chunk* stack);
 
 #endif /* PARROT_REGISTER_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -2,7 +2,7 @@
 ** experimental.ops
 */
 
-extern PMC* Parrot_NameSpace_name(Interp* interpreter, PMC* pmc);
+extern PMC* Parrot_NameSpace_nci_get_name(Interp* interp, PMC* pmc);
 
 VERSION = PARROT_VERSION;
 
@@ -18,6 +18,44 @@ This file contains operations that are in an experimental state. Do not
 rely upon the existence of the ops in this file when writing production code.
 No decision has yet been made as to whether they are accepted as regular
 Parrot ops or not. They are included here for testing purposes only!
+
+=cut
+
+###############################################################################
+
+=head2 IO operations
+
+=over 4
+
+=cut
+
+########################################
+
+=item B<print_newline>()
+
+Print a newline char to standard output.
+
+=cut
+
+op print_newline() :base_io {
+  PMC * const io = PIO_STDOUT(interp);
+  PIO_puts(interp, io, "\n");
+  goto NEXT();
+}
+
+=item B<print_newline>(invar PMC)
+
+Print a newline char to IO stream object $1.
+
+=cut
+
+op print_newline(invar PMC) :base_io {
+  PMC * const io = $1;
+  PIO_puts(interp, io, "\n");
+  goto NEXT();
+}
+
+=back
 
 =cut
 
@@ -52,7 +90,7 @@ inline op gcd(out INT, in NUM, in NUM) :advanced_math {
   FLOATVAL temp2 = $2 < 0.0 ? -$2 : $2;
   FLOATVAL temp3 = $3 < 0.0 ? -$3 : $3;
   while (temp3 != 0) {
-    q = floor( (FLOATVAL)temp2/temp3 );
+    q = floor((FLOATVAL)temp2/temp3);
     c = temp2 - temp3*q;
     temp2 = temp3;
     temp3 = c;
@@ -99,24 +137,24 @@ inline op gcd(out INT, out INT, out INT, in INT, in INT) :advanced_math {
     yk = ykp1;
   }
   $1 = r1;
-  $2 = (INTVAL)( xk * pow( -1, n ) );
-  $3 = (INTVAL)( yk * pow( -1, n+1 ) );
+  $2 = (INTVAL)(xk * pow(-1, n));
+  $3 = (INTVAL)(yk * pow(-1, n+1));
 
   x = $2 * $4;
   y = $3 * $5;
 
   /* correct the sign (can be wrong because we used abs($4) and abs($5) */
-  if ( x + y == r1 ) {
+  if (x + y == r1) {
     /* no correction necessary */
   }
-  else if ( x + y == -r1 ) {
+  else if (x + y == -r1) {
     $2 = -$2;
     $3 = -$3;
   }
-  else if ( x - y == r1 ) {
+  else if (x - y == r1) {
     $3 = -$3;
   }
-  else if ( -x + y == r1 ) {
+  else if (-x + y == r1) {
     $2 = -$2;
   }
 
@@ -144,7 +182,7 @@ be reused, they have to be B<clone>d.
 =cut
 
 inline op splice(invar PMC, invar PMC, in INT, in INT) {
-    $1->vtable->splice(interpreter, $1, $2, $3, $4);
+    $1->vtable->splice(interp, $1, $2, $3, $4);
     goto NEXT();
 }
 
@@ -167,17 +205,17 @@ Return a new Iterator PMC $1 for aggregate $2.
 =cut
 
 inline op slice (out PMC, invar PMC, in KEY) :base_core {
-    $1 = $2->vtable->slice(interpreter, $2, $3, 0);
+    $1 = $2->vtable->slice(interp, $2, $3, 0);
     goto NEXT();
 }
 
 inline op slice (out PMC, invar PMC, in KEY, inconst INT) :python {
-    $1 = $2->vtable->slice(interpreter, $2, $3, $4);
+    $1 = $2->vtable->slice(interp, $2, $3, $4);
     goto NEXT();
 }
 
 inline op iter (out PMC, invar PMC) :base_core {
-    $1 = $2->vtable->get_iter(interpreter, $2);
+    $1 = $2->vtable->get_iter(interp, $2);
     goto NEXT();
 }
 
@@ -190,7 +228,7 @@ Have $1 turn itself into a PMC of type $2.
 =cut
 
 inline op morph(invar PMC, in INT) {
-  VTABLE_morph(interpreter, $1, $2);
+  VTABLE_morph(interp, $1, $2);
   goto NEXT();
 }
 
@@ -204,7 +242,7 @@ wrong.
 =cut
 
 inline op exec(in STR) {
-  Parrot_Exec_OS_Command(interpreter, $1);
+  Parrot_Exec_OS_Command(interp, $1);
   goto NEXT();
 }
 
@@ -217,11 +255,11 @@ a Key PMC that you can use with "new", for example.
 =cut
 
 op classname(out PMC, invar PMC) :object_base {
-    PMC *ns = Parrot_NameSpace_name(interpreter, 
-                                    VTABLE_namespace(interpreter, $2));
-    if (PMC_IS_NULL(ns) || VTABLE_elements(interpreter, ns) < 2)
+    PMC *ns = Parrot_NameSpace_nci_get_name(interp,
+                                    VTABLE_pmc_namespace(interp, $2));
+    if (PMC_IS_NULL(ns) || VTABLE_elements(interp, ns) < 2)
     {
-        real_exception(interpreter, NULL, NO_CLASS, 
+        real_exception(interp, NULL, NO_CLASS,
             "Attempt to get class name of a non-class.");
     }
     else
@@ -232,17 +270,17 @@ op classname(out PMC, invar PMC) :object_base {
 
         /* Need to turn list of strings into a key. Note that we are not
            including the first item in the array, since that is the HLL. */
-        tmp = VTABLE_get_string_keyed_int(interpreter, ns, 1);
-        $1 = key_tail = key_new_string(interpreter, tmp);
-        max = VTABLE_elements(interpreter, ns);
+        tmp = VTABLE_get_string_keyed_int(interp, ns, 1);
+        $1 = key_tail = key_new_string(interp, tmp);
+        max = VTABLE_elements(interp, ns);
         for (i = 2; i < max; i++)
         {
-            tmp = VTABLE_get_string_keyed_int(interpreter, ns, i);
-            key = key_new_string(interpreter, tmp);
-            key_append(interpreter, key_tail, key);
+            tmp = VTABLE_get_string_keyed_int(interp, ns, i);
+            key = key_new_string(interp, tmp);
+            key_append(interp, key_tail, key);
             key_tail = key;
         }
-    }    
+    }
     goto NEXT();
 }
 
@@ -252,20 +290,24 @@ op classname(out PMC, invar PMC) :object_base {
 
 =over 4
 
-=item C<debug_brk>
+=item C<trap>
 
 Break into debugger. Implementation notes:
 
  - x86/gcc ... works with gdb
+ - ppc/gcc ... works with gdb, to proceed: gdb> p $pc = $pc + 4
  - TODO
 
 For other architectures, this is a C<noop>.
 
 =cut
 
-op debug_brk() {
+op trap() {
 #if defined(__GNUC__) && defined(i386)
     __asm__("int3");       /* opcode 0xcc */
+#endif
+#if defined(__GNUC__) && defined(PPC)
+    __asm__("trap");       /* opcode tr 31,0,0 */
 #endif
     goto NEXT();
 }
@@ -282,20 +324,20 @@ inline op pow(out NUM, in NUM, in INT) :base_core {
     INTVAL   e  = $3;
     int s = 1;
     if (e != 0) {
-	if (e < 0) {
-	    s = -1;
-	    e = -e;
-	}
+        if (e < 0) {
+            s = -1;
+            e = -e;
+        }
     }
     while (e) {
-	if (e & 1) {
-	    res *= n2;
-	}
-	n2 *= n2;
-	e >>= 1;
+        if (e & 1) {
+            res *= n2;
+        }
+        n2 *= n2;
+        e >>= 1;
     }
     if (s < 0) {
-	res = 1.0/res;
+        res = 1.0/res;
     }
     $1 = res;
     goto NEXT();
@@ -309,10 +351,10 @@ Return the class PMC of the type $2.
 
 op getclass(out PMC, in INT) {
     int typ = $2;
-    if (typ < 1 || typ >= interpreter->n_vtable_max)
-	real_exception(interpreter, NULL, E_ValueError,
-		"type number out of range");
-    $1 = interpreter->vtables[typ]->class;
+    if (typ < 1 || typ >= interp->n_vtable_max)
+        real_exception(interp, NULL, E_ValueError,
+                "type number out of range");
+    $1 = interp->vtables[typ]->pmc_class;
     goto NEXT();
 }
 
@@ -327,13 +369,13 @@ OR IF YOU NEED THIS (OR INSTANTIATE), TELL CHIP
 =cut
 
 op new(out PMC, in INT, in STR) {
-  PMC *class;
-  if ($2 <= 0 || $2 >= interpreter->n_vtable_max) {
-    real_exception(interpreter, 0, NO_CLASS,
-		   "Illegal PMC enum (%d) in new", (int)$2);
+  PMC *_class;
+  if ($2 <= 0 || $2 >= interp->n_vtable_max) {
+    real_exception(interp, 0, NO_CLASS,
+                   "Illegal PMC enum (%d) in new", (int)$2);
   }
-  class = interpreter->vtables[$2]->class;
-  $1 = VTABLE_new_from_string(interpreter, class, $3, 0);
+  _class = interp->vtables[$2]->pmc_class;
+  $1 = VTABLE_new_from_string(interp, _class, $3, 0);
   goto NEXT();
 }
 
@@ -350,40 +392,40 @@ OR IF YOU NEED IT, TELL CHIP
 
 op instantiate(out PMC) {
   opcode_t* arg_op;
-  PMC *sig, *class;
+  PMC *sig, *_class;
   int typ;
-  
-  arg_op = interpreter->current_args;
+
+  arg_op = interp->current_args;
   if (!arg_op) {
-        real_exception(interpreter, NULL, NULL_REG_ACCESS,
+        real_exception(interp, NULL, NULL_REG_ACCESS,
             "No set_args with instantiate");
   }
-  sig = CONTEXT(interpreter->ctx)->constants[arg_op[1]]->u.key;
+  sig = CONTEXT(interp->ctx)->constants[arg_op[1]]->u.key;
   ASSERT_SIG_PMC(sig);
   if (!SIG_ELEMS(sig)) {
-        real_exception(interpreter, NULL, E_ValueError,
+        real_exception(interp, NULL, E_ValueError,
             "Empty signature with instantiate");
   }
   switch (SIG_ITEM(sig, 0)) {
       case PARROT_ARG_IC:
-	  typ = arg_op[2];
-	  if (typ <= 1 || typ >= interpreter->n_vtable_max) {
-	      real_exception(interpreter, NULL, E_ValueError,
-		      "Illegal PMC enum (%d) in instantiate", typ);
-	  }
-	  class = interpreter->vtables[typ]->class;
-	  break;
+          typ = arg_op[2];
+          if (typ <= 1 || typ >= interp->n_vtable_max) {
+              real_exception(interp, NULL, E_ValueError,
+                      "Illegal PMC enum (%d) in instantiate", typ);
+          }
+          _class = interp->vtables[typ]->pmc_class;
+          break;
       case PARROT_ARG_P:
-	  class = REG_PMC(arg_op[2]);
-	  break;
+          _class = REG_PMC(arg_op[2]);
+          break;
       default:
-	  internal_exception(UNIMPLEMENTED, 
-		  "uninplement class argument in instantiate");
-	  class = NULL; /* just for cc */
-	  break;
+          internal_exception(UNIMPLEMENTED,
+                  "uninplement class argument in instantiate");
+          _class = NULL; /* just for cc */
+          break;
   }
-  $1 = VTABLE_instantiate(interpreter, class, sig);
-  interpreter->current_args = NULL;
+  $1 = VTABLE_instantiate(interp, _class, sig);
+  interp->current_args = NULL;
   goto NEXT();
 }
 
@@ -398,7 +440,7 @@ Possible values for $3 are:
 
 =back
 
-B<TODO> move/officalize this opcode at next op cleanup.
+RT#42375 move/officalize this opcode at next op cleanup.
 
 =cut
 
@@ -419,23 +461,92 @@ inline op new(out PMC, invar PMC) :object_classes {
     INTVAL type;
     switch ($2->vtable->base_type) {
         case enum_class_String:
-	        type = pmc_type(interpreter, PMC_str_val($2));
+                type = pmc_type(interp, PMC_str_val($2));
             if (type <= 0)
-                real_exception(interpreter, NULL, NO_CLASS,
+                real_exception(interp, NULL, NO_CLASS,
                     "Class '%Ss' not found", PMC_str_val($2));
-            $1 = pmc_new(interpreter, type);
+            $1 = pmc_new(interp, type);
             break;
         case enum_class_Key:
-            type = pmc_type_p(interpreter, $2);
+            type = pmc_type_p(interp, $2);
             if (type <= 0)
-                real_exception(interpreter, NULL, NO_CLASS,
-                    "Class '%Ss' not found", readable_name(interpreter, $2));
-            $1 = pmc_new(interpreter, type);
+                real_exception(interp, NULL, NO_CLASS,
+                    "Class '%Ss' not found", readable_name(interp, $2));
+            $1 = pmc_new(interp, type);
             break;
         default:
-            real_exception(interpreter, NULL, NO_CLASS,
+            real_exception(interp, NULL, NO_CLASS,
                 "Can only use a Key or String PMC with new");
     }
+    goto NEXT();
+}
+
+=item B<add_io_event>(invar PMC, invar PMC, invar PMC, inconst INT)
+
+Call the sub $2 for PIO $1 with user data $3 on ready state of $4.
+RT#42376 The only handled $4 = IO_THR_MSG_ADD_SELECT_RD aka 2 for now.
+
+=cut
+
+op add_io_event(invar PMC, invar PMC, invar PMC, inconst INT) {
+    Parrot_event_add_io_event(interp, $1, $2, $3, $4);
+    goto NEXT();
+}
+
+=item B<need_finalize>(invar PMC)
+
+The ParrotObject $1 needs the __finalize method during GC.
+
+=cut
+
+op need_finalize(invar PMC) {
+    PMC* pmc = $1;
+    if (PObj_is_object_TEST(pmc)) {
+        PObj_get_FLAGS(pmc) |= PObj_need_finalize_FLAG;
+    }
+    goto NEXT();
+}
+
+
+########################################
+
+=item B<runinterp>(invar PMC, in PMC)
+
+Invokes the PMC $2 using interp $1.
+
+=cut
+
+op runinterp(invar PMC, in PMC) {
+    Interp * const new_interp = (Interp *)PMC_data($1);
+    opcode_t *pc;
+    Interp_flags_SET(new_interp, PARROT_EXTERN_CODE_FLAG);
+    pc = (opcode_t *)VTABLE_invoke(new_interp, $2, NULL);
+    Parrot_runops_fromc_args(new_interp, $2, "P");
+    goto NEXT();
+}
+
+########################################
+
+=item B<newpdd15class>(out PMC, in STR)
+
+Creates a new Parrot-style class, named $2, and puts the new PMC for it
+into $1.
+
+=item B<newpdd15class>(out PMC, in PMC)
+
+Create a new Parrot-style class, with the hierarchical name given in $2.
+
+=cut
+
+inline op newpdd15class(out PMC, in STR) :object_classes {
+  PMC *name = pmc_new(interp, enum_class_String);
+  VTABLE_set_string_native(interp, name, $2);
+  $1 = pmc_new_init(interp, enum_class_Class, name);
+  goto NEXT();
+}
+
+inline op newpdd15class(out PMC, in PMC) :object_classes {
+    $1 = pmc_new_init(interp, enum_class_Class, $2);
     goto NEXT();
 }
 
@@ -448,6 +559,14 @@ Copyright (C) 2001-2004, The Perl Foundation.
 =head1 LICENSE
 
 This program is free software. It is subject to the same license
-as the Parrot interpreter itself.
+as the Parrot interp itself.
 
 =cut
+
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

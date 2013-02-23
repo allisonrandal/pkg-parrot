@@ -98,7 +98,7 @@ Creates the Specs and notOptStop attribute, interal stuff.
 
 =cut
 
-.sub __init :method
+.sub init :vtable :method
     $P0 = new .ResizablePMCArray
     setattribute self, "Specs", $P0
     $P0 = new .Boolean
@@ -278,16 +278,20 @@ optelse:
     goto endifelse
 array:
     $P0 = return[name]
+    if null $P0 goto not_set
     $I0 = typeof $P0
     unless $I0 != .ResizableStringArray goto endif_5
+not_set:
     $P0 = new .ResizableStringArray
 endif_5:
     push $P0, val
     goto endifelse
 hash:
     $P0 = return[name]
+    if null $P0 goto not_set_hash
     $I0 = typeof $P0
     unless $I0 != .Hash goto endif_7
+not_set_hash:
     $P0 = new .Hash
 endif_7:
     $I0 = index val, '='
@@ -371,7 +375,7 @@ A long option of "foo" is set to C<.String>, with "optarg" set to a true value.
 
 =cut
 
-.sub "__push_string" :method
+.sub "push_string" :vtable :method
     .param string format
     .local string key, type, long, short
     $P0 = self."add"()
@@ -566,7 +570,7 @@ Set the defaults to all our attributes, more internal stuff.  Sets the default
 
 =cut
 
-.sub __init :method
+.sub init :vtable :method
     $P0 = new .String
     $P0 = ''
     setattribute self, "name", $P0
@@ -838,10 +842,10 @@ Copyright (C) 2006, The Perl Foundation.
 This program is free software. It is subject to the same
 license as The Parrot Interpreter.
 
-=for vim
-
-" vim: ts=4 expandtab
-
 =cut
 
-
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

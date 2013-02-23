@@ -5,7 +5,7 @@
     .include "interpinfo.pasm"
     .include "iterator.pasm"
     .local pmc ns
-    ns = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    ns = get_root_namespace
     dump(ns, 0)
 .end
 
@@ -88,3 +88,9 @@ lp2:
     inc i
     if i < n goto loop
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

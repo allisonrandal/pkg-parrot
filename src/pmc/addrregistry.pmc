@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2005, The Perl Foundation.
-$Id: /local/src/pmc/addrregistry.pmc 13925 2006-08-04T15:10:35.798913Z chip  $
+Copyright (C) 2005-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/addrregistry.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
 
 =head1 NAME
 
@@ -64,14 +64,14 @@ Free hash structure.
 
 */
 
-    void init () {
+    void init() {
         PMC_struct_val(SELF) = NULL;
         PObj_custom_mark_destroy_SETALL(SELF);
         parrot_new_pmc_hash_x(INTERP, SELF, enum_type_int, Hash_key_type_PMC,
                 int_compare, key_hash_int);
     }
 
-    void destroy () {
+    void destroy() {
         if (PMC_struct_val(SELF)) {
             parrot_hash_destroy(INTERP, (Hash*) PMC_struct_val(SELF));
             PMC_struct_val(SELF) = NULL;
@@ -88,9 +88,9 @@ Marks the hash as live.
 
 */
 
-    void mark () {
+    void mark() {
         if (PMC_struct_val(SELF))
-            parrot_mark_hash(INTERP, PMC_struct_val(SELF));
+            parrot_mark_hash(INTERP, (Hash *)PMC_struct_val(SELF));
     }
 
 /*
@@ -112,22 +112,22 @@ Returns true if the hash size is not zero.
 
 */
 
-    INTVAL get_integer_keyed (PMC* key) {
-        Hash *hash = PMC_struct_val(SELF);
-        HashBucket *b;
+    INTVAL get_integer_keyed(PMC* key) {
+        Hash       *hash = (Hash *)PMC_struct_val(SELF);
+        HashBucket *b    = parrot_hash_get_bucket(INTERP, hash, key);
 
-        b = parrot_hash_get_bucket(INTERP, hash, key);
         if (b == NULL)
             return 0;
+
         return (INTVAL) b->value;
     }
 
-    INTVAL elements () {
-        return parrot_hash_size(INTERP, PMC_struct_val(SELF));
+    INTVAL elements() {
+        return parrot_hash_size(INTERP, (Hash *)PMC_struct_val(SELF));
     }
 
-    INTVAL get_bool () {
-        return parrot_hash_size(INTERP, PMC_struct_val(SELF)) != 0;
+    INTVAL get_bool() {
+        return parrot_hash_size(INTERP, (Hash *)PMC_struct_val(SELF)) != 0;
     }
 /*
 
@@ -150,7 +150,7 @@ reaches 0, delete the entry.
 
 */
 
-    void set_pmc_keyed (PMC* key, PMC* value) {
+    void set_pmc_keyed(PMC* key, PMC* value) {
         Hash * hash = (Hash *)PMC_struct_val(SELF);
         HashBucket *b;
         b = parrot_hash_get_bucket(INTERP, hash, key);
@@ -160,7 +160,7 @@ reaches 0, delete the entry.
             parrot_hash_put(INTERP, hash, key, (void *) 1);
     }
 
-    void set_integer_keyed (PMC* key, INTVAL value) {
+    void set_integer_keyed(PMC* key, INTVAL value) {
         Hash * hash = (Hash *)PMC_struct_val(SELF);
         parrot_hash_put(INTERP, hash, key, (void *) value);
     }
@@ -191,17 +191,18 @@ If called from iteration, return the key PMC, else PMCNULL is returned.
 
 */
 
-    PMC* get_iter () {
+    PMC* get_iter() {
         return Parrot_Hash_get_iter(INTERP, SELF);
     }
 
-    PMC* get_pmc_keyed (PMC* key) {
-        Hash *hash = PMC_struct_val(SELF);
+    PMC* get_pmc_keyed(PMC *key) {
+        Hash *hash = (Hash *)PMC_struct_val(SELF);
 
         if ((PObj_get_FLAGS(key) & KEY_type_FLAGS) ==
                 KEY_hash_iterator_FLAGS) {
-            return parrot_hash_get_idx(INTERP, hash, key);
+            return (PMC *)parrot_hash_get_idx(INTERP, hash, key);
         }
+
         return PMCNULL;
     }
 }
@@ -220,10 +221,7 @@ F<src/pmc.c:dod_register_pmc()>
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

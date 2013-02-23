@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/configure/base.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/configure/base.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -31,37 +31,42 @@ use base qw(Parrot::Configure::Step::Base);
 
 use vars qw($description @args);
 
-$description    = "foo";
-@args           = qw(foo bar baz);
+$description = "foo";
+@args        = qw(foo bar baz);
 
 package main;
 
 my $testpkg = 'Test::Parrot::Configure::Step::Base';
 
-can_ok($testpkg, qw(new description args result set_result));
+can_ok( $testpkg, qw(new description args result set_result) );
 
 # class methods
-is($testpkg->description, 'foo', "->description() returns the proper value");
-is_deeply([$testpkg->args], [qw(foo bar baz)],
-    "->args() returns the proper value");
+is( $testpkg->description, 'foo', "->description() returns the proper value" );
+is_deeply( [ $testpkg->args ], [qw(foo bar baz)], "->args() returns the proper value" );
 
 # object methods
 
-isa_ok($testpkg->new, $testpkg);
+isa_ok( $testpkg->new, $testpkg );
 
 # ->description() & ->args() work as object methods too
 {
     my $teststep = $testpkg->new;
 
-    is($teststep->description, 'foo', "->description() returns the proper value");
-    is_deeply([$teststep->args], [qw(foo bar baz)],
-        "->args() returns the proper value");
+    is( $teststep->description, 'foo', "->description() returns the proper value" );
+    is_deeply( [ $teststep->args ], [qw(foo bar baz)], "->args() returns the proper value" );
 }
 
 {
     my $teststep = $testpkg->new;
 
-    is($teststep->result('baz'), undef, "->set_result() returns the class");
-    isa_ok($teststep->set_result('baz'), $testpkg);
-    is($teststep->result, 'baz', "->set_result() changed the result value");
+    is( $teststep->result('baz'), undef, "->set_result() returns the class" );
+    isa_ok( $teststep->set_result('baz'), $testpkg );
+    is( $teststep->result, 'baz', "->set_result() changed the result value" );
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,14 +1,13 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/pge/pge_globs.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/pge/pge_globs.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 28;
 use Parrot::Test::PGE;
-
 
 =head1 NAME
 
@@ -16,47 +15,55 @@ t/library/pge_globs.t - Parrot Grammar Engine tests of globs
 
 =head1 SYNOPSIS
 
-	% prove -Ilib t/library/pge_globs.t
+        % prove -Ilib t/library/pge_globs.t
 
 =cut
 
+## literal match
+pgeglob_is( '', '', 'literal: empty string, empty pattern' );
+pgeglob_isnt( '0', '',  'literal: empty pattern' );
+pgeglob_isnt( '',  '0', 'literal: empty string' );
+pgeglob_is( 'abc', 'abc', 'literal' );
+pgeglob_isnt( 'abc', 'abd', 'literal' );
 
-# 1-6
-pgeglob_is  ('bznza', 'b?n*a', "glob wildcards");
-pgeglob_is  ('bana', 'b?n*a', "glob wildcards");
-pgeglob_isnt('bnana', 'b?n*a', "glob wildcards");
-pgeglob_is  ('bnan', '?n?*', "glob wildcards");
-pgeglob_is  ('ana', '?n?*', "glob wildcards");
-pgeglob_isnt('an', '?n?*', "glob wildcards");
+## wildcards
+pgeglob_is( 'bznza', 'b?n*a', "glob wildcards" );
+pgeglob_is( 'bana',  'b?n*a', "glob wildcards" );
+pgeglob_isnt( 'bnana', 'b?n*a', "glob wildcards" );
+pgeglob_is( 'bnan', '?n?*', "glob wildcards" );
+pgeglob_is( 'ana',  '?n?*', "glob wildcards" );
+pgeglob_isnt( 'an', '?n?*', "glob wildcards" );
 
-# 7
-pgeglob_is  ('orange','[go]range','glob enumerated characters');
-pgeglob_is  ('grange','[go]range','glob enumerated characters');
-pgeglob_isnt('ggrange','[go]range','glob enumerated characters');
-pgeglob_isnt('borange','[go]range','glob enumerated characters');
-pgeglob_isnt('arange','[go]range','glob enumerated characters');
-pgeglob_is  ('a','[^0-9]','glob enumerated characters');
-pgeglob_isnt('4','[^0-9]','glob enumerated characters');
-pgeglob_isnt('0','[^0-9]','glob enumerated characters');
-pgeglob_isnt('9','[^0-9]','glob enumerated characters');
-pgeglob_isnt('4a','[^0-9]','glob enumerated characters');
-pgeglob_isnt('aa','[^0-9]','glob enumerated characters');
+## enumerated chars
+pgeglob_is( 'orange', '[go]range', 'glob enumerated characters' );
+pgeglob_is( 'grange', '[go]range', 'glob enumerated characters' );
+pgeglob_isnt( 'ggrange', '[go]range', 'glob enumerated characters' );
+pgeglob_isnt( 'borange', '[go]range', 'glob enumerated characters' );
+pgeglob_isnt( 'arange',  '[go]range', 'glob enumerated characters' );
+pgeglob_is( 'a', '[^0-9]', 'glob enumerated characters' );
+pgeglob_isnt( '4',  '[^0-9]', 'glob enumerated characters' );
+pgeglob_isnt( '0',  '[^0-9]', 'glob enumerated characters' );
+pgeglob_isnt( '9',  '[^0-9]', 'glob enumerated characters' );
+pgeglob_isnt( '4a', '[^0-9]', 'glob enumerated characters' );
+pgeglob_isnt( 'aa', '[^0-9]', 'glob enumerated characters' );
+pgeglob_is( '_', '[A-z]', '_ is between A and z' );
 
-pgeglob_is  ('', '*', 'glob empty string');
-pgeglob_isnt('', '?', 'glob empty string');
-pgeglob_isnt('', '[0]', 'glob empty string');
-pgeglob_isnt('', '[^0]', 'glob empty string');
+## empty string
+pgeglob_is( '', '*', 'glob empty string' );
+pgeglob_isnt( '', '?',    'glob empty string' );
+pgeglob_isnt( '', '[0]',  'glob empty string' );
+pgeglob_isnt( '', '[^0]', 'glob empty string' );
 
-# 22 
-pir_output_is(<<'CODE', <<'OUT', "Glob, alternate");
+## alternate
+pir_output_is( <<'CODE', <<'OUT', "Glob, alternate" );
 
 .sub _main
-  load_bytecode "library/PGE.pbc"
-  load_bytecode "library/PGE/Glob.pir"
+  load_bytecode "PGE.pbc"
+  load_bytecode "PGE/Glob.pbc"
 
-  .local pmc rule
-  $P0 = compreg "PGE::Glob"
-  (rule, $P1, $P2) = $P0("{app,bet,cod}a")
+  .local pmc rule, globc
+  globc = compreg "PGE::Glob"
+  rule = globc.'compile'("{app,bet,cod}a")
 
   $P1 = rule("appa")
   if $P1 goto ok1
@@ -88,7 +95,7 @@ ok4:
 ok5:
   print "ok5\n"
 
-  (rule, $P1, $P2) = $P0("*{1,two,three}")
+  rule = globc.'compile'("*{1,two,three}")
 
   $P1 = rule("1")
   if $P1 goto ok6
@@ -141,6 +148,9 @@ ok10
 ok11
 OUT
 
-
-# remember to change the number of tests :-)
-BEGIN { plan tests => 22; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

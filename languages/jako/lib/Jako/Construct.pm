@@ -7,17 +7,24 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct;
 
 use base qw(Jako::Processor);
 
-sub block  { return shift->{BLOCK};  }
+sub block { return shift->{BLOCK}; }
 
 1;
 
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

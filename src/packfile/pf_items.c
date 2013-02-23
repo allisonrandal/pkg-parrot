@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/packfile/pf_items.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/packfile/pf_items.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
 
 =head1 NAME
 
@@ -80,7 +80,7 @@ nul:
     expo += 1023;       /* + bias 8byte */
     if (expo <= 0)       /* underflow */
         goto nul;
-    if (expo > 0x7ff) {	/* inf/nan */
+    if (expo > 0x7ff) {  /* inf/nan */
         dest[7] = 0x7f;
         dest[6] = src[7] == 0xc0 ? 0xf8 : 0xf0 ;
         goto nul;
@@ -235,7 +235,7 @@ fetch_op_le_4(unsigned char *b)
 #if PARROT_BIGENDIAN
 #  if OPCODE_T_SIZE == 8
     return u.o >> 32;
-#    else
+#  else
     return (opcode_t) fetch_iv_be((INTVAL)u.o);
 #  endif
 #else
@@ -269,7 +269,7 @@ fetch_op_le_8(unsigned char *b)
 /*
 
 =item C<opcode_t
-PF_fetch_opcode(struct PackFile *pf, opcode_t **stream)>
+PF_fetch_opcode(PackFile *pf, opcode_t **stream)>
 
 Fetch an C<opcode_t> from the stream, converting byteorder if needed.
 
@@ -278,7 +278,7 @@ Fetch an C<opcode_t> from the stream, converting byteorder if needed.
 */
 
 opcode_t
-PF_fetch_opcode(struct PackFile *pf, opcode_t **stream) {
+PF_fetch_opcode(PackFile *pf, opcode_t **stream) {
     opcode_t o;
     if (!pf || !pf->fetch_op)
         return *(*stream)++;
@@ -329,11 +329,11 @@ PF_size_opcode(void)
 /*
 
 =item C<INTVAL
-PF_fetch_integer(struct PackFile *pf, opcode_t **stream)>
+PF_fetch_integer(PackFile *pf, opcode_t **stream)>
 
 Fetch an C<INTVAL> from the stream, converting byteorder if needed.
 
-XXX assumes C<sizeof(INTVAL) == sizeof(opcode_t)> - we don't have
+XXX assumes C<sizeof (INTVAL) == sizeof (opcode_t)> - we don't have
 C<INTVAL> size in the PackFile header.
 
 =cut
@@ -341,12 +341,12 @@ C<INTVAL> size in the PackFile header.
 */
 
 INTVAL
-PF_fetch_integer(struct PackFile *pf, opcode_t **stream) {
+PF_fetch_integer(PackFile *pf, opcode_t **stream) {
     INTVAL i;
     if (!pf || pf->fetch_iv == NULL)
         return *(*stream)++;
     i = (pf->fetch_iv)(*((unsigned char **)stream));
-    /* XXX assume sizeof(opcode_t) == sizeof(INTVAL) on the
+    /* XXX assume sizeof (opcode_t) == sizeof (INTVAL) on the
      * machine producing this PBC
      */
     *((unsigned char **) (stream)) += pf->header->wordsize;
@@ -386,14 +386,14 @@ Return store size of C<INTVAL> in C<opcode_t> units.
 size_t
 PF_size_integer(void)
 {
-    size_t s = sizeof(INTVAL) / sizeof(opcode_t);
+    size_t s = sizeof (INTVAL) / sizeof (opcode_t);
     return s ? s : 1;
 }
 
 /*
 
 =item C<FLOATVAL
-PF_fetch_number(struct PackFile *pf, opcode_t **stream)>
+PF_fetch_number(PackFile *pf, opcode_t **stream)>
 
 Fetch a C<FLOATVAL> from the stream, converting byteorder if needed.
 Then advance stream pointer by amount of packfile float size.
@@ -403,7 +403,7 @@ Then advance stream pointer by amount of packfile float size.
 */
 
 FLOATVAL
-PF_fetch_number(struct PackFile *pf, opcode_t **stream) {
+PF_fetch_number(PackFile *pf, opcode_t **stream) {
     /* When we have alignment all squared away we don't need
      * to use memcpy() for native byteorder.
      */
@@ -412,11 +412,11 @@ PF_fetch_number(struct PackFile *pf, opcode_t **stream) {
     if (!pf || !pf->fetch_nv) {
 #if TRACE_PACKFILE
         PIO_eprintf(NULL, "PF_fetch_number: Native [%d bytes]\n",
-		    sizeof(FLOATVAL));
+                sizeof (FLOATVAL));
 #endif
-        memcpy(&f, (char*)*stream, sizeof(FLOATVAL));
-        (*stream) += (sizeof(FLOATVAL) + sizeof(opcode_t) - 1)/
-            sizeof(opcode_t);
+        memcpy(&f, (char*)*stream, sizeof (FLOATVAL));
+        (*stream) += (sizeof (FLOATVAL) + sizeof (opcode_t) - 1)/
+            sizeof (opcode_t);
         return f;
     }
     f = (FLOATVAL) 0;
@@ -450,9 +450,9 @@ Write a C<FLOATVAL> to the opcode stream as is.
 opcode_t*
 PF_store_number(opcode_t *cursor, FLOATVAL *val)
 {
-    opcode_t padded_size  = (sizeof(FLOATVAL) + sizeof(opcode_t) - 1) /
-        sizeof(opcode_t);
-    mem_sys_memcopy(cursor, val, sizeof(FLOATVAL));
+    opcode_t padded_size  = (sizeof (FLOATVAL) + sizeof (opcode_t) - 1) /
+        sizeof (opcode_t);
+    mem_sys_memcopy(cursor, val, sizeof (FLOATVAL));
     cursor += padded_size;
     return cursor;
 }
@@ -471,13 +471,13 @@ Return store size of FLOATVAL in opcode_t units.
 size_t
 PF_size_number(void)
 {
-    return ROUND_UP(sizeof(FLOATVAL), sizeof(opcode_t));
+    return ROUND_UP(sizeof (FLOATVAL), sizeof (opcode_t));
 }
 
 /*
 
 =item C<STRING *
-PF_fetch_string(Parrot_Interp interp, struct PackFile *pf, opcode_t **cursor)>
+PF_fetch_string(Parrot_Interp interp, PackFile *pf, opcode_t **cursor)>
 
 Fetch a C<STRING> from bytecode and return a new C<STRING>.
 
@@ -494,13 +494,13 @@ Opcode format is:
 */
 
 STRING *
-PF_fetch_string(Parrot_Interp interp, struct PackFile *pf, opcode_t **cursor)
+PF_fetch_string(Parrot_Interp interp, PackFile *pf, opcode_t **cursor)
 {
     UINTVAL flags;
     opcode_t charset_nr;
     size_t size;
     STRING *s;
-    int wordsize = pf ? pf->header->wordsize : sizeof(opcode_t);
+    int wordsize = pf ? pf->header->wordsize : sizeof (opcode_t);
     const char *charset_name;
 
     flags = PF_fetch_opcode(pf, cursor);
@@ -521,11 +521,11 @@ PF_fetch_string(Parrot_Interp interp, struct PackFile *pf, opcode_t **cursor)
 
 
     charset_name = Parrot_charset_c_name(interp, charset_nr);
-    s = string_make(interp, *cursor, size, charset_name, flags);
+    s = string_make(interp, (char *)*cursor, size, charset_name, flags);
 
 #if TRACE_PACKFILE
     PIO_eprintf(NULL, "PF_fetch_string(): string is: ");
-	PIO_putps(interp, PIO_STDERR(interp), s);
+    PIO_putps(interp, PIO_STDERR(interp), s);
     PIO_eprintf(NULL, "\n");
 #endif
 
@@ -558,8 +558,8 @@ PF_store_string(opcode_t *cursor, STRING *s)
 
 /*    PIO_eprintf(NULL, "PF_store_string(): size is %ld...\n", s->bufused); */
 
-    if (padded_size % sizeof(opcode_t)) {
-        padded_size += sizeof(opcode_t) - (padded_size % sizeof(opcode_t));
+    if (padded_size % sizeof (opcode_t)) {
+        padded_size += sizeof (opcode_t) - (padded_size % sizeof (opcode_t));
     }
 
     *cursor++ = PObj_get_FLAGS(s); /* only constant_FLAG and private7 */
@@ -582,14 +582,14 @@ PF_store_string(opcode_t *cursor, STRING *s)
         mem_sys_memcopy(charcursor, s->strstart, s->bufused);
         charcursor += s->bufused;
 
-        if (s->bufused % sizeof(opcode_t)) {
-            for (i = 0; i < (sizeof(opcode_t) -
-                        (s->bufused % sizeof(opcode_t))); i++) {
+        if (s->bufused % sizeof (opcode_t)) {
+            for (i = 0; i < (sizeof (opcode_t) -
+                        (s->bufused % sizeof (opcode_t))); i++) {
                 *charcursor++ = 0;
             }
         }
     }
-    assert( ((long)charcursor & 3) == 0);
+    assert(((long)charcursor & 3) == 0);
     cursor = (opcode_t *)charcursor;
 
     return cursor;
@@ -611,18 +611,18 @@ PF_size_string(STRING *s)
 {
     opcode_t padded_size = s->bufused;
 
-    if (padded_size % sizeof(opcode_t)) {
-        padded_size += sizeof(opcode_t) - (padded_size % sizeof(opcode_t));
+    if (padded_size % sizeof (opcode_t)) {
+        padded_size += sizeof (opcode_t) - (padded_size % sizeof (opcode_t));
     }
 
     /* Include space for flags, representation, and size fields.  */
-    return 3 + (size_t)padded_size / sizeof(opcode_t);
+    return 3 + (size_t)padded_size / sizeof (opcode_t);
 }
 
 /*
 
 =item C<char *
-PF_fetch_cstring(struct PackFile *pf, opcode_t **cursor)>
+PF_fetch_cstring(PackFile *pf, opcode_t **cursor)>
 
 Fetch a cstring from bytecode and return an allocated copy
 
@@ -631,10 +631,10 @@ Fetch a cstring from bytecode and return an allocated copy
 */
 
 char *
-PF_fetch_cstring(struct PackFile *pf, opcode_t **cursor)
+PF_fetch_cstring(PackFile *pf, opcode_t **cursor)
 {
     size_t str_len = strlen ((char *)(*cursor)) + 1;
-    char *p = mem_sys_allocate(str_len);
+    char *p = (char *)mem_sys_allocate(str_len);
 
     if (p) {
         int wordsize = pf->header->wordsize;
@@ -682,13 +682,13 @@ PF_size_cstring(const char *s)
 
     assert(s);
     str_len = strlen(s);
-    return ROUND_UP(str_len + 1, sizeof(opcode_t));
+    return ROUND_UP(str_len + 1, sizeof (opcode_t));
 }
 
 /*
 
 =item C<void
-PackFile_assign_transforms(struct PackFile *pf)>
+PackFile_assign_transforms(PackFile *pf)>
 
 Assign transform functions to vtable.
 
@@ -697,10 +697,10 @@ Assign transform functions to vtable.
 */
 
 void
-PackFile_assign_transforms(struct PackFile *pf)
+PackFile_assign_transforms(PackFile *pf)
 {
     int need_endianize = pf->header->byteorder != PARROT_BIGENDIAN;
-    int need_wordsize  = pf->header->wordsize != sizeof(opcode_t);
+    int need_wordsize  = pf->header->wordsize != sizeof (opcode_t);
 
     pf->need_endianize = need_endianize;
     pf->need_wordsize  = need_wordsize;
@@ -737,7 +737,8 @@ PackFile_assign_transforms(struct PackFile *pf)
             pf->fetch_nv = fetch_buf_be_8;
         else if (pf->header->floattype == 1)
             pf->fetch_nv = cvt_num12_num8_be;
-    } else {
+    }
+    else {
         if (pf->header->wordsize == 4)
             pf->fetch_op = fetch_op_le_4;
         else
@@ -777,12 +778,10 @@ C<<PF_size_<type>()>> - return the needed size in C<opcode_t> units.
 
 */
 
+
 /*
-* Local variables:
-* c-indentation-style: bsd
-* c-basic-offset: 4
-* indent-tabs-mode: nil
-* End:
-*
-* vim: expandtab shiftwidth=4:
-*/
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

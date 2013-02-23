@@ -6,9 +6,9 @@ use warnings;
 use lib 'lib';
 use Parrot::Vtable;
 
-my $vtable = parse_vtable( 'vtable.tbl' );
+my $vtable = parse_vtable('vtable.tbl');
 
-my ($funcs, $protos) = vtbl_embed( $vtable );
+my ( $funcs, $protos ) = vtbl_embed($vtable);
 
 my $header = <<'EOH';
 /* ex: set ro:
@@ -19,14 +19,14 @@ my $header = <<'EOH';
 */
 EOH
 
-open OUT, ">include/parrot/extend_vtable.h" or die $!;
+open my $OUT, '>', 'include/parrot/extend_vtable.h' or die $!;
 
-print OUT $header, <<'EOF';
+print $OUT $header, <<'EOF';
 
 /*
-Copyright (C) 2005, The Perl Foundation.
+Copyright (C) 2005-2007, The Perl Foundation.
 */
-#if !defined(PARROT_EXTEND_VTABLE_H_GUARD)
+#ifndef PARROT_EXTEND_VTABLE_H_GUARD
 #define PARROT_EXTEND_VTABLE_H_GUARD
 
 /* Need size_t  */
@@ -34,21 +34,32 @@ Copyright (C) 2005, The Perl Foundation.
 
 EOF
 
-print OUT $protos;
+print $OUT $protos;
 
-print OUT <<'EOF';
+print $OUT <<'EOF';
 
-#endif
+#endif /* PARROT_EXTEND_VTABLE_H_GUARD */
 EOF
 
-close OUT or die $!;
-
-open OUT, ">src/extend_vtable.c" or die $!;
-
-print OUT $header, <<'EOF';
+# append the C code coda
+print $OUT <<'EOF';
 
 /*
-Copyright (C) 2001-2003, 2005, The Perl Foundation. 
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
+EOF
+
+close $OUT or die $!;
+
+open $OUT, '>', 'src/extend_vtable.c' or die $!;
+
+print $OUT $header, <<'EOF';
+
+/*
+Copyright (C) 2001-2003, 2005, The Perl Foundation.
 
 =head1 NAME
 
@@ -111,9 +122,9 @@ can.
 
 EOF
 
-print OUT $funcs;
+print $OUT $funcs;
 
-print OUT <<'EOF';
+print $OUT <<'EOF';
 /*
 
 =back
@@ -132,13 +143,17 @@ Initial version by Dan Sugalski.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */
 EOF
 
-close OUT or die $!;
+close $OUT or die $!;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

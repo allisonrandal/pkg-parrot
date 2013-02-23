@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 7
+plan 8
 
 eval_is {
  set a 2
@@ -13,8 +19,10 @@ eval_is {
  set a
 } 1 {get}
 
-eval_is {expr $a} \
-  {can't read "a": no such variable} \
+eval_is {
+  catch {unset a}
+  set a
+} {can't read "a": no such variable} \
   {missing global}
 
 eval_is {
@@ -22,6 +30,12 @@ eval_is {
  set b(c) 2
 } {can't set "b(c)": variable isn't array} \
   {not an array}
+
+eval_is {
+  array set a {}
+  set a foo
+} {can't set "a": variable is array} \
+  {variable is array}
 
 eval_is {
   array set test {4 ok}

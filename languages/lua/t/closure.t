@@ -1,10 +1,10 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/closure.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/closure.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
 
 =head1 NAME
 
-t/closure.t - Lua closures 
+t/closure.t - Lua closures
 
 =head1 SYNOPSIS
 
@@ -12,13 +12,15 @@ t/closure.t - Lua closures
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.6 "Visibility Rules".
+See "Lua 5.1 Reference Manual", section 2.6 "Visibility Rules",
+L<http://www.lua.org/manual/5.1/manual.html#2.6>.
 
-See "Programming in Lua", section 6.1 "Closures". 
+See "Programming in Lua", section 6.1 "Closures".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -66,9 +68,9 @@ CODE
 OUT
 
 TODO: {
-local $TODO = 'each execution of a local statement defines new local variables';
+    local $TODO = 'each execution of a local statement defines new local variables';
 
-language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+    language_output_is( 'lua', <<'CODE', <<'OUT', '' );
 a = {}
 local x = 20
 for i=1,10 do
@@ -105,3 +107,11 @@ CODE
 function	12
 6	15	3
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
+

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/resizableintegerarray.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/pmc/resizableintegerarray.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -8,8 +8,9 @@ src/pmc/resizableintegerarray.pmc - resizable array for integers only
 
 =head1 DESCRIPTION
 
-This class, ResizableIntegerArray, implements an array of resizable size, which stores INTVALs.
-It uses Integer PMCs for all of the conversions.
+This class, ResizableIntegerArray, implements an array of resizable
+size, which stores INTVALs.  It uses Integer PMCs for all of the
+conversions.
 
 =head2 Functions
 
@@ -34,12 +35,12 @@ Returns the integer value of the element at index C<key>.
 
 */
 
-    INTVAL get_integer_keyed_int (INTVAL key) {
+    INTVAL get_integer_keyed_int(INTVAL key) {
         INTVAL *data;
         if (key < 0)
             real_exception(INTERP, NULL, E_IndexError,
                 "ResizableIntegerArray: index out of bounds!");
-        if(key >= PMC_int_val(SELF))
+        if (key >= PMC_int_val(SELF))
             DYNSELF.set_integer_native(key+1);
 
         data = (INTVAL *)PMC_data(SELF);
@@ -56,12 +57,12 @@ Sets the integer value of the element at index C<key> to C<value>.
 
 */
 
-    void set_integer_keyed_int (INTVAL key, INTVAL value) {
+    void set_integer_keyed_int(INTVAL key, INTVAL value) {
         INTVAL *data;
         if (key < 0)
             real_exception(INTERP, NULL, E_IndexError,
                 "ResizableIntegerArray: index out of bounds!");
-        if(key >= PMC_int_val(SELF))
+        if (key >= PMC_int_val(SELF))
             DYNSELF.set_integer_native(key+1);
 
         data = (INTVAL *)PMC_data(SELF);
@@ -78,12 +79,12 @@ Resizes the array to C<size> elements.
 
 */
 
-    void set_integer_native (INTVAL size) {
+    void set_integer_native(INTVAL size) {
         if (size < 0)
             real_exception(INTERP, NULL, E_IndexError,
                     "ResizableStringArray: Can't resize!");
 
-        if(!PMC_data(SELF)) {
+        if (!PMC_data(SELF)) {
             /* empty - used fixed routine */
             if (size < 8) {
                 SUPER(8);
@@ -111,7 +112,7 @@ Resizes the array to C<size> elements.
                 cur &= ~0xfff;
             }
             PMC_data(SELF) = mem_sys_realloc(PMC_data(SELF),
-                    cur * sizeof(INTVAL));
+                    cur * sizeof (INTVAL));
             PMC_int_val2(SELF) = cur;
             PMC_int_val(SELF) = size;
         }
@@ -119,7 +120,7 @@ Resizes the array to C<size> elements.
 
 /*
 
-=item C<void push_integer (INTVAL value)>
+=item C<void push_integer(INTVAL value)>
 
 Extends the array by adding an element of value C<value> to the end
 of the array.
@@ -128,7 +129,7 @@ of the array.
 
 */
 
-    void push_integer (INTVAL value) {
+    void push_integer(INTVAL value) {
         INTVAL nextix = DYNSELF.elements();
         DYNSELF.set_integer_keyed_int(nextix, value);
     }
@@ -178,7 +179,7 @@ Removes and returns an item from the start of the array.
         data = (INTVAL *)PMC_data(SELF);
         value = data[0];
         PMC_int_val(SELF) = --size;
-        mem_sys_memmove(data, data + 1, size * sizeof(INTVAL));
+        mem_sys_memmove(data, data + 1, size * sizeof (INTVAL));
         return value;
     }
 
@@ -198,7 +199,7 @@ Add and integer to the start of the array.
         size = PMC_int_val(SELF);
         DYNSELF.set_integer_native(size + 1);
         data = (INTVAL *)PMC_data(SELF);
-        mem_sys_memmove(data + 1, data, size * sizeof(INTVAL));
+        mem_sys_memmove(data + 1, data, size * sizeof (INTVAL));
         data[0] = value;
     }
 /*
@@ -211,7 +212,7 @@ Creates and returns a copy of the array.
 
 */
 
-    PMC* clone () {
+    PMC* clone() {
         PMC *copy = SUPER();
         /* copy trimmed extra space */
         PMC_int_val2(copy) = PMC_int_val(SELF);
@@ -241,10 +242,7 @@ moved available size to int_val2 - Matt Fowles 2005-07-22
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/Sprite.pir 13110 2006-07-02T05:33:33.796653Z chromatic  $
+# $Id: /parrotcode/local/runtime/parrot/library/SDL/Sprite.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -551,3 +551,9 @@ the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

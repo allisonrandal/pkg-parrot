@@ -1,5 +1,6 @@
+#!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/pmc/hash.t 12856 2006-05-31T15:18:28.565772Z leo  $
+# $Id: /parrotcode/local/t/pmc/hash.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -24,50 +25,50 @@ well.
 
 =cut
 
-pasm_output_is(<<CODE, <<OUTPUT, "Initial Hash tests");
-	new	P0, .Hash
+pasm_output_is( <<CODE, <<OUTPUT, "Initial Hash tests" );
+    new	P0, .Hash
 
-	set	P0["foo"], -7
-	set	P0["bar"], 3.5
-	set	P0["baz"], "value"
+    set	P0["foo"], -7
+    set	P0["bar"], 3.5
+    set	P0["baz"], "value"
 
-	set	I0, P0["foo"]
-	set	N0, P0["bar"]
-	set	S0, P0["baz"]
+    set	I0, P0["foo"]
+    set	N0, P0["bar"]
+    set	S0, P0["baz"]
 
-	eq	I0,-7,OK_1
-	print	"not "
-OK_1:	print	"ok 1\\n"
-	eq	N0,3.500000,OK_2
-	print	N0
-OK_2:	print	"ok 2\\n"
-	eq	S0,"value",OK_3
-	print	S0
-OK_3:	print	"ok 3\\n"
+    eq	I0,-7,OK_1
+    print	"not "
+OK_1:    print	"ok 1\\n"
+    eq	N0,3.500000,OK_2
+    print	N0
+OK_2:    print	"ok 2\\n"
+    eq	S0,"value",OK_3
+    print	S0
+OK_3:    print	"ok 3\\n"
 
         set     S1, "oof"
         set     S2, "rab"
         set     S3, "zab"
 
-	set	P0[S1], 7
-	set	P0[S2], -3.5
-	set	P0[S3], "VALUE"
+    set	P0[S1], 7
+    set	P0[S2], -3.5
+    set	P0[S3], "VALUE"
 
-	set	I0, P0[S1]
-	set	N0, P0[S2]
-	set	S0, P0[S3]
+    set	I0, P0[S1]
+    set	N0, P0[S2]
+    set	S0, P0[S3]
 
-	eq	I0,7,OK_4
-	print	"not "
-OK_4:	print	"ok 4\\n"
-	eq	N0,-3.500000,OK_5
-	print	N0
-OK_5:	print	"ok 5\\n"
-	eq	S0,"VALUE",OK_6
-	print	S0
-OK_6:	print	"ok 6\\n"
+    eq	I0,7,OK_4
+    print	"not "
+OK_4:    print	"ok 4\\n"
+    eq	N0,-3.500000,OK_5
+    print	N0
+OK_5:    print	"ok 5\\n"
+    eq	S0,"VALUE",OK_6
+    print	S0
+OK_6:    print	"ok 6\\n"
 
-	end
+    end
 CODE
 ok 1
 ok 2
@@ -77,88 +78,88 @@ ok 5
 ok 6
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "more than one Hash");
-	new P0, .Hash
-	set S0, "key"
-	set P0[S0], 1
+pasm_output_is( <<'CODE', <<OUTPUT, "more than one Hash" );
+    new P0, .Hash
+    set S0, "key"
+    set P0[S0], 1
 
         new P1, .Hash
         set S1, "another_key"
         set P1[S1], 2
 
-	set I0, P0[S0]
-	set I1, P1[S1]
+    set I0, P0[S0]
+    set I1, P1[S1]
 
-	print I0
-	print "\n"
-	print I1
-	print "\n"
+    print I0
+    print "\n"
+    print I1
+    print "\n"
         end
 CODE
 1
 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "hash keys with nulls in them");
-	new P0, .Hash
-	set S0, "parp\0me"
-	set S1, "parp\0you"
+pasm_output_is( <<'CODE', <<OUTPUT, "hash keys with nulls in them" );
+    new P0, .Hash
+    set S0, "parp\0me"
+    set S1, "parp\0you"
 
-	set P0[S0], 1		# $P0{parp\0me} = 1
-	set P0[S1], 2		# $P0{parp\0you} = 2
+    set P0[S0], 1		# $P0{parp\0me} = 1
+    set P0[S1], 2		# $P0{parp\0you} = 2
 
-	set I0, P0[S0]
-	set I1, P0[S1]
+    set I0, P0[S0]
+    set I1, P0[S1]
 
-	print I0
-	print "\n"
-	print I1
-	print "\n"
-	end
+    print I0
+    print "\n"
+    print I1
+    print "\n"
+    end
 CODE
 1
 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "nearly the same hash keys");
-	new P0, .Hash
-	set S0, "a\0"
-	set S1, "\0a"
+pasm_output_is( <<'CODE', <<OUTPUT, "nearly the same hash keys" );
+    new P0, .Hash
+    set S0, "a\0"
+    set S1, "\0a"
 
-	set P0[S0], 1
-	set P0[S1], 2
+    set P0[S0], 1
+    set P0[S1], 2
 
-	set I0, P0[S0]
-	set I1, P0[S1]
+    set I0, P0[S0]
+    set I1, P0[S1]
 
-	print I0
-	print "\n"
-	print I1
-	print "\n"
+    print I0
+    print "\n"
+    print I1
+    print "\n"
 
-	end
+    end
 CODE
 1
 2
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "The same hash keys");
-	new P0, .Hash
-	set S0, "Happy"
-	set S1, "Happy"
+pasm_output_is( <<'CODE', <<OUTPUT, "The same hash keys" );
+    new P0, .Hash
+    set S0, "Happy"
+    set S1, "Happy"
 
-	set P0[S0], 1
-	set I0, P0[S0]
-	print I0
-	print "\n"
+    set P0[S0], 1
+    set I0, P0[S0]
+    print I0
+    print "\n"
 
-	set P0[S1], 2
-	set I1, P0[S1]
+    set P0[S1], 2
+    set I1, P0[S1]
 
-	print I1
-	print "\n"
+    print I1
+    print "\n"
 
-	end
+    end
 CODE
 1
 2
@@ -167,45 +168,45 @@ OUTPUT
 # NB Next test depends on "key2" hashing to zero, which it does with
 # the current algorithm; if the algorithm changes, change the test!
 
-pasm_output_is(<<'CODE', <<OUTPUT, "key that hashes to zero");
+pasm_output_is( <<'CODE', <<OUTPUT, "key that hashes to zero" );
         new P0, .Hash
         set S0, "key2"
         set P0[S0], 1
         set I0, P0[S0]
-	print I0
-	print "\n"
-	end
+    print I0
+    print "\n"
+    end
 CODE
 1
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "size of the hash");
-	new P0, .Hash
+pasm_output_is( <<'CODE', <<OUTPUT, "size of the hash" );
+    new P0, .Hash
 
-	set P0["0"], 1
-	set I0, P0
-	print I0
-	print "\n"
+    set P0["0"], 1
+    set I0, P0
+    print I0
+    print "\n"
 
-	set P0["1"], 1
-	set I0, P0
-	print I0
-	print "\n"
+    set P0["1"], 1
+    set I0, P0
+    print I0
+    print "\n"
 
-	set P0["0"], 1
-	set I0, P0
-	print I0
-	print "\n"
+    set P0["0"], 1
+    set I0, P0
+    print I0
+    print "\n"
 
-	end
+    end
 CODE
 1
 2
 2
 OUTPUT
 
-pasm_output_is(<<CODE, <<OUTPUT, "stress test: loop(set, check)");
-	new	P0, .Hash
+pasm_output_is( <<CODE, <<OUTPUT, "stress test: loop(set, check)" );
+    new	P0, .Hash
 
         set I0, 200
         set S0, "mikey"
@@ -276,93 +277,93 @@ start
 OUTPUT
 
 ## stuff them in, and check periodically that we can pull selected ones out.
-pir_output_is(<<'CODE', <<OUTPUT, "stress test: lots of keys");
+pir_output_is( <<'CODE', <<OUTPUT, "stress test: lots of keys" );
 .sub set_multiple_keys
-	.param pmc hash
+    .param pmc hash
         .param int key_index
         .param int step
-	.param int count
+    .param int count
 
 again:
-	if count <= 0 goto ret
-	S0 = key_index
-	S1 = concat "key", S0
-	S2 = concat "value", S0
-	hash[S1] = S2
-	key_index = key_index + step
-	count = count - 1
-	goto again
+    if count <= 0 goto ret
+    S0 = key_index
+    S1 = concat "key", S0
+    S2 = concat "value", S0
+    hash[S1] = S2
+    key_index = key_index + step
+    count = count - 1
+    goto again
 ret:
 .end
 
 .sub print_multiple_keys
-	.param pmc hash
+    .param pmc hash
         .param int key_index
         .param int step
-	.param int count
+    .param int count
 
 again:
-	if count <= 0 goto ret
-	S0 = key_index
-	S1 = concat "key", S0
-	print S1
-	print " => "
-	I2 = exists hash[S1]
-	if I2 goto print_value
-	print "(undef)"
-	goto print_end
+    if count <= 0 goto ret
+    S0 = key_index
+    S1 = concat "key", S0
+    print S1
+    print " => "
+    I2 = exists hash[S1]
+    if I2 goto print_value
+    print "(undef)"
+    goto print_end
 print_value:
-	S2 = hash[S1]
-	print S2
+    S2 = hash[S1]
+    print S2
 print_end:
-	print "\n"
-	key_index = key_index + step
-	count = count - 1
-	goto again
+    print "\n"
+    key_index = key_index + step
+    count = count - 1
+    goto again
 ret:
 .end
 
 .sub delete_multiple_keys
-	.param pmc hash
-	.param int key_index
-	.param int step
-	.param int count
+    .param pmc hash
+    .param int key_index
+    .param int step
+    .param int count
 
 again:
-	if count <= 0 goto ret
-	S0 = key_index
-	S1 = concat "key", S0
-	delete hash[S1]
-	key_index = key_index + step
-	count = count - 1
-	goto again
+    if count <= 0 goto ret
+    S0 = key_index
+    S1 = concat "key", S0
+    delete hash[S1]
+    key_index = key_index + step
+    count = count - 1
+    goto again
 ret:
 .end
 
 .sub _main :main
-	new	P30, .Hash
-	print "round 1\n"
-	I29 = 1
-	I30 = 1000
-	I31 = 1000
-	set_multiple_keys(P30, I29, I30, I31)
-	I20 = 3
-	print_multiple_keys(P30, I29, I30, I20)
-	print "round 2\n"
-	I21 = 100000
-	set_multiple_keys(P30, I21, I30, I31)
-	print_multiple_keys(P30, I29, I30, I20)
-	print_multiple_keys(P30, I21, I30, I20)
-	print "round 3\n"
-	I22 = 50000
-	set_multiple_keys(P30, I22, I29, I22)
-	print_multiple_keys(P30, I29, I30, I20)
-	print_multiple_keys(P30, I22, I30, I20)
-	print "round 4\n"
-	delete_multiple_keys(P30, I22, I29, I22)
-	print_multiple_keys(P30, I29, I30, I20)
-	print_multiple_keys(P30, I22, I30, I20)
-	print "done.\n"
+    new	P30, .Hash
+    print "round 1\n"
+    I29 = 1
+    I30 = 1000
+    I31 = 1000
+    set_multiple_keys(P30, I29, I30, I31)
+    I20 = 3
+    print_multiple_keys(P30, I29, I30, I20)
+    print "round 2\n"
+    I21 = 100000
+    set_multiple_keys(P30, I21, I30, I31)
+    print_multiple_keys(P30, I29, I30, I20)
+    print_multiple_keys(P30, I21, I30, I20)
+    print "round 3\n"
+    I22 = 50000
+    set_multiple_keys(P30, I22, I29, I22)
+    print_multiple_keys(P30, I29, I30, I20)
+    print_multiple_keys(P30, I22, I30, I20)
+    print "round 4\n"
+    delete_multiple_keys(P30, I22, I29, I22)
+    print_multiple_keys(P30, I29, I30, I20)
+    print_multiple_keys(P30, I22, I30, I20)
+    print "done.\n"
 .end
 CODE
 round 1
@@ -394,8 +395,8 @@ done.
 OUTPUT
 
 # Check all values after setting all of them
-pasm_output_is(<<CODE, <<OUTPUT, "stress test: loop(set), loop(check)");
-	new	P0, .Hash
+pasm_output_is( <<CODE, <<OUTPUT, "stress test: loop(set), loop(check)" );
+    new	P0, .Hash
 
         set I0, 200
         set S0, "mikey"
@@ -430,7 +431,7 @@ CODE
 done
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Testing two hash indices with integers at a time");
+pasm_output_is( <<'CODE', <<OUTPUT, "Testing two hash indices with integers at a time" );
       new P0, .Hash
 
       set P0["foo"],37
@@ -466,7 +467,7 @@ ok 3
 ok 4
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Testing two hash indices with numbers at a time");
+pasm_output_is( <<'CODE', <<OUTPUT, "Testing two hash indices with numbers at a time" );
       new P0, .Hash
 
       set P0["foo"],37.100000
@@ -502,7 +503,7 @@ ok 3
 ok 4
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Testing two hash indices with strings at a time");
+pasm_output_is( <<'CODE', <<OUTPUT, "Testing two hash indices with strings at a time" );
       new P0, .Hash
 
       set P0["foo"],"baz"
@@ -538,11 +539,10 @@ ok 3
 ok 4
 OUTPUT
 
-
 # So far, we've only used INTVALs, FLOATVALs and STRINGs as values
 # and/or keys. Now we try PMCs.
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Setting & getting scalar PMCs");
+pasm_output_is( <<'CODE', <<OUTPUT, "Setting & getting scalar PMCs" );
       new P0, .Hash
       new P1, .Integer
       new P2, .Integer
@@ -586,7 +586,7 @@ ok 3
 ok 4
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Setting scalar PMCs & getting scalar values");
+pasm_output_is( <<'CODE', <<OUTPUT, "Setting scalar PMCs & getting scalar values" );
       new P0, .Hash
       new P1, .Integer
 
@@ -623,7 +623,7 @@ ok 2
 ok 3
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Getting values from undefined keys");
+pasm_output_is( <<'CODE', <<OUTPUT, "Getting values from undefined keys" );
       new P2, .Hash
 
       set I0, P2["qwerty"]
@@ -643,8 +643,7 @@ OK2:  print "ok 2\n"
       print "not "
 OK3:  print "ok 3\n"
 
-      typeof S1, P0
-      eq S1, "None", OK4
+      if_null P0, OK4
       print "not "
 OK4:  print "ok 4\n"
       end
@@ -655,7 +654,7 @@ ok 3
 ok 4
 OUTPUT
 
-pasm_output_is(<<CODE, <<OUTPUT, "Setting & getting non-scalar PMCs");
+pasm_output_is( <<CODE, <<OUTPUT, "Setting & getting non-scalar PMCs" );
         new P0,.Hash
         new P1,.ResizablePMCArray
         new P2,.ResizablePMCArray
@@ -670,7 +669,7 @@ CODE
 string
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Testing clone");
+pasm_output_is( <<'CODE', <<OUTPUT, "Testing clone" );
     new P0, .Hash
     set S0, "a"
     set P0[S0], S0
@@ -739,7 +738,7 @@ ok 4
 ok 5
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Compound keys");
+pasm_output_is( <<'CODE', <<OUTPUT, "Compound keys" );
     new P0, .Hash
     new P1, .Hash
     new P2, .ResizablePMCArray
@@ -796,7 +795,7 @@ ok 5
 ok 6
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Getting PMCs from compound keys");
+pasm_output_is( <<'CODE', <<OUTPUT, "Getting PMCs from compound keys" );
     new P0, .Hash
     new P1, .Hash
     new P2, .Integer
@@ -811,7 +810,7 @@ CODE
 12
 OUTPUT
 
-pasm_output_is(<< 'CODE', << 'OUTPUT', "Getting PMCs from string;int compound keys");
+pasm_output_is( << 'CODE', << 'OUTPUT', "Getting PMCs from string;int compound keys" );
     new P0, .Hash
     new P1, .Hash
     new P2, .Integer
@@ -833,7 +832,7 @@ OUTPUT
 
 # A hash is only false if it has size 0
 
-pasm_output_is(<<'CODE', <<OUTPUT, "if (Hash)");
+pasm_output_is( <<'CODE', <<OUTPUT, "if (Hash)" );
       new P0, .Hash
 
       if P0, BAD1
@@ -866,7 +865,7 @@ ok 3
 ok 4
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "unless (Hash)");
+pasm_output_is( <<'CODE', <<OUTPUT, "unless (Hash)" );
       new P0, .Hash
 
       unless P0, OK1
@@ -903,7 +902,7 @@ ok 3
 ok 4
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "defined");
+pasm_output_is( <<'CODE', <<OUTPUT, "defined" );
     new P0, .Hash
     defined I0, P0
     print I0
@@ -933,7 +932,7 @@ CODE
 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "exists");
+pasm_output_is( <<'CODE', <<OUTPUT, "exists" );
     new P0, .Hash
     set P0["a"], 1
     exists I0, P0["a"]
@@ -955,7 +954,7 @@ CODE
 1
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "delete");
+pasm_output_is( <<'CODE', <<OUTPUT, "delete" );
     new P0, .Hash
     set P0["a"], 1
     exists I0, P0["a"]
@@ -971,7 +970,7 @@ CODE
 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Cloning keys");
+pasm_output_is( <<'CODE', <<OUTPUT, "Cloning keys" );
     new P10, .Hash
     new P1, .Key
 
@@ -993,7 +992,7 @@ Food
 Sheep
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "Cloning PMC vals");
+pasm_output_is( <<'CODE', <<OUTPUT, "Cloning PMC vals" );
     new P10, .Hash
     new P1, .Undef
     set P1, "value\n"
@@ -1011,7 +1010,7 @@ CODE
 42value
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "entry types - type_keyed");
+pasm_output_is( <<'CODE', <<OUTPUT, "entry types - type_keyed" );
 .include "pmctypes.pasm"
     new P1, .Hash
 
@@ -1056,7 +1055,7 @@ Float
 String
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "delete and free_list");
+pasm_output_is( <<'CODE', <<OUTPUT, "delete and free_list" );
     set I2, 10
     set I1, 1
     new P0, .SArray
@@ -1096,7 +1095,7 @@ ok 10
 10
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "exists with constant string key");
+pasm_output_is( <<'CODE', <<OUTPUT, "exists with constant string key" );
     new P16, .Hash
     set P16["key1"], "value for key1\n"
     set S16, P16["key1"]
@@ -1119,7 +1118,7 @@ value for key1
 0
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Hash in PIR");
+pir_output_is( << 'CODE', << 'OUTPUT', "Hash in PIR" );
 
 .sub _main
     .local pmc hash1
@@ -1135,7 +1134,7 @@ CODE
 U
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Setting with compound keys");
+pir_output_is( << 'CODE', << 'OUTPUT', "Setting with compound keys" );
 
 .sub _main
     .local pmc outer_hash
@@ -1264,35 +1263,35 @@ changed inner_hash:133
 -135.135000
 OUTPUT
 
-pasm_output_is(<< 'CODE', << 'OUTPUT', "mutating the lookup string");
+pasm_output_is( << 'CODE', << 'OUTPUT', "mutating the lookup string" );
     new P0, .Hash
     set P0["a"], "one"
     set P0["ab"], "two"
     set P0["abc"], "three"
 
-	set S0, "a"
+    set S0, "a"
     set S1, P0[S0]
-	print S1
-	print "\n"
+    print S1
+    print "\n"
 
-	concat S0, "b"
+    concat S0, "b"
     set S1, P0[S0]
-	print S1
-	print "\n"
+    print S1
+    print "\n"
 
-	concat S0, "c"
+    concat S0, "c"
     set S1, P0[S0]
-	print S1
-	print "\n"
+    print S1
+    print "\n"
 
-	end
+    end
 CODE
 one
 two
 three
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -1315,7 +1314,7 @@ CODE
 0
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "iter");
+pir_output_is( << 'CODE', << 'OUTPUT', "iter" );
 
 .sub __main__ :main
     new P0, .Hash
@@ -1340,7 +1339,7 @@ CODE
 a
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "broken delete, thx to azuroth on irc");
+pir_output_is( << 'CODE', << 'OUTPUT', "broken delete, thx to azuroth on irc" );
 .include "iterator.pasm"
 
 .sub main :main
@@ -1399,7 +1398,7 @@ a
 e
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "unicode keys (register) (RT #39249)");
+pir_output_is( << 'CODE', << 'OUTPUT', "unicode keys (register) (RT #39249)" );
 .sub test
   $P1 = new .Hash
   $S99 = unicode:"\u7777"
@@ -1411,7 +1410,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "unicode keys (literal) (RT ##39249)");
+pir_output_is( << 'CODE', << 'OUTPUT', "unicode keys (literal) (RT ##39249)" );
 .sub test
   $P1 = new .Hash
   $P1[unicode:"\u7777"] = "ok"
@@ -1426,9 +1425,9 @@ ok
 ok
 OUTPUT
 
-
-
-
-
-
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

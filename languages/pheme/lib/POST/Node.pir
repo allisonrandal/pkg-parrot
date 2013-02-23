@@ -21,7 +21,7 @@ All POST nodes subclass from this base type.
 .end
 
 
-.sub __init :method
+.sub init :vtable :method
     $P1 = new .Undef
     $P2 = new .Integer
     $P3 = new .ResizablePMCArray
@@ -33,7 +33,7 @@ All POST nodes subclass from this base type.
     setattribute self, 'symbols', $P4
 .end
 
-.sub __get_bool :method
+.sub get_bool :vtable :method
 	.return( 1 )
 .end
 
@@ -209,3 +209,9 @@ loop:
     .yield(id)
     goto loop
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

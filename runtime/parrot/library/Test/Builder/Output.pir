@@ -49,19 +49,19 @@ STDERR by default.
 
 =cut
 
-.sub __init :method
+.sub init_pmc :vtable :method
 	.param pmc args
 
 	.local pmc output
 	.local pmc diag_output
 
 	output = args['output']
-	if output goto CHECK_ERROR_OUTPUT
+	unless null output goto CHECK_ERROR_OUTPUT
 	getstdout output
 
   CHECK_ERROR_OUTPUT:
 	diag_output = args['diag_output']
-	if diag_output goto SET_OUTPUT
+	unless null diag_output goto SET_OUTPUT
 	getstderr diag_output
 
   SET_OUTPUT:
@@ -133,11 +133,11 @@ unescaped newlines.
 
   END_LOOP:
   	push lines, message
+
+	# loop from 0 to index of final element,
+	# so keep i less than num_lines
 	.local int num_lines
 	num_lines = lines
-
-	# loop from 0 to index of final element
-	dec num_lines
 
 	.local int i
 	i = 0
@@ -213,3 +213,9 @@ to the Perl 6 internals mailing list.
 Copyright (C) 2005, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

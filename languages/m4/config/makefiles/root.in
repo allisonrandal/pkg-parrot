@@ -1,16 +1,16 @@
-# $Id: /local/languages/m4/config/makefiles/root.in 12226 2006-04-14T15:02:50.254463Z bernhard  $
+# $Id: /parrotcode/trunk/languages/m4/config/makefiles/root.in 470 2006-12-05T03:30:45.414067Z svm  $
 
 # Makefile for languages/m4
 
 # Setup of some commands
-PARROT         = ..@slash@..@slash@parrot@exe@
+PARROT         = ../../parrot@exe@
 PERL           = @perl@
 RM_RF          = @rm_rf@
 O              = @o@
 
 # Compile commands and flags
 CC             = @cc@
-CFLAGS         = @ccflags@ -I..@slash@..@slash@include
+CFLAGS         = @ccflags@ -I../../include
 CC_SHARED      = @cc_shared@ # e.g. -fpic
 DEBUG          = @cc_debug@
 WARN           = @ccwarn@
@@ -24,7 +24,7 @@ LIBS        = @libs@
 #INVERSE_CONDITIONED_LINE(parrot_exe_def):LIBPARROT      =
 
 # some constants
-M4_EVALUATE_SO = ..@slash@..@slash@runtime@slash@parrot@slash@dynext@slash@m4_evaluate@share_ext@
+M4_EVALUATE_SO = ../../runtime/parrot/dynext/m4_evaluate@share_ext@
 
 default: all
 all: build 

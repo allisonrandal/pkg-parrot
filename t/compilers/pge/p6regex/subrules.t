@@ -1,14 +1,13 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/pge/p6regex/subrules.t 13402 2006-07-20T18:04:44.539601Z pmichaud  $
+# $Id: /parrotcode/local/t/compilers/pge/p6regex/subrules.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib ../../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 8;
 use Parrot::Test::PGE;
-
 
 =head1 NAME
 
@@ -21,49 +20,55 @@ ver. 7, in the B<'Named regexes'> section
 
 =head1 SYNOPSIS
 
-	% prove t/p6regex/subrules.t
+        % prove t/p6regex/subrules.t
 
 =cut
 
-
-p6rule_is  ("   int argc ",
+p6rule_is(
+    "   int argc ",
     [
         [ type    => 'int | double | float | char' ],
         [ ident   => '\w+' ],
         [ _MASTER => ':w<type> <ident>' ],
     ],
-    "simple subrules");
+    "simple subrules"
+);
 
-p6rule_isnt("doggy",
+p6rule_isnt(
+    "doggy",
     [
         [ type    => 'int | double | float | char' ],
         [ ident   => '\w+' ],
         [ _MASTER => ':w<type> <ident>' ],
     ],
-    "simple subrules");
+    "simple subrules"
+);
 
-p6rule_is  ("(565) 325-2935",
+p6rule_is(
+    "(565) 325-2935",
     [
-        [ digits => '\d+' ],
-        [ exch => '\(<digits>\)' ],
+        [ digits  => '\d+' ],
+        [ exch    => '\(<digits>\)' ],
         [ _MASTER => ':w<exch> <digits>-<digits>' ],
     ],
-    "nested subrules");
+    "nested subrules"
+);
 
-p6rule_isnt("0-900-04-41-59",
+p6rule_isnt(
+    "0-900-04-41-59",
     [
-        [ digits => '\d+' ],
-        [ exch => '\(<digits>\)' ],
+        [ digits  => '\d+' ],
+        [ exch    => '\(<digits>\)' ],
         [ _MASTER => ':w<exch> <digits>-<digits>' ],
     ],
-    "nested subrules");
+    "nested subrules"
+);
 
-p6rule_is("ab",
-    [
-        [ alpha => '<[aeiou]>' ],
-        [ _MASTER => '^ <alpha> <PGE::Match::alpha>' ],
-    ],
-    "named and lexical subrules");
+p6rule_is(
+    "ab",
+    [ [ alpha => '<[aeiou]>' ], [ _MASTER => '^ <alpha> <PGE::Match::alpha>' ], ],
+    "named and lexical subrules"
+);
 
 #p6rule_isnt("ba",
 #    [
@@ -72,16 +77,23 @@ p6rule_is("ab",
 #    ],
 #    "named and lexical subrules");
 
-p6rule_isnt("   ab", '^ <ws>: \ ab', "cut on subrules");
+p6rule_isnt( "   ab", '^ <ws>: \ ab', "cut on subrules" );
 
-p6rule_isnt('whence',
-    [
-        [ subrule => 'when <commit> ever' ],
-        [ _MASTER => '<subrule> | whence' ],
-    ],
-    "<commit> in nested subrule");
+p6rule_isnt(
+    'whence',
+    [ [ subrule => 'when <commit> ever' ], [ _MASTER => '<subrule> | whence' ], ],
+    "<commit> in nested subrule"
+);
 
+p6rule_is(
+    '"abcd"',
+    [ [ char => '<-[\\"]>' ], [ _MASTER => '" <char>* "' ], ],
+    "negated charclass in subrule"
+);
 
-
-# remember to change the number of tests :-)
-BEGIN { plan tests => 7; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

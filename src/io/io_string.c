@@ -1,6 +1,6 @@
 /*
 Copyright (c) 2006, The Perl Foundation.
-$Id: /local/src/io/io_string.c 14038 2006-08-09T01:27:02.446673Z chip  $
+$Id: /parrotcode/trunk/src/io/io_string.c 3371 2007-05-03T07:57:59.749245Z chromatic  $
 
 =head1 NAME
 
@@ -43,35 +43,33 @@ PIO_string_register_layer(void)
 }
 
 static size_t
-PIO_string_read(theINTERP, ParrotIOLayer *l, ParrotIO *io, STRING **buf)
+PIO_string_read(Interp *interp, ParrotIOLayer *l, ParrotIO *io, STRING **buf)
 {
     UNUSED(io);
-    UNUSED(interpreter);
+    UNUSED(interp);
 
     if (l->self == 0)
         return 0;
 
-    *buf    = l->self;
+    *buf    = (STRING *)l->self;
     l->self = 0;
 
     return (*buf)->strlen;
 }
 
 static size_t
-PIO_string_write(theINTERP, ParrotIOLayer *l, ParrotIO *io, STRING *s)
+PIO_string_write(Interp *interp, ParrotIOLayer *l, ParrotIO *io, STRING *s)
 {
-    STRING * old_string;
-
+    STRING *old_string = (STRING *)l->self;
     UNUSED(io);
-    old_string = l->self;
 
     if (old_string == 0) {
         l->self = s;
         return s->strlen;
     }
 
-    l->self = string_append(interpreter, old_string, s, 0);
-    return string_length(interpreter, l->self);
+    l->self = string_append(interp, old_string, s);
+    return string_length(interp, (STRING *)l->self);
 }
 
 static const ParrotIOLayerAPI pio_string_layer_api = {
@@ -128,12 +126,10 @@ Initially written by chromatic.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

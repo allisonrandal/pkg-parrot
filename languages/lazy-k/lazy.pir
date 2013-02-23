@@ -1,4 +1,4 @@
-# $Id: /local/languages/lazy-k/lazy.pir 11641 2006-02-18T12:54:27.528543Z bernhard  $
+# $Id: /parrotcode/trunk/languages/lazy-k/lazy.pir 3059 2007-04-09T22:00:23.617831Z paultcochrane  $
 
 =head1 DESCRIPTION
 
@@ -529,4 +529,9 @@ not_num:
 .end
 
 .include "library/dumper.pir"
-# vim: ft=imc sw=4:
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

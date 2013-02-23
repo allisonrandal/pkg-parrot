@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/object-mro.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/object-mro.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/object-mro.t - Object Methods Resolution Order
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/object-mro.t
+    % prove t/pmc/object-mro.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ These are tests for the C3 MRO order
 
 =cut
 
-pir_output_is(<<'CODE', <<'OUTPUT', "print mro diamond");
+pir_output_is( <<'CODE', <<'OUTPUT', "print mro diamond" );
 #
 # A   B A   E
 #  \ /   \ /
@@ -50,16 +50,18 @@ loop:
     unless it goto ex
     p = shift it
     $S0 = classname p
-    print_item $S0
+    print $S0
+    print ' '
     goto loop
 ex:
+    print 'G'
     print_newline
 .end
 CODE
-F C D A B E
+F C D A B E G
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "print mro 1");
+pir_output_is( <<'CODE', <<'OUTPUT', "print mro 1" );
 #
 # example take from: http://www.python.org/2.3/mro.html
 #
@@ -118,16 +120,18 @@ loop:
     unless it goto ex
     p = shift it
     $S0 = classname p
-    print_item $S0
+    print $S0
+    print ' '
     goto loop
 ex:
+    print 'G'
     print_newline
 .end
 CODE
-A B C D E F O
+A B C D E F O G
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "print mro 2");
+pir_output_is( <<'CODE', <<'OUTPUT', "print mro 2" );
 #
 # example take from: http://www.python.org/2.3/mro.html
 #
@@ -187,16 +191,18 @@ loop:
     unless it goto ex
     p = shift it
     $S0 = classname p
-    print_item $S0
+    print $S0
+    print ' '
     goto loop
 ex:
+    print 'G'
     print_newline
 .end
 CODE
-A B E C D F O
+A B E C D F O G
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "print mro 3");
+pir_output_is( <<'CODE', <<'OUTPUT', "print mro 3" );
 #
 #    C
 #   / \
@@ -223,18 +229,20 @@ loop:
     unless it goto ex
     p = shift it
     $S0 = classname p
-    print_item $S0
+    print $S0
+    print ' '
     goto loop
 ex:
+    print 'G'
     print_newline
 .end
 CODE
-D A B C
+D A B C G
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "print mro 4");
+pir_output_is( <<'CODE', <<'OUTPUT', "print mro 4" );
 #
-#          Object
+#        TestObject
 #            ^
 #            |
 #         LifeForm
@@ -257,11 +265,11 @@ pir_output_is(<<'CODE', <<'OUTPUT', "print mro 4");
 #  define class <vulcan> (<intelligent>, <humanoid>) end class;
 #
 .sub main :main
-    .local pmc Object, LifeForm, Sentient, BiPedal, Intelligent, Humanoid, Vulcan
+    .local pmc TestObject, LifeForm, Sentient, BiPedal, Intelligent, Humanoid, Vulcan
 
-    newclass Object, "Object"
+    newclass TestObject, "TestObject"
 
-    subclass LifeForm, Object, "LifeForm"
+    subclass LifeForm, TestObject, "LifeForm"
 
     subclass Sentient, LifeForm, "Sentient"
     subclass Intelligent, Sentient, "Intelligent"
@@ -281,18 +289,20 @@ loop:
     unless it goto ex
     p = shift it
     $S0 = classname p
-    print_item $S0
+    print $S0
+    print ' '
     goto loop
 ex:
+    print 'R'
     print_newline
 .end
 CODE
-Vulcan Intelligent Sentient Humanoid BiPedal LifeForm Object
+Vulcan Intelligent Sentient Humanoid BiPedal LifeForm TestObject R
 OUTPUT
 
 # ... now some tests which fail to compose the class
 
-pir_output_like(<<'CODE', <<'OUTPUT', "mro error 1");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "mro error 1" );
 #
 # example take from: http://www.python.org/2.3/mro.html
 #
@@ -326,3 +336,10 @@ pir_output_like(<<'CODE', <<'OUTPUT', "mro error 1");
 CODE
 /inconsisten class hierarchy/
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/OpTrans/CSwitch.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/trunk/lib/Parrot/OpTrans/CSwitch.pm 3388 2007-05-05T19:03:08.093329Z chromatic  $
 
 =head1 NAME
 
@@ -25,12 +25,11 @@ use warnings;
 use Parrot::OpTrans;
 use base qw( Parrot::OpTrans::CPrederef );
 
-sub new
-{
-	my $class = shift;
-	my $self  = $class->SUPER::new( @_ );
-	$self->{split_count} ||= 0;
-	return $self;
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
+    $self->{split_count} ||= 0;
+    return $self;
 }
 
 =item C<core_type()>
@@ -39,8 +38,7 @@ The core type is C<PARROT_SWITCH_CORE>.
 
 =cut
 
-sub core_type
-{
+sub core_type {
     return 'PARROT_SWITCH_CORE';
 }
 
@@ -50,8 +48,7 @@ The prefix is C<'switch_'>.
 
 =cut
 
-sub core_prefix
-{
+sub core_prefix {
     return "switch_";
 }
 
@@ -61,8 +58,7 @@ The suffix is C<'_switch'>.
 
 =cut
 
-sub suffix
-{
+sub suffix {
     return "_switch";
 }
 
@@ -72,18 +68,15 @@ Returns the C C<#define> macros required by the ops.
 
 =cut
 
-sub defines
-{
-    return <<END;
-#define REL_PC ((size_t)((opcode_t*)cur_opcode - (opcode_t*)interpreter->code->prederef.code))
-#define CUR_OPCODE ((opcode_t*)cur_opcode + CONTEXT(interpreter->ctx)->pred_offset)
-
+sub defines {
+    my ( $self, $pred_def );
+    $self     = shift;
+    $pred_def = $self->SUPER::defines();
+    my $type = __PACKAGE__;
+    return $pred_def . <<END;
+/* defines - $0 -> $type */
 #  define opcode_to_prederef(i, op)   (op ? \\
      (void**) (op   - CONTEXT(i->ctx)->pred_offset) : NULL)
-
-
-#define OP_AS_OFFS(o) (_reg_base + ((opcode_t*)cur_opcode)[o])
-
 /*
  * if we are using CHECK_EVENTS elsewhere this macro should (again)
  * be in includes/parrot/event.h
@@ -93,8 +86,8 @@ sub defines
 
 #undef  CHECK_EVENTS
 #define CHECK_EVENTS(i, n)   \\
-	interpreter->task_queue->head ?  \\
-		Parrot_do_check_events(i, n) : n
+        interp->task_queue->head ?  \\
+                Parrot_do_check_events(i, n) : n
 END
 }
 
@@ -105,22 +98,19 @@ relevant C code.
 
 =cut
 
-sub goto_address
-{
-    my ($self, $addr) = @_;
+sub goto_address {
+    my ( $self, $addr ) = @_;
 
     #print STDERR "pbcc: map_ret_abs($addr)\n";
 
-    if ($addr eq '0')
-    {
-  	    return "return (0);"
+    if ( $addr eq '0' ) {
+        return "return (0);";
     }
-    else
-    {
-  	    return <<EOC;
-	    {
-	       cur_opcode = (opcode_t *) opcode_to_prederef(interpreter, $addr);
-	       goto SWITCH_RELOAD;
+    else {
+        return <<EOC;
+            {
+               cur_opcode = opcode_to_prederef(interp, $addr);
+               goto SWITCH_RELOAD;
             }
 EOC
     }
@@ -133,9 +123,8 @@ relevant C code.
 
 =cut
 
-sub goto_offset
-{
-    my ($self, $offset) = @_;
+sub goto_offset {
+    my ( $self, $offset ) = @_;
     return "{ cur_opcode += $offset; goto SWITCH_AGAIN; }";
 }
 
@@ -146,27 +135,11 @@ code.
 
 =cut
 
-sub goto_pop
-{
+sub goto_pop {
     my ($self) = @_;
-    return "{ opcode_t *dest = (opcode_t*)pop_dest(interpreter);
-              cur_opcode = (opcode_t*)opcode_to_prederef(interpreter, dest);
-	      goto SWITCH_AGAIN; }";
-}
-
-=item C<run_core_func_decl($core)>
-
-Returns the C code for the run core function declaration.
-
-=cut
-
-sub run_core_func_decl
-{
-    my ($self, $core) = @_;
-
-    return "opcode_t * " .
-        $self->core_prefix .
-        "$core(opcode_t *cur_op, Parrot_Interp interpreter)";
+    return "{ opcode_t *dest = (opcode_t*)pop_dest(interp);
+              cur_opcode = opcode_to_prederef(interp, dest);
+              goto SWITCH_AGAIN; }";
 }
 
 =item C<run_core_func_start()>
@@ -175,25 +148,26 @@ Returns the C code prior to the run core function.
 
 =cut
 
-sub run_core_func_start
-{
+sub run_core_func_start {
+    my $type = __PACKAGE__;
     return <<END_C;
+/* run_core_func_start - $0 -> $type */
 #if defined(__GNUC__) && defined(I386) && defined(PARROT_SWITCH_REGS)
-    register opcode_t *cur_opcode asm ("esi") = cur_op;
+    register void **   cur_opcode asm ("esi") = cur_op;
     register char *   _reg_base   asm ("edi");
 #else
-    opcode_t *cur_opcode = cur_op;
+    void ** cur_opcode = cur_op;
     char * _reg_base;
 #endif
 
 SWITCH_RELOAD:
-    _reg_base = (char*)interpreter->ctx.bp.regs_i;
+    _reg_base = (char*)interp->ctx.bp.regs_i;
     do {
 SWITCH_AGAIN:
-    cur_opcode = CHECK_EVENTS(interpreter, cur_opcode);
+    cur_opcode = CHECK_EVENTS(interp, *cur_opcode);
     if (!cur_opcode)
         break;
-    switch (*cur_opcode) {
+    switch (*(opcode_t*)cur_opcode) {
 END_C
 }
 
@@ -203,14 +177,13 @@ If defined return code to split e.g. a switch.
 
 =cut
 
-sub run_core_split
-{
+sub run_core_split {
     my ($self) = @_;
     $self->{split_count}++;
 
     return <<END_C;
     default:
-    switch (*cur_opcode) {
+    switch (*(opcode_t*)cur_opcode) {
 END_C
 }
 
@@ -220,26 +193,26 @@ Returns the C code following the run core function.
 
 =cut
 
-sub run_core_finish
-{
-    my ($self, $base) = @_;
+sub run_core_finish {
+    my ( $self, $base ) = @_;
     my $bs = $base . $self->suffix . '_';
-    my $c = <<END_C;
-	default:
-	    if (*cur_opcode >= 0 && *cur_opcode < (opcode_t)${bs}op_lib.op_count) {
-		*cur_opcode = CORE_OPS_wrapper__;
-		continue;
-	    }
-	    internal_exception(1, "illegal opcode in switch core\\n");
-	    break;
-	} /* switch */
+    my $c  = <<END_C;
+        default:
+            if (*(opcode_t*)cur_opcode >= 0 &&
+                *(opcode_t*)cur_opcode < (opcode_t)${bs}op_lib.op_count) {
+                *(opcode_t*)cur_opcode = CORE_OPS_wrapper__;
+                continue;
+            }
+            internal_exception(1, "illegal opcode in switch core\\n");
+            break;
+        } /* switch */
 END_C
-    for (my $i = 0; $i < $self->{split_count}; $i++) {
-	$c .= <<END_C;
+    for ( my $i = 0 ; $i < $self->{split_count} ; $i++ ) {
+        $c .= <<END_C;
     } /* switch $i */
 END_C
     }
-	$c .= <<END_C;
+    $c .= <<END_C;
     } while (1);
     return NULL;
 }
@@ -273,3 +246,10 @@ END_C
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

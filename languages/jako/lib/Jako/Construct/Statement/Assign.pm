@@ -5,11 +5,11 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Statement/Assign.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Statement/Assign.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Statement::Assign;
 
@@ -17,73 +17,77 @@ use Carp;
 
 use base qw(Jako::Construct::Statement);
 
-sub new
-{
-  my $class = shift;
-  my ($block, $left, $right) = @_;
+sub new {
+    my $class = shift;
+    my ( $block, $left, $right ) = @_;
 
-  confess("Block (" . ref($block) . ") not!") unless UNIVERSAL::isa($block, 'Jako::Construct::Block');
-  confess("Left (" . ref($left) . ") is not Value") unless UNIVERSAL::isa($left, 'Jako::Construct::Expression::Value');
-  confess("Right (" . ref($right) . ") is not Value") unless UNIVERSAL::isa($right, 'Jako::Construct::Expression::Value');
+    confess( "Block (" . ref($block) . ") not!" )
+        unless UNIVERSAL::isa( $block, 'Jako::Construct::Block' );
+    confess( "Left (" . ref($left) . ") is not Value" )
+        unless UNIVERSAL::isa( $left, 'Jako::Construct::Expression::Value' );
+    confess( "Right (" . ref($right) . ") is not Value" )
+        unless UNIVERSAL::isa( $right, 'Jako::Construct::Expression::Value' );
 
-  my $self = bless {
-    BLOCK => $block,
-    LEFT  => $left,
-    RIGHT => $right
-  }, $class;
+    my $self = bless {
+        BLOCK => $block,
+        LEFT  => $left,
+        RIGHT => $right
+    }, $class;
 
-  $block->push_content($self);
+    $block->push_content($self);
 
-  return $self;
+    return $self;
 }
 
-sub left  { return shift->{LEFT};  }
+sub left  { return shift->{LEFT}; }
 sub right { return shift->{RIGHT}; }
-
 
 #
 # compile()
 #
 
-sub compile
-{
-  my $self = shift;
-  my ($compiler) = @_;
+sub compile {
+    my $self = shift;
+    my ($compiler) = @_;
 
-  my $left  = $self->left->value;
-  my $right = $self->right->compile($compiler);
+    my $left  = $self->left->value;
+    my $right = $self->right->compile($compiler);
 
-  if ($self->block->scope_of_ident($left) eq 'global') {
-    my $type = $self->block->type_of_ident($left);
-    my $pmc_type = $type->imcc_pmc;
-    my $temp_pmc = $compiler->temp_pmc();
+    if ( $self->block->scope_of_ident($left) eq 'global' ) {
+        my $type     = $self->block->type_of_ident($left);
+        my $pmc_type = $type->imcc_pmc;
+        my $temp_pmc = $compiler->temp_pmc();
 
-    $compiler->emit("  $temp_pmc = new $pmc_type");
-    $compiler->emit("  $temp_pmc = $right");
-    $compiler->emit("  global \"$left\" = $temp_pmc");
-  }
-  else {
-    $compiler->emit("  $left = $right");
-  }
+        $compiler->emit("  $temp_pmc = new $pmc_type");
+        $compiler->emit("  $temp_pmc = $right");
+        $compiler->emit("  global \"$left\" = $temp_pmc");
+    }
+    else {
+        $compiler->emit("  $left = $right");
+    }
 
-  return 1;
+    return 1;
 }
-
 
 #
 # sax()
 #
 
-sub sax
-{
-  my $self = shift;
-  my ($handler) = @_;
+sub sax {
+    my $self = shift;
+    my ($handler) = @_;
 
-  $handler->start_element({ Name => 'assign' });
-  $self->left->sax($handler);
-  $self->right->sax($handler);
-  $handler->end_element({ Name => 'assign' });
+    $handler->start_element( { Name => 'assign' } );
+    $self->left->sax($handler);
+    $self->right->sax($handler);
+    $handler->end_element( { Name => 'assign' } );
 }
 
-
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

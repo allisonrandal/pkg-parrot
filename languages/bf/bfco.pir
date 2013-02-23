@@ -1,4 +1,4 @@
-# $Id: /local/languages/bf/bfco.pir 12959 2006-06-17T10:29:48.512439Z bernhard  $
+# $Id: /parrotcode/trunk/languages/bf/bfco.pir 3045 2007-04-09T20:26:49.634143Z paultcochrane  $
 #
 # An Optimizing Brainfuck compiler
 # By Leo based on bfc.imc by Leon
@@ -276,3 +276,9 @@ debug:
   concat code, "\n"
   ret
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

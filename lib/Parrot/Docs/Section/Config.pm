@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Config.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Config.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Section::Config - Configuration documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Section::Config;
+        use Parrot::Docs::Section::Config;
 
 =head1 DESCRIPTION
 
@@ -33,29 +33,26 @@ contents of C<@Parrot::Configure::steps>.
 
 =cut
 
-sub config_groups
-{
+sub config_groups {
     my $self = shift;
     my $dist = Parrot::Distribution->new;
-    
+
     my @groups = ();
     my %titles = (
-        'init' => 'Initialization Steps',
+        'init'  => 'Initialization Steps',
         'inter' => 'User Dialogue Steps',
-        'auto' => 'System Test Steps',
-        'gen' => 'File Creation Steps',
+        'auto'  => 'System Test Steps',
+        'gen'   => 'File Creation Steps',
     );
-    
-    foreach my $group (qw(init inter auto gen))
-    {
-        my $dir = $dist->existing_directory_with_name('config/' . $group);
-        my @files = $dir->files_with_suffix('pm', 1);    
+
+    foreach my $group (qw(init inter auto gen)) {
+        my $dir = $dist->existing_directory_with_name( 'config/' . $group );
+        my @files = $dir->files_with_suffix( 'pm', 1 );
         push @groups,
-            $self->new_group(
-                $titles{$group}, '',
-                map {$self->new_item('', $dist->relative_path($_))} @files);
+            $self->new_group( $titles{$group}, '',
+            map { $self->new_item( '', $dist->relative_path($_) ) } @files );
     }
-    
+
     return @groups;
 }
 
@@ -65,26 +62,29 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'Configuration', 'config.html', 'Parrot is configured by running
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new(
+        'Configuration', 'config.html', 'Parrot is configured by running
 the <i>Configure.pl</i> script. This is essentially just a wrapper around
 <code>Parrot::Configure</code>. The steps are listed below in the order in
 which they are performed.',
-		$self->new_item('', 'Configure.pl'),
-		$self->config_groups,
-        $self->new_group('Documentation', '',
-		    $self->new_item('How to add new configuration steps.', 
-		        'docs/configuration.pod')
-		),
-		$self->new_group('Library', '',
-		    $self->new_item('PASM/IMC access to Parrot configuration data.', 
-		        'runtime/parrot/library/config.pir')
-		),
-	);
+        $self->new_item( '', 'Configure.pl' ),
+        $self->config_groups,
+        $self->new_group(
+            'Documentation', '',
+            $self->new_item( 'How to add new configuration steps.', 'docs/configuration.pod' )
+        ),
+        $self->new_group(
+            'Library',
+            '',
+            $self->new_item(
+                'PASM/IMC access to Parrot configuration data.',
+                'runtime/parrot/library/config.pir'
+            )
+        ),
+    );
 }
 
 =back
@@ -92,3 +92,10 @@ which they are performed.',
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

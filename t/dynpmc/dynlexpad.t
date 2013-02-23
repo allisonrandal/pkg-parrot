@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/dynpmc/dynlexpad.t 13274 2006-07-13T00:32:07.017597Z audreyt  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/dynpmc/dynlexpad.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
@@ -9,14 +9,13 @@ use Test::More;
 use Parrot::Test tests => 6;
 use Parrot::Config;
 
-
 =head1 NAME
 
 t/dynpmc/dynlexpad.t - test the DynLexPad PMC
 
 =head1 SYNOPSIS
 
-	% prove t/dynpmc/dynlexpad.t
+        % prove t/dynpmc/dynlexpad.t
 
 =head1 DESCRIPTION
 
@@ -24,8 +23,7 @@ Tests the C<DynLexPad> PMC.
 
 =cut
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "loadlib");
+pir_output_is( << 'CODE', << 'OUTPUT', "loadlib" );
 .sub main :main
     .local pmc lib
     lib = loadlib "dynlexpad"
@@ -52,7 +50,7 @@ my $loadlib = <<'EOC';
 
 EOC
 
-pir_output_is($loadlib . << 'CODE', << 'OUTPUT', "store_lex");
+pir_output_is( $loadlib . << 'CODE', << 'OUTPUT', "store_lex" );
 # see loadlib
 .sub 'test' :main
     foo()
@@ -74,7 +72,7 @@ ok 2
 13013
 OUTPUT
 
-pir_output_is($loadlib . << 'CODE', << 'OUTPUT', "check :outer");
+pir_output_is( $loadlib . << 'CODE', << 'OUTPUT', "check :outer" );
 .sub 'test' :main
     foo()
 .end
@@ -104,7 +102,7 @@ CODE
 13013
 OUTPUT
 
-pir_output_is($loadlib . << 'CODE', << 'OUTPUT', "tcl-ish upvar");
+pir_output_is( $loadlib . << 'CODE', << 'OUTPUT', "tcl-ish upvar" );
 .sub 'test' :main
     foo()
 .end
@@ -149,7 +147,7 @@ CODE
 55
 OUTPUT
 
-pir_output_is($loadlib . << 'CODE', << 'OUTPUT', "check that dynlexpad honors hll");
+pir_output_is( $loadlib . << 'CODE', << 'OUTPUT', "check that dynlexpad honors hll" );
 .sub 'test' :main
     foo()
     bar()
@@ -176,7 +174,7 @@ DynLexPad
 LexPad
 OUTPUT
 
-pir_output_is($loadlib . << 'CODE', << 'OUTPUT', "dynlexpad - lexpad interop");
+pir_output_is( $loadlib . << 'CODE', << 'OUTPUT', "dynlexpad - lexpad interop" );
 
 .sub 'test' :main
     foo()
@@ -203,3 +201,9 @@ ok 2
 ok 3
 OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

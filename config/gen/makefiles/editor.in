@@ -1,4 +1,4 @@
-# $Id: /local/config/gen/makefiles/editor.in 13676 2006-07-29T19:32:10.957437Z chip  $
+# $Id: /parrotcode/trunk/config/gen/makefiles/editor.in 470 2006-12-05T03:30:45.414067Z svm  $
 
 OPS_DIR     = ../src/ops
 VIM_DIR     = $(HOME)/.vim
@@ -50,7 +50,7 @@ vim-install: pir.vim
 imc.kate: imcc.xml
 
 imcc.xml:
-	$(PERL) kate_syntax.pl '..@slash@' > imcc.xml
+	$(PERL) kate_syntax.pl '../' > imcc.xml
 
 vim-uninstall:
 	$(RM_F) "$(VIM_SYN_DIR)/pir.vim"

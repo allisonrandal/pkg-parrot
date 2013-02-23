@@ -1,13 +1,12 @@
 /* TclArray.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/languages/tcl/src/pmc/tclarray.pmc 12884 2006-06-05T13:29:13.115985Z audreyt  $
+ *     $Id: /parrotcode/trunk/languages/tcl/src/pmc/tclarray.pmc 2695 2007-03-31T14:41:44.263652Z paultcochrane  $
  *  Overview:
  *     These are the vtable functions for the TclArray base class
  *  Data Structure and Algorithms:
  *  History:
  *  Notes:
- *     Please remove unneeded entries.
  *  References:
 
 =head1 NAME
@@ -30,28 +29,15 @@ This is the Array PMC for the Tcl implementation.
 
 static INTVAL dynpmc_TclString;
 
-/*
-
-=item C<static STRING* make_hash_key(Interp *interpreter, PMC *key)>
-
-Returns a Parrot string for C<*key>.
-
-=cut
-
-*/
-
-static STRING* make_hash_key(Interp* interpreter, PMC * key)
+pmclass TclArray
+    need_ext
+    dynpmc
+    extends Hash
+    does    hash
+    group   tcl_group
+    hll     Tcl
+    maps    Hash
 {
-    if (key == NULL) {
-        internal_exception(OUT_OF_BOUNDS,
-        "Cannot use NULL key for TclArray!");
-        return NULL;
-    }
-    return key_string(interpreter, key);
-}
-
-
-pmclass TclArray extends Hash need_ext does hash dynpmc group tcl_group hll Tcl maps Hash {
 
 /*
 
@@ -63,7 +49,7 @@ Initializes variables needed by the class.
 
 */
 
-    void class_init () {
+    void class_init() {
         if (pass) {
             dynpmc_TclString = pmc_type(INTERP,
                 string_from_const_cstring(INTERP, "TclString", 0));
@@ -72,39 +58,41 @@ Initializes variables needed by the class.
 
 /*
 
-=item C<PMC *get_pmc_keyed(PMC *key)>
+=item C<void assign_pmc(PMC *other)>
 
-Returns the PMC value for the element at C<*key>.
-
-XXX - Why is Hash's implementation insufficient here??
+Copy the contents of other to self.
 
 =cut
 
 */
 
+    void assign_pmc(PMC *other) {
+        STRING *hash   = string_from_const_cstring(INTERP, "hash", 4);
+        STRING *undef  = string_from_const_cstring(INTERP, "Undef", 5);
 
-    PMC* get_pmc_keyed (PMC* key) {
-        STRING *s;
-        PMC* nextkey, *result;
-        Hash *hash = PMC_struct_val(SELF);
-        HashBucket *b;
-        switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
-            case KEY_hash_iterator_FLAGS:
-                s = parrot_hash_get_idx(INTERP, hash, key);
-                result = pmc_new(INTERP, dynpmc_TclString);
-                VTABLE_set_string_native(INTERP, result, s);
-                return result;
+        if (VTABLE_does(INTERP, other, hash))
+        {
+            PMC *iter = pmc_new_init(INTERP, enum_class_Iterator, other);
+
+            pmc_reuse(INTERP, SELF, SELF->vtable->base_type, 0);
+            while (VTABLE_get_bool(INTERP, iter))
+            {
+                STRING *key   = VTABLE_shift_string(INTERP, iter);
+                PMC    *value = VTABLE_get_pmc_keyed_str(INTERP, other, key);
+                VTABLE_set_pmc_keyed_str(INTERP, SELF, key, value);
+            }
         }
-        s = make_hash_key(INTERP, key);
-        b = parrot_hash_get_bucket(INTERP, hash, s);
-        if (b == NULL) {
-            return NULL;
+        else if (VTABLE_isa(INTERP, other, undef))
+        {
+            pmc_reuse(INTERP, SELF, other->vtable->base_type, 0);
         }
-        nextkey = key_next(INTERP, key);
-        if (!nextkey)
-            return b->value;
-        return VTABLE_get_pmc_keyed(INTERP, (PMC*)b->value, nextkey);
+        else
+        {
+            real_exception(INTERP, NULL, E_TypeError,
+                           "unable to assign self to this type");
+        }
     }
+
 }
 
 /*
@@ -117,10 +105,7 @@ XXX - Why is Hash's implementation insufficient here??
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

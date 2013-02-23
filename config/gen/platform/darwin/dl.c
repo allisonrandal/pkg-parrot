@@ -23,16 +23,16 @@ scan_paths(const char *filename, const char *libpath)
     char *path_list_start;
     const char *path;
 
-    if(!libpath)
+    if (!libpath)
         return NULL;
 
     path_list_start = path_list = strdup(libpath);
 
     path = strsep(&path_list, ":");
 
-    while(path) {
+    while (path) {
         snprintf(buf, PATH_MAX, "%s/%s", path, filename);
-        if(stat(buf, &st) == 0) {
+        if (stat(buf, &st) == 0) {
             free(path_list_start);
             return buf;
         }
@@ -59,16 +59,16 @@ get_lib(const char *filename)
     char fallback[PATH_MAX] = "/usr/local/lib:/lib:/usr/lib";
 
     rv = scan_paths(filename, libpath);
-    if(rv)
+    if (rv)
       return rv;
 
     libpath = getenv("DYLD_FALLBACK_LIBRARY_PATH");
     rv = scan_paths(filename, libpath);
-    if(rv)
+    if (rv)
         return rv;
 
     rv = scan_paths(filename, fallback);
-    if(rv)
+    if (rv)
         return rv;
 
     return filename;
@@ -109,26 +109,26 @@ Parrot_dlopen(const char *filename)
             return (void *)header;
 
         /*
-	 * that didn't work either; go ahead and report the orignal error
-	 */
+         * that didn't work either; go ahead and report the orignal error
+         */
 
-	switch(dyld_result) {
+        switch (dyld_result) {
         /* XXX for now, ignore all the known errors */
-	case NSObjectFileImageFailure:
-	case NSObjectFileImageInappropriateFile:
-	case NSObjectFileImageArch:
-	case NSObjectFileImageFormat:
-	case NSObjectFileImageAccess:
-	    break;
+        case NSObjectFileImageFailure:
+        case NSObjectFileImageInappropriateFile:
+        case NSObjectFileImageArch:
+        case NSObjectFileImageFormat:
+        case NSObjectFileImageAccess:
+            break;
 
-	default:
-	    fprintf(stderr,
-		    "open result was unknown (%i) for fullpath [%s]\n",
-		    dyld_result, fullpath);
-	    break;
-	}
+        default:
+            fprintf(stderr,
+                    "open result was unknown (%i) for fullpath [%s]\n",
+                    dyld_result, fullpath);
+            break;
+        }
 
-	return NULL;
+        return NULL;
     }
 }
 
@@ -216,4 +216,12 @@ Parrot_dlclose(void *handle)
         return 0;
     }
 }
+
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
 

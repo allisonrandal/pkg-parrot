@@ -1,4 +1,4 @@
-# $Id: /local/languages/tcl/src/grammar/expr/operators.pir 13784 2006-08-01T17:54:04.760248Z chip  $
+# $Id: /parrotcode/trunk/languages/tcl/src/grammar/expr/operators.pir 3023 2007-04-09T07:41:20.576910Z paultcochrane  $
 
 =head1 NAME
 
@@ -25,13 +25,16 @@ src/grammar/expr/operators.pir - [expr] operator definitions.
     .return(a)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"+\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"+\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"+\""
 .end
 
 .sub 'prefix:+' :multi(pmc)
     .param pmc a
-    $N0 = a
-    .return ($N0)
+    .return(a)
 .end
 
 # unary minus
@@ -50,14 +53,19 @@ is_string:
     .return($N0)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"-\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"-\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"-\""
 .end
 
 .sub 'prefix:-' :multi(pmc)
     .param pmc a
-    $N0 = a
-    $N0 = neg $N0
-    .return ($N0)
+    .local pmc b
+    b = clone a
+    b = -b
+    .return(b)
 .end
 
 # bit-wise NOT
@@ -71,12 +79,26 @@ is_string:
       a = __number(a)
     clear_eh
 
+    $I0 = typeof a
+    if $I0 == .TclFloat goto cant_use_float
+
     $I0 = a
     $I0 = bnot $I0
     .return($I0)
 
+cant_use_float:
+    tcl_error "can't use floating-point value as operand of \"~\""
+
 is_string:
-    .throw("can't use non-numeric string as operand of \"~\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"~\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"~\""
+.end
+
+.sub 'prefix:~' :multi(Float)
+    tcl_error "can't use floating-point value as operand of \"~\""
 .end
 
 .sub 'prefix:~' :multi(pmc)
@@ -89,11 +111,11 @@ is_string:
 .sub 'prefix:!' :multi(String)
     .param pmc a
 
-    .local pmc __number
-    __number = get_root_global ['_tcl'], '__number'
+    .local pmc __boolean
+    __boolean = get_root_global ['_tcl'], '__boolean'
 
     push_eh is_string
-      a = __number(a)
+      a = __boolean(a)
     clear_eh
 
     $I0 = a
@@ -101,7 +123,11 @@ is_string:
     .return($I0)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"!\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"!\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"!\""
 .end
 
 .sub 'prefix:!' :multi(pmc)
@@ -131,7 +157,44 @@ is_string:
     .return($P0)
 .end
 
-.sub 'infix:*'  
+.sub 'infix:**'
+    .param pmc a
+    .param pmc b
+
+    .local pmc __number
+    __number = get_root_global ['_tcl'], '__number'
+
+    push_eh is_string
+      a = __number(a)
+      b = __number(b)
+    clear_eh
+   
+    if a == 0 goto zero
+
+    $P0 = new 'TclFloat'
+    $P0 = pow a, b
+    .return ($P0)
+
+is_string:
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"**\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"**\""
+
+zero:
+    if b < 0 goto zero_with_neg
+    if b == 0 goto zero_with_zero
+    .return(0)
+
+zero_with_zero:
+    .return(1)
+zero_with_neg:
+     tcl_error 'exponentiation of zero by negative power'
+.end
+
+.sub 'infix:*'
     .param pmc a
     .param pmc b
 
@@ -147,7 +210,12 @@ is_string:
     .return ($P0)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"*\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"*\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"*\""
 .end
 
 .sub 'infix:/'
@@ -160,13 +228,29 @@ is_string:
     push_eh is_string
       a = __number(a)
       b = __number(b)
-      $P0 = new 'TclFloat'
-      $P0 = div a, b
     clear_eh
+
+    if b == 0 goto divide_by_zero
+
+    $P0 = new 'TclFloat'
+    $P0 = div a, b
     .return($P0)
 
+divide_by_zero:
+    $P0 = new .TclList
+    $P0[0] = 'ARITH'
+    $P0[1] = 'DIVZERO'
+    $S0 = 'divide by zero'
+    $P0[2] = $S0
+    tcl_error $S0,  $P0
+
 is_string:
-    .throw("can't use non-numeric string as operand of \"/\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"/\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"/\""
 .end
 
 .sub 'infix:%'
@@ -191,10 +275,15 @@ is_string:
     .return($P0)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"%\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"%\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"%\""
 
 is_float:
-    .throw("can't use floating-point value as operand of \"%\"")
+    tcl_error "can't use floating-point value as operand of \"%\""
 .end
 
 .sub 'infix:+'
@@ -213,7 +302,12 @@ is_float:
     .return($P0)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"+\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"+\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"+\""
 .end
 
 .sub 'infix:-'
@@ -232,16 +326,21 @@ is_string:
     .return($P0)
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"-\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"-\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"-\""
 .end
 
 # left shift
 .sub 'infix:<<'     :multi(Float, pmc)
-  .throw ("can't use floating-point value as operand of \"<<\"")
+  tcl_error "can't use floating-point value as operand of \"<<\""
 .end
 
 .sub 'infix:<<'     :multi(pmc, Float)
-  .throw ("can't use floating-point value as operand of \"<<\"")
+  tcl_error "can't use floating-point value as operand of \"<<\""
 .end
 
 .sub 'infix:<<'     :multi(Integer, Integer)
@@ -275,19 +374,24 @@ is_string:
     .return ($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"<<\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"<<\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"<<\""
 
 is_float:
-  .throw ("can't use floating-point value as operand of \"<<\"")
+  tcl_error "can't use floating-point value as operand of \"<<\""
 .end
 
 # right shift
 .sub 'infix:>>'     :multi(Float, pmc)
-  .throw ("can't use floating-point value as operand of \">>\"")
+  tcl_error "can't use floating-point value as operand of \">>\""
 .end
 
 .sub 'infix:>>'     :multi(pmc, Float)
-  .throw ("can't use floating-point value as operand of \">>\"")
+  tcl_error "can't use floating-point value as operand of \">>\""
 .end
 
 .sub 'infix:>>'     :multi(Integer, Integer)
@@ -320,10 +424,15 @@ is_float:
     .return ($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \">>\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \">>\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \">>\""
 
 is_float:
-  .throw ("can't use floating-point value as operand of \">>\"")
+    tcl_error "can't use floating-point value as operand of \">>\""
 .end
 
 # *ALL* operands
@@ -422,7 +531,9 @@ is_string:
     .return($I0)
 
 is_string:
-    $I0 = iseq a, b
+    $S0 = a
+    $S1 = b
+    $I0 = iseq $S0, $S1
     .return ($I0)
 .end
 
@@ -443,7 +554,9 @@ is_string:
     .return($I0)
 
 is_string:
-    $I0 = isne a, b
+    $S0 = a
+    $S1 = b
+    $I0 = isne $S0, $S1
     .return ($I0)
 .end
 
@@ -457,7 +570,10 @@ is_string:
 .sub 'infix:ne'    # string inequality
     .param pmc a
     .param pmc b
-    $I0 = isne a, b 
+
+    $S0 = a
+    $S1 = b
+    $I0 = isne $S0, $S1
     .return ($I0)
 .end
 
@@ -481,7 +597,12 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"&\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"&\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(String, Integer)
@@ -500,7 +621,11 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"&\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"&\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(Integer, String)
@@ -519,7 +644,11 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"&\"")
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"&\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(Float, String)
@@ -532,10 +661,14 @@ is_string:
     push_eh is_string
         b = __integer(b)
     clear_eh
-    .throw("can't use floating-point value as operand of \"&\"")
+    tcl_error "can't use floating-point value as operand of \"&\""
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"&\"")
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"&\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(String, Float)
@@ -548,18 +681,22 @@ is_string:
     push_eh is_string
         a = __integer(a)
     clear_eh
-    .throw("can't use floating-point value as operand of \"&\"")
+    tcl_error "can't use floating-point value as operand of \"&\""
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"&\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"&\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(Float, pmc)
-  .throw ("can't use floating-point value as operand of \"&\"")
+  tcl_error "can't use floating-point value as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(pmc, Float)
-  .throw ("can't use floating-point value as operand of \"&\"")
+  tcl_error "can't use floating-point value as operand of \"&\""
 .end
 
 .sub 'infix:&'     :multi(Integer, Integer)
@@ -589,7 +726,12 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"^\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"^\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(String, Integer)
@@ -608,7 +750,11 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"^\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"^\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(Integer, String)
@@ -627,7 +773,11 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"^\"")
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"^\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(Float, String)
@@ -640,10 +790,14 @@ is_string:
     push_eh is_string
         b = __integer(b)
     clear_eh
-    .throw("can't use floating-point value as operand of \"^\"")
+    tcl_error "can't use floating-point value as operand of \"^\""
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"^\"")
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"^\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(String, Float)
@@ -656,18 +810,22 @@ is_string:
     push_eh is_string
         a = __integer(a)
     clear_eh
-    .throw("can't use floating-point value as operand of \"^\"")
+    tcl_error "can't use floating-point value as operand of \"^\""
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"^\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"^\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(Float, pmc)
-  .throw ("can't use floating-point value as operand of \"^\"")
+  tcl_error "can't use floating-point value as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(pmc, Float)
-  .throw ("can't use floating-point value as operand of \"^\"")
+  tcl_error "can't use floating-point value as operand of \"^\""
 .end
 
 .sub 'infix:^'     :multi(Integer, Integer)
@@ -697,7 +855,12 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"|\"")
+    if a == '' goto empty_string
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"|\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(String, Integer)
@@ -716,7 +879,11 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"|\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"|\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(Integer, String)
@@ -735,7 +902,11 @@ is_string:
   .return($I0)
 
 is_string:
-  .throw ("can't use non-numeric string as operand of \"|\"")
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"|\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(Float, String)
@@ -748,10 +919,14 @@ is_string:
     push_eh is_string
         b = __integer(b)
     clear_eh
-    .throw("can't use floating-point value as operand of \"|\"")
+    tcl_error "can't use floating-point value as operand of \"|\""
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"|\"")
+    if b == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"|\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(String, Float)
@@ -764,18 +939,22 @@ is_string:
     push_eh is_string
         a = __integer(a)
     clear_eh
-    .throw("can't use floating-point value as operand of \"|\"")
+    tcl_error "can't use floating-point value as operand of \"|\""
 
 is_string:
-    .throw("can't use non-numeric string as operand of \"|\"")
+    if a == '' goto empty_string
+    tcl_error "can't use non-numeric string as operand of \"|\""
+
+empty_string:
+    tcl_error "can't use empty string as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(Float, pmc)
-  .throw ("can't use floating-point value as operand of \"|\"")
+  tcl_error "can't use floating-point value as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(pmc, Float)
-  .throw ("can't use floating-point value as operand of \"|\"")
+  tcl_error "can't use floating-point value as operand of \"|\""
 .end
 
 .sub 'infix:|'     :multi(Integer, Integer)
@@ -831,3 +1010,9 @@ true:
 false:
     .return(0)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/EditorPlugins.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/EditorPlugins.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Section::EditorPlugins - Editor Plugins documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Section::EditorPlugins;
+        use Parrot::Docs::Section::EditorPlugins;
 
 =head1 DESCRIPTION
 
@@ -32,14 +32,11 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'Editor Plugins', 'editor.html', '',
-		$self->new_item('', 'editor')
-	);
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new( 'Editor Plugins', 'editor.html', '',
+        $self->new_item( '', 'editor' ) );
 }
 
 =back
@@ -47,3 +44,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

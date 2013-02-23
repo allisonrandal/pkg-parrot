@@ -1,7 +1,7 @@
 /* hash.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/hash.h 12884 2006-06-05T13:29:13.115985Z audreyt  $
+ *     $Id: /parrotcode/trunk/include/parrot/hash.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Hashtable implementation
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_HASH_H_GUARD)
+#ifndef PARROT_HASH_H_GUARD
 #define PARROT_HASH_H_GUARD
 
 /* Prototypes */
@@ -22,7 +22,8 @@ typedef enum {
     enum_hash_int = enum_type_INTVAL,
     enum_hash_num = enum_type_FLOATVAL,
     enum_hash_string = enum_type_STRING,
-    enum_hash_pmc = enum_type_PMC
+    enum_hash_pmc = enum_type_PMC,
+    enum_hash_ptr = enum_type_ptr
 } HashEntryType;
 
 /*
@@ -45,7 +46,8 @@ typedef enum {
     Hash_key_type_int,
     Hash_key_type_cstring,
     Hash_key_type_STRING,
-    Hash_key_type_PMC
+    Hash_key_type_PMC,
+    Hash_key_type_ptr
 } Hash_key_type;
 
 typedef struct _hashbucket {
@@ -69,39 +71,36 @@ typedef struct _hash {
     hash_hash_key_fn hash_val;  /* generate a hash value for key */
 } Hash;
 
-PARROT_API void parrot_new_hash(Interp * interpreter, Hash **hptr);
-PARROT_API void parrot_hash_destroy(Interp * interpreter, Hash *h);
-PARROT_API void parrot_new_pmc_hash(Interp * interpreter, PMC *container);
+PARROT_API void parrot_new_hash(Interp *interp, Hash **hptr);
+PARROT_API void parrot_new_pmc_hash(Interp *interp, PMC *container);
 void parrot_new_hash_x(Interp *, Hash**, PARROT_DATA_TYPES,
         Hash_key_type, hash_comp_fn, hash_hash_key_fn);
 void parrot_new_pmc_hash_x(Interp *, PMC*, PARROT_DATA_TYPES,
         Hash_key_type, hash_comp_fn, hash_hash_key_fn);
-PARROT_API void parrot_new_cstring_hash(Interp *interpreter, Hash **);
+PARROT_API void parrot_new_cstring_hash(Interp *interp, Hash **);
+PARROT_API void parrot_new_pointer_hash(Interp *interp, Hash **);
 
-PARROT_API PMC* Parrot_new_INTVAL_hash(Interp *interpreter, UINTVAL flags);
+PARROT_API PMC* Parrot_new_INTVAL_hash(Interp *interp, UINTVAL flags);
 
-PARROT_API void parrot_hash_clone(Interp * interpreter, Hash * src, Hash **dest);
-PARROT_API INTVAL parrot_hash_size(Interp * interpreter, Hash *hash);
-PARROT_API void parrot_hash_set_size(Interp * interpreter, Hash *hash, UINTVAL size);
-PARROT_API void parrot_hash_destroy(Interp * interpreter, Hash *hash);
-PARROT_API HashBucket *parrot_hash_get_bucket(Interp * interpreter, Hash *hash, void *key);
-PARROT_API void *parrot_hash_get(Interp * interpreter, Hash *hash, void *key);
-PARROT_API INTVAL parrot_hash_exists(Interp * interpreter, Hash *hash, void *key);
-PARROT_API HashBucket *parrot_hash_put(Interp * interpreter, Hash *hash, void *key, void *value);
-PARROT_API void parrot_hash_delete(Interp * interpreter, Hash *hash, void *key);
-PARROT_API void parrot_mark_hash(Interp * interpreter, Hash *hash);
-PARROT_API void parrot_hash_visit(Interp * interpreter, Hash *hash, void*);
-PARROT_API void parrot_dump_hash(Interp * interpreter, Hash *hash);
-PARROT_API void* parrot_hash_get_idx(Interp *interpreter, Hash *hash, PMC *key);
+PARROT_API void parrot_hash_clone(Interp *interp, Hash * src, Hash **dest);
+PARROT_API INTVAL parrot_hash_size(Interp *interp, Hash *hash);
+PARROT_API void parrot_hash_set_size(Interp *interp, Hash *hash, UINTVAL size);
+PARROT_API void parrot_hash_destroy(Interp *interp, Hash *hash);
+PARROT_API HashBucket *parrot_hash_get_bucket(Interp *interp, Hash *hash, void *key);
+PARROT_API void *parrot_hash_get(Interp *interp, Hash *hash, void *key);
+PARROT_API INTVAL parrot_hash_exists(Interp *interp, Hash *hash, void *key);
+PARROT_API HashBucket *parrot_hash_put(Interp *interp, Hash *hash, void *key, void *value);
+PARROT_API void parrot_hash_delete(Interp *interp, Hash *hash, void *key);
+PARROT_API void parrot_mark_hash(Interp *interp, Hash *hash);
+PARROT_API void parrot_hash_visit(Interp *interp, Hash *hash, void*);
+PARROT_API void parrot_dump_hash(Interp *interp, Hash *hash);
+PARROT_API void* parrot_hash_get_idx(Interp *interp, Hash *hash, PMC *key);
 
 #endif /* PARROT_HASH_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

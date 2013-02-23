@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/stacks.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/stacks.c 3477 2007-05-13T20:42:55.058233Z chromatic  $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ where each chunk has room for one entry.
 /*
 
 =item C<Stack_Chunk_t *
-new_stack(Interp *interpreter, const char *name)>
+new_stack(Interp *interp, const char *name)>
 
 Create a new stack and name it. C<< stack->name >> is used for
 debugging/error reporting.
@@ -35,17 +35,17 @@ debugging/error reporting.
 */
 
 Stack_Chunk_t *
-new_stack(Interp *interpreter, const char *name /*NN*/)
+new_stack(Interp *interp, const char *name /*NN*/)
 {
 
-    return register_new_stack(interpreter, name, sizeof(Stack_Entry_t));
+    return register_new_stack(interp, name, sizeof (Stack_Entry_t));
 }
 
 
 /*
 
 =item C<void
-mark_stack(Interp *interpreter, Stack_Chunk_t *chunk)>
+mark_stack(Interp *interp, Stack_Chunk_t *chunk)>
 
 Mark entries in a stack structure during DOD.
 
@@ -54,27 +54,23 @@ Mark entries in a stack structure during DOD.
 */
 
 void
-mark_stack(Interp *interpreter, Stack_Chunk_t *chunk /*NN*/)
+mark_stack(Interp *interp, Stack_Chunk_t *chunk /*NN*/)
 {
     for (; ; chunk = chunk->prev) {
         Stack_Entry_t *entry;
 
-        pobject_lives(interpreter, (PObj*)chunk);
+        pobject_lives(interp, (PObj*)chunk);
         if (chunk == chunk->prev)
             break;
         entry = (Stack_Entry_t *)STACK_DATAP(chunk);
         switch (entry->entry_type) {
             case STACK_ENTRY_PMC:
-                if (entry->entry.pmc_val) {
-                    pobject_lives(interpreter,
-                            (PObj *)entry->entry.pmc_val);
-                }
+                if (UVal_pmc(entry->entry))
+                    pobject_lives(interp, (PObj *)UVal_pmc(entry->entry));
                 break;
             case STACK_ENTRY_STRING:
-                if (entry->entry.string_val) {
-                    pobject_lives(interpreter,
-                            (PObj *)entry->entry.string_val);
-                }
+                if (UVal_str(entry->entry))
+                    pobject_lives(interp, (PObj *)UVal_str(entry->entry));
                 break;
             default:
                 break;
@@ -101,7 +97,7 @@ stack_destroy(Stack_Chunk_t * top)
 /*
 
 =item C<size_t
-stack_height(Interp *interpreter, const Stack_Chunk_t *top)>
+stack_height(Interp *interp, const Stack_Chunk_t *top)>
 
 Returns the height of the stack. The maximum "depth" is height - 1.
 
@@ -110,7 +106,7 @@ Returns the height of the stack. The maximum "depth" is height - 1.
 */
 
 size_t
-stack_height(Interp *interpreter, const Stack_Chunk_t *chunk /*NN*/)
+stack_height(Interp *interp, const Stack_Chunk_t *chunk /*NN*/)
 {
     size_t height = 0;
 
@@ -127,7 +123,7 @@ stack_height(Interp *interpreter, const Stack_Chunk_t *chunk /*NN*/)
 /*
 
 =item C<Stack_Entry_t *
-stack_entry(Interp *interpreter, Stack_Chunk_t *stack, INTVAL depth)>
+stack_entry(Interp *interp, Stack_Chunk_t *stack, INTVAL depth)>
 
 If C<< depth >= 0 >>, return the entry at that depth from the top of the
 stack, with 0 being the top entry. If C<depth < 0>, then return the
@@ -139,7 +135,7 @@ if C<|depth| > number> of entries in stack.
 */
 
 Stack_Entry_t *
-stack_entry(Interp *interpreter, Stack_Chunk_t *stack /*NN*/, INTVAL depth)
+stack_entry(Interp *interp, Stack_Chunk_t *stack /*NN*/, INTVAL depth)
 {
     Stack_Chunk_t *chunk;
     Stack_Entry_t *entry = NULL;
@@ -147,13 +143,14 @@ stack_entry(Interp *interpreter, Stack_Chunk_t *stack /*NN*/, INTVAL depth)
 
     /* For negative depths, look from the bottom of the stack up. */
     if (depth < 0) {
-        depth = stack_height(interpreter, CONTEXT(interpreter->ctx)->user_stack) + depth;
+        depth = stack_height(interp,
+                             CONTEXT(interp->ctx)->user_stack) + depth;
         if (depth < 0)
             return NULL;
         offset = (size_t)depth;
     }
     chunk = stack;          /* Start at top */
-    while ( offset) {
+    while (offset) {
         if (chunk == chunk->prev)
             break;
         --offset;
@@ -168,7 +165,7 @@ stack_entry(Interp *interpreter, Stack_Chunk_t *stack /*NN*/, INTVAL depth)
 /*
 
 =item C<void
-rotate_entries(Interp *interpreter, Stack_Chunk_t **stack_p,
+rotate_entries(Interp *interp, Stack_Chunk_t **stack_p,
                INTVAL num_entries)>
 
 Rotate the top N entries by one.  If C<N > 0>, the rotation is bubble
@@ -181,7 +178,9 @@ element.
 */
 
 void
-rotate_entries(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/, INTVAL num_entries)
+rotate_entries(Interp *interp,
+               Stack_Chunk_t **stack_p /*NN*/,
+               INTVAL num_entries)
 {
     Stack_Chunk_t *stack = *stack_p;
     Stack_Entry_t temp;
@@ -197,37 +196,37 @@ rotate_entries(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/, INTVAL num_e
         num_entries = -num_entries;
         depth = num_entries - 1;
 
-        if (stack_height(interpreter, stack) < (size_t)num_entries) {
+        if (stack_height(interp, stack) < (size_t)num_entries) {
             internal_exception(ERROR_STACK_SHALLOW, "Stack too shallow!");
         }
 
-        temp = *stack_entry(interpreter, stack, depth);
+        temp = *stack_entry(interp, stack, depth);
         for (i = depth; i > 0; i--) {
-            *stack_entry(interpreter, stack, i) =
-                *stack_entry(interpreter, stack, i - 1);
+            *stack_entry(interp, stack, i) =
+                *stack_entry(interp, stack, i - 1);
         }
 
-        *stack_entry(interpreter, stack, 0) = temp;
+        *stack_entry(interp, stack, 0) = temp;
     }
     else {
 
-        if (stack_height(interpreter, stack) < (size_t)num_entries) {
+        if (stack_height(interp, stack) < (size_t)num_entries) {
             internal_exception(ERROR_STACK_SHALLOW, "Stack too shallow!");
         }
-        temp = *stack_entry(interpreter, stack, 0);
+        temp = *stack_entry(interp, stack, 0);
         for (i = 0; i < depth; i++) {
-            *stack_entry(interpreter, stack, i) =
-                *stack_entry(interpreter, stack, i + 1);
+            *stack_entry(interp, stack, i) =
+                *stack_entry(interp, stack, i + 1);
         }
 
-        *stack_entry(interpreter, stack, depth) = temp;
+        *stack_entry(interp, stack, depth) = temp;
     }
 }
 
 /*
 
 =item C<void
-stack_push(Interp *interpreter, Stack_Chunk_t **stack_p,
+stack_push(Interp *interp, Stack_Chunk_t **stack_p,
            void *thing, Stack_entry_type type, Stack_cleanup_method cleanup)>
 
 Push something on the generic stack.
@@ -244,10 +243,10 @@ variable or something.
 */
 
 void
-stack_push(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/,
+stack_push(Interp *interp, Stack_Chunk_t **stack_p /*NN*/,
            void *thing, Stack_entry_type type, Stack_cleanup_method cleanup)
 {
-    Stack_Entry_t *entry = stack_prepare_push(interpreter, stack_p);
+    Stack_Entry_t *entry = (Stack_Entry_t *)stack_prepare_push(interp, stack_p);
 
     /* Remember the type */
     entry->entry_type = type;
@@ -283,7 +282,7 @@ stack_push(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/,
 /*
 
 =item C<void *
-stack_pop(Interp *interpreter, Stack_Chunk_t **stack_p,
+stack_pop(Interp *interp, Stack_Chunk_t **stack_p,
           void *where, Stack_entry_type type)>
 
 Pop off an entry and return a pointer to the contents.
@@ -293,10 +292,10 @@ Pop off an entry and return a pointer to the contents.
 */
 
 void *
-stack_pop(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/,
+stack_pop(Interp *interp, Stack_Chunk_t **stack_p /*NN*/,
           void *where, Stack_entry_type type)
 {
-    Stack_Entry_t * const entry = stack_prepare_pop(interpreter, stack_p);
+    Stack_Entry_t * const entry = (Stack_Entry_t *)stack_prepare_pop(interp, stack_p);
 
     /* Types of 0 mean we don't care */
     if (type && entry->entry_type != type) {
@@ -306,7 +305,7 @@ stack_pop(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/,
 
     /* Cleanup routine? */
     if (entry->cleanup != STACK_CLEANUP_NULL) {
-        (*entry->cleanup) (interpreter, entry);
+        (*entry->cleanup) (interp, entry);
     }
 
     /* Sometimes the caller doesn't care what the value was */
@@ -346,7 +345,7 @@ stack_pop(Interp *interpreter, Stack_Chunk_t **stack_p /*NN*/,
 /*
 
 =item C<void *
-pop_dest(Interp *interpreter)>
+pop_dest(Interp *interp)>
 
 Pop off a destination entry and return a pointer to the contents.
 
@@ -355,12 +354,12 @@ Pop off a destination entry and return a pointer to the contents.
 */
 
 void *
-pop_dest(Interp *interpreter)
+pop_dest(Interp *interp)
 {
     /* We don't mind the extra call, so we do this: (previous comment
      * said we *do* mind, but I say let the compiler decide) */
     void *dest;
-    (void)stack_pop(interpreter, &CONTEXT(interpreter->ctx)->control_stack,
+    (void)stack_pop(interp, &interp->dynamic_env,
                     &dest, STACK_ENTRY_DESTINATION);
     return dest;
 }
@@ -368,7 +367,7 @@ pop_dest(Interp *interpreter)
 /*
 
 =item C<void *
-stack_peek(Interp *interpreter, Stack_Chunk_t *stack_base,
+stack_peek(Interp *interp, Stack_Chunk_t *stack_base,
            Stack_entry_type *type)>
 
 Peek at stack and return pointer to entry and the type of the entry.
@@ -378,10 +377,10 @@ Peek at stack and return pointer to entry and the type of the entry.
 */
 
 void *
-stack_peek(Interp *interpreter, Stack_Chunk_t *stack_base /*NN*/,
+stack_peek(Interp *interp, Stack_Chunk_t *stack_base /*NN*/,
            Stack_entry_type *type)
 {
-    Stack_Entry_t * const entry = stack_entry(interpreter, stack_base, 0);
+    Stack_Entry_t * const entry = stack_entry(interp, stack_base, 0);
     if (entry == NULL) {
         return NULL;
     }
@@ -401,7 +400,7 @@ stack_peek(Interp *interpreter, Stack_Chunk_t *stack_base /*NN*/,
 /*
 
 =item C<Stack_entry_type
-get_entry_type(Interp *interpreter, Stack_Entry_t *entry)>
+get_entry_type(Interp *interp, Stack_Entry_t *entry)>
 
 Returns the stack entry type of C<entry>.
 
@@ -410,9 +409,56 @@ Returns the stack entry type of C<entry>.
 */
 
 Stack_entry_type
-get_entry_type(Interp *interpreter, Stack_Entry_t *entry /*NN*/)
+get_entry_type(Interp *interp, Stack_Entry_t *entry /*NN*/)
 {
     return entry->entry_type;
+}
+
+/*
+
+=item C<void
+Parrot_dump_dynamic_environment(Interp *interp,
+                                Stack_Chunk_t *dynamic_env)>
+
+Print a representation of the dynamic stack to the standard error (using
+C<PIO_eprintf>).  This is used only temporarily for debugging.
+
+=cut
+
+*/
+
+void
+Parrot_dump_dynamic_environment(Interp *interp,
+                                Stack_Chunk_t *dynamic_env)
+{
+    int height = (int) stack_height(interp, dynamic_env);
+
+    while (dynamic_env->prev != dynamic_env) {
+        Stack_Entry_t *e = stack_entry(interp, dynamic_env, 0);
+        if (! e)
+            internal_exception(1, "Control stack damaged");
+
+        PIO_eprintf(interp, "[%4d:  chunk %p entry %p "
+                                 "type %d cleanup %p]\n",
+                    height, dynamic_env, e,
+                    e->entry_type, e->cleanup);
+        if (e->entry_type == STACK_ENTRY_PMC
+                || e->entry_type == STACK_ENTRY_ACTION) {
+            PMC *thing = UVal_pmc(e->entry);
+
+            PIO_eprintf(interp, "[        PMC %p type %d => %Ss]\n",
+                        thing, thing->vtable->base_type,
+                        VTABLE_get_string(interp, thing));
+        }
+        else if (e->entry_type == STACK_ENTRY_MARK) {
+            PIO_eprintf(interp, "[        mark %d]\n",
+                        UVal_int(e->entry));
+        }
+        dynamic_env = dynamic_env->prev;
+        height--;
+    }
+    PIO_eprintf(interp, "[%4d:  chunk %p %s base]\n",
+                height, dynamic_env, dynamic_env->name);
 }
 
 /*
@@ -428,12 +474,10 @@ F<src/stack_common.c>
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

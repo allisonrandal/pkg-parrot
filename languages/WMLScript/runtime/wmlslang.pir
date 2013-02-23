@@ -1,5 +1,5 @@
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/runtime/wmlslang.pir 13660 2006-07-28T17:05:24.263356Z chip  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/runtime/wmlslang.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -16,42 +16,42 @@ See "WMLScript Standard Libraries Specification", section 7 "Lang".
 
 =cut
 
-.loadlib "wmls_ops"
-.HLL "WMLScript", "wmls_group"
+.loadlib 'wmls_ops'
+.HLL 'WMLScript', 'wmls_group'
 
 
-.sub getLang
+.sub 'getLang'
     new $P0, .Hash
-    
-    .const .Sub _lang_abs = "_lang_abs"
+
+    .const .Sub _lang_abs = '_lang_abs'
     $P0[0]  = _lang_abs
-    .const .Sub _lang_min = "_lang_min"
+    .const .Sub _lang_min = '_lang_min'
     $P0[1]  = _lang_min
-    .const .Sub _lang_max = "_lang_max"
+    .const .Sub _lang_max = '_lang_max'
     $P0[2]  = _lang_max
-    .const .Sub _lang_parseInt = "_lang_parseInt"
+    .const .Sub _lang_parseInt = '_lang_parseInt'
     $P0[3]  = _lang_parseInt
-    .const .Sub _lang_parseFloat = "_lang_parseFloat"
+    .const .Sub _lang_parseFloat = '_lang_parseFloat'
     $P0[4]  = _lang_parseFloat
-    .const .Sub _lang_isInt = "_lang_isInt"
+    .const .Sub _lang_isInt = '_lang_isInt'
     $P0[5]  = _lang_isInt
-    .const .Sub _lang_isFloat = "_lang_isFloat"
+    .const .Sub _lang_isFloat = '_lang_isFloat'
     $P0[6]  = _lang_isFloat
-    .const .Sub _lang_maxInt = "_lang_maxInt"
+    .const .Sub _lang_maxInt = '_lang_maxInt'
     $P0[7]  = _lang_maxInt
-    .const .Sub _lang_minInt = "_lang_minInt"
+    .const .Sub _lang_minInt = '_lang_minInt'
     $P0[8]  = _lang_minInt
-    .const .Sub _lang_float = "_lang_float"
+    .const .Sub _lang_float = '_lang_float'
     $P0[9]  = _lang_float
-    .const .Sub _lang_exit = "_lang_exit"
+    .const .Sub _lang_exit = '_lang_exit'
     $P0[10] = _lang_exit
-    .const .Sub _lang_abort = "_lang_abort"
+    .const .Sub _lang_abort = '_lang_abort'
     $P0[11] = _lang_abort
-    .const .Sub _lang_random = "_lang_random"
+    .const .Sub _lang_random = '_lang_random'
     $P0[12] = _lang_random
-    .const .Sub _lang_seed = "_lang_seed"
+    .const .Sub _lang_seed = '_lang_seed'
     $P0[13] = _lang_seed
-    .const .Sub _lang_characterSet = "_lang_characterSet"
+    .const .Sub _lang_characterSet = '_lang_characterSet'
     $P0[14] = _lang_characterSet
 
     .return ($P0)
@@ -76,9 +76,10 @@ Number or invalid.
 
 =cut
 
-.sub _lang_abs :anon
+.sub '_lang_abs' :anon
     .param pmc value
     .local pmc ret
+    ret = clone value
     ret = abs value
     .return (ret)
 .end
@@ -107,9 +108,9 @@ Compare the numbers to select the smaller one.
 =item *
 
 If the values are equal then the first value is selected.
-    
+
 =back
-    
+
 =head3 PARAMETERS
 
 value1 = Number
@@ -122,22 +123,22 @@ Number or invalid.
 
 =cut
 
-.sub _lang_min :anon
+.sub '_lang_min' :anon
     .param pmc value1
     .param pmc value2
     .local pmc ret
     $P1 = value1
-    $I0 = isa value1, "WmlsString"
+    $I0 = isa value1, 'WmlsString'
     unless $I0 goto L1
-    $P1 = value1.parseNumber()
+    $P1 = value1.'parseNumber'()
 L1:
     $P2 = value2
-    $I0 = isa value2, "WmlsString"
+    $I0 = isa value2, 'WmlsString'
     unless $I0 goto L2
-    $P2 = value2.parseNumber()
-L2:        
+    $P2 = value2.'parseNumber'()
+L2:
     $P0 = isle $P1, $P2
-    $I0 = isa $P0, "WmlsInvalid"
+    $I0 = isa $P0, 'WmlsInvalid'
     unless $I0 goto L3
     .return ($P0)
 L3:
@@ -190,22 +191,22 @@ Number or invalid.
 
 =cut
 
-.sub _lang_max :anon
+.sub '_lang_max' :anon
     .param pmc value1
     .param pmc value2
     .local pmc ret
     $P1 = value1
-    $I0 = isa value1, "WmlsString"
+    $I0 = isa value1, 'WmlsString'
     unless $I0 goto L1
-    $P1 = value1.parseNumber()
+    $P1 = value1.'parseNumber'()
 L1:
     $P2 = value2
-    $I0 = isa value2, "WmlsString"
+    $I0 = isa value2, 'WmlsString'
     unless $I0 goto L2
-    $P2 = value2.parseNumber()
-L2:        
+    $P2 = value2.'parseNumber'()
+L2:
     $P0 = isge $P1, $P2
-    $I0 = isa $P0, "WmlsInvalid"
+    $I0 = isa $P0, 'WmlsInvalid'
     unless $I0 goto L3
     .return ($P0)
 L3:
@@ -254,16 +255,16 @@ In case of a parsing error an C<invalid> value is returned.
 
 =cut
 
-.sub _lang_parseInt :anon
+.sub '_lang_parseInt' :anon
     .param pmc value
     .local pmc ret
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
-    ret = value.parseInt()
+    ret = value.'parseInt'()
     .return (ret)
 L1:
     ret = value
-    $I0 = isa value, "WmlsInteger"
+    $I0 = isa value, 'WmlsInteger'
     if $I0 goto L2
     new ret, .WmlsInvalid
 L2:
@@ -305,24 +306,24 @@ In case of a parsing error an C<invalid> value is returned.
 
 =cut
 
-.sub _lang_parseFloat :anon
+.sub '_lang_parseFloat' :anon
     .param pmc value
     .local pmc ret
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
-    ret = value.parseFloat()
+    ret = value.'parseFloat'()
     .return (ret)
 L1:
     ret = value
-    $I0 = isa value, "WmlsFloat"
+    $I0 = isa value, 'WmlsFloat'
     if $I0 goto L2
-    $I0 = isa value, "WmlsInteger"
+    $I0 = isa value, 'WmlsInteger'
     unless $I0 goto L3
     $I0 = value
     new ret, .WmlsFloat
     set ret, $I0
     goto L2
-L3:    
+L3:
     new ret, .WmlsInvalid
 L2:
     .return (ret)
@@ -347,22 +348,22 @@ Boolean or invalid.
 
 =cut
 
-.sub _lang_isInt :anon
+.sub '_lang_isInt' :anon
     .param pmc value
     .local pmc ret
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
-    $P0 = value.parseInt()
+    $P0 = value.'parseInt'()
     ret = defined $P0
     .return (ret)
 L1:
-    $I0 = isa value, "WmlsInvalid"
+    $I0 = isa value, 'WmlsInvalid'
     unless $I0 goto L2
     new ret, .WmlsInvalid
-    .return (ret) 
-L2:                                             
+    .return (ret)
+L2:
     new ret, .WmlsBoolean
-    $I0 = isa value, "WmlsInteger"
+    $I0 = isa value, 'WmlsInteger'
     set ret, $I0
     .return (ret)
 .end
@@ -386,25 +387,25 @@ Boolean or invalid.
 
 =cut
 
-.sub _lang_isFloat :anon
+.sub '_lang_isFloat' :anon
     .param pmc value
     .local pmc ret
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
-    $P0 = value.parseFloat()
+    $P0 = value.'parseFloat'()
     ret = defined $P0
     .return (ret)
 L1:
-    $I0 = isa value, "WmlsInvalid"
+    $I0 = isa value, 'WmlsInvalid'
     unless $I0 goto L2
     new ret, .WmlsInvalid
     .return (ret)
 L2:
     new ret, .WmlsBoolean
-    $I0 = isa value, "WmlsFloat"
+    $I0 = isa value, 'WmlsFloat'
     set ret, $I0
     if $I0 goto L3
-    $I0 = isa value, "WmlsInteger"
+    $I0 = isa value, 'WmlsInteger'
     set ret, $I0
 L3:
     .return (ret)
@@ -423,7 +424,7 @@ Integer 2147483647.
 
 =cut
 
-.sub _lang_maxInt :anon
+.sub '_lang_maxInt' :anon
     .local pmc ret
     new ret, .WmlsInteger
     set ret, 2147483647
@@ -443,7 +444,7 @@ Integer -2147483648.
 
 =cut
 
-.sub _lang_minInt :anon
+.sub '_lang_minInt' :anon
     .local pmc ret
     new ret, .WmlsInteger
     set ret, -2147483648
@@ -463,7 +464,7 @@ Boolean.
 
 =cut
 
-.sub _lang_float :anon
+.sub '_lang_float' :anon
     .local pmc ret
     new ret, .WmlsBoolean
     set ret, 1
@@ -490,17 +491,17 @@ None (this function ends the interpretation).
 
 =cut
 
-.sub _lang_exit :anon
+.sub '_lang_exit' :anon
     .param pmc value
     .local pmc ret
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
     $P0 = value.parseInt()
     $I0 = $P0
     exit $I0
 L1:
     $I0 = value
-    exit $I0                                            
+    exit $I0
 .end
 
 
@@ -525,12 +526,12 @@ None (this function aborts the interpretation).
 
 =cut
 
-.sub _lang_abort :anon
+.sub '_lang_abort' :anon
     .param pmc value
     .local pmc ex
     new ex, .Exception
     $S0 = value
-    ex["_message"] = $S0
+    ex['_message'] = $S0
     throw ex
 .end
 
@@ -563,15 +564,15 @@ If value is less than zero (0), the function returns C<invalid>.
 
 =cut
 
-.sub _lang_random :anon
+.sub '_lang_random' :anon
     .param pmc value
     .local pmc ret
     $P0 = value
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
-    $P0 = value.parseNumber()
+    $P0 = value.'parseNumber'()
 L1:
-    $I0 = isa $P0, "WmlsInvalid"
+    $I0 = isa $P0, 'WmlsInvalid'
     if $I0 goto L2
     $I0 = $P0
     if $I0 < 0 goto L2
@@ -614,15 +615,15 @@ String or invalid.
 
 =cut
 
-.sub _lang_seed :anon
+.sub '_lang_seed' :anon
     .param pmc value
     .local pmc ret
     $P0 = value
-    $I0 = isa value, "WmlsString"
+    $I0 = isa value, 'WmlsString'
     unless $I0 goto L1
-    $P0 = value.parseNumber()
+    $P0 = value.'parseNumber'()
 L1:
-    $I0 = isa $P0, "WmlsInvalid"
+    $I0 = isa $P0, 'WmlsInvalid'
     if $I0 goto L2
     $I0 = $P0
     if $I0 >= 0 goto L3
@@ -653,7 +654,7 @@ Integer.
 
 =cut
 
-.sub _lang_characterSet :anon
+.sub '_lang_characterSet' :anon
     .local pmc ret
     new ret, .WmlsInteger
     ret = 4     # latin1
@@ -667,3 +668,9 @@ Francois Perrad.
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

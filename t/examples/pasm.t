@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/t/examples/pasm.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/examples/pasm.t 959 2006-12-30T19:52:38.264180Z chromatic  $
 
 use strict;
 use warnings;
@@ -8,7 +8,6 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test tests => 6;
 use Parrot::Config;
-
 
 =head1 NAME
 
@@ -32,12 +31,10 @@ F<t/examples/pir.t>
 
 =cut
 
-
 # Set up expected output for examples
-my %expected
-  = (
+my %expected = (
 
-    'fact.pasm'        =>  << 'END_EXPECTED',
+    'fact.pasm' => << 'END_EXPECTED',
 fact of 0 is: 1
 fact of 1 is: 1
 fact of 2 is: 2
@@ -47,11 +44,11 @@ fact of 5 is: 120
 fact of 6 is: 720
 END_EXPECTED
 
-    'hello.pasm'        =>  << 'END_EXPECTED',
+    'hello.pasm' => << 'END_EXPECTED',
 Hello World
 END_EXPECTED
 
-    'queens.pasm'        =>  << 'END_EXPECTED',
+    'queens.pasm' => << 'END_EXPECTED',
 Making new board with 8 ranks and 8 files...
 Board length is 64.
   +---+---+---+---+---+---+---+---+
@@ -74,11 +71,11 @@ Board length is 64.
     A   B   C   D   E   F   G   H  
 END_EXPECTED
 
-    'stack.pasm'        =>  << 'END_EXPECTED',
-87654321098765432100123456789012345678998765432109876543210
+    'stack.pasm' => << 'END_EXPECTED',
+9876543210 9876543210 0123456789 0123456789 9876543210 9876543210
 END_EXPECTED
 
-    'xml_parser.pasm'        =>  << 'END_EXPECTED',
+    'xml_parser.pasm' => << 'END_EXPECTED',
 Start xml version=1.0
 Start top
 Start inner foo=bar narf=poit
@@ -91,7 +88,7 @@ Close inner
 Close top
 END_EXPECTED
 
-    );
+);
 
 while ( my ( $example, $expected ) = each %expected ) {
     example_output_is( "examples/pasm/$example", $expected );
@@ -99,6 +96,13 @@ while ( my ( $example, $expected ) = each %expected ) {
 
 TODO:
 {
-  local $TODO = 'nanoforth2.pasm not testable yet';
-  fail( 'nanoforth2.pasm' );
-};
+    local $TODO = 'nanoforth2.pasm not testable yet';
+    fail('nanoforth2.pasm');
+}
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,13 +1,15 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 5;
 
 ## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     public class test_elem
@@ -43,7 +45,7 @@ namespace Testing
                 x[i] = new test_elem();
                 x[i].value = i + 1;
             }
-        
+
             int total = 0;
             for (int i = 0; i < x.Length; i++)
                 total += x[i].value;
@@ -54,10 +56,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'create_array');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'create_array' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -70,7 +72,7 @@ PIR
 5
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'array_length');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'array_length' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -84,7 +86,7 @@ PIR
 5
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'create_and_length');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'create_and_length' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -97,7 +99,7 @@ PIR
 5
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'loadstore_test');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'loadstore_test' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -109,3 +111,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'loadstore_test');
 PIR
 15
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

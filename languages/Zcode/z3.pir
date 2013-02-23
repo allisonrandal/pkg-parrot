@@ -1,4 +1,4 @@
-# $Id: /local/languages/Zcode/z3.pir 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/Zcode/z3.pir 3047 2007-04-09T20:49:40.161321Z paultcochrane  $
 
 =head1 NAME
 
@@ -49,3 +49,9 @@ Compile z3 to PIR and run it.
   zm."stats"()
   zm."translate"()
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

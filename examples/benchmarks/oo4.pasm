@@ -1,4 +1,4 @@
-# $Id: /local/examples/benchmarks/oo4.pasm 12193 2006-04-12T20:04:06.066885Z bernhard  $
+# $Id: /parrotcode/trunk/examples/benchmarks/oo4.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
     newclass P1, "Foo"
     find_global P2, "init"

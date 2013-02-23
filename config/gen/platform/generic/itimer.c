@@ -16,10 +16,10 @@ void
 start_sys_timer_ms(void *handle, int ms)
 {
     struct itimerval its;
-    memset(&its, 0, sizeof(its));
+    memset(&its, 0, sizeof (its));
     if (ms) {
-	its.it_interval.tv_sec = its.it_value.tv_sec = ms/1000;
-	its.it_interval.tv_usec = its.it_value.tv_usec = 1000 *(ms%1000);
+        its.it_interval.tv_sec = its.it_value.tv_sec = ms/1000;
+        its.it_interval.tv_usec = its.it_value.tv_usec = 1000 *(ms%1000);
     }
     setitimer(ITIMER_REAL, &its, NULL);
 }
@@ -56,3 +56,10 @@ new_sys_timer_ms()
 
 #else
 #endif
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

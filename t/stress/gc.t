@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/t/stress/gc.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/stress/gc.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/stress/gc.t - Garbage Collection
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/stress/gc.t
+    % perl -Ilib t/stress/gc.t
 
 =head1 DESCRIPTION
 
@@ -16,18 +16,29 @@ Tests garbage collection.
 
 =cut
 
+use strict;
+use warnings;
+
+use lib qw(lib . ../lib ../../lib);
 use Parrot::Test tests => 1;
 use Test::More;
 use Parrot::PMC qw(%pmc_types);
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "arraystress");
-	print "starting\n"
-	new P0, .Integer
-	print "ending\n"
-	end
+pasm_output_is( <<'CODE', <<'OUTPUT', "arraystress" );
+    print "starting\n"
+    new P0, .Integer
+    print "ending\n"
+    end
 CODE
 starting
 ending
 OUTPUT
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

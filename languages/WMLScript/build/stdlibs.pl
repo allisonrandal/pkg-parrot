@@ -5,10 +5,8 @@ use warnings;
 use Getopt::Long;
 
 # Grab parameters.
-my ($cfg_file, $output_file);
-GetOptions(
-    'output=s'  => \$output_file,
-) or usage();
+my ( $cfg_file, $output_file );
+GetOptions( 'output=s' => \$output_file, ) or usage();
 $cfg_file = shift @ARGV;
 usage() if !$cfg_file || @ARGV;
 
@@ -31,29 +29,34 @@ close $fh;
 # Parse configuration file and build a data structure.
 # ####################################################
 sub parse_cfg {
+
     # Get filename and open the file.
     my ($filename) = @_;
 
     open my $fh, '<', $filename
         or die "Unable to open $filename: $!\n";
-    
+
     my $lib = {};
     my $func;
-    
+
     while (<$fh>) {
-        if      (/^#.*$/) {
-#           warn "Comment $_";
+        if (/^#.*$/) {
+
+            #           warn "Comment $_";
         }
         elsif (/^\s*$/) {
-#           warn "Empty\n";
+
+            #           warn "Empty\n";
         }
         elsif (/^\@([A-Z_a-z][0-9A-Z_a-z]*)\s+([0-9]+)\s*$/) {
-#           warn "Lib $1 $2\n";
+
+            #           warn "Lib $1 $2\n";
             $func = {};
             $lib->{$2} = [ $1, $func ];
         }
         elsif (/^([A-Z_a-z][0-9A-Z_a-z]*)\s+([0-9]+)\s+([0-9]+)\s*$/) {
-#           warn "Fct $1 $2 $3\n";
+
+            #           warn "Fct $1 $2 $3\n";
             $func->{$2} = [ $1, $3 ];
         }
         else {
@@ -62,10 +65,9 @@ sub parse_cfg {
     }
 
     close $fh;
-    
+
     return $lib;
 }
-
 
 # Generate the code.
 # ##################
@@ -79,43 +81,42 @@ sub generate_pir {
 .sub _init_lib
     .local pmc stdlibs
     .local pmc lib
-    stdlibs = new .Hash
+    new stdlibs, .Hash
 PIRCODE
 
-    while (my ($num_lib, $lib) = each %{$cfg}) {
-        my ($name, $h_lib) = @{$lib};
+    while ( my ( $num_lib, $lib ) = each %{$cfg} ) {
+        my ( $name, $h_lib ) = @{$lib};
         $pir .= "\n    # $name\n";
-        $pir .= "    lib = new .Hash\n";
-        
-        while (my ($num_func, $func) = each %{$h_lib}) {
-            my ($name, $nb) = @{$func};
+        $pir .= "    new lib, .Hash\n";
+
+        while ( my ( $num_func, $func ) = each %{$h_lib} ) {
+            my ( $name, $nb ) = @{$func};
             $pir .= "    lib[$num_func] = $nb\t# $name\n";
         }
-        
+
         $pir .= "    stdlibs[$num_lib] = lib\n";
     }
 
     # Emit the final PIR.
     $pir .= <<'PIRCODE';
 
-    global "stdlibs" = stdlibs
+    global 'stdlibs' = stdlibs
 .end
 
 .sub get_nb_arg_lib
     .param int lib
     .param int func
     .local pmc stdlib
-    stdlib = global "stdlibs"
+    stdlib = global 'stdlibs'
     $P0 = stdlib[lib]
     $I0 = $P0[func]
-    .return ($I0) 
+    .return ($I0)
 .end
 PIRCODE
 
     # Return generated code.
     return $pir;
 }
-
 
 # Usage message.
 # ##############
@@ -127,4 +128,9 @@ USAGE
     exit(1);
 }
 
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

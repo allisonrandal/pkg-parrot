@@ -1,7 +1,7 @@
 /* rubyobject.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/languages/cardinal/src/pmc/rubyobject.pmc 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/trunk/languages/cardinal/src/pmc/rubyobject.pmc 470 2006-12-05T03:30:45.414067Z svm  $
  *  Overview:
  *     These are the vtable functions for the rubyobject base class
  *  Data Structure and Algorithms:
@@ -24,7 +24,10 @@ static INTVAL dynpmc_RubyString;
 static INTVAL dynpmc_RubyFloat;
 static INTVAL dynpmc_RubyInteger;
 
-pmclass RubyObject dynpmc group ruby_group {
+pmclass RubyObject
+        dynpmc
+        group ruby_group
+{
 
     void class_init() {
         if (pass) {
@@ -40,18 +43,18 @@ pmclass RubyObject dynpmc group ruby_group {
     void morph (INTVAL type) {
         if (SELF->vtable->base_type == type)
             return;
-	switch (type) {
-	    case enum_class_String:
-		type = dynpmc_RubyString;
-		break;
-	    case enum_class_Integer:
-		type = dynpmc_RubyInteger;
-		break;
-	    case enum_class_Float:
-		type = dynpmc_RubyFloat;
-		break;
-	}
-	pmc_reuse(INTERP, SELF, type, 0);
+        switch (type) {
+            case enum_class_String:
+                type = dynpmc_RubyString;
+                break;
+            case enum_class_Integer:
+                type = dynpmc_RubyInteger;
+                break;
+            case enum_class_Float:
+                type = dynpmc_RubyFloat;
+                break;
+        }
+        pmc_reuse(INTERP, SELF, type, 0);
     }
 
     void set_integer_native (INTVAL value) {
@@ -69,3 +72,10 @@ pmclass RubyObject dynpmc group ruby_group {
         PMC_str_val(SELF) = string_copy(INTERP, value);
     }
 }
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

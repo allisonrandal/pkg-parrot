@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 11
+plan 16
 
 eval_is {foreach} \
   {wrong # args: should be "foreach varList list ?varList list ...? command"} \
@@ -10,6 +16,19 @@ eval_is {foreach} \
 eval_is {foreach a b q {puts $a}} \
   {wrong # args: should be "foreach varList list ?varList list ...? command"} \
   {uneven # of args}
+
+eval_is {foreach {} {a b c} {puts foo}} \
+  {foreach varlist is empty} \
+  {empty varList}
+
+eval_is {
+    array set a {}
+    foreach a {1 2 3 4} {puts $a}
+} {couldn't set loop variable: "a"} \
+  {couldn't set loop variable}
+
+unset -nocomplain a
+is [foreach a {1 2 3 4} {set a}] {} {return value}
 
 eval_is {
   set r ""
@@ -67,3 +86,18 @@ eval_is {
 eval_is {
   foreach name {a b c d} { aputs }
 } {invalid command name "aputs"} {inner exception}
+
+is [
+    set x {}
+    foreach {c n} {a 1 b 2 c} {append x "$c = $n;"}
+    set x
+] {a = 1;b = 2;c = ;} \
+  {multiple index variables}
+
+eval_is {
+  namespace eval lib {
+    set val {}
+    proc a {} {error ok}
+    foreach n 1 a
+  }
+} ok {namespace resolution in body}

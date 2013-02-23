@@ -1,13 +1,13 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/configure/step.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/trunk/t/configure/step.t 3480 2007-05-14T02:03:28.846683Z jkeenan  $
 
 use strict;
 use warnings;
 
 use lib qw( . lib ../lib ../../lib );
 
-use Test::More tests => 19;
+use Test::More qw(no_plan); # tests => 20;
 
 use File::Basename qw(basename dirname);
 use File::Temp 0.13 qw/tempfile/;
@@ -24,7 +24,7 @@ t/configure/step.t - tests Parrot::Configure::Step
 
 =head1 DESCRIPTION
 
-Regressions tests for the L<Parrote::Configure::Step> module.
+Regression tests for the L<Parrote::Configure::Step> module.
 
 =cut
 
@@ -32,48 +32,76 @@ BEGIN { use_ok('Parrot::Configure::Step'); }
 
 Parrot::Configure::Step->import(@Parrot::Configure::Step::EXPORT_OK);
 
-can_ok(__PACKAGE__, @Parrot::Configure::Step::EXPORT_OK);
+can_ok( __PACKAGE__, @Parrot::Configure::Step::EXPORT_OK );
 
 # XXX add verbose tests with some Test::Warn like mechanism
 
 # integrate()
 
-is(integrate(undef, undef), undef, "integrate(undef, undef)");
-is(integrate(undef, 1), 1, "integrate(undef, 1)");
-is(integrate(1, undef), 1, "integrate(1, undef)");
-is(integrate(1, 2), 2, "integrate(1, 1)");
+is( integrate( undef, undef ), undef, "integrate(undef, undef)" );
+is( integrate( undef, 1 ),     1,     "integrate(undef, 1)" );
+is( integrate( 1,     undef ), 1,     "integrate(1, undef)" );
+is( integrate( 1,     2 ),     2,     "integrate(1, 1)" );
+is( integrate( 1, q{ }), 1, 'integrate(1, [empty string])' );
 
 # reopn STDIN to test prompt()
 
 # file_checksum(), not exported
 
 {
-    my( $tmpfile, $fname ) = tempfile(UNLINK => 1);
+    my ( $tmpfile, $fname ) = tempfile( UNLINK => 1 );
     print $tmpfile "foo" x 1000;
     $tmpfile->flush;
-    is(Parrot::Configure::Step::file_checksum("$fname"), '324000',
-        "file_checksum() returns correct checksum");
+    is( Parrot::Configure::Step::file_checksum($fname),
+        '324000', "file_checksum() returns correct checksum" );
+}
+
+{
+    my ( $tmpfile, $fname ) = tempfile( UNLINK => 1 );
+    my $str = 'Do not print this line';
+    print $tmpfile "foo" x 500;
+    print $tmpfile "\n";
+    print $tmpfile "$str\n";
+    print $tmpfile "foo" x 500;
+    $tmpfile->flush;
+    my $ignore_pattern = qr/$str/;
+    my $csum = Parrot::Configure::Step::file_checksum(
+        $fname, $ignore_pattern
+    );
+    is( $csum, '324010', "file_checksum() returns correct checksum" );
 }
 
 # copy_if_diff()
 
 {
-    my( $fromfile, $fromfname ) = tempfile(UNLINK => 1);
-    my( $tofile, $tofname ) = tempfile(UNLINK => 1);
+    my ( $fromfile, $fromfname ) = tempfile( UNLINK => 1 );
+    my ( $tofile,   $tofname )   = tempfile( UNLINK => 1 );
     print $fromfile "foo" x 1000;
     $fromfile->flush;
 
-    ok(copy_if_diff("$fromfname", "$tofname"),
-        "copy_if_diff() true return status");
-    is(Parrot::Configure::Step::file_checksum("$tofname"), '324000',
-        "copy_if_diff() copied differing files");
+    ok( copy_if_diff( $fromfname, $tofname ),
+        "copy_if_diff() true return status" );
+    is( Parrot::Configure::Step::file_checksum($tofname),
+        '324000', "copy_if_diff() copied differing files" );
+}
+
+{
+    my ( $fromfile, $fromfname ) = tempfile( UNLINK => 1 );
+    my ( $tofile,   $tofname )   = tempfile( UNLINK => 1 );
+    print $fromfile "foo" x 1000;
+    $fromfile->flush;
+    print $tofile "foo" x 1000;
+    $tofile->flush;
+
+    ok (! defined(copy_if_diff( $fromfname, $tofname )),
+        "copy_if_diff() true return undef" );
 }
 
 # move_if_diff()
 
 {
-    my( $fromfile, $fromfname ) = tempfile(UNLINK => 1);
-    my( $tofile, $tofname ) = tempfile(UNLINK => 1);
+    my ( $fromfile, $fromfname ) = tempfile( UNLINK => 1 );
+    my ( $tofile,   $tofname )   = tempfile( UNLINK => 1 );
     print $fromfile "foo" x 1000;
     $fromfile->close;
     $tofile->close;
@@ -82,24 +110,24 @@ is(integrate(1, 2), 2, "integrate(1, 1)");
     my $redir = File::Spec->devnull;
 
     # copy file descriptors
-    open OLDERR, ">&STDERR";
+    open *OLDERR, ">&", "STDERR";
     $fromfile->close();
     $tofile->close();
 
-    ok(move_if_diff("$fromfname", "$tofname"),
-        "move_if_diff() true return status");
-    ok(! -e "$fromfname", "move_if_diff() moved differing file");
+    ok( move_if_diff( $fromfname, $tofname ),
+        "move_if_diff() true return status" );
+    ok( !-e $fromfname, "move_if_diff() moved differing file" );
 
     # redirect STDERR for the test below
-    close STDERR;
-    open STDERR, $redir;
+    close *STDERR;
+    open *STDERR, '<', $redir;
 
-    ok(-e "$tofname", "move_if_diff() moved differing file");
+    ok( -e $tofname, "move_if_diff() moved differing file" );
 
     # restore STDERR
-    close STDERR;
-    open STDERR, ">&OLDERR";
-    close OLDERR;
+    close *STDERR;
+    open *STDERR, ">&", "OLDERR";
+    close *OLDERR;
 }
 
 # genfile()
@@ -123,47 +151,49 @@ is(integrate(1, 2), 2, "integrate(1, 1)");
 {
     my %tf_params = ( UNLINK => 1, );
     $tf_params{SUFFIX} = '.exe' if 'MSWin32' eq $^O;
-    my( $tmpfile, $fname ) = tempfile(%tf_params);
+    my ( $tmpfile, $fname ) = tempfile(%tf_params);
 
-    local $ENV{PATH} = dirname("$fname");
-    chmod 0777, "$fname";
-    my $prog = basename("$fname");
+    local $ENV{PATH} = dirname($fname);
+    chmod 0777, $fname;
+    my $prog = basename($fname);
 
-    is(check_progs($prog), $prog,
-        "check_progs() returns the proper program")
+    is( check_progs($prog), $prog, "check_progs() returns the proper program" )
 }
 
 {
     my %tf_params = ( UNLINK => 1, );
     $tf_params{SUFFIX} = '.exe' if 'MSWin32' eq $^O;
-    my( $tmpfile, $fname ) = tempfile(%tf_params);
+    my ( $tmpfile, $fname ) = tempfile(%tf_params);
 
-    local $ENV{PATH} = dirname("$fname");
-    chmod 0777, "$fname";
-    my $prog = basename("$fname");
+    local $ENV{PATH} = dirname($fname);
+    chmod 0777, $fname;
+    my $prog = basename($fname);
 
-    is(check_progs([$prog]), $prog,
-        "check_progs() returns the proper program when passed an array ref")
+    is( check_progs( [$prog] ),
+        $prog, "check_progs() returns the proper program when passed an array ref" )
 }
 
 {
     my $cmd = 'someboguscommand';
-    ok(!check_progs([$cmd]),
-        "check_progs() returns undef in scalar context on failure");
-    ok(!check_progs($cmd),
-        "check_progs() returns undef in scalar context on failure");
-    is_deeply([check_progs([$cmd])], [],
-        "check_progs() returns () in list context on failure");
-    is_deeply([check_progs($cmd)], [],
-        "check_progs() returns () in list context on failure");
+    ok( !check_progs( [$cmd] ), "check_progs() returns undef in scalar context on failure" );
+    ok( !check_progs($cmd), "check_progs() returns undef in scalar context on failure" );
+    is_deeply( [ check_progs( [$cmd] ) ],
+        [], "check_progs() returns () in list context on failure" );
+    is_deeply( [ check_progs($cmd) ], [], "check_progs() returns () in list context on failure" );
 }
 
 # _slurp(), not exported
 
 {
-    my( $tmpfile, $fname ) = tempfile(UNLINK => 1);
+    my ( $tmpfile, $fname ) = tempfile( UNLINK => 1 );
     print $tmpfile "foo" x 1000;
     $tmpfile->flush;
-    is(Parrot::Configure::Step::_slurp($fname), "foo" x 1000,
-        "_slurp() slurped the file");
+    is( Parrot::Configure::Step::_slurp($fname), "foo" x 1000, "_slurp() slurped the file" );
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

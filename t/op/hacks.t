@@ -1,15 +1,14 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/hacks.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/op/hacks.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 2;
 use Parrot::Config;
 use Config;
-
 
 =head1 NAME
 
@@ -17,7 +16,7 @@ t/op/hacks.t - IO Ops
 
 =head1 SYNOPSIS
 
-	% prove t/op/hacks.t
+        % prove t/op/hacks.t
 
 =head1 DESCRIPTION
 
@@ -25,19 +24,18 @@ Tests basic file IO operations.
 
 =cut
 
-
 sub has_signal {
-  my $sig = shift;
-  foreach my $name (split(' ', $Config{sig_name})) {
-    return 1 if ("SIG$name" eq $sig);
-  }
-  return 0;
+    my $sig = shift;
+    foreach my $name ( split( ' ', $Config{sig_name} ) ) {
+        return 1 if ( "SIG$name" eq $sig );
+    }
+    return 0;
 }
 
 SKIP: {
-  skip("no universal SIGFPE handling", 2);
+    skip( "no universal SIGFPE handling", 2 );
 
-pasm_output_is(<<'CODE', <<OUT, "catch a SIGFPE");
+    pasm_output_is( <<'CODE', <<OUT, "catch a SIGFPE" );
     push_eh _handler
     div I10, 0
     print "not reached\n"
@@ -60,7 +58,7 @@ error -8
 severity 0
 OUT
 
-pasm_output_is(<<'CODE', <<OUT, "catch a SIGFPE 2");
+    pasm_output_is( <<'CODE', <<OUT, "catch a SIGFPE 2" );
     push_eh _handler
     div I10, 0
     print "not reached\n"
@@ -80,6 +78,9 @@ ok
 OUT
 }
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 2; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

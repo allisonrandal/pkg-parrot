@@ -2,7 +2,7 @@
 Copyright (C) 2001-2006, The Perl Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: /local/src/packout.c 13784 2006-08-01T17:54:04.760248Z chip  $
+$Id: /parrotcode/trunk/src/packout.c 3477 2007-05-13T20:42:55.058233Z chromatic  $
 
 =head1 NAME
 
@@ -30,12 +30,12 @@ contiguous region of memory.
 #define TRACE_PACKFILE_PMC 0
 
 /* XXX This should be in an external file */
-extern struct PackFile_Directory *directory_new (Interp*, struct PackFile *pf);
+extern PackFile_Directory *directory_new(Interp *interp, PackFile *pf);
 
 /*
 
 =item C<opcode_t
-PackFile_pack_size(Interp*, struct PackFile *self)>
+PackFile_pack_size(Interp *interp, PackFile *self)>
 
 Description.
 
@@ -44,18 +44,17 @@ Description.
 */
 
 opcode_t
-PackFile_pack_size(Interp* interpreter, struct PackFile *self)
+PackFile_pack_size(Interp *interp, PackFile *self)
 {
     opcode_t size;
-    struct PackFile_Directory * const dir = &self->directory;
+    PackFile_Directory * const dir = &self->directory;
 
-    size = PACKFILE_HEADER_BYTES / sizeof(opcode_t);
+    size = PACKFILE_HEADER_BYTES / sizeof (opcode_t);
 
     size += 4; /* magic + opcode type + directory type + pad */
 
     dir->base.file_offset = size;
-    size += PackFile_Segment_packed_size(interpreter,
-            (struct PackFile_Segment *) dir);
+    size += PackFile_Segment_packed_size(interp, (PackFile_Segment *) dir);
 
     return size;
 }
@@ -63,7 +62,7 @@ PackFile_pack_size(Interp* interpreter, struct PackFile *self)
 /*
 
 =item C<void
-PackFile_pack(Interp*, struct PackFile *self, opcode_t *cursor)>
+PackFile_pack(Interp*, PackFile *self, opcode_t *cursor)>
 
 Pack the PackFile into a contiguous region of memory.
 
@@ -80,29 +79,29 @@ Other pack routines are in F<src/packfile.c>.
 */
 
 void
-PackFile_pack(Interp* interpreter, struct PackFile *self, opcode_t *cursor)
+PackFile_pack(Interp *interp, PackFile *self, opcode_t *cursor)
 {
     opcode_t *ret;
 
     size_t size;
-    struct PackFile_Directory * const dir = &self->directory;
-    struct PackFile_Segment *seg;
+    PackFile_Directory * const dir = &self->directory;
+    PackFile_Segment *seg;
 
     self->src = cursor;
 
     /* Pack the header */
     mem_sys_memcopy(cursor, self->header, PACKFILE_HEADER_BYTES);
-    cursor += PACKFILE_HEADER_BYTES / sizeof(opcode_t);
+    cursor += PACKFILE_HEADER_BYTES / sizeof (opcode_t);
     *cursor++ = PARROT_MAGIC;           /* Pack the magic */
     *cursor++ = OPCODE_TYPE_PERL;       /* Pack opcode type */
     *cursor++ = PF_DIR_FORMAT;          /* dir format */
     *cursor++ = 0;                      /* pad */
 
     /* pack the directory */
-    seg = (struct PackFile_Segment *) dir;
+    seg = (PackFile_Segment *) dir;
     /* dir size */
     size = seg->op_count;
-    ret = PackFile_Segment_pack (interpreter, seg, cursor);
+    ret = PackFile_Segment_pack(interp, seg, cursor);
     if ((size_t)(ret - cursor) != size) {
         fprintf(stderr, "PackFile_pack segment '%s' used size %d "
                 "but reported %d\n", seg->name, (int)(ret-cursor), (int)size);
@@ -112,7 +111,7 @@ PackFile_pack(Interp* interpreter, struct PackFile *self, opcode_t *cursor)
 /*
 
 =item C<size_t
-PackFile_ConstTable_pack_size(struct PackFile_Segment *seg)>
+PackFile_ConstTable_pack_size(PackFile_Segment *seg)>
 
 Determine the size of the buffer needed in order to pack the PackFile
 constant table into a contiguous region of memory.
@@ -122,21 +121,21 @@ constant table into a contiguous region of memory.
 */
 
 size_t
-PackFile_ConstTable_pack_size(Interp *interpreter, struct PackFile_Segment *seg)
+PackFile_ConstTable_pack_size(Interp *interp, PackFile_Segment *seg)
 {
     opcode_t i;
-    struct PackFile_ConstTable * const self = (struct PackFile_ConstTable *) seg;
+    PackFile_ConstTable* const self = (PackFile_ConstTable *) seg;
     size_t size = 1;    /* const_count */
 
     for (i = 0; i < self->const_count; i++)
-        size += PackFile_Constant_pack_size(interpreter, self->constants[i]);
+        size += PackFile_Constant_pack_size(interp, self->constants[i]);
     return size;
 }
 
 /*
 
-=item C<opcode_t *
-PackFile_ConstTable_pack(Interp *, struct PackFile_Segment *seg, opcode_t *cursor)>
+=item C<opcode_t *PackFile_ConstTable_pack(Interp *, PackFile_Segment *seg,
+                                           opcode_t *cursor)>
 
 Pack the PackFile ConstTable into a contiguous region of memory.
 
@@ -150,22 +149,17 @@ C<PackFile_ConstTable_pack()>
 
 */
 
-static struct PackFile_ConstTable *ct;
-
 opcode_t *
-PackFile_ConstTable_pack(Interp *interpreter,
-        struct PackFile_Segment *seg, opcode_t *cursor)
+PackFile_ConstTable_pack(Interp *interp,
+        PackFile_Segment *seg, opcode_t *cursor)
 {
-    struct PackFile_ConstTable * const self = (struct PackFile_ConstTable *)seg;
+    PackFile_ConstTable * const self = (PackFile_ConstTable *)seg;
     opcode_t i;
-
-    /* remember const_table for find_in_const */
-    ct = self;
 
     *cursor++ = self->const_count;
 
     for (i = 0; i < self->const_count; i++) {
-        cursor = PackFile_Constant_pack(interpreter, self->constants[i], cursor);
+        cursor = PackFile_Constant_pack(interp, self, self->constants[i], cursor);
     }
 
     return cursor;
@@ -174,7 +168,7 @@ PackFile_ConstTable_pack(Interp *interpreter,
 /*
 
 =item C<static int
-find_in_const(Interp *interpreter, PMC *key, int type)>
+find_in_const(Interp *interp, PMC *key, int type)>
 
 This is really ugly, we don't know where our C<PARROT_ARG_SC> key
 constant is in constant table, so we have to search for it.
@@ -183,8 +177,9 @@ constant is in constant table, so we have to search for it.
 
 */
 
-static int
-find_in_const(Interp *interpreter, PMC *key, int type)
+int
+PackFile_find_in_const(Interp *interp, PackFile_ConstTable *ct, PMC *key,
+                       int type)
 {
     int i;
     for (i = 0; i < ct->const_count; i++)
@@ -195,14 +190,15 @@ find_in_const(Interp *interpreter, PMC *key, int type)
                  PMC_num_val(key))
             return i;
     PIO_eprintf(NULL, "find_in_const: couldn't find const for key\n");
-    Parrot_exit(interpreter, 1);
+    Parrot_exit(interp, 1);
     return 0;
 }
 
 /*
 
 =item C<opcode_t *
-PackFile_Constant_pack(Interp*, struct PackFile_Constant *self, opcode_t *cursor)>
+PackFile_Constant_pack(Interp*, PackFile_ConstTable * const_table,
+                       PackFile_Constant *self, opcode_t *cursor)>
 
 Pack a PackFile Constant into a contiguous region of memory.
 
@@ -220,10 +216,10 @@ The data is zero-padded to an opcode_t-boundary, so pad bytes may be added.
 */
 
 opcode_t *
-PackFile_Constant_pack(Interp* interpreter,
-        struct PackFile_Constant *self, opcode_t *cursor)
+PackFile_Constant_pack(Interp* interp, PackFile_ConstTable * const_table,
+        PackFile_Constant *self, opcode_t *cursor)
 {
-    struct PMC *key;
+    PMC *key;
     size_t i;
     opcode_t slice_bits;
     STRING *image;
@@ -242,17 +238,17 @@ PackFile_Constant_pack(Interp* interpreter,
 
     case PFC_PMC:
         key = self->u.key;      /* the (Sub) PMC */
-        image = Parrot_freeze(interpreter, key);
+        image = Parrot_freeze(interp, key);
         cursor = PF_store_string(cursor, image);
         break;
 
     case PFC_KEY:
-        for (i = 0, key = self->u.key; key; key = PMC_data(key), i++)
+        for (i = 0, key = self->u.key; key; key = (PMC *)PMC_data(key), i++)
             ;
         /* number of key components */
         *cursor++ = i;
         /* and now type / value per component */
-        for (key = self->u.key; key; key = PMC_data(key)) {
+        for (key = self->u.key; key; key = (PMC *)PMC_data(key)) {
             opcode_t type = PObj_get_FLAGS(key);
             slice_bits = 0;
             if ((type & (KEY_start_slice_FLAG|KEY_inf_slice_FLAG)) ==
@@ -274,11 +270,13 @@ PackFile_Constant_pack(Interp* interpreter,
                     break;
                 case KEY_number_FLAG:
                     *cursor++ = PARROT_ARG_NC | slice_bits;
-                    *cursor++ = find_in_const(interpreter, key, PFC_NUMBER);     /* Argh */
+                    /* Argh */
+                    *cursor++ = PackFile_find_in_const(interp, const_table, key, PFC_NUMBER);
                     break;
                 case KEY_string_FLAG:
                     *cursor++ = PARROT_ARG_SC | slice_bits;
-                    *cursor++ = find_in_const(interpreter, key, PFC_STRING);     /* Argh */
+                    /* Argh */
+                    *cursor++ = PackFile_find_in_const(interp, const_table, key, PFC_STRING);
                     break;
 
                 case KEY_integer_FLAG | KEY_register_FLAG:
@@ -300,7 +298,7 @@ PackFile_Constant_pack(Interp* interpreter,
                 default:
                     PIO_eprintf(NULL, "PackFile_Constant_pack: "
                             "unsupported constant type\n");
-                    Parrot_exit(interpreter, 1);
+                    Parrot_exit(interp, 1);
             }
         }
 
@@ -308,7 +306,7 @@ PackFile_Constant_pack(Interp* interpreter,
 
     default:
         PIO_eprintf(NULL, "PackFile_Constant_pack: unsupported constant\n");
-        Parrot_exit(interpreter, 1);
+        Parrot_exit(interp, 1);
         break;
     }
     return cursor;
@@ -329,12 +327,10 @@ leo: rewrite to use new directory-based format.
 
 */
 
+
 /*
-* Local variables:
-* c-indentation-style: bsd
-* c-basic-offset: 4
-* indent-tabs-mode: nil
-* End:
-*
-* vim: expandtab shiftwidth=4:
-*/
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

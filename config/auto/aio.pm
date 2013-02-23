@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/aio.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/aio.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Determines whether the platform supports AIO.
 package auto::aio;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,27 +25,27 @@ $description = 'Determining if your platform supports AIO';
 
 @args = qw(verbose);
 
-sub runstep
-{
-    my ($self, $conf) = (shift, shift);
+sub runstep {
+    my ( $self, $conf ) = ( shift, shift );
 
     my $test;
     my $verbose = $conf->options->get('verbose');
     my $libs    = $conf->data->get('libs');
-    $conf->data->add(' ', libs => '-lrt');
+    $conf->data->add( ' ', libs => '-lrt' );
 
     cc_gen('config/auto/aio/aio.in');
     eval { cc_build(); };
-    if (!$@) {
+    if ( !$@ ) {
         $test = cc_run(35);
 
         # if the test is failing with sigaction err
         # we should repeat it with a different signal number
         if (
             $test =~ /SIGRTMIN=(\d+)\sSIGRTMAX=(\d+)\n
-		INFO=42\n
-		ok/x
-            ) {
+                INFO=42\n
+                ok/x
+            )
+        {
             print " (yes) " if $verbose;
             $self->set_result('yes');
 
@@ -56,8 +57,9 @@ sub runstep
             );
         }
 
-    } else {
-        $conf->data->set(libs => $libs);
+    }
+    else {
+        $conf->data->set( libs => $libs );
         print " (no) " if $verbose;
         $self->set_result('no');
     }
@@ -66,3 +68,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

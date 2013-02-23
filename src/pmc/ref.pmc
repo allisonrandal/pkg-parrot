@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/ref.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/src/pmc/ref.pmc 3368 2007-05-03T05:08:51.125791Z chromatic  $
 
 =head1 NAME
 
@@ -35,7 +35,7 @@ Sets the referenced PMC to C<PMCNULL>.
 
 */
 
-    void init () {
+    void init() {
         SELF.init_pmc(PMCNULL);
     }
 
@@ -54,7 +54,7 @@ Sets the referenced PMC to C<initializer>.
 
 */
 
-    void init_pmc (PMC* initializer) {
+    void init_pmc(PMC *initializer) {
         PMC_pmc_val(SELF) = initializer; /* the referred PMC itself */
         PObj_custom_mark_SET(SELF);
         if (initializer) {
@@ -96,6 +96,20 @@ Get the referenced PMC.
 
 /*
 
+=item C<INTVAL type()>
+
+Returns the PMC's type.
+
+=cut
+
+*/
+
+    INTVAL type() {
+        return VTABLE_type(interp, PMC_pmc_val(SELF));
+    }
+
+/*
+
 =item C<void mark()>
 
 Marks the referenced PMC as live.
@@ -104,7 +118,7 @@ Marks the referenced PMC as live.
 
 */
 
-    void mark () {
+    void mark() {
         pobject_lives(INTERP, (PObj *) PMC_pmc_val(SELF));
     }
 
@@ -115,20 +129,6 @@ Marks the referenced PMC as live.
 These two methods must be implemented because they are not delegated.
 
 =over 4
-
-=item C<INTVAL type()>
-
-Returns the type of the PMC, not the type of the referenced PMC.
-
-=cut
-
-*/
-
-    INTVAL type() {
-        return SUPER();
-    }
-
-/*
 
 =item C<STRING *name()>
 
@@ -159,10 +159,7 @@ Allowed null value by TOGoS 2004.07.28 (evil+bad?)
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

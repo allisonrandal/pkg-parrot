@@ -1,4 +1,4 @@
-/* $Id: /local/compilers/imcc/instructions.c 12606 2006-05-10T17:54:59.703856Z petdance  $ */
+/* $Id: /parrotcode/local/compilers/imcc/instructions.c 930 2006-12-28T23:51:13.748136Z chromatic  $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,18 +55,18 @@ static int emitter;     /* XXX */
 
 Instruction *
 _mk_instruction(const char *op, const char * fmt, int n,
-	SymReg ** r, int flags)
+        SymReg ** r, int flags)
 {
     int i, reg_space;
     Instruction * ins;
 
     reg_space = 0;
     if (n > 1)
-        reg_space = sizeof(SymReg *) * (n - 1);
-    ins = calloc(sizeof(Instruction) + reg_space, 1);
+        reg_space = sizeof (SymReg *) * (n - 1);
+    ins = calloc(sizeof (Instruction) + reg_space, 1);
     if (ins == NULL) {
         fprintf(stderr, "Memory error at mk_instruction\n");
-	abort();
+        abort();
     }
 
     ins->op = str_dup(op);
@@ -92,7 +92,7 @@ static int r_special[5];
 static int w_special[1+4*3];
 
 void
-imcc_init_tables(Interp * interpreter)
+imcc_init_tables(Interp *interp)
 {
     size_t i;
     const char *reads[] = {
@@ -104,13 +104,13 @@ imcc_init_tables(Interp * interpreter)
     };
     /* init opnums */
     if (!r_special[0]) {
-        for (i = 0; i < sizeof(reads)/sizeof(reads[0]); i++) {
-            int n = interpreter->op_lib->op_code(reads[i], 1);
+        for (i = 0; i < sizeof (reads)/sizeof (reads[0]); i++) {
+            int n = interp->op_lib->op_code(reads[i], 1);
             assert(n);
             r_special[i] = n;
         }
-        for (i = 0; i < sizeof(writes)/sizeof(writes[0]); i++) {
-            int n = interpreter->op_lib->op_code(writes[i], 1);
+        for (i = 0; i < sizeof (writes)/sizeof (writes[0]); i++) {
+            int n = interp->op_lib->op_code(writes[i], 1);
             assert(n);
             w_special[i] = n;
         }
@@ -133,7 +133,7 @@ ins_reads2(Instruction *ins, int t)
     if (!p)
         return 0;
     idx = p - types;
-    for (i = 1; i < sizeof(r_special)/sizeof(int); i += 4) {
+    for (i = 1; i < sizeof (r_special)/sizeof (int); i += 4) {
         if (ins->opnum == r_special[i + idx])
             return 1;
     }
@@ -156,7 +156,7 @@ ins_writes2(Instruction *ins, int t)
     if (!p)
         return 0;
     idx = p - types;
-    for (i = 1; i < sizeof(w_special)/sizeof(int); i += 4) {
+    for (i = 1; i < sizeof (w_special)/sizeof (int); i += 4) {
         if (ins->opnum == w_special[i + idx])
             return 1;
     }
@@ -191,7 +191,7 @@ instruction_reads(Instruction* ins, SymReg* r) {
     }
     f = ins->flags;
     for (i = 0; i < ins->n_r; i++) {
-	if (f & (1<<i)) {
+        if (f & (1<<i)) {
             ri = ins->r[i];
             if (ri == r)
                 return 1;
@@ -229,7 +229,7 @@ instruction_writes(Instruction* ins, SymReg* r) {
 
     f = ins->flags;
 
-    /* 
+    /*
      * a get_results opcode is before the actual sub call
      * but for the register allocator, the effect matters, thus
      * postpone the effect after the invoke
@@ -239,7 +239,7 @@ instruction_writes(Instruction* ins, SymReg* r) {
          * an exception_handler, which doesn't have
          * a call next
          */
-        if (ins->next && (ins->next->type & ITPCCSUB)) 
+        if (ins->next && (ins->next->type & ITPCCSUB))
             return 0;
         for (i = 0; i < ins->n_r; i++) {
             if (ins->r[i] == r)
@@ -277,7 +277,7 @@ instruction_writes(Instruction* ins, SymReg* r) {
         return 0;
     }
     for (i = 0; i < ins->n_r; i++)
-	if (f & (1<<(16+i))) {
+        if (f & (1<<(16+i))) {
             if (ins->r[i] == r)
                 return 1;
         }
@@ -398,7 +398,8 @@ prepend_ins(IMC_Unit *unit, Instruction *ins, Instruction * tmp)
  */
 
 void
-subst_ins(IMC_Unit *unit, Instruction *ins, Instruction * tmp, int needs_freeing)
+subst_ins(IMC_Unit *unit, Instruction *ins,
+          Instruction * tmp, int needs_freeing)
 {
     Instruction *prev = ins->prev;
     if (prev)
@@ -433,19 +434,19 @@ move_ins(IMC_Unit * unit, Instruction *ins, Instruction *to)
 
 /* Emit a single instruction into the current unit buffer. */
 Instruction *
-emitb(IMC_Unit * unit, Instruction * i)
+emitb(Interp * interp, IMC_Unit * unit, Instruction * i)
 {
 
     if (!unit || !i)
-	return 0;
-    if(!unit->instructions)
+        return 0;
+    if (!unit->instructions)
         unit->last_ins = unit->instructions = i;
     else {
-	unit->last_ins->next = i;
+        unit->last_ins->next = i;
         i->prev = unit->last_ins;
-	unit->last_ins = i;
+        unit->last_ins = i;
     }
-    i->line = line - 1;         /* lexer is in next line already */
+    i->line = IMCC_INFO(interp)->line - 1;         /* lexer is in next line already */
     return i;
 }
 
@@ -477,8 +478,8 @@ ins_print(Interp *interp, FILE *fd, Instruction * ins)
     PIO_eprintf(NULL, "ins_print\n");
 #endif
 
-    if (!ins->r[0] || !strchr(ins->fmt, '%')) {	/* comments, labels and such */
-	return fprintf(fd, "%s", ins->fmt);
+    if (!ins->r[0] || !strchr(ins->fmt, '%')) { /* comments, labels and such */
+        return fprintf(fd, "%s", ins->fmt);
     }
     for (i = 0; i < ins->n_r; i++) {
         p = ins->r[i];
@@ -486,17 +487,17 @@ ins_print(Interp *interp, FILE *fd, Instruction * ins)
             continue;
         if (p->type & VT_CONSTP)
             p = p->reg;
-	if (p->color >= 0 && (p->type & VTREGISTER)) {
-	    sprintf(regb[i], "%c%d", p->set, (int)p->color);
-	    regstr[i] = regb[i];
-	}
+        if (p->color >= 0 && (p->type & VTREGISTER)) {
+            sprintf(regb[i], "%c%d", p->set, (int)p->color);
+            regstr[i] = regb[i];
+        }
         else if (IMCC_INFO(interp)->allocated &&
                 (IMCC_INFO(interp)->optimizer_level & OPT_J) &&
                 p->set != 'K' &&
                 p->color < 0 && (p->type & VTREGISTER)) {
-	    sprintf(regb[i], "r%c%d", tolower(p->set), -1 - (int)p->color);
-	    regstr[i] = regb[i];
-	}
+                    sprintf(regb[i], "r%c%d", tolower(p->set), -1 - (int)p->color);
+                    regstr[i] = regb[i];
+        }
         else if (p->type & VTREGKEY) {
             SymReg * k = p->nextkey;
             for (*regb[i] = '\0'; k; k = k->nextkey) {
@@ -522,8 +523,8 @@ ins_print(Interp *interp, FILE *fd, Instruction * ins)
             sprintf(regb[i], "\"%s\"", p->name);      /* XXX */
             regstr[i] = regb[i];
         }
-	else
-	    regstr[i] = p->name;
+        else
+            regstr[i] = p->name;
     }
 
     switch (ins->opsize-1) {
@@ -570,17 +571,18 @@ e_file_open(Interp *interp, void *param)
     if (strcmp(file, "-"))
         freopen(file, "w", stdout);
     output = file;
-    printf( "# IMCC does produce b0rken PASM files\n# see http://guest@rt.perl.org/rt3/Ticket/Display.html?id=32392\n" );
+    printf("# IMCC does produce b0rken PASM files\n");
+    printf("# see http://guest@rt.perl.org/rt3/Ticket/Display.html?id=32392\n");
     return 1;
 }
 
 static int
-e_file_close(Interp *interpreter, void *param)
+e_file_close(Interp *interp, void *param)
 {
     UNUSED(param);
     printf("\n\n");
     fclose(stdout);
-    IMCC_info(interpreter, 1, "assembly module %s written.\n", output);
+    IMCC_info(interp, 1, "assembly module %s written.\n", output);
     return 0;
 }
 
@@ -593,9 +595,9 @@ e_file_emit(Interp *interp, void *param, IMC_Unit * unit, Instruction * ins)
     PIO_eprintf(NULL, "e_file_emit\n");
 #endif
     if ((ins->type & ITLABEL) || ! *ins->op)
-	ins_print(interp, stdout, ins);
+        ins_print(interp, stdout, ins);
     else {
-	imcc_fprintf(interp, stdout, "\t%I ",ins);
+        imcc_fprintf(interp, stdout, "\t%I ",ins);
     }
     printf("\n");
     return 0;
@@ -634,11 +636,8 @@ emit_close(Interp *interp, void *param)
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */
 

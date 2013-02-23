@@ -1,3 +1,4 @@
+# $Id: /parrotcode/trunk/languages/lisp/include/macros/list.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
 
 =head1 LIST PROCESSING MACROS
 
@@ -45,11 +46,11 @@ Appends B to list A, placing the result into R.  A is assumed to be a valid list
   .sym pmc _listptr2p
   .sym pmc _listtmpp
 
-  .NULL(.A, .$EMPTY_LIST)	# Special case if A is an empty list.
+  .NULL(.A, .$EMPTY_LIST)       # Special case if A is an empty list.
 
   _listptr1p = .A
 
-.local $APPEND_LOOP:		# Loop until we reach the end of the list.
+.local $APPEND_LOOP:            # Loop until we reach the end of the list.
   .NULL(_listptr1p,.$DONE_LOOP)
 
   _listptr2p = _listptr1p
@@ -57,8 +58,8 @@ Appends B to list A, placing the result into R.  A is assumed to be a valid list
   .CDR(_listptr1p,_listptr1p)
   goto .$APPEND_LOOP
 
-.local $DONE_LOOP:		# At the EOL, replace the list end (NIL)
-  .LIST_1(_listtmpp, .B)	# with a new cons containing the new element.
+.local $DONE_LOOP:              # At the EOL, replace the list end (NIL)
+  .LIST_1(_listtmpp, .B)        # with a new cons containing the new element.
   _listptr2p[1] = _listtmpp  
   goto .$DONE
 
@@ -164,3 +165,9 @@ Creates a two element list containing A and B, placing the result in R.
 .endm
 
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

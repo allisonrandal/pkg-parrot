@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2005-2006, The Perl Foundation.
-$Id: /local/languages/lua/pmc/luauserdata.pmc 13236 2006-07-10T06:47:56.488120Z fperrad  $
+Copyright (C) 2005-2007, The Perl Foundation.
+$Id: /parrotcode/trunk/languages/lua/pmc/luauserdata.pmc 2769 2007-04-03T06:04:44.542626Z fperrad  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ pmc/luauserdata.pmc - Lua Userdata
 
 =head1 DESCRIPTION
 
-C<LuaUserdata> extends C<LuaBase> to provide a class with the behaviour of
+C<LuaUserdata> extends C<LuaAny> to provide a class with the behaviour of
 the Lua C<Userdata> type.
 
 =head2 Overloaded Methods
@@ -22,30 +22,27 @@ the Lua C<Userdata> type.
 #include "parrot/parrot.h"
 
 static STRING *luauserdata_name;
-static INTVAL dynpmc_LuaBoolean;
-static INTVAL dynpmc_LuaNil;
-static INTVAL dynpmc_LuaString;
+extern INTVAL dynpmc_LuaBoolean;
+extern INTVAL dynpmc_LuaNil;
+extern INTVAL dynpmc_LuaString;
+extern INTVAL dynpmc_LuaTable;
+
+extern PMC * find_meth(Interp* interp, PMC *obj, const char *name);
 
 
-pmclass LuaUserdata 
-    extends LuaBase
+pmclass LuaUserdata
+    extends LuaAny
     does scalar
-    dynpmc 
-    group lua_group 
+    dynpmc
+    need_ext
+    group lua_group
     hll Lua {
 
 /* Class initialization. Caches constant strings that will be used later.
 */
     void class_init() {
         if (pass) {
-            Parrot_LuaBase_super_init(INTERP, NULL);
             luauserdata_name = const_string(INTERP, "userdata");
-            dynpmc_LuaBoolean = pmc_type(INTERP,
-              string_from_const_cstring(INTERP, "LuaBoolean", 0));
-            dynpmc_LuaNil = pmc_type(INTERP,
-              string_from_const_cstring(INTERP, "LuaNil", 0));
-            dynpmc_LuaString = pmc_type(INTERP,
-              string_from_const_cstring(INTERP, "LuaString", 0));
         }
     }
 
@@ -60,22 +57,8 @@ Initializes the userdata.
 */
     void init () {
         PMC_pmc_val(SELF) = NULL;
-        PMC_struct_val(SELF) = NULL;
-    }
-
-/*
-
-=item C<void init_pmc(PMC *value)>
-
-Initializes the userdata.
-
-=cut
-
-*/
-    void init_pmc (PMC* value) {
-        PMC_pmc_val(SELF) = value;
-        PMC_struct_val(SELF) = NULL;
-        PObj_custom_mark_SET(SELF);
+        PMC_metadata(SELF) = NULL;
+        PObj_custom_mark_destroy_SETALL(SELF);
     }
 
 /*
@@ -88,8 +71,27 @@ Marks the userdata as live.
 
 */
     void mark () {
-        if(PMC_pmc_val(SELF))
+        if (PMC_pmc_val(SELF))
             pobject_lives(INTERP, (PObj *)PMC_pmc_val(SELF));
+    }
+
+/*
+
+=item C<void destroy()>
+
+Call finalizer and free the userdata.
+
+=cut
+
+*/
+    void destroy () {
+        PMC* meth = find_meth(INTERP, SELF, "__gc");
+        if (meth != NULL) {
+            (void)Parrot_runops_fromc_args(INTERP, meth, "vP", SELF);
+        }
+        if (PMC_pmc_val(SELF)) {
+            PMC_pmc_val(SELF) = NULL;
+        }
     }
 
 /*
@@ -101,22 +103,6 @@ Marks the userdata as live.
 */
     STRING* get_string () {
         return Parrot_sprintf_c(INTERP, "userdata: %08X", SELF);
-    }
-
-/*
-
-=item C<PMC* get_pmc_keyed (PMC* key)>
-
-=cut
-
-*/
-    PMC* get_pmc_keyed (PMC* key) {
-        PMC *metamethod = Parrot_LuaBase_find_metamethod(INTERP, SELF,
-                string_from_const_cstring(INTERP, "__index", 0));
-        if (metamethod != NULL) {
-            return VTABLE_get_pmc_keyed(INTERP, metamethod, key);
-        }
-        return pmc_new(INTERP, dynpmc_LuaNil);
     }
 
 /*
@@ -145,23 +131,23 @@ Return the string "userdata".
 
 /*
 
-=item C<PMC* get_attr(INTVAL idx)>
+=item C<PMC* get_attr_str(STRING* key)>
 
 =cut
 
 */
-    PMC* get_attr(INTVAL idx) {
+    PMC* get_attr_str(STRING* key) {
         return PMC_pmc_val(SELF);
     }
 
 /*
 
-=item C<void set_attr(INTVAL idx, PMC *val)>
+=item C<void set_attr_str(STRING* key, PMC* value)>
 
 =cut
 
 */
-    void set_attr(INTVAL idx, PMC* value) {
+    void set_attr_str(STRING* key, PMC* value) {
         PMC_pmc_val(SELF) = value;
     }
 
@@ -182,10 +168,10 @@ The C<==> operation. Compares reference (not in depth).
 */
     INTVAL is_equal (PMC* value) {
 MMD_LuaUserdata: {
-            PMC *metamethod = Parrot_LuaBase_find_metamethod(INTERP, SELF,
-                    string_from_const_cstring(INTERP, "__eq", 0));
-            if (metamethod != NULL) {
-                PMC *retval = Parrot_runops_fromc_args(INTERP, metamethod, "PPP", SELF, value);
+            PMC *meth = find_meth(INTERP, SELF, "__eq");
+            if (meth != NULL) {
+                PMC *retval = Parrot_runops_fromc_args(INTERP, meth, "PPP",
+                                                       SELF, value);
                 if (NULL == retval) {
                     return (INTVAL)0;
                 }
@@ -193,7 +179,7 @@ MMD_LuaUserdata: {
             }
             if (SELF == value)
                 return (INTVAL)1;
-            else 
+            else
                 return (INTVAL)0;
         }
 MMD_DEFAULT: {
@@ -230,15 +216,28 @@ MMD_DEFAULT: {
 
 =over 4
 
+=item C<PMC *get_metatable()>
+
+=cut
+
+*/
+    METHOD PMC* get_metatable() {
+        PMC *retval = PMC_metadata(SELF);
+        if (retval != NULL)
+            return retval;
+        else
+            return pmc_new(INTERP, dynpmc_LuaNil);
+    }
+
+/*
+
 =item C<PMC* rawequal (PMC* value)>
 
 =cut
 
 */
     METHOD PMC* rawequal (PMC* value) {
-        PMC *retval;
-       
-        retval = pmc_new(INTERP, dynpmc_LuaBoolean);
+        PMC* retval = pmc_new(INTERP, dynpmc_LuaBoolean);
         if (SELF->vtable->base_type == value->vtable->base_type
          && SELF == value)
             PMC_int_val(retval) = 1;
@@ -256,9 +255,10 @@ MMD_DEFAULT: {
 */
     METHOD void set_metatable(PMC *meta) {
         if (dynpmc_LuaNil == meta->vtable->base_type) {
-            PMC_struct_val(SELF) = NULL;
-        } else {
-            PMC_struct_val(SELF) = meta;
+            PMC_metadata(SELF) = NULL;
+        }
+        else {
+            PMC_metadata(SELF) = meta;
         }
     }
 
@@ -275,3 +275,10 @@ Francois Perrad.
 =cut
 
 */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

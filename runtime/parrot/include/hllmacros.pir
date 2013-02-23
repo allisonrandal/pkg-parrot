@@ -2,7 +2,7 @@
 
 These macros are to make it easier to write readable and maintainable PIR by
 preprocessing common HLL forms into their low level PIR forms.  These are
-B<not> actually high level constructs, but merely preprocessor directives.  
+B<not> actually high level constructs, but merely preprocessor directives.
 
 =head2 Conditionals
 
@@ -35,6 +35,7 @@ Using C<.NL()> in a line will insert a linebreak.
 .macro NL()
 .endm
 
+
 =item C<.If(conditional, code)>
 
 Runs the code in C<code> if C<conditional> is true.
@@ -47,6 +48,7 @@ Runs the code in C<code> if C<conditional> is true.
 .local $endif:
 .endm
 
+
 =item C<.Unless(conditional, code)>
 
 Runs the code in C<code> if C<conditional> is false.
@@ -58,6 +60,7 @@ Runs the code in C<code> if C<conditional> is false.
     .code
 .local $endif:
 .endm
+
 
 =item C<.IfElse(conditional, true, false)>
 
@@ -75,6 +78,7 @@ C<false>.
 .local $endif:
 .endm
 
+
 =item C<.While(conditional, code)>
 
 Runs the code in C<code> as long as C<conditional> is true.
@@ -89,6 +93,7 @@ Runs the code in C<code> as long as C<conditional> is true.
 .local $endwhile:
 .endm
 
+
 =item C<.DoWhile(code, conditional)>
 
 Runs the code in C<code> once, and then as long as C<conditional> is true.
@@ -99,6 +104,18 @@ Runs the code in C<code> once, and then as long as C<conditional> is true.
 .local $beginwhile:
     .code
     if .conditional goto .$beginwhile
+.endm
+
+=item C<.Loop(code)>
+
+Runs the code in C<code> forever.
+
+=cut
+
+.macro Loop(code)
+.local $beginloop:
+    .code
+    goto .$beginloop
 .endm
 
 =item C<.For(start, conditional, continue, code)>
@@ -117,6 +134,7 @@ true, runs C<code>, and then the C<continue> code, such as C<inc i>.
     goto .$beginfor
 .local $endfor:
 .endm
+
 
 =item C<.Foreach(name, array, code)>
 
@@ -138,6 +156,7 @@ work with in C<code>.
     goto .$beginforeach
 .local $endforeach:
 .endm
+
 
 =back
 
@@ -210,6 +229,7 @@ Using C<.NL()>
         print "\n"
     })
 
+
 =head1 Caveats
 
 The .Foreach macro is not nestable within itself currently.  You can use other macros inside a .Foreach loop, and the .Foreach loop can be nested inside other macros.
@@ -222,12 +242,10 @@ The .Foreach macro is not nestable within itself currently.  You can use other m
 
 Will not run as you would expect.
 
-=begin vim
-
-vim: ts=4 expandtab
-
-=end vim
-
 =cut
 
-
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/forlist.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/forlist.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
 
 =head1 NAME
 
@@ -12,17 +12,19 @@ t/forlist.t - Lua for statement
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.4.4 "Control Structures".
+See "Lua 5.1 Reference Manual", section 2.4.5 "For Statement",
+L<http://www.lua.org/manual/5.1/manual.html#2.4.5>.
 
 See "Programming in Lua", section 4.3 "Control Structures".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 3;
+use Parrot::Test tests => 5;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'for ipairs' );
@@ -37,6 +39,15 @@ CODE
 3	Tuesday
 OUT
 
+language_output_is( 'lua', <<'CODE', <<'OUT', 'for ipairs (hash)' );
+t = {a=10, b=100}
+
+for i, v in ipairs(t) do
+    print(i, v)
+end
+CODE
+OUT
+
 language_output_is( 'lua', <<'CODE', <<'OUT', 'for pairs' );
 a = {"Sunday", "Monday", "Tuesday"}
 
@@ -47,6 +58,17 @@ CODE
 1
 2
 3
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'for pairs (hash)' );
+t = {a=10, b=100}
+
+for k in pairs(t) do
+    print(k)
+end
+CODE
+a
+b
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'for break' );
@@ -60,4 +82,11 @@ CODE
 1	Sunday
 2	Monday
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

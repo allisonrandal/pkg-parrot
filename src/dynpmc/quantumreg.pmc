@@ -1,12 +1,12 @@
 /* quantumreg.pmc
  *  SVN Info
- *     $Id: /local/src/dynpmc/quantumreg.pmc 13523 2006-07-24T15:49:07.843920Z chip  $
+ *     $Id: /parrotcode/local/src/dynpmc/quantumreg.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
  *  Overview:
  *     These are the vtable functions for the QuantumReg PMC
  *  Data Structure and Algorithms:
  *  History:
- *    2005-11-13: Get started, start with example in 
- *                http://www.enyo.de/libquantum/api/node12.html 
+ *    2005-11-13: Get started, start with example in
+ *                http://www.enyo.de/libquantum/api/node12.html
  *  Notes:
  *     Please remove unneeded entries.
  *  References:
@@ -55,7 +55,7 @@ When it is available, the shared library has linked in the library 'libquantum'.
         }
     }
 
-    void init () {
+    void init() {
         PMC_struct_val(SELF) = NULL;
     }
 
@@ -69,15 +69,15 @@ Create a new QuantumReg with specified number of registers.
 
 */
 
-    void set_integer_native (INTVAL size) {
-        quantum_reg * reg_p = (quantum_reg *) malloc( 1 * sizeof(quantum_reg) );
+    void set_integer_native(INTVAL size) {
+        quantum_reg * reg_p = (quantum_reg *) malloc(1 * sizeof (quantum_reg));
         PMC_struct_val(SELF) = (void *) reg_p;
         *reg_p = quantum_new_qureg(0,size);
 
         /* change 1|0> to 0.5*sqrt(2)*|0> + 0.5*sqrt(2)*|1>  for first qubit */
         /* Measuring |0> will give a random value */
         /* TODO: op or method for hadamard */
-        quantum_hadamard(0, reg_p);  
+        quantum_hadamard(0, reg_p);
 
         return;
     }
@@ -93,9 +93,9 @@ Makes a measurement on |0> of the qubit at position key.
 
 */
 
-    INTVAL get_integer_keyed_int (INTVAL key) {
+    INTVAL get_integer_keyed_int(INTVAL key) {
         quantum_reg * reg_p = (quantum_reg *) PMC_struct_val(SELF);
-       
+
         return quantum_bmeasure(key, reg_p);
     }
 
@@ -111,7 +111,7 @@ Returns the number of qbits in the quantum register.
 
     INTVAL get_integer() {
         quantum_reg *reg_p = (quantum_reg *)PMC_struct_val(SELF);
-        if ( ! reg_p ) {
+        if (! reg_p) {
             return 0;
         }
         else {
@@ -135,10 +135,7 @@ L<http://www.enyo.de/libquantum/>
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

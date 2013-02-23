@@ -1,13 +1,13 @@
+#!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/library/yaml_parser_syck.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/library/yaml_parser_syck.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 1;
 
 =head1 NAME
 
@@ -23,12 +23,11 @@ Try to parse a YAML document.
 
 =cut
 
-
 TODO: {
 
-  local $TODO = 'Not properly implemented yet';
+    local $TODO = 'Not properly implemented yet';
 
-  pir_output_is( << 'CODE', << 'OUT', "basic parsing" );
+    pir_output_is( << 'CODE', << 'OUT', "basic parsing" );
 
 .include "library/YAML/Parser/Syck.pir"
 .include "library/dumper.pir"
@@ -156,8 +155,7 @@ elem12345678
     "_synchronous" => 1
 }
 OUT
-};
-
+}
 
 =head1 AUTHOR
 
@@ -169,7 +167,9 @@ F<runtime/parrot/library/YAML/Parser/Syck.pir>
 
 =cut
 
-
-## remember to change the number of tests! :-)
-BEGIN { plan tests => 1; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

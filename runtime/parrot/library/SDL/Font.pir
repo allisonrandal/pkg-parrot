@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/Font.pir 13104 2006-07-01T22:28:03.092980Z chromatic  $
+# $Id: /parrotcode/local/runtime/parrot/library/SDL/Font.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -210,3 +210,9 @@ list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

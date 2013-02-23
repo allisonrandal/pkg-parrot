@@ -1,7 +1,7 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /local/runtime/parrot/library/libpcre.pir 12837 2006-05-30T13:47:57.477012Z coke  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/libpcre.pir 3150 2007-04-13T06:37:16.786108Z chromatic  $
 
-=head1 TITEL
+=head1 TITLE
 
 libpcre.pir - NCI interface to Perl-Compatible Regular Expression library
 
@@ -176,3 +176,9 @@ E<lt>jerry dot gay at gmail dot com<gt>
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

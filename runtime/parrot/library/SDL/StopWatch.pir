@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/StopWatch.pir 13081 2006-07-01T03:36:07.973456Z chromatic  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/SDL/StopWatch.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 =head1 NAME
 
@@ -58,7 +58,7 @@ The stopwatch will be drawn onto the specified screen.
 
 =cut
 
-.sub __init :method
+.sub init :vtable :method
     .param pmc screen
 
     $I0 = classoffset self, 'SDL::StopWatch'
@@ -351,3 +351,9 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

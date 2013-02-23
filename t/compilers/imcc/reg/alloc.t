@@ -1,11 +1,13 @@
-#!perl -w
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/reg/alloc.t 13078 2006-06-30T23:50:00.784287Z leo  $
+#!perl
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/compilers/imcc/reg/alloc.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
 use Parrot::Test tests => 11;
 
-pir_output_is(<<'CODE', <<'OUT', "alligator");
+pir_output_is( <<'CODE', <<'OUT', "alligator" );
 # if the side-effect of set_addr/continuation isn't
 # detected this program prints "Hi\nalligator\n"
 
@@ -33,7 +35,7 @@ Hi
 Hi
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "alligator 2 - r9629");
+pir_output_is( <<'CODE', <<'OUT', "alligator 2 - r9629" );
 .sub xyz
     .local pmc args
     args = new .ResizablePMCArray
@@ -61,7 +63,7 @@ abc
 def
 OUT
 
-pir_2_pasm_is(<<'CODE', <<'OUT', ":unique_reg");
+pir_2_pasm_is( <<'CODE', <<'OUT', ":unique_reg" );
 .sub main
     .param int i :unique_reg
     .local int j :unique_reg
@@ -82,7 +84,7 @@ main:
         returncc
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "Explicit large register: S, PIR");
+pir_output_is( <<'CODE', <<'OUT', "Explicit large register: S, PIR" );
 .sub main
   S32 = "ok\n"
   print S32
@@ -91,7 +93,7 @@ CODE
 ok
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "Explicit large register: N, PIR");
+pir_output_is( <<'CODE', <<'OUT', "Explicit large register: N, PIR" );
 .sub main
   N32 = 3.8
   print N32
@@ -101,7 +103,7 @@ CODE
 3.800000
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "Explicit large register: I, PIR");
+pir_output_is( <<'CODE', <<'OUT', "Explicit large register: I, PIR" );
 .sub main
   I32 = 123
   print I32
@@ -111,7 +113,7 @@ CODE
 123
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "Explicit large register: P, PIR");
+pir_output_is( <<'CODE', <<'OUT', "Explicit large register: P, PIR" );
 .sub main
   P32 = new .String
   P32 = "ok\n"
@@ -121,7 +123,7 @@ CODE
 ok
 OUT
 
-pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: S, PASM");
+pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: S, PASM" );
   set S32, "ok\n"
   print S32
   end
@@ -129,7 +131,7 @@ CODE
 ok
 OUT
 
-pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: N, PASM");
+pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: N, PASM" );
   set N32, 3.8
   print N32
   print "\n"
@@ -138,7 +140,7 @@ CODE
 3.800000
 OUT
 
-pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: I, PASM");
+pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: I, PASM" );
   set I32, 123
   print I32
   print "\n"
@@ -147,7 +149,7 @@ CODE
 123
 OUT
 
-pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: P, PASM");
+pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: P, PASM" );
   new P32, .String
   set P32, "ok\n"
   print P32
@@ -155,3 +157,10 @@ pasm_output_is(<<'CODE', <<'OUT', "Explicit large register: P, PASM");
 CODE
 ok
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

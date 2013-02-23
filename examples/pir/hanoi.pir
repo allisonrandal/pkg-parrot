@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/examples/pir/hanoi.pir 12835 2006-05-30T13:32:26.641316Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/examples/pir/hanoi.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -244,3 +244,9 @@ move_multiple:
         ret
 
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

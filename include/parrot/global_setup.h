@@ -1,7 +1,7 @@
 /* global_setup.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/global_setup.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/global_setup.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *      Contains declarations of global data and the functions
  *      that initialize that data.
@@ -11,7 +11,7 @@
  *  References:
  */
 
-#if !defined(PARROT_GLOBAL_SETUP_H_GUARD)
+#ifndef PARROT_GLOBAL_SETUP_H_GUARD
 #define PARROT_GLOBAL_SETUP_H_GUARD
 
 #include "parrot/config.h"
@@ -25,10 +25,7 @@ void parrot_global_setup_2(Interp *);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

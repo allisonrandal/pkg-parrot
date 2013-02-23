@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 6;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     public class test_item
@@ -17,7 +20,7 @@ namespace Testing
     public class test_item_2
     {
     }
-    
+
     public class Test
     {
         public int m(int x)
@@ -80,10 +83,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'one_arg_i');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'one_arg_i' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -96,7 +99,7 @@ PIR
 10
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'two_args_ii');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'two_args_ii' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -109,7 +112,7 @@ PIR
 20
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'two_args_if');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'two_args_if' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -122,7 +125,7 @@ PIR
 30
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'test_obj_1');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'test_obj_1' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -135,7 +138,7 @@ PIR
 40
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'test_obj_2');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'test_obj_2' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -147,3 +150,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'test_obj_2');
 PIR
 50
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

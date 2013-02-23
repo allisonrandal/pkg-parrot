@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/coroutine.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/coroutine.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 10;
+use Parrot::Test tests => 11;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/pmc/coroutines.t - Coroutines
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/coroutines.t
+    % prove t/pmc/coroutines.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ Tests the C<Coroutine> PMC.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine 1");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Coroutine 1" );
 .include "interpinfo.pasm"
 .pcc_sub _main:
     .const .Sub P0 = "_coro"
@@ -49,7 +49,7 @@ back 0
 done
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "Coroutines - M. Wallace yield example");
+pir_output_is( <<'CODE', <<'OUTPUT', "Coroutines - M. Wallace yield example" );
 
 .sub __main__
     .local object return
@@ -106,7 +106,7 @@ CODE
 10 0
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in main");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Coroutine - exception in main" );
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -119,7 +119,8 @@ lp:
     print "back "
     print P16
     print "\n"
-    find_global P17, "no_such"
+    null S0
+    find_global P17, S0
     if P16, lp
     print "done\n"
     end
@@ -144,7 +145,7 @@ back 1
 catch main
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Coroutine - exception in coro" );
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -171,7 +172,8 @@ corolp:
     find_global P17, "i"
     dec P17
     yield
-    find_global P17, "no_such"
+    null S0
+    find_global P17, S0
     branch corolp
 _catchc:
     get_results '(0, 0)' , P5, S0
@@ -182,7 +184,7 @@ back 1
 catch coro
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro no handler");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Coroutine - exception in coro no handler" );
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -207,7 +209,8 @@ corolp:
     find_global P17, "i"
     dec P17
     yield
-    find_global P17, "no_such"
+    null S0
+    find_global P17, S0
     branch corolp
 _catchc:
     print "catch coro\n"
@@ -217,7 +220,7 @@ back 1
 catch main
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "Coroutine - exception in coro rethrow");
+pasm_output_is( <<'CODE', <<'OUTPUT', "Coroutine - exception in coro rethrow" );
 .include "interpinfo.pasm"
 _main:
     .const .Sub P0 = "_coro"
@@ -244,7 +247,8 @@ corolp:
     find_global P17, "i"
     dec P17
     yield
-    find_global P17, "no_such"
+    null S0
+    find_global P17, S0
     branch corolp
 _catchc:
     get_results '(0, 0)' , P5, S0
@@ -257,8 +261,7 @@ catch coro
 catch main
 OUTPUT
 
-
-pir_output_is(<<'CODE', 'Coroutine', "Coro new - type");
+pir_output_is( <<'CODE', 'Coroutine', "Coro new - type" );
 
 .sub main :main
     .local pmc c
@@ -277,7 +280,7 @@ pir_output_is(<<'CODE', 'Coroutine', "Coro new - type");
 .end
 CODE
 
-pir_output_is(<<'CODE', '01234', "Coro new - yield");
+pir_output_is( <<'CODE', '01234', "Coro new - yield" );
 
 .sub main :main
     .local pmc c
@@ -304,7 +307,30 @@ ex:
 .end
 CODE
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_like(
+    <<'CODE', <<'OUTPUT', "Call an exited coroutine", todo => 'goes one iteration too far.' );
+.sub main :main
+    .local pmc c
+    c = global "coro"
+loop:
+    $P0 = c()
+    print $P0
+    goto loop
+.end
+.sub coro
+    .local pmc x
+    x = new Integer
+    x = 0
+    iloop:
+        .yield (x)
+        x = x + 1
+    if x <= 4 goto iloop
+.end
+CODE
+/\A01234Cannot resume dead coroutine/
+OUTPUT
+
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -323,7 +349,7 @@ CODE
 0
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "re-entering coro from another sub");
+pir_output_is( <<'CODE', <<'OUTPUT', "re-entering coro from another sub" );
 
 .sub main :main
     .local int z
@@ -367,4 +393,9 @@ yield #4
 yield #5
 OUTPUT
 
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

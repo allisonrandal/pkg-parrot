@@ -1,13 +1,12 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/library/pcre.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/library/pcre.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 1;
 
 =head1 NAME
 
@@ -24,19 +23,16 @@ the installed PCRE library, and matches patterns successfully.
 
 =cut
 
-
 # if we keep pcre, we need a config test
-my $cmd = ($^O =~ /MSWin32/) ? "pcregrep --version" : "pcre-config --version";
-my $has_pcre = 0 == Parrot::Test::run_command(
-    $cmd, STDERR => File::Spec->devnull,
-);
+my $cmd = ( $^O =~ /MSWin32/ ) ? "pcregrep --version" : "pcre-config --version";
+my $has_pcre = !Parrot::Test::run_command( $cmd, STDERR => File::Spec->devnull, );
 
 SKIP: {
-    skip("no pcre-config", Test::Builder->new()->expected_tests())
+    skip( "no pcre-config", Test::Builder->new()->expected_tests() )
         unless $has_pcre;
 
 ## 1
-pir_output_is( <<'CODE', <<'OUT', 'soup to nuts' );
+    pir_output_is( <<'CODE', <<'OUT', 'soup to nuts' );
 
 
 .sub main :main
@@ -113,9 +109,11 @@ ok 4
 ok 5
 OUT
 
-};
+}
 
-
-## remember to change the number of tests! :-)
-BEGIN { plan tests => 1; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

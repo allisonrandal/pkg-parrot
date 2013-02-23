@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2006, The Perl Foundation. */
-/* $Id: /local/config/gen/config_h/config_h.in 12827 2006-05-30T02:28:15.110975Z coke  $ */
+/* $Id: /parrotcode/trunk/config/gen/config_h/config_h.in 3385 2007-05-05T14:41:57.057265Z bernhard  $ */
 
 /* config.h
  *
@@ -7,7 +7,7 @@
  *
  */
 
-#if !defined(PARROT_CONFIG_H_GUARD)
+#ifndef PARROT_CONFIG_H_GUARD
 #define PARROT_CONFIG_H_GUARD
 
 /*
@@ -142,14 +142,12 @@ typedef void DPOINTER;
 
 #endif
 
-#endif
+#endif /* PARROT_CONFIG_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */
+

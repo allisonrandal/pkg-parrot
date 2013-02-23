@@ -1,7 +1,13 @@
-#!../../parrot tcl.pbc
+#!perl
+
+# the following lines re-execute this as a tcl script
+# the \ at the end of these lines makes them a comment in tcl \
+use lib qw(languages/tcl/lib tcl/lib lib ../lib ../../lib); # \
+use Tcl::Test; #\
+__DATA__
 
 source lib/test_more.tcl
-plan 126
+plan 136
 
 # arg checking
 eval_is {string} \
@@ -99,6 +105,7 @@ eval_is {string range a b c d} \
 is [string range abcde 0 end] abcde {range, total}
 is [string range abcde 1 end-1] bcd {range, partial}
 is [string range abcde end-20 20] abcde {range, overextended}
+is [string range abcde end-1 1] {} {range, reversed}
 
 # [string match]
 
@@ -263,17 +270,25 @@ eval_is {string compare -length 4.2 aaabc aaabb} \
   {compare, float length}
 
 # [string wordend]
-is  [string wordend "foo bar baz" 0] 3 {wordend, from beginning} \
-  {TODO {not implemented}}
+is  [string wordend "foo bar baz" 0] 3 {wordend, from beginning}
 
-is [string wordend "foo bar99_baz" 5] 13 {wordend, numerics and underscores} \
-  {TODO {not implemented}}
+is [string wordend "foo bar99_baz" 5] 13 {wordend, numerics and underscores}
 
-is [string wordend "foo bar" 3] 4 {wordend, space} \
-  {TODO {not implemented}}
+is [string wordend "foo bar" 3] 4 {wordend, space}
 
 eval_is {string wordend} \
   {wrong # args: should be "string wordend string index"} \
-  {wordend too few args} \
-  {TODO {not implemented}}
+  {wordend too few args}
 
+# [string is]
+# # RT#40629: - many of the classes are NOT tested here, and we rely
+# on the cvs tests from tcl for that.
+is [string is double 2.1] 1 {string is double}
+is [string is double 7.0] 1 {string is double}
+is [string is double 7]   1 {string is double}
+is [string is double 1e1] 1 {string is double}
+is [string is double .1]  1 {string is double}
+is [string is double no]  0 {string is double}
+is [string is double .]   0 {string is double}
+is [string is double +2.] 1 {string is double}
+is [string is double -2.] 1 {string is double}

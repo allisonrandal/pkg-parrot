@@ -1,28 +1,28 @@
-# $Id: /local/languages/BASIC/compiler/RT_initialize.pir 11761 2006-02-27T07:57:10.879453Z bernhard  $
+# $Id: /parrotcode/trunk/languages/BASIC/compiler/RT_initialize.pir 3051 2007-04-09T21:07:27.159208Z paultcochrane  $
 
 .const int TYPE = 0
 .const int VALUE = 1
 .sub _main :main
-	$P0 = new .PerlHash 
+	$P0 = new .Hash 
 	store_global "BASICARR", $P0
-	$P0 = new .PerlArray
+	$P0 = new .ResizablePMCArray
 	store_global "READDATA", $P0
-	$P0 = new .PerlHash
+	$P0 = new .Hash
 	store_global "RESTOREINFO", $P0
-	$P0=new .PerlHash
+	$P0=new .Hash
 	$P0["value"]=0
 	store_global "READPOINTER", $P0
-	$P0=new .PerlHash
+	$P0=new .Hash
 	$P0["value"]=20021107
 	store_global "RANDSEED", $P0
-	$P0=new .PerlHash
+	$P0=new .Hash
 	$P0["value"]=0
 	store_global "PRINTCOL", $P0
-	$P0=new .PerlHash
+	$P0=new .Hash
 	store_global "DEBUGGER", $P0
-	$P0=new .PerlHash
+	$P0=new .Hash
 	store_global "COMMON", $P0
-	$P0=new .PerlArray
+	$P0=new .ResizablePMCArray
 	fdopen $P1, 0, "r"	# STDIN and friends...
         $P1 = getstdin
 	$P0[0]=$P1
@@ -40,3 +40,9 @@
 	_platform_shutdown()
 	end
 .end	        
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

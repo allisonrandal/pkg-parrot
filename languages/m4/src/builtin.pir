@@ -1,4 +1,4 @@
-# $Id: /local/languages/m4/src/builtin.pir 11640 2006-02-18T12:46:43.643690Z bernhard  $
+# $Id: /parrotcode/trunk/languages/m4/src/builtin.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ builtin.pir - builtin and user defined macros
 =head2 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: /local/languages/m4/src/builtin.pir 11640 2006-02-18T12:46:43.643690Z bernhard  $
+SVN Info:   $Id: /parrotcode/trunk/languages/m4/src/builtin.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 
@@ -875,3 +875,9 @@ A placeholder for unimplemented functions.
 
   .return ( 'not implemented yet' )
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,3 +1,6 @@
+#ifndef PARROT_DOTNET_PMC_STRUCTURES_H_GUARD
+#define PARROT_DOTNET_PMC_STRUCTURES_H_GUARD
+
 /* Some structures relating to the .NET CLI files and metadata PMCs. */
 
 /* This structure describes a loaded .NET assembly. */
@@ -58,7 +61,7 @@ struct dotnet_assemblyref {
     Parrot_UInt2 version_minor;
     Parrot_UInt2 version_build;
     Parrot_UInt2 version_revision;
-    
+
     /* Info about the assembly and its author. */
     Parrot_UInt4 flags;
     Parrot_UInt4 public_key;
@@ -267,3 +270,12 @@ struct dotnet_uint64
 {
     UHUGEINTVAL x;
 };
+
+#endif /* PARROT_DOTNET_PMC_STRUCTURES_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

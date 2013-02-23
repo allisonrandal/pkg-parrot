@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/Parrot/Test/Lua.pm 13236 2006-07-10T06:47:56.488120Z fperrad  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/Parrot/Test/Lua.pm 3356 2007-05-02T05:51:30.685110Z fperrad  $
 
 package Parrot::Test::Lua;
 
@@ -26,6 +26,9 @@ Yet another constructor.
 
 =cut
 
+use strict;
+use warnings;
+
 sub new {
     return bless {};
 }
@@ -45,18 +48,18 @@ foreach my $func ( keys %language_test_map ) {
 
         my $count = $self->{builder}->current_test + 1;
 
+        my $params = $options{params} || q{};
+
         # flatten filenames (don't use directories)
         my $lua_test = $ENV{PARROT_LUA_TEST_PROG} || q{};
         my $lang_fn = Parrot::Test::per_test( '.lua', $count );
         my $pir_fn  = Parrot::Test::per_test( '.pir', $count );
-        my $lua_out_fn = Parrot::Test::per_test(
-            $lua_test eq 'lua' ? '.orig_out' : '.parrot_out', $count );
+        my $lua_out_fn =
+            Parrot::Test::per_test( $lua_test eq 'lua' ? '.orig_out' : '.parrot_out', $count );
         my $test_prog_args = $ENV{TEST_PROG_ARGS} || q{};
         my @test_prog;
         if ( $lua_test eq 'lua' ) {
-            @test_prog = (
-                "$ENV{PARROT_LUA_TEST_PROG} ${test_prog_args} languages/${lang_fn}",
-            );
+            @test_prog = ( "$ENV{PARROT_LUA_TEST_PROG} ${test_prog_args} languages/${lang_fn} $params", );
         }
         elsif ( $lua_test eq 'monkey' ) {
             @test_prog = (
@@ -74,7 +77,9 @@ foreach my $func ( keys %language_test_map ) {
         else {
             @test_prog = (
                 "perl -Ilanguages/lua languages/lua/luac.pl languages/${lang_fn}",
-                "$self->{parrot} --no-gc languages/${pir_fn}",
+                "$self->{parrot} --no-gc languages/${pir_fn} $params",
+
+                # "$self->{parrot} languages/lua/luac.pir languages/${lang_fn}",
             );
         }
 
@@ -92,9 +97,9 @@ foreach my $func ( keys %language_test_map ) {
         my $builder_func = $language_test_map{$func};
 
         # That's the reason for:   no strict 'refs';
-        my $pass = $self->{builder}
-            ->$builder_func( Parrot::Test::slurp_file($lua_out_fn),
-            $output, $desc );
+        my $pass =
+            $self->{builder}
+            ->$builder_func( Parrot::Test::slurp_file($lua_out_fn), $output, $desc );
         unless ($pass) {
             my $diag = q{};
             my $test_prog = join ' && ', @test_prog;
@@ -125,3 +130,11 @@ Francois Perrad
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
+

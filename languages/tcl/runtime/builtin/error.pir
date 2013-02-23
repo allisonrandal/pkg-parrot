@@ -1,7 +1,7 @@
 ###
 # [error]
 
-# XXX only handles the one arg form of error right now.
+# RT#40757: only handles the one arg form of error right now.
 # need global vars before setting errorInfo, and stack tracing isn't
 # ready yet.
 # (So, the usage statement lies)
@@ -44,8 +44,14 @@ finish:
   $P1 = get_hll_global '$errorCode'
   assign $P1, errorCode
   $P0 = argv[0]
-  .throw($P0)
+  tcl_error $P0
 
 badargs:
-  .throw('wrong # args: should be "error message ?errorInfo? ?errorCode?"')
+  tcl_error 'wrong # args: should be "error message ?errorInfo? ?errorCode?"'
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

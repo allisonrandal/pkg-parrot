@@ -5,7 +5,7 @@
 #	bsr ISALPHA
 #	restore I2  # False!
 #
-# $Id: /local/languages/BASIC/interpreter/alpha.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
+# $Id: /parrotcode/trunk/languages/BASIC/interpreter/alpha.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 # $Log$
 # Revision 1.2  2003/09/04 12:09:22  leo
 # imcc cleanup; fix BASIC interpreter syntax

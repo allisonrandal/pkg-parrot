@@ -1,7 +1,7 @@
 /* pobj.h
  *  Copyright (C) 2001-2005, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/pobj.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/pobj.h 3495 2007-05-15T17:22:40.025112Z allison  $
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:
@@ -10,46 +10,21 @@
  *  References: memory_internals.pod
  */
 
-#if !defined(PARROT_POBJ_H_GUARD)
+#ifndef PARROT_POBJ_H_GUARD
 #define PARROT_POBJ_H_GUARD
 
 #include "parrot/config.h"
 
-/*
- * if define below is 1 (see include/parrot/settings.h)
- *
- * live, on_free_list, special_PMC are kept in the pools arenas
- * this needs aligned memory
- */
-
-
-#if ARENA_DOD_FLAGS && ! defined(PARROT_HAS_SOME_MEMALIGN)
-#  undef ARENA_DOD_FLAGS
-#  define ARENA_DOD_FLAGS 0
-#endif
-
-/*
- * when GC_IS_MALLOC is set at configure time, we turn off
- * ARENA_DOD_FLAGS, because the additional flag setting needed
- * for this mode isn't optimized. See src/dod.c used_cow() and clear_cow()
- */
-
-#ifdef GC_IS_MALLOC
-#  undef ARENA_DOD_FLAGS
-#  define ARENA_DOD_FLAGS 0
-#endif
-
-
 typedef union UnionVal {
-    struct {                                  /* One Buffer structure */
+    struct _b {                                  /* One Buffer structure */
         void *     _bufstart;
         size_t     _buflen;
     } _b;
-    struct {                                  /* or two pointers, both are defines */
-        DPOINTER * _struct_val;      
+    struct _ptrs {                                  /* or two pointers, both are defines */
+        DPOINTER * _struct_val;
         PMC *      _pmc_val;
     } _ptrs;
-    struct {
+    struct _i {
         INTVAL _int_val;                      /* or 2 intvals */
         INTVAL _int_val2;
     } _i;
@@ -63,19 +38,6 @@ typedef union UnionVal {
 #define UVal_int2(u)      (u)._i._int_val2
 #define UVal_num(u)       (u)._num_val
 #define UVal_str(u)       (u)._string_val
-#define UVal_bufstart(u)  (u)._b._bufstart
-#define UVal_buflen(u)    (u)._b._buflen
-
-/* BEGIN DEPRECATED UVAL ACCESSOR MACROS */
-#define num_val _num_val
-#define int_val _i._int_val
-#define string_val _string_val
-#define struct_val _ptrs._struct_val
-#define pmc_val _ptrs._pmc_val
-
-#define PMC_ptr1v(pmc) PMC_struct_val(pmc)
-#define PMC_ptr2p(pmc) PMC_pmc_val(pmc)
-/* END DEPRECATED UVAL ACCESSOR MACROS */
 
 /* Parrot Object - base class for all others */
 typedef struct pobj_t {
@@ -99,6 +61,54 @@ typedef Buffer PObj;
 #define PMC_num_val(pmc)      (pmc)->obj.u._num_val
 #define PMC_str_val(pmc)      (pmc)->obj.u._string_val
 
+/* See src/gc/resources.c. the basic idea is that buffer memory is
+   set up as follows:
+                    +-----------------+
+                    |  ref_count   |f |    # GC header
+  obj->bufstart  -> +-----------------+
+                    |  data           |
+                    v                 v
+
+The actual set-up is more involved because of padding.  obj->bufstart must
+be suitably aligned for any UnionVal.  (Perhaps it should be a Buffer
+there instead.)  The start of the memory region (as returned by malloc()
+is also suitably aligned for any use.  If, for example, malloc() returns
+objects aligned on 8-byte boundaries, and obj->bufstart is also aligned
+on 8-byte boundaries, then there should be 4 bytes of padding.  It is
+handled differently in the two files resources.c and res_lea.c.
+In resources.c, the buffer is carved out of a larger memory pool.  In
+res_lea.c, each buffer is individually allocated.
+
+                     src/gc/resources.c:       src/gc/res_lea.c:
+
+ptr from malloc ->  +------------------+      +------------------+
+                      [other blocks?]         | INTVAL ref_count |
+                    | INTVAL ref_count |      | possible padding |
+obj->bufstart   ->  +------------------+      +------------------+
+                    |     data         |      |      data        |
+                    v                  v      v                  v
+
+*/
+typedef struct Buffer_alloc_unit {
+    INTVAL ref_count;
+    UnionVal buffer[1]; /* Guarantee it's suitably aligned */
+} Buffer_alloc_unit;
+
+/* Given a pointer to the buffer, find the ref_count and the actual start of
+   the allocated space. Setting ref_count is clunky because we avoid lvalue
+   casts. */
+#ifdef GC_IS_MALLOC       /* see src/gc/res_lea.c */
+#  define Buffer_alloc_offset    (offsetof(Buffer_alloc_unit, buffer))
+#  define PObj_bufallocstart(b)  ((char *)PObj_bufstart(b) - Buffer_alloc_offset)
+#  define PObj_bufrefcount(b)    (((Buffer_alloc_unit *)PObj_bufallocstart(b))->ref_count)
+#  define PObj_bufrefcountptr(b) (&PObj_bufrefcount(b))
+#else                     /* see src/gc/resources.c */
+#  define Buffer_alloc_offset sizeof(INTVAL)
+#  define PObj_bufallocstart(b)  ((char *)PObj_bufstart(b) - Buffer_alloc_offset)
+#  define PObj_bufrefcount(b)    (*(INTVAL *)PObj_bufallocstart(b))
+#  define PObj_bufrefcountptr(b) ((INTVAL *)PObj_bufallocstart(b))
+#endif
+
 /* BEGIN DEPRECATED BUFFER ACCESSORS */
 /* macros for accessing old buffer members
  * #define bufstart obj.u._b._bufstart
@@ -116,13 +126,11 @@ typedef enum {
 struct parrot_string_t {
     pobj_t obj;
     UINTVAL bufused;
-    void *strstart;
+    char *strstart;
     UINTVAL strlen;
     /*    parrot_string_representation_t representation;*/
-    void *encoding; /* These should be of type ENCODING * and CHARSET *
-                     * respectively, but I'm not sure how to get them
-                     * to do that without a whole lotta work right now */
-    void *charset;
+    struct _encoding *encoding;
+    struct _charset *charset;
     UINTVAL hashval; /* cached hash value computation; not yet used */
 };
 
@@ -141,7 +149,7 @@ struct PMC {
 
 struct _Sync;   /* forward decl */
 
-struct PMC_EXT {
+typedef struct PMC_EXT {
 #if PMC_DATA_IN_EXT
     DPOINTER *data;
 #endif /* PMC_DATA_IN_EXT */
@@ -169,9 +177,7 @@ struct PMC_EXT {
        stuff, which'd merit an extra dereference when setting, but let
        us memset the actual GC data in a big block
     */
-};
-
-typedef struct PMC_EXT PMC_EXT;
+} PMC_EXT;
 
 #ifdef NDEBUG
 #  define PMC_ext_checked(pmc)             (pmc)->pmc_ext
@@ -179,12 +185,16 @@ typedef struct PMC_EXT PMC_EXT;
 #  define PMC_ext_checked(pmc)             (assert((pmc)->pmc_ext), (pmc)->pmc_ext)
 #endif /* NDEBUG */
 #if PMC_DATA_IN_EXT
-#  define PMC_data(pmc)       PMC_ext_checked(pmc)->data
+#  define PMC_data(pmc)                   PMC_ext_checked(pmc)->data
+#  define PMC_data_typed(pmc, type) (type)PMC_ext_checked(pmc)->data
 #  define PMC_data0(pmc)      ((pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
+#  define PMC_data0_typed(pmc, type) (type)(pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
 #else
-#  define PMC_data(pmc)       (pmc)->data
+#  define PMC_data(pmc)                   (pmc)->data
+#  define PMC_data_typed(pmc, type) (type)(pmc)->data
 /* do not allow PMC_data2 as lvalue */
-#  define PMC_data0(pmc)      (1 ? (pmc)->data : 0)
+#  define PMC_data0(pmc)            (1 ? (pmc)->data : 0)
+#  define PMC_data0_typed(pmc)      (type)(1 ? (pmc)->data : 0)
 #endif /* PMC_DATA_IN_EXT */
 #define PMC_metadata(pmc)     PMC_ext_checked(pmc)->_metadata
 #define PMC_next_for_GC(pmc)  PMC_ext_checked(pmc)->_next_for_GC
@@ -216,6 +226,9 @@ typedef enum PObj_enum {
     PObj_is_PMC_EXT_FLAG = 1 << 10,
     /* the PMC is a shared PMC */
     PObj_is_PMC_shared_FLAG = 1 << 11,
+
+    /* PObj is otherwise shared */
+    PObj_is_shared_FLAG = 1 << 11,
 
     /* Memory management FLAGs */
 
@@ -257,8 +270,8 @@ typedef enum PObj_enum {
      * array of PObjs
      */
     PObj_data_is_PMC_array_FLAG = 1 << 24,
-    /* unused */
-    PObj_is_unused_ptr_FLAG = 1 << 25,
+    /* call object finalizer */
+    PObj_need_finalize_FLAG = 1 << 25,
     /* a PMC that needs special handling in DOD, i.e one that has either:
      * - metadata
      * - data_is_PMC_array_FLAG
@@ -283,96 +296,6 @@ typedef enum PObj_enum {
  * these macros
  */
 
-#if ARENA_DOD_FLAGS
-/*
- * these flags are stored in one nibble per object. 0x08 is unused.
- */
-#  define d_PObj_live_FLAG              ((UINTVAL)0x01)
-#  define d_PObj_on_free_list_FLAG      ((UINTVAL)0x02)
-#  define d_PObj_is_special_PMC_FLAG    ((UINTVAL)0x04)
-
-/*
- * arenas are constant sized ~32 byte object size, ~32K objects
- */
-# define ARENA_SIZE (32*1024*32)
-# define ARENA_ALIGN ARENA_SIZE
-# define ARENA_MASK (~ (ARENA_SIZE-1) )
-
-/*
- * ARENA_FLAG_SHIFT is log2 of the number of nibbles per UINTVAL, i.e. how
- * many object flag sets fit into a frame of arena->dod_flags.
- * ARENA_FLAG_MASK has its lowest ARENA_FLAG_SHIFT bits set.
- *
- * 32-bit systems have 32/4=8=2<<3 nibbles per word
- * 64-bit systems have 64/4=16=2<<4 nibbles per word
- */
-
-#if INTVAL_SIZE == 4
-# define ARENA_FLAG_SHIFT 3
-# define ARENA_FLAG_MASK 0x7
-# define ALL_LIVE_MASK 0x11111111
-# define ALL_FREE_MASK 0x22222222
-# define ALL_SPECIAL_MASK 0x44444444
-#elif INTVAL_SIZE == 8
-# define ARENA_FLAG_SHIFT 4
-# define ARENA_FLAG_MASK 0xf
-# define ALL_LIVE_MASK 0x1111111111111111
-# define ALL_FREE_MASK 0x2222222222222222
-# define ALL_SPECIAL_MASK 0x4444444444444444
-#else
-# error Unsupported INTVAL_SIZE
-#endif /* INTVAL_SIZE == 4 */
-# define ARENA_OBJECTS(_pool) ( ARENA_SIZE / _pool->object_size )
-# define ARENA_FLAG_SIZE(_pool) \
-     (4*sizeof(INTVAL) + sizeof(INTVAL) * \
-      ((ARENA_OBJECTS(_pool) >> ARENA_FLAG_SHIFT )) )
-
-/*
- * since arenas are memaligned, the beginning of one can be found by zeroing
- * the low bits of any object in it
- */
-# define GET_ARENA(o) \
-     ((struct Small_Object_Arena *) (PTR2UINTVAL(o) & ARENA_MASK))
-
-/*
- * objects are all same size, so to determine one's index we need only divide
- * its offset in the arena by that size
- */
-# define GET_OBJ_N(arena, o) \
-     ((PTR2UINTVAL(o) - PTR2UINTVAL((arena)->start_objects)) \
-          / (arena)->object_size)
-
-/*
- * see memory_internals.pod for discussion of flag packing format
- */
-# define DOD_flag_TEST(flag, o) \
-      GET_ARENA(o)->dod_flags[ GET_OBJ_N(GET_ARENA(o), o) >> \
-      ARENA_FLAG_SHIFT ] & ((d_PObj_ ## flag ## _FLAG << \
-      (( GET_OBJ_N(GET_ARENA(o), o) & ARENA_FLAG_MASK ) << 2)))
-
-# define DOD_flag_SET(flag, o) \
-  do { \
-      struct Small_Object_Arena *_arena = GET_ARENA(o); \
-      size_t _n = GET_OBJ_N(_arena, o); \
-      _arena->dod_flags[ _n >> ARENA_FLAG_SHIFT ] |= \
-         ((d_PObj_ ## flag ## _FLAG << (( _n & ARENA_FLAG_MASK ) << 2))); \
-  } \
-  while (0)
-# define DOD_flag_CLEAR(flag, o) \
-  do { \
-      struct Small_Object_Arena *_arena = GET_ARENA(o); \
-      size_t _n = GET_OBJ_N(_arena, o); \
-      _arena->dod_flags[ _n >> ARENA_FLAG_SHIFT ] &= \
-         ~((d_PObj_ ## flag ## _FLAG << (( _n & ARENA_FLAG_MASK ) << 2))); \
-  } \
-  while (0)
-
-#  define PObj_live_FLAG              d_PObj_live_FLAG
-#  define PObj_on_free_list_FLAG      d_PObj_on_free_list_FLAG
-#  define PObj_is_special_PMC_FLAG    d_PObj_is_special_PMC_FLAG
-
-#else
-
 #  define PObj_live_FLAG              b_PObj_live_FLAG
 #  define PObj_on_free_list_FLAG      b_PObj_on_free_list_FLAG
 #  define PObj_is_special_PMC_FLAG    b_PObj_is_special_PMC_FLAG
@@ -380,8 +303,6 @@ typedef enum PObj_enum {
 #  define DOD_flag_TEST(flag, o)      PObj_flag_TEST(flag, o)
 #  define DOD_flag_SET(flag, o)       PObj_flag_SET(flag, o)
 #  define DOD_flag_CLEAR(flag, o)     PObj_flag_CLEAR(flag, o)
-
-#endif /* ARENA_DOD_FLAGS */
 
 #define PObj_get_FLAGS(o) ((o)->obj.flags)
 
@@ -411,9 +332,6 @@ typedef enum PObj_enum {
 #define PObj_external_SET(o) PObj_flag_SET(external, o)
 #define PObj_external_CLEAR(o) PObj_flag_CLEAR(external, o)
 
-#define PObj_bufstart_external_TEST(o) PObj_flag_TEST(bufstart_external, o)
-#define PObj_bufstart_external_SET(o) PObj_flag_SET(bufstart_external, o)
-
 #define PObj_report_TEST(o) PObj_flag_TEST(report, o)
 #define PObj_report_SET(o) PObj_flag_SET(report, o)
 #define PObj_report_CLEAR(o) PObj_flag_CLEAR(report, o)
@@ -439,7 +357,7 @@ typedef enum PObj_enum {
 #define PObj_special_SET(flag, o) do { \
     PObj_flag_SET(flag, o); \
     DOD_flag_SET(is_special_PMC, o); \
-} while(0)
+} while (0)
 
 #define PObj_special_CLEAR(flag, o) do { \
     PObj_flag_CLEAR(flag, o); \
@@ -448,8 +366,7 @@ typedef enum PObj_enum {
                  PObj_custom_mark_FLAG | \
                  PObj_data_is_PMC_array_FLAG  | \
                  PObj_is_PMC_EXT_FLAG | \
-                 PObj_needs_early_DOD_FLAG \
-                 ))) \
+                 PObj_needs_early_DOD_FLAG))) \
         DOD_flag_SET(is_special_PMC, o); \
     else \
         DOD_flag_CLEAR(is_special_PMC, o); \
@@ -461,7 +378,7 @@ typedef enum PObj_enum {
 #define PObj_data_is_PMC_array_SET(o) do { \
     PObj_special_SET(data_is_PMC_array, o); \
     PObj_flag_SET(active_destroy, o); \
-    } while(0)
+    } while (0)
 
 #define PObj_data_is_PMC_array_CLEAR(o) do {\
     PObj_special_CLEAR(data_is_PMC_array, o); \
@@ -502,7 +419,11 @@ typedef enum PObj_enum {
 
 #define PObj_is_PMC_shared_TEST(o) PObj_flag_TEST(is_PMC_shared, o)
 #define PObj_is_PMC_shared_SET(o)  PObj_flag_SET(is_PMC_shared, o)
+#define PObj_is_PMC_shared_CLEAR(o) PObj_flag_CLEAR(is_PMC_shared, o)
 
+#define PObj_is_shared_TEST(o) PObj_flag_TEST(is_shared, o)
+#define PObj_is_shared_SET(o)  PObj_flag_SET(is_shared, o)
+#define PObj_is_shared_CLEAR(o) PObj_flag_CLEAR(is_shared, o)
 
 /* some combinations */
 #define PObj_is_cowed_TESTALL(o) (PObj_get_FLAGS(o) & \
@@ -527,16 +448,13 @@ typedef enum PObj_enum {
 #define PObj_custom_mark_destroy_SETALL(o) do { \
         PObj_custom_mark_SET(o); \
         PObj_active_destroy_SET(o); \
-} while(0)
+} while (0)
 
 #endif /* PARROT_POBJ_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

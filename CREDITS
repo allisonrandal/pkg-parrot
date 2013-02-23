@@ -1,4 +1,4 @@
-﻿# $Id: /local/CREDITS 13846 2006-08-03T17:06:49.435642Z chip  $
+﻿# $Id: /parrotcode/trunk/CREDITS 3361 2007-05-02T15:16:29.320663Z fperrad  $
 
 	Following in the steps of other open source projects that
 	eventually take over the world, here is the partial list
@@ -26,11 +26,13 @@ D: Building on various platforms.
 
 N: Alberto Manuel Brandao Simoes
 E: ambs@cpan.org
-D: Some random patches
+D: Named arguments support and recovery support on PIR parser
 S: Braga, Portugal
+W: http://alfarrabio.di.uminho.pt/~albie/
 
 N: Aldo Calpini
 D: Debugging tutorial
+D: Porting to PDA
 
 N: Alex Gough
 D: bignum
@@ -84,7 +86,9 @@ N: Bernhard Schmalhofer
 D: Bugfixes
 D: Parrot m4
 D: Parrot bc
-D: Cleanup of examples/assembly 
+D: Plumhead
+D: Cleanup of examples/assembly
+E: Bernhard.Schmalhofer@gmx.de
 
 N: Bob Diertens
 D: patch regarding macro argument expansion
@@ -92,6 +96,10 @@ D: patch regarding macro argument expansion
 N: Bob Rogers
 D: Random small bug fixes, including one for the linguine bug.
 E: rogers-perl6@rgrjr.dyndns.org
+
+N: Bram Geron
+D: IMCC documentation update
+E: bgeron@gmail.com
 
 N: Brent Royal-Gordon
 D: Configure, Parrot_sprintf, embedding, early regex engine.
@@ -119,9 +127,11 @@ D: TAP language author, and Parrot Bug fixes
 E: cdolan@cpan.org
 
 N: chromatic
-D: SDL library and examples; Test::Builder; test suite cleanup; Pheme
+D: SDL library and examples; PIR Test::*; test suite cleanup
+D: Parrot::Embed; Pheme
 D: lead philosopher -- "Why doesn't this work?"
 E: chromatic@wgz.org
+W: http://wgz.org/chromatic/
 
 N: Clayton O'Neill
 D: Fix for parrot linking issue on Solaris 8
@@ -149,7 +159,15 @@ D: JIT and EXEC subsystems
 N: Danny Werner
 D: Test for literals
 
+N: Dave Woldrich
+D: Win32 build fixes
+E: dave@woldrich.com
+
 N: David M. Loyd
+
+N: David Romano
+D: PGE tests and fixes
+E: david.romano+p6i@gmail.com
 
 N: Dennis Rieks
 D: Win32 config and build
@@ -158,8 +176,21 @@ N: Dino Morelli
 D: PGE tests
 E: dmorelli@reactorweb.net
 
+N: Dmitry Karasik
+D: nci loadlib fixes
+E: dmitry@karasik.eu.org
+
 N: Eirik Berg Hanssen
 D: Use unix98 ps option in signal.t
+
+N: Eric Hanchrow
+D: add "clone" to iterator
+E: offby1@blarg.net
+
+N: Eric Lubow
+D: makefile fixes
+E: eric@lubow.org
+W: http://eric.lubow.org/
 
 N: Felix Gallo
 D: delegate.pmc patch
@@ -212,6 +243,11 @@ D: Binary GCD / LCM
 N: Ion Alexandru Morega
 D: string.pmc, complex.pmc
 
+N: James E Keenan (Jim)
+D: Testing of build tools
+W: http://thenceforward.net/parrot/
+S:  Brooklyn, NY, USA
+
 N: Jarkko Hietaniemi
 D: packfile and Tru64 fixes
 D: lot of general hints and patches to improve portability
@@ -255,7 +291,7 @@ D: Lexical pads, CPS.
 N: Jonathan Stowe
 
 N: Jonathan Worthington
-D: Bits of Win32 support, PBC utilities, debug segment work, .Net 
+D: Bits of Win32 support, PBC utilities, debug segment work, .Net
 D: to PIR translator and various patches
 E: jonathan@jwcs.net
 W: http://www.jwcs.net/~jonathan/
@@ -282,7 +318,17 @@ N: Josh Wilmes
 N: Juergen Boemmels
 D: Parrot I/O; macro stuff in assembler.
 
+N: Julian Fondren
+E: ayrnieu@gmail.com
+D: Standardize and add languages/*/MAINTAINER files
+D: a patch to catch exception in Lua
+
+N: Karl Forner
+D: shootout examples testing
+E: karl.forner@gmail.com
+
 N: Kay-Uwe 'kiwi' Hüll
+D: Cage cleaning tasks
 
 N: Kenneth A Graves
 D: yield and other PIR improvements
@@ -290,7 +336,8 @@ D: yield and other PIR improvements
 N: Kevin Falcone
 
 N: Kevin Tew
-D: Cardinal(Ruby on Parrot), ECMAScript parser, ECMAScript parser
+D: Cardinal(Ruby on Parrot), ECMAScript PGE grammar,
+D: Python PGE grammar, C99 PGE Grammar
 D: Various Config Fixes, Compiler Warnings, etc
 
 N: Klaas-Jan Stol
@@ -300,6 +347,10 @@ E: vanderlay@home.nl
 
 N: Lars Balker Rasmussen
 D: FreeBSD and other build fixes
+
+N: Lee Duhem
+D: Debug patch
+E: lee.duhem@gmail.com
 
 N: Leon Brocard
 
@@ -313,6 +364,9 @@ D: Many fixes
 
 N: Marcus Thiesen
 D: URM language, bugfixes
+
+N: Mark Glines
+D: Cage cleaning, report bugs
 
 N: Markus Amsler
 D: httpd.imc, bugfixes
@@ -356,6 +410,10 @@ D: Pie-thon hammering PIR
 
 N: Mike Lambert
 
+N: Mike Mattie
+E: codermattie@gmail.com
+D: Patch reducing code duplication
+
 N: Mitchell N Charity
 
 N: Neil Conway
@@ -372,15 +430,33 @@ E: nick.glencross@gmail.com
 N: Nick Kostirya
 D: Win32, FreeBSD build fixes
 
+N: Nikolay Ananiev
+D: Win32 build fix
+
 N: Nigelsandever
 D: Win32 patches
+
+N: Nuno 'smash' Carvalho
+D: PGE/perl6/abc debugging and testing
+E: mestre.smash@gmail.com
 
 N: OOLLEY kj
 D: Miscellaneous cleanup and PDD07-conformance
 
 N: Patrick R. Michaud
-D: Parrot Grammar Engine, Perl 6 pumpking, APL
+D: Parrot Grammar Engine
+D: Perl 6 pumpking
+D: APL
+D: Pynie
 E: pmichaud@pobox.com
+
+N: Pat Eyler
+D: Ruby recursive expression support.
+E: pat.eyler@gmail.com
+
+N: Paul Cochrane
+D: Changing the newspaper in the parrot cage
+E: paultcochrane@gmail.com
 
 N: Peter Gibbs
 D: String subsystem
@@ -396,12 +472,16 @@ W: http://www.bofh.org.uk:8080/
 N: Richard Tibbetts
 D: Divide by zero exceptions in some PMCs
 
+N: Rick Scott
+D: Test and doc tuneups
+E: rick@shadowspar.dyndns.org
+
 N: Ritz Daniel
 
 N: Robert Spier
 D: Keeps us running
 
-N: Roger Browne 
+N: Roger Browne
 D: Author of Amber; bug fixes and tests
 
 N: Roland Illing
@@ -410,13 +490,24 @@ D: Building Parrot with pkgsrc
 N: Ron Blaschke
 D: Win32 patches
 
+N: Ruben Fonseca
+D: opcode test coverage script
+E: fonseka@gmail.com
+
 N: Sam Ruby
 D: Pythonic and OO patches
+
+N: Sam Vilain
+D: Prototype object model and tests
 
 N: Sean O'Rourke
 D: Original Perl6 compiler
 
 N: Sebastian Riedel
+
+N: Shawn M Moore
+D: Cage cleaner
+E: sartak@gmail.com
 
 N: Simon Cozens
 D: Release pumpking for 0.0.1-0.0.4
@@ -494,3 +585,7 @@ E: nnunley@gmail.com
 N: Vishal Soni
 E: vishalrsoni@gmail.com
 D: Bug fixes in IMCC, ECMAScript
+
+N: Alek Storm
+E: alek.storm@gmail.com
+D: Fixed object vtable method overrides in PIR

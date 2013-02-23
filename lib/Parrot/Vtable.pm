@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/lib/Parrot/Vtable.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/lib/Parrot/Vtable.pm 3442 2007-05-09T12:17:06.032451Z paultcochrane  $
 
 =head1 NAME
 
@@ -40,21 +40,33 @@ sub make_re {
 
     my $comp_re = eval "qr/$re/";
 
-    if ($@) { return "(?:$re)"; } else { return $comp_re; }
+    if   ($@) { return "(?:$re)"; }
+    else      { return $comp_re; }
 }
 
-my $ident_re = make_re('[A-Za-z_][A-Za-z0-9_]*');
-my $type_re = make_re('(?:(?:struct\s+)|(?:union\s+))?'.$ident_re.'\**');
-my $param_re = make_re($type_re.'\s+'.$ident_re);
-my $arglist_re = make_re('(?:'.$param_re.'(?:\s*,\s*'.$param_re.')*)?');
-my $method_re = make_re('^\s*('.$type_re.')\s+('.$ident_re.')\s*\(('.$arglist_re.')\)\s*$');
+my $ident_re   = make_re('[A-Za-z_][A-Za-z0-9_]*');
+my $type_re    = make_re( '(?:(?:struct\s+)|(?:union\s+))?' . $ident_re . '\**' );
+my $param_re   = make_re( $type_re . '\s+' . $ident_re );
+my $arglist_re = make_re( '(?:' . $param_re . '(?:\s*,\s*' . $param_re . ')*)?' );
+my $method_re =
+    make_re( '^\s*(' . $type_re . ')\s+(' . $ident_re . ')\s*\((' . $arglist_re . ')\)\s*$' );
+my $attrs_re = make_re('(?::(\w+)\s*)*');
+my $attr_re  = make_re(':(\w+)\s*');
 
+sub parse_attrs {
+    my $attrs = shift;
+    my $default = shift || {};
+
+    my $result = {%$default};
+    $result->{$1} = 1 while $attrs =~ /$attr_re/g;
+    return $result;
+}
 
 =item C<parse_vtable($file)>
 
 Returns a reference to an array containing
 
-  [ return_type method_name parameters section MMD_type ]
+  [ return_type method_name parameters section MMD_type attributes ]
 
 for each vtable method defined in C<$file>. If C<$file> is unspecified it
 defaults to F<vtable.tbl>.  If it is not an MMD method, C<MMD_type> is -1.
@@ -63,34 +75,49 @@ defaults to F<vtable.tbl>.  If it is not an MMD method, C<MMD_type> is -1.
 
 sub parse_vtable {
 
-    my $file = defined $_[0] ? shift() : 'vtable.tbl';
+    my $file   = defined $_[0] ? shift() : 'vtable.tbl';
     my $vtable = [];
-    my $fh = FileHandle->new($file, O_RDONLY) or
-        die "Can't open $file for reading: $!\n";
+    my $mmd    = [];
+    my $fh     = FileHandle->new( $file, O_RDONLY )
+        or die "Can't open $file for reading: $!\n";
     my $section = 'MAIN';
 
-    while(<$fh>) {
-
+    my $default_attrs = {};
+    while (<$fh>) {
         chomp;
 
         next if /^\s*#/ or /^\s*$/;
 
-    if (/^\[(\w+)\]/) {
-        $section = $1;
-    }
-        elsif (m/^\s*
+        if (/^\[(\w+)\]\s*($attrs_re)/) {
+            $section       = $1;
+            $default_attrs = parse_attrs($2);
+        }
+        elsif (
+            m/^\s*
             ($type_re)\s+
             ($ident_re)\s*
         \(($arglist_re)\)
-        (?:\s+(MMD_\w+))?\s*$/x) {
-        my $mmd = defined $4 ? $4 : -1;
-            push @{$vtable}, [ $1, $2, $3, $section, $mmd ];
-        } else {
-            die "Syntax error at $file line ".$fh->input_line_number()."\n";
+        (?:\s+(MMD_\w+))?\s*($attrs_re)$/x
+            )
+        {
+            my $mmdop = defined $4 ? $4 : -1;
+
+            my $entry = [ $1, $2, $3, $section, $mmdop, parse_attrs( $5, $default_attrs ) ];
+            if (defined $4) {
+                push @{$mmd}, $entry;
+            }
+            else {
+                push @{$vtable}, $entry;
+            }
+        }
+        else {
+            die "Syntax error at $file line " . $fh->input_line_number() . "\n";
         }
     }
 
-    return $vtable;
+    # We probably should sort on insert, but this is easier for now. And it's
+    # compile time, so it's not all that important.
+    return [@$mmd, sort { $a->[1] cmp $b->[1] } @$vtable];
 }
 
 =item C<vtbl_defs($vtable)>
@@ -106,9 +133,9 @@ sub vtbl_defs {
     my $defs = q{};
     my $entry;
 
-    for $entry (@{$vtable}) {
-    next if ($entry->[4] =~ /MMD_/);
-        my $args = join(", ", 'Interp* interpreter', 'PMC* pmc', split(/\s*,\s*/, $entry->[2]));
+    for $entry ( @{$vtable} ) {
+        next if ( $entry->[4] =~ /MMD_/ );
+        my $args = join( ", ", 'Interp *interp', 'PMC* pmc', split( /\s*,\s*/, $entry->[2] ) );
         $defs .= "typedef $entry->[0] (*$entry->[1]_method_t)($args);\n";
     }
 
@@ -130,34 +157,38 @@ sub vtbl_struct {
 
     $struct = <<"EOF";
 typedef enum {
-    VTABLE_IS_CONST_FLAG = 0x01,
-    VTABLE_HAS_CONST_TOO = 0x02,
-    VTABLE_PMC_NEEDS_EXT = 0x04,
-    VTABLE_DATA_IS_PMC   = 0x08,
-    VTABLE_PMC_IS_SINGLETON = 0x10,
-    VTABLE_IS_SHARED_FLAG   = 0x20,
-    VTABLE_IS_CONST_PMC_FLAG = 0x40
+    VTABLE_IS_CONST_FLAG     = 0x001,
+    VTABLE_HAS_CONST_TOO     = 0x002,
+    VTABLE_PMC_NEEDS_EXT     = 0x004,
+    VTABLE_DATA_IS_PMC       = 0x008,
+    VTABLE_PMC_IS_SINGLETON  = 0x010,
+    VTABLE_IS_SHARED_FLAG    = 0x020,
+    VTABLE_IS_CONST_PMC_FLAG = 0x040,
+    VTABLE_HAS_READONLY_FLAG = 0x080,
+    VTABLE_IS_READONLY_FLAG  = 0x100
 } vtable_flags_t;
 
-struct _vtable {
-    PMC * _namespace;        /* Pointer to namespace for this class */
-    INTVAL base_type;        /* 'type' value for MMD */
-    STRING* whoami;          /* Name of class this vtable is for */
-    UINTVAL flags;           /* Flags. Duh */
-    STRING* does_str;        /* space-separated list of interfaces */
-    STRING* isa_str;         /* space-separated list of classes */
-    PMC *class;              /* for PMCs: a PMC of that type
-                                for objects: the class PMC */
-    PMC *mro;                /* array PMC of [class, parents ... ] */
+typedef struct _vtable {
+    PMC    *_namespace;     /* Pointer to namespace for this class */
+    INTVAL  base_type;      /* 'type' value for MMD */
+    STRING *whoami;         /* Name of class this vtable is for */
+    UINTVAL flags;          /* Flags. Duh */
+    STRING *does_str;       /* space-separated list of interfaces */
+    STRING *isa_str;        /* space-separated list of classes */
+    PMC    *pmc_class;      /* for PMCs: a PMC of that type
+                               for objects: the class PMC */
+    PMC    *mro;            /* array PMC of [class, parents ... ] */
+    struct _vtable *ro_variant_vtable; /* A variant of this vtable with the
+                                   opposite IS_READONLY flag */
     /* Vtable Functions */
 
 EOF
-    for $entry (@{$vtable}) {
-    next if ($entry->[4] =~ /MMD_/);
+    for $entry ( @{$vtable} ) {
+        next if ( $entry->[4] =~ /MMD_/ );
         $struct .= "    $entry->[1]_method_t $entry->[1];\n";
     }
 
-    $struct .= "};\n";
+    $struct .= "} _vtable;\n";
 
     return $struct;
 }
@@ -181,12 +212,12 @@ sub vtbl_macros {
  */
 
 EOM
-    for my $entry (@{$vtable}) {
-    next if ($entry->[4] =~ /MMD_/);
-    my @args = split /,\s*/, $entry->[2];
-    unshift @args, "i interp", "p pmc";
-    my $args = join ', ', map { (split / /, $args[$_])[1] } (0..$#args);
-    $macros .= <<"EOM";
+    for my $entry ( @{$vtable} ) {
+        next if ( $entry->[4] =~ /MMD_/ );
+        my @args = split /,\s*/, $entry->[2];
+        unshift @args, "i interp", "p pmc";
+        my $args = join ', ', map { ( split / /, $args[$_] )[1] } ( 0 .. $#args );
+        $macros .= <<"EOM";
 #define VTABLE_$entry->[1]($args) \\
     (pmc)->vtable->$entry->[1]($args)
 EOM
@@ -199,9 +230,9 @@ EOM
 
 /* &gen_from_def(vtable_methods.pasm) */
 EOM
-    for my $entry (@{$vtable}) {
-    my $uc_meth = uc $entry->[1];
-    $macros .= <<"EOM";
+    for my $entry ( @{$vtable} ) {
+        my $uc_meth = uc $entry->[1];
+        $macros .= <<"EOM";
 #define PARROT_VTABLE_${uc_meth}_METHNAME \"__$entry->[1]\"
 EOM
 
@@ -226,18 +257,23 @@ static const char * const Parrot_vtable_slot_names[] = {
     "",     /* space-separated list of classes */
     "",     /* class */
     "",     /* mro */
+    "",     /* ro_variant_vtable */
 
     /* Vtable Functions */
 EOM
-    for my $entry (@{$vtable}) {
-    next if ($entry->[4] =~ /MMD_/);
-    $macros .= <<"EOM";
+    my $num_vtable_funcs = 0;
+    for my $entry ( @{$vtable} ) {
+        next if ( $entry->[4] =~ /MMD_/ );
+        $num_vtable_funcs++;
+        $macros .= <<"EOM";
         \"__$entry->[1]\",
 EOM
     }
     $macros .= <<"EOM";
     NULL
 };
+
+#define NUM_VTABLE_FUNCTIONS $num_vtable_funcs
 
 #endif /* PARROT_IN_OBJECTS_C */
 
@@ -249,16 +285,16 @@ EOM
 
 typedef enum {
 EOM
-    for my $entry (@{$vtable}) {
-    next unless ($entry->[4] =~ /MMD_/);
-    next if ($entry->[4] =~ /_INT$/);
-    next if ($entry->[4] =~ /_STR$/);
-    next if ($entry->[4] =~ /_FLOAT$/);
-    $macros .= <<"EOM";
+    for my $entry ( @{$vtable} ) {
+        next unless ( $entry->[4] =~ /MMD_/ );
+        next if ( $entry->[4] =~ /_INT$/ );
+        next if ( $entry->[4] =~ /_STR$/ );
+        next if ( $entry->[4] =~ /_FLOAT$/ );
+        $macros .= <<"EOM";
         $entry->[4],
 EOM
     }
-    $macros .=<<"EOM";
+    $macros .= <<"EOM";
         MMD_USER_FIRST
 } parrot_mmd_func_enum;
 
@@ -268,12 +304,12 @@ EOM
 static const char * const Parrot_mmd_func_names[] = {
 EOM
 
-    for my $entry (@{$vtable}) {
-    next unless ($entry->[4] =~ /MMD_/);
-    next if ($entry->[4] =~ /_INT$/);
-    next if ($entry->[4] =~ /_STR$/);
-    next if ($entry->[4] =~ /_FLOAT$/);
-    $macros .= <<"EOM";
+    for my $entry ( @{$vtable} ) {
+        next unless ( $entry->[4] =~ /MMD_/ );
+        next if ( $entry->[4] =~ /_INT$/ );
+        next if ( $entry->[4] =~ /_STR$/ );
+        next if ( $entry->[4] =~ /_FLOAT$/ );
+        $macros .= <<"EOM";
         \"__$entry->[1]\",
 EOM
     }
@@ -281,7 +317,7 @@ EOM
     NULL
 };
 
-#endif
+#endif /* PARROT_IN_OBJECTS_C */
 EOM
 
     $macros;
@@ -294,43 +330,37 @@ elements in the referenced vtable array.
 
 =cut
 
-sub vtbl_embed
-{
+sub vtbl_embed {
     my $vtable = shift;
 
     my $funcs  = q{};
     my $protos = q{};
 
-    for my $entry (@$vtable)
-    {
-        my ($return_type, $name, $params, $section, $mmd) = @$entry;
+    for my $entry (@$vtable) {
+        my ( $return_type, $name, $params, $section, $mmd ) = @$entry;
         next unless $mmd eq '-1';
 
-        my @params    = parse_params( $params );
-        my @sig       = ( 'Parrot_INTERP interp', 'Parrot_PMC pmc' );
-        my @args      = ( 'interp', 'pmc' );
+        my @params = parse_params($params);
+        my @sig    = ( 'Parrot_Interp interp', 'Parrot_PMC pmc' );
+        my @args   = ( 'interp', 'pmc' );
 
-        while (my ($type, $name) = splice( @params, 0, 2 ))
-        {
-           eval
-           {
-               push @sig, find_type( $type ) . ' ' . $name;
-               push @args, $name;
+        while ( my ( $type, $name ) = splice( @params, 0, 2 ) ) {
+            eval {
+                push @sig,  find_type($type) . ' ' . $name;
+                push @args, $name;
             };
         }
 
         next if $@;
 
-        my $signature = join( ', ', @sig  );
+        my $signature = join( ', ', @sig );
         my $arguments = join( ', ', @args );
 
-        my $ret_type  = find_type( $return_type );
+        my $ret_type = find_type($return_type);
 
-        $protos .= sprintf "extern %s Parrot_PMC_%s( %s );\n",
-            $ret_type, $name, $signature;
+        $protos .= sprintf "extern %s Parrot_PMC_%s( %s );\n", $ret_type, $name, $signature;
 
-        $funcs .= sprintf
-"/*
+        $funcs .= sprintf "/*
 
 =item C<%s
 %s(%s)>
@@ -341,10 +371,10 @@ sub vtbl_embed
 
 %s Parrot_PMC_%s( %s )
 {
-", ($ret_type, $name, $signature) x 2;
+", ( $ret_type, $name, $signature ) x 2;
 
         $funcs .= "    $ret_type retval;\n" unless $ret_type eq 'void';
-	$funcs .= "    PARROT_CALLIN_START( interp );\n    ";
+        $funcs .= "    PARROT_CALLIN_START( interp );\n    ";
         $funcs .= "retval = " unless $ret_type eq 'void';
         $funcs .= "VTABLE_$name( $arguments );
     PARROT_CALLIN_END( interp );
@@ -354,38 +384,35 @@ sub vtbl_embed
 
     }
 
-    return ($funcs, $protos);
+    return ( $funcs, $protos );
 }
 
-sub find_type
-{
-    my $type    = shift;
+sub find_type {
+    my $type = shift;
 
-    my %typemap =
-    (
-        'STRING*'  => 'Parrot_STRING',
-        'void*'    => 'void*',
-        'INTVAL'   => 'Parrot_Int',
-        'PMC*'     => 'Parrot_PMC',
-        'FLOATVAL' => 'Parrot_Float',
-        'void'     => 'void',
-        'UINTVAL'  => 'Parrot_Int',
-        'size_t'   => 'size_t',
+    my %typemap = (
+        'STRING*'   => 'Parrot_String',
+        'void*'     => 'void*',
+        'INTVAL'    => 'Parrot_Int',
+        'PMC*'      => 'Parrot_PMC',
+        'FLOATVAL'  => 'Parrot_Float',
+        'void'      => 'void',
+        'UINTVAL'   => 'Parrot_Int',
+        'size_t'    => 'size_t',
+        'opcode_t*' => 'Parrot_Opcode*',
     );
 
-    die "Unknown type $type\n" unless exists $typemap{ $type };
+    die "Unknown type $type\n" unless exists $typemap{$type};
 
-    return $typemap{ $type };
+    return $typemap{$type};
 }
 
-sub parse_params
-{
+sub parse_params {
     my $params = shift;
 
     my @params;
 
-    while ($params =~ m/(\w+\*?) (\w+)/g)
-    {
+    while ( $params =~ m/(\w+\*?) (\w+)/g ) {
         push @params, $1, $2;
     }
 
@@ -408,6 +435,13 @@ sub parse_params
 
 =item F<src/pmc/null.pl>
 
-=back
+=cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

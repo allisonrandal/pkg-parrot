@@ -1,14 +1,14 @@
 #! perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: pragmas.t 13503 2006-07-24 15:26:45Z ambs $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/pragmas.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
-                    
+
 t/pragmas.t - WMLScript Pragmas
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/pragmas.t
+    % perl -I../lib WMLScript/t/pragmas.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ use lib "$FindBin::Bin";
 use Parrot::Test tests => 5;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'hello');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'hello' );
 extern function hello()
 {
     Console.println("Hello World!");
@@ -36,7 +36,7 @@ CODE
 Hello World!
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'use url');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'use url' );
 use url OtherScript "languages/WMLScript/t/pragmas_1.wmlsc";
 
 extern function main()
@@ -47,7 +47,7 @@ CODE
 Hello World!
 OUT
 
-language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'unable to load');
+language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'unable to load' );
 use url OtherScript "languages/WMLScript/t/pragmas_x.wmlsc";
 
 extern function main()
@@ -58,7 +58,7 @@ CODE
 /unable to load/
 OUT
 
-language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'verification failed');
+language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'verification failed' );
 use url OtherScript "languages/WMLScript/t/pragmas_1.out";
 
 extern function main()
@@ -69,7 +69,7 @@ CODE
 /verification failed/
 OUT
 
-language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'external function not found');
+language_output_like( 'WMLScript', <<'CODE', <<'OUT', 'external function not found' );
 use url OtherScript "languages/WMLScript/t/pragmas_1.wmlsc";
 
 extern function main()
@@ -79,4 +79,11 @@ extern function main()
 CODE
 /external function '\w+' not found/
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

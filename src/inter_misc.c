@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/inter_misc.c 13660 2006-07-28T17:05:24.263356Z chip  $
+$Id: /parrotcode/trunk/src/inter_misc.c 3312 2007-04-27T05:11:59.998768Z mdiep  $
 
 =head1 NAME
 
@@ -26,8 +26,8 @@ NCI function setup, C<interpinfo>, and C<sysinfo> opcodes.
 /*
 
 =item C<void
-enter_nci_method(Parrot_Interp interpreter, int type,
-		 void *func, const char *name, const char *proto)>
+register_nci_method(Parrot_Interp interp, int type,
+                    void *func, const char *name, const char *proto)>
 
 Create an entry in the C<nci_method_table> for the given NCI method of PMC
 class C<type>.
@@ -35,31 +35,74 @@ class C<type>.
 =cut
 
 */
+void Parrot_NCI_nci_make_raw_nci(Interp *interp, PMC *method, void *func);
 
 void
-enter_nci_method(Parrot_Interp interpreter, int type,
-		 void *func, const char *name, const char *proto)
+enter_nci_method(Parrot_Interp interp, const int type, void *func,
+                const char *name, const char *proto)
 {
-    PMC * const method = pmc_new(interpreter, enum_class_NCI);
+    register_nci_method(interp, type, func, name, proto);
+}
+
+void
+register_nci_method(Parrot_Interp interp, const int type, void *func,
+                    const char *name, const char *proto)
+{
+    PMC * const method = pmc_new(interp, enum_class_NCI);
     /* create call func */
-    VTABLE_set_pointer_keyed_str(interpreter, method,
-            string_make(interpreter, proto, strlen(proto),
-                NULL, PObj_constant_FLAG|PObj_external_FLAG),
+    VTABLE_set_pointer_keyed_str(interp, method,
+            string_make(interp, proto, strlen(proto), NULL,
+                PObj_constant_FLAG|PObj_external_FLAG),
             func);
     /* insert it into namespace */
-    VTABLE_set_pmc_keyed_str(interpreter, 
-        interpreter->vtables[type]->_namespace,
-            string_make(interpreter, name,
-                strlen(name), NULL,
+    VTABLE_set_pmc_keyed_str(interp, interp->vtables[type]->_namespace,
+            string_make(interp, name, strlen(name), NULL,
                 PObj_constant_FLAG|PObj_external_FLAG),
             method);
+}
 
+void
+register_raw_nci_method_in_ns(Parrot_Interp interp, const int type, void *func,
+        const char *name)
+{
+    PMC * const method = pmc_new(interp, enum_class_NCI);
+    /* setup call func */
+    Parrot_NCI_nci_make_raw_nci(interp, method, func);
+    /* insert it into namespace */
+    VTABLE_set_pmc_keyed_str(interp, interp->vtables[type]->_namespace,
+            string_make(interp, name, strlen(name), NULL,
+                PObj_constant_FLAG|PObj_external_FLAG),
+            method);
 }
 
 /*
 
 =item C<void
-Parrot_compreg(Parrot_Interp interpreter, STRING *type, Parrot_compiler_func_t func);>
+Parrot_mark_method_writes(Parrot_Interp interp,
+                          int type, const char *name)>
+
+Mark the method C<name> on PMC type C<type> as one that modifies the PMC.
+
+=cut
+
+*/
+
+void Parrot_mark_method_writes(Parrot_Interp interp,
+                               int type, const char *name) {
+    STRING *const str_name = const_string(interp, name);
+    PMC *const pmc_true = pmc_new(interp, enum_class_Integer);
+    PMC *const method = VTABLE_get_pmc_keyed_str(
+        interp, interp->vtables[type]->_namespace, str_name);
+    VTABLE_set_integer_native(interp, pmc_true, 1);
+    VTABLE_setprop(interp, method, const_string(interp, "write"),
+                   pmc_true);
+}
+
+/*
+
+=item C<void
+Parrot_compreg(Parrot_Interp interp, STRING *type,
+               Parrot_compiler_func_t func);>
 
 Register a parser/compiler function.
 
@@ -67,32 +110,32 @@ Register a parser/compiler function.
 
 */
 
-void
-Parrot_compreg(Parrot_Interp interpreter, STRING *type, Parrot_compiler_func_t func)
+void Parrot_compreg(Parrot_Interp interp, STRING *type,
+                    Parrot_compiler_func_t func)
 {
     PMC *hash, *nci;
-    PMC* iglobals = interpreter->iglobals;
+    PMC* iglobals = interp->iglobals;
     STRING *sc;
 
-    hash = VTABLE_get_pmc_keyed_int(interpreter, interpreter->iglobals,
+    hash = VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
             IGLOBALS_COMPREG_HASH);
     if (!hash) {
-        hash = pmc_new_noinit(interpreter, enum_class_Hash);
-        VTABLE_init(interpreter, hash);
-        VTABLE_set_pmc_keyed_int(interpreter, iglobals,
+        hash = pmc_new_noinit(interp, enum_class_Hash);
+        VTABLE_init(interp, hash);
+        VTABLE_set_pmc_keyed_int(interp, iglobals,
                 (INTVAL)IGLOBALS_COMPREG_HASH, hash);
     }
-    nci = pmc_new(interpreter, enum_class_Compiler);
-    VTABLE_set_pmc_keyed_str(interpreter, hash, type, nci);
+    nci = pmc_new(interp, enum_class_Compiler);
+    VTABLE_set_pmc_keyed_str(interp, hash, type, nci);
     /* build native call interface fir the C sub in "func" */
-    sc = CONST_STRING(interpreter, "PJt");
-    VTABLE_set_pointer_keyed_str(interpreter, nci, sc, (void*)func);
+    sc = CONST_STRING(interp, "PJt");
+    VTABLE_set_pointer_keyed_str(interp, nci, sc, (void*)func);
 }
 
 /*
 
 =item C<PMC *
-Parrot_compile_string(Parrot_Interp interpreter, STRING *type, 
+Parrot_compile_string(Parrot_Interp interp, STRING *type,
                       char *code, String **error)>
 
 Compile code string.
@@ -102,27 +145,27 @@ Compile code string.
 */
 
 PMC *
-Parrot_compile_string(Parrot_Interp interpreter, STRING *type, 
+Parrot_compile_string(Parrot_Interp interp, STRING *type,
                       char *code, STRING **error)
 {
-    if (!string_compare(interpreter, const_string(interpreter, "PIR"), 
+    if (!string_compare(interp, const_string(interp, "PIR"),
         type)) {
-        return IMCC_compile_pir_s(interpreter, code, error); 
-    }    
-    else if (!string_compare(interpreter,const_string(interpreter, 
+        return IMCC_compile_pir_s(interp, code, error);
+    }
+    else if (!string_compare(interp,const_string(interp,
         "PASM"), type)) {
-        return IMCC_compile_pasm_s(interpreter, code, error);
+        return IMCC_compile_pasm_s(interp, code, error);
     }
     else {
-        *error=const_string(interpreter, "Invalid interpreter type");
-        return NULL;    
+        *error=const_string(interp, "Invalid interpreter type");
+        return NULL;
     }
 }
 
 /*
 
 =item C<void
-Parrot_compile_file(Parrot_Interp interpreter, const char *fullname, 
+Parrot_compile_file(Parrot_Interp interp, const char *fullname,
                     String **error)>
 
 Compile code file.
@@ -132,10 +175,10 @@ Compile code file.
 */
 
 void *
-Parrot_compile_file(Parrot_Interp interpreter, char *fullname, 
+Parrot_compile_file(Parrot_Interp interp, char *fullname,
                     String **error)
 {
-    return IMCC_compile_file_s(interpreter, fullname, error);
+    return IMCC_compile_file_s(interp, fullname, error);
 }
 
 #ifdef GC_IS_MALLOC
@@ -160,10 +203,10 @@ extern struct mallinfo mallinfo(void);
 /*
 
 =item C<INTVAL
-interpinfo(Interp *interpreter, INTVAL what)>
+interpinfo(Interp *interp, INTVAL what)>
 
 =item C<PMC*
-interpinfo_p(Interp *interpreter, INTVAL what)>
+interpinfo_p(Interp *interp, INTVAL what)>
 
 C<what> specifies the type of information you want about the
 interpreter.
@@ -173,18 +216,18 @@ interpreter.
 */
 
 INTVAL
-interpinfo(Interp *interpreter, INTVAL what)
+interpinfo(Interp *interp, INTVAL what)
 {
     INTVAL ret = 0;
     int j;
-    struct Arenas *arena_base = interpreter->arena_base;
+    Arenas *arena_base = interp->arena_base;
 
     switch (what) {
         case TOTAL_MEM_ALLOC:
 #ifdef GC_IS_MALLOC
-#if 0
-            interpreter->memory_allocated = mallinfo().uordblks;
-#endif
+#  if 0
+            interp->memory_allocated = mallinfo().uordblks;
+#  endif
 #endif
             ret = arena_base->memory_allocated;
             break;
@@ -204,7 +247,7 @@ interpinfo(Interp *interpreter, INTVAL what)
         case ACTIVE_BUFFERS:
             ret = 0;
             for (j = 0; j < (INTVAL)arena_base->num_sized; j++) {
-                struct Small_Object_Pool * const header_pool =
+                Small_Object_Pool * const header_pool =
                     arena_base->sized_header_pools[j];
                 if (header_pool)
                     ret += header_pool->total_objects -
@@ -217,7 +260,7 @@ interpinfo(Interp *interpreter, INTVAL what)
         case TOTAL_BUFFERS:
             ret = 0;
             for (j = 0; j < (INTVAL)arena_base->num_sized; j++) {
-                struct Small_Object_Pool * const header_pool =
+                Small_Object_Pool * const header_pool =
                     arena_base->sized_header_pools[j];
                 if (header_pool)
                     ret += header_pool->total_objects;
@@ -246,25 +289,23 @@ interpinfo(Interp *interpreter, INTVAL what)
 }
 
 PMC*
-interpinfo_p(Interp *interpreter, INTVAL what)
+interpinfo_p(Interp *interp, INTVAL what)
 {
     switch (what) {
         case CURRENT_SUB:
-            return CONTEXT(interpreter->ctx)->current_sub;
+            return CONTEXT(interp->ctx)->current_sub;
         case CURRENT_CONT:
             {
-            PMC * const cont = CONTEXT(interpreter->ctx)->current_cont;
+            PMC * const cont = CONTEXT(interp->ctx)->current_cont;
             if (!PMC_IS_NULL(cont) && cont->vtable->base_type ==
                     enum_class_RetContinuation)
-                return VTABLE_clone(interpreter, cont);
+                return VTABLE_clone(interp, cont);
             return cont;
             }
         case CURRENT_OBJECT:
-            return CONTEXT(interpreter->ctx)->current_object;
-        case NAMESPACE_ROOT: 
-            return interpreter->root_namespace;
+            return CONTEXT(interp->ctx)->current_object;
         case CURRENT_LEXPAD:
-            return CONTEXT(interpreter->ctx)->lex_pad;
+            return CONTEXT(interp->ctx)->lex_pad;
         default:        /* or a warning only? */
             internal_exception(UNIMPLEMENTED,
                     "illegal argument in interpinfo");
@@ -273,11 +314,38 @@ interpinfo_p(Interp *interpreter, INTVAL what)
 }
 
 STRING*
-interpinfo_s(Interp *interpreter, INTVAL what)
+interpinfo_s(Interp *interp, INTVAL what)
 {
+    STRING *fullname, *basename;
+    char *fullname_c;
+    int pos;
+
     switch (what) {
-        case CURRENT_METHOD:
-            return CONTEXT(interpreter->ctx)->current_method;
+        case EXECUTABLE_FULLNAME:
+            return VTABLE_get_string(interp,
+                VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
+                    IGLOBALS_EXECUTABLE));
+        case EXECUTABLE_BASENAME:
+            /* Need to strip back to what follows the final / or \. */
+            fullname = VTABLE_get_string(interp,
+                VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
+                    IGLOBALS_EXECUTABLE));
+            fullname_c = string_to_cstring(interp, fullname);
+            pos = strlen(fullname_c) - 1;
+            while (pos > 0 && fullname_c[pos] != '/' && fullname_c[pos] != '\\')
+                pos--;
+            if (pos > 0)
+                pos++;
+            basename = string_from_cstring(interp, fullname_c + pos, 0);
+            mem_sys_free(fullname_c);
+            return basename;
+
+        case RUNTIME_PREFIX:
+            fullname_c = Parrot_get_runtime_prefix(interp, NULL);
+            fullname = string_from_cstring(interp, fullname_c, 0);
+            mem_sys_free(fullname_c);
+            return fullname;
+
         default:        /* or a warning only? */
             internal_exception(UNIMPLEMENTED,
                     "illegal argument in interpinfo");
@@ -288,7 +356,7 @@ interpinfo_s(Interp *interpreter, INTVAL what)
 /*
 
 =item C<INTVAL
-sysinfo_i(Parrot_Interp interpreter, INTVAL info_wanted)>
+sysinfo_i(Parrot_Interp interp, INTVAL info_wanted)>
 
 Returns the system info.
 
@@ -305,15 +373,15 @@ In unknown info is requested then -1 is returned.
 */
 
 INTVAL
-sysinfo_i(Parrot_Interp interpreter, INTVAL info_wanted)
+sysinfo_i(Parrot_Interp interp, INTVAL info_wanted)
 {
     switch (info_wanted) {
     case PARROT_INTSIZE:
-        return sizeof(INTVAL);
+        return sizeof (INTVAL);
     case PARROT_FLOATSIZE:
-        return sizeof(FLOATVAL);
+        return sizeof (FLOATVAL);
     case PARROT_POINTERSIZE:
-        return sizeof(void *);
+        return sizeof (void *);
     default:
         return -1;
     }
@@ -322,7 +390,7 @@ sysinfo_i(Parrot_Interp interpreter, INTVAL info_wanted)
 /*
 
 =item C<STRING *
-sysinfo_s(Parrot_Interp interpreter, INTVAL info_wanted)>
+sysinfo_s(Parrot_Interp interp, INTVAL info_wanted)>
 
 Returns the system info string.
 
@@ -341,17 +409,17 @@ If unknown info is requested then and empty string is returned.
 */
 
 STRING *
-sysinfo_s(Parrot_Interp interpreter, INTVAL info_wanted)
+sysinfo_s(Parrot_Interp interp, INTVAL info_wanted)
 {
     switch (info_wanted) {
     case PARROT_OS:
-        return string_from_cstring(interpreter, BUILD_OS_NAME, 0);
+        return string_from_cstring(interp, BUILD_OS_NAME, 0);
     case PARROT_OS_VERSION:
     case PARROT_OS_VERSION_NUMBER:
     case CPU_ARCH:
     case CPU_TYPE:
     default:
-        return CONST_STRING(interpreter, "");
+        return CONST_STRING(interp, "");
     }
 }
 /*
@@ -367,12 +435,10 @@ F<include/parrot/interpreter.h>.
 */
 
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

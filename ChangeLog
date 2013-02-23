@@ -1,4 +1,57 @@
-#1 $Id: /local/ChangeLog 14032 2006-08-09T01:15:23.527431Z chip  $
+#1 $Id: /parrotcode/trunk/ChangeLog 3510 2007-05-16T02:47:23.785670Z chromatic  $
+
+2007.05.15    chromatic
+	* Released 0.4.12
+	See NEWS for more.
+
+2007.04.17    mdiep
+	* Released 0.4.11
+	See NEWS for more.
+
+2007.03.20    coke
+	* Released 0.4.10
+	See NEWS for more.
+
+2007.3.10     coke
+        * removed parakeet
+
+2007.02.22    pmichaud
+	* Released 0.4.9
+	See NEWS for more.
+
+2007.01.17    chromatic
+	* changed 'name' method on namespaces to 'get_name' per pdd21
+
+2007.01.16    particle
+	* Released 0.4.8
+	See NEWS for more.
+
+2006.12.12    particle
+	* added C<isnull> opcode
+
+2006.11.14    chip
+	* Released 0.4.7
+	See NEWS for more.
+
+2006.11.07	tewk
+	* added :init pragma functionality to subs
+
+2006.10.28	jonathan
+	* added :vtable pragma functionality to subs
+
+2006.09.18    chromatic
+	* added Parrot::Embed under ext/Parrot-Embed
+
+2006.08.18    leo
+	* remove the None PMC - if needed it can trivially be reimplemented
+	  in languages from r14189
+
+2006.08.16    creiss
+	Merged Software Transactional Memory branch into trunk, adds:
+	* several new opcodes whose names start with stm_
+	* read-only PMC support
+	* several new PMC types (whose names start with STM*)
+	* support for threads (again)
 
 2006.08.08    chip
 	* Released 0.4.6
@@ -3656,9 +3709,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: /local/ChangeLog 14032 2006-08-09T01:15:23.527431Z chip  $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: /parrotcode/trunk/ChangeLog 3510 2007-05-16T02:47:23.785670Z chromatic  $
 	into generated files
-	   but the $Id: /local/ChangeLog 14032 2006-08-09T01:15:23.527431Z chip  $ string gets mangled when it's committed.
+	   but the $Id: /parrotcode/trunk/ChangeLog 3510 2007-05-16T02:47:23.785670Z chromatic  $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/docs/pdds/pdd20_lexical_vars.pod 12839 2006-05-30T14:34:31.126984Z coke  $
+# $Id: /parrotcode/trunk/docs/pdds/pdd20_lexical_vars.pod 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ docs/pdds/pdd20_lexical_vars.pod - Lexical variables
 
 =head1 VERSION
 
-$Revision: 12839 $
+$Revision: 470 $
 
 =head1 ABSTRACT
 

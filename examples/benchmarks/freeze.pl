@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/examples/benchmarks/freeze.pl 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/local/examples/benchmarks/freeze.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -24,21 +24,21 @@ use Time::HiRes qw( time );
 
 my @a;
 my $s = time();
-for my $i (0..99999) {
+for my $i ( 0 .. 99999 ) {
     push @a, $i;
-};
+}
 my $e = time();
-printf "constr.time %.6f\n", $e-$s;
+printf "constr.time %.6f\n", $e - $s;
 
 $s = time();
-my $image = freeze(\@a);
+my $image = freeze( \@a );
 $e = time();
-printf "freeze time %.6f\n", $e-$s;
+printf "freeze time %.6f\n", $e - $s;
 
 $s = time();
 my @b = @{ thaw $image };
 $e = time();
-printf "  thaw time %.6f\n", $e-$s;
+printf "  thaw time %.6f\n", $e - $s;
 
 #$s = time();
 #my $c = dclone \@a;
@@ -53,3 +53,10 @@ print "array size ", scalar(@b), "\n";
 F<examples/benchmarks/freeze.pasm>.
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

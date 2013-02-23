@@ -1,4 +1,4 @@
-# $Id: /local/runtime/parrot/library/config.pir 12837 2006-05-30T13:47:57.477012Z coke  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/config.pir 3312 2007-04-27T05:11:59.998768Z mdiep  $
 
 =head1 TITLE
 
@@ -43,10 +43,13 @@ undefined values) is undefined, and may be rather funky.
 
 =cut
 
+.include "interpinfo.pasm"
+
 .pcc_sub _config
     .local pmc CONF
-    # XXX: this works only if parrot is run from its root directory
-    .const string conf_file = "runtime/parrot/include/config.fpmc"
+    .local string conf_file
+    conf_file = interpinfo .INTERPINFO_RUNTIME_PREFIX
+    conf_file .= "/runtime/parrot/include/config.fpmc"
 
     open CONF, conf_file, "<"
     $I0 = defined CONF
@@ -82,3 +85,9 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

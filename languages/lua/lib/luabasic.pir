@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/lib/luabasic.pir 12840 2006-05-30T15:08:05.048089Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/lib/luabasic.pir 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -9,7 +9,8 @@ lib/luabasic.pir - Lua Basic Library
 
 The basic library provides some core functions to Lua.
 
-See "Lua 5.1 Reference Manual", section 5.1 "Basic Functions".
+See "Lua 5.1 Reference Manual", section 5.1 "Basic Functions",
+L<http://www.lua.org/manual/5.1/manual.html#5.1>.
 
 =head2 Variables
 
@@ -17,28 +18,26 @@ See "Lua 5.1 Reference Manual", section 5.1 "Basic Functions".
 
 =cut
 
-.namespace [ "Lua" ]
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 
+.sub 'init_basic' :load :anon
 
-.sub init_basic :load :anon
-
-#    load_bytecode "languages/lua/lib/luaaux.pbc"
+    load_bytecode 'languages/lua/lib/luaaux.pbc'
 
 #    print "init Lua Basic\n"
 
     .local pmc _lua__REGISTRY
     _lua__REGISTRY = new .LuaTable
-    global "_REGISTRY" = _lua__REGISTRY
-
-    .local pmc _lua__ENVIRON
-    _lua__ENVIRON = new .LuaTable
-    global "_ENVIRON" = _lua__ENVIRON
+    global '_REGISTRY' = _lua__REGISTRY
 
     .local pmc _lua__GLOBAL
     _lua__GLOBAL = new .LuaTable
-    global "_G" = _lua__GLOBAL
-    $P1 = new .LuaString
+    global '_G' = _lua__GLOBAL
+    new $P1, .LuaString
+
+    set $P1, '_LOADED'
+    new $P0, .LuaTable
+    _lua__REGISTRY[$P1] = $P0
 
 =item C<_G>
 
@@ -49,8 +48,10 @@ environments.)
 
 =cut
 
-    $P1 = "_G"
+    set $P1, '_G'
     _lua__GLOBAL[$P1] = _lua__GLOBAL
+
+    lua_register($P1, _lua__GLOBAL)
 
 =item C<_VERSION>
 
@@ -59,9 +60,9 @@ interpreter version. The current contents of this variable is C<"Lua 5.1">.
 
 =cut
 
-    $P0 = new .LuaString
-    $P0 = "Lua 5.1 (on Parrot)"
-    $P1 = "_VERSION"
+    new $P0, .LuaString
+    set $P0, "Lua 5.1 (on Parrot)"
+    set $P1, '_VERSION'
     _lua__GLOBAL[$P1] = $P0
 
 =back
@@ -72,104 +73,129 @@ interpreter version. The current contents of this variable is C<"Lua 5.1">.
 
 =cut
 
-    .const .Sub _lua_assert = "_lua_assert"
-    $P1 = "assert"
+    .const .Sub _lua_assert = 'assert'
+    _lua_assert.'setfenv'(_lua__GLOBAL)
+    set $P1, 'assert'
     _lua__GLOBAL[$P1] = _lua_assert
 
-    .const .Sub _lua_collectgarbage = "_lua_collectgarbage"
-    $P1 = "collectgarbage"
+    .const .Sub _lua_collectgarbage = 'collectgarbage'
+    _lua_collectgarbage.'setfenv'(_lua__GLOBAL)
+    set $P1, 'collectgarbage'
     _lua__GLOBAL[$P1] = _lua_collectgarbage
 
-    .const .Sub _lua_dofile = "_lua_dofile"
-    $P1 = "dofile"
+    .const .Sub _lua_dofile = 'dofile'
+    _lua_dofile.'setfenv'(_lua__GLOBAL)
+    set $P1, 'dofile'
     _lua__GLOBAL[$P1] = _lua_dofile
 
-    .const .Sub _lua_error = "_lua_error"
-    $P1 = "error"
+    .const .Sub _lua_error = 'error'
+    _lua_error.'setfenv'(_lua__GLOBAL)
+    set $P1, 'error'
     _lua__GLOBAL[$P1] = _lua_error
 
-    .const .Sub _lua_getfenv = "_lua_getfenv"
-    $P1 = "getfenv"
+    .const .Sub _lua_getfenv = 'getfenv'
+    _lua_getfenv.'setfenv'(_lua__GLOBAL)
+    set $P1, 'getfenv'
     _lua__GLOBAL[$P1] = _lua_getfenv
 
-    .const .Sub _lua_getmetatable = "_lua_getmetatable"
-    $P1 = "getmetatable"
+    .const .Sub _lua_getmetatable = 'getmetatable'
+    _lua_getmetatable.'setfenv'(_lua__GLOBAL)
+    set $P1, 'getmetatable'
     _lua__GLOBAL[$P1] = _lua_getmetatable
 
-    .const .Sub _lua_ipairs = "_lua_ipairs"
-    $P1 = "ipairs"
+    .const .Sub _lua_ipairs = 'ipairs'
+    _lua_ipairs.'setfenv'(_lua__GLOBAL)
+    set $P1, 'ipairs'
     _lua__GLOBAL[$P1] = _lua_ipairs
 
-    .const .Sub _lua_load = "_lua_load"
-    $P1 = "load"
+    .const .Sub _lua_load = 'load'
+    _lua_load.'setfenv'(_lua__GLOBAL)
+    set $P1, 'load'
     _lua__GLOBAL[$P1] = _lua_load
 
-    .const .Sub _lua_loadfile = "_lua_loadfile"
-    $P1 = "loadfile"
+    .const .Sub _lua_loadfile = 'loadfile'
+    _lua_loadfile.'setfenv'(_lua__GLOBAL)
+    set $P1, 'loadfile'
     _lua__GLOBAL[$P1] = _lua_loadfile
 
-    .const .Sub _lua_loadstring = "_lua_loadstring"
-    $P1 = "loadstring"
+    .const .Sub _lua_loadstring = 'loadstring'
+    _lua_loadstring.'setfenv'(_lua__GLOBAL)
+    set $P1, 'loadstring'
     _lua__GLOBAL[$P1] = _lua_loadstring
 
-    .const .Sub _lua_next = "_lua_next"
-    $P1 = "next"
+    .const .Sub _lua_next = 'next'
+    _lua_next.'setfenv'(_lua__GLOBAL)
+    set $P1, 'next'
     _lua__GLOBAL[$P1] = _lua_next
 
-    .const .Sub _lua_pairs = "_lua_pairs"
-    $P1 = "pairs"
+    .const .Sub _lua_pairs = 'pairs'
+    _lua_pairs.'setfenv'(_lua__GLOBAL)
+    set $P1, 'pairs'
     _lua__GLOBAL[$P1] = _lua_pairs
 
-    .const .Sub _lua_pcall = "_lua_pcall"
-    $P1 = "pcall"
+    .const .Sub _lua_pcall = 'pcall'
+    _lua_pcall.'setfenv'(_lua__GLOBAL)
+    set $P1, 'pcall'
     _lua__GLOBAL[$P1] = _lua_pcall
 
-    .const .Sub _lua_print = "_lua_print"
-    $P1 = "print"
+    .const .Sub _lua_print = 'print'
+    _lua_print.'setfenv'(_lua__GLOBAL)
+    set $P1, 'print'
     _lua__GLOBAL[$P1] = _lua_print
 
-    .const .Sub _lua_rawequal = "_lua_rawequal"
-    $P1 = "rawequal"
+    .const .Sub _lua_rawequal = 'rawequal'
+    _lua_rawequal.'setfenv'(_lua__GLOBAL)
+    set $P1, 'rawequal'
     _lua__GLOBAL[$P1] = _lua_rawequal
 
-    .const .Sub _lua_rawget = "_lua_rawget"
-    $P1 = "rawget"
+    .const .Sub _lua_rawget = 'rawget'
+    _lua_rawget.'setfenv'(_lua__GLOBAL)
+    set $P1, 'rawget'
     _lua__GLOBAL[$P1] = _lua_rawget
 
-    .const .Sub _lua_rawset = "_lua_rawset"
-    $P1 = "rawset"
+    .const .Sub _lua_rawset = 'rawset'
+    _lua_rawset.'setfenv'(_lua__GLOBAL)
+    set $P1, 'rawset'
     _lua__GLOBAL[$P1] = _lua_rawset
 
-    .const .Sub _lua_select = "_lua_select"
-    $P1 = "select"
+    .const .Sub _lua_select = 'select'
+    _lua_select.'setfenv'(_lua__GLOBAL)
+    set $P1, 'select'
     _lua__GLOBAL[$P1] = _lua_select
 
-    .const .Sub _lua_setfenv = "_lua_setfenv"
-    $P1 = "setfenv"
+    .const .Sub _lua_setfenv = 'setfenv'
+    _lua_setfenv.'setfenv'(_lua__GLOBAL)
+    set $P1, 'setfenv'
     _lua__GLOBAL[$P1] = _lua_setfenv
 
-    .const .Sub _lua_setmetatable = "_lua_setmetatable"
-    $P1 = "setmetatable"
+    .const .Sub _lua_setmetatable = 'setmetatable'
+    _lua_setmetatable.'setfenv'(_lua__GLOBAL)
+    set $P1, 'setmetatable'
     _lua__GLOBAL[$P1] = _lua_setmetatable
 
-    .const .Sub _lua_tonumber = "_lua_tonumber"
-    $P1 = "tonumber"
+    .const .Sub _lua_tonumber = 'tonumber'
+    _lua_tonumber.'setfenv'(_lua__GLOBAL)
+    set $P1, 'tonumber'
     _lua__GLOBAL[$P1] = _lua_tonumber
 
-    .const .Sub _lua_tostring = "_lua_tostring"
-    $P1 = "tostring"
+    .const .Sub _lua_tostring = 'tostring'
+    _lua_tostring.'setfenv'(_lua__GLOBAL)
+    set $P1, 'tostring'
     _lua__GLOBAL[$P1] = _lua_tostring
 
-    .const .Sub _lua_type = "_lua_type"
-    $P1 = "type"
+    .const .Sub _lua_type = 'type'
+    _lua_type.'setfenv'(_lua__GLOBAL)
+    set $P1, 'type'
     _lua__GLOBAL[$P1] = _lua_type
 
-    .const .Sub _lua_unpack = "_lua_unpack"
-    $P1 = "unpack"
+    .const .Sub _lua_unpack = 'unpack'
+    _lua_unpack.'setfenv'(_lua__GLOBAL)
+    set $P1, 'unpack'
     _lua__GLOBAL[$P1] = _lua_unpack
 
-    .const .Sub _lua_xpcall = "_lua_xpcall"
-    $P1 = "xpcall"
+    .const .Sub _lua_xpcall = 'xpcall'
+    _lua_xpcall.'setfenv'(_lua__GLOBAL)
+    set $P1, 'xpcall'
     _lua__GLOBAL[$P1] = _lua_xpcall
 
 .end
@@ -183,15 +209,15 @@ message; when absent, it defaults to "assertion failed!"
 
 =cut
 
-.sub _lua_assert :anon :outer(init_basic)
+.sub 'assert' :anon
     .param pmc v :optional
     .param pmc message :optional
-    checkany(v)
+    lua_checkany(1, v)
     $I0 = istrue v
-    if $I0 goto L0
-    $S0 = optstring(message, "assertion failed!")
-    error($S0)
-L0:
+    if $I0 goto L1
+    $S2 = lua_optstring(2, message, "assertion failed!")
+    lua_error($S2)
+L1:
     .return (v, message)
 .end
 
@@ -221,7 +247,7 @@ returns the total memory in use by Lua (in Kbytes).
 
 =item B<"step">
 
-performs a garbage-collection step. The step C<"size"> is controlled 
+performs a garbage-collection step. The step C<"size"> is controlled
 by C<arg> (larger values mean more steps) in a non-specified way.
 If you want to control the step size you must tune experimentally the value
 of C<arg>. Returns B<true> if the step finished a collection cycle.
@@ -232,18 +258,73 @@ sets C<arg>/100 as the new value for the I<pause> of the collector.
 
 =item B<"setstepmul">
 
-sets C<arg>/100 as the new value for the I<step multiplier> of the collector. 
-    
+sets C<arg>/100 as the new value for the I<step multiplier> of the collector.
+
 =back
-    
-NOT YET IMPLEMENTED.
+
+STILL INCOMPLETE (see gc).
 
 =cut
 
-.sub _lua_collectgarbage :anon :outer(init_basic)
+.sub 'collectgarbage' :anon
     .param pmc opt :optional
-    $S0 = checkstring(opt)
-    not_implemented()
+    .param pmc arg :optional
+    .local pmc ret
+    $S1 = lua_optstring(1, opt, 'collect')
+    lua_checkoption(1, $S1, 'stop restart collect count step setpause setstepmul')
+    $I2 = lua_optint(2, arg, 0)
+    $N0 = gc($S1, $I2)
+    unless $S1 == 'step' goto L1
+    new ret, .LuaBoolean
+    $I0 = $N0
+    set ret, $I0
+    goto L2
+L1:
+    new ret, .LuaNumber
+    set ret, $N0
+L2:
+    .return (ret)
+.end
+
+.include 'interpinfo.pasm'
+
+.sub 'gc' :anon
+    .param string what
+    .param int data
+    .local float res
+    res = 0
+L_stop:
+    unless what == 'stop' goto L_restart
+    collectoff
+    goto L_end
+L_restart:
+    unless what == 'restart' goto L_collect
+    collecton
+    goto L_end
+L_collect:
+    unless what == 'collect' goto L_count
+    collect
+    goto L_end
+L_count:
+    unless what == 'count' goto L_step
+    interpinfo $I0, .INTERPINFO_TOTAL_MEM_ALLOC
+    # GC values are expressed in Kbytes
+    res = $I0 / 1024
+    goto L_end
+L_step:
+    unless what == 'step' goto L_setpause
+    goto L_end
+L_setpause:
+    unless what == 'setpause' goto L_setstepmul
+    # not_implemented()
+    goto L_end
+L_setstepmul:
+    unless what == 'setstepmul' goto L_default
+    goto L_end
+L_default:
+    res = -1
+L_end:
+    .return (res)
 .end
 
 
@@ -255,24 +336,25 @@ without arguments, C<dofile> executes the contents of the standard input
 C<dofile> propagates the error to its caller (that is, dofile does not run in
 protected mode).
 
-NOT YET IMPLEMENTED.
-
 =cut
 
-.sub _lua_dofile :anon :outer(init_basic)
+.sub 'dofile' :anon
     .param pmc filename :optional
-    $S0 = optstring(filename, "")
-    not_implemented()
+    $S1 = lua_optstring(1, filename, '')
+    ($P0, $S0) = lua_loadfile($S1)
+    if null $P0 goto L1
+    .return $P0()
+L1:
+    lua_error($S0)
 .end
-
 
 =item C<error (message [, level])>
 
 Terminates the last protected function called and returns C<message> as the
 error message. Function C<error> never returns.
 
-Usually, C<error> adds some information about the error position at the 
-beginning of the message. The C<level> argument specifies how to get the 
+Usually, C<error> adds some information about the error position at the
+beginning of the message. The C<level> argument specifies how to get the
 error position. With level 1 (the default), the error position is where the
 C<error> function was called. Level 2 points the error to where the function
 that called C<error> was called; and so on. Passing a level 0 avoids the
@@ -282,14 +364,14 @@ STILL INCOMPLETE.
 
 =cut
 
-.sub _lua_error :anon :outer(init_basic)
+.sub 'error' :anon
     .param pmc message :optional
     .param pmc level :optional
-    $I0 = optint(level, 1)
-    checkany(message)
+    $I2 = lua_optint(2, level, 1)
+    lua_checkany(1, message)
     #
-    $S0 = message
-    error($S0)
+    $S1 = message
+    lua_error($S1)
 .end
 
 
@@ -301,14 +383,53 @@ function or a number that specifies the function at that stack level: Level
 function, or if C<f> is 0, C<getfenv> returns the global environment. The
 default for C<f> is 1.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
-.sub _lua_getfenv :anon :outer(init_basic)
-    not_implemented()
+.sub 'getfenv' :anon
+    .param pmc f :optional
+    .local pmc ret
+    if null f goto L1
+    .const .LuaNumber zero = '0'
+    if f == zero goto L2
+L1:
+    f = getfunc(f, 1)
+    $I0 = isa f, 'LuaClosure'
+    if $I0 goto L3
+L2:
+    ret = get_global '_G'
+    .return (ret)
+L3:
+    .return lua_getfenv(f)
 .end
 
+.sub 'getfunc' :anon
+    .param pmc f
+    .param int opt
+    if null f goto L1
+    $I0 = isa f, 'LuaFunction'
+    if $I0 goto L2
+    $I0 = isa f, 'LuaClosure'
+    if $I0 goto L2
+L1:
+    .local int level
+    unless opt goto L3
+    level = lua_optint(1, f, 1)
+    goto L4
+L3:
+    level = lua_checknumber(1, f)
+L4:
+    if level >= 0 goto L5
+    lua_argerror(1, "level must be non-negative")
+L5:
+    $P0 = getinterp
+    inc level
+    push_eh _handler
+    f = $P0['sub'; level]
+L2:
+    .return (f)
+_handler:
+    lua_argerror(1, "invalid level")
+.end
 
 =item C<getmetatable (object)>
 
@@ -318,17 +439,17 @@ Otherwise, returns the metatable of the given object.
 
 =cut
 
-.sub _lua_getmetatable :anon :outer(init_basic)
+.sub 'getmetatable' :anon
     .param pmc obj :optional
     .local pmc ret
-    checkany(obj)
-    ret = obj."get_metatable"()
+    lua_checkany(1, obj)
+    ret = obj.'get_metatable'()
     if ret goto L1
     .return (ret)
 L1:
     .local pmc prot
-    .const .LuaString mt = "__metatable"
-    prot = ret."rawget"(mt)
+    .const .LuaString mt = '__metatable'
+    prot = ret.'rawget'(mt)
     unless prot goto L2
     .return (prot)
 L2:
@@ -346,35 +467,33 @@ the construction
 will iterate over the pairs (C<1,t[1]>), (C<2,t[2]>), ..., up to the first
 integer key with a nil value in the table.
 
-See C<next> for the caveats of modifying the table during its traversal. 
+See C<next> for the caveats of modifying the table during its traversal.
 
 =cut
 
-.sub _lua_ipairs :anon :outer(init_basic)
+.sub 'ipairs' :anon
     .param pmc t :optional
     .param pmc i :optional
-    checktype(t, "table")
-    unless_null i, L0
+    lua_checktype(1, t, 'table')
+    unless null i goto L1
     .local pmc _G
-    _G = global "_G"
-    .const .LuaString key_ipairs = "ipairs"
+    _G = global '_G'
+    .const .LuaString key_ipairs = 'ipairs'
     .local pmc ipairs
-    ipairs = _G."rawget"(key_ipairs)
+    ipairs = _G.'rawget'(key_ipairs)
     .local pmc zero
     new zero, .LuaNumber
-    zero = 0.0
+    set zero, 0.0
     .return (ipairs, t, zero)
-L0:
-    $N0 = checknumber(i)
-    inc $N0
-    .local pmc ret
-    .local pmc n
-    new n, .LuaNumber
-    n = $N0
-    ret = t."rawget"(n)
-    unless ret goto L1
-    .return (n, ret)
 L1:
+    $P2 = lua_checknumber(2, i)
+    $P0 = clone $P2
+    inc $P0
+    .local pmc ret
+    ret = t.'rawget'($P0)
+    unless ret goto L2
+    .return ($P0, ret)
+L2:
     .return ()
 .end
 
@@ -390,14 +509,32 @@ returns B<nil> plus the error message. The environment of the returned
 function is the global environment.
 
 C<chunkname> is used as the chunk name for error messages and debug
-information. 
+information.
 
 NOT YET IMPLEMENTED.
 
 =cut
 
-.sub _lua_load :anon :outer(init_basic)
+.sub 'load' :anon
+    .param pmc func :optional
+    .param pmc chunkname :optional
+    lua_checktype(1, func, 'function')
+    $S2 = lua_optstring(2, chunkname, '=(load)')
     not_implemented()
+    .return load_aux($P0, $S0)
+.end
+
+.sub 'load_aux' :anon
+    .param pmc func
+    .param string error
+    if null func goto L1
+    .return (func)
+L1:
+    .local pmc msg
+    new msg, .LuaString
+    set msg, error
+    new func, .LuaNil
+    .return (func, msg)
 .end
 
 
@@ -406,14 +543,13 @@ NOT YET IMPLEMENTED.
 Similar to C<load>, but gets the chunk from file C<filename> or from the
 standard input, if no file name is given.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
-.sub _lua_loadfile :anon :outer(init_basic)
+.sub 'loadfile' :anon
     .param pmc filename :optional
-    $S0 = optstring(filename, "")
-    not_implemented()
+    $S1 = lua_optstring(1, filename, '')
+    ($P0, $S0) = lua_loadfile($S1)
+    .return load_aux($P0, $S0)
 .end
 
 
@@ -425,16 +561,15 @@ To load and run a given string, use the idiom
 
     assert(loadstring(s))()
 
-NOT YET IMPLEMENTED.
-
 =cut
 
-.sub _lua_loadstring :anon :outer(init_basic)
+.sub 'loadstring' :anon
     .param pmc s :optional
     .param pmc chunkname :optional
-    $S0 = checkstring(s)
-    $S1 = optstring(chunkname, s)
-    not_implemented()
+    $S1 = lua_checkstring(1, s)
+    $S2 = lua_optstring(2, chunkname, $S1)
+    ($P0, $S0) = lua_loadbuffer($S1, $S2)
+    .return load_aux($P0, $S0)
 .end
 
 
@@ -446,7 +581,7 @@ next index of the table and its associated value. When called
 with B<nil> as its second argument, C<next> returns an initial index
 and its associated value. When called with the last index, or with
 B<nil> in an empty table, C<next> returns B<nil>. If the second argument is
-absent, then it is interpreted as B<nil>. In particular, you can use 
+absent, then it is interpreted as B<nil>. In particular, you can use
 C<next(t)> to check whether a table is empty.
 
 Lua has no declaration of fields. There is no difference between a field
@@ -457,23 +592,19 @@ in numeric order, use a numerical for or the C<ipairs> function.)
 
 The behavior of C<next> is I<undefined> if, during the traversal, you assign
 any value to a non-existent field in the table. You may however modify
-existing fields. In particular, you may clear existing fields. 
-
-STILL INCOMPLETE (see next in luapir.pir).
+existing fields. In particular, you may clear existing fields.
 
 =cut
 
-.sub _lua_next :anon :outer(init_basic)
+.sub 'next' :anon
     .param pmc table :optional
-    .param pmc index :optional
-    .local pmc idx
-    .local pmc value
-    checktype(table, "table")
-    (idx, value) = next(table, index)
-    unless idx goto L1
-    .return (idx, value) 
+    .param pmc idx :optional
+    lua_checktype(1, table, 'table')
+    $P0 = table.'next'(idx)
+    unless $P0 goto L1
+    .return ($P0 :flat)
 L1:
-    .return (idx)	# nil                               
+    .return ($P0)   # nil
 .end
 
 
@@ -488,18 +619,16 @@ will iterate over all key--value pairs of table C<t>.
 
 See C<next> for the caveats of modifying the table during its traversal.
 
-STILL INCOMPLETE (see next).
-
 =cut
 
-.sub _lua_pairs :anon :outer(init_basic)
+.sub 'pairs' :anon
     .param pmc t :optional
-    checktype(t, "table")
+    lua_checktype(1, t, 'table')
     .local pmc _G
-    _G = global "_G"
-    .const .LuaString key_next = "next"
+    _G = global '_G'
+    .const .LuaString key_next = 'next'
     .local pmc next
-    next = _G."rawget"(key_next)
+    next = _G.'rawget'(key_next)
     .local pmc nil
     new nil, .LuaNil
     .return (next, t, nil)
@@ -517,25 +646,25 @@ In case of any error, C<pcall> returns B<false> plus the error message.
 
 =cut
 
-.sub _lua_pcall :anon :outer(init_basic)
+.sub 'pcall' :anon
     .param pmc f :optional
     .param pmc argv :slurpy
     .local pmc ret
     .local pmc status
     new status, .LuaBoolean
-    checkany(f)
+    lua_checkany(1, f)
     push_eh _handler
     (ret :slurpy) = f(argv :flat)
-    status = 1
+    set status, 1
     .return (status, ret :flat)
 _handler:
     .local pmc e
     .local string s
     .local pmc msg
     .get_results (e, s)
-    status = 0    
+    set status, 0
     new msg, .LuaString
-    msg = s
+    set msg, s
     .return (status, msg)
 .end
 
@@ -549,7 +678,7 @@ debugging. For formatted output, use C<string.format>.
 
 =cut
 
-.sub _lua_print :anon :outer(init_basic)
+.sub 'print' :anon
     .param pmc argv :slurpy
     .local int argc
     .local int i
@@ -561,8 +690,8 @@ L1:
     print "\t"
 L2:
     $P0 = argv[i]
-    $P1 = $P0."tostring"()
-    print $P1
+    $P0 = $P0.'tostring'()
+    print $P0
     inc i
     goto L1
 L3:
@@ -577,13 +706,13 @@ Returns a boolean.
 
 =cut
 
-.sub _lua_rawequal :anon :outer(init_basic)
+.sub 'rawequal' :anon
     .param pmc v1 :optional
     .param pmc v2 :optional
     .local pmc ret
-    checkany(v1)
-    checkany(v2)
-     ret = v1."rawequal"(v2)
+    lua_checkany(1, v1)
+    lua_checkany(2, v2)
+    ret = v1.'rawequal'(v2)
     .return (ret)
 .end
 
@@ -595,13 +724,13 @@ C<table> must be a table; C<index> is any value different from B<nil>.
 
 =cut
 
-.sub _lua_rawget :anon :outer(init_basic)
+.sub 'rawget' :anon
     .param pmc table :optional
-    .param pmc index :optional
+    .param pmc idx :optional
     .local pmc ret
-    checktype(table, "table")
-    checkany(index)
-     ret = table."rawget"(index)
+    lua_checktype(1, table, 'table')
+    lua_checkany(2, idx)
+    ret = table.'rawget'(idx)
     .return (ret)
 .end
 
@@ -612,17 +741,19 @@ Sets the real value of C<table[index]> to value, without invoking any
 metamethod. C<table> must be a table, C<index> is any value different from
 B<nil>, and C<value> is any Lua value.
 
+This function returns C<table>.
+
 =cut
 
-.sub _lua_rawset :anon :outer(init_basic)
+.sub 'rawset' :anon
     .param pmc table :optional
-    .param pmc index :optional
+    .param pmc idx :optional
     .param pmc value :optional
-    checktype(table, "table")
-    checkany(index)
-    checkany(value)
-    table."rawset"(index, value)
-    .return ()
+    lua_checktype(1, table, 'table')
+    lua_checkany(2, idx)
+    lua_checkany(3, value)
+    table.'rawset'(idx, value)
+    .return (table)
 .end
 
 
@@ -630,26 +761,26 @@ B<nil>, and C<value> is any Lua value.
 
 If C<index> is a number, returns all arguments after argument number C<index>.
 Otherwise, C<index> must be the string C<"#">, and C<select> returns the
-total number of extra arguments it received. 
+total number of extra arguments it received.
 
 =cut
 
-.sub _lua_select :anon :outer(init_basic)
-    .param pmc index :optional
+.sub 'select' :anon
+    .param pmc idx :optional
     .param pmc argv :slurpy
     .local pmc ret
-    unless index goto L1
-    $I0 = isa index, "LuaString"
+    unless idx goto L1
+    $I0 = isa idx, 'LuaString'
     unless $I0 goto L1
-    $S0 = index
-    unless $S0 == "#" goto L1
+    $S0 = idx
+    unless $S0 == '#' goto L1
     $I1 = argv
     new ret, .LuaNumber
     ret = $I1
     .return (ret)
 L1:
     .local int i
-    i = checknumber(index)
+    i = lua_checknumber(1, idx)
     .local int n
     n = argv
     inc n
@@ -659,13 +790,13 @@ L1:
 L2:
     unless i > n goto L3
     i = n
-L3:    
+L3:
     if 1 <= i goto L4
-    argerror("index out of range")
+    lua_argerror(1, "index out of range")
 L4:
     $I0 = n - i
-    new ret, .Array
-    ret = $I0
+    new ret, .FixedPMCArray
+    set ret, $I0
     $I1 = 0
     dec i
 L5:
@@ -675,7 +806,7 @@ L5:
     inc i
     inc $I1
     goto L5
-L6:    
+L6:
     .return (ret :flat)
 .end
 
@@ -687,17 +818,30 @@ function or a number that specifies the function at that stack level: Level
 1 is the function calling C<setfenv>. C<setfenv> returns the given function.
 
 As a special case, when C<f> is 0 C<setfenv> changes the environment of the
-running thread. In this case, C<setfenv> returns no values. 
+running thread. In this case, C<setfenv> returns no values.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE.
 
 =cut
 
-.sub _lua_setfenv :anon :outer(init_basic)
+.sub 'setfenv' :anon
     .param pmc f :optional
     .param pmc table :optional
-    checktype(table, "table")
+    .const .LuaNumber zero = '0'
+    lua_checktype(2, table, 'table')
+    unless f == zero goto L1
+    # change environment of current thread
     not_implemented()
+    .return ()
+L1:
+    f = getfunc(f, 0)
+    $I0 = isa f, 'LuaFunction'
+    if $I0 goto L2
+    $I0 = lua_setfenv(f, table)
+    unless $I0 goto L2
+    .return (f)
+L2:
+    lua_error("'setfenv' cannot change environment of given object")
 .end
 
 
@@ -708,32 +852,33 @@ other types from Lua.) If metatable is B<nil>, removes the metatable of the
 given table. If the original metatable has a C<"__metatable"> field, raises
 an error.
 
-This function returns table. 
+This function returns C<table>.
 
 =cut
 
-.sub _lua_setmetatable :anon :outer(init_basic)
+.sub 'setmetatable' :anon
     .param pmc table :optional
     .param pmc metatable :optional
-    checktype(table, "table")
-    if_null metatable, L0
-    $S0 = typeof metatable
-    if $S0 == "nil" goto L1
-    if $S0 == "table" goto L1
-L0:
-    argerror("nil or table expected")
+    lua_checktype(1, table, 'table')
+    if null metatable goto L1
+    $I0 = isa metatable, 'LuaNil'
+    if $I0 goto L2
+    $I0 = isa metatable, 'LuaTable'
+    if $I0 goto L2
 L1:
+    lua_argerror(2, "nil or table expected")
+L2:
     .local pmc meta
-    meta = table."get_metatable"()
+    meta = table.'get_metatable'()
     unless meta goto L3
     .local pmc prot
-    .const .LuaString mt = "__metatable"
-    prot = meta."rawget"(mt)
+    .const .LuaString mt = '__metatable'
+    prot = meta.'rawget'(mt)
     unless prot goto L3
-    error("cannot change a protected metatable")
+    lua_error("cannot change a protected metatable")
 L3:
-    table."set_metatable"(metatable)
-    .return ()
+    table.'set_metatable'(metatable)
+    .return (table)
 .end
 
 
@@ -752,24 +897,24 @@ unsigned integers are accepted.
 
 =cut
 
-.sub _lua_tonumber :anon :outer(init_basic)
-    .param pmc e :optional 
+.sub 'tonumber' :anon
+    .param pmc e :optional
     .param pmc base :optional
     .local pmc ret
-    checkany(e)
-    $I0 = optint(base, 10)
-    unless $I0 == 10 goto L1
-    ret = e."tonumber"()
+    lua_checkany(1, e)
+    $I2 = lua_optint(2, base, 10)
+    unless $I2 == 10 goto L1
+    ret = e.'tonumber'()
     .return (ret)
 L1:
-    $P0 = checkstring(e)
-    unless 2 <= $I0 goto L2
-    unless $I0 <= 36 goto L2
+    $P0 = lua_checkstring(1, e)
+    unless 2 <= $I2 goto L2
+    unless $I2 <= 36 goto L2
     goto L3
 L2:
-    argerror("base out of range")
+    lua_argerror(2, "base out of range")
 L3:
-    ret = $P0."tobase"($I0)
+    ret = $P0.'tobase'($I2)
     .return (ret)
 .end
 
@@ -785,11 +930,11 @@ as its result.
 
 =cut
 
-.sub _lua_tostring :anon :outer(init_basic)
+.sub 'tostring' :anon
     .param pmc e :optional
     .local pmc ret
-    checkany(e)
-    ret = e."tostring"()
+    lua_checkany(1, e)
+    ret = e.'tostring'()
     .return (ret)
 .end
 
@@ -803,13 +948,13 @@ C<"userdata">.
 
 =cut
 
-.sub _lua_type :anon :outer(init_basic)
+.sub 'type' :anon
     .param pmc v :optional
     .local pmc ret
-    checkany(v)
+    lua_checkany(1, v)
     $S0 = typeof v
     new ret, .LuaString
-    ret = $S0
+    set ret, $S0
     .return (ret)
 .end
 
@@ -826,7 +971,7 @@ length operator.
 
 =cut
 
-.sub _lua_unpack :anon :outer(init_basic)
+.sub 'unpack' :anon
     .param pmc list :optional
     .param pmc i :optional
     .param pmc j :optional
@@ -835,25 +980,25 @@ length operator.
     .local int idx
     .local int e
     .local int n
-    checktype(list, "table")
-    $I0 = getn(list)                                   
-    $I1 = optint(i, 1)
-    e = optint(j, $I0)
-    n = e - $I1
+    lua_checktype(1, list, 'table')
+    $I0 = list.'len'()
+    $I2 = lua_optint(2, i, 1)
+    e = lua_optint(3, j, $I0)
+    n = e - $I2
     inc n
-    new ret, .Array
+    new ret, .FixedPMCArray
     set ret, n
     new index, .LuaNumber
-    index = $I1
+    set index, $I2
     idx = 0
-L0:    
-    unless idx < n goto L1
-    $P0 = list."rawget"(index)
+L1:
+    unless idx < n goto L2
+    $P0 = list.'rawget'(index)
     ret[idx] = $P0
     inc index
     inc idx
-    goto L0
-L1:
+    goto L1
+L2:
     .return (ret :flat)
 .end
 
@@ -869,33 +1014,33 @@ the error, calls the C<err> function with the original error object, and
 returns a status code. Its first result is the status code (a boolean), which
 is true if the call succeeds without errors. In this case, C<xpcall> also
 returns all results from the call, after this first result. In case of any
-error, C<xpcall> returns false plus the result from C<err>. 
+error, C<xpcall> returns false plus the result from C<err>.
 
 =cut
 
-.sub _lua_xpcall :anon :outer(init_basic)
+.sub 'xpcall' :anon
     .param pmc f :optional
     .param pmc err :optional
     .local pmc ret
     .local pmc status
     new status, .LuaBoolean
-    checkany(f)
-    checkany(err)
+    lua_checkany(1, f)
+    lua_checkany(2, err)
     push_eh _handler
     (ret :slurpy) = f()
-    status = 1
+    set status, 1
     .return (status, ret :flat)
 _handler:
-    .local pmc e
-    .local pmc msg
-    status = 0
-    $S0 = typeof err
-    unless $S0 == "Sub" goto L0    
-    .get_results (e)
-    (ret :slurpy) = err(e)
+    set status, 0
+    $I0 = isa err, 'LuaFunction'
+    if $I0 goto L1
+    $I0 = isa err, 'LuaClosure'
+    unless $I0 goto L2
+L1:
+    (ret :slurpy) = err()
     .return (status, ret :flat)
-L0:
-    .return (status)    
+L2:
+    .return (status)
 .end
 
 =back
@@ -906,3 +1051,9 @@ Francois Perrad.
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

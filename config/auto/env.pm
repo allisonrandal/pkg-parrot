@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/env.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/env.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Determining if the C library has C<setenv()> and C<unsetenv()>.
 package auto::env;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -23,23 +24,22 @@ use Parrot::Configure::Step ':auto';
 $description = 'Determining if your C library has setenv / unsetenv';
 @args        = qw(verbose);
 
-sub runstep
-{
-    my ($self, $conf) = (shift, shift);
+sub runstep {
+    my ( $self, $conf ) = ( shift, shift );
 
     my $verbose = $conf->options->get('verbose');
 
-    my ($setenv, $unsetenv) = (0, 0);
+    my ( $setenv, $unsetenv ) = ( 0, 0 );
 
     cc_gen('config/auto/env/test_setenv.in');
     eval { cc_build(); };
-    unless ($@ || cc_run() !~ /ok/) {
+    unless ( $@ || cc_run() !~ /ok/ ) {
         $setenv = 1;
     }
     cc_clean();
     cc_gen('config/auto/env/test_unsetenv.in');
     eval { cc_build(); };
-    unless ($@ || cc_run() !~ /ok/) {
+    unless ( $@ || cc_run() !~ /ok/ ) {
         $unsetenv = 1;
     }
     cc_clean();
@@ -49,16 +49,19 @@ sub runstep
         unsetenv => $unsetenv
     );
 
-    if ($setenv && $unsetenv) {
+    if ( $setenv && $unsetenv ) {
         print " (both) " if $verbose;
         $self->set_result('both');
-    } elsif ($setenv) {
+    }
+    elsif ($setenv) {
         print " (setenv) " if $verbose;
         $self->set_result('setenv');
-    } elsif ($unsetenv) {
+    }
+    elsif ($unsetenv) {
         print " (unsetenv) " if $verbose;
         $self->set_result('unsetenv');
-    } else {
+    }
+    else {
         print " (no) " if $verbose;
         $self->set_result('no');
     }
@@ -67,3 +70,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

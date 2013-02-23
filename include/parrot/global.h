@@ -1,7 +1,7 @@
 /* global.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/global.h 13359 2006-07-18T17:27:46.554567Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/global.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *      Contains accessor functions for globals
  *  Data Structure and Algorithms:
@@ -10,14 +10,17 @@
  *  References:
  */
 
-#if !defined(PARROT_GLOBAL_H_GUARD)
+#ifndef PARROT_GLOBAL_H_GUARD
 #define PARROT_GLOBAL_H_GUARD
 
-PARROT_API PMC *Parrot_get_namespace_keyed(     Interp *, PMC *base_ns, PMC *pmc_key);
-PARROT_API PMC *Parrot_get_namespace_keyed_str( Interp *, PMC *base_ns, STRING *str_key);
+PARROT_API PMC *Parrot_get_namespace_keyed(Interp *, PMC *base_ns, PMC *pmc_key);
+PARROT_API PMC *Parrot_get_namespace_keyed_str(Interp *, PMC *base_ns, STRING *str_key);
 
-PARROT_API PMC *Parrot_make_namespace_keyed(    Interp *, PMC *base_ns, PMC *pmc_key);
+PARROT_API PMC *Parrot_make_namespace_keyed(Interp *, PMC *base_ns, PMC *pmc_key);
 PARROT_API PMC *Parrot_make_namespace_keyed_str(Interp *, PMC *base_ns, STRING *str_key);
+
+PARROT_API PMC *Parrot_get_namespace_autobase(Interp *interp, PMC *key);
+PARROT_API PMC *Parrot_make_namespace_autobase(Interp *interp, PMC *key);
 
 /*
  * {get,set}_global.
@@ -62,12 +65,8 @@ PARROT_API void Parrot_store_sub_in_namespace(Interp *, PMC *sub_pmc);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
-
+ */
 

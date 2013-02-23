@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Libs.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Libs.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Libs - Parrot libraries documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Libs;
+        use Parrot::Docs::Libs;
 
 =head1 DESCRIPTION
 
@@ -32,15 +32,14 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'Libraries', 'libs.html', '',
-		$self->new_group('Parrot Core Libraries', '', 'runtime/parrot/library'),
-		$self->new_group('Dynamic Libraries', '', 'src/dynoplibs'),
-	);
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new(
+        'Libraries', 'libs.html', '',
+        $self->new_group( 'Parrot Core Libraries', '', 'runtime/parrot/library' ),
+        $self->new_group( 'Dynamic Libraries',     '', 'src/dynoplibs' ),
+    );
 }
 
 =back
@@ -48,3 +47,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

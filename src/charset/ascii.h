@@ -1,7 +1,7 @@
 /* ascii.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/src/charset/ascii.h 12826 2006-05-30T01:36:30.308856Z coke  $
+ *     $Id: /parrotcode/trunk/src/charset/ascii.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the header for the ascii charset functions
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_CHARSET_ASCII_H_GUARD)
+#ifndef PARROT_CHARSET_ASCII_H_GUARD
 #define PARROT_CHARSET_ASCII_H_GUARD
 
 /*
@@ -18,10 +18,10 @@
  */
 
 INTVAL
-ascii_find_thing(Interp *interpreter, STRING *string, UINTVAL start,
+ascii_find_thing(Interp *interp, STRING *string, UINTVAL start,
         PARROT_CCLASS_FLAGS type, const PARROT_CCLASS_FLAGS *table);
 INTVAL
-ascii_find_not_thing(Interp *interpreter, STRING *string, UINTVAL start,
+ascii_find_not_thing(Interp *interp, STRING *string, UINTVAL start,
         PARROT_CCLASS_FLAGS type, const PARROT_CCLASS_FLAGS *table);
 STRING *ascii_get_graphemes(Interp *, STRING *source_string,
         UINTVAL offset, UINTVAL count);
@@ -42,12 +42,10 @@ STRING *charset_cvt_ascii_to_binary(Interp *, STRING *src, STRING *dest);
 STRING *charset_cvt_ascii_to_iso_8859_1(Interp *, STRING *src, STRING *dest);
 
 #endif /* PARROT_CHARSET_ASCII_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

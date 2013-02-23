@@ -1,4 +1,4 @@
-# $Id: /local/README.win32.pod 13250 2006-07-11T18:23:08.462449Z particle  $
+# $Id: /parrotcode/trunk/README.win32.pod 3497 2007-05-15T18:50:08.321272Z fperrad  $
 
 This file is best viewed with "perldoc README.win32".
 
@@ -19,9 +19,9 @@ systems that run on Win32, eg Cygwin.
 
 Native compilers include:
 
-       Borland C++ (bcc)		version xxx or later
-       Microsoft Visual C++ (cl)	version 13.10.3077 or later
-       MinGW32 with GCC (gcc)		version 3.4.2 or later
+       Borland C++ (bcc)                version xxx or later
+       Microsoft Visual C++ (cl)        version 13.10.3077 or later
+       MinGW32 with GCC (gcc)           version 3.4.2 or later
        Intel C++ (icl)                  version 8.0.48 works
 
 =head2 Setting Up Parrot
@@ -38,8 +38,15 @@ Homepage L<http://msdn.microsoft.com/netframework/>.
 Note: Parrot will not build using nmake v1.5 from the MS web site.  Download
 one of the above toolkits to obtain a later version, either v7 or v8.
 
-MinGW works with its GNU "make" (v 3.80) port and its name is
-'mingw32-make.exe'.
+MinGW works with its GNU "make" (v 3.81) port and its name is
+'mingw32-make.exe'.  If you also have the Minimal SYStem (MSYS) installed,
+you will need to remove the Msys/bin folder from your PATH environment
+variable before calling "perl Configure.pl" and mingw32-make.  Perl detects
+and calls /bin/sh.exe, if found, whenever shelling a new process.  sh.exe
+causes problems for mingw32-make.exe because of its inability to handle
+Windows pathnames with backslashes.  You must run "perl Configure.pl" and
+mingw32-make from a dosbox; running those commands from an MSYS shell window
+will experience the same backslash path problems.
 
 =item Command Shell
 
@@ -53,7 +60,7 @@ build Parrot without it, by not installing it or asking Parrot to
 ignore it (C<--without-icu>).
 
 If you want to use ICU, download it from
-L<http://www-306.ibm.com/software/globalization/icu/downloads.jsp>.
+L<http://icu.sourceforge.net/download/>.
 
 If you want to use precompiled binaries, do the following.
 Download the package matching your compiler, unpack it (say, into
@@ -61,11 +68,14 @@ C:\usr\lib), add the F<bin> directory to C<PATH>, and tell
 Configure.pl to use it.
 
     mkdir C:\usr\lib
-    unzip icu-3.4-Win32-msvc7.1.zip -d C:\usr\lib
+    unzip icu4c-3_6-Win32-msvc7_1.zip -d C:\usr\lib
     mkdir C:\usr\lib\data
     set PATH=%PATH%;C:\usr\lib\icu\bin
     cd <parrot directory>
-    perl Configure.pl --icushared="C:\usr\lib\icu\lib\icudt.lib C:\usr\lib\icu\lib\icuuc.lib" --icuheaders="C:\usr\lib\icu\include" --icudatadir="C:\usr\local\icu\data"
+    perl Configure.pl
+        --icushared="C:\usr\lib\icu\lib\icudt.lib C:\usr\lib\icu\lib\icuuc.lib"
+        --icuheaders="C:\usr\lib\icu\include"
+        --icudatadir="C:\usr\local\icu\data"
 
 Note the step of creating the F<C:\usr\lib\data> directory, as Parrot
 really wants it and the binary packages don't contain it.  It doesn't
@@ -90,7 +100,8 @@ L<http://gnuwin32.sourceforge.net/>
 
 =item Optional utilities
 
-The availability of these utilities is checked by Configure.pl.
+The availability of these utilities is checked by Configure.pl
+or by some test.
 
 B<antlr> - ANother Tool for Language Recognition
 L<http://www.antlr.org/>
@@ -104,11 +115,14 @@ L<http://gnuwin32.sourceforge.net/>
 B<Python> - an interpreted, interactive, object-oriented programming language
 L<http://www.python.org/>
 
+B<SVN::Client> - Perl wrapper of Subversion client functions
+L<http://subversion.tigris.org/> (svn-win32-1.4.x_pl.zip)
+
 =item Inno Setup
 
 Inno Setup is a I<free> installer for Windows programs.
 
-The latest release of Inno Setup at the time of writing is 5.1.4.
+The latest release of Inno Setup at the time of writing is 5.1.12.
 
 The HomePage is on L<http://www.jrsoftware.org/>.
 
@@ -144,16 +158,20 @@ have to compile your own perl.
 
 =item MinGW32 with GCC
 
-The latest release of MinGW package at the time of writing is 4.1.1,
+The latest release of MinGW package at the time of writing is 5.1.3,
 which contains gcc-3.4.2. It can be downloaded here:
-L<http://prdownloads.sf.net/mingw/MinGW-4.1.1.exe>
+L<http://downloads.sourceforge.net/mingw/MinGW-5.1.3.exe>
 
 The HomePage is on L<http://www.mingw.org/>.
 
 With the ActiveState Perl distribution or PXPerl distribution,
 tell Configure.pl to use gcc :
 
-    perl Configure.pl --cc=gcc --icushared="C:\usr\lib\icu\lib\icudt.lib C:\usr\lib\icu\lib\icuuc.lib" --icuheaders="C:\usr\lib\icu\include" --icudatadir="C:\usr\local\icu\data"
+    perl Configure.pl
+         --cc=gcc
+         --icushared="C:\usr\lib\icu\lib\icudt.lib C:\usr\lib\icu\lib\icuuc.lib"
+         --icuheaders="C:\usr\lib\icu\include"
+         --icudatadir="C:\usr\local\icu\data"
 or
     perl Configure.pl --cc=gcc --without-icu
 
@@ -223,6 +241,6 @@ This document borrows heavily from Perl's README.win32.
 
 GCC/mingw32 support was added in 0.1.2 (François Perrad).
 
-Last updated: 9 August 2005
+Last updated: 15 May 2007
 
 =cut

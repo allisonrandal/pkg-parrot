@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/Rect.pir 13081 2006-07-01T03:36:07.973456Z chromatic  $
+# $Id: /parrotcode/local/runtime/parrot/library/SDL/Rect.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -83,13 +83,13 @@ The name of this method may change, as per discussion on p6i.
 =cut
 
 .sub 'init' :method
-	.param int x      :named( 'x' ) :optional
-	.param int y      :named( 'y' ) :optional
-	.param int width  :named( 'width' ) :optional
-	.param int height :named( 'height' ) :optional
+	.param int x           :named( 'x' ) :optional
 	.param int have_x      :opt_flag
+	.param int y           :named( 'y' ) :optional
 	.param int have_y      :opt_flag
+	.param int width       :named( 'width' ) :optional
 	.param int have_width  :opt_flag
+	.param int height      :named( 'height' ) :optional
 	.param int have_height :opt_flag
 
 	if have_x goto check_y
@@ -259,3 +259,9 @@ the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

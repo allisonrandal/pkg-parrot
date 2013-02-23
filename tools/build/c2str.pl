@@ -1,11 +1,11 @@
 #! perl
-# $Id: /local/tools/build/c2str.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/trunk/tools/build/c2str.pl 3441 2007-05-09T12:16:46.710530Z paultcochrane  $
 
 =head1 NAME
 
 tools/build/c2str.pl - constant string support
 
-=cut 
+=cut
 
 use warnings;
 use strict;
@@ -15,12 +15,12 @@ use Text::Balanced qw(extract_delimited);
 use Math::BigInt;
 use Getopt::Long;
 
-my $outfile = 'all_cstring.str';
+my $outfile          = 'all_cstring.str';
 my $string_private_h = 'src/string_private_cstring.h';
 
-my ($result, $do_all, $do_init, $file);
+my ( $result, $do_all, $do_init, $file );
 $result = GetOptions(
-    "all" => \$do_all,
+    "all"  => \$do_all,
     "init" => \$do_init,
 );
 
@@ -43,38 +43,40 @@ my %known_strings = ();
 my @all_strings;
 
 &read_all;
-open ALL, '>>', $outfile or die "Can't write '$outfile': $!";
+open my $ALL, '>>', $outfile or die "Can't write '$outfile': $!";
 process_cfile();
-close ALL;
+close $ALL;
 
 sub hash_val {
-	my $h = Math::BigInt->new('+0');
-	my $s = shift;
-	for (my $i = 0; $i < length($s); ++$i) {
-		$h += $h << 5;
-		$h &= 0xffffffff;
-		$h += ord substr($s, $i, 1);
-		$h &= 0xffffffff;
-	}
-	return sprintf("0x%x", $h);
+    my $h = Math::BigInt->new('+0');
+    my $s = shift;
+    for ( my $i = 0 ; $i < length($s) ; ++$i ) {
+        $h += $h << 5;
+        $h &= 0xffffffff;
+        $h += ord substr( $s, $i, 1 );
+        $h &= 0xffffffff;
+    }
+    return sprintf( "0x%x", $h );
 }
 
 sub read_all {
-    if (-e $outfile) {
-	open IN, "<$outfile";
-	while (<IN>) {
-	    # len hashval "string"
-	    if (/(\d+)\s+(0x[\da-hA-H]+)\s+"(.*)"/) {
-		push @all_strings, [$1, $2, $3];
-		$known_strings{$3} = scalar @all_strings;
-	    }
-	}
-	close(IN);
+    if ( -e $outfile ) {
+        open my $IN, '<', $outfile;
+        while (<$IN>) {
+
+            # len hashval "string"
+            if (/(\d+)\s+(0x[\da-hA-H]+)\s+"(.*)"/) {
+                push @all_strings, [ $1, $2, $3 ];
+                $known_strings{$3} = scalar @all_strings;
+            }
+        }
+        close($IN);
     }
+    return;
 }
 
 sub process_cfile {
-    open IN, $infile or die "Can't read '$infile': $!";
+    open my $IN, '<', $infile or die "Can't read '$infile': $!";
 
     my $line = 0;
     print <<"HEADER";
@@ -93,59 +95,62 @@ sub process_cfile {
 #define CONST_STRING(i, s) _CONST_STRING(i, __LINE__)
 
 HEADER
-    print ALL "# $infile\n";
+    print $ALL "# $infile\n";
     my %this_file_seen;
+
     # There is a chance that the same __LINE__ will reoccur if #line directives
     # are used.
     my %lines_seen;
-    while (<IN>) {
-	if (m/^\s*#\s*line\s+(\d+)/) {
-	    # #line directive
-	    $line = $1 - 1;
-	    next;
-	}
-	$line++;
-	next if m/^\s*#/; # otherwise ignore preprocessor
-	next unless s/.*\bCONST_STRING\s*\(\w+\s*,//;
+    while (<$IN>) {
+        if (m/^\s*#\s*line\s+(\d+)/) {
 
-	if ($lines_seen{$line}++) {
-	    die "Seen line $line before in $infile - can't continue";
-	}
+            # #line directive
+            $line = $1 - 1;
+            next;
+        }
+        $line++;
+        next if m/^\s*#/;    # otherwise ignore preprocessor
+        next unless s/.*\bCONST_STRING\s*\(\w+\s*,//;
 
-	# TODO maybe cope with escaped \"
-	my $cnt = tr/"/"/;
-	die "bogus CONST_STRING at line $line" unless $cnt == 2;
+        if ( $lines_seen{$line}++ ) {
+            die "Seen line $line before in $infile - can't continue";
+        }
 
-	my $str = extract_delimited; # $_, '"';
-	$str = substr $str, 1, -1;
-	## print STDERR "** '$str' $line\n";
-	my $n;
-	if ($n = $known_strings{$str}) {
-	    if ($this_file_seen{$str}) {
-		print "#define _CONST_STRING_$line _CONST_STRING_",
-		    $this_file_seen{$str}, "\n";
-	    }
-	    else {
-		print "#define _CONST_STRING_$line $n\n";
-	    }
-	    $this_file_seen{$str} = $line;
-	    next;
-	}
-	my $len = length $str;
-	my $hashval = hash_val($str);
-	push @all_strings, [$len, $hashval, $str];
-	$n = scalar @all_strings;
-	$known_strings{$str} = $n;
-	$this_file_seen{$str} = $line;
-	print "#define _CONST_STRING_$line $n\n";
-	print ALL qq!$len\t$hashval\t"$str"\n!;
+        # TODO maybe cope with escaped \"
+        my $cnt = tr/"/"/;
+        die "bogus CONST_STRING at line $line" unless $cnt == 2;
+
+        my $str = extract_delimited;    # $_, '"';
+        $str = substr $str, 1, -1;
+        ## print STDERR "** '$str' $line\n";
+        my $n;
+        if ( $n = $known_strings{$str} ) {
+            if ( $this_file_seen{$str} ) {
+                print "#define _CONST_STRING_$line _CONST_STRING_", $this_file_seen{$str}, "\n";
+            }
+            else {
+                print "#define _CONST_STRING_$line $n\n";
+            }
+            $this_file_seen{$str} = $line;
+            next;
+        }
+        my $len     = length $str;
+        my $hashval = hash_val($str);
+        push @all_strings, [ $len, $hashval, $str ];
+        $n                    = scalar @all_strings;
+        $known_strings{$str}  = $n;
+        $this_file_seen{$str} = $line;
+        print "#define _CONST_STRING_$line $n\n";
+        print $ALL qq!$len\t$hashval\t"$str"\n!;
     }
-    close(IN);
+    close($IN);
+    return;
 }
 
 sub create_c_include {
-    open OUT, '>', $string_private_h or die "Can't write '$string_private_h': $!";
-    print OUT <<"HEADER";
+    open my $OUT, '>', $string_private_h
+        or die "Can't write '$string_private_h': $!";
+    print $OUT <<"HEADER";
 /* ex: set ro:
  * !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
  *
@@ -156,24 +161,42 @@ sub create_c_include {
  *
  */
 
+#ifndef PARROT_SRC_STRING_PRIVATE_CSTRING_H_GUARD
+#define PARROT_SRC_STRING_PRIVATE_CSTRING_H_GUARD
+
 static const struct _cstrings {
     UINTVAL len;
     Parrot_UInt4 hash_val;
     const char *string;
 } parrot_cstrings[] = {
-	{ 0, 0, "" },
+    { 0, 0, "" },
 HEADER
     my @all;
     for my $s (@all_strings) {
-	push @all, qq!\t{$s->[0], $s->[1], "$s->[2]"}!;
+        push @all, qq!    {$s->[0], $s->[1], "$s->[2]"}!;
     }
-    print OUT join(",\n", @all);
-    print OUT <<HEADER;
+    print $OUT join( ",\n", @all );
+    print $OUT <<HEADER;
 
 };
 
 HEADER
-    close OUT;
+
+    # append the C code coda
+    print $OUT <<HEADER;
+
+#endif /* PARROT_SRC_STRING_PRIVATE_CSTRING_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
+HEADER
+
+    close $OUT;
+    return;
 }
 
 =for never
@@ -236,7 +259,7 @@ DATA
   }
 }
 
-open IN, $infile;
+open IN, '<', $infile;
 
 my $line = 0;
 while (<IN>) {
@@ -250,3 +273,10 @@ while (<IN>) {
 }
 
 =cut
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

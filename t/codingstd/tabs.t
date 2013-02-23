@@ -1,13 +1,12 @@
 #! perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/t/codingstd/tabs.t 13201 2006-07-08T00:17:25.560997Z coke  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/codingstd/tabs.t 3412 2007-05-08T05:59:28.833014Z paultcochrane  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
-use Test::More;
+use Test::More tests => 1;
 use Parrot::Distribution;
-
 
 =head1 NAME
 
@@ -15,14 +14,15 @@ t/codingstd/tabs.t - checks for tab indents in C source and headers
 
 =head1 SYNOPSIS
 
-    % prove t/codingstd/tabs.t [file ...]
+    # test all files
+    % prove t/codingstd/tabs.t
+
+    # test specific files
+    % perl t/codingstd/tabs.t src/foo.c include/parrot/bar.h
 
 =head1 DESCRIPTION
 
-Checks that the indicated file(s) do not use tabs to indent.
-
-If no file(s) are specified, checks the Parrot C source and header files for
-tab indents.
+Checks that files do not use tabs to indent.
 
 =head1 SEE ALSO
 
@@ -30,41 +30,40 @@ L<docs/pdds/pdd07_codingstd.pod>
 
 =cut
 
-
-my @files = @ARGV ? @ARGV : source_files();
-
-plan tests => scalar @files;
+my $DIST = Parrot::Distribution->new;
+my @files = @ARGV ? @ARGV : $DIST->get_c_language_files();
+my @tabs;
 
 foreach my $file (@files) {
-    open FILE, "<$file" or die "Unable to open '$file' for reading: $!";
 
-    my @tabs;
-    LINE:
-    while (<FILE>) {
-        next unless /^ *\t/;
-        push @tabs, "tab in leading whitespace, file '$file', line $.\n";
-        if (@tabs >= 5) {
-            push @tabs, "skipping remaining lines (you get the idea)\n";
-            last LINE;
+    # if we have command line arguments, the file is the full path
+    # otherwise, use the relevant Parrot:: path method
+    my $path = @ARGV ? $file : $file->path;
+
+    open my $fh, '<', $path
+        or die "Cannot open '$path' for reading: $!\n";
+
+    my $line = 1;
+
+    # search each line for leading tabs
+    while (<$fh>) {
+        if ( $_ =~ m/^ *\t/ ) {
+            push @tabs => "$path:$line\n";
         }
+
+        $line++;
     }
-    close FILE;
-
-    is(scalar(@tabs), 0, "file '$file' does not use tabs")
-      or diag(@tabs);
+    close $fh;
 }
 
+## L<PDD07/Code Formatting/"Indentation must consist only of spaces">
+ok( !scalar(@tabs), "tabs in leading whitespace" )
+    or diag(
+    "Found tab in leading whitespace " . scalar(@tabs) . " instances.  Lines found:\n@tabs" );
 
-exit;
-
-
-sub source_files {
-    my $dist = Parrot::Distribution->new;
-    return map { $_->path } (
-        map($_->files_of_type('C code'),   $dist->c_source_file_directories),
-        map($_->files_of_type('C header'), $dist->c_header_file_directories),
-    );
-}
-
-## vim: expandtab sw=4
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

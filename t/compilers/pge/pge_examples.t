@@ -1,15 +1,14 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/compilers/pge/pge_examples.t 12893 2006-06-06T17:45:12.755919Z bernhard  $
+# $Id: /parrotcode/local/t/compilers/pge/pge_examples.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 2;
 use Parrot::Test::PGE;
-
 
 =head1 NAME
 
@@ -21,9 +20,8 @@ t/library/pge_examples.t - Parrot Grammar Engine tests of examples
 
 =cut
 
-
-# 1 
-pir_output_is(<<'CODE', <<'OUT', "This made Parrot m4 fail");
+# 1
+pir_output_is( <<'CODE', <<'OUT', "This made Parrot m4 fail" );
 
 .sub 'test' :main
   load_bytecode "PGE.pbc"
@@ -53,16 +51,15 @@ ok1
 ok2
 OUT
 
-
-# 2 
-pir_output_is(<<'CODE', <<'OUT', "parse FASTA");
+# 2
+pir_output_is( <<'CODE', <<'OUT', "parse FASTA" );
 
 # Grok fasta files, which usually contain DNA, RNA or protein sequences.
 # http://en.wikipedia.org/wiki/FASTA_format
 
 .sub "example" :main
     load_bytecode 'PGE.pbc'
-    load_bytecode 'compilers/pge/pgc.pir'
+    load_bytecode 'PGE/P6Grammar.pbc'
 
     .local string fasta_grammar
     fasta_grammar = <<'END_FASTA_GRAMMAR'
@@ -93,7 +90,7 @@ END_FASTA
     .local pmc p6grammar
     p6grammar = compreg "PGE::P6Grammar"
     .local pmc code
-    ( code ) = p6grammar(fasta_grammar)
+    ( code ) = p6grammar.'compile'(fasta_grammar, 'target'=>'PIR')
     $P0 = compreg 'PIR'
     $P1 = $P0(code)
     $P1()
@@ -120,6 +117,9 @@ IENY
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 OUT
 
-
-# remember to change the number of tests :-)
-BEGIN { plan tests => 2; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

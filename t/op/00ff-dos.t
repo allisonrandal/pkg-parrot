@@ -1,13 +1,12 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/00ff-dos.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/op/00ff-dos.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -15,7 +14,7 @@ t/op/00ff-dos.t - DOS File Format
 
 =head1 SYNOPSIS
 
-	% prove t/op/00ff-dos.t
+        % prove t/op/00ff-dos.t
 
 =head1 DESCRIPTION
 
@@ -23,18 +22,19 @@ Tests file formats.
 
 =cut
 
-
 my $code = qq(print "ok\\n"\r\nend\r\n);
-pasm_output_is($code, <<'OUT', "fileformat dos");
+pasm_output_is( $code, <<'OUT', "fileformat dos" );
 ok
 OUT
 
 $code = qq(print "ok\\n"\r\nend\r\n\cZ\r\n);
-pasm_output_is($code, <<'OUT', "fileformat dos w ctrl-z");
+pasm_output_is( $code, <<'OUT', "fileformat dos w ctrl-z" );
 ok
 OUT
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 2; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

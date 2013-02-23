@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/pair.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/pmc/pair.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ t/pmc/pair.t - pair tests
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/pair.t
+    % prove t/pmc/pair.t
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ Tests the C<Pair> PMC.
 
 =cut
 
-pasm_output_is(<<'CODE', <<'OUT', 'create');
+pasm_output_is( <<'CODE', <<'OUT', 'create' );
     new P0, .Pair
     print "ok 1\n"
     new P1, .Integer
@@ -39,7 +39,7 @@ ok 2
 42
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', 'methods');
+pir_output_is( <<'CODE', <<'OUT', 'methods' );
 .sub main :main
     .local pmc p, kv
     new p, .Pair
@@ -48,16 +48,20 @@ pir_output_is(<<'CODE', <<'OUT', 'methods');
     set p["key"], $P1
 
     $P0 = p."key"()
-    print_item $P0
+    print $P0
+    print ' '
     $P0 = p."value"()
-    print_item $P0
+    print $P0
+    print ' '
     kv = p."kv"()
     $I0 = elements kv
-    print_item $I0
+    print $I0
+    print ' '
     $P0 = kv[0]
-    print_item $P0
+    print $P0
+    print ' '
     $P0 = kv[1]
-    print_item $P0
+    print $P0
     print_newline
 .end
 CODE
@@ -65,8 +69,8 @@ key 42 2 key 42
 OUT
 
 SKIP: {
-	skip("instantiate disabled", 1);
-pir_output_is(<<'CODE', <<'OUT', 'instantiate, assign');
+    skip( "instantiate disabled", 1 );
+    pir_output_is( <<'CODE', <<'OUT', 'instantiate, assign' );
 .sub main :main
     .local pmc cl, p, kv, k, v
     k = new .String
@@ -77,15 +81,17 @@ pir_output_is(<<'CODE', <<'OUT', 'instantiate, assign');
     p = cl."instantiate"(k, v)
 
     $P0 = p."key"()
-    print_item $P0
+    print $P0
+    print ' '
     $P0 = p."value"()
-    print_item $P0
+    print $P0
+    print ' '
 
     v = new .Integer
     v = 77
     assign p, v
     $P0 = p."value"()
-    print_item $P0
+    print $P0
 
     print_newline
 .end
@@ -93,3 +99,10 @@ CODE
 key value 77
 OUT
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

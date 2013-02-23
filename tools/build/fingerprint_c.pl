@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/tools/build/fingerprint_c.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/local/tools/build/fingerprint_c.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -27,12 +27,12 @@ use lib 'lib';
 use Digest::Perl::MD5 qw(md5_hex);
 
 my $compat_file = 'PBC_COMPAT';
-open IN, $compat_file or die "Can't read $compat_file";
-my @lines = <IN>;
-close IN;
+open my $IN, '<', $compat_file or die "Can't read $compat_file";
+my @lines = <$IN>;
+close $IN;
 
 my $len = 10;
-my $fingerprint = md5_hex join "\n", grep { ! /^#/ } @lines;
+my $fingerprint = md5_hex join "\n", grep { !/^#/ } @lines;
 
 print << "EOF";
 /* ex: set ro:
@@ -50,16 +50,16 @@ print << "EOF";
 
 EOF
 
-if (-e 'DEVELOPING') {
+if ( -e 'DEVELOPING' ) {
 
-print "/* $fingerprint */\n";
-print "static const unsigned char fingerprint[] = {\n";
-for my $i (0..$len-1) {
-  print '    0x', substr ($fingerprint, $i*2, 2), ",\n";
-}
-print "};\n";
+    print "/* $fingerprint */\n";
+    print "static const unsigned char fingerprint[] = {\n";
+    for my $i ( 0 .. $len - 1 ) {
+        print '    0x', substr( $fingerprint, $i * 2, 2 ), ",\n";
+    }
+    print "};\n";
 
-print << "EOF";
+    print << "EOF";
 
 int
 PackFile_check_fingerprint (void *cursor)
@@ -75,9 +75,10 @@ PackFile_write_fingerprint (void *cursor)
 }
 EOF
 
-} else { # !DEVELOPING
+}
+else {    # !DEVELOPING
 
-  print << "EOF";
+    print << "EOF";
 /* fingerprint checking is only enabled in development versions */
 
 int
@@ -94,4 +95,22 @@ PackFile_write_fingerprint (void *cursor)
 }
 EOF
 
-} # endif DEVELOPING
+}    # endif DEVELOPING
+
+# append the C code coda
+print << "EOF";
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
+EOF
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

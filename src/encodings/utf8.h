@@ -1,7 +1,7 @@
 /* utf8.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/src/encodings/utf8.h 12826 2006-05-30T01:36:30.308856Z coke  $
+ *     $Id: /parrotcode/trunk/src/encodings/utf8.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the header for the utf8 variable-width encoding.
  *  Data Structure and Algorithms:
@@ -10,18 +10,16 @@
  *  References:
  */
 
-#if !defined(PARROT_ENCODING_UTF8_H_GUARD)
+#ifndef PARROT_ENCODING_UTF8_H_GUARD
 #define PARROT_ENCODING_UTF8_H_GUARD
 
 ENCODING *Parrot_encoding_utf8_init(Interp *);
 
 #endif /* PARROT_ENCODING_UTF8_H_GUARD */
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/jit_debug.c 12981 2006-06-20T19:26:31.775154Z bernhard  $
+$Id: /parrotcode/trunk/src/jit_debug.c 3300 2007-04-24T21:18:22.142154Z mdiep  $
 
 =head1 NAME
 
@@ -79,20 +79,20 @@ http://sources.redhat.com/gdb/current/onlinedocs/stabs_toc.html.
 #define N_NBLCS "248"
 
 #ifdef __GNUC__
-void Parrot_jit_debug(Interp* interpreter);
+void Parrot_jit_debug(Interp* interp);
 
-#  define BIT_SIZE(t) ((int)(sizeof(t)*8))
-#  define BYTE_SIZE(t) ((int)sizeof(t))
+#  define BIT_SIZE(t) ((int)(sizeof (t)*8))
+#  define BYTE_SIZE(t) ((int)sizeof (t))
 #  define BIT_OFFSET(str, field) ((int)(offsetof(str, field) * 8))
 
-typedef struct {
+typedef struct BaseTypes {
     const char *name;
     const char *spec;
 } BaseTypes;
 
 /*
 
-=item C<static void write_types(FILE *stabs, Interp *interpreter)>
+=item C<static void write_types(FILE *stabs, Interp *interp)>
 
 Writes the types to C<stabs>.
 
@@ -101,7 +101,7 @@ Writes the types to C<stabs>.
 */
 
 static void
-write_types(FILE *stabs, Interp *interpreter)
+write_types(FILE *stabs, Interp *interp)
 {
     int i, j;
     /* borrowed from mono */
@@ -135,14 +135,14 @@ write_types(FILE *stabs, Interp *interpreter)
     for (i = 0; base_types[i].name; ++i) {
         if (! base_types[i].spec)
             continue;
-        fprintf (stabs, ".stabs \"%s:t(0,%d)=", base_types[i].name, i);
+        fprintf(stabs, ".stabs \"%s:t(0,%d)=", base_types[i].name, i);
         if (base_types[i].spec [0] == ';') {
-            fprintf (stabs, "r(0,%d)%s\"", i, base_types[i].spec);
+            fprintf(stabs, "r(0,%d)%s\"", i, base_types[i].spec);
         }
         else {
-            fprintf (stabs, "%s\"", base_types[i].spec);
+            fprintf(stabs, "%s\"", base_types[i].spec);
         }
-        fprintf (stabs, "," N_LSYM ",0,0,0\n");
+        fprintf(stabs, "," N_LSYM ",0,0,0\n");
     }
     fprintf(stabs, ".stabs \"STRING:t(0,%d)=*(0,%d)\""
                 "," N_LSYM ",0,0,0\n", i, i+1);
@@ -159,13 +159,12 @@ write_types(FILE *stabs, Interp *interpreter)
                 BIT_OFFSET(STRING, obj.u._b._buflen), BIT_SIZE(size_t),
                 BIT_OFFSET(STRING, obj.flags), BIT_SIZE(UINTVAL),
                 BIT_OFFSET(STRING, bufused), BIT_SIZE(UINTVAL),
-                BIT_OFFSET(STRING, strstart), BIT_SIZE(void*)
-                );
+                BIT_OFFSET(STRING, strstart), BIT_SIZE(void*));
 
     fprintf(stabs, ".stabs \"PMCType:T(0,%d)=e", i++);
-    for (j = 0; j < interpreter->n_vtable_max; ++j) {
-        if (interpreter->vtables[j] && interpreter->vtables[j]->whoami) {
-            STRING* name = interpreter->vtables[j]->whoami;
+    for (j = 0; j < interp->n_vtable_max; ++j) {
+        if (interp->vtables[j] && interp->vtables[j]->whoami) {
+            STRING* name = interp->vtables[j]->whoami;
             fwrite(name->strstart, name->strlen, 1, stabs);
             fprintf(stabs, ":%d,", j);
         }
@@ -178,10 +177,10 @@ write_types(FILE *stabs, Interp *interpreter)
             i + 1, BIT_OFFSET(PMC, obj), BIT_SIZE(pobj_t));
     fprintf(stabs, "vtable:*(0,%d),%d,%d;",
             i + 3, BIT_OFFSET(PMC, vtable), BIT_SIZE(void*));
-#if ! PMC_DATA_IN_EXT
+#  if ! PMC_DATA_IN_EXT
     fprintf(stabs, "data:(0,14),%d,%d;",
             BIT_OFFSET(PMC, data), BIT_SIZE(void*));
-#endif
+#  endif
     fprintf(stabs, "pmc_ext:*(0,%d),%d,%d;",
             i, BIT_OFFSET(PMC, pmc_ext), BIT_SIZE(void*));
     fprintf(stabs, ";\"");
@@ -191,24 +190,21 @@ write_types(FILE *stabs, Interp *interpreter)
                 "u:(0,%d),%d,%d;"
                 "flags:(0,12),%d,%d;"
                 ";\""
-                "," N_LSYM ",0,0,0\n", i + 1, (int)(sizeof(pobj_t)),
+                "," N_LSYM ",0,0,0\n", i + 1, (int)(sizeof (pobj_t)),
                 i + 2, BIT_OFFSET(pobj_t, u), BIT_SIZE(UnionVal),
-                BIT_OFFSET(pobj_t, flags), BIT_SIZE(Parrot_UInt)
-                );
+                BIT_OFFSET(pobj_t, flags), BIT_SIZE(Parrot_UInt));
     fprintf(stabs, ".stabs \"UnionVal:T(0,%d)=u%d"
                 "int_val:(0,12),%d,%d;"
                 "pmc_val:*(0,%d),%d,%d;"
                 ";\""
                 "," N_LSYM ",0,0,0\n", i + 2, BYTE_SIZE(UnionVal),
-                BIT_OFFSET(UnionVal, int_val), BIT_SIZE(INTVAL),
-                i, BIT_OFFSET(UnionVal, pmc_val), BIT_SIZE(void*)
-                );
+                BIT_OFFSET(UnionVal, _i._int_val), BIT_SIZE(INTVAL),
+                i, BIT_OFFSET(UnionVal, _ptrs._pmc_val), BIT_SIZE(void*));
     fprintf(stabs, ".stabs \"VTABLE:T(0,%d)=s%d"
                 "base_type:(0,%d),%d,%d;"
                 ";\""
                 "," N_LSYM ",0,0,0\n", i + 3, BYTE_SIZE(UnionVal),
-                i - 1, BIT_OFFSET(VTABLE, base_type), BIT_SIZE(INTVAL)
-                );
+                i - 1, BIT_OFFSET(VTABLE, base_type), BIT_SIZE(INTVAL));
     i += 4;
 
 }
@@ -216,7 +212,7 @@ write_types(FILE *stabs, Interp *interpreter)
 /*
 
 =item C<static void
-write_vars(FILE *stabs, Interp *interpreter)>
+write_vars(FILE *stabs, Interp *interp)>
 
 Writes the contents of the registers to C<stabs>.
 
@@ -225,7 +221,7 @@ Writes the contents of the registers to C<stabs>.
 */
 
 static void
-write_vars(FILE *stabs, Interp *interpreter)
+write_vars(FILE *stabs, Interp *interp)
 {
     int i;
     /* fake static var stabs */
@@ -244,7 +240,7 @@ write_vars(FILE *stabs, Interp *interpreter)
 /*
 
 =item C<static STRING *
-debug_file(Interp *interpreter, STRING *file, const char *ext)>
+debug_file(Interp *interp, STRING *file, const char *ext)>
 
 Returns C<file> with C<ext> appended.
 
@@ -253,21 +249,20 @@ Returns C<file> with C<ext> appended.
 */
 
 static STRING *
-debug_file(Interp *interpreter, STRING *file, const char *ext)
+debug_file(Interp *interp, STRING *file, const char *ext)
 {
     STRING *ret;
-    ret = string_copy(interpreter, file);
-    ret = string_append(interpreter, ret,
-            string_make(interpreter, ext, strlen(ext), NULL,
-                PObj_external_FLAG),
-            0);
+    ret = string_copy(interp, file);
+    ret = string_append(interp, ret,
+            string_make(interp, ext, strlen(ext), NULL,
+                PObj_external_FLAG));
     return ret;
 }
 
 /*
 
 =item C<static void
-Parrot_jit_debug_stabs(Interp *interpreter)>
+Parrot_jit_debug_stabs(Interp *interp)>
 
 Writes the JIT debugging stabs.
 
@@ -276,65 +271,66 @@ Writes the JIT debugging stabs.
 */
 
 static void
-Parrot_jit_debug_stabs(Interp *interpreter)
+Parrot_jit_debug_stabs(Interp *interp)
 {
-    Parrot_jit_info_t *jit_info = interpreter->code->jit_info;
+    Parrot_jit_info_t *jit_info = interp->code->jit_info;
     STRING *file = NULL;
     STRING *pasmfile, *stabsfile, *ofile, *cmd;
     FILE *stabs;
     size_t i;
     int line;
     opcode_t lc;
-    struct PackFile_Debug *debug;
+    PackFile_Debug *debug;
 
-    if (interpreter->code->debugs) {
+    if (interp->code->debugs) {
         char *ext;
-        char *src = string_to_cstring(interpreter,
-            Parrot_debug_pc_to_filename(interpreter,
-            interpreter->code->debugs, 0));
-        pasmfile = string_make(interpreter, src, strlen(src), NULL,
+        char *src = string_to_cstring(interp,
+            Parrot_debug_pc_to_filename(interp,
+            interp->code->debugs, 0));
+        pasmfile = string_make(interp, src, strlen(src), NULL,
                 PObj_external_FLAG);
-        file = string_copy(interpreter, pasmfile);
+        file = string_copy(interp, pasmfile);
         /* chop pasm/pir */
 
         ext = strrchr(src, '.');
-        if (ext && strcmp (ext, ".pasm") == 0)
-            file = string_chopn(interpreter, file, 4, 1);
-        else if (ext && strcmp (ext, ".pir") == 0)
-            file = string_chopn(interpreter, file, 3, 1);
+        if (ext && strcmp(ext, ".pasm") == 0)
+            file = string_chopn(interp, file, 4, 1);
+        else if (ext && strcmp(ext, ".pir") == 0)
+            file = string_chopn(interp, file, 3, 1);
         else if (!ext) /* EVAL_n */
-            file = string_append(interpreter, file,
-                    string_make(interpreter, ".", 1, NULL, PObj_external_FLAG),
-                    0);
+            file = string_append(interp, file,
+                    string_make(interp, ".", 1, NULL, PObj_external_FLAG));
+
+        string_cstring_free(src);
     }
     else {
         /* chop pbc */
-        file = string_chopn(interpreter, file, 3, 1);
-        pasmfile = debug_file(interpreter, file, "pasm");
+        file = string_chopn(interp, file, 3, 1);
+        pasmfile = debug_file(interp, file, "pasm");
     }
-    stabsfile = debug_file(interpreter, file, "stabs.s");
-    ofile = debug_file(interpreter, file, "o");
+    stabsfile = debug_file(interp, file, "stabs.s");
+    ofile     = debug_file(interp, file, "o");
     {
-    	char *temp = string_to_cstring(interpreter,stabsfile);
-        stabs = fopen(temp, "w");
-        free(temp);
+        char *temp = string_to_cstring(interp,stabsfile);
+        stabs      = fopen(temp, "w");
+        string_cstring_free(temp);
     }
     if (stabs == NULL)
         return;
 
     {
-    	char *temp = string_to_cstring(interpreter, pasmfile);
+        char *temp = string_to_cstring(interp, pasmfile);
         /* filename info */
         fprintf(stabs, ".data\n.text\n");       /* darwin wants it */
         fprintf(stabs, ".stabs \"%s\"," N_SO ",0,0,0\n",temp);
-        free(temp);
+        string_cstring_free(temp);
     }
     /* jit_func start addr */
     fprintf(stabs, ".stabs \"jit_func:F(0,1)\"," N_FUN ",0,1,%p\n",
             jit_info->arena.start);
 
-    write_types(stabs, interpreter);
-    write_vars(stabs, interpreter);
+    write_types(stabs, interp);
+    write_vars(stabs, interp);
     /* if we don't have line numbers, emit dummys, assuming there are
      * no comments and spaces in source for testing
      */
@@ -343,12 +339,12 @@ Parrot_jit_debug_stabs(Interp *interpreter)
     fprintf(stabs, ".stabn " N_SLINE ",0,1,0\n");
     line = 1;
     lc = 0;
-    debug = interpreter->code->debugs;
-    for (i = 0; i < interpreter->code->base.size; i++) {
+    debug = interp->code->debugs;
+    for (i = 0; i < interp->code->base.size; i++) {
         if (jit_info->arena.op_map[i].ptr) {
-            op_info_t* op = &interpreter->op_info_table[
-                interpreter->code->base.data[i]];
-            if (interpreter->code->debugs) {
+            op_info_t* op = &interp->op_info_table[
+                interp->code->base.data[i]];
+            if (interp->code->debugs) {
                 if (lc >= (int)(debug->base.size))
                     break;
                 line = (int)debug->base.data[lc++];
@@ -365,19 +361,19 @@ Parrot_jit_debug_stabs(Interp *interpreter)
             (char *) jit_info->arena.size);
     fclose(stabs);
     /* run the stabs file through C<as> generating file.o */
-    cmd = Parrot_sprintf_c(interpreter, "as %Ss -o %Ss", stabsfile, ofile);
+    cmd = Parrot_sprintf_c(interp, "as %Ss -o %Ss", stabsfile, ofile);
 
     {
-    	char *temp = string_to_cstring(interpreter, cmd);
-    	system(temp);
-    	free(temp);
+        char *temp = string_to_cstring(interp, cmd);
+        system(temp);
+        string_cstring_free(temp);
     }
 }
 
 /*
 
 =item C<void
-Parrot_jit_debug(Interp* interpreter)>
+Parrot_jit_debug(Interp* interp)>
 
 Writes the JIT debugging stabs. Just calls C<Parrot_jit_debug_stabs()>.
 
@@ -386,9 +382,9 @@ Writes the JIT debugging stabs. Just calls C<Parrot_jit_debug_stabs()>.
 */
 
 void
-Parrot_jit_debug(Interp* interpreter)
+Parrot_jit_debug(Interp* interp)
 {
-    Parrot_jit_debug_stabs(interpreter);
+    Parrot_jit_debug_stabs(interp);
 }
 
 
@@ -406,12 +402,10 @@ F<src/jit.c>, F<include/parrot/jit.h>, F<docs/jit.pod>.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

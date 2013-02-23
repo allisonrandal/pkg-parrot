@@ -1,3 +1,6 @@
+#ifndef PARROT_DOTNET_PMC_TABLEINFO_H_GUARD
+#define PARROT_DOTNET_PMC_TABLEINFO_H_GUARD
+
 /* Metadata table information. */
 
 /* Table name => number mappings */
@@ -42,12 +45,6 @@
 #define MAX_TABLE                       0x2B
 
 
-/* Macro for checking if table is present in valid bit vector. */
-#define TablePresent(ass, t)            (t >= 32 ? \
-                                        (ass->valid_hi & (1 << (t - 32))) : \
-                                        (ass->valid_lo & (1 << t)))
-
-
 /* Table row length macros. */
 #define Table_Assembly_RL(ass)          (16 + (2 * ass->strings_ptr_size) + \
                                         ass->blobs_ptr_size)
@@ -68,7 +65,7 @@
 
 #define Table_ClassLayout_RL(ass)       (6 + (ass->rows[Table_TypeDef] < (2 << 15) \
                                               ? 2 : 4))
- 
+
 #define Table_Constant_RL(ass)          (2 + ((ass->rows[Table_Field] < (2 << 13) && \
                                                ass->rows[Table_Param] < (2 << 13) && \
                                                ass->rows[Table_Property] < (2 << 13)) \
@@ -136,7 +133,7 @@
 #define Table_ImplMap_RL(ass)           (2 + ((ass->rows[Table_Field] < (2 << 14) && \
                                                ass->rows[Table_MethodDef] < (2 << 14)) \
                                               ? 2 : 4) + ass->strings_ptr_size + \
-                                         (ass->rows[Table_ModuleRef] < (2 << 15) ? 2 : 4)) 
+                                         (ass->rows[Table_ModuleRef] < (2 << 15) ? 2 : 4))
 
 #define Table_InterfaceImpl_RL(ass)     ((ass->rows[Table_TypeDef] < (2 << 15) ? 2 : 4) + \
                                          ((ass->rows[Table_TypeDef] < (2 << 13) && \
@@ -206,3 +203,11 @@
 
 #define Table_TypeSpec_RL(ass)          (ass->blobs_ptr_size)
 
+#endif /* PARROT_DOTNET_PMC_TABLEINFO_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

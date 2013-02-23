@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2006, The Perl Foundation.
-$Id: /local/src/pmc/float.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/pmc/float.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -81,9 +81,9 @@ Returns an integer representation of the number (by casting).
 
 */
 
-   INTVAL get_integer() {
+    INTVAL get_integer() {
         return (INTVAL) PMC_num_val(SELF);
-   }
+    }
 
 /*
 
@@ -95,7 +95,7 @@ Evaluates the number as a boolean, i.e. it's true if it's not zero.
 
 */
 
-    INTVAL get_bool () {
+    INTVAL get_bool() {
         return (INTVAL)(PMC_num_val(SELF) != 0.0);
     }
 
@@ -115,7 +115,7 @@ Returns a Parrot string representation of the number.
         return string_from_num(INTERP, PMC_num_val(SELF));
     }
 
-    STRING* get_repr () {
+    STRING* get_repr() {
         double d = (double) PMC_num_val(SELF);
         const char * const sign = signbit(PMC_num_val(SELF)) ? "-" : "";
         d = fabs(d);
@@ -132,12 +132,12 @@ Returns a Parrot string representation of the number.
 
 */
 
-    void set_integer_native (INTVAL value) {
+    void set_integer_native(INTVAL value) {
         DYNSELF.morph(enum_class_Integer);
         DYNSELF.set_integer_native(value);
     }
 
-    void set_bool (INTVAL value) {
+    void set_bool(INTVAL value) {
         DYNSELF.morph(enum_class_Boolean);
         DYNSELF.set_bool(value);
     }
@@ -166,7 +166,7 @@ Sets the value of the number to the value of C<*value>.
 
 */
 
-    void set_number_same (PMC* value) {
+    void set_number_same(PMC* value) {
         PMC_num_val(SELF) = PMC_num_val(value);
     }
 
@@ -182,7 +182,7 @@ Note that this method morphs the number into a C<String>.
 
 */
 
-    void set_string_native (STRING * value) {
+    void set_string_native(STRING * value) {
         DYNSELF.morph(enum_class_String);
         DYNSELF.set_string_native(value);
     }
@@ -210,7 +210,7 @@ Morphs the scalar to the specified type.
 
 */
 
-    void morph (INTVAL type) {
+    void morph(INTVAL type) {
         pmc_reuse(INTERP, SELF, type, 0);
     }
 
@@ -228,7 +228,7 @@ Set C<dest> to the negated value of C<SELF>.
 
 */
 
-    PMC* neg (PMC * dest) {
+    PMC* neg(PMC * dest) {
         const FLOATVAL a = - DYNSELF.get_number();
         if (!dest)
             dest = pmc_new(INTERP, SELF->vtable->base_type);
@@ -251,7 +251,7 @@ The C<==> operation.
 
 */
 
-    INTVAL is_equal (PMC* value) {
+    INTVAL is_equal(PMC* value) {
 MMD_Float: {
         return (INTVAL)(PMC_num_val(SELF) == PMC_num_val(value));
         }
@@ -260,7 +260,7 @@ MMD_DEFAULT: {
         }
     }
 
-    INTVAL is_equal_num (PMC* value) {
+    INTVAL is_equal_num(PMC* value) {
 MMD_Float: {
         return (INTVAL)(PMC_num_val(SELF) == PMC_num_val(value));
         }
@@ -285,7 +285,8 @@ MMD_Float: {
             return diff > 0 ? 1 : diff < 0 ? -1 : 0;
         }
 MMD_DEFAULT: {
-            const FLOATVAL diff = PMC_num_val(SELF) - VTABLE_get_number(INTERP, value);
+            const FLOATVAL diff =
+                PMC_num_val(SELF) - VTABLE_get_number(INTERP, value);
             return diff > 0 ? 1 : diff < 0 ? -1 : 0;
         }
     }
@@ -306,7 +307,8 @@ MMD_Float: {
             return diff > 0 ? 1 : diff < 0 ? -1 : 0;
         }
 MMD_DEFAULT: {
-            const FLOATVAL diff = PMC_num_val(SELF) - VTABLE_get_number(INTERP, value);
+            const FLOATVAL diff =
+                PMC_num_val(SELF) - VTABLE_get_number(INTERP, value);
             return diff > 0 ? 1 : diff < 0 ? -1 : 0;
         }
     }
@@ -321,7 +323,7 @@ Increments the number.
 
 */
 
-    void increment () {
+    void increment() {
         PMC_num_val(SELF) ++;
     }
 
@@ -335,7 +337,7 @@ Decrements the number.
 
 */
 
-    void decrement () {
+    void decrement() {
         PMC_num_val(SELF) --;
     }
 /*
@@ -447,7 +449,7 @@ Return a new PMC of the type of C<SELF> with I<FUNC>(value) of SELF.
     METHOD PMC* cos() {
         PMC * const d = pmc_new(INTERP,
                 Parrot_get_ctx_HLL_type(INTERP, enum_class_Float));
-        PMC_num_val(d) = cos(VTABLE_get_number(interpreter, SELF));
+        PMC_num_val(d) = cos(VTABLE_get_number(interp, SELF));
         return d;
     }
     METHOD PMC* asec() {
@@ -544,10 +546,7 @@ Return a new PMC of the type of C<SELF> with I<FUNC>(value) of SELF.
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

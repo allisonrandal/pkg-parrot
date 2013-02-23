@@ -2,11 +2,12 @@ package Regex::Parse;
 
 use Regex::Grammar;
 use strict;
+use warnings;
 require 'Regex.pm';
 
 sub new {
-    my ($proto, %opts) = @_;
-    my $self = bless \%opts, (ref($proto) || $proto);
+    my ( $proto, %opts ) = @_;
+    my $self = bless \%opts, ( ref($proto) || $proto );
     $self->init();
     return $self;
 }
@@ -38,23 +39,39 @@ sub init {
 # O (nop)
 
 sub compile {
-    my ($self, $expr, $ctx) = @_;
-    my ($vals, $types) = Regex::Grammar::tokenize($expr);
+    my ( $self, $expr, $ctx ) = @_;
+    my ( $vals, $types ) = Regex::Grammar::tokenize($expr);
     my $lexer = sub {
-#        print "TOK($vals->[0]) TYPE($types->[0])\n" if @$vals;
+
+        #        print "TOK($vals->[0]) TYPE($types->[0])\n" if @$vals;
         return shift(@$types), shift(@$vals) if (@$types);
-        return ('', undef);
+        return ( '', undef );
     };
     my $parser = new Regex::Grammar;
-    return $parser->YYParse(yylex => $lexer,
-			    yyerror => sub {
-				my $parser = shift;
-				die "Error: expected ".join(" ", $parser->YYExpect)
-				    ." got `".$parser->YYCurtok."', rest=".join(" ", @$types)."\nfrom ".join(" ", @$vals)."\n";
-			    },
-#			    yydebug => 0x1f,
-			    yydebug => 0,
-                           );
+    return $parser->YYParse(
+        yylex   => $lexer,
+        yyerror => sub {
+            my $parser = shift;
+            die "Error: expected "
+                . join( " ", $parser->YYExpect )
+                . " got `"
+                . $parser->YYCurtok
+                . "', rest="
+                . join( " ", @$types )
+                . "\nfrom "
+                . join( " ", @$vals ) . "\n";
+        },
+
+        #                           yydebug => 0x1f,
+        yydebug => 0,
+    );
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004, The Perl Foundation.
-$Id: /local/src/pmc/undef.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/local/src/pmc/undef.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ from there.
 #include "parrot/parrot.h"
 #define UNDEF_STRING_CLASS enum_class_String
 
-pmclass Undef extends default {
+pmclass Undef extends default no_ro {
 
   void set_pmc(PMC* other) {
     VTABLE_morph(INTERP, SELF, enum_class_Ref);
@@ -35,7 +35,9 @@ pmclass Undef extends default {
 
   void assign_pmc(PMC* other) {
     VTABLE_morph(INTERP, SELF, other->vtable->base_type);
-    VTABLE_set_pmc(INTERP, SELF, other);
+    /* don't want to call set_pmc if we're assigning an Undef to an Undef */
+    if (other->vtable->base_type != enum_class_Undef)
+        VTABLE_set_pmc(INTERP, SELF, other);
   }
 
   void morph(INTVAL new_type) {
@@ -77,9 +79,22 @@ pmclass Undef extends default {
     return 0;
   }
 
-    void share () {
-        /* see src/pmc/integer.pmc */
+  void share() {
+    /* see src/pmc/integer.pmc */
+  }
+
+  PMC* share_ro() {
+    if (PObj_is_PMC_shared_TEST(SELF)) {
+        return SELF;
     }
+    else {
+        return pt_shared_fixup(INTERP, SELF);
+    }
+  }
+
+  PMC* clone() {
+      return pmc_new(INTERP, SELF->vtable->base_type);
+  }
 }
 
 /*
@@ -90,13 +105,10 @@ pmclass Undef extends default {
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
-
+ */

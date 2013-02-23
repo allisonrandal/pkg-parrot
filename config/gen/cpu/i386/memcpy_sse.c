@@ -7,8 +7,8 @@
 
 /*
  * GAS LISTING /home/chip/tmp/ccvNpFsi.s 			page 1
- * 
- * 
+ *
+ *
  *    1              		.file	"memcpy_sse_in.c"
  *    2              		.text
  *    3              		.p2align 4,,15
@@ -69,19 +69,26 @@ int main(int argc, char *argv[]) {
 
     n = 640;	/* sizeof(reg_store) */
 
-    s = malloc(n);
+    s = (unsigned char *)malloc(n);
     for (i = 0; i < n; ++i)
-	s[i] = i & 0xff;
-    d = malloc(n);
+    s[i] = i & 0xff;
+    d = (unsigned char *)malloc(n);
     for (i = 0; i < n; ++i)
-	d[i] = 0xff;
+    d[i] = 0xff;
     Parrot_memcpy_aligned_sse(d, s, n);
     for (i = 0; i < n; ++i)
-	if (d[i] != (i & 0xff)) {
-	    printf("error s[%d] = %d d = %d\n", i, s[i], d[i]);
-	    exit(1);
-	}
+    if (d[i] != (i & 0xff)) {
+        printf("error s[%d] = %d d = %d\n", i, s[i], d[i]);
+        exit(1);
+    }
     puts("ok");
     return 0;
 }
 #endif /* PARROT_CONFIG_TEST */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

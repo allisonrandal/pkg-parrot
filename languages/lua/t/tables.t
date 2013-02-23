@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/tables.t 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/trunk/languages/lua/t/tables.t 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -17,6 +17,7 @@ See "Programming in Lua", section 2.5 "Tables".
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -141,4 +142,11 @@ CODE
 c
 a,B,C
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

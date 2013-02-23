@@ -1,13 +1,12 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/gc.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/trunk/t/op/gc.t 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 22;
 
 =head1 NAME
 
@@ -15,7 +14,7 @@ t/op/gc.t - Garbage Collection
 
 =head1 SYNOPSIS
 
-	% prove t/op/gc.t
+        % prove t/op/gc.t
 
 =head1 DESCRIPTION
 
@@ -23,7 +22,6 @@ Tests garbage collection with the C<interpinfo> operation and various
 DOD/GC related bugs.
 
 =cut
-
 
 pasm_output_is( <<'CODE', '1', "sweep 1" );
       interpinfo I1, 2   # How many DOD runs have we done already?
@@ -54,7 +52,7 @@ pasm_output_is( <<'CODE', '1', "sweep 0, with object that need destroy" );
       end
 CODE
 
-pasm_output_is( <<'CODE', '10', "sweep 0, with object that need destroy/destroy");
+pasm_output_is( <<'CODE', '10', "sweep 0, with object that need destroy/destroy" );
       interpinfo I1, 2   # How many DOD runs have we done already?
       new P0, .Undef
       needs_destroy P0
@@ -125,7 +123,7 @@ CODE
 1
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "sweepoff with newpmcs");
+pasm_output_is( <<'CODE', <<OUTPUT, "sweepoff with newpmcs" );
     print "starting\n"
 
     sweepoff
@@ -145,7 +143,7 @@ starting
 ending
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "vanishing slingleton PMC");
+pasm_output_is( <<'CODE', <<OUTPUT, "vanishing slingleton PMC" );
 _main:
     .const .Sub P0 = "_rand"
     set I16, 100
@@ -175,7 +173,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<OUTPUT, "vanishing return continuation in method calls");
+pir_output_is( <<'CODE', <<OUTPUT, "vanishing return continuation in method calls" );
 .sub main :main
     .local pmc o, cl
     cl = newclass "Foo"
@@ -187,7 +185,7 @@ pir_output_is(<<'CODE', <<OUTPUT, "vanishing return continuation in method calls
 .end
 
 .namespace ["Foo"]
-.sub __init :method
+.sub init :vtable :method
     print "init\n"
     sweep 1
     new P6, .String
@@ -214,7 +212,7 @@ back from _inc
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "failing if regsave is not marked");
+pasm_output_is( <<'CODE', <<OUTPUT, "failing if regsave is not marked" );
     newclass P9, "Source"
     newclass P10, "Source::Buffer"
     find_type I9,"Source"
@@ -227,7 +225,7 @@ pasm_output_is(<<'CODE', <<OUTPUT, "failing if regsave is not marked");
     end
 
 .namespace ["Source"]
-.pcc_sub __get_string:	# buffer
+.pcc_sub __get_string:  # buffer
     get_params "(0)", P2
     getprop P12, "buffer", P2
     sweep 1
@@ -257,7 +255,7 @@ OUTPUT
 
 # this is a stripped down version of imcc/t/syn/pcc_16
 # s. also src/pmc/retcontinuation.pmc
-pasm_output_is(<<'CODE', <<OUTPUT, "coro context and invalid return continuations");
+pasm_output_is( <<'CODE', <<OUTPUT, "coro context and invalid return continuations" );
 .pcc_sub main:
     .const .Sub P0 = "co1"
     set I20, 0
@@ -285,7 +283,7 @@ coro
 done
 OUTPUT
 
-pir_output_is(<<'CODE', <<OUTPUT, "Recursion and exceptions");
+pir_output_is( <<'CODE', <<OUTPUT, "Recursion and exceptions" );
 
 # this did segfault with GC_DEBUG
 
@@ -324,7 +322,7 @@ ok 1
 9
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "write barrier 1");
+pasm_output_is( <<'CODE', <<OUTPUT, "write barrier 1" );
     null I2
     set I3, 100
 lp3:
@@ -376,7 +374,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "write barrier 2 - hash");
+pasm_output_is( <<'CODE', <<OUTPUT, "write barrier 2 - hash" );
     null I2
     set I3, 100
 lp3:
@@ -432,7 +430,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "write barrier 3 - ref");
+pasm_output_is( <<'CODE', <<OUTPUT, "write barrier 3 - ref" );
     null I2
     set I3, 10
 lp3:
@@ -500,7 +498,7 @@ CODE
 ok
 OUTPUT
 
-pasm_output_is(<<'CODE', <<OUTPUT, "write barrier 4 - tqueue");
+pasm_output_is( <<'CODE', <<OUTPUT, "write barrier 4 - tqueue" );
     null I2
     set I3, 100
 lp3:
@@ -566,7 +564,7 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "verify deleg_pmc object marking");
+pir_output_is( <<'CODE', <<'OUTPUT', "verify deleg_pmc object marking" );
 .sub main :main
     .local pmc cl, s, t
     cl = subclass "String", "X"
@@ -609,7 +607,7 @@ ok 3
 ok 4
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "AddrRegistry 1");
+pir_output_is( <<'CODE', <<'OUTPUT', "AddrRegistry 1" );
 .sub main :main
     .local pmc a, reg, nil
     reg = new .AddrRegistry
@@ -654,7 +652,7 @@ ok 4
 ok 5
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "AddrRegistry 2");
+pir_output_is( <<'CODE', <<'OUTPUT', "AddrRegistry 2" );
 .sub main :main
     .local pmc a, b, reg, nil
     null nil
@@ -678,7 +676,7 @@ CODE
 0112
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "AddrRegistry 2");
+pir_output_is( <<'CODE', <<'OUTPUT', "AddrRegistry 2" );
 .sub main :main
     .local pmc a, b, c, reg, nil, it
     null nil
@@ -785,7 +783,9 @@ F<examples/benchmarks/primes2.py>.
 
 =cut
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 22; }
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

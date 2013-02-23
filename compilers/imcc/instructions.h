@@ -1,39 +1,39 @@
-#if !defined(PARROT_IMCC_INSTRUCTIONS_H_GUARD)
+#ifndef PARROT_IMCC_INSTRUCTIONS_H_GUARD
 #define PARROT_IMCC_INSTRUCTIONS_H_GUARD
 
 /* Types */
 
 enum INSTYPE {    /*instruction type can be   */
-    ITBRANCH = 0x10000, /*            branch        */
-    ITPCCRET = 0x20000, /*            PCC sub return */
-    ITCALL =   0x40000, /*            function call */
-    ITLABEL =  0x80000, /*            label         */
-    ITALIAS = 0x100000, /*   set P,P  */
-    ITADDR  = 0x200000, /*   set_addr P, addr*/
-    ITRESULT= 0x400000, /*   .get_results */
-    ITEXT   = 0x800000, /*   instruction is extcall in JIT */
-    ITSAVES = 0x1000000,  /*   saveall/restoreall in a bsr */
-    ITPCCSUB = 0x2000000,  /*  PCC sub call */
-    ITPCCYIELD = 0x4000000 /* yield from PCC call instead of return */
+    ITBRANCH   =   0x10000, /*  branch        */
+    ITPCCRET   =   0x20000, /*  PCC sub return */
+    ITCALL     =   0x40000, /*  function call */
+    ITLABEL    =   0x80000, /*  label         */
+    ITALIAS    =  0x100000, /*  set P,P  */
+    ITADDR     =  0x200000, /*  set_addr P, addr*/
+    ITRESULT   =  0x400000, /*  .get_results */
+    ITEXT      =  0x800000, /*  instruction is extcall in JIT */
+    ITSAVES    = 0x1000000, /*  saveall/restoreall in a bsr */
+    ITPCCSUB   = 0x2000000, /*  PCC sub call */
+    ITPCCYIELD = 0x4000000  /*  yield from PCC call instead of return */
 };
 
 
 typedef struct _Instruction {
-    char * op;		   /* opstring w/o params */
-    char * fmt;            /* printf style format string for params   */
-    unsigned int flags;    /* how the instruction affects each of the values */
-    unsigned int type;	   /* 16 bit register branches, + ITxxx */
-    int keys;		   /* bitmask of keys used in this instruction */
-    int index;             /* index on instructions[] */
-    int bbindex;	   /* number of basic block containing instruction */
+    char * op;          /* opstring w/o params */
+    char * fmt;         /* printf style format string for params   */
+    unsigned int flags; /* how the instruction affects each of the values */
+    unsigned int type;  /* 16 bit register branches, + ITxxx */
+    int keys;           /* bitmask of keys used in this instruction */
+    int index;          /* index on instructions[] */
+    int bbindex;        /* number of basic block containing instruction */
     struct _Instruction * prev;
     struct _Instruction * next;
-    int opnum;		   /* parrot op number */
-    int opsize;		   /* parrot op size   */
-    int line;		   /* source code line number */
-    int n_r;              /* count of regs in **r */
-    SymReg * r[1];         /* instruction is allocated variabled sized
-                              to hold more SymRegs */
+    int opnum;          /* parrot op number */
+    int opsize;         /* parrot op size   */
+    int line;           /* source code line number */
+    int n_r;            /* count of regs in **r */
+    SymReg * r[1];      /* instruction is allocated variabled sized
+                           to hold more SymRegs */
 } Instruction;
 
 
@@ -79,17 +79,17 @@ struct _IMC_Unit;
 #ifdef _PARSER
 Instruction * _mk_instruction(const char *,const char *, int n, SymReg **, int);
 #else
-#define _mk_instruction(a,b,n,c,d) dont_use(a,b)
+#  define _mk_instruction(a,b,n,c,d) dont_use(a,b)
 #endif
 Instruction * INS(Interp *, struct _IMC_Unit *, char * name,
-	const char *fmt, SymReg **regs, int nargs, int keyv, int emit);
-Instruction * INS_LABEL(struct _IMC_Unit *, SymReg * r0, int emit);
+        const char *fmt, SymReg **regs, int nargs, int keyv, int emit);
+Instruction * INS_LABEL(Interp * interp, struct _IMC_Unit *, SymReg * r0, int emit);
 
 Instruction * iNEW(Interp *, struct _IMC_Unit *, SymReg * r0, char * type,
-	SymReg *init, int emit);
+        SymReg *init, int emit);
 Instruction * iNEWSUB(Interp *, struct _IMC_Unit *, SymReg * r0, int type,
-	SymReg *init, int emit);
-Instruction * emitb(struct _IMC_Unit *, Instruction *);
+        SymReg *init, int emit);
+Instruction * emitb(Interp * interp, struct _IMC_Unit *, Instruction *);
 
 int instruction_reads(Instruction *, SymReg *);
 int instruction_writes(Instruction *, SymReg *);
@@ -128,4 +128,12 @@ PARROT_API void open_comp_unit(void);
 PARROT_API void close_comp_unit(Parrot_Interp);
 
 #endif /* PARROT_IMCC_INSTRUCTIONS_H_GUARD */
+
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
 

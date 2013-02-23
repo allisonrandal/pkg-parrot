@@ -17,7 +17,13 @@ The reference manual is available on L<http://www.lua.org/manual/>.
 
 This implementation is aligned with Lua 5.1 specifications.
 
-=head1 Compiler
+=head1 PIR Compiler/Interpreter
+
+Work started, but B<not functional>, see F<languages/lua/src/lua51.pir>.
+
+The lexicography part could be checked with F<languages/lua/test_lex.pir>.
+
+=head1 Perl Compiler
 
 This compiler is written in Perl5 :
 
@@ -80,13 +86,7 @@ in F<languages/lua/t/closure.t> :
 
 C<y> variable is not different.
 
-=head2 TODO
-
-Handle arguments from command line.
-
-Try to use Parse::RecDescent (the original Lua uses a LL parser).
-
-=head1 Lua PMC
+=head1 Lua Types
 
 There are eight basic types in Lua, each of them is implemented by a PMC.
 
@@ -101,6 +101,7 @@ There are eight basic types in Lua, each of them is implemented by a PMC.
 =item * string F<languages/lua/pmc/luastring.pmc>
 
 =item * function F<languages/lua/pmc/luafunction.pmc>
+& F<languages/lua/pmc/luaclosure.pmc>
 
 =item * userdata F<languages/lua/pmc/luauserdata.pmc>
 
@@ -110,7 +111,9 @@ Currently, C<file> in I/O library is an C<userdata>.
 
 =item * thread F<languages/lua/pmc/luathread.pmc>
 
-This type is used to implement coroutines. 
+This type is used to implement coroutines.
+The current implementation use the library
+F<runtime/parrot/library/Parrot/Coroutine.pir>.
 
 =item * table F<languages/lua/pmc/luatable.pmc>
 
@@ -118,14 +121,14 @@ This type is I<the> data structure of the language.
 
 =back
 
-F<languages/lua/pmc/luabase.pmc> provides an abstract base class for some 
-Lua types (nil, boolean, number, string, table).
+F<languages/lua/pmc/luaany.pmc> provides an abstract base class for all
+Lua types.
 
 F<languages/lua/pmc/lua.pmc> is a singleton PMC what holds some static methods.
 
 =head2 BUGS
 
-Lua PMC have problems with the Parrot garbage collector : used objects are 
+Lua PMC have problems with the Parrot garbage collector : used objects are
 released by the GC (infant mortality ?).
 
 So, use the option C<--no-gc>.
@@ -138,7 +141,7 @@ Weak table, weak reference.
 
 =head2 IMPROVEMENT
 
-C<table> with a mixed array and hash. 
+C<table> with a mixed array and hash (and with an efficient C<next> method).
 
 =head1 Lua Standard Libraries
 
@@ -158,7 +161,7 @@ Lua 5.1 defines the following standard libraries:
 
 =item * mathematical functions F<languages/lua/lib/luamath.pir>
 
-=item * input and output F<languages/lua/lib/luaio.pir>
+=item * input and output F<languages/lua/lib/luaio.pir>, F<languages/lua/lib/luafile.pir>
 
 =item * operating system facilities F<languages/lua/lib/luaos.pir>
 
@@ -168,20 +171,32 @@ Lua 5.1 defines the following standard libraries:
 
 F<languages/lua/lib/luaaux.pir> is the equivalent of Auxiliary Library.
 
+F<languages/lua/lib/luaregex.pir> implements a regex compiler using PGE.
+
 =head2 TODO
 
-Except math library, all of these libraries are incomplete.
+Except math & table libraries, all of these libraries are incomplete.
 
-And the coroutine library does not work. 
+=head2 IMPROVEMENT
 
-=head2 KNOWN PROBLEMS
+As compiled regex are not stored in Lua variable, the Regex compiler needs a
+Memoization mecanism (well-known optimization).
 
-Currently, these libraries are included as PIR file (not loaded as bytecode 
-PBC) because HLL support for Sub/Closure is incomplete with PBC.   
+=head1 Extension Libraries
+
+These libraries are loaded dynamically with the Lua function C<require>.
+
+=over 4
+
+=item * alarm library F<languages/lua/lib/alarm.pir>
+
+=item * Lua File System library F<languages/lua/lib/lfs.pir>
+
+=back
 
 =head1 Next Milestones
 
-Understand how work PGE & TGE and write an interpreter in PIR. 
+Understand how work PGE & TGE and write an interpreter in PIR.
 
 =head1 Related Projects
 
@@ -198,9 +213,9 @@ A Lua to PIR compiler implemented in C
 A Lua bytecode to PIR compiler
 
 =back
- 
-See L<http://members.home.nl/joeijoei/>. 
- 
+
+See L<http://kjs.home.fmf.nl/>.
+
 =head1 AUTHOR
 
 Francois Perrad.

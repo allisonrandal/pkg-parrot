@@ -1,7 +1,7 @@
 /* op.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/op.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/op.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Header file for op functions.
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_OP_H_GUARD)
+#ifndef PARROT_OP_H_GUARD
 #define PARROT_OP_H_GUARD
 
 #include "parrot/config.h"
@@ -27,7 +27,8 @@ typedef enum {
     PARROT_ARG_NC = PARROT_ARG_FLOATVAL | PARROT_ARG_CONSTANT,
     PARROT_ARG_PC = PARROT_ARG_PMC      | PARROT_ARG_CONSTANT,
     PARROT_ARG_SC = PARROT_ARG_STRING   | PARROT_ARG_CONSTANT,
-    PARROT_ARG_KEYED = 0x20,     /* reuse MAYBE_FLATTEN */
+
+    PARROT_ARG_KEYED = 0x20,
     PARROT_ARG_KC = PARROT_ARG_PC       | PARROT_ARG_KEYED,
     PARROT_ARG_KIC= PARROT_ARG_IC       | PARROT_ARG_KEYED,
 
@@ -71,7 +72,7 @@ typedef void **(*op_func_prederef_t)(void **, Interp *);
 ** its op function (since we may not be using op functions).
 */
 
-typedef struct {
+typedef struct op_info_t {
     /* op_type_t type; unused */
     const char *name;
     const char *full_name;
@@ -90,10 +91,7 @@ typedef struct {
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Directory.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Directory.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -36,8 +36,7 @@ Returns C<Parrot::Docs::File>.
 
 =cut
 
-sub file_class
-{
+sub file_class {
     return 'Parrot::Docs::File';
 }
 
@@ -47,8 +46,7 @@ Returns C<Parrot::Docs::Directory>.
 
 =cut
 
-sub directory_class
-{
+sub directory_class {
     return 'Parrot::Docs::Directory';
 }
 
@@ -66,33 +64,29 @@ C<$recursive> and C<$ignore> function as specified in C<files()>.
 
 =cut
 
-sub files_of_type
-{
+sub files_of_type {
     my $self = shift;
     my $type = shift;
-    
+
     return () unless defined $type;
-    
+
     my $recursive = shift;
-    my $ignore = shift;
-    my @files = ();
-    
-    foreach my $file ($self->files())
-    {
+    my $ignore    = shift;
+    my @files     = ();
+
+    foreach my $file ( $self->files() ) {
         next unless $file->is_of_type($type);
         push @files, $file;
     }
-    
-    if ( $recursive )
-    {
-        foreach my $dir ($self->directories())
-        {
+
+    if ($recursive) {
+        foreach my $dir ( $self->directories() ) {
             next if defined $ignore and $dir->name =~ /$ignore/;
-            
-            push @files, $dir->files_of_type($type, 1, $ignore);
+
+            push @files, $dir->files_of_type( $type, 1, $ignore );
         }
     }
-    
+
     return @files;
 }
 
@@ -109,3 +103,10 @@ sub files_of_type
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

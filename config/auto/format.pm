@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/format.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/format.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Figures out what formats should be used for C<sprintf()>.
 package auto::format;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,36 +25,39 @@ $description = 'Figuring out what formats should be used for sprintf';
 
 @args = ();
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    my ($ivformat, $nvformat, $nvsize);
-    my ($iv,       $nv,       $floatsize, $doublesize, $ldsize) = $conf->data->get(
-        qw(iv nv floatsize doublesize hugefloatvalsize)
-    );
+    my ( $ivformat, $nvformat, $nvsize );
+    my ( $iv, $nv, $floatsize, $doublesize, $ldsize ) =
+        $conf->data->get(qw(iv nv floatsize doublesize hugefloatvalsize));
 
-    if ($iv eq "int") {
+    if ( $iv eq "int" ) {
         $ivformat = "%d";
-    } elsif (($iv eq "long") || ($iv eq "long int")) {
+    }
+    elsif ( ( $iv eq "long" ) || ( $iv eq "long int" ) ) {
         $ivformat = "%ld";
-    } elsif (($iv eq "long long") || ($iv eq "long long int")) {
+    }
+    elsif ( ( $iv eq "long long" ) || ( $iv eq "long long int" ) ) {
         $ivformat = "%lld";
-    } else {
+    }
+    else {
         die "Configure.pl:  Can't find a printf-style format specifier for type \"$iv\"\n";
     }
 
     $nvsize = $floatsize;
-    if ($nv eq "double") {
+    if ( $nv eq "double" ) {
         $nvsize   = $doublesize;
         $nvformat = "%f";
-    } elsif ($nv eq "long double") {
+    }
+    elsif ( $nv eq "long double" ) {
 
         # Stay way from long double for now (it may be 64 or 80 bits)
         # die "long double not supported at this time, use double.";
         $nvsize   = $ldsize;
         $nvformat = "%Lf";
-    } else {
+    }
+    else {
         die "Configure.pl:  Can't find a printf-style format specifier for type \"$nv\"\n";
     }
 
@@ -67,3 +71,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

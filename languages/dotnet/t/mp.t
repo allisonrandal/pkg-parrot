@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 7;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     public class test_field
@@ -92,10 +95,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'local ints');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'local ints' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -108,7 +111,7 @@ PIR
 630
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'local floats');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'local floats' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -121,7 +124,7 @@ PIR
 32.500000
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'param ints');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'param ints' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -134,7 +137,7 @@ PIR
 630
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'param floats');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'param floats' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -147,7 +150,7 @@ PIR
 32.500000
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'element');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'element' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -160,7 +163,7 @@ PIR
 20
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'field');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'field' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -172,3 +175,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'field');
 PIR
 10
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

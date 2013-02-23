@@ -1,7 +1,7 @@
 /* dod.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/dod.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/dod.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Handles dead object destruction of the various headers
  *  Data Structure and Algorithms:
@@ -12,33 +12,38 @@
  *  References:
  */
 
-#if !defined(PARROT_DOD_H_GUARD)
+#ifndef PARROT_DOD_H_GUARD
 #define PARROT_DOD_H_GUARD
 
 #include "parrot/parrot.h"
 
 /* Macros for recursively blocking and unblocking DOD */
-#define Parrot_block_DOD(interpreter) \
-        (interpreter)->arena_base->DOD_block_level++
+#define Parrot_block_DOD(interp) \
+        do { \
+            (interp)->arena_base->DOD_block_level++; \
+            Parrot_shared_DOD_block(interp); \
+        } while (0)
 
-#define Parrot_unblock_DOD(interpreter) \
-        if ((interpreter)->arena_base->DOD_block_level) \
-            (interpreter)->arena_base->DOD_block_level--
+#define Parrot_unblock_DOD(interp) \
+        if ((interp)->arena_base->DOD_block_level) { \
+            (interp)->arena_base->DOD_block_level--; \
+            Parrot_shared_DOD_unblock(interp); \
+        }
 
 /* Macros for recursively blocking and unblocking GC */
-#define Parrot_block_GC(interpreter) \
-        (interpreter)->arena_base->GC_block_level++
+#define Parrot_block_GC(interp) \
+        (interp)->arena_base->GC_block_level++
 
-#define Parrot_unblock_GC(interpreter) \
-        if ((interpreter)->arena_base->GC_block_level) \
-            (interpreter)->arena_base->GC_block_level--
+#define Parrot_unblock_GC(interp) \
+        if ((interp)->arena_base->GC_block_level) \
+            (interp)->arena_base->GC_block_level--
 
 /* Macros for testing if the DOD and GC are blocked */
-#define Parrot_is_blocked_DOD(interpreter) \
-        ((interpreter)->arena_base->DOD_block_level)
+#define Parrot_is_blocked_DOD(interp) \
+        ((interp)->arena_base->DOD_block_level)
 
-#define Parrot_is_blocked_GC(interpreter) \
-        ((interpreter)->arena_base->GC_block_level)
+#define Parrot_is_blocked_GC(interp) \
+        ((interp)->arena_base->GC_block_level)
 
 enum {
     DOD_trace_stack_FLAG = 1 << 0,      /* trace system areads and stack */
@@ -53,12 +58,12 @@ PARROT_API void Parrot_do_dod_run(Interp *, UINTVAL flags);
 void trace_system_areas(Interp *);
 void trace_mem_block(Interp *, size_t, size_t);
 
-void free_unused_pobjects(Interp *interpreter,
+void free_unused_pobjects(Interp *interp,
                     struct Small_Object_Pool *pool);
 
-void used_cow(Interp *interpreter,
+void used_cow(Interp *interp,
         struct Small_Object_Pool *pool, int cleanup);
-void clear_cow(Interp *interpreter,
+void clear_cow(Interp *interp,
         struct Small_Object_Pool *pool, int cleanup);
 
 /* mark a PObj live during DOD */
@@ -66,14 +71,14 @@ void clear_cow(Interp *interpreter,
 #if PARROT_GC_GMS
 #  define pobject_lives(i, o) do { \
     if (!PObj_live_TEST(o) && \
-	    PObj_to_GMSH(o)->gen->gen_no >= i->gc_generation) \
-	parrot_gc_gms_pobject_lives(i, o); \
+            PObj_to_GMSH(o)->gen->gen_no >= i->gc_generation) \
+        parrot_gc_gms_pobject_lives(i, o); \
   } while (0)
 
-PARROT_API void parrot_gc_gms_pobject_lives(Interp* interpreter, PObj *obj);
+PARROT_API void parrot_gc_gms_pobject_lives(Interp *interp, PObj *obj);
 
 #else
-PARROT_API void pobject_lives(Interp *interpreter, PObj *buffer);
+PARROT_API void pobject_lives(Interp *interp, PObj *buffer);
 #endif
 
 #if ! DISABLE_GC_DEBUG
@@ -84,18 +89,18 @@ extern int CONSERVATIVE_POINTER_CHASING;
 PARROT_API int Parrot_dod_trace_root(Interp *, int trace_stack);
 PARROT_API int Parrot_dod_trace_children(Interp *, size_t how_many);
 PARROT_API void Parrot_dod_sweep(Interp *, struct Small_Object_Pool *pool);
-PARROT_API void Parrot_dod_ms_run_init(Interp *interpreter);
+PARROT_API void Parrot_dod_ms_run_init(Interp *interp);
 PARROT_API void Parrot_dod_clear_live_bits(Interp*);
 
-PARROT_API void Parrot_dod_profile_start(Parrot_Interp interpreter);
-PARROT_API void Parrot_dod_profile_end(Parrot_Interp interpreter, int what);
+PARROT_API void Parrot_dod_profile_start(Parrot_Interp interp);
+PARROT_API void Parrot_dod_profile_end(Parrot_Interp interp, int what);
 
 /* GC subsystem init functions */
-PARROT_API void Parrot_gc_ms_init(Interp* interpreter);
-PARROT_API void Parrot_gc_ims_init(Interp* interpreter);
-PARROT_API void Parrot_gc_gms_init(Interp* interpreter);
+PARROT_API void Parrot_gc_ms_init(Interp *interp);
+PARROT_API void Parrot_gc_ims_init(Interp *interp);
+PARROT_API void Parrot_gc_gms_init(Interp *interp);
 /* do_dod_run function for MS */
-PARROT_API void Parrot_dod_ms_run(Interp *interpreter, int flags);
+PARROT_API void Parrot_dod_ms_run(Interp *interp, int flags);
 
 PARROT_API void Parrot_dod_ims_wb(Interp*, PMC *, PMC *);
 /*
@@ -104,7 +109,7 @@ PARROT_API void Parrot_dod_ims_wb(Interp*, PMC *, PMC *);
 #if PARROT_GC_IMS
 #  define DOD_WRITE_BARRIER(interp, agg, old, new) \
     do { \
-        if (    !PMC_IS_NULL(new)   && \
+        if (!PMC_IS_NULL(new)   && \
                 PObj_live_TEST(agg) && \
                 (PObj_get_FLAGS(agg) & PObj_custom_GC_FLAG) && \
                 !PObj_live_TEST(new)) { \
@@ -153,10 +158,7 @@ void parrot_gc_gms_wb_key(Interp *, PMC *agg,
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

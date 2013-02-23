@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
+# Copyright (C) 2005-2007, The Perl Foundation.
 
 =head1 NAME
 
@@ -32,7 +32,7 @@ of TGE::Rule objects, which are the semantics defined by the grammar.
 
 =cut
 
-.sub __init :method
+.sub init :vtable :method
     $P1 = new .ResizablePMCArray
     setattribute self, 'rules', $P1
     $P2 = new .Hash
@@ -171,3 +171,9 @@ LOOP:
 Allison Randal <allison@perl.org>
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

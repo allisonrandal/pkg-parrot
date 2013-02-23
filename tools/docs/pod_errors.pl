@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/tools/docs/pod_errors.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# $Id: /parrotcode/local/tools/docs/pod_errors.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -21,24 +21,24 @@ use warnings;
 use lib 'lib';
 use Parrot::Docs::Directory;
 
-my $dir = Parrot::Docs::Directory->new(shift || '.');
+my $dir = Parrot::Docs::Directory->new( shift || '.' );
 my $ignore = shift || '^(icu)$';
 
-foreach my $file ($dir->files(1, $ignore))
-{
-	next unless $file->contains_pod;
-	next unless $file->num_pod_errors;
-	
-	my $errors = $file->pod_errors;
-	
-	print "\n",
-		$file->path, 
-		' has ', 
-		$file->num_pod_errors, 
-		' error',
-		$file->num_pod_errors != 1 ? 's' : '', 
-		":\n",
-		$errors;
+foreach my $file ( $dir->files( 1, $ignore ) ) {
+    next unless $file->contains_pod;
+    next unless $file->num_pod_errors;
+
+    my $errors = $file->pod_errors;
+
+    print "\n", $file->path, ' has ', $file->num_pod_errors, ' error',
+        $file->num_pod_errors != 1 ? 's' : '', ":\n", $errors;
 }
 
 exit 0;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

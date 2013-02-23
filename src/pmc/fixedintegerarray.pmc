@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/fixedintegerarray.pmc 13252 2006-07-11T20:35:46.150298Z leo  $
+$Id: /parrotcode/local/src/pmc/fixedintegerarray.pmc 930 2006-12-28T23:51:13.748136Z chromatic  $
 
 =head1 NAME
 
@@ -8,8 +8,8 @@ src/pmc/fixedintegerarray.pmc - fixed size array for integers only
 
 =head1 DESCRIPTION
 
-This class, FixedIntegerArray, implements an array of fixed size, which stored INTVALs,
-it uses Integer PMCs for all of the conversions
+This class, FixedIntegerArray, implements an array of fixed size,
+which stored INTVALs, it uses Integer PMCs for all of the conversions
 
 =head2 Functions
 
@@ -39,7 +39,7 @@ Initializes the array.
 
 */
 
-    void init () {
+    void init() {
         PMC_int_val(SELF) = 0;
         PMC_data(SELF) = NULL;
     }
@@ -49,7 +49,7 @@ Initializes the array.
 =item C<PMC new_from_string(STRING *rep, INTVAL flags)>
 
 Class method to construct an array from the string representation C<rep>,
-which is a string I<"(el0, el1, ...)">. C<flags> may have the 
+which is a string I<"(el0, el1, ...)">. C<flags> may have the
 C<PObj_constant_FLAG> bit set, which will be honored to create a PMC
 in the constant PMC pool.
 
@@ -146,7 +146,7 @@ Destroys the array.
 
 */
 
-    void destroy () {
+    void destroy() {
         if (PMC_data(SELF))
             mem_sys_free(PMC_data(SELF));
         PMC_data(SELF) = NULL;
@@ -163,7 +163,7 @@ Creates and returns a copy of the array.
 
 */
 
-    PMC* clone () {
+    PMC* clone() {
         INTVAL size;
         PMC * dest;
         /* a quick hack to create a clone in the constant PMC arena
@@ -183,8 +183,8 @@ Creates and returns a copy of the array.
         size = PMC_int_val(SELF);
         PMC_int_val(dest) = size;
 
-        PMC_data(dest) = mem_sys_allocate(size * sizeof(INTVAL));
-        mem_sys_memcopy(PMC_data(dest), PMC_data(SELF), size*sizeof(INTVAL));
+        PMC_data(dest) = mem_sys_allocate(size * sizeof (INTVAL));
+        mem_sys_memcopy(PMC_data(dest), PMC_data(SELF), size*sizeof (INTVAL));
         PObj_active_destroy_SET(dest);
         return dest;
     }
@@ -199,7 +199,7 @@ fixed sized array).
 =cut
 
 */
-    INTVAL get_bool () {
+    INTVAL get_bool() {
         INTVAL size = SELF.elements();
         return (INTVAL)(size != 0);
     }
@@ -212,7 +212,7 @@ fixed sized array).
 
 */
 
-    INTVAL elements () {
+    INTVAL elements() {
         return PMC_int_val(SELF);
     }
 
@@ -226,7 +226,7 @@ Returns the number of elements in the array.
 
 */
 
-    INTVAL get_integer () {
+    INTVAL get_integer() {
         return SELF.elements();
     }
 
@@ -241,10 +241,10 @@ Returns the integer value of the element at index C<key>.
 
 */
 
-    INTVAL get_integer_keyed_int (INTVAL key) {
+    INTVAL get_integer_keyed_int(INTVAL key) {
         INTVAL *data;
         if (key < 0 || key >= PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                 "FixedIntegerArray: index out of bounds!");
 
         data = (INTVAL *)PMC_data(SELF);
@@ -261,7 +261,7 @@ Returns the integer value of the element at index C<*key>.
 
 */
 
-    INTVAL get_integer_keyed (PMC* key) {
+    INTVAL get_integer_keyed(PMC* key) {
         /* simple int keys only */
         INTVAL k = key_integer(INTERP, key);
         return DYNSELF.get_integer_keyed_int(k);
@@ -278,13 +278,13 @@ Returns the floating-point value of the element at index C<key>.
 
 */
 
-    FLOATVAL get_number_keyed_int (INTVAL key) {
+    FLOATVAL get_number_keyed_int(INTVAL key) {
         return (FLOATVAL)DYNSELF.get_integer_keyed_int(key);
     }
 
 /*
 
-=item C<FLOATVAL get_number_keyed (PMC* key)>
+=item C<FLOATVAL get_number_keyed(PMC* key)>
 
 Returns the floating-point value of the element at index C<*key>.
 
@@ -292,7 +292,7 @@ Returns the floating-point value of the element at index C<*key>.
 
 */
 
-    FLOATVAL get_number_keyed (PMC* key) {
+    FLOATVAL get_number_keyed(PMC* key) {
         INTVAL k = key_integer(INTERP, key);
         return DYNSELF.get_number_keyed_int(k);
     }
@@ -307,11 +307,39 @@ Returns the Parrot string value of the element at index C<key>.
 
 */
 
-    STRING* get_string_keyed_int (INTVAL key) {
+    STRING* get_string_keyed_int(INTVAL key) {
         PMC *temp;
         temp = DYNSELF.get_pmc_keyed_int(key);
         return VTABLE_get_string(INTERP, temp);
     }
+
+/*
+
+=item C<STRING *get_repr()>
+
+Returns the Parrot string representation C<key>.
+
+=cut
+
+*/
+
+    STRING* get_repr() {
+        STRING *res;
+        INTVAL j, n;
+        PMC *val;
+
+        res = string_from_cstring(INTERP, "[ ", 0);
+        n = VTABLE_elements(INTERP, SELF);
+        for (j = 0; j < n; ++j) {
+            val = SELF.get_pmc_keyed_int(j);
+            res = string_append(INTERP, res, VTABLE_get_repr(INTERP, val));
+            if (j < n - 1)
+                res = string_append(INTERP, res, const_string(INTERP, ", "));
+        }
+        res = string_append(INTERP, res, const_string(INTERP, " ]"));
+        return res;
+    }
+
 
 /*
 
@@ -339,7 +367,7 @@ Returns the PMC value of the element at index C<key>.
 
 */
 
-    PMC* get_pmc_keyed_int (INTVAL key) {
+    PMC* get_pmc_keyed_int(INTVAL key) {
         PMC *ret;
         INTVAL val;
 
@@ -374,12 +402,12 @@ Resizes the array to C<size> elements.
 
 */
 
-    void set_integer_native (INTVAL size) {
+    void set_integer_native(INTVAL size) {
         if (PMC_int_val(SELF) || size < 1)
             real_exception(INTERP, NULL, E_IndexError,
                 "FixedIntegerArray: Can't resize!");
         PMC_int_val(SELF) = size;
-        PMC_data(SELF) = mem_sys_allocate_zeroed(size * sizeof(INTVAL));
+        PMC_data(SELF) = mem_sys_allocate_zeroed(size * sizeof (INTVAL));
         PObj_active_destroy_SET(SELF);
     }
 
@@ -393,10 +421,10 @@ Sets the integer value of the element at index C<key> to C<value>.
 
 */
 
-    void set_integer_keyed_int (INTVAL key, INTVAL value) {
+    void set_integer_keyed_int(INTVAL key, INTVAL value) {
         INTVAL *data;
         if (key < 0 || key >= PMC_int_val(SELF))
-            real_exception(interpreter, NULL, E_IndexError,
+            real_exception(interp, NULL, E_IndexError,
                 "FixedIntegerArray: index out of bounds!");
 
         data = (INTVAL*)PMC_data(SELF);
@@ -413,7 +441,7 @@ Sets the integer value of the element at index C<key> to C<value>.
 
 */
 
-    void set_integer_keyed (PMC *key, INTVAL value) {
+    void set_integer_keyed(PMC *key, INTVAL value) {
         INTVAL k;
         k = key_integer(INTERP, key);
         DYNSELF.set_integer_keyed_int(k, value);
@@ -430,7 +458,7 @@ C<value>.
 
 */
 
-    void set_number_keyed_int (INTVAL key, FLOATVAL value) {
+    void set_number_keyed_int(INTVAL key, FLOATVAL value) {
         DYNSELF.set_integer_keyed_int(key, (INTVAL)value);
     }
 
@@ -461,7 +489,7 @@ Sets the Parrot string value of the element at index C<key> to C<value>.
 
 */
 
-    void set_string_keyed_int (INTVAL key, STRING* value) {
+    void set_string_keyed_int(INTVAL key, STRING* value) {
         INTVAL tempInt;
         PMC *tempPMC;
 
@@ -498,7 +526,7 @@ Sets the PMC value of the element at index C<key> to C<*src>.
 
 */
 
-    void set_pmc_keyed_int (INTVAL key, PMC* src) {
+    void set_pmc_keyed_int(INTVAL key, PMC* src) {
         INTVAL tempInt;
 
         tempInt = VTABLE_get_integer(INTERP, src);
@@ -600,10 +628,7 @@ Initial version 2004.06.11 by Matt Fowles
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

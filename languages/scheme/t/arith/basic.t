@@ -1,6 +1,8 @@
-#! perl -w
-# $Id: /local/languages/scheme/t/arith/basic.t 11501 2006-02-10T18:27:13.457666Z particle  $
+#! perl
+# $Id: /parrotcode/local/languages/scheme/t/arith/basic.t 1502 2007-01-22T17:06:21.889089Z chromatic  $
 
+use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../..";
 
@@ -10,27 +12,27 @@ use Scheme::Test tests => 22;
 ### Add
 ###
 
-output_is(<<'CODE', 0, 'write (+)');
+output_is( <<'CODE', 0, 'write (+)' );
 (write (+))
 CODE
 
-output_is(<<'CODE', 0, 'write (+ 0)');
+output_is( <<'CODE', 0, 'write (+ 0)' );
 (write (+ 0))
 CODE
 
-output_is(<<'CODE', 1, 'write (+ 1)');
+output_is( <<'CODE', 1, 'write (+ 1)' );
 (write (+ 1))
 CODE
 
-output_is(<<'CODE', 0, 'write (+ 0 0)');
+output_is( <<'CODE', 0, 'write (+ 0 0)' );
 (write (+ 0 0))
 CODE
 
-output_is(<<'CODE', 1, 'write (+ 0 1)');
+output_is( <<'CODE', 1, 'write (+ 0 1)' );
 (write (+ 0 1))
 CODE
 
-output_is(<<'CODE', 2, 'write (+ 0 1 1)');
+output_is( <<'CODE', 2, 'write (+ 0 1 1)' );
 (write (+ 0 1 1))
 CODE
 
@@ -38,27 +40,27 @@ CODE
 ### Subtract
 ###
 
-output_is(<<'CODE', 0, 'write (-)');
+output_is( <<'CODE', 0, 'write (-)' );
 (write (-))
 CODE
 
-output_is(<<'CODE', 0, 'write (- 0)');
+output_is( <<'CODE', 0, 'write (- 0)' );
 (write (- 0))
 CODE
 
-output_is(<<'CODE', -1, 'write (- 1)');
+output_is( <<'CODE', -1, 'write (- 1)' );
 (write (- 1))
 CODE
 
-output_is(<<'CODE', 0, 'write (- 0 0)');
+output_is( <<'CODE', 0, 'write (- 0 0)' );
 (write (- 0 0))
 CODE
 
-output_is(<<'CODE', -1, 'write (- 0 1)');
+output_is( <<'CODE', -1, 'write (- 0 1)' );
 (write (- 0 1))
 CODE
 
-output_is(<<'CODE', -2, 'write (- 0 1 1)');
+output_is( <<'CODE', -2, 'write (- 0 1 1)' );
 (write (- 0 1 1))
 CODE
 
@@ -66,27 +68,27 @@ CODE
 ### Multiply
 ###
 
-output_is(<<'CODE', 0, 'write (*)');
+output_is( <<'CODE', 0, 'write (*)' );
 (write (*))
 CODE
 
-output_is(<<'CODE', 0, 'write (* 0)');
+output_is( <<'CODE', 0, 'write (* 0)' );
 (write (* 0))
 CODE
 
-output_is(<<'CODE', 1, 'write (* 1)');
+output_is( <<'CODE', 1, 'write (* 1)' );
 (write (* 1))
 CODE
 
-output_is(<<'CODE', 0, 'write (* 0 0)');
+output_is( <<'CODE', 0, 'write (* 0 0)' );
 (write (* 0 0))
 CODE
 
-output_is(<<'CODE', 0, 'write (* 0 1)');
+output_is( <<'CODE', 0, 'write (* 0 1)' );
 (write (* 0 1))
 CODE
 
-output_is(<<'CODE', 0, 'write (* 0 1 1)');
+output_is( <<'CODE', 0, 'write (* 0 1 1)' );
 (write (* 0 1 1))
 CODE
 
@@ -94,11 +96,11 @@ CODE
 ### Divide
 ###
 
-output_is(<<'CODE', 1, 'reciprocal');
+output_is( <<'CODE', 1, 'reciprocal' );
 (write (/ 1))
 CODE
 
-output_is(<<'CODE', 1, '1/1');
+output_is( <<'CODE', 1, '1/1' );
 (write (/ 1 1))
 CODE
 
@@ -106,10 +108,17 @@ CODE
 ### Abs
 ###
 
-output_is(<<'CODE', 5, 'abs 5');
+output_is( <<'CODE', 5, 'abs 5' );
 (write (abs 5))
 CODE
 
-output_is(<<'CODE', 7, 'abs -7');
+output_is( <<'CODE', 7, 'abs -7' );
 (write (abs -7))
 CODE
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/libfloat.t 13986 2006-08-07T17:04:53.535012Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/libfloat.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/libfloat.t - WMLScript Float library
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/libfloat.t
+    % perl -I../lib WMLScript/t/libfloat.t
 
 =head1 DESCRIPTION
 
@@ -18,13 +18,14 @@ Tests WMLScript Float Library
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 8;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.int');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.int' );
 extern function main()
 {
     var a = 3.14;
@@ -43,7 +44,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.floor');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.floor' );
 extern function main()
 {
     var a = 3.14;
@@ -62,7 +63,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.ceil');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.ceil' );
 extern function main()
 {
     var a = 3.14;
@@ -81,7 +82,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.pow');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.pow' );
 extern function main()
 {
     var a = 3;
@@ -94,7 +95,7 @@ CODE
 1
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.round');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.round' );
 extern function main()
 {
     var a = Float.round(3.5);
@@ -124,7 +125,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.sqrt');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.sqrt' );
 extern function main()
 {
     var a = 4;
@@ -147,7 +148,7 @@ CODE
 4
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.maxFloat');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.maxFloat' );
 extern function main()
 {
     var a = Float.maxFloat();
@@ -159,7 +160,7 @@ CODE
 1
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.minFloat');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'Float.minFloat' );
 extern function main()
 {
     var a = Float.minFloat();
@@ -171,4 +172,10 @@ CODE
 1
 OUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

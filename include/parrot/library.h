@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/library.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/library.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_LIBRARY_H_GUARD)
+#ifndef PARROT_LIBRARY_H_GUARD
 #define PARROT_LIBRARY_H_GUARD
 
 typedef enum {
@@ -38,20 +38,16 @@ PARROT_API char* Parrot_locate_runtime_file(Interp *, const char *file_name,
 PARROT_API STRING* Parrot_locate_runtime_file_str(Interp *, STRING *file_name,
         enum_runtime_ft);
 
-PARROT_API void Parrot_autoload_class(Interp *, STRING *class);
-PARROT_API const char* Parrot_get_runtime_prefix(Interp *, STRING **prefix);
+PARROT_API char* Parrot_get_runtime_prefix(Interp *, STRING **prefix);
 void parrot_init_library_paths(Interp *);
-STRING * parrot_split_path_ext(Interp* , STRING *in, 
+STRING * parrot_split_path_ext(Interp* , STRING *in,
         STRING **wo_ext, STRING **ext);
 
 #endif /* PARROT_LIBRARY_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pmc/enumerate.pmc 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/pmc/enumerate.pmc 3359 2007-05-02T06:53:54.573602Z chromatic  $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ These is an Iterator return [idx, item] tuples.
 
 #include "parrot/parrot.h"
 
-pmclass Enumerate extends Iterator {
+pmclass Enumerate extends Iterator no_ro {
 
     void init_pmc(PMC* iterable) {
         SUPER(iterable);
@@ -40,30 +40,37 @@ the next one.
 */
 
     INTVAL get_bool() {
-        PMC *key = PMC_struct_val(SELF);
-        PMC *iter = PMC_pmc_val(SELF);
-        INTVAL ok = PMC_int_val(key) >= 0 && VTABLE_get_bool(INTERP, iter);
+        PMC   *key  = (PMC *)PMC_struct_val(SELF);
+        PMC   *iter = (PMC *)PMC_pmc_val(SELF);
+        INTVAL ok   = PMC_int_val(key) >= 0 && VTABLE_get_bool(INTERP, iter);
+
         if (!ok)
             PMC_int_val(key) = -1;
+
         return ok;
     }
 
-    PMC* shift_pmc () {
-        PMC *key = PMC_struct_val(SELF);
-        PMC *iter = PMC_pmc_val(SELF);
+    PMC* shift_pmc() {
         PMC *item, *tupl, *val;
-        INTVAL i = PMC_int_val(key);
+        PMC *key  = (PMC *)PMC_struct_val(SELF);
+        PMC *iter = (PMC *)PMC_pmc_val(SELF);
+        INTVAL i  = PMC_int_val(key);
 
         if (i == -1)
             real_exception(INTERP, NULL, E_StopIteration, "StopIteration");
+
         item = VTABLE_shift_pmc(INTERP, iter);
         tupl = pmc_new(INTERP, enum_class_FixedPMCArray);
+
         ++PMC_int_val(key);
         VTABLE_set_integer_native(INTERP, tupl, 2);
-        val = pmc_new(INTERP, enum_class_Integer);
+
+        val              = pmc_new(INTERP, enum_class_Integer);
         PMC_int_val(val) = i;
+
         VTABLE_set_pmc_keyed_int(INTERP, tupl, 0, val);
         VTABLE_set_pmc_keyed_int(INTERP, tupl, 1, item);
+
         return tupl;
     }
 
@@ -81,13 +88,10 @@ the next one.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */
-

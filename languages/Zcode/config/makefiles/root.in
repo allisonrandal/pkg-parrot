@@ -1,13 +1,13 @@
-# $Id: /local/languages/Zcode/config/makefiles/root.in 13153 2006-07-04T22:59:35.281165Z bernhard  $
+# $Id: /parrotcode/trunk/languages/Zcode/config/makefiles/root.in 470 2006-12-05T03:30:45.414067Z svm  $
 
 # Makefile for languages/Zcode
 
 # Setup of some commands
-PARROT  = ..@slash@..@slash@parrot@exe@
+PARROT  = ../../parrot@exe@
 PERL       = @perl@
 RM_F       = @rm_f@
 
-EXAMPLES = examples@slash@small.z3 examples@slash@hello.z3
+EXAMPLES = examples/small.z3 examples/hello.z3
 
 default: all
 

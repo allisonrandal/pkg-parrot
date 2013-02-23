@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/va_ptr.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/config/auto/va_ptr.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Tests which kind of PARROT_VA_TO_VAPTR to use.
 package auto::va_ptr;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -24,28 +25,35 @@ $description = 'Test the type of va_ptr (this test is likely to segfault)';
 
 @args = qw();
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $va_type;
     cc_gen('config/auto/va_ptr/test_c.in');
     eval { cc_build('-DVA_TYPE_X86'); };
 
-    if ($@ || cc_run() !~ /^ok/) {
+    if ( $@ || cc_run() !~ /^ok/ ) {
         eval { cc_build('-DVA_TYPE_PPC'); };
-        if ($@ || cc_run() !~ /^ok/) {
+        if ( $@ || cc_run() !~ /^ok/ ) {
             die "Unknown va_ptr type";
         }
         $va_type = 'ppc';
-    } else {
+    }
+    else {
         $va_type = 'x86';
     }
     cc_clean();
     $self->set_result($va_type);
-    $conf->data->set(va_ptr_type => $va_type);
+    $conf->data->set( va_ptr_type => $va_type );
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

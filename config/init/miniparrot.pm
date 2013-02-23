@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/config/init/miniparrot.pm 12981 2006-06-20T19:26:31.775154Z bernhard  $
+# $Id: /parrotcode/local/config/init/miniparrot.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ from using  Configure at all for miniparrot builds.
 package init::miniparrot;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -29,11 +30,10 @@ $description = 'Tweaking settings for miniparrot';
 
 @args = qw(miniparrot);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
-    unless ($conf->options->get('miniparrot')) {
+    unless ( $conf->options->get('miniparrot') ) {
         $self->set_result('skipped');
         return $self;
     }
@@ -59,6 +59,7 @@ sub runstep
         TEMP_jit_o         => '',
         TEMP_exec_h        => '',
         TEMP_exec_o        => '',
+        TEMP_atomic_o      => '',
         asmfun_o           => '',
         has___sighandler_t => undef,
         has_sigatomic_t    => undef,
@@ -74,11 +75,19 @@ sub runstep
     foreach (
         qw(assert complex ctype errno locale math setjmp signal stdarg
         stdio stdlib string time)
-        ) {
-        $conf->data->set("i_$_" => 1);
+        )
+    {
+        $conf->data->set( "i_$_" => 1 );
     }
 
     return $self;
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -5,29 +5,35 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /local/languages/jako/lib/Jako/Construct/Type/Integer.pm 12840 2006-05-30T15:08:05.048089Z coke  $
+# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Type/Integer.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 #
 
 use strict;
-eval "use warnings";
+use warnings;
 
 package Jako::Construct::Type::Integer;
 
 use base qw(Jako::Construct::Type);
 
-sub new
-{
-  my $class = shift;
-  my ($token) = @_;
+sub new {
+    my $class = shift;
+    my ($token) = @_;
 
-  return bless {
-    TOKEN    => $token,
-    CODE     => 'I',
-    NAME     => 'int',
-    IMCC     => 'int',
-    IMCC_PMC => 'Integer'
-  }, $class;
+    return bless {
+        TOKEN    => $token,
+        CODE     => 'I',
+        NAME     => 'int',
+        IMCC     => 'int',
+        IMCC_PMC => 'Integer'
+    }, $class;
 }
 
 1;
 
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

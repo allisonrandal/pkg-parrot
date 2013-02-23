@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/config/auto/gc.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/local/config/auto/gc.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -37,6 +37,7 @@ Use the malloc in F<src/res_lea.c> with tracing enabled.
 package auto::gc;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -48,23 +49,24 @@ $description = 'Determining what allocator to use';
 # valid libc/malloc/malloc-trace/gc
 @args = qw(gc verbose);
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $gc = $conf->options->get('gc');
 
-    if (!defined($gc)) {
+    if ( !defined($gc) ) {
 
         # default is GC in resources.c
         $gc = 'gc';
-    } elsif ($gc eq 'libc') {
+    }
+    elsif ( $gc eq 'libc' ) {
 
         # tests mallinfo after allocation of 128 bytes
-        if ($conf->data->get('i_malloc')) {
-            $conf->data->set(malloc_header => 'malloc.h');
-        } else {
-            $conf->data->set(malloc_header => 'stdlib.h');
+        if ( $conf->data->get('i_malloc') ) {
+            $conf->data->set( malloc_header => 'malloc.h' );
+        }
+        else {
+            $conf->data->set( malloc_header => 'stdlib.h' );
         }
 
 =for nothing
@@ -86,7 +88,7 @@ sub runstep
 
     }
 
-    if ($gc =~ /^malloc(?:-trace)?$/) {
+    if ( $gc =~ /^malloc(?:-trace)?$/ ) {
         $conf->data->set(
             TEMP_gc_c => <<"EOF",
 \$(SRC_DIR)/$gc\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/$gc.c
@@ -95,21 +97,23 @@ EOF
             TEMP_gc_o => "\$(SRC_DIR)\/$gc\$(O) \$(SRC_DIR)/res_lea\$(O)",
             gc_flag   => '-DGC_IS_MALLOC',
         );
-    } elsif ($gc eq 'libc') {
+    }
+    elsif ( $gc eq 'libc' ) {
         $conf->data->set(
             TEMP_gc_c => <<"EOF",
-\$(SRC_DIR)/res_lea\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/res_lea.c
+\$(SRC_DIR)/gc/res_lea\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/gc/res_lea.c
 EOF
-            TEMP_gc_o => "\$(SRC_DIR)/res_lea\$(O)",
+            TEMP_gc_o => "\$(SRC_DIR)/gc/res_lea\$(O)",
             gc_flag   => '-DGC_IS_MALLOC',
         );
-    } else {
+    }
+    else {
         $gc = 'gc';
         $conf->data->set(
             TEMP_gc_c => <<"EOF",
-\$(SRC_DIR)/resources\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/resources.c
+\$(SRC_DIR)/gc/resources\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/gc/resources.c
 EOF
-            TEMP_gc_o => "\$(SRC_DIR)/resources\$(O)",
+            TEMP_gc_o => "\$(SRC_DIR)/gc/resources\$(O)",
             gc_flag   => '',
         );
     }
@@ -119,3 +123,10 @@ EOF
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

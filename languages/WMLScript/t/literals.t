@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/literals.t 13574 2006-07-25T06:25:05.355631Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/literals.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/literals.t - WMLScript literals
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/literals.t
+    % perl -I../lib WMLScript/t/literals.t
 
 =head1 DESCRIPTION
 
@@ -17,13 +17,14 @@ See "WMLScript Specification", section 6.1.5 "Literals".
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 9;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'decimal integer', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'decimal integer', cflags => '-On' );
 extern function main()
 {
     var a = 0;
@@ -40,7 +41,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'hexadecimal integer', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'hexadecimal integer', cflags => '-On' );
 extern function main()
 {
     var a = 0xFE;
@@ -52,7 +53,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'octal integer', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'octal integer', cflags => '-On' );
 extern function main()
 {
     var a = 033;
@@ -64,7 +65,7 @@ CODE
 0
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'floating-point', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'floating-point', cflags => '-On' );
 extern function main()
 {
     var a = 0.0;
@@ -86,7 +87,7 @@ CODE
 1
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'string', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'string', cflags => '-On' );
 extern function main()
 {
     var a = "Example";
@@ -98,7 +99,8 @@ Example
 2
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'string with escape sequence', cflags => '-On');
+language_output_is( 'WMLScript',
+    <<'CODE', <<'OUT', 'string with escape sequence', cflags => '-On' );
 extern function main()
 {
     var a = "Quote: \"";
@@ -120,7 +122,7 @@ Apos: '
 2
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'unicode string', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'unicode string', cflags => '-On' );
 extern function main()
 {
     var a = "Fran\u00e7ois";
@@ -137,7 +139,7 @@ François
 2
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'boolean', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'boolean', cflags => '-On' );
 extern function main()
 {
     var a = true;
@@ -154,7 +156,7 @@ false
 3
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'invalid', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'invalid', cflags => '-On' );
 extern function main()
 {
     var a = invalid;
@@ -165,4 +167,11 @@ CODE
 invalid
 4
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/BigNum.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/BigNum.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Section::BigNum - Big Number documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Section::BigNum;
+        use Parrot::Docs::Section::BigNum;
 
 =head1 DESCRIPTION
 
@@ -32,19 +32,19 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'Big Number Arithmetic', 'bignum.html', '',
-		$self->new_group('Decimal Arithmetic', '',
-			$self->new_item('', 'src/bignum.c', 'src/bignum.h'),
-		),
-		$self->new_group('Testing', '',
-			$self->new_item('', 't/pmc/bignum.t' ),
-		),
-	);
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new(
+        'Big Number Arithmetic',
+        'bignum.html',
+        '',
+        $self->new_group(
+            'Decimal Arithmetic',
+            '', $self->new_item( '', 'src/bignum.c', 'src/bignum.h' ),
+        ),
+        $self->new_group( 'Testing', '', $self->new_item( '', 't/pmc/bignum.t' ), ),
+    );
 }
 
 =back
@@ -52,3 +52,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

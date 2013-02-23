@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/byteorder.c 12826 2006-05-30T01:36:30.308856Z coke  $
+$Id: /parrotcode/trunk/src/byteorder.c 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ src/byteorder.c - Byteordering functions
 
 =head1 DESCRIPTION
 
-These are assigned to a vtable when the PBC file is loaded. 
+These are assigned to a vtable when the PBC file is loaded.
 
 If the vtable method for conversion from the native byteorder is called,
 it is a I<no op> and will work, but the caller should know if the
@@ -351,10 +351,7 @@ Initial version by Melvin on 2002/05/1
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/expr.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/expr.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/expr.t - WMLScript expressions
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/expr.t
+    % perl -I../lib WMLScript/t/expr.t
 
 =head1 DESCRIPTION
 
@@ -16,13 +16,14 @@ t/expr.t - WMLScript expressions
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 2;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'assign', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'assign', cflags => '-On' );
 extern function main()
 {
     var a = "abc";
@@ -36,7 +37,7 @@ abc
 def
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'incr', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'incr', cflags => '-On' );
 extern function main()
 {
     var a = 10;
@@ -49,4 +50,11 @@ CODE
 10
 11
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

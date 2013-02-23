@@ -1,12 +1,13 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/pmc/env.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /parrotcode/local/t/pmc/env.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 12;
 use Parrot::Config;
 
 =head1 NAME
@@ -15,7 +16,7 @@ t/pmc/env.t - System Environment
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/env.t
+    % prove t/pmc/env.t
 
 =head1 DESCRIPTION
 
@@ -23,7 +24,7 @@ Tests the C<Env> PMC.
 
 =cut
 
-pasm_output_is(<<'CODE', <<OUT, "all Envs are ident");
+pasm_output_is( <<'CODE', <<OUT, "all Envs are ident" );
     new P0, .Env
     new P1, .Env
     eq_addr P0, P1, ok
@@ -35,7 +36,7 @@ ok
 OUT
 
 $ENV{"PARROT_TMP"} = "riding a ponie";
-pasm_output_like(<<'CODE', <<OUT, "getenv");
+pasm_output_like( <<'CODE', <<OUT, "getenv" );
     new P0, .Env
     set S0, P0["PARROT_TMP"]
     print S0
@@ -45,7 +46,7 @@ CODE
 OUT
 
 delete $ENV{"PARROT_TMP"};
-pasm_output_like(<<'CODE', <<OUT, "setenv/getenv");
+pasm_output_like( <<'CODE', <<OUT, "setenv/getenv" );
     new P0, .Env
     set P0["PARROT_TMP"], "hello polly"
     set S0, P0["PARROT_TMP"]
@@ -55,7 +56,7 @@ CODE
 /hello polly/i
 OUT
 
-pasm_output_is(<<'CODE', <<OUT, "envs are all the same");
+pasm_output_is( <<'CODE', <<OUT, "envs are all the same" );
     new P0, .Env
     set P0["PARROT_TMP"], "hello polly"
     set S0, P0["PARROT_TMP"]
@@ -71,7 +72,7 @@ CODE
 ok
 OUT
 
-pasm_output_is(<<'CODE', <<OUT, "gone/delete");
+pasm_output_is( <<'CODE', <<OUT, "gone/delete" );
     new P0, .Env
     set P0["PARROT_TMP"], "hello polly"
     exists I0, P0["PARROT_TMP"]
@@ -93,9 +94,9 @@ OUT
 
 SKIP:
 {
-	skip 'iterator not available on win32' => 1
-		if 'MSWin32' eq $^O;
-pasm_output_is(<<'CODE', <<OUT, "iterate");
+    skip 'iterator not available on win32' => 1
+        if 'MSWin32' eq $^O;
+    pasm_output_is( <<'CODE', <<OUT, "iterate" );
     new P0, .Env
     set P0["PARROT_1"], "hello"
     set P0["PARROT_2"], "polly"
@@ -123,9 +124,10 @@ OUT
 }
 
 SKIP: {
+
     # This will not work on our unsetenv implementation
-    skip("no native unsetenv", 1) unless $PConfig{"unsetenv"};
-pasm_output_is(<<'CODE', <<OUT, "exists/delete");
+    skip( "no native unsetenv", 1 ) unless $PConfig{"unsetenv"};
+    pasm_output_is( <<'CODE', <<OUT, "exists/delete" );
     new P0, .Env
     set P0["PARROT_TMP"], "hello polly"
     exists I0, P0["PARROT_TMP"]
@@ -144,29 +146,37 @@ CODE
 ok 1
 ok 2
 OUT
-};
+}
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub main
     .local pmc pmc1
     pmc1 = new Env
     .local int bool1
+
+    does bool1, pmc1, "hash"
+    print bool1
+    print "\n"
+
     does bool1, pmc1, "scalar"
     print bool1
     print "\n"
+
     does bool1, pmc1, "no_interface"
     print bool1
     print "\n"
-    end
 .end
 CODE
 1
 0
+0
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "get_integer()");
+SKIP: {
+    skip 'not changing environment on windows', 2 if $^O eq 'MSWin32';
 
+    pir_output_is( << 'CODE', << 'OUTPUT', "get_integer()" );
 .sub main
     .local pmc env
     .local int num_before, num_after, num_diff
@@ -187,9 +197,7 @@ CODE
 3
 OUTPUT
 
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "get_number()");
-
+    pir_output_is( << 'CODE', << 'OUTPUT', "get_number()" );
 .sub main
     .local pmc env
     .local num num_before, num_after, num_diff
@@ -209,8 +217,9 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "get_number()");
 CODE
 3.000000
 OUTPUT
+}
 
-pasm_output_is(<<'CODE', <<OUT, "getenv - null key");
+pasm_output_is( <<'CODE', <<OUT, "getenv - null key" );
     new P0, .Env
     set S0, P0[""]
     eq S0, "", OK
@@ -221,7 +230,7 @@ CODE
 ok
 OUT
 
-pasm_output_like(<<'CODE', <<OUT, "setenv/getenv - PMC key");
+pasm_output_like( <<'CODE', <<OUT, "setenv/getenv - PMC key" );
     new P0, .Env
     new P1, .Key
     set P1, "PARROT_TMP"
@@ -236,6 +245,9 @@ CODE
 /Foobar/i
 OUT
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 12; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -17,20 +17,21 @@
   value = pop argv
   dec argc
 
-  .local pmc __read, __set
+  .local pmc __read, __list, __set
   __read = get_root_global ['_tcl'], '__read'
+  __list = get_root_global ['_tcl'], '__list'
   __set  = get_root_global ['_tcl'], '__set'
 
   .local pmc retval, list
-  list   = __read(name)
+  list = __read(name)
+  list = __list(list)
   retval = list
 
   # we removed the value, so this would be one now
   if argc == 1 goto replace
 
 lset:
-  .local pmc __list, __index
-  __list  = get_root_global ['_tcl'], '__list'
+  .local pmc __index
   __index = get_root_global ['_tcl'], '__index'
 
   unless argc == 2 goto iterate
@@ -40,9 +41,6 @@ lset:
   if $I0 == 0 goto replace
 
 iterate:
-  list = __list(list)
-  __set(name, list)
-  
   .local pmc indices, prev
   .local int outer_i
   outer_i = 0
@@ -59,6 +57,7 @@ loop:
 
   $P0 = indices[$I0]
   $I2 = __index($P0, list)
+  if $I2 < 0 goto out_of_range
   $I3 = elements list
   if $I2 >= $I3 goto out_of_range
 
@@ -72,14 +71,21 @@ loop:
 
 done:
   prev[$I2] = value
+  __set(name, retval)
   .return(retval)
 
 out_of_range:
-  .throw('list index out of range')
+  tcl_error 'list index out of range'
 
 wrong_args:
-  .throw ('wrong # args: should be "lset listVar index ?index...? value"')
+  tcl_error 'wrong # args: should be "lset listVar index ?index...? value"'
 
 replace:
   .return __set(name, value)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

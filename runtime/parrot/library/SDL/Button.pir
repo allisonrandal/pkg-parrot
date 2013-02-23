@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/Button.pir 13081 2006-07-01T03:36:07.973456Z chromatic  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/SDL/Button.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ END:
 
 =cut
 
-.sub __init :method
+.sub init_pmc :vtable :method
     .param pmc name
     
     $I0 = classoffset self, 'SDL::Button'
@@ -103,11 +103,11 @@ END:
     setattribute self, $I0, $P0
 .end
 
-=item __set_integer_native
+=item set_integer_native
 
 =cut
 
-.sub __set_integer_native :method
+.sub set_integer_native :vtable :method
     .param int val
     
     $I0 = classoffset self, 'SDL::Button'
@@ -116,11 +116,11 @@ END:
     $P0 = val
 .end
 
-=item __get_integer
+=item get_integer
 
 =cut
 
-.sub __get_integer :method
+.sub get_integer :vtable :method
     $I0 = classoffset self, 'SDL::Button'
     inc $I0
     $P0 = getattribute self, $I0
@@ -331,3 +331,9 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

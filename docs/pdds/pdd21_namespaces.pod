@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/docs/pdds/pdd21_namespaces.pod 13925 2006-08-04T15:10:35.798913Z chip  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/docs/pdds/pdd21_namespaces.pod 3348 2007-05-01T23:41:53.406308Z particle  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ docs/pdds/pdd21_namespaces.pod - Parrot Namespaces
 
 =head1 VERSION
 
-$Revision: 13925 $
+$Revision: 3348 $
 
 =head1 DESCRIPTION
 
@@ -214,9 +214,14 @@ consider not exporting variables at all, but that's a style issue.)
     $P1.export_to($P2, $P3)
 
 Export items from the namespace $P1 into the namespace $P2.  The items to
-export are named in the array $P3; a null $P3 requests the 'default' set of
-items.  The interpretation of the array in $P3 always follows the conventions
-of the source (exporting) namespace.
+export are named in $P3, which may be an array of strings, a hash, or null.
+If $P3 is an array of strings, interpretation of items in an array follows
+the conventions of the source (exporting) namespace.
+If $P3 is a hash, the keys correspond to the names in the source namespace,
+and the values correspond to the names in the destination namespace.
+if a hash value is null or an empty string, the name in the hash key is used.
+A null $P3 requests the 'default' set of items.
+Any other type passed in $P3 throws an exception.
 
 The base Parrot namespace export_to() function interprets item names as
 literals -- no wildcards or other special meaning.  There is no default list
@@ -275,8 +280,8 @@ namespace PMC on success and a null PMC on failure.
 
 This method allows other HLLs to know one name (the HLL) and then work with
 that HLL's modules without having to know the name it chose for its namespace
-tree.  (If you really want to know the name, the get_name() method should work on
-the returned namespace PMC.)
+tree.  (If you really want to know the name, the get_name() method should work
+on the returned namespace PMC.)
 
 Note that this method is basically a convenience and/or performance hack, as
 it does the equivalent of C<get_root_namespace> followed by
@@ -481,8 +486,8 @@ should map roughly to this PIR:
     set_global "$x", $P0
   .end
 
-In this case, the C<main> sub would be tied to Perl5 by the C<.HLL> directive,
-so a Perl5 namespace would be created.
+In this case, the C<main> sub would be tied to Perl 5 by the C<.HLL> directive,
+so a Perl 5 namespace would be created.
 
 =head3 Run-time Creation
 
@@ -501,7 +506,7 @@ subroutine that calls the store function.
     # $a = 'x';
     $P0 = new .PerlString
     $P0 = "x"
-    set_global "$a", a
+    set_global "$a", $P0
     # ${"Foo::$a"} = 5;
     $P1 = new PerlString
     $P1 = "Foo::"
@@ -516,8 +521,8 @@ subroutine that calls the store function.
   .end
 
 In this case, C<set_global> should see that it was called from "main",
-which is in a Perl5 namespace, so it will create the "Foo" namespace as
-a Perl5 namespace.
+which is in a Perl 5 namespace, so it will create the "Foo" namespace as
+a Perl 5 namespace.
 
 =head1 LANGUAGE NOTES
 
@@ -525,12 +530,12 @@ a Perl5 namespace.
 
 =head3 Sigils
 
-Perl6 may wish to be able to access the namespace as a hash with sigils.  That
+Perl 6 may wish to be able to access the namespace as a hash with sigils.  That
 is certainly possible, even with subroutines and methods.  It's not important
 that a HLL use the typed namespace API, it is only important that it provides
 it for others to use.
 
-So Perl6 may implement get_keyed and set_keyed VTABLE slots that allow the
+So Perl 6 may implement get_keyed and set_keyed VTABLE slots that allow the
 namespace PMC to be used as a hash.  The C<find_sub> method would, in this
 case, append a "&" sigil to the front of the sub/method name and search
 in the internal hash.
@@ -583,7 +588,7 @@ PIR:
 
 =head3 Cross-language Exportation
 
-Perl5:
+Perl 5:
 
   #!/usr/bin/perl
   use tcl:Some::Module 'w*';   # XXX - ':' after HLL may change in Perl 6

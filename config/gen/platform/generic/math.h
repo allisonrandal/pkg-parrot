@@ -1,3 +1,5 @@
+#ifndef PARROT_PLATFORM_GENERIC_MATH_H_GUARD
+#define PARROT_PLATFORM_GENERIC_MATH_H_GUARD
 /*
  * math related stuff
  */
@@ -7,16 +9,24 @@
 #  include <math.h>
 #endif
 
-#  ifndef signbit
-#    if NUMVAL_SIZE == 8
-#      define signbit(x) Parrot_signbit(x)
-#    else
+#ifndef signbit
+#  if NUMVAL_SIZE == 8
+#    define signbit(x) Parrot_signbit(x)
+#  else
 
-#      define signbit(x) Parrot_signbit_l(x)
+#    define signbit(x) Parrot_signbit_l(x)
 
-#    endif
-
-#
 #  endif
 
+#endif
+
 #define Parrot_is_nzero(x) ((x) == 0.0 && signbit(x))
+
+#endif /* PARROT_PLATFORM_GENERIC_MATH_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

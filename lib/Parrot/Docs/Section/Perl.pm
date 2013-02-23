@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/lib/Parrot/Docs/Section/Perl.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
+# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Perl.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Docs::Section::Perl - Perl documentation section
 
 =head1 SYNOPSIS
 
-	use Parrot::Docs::Section::Perl;
+        use Parrot::Docs::Section::Perl;
 
 =head1 DESCRIPTION
 
@@ -32,42 +32,48 @@ Returns a new section.
 
 =cut
 
-sub new
-{
-	my $self = shift;
-	
-	return $self->SUPER::new(
-		'Perl Modules', 'perl.html', '',
-		$self->new_group('Operations', '',
-			$self->new_item('Ops to C Code Generation', 
-			    'lib/Parrot/OpsFile.pm', 'lib/Parrot/Op.pm',
-			    'lib/Parrot/OpLib',
-			    'lib/Parrot/OpTrans.pm', 'lib/Parrot/OpTrans'),
-		),
-		$self->new_group('PMCs', '',
-			$self->new_item('', 'lib/Parrot/Pmc2c.pm'),
-			$self->new_item('', 'lib/Parrot/Vtable.pm'),
-		),
-		$self->new_group('IO', '',
-			'lib/Parrot/Distribution.pm', 'lib/Parrot/IO'),
-		$self->new_group('Documentation', '', 
-            $self->new_item('', 'lib/Parrot/Docs/Item.pm'),
-            $self->new_item('', 'lib/Parrot/Docs/Group.pm'),
-            $self->new_item('', 'lib/Parrot/Docs/Section.pm'),
-            $self->new_item('', 'lib/Parrot/Docs/POD2HTML.pm'),
-            $self->new_item('', 'lib/Parrot/Docs/HTMLPage.pm'),
-            $self->new_item('', 'lib/Parrot/Docs/File.pm'),
-		    $self->new_item('', 'lib/Parrot/Docs/Directory.pm'),
-		    $self->new_item('Documentation Sections', 'lib/Parrot/Docs/Section')
-		),
-		$self->new_group('Configuration', '',
-			$self->new_item('', 'lib/Parrot/BuildUtil.pm'),
-			$self->new_item('', 'lib/Parrot/Configure'),
-			$self->new_item('', 'lib/Parrot/Config.pm'),
-		),
-		$self->new_group('Testing', '',
-			$self->new_item('', 'lib/Parrot/Test.pm'),
-		),
+sub new {
+    my $self = shift;
+
+    return $self->SUPER::new(
+        'Perl Modules',
+        'perl.html',
+        '',
+        $self->new_group(
+            'Operations',
+            '',
+            $self->new_item(
+                'Ops to C Code Generation', 'lib/Parrot/OpsFile.pm',
+                'lib/Parrot/Op.pm',         'lib/Parrot/OpLib',
+                'lib/Parrot/OpTrans.pm',    'lib/Parrot/OpTrans'
+            ),
+        ),
+        $self->new_group(
+            'PMCs', '',
+            $self->new_item( '', 'lib/Parrot/Pmc2c.pm' ),
+            $self->new_item( '', 'lib/Parrot/Vtable.pm' ),
+        ),
+        $self->new_group( 'IO', '', 'lib/Parrot/Distribution.pm', 'lib/Parrot/IO' ),
+        $self->new_group(
+            'Documentation',
+            '',
+            $self->new_item( '',                       'lib/Parrot/Docs/Item.pm' ),
+            $self->new_item( '',                       'lib/Parrot/Docs/Group.pm' ),
+            $self->new_item( '',                       'lib/Parrot/Docs/Section.pm' ),
+            $self->new_item( '',                       'lib/Parrot/Docs/POD2HTML.pm' ),
+            $self->new_item( '',                       'lib/Parrot/Docs/HTMLPage.pm' ),
+            $self->new_item( '',                       'lib/Parrot/Docs/File.pm' ),
+            $self->new_item( '',                       'lib/Parrot/Docs/Directory.pm' ),
+            $self->new_item( 'Documentation Sections', 'lib/Parrot/Docs/Section' )
+        ),
+        $self->new_group(
+            'Configuration',
+            '',
+            $self->new_item( '', 'lib/Parrot/BuildUtil.pm' ),
+            $self->new_item( '', 'lib/Parrot/Configure' ),
+            $self->new_item( '', 'lib/Parrot/Config.pm' ),
+        ),
+        $self->new_group( 'Testing', '', $self->new_item( '', 'lib/Parrot/Test.pm' ), ),
     );
 }
 
@@ -76,3 +82,10 @@ sub new
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

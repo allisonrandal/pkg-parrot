@@ -1,14 +1,14 @@
 #!/usr/bin/perl
 #
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: /local/parrotbug 13183 2006-07-06T20:05:47.681449Z chip  $
+# Copyright (C) 2004-2007, The Perl Foundation.
+# $Id: /parrotcode/local/parrotbug 2657 2007-03-31T01:57:48.733769Z chromatic  $
 #
 
 eval 'exec perl -w -S $0 ${1+"$@"}'
-  if $running_under_some_shell;
+    if $running_under_some_shell;
 
-$^W = 1; # Set warnings;
 use strict;
+use warnings;
 
 use Config;
 use File::Spec;
@@ -117,7 +117,6 @@ sub trivial_subject {
 # (ok, nok or bug report).
 sub init {
     $is_linux   = lc($^O) eq 'linux';
-    $is_macos   = $^O eq 'MacOS';
     $is_mswin32 = $^O eq 'MSWin32';
     $is_os2     = $^O eq 'os2';
     $is_vms     = $^O eq 'VMS';
@@ -147,9 +146,6 @@ sub init {
     ##
     ## Process options.
     ##
-    @ARGV = split m/\s+/,
-        MacPerl::Ask("Provide command-line args here (-h for help):")
-        if $is_macos && $MacPerl::Version =~ /App/;
     Getopt::Long::Configure("no_bundling", "no_ignore_case", "auto_abbrev");
     help() unless GetOptions
       ( \%opts,
@@ -381,14 +377,7 @@ EOT
     
     # Try and guess return address
     my ($from, $guess);
-    if ( $is_macos ) {
-        require Mac::InternetConfig;
-        $guess = $Mac::InternetConfig::InternetConfig{
-                   Mac::InternetConfig::kICEmail()
-                 };
-    } else {
-        $guess = $ENV{'REPLY-TO'} || $ENV{REPLYTO} || "";
-    }
+    $guess = $ENV{'REPLY-TO'} || $ENV{REPLYTO} || "";
 
     if ( ! $guess ) {
         # Use $domain if we can.
@@ -428,6 +417,7 @@ EOT
           . "Please be more verbose.\n";
         print "Subject: ";
         $subject = <STDIN>;
+        $subject = q{} unless defined $subject;
         chomp $subject;
         die "Aborting.\n" if $err++ == 5;
     } while ( trivial_subject($subject) );
@@ -442,14 +432,7 @@ sub edit_bug_report {
 
     # Launch editor.
     my $retval;
-    if ($is_macos) {
-        require ExtUtils::MakeMaker;
-        ExtUtils::MM_MacOS::launch_file($filename);
-        print "Press Enter when done.\n";
-        scalar <STDIN>;
-    } else {
-        $retval = system("$editor $filename");
-    }
+    $retval = system("$editor $filename");
 
     # Check whether editor run was successful.
     die <<EOT if $retval;
@@ -522,7 +505,8 @@ arch=   $Config{archname}
 EOT
 
     my $cc = $Config{cc};
-    $report .= "cc=     $cc $Config{${cc}.'version'}\n";
+    #$report .= "cc=     $cc $Config{${cc}.'version'}\n";
+    $report .= "cc=     $cc\n";
 
 
     # ... flags...
@@ -545,10 +529,11 @@ EOT
     my @env = qw[ PATH LD_LIBRARY_PATH LANG SHELL HOME LOGDIR LANGUAGE ];
     push @env, $Config{ldlibpthname} if $Config{ldlibpthname} ne '';
     push @env, grep /^(?:PERL|LC_|LANG|CYGWIN)/, keys %ENV;
-    my %env; @env{@env} = @env;
+    my %env; 
+    @env{@env} = @env;
     for my $env (sort keys %env) {
-	$report .= "    $env",
-          exists $ENV{$env} ? "=$ENV{$env}\n" : " (unset)\n";
+        my $env_value = exists $ENV{$env} ? "=$ENV{$env}\n" : " (unset)\n";
+	$report .= "    $env $env_value";
     }
 
     return $report;
@@ -825,4 +810,9 @@ perlbug(1), parrot(1), diff(1), patch(1)
 
 =cut
 
-
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

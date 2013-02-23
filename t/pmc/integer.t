@@ -1,5 +1,6 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/t/pmc/integer.t 12838 2006-05-30T14:19:10.150135Z coke  $
+#!perl
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/pmc/integer.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
@@ -22,7 +23,7 @@ Tests the Integer PMC.
 
 =cut
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "basic math");
+pir_output_is( << 'CODE', << 'OUTPUT', "basic math" );
 
 .sub _main
     .local pmc int_1
@@ -61,7 +62,7 @@ CODE
 5
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "truth and definedness");
+pir_output_is( << 'CODE', << 'OUTPUT', "truth and definedness" );
 
 .sub _main
     .local pmc int_1
@@ -108,7 +109,7 @@ The Integer -999999999 is true.
 The Integer -999999999 is defined.
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "set_string_native");
+pir_output_is( <<'CODE', <<'OUTPUT', "set_string_native" );
 
 .sub _main
     .local pmc pmc1
@@ -122,7 +123,7 @@ CODE
 -123456789
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "isa");
+pir_output_is( <<'CODE', <<'OUTPUT', "isa" );
 
 .sub _main
     .local pmc pmc1
@@ -142,7 +143,7 @@ CODE
 A newly created Integer is an Integer.
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
@@ -165,7 +166,7 @@ CODE
 0
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Comparison ops: ne");
+pir_output_is( << 'CODE', << 'OUTPUT', "Comparison ops: ne" );
 
 .sub _main
     .local pmc pmc1
@@ -191,7 +192,7 @@ ok 1
 ok 2
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Comparison ops: gt");
+pir_output_is( << 'CODE', << 'OUTPUT', "Comparison ops: gt" );
 
 .sub _main
     .local pmc pmc1
@@ -225,7 +226,7 @@ ok 2
 ok 3
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Comparison ops: ge");
+pir_output_is( << 'CODE', << 'OUTPUT', "Comparison ops: ge" );
 
 .sub _main
     .local pmc pmc1
@@ -257,7 +258,7 @@ ok 2
 ok 3
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "Logical ops: istrue & isfalse");
+pir_output_is( << 'CODE', << 'OUTPUT', "Logical ops: istrue & isfalse" );
 
 .sub _main
     .local pmc pmc1
@@ -287,7 +288,7 @@ CODE
 1
 OUTPUT
 
-pasm_output_is(<<'CODE', <<'OUTPUT', "if/unless with Integer PMC");
+pasm_output_is( <<'CODE', <<'OUTPUT', "if/unless with Integer PMC" );
       new P0, .Integer
       set P0, 10
       if P0, OK1
@@ -313,7 +314,7 @@ ok 3
 ok 4
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "n_<oper>");
+pir_output_is( << 'CODE', << 'OUTPUT', "n_<oper>" );
 .sub main :main
     $P0 = new Integer
     $P1 = new Integer
@@ -352,106 +353,106 @@ CODE
 36
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "can get_as_base()");
+pir_output_is( <<'CODE', <<'OUTPUT', "can get_as_base()" );
 .sub main :main
-	$P0 = new Integer
-	$P0 = 42
-	$I0 = can $P0, 'get_as_base'
-	if $I0, OK
-	print "not "
+    $P0 = new Integer
+    $P0 = 42
+    $I0 = can $P0, 'get_as_base'
+    if $I0, OK
+    print "not "
 OK: print "ok\n"
 .end
 CODE
 ok
 OUTPUT
 
-pir_output_like(<<'CODE', <<'OUTPUT', "get_as_base() bounds check");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "get_as_base() bounds check" );
 .sub main :main
-	$P0 = new .Integer
-	$P0 = 42
+    $P0 = new .Integer
+    $P0 = 42
 
-	$S0 = $P0.'get_as_base'(1)
+    $S0 = $P0.'get_as_base'(1)
 
-	print $S0
-	print "\n"
+    print $S0
+    print "\n"
 .end
 CODE
 /get_as_base: base out of bounds
 .*/
 OUTPUT
 
-pir_output_like(<<'CODE', <<'OUTPUT', "get_as_base() bounds check");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "get_as_base() bounds check" );
 .sub main :main
-	$P0 = new .Integer
-	$P0 = 42
+    $P0 = new .Integer
+    $P0 = 42
 
-	$S0 = $P0.'get_as_base'(37)
+    $S0 = $P0.'get_as_base'(37)
 
-	print $S0
-	print "\n"
+    print $S0
+    print "\n"
 .end
 CODE
 /get_as_base: base out of bounds
 .*/
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "get_as_base(10)");
+pir_output_is( <<'CODE', <<'OUTPUT', "get_as_base(10)" );
 .sub main :main
-	$P0 = new .Integer
-	$P0 = 42
+    $P0 = new .Integer
+    $P0 = 42
 
-	$S0 = $P0.'get_as_base'(10)
+    $S0 = $P0.'get_as_base'(10)
 
-	print $S0
-	print "\n"
+    print $S0
+    print "\n"
 .end
 CODE
 42
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "get_as_base(various)");
+pir_output_is( <<'CODE', <<'OUTPUT', "get_as_base(various)" );
 .sub main :main
-	$P0 = new .Integer
-	$P0 = 42
+    $P0 = new .Integer
+    $P0 = 42
 
-	$S0 = $P0.'get_as_base'(2)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(2)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(3)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(3)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(5)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(5)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(7)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(7)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(11)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(11)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(13)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(13)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(17)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(17)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(19)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(19)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(23)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(23)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(29)
-	bsr PRINT
+    $S0 = $P0.'get_as_base'(29)
+    bsr PRINT
 
-	$S0 = $P0.'get_as_base'(31)
-	bsr PRINT
-	goto END
+    $S0 = $P0.'get_as_base'(31)
+    bsr PRINT
+    goto END
 
 PRINT:
-	print $S0
-	print "\n"
-	ret
+    print $S0
+    print "\n"
+    ret
 END:
 .end
 CODE
@@ -468,7 +469,7 @@ CODE
 1b
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "instantiate");
+pir_output_is( << 'CODE', << 'OUTPUT', "instantiate" );
 
 .sub _main
     .local pmc cl, o
@@ -486,7 +487,7 @@ CODE
 Integer
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', 'instantiate derived');
+pir_output_is( <<'CODE', <<'OUTPUT', 'instantiate derived' );
 .sub _main :main
     .local pmc cl, o
     cl = getclass "Integer"
@@ -503,7 +504,7 @@ CODE
 Integer
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "instantiate w arg");
+pir_output_is( << 'CODE', << 'OUTPUT', "instantiate w arg" );
 
 .sub _main
     .local pmc cl, o
@@ -520,3 +521,10 @@ CODE
 42
 Integer
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

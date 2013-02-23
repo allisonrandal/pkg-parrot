@@ -1,5 +1,6 @@
+#!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/t/examples/japh.t 13870 2006-08-03T23:40:24.624450Z chip  $
+# $Id: /parrotcode/trunk/t/examples/japh.t 3509 2007-05-16T02:26:11.809697Z chromatic  $
 
 use strict;
 use warnings;
@@ -7,7 +8,6 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test tests => 17;
 use Parrot::Config;
-
 
 =head1 NAME
 
@@ -35,34 +35,44 @@ Get the TODO JAPHs working or decide that they are not suitable for testing.
 =cut
 
 # known reasons for failure
-my %todo = ( 1  => 'opcode "pack" is gone',
-             2  => 'opcode "pack" is gone',
-             4  => 'namespace has changed',
-             9  => 'P1 is no longer special',
-             10 => 'core dump',
-             11 => 'opcode "pack" is gone, other reasons',
-             12 => '{{deleted}}',
-             13 => 'unreliable, but often succeeds',
-             14 => 'unknown reason',
-             15 => 'unknown reason',
-             16 => 'unknown reason',
-             17 => 'unknown reason',
-           );
+my %todo = (
+    1  => 'deleted, opcode "pack" is gone',
+    2  => 'deleted, opcode "pack" is gone',
+    9  => 'P1 is no longer special',
+    10 => 'core dump',
+    11 => 'opcode "pack" is gone, other reasons',
+    12 => '{{deleted}}',
+    13 => 'unreliable, but often succeeds',
+    14 => 'unknown reason',
+    15 => 'unknown reason',
+    16 => 'unknown reason',
+    17 => 'unknown reason',
+);
 if ( $PConfig{bigendian} ) {
     $todo{8} = 'works only on little endian';
 }
-if ( $PConfig{intvalsize} == 8) {
+if ( $PConfig{intvalsize} == 8 ) {
     $todo{8} = 'works only with 32-bit integer values';
+}
+if ( $ENV{TEST_PROG_ARGS} =~ /-j/) {
+    $todo{4} = 'broken with -j';
 }
 
 # run all tests and tell about todoness
 foreach ( 1 .. 17 ) {
-    my $pasm_fn   = "examples/japh/japh$_.pasm";
-    unless (-e $pasm_fn) {
+    my $pasm_fn = "examples/japh/japh$_.pasm";
+    unless ( -e $pasm_fn ) {
         pass("deleted");
         next;
     }
 
     my @todo = $todo{$_} ? ( todo => $todo{$_} ) : ();
-    example_output_is($pasm_fn, "Just another Parrot Hacker\n", @todo);
+    example_output_is( $pasm_fn, "Just another Parrot Hacker\n", @todo );
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

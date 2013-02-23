@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/fornum.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/t/fornum.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -12,13 +12,15 @@ t/fornum.t - Lua for statement
 
 =head1 DESCRIPTION
 
-See "Lua 5.0 Reference Manual", section 2.4.4 "Control Structures".
+See "Lua 5.1 Reference Manual", section 2.4.5 "For Statement",
+L<http://www.lua.org/manual/5.1/manual.html#2.4.5>.
 
 See "Programming in Lua", section 4.3 "Control Structures".
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
@@ -126,6 +128,13 @@ for i = first(), limit(), step() do
     print(i)
 end
 CODE
-/for' limit must be a number/
+/^[^:]+: [^:]+:\d+: 'for' limit must be a number\nstack traceback:\n/
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

@@ -1,13 +1,16 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 7;
 
-## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+## Testing class for this file.t';
+#
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     using System;
@@ -66,11 +69,12 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-SKIP: { skip "Parrot exceptions from constructors bug", 2;
-is (run_pir(<<'PIR'), <<'OUTPUT', 'no instantiation');
+SKIP: {
+    skip "Parrot exceptions from constructors bug", 2;
+    is( run_pir(<<'PIR'), <<'OUTPUT', 'no instantiation' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -84,7 +88,7 @@ PIR
 ok
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'no instantiation');
+    is( run_pir(<<'PIR'), <<'OUTPUT', 'no instantiation' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -99,7 +103,7 @@ ok
 OUTPUT
 }
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'concrete instantiation');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'concrete instantiation' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -114,7 +118,7 @@ PIR
 ok
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'abstract method call');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'abstract method call' );
 .sub main
 	.local pmc prt, cls, obj
 	load_bytecode "t.pbc"
@@ -132,7 +136,7 @@ PIR
 ok
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'methods');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'methods' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -147,7 +151,7 @@ PIR
 0
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'methods');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'methods' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -161,3 +165,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'methods');
 PIR
 1
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

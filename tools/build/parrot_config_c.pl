@@ -1,11 +1,12 @@
 #! perl
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/tools/build/parrot_config_c.pl 13529 2006-07-24T17:20:02.191389Z chip  $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /parrotcode/local/tools/build/parrot_config_c.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use warnings;
 use strict;
 
-my ($svnid) = '$Id: /local/tools/build/parrot_config_c.pl 13529 2006-07-24T17:20:02.191389Z chip  $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+my ($svnid) =
+    '$Id: /parrotcode/local/tools/build/parrot_config_c.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 
@@ -29,12 +30,11 @@ subsequently created Interpreters.
 
 =cut
 
-
 use strict;
 
-my ($mini_parrot, $install_parrot);
+my ( $mini_parrot, $install_parrot );
 
-$mini_parrot = 1    if @ARGV && $ARGV[0] =~ /mini/;
+$mini_parrot    = 1 if @ARGV && $ARGV[0] =~ /mini/;
 $install_parrot = 1 if @ARGV && $ARGV[0] =~ /install/;
 
 print << "EOF";
@@ -52,7 +52,7 @@ print << "EOF";
 /* proto is in embed.h, but we don't include anything here, which
  * could pull in some globals
  */
-void Parrot_set_config_hash(void);  
+void Parrot_set_config_hash(void);
 
 void
 Parrot_set_config_hash_internal (const unsigned char* parrot_config,
@@ -61,21 +61,19 @@ Parrot_set_config_hash_internal (const unsigned char* parrot_config,
 
 static const unsigned char parrot_config[] = {
 EOF
-;
 
 if ($mini_parrot) {
     print "    0\n";
 }
 else {
 
-    my $image_file = $install_parrot ?
-        'install_config.fpmc' : 'runtime/parrot/include/config.fpmc';
-    open F, $image_file or die "Can't read '$image_file': $!";
+    my $image_file = $install_parrot ? 'install_config.fpmc' : 'runtime/parrot/include/config.fpmc';
+    open my $F, '<', $image_file or die "Can't read '$image_file': $!";
     my $image;
     local $/;
-    binmode F;
-    $_ = <F>;
-    close F;
+    binmode $F;
+    $_ = <$F>;
+    close $F;
 
     my @c = split '';
     die "'$image_file' is truncated. Remove it and rerun make\n" if !@c;
@@ -85,7 +83,7 @@ else {
     for (@c) {
         printf "0x%02x", ord($_);
         ++$i;
-        print ', ', if ($i < scalar(@c));
+        print ', ', if ( $i < scalar(@c) );
         print "\n    " unless $i % 8;
     }
     print "\n";
@@ -100,3 +98,21 @@ Parrot_set_config_hash(void)
     Parrot_set_config_hash_internal(parrot_config, sizeof(parrot_config));
 }
 EOF
+
+# append the C code coda
+print << "EOC";
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */
+EOC
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

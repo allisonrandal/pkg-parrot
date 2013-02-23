@@ -86,7 +86,7 @@ opcode.
     .return ($P2)
 .end
 
-.sub __clone :method
+.sub clone :vtable :method
     .local pmc result
     result = new 'POST::Label'
     $P1 = self.'name'()
@@ -118,3 +118,9 @@ opcode.
     print "}\n"
     .return ()
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

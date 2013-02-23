@@ -1,7 +1,7 @@
 /*
 
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/examples/nci/PQt.C 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/trunk/examples/nci/PQt.C 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -140,3 +140,10 @@ F<docs/pdds/pdd03_calling_conventions.pod>.
 =cut
 
 */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

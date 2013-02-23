@@ -1,35 +1,36 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/init/hints/irix.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/init/hints/irix.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 package init::hinits::irix;
 
 use strict;
+use warnings;
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $ccflags = $conf->data->get('ccflags') || "";
 
     # 1185 An enumerated type is mixed with another type.
-    if ($ccflags =~ /-woff /) {
+    if ( $ccflags =~ /-woff / ) {
         $ccflags =~ s/-woff (?:\d+,)*\d+/-woff 1185/;
-    } else {
+    }
+    else {
         $ccflags .= ' -woff 1185';
     }
-    $conf->data->set(ccflags => $ccflags);
+    $conf->data->set( ccflags => $ccflags );
 
     my $libs = $conf->data->get('libs');
-    if ($libs !~ /-lpthread/) {
+    if ( $libs !~ /-lpthread/ ) {
         $libs .= ' -lpthread';
     }
-    $conf->data->set(libs => $libs);
+    $conf->data->set( libs => $libs );
 
     my $cc   = $conf->data->get('cc');
     my $cxx  = $conf->data->get('cxx');
     my $ld   = $conf->data->get('ld');
     my $link = $conf->data->get('link');
-    if ($cc =~ /cc -64/) {
+    if ( $cc =~ /cc -64/ ) {
         $cxx  = 'CC -64';
         $ld   = 'CC -64';
         $link = 'CC -64';
@@ -42,3 +43,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

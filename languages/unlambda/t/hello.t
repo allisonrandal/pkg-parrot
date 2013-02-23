@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/languages/unlambda/t/hello.t 12840 2006-05-30T15:08:05.048089Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/unlambda/t/hello.t 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 

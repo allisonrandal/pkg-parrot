@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/examples.t 13986 2006-08-07T17:04:53.535012Z chip  $
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/WMLScript/t/examples.t 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/examples.t - some WMLScript code examples
 
 =head1 SYNOPSIS
 
-    % perl -I../lib -IWMLScript/t WMLScript/t/examples.t
+    % perl -I../lib WMLScript/t/examples.t
 
 =head1 DESCRIPTION
 
@@ -24,7 +24,7 @@ use lib "$FindBin::Bin";
 use Parrot::Test tests => 5;
 use Test::More;
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'hello world');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'hello world' );
 extern function main()
 {
     Console.println("Hello World!");
@@ -53,7 +53,7 @@ abc
 def
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'no optim', cflags => '-On');
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'no optim', cflags => '-On' );
 extern function main()
 {
     Console.println(1 + 2);
@@ -62,8 +62,8 @@ CODE
 3
 OUT
 
-language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'sieve', function => 'sieve');
-/* 
+language_output_is( 'WMLScript', <<'CODE', <<'OUT', 'sieve', function => 'sieve' );
+/*
  *  Eratosthenes Sieve prime number calculation
  */
 extern function sieve ()
@@ -73,7 +73,7 @@ extern function sieve ()
     var count = 0;
     var flag = 0;
     for (i = 0; i < MAX_PRIME; i++) {
-        flag |= (1 << i);   // set 
+        flag |= (1 << i);   // set
     }
     for (i = 0; i < MAX_PRIME; i++) {
         if (flag & (1 << i)) {  // test
@@ -104,4 +104,11 @@ CODE
 
 10 primes.
 OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

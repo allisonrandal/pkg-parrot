@@ -19,7 +19,7 @@
 #include "imc.h"
 #include "optimizer.h"
 
-void graph_coloring_reg_alloc(Interp *interpreter, IMC_Unit * unit);
+void graph_coloring_reg_alloc(Interp *interp, IMC_Unit * unit);
 static void make_stat(IMC_Unit *, int *sets, int *cols);
 static void imc_stat_init(IMC_Unit *);
 static void print_stat(Parrot_Interp, IMC_Unit *);
@@ -29,10 +29,12 @@ static void build_interference_graph(Parrot_Interp, IMC_Unit *);
 static void compute_du_chain(IMC_Unit * unit);
 static void compute_one_du_chain(SymReg * r, IMC_Unit * unit);
 static int interferes(Interp *, IMC_Unit *, SymReg * r0, SymReg * r1);
-static void map_colors(IMC_Unit *, int x, unsigned int * graph, char colors[], int typ, int);
+static void map_colors(IMC_Unit *, int x, unsigned int * graph,
+                       char colors[], int typ, int);
 static int try_allocate(Parrot_Interp, IMC_Unit *);
-static void allocate_lexicals (Parrot_Interp, IMC_Unit *);
-static void allocate_non_volatile (Parrot_Interp, IMC_Unit *);
+static void allocate_lexicals(Parrot_Interp, IMC_Unit *);
+static void vanilla_reg_alloc(Parrot_Interp, IMC_Unit *);
+static void allocate_non_volatile(Parrot_Interp, IMC_Unit *);
 #if 0
 static int neighbours(int node);
 #endif
@@ -41,8 +43,8 @@ static unsigned int* ig_get_word(int i, int j, int N, unsigned int* graph,
                                  int* bit_ofs)
 {
     unsigned int bit = i * N + j;
-    *bit_ofs = bit % sizeof(*graph);
-    return &graph[bit / sizeof(*graph)];
+    *bit_ofs = bit % sizeof (*graph);
+    return &graph[bit / sizeof (*graph)];
 }
 
 static void ig_set(int i, int j, int N, unsigned int* graph)
@@ -63,18 +65,18 @@ int ig_test(int i, int j, int N, unsigned int* graph)
 static unsigned int* ig_allocate(int N)
 {
     /* size is N*N bits, but we want don't want to allocate a partial
-     * word, so round up to the nearest multiple of sizeof(int).
+     * word, so round up to the nearest multiple of sizeof (int).
      */
     int need_bits = N * N;
-    int num_words = (need_bits + sizeof(int) - 1) / sizeof(int);
-    return (unsigned int*) mem_sys_allocate_zeroed(num_words * sizeof(int));
+    int num_words = (need_bits + sizeof (int) - 1) / sizeof (int);
+    return (unsigned int*) mem_sys_allocate_zeroed(num_words * sizeof (int));
 }
 
 /* imc_reg_alloc is the main loop of the allocation algorithm. It operates
  * on a single compilation unit at a time.
  */
 void
-imc_reg_alloc(Interp *interpreter, IMC_Unit * unit)
+imc_reg_alloc(Interp *interp, IMC_Unit * unit)
 {
     int first;
     char *function;
@@ -84,12 +86,12 @@ imc_reg_alloc(Interp *interpreter, IMC_Unit * unit)
     if (!unit->instructions)
         return;
     imc_stat_init(unit);
-    if (!(IMCC_INFO(interpreter)->optimizer_level &
+    if (!(IMCC_INFO(interp)->optimizer_level &
                 (OPT_PRE|OPT_CFG|OPT_PASM)) && unit->pasm_file)
         goto done;
 
-    imcc_init_tables(interpreter);
-    IMCC_INFO(interpreter)->allocated = 0;
+    imcc_init_tables(interp);
+    IMCC_INFO(interp)->allocated = 0;
 
 #if IMC_TRACE
     fprintf(stderr, "reg_alloc.c: imc_reg_alloc\n");
@@ -103,55 +105,60 @@ imc_reg_alloc(Interp *interpreter, IMC_Unit * unit)
       function = unit->instructions->r[0]->name;
     else
       function = "(not a sub)";
-    IMCC_debug(interpreter, DEBUG_IMC, "\n------------------------\n");
-    IMCC_debug(interpreter, DEBUG_IMC, "processing sub %s\n", function);
-    IMCC_debug(interpreter, DEBUG_IMC, "------------------------\n\n");
+    IMCC_debug(interp, DEBUG_IMC, "\n------------------------\n");
+    IMCC_debug(interp, DEBUG_IMC, "processing sub %s\n", function);
+    IMCC_debug(interp, DEBUG_IMC, "------------------------\n\n");
 
-    if (IMCC_INFO(interpreter)->optimizer_level == OPT_PRE &&
+    if (IMCC_INFO(interp)->optimizer_level == OPT_PRE &&
             unit->pasm_file) {
-        while (pre_optimize(interpreter, unit))
+        while (pre_optimize(interp, unit))
             ;
         goto done;
     }
     /*
      * all lexicals get a unique register
      */
-    allocate_lexicals(interpreter, unit);
+    allocate_lexicals(interp, unit);
 
     /* build CFG and life info, and optimize iteratively */
     do {
         first = 1;
         do {
-            while (pre_optimize(interpreter, unit));
+            while (pre_optimize(interp, unit));
 
-            find_basic_blocks(interpreter, unit, first);
-            build_cfg(interpreter, unit);
+            find_basic_blocks(interp, unit, first);
+            build_cfg(interp, unit);
             first = 0;
-        } while (cfg_optimize(interpreter, unit));
+        } while (cfg_optimize(interp, unit));
 
-        compute_dominators(interpreter, unit);
-        find_loops(interpreter, unit);
-        if (IMCC_INFO(interpreter)->optimizer_level) {
-            compute_dominance_frontiers(interpreter, unit);
+        compute_dominators(interp, unit);
+        find_loops(interp, unit);
+        if (IMCC_INFO(interp)->optimizer_level) {
+            compute_dominance_frontiers(interp, unit);
         }
 
-        build_reglist(interpreter, unit);
-        life_analysis(interpreter, unit);
-        allocate_non_volatile(interpreter, unit);
-    } while (!IMCC_INFO(interpreter)->dont_optimize &&
-            optimize(interpreter, unit));
+        build_reglist(interp, unit);
+        if (IMCC_INFO(interp)->allocator == IMCC_GRAPH_ALLOCATOR)
+            life_analysis(interp, unit);
+        allocate_non_volatile(interp, unit);
+    } while (!IMCC_INFO(interp)->dont_optimize &&
+            optimize(interp, unit));
 
-    if (IMCC_INFO(interpreter)->debug & DEBUG_IMC)
+    if (IMCC_INFO(interp)->debug & DEBUG_IMC)
         dump_symreg(unit);
-    rebuild_reglist(interpreter, unit);
-    graph_coloring_reg_alloc(interpreter, unit);
 
-    if (IMCC_INFO(interpreter)->debug & DEBUG_IMC)
-        dump_instructions(interpreter, unit);
+    rebuild_reglist(interp, unit);
+    if (IMCC_INFO(interp)->allocator == IMCC_VANILLA_ALLOCATOR)
+        vanilla_reg_alloc(interp, unit);
+    else
+        graph_coloring_reg_alloc(interp, unit);
+
+    if (IMCC_INFO(interp)->debug & DEBUG_IMC)
+        dump_instructions(interp, unit);
 done:
-    if (IMCC_INFO(interpreter)->verbose  ||
-            (IMCC_INFO(interpreter)->debug & DEBUG_IMC)) {
-        print_stat(interpreter, unit);
+    if (IMCC_INFO(interp)->verbose  ||
+            (IMCC_INFO(interp)->debug & DEBUG_IMC)) {
+        print_stat(interp, unit);
     }
     else {
         make_stat(unit, NULL, unit->n_regs_used);
@@ -179,13 +186,13 @@ free_reglist(IMC_Unit * unit)
 }
 
 void
-graph_coloring_reg_alloc(Interp *interpreter, IMC_Unit * unit)
+graph_coloring_reg_alloc(Interp *interp, IMC_Unit * unit)
 {
 
-    build_interference_graph(interpreter, unit);
+    build_interference_graph(interp, unit);
 
-    try_allocate(interpreter, unit);
-    IMCC_INFO(interpreter)->allocated = 1;
+    try_allocate(interp, unit);
+    IMCC_INFO(interp)->allocated = 1;
 }
 
 /* some statistics about register usage
@@ -231,15 +238,13 @@ imc_stat_init(IMC_Unit * unit)
         unit->n_regs_used[j] = -1;
         unit->first_avail[j] = 0;
     }
-    /*
-     * TODO move statistic into unit
-     */
-    memset(&ostat, 0, sizeof(ostat));
+
+    memset(&(unit->ostat), 0, sizeof (struct imcc_ostat));
 }
 
 /* and final */
 static void
-print_stat(Parrot_Interp interpreter, IMC_Unit * unit)
+print_stat(Parrot_Interp interp, IMC_Unit * unit)
 {
     int sets[4] = {0,0,0,0};
 
@@ -250,29 +255,29 @@ print_stat(Parrot_Interp interpreter, IMC_Unit * unit)
         function = "(not a function)";
 
     make_stat(unit, sets, unit->n_regs_used);
-    IMCC_info(interpreter, 1,
+    IMCC_info(interp, 1,
             "sub %s:\n\tregisters in .pir:\t I%d, N%d, S%d, P%d\n",
             function,
             unit->n_vars_used[0], unit->n_vars_used[1],
             unit->n_vars_used[2], unit->n_vars_used[3]);
-    IMCC_info(interpreter, 1,
-            "\t%d labels, %d lines deleted, "
-            "%d if_branch, %d branch_branch\n",
-            ostat.deleted_labels, ostat.deleted_ins, ostat.if_branch,
-            ostat.branch_branch);
-    IMCC_info(interpreter, 1, "\t%d branch_cond_loop\n",
-            ostat.branch_cond_loop);
-    IMCC_info(interpreter, 1, "\t%d used once deleted\n",
-            ostat.used_once);
-    IMCC_info(interpreter, 1, "\t%d invariants_moved\n",
-            ostat.invariants_moved);
-    IMCC_info(interpreter, 1, "\tregisters needed:\t I%d, N%d, S%d, P%d\n",
+    IMCC_info(interp, 1,
+              "\t%d labels, %d lines deleted, "
+              "%d if_branch, %d branch_branch\n",
+              unit->ostat.deleted_labels, unit->ostat.deleted_ins,
+              unit->ostat.if_branch, unit->ostat.branch_branch);
+    IMCC_info(interp, 1, "\t%d branch_cond_loop\n",
+              unit->ostat.branch_cond_loop);
+    IMCC_info(interp, 1, "\t%d used once deleted\n",
+              unit->ostat.used_once);
+    IMCC_info(interp, 1, "\t%d invariants_moved\n",
+              unit->ostat.invariants_moved);
+    IMCC_info(interp, 1, "\tregisters needed:\t I%d, N%d, S%d, P%d\n",
             sets[0], sets[1], sets[2], sets[3]);
-    IMCC_info(interpreter, 1,
+    IMCC_info(interp, 1,
             "\tregisters in .pasm:\t I%d, N%d, S%d, P%d - %d\n",
             unit->n_regs_used[0], unit->n_regs_used[1],
             unit->n_regs_used[2], unit->n_regs_used[3]);
-    IMCC_info(interpreter, 1, "\t%d basic_blocks, %d edges\n",
+    IMCC_info(interp, 1, "\t%d basic_blocks, %d edges\n",
             unit->n_basic_blocks, edge_count(unit));
 }
 
@@ -283,20 +288,20 @@ reg_sort_f(const void *a, const void *b)
     SymReg *ra = *(SymReg**) a;
     SymReg *rb = *(SymReg**) b;
     if (ra->first_ins->index < rb->first_ins->index) {
-	return -1;
+        return -1;
     }
     else if (ra->first_ins->index == rb->first_ins->index) {
         return 0;
     }
     else {
-	return 1;
+        return 1;
     }
 }
 
 static void
 sort_reglist(IMC_Unit *unit)
 {
-    qsort(unit->reglist, unit->n_symbols, sizeof(SymReg*), reg_sort_f);
+    qsort(unit->reglist, unit->n_symbols, sizeof (SymReg*), reg_sort_f);
 }
 
 /*
@@ -314,20 +319,20 @@ sort_reglist(IMC_Unit *unit)
  */
 
 static void
-build_reglist(Parrot_Interp interpreter, IMC_Unit * unit)
+build_reglist(Parrot_Interp interp, IMC_Unit * unit)
 {
     int i, count, unused, n_symbols;
     SymHash *hsh = &unit->hash;
     SymReg * r;
 
-    IMCC_info(interpreter, 2, "build_reglist\n");
+    IMCC_info(interp, 2, "build_reglist\n");
     /* count symbols */
     if (unit->reglist)
         free_reglist(unit);
     count = unit->hash.entries;
     if (count == 0)
         return;
-    unit->reglist = mem_sys_allocate(count * sizeof(SymReg*));
+    unit->reglist = mem_sys_allocate(count * sizeof (SymReg*));
 
     for (i = count = 0; i < hsh->size; i++) {
         for (r = hsh->data[i]; r; r = r->next) {
@@ -338,7 +343,7 @@ build_reglist(Parrot_Interp interpreter, IMC_Unit * unit)
         }
     }
     unit->n_symbols = n_symbols = count;
-    if (IMCC_INFO(interpreter)->debug & DEBUG_IMC)
+    if (IMCC_INFO(interp)->debug & DEBUG_IMC)
         dump_symreg(unit);
     compute_du_chain(unit);
     /* we might have unused symbols here, from optimizations */
@@ -361,13 +366,13 @@ build_reglist(Parrot_Interp interpreter, IMC_Unit * unit)
  * significantly
  */
 static void
-rebuild_reglist(Parrot_Interp interpreter, IMC_Unit * unit)
+rebuild_reglist(Parrot_Interp interp, IMC_Unit * unit)
 {
     int i, count, unused, reg_set;
     SymReg * r;
     char types[] = "INSP", *p;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     for (i = count = unused = 0; i < unit->n_symbols; i++) {
         r = unit->reglist[i];
         if (r->color == -1)
@@ -399,7 +404,7 @@ use_it:
  */
 
 static void
-build_interference_graph(Parrot_Interp interpreter, IMC_Unit * unit)
+build_interference_graph(Parrot_Interp interp, IMC_Unit * unit)
 {
     int x, y, n_symbols;
     unsigned int* interference_graph;
@@ -422,7 +427,7 @@ build_interference_graph(Parrot_Interp interpreter, IMC_Unit * unit)
         for (y = x + 1; y < n_symbols; y++) {
             if (!unit->reglist[y]->first_ins)
                 continue;
-            if (interferes(interpreter, unit,
+            if (interferes(interp, unit,
                         unit->reglist[x], unit->reglist[y])) {
                 ig_set(x, y, n_symbols, interference_graph);
                 ig_set(y, x, n_symbols, interference_graph);
@@ -430,7 +435,7 @@ build_interference_graph(Parrot_Interp interpreter, IMC_Unit * unit)
         }
     }
 
-    if (IMCC_INFO(interpreter)->debug & DEBUG_IMC)
+    if (IMCC_INFO(interp)->debug & DEBUG_IMC)
         dump_interference_graph(unit);
 }
 
@@ -507,7 +512,7 @@ compute_one_du_chain(SymReg * r, IMC_Unit * unit)
  */
 
 static int
-interferes(Interp *interpreter, IMC_Unit * unit, SymReg * r0, SymReg * r1)
+interferes(Interp *interp, IMC_Unit * unit, SymReg * r0, SymReg * r1)
 {
 
     int i;
@@ -595,11 +600,11 @@ interferes(Interp *interpreter, IMC_Unit * unit, SymReg * r0, SymReg * r1)
  * find available color for register #x in available colors
  */
 static int
-ig_find_color(Interp* interpreter, IMC_Unit *unit, int x, char *avail)
+ig_find_color(Interp* interp, IMC_Unit *unit, int x, char *avail)
 {
     int c;
 
-    UNUSED(interpreter);
+    UNUSED(interp);
     UNUSED(x);
     for (c = 0; c < unit->n_symbols; c++)
         if (avail[c])
@@ -616,7 +621,7 @@ ig_find_color(Interp* interpreter, IMC_Unit *unit, int x, char *avail)
  */
 
 static int
-try_allocate(Parrot_Interp interpreter, IMC_Unit * unit)
+try_allocate(Parrot_Interp interp, IMC_Unit * unit)
 {
     int x;
     int color;
@@ -647,19 +652,19 @@ try_allocate(Parrot_Interp interpreter, IMC_Unit * unit)
             if (r->set == typ) {
                 memset(avail, 1, n);
                 map_colors(unit, x, graph, avail, typ, already_allocated );
-                color = ig_find_color(interpreter, unit, x, avail);
+                color = ig_find_color(interp, unit, x, avail);
                 if (color >= 0) {
                     color += already_allocated;
                     r->color = color;
 
-                    IMCC_debug(interpreter, DEBUG_IMC,
+                    IMCC_debug(interp, DEBUG_IMC,
                             "#[%s] gets color [%d]\n",
                             r->name, color);
                     break;
                 }
 
                 if (r->color == -1) {
-                    IMCC_fatal(interpreter, DEBUG_IMC,
+                    IMCC_fatal(interp, DEBUG_IMC,
                             "# no more colors - this should not happen\n");
 
                 }
@@ -687,11 +692,11 @@ map_colors(IMC_Unit* unit, int x, unsigned int *graph, char avail[],
             continue;
         r = unit->reglist[y];
         if (   r
-    	    && r->color != -1
-	    && r->set == typ) {
+                && r->color != -1
+                && r->set == typ) {
             assert(r->color - already_allocated >= 0);
-    	    avail[r->color - already_allocated] = 0;
-    	}
+            avail[r->color - already_allocated] = 0;
+        }
     }
 }
 
@@ -710,7 +715,7 @@ first_avail(IMC_Unit *unit, int reg_set, Set **avail)
     n = unit->n_symbols;
     if (unit->max_color > n)
         n = unit->max_color;
-    allocated = set_make(n);
+    allocated = set_make(n + 1);
     hsh = &unit->hash;
     for (i = 0; i < hsh->size; i++) {
         for (r = hsh->data[i]; r; r = r->next) {
@@ -736,7 +741,7 @@ first_avail(IMC_Unit *unit, int reg_set, Set **avail)
  */
 
 static void
-allocate_uniq(Parrot_Interp interpreter, IMC_Unit *unit, int usage)
+allocate_uniq(Parrot_Interp interp, IMC_Unit *unit, int usage)
 {
     char type[] = "INSP";
     int i, j, reg_set, first_reg;
@@ -759,7 +764,7 @@ allocate_uniq(Parrot_Interp interpreter, IMC_Unit *unit, int usage)
                         first_reg = first_avail(unit, reg_set, NULL);
                     set_add(avail, first_reg);
                     r->color = first_reg++;
-                    IMCC_debug(interpreter, DEBUG_IMC,
+                    IMCC_debug(interp, DEBUG_IMC,
                             "allocate %s sym %c '%s'  color %d\n",
                             usage & U_LEXICAL ? "Lexical" : "Non-vol",
                             reg_set, r->name, r->color);
@@ -777,25 +782,64 @@ allocate_uniq(Parrot_Interp interpreter, IMC_Unit *unit, int usage)
 }
 
 static void
-allocate_lexicals(Parrot_Interp interpreter, IMC_Unit *unit)
+vanilla_reg_alloc(Parrot_Interp interp, IMC_Unit *unit)
 {
-    IMCC_debug(interpreter, DEBUG_IMC, "allocate lexicals\n");
-    allocate_uniq(interpreter, unit, U_LEXICAL);
+    char type[] = "INSP";
+    int i, j, reg_set, first_reg;
+    SymReg * r;
+    SymHash *hsh;
+    Set *avail;
+
+    UNUSED(interp);
+    hsh = &unit->hash;
+
+    /* Clear the pre-assigned colors. */
+    for (i = 0; i < hsh->size; i++) {
+        for (r = hsh->data[i]; r; r = r->next) {
+            if (r->type & VTREGISTER) /* TODO Ignore non-volatiles */
+                r->color=-1;
+        }
+    }
+
+    /* Assign new colors. */
+    for (j = 0; j < 4; j++) {
+        reg_set = type[j];
+        first_reg = first_avail(unit, reg_set, &avail);
+        for (i = 0; i < hsh->size; i++) {
+            for (r = hsh->data[i]; r; r = r->next) {
+                if (r->set != reg_set)
+                    continue;
+                if ((r->type & VTREGISTER) && (r->color == -1 )
+                        ) {
+                    if (set_contains(avail, first_reg))
+                        first_reg = first_avail(unit, reg_set, NULL);
+                    set_add(avail, first_reg);
+                    r->color = first_reg++;
+                }
+            }
+        }
+        set_free(avail);
+        unit->first_avail[j] = first_reg;
+    }
 }
 
 static void
-allocate_non_volatile(Parrot_Interp interpreter, IMC_Unit *unit)
+allocate_lexicals(Parrot_Interp interp, IMC_Unit *unit)
 {
-    IMCC_debug(interpreter, DEBUG_IMC, "allocate non_volatile\n");
-    allocate_uniq(interpreter, unit, U_NON_VOLATILE);
+    IMCC_debug(interp, DEBUG_IMC, "allocate lexicals\n");
+    allocate_uniq(interp, unit, U_LEXICAL);
+}
+
+static void
+allocate_non_volatile(Parrot_Interp interp, IMC_Unit *unit)
+{
+    IMCC_debug(interp, DEBUG_IMC, "allocate non_volatile\n");
+    allocate_uniq(interp, unit, U_NON_VOLATILE);
 }
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

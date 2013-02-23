@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/t/dynpmc/quantumreg.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/local/t/dynpmc/quantumreg.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
@@ -9,14 +9,13 @@ use Test::More;
 use Parrot::Test;
 use Parrot::Config;
 
-
 =head1 NAME
 
-t/dynpmc/quantumreg.t - test the QuantumReg PMC 
+t/dynpmc/quantumreg.t - test the QuantumReg PMC
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/dynpmc/quantumreg.t
+        % perl -Ilib t/dynpmc/quantumreg.t
 
 =head1 DESCRIPTION
 
@@ -24,30 +23,27 @@ Tests the C<QuantumReg> PMC.
 
 =cut
 
-
 # There is no config probe for libquantum yet, please enable manually
 # if ( 1 ) {
-if ($PConfig{has_quantum}) {
+if ( $PConfig{has_quantum} ) {
     plan tests => 3;
 }
 else {
     plan skip_all => "No quantum library available";
 }
 
-
 # PIR fragment for setting up a GDBM Hash
 my $new_reg_1 = << 'CODE';
 .sub 'test' :main
     .local pmc quantumreg_lib
-    quantumreg_lib = loadlib "quantumreg" 
+    quantumreg_lib = loadlib "quantumreg"
     .local int quantumreg_type
     quantumreg_type = find_type "QuantumReg"
     .local pmc reg_1
     reg_1 = new quantumreg_type
 CODE
 
-
-pir_output_is($new_reg_1 . << 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( $new_reg_1 . << 'CODE', << 'OUTPUT', "check whether interface is done" );
     unless quantumreg_type goto NOT_FOUND
     print "Found QuantumReq\n"
     goto CONTINUE
@@ -60,7 +56,7 @@ CODE
 Found QuantumReq
 OUTPUT
 
-pir_output_is($new_reg_1 . << 'CODE', << 'OUTPUT', "typeof");
+pir_output_is( $new_reg_1 . << 'CODE', << 'OUTPUT', "typeof" );
 
     .local string type
     type = typeof reg_1
@@ -71,8 +67,7 @@ CODE
 QuantumReg
 OUTPUT
 
-
-pir_output_is($new_reg_1 . << 'CODE', << 'OUTPUT', "check whether interface is done");
+pir_output_is( $new_reg_1 . << 'CODE', << 'OUTPUT', "check whether interface is done" );
     .local int bool1
     bool1 = does reg_1, "scalar"
     print bool1
@@ -94,3 +89,9 @@ CODE
 0
 OUTPUT
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

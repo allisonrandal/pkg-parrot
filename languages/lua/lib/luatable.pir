@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/languages/lua/lib/luatable.pir 12840 2006-05-30T15:08:05.048089Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/lua/lib/luatable.pir 3437 2007-05-09T11:01:53.500408Z fperrad  $
 
 =head1 NAME
 
@@ -12,9 +12,10 @@ all its functions inside the table C<table>.
 
 Most functions in the table library assume that the table represents an
 array or a list. For these functions, when we talk about the "length" of a
-table we mean the result of the length operator. 
+table we mean the result of the length operator.
 
-See "Lua 5.1 Reference Manual", section 5.5 "Table Manipulation".
+See "Lua 5.1 Reference Manual", section 5.5 "Table Manipulation",
+L<http://www.lua.org/manual/5.1/manual.html#5.5>.
 
 =head2 Functions
 
@@ -22,60 +23,69 @@ See "Lua 5.1 Reference Manual", section 5.5 "Table Manipulation".
 
 =cut
 
-.namespace [ "Lua" ]
-.HLL "Lua", "lua_group"
+.HLL 'Lua', 'lua_group'
 
+.sub 'init_table' :load :anon
 
-.sub init_table :load :anon
-
-#    load_bytecode "languages/lua/lib/luaaux.pbc"
-#    load_bytecode "languages/lua/lib/luabasic.pbc"
+    load_bytecode 'languages/lua/lib/luabasic.pbc'
 
 #    print "init Lua Table\n"
 
     .local pmc _lua__GLOBAL
-    _lua__GLOBAL = global "_G"
-    $P1 = new .LuaString
+    _lua__GLOBAL = global '_G'
+    new $P1, .LuaString
 
     .local pmc _table
-    _table = new .LuaTable
-    $P1 = "table"
+    new _table, .LuaTable
+    set $P1, 'table'
     _lua__GLOBAL[$P1] = _table
 
-    .const .Sub _table_concat = "_table_concat"
-    $P1 = "concat"
+    lua_register($P1, _table)
+
+    .const .Sub _table_concat = 'concat'
+    _table_concat.'setfenv'(_lua__GLOBAL)
+    set $P1, 'concat'
     _table[$P1] = _table_concat
 
-    .const .Sub _table_foreach = "_table_foreach"
-    $P1 = "foreach"
+    .const .Sub _table_foreach = 'foreach'
+    _table_foreach.'setfenv'(_lua__GLOBAL)
+    set $P1, 'foreach'
     _table[$P1] = _table_foreach
 
-    .const .Sub _table_foreachi = "_table_foreachi"
-    $P1 = "foreachi"
+    .const .Sub _table_foreachi = 'foreachi'
+    _table_foreachi.'setfenv'(_lua__GLOBAL)
+    set $P1, 'foreachi'
     _table[$P1] = _table_foreachi
 
-    .const .Sub _table_getn = "_table_getn"
-    $P1 = "getn"
+    # LUA_COMPAT_GETN
+    .const .Sub _table_getn = 'getn'
+    _table_getn.'setfenv'(_lua__GLOBAL)
+    set $P1, 'getn'
     _table[$P1] = _table_getn
 
-    .const .Sub _table_insert = "_table_insert"
-    $P1 = "insert"
+    .const .Sub _table_insert = 'insert'
+    _table_insert.'setfenv'(_lua__GLOBAL)
+    set $P1, 'insert'
     _table[$P1] = _table_insert
 
-    .const .Sub _table_maxn = "_table_maxn"
-    $P1 = "maxn"
+    .const .Sub _table_maxn = 'maxn'
+    _table_maxn.'setfenv'(_lua__GLOBAL)
+    set $P1, 'maxn'
     _table[$P1] = _table_maxn
 
-    .const .Sub _table_remove = "_table_remove"
-    $P1 = "remove"
+    .const .Sub _table_remove = 'remove'
+    _table_remove.'setfenv'(_lua__GLOBAL)
+    set $P1, 'remove'
     _table[$P1] = _table_remove
 
-    .const .Sub _table_setn = "_table_setn"
-    $P1 = "setn"
+    .const .Sub _table_setn = 'setn'
+    _table_setn.'setfenv'(_lua__GLOBAL)
+    set $P1, 'setn'
     _table[$P1] = _table_setn
 
-    .const .Sub _table_sort = "_table_sort"
-    $P1 = "sort"
+    .const .Sub _table_sort = 'sort'
+    _table_sort.'setfenv'(_lua__GLOBAL)
+    set $P1, 'sort'
     _table[$P1] = _table_sort
 
 .end
@@ -91,43 +101,43 @@ Returns C<table[i]..sep..table[i+1] ... sep..table[j]>. The default value for
 
 =cut
 
-.sub _table_concat :anon :outer(init_table)
+.sub 'concat' :anon
     .param pmc table :optional
     .param pmc sep :optional
     .param pmc i :optional
     .param pmc j :optional
     .local pmc idx
     .local pmc value
-    .local pmc ret
+    .local string ret
     .local int last
-    $S0 = optstring(sep, "")
-    checktype(table, "table")
-    $I0 = optint(i, 1)
-    $I1 = getn(table)
-    last = optint(j, $I1)
-    $S1 = ""
-    new idx, .LuaNumber 
-L2:
-    unless $I0 <= last goto L3
-    idx = $I0
-    value = table."rawget"(idx)
-    $I2 = isa value, "LuaString"
-    if $I2 goto L4
-    $I2 = isa value, "LuaNumber"
-    if $I2 goto L4
-    argerror("table contains non-strings")
-L4:
-    $S2 = value
-    concat $S1, $S2
-    unless $I0 != last goto L5
-    concat $S1, $S0
-L5:    
-    add $I0, 1
-    goto L2
+    $S2 = lua_optstring(2, sep, '')
+    lua_checktype(1, table, 'table')
+    $I3 = lua_optint(3, i, 1)
+    $I0 = table.'len'()
+    last = lua_optint(4, j, $I0)
+    ret = ''
+    new idx, .LuaNumber
+L1:
+    unless $I3 <= last goto L2
+    set idx, $I3
+    value = table.'rawget'(idx)
+    $I0 = isa value, 'LuaString'
+    if $I0 goto L3
+    $I0 = isa value, 'LuaNumber'
+    if $I0 goto L3
+    lua_argerror(1, "table contains non-strings")
 L3:
-    new ret, .LuaString
-    ret = $S1
-    .return (ret)
+    $S0 = value
+    concat ret, $S0
+    unless $I3 != last goto L4
+    concat ret, $S2
+L4:
+    inc $I3
+    goto L1
+L2:
+    new $P0, .LuaString
+    set $P0, ret
+    .return ($P0)
 .end
 
 
@@ -144,22 +154,24 @@ B<DEPRECATED>
 
 =cut
 
-.sub _table_foreach :anon :outer(init_table)
+.sub 'foreach' :anon
     .param pmc table :optional
     .param pmc f :optional
     .local pmc idx
     .local pmc value
     .local pmc ret
-    checktype(table, "table")
-    checktype(f, "function")
+    lua_checktype(1, table, 'table')
+    lua_checktype(2, f, 'function')
     new idx, .LuaNil
 L1:
-    (idx, value) = next(table, idx)
-    unless idx goto L2
+    $P0 = table.'next'(idx)
+    unless $P0 goto L2
+    idx = $P0[0]
+    value = $P0[1]
     (ret) = f(idx, value)
     $I0 = defined ret
     unless $I0 goto L1
-    .return (ret)       
+    .return (ret)
 L2:
     .return ()
 .end
@@ -177,34 +189,34 @@ B<DEPRECATED>
 
 =cut
 
-.sub _table_foreachi :anon :outer(init_table)
+.sub 'foreachi' :anon
     .param pmc table :optional
     .param pmc f :optional
-    .local pmc index
+    .local pmc idx
     .local pmc value
     .local pmc ret
     .local int i
     .local int n
-    checktype(table, "table")
-    checktype(f, "function")
-    n = getn(table)
+    lua_checktype(1, table, 'table')
+    lua_checktype(2, f, 'function')
+    n = table.'len'()
     i = 0
-    new index, .LuaNumber
+    new idx, .LuaNumber
 L1:
-    add i, 1
+    inc i
     unless i <= n goto L2
-    index = i
-    value = table."rawget"(index)
-    (ret) = f(index, value) 
+    set idx, i
+    value = table.'rawget'(idx)
+    (ret) = f(idx, value)
     $I0 = defined ret
     unless $I0 goto L1
-    .return (ret)       
+    .return (ret)
 L2:
     .return ()
 .end
 
 
-=item C<table.getn (table)>       
+=item C<table.getn (table)>
 
 Returns the size of a table.
 
@@ -212,11 +224,11 @@ B<DEPRECATED>
 
 =cut
 
-.sub _table_getn :anon :outer(init_table)
+.sub 'getn' :anon
     .param pmc table :optional
     .local pmc ret
-    checktype(table, "table")
-    ret = table."len"()
+    lua_checktype(1, table, 'table')
+    ret = table.'len'()
     .return (ret)
 .end
 
@@ -230,24 +242,24 @@ inserts C<x> at the end of table C<t>.
 
 =cut
 
-.sub _table_insert :anon :outer(init_table)
+.sub 'insert' :anon
     .param pmc table :optional
     .param pmc arg2 :optional
     .param pmc arg3 :optional
     .local pmc value
-    .local pmc index
+    .local pmc idx
     .local int e
     .local int pos
-    new index, .LuaNumber
-    checktype(table, "table")
-    e = getn(table)
+    new idx, .LuaNumber
+    lua_checktype(1, table, 'table')
+    e = table.'len'()
     inc e
-    unless_null arg3, L1
+    unless null arg3 goto L1
     pos = e
     value = arg2
     goto L2
 L1:
-    pos = checknumber(arg2)    
+    pos = lua_checknumber(2, arg2)
     unless pos > e goto L3
     e = pos
 L3:
@@ -255,15 +267,14 @@ L3:
 L4:
     dec e
     unless e >= pos goto L2
-    index = e
-    $P0 = table."rawget"(index)
-    $I0 = e + 1
-    index = $I0
-    table."rawset"(index, $P0)
+    set idx, e
+    $P0 = table.'rawget'(idx)
+    inc idx
+    table.'rawset'(idx, $P0)
     goto L4
 L2:
-    index = pos
-    table[index] = value
+    set idx, pos
+    table.'rawset'(idx, value)
 .end
 
 
@@ -273,29 +284,27 @@ Returns the largest positive numerical index of the given table, or zero if
 the table has no positive numerical indices. (To do its job this function
 does a linear traversal of the whole table.)
 
-STILL INCOMPLETE (see next in luapir.pir).
-
 =cut
 
-.sub _table_maxn :anon :outer(init_table)
+.sub 'maxn' :anon
     .param pmc table :optional
     .local pmc idx
-    .local pmc value
     .local pmc max
-    checktype(table, "table")
+    lua_checktype(1, table, 'table')
     new max, .LuaNumber
-    max = 0
+    set max, 0
     new idx, .LuaNil
 L1:
-    (idx, value) = next(table, idx)
-    unless idx goto L2
-    $I0 = isa idx, "LuaNumber"
+    $P0 = table.'next'(idx)
+    unless $P0 goto L2
+    idx = $P0[0]
+    $I0 = isa idx, 'LuaNumber'
     unless $I0 goto L1
-    unless idx > max goto L1 
+    unless idx > max goto L1
     max = clone idx
     goto L1
 L2:
-    .return (max)       
+    .return (max)
 .end
 
 
@@ -309,40 +318,39 @@ table C<t>.
 
 =cut
 
-.sub _table_remove :anon :outer(init_table)
+.sub 'remove' :anon
     .param pmc table :optional
     .param pmc pos :optional
-    .local pmc index
+    .local pmc idx
     .local pmc ret
     .local int e
     .local int ipos
-    checktype(table, "table")
-    e = getn(table)
-    ipos = optint(pos, e)
+    lua_checktype(1, table, 'table')
+    e = table.'len'()
+    ipos = lua_optint(2, pos, e)
     unless e <= 0 goto L1
+    # table is `empty'
     new ret, .LuaNil
     .return (ret)
-L1:      
-    $I1 = e - 1
-    new index, .LuaNumber
-    index = ipos
-    ret = table."rawget"(index)
+L1:
+    new idx, .LuaNumber
+    set idx, ipos
+    ret = table.'rawget'(idx)
 L2:
     unless ipos < e goto L3
     $I2 = ipos + 1
-    index = $I2
-    $P0 = table."rawget"(index)
-    index = ipos
-    table."rawset"(index, $P0)
+    set idx, $I2
+    $P0 = table.'rawget'(idx)
+    set idx, ipos
+    table.'rawset'(idx, $P0)
     ipos = $I2
     goto L2
 L3:
     new $P0, .LuaNil
-    index = e
-    table."rawset"(index, $P0)        
+    set idx, e
+    table.'rawset'(idx, $P0)
     .return (ret)
 .end
-
 
 =item C<table.setn (table, n)>
 
@@ -350,11 +358,11 @@ B<OBSOLETE>
 
 =cut
 
-.sub _table_setn :anon :outer(init_table)
+.sub 'setn' :anon
     .param pmc table :optional
     .param pmc n :optional
-    checktype(table, "table")
-    error("'setn' is obsolete")
+    lua_checktype(1, table, 'table')
+    lua_error("'setn' is obsolete")
 .end
 
 
@@ -368,42 +376,148 @@ will be true after the sort). If C<comp> is not given, then the standard Lua
 operator C<<> is used instead.
 
 The sort algorithm is I<not> stable; that is, elements considered equal by
-the given order may have their relative positions changed by the sort. 
-
-NOT YET IMPLEMENTED (see auxsort).
+the given order may have their relative positions changed by the sort.
 
 =cut
 
-.sub _table_sort :anon :outer(init_table)
+.sub 'sort' :anon
     .param pmc table :optional
     .param pmc comp :optional
     .local int n
-    checktype(table, "table")
-    n = getn(table)
-    if_null comp, L1
-    if comp goto L1
-    checktype(comp, "function")
-    goto L2
-L1:    
-    .const .Sub lessthan = "lessthan"
-    comp = lessthan
-L2:
-    auxsort(table, comp, n)
+    lua_checktype(1, table, 'table')
+    n = table.'len'()
+    if null comp goto L1
+    $I0 = isa comp, 'LuaNil'
+    if $I0 goto L1
+    lua_checktype(2, comp, 'function')
+L1:
+    auxsort(table, comp, 1, n)
 .end
 
-.sub auxsort :anon
+.sub 'auxsort' :anon
     .param pmc table
     .param pmc comp
+    .param int l
     .param int u
-    not_implemented()
+    .local pmc idx1
+    .local pmc idx2
+    .local int i
+    .local int j
+    .local int tmp
+    new idx1, .LuaNumber
+    new idx2, .LuaNumber
+L1:
+    unless l < u goto L2
+    # sort elements a[l], a[(l+u)/2] and a[u]
+    set idx1, l
+    set idx2, u
+    $P1 = table.'rawget'(idx1)
+    $P2 = table.'rawget'(idx2)
+    $I0 = sort_comp(comp, $P2, $P1) # a[u] < a[l]?
+    unless $I0 goto L3
+    # swap a[l] - a[u]
+    table.'rawset'(idx1, $P2)
+    table.'rawset'(idx2, $P1)
+L3:
+    tmp = u - l
+    if tmp == 1 goto L2 # break: only 2 elements
+    i = l + u
+    i /= 2
+    set idx1, i
+    set idx2, l
+    $P1 = table.'rawget'(idx1)
+    $P2 = table.'rawget'(idx2)
+    $I0 = sort_comp(comp, $P1, $P2) # a[i]<a[l]?
+    unless $I0 goto L4
+    table.'rawset'(idx1, $P2)
+    table.'rawset'(idx2, $P1)
+    goto L5
+L4:
+    set idx2, u
+    $P2 = table.'rawget'(idx2)
+    $I0 = sort_comp(comp, $P2, $P1) # a[u]<a[i]?
+    unless $I0 goto L5
+    table.'rawset'(idx1, $P2)
+    table.'rawset'(idx2, $P1)
+L5:
+    tmp = u - l
+    if tmp == 2 goto L2 # break: only 3 elements
+    set idx1, i
+    $P1 = table.'rawget'(idx1)    # Pivot
+    tmp = u - 1
+    set idx2, tmp
+    $P2 = table.'rawget'(idx2)
+    table.'rawset'(idx1, $P2)
+    table.'rawset'(idx2, $P1)
+    # a[l] <= P == a[u-1] <= a[u], only need to sort from l+1 to u-2 */
+    i = l
+    j = u - 1
+L6: # invariant: a[l..i] <= P <= a[j..u]
+    # repeat ++i until a[i] >= P
+    inc i
+    set idx2, i
+    $P2 = table.'rawget'(idx2)
+    $I0 = sort_comp(comp, $P2, $P1)
+    unless $I0 goto L7
+    unless i > u goto L6
+    lua_error("invalid order function for sorting")
+    goto L6
+L7:
+    # repeat --j until a[j] <= P
+    dec j
+    set idx1, j
+    $P3 = table.'rawget'(idx1)
+    $I0 = sort_comp(comp, $P1, $P3)
+    unless $I0 goto L8
+    unless j < l goto L7
+    lua_error("invalid order function for sorting")
+    goto L7
+L8:
+    if j < i goto L9
+    table.'rawset'(idx2, $P3)
+    table.'rawset'(idx1, $P2)
+    goto L6
+L9:
+    tmp = u - 1
+    set idx1, tmp
+    set idx2, i
+    $P1 = table.'rawget'(idx1)
+    $P2 = table.'rawget'(idx2)
+    # swap pivot (a[u-1]) with a[i]
+    table.'rawset'(idx1, $P2)
+    table.'rawset'(idx2, $P1)
+    # a[l..i-1] <= a[i] == P <= a[i+1..u]
+    # adjust so that smaller half is in [j..i] and larger one in [l..u]
+    tmp += l
+    unless i < tmp goto L10
+    j = l
+    i = i - 1
+    l = i + 2
+    goto L11
+L10:
+    j = i + 1
+    i = u
+    u = j - 2
+L11:
+    # call recursively the smaller one
+    auxsort(table, comp, j, i)
+    # repeat the routine for the larger one
+    goto L1
+L2:
 .end
 
-.sub lessthan :anon
-    .param pmc l
-    .param pmc r
-    .local int ret
-    ret = cmp l, r
-    .return (ret)
+.sub 'sort_comp' :anon
+    .param pmc comp
+    .param pmc a
+    .param pmc b
+    if null comp goto L1
+    unless comp goto L1
+    $P0 = comp(a, b)
+    $I0 = istrue $P0
+    .return ($I0)
+L1:
+    $I0 = islt a, b
+    .return ($I0)
 .end
 
 =back
@@ -414,3 +528,9 @@ Francois Perrad
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

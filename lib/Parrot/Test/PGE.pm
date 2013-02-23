@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 Parrot::Test::PGE - test functions for Perl 6 Grammar Engine
@@ -62,12 +63,13 @@ will be matched against. The 'outer rule' if you will.
 =cut
 
 sub p6rule_is {
-    my ($target, $pattern) = (shift, shift);
+    my ( $target, $pattern ) = ( shift, shift );
 
     unshift @_ => 'matched';
-    unshift @_ => ( ref $pattern
-        ? Parrot::Test::PGE::_generate_subrule_pir($target, $pattern)
-        : Parrot::Test::PGE::_generate_pir_for($target, $pattern)
+    unshift @_ => (
+        ref $pattern
+        ? Parrot::Test::PGE::_generate_subrule_pir( $target, $pattern )
+        : Parrot::Test::PGE::_generate_pir_for( $target, $pattern )
     );
 
     goto &Parrot::Test::pir_output_is;
@@ -81,12 +83,13 @@ they do not match. The same pattern argument syntax above applies here.
 =cut
 
 sub p6rule_isnt {
-    my ($target, $pattern) = (shift, shift);
+    my ( $target, $pattern ) = ( shift, shift );
 
     unshift @_ => 'failed';
-    unshift @_ => ( ref $pattern
-        ? Parrot::Test::PGE::_generate_subrule_pir($target, $pattern)
-        : Parrot::Test::PGE::_generate_pir_for($target, $pattern)
+    unshift @_ => (
+        ref $pattern
+        ? Parrot::Test::PGE::_generate_subrule_pir( $target, $pattern )
+        : Parrot::Test::PGE::_generate_pir_for( $target, $pattern )
     );
 
     goto &Parrot::Test::pir_output_is;
@@ -101,11 +104,25 @@ parameter.  Note that C<$expected> is a I<Perl 5> pattern.
 =cut
 
 sub p6rule_like {
-    my ($target, $pattern) = (shift, shift);
+    my ( $target, $pattern ) = ( shift, shift );
 
-    unshift @_ => Parrot::Test::PGE::_generate_pir_for($target, $pattern, 1);
+    unshift @_ => Parrot::Test::PGE::_generate_pir_for( $target, $pattern, 1 );
 
     goto &Parrot::Test::pir_output_like;
+}
+
+=item C<p6rule_error_like($target, $pattern, $expected, $description, @todo)>
+
+Like C<p6rule_like()>, but expects Parrot/PGE to exit with an error.
+
+=cut
+
+sub p6rule_error_like {
+    my ( $target, $pattern ) = ( shift, shift );
+
+    unshift @_ => Parrot::Test::PGE::_generate_pir_for( $target, $pattern, 1 );
+
+    goto &Parrot::Test::pir_error_output_like;
 }
 
 =item C<p6rule_throws($pattern, $expected, $description, @todo)>
@@ -137,10 +154,10 @@ what this does.)
 =cut
 
 sub pgeglob_is {
-    my ($target, $pattern) = (shift, shift);
+    my ( $target, $pattern ) = ( shift, shift );
 
     unshift @_ => 'matched';
-    unshift @_ => Parrot::Test::PGE::_generate_glob_for($target, $pattern);
+    unshift @_ => Parrot::Test::PGE::_generate_glob_for( $target, $pattern );
 
     goto &Parrot::Test::pir_output_is;
 }
@@ -153,10 +170,10 @@ they do not match. The same pattern argument syntax above applies here.
 =cut
 
 sub pgeglob_isnt {
-    my ($target, $pattern) = (shift, shift);
+    my ( $target, $pattern ) = ( shift, shift );
 
     unshift @_ => 'failed';
-    unshift @_ => Parrot::Test::PGE::_generate_glob_for($target, $pattern);
+    unshift @_ => Parrot::Test::PGE::_generate_glob_for( $target, $pattern );
 
     goto &Parrot::Test::pir_output_is;
 }
@@ -170,13 +187,12 @@ parameter.  Note that C<$expected> is a I<Perl 5> pattern.
 =cut
 
 sub pgeglob_like {
-    my ($target, $pattern) = (shift, shift);
+    my ( $target, $pattern ) = ( shift, shift );
 
-    unshift @_ => Parrot::Test::PGE::_generate_glob_for($target, $pattern, 1);
+    unshift @_ => Parrot::Test::PGE::_generate_glob_for( $target, $pattern, 1 );
 
     goto &Parrot::Test::pir_output_like;
 }
-
 
 package Parrot::Test::PGE;
 
@@ -190,14 +206,14 @@ sub _parrot_stringify {
 }
 
 sub _generate_pir_for {
-    my($target, $pattern, $captures) = @_;
-    $target = _parrot_stringify($target);
+    my ( $target, $pattern, $captures ) = @_;
+    $target  = _parrot_stringify($target);
     $pattern = _parrot_stringify($pattern);
-    my $unicode = ($target =~ /\\u/) ? "unicode:" : "";
-    if ($captures) { 
+    my $unicode = ( $target =~ /\\u/ ) ? "unicode:" : "";
+    if ($captures) {
         $captures = qq(
             print "\\n"
-            match."dump"("mob"," ","")\n); 
+            match."dump"("mob"," ","")\n);
     }
     else {
         $captures = "";
@@ -235,7 +251,7 @@ sub _generate_pir_for {
 }
 
 sub _generate_pir_catch_for {
-    my($pattern) = @_;
+    my ($pattern) = @_;
     $pattern = _parrot_stringify($pattern);
     return qq(
         .sub _PGE_Test
@@ -268,7 +284,7 @@ sub _generate_pir_catch_for {
 }
 
 sub _generate_subrule_pir {
-    my($target, $pattern) = @_;
+    my ( $target, $pattern ) = @_;
     $target = _parrot_stringify($target);
 
     # Beginning of the pir code
@@ -286,9 +302,9 @@ sub _generate_subrule_pir {
 
             target = "$target"\n\n);
 
-    # Loop to create the subrules pir code 
+    # Loop to create the subrules pir code
     for my $ruleRow (@$pattern) {
-        my ($name, $subpat) = @$ruleRow;
+        my ( $name, $subpat ) = @$ruleRow;
         $subpat = _parrot_stringify($subpat);
 
         $pirCode .= qq(
@@ -319,16 +335,15 @@ sub _generate_subrule_pir {
 }
 
 sub _generate_glob_for {
-    my($target, $pattern, $captures) = @_;
-    $target = _parrot_stringify($target);
+    my ( $target, $pattern, $captures ) = @_;
+    $target  = _parrot_stringify($target);
     $pattern = _parrot_stringify($pattern);
     return qq(
         .sub _PGE_Test
             .local pmc glob_compile
             load_bytecode "PGE.pbc"
-            load_bytecode "PGE/Glob.pir"
-            load_bytecode "PGE/Dumper.pir"
-            load_bytecode "PGE/Text.pir"
+            load_bytecode "PGE/Glob.pbc"
+            load_bytecode "PGE/Text.pbc"
             glob_compile = compreg "PGE::Glob"
 
             .local string target
@@ -339,7 +354,7 @@ sub _generate_glob_for {
             .local pmc exp
             target = unicode:"$target"
             pattern = "$pattern"
-            (rulesub, code, exp) = glob_compile(pattern)
+            rulesub = glob_compile.'compile'(pattern)
             match = rulesub(target)
             unless match goto match_fail
           match_success:
@@ -350,6 +365,7 @@ sub _generate_glob_for {
           match_end:
         .end\n);
 }
+
 =back
 
 =head1 AUTHOR
@@ -359,3 +375,10 @@ Patrick R. Michaud, pmichaud@pobox.com   18-Nov-2004
 =cut
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

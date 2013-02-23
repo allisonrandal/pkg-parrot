@@ -1,14 +1,13 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/pge/pge_util.t 13079 2006-07-01T02:48:47.459799Z mdiep  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/compilers/pge/pge_util.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
+use Parrot::Test tests => 8;
 use Parrot::Test::PGE;
-
 
 =head1 NAME
 
@@ -16,15 +15,18 @@ t/library/pge_util.t - Parrot Grammar Engine tests of utility rules
 
 =head1 SYNOPSIS
 
-	% prove -Ilib t/library/pge_util.t
+        % prove -Ilib t/library/pge_util.t
 
 =cut
 
 my $str = "How will this\nstring choose\nto explode?\n\nTest";
-p6rule_like($str, 'expl <PGE::Util::die: kaboom>', 
-    qr/^kaboom at line 3, near "ode\?\\n\\n/, "die");
+p6rule_error_like(
+    $str,
+    'expl <PGE::Util::die: kaboom>',
+    qr/^kaboom at line 3, near "ode\?\\n\\n/, "die"
+);
 
-pir_output_is(<<'CODE', <<'OUT', "split /\\:+/, 'Foo::Bar::baz'");
+pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, 'Foo::Bar::baz'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -47,7 +49,7 @@ Bar
 baz
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "split /\\:+/, 'Foo::'");
+pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, 'Foo::'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -68,7 +70,7 @@ CODE
 Foo
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "split /\\:+/, '::Foo'");
+pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, '::Foo'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -90,7 +92,7 @@ CODE
 Foo
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "split /\\:+/, 'Foo'");
+pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, 'Foo'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -111,7 +113,7 @@ CODE
 Foo
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "split /\\:/, 'Foo::Bar'");
+pir_output_is( <<'CODE', <<'OUT', "split /\\:/, 'Foo::Bar'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -134,7 +136,7 @@ Foo
 Bar
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "split /\\:/, 'Foo::Bar::Baz', 2");
+pir_output_is( <<'CODE', <<'OUT', "split /\\:/, 'Foo::Bar::Baz', 2" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -156,7 +158,7 @@ Foo
 Bar::Baz
 OUT
 
-pir_output_is(<<'CODE', <<'OUT', "split /(a)(b)/, 'abracadabra'");
+pir_output_is( <<'CODE', <<'OUT', "split /(a)(b)/, 'abracadabra'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
@@ -177,4 +179,9 @@ CODE
 -a-b-racad-a-b-ra
 OUT
 
-BEGIN { plan tests => 8; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

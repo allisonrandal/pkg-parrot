@@ -1,5 +1,5 @@
 
-# $Id: /local/runtime/parrot/library/SDL/Color.pir 13104 2006-07-01T22:28:03.092980Z chromatic  $
+# $Id: /parrotcode/trunk/runtime/parrot/library/SDL/Color.pir 3366 2007-05-02T22:49:45.363630Z mdiep  $
 
 =head1 NAME
 
@@ -118,7 +118,7 @@ is none and 255 is the maximum possible.
 	.return()
 .end
 
-.sub __get_integer :method
+.sub get_integer :vtable :method
 	.local pmc color
 	color = self.'color'()
 
@@ -232,3 +232,9 @@ the Perl 6 Internals mailing list.
 Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

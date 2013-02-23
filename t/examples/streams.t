@@ -1,5 +1,6 @@
+#!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /local/t/examples/streams.t 12841 2006-05-30T15:23:20.183054Z coke  $
+# $Id: /parrotcode/trunk/t/examples/streams.t 3094 2007-04-10T12:04:48.372595Z paultcochrane  $
 
 use strict;
 use warnings;
@@ -8,7 +9,6 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test tests => 12;
 use Parrot::Config;
-
 
 =head1 NAME
 
@@ -31,7 +31,6 @@ F<t/examples/pasm.t>
 Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
 
 =cut
-
 
 # map examples to expected output, organized by io type (file|stream)
 # NOTE: examples using file io must have 'svn:eol-style' set to 'LF'
@@ -118,7 +117,6 @@ read:[parrot]
 read:[is cool]
 EXP_SUBHELLO
     },
-
 
     file => {
         'FileLines.pir' => <<'EXP_FILELINES',
@@ -227,6 +225,12 @@ read:[  102 ]
 read:[  103 Copyright (C) 2004, The Perl Foundation.]
 read:[  104 ]
 read:[  105 =cut]
+read:[  106 ]
+read:[  107 # Local Variables:]
+read:[  108 #   mode: pir]
+read:[  109 #   fill-column: 100]
+read:[  110 # End:]
+read:[  111 # vim: expandtab shiftwidth=4:]
 EXP_FILELINES
 
         'ParrotIO.pir' => <<'EXP_PARROTIO',
@@ -253,7 +257,9 @@ read:[nd\n.end\n\n=head1 AUTHOR\n\nJens Rieks E<lt>parrot at ]
 read:[jensbeimsurfen dot deE<gt> is the author\nand maint]
 read:[ainer.\nPlease send patches and suggestions to the ]
 read:[Perl 6 Internals mailing list.\n\n=head1 COPYRIGHT\n\n]
-read:[Copyright (C) 2004, The Perl Foundation.\n\n=cut\n]
+read:[Copyright (C) 2004, The Perl Foundation.\n\n=cut\n\n# ]
+read:[Local Variables:\n#   mode: pir\n#   fill-column: 10]
+read:[0\n# End:\n# vim: expandtab shiftwidth=4:\n]
 EXP_PARROTIO
     },
 );
@@ -261,22 +267,35 @@ EXP_PARROTIO
 #=for comment
 #        'ParrotIO.pir t/examples/test.txt' => do{
 #            local $/ = 60;
-#            my $file = 
+#            my $file =
 #            @lines=map {} <>;
 #        },
 #=cut
 
-for my $io ( keys %expected ) {
-    while ( my ( $example, $expected ) = each %{$expected{$io}} ) {
+for my $io ( sort keys %expected ) {
+    while ( my ( $example, $expected ) = each %{ $expected{$io} } ) {
+        if ( $^O eq 'MSWin32' ) {
+            if ( grep { $_ eq $example } qw/ParrotIO.pir FileLines.pir/ ) {
+                local $TODO = 'not testable on windows yet';
+                fail($example);
+                next;
+            }
+        }
         example_output_is( "examples/streams/$example", $expected );
     }
 }
 
-
 TODO:
 {
     local $TODO = 'some examples not testable yet';
-    fail( 'Bytes.pir' );
-    fail( 'Replay.pir' );
-    fail( 'Writer.pir' );
-};
+    fail('Bytes.pir');
+    fail('Replay.pir');
+    fail('Writer.pir');
+}
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

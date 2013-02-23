@@ -1,12 +1,11 @@
 #! perl
-# $Id: /local/tools/util/pirtidy.pl 12617 2006-05-11T16:43:46.320675Z particle  $
+# $Id: /parrotcode/local/tools/util/pirtidy.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 use strict;
 use warnings;
 use Fatal qw( open close );
 
 use lib 'lib';
-
 use Parrot::PIR::Formatter;
 
 my $extension = 'tdy';
@@ -22,7 +21,7 @@ foreach my $file (@ARGV) {
     my $formatter = new Parrot::PIR::Formatter();
 
     foreach my $line (<$ifh>) {
-      $formatter->add_pir( $line );
+        $formatter->add_pir($line);
     }
 
     my $output = $formatter->get_formatted();
@@ -66,3 +65,9 @@ Missing all of the perltidy-ish geeknobs and options.
 
 =cut
 
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

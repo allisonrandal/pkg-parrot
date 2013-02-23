@@ -1,14 +1,13 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/syn/macro.t 12838 2006-05-30T14:19:10.150135Z coke  $
-
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/t/compilers/imcc/syn/macro.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 29;
+use Parrot::Test tests => 31;
 
 # macro tests
 
@@ -130,7 +129,7 @@ CODE
 42
 OUTPUT
 
-pir_output_is(<<'CODE', '32', "constant defined and used");
+pir_output_is( <<'CODE', '32', "constant defined and used" );
 .sub test :main
 .const int FOO = 32
   print FOO
@@ -138,7 +137,7 @@ pir_output_is(<<'CODE', '32', "constant defined and used");
 .end
 CODE
 
-pir_output_is(<<'CODE', 'foo', "constant defined and used");
+pir_output_is( <<'CODE', 'foo', "constant defined and used" );
 .sub test :main
 .const string FOO = "foo"
   print FOO
@@ -146,7 +145,7 @@ pir_output_is(<<'CODE', 'foo', "constant defined and used");
 .end
 CODE
 
-pasm_output_is(<<'CODE', 'foo', "constant defined, used in a macro call");
+pasm_output_is( <<'CODE', 'foo', "constant defined, used in a macro call" );
 .constant FOO S0
 .macro answer (bar)
   print .bar
@@ -156,13 +155,13 @@ pasm_output_is(<<'CODE', 'foo', "constant defined, used in a macro call");
   end
 CODE
 
-open FOO, ">macro.tempfile";
+open FOO, ">", "macro.tempfile";
 print FOO <<'ENDF';
   set S0, "Betelgeuse\n"
 ENDF
 close FOO;
 
-pasm_output_is(<<"CODE", <<OUTPUT, "basic include macro");
+pasm_output_is( <<"CODE", <<OUTPUT, "basic include macro" );
 .include "macro.tempfile"
   print S0
 
@@ -175,7 +174,7 @@ Betelgeuse
 Betelgeuse
 OUTPUT
 
-open FOO, ">macro.tempfile";   # Clobber previous
+open FOO, ">", "macro.tempfile";    # Clobber previous
 print FOO <<'ENDF';
 .macro multiply(A,B)
 	new P0, .Float
@@ -188,7 +187,7 @@ print FOO <<'ENDF';
 ENDF
 close FOO;
 
-pasm_output_is(<<"CODE", <<OUTPUT, "include a file defining a macro");
+pasm_output_is( <<"CODE", <<OUTPUT, "include a file defining a macro" );
 .include "macro.tempfile"
  .multiply(12,13)
  print P2
@@ -233,7 +232,7 @@ CODE
 10
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "too few params" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "too few params");
 .sub test :main
 .macro M(A, B)
     print .A
@@ -246,7 +245,7 @@ CODE
 /Macro 'M' requires 2 arguments, but 1 given/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "too many params" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "too many params");
 .sub test :main
 .macro M(A, B)
     print .A
@@ -272,7 +271,7 @@ CODE
 fine
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "macro name is no ident" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "macro name is no ident");
 .sub test :main
 .macro 42(A, B)
     print .A
@@ -285,7 +284,7 @@ CODE
 /Macro names must be identifiers/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "unterminated macro" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "unterminated macro");
 .sub test :main
 .macro M(
 
@@ -294,7 +293,7 @@ CODE
 /End of file reached/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "unterminated macro 2" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "unterminated macro 2");
 .sub test :main
 .macro M(A, B)
   print .A
@@ -305,7 +304,7 @@ CODE
 /End of file reached/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "ill param def" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "ill param def");
 .sub test :main
 .macro M(A, B
   print .A
@@ -316,7 +315,7 @@ CODE
 /Parameter definition in 'M' must be IDENT/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "no params" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "no params");
 .sub test :main
 .macro M(A, B)
     print .A
@@ -329,8 +328,7 @@ CODE
 /Macro 'M' needs 2 arguments/
 OUTPUT
 
-
-pir_output_like( <<'CODE', <<OUTPUT, "unknown macro" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "unknown macro");
 .sub test :main
 .macro M(A, B)
     print .A
@@ -343,7 +341,7 @@ CODE
 /(unknown macro|unexpected DOT)/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "unexpected IDENTIFIER" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "unexpected IDENTIFIER");
 .sub test :main
 .macro M()
     this gives a parse error
@@ -355,7 +353,7 @@ CODE
 /error, unexpected IDENTIFIER/
 OUTPUT
 
-pir_output_like( <<'CODE', <<OUTPUT, "unknown macro" );
+pir_error_output_like( <<'CODE', <<OUTPUT, "unknown macro");
 .sub test :main
 .macro M(A)
     .arg .A
@@ -410,3 +408,34 @@ CODE
 foo
 OUTPUT
 
+pir_output_is( <<'CODE', <<OUTPUT, "test that macros labels names can have the prefix \$" );
+.sub test :main
+.macro test_label_names()
+    branch .$jump
+    print 'do not print this'
+  .local $jump:
+    print 'print this'
+    print "\n"
+.endm
+    .test_label_names()
+.end
+CODE
+print this
+OUTPUT
+
+pir_output_is( <<'CODE', <<OUTPUT, "test that macros labels names can have the prefix \$" );
+.sub test :main
+.macro SpinForever (Count)
+    .local $LOOP: dec .COUNT # ".local $LOOP" defines a local label.
+    branch .$LOOP # Jump to said label.
+.endm
+.end
+CODE
+OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

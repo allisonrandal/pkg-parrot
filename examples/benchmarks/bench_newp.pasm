@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /local/examples/benchmarks/bench_newp.pasm 12835 2006-05-30T13:32:26.641316Z coke  $
+# $Id: /parrotcode/trunk/examples/benchmarks/bench_newp.pasm 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 

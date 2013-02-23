@@ -35,8 +35,8 @@ Type        *t_object,
 void init_builtin_types() {
     t_object    = store_type("object", 4);
     t_void      = store_type("void", 4);
-    t_string    = store_type("string", 4);    
-    t_bool      = store_type("bool", 1);    
+    t_string    = store_type("string", 4);
+    t_bool      = store_type("bool", 1);
     t_sbyte     = store_type("sbyte", 1);
     t_byte      = store_type("byte", 1);
     t_char      = store_type("char", 2);
@@ -53,14 +53,14 @@ void init_builtin_types() {
 
 /* size is bytes or elements, depending on if type is variable or array */
 Type * store_type(const char * name, int size) {
-    Type * t = (Type *)malloc(sizeof(*t));
+    Type * t = (Type *)malloc(sizeof (*t));
     Symbol * s = store_symbol(current_symbol_table, new_symbol(name));
     t->type = NULL;
     s->type = t;
     s->kind = TYPE;
     t->size = size;
     t->kind = TYPE_SCALAR;
-/* 
+/*
     t->typeid = 0;
     t->parentid = 0;
     t->flags = 0;
@@ -75,26 +75,26 @@ Type * store_type(const char * name, int size) {
 Type * lookup_type(const char * name) {
     Symbol * ns;
     Symbol * s;
-    for(ns = current_namespace; ns; ns = ns->tnext) {
+    for (ns = current_namespace; ns; ns = ns->tnext) {
         s = lookup_symbol_in_tab(ns->table, name);
-        if(s != NULL) {
-            if(s->kind != TYPE) {
-                fprintf(stderr, "lookup_type(%s) : Error, symbol not a type\n", name );
+        if (s != NULL) {
+            if (s->kind != TYPE) {
+                fprintf(stderr, "lookup_type(%s) : Error, symbol not a type\n", name);
                 abort();
             }
 #if DEBUG
             fprintf(stderr, "Found symbol [%s] in namespace [%s]\n",
-			name, ns->name);
+                        name, ns->name);
 #endif
-	    return s->type;
+            return s->type;
         }
-	else {
+        else {
 #if DEBUG
             fprintf(stderr, "Symbol [%s] not found in namespace [%s]\n",
-			name, ns->name);
+                        name, ns->name);
 #endif
-	}
-    }    
+        }
+    }
     return NULL;
 }
 
@@ -103,7 +103,7 @@ Type * lookup_type(const char * name) {
  * to nested namespace.
  */
 Type * lookup_type_symbol(Symbol * id) {
-    if(!id) {
+    if (!id) {
         fprintf(stderr, "lookup_type_symbol: NULL symbol\n");
         abort();
     }
@@ -115,15 +115,15 @@ const char * type_name(Type * t) {
 }
 
 Rank * new_rank(int dim) {
-    Rank * ret = malloc(sizeof(*ret));
+    Rank * ret = malloc(sizeof (*ret));
     ret->next = NULL;
     ret->tnext = NULL;
-    ret->dim = dim;    
+    ret->dim = dim;
     return ret;
 }
 
 Type * new_array_type(Symbol * typename, Symbol * sig) {
-    Type * ret = malloc(sizeof(*ret));
+    Type * ret = malloc(sizeof (*ret));
     ret->sym = symbol_concat(typename, sig);
     ret->kind = TYPE_ARRAY;
     ret->next = NULL;
@@ -132,11 +132,11 @@ Type * new_array_type(Symbol * typename, Symbol * sig) {
     ret->rank = rank;
     {
         Rank * r;
-        for(ret->dim = 0, r = rank; r; r = (Rank *)r->tnext) {
+        for (ret->dim = 0, r = rank; r; r = (Rank *)r->tnext) {
             ret->dim += r->dim;
-        } 
+        }
     }
-    ret->bounds = (int **)malloc(sizeof(int) * ret->dim * 2);
+    ret->bounds = (int **)malloc(sizeof (int) * ret->dim * 2);
 */
     return ret;
 }
@@ -148,9 +148,9 @@ Symbol * array_signature(Type * t) {
     int i;
     Symbol * ret = new_identifier_symbol("");
     sprintf(buf, "%s", type_name(t->type));
-    for(r = t->rank; r; r = (Rank *)r->tnext) {
+    for (r = t->rank; r; r = (Rank *)r->tnext) {
         strcat(buf, "[");
-        for(i = 0; i < r->dim; i++) {
+        for (i = 0; i < r->dim; i++) {
             sprintf(buf + strlen(buf), "(0..)");
         }
         strcat(buf, "]");
@@ -163,7 +163,7 @@ Symbol * array_signature(Type * t) {
 void resolve_identifier(Symbol ** ps) {
     Symbol * s = *ps;
     Symbol * t;
-    if(!s) {
+    if (!s) {
         fprintf(stderr, "Internal error: resolve_identifier: NULL symbol\n");
         abort();
     }
@@ -171,35 +171,35 @@ void resolve_identifier(Symbol ** ps) {
     fprintf(stderr, "!resolve[%s]\n", s->name);
 #endif
     t = lookup_symbol(s->name);
-    if(!t) {
+    if (!t) {
         fprintf(stderr, "Error: identifier [%s] undeclared.\n", s->name);
         exit(0);
     }
 
-    if(s != t) {
+    if (s != t) {
         *ps = t;
         s = *ps;
     }
 
-    if(!s->typename) {
+    if (!s->typename) {
         fprintf(stderr, "Internal error: identifier [%s] has no typename\n",
                 s->name);
         abort();
     }
 
-    if(!s->type) {
+    if (!s->type) {
         /* Resolve symbol */
         s->type = lookup_type_symbol(s->typename);
-        if(s->type) {
+        if (s->type) {
             /* Just in case typename is fully qualified or aliased */
             s->typename = t->typename;
-    		/* Not sure if this is the cleanest way..
-    		 * If symbol is an identifier, it may be a class,
-    		 * so each class instance has a pointer to the class
-    		 * namespace.
-    		 */
-    		s->table = t->table;
-    		fprintf(stderr, "%s is type [%s]\n", s->name, s->typename->name);
+                /* Not sure if this is the cleanest way..
+                 * If symbol is an identifier, it may be a class,
+                 * so each class instance has a pointer to the class
+                 * namespace.
+                 */
+                s->table = t->table;
+                fprintf(stderr, "%s is type [%s]\n", s->name, s->typename->name);
         }
         else {
             fprintf(stderr, "Error: identifier [%s] has unknown type [%s].\n",
@@ -208,8 +208,15 @@ void resolve_identifier(Symbol ** ps) {
         }
     }
 
-	if(s->type) {
-	    s->table = s->type->sym->table;
-	}
+        if (s->type) {
+            s->table = s->type->sym->table;
+        }
 }
 
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

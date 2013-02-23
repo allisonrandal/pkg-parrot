@@ -1,13 +1,12 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/op/literal.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/op/literal.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test;
-
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -15,7 +14,7 @@ t/op/literal.t - Testing the PIR and PASM lexer
 
 =head1 SYNOPSIS
 
-	% prove t/op/literal.t
+        % prove t/op/literal.t
 
 =head1 DESCRIPTION
 
@@ -28,12 +27,11 @@ More tests are welcome.
 
 =head1 SEE ALSO
 
-L<http://rt.perl.org/rt3/Ticket/Display.html?id=31197>
+L<https://rt.perl.org/rt3/Ticket/Display.html?id=31197>
 
 =cut
 
-
-pasm_output_is(<<'CODE', <<'OUTPUT', "integer literals in PASM");
+pasm_output_is( <<'CODE', <<'OUTPUT', "integer literals in PASM" );
         print 0x2A
         print "\n"
         print 0X2A
@@ -50,7 +48,7 @@ CODE
 42
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "integer literals in PIR");
+pir_output_is( <<'CODE', <<'OUTPUT', "integer literals in PIR" );
 .sub test :main
         print 0x2A
         print "\n"
@@ -68,6 +66,9 @@ CODE
 42
 OUTPUT
 
-
-## remember to change the number of tests :-)
-BEGIN { plan tests => 2; }
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

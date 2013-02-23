@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /local/t/compilers/imcc/syn/keyed.t 12838 2006-05-30T14:19:10.150135Z coke  $
+# $Id: /parrotcode/local/t/compilers/imcc/syn/keyed.t 880 2006-12-25T21:27:41.153122Z chromatic  $
 
 use strict;
 use warnings;
@@ -11,9 +11,9 @@ use Parrot::Test tests => 1;
 
 ##############################
 SKIP: {
-  skip("experimental", 1);
+    skip( "experimental", 1 );
 
-pir_output_is(<<'CODE', <<'OUTPUT', "add_keyed");
+    pir_output_is( <<'CODE', <<'OUTPUT', "add_keyed" );
 .sub test :main
     new P0, .Array
     new P1, .Array
@@ -33,3 +33,10 @@ CODE
 42
 OUTPUT
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

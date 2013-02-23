@@ -1,7 +1,7 @@
 /* pic.h
  *  Copyright (C) 2005, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/pic.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/pic.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     This is the api header for the pic subsystem
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_PIC_H_GUARD)
+#ifndef PARROT_PIC_H_GUARD
 #define PARROT_PIC_H_GUARD
 
 /*
@@ -21,12 +21,12 @@
  */
 typedef struct Parrot_pic_lru_t {
     union {
-        INTVAL type;			/* for MMD left << 16 | right type */
+        INTVAL type;                    /* for MMD left << 16 | right type */
         PMC *signature;                 /* arg passing signature */
     } u;
     union {
-        funcptr_t real_function; 	/* the actual C code */
-        PMC *sub; 			/* or a Sub PMC */
+        funcptr_t real_function;        /* the actual C code */
+        PMC *sub;                       /* or a Sub PMC */
         PMC **pattr;                    /* attribute location */
     } f;
 } Parrot_PIC_lru;
@@ -36,7 +36,7 @@ typedef struct Parrot_pic_lru_t {
  */
 typedef struct Parrot_pic_t {
     Parrot_PIC_lru lru[3];              /* PIC - three more cache entries */
-    INTVAL miss_count;			/* how many misses */
+    INTVAL miss_count;                  /* how many misses */
 } Parrot_PIC;
 
 /*
@@ -46,7 +46,7 @@ typedef struct Parrot_mic_t {
     Parrot_PIC_lru lru;                 /* MIC - one cache */
     union {
         STRING *method;                 /* for callmethod */
-        INTVAL func_nr;			/* MMD function number */
+        INTVAL func_nr;                 /* MMD function number */
         STRING *attribute;              /* obj.attribute */
         PMC *sig;                       /* arg passing */
     } m;
@@ -58,11 +58,11 @@ typedef struct Parrot_mic_t {
  * PackFile_ByteCode segment
  */
 typedef struct Parrot_pic_store_t {
-    struct Parrot_pic_store_t *prev;	/* prev pic_store */
-    size_t usable;			/* size of usable memory: */
-    Parrot_PIC *pic;		        /* from rear */
-    Parrot_MIC *mic;			/* idx access to allocated MICs */
-    size_t n_mics;			/* range check, debugging mainly */
+    struct Parrot_pic_store_t *prev;    /* prev pic_store */
+    size_t usable;                      /* size of usable memory: */
+    Parrot_PIC *pic;                    /* from rear */
+    Parrot_MIC *mic;                    /* idx access to allocated MICs */
+    size_t n_mics;                      /* range check, debugging mainly */
 } Parrot_PIC_store;
 
 /* more or less private interfaces */
@@ -74,7 +74,7 @@ Parrot_MIC* parrot_PIC_alloc_mic(Interp*, size_t n);
 Parrot_PIC* parrot_PIC_alloc_pic(Interp*);
 
 void parrot_pic_find_infix_v_pp(Interp *, PMC *left, PMC *right,
-                Parrot_MIC *mic, opcode_t *cur_opcode);
+                Parrot_MIC *mic, void **cur_opcode);
 void * parrot_pic_opcode(Interp *, INTVAL op);
 
 typedef int (*arg_pass_f)(Interp *, PMC *sig,
@@ -82,7 +82,7 @@ typedef int (*arg_pass_f)(Interp *, PMC *sig,
 
 int parrot_pic_check_sig(Interp *, PMC *sig1, PMC *sig2, int *type);
 int parrot_pic_is_safe_to_jit(Interp *, PMC *sub,
-	PMC *sig_args, PMC *sig_results, int *flags);
+        PMC *sig_args, PMC *sig_results, int *flags);
 
 funcptr_t  parrot_pic_JIT_sub(Interp *, PMC *sub, int flags);
 
@@ -90,10 +90,7 @@ funcptr_t  parrot_pic_JIT_sub(Interp *, PMC *sub, int flags);
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

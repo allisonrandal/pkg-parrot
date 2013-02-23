@@ -243,7 +243,7 @@ err_open:
     exit 1
 ok:				# fall through to caller/includer
 
-=head1 TITEL
+=head1 TITLE
 
 Parrot::DWIM - Parrot's confusing opcodes made easy.
 
@@ -309,3 +309,9 @@ and/or modified under the same terms as Parrot.
 
 =cut
 
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

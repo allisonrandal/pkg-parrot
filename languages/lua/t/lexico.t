@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/lua/t/lexico.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/local/languages/lua/t/lexico.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
 
 =head1 NAME
 
@@ -12,15 +12,17 @@ t/lexico.t - Lua lexicography
 
 =head1 DESCRIPTION
 
-See "Lua 5.1 Reference Manual", section 2.1 "Lexical Conventions".
+See "Lua 5.1 Reference Manual", section 2.1 "Lexical Conventions",
+L<http://www.lua.org/manual/5.1/manual.html#2.1>.
 
 =cut
 
 use strict;
+use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 2;
+use Parrot::Test tests => 3;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'string' );
@@ -67,4 +69,20 @@ CODE
 255
 86
 OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'escape character' );
+print("\n")
+print("\"")
+CODE
+
+
+"
+OUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

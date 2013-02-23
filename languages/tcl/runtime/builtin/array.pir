@@ -19,12 +19,31 @@
 
   .local string subcommand_name
   subcommand_name = shift argv
+
+  .local pmc options
+  options = new .ResizablePMCArray
+  options[0] = 'anymore'
+  options[1] = 'donesearch'
+  options[2] = 'exists'
+  options[3] = 'get'
+  options[4] = 'names'
+  options[5] = 'nextelement'
+  options[6] = 'set'
+  options[7] = 'size'
+  options[8] = 'startsearch'
+  options[9] = 'statistics'
+  options[10] = 'unset'
+
+  .local pmc select_option
+  select_option  = get_root_global ['_tcl'], 'select_option'
+  .local string canonical_subcommand
+  canonical_subcommand = select_option(options, subcommand_name)
+
   .local pmc subcommand_proc
   null subcommand_proc
 
-  push_eh bad_args
-    subcommand_proc = get_root_global ['_tcl'; 'helpers'; 'array'], subcommand_name
-  clear_eh
+  subcommand_proc = get_root_global ['_tcl'; 'helpers'; 'array'], canonical_subcommand
+  if null subcommand_proc goto bad_args
 
   .local int is_array
   .local string array_name
@@ -32,9 +51,6 @@
   
   array_name = shift argv
 
-  .local int call_level
-  $P0 = get_root_global ['_tcl'], 'call_level'
-  call_level = $P0
   null the_array
 
   .local pmc __find_var
@@ -56,13 +72,10 @@ scommand:
   .return subcommand_proc(is_array,the_array,array_name,argv)
 
 bad_args:
-  $S0  = 'bad option "'
-  $S0 .= subcommand_name
-  $S0 .= '": must be anymore, donesearch, exists, get, names, nextelement, set, size, startsearch, statistics, or unset'
-  .throw($S0)
+  .return ('') # once all commands are implemented, remove this...
 
 few_args:
-  .throw('wrong # args: should be "array option arrayName ?arg ...?"')
+  tcl_error 'wrong # args: should be "array option arrayName ?arg ...?"'
 
 .end
 
@@ -83,7 +96,7 @@ few_args:
   .return (is_array)
 
 bad_args:
-  .throw ('wrong # args: should be "array exists arrayName"')
+  tcl_error 'wrong # args: should be "array exists arrayName"'
 .end
 
 .sub 'size'
@@ -104,7 +117,7 @@ size_none:
   .return (0)
 
 bad_args:
-  .throw ('wrong # args: should be "array size arrayName"')
+  tcl_error 'wrong # args: should be "array size arrayName"'
 .end
 
 .sub 'set'
@@ -147,6 +160,7 @@ new_array:
   set(array_name,the_array) # create an empty named array...
 
 set_loop:
+  if loop >= count goto done
   key = elems[loop]
   inc loop
   val = elems[loop]
@@ -164,15 +178,16 @@ set_loop:
   subvar .= ')'
   set(subvar, val) 
 
-  if loop < count goto set_loop
+  goto set_loop
 
+done:
   .return ('')
 
 bad_args:
- .throw ('wrong # args: should be array set arrayName list')
+  tcl_error 'wrong # args: should be "array set arrayName list"'
 
 odd_args:
- .throw ('list must have an even number of elements')
+  tcl_error 'list must have an even number of elements'
 .end
 
 
@@ -206,12 +221,12 @@ no_args:
   .local pmc globber
   globber = compreg 'PGE::Glob'
   .local pmc rule
-  rule = globber(match_str)
+  rule = globber.'compile'(match_str)
 
   iter = new .Iterator, the_array
   iter = .ITERATE_FROM_START
 
-  retval = new .String
+  retval = new .TclList
 
   .local int count
   count = 0
@@ -224,26 +239,22 @@ push_loop:
   $P2 = rule(str)
   unless $P2 goto push_loop
 
-  # if it's the first, we don't want to print a separating space
-  unless count goto skip_space
-  retval .= ' '
-skip_space:
   inc count
-  retval .= str
-  retval .= ' '
+  push retval, str
   val = the_array[str]
-  retval .= val
+  val = clone val
+  push retval, val
 
   branch push_loop
 
 push_end:
-  .return (retval)
+  .return(retval)
 
 bad_args:
-  .throw('wrong # args: should be "array get arrayName ?pattern?"')
+  tcl_error 'wrong # args: should be "array get arrayName ?pattern?"'
 
 not_array:
-  .throw('')
+  .return ('')
 .end
 
 .sub 'unset'
@@ -276,7 +287,7 @@ no_args:
   .local pmc globber
   globber = compreg 'PGE::Glob'
   .local pmc rule
-  (rule, $P0, $P1) = globber(match_str)
+  (rule, $P0, $P1) = globber.'compile'(match_str)
 
   iter = new .Iterator, the_array
   iter = .ITERATE_FROM_START
@@ -297,10 +308,10 @@ push_end:
 
 
 bad_args:
-  .throw('wrong # args: should be "array unset arrayName ?pattern?"')
+   tcl_error 'wrong # args: should be "array unset arrayName ?pattern?"'
 
 not_array:
-  .throw('')
+   .return ('')
 .end
 
 .sub 'names'
@@ -329,26 +340,24 @@ skip_args:
   .local pmc match_proc
   null match_proc
 
-  push_eh bad_mode
-    match_proc = find_global [ 'helpers'; 'array'; 'names_helper' ], mode
-  clear_eh
-  if_null match_proc, bad_mode
+  match_proc = get_hll_global [ 'helpers'; 'array'; 'names_helper' ], mode
+  if null match_proc goto bad_mode
 
   if is_array == 0 goto not_array
 
   .return match_proc(the_array, pattern)
 
 bad_args:
-  .throw ('wrong # args: should be "array names arrayName ?mode? ?pattern?"')
+  tcl_error 'wrong # args: should be "array names arrayName ?mode? ?pattern?"'
 
 bad_mode:
   $S0 = 'bad option "'
   $S0 .= mode
   $S0 .= '": must be -exact, -glob, or -regexp'
-  .throw ($S0)
+  tcl_error $S0
 
 not_array:
-  .throw('')
+  tcl_error '' # is this right? -Coke
 .end
 
 .namespace [ 'helpers' ; 'array'; 'names_helper' ]
@@ -363,12 +372,12 @@ not_array:
   .local pmc globber, retval
   globber = compreg 'PGE::Glob'
   .local pmc rule
-  rule = globber(pattern)
+  rule = globber.'compile'(pattern)
 
   iter = new .Iterator, the_array
   iter = .ITERATE_FROM_START
 
-  retval = new .String
+  retval = new .TclList
 
   .local int count
   count = 0
@@ -379,11 +388,8 @@ check_loop:
   $P0 = rule(name)
   unless $P0 goto check_loop
 
-  unless count goto skip_space
-  retval .= ' '
-skip_space:
   inc count
-  retval .= name
+  push retval, name
 
   branch check_loop
 check_end:
@@ -433,7 +439,7 @@ found_match:
   iter = new .Iterator, the_array
   iter = .ITERATE_FROM_START
 
-  retval = new .String
+  retval = new .TclList
 
   .local int count
   count = 0
@@ -444,14 +450,17 @@ check_loop:
   $P0 = rule(name)
   unless $P0 goto check_loop
 
-  unless count goto skip_space
-  retval .= ' '
-skip_space:
   inc count
-  retval .= name
+  push retval, name
 
   branch check_loop
 check_end:
 
   .return (retval)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /local/src/exec.c 13327 2006-07-17T16:26:26.368832Z petdance  $
+$Id: /parrotcode/trunk/src/exec.c 3159 2007-04-14T03:15:44.800537Z chromatic  $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ section. And emits the executable.
 */
 
 void
-Parrot_exec(Interp *interpreter, opcode_t *pc,
+Parrot_exec(Interp *interp, opcode_t *pc,
         opcode_t *code_start, opcode_t *code_end)
 {
 #ifdef JIT_CGP
@@ -68,39 +68,40 @@ Parrot_exec(Interp *interpreter, opcode_t *pc,
     extern PARROT_API char **Parrot_exec_rel_addr;
     extern PARROT_API int Parrot_exec_rel_count;
 
-    Parrot_exec_objfile_t * const obj = mem_sys_allocate_zeroed(sizeof(Parrot_exec_objfile_t));
+    Parrot_exec_objfile_t * const obj =
+        mem_allocate_zeroed_typed(Parrot_exec_objfile_t);
     exec_init(obj);
-    Parrot_exec_rel_addr = (char **)mem_sys_allocate_zeroed(4 * sizeof(char *));
+    Parrot_exec_rel_addr = (char **)mem_sys_allocate_zeroed(4 * sizeof (char *));
     obj->bytecode_header_size =
-        (interpreter->code->base.file_offset + 4) * sizeof(opcode_t);
-    jit_info = parrot_build_asm(interpreter, code_start, code_end, 
+        (interp->code->base.file_offset + 4) * sizeof (opcode_t);
+    jit_info = parrot_build_asm(interp, code_start, code_end,
             obj, JIT_CODE_FILE);
 
     /* TODO Go zero the calls to jited opcodes. */
     /* Place the program code in the data section. */
     /* program_code */
-    add_data_member(obj, interpreter->code->base.pf->src,
-            interpreter->code->base.pf->size);
+    add_data_member(obj, interp->code->base.pf->src,
+            interp->code->base.pf->size);
     /* opcode_map */
     add_data_member(obj, jit_info->arena.op_map, (jit_info->arena.map_size+1) *
-        sizeof(opcode_t *));
+        sizeof (opcode_t *));
     /* const_table */
-    add_data_member(obj, NULL, interpreter->code->const_table->const_count *
-        sizeof(struct PackFile_Constant));
+    add_data_member(obj, NULL, interp->code->const_table->const_count *
+        sizeof (PackFile_Constant));
 #ifdef JIT_CGP
     /* prederef_code */
     j = (int)cgp_core;
-    j = (int)((op_func_t*)interpreter->op_lib->op_func_table)[2] - j;
-    k = (int *)interpreter->code->prederef.code;
-    for (i = 0; i < (int)interpreter->code->base.size; i++) {
+    j = (int)((op_func_t*)interp->op_lib->op_func_table)[2] - j;
+    k = (int *)interp->code->prederef.code;
+    for (i = 0; i < (int)interp->code->base.size; i++) {
         if (k[i] != j)
             k[i] = 0;
     }
-    add_data_member(obj, interpreter->code->prederef.code,
-        interpreter->code->base.size * sizeof(void *));
+    add_data_member(obj, interp->code->prederef.code,
+        interp->code->base.size * sizeof (void *));
 #endif /* JIT_CGP */
     /* bytecode_offset */
-    bhs = obj->bytecode_header_size / sizeof(opcode_t);
+    bhs = obj->bytecode_header_size / sizeof (opcode_t);
     add_data_member(obj, &bhs, 4);
 
     obj->text.code = jit_info->arena.start;
@@ -110,8 +111,8 @@ Parrot_exec(Interp *interpreter, opcode_t *pc,
     obj->text.size += (4 - obj->text.size % 4);
     obj->data.size += (4 - obj->data.size % 4);
     offset_fixup(obj);
-    output = interpreter->output_file ?
-        interpreter->output_file : "exec_output.o";
+    output = interp->output_file ?
+        interp->output_file : "exec_output.o";
     Parrot_exec_save(obj, output);
 }
 
@@ -132,12 +133,13 @@ add_data_member(Parrot_exec_objfile_t *obj /*NN*/, void *src, size_t len)
 
     if (obj->data.size == 0) {
         obj->data.code = (char *)mem_sys_allocate(len);
-        obj->data_size = (int *)mem_sys_allocate(sizeof(int));
+        obj->data_size = (int *)mem_sys_allocate(sizeof (int));
     }
     else {
-        obj->data.code = (char *)mem_sys_realloc(obj->data.code, obj->data.size + len);
+        obj->data.code = (char *)mem_sys_realloc(obj->data.code,
+                                                 obj->data.size + len);
         nds = (int *)mem_sys_realloc(obj->data_size, (obj->data_count + 2) *
-            sizeof(int));
+            sizeof (int));
         obj->data_size = nds;
     }
 
@@ -162,11 +164,11 @@ static void
 exec_init(Parrot_exec_objfile_t *obj /*NN*/)
 {
     obj->text_rellocation_table = (Parrot_exec_rellocation_t *)
-        mem_sys_allocate_zeroed(sizeof(Parrot_exec_rellocation_t));
+        mem_sys_allocate_zeroed(sizeof (Parrot_exec_rellocation_t));
     obj->data_rellocation_table = (Parrot_exec_rellocation_t *)
-        mem_sys_allocate_zeroed(sizeof(Parrot_exec_rellocation_t));
+        mem_sys_allocate_zeroed(sizeof (Parrot_exec_rellocation_t));
     obj->symbol_table = (Parrot_exec_symbol_t *)
-        mem_sys_allocate_zeroed(sizeof(Parrot_exec_symbol_t));
+        mem_sys_allocate_zeroed(sizeof (Parrot_exec_symbol_t));
     /* size of table */
 #ifdef PARROT_I386
     obj->symbol_list_size = 4;
@@ -195,7 +197,8 @@ Adds a symbol to the object file.
 */
 
 int
-Parrot_exec_add_symbol(Parrot_exec_objfile_t *obj /*NN*/, const char *symbol /*NN*/, int stype)
+Parrot_exec_add_symbol(Parrot_exec_objfile_t *obj /*NN*/,
+                       const char *symbol /*NN*/, int stype)
 {
 
     int symbol_number = symbol_list_find(obj, symbol);
@@ -203,8 +206,8 @@ Parrot_exec_add_symbol(Parrot_exec_objfile_t *obj /*NN*/, const char *symbol /*N
         Parrot_exec_symbol_t *new_symbol;
 
         symbol_number = obj->symbol_count;
-        new_symbol = mem_sys_realloc(obj->symbol_table,
-            (size_t)(obj->symbol_count + 1) * sizeof(Parrot_exec_symbol_t));
+        new_symbol = (Parrot_exec_symbol_t *)mem_sys_realloc(obj->symbol_table,
+            (size_t)(obj->symbol_count + 1) * sizeof (Parrot_exec_symbol_t));
         obj->symbol_table = new_symbol;
 
         new_symbol = &obj->symbol_table[obj->symbol_count++];
@@ -219,7 +222,7 @@ Parrot_exec_add_symbol(Parrot_exec_objfile_t *obj /*NN*/, const char *symbol /*N
             obj->symbol_list_size++;
         if (stype == STYPE_COM) {
             new_symbol->type = STYPE_COM;
-            new_symbol->value = sizeof(Interp);
+            new_symbol->value = sizeof (Interp);
         }
         else {
             new_symbol->type = stype;
@@ -230,16 +233,17 @@ Parrot_exec_add_symbol(Parrot_exec_objfile_t *obj /*NN*/, const char *symbol /*N
 }
 
 int *
-Parrot_exec_add_text_rellocation_reg(Parrot_exec_objfile_t *obj /*NN*/, char *nptr,
-    const char *var, int offset, int disp)
+Parrot_exec_add_text_rellocation_reg(Parrot_exec_objfile_t *obj /*NN*/,
+                                     char *nptr, const char *var, int offset,
+                                     int disp)
 {
     Parrot_exec_add_text_rellocation(obj, nptr, RTYPE_COM, var, disp);
     return (int *)offset;
 }
 
 void
-Parrot_exec_add_text_rellocation_func(Parrot_exec_objfile_t *obj /*NN*/, char *nptr,
-    const char *func_name)
+Parrot_exec_add_text_rellocation_func(Parrot_exec_objfile_t *obj /*NN*/,
+                                      char *nptr, const char *func_name)
 {
     Parrot_exec_add_text_rellocation(obj, nptr, RTYPE_FUNC, func_name, 1);
 }
@@ -262,9 +266,9 @@ Parrot_exec_add_text_rellocation(Parrot_exec_objfile_t *obj /*NN*/, char *nptr,
     extern PARROT_API char **Parrot_exec_rel_addr;
     extern PARROT_API int Parrot_exec_rel_count;
 
-    new_relloc = mem_sys_realloc(obj->text_rellocation_table,
-        (size_t)(obj->text_rellocation_count + 1)
-            * sizeof(Parrot_exec_rellocation_t));
+    new_relloc = (Parrot_exec_rellocation_t *)mem_sys_realloc(
+        obj->text_rellocation_table, (size_t)(obj->text_rellocation_count + 1)
+            * sizeof (Parrot_exec_rellocation_t));
     obj->text_rellocation_table = new_relloc;
     new_relloc = &obj->text_rellocation_table[obj->text_rellocation_count++];
 
@@ -329,12 +333,10 @@ Initial version by Daniel Grunblatt on 2003.6.9.
 
 */
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
  */

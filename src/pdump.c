@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /local/src/pdump.c 13784 2006-08-01T17:54:04.760248Z chip  $
+$Id: /parrotcode/trunk/src/pdump.c 3159 2007-04-14T03:15:44.800537Z chromatic  $
 
 =head1 NAME
 
@@ -34,8 +34,8 @@ Terse output.
 
 =item C<-o converted.pbc>
 
-Repacks a PBC file into platforms native binary format for better
-efficiency on reading non native PBCs.
+Repacks a PBC file into the platform's native binary format for better
+efficiency on reading non-native PBCs.
 
 =back
 
@@ -54,103 +54,101 @@ F<src/packdump.c>.
 /*
 
 static void
-const_dump(Interp *interpreter, struct PackFile_Segment *segp)
+const_dump(Interp *interp, PackFile_Segment *segp)
 
 Dump the constant table.
 
 */
 
 static void
-const_dump (Interp *interpreter, struct PackFile_Segment *segp)
+const_dump(Interp *interp, PackFile_Segment *segp)
 {
-    PIO_printf(interpreter, "%s => [\n", segp->name);
-    PackFile_ConstTable_dump(interpreter,
-            (struct PackFile_ConstTable *)segp);
-    PIO_printf(interpreter, "],\n");
+    PIO_printf(interp, "%s => [\n", segp->name);
+    PackFile_ConstTable_dump(interp, (PackFile_ConstTable *)segp);
+    PIO_printf(interp, "],\n");
 }
 
 /*
 
 static void
-fixup_dump(Interp *interpreter, struct PackFile_Segment *segp)
+fixup_dump(Interp *interp, PackFile_Segment *segp)
 
-Dump the fix-up table.
+Dump the fixup table.
 
 */
 
 static void
-fixup_dump (Interp *interpreter, struct PackFile_Segment *segp)
+fixup_dump(Interp *interp, PackFile_Segment *segp)
 {
-    PIO_printf(interpreter, "%s => [\n", segp->name);
-    PackFile_Fixup_dump(interpreter,
-            (struct PackFile_FixupTable *)segp);
-    PIO_printf(interpreter, "],\n");
+    PIO_printf(interp, "%s => [\n", segp->name);
+    PackFile_Fixup_dump(interp, (PackFile_FixupTable *)segp);
+    PIO_printf(interp, "],\n");
 }
 
 /*
 
 static void
-disas_dump(Interp *interpreter, struct PackFile_Segment *self)
+disas_dump(Interp *interp, PackFile_Segment *self)
 
 Disassemble and dump.
 
 */
 
 static void
-disas_dump (Interp *interpreter, struct PackFile_Segment *self)
+disas_dump(Interp *interp, PackFile_Segment *self)
 {
     opcode_t *pc;
     size_t i, n;
-    PIO_printf(interpreter, "%s => [ # %d ops at offs 0x%x\n",
+    PIO_printf(interp, "%s => [ # %d ops at offs 0x%x\n",
             self->name, (int)self->size, (int)self->file_offset + 4);
     pc = self->data;
     while (pc < self->data + self->size) {
-        /* trace_op_dump(interpreter, self->pf->src, pc); */
-        PIO_printf(interpreter, " %04x:  ", (int) (pc - self->data));
-        n = (size_t)interpreter->op_info_table[*pc].op_count;
+        /* trace_op_dump(interp, self->pf->src, pc); */
+        PIO_printf(interp, " %04x:  ", (int) (pc - self->data));
+        n = (size_t)interp->op_info_table[*pc].op_count;
         for (i = 0; i < 6; i++)
             if (i < n)
-                PIO_printf(interpreter, "%08lx ", (unsigned long) pc[i]);
+                PIO_printf(interp, "%08lx ", (unsigned long) pc[i]);
             else
-                PIO_printf(interpreter, "         ");
-        PIO_printf(interpreter, "%s\n",
-                interpreter->op_info_table[*pc].full_name);
-        ADD_OP_VAR_PART(interpreter, interpreter->code, pc, n);
+                PIO_printf(interp, "         ");
+        PIO_printf(interp, "%s\n",
+                interp->op_info_table[*pc].full_name);
+        ADD_OP_VAR_PART(interp, interp->code, pc, n);
         pc += n;
     }
-    PIO_printf(interpreter, "]\n");
+    PIO_printf(interp, "]\n");
 }
 
 /*
 
 static void
-PackFile_header_dump(Interp *interpreter, struct PackFile *pf)
+PackFile_header_dump(Interp *interp, PackFile *pf)
 
 Dump the header.
 
 */
 
 static void
-PackFile_header_dump(Interp *interpreter, struct PackFile *pf)
+PackFile_header_dump(Interp *interp, PackFile *pf)
 {
-    PIO_printf(interpreter, "HEADER => [\n");
-    PIO_printf(interpreter, "\twordsize  = %d", pf->header->wordsize);
-    PIO_printf(interpreter, "\t(interpreter's wordsize    = %d)\n",
-            sizeof(opcode_t));
-    PIO_printf(interpreter, "\tint_size  = %d", pf->header->intvalsize);
-    PIO_printf(interpreter, "\t(interpreter's INTVAL size = %d)\n",
-            sizeof(INTVAL));
-    PIO_printf(interpreter, "\tbyteorder = %d", pf->header->byteorder);
-    PIO_printf(interpreter, "\t(interpreter's byteorder   = %d)\n",
+    PIO_printf(interp, "HEADER => [\n");
+    PIO_printf(interp, "\twordsize  = %d", pf->header->wordsize);
+    PIO_printf(interp, "\t(interpreter's wordsize    = %d)\n",
+            sizeof (opcode_t));
+    PIO_printf(interp, "\tint_size  = %d", pf->header->intvalsize);
+    PIO_printf(interp, "\t(interpreter's INTVAL size = %d)\n",
+            sizeof (INTVAL));
+    PIO_printf(interp, "\tbyteorder = %d", pf->header->byteorder);
+    PIO_printf(interp, "\t(interpreter's byteorder   = %d)\n",
             PARROT_BIGENDIAN);
-    PIO_printf(interpreter, "\tfloattype = %d", pf->header->floattype);
-    PIO_printf(interpreter, "\t(interpreter's NUMVAL_SIZE = %d)\n",NUMVAL_SIZE);
-    PIO_printf(interpreter, "\t%s endianize, %s opcode, %s numval transform\n",
+    PIO_printf(interp, "\tfloattype = %d", pf->header->floattype);
+    PIO_printf(interp, "\t(interpreter's NUMVAL_SIZE = %d)\n",NUMVAL_SIZE);
+    PIO_printf(interp, "\t%s endianize, %s opcode, %s numval transform\n",
             pf->need_endianize ? "**need**" : "no",
             pf->need_wordsize ? "**need**" : "no",
             pf->fetch_nv ? "**need**" : "no");
-    PIO_printf(interpreter, "\tdirformat = %d\n", pf->header->dir_format);
-    PIO_printf(interpreter, "]\n");
+    PIO_printf(interp, "\tdirformat = %d\n", pf->header->dir_format);
+    PIO_printf(interp, "]\n");
 }
 
 /*
@@ -170,7 +168,8 @@ static void help(void)
     printf("\t-d ... disassemble bytecode segments\n");
     printf("\t-h ... dump header only\n");
     printf("\t-t ... terse output\n");
-    printf("\n\t-o converted.pbc repacks a PBC file into platforms native\n");
+    printf("\n\t-o converted.pbc repacks a PBC file into "
+           "the platform's native\n");
     printf("\t   binary format for better efficiency on reading "
            "non native PBCs\n");
     exit(0);
@@ -189,15 +188,15 @@ static struct longopt_opt_decl options[] = {
 int
 main(int argc, char **argv)
 
-The run loop. Process the command-line arguments and dumps accordingly.
+The run loop. Process the command-line arguments and dump accordingly.
 
 */
 
 int
 main(int argc, char **argv)
 {
-    struct PackFile *pf;
-    Interp *interpreter;
+    PackFile *pf;
+    Interp *interp;
     int terse = 0;
     int disas = 0;
     int convert = 0;
@@ -209,10 +208,10 @@ main(int argc, char **argv)
     if (argc < 2) {
         help();
     }
-    interpreter = Parrot_new(NULL);
+    interp = Parrot_new(NULL);
     /* init and set top of stack */
-    Parrot_init_stacktop(interpreter, &status);
-    while ((status = longopt_get(interpreter,
+    Parrot_init_stacktop(interp, &status);
+    while ((status = longopt_get(interp,
                     argc, argv, options, &opt)) > 0) {
         switch (opt.opt_id) {
             case 'h':
@@ -240,45 +239,45 @@ main(int argc, char **argv)
     argv += opt.opt_index;
 
 
-    pf = Parrot_readbc(interpreter, *argv);
+    pf = Parrot_readbc(interp, *argv);
 
     if (!pf) {
         printf("Can't read PBC\n");
         return 1;
     }
-    Parrot_loadbc(interpreter, pf);
+    Parrot_loadbc(interp, pf);
     if (convert) {
         size_t size;
         opcode_t *pack;
         FILE *fp;
 
-        size = PackFile_pack_size(interpreter,
-                interpreter->code->base.pf) * sizeof(opcode_t);
+        size = PackFile_pack_size(interp,
+                interp->code->base.pf) * sizeof (opcode_t);
         pack = (opcode_t*) mem_sys_allocate(size);
         if (!pack) {
             printf("out of mem\n");
             exit(1);
         }
-        PackFile_pack(interpreter, interpreter->code->base.pf, pack);
-        if (strcmp (file, "-") == 0)
+        PackFile_pack(interp, interp->code->base.pf, pack);
+        if (strcmp(file, "-") == 0)
             fp = stdout;
         else if ((fp = fopen(file, "wb")) == 0) {
             printf("Couldn't open %s\n", file);
             exit(1);
         }
 
-        if ((1 != fwrite(pack, size, 1, fp)) ) {
+        if ((1 != fwrite(pack, size, 1, fp))) {
             printf("Couldn't write %s\n", file);
             exit(1);
         }
         fclose(fp);
         mem_sys_free(pack);
-        Parrot_exit(interpreter, 0);
+        Parrot_exit(interp, 0);
     }
 
-    PackFile_header_dump(interpreter, pf);
+    PackFile_header_dump(interp, pf);
     if (header) {
-        Parrot_exit(interpreter, 0);
+        Parrot_exit(interp, 0);
     }
     /* install a dumper function */
     if (!terse) {
@@ -288,18 +287,16 @@ main(int argc, char **argv)
     if (disas)
         pf->PackFuncs[PF_BYTEC_SEG].dump = disas_dump;
     /* do a directory dump, which dumps segs then */
-    PackFile_Segment_dump(interpreter, &pf->directory.base);
+    PackFile_Segment_dump(interp, &pf->directory.base);
 
-    Parrot_exit(interpreter, 0);
+    Parrot_exit(interp, 0);
     return 0;
 }
 
+
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

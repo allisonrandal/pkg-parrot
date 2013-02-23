@@ -1,5 +1,5 @@
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: /local/config/gen/revision.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# Copyright (C) 2005-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/config/gen/revision.pm 3475 2007-05-13T17:39:21.678075Z jkeenan  $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ so this field is empty.
 package gen::revision;
 
 use strict;
+use warnings;
 use vars qw($description $result);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -23,21 +24,19 @@ use Parrot::Revision;
 
 $description = "Determining Parrot's revision";
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     my $revision = $Parrot::Revision::current;
-    my $entries  = $Parrot::Revision::svn_entries;
 
     $conf->data->set(
         revision    => $revision,
-        SVN_ENTRIES => $entries
     );
 
-    if ($revision >= 1) {
+    if ( $revision >= 1 ) {
         $self->set_result("r$revision");
-    } else {
+    }
+    else {
         $self->set_result("done");
     }
 
@@ -45,3 +44,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,7 +1,7 @@
 /* exceptions.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/exceptions.h 13784 2006-08-01T17:54:04.760248Z chip  $
+ *     $Id: /parrotcode/trunk/include/parrot/exceptions.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:
@@ -10,29 +10,29 @@
  *  References:
  */
 
-#if !defined(PARROT_EXCEPTIONS_H_GUARD)
+#ifndef PARROT_EXCEPTIONS_H_GUARD
 #define PARROT_EXCEPTIONS_H_GUARD
 
 #include "parrot/compiler.h"
 
 /* Prototypes */
-void Parrot_init_exceptions(Interp *interpreter);
+void Parrot_init_exceptions(Interp *interp);
 
 PARROT_API void internal_exception(int exitcode, const char *format, ...)
         __attribute__nonnull__(2)
         __attribute__noreturn__;
-PARROT_API void real_exception(Interp *interpreter,
+PARROT_API void real_exception(Interp *interp,
         void *ret_addr, int exitcode, const char *format, ...)
         __attribute__nonnull__(4)
         __attribute__noreturn__;
-PARROT_API void do_panic(Interp *interpreter, const char *message,
+PARROT_API void do_panic(Interp *interp, const char *message,
         const char *file, int line)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3)
         __attribute__noreturn__;
 
 #define PANIC(message)\
-        do_panic(interpreter, message, __FILE__, __LINE__)
+        do_panic(interp, message, __FILE__, __LINE__)
 
 /* Exception Types
  * the first types are real exceptions and have Python exception
@@ -131,7 +131,8 @@ typedef enum {
         NOSPAWN,
         INTERNAL_NOT_IMPLEMENTED,
         ERR_OVERFLOW,
-        LOSSY_CONVERSION
+        LOSSY_CONVERSION,
+        ROLE_COMPOSITION_METH_CONFLICT
 } exception_type_enum;
 
 /* &end_gen */
@@ -139,48 +140,48 @@ typedef enum {
 /* &gen_from_enum(except_severity.pasm) subst(s/(\w+)/uc($1)/e) */
 
 typedef enum {
-    EXCEPT_normal = 0,
+    EXCEPT_normal  = 0,
     EXCEPT_warning = 1,
-    EXCEPT_error = 2,
-    EXCEPT_severe = 3,
-    EXCEPT_fatal = 4,
-    EXCEPT_doomed = 5,
-    EXCEPT_exit = 6
+    EXCEPT_error   = 2,
+    EXCEPT_severe  = 3,
+    EXCEPT_fatal   = 4,
+    EXCEPT_doomed  = 5,
+    EXCEPT_exit    = 6
 } exception_severity;
 
 /* &end_gen */
 
-/* Right now there's nothing special for the jump buffer, but there might be one later, so we wrap it in a struct so that we can expand it later */
-struct parrot_exception_t {
+/* Right now there's nothing special for the jump buffer, but there might be
+ * one later, so we wrap it in a struct so that we can expand it later */
+typedef struct parrot_exception_t {
     Parrot_jump_buff destination;       /* jmp_buf */
-    exception_severity severity;        /* s. above */
+    INTVAL severity;                    /* s. above */
     long error;                         /* exception_type_enum */
     STRING *msg;                        /* may be NULL */
     void *resume;                       /* opcode_t* for resume or NULL */
     struct parrot_exception_t *prev;    /* interpreters handler stack */
     long language;                      /* what is this? */
     long system;                        /* what is this? */
-};
+} Parrot_exception;
 
-typedef struct parrot_exception_t Parrot_exception;
 /*
  * user level exception handling
  */
 PARROT_API void push_exception(Parrot_Interp, PMC *);
 PARROT_API void pop_exception(Parrot_Interp);
-PARROT_API void * throw_exception(Parrot_Interp, PMC *, void *);
-PARROT_API void * rethrow_exception(Parrot_Interp, PMC *);
+PARROT_API opcode_t * throw_exception(Parrot_Interp, PMC *, void *);
+PARROT_API opcode_t * rethrow_exception(Parrot_Interp, PMC *);
 
 PARROT_API size_t handle_exception(Parrot_Interp);
 
 PARROT_API PMC* new_c_exception_handler(Parrot_Interp, Parrot_exception *jb);
 PARROT_API void push_new_c_exception_handler(Parrot_Interp, Parrot_exception *jb);
-PARROT_API void rethrow_c_exception(Parrot_Interp interpreter);
+PARROT_API void rethrow_c_exception(Parrot_Interp interp);
 
 /*
  * internal exception handling
  */
-PARROT_API void do_exception(Parrot_Interp, exception_severity severity, long error);
+PARROT_API void do_exception(Parrot_Interp, INTVAL severity, long error);
 PARROT_API void new_internal_exception(Parrot_Interp);
 PARROT_API void free_internal_exception(Parrot_Interp);
 
@@ -192,14 +193,15 @@ PARROT_API void Parrot_push_mark(Interp *, INTVAL mark);
 PARROT_API void Parrot_pop_mark(Interp *, INTVAL mark);
 PARROT_API void Parrot_push_action(Interp *, PMC *sub);
 
+/* global cleanup */
+void destroy_exception_list(Interp *interp);
+void really_destroy_exception_list(Parrot_exception *e);
+
 #endif /* PARROT_EXCEPTIONS_H_GUARD */
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

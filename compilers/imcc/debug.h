@@ -1,4 +1,4 @@
-#if !defined(PARROT_IMCC_DEBUG_H_GUARD)
+#ifndef PARROT_IMCC_DEBUG_H_GUARD
 #define PARROT_IMCC_DEBUG_H_GUARD
 
 #define DEBUG_PARROT 0x0001
@@ -39,3 +39,10 @@ void dump_liveness_status(IMC_Unit *);
 void dump_liveness_status_var(IMC_Unit *, SymReg*);
 
 #endif /* PARROT_IMCC_DEBUG_H_GUARD */
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

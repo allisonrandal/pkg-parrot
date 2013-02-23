@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /local/config/auto/byteorder.pm 12827 2006-05-30T02:28:15.110975Z coke  $
+# $Id: /parrotcode/local/config/auto/byteorder.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Computes the native byteorder for Parrot's wordsize.
 package auto::byteorder;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use Parrot::Configure::Step qw(:auto);
@@ -23,9 +24,8 @@ $description = q{Computing native byteorder for Parrot's wordsize};
 
 @args = ();
 
-sub runstep
-{
-    my ($self, $conf) = @_;
+sub runstep {
+    my ( $self, $conf ) = @_;
 
     cc_gen('config/auto/byteorder/test_c.in');
     cc_build();
@@ -34,19 +34,21 @@ sub runstep
 
     chomp $byteorder;
 
-    if ($byteorder =~ /^1234/) {
+    if ( $byteorder =~ /^1234/ ) {
         $conf->data->set(
             byteorder => $byteorder,
             bigendian => 0
         );
         $self->set_result('little-endian');
-    } elsif ($byteorder =~ /^(8765|4321)/) {
+    }
+    elsif ( $byteorder =~ /^(8765|4321)/ ) {
         $conf->data->set(
             byteorder => $byteorder,
             bigendian => 1
         );
         $self->set_result('big-endian');
-    } else {
+    }
+    else {
         die "Unsupported byte-order [$byteorder]!";
     }
 
@@ -54,3 +56,10 @@ sub runstep
 }
 
 1;
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

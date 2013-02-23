@@ -63,28 +63,13 @@ transform result (Cardinal::Grammar::body_statement) :language('PIR') {
 
 transform result (Cardinal::Grammar::compound_statement) :language('PIR') {
     .local pmc child
-    $I0 = defined node['statements']
-    unless $I0 goto err_no_tree
-    $P0 = node['statements']
-    $P0 = $P0[0]
-
-    child = tree.get('result', $P0, 'Cardinal::Grammar::statements')
-
-    .return (child)
-
-  err_no_tree:
-    print "The compound_statement node doesn't contain a 'statements' match.\n"
-    end
-}
-
-transform result (Cardinal::Grammar::statements) :language('PIR') {
-    .local pmc child
     .local pmc result
     result = new 'Cardinal::PAST::Stmts'
     result.'init'('node'=>node)
+    #.kdump2(node, 'compound_statement')
 
     $I0 = defined node['statement']
-    unless $I0 goto err_no_tree
+    unless $I0 goto no_statement
     $P0 = node['statement']      
     
     .local pmc iter
@@ -103,8 +88,12 @@ transform result (Cardinal::Grammar::statements) :language('PIR') {
   iter_end:
     .return (result)
 
-    err_no_tree:
+  no_statement:
+    .return ()
+
+  err_no_tree:
     print "The statements node doesn't contain a 'statement' match.\n"
+    .kdump2(node, 'statements')
     end
 }
 
@@ -206,7 +195,7 @@ transform result (Cardinal::Grammar::statement) :language('PIR') {
   n4:
     # if | unless | while | until
     $I0 = defined node['expression']
-    unless $I0 goto err_no_tree
+    unless $I0 goto n6
     $P0 = node['expression']      
     $P1 = $P0[0]
     child = tree.get('result', $P1, 'Cardinal::Grammar::expression')
@@ -244,6 +233,14 @@ transform result (Cardinal::Grammar::statement) :language('PIR') {
     result.'init'('node'=>node, 'try_stmt'=>child, 'rescue_stmt'=>$P0)
     .return (result)
 
+  n6:
+    $I0 = defined node['lang_statements']
+    unless $I0 goto err_no_tree
+    $P0 = node['lang_statements']      
+    $P0 = tree.get('result', $P0, 'Cardinal::Grammar::lang_statements')
+    .return ($P0)
+
+
   pass_through: 
     result.'add_child'(child)
     .return (result)
@@ -261,12 +258,7 @@ transform result (Cardinal::Grammar::expression) :language('PIR') {
     unless $I0 goto err_no_tree
     $P0 = node['operator_precedence_parser']
     child = tree.get('result', $P0, 'Cardinal::Grammar::operator_precedence_parser')
-
-    .local pmc result 
-    result = new 'Cardinal::PAST::Exp'
-    result.'init'('node'=>node)
-    result.'add_child'(child) 
-    .return (result)
+    .return (child)
 
   err_no_tree:
     print "The expression node doesn't contain a 'operator_precedence_parser' match.\n"
@@ -359,18 +351,25 @@ transform result (Cardinal::Grammar::assignment) :language('PIR') {
     child2 = tree.get('result', $P0, 'Cardinal::Grammar::expression')
     goto build_assignment
 
-   try_command:
+  try_command:
     $I0 = defined node['command_call']
-    unless $I0 goto try_primary
+    unless $I0 goto try_method_call
     $P0 = node['command_call']
     child = tree.get('result', $P0, 'Cardinal::Grammar::command_call')
     goto single_item
+
+  try_method_call:
+    $I0 = defined node['method_call']
+    unless $I0 goto try_atom
+    $P0 = node['method_call']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::method_call')
+    goto single_item
   
-  try_primary:
-    $I0 = defined node['primary']
+  try_atom:
+    $I0 = defined node['atom']
     unless $I0 goto err_no_tree
-    $P0 = node['primary']
-    child = tree.get('result', $P0, 'Cardinal::Grammar::primary')
+    $P0 = node['atom']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::atom')
     goto single_item
   
 
@@ -413,6 +412,35 @@ transform result (Cardinal::Grammar::command_call) :language('PIR') {
 
   err_no_tree:
     print "The command_call node doesn't contain a 'command' match.\n"
+    end
+}
+
+transform result (Cardinal::Grammar::method_call) :language('PIR') {
+    .local pmc child
+    .local pmc child2
+
+    $I0 = defined node['atom']
+    unless $I0 goto err_no_tree
+    $P0 = node['atom']
+    $S0 = node['atom']
+    #child = tree.get('result', $P0, 'Cardinal::Grammar::atom')
+    child = new 'Cardinal::PAST::Var'
+    child.'init'('node'=>node, 'name'=> $S0, 'scope'=>'exists')
+    
+    $I0 = defined node['operation2']
+    unless $I0 goto err_no_tree
+    $P0 = node['operation2']
+    child2 = tree.get('result', $P0, 'Cardinal::Grammar::operation2')
+
+    .local pmc result
+    result = new 'Cardinal::PAST::MethodCall'
+    result.'init'('node'=>node, 'name'=>child2)
+    result.'add_child'(child)
+    result.'add_child'(child2)
+    .return (result)
+
+  err_no_tree:
+    print "The method_call node doesn't contain a match.\n"
     end
 }
 
@@ -582,12 +610,38 @@ transform result (Cardinal::Grammar::operation) :language('PIR') {
     end
 }
 
+transform result (Cardinal::Grammar::operation2) :language('PIR') {
+.local pmc name
+
+    $I0 = defined node['IDENTIFIER']
+    unless $I0 goto test_constant
+    $P0 = node['IDENTIFIER']
+    name = tree.get('result', $P0, 'Cardinal::Grammar::IDENTIFIER')
+    .return (name)
+
+  test_constant:
+    $I0 = defined node['CONSTANT']
+    unless $I0 goto test_op
+    $P0 = node['CONSTANT']
+    name = tree.get('result', $P0, 'Cardinal::Grammar::CONSTANT')
+    .return (name)
+
+  test_op:
+    $I0 = defined node['op']
+    unless $I0 goto err_no_name
+    $P0 = node['op']
+    name = tree.get('result', $P0, 'Cardinal::Grammar::op')
+    .return (name)
+  
+  err_no_name:
+    print "The PGE operation2 node doesn't contain a 'IDENTIFIER', 'CONSTANT', or a 'op' match.\n"
+    end
+}
+
 transform result (Cardinal::Grammar::IDENTIFIER) :language('PIR') {
     .local pmc result
 
-    $I0 = defined node[0]
-    unless $I0 goto err_no_tree
-    $S0 = node[0]
+    $S0 = node
 
     result = new 'Cardinal::PAST::Val'
     result.'init'('node'=>node, 'name'=>$S0, 'valtype'=>'identifier')
@@ -613,17 +667,16 @@ transform result (Cardinal::Grammar::CONSTANT) :language('PIR') {
     end
 }
 
-transform result (Cardinal::Grammar::primary) :language('PIR') {
-    .local pmc child
-    $I0 = defined node['atom']
-    unless $I0 goto err_no_tree
-    $P0 = node['atom']
-    child = tree.get('result', $P0, 'Cardinal::Grammar::atom')
+transform result (Cardinal::Grammar::op) :language('PIR') {
+    $S0 = node
 
-    .return (child)
+    .local pmc result
+    result = new 'Cardinal::PAST::Val'
+    result.'init'('node'=>node, 'name'=>$S0, 'valtype'=>'op')      
+    .return (result)             
 
   err_no_tree:
-    print "The primary node doesn't contain a 'atom' match.\n"
+    print "The op node doesn't contain an 'op' match.\n"
     end
 }
 
@@ -644,72 +697,443 @@ transform result (Cardinal::Grammar::atom) :language('PIR') {
 
   try_variable:
     $I0 = defined node['variable']
-    unless $I0 goto try_if_clause
+    unless $I0 goto try_expression 
     $P0 = node['variable']
     child = tree.get('result', $P0, 'Cardinal::Grammar::variable')
     goto done
 
-  try_if_clause:
-    $I0 = defined node['if_clause']
-    unless $I0 goto try_begin
-    $P0 = node['if_clause']
-    child = tree.get('result', $P0, 'Cardinal::Grammar::if_clause')
+  try_expression:
+    $I0 = defined node['expression']
+    unless $I0 goto err_no_tree
+    $P0 = node['expression']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::expression')
     goto done
 
-  try_begin:
+done:
+    .return (child)
+
+err_no_tree:
+    print "The atom node doesn't contain an appropriate match.\n"
+    .kdump2(node, "atom")
+    end
+}
+    
+transform result (Cardinal::Grammar::lang_statements) :language('PIR') {
+    .local pmc child
     $I0 = defined node['begin']
-    unless $I0 goto try_def
+    unless $I0 goto try_if_clause
     .local pmc block
     $P0 = self.'top_scope_stack'()
     block = new 'Cardinal::PAST::Block'
     block.'init'('node'=>node, 'blocktype'=>'begin', 'outer'=>$P0)
-    $P0 = node['body_statement']
 
+    $P0 = node['body_statement']
     self.'push_scope_stack'(block)
     child = tree.get('result', $P0, 'Cardinal::Grammar::body_statement')
     self.'pop_scope_stack'()
 
     block.'add_child'(child)
     .return (block)
+  
+  try_if_clause:
+    $I0 = defined node['if_clause']
+    unless $I0 goto try_while_until_statement
+    $P0 = node['if_clause']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::if_clause')
+    .return (child)
+
+  try_while_until_statement:
+    .local pmc test
+    .local pmc body
+    .local pmc result
+
+    $I0 = defined node['while_until']
+    unless $I0 goto try_for_statement
+    $P0 = node['while_until']
+    $S0 = $P0
+
+    result = new 'Cardinal::PAST::WhileUntil'
+    result.'init'('node'=>node, 'name'=>$S0)
+  
+    $I0 = defined node['expression']
+    unless $I0 goto while_err_no_tree
+    $P0 = node['expression']
+    test = tree.get('result', $P0, 'Cardinal::Grammar::expression')
+    result.add_child(test)
+
+    $I0 = defined node['compound_statement']
+    unless $I0 goto while_err_no_tree
+    $P0 = node['compound_statement']
+    body = tree.get('result', $P0, 'Cardinal::Grammar::compound_statement')
+    result.add_child(body)
+
+    .return (result)             
+  
+  while_err_no_tree:
+    print "while or until node inline\n"
+    print "The while or until node doesn't contain an appropriate match.\n"
+    .kdump2(node, "while_statement")
+    end
+
+#    $I0 = defined node['while_until']
+#    unless $I0 goto try_for_statement
+#    child = tree.get('result', node, 'Cardinal::Grammar::while_until_statement')
+#    .return (child)
+
+  try_for_statement:
+    $I0 = defined node['for']
+    unless $I0 goto try_def
+
+    .local pmc var
+    .local pmc test
+    .local pmc body
+    .local pmc result
+
+    result = new 'Cardinal::PAST::For'
+    result.'init'('node'=>node)
+  
+    $I0 = defined node['for_variable']
+    unless $I0 goto for_err_no_tree
+    $P0 = node['for_variable']
+    var = tree.get('result', $P0, 'Cardinal::Grammar::for_variable')
+    result.add_child(var)
+
+    $I0 = defined node['expression']
+    unless $I0 goto for_err_no_tree
+    $P0 = node['expression']
+    test = tree.get('result', $P0, 'Cardinal::Grammar::expression')
+    result.add_child(test)
+
+    $I0 = defined node['compound_statement']
+    unless $I0 goto for_err_no_tree
+    $P0 = node['compound_statement']
+    body = tree.get('result', $P0, 'Cardinal::Grammar::compound_statement')
+    result.add_child(body)
+
+    .return (result)             
+  
+  for_err_no_tree:
+    print "The for node doesn't contain an appropriate match.\n"
+    .kdump2(node, "while_statement")
+    end
+
+#    $I0 = defined node['for']
+#    unless $I0 goto try_def
+#    child = tree.get('result', node, 'Cardinal::Grammar::for')
+#    .return (child)
 
   try_def:
     $I0 = defined node['def']
-    unless $I0 goto err_no_tree
+    unless $I0 goto try_class
     .local pmc function
     .local string function_name
     $P0 = node['function_name']
     function_name = tree.get('result', $P0, 'Cardinal::Grammar::function_name')
 
     $P0 = self.'top_scope_stack'()
+    $S0 = $P0.'blocktype'()
+    .local string function_blocktype
+    
+    function_blocktype = 'function'
+    unless $S0 == 'class' goto is_function
+      function_blocktype = 'method'
+    is_function:
+    
     function = new 'Cardinal::PAST::Block'
-    function.'init'('node'=>node, 'name'=>function_name, 'blocktype'=>function, 'outer'=>$P0)
+    function.'init'('node'=>node, 'name'=>function_name, 'blocktype'=>function_blocktype, 'outer'=>$P0)
     $P0 = node['function_prototype_arg_list']
+    
+    self.'add_to_current_block'(function_name, function)
 
     self.'push_scope_stack'(function)
-    child = tree.get('result', $P0, 'Cardinal::Grammar::function_prototype_arg_list')
-    self.'pop_scope_stack'()
 
-    function.'add_child'(child)
+    child = tree.get('result', $P0, 'Cardinal::Grammar::function_prototype_arg_list')
+   
+  if_null child, no_params 
+    .local pmc iter
+    iter = new .Iterator, child
+  iter_loop1:
+    unless iter, iter_end1
+    shift $P1, iter
+    function.'add_child'($P1)
+    goto iter_loop1
+  iter_end1:
+  no_params:
+
     $P0 = node['body_statement']
     child = tree.get('result', $P0, 'Cardinal::Grammar::body_statement')
+    self.'pop_scope_stack'()
     function.'add_child'(child)
     .return (function)
+  
+  try_class:
+    $I0 = defined node['class']
+    unless $I0 goto try_module
 
-  done:
-    .return (child)
+    $P0 = self.'top_scope_stack'()
+    .local pmc class_block
+    class_block = new 'Cardinal::PAST::Class'
+    class_block.'init'('node'=>node, 'name'=>function_name, 'blocktype'=>'class', 'outer'=>$P0)
+
+    $I0 = defined node['class_path']
+    unless $I0 goto err_no_tree
+    $P0 = node['class_path']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::class_path')
+    class_block.'class_path'(child)
+
+
+    $I0 = defined node['superclass']
+    unless $I0 goto err_no_tree
+    $P0 = node['superclass']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::superclass')
+    if_null child, class_body
+    class_block.'add_child'(child)
+
+  class_body:
+    $P0 = node['body_statement']
+    self.'push_scope_stack'(class_block)
+    child = tree.get('result', $P0, 'Cardinal::Grammar::body_statement')
+    self.'pop_scope_stack'()
+    class_block.'add_child'(child)
+    .return (class_block)
+
+  try_module:
+    $I0 = defined node['module']
+    unless $I0 goto err_no_tree
+
+    $P0 = self.'top_scope_stack'()
+    .local pmc module_block
+    module_block = new 'Cardinal::PAST::Module'
+    module_block.'init'('node'=>node, 'name'=>function_name, 'blocktype'=>'module', 'outer'=>$P0)
+
+    $I0 = defined node['class_path']
+    unless $I0 goto err_no_tree
+    $P0 = node['class_path']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::class_path')
+    module_block.'add_child'(child)
+
+  module_body:
+    $P0 = node['body_statement']
+    self.'push_scope_stack'(module_block)
+    child = tree.get('result', $P0, 'Cardinal::Grammar::body_statement')
+    self.'pop_scope_stack'()
+    module_block.'add_child'(child)
+    .return (module_block)
 
   err_no_tree:
-    print "The atom node doesn't contain a 'luteral' or a 'string'  match.\n"
-    .kdump2(node, "atom")
+    print "The lang_statements node doesn't contain an appropriate match.\n"
+    .kdump2(node, "lang_statements")
     end
 }
 
+transform result (Cardinal::Grammar::while_until_statement) :language('PIR') {
+    .local pmc test
+    .local pmc body
+    .local pmc result
+
+    $I0 = defined node['while_until']
+    unless $I0 goto err_no_tree
+    $P0 = node['while_until']
+    $S0 = $P0
+
+    result = new 'Cardinal::PAST::WhileUntil'
+    result.'init'('node'=>node, 'name'=>$S0)
+  
+    $I0 = defined node['expression']
+    unless $I0 goto err_no_tree
+    $P0 = node['expression']
+    test = tree.get('result', $P0, 'Cardinal::Grammar::expression')
+    result.add_child(test)
+
+    $I0 = defined node['compound_statement']
+    unless $I0 goto err_no_tree
+    $P0 = node['compound_statement']
+    body = tree.get('result', $P0, 'Cardinal::Grammar::compound_statement')
+    result.add_child(body)
+
+    .return (result)             
+  
+  err_no_tree:
+    print "while_until_statement\n"
+    print "The while or until node doesn't contain an appropriate match.\n"
+    .kdump2(node, "while_until_statement")
+    end
+}
+
+transform result (Cardinal::Grammar::for_statement) :language('PIR') {
+    .local pmc var
+    .local pmc test
+    .local pmc body
+    .local pmc result
+
+    result = new 'Cardinal::PAST::For'
+    result.'init'('node'=>node)
+  
+    $I0 = defined node['for_variable']
+    unless $I0 goto err_no_tree
+    $P0 = node['for_variable']
+    var = tree.get('result', $P0, 'Cardinal::Grammar::for_variable')
+    result.add_child(var)
+
+    $I0 = defined node['expression']
+    unless $I0 goto err_no_tree
+    $P0 = node['expression']
+    test = tree.get('result', $P0, 'Cardinal::Grammar::expression')
+    result.add_child(test)
+
+    $I0 = defined node['compound_statement']
+    unless $I0 goto err_no_tree
+    $P0 = node['compound_statement']
+    body = tree.get('result', $P0, 'Cardinal::Grammar::compound_statement')
+    result.add_child(body)
+
+    .return (result)             
+  
+  err_no_tree:
+    print "The for node doesn't contain an appropriate match.\n"
+    .kdump2(node, "while_statement")
+    end
+}
+
+transform result (Cardinal::Grammar::for_variable) :language('PIR') {
+    .local pmc var
+
+    $I0 = defined node['left_hand_side']
+    unless $I0 goto err_no_tree
+    $P0 = node['left_hand_side']
+    var = tree.get('result', $P0, 'Cardinal::Grammar::left_hand_side')
+    .return (var)
+
+    $I0 = defined node['multiple_left_hand_side']
+    unless $I0 goto err_no_tree
+    $P0 = node['multiple_left_hand_side']
+    var = tree.get('result', $P0, 'Cardinal::Grammar::multiple_left_hand_side')
+
+    .return (var)
+  
+  err_no_tree:
+    print "The for_variable node doesn't contain an appropriate match.\n"
+    .kdump2(node, "for_variable")
+    end
+}
+
+transform result (Cardinal::Grammar::function_name) :language('PIR') {
+    .local pmc op
+    .local pmc child
+    $I0 = defined node['IDENTIFIER']
+    unless $I0 goto n1
+    $P0 = node['IDENTIFIER']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::IDENTIFIER')
+    goto finish
+    n1:
+    $I0 = defined node['CONSTANT']
+    unless $I0 goto n2
+    $P0 = node['CONSTANT']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::CONSTANT')
+    goto finish
+    n2:
+    $I0 = defined node['FID']
+    unless $I0 goto n3
+    $P0 = node['FID']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::FID')
+    goto finish
+    n3:
+    $I0 = defined node['op']
+    unless $I0 goto n4
+    $P0 = node['op']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::op')
+    goto finish
+    n4:
+    $I0 = defined node['reserved_words']
+    unless $I0 goto err_no_tree
+    $P0 = node['reserved_words']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::reserved_words')
+    goto finish
+    finish:
+    $S0 = child
+    .return ($S0)
+
+  err_no_tree:
+    print "The function_name node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_name')
+    end
+}
+transform result (Cardinal::Grammar::class_path) :language('PIR') {
+    .local pmc result
+    .local pmc child
+    result = new 'Cardinal::PAST::ClassPath'
+    result.'init'('node'=>node, 'name'=>'class_path')
+    $S0 = node
+    result.'class_name'($S0)
+    
+    $I0 = defined node['starting_colons']
+    unless $I0 goto atoms
+    $P0 = node['starting_colons']
+    result.'starting_colons'(1)
+
+  atoms:
+    $I0 = defined node['atom']
+    unless $I0 goto get_name
+    $P0 = node['atom']
+
+    .local pmc iter
+    iter = new .Iterator, $P0
+  iter_loop:
+    unless iter goto iter_end
+    $P1 = shift iter
+    child = tree.get('result', $P1, 'Cardinal::Grammar::atom')
+    result.'add_child'(child)
+    goto iter_loop
+  iter_end:
+
+  get_name:
+    $I0 = defined node['class_name']
+    unless $I0 goto err_no_tree
+    $S0 = node['class_name']
+    result.'add_child'($S0)
+
+    .return (result)
+
+  err_no_tree:
+    print "The class_path node doesn't contain a the right component matches.\n"
+    .kdump(node)
+    end
+}
+
+transform result (Cardinal::Grammar::superclass) :language('PIR') {
+    .local pmc result
+    .local pmc child
+    result = new 'Cardinal::PAST::Op'
+    result.'init'('node'=>node, 'name'=>'superclass')
+    
+    $I0 = defined node['expression']
+    unless $I0 goto try_error
+    $P0 = node['expression'; 0]
+    child = tree.get('result', $P0, 'Cardinal::Grammar::expression')
+    .return (child)
+
+  try_error:
+    $I0 = defined node['error']
+    unless $I0 goto just_return
+    $P0 = node['error']
+    child = tree.get('result', $P0, 'Cardinal::Grammar::error')
+    .return (child)
+
+  just_return:
+    null $P0
+    .return ($P0)
+
+  err_no_tree:
+    print "The superclass node doesn't contain a the right component matches.\n"
+    .kdump(node)
+    end
+}
 
 transform result (Cardinal::Grammar::function_prototype_arg_list) :language('PIR') {
     .local pmc child
     $I0 = defined node['function_prototype_args']
     unless $I0 goto return_empty
-    $P0 = node['function_prototype_args']
+    $P0 = node['function_prototype_args'; 0]
     child = tree.get('result', $P0, 'Cardinal::Grammar::function_prototype_args')
     .return (child)
   return_empty:
@@ -717,73 +1141,114 @@ transform result (Cardinal::Grammar::function_prototype_arg_list) :language('PIR
     .return ($P0)
 
   err_no_tree:
-    print "The function_prototype_arg_list node doesn't contain a the right component matchs.\n"
+    print "The function_prototype_arg_list node doesn't contain a the right component matches.\n"
     .kdump2(node, 'function_prototype_arg_list')
     end
 }
 
 transform result (Cardinal::Grammar::function_prototype_args) :language('PIR') {
     .local pmc child
-    .local pmc op
-    op = new 'Cardinal::PAST::Op'
-    op.'init'('node'=>node, 'name'=>'parameters')
+    .local pmc arg_list
+    arg_list = new .ResizablePMCArray
+
+    $I0 = defined node['function_prototype_positional_arg_list']
+    unless $I0 goto n1
+    $P1 = node['function_prototype_positional_arg_list']
+    child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_positional_arg_list')
+    arg_list.'append'(child)
+
+    n1:
+    $I0 = defined node['function_prototype_optional_arg_list']
+    unless $I0 goto n2
+    $P1 = node['function_prototype_optional_arg_list']
+    child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_optional_arg_list')
+    arg_list.'append'(child)
+
+    n2:
+    $I0 = defined node['function_prototype_rest_args']
+    unless $I0 goto n3
+    $P1 = node['function_prototype_rest_args']
+    child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_rest_args')
+    push arg_list, child
+
+    n3:
+    $I0 = defined node['function_prototype_block_arg']
+    unless $I0 goto n4
+    $P1 = node['function_prototype_block_arg']
+    child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_block_arg')
+    push arg_list, child
+
+    n4:
+    .return (arg_list)
+
+  err_no_tree:
+    print "The function_prototype_args node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_prototype_args')
+    end
+}
+
+transform result (Cardinal::Grammar::function_prototype_positional_arg_list) :language('PIR') {
+    .local pmc child
+    .local pmc arg_list
+    arg_list = new .ResizablePMCArray
 
     $I0 = defined node['function_prototype_arg']
     unless $I0 goto n1
     $P0 = node['function_prototype_arg']
     
     .local pmc iter
-    iter = $P0.'child_iter'()
+    iter = new .Iterator, $P0
   iter_loop:
     unless iter, iter_end
     shift $P1, iter
     child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_arg')
-    op.'add_child'(child)
+    push arg_list, child
     goto iter_loop
   iter_end:
-    
-    n1:
+   
+  n1: 
+    .return (arg_list)
+
+  err_no_tree:
+    print "The function_prototype_positional_arg_list node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_prototype_positional_arg_list')
+    end
+}
+
+transform result (Cardinal::Grammar::function_prototype_optional_arg_list) :language('PIR') {
+    .local pmc child
+    .local pmc arg_list
+    arg_list = new .ResizablePMCArray
+
     $I0 = defined node['function_prototype_optional_arg']
-    unless $I0 goto n2
+    unless $I0 goto n1
     $P0 = node['function_prototype_optional_arg']
     
     .local pmc iter
-    iter = $P0.'child_iter'()
-  iter_loop1:
-    unless iter, iter_end1
+    iter = new .Iterator, $P0
+  iter_loop:
+    unless iter, iter_end
     shift $P1, iter
     child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_optional_arg')
-    op.'add_child'(child)
-    goto iter_loop1
-  iter_end1:
+    push arg_list, child
+    goto iter_loop
+  iter_end:
 
-    n2:
-    $I0 = defined node['function_prototype_rest_args']
-    unless $I0 goto n3
-    $P0 = node['function_prototype_rest_args']
-    child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_rest_args')
-    op.'add_child'(child)
-
-    n3:
-    $I0 = defined node['function_prototype_block_arg']
-    unless $I0 goto n4
-    $P0 = node['function_prototype_block_arg']
-    child = tree.get('result', $P1, 'Cardinal::Grammar::function_prototype_block_arg')
-    op.'add_child'(child)
-
-    n4:
-    .return (op)
-
+  n1:
+    .return (arg_list)
+  
   err_no_tree:
-    print "The function_prototype_arg_list node doesn't contain a the right component matchs.\n"
-    .kdump2(node, 'function_prototype_arg_list')
+    print "The function_prototype_optional_arg_list node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_prototype_optional_arg_list')
     end
 }
+
 
 transform result (Cardinal::Grammar::function_prototype_arg) :language('PIR') {
     .local pmc op
     .local pmc child
     .local string type
+    
     $I0 = defined node['IDENTIFIER']
     unless $I0 goto n1
     $P0 = node['IDENTIFIER']
@@ -820,12 +1285,13 @@ transform result (Cardinal::Grammar::function_prototype_arg) :language('PIR') {
     goto finish
     finish:
     $S0 = child
-    op = new 'Cardinal::PAST::Var'
-    op.'init'('node'=>node, 'name'=>$S0, 'type'=>'parameter', 'subtype'=>'positional', 'type2'=>type)
+    op = new 'Cardinal::PAST::PositionalParameter'
+    op.'init'('node'=>node, 'name'=>$S0, 'scope'=>'parameter', 'type'=>type)
+    self.'add_to_current_block'($S0, op)
     .return (op)
 
   err_no_tree:
-    print "The function_prototype_arg node doesn't contain a the right component matchs.\n"
+    print "The function_prototype_arg node doesn't contain a the right component matches.\n"
     .kdump2(node, 'function_prototype_arg')
     end
 }
@@ -841,13 +1307,14 @@ transform result (Cardinal::Grammar::function_prototype_optional_arg) :language(
     $S0 = child
     $P0 = node['expression']
     expression = tree.get('result', $P0, 'Cardinal::Grammar::expression')
-    op = new 'Cardinal::PAST::Var'
-    op.'init'('node'=>node, 'name'=>$S0, 'type'=>'parameter', 'subtype'=>'optional', 'default_value'=>expression)
+    op = new 'Cardinal::PAST::OptionalParameter'
+    op.'init'('node'=>node, 'name'=>$S0, 'scope'=>'parameter', 'default_value'=>expression)
+    self.'add_to_current_block'($S0, op)
     .return (op)
 
   err_no_tree:
-    print "The function_prototype_arg_list node doesn't contain a the right component matchs.\n"
-    .kdump2(node, 'function_prototype_arg_list')
+    print "The function_prototype_optional_arg node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_prototype_optional_arg')
     end
 }
 
@@ -859,13 +1326,14 @@ transform result (Cardinal::Grammar::function_prototype_rest_args) :language('PI
     $P0 = node['IDENTIFIER']
     child = tree.get('result', $P0, 'Cardinal::Grammar::IDENTIFIER')
     $S0 = child
-    op = new 'Cardinal::PAST::Var'
-    op.'init'('node'=>node, 'name'=>$S0, 'type'=>'parameter', 'subtype'=>'rest')
+    op = new 'Cardinal::PAST::RestParameter'
+    op.'init'('node'=>node, 'name'=>$S0, 'scope'=>'parameter')
+    self.'add_to_current_block'($S0, op)
     .return (op)
 
   err_no_tree:
-    print "The function_prototype_arg_list node doesn't contain a the right component matchs.\n"
-    .kdump2(node, 'function_prototype_arg_list')
+    print "The function_prototype_rest_arg_list node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_prototype_rest_arg_list')
     end
 }
 
@@ -877,13 +1345,14 @@ transform result (Cardinal::Grammar::function_prototype_block_arg) :language('PI
     $P0 = node['IDENTIFIER']
     child = tree.get('result', $P0, 'Cardinal::Grammar::IDENTIFIER')
     $S0 = child
-    op = new 'Cardinal::PAST::Var'
-    op.'init'('node'=>node, 'name'=>$S0, 'type'=>'parameter', 'subtype'=>'block')
+    op = new 'Cardinal::PAST::BlockParameter'
+    op.'init'('node'=>node, 'name'=>$S0, 'scope'=>'parameter')
+    self.'add_to_current_block'($S0, op)
     .return (op)
 
   err_no_tree:
-    print "The function_prototype_arg_list node doesn't contain a the right component matchs.\n"
-    .kdump2(node, 'function_prototype_arg_list')
+    print "The function_prototype_block_arg node doesn't contain a the right component matches.\n"
+    .kdump2(node, 'function_prototype_block_arg')
     end
 }
 
@@ -923,7 +1392,7 @@ transform result (Cardinal::Grammar::if_clause) :language('PIR') {
 
 
   err_no_tree:
-    print "The if_clause node doesn't contain a the right component matchs.\n"
+    print "The if_clause node doesn't contain a the right component matches.\n"
     .kdump2(node, 'if_clause')
     end
 }
@@ -1093,16 +1562,37 @@ transform result (Cardinal::Grammar::left_hand_side) :language('PIR') {
 
 transform result (Cardinal::Grammar::variable) :language('PIR') {
     $I0 = defined node['IDENTIFIER']
-    unless $I0 goto global_variable
+    unless $I0 goto constant_variable
     $S0 = node['IDENTIFIER']
     #$S0 = tree.get('result', $P0, 'Cardinal::Grammar::IDENTIFIER')
     goto case_end
 
+  constant_variable:
+    $I0 = defined node['CONSTANT']
+    unless $I0 goto global_variable
+    $S0 = node['CONSTANT']
+    #$S0 = tree.get('result', $P0, 'Cardinal::Grammar::CONSTANT')
+    goto case_end
+
   global_variable:
     $I0 = defined node['GLOBAL_VARIABLE']
-    unless $I0 goto true_bool
+    unless $I0 goto instance_variable
     $P0 = node['GLOBAL_VARIABLE']
     $P0 = tree.'get'('result', $P0, 'Cardinal::Grammar::GLOBAL_VARIABLE')
+    .return ($P0)
+
+  instance_variable:
+    $I0 = defined node['INSTANCE_VARIABLE']
+    unless $I0 goto class_variable
+    $P0 = node['INSTANCE_VARIABLE']
+    $P0 = tree.'get'('result', $P0, 'Cardinal::Grammar::INSTANCE_VARIABLE')
+    .return ($P0)
+
+  class_variable:
+    $I0 = defined node['CLASS_VARIABLE']
+    unless $I0 goto true_bool
+    $P0 = node['CLASS_VARIABLE']
+    $P0 = tree.'get'('result', $P0, 'Cardinal::Grammar::CLASS_VARIABLE')
     .return ($P0)
 
   true_bool:
@@ -1119,12 +1609,19 @@ transform result (Cardinal::Grammar::variable) :language('PIR') {
 
   case_end:
     .local pmc result
-    result = new 'Cardinal::PAST::Var'
     $S1 = self.'variable_scope'($S0)
+    eq $S1, 'func', func_call_without_args
+
+    result = new 'Cardinal::PAST::Var'
     result.'init'('node'=>node, 'name'=> $S0, 'scope'=>$S1)
     ne $S1, 'lexical', return
     self.'add_to_current_block'($S0, result)
   return:
+    .return (result)
+
+  func_call_without_args:
+    result = new 'Cardinal::PAST::FunctionCall'
+    result.'init'('node'=>node, 'name'=> $S0)
     .return (result)
 
   err_no_tree:
@@ -1141,6 +1638,22 @@ transform result (Cardinal::Grammar::GLOBAL_VARIABLE) :language('PIR') {
     .return (result)
 }
 
+transform result (Cardinal::Grammar::INSTANCE_VARIABLE) :language('PIR') {
+    $S0 = node
+    .local pmc result
+    result = new 'Cardinal::PAST::Var'
+    result.'init'('node'=>node, 'name'=> $S0, 'scope'=>'instance')
+    .return (result)
+}
+
+transform result (Cardinal::Grammar::CLASS_VARIABLE) :language('PIR') {
+    $S0 = node
+    .local pmc result
+    result = new 'Cardinal::PAST::Var'
+    result.'init'('node'=>node, 'name'=> $S0, 'scope'=>'class')
+    .return (result)
+}
+
 
 
 # The following rules are for the results of the operator precedence
@@ -1151,6 +1664,7 @@ transform result (Cardinal::Grammar::GLOBAL_VARIABLE) :language('PIR') {
 
 transform op (expr) :language('PIR') {
     .local pmc result
+    .local string type
     $S1 = node["type"]
     result = new 'Cardinal::PAST::Op'
     result.'init'('node'=>node, 'name'=>$S1)
@@ -1162,10 +1676,19 @@ transform op (expr) :language('PIR') {
   iter_loop:
     unless iter, iter_end
     shift $P2, iter
-    $P3 = tree.get('term', $P2, 'expr')
-    if null $P3 goto iter_loop
-    result.'add_child'($P3)
-    goto iter_loop
+    
+    type = $P2["type"]
+    if type == 'term:' goto transform_term
+      # else
+      $P3 = tree.get('op', $P2, 'expr')
+      if null $P3 goto iter_loop
+      result.'add_child'($P3)
+      goto iter_loop
+    transform_term:
+      $P3 = tree.get('term', $P2, 'expr')
+      if null $P3 goto iter_loop
+      result.'add_child'($P3)
+      goto iter_loop
   iter_end:
 
     .return (result)
@@ -1199,6 +1722,7 @@ transform term (expr) :language('PIR') {
 
   err_too_many:
     print "error: Currently, 'term' nodes should have only one child.\n"
+    .kdump2(node, 'term')
     end
 }
 

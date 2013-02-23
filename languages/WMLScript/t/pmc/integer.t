@@ -1,6 +1,6 @@
-#! perl -w
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: /local/languages/WMLScript/t/pmc/integer.t 13523 2006-07-24T15:49:07.843920Z chip  $
+#! perl
+# Copyright (C) 2006-2007, The Perl Foundation.
+# $Id: /parrotcode/trunk/languages/WMLScript/t/pmc/integer.t 470 2006-12-05T03:30:45.414067Z svm  $
 
 =head1 NAME
 
@@ -17,6 +17,8 @@ Tests C<WmlsInteger> PMC
 
 =cut
 
+use strict;
+use warnings;
 use Parrot::Test tests => 10;
 use Test::More;
 
@@ -229,4 +231,11 @@ CODE
 true
 WmlsBoolean
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
 

@@ -24,5 +24,11 @@
   .return($S0)
 
 noargs:
-  .throw('wrong # args: should be "format formatString ?arg arg ...?"')
+  tcl_error 'wrong # args: should be "format formatString ?arg arg ...?"'
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

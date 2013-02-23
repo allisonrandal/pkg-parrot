@@ -1,20 +1,22 @@
-#!perl -w
+#!perl
 
-use Test::More;
-use DotNetTesting;
 use strict;
+use warnings;
+use lib qw( lib ../lib ../../lib dotnet dotnet/t );
+
+use DotNetTesting;
 
 use Test::More tests => 3;
 
 ## Testing class for this file.
-die unless compile_cs("t.dll", <<'CSHARP');
+die unless compile_cs( "t.dll", <<'CSHARP');
 namespace Testing
 {
     public struct value_type {
         public int x;
         public int y;
     }
-    
+
     public class Test
     {
         public int box_1()
@@ -45,10 +47,10 @@ namespace Testing
 CSHARP
 
 ## Attempt to translate.
-ok(translate("t.dll", "t.pbc"), 'translate');
+ok( translate( "t.dll", "t.pbc" ), 'translate' );
 
 ## Tests.
-is (run_pir(<<'PIR'), <<'OUTPUT', 'box_1');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'box_1' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -61,7 +63,7 @@ PIR
 11
 OUTPUT
 
-is (run_pir(<<'PIR'), <<'OUTPUT', 'box_2');
+is( run_pir(<<'PIR'), <<'OUTPUT', 'box_2' );
 .sub main
 	.local pmc obj
 	load_bytecode "t.pbc"
@@ -73,3 +75,10 @@ is (run_pir(<<'PIR'), <<'OUTPUT', 'box_2');
 PIR
 22
 OUTPUT
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

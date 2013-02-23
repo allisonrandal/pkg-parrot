@@ -1,7 +1,7 @@
 /* longopt.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /local/include/parrot/longopt.h 12834 2006-05-30T13:17:39.723584Z coke  $
+ *     $Id: /parrotcode/trunk/include/parrot/longopt.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
  *  Overview:
  *     Command line option parsing (for pre-initialized code)
  *  Data Structure and Algorithms:
@@ -10,7 +10,7 @@
  *  References:
  */
 
-#if !defined(PARROT_LONGOPT_H_GUARD)
+#ifndef PARROT_LONGOPT_H_GUARD
 #define PARROT_LONGOPT_H_GUARD
 
 /* I use a char* here because this needs to be easily statically
@@ -52,10 +52,7 @@ PARROT_API int longopt_get(Parrot_Interp, int argc, char* argv[],
 
 /*
  * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
+ *   c-file-style: "parrot"
  * End:
- *
  * vim: expandtab shiftwidth=4:
-*/
+ */

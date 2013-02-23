@@ -29,8 +29,17 @@ select_elem:
 
   $P0 = argv[$I0]
   .local pmc indices
-  indices = __list($P0)
-  
+  push_eh not_a_list
+    indices = __list($P0)
+  clear_eh
+  goto select
+
+not_a_list:
+  indices = new .FixedPMCArray
+  indices = 1
+  indices[0] = $P0
+
+select:
   .local int index
   .local int elems
   elems = elements indices
@@ -41,6 +50,11 @@ select_loop:
   
   $P0 = indices[$I1]
   index = __index($P0, list)
+
+  $I2 = elements list
+  if index >= $I2 goto empty
+  if index < 0    goto empty
+
   list  = list[index]
   
   inc $I1
@@ -49,6 +63,15 @@ select_loop:
 done:
   .return(list)
 
+empty:
+  .return('')
+
 bad_args:
-  .throw('wrong # args: should be "lindex list ?index...?"')
+  tcl_error 'wrong # args: should be "lindex list ?index...?"'
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:
