@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 11_math_ops_self_mod.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 Math Operations (continued)
 
 There is a second common form of math operations. This form takes

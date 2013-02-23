@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: Perl6Grammar.pir 39972 2009-07-10 05:14:13Z pmichaud $
+
 =head1 TITLE
 
 Perl6Grammar - compiler for Perl 6 grammars
@@ -63,7 +66,7 @@ the output to the correct output file.
     .local pmc pgc
 
     pgc = compreg 'PGE::Perl6Grammar'
-    pgc.'command_line'(args, 'target'=>'PIR', 'combine'=>1)
+    pgc.'command_line'(args, 'target'=>'PIR', 'combine'=>1, 'transcode'=>'iso-8859-1')
     .return ()
 .end
 
@@ -98,7 +101,8 @@ the output to the correct output file.
       | '"' (<-["]>*:) '"'
       | '(' (<-[)]>*:) ')'
       | '<' (<-[>]>*:) '>'
-      | '«' (<-[»]>*:) '»'
+      | \xc2\xab (.*?) \xc2\xbb
+      | \xab (<-[\xbb]>*:) \xbb
       | (\S+)
       ]
       END_ARG_RULE
@@ -136,9 +140,9 @@ the output to the correct output file.
     .param pmc source
     .param pmc adverbs         :slurpy :named
 
-    .local pmc nstable, namespace
+    .local pmc nstable, ns
     nstable = new 'Hash'
-    namespace = new 'String'
+    ns = new 'String'
     $P0 = new 'Hash'
     $P1 = new 'CodeString'
     $P0['optable'] = $P1
@@ -161,7 +165,7 @@ the output to the correct output file.
     $S0 = match['cmd']
     concat $S0, '_stmt'
     $P0 = find_name $S0
-    $P0(match, namespace, nstable)
+    $P0(match, ns, nstable)
     goto stmt_loop
   stmt_end:
 
@@ -193,7 +197,7 @@ the output to the correct output file.
   ns_optable:
     $P0 = ns['optable']
     if $P0 == '' goto iter_loop
-    initpir.'emit'("          optable = new ['PGE';'OPTable']")
+    initpir.'emit'("          optable = root_new ['parrot';'PGE';'OPTable']")
     $S0 = namespace
     $P1 = split '::', $S0
     $P1 = initpir.'key'($P1 :flat)

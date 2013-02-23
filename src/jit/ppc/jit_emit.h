@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2008, Parrot Foundation.
+ * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
 /*
@@ -7,7 +7,7 @@
  *
  * PPC
  *
- * $Id: jit_emit.h 37392 2009-03-13 19:51:47Z Util $
+ * $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
  */
 
 #ifndef PARROT_PPC_JIT_EMIT_H_GUARD
@@ -880,7 +880,7 @@ jit_get_params_pc(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
     PMC    *sig_pmc  = CONTEXT(interp)->constants[CUR_OPCODE[1]]->u.key;
     INTVAL *sig_bits = PMC_data_typed(sig_pmc, INTVAL *);
-    INTVAL  n        = PMC_int_val(sig_pmc);
+    INTVAL  n        = VTABLE_get_integer(interp, sig_pmc);
     INTVAL  i;
 
     jit_info->n_args = n;
@@ -1386,6 +1386,8 @@ static const jit_arch_info arch_info = {
 };
 
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 const jit_arch_info *
 Parrot_jit_init(PARROT_INTERP)
 {

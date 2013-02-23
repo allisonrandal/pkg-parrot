@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Daemon.pir 37466 2009-03-16 05:41:07Z cotto $
+# $Id: Daemon.pir 38693 2009-05-11 18:45:05Z NotFound $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ HTTP;Daemon - A Simple HTTPD Server
 
 =head1 SYNOPSIS
 
-  load_bytecode "HTTP/Daemon.pir"
+  load_bytecode "HTTP/Daemon.pbc"
   opts = new 'Hash'
   opts['LocalPort'] = 1234
   opts['LocalAddr'] = 'localhost'

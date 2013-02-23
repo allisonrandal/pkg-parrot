@@ -1,5 +1,5 @@
 /*
- * $Id: pirop.c 36665 2009-02-13 10:20:10Z kjs $
+ * $Id: pirop.c 37925 2009-04-06 18:00:28Z coke $
  * Copyright (C) 2009, Parrot Foundation.
  */
 
@@ -42,6 +42,11 @@ static char const type_codes[10] = {
     'n',   /* NUM_VAL      */
     's'    /* USTRING_VAL  */
 };
+
+
+/* HEADERIZER HFILE: compilers/pirc/src/pirop.h */
+
+/* HEADERIZER BEGIN: static */
 
 /*
 
@@ -269,8 +274,7 @@ get_signatured_opname(NOTNULL(lexer_state * const lexer), NOTNULL(instruction * 
 
 /*
 
-=item C<int
-get_opinfo(lexer_state * const lexer)>
+=item C<int get_opinfo(lexer_state * const lexer)>
 
 Compute the signatured opname from the instruction name and its arguments.
 Based on this signature, the opcode is retrieved. If the opcode cannot
@@ -284,7 +288,9 @@ then that means the op is not valid, and an error message will be reported.
 */
 PARROT_IGNORABLE_RESULT
 int
-get_opinfo(lexer_state * const lexer) {
+get_opinfo(ARGIN(lexer_state * const lexer))
+{
+    ASSERT_ARGS(get_opinfo)
     instruction * const instr = CURRENT_INSTRUCTION(lexer);
 
     char * const fullopname   = get_signatured_opname(lexer, instr);
@@ -301,6 +307,8 @@ get_opinfo(lexer_state * const lexer) {
     }
 
 }
+
+/* HEADERIZER END: static */
 
 /*
 

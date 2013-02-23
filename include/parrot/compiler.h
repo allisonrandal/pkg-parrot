@@ -1,7 +1,7 @@
 /* compiler.h
  *  Copyright (C) 2007-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: compiler.h 36833 2009-02-17 20:09:26Z allison $
+ *     $Id: compiler.h 40159 2009-07-19 18:14:46Z moritz $
  *  Overview:
  *     defines compiler capabilities
  */
@@ -13,20 +13,6 @@
  * This set of macros define capabilities that may or may not be available
  * for a given compiler.  They are based on GCC's __attribute__ functionality.
  */
-
-/*
- * Microsoft provides two annotations mechanisms.  __declspec, which has been
- * around for a while, and Microsoft's standard source code annotation
- * language (SAL), introduced with Visual C++ 8.0.
- * See <http://msdn2.microsoft.com/en-us/library/ms235402(VS.80).aspx>,
- * <http://msdn2.microsoft.com/en-us/library/dabb5z75(VS.80).aspx>.
- */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#  define PARROT_HAS_SAL 1
-#  include <sal.h>
-#else
-#  define PARROT_HAS_SAL 0
-#endif
 
 #ifdef HASATTRIBUTE_NEVER_WORKS
  #  error This attribute can never succeed.  Something has mis-sniffed your configuration.
@@ -111,9 +97,21 @@
 /* UNUSED() is the old way we handled shim arguments Should still be
    used in cases where the argument should, at some point be used.
  */
-#define UNUSED(a) if (0) (void)(a);
+#define UNUSED(a) /*@-noeffect*/if (0) (void)(a)/*@=noeffect*/;
 
-#if PARROT_HAS_SAL
+/* 64-bit CL has some problems, so this section here is going to try to fix them */
+#ifdef PARROT_HAS_MSVC_SAL
+#  ifdef _WIN64
+    /* CL64 can't seem to find sal.h, so take that out of the equation */
+#    undef PARROT_HAS_MSVC_SAL
+    /* CL64 complains about not finding _iob, so this might fix it */
+
+
+#  endif
+#endif
+
+#ifdef PARROT_HAS_MSVC_SAL
+#  include <sal.h>
 #  define PARROT_CAN_RETURN_NULL      /*@null@*/ __maybenull
 #  define PARROT_CANNOT_RETURN_NULL   /*@notnull@*/ __notnull
 #else
@@ -126,16 +124,25 @@
 #define PARROT_IGNORABLE_RESULT
 #define PARROT_WARN_UNUSED_RESULT   __attribute__warn_unused_result__
 
+/* Pure functions have no side-effects, and depend only on parms or globals. e.g. strlen() */
 #define PARROT_PURE_FUNCTION                __attribute__pure__  __attribute__warn_unused_result__
+
+/* Const functions are pure functions, and do not examine targets of pointers. e.g. sqrt() */
 #define PARROT_CONST_FUNCTION               __attribute__const__ __attribute__warn_unused_result__
+
 #define PARROT_DOES_NOT_RETURN              /*@noreturn@*/ __attribute__noreturn__
 #define PARROT_DOES_NOT_RETURN_WHEN_FALSE   /*@noreturnwhenfalse@*/
 #define PARROT_MALLOC                       /*@only@*/ __attribute__malloc__ __attribute__warn_unused_result__
 
+/* Macros for exposure tracking for splint. */
+/* See http://www.splint.org/manual/html/all.html section 6.2 */
+#define PARROT_OBSERVER                     /*@observer@*/
+#define PARROT_EXPOSED                      /*@exposed@*/
+
 /* Function argument instrumentation */
 /* For explanations of the annotations, see http://www.splint.org/manual/manual.html */
 
-#if PARROT_HAS_SAL
+#ifdef PARROT_HAS_MSVC_SAL
 #  define NOTNULL(x)                  /*@notnull@*/ __notnull x
     /* The pointer passed may not be NULL */
 

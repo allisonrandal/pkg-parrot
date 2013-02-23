@@ -1,10 +1,10 @@
 #! parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: hllmacros.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: hllmacros.t 37840 2009-04-01 17:19:14Z barney $
 
-.include 'include/hllmacros.pir'
+.include 'hllmacros.pir'
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     plan(17)
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2009, Parrot Foundation.
- * $Id: pcc.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: pcc.c 39725 2009-06-22 21:39:26Z NotFound $
  */
 
 /*
@@ -150,7 +150,8 @@ static void unshift_self(ARGIN(SymReg *sub), ARGIN(SymReg *obj))
 
 /*
 
-=item C<static Instruction * insINS>
+=item C<static Instruction * insINS(PARROT_INTERP, IMC_Unit *unit, Instruction
+*ins, const char *name, SymReg **regs, int n)>
 
 Utility instruction routine. Creates and inserts an instruction
 into the current block in one call.
@@ -175,7 +176,7 @@ insINS(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(Instruction *ins),
 
 /*
 
-=item C<SymReg* get_pasm_reg>
+=item C<SymReg* get_pasm_reg(PARROT_INTERP, const char *name)>
 
 get or create the SymReg
 
@@ -199,7 +200,7 @@ get_pasm_reg(PARROT_INTERP, ARGIN(const char *name))
 
 /*
 
-=item C<SymReg* get_const>
+=item C<SymReg* get_const(PARROT_INTERP, const char *name, int type)>
 
 get or create a constant
 
@@ -223,7 +224,9 @@ get_const(PARROT_INTERP, ARGIN(const char *name), int type)
 
 /*
 
-=item C<static Instruction* pcc_get_args>
+=item C<static Instruction* pcc_get_args(PARROT_INTERP, IMC_Unit *unit,
+Instruction *ins, const char *op_name, int n, SymReg * const *args, const int
+*arg_flags)>
 
 set arguments or return values
 get params or results
@@ -337,7 +340,7 @@ pcc_get_args(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(Instruction *ins),
 
 /*
 
-=item C<static void unshift_self>
+=item C<static void unshift_self(SymReg *sub, SymReg *obj)>
 
 prepend the object to args or self to params
 
@@ -368,7 +371,7 @@ unshift_self(ARGIN(SymReg *sub), ARGIN(SymReg *obj))
 
 /*
 
-=item C<void expand_pcc_sub>
+=item C<void expand_pcc_sub(PARROT_INTERP, IMC_Unit *unit, Instruction *ins)>
 
 Expand a PCC (Parrot Calling Convention) subroutine
 by generating the appropriate prologue and epilogue
@@ -448,7 +451,8 @@ expand_pcc_sub(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(Instruction *ins))
 
 /*
 
-=item C<void expand_pcc_sub_ret>
+=item C<void expand_pcc_sub_ret(PARROT_INTERP, IMC_Unit *unit, Instruction
+*ins)>
 
 Expand a PCC sub return directive into its PASM instructions
 
@@ -492,9 +496,8 @@ typedef struct move_info_t {
 
 /*
 
-=item C<static int pcc_reg_mov>
-
-RT #48260: Not yet documented!!!
+=item C<static int pcc_reg_mov(PARROT_INTERP, unsigned char d, unsigned char s,
+void *vinfo)>
 
 =cut
 
@@ -564,9 +567,8 @@ pcc_reg_mov(PARROT_INTERP, unsigned char d, unsigned char s, ARGMOD(void *vinfo)
 
 /*
 
-=item C<static Instruction * move_regs>
-
-RT #48260: Not yet documented!!!
+=item C<static Instruction * move_regs(PARROT_INTERP, IMC_Unit *unit,
+Instruction *ins, size_t n, SymReg **dest, SymReg **src)>
 
 =cut
 
@@ -622,7 +624,8 @@ done:
 
 /*
 
-=item C<static int recursive_tail_call>
+=item C<static int recursive_tail_call(PARROT_INTERP, IMC_Unit *unit,
+Instruction *ins, SymReg *sub)>
 
 convert a recursive tailcall into a loop
 
@@ -686,9 +689,8 @@ recursive_tail_call(PARROT_INTERP, ARGIN(IMC_Unit *unit),
 
 /*
 
-=item C<static void insert_tail_call>
-
-RT #48260: Not yet documented!!!
+=item C<static void insert_tail_call(PARROT_INTERP, IMC_Unit *unit, Instruction
+*ins, SymReg *sub, SymReg *meth)>
 
 =cut
 
@@ -718,7 +720,8 @@ insert_tail_call(PARROT_INTERP, ARGIN(IMC_Unit *unit), ARGMOD(Instruction *ins),
 
 /*
 
-=item C<void expand_pcc_sub_call>
+=item C<void expand_pcc_sub_call(PARROT_INTERP, IMC_Unit *unit, Instruction
+*ins)>
 
 Expand a PCC subroutine call (IMC) into its PASM instructions
 This is the nuts and bolts of pdd03 routine call style
@@ -739,6 +742,9 @@ expand_pcc_sub_call(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction *i
     Instruction *get_name;
 
     SymReg * const sub = ins->symregs[0];
+
+    PARROT_ASSERT(sub);
+    PARROT_ASSERT(sub->pcc_sub);
 
     if (ins->type & ITRESULT) {
         const int n = sub->pcc_sub->nret;
@@ -764,6 +770,11 @@ expand_pcc_sub_call(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction *i
 
     if (ins->type & ITCALL) {
         SymReg * const the_sub = sub->pcc_sub->sub;
+        /* If this condition is true the generator must haven't be called,
+         * but check it as a last resort.
+         * See also TT #737 */
+        if (the_sub == NULL)
+            IMCC_fatal(interp, 1, "expand_pcc_sub_call: no such sub");
 
         if (!meth_call && (the_sub->type & VTADDRESS)) {
             /* sub->pcc_sub->sub is an actual subroutine name, not a variable */
@@ -812,8 +823,14 @@ expand_pcc_sub_call(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction *i
         if (arg->set != 'P') {
             if (!(arg->type == VTIDENTIFIER
             ||    arg->type == VTPASM
-            ||    arg->type == VTREG))
-                meth = mk_const(interp, arg->name, 'S');
+            ||    arg->type == VTREG)) {
+                if (arg->type & VT_ENCODED) {
+                    meth = mk_const(interp, arg->name, 'U');
+                }
+                else {
+                    meth = mk_const(interp, arg->name, 'S');
+                }
+            }
         }
     }
 

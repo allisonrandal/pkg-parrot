@@ -1,3 +1,5 @@
+# $Id: blue_rect.pir 38115 2009-04-15 14:41:32Z fperrad $
+
 =head1 TITLE
 
 blue_rect.pir - draw a blue rectangle with the SDL Parrot bindings
@@ -13,9 +15,9 @@ To run this file, run the following command from the Parrot directory:
 
 .sub _main :main
     # first load the necessary libraries
-    load_bytecode "library/SDL/App.pir"
-    load_bytecode "library/SDL/Rect.pir"
-    load_bytecode "library/SDL/Color.pir"
+    load_bytecode "SDL/App.pir"
+    load_bytecode "SDL/Rect.pir"
+    load_bytecode "SDL/Color.pir"
 
     # create an SDL::App object
     .local pmc app

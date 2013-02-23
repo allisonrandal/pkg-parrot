@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: icu.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: icu.pm 39801 2009-06-26 14:13:26Z rblasch $
 
 =head1 NAME
 
@@ -299,6 +299,7 @@ sub _try_icuconfig {
         print "Trying $arg->{icuconfig} with '--prefix'\n"
             if $arg->{verbose};
         $icuheaders = capture_output("$arg->{icuconfig} --prefix");
+        chomp($icuheaders);
         print "icuheaders:  captured $icuheaders\n"
             if $arg->{verbose};
         ($icuheaders, $arg->{without}) =
@@ -393,10 +394,20 @@ sub _handle_ccflags_status {
         }
     }
     else {
-        if ($arg->{verbose}) {
-            print "Adding -I $arg->{icuheaders} to ccflags for icu headers.\n";
+        my $icuheaders = $arg->{icuheaders};
+
+        my $icuflags;
+        if ($icuheaders =~ /\s/) {
+            $icuflags = "-I \"$arg->{icuheaders}\"";
         }
-        $conf->data->add( ' ', ccflags => "-I $arg->{icuheaders}" );
+        else {
+            $icuflags = "-I $arg->{icuheaders}";
+        }
+
+        if ($arg->{verbose}) {
+            print "Adding $icuflags to ccflags for icu headers.\n";
+        }
+        $conf->data->add( ' ', ccflags => $icuflags );
     }
 }
 

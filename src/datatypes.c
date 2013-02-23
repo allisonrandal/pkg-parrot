@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2002-2009, Parrot Foundation.
 License:  Artistic 2.0, see README and LICENSE for details
-$Id: datatypes.c 37201 2009-03-08 12:07:48Z fperrad $
+$Id: datatypes.c 39173 2009-05-26 05:52:21Z petdance $
 
 =head1 NAME
 
@@ -27,7 +27,7 @@ F<include/parrot/datatypes.h>.
 
 /*
 
-=item C<INTVAL Parrot_get_datatype_enum>
+=item C<INTVAL Parrot_get_datatype_enum(PARROT_INTERP, const STRING *type_name)>
 
 Return datatype C<enum> for C<STRING*> type_name.
 
@@ -58,7 +58,7 @@ Parrot_get_datatype_enum(PARROT_INTERP, ARGIN(const STRING *type_name))
 
 /*
 
-=item C<STRING * Parrot_get_datatype_name>
+=item C<STRING * Parrot_get_datatype_name(PARROT_INTERP, INTVAL type)>
 
 Return datatype name for C<type>.
 
@@ -81,13 +81,23 @@ Parrot_get_datatype_name(PARROT_INTERP, INTVAL type)
     return string_make(interp, s, strlen(s), NULL, PObj_external_FLAG);
 }
 
+/*
+
+=item C<FLOATVAL floatval_divide_by_zero(PARROT_INTERP, FLOATVAL num)>
+
+Only used to generate Infinity and NaN constants in our corresponding
+header file.
+
+=cut
+
+*/
 
 PARROT_EXPORT
 FLOATVAL
-floatval_divide_by_zero(PARROT_INTERP, FLOATVAL num)
+floatval_divide_by_zero(SHIM_INTERP, FLOATVAL num)
 {
     ASSERT_ARGS(floatval_divide_by_zero)
-    FLOATVAL zero = 0.0;
+    const FLOATVAL zero = 0.0;
     return num / zero;
 }
 

@@ -1,6 +1,6 @@
 =pod
 
-﻿# $Id: CREDITS 37450 2009-03-15 20:08:53Z Util $
+﻿# $Id: CREDITS 40173 2009-07-20 20:25:31Z dukeleto $
 
     Following in the steps of other open source projects that
     eventually take over the world, here is the partial list
@@ -8,8 +8,8 @@
     works.  It is sorted by name and formatted to allow easy
     grepping and beautification by scripts.
     The fields are: name (N), email (E), web-address (W),
-    description (D), subversion username (U) and snail-mail
-    address (S).
+    description (D), main username (U), alias usernames (A)
+    and snail-mail address (S).
 
         Thanks,
 
@@ -92,7 +92,7 @@ E: yDNA@cpan.org
 N: Andrew Whitworth
 D: Internals development
 D: Documentation
-D: Release manager for 0.8.2
+D: Release manager for 0.8.2 and 1.3.0
 E: wknight8111@gmail.com
 U: Whiteknight
 
@@ -133,6 +133,13 @@ U: audreyt
 U: autrijus
 E: audreyt@audreyt.org
 D: Pugs, a Perl6->Parrot implementation.
+
+N: Austin Hastings
+U: Austin
+A: austin_hastings@yahoo.com
+A: austin_h...@yahoo.com
+E: austin_hastings@yahoo.com
+D: Close
 
 N: Benjamin Goldberg
 D: Numerous improvements and proposals.
@@ -229,6 +236,7 @@ N: Christoph Otto a.k.a. cotto
 U: cotto
 D: Patch for key flags in pdd08
 D: Range check in Env PMC
+A: christoph_googleacct@mksig.org
 D: Pipp
 E: christoph@mksig.org
 
@@ -271,6 +279,9 @@ U: cgrawls
 D: imcc optimizer and register allocator patches and tests
 E: cgrawls@gmail.com
 
+U: cxreg
+D: copyright test cleanup
+
 N: Damian Miles Knopp
 U: dmknopp
 E: dmknopp@loyola.edu
@@ -288,6 +299,12 @@ U: grunblatt
 
 N: Danny Werner
 D: Test for literals
+
+N: Daniel Arbelo Arrocha
+U: darbelo
+A: arbelo
+D: OpenBSD fixes and testing, gsoc2009-decnum-dynpmcs
+E: dany.arbelo@gmail.com
 
 N: Dave Woldrich
 D: Win32 build fixes
@@ -340,6 +357,7 @@ D: Debian packaging
 S: Chemnitz, Germany
 
 N: François Perrad
+A: Francois Perrad
 E: francois.perrad@gadz.org
 W: http://fperrad.googlepages.com/home
 U: fperrad
@@ -348,6 +366,7 @@ D: a patch to remove slash_exec from config
 D: language Lua
 D: language WMLScript (PIR translator)
 D: Pipp
+D: Release manager for 1.1.0
 
 N: Garrett Rooney
 D: Fix typo in PARROT_BIGENDIAN case
@@ -383,8 +402,17 @@ D: The human version of indent.
 E: gregor@focusresearch.com
 S: Sunnyvale, CA
 
+N: Havard Eidnes
+U: he
+D: NetBSD and OpenBSD fixes
+E: he@NetBSD.org
+
 N: H.Merijn Brand
 D: HP-UX fixes and smoke tests
+
+N: Igor Rafael Sanchez-Puls
+D: extending test_file_coverage to test PMC coverage
+E: quevlar@ymail.com
 
 N: Ibotty
 D: parrotbench ruby benchmarks
@@ -457,6 +485,7 @@ U: jesse
 E: jesse@fsck.com
 
 N: Jimmy Zhuo
+A: jimmy
 E: zhuomingliang@yahoo.com.cn
 D: Bugfixes
 
@@ -466,6 +495,12 @@ D: coding standard tests
 
 N: John Paul Wallington
 D: pir-mode.el: fix for xemacs plus bugfixes and cleanups
+
+N: Jonathan Leto
+E: jonathan@leto.net
+W: http://leto.net
+U: dukeleto
+S: Portland, OR
 
 N: Jonathan Scott Duff
 U: duff
@@ -582,6 +617,10 @@ E: luke@luqui.org
 U: luqui
 D: Many fixes
 
+U: LylePerl
+D: Win32 and CGI testing
+W: http://perl.bristolbath.org/blog/lyle/
+
 N: Marcelo Serra Castilhos
 E: mhelix@terra.com.br
 D: Bug fix
@@ -644,7 +683,7 @@ E: michael_scott@mac.com
 U: mikescott
 W: http://xrl.us/sml
 
-U: mikeh
+U: mikehh
 D: codingstd patches
 
 N: Michael Stevens
@@ -664,6 +703,7 @@ D: Patch reducing code duplication
 N: Mitchell N Charity
 
 N: Moritz A Lenz
+A: Moritz Lenz
 E: moritz@faui2k3.org
 U: moritz
 D: Test infrastructure for languages/perl6/ and Perl 6 in general
@@ -754,6 +794,11 @@ U: rurban
 E: rurban@cpan.org
 D: cygwin, 64-bit pbc compat, float converters, bignum.pmc
 
+N: Richard Hainsworth
+U: finanalyst
+E: richard@rusrating.ru
+D: bugfix SDL Font
+
 N: Richard Tibbetts
 D: Divide by zero exceptions in some PMCs
 
@@ -779,6 +824,11 @@ D: Author of Amber; bug fixes and tests
 
 N: Roland Illing
 D: Building Parrot with pkgsrc
+
+N: Rolf Grossmann
+U: rg
+D: pod2html fixes, floating point fixes, platform testing, cage cleaning
+E: rg@progtech.net
 
 N: Ron Blaschke
 U: rblasch
@@ -844,6 +894,7 @@ D: Questions for the FAQ
 
 N: Stephen Weeks
 U: tene
+A: t...@allalone.org
 D: Cardinal, a Ruby compiler
 D: ChitChat, a Smalltalk compiler
 D: Minor Rakudo patches
@@ -911,6 +962,7 @@ N: Uri Guttman
 D: Lot of general Parrot design hints
 
 N: Vasily Chekalkin
+U: bacek
 E: bacek@bacek.com
 D: Core and Rakudo patches
 
@@ -924,6 +976,7 @@ D: Win32, IO fixes
 
 N: Will "Coke" Coleda
 U: coke
+A: wcoleda
 E: will@coleda.com
 D: Tcl language (partcl), APL, website, various languages/ upkeep, misc.
 

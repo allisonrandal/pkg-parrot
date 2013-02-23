@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: Method.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: Method.pm 40100 2009-07-15 13:15:25Z bacek $
 package Parrot::Pmc2c::Method;
 use strict;
 use warnings;
@@ -104,8 +104,8 @@ sub trans {
 
     return $1  if $char =~ /([ISP])/;
     return 'N' if $char eq 'F';
-    return 'v' if $type eq 'void';
     return 'V' if $type =~ /void\s*\*/;
+    return 'v' if $type =~ /void\s*$/;
     return 'P' if $type =~ /opcode_t\*/;
     return 'I' if $type =~ /int(val)?/i;
     return '?';

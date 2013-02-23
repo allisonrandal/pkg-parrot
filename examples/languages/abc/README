@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: README 37298 2009-03-11 05:15:40Z allison $
+# $Id: README 36833 2009-02-17 20:09:26Z allison $
 
 This is an implementation of the basic calculator
 using the Parrot compiler tools.

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: cat.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: cat.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ examples/pasm/cat.pasm - cat-like utility
 
 Simple C<cat>-like utility to test PIO read/write. Does not use STDIO.
 
-Echoes what you type once you hit return. 
+Echoes what you type once you hit return.
 
 You'll have to Ctl-C to exit.
 
@@ -26,3 +26,9 @@ REDO:
 	print S0
 	if S0, REDO
 	end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

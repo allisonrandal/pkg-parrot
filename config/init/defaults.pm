@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: defaults.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: defaults.pm 40161 2009-07-19 23:54:50Z jkeenan $
 
 =head1 NAME
 
@@ -72,6 +72,9 @@ sub runstep {
     # to their 'use English' names as documented in 'perlvar'.)
     $conf->data->set_p5( OSNAME => $^O );
 
+    my $ccdlflags = $Config{ccdlflags};
+    $ccdlflags =~ s/\s*-Wl,-rpath,\S*//g if $conf->options->get('disable-rpath');
+
     # We need a Glossary somewhere!
     $conf->data->set(
         debugging => $conf->options->get('debugging') ? 1 : 0,
@@ -112,7 +115,7 @@ sub runstep {
         # Linker Flags to have this binary work with the shared and dynamically
         # loadable libraries we're building.  On HP-UX, for example, we need to
         # allow dynamic libraries to access the binary's symbols
-        link_dynamic => $Config{ccdlflags},    # e.g. -Wl,-E on HP-UX
+        link_dynamic => $ccdlflags,    # e.g. -Wl,-E on HP-UX
 
         # ld: Tool used to build shared libraries and dynamically loadable
         # modules. Often $cc on Unix-ish systems, but apparently sometimes
@@ -206,9 +209,6 @@ sub runstep {
         make_set_make => $Config{make_set_make},
         make_and      => '&&',
 
-        # for cygwin
-        cygchkdll => '',
-
         # make_c: Command to emulate GNU make's C<-C directory> option:  chdir
         # to C<directory> before executing $(MAKE)
         make_c => '$(PERL) -e \'chdir shift @ARGV; system q{$(MAKE)}, @ARGV; exit $$? >> 8;\'',
@@ -239,12 +239,14 @@ sub runstep {
         # Extra flags needed for libnci_test.so
         ncilib_link_extra => '',
 
+        # Flag determines if pmc2c.pl and ops2c.pl also
+        # generate #line directives. These can confuse
+        # debugging internals.
+        no_lines_flag => $conf->options->get('no-line-directives') ? '--no-lines' : '',
     );
 
     # add profiling if needed
-    # RT#41497 gcc syntax
-    # we should have this in the hints files e.g. cc_profile
-    # RT#41496 move profiling to it's own step
+    # RT #41497 gcc syntax
     if ( $conf->options->get('profile') ) {
         $conf->data->set(
             cc_debug => " -pg ",

@@ -1,7 +1,7 @@
 /* exceptions.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: exceptions.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: exceptions.h 38887 2009-05-18 04:54:50Z petdance $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:
@@ -90,6 +90,7 @@ typedef enum {
         CONTROL_CONTINUE,
         CONTROL_ERROR,
         CONTROL_TAKE,
+        CONTROL_LEAVE,
 
         CONTROL_LOOP_NEXT,
         CONTROL_LOOP_LAST,
@@ -275,21 +276,20 @@ void Parrot_print_backtrace(void);
  * int _ASSERT_ARGS = PARROT_ASSERT_ARG(a) || PARROT_ASSERT_ARG(b) || ...
  */
 #ifdef NDEBUG
-#  define PARROT_ASSERT(x) ((void)0)
+#  define PARROT_ASSERT(x) /*@-noeffect@*/((void)0)/*@=noeffect@*/
 #  define PARROT_ASSERT_ARG(x) (0)
 #  define ASSERT_ARGS(a)
 #else
 #  define PARROT_ASSERT(x) (x) ? ((void)0) : Parrot_confess(#x, __FILE__, __LINE__)
 #  define PARROT_ASSERT_ARG(x) ((x) ? (0) : (Parrot_confess(#x, __FILE__, __LINE__), 0))
 
-#  ifdef _MSC_VER
-#    define ASSERT_ARGS(a)
-#  else
+#  ifdef __GNUC__
 #    define ASSERT_ARGS(a) ASSERT_ARGS_ ## a ;
-#  endif /* _MSC_VER */
+#  else
+#    define ASSERT_ARGS(a)
+#  endif /* __GNUC__ */
 
 #endif /* NDEBUG */
-
 
 #endif /* PARROT_EXCEPTIONS_H_GUARD */
 

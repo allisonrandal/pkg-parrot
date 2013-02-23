@@ -1,4 +1,5 @@
-# $Id: stack.pir 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2002-2009, Parrot Foundation.
+# $Id: stack.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 #
 # stack__duplicate()

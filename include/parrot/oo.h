@@ -1,7 +1,7 @@
 /* objects.h
  *  Copyright (C) 2007-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: oo.h 36833 2009-02-17 20:09:26Z allison $
+ *     $Id: oo.h 39487 2009-06-10 06:16:46Z petdance $
  *  Overview:
  *     Parrot class and object header stuff
  *  Data Structure and Algorithms:
@@ -25,10 +25,7 @@ typedef enum {
 } PARROT_CLASS_DATA_ENUM;
 
 
-/* Objects, classes and PMCarrays all use the same data scheme:
- * PMC_data() holds a malloced array, PMC_int_val() is the size of it
- * this simplifies the GC mark phase a lot
- *
+/*
  * The active destroy flag is necessary to free the malloced array.
  */
 #define SLOTTYPE PMC*
@@ -38,19 +35,11 @@ typedef enum {
         GC_WRITE_BARRIER(interp, (o), ((PMC **)(x))[y], (z)); \
         ((PMC **)(x))[(y)] = (z); \
     } while (0)
-#define set_attrib_flags(x) do { \
-        PObj_active_destroy_SET(x); \
-    } while (0)
-#define set_attrib_array_size(o, y) do { \
-    PMC_data(o) = mem_sys_allocate_zeroed((sizeof (PMC *)*(y))); \
-    PMC_int_val(o) = (y); \
-} while (0)
 
 /*
  * class macros
  */
 
-#define CLASS_ATTRIB_COUNT(cl)  PMC_int_val2(cl)
 #define GET_CLASS(obj)          (obj)->vtable->pmc_class
 
 /* HEADERIZER BEGIN: src/oo.c */
@@ -105,6 +94,11 @@ INTVAL Parrot_get_vtable_index(PARROT_INTERP, ARGIN(const STRING *name))
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
+PARROT_CAN_RETURN_NULL
+const char * Parrot_get_vtable_name(SHIM_INTERP, INTVAL idx);
+
+PARROT_EXPORT
 void Parrot_invalidate_method_cache(PARROT_INTERP,
     ARGIN_NULLOK(STRING *_class))
         __attribute__nonnull__(1);
@@ -137,6 +131,16 @@ void init_object_cache(PARROT_INTERP)
 void mark_object_cache(PARROT_INTERP)
         __attribute__nonnull__(1);
 
+PARROT_CANNOT_RETURN_NULL
+PMC * Parrot_oo_clone_object(PARROT_INTERP,
+    ARGIN(PMC *pmc),
+    ARGMOD_NULLOK(PMC *class_),
+    ARGMOD_NULLOK(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*class_)
+        FUNC_MODIFIES(*dest);
+
 void Parrot_oo_extract_methods_from_namespace(PARROT_INTERP,
     ARGIN(PMC *self),
     ARGIN(PMC *ns))
@@ -165,6 +169,11 @@ PMC * Parrot_oo_find_vtable_override_for_class(PARROT_INTERP,
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 PMC * Parrot_oo_get_namespace(SHIM_INTERP, ARGIN(const PMC *classobj))
+        __attribute__nonnull__(2);
+
+PARROT_CANNOT_RETURN_NULL
+void * Parrot_oo_new_object_attrs(PARROT_INTERP, ARGIN(PMC * class_))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_CAN_RETURN_NULL
@@ -202,6 +211,7 @@ INTVAL Parrot_oo_register_type(PARROT_INTERP,
 #define ASSERT_ARGS_Parrot_get_vtable_index __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(name)
+#define ASSERT_ARGS_Parrot_get_vtable_name __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_Parrot_invalidate_method_cache \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
@@ -218,6 +228,9 @@ INTVAL Parrot_oo_register_type(PARROT_INTERP,
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_mark_object_cache __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_oo_clone_object __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_oo_extract_methods_from_namespace \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
@@ -235,6 +248,9 @@ INTVAL Parrot_oo_register_type(PARROT_INTERP,
     || PARROT_ASSERT_ARG(name)
 #define ASSERT_ARGS_Parrot_oo_get_namespace __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(classobj)
+#define ASSERT_ARGS_Parrot_oo_new_object_attrs __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(class_)
 #define ASSERT_ARGS_Parrot_oo_newclass_from_str __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(name)

@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: annotate.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: annotate.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Test various use cases of the annotate directive.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
     plan(33)
 

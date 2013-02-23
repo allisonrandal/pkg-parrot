@@ -4,12 +4,12 @@ Parrot::Coroutine - A pure PIR implementation of coroutines
 
 =head1 VERSION
 
- $Id: Coroutine.pir 36833 2009-02-17 20:09:26Z allison $
+ $Id: Coroutine.pir 38693 2009-05-11 18:45:05Z NotFound $
 
 =head1 SYNOPSIS
 
     .sub onload :load
-        load_bytecode 'Parrot/Coroutine.pir'
+        load_bytecode 'Parrot/Coroutine.pbc'
     .end
 
     ## Recursive coroutine to enumerate tree elements.  Each element that is

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004-2008, Parrot Foundation.
-$Id: undef.pmc 37257 2009-03-10 04:22:07Z Util $
+Copyright (C) 2004-2009, Parrot Foundation.
+$Id: undef.pmc 39479 2009-06-09 21:00:23Z chromatic $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ from there.
 
 */
 
-#include "parrot/parrot.h"
+#include "pmc_object.h"
 #define UNDEF_STRING_CLASS enum_class_String
 
 pmclass Undef no_ro {
@@ -40,8 +40,26 @@ appropriate type.
 */
 
     VTABLE void set_pmc(PMC *other) {
-        pmc_reuse(INTERP, SELF, enum_class_Ref, 0);
-        VTABLE_set_pmc(INTERP, SELF, other);
+        if (!PObj_is_object_TEST(other)) {
+            pmc_reuse(INTERP, SELF, other->vtable->base_type, 0);
+            VTABLE_set_pmc(INTERP, SELF, other);
+        }
+        else {
+            PMC * const class_ = PARROT_OBJECT(other)->_class;
+            PMC        *clone  = VTABLE_clone(interp, other);
+            void       *attrs;
+            pmc_reuse_by_class(INTERP, SELF, class_, PObj_is_object_FLAG);
+
+            /* now swap memory without leaking it */
+            attrs              = PMC_data(SELF);
+            PMC_data(SELF)     = PMC_data(clone);
+            PMC_data(clone)    = attrs;
+            VTABLE_destroy(interp, clone);
+
+            PObj_is_object_SET(SELF);
+            PObj_active_destroy_SET(SELF);
+
+        }
     }
 
 /*
@@ -56,9 +74,6 @@ appropriate type.
 */
 
     VTABLE void assign_pmc(PMC *other) {
-        if (!PObj_is_object_TEST(other))
-            pmc_reuse(INTERP, SELF, other->vtable->base_type, 0);
-
         /* don't want to call set_pmc if we're assigning an Undef to an Undef */
         if (other->vtable->base_type != enum_class_Undef)
             VTABLE_set_pmc(INTERP, SELF, other);

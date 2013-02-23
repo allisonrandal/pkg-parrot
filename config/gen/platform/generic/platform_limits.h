@@ -1,5 +1,5 @@
 /*
- * $Id: platform_limits.h 36833 2009-02-17 20:09:26Z allison $
+ * $Id: platform_limits.h 40176 2009-07-21 00:33:45Z whiteknight $
  * Copyright (C) 2008, Parrot Foundation.
  */
 
@@ -9,9 +9,19 @@
 /*
  * Define the values for PARROT_INTVAL_MAX and PARROT_INTVAL_MIN
  * in platforms that does no have limits.h or gives wrong values.
- * The generic versions assumes limits.h availability,
- * and does nothing.
+ * The generic versions assumes limits.h availability.
  */
+
+/* LLONG_MAX doesn't appear to be provided for some compilers of Win64, so
+   try to define them here. */
+#ifdef _MSC_VER
+#  ifndef LLONG_MAX
+#    define LLONG_MAX _I64_MAX
+#  endif
+#  ifndef LLONG_MIN
+#    define LLONG_MIN _I64_MIN
+#  endif
+#endif
 
 #endif /* PARROT_PLATFORM_GENERIC_PLATFORM_LIMITS_GUARD */
 

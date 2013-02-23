@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 23_string_ops_substr.pir 40124 2009-07-16 21:36:57Z allison $
+
 =head1 String Operations (continued)
 
 We can pick apart a string and pull substrings out of it using the
@@ -7,7 +10,7 @@ the string between the starting and ending positions. If the ending
 position is left out, C<substr> returns all the characters until the
 end of the string.
 
-An optional fourth argument can be a string that will be used to
+An optional fourth argument is a string that will be used to
 replace the characters between the start and end positions.
 
 =cut

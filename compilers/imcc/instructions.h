@@ -1,5 +1,5 @@
 /*
- * $Id: instructions.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: instructions.h 39837 2009-06-30 04:30:24Z petdance $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -160,7 +160,11 @@ int get_branch_regno(ARGIN(const Instruction *ins))
 void imcc_init_tables(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-int ins_print(PARROT_INTERP, ARGIN(PMC *io), ARGIN(const Instruction *ins))
+PARROT_IGNORABLE_RESULT
+int /*@alt void@*/
+ins_print(PARROT_INTERP,
+    ARGIN(PMC *io),
+    ARGIN(const Instruction *ins))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: intro.pod 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: intro.pod 38811 2009-05-16 02:08:14Z coke $
 
 =head1 NAME
 
@@ -173,9 +173,13 @@ build problems.
 
 Create a file called F<hello.pir> that contains the following code.
 
+=begin PIR
+
   .sub main
       print "Hello world!\n"
   .end
+
+=end PIR
 
 Then run it by typing:
 
@@ -195,29 +199,33 @@ care of deciding which variant of the instruction to use for us.
 We can modify hello.pir to first store the string C<Hello world!\n> in a
 register and then use that register with the print instruction.
 
-  .sub main
-      set S0, "Hello world!\n"
-      print S0
-  .end
-
-Here we have stated exactly which register to use. However, by
-replacing C<S0> with C<$S0> we can delegate the choice of which
-register to use to Parrot.  It is also possible to use an C<=>
-notation instead of writing the C<set> instruction.
+=begin PIR
 
   .sub main
       $S0 = "Hello world!\n"
       print $S0
   .end
 
+=end PIR
+
+PIR does not allow us to set a register directly. We need to prefix the
+register name with C<$> when referring to a register. The compiler will map $S0
+to one of the available string registers, for example S0, and set the value.
+This example also uses the syntactic sugar provided by the C<=> operator.  C<=>
+is simply a more readable way of using the C<set> opcode.  
+
 To make PIR even more readable, named registers can be used. These are later
 mapped to real numbered registers.
+
+=begin PIR
 
   .sub main
       .local string hello
       hello = "Hello world!\n"
       print hello
   .end
+
+=end PIR
 
 The C<.local> directive indicates that the named register is only needed inside
 the current subroutine (that is, between C<.sub> and C<.end>). Following
@@ -235,6 +243,8 @@ replacing them with a label at the start of the instructions.
 
 This example introduces some more instructions and PIR syntax. Lines starting
 with a C<#> are comments.
+
+=begin PIR
 
   .sub main
       # State the number of squares to sum.
@@ -262,30 +272,66 @@ with a C<#> are comments.
       print ".\n"
   .end
 
+=end PIR
+
 PIR provides a bit of syntactic sugar that makes it look more high level than
 assembly. For example:
 
+=begin PIR_FRAGMENT
+
+  .local pmc temp, i
   temp = i * i
+
+=end PIR_FRAGMENT
 
 Is just another way of writing the more assembly-ish:
 
+=begin PIR_FRAGMENT
+
+  .local pmc temp, i
   mul temp, i, i
 
+=end PIR_FRAGMENT
+
 And:
 
+=begin PIR_FRAGMENT
+
+  .local pmc i, maxnum
   if i <= maxnum goto loop
+  # ...
+  loop:
+
+=end PIR_FRAGMENT
 
 Is the same as:
 
+=begin PIR_FRAGMENT
+
+  .local pmc i, maxnum
   le i, maxnum, loop
+  # ...
+  loop:
+
+=end PIR_FRAGMENT
 
 And:
 
+=begin PIR_FRAGMENT
+
+  .local pmc temp, total
   total += temp
 
+=end PIR_FRAGMENT
+
 Is the same as:
 
+=begin PIR_FRAGMENT
+
+  .local pmc  temp, total
   add total, temp
+
+=end PIR_FRAGMENT
 
 As a rule, whenever a Parrot instruction modifies the contents of a register,
 that will be the first register when writing the instruction in assembly form.
@@ -298,6 +344,8 @@ programming is one place where using goto is not bad form!
 
 In this example we define a factorial function and recursively call it to
 compute factorial.
+
+=begin PIR
 
   .sub factorial
       # Get input parameter.
@@ -338,6 +386,8 @@ compute factorial.
       if i <= 10 goto loop
   .end
 
+=end PIR
+
 The first line, C<.param int n>, specifies that this subroutine takes one
 integer parameter and that we'd like to refer to the register it was passed in
 by the name C<n> for the rest of the sub.
@@ -345,9 +395,14 @@ by the name C<n> for the rest of the sub.
 Much of what follows has been seen in previous examples, apart from the line
 reading:
 
+=begin PIR_FRAGMENT
+
+  .local pmc result, factorial
   result = factorial($I0)
 
-This single line of PIR actually represents a few lines of PASM. The assembler
+=end PIR_FRAGMENT
+
+The last line of PIR actually represents a few lines of PASM. The assembler
 builds a PMC that describes the signature, including which register the
 arguments are held in. A similar process happens for providing the registers
 that the return values should be placed in. Finally, the C<factorial> sub is 

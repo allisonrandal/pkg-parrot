@@ -2,7 +2,7 @@
 # This program is free software. It is subject to the same
 # license as Parrot.
 #
-# $Id: jsr_ret.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: jsr_ret.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -45,3 +45,8 @@ SUB_2:      print "Entered subroutine SUB_2.\n"
             print "Returning from subroutine SUB_2.\n"
             ret
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

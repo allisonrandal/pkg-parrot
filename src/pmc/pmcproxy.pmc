@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: pmcproxy.pmc 37099 2009-03-03 18:23:12Z Util $
+$Id: pmcproxy.pmc 40078 2009-07-14 14:19:53Z bacek $
 
 =head1 NAME
 
@@ -51,7 +51,6 @@ NOTE: No doubt we will need other things later; this is a start.
 
 */
 
-#include "parrot/parrot.h"
 #include "parrot/oo_private.h"
 
 /*
@@ -95,7 +94,7 @@ Initializes a PMCProxy PMC.
         _pmc->all_parents      = pmc_new(interp, enum_class_ResizablePMCArray);
         _pmc->roles            = pmc_new(interp, enum_class_ResizablePMCArray);
         _pmc->methods          = pmc_new(interp, enum_class_Hash);
-        _pmc->vtable_overrides = constant_pmc_new(interp, enum_class_Hash);
+        _pmc->vtable_overrides = pmc_new(interp, enum_class_Hash);
         _pmc->parent_overrides = pmc_new(interp, enum_class_Hash);
         _pmc->attrib_metadata  = pmc_new(interp, enum_class_Hash);
         _pmc->attrib_index     = PMCNULL;
@@ -136,9 +135,10 @@ Initializes a PMCProxy PMC.
         mro_length = VTABLE_elements(interp, interp->vtables[type_num]->mro);
         for (i = 1; i < mro_length; i++) {
             PMC    *pclass = VTABLE_get_pmc_keyed_int(interp, interp->vtables[type_num]->mro, i);
+            PMC    *cns    = pclass->vtable->_namespace;
             STRING *cname  = pclass->vtable->whoami;
             if (Parrot_str_not_equal(interp, cname, CONST_STRING(interp, "scalar"))) {
-                PMC *pproxy = Parrot_oo_get_class_str(interp, cname);
+                PMC *pproxy = Parrot_oo_get_class(interp, cns);
                 VTABLE_push_pmc(interp, proxy_info->all_parents, pproxy);
             }
         }
@@ -202,59 +202,6 @@ Creates an instance of the PMC.
 
 /*
 
-=item C<void destroy()>
-
-Free the memory associated with the object's underlying struct.
-
-=cut
-
-*/
-
-    VTABLE void destroy() {
-        mem_sys_free(PMC_data(SELF));
-    }
-
-/*
-
-=item C<void mark()>
-
-Mark any referenced strings and PMCs in the structure as live.
-
-=cut
-
-*/
-
-    VTABLE void mark() {
-        Parrot_Class_attributes * const _pmc = PARROT_CLASS(SELF);
-
-        if (_pmc->name)
-            pobject_lives(interp, (PObj *)_pmc->name);
-        if (_pmc->_namespace)
-            pobject_lives(interp, (PObj *)_pmc->_namespace);
-        if (_pmc->parents)
-            pobject_lives(interp, (PObj *)_pmc->parents);
-        if (_pmc->all_parents)
-            pobject_lives(interp, (PObj *)_pmc->all_parents);
-        if (_pmc->roles)
-            pobject_lives(interp, (PObj *)_pmc->roles);
-        if (_pmc->methods)
-            pobject_lives(interp, (PObj *)_pmc->methods);
-        if (_pmc->vtable_overrides)
-            pobject_lives(interp, (PObj *)_pmc->vtable_overrides);
-        if (_pmc->parent_overrides)
-            pobject_lives(interp, (PObj *)_pmc->parent_overrides);
-        if (_pmc->attrib_metadata)
-            pobject_lives(interp, (PObj *)_pmc->attrib_metadata);
-        if (_pmc->attrib_index)
-            pobject_lives(interp, (PObj *)_pmc->attrib_index);
-        if (_pmc->attrib_cache)
-            pobject_lives(interp, (PObj *)_pmc->attrib_cache);
-        if (_pmc->resolve_method)
-            pobject_lives(interp, (PObj *)_pmc->resolve_method);
-    }
-
-/*
-
 =item C<INTVAL isa_pmc(PMC *classname)>
 
 Returns whether the class is or inherits from C<*classname>.
@@ -295,8 +242,16 @@ Returns whether the class is or inherits from C<*classname>.
             return 1;
 
         /* Look in the isa hash. */
-        if (parrot_hash_exists(interp, interp->vtables[_proxy->id]->isa_hash, classname))
-            return 1;
+        if (interp->vtables[_proxy->id]) {
+            Hash *isa_hash = interp->vtables[_proxy->id]->isa_hash;
+
+            if (!isa_hash && Parrot_str_equal(interp,
+                     interp->vtables[_proxy->id]->whoami, classname))
+                return 1;
+
+            if (isa_hash && parrot_hash_exists(interp, isa_hash, classname))
+                return 1;
+        }
 
         /* Iterate over all the parents and check if they respond true
          * for 'isa' on the original comparison. */
@@ -333,8 +288,17 @@ Returns whether the class is or inherits from C<*classname>.
             return 1;
 
         /* Look in the isa hash. */
-        if (parrot_hash_exists(interp, interp->vtables[_proxy->id]->isa_hash, classname))
-            return 1;
+        if (interp->vtables[_proxy->id]) {
+            Hash *isa_hash = interp->vtables[_proxy->id]->isa_hash;
+
+            if (!isa_hash && Parrot_str_equal(interp,
+                     interp->vtables[_proxy->id]->whoami, classname)) {
+                return 1;
+            }
+
+            if (isa_hash && parrot_hash_exists(interp, isa_hash, classname))
+                return 1;
+        }
 
         return 0;
     }
@@ -387,7 +351,7 @@ inspect_str.
 =cut
 
 */
-    PMC *inspect()
+    VTABLE PMC *inspect()
     {
         /* Create a hash, then use inspect_str to get all of the data to
          * fill it up with. */

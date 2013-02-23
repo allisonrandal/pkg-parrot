@@ -1,4 +1,4 @@
-# $Id: objects.pod 37501 2009-03-16 21:06:48Z allison $
+# $Id: objects.pod 39689 2009-06-21 17:36:39Z japhb $
 
 =head1 Programming Parrot -- Using objects
 
@@ -37,6 +37,8 @@ is some code to illustrate this example:
 
 =head3 Example 1:
 
+=begin PIR
+
     .namespace [ "Person" ]
 
     .sub run
@@ -48,6 +50,8 @@ is some code to illustrate this example:
     .sub run
         say "Running process #53"
     .end
+
+=end PIR
 
 As you might guess, the C<.namespace> directive tells Parrot
 what namespace to group subroutines under.  A namespace ends when
@@ -76,11 +80,15 @@ created with C<newclass>.  Here's a simple example:
 
 =head3 Example 2: A classic Dog
 
+=begin PIR
+
     .sub _ :main
         $P0 = newclass 'Dog'
         .local pmc spot
         spot = new 'Dog'
     .end
+
+=end PIR
 
 You may notice that I didn't use the return value of
 C<newclass>.  That's only because this is a simple example.  :-)
@@ -100,6 +108,8 @@ subroutine name. Here's a familiar example to anyone who has
 read L<perlboot>.
 
 =head3 Example 3: Barnyard animals
+
+=begin PIR
 
     .namespace [ "Cow" ]
 
@@ -137,6 +147,8 @@ read L<perlboot>.
         porky.'speak'()
     .end
 
+=end PIR
+
 It's important to note that even though I've declared the
 namespaces and put subroutines in them, this does not
 automatically create classes. The C<newclass> declarations
@@ -149,17 +161,29 @@ method names are quoted. Why is that? If you would have left out
 the quotes, then the identifier is assumed to be a declared
 C<.local> symbol. So, instead of writing:
 
+=begin PIR_FRAGMENT
+
+    .local pmc elsie
     elsie.'speak'()
+
+=end PIR_FRAGMENT
 
 you could also have written:
 
+=begin PIR_FRAGMENT
+
+    .local pmc elsie
     .local string speak
     speak = 'speak'
     elsie.speak()
 
+=end PIR_FRAGMENT
+
 Another example of this is shown below.
 
 =head3 Example 4: variable methods
+
+=begin PIR
 
     .namespace [ 'Foo' ]
 
@@ -185,6 +209,8 @@ Another example of this is shown below.
         f.m()
     .end
 
+=end PIR
+
 =head2 But where do I store my stuff?
 
 So far I've talked about namespaces and creating classes
@@ -209,6 +235,8 @@ illustrate with just one animal and you can infer how to do the
 same for the rest):
 
 =head3 Example 5: Naming my animals
+
+=begin PIR
 
     .namespace [ "Dog" ]
 
@@ -239,6 +267,8 @@ same for the rest):
         dog.'speak'()
         print "!\n"
     .end
+
+=end PIR
 
 Whew! There's a lot of new stuff in this code. I'll take them
 starting from the top of the program and working towards the
@@ -285,17 +315,21 @@ the Animal base class like so:
 
 =head3 Example 6: inheriting
 
-    ...
+=begin PIR_FRAGMENT
+
     $P0 = newclass "Animal"
     addattribute $P0, "name"
     $P0 = subclass "Animal", "Cow"
     $P0 = subclass "Animal", "Dog"
     $P0 = subclass "Animal", "Pig"
-    ...
+    # ...
+    .local pmc cow
     cow = new 'Cow'
     cow.'setname'("Elsie")
-    ...
+    # ...
     cow.'getname'()
+
+=end PIR_FRAGMENT
 
 Each subclass will contain an attribute called "name" that can be
 used to store the name of the animal.  The C<setname> method
@@ -336,6 +370,8 @@ Jonathan Scott Duff
 
 =head3 Example 6: Full barnyard listing
 
+=begin PIR
+
     .namespace [ "Animal" ]
 
     .sub setname :method
@@ -347,7 +383,7 @@ Jonathan Scott Duff
 
     .sub getname :method
         $P0 = getattribute self, "name"
-        print $P0
+        .return($P0)
     .end
 
     .sub speak :method
@@ -400,5 +436,7 @@ Jonathan Scott Duff
         dog.'speak'()
         pig.'speak'()
     .end
+
+=end PIR
 
 =cut

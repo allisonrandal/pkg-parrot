@@ -1,4 +1,5 @@
-# $Id: all.pir 37298 2009-03-11 05:15:40Z allison $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: all.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 =head1
 

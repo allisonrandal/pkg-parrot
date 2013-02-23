@@ -1,3 +1,6 @@
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: Util.pir 39631 2009-06-17 20:30:30Z NotFound $
+
 =head1 TITLE
 
 PGE/Util.pir - useful rules for working with PGE grammars
@@ -157,7 +160,7 @@ string is treated as '0'.
   have_pos:
 
     # count newlines to the current position of the parse
-    .local int pos, npos, lines
+    .local int npos, lines
     .local string target
     $P99 = getattribute match, '$.target'
     target = $P99

@@ -1,6 +1,6 @@
-#!./parrot
+#!parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: metamodel.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: metamodel.t 39803 2009-06-26 21:27:18Z duff $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Tests the metamodel for the OO implementation.
 =cut
 
 .sub _main :main
-    load_bytecode 'library/Test/More.pir'
+    load_bytecode 'Test/More.pbc'
 
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace

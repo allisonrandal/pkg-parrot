@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007, Parrot Foundation.
+ * Copyright (C) 2004-2009, Parrot Foundation.
  */
 
 /*
@@ -7,7 +7,7 @@
  *
  * HPPA
  *
- * $Id: jit_emit.h 37392 2009-03-13 19:51:47Z Util $
+ * $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
  */
 
 #ifndef PARROT_HPPA_JIT_EMIT_H_GUARD
@@ -763,6 +763,9 @@ static const jit_arch_info arch_info = {
         }
     }
 };
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 const jit_arch_info*
 Parrot_jit_init(PARROT_INTERP)
 {

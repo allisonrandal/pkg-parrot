@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Grammar.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: Grammar.pir 37824 2009-03-31 01:24:46Z pmichaud $
 
 =head1 NAME
 
@@ -80,9 +80,9 @@ throw an exception if a result object hasn't been set.
 
 =cut
 
-.sub 'item' :method
+.sub 'ast' :method
     .local pmc obj
-    obj = getattribute self, '$!item'
+    obj = getattribute self, '$!ast'
     unless null obj goto end
     die "No result object"
   end:
@@ -223,7 +223,7 @@ to enforce whitespace between lexical words.
 
   literal_end:
     mob.'to'(pos)
-    mob.'result_object'(literal)
+    mob.'!make'(literal)
     .return (mob)
 
   fail:

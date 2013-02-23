@@ -1,10 +1,11 @@
 #! perl
-# Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: headerizer.pl 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: headerizer.pl 38890 2009-05-18 05:35:29Z petdance $
 
 use strict;
 use warnings;
 use Carp qw( confess );
+
 
 =head1 NAME
 
@@ -23,11 +24,7 @@ on the command line.
 
 =head1 TODO
 
-* Tell if there are funcs without docs
-
 * Generate docs from funcs
-
-* Test the POD of the stuff we're parsing.
 
 * Somehow handle static functions in the source file
 
@@ -65,6 +62,9 @@ One or more object file names.
 use Getopt::Long;
 use lib qw( lib );
 use Parrot::Config;
+use Parrot::Headerizer;
+
+my $headerizer = Parrot::Headerizer->new;
 
 my %warnings;
 my %opt;
@@ -81,6 +81,7 @@ my %valid_macros = map { ( $_, 1 ) } qw(
     PARROT_DOES_NOT_RETURN
     PARROT_DOES_NOT_RETURN_WHEN_FALSE
     PARROT_MALLOC
+    PARROT_OBSERVER
 );
 
 main();
@@ -144,6 +145,9 @@ sub extract_function_declarations {
     # If it's got a semicolon, it's not a function header
     @funcs = grep !/;/, @funcs;
 
+    # remove any remaining }'s
+    @funcs = grep {! /^}/} @funcs;
+
     chomp @funcs;
 
     return @funcs;
@@ -167,12 +171,11 @@ sub extract_function_declarations_and_update_source {
     for my $decl ( @func_declarations ) {
         my $specs = function_components_from_declaration( $cfile_name, $decl );
         my $name = $specs->{name};
-        my $return_type = $specs->{return_type};
-        my $heading = "$return_type $name";
-        $heading = "static $heading" if $specs->{is_static};
 
-        $text =~ s/=item C<[^>]*\b$name\b[^>]*>\n/=item C<$heading>\n/sm or
-            warn "$name has no POD\n";
+        my $heading = $headerizer->generate_documentation_signature($decl);
+
+        $text =~ s/=item C<[^>]*\b$name\b[^>]*>\n+/$heading\n\n/sm or
+            warn "$cfile_name: $name has no POD\n";
     }
     open( my $fhout, '>', $cfile_name ) or die "Can't create $cfile_name: $!";
     print {$fhout} $text;
@@ -180,6 +183,13 @@ sub extract_function_declarations_and_update_source {
 
     return @func_declarations;
 }
+
+=head2 function_components_from_declaration( $file, $proto )
+
+Takes a declaration of a function and returns an ad-hoc hashref of
+properties for use elsewhere.
+
+=cut
 
 sub function_components_from_declaration {
     my $file  = shift;
@@ -224,6 +234,7 @@ sub function_components_from_declaration {
             or die "Bad args in $proto";
     }
 
+    my $is_ignorable = 0;
     my $is_static = 0;
     $is_static = $2 if $return_type =~ s/^((static)\s+)?//i;
 
@@ -234,6 +245,9 @@ sub function_components_from_declaration {
         $macros{$macro} = 1;
         if ( not $valid_macros{$macro} ) {
             squawk( $file, $name, "Invalid macro $macro" );
+        }
+        if ( $macro eq 'PARROT_IGNORABLE_RESULT' ) {
+            $is_ignorable = 1;
         }
     }
     if ( $return_type =~ /\*/ ) {
@@ -248,14 +262,15 @@ sub function_components_from_declaration {
     }
 
     return {
-        file        => $file,
-        name        => $name,
-        args        => \@args,
-        macros      => \@macros,
-        is_static   => $is_static,
-        is_inline   => $parrot_inline,
-        is_api      => $parrot_api,
-        return_type => $return_type,
+        file         => $file,
+        name         => $name,
+        args         => \@args,
+        macros       => \@macros,
+        is_static    => $is_static,
+        is_inline    => $parrot_inline,
+        is_api       => $parrot_api,
+        is_ignorable => $is_ignorable,
+        return_type  => $return_type,
     };
 }
 
@@ -309,9 +324,9 @@ sub asserts_from_args {
             else {
                 # try to isolate the variable's name;
                 # strip off everything before the final space or asterisk.
-                $var =~ s[.+[* ]([^* ]+)$][$1];
+                $var =~ s{.+[* ]([^* ]+)$}{$1};
                 # strip off a trailing "[]", if any.
-                $var =~ s/\[\]$//;
+                $var =~ s{\[\]$}{};
             }
             push( @asserts, "PARROT_ASSERT_ARG($var)" );
         }
@@ -330,7 +345,13 @@ sub make_function_decls {
     foreach my $func (@funcs) {
         my $multiline = 0;
 
-        my $decl = sprintf( "%s %s(", $func->{return_type}, $func->{name} );
+        my $return = $func->{return_type};
+        my $alt_void = ' ';
+        if ( $func->{is_ignorable} && ($return ne 'void') && ($return !~ /\*/) ) {
+            $alt_void = " /*\@alt void@*/\n";
+        }
+
+        my $decl = sprintf( "%s%s%s(", $return, $alt_void, $func->{name} );
         $decl = "static $decl" if $func->{is_static};
 
         my @args    = @{ $func->{args} };

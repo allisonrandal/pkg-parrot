@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: pcre.pir 37343 2009-03-12 05:22:02Z Util $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: pcre.pir 39334 2009-06-02 14:51:55Z barney $
 
 =head1 TITLE
 
@@ -7,8 +7,11 @@ pcre.pir - user interface to Perl-Compatible Regular Expression library
 
 =head1 SYNOPSIS
 
-    load_bytecode 'library/pcre.pir'
-    lib = pcre_init()
+    load_bytecode 'pcre.pbc'
+
+    .local pmc func, lib
+    func = get_hll_global ['PCRE'], 'init'
+    lib = func()
 
     func = get_hll_global ['PCRE'], 'compile'
     ( regex, error, errptr )= func( pat, options )
@@ -81,7 +84,7 @@ LIB_CYGWIN:
 LIB_LOADED:
     set_hll_global ['PCRE'], 'lib', libpcre
 
-    load_bytecode 'library/libpcre.pir'
+    load_bytecode 'libpcre.pbc'
 
     # pcre *pcre_compile(const char *pattern, int options,
     #            const char **errptr, int *erroffset,
@@ -194,7 +197,7 @@ Returns the match.
 .sub version
     .local pmc pcre_function
 
-    pcre_function= get_hll_global ['PCRE::NCI'], 'PCRE_version'
+    pcre_function = get_hll_global ['PCRE::NCI'], 'PCRE_version'
 
     .local string ver
 

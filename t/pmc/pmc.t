@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pmc.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: pmc.t 40100 2009-07-15 13:15:25Z bacek $
 
 use strict;
 use warnings;
@@ -49,9 +49,7 @@ OUTPUT
 my $checkTypes;
 my %types_we_cant_test
     = map { $_ => 1; } (    # These require initializers.
-    qw(Null Iterator Enumerate Ref SharedRef
-        ParrotObject ParrotThread
-        BigInt LexInfo LexPad Slice Object),
+    qw(default Null Iterator ArrayIterator HashIterator StringIterator OrderedHashIterator Enumerate ParrotObject ParrotThread BigInt LexInfo LexPad Object Handle),
 
     # Instances of these appear to have other types.
     qw(PMCProxy Class) );

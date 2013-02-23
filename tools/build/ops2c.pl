@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: ops2c.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: ops2c.pl 39866 2009-07-02 07:07:07Z cotto $
 
 use warnings;
 use strict;
@@ -154,8 +154,6 @@ contributed to this program:
 =item C<Parrot::OpTrans::C>
 
 =item C<Parrot::OpTrans::CGoto>
-
-=item C<Parrot::OpTrans::Compiled>
 
 =item C<Parrot::OpTrans::CGP>
 

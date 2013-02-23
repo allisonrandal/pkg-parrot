@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 32_array_ops_sprintf.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1
 
 C<sprintf> is a function common to most programmers as part of the C
@@ -11,13 +14,13 @@ arguments to be taken from inside an array PMC.
 .sub main :main
 
     .local pmc myarray
-    myarray = new 'ResizablePMCArray'
+    myarray = new ['ResizablePMCArray']
 
-    $P0 = new 'Integer'
+    $P0 = new ['Integer']
     $P0 = 42
     push myarray, $P0
 
-    $P1 = new 'Float'
+    $P1 = new ['Float']
     $P1 = 10.5
     push myarray, $P1
 

@@ -5,7 +5,7 @@
 /*
  * jit.h
  *
- * $Id: jit.h 37393 2009-03-13 19:56:52Z Util $
+ * $Id: jit.h 37993 2009-04-09 02:03:24Z Infinoid $
  */
 
 #ifndef PARROT_JIT_H_GUARD
@@ -321,7 +321,13 @@ parrot_build_asm(PARROT_INTERP,
 /*
  * NCI interface
  */
-void *Parrot_jit_build_call_func(Interp *, PMC *, STRING *);
+void *Parrot_jit_build_call_func(Interp *, PMC *, STRING *, int *);
+/* custom pmc callback functions */
+void Parrot_jit_free_buffer(PARROT_INTERP, void *ptr, void *priv);
+PMC* Parrot_jit_clone_buffer(PARROT_INTERP, PMC *pmc, void *priv);
+struct jit_buffer_private_data {
+    int size;
+};
 
 #endif /* PARROT_JIT_H_GUARD */
 

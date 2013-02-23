@@ -1,13 +1,13 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: io.t 37526 2009-03-17 17:59:48Z allison $
+# $Id: io.t 39472 2009-06-09 15:07:24Z whiteknight $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 43;
+use Parrot::Test tests => 41;
 use Parrot::Test::Util 'create_tempfile';
 use Parrot::Test::Util 'create_tempfile';
 
@@ -37,58 +37,6 @@ sub file_content_is {
     is( <$FOO>, $content, $name );
 
     close $FOO;
-}
-
-TODO: {
-    local $TODO = "IO on some invalid types";
-
-    pir_output_is( <<'CODE', <<'OUTPUT', "IO on some invalid types" );
-.sub main
-    $P0 = null
-    test($P0, "Undef")
-    new $P0, ['Integer']
-    test($P0, "null")
-    new $P0, ['Undef']
-    test($P0, "Integer")
-    new $P0, ['String']
-    test($P0, "String")
-.end
-.sub test
-    .param pmc io
-    .param string name
-
-    print name
-    read $S0, io, 1
-    length $I0, $S0
-    if $I0 == 0 goto ok1
-    print " not"
-ok1:
-    print " ok 1\n"
-
-    print name
-    # what should happen here?
-    close io
-    print " ok 2\n"
-
-    print name
-    # what should happen here?
-    print io, "not"
-    print " ok 3\n"
-.end
-CODE
-Undef ok 1
-Undef ok 2
-Undef ok 3
-null ok 1
-null ok 2
-null ok 3
-Integer ok 1
-Integer ok 2
-Integer ok 3
-String ok 1
-String ok 2
-String ok 3
-OUTPUT
 }
 
 my (undef, $temp_file) = create_tempfile( UNLINK => 1 );
@@ -431,8 +379,6 @@ file_content_is( $temp_file, <<'OUTPUT', 'unbuffered file contents' );
 Howdy World
 OUTPUT
 
-SKIP: {
-    skip( "segfault, see TT #418", 1 );
 pir_output_is( <<"CODE", <<'OUTPUT', 'I/O buffering' );
 .sub main
     .local string filename
@@ -490,7 +436,6 @@ pir_output_is( <<"CODE", <<'OUTPUT', 'I/O buffering' );
 CODE
 Successful
 OUTPUT
-}
 
 # RT #46843
 pir_output_is( <<'CODE', <<'OUT', 'standard file descriptors' );
@@ -824,27 +769,6 @@ CODE
 unicode
 utf8
 T\xf6tsch
-OUTPUT
-
-pir_output_is( <<'CODE', <<"OUTPUT", "string read/write handle", todo => "no stringhandle yet" );
-.sub main :main
-    .local pmc    pio
-    .local string greeting
-    .local string layer
-
-    pio = new ['StringHandle']
-    print pio, "Hello"
-    print pio, ", "
-    print pio, "world!"
-    print pio, "\n"
-
-    greeting = read pio, 1024
-
-    print greeting
-    print "\n"
-.end
-CODE
-Hello, world!
 OUTPUT
 
 pir_output_is( <<"CODE", <<"OUTPUT", "PIO.readall() - classmeth" );

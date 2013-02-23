@@ -1,3 +1,5 @@
+# $Id: Obj.pir 39631 2009-06-17 20:30:30Z NotFound $
+
 =head1 NAME
 
 library/Getopt/Obj.pir - parse long and short command line options
@@ -9,7 +11,7 @@ library/Getopt/Obj.pir - parse long and short command line options
 
     .local string prog_name
     prog_name = shift argv
-    load_bytecode "Getopt/Obj.pir"
+    load_bytecode "Getopt/Obj.pbc"
     .local pmc getopts
     getopts = new "Getopt::Obj"
     getopts."notOptStop"(1)
@@ -200,7 +202,6 @@ shortarg:
 
     key = name
 
-    .local string type
     type = spec."type"()
     $I2 = length val
 
@@ -218,7 +219,6 @@ beginfor_0:
 
     (name, spec) = self."getNameForKey"(key)
     if null name goto redofor
-    .local string type
     type = spec."type"()
     unless type == 'Boolean' goto error_2
 
@@ -261,7 +261,6 @@ beginstore:
 
 beginstore_1:
     # Store the value...
-    .local string type
     type = spec."type"()
     if_null val, undef
     if type == 'String' goto str
@@ -284,7 +283,6 @@ optelse:
 array:
     $P0 = return[name]
     if null $P0 goto not_set
-    .local string type
     type = typeof $P0
     unless type != 'ResizableStringArray' goto endif_5
 not_set:
@@ -295,7 +293,6 @@ endif_5:
 hash:
     $P0 = return[name]
     if null $P0 goto not_set_hash
-    .local string type
     type = typeof $P0
     unless type != 'Hash' goto endif_7
 not_set_hash:
@@ -350,7 +347,7 @@ finish:
     .return(return)
 .end
 
-=item C<__push_string(STRING format)>
+=item C<push_string(STRING format)>
 
 A vtable method, invoked by e.g. C<push getopts, "foo|f=s">.  The format is as such.
 

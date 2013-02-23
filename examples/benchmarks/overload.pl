@@ -2,7 +2,7 @@
 package Foo;
 
 # Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: overload.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: overload.pl 38923 2009-05-19 06:07:42Z cotto $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ package main;
 my $a = Foo->new(7);
 my $b = Foo->new(6);
 my $r;
-for my $i ( 1 .. 500_000 ) { $r = $a * $b }
+for my $i ( 1 .. 50_000 ) { $r = $a * $b }
 print "$r\n";
 
 # Local Variables:

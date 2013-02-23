@@ -153,10 +153,10 @@ newline or semicolon after an end keyword."
     "ManagedStruct" "MultiSub" "NCI" "NameSpace" "Null"
     "OS" "Object" "OrderedHash" "PMCProxy" "ParrotClass"
     "ParrotIO" "ParrotInterpreter" "ParrotLibrary" "ParrotObject"
-    "ParrotRunningThread" "ParrotThread" "Pointer" "Random" "Ref"
+    "ParrotRunningThread" "ParrotThread" "Pointer" "Random"
     "ResizableBooleanArray" "ResizableFloatArray" "ResizableIntegerArray"
     "ResizablePMCArray" "ResizableStringArray" "RetContinuation"
-    "Role" "Scalar" "SharedRef" "Slice" "String" "Sub" "Super"
+    "Role" "Scalar" "String" "Sub" "Super"
     "Timer" "UnManagedStruct" "Undef" "VtableCache"))
 
 (defvar pir-ops
@@ -226,7 +226,7 @@ newline or semicolon after an end keyword."
     ":slurpy" ":unique_reg" ":vtable" ":wrap"))
 
 (defvar pir-dotted-directives
-  '(".HLL" ".HLL_map" ".arg" ".const" ".constant" ".emit" ".end" ".endm"
+  '(".HLL" ".arg" ".const" ".constant" ".emit" ".end" ".endm"
     ".endnamespace" ".eom" ".get_results" ".global" ".globalconst"
     ".include" ".invocant" ".lex" ".line" ".loadlib" ".macro" ".meth_call"
     ".namespace" ".nci_call" ".pcc_begin" ".pcc_begin_return"

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: addit.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: addit.pl 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ $args[2] = 87;
 $args[3] = "3.87";
 $args[4] = "21000000";
 
-for ( my $x = 500000 ; $x >= 0 ; --$x ) {
+for ( my $x = 50000 ; $x >= 0 ; --$x ) {
     $result = varargs_adder(@args);
 }
 print "$result\n";

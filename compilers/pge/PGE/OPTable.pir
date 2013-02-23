@@ -1,4 +1,5 @@
-# $Id: OPTable.pir 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: OPTable.pir 39852 2009-07-01 01:47:07Z pmichaud $
 
 =head1 Title
 
@@ -526,7 +527,7 @@ Adds (or replaces) a syntactic category's defaults.
     unless rulename goto reduce_saveterm_1
     ($P0 :optional, $I0 :opt_flag) = action.rulename($P1, 'reduce')
     unless $I0 goto reduce_saveterm_1
-    $P1.'result_object'($P0)
+    $P1.'!make'($P0)
   reduce_saveterm_1:
     push termstack, $P1
   reduce_end:
@@ -608,13 +609,18 @@ Adds (or replaces) a syntactic category's defaults.
     unless rulename goto end_all
     ($P0 :optional, $I0 :opt_flag) = action.rulename(mob, 'end')
     unless $I0 goto end_all
-    mob.'result_object'($P0)
+    mob.'!make'($P0)
   end_all:
     .return (mob)
 
   err_ternary:
-    print "Ternary error\n"
-    end
+    $S1 = pos
+    $S0 = concat 'Ternary error at offset ', $S1
+    $S0 .= ", found '"
+    $S1 = substr target, pos, 1
+    $S0 .= $S1
+    $S0 .= "'"
+    die $S0
 .end
 
 

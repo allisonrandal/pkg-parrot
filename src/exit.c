@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, Parrot Foundation.
-$Id: exit.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: exit.c 37854 2009-04-01 20:00:45Z coke $
 
 =head1 NAME
 
@@ -28,7 +28,7 @@ called by C<Parrot_exit()> when the interpreter exits.
 
 /*
 
-=item C<void Parrot_on_exit>
+=item C<void Parrot_on_exit(PARROT_INTERP, exit_handler_f function, void *arg)>
 
 Register the specified function to be called on exit.
 
@@ -54,7 +54,7 @@ Parrot_on_exit(PARROT_INTERP, NOTNULL(exit_handler_f function), ARGIN_NULLOK(voi
 
 /*
 
-=item C<void Parrot_exit>
+=item C<void Parrot_exit(PARROT_INTERP, int status)>
 
 Exit, calling any registered exit handlers.
 

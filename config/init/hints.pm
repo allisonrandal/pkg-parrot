@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: hints.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: hints.pm 40120 2009-07-16 18:53:20Z allison $
 
 =head1 NAME
 
@@ -37,6 +37,7 @@ sub runstep {
     my $hints_used = 0;
 
     my $osname = lc( $conf->data->get_p5('OSNAME') );
+    $osname = 'linux' if ($osname eq 'gnukfreebsd');
     my $hints_file = catfile('config', 'init', 'hints', "$osname.pm");
     if ( -f $hints_file ) {
         my $hints_pkg = "init::hints::" . $osname;

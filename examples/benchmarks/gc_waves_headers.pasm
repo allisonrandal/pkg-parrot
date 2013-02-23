@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: gc_waves_headers.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: gc_waves_headers.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -113,3 +113,9 @@ F<examples/benchmarks/gc_waves_sizeable_data.pasm>,
 F<examples/benchmarks/gc_waves_sizeable_headers.pasm>.
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

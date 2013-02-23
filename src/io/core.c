@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: core.c 37201 2009-03-08 12:07:48Z fperrad $
+$Id: core.c 38845 2009-05-16 20:57:52Z whiteknight $
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ PIOOFF_T piooffsetzero;
 
 /*
 
-=item C<void Parrot_io_init>
+=item C<void Parrot_io_init(PARROT_INTERP)>
 
 Sets up the interpreter's I/O storage and creates the C<STD*> handles.
 
@@ -78,7 +78,7 @@ Parrot_io_init(PARROT_INTERP)
 
 /*
 
-=item C<void Parrot_io_finish>
+=item C<void Parrot_io_finish(PARROT_INTERP)>
 
 Closes the interpreter's IO resourses.  Called during its interpreter
 destruction.
@@ -105,9 +105,9 @@ Parrot_io_finish(PARROT_INTERP)
 
 /*
 
-=item C<void Parrot_IOData_mark>
+=item C<void Parrot_IOData_mark(PARROT_INTERP, ParrotIOData *piodata)>
 
-Called from C<trace_active_PMCs()> to mark the IO data live.
+Called from C<Parrot_gc_trace_root()> to mark the IO data live.
 
 =cut
 
@@ -126,7 +126,7 @@ Parrot_IOData_mark(PARROT_INTERP, ARGIN(ParrotIOData *piodata))
      */
     for (i = 0; i < 3; i++) {
         if (table[i]) {
-            pobject_lives(interp, (PObj *)table[i]);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)table[i]);
         }
     }
 }

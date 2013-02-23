@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: pccmethod_test.pmc 36832 2009-02-17 19:58:58Z allison $
+$Id: pccmethod_test.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -9,8 +9,6 @@ src/pmc/pmethod_test.pmc - METHOD_Test PMC
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 pmclass PCCMETHOD_Test need_ext provides hash {
 

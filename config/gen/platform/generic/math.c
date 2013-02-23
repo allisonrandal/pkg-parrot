@@ -1,5 +1,5 @@
 /*
- * $Id: math.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: math.c 37786 2009-03-28 01:09:22Z coke $
  * Copyright (C) 2004-2007, Parrot Foundation.
  */
 
@@ -54,8 +54,6 @@ Parrot_signbit(double x)
 /*
 
 =item C<int Parrot_signbit_l(long double x)>
-
-RT#48260: Not yet documented!!!
 
 =cut
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: pdd09_gc.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id: pdd09_gc.pod 38656 2009-05-09 21:58:21Z Infinoid $
 
 =head1 PDD 9: Garbage Collection Subsystem
 
@@ -9,7 +9,7 @@ This PDD specifies Parrot's garbage collection subsystems.
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision: 38656 $
 
 =head2 Definitions
 
@@ -380,8 +380,8 @@ order to complete an entire run of an incremental collector.
 For a concurrent collector, calls to this function may activate a concurrent
 collection thread or, if such a thread is already running, do nothing at all.
 
-The C<do_gc_mark> function is called from the C<Parrot_do_gc_run> function,
-and should not usually be called directly.
+The C<do_gc_mark> function is called from the C<Parrot_gc_mark_and_sweep>
+function, and should not usually be called directly.
 
 C<flags> is one of:
 
@@ -570,9 +570,9 @@ within C<src/gc/api.c:Parrot_gc_free_pmc>.
 =item PObj_custom_mark_FLAG
 
 The C<mark> vtable slot will be called during the GC mark phase. The mark
-function must call C<pobject_lives> for all non-NULL objects (Buffers and
-PMCs) that PMC refers to. This flag is typically tested and the custom mark
-VTABLE method called from C<src/gc/api.c:mark_special>.
+function must call C<Parrot_gc_mark_PObj_alive> for all non-NULL objects
+(Buffers and PMCs) that PMC refers to. This flag is typically tested and the
+custom mark VTABLE method called from C<src/gc/api.c:mark_special>.
 
 =item PObj_external_FLAG
 

@@ -1,3 +1,5 @@
+# $Id: SubHello.pir 38689 2009-05-11 17:22:23Z NotFound $
+
 =head1 Hello Example
 
 This example shows the usage of C<Stream::Sub>.
@@ -15,9 +17,9 @@ Creates a C<Stream::Sub> and dumps it.
 .sub _main :main
     .local pmc stream
 
-    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode 'Stream/Sub.pbc'
 
-    stream = new "Stream::Sub"
+    stream = new ['Stream'; 'Sub']
 
     # set the stream's source sub
     .const 'Sub' temp = "_hello"
@@ -54,7 +56,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2008, Parrot Foundation.
+Copyright (C) 2004-2009, Parrot Foundation.
 
 =cut
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: boolean.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: boolean.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -20,8 +20,6 @@ it doesn't morph to other types. Only its value is changed.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 pmclass Boolean extends Integer provides boolean provides scalar {
 

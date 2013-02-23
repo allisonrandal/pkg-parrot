@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: file.pmc 37200 2009-03-08 11:46:01Z fperrad $
+$Id: file.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -21,8 +21,6 @@ C<File> is a singleton class which provides access to File functions.
 #ifdef WIN32
 #  include <direct.h>
 #endif
-
-#include "parrot/parrot.h"
 
 /* RT#46681 apparently, strerror_r is thread-safe and should be used instead.*/
 

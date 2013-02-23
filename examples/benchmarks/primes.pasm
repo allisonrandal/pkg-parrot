@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: primes.pasm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: primes.pasm 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ of primes, the last one found, and the time taken.
 	set     P1, 1
 	# I2 holds the highest number we want to check for primality
 	new P2, 'Integer'
-	set     P2, 10000
+	set     P2, 1000
 	new P6, 'Integer'
 	set	P6, 0
 	print   "N primes up to "
@@ -76,3 +76,8 @@ F<examples/benchmarks/primes2.py>.
 
 =cut
 
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

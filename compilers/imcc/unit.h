@@ -1,5 +1,5 @@
 /*
- * $Id: unit.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: unit.h 39492 2009-06-10 07:28:01Z chromatic $
  * Copyright (C) 2003-2009, Parrot Foundation.
  */
 
@@ -56,6 +56,7 @@ struct _IMC_Unit {
     struct _IMC_Unit *next;
 
     SymReg           *_namespace;
+    int               owns_namespace;   /* should this unit free *_namespace */
     int               pasm_file;
     const char       *file;
     int               n_vars_used[4];   /* INSP in PIR */

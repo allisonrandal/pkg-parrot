@@ -1,4 +1,5 @@
-# $Id: oo5.pir 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: oo5.pir 38923 2009-05-19 06:07:42Z cotto $
 
 .sub bench :main
     .local pmc cl
@@ -22,7 +23,7 @@ loop:
     y = new 'Integer'
     assign y, $P5
     inc i
-    if i <= 500000 goto loop
+    if i <= 50000 goto loop
 
     $P2 = o."i"()
     print $P2

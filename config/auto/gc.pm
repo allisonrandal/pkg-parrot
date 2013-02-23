@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: gc.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: gc.pm 39028 2009-05-21 23:11:17Z whiteknight $
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ sub runstep {
 
     my $gc = $conf->options->get('gc');
 
-    # default is GC in resources.c
+    # default is GC in alloc_resources.c
     $gc = 'gc' unless defined $gc;
 
     if ( $gc =~ /^malloc(?:-trace)?$/ ) {
@@ -97,9 +97,9 @@ EOF
         $gc = 'gc';
         $conf->data->set(
             TEMP_gc_c => <<"EOF",
-\$(SRC_DIR)/gc/resources\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/gc/resources.c
+\$(SRC_DIR)/gc/alloc_resources\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/gc/alloc_resources.c
 EOF
-            TEMP_gc_o => "\$(SRC_DIR)/gc/resources\$(O)",
+            TEMP_gc_o => "\$(SRC_DIR)/gc/alloc_resources\$(O)",
             gc_flag   => '',
         );
     }

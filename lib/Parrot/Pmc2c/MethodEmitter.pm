@@ -1,6 +1,6 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
 
-# $Id: MethodEmitter.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: MethodEmitter.pm 38536 2009-05-07 12:27:30Z bacek $
 
 =head1 NAME
 
@@ -47,7 +47,7 @@ sub generate_body {
         $self->rewrite_nci_method($pmc);
     }
 
-    $emit->( $pmc->export . ' ' . $self->decl( $pmc, 'CFILE' ) );
+    $emit->( $self->decl( $pmc, 'CFILE' ) );
     $emit->("{\n");
     $emit->($body);
     $emit->("}\n");
@@ -98,14 +98,12 @@ sub decl {
     $args = ", $args" if $args =~ /\S/;
     $args =~ s/(\w+)\s*(\*)\s*/$1 $2/g;
 
-    my ( $export, $extern, $newl, $semi );
+    my ( $extern, $newl, $semi );
     if ( $for_header eq 'HEADER' ) {
-        $export = $pmc->export;
         $newl   = ' ';
         $semi   = ';';
     }
     else {
-        $export = '';
         $newl   = "\n";
         $semi   = '';
     }
@@ -113,7 +111,7 @@ sub decl {
     $pmcarg    = "SHIM($pmcarg)" if $self->pmc_unused;
 
     return <<"EOC";
-$decs$export $ret${newl}Parrot_${pmcname}_$meth(PARROT_INTERP, $pmcarg$args)$semi
+static $decs $ret${newl}Parrot_${pmcname}_$meth(PARROT_INTERP, $pmcarg$args)$semi
 EOC
 }
 
@@ -250,7 +248,7 @@ sub rewrite_vtable_method {
             \bDYNSUPER\b      # Macro: DYNSUPER
             \(\s*(.*?)\)      # capture argument list
           }x,
-            sub { "interp->vtables[$supertype].$name(" . full_arguments($1) . ')' }
+            sub { "interp->vtables[$supertype]->$name(" . full_arguments($1) . ')' }
         );
 
         # Rewrite OtherClass.SUPER(args...)
@@ -260,7 +258,7 @@ sub rewrite_vtable_method {
             \.SUPER\b         # Macro: SUPER
             \(\s*(.*?)\)      # capture argument list
           }x,
-            sub { "Parrot_${1}_$name(" . full_arguments($2) . ')' }
+            sub { "interp->vtables[enum_class_${1}]->$name(" . full_arguments($2) . ')' }
         );
 
         # Rewrite SUPER(args...)
@@ -269,7 +267,7 @@ sub rewrite_vtable_method {
             \bSUPER\b         # Macro: SUPER
             \(\s*(.*?)\)      # capture argument list
           }x,
-            sub { "$supermethod(" . full_arguments($1) . ')' }
+            sub { "interp->vtables[$supertype]->$name(" . full_arguments($1) . ')' }
         );
     }
 

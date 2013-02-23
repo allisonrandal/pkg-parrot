@@ -1,9 +1,9 @@
-This is Parrot, version 1.0.0
+This is Parrot, version 1.4.0
 ------------------------------
 
 Parrot is Copyright (C) 2001-2009, Parrot Foundation.
 
-$Id: README 37535 2009-03-17 22:21:02Z allison $
+$Id: README 40184 2009-07-21 08:08:33Z cotto $
 
 LICENSE INFORMATION
 -------------------
@@ -18,7 +18,7 @@ You need a C compiler, a linker, and a make program of course. If you will be
 linking with the ICU library you have to download and install it before
 configuring Parrot.
 
-Get it from http://www-306.ibm.com/software/globalization/icu/downloads.jsp
+Get it from http://site.icu-project.org/download
 
 You also need Perl 5.8.4 or newer, Storable 2.12 or newer, and Bundle::Parrot
 to run various configure and build scripts.

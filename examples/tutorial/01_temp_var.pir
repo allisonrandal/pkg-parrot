@@ -1,14 +1,17 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 01_temp_var.pir 40124 2009-07-16 21:36:57Z allison $
+
 =head1 Simple Variables
 
-PIR has two kinds of variables. The most simple kind are Parrot
-registers. Registers are named with a dollar sign followed by a single
-letter type indicator and an integer. The letter in the name corresponds
-to the type of the variable, I for integer, N for number (float), S for
-string, and P for PMC (any kind of object). There are an unlimited
-number of each type of register per call frame, and you can use them
-in any order.
+PIR has two kinds of variables. The most simple kind are
+Parrot register variables. Register variables are named with
+a dollar sign followed by a single letter and an integer.
+The letter corresponds to the type of the variable, I for
+integer, N for number (float), S for string, and P for PMC
+(any kind of object).
 
-The C<=> symbol can be used to assign a value to one of these registers.
+The C<=> symbol can be used to assign a value to one of
+these register variables.
 
 =cut
 
@@ -20,7 +23,7 @@ The C<=> symbol can be used to assign a value to one of these registers.
 
     $S5 = "Hello"    # set temp string var to "Hello"
 
-    $P0 = new 'String'
+    $P0 = new ['String']
     $P0 = "Ford"     # set temp PMC var to "Ford"
 
     say $I0

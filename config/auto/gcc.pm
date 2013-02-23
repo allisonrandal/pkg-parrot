@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: gcc.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: gcc.pm 39870 2009-07-03 13:41:44Z fperrad $
 
 =head1 NAME
 
@@ -88,15 +88,12 @@ sub _evaluate_gcc {
     my $ccwarn = $conf->data->get('ccwarn');
 
     $conf->data->set( sym_export => '__attribute__ ((visibility("default")))' )
-        if $gccversion >= 4.0;
+        if $gccversion >= 4.0 && !$conf->data->get('sym_export');
 
     $conf->data->set(
         ccwarn              => "$ccwarn",
         gccversion          => $gccversion,
-        HAS_aligned_funcptr => 1
     );
-    $conf->data->set( HAS_aligned_funcptr => 0 )
-        if $conf->data->get_p5('OSNAME') eq 'hpux';
     return 1;
 }
 

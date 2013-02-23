@@ -1,5 +1,5 @@
 /*
- * $Id: signal.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: signal.c 37877 2009-04-02 20:20:22Z coke $
  * Copyright (C) 2004-2007, Parrot Foundation.
  */
 
@@ -26,8 +26,8 @@ Signal handling stuff
 
 /*
 
-=item C<Parrot_sighandler_t
-Parrot_set_sighandler(int signum, Parrot_sighandler_t handler)>
+=item C<Parrot_sighandler_t Parrot_set_sighandler(int signum,
+Parrot_sighandler_t handler)>
 
 for now use signal based functions
 

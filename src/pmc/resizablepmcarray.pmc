@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: resizablepmcarray.pmc 37267 2009-03-10 10:01:14Z cotto $
+$Id: resizablepmcarray.pmc 38994 2009-05-20 22:27:54Z chromatic $
 
 =head1 NAME
 
@@ -18,8 +18,6 @@ It puts things into Integer, Float, or String PMCs as appropriate.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 #define PMC_size(x)      ((Parrot_ResizablePMCArray_attributes *)PMC_data(x))->size
 #define PMC_array(x)     ((Parrot_ResizablePMCArray_attributes *)PMC_data(x))->pmc_array
@@ -71,10 +69,12 @@ Resizes the array to C<size> elements.
 
             }
             else {
-
                 SUPER(size);
                 PMC_threshold(SELF) = size;
             }
+        }
+        else if (size == PMC_size(SELF)) {
+            return;
         }
         else if (size <= PMC_threshold(SELF)) {
 
@@ -83,7 +83,6 @@ Resizes the array to C<size> elements.
             return;
         }
         else {
-
             INTVAL i, cur, needed;
             i = cur = PMC_threshold(SELF);
             if (cur < 8192)
@@ -94,8 +93,10 @@ Resizes the array to C<size> elements.
                 cur   &= ~0xfff;
             }
 
-            PMC_array(SELF) = (PMC **)mem_sys_realloc(PMC_array(SELF),
-                    cur * sizeof (PMC *));
+            if (cur < 8)
+                cur = 8;
+
+            PMC_array(SELF) = mem_realloc_n_typed(PMC_array(SELF), cur, PMC *);
 
             for (; i < cur; i++) {
                 (PMC_array(SELF))[i] = PMCNULL;
@@ -278,14 +279,17 @@ If key is a slice, do a splice as set that item.
     }
 
     VTABLE void delete_keyed(PMC *key) {
-        INTVAL  i;
-        INTVAL  idx  = key_integer(INTERP, key);
-        INTVAL  n    = PMC_size(SELF);
-        PMC   **data = PMC_array(SELF);
+        const INTVAL idx  = VTABLE_get_integer(INTERP, key);
+        SELF.delete_keyed_int(idx);
+    }
 
-        for (i = idx; i < n - 1; ++i) {
+    VTABLE void delete_keyed_int(INTVAL idx) {
+        PMC   **data = PMC_array(SELF);
+        INTVAL  n    = PMC_size(SELF);
+        INTVAL  i;
+
+        for (i = idx; i < n - 1; ++i)
             data[i] = data[i + 1];
-        }
 
         PMC_size(SELF)--;
     }
@@ -315,7 +319,7 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
     }
 
     VTABLE INTVAL exists_keyed(PMC *key) {
-        INTVAL ix = key_integer(INTERP, key);
+        INTVAL ix = VTABLE_get_integer(INTERP, key);
         return SELF.exists_keyed_int(ix);
     }
 
@@ -385,7 +389,7 @@ the array.
         return;
     }
 
-    void push_pmc(PMC *value) {
+    VTABLE void push_pmc(PMC *value) {
 
         INTVAL size = PMC_size(SELF);
         SELF.set_integer_native(size + 1);
@@ -538,7 +542,7 @@ the array.
         return;
     }
 
-    void unshift_pmc(PMC *value) {
+    VTABLE void unshift_pmc(PMC *value) {
 
         INTVAL  size = PMC_size(SELF);
         PMC   **data;
@@ -714,7 +718,7 @@ everything via the VTABLE api.
 
 */
 
-    void splice(PMC *value, INTVAL offset, INTVAL count) {
+    VTABLE void splice(PMC *value, INTVAL offset, INTVAL count) {
 
         const INTVAL length = VTABLE_elements(INTERP, SELF);
         const INTVAL elems  = VTABLE_elements(INTERP, value);
@@ -768,12 +772,12 @@ end of the array.
 
 */
 
-    METHOD PMC* shift() {
+    METHOD shift() {
         PMC *value = VTABLE_shift_pmc(INTERP, SELF);
         RETURN(PMC *value);
     }
 
-    METHOD PMC* pop() {
+    METHOD pop() {
         PMC *value = VTABLE_pop_pmc(INTERP, SELF);
         RETURN(PMC *value);
     }

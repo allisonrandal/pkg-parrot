@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: resizablebooleanarray.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: resizablebooleanarray.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -19,9 +19,6 @@ C<ResizableBooleanArray PMC> extends the C<FixedBooleanArray PMC>.
 =cut
 
 */
-
-#include "parrot/parrot.h"
-
 
 #define BITS_PER_CHAR 8
 /* MIN_ALLOC is 8 * BITS_PER_CHAR */
@@ -435,7 +432,7 @@ Used to archive the string.
         VTABLE_push_integer(INTERP, io, head_pos);
         VTABLE_push_integer(INTERP, io, tail_pos);
 
-        s = Parrot_str_new(INTERP, (char*)bit_array, tail_pos);
+        s = Parrot_str_new(INTERP, (char*)bit_array, rounded_size);
 
         VTABLE_push_string(INTERP, io, s);
     }

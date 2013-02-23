@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: mswin32.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: mswin32.pm 39871 2009-07-03 14:40:18Z jkeenan $
 
 package init::hints::mswin32;
 
@@ -13,6 +13,8 @@ sub runstep {
     my $libs      = $conf->option_or_data('libs');
     my $ccflags   = $conf->option_or_data('ccflags');
     my $cc        = $conf->option_or_data('cc');
+    my $share_ext = $conf->option_or_data('share_ext');
+    my $version   = $conf->option_or_data('VERSION');
 
     # Later in the Parrot::Configure::runsteps() process,
     # inter::progs will merge the command-line overrides with the defaults.
@@ -37,6 +39,12 @@ sub runstep {
         $conf->data->set( build_dir => Win32::GetShortPathName($build_dir) );
     }
 
+    my $bindir = $conf->data->get('bindir');
+
+    if ( $bindir =~ /\s/ ) {
+        $conf->data->set( bindir => Win32::GetShortPathName($bindir) );
+    }
+
     if ($is_msvc) {
         my $msvcversion = $conf->data->get('msvcversion');
 
@@ -55,7 +63,7 @@ sub runstep {
 
         # if we want pbc_to_exe to work, need to let some versions of the
         # compiler use more memory than they normally would
-        $ccflags .= " -Zm1000 " if $msvcversion < 13;
+        $ccflags .= " -Zm1500 " if $msvcversion < 13;
 
         my $ccwarn = '';
         # disable certain very noisy warnings
@@ -87,7 +95,7 @@ sub runstep {
             ldflags             => '-nologo -nodefaultlib',
             libs                => 'kernel32.lib ws2_32.lib msvcrt.lib oldnames.lib ',
             libparrot_static    => 'libparrot' . $conf->data->get('a'),
-            libparrot_shared    => 'libparrot$(SHARE_EXT)',
+            libparrot_shared    => "libparrot$share_ext",
             ar_flags            => '',
             ar_out              => '-out:',
             slash               => '\\',
@@ -103,7 +111,9 @@ sub runstep {
 
         # If we are building shared, need to include dynamic libparrot.lib, otherwise
         # the static libparrot.lib.
+        # Unclear if it's needed both for ld and link.
         $conf->data->set( libparrot_ldflags   => "\"$build_dir\\libparrot.lib\"" );
+        $conf->data->set( libparrot_linkflags   => "\"$build_dir\\libparrot.lib\"" );
 
         # 'link' needs to be link.exe, not cl.exe.
         # This makes 'link' and 'ld' the same.
@@ -240,6 +250,9 @@ sub runstep {
             ld_load_flags       => '-shared ',
             ld_share_flags      => '-shared ',
             libparrot_ldflags   => "\"$build_dir\\libparrot.dll\"",
+            inst_libparrot_ldflags => "\"$bindir\\libparrot.dll\"",
+            libparrot_linkflags   => "\"$build_dir\\libparrot.dll\"",
+            inst_libparrot_linkflags => "\"$bindir\\libparrot.dll\"",
             ncilib_link_extra   => 'src/libnci_test.def',
             sym_export          => '__declspec(dllexport)',
             sym_import          => '__declspec(dllimport)',

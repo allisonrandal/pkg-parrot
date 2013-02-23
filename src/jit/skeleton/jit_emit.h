@@ -7,7 +7,7 @@
  *
  * skeleton example - a stripped down jit/ppc/jit_emit.h
  *
- * $Id: jit_emit.h 37392 2009-03-13 19:51:47Z Util $
+ * $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
  */
 
 #ifndef PARROT_JIT_SKELETON_JIT_EMIT_H_GUARD
@@ -353,6 +353,8 @@ static const jit_arch_info arch_info = {
  * and finally you need an interface function to return above structure
  */
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 const jit_arch_info *
 Parrot_jit_init(PARROT_INTERP)
 {

@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: Protoobject.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 TITLE
 
 Protoobject.pir - PIR implementation for creating protoobjects

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: gc_malloc.c 36832 2009-02-17 19:58:58Z allison $
+$Id: gc_malloc.c 38843 2009-05-16 20:52:24Z whiteknight $
 
 =head1 NAME
 
@@ -58,7 +58,7 @@ static void used_cow(PARROT_INTERP,
 
 /*
 
-=item C<static int sweep_cb>
+=item C<static int sweep_cb(PARROT_INTERP, Small_Object_Pool *pool, int flag, void *arg)>
 
 Sweeps the given pool for the MS collector. This function also ends
 the profiling timer, if profiling is enabled. Returns the total number
@@ -77,7 +77,7 @@ sweep_cb(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool), int flag,
     if (flag & POOL_BUFFER)
         used_cow(interp, pool, 0);
 
-    Parrot_gc_sweep(interp, pool);
+    Parrot_gc_sweep_pool(interp, pool);
 
     if (flag & POOL_BUFFER)
         clear_cow(interp, pool, 0);
@@ -93,7 +93,7 @@ sweep_cb(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool), int flag,
 
 /*
 
-=item C<static void clear_cow>
+=item C<static void clear_cow(PARROT_INTERP, Small_Object_Pool *pool, int cleanup)>
 
 Clears the COW ref count.
 
@@ -139,7 +139,7 @@ clear_cow(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool), int cleanup)
 
 /*
 
-=item C<static void used_cow>
+=item C<static void used_cow(PARROT_INTERP, Small_Object_Pool *pool, int cleanup)>
 
 Finds other users of COW's C<bufstart>.
 

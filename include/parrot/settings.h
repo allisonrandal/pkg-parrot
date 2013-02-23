@@ -1,7 +1,7 @@
 /* settings.h
  *  Copyright (C) 2001-2004, Parrot Foundation.
  *  SVN Info
- *     $Id: settings.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: settings.h 40035 2009-07-12 22:27:35Z NotFound $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:
@@ -39,8 +39,10 @@
  * 0 ... MS  stop-the-world mark & sweep
  * 1 ... IMS incremental mark & sweep
  * 2 ... GMS generational mark & sweep
+ * 3 ... INF infinite memory "collector"
  *
- * Please note that only 0 currently works.
+ * Please note that only 0 and 3 currently work (and INF doesn't really
+ * "work").
  */
 
 #define PARROT_GC_SUBSYSTEM 0
@@ -49,16 +51,25 @@
 #  define PARROT_GC_MS      1
 #  define PARROT_GC_IMS     0
 #  define PARROT_GC_GMS     0
+#  define PARROT_GC_INF     0
 #endif
 #if PARROT_GC_SUBSYSTEM == 1
 #  define PARROT_GC_MS      0
 #  define PARROT_GC_IMS     1
 #  define PARROT_GC_GMS     0
+#  define PARROT_GC_INF     0
 #endif
 #if PARROT_GC_SUBSYSTEM == 2
 #  define PARROT_GC_MS      0
 #  define PARROT_GC_IMS     0
 #  define PARROT_GC_GMS     1
+#  define PARROT_GC_INF     0
+#endif
+#if PARROT_GC_SUBSYSTEM == 3
+#  define PARROT_GC_MS      0
+#  define PARROT_GC_IMS     0
+#  define PARROT_GC_GMS     0
+#  define PARROT_GC_INF     1
 #endif
 
 /*

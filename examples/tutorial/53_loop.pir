@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 53_loop.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 Loops
 
 PIR has no built-in looping structures such as C<for>, C<while>,

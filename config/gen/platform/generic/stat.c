@@ -1,5 +1,5 @@
 /*
- * $Id: stat.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: stat.c 38107 2009-04-14 23:41:32Z coke $
  * Copyright (C) 2007-2008, Parrot Foundation.
  */
 
@@ -24,44 +24,37 @@ File stat stuff
 
 /*
 
-=item C<PMC *
-Parrot_stat_file(PARROT_INTERP, STRING *filename)>
-
-RT#48260: Not yet documented!!!
+=item C<PMC * Parrot_stat_file(PARROT_INTERP, STRING *filename)>
 
 =cut
 
 */
 
 PMC *
-Parrot_stat_file(PARROT_INTERP, STRING *filename)
+Parrot_stat_file(SHIM_INTERP, SHIM(STRING *filename))
 {
     return NULL;
 }
 
 /*
 
-=item C<PMC *
-Parrot_stat_info_pmc(PARROT_INTERP, STRING *filename, INTVAL thing)>
-
-RT#48260: Not yet documented!!!
+=item C<PMC * Parrot_stat_info_pmc(PARROT_INTERP, STRING *filename, INTVAL
+thing)>
 
 =cut
 
 */
 
 PMC *
-Parrot_stat_info_pmc(PARROT_INTERP, STRING *filename, INTVAL thing)
+Parrot_stat_info_pmc(SHIM_INTERP, SHIM(STRING *filename), SHIM(INTVAL thing))
 {
     return NULL;
 }
 
 /*
 
-=item C<static INTVAL
-stat_common(PARROT_INTERP, struct stat *statbuf, INTVAL thing, int status)>
-
-RT#48260: Not yet documented!!!
+=item C<static INTVAL stat_common(PARROT_INTERP, struct stat *statbuf, INTVAL
+thing, int status)>
 
 =cut
 
@@ -145,10 +138,8 @@ stat_common(PARROT_INTERP, struct stat *statbuf, INTVAL thing, int status)
 
 /*
 
-=item C<INTVAL
-Parrot_stat_info_intval(PARROT_INTERP, STRING *file, INTVAL thing)>
-
-RT#48260: Not yet documented!!!
+=item C<INTVAL Parrot_stat_info_intval(PARROT_INTERP, STRING *file, INTVAL
+thing)>
 
 =cut
 
@@ -170,10 +161,8 @@ Parrot_stat_info_intval(PARROT_INTERP, STRING *file, INTVAL thing)
 
 /*
 
-=item C<INTVAL
-Parrot_fstat_info_intval(PARROT_INTERP, INTVAL file, INTVAL thing)>
-
-RT#48260: Not yet documented!!!
+=item C<INTVAL Parrot_fstat_info_intval(PARROT_INTERP, INTVAL file, INTVAL
+thing)>
 
 =cut
 
@@ -192,34 +181,30 @@ Parrot_fstat_info_intval(PARROT_INTERP, INTVAL file, INTVAL thing)
 
 /*
 
-=item C<FLOATVAL
-Parrot_stat_info_floatval(PARROT_INTERP, STRING *filename, INTVAL thing)>
-
-RT#48260: Not yet documented!!!
+=item C<FLOATVAL Parrot_stat_info_floatval(PARROT_INTERP, STRING *filename,
+INTVAL thing)>
 
 =cut
 
 */
 
 FLOATVAL
-Parrot_stat_info_floatval(PARROT_INTERP, STRING *filename, INTVAL thing)
+Parrot_stat_info_floatval(SHIM_INTERP, SHIM(STRING *filename), SHIM(INTVAL thing))
 {
     return (FLOATVAL)-1;
 }
 
 /*
 
-=item C<STRING *
-Parrot_stat_info_string(PARROT_INTERP, STRING *filename, INTVAL thing)>
-
-RT#48260: Not yet documented!!!
+=item C<STRING * Parrot_stat_info_string(PARROT_INTERP, STRING *filename, INTVAL
+thing)>
 
 =cut
 
 */
 
 STRING *
-Parrot_stat_info_string(PARROT_INTERP, STRING *filename, INTVAL thing)
+Parrot_stat_info_string(SHIM_INTERP, SHIM(STRING *filename), SHIM(INTVAL thing))
 {
     return NULL;
 }

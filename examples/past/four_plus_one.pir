@@ -1,4 +1,5 @@
-# $Id: four_plus_one.pir 32819 2008-11-18 16:51:12Z coke $
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: four_plus_one.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 # Set up a PAST data structure that represents a sub and run it.
 
@@ -48,11 +49,10 @@
 
 =cut
 
-.include "library/dumper.pir"
-
 .namespace []
 
 .sub '__onload' :init
+    load_bytecode "dumper.pbc"
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Text.pbc'
     load_bytecode 'PGE/Util.pbc'

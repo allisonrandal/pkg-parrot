@@ -1,7 +1,7 @@
 /* memory.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: memory.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: memory.h 39775 2009-06-25 19:55:05Z NotFound $
  *  Overview:
  *     This is the API header for the memory subsystem
  *  Data Structure and Algorithms:
@@ -41,7 +41,7 @@
 #define mem_realloc_n_typed(p, n, type)     (p) = (type *)mem_sys_realloc((p), (n)*sizeof(type))
 #define mem_copy_n_typed(dest, src, n, type) memcpy((dest), (src), (n)*sizeof(type))
 
-/* HEADERIZER BEGIN: src/gc/memory.c */
+/* HEADERIZER BEGIN: src/gc/alloc_memory.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
@@ -69,6 +69,12 @@ void * mem_sys_realloc_zeroed(
     ARGFREE(void *from),
     size_t size,
     size_t old_size);
+
+PARROT_EXPORT
+PARROT_MALLOC
+PARROT_CANNOT_RETURN_NULL
+char * mem_sys_strdup(ARGIN(const char *src))
+        __attribute__nonnull__(1);
 
 PARROT_MALLOC
 PARROT_CANNOT_RETURN_NULL
@@ -111,15 +117,13 @@ void * mem__internal_realloc_zeroed(
     int line)
         __attribute__nonnull__(4);
 
-void mem_setup_allocator(PARROT_INTERP, ARGIN(void *stacktop))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
 #define ASSERT_ARGS_mem_sys_allocate __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_mem_sys_allocate_zeroed __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_mem_sys_free __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_mem_sys_realloc __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_mem_sys_realloc_zeroed __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_mem_sys_strdup __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(src)
 #define ASSERT_ARGS_mem__internal_allocate __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(file)
 #define ASSERT_ARGS_mem__internal_allocate_zeroed __attribute__unused__ int _ASSERT_ARGS_CHECK = \
@@ -130,11 +134,8 @@ void mem_setup_allocator(PARROT_INTERP, ARGIN(void *stacktop))
        PARROT_ASSERT_ARG(file)
 #define ASSERT_ARGS_mem__internal_realloc_zeroed __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(file)
-#define ASSERT_ARGS_mem_setup_allocator __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(stacktop)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-/* HEADERIZER END: src/gc/memory.c */
+/* HEADERIZER END: src/gc/alloc_memory.c */
 
 #endif /* PARROT_MEMORY_H_GUARD */
 

@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: fixedbooleanarray.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: fixedbooleanarray.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 13;
+use Parrot::Test tests => 14;
 
 =head1 NAME
 
@@ -142,7 +142,7 @@ current instr\.:/
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedBooleanArray']
      set P0, 3
      new P1, ['Key']
@@ -179,7 +179,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['FixedBooleanArray']
      set P0, 1024
 
@@ -336,6 +336,28 @@ CODE
 01001000100010010
 01001000100010010
 OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "get_iter" );
+.sub 'main' :main
+    $P0 = new ['FixedBooleanArray']
+    $P0 = 3
+    $P0[0] = 1
+    $P0[1] = 0
+    $P0[2] = 1
+    $P1 = iter $P0
+loop:
+    unless $P1 goto loop_end
+    $S2 = shift $P1
+    say $S2
+    goto loop
+loop_end:
+.end
+CODE
+1
+0
+1
+OUTPUT
+
 
 1;
 

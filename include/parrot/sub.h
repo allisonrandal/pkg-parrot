@@ -1,7 +1,7 @@
 /* sub.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: sub.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: sub.h 39704 2009-06-22 05:07:15Z petdance $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures
@@ -169,16 +169,17 @@ typedef struct Parrot_sub {
 
 #define PMC_get_sub(interp, pmc, sub) \
     do { \
-        if ((pmc)->vtable->base_type == enum_class_Sub || \
-            (pmc)->vtable->base_type == enum_class_Coroutine || \
-            (pmc)->vtable->base_type == enum_class_Eval)  \
+        const INTVAL type = (pmc)->vtable->base_type; \
+        if (type == enum_class_Sub || \
+            type == enum_class_Coroutine || \
+            type == enum_class_Eval)  \
         {\
             GETATTR_Sub_sub((interp), (pmc), (sub)); \
         } \
         else { \
             (sub) = Parrot_get_sub_pmc_from_subclass((interp), (pmc)); \
         } \
-    } while (0);
+    } while (0)
 
 /* the first entries must match Parrot_sub, so we can cast
  * these two to the other type

@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: resizablefloatarray.t 37393 2009-03-13 19:56:52Z Util $
+# $Id: resizablefloatarray.t 38718 2009-05-12 16:48:28Z NotFound $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 21;
+use Parrot::Test tests => 22;
 
 =head1 NAME
 
@@ -193,7 +193,7 @@ ok 1
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      new P1, ['Key']
 
@@ -229,7 +229,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      set P0, 1
 
@@ -275,7 +275,7 @@ ok 4
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', 'basic push' );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      push P0, 1.0
      push P0, 2.0
@@ -302,7 +302,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', 'push many values' );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      set I0, 0
 L1:  set N0, I0
@@ -321,7 +321,7 @@ ok 1
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', 'basic pop' );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      set P0[0], 1.0
      set P0[1], 2.0
@@ -348,7 +348,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', 'pop many values' );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      set I0, 0
 L1:  set N0, I0
@@ -376,7 +376,7 @@ ok
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', 'push/pop' );
-     .include 'include/fp_equality.pasm'
+     .include 'fp_equality.pasm'
      new P0, ['ResizableFloatArray']
      push P0, 1.0
      push P0, 2.0
@@ -487,6 +487,26 @@ pir_output_is( << 'CODE', << 'OUTPUT', "unshift float" );
 .end
 CODE
 2 20.2 10.1
+OUTPUT
+
+pir_output_is( << 'CODE', << 'OUTPUT', "get_iter" );
+.sub main :main
+    $P0 = new ['ResizableFloatArray']
+    $P0[0] = 1.1
+    $P0[1] = 99.99
+    $P0[2] = -345.001
+    $P1 = iter $P0
+loop:
+    unless $P1 goto loop_end
+    $S2 = shift $P1
+    say $S2
+    goto loop
+  loop_end:
+.end
+CODE
+1.1
+99.99
+-345.001
 OUTPUT
 
 # Local Variables:

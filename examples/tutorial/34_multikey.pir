@@ -1,21 +1,25 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 34_multikey.pir 40124 2009-07-16 21:36:57Z allison $
+
 =head1 Multi-Level Keys
 
-Hashes and arrays can be combined in a number of ways to make interesting
-and complex data structures. A hash bucket may contain an array PMC, which
-in turn can contain other arrays or hashes. In these cases, the keys for
-each level can be combined together to form a single unique key for
-a data element in the structure.
+Hashes and arrays can be combined in a number of ways to
+make interesting and complex data structures. A hash may
+contain an array PMC, which in turn can contain other arrays
+or hashes. In these cases, the keys for each level can be
+combined together to form a single unique key for a data
+element in the structure.
 
-This technique works equally well for arrays-of-arrays, hashes-of-hashes,
-and combination structures as well.
+This technique works equally well for arrays-of-arrays,
+hashes-of-hashes, and combination structures as well.
 
 =cut
 
 .sub main :main
 
     .local pmc myhash, innerarray
-    myhash  = new 'Hash'
-    innerarray = new 'ResizableIntegerArray'
+    myhash  = new ['Hash']
+    innerarray = new ['ResizableIntegerArray']
 
     $I0 = 2
     innerarray[2] = 42

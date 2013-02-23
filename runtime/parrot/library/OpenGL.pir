@@ -1,3 +1,6 @@
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: OpenGL.pir 39762 2009-06-25 00:42:22Z japhb $
+
 =head1 NAME
 
 OpenGL - Parrot extension for OpenGL bindings
@@ -15,8 +18,8 @@ F<examples/opengl/triangle.pir>.
     .param pmc argv
 
     # Load OpenGL libary and a helper library for calling glutInit
-    load_bytecode 'library/OpenGL.pbc'
-    load_bytecode 'library/NCI/call_toolkit_init.pbc'
+    load_bytecode 'OpenGL.pbc'
+    load_bytecode 'NCI/call_toolkit_init.pbc'
 
     # Import all OpenGL/GLU/GLUT functions
     .local pmc import_gl
@@ -27,7 +30,7 @@ F<examples/opengl/triangle.pir>.
     .local pmc call_toolkit_init
     call_toolkit_init = get_global ['NCI'], 'call_toolkit_init'
 
-    .const .Sub glutInit = 'glutInit'
+    .const 'Sub' glutInit = 'glutInit'
     argv = call_toolkit_init(glutInit, argv)
 
     # Set display mode, create GLUT window, save window handle
@@ -41,9 +44,9 @@ F<examples/opengl/triangle.pir>.
     set_global 'glut_window', window
 
     # Set up GLUT callbacks
-    .const .Sub draw     = 'draw'
-    .const .Sub idle     = 'idle'
-    .const .Sub keyboard = 'keyboard'
+    .const 'Sub' draw     = 'draw'
+    .const 'Sub' idle     = 'idle'
+    .const 'Sub' keyboard = 'keyboard'
     glutDisplayFunc (draw)
     glutIdleFunc    (idle)
     glutKeyboardFunc(keyboard)
@@ -77,9 +80,6 @@ include:
 
 .namespace ['OpenGL']
 
-.include 'library/OpenGL_funcs.pir'
-
-
 =item _opengl_init()
 
 At module load time, calls the other initialization routines in the proper
@@ -88,8 +88,10 @@ order.
 =cut
 
 .sub _opengl_init :load
+    load_bytecode 'OpenGL_funcs.pbc'
     _load_opengl_libs()
-    _wrap_all_opengl_entry_points()
+    _wrap_opengl_entry_points()
+    _export_opengl_functions()
 .end
 
 
@@ -106,6 +108,9 @@ the known different filenames for each library in turn before giving up.
     .local pmc libnames
 
     libnames = new 'ResizableStringArray'
+    # The following line brought to you by proprietary driver packages
+    # that don't update the libGL.so symlink properly, causing FAIL
+    push libnames, 'libGL.so.1'
     push libnames, 'libGL'
     push libnames, 'opengl32'
     push libnames, '/System/Library/Frameworks/OpenGL.framework/OpenGL'
@@ -172,13 +177,13 @@ match can be found on the system.
 .end
 
 
-=item _wrap_all_opengl_entry_points()
+=item _wrap_opengl_entry_points()
 
 Create NCI wrappers for all GL, GLU, and GLUT functions
 
 =cut
 
-.sub _wrap_all_opengl_entry_points
+.sub _wrap_opengl_entry_points
     .local pmc namespace
     namespace = get_namespace
 
@@ -245,6 +250,59 @@ this library.
 
 =over 4
 
+=item _export_opengl_functions()
+
+Marks all OpenGL/GLU/GLUT functions as exported (to the default export tags,
+currently ALL and DEFAULT).  Unmangles callback names, so that the importing
+namespaces see the standard names instead of the mangled versions.  Called
+at :load time by _opengl_init().
+
+=cut
+
+.sub _export_opengl_functions
+    .local pmc     gl_namespace
+    gl_namespace = get_namespace
+
+    .local pmc     gl_ns_iterator, export_list, export_renames
+    .local string  symbol, prefix
+    gl_ns_iterator = iter gl_namespace
+    export_list    = new 'ResizableStringArray'
+    export_renames = new 'Hash'
+
+    # Prepare list of symbols and hash of renames for export
+  symbol_loop:
+    unless gl_ns_iterator goto symbol_loop_end
+    symbol = shift gl_ns_iterator
+
+    # For now, only handle symbols starting with 'gl'
+    prefix = substr symbol, 0, 2
+    unless prefix == 'gl' goto symbol_loop
+
+    # Special-case callbacks
+    prefix = substr symbol, 0, 6
+    if prefix == 'glutcb' goto rename_callbacks
+
+    # Add all other matching symbols to export list
+    push export_list, symbol
+    goto symbol_loop
+
+    # Rename all 'glutcb*' symbols to 'glut*'
+  rename_callbacks:
+    .local string renamed
+    renamed = clone symbol
+    substr renamed, 4, 2, ''
+    export_renames[symbol] = renamed
+    goto symbol_loop
+  symbol_loop_end:
+
+    # Mark all symbols and renames for export
+    .local pmc parrot
+    load_language 'parrot'
+    parrot = compreg 'parrot'
+    parrot.'export'(export_list)
+    parrot.'export'(export_renames)
+.end
+
 =item _export_all_functions(pmc to_namespace :optional)
 
 Export all OpenGL/GLU/GLUT functions to the target C<namespace>.  Unmangles
@@ -267,24 +325,24 @@ caller's namespace is assumed.
     .local pmc     gl_namespace
     gl_namespace = get_namespace
 
-    .local pmc     iterator, export_list, export_renames
-    .local string  symbol, tag
-    iterator       = iter gl_namespace
+    .local pmc     gl_ns_iterator, export_list, export_renames
+    .local string  symbol, prefix
+    gl_ns_iterator = iter gl_namespace
     export_list    = new 'ResizableStringArray'
     export_renames = new 'Hash'
 
     # Prepare list of symbols and hash of renames for export
   symbol_loop:
-    unless iterator goto symbol_loop_end
-    symbol = shift iterator
+    unless gl_ns_iterator goto symbol_loop_end
+    symbol = shift gl_ns_iterator
 
     # For now, only handle symbols starting with 'gl'
-    tag = substr symbol, 0, 2
-    unless tag == 'gl' goto symbol_loop
+    prefix = substr symbol, 0, 2
+    unless prefix == 'gl' goto symbol_loop
 
     # Special-case callbacks
-    tag = substr symbol, 0, 6
-    if tag == 'glutcb' goto rename_callbacks
+    prefix = substr symbol, 0, 6
+    if prefix == 'glutcb' goto rename_callbacks
 
     # Add all other matching symbols to export list
     push export_list, symbol

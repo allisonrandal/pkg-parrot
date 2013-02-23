@@ -1,5 +1,5 @@
 /*
- * $Id: main.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: main.c 39842 2009-06-30 14:45:08Z petdance $
  *
  * Intermediate Code Compiler for Parrot.
  *
@@ -133,7 +133,7 @@ static void usage(ARGMOD(FILE *fp))
 
 /*
 
-=item C<static void usage>
+=item C<static void usage(FILE *fp)>
 
 Outputs usage error message.
 
@@ -152,7 +152,7 @@ usage(ARGMOD(FILE *fp))
 
 /*
 
-=item C<static void help_debug>
+=item C<static void help_debug(void)>
 
 Print out list of debugging flag values.
 
@@ -197,7 +197,7 @@ help_debug(void)
 
 /*
 
-=item C<static void help>
+=item C<static void help(void)>
 
 Print out "help" list of options.
 
@@ -215,17 +215,13 @@ help(void)
     "  Options:\n"
     "    -h --help\n"
     "    -V --version\n"
-    "    -I add path to include search\n"
-    "    -L add path to library search\n"
+    "    -I --include add path to include search\n"
+    "    -L --library add path to library search\n"
+    "    -X --dynext add path to dynamic extension search\n"
     "   <Run core options>\n"
-    "    -R --runcore CORE\n"
-    "    --bounds-checks|--slow-core\n"
-    "    --CGP-core\n"
-    "    --fast-core\n"
-    "    --computed-goto-core\n"
-    "    --jit-core\n"
+    "    -R --runcore slow|bounds|fast|jit|cgoto|cgp|cgp-jit\n"
+    "    -R --runcore switch|switch-jit|trace|exec|gcdebug\n"
     "    -p --profile\n"
-    "    --switched-core\n"
     "    -t --trace [flags]\n"
     "   <VM options>\n"
     "    -D --parrot-debug[=HEXFLAGS]\n"
@@ -255,7 +251,7 @@ help(void)
 
 /*
 
-=item C<static void Parrot_version>
+=item C<static void Parrot_version(PARROT_INTERP)>
 
 Print out parrot version number.
 
@@ -296,11 +292,12 @@ static struct longopt_opt_decl options[] = {
     { 'D', 'D', OPTION_optional_FLAG, { "--parrot-debug" } },
     { 'E', 'E', (OPTION_flags)0, { "--pre-process-only" } },
     { 'G', 'G', (OPTION_flags)0, { "--no-gc" } },
-    { 'I', 'I', OPTION_required_FLAG, { NULL } },
-    { 'L', 'L', OPTION_required_FLAG, { NULL } },
+    { 'I', 'I', OPTION_required_FLAG, { "--include" } },
+    { 'L', 'L', OPTION_required_FLAG, { "--library" } },
     { 'O', 'O', OPTION_optional_FLAG, { "--optimize" } },
     { 'R', 'R', OPTION_required_FLAG, { "--runcore" } },
     { 'V', 'V', (OPTION_flags)0, { "--version" } },
+    { 'X', 'X', OPTION_required_FLAG, { "--dynext" } },
     { '\0', OPT_DESTROY_FLAG, (OPTION_flags)0,
                                  { "--leak-test", "--destroy-at-end" } },
     { '\0', OPT_GC_DEBUG, (OPTION_flags)0, { "--gc-debug" } },
@@ -323,7 +320,7 @@ static struct longopt_opt_decl options[] = {
 
 /*
 
-=item C<static int is_all_hex_digits>
+=item C<static int is_all_hex_digits(const char *s)>
 
 Tests all characters in a string are hexadecimal digits.
 Returns 1 if true, 0 as soon as a non-hex found
@@ -346,7 +343,7 @@ is_all_hex_digits(ARGIN(const char *s))
 
 /*
 
-=item C<const char * parseflags>
+=item C<const char * parseflags(PARROT_INTERP, int *argc, char **argv[])>
 
 Parse Parrot's command line for options and set appropriate flags.
 
@@ -411,13 +408,13 @@ parseflags(PARROT_INTERP, int *argc, char **argv[])
                 break;
             case 't':
                 if (opt.opt_arg && is_all_hex_digits(opt.opt_arg))
-                    SET_TRACE(strtoul(opt.opt_arg, 0, 16));
+                    SET_TRACE(strtoul(opt.opt_arg, NULL, 16));
                 else
                     SET_TRACE(PARROT_TRACE_OPS_FLAG);
                 break;
             case 'd':
                 if (opt.opt_arg && is_all_hex_digits(opt.opt_arg)) {
-                    IMCC_INFO(interp)->debug = strtoul(opt.opt_arg, 0, 16);
+                    IMCC_INFO(interp)->debug = strtoul(opt.opt_arg, NULL, 16);
                 }
                 else {
                     IMCC_INFO(interp)->debug++;
@@ -425,7 +422,7 @@ parseflags(PARROT_INTERP, int *argc, char **argv[])
                 break;
             case 'D':
                 if (opt.opt_arg && is_all_hex_digits(opt.opt_arg)) {
-                    SET_DEBUG(strtoul(opt.opt_arg, 0, 16));
+                    SET_DEBUG(strtoul(opt.opt_arg, NULL, 16));
                 }
                 else
                     SET_DEBUG(PARROT_MEM_STAT_DEBUG_FLAG);
@@ -532,12 +529,16 @@ parseflags(PARROT_INTERP, int *argc, char **argv[])
                 SET_FLAG(PARROT_DESTROY_FLAG);
                 break;
             case 'I':
-                Parrot_add_library_path(interp, opt.opt_arg,
+                Parrot_lib_add_path_from_cstring(interp, opt.opt_arg,
                     PARROT_LIB_PATH_INCLUDE);
                 break;
             case 'L':
-                Parrot_add_library_path(interp, opt.opt_arg,
+                Parrot_lib_add_path_from_cstring(interp, opt.opt_arg,
                     PARROT_LIB_PATH_LIBRARY);
+                break;
+            case 'X':
+                Parrot_lib_add_path_from_cstring(interp, opt.opt_arg,
+                    PARROT_LIB_PATH_DYNEXT);
                 break;
             default:
                 Parrot_ex_throw_from_c_args(interp, NULL, 1,
@@ -570,7 +571,7 @@ parseflags(PARROT_INTERP, int *argc, char **argv[])
 
 /*
 
-=item C<static void do_pre_process>
+=item C<static void do_pre_process(PARROT_INTERP)>
 
 Pre-processor step.  Turn parser's output codes into Parrot instructions.
 
@@ -692,7 +693,8 @@ do_pre_process(PARROT_INTERP)
 
 /*
 
-=item C<static void imcc_get_optimization_description>
+=item C<static void imcc_get_optimization_description(const PARROT_INTERP, int
+opt_level, char *opt_desc)>
 
 Create list (opt_desc[]) describing optimisation flags.
 
@@ -729,7 +731,7 @@ imcc_get_optimization_description(const PARROT_INTERP, int opt_level, ARGMOD(cha
 
 /*
 
-=item C<void imcc_initialize>
+=item C<void imcc_initialize(PARROT_INTERP)>
 
 Initialise interpreter and set optimisation level.
 
@@ -764,7 +766,8 @@ imcc_initialize(PARROT_INTERP)
 
 /*
 
-=item C<static void imcc_run_pbc>
+=item C<static void imcc_run_pbc(PARROT_INTERP, int obj_file, const char
+*output_file, int argc, char **argv)>
 
 Write out or run Parrot bytecode.
 
@@ -800,7 +803,7 @@ imcc_run_pbc(PARROT_INTERP, int obj_file, ARGIN_NULLOK(const char *output_file),
 
 /*
 
-=item C<static void imcc_write_pbc>
+=item C<static void imcc_write_pbc(PARROT_INTERP, const char *output_file)>
 
 Output packed bytecode file.
 
@@ -825,7 +828,7 @@ imcc_write_pbc(PARROT_INTERP, ARGIN(const char *output_file))
     PackFile_pack(interp, interp->code->base.pf, packed);
     if (STREQ(output_file, "-"))
         fp = stdout;
-    else if ((fp = fopen(output_file, "wb")) == 0)
+    else if ((fp = fopen(output_file, "wb")) == NULL)
         IMCC_fatal_standalone(interp, EXCEPTION_EXTERNAL_ERROR,
             "Couldn't open %s\n", output_file);
 
@@ -839,7 +842,8 @@ imcc_write_pbc(PARROT_INTERP, ARGIN(const char *output_file))
 
 /*
 
-=item C<static void determine_input_file_type>
+=item C<static void determine_input_file_type(PARROT_INTERP, const char * const
+sourcefile)>
 
 Read in the source and determine whether it's Parrot bytecode or PASM
 
@@ -883,7 +887,8 @@ determine_input_file_type(PARROT_INTERP, ARGIN(const char * const sourcefile))
 
 /*
 
-=item C<static void determine_output_file_type>
+=item C<static void determine_output_file_type(PARROT_INTERP, int *obj_file,
+const char *output_file)>
 
 Decide what kind of file we are to output.
 
@@ -918,7 +923,8 @@ determine_output_file_type(PARROT_INTERP,
 
 /*
 
-=item C<static void compile_to_bytecode>
+=item C<static void compile_to_bytecode(PARROT_INTERP, const char * const
+sourcefile, const char * const output_file)>
 
 Compile source code into bytecode (or die trying).
 
@@ -949,7 +955,7 @@ compile_to_bytecode(PARROT_INTERP,
     Parrot_pbc_load(interp, pf);
 
     IMCC_push_parser_state(interp);
-    IMCC_INFO(interp)->state->file = sourcefile;
+    IMCC_INFO(interp)->state->file = mem_sys_strdup(sourcefile);
 
     emit_open(interp, per_pbc, per_pbc ? NULL : (void*)output_file);
 
@@ -997,7 +1003,8 @@ compile_to_bytecode(PARROT_INTERP,
 
 /*
 
-=item C<int imcc_run>
+=item C<int imcc_run(PARROT_INTERP, const char *sourcefile, int argc, char
+**argv)>
 
 Entry point of IMCC, as invoked by Parrot's main function.
 Compile source code (if required), write bytecode file (if required)

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: Revision.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Revision.pm 38687 2009-05-11 14:24:04Z Infinoid $
 
 =head1 NAME
 
@@ -89,6 +89,12 @@ sub _analyze_sandbox {
     if ( my @svn_info = qx/svn info 2>$nul/ and $? == 0 ) {
         if ( my ($line) = grep /^Revision:/, @svn_info ) {
             ($revision) = $line =~ /(\d+)/;
+        }
+    }
+    if( !$revision && (-d '.git') ) {
+        my $git_log = qx/git log -100 2>$nul/;
+        if(defined($git_log) && $git_log =~ /git-svn-id: \S+\@(\d+)\s/) {
+            $revision = $1;
         }
     }
     return $revision;

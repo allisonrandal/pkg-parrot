@@ -1,7 +1,7 @@
 /* io.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: io.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: io.h 39888 2009-07-05 05:15:50Z petdance $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:
@@ -101,8 +101,6 @@ typedef long PIOOFF_T;
 
 extern PIOOFF_T piooffsetzero;
 
-typedef struct _ParrotIOFilter ParrotIOFilter;
-typedef struct _ParrotIO ParrotIO;
 typedef struct _ParrotIOData ParrotIOData;
 
 #ifdef _MSC_VER
@@ -152,6 +150,10 @@ INTVAL Parrot_io_close(PARROT_INTERP, ARGMOD(PMC *pmc))
         FUNC_MODIFIES(*pmc);
 
 PARROT_EXPORT
+INTVAL Parrot_io_close_piohandle(PARROT_INTERP, PIOHANDLE handle)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 INTVAL Parrot_io_eof(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
@@ -160,7 +162,11 @@ INTVAL Parrot_io_eof(PARROT_INTERP, ARGMOD(PMC *pmc))
 
 PARROT_EXPORT
 PARROT_IGNORABLE_RESULT
-INTVAL Parrot_io_eprintf(NULLOK(PARROT_INTERP), ARGIN(const char *s), ...)
+INTVAL /*@alt void@*/
+Parrot_io_eprintf(
+    NULLOK(PARROT_INTERP),
+    ARGIN(const char *s),
+    ...)
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
@@ -180,7 +186,9 @@ void Parrot_io_flush(PARROT_INTERP, ARGMOD(PMC *pmc))
         FUNC_MODIFIES(*pmc);
 
 PARROT_EXPORT
-INTVAL Parrot_io_fprintf(PARROT_INTERP,
+PARROT_IGNORABLE_RESULT
+INTVAL /*@alt void@*/
+Parrot_io_fprintf(PARROT_INTERP,
     ARGMOD(PMC *pmc),
     ARGIN(const char *s),
     ...)
@@ -197,6 +205,7 @@ PIOHANDLE Parrot_io_getfd(PARROT_INTERP, ARGMOD(PMC *pmc))
         FUNC_MODIFIES(*pmc);
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL Parrot_io_is_closed(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
@@ -210,6 +219,7 @@ INTVAL Parrot_io_is_tty(PARROT_INTERP, ARGMOD(PMC *pmc))
         FUNC_MODIFIES(*pmc);
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 PIOOFF_T Parrot_io_make_offset(INTVAL offset);
 
 PARROT_EXPORT
@@ -223,12 +233,12 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 PMC * Parrot_io_open(PARROT_INTERP,
     ARGIN_NULLOK(PMC *pmc),
-    ARGIN(STRING *path),
+    ARGIN_NULLOK(STRING *path),
     ARGIN_NULLOK(STRING *mode))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3);
+        __attribute__nonnull__(1);
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL Parrot_io_peek(PARROT_INTERP,
     ARGMOD(PMC *pmc),
     ARGOUT(STRING **buffer))
@@ -239,7 +249,11 @@ INTVAL Parrot_io_peek(PARROT_INTERP,
         FUNC_MODIFIES(*buffer);
 
 PARROT_EXPORT
-INTVAL Parrot_io_printf(PARROT_INTERP, ARGIN(const char *s), ...)
+PARROT_IGNORABLE_RESULT
+INTVAL /*@alt void@*/
+Parrot_io_printf(PARROT_INTERP,
+    ARGIN(const char *s),
+    ...)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
@@ -292,6 +306,7 @@ PMC * Parrot_io_STDERR(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 PMC * Parrot_io_stdhandle(PARROT_INTERP,
     INTVAL fileno,
@@ -328,7 +343,10 @@ INTVAL Parrot_io_write(PARROT_INTERP,
         __attribute__nonnull__(3)
         FUNC_MODIFIES(*pmc);
 
+PARROT_WARN_UNUSED_RESULT
 PIOOFF_T Parrot_io_make_offset32(INTVAL hi, INTVAL lo);
+
+PARROT_WARN_UNUSED_RESULT
 PIOOFF_T Parrot_io_make_offset_pmc(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
@@ -337,6 +355,8 @@ PIOOFF_T Parrot_io_make_offset_pmc(PARROT_INTERP, ARGMOD(PMC *pmc))
 #define ASSERT_ARGS_Parrot_io_close __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_io_close_piohandle __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_io_eof __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc)
@@ -365,8 +385,7 @@ PIOOFF_T Parrot_io_make_offset_pmc(PARROT_INTERP, ARGMOD(PMC *pmc))
 #define ASSERT_ARGS_Parrot_io_new_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_io_open __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(path)
+       PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_io_peek __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc) \
@@ -757,6 +776,127 @@ void Parrot_io_set_buffer_start(SHIM_INTERP,
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/io/filehandle.c */
 
+/* HEADERIZER BEGIN: src/io/socket_api.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+PMC * Parrot_io_accept(PARROT_INTERP, ARGMOD(PMC *pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*pmc);
+
+PARROT_EXPORT
+INTVAL Parrot_io_bind(PARROT_INTERP, ARGMOD(PMC *pmc), ARGMOD(PMC *address))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*pmc)
+        FUNC_MODIFIES(*address);
+
+PARROT_EXPORT
+INTVAL Parrot_io_connect(PARROT_INTERP,
+    ARGMOD(PMC *pmc),
+    ARGMOD(PMC *address))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*pmc)
+        FUNC_MODIFIES(*address);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+INTVAL Parrot_io_listen(PARROT_INTERP, ARGMOD(PMC *pmc), INTVAL backlog)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*pmc);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * Parrot_io_new_socket_pmc(PARROT_INTERP, INTVAL flags)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+INTVAL Parrot_io_poll(PARROT_INTERP,
+    ARGMOD(PMC *pmc),
+    INTVAL which,
+    INTVAL sec,
+    INTVAL usec)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*pmc);
+
+PARROT_EXPORT
+INTVAL Parrot_io_recv(PARROT_INTERP, ARGMOD(PMC *pmc), ARGOUT(STRING **buf))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*pmc)
+        FUNC_MODIFIES(*buf);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+INTVAL Parrot_io_send(PARROT_INTERP, ARGMOD(PMC *pmc), ARGMOD(STRING *buf))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*pmc)
+        FUNC_MODIFIES(*buf);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+INTVAL Parrot_io_socket(PARROT_INTERP,
+    ARGMOD_NULLOK(PMC *socket),
+    INTVAL fam,
+    INTVAL type,
+    INTVAL proto)
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*socket);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+INTVAL Parrot_io_socket_is_closed(ARGMOD(PMC *socket))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*socket);
+
+#define ASSERT_ARGS_Parrot_io_accept __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_io_bind __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc) \
+    || PARROT_ASSERT_ARG(address)
+#define ASSERT_ARGS_Parrot_io_connect __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc) \
+    || PARROT_ASSERT_ARG(address)
+#define ASSERT_ARGS_Parrot_io_listen __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_io_new_socket_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_io_poll __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_io_recv __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc) \
+    || PARROT_ASSERT_ARG(buf)
+#define ASSERT_ARGS_Parrot_io_send __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc) \
+    || PARROT_ASSERT_ARG(buf)
+#define ASSERT_ARGS_Parrot_io_socket __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_io_socket_is_closed __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(socket)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: src/io/socket_api.c */
+
 /* Put platform specific macros here if you must */
 #ifdef PIO_OS_WIN32
 extern STRING          *PIO_sockaddr_in(PARROT_INTERP, unsigned short, STRING *);
@@ -784,7 +924,37 @@ extern INTVAL           PIO_stdio_getblksize(PIOHANDLE fd);
 #define PIOCTL_LINEBUF             1
 #define PIOCTL_BLKBUF              2
 
+/*
+ * Enum definition of constants for Socket.socket.
+ * Note that these are the *parrot* values for these defines; the system
+ * values vary from one platform to the next.  See the lookup tables in
+ * socket_unix.c and socket_win32.c for the mappings.
+ */
 
+/* &gen_from_enum(socket.pasm) */
+typedef enum {
+    PIO_PF_LOCAL    = 0,
+    PIO_PF_UNIX     = 1,
+    PIO_PF_INET     = 2,
+    PIO_PF_INET6    = 3,
+    PIO_PF_MAX      = 4     /* last elem */
+} Socket_Protocol_Family;
+
+typedef enum {
+    PIO_SOCK_PACKET     = 0,
+    PIO_SOCK_STREAM     = 1,
+    PIO_SOCK_DGRAM      = 2,
+    PIO_SOCK_RAW        = 3,
+    PIO_SOCK_RDM        = 4,
+    PIO_SOCK_SEQPACKET  = 5,
+    PIO_SOCK_MAX        = 6 /* last element */
+} Socket_Socket_Type;
+
+typedef enum {
+    PIO_PROTO_TCP   = 6,
+    PIO_PROTO_UDP   = 17,
+} Socket_Protocol;
+/* &end_gen */
 
 #endif /* PARROT_IO_H_GUARD */
 

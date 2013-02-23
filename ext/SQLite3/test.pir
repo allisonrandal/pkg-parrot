@@ -1,4 +1,7 @@
 #../../parrot -t5 test.pir
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: test.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 .sub 'main'
 load_bytecode 'SQLite3'
 

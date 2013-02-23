@@ -1,3 +1,6 @@
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: shapes.pir 39521 2009-06-12 07:51:40Z japhb $
+
 =head1 TITLE
 
 shapes.pir - Exercise basic OpenGL 1.1/GLUT 3 APIs by drawing animated shapes
@@ -34,7 +37,7 @@ ASCII key.
     mode   |= .GLUT_DEPTH
     mode   |= .GLUT_STENCIL
     window  = new 'Integer'
-    window  = init_glut(argv, mode, 'Test')
+    window  = init_glut(argv, mode, 'Shapes: OpenGL 1.x NCI Test')
     set_global 'glut_window', window
 
     # Init miscellaneous globals
@@ -65,8 +68,8 @@ ASCII key.
     .param string window_title
 
     # Load OpenGL libary and a helper library for calling glutInit
-    load_bytecode 'library/OpenGL.pbc'
-    load_bytecode 'library/NCI/call_toolkit_init.pbc'
+    load_bytecode 'OpenGL.pbc'
+    load_bytecode 'NCI/Utils.pbc'
 
     # Import all OpenGL/GLU/GLUT functions
     .local pmc import_gl
@@ -78,7 +81,7 @@ ASCII key.
 
     # Initialize GLUT, overwriting argv in place
     .local pmc call_toolkit_init
-    call_toolkit_init = get_global ['NCI'], 'call_toolkit_init'
+    call_toolkit_init = get_global ['NCI';'Utils'], 'call_toolkit_init'
 
     .const 'Sub' glutInit = 'glutInit'
     $P0 = call_toolkit_init(glutInit, argv)

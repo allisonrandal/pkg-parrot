@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004-2008, Parrot Foundation.
-$Id: pic.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2004-2009, Parrot Foundation.
+$Id: pic.c 39168 2009-05-25 02:57:18Z petdance $
 
 =head1 NAME
 
@@ -124,11 +124,6 @@ static int is_pic_param(PARROT_INTERP,
         __attribute__nonnull__(3)
         FUNC_MODIFIES(*mic);
 
-static void parrot_pic_move(PARROT_INTERP, ARGMOD(Parrot_MIC *mic))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        FUNC_MODIFIES(*mic);
-
 static int pass_int(PARROT_INTERP,
     ARGIN(PMC *sig),
     ARGIN(const char *src_base),
@@ -207,9 +202,6 @@ static int pass_str(PARROT_INTERP,
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pc) \
     || PARROT_ASSERT_ARG(mic)
-#define ASSERT_ARGS_parrot_pic_move __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(mic)
 #define ASSERT_ARGS_pass_int __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(sig) \
@@ -251,7 +243,7 @@ static int pass_str(PARROT_INTERP,
 
 /*
 
-=item C<void parrot_PIC_alloc_store>
+=item C<void parrot_PIC_alloc_store(PackFile_ByteCode *cs, size_t n)>
 
 Initialize the PIC storage for the given code segment with the capacitiy of
 holding at least C<n> MIC entries. The PIC_store itself, room for C<n> MICs and
@@ -292,7 +284,7 @@ parrot_PIC_alloc_store(ARGOUT(PackFile_ByteCode *cs), size_t n)
 
 /*
 
-=item C<void parrot_PIC_destroy>
+=item C<void parrot_PIC_destroy(PackFile_ByteCode *cs)>
 
 Free memory for the PIC storage.
 
@@ -317,7 +309,7 @@ parrot_PIC_destroy(ARGMOD(PackFile_ByteCode *cs))
 
 /*
 
-=item C<int parrot_PIC_op_is_cached>
+=item C<int parrot_PIC_op_is_cached(int op_code)>
 
 Return true, if the opcode needs a PIC slot.
 
@@ -342,7 +334,7 @@ parrot_PIC_op_is_cached(int op_code)
 
 /*
 
-=item C<Parrot_MIC* parrot_PIC_alloc_mic>
+=item C<Parrot_MIC* parrot_PIC_alloc_mic(const PARROT_INTERP, size_t n)>
 
 Allocate a new MIC structure for the C<n>th cached opcode in this
 bytecode segement.
@@ -364,7 +356,7 @@ parrot_PIC_alloc_mic(const PARROT_INTERP, size_t n)
 
 /*
 
-=item C<Parrot_PIC* parrot_PIC_alloc_pic>
+=item C<Parrot_PIC* parrot_PIC_alloc_pic(PARROT_INTERP)>
 
 Allocate a new PIC structure for the C<n>th cached opcode in this
 bytecode segement.
@@ -410,9 +402,7 @@ parrot_PIC_alloc_pic(PARROT_INTERP)
 
 /*
 
-=item C<void * parrot_pic_opcode>
-
-RT #48260: Not yet documented!!!
+=item C<void * parrot_pic_opcode(PARROT_INTERP, INTVAL op)>
 
 =cut
 
@@ -441,9 +431,8 @@ parrot_pic_opcode(PARROT_INTERP, INTVAL op)
 
 /*
 
-=item C<static int pass_int>
-
-RT #48260: Not yet documented!!!
+=item C<static int pass_int(PARROT_INTERP, PMC *sig, const char *src_base, const
+void **src, char *dest_base, void * const *dest)>
 
 =cut
 
@@ -466,9 +455,8 @@ pass_int(PARROT_INTERP, ARGIN(PMC *sig), ARGIN(const char *src_base),
 
 /*
 
-=item C<static int pass_num>
-
-RT #48260: Not yet documented!!!
+=item C<static int pass_num(PARROT_INTERP, PMC *sig, const char *src_base, const
+void **src, char *dest_base, void * const *dest)>
 
 =cut
 
@@ -491,9 +479,8 @@ pass_num(PARROT_INTERP, ARGIN(PMC *sig), ARGIN(const char *src_base),
 
 /*
 
-=item C<static int pass_str>
-
-RT #48260: Not yet documented!!!
+=item C<static int pass_str(PARROT_INTERP, PMC *sig, const char *src_base, const
+void **src, char *dest_base, void * const *dest)>
 
 =cut
 
@@ -517,9 +504,8 @@ pass_str(PARROT_INTERP, ARGIN(PMC *sig), ARGIN(const char *src_base),
 
 /*
 
-=item C<static int pass_pmc>
-
-RT #48260: Not yet documented!!!
+=item C<static int pass_pmc(PARROT_INTERP, PMC *sig, const char *src_base, const
+void **src, char *dest_base, void * const *dest)>
 
 =cut
 
@@ -542,9 +528,8 @@ pass_pmc(PARROT_INTERP, ARGIN(PMC *sig), ARGIN(const char *src_base),
 
 /*
 
-=item C<static int pass_mixed>
-
-RT #48260: Not yet documented!!!
+=item C<static int pass_mixed(PARROT_INTERP, PMC *sig, const char *src_base,
+void * const *src, char *dest_base, void * const *dest)>
 
 =cut
 
@@ -627,7 +612,8 @@ pass_mixed(PARROT_INTERP, ARGIN(PMC *sig), ARGIN(const char *src_base),
 
 /*
 
-=item C<int parrot_pic_check_sig>
+=item C<int parrot_pic_check_sig(PARROT_INTERP, PMC *sig1, PMC *sig2, int
+*type)>
 
 return argument count and type of the signature or -1 if not pic-able
 the type PARROT_ARG_CONSTANT stands for mixed types or constants
@@ -697,9 +683,8 @@ parrot_pic_check_sig(PARROT_INTERP, ARGIN(PMC *sig1), ARGIN(PMC *sig2),
 
 /*
 
-=item C<static int is_pic_param>
-
-RT #48260: Not yet documented!!!
+=item C<static int is_pic_param(PARROT_INTERP, void **pc, Parrot_MIC *mic,
+opcode_t op)>
 
 =cut
 
@@ -781,9 +766,8 @@ is_pic_param(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), opcode_t 
 
 /*
 
-=item C<static int is_pic_func>
-
-RT #48260: Not yet documented!!!
+=item C<static int is_pic_func(PARROT_INTERP, void **pc, Parrot_MIC *mic, int
+core_type)>
 
 =cut
 
@@ -857,7 +841,8 @@ is_pic_func(PARROT_INTERP, ARGIN(void **pc), ARGOUT(Parrot_MIC *mic), int core_t
 
 /*
 
-=item C<void parrot_PIC_prederef>
+=item C<void parrot_PIC_prederef(PARROT_INTERP, opcode_t op, void **pc_pred, int
+core)>
 
 Define either the normal prederef function or the PIC stub, if PIC for
 this opcode function is available. Called from C<do_prederef>.
@@ -920,45 +905,8 @@ parrot_PIC_prederef(PARROT_INTERP, opcode_t op, ARGOUT(void **pc_pred), int core
 
 /*
 
-=item C<static void parrot_pic_move>
-
-RT #48260: Not yet documented!!!
-
-=cut
-
-*/
-
-static void
-parrot_pic_move(PARROT_INTERP, ARGMOD(Parrot_MIC *mic))
-{
-    ASSERT_ARGS(parrot_pic_move)
-    /* MIC slot is empty - use it */
-    if (!mic->lru.u.type)
-        return;
-
-    /* need more cache slots - allocate one PIC */
-    if (!mic->pic) {
-        mic->pic = parrot_PIC_alloc_pic(interp);
-    }
-    else {
-        /* PIC was already used - shift slots up */
-        Parrot_PIC * const pic = mic->pic;
-
-        pic->lru[2].u.type = pic->lru[1].u.type;
-        pic->lru[2].f.sub  = pic->lru[1].f.sub;
-        pic->lru[1].u.type = pic->lru[0].u.type;
-        pic->lru[1].f.sub  = pic->lru[0].f.sub;
-        pic->lru[0].u.type = mic->lru.u.type;
-        pic->lru[0].f.sub  = mic->lru.f.sub;
-        mic->lru.u.type    = 0;
-    }
-}
-
-/*
-
-=item C<void parrot_pic_find_infix_v_pp>
-
-RT #48260: Not yet documented!!!
+=item C<void parrot_pic_find_infix_v_pp(PARROT_INTERP, PMC *left, PMC *right,
+Parrot_MIC *mic, opcode_t *cur_opcode)>
 
 =cut
 
@@ -982,8 +930,8 @@ Leopold Toetsch with many hints from Ken Fox.
 
 =head1 SEE ALSO
 
-F<src/multidispatch.c>, F<src/object.c>, F<src/interpreter.c>, F<ops/core_ops_cgp.c>,
-F<include/parrot/pic.h>, F<ops/pic.ops>
+L<src/multidispatch.c>, L<src/object.c>, L<src/interp/interpreter.c>,
+L<ops/core_ops_cgp.c>, L<include/parrot/pic.h>, L<ops/pic.ops>
 
 =cut
 

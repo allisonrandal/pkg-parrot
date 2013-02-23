@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: jit.pm 37231 2009-03-09 07:48:11Z rurban $
+# $Id: jit.pm 38256 2009-04-21 21:31:15Z Infinoid $
 
 =head1 NAME
 
@@ -182,11 +182,11 @@ sub _handle_asm {
     my $sjit = "$arg->{jitbase}/$arg->{cpuarch}/$arg->{jitarchname}.s";
     my $asm = "$arg->{jitbase}/$arg->{cpuarch}/asm.s";
     if ( -e $sjit ) {
-        copy_if_diff( $sjit, "src/asmfun.s" );
+        copy_if_diff( $sjit, "src/asmfun.S" );
         $arg->{conf}->data->set( asmfun_o => 'src/asmfun$(O)' );
     }
     elsif ( -e $asm ) {
-        copy_if_diff( $asm, "src/asmfun.s" );
+        copy_if_diff( $asm, "src/asmfun.S" );
         $arg->{conf}->data->set( asmfun_o => 'src/asmfun$(O)' );
     }
     else {

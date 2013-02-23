@@ -1,3 +1,5 @@
+# $Id: Class.pir 38115 2009-04-15 14:41:32Z fperrad $
+
 =head1 NAME
 
 Test::Class - Parrot extension for objecty testing of modules
@@ -9,7 +11,7 @@ Test::Class - Parrot extension for objecty testing of modules
         load_bytecode 'Test/Class.pbc'
 
         # load other testing libraries
-        .include 'include/test_more.pir'
+        .include 'test_more.pir'
 
         .local pmc class
         class = subclass [ 'Test'; 'Class' ], 'MyClass'
@@ -301,7 +303,7 @@ internals mailing list.
 
 Copyright (C) 2008, Parrot Foundation.
 
-# $Id: Class.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: Class.pir 38115 2009-04-15 14:41:32Z fperrad $
 
 =cut
 

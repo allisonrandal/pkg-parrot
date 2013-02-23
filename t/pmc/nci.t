@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: nci.t 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: nci.t 40181 2009-07-21 02:57:11Z chromatic $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 69;
+use Parrot::Test tests => 70;
 use Parrot::Config qw(%PConfig);
 
 =head1 NAME
@@ -2525,8 +2525,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', "conversion I <-> P" );
     i = new ['Integer']
     i = 2
     j = mult( 21, i )       # call signature is PI
-    print j
-    print "\n"
+    say j
 .end
 CODE
 42
@@ -2724,6 +2723,34 @@ pir_output_is( << 'CODE', << 'OUTPUT', "nci_vV - char** out parameter" );
 .end
 CODE
 Hello bright new world
+OUTPUT
+
+pir_output_is( << 'CODE', << 'OUTPUT', "nci_vVV - multiple char** out parameters" );
+.sub test :main
+    .local string library_name
+    library_name = 'libnci_test'
+    .local pmc libnci_test
+    libnci_test = loadlib  library_name
+
+    .local pmc nci_vVVV
+    nci_vVVV = dlfunc libnci_test, "nci_vVVV", "vVVV"
+
+    .local pmc char_s_s1, char_s_s2, char_s_s3
+    char_s_s1 = new ['Pointer']
+    char_s_s2 = new ['Pointer']
+    char_s_s3 = new ['Pointer']
+    nci_vVVV(char_s_s1, char_s_s2, char_s_s3)
+    $S1 = char_s_s1
+    print $S1
+    $S1 = char_s_s2
+    print $S1
+    $S1 = char_s_s3
+    print $S1
+.end
+CODE
+Hello bright new world!
+It is a beautiful day!
+Go suck a lemon.
 OUTPUT
 
 # Local Variables:

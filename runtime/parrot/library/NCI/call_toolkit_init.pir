@@ -1,3 +1,6 @@
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: call_toolkit_init.pir 38693 2009-05-11 18:45:05Z NotFound $
+
 =head1 TITLE
 
 call_toolkit_init.pir - PIR code to call toolkits that alter argv
@@ -8,8 +11,8 @@ call_toolkit_init.pir - PIR code to call toolkits that alter argv
         .param pmc argv
 
         # Load this library and the NCI wrapper for the toolkit
-	load_bytecode 'library/NCI/call_toolkit_init.pbc'
-	load_bytecode 'library/FooTK.pbc'
+	load_bytecode 'NCI/call_toolkit_init.pbc'
+	load_bytecode 'FooTK.pbc'
 
 	# Find Subs for toolkit's init function, and this helper routine
         .local pmc fooInit, call_toolkit_init

@@ -1,8 +1,8 @@
-# $Id: Filter.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Filter.pir 38689 2009-05-11 17:22:23Z NotFound $
 
 =head1 TITLE
 
-Stream::Filter - filter and/or alter a stream
+Stream;Filter - filter and/or alter a stream
 
 =head1 VERSION
 
@@ -27,19 +27,19 @@ TBD
     .local pmc base
     .local pmc filter
 
-    $P0 = get_class 'Stream::Filter'
+    $P0 = get_class ['Stream'; 'Filter']
     unless null $P0 goto END
 
-    load_bytecode "library/Stream/Base.pir"
+    load_bytecode 'Stream/Base.pbc'
 
-    get_class base, "Stream::Base"
-    subclass filter, base, "Stream::Filter"
+    get_class base, ['Stream'; 'Base']
+    subclass filter, base, ['Stream'; 'Filter']
 
     addattribute filter, "filter"
 END:
 .end
 
-.namespace ["Stream::Filter"]
+.namespace ['Stream'; 'Filter']
 
 =item source."filter"( filter )
 
@@ -94,7 +94,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2008, Parrot Foundation.
+Copyright (C) 2004-2009, Parrot Foundation.
 
 =cut
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id: pbc_info.c 37212 2009-03-08 23:02:22Z rurban $
+$Id: pbc_info.c 38107 2009-04-14 23:41:32Z coke $
 
 =head1 NAME
 
@@ -62,7 +62,7 @@ the directory using PackFile_map_segments() and iter().
 */
 
 int
-main(int argc, char *argv[])
+main(SHIM(int argc), char *argv[])
 {
     PackFile *pf;
     Interp *interp;

@@ -1,12 +1,12 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: string_cs.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: string_cs.t 37588 2009-03-19 06:40:33Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 51;
+use Parrot::Test tests => 52;
 use Parrot::Config;
 
 =head1 NAME
@@ -489,7 +489,7 @@ abcdefg
 OUTPUT
 
 SKIP: {
-    skip( 'no ICU lib', 16 ) unless $PConfig{has_icu};
+    skip( 'no ICU lib', 17 ) unless $PConfig{has_icu};
     pir_output_is( <<'CODE', <<"OUTPUT", "unicode downcase" );
 .sub main :main
     set $S0, iso-8859-1:"TÖTSCH"
@@ -519,6 +519,14 @@ OUTPUT
 CODE
 t\xf6tsch
 OUTPUT
+
+    pasm_error_output_like( <<'CODE', <<"OUTPUT", "negative encoding number" );
+    trans_encoding S2, 'foo', -1
+    end
+CODE
+/encoding #-1 not found/
+OUTPUT
+
     pasm_output_is( <<'CODE', <<"OUTPUT", "unicode downcase - transcharset" );
     set S0, iso-8859-1:"TÖTSCH"
     find_charset I0, "unicode"

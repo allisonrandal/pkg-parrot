@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: multisub.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: multisub.pmc 39694 2009-06-22 02:49:35Z cotto $
 
 =head1 NAME
 
@@ -19,12 +19,9 @@ Sub PMCs with the same short name, but different long names.
 
 */
 
-#include "parrot/parrot.h"
-
-
 pmclass MultiSub extends ResizablePMCArray need_ext provides array {
 
-    void push_pmc(PMC *value) {
+    VTABLE void push_pmc(PMC *value) {
         STRING * const _sub = CONST_STRING(interp, "Sub");
         STRING * const _nci = CONST_STRING(interp, "NCI");
 
@@ -87,7 +84,7 @@ pmclass MultiSub extends ResizablePMCArray need_ext provides array {
         return SUPER(key);
     }
 
-    VTABLE PMC *get_pmc_keyed_string(STRING *s) {
+    VTABLE PMC *get_pmc_keyed_str(STRING *s) {
         PMC * const sub = Parrot_mmd_sort_manhattan(INTERP, SELF);
         if (PMC_IS_NULL(sub))
             Parrot_ex_throw_from_c_args(INTERP, NULL, 1, "No applicable methods.\n");
@@ -99,7 +96,7 @@ pmclass MultiSub extends ResizablePMCArray need_ext provides array {
        (N, I, S, P). It should sort the argument list according to closeness
        to this input argument list and return an iterator over that list. */
 
-    METHOD PMC *get_iter(PMC *args) {
+    METHOD get_iter(PMC *args) {
         STRING * const _array  = CONST_STRING(interp, "Array");
         STRING * const _string = CONST_STRING(interp, "String");
 

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: running.pod 37232 2009-03-09 07:54:18Z allison $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: running.pod 39413 2009-06-05 23:19:30Z chromatic $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot - Running
 
 =head1 VERSION
 
-$Revision: 37232 $
+$Revision: 39413 $
 
 =head1 OVERVIEW
 
@@ -147,34 +147,9 @@ may be available on your system:
   switch-jit    switch core with JIT
   trace         bounds checking core w/ trace info (see 'parrot --help-debug')
 
-=item --bounds-checks, --slow-core
-
-Select the bounds-checking slow core (default).
-
-=item --computed-goto-core
-
-Select the CGoto core (if available).
-
-=item --CGP-core
-
-Select the CGP (CGoto Predereferenced) core (if available).
-
-=item --fast-core
-
-Select the fast (or function) core.  Bounds checking, profiling, and tracing
-are not available. (That's why it's so fast.)
-
-=item --jit-core
-
-Run with the JIT subsystem (if available).
-
 =item -p, --profile
 
 Run with the slow core and print an execution profile.
-
-=item --switched-core
-
-TODO:  This needs to be documented briefly here and also in glossary.pod.
 
 =item -t, --trace
 

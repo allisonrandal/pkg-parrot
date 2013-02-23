@@ -1,5 +1,5 @@
 /*
- * $Id: time.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: time.c 37877 2009-04-02 20:20:22Z coke $
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
@@ -26,10 +26,7 @@ Time stuff
 
 /*
 
-=item C<INTVAL
-Parrot_intval_time(void)>
-
-RT#48260: Not yet documented!!!
+=item C<INTVAL Parrot_intval_time(void)>
 
 =cut
 
@@ -44,10 +41,7 @@ Parrot_intval_time(void)
 
 /*
 
-=item C<FLOATVAL
-Parrot_floatval_time(void)>
-
-RT#48260: Not yet documented!!!
+=item C<FLOATVAL Parrot_floatval_time(void)>
 
 =cut
 
@@ -63,10 +57,7 @@ Parrot_floatval_time(void)
 
 /*
 
-=item C<void
-Parrot_sleep(unsigned int seconds)>
-
-RT#48260: Not yet documented!!!
+=item C<void Parrot_sleep(unsigned int seconds)>
 
 =cut
 
@@ -80,8 +71,7 @@ Parrot_sleep(unsigned int seconds)
 
 /*
 
-=item C<void
-Parrot_usleep(unsigned int microseconds)>
+=item C<void Parrot_usleep(unsigned int microseconds)>
 
 Sleep for at least the specified number of microseconds (millionths of a
 second).
@@ -98,10 +88,7 @@ Parrot_usleep(unsigned int microseconds)
 
 /*
 
-=item C<struct tm *
-Parrot_gmtime_r(const time_t *t, struct tm *tm)>
-
-RT#48260: Not yet documented!!!
+=item C<struct tm * Parrot_gmtime_r(const time_t *t, struct tm *tm)>
 
 =cut
 
@@ -115,10 +102,7 @@ Parrot_gmtime_r(const time_t *t, struct tm *tm)
 
 /*
 
-=item C<struct tm *
-Parrot_localtime_r(const time_t *t, struct tm *tm)>
-
-RT#48260: Not yet documented!!!
+=item C<struct tm * Parrot_localtime_r(const time_t *t, struct tm *tm)>
 
 =cut
 
@@ -132,10 +116,7 @@ Parrot_localtime_r(const time_t *t, struct tm *tm)
 
 /*
 
-=item C<char*
-Parrot_asctime_r(const struct tm *tm, char *buffer)>
-
-RT#48260: Not yet documented!!!
+=item C<char* Parrot_asctime_r(const struct tm *tm, char *buffer)>
 
 =cut
 

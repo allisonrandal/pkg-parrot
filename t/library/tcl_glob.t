@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: tcl_glob.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: tcl_glob.t 37811 2009-03-29 10:49:29Z barney $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ t/library/tcl_glob.t - test tcl-style globs
 =cut
 
 .sub 'main' :main
-    load_bytecode 'library/Test/More.pbc'
+    load_bytecode 'Test/More.pbc'
 
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace

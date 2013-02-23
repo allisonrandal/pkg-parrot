@@ -1,10 +1,10 @@
-# $Id: META.yml 37535 2009-03-17 22:21:02Z allison $
+# $Id: META.yml 40184 2009-07-21 08:08:33Z cotto $
 #
 # This file describes the CPAN distribution for Parrot.
 # See http://module-build.sourceforge.net/META-spec-current.html for details.
 ---
 name: parrot
-version: 1.0.0
+version: 1.4.0
 author: parrot-dev@lists.parrot.org
 abstract: a virtual machine designed for dynamic languages
 license: artistic2
@@ -30,7 +30,6 @@ no_index:
         - Parrot::Docs::HTMLPage
         - Parrot::OpTrans::CGP
         - Parrot::OpTrans::CSwitch
-        - Parrot::OpTrans::Compiled
         - Parrot::OpsFile
 requires:
   Storable: 2.12

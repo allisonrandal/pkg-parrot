@@ -1,3 +1,5 @@
+# $Id: blue_font.pir 38115 2009-04-15 14:41:32Z fperrad $
+
 =head1 TITLE
 
 blue_font.pir - draw a friendly message to the screen
@@ -20,10 +22,10 @@ royalty-free font file.  Maybe soon.
 .sub main :main
 
     # first load the necessary libraries
-    load_bytecode "library/SDL/App.pir"
-    load_bytecode "library/SDL/Rect.pir"
-    load_bytecode "library/SDL/Color.pir"
-    load_bytecode "library/SDL/Font.pir"
+    load_bytecode "SDL/App.pir"
+    load_bytecode "SDL/Rect.pir"
+    load_bytecode "SDL/Color.pir"
+    load_bytecode "SDL/Font.pir"
 
     # create an SDL::App object
     .local pmc app

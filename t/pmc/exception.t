@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: exception.t 37427 2009-03-15 04:48:09Z allison $
+# $Id: exception.t 40073 2009-07-14 02:58:11Z jkeenan $
 
 use strict;
 use warnings;
@@ -678,8 +678,6 @@ CODE
 /No such string attribute/
 OUTPUT
 
-SKIP: {
-    skip( "intermittent segfault, RT #60556", 1 );
 pir_output_is( <<'CODE', <<'OUTPUT', "catch ex from C-level MULTI function" );
 .sub main :main
 
@@ -715,7 +713,6 @@ end:
 CODE
 no segfault
 OUTPUT
-}
 
 pir_output_is( <<'CODE', <<'OUTPUT', "count_eh" );
 .sub main :main

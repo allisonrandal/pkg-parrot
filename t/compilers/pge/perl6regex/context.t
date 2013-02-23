@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: context.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: context.t 39655 2009-06-18 17:42:57Z NotFound $
 
 use strict;
 use warnings;
@@ -27,12 +27,12 @@ ver. 8, in the B<'Return values from matches'> section
 my $PRE = <<PRE;
 .sub 'main' :main
     load_bytecode "PGE.pbc"
-    load_bytecode "dumper.pir"
-    load_bytecode "PGE/Dumper.pir"
-    load_bytecode "PGE/Glob.pir"
-    load_bytecode "PGE/Text.pir"
+    load_bytecode "dumper.pbc"
+    load_bytecode "PGE/Dumper.pbc"
+    load_bytecode "PGE/Glob.pbc"
+    load_bytecode "PGE/Text.pbc"
     .local string target, pattern
-    .local pmc perl6regex, rulesub, pir, exp, match
+    .local pmc perl6regex, rulesub, pir, match
     perl6regex = compreg 'PGE::Perl6Regex'
     null match
     null rulesub

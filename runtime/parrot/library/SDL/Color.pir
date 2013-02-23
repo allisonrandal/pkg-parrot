@@ -1,5 +1,5 @@
 
-# $Id: Color.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Color.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ SDL::Color - Parrot class representing colors in Parrot SDL
 
 =head1 SYNOPSIS
 
-    load_bytecode 'library/SDL/Color.pir'
+    load_bytecode 'SDL/Color.pir'
 
     # create a new SDL::Color object
     .local pmc color

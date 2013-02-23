@@ -1,4 +1,4 @@
-# $Id: P6object.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: P6object.pir 39900 2009-07-06 18:14:28Z jonathan $
 
 =head1 NAME
 
@@ -7,6 +7,8 @@ P6object - Perl 6-like methods and metaclasses for Parrot
 =head1 SYNOPSIS
 
     .sub 'main'
+        load_bytecode "dumper.pbc"
+
         # load this library
         load_bytecode 'P6object.pbc'
 
@@ -152,7 +154,7 @@ Return a true value if the invocant 'isa' C<x>.
 
 =cut
 
-.sub 'isa' :method
+.sub 'isa' :method :multi(_,_, _)
     .param pmc obj
     .param pmc x
 
@@ -180,19 +182,34 @@ Return a true value if the invocant 'can' C<x>.
 
 =item add_parent(parentclass [, 'to'=>parrotclass])
 
+Deprecated; use add_parent(class, parentclass)
+
 =cut
 
-.sub 'add_parent' :method
+.sub 'add_parent' :method :multi(_,_)
     .param pmc parentclass
     .param pmc options         :slurpy :named
 
-    parentclass = self.'get_parrotclass'(parentclass)
     $P0 = options['to']
     unless null $P0 goto have_to
     $P0 = self
   have_to:
+    .tailcall self.'add_parent'($P0, parentclass)
+.end
+
+
+=item add_parent(class, parentclass)
+
+=cut
+
+.sub 'add_parent' :method :multi(_,_,_)
+    .param pmc obj
+    .param pmc parentclass
+
+    parentclass = self.'get_parrotclass'(parentclass)
+
     .local pmc parrotclass
-    parrotclass = self.'get_parrotclass'($P0)
+    parrotclass = self.'get_parrotclass'(obj)
     if null parrotclass goto end
 
     ##  if parrotclass isa parentclass, we're done
@@ -219,11 +236,18 @@ Return a true value if the invocant 'can' C<x>.
   method_loop:
     unless methoditer goto mro_loop
     $S0 = shift methoditer
-    push_eh method_next
+    $P0 = parrotclassns[$S0]
+    if null $P0 goto add_method
+    $I0 = isa $P0, 'MultiSub'
+    unless $I0 goto method_loop
+  add_method:
     $P0 = methods[$S0]
+    $I0 = isa $P0, 'NCI'
+    if $I0 goto method_loop
+    push_eh err
     parrotclassns.'add_sub'($S0, $P0)
-  method_next:
     pop_eh
+  err:
     goto method_loop
   mro_end:
 
@@ -235,9 +259,11 @@ Return a true value if the invocant 'can' C<x>.
 
 Add C<method> with C<name> to C<parrotclass>.
 
+DEPRECATED. Use add_method(class, name, method)
+
 =cut
 
-.sub 'add_method' :method
+.sub 'add_method' :method :multi(_,_,_)
     .param string name
     .param pmc method
     .param pmc options         :slurpy :named
@@ -246,15 +272,49 @@ Add C<method> with C<name> to C<parrotclass>.
     unless null $P0 goto have_to
     $P0 = self
   have_to:
+    .tailcall self.'add_method'($P0, name, method)
+.end
+
+
+=item add_method(class, name, method)
+
+Add C<method> with C<name> to C<class>.
+
+=cut
+
+
+.sub 'add_method' :method :multi(_,_,_,_)
+    .param pmc obj
+    .param string name
+    .param pmc method
+
     .local pmc parrotclass
-    parrotclass = self.'get_parrotclass'($P0)
+    parrotclass = self.'get_parrotclass'(obj)
     parrotclass.'add_method'(name, method)
+.end
+
+
+=item add_attribute(class, name)
+
+Add C<method> with C<name> to C<class>.
+
+=cut
+
+.sub 'add_attribute' :method
+    .param pmc obj
+    .param string name
+    .param pmc options         :slurpy :named
+    .local pmc parrotclass
+    parrotclass = self.'get_parrotclass'(obj)
+    parrotclass.'add_attribute'(name)
 .end
 
 
 =item add_role(role, [, 'to'=>parrotclass])
 
 Add C<role> to C<parrotclass>.
+
+DEPRECATED. Use compose_role(class, role)
 
 =cut
 
@@ -266,8 +326,22 @@ Add C<role> to C<parrotclass>.
     unless null $P0 goto have_to
     $P0 = self
   have_to:
+    .tailcall self.'compose_role'($P0, role)
+.end
+
+
+=item compose_role(class, role)
+
+Add C<role> to C<class>.
+
+=cut
+
+.sub 'compose_role' :method
+    .param pmc obj
+    .param pmc role
+
     .local pmc parrotclass
-    parrotclass = self.'get_parrotclass'($P0)
+    parrotclass = self.'get_parrotclass'(obj)
     parrotclass.'add_role'(role)
 .end
 
@@ -286,8 +360,6 @@ to map to a class name that already exists in Parrot (e.g., 'Hash'
 or 'Object').
 
 =cut
-
-.include 'library/dumper.pir'
 
 .sub 'register' :method
     .param pmc parrotclass
@@ -381,7 +453,7 @@ or 'Object').
     setattribute how, 'parrotclass', parrotclass
 
     ##  create an anonymous class for the protoobject
-    .local pmc protoclass, protoobject, iter
+    .local pmc protoclass, protoobject
     protoclass = new 'Class'
     $P0 = get_class 'P6protoobject'
     ##  P6protoobject methods override parrotclass methods...
@@ -591,6 +663,8 @@ Multimethod helper to return the parrotclass for C<x>.
     x = get_hll_namespace $P0
   x_ns:
     if null x goto done
+    $I0 = isa x, 'P6protoobject'
+    if $I0 goto x_p6object
     parrotclass = get_class x
   done:
     .return (parrotclass)
@@ -604,7 +678,7 @@ Multimethod helper to return the parrotclass for C<x>.
 
 =item get_string()  (vtable method)
 
-Returns the "shortname" of the protoobject's class.
+Returns the "shortname" of the protoobject's class and parens.
 
 =cut
 
@@ -612,8 +686,10 @@ Returns the "shortname" of the protoobject's class.
 
 .sub 'VTABLE_get_string' :method :vtable('get_string')
     $P0 = self.'HOW'()
-    $P1 = getattribute $P0, 'shortname'
-    .return ($P1)
+    $P1 = getattribute $P0, 'longname'
+    $S0 = $P1
+    $S0 = concat $S0, '()'
+    .return ($S0)
 .end
 
 =item defined()  (vtable method)
@@ -672,24 +748,24 @@ will be used in lieu of this one.)
     .param pmc topic
     .local pmc topichow, topicwhat, parrotclass
 
-    topichow = topic.'HOW'()
+    $P0 = self.'HOW'()
+    parrotclass = $P0.'get_parrotclass'(self)
+
+    $S0 = parrotclass
+    if $S0 == 'Perl6Object' goto accept_anyway
+
+    $I0 = isa topic, 'Junction'
+    if $I0 goto normal_check
+
+    if $S0 == 'Any' goto accept_anyway
+
+  normal_check:
+    $I0 = can topic, 'HOW'
+    unless $I0 goto end
     topicwhat = topic.'WHAT'()
-    parrotclass = topichow.'get_parrotclass'(self)
     $I0 = isa topicwhat, parrotclass
     if $I0 goto end
     $I0 = does topic, parrotclass
-    if $I0 goto end
-
-    # Here comes some special handling for Perl 6, that really shouldn't be in
-    # here; we'll figure out a way to let Perl 6 provide it's own ACCEPTS that
-    # does this or, better make it so we don't need to do this. The purpose is
-    # to make Any accept stuff that doesn't actually inherit from it, aside
-    # from Junction, and to make Perl6Object accept anything.
-    $S0 = parrotclass
-    if $S0 == 'Perl6Object' goto accept_anyway
-    if $S0 != 'Any' goto end
-    $S0 = topicwhat
-    if $S0 != 'Junction' goto accept_anyway
     goto end
 
   accept_anyway:

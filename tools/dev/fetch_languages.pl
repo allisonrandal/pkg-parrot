@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: fetch_languages.pl 37515 2009-03-17 08:26:49Z fperrad $
+# $Id: fetch_languages.pl 39818 2009-06-29 02:05:56Z Infinoid $
 
 =head1 NAME
 
@@ -9,7 +9,8 @@ fetch_languages.pl - A helper to fetch language implementations from the SCM rep
 
     perl fetch_languages.pl
 
-    perl fetch_languages.pl --update
+    perl fetch_languages.pl [--update] [--lang=<hll>]
+
 
 =head1 DESCRIPTION
 
@@ -18,6 +19,8 @@ Creates a directory called 'languages' and checks out the languages.
 =head1 HISTORY
 
 2009-03-14 Salvaged from https:/svn.parrot.org/parrot/trunk/config/gen/makefiles/languages.in@37396.
+
+2009-06-28 --lang=<hll> option added by s1n++.
 
 =cut
 
@@ -29,11 +32,12 @@ use Getopt::Long;
 use Pod::Usage;
 use Cwd;
 
-my ( $update_flag, $checkout_flag ) = ( 0, 1 );
-GetOptions( "update" => \$update_flag ) or pod2usage();
+my ( $update_flag, $checkout_flag, $lang_flag ) = ( 0, 1, undef );
+GetOptions( 'lang=s' => \$lang_flag, 'update' => \$update_flag ) or pod2usage();
 
-mkdir 'languages';
-chdir 'languages';
+my $languages_dir = 'languages';
+mkdir $languages_dir;
+chdir $languages_dir;
 
 # some commands
 my %checkout_cmd = (
@@ -59,6 +63,12 @@ my @hlls = (
         name       => 'c99',
         scm        => 'SVN',
         repository => 'https://svn.parrot.org/languages/c99/trunk'
+    },
+
+    {
+        name       => 'cardinal',
+        scm        => 'GIT',
+        repository => 'git://github.com/cardinal/cardinal.git'
     },
 
     {
@@ -218,6 +228,12 @@ my @hlls = (
     },
 
     {
+        name       => 'porcupine',
+        scm        => 'SVN',
+        repository => 'http://porcupinepascal.googlecode.com/svn/trunk'
+    },
+
+    {
         name       => 'primitivearc',
         scm        => 'GIT',
         repository => 'git://github.com/stefano/primitivearc.git'
@@ -254,6 +270,12 @@ my @hlls = (
     },
 
     {
+        name       => 'steme',
+        scm        => 'GIT',
+        repository => 'git://github.com/tene/steme.git'
+    },
+
+    {
         name       => 'tcl',
         scm        => 'SVN',
         repository => 'http://partcl.googlecode.com/svn/trunk'
@@ -276,9 +298,16 @@ my @hlls = (
         scm        => 'GIT',
         repository => 'git://github.com/fperrad/wmlscript.git'
     },
+
+    {
+        name       => 'xml',
+        scm        => 'GIT',
+        repository => 'git://github.com/fperrad/xml.git'
+    },
 );
 
 foreach (@hlls) {
+    next if $lang_flag && $_->{name} ne $lang_flag;
     if ($checkout_flag && ! -d $_->{name}) {
         my @cmd = ( @{ $checkout_cmd{ $_->{scm} } }, $_->{repository}, $_->{name} );
         my $dir = getcwd();

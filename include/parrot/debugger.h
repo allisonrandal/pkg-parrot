@@ -6,7 +6,7 @@
  * debug.h
  *
  * SVN Info
- *    $Id: debugger.h 37257 2009-03-10 04:22:07Z Util $
+ *    $Id: debugger.h 38479 2009-05-05 04:15:26Z petdance $
  * Overview:
  *    Parrot debugger header files
  * History:
@@ -333,7 +333,9 @@ char PDB_program_end(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 PARROT_IGNORABLE_RESULT
-int PDB_run_command(PARROT_INTERP, ARGIN(const char *command))
+int /*@alt void@*/
+PDB_run_command(PARROT_INTERP,
+    ARGIN(const char *command))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 

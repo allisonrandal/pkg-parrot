@@ -1,4 +1,6 @@
 #!./parrot
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: nsieve-bits-2.pir 38369 2009-04-26 12:57:09Z fperrad $
 #
 # ./parrot -R jit nsieve-bits-2.pir N  (N = 9 for shootout)
 # by Leopold Toetsch

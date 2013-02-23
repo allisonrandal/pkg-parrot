@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: file.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: file.t 40123 2009-07-16 20:05:06Z NotFound $
 
 use strict;
 use warnings;
@@ -33,7 +33,8 @@ my $PERL5  = $PConfig{perl};
 
 my $ended_ok = 0;
 
-my ($FOO, $temp_pasm) = create_tempfile( SUFFIX => '.pasm', DIR => cwd(), UNLINK => 1 );
+#my ($FOO, $temp_pasm) = create_tempfile( SUFFIX => '.pasm', DIR => cwd(), UNLINK => 1 );
+my ($FOO, $temp_pasm) = create_tempfile( SUFFIX => '.pasm', UNLINK => 1 );
 
 print $FOO <<'ENDF';
   .macro_const BAR 42
@@ -462,6 +463,7 @@ TEMP_PIR
 
     pir_output_is( <<"CODE", <<'OUT', 'load PIR from added paths, minding slash' );
   .include 'iglobals.pasm'
+  .include 'libpaths.pasm'
 
   .sub main :main
       .local pmc interp
@@ -470,9 +472,8 @@ TEMP_PIR
       .local pmc lib_paths
       lib_paths = interp[.IGLOBALS_LIB_PATHS]
 
-      # XXX - hard-coded magic constant (should be PARROT_LIB_PATH_LIBRARY)
       .local pmc include_paths
-      include_paths = lib_paths[1]
+      include_paths = lib_paths[.PARROT_LIB_PATH_LIBRARY]
 
       unshift include_paths, '$temp_dir'
       load_bytecode 'with_slash.pir'

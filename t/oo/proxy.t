@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: proxy.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: proxy.t 39239 2009-05-29 16:36:02Z pmichaud $
 
 =head1 NAME
 
@@ -17,16 +17,19 @@ Tests OO features related to creating and using class proxies.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
-    plan(9)
+    plan(11)
 
     typeof_a_low_level_object()
     typeof_a_high_level_object()
     typeof_a_class_object()
     proxy_as_parent_of_class()
     proxy_as_parent_of_class_with_new()
-
+    proxy_no_method_conflict()
+    .local pmc proxy_no_invade
+    proxy_no_invade = get_root_global ['foo'], 'proxy_no_invade'
+    proxy_no_invade()
 .end
 
 .sub typeof_a_low_level_object
@@ -80,6 +83,36 @@ Tests OO features related to creating and using class proxies.
     $S0 = typeof $P2
     is ($S0, 'Foo;Bar', 'object is typeof Foo;Bar')
 .end
+
+.sub proxy_no_method_conflict
+    $P0 = new 'Complex'
+    $P0['real'] = 1
+    $P1 = $P0.'Complex'()
+    $S0 = $P1
+    is($S0, "1+0i", 'Complex method survived')
+.end
+
+.namespace ['Complex']
+.sub 'Complex' :method
+    .return (self)
+.end
+
+.HLL 'foo'
+
+.sub proxy_no_invade
+    .local pmc is
+    is = get_root_global ['parrot'], 'is'
+
+    $P0 = new 'Class'
+    $I0 = isa $P0, 'Sub'
+    $P1 = get_root_global ['foo'], 'Sub'
+    $I1 = 0
+    if null $P1 goto do_test
+    inc $I1
+do_test:
+    is($I1, 0, 'No proxy in current HLL namespace, TT #715')
+.end
+
 
 # Local Variables:
 #   mode: pir

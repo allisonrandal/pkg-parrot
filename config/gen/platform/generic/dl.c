@@ -1,5 +1,5 @@
 /*
- * $Id: dl.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: dl.c 37877 2009-04-02 20:20:22Z coke $
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
@@ -29,10 +29,7 @@ Dynlib stuff
 
 /*
 
-=item C<void *
-Parrot_dlopen(const char *filename)>
-
-RT#48260: Not yet documented!!!
+=item C<void * Parrot_dlopen(const char *filename)>
 
 =cut
 
@@ -50,10 +47,7 @@ Parrot_dlopen(const char *filename)
 
 /*
 
-=item C<const char *
-Parrot_dlerror(void)>
-
-RT#48260: Not yet documented!!!
+=item C<const char * Parrot_dlerror(void)>
 
 =cut
 
@@ -71,10 +65,7 @@ Parrot_dlerror(void)
 
 /*
 
-=item C<void *
-Parrot_dlsym(void *handle, const char *symbol)>
-
-RT#48260: Not yet documented!!!
+=item C<void * Parrot_dlsym(void *handle, const char *symbol)>
 
 =cut
 
@@ -92,10 +83,7 @@ Parrot_dlsym(void *handle, const char *symbol)
 
 /*
 
-=item C<int
-Parrot_dlclose(void *handle)>
-
-RT#48260: Not yet documented!!!
+=item C<int Parrot_dlclose(void *handle)>
 
 =cut
 

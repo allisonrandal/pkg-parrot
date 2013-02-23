@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: p6object.t 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: p6object.t 39571 2009-06-15 13:24:40Z barney $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Testing Perl 6 objects.
 =cut
 
 .sub 'main' :main
-    load_bytecode 'library/Test/More.pbc'
+    load_bytecode 'Test/More.pbc'
 
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
@@ -26,7 +26,7 @@ Testing Perl 6 objects.
     test_namespace.'export_to'(curr_namespace, exports)
 
     ##  set our plan
-    plan(234)
+    plan(252)
 
     ##  make sure we can load the P6object library
     push_eh load_fail
@@ -36,7 +36,7 @@ Testing Perl 6 objects.
     goto load_success
 
   load_fail:
-    ok(0, "load_bytecode 'P6object.pir' failed -- skipping tests")
+    ok(0, "load_bytecode 'P6object.pbc' failed -- skipping tests")
     .return ()
 
   load_success:
@@ -151,7 +151,7 @@ Testing Perl 6 objects.
     is_same($P0, jklproto, 'return from .new_class =:= Foo::JKL')
     $P0 = get_hll_global 'Foo::JKL'
     isa_nok($P0, 'P6protoobject', '["Foo::JKL"]')
-    jklobj = p6obj_tests(jklproto, 'Foo::JKL', 'shortname'=>'JKL', 'isa'=>'P6object', 'can'=>'foo')
+    jklobj = p6obj_tests(jklproto, 'Foo::JKL', 'isa'=>'P6object', 'can'=>'foo')
 
     ##  add a method to a class
     $P0 = get_hll_global ['ABC'], 'foo'
@@ -200,6 +200,8 @@ The available options include:
     classname = hash_default(options, 'classname', class)
     shortname = hash_default(options, 'shortname', classname)
     typename =  hash_default(options, 'typename',  classname)
+
+    shortname = concat shortname, '()'
 
     .local string msg
 
@@ -458,6 +460,15 @@ diagnostic message).
     $I0 = isnull $P0
     ok($I0, ".new_class didn't store ['parrot'], 'WXY'")
     p6obj_tests(wxyproto, 'WXY', 'isa'=>'WXY P6object', 'can'=>'foo')
+
+    ## build a Parrotclass
+    .local pmc vwx_nsarray, vwx_ns, vwx_parrotclass, vwx_proto 
+    vwx_nsarray = new 'ResizablePMCArray'
+    push vwx_nsarray, 'VWX'
+    vwx_ns = get_hll_namespace vwx_nsarray
+    vwx_parrotclass = newclass vwx_ns
+    vwx_proto = p6meta.'register'(vwx_parrotclass)
+    p6obj_tests(vwx_proto, 'VWX', 'can'=>'foo')
 .end
 
 .namespace ['XYZ']
@@ -466,6 +477,11 @@ diagnostic message).
 .end
 
 .namespace ['WXY']
+.sub 'foo' :method
+    .return ('WXY::foo')
+.end
+
+.namespace ['VWX']
 .sub 'foo' :method
     .return ('WXY::foo')
 .end

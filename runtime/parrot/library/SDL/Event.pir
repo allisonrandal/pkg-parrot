@@ -1,5 +1,5 @@
 
-# $Id: Event.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Event.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ SDL::Event - Parrot extension representing SDL Events
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/SDL/Event.pir'
+    load_bytecode 'SDL/Event.pir'
 
     # create a new SDL::Event object
     .local pmc event

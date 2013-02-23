@@ -1,6 +1,6 @@
 package Parrot::Interpreter;
-
-# $Id: Interpreter.pm 37377 2009-03-13 08:48:14Z allison $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: Interpreter.pm 38763 2009-05-14 02:16:03Z jkeenan $
 
 use strict;
 use warnings;
@@ -119,13 +119,6 @@ Patches welcome.
 
 Please report any bugs or feature requests to the Parrot Porters mailing list.
 Someday there may be a CPAN version of this code.  Who knows?
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright (C) 2006-2008, Parrot Foundation / chromatic.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Parrot itself.
 
 =cut
 

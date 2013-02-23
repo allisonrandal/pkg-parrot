@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: key.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: key.pmc 38960 2009-05-20 04:44:04Z petdance $
 
 =head1 NAME
 
@@ -17,8 +17,6 @@ These are the vtable functions for the Key PMC class.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 pmclass Key need_ext {
     ATTR PMC      *next_key; /* Sometimes it's the next key, sometimes it's
@@ -43,7 +41,7 @@ Initializes the key.
 
     VTABLE void init() {
 
-        Parrot_Key_attributes *attrs =
+        Parrot_Key_attributes * const attrs =
             mem_allocate_zeroed_typed(Parrot_Key_attributes);
 
         PMC_data(SELF) = attrs;
@@ -277,7 +275,13 @@ chain.
 */
 
     VTABLE PMC *shift_pmc() {
-        return key_next(INTERP, SELF);
+        PMC *next_key;
+
+        if (!SELF->pmc_ext)
+            return NULL;
+
+        GET_ATTR_next_key(INTERP, SELF, next_key);
+        return next_key;
     }
 
 /*
@@ -305,7 +309,7 @@ Returns the key itself.
 =item C<PMC *nextkey_keyed(PMC *key, INTVAL what)>
 
 Returns the next key relative to the location specified in C<what>.
-PMC_int_val(-1) means end of iteration.
+int_key == -1 means end of iteration.
 
 =cut
 
@@ -487,6 +491,7 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
 
     VTABLE void thawfinish(visit_info *info) {
         PMC *key = SELF;
+        UNUSED(info)
 
         while (1) {
             PMC *next;

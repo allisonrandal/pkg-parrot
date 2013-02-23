@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2008, Parrot Foundation.
-$Id: callsignature.pmc 36832 2009-02-17 19:58:58Z allison $
+Copyright (C) 2008-2009, Parrot Foundation.
+$Id: callsignature.pmc 38963 2009-05-20 04:48:44Z petdance $
 
 =head1 NAME
 
@@ -18,8 +18,6 @@ information for a multiple dispatch call.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 #define CAPTURE_DATA_SIZE   2
 #define CAPTURE_array_CREATE(i, obj) \
@@ -45,7 +43,7 @@ Initializes a newly created CallSignature object.
 */
 
     VTABLE void init() {
-        Parrot_CallSignature_attributes *sig_struct =
+        Parrot_CallSignature_attributes * const sig_struct =
             mem_allocate_typed(Parrot_CallSignature_attributes);
         PMC_data(SELF)         = sig_struct;
         sig_struct->short_sig  = NULL;
@@ -53,7 +51,7 @@ Initializes a newly created CallSignature object.
         sig_struct->returns    = PMCNULL;
         sig_struct->array      = NULL;
         sig_struct->hash       = NULL;
-        PMC_int_val(SELF)      = CAPTURE_DATA_SIZE;
+        sig_struct->data_size  = CAPTURE_DATA_SIZE;
         PObj_active_destroy_SET(SELF);
         PObj_custom_mark_SET(SELF);
     }
@@ -185,29 +183,28 @@ Mark any referenced strings and PMCs.
 */
     VTABLE void mark() {
         PMC ** const data = PMC_data_typed(SELF, PMC **);
-        INTVAL i;
+        Parrot_CallSignature_attributes * const attrs = PARROT_CALLSIGNATURE(SELF);
 
-        if (PARROT_CALLSIGNATURE(SELF)) {
-            Parrot_CallSignature_attributes * const attrs = PARROT_CALLSIGNATURE(SELF);
+        if (attrs) {
 
             if (attrs->array)
-                pobject_lives(interp, (PObj*)attrs->array);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)attrs->array);
             if (attrs->hash)
-                pobject_lives(interp, (PObj*)attrs->hash);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)attrs->hash);
             if (attrs->returns)
-                pobject_lives(interp, (PObj*)attrs->returns);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)attrs->returns);
             if (attrs->type_tuple)
-                pobject_lives(interp, (PObj*)attrs->type_tuple);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)attrs->type_tuple);
             if (attrs->short_sig)
-                pobject_lives(interp, (PObj*)attrs->short_sig);
+                Parrot_gc_mark_PObj_alive(interp, (PObj*)attrs->short_sig);
         }
 
-        if (!data)
-            return;
-
-        for (i = PMC_int_val(SELF) - 1; i >= 0; --i)
-            if (data[i])
-                pobject_lives(interp, (PObj *)data[i]);
+        if (data) {
+            INTVAL i;
+            for (i = attrs->data_size - 1; i >= 0; --i)
+                if (data[i])
+                    Parrot_gc_mark_PObj_alive(interp, (PObj *)data[i]);
+        }
     }
 
 

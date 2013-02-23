@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2009, Parrot Foundation.
-$Id: lexpad.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: lexpad.pmc 39236 2009-05-29 10:05:02Z chromatic $
 
 =head1 NAME
 
@@ -17,8 +17,6 @@ These are the vtable functions for the lexpad PMC.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 /*
  * LexPad provides a Hash interface for lexical fetch/store
@@ -80,8 +78,11 @@ Return the LexInfo PMC, if any or a Null PMC.
 
 */
     VTABLE void init_pmc(PMC *lexinfo) {
-        Parrot_LexPad_attributes *attrs =
+        Parrot_LexPad_attributes * const attrs =
             mem_allocate_zeroed_typed(Parrot_LexPad_attributes);
+
+        PObj_active_destroy_SET(SELF);
+
         attrs->lexinfo = lexinfo;
         PMC_data(SELF) = attrs;
     }
@@ -97,14 +98,15 @@ Return the LexInfo PMC, if any or a Null PMC.
     VTABLE INTVAL elements() {
         PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        return parrot_hash_size(INTERP, (Hash *)PMC_struct_val(info));
+        return parrot_hash_size(INTERP,
+                (Hash *)VTABLE_get_pointer(INTERP, info));
     }
 
     VTABLE INTVAL exists_keyed_str(STRING *name) {
         PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
         return parrot_hash_get_bucket(INTERP,
-            (Hash *)PMC_struct_val(info), name) != 0;
+                (Hash *)VTABLE_get_pointer(INTERP, info), name) != 0;
     }
 
     VTABLE INTVAL exists_keyed(PMC *name) {
@@ -121,7 +123,7 @@ Return the LexInfo PMC, if any or a Null PMC.
 
         GET_ATTR_lexinfo(INTERP, SELF, info);
         GET_ATTR_ctx(INTERP, SELF, ctx);
-        hash = (Hash *)PMC_struct_val(info);
+        hash = (Hash *)VTABLE_get_pointer(INTERP, info);
         b    = parrot_hash_get_bucket(INTERP, hash, name);
 
         if (!b)
@@ -146,7 +148,7 @@ Return the LexInfo PMC, if any or a Null PMC.
 
         GET_ATTR_lexinfo(INTERP, SELF, info);
         GET_ATTR_ctx(INTERP, SELF, ctx);
-        hash = (Hash *)PMC_struct_val(info);
+        hash = (Hash *)VTABLE_get_pointer(INTERP, info);
         b    = parrot_hash_get_bucket(INTERP, hash, name);
 
         if (!b)

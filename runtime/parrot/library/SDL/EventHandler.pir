@@ -1,5 +1,5 @@
 
-# $Id: EventHandler.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: EventHandler.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -8,8 +8,8 @@ SDL::EventHandler - base class for application-specific SDL event handlers
 =head1 SYNOPSIS
 
     # load the event class and this library
-    load_bytecode 'library/SDL/Event.pir'
-    load_bytecode 'library/SDL/EventHandler.pir'
+    load_bytecode 'SDL/Event.pir'
+    load_bytecode 'SDL/EventHandler.pir'
 
     # subclass this class
     .local pmc parent_class

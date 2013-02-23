@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: Crow.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 .namespace ['Crow']
 
 .sub 'get_args'

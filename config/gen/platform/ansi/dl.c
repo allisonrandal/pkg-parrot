@@ -1,5 +1,5 @@
 /*
- * $Id: dl.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: dl.c 37786 2009-03-28 01:09:22Z coke $
  * Copyright (C) 2007, Parrot Foundation.
  */
 
@@ -25,8 +25,6 @@ RT#48264
 
 =item C<void * Parrot_dlopen(const char *filename)>
 
-RT#48260: Not yet documented!!!
-
 =cut
 
 */
@@ -43,8 +41,6 @@ Parrot_dlopen(const char *filename)
 
 =item C<const char * Parrot_dlerror(void)>
 
-RT#48260: Not yet documented!!!
-
 =cut
 
 */
@@ -59,8 +55,6 @@ Parrot_dlerror(void)
 /*
 
 =item C<void * Parrot_dlsym(void *handle, const char *symbol)>
-
-RT#48260: Not yet documented!!!
 
 =cut
 
@@ -77,8 +71,6 @@ Parrot_dlsym(void *handle, const char *symbol)
 /*
 
 =item C<int Parrot_dlclose(void *handle)>
-
-RT#48260: Not yet documented!!!
 
 =cut
 

@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: Range.pir 39631 2009-06-17 20:30:30Z NotFound $
+
 =head1 Range
 
 Based on the Range object described in S03:
@@ -13,9 +16,9 @@ L<http://perlcabal.org/syn/S03.html#Range_semantics>
 =cut
 
 .macro exhausted_check()
-  .local pmc exhausted
-  exhausted = getattribute self, 'exhausted'
-  unless exhausted goto .$more
+  .local pmc exhausted_check
+  exhausted_check = getattribute self, 'exhausted'
+  unless exhausted_check goto .$more
   .local pmc exception
   exception = new 'Exception'
   exception[0] = 'Exhausted Range'
@@ -152,7 +155,7 @@ Throw an exception if we're out of values.
 .sub 'shift' :vtable('shift_pmc') :method
   .exhausted_check()
 
-  .local pmc exhausted, from, to, by
+  .local pmc from, to, by
   from = getattribute self, 'from'
   to   = getattribute self, 'to'
   by   = getattribute self, 'by'

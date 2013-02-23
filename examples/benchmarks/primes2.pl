@@ -1,13 +1,13 @@
 #! perl
 
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: primes2.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: primes2.pl 38923 2009-05-19 06:07:42Z cotto $
 
 use strict;
 use warnings;
 
 my $i   = 0;
-my $max = 5000;
+my $max = 500;
 my $i6  = 0;
 my $i7;
 

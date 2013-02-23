@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: namespace_dump.pir 38952 2009-05-20 02:02:06Z allison $
+
 #
 # dump all namespaces and the contents recursively
 #
@@ -77,6 +80,7 @@ loop:
     print spac
     $P0 = multi[i]
     $P1 = $P0."get_multisig"()
+    if null $P1 goto next_loop
     m = elements $P1
     j = 0
 lp2:
@@ -87,6 +91,7 @@ lp2:
     if j < m goto lp2
 
     print "\n"
+next_loop:
     inc i
     if i < n goto loop
 .end

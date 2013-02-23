@@ -1,5 +1,5 @@
 /*
- * $Id: env.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: env.c 37877 2009-04-02 20:20:22Z coke $
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
@@ -26,10 +26,7 @@ Environment manipulation stuff
 
 /*
 
-=item C<void
-Parrot_setenv(const char *name, const char *value)>
-
-RT#48260: Not yet documented!!!
+=item C<void Parrot_setenv(const char *name, const char *value)>
 
 =cut
 
@@ -62,10 +59,7 @@ Parrot_setenv(const char *name, const char *value)
 
 /*
 
-=item C<void
-Parrot_unsetenv(const char *name)>
-
-RT#48260: Not yet documented!!!
+=item C<void Parrot_unsetenv(const char *name)>
 
 =cut
 
@@ -83,10 +77,7 @@ Parrot_unsetenv(const char *name)
 
 /*
 
-=item C<char *
-Parrot_getenv(const char *name, int *free_it)>
-
-RT#48260: Not yet documented!!!
+=item C<char * Parrot_getenv(const char *name, int *free_it)>
 
 =cut
 

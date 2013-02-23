@@ -8,7 +8,7 @@
  *
  * parser support functions
  *
- * $Id: parser_util.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: parser_util.c 39834 2009-06-30 03:40:29Z petdance $
  *
  */
 
@@ -129,7 +129,8 @@ static INTVAL       eval_nr  = 0;
 
 =over 4
 
-=item C<Instruction * iNEW>
+=item C<Instruction * iNEW(PARROT_INTERP, IMC_Unit *unit, SymReg *r0, char
+*type, SymReg *init, int emit)>
 
  * P = new type, [init]
  * PASM like:
@@ -182,7 +183,8 @@ iNEW(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(SymReg *r0),
 
 /*
 
-=item C<void op_fullname>
+=item C<void op_fullname(char *dest, const char *name, SymReg * const *args, int
+narg, int keyvec)>
 
 Lookup the full opcode given the short name
 
@@ -265,7 +267,8 @@ op_fullname(ARGOUT(char *dest), ARGIN(const char *name),
 
 /*
 
-=item C<int check_op>
+=item C<int check_op(PARROT_INTERP, char *fullname, const char *name, SymReg *
+const * r, int narg, int keyvec)>
 
 Return opcode value for op name
 
@@ -286,7 +289,7 @@ check_op(PARROT_INTERP, ARGOUT(char *fullname), ARGIN(const char *name),
 
 /*
 
-=item C<int is_op>
+=item C<int is_op(PARROT_INTERP, const char *name)>
 
 Is instruction a parrot opcode?
 
@@ -305,9 +308,8 @@ is_op(PARROT_INTERP, ARGIN(const char *name))
 
 /*
 
-=item C<static Instruction * var_arg_ins>
-
-TODO: Needs to be documented!!!
+=item C<static Instruction * var_arg_ins(PARROT_INTERP, IMC_Unit *unit, const
+char *name, SymReg **r, int n, int emit)>
 
 =cut
 
@@ -327,6 +329,12 @@ var_arg_ins(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *name),
 
     /* in constant */
     int dirs       = 1;
+
+    /* XXX: Maybe the check for n == 0 is the only one required
+     * and the other must be assertions? */
+    if (n == 0 || r[0] == NULL || r[0]->name == NULL)
+        IMCC_fataly(interp, EXCEPTION_SYNTAX_ERROR,
+                    "The opcode '%s' needs arguments", name);
 
     r[0]           = mk_const(interp, r[0]->name, 'P');
     r[0]->pmc_type = enum_class_FixedIntegerArray;
@@ -348,7 +356,8 @@ var_arg_ins(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *name),
 
 /*
 
-=item C<Instruction * INS>
+=item C<Instruction * INS(PARROT_INTERP, IMC_Unit *unit, const char *name, const
+char *fmt, SymReg **r, int n, int keyvec, int emit)>
 
 Makes an instruction.
 
@@ -570,9 +579,7 @@ extern void* yy_scan_string(const char *);
 
 /*
 
-=item C<int do_yylex_init>
-
-TODO: Needs to be documented!!!
+=item C<int do_yylex_init(PARROT_INTERP, yyscan_t* yyscanner)>
 
 =cut
 
@@ -594,7 +601,8 @@ do_yylex_init(PARROT_INTERP, ARGOUT(yyscan_t* yyscanner))
 
 /*
 
-=item C<PMC * imcc_compile>
+=item C<PMC * imcc_compile(PARROT_INTERP, const char *s, int pasm_file, STRING
+**error_message)>
 
 Compile a pasm or imcc string
 
@@ -669,7 +677,7 @@ imcc_compile(PARROT_INTERP, ARGIN(const char *s), int pasm_file,
         IMCC_INFO(interp)->state->next = NULL;
 
     IMCC_INFO(interp)->state->pasm_file = pasm_file;
-    IMCC_INFO(interp)->state->file      = name;
+    IMCC_INFO(interp)->state->file      = mem_sys_strdup(name);
     IMCC_INFO(interp)->expect_pasm      = 0;
 
     compile_string(interp, s, yyscanner);
@@ -738,12 +746,10 @@ imcc_compile(PARROT_INTERP, ARGIN(const char *s), int pasm_file,
 
 /*
 
-=item C<PMC * imcc_compile_pasm>
+=item C<PMC * imcc_compile_pasm(PARROT_INTERP, const char *s)>
 
-TODO: Needs to be documented!!!
-
- * Note: This function is provided for backward compatibility. This
- * function can go away in future.
+Note: This function is provided for backward compatibility. This
+function can go away in future.
 
 =cut
 
@@ -761,12 +767,10 @@ imcc_compile_pasm(PARROT_INTERP, ARGIN(const char *s))
 
 /*
 
-=item C<PMC * imcc_compile_pir>
+=item C<PMC * imcc_compile_pir(PARROT_INTERP, const char *s)>
 
-TODO: Needs to be documented!!!
-
- * Note: This function is provided for backward compatibility. This
- * function can go away in future.
+Note: This function is provided for backward compatibility. This
+function can go away in future.
 
 =cut
 
@@ -784,9 +788,8 @@ imcc_compile_pir(PARROT_INTERP, ARGIN(const char *s))
 
 /*
 
-=item C<PMC * IMCC_compile_pir_s>
-
-TODO: Needs to be documented!!!
+=item C<PMC * IMCC_compile_pir_s(PARROT_INTERP, const char *s, STRING
+**error_message)>
 
 =cut
 
@@ -804,9 +807,8 @@ IMCC_compile_pir_s(PARROT_INTERP, ARGIN(const char *s),
 
 /*
 
-=item C<PMC * IMCC_compile_pasm_s>
-
-TODO: Needs to be documented!!!
+=item C<PMC * IMCC_compile_pasm_s(PARROT_INTERP, const char *s, STRING
+**error_message)>
 
 =cut
 
@@ -824,9 +826,7 @@ IMCC_compile_pasm_s(PARROT_INTERP, ARGIN(const char *s),
 
 /*
 
-=item C<PMC * imcc_compile_pasm_ex>
-
-TODO: Needs to be documented!!!
+=item C<PMC * imcc_compile_pasm_ex(PARROT_INTERP, const char *s)>
 
 =cut
 
@@ -851,9 +851,7 @@ imcc_compile_pasm_ex(PARROT_INTERP, ARGIN(const char *s))
 
 /*
 
-=item C<PMC * imcc_compile_pir_ex>
-
-TODO: Needs to be documented!!!
+=item C<PMC * imcc_compile_pir_ex(PARROT_INTERP, const char *s)>
 
 =cut
 
@@ -866,8 +864,18 @@ imcc_compile_pir_ex(PARROT_INTERP, ARGIN(const char *s))
 {
     ASSERT_ARGS(imcc_compile_pir_ex)
     STRING *error_message;
+    PMC *sub;
 
-    PMC * const sub = imcc_compile(interp, s, 0, &error_message);
+    /* We need to clear the current_results from the current context. This is
+     * in order to prevent any RetContinuations that get promoted to full
+     * Continuations (this happens when something is the target of a :outer)
+     * trying to return values using them when invoked. (See TT#500 for the
+     * report of the bug this fixes). */
+    opcode_t *save_results = CONTEXT(interp)->current_results;
+    CONTEXT(interp)->current_results = NULL;
+    sub = imcc_compile(interp, s, 0, &error_message);
+    CONTEXT(interp)->current_results = save_results;
+
     if (sub)
         return sub;
 
@@ -877,7 +885,8 @@ imcc_compile_pir_ex(PARROT_INTERP, ARGIN(const char *s))
 
 /*
 
-=item C<static void * imcc_compile_file>
+=item C<static void * imcc_compile_file(PARROT_INTERP, const char *fullname,
+STRING **error_message)>
 
 Compile a file by filename (can be either PASM or IMCC code)
 
@@ -930,8 +939,12 @@ imcc_compile_file(PARROT_INTERP, ARGIN(const char *fullname),
     interp->code                     = NULL;
 
     IMCC_push_parser_state(interp);
-    IMCC_INFO(interp)->state->file = fullname;
-    ext                            = strrchr(fullname, '.');
+    {
+        /* Store a copy, in order to know how to free it later */
+        char *copyname = mem_sys_strdup(fullname);
+        IMCC_INFO(interp)->state->file = copyname;
+        ext                            = strrchr(copyname, '.');
+    }
     IMCC_INFO(interp)->line        = 1;
 
     /*
@@ -989,12 +1002,10 @@ imcc_compile_file(PARROT_INTERP, ARGIN(const char *fullname),
 
 /*
 
-=item C<void * IMCC_compile_file>
+=item C<void * IMCC_compile_file(PARROT_INTERP, const char *s)>
 
-TODO: Needs to be documented!!!
-
- * Note: This function is provided for backward compatibility. This
- * function can go away in future.
+Note: This function is provided for backward compatibility. This
+function can go away in future.
 
 =cut
 
@@ -1011,9 +1022,8 @@ IMCC_compile_file(PARROT_INTERP, ARGIN(const char *s))
 
 /*
 
-=item C<void * IMCC_compile_file_s>
-
-TODO: Needs to be documented!!!
+=item C<void * IMCC_compile_file_s(PARROT_INTERP, const char *s, STRING
+**error_message)>
 
 =cut
 
@@ -1030,7 +1040,7 @@ IMCC_compile_file_s(PARROT_INTERP, ARGIN(const char *s),
 
 /*
 
-=item C<void register_compilers>
+=item C<void register_compilers(PARROT_INTERP)>
 
 Register additional compilers with the interpreter
 
@@ -1054,9 +1064,8 @@ register_compilers(PARROT_INTERP)
 
 /*
 
-=item C<static int change_op>
-
-TODO: Needs to be documented!!!
+=item C<static int change_op(PARROT_INTERP, IMC_Unit *unit, SymReg **r, int num,
+int emit)>
 
 =cut
 
@@ -1105,7 +1114,8 @@ change_op(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(SymReg **r), int num, in
 
 /*
 
-=item C<int try_find_op>
+=item C<int try_find_op(PARROT_INTERP, IMC_Unit *unit, const char *name, SymReg
+**r, int n, int keyvec, int emit)>
 
 Try to find valid op doing the same operation e.g.
 
@@ -1198,9 +1208,7 @@ try_find_op(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *name),
 
 /*
 
-=item C<static const char * try_rev_cmp>
-
-TODO: Needs to be documented!!!
+=item C<static const char * try_rev_cmp(const char *name, SymReg **r)>
 
 =cut
 
@@ -1213,8 +1221,8 @@ try_rev_cmp(ARGIN(const char *name), ARGMOD(SymReg **r))
 {
     ASSERT_ARGS(try_rev_cmp)
     static struct br_pairs {
-        ARGIN(const char * const op);
-        ARGIN(const char * const nop);
+        PARROT_OBSERVER const char * const op;
+        PARROT_OBSERVER const char * const nop;
         const int to_swap;
     } br_pairs[] = {
         { "gt",   "lt",   0 },
@@ -1247,7 +1255,8 @@ try_rev_cmp(ARGIN(const char *name), ARGMOD(SymReg **r))
 
 /*
 
-=item C<int imcc_vfprintf>
+=item C<int imcc_vfprintf(PARROT_INTERP, PMC *io, const char *format, va_list
+ap)>
 
 Formats a given series of arguments per a given format string and prints it to
 the given Parrot IO PMC.
@@ -1256,8 +1265,9 @@ the given Parrot IO PMC.
 
 */
 
+PARROT_IGNORABLE_RESULT
 int
-imcc_vfprintf(PARROT_INTERP, ARGIN(PMC *io), ARGIN(const char *format), va_list ap)
+imcc_vfprintf(PARROT_INTERP, ARGMOD(PMC *io), ARGIN(const char *format), va_list ap)
 {
     ASSERT_ARGS(imcc_vfprintf)
     return Parrot_io_putps(interp, io, Parrot_vsprintf_c(interp, format, ap));
@@ -1267,9 +1277,7 @@ imcc_vfprintf(PARROT_INTERP, ARGIN(PMC *io), ARGIN(const char *format), va_list 
 
 /*
 
-=item C<void imcc_init>
-
-TODO: Needs to be documented!!!
+=item C<void imcc_init(PARROT_INTERP)>
 
 =cut
 
@@ -1289,7 +1297,7 @@ imcc_init(PARROT_INTERP)
 
 /*
 
-=item C<static void imcc_destroy_macro_values>
+=item C<static void imcc_destroy_macro_values(void *value)>
 
 A callback for parrot_chash_destroy_values() to free all macro-allocated memory.
 
@@ -1319,9 +1327,7 @@ imcc_destroy_macro_values(ARGMOD(void *value))
 
 /*
 
-=item C<void imcc_destroy>
-
-TODO: Needs to be documented!!!
+=item C<void imcc_destroy(PARROT_INTERP)>
 
 =cut
 

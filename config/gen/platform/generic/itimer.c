@@ -1,6 +1,6 @@
 /*
- * $Id: itimer.c 37201 2009-03-08 12:07:48Z fperrad $
- * Copyright (C) 2004-2006, Parrot Foundation.
+ * $Id: itimer.c 38707 2009-05-12 06:30:55Z petdance $
+ * Copyright (C) 2004-2009, Parrot Foundation.
  */
 
 /*
@@ -38,7 +38,7 @@ as we are just having one timer.
 */
 
 void
-start_sys_timer_ms(void *handle, int ms)
+start_sys_timer_ms(SHIM(void *handle), int ms)
 {
     struct itimerval its;
     memset(&its, 0, sizeof (its));
@@ -98,7 +98,7 @@ The returned handle is passed to the other timer functions.
 void *
 new_sys_timer_ms(void)
 {
-    return 0;
+    return NULL;
 }
 
 #else

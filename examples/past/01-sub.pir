@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: 01-sub.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: 01-sub.pir 37812 2009-03-29 11:36:54Z barney $
 
 =for doc
 
@@ -15,11 +15,10 @@ roughly represents following Perl 6 code:
 
 =cut
 
-.include "library/dumper.pir"
-
 .namespace []
 
 .sub '__onload' :init
+    load_bytecode "dumper.pbc"
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Text.pbc'
     load_bytecode 'PGE/Util.pbc'

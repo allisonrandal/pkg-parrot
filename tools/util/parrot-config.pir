@@ -1,5 +1,5 @@
 #!/usr/bin/env parrot
-# $Id: parrot-config.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: parrot-config.pir 37751 2009-03-26 20:01:38Z coke $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ Leopold Toetsch E<lt>lt@toetsch.atE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, Parrot Foundation.
+Copyright (C) 2004-2009, Parrot Foundation.
 
 =cut
 
@@ -43,6 +43,7 @@ Copyright (C) 2004-2006, Parrot Foundation.
     i = 1
 loop:
     key = argv[i]
+    if key == '--help' goto usage
     if key == '--dump' goto dump
     $I0 = defined conf_hash[key]
     if $I0 goto ok2
@@ -58,25 +59,23 @@ ok2:
     print "\n"
     end
 dump:
-   .local pmc iter
-    .include 'iterator.pasm'
-    new iter, 'Iterator', conf_hash
-    iter = .ITERATE_FROM_START
+   .local pmc iterator
+    iterator = iter conf_hash
 iter_loop:
-    unless iter goto iter_end
-    shift $S0, iter
+    unless iterator goto iter_end
+    shift $S0, iterator
     print $S0
     print " => '"
     $S1 = conf_hash[$S0]
     print $S1
-    print "'\n"
+    say "'"
     goto iter_loop
 iter_end:
     end
 usage:
     $S0 = argv[0]
     printerr $S0
-    printerr ": config-key\n"
+    printerr " [ <config-key> | --dump | --help ]\n"
     exit 1
 .end
 

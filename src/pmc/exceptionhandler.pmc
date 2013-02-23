@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: exceptionhandler.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: exceptionhandler.pmc 39973 2009-07-10 05:15:20Z pmichaud $
 
 =head1 NAME
 
@@ -20,7 +20,6 @@ exception object's C<_P5> attribute.
 
 */
 
-#include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
 
 pmclass ExceptionHandler extends Continuation need_ext {
@@ -74,34 +73,10 @@ Mark any active exception handler data as live.
         Parrot_ExceptionHandler_attributes * const core_struct =
             PARROT_EXCEPTIONHANDLER(SELF);
         if (core_struct->handled_types)
-            pobject_lives(interp, (PObj *)core_struct->handled_types);
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->handled_types);
         if (core_struct->handled_types_except)
-            pobject_lives(interp, (PObj *)core_struct->handled_types_except);
-    }
-
-    /*
-     * can't reuse Continuation's destroy yet -
-     * RT #46703 fix ref_count handling for exception_handlers first
-     *
-     * An ExceptionHandler is kind of a limited Continuation
-     * (can only call 'up the stack').  Therefore we probably don't
-     * have to convert all RetContinuations to real Continuations
-     */
-
-    VTABLE void destroy() {
-        Parrot_cont                        * const cc          = (Parrot_cont *)PMC_cont(SELF);
-        Parrot_ExceptionHandler_attributes * const core_struct =
-            PARROT_EXCEPTIONHANDLER(SELF);
-
-        if (cc) {
-            mem_sys_free(cc);
-            PMC_cont(SELF) = NULL;
-        }
-
-        if (core_struct) {
-            mem_sys_free(core_struct);
-            PMC_data(SELF) = NULL;
-        }
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->handled_types_except);
+        SUPER();
     }
 
     VTABLE PMC *clone() {

@@ -1,7 +1,7 @@
 /* scheduler.h
  *  Copyright (C) 2007, Parrot Foundation.
  *  SVN Info
- *     $Id: scheduler.h 36833 2009-02-17 20:09:26Z allison $
+ *     $Id: scheduler.h 38175 2009-04-17 12:48:59Z NotFound $
  *  Overview:
  *     Parrot concurrency scheduler header stuff
  *  Data Structure and Algorithms:
@@ -138,7 +138,7 @@ void Parrot_cx_schedule_timer(PARROT_INTERP,
 PARROT_EXPORT
 void Parrot_cx_send_message(PARROT_INTERP,
     ARGIN(STRING *messagetype),
-    ARGIN_NULLOK(PMC *payload))
+    SHIM(PMC *payload))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 

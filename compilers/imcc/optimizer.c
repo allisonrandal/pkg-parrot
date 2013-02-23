@@ -1,5 +1,5 @@
 /*
- * $Id: optimizer.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: optimizer.c 39824 2009-06-29 07:11:48Z petdance $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -193,7 +193,7 @@ static int used_once(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<int pre_optimize>
+=item C<int pre_optimize(PARROT_INTERP, IMC_Unit *unit)>
 
 Handles optimizations occuring before the construction of the CFG.
 
@@ -219,7 +219,7 @@ pre_optimize(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<int cfg_optimize>
+=item C<int cfg_optimize(PARROT_INTERP, IMC_Unit *unit)>
 
 Handles optimizations occuring during the construction of the CFG.
 Returns TRUE if any optimization was performed. Otherwise, returns
@@ -255,9 +255,7 @@ cfg_optimize(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<int optimize>
-
-RT #48260: Not yet documented!!!
+=item C<int optimize(PARROT_INTERP, IMC_Unit *unit)>
 
 =cut
 
@@ -279,7 +277,7 @@ optimize(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<const char * get_neg_op>
+=item C<const char * get_neg_op(const char *op, int *n)>
 
 Get negated form of operator. If no negated form is known, return NULL.
 
@@ -293,9 +291,9 @@ const char *
 get_neg_op(ARGIN(const char *op), ARGOUT(int *n))
 {
     ASSERT_ARGS(get_neg_op)
-    static const struct br_pairs {
-        const char * const op;
-        const char * const nop;
+    PARROT_OBSERVER static const struct br_pairs {
+        PARROT_OBSERVER const char * const op;
+        PARROT_OBSERVER const char * const nop;
         int n;
     } br_pairs[] = {
         { "if", "unless", 2 },
@@ -319,7 +317,7 @@ get_neg_op(ARGIN(const char *op), ARGOUT(int *n))
  */
 /*
 
-=item C<static int if_branch>
+=item C<static int if_branch(PARROT_INTERP, IMC_Unit *unit)>
 
 Convert if/branch/label constructs of the form:
 
@@ -362,15 +360,15 @@ if_branch(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
                 IMCC_debug(interp, DEBUG_OPT1, "if_branch %s ... %s\n",
                         last->opname, br_dest->name);
                 /* find the negated op (e.g if->unless, ne->eq ... */
-                if ((neg_op = get_neg_op(last->opname, &args)) != 0) {
+                if ((neg_op = get_neg_op(last->opname, &args)) != NULL) {
                     Instruction * tmp;
                     last->symregs[reg] = go;
-                    tmp = INS(interp, unit, (char*)neg_op, "",
+                    tmp = INS(interp, unit, neg_op, "",
                               last->symregs, args, 0, 0);
                     last->opnum = tmp->opnum;
                     last->opsize = tmp->opsize;
                     free(last->opname);
-                    last->opname = str_dup(tmp->opname);
+                    last->opname = mem_sys_strdup(tmp->opname);
                     free_ins(tmp);
 
                     /* delete branch */
@@ -389,7 +387,7 @@ if_branch(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<static int strength_reduce>
+=item C<static int strength_reduce(PARROT_INTERP, IMC_Unit *unit)>
 
 strength_reduce ... rewrites e.g add Ix, Ix, y => add Ix, y
 
@@ -635,7 +633,7 @@ strength_reduce(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<static int constant_propagation>
+=item C<static int constant_propagation(PARROT_INTERP, IMC_Unit *unit)>
 
 Does conservative constant propagation.
 This code will not propagate constants past labels or saves,
@@ -742,7 +740,8 @@ next_constant:;
 
 /*
 
-=item C<Instruction * IMCC_subst_constants_umix>
+=item C<Instruction * IMCC_subst_constants_umix(PARROT_INTERP, IMC_Unit *unit,
+const char *name, SymReg **r, int n)>
 
 rewrite e.g. add_n_ic => add_n_nc
 
@@ -758,7 +757,7 @@ IMCC_subst_constants_umix(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const cha
 {
     ASSERT_ARGS(IMCC_subst_constants_umix)
     Instruction *tmp;
-    const char * const ops[] = {
+    PARROT_OBSERVER const char * const ops[] = {
         "abs", "add", "div", "mul", "sub", "fdiv"
     };
     size_t i;
@@ -783,7 +782,8 @@ IMCC_subst_constants_umix(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const cha
 
 /*
 
-=item C<static int eval_ins>
+=item C<static int eval_ins(PARROT_INTERP, const char *op, size_t ops, SymReg
+**r)>
 
 Run one parrot instruction, registers are filled with the
 according constants. If an exception occurs, return -1, aborting
@@ -862,7 +862,8 @@ eval_ins(PARROT_INTERP, ARGIN(const char *op), size_t ops, ARGIN(SymReg **r))
 
 /*
 
-=item C<Instruction * IMCC_subst_constants>
+=item C<Instruction * IMCC_subst_constants(PARROT_INTERP, IMC_Unit *unit, const
+char *name, SymReg **r, int n, int *ok)>
 
 rewrite e.g. add_n_nc_nc => set_n_nc
              abs_i_ic    => set_i_ic
@@ -881,7 +882,7 @@ IMCC_subst_constants(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *na
 {
     ASSERT_ARGS(IMCC_subst_constants)
     Instruction *tmp;
-    const char * const ops[] = {
+    PARROT_OBSERVER const char * const ops[] = {
         "add", "sub", "mul", "div", "fdiv", "pow",
         "cmod", "mod", "atan",
         "shr", "shl", "lsr",
@@ -891,16 +892,16 @@ IMCC_subst_constants(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *na
         "and", "or", "xor",
         "iseq", "isne", "islt", "isle", "isgt", "isge", "cmp", "concat"
     };
-    const char * const ops2[] = {
+    PARROT_OBSERVER const char * const ops2[] = {
         "abs", "neg", "not", "fact", "sqrt", "ceil", "floor"
         "acos", "asec", "asin",
         "atan", "cos", "cosh", "exp", "ln", "log10", "log2", "sec",
         "sech", "sin", "sinh", "tan", "tanh", "fact"
     };
-    const char * const ops3[] = {
+    PARROT_OBSERVER const char * const ops3[] = {
         "eq", "ne", "gt", "ge", "lt", "le"
     };
-    const char * const ops4[] = {
+    PARROT_OBSERVER const char * const ops4[] = {
         "if", "unless"
     };
 
@@ -1001,6 +1002,7 @@ IMCC_subst_constants(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *na
         return NULL;
     }
 
+    /* XXX We can get to this point with debug_fmt = NULL */
     IMCC_debug(interp, DEBUG_OPT1, debug_fmt, name);
     /* we construct a parrot instruction
      * here and let parrot do the calculation in a
@@ -1071,7 +1073,7 @@ IMCC_subst_constants(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(const char *na
 
 /*
 
-=item C<static int branch_branch>
+=item C<static int branch_branch(PARROT_INTERP, IMC_Unit *unit)>
 
 if I0 goto L1  => if IO goto L2
 ...
@@ -1127,7 +1129,7 @@ branch_branch(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<static int branch_reorg>
+=item C<static int branch_reorg(PARROT_INTERP, IMC_Unit *unit)>
 
 branch L2  => ...
 L1:           branch L4
@@ -1220,9 +1222,8 @@ branch_reorg(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<static int branch_cond_loop_swap>
-
-RT #48260: Not yet documented!!!
+=item C<static int branch_cond_loop_swap(PARROT_INTERP, IMC_Unit *unit,
+Instruction *branch, Instruction *start, Instruction *cond)>
 
 =cut
 
@@ -1245,7 +1246,7 @@ branch_cond_loop_swap(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction 
 
         for (count = 1; count != 999; ++count) {
             snprintf(label, size, "%s_post%d", branch->symregs[0]->name, count);
-            if (get_sym(interp, label) == 0) {
+            if (get_sym(interp, label) == NULL) {
                 found = 1;
                 break;
             }
@@ -1300,7 +1301,7 @@ branch_cond_loop_swap(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction 
 
 /*
 
-=item C<static int branch_cond_loop>
+=item C<static int branch_cond_loop(PARROT_INTERP, IMC_Unit *unit)>
 
 start:           => start:
 if cond goto end    if cond goto end
@@ -1381,7 +1382,7 @@ branch_cond_loop(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<static int unused_label>
+=item C<static int unused_label(PARROT_INTERP, IMC_Unit *unit)>
 
 Removes unused labels.
 
@@ -1458,9 +1459,7 @@ unused_label(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 /*
 
-=item C<static int dead_code_remove>
-
-RT #48260: Not yet documented!!!
+=item C<static int dead_code_remove(PARROT_INTERP, IMC_Unit *unit)>
 
 =cut
 
@@ -1542,9 +1541,7 @@ dead_code_remove(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 /* optimizations with CFG & life info built */
 /*
 
-=item C<static int used_once>
-
-RT #48260: Not yet documented!!!
+=item C<static int used_once(PARROT_INTERP, IMC_Unit *unit)>
 
 =cut
 

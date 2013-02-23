@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: darwin.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: darwin.pm 39871 2009-07-03 14:40:18Z jkeenan $
 
 package init::hints::darwin;
 
@@ -16,6 +16,8 @@ our %defaults = (
 sub runstep {
     my ( $self, $conf ) = @_;
 
+    my $share_ext = $conf->option_or_data('share_ext');
+    my $version   = $conf->option_or_data('VERSION');
     my $verbose = $conf->options->get('verbose');
 
     # The hash referenced by $flagsref is the list of options that have -arch
@@ -56,13 +58,13 @@ sub runstep {
         memalign            => 'some_memalign',
         has_dynamic_linking => 1,
 
-        # RT 43147:  When built against a dynamic libparrot,
+        # TT #344:  When built against a dynamic libparrot,
         # installable_parrot records the path to the blib version
         # of the library.
 
         parrot_is_shared       => 1,
-        libparrot_shared       => 'libparrot.$(SOVERSION)$(SHARE_EXT)',
-        libparrot_shared_alias => 'libparrot$(SHARE_EXT)',
+        libparrot_shared       => "libparrot.$version$share_ext",
+        libparrot_shared_alias => "libparrot$share_ext",
         rpath                  => "-L",
         libparrot_soname       => "-install_name "
             . $lib_dir

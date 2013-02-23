@@ -1,5 +1,5 @@
-# Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: PMCEmitter.pm 37123 2009-03-05 10:31:41Z cotto $
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: PMCEmitter.pm 40100 2009-07-15 13:15:25Z bacek $
 
 =head1 NAME
 
@@ -22,15 +22,15 @@ C<Parrot::Pmc2c::PMCEmitter> is used by F<tools/build/pmc2c.pl> to generate C co
 package Parrot::Pmc2c::PMC;
 use strict;
 use warnings;
-use Parrot::Pmc2c::Emitter;
-use Parrot::Pmc2c::Method;
-use Parrot::Pmc2c::MethodEmitter;
+use Parrot::Pmc2c::Emitter ();
+use Parrot::Pmc2c::Method ();
+use Parrot::Pmc2c::MethodEmitter ();
 use Parrot::Pmc2c::UtilFunctions qw( dont_edit dynext_load_code c_code_coda );
 use Text::Balanced 'extract_bracketed';
-use Parrot::Pmc2c::PCCMETHOD;
-use Parrot::Pmc2c::MULTI;
-use Parrot::Pmc2c::PMC::RO;
-use Parrot::Pmc2c::PMC::ParrotClass;
+use Parrot::Pmc2c::PCCMETHOD ();
+use Parrot::Pmc2c::MULTI ();
+use Parrot::Pmc2c::PMC::RO ();
+use Parrot::Pmc2c::PMC::ParrotClass ();
 
 sub prep_for_emit {
     my ( $this, $pmc, $vtable_dump ) = @_;
@@ -80,6 +80,8 @@ sub generate_c_file {
 
     $c->emit( $self->preamble );
 
+    $c->emit( $self->hdecls );
+    $c->emit( $self->{ro}->hdecls ) if ( $self->{ro} );
     $self->gen_methods;
 
     my $ro = $self->ro;
@@ -90,6 +92,10 @@ sub generate_c_file {
 
     $c->emit("#include \"pmc_default.h\"\n");
 
+    $c->emit( $self->update_vtable_func );
+    $c->emit( $self->get_vtable_func );
+    $c->emit( $self->get_mro_func );
+    $c->emit( $self->get_isa_func );
     $c->emit( $self->init_func );
     $c->emit( $self->postamble );
 
@@ -103,25 +109,42 @@ Generates the C header file code for the PMC.
 =cut
 
 sub generate_h_file {
-    my ($self) = @_;
-    my $h      = $self->{emitter};
-    my $name   = uc $self->name;
+    my ($self)  = @_;
+    my $h       = $self->{emitter};
+    my $uc_name = uc $self->name;
+    my $name    = $self->name;
 
     $h->emit( dont_edit( $self->filename ) );
     $h->emit(<<"EOH");
 
-#ifndef PARROT_PMC_${name}_H_GUARD
-#define PARROT_PMC_${name}_H_GUARD
+#ifndef PARROT_PMC_${uc_name}_H_GUARD
+#define PARROT_PMC_${uc_name}_H_GUARD
 
 EOH
 
     $h->emit("#define PARROT_IN_EXTENSION\n") if ( $self->is_dynamic );
-    $h->emit( $self->hdecls );
-    $h->emit( $self->{ro}->hdecls ) if ( $self->{ro} );
+
+    # Emit available functions for work with vtables.
+    my $export = 'PARROT_EXPORT ';
+    if ($self->is_dynamic) {
+        $export = 'PARROT_DYNEXT_EXPORT ';
+        $h->emit("${export}void    Parrot_${name}_class_init(PARROT_INTERP, int, int);\n");
+    }
+
+    if ($name ne 'default') {
+        $h->emit("${export}VTABLE* Parrot_${name}_update_vtable(ARGMOD(VTABLE*));\n");
+        $h->emit("${export}VTABLE* Parrot_${name}_ro_update_vtable(ARGMOD(VTABLE*));\n");
+    }
+    $h->emit("${export}VTABLE* Parrot_${name}_get_vtable(PARROT_INTERP);\n");
+    $h->emit("${export}VTABLE* Parrot_${name}_ro_get_vtable(PARROT_INTERP);\n");
+    $h->emit("${export}PMC*    Parrot_${name}_get_mro(PARROT_INTERP, PMC* mro);\n");
+    $h->emit("${export}Hash*   Parrot_${name}_get_isa(PARROT_INTERP, Hash* isa);\n");
+
+
     $self->gen_attributes;
     $h->emit(<<"EOH");
 
-#endif /* PARROT_PMC_${name}_H_GUARD */
+#endif /* PARROT_PMC_${uc_name}_H_GUARD */
 
 EOH
     $h->emit( c_code_coda() );
@@ -139,7 +162,8 @@ sub hdecls {
     my ($self) = @_;
 
     my $hout;
-    my $name = $self->name;
+    my $name    = $self->name;
+    my $lc_name = $self->name;
 
     # generate decls for all vtable methods in this PMC
     foreach my $vt_method_name ( @{ $self->vtable->names } ) {
@@ -155,9 +179,18 @@ sub hdecls {
         $hout .= $method->generate_headers($self);
     }
 
+    my $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : '';
+
     # class init decl
-    $hout .= 'PARROT_DYNEXT_EXPORT ' if ( $self->is_dynamic );
-    $hout .= "void Parrot_${name}_class_init(PARROT_INTERP, int, int);\n";
+    $hout .= "${export}void    Parrot_${name}_class_init(PARROT_INTERP, int, int);\n";
+
+    $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : 'PARROT_EXPORT ';
+
+    $hout .= "${export}VTABLE* Parrot_${lc_name}_update_vtable(ARGMOD(VTABLE*));\n"
+        unless $name eq 'default';
+
+    $hout .= "${export}VTABLE* Parrot_${lc_name}_get_vtable(PARROT_INTERP);\n";
+
     $self->{hdecls} .= $hout;
 
     return $self->{hdecls};
@@ -178,45 +211,11 @@ Initializes the instance.
 sub init {
     my ($self) = @_;
 
-    $self->fixup_singleton if $self->singleton;
-
     #!( singleton or abstract ) everything else gets readonly version of
     # methods too.
 
     $self->ro( Parrot::Pmc2c::PMC::RO->new($self) )
         unless $self->abstract or $self->singleton;
-}
-
-sub fixup_singleton {
-    my ($self) = @_;
-
-    # Because singletons are shared between interpreters, we need to make
-    # special effort to use the right namespace for method lookups.
-    #
-    # Note that this trick won't work if the singleton inherits from something
-    # else (because the MRO will still be shared).
-
-    unless ( $self->implements_vtable('get_namespace')
-        or $self->super_method('get_namespace') ne 'default' )
-    {
-        my $body =
-            Parrot::Pmc2c::Emitter->text(
-            "  return INTERP->vtables[SELF->vtable->base_type]->_namespace;\n");
-        $self->add_method(
-            Parrot::Pmc2c::Method->new(
-                {
-                    name        => 'get_namespace',
-                    parent_name => $self->name,
-                    parameters  => '',
-                    body        => $body,
-                    type        => Parrot::Pmc2c::Method::VTABLE,
-                    mmds        => [],
-                    return_type => 'PMC*',
-                    attrs       => {},
-                }
-            )
-        );
-    }
 }
 
 =item C<gen_includes()>
@@ -304,7 +303,18 @@ sub proto {
     return $ret;
 }
 
+=item C<pre_method_gen>
+
+Generate switch-bases VTABLE for MULTI
+
+=cut
+
 sub pre_method_gen {
+    my ($self) = @_;
+
+    $self->gen_switch_vtable;
+
+    1;
 }
 
 =item C<gen_methods()>
@@ -343,21 +353,20 @@ sub gen_attributes {
     my ($self)     = @_;
     my $attributes = $self->attributes;
 
-    if ( @$attributes ) {
+    if ( @{$attributes} ) {
 
         Parrot::Pmc2c::Attribute::generate_start( $attributes->[0], $self );
 
-        foreach my $attribute ( @$attributes ) {
+        foreach my $attribute ( @{$attributes} ) {
             $attribute->generate_declaration($self);
         }
 
         Parrot::Pmc2c::Attribute::generate_end( $attributes->[0], $self );
 
-        foreach my $attribute ( @$attributes ) {
+        foreach my $attribute ( @{$attributes} ) {
             $attribute->generate_accessor($self);
         }
     }
-
 }
 
 =item C<find_multi_functions()>
@@ -375,10 +384,11 @@ sub find_multi_functions {
 
     foreach my $method ( @{ $self->methods } ) {
         next unless $method->is_multi;
-        my $short_sig = $method->{MULTI_short_sig};
-        my $full_sig = $pmcname . "," . $method->{MULTI_full_sig};
+        my $short_sig    = $method->{MULTI_short_sig};
+        my $full_sig     = $pmcname . "," . $method->{MULTI_full_sig};
         my $functionname = 'Parrot_' . $pmcname . '_' . $method->name;
-        push @multi_names, [ $method->symbol, $short_sig, $full_sig, $functionname ];
+        push @multi_names, [ $method->symbol, $short_sig, $full_sig,
+                             $pmcname, $functionname, $method ];
     }
     return ( \@multi_names );
 }
@@ -401,6 +411,25 @@ sub build_full_c_vt_method_name {
     return "Parrot_${implementor}_$vt_method_name";
 }
 
+=item C<vtable_flags()>
+
+Returns C code to produce a PMC's flags.
+
+=cut
+
+sub vtable_flags {
+    my ($self) = @_;
+
+    my $vtbl_flag = 0;
+    $vtbl_flag .= '|VTABLE_PMC_NEEDS_EXT'     if $self->flag('need_ext');
+    $vtbl_flag .= '|VTABLE_PMC_IS_SINGLETON'  if $self->flag('singleton');
+    $vtbl_flag .= '|VTABLE_IS_SHARED_FLAG'    if $self->flag('is_shared');
+    $vtbl_flag .= '|VTABLE_IS_READONLY_FLAG'  if $self->flag('is_ro');
+    $vtbl_flag .= '|VTABLE_HAS_READONLY_FLAG' if $self->flag('has_ro');
+
+    return $vtbl_flag;
+}
+
 =item C<vtable_decl($name)>
 
 Returns the C code for the declaration of a vtable temporary named
@@ -412,12 +441,7 @@ sub vtable_decl {
     my ( $self, $temp_struct_name, $enum_name ) = @_;
 
     # gen vtable flags
-    my $vtbl_flag = 0;
-    $vtbl_flag .= '|VTABLE_PMC_NEEDS_EXT'     if $self->flag('need_ext');
-    $vtbl_flag .= '|VTABLE_PMC_IS_SINGLETON'  if $self->flag('singleton');
-    $vtbl_flag .= '|VTABLE_IS_SHARED_FLAG'    if $self->flag('is_shared');
-    $vtbl_flag .= '|VTABLE_IS_READONLY_FLAG'  if $self->flag('is_ro');
-    $vtbl_flag .= '|VTABLE_HAS_READONLY_FLAG' if $self->flag('has_ro');
+    my $vtbl_flag = $self->vtable_flags;
 
     my @vt_methods;
     foreach my $vt_method ( @{ $self->vtable->methods } ) {
@@ -438,12 +462,21 @@ sub vtable_decl {
         NULL,       /* isa_hash */
         NULL,       /* class */
         NULL,       /* mro */
-        attr_defs,  /* attribute_defs */
+        NULL,       /* attribute_defs */
         NULL,       /* ro_variant_vtable */
         $methlist
     };
 ENDOFCODE
     return $cout;
+}
+
+sub gen_multi_name
+{
+    my ($name, $cache) = @_;
+
+    return $cache->{$name} if exists $cache->{$name};
+    my $count              = keys %$cache;
+    return $cache->{$name} = "mfl_$count";
 }
 
 =item C<init_func()>
@@ -455,20 +488,44 @@ string if the PMC has a C<no_init> flag.
 
 sub init_func {
     my ($self) = @_;
-    return "" if $self->no_init;
+    return '' if $self->no_init;
 
-    my $cout      = "";
-    my $classname = $self->name;
-
+    my $cout        = '';
+    my $classname   = $self->name;
     my $enum_name   = $self->is_dynamic ? -1 : "enum_class_$classname";
-    my $vtable_decl = $self->vtable_decl( 'temp_base_vtable', $enum_name );
-
     my $multi_funcs = $self->find_multi_functions();
-    my $multi_list = join( ",\n        ",
-        map { '{ "'. $_->[0] .  '", ' . "\n          " .
-                '"'. $_->[1] .  '", ' . "\n          " .
-                '"'. $_->[2] .  '", ' . "\n          " .
-                '(funcptr_t) ' . $_->[3] . ' }' } @$multi_funcs );
+
+    my @multi_list;
+    my %strings_seen;
+    my $multi_strings = '';
+    my $cache         = {};
+
+    for my $multi (@$multi_funcs) {
+        my ($name, $ssig, $fsig, $ns, $func) = @$multi;
+        my ($name_str, $ssig_str, $fsig_str, $ns_name)     =
+            map { gen_multi_name($_, $cache) } ($name, $ssig, $fsig, $ns);
+
+        for my $s ([$name, $name_str],
+                   [$ssig, $ssig_str],
+                   [$fsig, $fsig_str],
+                   [$ns,   $ns_name ]) {
+            my ($raw_string, $name) = @$s;
+            next if $strings_seen{$name}++;
+            $multi_strings .=  "        STRING * const $name = "
+                           . qq|CONST_STRING_GEN(interp, "$raw_string");\n|;
+        }
+
+        push @multi_list, <<END_MULTI_LIST;
+        { $name_str,
+          $ssig_str,
+          $fsig_str,
+          $ns_name,
+          (funcptr_t) $func }
+END_MULTI_LIST
+
+    }
+
+    my $multi_list = join( ",\n", @multi_list);
 
     my @isa = grep { $_ ne 'default' } @{ $self->parents };
 
@@ -498,8 +555,12 @@ EOC
     my $attributes = $self->attributes;
     foreach my $attribute ( @$attributes ) {
         my $attrtype       = $attribute->{type};
+        my $attrname       = $attribute->{name};
         my $typeid = ':'; # Unhandled
-        if ($attrtype eq "INTVAL") {
+        if($attrname =~ m/\(*(\w+)\)\(.*?\)/) {
+            $attrname = $1;
+        }
+        elsif ($attrtype eq "INTVAL") {
             $typeid = 'I';
         }
         elsif ($attrtype eq "FLOATVAL") {
@@ -513,22 +574,15 @@ EOC
         }
 
         $cout .= $typeid;
-        $cout .= $attribute->name;
+        $cout .= $attrname;
         $cout .= ' ';
     }
 
     $cout .= "\";\n";
-    $cout .= <<"EOC";
-$vtable_decl
-EOC
-
-    for my $k ( keys %extra_vt ) {
-        $cout .= $extra_vt{$k}->vtable_decl( "temp_${k}_vtable", $enum_name );
-    }
 
     my $const = ( $self->{flags}{dynpmc} ) ? " " : " const ";
     if ( @$multi_funcs ) {
-        $cout .= <<"EOC";
+        $cout .= $multi_strings . <<"EOC";
 
    $const multi_func_list _temp_multi_func_list[] = {
         $multi_list
@@ -536,71 +590,66 @@ EOC
 EOC
     }
 
+    my $flags = $self->vtable_flags;
     $cout .= <<"EOC";
     if (pass == 0) {
+        VTABLE * const vt  = Parrot_${classname}_get_vtable(interp);
+        vt->base_type      = $enum_name;
+        vt->flags          = $flags;
+        vt->attribute_defs = attr_defs;
+        interp->vtables[entry] = vt;
+
 EOC
-    $cout .= <<"EOC";
-        Hash          *isa_hash;
-        /* create vtable - clone it - we have to set a few items */
-        VTABLE * const vt_clone        = Parrot_clone_vtable(interp,
-                                             &temp_base_vtable);
-EOC
-    for my $k ( keys %extra_vt ) {
-        $cout .= <<"EOC";
-        VTABLE * const vt_${k}_clone     = Parrot_clone_vtable(interp,
-                                             &temp_${k}_vtable);
-EOC
-    }
 
     # init vtable slot
     if ( $self->is_dynamic ) {
         $cout .= <<"EOC";
-        vt_clone->base_type    = entry;
-        vt_clone->whoami       = string_make(interp, "$classname", @{[length($classname)]}, "ascii",
-            PObj_constant_FLAG|PObj_external_FLAG);
-        vt_clone->provides_str = Parrot_str_append(interp, vt_clone->provides_str,
-            string_make(interp, " $provides", @{[length($provides) + 1]}, "ascii",
+        vt->base_type    = entry;
+        vt->whoami       = string_make(interp, "$classname", @{[length($classname)]},
+                                       "ascii", PObj_constant_FLAG|PObj_external_FLAG);
+        vt->provides_str = Parrot_str_append(interp, vt->provides_str,
+            string_make(interp, "$provides", @{[length($provides)]}, "ascii",
             PObj_constant_FLAG|PObj_external_FLAG));
 
-        /* set up isa hash */
-        parrot_new_hash(interp, &isa_hash);
-        vt_clone->isa_hash     = isa_hash;
 EOC
     }
     else {
         $cout .= <<"EOC";
-        vt_clone->whoami       = CONST_STRING_GEN(interp, "$classname");
-        vt_clone->provides_str = CONST_STRING_GEN(interp, "$provides");
+        vt->whoami       = CONST_STRING_GEN(interp, "$classname");
+        vt->provides_str = CONST_STRING_GEN(interp, "$provides");
+EOC
+    }
 
-        /* set up isa hash */
-        parrot_new_hash(interp, &isa_hash);
-        vt_clone->isa_hash     = isa_hash;
+    if (@isa) {
+        unshift @isa, $classname;
+        $cout .= <<"EOC";
+        vt->isa_hash     = Parrot_${classname}_get_isa(interp, NULL);
+EOC
+    }
+    else {
+        $cout .= <<"EOC";
+        vt->isa_hash     = NULL;
 EOC
     }
 
     for my $k ( keys %extra_vt ) {
+        my $k_flags = $self->$k->vtable_flags;
         $cout .= <<"EOC";
-        vt_${k}_clone->base_type    = entry;
-        vt_${k}_clone->whoami       = vt_clone->whoami;
-        vt_${k}_clone->provides_str = vt_clone->provides_str;
-EOC
-    }
+        {
+            VTABLE                   *vt_$k;
+            vt_${k}                 = Parrot_${classname}_${k}_get_vtable(interp);
+            vt_${k}->base_type      = $enum_name;
+            vt_${k}->flags          = $k_flags;
+            vt_${k}->attribute_defs = attr_defs;
 
-    if ( $extra_vt{ro} ) {
-        $cout .= <<"EOC";
-        vt_clone->ro_variant_vtable    = vt_ro_clone;
-        vt_ro_clone->ro_variant_vtable = vt_clone;
-        vt_ro_clone->isa_hash          = isa_hash;
-EOC
-    }
+            vt_${k}->base_type           = entry;
+            vt_${k}->whoami              = vt->whoami;
+            vt_${k}->provides_str        = vt->provides_str;
+            vt->${k}_variant_vtable      = vt_${k};
+            vt_${k}->${k}_variant_vtable = vt;
+            vt_${k}->isa_hash            = vt->isa_hash;
+        }
 
-    $cout .= <<"EOC";
-        interp->vtables[entry]         = vt_clone;
-EOC
-
-    for my $isa ($classname, @isa) {
-        $cout .= <<"EOC";
-        parrot_hash_put(interp, isa_hash, (void *)(CONST_STRING_GEN(interp, "$isa")), PMCNULL);
 EOC
     }
 
@@ -617,8 +666,7 @@ EOC
 
         {
             /* Register this PMC as a HLL mapping */
-            const INTVAL pmc_id = Parrot_get_HLL_id( interp, CONST_STRING_GEN(interp, "$hll")
-            );
+            const INTVAL pmc_id = Parrot_get_HLL_id( interp, CONST_STRING_GEN(interp, "$hll"));
             if (pmc_id > 0) {
 EOC
         foreach my $maps ( sort keys %{ $self->{flags}{maps} } ) {
@@ -634,26 +682,15 @@ EOC
 
         $cout .= <<"EOC";
         {
-            PMC           *mro      = pmc_new(interp, enum_class_ResizableStringArray);
-            VTABLE * const vt_clone = interp->vtables[entry];
+            VTABLE * const vt  = interp->vtables[entry];
 
-            vt_clone->mro = mro;
+            vt->mro = Parrot_${classname}_get_mro(interp, PMCNULL);
 
-            if (vt_clone->ro_variant_vtable)
-                vt_clone->ro_variant_vtable->mro = mro;
-
-EOC
-
-    for my $isa ($classname, @isa) {
-        $cout .= <<"EOC";
-            VTABLE_push_string(interp, mro, CONST_STRING_GEN(interp, "$isa"));
-EOC
-    }
-
-    $cout .= <<"EOC";
+            if (vt->ro_variant_vtable)
+                vt->ro_variant_vtable->mro = vt->mro;
         }
 
-        /* setup MRO and _namespace */
+        /* set up MRO and _namespace */
         Parrot_create_mro(interp, entry);
 EOC
 
@@ -661,23 +698,13 @@ EOC
     foreach my $method ( @{ $self->{methods} } ) {
         next unless $method->type eq Parrot::Pmc2c::Method::NON_VTABLE;
 
-        my $proto       = proto( $method->return_type, $method->parameters );
+        #these differ for METHODs
         my $method_name = $method->name;
-        my $symbol_name =
-            defined $method->symbol ? $method->symbol : $method->name;
+        my $symbol_name = $method->symbol;
 
-        if ( exists $method->{PCCMETHOD} ) {
-            $cout .= <<"EOC";
-        register_raw_nci_method_in_ns(interp, entry,
-            F2DPTR(Parrot_${classname}_${method_name}), "$symbol_name");
+        $cout .= <<"EOC";
+        register_raw_nci_method_in_ns(interp, entry, F2DPTR(Parrot_${classname}_${method_name}), CONST_STRING_GEN(interp, "$symbol_name"));
 EOC
-        }
-        else {
-            $cout .= <<"EOC";
-        register_nci_method(interp, entry,
-                F2DPTR(Parrot_${classname}_${method_name}), "$symbol_name", "$proto");
-EOC
-        }
         if ( $method->{attrs}{write} ) {
             $cout .= <<"EOC";
         Parrot_mark_method_writes(interp, entry, "$symbol_name");
@@ -686,12 +713,14 @@ EOC
     }
 
     # include any class specific init code from the .pmc file
-    $cout .= <<"EOC" if $class_init_code;
+    if ($class_init_code) {
+        $cout .= <<"EOC";
         /* class_init */
         {
 $class_init_code
         }
 EOC
+    }
 
     $cout .= <<"EOC";
         {
@@ -711,9 +740,222 @@ EOC
     } /* pass */
 } /* Parrot_${classname}_class_init */
 EOC
+
     if ( $self->is_dynamic ) {
         $cout .= dynext_load_code( $classname, $classname => {} );
     }
+
+    $cout;
+}
+
+=item C<update_vtable_func()>
+
+Returns the C code for the PMC's update_vtable method.
+
+=cut
+
+sub update_vtable_func {
+    my ($self) = @_;
+
+    my $cout      = "";
+    my $classname = $self->name;
+    my $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : 'PARROT_EXPORT';
+
+    my $vtable_updates = '';
+    for my $name ( @{ $self->vtable->names } ) {
+        if (exists $self->{has_method}{$name}) {
+            $vtable_updates .= "    vt->$name = Parrot_${classname}_${name};\n";
+        }
+    }
+
+    $cout .= <<"EOC";
+
+$export
+VTABLE *Parrot_${classname}_update_vtable(VTABLE *vt) {
+$vtable_updates
+    return vt;
+}
+
+EOC
+
+    # Generate RO vtable for implemented non-updating methods
+    $vtable_updates = '';
+    foreach my $name ( @{ $self->vtable->names} ) {
+        next unless exists $self->{has_method}{$name};
+        if ($self->vtable_method_does_write($name)) {
+            # If we override constantness status of vtable
+            if (!$self->vtable->attrs($name)->{write}) {
+                $vtable_updates .= "    vt->$name = Parrot_${classname}_ro_${name};\n";
+            }
+        }
+        else {
+            $vtable_updates .= "    vt->$name = Parrot_${classname}_${name};\n";
+        }
+    }
+
+    $cout .= <<"EOC";
+
+$export
+VTABLE *Parrot_${classname}_ro_update_vtable(ARGMOD(VTABLE *vt)) {
+$vtable_updates
+    return vt;
+}
+
+EOC
+
+    $cout;
+}
+
+=item C<get_mro_func()>
+
+Returns the C code for the PMC's get_mro function.
+
+=cut
+
+sub get_mro_func {
+    my ($self) = @_;
+
+    my $cout      = "";
+    my $classname = $self->name;
+    my $get_mro = '';
+    my @parent_names;
+    my $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : 'PARROT_EXPORT';
+
+    if ($classname ne 'default') {
+        for my $dp (reverse @{ $self->direct_parents}) {
+            $get_mro .= "    mro = Parrot_${dp}_get_mro(interp, mro);\n"
+            unless $dp eq 'default';
+        }
+    }
+
+    $cout .= <<"EOC";
+$export
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PMC* Parrot_${classname}_get_mro(PARROT_INTERP, PMC* mro) {
+    if (PMC_IS_NULL(mro)) {
+        mro = pmc_new(interp, enum_class_ResizableStringArray);
+    }
+$get_mro
+    VTABLE_unshift_string(interp, mro,
+        string_make(interp, "$classname", @{[length($classname)]}, NULL, 0));
+    return mro;
+}
+
+EOC
+
+    $cout;
+}
+
+=item C<get_isa_func()>
+
+Returns the C code for the PMC's get_isa function.
+
+=cut
+
+sub get_isa_func {
+    my ($self) = @_;
+
+    my $cout      = "";
+    my $classname = $self->name;
+    my $get_isa = '';
+    my @parent_names;
+    my $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : 'PARROT_EXPORT';
+
+    if ($classname ne 'default') {
+        for my $dp (reverse @{ $self->direct_parents}) {
+            $get_isa .= "    isa = Parrot_${dp}_get_isa(interp, isa);\n"
+            unless $dp eq 'default';
+        }
+    }
+
+    $cout .= <<"EOC";
+$export
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+Hash* Parrot_${classname}_get_isa(PARROT_INTERP, Hash* isa) {
+    if (isa == NULL) {
+        isa = parrot_new_hash(interp);
+    }
+$get_isa
+    parrot_hash_put(interp, isa, (void *)(CONST_STRING_GEN(interp, "$classname")), PMCNULL);
+    return isa;
+}
+
+EOC
+
+    $cout;
+}
+
+
+=item C<get_vtable_func()>
+
+Returns the C code for the PMC's update_vtable method.
+
+=cut
+
+sub get_vtable_func {
+    my ($self) = @_;
+
+    my $cout      = "";
+    my $classname = $self->name;
+    my @other_parents = reverse @{ $self->direct_parents };
+    my $first_parent = shift @other_parents;
+    my $export = $self->is_dynamic ? 'PARROT_DYNEXT_EXPORT ' : 'PARROT_EXPORT';
+
+    my $get_vtable = '';
+
+    if ($first_parent eq 'default') {
+        $get_vtable .= "    vt = Parrot_default_get_vtable(interp);\n";
+    }
+    else {
+        $get_vtable .= "    vt = Parrot_${first_parent}_get_vtable(interp);\n";
+    }
+
+    foreach my $parent_name ( @other_parents) {
+        $get_vtable .= "    Parrot_${parent_name}_update_vtable(vt);\n";
+    }
+
+    $get_vtable .= "    Parrot_${classname}_update_vtable(vt);\n";
+
+    $cout .= <<"EOC";
+$export
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+VTABLE* Parrot_${classname}_get_vtable(PARROT_INTERP) {
+    VTABLE *vt;
+$get_vtable
+    return vt;
+}
+
+EOC
+
+    my $get_extra_vtable = '';
+
+    if ($first_parent eq 'default') {
+        $get_extra_vtable .= "    vt = Parrot_default_ro_get_vtable(interp);\n";
+    }
+    else {
+        $get_extra_vtable .= "    vt = Parrot_${first_parent}_ro_get_vtable(interp);\n";
+    }
+
+    foreach my $parent_name ( @other_parents ) {
+        $get_extra_vtable .= "    Parrot_${parent_name}_ro_update_vtable(vt);\n";
+    }
+
+    $get_extra_vtable .= "    Parrot_${classname}_ro_update_vtable(vt);\n";
+
+    $cout .= <<"EOC";
+$export
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+VTABLE* Parrot_${classname}_ro_get_vtable(PARROT_INTERP) {
+    VTABLE *vt;
+$get_extra_vtable
+    return vt;
+}
+
+EOC
 
     $cout;
 }
@@ -729,6 +971,148 @@ sub vtable {
     $self->{vtable} = $value if $value;
     return $self->{vtable};
 }
+
+=item C<gen_switch_vtable>
+
+Generate switch-bases VTABLE for MULTI
+
+=cut
+
+sub gen_switch_vtable {
+    my ($self) = @_;
+
+    # No cookies for DynPMC. At least not now.
+    return 1 if $self->is_dynamic;
+
+    # Convert list of multis to name->[(type,,ssig,fsig,ns,func)] hash.
+    my %multi_methods;
+    foreach (@{$self->find_multi_functions}) {
+        my ($name, $ssig, $fsig, $ns, $func, $method) = @$_;
+        my @sig = split /,/, $fsig;
+        push @{ $multi_methods{ $name } }, [ $sig[1], $ssig, $fsig, $ns, $func, $method ];
+    }
+
+    # vtable methods
+    foreach my $method ( @{ $self->vtable->methods } ) {
+        my $vt_method_name = $method->name;
+        next if $vt_method_name eq 'class_init';
+
+        next if $self->implements_vtable($vt_method_name);
+        next unless exists $multi_methods{$vt_method_name};
+
+        my $multis = $multi_methods{$vt_method_name};
+
+        # Get parameters.      strip type from param
+        my @parameters = map { s/(\s*\S+\s*\*?\s*)//; $_ } split (/,/, $method->parameters);
+
+        # Gather "case :"
+        my @cases = map { $self->generate_single_case($vt_method_name, $_, @parameters) } @$multis;
+        my $cases = join "\n", @cases;
+
+        my $body = <<"BODY";
+    INTVAL type = VTABLE_type(INTERP, $parameters[0]);
+    /* For dynpmc fallback to MMD */
+    if ((type >= enum_class_core_max) || (SELF.type() >= enum_class_core_max))
+        type = enum_class_core_max;
+    switch(type) {
+$cases
+    }
+BODY
+
+        my $vtable = $method->clone({
+                body => Parrot::Pmc2c::Emitter->text($body),
+            });
+        $self->add_method($vtable);
+    }
+
+    1;
+}
+
+# Generate single case for switch VTABLE
+sub generate_single_case {
+    my ($self, $vt_method_name, $multi, @parameters) = @_;
+
+    my ($type, $ssig, $fsig, $ns, $func, $impl) = @$multi;
+    my $case;
+
+    # Gather parameters names
+    my $parameters = join ', ', @parameters;
+    # ISO C forbids return with expression from void functions.
+    my $return = $impl->return_type =~ /^void\s*$/
+                    ? ''
+                    : 'return ';
+
+    if ($type eq 'DEFAULT' || $type eq 'PMC') {
+        # For default case we have to handle return manually.
+        my ($pcc_signature, $retval, $call_tail, $pcc_return)
+                = $self->gen_defaul_case_wrapping($ssig, @parameters);
+
+        $case = <<"CASE";
+        default:
+            if (type < enum_class_core_max)
+                $return$func(INTERP, SELF, $parameters);
+            else {
+                $retval
+                Parrot_mmd_multi_dispatch_from_c_args(INTERP, "$vt_method_name", "$pcc_signature", SELF, $parameters$call_tail);
+                $pcc_return
+            }
+            break;
+CASE
+    }
+    else {
+        $case = <<"CASE";
+        case enum_class_$type:
+            $return$func(INTERP, SELF, $parameters);
+            break;
+CASE
+    }
+
+    $case;
+}
+
+# Generate (pcc_signature, retval holder, pcc_call_tail, return statement)
+# for default case in switch.
+sub gen_defaul_case_wrapping {
+    my ($self, $ssig, @parameters) = @_;
+
+    my $letter = substr($ssig, 0, 1);
+    if ($letter eq 'I') {
+        return (
+            "PP->" . $letter,
+            "INTVAL retval;",
+            ', &retval',
+            'return retval;',
+        );
+    }
+    elsif ($letter eq 'S') {
+        return (
+            "PP->" . $letter,
+            "STRING *retval;",
+            ', &retval',
+            'return retval;',
+        );
+    }
+    elsif ($letter eq 'P') {
+        return (
+            'PPP->P',
+            'PMC *retval;',
+            ", &retval",
+            "return retval;",
+        );
+    }
+    elsif ($letter eq 'v') {
+        return (
+            'PP->',
+            '',
+            '',
+            'return;',
+        );
+    }
+    else {
+        die "Can't handle signature $ssig!";
+    }
+}
+
 
 1;
 

@@ -1,3 +1,5 @@
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: pcore.pir 38369 2009-04-26 12:57:09Z fperrad $
 # create/export some useful but rarely used methods
 
 # TODO podify & beautify & doc

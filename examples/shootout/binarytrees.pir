@@ -1,4 +1,6 @@
 #!./parrot -R cgp
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: binarytrees.pir 38369 2009-04-26 12:57:09Z fperrad $
 #
 # binarytrees.pir N         (N = 16 for shootout)
 # by Joshua Isom, modified by Leopold Toetsch

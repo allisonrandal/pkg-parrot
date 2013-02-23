@@ -1,5 +1,5 @@
 
-# $Id: Surface.pir 37343 2009-03-12 05:22:02Z Util $
+# $Id: Surface.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ SDL::Surface - Parrot class representing surfaces in Parrot SDL
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/SDL/Surface.pir'
+    load_bytecode 'SDL/Surface.pir'
 
     # create a new SDL::Surface object
     surface = new 'SDL::Surface'

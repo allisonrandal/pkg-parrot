@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: managedstruct.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: managedstruct.t 38027 2009-04-10 17:48:14Z whiteknight $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Tests the ManagedStruct PMC. Checks element access and memory allocation.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
     plan(24)
 
     set_managedstruct_size()
@@ -81,7 +81,7 @@ Tests the ManagedStruct PMC. Checks element access and memory allocation.
     push $P2, 0
     new $P0, ['ManagedStruct'], $P2
     set $I0, $P0
-    $I1 = ge $I0, 2
+    $I1 = isge $I0, 2
     ok($I1, "ManagedStruct size is at least 2")
 
     set $P0[0;0], 1

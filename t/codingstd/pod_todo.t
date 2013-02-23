@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pod_todo.t 37319 2009-03-11 19:29:04Z coke $
+# $Id: pod_todo.t 37688 2009-03-24 20:55:58Z coke $
 
 use strict;
 use warnings;
@@ -31,6 +31,9 @@ my $bad_files = join( "\n", sort @{ $need_testing_ref } );
 my $nbad_files = scalar @{ $need_testing_ref };
 
 # only ok if everything passed
+TODO: {
+    local $TODO = 'some todo remain';
+
 is(
     $bad_files,
     q{},
@@ -39,6 +42,7 @@ is(
 
 diag("\nFound $nbad_files files with 'todo', 'fixme' or 'XXX' items.\n")
     if $nbad_files;
+}
 
 =head1 NAME
 

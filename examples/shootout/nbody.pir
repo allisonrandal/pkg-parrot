@@ -1,4 +1,6 @@
 #!./parrot
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: nbody.pir 38369 2009-04-26 12:57:09Z fperrad $
 # The Computer Language Shootout
 # http://shootout.alioth.debian.org/
 #

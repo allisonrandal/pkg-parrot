@@ -1,12 +1,13 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: threads.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: threads.t 39976 2009-07-10 08:20:13Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test;
+use Parrot::Config;
 
 =head1 NAME
 
@@ -23,20 +24,6 @@ platform.
 
 =cut
 
-my %platforms = map { $_ => 1 } qw/
-    aix
-    cygwin
-    dec_osf
-    freebsd
-    hpux
-    irix
-    linux
-    openbsd
-    solaris
-    MSWin32
-    darwin
-    /;
-
 if ( $^O eq "cygwin" ) {
     my @uname = split / /, qx'uname -v';
 
@@ -45,13 +32,11 @@ if ( $^O eq "cygwin" ) {
         exit;
     }
 }
-if ( $platforms{$^O} ) {
-    plan tests => 15;
+if ( $PConfig{HAS_THREADS} ) {
+    plan tests => 14;
 }
 else {
-    plan skip_all => "No threading yet or test not enabled for '$^O'";
-
-    # plan skip_all => "Needs COPY for argument passing";
+    plan skip_all => "No threading enabled for '$^O'";
 }
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "interp identity" );
@@ -286,42 +271,6 @@ loop:
 CODE
 500500
 500500
-OUTPUT
-
-pir_output_is( <<'CODE', <<'OUTPUT', "share a PMC" );
-.sub main :main
-    .local pmc foo
-    foo = get_global "_foo"
-    .local pmc to_share
-    to_share = new ['Integer']
-    .local pmc shared_ref
-    shared_ref = new ['SharedRef'], to_share
-    shared_ref = 20
-    .local pmc thread
-    thread = new ['ParrotThread']
-    thread.'run_clone'(foo, shared_ref)
-
-    sleep 0.1 # to let the thread run
-
-    .local pmc result
-    thread.'join'()
-    print "done\n"
-    print shared_ref
-    print "\n"
-.end
-
-.sub _foo
-    .param pmc shared_ref
-    print "thread\n"
-    print shared_ref
-    print "\n"
-    inc shared_ref
-.end
-CODE
-thread
-20
-done
-21
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUT', "sub name lookup in new thread" );

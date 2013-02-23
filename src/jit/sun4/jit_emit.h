@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2008, Parrot Foundation.
+ * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
 /*
@@ -7,7 +7,7 @@
 **
 ** SPARC
 **
-** $Id: jit_emit.h 37201 2009-03-08 12:07:48Z fperrad $
+** $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
 **/
 
 #ifndef PARROT_SUN4_JIT_EMIT_H_GUARD

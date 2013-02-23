@@ -1,7 +1,7 @@
 /* charset.h
  *  Copyright (C) 2004-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: charset.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: charset.h 38921 2009-05-19 04:05:43Z petdance $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:
@@ -152,10 +152,9 @@ PARROT_MALLOC
 CHARSET * Parrot_new_charset(SHIM_INTERP);
 
 PARROT_EXPORT
-INTVAL Parrot_register_charset(PARROT_INTERP,
+INTVAL Parrot_register_charset(SHIM_INTERP,
     ARGIN(const char *charsetname),
     ARGIN(CHARSET *charset))
-        __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);
 
@@ -194,8 +193,7 @@ void Parrot_register_charset_converter(SHIM_INTERP,
        PARROT_ASSERT_ARG(charset)
 #define ASSERT_ARGS_Parrot_new_charset __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_Parrot_register_charset __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(charsetname) \
+       PARROT_ASSERT_ARG(charsetname) \
     || PARROT_ASSERT_ARG(charset)
 #define ASSERT_ARGS_Parrot_register_charset_converter \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \

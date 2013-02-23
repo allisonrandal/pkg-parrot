@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: transform.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 NAME
 
 transform - transform a sample tree of Branch and Leaf nodes

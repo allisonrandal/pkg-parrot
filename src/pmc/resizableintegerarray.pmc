@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: resizableintegerarray.pmc 37201 2009-03-08 12:07:48Z fperrad $
+$Id: resizableintegerarray.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -19,9 +19,6 @@ conversions.
 =cut
 
 */
-
-#include "parrot/parrot.h"
-
 
 pmclass ResizableIntegerArray extends FixedIntegerArray need_ext provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs to be resized */

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: arch.pm 36857 2009-02-18 17:02:44Z rurban $
+# $Id: arch.pm 38625 2009-05-09 01:31:29Z Infinoid $
 
 =head1 NAME
 
@@ -39,7 +39,10 @@ sub runstep {
     $verbose and print "\n";
 
     my $archname = $conf->data->get('archname');
+    # This was added to convert IA64.ARCHREV_0 on HP-UX, TT #645, TT #653
+    $archname =~ s|\.|_|g;
     my ( $cpuarch, $osname ) = split( /-/, $archname );
+
 
     if ($verbose) {
         print "determining operating system and cpu architecture\n";

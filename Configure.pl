@@ -1,7 +1,7 @@
 #! perl
 
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Configure.pl 37397 2009-03-13 21:45:55Z allison $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: Configure.pl 38422 2009-05-01 15:43:10Z coke $
 
 use 5.008;
 use strict;
@@ -274,6 +274,14 @@ Specify which loader to use for shared libraries.
 
 Use the given loader flags for shared libraries
 
+=item C<--disable-rpath>
+
+Specify that rpath should not be included in linking flags. With this
+configuration option, you must append the library build directory
+(usually blib/lib) to the LD_LIBRARY_PATH environment variable (or your
+platform equivalent). This option is primarily used for building Linux
+packages.
+
 =item C<--lex=(lexer)>
 
 Specify which lexer to use.
@@ -288,6 +296,11 @@ Generate "#define PARROT_DEF_VAL1 1" ... entries in has_header.h. Currently
 needed to use inet_aton for systems that lack inet_pton:
 
   --define=inet_aton
+
+=item C<--no-line-directives>
+
+Disables the creation of C #line directives when generating C from PMCs and
+ops. Useful when debugging internals.
 
 =back
 
@@ -310,10 +323,6 @@ Use the given type for opcodes.
 =item C<--ops=(files)>
 
 Use the given ops files.
-
-=item C<--pmc=(files)>
-
-Use the given PMC files.
 
 =item C<--cgoto=0>
 
@@ -585,7 +594,6 @@ configuration file.
     inter::encoding
     inter::types
     auto::ops
-    auto::pmc
     auto::alignptrs
     auto::headers
     auto::sizes

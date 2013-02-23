@@ -1,5 +1,5 @@
 /*
- * $Id: memalign.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: memalign.c 37786 2009-03-28 01:09:22Z coke $
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
@@ -28,8 +28,6 @@ memalign related stuff
 
 =item C<void * Parrot_memalign(size_t align, size_t size)>
 
-RT#48260: Not yet documented!!!
-
 =cut
 
 */
@@ -54,8 +52,6 @@ Parrot_memalign(size_t align, size_t size)
 
 =item C<void * Parrot_memalign(size_t align, size_t size)>
 
-RT#48260: Not yet documented!!!
-
 =cut
 
 */
@@ -71,8 +67,6 @@ Parrot_memalign(size_t align, size_t size)
 /*
 
 =item C<void Parrot_free_memalign(void *p)>
-
-RT#48260: Not yet documented!!!
 
 =cut
 

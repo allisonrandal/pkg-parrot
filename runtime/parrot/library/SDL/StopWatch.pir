@@ -1,5 +1,5 @@
 
-# $Id: StopWatch.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: StopWatch.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -42,7 +42,7 @@ An SDL::StopWatch object has the following methods:
     .return()
 
   create_class:
-    load_bytecode "library/SDL/LCD.pir"
+    load_bytecode "SDL/LCD.pir"
     class = get_class 'SDL::LCD'
     class = subclass class, 'SDL::StopWatch'
     addattribute $P0, 'time'

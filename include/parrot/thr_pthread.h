@@ -1,7 +1,7 @@
 /* thr_pthread.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: thr_pthread.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: thr_pthread.h 39976 2009-07-10 08:20:13Z fperrad $
  *  Overview:
  *     POSIS pthread interface
  *  Data Structure and Algorithms:
@@ -18,7 +18,6 @@
 
 #  include <pthread.h>
 
-#  define PARROT_SYNC_PRIMITIVES_DEFINED
 #  define LOCK(m) pthread_mutex_lock((pthread_mutex_t*)&(m))
 #  define UNLOCK(m) pthread_mutex_unlock((pthread_mutex_t*)&(m))
 #  define COND_WAIT(c, m) pthread_cond_wait(&(c), &(m))

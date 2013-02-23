@@ -1,7 +1,7 @@
 /* interpreter.h
- *  Copyright (C) 2001-2007, Parrot Foundation.
+ *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: interpreter.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: interpreter.h 40061 2009-07-13 20:40:15Z NotFound $
  *  Overview:
  *     The interpreter API handles running the operations
  */
@@ -195,38 +195,40 @@ typedef union {
 
 struct Parrot_Context {
     /* common header with Interp_Context */
-    struct Parrot_Context *caller_ctx;  /* caller context */
-    Regs_ni                bp;          /* pointers to FLOATVAL & INTVAL */
-    Regs_ps                bp_ps;       /* pointers to PMC & STR */
+    struct Parrot_Context *caller_ctx;      /* caller context */
+    Regs_ni                bp;              /* pointers to FLOATVAL & INTVAL */
+    Regs_ps                bp_ps;           /* pointers to PMC & STR */
 
     /* end common header */
-    INTVAL *n_regs_used;                /* INSP in PBC points to Sub */
-    size_t regs_mem_size;               /* memory occupied by registers */
-    int ref_count;                      /* how often refered to */
-    int gc_mark;                        /* marked in gc run */
-
-    PMC      *lex_pad;                  /* LexPad PMC */
-    struct Parrot_Context *outer_ctx;   /* outer context, if a closure */
-    UINTVAL warns;             /* Keeps track of what warnings
-                                * have been activated */
-    UINTVAL errors;            /* fatals that can be turned off */
-    UINTVAL trace_flags;
-    UINTVAL recursion_depth;    /* Sub call recursion depth */
+    INTVAL                n_regs_used[4];   /* INSP in PBC points to Sub */
+    PMC                   *lex_pad;         /* LexPad PMC */
+    struct Parrot_Context *outer_ctx;       /* outer context, if a closure */
 
     /* new call scheme and introspective variables */
-    PMC *current_sub;           /* the Sub we are executing */
+    PMC      *current_sub;           /* the Sub we are executing */
 
     /* for now use a return continuation PMC */
-    PMC *current_cont;          /* the return continuation PMC */
-    PMC *current_object;        /* current object if a method call */
-    opcode_t *current_pc;       /* program counter of Sub invocation */
-    PMC *current_namespace;     /* The namespace we're currently in */
-    INTVAL current_HLL;         /* see also src/hll.c */
-    opcode_t *current_results;  /* ptr into code with get_results opcode */
-    PMC *results_signature;     /* results signature pmc if it is non-const */
-    PMC *handlers;              /* local handlers for the context */
+    PMC      *handlers;              /* local handlers for the context */
+    PMC      *current_cont;          /* the return continuation PMC */
+    PMC      *current_object;        /* current object if a method call */
+    PMC      *current_namespace;     /* The namespace we're currently in */
+    PMC      *results_signature;     /* non-const results signature PMC */
+    opcode_t *current_pc;            /* program counter of Sub invocation */
+    opcode_t *current_results;       /* ptr into code with get_results opcode */
+
     /* deref the constants - we need it all the time */
-    struct PackFile_Constant ** constants;
+    struct PackFile_Constant **constants;
+
+    INTVAL                 current_HLL;     /* see also src/hll.c */
+    size_t                 regs_mem_size;   /* memory occupied by registers */
+    int                    ref_count;       /* how often refered to */
+    int                    gc_mark;         /* marked in gc run */
+
+    UINTVAL                warns;           /* Keeps track of what warnings
+                                             * have been activated */
+    UINTVAL                errors;          /* fatals that can be turned off */
+    UINTVAL                trace_flags;
+    UINTVAL                recursion_depth; /* Sub call recursion depth */
 
     /* code->prederefed.code - code->base.data in opcodes
      * to simplify conversion between code ptrs in e.g. invoke */
@@ -288,8 +290,10 @@ typedef struct _context_mem {
  * runloop ID, so it still needs to be a separate stack for a while longer. */
 
 typedef struct parrot_runloop_t {
-    Parrot_jump_buff resume;     /* jmp_buf */
-    struct parrot_runloop_t *prev; /* interpreter's runloop jump buffer stack */
+    Parrot_jump_buff         resume;        /* jmp_buf */
+    struct parrot_runloop_t *prev;          /* interpreter's runloop
+                                             * jump buffer stack */
+    opcode_t                *handler_start; /* Used in exception handling */
 } parrot_runloop_t;
 
 typedef parrot_runloop_t Parrot_runloop;
@@ -310,7 +314,6 @@ struct parrot_interp_t {
     int      n_vtable_max;                    /* highest used type */
     int      n_vtable_alloced;                /* alloced vtable space */
 
-    struct _ParrotIOLayer **piolayers;        /* IO registered layers */
     struct _ParrotIOData   *piodata;          /* interpreter's IO system */
 
     op_lib_t  *op_lib;                        /* Opcode library */
@@ -455,7 +458,12 @@ typedef enum {
 #define PNCONST   PF_NCONST(interp->code)
 
 /* TODO - Make this a config option */
-#define PARROT_CATCH_NULL 1
+/* Splint complains about PMCNULL's storage, so don't use it. */
+#ifdef S_SPLINT_S
+#  define PARROT_CATCH_NULL 0
+#else
+#  define PARROT_CATCH_NULL 1
+#endif
 
 #if PARROT_CATCH_NULL
 PARROT_DATA PMC * PMCNULL;   /* Holds single Null PMC */
@@ -497,7 +505,7 @@ VAR_SCOPE native_func_t run_native;
 typedef PMC *(*Parrot_compiler_func_t)(PARROT_INTERP,
                                        const char * program);
 
-/* HEADERIZER BEGIN: src/inter_create.c */
+/* HEADERIZER BEGIN: src/interp/inter_create.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
@@ -519,9 +527,9 @@ void Parrot_really_destroy(PARROT_INTERP,
 #define ASSERT_ARGS_Parrot_really_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-/* HEADERIZER END: src/inter_create.c */
+/* HEADERIZER END: src/interp/inter_create.c */
 
-/* HEADERIZER BEGIN: src/inter_cb.c */
+/* HEADERIZER BEGIN: src/interp/inter_cb.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
@@ -574,12 +582,13 @@ void Parrot_run_callback(PARROT_INTERP,
     || PARROT_ASSERT_ARG(user_data) \
     || PARROT_ASSERT_ARG(external_data)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-/* HEADERIZER END: src/inter_cb.c */
+/* HEADERIZER END: src/interp/inter_cb.c */
 
-/* HEADERIZER BEGIN: src/inter_misc.c */
+/* HEADERIZER BEGIN: src/interp/inter_misc.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL interpinfo(PARROT_INTERP, INTVAL what)
         __attribute__nonnull__(1);
 
@@ -635,7 +644,7 @@ PARROT_EXPORT
 void register_raw_nci_method_in_ns(PARROT_INTERP,
     const int type,
     ARGIN(void *func),
-    ARGIN(const char *name))
+    ARGIN(STRING *name))
         __attribute__nonnull__(1)
         __attribute__nonnull__(3)
         __attribute__nonnull__(4);
@@ -678,7 +687,7 @@ STRING * sysinfo_s(PARROT_INTERP, INTVAL info_wanted)
 #define ASSERT_ARGS_sysinfo_s __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-/* HEADERIZER END: src/inter_misc.c */
+/* HEADERIZER END: src/interp/inter_misc.c */
 
 
 /* interpreter.c */

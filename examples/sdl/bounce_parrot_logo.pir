@@ -1,3 +1,5 @@
+# $Id: bounce_parrot_logo.pir 38115 2009-04-15 14:41:32Z fperrad $
+
 =head1 TITLE
 
 bounce_parrot_logo.pir - bounce a Parrot logo with the SDL Parrot bindings
@@ -16,13 +18,13 @@ Use the Escape key or close the window when you've had enough.
 =cut
 
 .sub _main :main
-    load_bytecode "library/SDL/App.pir"
-    load_bytecode "library/SDL/Color.pir"
-    load_bytecode "library/SDL/Rect.pir"
-    load_bytecode "library/SDL/Image.pir"
-    load_bytecode "library/SDL/Sprite.pir"
-    load_bytecode "library/SDL/EventHandler.pir"
-    load_bytecode "library/SDL/Event.pir"
+    load_bytecode "SDL/App.pir"
+    load_bytecode "SDL/Color.pir"
+    load_bytecode "SDL/Rect.pir"
+    load_bytecode "SDL/Image.pir"
+    load_bytecode "SDL/Sprite.pir"
+    load_bytecode "SDL/EventHandler.pir"
+    load_bytecode "SDL/Event.pir"
 
     .local pmc app
     app = new 'SDL::App'

@@ -1,7 +1,7 @@
 /* pobj.h
  *  Copyright (C) 2001-2005, Parrot Foundation.
  *  SVN Info
- *     $Id: pobj.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: pobj.h 39028 2009-05-21 23:11:17Z whiteknight $
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:
@@ -55,14 +55,8 @@ typedef Buffer PObj;
 
 #define PObj_bufstart(pmc)    (pmc)->cache._b._bufstart
 #define PObj_buflen(pmc)      (pmc)->cache._b._buflen
-#define PMC_struct_val(pmc)   (pmc)->cache._ptrs._struct_val
-#define PMC_pmc_val(pmc)      (pmc)->cache._ptrs._pmc_val
-#define PMC_int_val(pmc)      (pmc)->cache._i._int_val
-#define PMC_int_val2(pmc)     (pmc)->cache._i._int_val2
-#define PMC_num_val(pmc)      (pmc)->cache._num_val
-#define PMC_str_val(pmc)      (pmc)->cache._string_val
 
-/* See src/gc/resources.c. the basic idea is that buffer memory is
+/* See src/gc/alloc_resources.c. the basic idea is that buffer memory is
    set up as follows:
                     +-----------------+
                     |  ref_count   |f |    # GC header
@@ -76,11 +70,11 @@ there instead.)  The start of the memory region (as returned by malloc()
 is also suitably aligned for any use.  If, for example, malloc() returns
 objects aligned on 8-byte boundaries, and obj->bufstart is also aligned
 on 8-byte boundaries, then there should be 4 bytes of padding.  It is
-handled differently in the two files resources.c and res_lea.c.
-In resources.c, the buffer is carved out of a larger memory pool.  In
+handled differently in the two files alloc_resources.c and res_lea.c.
+In alloc_resources.c, the buffer is carved out of a larger memory pool.  In
 res_lea.c, each buffer is individually allocated.
 
-                     src/gc/resources.c:       src/gc/res_lea.c:
+               src/gc/alloc_resources.c:       src/gc/res_lea.c:
 
 ptr from malloc ->  +------------------+      +------------------+
                       [other blocks?]         | INTVAL ref_count |
@@ -103,7 +97,7 @@ typedef struct Buffer_alloc_unit {
 #  define PObj_bufallocstart(b)  ((char *)PObj_bufstart(b) - Buffer_alloc_offset)
 #  define PObj_bufrefcount(b)    (((Buffer_alloc_unit *)PObj_bufallocstart(b))->ref_count)
 #  define PObj_bufrefcountptr(b) (&PObj_bufrefcount(b))
-#else                     /* see src/gc/resources.c */
+#else                     /* see src/gc/alloc_resources.c */
 #  define Buffer_alloc_offset sizeof (INTVAL)
 #  define PObj_bufallocstart(b)  ((char *)PObj_bufstart(b) - Buffer_alloc_offset)
 #  define PObj_bufrefcount(b)    (*(INTVAL *)PObj_bufallocstart(b))
@@ -130,10 +124,6 @@ struct parrot_string_t {
     const struct _charset  *charset;
 };
 
-
-/* put data into the PMC_EXT structure */
-#define PMC_DATA_IN_EXT 0
-
 /* note that cache and flags are isomorphic with Buffer and PObj */
 struct PMC {
     UnionVal        cache;
@@ -146,9 +136,6 @@ struct PMC {
 struct _Sync;   /* forward decl */
 
 typedef struct PMC_EXT {
-#if PMC_DATA_IN_EXT
-    DPOINTER *data;
-#endif /* PMC_DATA_IN_EXT */
     PMC *_metadata;      /* properties */
     /*
      * PMC access synchronization for shared PMCs
@@ -180,22 +167,14 @@ typedef struct PMC_EXT {
 #else
 #  define PMC_ext_checked(pmc)             (PARROT_ASSERT((pmc)->pmc_ext), (pmc)->pmc_ext)
 #endif /* NDEBUG */
-#if PMC_DATA_IN_EXT
-#  define PMC_data(pmc)                   PMC_ext_checked(pmc)->data
-#  define PMC_data_typed(pmc, type) (type)PMC_ext_checked(pmc)->data
-#  define PMC_data0(pmc)      ((pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
-#  define PMC_data0_typed(pmc, type) (type)((pmc)->pmc_ext ? pmc->pmc_ext->data : 0)
-#else
-#  define PMC_data(pmc)                   (pmc)->data
-#  define PMC_data_typed(pmc, type) (type)(pmc)->data
+#define PMC_data(pmc)                   (pmc)->data
+#define PMC_data_typed(pmc, type) (type)(pmc)->data
 /* do not allow PMC_data2 as lvalue */
-#  define PMC_data0(pmc)            (1 ? (pmc)->data : 0)
-#  define PMC_data0_typed(pmc)      (type)(1 ? (pmc)->data : 0)
-#endif /* PMC_DATA_IN_EXT */
+#define PMC_data0(pmc)            (1 ? (pmc)->data : 0)
+#define PMC_data0_typed(pmc)      (type)(1 ? (pmc)->data : 0)
 #define PMC_metadata(pmc)     PMC_ext_checked(pmc)->_metadata
 #define PMC_next_for_GC(pmc)  PMC_ext_checked(pmc)->_next_for_GC
 #define PMC_sync(pmc)         PMC_ext_checked(pmc)->_synchronize
-#define PMC_union(pmc)        (pmc)->cache
 
 #define POBJ_FLAG(n) ((UINTVAL)1 << (n))
 /* PObj flags */

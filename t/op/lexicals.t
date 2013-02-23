@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: lexicals.t 37344 2009-03-12 05:43:51Z allison $
+# $Id: lexicals.t 39633 2009-06-17 21:31:46Z NotFound $
 
 use strict;
 use warnings;
@@ -118,7 +118,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'api parsing' );
     $P0 = find_lex 'a'
     print "ok\n"
 .include 'interpinfo.pasm'
-    load_bytecode "pcore.pir"      # TODO autoload/preload
+    load_bytecode 'pcore.pbc'      # TODO autoload/preload
     interpinfo $P1, .INTERPINFO_CURRENT_SUB
     $P2 = $P1.'get_lexinfo'()
     $P2 = $P1.'get_lexenv'()
@@ -226,7 +226,6 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'get_lexpad - set two vars via pad (2 lex -
     .local pmc pad, interp
     interp = getinterp
     pad = interp["lexpad"]
-    .local pmc pad
     unless null pad goto ok
     print "pad is NULL\n"
     end

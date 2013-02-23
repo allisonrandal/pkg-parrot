@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: key.c 37454 2009-03-15 20:24:49Z rurban $
+$Id: key.c 39700 2009-06-22 04:48:36Z petdance $
 
 =head1 NAME
 
@@ -27,7 +27,7 @@ The base vtable calling functions.
 
 /*
 
-=item C<PMC * key_new>
+=item C<PMC * key_new(PARROT_INTERP)>
 
 Returns a new C<Key> PMC.
 
@@ -48,7 +48,7 @@ key_new(PARROT_INTERP)
 
 /*
 
-=item C<PMC * key_new_integer>
+=item C<PMC * key_new_integer(PARROT_INTERP, INTVAL value)>
 
 Returns a new integer C<Key> PMC with value C<value>.
 
@@ -74,7 +74,7 @@ key_new_integer(PARROT_INTERP, INTVAL value)
 
 /*
 
-=item C<PMC * key_new_number>
+=item C<PMC * key_new_number(PARROT_INTERP, FLOATVAL value)>
 
 Returns a new number C<Key> PMC with value C<value>.
 
@@ -92,7 +92,7 @@ key_new_number(PARROT_INTERP, FLOATVAL value)
     PMC * const key = pmc_new(interp, enum_class_Key);
 
     PObj_get_FLAGS(key) |= KEY_number_FLAG;
-    PMC_num_val(key) = value;
+    SETATTR_Key_num_key(interp, key, value);
 
     return key;
 }
@@ -100,7 +100,7 @@ key_new_number(PARROT_INTERP, FLOATVAL value)
 
 /*
 
-=item C<PMC * key_new_string>
+=item C<PMC * key_new_string(PARROT_INTERP, STRING *value)>
 
 Returns a new string C<Key> PMC with value C<value>.
 
@@ -126,7 +126,7 @@ key_new_string(PARROT_INTERP, ARGIN(STRING *value))
 
 /*
 
-=item C<PMC * key_new_cstring>
+=item C<PMC * key_new_cstring(PARROT_INTERP, const char *value)>
 
 Returns a new string C<Key> PMC with value C<value> converted to a
 C<STRING>.
@@ -148,7 +148,7 @@ key_new_cstring(PARROT_INTERP, ARGIN_NULLOK(const char *value))
 
 /*
 
-=item C<PMC * key_new_pmc>
+=item C<PMC * key_new_pmc(PARROT_INTERP, PMC *value)>
 
 Returns a new PMC C<Key> PMC with value C<value>.
 
@@ -172,7 +172,7 @@ key_new_pmc(PARROT_INTERP, ARGIN(PMC *value))
 
 /*
 
-=item C<void key_set_integer>
+=item C<void key_set_integer(PARROT_INTERP, PMC *key, INTVAL value)>
 
 Set the integer C<value> in C<key>.
 
@@ -195,7 +195,8 @@ key_set_integer(PARROT_INTERP, ARGMOD(PMC *key), INTVAL value)
 
 /*
 
-=item C<void key_set_register>
+=item C<void key_set_register(PARROT_INTERP, PMC *key, INTVAL value, INTVAL
+flag)>
 
 Set the register C<value> in C<key>.
 
@@ -218,7 +219,7 @@ key_set_register(PARROT_INTERP, ARGMOD(PMC *key), INTVAL value, INTVAL flag)
 
 /*
 
-=item C<void key_set_number>
+=item C<void key_set_number(PARROT_INTERP, PMC *key, FLOATVAL value)>
 
 Set the number C<value> in C<key>.
 
@@ -233,7 +234,7 @@ key_set_number(PARROT_INTERP, ARGMOD(PMC *key), FLOATVAL value)
     ASSERT_ARGS(key_set_number)
     PObj_get_FLAGS(key) &= ~KEY_type_FLAGS;
     PObj_get_FLAGS(key) |=  KEY_number_FLAG;
-    PMC_num_val(key)     = value;
+    SETATTR_Key_num_key(interp, key, value);
 
     return;
 }
@@ -241,7 +242,7 @@ key_set_number(PARROT_INTERP, ARGMOD(PMC *key), FLOATVAL value)
 
 /*
 
-=item C<void key_set_string>
+=item C<void key_set_string(PARROT_INTERP, PMC *key, STRING *value)>
 
 Set the string C<value> in C<key>.
 
@@ -264,7 +265,7 @@ key_set_string(PARROT_INTERP, ARGMOD(PMC *key), ARGIN(STRING *value))
 
 /*
 
-=item C<void key_set_pmc>
+=item C<void key_set_pmc(PARROT_INTERP, PMC *key, PMC *value)>
 
 Set the PMC C<value> in C<key>.
 
@@ -290,7 +291,7 @@ key_set_pmc(PARROT_INTERP, ARGMOD(PMC *key), ARGIN(PMC *value))
 
 /*
 
-=item C<INTVAL key_type>
+=item C<INTVAL key_type(PARROT_INTERP, const PMC *key)>
 
 Returns the type of C<key>.
 
@@ -310,7 +311,7 @@ key_type(SHIM_INTERP, ARGIN(const PMC *key))
 
 /*
 
-=item C<INTVAL key_integer>
+=item C<INTVAL key_integer(PARROT_INTERP, PMC *key)>
 
 Translates a key value into an integer.
 Takes an interpreter name and pointer to a key.
@@ -326,11 +327,11 @@ INTVAL
 key_integer(PARROT_INTERP, ARGIN(PMC *key))
 {
     ASSERT_ARGS(key_integer)
-    INTVAL  int_key;
-    STRING *str_key;
+    INTVAL   int_key;
+    STRING  *str_key;
+    FLOATVAL num_key;
 
-    if (VTABLE_isa(interp, key, CONST_STRING(interp, "Key"))) {
-        switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
+    switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
         case KEY_hash_iterator_FLAGS:
 
         case KEY_integer_FLAG:
@@ -341,7 +342,8 @@ key_integer(PARROT_INTERP, ARGIN(PMC *key))
             return REG_INT(interp, int_key);
 
         case KEY_number_FLAG:
-            return (INTVAL)PMC_num_val(key);
+            GETATTR_Key_num_key(interp, key, num_key);
+            return (INTVAL)num_key;
         case KEY_number_FLAG | KEY_register_FLAG:
             GETATTR_Key_int_key(interp, key, int_key);
             return (INTVAL)REG_NUM(interp, int_key);
@@ -375,7 +377,6 @@ key_integer(PARROT_INTERP, ARGIN(PMC *key))
         case KEY_inf_slice_FLAG:
         default:
             break;
-        }
     }
 
     return VTABLE_get_integer(interp, key);
@@ -384,7 +385,7 @@ key_integer(PARROT_INTERP, ARGIN(PMC *key))
 
 /*
 
-=item C<FLOATVAL key_number>
+=item C<FLOATVAL key_number(PARROT_INTERP, PMC *key)>
 
 Translates a key value into a number.
 Takes an interpreter name and pointer to a key.
@@ -401,17 +402,18 @@ FLOATVAL
 key_number(PARROT_INTERP, ARGIN(PMC *key))
 {
     ASSERT_ARGS(key_number)
-    INTVAL int_key;
+    INTVAL   int_key;
+    FLOATVAL num_key;
 
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
     case KEY_number_FLAG:
-        return PMC_num_val(key);
+        GETATTR_Key_num_key(interp, key, num_key);
+        return num_key;
     case KEY_number_FLAG | KEY_register_FLAG:
         GETATTR_Key_int_key(interp, key, int_key);
         return REG_NUM(interp, int_key);
     case KEY_pmc_FLAG:
         return VTABLE_get_number(interp, key);
-                                                 /*  PMC_pmc_val(key)); */
     case KEY_pmc_FLAG | KEY_register_FLAG:
         {
         PMC *reg;
@@ -428,7 +430,7 @@ key_number(PARROT_INTERP, ARGIN(PMC *key))
 
 /*
 
-=item C<STRING * key_string>
+=item C<STRING * key_string(PARROT_INTERP, PMC *key)>
 
 Translates a key value into a string.  Takes an interpreter name and pointer to
 a key.  Returns a string value corresponding to the key.
@@ -438,12 +440,11 @@ a key.  Returns a string value corresponding to the key.
 */
 
 PARROT_WARN_UNUSED_RESULT
-PARROT_CANNOT_RETURN_NULL
+PARROT_CAN_RETURN_NULL
 STRING *
 key_string(PARROT_INTERP, ARGIN(PMC *key))
 {
     ASSERT_ARGS(key_string)
-    INTVAL int_key;
 
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
         /* remember to COW strings instead of returning them directly */
@@ -457,6 +458,7 @@ key_string(PARROT_INTERP, ARGIN(PMC *key))
         }
         case KEY_string_FLAG | KEY_register_FLAG:
         {
+            INTVAL int_key;
             STRING *s;
             GETATTR_Key_int_key(interp, key, int_key);
             s = REG_STR(interp, int_key);
@@ -464,27 +466,38 @@ key_string(PARROT_INTERP, ARGIN(PMC *key))
                 s = Parrot_str_new_COW(interp, s);
             return s;
         }
-                                               /*   PMC_pmc_val(key)); */
         case KEY_pmc_FLAG | KEY_register_FLAG:
         {
+            INTVAL int_key;
             PMC *reg;
             GETATTR_Key_int_key(interp, key, int_key);
             reg = REG_PMC(interp, int_key);
             return VTABLE_get_string(interp, reg);
         }
         case KEY_integer_FLAG:
+        {
+            INTVAL int_key;
             GETATTR_Key_int_key(interp, key, int_key);
             return Parrot_str_from_int(interp, int_key);
+        }
         case KEY_integer_FLAG | KEY_register_FLAG:
+        {
+            INTVAL int_key;
             GETATTR_Key_int_key(interp, key, int_key);
             return Parrot_str_from_int(interp, REG_INT(interp, int_key));
-
+        }
         case KEY_number_FLAG:
-            return Parrot_str_from_num(interp, PMC_num_val(key));
+        {
+            FLOATVAL num_key;
+            GETATTR_Key_num_key(interp, key, num_key);
+            return Parrot_str_from_num(interp, num_key);
+        }
         case KEY_number_FLAG | KEY_register_FLAG:
+        {
+            INTVAL int_key;
             GETATTR_Key_int_key(interp, key, int_key);
             return Parrot_str_from_num(interp, REG_NUM(interp, int_key));
-
+        }
         default:
         case KEY_pmc_FLAG:
             return VTABLE_get_string(interp, key);
@@ -494,7 +507,7 @@ key_string(PARROT_INTERP, ARGIN(PMC *key))
 
 /*
 
-=item C<PMC * key_pmc>
+=item C<PMC * key_pmc(PARROT_INTERP, PMC *key)>
 
 These functions return the integer/number/string/PMC values of C<key> if
 possible. Otherwise they throw exceptions.
@@ -517,14 +530,14 @@ key_pmc(PARROT_INTERP, ARGIN(PMC *key))
         GETATTR_Key_int_key(interp, key, int_key);
         return REG_PMC(interp, int_key);
     default:
-        return key; /* PMC_pmc_val(key); */
+        return key;
     }
 }
 
 
 /*
 
-=item C<PMC * key_next>
+=item C<PMC * key_next(PARROT_INTERP, PMC *key)>
 
 Returns the next key if C<key> is in a sequence of linked keys.
 
@@ -545,15 +558,14 @@ key_next(PARROT_INTERP, ARGIN(PMC *key))
         GETATTR_Key_next_key(interp, key, next_key);
         return next_key;
     }
-    else {
-        return NULL;
-    }
+
+    return NULL;
 }
 
 
 /*
 
-=item C<PMC * key_append>
+=item C<PMC * key_append(PARROT_INTERP, PMC *key1, PMC *key2)>
 
 Appends C<key2> to C<key1>.
 
@@ -591,7 +603,7 @@ key_append(PARROT_INTERP, ARGMOD(PMC *key1), ARGIN(PMC *key2))
 
 /*
 
-=item C<void key_mark>
+=item C<void key_mark(PARROT_INTERP, PMC *key)>
 
 Marks C<key> as live.
 
@@ -605,12 +617,14 @@ key_mark(PARROT_INTERP, ARGIN(PMC *key))
 {
     ASSERT_ARGS(key_mark)
     const UINTVAL flags = PObj_get_FLAGS(key) & KEY_type_FLAGS;
-    PMC          *next_key;
-    STRING       *str_key;
 
     if (flags == KEY_string_FLAG) {
+        STRING *str_key;
         GETATTR_Key_str_key(interp, key, str_key);
-        pobject_lives(interp, (PObj *)str_key);
+
+        /* XXX str_key can be NULL from GETATTR_Key_str_key, */
+        /* so shouldn't be marked. */
+        Parrot_gc_mark_PObj_alive(interp, (PObj *)str_key);
     }
 
     /*
@@ -618,20 +632,20 @@ key_mark(PARROT_INTERP, ARGIN(PMC *key))
      * the bucket_index and not the next key component
      * Note to self: shoot whoever thought this was a good idea.
      */
-    if (flags == KEY_hash_iterator_FLAGS)
-        return;
-
-    /* if iteration hasn't started, above flag isn't set yet */
-    GETATTR_Key_next_key(interp, key, next_key);
-    if (next_key && (void *)next_key != (void *)INITBucketIndex)
-        pobject_lives(interp, (PObj *)next_key);
+    if (flags != KEY_hash_iterator_FLAGS) {
+        PMC *next_key;
+        /* if iteration hasn't started, above flag isn't set yet */
+        GETATTR_Key_next_key(interp, key, next_key);
+        if (next_key && (void *)next_key != (void *)INITBucketIndex)
+            Parrot_gc_mark_PObj_alive(interp, (PObj *)next_key);
+    }
 
 }
 
 
 /*
 
-=item C<STRING * key_set_to_string>
+=item C<STRING * key_set_to_string(PARROT_INTERP, PMC *key)>
 
 Translates a series of key values into strings, quoted or bracketed if
 appropriate.  Takes an interpreter name and pointer to a key.  Returns a
@@ -655,7 +669,7 @@ key_set_to_string(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
     INTVAL         int_key;
     STRING        *str_key;
 
-    for (;key;) {
+    while (key != NULL) {
         switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
             case KEY_integer_FLAG:
                 GETATTR_Key_int_key(interp, key, int_key);
@@ -665,7 +679,7 @@ key_set_to_string(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
             case KEY_number_FLAG:
                 GETATTR_Key_int_key(interp, key, int_key);
                 value = Parrot_str_append(interp, value,
-                    Parrot_str_from_num(interp, int_key));
+                    Parrot_str_from_num(interp, (FLOATVAL)int_key));
                 break;
             case KEY_string_FLAG:
                 GETATTR_Key_str_key(interp, key, str_key);

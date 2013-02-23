@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 06-dynamic.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: 06-dynamic.t 39944 2009-07-08 02:48:40Z coke $
 # 06-dynamic.t
 
 use strict;
@@ -19,7 +19,7 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 43;
+use Test::More tests => 27;
 use Carp;
 use Cwd;
 use File::Copy;
@@ -34,7 +34,7 @@ use GenerateCore qw|
 |;
 use IO::CaptureOutput qw | capture |;
 
-my @dynopsfiles = qw( src/dynoplibs/dan.ops src/dynoplibs/myops.ops );
+my @dynopsfiles = qw( src/dynoplibs/obscure.ops );
 
 ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
 my $cwd = cwd();
@@ -55,20 +55,16 @@ my ( $msg, $tie );
     }
     chdir "src/dynoplibs" or croak "Unable to change to src/dynoplibs: $!";
 
-    test_dynops( [qw( CGoto    myops.ops )] );
-    test_dynops( [qw( CGP      myops.ops )] );
-    test_dynops( [qw( C        myops.ops )] );
-    test_dynops( [qw( CSwitch  myops.ops )] );
-    test_dynops( [qw( CGoto    dan.ops )] );
-    test_dynops( [qw( CGP      dan.ops )] );
-    test_dynops( [qw( C        dan.ops )] );
-    test_dynops( [qw( CSwitch  dan.ops )] );
+    test_dynops( [qw( CGoto    obscure.ops )] );
+    test_dynops( [qw( CGP      obscure.ops )] );
+    test_dynops( [qw( C        obscure.ops )] );
+    test_dynops( [qw( CSwitch  obscure.ops )] );
 
     {
         my ($self, $stdout, $stderr);
         capture(
             sub { $self = Parrot::Ops2c::Utils->new( {
-                        argv => [qw( CSwitch  dan.ops dan.ops )],
+                        argv => [qw( CSwitch  obscure.ops obscure.ops )],
                         flag => { dynamic => 1 },
                 } ); },
             \$stdout,
@@ -77,7 +73,7 @@ my ( $msg, $tie );
         ok( defined $self,
             "Constructor correctly returned when provided >= 1 arguments" );
         like( $stderr,
-            qr/Ops file 'dan\.ops' mentioned more than once!/, "Error message is correct" );
+            qr/Ops file 'obscure\.ops' mentioned more than once!/, "Error message is correct" );
 
         my $c_header_file = $self->print_c_header_file();
         ok( -e $c_header_file, "$c_header_file created" );

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: interp.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: interp.t 39472 2009-06-09 15:07:24Z whiteknight $
 
 use strict;
 use warnings;
@@ -56,13 +56,6 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'runinterp - works with printing' );
     print "uno\n"
     runinterp test_interp, pasm
     print "dos\n"
-
-  get_stdout:
-    $S0 = readline stdout
-    actual .= $S0
-    if $S0 goto get_stdout
-
-    print actual
     goto pasm_end
 
   pasm:

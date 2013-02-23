@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: subflags.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: subflags.t 38691 2009-05-11 17:41:35Z NotFound $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ t/compilers/imcc/syn/subflags.t  - test flags on PIR subs
 .namespace ['FlagTest']
 
 .sub 'main' :main
-    load_bytecode 'library/Test/More.pbc'
+    load_bytecode 'Test/More.pbc'
 
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace

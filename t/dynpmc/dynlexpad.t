@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: dynlexpad.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: dynlexpad.t 37579 2009-03-19 04:57:31Z coke $
 
 use strict;
 use warnings;
@@ -38,14 +38,16 @@ ok
 OUTPUT
 
 my $loadlib = <<'EOC';
-#
-# the .loadlib directive gets run before the .HLL_map below is parsed,
-# therefore the .DynLexPad constant is already available
-#
 .loadlib "dynlexpad"
 
 .HLL "Some"
-.HLL_map "LexPad" = "DynLexPad"
+.sub load :anon :init
+  .local pmc interp, lexpad, dynlexpad
+  interp = getinterp
+  lexpad = get_class 'LexPad'
+  dynlexpad = get_class 'DynLexPad'
+  interp.'hll_map'(lexpad, dynlexpad)
+.end
 
 EOC
 

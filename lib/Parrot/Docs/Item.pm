@@ -1,5 +1,5 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: Item.pm 37258 2009-03-10 04:30:17Z Util $
+# $Id: Item.pm 38996 2009-05-20 22:35:50Z jkeenan $
 
 =head1 NAME
 
@@ -67,8 +67,6 @@ sub new {
     my $self     = ref $_[0] ? ref shift : shift;
     my $text     = shift;
     my @contents = @_;
-
-    # RT#43713 - Items should only contain paths.
 
     die "No contents ($text).\n" unless @contents;
 

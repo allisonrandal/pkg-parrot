@@ -16,12 +16,10 @@ Test cases taken from base64.t of MIME::Base64.
 
 =cut
 
-.include "library/dumper.pir"
-
 .sub test :main
-
-    load_bytecode 'Test/More.pir'
-    load_bytecode 'MIME/Base64.pir'
+    load_bytecode "dumper.pbc"
+    load_bytecode 'Test/More.pbc'
+    load_bytecode 'MIME/Base64.pbc'
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Util.pbc'
     load_bytecode 'compilers/json/JSON.pbc'

@@ -1,8 +1,8 @@
-# $Id: Lines.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Lines.pir 38689 2009-05-11 17:22:23Z NotFound $
 
 =head1 TITLE
 
-Stream::Lines - process a stream one line per read
+Stream;Lines - process a stream one line per read
 
 =head1 VERSION
 
@@ -27,19 +27,19 @@ TBD
     .local pmc base
     .local pmc lines
 
-    $P0 = get_class 'Stream::Lines'
+    $P0 = get_class ['Stream'; 'Lines']
     unless null $P0 goto END
 
-    load_bytecode "library/Stream/Base.pir"
+    load_bytecode 'Stream/Base.pbc'
 
-    get_class base, "Stream::Base"
-    subclass lines, base, "Stream::Lines"
+    get_class base, ['Stream'; 'Base']
+    subclass lines, base, ['Stream'; 'Lines']
 
     addattribute lines, "line_buffer"
 END:
 .end
 
-.namespace ["Stream::Lines"]
+.namespace ['Stream'; 'Lines']
 
 .sub init :vtable :method
     .local pmc temp
@@ -183,7 +183,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2008, Parrot Foundation.
+Copyright (C) 2004-2009, Parrot Foundation.
 
 =cut
 

@@ -1,3 +1,6 @@
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: Exp.pir 40175 2009-07-20 23:45:12Z pmichaud $
+
 =head1 TITLE
 
 PGE::Exp - base class for expressions
@@ -123,13 +126,17 @@ tree as a PIR code object that can be compiled.
     name = code.'escape'(name)
     namecorou = code.'escape'(namecorou)
 
-    .local string subid
-    subid = ''
+    .local string pirflags
+    pirflags = adverbs['pirflags']
+
+    $I0 = index pirflags, ':subid'
+    if $I0 >= 0 goto have_subid
     $P0 = adverbs['subid']
     if null $P0 goto have_subid
     $S0 = code.'escape'($P0)
-    subid = concat ':subid(', $S0
-    concat subid, ')'
+    pirflags = concat pirflags, ' :subid('
+    concat pirflags, $S0
+    concat pirflags, ')'
   have_subid:
 
     ##   Perform reduction/optimization on the
@@ -155,7 +162,7 @@ tree as a PIR code object that can be compiled.
     ##   Generate the initial PIR code for a backtracking (uncut) rule.
     .local string returnop
     returnop = '.yield'
-    code.'emit'(<<"        CODE", name, subid, namecorou, .INTERPINFO_CURRENT_SUB)
+    code.'emit'(<<"        CODE", name, pirflags, namecorou, .INTERPINFO_CURRENT_SUB)
       .sub %0 :method %1
           .param pmc adverbs   :slurpy :named
           .local pmc mob
@@ -184,7 +191,7 @@ tree as a PIR code object that can be compiled.
   code_cutrule:
     ##   Initial code for a rule that cannot be backtracked into.
     returnop = '.return'
-    code.'emit'(<<"        CODE", name, subid)
+    code.'emit'(<<"        CODE", name, pirflags)
       .sub %0 :method %1
           .param pmc adverbs      :unique_reg :slurpy :named
           .local pmc mob
@@ -203,17 +210,17 @@ tree as a PIR code object that can be compiled.
     .local string expstr
     expstr = expcode
     code.'emit'("          .local pmc cstack :unique_reg")
-    code.'emit'("          cstack = new 'ResizableIntegerArray'")
+    code.'emit'("          cstack = root_new ['parrot';'ResizableIntegerArray']")
     $I0 = index expstr, 'ustack'
     if $I0 < 0 goto code_body_1
     code.'emit'("          .local pmc ustack :unique_reg")
-    code.'emit'("          ustack = new 'ResizablePMCArray'")
+    code.'emit'("          ustack = root_new ['parrot';'ResizablePMCArray']")
   code_body_1:
     ##   generate the gpad only if we need it
     $I0 = index expstr, 'gpad'
     if $I0 < 0 goto code_body_2
     code.'emit'("          .local pmc gpad :unique_reg")
-    code.'emit'("          gpad = new 'ResizablePMCArray'")
+    code.'emit'("          gpad = root_new ['parrot';'ResizablePMCArray']")
   code_body_2:
     ##   set the captscope if we need it
     $I0 = index expstr, 'captscope'
@@ -321,7 +328,7 @@ tree as a PIR code object that can be compiled.
     captgen.'emit'(<<"        CODE", cname, label)
           $I0 = defined captscope[%0]
           if $I0 goto %1_cgen
-          $P0 = new 'ResizablePMCArray'
+          $P0 = root_new ['parrot';'ResizablePMCArray']
           captscope[%0] = $P0
           local_branch cstack, %1_cgen
           delete captscope[%0]
@@ -349,7 +356,7 @@ tree as a PIR code object that can be compiled.
     args = self.'getargs'(label, next)
     .local string literal
     .local int litlen
-    literal = self
+    literal = self.'ast'()
     litlen = length literal
 
     args['I'] = ''
@@ -410,10 +417,10 @@ tree as a PIR code object that can be compiled.
     $I0 = exp0['ignorecase']
     $I1 = exp1['ignorecase']
     if $I0 != $I1 goto concat_lit_shift
-    $S0 = exp0
-    $S1 = exp1
+    $S0 = exp0.'ast'()
+    $S1 = exp1.'ast'()
     concat $S0, $S1
-    exp0.'result_object'($S0)
+    exp0.'!make'($S0)
     goto concat_lit_loop
   concat_lit_shift:
     inc j
@@ -460,8 +467,9 @@ tree as a PIR code object that can be compiled.
 
 .sub 'reduce' :method
     .param pmc next
-    .local pmc exp0
+    .local pmc exp0, sep
     exp0 = self[0]
+    sep = self['sep']
 
     .local int backtrack, min, max
     backtrack = self['backtrack']
@@ -483,6 +491,10 @@ tree as a PIR code object that can be compiled.
   reduce_exp0:
     exp0 = exp0.'reduce'(next)
     self[0] = exp0
+    if null sep goto reduce_exp0_1
+    sep = sep.'reduce'(next)
+    self['sep'] = sep
+  reduce_exp0_1:
     .return (self)
 .end
 
@@ -491,10 +503,12 @@ tree as a PIR code object that can be compiled.
     .param string label
     .param string next
 
-    .local pmc exp
-    .local string explabel, replabel
+    .local pmc exp, sep
+    .local string explabel, seplabel, replabel, nextlabel
     exp = self[0]
+    sep = self['sep']
 
+    unless null sep goto outer_quant
     $I0 = can exp, 'pir_quant'
     if $I0 == 0 goto outer_quant
     $I0 = exp.'pir_quant'(code, label, next, self)
@@ -509,7 +523,12 @@ tree as a PIR code object that can be compiled.
     backtrack = self['backtrack']
 
     explabel = code.'unique'('R')
+    nextlabel = explabel
     replabel = concat label, '_repeat'
+    if null sep goto outer_quant_1
+    seplabel = code.'unique'('R')
+    nextlabel = concat label, '_sep'
+  outer_quant_1:
 
     if backtrack == PGE_BACKTRACK_EAGER goto bt_eager
     if backtrack == PGE_BACKTRACK_NONE goto bt_none
@@ -522,7 +541,7 @@ tree as a PIR code object that can be compiled.
     if $I0 != 0 goto bt_greedy_none
     $I0 = self['max']
     if $I0 != PGE_INF goto bt_greedy_none
-    code.'emit'(<<"        CODE", replabel, explabel, args :flat :named)
+    code.'emit'(<<"        CODE", replabel, nextlabel, args :flat :named)
         %L:  # quant 0..Inf greedy
         %0:
           push ustack, pos
@@ -542,7 +561,7 @@ tree as a PIR code object that can be compiled.
     if $I0 != 0 goto bt_greedy_none
     $I0 = self['max']
     if $I0 != PGE_INF goto bt_greedy_none
-    code.'emit'(<<"        CODE", replabel, explabel, args :flat :named)
+    code.'emit'(<<"        CODE", replabel, nextlabel, args :flat :named)
         %L:  # quant 0..Inf none
           local_branch cstack, %0
           if cutmark != %c goto fail
@@ -562,7 +581,7 @@ tree as a PIR code object that can be compiled.
 
   bt_greedy_none:
     ##   handle greedy or none
-    code.'emit'(<<"        CODE", replabel, explabel, args :flat :named)
+    code.'emit'(<<"        CODE", replabel, nextlabel, args :flat :named)
         %L:  # quant %Q greedy/none
           push gpad, 0
           local_branch cstack, %0
@@ -597,7 +616,7 @@ tree as a PIR code object that can be compiled.
 
   bt_eager:
     ##   handle eager backtracking
-    code.'emit'(<<"        CODE", replabel, explabel, args :flat :named)
+    code.'emit'(<<"        CODE", replabel, nextlabel, args :flat :named)
         %L:  # quant %Q eager
           push gpad, 0
           local_branch cstack, %0
@@ -621,6 +640,14 @@ tree as a PIR code object that can be compiled.
         CODE
 
   end:
+    if null sep goto sep_done
+    code.'emit'(<<"        CODE", nextlabel, explabel, seplabel)
+        %0:
+          if rep == 1 goto %1
+          goto %2
+        CODE
+    sep.'pir'(code, seplabel, explabel)
+  sep_done:
     exp.'pir'(code, explabel, replabel)
     .return ()
 .end
@@ -835,7 +862,7 @@ tree as a PIR code object that can be compiled.
         %L_1:
           $P0 = find_name '%0'
           unless null $P0 goto %L_2
-          say "Unable to find regex '%0'"
+          die "Unable to find regex '%0'"
         %L_2:
         CODE
 
@@ -959,8 +986,9 @@ tree as a PIR code object that can be compiled.
     .param pmc label
     .param pmc next
     .local string token, test
-    token = self
+    token = self.'ast'()
 
+    if token == '<?>' goto anchor_null
     if token == '^' goto anchor_bos
     if token == '$' goto anchor_eos
     if token == '^^' goto anchor_bol
@@ -974,6 +1002,15 @@ tree as a PIR code object that can be compiled.
     test = '=='
     if token == '\B' goto anchor_word
 
+  anchor_fail:
+    code.'emit'("        %0: # anchor fail %1", label, token)
+    code.'emit'("          goto fail")
+    .return ()
+
+  anchor_null:
+    code.'emit'("        %0: # anchor null %1", label, token)
+    code.'emit'("          goto %0", next)
+    .return ()
 
   anchor_bos:
     code.'emit'("        %0: # anchor bos", label)
@@ -1067,7 +1104,7 @@ tree as a PIR code object that can be compiled.
     .param pmc next
 
     .local string token
-    token = self
+    token = self.'ast'()
     self['negate'] = 1
     if token == '\D' goto digit
     if token == '\S' goto space
@@ -1102,7 +1139,7 @@ tree as a PIR code object that can be compiled.
     .param string next
     .local int cclass, negate
 
-    $S0 = self
+    $S0 = self.'ast'()
     code.'emit'("        %0: # cclass %1", label, $S0)
     code.'emit'("          if pos >= lastpos goto fail")
     cclass = self['cclass']
@@ -1300,7 +1337,7 @@ tree as a PIR code object that can be compiled.
     .param string next
 
     .local string charlist
-    $S0 = self
+    $S0 = self.'ast'()
     charlist = code.'escape'($S0)
 
     .local string test
@@ -1424,7 +1461,7 @@ tree as a PIR code object that can be compiled.
     .param string label
     .param string next
     .local string value, lang
-    value = self
+    value = self.'ast'()
     lang = self['lang']
     value = code.'escape'(value)
     lang = code.'escape'(lang)
@@ -1451,12 +1488,12 @@ tree as a PIR code object that can be compiled.
           mpos = pos
           ($P0 :optional, $I0 :opt_flag) = $P1(mob)
           if $I0 == 0 goto %0
-          mob.'result_object'($P0)
+          mob.'!make'($P0)
           push ustack, pos
           local_branch cstack, succeed
           pos = pop ustack
           null $P0
-          mob.'result_object'($P0)
+          mob.'!make'($P0)
           goto fail
         CODE
     .return ()

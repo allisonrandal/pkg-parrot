@@ -1,4 +1,117 @@
-# $Id: NEWS 37523 2009-03-17 17:06:13Z allison $
+# $Id: NEWS 40183 2009-07-21 07:11:54Z cotto $
+
+New in 1.4.0
+- Core
+  + Key and Iterator refactor
+  + Major pbc_to_exe generated code speed improvement
+  + New "Infinite Memory" GC core for demonstration purposes
+  + gc_debug runcore and GC-related heisenbug fixes
+  + Elimination of variable expansion in parrot_config
+  + CLI arguments are processed as Unicode by default
+  + Substantial optimizations in NCI
+  + Parrot builds on Win64
+  + Hashes can use native types as keys and values
+  + Fixed installed pbc_to_exe
+  + Simplification of PMC generation code
+  + Improved GC encapsulation and API documentation
+- Documentation
+  + List of candidates for embedding API (docs/embed.pod)
+  + PIR book sent to publisher
+- Testing
+  + Several conversions of Perl test to pure PIR.
+  + C indentation coding standards test improvement
+  + Improved test coverage of example code
+- Deprecations
+  + Removal of PGE rules: <null> <fail> <sp> <lt> <gt> <dot>
+  + Removal of PGE methods: .text .item .result_object
+  + Deprecation of most dynops
++ Miscellaneous
+  + Beginnings of OpenGL::Math library; OpenGL bindings and library marked experimental
+  + Localizing and consting fixes
+  + Many memory and thread-related leaks plugged
+
+New in 1.3.0
+- Core
+  + Optimized parts of the IO system
+  + Fixed inheritance hierarchy of FileHandle and Socket PMC types
+  + Fixed leaks involving subroutines and Parrot_Context
+  + Cleaned up and refactored GC internals, including fixes and optimizations
+  + Optimized PMC class manipulations to use type numbers instead of string names
+  + Fixed problems involving hashval calculations in strings
+  + Removed unnecessary MULTI dispatches in built-in PMCs
+  + Fixed memory leaks involving PMCs that were not properly destroyed
+  + Fixed creation of PMCProxy PMCs in correct namespaces
+  + Added preliminary Pipe support
+  + Fixed cloning of Object PMCs
+  + Added root_new opcode
+  + Added initial versions of Packfile PMCs with read/write capabilities
+- Compilers
+  + Fixed several memory leaks in IMCC
+  + Updated PCT to use root_new opcode
+  + Added support for keyword "self" in NQP
+- Documentation
+  + Improved and expanded /docs/book
+  + Updated project documentation
+  + Defined 'experimental' status and procedures in DEPRECATED.pod
+- Miscellaneous
+  + Cleaned code and improved code-level documentation
+  + Various bugfixes, code cleanups, and coding standard fixes
+  + Added an experimental compiler library to help use PIR libraries from HLLs
+  + Updated OpenGL library and examples to support experimental HLL import
+
+New in 1.2.0
+- Core
+  + Fixes for pir classes inheriting from core pmcs.
+  + Cleaned up headers and reorganized some sources into subsystem directories.
+  + Clean up PMCs so libparrot.so exports far fewer vtable/method symbols.
+  + Clean up the GC API.
+  + Several unicode identifier improvements in IMCC.
+- Deprecations
+  + Protoobject stringification is gone.
+- Documentation
+  + Rewrite several core documents.
+  + Many reworks, improvements & additions to the Parrot Book.
+  + Installation PDD is launched out of draft.
+- Tools
+  + Fixes for running the language shell generator outside the parrot tree.
+  + Several fixes for developing and building HLLs from an installed parrot.
+  + Configure.pl now has a --no-line-directives option to ease source level debugging.
+- Miscellaneous
+  + Portability updates for macports, netbsd, mingw32, hpux.
+  + Several (build time, runtime) performance improvements.
+  + Lots of updates to examples and tests.
+  + Various bugfixes, code cleanups, and coding standard fixes.
+
+New in 1.1.0
+- Core
+  + Added op: load_language, find_caller_lex
+  + Socket IO are back as PMC
+  + Refactor some PMC: Hash, ManagedStruct
+  + Refactor GC API
+- Compiler
+  + PGE
+    - Allow \x, \c, and \o in enumerated character classes (incl ranges)
+    - Add initial greedy-only version of ** <exp> quantifier
+  + PCT
+    - Add HLL source line bytecode annotations
+    - Add another dumper format to assist syntax highlighters
+    - Revise mk_language_shell.pl to updated create_language.pl
+- Deprecations
+  + Removed ops: gcd, exec, classname, need_finalize, runinterp, substr_r
+  + Removed dynamic op: mul
+  + Removed .HLL_map directive; use interp's .hll_map() instead
+  + Removed PMCs: slice, bound_nci, ref
+  + Removed Configure.pl option: --pmc
+  + Removed PMC union struct
+- Documentation
+  + Book
+    - Reorganization and many improvements & additions
+- Tools
+  + Add a parrot-fuzzer
+- Miscellaneous
+  + Improve Debian/Ubuntu package
+  + various bugfixes, code cleanups, and coding standard fixes
+
 
 New in 1.0.0
 - Documentation

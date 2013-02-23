@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: warnings.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: warnings.c 38481 2009-05-05 04:47:13Z petdance $
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ static INTVAL print_warning(PARROT_INTERP, ARGIN_NULLOK(STRING *msg))
 
 /*
 
-=item C<void print_pbc_location>
+=item C<void print_pbc_location(PARROT_INTERP)>
 
 Prints the bytecode location of the warning or error to C<Parrot_io_STDERR>.
 
@@ -59,7 +59,7 @@ print_pbc_location(PARROT_INTERP)
 
 /*
 
-=item C<static INTVAL print_warning>
+=item C<static INTVAL print_warning(PARROT_INTERP, STRING *msg)>
 
 Prints the warning message and the bytecode location.
 
@@ -90,7 +90,8 @@ print_warning(PARROT_INTERP, ARGIN_NULLOK(STRING *msg))
 
 =over 4
 
-=item C<INTVAL Parrot_warn>
+=item C<INTVAL Parrot_warn(PARROT_INTERP, INTVAL warnclass, const char *message,
+...)>
 
 The Parrot C string warning/error reporter.
 
@@ -103,6 +104,7 @@ C<message, ..> can be a C<Parrot_vsprintf_c()> format with arguments.
 */
 
 PARROT_EXPORT
+PARROT_IGNORABLE_RESULT
 INTVAL
 Parrot_warn(PARROT_INTERP, INTVAL warnclass,
             ARGIN(const char *message), ...)

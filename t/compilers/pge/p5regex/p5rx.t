@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: p5rx.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: p5rx.t 38704 2009-05-11 22:03:32Z NotFound $
 # vi: ft=pir
 
 =head1 NAME
@@ -56,7 +56,7 @@ Column 6, if present, contains a description of what is being tested.
 .const int TESTS = 960
 
 .sub main :main
-    load_bytecode 'Test/Builder.pir'
+    load_bytecode 'Test/Builder.pbc'
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Dumper.pbc'
     .include 'iglobals.pasm'

@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: key.t 37201 2009-03-08 12:07:48Z fperrad $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: key.t 38387 2009-04-28 08:16:26Z chromatic $
 
 =head1 NAME
 
@@ -17,16 +17,15 @@ Tests the C<Key> PMC.
 =cut
 
 .sub main :main
-    .include 'include/test_more.pir'
+    .include 'test_more.pir'
 
-    plan(10)
+    plan(9)
 
     traverse_key_chain()
     extract_int_from_string_keys()
     extract_string_from_int_keys()
     use_number_keys()
     do_not_collect_string_keys_early_rt_60128()
-    todo(0, 'register and non-register string keys should be COW (RT #60128)' )
 .end
 
 .sub traverse_key_chain

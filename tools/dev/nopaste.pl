@@ -1,7 +1,7 @@
 #!perl
 
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: nopaste.pl 36833 2009-02-17 20:09:26Z allison $
+# $Id: nopaste.pl 38612 2009-05-08 18:30:25Z Infinoid $
 
 use 5.008;
 use strict;
@@ -9,6 +9,7 @@ use warnings;
 
 use WWW::Mechanize;
 use Getopt::Std;
+use Pod::Usage;
 
 
 my $server  = 'nopaste.snit.ch';
@@ -21,7 +22,7 @@ my $opt     = {
 
 getopt( 'c:n:t:', $opt );
 
-usage()
+pod2usage(2)
     unless defined $opt->{t};
 
 
@@ -51,9 +52,11 @@ my @link = $mech->links;
 print "Your paste can be found at ", $link[0]->url, "\n";
 
 
-sub usage {
-    print <<USAGE;
-nopaste.pl - paste the contents of a file via $server
+=head1 NAME
+
+tools/dev/nopaste.pl - paste the contents of a file via a pastebot server
+
+=head1 SYNOPSIS
 
   nopaste.pl -t "TITLE" [ -c CHANNEL ] [ -n NAME ] [ FILENAME ]
 
@@ -61,9 +64,19 @@ nopaste.pl - paste the contents of a file via $server
     CHANNEL   the irc channel (defaults to #parrot)
     NAME      the username (defaults to username or 'someone')
     FILENAME  the name of the file to paste (defaults to STDIN)
-USAGE
-    exit 0;
-}
+
+=head1 DESCRIPTION
+
+This program can be used to paste the contents of a file on a pastebot server
+-- specifically, B<nopaste.snit.ch> -- for immediate linkage on an IRC channel --
+by default, B<#parrot>.
+
+=head1 AUTHOR
+
+Originally written by particle, with subsequent contributions to functionality
+by LimbicRegion, paultcochrane and cotto.
+
+=cut
 
 # Local Variables:
 #   mode: cperl

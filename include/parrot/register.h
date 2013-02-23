@@ -1,7 +1,7 @@
 /* register.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: register.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: register.h 39028 2009-05-21 23:11:17Z whiteknight $
  *  Overview:
  *     Defines the register api
  *  Data Structure and Algorithms:
@@ -60,7 +60,7 @@
 struct Stack_Chunk;
 typedef struct Parrot_Context Parrot_Context; /* parrot/interpreter.h */
 
-/* HEADERIZER BEGIN: src/gc/register.c */
+/* HEADERIZER BEGIN: src/gc/alloc_register.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
@@ -172,7 +172,7 @@ Parrot_Context * Parrot_set_new_context(PARROT_INTERP,
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(number_regs_used)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-/* HEADERIZER END: src/gc/register.c */
+/* HEADERIZER END: src/gc/alloc_register.c */
 
 #endif /* PARROT_REGISTER_H_GUARD */
 

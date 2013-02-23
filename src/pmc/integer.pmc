@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2008, Parrot Foundation.
-$Id: integer.pmc 37393 2009-03-13 19:56:52Z Util $
+$Id: integer.pmc 39346 2009-06-02 23:42:17Z bacek $
 
 =head1 NAME
 
@@ -18,8 +18,6 @@ integer type without going to an I register.
 =cut
 
 */
-
-#include "parrot/parrot.h"
 
 #include "pmc_bigint.h"
 
@@ -92,9 +90,10 @@ Destroys this PMC.
 
 
     VTABLE void init() {
-        Parrot_Integer_attributes* const attrs =
-            mem_allocate_zeroed_typed(Parrot_Integer_attributes);
-        attrs->iv = 0;
+        Parrot_Integer_attributes * const attrs =
+            mem_allocate_typed(Parrot_Integer_attributes);
+
+        attrs->iv      = 0;
         PMC_data(SELF) = attrs;
         PObj_active_destroy_SET(SELF);
     }
@@ -135,7 +134,8 @@ Class method to construct an Integer from the string representation C<rep>.
             ? constant_pmc_new(INTERP, type)
             : pmc_new(INTERP, type);
 
-        /* RT #46623 bigint overflow */
+        /* Parrot_str_to_int catches overflow automatically, so we don't need to
+           worry about it here. */
         VTABLE_set_integer_native(INTERP, res, Parrot_str_to_int(INTERP, rep));
         return res;
     }
@@ -342,18 +342,6 @@ Adds C<value> to the integer and returns the result in C<*dest>.
 */
 
     MULTI PMC *add(Integer value, PMC *dest) {
-        /*
-         * SELF and value can both be PMCs that inherit
-         * from Integer:
-         *   cl = subclass "Integer", "MyInt"
-         * so we can't used PMC_int_val(SELF) in any of these
-         * Integer methods
-         *
-         * RT #46627
-         *   check for exact Integer type
-         *   e.g. MMD_Integer_EXACT
-         */
-
         const INTVAL a = SELF.get_integer();
         const INTVAL b = VTABLE_get_integer(INTERP, value);
         const INTVAL c = a + b;
@@ -376,7 +364,7 @@ Adds C<value> to the integer and returns the result in C<*dest>.
 
     MULTI PMC *add(Complex value, PMC *dest) {
         const INTVAL a = SELF.get_integer();
-        dest           = pmc_new(INTERP, VTABLE_type(interp, value));
+        dest           = pmc_new(INTERP, VTABLE_type(INTERP, value));
 
         VTABLE_set_number_native(INTERP, dest,
                 a + VTABLE_get_number_keyed_int(INTERP, value, 0));
@@ -733,7 +721,7 @@ Multiply C<value> with C<SELF> inplace.
 
 
     MULTI void i_multiply(BigInt value) {
-        Parrot_BigInt_multiply_int(INTERP, value, SELF.get_integer(), SELF);
+        interp->vtables[enum_class_BigInt]->multiply_int(INTERP, value, SELF.get_integer(), SELF);
     }
 
 
@@ -1161,16 +1149,23 @@ The C<==> operation.
 
 */
 
-    MULTI INTVAL is_equal(BigInt value) {
-        PMC * const temp = pmc_new(INTERP, enum_class_BigInt);
-        VTABLE_set_integer_native(INTERP, temp, SELF.get_integer());
-        return Parrot_BigInt_multi_is_equal_BigInt(INTERP, temp, value);
-    }
+    VTABLE INTVAL is_equal(PMC *value) {
+        INTVAL retval;
+        PMC *temp;
 
-
-    MULTI INTVAL is_equal(DEFAULT value) {
-        return (VTABLE_get_integer(INTERP, SELF)
-            ==  VTABLE_get_integer(INTERP, value));
+        switch (value->vtable->base_type) {
+            case enum_class_BigInt:
+                temp = pmc_new(INTERP, enum_class_BigInt);
+                VTABLE_set_integer_native(INTERP, temp, SELF.get_integer());
+                Parrot_mmd_multi_dispatch_from_c_args(interp,
+                    "is_equal", "PP->I", temp, value, &retval);
+                return retval;
+                break;
+            default:
+                return (VTABLE_get_integer(INTERP, SELF)
+                    ==  VTABLE_get_integer(INTERP, value));
+                break;
+        }
     }
 
 

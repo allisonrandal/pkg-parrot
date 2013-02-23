@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: QueryHash.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: QueryHash.pir 39631 2009-06-17 20:30:30Z NotFound $
 
 .namespace ['CGI'; 'QueryHash']
 
@@ -93,7 +93,7 @@ Split into a hash.
     unless query goto END
 
     .local pmc query_hash, items, items_tmp_1, items_tmp_2
-    .local string query, kv, k, v, item_tmp_1, item_tmp_2, last_chars_of_k
+    .local string kv, k, v, item_tmp_1, item_tmp_2, last_chars_of_k
     .local int i, j, n, o, len_of_k
 
     query_hash      = new 'Hash'

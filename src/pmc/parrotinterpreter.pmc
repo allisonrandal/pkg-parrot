@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: parrotinterpreter.pmc 37393 2009-03-13 19:56:52Z Util $
+$Id: parrotinterpreter.pmc 39675 2009-06-20 20:24:17Z Infinoid $
 
 =head1 NAME
 
@@ -25,7 +25,6 @@ These are the vtable functions for the ParrotInterpreter base class
 
 */
 
-#include "parrot/parrot.h"
 #include "parrot/embed.h"
 #include "parrot/dynext.h"
 #include "parrot/io.h"
@@ -68,7 +67,7 @@ clone_interpreter(Parrot_Interp d, Parrot_Interp s, INTVAL flags)
     if (flags & PARROT_CLONE_HLL) {
         /* we'd like to share the HLL data. Give it a PMC_sync structure
            if it doesn't have one already */
-        add_pmc_sync(s, s->HLL_info);
+        Parrot_gc_add_pmc_sync(s, s->HLL_info);
         d->HLL_info = s->HLL_info;
         Parrot_regenerate_HLL_namespaces(d);
     }
@@ -179,6 +178,8 @@ static int
 recursion_limit(PARROT_INTERP, PMC *self, int l)
 {
     const int ret           = interp->recursion_limit;
+    UNUSED(self)
+
     interp->recursion_limit = l;
     return ret;
 }
@@ -242,6 +243,7 @@ Initializes the interpreter.
             create_interp(SELF, INTERP);
             PARROT_ASSERT(attrs->interp);
         }
+        PObj_active_destroy_SET(SELF);
     }
 
 /*
@@ -263,6 +265,23 @@ C<parent> and uses that thread.
             create_interp(SELF, p);
     }
 
+
+/*
+
+=item C<void destroy()>
+
+Destroys the PMC.
+
+=cut
+
+*/
+
+    VTABLE void destroy() {
+        if (PMC_data(SELF))
+            mem_sys_free(PMC_data(SELF));
+    }
+
+
 /*
 
 =item C<void set_pointer(void *value)>
@@ -282,6 +301,7 @@ Sets C<struct_val> to C<*value>.
             Parrot_ParrotInterpreter_attributes *attrs =
                 mem_allocate_zeroed_typed(Parrot_ParrotInterpreter_attributes);
             PMC_data(SELF) = attrs;
+            PObj_active_destroy_SET(SELF);
         }
         PMC_interp(SELF) = (struct parrot_interp_t *)value;
     }
@@ -442,7 +462,7 @@ Introspection interface. C<key> can be:
         nextkey = key_next(INTERP, key);
 
         if (nextkey)
-            level = key_integer(interp, nextkey);
+            level = VTABLE_get_integer(interp, nextkey);
         else if (outer)
             level = 1;
 
@@ -691,6 +711,7 @@ Finish thawing.
                 Parrot_ParrotInterpreter_attributes *attrs =
                     mem_allocate_zeroed_typed(Parrot_ParrotInterpreter_attributes);
                 PMC_data(SELF) = attrs;
+                PObj_active_destroy_SET(SELF);
             }
 
             PMC_interp(SELF) = INTERP;
@@ -698,10 +719,11 @@ Finish thawing.
         }
     }
 
-    void thawfinish(visit_info *info) {
+    VTABLE void thawfinish(visit_info *info) {
         PMC * const new_info = PMC_args(SELF);
         const INTVAL  m      = VTABLE_elements(INTERP, new_info);
         INTVAL  i;
+        UNUSED(info)
 
         PMC_args(SELF) = NULL;
 
@@ -754,7 +776,7 @@ Finish thawing.
     }
 
     METHOD run_gc() {
-        Parrot_do_gc_run(PMC_interp(SELF), 0);
+        Parrot_gc_mark_and_sweep(PMC_interp(SELF), 0);
     }
 
 /*
@@ -784,7 +806,7 @@ The valid values for fileno are listed in include/stdio.pasm
 Optionally sets the parrot handler passed as second argument
 as the specified standard handler.
 
-This method is experimental.
+This method is experimental. See TT #264.
 
 =cut
 

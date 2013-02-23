@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: jit.c 37393 2009-03-13 19:56:52Z Util $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: jit.c 38999 2009-05-20 22:56:06Z chromatic $
 
 =head1 NAME
 
@@ -35,6 +35,7 @@ used and not per subroutine or even opcode, it works per bytecode segment.
 #include "parrot/packfile.h"
 #include "parrot/oplib/ops.h"
 #include "pmc/pmc_sub.h"
+#include "pmc/pmc_managedstruct.h"
 
 #define JIT_SEGS 0
 
@@ -356,8 +357,9 @@ set_register_usage(PARROT_INTERP,
             while (key) {
                 const UINTVAL flags = PObj_get_FLAGS(key);
                 if (flags & KEY_register_FLAG) {
-                    INTVAL n = PMC_int_val(key);
+                    INTVAL n = 0;
                     if (flags & KEY_integer_FLAG) {
+                        n = VTABLE_get_integer(interp, key);
                         typ = 0;
                         if (n < 0)
                             n = -1 - n;
@@ -370,7 +372,7 @@ set_register_usage(PARROT_INTERP,
                     if (n < NUM_REGISTERS && !ru[typ].reg_count[n]++)
                         ru[typ].reg_dir[n] |= PARROT_ARGDIR_IN;
                 }
-                key = key_next(interp, key);
+                key = VTABLE_shift_pmc(interp, key);
             }
         }
     }
@@ -394,12 +396,10 @@ init_regusage(PARROT_INTERP, Parrot_jit_optimizer_section_ptr cur_section)
 {
     int typ;
 
-    cur_section->ru[0].registers_used =
-        CONTEXT(interp)->n_regs_used[REGNO_INT];
-    cur_section->ru[3].registers_used =
-        CONTEXT(interp)->n_regs_used[REGNO_NUM];
-    cur_section->ru[1].registers_used =
-        cur_section->ru[2].registers_used = 0;
+    cur_section->ru[0].registers_used = CONTEXT(interp)->n_regs_used[REGNO_INT];
+    cur_section->ru[3].registers_used = CONTEXT(interp)->n_regs_used[REGNO_NUM];
+    cur_section->ru[1].registers_used = cur_section->ru[2].registers_used = 0;
+
     for (typ = 0; typ < 4; typ++) {
         int j;
         for (j = 0; j < cur_section->ru[typ].registers_used; j++)
@@ -1256,7 +1256,7 @@ Parrot_destroy_jit(void *ptr)
     }
     /* arena stuff */
     mem_sys_free(jit_info->arena.op_map);
-    mem_free_executable(jit_info->arena.start);
+    mem_free_executable(jit_info->arena.start, jit_info->arena.size);
     fixup = jit_info->arena.fixups;
     while (fixup) {
         next_f = fixup->next;
@@ -1297,12 +1297,15 @@ set_reg_usage(PARROT_INTERP, const opcode_t *pc)
             PMC        * const sub_pmc = ct->constants[ci]->u.key;
             Parrot_sub        *sub;
             size_t             offs;
+            int                i;
 
             PMC_get_sub(interp, sub_pmc, sub);
             offs = pc - sub->seg->base.data;
 
             if (offs >= sub->start_offs && offs < sub->end_offs) {
-                CONTEXT(interp)->n_regs_used = sub->n_regs_used;
+                for (i = 0; i < 4; i++)
+                    CONTEXT(interp)->n_regs_used[i] = sub->n_regs_used[i];
+
                 return;
             }
         }
@@ -1351,7 +1354,7 @@ parrot_build_asm(PARROT_INTERP, ARGIN(opcode_t *code_start), ARGIN(opcode_t *cod
     PackFile_Segment     *jit_seg;
     char                 *map;
     Parrot_jit_fn_info_t *op_func;
-    INTVAL               *n_regs_used;        /* INSP in PBC */
+    INTVAL                n_regs_used[4];        /* INSP in PBC */
     op_info_t            *op_info;
     const jit_arch_info  *arch_info;
     int                   needs_fs;       /* fetch/store */
@@ -1421,7 +1424,9 @@ parrot_build_asm(PARROT_INTERP, ARGIN(opcode_t *code_start), ARGIN(opcode_t *cod
 #endif
 
     /* remember register usage */
-    n_regs_used = CONTEXT(interp)->n_regs_used;
+    for (i = 0; i < 4; i++)
+        n_regs_used[i] = CONTEXT(interp)->n_regs_used[i];
+
     set_reg_usage(interp, code_start);
 
 #if JIT_SEGS
@@ -1524,7 +1529,7 @@ parrot_build_asm(PARROT_INTERP, ARGIN(opcode_t *code_start), ARGIN(opcode_t *cod
                 Parrot_jit_extend_arena(jit_info);
 #else
                 new_arena = (char *)mem_realloc_executable(jit_info->arena.start,
-                        (size_t)jit_info->arena.size * 2);
+                        jit_info->arena.size, (size_t)jit_info->arena.size * 2);
                 jit_info->arena.size *= 2;
                 jit_info->native_ptr  = new_arena +
                     (jit_info->native_ptr - jit_info->arena.start);
@@ -1672,10 +1677,9 @@ parrot_build_asm(PARROT_INTERP, ARGIN(opcode_t *code_start), ARGIN(opcode_t *cod
             cur_section->next;
     }
 
-    /*
-     * restore register usage
-     */
-    CONTEXT(interp)->n_regs_used = n_regs_used;
+    /* restore register usage */
+    for (i = 0; i < 4; i++)
+        CONTEXT(interp)->n_regs_used[i] = n_regs_used[i];
 
     /* Do fixups before converting offsets */
     (arch_info->jit_dofixup)(jit_info, interp);
@@ -1749,6 +1753,88 @@ Parrot_jit_newfixup(Parrot_jit_info_t *jit_info)
     fixup->native_offset =
         (ptrdiff_t)(jit_info->native_ptr - jit_info->arena.start);
 }
+
+/*
+
+=item C<void Parrot_jit_free_buffer(PARROT_INTERP, void *ptr, void *priv)>
+
+This is a callback to implement the proper freeing semantics.  It is called by
+the ManagedStruct PMC as it is garbage collected.
+
+=cut
+
+*/
+
+void
+Parrot_jit_free_buffer(PARROT_INTERP, void *ptr, void *priv)
+{
+    const struct jit_buffer_private_data * const jit = (struct jit_buffer_private_data*)priv;
+    mem_free_executable(ptr, jit->size);
+    free(priv);
+}
+
+/*
+
+=item C<PMC *Parrot_jit_clone_buffer(PARROT_INTERP, PMC *pmc, void *priv)>
+
+This is a callback to implement the proper cloning semantics for jit buffers.
+It is called by the ManagedStruct PMC's clone() function.
+
+=cut
+
+*/
+
+PMC *
+Parrot_jit_clone_buffer(PARROT_INTERP, PMC *pmc, void *priv)
+{
+    PMC * const rv = pmc_new(interp, pmc->vtable->base_type);
+
+    VTABLE_init(interp, rv);
+    /* copy the attributes */
+    {
+        void (*tmpfreefunc)(PARROT_INTERP, void*, void*);
+        GETATTR_ManagedStruct_custom_free_func(interp, pmc, tmpfreefunc);
+        SETATTR_ManagedStruct_custom_free_func(interp, rv , tmpfreefunc);
+    }
+    {
+        PMC* (*tmpclonefunc)(PARROT_INTERP, PMC*, void*);
+        GETATTR_ManagedStruct_custom_clone_func(interp, pmc, tmpclonefunc);
+        SETATTR_ManagedStruct_custom_clone_func(interp, rv , tmpclonefunc);
+    }
+
+    {
+        void *freepriv, *clonepriv;
+        GETATTR_ManagedStruct_custom_free_priv(interp , pmc, freepriv);
+        GETATTR_ManagedStruct_custom_clone_priv(interp, pmc, clonepriv);
+        if (freepriv) {
+            void *tmp = mem_sys_allocate(sizeof (struct jit_buffer_private_data));
+            memcpy(tmp, freepriv, sizeof (struct jit_buffer_private_data));
+            SETATTR_ManagedStruct_custom_free_priv(interp, rv , tmp);
+            if (clonepriv == freepriv) {
+                /* clonepriv is a copy of freepriv, make it a copy in the clone too. */
+                SETATTR_ManagedStruct_custom_clone_priv(interp, rv , tmp);
+                clonepriv = NULL; /* disable the clonepriv copying below */
+            }
+        }
+        if (clonepriv) {
+            void *tmp = mem_sys_allocate(sizeof (struct jit_buffer_private_data));
+            memcpy(tmp, clonepriv, sizeof (struct jit_buffer_private_data));
+            SETATTR_ManagedStruct_custom_clone_priv(interp, rv , tmp);
+        }
+    }
+
+    /* copy the execmem buffer */
+    if (PARROT_MANAGEDSTRUCT(pmc)->ptr) {
+        struct jit_buffer_private_data *jit = (struct jit_buffer_private_data*)priv;
+        void *ptr = PARROT_MANAGEDSTRUCT(pmc)->ptr;
+        void *newptr = mem_alloc_executable(jit->size);
+        memcpy(newptr, ptr, jit->size);
+        PARROT_MANAGEDSTRUCT(rv)->ptr = newptr;
+    }
+
+    return rv;
+}
+
 
 /*
 

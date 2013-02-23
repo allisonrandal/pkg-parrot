@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: capture.pmc 36832 2009-02-17 19:58:58Z allison $
+$Id: capture.pmc 38794 2009-05-15 16:12:33Z coke $
 
 =head1 NAME
 
@@ -18,9 +18,6 @@ These are the vtable functions for the Capture PMC.
 
 */
 
-#include "parrot/parrot.h"
-
-
 #define CAPTURE_DATA_SIZE   2
 #define CAPTURE_array_CREATE(i, obj) \
     if (!PARROT_CAPTURE(obj)->array) \
@@ -30,8 +27,9 @@ These are the vtable functions for the Capture PMC.
         PARROT_CAPTURE(obj)->hash = pmc_new((i), enum_class_Hash);
 
 pmclass Capture need_ext {
-    ATTR PMC *array;
-    ATTR PMC *hash;
+    ATTR PMC    *array;
+    ATTR PMC    *hash;
+    ATTR INTVAL  data_size;
 
 /*
 
@@ -52,7 +50,7 @@ Free structures.
         PMC_data(SELF)          = capture;
         capture->array          = NULL;
         capture->hash           = NULL;
-        PMC_int_val(SELF)       = CAPTURE_DATA_SIZE;
+        capture->data_size      = CAPTURE_DATA_SIZE;
         PObj_active_destroy_SET(SELF);
         PObj_custom_mark_SET(SELF);
     }
@@ -62,8 +60,6 @@ Free structures.
             mem_sys_free(PARROT_CAPTURE(SELF));
             PMC_data(SELF) = NULL;
         }
-
-        PMC_int_val(SELF)  = 0;
     }
 
 /*
@@ -211,7 +207,7 @@ Unshift a value onto the array component of the Capture.
         VTABLE_push_integer(INTERP, PARROT_CAPTURE(SELF)->array, value);
     }
 
-    void push_pmc(PMC *value) {
+    VTABLE void push_pmc(PMC *value) {
         CAPTURE_array_CREATE(INTERP, SELF);
         VTABLE_push_pmc(INTERP, PARROT_CAPTURE(SELF)->array, value);
     }
@@ -231,7 +227,7 @@ Unshift a value onto the array component of the Capture.
         VTABLE_unshift_integer(INTERP, PARROT_CAPTURE(SELF)->array, value);
     }
 
-    void unshift_pmc(PMC *value) {
+    VTABLE void unshift_pmc(PMC *value) {
         CAPTURE_array_CREATE(INTERP, SELF);
         VTABLE_unshift_pmc(INTERP, PARROT_CAPTURE(SELF)->array, value);
     }
@@ -524,9 +520,9 @@ Mark the array.
         if (!data)
             return;
 
-        for (i = PMC_int_val(SELF) - 1; i >= 0; --i)
+        for (i = PARROT_CAPTURE(SELF)->data_size - 1; i >= 0; --i)
             if (data[i])
-                pobject_lives(interp, (PObj *)data[i]);
+                Parrot_gc_mark_PObj_alive(interp, (PObj *)data[i]);
     }
 
 /*
@@ -547,9 +543,12 @@ Mark the array.
         /* XXX:  This workaround is for when we get here as
                  part of a subclass of Capture */
         if (PObj_is_object_TEST(SELF)) {
-            STRING *classname = CONST_STRING(INTERP, "Capture");
-            PMC    *classobj  = Parrot_oo_get_class_str(INTERP, classname);
             STRING *attribute = CONST_STRING(interp, "proxy");
+            PMC    *classobj;
+            PMC *ns = INTERP->root_namespace;
+            ns = Parrot_get_namespace_keyed_str(INTERP, ns, CONST_STRING(INTERP, "parrot"));
+            ns = Parrot_get_namespace_keyed_str(INTERP, ns, CONST_STRING(INTERP, "Capture"));
+            classobj  = Parrot_oo_get_class(INTERP, ns);
             capt              = VTABLE_get_attr_keyed(interp, SELF, classobj, attribute);
         }
 

@@ -1,11 +1,11 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd17_pmc.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id: pdd17_pmc.pod 38816 2009-05-16 04:08:22Z coke $
 
 =head1 PDD 17: Polymorphic Containers
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision: 38816 $
 
 =head2 Abstract
 
@@ -310,8 +310,12 @@ requires the same steps as accessing a class from another HLL, first
 retrieving the namespace object, and then instantiating from that
 namespace.
 
+=begin PIR_FRAGMENT
+
   $P0 = get_root_namespace ['parrot'; 'Integer']
   $P1 = new $P0
+
+=end PIR_FRAGMENT
 
 HLLs can choose to provide direct access to Parrot's core PMC types by
 aliasing them within the HLL namespace.
@@ -380,13 +384,21 @@ so they are only created once.
 Therefore, subclassing a PMC looks, at a PIR level, like subclassing a high
 level class.
 
+=begin PIR_FRAGMENT
+
   $P0 = get_class 'Hash'
   $P1 = newclass 'MyClass'
   addparent $P1, $P0     # The new class inherits from the Hash PMC
 
+=end PIR_FRAGMENT
+
 Or, more briefly:
 
+=begin PIR_FRAGMENT
+
   $P1 = subclass 'Hash', 'MyClass'
+
+=end PIR_FRAGMENT
 
 PMCs store state in a very different way to PDD15 objects. When a method
 inherited from a PMC is called on a PDD15 object, that method needs to

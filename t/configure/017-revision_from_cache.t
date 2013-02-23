@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 017-revision_from_cache.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: 017-revision_from_cache.t 39955 2009-07-09 00:02:26Z jkeenan $
 # 017-revision_from_cache.t
 
 use strict;
@@ -41,10 +41,10 @@ sub setup_cache {
     my $tdir = tempdir( CLEANUP => 1 );
     ok( chdir $tdir, "Changed to temporary directory for testing" );
     my $libdir = qq{$tdir/lib};
-    ok( (File::Path::mkpath( $libdir )), "Able to make libdir");
+    ok( (File::Path::mkpath( [ $libdir ], 0, 0777 )), "Able to make libdir");
     local @INC;
     unshift @INC, $libdir;
-    ok( (File::Path::mkpath( qq{$libdir/Parrot} )), "Able to make Parrot dir");
+    ok( (File::Path::mkpath( [ qq{$libdir/Parrot} ], 0, 0777 )), "Able to make Parrot dir");
     ok( (copy qq{$cwd/lib/Parrot/Revision.pm},
             qq{$libdir/Parrot}), "Able to copy Parrot::Revision");
     my $cache = q{.parrot_current_rev};

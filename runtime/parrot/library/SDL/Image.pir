@@ -1,5 +1,5 @@
 
-# $Id: Image.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: Image.pir 37870 2009-04-02 18:58:28Z barney $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ SDL::Image - Parrot class representing images in Parrot SDL
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/SDL/Image.pir'
+    load_bytecode 'SDL/Image.pir'
 
     # create a new SDL::Image object
     .local pmc image

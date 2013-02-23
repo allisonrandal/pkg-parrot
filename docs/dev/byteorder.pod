@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: byteorder.pod 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: byteorder.pod 38813 2009-05-16 02:22:57Z coke $
 
 =head1 NAME
 
@@ -13,8 +13,14 @@ The platform byteorder is stored for C code in F<include/parrot/config.h>
 
 for parrot code in
 
-  $P0 = _config()
-  $P0["byteorder"]
+=begin PIR_FRAGMENT
+
+  $P0 = getinterp
+  .include 'iglobals.pasm'
+  $P1 = $P0[.IGLOBALS_CONFIG_HASH]
+  $P2 = $P1["byteorder"]
+
+=end PIR_FRAGMENT
 
 or for perl code via
 

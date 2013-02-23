@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pge_util.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: pge_util.t 38705 2009-05-11 22:13:04Z NotFound $
 
 use strict;
 use warnings;
@@ -30,7 +30,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, 'Foo::Bar::baz'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'
@@ -53,7 +53,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, 'Foo::'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'
@@ -74,7 +74,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, '::Foo'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'
@@ -96,7 +96,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /\\:+/, 'Foo'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'
@@ -117,7 +117,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /\\:/, 'Foo::Bar'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'
@@ -140,7 +140,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /\\:/, 'Foo::Bar::Baz', 2" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'
@@ -162,7 +162,7 @@ pir_output_is( <<'CODE', <<'OUT', "split /(a)(b)/, 'abracadabra'" );
 
 .sub main :main
   load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Util.pir'
+  load_bytecode 'PGE/Util.pbc'
 
   .local pmc split, p6rule, regex
   split  = get_global ['PGE';'Util'], 'split'

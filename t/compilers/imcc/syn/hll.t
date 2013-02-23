@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: hll.t 37344 2009-03-12 05:43:51Z allison $
+# $Id: hll.t 37582 2009-03-19 05:08:38Z coke $
 
 use strict;
 use warnings;
@@ -12,7 +12,14 @@ use Parrot::Test tests => 2;
 pir_output_is( <<'CODE', <<'OUT', ".param :slurpy (using PMC)" );
 
 .HLL 'misc'
-.HLL_map 'ResizablePMCArray' = 'ResizableStringArray'
+.sub anon :anon :init
+  .local pmc interp
+  .local pmc rpa,rsa
+  interp = getinterp
+  rpa = get_class 'ResizablePMCArray'
+  rsa = get_class 'ResizableStringArray'
+  interp.'hll_map'(rpa,rsa)
+.end
 
 .sub main :main
   elm('a','b','c')
@@ -43,7 +50,15 @@ pir_output_is( <<'CODE', <<'OUT', ".param :slurpy (using object)", @todo );
 .end
 
 .HLL 'misc'
-.HLL_map 'ResizablePMCArray' = 'Stack'
+.sub anon :anon :init
+  .local pmc interp
+  .local pmc rpa,stack
+  interp = getinterp
+  rpa = get_class 'ResizablePMCArray'
+  stack = get_class 'Stack'
+  interp.'hll_map'(rpa,stack)
+.end
+
 
 .sub main :main
   elm('a','b','c')

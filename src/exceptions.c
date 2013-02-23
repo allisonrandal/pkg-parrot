@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2008, Parrot Foundation.
-$Id: exceptions.c 37208 2009-03-08 17:50:46Z NotFound $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: exceptions.c 39937 2009-07-07 22:31:06Z NotFound $
 
 =head1 NAME
 
@@ -19,16 +19,10 @@ Define the the core subsystem for exceptions.
 */
 
 #include "parrot/parrot.h"
+#include "parrot/call.h"
 #include "parrot/exceptions.h"
 #include "exceptions.str"
 #include "pmc/pmc_continuation.h"
-
-#ifdef PARROT_HAS_BACKTRACE
-#  include <execinfo.h>
-#  ifdef PARROT_HAS_DLINFO
-#    include <dlfcn.h>
-#  endif
-#endif
 
 /* HEADERIZER HFILE: include/parrot/exceptions.h */
 
@@ -69,7 +63,8 @@ static opcode_t * pass_exception_args(PARROT_INTERP,
 
 /*
 
-=item C<PMC * Parrot_ex_build_exception>
+=item C<PMC * Parrot_ex_build_exception(PARROT_INTERP, INTVAL severity, long
+error, STRING *msg)>
 
 Constructs a new exception object from the passed in arguments.
 
@@ -95,7 +90,7 @@ Parrot_ex_build_exception(PARROT_INTERP, INTVAL severity,
 
 /*
 
-=item C<void die_from_exception>
+=item C<void die_from_exception(PARROT_INTERP, PMC *exception)>
 
 Print a stack trace for C<exception>, a message if there is one, and then exit.
 
@@ -162,7 +157,7 @@ die_from_exception(PARROT_INTERP, ARGIN(PMC *exception))
 
 /*
 
-=item C<void Parrot_ex_add_c_handler>
+=item C<void Parrot_ex_add_c_handler(PARROT_INTERP, Parrot_runloop *jp)>
 
 Adds a new exception handler (defined in C) to the concurrency scheduler. Since
 the exception handler is C code, it stores a runloop jump point to the start of
@@ -186,9 +181,14 @@ Parrot_ex_add_c_handler(PARROT_INTERP, ARGIN(Parrot_runloop *jp))
 
 /*
 
-=item C<opcode_t * Parrot_ex_throw_from_op>
+=item C<opcode_t * Parrot_ex_throw_from_op(PARROT_INTERP, PMC *exception, void
+*dest)>
 
-Runs the exception handler.
+Throw an exception from inside an op. Looks for an exception handler in the
+current concurrency scheduler. If a suitable handler is found, invoke it and
+return the address where execution should continue. If no handler is found,
+the exception message is printed along with the current line number
+annotation and a backtrace before exiting Parrot.
 
 =cut
 
@@ -227,8 +227,17 @@ Parrot_ex_throw_from_op(PARROT_INTERP, ARGIN(PMC *exception), ARGIN_NULLOK(void 
 
     address    = VTABLE_invoke(interp, handler, dest);
 
+    /* XXX This is an obvious hack. We need to identify here whether this is
+       an ExceptionHandler proper or a PIR-defined subclass. This conditional
+       monstrosity attempts to check whether this is an object of a PIR-defined
+       subclass. When we have garbage-collectable PMCs, we shouldn't need to do
+       this nonsense. See TT#154 for details */
+    if (handler->vtable->base_type == enum_class_Object) {
+        /* Don't know what to do here to make sure the exception parameter gets
+           passed properly. */
+    }
     /* Set up the continuation context of the handler in the interpreter. */
-    if (PMC_cont(handler)->current_results)
+    else if (PMC_cont(handler)->current_results)
         address = pass_exception_args(interp, "P", address,
                 CONTEXT(interp), exception);
 
@@ -241,6 +250,18 @@ Parrot_ex_throw_from_op(PARROT_INTERP, ARGIN(PMC *exception), ARGIN_NULLOK(void 
     /* return the address of the handler */
     return address;
 }
+
+/*
+
+=item C<static opcode_t * pass_exception_args(PARROT_INTERP, const char *sig,
+opcode_t *dest, Parrot_Context * old_ctx, ...)>
+
+Passes arguments to the exception handler routine. These are retrieved with
+the .get_results() directive in PIR code.
+
+=cut
+
+*/
 
 PARROT_CAN_RETURN_NULL
 static opcode_t *
@@ -257,6 +278,19 @@ pass_exception_args(PARROT_INTERP, ARGIN(const char *sig),
 
     return next;
 }
+
+/*
+
+=item C<static PMC * build_exception_from_args(PARROT_INTERP, int ex_type, const
+char *format, va_list arglist)>
+
+Builds an exception PMC with the given integer type C<ex_type>, and the string
+message given as a format/arglist combo, like is used by the Parrot_vsprintf*
+family of functions.
+
+=cut
+
+*/
 
 PARROT_CANNOT_RETURN_NULL
 static PMC *
@@ -275,12 +309,16 @@ build_exception_from_args(PARROT_INTERP, int ex_type,
 
 /*
 
-=item C<void Parrot_ex_throw_from_c>
+=item C<void Parrot_ex_throw_from_c(PARROT_INTERP, PMC *exception)>
 
-Throws an exception object.
+Throws an exception object from any location in C code. A suitable handler
+is retrieved from the concurrency scheduler. If the handler is found, control
+flow is passed to it. Handlers can be either C-level or PIR-level routines. If
+no suitable handler is found, Parrot exits with the stored exception error
+message.
 
 See also C<exit_fatal()>, which signals fatal errors, and
-C<Parrot_ex_throw_from_op>.
+C<Parrot_ex_throw_from_op> which throws an exception from within an op.
 
 The 'invoke' vtable function doesn't actually execute a
 sub/continuation/handler, it only sets up the environment for invocation and
@@ -302,12 +340,15 @@ void
 Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
 {
     ASSERT_ARGS(Parrot_ex_throw_from_c)
-    PMC * const handler = Parrot_cx_find_handler_local(interp, exception);
-    RunProfile * const profile      = interp->profile;
+
     Parrot_runloop    *return_point = interp->current_runloop;
-    if (PMC_IS_NULL(handler)) {
+    RunProfile * const profile      = interp->profile;
+    opcode_t *address;
+    PMC        * const handler      =
+                             Parrot_cx_find_handler_local(interp, exception);
+
+    if (PMC_IS_NULL(handler))
         die_from_exception(interp, exception);
-    }
 
     /* If profiling, remember end time of lastop and generate entry for
      * exception. */
@@ -321,14 +362,20 @@ Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
     }
 
     if (Interp_debug_TEST(interp, PARROT_BACKTRACE_DEBUG_FLAG)) {
-        STRING * const msg = VTABLE_get_string(interp, exception);
-        int exitcode       = VTABLE_get_integer_keyed_str(interp, exception, CONST_STRING(interp, "exit_code"));
+        STRING * const exit_code = CONST_STRING(interp, "exit_code");
+        STRING * const msg       = VTABLE_get_string(interp, exception);
+        int            exitcode  = VTABLE_get_integer_keyed_str(interp,
+                                        exception, exit_code);
 
         Parrot_io_eprintf(interp,
             "Parrot_ex_throw_from_c (severity:%d error:%d): %Ss\n",
             EXCEPT_error, exitcode, msg);
         PDB_backtrace(interp);
     }
+
+    /* Note the thrower.
+     * XXX TT#596 - pass in current context instead when we have context PMCs. */
+    VTABLE_set_attr_str(interp, exception, CONST_STRING(interp, "thrower"), CONTEXT(interp)->current_cont);
 
     /* it's a C exception handler */
     if (PObj_get_FLAGS(handler) & SUB_FLAG_C_HANDLER) {
@@ -338,23 +385,25 @@ Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
     }
 
     /* Run the handler. */
-    Parrot_runops_fromc_args(interp, handler, "vP", exception);
-
-    /* After handling a C exception, you don't want to resume at the point
-     * where the C exception was thrown, you want to resume the next outer
-     * runloop.  */
-    longjmp(return_point->resume, 1);
+    address = VTABLE_invoke(interp, handler, NULL);
+    if (PMC_cont(handler)->current_results)
+        address = pass_exception_args(interp, "P", address,
+                CONTEXT(interp), exception);
+    PARROT_ASSERT(return_point->handler_start == NULL);
+    return_point->handler_start = address;
+    longjmp(return_point->resume, 2);
 }
 
 /*
 
-=item C<opcode_t * Parrot_ex_throw_from_op_args>
+=item C<opcode_t * Parrot_ex_throw_from_op_args(PARROT_INTERP, void *dest, int
+ex_type, const char *format, ...)>
 
 Throws an exception from an opcode, with an error message constructed
-from a format string and arguments.
+from a format string and arguments. Constructs an Exception PMC, and passes it
+to C<Parrot_ex_throw_from_op>.
 
-See also C<Parrot_ex_throw_from_c>, C<Parrot_ex_throw_from_op>, and
-C<exit_fatal()>.
+See also C<Parrot_ex_throw_from_c> and C<exit_fatal()>.
 
 =cut
 
@@ -379,15 +428,16 @@ Parrot_ex_throw_from_op_args(PARROT_INTERP, ARGIN_NULLOK(void *dest),
 
 /*
 
-=item C<void Parrot_ex_throw_from_c_args>
+=item C<void Parrot_ex_throw_from_c_args(PARROT_INTERP, void *ret_addr, int
+exitcode, const char *format, ...)>
 
 Throws an exception, with an error message constructed from a format string and
 arguments. C<ret_addr> is the address from which to resume, if some handler
 decides that is appropriate, or zero to make the error non-resumable.
-C<exitcode> is a C<exception_type_enum> value.
+C<exitcode> is a C<exception_type_enum> value. Constructs an Exception PMC
+and passes it to C<Parrot_ex_throw_from_c>.
 
-See also C<Parrot_ex_throw_from_c>, C<Parrot_ex_throw_from_op>, and
-C<exit_fatal()>.
+See also C<Parrot_ex_throw_from_op> and C<exit_fatal()>.
 
 =cut
 
@@ -412,9 +462,11 @@ Parrot_ex_throw_from_c_args(PARROT_INTERP, SHIM(void *ret_addr),
 
 /*
 
-=item C<opcode_t * Parrot_ex_rethrow_from_op>
+=item C<opcode_t * Parrot_ex_rethrow_from_op(PARROT_INTERP, PMC *exception)>
 
-Rethrow the exception.
+Rethrow the given exception from an op, if it has previously been thrown and
+not handled by the provided handler. Marks the exception object as being
+unhandled and throws it again.
 
 =cut
 
@@ -427,8 +479,6 @@ opcode_t *
 Parrot_ex_rethrow_from_op(PARROT_INTERP, ARGIN(PMC *exception))
 {
     ASSERT_ARGS(Parrot_ex_rethrow_from_op)
-    if (exception->vtable->base_type != enum_class_Exception)
-        PANIC(interp, "Illegal rethrow");
 
     Parrot_ex_mark_unhandled(interp, exception);
 
@@ -437,10 +487,10 @@ Parrot_ex_rethrow_from_op(PARROT_INTERP, ARGIN(PMC *exception))
 
 /*
 
-=item C<void Parrot_ex_rethrow_from_c>
+=item C<void Parrot_ex_rethrow_from_c(PARROT_INTERP, PMC *exception)>
 
-Return back to runloop, assumes exception is still in todo (see RT #45915) and
-that this is called from within a handler setup with C<new_c_exception>.
+Rethrow the exception from C code. Marks the Exception PMC as being unhandled
+and throws it again.
 
 =cut
 
@@ -459,7 +509,7 @@ Parrot_ex_rethrow_from_c(PARROT_INTERP, ARGIN(PMC *exception))
 
 /*
 
-=item C<void Parrot_ex_mark_unhandled>
+=item C<void Parrot_ex_mark_unhandled(PARROT_INTERP, PMC *exception)>
 
 Mark an exception as unhandled, as part of rethrowing it.
 
@@ -477,11 +527,13 @@ Parrot_ex_mark_unhandled(PARROT_INTERP, ARGIN(PMC *exception))
 
 /*
 
-=item C<size_t Parrot_ex_calc_handler_offset>
+=item C<size_t Parrot_ex_calc_handler_offset(PARROT_INTERP)>
 
 Retrieve an exception from the concurrency scheduler, prepare a call to the
 handler, and return the offset to the handler so it can become the next op in
 the runloop.
+
+TT #546: This function appears to be unused.
 
 =cut
 
@@ -513,7 +565,8 @@ Parrot_ex_calc_handler_offset(PARROT_INTERP)
 
 =over 4
 
-=item C<void Parrot_assert>
+=item C<PARROT_DOES_NOT_RETURN_WHEN_FALSE void Parrot_assert(INTVAL condition,
+const char *condition_string, const char *file, unsigned int line)>
 
 A better version of assert() that gives a backtrace.
 
@@ -534,7 +587,8 @@ Parrot_assert(INTVAL condition, ARGIN(const char *condition_string),
 
 /*
 
-=item C<void Parrot_confess>
+=item C<void Parrot_confess(const char *cond, const char *file, unsigned int
+line)>
 
 Prints a backtrace and message for a failed assertion.
 
@@ -555,7 +609,7 @@ Parrot_confess(ARGIN(const char *cond), ARGIN(const char *file), unsigned int li
 
 /*
 
-=item C<void Parrot_print_backtrace>
+=item C<void Parrot_print_backtrace(void)>
 
 Displays the primrose path to disaster, (the stack frames leading up to the
 abort).  Used by C<Parrot_confess>.
@@ -619,7 +673,7 @@ Parrot_print_backtrace(void)
 
 /*
 
-=item C<void exit_fatal>
+=item C<void exit_fatal(int exitcode, const char *format, ...)>
 
 Signal a fatal error condition.  This should only be used with dire errors that
 cannot throw an exception (because no interpreter is available, or the nature
@@ -663,9 +717,12 @@ exit_fatal(int exitcode, ARGIN(const char *format), ...)
 
 /*
 
-=item C<void do_panic>
+=item C<void do_panic(NULLOK_INTERP, const char *message, const char *file,
+unsigned int line)>
 
-Panic handler.
+Panic handler. Things have gone very wrong in an unexpected way. Print out an
+error message and instructions for the user to report the error to the
+developers
 
 =cut
 

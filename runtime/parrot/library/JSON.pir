@@ -1,3 +1,6 @@
+# Copyright (C) 2005-2009, Parrot Foundation.
+# $Id: JSON.pir 39161 2009-05-24 22:47:20Z NotFound $
+
 =head1 TITLE
 
 JSON.pir - PIR implementation of JSON data interchange format.
@@ -6,7 +9,7 @@ JSON.pir - PIR implementation of JSON data interchange format.
 
 Use the C<_json> method to generate a JSON representation of a PMC.
 
- .include 'library/JSON.pir'
+ load_bytecode 'JSON.pir'
  $S0 = _json( $P0 )
 
 To generate a PMC from a JSON string, see L<compilers/json/JSON.pir>.

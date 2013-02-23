@@ -1,5 +1,5 @@
 /*
- * $Id: math.c 37200 2009-03-08 11:46:01Z fperrad $
+ * $Id: math.c 38218 2009-04-20 01:53:36Z coke $
  * Copyright (C) 2006-2007, Parrot Foundation.
  */
 
@@ -26,8 +26,11 @@ math stuff
  */
 
 #include <math.h>
+#ifdef _IEEE_
 
 _LIB_VERSION_TYPE _LIB_VERSION = _IEEE_;
+
+#endif
 
 #if DOUBLE_SIZE == 2 * INT_SIZE
 /*
@@ -60,10 +63,7 @@ Parrot_signbit(double x)
 #if NUMVAL_SIZE == 12 && DOUBLE_SIZE == 3 * INT_SIZE && PARROT_LITTLE_ENDIAN
 /*
 
-=item C<int
-Parrot_signbit_l(long double x)>
-
-RT#48260: Not yet documented!!!
+=item C<int Parrot_signbit_l(long double x)>
 
 =cut
 

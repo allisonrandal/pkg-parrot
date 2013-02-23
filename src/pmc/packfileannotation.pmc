@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: packfileannotation.pmc 36832 2009-02-17 19:58:58Z allison $
+$Id: packfileannotation.pmc 38965 2009-05-20 04:55:05Z bacek $
 
 =head1 NAME
 
@@ -19,10 +19,52 @@ PackfileAnnotations segment of the .pbc file.  See PDD13 for a design spec.
 
 */
 
-#include "parrot/parrot.h"
-
 pmclass PackfileAnnotation {
+    ATTR STRING    *name;
+    ATTR INTVAL     offset;
+    ATTR INTVAL     value_type;
+    /* This 3 attributes should be in single union. But Pmc2c isn't smart enough to handle it */
+    ATTR INTVAL     int_value;
+    ATTR FLOATVAL   num_value;
+    ATTR STRING    *str_value;
 
+/*
+
+=item C<init>
+
+Create empty PackfileAnnotation.
+
+=cut
+
+*/
+
+    VTABLE void init() {
+        Parrot_PackfileAnnotation_attributes * attrs =
+                mem_allocate_zeroed_typed(Parrot_PackfileAnnotation_attributes);
+
+        PObj_active_destroy_SET(SELF);
+        PMC_data(SELF) = attrs;
+    }
+
+/*
+
+=item C<void destroy()>
+
+Destroys the PMC and frees all allocated memory.
+
+=cut
+
+*/
+
+    VTABLE void destroy() {
+        Parrot_PackfileAnnotation_attributes * attrs =
+                PARROT_PACKFILEANNOTATION(SELF);
+
+        if (attrs) {
+            mem_sys_free(attrs);
+            PMC_data(SELF) = NULL;
+        }
+    }
 
 /*
 
@@ -33,8 +75,9 @@ Fetch the offset into the bytecode of the instruction that is being annotated.
 =cut
 
 */
-    INTVAL get_offset() {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED, "Not implemented yet.");
+    METHOD get_offset() {
+        INTVAL offset = PARROT_PACKFILEANNOTATION(SELF)->offset;
+        RETURN(INTVAL offset);
     }
 
 
@@ -47,36 +90,37 @@ Set the offset into the bytecode of the instruction that is being annotated.
 =cut
 
 */
-    void set_offset(INTVAL offset) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED, "Not implemented yet.");
+    METHOD set_offset(INTVAL offset) {
+        PARROT_PACKFILEANNOTATION(SELF)->offset = offset;
     }
 
 
 /*
 
-=item C<INTVAL get_key_id()>
+=item C<STRING* get_name()>
 
-Fetch the ID of the key of the annotation.
+Fetch the name of the annotation.
 
 =cut
 
 */
-    INTVAL get_key_id() {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED, "Not implemented yet.");
+    METHOD get_name() {
+        STRING * name = PARROT_PACKFILEANNOTATION(SELF)->name;
+        RETURN(STRING * name);
     }
 
 
 /*
 
-=item C<void set_key_id(INTVAL offset)>
+=item C<void set_name(STRING* name)>
 
-Set the ID of the key of the annotation.
+Set the name of the annotation.
 
 =cut
 
 */
-    void set_key_id(INTVAL offset) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED, "Not implemented yet.");
+    METHOD set_name(STRING * name) {
+        PARROT_PACKFILEANNOTATION(SELF)->name = name;
     }
 
 
@@ -84,27 +128,99 @@ Set the ID of the key of the annotation.
 
 =item C<INTVAL get_integer()>
 
-Fetch the value of the annotation.
+Fetch the integer value of the annotation.
 
 =cut
 
 */
     VTABLE INTVAL get_integer() {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED, "Not implemented yet.");
+        Parrot_PackfileAnnotation_attributes * attrs = PARROT_PACKFILEANNOTATION(SELF);
+        if (attrs->value_type != PF_ANNOTATION_KEY_TYPE_INT)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Trying to fetch wrong type of value from annotation");
+        return attrs->int_value;
     }
 
 
 /*
 
-=item C<void set_integer(INTVAL offset)>
+=item C<void set_integer_native(INTVAL value)>
 
-Set the value of the annotation.
+Set the integer value of the annotation.
 
 =cut
 
 */
-    VTABLE void set_integer(INTVAL offset) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED, "Not implemented yet.");
+    VTABLE void set_integer_native(INTVAL value) {
+        Parrot_PackfileAnnotation_attributes * attrs = PARROT_PACKFILEANNOTATION(SELF);
+        attrs->value_type = PF_ANNOTATION_KEY_TYPE_INT;
+        attrs->int_value  = value;
+    }
+
+/*
+
+=item C<STRING * get_string()>
+
+Fetch the string value of the annotation.
+
+=cut
+
+*/
+    VTABLE STRING * get_string() {
+        Parrot_PackfileAnnotation_attributes * attrs = PARROT_PACKFILEANNOTATION(SELF);
+        if (attrs->value_type != PF_ANNOTATION_KEY_TYPE_STR)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Trying to fetch wrong type of value from annotation");
+        return attrs->str_value;
+    }
+
+
+/*
+
+=item C<void set_string_native(STRING * value)>
+
+Set the string value of the annotation.
+
+=cut
+
+*/
+    VTABLE void set_string_native(STRING * value) {
+        Parrot_PackfileAnnotation_attributes * attrs = PARROT_PACKFILEANNOTATION(SELF);
+        attrs->value_type = PF_ANNOTATION_KEY_TYPE_STR;
+        attrs->str_value  = value;
+    }
+
+/*
+
+=item C<INTVAL get_number()>
+
+Fetch the float value of the annotation.
+
+=cut
+
+*/
+    VTABLE FLOATVAL get_number() {
+        Parrot_PackfileAnnotation_attributes * attrs = PARROT_PACKFILEANNOTATION(SELF);
+        if (attrs->value_type != PF_ANNOTATION_KEY_TYPE_NUM)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Trying to fetch wrong type of value from annotation");
+        return attrs->num_value;
+    }
+
+
+/*
+
+=item C<void set_number_native(INTVAL value)>
+
+Set the float value of the annotation.
+
+=cut
+
+*/
+    VTABLE void set_number_native(FLOATVAL value) {
+        Parrot_PackfileAnnotation_attributes * attrs = PARROT_PACKFILEANNOTATION(SELF);
+        attrs->value_type = PF_ANNOTATION_KEY_TYPE_NUM;
+        attrs->num_value  = value;
     }
 
 }

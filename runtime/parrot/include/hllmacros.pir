@@ -1,3 +1,6 @@
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: hllmacros.pir 38369 2009-04-26 12:57:09Z fperrad $
+
 =head1 High Level Language Macros
 
 These macros are to make it easier to write readable and maintainable PIR by

@@ -1,3 +1,6 @@
+# Copyright (C) 2004-2009, Parrot Foundation.
+# $Id: config_lib_pasm.in 39993 2009-07-11 05:16:24Z allison $
+
 .pcc_sub main:
     get_params "(0)", P5
     set I10, P5     # argv
@@ -15,7 +18,18 @@ no_arg:
     if I11, is_install
     set S1, "@PWD@"
     set P0["prefix"], S1
+    set P0["installed"], "0"
+    branch freeze_config
 is_install:
+    set P0["installed"], "1"
+freeze_config:
+
     freeze S0, P0
     print S0
     end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

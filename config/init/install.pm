@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: install.pm 37144 2009-03-06 04:26:29Z Util $
+# $Id: install.pm 39165 2009-05-25 01:15:28Z jkeenan $
 
 =head1 NAME
 
@@ -90,7 +90,6 @@ sub runstep {
     $conf->data->set(
         prefix         => $prefix,
         exec_prefix    => $eprefix,
-        bin_dir        => $bindir,           # deprecated
         bindir         => $bindir,
         sbindir        => $sbindir,
         libexecdir     => $libexecdir,
@@ -99,16 +98,14 @@ sub runstep {
         sharedstatedir => $sharedstatedir,
         localstatedir  => $localstatedir,
         libdir         => $libdir,
-        lib_dir        => $libdir,           # deprecated
         includedir     => $includedir,
-        include_dir    => $includedir,       # deprecated
         oldincludedir  => $oldincludedir,
         infodir        => $infodir,
         mandir         => $mandir,
         srcdir         => $srcdir,
 
         # parrot internal use only
-        doc_dir        => $datadir . "/doc",
+        docdir         => $datadir . "/doc",
         versiondir     => $versiondir,
     );
 

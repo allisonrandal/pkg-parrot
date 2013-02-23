@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: scalar.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id: scalar.t 37607 2009-03-20 01:53:09Z coke $
 
 =head1 NAME
 
@@ -21,9 +21,8 @@ Tests the scalar PMC.
     .include 'test_more.pir'
     plan(1)
 
-    skip(1, "doesn't work yet")
-    #$P0 = new 'scalar'
-    #ok(1, "scalar creation didn't explode")
+    $P0 = new 'scalar'
+    ok(1, "scalar creation didn't explode")
 .end
 
 # Local Variables:

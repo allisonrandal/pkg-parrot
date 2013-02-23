@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Pmc2cMain.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: Pmc2cMain.pm 38940 2009-05-19 15:21:44Z Infinoid $
 
 package Parrot::Pmc2c::Pmc2cMain;
 
@@ -18,11 +18,14 @@ use Parrot::Pmc2c::UtilFunctions 'filename';
 use Parrot::Pmc2c::PCCMETHOD ();
 use Parrot::Pmc2c::PMC::default ();
 use Parrot::Pmc2c::PMC::Null ();
-use Parrot::Pmc2c::PMC::Ref ();
-use Parrot::Pmc2c::PMC::SharedRef ();
 use Parrot::Pmc2c::PMC::Object ();
 
-$SIG{'__WARN__'} = sub { use Carp; warn $_[0]; Carp::confess; };
+# put the options in a package var so it can be accessed from
+# Parrot::Pmc2c::Emitter.
+our $OPTIONS;
+
+# This is useful for debugging, but upgrades deprecation warnings to errors.
+#$SIG{'__WARN__'} = sub { use Carp; warn $_[0]; Carp::confess; };
 
 =head1 NAME
 
@@ -96,6 +99,8 @@ sub new {
             $allargsref->{opt}{$opt} = 0;
         }
     }
+
+    $OPTIONS = $allargsref->{opt};
 
     return bless( $allargsref, $class );
 }

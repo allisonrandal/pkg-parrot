@@ -1,12 +1,15 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: UtilFunctions.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id: UtilFunctions.pm 37662 2009-03-24 02:29:12Z coke $
 
 package Parrot::Pmc2c::UtilFunctions;
 use strict;
 use warnings;
+
+use Fatal qw(open close);
+
 use base qw( Exporter );
 our @EXPORT_OK = qw( count_newlines return_statement dont_edit dynext_load_code
-    c_code_coda slurp spew splat open_file filename escape_filename
+    c_code_coda slurp spew filename escape_filename
     args_from_parameter_list
     passable_args_from_parameter_list
 );
@@ -256,48 +259,9 @@ sub c_code_coda {
 EOC
 }
 
-=head3 C<open_file()>
-
-    $fh = open_file( "<", $file );
-
-B<Purpose:>  Utility subroutine.
-
-B<Arguments:>  List of scalars:  two required, one optional.
-
-=over 4
-
-=item * action
-
-String holding action/direction desired:   C<E<lt>> for
-reading or C<E<gt>E<gt>> for writing or appending.
-
-=item * filename
-
-String holding name of file to be opened.
-
-=back
-
-B<Return Values:>  Filehandle to file so opened.
-
-B<Comment:>  Called within C<dump_vtable()>, C<read_dump()>, and C<dump_pmc()>.
-
-=cut
-
-sub open_file {
-    my ( $direction, $filename ) = @_;
-
-    my $verbose              = 0;
-    my $actions_descriptions = { '<' => 'Reading', '>>' => "Appending", '>' => "Writing" };
-    my $action               = $actions_descriptions->{$direction} || "Unknown";
-    print "$action $filename\n" if $verbose;
-
-    open my $fh, $direction, $filename or die "$action $filename: $!\n";
-    return $fh;
-}
-
 sub slurp {
     my ($filename) = @_;
-    my $fh = open_file( '<', $filename );
+    open my $fh, '<', $filename;
     my $data = do { local $/; <$fh> };
     close $fh;
     return $data;
@@ -305,15 +269,8 @@ sub slurp {
 
 sub spew {
     my ( $filename, $data ) = @_;
-    my $fh = open_file( '>', $filename );
-    print $fh $data;
-    close $fh;
-}
-
-sub splat {
-    my ( $filename, $data ) = @_;
-    my $fh = open_file( '>>', $filename );
-    print $fh $data;
+    open my $fh, '>', $filename;
+    print {$fh} $data;
     close $fh;
 }
 

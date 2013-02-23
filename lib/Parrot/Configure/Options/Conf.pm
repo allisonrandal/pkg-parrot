@@ -1,5 +1,5 @@
-# Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Conf.pm 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: Conf.pm 39976 2009-07-10 08:20:13Z fperrad $
 package Parrot::Configure::Options::Conf;
 
 use strict;
@@ -18,7 +18,7 @@ use FindBin qw($Bin);
 
 our $script         = q{Configure.pl};
 our $parrot_version = Parrot::BuildUtil::parrot_version("$Bin/../../");
-our $svnid          = '$Id: Conf.pm 36833 2009-02-17 20:09:26Z allison $';
+our $svnid          = '$Id: Conf.pm 39976 2009-07-10 08:20:13Z fperrad $';
 
 sub print_version {
     print "Parrot Version $parrot_version Configure 2.0\n";
@@ -62,6 +62,7 @@ Compile Options:
    --optimize           Optimized compile
    --optimize=flags     Add given optimizer flags
    --parrot_is_shared   Link parrot dynamically
+   --disable-rpath      Link without rpath (user must set LD_LIBRARY_PATH)
    --m=32               Build 32bit executable on 64-bit architecture.
    --profile            Turn on profiled compile (gcc only for now)
    --cage               [CAGE] compile includes many additional warnings
@@ -79,6 +80,8 @@ Compile Options:
    --make=(make tool)   Use the given make utility
    --yacc=(parser)      Use the given parser generator
 
+   --no-line-directives Disable creation of C #line directives
+
    --define=inet_aton   Quick hack to use inet_aton instead of inet_pton
 
 Parrot Options:
@@ -87,13 +90,13 @@ Parrot Options:
    --floatval=(type)    Use the given type for FLOATVAL
    --opcode=(type)      Use the given type for opcodes
    --ops=(files)        Use the given ops files
-   --pmc=(files)        Use the given PMC files
 
    --cgoto=0            Don't build cgoto core - recommended when short of mem
    --jitcapable         Use JIT
    --execcapable        Use JIT to emit a native executable
    --gc=(type)          Determine the type of garbage collection
                         type=(gc|libc|malloc|malloc-trace) default is gc
+   --without-threads    Build parrot without thread support
 
 External Library Options:
 

@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 24_string_ops_clone.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1
 
 This code example illustrates cloning with PMC strings. Simple copying
@@ -11,7 +14,7 @@ both reference the same location in memory, but C<$P2> doesn't.
 .sub main :main
     .local pmc firstname
 
-    firstname = new 'String'
+    firstname = new ['String']
     firstname = "Ford"
     say firstname
 

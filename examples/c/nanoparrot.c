@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2001-2008, Parrot Foundation.
- * $Id: nanoparrot.c 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: nanoparrot.c 37878 2009-04-02 20:23:29Z coke $
 
 =head1 NAME
 
@@ -146,10 +146,7 @@ function(opcode_t *pc, Interp *interp) \
 
 /*
 
-=item C<static void
-run(Interp *interp, opcode_t *pc)>
-
-RT#48260: Not yet documented!!!
+=item C<static void run(Interp *interp, opcode_t *pc)>
 
 =cut
 
@@ -240,10 +237,7 @@ ENDRUN
 
 /*
 
-=item C<static void
-init(Interp *interp, opcode_t *prog)>
-
-RT#48260: Not yet documented!!!
+=item C<static void init(Interp *interp, opcode_t *prog)>
 
 =cut
 
@@ -291,10 +285,7 @@ init(Interp *interp, opcode_t *prog)
 
 /*
 
-=item C<int
-main(int argc, char *argv[])>
-
-RT#48260: Not yet documented!!!
+=item C<int main(int argc, char *argv[])>
 
 =cut
 

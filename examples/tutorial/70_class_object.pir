@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 70_class_object.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1 Classes
 
 If we combine the ideas of namespaces, subroutines, and global variables,
@@ -34,7 +37,7 @@ It also has two setter and two accessor methods, one for each attribute.
     addattribute myclass, 'bar'
     addattribute myclass, 'baz'
 
-    myobj = new 'Foo'
+    myobj = new ['Foo']
     myobj.'set_bar'("Hello")
     myobj.'set_baz'(5)
 
@@ -58,7 +61,7 @@ It also has two setter and two accessor methods, one for each attribute.
 .sub set_bar :method
     .param string value
 
-    $P0 = new 'String'
+    $P0 = new ['String']
     $P0 = value
     setattribute self, "bar", $P0
 .end
@@ -71,7 +74,7 @@ It also has two setter and two accessor methods, one for each attribute.
 .sub set_baz :method
     .param int value
 
-    $P0 = new 'Integer'
+    $P0 = new ['Integer']
     $P0 = value
     setattribute self, "baz", $P0
 .end

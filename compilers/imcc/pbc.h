@@ -1,5 +1,5 @@
 /*
- * $Id: pbc.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: pbc.h 39837 2009-06-30 04:30:24Z petdance $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -31,6 +31,7 @@ int e_pbc_new_sub(PARROT_INTERP, SHIM(void *param), ARGIN(IMC_Unit *unit))
 int e_pbc_open(PARROT_INTERP, SHIM(void *param))
         __attribute__nonnull__(1);
 
+PARROT_WARN_UNUSED_RESULT
 INTVAL IMCC_int_from_reg(PARROT_INTERP, ARGIN(const SymReg *r))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);

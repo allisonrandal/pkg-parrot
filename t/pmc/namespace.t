@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: namespace.t 37344 2009-03-12 05:43:51Z allison $
+# $Id: namespace.t 40180 2009-07-21 02:43:45Z chromatic $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 67;
+use Parrot::Test tests => 68;
 use Parrot::Config;
 
 =head1 NAME
@@ -1333,13 +1333,10 @@ parrot
 parrot
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error', todo => 'needs full implementation of PDD 17' );
+pir_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error' );
 .sub main :main
     .local pmc s_child
     s_child = subclass 'Sub', 'SubChild'
-
-    .local pmc e_child
-    e_child = subclass 'Closure', 'ClosureChild'
 
     .local pmc child
     child = new ['SubChild']
@@ -1350,10 +1347,6 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error', todo => 'ne
     root_ns.'add_sub'( 'child', child )
     print "Added sub child\n"
 
-    child = new ['Closure']
-    root_ns.'add_sub'( 'closure', child )
-    print "Added closure\n"
-
     child = new ['Coroutine']
     root_ns.'add_sub'( 'coroutine', child )
     print "Added coroutine\n"
@@ -1361,10 +1354,6 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', 'add_sub() with error', todo => 'ne
     child = new ['Eval']
     root_ns.'add_sub'( 'eval', child )
     print "Added eval\n"
-
-    child = new ['ClosureChild']
-    root_ns.'add_sub'( 'closure_child', child )
-    print "Added closure child\n"
 
     .local pmc not_a_sub
     not_a_sub = new ['Integer']
@@ -1384,10 +1373,8 @@ _invalid_sub:
 .end
 CODE
 /Added sub child
-Added closure
 Added coroutine
 Added eval
-Added closure child
 Invalid type \d+ in add_sub\(\)/
 OUTPUT
 
@@ -1464,7 +1451,6 @@ $create_nested_key
 
     key      = create_nested_key( 'Child' )
 
-    .local pmc grandchild_ns
     grandchild_ns = child_ns.'find_namespace'( key )
     if_null grandchild_ns, CHECK_SIBLING
     print "Grandchild still exists\\n"
@@ -1574,7 +1560,6 @@ pir_output_is( <<"CODE", <<'OUTPUT', 'del_sub()' );
     child_ns = parent_ns.'find_namespace'( 'Child' )
     child_ns.'del_sub'( 'dummy' )
 
-    .local pmc my_sub
     my_sub = get_global [ 'Parent'; 'Child' ], 'dummy'
     if_null my_sub, CHILD_NO_DUMMY
     print "Child did not delete dummy\\n"
@@ -1714,21 +1699,24 @@ pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC, RT #39978" );
      $P1 = 0
      set_root_global [ "DUMMY"; "X"; "Y" ], "T0", $P0
 
-     .local pmc dummy_x_y_ns, iter
+     .local pmc dummy_x_y_ns, iter, res
      dummy_x_y_ns = get_root_namespace [ "DUMMY"; "X"; "Y" ]
      iter = new ['Iterator'], dummy_x_y_ns
+     res  = new ['ResizablePMCArray']
 loop:
      unless iter goto loop_end
      $S0 = shift iter
-     print $S0
-     print "\n"
+     push res, $S0
      goto loop
 loop_end:
 
+     res.'sort'()
+     $S0 = join ' ', res
+     say $S0
+
 .end
 CODE
-Explosion
-T0
+Explosion T0
 OUT
 
 pir_error_output_like( <<'CODE', <<OUT, "NameSpace with no class, RT #55620" );
@@ -1745,6 +1733,9 @@ pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC" );
 .namespace [ 'bar' ]
 
 .sub 'main' :main
+    .local pmc res
+    res = new ['ResizablePMCArray']
+
     $P0 = get_namespace
     say $P0
     $I0 = elements $P0
@@ -1753,9 +1744,13 @@ pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC" );
   L1:
     unless $P1 goto L2
     $P2 = shift $P1
-    say $P2
+    $S0 = $P2
+    push res, $S0
     goto L1
   L2:
+    res.'sort'()
+    $S0 = join "\n", res
+    say $S0
     say 'OK'
 .end
 
@@ -1765,8 +1760,8 @@ pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC" );
 CODE
 bar
 2
-main
 foo
+main
 OK
 OUT
 
@@ -1811,6 +1806,35 @@ CODE
 /
 ok 1
 Could not find non-existent sub nok/
+OUT
+
+
+pir_output_is( <<'CODE', <<'OUT', 'HLL_map on namespace', todo => 'TT #867');
+.HLL 'tcl'
+
+.sub 'foo' :anon :init
+  $P1 = get_class 'NameSpace'
+  $P2 = subclass $P1, 'BSNS'
+  $P0 = getinterp
+  $P0.'hll_map'($P1, $P2)
+.end
+
+.namespace ['a';'b';'c']
+
+.sub 'hi'
+  noop
+.end
+
+.namespace []
+
+.sub 'blah' :main
+  $P1 = get_hll_namespace ['a';'b';'c']
+  $S0 = typeof $P1
+  print 'ok 1 - '
+  say $S0
+.end
+CODE
+ok 1 - BSNS
 OUT
 
 # Local Variables:

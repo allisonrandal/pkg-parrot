@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2009, Parrot Foundation.
-# $Id: RESPONSIBLE_PARTIES 37428 2009-03-15 07:14:06Z allison $
+# $Id: RESPONSIBLE_PARTIES 40179 2009-07-21 02:42:00Z cotto $
 
 This is a list of project roles, with a partial list of the folks who have
 taken responsibility for them.  This does not list all the people with
@@ -7,8 +7,7 @@ SVN commit access, just those who have a role they've taken responsibility
 for.
 
 See docs/project/roles_responsibilities.pod for role definitions, and
-https://trac.parrot.org/parrot/wiki/Languages for more language
-authors/maintainers.
+https://trac.parrot.org/parrot/wiki/Languages for language authors/maintainers.
 
 
 Project Team
@@ -24,6 +23,9 @@ Release Manager                 Bob Rogers
                                 Will Coleda
                                 Andrew Whitworth
                                 Klaas-Jan Stol
+                                Francois Perrad
+                                Mark Glines
+                                Christoph Otto
 
 Metacommitter                   Allison Randal
                                 Jerry Gay
@@ -46,21 +48,13 @@ Core Developer                  Jonathan Worthington
                                 Christoph Otto
                                 Julian Albo
                                 Mark Glines
+                                Vasily Chekalkin
 
 Compiler Developer              Patrick Michaud (PGE, PCT)
                                 Allison Randal (TGE)
                                 Klaas-Jan Stol (PIRC)
 
-High Level Language Developer   Patrick Michaud (Perl 6, NQP)
-                                Will Coleda (Tcl)
-                                Stephen Weeks (Cardinal (Ruby), Lolcode)
-                                Francois Perrad (Lua, Pipp (PHP))
-                                Bernhard Schmalhofer (Pipp (PHP), Eclectus (Scheme))
-                                Kevin Tew (Cardinal (Ruby))
-                                Christoph Otto (Pipp (PHP))
-
 Platform Porter                 Allison Randal (Debian, Ubuntu)
-                                Aldo Calpini (PocketPC)
                                 Francois Perrad (MinGW32)
                                 Reini Urban (cygwin)
                                 Will Coleda (MacPorts)

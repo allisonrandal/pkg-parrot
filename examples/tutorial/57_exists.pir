@@ -1,3 +1,6 @@
+# Copyright (C) 2007-2009, Parrot Foundation.
+# $Id: 57_exists.pir 39674 2009-06-20 14:09:03Z cotto $
+
 =head1 exists
 
 The C<exists> opcode tells you whether an element of a container PMC
@@ -20,10 +23,10 @@ that PMC implements the related vtable functions.
 
     # set up an array with two elements
     .local pmc my_array
-    my_array = new 'ResizablePMCArray'
-    $P0      = new 'String'
+    my_array = new ['ResizablePMCArray']
+    $P0      = new ['String']
     $P0      = "Hello"
-    $P1      = new 'Undef'
+    $P1      = new ['Undef']
     push my_array, $P0
     push my_array, $P1
 
