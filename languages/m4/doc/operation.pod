@@ -1,0 +1,19 @@
+# $Id: operation.pod 5151 2004-01-26 10:14:43Z leo $
+
+=head1 TITLE
+
+How does this thing work?
+
+=head1 Parrot stuff
+
+=head1 IMCC
+
+=head1 GNU m4
+
+=head1 Parrot m4
+
+=head1 SEE ALSO
+
+=head2 AUTHORS
+
+=cut
