@@ -1,6 +1,6 @@
 #!./parrot
 
-# $Id: /parrotcode/trunk/languages/plumhead/src/common/plumhead.pir 3306 2007-04-25T19:25:28.192829Z bernhard  $
+# $Id: plumhead.pir 18335 2007-04-25 19:25:28Z bernhard $
 
 =head1 NAME
 

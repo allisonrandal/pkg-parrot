@@ -1,5 +1,5 @@
 #! perl -w
-#$Id: /parrotcode/trunk/lib/Digest/Perl/MD5.pm 470 2006-12-05T03:30:45.414067Z svm  $
+#$Id: MD5.pm 15596 2006-11-16 12:02:16Z paultcochrane $
 
 package Digest::Perl::MD5;
 use strict;

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/m4/src/output.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
+# $Id: output.pir 18075 2007-04-09 21:15:02Z paultcochrane $
 
 =head1 NAME 
 
@@ -7,7 +7,7 @@ output.pir - handle output for Parrot m4
 =head1 DESCRIPTION
 
 Copyright:  2004 Bernhard Schmalhofer. All Rights Reserved.
-SVN Info:   $Id: /parrotcode/trunk/languages/m4/src/output.pir 3052 2007-04-09T21:15:02.309562Z paultcochrane  $
+SVN Info:   $Id: output.pir 18075 2007-04-09 21:15:02Z paultcochrane $
 Overview:   output
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html

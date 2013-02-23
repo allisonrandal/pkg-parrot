@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure/Options.pm 3467 2007-05-12T14:16:07.178849Z jkeenan  $
+# $Id: Options.pm 18797 2007-06-04 07:33:32Z paultcochrane $
 package Parrot::Configure::Options;
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ sub get_valid_options {
         jitcapable ld ldflags lex libdir libexecdir libs link linkflags
         localstatedir m maintainer mandir miniparrot nomanicheck oldincludedir
         opcode ops optimize parrot_is_shared pmc prefix profile sbindir
-        sharedstatedir step sysconfdir test verbose verbose-step version 
+        sharedstatedir step sysconfdir test verbose verbose-step version
         without-gdbm without-gmp without-icu yacc);
 }
 
@@ -213,7 +213,7 @@ Parrot::Configure::Options - Process command-line options to F<Configure.pl>
         script          => $0,
         parrot_version  => $parrot_version,
         svnid           =>
-            '$Id: /parrotcode/trunk/lib/Parrot/Configure/Options.pm 3467 2007-05-12T14:16:07.178849Z jkeenan  $',
+            '$Id: Options.pm 18797 2007-06-04 07:33:32Z paultcochrane $',
     } );
 
     @valid_options = get_valid_options();

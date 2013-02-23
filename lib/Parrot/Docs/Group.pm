@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/Docs/Group.pm 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: Group.pm 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-;;; $Id: /parrotcode/trunk/editor/parrot.el 470 2006-12-05T03:30:45.414067Z svm  $
+;;; $Id: parrot.el 14698 2006-09-24 02:19:47Z rgrjr $
 ;;; Emacs support for working on the source code of the Parrot virtual
 ;;; machine.
 ;;

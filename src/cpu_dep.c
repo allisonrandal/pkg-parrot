@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/local/src/cpu_dep.c 930 2006-12-28T23:51:13.748136Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: cpu_dep.c 19017 2007-06-15 03:16:38Z petdance $
 
 =head1 NAME
 
@@ -20,13 +20,11 @@ Remember you read something about it in F<docs/infant.dev>?
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
+
+/* HEADER: include/parrot/dod.h */
 
 #ifdef __ia64__
 
@@ -40,16 +38,14 @@ static void trace_system_stack(Interp *interp);
 
 /*
 
-=item C<void trace_system_areas(Interp *interp)>
+FUNCDOC: trace_system_areas
 
 Traces the system stack and any additional CPU-specific areas.
-
-=cut
 
 */
 
 void
-trace_system_areas(Interp *interp)
+trace_system_areas(Interp *interp /*NN*/)
 {
 #if defined(__sparc) /* Flush register windows */
     static union {
@@ -100,12 +96,9 @@ trace_system_areas(Interp *interp)
 
 /*
 
-=item C<static void
-trace_system_stack(Interp *interp)>
+FUNCDOC: trace_system_stack
 
 Traces the memory block starting at C<< interp->lo_var_ptr >>.
-
-=cut
 
 */
 
@@ -120,13 +113,9 @@ trace_system_stack(Interp *interp)
 
 /*
 
-=back
-
 =head1 SEE ALSO
 
 F<src/dod.c>, F<include/parrot/dod.h> and F<docs/infant.dev>.
-
-=cut
 
 */
 

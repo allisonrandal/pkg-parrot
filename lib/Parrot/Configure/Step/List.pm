@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure/Step/List.pm 3134 2007-04-12T00:32:35.049658Z jkeenan  $
+# $Id: List.pm 18157 2007-04-12 00:32:35Z jkeenan $
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;

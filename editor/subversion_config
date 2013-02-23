@@ -1,4 +1,4 @@
-### $Id: /parrotcode/trunk/editor/subversion_config 2712 2007-04-01T07:13:06.435030Z paultcochrane  $
+### $Id: subversion_config 17916 2007-04-01 07:13:06Z paultcochrane $
 
 ### This file configures various client-side behaviors for Subversion for
 ### use with Parrot.

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/codingstd/linelength.t 3344 2007-05-01T19:48:37.296496Z bernhard  $
+# $Id: linelength.t 18378 2007-05-01 19:48:37Z bernhard $
 
 =head1 NAME
 

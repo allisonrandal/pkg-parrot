@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/bf/bfco.pir 3045 2007-04-09T20:26:49.634143Z paultcochrane  $
+# $Id: bfco.pir 18068 2007-04-09 20:26:49Z paultcochrane $
 #
 # An Optimizing Brainfuck compiler
 # By Leo based on bfc.imc by Leon

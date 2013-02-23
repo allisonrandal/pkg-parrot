@@ -1,4 +1,4 @@
-/* $Id: /parrotcode/trunk/languages/pugs/include/pugs_common.h 3385 2007-05-05T14:41:57.057265Z bernhard  $ */
+/* $Id: pugs_common.h 18945 2007-06-12 14:08:35Z fperrad $ */
 
 #ifndef PARROT_PUGS_COMMONL_H_GUARD
 #define PARROT_PUGS_COMMONL_H_GUARD

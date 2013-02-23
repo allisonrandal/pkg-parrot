@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/tools/docs/write_docs.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: write_docs.pl 16172 2006-12-17 19:08:16Z paultcochrane $
 
 =head1 NAME
 

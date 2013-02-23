@@ -16,7 +16,7 @@
 # Contributions from Don Porter, NIST, 2002.  (not subject to US copyright)
 # All rights reserved.
 #
-# RCS: @(#) $Id: /parrotcode/trunk/languages/tcl/library/tcltest/tcltest.tcl 470 2006-12-05T03:30:45.414067Z svm  $
+# RCS: @(#) $Id: tcltest.tcl 17096 2007-02-20 20:20:48Z paultcochrane $
 
 package require Tcl 8.5		;# To provide an alpha version
 package require Tcl 8.3		;# uses [glob -directory]

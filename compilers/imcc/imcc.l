@@ -9,7 +9,7 @@
  *
  * The tokenizer.
  *
- * $Id: /parrotcode/trunk/compilers/imcc/imcc.l 3034 2007-04-09T09:25:01.356103Z paultcochrane  $
+ * $Id: imcc.l 19026 2007-06-15 21:32:14Z chromatic $
  *
  */
 
@@ -71,6 +71,16 @@ static void include_file (Interp* interp, char *file_name, void *yyscanner);
   do {                                       \
       if (valp) (valp)->s = str_dup(yytext); \
       return token;                          \
+  } while (0)
+
+#define DUP_AND_RET_FREE(valp, token)        \
+  do {                                       \
+      if (valp) {                            \
+          if ((valp)->s)                     \
+              mem_sys_free((valp)->s);       \
+          (valp)->s = str_dup(yytext);       \
+          return token;                      \
+      }                                      \
   } while (0)
 
 %}
@@ -147,7 +157,7 @@ SP              [ ]
         /* Newline in the heredoc. Realloc and cat on. */
         IMCC_INFO(interp)->line++;
         IMCC_INFO(interp)->heredoc_content =
-            mem_sys_realloc(IMCC_INFO(interp)->heredoc_content,
+            (char*)mem_sys_realloc(IMCC_INFO(interp)->heredoc_content,
                             strlen(IMCC_INFO(interp)->heredoc_content) +
                             strlen(yytext) + 2);
         strcpy(IMCC_INFO(interp)->heredoc_content +
@@ -174,7 +184,7 @@ SP              [ ]
         {
             /* Part of the heredoc. Realloc and cat the line on. */
             IMCC_INFO(interp)->heredoc_content =
-                mem_sys_realloc(IMCC_INFO(interp)->heredoc_content,
+                (char*)mem_sys_realloc(IMCC_INFO(interp)->heredoc_content,
                                 strlen(IMCC_INFO(interp)->heredoc_content) +
                                 strlen(yytext) + 2);
             strcpy(IMCC_INFO(interp)->heredoc_content +
@@ -404,7 +414,7 @@ SP              [ ]
 
             if (!IMCC_INFO(interp)->frames || !IMCC_INFO(interp)->frames->label)
                 IMCC_fataly(interp, E_SyntaxError, "missing space?");
-        label = mem_sys_allocate(yyleng+10);
+        label = (char*)mem_sys_allocate(yyleng+10);
         sprintf(label, "%s%d", yytext, IMCC_INFO(interp)->frames->label);
 
         valp->s = label;
@@ -423,7 +433,7 @@ SP              [ ]
             if (!IMCC_INFO(interp)->frames || !IMCC_INFO(interp)->frames->label)
                 IMCC_fataly(interp, E_SyntaxError, "missing space?");
 
-            label = mem_sys_allocate(yyleng+10);
+            label = (char*)mem_sys_allocate(yyleng+10);
             sprintf(label, "%s%d", yytext, IMCC_INFO(interp)->frames->label);
 
             valp->s = label;
@@ -444,9 +454,10 @@ SP              [ ]
         int type = pmc_type(interp, string_from_cstring(interp, macro_name, 0));
 
         if (type > 0) {
-            char *buf = malloc(16);
+            char *buf = (char*)malloc(16);
             sprintf(buf, "%d", type);
-            valp->s = buf;
+            valp->s = str_dup(buf);
+            mem_sys_free(buf);
             free(macro_name);
             return INTC;
         }
@@ -515,7 +526,7 @@ SP              [ ]
         frame->s.next = (struct parser_state_t*) IMCC_INFO(interp)->frames;
         IMCC_INFO(interp)->frames = frame;
         /* Start slurping up the heredoc. */
-        IMCC_INFO(interp)->heredoc_content = mem_sys_allocate(2);
+        IMCC_INFO(interp)->heredoc_content = (char*)mem_sys_allocate(2);
         IMCC_INFO(interp)->heredoc_content[0] = yytext[2];        /* preserve delim */
         IMCC_INFO(interp)->heredoc_content[1] = 0;                /* eos */
         yy_push_state(heredoc1, yyscanner);
@@ -572,7 +583,7 @@ SP              [ ]
     if (valp) {
         YYCHOP();
 
-        label = mem_sys_allocate(strlen(IMCC_INFO(interp)->cur_macro_name) + yyleng + 15);
+        label = (char*)mem_sys_allocate(strlen(IMCC_INFO(interp)->cur_macro_name) + yyleng + 15);
         sprintf(label, "local__%s__%s__$:", IMCC_INFO(interp)->cur_macro_name, yytext+1);
 
         valp->s = label;
@@ -585,10 +596,11 @@ SP              [ ]
     char *label;
 
     if (valp) {
-        label = mem_sys_allocate(strlen(IMCC_INFO(interp)->cur_macro_name) + yyleng + 15);
+        label = (char*)mem_sys_allocate(strlen(IMCC_INFO(interp)->cur_macro_name) + yyleng + 15);
         sprintf(label, "local__%s__%s__$", IMCC_INFO(interp)->cur_macro_name, yytext+2);
 
-        valp->s = label;
+        valp->s = str_dup(label);
+        mem_sys_free(label);
     }
 
     return IDENTIFIER;
@@ -685,9 +697,8 @@ destroy_frame (struct macro_frame_t *frame, void *yyscanner)
 
     mem_sys_free(frame);
 
-    if (buffer != NULL) {
+    if (buffer != NULL)
         yy_switch_to_buffer(buffer, yyscanner);
-    }
 
     return ret;
 }
@@ -708,7 +719,7 @@ yylex_skip (YYSTYPE *valp, void *interp, const char *skip, void *yyscanner)
     } while (*p != '\0');
 
     if (c)
-        DUP_AND_RET(valp, c);
+        DUP_AND_RET_FREE(valp, c);
     else
         return c;
 }
@@ -995,7 +1006,7 @@ expand_macro (YYSTYPE *valp, void *interp, const char *name, void *yyscanner)
             if (current[0] == '.') { /* parameter of outer macro */
                 s = find_macro_param(interp, current + 1);
                 if (s) {
-                    frame->expansion.name[i] = strdup(s);
+                    frame->expansion.name[i] = str_dup(s);
                     free(current);
                 }
             }
@@ -1032,10 +1043,9 @@ include_file (Interp* interp, char *file_name, void *yyscanner)
                                    PARROT_RUNTIME_FT_INCLUDE);
     if (s) {
         file = fopen(s, "r");
-        if (!file) {
-            mem_sys_free(s);
+        mem_sys_free(s);
+        if (!file)
             IMCC_fataly(interp, E_IOError, strerror(errno));
-        }
     }
     else
         IMCC_fataly(interp, E_IOError, strerror(errno));

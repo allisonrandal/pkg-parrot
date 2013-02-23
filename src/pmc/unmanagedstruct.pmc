@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/unmanagedstruct.pmc 891 2006-12-28T01:20:44.744422Z particle  $
+$Id: unmanagedstruct.pmc 16275 2006-12-28 01:20:44Z particle $
 
 =head1 NAME
 

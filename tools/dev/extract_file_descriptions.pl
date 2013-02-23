@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/trunk/tools/dev/extract_file_descriptions.pl 3344 2007-05-01T19:48:37.296496Z bernhard  $
+# $Id: extract_file_descriptions.pl 18378 2007-05-01 19:48:37Z bernhard $
 
 =head1 NAME
 

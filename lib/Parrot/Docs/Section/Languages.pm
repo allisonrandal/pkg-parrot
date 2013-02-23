@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/Docs/Section/Languages.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: Languages.pm 17429 2007-03-11 02:09:11Z coke $
 
 =head1 NAME
 

@@ -1,7 +1,8 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure/Options/Test.pm 3467 2007-05-12T14:16:07.178849Z jkeenan  $
+# $Id: Test.pm 18803 2007-06-04 14:03:54Z paultcochrane $
 package Parrot::Configure::Options::Test;
 use strict;
+use warnings;
 
 our @preconfiguration_tests = qw(
     t/configure/*.t
@@ -40,10 +41,10 @@ sub run_configure_tests {
         system(qq{prove @preconfiguration_tests})
             and die "Unable to execute configuration tests";
         print <<"TEST";
-    
+
 I just ran some tests to demonstrate that
 Parrot's configuration tools will work as intended.
-    
+
 TEST
     }
     return 1;
@@ -79,7 +80,7 @@ In F<Configure.pl>:
         argv            => [ @ARGV ],
         script          => $0,
         parrot_version  => $parrot_version,
-        svnid           => '$Id: /parrotcode/trunk/lib/Parrot/Configure/Options/Test.pm 3467 2007-05-12T14:16:07.178849Z jkeenan  $',
+        svnid           => '$Id: Test.pm 18803 2007-06-04 14:03:54Z paultcochrane $',
     } );
 
     $opttest = Parrot::Configure::Options::Test->new($args);
@@ -99,7 +100,7 @@ On command line:
     # run tests of configuration tools, then configure,
     # then run tests of build tools
     perl Configure.pl  --test
-    
+
 =head1 DESCRIPTION
 
 Test suites have been constructed which test those of Parrot's configuration

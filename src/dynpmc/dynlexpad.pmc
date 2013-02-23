@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005, The Perl Foundation.
-$Id: /parrotcode/local/src/dynpmc/dynlexpad.pmc 2657 2007-03-31T01:57:48.733769Z chromatic  $
+$Id: dynlexpad.pmc 17758 2007-03-26 07:39:09Z fperrad $
 
 =head1 NAME
 

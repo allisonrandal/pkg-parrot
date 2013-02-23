@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/porting_intro.pod 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: porting_intro.pod 18689 2007-05-30 15:58:47Z coke $
 
 =head1 NAME
 
@@ -61,6 +61,9 @@ been implemented for DEC Alpha, ARM, Intel i386, SGI MIPS, PPC, and Sun4.  If
 you know that your architecture is substantially similar to one of these,
 adding support may be possible with relatively little effort.  Implementing a
 novel JIT core from scratch is a substantial undertaking.
+
+Also note that some changes may be required based on OS as well. (e.g.:
+OS X/i386 vs. Linux/i386; OS X/i386 doesn't currently work.)
 
 =head2 References
 

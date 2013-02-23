@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/trunk/examples/benchmarks/primes2_i.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: primes2_i.pasm 12973 2006-06-19 15:06:58Z leo $
 
 =head1 NAME
 

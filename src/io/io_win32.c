@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/io/io_win32.c 3493 2007-05-15T16:08:45.769357Z particle  $
+$Id: io_win32.c 19010 2007-06-14 21:53:44Z petdance $
 
 =head1 NAME
 
@@ -28,6 +28,8 @@ Win32 System Programming, 2nd Edition.
 
 #include "parrot/parrot.h"
 #include "io_private.h"
+
+/* HEADER: none */
 
 #ifdef PIO_OS_WIN32
 
@@ -143,21 +145,21 @@ PIO_win32_init(Interp *interp, ParrotIOLayer *layer)
 #  endif
 
     if ((h = GetStdHandle(STD_INPUT_HANDLE)) != INVALID_HANDLE_VALUE) {
-        PIO_STDIN(interp) = new_io_pmc(interp,
+        _PIO_STDIN(interp) = new_io_pmc(interp,
             PIO_win32_fdopen(interp, layer, h, PIO_F_READ));
     }
     else {
         return -1;
     }
     if ((h = GetStdHandle(STD_OUTPUT_HANDLE)) != INVALID_HANDLE_VALUE) {
-        PIO_STDOUT(interp) = new_io_pmc(interp,
+        _PIO_STDOUT(interp) = new_io_pmc(interp,
             PIO_win32_fdopen(interp, layer, h, PIO_F_WRITE));
     }
     else {
         return -2;
     }
     if ((h = GetStdHandle(STD_ERROR_HANDLE)) != INVALID_HANDLE_VALUE) {
-        PIO_STDERR(interp) = new_io_pmc(interp,
+        _PIO_STDERR(interp) = new_io_pmc(interp,
             PIO_win32_fdopen(interp, layer, h, PIO_F_WRITE));
     }
     else {

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/config/init/optimize.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: optimize.pm 18877 2007-06-08 14:15:40Z paultcochrane $
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ sub runstep {
 
             # use perl5's value
             # gcc 4.1 doesn't like -mcpu=xx, i.e. it's deprecated
-            # XXX do we know compiler (version) already?
+            # RT#43151 do we know compiler (version) already?
             my $opts = $Config{optimize};
             $opts =~ s/-mcpu=\S+//;
             $conf->data->add( ' ', ccflags => $opts );

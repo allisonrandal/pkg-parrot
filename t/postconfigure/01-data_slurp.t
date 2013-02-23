@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/postconfigure/01-data_slurp.t 3453 2007-05-11T01:49:26.992926Z jkeenan  $
+# $Id: 01-data_slurp.t 18500 2007-05-11 01:49:26Z jkeenan $
 # 01-data_slurp.t
 
 use strict;
@@ -32,7 +32,7 @@ my $args = process_options( {
     argv            => $localargv,
     script          => $0,
     parrot_version  => $parrot_version,
-    svnid           => '$Id: /parrotcode/trunk/t/postconfigure/01-data_slurp.t 3453 2007-05-11T01:49:26.992926Z jkeenan  $',
+    svnid           => '$Id: 01-data_slurp.t 18500 2007-05-11 01:49:26Z jkeenan $',
 } );
 ok(defined $args, "process_options returned successfully");
 my %args = %$args;

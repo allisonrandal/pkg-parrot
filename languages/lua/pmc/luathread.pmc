@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: /parrotcode/local/languages/lua/pmc/luathread.pmc 1640 2007-02-01T03:58:19.287027Z chromatic  $
+$Id: luathread.pmc 18920 2007-06-11 06:31:41Z fperrad $
 
 =head1 NAME
 
@@ -118,6 +118,17 @@ Return the string "thread".
 */
     STRING* get_string () {
         return Parrot_sprintf_c(INTERP, "thread: %08X", SELF);
+    }
+
+/*
+
+=item C<void set_pmc(PMC *value)>
+
+=cut
+
+*/
+    void set_pmc(PMC *value) {
+        PMC_pmc_val(SELF) = PMC_pmc_val(value);
     }
 
 /*

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/src/compiler.t 3305 2007-04-25T18:08:14.857808Z coke  $
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: compiler.t 19101 2007-06-19 00:43:28Z chromatic $
 
 use strict;
 use warnings;
@@ -27,7 +27,9 @@ gathered in some API calls..
 
 =cut
 
-c_output_is( <<'CODE', <<'OUTPUT', "compreg/compile" );
+SKIP: {
+    skip( 'compreg disabled/imcc_compile_pir() not exported', 1 );
+    c_output_is( <<'CODE', <<'OUTPUT', "compreg/compile" );
 
 #include <stdio.h>
 #include "parrot/parrot.h"
@@ -107,6 +109,8 @@ main(int margc, char *margv[])
 CODE
 ok
 OUTPUT
+}
+
 c_output_is( <<'CODE', <<'OUTPUT', "Parror Compile API Single call" );
 
 #include <stdio.h>
@@ -201,9 +205,9 @@ static void
 compile_run(Parrot_Interp interp, const char *src, STRING *type, int argc,
             char *argv[])
 {
-    String *smain;
+    STRING *smain;
     PMC *prog, *entry;
-    String *error;
+    STRING *error;
     opcode_t *dest;
     prog = Parrot_compile_string(interp, type, src, &error);
 

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/compilers/imcc/imcpasm/opt2.t 3009 2007-04-08T06:57:02.911194Z chromatic  $
+# $Id: opt2.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

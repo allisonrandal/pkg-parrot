@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/examples/subs/single_retval.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: single_retval.pir 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

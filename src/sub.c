@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/sub.c 3477 2007-05-13T20:42:55.058233Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: sub.c 19036 2007-06-16 04:42:33Z petdance $
 
 =head1 NAME
 
@@ -12,28 +12,23 @@ Subroutines, continuations, co-routines and other fun stuff...
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
 
+/* HEADER: include/parrot/sub.h */
+
 /*
 
-=item C<void
-mark_context(Interp *interp, parrot_context_t* ctx)>
+FUNCDOC: mark_context
 
 Marks the context C<*ctx>.
-
-=cut
 
 */
 
 void
-mark_context(Interp *interp, parrot_context_t* ctx)
+mark_context(Interp *interp /*NN*/, parrot_context_t* ctx /*NN*/)
 {
     PObj *obj;
     int i;
@@ -77,17 +72,14 @@ mark_context(Interp *interp, parrot_context_t* ctx)
 
 /*
 
-=item C<Parrot_sub *
-new_sub(Interp *interp)>
+FUNCDOC: new_sub
 
 Returns a new C<Parrot_sub>.
-
-=cut
 
 */
 
 Parrot_sub *
-new_sub(Interp *interp)
+new_sub(Interp *interp /*NN*/)
 {
     /* Using system memory until I figure out GC issues */
     Parrot_sub * const newsub = mem_allocate_zeroed_typed(Parrot_sub);
@@ -97,38 +89,33 @@ new_sub(Interp *interp)
 
 /*
 
-=item C<Parrot_sub *
-new_closure(Interp *interp)>
+FUNCDOC: new_closure
 
 Returns a new C<Parrot_sub> with its own sctatchpad.
 
 XXX: Need to document semantics in detail.
 
-=cut
-
 */
 
 Parrot_sub *
-new_closure(Interp *interp)
+new_closure(Interp *interp /*NN*/)
 {
     Parrot_sub * const newsub = new_sub(interp);
     return newsub;
 }
+
 /*
 
-=item C<Parrot_cont *
-new_continuation(Interp *interp, Parrot_cont *to)>
+FUNCDOC: new_continuation
 
 Returns a new C<Parrot_cont> to the context of C<to> with its own copy of the
 current interpreter context.  If C<to> is C<NULL>, then the C<to_ctx> is set
 to the current context.
 
-=cut
-
 */
 
 Parrot_cont *
-new_continuation(Interp *interp, Parrot_cont *to)
+new_continuation(Interp *interp /*NN*/, Parrot_cont *to /*NULLOK*/)
 {
     Parrot_cont    * const cc     = mem_allocate_typed(Parrot_cont);
     Parrot_Context * const to_ctx = to ? to->to_ctx : CONTEXT(interp->ctx);
@@ -152,19 +139,17 @@ new_continuation(Interp *interp, Parrot_cont *to)
 
 /*
 
-=item C<Parrot_cont *
-new_ret_continuation(Interp *interp)>
+FUNCDOC: new_ret_continuation
 
 Returns a new C<Parrot_cont> pointing to the current context.
-
-=cut
 
 */
 
 Parrot_cont *
-new_ret_continuation(Interp *interp)
+new_ret_continuation(Interp *interp /*NN*/)
 {
     Parrot_cont * const cc = mem_allocate_typed(Parrot_cont);
+
     cc->to_ctx = CONTEXT(interp->ctx);
     cc->from_ctx = NULL;    /* filled in during a call */
     cc->dynamic_state = NULL;
@@ -177,19 +162,16 @@ new_ret_continuation(Interp *interp)
 
 /*
 
-=item C<Parrot_coro *
-new_coroutine(Interp *interp)>
+FUNCDOC: new_coroutine
 
 Returns a new C<Parrot_coro>.
 
 XXX: Need to document semantics in detail.
 
-=cut
-
 */
 
 Parrot_coro *
-new_coroutine(Interp *interp)
+new_coroutine(Interp *interp /*NN*/)
 {
     Parrot_coro * const co = mem_allocate_zeroed_typed(Parrot_coro);
 
@@ -201,18 +183,16 @@ new_coroutine(Interp *interp)
 
 /*
 
-=item C<PMC *
-new_ret_continuation_pmc(Interp * interp, opcode_t * address)>
+FUNCDOC: new_ret_continuation_pmc
 
 Returns a new C<RetContinuation> PMC. Uses one from the cache,
 if possible; otherwise, creates a new one.
 
-=cut
-
 */
 
+PARROT_API
 PMC *
-new_ret_continuation_pmc(Interp *interp, opcode_t * address)
+new_ret_continuation_pmc(Interp *interp /*NN*/, opcode_t *address)
 {
     PMC* const continuation = pmc_new(interp, enum_class_RetContinuation);
     VTABLE_set_pointer(interp, continuation, address);
@@ -221,16 +201,14 @@ new_ret_continuation_pmc(Interp *interp, opcode_t * address)
 
 /*
 
-=item C< void invalidate_retc_context(Interp *, PMC *cont)>
+FUNCDOC: invalidate_retc_context
 
 Make true Continuation from all RetContinuations up the call chain.
-
-=cut
 
 */
 
 void
-invalidate_retc_context(Interp *interp, PMC *cont)
+invalidate_retc_context(Interp *interp /*NN*/, PMC *cont /*NN*/)
 {
     Parrot_Context *ctx = PMC_cont(cont)->from_ctx;
 
@@ -251,23 +229,22 @@ invalidate_retc_context(Interp *interp, PMC *cont)
 
 }
 
-/*
-
-=item C<Parrot_full_sub_name>
-
-Return namespace, name, and location of subroutine.
-
-=cut
-
-*/
-
 /* XXX use method lookup - create interface
  *                         see also pbc.c
  */
 extern PMC* Parrot_NameSpace_nci_get_name(Interp *interp, PMC* pmc);
 
+/*
+
+FUNCDOC: Parrot_full_sub_name
+
+Return namespace, name, and location of subroutine.
+
+*/
+
+PARROT_API
 STRING*
-Parrot_full_sub_name(Interp *interp, PMC* sub)
+Parrot_full_sub_name(Interp *interp /*NN*/, PMC* sub /*NULLOK*/)
 {
     Parrot_sub * s;
     STRING *res;
@@ -290,33 +267,35 @@ Parrot_full_sub_name(Interp *interp, PMC* sub)
         }
         j = const_string(interp, ";");
 
-        res =  string_join(interp, j, ns_array);
+        res = string_join(interp, j, ns_array);
         Parrot_unblock_DOD(interp);
         return res;
     }
     return NULL;
 }
 
+PARROT_API
 int
-Parrot_Context_get_info(Interp *interp, parrot_context_t *ctx,
-                    Parrot_Context_info *info)
+Parrot_Context_get_info(Interp *interp /*NN*/, parrot_context_t *ctx /*NN*/,
+                    Parrot_Context_info *info /*NN*/)
 {
     Parrot_sub *sub;
+    DECL_CONST_CAST;
 
     /* set file/line/pc defaults */
-    info->file = (char *) "(unknown file)";
-    info->line = -1;
-    info->pc = -1;
-    info->nsname = NULL;
-    info->subname = NULL;
+    info->file     = (char *) const_cast("(unknown file)");
+    info->line     = -1;
+    info->pc       = -1;
+    info->nsname   = NULL;
+    info->subname  = NULL;
     info->fullname = NULL;
 
     /* is the current sub of the specified context valid? */
     if (PMC_IS_NULL(ctx->current_sub)) {
-        info->subname = string_from_cstring(interp, "???", 3);
-        info->nsname = info->subname;
+        info->subname  = string_from_cstring(interp, "???", 3);
+        info->nsname   = info->subname;
         info->fullname = string_from_cstring(interp, "??? :: ???", 10);
-        info->pc = -1;
+        info->pc       = -1;
         return 0;
     }
 
@@ -348,15 +327,17 @@ Parrot_Context_get_info(Interp *interp, parrot_context_t *ctx,
 
     /* determine the current source file/line */
     if (ctx->current_pc) {
-        size_t offs = info->pc;
+        const size_t offs = info->pc;
         size_t i, n;
         opcode_t *pc = sub->seg->base.data;
-        PackFile_Debug *debug = sub->seg->debugs;
+        PackFile_Debug * const debug = sub->seg->debugs;
+
         if (!debug)
             return 0;
         for (i = n = 0; n < sub->seg->base.size; i++) {
-            op_info_t *op_info = &interp->op_info_table[*pc];
+            op_info_t * const op_info = &interp->op_info_table[*pc];
             opcode_t var_args = 0;
+
             if (i >= debug->base.size)
                 return 0;
             if (n >= offs) {
@@ -374,18 +355,19 @@ Parrot_Context_get_info(Interp *interp, parrot_context_t *ctx,
     return 1;
 }
 
+PARROT_API
 STRING*
-Parrot_Context_infostr(Interp *interp, parrot_context_t *ctx)
+Parrot_Context_infostr(Interp *interp /*NN*/, parrot_context_t *ctx /*NN*/)
 {
     Parrot_Context_info info;
-    const char* const msg = (CONTEXT(interp->ctx) == ctx) ?
-        "current instr.:":
-        "called from Sub";
+    const char* const msg = (CONTEXT(interp->ctx) == ctx)
+        ?  "current instr.:"
+        : "called from Sub";
     STRING *res;
 
     Parrot_block_DOD(interp);
     if (Parrot_Context_get_info(interp, ctx, &info)) {
-        char *file = info.file;
+        char * const file = info.file;
         res        = Parrot_sprintf_c(interp,
             "%s '%Ss' pc %d (%s:%d)", msg,
             info.fullname, info.pc, file, info.line);
@@ -403,16 +385,14 @@ Parrot_Context_infostr(Interp *interp, parrot_context_t *ctx)
 
 /*
 
-=item C<PMC* Parrot_find_pad(Interp*, STRING *lex_name)>
+FUNCDOC: Parrot_find_pad
 
 Locate the LexPad containing the given name. Return NULL on failure.
-
-=cut
 
 */
 
 PMC*
-Parrot_find_pad(Interp *interp, STRING *lex_name, parrot_context_t *ctx)
+Parrot_find_pad(Interp *interp /*NN*/, STRING *lex_name, parrot_context_t *ctx /*NN*/)
 {
     while (1) {
         PMC * const lex_pad = ctx->lex_pad;
@@ -441,22 +421,20 @@ Parrot_find_pad(Interp *interp, STRING *lex_name, parrot_context_t *ctx)
     return NULL;
 }
 
+PARROT_API
 PMC*
-parrot_new_closure(Interp *interp, PMC *sub_pmc)
+parrot_new_closure(Interp *interp /*NN*/, PMC *sub_pmc)
 {
-    PMC *clos_pmc;
-    Parrot_sub *clos, *sub;
     PMC *cont;
-    parrot_context_t *ctx;
 
-    clos_pmc = VTABLE_clone(interp, sub_pmc);
-    sub = PMC_sub(sub_pmc);
-    clos = PMC_sub(clos_pmc);
+    PMC * const clos_pmc    = VTABLE_clone(interp, sub_pmc);
+    Parrot_sub * const sub  = PMC_sub(sub_pmc);
+    Parrot_sub * const clos = PMC_sub(clos_pmc);
     /*
      * the given sub_pmc has to have an :outer(sub) that is
      * this subroutine
      */
-    ctx = CONTEXT(interp->ctx);
+    parrot_context_t * const ctx = CONTEXT(interp->ctx);
     if (PMC_IS_NULL(sub->outer_sub)) {
         real_exception(interp, NULL, INVALID_OPERATION,
                 "'%Ss' isn't a closure (no :outer)", sub->name);
@@ -487,9 +465,8 @@ parrot_new_closure(Interp *interp, PMC *sub_pmc)
 #endif
     return clos_pmc;
 }
-/*
 
-=back
+/*
 
 =head1 SEE ALSO
 
@@ -498,8 +475,6 @@ F<include/parrot/sub.h>.
 =head1 HISTORY
 
 Initial version by Melvin on 2002/06/6.
-
-=cut
 
 */
 

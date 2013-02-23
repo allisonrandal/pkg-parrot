@@ -1,4 +1,4 @@
-## $Id: /parrotcode/trunk/languages/perl6/README 470 2006-12-05T03:30:45.414067Z svm  $
+## $Id: README 18694 2007-05-30 21:15:54Z coke $
 
 =head1 Perl 6 parser/compiler
 
@@ -93,6 +93,20 @@ One can also provide the "target" option to the compiler:
     $P1 = $P0($S0, 'target'=>'PAST')     # get AST
     $P1 = $P0($S0, 'target'=>'POST')     # get OST
     $P1 = $P0($S0, 'target'=>'PIR')      # get PIR
+
+=head2 Testing
+
+To run the parrot-specific tests:
+
+ make test
+
+To run the official test suite:
+
+ make spectest
+
+Note that this requires svn: it exports a copy of the official tests to a
+a local directory (once) and runs those tests. Right now we only run tests
+we're sure we might pass.
 
 =head1 AUTHOR
 

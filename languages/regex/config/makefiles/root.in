@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/regex/config/makefiles/root.in 3143 2007-04-12T12:53:09.014129Z fperrad  $
+# $Id: root.in 18166 2007-04-12 12:53:09Z fperrad $
 
 # Makefile for languages/regex
 

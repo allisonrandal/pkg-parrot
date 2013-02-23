@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/abc/config/makefiles/root.in 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: root.in 18948 2007-06-12 14:45:12Z pmichaud $
 
 # Setup some commands
 LN_S     = @lns@
@@ -14,6 +14,7 @@ CP       = @cp@
 O        = @o@
 LOAD_EXT = @load_ext@
 PARROT_DYNEXT = @build_dir@/runtime/parrot/dynext
+PGE_LIBRARY = ../../runtime/parrot/library/PGE
 
 PMCDIR   = src/pmc
 
@@ -25,8 +26,8 @@ SOURCES = abc.pir \
   src/PASTGrammar.tg
 
 # the default target
-abc.pbc: $(PARROT) $(PGE_DIR)/pgc.pir $(SOURCES)
-	$(PARROT) $(PGE_DIR)/pgc.pir --output=src/abc_gen.pir src/abc.pg
+abc.pbc: $(PARROT) $(PGE_LIBRARY)/Perl6Grammar.pir $(SOURCES)
+	$(PARROT) $(PGE_LIBRARY)/Perl6Grammar.pir --output=src/abc_gen.pir src/abc.pg
 	$(PARROT) $(TGE_DIR)/tgc.pir --output=src/PASTGrammar_gen.pir src/PASTGrammar.tg
 	$(PARROT) -o abc.pbc abc.pir
 

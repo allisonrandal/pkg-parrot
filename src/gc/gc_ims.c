@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2004, The Perl Foundation.
-$Id: /parrotcode/trunk/src/gc/gc_ims.c 3300 2007-04-24T21:18:22.142154Z mdiep  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: gc_ims.c 19025 2007-06-15 21:22:33Z petdance $
 
 =head1 NAME
 
@@ -154,7 +154,7 @@ The graph of all objects found live during the last collection.
 =item to-space
 
 The work area of the collector. During marking live objects are "moved"
-from the from-space into the to-space. This is the same as the next_for_GC
+from the from-space into the to-space. This is the same as the text_for_GC
 list used in src/dod.c. The to-space is initially empty. During marking
 it gets greyed and finally all reachable objects are black.
 
@@ -334,7 +334,10 @@ a sleep opcode.
 */
 
 #include "parrot/parrot.h"
+#include "parrot/dod.h"
 #include <assert.h>
+
+/* HEADER: include/parrot/dod.h */
 
 /*
  * size of one arena
@@ -433,7 +436,7 @@ gc_ims_add_free_object(Interp *interp, Small_Object_Pool *pool, void *to_add)
 #if ! DISABLE_GC_DEBUG
     if (GC_DEBUG(interp)) {
         if (pool == interp->arena_base->pmc_pool) {
-            PMC *p    = (PMC *)to_add;
+            PMC * const p = (PMC *)to_add;
             p->vtable = interp->vtables[enum_class_Null];
         }
     }
@@ -502,9 +505,8 @@ gc_ims_pool_init(Interp *interp, Small_Object_Pool *pool)
 static void
 parrot_gc_ims_deinit(Interp* interp)
 {
-    Arenas *arena_base;
+    Arenas * const arena_base = interp->arena_base;
 
-    arena_base = interp->arena_base;
     mem_sys_free(arena_base->gc_private);
     arena_base->gc_private = NULL;
 }
@@ -522,12 +524,12 @@ C<more_objects_fn>.
 
 */
 
+PARROT_API
 void
-Parrot_gc_ims_init(Interp* interp)
+Parrot_gc_ims_init(Interp* interp /*NN*/)
 {
-    Arenas *arena_base;
+    Arenas * const arena_base = interp->arena_base;
 
-    arena_base = interp->arena_base;
     arena_base->gc_private = mem_sys_allocate_zeroed(sizeof (Gc_ims_private));
     /*
      * set function hooks according to pdd09
@@ -556,9 +558,8 @@ static void
 parrot_gc_ims_reinit(Interp* interp)
 {
     Gc_ims_private *g_ims;
-    Arenas *arena_base;
+    Arenas * const arena_base = interp->arena_base;
 
-    arena_base = interp->arena_base;
     arena_base->lazy_dod = 0;
     Parrot_dod_ms_run_init(interp);
     /*
@@ -588,14 +589,12 @@ The former are marked immediately, only the latter need real work here.
 static void
 parrot_gc_ims_mark(Interp* interp)
 {
-    Gc_ims_private *g_ims;
     size_t todo;
-    Arenas *arena_base;
     double work_factor;
     PMC *next;
 
-    arena_base = (Arenas *)interp->arena_base;
-    g_ims      = (Gc_ims_private *)arena_base->gc_private;
+    Arenas * const arena_base    = (Arenas *)interp->arena_base;
+    Gc_ims_private * const g_ims = (Gc_ims_private *)arena_base->gc_private;
     /*
      * use statistics from the previous run
      */
@@ -631,7 +630,7 @@ TODO split work per pool.
 static int
 sweep_cb(Interp *interp, Small_Object_Pool *pool, int flag, void *arg)
 {
-    int *n_obj = (int *) arg;
+    int * const n_obj = (int *) arg;
 
     Parrot_dod_sweep(interp, pool);
     if (interp->profile && (flag & POOL_PMC))
@@ -643,7 +642,7 @@ sweep_cb(Interp *interp, Small_Object_Pool *pool, int flag, void *arg)
 static void
 parrot_gc_ims_sweep(Interp* interp)
 {
-    Arenas *arena_base = interp->arena_base;
+    Arenas * const arena_base = interp->arena_base;
     Gc_ims_private *g_ims;
     size_t n_objects;
 
@@ -695,7 +694,7 @@ parrot_gc_ims_collect(Interp* interp, int check_only)
 static int
 collect_cb(Interp *interp, Small_Object_Pool *pool, int flag, void *arg)
 {
-    int check_only = (int)(INTVAL)arg;
+    const int check_only = (int)(INTVAL)arg;
     Memory_Pool *mem_pool;
     /*
      * check if there is an associated memory pool
@@ -731,7 +730,7 @@ collect_cb(Interp *interp, Small_Object_Pool *pool, int flag, void *arg)
 static int
 parrot_gc_ims_collect(Interp* interp, INTVAL check_only)
 {
-    Arenas *arena_base = interp->arena_base;
+    Arenas * const arena_base = interp->arena_base;
     Gc_ims_private *g_ims;
     int ret;
 
@@ -765,8 +764,8 @@ allocation.
 static void
 parrot_gc_ims_run_increment(Interp* interp)
 {
-    Arenas *arena_base    = interp->arena_base;
-    Gc_ims_private *g_ims = (Gc_ims_private *)arena_base->gc_private;
+    Arenas * const arena_base    = interp->arena_base;
+    Gc_ims_private * const g_ims = (Gc_ims_private *)arena_base->gc_private;
 
     if (arena_base->DOD_block_level || g_ims->state == GC_IMS_DEAD) {
         return;
@@ -843,8 +842,8 @@ static void
 parrot_gc_ims_run(Interp *interp, int flags)
 {
     int lazy;
-    Arenas *arena_base    = interp->arena_base;
-    Gc_ims_private *g_ims = (Gc_ims_private *)arena_base->gc_private;
+    Arenas * const arena_base    = interp->arena_base;
+    Gc_ims_private * const g_ims = (Gc_ims_private *)arena_base->gc_private;
 
     if (arena_base->DOD_block_level || g_ims->state == GC_IMS_DEAD) {
         return;
@@ -931,7 +930,7 @@ be greyed or the aggregate must be rescanned - by greying it.
 
 #define DOD_IMS_GREY_NEW 1
 
-
+PARROT_API
 void
 Parrot_dod_ims_wb(Interp* interp, PMC *agg, PMC *_new)
 {

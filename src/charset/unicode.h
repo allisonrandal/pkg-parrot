@@ -1,7 +1,7 @@
 /* unicode.h
- *  Copyright (C) 2005, The Perl Foundation.
+ *  Copyright (C) 2005-2007, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/src/charset/unicode.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: unicode.h 18984 2007-06-13 19:13:35Z petdance $
  *  Overview:
  *     This is the header for the unicode charset functions
  *  Data Structure and Algorithms:
@@ -17,7 +17,11 @@
  * init function
  */
 
-CHARSET *Parrot_charset_unicode_init(Interp *);
+
+/* HEADERIZER BEGIN: src/charset/unicode.c */
+
+CHARSET * Parrot_charset_unicode_init( Interp *interp );
+/* HEADERIZER END: src/charset/unicode.c */
 
 
 #endif /* PARROT_CHARSET_UNICODE_H_GUARD */

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/pmc/thread.t 3489 2007-05-15T09:30:43.862337Z fperrad  $
+# $Id: thread.t 18543 2007-05-15 09:30:43Z fperrad $
 
 =head1 NAME
 

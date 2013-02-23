@@ -64,6 +64,7 @@ Other node attributes are generally defined by subclasses of C<PAST::Node>.
 Initialize a PAST node with the given children and attributes.
 Adds each child to the node (using the C<push> method, below) and
 calls the appropriate accessor method for each attribute.
+And returns the node.
 
 =cut
 
@@ -92,7 +93,7 @@ calls the appropriate accessor method for each attribute.
     goto adverbs_loop
   adverbs_end:
   end:
-    .return ()
+    .return (self)
 .end
 
 
@@ -482,6 +483,10 @@ while      - Evaluate the first child, if the result is
 until      - Evaluate the first child, if the result is
              false then evaluate the second child and repeat.
 
+for        - Iterate over the first child. For each element, 
+             invoke the sub in the second child, passing the
+             element as the only parameter.
+
 call       - Call a subroutine, passing the results of any
              child nodes as arguments.  The subroutine to be
              called is given by the node's C<name> attribute,
@@ -505,8 +510,8 @@ callmethod - Invokes a method on an object, using children
              called, the second child is the invocant, and
              the remaining children are arguments to the method call.
 
-try        - (preliminary) Execute the code given by the first 
-             child, and if any exceptions occur then handle them 
+try        - (preliminary) Execute the code given by the first
+             child, and if any exceptions occur then handle them
              using the code given by the second child.
 
 If a node doesn't have a value set for C<pasttype>, then it
@@ -604,6 +609,10 @@ given by "%r", "%t", or "%u" in the C<code> string:
 
 =back
 
+=head2 PAST::Stmts
+
+C<PAST::Stmts> is a container of C<PAST::Node> without any specific methods.
+
 =head2 PAST::Block
 
 C<PAST::Block> nodes represent lexical scopes within an abstract
@@ -654,8 +663,8 @@ caller; PAST doesn't use C<symtable> for any code generation.
 
 =item compiler([name])
 
-Indicate that the children nodes of this block are to be 
-compiled using compiler C<name> instead of the standard 
+Indicate that the children nodes of this block are to be
+compiled using compiler C<name> instead of the standard
 PAST compiler.
 
 =cut

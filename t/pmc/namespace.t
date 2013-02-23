@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/namespace.t 3483 2007-05-14T15:45:23.075274Z particle  $
+# $Id: namespace.t 18537 2007-05-14 15:45:23Z particle $
 
 use strict;
 use warnings;

@@ -1,6 +1,6 @@
 """
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/examples/benchmarks/primes2.py 470 2006-12-05T03:30:45.414067Z svm  $
+$Id: primes2.py 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

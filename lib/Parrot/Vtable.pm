@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Vtable.pm 3442 2007-05-09T12:17:06.032451Z paultcochrane  $
+# $Id: Vtable.pm 19033 2007-06-16 04:23:47Z chromatic $
 
 =head1 NAME
 
@@ -248,16 +248,19 @@ EOM
  * vtable slot names
  */
 #ifdef PARROT_IN_OBJECTS_C
+
+#define PARROT_VTABLE_LOW 9
+
 static const char * const Parrot_vtable_slot_names[] = {
-    "",     /* Pointer to namespace for this class */
-    "",     /* 'type' value for MMD */
-    "",     /* Name of class this vtable is for */
-    "",     /* Flags. Duh */
-    "",     /* space-separated list of interfaces */
-    "",     /* space-separated list of classes */
-    "",     /* class */
-    "",     /* mro */
-    "",     /* ro_variant_vtable */
+    "",   /* Pointer to namespace for this class */
+    "",   /* 'type' value for MMD */
+    "",   /* Name of class this vtable is for */
+    "",   /* Flags. Duh */
+    "",   /* space-separated list of interfaces */
+    "",   /* space-separated list of classes */
+    "",   /* class */
+    "",   /* mro */
+    "",   /* ro_variant_vtable */
 
     /* Vtable Functions */
 EOM
@@ -358,7 +361,8 @@ sub vtbl_embed {
 
         my $ret_type = find_type($return_type);
 
-        $protos .= sprintf "extern %s Parrot_PMC_%s( %s );\n", $ret_type, $name, $signature;
+        $protos .= sprintf "extern PARROT_API %s Parrot_PMC_%s( %s );\n",
+            $ret_type, $name, $signature;
 
         $funcs .= sprintf "/*
 
@@ -369,7 +373,8 @@ sub vtbl_embed {
 
 */
 
-%s Parrot_PMC_%s( %s )
+PARROT_API %s
+Parrot_PMC_%s( %s )
 {
 ", ( $ret_type, $name, $signature ) x 2;
 

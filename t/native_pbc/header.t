@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/t/native_pbc/header.t 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: header.t 17094 2007-02-20 20:10:40Z paultcochrane $
 
 use strict;
 use warnings;

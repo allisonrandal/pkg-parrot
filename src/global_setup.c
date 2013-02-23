@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/global_setup.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: global_setup.c 18963 2007-06-12 20:39:15Z petdance $
 
 =head1 NAME
 
@@ -15,10 +15,6 @@ I<What are these global variables?>
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #define INSIDE_GLOBAL_SETUP
@@ -26,27 +22,26 @@ I<What are these global variables?>
 #include "global_setup.str"
 
 /* These functions are defined in the auto-generated file core_pmcs.c */
+/* XXX Get it into some public place */
 extern void Parrot_initialize_core_pmcs(Interp *interp);
+void Parrot_register_core_pmcs(Interp *interp, PMC* registry);
 
 static const unsigned char* parrot_config_stored = NULL;
 static unsigned int parrot_config_size_stored = 0;
 
+/* HEADER: include/parrot/global_setup.h */
 
 /*
 
-=item C<void
-Parrot_set_config_hash_internal(const unsigned char* parrot_config,
-                                 unsigned int parrot_config_size)>
+FUNCDOC: Parrot_set_config_hash_internal
 
 Called by Parrot_set_config_hash with the serialised hash which
 will be used in subsequently created Interpreters
 
-=cut
-
 */
 
 void
-Parrot_set_config_hash_internal(const unsigned char* parrot_config,
+Parrot_set_config_hash_internal(const unsigned char* parrot_config /*NN*/,
                                  unsigned int parrot_config_size)
 {
     parrot_config_stored      = parrot_config;
@@ -55,26 +50,22 @@ Parrot_set_config_hash_internal(const unsigned char* parrot_config,
 
 /*
 
-=item C<void parrot_set_config_hash_interpreter(Interp* interp)>
-
+FUNCDOC: parrot_set_config_hash_interpreter
 
 Used internally to associate the config hash with an Interpreter
 using the last registered config data.
 
-=cut
-
 */
 
 static void
-parrot_set_config_hash_interpreter(Interp* interp)
+parrot_set_config_hash_interpreter(Interp* interp /*NN*/)
 {
     PMC *iglobals = interp->iglobals;
 
     PMC *config_hash = NULL;
 
-    if (parrot_config_size_stored > 1)
-    {
-        STRING *config_string =
+    if (parrot_config_size_stored > 1) {
+        STRING * const config_string =
             string_make_direct(interp,
                                (const char *)parrot_config_stored, parrot_config_size_stored,
                                PARROT_DEFAULT_ENCODING, PARROT_DEFAULT_CHARSET,
@@ -82,8 +73,7 @@ parrot_set_config_hash_interpreter(Interp* interp)
 
         config_hash = Parrot_thaw(interp, config_string);
     }
-    else
-    {
+    else {
         config_hash = pmc_new(interp, enum_class_Hash);
     }
 
@@ -94,7 +84,7 @@ parrot_set_config_hash_interpreter(Interp* interp)
 
 /*
 
-=item C<void init_world(Interp *interp)>
+FUNCDOC: init_world(Interp *interp)>
 
 This is the actual initialization code called by C<Parrot_init()>.
 
@@ -102,18 +92,16 @@ It sets up the Parrot system, running any platform-specific init code if
 necessary, then initializing the string subsystem, and setting up the
 base vtables and core PMCs.
 
-C<interp> should be the root interpreter returned by
-C<Parrot_new(NULL)>.
-
-=cut
+C<interp> should be the root interpreter returned by C<Parrot_new(NULL)>.
 
 */
 
 void
-init_world(Interp *interp)
+init_world(Interp *interp /*NN*/)
 {
     PMC *iglobals;
     PMC *self, *pmc;
+    int i;
 
 #ifdef PARROT_HAS_PLATFORM_INIT_CODE
     Parrot_platform_init_code();
@@ -123,6 +111,14 @@ init_world(Interp *interp)
 
     /* Call base vtable class constructor methods */
     Parrot_initialize_core_pmcs(interp);
+
+    /* We have a Proxy PMC for each of the PMCs; now need to attach that to
+     * the class slot for the namespace each of the PMCs reference. */
+    for (i = 0; i <= interp->n_vtable_max; i++)
+        if (interp->vtables[i])
+            Parrot_PCCINVOKE(interp, interp->vtables[i]->_namespace,
+                string_from_const_cstring(interp, "set_class", 0), "P->",
+                VTABLE_get_pmc_keyed_int(interp, interp->pmc_proxies, i));
 
     iglobals = interp->iglobals;
     VTABLE_set_pmc_keyed_int(interp, iglobals,
@@ -153,11 +149,9 @@ init_world(Interp *interp)
  * called from inmidst of PMC bootstrapping between pass 0 and 1
  */
 
-/* in generated src_core_pmcs.c */
-void Parrot_register_core_pmcs(Interp *interp, PMC* registry);
 
 void
-parrot_global_setup_2(Interp *interp)
+parrot_global_setup_2(Interp *interp /*NN*/)
 {
     PMC *classname_hash, *iglobals;
     int i;
@@ -181,6 +175,8 @@ parrot_global_setup_2(Interp *interp)
     interp->class_hash = classname_hash =
         pmc_new(interp, enum_class_NameSpace);
     Parrot_register_core_pmcs(interp, classname_hash);
+    /* Also a PMC array to store PMC Proxy objects. */
+    interp->pmc_proxies = pmc_new(interp, enum_class_ResizablePMCArray);
     /* init the interpreter globals array */
     iglobals = pmc_new(interp, enum_class_SArray);
     interp->iglobals = iglobals;
@@ -189,19 +185,6 @@ parrot_global_setup_2(Interp *interp)
     for (i = 0; i < (INTVAL)IGLOBALS_SIZE; i++)
         VTABLE_set_pmc_keyed_int(interp, iglobals, i, NULL);
 }
-
-/*
-
-=back
-
-=head1 SEE ALSO
-
-F<include/parrot/global_setup.h>.
-
-=cut
-
-*/
-
 
 /*
  * Local variables:

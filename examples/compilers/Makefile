@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/compilers/Makefile 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: Makefile 11501 2006-02-10 18:27:13Z particle $
 
 # Generate shared libs, which will be used as loadable compilers
 

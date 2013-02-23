@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/examples/nci/sdl_blue_rectangle.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: sdl_blue_rectangle.pir 17600 2007-03-18 10:52:17Z paultcochrane $
 
 .sub _main :main
 	_init()

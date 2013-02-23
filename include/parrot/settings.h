@@ -1,7 +1,7 @@
 /* settings.h
  *  Copyright (C) 2001-2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/settings.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: settings.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:

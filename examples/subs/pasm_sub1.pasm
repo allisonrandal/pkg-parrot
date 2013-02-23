@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/examples/subs/pasm_sub1.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: pasm_sub1.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

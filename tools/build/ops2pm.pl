@@ -1,8 +1,10 @@
 #! perl
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /parrotcode/local/tools/build/ops2pm.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $
-use warnings;
+# Copyright (C) 2001-2007, The Perl Foundation.
+# $Id: ops2pm.pl 18571 2007-05-16 20:48:17Z bernhard $
+
 use strict;
+use warnings;
+
 use Getopt::Long;
 use lib 'lib';
 use Parrot::Ops2pm::Utils;
@@ -167,4 +169,3 @@ Others who provided code cited in the version control logs include:
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4:
-

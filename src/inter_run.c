@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/inter_run.c 3310 2007-04-26T17:30:06.127472Z chromatic  $
+$Id: inter_run.c 19055 2007-06-17 05:42:16Z petdance $
 
 =head1 NAME
 
@@ -22,6 +22,8 @@ Various functions that call the run loop.
 #include <assert.h>
 #include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
+
+/* HEADER: none */ /* XXX Needs to get done at the same time as the other interpreter files */
 
 /*
 

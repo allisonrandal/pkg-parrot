@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/HQ9plus/HQ9plus.pir 3054 2007-04-09T21:21:39.015947Z paultcochrane  $
+# $Id: HQ9plus.pir 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

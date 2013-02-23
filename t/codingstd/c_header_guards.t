@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/codingstd/c_header_guards.t 3444 2007-05-09T12:20:01.418142Z paultcochrane  $
+# $Id: c_header_guards.t 18488 2007-05-09 12:20:01Z paultcochrane $
 
 use strict;
 use warnings;

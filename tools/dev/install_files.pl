@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/install_files.pl 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: install_files.pl 16243 2006-12-25 22:11:13Z paultcochrane $
 ################################################################################
 
 =head1 TITLE

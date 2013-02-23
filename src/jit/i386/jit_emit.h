@@ -3,7 +3,7 @@
  *
  * i386
  *
- * $Id: /parrotcode/trunk/src/jit/i386/jit_emit.h 3424 2007-05-08T17:05:44.442851Z paultcochrane  $
+ * $Id: jit_emit.h 19094 2007-06-18 21:45:36Z petdance $
  */
 
 #ifndef PARROT_I386_JIT_EMIT_H_GUARD
@@ -2798,7 +2798,7 @@ Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info,
     else
 #  endif
     {
-        call_func(jit_info, (void (*)(void))pmc_new_noinit);
+        call_func(jit_info, (void*)pmc_new_noinit);
     }
     /* result = eax push pmc */
     emitm_pushl_r(jit_info->native_ptr, emit_EAX);
@@ -3705,7 +3705,7 @@ count_regs(char *sig, char *sig_start)
  */
 void *
 Parrot_jit_build_call_func(Interp *interp, PMC *pmc_nci,
-        String *signature)
+        STRING *signature)
 {
     Parrot_jit_info_t jit_info;
     char *sig, *pc;

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/05-run_one_step.t 3486 2007-05-15T01:25:21.123501Z jkeenan  $
+# $Id: 05-run_one_step.t 18540 2007-05-15 01:25:21Z jkeenan $
 # 05-run_one_step.t
 
 use strict;
@@ -25,7 +25,7 @@ my $args = process_options( {
     argv            => [],
     script          => $0,
     parrot_version  => $parrot_version,
-    svnid           => '$Id: /parrotcode/trunk/t/configure/05-run_one_step.t 3486 2007-05-15T01:25:21.123501Z jkeenan  $',
+    svnid           => '$Id: 05-run_one_step.t 18540 2007-05-15 01:25:21Z jkeenan $',
 } );
 ok(defined $args, "process_options returned successfully");
 my %args = %$args;

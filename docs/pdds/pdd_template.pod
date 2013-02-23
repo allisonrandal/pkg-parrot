@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/pdds/pdd_template.pod 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: pdd_template.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Summary of the contents of the PDD.
 
 =head1 VERSION
 
-$Revision: 470 $
+$Revision: 12839 $
 
 =head1 DESCRIPTION
 

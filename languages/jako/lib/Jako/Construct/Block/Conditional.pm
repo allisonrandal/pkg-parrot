@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: /parrotcode/local/languages/jako/lib/Jako/Construct/Block/Conditional.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: Conditional.pm 16255 2006-12-25 22:20:28Z paultcochrane $
 #
 
 use strict;

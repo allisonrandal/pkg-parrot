@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/bf/bfc.pir 3045 2007-04-09T20:26:49.634143Z paultcochrane  $
+# $Id: bfc.pir 18068 2007-04-09 20:26:49Z paultcochrane $
 # A Brainfuck compiler
 # By Leon Brocard <acme@astray.com>
 #

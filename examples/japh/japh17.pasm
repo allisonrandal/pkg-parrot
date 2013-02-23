@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/japh/japh17.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: japh17.pasm 11501 2006-02-10 18:27:13Z particle $
 
     newclass P1, "JaPH"
     find_global P2, "get_s"

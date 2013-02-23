@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2005, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/resizablepmcarray.pmc 3368 2007-05-03T05:08:51.125791Z chromatic  $
+$Id: resizablepmcarray.pmc 18905 2007-06-10 06:49:30Z petdance $
 
 =head1 NAME
 
@@ -679,8 +679,8 @@ everything via the VTABLE api.
 */
 
     void splice(PMC* value, INTVAL offset, INTVAL count) {
-        INTVAL length = VTABLE_elements(INTERP, SELF);
-        INTVAL elems  = VTABLE_elements(INTERP, value);
+        const INTVAL length = VTABLE_elements(INTERP, SELF);
+        const INTVAL elems  = VTABLE_elements(INTERP, value);
         INTVAL shift  = elems - count;
         INTVAL i;
 

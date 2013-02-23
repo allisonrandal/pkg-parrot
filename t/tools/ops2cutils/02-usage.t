@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/tools/ops2cutils/02-usage.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: 02-usage.t 17576 2007-03-17 22:50:07Z paultcochrane $
 # 02-usage.t
 
 use strict;

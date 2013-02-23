@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/HQ9plus/t/basic.t 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: basic.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

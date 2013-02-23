@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/languages/regex/lib/Regex/Parse/P6C.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: P6C.pm 16249 2006-12-25 22:17:17Z paultcochrane $
 
 package Regex::Parse::P6C;
 

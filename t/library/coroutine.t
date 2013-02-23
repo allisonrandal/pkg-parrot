@@ -1,6 +1,6 @@
 #!./parrot 
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/library/coroutine.t 1920 2007-02-20T19:28:18.283760Z chromatic  $
+# $Id: coroutine.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/docs/imcc/syntax.pod 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: syntax.pod 17689 2007-03-22 09:24:25Z kjs $
 
 =head1 NAME
 

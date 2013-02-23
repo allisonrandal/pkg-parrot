@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/config/auto/gdbm.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: gdbm.pm 19060 2007-06-17 14:21:35Z paultcochrane $
 
 =head1 NAME
 
@@ -46,7 +46,8 @@ sub runstep {
     my $osname = $Config{osname};
 
     # On OS X check the presence of the gdbm header in the standard
-    # Fink location. TODO: Need a more generalized way for finding
+    # Fink location.
+    # RT#43134: Need a more generalized way for finding
     # where Fink lives.
     if ( $osname =~ /darwin/ ) {
         if ( -f "/sw/include/gdbm.h" ) {

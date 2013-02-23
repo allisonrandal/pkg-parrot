@@ -1,7 +1,7 @@
 /* parrot.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2007, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/parrot.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: parrot.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -127,14 +127,6 @@ typedef struct parrot_interp_t Interp;
  * isn't represented by zeroes, so don't use these, for resetting
  * non-null pointers
  */
-
-#ifdef HAS_NON_ZERO_NULL
-#  define SET_NULL(x) x = NULL
-#  define SET_NULL_P(x, s) x = (s)NULL
-#else
-#  define SET_NULL(x)
-#  define SET_NULL_P(x, s)
-#endif /* HAS_NON_ZERO_NULL */
 
 /*  Casting between pointers and integers:  If pointers and integers
     are the same size, then direct casting is fine.  If pointers and

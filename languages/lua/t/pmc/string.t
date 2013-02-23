@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /parrotcode/local/languages/lua/t/pmc/string.t 759 2006-12-18T22:22:06.933291Z chromatic  $
+# $Id: string.t 18165 2007-04-12 11:42:33Z fperrad $
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/pasm/nanoforth2.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: nanoforth2.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 =pod
 

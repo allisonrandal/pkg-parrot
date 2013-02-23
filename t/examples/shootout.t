@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/examples/shootout.t 3128 2007-04-11T21:06:01.894856Z paultcochrane  $
+# $Id: shootout.t 19146 2007-06-19 20:59:42Z allison $
 
 use strict;
 use warnings;
@@ -55,6 +55,7 @@ my %skips = (
     'pidigits.pir'    => [ 'not exists $PConfig{HAS_GMP}', 'needs GMP' ],
     'recursive.pir'   => [ '$PConfig{cpuarch} !~ /86/',    'float JIT broken on non-x86' ],
     'recursive-2.pir' => [ '$PConfig{cpuarch} !~ /86/',    'float JIT broken on non-x86' ],
+    'fannkuch.pir'    => [ '$^O eq "darwin"',              'fannkuch benchmark failure on darwin' ],
 );
 my $INPUT_EXT = '.input';
 foreach my $script (@shootouts) {
@@ -69,9 +70,9 @@ foreach my $script (@shootouts) {
     my $file = "$DIR/$script";
 
     # parse first line
-    open( FILE, '<', $file ) or die "unable to open file [$file] : $!";
-    my $shebang = <FILE>;
-    close FILE;
+    open( my $FILE, '<', $file ) or die "unable to open file [$file] : $!";
+    my $shebang = <$FILE>;
+    close $FILE;
     my $expected = slurp_file("$file$EXT");
 
     my $args = "";

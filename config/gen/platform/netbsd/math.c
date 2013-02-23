@@ -1,4 +1,4 @@
-/* $Id: /parrotcode/trunk/config/gen/platform/netbsd/math.c 3335 2007-05-01T13:29:35.445138Z bernhard  $ */
+/* $Id: math.c 18369 2007-05-01 13:29:35Z bernhard $ */
 
 /*
  * math stuff

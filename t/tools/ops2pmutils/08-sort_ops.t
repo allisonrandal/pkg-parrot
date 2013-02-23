@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/ops2pmutils/08-sort_ops.t 3018 2007-04-08T14:25:01.276551Z jkeenan  $
+# $Id: 08-sort_ops.t 18799 2007-06-04 07:35:02Z paultcochrane $
 # 08-sort_ops.t
 
 use strict;
@@ -206,6 +206,21 @@ ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
         ok( copy( qq{$cwd/$num},       qq{$tdir/$num} ),       "copied ops.num file" );
         ok( copy( qq{$cwd/$skip},      qq{$tdir/$skip} ),      "copied ops.skip file" );
         ok( copy( qq{$cwd/DEVELOPING}, qq{$tdir/DEVELOPING} ), "copied DEVELOPING file" );
+        my $dummyops = "./src/ops/dummy.ops";
+        open my $FH, ">", $dummyops or
+            croak "Unable to open handle to create dummy ops file: $!";
+        print $FH <<DUMMYOPS;
+/*
+** dummy.ops
+*/
+
+VERSION = PARROT_VERSION;
+
+inline op zzzzzz(inout INT, in INT) :base_core {
+  goto NEXT();
+}
+DUMMYOPS
+        close $FH or croak "Unable to close handle after writing: $!";
         my @opsfiles = glob("./src/ops/*.ops");
 
         my $self = Parrot::Ops2pm::Utils->new(
@@ -232,6 +247,7 @@ ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
         ok( $self->sort_ops(), "sort_ops returned successfully" );
         $msg = $tie->READLINE;
         untie *STDERR;
+
         like(
             $msg,
             qr|not in ops\.num nor ops\.skip|,

@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: /parrotcode/local/languages/parrot_compiler/lib/Parrot/Test/ParrotCompiler.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: ParrotCompiler.pm 16252 2006-12-25 22:18:26Z paultcochrane $
 
 use strict;
 use warnings;

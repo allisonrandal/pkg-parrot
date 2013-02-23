@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/t/op/00ff-dos.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: 00ff-dos.t 17574 2007-03-17 22:47:11Z paultcochrane $
 
 use strict;
 use warnings;

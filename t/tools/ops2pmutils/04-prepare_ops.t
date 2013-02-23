@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/ops2pmutils/04-prepare_ops.t 3018 2007-04-08T14:25:01.276551Z jkeenan  $
+# $Id: 04-prepare_ops.t 18040 2007-04-08 14:25:01Z jkeenan $
 # 04-prepare_ops.t
 
 use strict;

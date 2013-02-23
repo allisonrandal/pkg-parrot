@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/t/pmc/signal.t 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: signal.t 16171 2006-12-17 19:06:36Z paultcochrane $
 
 use strict;
 use warnings;

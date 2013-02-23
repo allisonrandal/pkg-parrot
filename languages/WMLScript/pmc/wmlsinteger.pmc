@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/languages/WMLScript/pmc/wmlsinteger.pmc 2975 2007-04-05T13:58:31.522219Z fperrad  $
+$Id: wmlsinteger.pmc 17997 2007-04-05 13:58:31Z fperrad $
 
 =head1 NAME
 

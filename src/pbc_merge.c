@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pbc_merge.c 3477 2007-05-13T20:42:55.058233Z chromatic  $
+$Id: pbc_merge.c 18526 2007-05-13 20:42:55Z chromatic $
 
 =head1 NAME
 

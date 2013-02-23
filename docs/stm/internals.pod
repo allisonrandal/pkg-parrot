@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/docs/stm/internals.pod 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: internals.pod 17331 2007-03-04 17:21:14Z rgrjr $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Software Transactional Memory internals
 
 =head1 VERSION
 
-$Revision: 2657 $
+$Revision: 17331 $
 
 =head1 DESCRIPTION
 

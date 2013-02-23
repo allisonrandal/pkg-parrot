@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/lisp/include/macros/list.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
+# $Id: list.pir 18523 2007-05-13 11:14:07Z bernhard $
 
 =head1 LIST PROCESSING MACROS
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /parrotcode/local/docs/pdds/draft/pdd14_bignum.pod 1506 2007-01-22T20:56:47.027038Z chromatic  $
+# $Id: pdd14_bignum.pod 13593 2006-07-26 21:44:40Z allison $
 
 =head1 NAME
 
@@ -385,9 +385,9 @@ Perl's Math::Big* modules.
     Maintainer: Alex Gough (alex@earth.li)
     Class: Internals
     PDD Number: 14
-    Version: $Id: /parrotcode/local/docs/pdds/draft/pdd14_bignum.pod 1506 2007-01-22T20:56:47.027038Z chromatic  $
+    Version: $Id: pdd14_bignum.pod 13593 2006-07-26 21:44:40Z allison $
     Status: Informational
-    Last Modified: $Id: /parrotcode/local/docs/pdds/draft/pdd14_bignum.pod 1506 2007-01-22T20:56:47.027038Z chromatic  $
+    Last Modified: $Id: pdd14_bignum.pod 13593 2006-07-26 21:44:40Z allison $
     PDD Format: 1
     Language: English
 

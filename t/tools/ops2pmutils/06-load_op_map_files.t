@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/ops2pmutils/06-load_op_map_files.t 3018 2007-04-08T14:25:01.276551Z jkeenan  $
+# $Id: 06-load_op_map_files.t 18040 2007-04-08 14:25:01Z jkeenan $
 # 06-load_op_map_files.t
 
 use strict;

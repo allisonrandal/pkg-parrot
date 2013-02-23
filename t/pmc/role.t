@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/role.t 3224 2007-04-17T07:16:09.064950Z chromatic  $
+# $Id: role.t 18258 2007-04-17 07:16:09Z chromatic $
 
 =head1 NAME
 

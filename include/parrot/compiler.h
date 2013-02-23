@@ -1,7 +1,7 @@
 /* compiler.h
  *  Copyright (C) 2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/compiler.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: compiler.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     defines compiler capabilities
  */
@@ -31,6 +31,9 @@
 #ifdef HASATTRIBUTE_PURE
 #  define __attribute__pure__               __attribute__((pure))
 #endif
+#ifdef HASATTRIBUTE_CONST
+#  define __attribute__const__              __attribute__((const))
+#endif
 #ifdef HASATTRIBUTE_UNUSED
 #  define __attribute__unused__             __attribute__((unused))
 #endif
@@ -50,6 +53,9 @@
 #endif
 #ifndef __attribute__noreturn__
 #  define __attribute__noreturn__
+#endif
+#ifndef __attribute__const__
+#  define __attribute__const__
 #endif
 #ifndef __attribute__pure__
 #  define __attribute__pure__

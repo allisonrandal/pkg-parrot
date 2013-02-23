@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/tools/ops2cutils/03-print_c_header_file.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: 03-print_c_header_file.t 17576 2007-03-17 22:50:07Z paultcochrane $
 # 03-print_c_header_file.t
 
 use strict;

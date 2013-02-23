@@ -11,14 +11,7 @@ http://xrl.us/jc4u
 
 =head1 Deprecated C APIs
 
-=over 4
-
-=item enter_nci_method
-
-This function is being renamed to register_nci_method. The original name was
-confusing (see #40801).
-
-=back
+Currently no C APIs are deprecated.
 
 =head1 Deprecated methods
 
@@ -54,18 +47,8 @@ There are several variants of some of the above ops; all are deprecated,
 and are replaced by the ops {set,get}_[hll,root]_global. See also
 http://www.parrotcode.org/docs/ops/var.html.
 
-Additionally, the following (unimplemented) ops are going to be removed:
-
-=over 4
-
-=item adddoes
-
-=item removedoes
-
-=item singleton
-
-=back
-
+The C<classname> op will deprecated in the 0.5.0 release. It's an exact
+duplicate of the string return variant of the C<typeof> op.
 
 =head1 Deprecated vtable methods
 
@@ -73,16 +56,19 @@ The following vtable methods are deprecated:
 
 =over 4
 
-=item void become_parent(PMC* class)
-
 =item PMC* subclass(PMC* name)
-
-=item PMC* get_anonymous_subclass()
-
-=item PMC* new_singleton()
 
 =back
 
+=head1 Deprecated classes
+
+To be removed from the 0.4.14 release [RT #43249].
+
+ src/pmc/smop_class.pmc
+ src/pmc/smop_attribute.pmc
+ t/pmc/smop_attribute.t
+ t/pmc/smop_class.t
+ compilers/smop/ (entire directory)
 
 =head1 FUTURE changes
 

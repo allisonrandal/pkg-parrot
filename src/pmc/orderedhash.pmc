@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/orderedhash.pmc 3359 2007-05-02T06:53:54.573602Z chromatic  $
+$Id: orderedhash.pmc 18394 2007-05-02 06:53:54Z chromatic $
 
 =head1 NAME
 

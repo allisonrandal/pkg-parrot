@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/compilers/pge/pge_text.t 3166 2007-04-14T14:54:09.933069Z pmichaud  $
+# $Id: pge_text.t 18194 2007-04-14 14:54:09Z pmichaud $
 
 use strict;
 use warnings;

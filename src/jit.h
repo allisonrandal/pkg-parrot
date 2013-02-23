@@ -1,7 +1,7 @@
 /*
  * jit.h
  *
- * $Id: /parrotcode/trunk/src/jit.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ * $Id: jit.h 19094 2007-06-18 21:45:36Z petdance $
  */
 
 #ifndef PARROT_JIT_H_GUARD
@@ -318,7 +318,7 @@ parrot_build_asm(Interp *interp,
 /*
  * NCI interface
  */
-void *Parrot_jit_build_call_func(Interp *, PMC *, String *);
+void *Parrot_jit_build_call_func(Interp *, PMC *, STRING *);
 
 #endif /* PARROT_JIT_H_GUARD */
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure.pm 3367 2007-05-03T01:40:40.859036Z jkeenan  $
+# $Id: Configure.pm 18405 2007-05-03 01:40:40Z jkeenan $
 
 =head1 NAME
 

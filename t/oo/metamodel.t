@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/oo/metamodel.t 3222 2007-04-17T06:55:10.804593Z allison  $
+# $Id: metamodel.t 18256 2007-04-17 06:55:10Z allison $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/config/init/hints/msys.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: msys.pm 18563 2007-05-16 00:53:55Z chromatic $
 
 package init::hints::msys;
 

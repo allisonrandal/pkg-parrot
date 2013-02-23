@@ -1,4 +1,4 @@
-' $Id: /parrotcode/trunk/languages/BASIC/compiler/samples/count_to_100.bas 470 2006-12-05T03:30:45.414067Z svm  $
+' $Id: count_to_100.bas 17096 2007-02-20 20:20:48Z paultcochrane $
 '   
 ' count_to_100.bas
 '

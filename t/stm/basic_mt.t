@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/stm/basic_mt.t 3305 2007-04-25T18:08:14.857808Z coke  $
+# $Id: basic_mt.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

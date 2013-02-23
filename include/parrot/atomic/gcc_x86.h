@@ -1,7 +1,7 @@
 /* atomic/gcc_x86.h
  *  Copyright (C) 2006, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/atomic/gcc_x86.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: gcc_x86.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     This header provides an implementation of atomic
  *     operations on x86 platforms with GCC-style

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/codingstd/c_indent.t 3413 2007-05-08T06:00:18.781730Z paultcochrane  $
+# $Id: c_indent.t 18458 2007-05-08 06:00:18Z paultcochrane $
 
 use strict;
 use warnings;

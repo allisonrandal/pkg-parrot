@@ -1,5 +1,5 @@
 #!perl
-# $Id: /parrotcode/local/t/pmc/bignum.t 1506 2007-01-22T20:56:47.027038Z chromatic  $
+# $Id: bignum.t 16761 2007-01-22 19:29:00Z particle $
 
 =head1 NAME
 

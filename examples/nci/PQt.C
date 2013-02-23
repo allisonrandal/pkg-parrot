@@ -1,7 +1,7 @@
 /*
 
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/trunk/examples/nci/PQt.C 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: PQt.C 14677 2006-09-20 17:57:50Z particle $
 
 =head1 NAME
 

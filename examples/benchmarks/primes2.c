@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/local/examples/benchmarks/primes2.c 930 2006-12-28T23:51:13.748136Z chromatic  $
+$Id: primes2.c 16298 2006-12-28 22:25:17Z paultcochrane $
 
 =head1 NAME
 

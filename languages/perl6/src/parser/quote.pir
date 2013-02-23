@@ -1,4 +1,4 @@
-## $Id: /parrotcode/trunk/languages/perl6/src/parser/quote.pir 3029 2007-04-09T08:24:24.276835Z paultcochrane  $
+## $Id: quote.pir 18052 2007-04-09 08:24:24Z paultcochrane $
 
 =head1 TITLE
 

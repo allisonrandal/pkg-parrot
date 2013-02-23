@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/WMLScript/runtime/wmlsconsole.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: wmlsconsole.pir 18801 2007-06-04 07:53:36Z fperrad $
 
 =head1 NAME
 
@@ -46,19 +46,19 @@ Number or invalid.
 
 .sub '_console_print' :anon
     .param pmc str
-    .local pmc ret
+    .local pmc res
     $I0 = isa str, 'WmlsInvalid'
     if $I0 goto L1
     $S0 = str
     print $S0
     $I0 = length $S0
-    new ret, .WmlsInteger
-    ret = $I0
+    new res, .WmlsInteger
+    set res, $I0
     goto L2
-L1:
-    new ret, .WmlsInvalid
-L2:
-    .return (ret)
+  L1:
+    new res, .WmlsInvalid
+  L2:
+    .return (res)
 .end
 
 
@@ -79,20 +79,20 @@ Number or invalid.
 
 .sub '_console_println' :anon
     .param pmc str
-    .local pmc ret
+    .local pmc res
     $I0 = isa str, 'WmlsInvalid'
     if $I0 goto L1
     $S0 = str
     print $S0
     print "\n"
     $I0 = length $S0
-    new ret, .WmlsInteger
-    ret = $I0
+    new res, .WmlsInteger
+    set res, $I0
     goto L2
-L1:
-    new ret, .WmlsInvalid
-L2:
-    .return (ret)
+  L1:
+    new res, .WmlsInvalid
+  L2:
+    .return (res)
 .end
 
 

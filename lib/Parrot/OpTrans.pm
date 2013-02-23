@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/OpTrans.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: OpTrans.pm 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

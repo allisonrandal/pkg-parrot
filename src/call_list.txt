@@ -1,5 +1,5 @@
-# Copyright (C) 2002-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/src/call_list.txt 3477 2007-05-13T20:42:55.058233Z chromatic  $
+# Copyright (C) 2002-2007, The Perl Foundation.
+# $Id: call_list.txt 18648 2007-05-27 00:11:49Z chromatic $
 
 # Function signature declarations for Parrot Native Call Interface.
 # The first alphanumeric is the type of the return value,
@@ -422,6 +422,10 @@ l ttl	#  unsigned long mysql_escape_string(char *to,const char *from, unsigned l
 l pttl	#  unsigned long mysql_real_escape_string(MYSQL *mysql, char *to,const char *from, unsigned long length)
 v t	#  void mysql_debug(const char *debug)
 # --- end mysqlclient library ---
+
+i       # void function returning int like fork()
+i i3i   # POSIX's waitpid
+i ibi   # POSIX's read
 
 # win32
 l lttl

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/shootout.t 3082 2007-04-10T08:45:23.830447Z fperrad  $
+# $Id: shootout.t 19127 2007-06-19 13:37:58Z fperrad $
 
 =head1 NAME
 
@@ -121,7 +121,7 @@ language_output_is( 'lua', $code, $out, 'nsieve-bits' );
 
 SKIP:
 {
-    skip('low memory', 1) unless (exists $ENV{PARROT_LUA_TEST_PROG});
+    skip('low memory', 1) unless (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 $code = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'recursive.lua' ));
 $out = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'recursive-output.txt' ));
@@ -153,7 +153,7 @@ language_output_is( 'lua', $code, $out, 'n-body', params => '1000' );
 
 SKIP:
 {
-    skip('maximum recursion depth exceeded', 1) unless (exists $ENV{PARROT_LUA_TEST_PROG});
+    skip('maximum recursion depth exceeded', 1) unless (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 $code = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'message.lua-2.lua' ));
 $out = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'message-output.txt' ));
@@ -174,14 +174,9 @@ language_output_is( 'lua', $code, $out, 'spectral-norm', params => '100' );
 #       Symmetrical thread rendez-vous requests
 #
 
-TODO:
-{
-    local $TODO = 'pb with tail call ?';
-
 $code = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'chameneos.lua' ));
 $out = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'chameneos-output.txt' ));
 language_output_is( 'lua', $code, $out, 'chameneos', params => '100' );
-}
 
 #
 #   reverse-complement
@@ -190,7 +185,7 @@ language_output_is( 'lua', $code, $out, 'chameneos', params => '100' );
 
 SKIP:
 {
-    skip('maximum recursion depth exceeded', 1) unless (exists $ENV{PARROT_LUA_TEST_PROG});
+    skip('maximum recursion depth exceeded', 1) unless (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 $code = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'revcomp.lua-3.lua' ));
 $out = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'revcomp-output.txt' ));
@@ -205,7 +200,7 @@ language_output_is( 'lua', $code, $out, 'reverse-complement', params => "< $in" 
 
 SKIP:
 {
-    skip('low memory', 1) unless (exists $ENV{PARROT_LUA_TEST_PROG});
+    skip('low memory', 1) unless (($ENV{PARROT_LUA_TEST_PROG} || q{}) eq 'lua');
 
 $code = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'binarytrees.lua-3.lua' ));
 $out = Parrot::Test::slurp_file(File::Spec->catfile( @dir, 'binarytrees-output.txt' ));

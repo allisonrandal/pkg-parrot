@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/capture.pmc 3300 2007-04-24T21:18:22.142154Z mdiep  $
+$Id: capture.pmc 18329 2007-04-24 21:18:22Z mdiep $
 
 =head1 NAME
 

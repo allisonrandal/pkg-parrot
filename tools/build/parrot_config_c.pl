@@ -1,12 +1,12 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/local/tools/build/parrot_config_c.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: parrot_config_c.pl 17580 2007-03-17 22:53:00Z paultcochrane $
 
 use warnings;
 use strict;
 
 my ($svnid) =
-    '$Id: /parrotcode/local/tools/build/parrot_config_c.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+    '$Id: parrot_config_c.pl 17580 2007-03-17 22:53:00Z paultcochrane $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 

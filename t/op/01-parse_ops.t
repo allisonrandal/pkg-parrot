@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/op/01-parse_ops.t 3509 2007-05-16T02:26:11.809697Z chromatic  $
+# $Id: 01-parse_ops.t 18564 2007-05-16 02:26:11Z chromatic $
 
 use strict;
 use warnings;

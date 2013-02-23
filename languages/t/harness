@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/t/harness 2954 2007-04-04T18:41:23.735838Z bernhard  $
+# $Id: harness 18725 2007-06-01 20:11:57Z bernhard $
 
 use strict;
 use warnings;
@@ -79,7 +79,6 @@ my $result = GetOptions( 'html'          => \$do_gen_html,
 # cola                 not maintained
 # conversion           No t/harness
 # forth                No t/harness
-# lisp                 No t/harness
 # miniperl             not maintained, should be removed
 # perl6                test scripts are written in Perl 6, not Perl 5
 # pheme                test scripts are written in Scheme, not Perl 5
@@ -100,6 +99,7 @@ my @unified_testable_languages
               HQ9plus
               jako
               lazy-k
+              lisp
               lua
               m4
               ook

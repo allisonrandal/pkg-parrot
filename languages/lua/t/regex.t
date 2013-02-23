@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/lua/t/regex.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: regex.t 17627 2007-03-19 07:08:44Z fperrad $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/dynoplibs/myops.t 3509 2007-05-16T02:26:11.809697Z chromatic  $
+# $Id: myops.t 19131 2007-06-19 14:57:20Z particle $
 
 use strict;
 use warnings;
@@ -62,7 +62,11 @@ OUTPUT
 
 {
     my @todo;
-    @todo = ( todo => 'broken with -j' ) if $ENV{TEST_PROG_ARGS} =~ /-j/;
+
+    if ($ENV{TEST_PROG_ARGS}) {
+        @todo = ( todo => 'broken with -j' ) if $ENV{TEST_PROG_ARGS} =~ /-j/;
+    }
+
     my $quine = <<'END_PASM';
 .loadlib "myops_ops"
 q
@@ -76,14 +80,16 @@ pir_output_is( << 'CODE', << 'OUTPUT', "one alarm" );
 .sub main :main
     find_global P0, "_alarm"
     alarm 2.0, P0
-    set I0, 1
-loop:
     sleep 1
-    print I0
-    print "\n"
-    inc I0
-    # check_events
-    le I0, 3, loop
+    print "1\n"
+
+    # alarm should be triggered half-way
+    # during this sleep
+    sleep 2
+    print "2\n"
+
+    sleep 1
+    print "3\n"
     print "done.\n"
 .end
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/exec.c 3159 2007-04-14T03:15:44.800537Z chromatic  $
+$Id: exec.c 18915 2007-06-11 03:08:03Z petdance $
 
 =head1 NAME
 
@@ -311,7 +311,7 @@ symbol_list_find(Parrot_exec_objfile_t *obj /*NN*/, const char *symbol /*NN*/)
     int i;
 
     for (i = 0; i < obj->symbol_count; i++)
-        if (!strcmp(symbol, obj->symbol_table[i].symbol))
+        if (strcmp(symbol, obj->symbol_table[i].symbol) == 0)
             return i;
     return -1;
 }

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2007 The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/stmvar.pmc 3368 2007-05-03T05:08:51.125791Z chromatic  $
+$Id: stmvar.pmc 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

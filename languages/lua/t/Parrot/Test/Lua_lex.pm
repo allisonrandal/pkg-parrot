@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/Parrot/Test/Lua_lex.pm 3360 2007-05-02T08:34:39.337949Z fperrad  $
+# $Id: Lua_lex.pm 18395 2007-05-02 08:34:39Z fperrad $
 
 package Parrot::Test::Lua_lex;
 

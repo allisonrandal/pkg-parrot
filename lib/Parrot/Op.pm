@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/Op.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: Op.pm 16170 2006-12-17 18:59:41Z paultcochrane $
 
 =head1 NAME
 

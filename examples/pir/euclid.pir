@@ -1,7 +1,7 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
 # This program is free software. It is subject to the same
 # license as Perl itself.
-# $Id: /parrotcode/local/examples/pir/euclid.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: euclid.pir 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

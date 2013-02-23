@@ -1,7 +1,7 @@
 /* slice.h
  *  Copyright (C) 2001-2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/slice.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: slice.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     This is the api header for slices.
  *  Data Structure and Algorithms:

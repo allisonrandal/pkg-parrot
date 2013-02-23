@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/local/lib/Parrot/Configure/Step/Base.pm 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: Base.pm 17090 2007-02-20 20:06:55Z paultcochrane $
 
 =pod
 

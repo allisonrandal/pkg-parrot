@@ -1,4 +1,4 @@
-/* $Id: /parrotcode/trunk/examples/compilers/japhc.c 3477 2007-05-13T20:42:55.058233Z chromatic  $ */
+/* $Id: japhc.c 18526 2007-05-13 20:42:55Z chromatic $ */
 
 /*
  * example compiler used by japh16.pasm

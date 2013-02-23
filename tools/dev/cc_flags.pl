@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/cc_flags.pl 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: cc_flags.pl 18810 2007-06-04 20:27:35Z paultcochrane $
 ################################################################################
 
 =head1 NAME
@@ -32,11 +32,11 @@ use warnings;
 
 my $cflags = shift;
 
-open F, '<', $cflags or die "open $cflags: $!\n";
+open my $F, '<', $cflags or die "open $cflags: $!\n";
 
 my @options;
 
-while (<F>) {
+while (<$F>) {
     chomp;
     s/#.*//;
     next unless /\S/;

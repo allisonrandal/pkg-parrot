@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/stm/queue.t 3362 2007-05-02T16:29:23.841851Z mdiep  $
+# $Id: queue.t 18563 2007-05-16 00:53:55Z chromatic $
 use warnings;
 use strict;
 use lib qw( . lib ../lib ../../lib );

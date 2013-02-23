@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/pdds/draft/pdd05_opfunc.pod 3073 2007-04-10T06:37:43.725427Z allison  $
+# $Id: pdd05_opfunc.pod 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

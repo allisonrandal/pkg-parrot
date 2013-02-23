@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/nci.pmc 3310 2007-04-26T17:30:06.127472Z chromatic  $
+Copyright (C) 2001-2007, The Perl Foundation.
+$Id: nci.pmc 18695 2007-05-30 22:07:12Z petdance $
 
 =head1 NAME
 
@@ -112,7 +112,7 @@ Creates and returns a clone of the NCI.
 */
 
     PMC* clone() {
-        PMC* ret = pmc_new_noinit(INTERP, SELF->vtable->base_type);
+        PMC* const ret = pmc_new_noinit(INTERP, SELF->vtable->base_type);
         PMC_struct_val(ret) = PMC_struct_val(SELF);
         PMC_pmc_val(ret) = NULL;
         /* FIXME if data is malloced (JIT/i386!) then we need

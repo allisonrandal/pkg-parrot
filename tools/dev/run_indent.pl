@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/tools/dev/run_indent.pl 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: run_indent.pl 18810 2007-06-04 20:27:35Z paultcochrane $
 ################################################################################
 
 =head1 NAME
@@ -83,10 +83,10 @@ foreach my $file (@ARGV) {
     }
 
     # now a little trick.  Weed out the ones we know aren't used in this file.
-    open( F, "<", "$file" ) || die "Can't read $file: $!\n";
+    open( my $F, "<", "$file" ) || die "Can't read $file: $!\n";
     {
         local $/ = undef;
-        my $contents = <F>;
+        my $contents = <$F>;
 
         foreach ( keys %$typedefs ) {
             delete $typedefs->{$_} unless ( $contents =~ /\Q$_\E/ );
@@ -98,7 +98,7 @@ foreach my $file (@ARGV) {
         }
 
     }
-    close(F);
+    close($F);
 
     print STDERR "$errors parse errors.  " if ($errors);
     print STDERR "Found " . scalar( keys %$typedefs ) . " typedefs.\n";

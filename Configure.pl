@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/Configure.pl 3467 2007-05-12T14:16:07.178849Z jkeenan  $
+# $Id: Configure.pl 19047 2007-06-16 23:50:09Z chromatic $
 
 =head1 NAME
 
@@ -281,7 +281,7 @@ F<lib/Parrot/Configure/Step.pm>, F<docs/configuration.pod>
 
 =cut
 
-use 5.006_001;
+use 5.008_000;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -316,12 +316,12 @@ my $args = process_options( {
     argv            => [ @ARGV ],
     script          => $0,
     parrot_version  => $parrot_version,
-    svnid           => '$Id: /parrotcode/trunk/Configure.pl 3467 2007-05-12T14:16:07.178849Z jkeenan  $',
+    svnid           => '$Id: Configure.pl 19047 2007-06-16 23:50:09Z chromatic $',
 } );
 exit unless defined $args;
 
 my $opttest = Parrot::Configure::Options::Test->new($args);
-# configuration tests will only be run if you requested them 
+# configuration tests will only be run if you requested them
 # as command-line option
 $opttest->run_configure_tests();
 
@@ -333,7 +333,7 @@ my $conf = Parrot::Configure->new;
 # from Parrot::Configure::Step::List
 $conf->add_steps(get_steps_list());
 
-my %args = %$args;
+my %args = %{$args};
 # from Parrot::Configure::Data
 $conf->options->set(%args);
 
@@ -350,16 +350,7 @@ else {
     $conf->runsteps or exit(1);
 }
 
-# tell users what to do next
-#if ($run_build_tests) {
-#    print "\n\n";
-#    print "As you requested, I will now run some tests of the build tools.\n\n";
-#    system(qq{prove t/postconfigure/*.t t/tools/pmc2cutils/*.t t/tools/ops2cutils/*.t t/tools/ops2pmutils/*.t})
-#        and die "Unable to execute post-configuration and build tools tests";
-#}
-
-
-# build tests will only be run if you requested them 
+# build tests will only be run if you requested them
 # as command-line option
 $opttest->run_build_tests();
 

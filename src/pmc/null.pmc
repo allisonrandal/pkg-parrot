@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/null.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
+$Id: null.pmc 18755 2007-06-02 03:49:27Z petdance $
 
 =head1 NAME
 
@@ -20,12 +20,6 @@ really slowing down the bytecode execution.
 */
 
 #include "parrot/parrot.h"
-
-static void
-show_backtrace(int ret, void *interp)
-{
-    PDB_backtrace((Interp*)interp);
-}
 
 pmclass Null singleton {
 

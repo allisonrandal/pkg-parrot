@@ -1,4 +1,4 @@
-## $Id: /parrotcode/trunk/languages/perl6/src/parser/expression.pir 3029 2007-04-09T08:24:24.276835Z paultcochrane  $
+## $Id: expression.pir 19093 2007-06-18 21:44:25Z pmichaud $
 
 =head1 TITLE
 
@@ -29,8 +29,9 @@ and returns the result to the caller.
 
 .sub "expression"
     .param pmc mob
-    .param string stoptoken       :optional
+    .param string stoptoken    :optional
     .param int has_stoptoken   :opt_flag
+    .param pmc adverbs         :slurpy :named
     .local pmc optable
     .local pmc ws
 

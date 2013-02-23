@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/op/string.t 3479 2007-05-14T01:12:54.049559Z chromatic  $
+# $Id: string.t 18770 2007-06-03 00:06:45Z rgrjr $
 
 use strict;
 use warnings;
@@ -1274,7 +1274,7 @@ XXXXXXXXXXXX
 >< done
 OUTPUT
 
-pasm_error_output_is( <<'CODE', "Cannot repeat with negative arg\n", 'repeat OOB' );
+pasm_error_output_like( <<'CODE', qr/Cannot repeat with negative arg\n/, 'repeat OOB' );
 	repeat S0, "japh", -1
 	end
 CODE

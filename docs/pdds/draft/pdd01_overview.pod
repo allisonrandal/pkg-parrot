@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/docs/pdds/draft/pdd01_overview.pod 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: pdd01_overview.pod 17205 2007-02-27 20:03:56Z allison $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ A high-level overview of the Parrot system.
 
 =head1 VERSION
 
-$Revision: 2657 $
+$Revision: 17205 $
 
 =head1 DESCRIPTION
 

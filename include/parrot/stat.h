@@ -1,7 +1,7 @@
 /* string.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/stat.h 3422 2007-05-08T17:04:21.006524Z paultcochrane  $
+ *     $Id: stat.h 18945 2007-06-12 14:08:35Z fperrad $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:

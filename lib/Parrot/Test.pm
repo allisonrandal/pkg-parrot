@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Test.pm 3479 2007-05-14T01:12:54.049559Z chromatic  $
+# $Id: Test.pm 18988 2007-06-13 19:45:11Z bernhard $
 
 =head1 NAME
 
@@ -593,8 +593,6 @@ sub _generate_functions {
             my $meth        = $parrot_test_map{$func};
             my $real_output = slurp_file($out_f);
 
-       # die Dumper( $code, $expected, $desc, \%extra, $extra{todo}, $call_pkg ) if ( keys %extra );
-
             unlink $out_f unless $ENV{POSTMORTEM};
 
             # set a TODO for Test::Builder to find
@@ -689,7 +687,6 @@ sub _generate_functions {
             # set a TODO for Test::Builder to find
             my $call_pkg = $builder->exported_to() || '';
 
-       # die Dumper( $code, $expected, $desc, \%extra, $extra{todo}, $call_pkg ) if ( keys %extra );
             local *{ $call_pkg . '::TODO' } = \$extra{todo}
                 if defined $extra{todo};
 
@@ -697,7 +694,7 @@ sub _generate_functions {
             $builder->diag("'$cmd' failed with exit code $exit_code")
                 if $exit_code and not $pass;
 
-            unless ( $ENV{POSTMORTEM} ) {
+            if ( ! $ENV{POSTMORTEM} ) {
                 unlink $out_f;
             }
 
@@ -759,7 +756,7 @@ sub _generate_functions {
                 # restore prior level, just in case.
                 $builder->level($level);
             }
-            }
+        }
     }
 
     # XXX this is broken WRT todo tests
@@ -842,6 +839,10 @@ sub _generate_functions {
                 $iculibs = $PConfig{icu_shared};
             }
 
+            # set TODO before trying to compile or link
+            local *main::TODO;
+            *main::TODO = \$options{todo} if $options{todo};
+
             my ( $cmd, $exit_code );
             $cmd =
                   "$PConfig{cc} $PConfig{ccflags} $PConfig{cc_debug} "
@@ -887,8 +888,6 @@ sub _generate_functions {
             $exit_code = run_command( $cmd, 'STDOUT' => $out_f, 'STDERR' => $out_f );
 
             my $meth = $c_test_map{$func};
-            local *main::TODO;
-            *main::TODO = \$options{todo} if $options{todo};
             my $pass = $builder->$meth( slurp_file($out_f), $expected, $desc );
             $builder->diag("'$cmd' failed with exit code $exit_code")
                 if $exit_code and not $pass;
@@ -927,7 +926,7 @@ Parrot::Test::_generate_functions();
 
 sub report_odd_hash {
     my $warning = shift;
-    if ( $warning =~ /Odd number of elements in hash assignment/ ) {
+    if ( $warning =~ m/Odd number of elements in hash assignment/ ) {
         require Carp;
         my @args = DB::uplevel_args();
         shift @args;

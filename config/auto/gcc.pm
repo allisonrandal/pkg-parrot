@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/config/auto/gcc.pm 3245 2007-04-18T19:13:32.336943Z chromatic  $
+# $Id: gcc.pm 18807 2007-06-04 19:46:53Z chromatic $
 
 =head1 NAME
 
@@ -132,6 +132,7 @@ sub runstep {
             # We shouldn't be using __packed__, but I doubt -Wpacked will harm
             # us -Wpadded may prove interesting, or even noisy.
             # -Wunreachable-code might be useful in a non debugging version
+            4.0 => "-fvisibility=hidden",
         );
         my @cage_opt_and_vers = (
             0 =>
@@ -245,6 +246,9 @@ sub runstep {
             $warns = join ' ', @warns;
         }
     }
+
+    $conf->data->set( sym_export => '__attribute__ ((visibility("default")))' )
+        if $gccversion >= 4.0;
 
     if ( defined $conf->options->get('miniparrot') && $gccversion ) {
 

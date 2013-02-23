@@ -1,6 +1,6 @@
 #!../../parrot
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/tcl/t/internals/select_option.t 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: select_option.t 17096 2007-02-20 20:20:48Z paultcochrane $
 
 =head1 NAME
 

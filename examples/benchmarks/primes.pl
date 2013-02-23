@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: /parrotcode/local/examples/benchmarks/primes.pl 736 2006-12-18T04:21:02.544079Z chromatic  $
+# $Id: primes.pl 16178 2006-12-18 05:22:02Z chromatic $
 
 =head1 NAME
 

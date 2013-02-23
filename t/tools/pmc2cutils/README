@@ -1,5 +1,5 @@
 # Copyright (C) 2003-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/pmc2cutils/README 3451 2007-05-11T00:50:42.095481Z tewk  $
+# $Id: README 18495 2007-05-11 00:50:42Z tewk $
 README for directory t/tools/pmc2cutils/
 
 This directory contains test code for Parrot::Pmc2c::Pmc2cMain, a Perl5

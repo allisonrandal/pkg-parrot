@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Pmc2c/Pmc2cMain.pm 3451 2007-05-11T00:50:42.095481Z tewk  $
+# $Id: Pmc2cMain.pm 18797 2007-06-04 07:33:32Z paultcochrane $
 package Parrot::Pmc2c::Pmc2cMain;
 use strict;
 use warnings;
@@ -480,7 +480,7 @@ sub gen_parent_list {
 
         for my $parent_name (@parent_names) {
             #load $parent_name into $all
-            $all->{$parent_name} = 
+            $all->{$parent_name} =
                 $self->read_dump( lc("$parent_name.pmc") ) if not $all->{$parent_name};
 
             #add parent's has_method hash to pmc_class' has_parent hash

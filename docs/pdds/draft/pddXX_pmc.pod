@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/pdds/draft/pddXX_pmc.pod 3187 2007-04-15T03:31:19.509244Z chromatic  $
+# $Id: pddXX_pmc.pod 18698 2007-05-31 00:55:39Z allison $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Proposal
 
 =head1 VERSION
 
-$Revision: 3187 $
+$Revision: 18698 $
 
 =head1 ABSTRACT
 
@@ -145,7 +145,7 @@ PMC and the property Hash.
 
 =head2 Locking or opmc->pmc_ext->_synchronize
 
-PMCs do no support locking universally. Creating sharable PMCs at
+PMCs do not support locking universally. Creating sharable PMCs at
 runtime (from standard PMCs) is again done by transparent Refs like
 C<SharedRef> or C<STMRef>.
 

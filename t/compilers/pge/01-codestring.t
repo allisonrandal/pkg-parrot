@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/compilers/pge/01-codestring.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: 01-codestring.t 18563 2007-05-16 00:53:55Z chromatic $
 
 use strict;
 use warnings;

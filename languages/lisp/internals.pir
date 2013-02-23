@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/lisp/internals.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
+# $Id: internals.pir 19003 2007-06-14 20:10:10Z bernhard $
 
 =head1 _LOOKUP_GLOBAL(pkgname, symname)
 
@@ -7,6 +7,7 @@
 .sub _LOOKUP_GLOBAL
   .param string pkgname
   .param string symname
+
   .local pmc package
   .local pmc retv
 
@@ -36,6 +37,7 @@ DONE:
 
 .sub _LOOKUP_LEXICAL
   .param string symname
+
   .local pmc retv
 
   push_eh LEXICAL_NOT_FOUND                     # Set an error handler
@@ -59,6 +61,7 @@ DONE:
 
 .sub _LOOKUP_SYMBOL
   .param string symname
+
   .local string pkgname
   .local pmc package
   .local pmc symbol
@@ -97,6 +100,7 @@ DONE:
 .sub _INTERN_GLOBAL
   .param pmc symbol
   .param string pkgname
+
   .local string symname
 
   symname = symbol._get_name_as_string()
@@ -111,6 +115,7 @@ DONE:
 
 .sub _INTERN_LEXICAL
   .param pmc symbol
+
   .local string symname
 
   symname = symbol._get_name_as_string()
@@ -127,6 +132,7 @@ DONE:
 .sub _LEXICAL_SYMBOL
   .param string symname
   .param pmc value
+
   .local pmc package
   .local pmc symbol
   .local int test
@@ -157,6 +163,7 @@ DONE:
 
 .sub _SYMBOL
   .param string symname
+
   .local pmc symbol
   .local pmc name
 
@@ -164,7 +171,6 @@ DONE:
 
   name = new "LispString"
   name = symname
-
   symbol._set_name(name)
 
   .return(symbol)
@@ -180,6 +186,7 @@ DONE:
   .param string symname
   .param pmc value
   .param pmc function
+
   .local pmc packages
   .local pmc package
   .local pmc symbol
@@ -233,14 +240,17 @@ DONE:
   proto = function._get_args()
   body  = function._get_body()
 
-  typeof type, body                     # Get the function type
+  type = typeof body                     # Get the function type
 
   if type == "Sub" goto COMPILED_FUNCTION
   goto INTERPRETED_FUNCTION
 
 COMPILED_FUNCTION:
-  set_args "0", args                    # First argument
-  goto CALL_FUNCTION
+  # VALID_IN_PARROT_0_2_0 set_args "0", args                    # First argument
+  # VALID_IN_PARROT_0_2_0 goto CALL_FUNCTION
+  # Just a wild guess
+  .return body( args )
+   
 
 INTERPRETED_FUNCTION:
   scope = function._get_scope()
@@ -262,12 +272,14 @@ CALL_FUNCTION:
 
 .sub _IS_SPECIAL
   .param pmc symbol
+
   .local pmc special
   .local int retv
 
    retv = 1
 
-   getattribute special, symbol, "LispSymbol\0special"
+   # VALID_IN_PARROT_0_2_0 getattribute special, symbol, "LispSymbol\0special"
+   special = getattribute symbol, "special"
    if_null special, NOT_SPECIAL
 
   .NULL(special, NOT_SPECIAL)
@@ -284,6 +296,7 @@ DONE:
 
 .sub _IS_ORDINARY_LAMBDA_LIST
   .param pmc form
+
   .local string type
   .local pmc symbol
   .local pmc args
@@ -444,10 +457,11 @@ DONE:
 .sub _IS_TYPE
   .param pmc args
   .param string rtype
+
   .local string atype
   .local int retv
 
-   typeof atype, args
+   atype = typeof args
    retv = 1
 
    if rtype == "cons"     goto CONS_TYPE

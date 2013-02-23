@@ -1,5 +1,5 @@
 #! perl
-# $Id: /parrotcode/local/languages/ook/t/basic.t 1502 2007-01-22T17:06:21.889089Z chromatic  $
+# $Id: basic.t 17096 2007-02-20 20:20:48Z paultcochrane $
 
 =head1 NAME
 

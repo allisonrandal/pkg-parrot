@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/tools/ops2cutils/testlib/GenerateCore.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: GenerateCore.pm 17576 2007-03-17 22:50:07Z paultcochrane $
 package GenerateCore;
 use strict;
 use warnings;

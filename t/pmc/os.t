@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/os.t 3415 2007-05-08T07:28:47.752276Z paultcochrane  $
+# $Id: os.t 18809 2007-06-04 20:24:05Z paultcochrane $
 
 use strict;
 use warnings;
@@ -197,9 +197,9 @@ CODE
 SKIP: {
     skip 'not implemented on windows yet', 1 if ( $MSWin32 && $MSVC );
 
-    opendir IN, '.';
-    my @entries = readdir IN;
-    closedir IN;
+    opendir my $IN, '.';
+    my @entries = readdir $IN;
+    closedir $IN;
     my $entries = join( ' ', @entries ) . "\n";
     pir_output_is( <<'CODE', $entries, 'Test OS.readdir' );
 .sub main :main
@@ -215,8 +215,8 @@ CODE
 
 # test rename
 SKIP: {
-    open FILE, ">", "____some_test_file";
-    close FILE;
+    open my $FILE, ">", "____some_test_file";
+    close $FILE;
     pir_output_is( <<'CODE', <<"OUT", 'Test OS.rename' );
 .sub main :main
     $P1 = new .OS

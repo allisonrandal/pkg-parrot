@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/lua/t/constructor.t 1640 2007-02-01T03:58:19.287027Z chromatic  $
+# $Id: constructor.t 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

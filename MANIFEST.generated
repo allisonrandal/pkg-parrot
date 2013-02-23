@@ -1,12 +1,12 @@
-# $Id: /parrotcode/trunk/MANIFEST.generated 3510 2007-05-16T02:47:23.785670Z chromatic  $
+# $Id: MANIFEST.generated 19137 2007-06-19 18:34:09Z allison $
 # See tools/dev/install_files.pl for documentation on the
 # format of this file.
 # Please re-sort this file after *EVERY* modification
-blib/lib/libparrot.0.4.12.dylib                   [main]lib
+blib/lib/libparrot.0.4.13.dylib                   [main]lib
 blib/lib/libparrot.a                              [main]lib
 blib/lib/libparrot.dylib                          [main]lib
 blib/lib/libparrot.so                             [main]lib
-blib/lib/libparrot.so.0.4.12                      [main]lib
+blib/lib/libparrot.so.0.4.13                      [main]lib
 compilers/imcc/imclexer.c                         [main]
 config/gen/cpu/i386/memcpy_mmx.c                  [main]
 config/gen/cpu/i386/memcpy_sse.c                  [main]
@@ -197,7 +197,16 @@ runtime/parrot/library/Data/Dumper/Default.pbc    [main]
 runtime/parrot/library/Data/Escape.pbc            [main]
 runtime/parrot/library/Data/Sort.pbc              [main]
 runtime/parrot/library/Getopt/Obj.pbc             [main]
+runtime/parrot/library/Parrot/Capture_PIR.pbc     [main]
+runtime/parrot/library/Parrot/Coroutine.pbc       [main]
+runtime/parrot/library/Parrot/HLLCompiler.pbc     [main]
 runtime/parrot/library/PGE.pbc                    [main]
+runtime/parrot/library/PGE/Dumper.pbc             [main]
+runtime/parrot/library/PGE/Glob.pbc               [main]
+runtime/parrot/library/PGE/Hs.pbc                 [main]
+runtime/parrot/library/PGE/P6Grammar.pbc          [main]
+runtime/parrot/library/PGE/Text.pbc               [main]
+runtime/parrot/library/PGE/Util.pbc               [main]
 runtime/parrot/library/Stream/Base.pbc            [main]
 runtime/parrot/library/Stream/Combiner.pbc        [main]
 runtime/parrot/library/Stream/Coroutine.pbc       [main]

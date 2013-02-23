@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/local/config/auto/signal.pm 740 2006-12-18T05:00:52.799273Z chromatic  $
+# $Id: signal.pm 16180 2006-12-18 06:00:55Z chromatic $
 
 =head1 NAME
 

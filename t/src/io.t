@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/src/io.t 3305 2007-04-25T18:08:14.857808Z coke  $
+# $Id: io.t 18660 2007-05-27 03:13:24Z chromatic $
 
 use strict;
 use warnings;
@@ -505,7 +505,7 @@ teardown;
 
 ###############################################################################
 
-c_output_is( $main . <<'CODE', <<'OUTPUT', "PIO_make_offset" );
+c_output_is( $main . <<'CODE', <<'OUTPUT', "PIO_make_offset", todo => 'RT #43055' );
 static opcode_t*
 the_test(Interp *interp,
          opcode_t *cur_op, opcode_t *start)
@@ -537,7 +537,7 @@ OUTPUT
 
 setup( "temp.file", "abcdefg" );
 
-c_output_is( $main . <<'CODE', <<'OUTPUT', "PIO_seek" );
+c_output_is( $main . <<'CODE', <<'OUTPUT', "PIO_seek", todo => 'RT #43055' );
 #include "../src/io/io_private.h"
 
 static opcode_t*
@@ -627,7 +627,7 @@ OUTPUT
 
 ###############################################################################
 
-c_output_is( $main . <<'CODE', <<'OUTPUT', 'stdio-layer' );
+c_output_is( $main . <<'CODE', <<'OUTPUT', 'stdio-layer', todo => 'RT #43055' );
 static opcode_t*
 the_test(Interp *interp,
          opcode_t *cur_op, opcode_t *start)

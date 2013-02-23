@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/local/config/inter/lex.pm 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: lex.pm 19060 2007-06-17 14:21:35Z paultcochrane $
 
 =head1 NAME
 
@@ -66,8 +66,8 @@ sub runstep {
         return;
     }
 
-    # XXX should --ask be handled like the other user defines or checked for
-    # version requirements?
+    # RT#43170 should --ask be handled like the other user defines or
+    # checked for version requirements?
     if ( $conf->options->get('ask') ) {
         $prog = prompt( $prompt, $prog ? $prog : $conf->data->get($util) );
     }

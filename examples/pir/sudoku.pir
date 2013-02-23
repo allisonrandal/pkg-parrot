@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/examples/pir/sudoku.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: sudoku.pir 17600 2007-03-18 10:52:17Z paultcochrane $
 
 =pod
 

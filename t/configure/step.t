@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/step.t 3480 2007-05-14T02:03:28.846683Z jkeenan  $
+# $Id: step.t 18534 2007-05-14 02:03:28Z jkeenan $
 
 use strict;
 use warnings;

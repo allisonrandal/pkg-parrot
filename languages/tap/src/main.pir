@@ -1,4 +1,4 @@
-## $Id: /parrotcode/trunk/languages/tap/src/main.pir 3061 2007-04-09T22:01:09.122746Z paultcochrane  $
+## $Id: main.pir 18084 2007-04-09 22:01:09Z paultcochrane $
 
 =head1 NAME
 

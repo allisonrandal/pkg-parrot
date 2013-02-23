@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/examples/mops/mops.c 470 2006-12-05T03:30:45.414067Z svm  $
+$Id: mops.c 15173 2006-11-07 18:01:26Z paultcochrane $
 
 =head1 NAME
 

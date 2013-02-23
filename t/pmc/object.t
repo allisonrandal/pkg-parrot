@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/pmc/object.t 3301 2007-04-25T02:37:03.820297Z coke  $
+# $Id: object.t 18330 2007-04-25 02:37:03Z coke $
 
 =head1 NAME
 

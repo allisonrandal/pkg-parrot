@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/plumhead/config/makefiles/root.in 3306 2007-04-25T19:25:28.192829Z bernhard  $
+# $Id: root.in 18335 2007-04-25 19:25:28Z bernhard $
 
 # Set up some commands
 PARROT   = ../../parrot@exe@

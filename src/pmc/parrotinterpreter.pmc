@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/parrotinterpreter.pmc 3359 2007-05-02T06:53:54.573602Z chromatic  $
+$Id: parrotinterpreter.pmc 18752 2007-06-02 03:21:20Z petdance $
 
 =head1 NAME
 
@@ -593,12 +593,10 @@ Finish thawing.
     }
 
     void freeze(visit_info *info) {
-        IMAGE_IO *io = info->image_io;
         SUPER(info);
     }
 
     void thaw(visit_info *info) {
-        IMAGE_IO *io = info->image_io;
         if (info->extra_flags == EXTRA_IS_PROP_HASH) {
             SUPER(info);
         }

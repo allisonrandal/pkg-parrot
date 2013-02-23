@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/config/auto/socklen_t.pm 1424 2007-01-19T05:42:41.020450Z chromatic  $
+# $Id: socklen_t.pm 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

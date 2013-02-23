@@ -1,6 +1,6 @@
 #!./parrot -G
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/compilers/pge/perl6regex/01-regex.t 3170 2007-04-14T16:52:28.082170Z pmichaud  $
+# $Id: 01-regex.t 18199 2007-04-14 16:52:28Z pmichaud $
 
 =head1 NAME
 

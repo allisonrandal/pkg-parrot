@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/runops_cores.c 3177 2007-04-14T20:50:06.571531Z chromatic  $
+$Id: runops_cores.c 18206 2007-04-14 20:50:06Z chromatic $
 
 =head1 NAME
 

@@ -1,7 +1,8 @@
-# $Id: /parrotcode/trunk/languages/lisp/read.pir 3474 2007-05-13T11:14:07.859087Z bernhard  $
+# $Id: read.pir 18824 2007-06-05 18:13:27Z bernhard $
 
 .sub _read
   .param pmc args
+
   .local pmc readmacros
   .local pmc readtable
   .local pmc readcase
@@ -54,16 +55,16 @@ STEP_4:
   .local pmc mchar
 
    macro = readmacros[char]                # Get the readmacro we're calling
+
   .STRING(mchar, char)
 
   .LIST_2(margs, istream, mchar)           # Create a list of args to pass in
    # VALID_IN_PARROT_0_2_0 retv = _FUNCTION_CALL(macro, margs)         # Call the readmacro
 
+   null retv
+   retv = _FUNCTION_CALL(macro, margs)         # Call the readmacro
    # VALID_IN_PARROT_0_2_0 if argcP == 0 goto STEP_1
-   (retv :slurpy) = _FUNCTION_CALL(macro, margs)         # Call the readmacro
-   
-   nretv = retv
-   if nretv == 0 goto STEP_1
+   if_null retv, STEP_1
    goto DONE
 
 STEP_5:
@@ -164,6 +165,7 @@ DONE:
 .sub _error
   .param string type                    # There's current no way to add more
   .param string mesg                    # than just _message to the exception.
+
   .local pmc e
 
   e = new Exception
@@ -175,6 +177,7 @@ DONE:
 
 .sub _read_delimited_list
   .param pmc args
+
   .local string dchar
   .local string char
   .local pmc readmacros
@@ -185,7 +188,6 @@ DONE:
   .local pmc stream
   .local pmc symbol
   .local pmc tretv
-  .local pmc ntretv
   .local pmc retv
   .local pmc lptr
   .local int ordv
@@ -265,11 +267,13 @@ CALL_MACRO:
   .STRING(mchar, char)
   .LIST_2(margs, istream, mchar)           # Create a list of args to pass in
 
+   null tretv
    tretv = _FUNCTION_CALL(macro, margs)   # Call the readmacro
+   if_null tretv, LOOP
 
    # VALID_IN_PARROT_0_2_0 if argcP == 0 goto LOOP                # If macro is NULL, start loop again
-   ntretv = tretv
-   if ntretv == 0 goto LOOP               # If macro is NULL, start loop again
+   # VALID_IN_PARROT_0_2_0 ntretv = tretv
+   # VALID_IN_PARROT_0_2_0 if ntretv == 0 goto LOOP               # If macro is NULL, start loop again
    goto APPEND_TO_LIST                    # else add the return value to list
 
 DELIMIT_CHAR:                             # We've hit the delimter char -
@@ -303,6 +307,7 @@ DONE:
 
 .sub _left_paren_macro                  # As described in CLtL section 2.4.1
   .param pmc args
+
   .local pmc stream
   .local pmc delimit
   .local pmc rargs
@@ -326,6 +331,7 @@ DONE:
 
 .sub _single_quote_macro                # As described in CLtL section 2.4.3
   .param pmc args
+
   .local pmc stream
   .local pmc symbol
   .local pmc rargs
@@ -345,8 +351,18 @@ RETURN:
   .return(retv)
 .end
 
+=head2 _semicolon_macro
+
+A comment. Skip everything till the end of line
+or the end of file.
+
+As described in CLtL section 2.4.4
+
+=cut
+
 .sub _semicolon_macro                   # As described in CLtL section 2.4.4
   .param pmc args
+
   .local string char
   .local pmc istream
   .local pmc stream
@@ -366,6 +382,7 @@ RETURN:
 
 .sub _double_quote_macro                # As described in CLtL section 2.4.5.
   .param pmc args
+
   .local string strtok
   .local pmc istream
   .local pmc stream
@@ -436,8 +453,8 @@ DONE:
 
 .sub _sharpsign_macro                   # As described in CLtL section 2.4.8
   .param pmc args
+
   .local string char
-  .local string test
   .local pmc istream
   .local pmc stream
   .local pmc symbol
@@ -459,8 +476,7 @@ DONE:
 
   macro = macros[char]
 
-  typeof test, macro
-  if test == "None" goto MACRO_NOT_DEFINED
+  if_null macro, MACRO_NOT_DEFINED
 
   .ASSERT_TYPE(macro, "function")
   _FUNCTION_CALL(macro,args)

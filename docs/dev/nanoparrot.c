@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2001-2006, The Perl Foundation.
- * $Id: /parrotcode/local/docs/dev/nanoparrot.c 2657 2007-03-31T01:57:48.733769Z chromatic  $
+ * $Id: nanoparrot.c 18915 2007-06-11 03:08:03Z petdance $
  *
  * - demonstrates how the interpreter interprets bytecode
  *   its vastly simplified but the very basics are the same
@@ -282,7 +282,7 @@ main(int argc, char *argv[]) {
 
     prog = usage;
     if (argc > 1) {
-        if (!strcmp(argv[1], "mops"))
+        if (strcmp(argv[1], "mops") == 0)
             prog = mops;
     }
     init(interpreter, prog);

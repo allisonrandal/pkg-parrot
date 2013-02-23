@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/tools/ops2cutils/08-nolines.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: 08-nolines.t 17576 2007-03-17 22:50:07Z paultcochrane $
 # 08-nolines.t
 
 use strict;

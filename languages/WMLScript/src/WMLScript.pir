@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/local/languages/WMLScript/src/WMLScript.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: WMLScript.pir 18563 2007-05-16 00:53:55Z chromatic $
 
 .loadlib 'wmls_ops'
 .HLL 'WMLScript', 'wmls_group'

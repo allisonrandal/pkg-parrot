@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/lib/alarm.pir 3437 2007-05-09T11:01:53.500408Z fperrad  $
+# $Id: alarm.pir 18800 2007-06-04 07:48:56Z fperrad $
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ inside C<f>.
 .sub 'alarm' :anon
     .param pmc s :optional
     .param pmc func :optional
-    .local pmc ret
+    .local pmc res
     $I1 = lua_checknumber(1, s)
     $P0 = global '_REGISTRY'
     new $P1, .LuaString
@@ -64,18 +64,18 @@ inside C<f>.
     unless $I0 goto L2
     lua_error("no alarm handler set")
     goto L2
-L1:
+  L1:
     lua_checktype(2, func, 'function')
     $P0[$P1] = func
-L2:
+  L2:
     new $P0, .Timer
     $P0[.PARROT_TIMER_SEC] = $I1
     $P0[.PARROT_TIMER_REPEAT] = 0
     $P0[.PARROT_TIMER_HANDLER] = func
     $P0()
-    new ret, .LuaNumber
-    set ret, $I1
-    .return (ret)
+    new res, .LuaNumber
+    set res, $I1
+    .return (res)
 .end
 
 =back

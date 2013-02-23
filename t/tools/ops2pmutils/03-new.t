@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/local/t/tools/ops2pmutils/03-new.t 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: 03-new.t 17576 2007-03-17 22:50:07Z paultcochrane $
 # 03-new.t
 
 use strict;

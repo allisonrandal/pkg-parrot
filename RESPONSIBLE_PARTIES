@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/RESPONSIBLE_PARTIES 3427 2007-05-08T21:29:45.852980Z allison  $
+# $Id: RESPONSIBLE_PARTIES 19099 2007-06-18 23:05:12Z allison $
 
 This is a list of project roles, with a partial list of the folks who have
 taken responsibility for them.  This does not list all the people with
@@ -35,7 +35,7 @@ Committers
 ----------
 
 Core Developer                  -
-                                Jonathan Worthington (bytecode format/loader)
+                                Jonathan Worthington
                                 Matt Diephouse
                                 Bernhard Schmalhofer
                                 Kevin Tew
@@ -64,8 +64,25 @@ Platform Porter                 Florian Ragwitz (Debian)
                                 Aldo Calpini (PocketPC)
                                 Francois Perrad (MinGW32)
 
+Patch Monster                   chromatic
+                                Jonathan Worthington
+                                Paul Cochrane
+                                Jerry Gay
+                                Matt Diephouse
+                                Will Coleda
+                                James Keenan
+
+
 Contributors
 ------------
 
-See CREDITS.
+Cage Cleaner                    James Keenan
+                                Paul Cochrane
+                                Mike Mattie
+                                Steve Peters
+                                Jerry Gay
+                                chromatic
+                                Andy Lester
+
+General Contributor             See CREDITS
 

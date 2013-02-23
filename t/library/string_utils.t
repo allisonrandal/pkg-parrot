@@ -1,6 +1,6 @@
 #!./parrot -G
 # Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/library/string_utils.t 2966 2007-04-05T03:20:48.940245Z pmichaud  $
+# $Id: string_utils.t 17988 2007-04-05 03:20:48Z pmichaud $
 
 =head1 NAME
 

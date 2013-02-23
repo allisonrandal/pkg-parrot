@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/18-revision.t 3386 2007-05-05T17:01:52.799755Z jkeenan  $
+# $Id: 18-revision.t 18427 2007-05-05 17:01:52Z jkeenan $
 # 18-revision.t
 
 use strict;

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/debug.pod 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: debug.pod 18781 2007-06-03 14:38:04Z paultcochrane $
 
 =head1 NAME
 
@@ -47,7 +47,7 @@ management in general, and garbage collection in particular.
 
 Infant mortality
 
-See F<docs/dev/infant.dev> for details of one frequent problem: infant
+See F<docs/dev/infant.pod> for details of one frequent problem: infant
 mortality. Infant mortality is when you create a Parrot object, but the garbage
 collector runs before you put it into a Parrot register or in something else
 that is itself within a Parrot register.

@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/configure/testlib/Make_VERSION_File.pm 3393 2007-05-06T18:41:27.104798Z bernhard  $
+# $Id: Make_VERSION_File.pm 18440 2007-05-06 18:41:27Z bernhard $
 
 package Make_VERSION_File;
 

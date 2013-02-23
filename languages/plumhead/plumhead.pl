@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# $Id: /parrotcode/trunk/languages/plumhead/plumhead.pl 3304 2007-04-25T17:50:24.116328Z bernhard  $
+# $Id: plumhead.pl 18333 2007-04-25 17:50:24Z bernhard $
 
 # A workaround for run-tests.php
 

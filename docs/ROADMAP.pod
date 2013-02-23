@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/docs/ROADMAP.pod 3510 2007-05-16T02:47:23.785670Z chromatic  $
+# $Id: ROADMAP.pod 19137 2007-06-19 18:34:09Z allison $
 
 =head1 NAME
 
@@ -34,9 +34,9 @@ This is the B<highest> priority.
 
 =back
 
-=head1 CURRENT RELEASE (0.4.12)
+=head1 CURRENT RELEASE (0.4.13)
 
-Parrot 0.4.12 was released on May 15, 2007. For a list of new and fixed
+Parrot 0.4.13 was released on June 19, 2007. For a list of new and fixed
 feature see L<NEWS>.
 
 =head1 OVERVIEW

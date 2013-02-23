@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/tools/ops2cutils/01-new.t 3128 2007-04-11T21:06:01.894856Z paultcochrane  $
+# $Id: 01-new.t 18151 2007-04-11 21:06:01Z paultcochrane $
 # 01-new.t
 
 use strict;

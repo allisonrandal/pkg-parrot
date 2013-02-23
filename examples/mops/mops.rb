@@ -3,7 +3,7 @@
 =begin RUBY_COMMENT
 
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: /parrotcode/trunk/examples/mops/mops.rb 470 2006-12-05T03:30:45.414067Z svm  $
+$Id: mops.rb 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

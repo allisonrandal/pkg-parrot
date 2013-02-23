@@ -6,7 +6,7 @@
   version="1.0" >
 <!--
 
-$Id: /parrotcode/local/languages/plumhead/src/phc/phc_xml_to_past_xml.xsl 2657 2007-03-31T01:57:48.733769Z chromatic  $
+$Id: phc_xml_to_past_xml.xsl 17648 2007-03-19 21:39:43Z bernhard $
 
 This transformation takes a XML abstract syntax tree as generated 
 by phc from PHP source. It generates a PAST-pm data structure in XML.

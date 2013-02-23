@@ -1,5 +1,5 @@
 # Copyright (C) 2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/runtime/parrot/library/String/Utils.pir 2966 2007-04-05T03:20:48.940245Z pmichaud  $
+# $Id: Utils.pir 17988 2007-04-05 03:20:48Z pmichaud $
 
 .namespace ['String';'Utils']
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2007, The Perl Foundation.
-$Id: /parrotcode/trunk/src/pmc/super.pmc 3352 2007-05-02T02:58:21.635107Z chromatic  $
+$Id: super.pmc 18578 2007-05-17 05:09:00Z chromatic $
 
 =head1 NAME
 
@@ -94,7 +94,7 @@ Find the method for C<*name> in the parent class of the bound object.
             pobject_lives(INTERP, (PObj *)PMC_struct_val(SELF));
     }
 
-    PMC* find_method(STRING* name) {
+    PMC* find_method(STRING *name) {
         PMC *mro, *_class;
 
         PMC * const obj = PMC_pmc_val(SELF);

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/config/init/hints/linux.pm 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: linux.pm 18877 2007-06-08 14:15:40Z paultcochrane $
 
 package init::hints::linux;
 
@@ -76,7 +76,7 @@ sub runstep {
         libs           => $libs,
         ld_share_flags => $ld_share_flags,
         ld_load_flags  => $ld_share_flags,
-        i_lib_pthread  => 1,                 # XXX fake a header entry
+        i_lib_pthread  => 1,                 # RT#43149 fake a header entry
         linkflags      => $linkflags,
         link           => $link,
         cc_shared      => $cc_shared,

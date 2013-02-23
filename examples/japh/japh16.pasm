@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/examples/japh/japh16.pasm 470 2006-12-05T03:30:45.414067Z svm  $
+# $Id: japh16.pasm 11501 2006-02-10 18:27:13Z particle $
 
 # see 'examples/compilers/Makefile' for instructions to generate japhc.$(SO)
 

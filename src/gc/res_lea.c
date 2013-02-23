@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/gc/res_lea.c 3495 2007-05-15T17:22:40.025112Z allison  $
+$Id: res_lea.c 18549 2007-05-15 17:22:40Z allison $
 
 =head1 NAME
 

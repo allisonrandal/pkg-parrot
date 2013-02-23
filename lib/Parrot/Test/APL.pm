@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/lib/Parrot/Test/APL.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: APL.pm 17090 2007-02-20 20:06:55Z paultcochrane $
 
 package Parrot::Test::APL;
 

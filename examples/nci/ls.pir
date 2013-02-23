@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: /parrotcode/local/examples/nci/ls.pir 2657 2007-03-31T01:57:48.733769Z chromatic  $
+# $Id: ls.pir 18563 2007-05-16 00:53:55Z chromatic $
 
 =head1 NAME
 

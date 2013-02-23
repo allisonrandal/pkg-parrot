@@ -1,4 +1,4 @@
-# $Id: /parrotcode/local/languages/regex/lib/Regex/Driver.pm 880 2006-12-25T21:27:41.153122Z chromatic  $
+# $Id: Driver.pm 16249 2006-12-25 22:17:17Z paultcochrane $
 
 package Regex::Driver;
 use strict;

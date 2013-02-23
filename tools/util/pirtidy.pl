@@ -1,5 +1,5 @@
 #! perl
-# $Id: /parrotcode/local/tools/util/pirtidy.pl 733 2006-12-17T23:24:17.491923Z chromatic  $
+# $Id: pirtidy.pl 17087 2007-02-20 20:04:56Z paultcochrane $
 
 use strict;
 use warnings;

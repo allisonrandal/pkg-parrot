@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/distro/manifest_skip.t 3394 2007-05-06T19:04:49.129707Z bernhard  $
+# $Id: manifest_skip.t 18441 2007-05-06 19:04:49Z bernhard $
 
 use strict;
 use warnings;

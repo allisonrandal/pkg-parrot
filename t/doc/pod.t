@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/t/doc/pod.t 3462 2007-05-11T23:55:12.324390Z jkeenan  $
+# $Id: pod.t 18509 2007-05-11 23:55:12Z jkeenan $
 
 =head1 NAME
 

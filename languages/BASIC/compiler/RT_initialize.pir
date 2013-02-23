@@ -1,4 +1,4 @@
-# $Id: /parrotcode/trunk/languages/BASIC/compiler/RT_initialize.pir 3051 2007-04-09T21:07:27.159208Z paultcochrane  $
+# $Id: RT_initialize.pir 18074 2007-04-09 21:07:27Z paultcochrane $
 
 .const int TYPE = 0
 .const int VALUE = 1

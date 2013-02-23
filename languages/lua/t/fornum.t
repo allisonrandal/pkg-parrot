@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/t/fornum.t 3437 2007-05-09T11:01:53.500408Z fperrad  $
+# $Id: fornum.t 18966 2007-06-13 06:44:21Z fperrad $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 10;
+use Parrot::Test tests => 11;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'for 1, 10, 2' );
@@ -86,6 +86,13 @@ OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'for 5, 7, -1' );
 for i = 5, 7, -1 do
+    print(i)
+end
+CODE
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'for 5, 7, 0' );
+for i = 5, 7, 0 do
     print(i)
 end
 CODE

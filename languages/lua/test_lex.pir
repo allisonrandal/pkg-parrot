@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: /parrotcode/trunk/languages/lua/test_lex.pir 3379 2007-05-04T07:14:59.938798Z fperrad  $
+# $Id: test_lex.pir 18631 2007-05-23 07:22:06Z fperrad $
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ and imports many definitions from the full Lua compiler
 =cut
 
 .sub '__onload' :load :init
-    load_bytecode 'languages/lua/src/lua51.pbc'
+    load_bytecode 'languages/lua/lua.pbc'
 
     $P0 = new [ 'HLLCompiler' ]
     $P0.'language'('LuaTestLex')

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: /parrotcode/local/languages/perl5/t/perlundef.t 1614 2007-01-30T05:55:40.019968Z chromatic  $
+# $Id: perlundef.t 16836 2007-01-30 04:30:52Z coke $
 
 use strict;
 use warnings;

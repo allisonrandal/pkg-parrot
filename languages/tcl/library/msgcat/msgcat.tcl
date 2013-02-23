@@ -10,7 +10,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: /parrotcode/trunk/languages/tcl/library/msgcat/msgcat.tcl 470 2006-12-05T03:30:45.414067Z svm  $
+# RCS: @(#) $Id: msgcat.tcl 17096 2007-02-20 20:20:48Z paultcochrane $
 
 package require Tcl 8.5
 # When the version number changes, be sure to update the pkgIndex.tcl file,

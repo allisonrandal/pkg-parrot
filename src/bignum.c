@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: /parrotcode/trunk/src/bignum.c 3300 2007-04-24T21:18:22.142154Z mdiep  $
+$Id: bignum.c 18329 2007-04-24 21:18:22Z mdiep $
 
 =head1 NAME
 

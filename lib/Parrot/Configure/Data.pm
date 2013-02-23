@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: /parrotcode/trunk/lib/Parrot/Configure/Data.pm 3367 2007-05-03T01:40:40.859036Z jkeenan  $
+# $Id: Data.pm 18405 2007-05-03 01:40:40Z jkeenan $
 
 =pod
 

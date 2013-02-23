@@ -1,7 +1,7 @@
 /*
-Copyright (C) 2002-2005, The Perl Foundation.
+Copyright (C) 2002-2007, The Perl Foundation.
 License:  Artistic/GPL, see README and LICENSES for details
-$Id: /parrotcode/trunk/src/datatypes.c 3239 2007-04-18T02:24:20.291709Z chromatic  $
+$Id: datatypes.c 18975 2007-06-13 16:48:54Z bernhard $
 
 =head1 NAME
 
@@ -15,33 +15,29 @@ F<include/parrot/datatypes.h>.
 
 =head2 Functions
 
-=over 4
-
-=cut
-
 */
 
 #include "parrot/parrot.h"
 
+/* HEADER: include/parrot/datatypes.h */
+
 /*
 
-=item C<INTVAL
-Parrot_get_datatype_enum(Interp *interp, STRING *typename)>
-
-Return datatype C<enum> for C<STRING*> typename.
-
-=cut
+FUNCDOC: Parrot_get_datatype_enum
+Return datatype C<enum> for C<STRING*> type_name.
 
 */
 
+PARROT_API
 INTVAL
-Parrot_get_datatype_enum(Interp *interp, STRING *_typename)
+Parrot_get_datatype_enum(Interp *interp, const STRING *type_name /*NN*/)
+    /* PURE, WARN_UNUSED */
 {
-    char *type = string_to_cstring(interp, _typename);
+    char * const type = string_to_cstring(interp, type_name);
     int i;
 
     for (i = enum_first_type; i < enum_last_type; i++) {
-        if (!strcmp(data_types[i - enum_first_type].name, type)) {
+        if (strcmp(data_types[i - enum_first_type].name, type) == 0) {
             string_cstring_free(type);
             return i;
         }
@@ -54,35 +50,29 @@ Parrot_get_datatype_enum(Interp *interp, STRING *_typename)
 
 /*
 
-=item C<STRING *
-Parrot_get_datatype_name(Interp *interp, INTVAL type)>
-
+FUNCDOC:
 Return datatype name for C<type>.
-
-=cut
 
 */
 
+PARROT_API
 STRING *
 Parrot_get_datatype_name(Interp *interp, INTVAL type)
+    /* WARN_UNUSED */
 {
-    const char *s;
-    if (type < enum_first_type || type >= enum_last_type)
-        s = "illegal";
-    else
-        s = data_types[type - enum_first_type].name;
+    const char * const s =
+        (type < enum_first_type || type >= enum_last_type)
+            ? "illegal"
+            : data_types[type - enum_first_type].name;
+
     return string_make(interp, s, strlen(s), NULL, PObj_external_FLAG);
 }
 
 /*
 
-=back
-
 =head1 SEE ALSO
 
 F<include/parrot/datatypes.h>.
-
-=cut
 
 */
 

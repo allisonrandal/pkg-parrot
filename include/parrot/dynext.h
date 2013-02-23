@@ -1,6 +1,6 @@
 /* dynext.h
 *
-* $Id: /parrotcode/trunk/include/parrot/dynext.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+* $Id: dynext.h 19018 2007-06-15 03:48:26Z petdance $
 *
 *   Parrot dynamic extensions
 */
@@ -8,21 +8,20 @@
 #ifndef PARROT_DYNEXT_H_GUARD
 #define PARROT_DYNEXT_H_GUARD
 
-/* dynamic lib/oplib/PMC loading */
-PARROT_API Parrot_PMC
-Parrot_load_lib(Parrot_Interp interp,
-                Parrot_String lib, Parrot_PMC initializer);
+/* HEADERIZER BEGIN: src/dynext.c */
 
-/* dynamic lib/oplib/PMC init */
-PARROT_API Parrot_PMC
-Parrot_init_lib(Parrot_Interp interp,
-                Parrot_PMC(*load_func)(Parrot_Interp),
-                void (*init_func)(Parrot_Interp, Parrot_PMC));
+PARROT_API PMC * Parrot_clone_lib_into( Interp *d, Interp *s, PMC *lib_pmc );
+PARROT_API PMC * Parrot_init_lib( Interp *interp,
+    PMC *(*load_func)(Interp *) /*NULLOK*/,
+    void (*init_func)(Interp *,
+    PMC *) /*NULLOK*/ );
 
-/* for cloning live iterpreters to create new threads */
-PARROT_API Parrot_PMC
-Parrot_clone_lib_into(Parrot_Interp dest_interp, Parrot_Interp source_interp,
-                      Parrot_PMC lib_pmc);
+PARROT_API PMC * Parrot_load_lib( Interp *interp /*NN*/,
+    STRING *lib /*NULLOK*/,
+    PMC *initializer )
+        __attribute__nonnull__(1);
+
+/* HEADERIZER END: src/dynext.c */
 
 #endif /* PARROT_DYNEXT_H_GUARD */
 

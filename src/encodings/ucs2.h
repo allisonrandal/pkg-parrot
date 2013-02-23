@@ -1,7 +1,7 @@
 /* ucs2.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/src/encodings/ucs2.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: ucs2.h 18993 2007-06-14 01:45:10Z petdance $
  *  Overview:
  *     This is the header for the ucs2 fixed-width encoding.
  *  Data Structure and Algorithms:
@@ -13,7 +13,10 @@
 #ifndef PARROT_ENCODING_UCS2_H_GUARD
 #define PARROT_ENCODING_UCS2_H_GUARD
 
-ENCODING *Parrot_encoding_ucs2_init(Interp *);
+/* HEADERIZER BEGIN: src/encodings/ucs2.c */
+
+ENCODING * Parrot_encoding_ucs2_init( Interp *interp );
+/* HEADERIZER END: src/encodings/ucs2.c */
 
 #endif /* PARROT_ENCODING_UCS2_H_GUARD */
 

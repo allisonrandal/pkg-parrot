@@ -1,9 +1,9 @@
 /* builtin.h
- *  Copyright (C) 2005, The Perl Foundation.
+ *  Copyright (C) 2005-2007, The Perl Foundation.
  *  SVN Info
- *     $Id: /parrotcode/trunk/include/parrot/builtin.h 3385 2007-05-05T14:41:57.057265Z bernhard  $
+ *     $Id: builtin.h 19011 2007-06-15 01:10:51Z petdance $
  *  Overview:
- *     This is the api header for builtins.
+ *     This is the API header for builtins.
  *  Data Structure and Algorithms:
  *  History:
  *  Notes:
@@ -15,10 +15,29 @@
 
 #include "parrot/compiler.h"
 
+/* HEADERIZER BEGIN: src/builtin.c */
+
+const char * Parrot_builtin_get_c_namespace( Interp *interp, int bi );
+int Parrot_builtin_is_class_method( Interp *interp, int bi );
+int Parrot_builtin_is_void( Interp *interp, int bi );
+PMC* Parrot_find_builtin( Interp *interp, STRING *func /*NN*/ )
+        __attribute__nonnull__(2)
+        __attribute__warn_unused_result__;
+
+void Parrot_init_builtins( Interp *interp /*NN*/ )
+        __attribute__nonnull__(1);
+
+int Parrot_is_builtin( Interp *interp,
+    const char *func /*NN*/,
+    const char *sig )
+        __attribute__nonnull__(2)
+        __attribute__warn_unused_result__;
+
+/* HEADERIZER END: src/builtin.c */
+
 void Parrot_init_builtins(Interp *interp);
 int  Parrot_is_builtin(Interp *interp, const char *func, const char *sig)
-        __attribute__nonnull__(2)
-        __attribute__nonnull__(3);
+        __attribute__nonnull__(2);
 PMC* Parrot_find_builtin(Interp *interp, STRING *func)
         __attribute__nonnull__(2);
 const char * Parrot_builtin_get_c_namespace(Interp *interp, int bi);
