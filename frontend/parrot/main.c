@@ -3,7 +3,7 @@ Copyright (C) 2007-2011, Parrot Foundation.
 
 =head1 NAME
 
-src/main.c - The PIR/PASM compiler frontend to libparrot
+frontend/parrot/main.c - The PIR/PASM compiler frontend to libparrot
 
 =head1 DESCRIPTION
 
@@ -441,7 +441,7 @@ usage(ARGMOD(FILE *fp))
     ASSERT_ARGS(usage)
     fprintf(fp,
             "parrot -[acEGhrtvVwy.] [-d [FLAGS]] [-D [FLAGS]]"
-            "[-O [level]] [-R runcore] [-o FILE] <file>\n");
+            "[-O [level]] [-L path] [-R runcore] [-o FILE] <file>\n");
 }
 
 /*
