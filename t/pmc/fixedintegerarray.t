@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: fixedintegerarray.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: fixedintegerarray.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 13;
+use Parrot::Test tests => 11;
 
 =head1 NAME
 
@@ -23,51 +23,8 @@ out-of-bounds test. Checks INT and PMC keys.
 
 =cut
 
-my $fp_equality_macro = <<'ENDOFMACRO';
-.macro fp_eq ( J, K, L )
-    save    N0
-    save    N1
-    save    N2
-
-    set     N0, .J
-    set     N1, .K
-    sub     N2, N1,N0
-    abs     N2, N2
-    gt      N2, 0.000001, .$FPEQNOK
-
-    restore N2
-    restore N1
-    restore N0
-    branch  .L
-.local $FPEQNOK:
-    restore N2
-    restore N1
-    restore N0
-.endm
-.macro fp_ne( J,K,L )
-    save    N0
-    save    N1
-    save    N2
-
-    set     N0, .J
-    set     N1, .K
-    sub     N2, N1,N0
-    abs     N2, N2
-    lt      N2, 0.000001, .$FPNENOK
-
-    restore N2
-    restore N1
-    restore N0
-    branch  .L
-.local $FPNENOK:
-    restore N2
-    restore N1
-    restore N0
-.endm
-ENDOFMACRO
-
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting array size" );
-    new P0,.FixedIntegerArray
+    new P0, ['FixedIntegerArray']
 
     set I0,P0
     eq I0,0,OK_1
@@ -87,7 +44,7 @@ ok 2
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Resetting array size (and getting an exception)" );
-    new P0, .FixedIntegerArray
+    new P0, ['FixedIntegerArray']
 
     set I0,P0
     set P0,1
@@ -104,8 +61,8 @@ OUTPUT
 #VIM's syntax highlighter needs this line
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting first element" );
-        new P0, .FixedIntegerArray
-        set P0, 1
+    new P0, ['FixedIntegerArray']
+    set P0, 1
 
     set P0[0],-7
     set I0,P0[0]
@@ -133,8 +90,8 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting second element" );
-        new P0, .FixedIntegerArray
-        set P0, 2
+    new P0, ['FixedIntegerArray']
+    set P0, 2
 
     set P0[1], -7
     set I0, P0[1]
@@ -162,8 +119,8 @@ ok 3
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Setting out-of-bounds elements" );
-        new P0, .FixedIntegerArray
-        set P0, 1
+    new P0, ['FixedIntegerArray']
+    set P0, 1
 
     set P0[1], -7
 
@@ -174,8 +131,8 @@ current instr\.:/
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements" );
-        new P0, .FixedIntegerArray
-        set P0, 1
+    new P0, ['FixedIntegerArray']
+    set P0, 1
 
     set I0, P0[1]
     end
@@ -185,8 +142,8 @@ current instr\.:/
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements, I" );
-        new P0, .FixedIntegerArray
-        set P0, 1
+    new P0, ['FixedIntegerArray']
+    set P0, 1
     set I1, 1
     set I0, P0[I1]
     end
@@ -196,8 +153,8 @@ current instr\.:/
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements, -I" );
-        new P0, .FixedIntegerArray
-        set P0, 1
+    new P0, ['FixedIntegerArray']
+    set P0, 1
     set I1, -1
     set I0, P0[I1]
     end
@@ -207,10 +164,10 @@ current instr\.:/
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-@{[ $fp_equality_macro ]}
-     new P0, .FixedIntegerArray
+     .include 'include/fp_equality.pasm'
+     new P0, ['FixedIntegerArray']
      set P0, 3
-     new P1, .Key
+     new P1, ['Key']
 
      set P1, 0
      set P0[P1], 25
@@ -227,7 +184,7 @@ pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
 OK1: print "ok 1\\n"
 
      set N0, P0[1]
-     .fp_eq(N0, 2.0, OK2)
+     .fp_eq_pasm(N0, 2.0, OK2)
      print "not "
 OK2: print "ok 2\\n"
 
@@ -244,18 +201,18 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-@{[ $fp_equality_macro ]}
-     new P0, .FixedIntegerArray
+     .include 'include/fp_equality.pasm'
+     new P0, ['FixedIntegerArray']
      set P0, 1024
 
      set P0[25], 125
      set P0[128], 10.2
      set P0[513], "17"
-     new P1, .Integer
+     new P1, ['Integer']
      set P1, 123456
      set P0[1023], P1
 
-     new P2, .Key
+     new P2, ['Key']
      set P2, 25
      set I0, P0[P2]
      eq I0, 125, OK1
@@ -264,7 +221,7 @@ OK1: print "ok 1\\n"
 
      set P2, 128
      set N0, P0[P2]
-     .fp_eq(N0, 10.0, OK2)
+     .fp_eq_pasm(N0, 10.0, OK2)
      print "not "
 OK2: print "ok 2\\n"
 
@@ -293,7 +250,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
-    pmc1 = new FixedIntegerArray
+    pmc1 = new ['FixedIntegerArray']
     .local int bool1
     does bool1, pmc1, "scalar"
     print bool1
@@ -310,47 +267,6 @@ CODE
 0
 1
 0
-OUTPUT
-
-pasm_output_is( <<'CODE', <<'OUTPUT', "new_p_i_s" );
-    new P0, .FixedIntegerArray, "(1, 17,42,0,77,0b111,    0Xff)"
-    set I0, P0
-    print I0
-    print "\n"
-    set I1, 0
-loop:
-    set I2, P0[I1]
-    print I2
-    print "\n"
-    inc I1
-    lt I1, I0, loop
-    print "ok\n"
-    end
-CODE
-7
-1
-17
-42
-0
-77
-7
-255
-ok
-OUTPUT
-
-pir_output_is( <<'CODE', <<'OUTPUT', "get_repr" );
-.sub main
-    new $P0, .FixedIntegerArray, "(1, 17,42,0,77,0b111,    0Xff)"
-    set $I0, $P0
-    print $I0
-    print "\n"
-    get_repr $S0, $P0
-    print $S0
-    print "\n"
-.end
-CODE
-7
-[ 1, 17, 42, 0, 77, 7, 255 ]
 OUTPUT
 
 1;

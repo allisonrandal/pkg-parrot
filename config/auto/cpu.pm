@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: cpu.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: cpu.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ config/auto/cpu.pm - CPU specific Files
 
 =head1 DESCRIPTION
 
-Runs C<&run_cpu()> in F<config/auto/cpu/${cpuarch}/auto.pm> if it exists.
+Runs C<runstep()> in F<config/auto/cpu/${cpuarch}/auto.pm> if it exists.
 
 =cut
 
@@ -15,24 +15,23 @@ package auto::cpu;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step;
+use Parrot::Configure::Utils qw(copy_if_diff);
 use Carp;
 
-$description = 'Running CPU specific stuff';
 
-@args = qw(miniparrot verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Generate CPU specific stuff};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
-
-    if ( $conf->options->get('miniparrot') ) {
-        $self->set_result('skipped');
-        return $self;
-    }
 
     my $verbose = $conf->options->get('verbose');
 
@@ -50,7 +49,7 @@ sub runstep {
         print "(no cpu specific hints)" if $verbose;
     }
 
-    return $self;
+    return 1;
 }
 
 1;

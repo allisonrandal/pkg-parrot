@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: pod.t 18809 2007-06-04 20:24:05Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: pod.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -75,7 +75,7 @@ pass
 OUT
 }
 
-unlink('macro.tempfile', 'include.tempfile');
+unlink( 'macro.tempfile', 'include.tempfile' );
 
 # Local Variables:
 #   mode: cperl

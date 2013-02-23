@@ -1,7 +1,36 @@
+/*
+ * $Id: time.c 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2007, Parrot Foundation.
+ */
+
+/*
+
+=head1 NAME
+
+config/gen/platform/ansi/time.c
+
+=head1 DESCRIPTION
+
+RT#48264
+
+=head2 Functions
+
+=over 4
+
+=cut
+
+*/
+
 #include <time.h>
 
 /*
-** Parrot_intval_time()
+
+=item C<INTVAL Parrot_intval_time(void)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 INTVAL
@@ -12,7 +41,13 @@ Parrot_intval_time(void)
 
 
 /*
-** Parrot_floatval_time()
+
+=item C<FLOATVAL Parrot_floatval_time(void)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 FLOATVAL
@@ -26,7 +61,13 @@ Parrot_floatval_time(void)
 
 
 /*
-** Parrot_sleep()
+
+=item C<void Parrot_sleep(unsigned int seconds)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 void
@@ -35,6 +76,32 @@ Parrot_sleep(unsigned int seconds)
     Parrot_warn(NULL, PARROT_WARNINGS_PLATFORM_FLAG, "Parrot_sleep not implemented");
     return;
 }
+
+/*
+
+=item C<void Parrot_usleep(unsigned int microseconds)>
+
+Sleep for at least the specified number of microseconds (millionths of a
+second).
+
+=cut
+
+*/
+
+void
+Parrot_usleep(unsigned int microseconds)
+{
+    Parrot_warn(NULL, PARROT_WARNINGS_PLATFORM_FLAG, "Parrot_usleep not implemented");
+    return;
+}
+
+/*
+
+=back
+
+=cut
+
+*/
 
 /*
  * Local variables:

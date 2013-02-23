@@ -1,7 +1,7 @@
 /* atomic/sparc.h
- *  Copyright (C) 2006, The Perl Foundation.
+ *  Copyright (C) 2006-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: sparc.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: sparc.h 36833 2009-02-17 20:09:26Z allison $
  *  Overview:
  *     This header provides an implementation of atomic
  *     operations on Sparc V8plus and better platforms.
@@ -28,21 +28,21 @@ typedef struct Parrot_atomic_pointer {
     void * volatile val;
 } Parrot_atomic_pointer;
 
-#define PARROT_ATOMIC_PTR_GET(result, a) (result = (a).val)
+#define PARROT_ATOMIC_PTR_GET(result, a) ((result) = (a).val)
 
-#define PARROT_ATOMIC_PTR_SET(a, b) ((a).val = b)
+#define PARROT_ATOMIC_PTR_SET(a, b) ((a).val = (b))
 
 #if PTR_SIZE == 8
 #  define PARROT_ATOMIC_PTR_CAS(result, a, expect, update) \
       do { \
-          result = parrot_sparc_cas64((INTVAL *) &(a).val, \
-              (INTVAL) expect, (INTVAL) update); \
+          (result) = parrot_sparc_cas64((INTVAL *) &(a).val, \
+              (INTVAL) (expect), (INTVAL) (update)); \
       } while (0)
 #else
 #  define PARROT_ATOMIC_PTR_CAS(result, a, expect, update) \
       do { \
-          result = parrot_sparc_cas32((Parrot_UInt4 *) &(a).val, \
-              (Parrot_UInt4) expect, (Parrot_UInt4) update); \
+          (result) = parrot_sparc_cas32((Parrot_UInt4 *) &(a).val, \
+              (Parrot_UInt4) (expect), (Parrot_UInt4) (update)); \
       } while (0)
 #endif
 
@@ -58,13 +58,13 @@ typedef struct Parrot_atomic_integer {
 
 #define PARROT_ATOMIC_INT_DESTROY(a)
 
-#define PARROT_ATOMIC_INT_GET(result, a) (result = (a).val)
+#define PARROT_ATOMIC_INT_GET(result, a) ((result) = (a).val)
 
-#define PARROT_ATOMIC_INT_SET(a, b) ((a).val = b)
+#define PARROT_ATOMIC_INT_SET(a, b) ((a).val = (b))
 
 #define PARROT_ATOMIC_INT_CAS(result, a, expect, update) \
     do { \
-        result = parrot_sparc_cas32((Parrot_UInt4*) &(a).val, \
+        (result) = parrot_sparc_cas32((Parrot_UInt4*) &(a).val, \
             (Parrot_UInt4) (expect), (Parrot_UInt4) (update)); \
     } while (0)
 
@@ -74,14 +74,14 @@ typedef struct Parrot_atomic_integer {
         Parrot_Int4 old; \
         do { \
             old = (a).val; \
-            PARROT_ATOMIC_INT_CAS(successp, a, old, old + what); \
+            PARROT_ATOMIC_INT_CAS(successp, (a), old, old + (what)); \
         } while (!successp); \
-        result = old + what; \
+        (result) = (old) + (what); \
     } while (0)
 
 
-#define PARROT_ATOMIC_INT_DEC(result, a) parrot_sparc_atomic_int_add(result, a, -1)
-#define PARROT_ATOMIC_INT_INC(result, a) parrot_sparc_atomic_int_add(result, a,  1)
+#define PARROT_ATOMIC_INT_DEC(result, a) parrot_sparc_atomic_int_add((result), (a), -1)
+#define PARROT_ATOMIC_INT_INC(result, a) parrot_sparc_atomic_int_add((result), (a),  1)
 
 #endif /* PARROT_ATOMIC_SPARC_H_GUARD */
 

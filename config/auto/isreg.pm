@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: isreg.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: isreg.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,33 +15,57 @@ package auto::isreg;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining if your C library has a working S_ISREG';
 
-@args = qw(verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does your C library have a working S_ISREG};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $test = 0;
+    my $errormsg = _first_probe_for_isreg($conf);
 
-    cc_gen('config/auto/isreg/test_c.in');
-    eval { cc_build(); };
-    unless ( $@ || cc_run() !~ /ok/ ) {
-        $test = 1;
+    if (! $errormsg) {
+        $errormsg = _second_probe_for_isreg($conf);
     }
-    cc_clean();
+    $conf->cc_clean();
+    $self->_evaluate_isreg($conf, $errormsg);
+    return 1;
+}
 
+sub _first_probe_for_isreg {
+    my $conf = shift;
+    my $errormsg;
+    $conf->cc_gen('config/auto/isreg/test_c.in');
+    eval { $conf->cc_build(); };
+    $errormsg = 1 if  $@;
+    return $errormsg;
+}
+
+sub _second_probe_for_isreg {
+    my $conf = shift;
+    my $ccrunfailure;
+    $ccrunfailure++ if ( $conf->cc_run() !~ /ok/ );
+    return $ccrunfailure;
+}
+
+sub _evaluate_isreg {
+    my ($self, $conf, $anyerror) = @_;
+    my $test;
+    $test = (! defined $anyerror) ? 1 : 0;
     $conf->data->set( isreg => $test );
     print( $test ? " (Yep) " : " (no) " ) if $conf->options->get('verbose');
     $self->set_result( $test ? 'yes' : 'no' );
-
-    return $self;
+    return 1;
 }
 
 1;

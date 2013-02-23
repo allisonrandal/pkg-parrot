@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: pointer.pmc 18386 2007-05-02 02:58:21Z chromatic $
+Copyright (C) 2001-2007, Parrot Foundation.
+$Id: pointer.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -34,21 +34,8 @@ Initializes the pointer.
 
 */
 
-    void init() {
+    VTABLE void init() {
         PObj_custom_mark_SET(SELF);
-    }
-
-/*
-
-=item C<void morph(INTVAL type)>
-
-Does nothing.
-
-=cut
-
-*/
-
-    void morph(INTVAL type) {
     }
 
 /*
@@ -61,15 +48,12 @@ Marks the pointer as live.
 
 */
 
-    void mark() {
-        void (*mark_function)(Interp*, void*) =
-            (void (*)(Interp*, void*))
-            D2FPTR(PMC_struct_val(SELF));
-        if (PMC_data(SELF) == NULL)
-            return;
-        if (PMC_struct_val(SELF) == NULL)
-            return;
-        (*mark_function)(INTERP, PMC_data(SELF));
+    VTABLE void mark() {
+        void (*mark_function)(Interp *, void *) =
+            (void (*)(Interp *, void *))D2FPTR(PMC_struct_val(SELF));
+
+        if (PMC_data(SELF) && PMC_struct_val(SELF))
+            (*mark_function)(INTERP, PMC_data(SELF));
     }
 
 /*
@@ -82,8 +66,8 @@ Creates and returns a clone of the pointer.
 
 */
 
-    PMC* clone() {
-        PMC* dest = pmc_new_noinit(INTERP, SELF->vtable->base_type);
+    VTABLE PMC *clone() {
+        PMC * const dest = pmc_new_noinit(INTERP, SELF->vtable->base_type);
         PObj_custom_mark_SET(dest);
         PMC_data(dest) = PMC_data(SELF);
         return dest;
@@ -99,7 +83,7 @@ Returns the pointer value as an integer.
 
 */
 
-    INTVAL get_integer() {
+    VTABLE INTVAL get_integer() {
         return (INTVAL)PMC_data(SELF);
     }
 
@@ -113,9 +97,24 @@ Returns the pointer value as a floating-point number.
 
 */
 
-    FLOATVAL get_number() {
+    VTABLE FLOATVAL get_number() {
         return (FLOATVAL)(INTVAL)PMC_data(SELF);
     }
+
+/*
+
+=item C<STRING *get_repr()>
+
+Returns the pointer value as a Parrot string.
+
+=cut
+
+*/
+
+    VTABLE STRING *get_repr() {
+        return Parrot_sprintf_c(INTERP, "Pointer = 0x%p", PMC_data(SELF));
+    }
+
 
 /*
 
@@ -127,18 +126,8 @@ Returns the pointer value as a Parrot string.
 
 */
 
-    STRING* get_string() {
-        STRING *ret;
-        char   *target = (char *)mem_sys_allocate(64);
-
-        /* XXX Dangerous if you have a 196-bit system or above
-        (and if you do, you have too comfortable a life and
-        deserve to be tormented by coredumps). */
-        sprintf(target, "Pointer=0x%p", PMC_data(SELF));
-        ret = string_make(INTERP, target, strlen(target), "iso-8859-1", 0);
-
-        mem_sys_free(target);
-        return ret;
+    VTABLE STRING *get_string() {
+        return Parrot_sprintf_c(INTERP, "%s", PMC_data(SELF));
     }
 
 /*
@@ -151,7 +140,7 @@ Returns whether the pointer is not C<NULL>.
 
 */
 
-    INTVAL get_bool() {
+    VTABLE INTVAL get_bool() {
         return (INTVAL)(PMC_data(SELF) != NULL);
     }
 
@@ -165,9 +154,9 @@ Returns whether the pointer has the same value as C<*pmc2>.
 
 */
 
-    INTVAL is_same(PMC* pmc2) {
-        return (INTVAL)(SELF->vtable == pmc2->vtable &&
-        PMC_data(SELF) == PMC_data(pmc2));
+    VTABLE INTVAL is_same(PMC *pmc2) {
+        return (INTVAL)(SELF->vtable   == pmc2->vtable &&
+                        PMC_data(SELF) == PMC_data(pmc2));
     }
 }
 

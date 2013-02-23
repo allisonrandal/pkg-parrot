@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: multisub.t 17523 2007-03-17 06:00:27Z allison $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: multisub.t 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -18,17 +18,11 @@ Tests the creation and invocation of Perl6 multi subs.
 
 
 .sub main :main
-    load_bytecode 'library/Test/More.pir'
+    .include 'include/test_more.pir'
 
-    .local pmc exports, curr_namespace, test_namespace
-    curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
-    exports = split " ", "plan ok is"
-    test_namespace.export_to(curr_namespace, exports)
+    plan( 8 )
 
-    plan( 6 )
-
-    $P0 = new .MultiSub
+    $P0 = new ['MultiSub']
     $I0 = defined $P0
     ok($I0, "create PMC")
 
@@ -43,6 +37,20 @@ Tests the creation and invocation of Perl6 multi subs.
     is($S0, "testing 5", "single int variant")
     $S0 = foo(42, "goodbye")
     is($S0, "testing 42, goodbye", "int and string variant")
+
+    ## Test handling of :flat parameters.
+    $P0 = new ['ResizablePMCArray']
+    push $P0, 42
+    push $P0, "goodbye"
+    $S0 = foo($P0 :flat)
+    is($S0, "testing 42, goodbye", "Int and String :flat")
+    ## Now try double :flat (regression test for RT #43869).
+    $P1 = new ['ResizablePMCArray']
+    push $P1, 42
+    $P2 = new ['ResizablePMCArray']
+    push $P2, "goodbye"
+    $S0 = foo($P1 :flat, $P2 :flat)
+    is($S0, "testing 42, goodbye", "Int and String double :flat")
 
 .end
 
@@ -73,8 +81,19 @@ Tests the creation and invocation of Perl6 multi subs.
     .return ($S0)
 .end
 
+.sub foo :multi(Integer, String)
+    .param pmc bar
+    .param pmc baz
+    $S1 = bar
+    $S2 = baz
+    $S0 = "testing " . $S1
+    $S0 .= ", "
+    $S0 .= $S2
+    .return ($S0)
+.end
+
 # Local Variables:
 #   mode: pir
-#   fill-column: 70
+#   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

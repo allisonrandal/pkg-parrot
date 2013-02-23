@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, The Perl Foundation.
-$Id: managedstruct.pmc 18207 2007-04-14 21:31:11Z chromatic $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: managedstruct.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 DESCRIPTION
 
@@ -34,7 +34,7 @@ Initializes an empty struct.
 
 */
 
-    void init() {
+    VTABLE void init() {
         PObj_active_destroy_SET(SELF);
         PMC_pmc_val(SELF) = NULL;
         PMC_int_val(SELF) = 0;
@@ -50,7 +50,7 @@ Initializes the struct with C<*value>.
 
 */
 
-    void init_pmc(PMC* value) {
+    VTABLE void init_pmc(PMC *value) {
         SELF.init();
         SUPER(value);
     }
@@ -65,7 +65,7 @@ Destroys the struct, freeing the allocated memory.
 
 */
 
-    void destroy() {
+    VTABLE void destroy() {
         if (PMC_data(SELF))
             mem_sys_free(PMC_data(SELF));
     }
@@ -80,21 +80,48 @@ Destroys the struct, freeing the allocated memory.
 
 */
 
-    void set_integer_native(INTVAL value) {
-        if (PMC_data(SELF) && (! value)) {
+    VTABLE void set_integer_native(INTVAL value) {
+        if (PMC_data(SELF) && !value) {
             mem_sys_free(PMC_data(SELF));
-            PMC_data(SELF) = NULL;
+            PMC_data(SELF)    = NULL;
             PMC_int_val(SELF) = 0;
         }
-        else if (value && (! PMC_data(SELF))) {
-            PMC_data(SELF) = mem_sys_allocate_zeroed(value);
+        else if (value && !PMC_data(SELF)) {
+            PMC_data(SELF)    = mem_sys_allocate_zeroed((size_t)value);
             PMC_int_val(SELF) = value;
         }
         else if (value && PMC_data(SELF)) {
-            PMC_data(SELF) = mem_sys_realloc(PMC_data(SELF), value);
-            PMC_int_val(SELF) = value;
+            if (PMC_int_val(SELF) != value) {
+                PMC_data(SELF)    = mem_sys_realloc(PMC_data(SELF),
+                                        (size_t)value);
+                PMC_int_val(SELF) = value;
+            }
         }
+
         return;
+    }
+
+
+/*
+
+=item C<PMC * clone()>
+
+Creates a clone of this PMC; clones any unmanaged memory it holds too.  Note
+that the latter is only a shallow copy, as there's no general way of knowing
+how to clone I<that> data.
+
+=cut
+
+*/
+
+    VTABLE PMC *clone() {
+        PMC *dest = pmc_new_init(interp, SELF->vtable->base_type,
+            PMC_pmc_val(SELF));
+
+        if (PMC_data(SELF))
+            memmove(PMC_data(dest), PMC_data(SELF), PMC_int_val(SELF));
+
+        return dest;
     }
 
 }

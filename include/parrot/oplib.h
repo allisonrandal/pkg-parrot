@@ -1,7 +1,7 @@
 /* oplib.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: oplib.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: oplib.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Header file for op libraries.
  *  Data Structure and Algorithms:

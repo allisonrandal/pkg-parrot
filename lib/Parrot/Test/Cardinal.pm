@@ -1,6 +1,8 @@
-# $Id: Cardinal.pm 17090 2007-02-20 20:06:55Z paultcochrane $
+# $Id: Cardinal.pm 36833 2009-02-17 20:09:26Z allison $
 
 package Parrot::Test::Cardinal;
+
+# Copyright (C) 2006-2007, Parrot Foundation.
 
 use strict;
 use warnings;
@@ -20,10 +22,8 @@ sub new {
     return bless {};
 }
 
-sub output_is() {
+sub output_is {
     my ( $self, $code, $output, $desc ) = @_;
-
-    #print "@_\n";
 
     my $count = $self->{builder}->current_test + 1;
     $desc = 'Cardinal Test' unless $desc;

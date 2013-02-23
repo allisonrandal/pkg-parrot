@@ -30,7 +30,7 @@ getting replaced by their appropriate values.
 Finally, the .c and .h files are generated. The appropriate base class
 header files are included.
 
-If the C<noinit> flag was used, then no init function is generated.
+If the C<no_init> flag was used, then no init function is generated.
 Otherwise, one is generated which sets up the vtable and enters it into
 the C<vtables> array.
 
@@ -67,7 +67,7 @@ If no parent class is defined, methods from F<default.pmc> are used.
 This class cannot be instantiated. Abstract classes are shown with lower
 case class names in the class tree.
 
-=item C<noinit>
+=item C<no_init>
 
 Used with C<abstract>: No C<class_init> code is generated.
 
@@ -126,11 +126,13 @@ The High level language this PMC corresponds to.
 The basic parrot PMC type that this PMC correspond to for C<.HLL>
 usage. For example:
 
-    pmcclass TclInt hll Tcl maps Integer
+ pmclass TclInt hll Tcl maps Integer
 
 allows this PMC to automatically be used when autoboxing C<I> registers to PMCs.
 
-Requires the C<hll> flag.
+Requires the C<hll> flag. Note that multiple mappings can be specified:
+
+ pmclass myOrderedHash hll frob maps Hash maps Array
 
 =back
 
@@ -164,16 +166,16 @@ Calls the static vtable method 'method' in C<OtherClass>.
 
 =item C<SELF.method(a,b,c)>
 
-Calls the vtable method 'method' using the static type of C<SELF> (in
-other words, calls another method defined in the same file).
-
-=item C<DYNSELF.method(a,b,c)>
-
 Calls the vtable method 'method' using the dynamic type of C<SELF>.
 
-=item C<DYNSELF(a,b,c)>
+=item C<SELF(a,b,c)>
 
 Same as above, but calls the current method.
+
+=item C<STATICSELF.method(a,b,c)>
+
+Calls the vtable method 'method' using the static type of C<SELF> (in
+other words, calls another method defined in the same file).
 
 =item C<OtherClass.SUPER(a,b,c)>
 

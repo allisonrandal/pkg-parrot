@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: single_retval.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: single_retval.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -26,16 +26,16 @@ F<docs/imcc/calling_conventions.pod>
   $I1 = 8
   .local string s
   s = "nine"
-  I2  = 10
+  $I2  = 10
 
   # subs accept locals and registers
-  $I0 = foo(i, $I1, s, I2)
+  $I0 = foo(i, $I1, s, $I2)
   print "return: "
   print $I0
   print "\n"
 
   # subs accept locals and registers
-  ( $I3 ) = foo(i, $I1, s, I2)
+  ( $I3 ) = foo(i, $I1, s, $I2)
   print "return: "
   print $I3
   print "\n"
@@ -64,4 +64,4 @@ F<docs/imcc/calling_conventions.pod>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

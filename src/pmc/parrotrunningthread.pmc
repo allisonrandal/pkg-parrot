@@ -1,6 +1,6 @@
 /*
-Copyright 2006 The Perl Foundation.
-$Id: parrotrunningthread.pmc 17084 2007-02-20 20:03:37Z paultcochrane $
+Copyright (C) 2006-2008, Parrot Foundation.
+$Id: parrotrunningthread.pmc 37236 2009-03-09 10:52:41Z cotto $
 
 =head1 NAME
 
@@ -30,10 +30,11 @@ unrelated thread.
 
 #include "parrot/parrot.h"
 #include "parrot/embed.h"
-#include <assert.h>
 
+#define PMC_tid(x) ((Parrot_ParrotRunningThread_attributes *)PMC_data(x))->tid
 
 pmclass ParrotRunningThread no_ro {
+    ATTR INTVAL tid; /* thread id */
 
 /*
 
@@ -45,13 +46,30 @@ Create a new, invalid handle to a running thread.
 
 */
 
-    void init() {
-        PMC_int_val(SELF) = -1;
+    VTABLE void init() {
+        Parrot_ParrotRunningThread_attributes *attrs =
+            mem_allocate_zeroed_typed(Parrot_ParrotRunningThread_attributes);
+        attrs->tid = -1;
+        PMC_data(SELF) = attrs;
     }
 
 /*
 
-=item C<void init_pmc(PMC* tid)>
+=item C<void destroy()>
+
+Destroy this PMC.
+
+=cut
+
+*/
+
+    VTABLE void destroy() {
+        mem_sys_free(PMC_data(SELF));
+    }
+
+/*
+
+=item C<void init_pmc(PMC *tid)>
 
 Create a new running thread referring to the thread with
 the Thread ID specified in C<tid>.
@@ -60,8 +78,8 @@ the Thread ID specified in C<tid>.
 
 */
 
-    void init_pmc(PMC* tid) {
-        PMC_int_val(SELF) = VTABLE_get_integer(INTERP, tid);
+    VTABLE void init_pmc(PMC *tid) {
+        PMC_tid(SELF) = VTABLE_get_integer(INTERP, tid);
     }
 
 /*
@@ -74,8 +92,8 @@ Return the thread ID of this thread.
 
 */
 
-    INTVAL get_integer() {
-        return PMC_int_val(SELF);
+    VTABLE INTVAL get_integer() {
+        return PMC_tid(SELF);
     }
 
 /*
@@ -84,45 +102,53 @@ Return the thread ID of this thread.
 
 Change the thread ID we refer to to C<new_tid>.
 
+=cut
+
 */
 
-    void set_integer_native(INTVAL new_tid) {
-        PMC_int_val(SELF) = new_tid;
+    VTABLE void set_integer_native(INTVAL new_tid) {
+        if (new_tid < 0)
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INTERP_ERROR,
+                "Attempt to set invalid thread id %d", (int)new_tid);
+        PMC_tid(SELF) = new_tid;
     }
 /*
 
-=item C<METHOD PMC* join()>
+=item C<METHOD join()>
 
 Join the thread, returning whatever its main method returns.
 
 =cut
 
 */
-    METHOD PMC* join() {
-        PMC *ret;
-        ret = pt_thread_join(INTERP, PMC_int_val(SELF));
-        PMC_int_val(SELF) = -1; /* invalidate self */
-        return ret;
+    METHOD join() {
+        PMC *ret = pt_thread_join(INTERP,
+            (UINTVAL)VTABLE_get_integer(INTERP, SELF));
+
+        /* invalidate self */
+        PMC_tid(SELF) = -1;
+
+        RETURN(PMC *ret);
     }
 
 /*
 
-=item C<METHOD void detach()>
+=item C<METHOD detach()>
 
-Detach the thread so it cannot be joined and will free its
-resources immediatelly when it exits.
+Detach the thread so it cannot be joined and will free its resources
+immediately when it exits.
 
 =cut
 
 */
 
-    METHOD void detach() {
-        pt_thread_detach(PMC_int_val(SELF));
+    METHOD detach() {
+        pt_thread_detach((UINTVAL)VTABLE_get_integer(INTERP, SELF));
     }
 
 /*
 
-=item C<METHOD void kill()>
+=item C<METHOD kill()>
 
 Terminate a running thread.
 
@@ -130,8 +156,8 @@ Terminate a running thread.
 
 */
 
-    METHOD void kill() {
-        pt_thread_kill(PMC_int_val(SELF));
+    METHOD kill() {
+        pt_thread_kill((UINTVAL)VTABLE_get_integer(INTERP, SELF));
     }
 
 }

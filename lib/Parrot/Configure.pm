@@ -1,5 +1,10 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: Configure.pm 18405 2007-05-03 01:40:40Z jkeenan $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: Configure.pm 37201 2009-03-08 12:07:48Z fperrad $
+
+package Parrot::Configure;
+
+use strict;
+use warnings;
 
 =head1 NAME
 
@@ -9,17 +14,18 @@ Parrot::Configure - Conducts the execution of Configuration Steps
 
     use Parrot::Configure;
 
-    my $conf = Parrot::Configure->new;
-    my $data = $conf->data;
+    my $conf    = Parrot::Configure->new;
+    my $data    = $conf->data;
     my $options = $conf->options;
-    my @steps = $conf->steps;
+    my @steps   = $conf->steps;
+
     $conf->add_steps(@steps);
     $conf->runsteps;
 
 =head1 DESCRIPTION
 
-This module provides provides a means for registering, executing, and
-coordinating one or more Configuration steps.  Please see
+This module provides a means for registering, executing, and
+coordinating one or more configuration steps.  Please see
 F<docs/configuration.pod> for further details about the configuration
 framework.
 
@@ -32,28 +38,24 @@ I<symbols>.
 
 =cut
 
-package Parrot::Configure;
-
-use strict;
-use warnings;
-
 use lib qw(config);
 use Carp qw(carp);
+use Storable qw(2.12 nstore retrieve nfreeze thaw);
 use Parrot::Configure::Data;
+use base qw(Parrot::Configure::Compiler);
 
 use Class::Struct;
 
 struct(
     'Parrot::Configure::Task' => {
         step   => '$',
-        params => '@',
         object => 'Parrot::Configure::Step',
     },
 );
 
 =head2 Methods
 
-=head3 Constructors
+=head3 Constructor
 
 =over 4
 
@@ -61,18 +63,19 @@ struct(
 
 Basic constructor.
 
-Accepts no arguments and returns a L<Parrot::Configure> object.
+Accepts no arguments and returns a Parrot::Configure object.
 
 =cut
 
 my $singleton;
+
 BEGIN {
     $singleton = {
         steps   => [],
         data    => Parrot::Configure::Data->new,
         options => Parrot::Configure::Data->new,
     };
-    bless $singleton, "Parrot::Configure";
+    bless $singleton, 'Parrot::Configure';
 }
 
 sub new {
@@ -88,39 +91,39 @@ sub new {
 
 =item * C<data()>
 
-Provides access to a L<Parrot::Configure::Data> object intended to contain
+Provides access to a Parrot::Configure::Data object intended to contain
 initial and discovered configuration data.
 
-Accepts no arguments and returns a L<Parrot::Configure::Data> object.
+Accepts no arguments and returns a Parrot::Configure::Data object.
 
 =cut
 
 sub data {
-    my $self = shift;
+    my $conf = shift;
 
-    return $self->{data};
+    return $conf->{data};
 }
 
 =item * C<options()>
 
-Provides access to a L<Parrot::Configure::Data> object intended to contain CLI
+Provides access to a Parrot::Configure::Data object intended to contain CLI
 option data.
 
-Accepts no arguments and returns a L<Parrot::Configure::Data> object.
+Accepts no arguments and returns a Parrot::Configure::Data object.
 
 =cut
 
 sub options {
-    my $self = shift;
+    my $conf = shift;
 
-    return $self->{options};
+    return $conf->{options};
 }
 
 =item * C<steps()>
 
 Provides a list of registered steps, where each step is represented by an
-L<Parrot::Configure::Task> object.  Steps are returned in the order in which
-they were registered in.
+Parrot::Configure::Task object.  Steps are returned in the order in which
+they were registered.
 
 Accepts no arguments and returns a list in list context or an arrayref in
 scalar context.
@@ -128,9 +131,34 @@ scalar context.
 =cut
 
 sub steps {
-    my $self = shift;
+    my $conf = shift;
 
-    return wantarray ? @{ $self->{steps} } : $self->{steps};
+    return wantarray ? @{ $conf->{steps} } : $conf->{steps};
+}
+
+=item * C<get_list_of_steps()>
+
+Provides a list of the B<names> of registered steps.
+
+C<steps()>, in contrast, provides a list of registered step B<objects>, of
+which the B<step name> is just a small part.  Step names are returned in the
+order in which their corresponding step objects were registered.
+
+Accepts no arguments and returns a list in list context or an arrayref in
+scalar context.
+
+B<Note:> The list of step names returned by C<get_list_of_steps()> will be the
+same as that in the second argument returned by
+C<Parrot::Configure::Options::process_options()> B<provided> that you have not
+used C<add_step()> or C<add_steps()> to add any configuration steps.
+
+=cut
+
+sub get_list_of_steps {
+    my $conf = shift;
+    die 'list_of_steps not available until steps have been added'
+        unless defined $conf->{list_of_steps};
+    return wantarray ? @{ $conf->{list_of_steps} } : $conf->{list_of_steps};
 }
 
 =item * C<add_step()>
@@ -140,14 +168,18 @@ first parameter passed is the class name of the step being registered.  All
 other parameters are saved and passed to the registered class's C<runstep()>
 method.
 
-Accepts a list and modifies the data structure within the L<Parrot::Configure> object.
+Accepts a list and modifies the data structure within the
+Parrot::Configure object.
 
 =cut
 
 sub add_step {
-    my ( $self, $step, @params ) = @_;
+    my ( $conf, $step ) = @_;
 
-    push @{ $self->{steps} }, Parrot::Configure::Task->new( step => $step, params => \@params );
+    push @{ $conf->{steps} },
+        Parrot::Configure::Task->new(
+            step   => $step,
+        );
 
     return 1;
 }
@@ -156,15 +188,18 @@ sub add_step {
 
 Registers new steps to be run at the end of the execution queue.
 
-Accepts a list of new steps and modifies the data structure within the L<Parrot::Configure> object.
+Accepts a list of new steps and modifies the data structure within the
+Parrot::Configure object.
 
 =cut
 
 sub add_steps {
-    my ( $self, @new_steps ) = @_;
+    my ( $conf, @new_steps ) = @_;
 
-    foreach my $step (@new_steps) {
-        $self->add_step($step);
+    for ( my $i = 0 ; $i <= $#new_steps ; $i++ ) {
+        $conf->add_step( $new_steps[$i] );
+        push @{ $conf->{list_of_steps} }, $new_steps[$i];
+        $conf->{hash_of_steps}->{ $new_steps[$i] } = $i + 1;
     }
 
     return 1;
@@ -173,122 +208,350 @@ sub add_steps {
 =item * C<runsteps()>
 
 Sequentially executes steps in the order they were registered.  The invoking
-L<Parrot::Configure> object is passed as the first argument to each step's
+Parrot::Configure object is passed as the first argument to each step's
 C<runstep()> method, followed by any parameters that were registered for that
 step.
 
-Accepts no arguments and modifies the data structure within the L<Parrot::Configure> object.
+Accepts no arguments and modifies the data structure within the
+Parrot::Configure object.
 
 =cut
 
 sub runsteps {
-    my $self = shift;
-
-    my ( $verbose, $verbose_step, $ask ) = $self->options->get(qw(verbose verbose-step ask));
+    my $conf = shift;
 
     my $n = 0;    # step number
-    foreach my $task ( $self->steps ) {
+    my ( $silent, $verbose, $verbose_step_str, $fatal, $fatal_step_str, $ask );
+    $silent = $conf->options->get(qw( silent ));
+    unless ($silent) {
+        ( $verbose, $verbose_step_str, $fatal, $fatal_step_str, $ask ) =
+            $conf->options->get(qw( verbose verbose-step fatal fatal-step ask ));
+    }
+
+    $conf->{log} = [];
+    my %steps_to_die_for = ();
+    # If the --fatal option is true, then all config steps are mapped into
+    # %steps_to_die_for and there is no consideration of --fatal-step.
+    if ($fatal) {
+        %steps_to_die_for = map { ($_,1) } @{ $conf->{list_of_steps} };
+    }
+    # We make certain that argument to --fatal-step is a comma-delimited
+    # string of configuration steps, each of which is a string delimited by
+    # two colons, the first half of which is one of init|inter|auto|gen
+    elsif ( defined ( $fatal_step_str ) ) {
+        %steps_to_die_for = _handle_fatal_step_option( $fatal_step_str );
+    }
+    else {
+        # No action needed; this is the default case where no step is fatal
+    }
+
+    my %verbose_steps;
+    if (defined $verbose_step_str) {
+        %verbose_steps = _handle_verbose_step_option( $verbose_step_str );
+    }
+    foreach my $task ( $conf->steps ) {
+        my ($red_flag, $this_step_is_verbose);
+        my $step_name   = $task->step;
+        if ( scalar keys %steps_to_die_for ) {
+            if ( $steps_to_die_for{$step_name} ) {
+                $red_flag++;
+            }
+        }
+        if ( scalar keys %verbose_steps ) {
+             $this_step_is_verbose = $verbose_steps{$step_name}
+                ? $step_name
+                : q{};
+        }
+
         $n++;
-        $self->_runstep( $task, $verbose, $verbose_step, $ask, $n );
+        my $rv = $conf->_run_this_step(
+            {
+                task            => $task,
+                verbose         => $verbose,
+                verbose_step    => $this_step_is_verbose,
+                ask             => $ask,
+                n               => $n,
+                silent          => $silent,
+            }
+        );
+        if ( ! defined $rv ) {
+            if ( $red_flag ) {
+                return;
+            }
+            else {
+                $conf->{log}->[$n] = {
+                    step    => $step_name,
+                };
+            }
+        }
     }
     return 1;
 }
 
-=item * C<runstep()>
+sub _handle_fatal_step_option {
+    my $fatal_step_str = shift;
+    my %steps_to_die_for = ();
+    my $named_step_pattern = qr/(?:init|inter|auto|gen)::\w+/;
+    if ( $fatal_step_str =~ m{^
+        $named_step_pattern
+        (, $named_step_pattern)*
+        $}x
+    ) {
+        my @fatal_steps = split /,/, $fatal_step_str;
+        for my $s (@fatal_steps) {
+            $steps_to_die_for{$s}++;
+        }
+    }
+    else {
+        die q{Argument to fatal-step option must be comma-delimited string of valid configuration steps};
+    }
+    return %steps_to_die_for;
+}
 
-The invoking L<Parrot::Configure> object is passed as the first argument to
+sub _handle_verbose_step_option {
+    my $verbose_step_str = shift;
+    my %verbose_steps = ();
+    my $named_step_pattern = qr/(?:init|inter|auto|gen)::\w+/;
+    if ( $verbose_step_str =~ m{^
+        $named_step_pattern
+        (, $named_step_pattern)*
+        $}x
+    ) {
+        my @verbose_steps = split /,/, $verbose_step_str;
+        for my $s (@verbose_steps) {
+            $verbose_steps{$s}++;
+        }
+    }
+    else {
+        die q{Argument to verbose-step option must be comma-delimited string of valid configuration steps};
+    }
+    return %verbose_steps;
+}
+
+=item * C<run_single_step()>
+
+The invoking Parrot::Configure object is passed as the first argument to
 each step's C<runstep()> method, followed by any parameters that were
 registered for that step.
 
-Accepts no arguments and modifies the data structure within the L<Parrot::Configure> object.
+Accepts no arguments and modifies the data structure within the
+Parrot::Configure object.
+
+B<Note:>  Currently used only in F<tools/dev/reconfigure.pl>; not used in
+F<Configure.pl>.
 
 =cut
 
-sub runstep {
-    my $self     = shift;
+sub run_single_step {
+    my $conf     = shift;
     my $taskname = shift;
 
-    my ( $verbose, $verbose_step, $ask ) = $self->options->get(qw(verbose verbose-step ask));
+    my ( $verbose, $verbose_step, $ask ) =
+        $conf->options->get(qw( verbose verbose-step ask ));
 
-    for my $task ( $self->steps() ) {
-        if ( $task->{"Parrot::Configure::Task::step"} eq $taskname ) {
-            $self->_runstep( $task, $verbose, $verbose_step, $ask, 1 );
-        }
+    my $task = ( $conf->steps() )[0];
+    if ( $task->{'Parrot::Configure::Task::step'} eq $taskname ) {
+        $conf->_run_this_step(
+            {
+                task            => $task,
+                verbose         => $verbose,
+                verbose_step    => $verbose_step,
+                ask             => $ask,
+                n               => 1,
+            }
+        );
     }
+    else {
+        die 'Mangled task in run_single_step';
+    }
+
+    return;
 }
 
-sub _runstep {
-    my $self = shift;
-    my $task = shift;
+sub _run_this_step {
+    my $conf = shift;
+    my $args = shift;
 
-    my ( $verbose, $verbose_step, $ask, $n ) = @_;
+    my $step_name   = $args->{task}->step;
 
-    my $step_name   = $task->step;
-    my @step_params = @{ $task->params };
-
-    eval "use $step_name;";
+    eval "use $step_name;"; ## no critic (BuiltinFunctions::ProhibitStringyEval)
     die $@ if $@;
 
-    my $step = $step_name->new;
-
-    # XXX This works. but is probably not a good design.
-    # Using $step->description() would be nicer
-    my $description = $step->description();
-    $description = "" unless defined $description;
-
-    # set per step verbosity
-    if ( defined $verbose_step ) {
-
-        # by step number
-        if ( $verbose_step =~ /^\d+$/ && $n == $verbose_step ) {
-            $self->options->set( verbose => 2 );
-        }
-
-        # by description
-        elsif ( $description =~ /$verbose_step/ ) {
-            $self->options->set( verbose => 2 );
+    my $conftrace = [];
+    my $sto       = q{.configure_trace.sto};
+    {
+        local $Storable::Eval = 1;
+        if ( $conf->options->get(q{configure_trace}) and ( -e $sto ) ) {
+            $conftrace = retrieve($sto);
         }
     }
+    my $step = $step_name->new();
 
-    # XXX cc_build uses this verbose setting, why?
-    $self->data->set( verbose => $verbose ) if $n > 2;
+    # set per step verbosity
+    if ( $args->{verbose_step} ) {
+        $conf->options->set( verbose => 2 );
+    }
 
-    print "\n", $description, '...';
-    print "\n" if $verbose && $verbose == 2;
+    my $stub = qq{$step_name - };
+    my $message = $stub .
+        (q{ } x (22 - length($stub))) .
+        $step->description .
+        '...';
+    my $length_message = length($message);
+    unless ($args->{silent}) {
+        # The first newline terminates the report on the *previous* step.
+        # (Probably needed to make interactive output work properly.
+        # Otherwise, we'd put it in _finish_printing_result().
+        print "\n";
+        print $message;
+        print "\n" if $args->{verbose_step};
+    }
 
-    my $ret;    # step return value
-    eval {
-        if (@step_params)
-        {
-            $ret = $step->runstep( $self, @step_params );
-        }
-        else {
-            $ret = $step->runstep($self);
-        }
-    };
+    my $ret;
+    # When successful, a Parrot configuration step now returns 1
+    eval { $ret = $step->runstep($conf); };
     if ($@) {
         carp "\nstep $step_name died during execution: $@\n";
         return;
     }
+    else {
+        # A Parrot configuration step can run successfully, but if it fails to
+        # achieve its objective it is supposed to return an undefined status.
+        if ( $ret ) {
+            # reset verbose value for the next step
+            $conf->options->set( verbose => $args->{verbose} );
+            unless ($args->{silent}) {
+                _finish_printing_result(
+                    {
+                        step        => $step,
+                        step_name   => $step_name,
+                        args        => $args,
+                        description => $step->description,
+                        length_message => $length_message,
+                    }
+                );
+            }
+            if ($conf->options->get(q{configure_trace}) ) {
+                _update_conftrace(
+                    {
+                        conftrace   => $conftrace,
+                        step_name   => $step_name,
+                        conf        => $conf,
+                        sto         => $sto,
+                    }
+                );
+            }
+            return 1;
+        }
+        else {
+            _failure_message( $step, $step_name );
+            return;
+        }
+    }
+}
 
-    # did the step return itself?
-    eval { $ret->can('result'); };
+sub _failure_message {
+    my ( $step, $step_name ) = @_;
+    my $result = $step->result || 'no result returned';
+    carp "\nstep $step_name failed: " . $result;
 
-    # if not, report the result and return
-    if ($@) {
-        my $result = $step->result || 'no result returned';
-        carp "\nstep $step_name failed: " . $result;
-        return;
+    return;
+}
+
+
+sub _finish_printing_result {
+    my $argsref = shift;
+    my $result = $argsref->{step}->result || 'done';
+    my $linelength = 78;
+    if ($argsref->{args}->{verbose} or $argsref->{args}->{verbose_step}) {
+        # For more readable verbose output, we'll repeat the step description
+        print "\n";
+        my $spaces = 22;
+        print q{ } x $spaces;
+        print $argsref->{description};
+        print '.' x (
+            ( $linelength - $spaces ) -
+            ( length($argsref->{description}) + length($result) + 1 )
+        );
+    }
+    else {
+        print '.' x (
+            $linelength -
+            ( $argsref->{length_message} + length($result) + 1 )
+        );
+    }
+    unless ( $argsref->{step_name} =~ m{^inter} && $argsref->{args}->{ask} ) {
+        print "$result.";
+    }
+    return 1;
+}
+
+sub _update_conftrace {
+    my $argsref = shift;
+    if (! defined $argsref->{conftrace}->[0]) {
+        $argsref->{conftrace}->[0] = [];
+    }
+    push @{ $argsref->{conftrace}->[0] }, $argsref->{step_name};
+    my $evolved_data = {
+        options => $argsref->{conf}->{options},
+        data    => $argsref->{conf}->{data},
+    };
+    push @{ $argsref->{conftrace} }, $evolved_data;
+    {
+        local $Storable::Deparse = 1;
+        nstore( $argsref->{conftrace}, $argsref->{sto} );
+    }
+    return 1;
+}
+
+=item * C<option_or_data($arg)>
+
+Are you tired of this construction all over the place?
+
+    my $opt = $conf->options->get( $arg );
+       $opt = $conf->data->get( $arg ) unless defined $opt;
+
+It gives you the user-specified option for I<$arg>, and if there
+isn't one, it gets it from the created data.  You do it all the
+time, but oh! the wear and tear on your fingers!
+
+Toil no more!  Use this simple construction:
+
+    my $opt = $conf->option_or_data($arg);
+
+and save your fingers for some real work!
+
+=cut
+
+sub option_or_data {
+    my $conf = shift;
+    my $arg  = shift;
+
+    my $opt = $conf->options->get($arg);
+    return defined $opt ? $opt : $conf->data->get($arg);
+}
+
+sub pcfreeze {
+    my $conf = shift;
+    local $Storable::Deparse = 1;
+    local $Storable::Eval = 1;
+    return nfreeze($conf);
+}
+
+sub replenish {
+    my $conf = shift;
+    my $serialized = shift;
+    foreach my $k (keys %{$conf}) {
+        delete $conf->{$k};
+    }
+    local $Storable::Deparse = 1;
+    local $Storable::Eval = 1;
+    my %gut = %{ thaw($serialized) };
+    while ( my ($k, $v) = each %gut ) {
+        $conf->{$k} = $v;
     }
 
-    my $result = $step->result || 'done';
-
-    print "..." if $verbose && $verbose == 2;
-    print "." x ( 71 - length($description) - length($result) );
-    print "$result." unless $step =~ m{^inter/} && $ask;
-
-    # reset verbose value for the next step
-    $self->options->set( verbose => $verbose );
+    return;
 }
 
 =back
@@ -305,7 +568,7 @@ Joshua Hoblitt C<jhoblitt@cpan.org>
 =head1 SEE ALSO
 
 F<docs/configuration.pod>, L<Parrot::Configure::Data>,
-L<Parrot::Configure::Step>, L<Parrot::Configure::Step::Base>
+L<Parrot::Configure::Utils>, L<Parrot::Configure::Step>
 
 =cut
 

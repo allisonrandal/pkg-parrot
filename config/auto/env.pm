@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: env.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: env.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -9,41 +9,55 @@ config/auto/env.pm - System Environment
 
 Determining if the C library has C<setenv()> and C<unsetenv()>.
 
+More information about these functions can be found at
+L<http://www.gnu.org/software/libc/manual/html_node/Environment-Access.html>,
+among other locations.
+
 =cut
 
 package auto::env;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining if your C library has setenv / unsetenv';
-@args        = qw(verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does your C library have setenv / unsetenv};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = ( shift, shift );
 
-    my $verbose = $conf->options->get('verbose');
-
     my ( $setenv, $unsetenv ) = ( 0, 0 );
 
-    cc_gen('config/auto/env/test_setenv.in');
-    eval { cc_build(); };
-    unless ( $@ || cc_run() !~ /ok/ ) {
+    $conf->cc_gen('config/auto/env/test_setenv_c.in');
+    eval { $conf->cc_build(); };
+    unless ( $@ || $conf->cc_run() !~ /ok/ ) {
         $setenv = 1;
     }
-    cc_clean();
-    cc_gen('config/auto/env/test_unsetenv.in');
-    eval { cc_build(); };
-    unless ( $@ || cc_run() !~ /ok/ ) {
+    $conf->cc_clean();
+    $conf->cc_gen('config/auto/env/test_unsetenv_c.in');
+    eval { $conf->cc_build(); };
+    unless ( $@ || $conf->cc_run() !~ /ok/ ) {
         $unsetenv = 1;
     }
-    cc_clean();
+    $conf->cc_clean();
 
+    $self->_evaluate_env($conf, $setenv, $unsetenv);
+
+    return 1;
+}
+
+sub _evaluate_env {
+    my ($self, $conf, $setenv, $unsetenv) = @_;
+    my $verbose = $conf->options->get('verbose');
     $conf->data->set(
         setenv   => $setenv,
         unsetenv => $unsetenv
@@ -65,8 +79,6 @@ sub runstep {
         print " (no) " if $verbose;
         $self->set_result('no');
     }
-
-    return $self;
 }
 
 1;

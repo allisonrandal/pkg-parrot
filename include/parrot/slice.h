@@ -1,7 +1,7 @@
 /* slice.h
- *  Copyright (C) 2001-2004, The Perl Foundation.
+ *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: slice.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: slice.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This is the api header for slices.
  *  Data Structure and Algorithms:
@@ -20,16 +20,13 @@ typedef struct RUnion {
     STRING *s;
 } RUnion;
 
-#define RVal_int(u) u.i
-#define RVal_str(u) u.s
-
 typedef struct _parrot_range_t {
-    int type;                   /* enum_type_INTVAL or STRING */
-    RUnion start;             /* start of this range */
-    RUnion end;               /* end of this range */
-    RUnion step;              /* step of this range */
-    RUnion cur;               /* current value */
-    struct _parrot_range_t *next;       /* next in chain */
+    int type;                      /* enum_type_INTVAL or STRING */
+    RUnion start;                  /* start of this range */
+    RUnion end;                    /* end of this range */
+    RUnion step;                   /* step of this range */
+    RUnion cur;                    /* current value */
+    struct _parrot_range_t *next;  /* next in chain */
 } parrot_range_t;
 
 #endif /* PARROT_IN_CORE */

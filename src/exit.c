@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: exit.c 18912 2007-06-11 02:24:22Z petdance $
+Copyright (C) 2001-2007, Parrot Foundation.
+$Id: exit.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,55 +15,64 @@ called by C<Parrot_exit()> when the interpreter exits.
 
 =head2 Functions
 
+=over 4
+
+=cut
+
 */
 
 #include <stdlib.h>
 #include "parrot/parrot.h"
 
-/* HEADER: include/parrot/exit.h */
+/* HEADERIZER HFILE: include/parrot/exit.h */
 
 /*
 
-FUNCDOC: Parrot_on_exit
+=item C<void Parrot_on_exit>
 
 Register the specified function to be called on exit.
 
+=cut
+
 */
 
-PARROT_API
-int
-Parrot_on_exit(Interp *interp /*NN*/, exit_handler_f function /*NN*/, void *arg)
+PARROT_EXPORT
+void
+Parrot_on_exit(PARROT_INTERP, NOTNULL(exit_handler_f function), ARGIN_NULLOK(void *arg))
 {
-    /* XXX  we might want locking around the list access.   I'm sure this
+    ASSERT_ARGS(Parrot_on_exit)
+    /* RT#46403  we might want locking around the list access.   I'm sure this
      * will be the least of the threading issues. */
 
-    handler_node_t* const new_node = mem_allocate_typed(handler_node_t);
+    handler_node_t * const new_node = mem_allocate_typed(handler_node_t);
 
-    new_node->function = function;
-    new_node->arg = arg;
-    new_node->next = interp->exit_handler_list;
+    new_node->function        = function;
+    new_node->arg             = arg;
+    new_node->next            = interp->exit_handler_list;
     interp->exit_handler_list = new_node;
-    return 0;
 }
 
 /*
 
-FUNCDOC: Parrot_exit
+=item C<void Parrot_exit>
 
 Exit, calling any registered exit handlers.
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
 void
-Parrot_exit(Interp *interp /*NN*/, int status)
-    /* NORETURN */
+Parrot_exit(PARROT_INTERP, int status)
 {
+    ASSERT_ARGS(Parrot_exit)
     /* call all the exit handlers */
     /* we are well "below" the runloop now, where lo_var_ptr
      * is set usually - exit handlers may run some resource-hungry
-     * stuff like printing profile stats - a DOD run would kill
-     * resources - TODO reset stacktop or better disable GC
+     * stuff like printing profile stats - a GC run would kill
+     * resources - RT#46405 reset stacktop or better disable GC
      */
     /*
      * we don't allow new exit_handlers being installed inside exit handlers
@@ -72,6 +81,10 @@ Parrot_exit(Interp *interp /*NN*/, int status)
      *      (Parrot_really_destroy) has run
      */
     handler_node_t *node = interp->exit_handler_list;
+
+    Parrot_block_GC_mark(interp);
+    Parrot_block_GC_sweep(interp);
+
     while (node) {
         handler_node_t * const next = node->next;
 
@@ -85,6 +98,8 @@ Parrot_exit(Interp *interp /*NN*/, int status)
 
 /*
 
+=back
+
 =head1 SEE ALSO
 
 F<include/parrot/exit.h> and F<t/src/exit.t>.
@@ -92,6 +107,8 @@ F<include/parrot/exit.h> and F<t/src/exit.t>.
 =head1 HISTORY
 
 Initial version by Josh Wilmes.
+
+=cut
 
 */
 

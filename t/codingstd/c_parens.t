@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: c_parens.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: c_parens.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -8,6 +8,7 @@ use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More tests => 3;
 use Parrot::Distribution;
+use Pod::Simple;
 
 =head1 NAME
 
@@ -33,21 +34,36 @@ L<docs/pdds/pdd07_codingstd.pod>
 =cut
 
 my $keywords = join '|' => sort { length $a cmp length $b } qw/
-    auto      double    int       struct
-    break     else      long      switch
-    case      enum      register  typedef
-    char      extern    return    union
+    auto      double    int       struct    INTVAL
+    break     else      long      switch    UINTVAL
+    case      enum      register  typedef   FLOATVAL
+    char      extern    return    union     PIOOFF_T
     const     float     short     unsigned
     continue  for       signed    void
-    default   goto      sizeof    volatile
-    do        if        static    while
+    default   goto      sizeof    volatile  opcode_t
+    do        if        static    while     size_t
     /;
 my $DIST = Parrot::Distribution->new;
-my @files = @ARGV ? @ARGV : $DIST->get_c_language_files();
-my @no_space_before_open_paren;
+my @files = @ARGV ? <@ARGV> : $DIST->get_c_language_files();
 check_parens(@files);
 
 exit;
+
+sub strip_pod {
+    my $buf = shift;
+    my $parser = Pod::Simple->new();
+    my $non_pod_buf;
+    $parser->output_string( \$non_pod_buf );
+    # set up a code handler to get at the non-pod
+    # thanks to Thomas Klausner's Pod::Strip for the inspiration
+    $parser->code_handler(
+        sub {
+            print {$_[2]{output_fh}} $_[0], "\n";
+        });
+    $parser->parse_string_document( $buf );
+
+    return $non_pod_buf;
+}
 
 sub check_parens {
     my @keyword_paren;
@@ -55,14 +71,16 @@ sub check_parens {
     my @space_between_parens;
 
     foreach my $file (@_) {
-        my $buf;
         my $path = @ARGV ? $file : $file->path();
-        open my $fh, '<', $path
-            or die "Can not open '$path' for reading!\n";
-        {
-            local $/;
-            $buf = <$fh>;
+
+        my $buf = $DIST->slurp($path);
+
+        # only strip pod from .ops files
+        if ( $path =~ m/\.ops$/ ) {
+            $buf = strip_pod($buf);
         }
+
+        # strip ', ", and C comments
         $buf =~ s{ (?:
                        (?: (') (?: \\\\ | \\' | [^'] )* (') ) # remove ' string
                      | (?: (") (?: \\\\ | \\" | [^"] )* (") ) # remove " string
@@ -70,34 +88,44 @@ sub check_parens {
                    )
                 }{defined $1 ? "$1$2" : defined $3 ? "$3$4" : "$5$6"}egsx;
 
-        if ( $buf =~ m{ ( (?<!\w) (?:$keywords) (?: \( | \ \s+ \( ) ) }x ) {
-            push @keyword_paren => "$path: $1\n";
-        }
-        if ( $buf =~ m{ ( (?<!\w) (?!(?:$keywords)\W) \w+ \s+ \( ) }x ) {
-            push @non_keyword_paren => "$path: $1\n";
-        }
-        if ( $buf =~ m{ ( \( [ \t]+ [^\n] | [^\n] [ \t]+ \) ) }x ) {
-            push @space_between_parens => "$path: $1\n";
+        my @lines = split( /\n/, $buf );
+        for my $line (@lines) {
+            next if $line =~ m{#\s*define};    # skip #defines
+            if ( $line =~ m{ ( (?<!\w) (?:$keywords) (?: \( | \ \s+ \( ) ) }xo ) {
+                my $paren = $1;
+
+                # ops use the same names as some C keywords, so skip
+                next if $line =~ m{^op};
+                push @keyword_paren => "$path: $paren";
+            }
+            if ( $line =~ m{ ( (?<!\w) (?!(?:$keywords)\W) \w+ \s+ \( ) }xo ) {
+                push @non_keyword_paren => "$path: $1";
+            }
+            if ( $line =~ m{ ( \( [ \t]+ [^\n] | [^\n] [ \t]+ \) ) }x ) {
+                push @space_between_parens => "$path: $1";
+            }
         }
     }
 
 ## L<PDD07/Code Formatting/"there should be at least one space between a C keyword and any subsequent open parenthesis">
-    ok( !scalar(@keyword_paren), 'Spacing between C keyword and following open parenthesis'  )
-        or diag( "incorrect spacing between C keyword and following open parenthesis found in "
-            . scalar @keyword_paren
-            . " files:\n@keyword_paren" );
+    is( join("\n",@keyword_paren), "", <<END_DESCRIPTION);
+there should be at least one space between a C
+keyword and any subsequent open parenthesis
+END_DESCRIPTION
 
 ## L<PDD07/Code Formatting/"There should be no space between a function name and the following open parenthesis">
-    ok( !scalar(@non_keyword_paren), 'Spacing between function name and following open parethesis' )
-        or diag( "incorrect spacing between function name and following open parenthesis found in "
-            . scalar @non_keyword_paren
-            . " files:\n@non_keyword_paren" );
+    is( join("\n",@non_keyword_paren), "", <<END_DESCRIPTION);
+There should be no space between a function name
+and the following open parenthesis
+END_DESCRIPTION
 
 ## L<PDD07/Code Formatting/"parentheses should not have space immediately after the opening parenthesis nor immediately before the closing parenthesis">
-    ok( !scalar(@space_between_parens), 'Spacing between parentheses' )
-        or diag( "incorrect spacing between parentheses found in "
-            . scalar @space_between_parens
-            . " files:\n@space_between_parens" );
+    is( join("\n",@space_between_parens), "", <<END_DESCRIPTION);
+parentheses should not have space immediately
+after the opening parenthesis nor immediately
+before the closing parenthesis
+END_DESCRIPTION
+
 }
 
 # Local Variables:

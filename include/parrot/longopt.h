@@ -1,7 +1,7 @@
 /* longopt.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: longopt.h 19064 2007-06-17 15:23:33Z petdance $
+ *     $Id: longopt.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Command line option parsing (for pre-initialized code)
  *  Data Structure and Algorithms:
@@ -45,21 +45,27 @@ struct longopt_opt_info {
 #define LONGOPT_OPT_INFO_INIT { 1, 0, NULL, NULL, NULL }
 
 /* HEADERIZER BEGIN: src/longopt.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API int longopt_get( Interp *interp /*NN*/,
+PARROT_EXPORT
+int longopt_get(PARROT_INTERP,
     int argc,
-    char* argv[] /*NN*/,
-    const struct longopt_opt_decl options[] /*NN*/,
-    struct longopt_opt_info* info_buf /*NN*/ )
+    ARGIN(const char* argv[]),
+    ARGIN(const struct longopt_opt_decl options[]),
+    ARGMOD(struct longopt_opt_info* info_buf))
         __attribute__nonnull__(1)
         __attribute__nonnull__(3)
         __attribute__nonnull__(4)
-        __attribute__nonnull__(5);
+        __attribute__nonnull__(5)
+        FUNC_MODIFIES(* info_buf);
 
+#define ASSERT_ARGS_longopt_get __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(argv) \
+    || PARROT_ASSERT_ARG(options) \
+    || PARROT_ASSERT_ARG(info_buf)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/longopt.c */
-PARROT_API int longopt_get(Parrot_Interp, int argc, char* argv[],
-                const struct longopt_opt_decl options[],
-                struct longopt_opt_info* info_buf);
 
 #endif /* PARROT_LONGOPT_H_GUARD */
 

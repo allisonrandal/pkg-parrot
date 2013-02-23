@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: Tools.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: Tools.pm 37229 2009-03-09 04:39:01Z allison $
 
 =head1 NAME
 
@@ -52,46 +52,35 @@ sub new {
             $self->new_item( '', 'tools/build/vtable_extend.pl' ),
         ),
         $self->new_group(
-            'Bytecode', '',
-            $self->new_item( '', 'tools/build/pbc2c.pl' ),
-            $self->new_item( '', 'tools/dev/pbc_header.pl' ),
-        ),
-        $self->new_group(
-            'QA',
-            '',
-            $self->new_item( '', 'parrotbug' ),
-            $self->new_item( '', 'tools/dev/check_source_standards.pl' ),
-            $self->new_item( '', 'tools/docs/pod_errors.pl' ),
-            $self->new_item( '', 'tools/dev/manicheck.pl' ),
-            $self->new_item( '', 'tools/dev/run_indent.pl' ),
-        ),
-        $self->new_group(
-            'Documentation',
-            '',
-            $self->new_item( '', 'tools/dev/extract_file_descriptions.pl' ),
-            $self->new_item( '', 'tools/dev/lib_deps.pl' ),
-            $self->new_item( '', 'tools/dev/parrot_coverage.pl' ),
-            $self->new_item( '', 'tools/docs/write_docs.pl' ),
-        ),
-        $self->new_group(
             'Building',
             '',
+            $self->new_item( '', 'docs/configuration.pod' ),
             $self->new_item( '', 'tools/build/c2str.pl' ),
             $self->new_item( '', 'tools/build/dynoplibs.pl' ),
             $self->new_item( '', 'tools/build/dynpmc.pl' ),
-            $self->new_item( '', 'tools/build/fingerprint_c.pl' ),
             $self->new_item( '', 'tools/build/ops2c.pl' ),
             $self->new_item( '', 'tools/build/ops2pm.pl' ),
             $self->new_item( '', 'tools/build/parrot_config_c.pl' ),
             $self->new_item( '', 'tools/build/pmc2c.pl' ),
-            $self->new_item( '', 'tools/build/revision_c.pl' ),
             $self->new_item( '', 'tools/dev/install_files.pl' ),
-            $self->new_item( '', 'tools/dev/mk_manifests.pl' ),
             $self->new_item( '', 'tools/dev/mk_manifest_and_skip.pl' ),
-            $self->new_item( '', 'tools/dev/rebuild_miniparrot.pl' ),
             $self->new_item( '', 'tools/dev/symlink.pl' ),
+            $self->new_item( '', 'tools/dev/mk_native_pbc' ),
         ),
-        $self->new_group( 'Testing', '', $self->new_item( '', 'tools/dev/mk_native_pbc' ), ),
+        $self->new_group(
+            'Testing',
+            '',
+            $self->new_item( '', 'parrotbug' ),
+            $self->new_item( '', 'tools/dev/manicheck.pl' ),
+            $self->new_item( '', 'docs/tests.pod' ),
+        ),
+        $self->new_group(
+            'Documentation',
+            '',
+            $self->new_item( '', 'tools/dev/lib_deps.pl' ),
+            $self->new_item( '', 'tools/dev/parrot_coverage.pl' ),
+            $self->new_item( '', 'tools/docs/write_docs.pl' ),
+        ),
         $self->new_group(
             'Benchmarking', '',
             $self->new_item( '', 'tools/dev/bench_op.pir' ),
@@ -100,17 +89,17 @@ sub new {
         $self->new_group(
             'Utilities',
             '',
-            $self->new_item( '', 'tools/build/list_unjitted.pl' ),
+            $self->new_item( '', 'tools/dev/list_unjitted.pl' ),
             $self->new_item( '', 'tools/dev/gen_class.pl' ),
             $self->new_item( '', 'tools/dev/nm.pl' ),
             $self->new_item( '', 'tools/util/ncidef2pasm.pl' ),
-            $self->new_item( '', 'tools/util/smokeserv-README.pod' ),
+            $self->new_item( '', 'tools/dev/pbc_header.pl' ),
         ),
         $self->new_group(
-            'Possibly obsolete',
+            'Debugging',
             '',
-            $self->new_item( '', 'tools/dev/gen_charset_tables.pl' ),
-            $self->new_item( '', 'tools/dev/rebuild_miniparrot.pl' ),
+            $self->new_item( 'Debugging Tools', 'docs/debug.pod'),
+            $self->new_item( 'Parrot Debugger', 'docs/debugger.pod'),
         ),
     );
 }

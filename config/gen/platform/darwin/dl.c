@@ -1,19 +1,46 @@
+/*
+ * $Id: dl.c 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2004-2006, Parrot Foundation.
+ */
+
+/*
+
+=head1 NAME
+
+dl.c
+
+=head1 DESCRIPTION
+
+The dl* functions showed up in OS X 10.3, but they are just a
+wrapper around the native dyld and NSModule API, so we'll use
+the base API directly. This gives us wider compatibility, and
+more control over the behavior.
+
+=head2 Functions
+
+=over 4
+
+=cut
+
+*/
+
 #import <mach-o/dyld.h>
 
 #define PARROT_DLOPEN_FLAGS RTLD_LAZY
 
-/* The dl* functions showed up in OS X 10.3, but they are just a
-   wrapper around the native dyld and NSModule API, so we'll use
-   the base API directly. This gives us wider compatibility, and
-   more control over the behavior. */
-
 /*
-** scan_paths()
- */
 
-/* Simple routine to walk a colon separated list of directories in a string
-   and check for a file in each one, returning the first match.
-   Note that this returns a static buffer, and so is not thread-safe. */
+=item C<static const char *
+scan_paths(const char *filename, const char *libpath)>
+
+Simple routine to walk a colon separated list of directories in a string
+and check for a file in each one, returning the first match.
+Note that this returns a static buffer, and so is not thread-safe.
+
+=cut
+
+*/
+
 static const char *
 scan_paths(const char *filename, const char *libpath)
 {
@@ -43,14 +70,20 @@ scan_paths(const char *filename, const char *libpath)
 }
 
 /*
-** get_lib()
+
+=item C<static const char *
+get_lib(const char *filename)>
+
+Try to expand a filename input into a full file system path following
+the behavior described in dyld(1). First looks for the file in
+DYLD_LIBRARY_PATH, the DYLD_FALLBACK_LIBRARY_PATH, and lastly uses the
+default of /usr/local/lib:/lib:/usr/lib. If the filename cannot be
+expanded, the original value passed to the function is returned.
+
+=cut
+
 */
 
-/* Try to expand a filename input into a full file system path following
-   the behavior described in dyld(1). First looks for the file in
-   DYLD_LIBRARY_PATH, the DYLD_FALLBACK_LIBRARY_PATH, and lastly uses the
-   default of /usr/local/lib:/lib:/usr/lib. If the filename cannot be
-   expanded, the original value passed to the function is returned. */
 static const char *
 get_lib(const char *filename)
 {
@@ -75,7 +108,14 @@ get_lib(const char *filename)
 }
 
 /*
-** Parrot_dlopen()
+
+=item C<void *
+Parrot_dlopen(const char *filename)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 void *
@@ -101,19 +141,19 @@ Parrot_dlopen(const char *filename)
     else
     { /* bundle-style loading didn't work; try dylib-style before giving up */
         const struct mach_header *header =
-                NSAddImage( fullpath,
-                            NSADDIMAGE_OPTION_RETURN_ON_ERROR
-                            | NSADDIMAGE_OPTION_WITH_SEARCHING);
+                NSAddImage(fullpath,
+                           NSADDIMAGE_OPTION_RETURN_ON_ERROR
+                           | NSADDIMAGE_OPTION_WITH_SEARCHING);
 
         if (header)
             return (void *)header;
 
         /*
-         * that didn't work either; go ahead and report the orignal error
+         * that didn't work either; go ahead and report the original error
          */
 
         switch (dyld_result) {
-        /* XXX for now, ignore all the known errors */
+        /* RT#48274 for now, ignore all the known errors */
         case NSObjectFileImageFailure:
         case NSObjectFileImageInappropriateFile:
         case NSObjectFileImageArch:
@@ -134,7 +174,14 @@ Parrot_dlopen(const char *filename)
 
 
 /*
-** Parrot_dlerror()
+
+=item C<const char *
+Parrot_dlerror(void)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 const char *
@@ -145,7 +192,14 @@ Parrot_dlerror(void)
 
 
 /*
-** Parrot_dlsym()
+
+=item C<void *
+Parrot_dlsym(void *handle, const char *symbol)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 void *
@@ -166,8 +220,8 @@ Parrot_dlsym(void *handle, const char *symbol)
             found_symbol = NSLookupAndBindSymbol(fixed_name);
         }
     }
-    else if (    ((struct mach_header *)handle)->magic == MH_MAGIC
-              || ((struct mach_header *)handle)->magic == MH_CIGAM )
+    else if (((struct mach_header *)handle)->magic == MH_MAGIC
+             || ((struct mach_header *)handle)->magic == MH_CIGAM)
     {
         if (NSIsSymbolNameDefinedInImage(handle, fixed_name))
         {
@@ -195,28 +249,39 @@ Parrot_dlsym(void *handle, const char *symbol)
 
 
 /*
-** Parrot_dlclose()
+
+=item C<int
+Parrot_dlclose(void *handle)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
 */
 
 int
 Parrot_dlclose(void *handle)
 {
-    if ( handle && !( ((struct mach_header *)handle)->magic == MH_MAGIC
-                   || ((struct mach_header *)handle)->magic == MH_CIGAM ) )
-    {
+    if (handle && !(((struct mach_header *)handle)->magic == MH_MAGIC
+               ||   ((struct mach_header *)handle)->magic == MH_CIGAM)) {
         unsigned long options = NSUNLINKMODULE_OPTION_NONE;
 #ifdef __ppc__
         options = NSUNLINKMODULE_OPTION_RESET_LAZY_REFERENCES;
 #endif
 
-        return (int)NSUnLinkModule(handle, options);
+        return NSUnLinkModule(handle, options) ? 1 : 0;
     }
     else
-    {
         return 0;
-    }
 }
 
+/*
+
+=back
+
+=cut
+
+*/
 
 /*
  * Local variables:

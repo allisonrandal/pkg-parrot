@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: jit2c.pl 18183 2007-04-14 03:15:44Z chromatic $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: jit2c.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -103,6 +103,8 @@ sub readjit {
     my %ops;
     my $template;
 
+    local $.;
+
     open my $IN, '<', $file or die "Can't open file $file: $!";
     while ( my $line = <$IN> ) {
         if ( $line =~ m/^#define/ ) {
@@ -113,36 +115,35 @@ s/PREV_OP\s(..?)\s(\w+)/(jit_info->prev_op) && (*jit_info->prev_op $1 $opcodes{$
         }
 
         # ignore comment and empty lines
-        next if ( ( $line =~ m/^;/ ) || ( $line =~ m/^\s*$/ ) );
+        next if $line =~ m/^;/ || $line !~ m/\S/;
+
         if ( !defined($function) && !defined($template) ) {
             if ( $line =~ m/TEMPLATE\s+(\w+)\s*{/ ) {    #}
                 $template = $1;
-                $asm      = q{};
+                $asm      = qq{#line $. "$file"\n};
                 next;
             }
             else {
                 $line =~ m/(extern\s*)?(\w+)\s*{/;       #}
                 $extern   = ( defined($1) ) ? 1 : 0;
                 $function = $2;
-                $asm      = q{};
+                $asm      = qq{#line $. "$file"\n};
                 next;
             }
         }
         if ( $line =~ m/^}/ ) {                          #{
                                                          # 1. check templates
-            while ( my ( $t, $body ) = each(%templates) ) {
+            while ( my ( $t, $body ) = each %templates ) {
                 if ( $asm =~ /$t\s+/ ) {
                     my $tbody = $body;
                     while ( $asm =~ s/\b(s(.).+?\2.*?\2)(?:\s+)?// ) {
                         eval "\$tbody =~ ${1}g";
-                        if ($@) {
-                            die "error in template subst: $@\n";
-                        }
+                        die "error in template subst: $@\n" if $@;
                     }
                     $asm = $tbody;
 
                     # reset iterator for next run
-                    keys(%templates);
+                    keys %templates;
                     last;
                 }
             }
@@ -182,7 +183,7 @@ s/PREV_OP\s(..?)\s(\w+)/(jit_info->prev_op) && (*jit_info->prev_op $1 $opcodes{$
 s/CONST\((\d)\)\s*([><=!]=?)\s*CONST\((\d)\)/RCONST($1)->u.number $2 RCONST($3)->u.number/
                     if ( $asm =~ /CONST.*CONST/ );
                 $asm =~
-s/(emitm_pushl_m[^\n]*CONST[^\n]*)/$1\\\n        Parrot_exec_add_text_rellocation(jit_info->objfile, NULL, RTYPE_DATA, "const_table", 0);/g;
+s/(emitm_pushl_m[^\n]*CONST[^\n]*)/$1\\\n        Parrot_exec_add_text_rellocation(jit_info->objfile, jit_info->native_ptr, RTYPE_DATA, "const_table", 0);/g;
                 $asm =~ s/jit_emit_end/exec_emit_end/;
             }
             if ( ( $cpuarch eq 'ppc' ) && ( $genfile ne "src/jit_cpu.c" ) ) {
@@ -195,7 +196,7 @@ s/jit_emit_mov_ri_i\(jit_info->native_ptr, ISR([12]), &CONST\((\d)\)\);/load_nc(
             $function = undef;
         }
         unless ($jit_cpu) {
-            $line =~ s/emitm_pushl_i/emitm_pushl_m/ if ( $line =~ /string/ );
+            $line =~ s/emitm_pushl_i/emitm_pushl_m/ if $line =~ /string/;
         }
         $asm .= $line;
     }
@@ -214,7 +215,7 @@ sub vtable_num {
     my $i = 0;
     $vjit++;
     for my $entry ( @{$vtable} ) {
-        next if $entry->[4] =~ /MMD_/;    # TODO all
+        next if $entry->[4] =~ /MMD_/;    # RT#46915 all
         return $i if ( $entry->[1] eq $meth );
         $i++;
     }
@@ -237,8 +238,11 @@ print $JITCPU <<"END_C";
  *
  */
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER STOP */
+
 #include<parrot/parrot.h>
-#if HAVE_COMPUTED_GOTO
+#ifdef HAVE_COMPUTED_GOTO
 #  include<parrot/oplib/core_ops_cgp.h>
 #endif
 #include"parrot/exec.h"
@@ -256,7 +260,7 @@ print $JITCPU <<"END_C";
 #define Parrot_jit_vtable1_op Parrot_jit_normal_op
 #define Parrot_jit_vtable1r_op Parrot_jit_normal_op
 /*
- * the numbers corresspond to the registers
+ * the numbers correspond to the registers
  */
 #define Parrot_jit_vtable_111_op Parrot_jit_normal_op
 #define Parrot_jit_vtable_112_op Parrot_jit_normal_op
@@ -281,9 +285,6 @@ print $JITCPU <<"END_C";
 # define MAP(i) jit_info->optimizer->map_branch[jit_info->op_i + (i)]
 #endif
 
-extern PARROT_API char **Parrot_exec_rel_addr;
-extern PARROT_API int Parrot_exec_rel_count;
-
 #define ROFFS_INT(x) REG_OFFS_INT(jit_info->cur_op[x])
 #define ROFFS_NUM(x) REG_OFFS_NUM(jit_info->cur_op[x])
 #define ROFFS_STR(x) REG_OFFS_STR(jit_info->cur_op[x])
@@ -293,10 +294,10 @@ END_C
 
 if ($jit_cpu) {
     print $JITCPU <<'END_C';
-#define IREG(i) REG_INT(jit_info->cur_op[i])
-#define NREG(i) REG_NUM(jit_info->cur_op[i])
-#define PREG(i) REG_PMC(jit_info->cur_op[i])
-#define SREG(i) REG_STR(jit_info->cur_op[i])
+#define IREG(i) REG_INT(interp, jit_info->cur_op[i])
+#define NREG(i) REG_NUM(interp, jit_info->cur_op[i])
+#define PREG(i) REG_PMC(interp, jit_info->cur_op[i])
+#define SREG(i) REG_STR(interp, jit_info->cur_op[i])
 #define CONST(i) interp->code->const_table->constants[jit_info->cur_op[i]]
 END_C
 }
@@ -316,14 +317,14 @@ if ( $cpuarch eq 'ppc' && $genfile ne 'src/jit_cpu.c' ) {
 
 my %core_ops = readjit("src/jit/$cpuarch/core.jit");
 
-print $JITCPU $header if ($header);
+print $JITCPU $header if $header;
 
-my $njit = scalar keys(%core_ops);
+my $njit = keys %core_ops;
 
 my $jit_fn_retn   = 'void';
 my $jit_fn_params = '(Parrot_jit_info_t *jit_info, Interp *interp)';
 
-for ( my $i = 0 ; $i < $core_numops ; $i++ ) {
+for my $i ( 0 .. $core_numops - 1) {
     $body   = $core_ops{ $core_opfunc[$i] }[0];
     $extern = $core_ops{ $core_opfunc[$i] }[1];
 
@@ -493,10 +494,10 @@ print $JITCPU @jit_funcs, "};\n";
 
 if ( $genfile =~ /jit_cpu.c/ ) {
     print $JITCPU <<"EOC";
-    PARROT_API Parrot_jit_fn_info_t *op_jit = &_op_jit[0];
+    Parrot_jit_fn_info_t *op_jit = &_op_jit[0];
 
     extern int jit_op_count(void);
-    int jit_op_count() { return $core_numops; }
+    int jit_op_count(void) { return $core_numops; }
 EOC
 }
 
@@ -506,6 +507,7 @@ print $JITCPU <<"EOC";
 /*
  * Local variables:
  *   c-file-style: "parrot"
+ *   buffer-read-only: t
  * End:
  * vim: expandtab shiftwidth=4:
  */
@@ -519,6 +521,7 @@ sub make_subs {
     return ( ( $ptr eq '&' ? '&' : '' ) . sprintf( $argmaps{ $type_to_arg{$type} }, $index ) );
 }
 
+
 # Local Variables:
 #   mode: cperl
 #   cperl-indent-level: 4

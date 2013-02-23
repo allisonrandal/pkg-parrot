@@ -1,18 +1,18 @@
 #!perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: extend.t 18383 2007-05-02 00:00:16Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: extend.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
+use Parrot::Test::Util 'create_tempfile';
+
 use Parrot::Test;
 use Parrot::Config;
 
-plan $^O =~ m/MSWin32|cygwin/
-   ? ( skip_all => 'broken on win32 && cygwin' )
-   : ( tests => 16 );
+plan tests => 17;
 
 =head1 NAME
 
@@ -28,7 +28,7 @@ Tests the extension API.
 
 =cut
 
-c_output_is( <<'CODE', <<'OUTPUT', "set/get_intreg" );
+c_output_is( <<'CODE', <<'OUTPUT', 'set/get_intreg' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -36,15 +36,14 @@ c_output_is( <<'CODE', <<'OUTPUT', "set/get_intreg" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int parrot_reg, value, new_value;
+    Parrot_Interp interp  = Parrot_new(NULL);
+    Parrot_Int    parrot_reg = 0;
+    Parrot_Int    value      = 42;
+    Parrot_Int    new_value;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
-
-    parrot_reg = 0;
-    value = 42;
+    if (!interp)
+        return 1;
 
     Parrot_set_intreg(interp, parrot_reg, value);
     new_value = Parrot_get_intreg(interp, parrot_reg);
@@ -59,7 +58,7 @@ CODE
 42
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "set/get_numreg" );
+c_output_is( <<'CODE', <<'OUTPUT', 'set/get_numreg' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -67,16 +66,14 @@ c_output_is( <<'CODE', <<'OUTPUT', "set/get_numreg" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int parrot_reg;
-    Parrot_Float value, new_value;
+    Parrot_Interp interp     = Parrot_new(NULL);
+    Parrot_Int    parrot_reg = 1;
+    Parrot_Float  value       = 2.5;
+    Parrot_Float  new_value;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
-
-    parrot_reg = 1;
-    value = 2.5;
+    if (!interp)
+        return 1;
 
     Parrot_set_numreg(interp, parrot_reg, value);
     new_value = Parrot_get_numreg(interp, parrot_reg);
@@ -91,7 +88,7 @@ CODE
 2.5
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "Parrot_new_string" );
+c_output_is( <<'CODE', <<'OUTPUT', 'Parrot_new_string' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -99,15 +96,15 @@ c_output_is( <<'CODE', <<'OUTPUT', "Parrot_new_string" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
+    Parrot_Interp interp = Parrot_new(NULL);
     Parrot_String output;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
     output = Parrot_new_string(interp, "Test", 4, "iso-8859-1", 0);
-    PIO_eprintf(interp, "%S\n", output);
+    Parrot_eprintf(interp, "%S\n", output);
 
     Parrot_exit(interp, 0);
     return 0;
@@ -117,7 +114,7 @@ CODE
 Test
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "set/get_strreg" );
+c_output_is( <<'CODE', <<'OUTPUT', 'set/get_strreg' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -125,19 +122,19 @@ c_output_is( <<'CODE', <<'OUTPUT', "set/get_strreg" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int parrot_reg;
+    Parrot_Interp interp     = Parrot_new(NULL);
+    Parrot_Int    parrot_reg = 2;
     Parrot_String value, new_value;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    parrot_reg = 2;
     value = Parrot_new_string(interp, "Test", 4, "iso-8859-1", 0);
     Parrot_set_strreg(interp, parrot_reg, value);
+
     new_value = Parrot_get_strreg(interp, parrot_reg);
-    PIO_eprintf(interp, "%S\n", new_value);
+    Parrot_eprintf(interp, "%S\n", new_value);
 
     Parrot_exit(interp, 0);
     return 0;
@@ -147,7 +144,7 @@ CODE
 Test
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_intval" );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_intval' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -155,18 +152,18 @@ c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_intval" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int type, value, new_value;
-    Parrot_PMC testpmc;
+    Parrot_Interp interp = Parrot_new(NULL);
+    Parrot_Int    value  = 101010;
+    Parrot_PMC    testpmc;
+    Parrot_Int    type, new_value;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    type = Parrot_PMC_typenum(interp, "Integer");
+    type    = Parrot_PMC_typenum(interp, "Integer");
     testpmc = Parrot_PMC_new(interp, type);
 
-    value = 101010;
     Parrot_PMC_set_intval(interp, testpmc, value);
     new_value = Parrot_PMC_get_intval(interp, testpmc);
 
@@ -179,7 +176,7 @@ CODE
 101010
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_intval_intkey" );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_intval_intkey' );
 
 #include <stdio.h>
 #include "parrot/parrot.h"
@@ -187,15 +184,14 @@ c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_intval_intkey" );
 #include "parrot/extend.h"
 
 static opcode_t*
-the_test(Parrot_Interp interp, opcode_t *cur_op, opcode_t *start)
+the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
 {
-    Parrot_Int type, value, key, new_value;
-    Parrot_PMC array;
-    type = Parrot_PMC_typenum(interp, "ResizablePMCArray");
-    array = Parrot_PMC_new(interp, type);
+    Parrot_Int type  = Parrot_PMC_typenum(interp, "ResizablePMCArray");
+    Parrot_PMC array = Parrot_PMC_new(interp, type);
+    Parrot_Int value = 12345;
+    Parrot_Int key   = 10;
+    Parrot_Int new_value;
 
-    value = 12345;
-    key   = 10;
     Parrot_PMC_set_intval_intkey(interp, array, key, value);
 
     new_value = Parrot_PMC_get_intval_intkey(interp, array, key);
@@ -206,11 +202,12 @@ the_test(Parrot_Interp interp, opcode_t *cur_op, opcode_t *start)
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
+    Parrot_Interp interp = Parrot_new(NULL);
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
+
     Parrot_run_native(interp, the_test);
     Parrot_exit(interp, 0);
     return 0;
@@ -219,7 +216,7 @@ CODE
 12345
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "set/get_pmcreg" );
+c_output_is( <<'CODE', <<'OUTPUT', 'set/get_pmcreg' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -227,25 +224,27 @@ c_output_is( <<'CODE', <<'OUTPUT', "set/get_pmcreg" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int type, value, new_value, parrot_reg;
-    Parrot_PMC testpmc, newpmc;
+    Parrot_Interp interp     = Parrot_new(NULL);
+    Parrot_Int    value      = -123;
+    Parrot_Int    parrot_reg =  31;
+    Parrot_Int    type, new_value;
+    Parrot_PMC    testpmc, newpmc;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    type = Parrot_PMC_typenum(interp, "Integer");
+    type    = Parrot_PMC_typenum(interp, "Integer");
     testpmc = Parrot_PMC_new(interp, type);
 
-    value = -123;
     Parrot_PMC_set_intval(interp, testpmc, value);
 
     parrot_reg = 31;
     Parrot_set_pmcreg(interp, parrot_reg, testpmc);
 
-    newpmc = Parrot_get_pmcreg(interp, parrot_reg);
+    newpmc    = Parrot_get_pmcreg(interp, parrot_reg);
     new_value = Parrot_PMC_get_intval(interp, newpmc);
+
     printf("%d\n", (int)new_value);
 
     Parrot_exit(interp, 0);
@@ -255,7 +254,7 @@ CODE
 -123
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_numval" );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_numval' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -263,19 +262,19 @@ c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_numval" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int type;
-    Parrot_Float value, new_value;
-    Parrot_PMC testpmc;
+    Parrot_Interp interp = Parrot_new(NULL);
+    Parrot_Float  value  = 3.1415927;
+    Parrot_Int    type;
+    Parrot_Float  new_value;
+    Parrot_PMC    testpmc;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    type = Parrot_PMC_typenum(interp, "Float");
+    type    = Parrot_PMC_typenum(interp, "Float");
     testpmc = Parrot_PMC_new(interp, type);
 
-    value = 3.1415927;
     Parrot_PMC_set_numval(interp, testpmc, value);
     new_value = Parrot_PMC_get_numval(interp, testpmc);
 
@@ -288,7 +287,7 @@ CODE
 3.1415927
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_string" );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_string' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -296,23 +295,23 @@ c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_string" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int type;
+    Parrot_Interp interp = Parrot_new(NULL);
+    Parrot_Int    type;
     Parrot_String value, new_value;
-    Parrot_PMC testpmc;
+    Parrot_PMC    testpmc;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    type = Parrot_PMC_typenum(interp, "String");
+    type    = Parrot_PMC_typenum(interp, "String");
     testpmc = Parrot_PMC_new(interp, type);
 
-    value = Parrot_new_string(interp, "Pumpking", 8, "iso-8859-1", 0);
+    value     = Parrot_new_string(interp, "Pumpking", 8, "iso-8859-1", 0);
     Parrot_PMC_set_string(interp, testpmc, value);
     new_value = Parrot_PMC_get_string(interp, testpmc);
 
-    PIO_eprintf(interp, "%S\n", new_value);
+    Parrot_eprintf(interp, "%S\n", new_value);
 
     Parrot_exit(interp, 0);
     return 0;
@@ -321,7 +320,7 @@ CODE
 Pumpking
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_cstring" );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_cstring' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -329,16 +328,16 @@ c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_cstring" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int type;
-    Parrot_PMC testpmc;
-    char* new_value;
+    Parrot_Interp interp = Parrot_new(NULL);
+    Parrot_Int    type;
+    Parrot_PMC    testpmc;
+    char         *new_value;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    type = Parrot_PMC_typenum(interp, "String");
+    type    = Parrot_PMC_typenum(interp, "String");
     testpmc = Parrot_PMC_new(interp, type);
 
     Parrot_PMC_set_cstring(interp, testpmc, "Wibble");
@@ -355,7 +354,7 @@ CODE
 Wibble
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_cstringn" );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_cstringn' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -363,20 +362,19 @@ c_output_is( <<'CODE', <<'OUTPUT', "PMC_set/get_cstringn" );
 
 int
 main(int argc, char* argv[]) {
-    Parrot_Interp interp;
-    Parrot_Int type, length;
-    Parrot_Int new_len;
-    Parrot_PMC testpmc;
-    char* new_value;
+    Parrot_Interp interp = Parrot_new(NULL);
+    Parrot_Int    length = 6;
+    Parrot_Int    type;
+    Parrot_Int    new_len;
+    Parrot_PMC    testpmc;
+    char         *new_value;
 
     /* Interpreter set-up */
-    interp = Parrot_new(NULL);
-    if ( interp == NULL ) return 1;
+    if (!interp)
+        return 1;
 
-    type = Parrot_PMC_typenum(interp, "String");
+    type    = Parrot_PMC_typenum(interp, "String");
     testpmc = Parrot_PMC_new(interp, type);
-
-    length = 6;
 
     Parrot_PMC_set_cstringn(interp, testpmc, "Wibble", length);
     new_value = Parrot_PMC_get_cstringn(interp, testpmc, &new_len);
@@ -394,40 +392,41 @@ Wibble
 6
 OUTPUT
 
-my $temp = 'temp';
-open my $S, '>', "$temp.pasm" or die "Can't write $temp.pasm";
-print $S <<'EOF';
+my ($TEMP, $temp_pasm) = create_tempfile( SUFFIX => '.pasm', UNLINK => 1 );
+
+print $TEMP <<'EOF';
   .pcc_sub _sub1:
-  get_params "()"
+  get_params ""
   printerr "in sub1\n"
-  set_returns "()"
+  set_returns ""
   returncc
   .pcc_sub _sub2:
-  get_params "(0)", P5
+  get_params "0", P5
   printerr P5
   printerr "in sub2\n"
-  set_returns "()"
+  set_returns ""
   returncc
 EOF
-close $S;
+close $TEMP;
 
 # compile to pbc
-system(".$PConfig{slash}parrot$PConfig{exe} -o $temp.pbc $temp.pasm");
+my (undef, $temp_pbc) = create_tempfile( SUFFIX => '.pbc', UNLINK => 1 );
+system(".$PConfig{slash}parrot$PConfig{exe}", '-o', $temp_pbc, $temp_pasm);
 
-c_output_is( <<'CODE', <<'OUTPUT', "call a parrot sub" );
+c_output_is( <<"CODE", <<'OUTPUT', 'call a parrot sub' );
 
 #include <parrot/parrot.h>
 #include <parrot/embed.h>
+#include <parrot/extend.h>
 
 static opcode_t *the_test(Parrot_Interp, opcode_t *, opcode_t *);
 
 int
-main(int argc, char* argv[])
+main(int argc, char *argv[])
 {
     Parrot_Interp interp = Parrot_new(NULL);
-    if (!interp) {
+    if (!interp)
         return 1;
-    }
 
     Parrot_run_native(interp, the_test);
 
@@ -436,33 +435,32 @@ main(int argc, char* argv[])
 }
 
 /* also both the test PASM and the_test() print to stderr
- * so that buffering in PIO is not an issue
- */
+ * so that buffering in PIO is not an issue */
 
 static opcode_t*
-the_test(Parrot_Interp interp, opcode_t *cur_op, opcode_t *start)
+the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
 {
-    PackFile *pf;
-    PMC *sub, *arg;
-    STRING *name;
+    PackFile *pf = Parrot_pbc_read(interp, "$temp_pbc", 0);
+    STRING   *name = Parrot_str_new_constant(interp, "_sub1");
+    PMC      *sub, *arg;
 
-    pf = Parrot_readbc(interp, "temp.pbc");
-    Parrot_loadbc(interp, pf);
-    name = const_string(interp, "_sub1");
+    Parrot_pbc_load(interp, pf);
     sub = Parrot_find_global_cur(interp, name);
     Parrot_call_sub(interp, sub, "v");
-    PIO_eprintf(interp, "back\n");
+    Parrot_eprintf(interp, "back\\n");
 
     /* win32 seems to buffer stderr ? */
-    PIO_flush(interp, PIO_STDERR(interp));
+    Parrot_io_flush(interp, Parrot_io_STDERR(interp));
 
-    name = const_string(interp, "_sub2");
-    sub = Parrot_find_global_cur(interp, name);
-    arg = pmc_new(interp, enum_class_String);
-    VTABLE_set_string_native(interp, arg,
-                 string_from_cstring(interp, "hello ", 0));
+    name = Parrot_str_new_constant(interp, "_sub2");
+    sub  = Parrot_find_global_cur(interp, name);
+    arg  = pmc_new(interp, enum_class_String);
+
+    Parrot_PMC_set_string_native(interp, arg,
+                 Parrot_str_new(interp, "hello ", 0));
+
     Parrot_call_sub(interp, sub, "vP", arg);
-    PIO_eprintf(interp, "back\n");
+    Parrot_eprintf(interp, "back\\n");
 
     return NULL;
 }
@@ -473,35 +471,36 @@ hello in sub2
 back
 OUTPUT
 
-open $S, '>', "$temp.pasm" or die "Can't write $temp.pasm";
-print $S <<'EOF';
+($TEMP, $temp_pasm) = create_tempfile( SUFFIX => '.pasm', UNLINK => 1 );
+
+print $TEMP <<'EOF';
   .pcc_sub _sub1:
-  get_params "()"
+  get_params ""
   printerr "in sub1\n"
   find_lex P2, "no_such_var"
   printerr "never\n"
   returncc
 EOF
-close $S;
+close $TEMP;
 
 # compile to pbc
-system(".$PConfig{slash}parrot$PConfig{exe} -o $temp.pbc $temp.pasm");
+system(".$PConfig{slash}parrot$PConfig{exe}", '-o', $temp_pbc, $temp_pasm);
 
-c_output_is( <<'CODE', <<'OUTPUT', "call a parrot sub, catch exception" );
+c_output_is( <<"CODE", <<'OUTPUT', 'call a parrot sub, catch exception' );
 
 #include <parrot/parrot.h>
 #include <parrot/embed.h>
+#include <parrot/extend.h>
 
 static opcode_t *
 the_test(Parrot_Interp, opcode_t *, opcode_t *);
 
 int
-main(int argc, char* argv[])
+main(int argc, char *argv[])
 {
     Parrot_Interp interp = Parrot_new(NULL);
-    if (!interp) {
+    if (!interp)
         return 1;
-    }
 
     Parrot_run_native(interp, the_test);
 
@@ -510,32 +509,31 @@ main(int argc, char* argv[])
 }
 
 /* also both the test PASM and the_test() print to stderr
- * so that buffering in PIO is not an issue
- */
+ * so that buffering in PIO is not an issue */
 
 static opcode_t*
-the_test(Parrot_Interp interp, opcode_t *cur_op, opcode_t *start)
+the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
 {
-    PackFile *pf;
-    PMC *sub;
-    STRING *name;
-    Parrot_exception jb;
+    PackFile         *pf   = Parrot_pbc_read(interp, "$temp_pbc", 0);
+    STRING           *name = Parrot_str_new_constant(interp, "_sub1");
+    PMC              *sub;
+    Parrot_runloop jump_point;
 
-    pf = Parrot_readbc(interp, "temp.pbc");
-    Parrot_loadbc(interp, pf);
-    name = const_string(interp, "_sub1");
+    Parrot_pbc_load(interp, pf);
     sub = Parrot_find_global_cur(interp, name);
 
-    if (setjmp(jb.destination)) {
-        PIO_eprintf(interp, "caught\n");
+    if (setjmp(jump_point.resume)) {
+        Parrot_eprintf(interp, "caught\\n");
     }
     else {
-        interp->current_runloop_id++;      /* pretend the EH was pushed
-                                                   by the sub call. */
-        push_new_c_exception_handler(interp, &jb);
+        /* pretend the EH was pushed by the sub call. */
+        interp->current_runloop_id++;
+
+        Parrot_ex_add_c_handler(interp, &jump_point);
         Parrot_call_sub(interp, sub, "v");
     }
-    PIO_eprintf(interp, "back\n");
+
+    Parrot_eprintf(interp, "back\\n");
 
     return NULL;
 }
@@ -545,8 +543,9 @@ caught
 back
 OUTPUT
 
-open $S, '>', "$temp.pir" or die "Can't write $temp.pir";
-print $S <<'EOF';
+($TEMP, my $temp_pir) = create_tempfile( SUFFIX => '.pir', UNLINK => 1 );
+
+print $TEMP <<'EOF';
 .sub main :main
     .param pmc argv
 
@@ -581,12 +580,12 @@ print $S <<'EOF';
     .return( sum )
 .end
 EOF
-close $S;
+close $TEMP;
 
 # compile to pbc
-system(".$PConfig{slash}parrot$PConfig{exe} -o $temp.pbc $temp.pir");
+system(".$PConfig{slash}parrot$PConfig{exe}", '-o', $temp_pbc, $temp_pir);
 
-c_output_is( <<'CODE', <<'OUTPUT', "eval code through a parrot sub - #39669" );
+c_output_is( <<"CODE", <<'OUTPUT', 'eval code through a parrot sub - #39669' );
 
 #include <parrot/parrot.h>
 #include <parrot/embed.h>
@@ -595,22 +594,22 @@ int
 main(int argc, char* argv[])
 {
     Parrot_PackFile packfile;
-    char * code[] = { ".sub foo\nprint\"Hello from foo!\\n\"\n.end\n" };
+    char * code[] = { ".sub foo\\nsay \\"Hello from foo!\\"\\n.end\\n" };
 
     Parrot_Interp interp = Parrot_new(NULL);
     if (!interp) {
-        printf( "Hiss\n" );
+        printf( "Hiss\\n" );
         return 1;
     }
 
-    packfile = Parrot_readbc( interp, "temp.pbc" );
+    packfile = Parrot_pbc_read( interp, "$temp_pbc", 0 );
 
     if (!packfile) {
-        printf( "Boo\n" );
+        printf( "Boo\\n" );
         return 1;
     }
 
-    Parrot_loadbc( interp, packfile );
+    Parrot_pbc_load( interp, packfile );
     Parrot_runcode( interp, 1, code );
 
     Parrot_destroy( interp );
@@ -622,7 +621,7 @@ CODE
 Hello from foo!
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', "compile string in a fresh interp - #39986" );
+c_output_is( <<'CODE', <<'OUTPUT', 'compile string in a fresh interp - #39986' );
 
 #include <parrot/parrot.h>
 #include <parrot/embed.h>
@@ -631,13 +630,13 @@ c_output_is( <<'CODE', <<'OUTPUT', "compile string in a fresh interp - #39986" )
 int
 main(int argc, char* argv[])
 {
-    Parrot_PMC    retval;
-    Parrot_PMC    sub;
-    Parrot_Interp interp = Parrot_new(NULL);
-    char   * code      = ".sub foo\nprint\"Hello from foo!\\n\"\n.end\n";
-    STRING * code_type;
-    STRING * error;
-    STRING * foo_name;
+    Parrot_Interp   interp    = Parrot_new(NULL);
+    const char      *code      = ".sub foo\nprint\"Hello from foo!\\n\"\n.end\n";
+    Parrot_PMC      retval;
+    Parrot_PMC      sub;
+    STRING         *code_type;
+    STRING         *error;
+    STRING         *foo_name;
     Parrot_PackFile packfile;
 
     if (!interp) {
@@ -647,7 +646,7 @@ main(int argc, char* argv[])
 
     packfile = PackFile_new_dummy(interp, "dummy");
 
-    code_type = const_string( interp, "PIR" );
+    code_type = Parrot_str_new_constant( interp, "PIR" );
     retval    = Parrot_compile_string( interp, code_type, code, &error );
 
     if (!retval) {
@@ -655,10 +654,10 @@ main(int argc, char* argv[])
         return 1;
     }
 
-    foo_name = const_string( interp, "foo" );
+    foo_name = Parrot_str_new_constant( interp, "foo" );
     sub      = Parrot_find_global_cur( interp, foo_name );
 
-    retval   = Parrot_call_sub( interp, sub, "V", "" );
+    retval   = (PMC *) Parrot_call_sub( interp, sub, "V", "" );
 
     Parrot_exit(interp, 0);
     return 0;
@@ -667,7 +666,7 @@ CODE
 Hello from foo!
 OUTPUT
 
-c_output_is( <<"CODE", <<'OUTPUT', "call multi sub from C - #41511", todo => 'RT #41511' );
+c_output_is( <<"CODE", <<'OUTPUT', 'call multi sub from C - #41511', todo => 'RT #41511' );
 #include <parrot/parrot.h>
 #include <parrot/embed.h>
 #include <parrot/extend.h>
@@ -685,10 +684,10 @@ main(int argc, char* argv[])
         return 1;
     }
 
-    pf = Parrot_readbc( interp, "$temp.pbc" );
-    Parrot_loadbc( interp, pf );
+    pf = Parrot_pbc_read( interp, "$temp_pbc", 0 );
+    Parrot_pbc_load( interp, pf );
 
-    sub      = Parrot_find_global_cur( interp, const_string( interp, "add" ) );
+    sub      = Parrot_find_global_cur( interp, Parrot_str_new_constant( interp, "add" ) );
     result   = Parrot_call_sub( interp, sub, "III", 100, 200 );
     printf( "Result is %d.\\n", result );
 
@@ -699,7 +698,58 @@ CODE
 Result is 300.
 OUTPUT
 
-unlink "$temp.pasm", "$temp.pir", "$temp.pbc" unless $ENV{POSTMORTEM};
+c_output_is( <<'CODE', <<'OUTPUT', 'multiple Parrot_new/Parrot_exit cycles' );
+
+#include <stdio.h>
+#include "parrot/parrot.h"
+#include "parrot/embed.h"
+
+/* this is Parrot_exit without the exit()
+ * it will call Parrot_really_destroy() as an exit handler
+ */
+void interp_cleanup(Parrot_Interp, int);
+
+void interp_cleanup(PARROT_INTERP, int status)
+{
+    handler_node_t *node = interp->exit_handler_list;
+
+    Parrot_block_GC_mark(interp);
+    Parrot_block_GC_sweep(interp);
+
+    while (node) {
+        handler_node_t * const next = node->next;
+        (node->function)(interp, status, node->arg);
+        mem_sys_free(node);
+        node = next;
+    }
+}
+
+int
+main(int argc, char *argv[]) {
+    Parrot_Interp interp;
+    int i, niter = 2;
+
+    for (i = 1; i <= niter; i++) {
+        printf("Starting interp %d\n", i);
+        interp = Parrot_new(NULL);
+        Parrot_set_flag(interp, PARROT_DESTROY_FLAG);
+
+        if (!interp)
+            return 1;
+
+        printf("Destroying interp %d\n", i);
+        interp_cleanup(interp, 0);
+    }
+
+    return 0;
+}
+
+CODE
+Starting interp 1
+Destroying interp 1
+Starting interp 2
+Destroying interp 2
+OUTPUT
 
 # Local Variables:
 #   mode: cperl

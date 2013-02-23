@@ -1,4 +1,5 @@
 /*
+ * $Id: sys.ops 37225 2009-03-09 03:16:29Z allison $
 ** sys.ops
 */
 
@@ -6,7 +7,7 @@ VERSION = PARROT_VERSION;
 
 =head1 NAME
 
-sys.ops - System Interaction Ops
+sys.ops - System Interaction Opcodes
 
 =head1 DESCRIPTION
 
@@ -37,12 +38,10 @@ object-like. see RT ticket [perl #36619] for more info.
 
 inline op spawnw(out INT, in STR) {
   $1 = Parrot_Run_OS_Command(interp, $2);
-  goto NEXT();
 }
 
 inline op spawnw(out INT, invar PMC) {
   $1 = Parrot_Run_OS_Command_Argv(interp, $2);
-  goto NEXT();
 }
 
 ###############################################################################
@@ -64,19 +63,16 @@ and store it in $1.
 
 inline op err(out INT) {
   $1 = errno;
-  goto NEXT();
 }
 
 op err(out STR) {
   const char * const tmp = strerror(errno);
   $1 = string_make(interp, tmp, strlen(tmp), "ascii", 0);
-  goto NEXT();
 }
 
 op err(out STR, in INT) {
   const char * const tmp = strerror($2);
   $1 = string_make(interp, tmp, strlen(tmp), "ascii", 0);
-  goto NEXT();
 }
 
 
@@ -91,7 +87,6 @@ in $1.
 
 inline op time(out INT) {
   $1 = Parrot_intval_time();
-  goto NEXT();
 }
 
 
@@ -106,7 +101,6 @@ microseconds) in $1.
 
 inline op time(out NUM) {
   $1 = Parrot_floatval_time();
-  goto NEXT();
 }
 
 ########################################
@@ -184,8 +178,7 @@ op gmtime(out STR, in INT) {
   char resultbuffer[26];
   Parrot_gmtime_r(&t, &tm);
   Parrot_asctime_r(&tm, resultbuffer);
-  $1 = string_from_cstring(interp, resultbuffer, 26);
-  goto NEXT();
+  $1 = Parrot_str_new(interp, resultbuffer, 25);
 }
 
 op localtime(out STR, in INT) {
@@ -194,8 +187,7 @@ op localtime(out STR, in INT) {
   char resultbuffer[26];
   Parrot_localtime_r(&t, &tm);
   Parrot_asctime_r(&tm, resultbuffer);
-  $1 = string_from_cstring(interp, resultbuffer, 26);
-  goto NEXT();
+  $1 = Parrot_str_new(interp, resultbuffer, 25);
 }
 
 op decodetime(out PMC, in INT) {
@@ -203,7 +195,6 @@ op decodetime(out PMC, in INT) {
   const time_t t = (time_t) $2;
   Parrot_gmtime_r(&t, &tm);
   $1 = tm_to_array(interp, &tm);
-  goto NEXT();
 }
 
 op decodelocaltime(out PMC, in INT) {
@@ -211,7 +202,6 @@ op decodelocaltime(out PMC, in INT) {
   const time_t t = (time_t) $2;
   Parrot_localtime_r(&t, &tm);
   $1 = tm_to_array(interp, &tm);
-  goto NEXT();
 }
 
 ########################################
@@ -273,12 +263,10 @@ even if it's really running on an OS X system.
 
 inline op sysinfo(out STR, in INT) {
    $1 = sysinfo_s(interp, $2);
-   goto NEXT();
 }
 
 inline op sysinfo(out INT, in INT) {
    $1 = sysinfo_i(interp, $2);
-   goto NEXT();
 }
 
 ########################################
@@ -291,23 +279,27 @@ Sleep for $1 seconds.
 
 =cut
 
-inline op sleep(in INT) {
+inline op sleep(in INT) :flow {
   opcode_t *next = expr NEXT();
   if ($1 < 0) {
-      real_exception(interp, next, NEG_SLEEP,
+      opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, next,
+        EXCEPTION_NEG_SLEEP,
         "Cannot go back in time");
+      goto ADDRESS(handler);
   }
-  next = (opcode_t *)Parrot_sleep_on_event(interp, (FLOATVAL) $1, next);
+  next = (opcode_t *)Parrot_cx_schedule_sleep(interp, (FLOATVAL) $1, next);
   goto ADDRESS(next);
 }
 
-inline op sleep(in NUM) {
+inline op sleep(in NUM) :flow {
   opcode_t *next = expr NEXT();
   if ($1 < 0.0) {
-      real_exception(interp, next, NEG_SLEEP,
-        "Cannot go back in time");
+      opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, next,
+          EXCEPTION_NEG_SLEEP,
+          "Cannot go back in time");
+      goto ADDRESS(handler);
   }
-  next = (opcode_t *)Parrot_sleep_on_event(interp, $1, next);
+  next = (opcode_t *)Parrot_cx_schedule_sleep(interp, $1, next);
   goto ADDRESS(next);
 }
 
@@ -324,7 +316,6 @@ inline op sizeof (out INT, in INT) {
         $1 = -1;
     else
         $1 = data_types[$2 - enum_first_type].size;
-  goto NEXT();
 }
 
 ###############################################################################
@@ -333,7 +324,7 @@ inline op sizeof (out INT, in INT) {
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2006, The Perl Foundation.
+Copyright (C) 2001-2009, Parrot Foundation.
 
 =head1 LICENSE
 

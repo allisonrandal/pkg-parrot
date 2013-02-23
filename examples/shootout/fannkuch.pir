@@ -1,6 +1,6 @@
-#!./parrot -j
+#!./parrot
 #
-# fannkuch.pir N         (N = 9 for shootout)
+# ./parrot -R jit fannkuch.pir N         (N = 9 for shootout)
 # by Joshua Isom
 # modified by karl : default value of N=7 to match shootout output
 
@@ -8,14 +8,14 @@
 .sub fannkuch
 	.param int n
 	.local pmc perm, perm1, count
-	perm  = new .FixedIntegerArray
-	perm1 = new .FixedIntegerArray
-	count = new .FixedIntegerArray
+	perm  = new 'FixedIntegerArray'
+	perm1 = new 'FixedIntegerArray'
+	count = new 'FixedIntegerArray'
 	.local int flips, flipsMax, r, i, k, didpr
 	.local int n1
 	n1 = n
 	dec n1
-	
+
 	if n > 1 goto countok
 	.return(0)
 countok:
@@ -41,7 +41,7 @@ beginwhile_1:
 		if i < n goto for_2
 		print "\n"
 		inc didpr
-	endif_1: 
+	endif_1:
 	for_3:
 		unless r != 1 goto endfor_3
 			$I0 = r - 1
@@ -127,4 +127,4 @@ default:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

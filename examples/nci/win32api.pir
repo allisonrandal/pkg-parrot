@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: win32api.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: win32api.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -25,35 +25,28 @@ Call Interface.  The function is defined as:-
 
 # This is the entry point.
 .sub _MAIN
-	# Load user32.dll library and the MessageBoxA API.
-	.local pmc libuser32
-	.local pmc MessageBoxA
-	loadlib libuser32, "user32"
-	dlfunc MessageBoxA, libuser32, "MessageBoxA", "llttl"
-	
-	# Set up parameters for the message box.
-	.local int phWnd
-	.local string message
-	.local string caption
-	.local int style
-	phWnd = 0	# Parent window handle - we have none.
-	message = "This is a message from Parrot!"
-	caption = "Hey, you!"
-	style = 64  # This gives us a nice i in a speech bubble icon.
-	
-	# Invoke MessageBoxA.
-	.local int retVal
-	.pcc_begin
-		.arg phWnd
-		.arg message
-		.arg caption
-		.arg style
-		.nci_call MessageBoxA
-		.result retVal
-	.pcc_end
-	
-	# That's all, folks.
-	end
+    # Load user32.dll library and the MessageBoxA API.
+    .local pmc libuser32
+    .local pmc MessageBoxA
+    loadlib libuser32, "user32"
+    dlfunc MessageBoxA, libuser32, "MessageBoxA", "llttl"
+
+    # Set up parameters for the message box.
+    .local int phWnd
+    .local string message
+    .local string caption
+    .local int style
+    phWnd = 0   # Parent window handle - we have none.
+    message = "This is a message from Parrot!"
+    caption = "Hey, you!"
+    style = 64  # This gives us a nice i in a speech bubble icon.
+
+    # Invoke MessageBoxA.
+    .local int retVal
+    retVal = MessageBoxA(phWnd, message, caption, style)
+
+    # That's all, folks.
+    end
 .end
 
 =head1 SEE ALSO
@@ -66,4 +59,4 @@ F<docs/pdds/pdd03_calling_conventions.pod>.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,5 +1,5 @@
 
-# $Id: Color.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: Color.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -7,22 +7,19 @@ SDL::Color - Parrot class representing colors in Parrot SDL
 
 =head1 SYNOPSIS
 
-	load_bytecode 'library/SDL/Color.pir'
+    load_bytecode 'library/SDL/Color.pir'
 
-	# create a new SDL::Color object
-	.local pmc color
-	.local int color_type
+    # create a new SDL::Color object
+    .local pmc color
+    color = new 'SDL::Color'
 
-	find_type color_type, 'SDL::Color'
-	color = new color_type
+    # set the color values; this one's blue
+    color.'init'( 'r' => 0, 'g' => 0, 'b' => 255 )
 
-	# set the color values; this one's blue
-	color.'init'( 'r' => 0, 'g' => 0, 'b' => 255 )
-
-	# fetch the color value to pass directly to SDL functions
-	# (you should never need to do this if the rest of the library works right)
-	.local int color_value
-	color_value = color.'color'()
+    # fetch the color value to pass directly to SDL functions
+    # (you should never need to do this if the rest of the library works right)
+    .local int color_value
+    color_value = color.'color'()
 
 =head1 DESCRIPTION
 
@@ -48,14 +45,14 @@ SDL::Color objects have the following methods:
 
 .sub _initialize  :load
 
-	.local pmc color_class
+    .local pmc color_class
 
-	newclass color_class, 'SDL::Color'
+    newclass color_class, 'SDL::Color'
 
-	addattribute color_class, 'color'
-	addattribute color_class, 'r'
-	addattribute color_class, 'g'
-	addattribute color_class, 'b'
+    addattribute color_class, 'color'
+    addattribute color_class, 'r'
+    addattribute color_class, 'g'
+    addattribute color_class, 'b'
 .end
 
 =item _new( 'r' => xxx, 'g' => xxx, 'b' => xxx )
@@ -84,58 +81,57 @@ is none and 255 is the maximum possible.
 =cut
 
 .sub 'init' :method
-	.param int red   :named( 'r' )
-	.param int green :named( 'g' )
-	.param int blue  :named( 'b' )
+    .param int red   :named( 'r' )
+    .param int green :named( 'g' )
+    .param int blue  :named( 'b' )
 
-	.local pmc fetch_layout
-	find_global fetch_layout, 'SDL::NCI', 'fetch_layout'
+    .local pmc fetch_layout
+    get_hll_global fetch_layout, ['SDL::NCI'], 'fetch_layout'
 
-	.local pmc layout
-	layout = fetch_layout( 'Color' )
+    .local pmc layout
+    layout = fetch_layout( 'Color' )
 
-	.local pmc color
-	color     = new .ManagedStruct, layout
+    .local pmc color
+    color      = new 'ManagedStruct', layout
+    color['r'] = red
+    color['g'] = green
+    color['b'] = blue
 
-	set color['r'], red
-	set color['g'], green
-	set color['b'], blue
+    setattribute self, 'color', color
 
-	setattribute self, 'color', color
+    color = new 'Integer'
+    color = red
+    setattribute self, 'r', color
 
-	color = new .Integer
-	color = red
-	setattribute self, 'r', color
+    color = new 'Integer'
+    color = green
+    setattribute self, 'g', color
 
-	color = new .Integer
-	color = green
-	setattribute self, 'g', color
+    color = new 'Integer'
+    color = blue
+    setattribute self, 'b', color
 
-	color = new .Integer
-	color = blue
-	setattribute self, 'b', color
-
-	.return()
+    .return()
 .end
 
 .sub get_integer :vtable :method
-	.local pmc color
-	color = self.'color'()
+    .local pmc color
+    color = self.'color'()
 
-	.local int color_int
-	.local int component
+    .local int color_int
+    .local int component
 
-	component = color['r']
-	color_int = component << 16
+    component = color['r']
+    component <<= 16
+    color_int = component
 
-	component = color['g']
-	component <<= 8
-	color_int += component
+    component = color['g']
+    component <<= 8
+    color_int += component
 
-	component = color['b']
-	color_int += component
-	
-	.return( color_int )
+    component = color['b']
+    color_int += component
+    .return( color_int )
 .end
 
 =item color()
@@ -147,16 +143,16 @@ those functions directly.
 =cut
 
 .sub color :method
-	.local pmc color
-	getattribute color, self, 'color'
+    .local pmc color
+    getattribute color, self, 'color'
 
-	.return( color )
+    .return( color )
 .end
 
 =item color_for_surface( surface )
 
 Returns an integer representing the current color appropriate for the given
-SDL::Surface C<surface>, 
+SDL::Surface C<surface>,
 
 As far as I understand things right now, you don't need to call this directly
 unless you're manipulating raw pixels and need the boost of speed from
@@ -167,56 +163,50 @@ The name of this method may change.
 =cut
 
 .sub color_for_surface :method
-	.param pmc surface
+    .param pmc surface
 
-	.local pmc component
-	.local int color
+    .local pmc component
+    .local int color
 
-	.local int loss
-	.local int shift_bits
+    .local int loss
+    .local int shift_bits
 
-	.local int offset
-	classoffset offset, self, 'SDL::Color'
+    color = 0
 
-	color = 0
+    # red
+    getattribute component, self, 'r'
 
-	# red
-	inc offset
-	getattribute component, self, offset
+    .local int red
+    red = component
 
-	.local int red
-	red = component
+    (loss, shift_bits) = surface.'convert_red'()
+    shr red,   loss
+    shl red,   shift_bits
+    add color, red
 
-	(loss, shift_bits) = surface.'convert_red'()
-	shr red,   loss
-	shl red,   shift_bits
-	add color, red
+    # green
+    getattribute component, self, 'g'
+    (loss, shift_bits) = surface.'convert_green'()
 
-	# green
-	inc offset
-	getattribute component, self, offset
-	(loss, shift_bits) = surface.'convert_green'()
+    .local int green
+    green = component
 
-	.local int green
-	green = component
+    shr green, loss
+    shl green, shift_bits
+    add color, green
 
-	shr green, loss
-	shl green, shift_bits
-	add color, green
+    # blue
+    getattribute component, self, 'b'
+    (loss, shift_bits) = surface.'convert_blue'()
 
-	# blue
-	inc offset
-	getattribute component, self, offset
-	(loss, shift_bits) = surface.'convert_blue'()
+    .local int blue
+    blue = component
 
-	.local int blue
-	blue = component
+    shr blue,  loss
+    shl blue,  shift_bits
+    add color, blue
 
-	shr blue,  loss
-	shl blue,  shift_bits
-	add color, blue
-
-	.return( color )
+    .return( color )
 .end
 
 =back
@@ -229,7 +219,7 @@ the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -237,4 +227,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

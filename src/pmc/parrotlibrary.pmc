@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: parrotlibrary.pmc 17908 2007-03-31 22:05:46Z paultcochrane $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: parrotlibrary.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -9,10 +9,6 @@ src/pmc/parrotlibrary.pmc - Dynamic Library
 =head1 DESCRIPTION
 
 Class for holding info about a dynamic library.
-
-     PMC data
-     PMC_struct_val(SELF)   oplib init function
-     PMC_data(SELF)         DLL handle
 
 Properties:
 
@@ -34,7 +30,12 @@ a ParrotLibrary PMC.
 
 #include "parrot/parrot.h"
 
-pmclass ParrotLibrary need_ext does library const_too {
+#define PMC_dlhandle(x) ((Parrot_ParrotLibrary_attributes*)PMC_data(x))->dl_handle
+#define PMC_oplib_init(x) ((Parrot_ParrotLibrary_attributes*)PMC_data(x))->oplib_init
+
+pmclass ParrotLibrary need_ext provides library {
+    ATTR void * dl_handle;  /* DLL handle */
+    ATTR void * oplib_init; /* oplib init function */
 
 /*
 
@@ -46,23 +47,30 @@ Initializes the library with a C<NULL> oplib init function.
 
 */
 
-    void init() {
-        PMC_struct_val(SELF) = NULL;
+    VTABLE void init() {
+        Parrot_ParrotLibrary_attributes *attrs =
+            mem_allocate_zeroed_typed(Parrot_ParrotLibrary_attributes);
+        PMC_data(SELF) = attrs;
+        PObj_active_destroy_SET(SELF);
     }
 
 /*
 
-=item C<void morph(INTVAL type)>
+=item C<void destroy()>
 
-Morphs to C<type>.
+Destroys the library, closing the shared library.
 
 =cut
 
 */
 
-    void morph(INTVAL type) {
-        SUPER(type);
+    VTABLE void destroy() {
+        void *dl_handle = PMC_dlhandle(SELF);
+        if (dl_handle)
+            Parrot_dlclose(dl_handle);
+        mem_sys_free(PMC_data(SELF));
     }
+
 
 /*
 
@@ -74,13 +82,14 @@ Creates and returns a clone of the library.
 
 */
 
-    PMC* clone() {
-        PMC* dest = pmc_new_noinit(INTERP, SELF->vtable->base_type);
-        PMC_struct_val(dest) = PMC_struct_val(SELF);
-        PMC_data(dest) = PMC_data(SELF);
-        if (PMC_metadata(SELF)) {
+    VTABLE PMC *clone() {
+        PMC *dest            = pmc_new(INTERP, SELF->vtable->base_type);
+        PMC_oplib_init(dest) = PMC_oplib_init(SELF);
+        PMC_dlhandle(dest)   = PMC_dlhandle(SELF);
+
+        if (PMC_metadata(SELF))
             PMC_metadata(dest) = VTABLE_clone(INTERP, PMC_metadata(SELF));
-        }
+
         return dest;
     }
 
@@ -94,13 +103,13 @@ Returns whether a library has been successfully loaded.
 
 */
 
-    INTVAL get_bool() {
-        return (PMC_data(SELF) != NULL);
+    VTABLE INTVAL get_bool() {
+        return (PMC_dlhandle(SELF) != NULL);
     }
 
 /*
 
-=item C<STRING* get_string()>
+=item C<STRING *get_string()>
 
 Returns the name of the loaded library.
 
@@ -108,14 +117,26 @@ Returns the name of the loaded library.
 
 */
 
-    STRING* get_string() {
-        PMC *prop;
-        STRING *key;
-        key = const_string(INTERP, "_filename");
-        prop = VTABLE_getprop(INTERP, SELF, key);
+    VTABLE STRING *get_string() {
+        STRING *key  = CONST_STRING(INTERP, "_filename");
+        PMC    *prop = VTABLE_getprop(INTERP, SELF, key);
+
         return VTABLE_get_string(INTERP, prop);
     }
 
+/*
+
+=item C<void set_pointer(void *handle)>
+
+Set the pointer to the shared library handle.
+
+=cut
+
+*/
+
+    VTABLE void set_pointer(void *handle) {
+        PMC_dlhandle(SELF) = handle;
+    }
 }
 
 /*

@@ -17,10 +17,14 @@ This module provides the default output style of C<Data::Dumper>.
 =cut
 
 .sub __library_data_dumper_default_onload :load
-    find_type $I0, "Data::Dumper::Default"
-    if $I0 > 1 goto END
+    .local pmc ddb_class
+    ddb_class = get_class "Data::Dumper::Default"
+    if null ddb_class goto create_ddb
+    goto END
+
+  create_ddb:
     load_bytecode "library/Data/Dumper/Base.pir"
-    getclass $P0, "Data::Dumper::Base"
+    get_class $P0, "Data::Dumper::Base"
     subclass $P0, $P0, "Data::Dumper::Default"
 END:
     .return ()
@@ -117,8 +121,8 @@ Dumps a 'generic' Hash.
 
     print " {"
 
-    new keys, .ResizablePMCArray
-    new iter, .Iterator, hash
+    new keys, "ResizablePMCArray"
+    new iter, "Iterator", hash
     set iter, 0
 
 iter_loop:
@@ -139,7 +143,7 @@ dump_loop:
 
     shift key, keys
 
-    new val, .ResizablePMCArray
+    new val, "ResizablePMCArray"
     push val, name
     push val, key
     sprintf name2, "%s[\"%s\"]", val
@@ -186,15 +190,17 @@ Escape any characters in a string so we can re-use it as a literal.
 
 .sub pmcDefault :method
     .param string name
-    .param pmc dump
+    .param pmc    dump
+    .local pmc    class
     .local string type
 
-    typeof type, dump
+    type  = typeof dump
+
     print "PMC '"
     print type
     print "' "
 
-    can $I0, dump, "__dump"
+    $I0 = can dump, "__dump"
     if $I0 goto CAN_DUMP
     print "{ ... }"
     branch END
@@ -240,7 +246,7 @@ iter_loop:
 
     print subindent
 
-    new val, .ResizablePMCArray
+    new val, "ResizablePMCArray"
     push val, name
     push val, pos
     sprintf name2, "%s[%d]", val
@@ -306,7 +312,7 @@ iter_loop:
 
     print subindent
 
-    val = new .ResizablePMCArray
+    val = new 'ResizablePMCArray'
     push val, name
     push val, pos
     sprintf name2, "%s[%d]", val
@@ -398,6 +404,73 @@ Dumps a Null PMC.
     .return ( 1 )
 .end
 
+=item Capture dumpe
+
+Dump a capture object.
+
+=cut
+
+.namespace ['Capture']
+.sub '__dump' :method
+    .param pmc dumper
+    .param string label
+    .local int hasstuff
+    hasstuff = 0
+
+    .local string subindent, indent
+    (subindent, indent) = dumper.'newIndent'()
+
+    .local pmc hash, iter
+    hash = self.'hash'()
+    iter = new 'Iterator', hash
+  dump_hash_loop:
+    unless iter goto dump_hash_end
+    if hasstuff goto dump_hash_1
+    print " {"
+    hasstuff = 1
+  dump_hash_1:
+    print "\n"
+    print subindent
+    .local string key
+    .local pmc val
+    key = shift iter
+    val = hash[key]
+    print "<"
+    print key
+    print "> => "
+    dumper.'dump'(label, val)
+    goto dump_hash_loop
+  dump_hash_end:
+
+    .local pmc array
+    array = self.'list'()
+    if null array goto dump_array_end
+    $I1 = elements array
+    $I0 = 0
+  dump_array_loop:
+    if $I0 >= $I1 goto dump_array_end
+    if hasstuff goto dump_array_1
+    print " {"
+    hasstuff = 1
+  dump_array_1:
+    print "\n"
+    print subindent
+    val = array[$I0]
+    print "["
+    print $I0
+    print "] => "
+    dumper.'dump'(label, val)
+    inc $I0
+    goto dump_array_loop
+  dump_array_end:
+    unless hasstuff goto end
+    print "\n"
+    print indent
+    print '}'
+  end:
+    dumper.'deleteIndent'()
+.end
+
 =back
 
 =head1 AUTHOR
@@ -408,7 +481,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -416,4 +489,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

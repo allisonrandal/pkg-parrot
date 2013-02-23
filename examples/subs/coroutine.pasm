@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: coroutine.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: coroutine.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ F<docs/pdds/pdd03_calling_conventions.pod>
 =cut
 
 # create a coro and save it on the user stack
-.const .Sub P0 =  "MYCOROUTINE"
+.const 'Sub' P0 =  "MYCOROUTINE"
 # a coroutine carries state - clone it
 clone P0, P0
 

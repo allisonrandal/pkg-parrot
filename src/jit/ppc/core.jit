@@ -2,7 +2,7 @@
 ; ppc/core.jit
 ;
 ;
-; $Id: core.jit 18183 2007-04-14 03:15:44Z chromatic $
+; $Id: core.jit 37201 2009-03-08 12:07:48Z fperrad $
 ;
 
 # TODO complete this
@@ -1182,11 +1182,11 @@ Parrot_branch_i {
 }
 
 TEMPLATE Parrot_set_or_clone_s_sc {
-; string_copy(Interp *interp, STRING *s)
+; Parrot_str_copy(Interp *interp, STRING *s)
     jit_emit_mov_rr(NATIVECODE, r3, r16);
     jit_emit_mov_ri_i(NATIVECODE, r4, CONST(2)->u.string);
 
-    jit_emit_call_func(NATIVECODE, (void*) string_copy);
+    jit_emit_call_func(NATIVECODE, (void*) Parrot_str_copy);
 
     jit_emit_mov_mr_i(NATIVECODE, ROFFS_STR(1), r3);
 }
@@ -1208,7 +1208,7 @@ Parrot_clone_s_s {
     jit_emit_mov_rr(NATIVECODE, r3, r16);
     jit_emit_mov_rm_i(NATIVECODE, r4, ROFFS_STR(2));
 
-    jit_emit_call_func(NATIVECODE, (void*) string_copy);
+    jit_emit_call_func(NATIVECODE, (void*) Parrot_str_copy);
 
     jit_emit_mov_mr_i(NATIVECODE,ROFFS_STR(1), r3);
 }
@@ -1258,30 +1258,28 @@ extern Parrot_returncc {
 }
 
 Parrot_pic_callr___pc {
-    int offset, here, op_i;
-    PackFile_Constant ** constants;
-    PMC *sig_params, *sig_result;
-    opcode_t *params;
-    int skip;
+    PackFile_Constant **constants  = CONTEXT(interp)->constants;
+    PMC                *sig_result = constants[CUR_OPCODE[1]]->u.key;
+    opcode_t           *params     = jit_info->optimizer->sections->begin;
+    PMC                *sig_params = constants[params[1]]->u.key;
+    int                 op_i       = VTABLE_elements(interp, sig_params) + 2;
+    int                 offset     = jit_info->arena.op_map[op_i].offset;
+    int                 here       = NATIVECODE - jit_info->arena.start;
+    int                 skip;
 
-    constants = CONTEXT(interp->ctx)->constants;
-    params = jit_info->optimizer->sections->begin;
-    sig_params = constants[params[1]]->u.key;
-    op_i = 2 + SIG_ELEMS(sig_params);
-
-    offset = jit_info->arena.op_map[op_i].offset;
     /* TODO preserve necessary regs */
     assert(*CUR_OPCODE == PARROT_OP_get_results_pc);
-    constants = CONTEXT(interp->ctx)->constants;
-    sig_result = constants[CUR_OPCODE[1]]->u.key;
-    if (!SIG_ELEMS(sig_result))
-    skip = -1;
-    else
-    skip = MAP(2);      /* skip result - save rest */
 
-    here = NATIVECODE - jit_info->arena.start;
+    if (!VTABLE_elements(interp, sig_result))
+        skip = -1;
+    /* skip result - save rest */
+    else
+        skip = MAP(2);
+
     offset -= here;
-    _emit_bx(NATIVECODE, 1, offset); /* bl */
+
+    /* bl */
+    _emit_bx(NATIVECODE, 1, offset);
 
     jit_restore_regs_call(jit_info, interp, skip);
 }
@@ -1299,16 +1297,15 @@ Parrot_get_results_pc {
     jit_emit_mov_ri_i(NATIVECODE, ISR1, jit_info->cur_op);
     jit_emit_lwz(NATIVECODE, ISR2, offsetof(Interp, ctx.state), r16);
     jit_emit_stw(NATIVECODE, ISR1,
-        offsetof(parrot_context_t, current_results), ISR2);
+        offsetof(Parrot_Context, current_results), ISR2);
     }
     else {
-    PackFile_Constant ** constants;
-    PMC *sig_result;
+    PackFile_Constant **constants  = CONTEXT(interp)->constants;
+    PMC                *sig_result = constants[CUR_OPCODE[1]]->u.key;
 
-    constants = CONTEXT(interp->ctx)->constants;
-    sig_result = constants[CUR_OPCODE[1]]->u.key;
-    if (!SIG_ELEMS(sig_result))
+    if (!VTABLE_elements(interp, sig_result))
         return;
+
     /* result is r3 TODO Nums */
     jit_emit_mov_rr(NATIVECODE, MAP(2), r3);
     }

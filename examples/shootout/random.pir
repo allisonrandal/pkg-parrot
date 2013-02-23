@@ -1,4 +1,4 @@
-#!./parrot -C
+#!./parrot -R cgp
 #
 # random.pir N         (N = 900000 for shootout)
 # by Joshua Isom
@@ -12,7 +12,7 @@ while_1:
 	dec $I0
 	if $I0 > 1 goto while_1
 	$N0 = gen_random(100.0)
-	$P0 = new .FixedFloatArray
+	$P0 = new 'FixedFloatArray'
 	$P0 = 1
 	$P0[0] = $N0
 	$S0 = sprintf "%.9f\n", $P0
@@ -20,13 +20,13 @@ while_1:
 	.return(0)
 .end
 
-.const float IM = 139968.0
-.const float IA = 3877.0
-.const float IC = 29573.0
+.const num IM = 139968.0
+.const num IA = 3877.0
+.const num IC = 29573.0
 
 .sub gen_random
-	.param float max
-	.local float last
+	.param num max
+	.local num last
 	last = 42.0
 loop:
 	$N0 = last
@@ -38,7 +38,7 @@ loop:
 	$N1 /= IM
 	last = $N0
 	.yield($N1)
-	get_params "(0)", max
+	get_params "0", max
 	goto loop
 .end
 
@@ -47,4 +47,4 @@ loop:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

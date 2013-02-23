@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: interp.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: interp.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -28,7 +28,7 @@ SKIP: {
     skip( "we really shouldn't run just a label - use a sub", 1 );
 
     pasm_output_is( <<'CODE', <<'OUTPUT', "runinterp - new style" );
-    new P0, .ParrotInterpreter
+    new P0, 'ParrotInterpreter'
     print "calling\n"
     # set_addr/invoke ?
     runinterp P0, foo
@@ -45,14 +45,13 @@ ending
 OUTPUT
 }
 
-pir_output_is( <<'CODE', <<'OUTPUT', 'runinterp - works without printing' );
+pir_output_is( <<'CODE', <<'OUTPUT', 'runinterp - works with printing' );
 .sub 'test' :main
     .local string actual
     .local pmc test_interp
-               test_interp = new .ParrotInterpreter
+               test_interp = new 'ParrotInterpreter'
     .local pmc stdout
                stdout = getstdout
-    push stdout, 'string'
 
     print "uno\n"
     runinterp test_interp, pasm
@@ -62,7 +61,6 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'runinterp - works without printing' );
     $S0 = readline stdout
     actual .= $S0
     if $S0 goto get_stdout
-    $S0 = pop stdout
 
     print actual
     goto pasm_end
@@ -77,72 +75,35 @@ uno
 dos
 OUTPUT
 
-pir_output_is(
-    <<'CODE', <<'OUTPUT', 'runinterp - works with printing', todo => 'something funky here' );
-.sub 'test' :main
-    .local string actual
-    .local pmc test_interp
-               test_interp = new .ParrotInterpreter
-    .local pmc stdout
-               stdout = getstdout
-    push stdout, 'string'
-
-    print "uno\n"
-    runinterp test_interp, pasm
-    print "dos\n"
-
-  get_stdout:
-    $S0 = readline stdout
-    actual .= $S0
-    if $S0 goto get_stdout
-    $S0 = pop stdout
-
-    print actual
-    goto pasm_end
-
-  pasm:
-    print "y uno es igual a\n"
-    end
-  pasm_end:
-.end
-CODE
-uno
-y uno es igual a
-dos
-OUTPUT
-
-# Need to disable DOD while trace is on, as there's a non-zero chance that a
-# DOD sweep would occur, causing a bonus "DOD" line in the output, which makes
+# Need to disable GC while trace is on, as there's a non-zero chance that a
+# GC sweep would occur, causing a bonus "GC mark" line in the output, which makes
 # the test fail.
 pasm_output_like(
-    <<'CODE', <<'OUTPUT', "restart trace", todo => "lines are out of order due to buffering" );
+    <<'CODE', <<'OUTPUT', "restart trace" );
     printerr "ok 1\n"
     sweepoff
     set I0, 1
     trace I0
-    printerr "ok 2\n"
     dec I0
     trace I0
     sweepon
-    printerr "ok 3\n"
+    printerr "ok 2\n"
     end
 CODE
 /^ok\s1\n
 (?:\s+8.*)?\n
-ok\s2\n
 (?:\s+10.*)?\n
-(?:\s+12.*)?\n
-ok\s3\n$/x
+ok\s2\n$/x
 OUTPUT
 
-# This is the behavior as of Parrot 1.4.3
-# XXX Should there be a warning?
+# This is the behavior as of Parrot 0.4.3
+# RT #46819 Should there be a warning?
 pasm_output_is( <<'CODE', 'nada:', 'interp - warnings' );
-    new P0, .Undef
+    new P0, 'Undef'
     set I0, P0
     printerr "nada:"
     warningson 1
-    new P1, .Undef
+    new P1, 'Undef'
     set I0, P1
     end
 CODE
@@ -164,7 +125,7 @@ ok 2
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "access argv" );
-    get_params "(0)", P5
+    get_params "0", P5
     .include "iglobals.pasm"
     getinterp P1
     set P2, P1[.IGLOBALS_ARGV_LIST]
@@ -195,6 +156,40 @@ CODE
 before
 after
 OUTPUT
+
+
+pir_output_is( <<'CODE', <<'OUTPUT', "interpinfo & getinterp: current runcore" );
+.include 'interpinfo.pasm'
+.include 'interpcores.pasm'
+
+.sub 'test' :main
+    $I0 = interpinfo .INTERPINFO_CURRENT_RUNCORE
+    if $I0 == .PARROT_FUNCTION_CORE   goto ok1
+    if $I0 == .PARROT_FAST_CORE       goto ok1
+    if $I0 == .PARROT_SWITCH_CORE     goto ok1
+    if $I0 == .PARROT_CGOTO_CORE      goto ok1
+    if $I0 == .PARROT_CGP_CORE        goto ok1
+    if $I0 == .PARROT_JIT_CORE        goto ok1
+    if $I0 == .PARROT_SWITCH_JIT_CORE goto ok1
+    if $I0 == .PARROT_CGP_JIT_CORE    goto ok1
+    if $I0 == .PARROT_EXEC_CORE       goto ok1
+    if $I0 == .PARROT_GC_DEBUG_CORE   goto ok1
+    print 'not '
+  ok1:
+    say 'ok 1'
+
+    $P0 = getinterp
+    $I1 = $P0[.INTERPINFO_CURRENT_RUNCORE]
+    if $I0 == $I1 goto ok2
+    print 'not '
+  ok2:
+    say 'ok 2'
+.end
+CODE
+ok 1
+ok 2
+OUTPUT
+
 
 # Local Variables:
 #   mode: cperl

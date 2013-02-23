@@ -1,3 +1,8 @@
+/*
+ * $Id: stat.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2004-2007, Parrot Foundation.
+ */
+
 #ifndef PARROT_PLATFORM_GENERIC_STAT_H_GUARD
 #define PARROT_PLATFORM_GENERIC_STAT_H_GUARD
 /*

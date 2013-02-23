@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: pge_globs.t 17577 2007-03-17 22:51:14Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: pge_globs.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;

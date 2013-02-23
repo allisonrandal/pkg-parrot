@@ -1,10 +1,11 @@
-#!./parrot -Oc -Cj
+#!./parrot
 # OUTPUT="Ack(3, 9) = 4093\n"
 #
+# ./parrot -Oc -R cgp-jit
 # RQ (Karl)
 # Seems to be an old benchmark, now deprecated by the shootout
 #
-# ackermann - ack(3, 9) is default 
+# ackermann - ack(3, 9) is default
 # shootout runs ack(3, 11)
 # time for ack(3,11):  0.8s (AMD X2@2000)
 # by Leopold Toetsch
@@ -15,7 +16,7 @@
     argc = elements argv
     .local int x, y, r
     x = 3
-    y = 9
+    y = 7
     if argc == 1 goto go
     $S0 = argv[1]
     if argc == 2 goto xdefault
@@ -23,14 +24,14 @@
     $S0 = argv[2]
     y = $S0
     goto go
-xdefault:    
+xdefault:
     y = $S0
 go:
     $P0 = getinterp
     $P0.'recursion_limit'(100000)
     r = ack(x, y)
     .local pmc args
-    args = new .ResizableIntegerArray
+    args = new 'ResizableIntegerArray'
     push args, x
     push args, y
     push args, r
@@ -48,16 +49,16 @@ a1:
     if y goto a2
 	$I0 = x - 1
 	$I1 = 1
-	.return ack($I0, $I1)
+	.tailcall ack($I0, $I1)
 a2:
     $I2 = y - 1
     $I3 = ack(x, $I2)
     $I4 = x - 1
-    .return ack($I4, $I3)
+    .tailcall ack($I4, $I3)
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

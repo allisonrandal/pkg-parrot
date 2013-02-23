@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006, The Perl Foundation.
-# $Id: benchmarks.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2006, Parrot Foundation.
+# $Id: benchmarks.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -26,9 +26,9 @@ Called by 'make benchmark_tests'.
 # Expected output from scripts in 'examples/benchmarks'.
 # The expected out is needed for checking results with pir_output_is() and pir_output_like().
 my %outputs = (
-    q{addit.pir}        => qq(2.10011e+07\n),
-    q{addit.pasm}       => qq(21001097.970000\n),
-    q{addit2.pir}       => qq(2.10011e+07\n),
+    q{addit.pir}        => qq(21001097.97\n),
+    q{addit.pasm}       => qq(21001097.97\n),
+    q{addit2.pir}       => qq(21001097.97\n),
     q{array_access.pir} => qr/
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
@@ -52,10 +52,6 @@ FixedStringArray:\s\d+\.\d+s\n
 \n
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
-IntList:\s\d+\.\d+s\n
-\n
-1\s\*\s1000\s=\s1000\n
-100\s\*\s1000\s=\s100000\n
 ResizableFloatArray:\s\d+\.\d+s\n
 \n
 1\s\*\s1000\s=\s1000\n
@@ -72,13 +68,13 @@ ResizableStringArray:\s\d+\.\d+s\n
 \n
 1\s\*\s1000\s=\s1000\n
 100\s\*\s1000\s=\s100000\n
-SArray:\s\d+\.\d+s\n
+FixedPMCArray:\s\d+\.\d+s\n
 \s+$/x,
     q{arriter.pir}     => qq(100000\n100000\n100000\n111111\n),
     q{arriter_o1.pir}  => qq(100000\n100000\n100000\n111111\n),
     q{bench_newp.pasm} => qr/^\d+\.\d+\sseconds.\s\d+\.\d+\sloops\/sec\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sPMC\sstructs\n
@@ -93,56 +89,56 @@ SArray:\s\d+\.\d+s\n
         ResizablePMCArray\s100000\n$/x,
     q{gc_alloc_new.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_alloc_reuse.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_generations.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_header_new.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_header_reuse.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_waves_headers.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_waves_sizeable_data.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
         There\sare\s\d+\stotal\sBuffer\sstructs\n$/x,
     q{gc_waves_sizeable_headers.pasm} => qr/^\d+\.\d+\sseconds\.\n
         A\stotal\sof\s\d+\sbytes\swere\sallocated\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         A\stotal\sof\s\d+\scollection\sruns\swere\smade\n
         Copying\sa\stotal\sof\s\d+\sbytes\n
         There\sare\s\d+\sactive\sBuffer\sstructs\n
@@ -167,44 +163,43 @@ SArray:\s\d+\.\d+s\n
     q{primes.pasm}  => qr/^N\sprimes\sup\sto\s10000\sis:\s1229\n
         last\sis:\s10001\n
         Elapsed\stime:\s\d+\.\d+\n$/x,
-    q{primes2.pasm} => qr/^N\sprimes\scalculated\sto\s5000\sis\s670\n
+    q{primes2.pir} => qr/^N\sprimes\scalculated\sto\s5000\sis\s670\n
         last\sis:\s4999\n$/x,
-    q{primes2_i.pasm} => qr/^N\sprimes\scalculated\sto\s10000\s
+    q{primes2_i.pir} => qr/^N\sprimes\scalculated\sto\s10000\s
         is\s1230\nlast\sis:\s9973\n$/x,
     q{primes_i.pasm} => qr/^N\sprimes\sup\sto\s10000\sis:\s1229\n
         last\sis:\s9973\nElapsed\stime:\s\d+\.\d+\n$/x,
     q{shared_ref.pasm} => qq(),
-    q{stress.pasm}     => qr/^A\stotal\sof\s\d+\sDOD\sruns\s
+    q{stress.pasm}     => qr/^A\stotal\sof\s\d+\sGC\sruns\s
         were\smade\n$/x,
     q{stress1.pasm} => qr/^\d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\.\d+\n
-        A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n$/x,
+        A\stotal\sof\s\d+\sGC\sruns\swere\smade\n$/x,
     q{stress2.pasm} => qq(),
-    q{stress3.pasm} => qr/^A\stotal\sof\s\d+\sDOD\sruns\swere\smade\n
+    q{stress3.pasm} => qr/^A\stotal\sof\s\d+\sGC\sruns\swere\smade\n
         \d+\sactive\sPMCs\n
         \d+\stotal\s\sPMCs\n$/x,
     q{vpm.pir} => qq(100000;\nl hackerjust another per\n)
 );
 
 # These scripts are known to be failing.
-# Heh, currently all tests are working!
 my %todo = ();
 
 plan tests => scalar keys %outputs;

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: mops.pl 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: mops.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ use warnings;
 
 use vars qw( $I1 $I2 $I3 $I4 $I5 $N1 $N2 $N5 );
 
-sub time_hires { time() }
+sub time_hires { return time() }
 
 $I2 = 0;            # set    I2, 0
 $I3 = 1;            # set    I3, 1

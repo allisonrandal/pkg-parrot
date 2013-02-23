@@ -1,4 +1,4 @@
-#!./parrot -C
+#!./parrot -R cgp
 #
 # pidigits N  (N = 1000 for shootout)
 #
@@ -6,12 +6,10 @@
 #
 # by Leopold Toetsch
 # not really optimized yet
-# modified by Karl Forner to set a default value of N=27 (shootout test default) 
+# modified by Karl Forner to set a default value of N=27 (shootout test default)
 
 #def gen_x():
 #    return imap(lambda k: (k, 4*k + 2, 0, 2*k + 1), count(1))
-
-.pragma n_operators 1
 
 .sub count
     .param pmc start
@@ -20,7 +18,7 @@ loop:
     inc start
     goto loop
 .end
-		
+
 .sub gen_x
     .param pmc start
     .local pmc k
@@ -30,7 +28,7 @@ loop:
     $P1 = k * 4
     inc $P1
     inc $P1
-    $P2 = new .Integer
+    $P2 = new 'Integer'
     $P3 = k * 2
     inc $P3
     .yield ($P0, $P1, $P2, $P3)
@@ -89,45 +87,45 @@ loop:
 
 .sub pi_digits
     .local pmc x0,x1,x2,x3, y, z0,z1,z2,z3, one, three, four
-    z0 = new .Integer
+    z0 = new 'Integer'
     z0 = 1
-    z1 = new .Integer
-    z2 = new .Integer
-    z3 = new .Integer
+    z1 = new 'Integer'
+    z2 = new 'Integer'
+    z3 = new 'Integer'
     z3 = 1
-    one = new .Integer
+    one = new 'Integer'
     one = 1
-    three = new .Integer
+    three = new 'Integer'
     three = 3
-    four = new .Integer
+    four = new 'Integer'
     four = 4
 #    while 1:
 #        y = extract(z, 3)
 loop1:
 	y = extract(z0, z1, z2, z3, three)
-	
+
 #        while y != extract(z, 4):
 loop2:
 	    $P0 = extract(z0, z1, z2, z3, four)
 	    if y == $P0 goto end_loop2
-	
+
 #            z = compose(z, x.next())
 	    ($P1, $P2, $P3, $P4) = gen_x(one)
 	    (z0, z1, z2, z3) = "compose"(z0, z1, z2, z3, $P1, $P2, $P3, $P4)
-	
+
 #            y = extract(z, 3)
 	    y = extract(z0, z1, z2, z3, three)
 	goto loop2
 end_loop2:
 #        z = compose((10, -10*y, 0, 1), z)
 #        yield y
-	$P5 = new .Integer
+	$P5 = new 'Integer'
 	$P5 = 10
-	$P6 = new .Integer
+	$P6 = new 'Integer'
 	$P6 = -10
 	$P6 = $P6 * y
-	$P7 = new .Integer
-	$P8 = new .Integer
+	$P7 = new 'Integer'
+	$P8 = new 'Integer'
 	$P8 = 1
 	(z0, z1, z2, z3) = "compose"($P5, $P6, $P7, $P8, z0, z1, z2, z3)
 	.yield (y)
@@ -165,7 +163,7 @@ loop:
     if $I0 goto n
     print "\t:"
     print i
-    print "\n" 
+    print "\n"
 n:
     if i < N goto loop
     $I0 = i % width
@@ -177,13 +175,13 @@ rest:
         if $I0 goto rest
     print "\t:"
     print N
-    print "\n" 
+    print "\n"
 done:
 .end
-    
+
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

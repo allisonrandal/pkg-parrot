@@ -4,7 +4,7 @@
     .param pmc argv
 
     .local pmc code_as_data
-    code_as_data = new .ResizableIntegerArray
+    code_as_data = new 'ResizableIntegerArray'
 # ------ Start of data section ------
 push code_as_data, 35
 push code_as_data, 32
@@ -901,7 +901,6 @@ push code_as_data, 110
 push code_as_data, 92
 push code_as_data, 110
 push code_as_data, 34
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -1028,7 +1027,7 @@ push code_as_data, 110
 push code_as_data, 101
 push code_as_data, 119
 push code_as_data, 32
-push code_as_data, 46
+push code_as_data, 39
 push code_as_data, 82
 push code_as_data, 101
 push code_as_data, 115
@@ -1050,6 +1049,7 @@ push code_as_data, 114
 push code_as_data, 114
 push code_as_data, 97
 push code_as_data, 121
+push code_as_data, 39
 push code_as_data, 92
 push code_as_data, 110
 push code_as_data, 34
@@ -1433,9 +1433,9 @@ push code_as_data, 109
 push code_as_data, 101
 push code_as_data, 44
 push code_as_data, 32
-push code_as_data, 34
-push code_as_data, 60
-push code_as_data, 34
+push code_as_data, 39
+push code_as_data, 114
+push code_as_data, 39
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -1459,7 +1459,6 @@ push code_as_data, 99
 push code_as_data, 111
 push code_as_data, 100
 push code_as_data, 101
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -1644,7 +1643,6 @@ push code_as_data, 45
 push code_as_data, 45
 push code_as_data, 45
 push code_as_data, 34
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -1686,10 +1684,6 @@ push code_as_data, 32
 push code_as_data, 39
 push code_as_data, 39
 push code_as_data, 10
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -1994,7 +1988,6 @@ push code_as_data, 67
 push code_as_data, 72
 push code_as_data, 65
 push code_as_data, 82
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -2026,7 +2019,6 @@ push code_as_data, 101
 push code_as_data, 110
 push code_as_data, 100
 push code_as_data, 10
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 46
 push code_as_data, 115
@@ -2144,9 +2136,6 @@ push code_as_data, 105
 push code_as_data, 110
 push code_as_data, 116
 push code_as_data, 10
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -2162,7 +2151,7 @@ push code_as_data, 110
 push code_as_data, 101
 push code_as_data, 119
 push code_as_data, 32
-push code_as_data, 46
+push code_as_data, 39
 push code_as_data, 73
 push code_as_data, 116
 push code_as_data, 101
@@ -2171,17 +2160,13 @@ push code_as_data, 97
 push code_as_data, 116
 push code_as_data, 111
 push code_as_data, 114
+push code_as_data, 39
 push code_as_data, 44
 push code_as_data, 32
 push code_as_data, 100
 push code_as_data, 97
 push code_as_data, 116
 push code_as_data, 97
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -2492,7 +2477,6 @@ push code_as_data, 101
 push code_as_data, 110
 push code_as_data, 100
 push code_as_data, 10
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 46
 push code_as_data, 115
@@ -2603,7 +2587,7 @@ push code_as_data, 110
 push code_as_data, 101
 push code_as_data, 119
 push code_as_data, 32
-push code_as_data, 46
+push code_as_data, 39
 push code_as_data, 73
 push code_as_data, 116
 push code_as_data, 101
@@ -2612,17 +2596,13 @@ push code_as_data, 97
 push code_as_data, 116
 push code_as_data, 111
 push code_as_data, 114
+push code_as_data, 39
 push code_as_data, 44
 push code_as_data, 32
 push code_as_data, 100
 push code_as_data, 97
 push code_as_data, 116
 push code_as_data, 97
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -2744,9 +2724,6 @@ push code_as_data, 105
 push code_as_data, 110
 push code_as_data, 103
 push code_as_data, 10
-push code_as_data, 32
-push code_as_data, 32
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 32
 push code_as_data, 32
@@ -2976,7 +2953,6 @@ push code_as_data, 101
 push code_as_data, 110
 push code_as_data, 100
 push code_as_data, 10
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 61
 push code_as_data, 104
@@ -3159,7 +3135,6 @@ push code_as_data, 32
 push code_as_data, 114
 push code_as_data, 117
 push code_as_data, 110
-push code_as_data, 32
 push code_as_data, 10
 push code_as_data, 10
 push code_as_data, 32
@@ -3496,6 +3471,13 @@ push code_as_data, 116
 push code_as_data, 104
 push code_as_data, 61
 push code_as_data, 52
+push code_as_data, 32
+push code_as_data, 102
+push code_as_data, 116
+push code_as_data, 61
+push code_as_data, 112
+push code_as_data, 105
+push code_as_data, 114
 push code_as_data, 58
 push code_as_data, 10
 # ------ End of data section ------
@@ -3528,11 +3510,11 @@ DO_QUINE:
     # First print the stuff data section
     print "# ATT no autoexpanding svn markers please\n"
     print "\n"
-    print ".sub quine :main\n" 
+    print ".sub quine :main\n"
     print "    .param pmc argv\n"
     print "\n"
     print "    .local pmc code_as_data\n"
-    print "    code_as_data = new .ResizableIntegerArray\n"
+    print "    code_as_data = new 'ResizableIntegerArray'\n"
     print "# ------ Start of data section ------\n"
 
     # Now the data
@@ -3550,15 +3532,15 @@ DO_QUINE:
     .local pmc code_fh
     .local int size
     size = stat program_name, .STAT_FILESIZE
-    code_fh = open program_name, "<"
-    .local string code 
+    code_fh = open program_name, 'r'
+    .local string code
     code = read code_fh, size
 
     # Ignore everything up to end of data section
     .local int end_of_data_pos
-    end_of_data_pos = index code, "# ------ End of data section ------" 
+    end_of_data_pos = index code, "# ------ End of data section ------"
     substr code, 0, end_of_data_pos, ''
-    
+
     .local string char_string
     .local int    char_int
     SHIFT_NEXT_CHAR:
@@ -3568,11 +3550,11 @@ DO_QUINE:
         print 'push code_as_data, '
         print char_int
         print "\n"
-        goto SHIFT_NEXT_CHAR 
+        goto SHIFT_NEXT_CHAR
     FINISH_SHIFT_CHARS:
 
 .end
- 
+
 .sub print_data_as_data
 
     .param pmc data
@@ -3580,8 +3562,8 @@ DO_QUINE:
    .include "iterator.pasm"
    .local pmc iter
    .local int char_int
-   
-   iter = new .Iterator, data     
+
+   iter = new 'Iterator', data
     iter = .ITERATE_FROM_START # reset iterator, begin at start
     ITER_LOOP:
     unless iter goto ITER_END         # while (entries) ...
@@ -3592,7 +3574,7 @@ DO_QUINE:
         goto ITER_LOOP
     ITER_END:
 .end
- 
+
 .sub print_data_as_code
 
     .param pmc data
@@ -3600,12 +3582,12 @@ DO_QUINE:
    .include "iterator.pasm"
 
    .local pmc iter
-    iter = new .Iterator, data     
+    iter = new 'Iterator', data
     iter = .ITERATE_FROM_START # reset iterator, begin at start
 
    .local int    char_int
    .local string char_string
-   
+
     ITER_LOOP:
     unless iter goto ITER_END         # while (entries) ...
         char_int = shift iter         # get entry
@@ -3614,14 +3596,14 @@ DO_QUINE:
         goto ITER_LOOP
     ITER_END:
 .end
- 
+
 =head1 NAME
 
 quine_ord.pir - a quine that store the code in a ResizableIntegerArray
 
 =head1 DESCRIPTION
 
-When making changes, delete the code between the  '# ------' markers and run 
+When making changes, delete the code between the  '# ------' markers and run
 
   ../../parrot quine_ord.pir --print-code-as-data
 
@@ -3641,4 +3623,4 @@ L<http://www.madore.org/~david/computers/quine.html>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

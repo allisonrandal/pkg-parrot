@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: Pg.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: Pg.pir 37343 2009-03-12 05:22:02Z Util $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ Pg.pir - OO interface to libpq
 =head1 SYNOPSIS
 
   .local pmc pg, con, res
-  pg = getclass 'Pg'
+  pg = get_class 'Pg'
   con = pg.'connectdb'('dbname = db')
   res = con.'exec'('SELECT * from tab')
   n = res.'ntuples'()
@@ -72,16 +72,24 @@ A class method that returns a new connection object.
 .sub connectdb :method
     .param string args
     .local pmc con, connectdb, o_con
-    connectdb = get_global 'PQconnectdb' 
+    connectdb = get_global 'PQconnectdb'
     con = connectdb(args)
-    $I0 = find_type ['Pg';'Conn']
-    o_con = new  $I0, con
+    $P0 = get_class ['Pg';'Conn']
+
+    .local pmc init_data
+    init_data        = new 'Hash'
+    init_data['con'] = con
+    o_con            = new $P0, init_data
+
     # verify success
     .local int ok
     ok = o_con.'status'()
     if ok == CONNECTION_OK goto is_ok
-    con = new .Undef
-    o_con = new $I0, con
+
+    con              = new 'Undef'
+    init_data['con'] = con
+
+    o_con = new $P0, init_data
 is_ok:
     .return (o_con)
 .end
@@ -99,15 +107,20 @@ Object initializer. Takes a C<PGconn> structure.
 =cut
 
 .sub init_pmc :vtable :method
-    .param pmc con
+    .param pmc init
+
+    .local pmc con
+    con = init['con']
     setattribute self, 'con', con
 .end
 
 .sub get_bool :vtable :method
     .local pmc con
     con = getattribute self, 'con'
-    $I0 = typeof con
-    $I1 = isne $I0, .Undef
+
+    $I0 = isa con, 'Undef'
+    $I1 = not $I0
+
     .return ($I1)
 .end
 
@@ -152,7 +165,7 @@ thereafter and inaccessible then.
     # XXX and what happens if Pg is loaded from another HLL?
     finish = get_root_global ['parrot';'Pg'], 'PQfinish'
     finish(con)
-    con = new .Undef
+    con = new 'Undef'
     setattribute self, 'con', con
 .end
 
@@ -166,8 +179,9 @@ Execute the SQL command and return a Pg;Result object.
 .sub mk_res
     .param pmc res
     .local pmc o_res
-    $I0 = find_type ['Pg';'Result']
-    o_res = new $I0, res
+    $P0 = get_class ['Pg';'Result']
+    o_res = new $P0
+    setattribute o_res, 'res', res
     .return (o_res)
 .end
 
@@ -177,7 +191,7 @@ Execute the SQL command and return a Pg;Result object.
     con = getattribute self, 'con'
     exec = get_root_global ['parrot';'Pg'], 'PQexec'
     res = exec(con, cmd)
-    .return mk_res(res)
+    .tailcall mk_res(res)
 .end
 
 .include "datatypes.pasm"
@@ -195,11 +209,11 @@ are considered being text - there's no provision to use binary data.
     .local int i, n
     .local pmc str, vals
     n = elements values
-    str = new .OrderedHash
+    str = new 'OrderedHash'
     push str, .DATATYPE_CSTR
     push str, n
     push str, 0
-    vals = new .ManagedStruct
+    vals = new 'ManagedStruct'
     assign vals, str
     i = 0
 loop:
@@ -219,11 +233,11 @@ done:
     .local int n
     con = getattribute self, 'con'
     exec = get_root_global ['parrot';'Pg'], 'PQexecParams'
-    nil = new .ManagedStruct
+    nil = new 'ManagedStruct'
     (n, vals) = mk_struct(values)
     # we don't handle binary
     res = exec(con, cmd, n, nil, vals, nil, nil, 0)
-    .return mk_res(res)
+    .tailcall mk_res(res)
 .end
 
 =item res = con.'prepare'(name, query, nparams)
@@ -239,9 +253,9 @@ Prepare a query for execution with B<execPrepared>
     .local pmc con, f, res, nil
     con = getattribute self, 'con'
     f = get_root_global ['parrot';'Pg'], 'PQprepare'
-    nil = new .ManagedStruct
+    nil = new 'ManagedStruct'
     res = f(con, name, query, nparams, nil)
-    .return mk_res(res)
+    .tailcall mk_res(res)
 .end
 
 =item res = con.'execPrepared'(name, val, ...)
@@ -257,10 +271,10 @@ Execute a prepared query.
     .local int n
     con = getattribute self, 'con'
     f = get_root_global ['parrot';'Pg'], 'PQexecPrepared'
-    nil = new .ManagedStruct
+    nil = new 'ManagedStruct'
     (n, vals) = mk_struct(values)
     res = f(con, name, n, vals, nil, nil, 0)
-    .return mk_res(res)
+    .tailcall mk_res(res)
 .end
 
 =item $P0 = con.'setNoticeReceiver'(cb, arg)
@@ -270,7 +284,7 @@ Install a notice receiver callback. The callback will be called as
   .sub 'notice'
     .param pmc arg
     .param pmc res
-    
+
 
 =cut
 
@@ -294,18 +308,6 @@ Install a notice receiver callback. The callback will be called as
 =head2 Result Methods
 
 =over
-
-=item __init(res)
-
-Object initializer. Takes a C<PGresult> structure.
-
-=cut
-
-.sub init_pmc :vtable :method
-    .param pmc res
-    setattribute self, 'res', res
-    need_finalize self
-.end
 
 =item __finalize()
 
@@ -346,7 +348,7 @@ Return the status of the result.
 
 =item res.'clear'()
 
-Clear the result structure. You don't have to explicitely call this
+Clear the result structure. You don't have to explicitly call this
 method. If a result object is no longer alive, the GC will call
 __finalize(), which wil clear the object.
 
@@ -453,4 +455,4 @@ Return true if the result value at (r,c) is NULL.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

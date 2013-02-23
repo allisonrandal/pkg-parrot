@@ -1,19 +1,20 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: os.t 18809 2007-06-04 20:24:05Z paultcochrane $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: os.t 37509 2009-03-17 02:12:48Z jkeenan $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 15;
+use Parrot::Test tests => 16;
 use Parrot::Config;
 use Cwd;
 use File::Spec;
 
 my $MSWin32 = $^O =~ m!MSWin32!;
 my $cygwin  = $^O =~ m!cygwin!;
-my $MSVC = grep { $PConfig{cc} eq $_ } (qw(cl cl.exe));
+my $solaris = $^O =~ m!solaris!;
+my $MSVC = $PConfig{cc} =~ m/\bcl(?:\.exe)?/i;
 
 =head1 NAME
 
@@ -30,7 +31,6 @@ Tests the C<OS> PMC.
 =cut
 
 END {
-
     # Clean up environment on exit
     rmdir "xpto"  if -d "xpto";
     unlink "xpto" if -f "xpto";
@@ -38,9 +38,25 @@ END {
 
 # test 'cwd'
 my $cwd = File::Spec->canonpath(getcwd);
-pir_output_is( <<'CODE', <<"OUT", 'Test cwd' );
+if (File::Spec->case_tolerant(substr($cwd,0,2))) {
+    $cwd = lc($cwd);
+    pir_output_is( <<'CODE', <<"OUT", 'Test cwd' );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
+        $S1 = $P1."cwd"()
+        $S2 = downcase $S1
+        print $S2
+        print "\n"
+        end
+.end
+CODE
+$cwd
+OUT
+}
+else {
+    pir_output_is( <<'CODE', <<"OUT", 'Test cwd' );
+.sub main :main
+        $P1 = new ['OS']
         $S1 = $P1."cwd"()
         print $S1
         print "\n"
@@ -49,29 +65,34 @@ pir_output_is( <<'CODE', <<"OUT", 'Test cwd' );
 CODE
 $cwd
 OUT
+}
 
 #  TEST chdir
 chdir "src";
 my $upcwd = File::Spec->canonpath(getcwd);
 chdir '..';
 
-pir_output_is( <<'CODE', <<"OUT", 'Test chdir' );
+if (File::Spec->case_tolerant(substr($cwd,0,2))) {
+    $cwd = lc($cwd);
+    $upcwd = lc($upcwd);
+
+    pir_output_is( <<'CODE', <<"OUT", 'Test chdir' );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
 
         $S1 = "src"
         $P1."chdir"($S1)
 
         $S1 = $P1."cwd"()
-        print $S1
-        print "\n"
+        $S2 = downcase $S1
+        say $S2
 
         $S1 = ".."
         $P1."chdir"($S1)
 
         $S1 = $P1."cwd"()
-        print $S1
-        print "\n"
+        $S2 = downcase $S1
+        say $S2
 
         end
 .end
@@ -79,15 +100,42 @@ CODE
 $upcwd
 $cwd
 OUT
+}
+else {
+    pir_output_is( <<'CODE', <<"OUT", 'Test chdir' );
+.sub main :main
+        $P1 = new ['OS']
+
+        $S1 = "src"
+        $P1."chdir"($S1)
+
+        $S1 = $P1."cwd"()
+        say $S1
+
+        $S1 = ".."
+        $P1."chdir"($S1)
+
+        $S1 = $P1."cwd"()
+        say $S1
+
+        end
+.end
+CODE
+$upcwd
+$cwd
+OUT
+}
 
 # Test mkdir
 
 my $xpto = $upcwd;
 $xpto =~ s/src([\/\\]?)$/xpto$1/;
 
-pir_output_is( <<'CODE', <<"OUT", 'Test mkdir' );
+if (File::Spec->case_tolerant(substr($cwd,0,2))) {
+
+    pir_output_is( <<'CODE', <<"OUT", 'Test mkdir' );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
 
         $S1 = "xpto"
         $I1 = 0o555
@@ -95,15 +143,15 @@ pir_output_is( <<'CODE', <<"OUT", 'Test mkdir' );
         $P1."chdir"($S1)
 
         $S1 = $P1."cwd"()
-        print $S1
-        print "\n"
+        $S2 = downcase $S1
+        say $S2
 
         $S1 = ".."
         $P1."chdir"($S1)
 
         $S1 = $P1."cwd"()
-        print $S1
-        print "\n"
+        $S2 = downcase $S1
+        say $S2
 
         end
 .end
@@ -111,13 +159,40 @@ CODE
 $xpto
 $cwd
 OUT
+}
+else {
+    pir_output_is( <<'CODE', <<"OUT", 'Test mkdir' );
+.sub main :main
+        $P1 = new ['OS']
+
+        $S1 = "xpto"
+        $I1 = 0o555
+        $P1."mkdir"($S1,$I1)
+        $P1."chdir"($S1)
+
+        $S1 = $P1."cwd"()
+        say $S1
+
+        $S1 = ".."
+        $P1."chdir"($S1)
+
+        $S1 = $P1."cwd"()
+        say $S1
+
+        end
+.end
+CODE
+$xpto
+$cwd
+OUT
+}
 
 # Test remove on a directory
 mkdir "xpto" unless -d "xpto";
 
 pir_output_is( <<'CODE', <<'OUT', 'Test rm call in a directory' );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
 
         $S1 = "xpto"
         $P1."rm"($S1)
@@ -141,70 +216,61 @@ close $X;
 
 my $stat;
 
-if ( $cygwin || $MSWin32 ) {
+my $count = $MSWin32 ? 11 : 13;
+my @s = stat('xpto');
+if ( $cygwin ) {
+    # Mask inode number (fudge it)
+    $s[1] &= 0xffffffff;
+}
 
-    # Skip inode number
-    my @s = stat('xpto');
-    $stat = join( "\n", $s[0], @s[ 2 .. 10 ] ) . "\n";
+if ( $MSWin32 ) {
+    $stat = sprintf("0x%08x\n" x 11, @s);
     pir_output_is( <<'CODE', $stat, 'Test OS.stat' );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
         $S1 = "xpto"
         $P2 = $P1."stat"($S1)
 
-        $I1 = 0
-loop:
-        $S1 = $P2[$I1]
-        print $S1
-        print "\n"
-        $I1 += 1
-        if $I1 == 1 goto inc
-        if $I1 == 11 goto done
-        goto loop
-inc:
-        $I1 += 1
-        goto loop
+        $S1 = repeat "0x%08x\n", 11
+        $S2 = sprintf $S1, $P2
+        print $S2
+done:
+        end
+.end
+CODE
+} else {
+  SKIP: {
+    skip 'broken test TT #457', 1 if $solaris;
 
+    $stat = sprintf("0x%08x\n" x 13, @s);
+    pir_output_is( <<'CODE', $stat, 'Test OS.stat' );
+.sub main :main
+        $P1 = new ['OS']
+        $S1 = "xpto"
+        $P2 = $P1."stat"($S1)
+
+        $S1 = repeat "0x%08x\n", 13
+        $S2 = sprintf $S1, $P2
+        print $S2
 done:
         end
 .end
 CODE
 }
-else {
-    $stat = join( "\n", stat("xpto") ) . "\n";
-    pir_output_is( <<'CODE', $stat, 'Test OS.stat' );
-.sub main :main
-        $P1 = new .OS
-        $S1 = "xpto"
-        $P2 = $P1."stat"($S1)
-
-        $I1 = 0
-loop:
-        $S1 = $P2[$I1]
-        print $S1
-        print "\n"
-        $I1 += 1
-        if $I1 == 13 goto done
-        goto loop
-done:
-        end
-.end
-CODE
-
 }
 
 # test readdir
 SKIP: {
     skip 'not implemented on windows yet', 1 if ( $MSWin32 && $MSVC );
 
-    opendir my $IN, '.';
+    opendir my $IN, 'docs';
     my @entries = readdir $IN;
     closedir $IN;
     my $entries = join( ' ', @entries ) . "\n";
     pir_output_is( <<'CODE', $entries, 'Test OS.readdir' );
 .sub main :main
-    $P1 = new .OS
-    $P2 = $P1.readdir('.')
+    $P1 = new ['OS']
+    $P2 = $P1.'readdir'('docs')
 
     $S0 = join ' ', $P2
     print $S0
@@ -219,12 +285,12 @@ SKIP: {
     close $FILE;
     pir_output_is( <<'CODE', <<"OUT", 'Test OS.rename' );
 .sub main :main
-    $P1 = new .OS
-    $P1.rename('____some_test_file', '___some_other_file')
+    $P1 = new ['OS']
+    $P1.'rename'('____some_test_file', '___some_other_file')
     $I0 = stat '___some_other_file', 0
     print $I0
     print "\n"
-    $P1.rm('___some_other_file')
+    $P1.'rm'('___some_other_file')
 .end
 CODE
 1
@@ -236,64 +302,34 @@ OUT
 my $lstat;
 
 SKIP: {
-    skip 'lstat not available on Win 32 yet', 1 if $MSWin32;
+    skip 'lstat not on Win32', 1 if $MSWin32;
+    skip 'broken test TT #457', 1 if $solaris;
 
+    my @s = lstat('xpto');
     if ($cygwin) {
-
-        # Skip inode number
-        my @s = stat('xpto');
-        $stat = join( "\n", $s[0], @s[ 2 .. 12 ] ) . "\n";
-        pir_output_is( <<'CODE', $stat, "Test OS.lstat" );
+        # Mask inode number (fudge it)
+        $s[1] &= 0xffffffff;
+    }
+    $lstat = sprintf( "0x%08x\n" x 13, @s );
+    pir_output_is( <<'CODE', $lstat, "Test OS.lstat" );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
         $S1 = "xpto"
         $P2 = $P1."lstat"($S1)
 
-        $I1 = 0
-loop:
-        $S1 = $P2[$I1]
-        print $S1
-        print "\n"
-        $I1 += 1
-        if $I1 == 1 goto inc
-        if $I1 == 13 goto done
-        goto loop
-inc:
-        $I1 += 1
-        goto loop
+        $S1 = repeat "0x%08x\n", 13
+        $S2 = sprintf $S1, $P2
+        print $S2
 
-done:
         end
 .end
 CODE
-    }
-    else {
-        $lstat = join( "\n", lstat("xpto") ) . "\n";
-        pir_output_is( <<'CODE', $lstat, "Test OS.lstat" );
-.sub main :main
-        $P1 = new .OS
-        $S1 = "xpto"
-        $P2 = $P1."lstat"($S1)
-
-        $I1 = 0
-loop:
-        $S1 = $P2[$I1]
-        print $S1
-        print "\n"
-        $I1 += 1
-        if $I1 == 13 goto done
-        goto loop
-done:
-        end
-.end
-CODE
-    }
 }
 
 # Test remove on a file
 pir_output_is( <<'CODE', <<"OUT", "Test rm call in a file" );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
 
         $S1 = "xpto"
         $P1."rm"($S1)
@@ -315,7 +351,7 @@ SKIP: {
 
     pir_output_is( <<'CODE', <<"OUT", "Test symlink" );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
 
         $S1 = "xpto"
         $S2 = "MANIFEST"
@@ -333,16 +369,16 @@ OUT
     unlink "xpto" if -f "xpto";
 }
 
-# Test link
+# Test link to file. May require root permissions
 SKIP: {
-    skip "Parrot link not implemented for Windows, yet", 2 if $MSWin32;
+    skip "Hardlinks to files not possible on Windows", 2 if $MSWin32 or $cygwin;
 
     pir_output_is( <<'CODE', <<"OUT", "Test link" );
 .sub main :main
-        $P1 = new .OS
+        $P1 = new ['OS']
 
         $S1 = "xpto"
-        $S2 = "MANIFEST"
+        $S2 = "myconfig"
         $P1."link"($S2, $S1)
 
         print "ok\n"
@@ -353,9 +389,53 @@ CODE
 ok
 OUT
 
-    my $nl = [ stat("MANIFEST") ]->[3];
-    ok( $nl > 1, "hard link was really created" );
+    my $nl = [ stat("myconfig") ]->[3];
+    ok( $nl > 1, "hard link to file was really created" );
     unlink "xpto" if -f "xpto";
+}
+
+SKIP: {
+    skip "Hardlinks to files not possible on Windows", 1 if $MSWin32 or $cygwin;
+
+    my $prevnl = [ stat("tools") ]->[3];
+    pir_output_like( <<"CODE", <<"OUT", "Test dirlink" );
+.sub main :main
+    .local pmc os
+    .local string xpto, tools
+    os    = new ['OS']
+    xpto  = "xpto"
+    tools = "tools"
+
+    push_eh no_root_perms
+    os."link"(tools, xpto)
+    pop_eh
+
+    .local pmc statvals
+    statvals = os.'stat'(tools)
+
+    # nlink
+    .local int nlink
+    nlink = statvals[3]
+
+    gt nlink, $prevnl, is_okay
+    end
+
+  no_root_perms:
+    .local pmc e
+    .local string message
+    .get_results( e )
+    pop_eh
+    message = e['message']
+    say message
+    end
+
+  is_okay:
+    say "ok"
+    end
+.end
+CODE
+/link.* failed for OS PMC:/
+OUT
 }
 
 # Local Variables:

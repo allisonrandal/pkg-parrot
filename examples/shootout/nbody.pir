@@ -1,7 +1,8 @@
-#!./parrot -j
+#!./parrot
 # The Computer Language Shootout
 # http://shootout.alioth.debian.org/
-# 
+#
+# ./parrot -R jit
 # Contributed by Joshua Isom
 # speed up  from 1m25 to 6s by Leopold Toetsch
 # changed default value to 1000 to match shootout default (karl)
@@ -20,7 +21,7 @@
 	$N1 = .num5 * 365.24
 	$N2 = .num6 * 365.24
 	$N3 = .num7 * 39.478417604357428
-	$P0 = new .FixedFloatArray
+	$P0 = new 'FixedFloatArray'
 	$P0 = 7
 	.bodies[.i] = $P0
 	.bodies[.i; x] = .num1
@@ -42,7 +43,7 @@
 	n = $S0
 argsok:
 	.local pmc bodies
-	bodies = new .FixedPMCArray
+	bodies = new 'FixedPMCArray'
 	bodies = 5
 	# Sun
 	.InitBodies(bodies, 0, 0, 0, 0, 0, 0, 0, 1)
@@ -87,7 +88,7 @@ argsok:
 	offset_momentum(nbodies, bodies)
 	$N0 = energy(nbodies, bodies)
 	.local pmc spf
-	spf = new .FixedFloatArray
+	spf = new 'FixedFloatArray'
 	spf = 1
 	spf[0] = $N0
 	$S0 = sprintf "%.9f\n", spf
@@ -100,7 +101,7 @@ beginfor:
 	inc i
 	goto beginfor
 endfor:
-	
+
 	$N0 = energy(nbodies, bodies)
 	spf[0] = $N0
 	$S0 = sprintf "%.9f\n", spf
@@ -111,7 +112,7 @@ endfor:
 .sub offset_momentum
 	.param int nbodies
 	.param pmc bodies
-	.local float px, py, pz
+	.local num px, py, pz
 	px = 0.0
 	py = 0.0
 	pz = 0.0
@@ -146,7 +147,7 @@ endfor:
 .sub energy
 	.param int nbodies
 	.param pmc bodies
-	.local float e, tmp
+	.local num e, tmp
 	.local int i, j
 	e = 0.0
 	i = 0
@@ -159,23 +160,23 @@ beginfor_0:
 
 	$N1 = bodies[i; vx] # vx
 	$N3 = pow $N1, 2.0
-	
+
 	$N1 = bodies[i; vy] # vy
 	$N2 = pow $N1, 2.0
 	$N3 += $N2
-	
+
 	$N1 = bodies[i; vz] # vz
 	$N2 = pow $N1, 2.0
 	$N3 += $N2
 
 	$N0 *= $N3
-	
+
 	e += $N0
-	
+
 	j = i + 1
 beginfor_1:
 	unless j < nbodies goto endfor_1
-	.local float dx, dy, dz, distance
+	.local num dx, dy, dz, distance
 
 	# dx = b->x - b2->x;
 	$N0 = bodies[i; x]
@@ -199,14 +200,14 @@ beginfor_1:
 	$N0 += $N1
 	$N0 += $N2
 	distance = sqrt $N0
-	
+
 	# e -= (b->mass * b2->mass) / distance;
 	$N0 = bodies[i; m]
 	$N1 = bodies[j; m]
 	$N0 *= $N1
 	$N0 /= distance
 	e -= $N0
-	
+
 	inc j
 	goto beginfor_1
 endfor_1:
@@ -220,11 +221,11 @@ endfor_0:
 .sub advance
 	.param int nbodies
 	.param pmc bodies
-	.param float dt
+	.param num dt
 	.local int i, j
-	.local float dx, dy, dz, distance, mag
-	.local float bx, by, bz, bm, bvx, bvy, bvz
-	.local float b2x, b2y, b2z, b2m
+	.local num dx, dy, dz, distance, mag
+	.local num bx, by, bz, bm, bvx, bvy, bvz
+	.local num b2x, b2y, b2z, b2m
 	.local pmc bi, bj
 	i = 0
 beginfor_0:
@@ -237,7 +238,7 @@ beginfor_0:
 	bvx = bi[vx]
 	bvy = bi[vy]
 	bvz = bi[vz]
-	
+
 	j = i + 1
 	beginfor_1:
 		unless j < nbodies goto endfor_1
@@ -342,11 +343,11 @@ beginfor_2:
 	inc i
 	goto beginfor_2
 endfor_2:
-	
+
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

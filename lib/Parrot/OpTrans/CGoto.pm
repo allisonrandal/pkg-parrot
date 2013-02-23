@@ -1,5 +1,5 @@
-# Copyright (C) 2002-2007, The Perl Foundation.
-# $Id: CGoto.pm 18744 2007-06-02 01:10:38Z chromatic $
+# Copyright (C) 2002-2007, Parrot Foundation.
+# $Id: CGoto.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -66,11 +66,11 @@ sub defines {
 #undef CONST
 #define REL_PC     ((size_t)(cur_opcode - (opcode_t*)interp->code->base.data))
 #define CUR_OPCODE cur_opcode
-#define IREG(i) REG_INT(cur_opcode[i])
-#define NREG(i) REG_NUM(cur_opcode[i])
-#define PREG(i) REG_PMC(cur_opcode[i])
-#define SREG(i) REG_STR(cur_opcode[i])
-#define CONST(i) CONTEXT(interp->ctx)->constants[cur_opcode[i]]
+#define IREG(i) REG_INT(interp, cur_opcode[i])
+#define NREG(i) REG_NUM(interp, cur_opcode[i])
+#define PREG(i) REG_PMC(interp, cur_opcode[i])
+#define SREG(i) REG_STR(interp, cur_opcode[i])
+#define CONST(i) CONTEXT(interp)->constants[cur_opcode[i]]
 END
 }
 
@@ -254,7 +254,7 @@ Returns the C code for the run core function declaration.
 sub run_core_func_decl {
     my ( $self, $core ) = @_;
 
-    return "opcode_t * " . $self->core_prefix . "$core(opcode_t *cur_op, Parrot_Interp interp)";
+    return "opcode_t * " . $self->core_prefix . "$core(opcode_t *cur_op, PARROT_INTERP)";
 }
 
 =item C<ops_addr_decl($base_suffix)>
@@ -302,7 +302,7 @@ sub run_core_after_addr_table {
         ${bs}ops_addr = l_ops_addr;
     if (cur_opcode == 0) {
         DECL_CONST_CAST;
-        return ($t*)const_cast(${bs}ops_addr);
+        return (opcode_t *) PARROT_const_cast(void **, ${bs}ops_addr);
     }
 END_C
 }

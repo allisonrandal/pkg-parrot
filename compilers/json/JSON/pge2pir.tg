@@ -4,19 +4,19 @@ transform result (ROOT) {
     .local pmc pir
     .local string result
  
-    $S0 = tree.'get'('pir', node, 'thing')
+    $S0 = tree.'get'('pir', node, 'value')
 
-    pir = new 'PGE::CodeString'
-    pir.emit('.sub anon :anon')
-    pir.emit($S0)
+    pir = new 'CodeString'
+    pir.'emit'('.sub anon :anon')
+    pir.'emit'($S0)
     result = node['ret']
-    pir.emit('    .return (%0)',result)
-    pir.emit('.end')
+    pir.'emit'('    .return (%0)',result)
+    pir.'emit'('.end')
 
    .return(pir)
 } 
 
-transform pir (thing) {
+transform pir (value) {
 
     .local pmc sub_node, transform_result
     .local pmc pir, result
@@ -52,38 +52,38 @@ transform pir (thing) {
     .return (pir)
 
   got_true:
-    pir = new 'PGE::CodeString'
-    result = pir.unique('$P')
+    pir = new 'CodeString'
+    result = pir.'unique'('$P')
     $S0 = node
-    pir.emit('    %0 = new .Boolean', result)
-    pir.emit('    %0 = 1', result, $S0)
+    pir.'emit'("    %0 = new 'Boolean'", result)
+    pir.'emit'('    %0 = 1', result, $S0)
     node['ret'] = result
     .return(pir)
 
   got_false:
-    pir = new 'PGE::CodeString'
-    result = pir.unique('$P')
+    pir = new 'CodeString'
+    result = pir.'unique'('$P')
     $S0 = node
-    pir.emit('    %0 = new .Boolean', result)
-    pir.emit('    %0 = 0', result, $S0)
+    pir.'emit'("    %0 = new 'Boolean'", result)
+    pir.'emit'('    %0 = 0', result, $S0)
     node['ret'] = result
     .return(pir)
 
   got_null:
-    pir = new 'PGE::CodeString'
-    result = pir.unique('$P')
+    pir = new 'CodeString'
+    result = pir.'unique'('$P')
     $S0 = node
-    pir.emit('    null %0', result)
+    pir.'emit'('    null %0', result)
     node['ret'] = result
     .return(pir)
 }
 
 transform pir (object) {
     .local pmc pir
-    pir = new 'PGE::CodeString'
+    pir = new 'CodeString'
     .local string result, child_result, key_result
-    result = pir.unique('$P')
-    pir.emit('    %0 = new .Hash', result)
+    result = pir.'unique'('$P')
+    pir.'emit'("    %0 = new 'Hash'", result)
     
     .local pmc items
 
@@ -94,17 +94,17 @@ transform pir (object) {
 
     .local pmc keys
     keys  = items['string']
-    items = items['thing']
+    items = items['value']
 
     .local pmc iter, key_iter, child, key
-    key_iter = new .Iterator, keys
-    iter     = new .Iterator, items
+    key_iter = new 'Iterator', keys
+    iter     = new 'Iterator', items
 
     # the two iters should be in lockstep as a result of the PGE grammar
 loop:
     unless iter goto end
     child = shift iter
-    $P0 = tree.'get'('pir', child, 'thing')
+    $P0 = tree.'get'('pir', child, 'value')
     $S0 = $P0
     pir .= $S0 
     child_result = child['ret']
@@ -115,7 +115,7 @@ loop:
     pir .= $S0 
     key_result = key['ret']
 
-    pir.emit('    %0[%1] = %2', result, key_result, child_result)
+    pir.'emit'('    %0[%1] = %2', result, key_result, child_result)
 
 
     goto loop
@@ -127,10 +127,10 @@ end:
 
 transform pir (array) {
     .local pmc pir
-    pir = new 'PGE::CodeString'
+    pir = new 'CodeString'
     .local string result, child_result
-    result = pir.unique('$P')
-    pir.emit('    %0 = new .ResizablePMCArray', result)
+    result = pir.'unique'('$P')
+    pir.'emit'("    %0 = new 'ResizablePMCArray'", result)
     
     .local pmc items
 
@@ -138,19 +138,19 @@ transform pir (array) {
     items = node['elements']
     if null items goto end
 
-    items = items['thing']
+    items = items['value']
 
     .local pmc iter, child
-    iter = new .Iterator, items
+    iter = new 'Iterator', items
 loop:
     unless iter goto end
     child = shift iter
-    $P0 = tree.'get'('pir', child, 'thing')
+    $P0 = tree.'get'('pir', child, 'value')
     $S0 = $P0
     pir .= $S0 
 
     child_result = child['ret']
-    pir.emit('    push %0, %1', result, child_result)
+    pir.'emit'('    push %0, %1', result, child_result)
     goto loop
 end:
     node['ret'] = result
@@ -162,24 +162,24 @@ transform pir (string) {
     .local pmc pir, result, children, iter, child
     .local string tmp
     tmp = ''
-    pir = new 'PGE::CodeString'
+    pir = new 'CodeString'
     children = node['char']
     if null children goto loop_end
-    iter = new .Iterator, children 
+    iter = new 'Iterator', children 
   loop:
     push_eh loop_end
       child = shift iter
-    clear_eh
+    pop_eh
     unless child goto loop_end
     $S0 = child
     $I0 = length $S0
     if $I0 == 1 goto char
     if $I0 == 2 goto escape
   unicode:
-    $P1 = new .String
+    $P1 = new 'String'
     $S1 = substr $S0, 2, 4
     $P1 = $S1
-    $I0 = $P1.to_int(16)
+    $I0 = $P1.'to_int'(16)
     $S0 = chr $I0 
     goto char
   escape:
@@ -190,21 +190,21 @@ transform pir (string) {
     goto loop
   loop_end:
 
-    result = pir.unique('$P')
-    $S1 = pir.escape(tmp)
-    pir.emit('    %0 = new .String', result)
-    pir.emit('    %0 = %1', result, $S1)
+    result = pir.'unique'('$P')
+    $S1 = pir.'escape'(tmp)
+    pir.'emit'("    %0 = new 'String'", result)
+    pir.'emit'('    %0 = %1', result, $S1)
     node['ret'] = result
    .return(pir)
 }
 
 transform pir (number) {
     .local pmc pir, result
-    pir = new 'PGE::CodeString'
-    result = pir.unique('$P')
+    pir = new 'CodeString'
+    result = pir.'unique'('$P')
     $S0 = node
-    pir.emit('    %0 = new .Integer', result)
-    pir.emit('    %0 = %1', result, $S0)
+    pir.'emit'("    %0 = new 'Integer'", result)
+    pir.'emit'('    %0 = %1', result, $S0)
     node['ret'] = result
    .return(pir)
 }

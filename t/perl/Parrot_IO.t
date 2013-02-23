@@ -1,12 +1,16 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: Parrot_IO.t 17576 2007-03-17 22:50:07Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: Parrot_IO.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
-use Test::More 'tests' => 57;
-use File::Spec::Functions qw(:ALL);
+
+use Test::More 'tests' => 58;
+
+use Parrot::Distribution;
+use File::Spec::Functions ':ALL';
+use File::Temp qw/tempdir/;
 
 =head1 NAME
 
@@ -34,6 +38,14 @@ to ensure nothing is broken.
 # Path is really only an abstract superclass but there are a few things we
 # can do with it.
 BEGIN { use_ok('Parrot::IO::Path') }
+
+my $file_temp_work_path = tempdir(
+	'PARROT_IO_XXXX',
+	TMPDIR => 1,
+	CLEANUP => 1
+);
+# you can sort of count on the var below being the unique part of the temp dir
+my $file_temp_dir = (splitdir($file_temp_work_path))[-1];
 
 my $suffix   = 'txt';
 my $name     = 'file';
@@ -76,7 +88,9 @@ ok( $r, 'new' );
 isa_ok( $r, 'Parrot::IO::Directory' );
 ok( !$r->parent(), 'root has no parent' );
 
-my $d = Parrot::IO::Directory->tmp_directory('t');
+my $d = Parrot::IO::Directory->tmp_directory(
+	catfile($file_temp_dir, 't')
+);
 ok( $d, 'tmp_directory' );
 
 # Create a file in a directory that does not exist.
@@ -87,7 +101,7 @@ my $d1 = $d->directory_with_name('one');
 my $d2 = $d1->directory_with_name('two');
 ok( $d1 && $d2, 'directory_with_name' );
 
-my $f = Parrot::IO::File->tmp_file($fullname);
+my $f = Parrot::IO::File->tmp_file(catfile($file_temp_dir, $fullname));
 ok( $f, 'tmp_file' );
 
 # Check the instance got re-blessed.
@@ -146,7 +160,7 @@ my $time = time;
 ok( !$f3->modified_since($time), 'not modified_since' );
 
 # So that the modified time will be greater than $time.
-sleep 1;
+sleep 1 while time() <= ( $time + 1 );
 
 # Now the read/write stuff.
 $f3->write("hello");
@@ -158,11 +172,18 @@ is( $a[1], "world", 'array read' );
 
 ok( $f3->modified_since($time), 'modified_since' );
 
-$f = Parrot::IO::File->new( catfile( 'lib', 'Parrot', 'IO', 'File.pm' ) );
-ok( $f->has_svn_id(), 'has_svn_id' );
+SKIP: {
+    my $nul = File::Spec->devnull;
 
-# XXX doesn not work aftern switch to svn
-#ok($f->svn_id() =~ /File.pm,v/, 'svn_id');
+    skip( 'keywords not expanded in non-svn checkouts', 2 )
+        unless Parrot::Distribution->new->is_svn_co();
+
+    $f = Parrot::IO::File->new( catfile( 'lib', 'Parrot', 'IO', 'File.pm' ) );
+    ok( $f->has_svn_id(), 'has_svn_id' );
+
+    ok($f->svn_id() =~ /^(?:\$)Id:.*?File.pm \d+ \d{4}-\d\d-\d\d.*?[^\$]+ \$$/,
+       'svn_id');
+}
 
 $f3->delete();
 @a = $d2->files();
@@ -191,7 +212,7 @@ sub teardown {
 
 # tmp_dir_path(@dirs)
 sub tmp_dir_path {
-    return catdir( tmpdir, @_ );
+    return catdir( $file_temp_work_path, @_ );
 }
 
 # tmp_file_path(@dirs, $file)

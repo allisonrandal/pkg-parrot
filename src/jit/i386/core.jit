@@ -1,13 +1,13 @@
 ;
 ; i386/core.jit
 ;
-; $Id: core.jit 18183 2007-04-14 03:15:44Z chromatic $
+; $Id: core.jit 37201 2009-03-08 12:07:48Z fperrad $
 ;
 
 # TODO complete this
 #define P_ARITH ((PREV_OP == dec_i) || (PREV_OP == inc_i) || (PREV_OP == sub_i_i_i) || (PREV_OP == sub_i_i))
 
-#define CALL_FUNCTION(j, f) call_func(j, f)
+#define CALL_FUNCTION(j, f) call_func(j, (void (*)(void)) & f)
 
 Parrot_end {
     jit_emit_end(NATIVECODE);
@@ -23,14 +23,14 @@ TEMPLATE Parrot_set_x_x {
         jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], MAP[2]);
     }
     else if (MAP[1]) {
-        jit_emit_mov_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(2));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
     }
     else if (MAP[2]) {
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), MAP[2]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), MAP[2]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -52,10 +52,10 @@ Parrot_set_s_s {
 
 TEMPLATE Parrot_set_x_ic {
     if (MAP[1]) {
-        jit_emit_mov_ri<_N>(NATIVECODE, MAP[1], <typ>_CONST[2]);
+        jit_emit_mov_ri<_N>(interp, NATIVECODE, MAP[1], <typ>_CONST[2]);
     }
     else {
-        jit_emit_mov_MI<_N>(NATIVECODE, ROFFS_INT(1), <typ>_CONST[2]);
+        jit_emit_mov_MI<_N>(interp, NATIVECODE, ROFFS_INT(1), <typ>_CONST[2]);
     }
 }
 
@@ -69,35 +69,35 @@ Parrot_set_n_ic {
 
 Parrot_set_n_nc {
     if (MAP[1]) {
-        jit_emit_mov_ri_n(NATIVECODE, MAP[1], &NUM_CONST[2]);
+        jit_emit_mov_ri_n(interp, NATIVECODE, MAP[1], &NUM_CONST[2]);
     }
     else {
-        jit_emit_mov_ri_n(NATIVECODE, FSR1, &NUM_CONST[2]);
-        jit_emit_mov_MR_n(NATIVECODE, ROFFS_NUM(1), FSR1);
+        jit_emit_mov_ri_n(interp, NATIVECODE, FSR1, &NUM_CONST[2]);
+        jit_emit_mov_MR_n(interp, NATIVECODE, ROFFS_NUM(1), FSR1);
     }
 }
 
 Parrot_set_p_pc {
     if (MAP[1]) {
-        jit_emit_mov_rm_i(NATIVECODE, MAP[1], &PMC_CONST[2]);
+        jit_emit_mov_rm_i(interp, NATIVECODE, MAP[1], &PMC_CONST[2]);
     }
     else {
-        jit_emit_mov_rm_i(NATIVECODE, ISR1, &PMC_CONST[2]);
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_PMC(1), ISR1);
+        jit_emit_mov_rm_i(interp, NATIVECODE, ISR1, &PMC_CONST[2]);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_PMC(1), ISR1);
     }
 }
 
 Parrot_set_n_i {
 ; store mapped int
     if (MAP[2]) {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(2), MAP[2]);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(2), MAP[2]);
     }
     if (MAP[1]) {
-        jit_emit_mov_RM_ni(NATIVECODE, MAP[1], ROFFS_INT(2));
+        jit_emit_mov_RM_ni(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
     }
     else {
-        jit_emit_mov_RM_ni(NATIVECODE, FSR1, ROFFS_INT(2));
-        jit_emit_mov_MR_n(NATIVECODE, ROFFS_NUM(1), FSR1);
+        jit_emit_mov_RM_ni(interp, NATIVECODE, FSR1, ROFFS_INT(2));
+        jit_emit_mov_MR_n(interp, NATIVECODE, ROFFS_NUM(1), FSR1);
     }
 }
 
@@ -111,25 +111,25 @@ Parrot_set_n_i {
 ;        jit_emit_mov_MR_in(NATIVECODE, ROFFS_INT(1), FSR1);
 ;    }
 ;    if (MAP[1]) {
-;        jit_emit_mov_RM_i(NATIVECODE, MAP[1], ROFFS_INT(1));
+;        jit_emit_mov_RM_i(interp, NATIVECODE, MAP[1], ROFFS_INT(1));
 ;    }
 ;}
 ;
 ;Parrot_set_i_nc {
-;    jit_emit_mov_ri_n(NATIVECODE, FSR1, &NUM_CONST[2]);
+;    jit_emit_mov_ri_n(interp, NATIVECODE, FSR1, &NUM_CONST[2]);
 ;    jit_emit_mov_MR_in(NATIVECODE, ROFFS_INT(1), FSR1);
 ;    if (MAP[1]) {
-;        jit_emit_mov_RM_i(NATIVECODE, MAP[1], ROFFS_INT(1));
+;        jit_emit_mov_RM_i(interp, NATIVECODE, MAP[1], ROFFS_INT(1));
 ;    }
 ;}
 
 ; -- null op.
 TEMPLATE Parrot_null_x {
     if (MAP[1]) {
-        jit_emit_mov_ri<_N>(NATIVECODE, MAP[1], <val>);
+        jit_emit_mov_ri<_N>(interp, NATIVECODE, MAP[1], <val>);
     }
     else {
-        jit_emit_mov_MI<_N>(NATIVECODE, ROFFS_INT(1), <val>);
+        jit_emit_mov_MI<_N>(interp, NATIVECODE, ROFFS_INT(1), <val>);
     }
 }
 
@@ -149,33 +149,33 @@ Parrot_null_s {
 Parrot_null_n {
     static FLOATVAL zero = 0;
     if (MAP[1]) {
-        jit_emit_mov_ri_n(NATIVECODE, MAP[1], &zero);
+        jit_emit_mov_ri_n(interp, NATIVECODE, MAP[1], &zero);
     }
     else {
-        jit_emit_mov_MI_ni(NATIVECODE, ROFFS_NUM(1), &zero);
+        jit_emit_mov_MI_ni(interp, NATIVECODE, ROFFS_NUM(1), &zero);
     }
 }
 
 TEMPLATE Parrot_binop_x_x {
     if (MAP[1] && MAP[2]) {
-        jit_emit_<op>_rr<_N>(NATIVECODE, MAP[1], MAP[2]);
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, MAP[1], MAP[2]);
     }
     else if (MAP[1]) {
-        jit_emit_<op>_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(2));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
     }
     else if (MAP[2]) {
 # ifdef jit_emit_<op>_MR<_N>
-        jit_emit_<op>_MR<_N>(NATIVECODE, ROFFS_INT(1), MAP[2]);
+        jit_emit_<op>_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), MAP[2]);
 # else
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(1));
-        jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[2]);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[2]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
 # endif
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(1));
-        jit_emit_<op>_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -184,19 +184,19 @@ TEMPLATE Parrot_divop_x_x {
         jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[1]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(1));
     }
     if (MAP[2]) {
-        jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[2]);
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[2]);
     }
     else {
-        jit_emit_<op>_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
     }
     if (MAP[1]) {
         jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -281,12 +281,12 @@ Parrot_mul_i_i_ic {
     }
     else if (MAP[2]) {
         jit_emit_mul_rir_i(NATIVECODE, ISR1, *INT_CONST[3], MAP[2]);
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
     else {
-        jit_emit_mov_RM_i(NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_mov_RM_i(interp, NATIVECODE, ISR1, ROFFS_INT(2));
         jit_emit_mul_rir_i(NATIVECODE, ISR1, *INT_CONST[3], ISR1);
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -299,25 +299,25 @@ Parrot_mul_i_ic_i {
     }
     else if (MAP[3]) {
         jit_emit_mul_rir_i(NATIVECODE, ISR1, *INT_CONST[2], MAP[3]);
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
     else {
         jit_emit_mul_RIM_ii(NATIVECODE, ISR1, *INT_CONST[2], ROFFS_INT(3));
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
 TEMPLATE Parrot_binop_x_xc {
     if (MAP[1]) {
-        jit_emit_<op>_ri<_N>(NATIVECODE, MAP[1], <typ>_CONST[2]);
+        jit_emit_<op>_ri<_N>(interp, NATIVECODE, MAP[1], <typ>_CONST[2]);
     }
     else {
 # ifdef jit_emit_<op>_MI_<_N>
         jit_emit_<op>_MI<_N>(NATIVECODE, ROFFS_INT(1), <typ>_CONST[2]);
 # else
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(1));
-        jit_emit_<op>_ri<_N>(NATIVECODE, ISR1, <typ>_CONST[2]);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1)
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_<op>_ri<_N>(interp, NATIVECODE, ISR1, <typ>_CONST[2]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1)
 # endif
     }
 }
@@ -332,7 +332,7 @@ Parrot_mul_i_ic {
     }
     else  {
         jit_emit_mul_RIM_ii(NATIVECODE, ISR1, *INT_CONST[2], ROFFS_INT(1));
-        jit_emit_mov_MR_i  (NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -341,14 +341,14 @@ Parrot_div_i_ic {
         jit_emit_mov_rr_i(NATIVECODE, ISR1, MAP[1]);
     }
     else {
-        jit_emit_mov_RM_i(NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_mov_RM_i(interp, NATIVECODE, ISR1, ROFFS_INT(1));
     }
     jit_emit_div_ri_i(NATIVECODE, ISR1, *INT_CONST[2]);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp,NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -398,10 +398,10 @@ Parrot_div_n_nc {
 
 TEMPLATE Parrot_binop_i_ic_ic {
     if (MAP[1]) {
-        jit_emit_mov_ri_i(NATIVECODE, MAP[1], (INTVAL)((uicast)*INT_CONST[2] <op> *INT_CONST[3]));
+        jit_emit_mov_ri_i(interp, NATIVECODE, MAP[1], (INTVAL)((uicast)*INT_CONST[2] <op> *INT_CONST[3]));
     }
     else {
-        jit_emit_mov_MI_i(NATIVECODE, ROFFS_INT(1), (INTVAL)((uicast)*INT_CONST[2] <op> *INT_CONST[3]));
+        jit_emit_mov_MI_i(interp, NATIVECODE, ROFFS_INT(1), (INTVAL)((uicast)*INT_CONST[2] <op> *INT_CONST[3]));
     }
 }
 Parrot_mul_i_ic_ic {
@@ -414,10 +414,6 @@ Parrot_add_i_ic_ic {
 
 Parrot_sub_i_ic_ic {
     Parrot_binop_i_ic_ic s/<op>/-/ s/uicast/INTVAL/
-}
-
-Parrot_div_i_ic_ic {
-    Parrot_binop_i_ic_ic s!<op>!/! s/uicast/INTVAL/
 }
 
 Parrot_cmod_i_ic_ic {
@@ -450,13 +446,13 @@ Parrot_lsr_i_ic_ic {
 
 TEMPLATE Parrot_binop_n_nc_nc {
     if (MAP[1]) {
-        jit_emit_mov_ri_n(NATIVECODE, MAP[1], &NUM_CONST[2]);
-        jit_emit_<op>_ri_n(NATIVECODE, MAP[1], &NUM_CONST[3]);
+        jit_emit_mov_ri_n(interp, NATIVECODE, MAP[1], &NUM_CONST[2]);
+        jit_emit_<op>_ri_n(interp, NATIVECODE, MAP[1], &NUM_CONST[3]);
     }
     else {
-        jit_emit_mov_ri_n(NATIVECODE, FSR1, &NUM_CONST[2]);
-        jit_emit_<op>_ri_n(NATIVECODE, FSR1, &NUM_CONST[3]);
-        jit_emit_mov_MR_n(NATIVECODE, ROFFS_NUM(1), FSR1)
+        jit_emit_mov_ri_n(interp, NATIVECODE, FSR1, &NUM_CONST[2]);
+        jit_emit_<op>_ri_n(interp, NATIVECODE, FSR1, &NUM_CONST[3]);
+        jit_emit_mov_MR_n(interp, NATIVECODE, ROFFS_NUM(1), FSR1)
     }
 }
 
@@ -472,10 +468,6 @@ Parrot_mul_n_nc_nc {
     Parrot_binop_n_nc_nc s/<op>/mul/
 }
 
-Parrot_div_n_nc_nc {
-    Parrot_binop_n_nc_nc s/<op>/div/
-}
-
 Parrot_cmod_n_nc_nc {
     Parrot_binop_n_nc_nc s/<op>/cmod/
 }
@@ -483,29 +475,29 @@ Parrot_cmod_n_nc_nc {
 TEMPLATE Parrot_binop_x_x_xc {
     if (MAP[1] && MAP[2]) {
         if (*CUR_OPCODE == PARROT_OP_add_i_i_ic) {
-            emitm_lea_m_r(NATIVECODE, MAP(1), MAP(2), 0, 1, CUR_OPCODE[3]);
+            emitm_lea_m_r(interp, NATIVECODE, MAP(1), MAP(2), 0, 1, CUR_OPCODE[3]);
         }
         else if (*CUR_OPCODE == PARROT_OP_sub_i_i_ic) {
-            emitm_lea_m_r(NATIVECODE, MAP(1), MAP(2), 0, 1, -CUR_OPCODE[3]);
+            emitm_lea_m_r(interp, NATIVECODE, MAP(1), MAP(2), 0, 1, -CUR_OPCODE[3]);
         }
         else {
             jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], MAP[2]);
-            jit_emit_<op>_ri<_N>(NATIVECODE, MAP[1], <typ>_CONST[3]);
+            jit_emit_<op>_ri<_N>(interp, NATIVECODE, MAP[1], <typ>_CONST[3]);
         }
     }
     else if (MAP[1]) {
-        jit_emit_mov_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(2));
-        jit_emit_<op>_ri<_N>(NATIVECODE, MAP[1], <typ>_CONST[3]);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
+        jit_emit_<op>_ri<_N>(interp, NATIVECODE, MAP[1], <typ>_CONST[3]);
     }
     else {
         if (MAP[2]) {
             jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
         }
         else {
-            jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
+            jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
         }
-        jit_emit_<op>_ri<_N>(NATIVECODE, ISR1, <typ>_CONST[3]);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1)
+        jit_emit_<op>_ri<_N>(interp, NATIVECODE, ISR1, <typ>_CONST[3]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1)
     }
 }
 
@@ -514,14 +506,14 @@ TEMPLATE Parrot_divop_x_x_xc {
         jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
     }
     jit_emit_<op>_ri<_N>(NATIVECODE, ISR1, <typ>_CONST[3]);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -592,7 +584,7 @@ Parrot_rot_i_i_ic_ic {
 TEMPLATE Parrot_binop_x_xc_x {
     if (MAP[1] && MAP[3]) {
         if (*CUR_OPCODE == PARROT_OP_add_i_ic_i) {
-            emitm_lea_m_r(NATIVECODE, MAP(1), MAP(3), 0, 1, CUR_OPCODE[2]);
+            emitm_lea_m_r(interp, NATIVECODE, MAP(1), MAP(3), 0, 1, CUR_OPCODE[2]);
         }
 #ifdef emitm_f<op>
         else if (*CUR_OPCODE == PARROT_OP_<op>_n_nc_n && *&NUM_CONST[2] == 1.0) {
@@ -603,29 +595,29 @@ TEMPLATE Parrot_binop_x_xc_x {
 #endif
         else {
             if (MAP[1] == MAP[3]) {
-                jit_emit_mov_ri<_N>(NATIVECODE, ISR1, <typ>_CONST[2]);
-                jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
+                jit_emit_mov_ri<_N>(interp, NATIVECODE, ISR1, <typ>_CONST[2]);
+                jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
                 jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], ISR1)
             }
             else {
-                jit_emit_mov_ri<_N>(NATIVECODE, MAP[1], <typ>_CONST[2]);
-                jit_emit_<op>_rr<_N>(NATIVECODE, MAP[1], MAP[3]);
+                jit_emit_mov_ri<_N>(interp, NATIVECODE, MAP[1], <typ>_CONST[2]);
+                jit_emit_<op>_rr<_N>(interp, NATIVECODE, MAP[1], MAP[3]);
             }
         }
     }
     else if (MAP[1]) {
-        jit_emit_mov_ri<_N>(NATIVECODE, MAP[1], <typ>_CONST[2]);
-        jit_emit_<op>_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(3));
+        jit_emit_mov_ri<_N>(interp, NATIVECODE, MAP[1], <typ>_CONST[2]);
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(3));
     }
     else if (MAP[3]) {
-        jit_emit_mov_ri<_N>(NATIVECODE, ISR1, <typ>_CONST[2]);
-        jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1)
+        jit_emit_mov_ri<_N>(interp, NATIVECODE, ISR1, <typ>_CONST[2]);
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1)
     }
     else {
-        jit_emit_mov_ri<_N>(NATIVECODE, ISR1, <typ>_CONST[2]);
-        jit_emit_<op>_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(3));
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_ri<_N>(interp, NATIVECODE, ISR1, <typ>_CONST[2]);
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(3));
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -695,52 +687,52 @@ TEMPLATE Parrot_binop_x_x_x {
     if (MAP[1] && MAP[2] && MAP[3]) {
         if (MAP[1] == MAP[3]) {
             jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
-            jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
+            jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
             jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], ISR1);
         }
         else {
             jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], MAP[2]);
-            jit_emit_<op>_rr<_N>(NATIVECODE, MAP[1], MAP[3]);
+            jit_emit_<op>_rr<_N>(interp, NATIVECODE, MAP[1], MAP[3]);
         }
     }
     else if (MAP[1] && MAP[2]) {
         jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], MAP[2]);
-        jit_emit_<op>_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(3));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(3));
     }
     else if (MAP[1] && MAP[3]) {
         if (MAP[1] == MAP[3]) {
-            jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
-            jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
+            jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
+            jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
             jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], ISR1);
         }
         else {
-            jit_emit_mov_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(2));
-            jit_emit_<op>_rr<_N>(NATIVECODE, MAP[1], MAP[3]);
+            jit_emit_mov_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
+            jit_emit_<op>_rr<_N>(interp, NATIVECODE, MAP[1], MAP[3]);
         }
     }
     else if (MAP[2] && MAP[3]) {
         jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
-        jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
     else if (MAP[1]) {
-        jit_emit_mov_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(2));
-        jit_emit_<op>_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(3));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(3));
     }
     else if (MAP[2]) {
         jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
-        jit_emit_<op>_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(3));
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(3));
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
     else if (MAP[3]) {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
-        jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
-        jit_emit_<op>_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(3));
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(3));
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -749,19 +741,19 @@ TEMPLATE Parrot_divop_x_x_x {
         jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
     }
     if (MAP[3]) {
-        jit_emit_<op>_rr<_N>(NATIVECODE, ISR1, MAP[3]);
+        jit_emit_<op>_rr<_N>(interp, NATIVECODE, ISR1, MAP[3]);
     }
     else {
-        jit_emit_<op>_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(3));
+        jit_emit_<op>_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(3));
     }
     if (MAP[1]) {
         jit_emit_mov_rr<_N>(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -835,11 +827,11 @@ TEMPLATE unary_x {
     }
     else {
 #ifdef jit_emit_<op>_M<_N>
-        jit_emit_<op>_M<_N>(NATIVECODE, ROFFS_INT(1));
+        jit_emit_<op>_M<_N>(interp, NATIVECODE, ROFFS_INT(1));
 #else
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(1));
         jit_emit_<op>_r<_N>(NATIVECODE, ISR1);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
 #endif
     }
 }
@@ -871,18 +863,18 @@ TEMPLATE unary_x_x {
         jit_emit_<op>_r<_N>(NATIVECODE, MAP[1]);
     }
     else if (MAP[1]) {
-        jit_emit_mov_RM<_N>(NATIVECODE, MAP[1], ROFFS_INT(2));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_INT(2));
         jit_emit_<op>_r<_N>(NATIVECODE, MAP[1]);
     }
     else if (MAP[2]) {
         jit_emit_mov_rr<_N>(NATIVECODE, ISR1, MAP[2]);
         jit_emit_<op>_r<_N>(NATIVECODE, ISR1);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(2));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(2));
         jit_emit_<op>_r<_N>(NATIVECODE, ISR1);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -927,7 +919,7 @@ TEMPLATE Parrot_ifunless_x_ic {
         jit_emit_jcc(jit_info, <jne>, *INT_CONST[2]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_<t>(1));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_<t>(1));
         jit_emit_test_r<_N>(NATIVECODE, ISR1);
         jit_emit_jcc(jit_info, <jne>, *INT_CONST[2]);
     }
@@ -951,11 +943,11 @@ Parrot_unless_n_ic {
 
 TEMPLATE Parrot_cmp_x_xc_ic {
     if (MAP[1]) {
-        jit_emit_cmp_ri<_N>(NATIVECODE, MAP[1], <c>_CONST[2]);
+        jit_emit_cmp_ri<_N>(interp, NATIVECODE, MAP[1], <c>_CONST[2]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_<t>(1));
-        jit_emit_cmp_ri<_N>(NATIVECODE, ISR1, <c>_CONST[2]);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_<t>(1));
+        jit_emit_cmp_ri<_N>(interp, NATIVECODE, ISR1, <c>_CONST[2]);
     }
     jit_emit_jcc(jit_info, <je>, *INT_CONST[3]);
 }
@@ -993,12 +985,12 @@ Parrot_le_n_nc_ic {
 }
 
 TEMPLATE Parrot_cmp_xc_x_ic {
-    jit_emit_mov_ri<_N>(NATIVECODE, ISR1,<c>_CONST[1]);
+    jit_emit_mov_ri<_N>(interp, NATIVECODE, ISR1,<c>_CONST[1]);
     if (MAP[2]) {
         jit_emit_cmp_rr<_N>(NATIVECODE, ISR1, MAP[2]);
     }
     else {
-        jit_emit_cmp_RM<_N>(NATIVECODE, ISR1, ROFFS_<t>(2));
+        jit_emit_cmp_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_<t>(2));
     }
     jit_emit_jcc(jit_info, <je>, *INT_CONST[3]);
 }
@@ -1040,14 +1032,14 @@ TEMPLATE Parrot_cmp_x_x_ic {
         jit_emit_cmp_rr<_N>(NATIVECODE, MAP[1], MAP[2]);
     }
     else if (MAP[1]) {
-        jit_emit_cmp_RM<_N>(NATIVECODE, MAP[1], ROFFS_<typ>(2));
+        jit_emit_cmp_RM<_N>(interp, NATIVECODE, MAP[1], ROFFS_<typ>(2));
     }
     else if (MAP[2]) {
-        jit_emit_cmp_MR<_N>(NATIVECODE, ROFFS_<typ>(1), MAP[2]);
+        jit_emit_cmp_MR<_N>(interp, NATIVECODE, ROFFS_<typ>(1), MAP[2]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_<typ>(1));
-        jit_emit_cmp_RM<_N>(NATIVECODE, ISR1, ROFFS_<typ>(2));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_<typ>(1));
+        jit_emit_cmp_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_<typ>(2));
     }
     jit_emit_jcc(jit_info, <je>, *INT_CONST[3]);
 }
@@ -1093,9 +1085,9 @@ TEMPLATE Parrot_incdec_x {
         jit_emit_<op>_r<_N>(NATIVECODE, MAP[1]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, ISR1, ROFFS_INT(1));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, ISR1, ROFFS_INT(1));
         jit_emit_<op>_r<_N>(NATIVECODE, ISR1);
-        jit_emit_mov_MR<_N>(NATIVECODE, ROFFS_INT(1), ISR1)
+        jit_emit_mov_MR<_N>(interp, NATIVECODE, ROFFS_INT(1), ISR1)
     }
 }
 
@@ -1119,25 +1111,25 @@ Parrot_dec_n {
 ; string funcs
 ;
 Parrot_set_s_sc {
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_ECX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
     emitm_pushl_i(NATIVECODE, CONST(2)->u.string);
     emitm_pushl_r(NATIVECODE, emit_ECX);
-    CALL_FUNCTION(jit_info, (void*) string_copy);
+    CALL_FUNCTION(jit_info, Parrot_str_copy);
     emitm_addb_i_r(NATIVECODE, 8, emit_ESP);
-    jit_emit_mov_MR_i(NATIVECODE, ROFFS_STR(1), emit_EAX );
+    jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_STR(1), emit_EAX );
 }
 
 TEMPLATE Parrot_cmp_sx_sx_ic {
 # define push_r(i) \
-    jit_emit_mov_RM_i(NATIVECODE, emit_EAX, ROFFS_STR(i)); \
+    jit_emit_mov_RM_i(interp, NATIVECODE, emit_EAX, ROFFS_STR(i)); \
     emitm_pushl_r(NATIVECODE, emit_EAX)
 # define push_c(i) emitm_pushl_i(NATIVECODE, CONST(i)->u.string)
 
     push_<typ2>(2);
     push_<typ1>(1);
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_ECX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
     emitm_pushl_r(NATIVECODE, emit_ECX);
-    CALL_FUNCTION(jit_info, (void*)string_compare);
+    CALL_FUNCTION(jit_info, Parrot_str_compare);
     emitm_addb_i_r(NATIVECODE, 12, emit_ESP);
     jit_emit_test_r_i(NATIVECODE, emit_EAX);
     jit_emit_jcc(jit_info, <op>, *INT_CONST[3]);
@@ -1147,14 +1139,14 @@ TEMPLATE Parrot_cmp_sx_sx_ic {
 
 TEMPLATE Parrot_eq_sx_sx_ic {
 # define push_r(i) \
-    jit_emit_mov_RM_i(NATIVECODE, emit_EAX, ROFFS_STR(i)); \
+    jit_emit_mov_RM_i(interp, NATIVECODE, emit_EAX, ROFFS_STR(i)); \
     emitm_pushl_r(NATIVECODE, emit_EAX)
 # define push_c(i) emitm_pushl_i(NATIVECODE, CONST(i)->u.string)
     push_<typ2>(2);
     push_<typ1>(1);
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_ECX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
     emitm_pushl_r(NATIVECODE, emit_ECX);
-    CALL_FUNCTION(jit_info, (void*)string_equal);
+    CALL_FUNCTION(jit_info, Parrot_str_not_equal);
     emitm_addb_i_r(NATIVECODE, 12, emit_ESP);
     jit_emit_test_r_i(NATIVECODE, emit_EAX);
     jit_emit_jcc(jit_info, <op>, *INT_CONST[3]);
@@ -1213,14 +1205,14 @@ Parrot_lt_sc_s_ic {
 
 TEMPLATE Parrot_ifunless_sx_ic {
 # define push_r(i) \
-    jit_emit_mov_RM_i(NATIVECODE, emit_EAX, ROFFS_STR(i)); \
+    jit_emit_mov_RM_i(interp, NATIVECODE, emit_EAX, ROFFS_STR(i)); \
     emitm_pushl_r(NATIVECODE, emit_EAX)
 # define push_c(i) emitm_pushl_i(NATIVECODE, CONST(i)->u.string)
 
     push_<typ>(1);
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_ECX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
     emitm_pushl_r(NATIVECODE, emit_ECX);
-    CALL_FUNCTION(jit_info, (void*)string_bool);
+    CALL_FUNCTION(jit_info, Parrot_str_boolean);
     emitm_addb_i_r(NATIVECODE, 8, emit_ESP);
     jit_emit_test_r_i(NATIVECODE, emit_EAX);
     jit_emit_jcc(jit_info, <op>, *INT_CONST[2]);
@@ -1240,21 +1232,21 @@ Parrot_unless_s_ic {
 
 TEMPLATE Parrot_ord_i_sx {
 # define push_r(i) \
-    jit_emit_mov_RM_i(NATIVECODE, emit_EAX, ROFFS_STR(i)); \
+    jit_emit_mov_RM_i(interp, NATIVECODE, emit_EAX, ROFFS_STR(i)); \
         emitm_pushl_r(NATIVECODE, emit_EAX)
 # define push_c(i) emitm_pushl_i(NATIVECODE, CONST(i)->u.string)
 
     emitm_pushl_i(NATIVECODE, 0);
     push_<typ>(2);
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_ECX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_ECX);
     emitm_pushl_r(NATIVECODE, emit_ECX);
-    CALL_FUNCTION(jit_info, (void*)string_ord);
+    CALL_FUNCTION(jit_info, string_ord);
     emitm_addb_i_r(NATIVECODE, 12, emit_ESP);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 #undef push_r
 #undef push_c
@@ -1270,7 +1262,7 @@ Parrot_ord_i_sc {
 
 TEMPLATE Parrot_ord_i_sx_i {
 # define push_r(i) \
-    jit_emit_mov_RM_i(NATIVECODE, emit_EAX, ROFFS_STR(i)); \
+    jit_emit_mov_RM_i(interp, NATIVECODE, emit_EAX, ROFFS_STR(i)); \
         emitm_pushl_r(NATIVECODE, emit_EAX)
 # define push_c(i) emitm_pushl_i(NATIVECODE, CONST(i)->u.string)
 
@@ -1278,19 +1270,19 @@ TEMPLATE Parrot_ord_i_sx_i {
         emitm_pushl_r(NATIVECODE, MAP[3]);
     }
     else {
-        jit_emit_mov_RM_i(NATIVECODE, ISR1, ROFFS_INT(3));
+        jit_emit_mov_RM_i(interp, NATIVECODE, ISR1, ROFFS_INT(3));
         emitm_pushl_r(NATIVECODE, ISR1);
     }
     push_<typ>(2);
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_EAX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_EAX);
     emitm_pushl_r(NATIVECODE, emit_EAX);
-    CALL_FUNCTION(jit_info, (void*)string_ord);
+    CALL_FUNCTION(jit_info, string_ord);
     emitm_addb_i_r(NATIVECODE, 12, emit_ESP);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 #undef push_r
 #undef push_c
@@ -1307,33 +1299,33 @@ Parrot_ord_i_s_i {
     /*
      * movl $2, %ecx         # %ecx := string
      * movl $3, %edx         # %edx := offset
-     * movl %ecx, %eax       # %eax := string_length
+     * movl %ecx, %eax       # %eax := Parrot_str_byte_length
      * cmpl #0, %ecx
      * je  L1
      */
-    jit_emit_mov_RM_i(NATIVECODE, emit_ECX, ROFFS_STR(2));
+    jit_emit_mov_RM_i(interp, NATIVECODE, emit_ECX, ROFFS_STR(2));
     if (MAP[3]) {
         jit_emit_mov_rr_i(NATIVECODE, emit_EDX, MAP(3));
     }
     else {
-        jit_emit_mov_RM_i(NATIVECODE, emit_EDX, ROFFS_INT(3));
+        jit_emit_mov_RM_i(interp, NATIVECODE, emit_EDX, ROFFS_INT(3));
     }
     jit_emit_mov_rr_i(NATIVECODE, emit_EAX, emit_ECX);
-    jit_emit_cmp_ri_i(NATIVECODE, emit_ECX, 0);
+    jit_emit_cmp_ri_i(interp, NATIVECODE, emit_ECX, 0);
     L1 = NATIVECODE;
     emitm_jxs(NATIVECODE, emitm_jz, 0);
     /*
      * mov (strlen)%ecx, %eax
      */
-    emitm_movl_m_r(NATIVECODE, emit_EAX, emit_ECX, emit_None, 1,
+    emitm_movl_m_r(interp, NATIVECODE, emit_EAX, emit_ECX, emit_None, 1,
             offsetof(STRING, strlen));
     /* L1: */
-    L1[1] = NATIVECODE - L1 - 2;
+    L1[1] = (char)(NATIVECODE - L1 - 2);
     /*
      * cmpl #0, %eax
      * je  L2
      */
-    jit_emit_cmp_ri_i(NATIVECODE, emit_EAX, 0);
+    jit_emit_cmp_ri_i(interp, NATIVECODE, emit_EAX, 0);
     L2 = NATIVECODE;
     emitm_jxs(NATIVECODE, emitm_jz, 0);
     /*
@@ -1345,14 +1337,14 @@ Parrot_ord_i_s_i {
      * cmp %edx, %eax
      * jge L3
      */
-    jit_emit_cmp_ri_i(NATIVECODE, emit_EDX, 0);
+    jit_emit_cmp_ri_i(interp, NATIVECODE, emit_EDX, 0);
     Lpos = NATIVECODE;
     emitm_jxs(NATIVECODE, emitm_jnl, 0);
-    jit_emit_add_rr_i(NATIVECODE, emit_EDX, emit_EAX);
+    jit_emit_add_rr_i(interp, NATIVECODE, emit_EDX, emit_EAX);
     L3a = NATIVECODE;
     emitm_jxs(NATIVECODE, emitm_js, 0);
     /* LPos: */
-    Lpos[1] = NATIVECODE - Lpos - 2;
+    Lpos[1] = (char)(NATIVECODE - Lpos - 2);
 
     jit_emit_cmp_rr_i(NATIVECODE, emit_EDX, emit_EAX);
     L3 = NATIVECODE;
@@ -1363,9 +1355,9 @@ Parrot_ord_i_s_i {
      * cmp fixed8, %ecx
      * jne L4
      */
-    emitm_movl_m_r(NATIVECODE, emit_EAX, emit_ECX, emit_None, 1,
+    emitm_movl_m_r(interp, NATIVECODE, emit_EAX, emit_ECX, emit_None, 1,
             offsetof(STRING, encoding));
-    jit_emit_cmp_ri_i(NATIVECODE, emit_EAX, Parrot_fixed_8_encoding_ptr);
+    jit_emit_cmp_ri_i(interp, NATIVECODE, emit_EAX, Parrot_fixed_8_encoding_ptr);
     L4 = NATIVECODE;
     emitm_jxs(NATIVECODE, emitm_jnz, 0);
     /*
@@ -1373,45 +1365,45 @@ Parrot_ord_i_s_i {
      * xor %eax, %eax
      * movb (%ecx + %edx), %eax)
      */
-    emitm_movl_m_r(NATIVECODE, emit_ECX, emit_ECX, emit_None, 1,
+    emitm_movl_m_r(interp, NATIVECODE, emit_ECX, emit_ECX, emit_None, 1,
             offsetof(STRING, strstart));
-    jit_emit_bxor_rr_i(NATIVECODE, emit_EAX, emit_EAX);
-    emitm_movb_m_r(NATIVECODE, emit_EAX, emit_ECX, emit_EDX, 1, 0);
+    jit_emit_bxor_rr_i(interp, NATIVECODE, emit_EAX, emit_EAX);
+    emitm_movb_m_r(interp, NATIVECODE, emit_EAX, emit_ECX, emit_EDX, 1, 0);
     /*
      * branch L5
      */
     L5 = NATIVECODE;
     emitm_jumps(NATIVECODE, 0);
 
-    L3a[1] = NATIVECODE - L3a - 2;
+    L3a[1] = (char)(NATIVECODE - L3a - 2);
     /*
      * L3a:
      */
-    jit_emit_sub_rr_i(NATIVECODE, emit_EDX, emit_EAX);
+    jit_emit_sub_rr_i(interp, NATIVECODE, emit_EDX, emit_EAX);
 
     /*
      * L2:
      * L3:
      * L4:
      */
-    L2[1] = NATIVECODE - L2 - 2;
-    L3[1] = NATIVECODE - L3 - 2;
-    L4[1] = NATIVECODE - L4 - 2;
+    L2[1] = (char)(NATIVECODE - L2 - 2);
+    L3[1] = (char)(NATIVECODE - L3 - 2);
+    L4[1] = (char)(NATIVECODE - L4 - 2);
     emitm_pushl_r(NATIVECODE, emit_EDX);        /* offs */
     emitm_pushl_r(NATIVECODE, emit_ECX);        /* string */
-    Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_EAX);
+    Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_EAX);
     emitm_pushl_r(NATIVECODE, emit_EAX);        /* interp */
-    CALL_FUNCTION(jit_info, (void*)string_ord);
+    CALL_FUNCTION(jit_info, string_ord);
     emitm_addb_i_r(NATIVECODE, 12, emit_ESP);   /* result in eax */
     /*
      * L5:
      */
-    L5[1] = NATIVECODE - L5 - 2;
+    L5[1] = (char)(NATIVECODE - L5 - 2);
     if (MAP[1] && MAP[1] != emit_ECX && MAP[1] != emit_EDX) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], emit_EAX);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), emit_EAX);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), emit_EAX);
     }
 
 }
@@ -1425,7 +1417,7 @@ Parrot_ord_i_sc_i {
 ; or just JIT the 2 easy ones
 Parrot_set_args_pc {
     if (jit_info->code_type == JIT_CODE_FILE) {
-        Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_EAX);
+        Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_EAX);
         emitm_movl_i_m(NATIVECODE, jit_info->cur_op, emit_EAX, emit_None, 1,
                 offsetof(Interp, current_args));
     }
@@ -1452,7 +1444,7 @@ extern Parrot_returncc {
         if (!(jit_info->flags & JIT_CODE_RECURSIVE)) {
             jit_restore_regs(jit_info, interp);
             /* no branch ret 0 */
-            jit_emit_bxor_rr_i(NATIVECODE, emit_EAX, emit_EAX);
+            jit_emit_bxor_rr_i(interp, NATIVECODE, emit_EAX, emit_EAX);
             jit_emit_stack_frame_leave(NATIVECODE);
         }
         emitm_ret(NATIVECODE);
@@ -1466,17 +1458,17 @@ Parrot_pic_callr___pc {
     opcode_t *params;
     int skip;
 
-    constants = CONTEXT(interp->ctx)->constants;
+    constants = CONTEXT(interp)->constants;
     params = jit_info->optimizer->sections->begin;
     sig_params = constants[params[1]]->u.key;
-    op_i = 2 + SIG_ELEMS(sig_params);
+    op_i = 2 + VTABLE_elements(interp, sig_params);
 
     offset = jit_info->arena.op_map[op_i].offset;
     /* TODO preserve necessary regs */
     assert(*CUR_OPCODE == PARROT_OP_get_results_pc);
-    constants = CONTEXT(interp->ctx)->constants;
+    constants = CONTEXT(interp)->constants;
     sig_result = constants[CUR_OPCODE[1]]->u.key;
-    if (!SIG_ELEMS(sig_result))
+    if (!VTABLE_elements(interp, sig_result))
         skip = -1;
     else
         skip = MAP(2);      /* skip result - save rest */
@@ -1498,21 +1490,22 @@ extern Parrot_get_params_pc {
 
 Parrot_get_results_pc {
     if (jit_info->code_type == JIT_CODE_FILE) {
-        Parrot_jit_emit_get_INTERP(jit_info->native_ptr, emit_EAX);
-        emitm_movl_m_r(NATIVECODE, emit_EAX, emit_EAX, emit_None, 1,
+        Parrot_jit_emit_get_INTERP(interp, jit_info->native_ptr, emit_EAX);
+        emitm_movl_m_r(interp, NATIVECODE, emit_EAX, emit_EAX, emit_None, 1,
                 offsetof(Interp, ctx.state));
         emitm_movl_i_m(NATIVECODE, jit_info->cur_op, emit_EAX, emit_None, 1,
-                offsetof(parrot_context_t, current_results));
+                offsetof(Parrot_Context, current_results));
     }
     else {
         PackFile_Constant ** constants;
         PMC *sig_result;
 
-        constants = CONTEXT(interp->ctx)->constants;
+        constants = CONTEXT(interp)->constants;
         sig_result = constants[CUR_OPCODE[1]]->u.key;
-        if (!SIG_ELEMS(sig_result))
+        if (!VTABLE_elements(interp, sig_result))
             return;
-        if (SIG_ITEM(sig_result, 0) == PARROT_ARG_FLOATVAL) {
+        if (VTABLE_get_integer_keyed_int(interp, sig_result, 0) ==
+            PARROT_ARG_FLOATVAL) {
             /* float result is in ISR1 */
             emitm_fst(NATIVECODE, MAP(2));
         }
@@ -1528,22 +1521,22 @@ TEMPLATE iscc_i_x_x {
         jit_emit_cmp_rr<_N>(NATIVECODE, MAP[2], MAP[3]);
     }
     else if (MAP[2]) {
-        jit_emit_cmp_RM<_N>(NATIVECODE, MAP[2], ROFFS_<typ>(3));
+        jit_emit_cmp_RM<_N>(interp, NATIVECODE, MAP[2], ROFFS_<typ>(3));
     }
     else if (MAP[3]) {
-        jit_emit_cmp_MR<_N>(NATIVECODE, ROFFS_<typ>(2), MAP[3]);
+        jit_emit_cmp_MR<_N>(interp, NATIVECODE, ROFFS_<typ>(2), MAP[3]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, <scr>, ROFFS_<typ>(2));
-        jit_emit_cmp_RM<_N>(NATIVECODE, <scr>, ROFFS_<typ>(3));
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, <scr>, ROFFS_<typ>(2));
+        jit_emit_cmp_RM<_N>(interp, NATIVECODE, <scr>, ROFFS_<typ>(3));
     }
-    jit_emit_mov_ri_i(NATIVECODE, ISR1, 0);
+    jit_emit_mov_ri_i(interp, NATIVECODE, ISR1, 0);
     jit_emit_setcc_r(NATIVECODE, <cc>, ISR1);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -1581,19 +1574,19 @@ Parrot_isle_i_n_n {
 
 TEMPLATE iscc_i_x_xc {
     if (MAP[2]) {
-        jit_emit_cmp_ri<_N>(NATIVECODE, MAP[2], <c>_CONST[3]);
+        jit_emit_cmp_ri<_N>(interp, NATIVECODE, MAP[2], <c>_CONST[3]);
     }
     else {
-        jit_emit_mov_RM<_N>(NATIVECODE, <scr>, ROFFS_<typ>(2));
-        jit_emit_cmp_ri<_N>(NATIVECODE, <scr>, <c>_CONST[3]);
+        jit_emit_mov_RM<_N>(interp, NATIVECODE, <scr>, ROFFS_<typ>(2));
+        jit_emit_cmp_ri<_N>(interp, NATIVECODE, <scr>, <c>_CONST[3]);
     }
-    jit_emit_mov_ri_i(NATIVECODE, ISR1, 0);
+    jit_emit_mov_ri_i(interp, NATIVECODE, ISR1, 0);
     jit_emit_setcc_r(NATIVECODE, <cc>, ISR1);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -1630,20 +1623,20 @@ Parrot_isle_i_n_nc {
 }
 
 TEMPLATE iscc_i_xc_x {
-    jit_emit_mov_ri<_N>(NATIVECODE, <scr>, <c>_CONST[2]);
+    jit_emit_mov_ri<_N>(interp, NATIVECODE, <scr>, <c>_CONST[2]);
     if (MAP[3]) {
         jit_emit_cmp_rr<_N>(NATIVECODE, <scr>, MAP[3]);
     }
     else {
-        jit_emit_cmp_RM<_N>(NATIVECODE, <scr>, ROFFS_<typ>(3));
+        jit_emit_cmp_RM<_N>(interp, NATIVECODE, <scr>, ROFFS_<typ>(3));
     }
-    jit_emit_mov_ri_i(NATIVECODE, ISR1, 0);
+    jit_emit_mov_ri_i(interp, NATIVECODE, ISR1, 0);
     jit_emit_setcc_r(NATIVECODE, <cc>, ISR1);
     if (MAP[1]) {
         jit_emit_mov_rr_i(NATIVECODE, MAP[1], ISR1);
     }
     else {
-        jit_emit_mov_MR_i(NATIVECODE, ROFFS_INT(1), ISR1);
+        jit_emit_mov_MR_i(interp, NATIVECODE, ROFFS_INT(1), ISR1);
     }
 }
 
@@ -1691,7 +1684,7 @@ Parrot_pow_n_n_i {
         jit_emit_mov_rr_i(NATIVECODE, emit_EAX, MAP[3]);
     }
     else {
-        jit_emit_mov_RM_i(NATIVECODE, emit_EAX, ROFFS_INT(3));
+        jit_emit_mov_RM_i(interp, NATIVECODE, emit_EAX, ROFFS_INT(3));
     }
     jit_emit_test_r_i(NATIVECODE, emit_EAX);               /* e == 0? */
     L1 = NATIVECODE;
@@ -1700,13 +1693,13 @@ Parrot_pow_n_n_i {
         emitm_fld(NATIVECODE, (MAP[2] + 1));
     }
     else {
-        jit_emit_fload_mb_n(NATIVECODE, emit_EBX, ROFFS_NUM(2));
+        jit_emit_fload_mb_n(interp, NATIVECODE, emit_EBX, ROFFS_NUM(2));
     }                                    /* n2  = $2   ST(0) */
     if (intreg_is_used(jit_info, emit_ECX)) {
         emitm_pushl_r(NATIVECODE, emit_ECX);
         saved = 1;
     }
-    jit_emit_mov_ri_i(NATIVECODE, emit_ECX, 1);            /* s = 1 */
+    jit_emit_mov_ri_i(interp, NATIVECODE, emit_ECX, 1);    /* s = 1 */
     L2 = NATIVECODE;
     emitm_jxs(NATIVECODE, emitm_jg, 0);                    /* jg L2 */
     jit_emit_neg_r_i(NATIVECODE, emit_ECX);                /* s = -1 */
@@ -1722,15 +1715,15 @@ Parrot_pow_n_n_i {
         jit_emit_test_ri_i(NATIVECODE, emit_EAX, 1);        /* e & 1 ? */
         L5 = NATIVECODE;
         emitm_jxs(NATIVECODE, emitm_jz, 0);                 /* jz L5 */
-        jit_emit_mul_rr_n(NATIVECODE, 1, 0);                /* res *= n2 */
+        jit_emit_mul_rr_n(interp, NATIVECODE, 1, 0);        /* res *= n2 */
         /* L5: */
-        L5[1] = NATIVECODE - L5 - 2;
-        jit_emit_lsr_ri_i(NATIVECODE, emit_EAX, 1);          /* e >>= 1 */
-        jit_emit_mul_rr_n(NATIVECODE, 0, 0);                 /* n2 *= n2 */
+        L5[1] = (char)(NATIVECODE - L5 - 2);
+        jit_emit_lsr_ri_i(interp, NATIVECODE, emit_EAX, 1);  /* e >>= 1 */
+        jit_emit_mul_rr_n(interp, NATIVECODE, 0, 0);         /* n2 *= n2 */
         /* lsr is setting flags - branch past test at L3 */
         emitm_jxs(NATIVECODE, emitm_jnz, (L3 - NATIVECODE - 1)); /* jmp L3 */
     /* endwhile */
-    L4[1] = NATIVECODE - L4 - 2;
+    L4[1] = (char)(NATIVECODE - L4 - 2);
     /* L4:  */
     jit_emit_test_r_i(NATIVECODE, emit_ECX);               /* s ? */
     L6 = NATIVECODE;
@@ -1738,16 +1731,16 @@ Parrot_pow_n_n_i {
     emitm_fld1(NATIVECODE);                                /* push 1.0 */
     emitm_fxch(NATIVECODE, 2);
     emitm_fdivp(NATIVECODE, 2);                            /* res = 1.0/res */
-    L6[1] = NATIVECODE - L6 - 2;
+    L6[1] = (char)(NATIVECODE - L6 - 2);
     /* L6:  */
     emitm_fstp(NATIVECODE, 0);                             /* pop n2 */
-    L1[1] = NATIVECODE - L1 - 2;
+    L1[1] = (char)(NATIVECODE - L1 - 2);
     /* L1:  */
     if (MAP[1]) {
         emitm_fstp(NATIVECODE, (MAP[1] + 1));              /* store res */
     }
     else {
-        jit_emit_fstore_m_n(NATIVECODE, ROFFS_NUM(1));
+        jit_emit_fstore_m_n(interp, NATIVECODE, ROFFS_NUM(1));
     }
     if (saved)
         emitm_popl_r(NATIVECODE, emit_ECX);

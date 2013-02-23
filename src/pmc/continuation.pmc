@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: continuation.pmc 18386 2007-05-02 02:58:21Z chromatic $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: continuation.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -8,9 +8,9 @@ src/pmc/continuation.pmc - Continuation PMC
 
 =head1 DESCRIPTION
 
-A C<Continuation> has a copy of the interpreter's context at the location,
-where the Continuation was constructed.
-See the L<Glossary|docs/glossary.pod> for more information.
+A C<Continuation> has a copy of the interpreter's context at the location where
+the Continuation was constructed.  See the L<Glossary|docs/glossary.pod> for
+more information.
 
 =head2 Functions
 
@@ -23,8 +23,7 @@ See the L<Glossary|docs/glossary.pod> for more information.
 
 #include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
-#include <assert.h>
-
+#include "pmc_sub.h"
 
 /*
 
@@ -40,14 +39,15 @@ See the L<Glossary|docs/glossary.pod> for more information.
 
 
 /*
- * A Continuation (and RetContinuation, Exception_Handler) has in its
+ * A Continuation (and RetContinuation, ExceptionHandler) has in its
  * context a pointer to the register frame, which contains active objects.
- * Additionally ct->current_cont has he continuation of the caller.
+ * Additionally ct->current_cont has the continuation of the caller.
  * To avoid deep recursion during marking of nested subroutines, we
  * need the next_for_GC pointer in the pmc_ext area.
  */
 
 pmclass Continuation need_ext {
+    ATTR struct Parrot_cont *cont; /* the continuation struct */
 
 /*
 
@@ -59,14 +59,17 @@ Initializes the continuation.
 
 */
 
-    void init() {
-        PMC_struct_val(SELF) = new_continuation(INTERP, NULL);
-        PMC_pmc_val(SELF) = NULL;
+    VTABLE void init() {
+        Parrot_Continuation_attributes *attrs =
+            mem_allocate_zeroed_typed(Parrot_Continuation_attributes);
+        PMC_data(SELF) = attrs;
+
+        PMC_cont(SELF) = new_continuation(INTERP, NULL);
         PObj_custom_mark_destroy_SETALL(SELF);
         /* PANIC("don't do that"); */
         /*
          * Whenever we create a continuation, all return continuations
-         * up the call chain maybe reused due to invoking the
+         * up the call chain may be reused due to invoking the
          * continuation. To avoid that all return continuations are
          * converted to true continuations.
          */
@@ -83,12 +86,13 @@ Marks the continuation as live.
 
 */
 
-    void mark() {
-        struct Parrot_cont * cc = PMC_cont(SELF);
+    VTABLE void mark() {
+        Parrot_cont *cc = PMC_cont(SELF);
+
         if (cc->to_ctx)
             mark_context(INTERP, cc->to_ctx);
-        if (cc->dynamic_state)
-            mark_stack(INTERP, cc->dynamic_state);
+        if (cc->from_ctx)
+            mark_context(INTERP, cc->from_ctx);
     }
 
 /*
@@ -101,8 +105,8 @@ Destroys the continuation.
 
 */
 
-    void destroy() {
-        struct Parrot_cont * cc = PMC_cont(SELF);
+    VTABLE void destroy() {
+        Parrot_cont * const cc = PMC_cont(SELF);
         if (cc) {
 #if CTX_LEAK_DEBUG
             if (Interp_debug_TEST(interp, PARROT_CTX_DESTROY_DEBUG_FLAG)) {
@@ -110,12 +114,15 @@ Destroys the continuation.
                         "[destroy cont    %p, to_ctx %p, from_ctx %p]\n",
                         (void *)SELF, (void *)cc->to_ctx, (void *)cc->from_ctx);
             }
+
 #endif
             if (cc->from_ctx)
-                Parrot_free_context(interp, cc->from_ctx, 0);
+                Parrot_free_context(interp, cc->from_ctx, 1);
+
             mem_sys_free(cc);
-            PMC_struct_val(SELF) = NULL;
         }
+        mem_sys_free(PMC_data(SELF));
+        PMC_data(SELF) = NULL;
     }
 /*
 
@@ -127,17 +134,15 @@ Creates and returns a clone of the continuation.
 
 */
 
-    PMC* clone() {
-        struct Parrot_cont * cc;
-        struct Parrot_cont *cc_self = PMC_cont(SELF);
-        PMC* ret = pmc_new_noinit(INTERP, enum_class_Continuation);
+    VTABLE PMC *clone() {
+        Parrot_cont * const cc_self = PMC_cont(SELF);
+        Parrot_cont * const cc      = new_continuation(INTERP, cc_self);
+        PMC         * const ret     = pmc_new(INTERP, enum_class_Continuation);
 
         PObj_custom_mark_destroy_SETALL(ret);
-        cc = new_continuation(INTERP, cc_self);
         cc->runloop_id = cc_self->runloop_id;
-        cc->dynamic_state = cc_self->dynamic_state;
-        PMC_struct_val(ret) = cc;
-        PMC_pmc_val(ret) = PMC_pmc_val(SELF);
+        PMC_cont(ret)  = cc;
+
         return ret;
     }
 
@@ -150,33 +155,31 @@ Assign context.
 =cut
 
 */
-    void set_pmc(PMC* src) {
-        struct Parrot_cont *cc_self = PMC_cont(SELF);
-        struct Parrot_cont *cc_src  = PMC_cont(src);
+    VTABLE void set_pmc(PMC *src) {
+        Parrot_cont * const cc_self = PMC_cont(SELF);
+        Parrot_cont * const cc_src  = PMC_cont(src);
 
-        memcpy(cc_self, cc_src, sizeof (struct Parrot_cont));
-        PMC_pmc_val(SELF) = PMC_pmc_val(src);
+        STRUCT_COPY(cc_self, cc_src);
     }
 /*
 
 =item C<void set_pointer(void *value)>
 
-Sets the pointer to the return instruction.  Also captures the current
-dynamic state, and the descriptor address for any returned values.
+Sets the pointer to the return instruction.  Also captures the descriptor
+address for any returned values.
 
 =cut
 
 */
 
-    void set_pointer(void *value) {
-        opcode_t           *pos = (opcode_t *)value;
-        struct Parrot_cont *cc  = PMC_cont(SELF);
+    VTABLE void set_pointer(void *value) {
+        opcode_t    * const pos = (opcode_t *)value;
+        Parrot_cont * const cc  = PMC_cont(SELF);
 
         cc->address       = (opcode_t *)value;
-        cc->dynamic_state = INTERP->dynamic_env;
         cc->runloop_id    = INTERP->current_runloop_id;
 
-        if (pos && *pos == PARROT_OP_get_results_pc)
+        if (pos && (*pos == PARROT_OP_get_results_pc))
             cc->current_results = pos;
         else
             cc->current_results = NULL;
@@ -192,7 +195,7 @@ Returns the pointer to the return instruction.
 
 */
 
-    void* get_pointer() {
+    VTABLE void *get_pointer() {
         return PMC_cont(SELF)->address;
     }
 /*
@@ -207,11 +210,11 @@ Returns whether the subroutine is defined.
 
 */
 
-    INTVAL defined() {
+    VTABLE INTVAL defined() {
         return PMC_cont(SELF)->address != NULL;
     }
 
-    INTVAL get_bool() {
+    VTABLE INTVAL get_bool() {
         return PMC_cont(SELF)->address != NULL;
     }
 
@@ -219,173 +222,56 @@ Returns whether the subroutine is defined.
 
 =item C<opcode_t *invoke(void *next)>
 
-Restores the "context" of the interpreter and returns the branch
+Restores the context of the interpreter and returns the branch
 destination to continue execution.
 
 =cut
 
 */
 
-    opcode_t* invoke(void* next) {
-        struct Parrot_cont * cc = PMC_cont(SELF);
-        Stack_Chunk_t *stack_target = cc->dynamic_state;
-        Stack_Chunk_t *corresponding_target;
-        int stack_delta = 0;
-        parrot_context_t *from_ctx = CONTEXT(INTERP->ctx);
-        parrot_context_t *to_ctx   = cc->to_ctx;
-        opcode_t *pc = cc->address;
-        /* [bug: these should be 'isa' tests.  -- rgr, 17-Sep-06.] */
-        int exception_continuation_p
-            = SELF->vtable->base_type == enum_class_Exception_Handler;
-        int ret_continuation_p
-            = SELF->vtable->base_type == enum_class_RetContinuation;
+    VTABLE opcode_t *invoke(void *next) {
+        Parrot_cont      *cc           = PMC_cont(SELF);
+        Parrot_Context   *from_ctx     = CONTEXT(interp);
+        Parrot_Context   *to_ctx       = cc->to_ctx;
+        opcode_t         *pc           = cc->address;
 
-        if (interp->current_runloop_id != cc->runloop_id
-            /* it's ok if we are exiting to "runloop 0"; there is no such
-               runloop, but the only continuation that thinks it came from
-               runloop 0 is for the return from the initial sub call. */
-            && cc->runloop_id != 0
-            /* since a RetContinuation [currently] only returns to the next
-               outer frame, exiting to the inner run loop does the right thing,
-               since it normally returns to the next outer runloop anyway.  */
-            && ! ret_continuation_p) {
-            fprintf(stderr, "[oops; continuation %p of type %d "
-                    "is trying to jump from runloop %d to runloop %d]\n",
-                    (void *) SELF, (int) SELF->vtable->base_type,
-                    interp->current_runloop_id, cc->runloop_id);
-        }
-#if CTX_LEAK_DEBUG
-        if (Interp_debug_TEST(interp, PARROT_CTX_DESTROY_DEBUG_FLAG)) {
-            fprintf(stderr,
-                    "[invoke cont    %p, to_ctx %p, from_ctx %p (refs %d)]\n",
-                    (void *) SELF, (void *) to_ctx, (void *) from_ctx, (int) from_ctx->ref_count);
-        }
-#endif
-        if (! to_ctx) {
-            real_exception(interp, NULL, INVALID_OPERATION,
-                           "Continuation invoked after deactivation.");
-        }
+        Parrot_continuation_check(interp, SELF, cc);
+        Parrot_continuation_rewind_environment(interp, SELF, cc);
 
-        /*
-         * Rewind the dynamic environment.
-         */
-        if (interp->dynamic_env != stack_target) {
-            /* compute the "stack delta", which is a measure of how much
-               unwinding we have to do.  if negative, we have to pop that many
-               entries; if positive, we are going back up the stack.
-               [bug: this is not true rewinding.  -- rgr, 30-Sep-06.]
-            */
-            stack_delta
-                = ((int) stack_height(interp, stack_target)
-                   - (int) stack_height(interp, interp->dynamic_env));
-        }
-        /* descend down the target stack until we get to the same depth. */
-        corresponding_target = stack_target;
-        while (stack_delta > 0) {
-            corresponding_target = corresponding_target->prev;
-            stack_delta--;
-        }
-        /* both stacks are now at the same depth.  pop from both until we reach
-           their common ancestor. */
-        while (interp->dynamic_env != corresponding_target) {
-            PMC *cleanup_sub = NULL;
-            Stack_Entry_t *e;
-
-            if (! interp->dynamic_env)
-                internal_exception(1, "Control stack damaged");
-            e = stack_entry(interp, interp->dynamic_env, 0);
-            if (! e)
-                internal_exception(1, "Control stack damaged");
-            if (e->entry_type == STACK_ENTRY_ACTION) {
-                /*
-                 * Disable automatic cleanup routine execution in stack_pop so
-                 * that we can run the action subroutine manually.  This is
-                 * because we have to run the sub AFTER it has been popped, lest
-                 * a new error in the sub cause an infinite loop when invoking
-                 * an error handler.
-                 */
-                cleanup_sub = UVal_pmc(e->entry);
-                e->cleanup = STACK_CLEANUP_NULL;
-            }
-            (void)stack_pop(INTERP, &interp->dynamic_env,
-                            NULL, NO_STACK_ENTRY_TYPE);
-            if (cleanup_sub) {
-                /* Now it's safe to run. */
-                Parrot_runops_fromc_args(interp, cleanup_sub,
-                                         "vI", exception_continuation_p);
-            }
-
-            /* Keep corresponding_target in sync.  If stack_delta is negative,
-             * then dynamic_env is still above it; otherwise, we must step
-             * corresponding_target backwards as well.
-             */
-            if (stack_delta < 0) {
-                stack_delta++;
-            }
-            else {
-                corresponding_target = corresponding_target->prev;
-            }
-        }
-        /* run back up the target stack to our destination.  [when we support
-           dynamic binding (e.g.), we will have to traverse back up, and will
-           therefore need to keep track on the way down.  -- rgr, 30-Sep-06.] */
-        interp->dynamic_env = stack_target;
-
-        /* debug print before context is switched */
-        if (Interp_trace_TEST(INTERP, PARROT_TRACE_SUB_CALL_FLAG)) {
-            PMC *sub = to_ctx->current_sub;
-
-            PIO_eprintf(INTERP, "# Back in sub '%Ss', env %p\n",
-                        Parrot_full_sub_name(INTERP, sub),
-                        interp->dynamic_env);
-        }
-
-        /*
-         * set context
-         */
-        CONTEXT(INTERP->ctx) = to_ctx;
-        INTERP->ctx.bp = to_ctx->bp;
-        INTERP->ctx.bp_ps = to_ctx->bp_ps;
-        if (ret_continuation_p) {
-            /* RetContinuation arg passing is handled elsewhere. */
-            return pc;
-        }
-
-        /* pass args */
-        if (cc->current_results) {
-            /* where caller wants result */
+        /* pass args to where caller wants result */
+        if (cc->current_results)
             to_ctx->current_results = cc->current_results;
-        }
+
         if (to_ctx->current_results && INTERP->current_args) {
-            opcode_t *src_indexes, *dest_indexes;
             /*
              * the register pointer is already switched back
              * to the caller, therefore the registers of the
              * sub we are returning from aren't marked, if
-             * inside argument passing a DOD run is triggered
-             * therefore we have to block DOD
+             * inside argument passing a GC run is triggered
+             * therefore we have to block GC
              */
-            src_indexes = interp->current_args;
-            interp->current_args = NULL;
-            dest_indexes = to_ctx->current_results;
+            opcode_t *src_indexes  = interp->current_args;
+            opcode_t *dest_indexes = to_ctx->current_results;
+            interp->current_args   = NULL;
 
-            Parrot_block_DOD(INTERP);
-            parrot_pass_args(INTERP, from_ctx, to_ctx, src_indexes, dest_indexes,
-                    PARROT_PASS_PARAMS);
-            Parrot_unblock_DOD(INTERP);
+            Parrot_block_GC_mark(INTERP);
+            parrot_pass_args(INTERP, from_ctx, to_ctx,
+                             src_indexes, dest_indexes, PARROT_PASS_PARAMS);
+            Parrot_unblock_GC_mark(INTERP);
         }
 
         /* switch segment */
         INTERP->current_args = NULL;
-        if (INTERP->code != cc->seg) {
+
+        if (INTERP->code != cc->seg)
             Parrot_switch_to_cs(INTERP, cc->seg, 1);
-        }
+
         return pc;
     }
 
 /*
 
-=item C<STRING* get_string()>
+=item C<STRING *get_string()>
 
 Experimental: return caller info as a STRING.
 
@@ -393,45 +279,50 @@ Experimental: return caller info as a STRING.
 
 */
 
-    STRING* get_string() {
+    VTABLE STRING *get_string() {
         return Parrot_Context_infostr(INTERP, PMC_cont(SELF)->to_ctx);
     }
 
 /*
 
-=item C<METHOD PMC* "caller"()>
+=item C<PMC *caller()>
 
-Experimental: return caller PMC or Undef if none.
+Experimental: return caller PMC or PMCNULL if none.
 
 =cut
 
 */
 
-    METHOD PMC* caller() {
-        struct Parrot_cont * cc = PMC_cont(SELF);
-        PMC *caller = cc->to_ctx->current_sub;
-        if (!caller || !PMC_sub(caller)->seg) {
-            caller = pmc_new(INTERP, enum_class_Undef);
-        }
-        return caller;
+    METHOD caller() {
+        Parrot_cont *cc     = PMC_cont(SELF);
+        PMC         *caller = cc->to_ctx->current_sub;
+        Parrot_sub  *sub;
+
+        PMC_get_sub(INTERP, caller, sub);
+        if (!caller || !sub->seg)
+            caller = PMCNULL;
+
+        RETURN(PMC *caller);
 
     }
 /*
 
-=item C<METHOD PMC* "continuation"()>
+=item C<PMC *continuation()>
 
-Experimental: return continuation PMC of this Continuation or Undef if none.
+Experimental: return continuation PMC of this Continuation or PMCNULL if none.
 
 =cut
 
 */
 
-    METHOD PMC* continuation() {
-        struct Parrot_cont * cc = PMC_cont(SELF);
-        PMC *cont = cc->to_ctx->current_cont;
+    METHOD continuation() {
+        Parrot_cont *cc   = PMC_cont(SELF);
+        PMC         *cont = cc->to_ctx->current_cont;
+
         if (cont)
-            return cont;
-        return pmc_new(INTERP, enum_class_Undef);
+            RETURN(PMC *cont);
+
+        RETURN(PMC *PMCNULL);
     }
 }
 

@@ -1,9 +1,9 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: make.pm 18877 2007-06-08 14:15:40Z paultcochrane $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: make.pm 37440 2009-03-15 16:06:11Z rurban $
 
 =head1 NAME
 
-config/auto/make.pm - make utility
+config/inter/make.pm - make utility
 
 =head1 DESCRIPTION
 
@@ -16,32 +16,58 @@ package inter::make;
 use strict;
 use warnings;
 
-use vars qw( $description @args $prompt $util );
+use base qw(Parrot::Configure::Step);
 
-use base qw(Parrot::Configure::Step::Base);
+use Parrot::Configure::Utils qw( :inter capture_output check_progs );
 
-use Parrot::Configure::Step qw( :inter capture_output check_progs );
-
-$util        = 'make';
-$description = "Determining whether $util is installed";
-$prompt      = "Do you have a make utility like 'gmake' or 'make'?";
-@args        = qw( make ask );
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Is make installed};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
+    my $util        = 'make';
+    my $prompt      = "Do you have a make utility like 'gmake' or 'make'?";
 
     my $verbose = $conf->options->get('verbose');
 
     # undef means we don't have GNU make... default to not having it
     $conf->data->set( gmake_version => undef );
 
+    my $candidates;
+    if ( $^O eq 'cygwin') {
+        # On Cygwin prefer make over nmake.
+        $candidates = ['gmake', 'make'];
+    }
+    elsif ($conf->option_or_data('cc') =~ /cl(\.exe)?$/i) {
+        # Windows, Visual C++, prefer nmake
+        # This test should use something more stable than the compiler
+        # executable name.  'msvcversion' might be good, but is determined
+        # after this check.
+        $candidates = [ 'nmake', 'mingw32-make', 'gmake', 'make' ];
+    }
+    else {
+        # Default
+        $candidates = ['gmake', 'mingw32-make', 'nmake', 'make'];
+    }
+
     my $prog;
 
-    # precedence of sources for the program:
-    # default -> probe -> environment -> option -> ask
-    $prog ||= $conf->data->get($util);
-    $prog ||= $conf->options->get($util);
+    # check the candidates for a 'make' program in this order:
+    # environment ; option ; probe ; ask ; default
+    # first pick wins.
     $prog ||= $ENV{ uc($util) };
+    $prog ||= $conf->options->get($util);
+    $prog ||= check_progs( $candidates, $verbose );
+    if ( !$prog ) {
+        $prog = ( $conf->options->get('ask') )
+            ? prompt( $prompt, $prog ? $prog : $conf->data->get($util) )
+            : $conf->data->get($util);
+    }
 
     # never override the user.  If a non-existent program is specified then
     # the user is responsible for the consequences.
@@ -50,18 +76,14 @@ sub runstep {
         $self->set_result('yes');
     }
     else {
-        $prog = check_progs( [ 'gmake', 'mingw32-make', 'nmake', 'make' ], $verbose );
+        $prog = check_progs( $candidates, $verbose );
 
         unless ($prog) {
 
             # fall back to default
             $self->set_result('no');
-            return $self;
+            return 1;
         }
-    }
-
-    if ( $conf->options->get('ask') ) {
-        $prog = prompt( $prompt, $prog ? $prog : $conf->data->get($util) );
     }
 
     my ( $stdout, $stderr, $ret ) = capture_output( $prog, '--version' );
@@ -69,10 +91,9 @@ sub runstep {
     # don't override the user even if the program they provided appears to be
     # broken
     if ( $ret == -1 and !$conf->options->get('ask') ) {
-
         # fall back to default
         $self->set_result('no');
-        return $self;
+        return 1;
     }
 
     # if '--version' returns a string assume that this is gmake.
@@ -84,6 +105,13 @@ sub runstep {
     $self->set_result('yes');
 
     # setup make_C
+    _set_make_c($conf, $prog);
+
+    return 1;
+}
+
+sub _set_make_c {
+    my ($conf, $prog) = @_;
     if ( $conf->data->get('gmake_version') ) {
         $conf->data->set( make_c => "$prog -C" );
     }
@@ -99,8 +127,6 @@ sub runstep {
 
         $conf->data->set( make_c => $make_c );
     }
-
-    return $self;
 }
 
 1;

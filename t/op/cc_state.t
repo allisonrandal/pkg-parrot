@@ -1,4 +1,8 @@
 #! perl
+
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: cc_state.t 37200 2009-03-08 11:46:01Z fperrad $
+
 use strict;
 use warnings;
 
@@ -62,10 +66,8 @@ pcc_like(
 
 pcc_ok( { params => ".param pmc abc :optional" }, 'G3: optional param may be empty', );
 
-pcc_ok(
-    { params => ".param pmc abc :optional :slurpy" },
-    'G4: optional slurpy param may be empty'
-);
+pcc_ok( { params => ".param pmc abc :optional :slurpy" },
+    'G4: optional slurpy param may be empty' );
 
 pcc_error_like(
     { params => ".param pmc abc :named('x')" },

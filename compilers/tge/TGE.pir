@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
+# Copyright (C) 2005-2009, Parrot Foundation.
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ TGE - A tree grammar engine.
 =head1 SYNOPSIS
 
     # define a grammar leaf.tg
-    transform min (Leaf) :language('PIR') { 
+    transform min (Leaf) :language('PIR') {
         $P1 = getattribute node, "value"
         .return ($P1)
     }
@@ -19,7 +19,7 @@ TGE - A tree grammar engine.
 
         # Compile a grammar from the source grammar file
         .local pmc compiler
-        compiler = new 'TGE::Compiler'
+        compiler = new ['TGE';'Compiler']
 
         .local pmc grammar
         grammar = compiler.'compile'(source)
@@ -66,7 +66,7 @@ only valid language is PIR. Within the block, two parameters are supplied for
 you: C<node> is the current node considered, and C<tree> is the top-level node
 for the entire tree.
 
-The C<:applyto> modifier says which node the transform applies to. 
+The C<:applyto> modifier says which node the transform applies to.
 
     transform name (pattern) :applyto('childname') {
         # action
@@ -80,37 +80,40 @@ applies to a child of the current node (generally inherited attributes).
 
 .namespace [ 'TGE' ]
 
-.sub '__onload' :load
+.sub '__onload_first' :load
     # use other modules
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Util.pbc'
-    load_bytecode 'compilers/tge/TGE/Rule.pbc'
-    load_bytecode 'compilers/tge/TGE/Tree.pbc'
-    load_bytecode 'compilers/tge/TGE/Parser.pbc'
-    load_bytecode 'compilers/tge/TGE/Grammar.pbc'
-    load_bytecode 'compilers/tge/TGE/Compiler.pbc'
+.end
 
-    # import <die> rule from PGE::Util
-    $P0 = get_hll_global ['PGE::Util'], 'die'
-    set_hll_global ['TGE::Parser'], 'die', $P0
+.include "compilers/tge/TGE/Parser.pir"
+.include "compilers/tge/TGE/Rule.pir"
+.include "compilers/tge/TGE/Tree.pir"
+.include "compilers/tge/TGE/Grammar.pir"
+.include "compilers/tge/TGE/Compiler.pir"
 
-    # import <line_number> method from PGE::Util
-    $P0 = get_hll_global ['PGE::Util'], 'line_number'
-    set_hll_global ['TGE::Parser'], 'line_number', $P0
+.sub '__onload_last' :load
+    # make sure we execute this sub only once
+    $P0 = get_global '$!tge_loaded'
+    unless null $P0 goto end
+    $P0 = new 'Integer'
+    assign $P0, 1
+    set_global '$!tge_loaded', $P0
 
+    # import <die> and <line_number> rules from PGE::Util
+    $P0 = get_class ['TGE';'Parser']
+    $P1 = get_hll_global ['PGE';'Util'], 'die'
+    $P0.'add_method'('die', $P1)
+    $P1 = get_hll_global ['PGE';'Util'], 'line_number'
+    $P0.'add_method'('line_number', $P1)
+
+  end:
     .return ()
 .end
 
-
-
-=head1 AUTHOR
-
-Allison Randal <allison@perl.org>
-
-=cut
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

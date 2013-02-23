@@ -1,4 +1,8 @@
 #! perl
+
+# Copyright (C) 2003-2006, Parrot Foundation.
+# $Id: ops2vim.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 use strict;
 use warnings;
 
@@ -10,7 +14,8 @@ my %seen;
 
 ## make sure files have been globbed on non-globbing OSes
 ## and make sure at least one command-line parameter has been passed
-@ARGV = @ARGV
+@ARGV =
+    @ARGV
     ? map { glob $_ } @ARGV
     : die "usage: " . basename($0) . " FILE [ FILE [ ... ] ]\n";
 

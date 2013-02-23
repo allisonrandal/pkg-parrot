@@ -1,17 +1,17 @@
-# $Id: oofib.pir 17599 2007-03-18 10:51:10Z paultcochrane $
+# $Id: oofib.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 .sub bench :main
     .param pmc argv
-    .sym int argc
+    .local int argc
     argc = argv
-    .sym pmc N
-    N = new .Integer
+    .local pmc N
+    N = new 'Integer'
     N = 28
     if argc <= 1 goto noarg
     $S0 = argv[1]
     N = $S0
 noarg:
-    .sym float start
+    .local num start
     time start
 
     .local pmc A
@@ -21,13 +21,12 @@ noarg:
     A = newclass "A"
     B = subclass  A, "B"
 
-    find_type $I0, "B"
-    b = new  $I0
+    b = new "B"
 
-    .sym pmc r
+    .local pmc r
     r = b."fib"(N)
 
-    .sym float fin
+    .local num fin
     time fin
     print "fib("
     print N
@@ -42,82 +41,70 @@ noarg:
 
 .namespace ["A"]
 
-.sub fib method
+.sub fib :method
     .param pmc n
     if n >= 2 goto rec
-    .pcc_begin_return
-    .return n
-    .pcc_end_return
+    .return (n)
 rec:
-    .sym pmc n1
-    .sym pmc n2
-    .sym pmc r1
-    .sym pmc r2
-    n1 = new .Integer
-    n2 = new .Integer
+    .local pmc n1
+    .local pmc n2
+    .local pmc r1
+    .local pmc r2
+    n1 = new 'Integer'
+    n2 = new 'Integer'
     n1 = n - 1
     n2 = n - 2
     r1 = self."fibA"(n1)
     r2 = self."fibB"(n2)
-    n = new .Integer
+    n = new 'Integer'
     n = r1 + r2
-    .pcc_begin_return
-    .return n
-    .pcc_end_return
+    .return (n)
 .end
 
-.sub fibA method
+.sub fibA :method
     .param pmc n
     if n >= 2 goto rec
-    .pcc_begin_return
-    .return n
-    .pcc_end_return
+    .return (n)
 rec:
-    .sym pmc n1
-    .sym pmc n2
-    .sym pmc r1
-    .sym pmc r2
-    n1 = new .Integer
-    n2 = new .Integer
+    .local pmc n1
+    .local pmc n2
+    .local pmc r1
+    .local pmc r2
+    n1 = new 'Integer'
+    n2 = new 'Integer'
     n1 = n - 1
     n2 = n - 2
     r1 = self."fib"(n1)
     r2 = self."fibB"(n2)
-    n = new .Integer
+    n = new 'Integer'
     n = r1 + r2
-    .pcc_begin_return
-    .return n
-    .pcc_end_return
+    .return (n)
 .end
 
 .namespace ["B"]
 
-.sub fibB method
+.sub fibB :method
     .param pmc n
     if n >= 2 goto rec
-    .pcc_begin_return
-    .return n
-    .pcc_end_return
+    .return (n)
 rec:
-    .sym pmc n1
-    .sym pmc n2
-    .sym pmc r1
-    .sym pmc r2
-    n1 = new .Integer
-    n2 = new .Integer
+    .local pmc n1
+    .local pmc n2
+    .local pmc r1
+    .local pmc r2
+    n1 = new 'Integer'
+    n2 = new 'Integer'
     n1 = n - 1
     n2 = n - 2
     r1 = self."fib"(n1)
     r2 = self."fibA"(n2)
-    n = new .Integer
+    n = new 'Integer'
     n = r1 + r2
-    .pcc_begin_return
-    .return n
-    .pcc_end_return
+    .return (n)
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

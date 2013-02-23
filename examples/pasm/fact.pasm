@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: fact.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: fact.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ examples/pasm/fact.pasm - Mmmm, beer good
 
 =head1 DESCRIPTION
 
-Compute the factorial recursively for 0! to 6! and print the results.
+Compute the factorial recursively for 0! to 30! and print the results.
 
 =head1 HISTORY
 
@@ -28,35 +28,34 @@ of the now missing C<clonei>.
 
 main:
 	set 	I1,0
-
+	## P9 is used as a stack for temporaries.
+	new     P9, 'ResizableIntegerArray'
 loop:
 	print	"fact of "
 	print	I1
 	print	" is: "
-	set	I0,I1
+    new P0, 'Integer'
+	set	P0,I1
 	bsr	fact
-	print	I0
+	print	P0
 	print	"\n"
 	inc	I1
-	eq	I1,7,done
+	eq	I1,31,done
 	branch	loop
 done:
 	end
 
-# I0 is the number to compute
+### P0 is the number to compute, and also the return value.
 fact:
-        saveall
-	lt	I0,2,is_one
-	set	I1,I0
-	dec	I0
+	lt	P0,2,is_one
+	## save I2, because we're gonna trash it.
+	push	P9,I2
+	set	I2,P0
+	dec	P0
 	bsr	fact
-	mul	I0,I0,I1
-	save	I0
-	branch	fact_done
+	mul	P0,P0,I2
+	pop     I2,P9
+	ret
 is_one:
-	set	I0,1
-	save	I0
-fact_done:
-	restoreall
-	restore	I0
+	set	P0,1
 	ret

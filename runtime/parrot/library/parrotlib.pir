@@ -1,4 +1,4 @@
-# $Id: parrotlib.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# $Id: parrotlib.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 INFORMATION
 
@@ -26,7 +26,7 @@ parrotlib's interface functions.
 
 
     # XXX todo: get root from config
-    $P0 = new .Env
+    $P0 = new 'Env'
     root = $P0["PARROT_RUNTIME_ROOT"]
     length $I0, root
     if $I0 == 0 goto DEFAULT
@@ -38,22 +38,22 @@ OKAY:
     # XXX: get include paths from config
     $S0 = clone root
     concat $S0, "/include"
-    paths = new .ResizableStringArray
+    paths = new 'ResizableStringArray'
     push paths, "."
     push paths, $S0
     push paths, root
 
     # create includes array
-    includes = new .ResizablePMCArray
-    store_global "_parrotlib", "include_paths", includes
+    includes = new 'ResizablePMCArray'
+    set_hll_global ['_parrotlib'], 'include_paths', includes
 
     # get the directory handler
-    $P0 = find_global "_parrotlib", "handle_directory"
+    $P0 = get_hll_global ['_parrotlib'], 'handle_directory'
 
     # fill the includes array
 LOOP:
     $P1 = clone $P0
-    $P2 = new .String
+    $P2 = new 'String'
     $S0 = shift paths
     concat $S0, "/"
     $P2 = $S0
@@ -71,11 +71,11 @@ LOOP:
     .param string name
     .param string sig
 
-    $P1 = new .String
+    $P1 = new 'String'
     $P1 = sig
-    find_global $P0, "_parrotlib", name
+    $P0 = get_hll_global ['_parrotlib'], name
     setprop $P0, "signature", $P1
-    store_global "_parrotlib", name, $P0
+    set_hll_global ['_parrotlib'], name, $P0
 .end
 
 =item STRING = include_file_location( STRING )
@@ -90,12 +90,12 @@ This function returns the absolute filename of the requested file.
 .sub include_file_location
     .param string name
 
-    find_global $P0, "_parrotlib", "include_paths"
+    $P0 = get_hll_global ['_parrotlib'], 'include_paths'
     $S0 = find_file_path( name, $P0 )
 
-    .pcc_begin_return
-    .return $S0
-    .pcc_end_return
+    .begin_return
+    .set_return $S0
+    .end_return
 .end
 
 =item STRING = bytecode_location( STRING )
@@ -110,12 +110,13 @@ This function returns the absolute filename of the requested file.
 .sub imcc_compile_file_location
     .param string name
 
-    find_global $P0, "_parrotlib", "include_paths"
+    $P0 = get_hll_global ['_parrotlib'], 'include_paths'
+
     $S0 = find_file_path( name, $P0 )
 
-    .pcc_begin_return
-    .return $S0
-    .pcc_end_return
+    .begin_return
+    .set_return $S0
+    .end_return
 .end
 
 =item STRING = dynext_location( STRING )
@@ -154,9 +155,9 @@ Returns the location of a dynamic extension.
     concat name, ext
 
 END:
-    .pcc_begin_return
-    .return name
-    .pcc_end_return
+    .begin_return
+    .set_return name
+    .end_return
 .end
 
 
@@ -166,7 +167,7 @@ END:
     .local string ret
     .local pmc iter
 
-    iter = new .Iterator, array
+    iter = new 'Iterator', array
     iter = 0 #ITERATE_FROM_START
 
 NEXT:
@@ -177,9 +178,9 @@ NEXT:
     ret = $P0( name )
     if_null ret, NEXT
 END:
-    .pcc_begin_return
-    .return ret
-    .pcc_end_return
+    .begin_return
+    .set_return ret
+    .end_return
 .end
 
 .sub handle_directory
@@ -187,8 +188,8 @@ END:
     .local string path
 
 .include "interpinfo.pasm"
-    interpinfo P0, .INTERPINFO_CURRENT_SUB
-    getprop $P0, "path", P0
+    interpinfo $P1, .INTERPINFO_CURRENT_SUB
+    getprop $P0, "path", $P1
     path = $P0
 
     $S0 = clone path
@@ -197,9 +198,9 @@ END:
     if $I0 goto OK
     null $S0
 OK:
-    .pcc_begin_return
-    .return $S0
-    .pcc_end_return
+    .begin_return
+    .set_return $S0
+    .end_return
 .end
 
 =back
@@ -212,7 +213,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -220,4 +221,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

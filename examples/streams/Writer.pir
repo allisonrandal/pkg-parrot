@@ -1,4 +1,4 @@
-=head1 INFORMATION
+=head1 Write Example
 
 This example shows the usage of C<Stream::Write>.
 
@@ -17,11 +17,10 @@ Creates a C<Stream::Writer> and writes to it.
 
     load_bytecode "library/Stream/Writer.pir"
 
-    find_type $I0, "Stream::Writer"
-    new stream, $I0
+    stream = new "Stream::Writer"
 
     # set the stream's source sub
-    .const .Sub temp = "_reader"
+    .const 'Sub' temp = "_reader"
     assign stream, temp
 
     print "main start\n"
@@ -59,7 +58,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -67,4 +66,4 @@ Copyright (C) 2004, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

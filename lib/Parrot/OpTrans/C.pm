@@ -1,5 +1,5 @@
-# Copyright (C) 2002-2006, The Perl Foundation.
-# $Id: C.pm 18744 2007-06-02 01:10:38Z chromatic $
+# Copyright (C) 2002-2006, Parrot Foundation.
+# $Id: C.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -54,11 +54,11 @@ sub defines {
 #undef CONST
 #define REL_PC     ((size_t)(cur_opcode - (opcode_t *)interp->code->base.data))
 #define CUR_OPCODE cur_opcode
-#define IREG(i) REG_INT(cur_opcode[i])
-#define NREG(i) REG_NUM(cur_opcode[i])
-#define PREG(i) REG_PMC(cur_opcode[i])
-#define SREG(i) REG_STR(cur_opcode[i])
-#define CONST(i) CONTEXT(interp->ctx)->constants[cur_opcode[i]]
+#define IREG(i) REG_INT(interp, cur_opcode[i])
+#define NREG(i) REG_NUM(interp, cur_opcode[i])
+#define PREG(i) REG_PMC(interp, cur_opcode[i])
+#define SREG(i) REG_STR(interp, cur_opcode[i])
+#define CONST(i) CONTEXT(interp)->constants[cur_opcode[i]]
 END
 }
 

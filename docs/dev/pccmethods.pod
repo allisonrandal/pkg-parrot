@@ -1,5 +1,5 @@
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: pccmethods.pod 18619 2007-05-22 13:55:22Z particle $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: pccmethods.pod 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -26,29 +26,29 @@ implemented with C<PCCMETHOD>, too.
 To declare that a method in a PMC should take arguments using the Parrot
 Calling Conventions, prefix its name with the keyword C<PCCMETHOD>.
 Where you would put the C parameter list, put a PCC parameter list.
-You must always use the void return type for C<PCCMETHOD>s -- the true
-signature of the return is specified inside the method using C<PCCRETURN>,
+Do not specify a return type for C<PCCMETHOD>s -- the true
+signature of the return is specified inside the method using C<RETURN>,
 described below.
 
-  PCCMETHOD void PlayRandomSong() {
+  PCCMETHOD PlayRandomSong() {
       ...
   }
 
-  PCCMETHOD void PlaySong(STRING *artist, STRING *title) {
+  PCCMETHOD PlaySong(STRING *artist, STRING *title) {
       ...
   }
 
 For full details of the parameter list syntax, see L<Parameter List Syntax>.
 
 
-=head2 PCCRETURN
+=head2 RETURN
 
 To return arguments using the Parrot Calling Conventions, which you should do
 if you have implemented a C<PCCMETHOD> (unless it returns no arguments, of
-course), use the C<PCCRETURN> keyword. This takes a signature as specified in
+course), use the C<RETURN> keyword. This takes a signature as specified in
 the L<Parameter List Syntax> section.
 
-  PCCRETURN(PMC *status, INTVAL count);
+  RETURN(PMC *status, INTVAL count);
 
 
 =head2 PCCINVOKE

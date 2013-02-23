@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: primes2.c 16298 2006-12-28 22:25:17Z paultcochrane $
+Copyright (C) 2001-2003, Parrot Foundation.
+$Id: primes2.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,6 +15,21 @@ examples/benchmarks/primes2.c - Calculate prime numbers < 10000
 
 Calculates all the prime numbers up to 10000 and prints out the number
 of primes and the last one found.
+
+=head2 Functions
+
+=over 4
+
+=cut
+
+*/
+
+/*
+
+=item C<int
+main(int argc, char *argv[])>
+
+Main function to run the example.
 
 =cut
 
@@ -38,10 +53,20 @@ main(int argc, char *argv[])
                 }
         }
 
-        printf("N primes calculated to %d is %d\nlast is: %d\n",max,i6,i7);
+        printf("N primes calculated to %d is %d\nlast is: %d\n", max, i6, i7);
 
         return 0;
 }
+
+/*
+
+=item C<int isprime1(int input)>
+
+Determines if the input number is a prime.
+
+=cut
+
+*/
 
 int isprime1(int input)
 {
@@ -61,13 +86,15 @@ int isprime1(int input)
 
 /*
 
+=back
+
 =head1 SEE ALSO
 
 F<examples/benchmarks/primes.c>,
 F<examples/benchmarks/primes.pasm>,
 F<examples/benchmarks/primes.pl>,
 F<examples/benchmarks/primes2_p.pasm>,
-F<examples/benchmarks/primes2.pasm>,
+F<examples/benchmarks/primes2.pir>,
 F<examples/benchmarks/primes2.py>.
 
 =cut

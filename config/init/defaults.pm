@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: defaults.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: defaults.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,9 +15,8 @@ package init::defaults;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
 use Config;
 use FindBin;    # see build_dir
@@ -26,9 +25,14 @@ use Parrot::BuildUtil;
 use Cwd qw(abs_path);
 use File::Spec;
 
-$description = q{Setting up Configure's default values};
 
-@args = qw(debugging optimize profile verbose m);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Set Configure's default values};
+    $data{result}      = q{};
+    return \%data;
+}
 
 my $parrot_version = Parrot::BuildUtil::parrot_version();
 my @parrot_version = Parrot::BuildUtil::parrot_version();
@@ -36,12 +40,47 @@ my @parrot_version = Parrot::BuildUtil::parrot_version();
 sub runstep {
     my ( $self, $conf ) = @_;
 
+    # Later configuration steps need access to values from the Perl 5
+    # %Config.  However, other later configuration steps may change
+    # the corresponding values in the Parrot::Configure object.  In
+    # order to provide access to the original values from Perl 5
+    # %Config, we grab those settings we need now and store them in
+    # special keys within the Parrot::Configure object.
+    # This is a multi-stage process.
+
+    # Stage 1:
+    foreach my $orig ( qw|
+        archname
+        ccflags
+        d_socklen_t
+        longsize
+        optimize
+        sig_name
+        scriptdirexp
+        use64bitint
+    | ) {
+        $conf->data->set_p5( $orig => $Config{$orig} );
+    }
+
+    # Stage 2 (anticipating needs of config/auto/headers.pm):
+    $conf->data->set_p5(
+        map { $_ => $Config{$_} } grep { /^i_/ } keys %Config
+    );
+
+    # Stage 3 (Along similar lines, look up values from Perl 5 special
+    # variables and stash them for later lookups.  Name them according
+    # to their 'use English' names as documented in 'perlvar'.)
+    $conf->data->set_p5( OSNAME => $^O );
+
     # We need a Glossary somewhere!
     $conf->data->set(
         debugging => $conf->options->get('debugging') ? 1 : 0,
         optimize  => '',
         verbose   => $conf->options->get('verbose'),
         build_dir => abs_path($FindBin::Bin),
+        configured_from_file =>
+            $conf->options->get('configured_from_file') || '',
+        configuration_steps => ( join q{ } => $conf->get_list_of_steps() ),
 
         # Compiler -- used to turn .c files into object files.
         # (Usually cc or cl, or something like that.)
@@ -142,11 +181,17 @@ sub runstep {
         perl      => $^X,
         perl_inc  => $self->find_perl_headers(),
         test_prog => 'parrot',
+
+        # some utilities in Makefile
+        cat       => '$(PERL) -MExtUtils::Command -e cat',
+        chmod     => '$(PERL) -MExtUtils::Command -e ExtUtils::Command::chmod',
+        cp        => '$(PERL) -MExtUtils::Command -e cp',
+        mkpath    => '$(PERL) -MExtUtils::Command -e mkpath',
+        mv        => '$(PERL) -MExtUtils::Command -e mv',
         rm_f      => '$(PERL) -MExtUtils::Command -e rm_f',
         rm_rf     => '$(PERL) -MExtUtils::Command -e rm_rf',
-        mkpath    => '$(PERL) -MExtUtils::Command -e mkpath',
         touch     => '$(PERL) -MExtUtils::Command -e touch',
-        chmod     => '$(PERL) -MExtUtils::Command -e ExtUtils::Command::chmod',
+
         ar        => $Config{ar},
         ar_flags  => 'cr',
 
@@ -161,6 +206,9 @@ sub runstep {
         make_set_make => $Config{make_set_make},
         make_and      => '&&',
 
+        # for cygwin
+        cygchkdll => '',
+
         # make_c: Command to emulate GNU make's C<-C directory> option:  chdir
         # to C<directory> before executing $(MAKE)
         make_c => '$(PERL) -e \'chdir shift @ARGV; system q{$(MAKE)}, @ARGV; exit $$? >> 8;\'',
@@ -169,7 +217,6 @@ sub runstep {
         platform_asm => 0,
         as           => 'as',    # assembler
 
-        cp    => '$(PERL) -MExtUtils::Command -e cp',
         lns   => $Config{lns},                          # soft link
         slash => '/',
 
@@ -205,11 +252,26 @@ sub runstep {
         );
     }
 
+    $conf->data->set( 'archname', $Config{archname});
     # adjust archname, cc and libs for e.g. --m=32
     # RT#41499 this is maybe gcc only
-    my $m        = $conf->options->get('m');
-    my $archname = $Config{archname};
+    # RT#41500 adjust lib install-path /lib64 vs. lib
+    # remember corrected archname - jit.pm was using $Config('archname')
+    _64_bit_adjustments($conf);
+
+    return 1;
+}
+
+sub find_perl_headers {
+    my $self = shift;
+    return File::Spec->catdir( $Config::Config{archlib}, 'CORE' );
+}
+
+sub _64_bit_adjustments {
+    my $conf = shift;
+    my $m = $conf->options->get('m');
     if ($m) {
+        my $archname = $conf->data->get('archname');
         if ( $archname =~ /x86_64/ && $m eq '32' ) {
             $archname =~ s/x86_64/i386/;
 
@@ -225,18 +287,9 @@ sub runstep {
                 $conf->data->set( $lib, $ni );
             }
         }
+        $conf->data->set( 'archname', $archname );
     }
-
-    # RT#41500 adjust lib install-path /lib64 vs. lib
-    # remember corrected archname - jit.pm was using $Config('archname')
-    $conf->data->set( 'archname', $archname );
-
-    return $self;
-}
-
-sub find_perl_headers {
-    my $self = shift;
-    return File::Spec->catdir( $Config::Config{archlib}, 'CORE' );
+    return 1;
 }
 
 1;

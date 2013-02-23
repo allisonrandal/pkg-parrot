@@ -1,26 +1,20 @@
 #!./parrot
-# Copyright (C) 2006-2007, The Perl Foundtation.
-# $Id: iter.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: iter.t 36833 2009-02-17 20:09:26Z allison $
 
 .const int TESTS = 47
 
 .sub 'main' :main
-    load_bytecode 'Test/More.pir'
-
-    $P0 = new .Env
+    $P0 = new 'Env'
     $P0 = $P0['TEST_VERBOSE']
     unless null $P0 goto set_verbose
-    $P0 = new .Integer
+    $P0 = new 'Integer'
     $P0 = 0
   set_verbose:
-    store_global 'TEST_VERBOSE', $P0
+    set_global 'TEST_VERBOSE', $P0
 
   import:
-    .local pmc exports, curr_namespace, test_namespace
-    curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
-    exports = split " ", "plan ok is diag"
-    test_namespace.export_to(curr_namespace, exports)
+    .include 'include/test_more.pir'
 
     'plan'( TESTS )
 
@@ -33,14 +27,14 @@
 .end
 
 
+# test library loading
 .sub 'load'
-    'diag'('test library loading')
 
   T1:
     push_eh err_load_bytecode
     $S0 = 'Iter.pir'
     load_bytecode $S0
-    clear_eh
+    pop_eh
     $S1 = 'loaded '
     $S1 .= $S0
     'ok'(1, $S1)
@@ -54,11 +48,11 @@
 .end
 
 
+# test object initialization
 .sub 'object_init'
-    'diag'('test object initialization')
 
   T1:
-    $P99 = new .FixedPMCArray
+    $P99 = new 'FixedPMCArray'
     $P99 = 0
 
     .local pmc iter
@@ -73,7 +67,7 @@
   T2:
     push_eh err_start_noargs
     iter.'start'()
-    clear_eh
+    pop_eh
     'ok'(0, 'start requires an aggregate')
     goto T3
   err_start_noargs:
@@ -89,11 +83,11 @@
 .end
 
 
+# test empty FixedPMCArray
 .sub 'FixedPMCArray_empty'
-    'diag'('test empty FixedPMCArray')
 
   T1:
-    $P99 = new .FixedPMCArray
+    $P99 = new 'FixedPMCArray'
     $P99 = 0
 
     .local pmc iter
@@ -133,11 +127,11 @@
 .end
 
 
+# test FixedPMCArray with three elements
 .sub 'FixedPMCArray_3elem'
-    'diag'('test FixedPMCArray with three elements')
 
   T1:
-    $P99 = new .FixedPMCArray
+    $P99 = new 'FixedPMCArray'
     $P99 = 3
     $P99[0] = 'a'
     $P99[1] = 'b'
@@ -225,11 +219,11 @@
 .end
 
 
+# test empty ResizablePMCArray
 .sub 'ResizablePMCArray_empty'
-    'diag'('test empty ResizablePMCArray')
 
   T1:
-    $P99 = new .ResizablePMCArray
+    $P99 = new 'ResizablePMCArray'
     $P99 = 0
 
     .local pmc iter
@@ -269,11 +263,11 @@
 .end
 
 
+# test ResizablePMCArray with three elements
 .sub 'ResizablePMCArray_3elem'
-    'diag'('test ResizablePMCArray with three elements')
 
   T1:
-    $P99 = new .ResizablePMCArray
+    $P99 = new 'ResizablePMCArray'
     $P99 = 3
     $P99[0] = 'a'
     $P99[1] = 'b'
@@ -364,4 +358,5 @@
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:
+

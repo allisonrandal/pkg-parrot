@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: platform.pm 18945 2007-06-12 14:08:35Z fperrad $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: platform.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -16,40 +16,17 @@ package gen::platform;
 use strict;
 use warnings;
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Config;
+use Parrot::Configure::Utils ':gen';
 
-use Parrot::Configure::Step qw(copy_if_diff);
-
-our $description = 'Moving platform files into place';
-our @args        = qw(miniparrot verbose);
-
-sub runstep {
-    my ( $self, $conf ) = @_;
-
-    my $verbose  = $conf->options->get('verbose');
-    my $platform = lc $^O;
-
-    $platform = "ansi"  if defined( $conf->options->get('miniparrot') );
-    $platform = "win32" if $platform =~ /^msys/;
-    $platform = "win32" if $platform =~ /^mingw/;
-    $platform =~ s/^ms//;
-
-    if ( ( split( '-', $Config{archname} ) )[0] eq 'ia64' ) {
-        $platform = 'ia64';
-    }
-
-    $platform = 'generic' unless -d "config/gen/platform/$platform";
-
-    print " platform='$platform' " if $verbose;
-
-    my $generated = $conf->data->get('TEMP_generated');
-    $generated = '' unless defined $generated;
-    print " ($generated) " if $verbose;
-    print("\n") if defined $verbose && $verbose == 2;
-
-    my $coda = <<'CODA';
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Move platform files into place};
+    $data{result}      = q{};
+    $data{platform_interface} = q{config/gen/platform/platform_interface.h};
+    $data{coda} = <<'CODA';
 /*
  * Local variables:
  *   c-file-style: "parrot"
@@ -57,8 +34,65 @@ sub runstep {
  * vim: expandtab shiftwidth=4:
  */
 CODA
+    return \%data;
+}
+
+sub runstep {
+    my ( $self, $conf ) = @_;
+
+    my $verbose     = $conf->options->get('verbose');
+    my $platform    = $self->_get_platform( $conf, $verbose );
+    my $generated   = $self->_get_generated($conf, $verbose);
+
 
     # headers are merged into platform.h
+    $self->_set_headers($conf, $verbose, $platform, $generated);
+
+    # implementation files are merged into platform.c
+    $self->_set_implementations($conf, $verbose, $platform, $generated);
+
+    $self->_handle_asm($conf, $platform);
+
+    # interface is the same for all platforms
+    copy_if_diff( $self->{platform_interface},
+        "include/parrot/platform_interface.h" );
+
+    $self->_set_limits($conf, $verbose, $platform);
+
+    return 1;
+}
+
+sub _get_platform {
+    my $self = shift;
+    my ($conf, $verbose) = @_;
+    my $platform = lc ( $conf->data->get_p5('OSNAME') );
+
+    $platform = "win32" if $platform =~ /^msys/;
+    $platform = "win32" if $platform =~ /^mingw/;
+    $platform =~ s/^ms//;
+
+    if ( ( split m/-/, $conf->data->get_p5('archname'), 2 )[0] eq 'ia64' ) {
+        $platform = 'ia64';
+    }
+
+    $platform = 'generic' unless -d "config/gen/platform/$platform";
+
+    print " platform='$platform' " if $verbose;
+    return $platform;
+}
+
+sub _get_generated {
+    my $self = shift;
+    my ($conf, $verbose) = @_;
+    my $generated = $conf->data->get('TEMP_generated');
+    $generated = '' unless defined $generated;
+    print " ($generated) " if $verbose;
+    return $generated;
+}
+
+sub _set_headers {
+    my $self = shift;
+    my ($conf, $verbose, $platform, $generated) = @_;
     my @headers = qw/
         io.h
         math.h
@@ -70,8 +104,10 @@ CODA
         string.h
         /;
 
-    open my $PLATFORM_H, ">", "include/parrot/platform.h"
-        or die "Can't open include/parrot/platform.h: $!";
+    my $plat_h = q{include/parrot/platform.h};
+    $conf->append_configure_log($plat_h);
+    open my $PLATFORM_H, ">", $plat_h
+        or die "Can't open $plat_h: $!";
 
     print {$PLATFORM_H} <<"END_HERE";
 /* ex: set ro:
@@ -100,7 +136,7 @@ END_HERE
 
         if ( -e $header_file ) {
             local $/ = undef;
-            print("\t$header_file\n") if defined $verbose && $verbose == 2;
+            print("\t$header_file\n") if $verbose;
             open my $IN_H, "<", "$header_file"
                 or die "Can't open $header_file: $!";
 
@@ -108,7 +144,7 @@ END_HERE
             my $in_h = <$IN_H>;
 
             # remove the (in this case) superfluous coda
-            $in_h =~ s{\Q$coda\E\n*\z}{}xgs;
+            $in_h =~ s{\Q$self->{coda}\E\n*\z}{}xgs;
 
             print {$PLATFORM_H} <<"END_HERE";
 /*
@@ -128,23 +164,23 @@ END_HERE
     }
 
     # finally append generated
-    @headers = grep { /\.h$/ } split( ',', $generated );
-    for (@headers) {
-        if ( -e $_ ) {
+    @headers = grep { /\.h$/ } split( m/,/, $generated );
+    for my $h (@headers) {
+        if ( -e $h ) {
             local $/ = undef;
-            print("\t$_\n") if defined $verbose && $verbose == 2;
-            open my $IN_H, "<", "$_" or die "Can't open $_: $!";
+            print("\t$h\n") if $verbose;
+            open my $IN_H, "<", $h or die "Can't open $h: $!";
             print {$PLATFORM_H} <<"END_HERE";
 /*
-** $_
+** $h
 */
-#line 1 "$_"
+#line 1 "$h"
 END_HERE
             print {$PLATFORM_H} <$IN_H>, "\n\n";
             close $IN_H;
         }
         else {
-            warn("Header file '$_' listed in TEMP_generated but not found\n");
+            warn("Header file '$h' listed in TEMP_generated but not found\n");
         }
     }
 
@@ -152,12 +188,29 @@ END_HERE
     print $PLATFORM_H <<"END_HERE";
 #endif /* PARROT_PLATFORM_H_GUARD */
 
-$coda
+$self->{coda}
 END_HERE
 
     close $PLATFORM_H;
+    return 1;
+}
 
-    # implementation files are merged into platform.c
+sub _set_limits {
+    my $self = shift;
+    my ($conf, $verbose, $platform) = @_;
+
+    my $limits = "config/gen/platform/generic/platform_limits.h";
+    if ( -e "config/gen/platform/$platform/platform_limits.h" ) {
+        $limits = "config/gen/platform/$platform/platform_limits.h";
+    }
+    copy_if_diff( $limits, "include/parrot/platform_limits.h" );
+
+    return;
+}
+
+sub _set_implementations {
+    my $self = shift;
+    my ($conf, $verbose, $platform, $generated) = @_;
     my @impls = qw/
         time.c
         env.c
@@ -172,8 +225,10 @@ END_HERE
         misc.c
         /;
 
-    open my $PLATFORM_C, ">", "src/platform.c"
-        or die "Can't open src/platform.c: $!";
+    my $plat_c = q{src/platform.c};
+    $conf->append_configure_log($plat_c);
+    open my $PLATFORM_C, ">", $plat_c
+        or die "Can't open $plat_c: $!";
 
     print {$PLATFORM_C} <<"END_HERE";
 /*
@@ -183,28 +238,13 @@ END_HERE
 **
 ** Generated by config/gen/platform.pm
 */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER STOP */
 END_HERE
 
     # We need to put things from begin.c before the parrot.h include.
-    if ( -e "config/gen/platform/$platform/begin.c" ) {
-        local $/ = undef;
-        open my $IN_C, "<", "config/gen/platform/$platform/begin.c" or die "Can't open begin.c: $!";
-
-        # slurp in the C file
-        my $in_c = <$IN_C>;
-
-        # remove the (in this case) superfluous coda
-        $in_c =~ s{\Q$coda\E\n*\z}{}xgs;
-
-        print {$PLATFORM_C} <<"END_HERE";
-/*
-** begin.c
-*/
-#line 1 "config/gen/platform/$platform/begin.c"
-END_HERE
-        print {$PLATFORM_C} $in_c, "\n\n";
-        close $IN_C;
-    }
+    $self->_handle_begin_c($platform, $PLATFORM_C);
 
     # Copy the rest.
     print {$PLATFORM_C} <<'END_HERE';
@@ -212,22 +252,22 @@ END_HERE
 
 END_HERE
 
-    for (@impls) {
-        my $impl_file = "config/gen/platform/generic/$_";
-        if ( -e "config/gen/platform/$platform/$_" ) {
-            $impl_file = "config/gen/platform/$platform/$_";
+    for my $im (@impls) {
+        my $impl_file = "config/gen/platform/generic/$im";
+        if ( -e "config/gen/platform/$platform/$im" ) {
+            $impl_file = "config/gen/platform/$platform/$im";
         }
 
         if ( -e $impl_file ) {
             local $/ = undef;
-            print("\t$impl_file\n") if defined $verbose && $verbose == 2;
-            open my $IN_C, "<", "$impl_file" or die "Can't open $impl_file: $!";
+            print("\t$impl_file\n") if $verbose;
+            open my $IN_C, "<", $impl_file or die "Can't open $impl_file: $!";
 
             # slurp in the C file
             my $in_c = <$IN_C>;
 
             # remove the (in this case) superfluous coda
-            $in_c =~ s{\Q$coda\E\n*\z}{}xgs;
+            $in_c =~ s{\Q$self->{coda}\E\n*\z}{}xgs;
 
             print {$PLATFORM_C} <<"END_HERE";
 /*
@@ -241,17 +281,17 @@ END_HERE
     }
 
     # append generated c files
-    @impls = grep { /\.c$/ } split( ',', $generated );
-    for (@impls) {
-        if ( -e $_ ) {
+    @impls = grep { /\.c$/ } split( m/,/, $generated );
+    for my $im (@impls) {
+        if ( -e $im ) {
             local $/ = undef;
-            print("\t$_\n") if defined $verbose && $verbose == 2;
-            open my $IN_C, "<", "$_" or die "Can't open $_: $!";
+            print("\t$im\n") if $verbose;
+            open my $IN_C, "<", $im or die "Can't open $im: $!";
             print {$PLATFORM_C} <<"END_HERE";
 /*
-** $_:
+** $im:
 */
-#line 1 "$_"
+#line 1 "$im"
 END_HERE
             print {$PLATFORM_C} <$IN_C>, "\n\n";
             close $IN_C;
@@ -261,11 +301,42 @@ END_HERE
     # append the C code coda to the generated file
     print {$PLATFORM_C} <<"END_HERE";
 
-$coda
+$self->{coda}
 END_HERE
 
     close $PLATFORM_C;
+    return 1;
+}
 
+sub _handle_begin_c {
+    my $self = shift;
+    my ($platform, $PLATFORM_C) = @_;
+    if ( -e "config/gen/platform/$platform/begin.c" ) {
+        local $/ = undef;
+        open my $IN_C, "<", "config/gen/platform/$platform/begin.c" or die "Can't open begin.c: $!";
+
+        # slurp in the C file
+        my $in_c = <$IN_C>;
+
+        # remove the (in this case) superfluous coda
+        $in_c =~ s{\Q$self->{coda}\E\n*\z}{}xgs;
+
+        print {$PLATFORM_C} <<"END_HERE";
+/*
+** begin.c
+*/
+#line 1 "config/gen/platform/$platform/begin.c"
+END_HERE
+        print {$PLATFORM_C} $in_c, "\n\n";
+        close $IN_C;
+    }
+
+    return;
+}
+
+sub _handle_asm {
+    my $self = shift;
+    my ($conf, $platform) = @_;
     if ( $conf->data->get('platform_asm') ) {
         my $asm_file = "config/gen/platform/$platform/asm.s";
         if ( -e $asm_file ) {
@@ -273,11 +344,7 @@ END_HERE
         }
     }
 
-    # interface is the same for all platforms
-    copy_if_diff( "config/gen/platform/platform_interface.h",
-        "include/parrot/platform_interface.h" );
-
-    return $self;
+    return;
 }
 
 1;

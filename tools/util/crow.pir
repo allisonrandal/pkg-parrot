@@ -1,6 +1,6 @@
 #! ./parrot
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: crow.pir 17662 2007-03-20 21:47:56Z particle $
+# Copyright (C) 2007-2008, Parrot Foundation.
+# $Id: crow.pir 37200 2009-03-08 11:46:01Z fperrad $
 
 =head1 TITLE
 
@@ -29,13 +29,13 @@ module, L<runtime/parrot/library/Crow.pir>.
     curr_namespace = get_namespace
     test_namespace = get_namespace ['Crow']
     exports = split ' ', 'get_news get_args process'
-    test_namespace.export_to(curr_namespace, exports)
+    test_namespace.'export_to'(curr_namespace, exports)
 
     .local pmc opts
     opts = get_args(args)
 
     unless null opts goto got_opts
-    opts = new .Hash
+    opts = new 'Hash'
   got_opts:
 
     .local pmc templates
@@ -79,7 +79,7 @@ module, L<runtime/parrot/library/Crow.pir>.
     curr_namespace = get_namespace
     test_namespace = get_namespace [ 'Config';'JSON' ]
     exports = split ' ', 'ReadConfig'
-    test_namespace.export_to(curr_namespace, exports)
+    test_namespace.'export_to'(curr_namespace, exports)
 
     .local pmc result
     result = ReadConfig(filename)
@@ -111,8 +111,8 @@ module, L<runtime/parrot/library/Crow.pir>.
     .return ()
 
   agg_undefined:
-    $P0 = new .Exception
-    $P0['_message'] = "cannot assign to Null PMC!"
+    $P0 = new 'Exception'
+    $P0 = "cannot assign to Null PMC!"
     throw $P0
 .end
 
@@ -121,4 +121,4 @@ module, L<runtime/parrot/library/Crow.pir>.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

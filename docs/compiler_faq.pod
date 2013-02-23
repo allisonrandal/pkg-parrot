@@ -1,9 +1,9 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: compiler_faq.pod 18687 2007-05-30 14:25:33Z coke $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: compiler_faq.pod 37365 2009-03-12 20:51:38Z fperrad $
 
 =head1 NAME
 
-docs/compiler_faq.pod - Parrot FAQ for compiler writers
+docs/compiler_faq.pod - Parrot FAQ for compiler writers in PIR
 
 =head1 General Questions
 
@@ -13,31 +13,25 @@ Whoa, there--you're looking at the wrong FAQ.  This document is for people
 writing compilers that target Parrot.
 
 To answer your question, though, Parrot should theoretically work with any
-C89-compliant C compiler, although some features require C<gcc>.  See the
-F<README> files in the root directory for more information about building
-Parrot.
+C89-compliant C compiler. See the F<README> files in the root directory for
+more information about building Parrot.
 
 =head2 How can I implement a compiler to use as a compiler object from within
-Parrot? (For example, with the C<compile> op.)
+Parrot?
 
-Define a sub that takes as input a string, and returns something
-invokable. The easiest way to create something invokable at the moment
-is to use another compiler object (for example, the C<PIR> compiler), which
-you can get with:
-
- .local pmc pir_compiler
- pir_compiler = compreg 'PIR'
-
+See L<http://www.parrotblog.org/2008/03/targeting-parrot-vm.html>.
 
 =head2 How do I embed source locations in my code for debugging?
 
-Right now you can't.
+Use C<#line 42 "file.pir"> for this. Note that this command must be in the first
+column; there must not be any leading space, otherwise the command is treated
+as a comment (due to the C<#> character).
 
 =head1 Subroutines
 
 =head2 How do I generate a sub call in PIR?
 
-IMCC makes this easy, handling the calling conventions for you.
+This looks like a function call in many HLLs:
 
    $P0( $P1, $P2, $P3 )
 
@@ -54,6 +48,10 @@ You can also get return value(s):
 If the function name might collide with a Parrot opcode, quote it:
 
    i = 'new'(42)
+
+You can also use the full PCC for these calls. See
+L<docs/pdd19_pir.pod/Parameter Passing and Getting Flags> and other
+questions below for more information.
 
 =head2 How do I generate a method call in PIR?
 
@@ -75,20 +73,9 @@ the subroutine.
 
 If the sub is in the same compilation unit use a Sub constant:
 
-  .const .Sub foo = 'foo'
-
-The subroutine object is available in PASM too with a similar syntax:
-
-  .const .Sub P2 = 'foo'      # any P register will do
+  .const 'Sub' foo = 'foo'
   ...
-  .pcc_sub foo:               # denote a Sub constant
-
-If the PIR compiler finds a 'foo' function during compiling a file,
-then the syntax:
-
   foo()
-
-gets translated to above constant declaration.
 
 A more dynamic way is:
 
@@ -100,22 +87,23 @@ the current namespace, in the global, and in the builtin namespace in
 that order. This opcode is generated, if I<foo()> is used, but the
 compiler can't figure out, where the function is.
 
-If the subroutine is in a different namespace, use the C<find_global>
-opcode:
+If the subroutine is in a different namespace, use the
+C<get_hll_global> or C<get_root_global> opcodes:
 
-  foo = find_global 'Foo', 'foo'
+  foo = get_root_global ['Foo'], 'foo'
 
-This searches the sub C<foo> in the C<Foo> namespace.
+This fetches the sub C<foo> in the C<Foo> namespace.
 
 =head2 How do I create a Closure or Coroutine?
 
-Both carry dynamic state, therefore you use one of the above ways to
-locate the sub object, then you just clone it to get a distinct copy
-of it:
+Closure and Coroutine carry both a dynamic state.
+Therefore you need to perform two steps.
+First use one of the above ways to locate the Sub object.
+Then use the op C<newclosure> to capture the environment.
 
   .local pmc coro
   coro = find_name 'my_coro'
-  coro = clone coro
+  coro = newclosure coro
 
 Any subroutine that contains a C<.yield> directive is automatically
 created as a Coroutine PMC:
@@ -131,14 +119,15 @@ created as a Coroutine PMC:
 
   .sub foo
       # do something
-      .return bar(42)           # tail call sub bar
+      .tailcall bar(42)           # tail call sub bar
   .end
 
   .sub bar
       # ...
   .end
 
-The sub C<bar> will return to the caller of C<foo>.
+The sub C<bar> will return to the caller of C<foo>. (Warning! This fails
+in some cases. XXX Find the RT ticket and reference it here.)
 
 =head2 How do I generate a sub call with a variable-length parameter
 list in PIR?
@@ -146,7 +135,7 @@ list in PIR?
 If you have a variable amounts of arguments in an array, you can
 pass all items of that array with the C<:flat> directive.
 
-  ar = new .ResizablePMCArray
+  ar = new 'ResizablePMCArray'
   push ar, "arg 1\n"
   push ar, "arg 2\n"
   ...
@@ -190,8 +179,9 @@ Use the C<:optional> and C<:opt_flag> pragmas:
 
 =head2 How do I create nested subroutines?
 
-Please refer to L<docs/pdds/pdd20_lexical_vars.pod> for details: look for
-C<:outer>.
+Please refer to
+L<docs/pdds/pdd20_lexical_vars.pod/Nested Subroutines Have Outies; the ":outer" attribute>
+for details.
 
 =head1 Variables
 
@@ -201,27 +191,38 @@ There are two possible ways.  Either use the special PIR syntax:
 
     $P0 = global 'name_of_the_global'
 
-or the C<find_global> op:
+or the C<get_root_global> or C<get_hll_global> op:
 
-    find_global $P0, 'name_of_the_global'
+    get_hll_global $P0, ['name'; 'space'], 'name_of_the_global'
+    get_hll_global $P1, 'name_of_the_global'
 
 =head2 How can I delete a global?
 
 You can retrieve the namespace hash and use the C<delete> opcode.
 
-  .sub main :main
-    $P0 = new .Integer
-    store_hll_global 'foo', $P0
-    store_hll_global ['Bar'], 'baz', $P0
-    # ...
+    .sub main :main
+    $P0 = new 'Integer'
+    $P0 = 42
+    set_hll_global 'foo', $P0
+    set_hll_global ['Bar'], 'baz', $P0
+    show_baz()
     .local pmc ns, Bar_ns
     ns = get_hll_namespace
     delete ns['foo']              # delete from top level
     Bar_ns = ns['Bar']            # get Bar namespace
     delete Bar_ns['baz']
+    show_baz()
+    .end
+    .sub show_baz
     $P0 = get_hll_global ['Bar'], 'baz'
-    print "never\n"
-  .end
+    print "'baz' is "
+    if null $P0 goto is_null
+    print $P0
+    print ".\n"
+    .return ()
+    is_null:
+    print "null.\n"
+    .end
 
 
 =head2 How do I use lexical pads to have both a function scope and a
@@ -231,8 +232,9 @@ Please refer to L<docs/pdds/pdd20_lexical_vars.pod> for details.
 
 =head2 How can I delete a lexical variable?
 
-You can't.  You can store a Null PMC as the value though, which will catch all
-further access to that variable and throw an exception.
+You can't.  You can store a PMCNULL as the value though, which will catch all
+further access to that variable and throw an exception. (You can create
+a PMCNULL with the C<null> opcode.)
 
 =head2 How do I resolve a variable name?
 
@@ -266,14 +268,14 @@ If your language looks up variables differently, you have to walk the
 
 Don't emit C<store_lex> at all. Use C<find_lex> only if the compiler
 doesn't know the variable. You can always just use the register that was
-defined in the C<.lex> directive as an alias to that lexical, if you are in t
+defined in the C<.lex> directive as an alias to that lexical, if you are in
 the same scope.
 
 =head1 Modules, Classes, and Objects
 
 =head2 How do I create a module?
 
-TODO
+XXX
 
 =head2 How do I create a class?
 
@@ -322,19 +324,10 @@ You can access attributes by a short name:
   $P0 = getattribute self, 'legs'
   assign $P0, 4                   # set attribute's value
 
-a fully qualified name:
+or by a fully qualified name: XXX This is long dead.
 
   $P0 = getattribute self, "Animal\0legs"
   assign $P0, 4                   # set attribute's value
-
-or by an index:
-
-  .local int offs
-  offs = classoffset 'Animal'
-  $I0 = offs + 0                  # 1st attribute
-  $P0 = getattribute self, $I0
-  $I0 = offs + 1                  # 2nd attribute
-  $P0 = getattribute self, $I0
 
 =head2 When should I use properties vs. attributes?
 
@@ -345,9 +338,9 @@ don't fit into the class's hierarchy, you could use properties.
 
 You first have to get the class PMC of the class you want to subclass.
 Either you use the PMC returned by the C<newclass> op if you created
-the class, or use the C<getclass> op:
+the class, or use the C<get_class> op:
 
-    getclass $P0, 'Animal'
+    get_class $P0, 'Animal'
 
 Then you can use the C<subclass> op to create a new class that is a
 subclass of this class:
@@ -368,9 +361,9 @@ example.
 If you have a class PMC (created with C<newclass> or by C<subclass>),
 you can add more parent classes to it with the C<addparent> op:
 
-    getclass $P1, 'Dog'
+    get_class $P1, 'Dog'
     subclass $P2, $P1, 'SmallDog'
-    getclass $P3, 'Pet'
+    get_class $P3, 'Pet'
     addparent $P2, $P3  # make "SmallDog" also a "Pet"
 
 =head2 How can I specify the constructor of a class?
@@ -389,20 +382,28 @@ Or you can specify the constructor method by setting the BUILD
 property of the class PMC:
 
     newclass $P0, 'Dog'         # create a class named Dog
-    new $P1, .String            # create a string
+    new $P1, 'String'           # create a string
     set $P1, 'initialise'       # set it to the name of the constructor method
     setprop $P0, 'BUILD', $P1   # set the BUILD property
 
 =head2 How do I instantiate a class?
 
-You can either do so with an interger type id:
-
-    $I0 = find_type 'Dog'
-    new $P0, $I0    # creates a Dog object and stores it in register $P0
-
-or with the class name:
+You can do so either with the class name:
 
     new $P0, 'Dog'
+
+or with the class object:
+
+    $P1 = get_class 'Dog'   # find the 'Dog' class
+    unless null $P1 goto have_dog_class
+    printerr "Oops; can't find the 'Dog' class.\n"
+    .return ()
+  have_dog_class:
+    new $P0, $P1    # creates a Dog object and stores it in register $P0
+
+The chief difference is that using a string constant will produce the
+specific error "Class 'Dog' not found" if that happens to be the case;
+the other code has to check explicitly.
 
 During the C<new> opcode the constructor is called.
 
@@ -412,7 +413,7 @@ You can pass only a single argument to a constructor.  By convention,
 a hash PMC is passed to the constructor that contains the arguments as
 key/value pairs:
 
-    new $P0, .Hash
+    new $P0, 'Hash'
     set $P0['greeting'], 'hello'
     set $P0['size'], 1.23
 
@@ -422,77 +423,78 @@ key/value pairs:
 
 =head2 How do I add module/class methods?
 
-TODO
+XXX
 
 =head2 How do I access module/class variables?
 
-TODO
+XXX
 
 =head1 Exceptions
 
 =head2 How do I throw an exception in PIR?
 
-Create an Exception object and throw it!
+The easiest way is the perl-like
 
-    $P0 = new .Exception
-    throw $P0
+    die 'Eeeek!'
 
-Not too hard, is it?
+You can also explicitly create an exception object and throw it:
 
-=head2 How do I throw an exception with an error message in PIR?
-
-    $P0 = new .Exception
-    $P0['_message'] = 'something happened'
+    $P0 = new 'Exception'
+    $P0 = 'something happened'
     throw $P0
 
 =head2 How do I catch an exception in PIR?
 
-Use C<push_eh> to push an exception handler onto the stack.
+Use C<push_eh> to push an exception handler onto the stack. End the set of
+instructions that might throw the exception you're interested in with
+C<pop_eh>.
 
     push_eh handler
-      $P0 = new .Exception        # or any other code ...
-      throw $P0                   # ... that might throw
-    clear_eh
-    exit 0
+      die 'whoops'  # or any other code that might throw an exception...
+    pop_eh
+    ... # ok
 
-An exception handler is called with two arguments: the exception and the
-message.  More information is available inside the exception 'object' (TBD).
+An exception handler is called with one argument, which is the exception object.
+The message of the exception can be easily extracted, as follows:
 
-  handler:
-    .get_results ($P0, $S0)
+  handler: # exception
+    .get_results ($P0)
     print 'Exception caught:'
-    print $S0
-    print "\n"
-    exit 1
+    $S0 = $P0['message']
+    say $S0
+    ...
 
 =head2 How do I let exceptions from C<exit> pass through my handler?
 
 Rethrow the exception if it has a severity of C<EXCEPT_EXIT>.
 
+  .include 'except_severity.pasm'
+  ...
   handler:
-    .include 'except_severity.pasm'
-    .get_results ($P0, $S0)
-    $I0 = $P0[2]
-    if $I0 == .EXCEPT_EXIT goto unexceptional
-    print "Exception caught!\n"
-    exit 1
-  unexceptional:
-    rethrow $P0
+    .get_results ($P0)
+    $I0 = $P0['severity']
+    if $I0 == .EXCEPT_EXIT goto handle_exit
+    say 'Exception caught!'
+    ...
 
-=head2 How do I access the error message of an exception I've caught?
+  handle_exit:
+    rethrow $P0 # let the next handler deal with it.
+
+Exception example:
 
     push_eh handler
-    $P0 = new .Exception
-    $P0['_message'] = 'something happened'
+    $P0 = new 'Exception'
+    $P0 = 'something happened'
     throw $P0
-    clear_eh
+    pop_eh
     exit 0
 
   handler:
     .local pmc exception
     .local string message
-    .get_results (exception, message)
+    .get_results (exception)
     print 'Exception: '
+    message = exception['message']
     print message
     print "\n"
     exit 1
@@ -546,6 +548,58 @@ makefile:
       @cd $(OPSDIR) && $(BUILD) linklibs $(OPLIBS)
       @cd $(OPSDIR) && $(BUILD) copy "--destination=$(DESTDIR)" $(OPLIBS)
 
+
+=head2 How do I use the Native Calling Interface (NCI)?
+
+Using the NCI you can invoke functions written in C from a Parrot script.
+To every NCI invocation, there are two parts: the native function to be invoked,
+and the PIR code to do the invocation.
+
+First the native function, to be written in C.  On Windows, it is necessary
+to do a DLL export specification of the NCI function:
+
+  /* foo.c */
+
+  /* specify the function prototype */
+  #ifdef __WIN32
+  __declspec(dllexport) void foo(void);
+  #else
+  void foo(void);
+  #endif
+
+  void foo(void) {
+    printf("Hello Parrot!\n");
+  }
+
+Then, after having compiled the file as a shared library, the PIR code looks
+like this:
+
+  .sub main :main
+     .local pmc lib, func
+
+     # load the shared library
+     lib = loadlib "hello" # no extension, .so or .dll is assumed
+
+     # get a reference to the function from the library just
+     # loaded, called "foo", and signature "void" (and no arguments)
+     func = dlfunc lib, "foo", "v"
+
+     # invoke
+     func()
+
+  .end
+
+If you embedded a Parrot in your C file and you want to invoke another function
+in that same C file, you should pass a null string to loadlib. Do that as follows:
+
+ .local pmc lib
+ .local string libname
+ null libname
+
+ lib = loadlib libname
+
+Under Linux, the .c file must then be linked with the -export-dynamic option.
+
 =head1 Misc
 
 =head2 How can I access a program's environment?
@@ -553,7 +607,7 @@ makefile:
 Create a new C<Env> PMC and access it like a hash.
 
     .local pmc e
-    e = new .Env
+    e = new 'Env'
     $P0 = e['USER']      # lt
 
 =head2 How can I access Parrot's configuration?
@@ -577,7 +631,6 @@ Aside from the files in your new language directory, you must modify
     MANIFEST
     config/gen/languages.pm
     config/gen/makefiles/languages.in
-    languages/LANGUAGES.STATUS.pod
 
 Inside your language dir, you may consider adding the following:
 

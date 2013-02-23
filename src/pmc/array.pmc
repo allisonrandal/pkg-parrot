@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: array.pmc 18701 2007-05-31 04:55:41Z petdance $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: array.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -19,11 +19,10 @@ These are the vtable functions for the Array base class.
 */
 
 #include "parrot/parrot.h"
-#include <assert.h>
 
 /*
 
-=item C<static PMC* undef(Interp* interp)>
+=item C<static PMC *undef(PARROT_INTERP)>
 
 Returns a C<Undef> PMC.
 
@@ -31,14 +30,13 @@ Returns a C<Undef> PMC.
 
 */
 
-static PMC* undef(Interp* interp)
-{
+static PMC *undef(PARROT_INTERP) {
     return pmc_new(interp, enum_class_Undef);
 }
 
 /*
 
-=item C<static PMC* retval(Interp *interp, void *ret)>
+=item C<static PMC *retval(PARROT_INTERP, void *ret)>
 
 Processes C<*ret>, returning the appropriate PMC, or raising an
 exception if necessary.
@@ -47,28 +45,32 @@ exception if necessary.
 
 */
 
-static PMC* retval(Interp *interp, void *ret)
-{
+static PMC *retval(PARROT_INTERP, void *ret) {
     PMC *value;
+
     if (ret == 0)
-        real_exception(interp, NULL, E_IndexError,
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
             "Array index out of bounds!");
+
     /* XXX getting non existent value, exception or undef?
      * current is for perlarray */
-    if (ret == (void*) -1)
+    if (ret == (void *)-1)
         value = undef(interp);
     else {
-        value = *(PMC**) ret;
-        if (value == NULL)  /* XXX same here */
+        value = *(PMC **)ret;
+
+        /* XXX same here */
+        if (!value)
             value = undef(interp);
     }
+
     return value;
 }
 
 /*
 
-=item C<static PMC*
-Parrot_Array_set_pmc_ptr(Interp *interp, List *list, INTVAL key)>
+=item C<static PMC
+*Parrot_Array_set_pmc_ptr(PARROT_INTERP, List *list, INTVAL key)>
 
 Returns a pointer to the element at index C<key> of C<*list>. If
 this element was previously empty, then this function also creates
@@ -78,27 +80,27 @@ and assigns an "undef" PMC to that element.
 
 */
 
-static PMC*
-Parrot_Array_set_pmc_ptr(Interp *interp, List *list, INTVAL key)
-{
+static PMC *Parrot_Array_set_pmc_ptr(PARROT_INTERP, List *list, INTVAL key) {
     void * const ret = list_get(interp, list, key, enum_type_PMC);
-    PMC *value;
+    PMC  *value;
 
     if (ret == 0)
-        real_exception(interp, NULL, E_IndexError,
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
             "Array index out of bounds!");
+
     /* assign into a sparse or not yet set value */
-    if (ret == (void*) -1 || *(PMC**)ret == 0) {
+    if (ret == (void *)-1 || *(PMC **)ret == 0) {
         value = undef(interp);
         list_assign(interp, list, key, value, enum_type_PMC);
     }
     else
-        value = *(PMC**) ret;
+        value = *(PMC **)ret;
+
     return value;
 }
 
 
-pmclass Array need_ext does array {
+pmclass Array need_ext provides array {
 
 /*
 
@@ -117,9 +119,15 @@ Class initialization. Creates the required memory pools.
 */
 
     void class_init() {
-        /* class_init_code */
-        make_bufferlike_pool(INTERP, sizeof (List_chunk));
-        make_bufferlike_pool(INTERP, sizeof (List));
+        /* class_init_code; called for side effects */
+        Small_Object_Pool *List_chunks =
+            get_bufferlike_pool(INTERP, sizeof (List_chunk));
+        Small_Object_Pool *Lists       =
+            get_bufferlike_pool(INTERP, sizeof (List));
+
+        /* XXX until there's a function to allocate a pool in an arena */
+        UNUSED(List_chunks);
+        UNUSED(Lists);
     }
 
 /*
@@ -132,7 +140,7 @@ Initializes the PMC by calling the underlying C<list_new()> function.
 
 */
 
-    void init() {
+    VTABLE void init() {
         list_pmc_new(INTERP, SELF);
         PObj_custom_mark_SET(SELF);
     }
@@ -141,16 +149,14 @@ Initializes the PMC by calling the underlying C<list_new()> function.
 
 =item C<void init_pmc(PMC *init)>
 
-Calls C<list_new_init()> to initialize the underlying list.
-
-C<*init> contains the initialization information specifying initial
-size, number of dimensions, etc.
+C<*init> contains the initialization information specifying initial size,
+number of dimensions, etc.
 
 =cut
 
 */
 
-    void init_pmc(PMC *init) {
+    VTABLE void init_pmc(PMC *init) {
         list_pmc_new_init(INTERP, SELF, init);
         PObj_custom_mark_SET(SELF);
     }
@@ -165,14 +171,14 @@ Copy the contents of other to self.
 
 */
 
-    void assign_pmc(PMC *other) {
-        INTVAL i;
+    VTABLE void assign_pmc(PMC *other) {
+        const INTVAL size = VTABLE_elements(INTERP, other);
+        INTVAL       i;
 
-        const INTVAL size = VTABLE_elements(INTERP,other);
-        DYNSELF.set_integer_native(size);
+        SELF.set_integer_native(size);
         for (i = 0; i < size; i++) {
-            PMC* const elem = VTABLE_get_pmc_keyed_int(INTERP, other, i);
-            DYNSELF.set_pmc_keyed_int(i, elem);
+            PMC * const elem = VTABLE_get_pmc_keyed_int(INTERP, other, i);
+            SELF.set_pmc_keyed_int(i, elem);
         }
     }
 
@@ -181,14 +187,14 @@ Copy the contents of other to self.
 
 =item C<void set_pmc(PMC *other)>
 
-Currently, an alias to C<assign_pmc>.  Expected to go away soon.
+Implemented as an alias to C<assign_pmc> since the behavior is the same.
 
 =cut
 
 */
 
-    void set_pmc(PMC *other) {
-        DYNSELF.assign_pmc(other);
+    VTABLE void set_pmc(PMC *other) {
+        SELF.assign_pmc(other);
     }
 
 /*
@@ -201,13 +207,13 @@ Mark the array and its contents as live.
 
 */
 
-    void mark() {
-        list_mark(INTERP, (List *) PMC_data(SELF));
+    VTABLE void mark() {
+        list_mark(INTERP, (List *)PMC_data(SELF));
     }
 
 /*
 
-=item C<PMC* clone()>
+=item C<PMC *clone()>
 
 Return a clone of the array.
 
@@ -215,12 +221,15 @@ Return a clone of the array.
 
 */
 
-    PMC* clone() {
-        List *l;
-        PMC* const dest = pmc_new_noinit(INTERP, SELF->vtable->base_type);
+    VTABLE PMC *clone() {
+        List       *l    = list_clone(INTERP, (List *)PMC_data(SELF));
+        PMC * const dest = pmc_new_noinit(INTERP, SELF->vtable->base_type);
+
         PObj_custom_mark_SET(dest);
-        PMC_data(dest) = l = list_clone(INTERP, (List *) PMC_data(SELF));
-        l->container = dest;
+
+        PMC_data(dest) = l;
+        l->container   = dest;
+
         return dest;
     }
 
@@ -234,8 +243,8 @@ Returns the number of elements in the array.
 
 */
 
-    INTVAL get_integer() {
-        return DYNSELF.elements();
+    VTABLE INTVAL get_integer() {
+        return SELF.elements();
     }
 
 /*
@@ -248,8 +257,8 @@ Returns true if the array has one or more elements.
 
 */
 
-    INTVAL get_bool() {
-        const INTVAL size = DYNSELF.elements();
+    VTABLE INTVAL get_bool() {
+        const INTVAL size = SELF.elements();
         return (INTVAL)(size != 0);
     }
 
@@ -263,7 +272,7 @@ Returns the number of elements in the array.
 
 */
 
-    INTVAL elements() {
+    VTABLE INTVAL elements() {
         return ((List *) PMC_data(SELF))->length;
     }
 
@@ -277,13 +286,14 @@ Returns the number of elements in the array.
 
 */
 
-    FLOATVAL get_number() {
-        return (FLOATVAL)(DYNSELF.elements());
+    VTABLE FLOATVAL get_number() {
+        INTVAL e = SELF.elements();
+        return (FLOATVAL)e;
     }
 
 /*
 
-=item C<STRING* get_string()>
+=item C<STRING *get_string()>
 
 Returns a string representation of the array.
 
@@ -291,7 +301,7 @@ Returns a string representation of the array.
 
 */
 
-    STRING* get_string() {
+    VTABLE STRING *get_string() {
         return Parrot_sprintf_c(INTERP, "array[%p]", SELF);
     }
 
@@ -305,29 +315,15 @@ Returns the integer value of the element at index C<key>.
 
 */
 
-    INTVAL get_integer_keyed_int(INTVAL key) {
-        PMC* const value = DYNSELF.get_pmc_keyed_int(key);
+    VTABLE INTVAL get_integer_keyed_int(INTVAL key) {
+        PMC * const value = SELF.get_pmc_keyed_int(key);
 
         return VTABLE_get_integer(INTERP, value);
     }
 
 /*
 
-=item C<INTVAL type_keyed_int(INTVAL key)>
-
-=cut
-
-*/
-
-    INTVAL type_keyed_int(INTVAL key) {
-        PMC* const value = DYNSELF.get_pmc_keyed_int(key);
-
-        return VTABLE_type(INTERP, value);
-    }
-
-/*
-
-=item C<INTVAL get_integer_keyed(PMC* key)>
+=item C<INTVAL get_integer_keyed(PMC *key)>
 
 Returns the integer value of the element at index C<key>.
 
@@ -335,20 +331,22 @@ Returns the integer value of the element at index C<key>.
 
 */
 
-    INTVAL get_integer_keyed(PMC* key) {
+    VTABLE INTVAL get_integer_keyed(PMC *key) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC   *nextkey, *box;
 
         if (!key)
             return 0;
-        ix = key_integer(INTERP, key);
+
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL)
+
+        if (!nextkey)
             return SELF.get_integer_keyed_int(ix);
 
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL)
+
+        if (!box)
             box = undef(INTERP);
 
         return VTABLE_get_integer_keyed(INTERP, box, nextkey);
@@ -364,8 +362,8 @@ Returns the float value of the element at index C<key>.
 
 */
 
-    FLOATVAL get_number_keyed_int(INTVAL key) {
-        PMC* const value = DYNSELF.get_pmc_keyed_int(key);
+    VTABLE FLOATVAL get_number_keyed_int(INTVAL key) {
+        PMC * const value = SELF.get_pmc_keyed_int(key);
 
         return VTABLE_get_number(INTERP, value);
 
@@ -373,7 +371,7 @@ Returns the float value of the element at index C<key>.
 
 /*
 
-=item C<FLOATVAL get_number_keyed(PMC* key)>
+=item C<FLOATVAL get_number_keyed(PMC *key)>
 
 Returns the float value of the element at index C<key>.
 
@@ -381,20 +379,22 @@ Returns the float value of the element at index C<key>.
 
 */
 
-    FLOATVAL get_number_keyed(PMC* key) {
+    VTABLE FLOATVAL get_number_keyed(PMC *key) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC *nextkey, *box;
 
         if (!key)
-            return 0;
-        ix = key_integer(INTERP, key);
+            return (FLOATVAL)0;
+
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL)
+
+        if (!nextkey)
             return SELF.get_number_keyed_int(ix);
 
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL)
+
+        if (!box)
             box = undef(INTERP);
 
         return VTABLE_get_number_keyed(INTERP, box, nextkey);
@@ -402,7 +402,7 @@ Returns the float value of the element at index C<key>.
 
 /*
 
-=item C<STRING* get_string_keyed_int(INTVAL key)>
+=item C<STRING *get_string_keyed_int(INTVAL key)>
 
 Returns the string value of the element at index C<key>.
 
@@ -410,15 +410,15 @@ Returns the string value of the element at index C<key>.
 
 */
 
-    STRING* get_string_keyed_int(INTVAL key) {
-        PMC* const value = DYNSELF.get_pmc_keyed_int(key);
+    VTABLE STRING *get_string_keyed_int(INTVAL key) {
+        PMC * const value = SELF.get_pmc_keyed_int(key);
 
         return VTABLE_get_string(INTERP, value);
     }
 
 /*
 
-=item C<STRING* get_string_keyed(PMC* key)>
+=item C<STRING *get_string_keyed(PMC *key)>
 
 Returns the string value of the element at index C<key>.
 
@@ -426,20 +426,22 @@ Returns the string value of the element at index C<key>.
 
 */
 
-    STRING* get_string_keyed(PMC* key) {
+    VTABLE STRING *get_string_keyed(PMC *key) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC   *nextkey, *box;
 
         if (!key)
             return 0;
-        ix = key_integer(INTERP, key);
+
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL)
+
+        if (!nextkey)
             return SELF.get_string_keyed_int(ix);
 
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL)
+
+        if (!box)
             box = undef(INTERP);
 
         return VTABLE_get_string_keyed(INTERP, box, nextkey);
@@ -447,7 +449,7 @@ Returns the string value of the element at index C<key>.
 
 /*
 
-=item C<PMC* get_pmc_keyed_int(INTVAL key)>
+=item C<PMC *get_pmc_keyed_int(INTVAL key)>
 
 Returns the PMC value of the element at index C<key>.
 
@@ -455,14 +457,15 @@ Returns the PMC value of the element at index C<key>.
 
 */
 
-    PMC* get_pmc_keyed_int(INTVAL key) {
+    VTABLE PMC *get_pmc_keyed_int(INTVAL key) {
 
-        return retval(INTERP, list_get(INTERP, (List*)PMC_data(SELF), key, enum_type_PMC));
+        return retval(INTERP,
+            list_get(INTERP, (List *)PMC_data(SELF), key, enum_type_PMC));
     }
 
 /*
 
-=item C<PMC* get_pmc_keyed(PMC* key)>
+=item C<PMC *get_pmc_keyed(PMC *key)>
 
 Returns the PMC value of the element at index C<key>.
 
@@ -470,21 +473,22 @@ Returns the PMC value of the element at index C<key>.
 
 */
 
-    PMC* get_pmc_keyed(PMC* key) {
+    VTABLE PMC *get_pmc_keyed(PMC *key) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC   *nextkey, *box;
 
         if (!key)
             return 0;
 
-        ix = key_integer(INTERP, key);
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL)
+
+        if (!nextkey)
             return SELF.get_pmc_keyed_int(ix);
 
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL)
+
+        if (!box)
             box = undef(INTERP);
 
         return VTABLE_get_pmc_keyed(INTERP, box, nextkey);
@@ -500,12 +504,12 @@ Sets the length of the array to C<size>.
 
 */
 
-    void set_integer_native(INTVAL size) {
-        list_set_length(INTERP, (List *) PMC_data(SELF) ,size);
+    VTABLE void set_integer_native(INTVAL size) {
+        list_set_length(INTERP, (List *)PMC_data(SELF), size);
     }
 /*
 
-=item C<void set_integer_same(PMC* value)>
+=item C<void set_integer_same(PMC *value)>
 
 Sets the length of the array to the number of elements in C<*value>.
 
@@ -513,9 +517,9 @@ Sets the length of the array to the number of elements in C<*value>.
 
 */
 
-    void set_integer_same(PMC* value) {
+    VTABLE void set_integer_same(PMC *value) {
         const INTVAL size = VTABLE_elements(INTERP, value);
-        list_set_length(INTERP, (List *) PMC_data(SELF) ,size);
+        list_set_length(INTERP, (List *)PMC_data(SELF), size);
     }
 
 /*
@@ -528,15 +532,16 @@ Sets the integer value of the PMC at element C<key> to C<value>.
 
 */
 
-    void set_integer_keyed_int(INTVAL key, INTVAL value) {
-        PMC * const ptr = Parrot_Array_set_pmc_ptr(INTERP, (List *) PMC_data(SELF), key);
+    VTABLE void set_integer_keyed_int(INTVAL key, INTVAL value) {
+        PMC * const ptr =
+            Parrot_Array_set_pmc_ptr(INTERP, (List *)PMC_data(SELF), key);
 
         VTABLE_set_integer_native(INTERP, ptr, value);
     }
 
 /*
 
-=item C<void set_integer_keyed(PMC* key, INTVAL value)>
+=item C<void set_integer_keyed(PMC *key, INTVAL value)>
 
 Sets the integer value of the PMC at element C<key> to C<value>.
 
@@ -544,25 +549,27 @@ Sets the integer value of the PMC at element C<key> to C<value>.
 
 */
 
-    void set_integer_keyed(PMC* key, INTVAL value) {
+    VTABLE void set_integer_keyed(PMC *key, INTVAL value) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC   *nextkey, *box;
 
         if (!key)
             return;
 
-        ix = key_integer(INTERP, key);
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL) {
-            DYNSELF.set_integer_keyed_int(ix, value);
+
+        if (!nextkey) {
+            SELF.set_integer_keyed_int(ix, value);
             return;
         }
+
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL) {
-            /* autovivify an Array */
-            box = pmc_new(INTERP, DYNSELF.type());
-        }
+
+        /* autovivify an Array */
+        if (!box)
+            box = pmc_new(INTERP, SELF.type());
+
         VTABLE_set_integer_keyed(INTERP, box, nextkey, value);
     }
 
@@ -576,15 +583,16 @@ Sets the numeric value of the PMC at element C<key> to C<value>.
 
 */
 
-    void set_number_keyed_int(INTVAL key, FLOATVAL value) {
-        PMC* const ptr = Parrot_Array_set_pmc_ptr(INTERP, (List *) PMC_data(SELF), key);
+    VTABLE void set_number_keyed_int(INTVAL key, FLOATVAL value) {
+        PMC * const ptr =
+            Parrot_Array_set_pmc_ptr(INTERP, (List *)PMC_data(SELF), key);
 
         VTABLE_set_number_native(INTERP, ptr, value);
     }
 
 /*
 
-=item C<void set_number_keyed(PMC* key, FLOATVAL value)>
+=item C<void set_number_keyed(PMC *key, FLOATVAL value)>
 
 Sets the numeric value of the PMC at element C<key> to C<value>.
 
@@ -592,31 +600,33 @@ Sets the numeric value of the PMC at element C<key> to C<value>.
 
 */
 
-    void set_number_keyed(PMC* key, FLOATVAL value) {
+    VTABLE void set_number_keyed(PMC *key, FLOATVAL value) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC   *nextkey, *box;
 
         if (!key)
             return;
 
-        ix = key_integer(INTERP, key);
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL) {
+
+        if (!nextkey) {
             SELF.set_number_keyed_int(ix, value);
             return;
         }
+
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL) {
-            /* autovivify an Array */
-            box = pmc_new(INTERP, DYNSELF.type());
-        }
+
+        /* autovivify an Array */
+        if (!box)
+            box = pmc_new(INTERP, SELF.type());
+
         VTABLE_set_number_keyed(INTERP, box, nextkey, value);
     }
 
 /*
 
-=item C<void set_string_keyed_int(INTVAL key, STRING* value)>
+=item C<void set_string_keyed_int(INTVAL key, STRING *value)>
 
 Sets the string value of the PMC at element C<key> to C<value>.
 
@@ -624,15 +634,16 @@ Sets the string value of the PMC at element C<key> to C<value>.
 
 */
 
-    void set_string_keyed_int(INTVAL key, STRING* value) {
-        PMC* const ptr = Parrot_Array_set_pmc_ptr(INTERP, (List *) PMC_data(SELF), key);
+    VTABLE void set_string_keyed_int(INTVAL key, STRING *value) {
+        PMC * const ptr =
+            Parrot_Array_set_pmc_ptr(INTERP, (List *)PMC_data(SELF), key);
 
         VTABLE_set_string_native(INTERP, ptr, value);
     }
 
 /*
 
-=item C<void set_string_keyed(PMC* key, STRING* value)>
+=item C<void set_string_keyed(PMC *key, STRING *value)>
 
 Sets the string value of the PMC at element C<key> to C<value>.
 
@@ -640,31 +651,33 @@ Sets the string value of the PMC at element C<key> to C<value>.
 
 */
 
-    void set_string_keyed(PMC* key, STRING* value) {
+    VTABLE void set_string_keyed(PMC *key, STRING *value) {
         INTVAL ix;
-        PMC* nextkey;
-        PMC* box;
+        PMC   *nextkey, *box;
 
         if (!key)
             return;
 
-        ix = key_integer(INTERP, key);
+        ix      = key_integer(INTERP, key);
         nextkey = key_next(INTERP, key);
-        if (nextkey == NULL) {
+
+        if (!nextkey) {
             VTABLE_set_string_keyed_int(INTERP, SELF, ix, value);
             return;
         }
+
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL) {
-            /* autovivify an Array */
-            box = pmc_new(INTERP, DYNSELF.type());
-        }
+
+        /* autovivify an Array */
+        if (!box)
+            box = pmc_new(INTERP, SELF.type());
+
         VTABLE_set_string_keyed(INTERP, box, nextkey, value);
     }
 
 /*
 
-=item C<void set_pmc_keyed_int(INTVAL idx, PMC* src)>
+=item C<void set_pmc_keyed_int(INTVAL idx, PMC *src)>
 
 Sets the PMC at element C<idx> to C<*src>.
 
@@ -672,21 +685,20 @@ Sets the PMC at element C<idx> to C<*src>.
 
 */
 
-    void set_pmc_keyed_int(INTVAL idx, PMC* src) {
-        const INTVAL length = ((List *) PMC_data(SELF))->length;
+    VTABLE void set_pmc_keyed_int(INTVAL idx, PMC *src) {
+        const INTVAL length = ((List *)PMC_data(SELF))->length;
 
-        if (idx >= length || -idx > length) {
-            real_exception(INTERP, NULL, E_IndexError,
+        if (idx >= length || -idx > length)
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
                 "Array index out of bounds!");
-        }
 
-        list_assign(INTERP, (List *) PMC_data(SELF), idx,
-            (void*)src, enum_type_PMC);
+        list_assign(INTERP, (List *)PMC_data(SELF), idx,
+            (void *)src, enum_type_PMC);
     }
 
 /*
 
-=item C<void set_pmc_keyed(PMC* key, PMC* value)>
+=item C<void set_pmc_keyed(PMC *key, PMC *value)>
 
 Sets the PMC at index C<key> to C<value>.
 
@@ -694,21 +706,23 @@ Sets the PMC at index C<key> to C<value>.
 
 */
 
-    void set_pmc_keyed(PMC* key, PMC* value) {
-        PMC* box;
+    VTABLE void set_pmc_keyed(PMC *key, PMC *value) {
+        PMC *box;
 
-        const INTVAL ix = key_integer(INTERP, key);
-        PMC * const nextkey = key_next(INTERP, key);
+        const INTVAL ix      = key_integer(INTERP, key);
+        PMC * const  nextkey = key_next(INTERP, key);
 
-        if (nextkey == NULL) {
+        if (!nextkey) {
             VTABLE_set_pmc_keyed_int(INTERP, SELF, ix, value);
             return;
         }
+
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL) {
-            /* autovivify an Array */
-            box = pmc_new(INTERP, DYNSELF.type());
-        }
+
+        /* autovivify an Array */
+        if (!box)
+            box = pmc_new(INTERP, SELF.type());
+
         VTABLE_set_pmc_keyed(INTERP, box, nextkey, value);
     }
 
@@ -723,9 +737,9 @@ the array.
 
 */
 
-    void push_integer(INTVAL value) {
-        const INTVAL nextix = DYNSELF.elements();
-        DYNSELF.set_integer_keyed_int(nextix, value);
+    VTABLE void push_integer(INTVAL value) {
+        const INTVAL nextix = SELF.elements();
+        SELF.set_integer_keyed_int(nextix, value);
     }
 
 /*
@@ -739,14 +753,14 @@ the array.
 
 */
 
-    void push_float(FLOATVAL value) {
-        const INTVAL nextix = DYNSELF.elements();
-        DYNSELF.set_number_keyed_int(nextix, value);
+    VTABLE void push_float(FLOATVAL value) {
+        const INTVAL nextix = SELF.elements();
+        SELF.set_number_keyed_int(nextix, value);
     }
 
 /*
 
-=item C<void push_string(STRING* value)>
+=item C<void push_string(STRING *value)>
 
 Extends the array by adding an element of value C<*value> to the end of
 the array.
@@ -755,14 +769,14 @@ the array.
 
 */
 
-    void push_string(STRING* value) {
-        const INTVAL nextix = DYNSELF.elements();
-        DYNSELF.set_string_keyed_int(nextix, value);
+    VTABLE void push_string(STRING *value) {
+        const INTVAL nextix = SELF.elements();
+        SELF.set_string_keyed_int(nextix, value);
     }
 
 /*
 
-=item C<void push_pmc(PMC* value)>
+=item C<void push_pmc(PMC *value)>
 
 Extends the array by adding an element of value C<*value> to the end of
 the array.
@@ -771,9 +785,9 @@ the array.
 
 */
 
-    void push_pmc(PMC* value) {
-        const INTVAL nextix = DYNSELF.elements();
-        DYNSELF.set_pmc_keyed_int(nextix, value);
+    void push_pmc(PMC *value) {
+        const INTVAL nextix = SELF.elements();
+        SELF.set_pmc_keyed_int(nextix, value);
     }
 
 /*
@@ -787,10 +801,10 @@ of the array.
 
 */
 
-    void unshift_integer(INTVAL value) {
+    VTABLE void unshift_integer(INTVAL value) {
         PMC * const val = undef(INTERP);
 
-        list_unshift(INTERP, (List*)PMC_data(SELF), val, enum_type_PMC);
+        list_unshift(INTERP, (List *)PMC_data(SELF), val, enum_type_PMC);
         VTABLE_set_integer_native(INTERP, val, value);
     }
 
@@ -805,10 +819,10 @@ of the array.
 
 */
 
-    void unshift_float(FLOATVAL value) {
+    VTABLE void unshift_float(FLOATVAL value) {
         PMC * const val = undef(INTERP);
 
-        list_unshift(INTERP, (List*)PMC_data(SELF), val, enum_type_PMC);
+        list_unshift(INTERP, (List *)PMC_data(SELF), val, enum_type_PMC);
         VTABLE_set_number_native(INTERP, val, value);
     }
 
@@ -823,9 +837,9 @@ of the array.
 
 */
 
-    void unshift_string(STRING *value) {
+    VTABLE void unshift_string(STRING *value) {
         PMC * const val = undef(INTERP);
-        list_unshift(INTERP, (List*)PMC_data(SELF), val, enum_type_PMC);
+        list_unshift(INTERP, (List *)PMC_data(SELF), val, enum_type_PMC);
         VTABLE_set_string_native(INTERP, val, value);
     }
 
@@ -841,7 +855,7 @@ of the array.
 */
 
     void unshift_pmc(PMC *value) {
-        list_unshift(INTERP, (List*)PMC_data(SELF), value, enum_type_PMC);
+        list_unshift(INTERP, (List *)PMC_data(SELF), value, enum_type_PMC);
     }
 
 /*
@@ -854,9 +868,8 @@ Removes and returns an integer from the end of the array.
 
 */
 
-    INTVAL pop_integer() {
-        PMC * const ptr = DYNSELF.pop_pmc();
-
+    VTABLE INTVAL pop_integer() {
+        PMC * const ptr = SELF.pop_pmc();
         return VTABLE_get_integer(INTERP, ptr);
     }
 
@@ -870,15 +883,14 @@ Removes and returns a float value from the end of the array.
 
 */
 
-    FLOATVAL pop_float() {
-        PMC * const ptr = DYNSELF.pop_pmc();
-
+    VTABLE FLOATVAL pop_float() {
+        PMC * const ptr = SELF.pop_pmc();
         return VTABLE_get_number(INTERP, ptr);
     }
 
 /*
 
-=item C<STRING* pop_string()>
+=item C<STRING *pop_string()>
 
 Removes and returns a string from the end of the array.
 
@@ -886,15 +898,14 @@ Removes and returns a string from the end of the array.
 
 */
 
-    STRING* pop_string() {
-        PMC * const ptr = DYNSELF.pop_pmc();
-
+    VTABLE STRING *pop_string() {
+        PMC * const ptr = SELF.pop_pmc();
         return VTABLE_get_string(INTERP, ptr);
     }
 
 /*
 
-=item C<PMC* pop_pmc()>
+=item C<PMC *pop_pmc()>
 
 Removes and returns a PMC from the end of the array.
 
@@ -902,8 +913,9 @@ Removes and returns a PMC from the end of the array.
 
 */
 
-    PMC* pop_pmc() {
-        return retval(INTERP, list_pop(INTERP, (List*)PMC_data(SELF), enum_type_PMC));
+    VTABLE PMC *pop_pmc() {
+        return retval(INTERP,
+            list_pop(INTERP, (List *)PMC_data(SELF), enum_type_PMC));
     }
 
 /*
@@ -916,9 +928,8 @@ Removes and returns an integer from the start of the array.
 
 */
 
-    INTVAL shift_integer() {
-        PMC * const ptr = DYNSELF.shift_pmc();
-
+    VTABLE INTVAL shift_integer() {
+        PMC * const ptr = SELF.shift_pmc();
         return VTABLE_get_integer(INTERP, ptr);
     }
 
@@ -932,15 +943,14 @@ Removes and returns a float from the start of the array.
 
 */
 
-    FLOATVAL shift_float() {
-        PMC * const ptr = DYNSELF.shift_pmc();
-
+    VTABLE FLOATVAL shift_float() {
+        PMC * const ptr = SELF.shift_pmc();
         return VTABLE_get_number(INTERP, ptr);
     }
 
 /*
 
-=item C<STRING* shift_string()>
+=item C<STRING *shift_string()>
 
 Removes and returns a string from the start of the array.
 
@@ -948,15 +958,14 @@ Removes and returns a string from the start of the array.
 
 */
 
-    STRING* shift_string() {
-        PMC * const ptr = DYNSELF.shift_pmc();
-
+    VTABLE STRING *shift_string() {
+        PMC * const ptr = SELF.shift_pmc();
         return VTABLE_get_string(INTERP, ptr);
     }
 
 /*
 
-=item C<PMC* shift_pmc()>
+=item C<PMC *shift_pmc()>
 
 Removes and returns a PMC from the start of the array.
 
@@ -964,13 +973,14 @@ Removes and returns a PMC from the start of the array.
 
 */
 
-    PMC* shift_pmc() {
-        return retval(INTERP, list_shift(INTERP, (List*)PMC_data(SELF), enum_type_PMC));
+    VTABLE PMC *shift_pmc() {
+        return retval(INTERP,
+            list_shift(INTERP, (List *)PMC_data(SELF), enum_type_PMC));
     }
 
 /*
 
-=item C<void splice(PMC* value, INTVAL offset, INTVAL count)>
+=item C<void splice(PMC *value, INTVAL offset, INTVAL count)>
 
 Replaces C<count> elements starting at C<offset> with the elements in
 C<value>.
@@ -982,12 +992,13 @@ C<offset>.
 
 */
 
-    void splice(PMC* value, INTVAL offset, INTVAL count) {
+    void splice(PMC *value, INTVAL offset, INTVAL count) {
         if (SELF->vtable->base_type != value->vtable->base_type)
-            real_exception(INTERP, NULL, E_TypeError,
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
                 "Type mismatch in splice");
-        list_splice(INTERP, (List*) PMC_data(SELF),
-            (List *) PMC_data(value), offset, count);
+
+        list_splice(INTERP, (List *)PMC_data(SELF),
+            (List *)PMC_data(value), offset, count);
     }
 
 /*
@@ -1000,21 +1011,25 @@ Returns TRUE is the element at C<key> is defined; otherwise returns false.
 
 */
 
-    INTVAL defined_keyed_int(INTVAL key) {
-        PMC* value;
-        void * const ret = list_get(INTERP, (List *) PMC_data(pmc), key, enum_type_PMC);
+    VTABLE INTVAL defined_keyed_int(INTVAL key) {
+        PMC  *value;
+        void * const ret =
+            list_get(INTERP, (List *)PMC_data(pmc), key, enum_type_PMC);
 
         if (ret == 0 || ret == (void *) -1)
             return 0;
-        value = *(PMC**) ret;
+
+        value = *(PMC **)ret;
+
         if (!value)
             return 0;
+
         return VTABLE_defined(INTERP, value);
     }
 
 /*
 
-=item C<INTVAL defined_keyed(PMC* key)>
+=item C<INTVAL defined_keyed(PMC *key)>
 
 Returns TRUE is the element at C<key> is defined; otherwise returns false.
 
@@ -1022,17 +1037,18 @@ Returns TRUE is the element at C<key> is defined; otherwise returns false.
 
 */
 
-    INTVAL defined_keyed(PMC* key) {
-        PMC* box;
+    VTABLE INTVAL defined_keyed(PMC *key) {
+        PMC *box;
 
-        const INTVAL ix = key_integer(INTERP, key);
-        PMC * const nextkey = key_next(INTERP, key);
+        const INTVAL ix      = key_integer(INTERP, key);
+        PMC * const  nextkey = key_next(INTERP, key);
 
-        if (nextkey == NULL)
+        if (!nextkey)
             return SELF.defined_keyed_int(ix);
 
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL)
+
+        if (!box)
             return 0;
 
         return VTABLE_defined_keyed(INTERP, box, nextkey);
@@ -1048,18 +1064,19 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
 
 */
 
-    INTVAL exists_keyed_int(INTVAL key) {
-        void * ret;
+    VTABLE INTVAL exists_keyed_int(INTVAL key) {
+        void * ret = list_get(INTERP,
+            (List *)PMC_data(pmc), key, enum_type_PMC);
 
-        ret = list_get(INTERP, (List *) PMC_data(pmc), key, enum_type_PMC);
-        if (ret == 0 || ret == (void *) -1)
+        if (ret == 0 || ret == (void *)-1)
             return 0;
-        return *(PMC**) ret != NULL;
+
+        return !PMC_IS_NULL(*(PMC **)ret);
     }
 
 /*
 
-=item C<INTVAL exists_keyed(PMC* key)>
+=item C<INTVAL exists_keyed(PMC *key)>
 
 Returns TRUE is the element at C<key> exists; otherwise returns false.
 
@@ -1067,17 +1084,18 @@ Returns TRUE is the element at C<key> exists; otherwise returns false.
 
 */
 
-    INTVAL exists_keyed(PMC* key) {
-        PMC* box;
+    VTABLE INTVAL exists_keyed(PMC *key) {
+        PMC *box;
 
-        const INTVAL ix = key_integer(INTERP, key);
-        PMC * const nextkey = key_next(INTERP, key);
+        const INTVAL ix      = key_integer(INTERP, key);
+        PMC * const  nextkey = key_next(INTERP, key);
 
-        if (nextkey == NULL)
+        if (!nextkey)
             return SELF.exists_keyed_int(ix);
 
         box = SELF.get_pmc_keyed_int(ix);
-        if (box == NULL)
+
+        if (!box)
             return 0;
 
         return VTABLE_exists_keyed(INTERP, box, nextkey);
@@ -1093,13 +1111,13 @@ Removes the element at C<key>.
 
 */
 
-    void delete_keyed_int(INTVAL key) {
-        list_splice(INTERP, (List *) PMC_data(pmc), NULL, key, 1);
+    VTABLE void delete_keyed_int(INTVAL key) {
+        list_splice(INTERP, (List *)PMC_data(pmc), NULL, key, 1);
     }
 
 /*
 
-=item C<void delete_keyed(PMC* key)>
+=item C<void delete_keyed(PMC *key)>
 
 Removes the element at C<*key>.
 
@@ -1107,15 +1125,14 @@ Removes the element at C<*key>.
 
 */
 
-    void delete_keyed(PMC* key) {
+    VTABLE void delete_keyed(PMC *key) {
         const INTVAL ix = key_integer(INTERP, key);
-
-        list_splice(INTERP, (List *) PMC_data(pmc), NULL, ix, 1);
+        list_splice(INTERP, (List *)PMC_data(pmc), NULL, ix, 1);
     }
 
 /*
 
-=item C<INTVAL is_equal(PMC* value)>
+=item C<INTVAL is_equal(PMC *value)>
 
 The C<==> operation. Compares two array to hold equal elements.
 
@@ -1123,34 +1140,42 @@ The C<==> operation. Compares two array to hold equal elements.
 
 */
 
-    INTVAL is_equal(PMC* value) {
+    VTABLE INTVAL is_equal(PMC *value) {
         INTVAL j, n;
 
         if (value->vtable->base_type != enum_class_Array)
             return 0;
+
         n = SELF.elements();
+
         if (VTABLE_elements(INTERP, value) != n)
             return 0;
+
         for (j = 0; j < n; ++j) {
             PMC * const item1 = SELF.get_pmc_keyed_int(j);
             PMC * const item2 = VTABLE_get_pmc_keyed_int(INTERP, value, j);
 
-            if (item1 != item2)
-                if (!mmd_dispatch_i_pp(INTERP, item1, item2, MMD_EQ))
+            if (item1 != item2) {
+                INTVAL result;
+                Parrot_mmd_multi_dispatch_from_c_args(INTERP, "is_equal",
+                    "PP->I", item1, item2, &result);
+                if (!result)
                     return 0;
+            }
         }
+
         return 1;
     }
 
 /*
 
-=item C<PMC* slice(PMC *key, INTVAL f)>
+=item C<PMC *slice(PMC *key, INTVAL f)>
 
 Return a new iterator for the slice PMC C<key> if f == 0.
 
 Return a new pythonic array slice if f == 1.
 
-=item C<PMC* get_iter()>
+=item C<PMC *get_iter()>
 
 Return a new iterator for SELF.
 
@@ -1158,30 +1183,31 @@ Return a new iterator for SELF.
 
 */
 
-    PMC* slice(PMC* key, INTVAL f) {
-        switch (f) {
-            case 0:
-                {
-                    PMC * const iter = pmc_new_init(INTERP,
-                            enum_class_Iterator, SELF);
-                    PMC_struct_val(iter) = key;
-                    return iter;
-                }
+    VTABLE PMC *slice(PMC *key, INTVAL f) {
+        if (f == 0) {
+            STRING     *name = CONST_STRING(interp, "set_key");
+            PMC * const iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
+            Parrot_PCCINVOKE(interp, iter, name, "P->", key);
+            return iter;
         }
-        real_exception(INTERP, NULL, E_TypeError,
-            "Array: Unknown slice type");
-        return NULL;
+
+        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
+                "Array: Unknown slice type");
     }
 
-    PMC* get_iter() {
+    VTABLE PMC *get_iter() {
+        STRING     *name = CONST_STRING(interp, "set_key");
         PMC * const iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
-        PMC * const key =  pmc_new(INTERP, enum_class_Key);
+        PMC * const key  = pmc_new(INTERP, enum_class_Key);
+        Parrot_PCCINVOKE(interp, iter, name, "P->", key);
 
-        PMC_struct_val(iter) = key;
         PObj_get_FLAGS(key) |= KEY_integer_FLAG;
-        PMC_int_val(key) = 0;
-        if (!((List *) PMC_data(SELF))->length)
-            PMC_int_val(key) = -1;
+
+        if (!((List *)PMC_data(SELF))->length)
+            VTABLE_set_integer_native(INTERP, key, -1);
+        else
+            VTABLE_set_integer_native(INTERP, key, 0);
+
         return iter;
     }
 
@@ -1197,8 +1223,8 @@ C<*info> is the visit info, (see F<include/parrot/pmc_freeze.h>).
 
 */
 
-    void visit(visit_info *info) {
-        list_visit(INTERP, (List *) PMC_data(SELF), info);
+    VTABLE void visit(visit_info *info) {
+        list_visit(INTERP, (List *)PMC_data(SELF), info);
         SUPER(info);
     }
 
@@ -1212,10 +1238,10 @@ Used to archive the array.
 
 */
 
-    void freeze(visit_info *info) {
+    VTABLE void freeze(visit_info *info) {
         IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        io->vtable->push_integer(INTERP, io, VTABLE_elements(INTERP, SELF));
+        VTABLE_push_integer(INTERP, io, VTABLE_elements(INTERP, SELF));
     }
 
 /*
@@ -1228,41 +1254,39 @@ Used to unarchive the array.
 
 */
 
-    void thaw(visit_info *info) {
+    VTABLE void thaw(visit_info *info) {
         IMAGE_IO * const io = info->image_io;
 
         SUPER(info);
         if (info->extra_flags == EXTRA_IS_NULL) {
-            DYNSELF.set_integer_native(io->vtable->shift_integer(INTERP, io));
+            SELF.set_integer_native(VTABLE_shift_integer(INTERP, io));
     }
 }
 
 /*
 
-=item C<void share_ro()>
+=item C<PMC *share_ro()>
 
 Recursively make the array read-only and shared.
 
 =cut
 
 */
-    PMC* share_ro() {
-        PMC *_true;
-        PMC *ret;
+    VTABLE PMC *share_ro() {
+        PMC *_true, *ret;
 
         /* prevent infinite recursion */
-        if (PObj_is_PMC_shared_TEST(SELF)) {
-            real_exception(INTERP, NULL, INVALID_OPERATION, "share_ro on "
-                           "something that already is shared");
-        }
+        if (PObj_is_PMC_shared_TEST(SELF))
+            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
+                    "share_ro on something that already is shared");
 
         _true = pmc_new(INTERP, enum_class_Integer);
         VTABLE_set_integer_native(INTERP, _true, 1);
 
-        ret = pt_shared_fixup(INTERP, SELF);
+        ret   = pt_shared_fixup(INTERP, SELF);
 
         /* first set readonly */
-        VTABLE_setprop(INTERP, ret, const_string(INTERP, "_ro"), _true);
+        VTABLE_setprop(INTERP, ret, CONST_STRING(INTERP, "_ro"), _true);
 
         /* XXX do something that deals better with sparse lists */
         {
@@ -1270,16 +1294,17 @@ Recursively make the array read-only and shared.
             const INTVAL max = VTABLE_elements(INTERP, ret);
 
             for (i = 0; i < max; ++i) {
-                PMC * const value = (PMC *)list_get(INTERP, PMC_data_typed(ret, List *),
+                PMC * const value =
+                    (PMC *)list_get(INTERP, PMC_data_typed(ret, List *),
                                  i, enum_type_PMC);
 
                 if (!PMC_IS_NULL(value)) {
                     /* XXX do we need to clone first? */
                     PMC * const new_value = VTABLE_share_ro(INTERP, value);
-                    if (new_value != value) {
+
+                    if (new_value != value)
                         list_assign(INTERP, PMC_data_typed(ret, List *),
                             i, new_value, enum_type_PMC);
-                    }
                 }
             }
         }

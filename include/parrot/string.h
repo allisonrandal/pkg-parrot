@@ -1,7 +1,7 @@
 /* string.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: string.h 19094 2007-06-18 21:45:36Z petdance $
+ *     $Id: string.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -13,13 +13,12 @@
 #ifndef PARROT_STRING_H_GUARD
 #define PARROT_STRING_H_GUARD
 
+#include "parrot/core_types.h"
 #include "parrot/config.h"
-#include "parrot/pobj.h"
-
-struct parrot_string_t;
 
 #ifdef PARROT_IN_CORE
 
+#include "parrot/pobj.h"
 #include "parrot/parrot.h"
 
 typedef struct parrot_string_t STRING;
@@ -33,12 +32,13 @@ typedef struct string_iterator_t {
     const STRING *str;
     UINTVAL bytepos;
     UINTVAL charpos;
-    UINTVAL (*get_and_advance)(Interp *, struct string_iterator_t *i);
-    void (*set_and_advance)(Interp *, struct string_iterator_t *i, UINTVAL c);
-    void (*set_position)(Interp *, struct string_iterator_t *i, UINTVAL pos);
+    UINTVAL (*get_and_advance)(PARROT_INTERP, struct string_iterator_t *i);
+    void (*set_and_advance)(PARROT_INTERP, struct string_iterator_t *i, UINTVAL c);
+    void (*set_position)(PARROT_INTERP, struct string_iterator_t *i, UINTVAL pos);
 } String_iter;
 
-void string_iter_init(Interp *, const STRING *str, String_iter *);
+#define STREQ(x, y)  (strcmp((x), (y))==0)
+#define STRNEQ(x, y) (strcmp((x), (y))!=0)
 
 /* stringinfo parameters */
 

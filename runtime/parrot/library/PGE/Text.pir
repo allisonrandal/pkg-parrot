@@ -10,13 +10,14 @@ also.)
 
 =cut
 
-.namespace [ "PGE::Text" ]
+.namespace [ 'PGE';'Text' ]
 
 .include "cclass.pasm"
 
 .sub "__onload" :load
-    .local pmc base
-    $P0 = subclass 'PGE::Grammar', 'PGE::Text'
+    .local pmc p6meta
+    p6meta = get_hll_global 'P6metaclass'
+    p6meta.'new_class'('PGE::Text', 'parent'=>'PGE::Grammar')
 .end
 
 =head2 Available rules
@@ -28,7 +29,7 @@ also.)
 Extracts a balanced-bracket-delimited substring from the
 current position of C<target> using the delimiters specified
 by C<delim>, and returns a C<Match> object containing the result
-of the extraction.  
+of the extraction.
 
 =cut
 
@@ -37,20 +38,19 @@ of the extraction.
     .param string delim        :optional           # optional delimiters
     .param int has_delim       :opt_flag
     .param pmc adverbs         :slurpy :named      # named options
-    .local pmc newfrom                             # newfrom sub
-    .local pmc mob, mfrom, mpos                    # return match object
+    .local pmc mob                                 # return match object
     .local string target                           # target as string
     .local string bal, bra, ket                    # balanced brackets
     .local string delim_bra, delim_ket             # delims for this match
     .local string lookket                          # closing bracket char
-    .local int pos                                 # current match position
+    .local int from, pos                           # current match position
     .local int balanced                            # in balanced match
     .local pmc stack                               # lookket backtracking
 
-    stack = new .ResizableStringArray
-    newfrom = find_global "PGE::Match", "newfrom"
-    (mob, target, mfrom, mpos) = newfrom(tgt, 0)
-    pos = mfrom
+    stack = new 'ResizableStringArray'
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target) = $P0.'new'(tgt)
+    from = pos
 
     if has_delim goto mkdelims
     delim = "{}()[]<>"
@@ -63,7 +63,7 @@ of the extraction.
     ket = '}}))]]>>'                               # balanced closers
     $I0 = length delim                             # length of delim string
   mkdelims_1:
-    dec $I0                          
+    dec $I0
     if $I0 < 0 goto extract
     $S0 = substr delim, $I0, 1
     $I1 = index bal, $S0
@@ -79,13 +79,13 @@ of the extraction.
     goto mkdelims_1
 
   extract:
-    $S0 = substr target, pos, 1                    
+    $S0 = substr target, pos, 1
     if $S0 == "\\" goto end                        # leading escape fails
     $I0 = index delim_bra, $S0
     if $I0 < 0 goto end                            # no leading delim fails
     lookket = ''
     balanced = 1
-  next:                                       
+  next:
     $S0 = substr target, pos, 1                    # check current pos
     if $S0 == '' goto fail                         # end of string -> fail
     if $S0 == "\\" goto escape                     # skip escaped pos
@@ -95,7 +95,7 @@ of the extraction.
     if $I0 >= 0 goto open
     $I0 = index delim_ket, $S0                     # unbalanced nest?>
     if $I0 >= 0 goto fail
-  skip:                                       
+  skip:
     inc pos                                        # move to next char
     goto next                                      # try next
   escape:
@@ -112,10 +112,11 @@ of the extraction.
     balanced = 1                                   # we're balancing again
     inc pos                                        # skip close char
     if lookket != '' goto next                     # still nested?
-    mpos = pos                                     # we have a match!
-    ($P0, $P1, $P2, $P3) = newfrom(mob, mfrom)     # create delim-less submatch
-    $P2 = mfrom + 1
-    $P3 = mpos - 1
+    mob.'to'(pos)                                  # set end of match
+    $I0 = from + 1                                # create delim-less submatch
+    $I1 = pos - 1
+    $P0 = mob.'new'(mob, 'pos' => $I0)
+    $P0.'to'($I1)
     mob[0] = $P0
   fail:                                            # fail match
   end:
@@ -136,4 +137,4 @@ Patches and suggestions should be sent to the Perl 6 compiler list
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

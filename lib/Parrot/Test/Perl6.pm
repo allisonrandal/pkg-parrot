@@ -1,4 +1,6 @@
-# $Id: Perl6.pm 17090 2007-02-20 20:06:55Z paultcochrane $
+# $Id: Perl6.pm 37200 2009-03-08 11:46:01Z fperrad $
+
+# Copyright (C) 2006-2007, Parrot Foundation.
 
 =head1 NAME
 
@@ -131,9 +133,10 @@ sub _generate_functions {
             ## read in the command output
             my $actual_output = Parrot::Test::slurp_file($f_out);
 
-            ## tell Test::Builder if the test is marked TODO
+            ## tell Test::Builder if the test is marked as a todo-item
             my $call_pkg = $b->exported_to() || '';
-            local *{ $call_pkg . '::TODO' } = \$extra{todo}
+            local *{ $call_pkg . '::TODO' } = ## no critic Variables::ProhibitConditionalDeclarations
+                \$extra{todo}
                 if defined $extra{todo};
 
             ## run Test::Builder's test on actual vs. expected output

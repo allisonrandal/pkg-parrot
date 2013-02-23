@@ -1,11 +1,11 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: fhs.pod 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: fhs.pod 37201 2009-03-08 12:07:48Z fperrad $
 
 =pod
 
 =head1 Title
 
-FHS - Filesystem Hieararchy Standard and Parrot
+FHS - Filesystem Hierarchy Standard and Parrot
 
 =head1 AUTHOR
 
@@ -56,7 +56,7 @@ host-specific or varies with time is stored elsewhere.
 
 This is the primary directory of executable commands on the system. All
 executables that are intended to be called directly by the user (i.e.
-parrot, pdump, disassemble, parrot-debugger, pbc_info,  pbg_merge, ...)
+parrot, parrot_debugger, pbc_disassemble, pbc_dump, pbc_info, pbg_merge, ...)
 should go here. The current version number should be appended to the
 binaries itself and a symlink needs to be created that points from the
 binary with version number to the normal name of the file without a
@@ -82,7 +82,7 @@ are not intended to be executed directly by users or scripts.
 This is libparrot$(SOEXT).$(SOVERSION) if the parrot binary was linked
 dynamically. Otherwise nothing.
 
-Also Parrot usees a single subdirectory called I</usr/lib/parrot> to
+Also Parrot uses a single subdirectory called I</usr/lib/parrot> to
 store all architecture-dependent data exclusively used by parrot. These
 files are grouped by the parrot version they belong to. So we'll have
 I</usr/lib/parrot/0.4.0>, I</usr/lib/parrot/0.4.1>, etc.

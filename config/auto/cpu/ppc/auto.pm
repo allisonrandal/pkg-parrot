@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: auto.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: auto.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -16,25 +16,23 @@ package auto::cpu::ppc::auto;
 use strict;
 use warnings;
 
-use Parrot::Configure::Step qw(cc_gen cc_build cc_run cc_clean);
-
 sub runstep {
     my ( $self, $conf ) = @_;
 
     my $verbose = $conf->options->get('verbose');
 
-    my @files = qw( test_gcc_cmpset.in );
+    my @files = qw( test_gcc_cmpset_c.in );
     for my $f (@files) {
         print " $f " if $verbose;
         my ($suffix) = $f =~ /test_(\w+)/;
         $f = "config/auto/cpu/ppc/$f";
-        cc_gen($f);
-        eval { cc_build("-DPARROT_CONFIG_TEST") };
+        $conf->cc_gen($f);
+        eval { $conf->cc_build("-DPARROT_CONFIG_TEST") };
         if ($@) {
             print " $@ " if $verbose;
         }
         else {
-            if ( cc_run() =~ /ok/ ) {
+            if ( $conf->cc_run() =~ /ok/ ) {
                 $conf->data->set(
                     "ppc_has_$suffix" => '1',
                     "HAS_PPC_$suffix" => '1',
@@ -43,7 +41,7 @@ sub runstep {
                 $conf->data->add( ' ', TEMP_generated => $f );
             }
         }
-        cc_clean();
+        $conf->cc_clean();
     }
 }
 

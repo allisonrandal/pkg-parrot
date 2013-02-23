@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: pasm_sub1.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: pasm_sub1.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ F<docs/pdds/pdd03_calling_conventions.pod>
 =cut
 
     # Fetch a subroutine objec
-    .const .Sub P0 = "_sub"
+    .const 'Sub' P0 = "_sub"
 
     # Call the sub in argument, create return continuation
     invokecc P0

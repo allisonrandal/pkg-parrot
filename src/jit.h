@@ -1,13 +1,21 @@
 /*
+ * Copyright (C) 2001-2007, Parrot Foundation.
+ */
+
+/*
  * jit.h
  *
- * $Id: jit.h 19094 2007-06-18 21:45:36Z petdance $
+ * $Id: jit.h 37393 2009-03-13 19:56:52Z Util $
  */
 
 #ifndef PARROT_JIT_H_GUARD
 #define PARROT_JIT_H_GUARD
 
-typedef void (*jit_f)(Interp *interp, opcode_t *pc);
+#if EXEC_CAPABLE
+#  include "parrot/exec.h"
+#endif
+
+typedef void (*jit_f)(PARROT_INTERP, opcode_t *pc);
 
 
 void Parrot_destroy_jit(void *);
@@ -62,7 +70,7 @@ enum {
  *  size:           The size of the arena in bytes
  *  op_map:         Maps opcode offsets to native code.
  *  map_size:       The size of the map in bytes.
- *  fixups:         List of fixupes.
+ *  fixups:         List of fixups.
  */
 
 typedef struct Parrot_jit_arena_t {
@@ -210,7 +218,7 @@ typedef struct Parrot_jit_info_t {
     ((jit_info)->arena.start + (fixup)->native_offset)
 
 typedef void (*jit_fn_t)(Parrot_jit_info_t *jit_info,
-                         Interp *interp);
+                         PARROT_INTERP);
 
 /*  Parrot_jit_fn_info_t
  *      The table of opcodes.
@@ -226,28 +234,28 @@ typedef struct Parrot_jit_fn_info_t {
     int                            extcall;
 } Parrot_jit_fn_info_t;
 
-extern PARROT_API Parrot_jit_fn_info_t *op_jit;
+PARROT_DATA Parrot_jit_fn_info_t *op_jit;
 extern Parrot_jit_fn_info_t op_exec[];
 
-PARROT_API void Parrot_jit_newfixup(Parrot_jit_info_t *jit_info);
+PARROT_EXPORT void Parrot_jit_newfixup(Parrot_jit_info_t *jit_info);
 
 void Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-                        Interp *interp);
+                        PARROT_INTERP);
 
 void Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-                          Interp *interp);
+                          PARROT_INTERP);
 
 void Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
-                          Interp *interp);
+                          PARROT_INTERP);
 
 void Parrot_exec_cpcf_op(Parrot_jit_info_t *jit_info,
-                        Interp *interp);
+                        PARROT_INTERP);
 
 void Parrot_exec_normal_op(Parrot_jit_info_t *jit_info,
-                          Interp *interp);
+                          PARROT_INTERP);
 
 void Parrot_exec_restart_op(Parrot_jit_info_t *jit_info,
-                          Interp *interp);
+                          PARROT_INTERP);
 
 /*
  * interface functions for the register save/restore code
@@ -282,9 +290,9 @@ typedef struct jit_arch_regs {
     const char *map_F;
 } jit_arch_regs;
 
-typedef void (*mov_RM_f)(Parrot_jit_info_t *,
+typedef void (*mov_RM_f)(PARROT_INTERP, Parrot_jit_info_t *,
         int cpu_reg, int base_reg, INTVAL offs);
-typedef void (*mov_MR_f)(Parrot_jit_info_t *,
+typedef void (*mov_MR_f)(PARROT_INTERP, Parrot_jit_info_t *,
         int base_reg, INTVAL offs, int cpu_reg);
 
 typedef struct jit_arch_info_t {
@@ -304,15 +312,10 @@ typedef struct jit_arch_info_t {
 } jit_arch_info;
 
 /*
- * return the jit_arch_info for the given JIT_CODE type
- */
-const jit_arch_info * Parrot_jit_init(Interp *);
-
-/*
  * interface to create JIT code
  */
 Parrot_jit_info_t *
-parrot_build_asm(Interp *interp,
+parrot_build_asm(PARROT_INTERP,
                 opcode_t *code_start, opcode_t *code_end,
                 void *objfile, INTVAL);
 /*

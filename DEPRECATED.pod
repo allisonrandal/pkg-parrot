@@ -1,92 +1,140 @@
-=head1 .imc file extension
+# $Id: DEPRECATED.pod 37512 2009-03-17 06:55:09Z allison $
 
-http://xrl.us/jc4u
+=head1 Deprecation in Parrot
 
- IMC vs. PIR
- Two names enter
- One name leaves
+Please see F<docs/project/support_policy.pod> for the parrot
+project's policy regarding deprecated features.
 
- /me giggles
- -- Chip Salzenberg
+This is a list of currently deprecated features of Parrot.  Every deprecation
+has an associated Trac ticket [1].  Each item indicates the first release
+in which it is eligible for removal. If the release listed is one that
+has already occurred, this feature may be removed at any time.
 
-=head1 Deprecated C APIs
+Following the 1.0 release, whenever deprecated items are removed, information
+regarding how to cope with the removal will be added to
+L<https://trac.parrot.org/parrot/wiki/Deprecation>.
 
-Currently no C APIs are deprecated.
+When running parrot, you can receive warnings about deprecated opcodes.
+Either run parrot with the C<-w> option to enable all warnings, or
+specifically by including this C<PIR> code:
 
-=head1 Deprecated methods
+ .include 'include/warnings.pasm'
+ warningson .PARROT_WARNINGS_DEPRECATED_FLAG
+
+=head1 Configuration
 
 =over 4
 
-=item PGE
+=item Always build with core PMC set (remove config option) [eligible in 1.1]
 
-PGE::P6Regex is now a registered compiler, and should be used like so:
-
- <@pmichaud> it's easy; instead of  $P0 = find_global "PGE", "p6rule"
-   one now does  $P0 = compreg "PGE::P6Regex"
-
-This syntax is also true for PGE::Glob and PGE::P5Regex
+L<https://trac.parrot.org/parrot/ticket/310>
 
 =back
 
-=head1 Deprecated ops
-
-From http://www.parrotcode.org/docs/ops/var.html, the following ops are 
-deprecated:
+=head1 PMCS
 
 =over 4
 
-=item store_global
+=item pointer [eligible in 1.1]
 
-=item find_global
+L<https://trac.parrot.org/parrot/ticket/187>
 
-=item find_name
+=item random [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/189>
+
+=item ref [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/190>
+
+=item slice [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/372>
+
+=item bound_nci [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/373>
+
+=item moved to dynpmc [eligible in 1.1]
+
+AddrRegistry, CodeString, Env, Eval, File, OS, PCCMETHOD_Test, StringHandle,
+and Timer.
+
+L<https://trac.parrot.org/parrot/ticket/448>
+
+=item multiple dispatch within core PMCs [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/452>
 
 =back
 
-There are several variants of some of the above ops; all are deprecated,
-and are replaced by the ops {set,get}_[hll,root]_global. See also
-http://www.parrotcode.org/docs/ops/var.html.
-
-The C<classname> op will deprecated in the 0.5.0 release. It's an exact
-duplicate of the string return variant of the C<typeof> op.
-
-=head1 Deprecated vtable methods
-
-The following vtable methods are deprecated:
+=head1 Opcodes
 
 =over 4
 
-=item PMC* subclass(PMC* name)
+=item moved to dynop [eligible in 1.1]
+
+Parts or all of: bit.ops, debug.ops, io.ops, math.ops, obscure.ops, set.ops
+(the obscure and rarely used parts), sys.ops.
+
+L<https://trac.parrot.org/parrot/ticket/449>
+
+=item experimental ops [eligible in 1.1]
+
+F<src/ops/experimental.ops>
+
+=item myops & dan ops [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/450>
 
 =back
 
-=head1 Deprecated classes
-
-To be removed from the 0.4.14 release [RT #43249].
-
- src/pmc/smop_class.pmc
- src/pmc/smop_attribute.pmc
- t/pmc/smop_attribute.t
- t/pmc/smop_class.t
- compilers/smop/ (entire directory)
-
-=head1 FUTURE changes
-
-Not yet deprecated, but it's recommended to use the new syntax and
-gradually change the old.
+=head1 Bytecode
 
 =over 4
 
-=item PMC Class name IDs [#41237]
+=item packfile structure [eligible in 1.1]
 
-... will require a dot in front
+L<https://trac.parrot.org/parrot/ticket/451>
 
-  $P0 = new Integer               => $P0 = new .Integer
+=item opcode numbering [eligible in 1.1]
 
-=item Assignment syntax with opcodes [#36283]
+L<https://trac.parrot.org/parrot/ticket/451>
 
-When the first argument of an opcode is C<OUT>, then the assignment syntax
-will be allowed, as it is today.
+=item PMC numbering [eligible in 1.1]
+
+L<https://trac.parrot.org/parrot/ticket/451>
+
+=back
+
+=head1 Class Features
+
+=over 4
+
+=item PMC union struct [eligible in 1.1]
+
+This will be removed once all core PMCs have been updated.
+
+L<http://rt.perl.org/rt3/Ticket/Display.html?id=48014>
+
+=item :anon and :vtable named parameters to add_method [eligible in 1.1]
+
+If you want to override a vtable method/function when building a Class, then
+use the method C<add_vtable_override> instead of calling C<add_method> with
+one or both of these flags.
+
+L<https://trac.parrot.org/parrot/ticket/158>
+
+=back
+
+=head1 PIR syntax
+
+=over 4
+
+=item Assignment syntax with opcodes [eligible in 1.1]
+
+When the first argument of an opcode is C<OUT>, then
+the assignment syntax will be allowed, as it is today.
 
 In any other case (i.e. C<INOUT>, C<IN>), this will become
 a syntax error. For example:
@@ -99,4 +147,210 @@ Will have to be:
     print $S0
     substr $P0, 1, 2, "x"
 
+L<http://rt.perl.org/rt3/Ticket/Display.html?id=36283>
+
+=item named class/pmc lookup in pir syntax such as new, isa, subclass, 
+    get_class, etc [eligible in 1.1]
+
+Class PMC name resolution will be the following.
+
+if the arg is a STRING
+  Relative to the current Namespace
+
+if the arg is a Array (of any sort) or Key
+  Relative to the current HLL Namespace
+
+if the arg is a Namespace or Class PMC
+  The passed in class or the class attatched to the passed in namespace.
+
+L<https://trac.parrot.org/parrot/ticket/159>
+
+=item C<.HLL_map> [eligible in 1.1]
+
+Languages should use this instead:
+
+  $P0 = getinterp
+  $P0.'hll_map'(TypeA, TypeB)
+
+L<https://trac.parrot.org/parrot/ticket/314>
+
 =back
+
+=head1 Functions
+
+=over 4
+
+=item mmd_cvt_to_types [eligible in 1.1]
+
+L<http://rt.perl.org/rt3/Ticket/Display.html?id=60626>
+
+=item src/pic.c and src/pic_jit.c [eligible in 1.1]
+
+These two files were a thin prototype implementation of Polymorphic Inline
+Caching that only ever applied to 4 opcodes, one of which has now been removed.
+The files (and all functions in them) are deprecated, and will be removed.
+
+L<http://rt.perl.org/rt3/Ticket/Display.html?id=60048>
+
+=item Subs marked with C<:vtable>/C<:method> aren't in namespace [eligible in 1.1]
+
+Subs marked with C<:vtable> or C<:method> flags are no longer given a
+namespace entry by default.  Use the C<:nsentry> flag to cause this
+to happen.
+
+L<http://rt.perl.org/rt3/Ticket/Display.html?id=53302>
+
+=item Parrot_readbc, Parrot_loadbc. [eligible in 1.1]
+
+They have been renamed to C<Parrot_pbc_read>, C<Parrot_pbc_load>.
+C<Parrot_pbc_read> has one third int argument.
+
+L<https://trac.parrot.org/parrot/ticket/266>
+
+=item C API coding standards cleanup [eligible in 1.1]
+
+All C API functions that aren't currently named according to the
+'Parrot_<system>_*' scheme will be renamed. If you depend on these
+functions in an extending/embedding interface or C-level custom PMCs,
+check in 1.4 or 2.0 for the new names.
+
+L<https://trac.parrot.org/parrot/ticket/443>
+
+=item src/hash.c API cleanup [eligible in 1.1]
+
+The following functions will be changed to return a C<Hash*> instead of
+taking a C<Hash**> as an argument:
+
+=over 4
+
+=item * parrot_new_hash_x
+
+=item * parrot_new_cstring_hash
+
+=item * parrot_new_pointer_hash
+
+=back
+
+L<https://trac.parrot.org/parrot/ticket/447>
+
+C<Parrot_new_INTVAL_hash> will also be rewritten to return a Hash* and will be
+renamed to C<parrot_new_intval_hash> for consistency with other similar
+functions.
+
+L<https://trac.parrot.org/parrot/ticket/456>
+
+=item Parrot_add_library_path [eligible in 1.1]
+
+Will be renamed to C<Parrot_lib_add_path_from_cstring>.
+
+L<https://trac.parrot.org/parrot/ticket/455>
+
+=back
+
+=head1 Compiler tools
+
+=head2 P6object
+
+=over 4
+
+=item P6protoobject stringification [eligible in 1.1]
+
+Stringification of protoobjects will return the full name of the type
+and parentheses, per Synopsis 12.
+
+L<https://trac.parrot.org/parrot/ticket/168>
+
+=back
+
+=head2 Parrot Grammar Engine
+
+=over 4
+
+=item Deprecated rules and methods [eligible in 1.1]
+
+The following "built-in" PGE rules and methods are from previous 
+versions of Synopsis 5.
+
+Deprecated rules:
+    C<null>, C<fail>, C<sp>, C<lt>, C<gt>, C<dot>
+
+Deprecated methods:
+    C<.text>, C<.item>, C<.result_object>
+
+L<https://trac.parrot.org/parrot/ticket/460>
+
+=item Stringification, numification [eligible in 1.1]
+
+C< PGE::Match > objects will stringify or numify based on
+the text that is matched, not the result object.
+
+L<https://trac.parrot.org/parrot/ticket/461>
+
+=back
+
+=head2 Parrot Compiler Toolkit
+
+=over 4
+
+=item PCT::HLLCompiler stages [eligible in 1.1]
+
+The interface of various methods for adding, removing, and modifying 
+the list stages in a PCT::HLLCompiler object is subject to change.
+The existing actual stages will remain; only the mechanism for specifying
+the order of individual stages is likely to change.
+
+L<https://trac.parrot.org/parrot/ticket/462>
+
+=item PCT::HLLCompiler from Perl 5's Test::Harness [eligible in 1.1]
+
+In order to facilitate using PCT::HLLCompiler with test harnesses,
+the C<command_line> method of PCT::HLLCompiler object exits silently 
+if it detects that it is being run in a sample run from Perl's
+Test::Harness.  Currently this detection is done by checking the
+second command line argument for "@INC"; future releases may
+use a different detection mechanism or eliminate it altogether.
+
+L<https://trac.parrot.org/parrot/ticket/463>
+
+=back
+
+=head2 Not Quite Perl (NQP)
+
+=over 4
+
+=item C< $(...) > syntax  [eligible in 1.5]
+
+The C< $(...) > syntax for obtaining a result object from a Match
+object will no longer work.  The new syntax is yet to be determined.
+
+L<https://trac.parrot.org/parrot/ticket/459>
+
+=back
+
+=cut
+
+=head1 build tools
+
+=over 4
+
+=item tools/build/dynoplibs.pl and tools/build/dynpmc.pl [eligible in 1.1]
+
+Replaced with makefiles.
+
+L<https://trac.parrot.org/parrot/ticket/338>
+
+=back
+
+=head1 Footnotes
+
+=over 4
+
+=item 1
+
+L<Trac|http://trac.parrot.org/> is parrot's primary issue tracking system.
+
+Older tickets may be listed at L<RT|https://rt.perl.org/rt3>.
+
+=back
+
+=cut

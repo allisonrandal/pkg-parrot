@@ -1,9 +1,9 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: install.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: install.pm 37144 2009-03-06 04:26:29Z Util $
 
 =head1 NAME
 
-config/init/install.pm - autoconf compatabile installation paths
+config/init/install.pm - autoconf compatible installation paths
 
 =head1 DESCRIPTION
 
@@ -11,100 +11,81 @@ Sets up the installation paths
 
 =cut
 
-# taken from:
-#
-# autoconf (GNU Autoconf) 2.59
-# Written by David J. MacKenzie and Akim Demaille.
-#
-# Copyright (C) 2003 Free Software Foundation, Inc.
-# This is free software; see the source for copying conditions.  There is NO
-# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# Installation directories:
-#   --prefix=PREFIX         install architecture-independent files in PREFIX
-#                           [/usr/local]
-#   --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
-#                           [PREFIX]
-#
-# By default, `make install' will install all the files in
-# `/usr/local/bin', `/usr/local/lib' etc.  You can specify
-# an installation prefix other than `/usr/local' using `--prefix',
-# for instance `--prefix=$HOME'.
-#
-# For better control, use the options below.
-#
-# Fine tuning of the installation directories:
-#  --bindir=DIR           user executables [EPREFIX/bin]
-#  --sbindir=DIR          system admin executables [EPREFIX/sbin]
-#  --libexecdir=DIR       program executables [EPREFIX/libexec]
-#  --datadir=DIR          read-only architecture-independent data [PREFIX/share]
-#  --sysconfdir=DIR       read-only single-machine data [PREFIX/etc]
-#  --sharedstatedir=DIR   modifiable architecture-independent data [PREFIX/com]
-#  --localstatedir=DIR    modifiable single-machine data [PREFIX/var]
-#  --libdir=DIR           object code libraries [EPREFIX/lib]
-#  --includedir=DIR       C header files [PREFIX/include]
-#  --oldincludedir=DIR    C header files for non-gcc [/usr/include]
-#  --infodir=DIR          info documentation [PREFIX/info]
-#  --mandir=DIR           man documentation [PREFIX/man]
-
 package init::install;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step;
-
-$description = q{Setting up installation paths};
-
-@args = qw( prefix exec-prefix bindir sbindir libexecdir datadir sysconfdir
-    sharedstatedir localstatedir libdir includedir oldincludedir infodir
-    mandir );
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Set up installation paths};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $prefix  = $conf->options->get('prefix')      || "/usr/local";
-    my $eprefix = $conf->options->get('exec-prefix') || $prefix;
+    my $prefix = $conf->options->get('prefix') || ($^O eq 'MSWin32' ? "C:/Parrot" : "/usr/local");
+    $prefix =~ s{/\z}{};
+    my $ep = $conf->options->get('exec-prefix');
+    $ep =~ s{/\z}{} if defined $ep;
+    my $eprefix = $ep ? $ep : $prefix;
+
+    # Install in versioned subdirectories, "/usr/lib/parrot/1.5.0/...". Skip
+    # the "/parrot" or "/1.5.0" subdirectories if these are included in the
+    # prefix.
+    my $versiondir = '';
+    unless ($prefix =~ /parrot/) {
+        $versiondir .= '/parrot';
+    }
+    my $version = $conf->option_or_data('VERSION');
+    if ($version && $prefix !~ /$version/) {
+        $versiondir .= "/$version";
+        $versiondir .= $conf->option_or_data('DEVEL');
+    }
 
     #  --bindir=DIR           user executables [EPREFIX/bin]
-    my $bindir = $conf->options->get('bindir') || $eprefix . "/bin";
+    my $bindir = assign_dir( $conf, 'bindir', $eprefix, '/bin' );
 
     #  --sbindir=DIR          system admin executables [EPREFIX/sbin]
-    my $sbindir = $conf->options->get('sbindir') || $eprefix . "/sbin";
+    my $sbindir = assign_dir( $conf, 'sbindir', $eprefix, '/sbin' );
 
     #  --libexecdir=DIR       program executables [EPREFIX/libexec]
-    my $libexecdir = $conf->options->get('libexecdir') || $eprefix . "/libexec";
+    my $libexecdir = assign_dir( $conf, 'libexecdir', $eprefix, '/libexec' );
 
     #  --datadir=DIR          read-only architecture-independent data [PREFIX/share]
-    my $datadir = $conf->options->get('datadir') || $prefix . "/share";
+    my $datadir = assign_dir( $conf, 'datadir', $prefix, '/share' );
 
     #  --sysconfdir=DIR       read-only single-machine data [PREFIX/etc]
-    my $sysconfdir = $conf->options->get('sysconfdir') || $prefix . "/etc";
+    my $sysconfdir = assign_dir( $conf, 'sysconfdir', $prefix, '/etc' );
 
     #  --sharedstatedir=DIR   modifiable architecture-independent data [PREFIX/com]
-    my $sharedstatedir = $conf->options->get('sharedstatedir')
-        || $prefix . "/com";
+    my $sharedstatedir = assign_dir( $conf, 'sharedstatedir', $prefix, '/com' );
 
     #  --localstatedir=DIR    modifiable single-machine data [PREFIX/var]
-    my $localstatedir = $conf->options->get('localstatedir')
-        || $prefix . "/var";
+    my $localstatedir = assign_dir( $conf, 'localstatedir', $prefix, '/var' );
 
     #  --libdir=DIR           object code libraries [EPREFIX/lib]
-    my $libdir = $conf->options->get('libdir') || $eprefix . "/lib";
+    my $libdir = assign_dir( $conf, 'libdir', $eprefix, '/lib' );
 
     #  --includedir=DIR       C header files [PREFIX/include]
-    my $includedir = $conf->options->get('includedir') || $prefix . "/include";
+    my $includedir = assign_dir( $conf, 'includedir', $prefix, '/include' );
 
     #  --oldincludedir=DIR    C header files f|| non-gcc [/usr/include]
-    my $oldincludedir = $conf->options->get('oldincludedir') || "/usr/include";
+    my $oldincludedir = assign_dir( $conf, 'oldincludedir', q{}, '/usr/include' );
 
     #  --infodir=DIR          info documentation [PREFIX/info]
-    my $infodir = $conf->options->get('infodir') || $prefix . "/info";
+    my $infodir = assign_dir( $conf, 'infodir', $prefix, '/info' );
 
     #  --mandir=DIR           man documentation [PREFIX/man]
-    my $mandir = $conf->options->get('mandir') || $prefix . "/man";
+    my $mandir = assign_dir( $conf, 'mandir', $prefix, '/man' );
+
+    #  --srcdir=DIR           source code files PREFIX/src]
+    my $srcdir = assign_dir( $conf, 'srcdir', $prefix, '/src' );
 
     $conf->data->set(
         prefix         => $prefix,
@@ -124,12 +105,20 @@ sub runstep {
         oldincludedir  => $oldincludedir,
         infodir        => $infodir,
         mandir         => $mandir,
+        srcdir         => $srcdir,
 
         # parrot internal use only
-        doc_dir => $datadir . "/doc/parrot",
+        doc_dir        => $datadir . "/doc",
+        versiondir     => $versiondir,
     );
 
-    return $self;
+    return 1;
+}
+
+sub assign_dir {
+    my ( $conf, $dir_str, $fix, $ext ) = @_;
+    my $d = $conf->options->get($dir_str);
+    return $d ? $d : $fix . $ext;
 }
 
 1;

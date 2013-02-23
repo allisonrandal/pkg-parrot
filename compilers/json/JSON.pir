@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
+# Copyright (C) 2005-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ appropriate values. For example:
  JSON = compreg 'JSON'
  $P0 = JSON('[1,2,3]')
 
-Will create a pmc that C<does> array, contains the values 1, 2, and 3, and 
+Will create a pmc that C<does> array, contains the values 1, 2, and 3, and
 store it in register C<$P0>.
 
 For more information about the structure of the JSON representation, see the
@@ -34,7 +34,7 @@ documentation at L<http://www.json.org/>.
     $P1 = get_global '__compiler'
     compreg "JSON", $P1
 
-    $P1 = new .Hash
+    $P1 = new 'Hash'
     $P1['\"'] = '"'
     $P1['\\'] = "\\"
     $P1['\/'] = '/'
@@ -51,32 +51,32 @@ documentation at L<http://www.json.org/>.
     .param string json_string
 
    .local pmc parse, match
-   parse = get_root_global ['parrot'; 'JSON'], 'thing'
+   parse = get_root_global ['parrot'; 'JSON'], 'value'
 
-   $P0 = get_root_global ['parrot'; 'PGE::Match'], 'newfrom'
-   match = $P0(json_string)
-   match.to(0)
+   $P0 = get_root_global ['parrot'; 'PGE'], 'Match'
+   match = $P0.'new'(json_string)
+   match.'to'(0)
    match = parse(match)
    unless match goto failed
 
    .local pmc pirgrammar, pirbuilder, pir
-   pirgrammar = new 'JSON::PIR'
-   pirbuilder = pirgrammar.apply(match)
-   pir = pirbuilder.get('result')
-   
+   pirgrammar = new ['JSON'; 'PIR']
+   pirbuilder = pirgrammar.'apply'(match)
+   pir = pirbuilder.'get'('result')
+
    .local pmc pirc, result
    pirc = compreg "PIR"
-   result = pirc(pir) 
-   .return result()
+   result = pirc(pir)
+   .tailcall result()
 
   failed:
-   P0 = new .Exception
-   P0[0] = "invalid JSON value"
-   throw P0
+   $P0 = new 'Exception'
+   $P0[0] = "invalid JSON value"
+   throw $P0
 .end
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

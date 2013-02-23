@@ -1,4 +1,4 @@
-# $Id: dumper.pir 17613 2007-03-18 10:58:12Z paultcochrane $
+# $Id: dumper.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -24,7 +24,7 @@ version 0.10
 
 =head1 DESCRIPTION
 
-    PIR implementation of Perl5's Data::Dumper module.
+    PIR implementation of Perl 5's Data::Dumper module.
 
 =cut
 
@@ -96,7 +96,7 @@ ex:
 
 =item _register_dumper( id, sub )
 
-Registers a dumper for new PMC type. B<UNIMPLEMENTED>
+Registers a dumper for new PMC type. B<EXCEPTION_UNIMPLEMENTED>
 But see B<method __dump> below.
 
 =over 4
@@ -142,28 +142,32 @@ Returns the global dumper instance used by the non object interface.
 
 .sub _global_dumper
     .local pmc self
-    .local int mytype
-    .local int type
+    .local pmc dd_class
+    .local int is_defined
 
-    find_type mytype, "Data::Dumper"
-    if mytype != 0 goto TYPE_OK
+    get_class dd_class, "Data::Dumper"
+    if null dd_class goto load_dd_pir
+    goto TYPE_OK
+
+  load_dd_pir:
     load_bytecode "library/Data/Dumper.pir"
-    find_type mytype, "Data::Dumper"
-    if mytype != 0 goto TYPE_OK
+    get_class dd_class, "Data::Dumper"
+    if null dd_class goto no_class
+    goto TYPE_OK
+
+  no_class:
     print "fatal error: failure while loading library/Data/Dumper.pir\n"
     end
 TYPE_OK:
 
     errorsoff .PARROT_ERRORS_GLOBALS_FLAG
-    find_global self, "Data::Dumper", "global"
+    self = get_hll_global ['Data::Dumper'], 'global'
     errorson .PARROT_ERRORS_GLOBALS_FLAG
     if null self goto create_type
 
-    typeof type, self
-    if type == mytype goto END
 create_type:
-    new self, mytype
-    store_global "Data::Dumper", "global", self
+    new self, "Data::Dumper"
+    set_hll_global ['Data::Dumper'], 'global', self
 
 END:
     .return( self )
@@ -179,7 +183,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -187,4 +191,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

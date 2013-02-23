@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: install_files.pl 16243 2006-12-25 22:11:13Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: install_files.pl 37284 2009-03-10 23:29:43Z jkeenan $
 ################################################################################
 
 =head1 TITLE
@@ -124,9 +124,10 @@ my %options = (
     destdir     => '',
     exec_prefix => '/usr',
     bindir      => '/usr/bin',
-    libdir      => '/usr/lib',
-    includedir  => '/usr/include',
-    docdir      => '/usr/share/doc',
+    libdir      => '/usr/lib',       # parrot/ subdir added below
+    includedir  => '/usr/include',   # parrot/ subdir added below
+    docdir      => '/usr/share/doc', # parrot/ subdir added below
+    version     => '',
     'dry-run'   => 0,
 );
 
@@ -139,6 +140,8 @@ foreach (@ARGV) {
         push @manifests, $_;
     }
 }
+
+my $parrotdir = $options{versiondir};
 
 # We'll report multiple occurrences of the same file
 my %seen;
@@ -167,21 +170,33 @@ while (<>) {
     $meta =~ s/^\[(.*?)\]//;
     next unless $package;    # Skip if this file belongs to no package
 
-    next unless $package =~ /main|library/;    # XXX -lt
+    next unless $package =~ /main|library|pge/;
 
     my %meta;
     @meta{ split( /,/, $meta ) } = ();
     $meta{$_} = 1 for ( keys %meta );          # Laziness
 
-    if ( $meta{lib} ) {
-
-        # don't allow libraries to be installed into subdirs of libdir
-        $dest = File::Spec->catdir( $options{libdir}, basename($dest) );
+    if ( /^runtime/ ) {
+         # have to catch this case early.
+        $dest =~ s/^runtime\/parrot\///;
+        $dest = File::Spec->catdir( $options{libdir}, $parrotdir, $dest );
+    }
+    elsif ( $meta{lib} ) {
+        if ( $dest =~ /^install_/ ) {
+            $dest =~ s/^install_//;            # parrot with different config
+            $dest = File::Spec->catdir( $options{libdir}, $parrotdir, 'include', $dest );
+        }
+        else {
+            # don't allow libraries to be installed into subdirs of libdir
+            $dest = File::Spec->catdir( $options{libdir}, basename($dest) );
+        }
     }
     elsif ( $meta{bin} ) {
         my $copy = $dest;
         $dest =~ s/^installable_//;            # parrot with different config
         $dest = File::Spec->catdir( $options{bindir}, $dest );
+        # track bin here to check later below
+        # https://trac.parrot.org/parrot/ticket/434
         if ( $copy =~ /^installable/ ) {
             push @installable_exe, [ $src, $dest ];
             next;
@@ -189,22 +204,27 @@ while (<>) {
     }
     elsif ( $meta{include} ) {
         $dest =~ s/^include//;
-        $dest = File::Spec->catdir( $options{includedir}, $dest );
+        $dest = File::Spec->catdir( $options{includedir}, $parrotdir, $dest );
     }
     elsif ( $meta{doc} ) {
-        $dest = File::Spec->catdir( $options{docdir}, $dest );
+        $dest =~ s/^docs\/resources/resources/; # resources go in the top level of docs
+        $dest =~ s/^docs/pod/; # other docs are actually raw Pod
+        $dest = File::Spec->catdir( $options{docdir}, $parrotdir, $dest );
     }
     elsif ( $meta{pkgconfig} ) {
 
         # For the time being this is hardcoded as being installed under libdir
-        # as it is typically donw with automake installed packages.  If there
+        # as it is typically done with automake installed packages.  If there
         # is a use case to make this configurable we'll add a seperate
         # --pkgconfigdir option.
-        $dest = File::Spec->catdir( $options{libdir}, 'pkgconfig', $dest );
+        $dest = File::Spec->catdir( $options{libdir}, 'pkgconfig', $parrotdir, $dest );
+    }
+    elsif ( /^compilers/ ) {
+        $dest =~ s/^compilers/languages/;
+        $dest = File::Spec->catdir( $options{libdir}, $parrotdir, $dest );
     }
     else {
-        $dest =~ s/^runtime/lib/;
-        $dest = File::Spec->catdir( $options{prefix}, $dest );
+        die "Unknown install location in MANIFEST: $_";
     }
 
     $dest = File::Spec->catdir( $options{buildprefix}, $dest )
@@ -233,8 +253,36 @@ unless ( $options{'dry-run'} ) {
         }
     }
 }
+# TT #347
+# 1. skip build_dir-only binaries for @installable_exe
+for (@installable_exe) {
+    my ( $i, $dest ) = @$_;
+    my ($file) = $i =~ /installable_(.+)$/;
+    next unless $file;
+    my @f = map { $_ ? $_->[0] : '' } @files;
+    if (grep(/^$file$/, @f)) {
+        if (-e $file) {
+            print "skipping $file, using installable_$file instead\n";
+            @files = map {$_ and $_->[0] !~ /^$file$/ ? $_ : undef} @files;
+        }
+    }
+}
+# 2. for every .exe check if there's an installable. Fail if not
+foreach my $f (@files ) {
+    next unless $_;
+    my ( $f, $dest ) = @$_;
+    my $i;
+    # This logic will fail on non-win32 if the generated files are really
+    # generated as with rt #40817. We don't have [main]bin here.
+    $i = "installable_$f" if $f =~ /\.exe$/;
+    next unless $i;
+    unless (map {$_->[0] =~ /^$i$/} @installable_exe) {
+        die "$i is missing in MANIFEST or MANIFEST.generated\n";
+    }
+}
 print("Installing ...\n");
 foreach ( @files, @installable_exe ) {
+    next unless $_;
     my ( $src, $dest ) = @$_;
     $dest = $options{destdir} . $dest;
     if ( $options{'dry-run'} ) {
@@ -243,6 +291,7 @@ foreach ( @files, @installable_exe ) {
     }
     else {
         next unless -e $src;
+        next if $^O eq 'cygwin' and -e "$src.exe"; # stat works, copy not
         copy( $src, $dest ) or die "copy $src to $dest: $!\n";
         print "$dest\n";
     }

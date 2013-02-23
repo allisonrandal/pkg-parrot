@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: library.t 17094 2007-02-20 20:10:40Z paultcochrane $
+# Copyright (C) 2005-2006, Parrot Foundation.
+# $Id: library.t 37497 2009-03-16 20:16:34Z coke $
 
 use strict;
 use warnings;
@@ -55,12 +55,9 @@ my $PARROT = File::Spec->catfile( File::Spec->curdir(), $PConfig{test_prog} );
     is( $sum, "fb171bd1a17bf6cd08d73105ad738a35\t$sample_fn\n", $md5sum_fn );
 }
 
-# Testing pcre.pir with a simple pattern, if we have PCRE
-my $cmd = ( $^O =~ /MSWin32/ ) ? "pcregrep --version" : "pcre-config --version";
-my $has_pcre = Parrot::Test::run_command( $cmd, STDERR => File::Spec->devnull() ) == 0;
 SKIP:
 {
-    skip( 'no pcre-config', 1 ) unless $has_pcre;
+    skip( 'no pcre-config', 1 ); # Original check for PCRE flawed (TT #406)
 
     my $pcre_fn  = File::Spec->catfile(qw( examples library pcre.pir ));
     my $test_out = `$PARROT $pcre_fn asdf as`;

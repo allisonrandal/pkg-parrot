@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: pasm.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: pasm.t 36833 2009-02-17 20:09:26Z allison $
 
 # Test some basic pasm errors, not pir
 
@@ -13,7 +13,7 @@ use Parrot::Test tests => 1;
 
 # I am not sure if it is really important to support this, but at
 # least, we should not segfault when it happens :->
-pasm_error_output_like( "print \"Hi\\n\"", <<'OUT', "No new line at end of file");
+pasm_error_output_like( "print \"Hi\\n\"", <<'OUT', "No new line at end of file" );
 /^error:imcc:syntax error, unexpected EOM, expecting '\\n'/
 OUT
 

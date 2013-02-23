@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: libpcre.pir 18174 2007-04-13 06:37:16Z chromatic $
+# Copyright (C) 2004-2008, Parrot Foundation.
+# $Id: libpcre.pir 37343 2009-03-12 05:22:02Z Util $
 
 =head1 TITLE
 
@@ -27,7 +27,7 @@ See 'library/pcre.pir' for details on the user interface.
     null NULL
 
     .local pmc errptr
-    errptr= new .Integer
+    errptr= new 'Integer'
 
     ## error message string size
     error_size= 500
@@ -35,7 +35,7 @@ See 'library/pcre.pir' for details on the user interface.
     ## allocate space in string for error message
     repeat error, " ", error_size
 
-    PCRE_NCI_compile= find_global 'PCRE::NCI', 'PCRE_compile'
+    PCRE_NCI_compile= get_hll_global ['PCRE::NCI'], 'PCRE_compile'
 
     .local pmc code
 
@@ -76,12 +76,12 @@ RETURN:
     ovector_length= osize * num_result_pairs
 
     .local pmc ovector
-    ovector= new ManagedStruct
+    ovector= new 'ManagedStruct'
     ovector= ovector_length
 
     ## on 32 bit systems
     .local pmc PCRE_NCI_exec
-    PCRE_NCI_exec = find_global 'PCRE::NCI', 'PCRE_exec'
+    PCRE_NCI_exec = get_hll_global ['PCRE::NCI'], 'PCRE_exec'
 
     .local int ok
 
@@ -105,8 +105,8 @@ RETURN:
     .local int ovece
 
     .local pmc struct
-    struct= new SArray
-    struct= 3
+    struct = new 'FixedPMCArray'
+    struct = 3
 
     .include "datatypes.pasm"
 
@@ -131,20 +131,20 @@ NOMATCH:
 .end
 
 =for todo
-    # or use convinience function
+    # or use convenience function
     print "copy_substring\n"
     i = 0
     repeat match, " ", 500
 loop:
-    .pcc_begin
-    .arg s
-    .arg ovector
-    .arg ok
-    .arg i
-    .arg match
-    .arg 500
+    .begin_call
+    .set_arg s
+    .set_arg ovector
+    .set_arg ok
+    .set_arg i
+    .set_arg match
+    .set_arg 500
     .nci_call COPY_SUBSTRING
-    .pcc_end
+    .end_call
     if i goto subp
     print "all "
     goto all
@@ -171,7 +171,7 @@ pcre(3)
 
 =head1 AUTHORS
 
-Original code by Leo Toetsch, updated by Jerry Gay 
+Original code by Leo Toetsch, updated by Jerry Gay
 E<lt>jerry dot gay at gmail dot com<gt>
 
 =cut
@@ -181,4 +181,4 @@ E<lt>jerry dot gay at gmail dot com<gt>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

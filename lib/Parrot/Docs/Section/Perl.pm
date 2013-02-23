@@ -1,5 +1,5 @@
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: Perl.pm 16245 2006-12-25 22:15:39Z paultcochrane $
+# Copyright (C) 2004, Parrot Foundation.
+# $Id: Perl.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -43,14 +43,13 @@ sub new {
             'Operations',
             '',
             $self->new_item(
-                'Ops to C Code Generation', 'lib/Parrot/OpsFile.pm',
-                'lib/Parrot/Op.pm',         'lib/Parrot/OpLib',
+                'Ops to C Code Generation',
+                'lib/Parrot/OpsFile.pm',    'lib/Parrot/Op.pm',
                 'lib/Parrot/OpTrans.pm',    'lib/Parrot/OpTrans'
             ),
         ),
         $self->new_group(
-            'PMCs', '',
-            $self->new_item( '', 'lib/Parrot/Pmc2c.pm' ),
+            'PMCs', '', 'lib/Parrot/Pmc2c', 'lib/Parrot/Pmc2c/PMC',
             $self->new_item( '', 'lib/Parrot/Vtable.pm' ),
         ),
         $self->new_group( 'IO', '', 'lib/Parrot/Distribution.pm', 'lib/Parrot/IO' ),

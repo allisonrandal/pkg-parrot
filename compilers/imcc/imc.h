@@ -1,4 +1,9 @@
-/* $Id: imc.h 18945 2007-06-12 14:08:35Z fperrad $ */
+/*
+ * $Id: imc.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2002-2009, Parrot Foundation.
+ */
+
+/* $Id: imc.h 37201 2009-03-08 12:07:48Z fperrad $ */
 
 #ifndef PARROT_IMCC_IMC_H_GUARD
 #define PARROT_IMCC_IMC_H_GUARD
@@ -9,11 +14,11 @@
 #ifdef PARROT_HAS_HEADER_SYSEXITS
 #  include <sysexits.h>
 #else
-#  define EX_DATAERR 1
-#  define EX_SOFTWARE 1
-#  define EX_NOINPUT 1
-#  define EX_IOERR 1
-#  define EX_USAGE 1
+#  define EX_DATAERR     1
+#  define EX_SOFTWARE    1
+#  define EX_NOINPUT     1
+#  define EX_IOERR       1
+#  define EX_USAGE       1
 #  define EX_UNAVAILABLE 1
 #endif  /* PARROT_HAS_HEADER_SYSEXITS */
 
@@ -30,19 +35,15 @@
 
 #define IMCC_MAX_FIX_REGS PARROT_MAX_ARGS
 #if IMCC_MAX_FIX_REGS > 16
-#  error: flags wont fit
-#endif
-
-#ifdef MAIN
-#  define EXTERN
-#else
-#  define EXTERN extern
+ #  error: flags wont fit
 #endif
 
 /* IMCC reserves this character for internally generated labels
  * and identifiers that won't collide with high level compiler generated names.
  */
 #define IMCC_INTERNAL_CHAR '@'
+
+typedef struct _IMC_Unit IMC_Unit;
 
 #include "symreg.h"
 #include "instructions.h"
@@ -51,87 +52,465 @@
 #include "unit.h"
 #include "debug.h"
 
-#define IMCC_TRY(a,e)     do{ e=0; switch (setjmp(a)){ case 0:
-#define IMCC_CATCH(x)     break; case x:
-#define IMCC_END_TRY      } }while (0)
+#define IMCC_TRY(a, e)     do{ (e)=0; switch (setjmp(a)){ case 0:
+#define IMCC_CATCH(x)     break; case (x):
+#define IMCC_END_TRY      default: break; } }while (0)
 
-#define IMCC_THROW(a,x)  longjmp(a,x)
+#define IMCC_THROW(a, x)  longjmp((a), (x))
 
 #define IMCC_FATAL_EXCEPTION      1
 #define IMCC_FATALY_EXCEPTION     2
 
+#define N_ELEMENTS(x) (sizeof (x)/sizeof ((x)[0]))
+
+/* HEADERIZER BEGIN: compilers/imcc/imcc.y */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_CANNOT_RETURN_NULL
+Instruction * IMCC_create_itcall_label(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+void IMCC_itcall_sub(PARROT_INTERP, ARGIN(SymReg *sub))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_CANNOT_RETURN_NULL
+Instruction * INS_LABEL(PARROT_INTERP,
+    ARGMOD_NULLOK(IMC_Unit *unit),
+    ARGMOD(SymReg *r0),
+    int emit)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*r0);
+
+#define ASSERT_ARGS_IMCC_create_itcall_label __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_IMCC_itcall_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(sub)
+#define ASSERT_ARGS_INS_LABEL __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(r0)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/imcc.y */
+
+
 /*
  * imc.c
  */
-PARROT_API void imc_compile_all_units(Interp *);
-PARROT_API void imc_compile_unit(Interp *, IMC_Unit * unit);
-PARROT_API void imc_cleanup(Interp *, void *yyscanner);
-PARROT_API void imc_pragma(char * str);
-PARROT_API FILE* imc_yyin_set(FILE*, void*);
-PARROT_API FILE* imc_yyin_get(void*);
 
-/*
- * instructions.c
- */
-void imcc_init_tables(Interp * interp);
+/* HEADERIZER BEGIN: compilers/imcc/imc.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-/*
- * optimizer.c
- */
-const char * get_neg_op(char *op, int *nargs);
+PARROT_EXPORT
+void imc_cleanup(PARROT_INTERP, ARGIN_NULLOK(void *yyscanner))
+        __attribute__nonnull__(1);
 
-/*
- * reg_alloc.c
- */
-void imc_reg_alloc(Interp *, IMC_Unit * unit);
-void free_reglist(IMC_Unit *);
+PARROT_EXPORT
+void imc_compile_all_units(PARROT_INTERP)
+        __attribute__nonnull__(1);
 
-/*
- * parser_util.c
- */
-PARROT_API void imcc_init(Parrot_Interp interp);
-PARROT_API void imcc_destroy(Parrot_Interp interp);
-int check_op(Interp *, char * fullname, char *op, SymReg *r[], int narg, int keyvec);
-int is_op(Interp *, const char *opname);
-char *str_dup(const char *);
-char *str_cat(const char *, const char *);
-int imcc_vfprintf(Interp *, FILE *fd, const char *format, va_list ap);
-int imcc_fprintf(Interp *, FILE *fd, const char *fmt, ...);
+PARROT_EXPORT
+void imc_compile_unit(PARROT_INTERP, ARGIN(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
 
-/*
- * FIXME create an official interface
- * imcc compile interface
- *       this is needed for the debugger pdb and called from imcc/main.c
- */
-PMC *imcc_compile_pir(Parrot_Interp interp, const char *s);
-PMC *imcc_compile_pasm(Parrot_Interp interp, const char *s);
-PMC *imcc_compile_pir_ex(Parrot_Interp interp, const char *s);
-PMC *imcc_compile_pasm_ex(Parrot_Interp interp, const char *s);
-void *IMCC_compile_file(Parrot_Interp interp, const char *s);
-void *IMCC_compile_file_s(Parrot_Interp interp, const char *s,
-      STRING **error_message);
-PMC * IMCC_compile_pir_s(Parrot_Interp interp, const char *s,
-      STRING **error_message);
-PMC * IMCC_compile_pasm_s(Parrot_Interp interp, const char *s,
-      STRING **error_message);
+void imc_close_unit(PARROT_INTERP, ARGIN_NULLOK(IMC_Unit *unit))
+        __attribute__nonnull__(1);
 
-/* Call convention independant API */
+PARROT_CANNOT_RETURN_NULL
+IMC_Unit * imc_open_unit(PARROT_INTERP, IMC_Unit_Type t)
+        __attribute__nonnull__(1);
 
-/*
- * pcc.c
- */
-void expand_pcc_sub(Parrot_Interp interp, IMC_Unit *, Instruction *ins);
-void expand_pcc_sub_ret(Parrot_Interp interp, IMC_Unit *, Instruction *ins);
-void expand_pcc_sub_call(Parrot_Interp interp, IMC_Unit *, Instruction *ins);
+#define ASSERT_ARGS_imc_cleanup __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_imc_compile_all_units __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_imc_compile_unit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_imc_close_unit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_imc_open_unit __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/imc.c */
 
-/* pragmas avialable: */
-typedef enum {
-  PR_N_OPERATORS = 0x01
-} _imc_pragmas;
 
-#define PARROT_MAX_RECOVER_ERRORS 40 /* this is the number of times
-                                      * parrot will try to retry while
-                                      * compiling. */
+/* HEADERIZER BEGIN: compilers/imcc/reg_alloc.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+void free_reglist(ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit);
+
+void graph_coloring_reg_alloc(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+unsigned int ig_test(int i, int j, int N, ARGIN(unsigned int *graph))
+        __attribute__nonnull__(4);
+
+void imc_reg_alloc(PARROT_INTERP, ARGIN_NULLOK(IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_free_reglist __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_graph_coloring_reg_alloc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_ig_test __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(graph)
+#define ASSERT_ARGS_imc_reg_alloc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/reg_alloc.c */
+
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#  define YY_TYPEDEF_YY_SCANNER_T
+typedef void* yyscan_t;
+#endif
+
+
+/* HEADERIZER BEGIN: compilers/imcc/imcparser.c */
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+Instruction * IMCC_create_itcall_label(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+void IMCC_itcall_sub(PARROT_INTERP, ARGIN(SymReg *sub))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+Instruction * INS_LABEL(PARROT_INTERP,
+    ARGMOD_NULLOK(IMC_Unit *unit),
+    ARGIN(SymReg *r0),
+    int emit)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+/* HEADERIZER END: compilers/imcc/imcparser.c */
+
+/* HEADERIZER BEGIN: compilers/imcc/parser_util.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_EXPORT
+int do_yylex_init(PARROT_INTERP, ARGOUT(yyscan_t* yyscanner))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(* yyscanner);
+
+PARROT_EXPORT
+void imcc_destroy(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void imcc_init(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_WARN_UNUSED_RESULT
+int check_op(PARROT_INTERP,
+    ARGOUT(char *fullname),
+    ARGIN(const char *name),
+    ARGIN(SymReg * const * r),
+    int narg,
+    int keyvec)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*fullname);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * imcc_compile(PARROT_INTERP,
+    ARGIN(const char *s),
+    int pasm_file,
+    ARGOUT(STRING **error_message))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*error_message);
+
+PARROT_CANNOT_RETURN_NULL
+void * IMCC_compile_file(PARROT_INTERP, ARGIN(const char *s))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_CANNOT_RETURN_NULL
+void * IMCC_compile_file_s(PARROT_INTERP,
+    ARGIN(const char *s),
+    ARGOUT(STRING **error_message))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*error_message);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * imcc_compile_pasm(PARROT_INTERP, ARGIN(const char *s))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * imcc_compile_pasm_ex(PARROT_INTERP, ARGIN(const char *s))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * IMCC_compile_pasm_s(PARROT_INTERP,
+    ARGIN(const char *s),
+    ARGOUT(STRING **error_message))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*error_message);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * imcc_compile_pir(PARROT_INTERP, ARGIN(const char *s))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * imcc_compile_pir_ex(PARROT_INTERP, ARGIN(const char *s))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC * IMCC_compile_pir_s(PARROT_INTERP,
+    ARGIN(const char *s),
+    ARGOUT(STRING **error_message))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*error_message);
+
+int imcc_vfprintf(PARROT_INTERP,
+    ARGIN(PMC *io),
+    ARGIN(const char *format),
+    va_list ap)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+Instruction * iNEW(PARROT_INTERP,
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD(SymReg *r0),
+    ARGMOD(char *type),
+    ARGIN_NULLOK(SymReg *init),
+    int emit)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*r0)
+        FUNC_MODIFIES(*type);
+
+PARROT_IGNORABLE_RESULT
+PARROT_CAN_RETURN_NULL
+Instruction * INS(PARROT_INTERP,
+    ARGMOD(IMC_Unit *unit),
+    ARGIN(const char *name),
+    ARGIN_NULLOK(const char *fmt),
+    ARGIN(SymReg **r),
+    int n,
+    int keyvec,
+    int emit)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(5)
+        FUNC_MODIFIES(*unit);
+
+PARROT_WARN_UNUSED_RESULT
+int is_op(PARROT_INTERP, ARGIN(const char *name))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void op_fullname(
+    ARGOUT(char *dest),
+    ARGIN(const char *name),
+    ARGIN(SymReg * const *args),
+    int narg,
+    int keyvec)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*dest);
+
+void register_compilers(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_WARN_UNUSED_RESULT
+int try_find_op(PARROT_INTERP,
+    ARGMOD(IMC_Unit *unit),
+    ARGIN(const char *name),
+    ARGMOD(SymReg **r),
+    int n,
+    int keyvec,
+    int emit)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*r);
+
+#define ASSERT_ARGS_do_yylex_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(yyscanner)
+#define ASSERT_ARGS_imcc_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_imcc_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_check_op __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fullname) \
+    || PARROT_ASSERT_ARG(name) \
+    || PARROT_ASSERT_ARG(r)
+#define ASSERT_ARGS_imcc_compile __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s) \
+    || PARROT_ASSERT_ARG(error_message)
+#define ASSERT_ARGS_IMCC_compile_file __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s)
+#define ASSERT_ARGS_IMCC_compile_file_s __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s) \
+    || PARROT_ASSERT_ARG(error_message)
+#define ASSERT_ARGS_imcc_compile_pasm __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s)
+#define ASSERT_ARGS_imcc_compile_pasm_ex __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s)
+#define ASSERT_ARGS_IMCC_compile_pasm_s __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s) \
+    || PARROT_ASSERT_ARG(error_message)
+#define ASSERT_ARGS_imcc_compile_pir __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s)
+#define ASSERT_ARGS_imcc_compile_pir_ex __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s)
+#define ASSERT_ARGS_IMCC_compile_pir_s __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s) \
+    || PARROT_ASSERT_ARG(error_message)
+#define ASSERT_ARGS_imcc_vfprintf __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(io) \
+    || PARROT_ASSERT_ARG(format)
+#define ASSERT_ARGS_iNEW __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(r0) \
+    || PARROT_ASSERT_ARG(type)
+#define ASSERT_ARGS_INS __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(name) \
+    || PARROT_ASSERT_ARG(r)
+#define ASSERT_ARGS_is_op __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(name)
+#define ASSERT_ARGS_op_fullname __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(dest) \
+    || PARROT_ASSERT_ARG(name) \
+    || PARROT_ASSERT_ARG(args)
+#define ASSERT_ARGS_register_compilers __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_try_find_op __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(name) \
+    || PARROT_ASSERT_ARG(r)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/parser_util.c */
+
+/* imclexer.c */
+void IMCC_print_inc(PARROT_INTERP);
+
+/* Call convention independent API */
+
+/* HEADERIZER BEGIN: compilers/imcc/pcc.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+void expand_pcc_sub(PARROT_INTERP,
+    ARGMOD(IMC_Unit *unit),
+    ARGIN(Instruction *ins))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit);
+
+void expand_pcc_sub_call(PARROT_INTERP,
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD(Instruction *ins))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*ins);
+
+void expand_pcc_sub_ret(PARROT_INTERP,
+    ARGMOD(IMC_Unit *unit),
+    ARGIN(Instruction *ins))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+SymReg* get_const(PARROT_INTERP, ARGIN(const char *name), int type)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+SymReg* get_pasm_reg(PARROT_INTERP, ARGIN(const char *name))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+#define ASSERT_ARGS_expand_pcc_sub __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_expand_pcc_sub_call __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_expand_pcc_sub_ret __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_get_const __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(name)
+#define ASSERT_ARGS_get_pasm_reg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(name)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/pcc.c */
+
+#define PARROT_MAX_RECOVER_ERRORS 40
+/* this is the number of times parrot will try to retry while compiling. */
 
 typedef enum _enum_opt {
     OPT_NONE,
@@ -144,17 +523,15 @@ typedef enum _enum_opt {
 
 struct nodeType_t;
 
-/*
- * see also imcc/imcc.l struct macro_frame_t
- */
+/* see also imcc/imcc.l struct macro_frame_t */
 struct parser_state_t {
     struct parser_state_t *next;
-    Interp *interp;
-    const char *file;
-    FILE *handle;
-    int line;
-    int pasm_file;      /* pasm_file mode of this frame */
-    int pragmas;        /* n_operators ... */
+    Interp                *interp;
+    const char            *file;
+    FILE                  *handle;
+    int                    file_needs_free; /* is *file malloced? */
+    int                    line;
+    int                    pasm_file;       /* pasm_file mode of this frame */
 };
 
 typedef enum _AsmState {
@@ -169,91 +546,158 @@ typedef enum _imcc_reg_allocator_t {
     IMCC_GRAPH_ALLOCATOR
 } imcc_reg_allocator;
 
-PARROT_API void IMCC_push_parser_state(Interp*);
-PARROT_API void IMCC_pop_parser_state(Interp*, void *yyscanner);
+PARROT_EXPORT void IMCC_push_parser_state(PARROT_INTERP);
+PARROT_EXPORT void IMCC_pop_parser_state(PARROT_INTERP, void *yyscanner);
+
+/* globals store the state between individual e_pbc_emit calls */
+typedef struct subs_t {
+    IMC_Unit      *unit;
+    struct subs_t *prev;
+    struct subs_t *next;
+    SymHash        fixup;              /* currently set_p_pc sub names only */
+    int            ins_line;           /* line number for debug */
+    int            n_basic_blocks;     /* block count */
+    int            pmc_const;          /* index in const table */
+    size_t         size;               /* code size in ops */
+} subs_t;
+
+/* subs are kept per code segment */
+typedef struct code_segment_t {
+    PackFile_ByteCode     *seg;           /* bytecode segment */
+    PackFile_Segment      *jit_info;      /* bblocks, register usage */
+    subs_t                *subs;          /* current sub data */
+    subs_t                *first;         /* first sub of code segment */
+    struct code_segment_t *prev;          /* previous code segment */
+    struct code_segment_t *next;          /* next code segment */
+    SymHash                key_consts;    /* this seg's cached key constants */
+    int                    pic_idx;       /* next index of PIC */
+} code_segment_t;
+
+typedef struct _imcc_globals_t {
+    code_segment_t *cs;           /* current code segment */
+    code_segment_t *first;        /* first code segment   */
+    int             inter_seg_n;
+} imcc_globals;
 
 typedef struct _imc_info_t {
-    struct _imc_info_t *prev;
-    IMC_Unit * imc_units;
-    IMC_Unit * last_unit;
-    IMC_Unit * cur_unit;
-    int n_comp_units;
-    int imcc_warn;
-    int verbose;
-    int debug;
-    int IMCC_DEBUG;
-    int gc_off;
-    int write_pbc;
-    int allocator;
-    SymReg* sr_return;
-    AsmState asm_state;
-    int optimizer_level;
-    int dont_optimize;
-    int has_compile;
-    int allocated;
-    SymHash ghash;
-    SymReg  *  cur_namespace;
-    struct nodeType_t *top_node;
+    void                  *yyscanner;
+    struct _imc_info_t    *prev;
+    IMC_Unit              *imc_units;
+    IMC_Unit              *last_unit;
+    IMC_Unit              *cur_unit;
+    SymReg                *sr_return;
+    SymReg                *cur_namespace;
+    struct nodeType_t     *top_node;
     struct parser_state_t *state;
-    jmp_buf jump_buf;               /* The jump for error  handling */
-    int error_code;                 /* The Error code. */
-    STRING * error_message;         /* The Error message */
+    STRING                *error_message;   /* The Error message */
 
     /* some values that were global... */
-    int line;                   /* current line number */
-    int cur_pmc_type;
-    SymReg *cur_call;
-    SymReg *cur_obj;
-    char *adv_named_id;
+    SymReg               *cur_call;
+    SymReg               *cur_obj;
+    const char           *adv_named_id;
 
     /* Lex globals */
-    int in_pod;
-    char *heredoc_end;
-    char *heredoc_content;
-    char *cur_macro_name;
+    char                 *heredoc_end;
+    char                 *heredoc_content;
+    char                 *cur_macro_name;
 
-    int expect_pasm;
     struct macro_frame_t *frames;
+    imcc_globals         *globals;
 
-    /* this is just a sign that we suck.  that's all. */
-    char temp_buffer[4096];
-    /* I really do not like this temporary buffer. It makes the
-     * structure big. -- ambs */
+    char                 *macro_buffer;
+    Hash                 *macros;
+    PackFile_Debug       *debug_seg;
+    opcode_t             *pc;
 
-    /*
-     * XXX: The use of a cstring hash is good, pretty much.  But we're never
-     * clearing the hash, ever, which is bad, pretty much.
-     */
-    Hash *macros;
-
-    /*
-     * these are used for constructing one INS
-     */
+    /* these are used for constructing one INS */
 #define IMCC_MAX_STATIC_REGS 100
-    SymReg *regs[IMCC_MAX_STATIC_REGS];
-    int nkeys;
-    SymReg *keys[IMCC_MAX_FIX_REGS]; /* TODO key overflow check */
-    int keyvec;
-    int cnr;
-    int nargs;
-    int in_slice;
-    void *yyscanner;
+    SymReg               *regs[IMCC_MAX_STATIC_REGS];
+    SymReg               *keys[IMCC_MAX_FIX_REGS]; /* TODO key overflow check */
+    AsmState              asm_state;
+    SymHash               ghash;
+    jmp_buf               jump_buf;        /* The jump for error  handling */
+    int                   IMCC_DEBUG;
+    int                   allocated;
+    int                   allocator;
+    int                   cnr;
+    int                   cur_pmc_type;
+    int                   debug;
+    int                   dont_optimize;
+    int                   emitter;
+    int                   error_code;      /* The Error code. */
+    int                   expect_pasm;
+    int                   gc_off;
+    int                   has_compile;
+    int                   imcc_warn;
+    int                   in_pod;
+    int                   in_slice;
+    int                   ins_line;
+    int                   keyvec;
+    int                   line;                   /* current line number */
+    int                   optimizer_level;
+    int                   nargs;
+    int                   n_comp_units;
+    int                   nkeys;
+    int                   compiler_state;         /* see PBC_* flags */
+    int                   verbose;
+    int                   write_pbc;
+    opcode_t              npc;
 } imc_info_t;
+
+/* macro structs */
+#define MAX_PARAM 16
+
+typedef struct params_t {
+    char *name[MAX_PARAM];
+    int   num_param;
+} params_t;
+
+typedef struct macro_t {
+    char    *expansion;
+    int      line;
+    params_t params;
+} macro_t;
 
 #define IMCC_INFO(i) (((Parrot_Interp)(i))->imc_info)
 
-#define IMC_TRACE 0
+#define IMC_TRACE      0
 #define IMC_TRACE_HIGH 0
 
-PARROT_API Instruction * IMCC_create_itcall_label(Interp *);
-PARROT_API void IMCC_itcall_sub(Interp* interp, SymReg* sub);
+/* main.c */
+#define PBC_LOAD        (1 << 0)
+#define PBC_RUN         (1 << 1)
+#define PBC_WRITE       (1 << 2)
+#define PBC_PRE_PROCESS (1 << 3)
+#define PBC_PASM_FILE   (1 << 4)
+#define PBC_RUN_FILE    (1 << 5)
 
-STRING * IMCC_string_from_reg(Interp *interp, SymReg *r);
-INTVAL   IMCC_int_from_reg(Interp *interp, SymReg *r);
-Instruction * IMCC_subst_constants_umix(Interp *, IMC_Unit * unit, char *name,
-        SymReg **r, int n);
-Instruction * IMCC_subst_constants(Interp *, IMC_Unit * unit, char *name,
-        SymReg **r, int n, int *op);
+#define COMPILER_STATE(i) IMCC_INFO(i)->compiler_state
+
+#define STATE_LOAD_PBC(i)      (COMPILER_STATE(i) & PBC_LOAD)
+#define STATE_RUN_PBC(i)       (COMPILER_STATE(i) & PBC_RUN)
+#define STATE_WRITE_PBC(i)     (COMPILER_STATE(i) & PBC_WRITE)
+#define STATE_PRE_PROCESS(i)   (COMPILER_STATE(i) & PBC_PRE_PROCESS)
+#define STATE_PASM_FILE(i)     (COMPILER_STATE(i) & PBC_PASM_FILE)
+#define STATE_RUN_FROM_FILE(i) (COMPILER_STATE(i) & (PBC_RUN_FILE | PBC_RUN))
+
+#define SET_STATE_LOAD_PBC(i)      (COMPILER_STATE(i) |= PBC_LOAD)
+#define SET_STATE_RUN_PBC(i)       (COMPILER_STATE(i) |= PBC_RUN)
+#define SET_STATE_WRITE_PBC(i)     (COMPILER_STATE(i) |= PBC_WRITE)
+#define SET_STATE_PRE_PROCESS(i)   (COMPILER_STATE(i) |= PBC_PRE_PROCESS)
+#define SET_STATE_PASM_FILE(i)     (COMPILER_STATE(i) |= PBC_PASM_FILE)
+#define SET_STATE_RUN_FROM_FILE(i) (COMPILER_STATE(i) |= PBC_RUN_FILE)
+
+#define UNSET_STATE_LOAD_PBC(i)      (COMPILER_STATE(i) &= ~PBC_LOAD)
+#define UNSET_STATE_RUN_PBC(i)       (COMPILER_STATE(i) &= ~PBC_RUN)
+#define UNSET_STATE_WRITE_PBC(i)     (COMPILER_STATE(i) &= ~PBC_WRITE)
+#define UNSET_STATE_PRE_PROCESS(i)   (COMPILER_STATE(i) &= ~PBC_PRE_PROCESS)
+#define UNSET_STATE_PASM_FILE(i)     (COMPILER_STATE(i) &= ~PBC_PASM_FILE)
+#define UNSET_STATE_RUN_FROM_FILE(i) (COMPILER_STATE(i) &= ~PBC_RUN_FILE)
+
+/* imclexer.c */
+PARROT_EXPORT FILE * imc_yyin_set(FILE *new_yyin, void *yyscanner);
+PARROT_EXPORT FILE * imc_yyin_get(void *yyscanner);
+
 
 #endif /* PARROT_IMCC_IMC_H_GUARD */
 

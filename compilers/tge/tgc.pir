@@ -28,7 +28,7 @@ Send the output to OUTFILE. By default, output is directed to STDOUT.
     .local string infile, outfile
 
     load_bytecode "TGE.pbc"
-    load_bytecode "Getopt/Obj.pir"
+    load_bytecode "Getopt/Obj.pbc"
 
     # Grab program name for error reporting
     prog = shift args
@@ -66,14 +66,14 @@ Send the output to OUTFILE. By default, output is directed to STDOUT.
 
   OUTPUT_FILE:
     outfile = opts['output']
-    outfh = open outfile, '>'
+    outfh = open outfile, 'w'
     unless outfh goto ERR_NO_OUTFILE
 
   OUTPUT_DONE:
 
     # Read grammar file and compile here
     .local pmc infh
-    infh = open infile, "<"
+    infh = open infile, 'r'
     unless infh goto ERR_NO_INFILE
 
     .local string source
@@ -81,7 +81,7 @@ Send the output to OUTFILE. By default, output is directed to STDOUT.
     close infh
 
     .local pmc grammar
-    grammar = new 'TGE::Compiler'
+    grammar = new ['TGE';'Compiler']
 
     .local string compiled_source
     compiled_source = grammar.'precompile'(source, infile)
@@ -123,4 +123,4 @@ OPTIONS
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

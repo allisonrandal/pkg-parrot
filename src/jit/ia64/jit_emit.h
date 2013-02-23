@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2004-2007, Parrot Foundation.
+ */
+
 #ifndef PARROT_JIT_IA64_JIT_EMIT_H_GUARD
 #define PARROT_JIT_IA64_JIT_EMIT_H_GUARD
 
@@ -6,12 +10,12 @@
  *
  * IA64
  *
- * $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
+ * $Id: jit_emit.h 37201 2009-03-08 12:07:48Z fperrad $
  */
 
 #if JIT_EMIT
 
-#  define NATIVE_PTR ((Parrot_jit_info_t *)(interpreter->code->jit_info))->native_ptr
+#  define NATIVE_PTR ((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr
 
 /* r0            Zero
  * r1            Special
@@ -229,58 +233,58 @@ enum {
 
 /* Pseudo instructions. */
 #  define jit_emit_mov_ri_i(pc, dest, imm) \
-    emit_x2(pc, dest, ((long)(imm)));
+    emit_x2((pc), (dest), ((long)(imm)));
 
 /* Store a CPU register back to a Parrot register. */
 
 #  define jit_emit_mov_mr_i(pc, addr, reg) \
-    emit_a4(pc, R_INTREP, (((char *)addr) - ((char *)interpreter)), ISR2); \
-    emit_m4(pc, 0x33, ISR2, reg);
+    emit_a4((pc), R_INTREP, (((char *)(addr)) - ((char *)(interp))), ISR2); \
+    emit_m4((pc), 0x33, ISR2, (reg));
 
 #  define jit_emit_mov_rm_i(pc, reg, addr) \
-    emit_a4(pc, R_INTREP, (((char *)addr) - ((char *)interpreter)), ISR2); \
-    emit_m1(pc, 0x3, ISR2, reg);
+    emit_a4((pc), R_INTREP, (((char *)(addr)) - ((char *)(interp))), ISR2); \
+    emit_m1((pc), 0x3, ISR2, (reg));
 
 #  define jit_emit_mov_rr(pc, dst, src) \
-    emit_a4(pc, src, 0, dst);
+    emit_a4((pc), (src), 0, (dst));
 
-#  define jit_emit_add_rrr(pc, D, A ,B) \
-    emit_a1(pc, 0, 0, 0, 0, A, B, D);
+#  define jit_emit_add_rrr(pc, D, A, B) \
+    emit_a1((pc), 0, 0, 0, 0, (A), (B), (D));
 
-#  define jit_emit_sub_rrr(pc, D, A ,B) \
-    emit_a1(pc, 0, 0, 1, 1, B, A, D);
+#  define jit_emit_sub_rrr(pc, D, A, B) \
+    emit_a1((pc), 0, 0, 1, 1, (B), (A), (D));
 
 #  define jit_emit_neg_rr(pc, D, A) \
-    emit_a1(pc, 0, 0, 1, 1, A, 0, D);
+    emit_a1((pc), 0, 0, 1, 1, (A), 0, (D));
 
-#  define jit_emit_and_rrr(pc, D, A ,B) \
-    emit_a1(pc, 0, 0, 3, 0, A, B, D);
+#  define jit_emit_and_rrr(pc, D, A, B) \
+    emit_a1((pc), 0, 0, 3, 0, (A), (B), (D));
 
-#  define jit_emit_or_rrr(pc, D, A ,B) \
-    emit_a1(pc, 0, 0, 3, 2, A, B, D);
+#  define jit_emit_or_rrr(pc, D, A, B) \
+    emit_a1((pc), 0, 0, 3, 2, (A), (B), (D));
 
-#  define jit_emit_xor_rrr(pc, D, A ,B) \
-    emit_a1(pc, 0, 0, 3, 3, A, B, D);
+#  define jit_emit_xor_rrr(pc, D, A, B) \
+    emit_a1((pc), 0, 0, 3, 3, (A), (B), (D));
 
 #  define jit_emit_mov_nr(pc, dst, src) \
-    emit_m18(pc, fr_sig, dst, src);
+    emit_m18((pc), (fr_sig), (dst), (src));
 
 #  define jit_emit_mov_rn(pc, dst, src) \
-    emit_m19(pc, fr_sig, dst, src);
+    emit_m19((pc), (fr_sig), (dst), (src));
 
 #  define jit_emit_cmp_r0(pc, src) \
     emit_a6(pc, 0xE, 0, 2, 0, 0, 7, src, 0, 6);
 
 #  define jit_emit_nop(pc) \
-    it = emit_fill_nop_m; \
-    pc = loadinst(pc, it, IT_M);
+    (it) = emit_fill_nop_m; \
+    (pc) = loadinst((pc), it, IT_M);
 
 #  define jit_emit_end(pc) \
-    emit_i26(pc, PFS, RSF); \
-    emit_i21(pc, 0, R_RETURN_ADR); \
+    emit_i26((pc), PFS, RSF); \
+    emit_i21((pc), 0, R_RETURN_ADR); \
     jit_emit_mov_rr(NATIVE_PTR, 12, 35); \
-    emit_b4(pc, dh_none, bwh_sptk, 0x21, 0, ph_many, 4); \
-    pc = close_template(pc);
+    emit_b4((pc), dh_none, bwh_sptk, 0x21, 0, ph_many, 4); \
+    (pc) = close_template((pc));
 
 #  define emit_fill_nop 0x4000000
 #  define emit_fill_nop_m 0x8000000
@@ -574,8 +578,7 @@ jit_emit_bc(Parrot_jit_info_t *jit_info, opcode_t disp)
 }
 
 static void
-Parrot_jit_jump_to_ret(Parrot_jit_info_t *jit_info,
-                 Interp * interpreter)
+Parrot_jit_jump_to_ret(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
     jit_emit_sub_rrr(NATIVE_PTR, ISR1, R_RETURN, R_BYTECODE);
     jit_emit_add_rrr(NATIVE_PTR, ISR1, ISR1, R_OPMAP);
@@ -586,8 +589,7 @@ Parrot_jit_jump_to_ret(Parrot_jit_info_t *jit_info,
 }
 
 void
-Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-                 Interp * interpreter)
+Parrot_jit_begin(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
     emit_m34(NATIVE_PTR, RSRV_REG, 2, 0, RSF);
     jit_emit_mov_rr(NATIVE_PTR, 1, 4);
@@ -597,11 +599,11 @@ Parrot_jit_begin(Parrot_jit_info_t *jit_info,
     jit_emit_mov_rr(NATIVE_PTR, 35, 12);
     emit_i22(NATIVE_PTR, R_RETURN_ADR, 0);
     jit_emit_mov_rr(NATIVE_PTR, 8, R_ARG2);
-    Parrot_jit_jump_to_ret(jit_info, interpreter);
+    Parrot_jit_jump_to_ret(jit_info, interp);
 }
 
 static void
-fixup_jump_addr(char *fixup_ptr,long d)
+fixup_jump_addr(char *fixup_ptr, long d)
 {
     char *pit;
     long tmp, i;
@@ -616,12 +618,11 @@ fixup_jump_addr(char *fixup_ptr,long d)
 }
 
 void
-Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-                   Interp * interpreter)
+Parrot_jit_dofixup(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
     Parrot_jit_fixup_t *fixup;
     char *fixup_ptr, *pit, *disp;
-    long d,tmp,i;
+    long d, tmp, i;
 
     fixup = jit_info->arena.fixups;
 
@@ -640,7 +641,7 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
                 break;
 
             default:
-                internal_exception(JIT_ERROR, "Unknown fixup type:%d\n",
+                exit_fatal(EXCEPTION_JIT_ERROR, "Unknown fixup type:%d\n",
                                    fixup->type);
                 break;
         }
@@ -649,11 +650,10 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
 }
 
 void
-Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp * interpreter)
+Parrot_jit_normal_op(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
     emit_a4(NATIVE_PTR, R_BYTECODE,
-        ((long)jit_info->cur_op - (long)interpreter->code->base.data),
+        ((long)jit_info->cur_op - (long)interp->code->base.data),
             (R_ARG1 + RSRV_REG));
     jit_emit_mov_rr(NATIVE_PTR, (R_ARG2 + RSRV_REG), R_INTREP);
     jit_emit_mov_rr(NATIVE_PTR, 32, 1);
@@ -664,7 +664,7 @@ Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
     jit_info->arena.fixups->type = JIT_IA64_CALL;
     jit_info->arena.fixups->param.fptr =
         (void (*)(void))(*(long *)(
-            interpreter->op_func_table[*(jit_info->cur_op)]));
+            interp->op_func_table[*(jit_info->cur_op)]));
 
     emit_x4(NATIVE_PTR, dh_none, bwh_sptk, 0, ph_many, 0);
     jit_emit_mov_rr(NATIVE_PTR, 1, 32);
@@ -672,21 +672,19 @@ Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
 }
 
 void
-Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-                   Interp * interpreter)
+Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
-    Parrot_jit_normal_op(jit_info, interpreter);
-    Parrot_jit_jump_to_ret(jit_info, interpreter);
+    Parrot_jit_normal_op(jit_info, interp);
+    Parrot_jit_jump_to_ret(jit_info, interp);
 }
 
 #  undef Parrot_jit_restart_op
 void
-Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
-                   Interp * interpreter)
+Parrot_jit_restart_op(Parrot_jit_info_t *jit_info, PARROT_INTERP)
 {
     char *jmp_ptr, *sav_ptr;
 
-    Parrot_jit_normal_op(jit_info, interpreter);
+    Parrot_jit_normal_op(jit_info, interp);
     /* test r8, if zero (e.g after trace), return from JIT */
     jit_emit_cmp_r0(jit_info->native_ptr, R_RETURN);
     /* remember PC */
@@ -699,36 +697,36 @@ Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
     fixup_jump_addr(jit_info->native_ptr, (long)((sav_ptr - jmp_ptr) >> 4));
     /* restore PC */
     jit_info->native_ptr = sav_ptr;
-    Parrot_jit_jump_to_ret(jit_info, interpreter);
+    Parrot_jit_jump_to_ret(jit_info, interp);
 }
 
 /* move reg to mem (i.e. intreg) */
 void
-Parrot_jit_emit_mov_mr(Interp * interpreter, char *mem, int reg)
+Parrot_jit_emit_mov_mr(PARROT_INTERP, char *mem, int reg)
 {
     jit_emit_mov_mr_i(
-        ((Parrot_jit_info_t *)(interpreter->code->jit_info))->native_ptr, mem, reg);
+        ((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr, mem, reg);
     NATIVE_PTR = close_template(NATIVE_PTR);
 }
 
 /* move mem (i.e. intreg) to reg */
 void
-Parrot_jit_emit_mov_rm(Interp * interpreter, int reg, char *mem)
+Parrot_jit_emit_mov_rm(PARROT_INTERP, int reg, char *mem)
 {
     jit_emit_mov_rm_i(
-        ((Parrot_jit_info_t *)(interpreter->code->jit_info))->native_ptr, reg, mem);
+        ((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr, reg, mem);
     NATIVE_PTR = close_template(NATIVE_PTR);
 }
 
 /* move reg to mem (i.e. numreg) */
 void
-Parrot_jit_emit_mov_mr_n(Interp * interpreter, char *mem,int reg)
+Parrot_jit_emit_mov_mr_n(PARROT_INTERP, char *mem, int reg)
 {
 }
 
 /* move mem (i.e. numreg) to reg */
 void
-Parrot_jit_emit_mov_rm_n(Interp * interpreter, int reg,char *mem)
+Parrot_jit_emit_mov_rm_n(PARROT_INTERP, int reg, char *mem)
 {
 }
 
@@ -748,14 +746,14 @@ char intval_map[INT_REGISTERS_TO_MAP] =
       48, 49, 50, 51, 52, 53, 54, 55, 56, 57 };
 
 static void
-ia64_sync_cache (void *_start, void *_end)
+ia64_sync_cache(void *_start, void *_end)
 {
     char *start = (char*)(((long)_start) &~(CACHELINESIZE - 1));
     char *end = (char *)((((long)_end)+CACHELINESIZE-1) &~(CACHELINESIZE - 1));
     char *_sync;
 
     for (_sync = start; _sync < end; _sync += CACHELINESIZE) {
-        __asm__ __volatile__ (
+        __asm__ __volatile__(
         "fc %0\n"
         ";;\n"
         "sync.i\n"

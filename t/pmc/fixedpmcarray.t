@@ -1,11 +1,12 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: fixedpmcarray.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: fixedpmcarray.t 37384 2009-03-13 17:37:55Z barney $
 
 use strict;
 use warnings;
 use lib qw(lib . ../lib ../../lib);
-use Parrot::Test tests => 14;
+
+use Parrot::Test tests => 21;
 use Test::More;
 
 =head1 NAME
@@ -23,51 +24,8 @@ out-of-bounds test. Checks INT and PMC keys.
 
 =cut
 
-my $fp_equality_macro = <<'ENDOFMACRO';
-.macro fp_eq (	J, K, L )
-    save	N0
-    save	N1
-    save	N2
-
-    set	N0, .J
-    set	N1, .K
-    sub	N2, N1,N0
-    abs	N2, N2
-    gt	N2, 0.000001, .$FPEQNOK
-
-    restore N2
-    restore	N1
-    restore	N0
-    branch	.L
-.local $FPEQNOK:
-    restore N2
-    restore	N1
-    restore	N0
-.endm
-.macro fp_ne(	J,K,L)
-    save	N0
-    save	N1
-    save	N2
-
-    set	N0, .J
-    set	N1, .K
-    sub	N2, N1,N0
-    abs	N2, N2
-    lt	N2, 0.000001, .$FPNENOK
-
-    restore	N2
-    restore	N1
-    restore	N0
-    branch	.L
-.local $FPNENOK:
-    restore	N2
-    restore	N1
-    restore	N0
-.endm
-ENDOFMACRO
-
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting array size" );
-    new P0,.FixedPMCArray
+    new P0, ['FixedPMCArray']
 
     set I0,P0
     eq I0,0,OK_1
@@ -87,7 +45,7 @@ ok 2
 OUTPUT
 
 pasm_error_output_like( <<'CODE', <<'OUTPUT', "Resetting array size (and getting an exception)" );
-    new P0, .FixedPMCArray
+    new P0, ['FixedPMCArray']
 
     set I0,P0
     set P0,1
@@ -104,7 +62,7 @@ OUTPUT
 #VIM's syntax highlighter needs this line
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Truth and falsehood" );
-        new P0, .FixedPMCArray
+        new P0, ['FixedPMCArray']
 
         set P0, 0
         if P0, NOK_1
@@ -133,7 +91,7 @@ ok 4
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting first element" );
-        new P0, .FixedPMCArray
+        new P0, ['FixedPMCArray']
         set P0, 1
 
     set P0[0],-7
@@ -162,7 +120,7 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "Setting second element" );
-        new P0, .FixedPMCArray
+        new P0, ['FixedPMCArray']
         set P0, 2
 
     set P0[1], -7
@@ -190,36 +148,76 @@ ok 2
 ok 3
 OUTPUT
 
-# TODO: Rewrite these properly when we have exceptions
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting negatively indexed elements" );
+    new P0, ['FixedPMCArray']
+    set P0, 1
 
-pasm_error_output_like( <<'CODE', <<'OUTPUT', "Setting out-of-bounds elements" );
-        new P0, .FixedPMCArray
-        set P0, 1
-
-    set P0[1], -7
-
+    push_eh caught
+    set P0[-1], -7
+    pop_eh
+    say "no exception"
+    end
+caught:
+    say "caught an exception"
     end
 CODE
-/FixedPMCArray: index out of bounds!
-current instr\.:/
+caught an exception
 OUTPUT
 
-pasm_error_output_like( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements" );
-        new P0, .FixedPMCArray
-        set P0, 1
+pasm_output_is( <<'CODE', <<'OUTPUT', "Getting negatively indexed elements" );
+    new P0, ['FixedPMCArray']
+    set P0, 1
 
-    set I0, P0[1]
+    push_eh caught
+    set I0, P0[-1]
+    pop_eh
+    say "no exception"
+    end
+caught:
+    say "caught an exception"
     end
 CODE
-/FixedPMCArray: index out of bounds!
-current instr\.:/
+caught an exception
+OUTPUT
+
+
+pasm_output_is( <<'CODE', <<'OUTPUT', "Setting out-of-bounds elements" );
+    new P0, ['FixedPMCArray']
+    set P0, 1
+
+    push_eh caught
+    set P0[1], -7
+    pop_eh
+    say "no exception"
+    end
+caught:
+    say "caught an exception"
+    end
+CODE
+caught an exception
+OUTPUT
+
+pasm_output_is( <<'CODE', <<'OUTPUT', "Getting out-of-bounds elements" );
+    new P0, ['FixedPMCArray']
+    set P0, 1
+
+    push_eh caught
+    set I0, P0[1]
+    pop_eh
+    say "no exception"
+    end
+caught:
+    say "caught an exception"
+    end
+CODE
+caught an exception
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
-@{[ $fp_equality_macro ]}
-     new P0, .FixedPMCArray
+     .include 'include/fp_equality.pasm'
+     new P0, ['FixedPMCArray']
      set P0, 3
-     new P1, .Key
+     new P1, ['Key']
 
      set P1, 0
      set P0[P1], 25
@@ -236,7 +234,7 @@ pasm_output_is( <<"CODE", <<'OUTPUT', "Set via PMC keys, access via INTs" );
 OK1: print "ok 1\\n"
 
      set N0, P0[1]
-     .fp_eq(N0, 2.5, OK2)
+     .fp_eq_pasm(N0, 2.5, OK2)
      print "not "
 OK2: print "ok 2\\n"
 
@@ -253,18 +251,18 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<"CODE", <<'OUTPUT', "Set via INTs, access via PMC Keys" );
-@{[ $fp_equality_macro ]}
-     new P0, .FixedPMCArray
+     .include 'include/fp_equality.pasm'
+     new P0, ['FixedPMCArray']
      set P0, 1024
 
      set P0[25], 125
      set P0[128], 10.2
      set P0[513], "cow"
-     new P1, .Integer
+     new P1, ['Integer']
      set P1, 123456
      set P0[1023], P1
 
-     new P2, .Key
+     new P2, ['Key']
      set P2, 25
      set I0, P0[P2]
      eq I0, 125, OK1
@@ -273,7 +271,7 @@ OK1: print "ok 1\\n"
 
      set P2, 128
      set N0, P0[P2]
-     .fp_eq(N0, 10.2, OK2)
+     .fp_eq_pasm(N0, 10.2, OK2)
      print "not "
 OK2: print "ok 2\\n"
 
@@ -303,22 +301,22 @@ pir_output_like(
 
 .sub main :main
      .local pmc compares, cmp_fun
-     # XXX doesnt work wit prederef of JIT
+     # RT #46855 doesnt work wit prederef of JIT
      bounds 1
-     compares = new .Integer
+     compares = new ['Integer']
      compares = 0
-     global "compares" = compares
-    cmp_fun = global "cmp_fun"
+     set_global "compares", compares
+    cmp_fun = get_global "cmp_fun"
      sort_ar()
      sort_ar(cmp_fun)
 .end
 .sub sort_ar
     .param pmc cmp_fun :optional
     .local pmc compares
-    compares = global "compares"
+    compares = get_global "compares"
     compares = 0
     .local pmc ar
-    new ar, .FixedPMCArray
+    ar = new ['FixedPMCArray']
     ar = 5
     ar[0] = 10
     ar[1] = 2
@@ -348,11 +346,11 @@ done:
     .param pmc b
     $I0 = cmp a, b
     .local pmc compares
-    compares = global "compares"
+    compares = get_global "compares"
     inc compares
-    .pcc_begin_return
-    .return $I0
-    .pcc_end_return
+    .begin_return
+    .set_return $I0
+    .end_return
 .end
 CODE
 
@@ -368,7 +366,7 @@ pir_output_is( << 'CODE', << 'OUTPUT', "check whether interface is done" );
 
 .sub _main
     .local pmc pmc1
-    pmc1 = new FixedPMCArray
+    pmc1 = new ['FixedPMCArray']
     .local int bool1
     does bool1, pmc1, "scalar"
     print bool1
@@ -391,7 +389,7 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', "Getting unitialized elements" );
 
 .sub main :main
     .local pmc arr1
-    arr1 = new FixedPMCArray
+    arr1 = new ['FixedPMCArray']
     arr1 = 2005
     .local pmc elem_1956
     elem_1956 = arr1[1956]
@@ -413,14 +411,14 @@ pir_output_is( << 'CODE', << 'OUTPUT', "Multi keys" );
     .local num    elem_out_num
     .local string elem_out_string
 
-    matrix = new FixedPMCArray
+    matrix = new ['FixedPMCArray']
     matrix = 1
-    row = new FixedPMCArray
-    row = 4           # assing with an integer, number, pmc, string
+    row = new ['FixedPMCArray']
+    row = 4           # set the size by assigning an integer, number or pmc
     matrix[0] = row
     matrix[0;0] = 128
     matrix[0;1] = 128.128
-    elem_in_pmc = new Integer
+    elem_in_pmc = new ['Integer']
     elem_in_pmc = 256
     matrix[0;2] = elem_in_pmc
     matrix[0;3] = "asdf"
@@ -504,25 +502,86 @@ pir_output_is( << 'CODE', << 'OUTPUT', "Multi keys" );
 CODE
 set_integer_keyed, get_integer_keyed: 128
 set_integer_keyed, get_pmc_keyed: 128
-set_integer_keyed, get_number_keyed: 128.000000
+set_integer_keyed, get_number_keyed: 128
 set_integer_keyed, get_string_keyed: 128
 set_number_keyed, get_pmc_keyed: 128.128
-set_number_keyed, get_number_keyed: 128.128000
+set_number_keyed, get_number_keyed: 128.128
 set_number_keyed, get_string_keyed: 128.128
 set_pmc_keyed, get_integer_keyed: 256
 set_pmc_keyed, get_pmc_keyed: 256
-set_pmc_keyed, get_number_keyed: 256.000000
+set_pmc_keyed, get_number_keyed: 256
 set_pmc_keyed, get_string_keyed: 256
 set_integer_keyed, get_integer_keyed: 128
 set_integer_keyed, get_pmc_keyed: 128
-set_integer_keyed, get_number_keyed: 128.000000
+set_integer_keyed, get_number_keyed: 128
 set_integer_keyed, get_string_keyed: 128
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "equality" );
+.sub main :main
+    .local pmc fpa1, fpa2, p1, p2
+    .local int i
+    fpa1 = new ['FixedPMCArray']
+    fpa2 = new ['FixedPMCArray']
+
+    print "1:"
+    if fpa1 == fpa2 goto L1
+    print "not "
+L1: say "equal"
+
+    fpa1 = 3
+    print "2:"
+    if fpa1 == fpa2 goto L2
+    print "not "
+L2: say "equal"
+
+    fpa2 = 3
+
+    p1 = new ['String']
+    p1 = "foobarx"
+    p2 = new ['String']
+    p2 = "foobarx"
+
+    fpa1[0] = p1
+    fpa2[0] = p2
+
+    print "3:"
+    if fpa1 == fpa2 goto L3
+    print "not "
+L3: say "equal"
+
+    p1 = new ['String']
+    p2 = new ['String']
+    p1 = ''
+    p2 = ''
+
+    fpa1[1] = p1
+
+    print "4:"
+    if fpa1 == fpa2 goto L4
+    print "not "
+L4: say "equal"
+
+    fpa2[1] = p2
+
+    print "5:"
+    if fpa1 == fpa2 goto L5
+    print "not "
+L5: say "equal"
+
+.end
+CODE
+1:equal
+2:not equal
+3:equal
+4:not equal
+5:equal
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "defined" );
 .sub main :main
     .local pmc arr1
-    arr1 = new FixedPMCArray
+    arr1 = new ['FixedPMCArray']
     arr1 = 2005
     .local int defined_elem_1956
     defined_elem_1956 = defined arr1[1956]
@@ -539,6 +598,138 @@ pir_output_is( <<'CODE', <<'OUTPUT', "defined" );
 .end
 CODE
 010
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "elements, get_integer, get_number" );
+.sub 'test' :main
+    .local pmc arr1
+    .local int elems_i
+    .local num elems_f
+    arr1 = new ['FixedPMCArray']
+    arr1 = 0
+    elems_i = elements arr1
+    if elems_i == 0 goto ok_1
+    print 'not '
+  ok_1:
+    say 'ok 1'
+
+    elems_i = arr1
+    if elems_i == 0 goto ok_2
+    print 'not '
+  ok_2:
+    say 'ok 2'
+
+    elems_f = arr1
+    if elems_f == 0 goto ok_3
+    print 'not '
+  ok_3:
+    say 'ok 3'
+
+    arr1 = new ['FixedPMCArray']
+    arr1 = 2048
+    elems_i = elements arr1
+    if elems_i == 2048 goto ok_4
+    print 'not '
+  ok_4:
+    say 'ok 4'
+
+    elems_i = arr1
+    if elems_i == 2048 goto ok_5
+    print 'not '
+  ok_5:
+    say 'ok 5'
+
+    elems_f = arr1
+    if elems_f == 2048 goto ok_6
+    print 'not '
+  ok_6:
+    say 'ok 6'
+.end
+CODE
+ok 1
+ok 2
+ok 3
+ok 4
+ok 5
+ok 6
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'basic splice');
+.sub 'main'
+    .local pmc one
+    one = new ['Integer']
+    one = 1
+
+    .local pmc fpa
+    fpa = new ['FixedPMCArray']
+    fpa = 5
+
+    splice fpa, one, 0, 5
+    print_array( fpa )
+
+    .local pmc two
+    two = new ['Integer']
+    two = 2
+
+    splice fpa, two, 1, 3
+    print_array( fpa )
+
+    .local pmc three
+    three = new ['Integer']
+    three = 3
+
+    splice fpa, three, 2, 3
+    print_array( fpa )
+.end
+
+.sub 'print_array'
+    .param pmc fpa
+
+    .local pmc it
+    iter it, fpa
+
+    .local pmc elem
+  iter_start:
+    elem = shift it
+    print elem
+    if it goto iter_start
+  iter_end:
+    print "\n"
+.end
+CODE
+11111
+12221
+12333
+OUTPUT
+
+pir_error_output_like(<<'CODE', <<'OUTPUT', 'splice out of bounds, offset 0');
+.sub 'main'
+    .local pmc fpa
+    fpa = new ['FixedPMCArray']
+    fpa = 5
+
+    .local pmc nil
+    nil = new ['Undef']
+
+    splice fpa, nil, 0, 6
+.end
+CODE
+/FixedPMCArray: index out of bounds!/
+OUTPUT
+
+pir_error_output_like(<<'CODE', <<'OUTPUT', 'splice out of bounds, big offset');
+.sub 'main'
+    .local pmc fpa
+    fpa = new ['FixedPMCArray']
+    fpa = 5
+
+    .local pmc nil
+    nil = new ['Undef']
+
+    splice fpa, nil, 6, 0
+.end
+CODE
+/FixedPMCArray: index out of bounds!/
 OUTPUT
 
 # Local Variables:

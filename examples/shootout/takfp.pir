@@ -1,6 +1,6 @@
-#!./parrot -C
+#!./parrot -R cgp
 #
-# ./parrot -C takfp.pir N         (N = 10 for shootout)
+# ./parrot -R cgp takfp.pir N         (N = 10 for shootout)
 # by Joshua Isom
 # changed default value to N=7 (shootout default before being deprecated)
 # anyway N=10 froze my laptop. Karl Forner
@@ -14,7 +14,7 @@
 	$S0 = argv[1]
 	n = $S0
 argsok:
-	.local float f
+	.local num f
 	$N0 = n
 	$N0 *= 3
 	$N1 = n
@@ -22,7 +22,7 @@ argsok:
 	$N2 = n
 	$N2 *= 1
 	f = Tak($N0, $N1, $N2)
-	$P0 = new .FixedFloatArray
+	$P0 = new 'FixedFloatArray'
 	$P0 = 1
 	$P0[0] = f
 	$S0 = sprintf "%.1f\n", $P0
@@ -30,20 +30,20 @@ argsok:
 .end
 
 .sub Tak
-	.param float x
-	.param float y
-	.param float z
+	.param num x
+	.param num y
+	.param num z
 	unless y >= x goto endif
 	.return(z)
 endif:
-	.local float tmp
+	.local num tmp
 	tmp = x - 1
 	$N0 = Tak(tmp, y, z)
 	tmp = y - 1
 	$N1 = Tak(tmp, z, x)
 	tmp = z - 1
 	$N2 = Tak(tmp, x, y)
-	.return Tak($N0, $N1, $N2)
+	.tailcall Tak($N0, $N1, $N2)
 .end
 
 
@@ -51,4 +51,4 @@ endif:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

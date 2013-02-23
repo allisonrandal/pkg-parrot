@@ -1,13 +1,39 @@
 /*
- * Environment manipulation stuff
+ * $Id: env.c 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
 /*
-** Parrot_setenv()
+
+=head1 NAME
+
+config/gen/platform/generic/env.c
+
+=head1 DESCRIPTION
+
+Environment manipulation stuff
+
+=head2 Functions
+
+=over 4
+
+=cut
+
 */
 
 #include <stdlib.h>
 #include <string.h>
+
+/*
+
+=item C<void
+Parrot_setenv(const char *name, const char *value)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
 
 void
 Parrot_setenv(const char *name, const char *value)
@@ -34,6 +60,17 @@ Parrot_setenv(const char *name, const char *value)
 #endif
 }
 
+/*
+
+=item C<void
+Parrot_unsetenv(const char *name)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 void
 Parrot_unsetenv(const char *name)
 {
@@ -44,12 +81,31 @@ Parrot_unsetenv(const char *name)
 #endif
 }
 
+/*
+
+=item C<char *
+Parrot_getenv(const char *name, int *free_it)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 char *
 Parrot_getenv(const char *name, int *free_it)
 {
     *free_it = 0;
     return getenv(name);
 }
+
+/*
+
+=back
+
+=cut
+
+*/
 
 /*
  * Local variables:

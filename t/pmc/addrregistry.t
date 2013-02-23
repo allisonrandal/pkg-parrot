@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: addrregistry.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: addrregistry.t 37200 2009-03-08 11:46:01Z fperrad $
 
 =head1 NAME
 
@@ -17,26 +17,16 @@ Tests the AddrRegistry PMC.
 =cut
 
 .sub main :main
-    # load this library
-    load_bytecode 'library/Test/More.pir'
-
-    # get the testing functions
-    .local pmc exports, curr_namespace, test_namespace
-    curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
-    exports = split " ", "plan diag ok is is_deeply like isa_ok"
-
-    test_namespace."export_to"(curr_namespace, exports)
+    .include 'include/test_more.pir'
 
     plan(1)
 
-    new P0, .AddrRegistry
+    $P0 = new ['AddrRegistry']
     ok(1, 'Instantiated .AddrRegistry')
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: op.t 16244 2006-12-25 22:14:04Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: op.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -206,7 +206,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "x = defined" );
 .sub test :main
     .local pmc a
-    a = new ResizablePMCArray
+    a = new 'ResizablePMCArray'
     push a, 10
     $I0 = defined a
     print $I0
@@ -224,7 +224,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "x = clone" );
 .sub test :main
     .local pmc a
-    a = new Integer
+    a = new 'Integer'
     a = 10
     .local pmc b
     b = clone a
@@ -263,12 +263,12 @@ pir_output_is( <<'CODE', <<'OUT', "x = sin" );
     end
 .end
 CODE
-0.000000
+0
 OUT
 
 pir_output_is( <<'CODE', <<'OUT', "x = can" );
 .sub test :main
-    $P0 = new ParrotIO
+    $P0 = new 'FileHandle'
     $I0 = can $P0, "puts"
     print $I0
     print "\n"
@@ -280,7 +280,7 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "x = isa" );
 .sub test :main
-    $P0 = new Integer
+    $P0 = new 'Integer'
     $I0 = isa $P0, "scalar"
     print $I0
     print "\n"
@@ -304,7 +304,7 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "x = invoke" );
 .sub test :main
-    $P0 = find_global "_s"
+    $P0 = get_global "_s"
     $P0 = invokecc
     $S0 = "done\n"
     $S0 = print
@@ -324,8 +324,8 @@ pir_output_is( <<'CODE', '', "empty sub" );
 .sub _foo
 .end
 
-.emit
-.eom
+.sub _foo :anon
+.end
 CODE
 
 pir_output_is( <<'CODE', <<'OUT', "if null X goto Y" );

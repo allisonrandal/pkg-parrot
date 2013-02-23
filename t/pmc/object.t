@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: object.t 18330 2007-04-25 02:37:03Z coke $
+# Copyright (C) 2007-2008, Parrot Foundation.
+# $Id: object.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -17,36 +17,25 @@ Tests the Object PMC.
 =cut
 
 # L<PDD15/Object PMC API>
-# TODO fix smartlinks once this is specced
 ## TODO add more tests as this is documented and implemented
 
 .sub main :main
-    # load this library
-    load_bytecode 'library/Test/More.pir'
-
-    # get the testing functions
-    .local pmc exports, curr_namespace, test_namespace
-    curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
-    exports = split " ", "plan diag ok is is_deeply like isa_ok"
-
-    test_namespace."export_to"(curr_namespace, exports)
+    .include 'test_more.pir'
 
     plan(1)
 
     push_eh cant_instantiate
-      new P0, .Object
-    clear_eh
-    ok(0, 'Able to instantiate .Object')
+      new $P0, ['Object']
+    pop_eh
+    ok(0, 'Able to instantiate Object')
     goto done_1
 cant_instantiate:
-    ok(1, 'Unable to Instantiate .Object')
+    ok(1, 'Unable to Instantiate Object')
 done_1:
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

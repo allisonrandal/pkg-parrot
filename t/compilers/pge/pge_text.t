@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: pge_text.t 18194 2007-04-14 14:54:09Z pmichaud $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: pge_text.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -19,7 +19,7 @@ These tests examine the ability of PGE to match text with brackets in it.
 
 =head1 SYNOPSIS
 
-        % prove t/p6regex/text_brk.t
+        % prove t/compilers/pge/text_brk.t
 
 =cut
 
@@ -32,13 +32,13 @@ pir_output_is( <<'CODE', <<'OUT', "bracketed" );
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Text.pir'
 
-    bracketed = find_global "PGE::Text", "bracketed"
+    bracketed = get_global ['PGE';'Text'], "bracketed"
 
     $S0 = "{ nested { and } okay, () and <>,  escaped \\}'s } okay"
     $P0 = bracketed($S0)
     bsr result
     $S0 = "{ nested \n{ and } okay, \n() and <>, escaped \\}'s } okay"
-    $P0 = bracketed($S0) 
+    $P0 = bracketed($S0)
     bsr result
     $S0 = "{ nested { and } okay,  unbalanced ( and < , escaped \\}'s } okay"
     $P0 = bracketed($S0, "{}")

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: cgoto.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: cgoto.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,35 +15,47 @@ package auto::cgoto;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining whether your compiler supports computed goto';
-@args        = qw(cgoto miniparrot verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does your compiler support computed goto};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    if ( $conf->options->get('miniparrot') ) {
-        $self->set_result('skipped');
-        return $self;
-    }
+    my $test = _probe_for_cgoto( $conf );
 
-    my ( $cgoto, $verbose ) = $conf->options->get(qw(cgoto verbose));
+    $self->_evaluate_cgoto($conf, $test);
 
+    return 1;
+}
+
+sub _probe_for_cgoto {
+    my $conf = shift;
+    my $cgoto = $conf->options->get('cgoto');
     my $test;
     if ( defined $cgoto ) {
         $test = $cgoto;
     }
     else {
-        cc_gen('config/auto/cgoto/test_c.in');
-        $test = eval { cc_build(); 1; } || 0;
-        cc_clean();
+        $conf->cc_gen('config/auto/cgoto/test_c.in');
+        $test = eval { $conf->cc_build(); 1; } || 0;
+        $conf->cc_clean();
     }
+    return $test;
+}
 
+sub _evaluate_cgoto {
+    my ($self, $conf, $test) = @_;
+    my $verbose = $conf->options->get('verbose');
     if ($test) {
         $conf->data->set(
             TEMP_cg_h => '$(INC_DIR)/oplib/core_ops_cg.h $(INC_DIR)/oplib/core_ops_cgp.h',
@@ -54,14 +66,14 @@ $(OPS_DIR)/core_ops_cg$(O): $(GENERAL_H_FILES) $(OPS_DIR)/core_ops_cg.c
 $(OPS_DIR)/core_ops_cgp$(O): $(GENERAL_H_FILES) $(OPS_DIR)/core_ops_cgp.c
 $(SRC_DIR)/runops_cores.c: $(INC_DIR)/oplib/core_ops_cgp.h
 
-$(INC_DIR)/oplib/core_ops_cg.h: $(OPS_DIR)/core_ops_cg.c 
+$(INC_DIR)/oplib/core_ops_cg.h: $(OPS_DIR)/core_ops_cg.c
 
 $(OPS_DIR)/core_ops_cg.c : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGoto.pm lib/Parrot/OpLib/core.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2c.pl CGoto --core
 
-$(INC_DIR)/oplib/core_ops_cgp.h: $(OPS_DIR)/core_ops_cgp.c 
+$(INC_DIR)/oplib/core_ops_cgp.h: $(OPS_DIR)/core_ops_cgp.c
 
-$(OPS_DIR)/core_ops_cgp.c : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGP.pm lib/Parrot/OpLib/core.pm lib/Parrot/OpTrans/CPrederef.pm 
+$(OPS_DIR)/core_ops_cgp.c : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGP.pm lib/Parrot/OpLib/core.pm lib/Parrot/OpTrans/CPrederef.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2c.pl CGP --core
 EOF
             TEMP_cg_o => '$(OPS_DIR)/core_ops_cg$(O) $(OPS_DIR)/core_ops_cgp$(O)',
@@ -83,8 +95,6 @@ EOF
         print " (no) " if $verbose;
         $self->set_result('no');
     }
-
-    return $self;
 }
 
 1;

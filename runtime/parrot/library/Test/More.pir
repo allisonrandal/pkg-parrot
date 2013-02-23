@@ -5,15 +5,15 @@ Test::More - Parrot extension for testing modules
 =head1 SYNOPSIS
 
     # load this library
-    load_bytecode 'library/Test/More.pir'
+    load_bytecode 'library/Test/More.pbc'
 
     # get the testing functions
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
-    exports = split " ", "plan diag ok is is_deeply like isa_ok"
+    test_namespace = get_namespace [ 'Test'; 'More' ]
+    exports        = split ' ', 'plan diag ok nok is is_deeply like isa_ok skip isnt todo'
 
-    test_namespace."export_to"(curr_namespace, exports)
+    test_namespace.'export_to'(curr_namespace, exports)
 
     # set a test plan
     plan( 12 )
@@ -40,17 +40,17 @@ Test::More - Parrot extension for testing modules
     skip(1, 'reason for skipping')
     todo(0, 'this is a failed test', 'reason for todo')
 
-    $P0 = getclass "Squirrel"
+    $P0 = get_class "Squirrel"
     $P0.new()
 
     isa_ok($P0, "Squirrel", "new Squirrel")
 
 =head1 DESCRIPTION
 
-C<Test::More> is a pure-Parrot library for testing modules.  It provides
-the C<ok()>, C<is()>, C<is_deeply()>, and C<like()> comparison functions for
-you.  It also provides the C<plan()> and C<diag()> helper functions. It uses
-C<Test::Builder>, a simple, single backend for multiple test modules
+C<Test::More> is a pure-Parrot library for testing modules.  It provides the
+C<ok()>, C<is()>, C<isnt()>, C<is_deeply()>, and C<like()> comparison functions
+for you.  It also provides the C<plan()> and C<diag()> helper functions. It
+uses C<Test::Builder>, a simple, single backend for multiple test modules
 to use within your tests.
 
 =head1 FUNCTIONS
@@ -61,18 +61,15 @@ This class defines the following functions:
 
 =cut
 
-.namespace [ 'Test::More' ]
+.namespace [ 'Test'; 'More' ]
 
 .sub _initialize :load
-    load_bytecode 'library/Test/Builder.pir'
+    load_bytecode 'library/Test/Builder.pbc'
 
     .local pmc test
-    .local int test_type
+    test = new [ 'Test'; 'Builder' ]
 
-    find_type test_type, 'Test::Builder'
-    test = new test_type
-
-    store_global 'Test::More', '_test', test
+    set_hll_global [ 'Test'; 'More' ], '_test', test
 .end
 
 =item C<plan( number_or_no_plan )>
@@ -87,8 +84,8 @@ already declared a plan or if you pass an invalid argument.
     .param string tests
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
-    test.plan( tests )
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+    test.'plan'( tests )
 .end
 
 =item C<ok( passed, description )>
@@ -103,9 +100,9 @@ recording it with the optional test description in C<description>.
     .param string description     :optional
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
-    test.ok( passed, description )
+    test.'ok'( passed, description )
 .end
 
 =item C<nok( passed, description )>
@@ -116,16 +113,16 @@ C<passed>, recording it with the optional test description in C<description>.
 =cut
 
 .sub nok
-	.param int passed
-	.param string description :optional
+    .param int passed
+    .param string description :optional
 
-	.local pmc test
-	find_global test, 'Test::More', '_test'
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
-	.local int reverse_passed
-	reverse_passed = not passed
+    .local int reverse_passed
+    reverse_passed = not passed
 
-	test.ok( reverse_passed, description )
+    test.'ok'( reverse_passed, description )
 .end
 
 =item C<is( left, right, description )>
@@ -150,161 +147,300 @@ add more.
 
 =cut
 
-.sub is :multi( int, int )
-    .param int    left
-    .param int    right
-    .param string description :optional
+.sub is :multi(PMC, Integer)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+
+    .local int l, r, pass
+    l    = left
+    r    = right
+    pass = iseq l, r
+
+    test.'ok'( pass, description )
+    if pass goto done
+
+    .local string diagnostic
+    .local string l_string
+    .local string r_string
+
+    l_string    = left
+    r_string    = right
+
+    diagnostic = _make_diagnostic( l_string, r_string )
+    test.'diag'( diagnostic )
+  done:
+.end
+
+.sub is :multi(PMC, Float)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
+    .param pmc precision   :optional
+    .param int have_prec   :opt_flag
+
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+
+    .local num l, r
+    .local int pass
+    l    = left
+    r    = right
+    pass = iseq l, r
+
+    if     pass      goto report
+    unless have_prec goto report
+
+    .local num diff, prec_num
+    prec_num = precision
+    diff     = l - r
+    diff     = abs diff
+    pass     = isle diff, prec_num
+
+  report:
+    test.'ok'( pass, description )
+    if pass goto done
+
+    .local string diagnostic
+    .local string l_string
+    .local string r_string
+
+    l_string    = left
+    r_string    = right
+
+    diagnostic = _make_diagnostic( l_string, r_string )
+    test.'diag'( diagnostic )
+  done:
+.end
+
+.sub is :multi(PMC, String)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
+
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+
+    .local string l, r
+    .local int pass
+    l    = left
+    r    = right
+    pass = iseq l, r
+
+    test.'ok'( pass, description )
+    if pass goto done
+
+    .local string diagnostic
+    .local string l_string
+    .local string r_string
+
+    l_string    = left
+    r_string    = right
+
+    diagnostic = _make_diagnostic( l_string, r_string )
+    test.'diag'( diagnostic )
+  done:
+.end
+
+.sub is :multi(PMC, PMC)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
+
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+
+    .local int pass
+    .local int does_type
+
+    does_type = does right, 'String'
+    if does_type goto check_string
+
+    does_type = does right, 'Float'
+    if does_type goto check_float
+
+    does_type = does right, 'Integer'
+    if does_type goto check_integer
+
+  check_string:
+    pass = iseq left, right
+    goto result
+
+  check_float:
+    .local num ln, rn
+    ln   = left
+    rn   = right
+    pass = iseq ln, rn
+    goto result
+
+  check_integer:
+    .local int li, ri
+    li   = left
+    ri   = right
+    pass = iseq li, ri
+    goto result
+
+  result:
+    test.'ok'( pass, description )
+    if pass goto done
+
+    .local string diagnostic
+    .local string l_string
+    .local string r_string
+
+    l_string    = left
+    r_string    = right
+
+    diagnostic = _make_diagnostic( l_string, r_string )
+    test.'diag'( diagnostic )
+  done:
+.end
+
+=item C<isnt( left, right, description )>
+
+Like C<is>, but succeeds if the arguments I<don't> match.
+
+=cut
+
+.sub isnt :multi(Integer, Integer)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
+
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local int pass
     pass       = 0
 
-    if left == right goto pass_it
+    if left != right goto pass_it
     goto report
 
   pass_it:
     pass = 1
 
   report:
-    test.ok( pass, description )
+    test.'ok'( pass, description )
     if pass goto done
 
     .local string diagnostic
     .local string l_string
     .local string r_string
 
-    l_string    = left
-    r_string    = right
+    l_string = left
+    r_string = right
+    r_string = 'not ' . r_string
 
     diagnostic = _make_diagnostic( l_string, r_string )
-    test.diag( diagnostic )
+    test.'diag'( diagnostic )
   done:
 .end
 
-.sub is :multi( float, float )
-    .param float  left
-    .param float  right
-    .param string description :optional
+.sub isnt :multi(Float, Float)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local int pass
     pass = 0
 
-    eq left, right, pass_it
+    ne left, right, pass_it
     goto report
 
   pass_it:
     pass = 1
 
   report:
-    test.ok( pass, description )
+    test.'ok'( pass, description )
     if pass goto done
 
     .local string diagnostic
     .local string l_string
     .local string r_string
 
-    l_string    = left
-    r_string    = right
+    l_string = left
+    r_string = right
+    r_string = 'not ' . r_string
 
     diagnostic = _make_diagnostic( l_string, r_string )
-    test.diag( diagnostic )
+    test.'diag'( diagnostic )
   done:
 .end
 
-.sub is :multi( string, string )
-    .param string left
-    .param string right
-    .param string description :optional
+.sub isnt :multi(String, String)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local int pass
     pass = 0
 
-    eq left, right, pass_it
+    ne left, right, pass_it
     goto report
 
   pass_it:
     pass = 1
 
   report:
-    test.ok( pass, description )
+    test.'ok'( pass, description )
     if pass goto done
 
     .local string diagnostic
     .local string l_string
     .local string r_string
 
-    l_string    = left
-    r_string    = right
+    l_string = left
+    r_string = right
+    r_string = 'not ' . r_string
 
     diagnostic = _make_diagnostic( l_string, r_string )
-    test.diag( diagnostic )
+    test.'diag'( diagnostic )
   done:
 .end
 
-.sub is :multi()
-    .param pmc    left
-    .param pmc    right
-    .param string description :optional
+.sub isnt :multi(PMC, PMC)
+    .param pmc left
+    .param pmc right
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
+    # this comparison may not work in general, but it's worth trying
     .local int pass
-    pass = 0
-
-	.local string r_type
-	r_type = typeof right
-
-	if r_type == 'Float' goto num_compare
-	if r_type == 'Int'   goto num_compare
-	goto string_compare
-
-  num_compare:
- 	.local float l_val
- 	.local float r_val
-	l_val = left
-	r_val = right
-
-    if l_val == r_val goto pass_it
-
-	# XXX - significant places?  I don't care :)
-	.local float diff
-	diff = l_val - r_val
-
-	if diff < 0.000000000001 goto pass_it
-
-  string_compare:
-	.local string l_val
-	.local string r_val
-	l_val = left
-	r_val = right
-	eq l_val, r_val, pass_it
-	goto report
-
-  pass_it:
-    pass = 1
+    pass = isne left, right
 
   report:
-    test.ok( pass, description )
+    test.'ok'( pass, description )
     if pass goto done
 
     .local string diagnostic
     .local string l_string
     .local string r_string
 
-    l_string    = left
-    r_string    = right
+    l_string = left
+    r_string = right
+    r_string = 'not ' . r_string
 
     diagnostic = _make_diagnostic( l_string, r_string )
-    test.diag( diagnostic )
+    test.'diag'( diagnostic )
   done:
 .end
 
@@ -318,8 +454,8 @@ Prints C<diagnostic> to the screen, without affecting test comparisons.
     .param string diagnostic
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
-    test.diag( diagnostic )
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+    test.'diag'( diagnostic )
 .end
 
 
@@ -335,19 +471,20 @@ hard to extend it for hash-like structures, too.
 
 =cut
 
-.sub is_deeply :multi( pmc, pmc )
+.sub is_deeply :multi(PMC, PMC)
     .param pmc left
     .param pmc right
-    .param string description :optional
+    .param pmc description :optional
+    .param int have_desc   :opt_flag
 
     .local int    result
     .local string diagnosis
 
     .local pmc position
-    position = new .ResizablePMCArray
+    position = new 'ResizablePMCArray'
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local int does_flag
     does_flag = does left, 'array'
@@ -410,7 +547,7 @@ hard to extend it for hash-like structures, too.
     .param pmc position
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local int l_count
     .local int r_count
@@ -439,8 +576,8 @@ hard to extend it for hash-like structures, too.
     .local pmc r_iter
     .local int count
 
-    l_iter = new .Iterator, l_array
-    r_iter = new .Iterator, r_array
+    l_iter = new 'Iterator', l_array
+    r_iter = new 'Iterator', r_array
     l_iter = 0
     r_iter = 0
     count  = 0
@@ -475,7 +612,7 @@ hard to extend it for hash-like structures, too.
     .param pmc position
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local int l_count
     .local int r_count
@@ -504,8 +641,8 @@ hard to extend it for hash-like structures, too.
     .local pmc r_iter
     .local int count
 
-    l_iter = new .Iterator, l_hash
-    r_iter = new .Iterator, r_hash
+    l_iter = new 'Iterator', l_hash
+    r_iter = new 'Iterator', r_hash
     l_iter = 0
     r_iter = 0
     count  = 0
@@ -537,28 +674,13 @@ hard to extend it for hash-like structures, too.
     .return( 1 )
 .end
 
-.sub compare_elements :multi( string, string, PMC )
-    .param string left
-    .param string right
+.sub compare_elements :multi(String, String, PMC)
+    .param pmc left
+    .param pmc right
     .param pmc position
 
     .local int equal
 
-    eq left, right, are_equal
-
-  are_not_equal:
-    .return( 0 )
-
-  are_equal:
-    .return( 1 )
-.end
-
-.sub compare_elements :multi( int, int, PMC )
-    .param int left
-    .param int right
-    .param pmc position
-
-    .local int equal
     eq left, right, are_equal
 
   are_not_equal:
@@ -570,7 +692,7 @@ hard to extend it for hash-like structures, too.
     .return( 1 )
 .end
 
-.sub compare_elements :multi( String, String, PMC )
+.sub compare_elements :multi(Integer, Integer, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -587,7 +709,23 @@ hard to extend it for hash-like structures, too.
     .return( 1 )
 .end
 
-.sub compare_elements :multi( Integer, Integer, PMC )
+.sub compare_elements :multi(String, String, PMC)
+    .param pmc left
+    .param pmc right
+    .param pmc position
+
+    eq left, right, are_equal
+
+  are_not_equal:
+    push position, left
+    push position, right
+    .return( 0 )
+
+  are_equal:
+    .return( 1 )
+.end
+
+.sub compare_elements :multi(Integer, Integer, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -604,7 +742,7 @@ hard to extend it for hash-like structures, too.
     .return( 1 )
 .end
 
-.sub compare_elements :multi( Array, Array, PMC )
+.sub compare_elements :multi(Array, Array, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -614,7 +752,7 @@ hard to extend it for hash-like structures, too.
     .return( equal )
 .end
 
-.sub compare_elements :multi( Hash, Hash, PMC )
+.sub compare_elements :multi(Hash, Hash, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -624,7 +762,7 @@ hard to extend it for hash-like structures, too.
     .return( equal )
 .end
 
-.sub compare_elements :multi( Undef, Undef, PMC )
+.sub compare_elements :multi(Undef, Undef, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -632,7 +770,7 @@ hard to extend it for hash-like structures, too.
     .return( 1 )
 .end
 
-.sub compare_elements :multi( Undef, PMC, PMC )
+.sub compare_elements :multi(Undef, PMC, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -644,7 +782,7 @@ hard to extend it for hash-like structures, too.
     .return( 0 )
 .end
 
-.sub compare_elements :multi( PMC, Undef, PMC )
+.sub compare_elements :multi(PMC, Undef, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -656,7 +794,7 @@ hard to extend it for hash-like structures, too.
     .return( 0 )
 .end
 
-.sub compare_elements :multi( PMC, PMC, PMC )
+.sub compare_elements :multi(PMC, PMC, PMC)
     .param pmc left
     .param pmc right
     .param pmc position
@@ -695,14 +833,14 @@ optional test description in C<description>.
     .param string description :optional
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local pmc p6rule_compile
     load_bytecode "PGE.pbc"
-    load_bytecode "PGE/Dumper.pir"
-    load_bytecode "PGE/Text.pir"
-    load_bytecode "PGE/Util.pir"
-    p6rule_compile = compreg "PGE::P6Regex"
+    load_bytecode "PGE/Dumper.pbc"
+    load_bytecode "PGE/Text.pbc"
+    load_bytecode "PGE/Util.pbc"
+    p6rule_compile = compreg "PGE::Perl6Regex"
 
     .local string diagnostic
     .local int pass
@@ -730,10 +868,10 @@ optional test description in C<description>.
     pass = 1
 
   report:
-    test.ok( pass, description )
+    test.'ok'( pass, description )
     if pass goto done
 
-    test.diag( diagnostic )
+    test.'diag'( diagnostic )
   done:
 .end
 
@@ -744,34 +882,34 @@ actually skipped.  Arguments are optional.
 
 =cut
 
-.sub skip :multi(int, string)
+.sub skip :multi(Integer, String)
     .param int how_many
     .param string description
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
     test.'skip'(how_many, description)
 .end
 
-.sub skip :multi(int)
+.sub skip :multi(Integer)
     .param int how_many
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
     test.'skip'(how_many)
 .end
 
-.sub skip :multi(string)
+.sub skip :multi(String)
     .param string description
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
     test.'skip'(1, description)
 .end
 
 .sub skip :multi()
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
     test.'skip'()
 .end
 
@@ -787,9 +925,9 @@ and the C<reason> you have marked it as TODO.
     .param pmc args :slurpy
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
-    test.todo( args :flat )
+    test.'todo'( args :flat )
 .end
 
 =item C<isa_ok( object, class_name, object_name )>
@@ -812,7 +950,7 @@ Bad input: "C<test that the return from Foo is correct type>"
     .param int got_name :opt_flag
 
     .local pmc test
-    find_global test, 'Test::More', '_test'
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
 
     .local string description, diagnostic
     description = "The object"
@@ -842,9 +980,9 @@ Bad input: "C<test that the return from Foo is correct type>"
     .param string expected
     .local string diagnostic
 
-    diagnostic  = 'Received: '
+    diagnostic  = 'Have: '
     diagnostic .= received
-    diagnostic .= "\nExpected: "
+    diagnostic .= "\nWant: "
     diagnostic .= expected
 
     .return( diagnostic )
@@ -861,7 +999,7 @@ to the Perl 6 internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005 - 2006 The Perl Foundation.
+Copyright (C) 2005-2008, Parrot Foundation.
 
 =cut
 
@@ -869,4 +1007,4 @@ Copyright (C) 2005 - 2006 The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

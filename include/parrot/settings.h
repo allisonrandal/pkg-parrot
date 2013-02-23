@@ -1,7 +1,7 @@
 /* settings.h
- *  Copyright (C) 2001-2004, The Perl Foundation.
+ *  Copyright (C) 2001-2004, Parrot Foundation.
  *  SVN Info
- *     $Id: settings.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: settings.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:
@@ -14,20 +14,20 @@
 #define PARROT_SETTINGS_H_GUARD
 
 /*
- * DOD/GC switches
+ * GC switches
  */
 
 /* If you are trying to debug GC problems which only occur on large test cases,
  * turning on GC_DEBUG should help make the problem appear with smaller data
- * samples by reducing various numbers, and causing DOD and allocation runs
- * to occur more frequently. It does significantly reduce performance. */
+ * samples by reducing various numbers, and causing GC runs to occur more
+ * frequently. It does significantly reduce performance. */
 #ifndef DISABLE_GC_DEBUG
 #  define DISABLE_GC_DEBUG 0
 #endif /* DISABLE_GC_DEBUG */
 
 /* Helpful internal macro for testing whether we are currently
  * debugging garbage collection and memory management. See also the
- * definition of GC_VERBOSE in dod.c. */
+ * definition of GC_VERBOSE in include/parrot/gc_api.h. */
 #if DISABLE_GC_DEBUG
 #  define GC_DEBUG(interp) 0
 #else
@@ -40,7 +40,7 @@
  * 1 ... IMS incremental mark & sweep
  * 2 ... GMS generational mark & sweep
  *
- * Please note that only '0' is tested.
+ * Please note that only 0 currently works.
  */
 
 #define PARROT_GC_SUBSYSTEM 0
@@ -60,11 +60,6 @@
 #  define PARROT_GC_IMS     0
 #  define PARROT_GC_GMS     1
 #endif
-
-
-/*
- * misc settings
- */
 
 /*
  * JIT/i386 can use the CGP run core for external functions instead

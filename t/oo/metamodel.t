@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: metamodel.t 18256 2007-04-17 06:55:10Z allison $
+# Copyright (C) 2007-2008, Parrot Foundation.
+# $Id: metamodel.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -21,9 +21,9 @@ Tests the metamodel for the OO implementation.
 
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
+    test_namespace = get_namespace [ 'Test'; 'More' ]
     exports = split " ", "plan ok is isa_ok skip todo"
-    test_namespace.export_to(curr_namespace, exports)
+    test_namespace.'export_to'(curr_namespace, exports)
 
     plan( 12 )
 
@@ -33,9 +33,9 @@ Tests the metamodel for the OO implementation.
 
     class = new "Class", init_args1
     isa_ok(class, "Class", "created class isa Class")
-    $P1 = class.name()
+    $P1 = class.'name'()
     is($P1, "Dog", "created a new class via Class")
-    $P1 = class.name()
+    $P1 = class.'name'()
     is($P1, "Dog", "Class accessor doesn't destroy value")
 
     class.'add_attribute'('bark')
@@ -110,7 +110,7 @@ get_attr:
     .param pmc init_args
   # Iterate over the constructor arguments, calling the accessor for each
     .local pmc iter
-    iter = new Iterator, init_args
+    iter = new 'Iterator', init_args
     iter = 0
   iter_loop:
     unless iter goto iter_end
@@ -125,7 +125,7 @@ get_attr:
   .param pmc bark :optional
   .param int got_bark :opt_flag
   .local pmc rv
-  rv = self._accessor( "bark", bark, got_bark )
+  rv = self.'_accessor'( "bark", bark, got_bark )
   .return(rv)
 .end
 
@@ -133,7 +133,7 @@ get_attr:
   .param pmc tail :optional
   .param int got_tail :opt_flag
   .local pmc rv
-  rv = self._accessor( "tail", tail, got_tail )
+  rv = self.'_accessor'( "tail", tail, got_tail )
   .return(rv)
 .end
 
@@ -141,4 +141,4 @@ get_attr:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

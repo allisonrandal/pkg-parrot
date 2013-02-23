@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: gmp.pm 19060 2007-06-17 14:21:35Z paultcochrane $
+# Copyright (C) 2001-2004, Parrot Foundation.
+# $Id: gmp.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -9,94 +9,95 @@ config/auto/gmp.pm - Test for GNU MP (GMP) Math library
 
 Determines whether the platform supports GMP.
 
+From L<http://gmplib.org/>:  "GMP is a free library for arbitrary precision
+arithmetic, operating on signed integers, rational numbers, and floating point
+numbers. There is no practical limit to the precision except the ones implied
+by the available memory in the machine GMP runs on. ..."
+
+"The main target applications for GMP are cryptography applications and
+research, Internet security applications, algebra systems, computational
+algebra research, etc."
+
 =cut
 
 package auto::gmp;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Config;
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining if your platform supports GMP';
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does your platform support GMP};
+    $data{result}      = q{};
+    $data{cc_run_expected} =
+"6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151 0\n";
 
-@args = qw(verbose without-gmp);
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my ( $verbose, $without ) = $conf->options->get(@args);
+    my ( $verbose, $without ) = $conf->options->get(
+        qw|
+            verbose
+            without-gmp
+        |
+    );
 
     if ($without) {
         $conf->data->set( has_gmp => 0 );
         $self->set_result('no');
-        return $self;
+        return 1;
     }
 
-    my $cc        = $conf->data->get('cc');
-    my $libs      = $conf->data->get('libs');
-    my $linkflags = $conf->data->get('linkflags');
-    my $ccflags   = $conf->data->get('ccflags');
-    if ( $^O =~ /mswin32/i ) {
-        if ( $cc =~ /^gcc/i ) {
-            $conf->data->add( ' ', libs => '-lgmp' );
-        }
-        else {
-            $conf->data->add( ' ', libs => 'gmp.lib' );
-        }
-    }
-    else {
-        $conf->data->add( ' ', libs => '-lgmp' );
-    }
+    my $osname = $conf->data->get_p5('OSNAME');
 
-    my $osname = $Config{osname};
+    my $extra_libs = $self->_select_lib( {
+        conf            => $conf,
+        osname          => $osname,
+        cc              => $conf->data->get('cc'),
+        win32_nongcc    => 'gmp.lib',
+        default         => '-lgmp',
+    } );
 
     # On OS X check the presence of the gmp header in the standard
     # Fink location.
-    # RT#43134: Need a more generalized way for finding
-    # where Fink lives.
-    if ( $osname =~ /darwin/ ) {
-        if ( -f "/sw/include/gmp.h" ) {
-            $conf->data->add( ' ', linkflags => '-L/sw/lib' );
-            $conf->data->add( ' ', ldflags   => '-L/sw/lib' );
-            $conf->data->add( ' ', ccflags   => '-I/sw/include' );
-        }
-    }
+    $self->_handle_darwin_for_fink($conf, $osname, 'gmp.h');
+    $self->_handle_darwin_for_macports($conf, $osname, 'gmp.h');
 
-    cc_gen('config/auto/gmp/gmp.in');
-    eval { cc_build(); };
+    $conf->cc_gen('config/auto/gmp/gmp_c.in');
+    eval { $conf->cc_build( q{}, $extra_libs); };
     my $has_gmp = 0;
     if ( !$@ ) {
-        my $test = cc_run();
-        if ( $test eq
-"6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151 0\n"
-            )
-        {
-            $has_gmp = 1;
-            print " (yes) " if $verbose;
-            $self->set_result('yes');
-
-            $conf->data->set(
-                gmp     => 'define',
-                HAS_GMP => $has_gmp,
-            );
-        }
+        my $test = $conf->cc_run();
+        $has_gmp = $self->_evaluate_cc_run( $conf, $test, $has_gmp, $verbose );
     }
-    unless ($has_gmp) {
-
-        # The Config::Data settings might have changed for the test
-        $conf->data->set( 'libs',      $libs );
-        $conf->data->set( 'ccflags',   $ccflags );
-        $conf->data->set( 'linkflags', $linkflags );
-        print " (no) " if $verbose;
-        $self->set_result('no');
+    if ($has_gmp) {
+        $conf->data->add( ' ', libs => $extra_libs );
     }
 
-    return $self;
+    return 1;
+}
+
+sub _evaluate_cc_run {
+    my ($self, $conf, $test, $has_gmp, $verbose) = @_;
+    if ( $test eq $self->{cc_run_expected} ) {
+        $has_gmp = 1;
+        print " (yes) " if $verbose;
+        $self->set_result('yes');
+
+        $conf->data->set(
+            gmp     => 'define',
+            HAS_GMP => $has_gmp,
+        );
+    }
+    return $has_gmp;
 }
 
 1;

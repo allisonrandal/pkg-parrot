@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: cc_params.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: cc_params.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -72,7 +72,7 @@ for my $c_args ( 0 .. 1 ) {
                 my $testhead = create_test_header( $c_args, $c_results, $c_params, $c_returns, );
 
                 ## execute tests
-                if ($expbody eq "ok\n") {
+                if ( $expbody eq "ok\n" ) {
                     pir_output_like( $testbody, "/$expbody/", $testhead );
                 }
                 else {
@@ -101,7 +101,6 @@ package TemplateData;
 
 sub new { bless {} => shift; }
 sub addkey { my $self = shift; $self->{$_} = '' for @_ }
-sub keys { sort keys %{ +shift } }
 
 sub create_args {
     my $self = shift;
@@ -169,7 +168,7 @@ sub create_func {
     my ( $c_args, $c_params, $c_returns, $c_results ) = @_;
 
     $self->{FUNC} =
-          'args' . $c_args
+        'args' . $c_args
         . '_results'
         . $c_results
         . '__params'

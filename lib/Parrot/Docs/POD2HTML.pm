@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: POD2HTML.pm 16739 2007-01-22 10:48:23Z paultcochrane $
+# Copyright (C) 2004-2008, Parrot Foundation.
+# $Id: POD2HTML.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -183,7 +183,7 @@ sub process_code_start_token {
 
     if ( $text =~ /^Parrot::/o ) {
 
-        # TODO - C<Perl::Module> should really be L<Perl::Module>
+        # RT #43715 - C<Perl::Module> should really be L<Perl::Module>
         # but this will do until the docs are changed.
 
         my $href = $self->href_for_perl_module($text);
@@ -274,7 +274,7 @@ sub process_item_text_or_head_start_token {
 
         last
             if $to_unget[-1]->is_end
-            and $to_unget[-1]->tagname eq $tagname;
+                and $to_unget[-1]->tagname eq $tagname;
     }
 
     # Convert them into an anchor name;
@@ -338,8 +338,8 @@ sub process_other_start_token {
 
     ++$self->{DONT_WRAP}
         if $tagname eq 'Verbatim'
-        or $tagname eq "VerbatimFormatted"
-        or $tagname eq 'X';
+            or $tagname eq "VerbatimFormatted"
+            or $tagname eq 'X';
 }
 
 =item C<process_end_token($token)>
@@ -359,13 +359,6 @@ sub process_end_token {
     elsif ( $tagname eq 'Para' ) {
         $tagname = 'Para_item'
             if @{ $self->{STACK} } and $self->{STACK}->[-1] eq 'text';
-    }
-    elsif ( $tagname =~ /head[12]/o ) {
-
-        # Put the up arrow on the end of a heading.
-        # The space is needed on the front.
-        print { $self->{'output_fh'} }
-            " <a href='#_top'><img alt='^' border=0 src='$self->{RESOURCES_URL}/up.gif'></a>";
     }
     elsif ( $tagname eq 'C' ) {
 
@@ -690,9 +683,9 @@ s/([^\n\t !\#\$\%\(\)\*\+,\.\~\/\:\;=\?\@\[\\\]\^_\`\{\|\}abcdefghijklmnopqrstuv
 
 =head1 HISTORY
 
-In order to avoid modifying C<Pod:Simple::HTLM> large sections of its code
-have been copied here, and then refactored and adjusted to enable various
-bits of Parrot-specific behaviour.
+In order to avoid modifying C<Pod:Simple::HTML>, large sections of its code
+have been copied here, and then refactored and adjusted to enable various bits
+of Parrot-specific behaviour.
 
 =cut
 

@@ -1,5 +1,7 @@
-# $Id: ProhibitShebangWarningsArg.pm 17579 2007-03-17 22:52:33Z paultcochrane $
+# $Id: ProhibitShebangWarningsArg.pm 36833 2009-02-17 20:09:26Z allison $
 package Perl::Critic::Policy::TestingAndDebugging::ProhibitShebangWarningsArg;
+
+# Copyright (C) 2006-2007, Parrot Foundation.
 
 use strict;
 use warnings;

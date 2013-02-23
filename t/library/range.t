@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: range.t 18374 2007-05-01 14:37:45Z coke $
+# Copyright (C) 2007-2008, Parrot Foundation.
+# $Id: range.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -17,18 +17,8 @@ Tests the Range class.
 =cut
 
 .sub main :main
-    # load this library
-    load_bytecode 'library/Test/More.pir'
-
-    # get the testing functions
-    .local pmc exports, curr_namespace, test_namespace
-    curr_namespace = get_namespace
-    test_namespace = get_namespace [ "Test::More" ]
-    exports = split " ", "plan diag ok is is_deeply like isa_ok"
-
-    test_namespace."export_to"(curr_namespace, exports)
-
-    load_bytecode 'Range.pir' # XXX eventually convert to pbc.
+    .include 'include/test_more.pir'
+    load_bytecode 'Range.pir'
 
     plan(78)
 
@@ -51,7 +41,7 @@ Tests the Range class.
     test_14() # 5 tests
 .end
 
-.sub 'test_1' 
+.sub 'test_1'
     .local string test_desc
     test_desc = "1..3, shift until exhausted"
 
@@ -74,8 +64,8 @@ Tests the Range class.
       $I0 = $P0.'shift'()
       ok(0,'1 - exhausted')
       goto finally
-    clear_eh
-    
+    pop_eh
+
 catch:
     # XXX should have more thorough exception check
     ok(1,'1 - exhausted')
@@ -111,7 +101,7 @@ finally:
       $I0 = $P0.'shift'()
       ok(0,'2 - exhausted')
       goto finally
-    clear_eh
+    pop_eh
 
 catch:
     # XXX should have more thorough exception check
@@ -147,7 +137,7 @@ finally:
       $I0 = $P0.'shift'()
       ok(0,'3 - exhausted')
       goto finally
-    clear_eh
+    pop_eh
 
 catch:
     # XXX should have more thorough exception check
@@ -157,7 +147,7 @@ finally:
     .return()
 .end
 
-.sub 'test_4' 
+.sub 'test_4'
     .local string test_desc
     test_desc = "1..3, pop until exhausted"
 
@@ -180,8 +170,8 @@ finally:
       $I0 = $P0.'pop'()
       ok(0,'4 - exhausted')
       goto finally
-    clear_eh
-    
+    pop_eh
+
 catch:
     # XXX should have more thorough exception check
     ok(1,'4 - exhausted')
@@ -216,7 +206,7 @@ finally:
       $I0 = $P0.'pop'()
       ok(0,'5 - exhausted')
       goto finally
-    clear_eh
+    pop_eh
 
 catch:
     # XXX should have more thorough exception check
@@ -252,7 +242,7 @@ finally:
       $I0 = $P0.'pop'()
       ok(0,'6 - exhausted')
       goto finally
-    clear_eh
+    pop_eh
 
 catch:
     # XXX should have more thorough exception check
@@ -278,7 +268,7 @@ finally:
     is($N0, 1, '7 - 1st')
     $N0 = $P0.'pop'()
     is($N0, 42.5, '7 - last')
-  
+
     $N0 = $P0.'get_from'()
     is($N0, 2, '7 - from')
 
@@ -289,7 +279,7 @@ finally:
     .return()
 .end
 
-.sub 'test_8' 
+.sub 'test_8'
     .local string test_desc
     test_desc = "1..3, reverse, shift until exhausted"
 
@@ -316,8 +306,8 @@ finally:
       $I0 = $P0.'shift'()
       ok(0,'8 - exhausted')
       goto finally
-    clear_eh
-    
+    pop_eh
+
 catch:
     # XXX should have more thorough exception check
     ok(1,'8 - exhausted')
@@ -326,7 +316,7 @@ finally:
     .return()
 .end
 
-.sub 'test_9' 
+.sub 'test_9'
     .local string test_desc
     test_desc = "1..3, reverse, pop until exhausted"
 
@@ -353,8 +343,8 @@ finally:
       $I0 = $P0.'pop'()
       ok(0,'9 - exhausted')
       goto finally
-    clear_eh
-    
+    pop_eh
+
 catch:
     # XXX should have more thorough exception check
     ok(1,'9 - exhausted')
@@ -363,7 +353,7 @@ finally:
     .return()
 .end
 
-.sub 'test_10' 
+.sub 'test_10'
     .local string test_desc
     test_desc = "1..3, get attributes..."
 
@@ -394,7 +384,7 @@ finally:
     .return()
 .end
 
-.sub 'test_11' 
+.sub 'test_11'
     .local string test_desc
     test_desc = "3..1:by(-1), get attributes"
 
@@ -428,7 +418,7 @@ finally:
     .return()
 .end
 
-.sub 'test_12' 
+.sub 'test_12'
     .local string test_desc
     test_desc = "1..3, reverse, get attributes"
 
@@ -460,7 +450,7 @@ finally:
     .return()
 .end
 
-.sub 'test_13' 
+.sub 'test_13'
     .local string test_desc
     test_desc = "1..4, vtable shift, all varieties"
 
@@ -486,7 +476,7 @@ finally:
     .return()
 .end
 
-.sub 'test_14' 
+.sub 'test_14'
     .local string test_desc
     test_desc = "1..4, vtable pop, all varieties"
 
@@ -512,10 +502,9 @@ finally:
     .return()
 .end
 
-
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:
+

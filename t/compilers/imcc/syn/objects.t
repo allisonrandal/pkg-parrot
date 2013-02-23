@@ -1,13 +1,29 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: objects.t 18401 2007-05-02 22:49:45Z mdiep $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: objects.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 11;
+use Parrot::Test tests => 13;
+
+##############################
+# ".namespace" sanity
+
+pir_output_is( <<'CODE', <<'OUT', "different namespace declarations");
+
+.namespace ["Foo"]
+.namespace [ ]
+.namespace []
+
+.sub test :main
+    print "ok\n"
+.end
+CODE
+ok
+OUT
 
 ##############################
 # Parrot Calling Conventions
@@ -18,10 +34,8 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    obj._meth()
-    obj->_meth()
+    obj = new "Foo"
+    obj.'_meth'()
     print "done\n"
     end
 .end
@@ -32,7 +46,6 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax" );
 .end
 CODE
 in meth
-in meth
 done
 OUT
 
@@ -41,11 +54,10 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax m.o(arg)" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    $P0 = new String
+    obj = new "Foo"
+    $P0 = new 'String'
     $P0 = "ok\n"
-    obj._meth($P0)
+    obj.'_meth'($P0)
     print "done\n"
     end
 .end
@@ -67,11 +79,10 @@ pir_output_is( <<'CODE', <<'OUT', "meth call ret = o.m(arg)" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    $P0 = new String
+    obj = new "Foo"
+    $P0 = new 'String'
     $P0 = "ok\n"
-    $S0 = obj._meth($P0)
+    $S0 = obj.'_meth'($P0)
     print $S0
     end
 .end
@@ -81,9 +92,9 @@ pir_output_is( <<'CODE', <<'OUT', "meth call ret = o.m(arg)" );
     .param pmc s
     print "in meth\n"
     print s
-    .pcc_begin_return
-    .return "done\n"
-    .pcc_end_return
+    .begin_return
+    .set_return "done\n"
+    .end_return
 .end
 CODE
 in meth
@@ -98,14 +109,12 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax, string" );
     .local string meth
     meth = "_meth"
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
+    obj = new "Foo"
     obj."_meth"()
-    obj->meth()
-    set S10, "_meth"
-    obj->S10()
     set $S10, "_meth"
-    obj->$S10()
+    obj.$S10()
+    set $S10, "_meth"
+    obj.$S10()
     print "done\n"
     end
 .end
@@ -117,19 +126,17 @@ CODE
 in meth
 in meth
 in meth
-in meth
 done
 OUT
 
 pir_output_is( <<'CODE', <<'OUT', "initializer" );
 .sub test :main
-    newclass P1, "Foo"
-    subclass P2, P1, "Bar"
-    subclass P3, P2, "Baz"
-    find_type I1, "Baz"
-    new P3, I1
-    find_global P0, "_sub"
-    invokecc P0
+    newclass $P1, "Foo"
+    subclass $P2, $P1, "Bar"
+    subclass $P3, $P2, "Baz"
+    $P3 = new "Baz"
+    get_global $P0, "_sub"
+    invokecc $P0
     print "done\n"
     end
 .end
@@ -149,7 +156,7 @@ pir_output_is( <<'CODE', <<'OUT', "initializer" );
     print "baz_init\n"
 .end
 
-.namespace  # main again
+.namespace [] # main again
 .sub _sub
     print "in sub\n"
 .end
@@ -167,9 +174,8 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax - method, self" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    obj._meth()
+    obj = new "Foo"
+    obj.'_meth'()
     print "done\n"
     end
 .end
@@ -195,12 +201,11 @@ pir_output_is( <<'CODE', <<'OUT', "explicit meth call syntax" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    .pcc_begin
+    obj = new "Foo"
+    .begin_call
     .invocant obj
     .meth_call "_meth"
-    .pcc_end
+    .end_call
     print "done\n"
     end
 .end
@@ -221,14 +226,13 @@ pir_output_is( <<'CODE', <<'OUT', "explicit meth call syntax, meth var" );
     .local pmc obj
     .local string meth
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
+    obj = new "Foo"
     meth = "_me"
-    meth = meth . "th" 	# test concat to
-    .pcc_begin
+    meth = meth . "th"  # test concat to
+    .begin_call
     .invocant obj
     .meth_call meth
-    .pcc_end
+    .end_call
     print "done\n"
     end
 .end
@@ -247,15 +251,14 @@ pir_output_is( <<'CODE', <<'OUT', "explicit meth call syntax, args" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    .pcc_begin
-    .arg "hello"
-    .arg "\n"
+    obj = new "Foo"
+    .begin_call
+    .set_arg "hello"
+    .set_arg "\n"
     .invocant obj
     .meth_call "_meth"
-    .result $S0
-    .pcc_end
+    .get_result $S0
+    .end_call
     print $S0
     print "done\n"
     end
@@ -268,9 +271,9 @@ pir_output_is( <<'CODE', <<'OUT', "explicit meth call syntax, args" );
     print "in meth\n"
     print p1
     print p2
-    .pcc_begin_return
-    .return "ok\n"
-    .pcc_end_return
+    .begin_return
+    .set_return "ok\n"
+    .end_return
 .end
 CODE
 in meth
@@ -285,12 +288,11 @@ pir_output_is( <<'CODE', <<'OUT', "explicit meth call syntax" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    .pcc_begin
+    obj = new "Foo"
+    .begin_call
     .invocant obj
     .meth_call "_meth"
-    .pcc_end
+    .end_call
     print "done\n"
     end
 .end
@@ -310,9 +312,8 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax - reserved word" );
     .local pmc class
     .local pmc obj
     newclass class, "Foo"
-    find_type $I0, "Foo"
-    new obj, $I0
-    obj.open()
+    obj = new "Foo"
+    obj.'open'()
     print "done\n"
     end
 .end
@@ -324,6 +325,29 @@ pir_output_is( <<'CODE', <<'OUT', "meth call syntax - reserved word" );
 CODE
 in meth
 done
+OUT
+
+pir_output_is( <<'CODE', <<'OUT', ":vtable implies self (see RT #47674)" );
+.sub 'main' :main
+    $P1 = newclass "Foo"
+    $P2 = new "Foo"
+    $S1 = $P2
+    print $S1
+.end
+
+.namespace [ "Foo" ]
+
+.sub 'get_string' :vtable
+    self.'bar'()
+    .return ("stringy thingy\n")
+.end
+
+.sub bar :method
+    print "called bar\n"
+.end
+CODE
+called bar
+stringy thingy
 OUT
 
 # Local Variables:

@@ -1,11 +1,12 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: Parrot_Distribution.t 18324 2007-04-24 20:44:21Z bernhard $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: Parrot_Distribution.t 37280 2009-03-10 21:35:20Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
-use Test::More tests => 38;
+
+use Test::More tests => 26;
 use File::Spec;
 
 =head1 NAME
@@ -51,18 +52,14 @@ ok( !$d->file_for_perl_module('Parrot::Dummy'), 'Perl module file not there' );
 my %pmc_source_file_directories = map { $_->path => 1 } $d->pmc_source_file_directories();
 
 my @old_directory_list = (
-    'compilers/bcg/src/pmc',      'languages/APL/src/pmc',
-    'languages/WMLScript/pmc',    'languages/amber/lib/kernel/pmc',
-    'languages/cardinal/src/pmc', 'languages/dotnet/pmc',
-    'languages/lua/pmc',          'languages/perl6/src/pmc',
-    'languages/pugs/pmc',         'languages/tcl/src/pmc',
     map { File::Spec->catdir( 'src', $_ ) } qw(dynpmc pmc)
 );
 
 for my $dir (@old_directory_list) {
     my $path = $d->directory_with_name($dir)->path();
     ok( exists $pmc_source_file_directories{$path},
-        "Directory from hardcoded list $dir found through MANIFEST" );
+        "Directory from hardcoded list $dir found through MANIFEST" )
+        or diag( "Missing $dir\n" );
 }
 
 ## perl files and exemptions
@@ -78,24 +75,22 @@ for my $dir (@old_directory_list) {
     my $perl_exemption_regexp = $d->get_perl_exemption_regexp();
     ok( $perl_exemption_regexp, 'Got perl exemption regexp' );
 
-    my $exempted_file     = Parrot::IO::File->new( '../../lib/SmartLink.pm' );
-    ok( $d->is_perl_exemption( $exempted_file ), 'SmartLink.pm is exempted' );
-    like( $exempted_file->path(), $perl_exemption_regexp, 'SmartLink.pm is matched' );
-
     # we are in 't/perl'
-    my $not_exempted_file = Parrot::IO::File->new( '../../lib/DumbLink.pm' );
-    ok( ! $d->is_perl_exemption( $not_exempted_file ), 'DumbLink.pm is not exempted' );
-    unlike( $not_exempted_file->path(), $perl_exemption_regexp, 'DumbLink.pm is not matched' );
+    {
+        my $dummy_fn = '../../lib/DumbLink.pm';
+        my $not_exempted_file = Parrot::IO::File->new($dummy_fn);
+        ok( !$d->is_perl_exemption($not_exempted_file), 'DumbLink.pm is not exempted' );
+        unlike( $not_exempted_file->path(), $perl_exemption_regexp, 'DumbLink.pm is not matched' );
+        unlink $dummy_fn;
+    }
 
     # check that no exemptions turn up in the main file list
-    my @exemptions_in_perl_list
-         = grep { $_ =~ $perl_exemption_regexp }
-                map { $_->path }
-                    @perl_files;
+    my @exemptions_in_perl_list = grep { $_ =~ $perl_exemption_regexp }
+        map { $_->path } @perl_files;
 
-    ok( ! @exemptions_in_perl_list, 'No exemptions in Perl source list' );
+    ok( !@exemptions_in_perl_list, 'No exemptions in Perl source list' );
     foreach (@exemptions_in_perl_list) {
-        diag( "got exempted perl file: $_" );
+        diag("got exempted perl file: $_");
     }
 }
 

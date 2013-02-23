@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: hash.c 19110 2007-06-19 04:36:08Z petdance $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: hash.c 37416 2009-03-14 19:20:21Z cotto $
 
 =head1 NAME
 
@@ -21,295 +21,658 @@ don't apply.
 
 =head2 Functions
 
-*/
-
-#include "parrot/parrot.h"
-#include <assert.h>
-
-#define INITIAL_BUCKETS 16
-
-#define N_BUCKETS(n) ((n) - (n)/4)
-#define HASH_ALLOC_SIZE(n) (N_BUCKETS(n) * sizeof (HashBucket) + \
-                             (n) * sizeof (HashBucket *))
-
-/* HEADER: include/parrot/hash.h */
-
-
-/*
-
-FUNCDOC:
-Return the hashed value of the key C<value>.
-
-see also string.c
-
-*/
-
-
-static size_t
-key_hash_STRING(Interp *interp, STRING *value, size_t seed)
-{
-    STRING * const s = value;
-
-    if (s->hashval) {
-        return s->hashval;
-    }
-
-    return string_hash(interp, s, seed);
-}
-
-/*
-
-FUNCDOC:
-Compares the two strings, returning 0 if they are identical.
-
-*/
-
-static int
-STRING_compare(Parrot_Interp interp, const void *search_key, const void *bucket_key)
-{
-    return string_equal(interp, (const STRING *)search_key, (const STRING *)bucket_key);
-}
-
-/*
-
-FUNCDOC:
-Compares the two pointers, returning 0 if they are identical
-
-*/
-
-static int
-pointer_compare(Parrot_Interp interp, const void * const a, const void * const b) {
-    return a != b;
-}
-
-/*
-
-FUNCDOC:
-Returns a hashvalue for a pointer.
-
-*/
-
-static size_t
-key_hash_pointer(Interp *interp, void *value, size_t seed) {
-    return ((size_t) value) ^ seed;
-}
-
-static size_t
-key_hash_cstring(Interp *interp, const void *value /*NN*/, size_t seed)
-{
-    register size_t h = seed;
-    const unsigned char * p = (const unsigned char *) value;
-    while (*p) {
-        h += h << 5;
-        h += *p++;
-    }
-    return h;
-}
-
-/*
-
-FUNCDOC:
-C string versions of the C<key_hash> and C<compare> functions.
-
-*/
-
-static int
-cstring_compare(Parrot_Interp interp, const char *a /*NN*/, const char *b /*NN*/)
-{
-    UNUSED(interp);
-    return strcmp(a, b);
-}
-
-/*
-
-FUNCDOC:
-Custom C<key_hash> function.
-
-*/
-
-static size_t
-key_hash_int(Interp *interp, void *value, size_t seed)
-{
-    UNUSED(interp);
-    return (size_t)value ^ seed;
-}
-
-/*
-
-FUNCDOC:
-Custom C<compare> function.
-
-*/
-
-/*
-
-FUNCDOC:
-Custom C<compare> function.
-
-*/
-
-static int
-int_compare(Parrot_Interp interp, const void *a, const void *b)
-{
-    UNUSED(interp);
-    return a != b;
-}
-
-/*
-
-FUNCDOC:
-Print out the hash in human-readable form.  Except it's empty.
+=over 4
 
 =cut
 
 */
 
-PARROT_API
-void
-parrot_dump_hash(Interp *interp, const Hash *hash)
-{
-}
+#include "parrot/parrot.h"
+#include "pmc/pmc_key.h"
+
+#define INITIAL_BUCKETS 16
+
+/* HEADERIZER HFILE: include/parrot/hash.h */
+
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_MALLOC
+static Hash * create_hash(PARROT_INTERP,
+    PARROT_DATA_TYPE val_type,
+    Hash_key_type hkey_type,
+    ARGIN(hash_comp_fn compare),
+    ARGIN(hash_hash_key_fn keyhash))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(4)
+        __attribute__nonnull__(5);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static int cstring_compare(SHIM_INTERP,
+    ARGIN(const char *a),
+    ARGIN(const char *b))
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+static void expand_hash(PARROT_INTERP, ARGMOD(Hash *hash))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*hash);
+
+static void hash_freeze(PARROT_INTERP,
+    ARGIN(const Hash * const hash),
+    ARGMOD(visit_info *info))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*info);
+
+static void hash_thaw(PARROT_INTERP,
+    ARGMOD(Hash *hash),
+    ARGMOD(visit_info *info))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*hash)
+        FUNC_MODIFIES(*info);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static size_t key_hash_cstring(SHIM_INTERP,
+    ARGIN(const void *value),
+    size_t seed)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static size_t key_hash_pointer(SHIM_INTERP,
+    ARGIN(const void *value),
+    size_t seed)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+static size_t key_hash_STRING(PARROT_INTERP,
+    ARGMOD(STRING *s),
+    SHIM(size_t seed))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*s);
+
+static void parrot_mark_hash_both(PARROT_INTERP, ARGIN(Hash *hash))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void parrot_mark_hash_keys(PARROT_INTERP, ARGIN(Hash *hash))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void parrot_mark_hash_values(PARROT_INTERP, ARGIN(Hash *hash))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static int pointer_compare(SHIM_INTERP,
+    ARGIN_NULLOK(const void *a),
+    ARGIN_NULLOK(const void *b));
+
+PARROT_WARN_UNUSED_RESULT
+static int STRING_compare(PARROT_INTERP,
+    ARGIN(const void *search_key),
+    ARGIN_NULLOK(const void *bucket_key))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+#define ASSERT_ARGS_create_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(compare) \
+    || PARROT_ASSERT_ARG(keyhash)
+#define ASSERT_ARGS_cstring_compare __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(a) \
+    || PARROT_ASSERT_ARG(b)
+#define ASSERT_ARGS_expand_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(hash)
+#define ASSERT_ARGS_hash_freeze __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(hash) \
+    || PARROT_ASSERT_ARG(info)
+#define ASSERT_ARGS_hash_thaw __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(hash) \
+    || PARROT_ASSERT_ARG(info)
+#define ASSERT_ARGS_key_hash_cstring __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(value)
+#define ASSERT_ARGS_key_hash_pointer __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(value)
+#define ASSERT_ARGS_key_hash_STRING __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(s)
+#define ASSERT_ARGS_parrot_mark_hash_both __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(hash)
+#define ASSERT_ARGS_parrot_mark_hash_keys __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(hash)
+#define ASSERT_ARGS_parrot_mark_hash_values __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(hash)
+#define ASSERT_ARGS_pointer_compare __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_STRING_compare __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(search_key)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+
+
 
 /*
 
-FUNCDOC:
-Marks the hash and its contents as live.
+=item C<static size_t key_hash_STRING>
+
+Returns the hashed value of the key C<value>.  See also string.c.
+
+=cut
 
 */
 
-PARROT_API
-void
-parrot_mark_hash(Interp *interp, Hash *hash /*NN*/)
+
+PARROT_WARN_UNUSED_RESULT
+static size_t
+key_hash_STRING(PARROT_INTERP, ARGMOD(STRING *s), SHIM(size_t seed))
 {
-    UINTVAL found = 0;
-    int mark_key = 0;
+    ASSERT_ARGS(key_hash_STRING)
+
+    if (s->hashval)
+        return s->hashval;
+
+   return Parrot_str_to_hashval(interp, s);
+}
+
+
+/*
+
+=item C<static int STRING_compare>
+
+Compares the two strings, returning 0 if they are identical.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+static int
+STRING_compare(PARROT_INTERP, ARGIN(const void *search_key), ARGIN_NULLOK(const void *bucket_key))
+{
+    ASSERT_ARGS(STRING_compare)
+    STRING const *s1 = (STRING const *)search_key;
+    STRING const *s2 = (STRING const *)bucket_key;
+
+    if (!s2)
+        return 1;
+
+    if (s1->hashval != s2->hashval)
+        return 1;
+
+    /* COWed strings */
+    if (s1->strstart == s2->strstart && s1->bufused == s2->bufused)
+        return 0;
+
+    return CHARSET_COMPARE(interp, s1, s2);
+}
+
+
+/*
+
+=item C<static int pointer_compare>
+
+Compares the two pointers, returning 0 if they are identical
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static int
+pointer_compare(SHIM_INTERP, ARGIN_NULLOK(const void *a), ARGIN_NULLOK(const void *b))
+{
+    ASSERT_ARGS(pointer_compare)
+    return a != b;
+}
+
+
+/*
+
+=item C<static size_t key_hash_pointer>
+
+Returns a hashvalue for a pointer.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static size_t
+key_hash_pointer(SHIM_INTERP, ARGIN(const void *value), size_t seed)
+{
+    ASSERT_ARGS(key_hash_pointer)
+    return ((size_t) value) ^ seed;
+}
+
+
+/*
+
+=item C<static size_t key_hash_cstring>
+
+Creates and returns a hash value from a string.
+
+Takes an interpreter, a pointer to a string, and a seed value.
+Returns the hash value.
+
+Used by parrot_new_cstring_hash.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static size_t
+key_hash_cstring(SHIM_INTERP, ARGIN(const void *value), size_t seed)
+{
+    ASSERT_ARGS(key_hash_cstring)
+    const unsigned char * p = (const unsigned char *) value;
+    register size_t       h = seed;
+
+    while (*p) {
+        h += h << 5;
+        h += *p++;
+    }
+
+    return h;
+}
+
+
+/*
+
+=item C<static int cstring_compare>
+
+Compares two C strings for equality, returning -1, 0, and 1 if the first string
+is less than, equal to, or greater than the second, respectively.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+static int
+cstring_compare(SHIM_INTERP, ARGIN(const char *a), ARGIN(const char *b))
+{
+    ASSERT_ARGS(cstring_compare)
+    return strcmp(a, b);
+}
+
+
+/*
+
+=item C<size_t key_hash_int>
+
+Returns a hashed value for an integer key (passed as a void pointer, sadly).
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+size_t
+key_hash_int(SHIM_INTERP, ARGIN(const void *value), size_t seed)
+{
+    ASSERT_ARGS(key_hash_int)
+    return (size_t)value ^ seed;
+}
+
+
+/*
+
+=item C<int int_compare>
+
+Compares two integers for equality, returning -1, 0, and 1 if the first is less
+than, equal to, or greater than the second, respectively.  Uses void pointers
+to store the integers, sadly.
+
+=cut
+
+*/
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
+int
+int_compare(SHIM_INTERP, ARGIN_NULLOK(const void *a), ARGIN_NULLOK(const void *b))
+{
+    ASSERT_ARGS(int_compare)
+    return a != b;
+}
+
+
+/*
+
+=item C<void parrot_dump_hash>
+
+Prints out the hash in human-readable form, at least once someone implements
+this.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+void
+parrot_dump_hash(SHIM_INTERP, ARGIN(const Hash *hash))
+{
+    ASSERT_ARGS(parrot_dump_hash)
+    UNUSED(hash);
+}
+
+
+/*
+
+=item C<void parrot_mark_hash>
+
+Marks the hash and its contents as live.  Assumes that key and value are non
+null in all buckets.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+void
+parrot_mark_hash(PARROT_INTERP, ARGIN(Hash *hash))
+{
+    ASSERT_ARGS(parrot_mark_hash)
+    int mark_key   = 0;
     int mark_value = 0;
-    size_t i;
 
-    if (hash->entry_type == enum_hash_string ||
-            hash->entry_type == enum_hash_pmc)
+    if (hash->entry_type == (PARROT_DATA_TYPE) enum_hash_string
+    ||  hash->entry_type == (PARROT_DATA_TYPE) enum_hash_pmc)
         mark_value = 1;
-    if (hash->key_type == Hash_key_type_STRING ||
-            hash->key_type == Hash_key_type_PMC)
-        mark_key = 1;
-    if (!mark_key && !mark_value)
-        return;
 
-    for (i = 0; i <= hash->mask; i++) {
+    if (hash->key_type == Hash_key_type_STRING
+    ||  hash->key_type == Hash_key_type_PMC)
+        mark_key = 1;
+
+    if (mark_key) {
+        if (mark_value)
+            parrot_mark_hash_both(interp, hash);
+        else
+            parrot_mark_hash_keys(interp, hash);
+    }
+    else {
+        if (mark_value)
+            parrot_mark_hash_values(interp, hash);
+    }
+}
+
+
+/*
+
+=item C<static void parrot_mark_hash_keys>
+
+Marks the hash and only its keys as live.
+
+=cut
+
+*/
+
+static void
+parrot_mark_hash_keys(PARROT_INTERP, ARGIN(Hash *hash))
+{
+    ASSERT_ARGS(parrot_mark_hash_keys)
+    UINTVAL entries = hash->entries;
+    UINTVAL found   = 0;
+    INTVAL  i;
+
+    for (i = hash->mask; i >= 0; --i) {
         HashBucket *bucket = hash->bi[i];
 
         while (bucket) {
-            if (++found > hash->entries)
-                internal_exception(1,
-                        "Detected hash corruption at hash %p entries %d",
-                        hash, (int)hash->entries);
-            if (mark_key)
-                pobject_lives(interp, (PObj *)bucket->key);
-            if (mark_value)
-                pobject_lives(interp, (PObj *)bucket->value);
+            if (++found > entries)
+                Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                    "Detected hash corruption at hash %p entries %d",
+                    hash, (int)entries);
+
+            PARROT_ASSERT(bucket->key);
+            pobject_lives(interp, (PObj *)bucket->key);
+
             bucket = bucket->next;
         }
     }
 }
 
+
 /*
 
-FUNCDOC:
-This is used by freeze/thaw to visit the contents of the hash.
+=item C<static void parrot_mark_hash_values>
 
-C<pinfo> is the visit info, (see include/parrot/pmc_freeze.h>).
+Marks the hash and only its values as live.
+
+=cut
 
 */
 
 static void
-hash_thaw(Interp *interp, Hash *hash /*NN*/, visit_info* info)
+parrot_mark_hash_values(PARROT_INTERP, ARGIN(Hash *hash))
 {
-    size_t i;
-    IMAGE_IO * const io = info->image_io;
-    HashBucket *b;
+    ASSERT_ARGS(parrot_mark_hash_values)
+    UINTVAL entries = hash->entries;
+    UINTVAL found   = 0;
+    INTVAL  i;
 
-    /*
-     * during thaw info->extra is the key/value count
-     */
-    const size_t n = (size_t) hash->entries;
+    for (i = hash->mask; i >= 0; --i) {
+        HashBucket *bucket = hash->bi[i];
+
+        while (bucket) {
+            if (++found > entries)
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                        "Detected hash corruption at hash %p entries %d",
+                        hash, (int)entries);
+
+            PARROT_ASSERT(bucket->value);
+            pobject_lives(interp, (PObj *)bucket->value);
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+
+/*
+
+=item C<static void parrot_mark_hash_both>
+
+Marks the hash and both its keys and values as live.
+
+=cut
+
+*/
+
+static void
+parrot_mark_hash_both(PARROT_INTERP, ARGIN(Hash *hash))
+{
+    ASSERT_ARGS(parrot_mark_hash_both)
+    UINTVAL entries = hash->entries;
+    UINTVAL found   = 0;
+    INTVAL  i;
+
+    for (i = hash->mask; i >= 0; --i) {
+        HashBucket *bucket = hash->bi[i];
+
+        while (bucket) {
+            if (++found > entries)
+                Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                        "Detected hash corruption at hash %p entries %d",
+                        hash, (int)entries);
+
+            PARROT_ASSERT(bucket->key);
+            pobject_lives(interp, (PObj *)bucket->key);
+
+            PARROT_ASSERT(bucket->value);
+            pobject_lives(interp, (PObj *)bucket->value);
+
+            bucket = bucket->next;
+        }
+    }
+}
+
+
+/*
+
+=item C<static void hash_thaw>
+
+Visits the contents of a hash during freeze/thaw.
+
+C<pinfo> is the visit info, (see include/parrot/pmc_freeze.h>).
+
+=cut
+
+*/
+
+static void
+hash_thaw(PARROT_INTERP, ARGMOD(Hash *hash), ARGMOD(visit_info *info))
+{
+    ASSERT_ARGS(hash_thaw)
+    IMAGE_IO * const io         = info->image_io;
+
+    /* during thaw, info->extra is the key/value count */
+    const size_t     num_entries = (size_t) hash->entries;
+    size_t           entry_index;
 
     hash->entries = 0;
-    for (i = 0; i < n; ++i) {
+
+    for (entry_index = 0; entry_index < num_entries; ++entry_index) {
+        HashBucket *b;
+
         switch (hash->key_type) {
             case Hash_key_type_STRING:
                 {
-                STRING * const s_key = io->vtable->shift_string(interp, io);
-                b = parrot_hash_put(interp, hash, s_key, NULL);
+                    STRING * const s_key = VTABLE_shift_string(interp, io);
+                    b = parrot_hash_put(interp, hash, s_key, NULL);
                 }
                 break;
             case Hash_key_type_int:
                 {
-                const INTVAL i_key = io->vtable->shift_integer(interp, io);
-                b = parrot_hash_put(interp, hash, (void*)i_key, NULL);
+                    const INTVAL i_key = VTABLE_shift_integer(interp, io);
+                    b = parrot_hash_put(interp, hash, (void*)i_key, NULL);
                 }
                 break;
             default:
-                internal_exception(1, "unimplemented key type");
-                b = NULL;
+                Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                    "unimplemented key type");
                 break;
         }
+
         switch (hash->entry_type) {
             case enum_hash_pmc:
-                info->thaw_ptr = (PMC**)&b->value;
-                (info->visit_pmc_now)(interp, NULL, info);
-                break;
+                {
+                    /* this looks awful, but it avoids type-punning warnings */
+                    void **ptr     = &b->value;
+                    info->thaw_ptr = (PMC **)ptr;
+                    (info->visit_pmc_now)(interp, NULL, info);
+                    break;
+                }
             case enum_hash_int:
-                b->value = (void*)io->vtable->shift_integer(interp, io);
-                break;
+                {
+                    const INTVAL i = VTABLE_shift_integer(interp, io);
+                    b->value       = (void *)i;
+                    break;
+                }
             default:
-                internal_exception(1, "unimplemented value type");
+                Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                    "unimplemented value type");
                 break;
         }
     }
 }
+
+
+/*
+
+=item C<static void hash_freeze>
+
+Freezes hash into a string.
+
+Takes an interpreter, a pointer to the hash, and a pointer to the structure
+containing the string start location.
+
+Use by parrot_hash_visit.
+
+=cut
+
+*/
 
 static void
-hash_freeze(Interp *interp, const Hash * const hash, visit_info* info /*NN*/)
+hash_freeze(PARROT_INTERP, ARGIN(const Hash * const hash), ARGMOD(visit_info *info))
 {
-    size_t i;
+    ASSERT_ARGS(hash_freeze)
     IMAGE_IO * const io = info->image_io;
+    size_t           i;
 
-    for (i = 0; i <= hash->mask; i++) {
-        HashBucket *b = hash->bi[i];
+    for (i = 0; i < hash->entries; i++) {
+        HashBucket *b = hash->bs+i;
 
-        while (b) {
-            switch (hash->key_type) {
-                case Hash_key_type_STRING:
-                    io->vtable->push_string(interp, io, (STRING *)b->key);
-                    break;
-                case Hash_key_type_int:
-                    io->vtable->push_integer(interp, io, (INTVAL)b->key);
-                    break;
-                default:
-                    internal_exception(1, "unimplemented key type");
-                    b = NULL;
-                    break;
-            }
-            switch (hash->entry_type) {
-                case enum_hash_pmc:
-                    (info->visit_pmc_now)(interp, (PMC *)b->value, info);
-                    break;
-                case enum_hash_int:
-                    io->vtable->push_integer(interp, io, (INTVAL)b->value);
-                    break;
-                default:
-                    internal_exception(1, "unimplemented value type");
-                    break;
-            }
-            b = b->next;
+        switch (hash->key_type) {
+            case Hash_key_type_STRING:
+                VTABLE_push_string(interp, io, (STRING *)b->key);
+                break;
+            case Hash_key_type_int:
+                VTABLE_push_integer(interp, io, (INTVAL)b->key);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                    "unimplemented key type");
+                break;
+        }
+
+        switch (hash->entry_type) {
+            case enum_hash_pmc:
+                (info->visit_pmc_now)(interp, (PMC *)b->value, info);
+                break;
+            case enum_hash_int:
+                VTABLE_push_integer(interp, io, (INTVAL)b->value);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                    "unimplemented value type");
+                break;
         }
     }
 }
 
-PARROT_API
+
+/*
+
+=item C<void parrot_hash_visit>
+
+Freezes or thaws a hash as specified.  Takes an interpreter, a pointer to the
+hash, and a pointer to the structure identifying what to do and the location of
+the string.
+
+=cut
+
+*/
+
+PARROT_EXPORT
 void
-parrot_hash_visit(Interp *interp, Hash *hash, void *pinfo /*NN*/)
+parrot_hash_visit(PARROT_INTERP, ARGMOD(Hash *hash), ARGMOD(void *pinfo))
 {
+    ASSERT_ARGS(parrot_hash_visit)
     visit_info* const info = (visit_info*) pinfo;
 
     switch (info->what) {
@@ -322,14 +685,18 @@ parrot_hash_visit(Interp *interp, Hash *hash, void *pinfo /*NN*/)
             hash_freeze(interp, hash, info);
             break;
         default:
-            internal_exception(1, "unimplemented visit mode");
-            break;
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                "unimplemented visit mode");
     }
 }
 
+
 /*
 
-FUNCDOC:
+=item C<static void expand_hash>
+
+Expands a hash when necessary.
+
 For a hashtable of size N, we use C<MAXFULL_PERCENT> % of N as the
 number of buckets. This way, as soon as we run out of buckets on the
 free list, we know that it's time to resize the hashtable.
@@ -337,31 +704,36 @@ free list, we know that it's time to resize the hashtable.
 Algorithm for expansion: We exactly double the size of the hashtable.
 Keys are assigned to buckets with the formula
 
-        bucket_index = hash(key) % parrot_hash_size
+    bucket_index = hash(key) % parrot_hash_size
 
-so when doubling the size of the hashtable, we know that every key is
-either already in the correct bucket, or belongs in the current bucket
-plus C<parrot_hash_size> (the old C<parrot_hash_size>). In fact,
-because the hashtable is always a power of two in size, it depends
-only on the next bit in the hash value, after the ones previously
-used.
+When doubling the size of the hashtable, we know that every key is either
+already in the correct bucket, or belongs in the current bucket plus
+C<parrot_hash_size> (the old C<parrot_hash_size>). In fact, because the
+hashtable is always a power of two in size, it depends only on the next bit
+in the hash value, after the ones previously used.
 
-So we scan through all the buckets in order, moving the buckets that
-need to be moved. No bucket will be scanned twice, and the cache should
-be reasonably happy because the hashtable accesses will be two parallel
-sequential scans. (Of course, this also mucks with the C<< ->next >>
-pointers, and they'll be all over memory.)
+We scan through all the buckets in order, moving the buckets that need to be
+moved. No bucket will be scanned twice, and the cache should be reasonably
+happy because the hashtable accesses will be two parallel sequential scans.
+(Of course, this also mucks with the C<< ->next >> pointers, and they'll be
+all over memory.)
+
+=cut
 
 */
 
 static void
-expand_hash(Interp *interp, Hash *hash /*NN*/)
+expand_hash(PARROT_INTERP, ARGMOD(Hash *hash))
 {
+    ASSERT_ARGS(expand_hash)
+    HashBucket  **old_bi, **new_bi;
+    HashBucket   *bs, *b;
+
+    void * const  old_mem  = hash->bs;
     const UINTVAL old_size = hash->mask + 1;
     const UINTVAL new_size = old_size << 1;
-    HashBucket **old_bi, **new_bi;
-    HashBucket  *bs, *b;
-    size_t offset, i, new_loc;
+    const UINTVAL old_nb   = N_BUCKETS(old_size);
+    size_t        offset, i, new_loc;
 
     /*
        allocate some less buckets
@@ -373,13 +745,11 @@ expand_hash(Interp *interp, Hash *hash /*NN*/)
          ^           ^
          | old_mem   | hash->bi
     */
-    const UINTVAL old_nb = N_BUCKETS(old_size);
-    void * const old_mem = hash->bs;
-    /*
-     * resize mem
-     */
+
+    /* resize mem */
     HashBucket * const new_mem =
         (HashBucket *)mem_sys_realloc(old_mem, HASH_ALLOC_SIZE(new_size));
+
     /*
          +---+---+---+---+---+---+-+-+-+-+-+-+-+-+
          |  bs       | old_bi    |  new_bi       |
@@ -387,21 +757,24 @@ expand_hash(Interp *interp, Hash *hash /*NN*/)
            ^                       ^
          | new_mem                 | hash->bi
     */
-    bs = new_mem;
+    bs     = new_mem;
     old_bi = (HashBucket**) (bs + old_nb);
     new_bi = (HashBucket**) (bs + N_BUCKETS(new_size));
+
     /* things can have moved by this offset */
     offset = (char*)new_mem - (char*)old_mem;
+
     /* relocate the bucket index */
-    mem_sys_memmove(new_bi, old_bi, old_size * sizeof (HashBucket*));
+    mem_sys_memmove(new_bi, old_bi, old_size * sizeof (HashBucket *));
 
     /* update hash data */
-    hash->bi = new_bi;
-    hash->bs = bs;
+    hash->bi   = new_bi;
+    hash->bs   = bs;
     hash->mask = new_size - 1;
 
     /* clear freshly allocated bucket index */
-    memset(new_bi + old_size, 0, sizeof (HashBucket*) * old_size);
+    memset(new_bi + old_size, 0, sizeof (HashBucket *) * old_size);
+
     /*
      * reloc pointers - this part would be also needed, if we
      * allocate hash memory from GC movable memory, and then
@@ -413,11 +786,12 @@ expand_hash(Interp *interp, Hash *hash /*NN*/)
             HashBucket **next_p = new_bi + i;
             while (*next_p) {
                 *next_p = (HashBucket *)((char *)*next_p + offset);
-                b = *next_p;
-                next_p = &b->next;
+                b       = *next_p;
+                next_p  = &b->next;
             }
         }
     }
+
     /* recalc bucket index */
     for (i = 0; i < old_size; ++i) {
         HashBucket **next_p = new_bi + i;
@@ -426,21 +800,22 @@ expand_hash(Interp *interp, Hash *hash /*NN*/)
             /* rehash the bucket */
             new_loc = (hash->hash_val)(interp, b->key, hash->seed) &
                 (new_size - 1);
+
             if (i != new_loc) {
-                *next_p = b->next;
-                b->next = new_bi[new_loc];
+                *next_p         = b->next;
+                b->next         = new_bi[new_loc];
                 new_bi[new_loc] = b;
             }
             else
                 next_p = &b->next;
         }
     }
+
     /* add new buckets to free_list in reverse order
-     * lowest bucket is top on free list and will be used first
-     */
+     * lowest bucket is top on free list and will be used first */
     for (i = 0, b = (HashBucket*)new_bi - 1; i < old_nb; ++i, --b) {
-        b->next = hash->free_list;
-        b->key = b->value = NULL;
+        b->next         = hash->free_list;
+        b->key          = b->value         = NULL;
         hash->free_list = b;
     }
 
@@ -449,77 +824,111 @@ expand_hash(Interp *interp, Hash *hash /*NN*/)
 
 /*
 
-FUNCDOC:
-Returns a new Parrot STRING hash in C<hptr>.
+=item C<void parrot_new_hash>
+
+Creates a new Parrot STRING hash in C<hptr>.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-parrot_new_hash(Interp *interp, Hash **hptr)
+parrot_new_hash(PARROT_INTERP, ARGOUT(Hash **hptr))
 {
-    parrot_new_hash_x(interp, hptr,
+    ASSERT_ARGS(parrot_new_hash)
+    parrot_new_hash_x(interp,
+            hptr,
             enum_type_PMC,
             Hash_key_type_STRING,
             STRING_compare,     /* STRING compare */
             (hash_hash_key_fn)key_hash_STRING);    /*        hash */
 }
 
+
 /*
 
-FUNCDOC:
-Create a new Parrot STRING hash in PMC_struct_val(container)
+=item C<void parrot_new_pmc_hash>
+
+Creates a new Parrot STRING hash in PMC_struct_val(container).
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-parrot_new_pmc_hash(Interp *interp, PMC *container)
+parrot_new_pmc_hash(PARROT_INTERP, ARGOUT(PMC *container))
 {
-    parrot_new_pmc_hash_x(interp, container,
+    ASSERT_ARGS(parrot_new_pmc_hash)
+    parrot_new_pmc_hash_x(interp,
+            container,
             enum_type_PMC,
             Hash_key_type_STRING,
             STRING_compare,     /* STRING compare */
             (hash_hash_key_fn)key_hash_STRING);    /*        hash */
 }
+
+
 /*
 
-FUNCDOC:
-Returns a new C string hash in C<hptr>.
+=item C<void parrot_new_cstring_hash>
+
+Creates a new C string hash in C<hptr>.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-parrot_new_cstring_hash(Interp *interp, Hash **hptr)
+parrot_new_cstring_hash(PARROT_INTERP, ARGOUT(Hash **hptr))
 {
-    parrot_new_hash_x(interp, hptr,
+    ASSERT_ARGS(parrot_new_cstring_hash)
+    parrot_new_hash_x(interp,
+            hptr,
             enum_type_PMC,
             Hash_key_type_cstring,
             (hash_comp_fn)cstring_compare,     /* cstring compare */
             (hash_hash_key_fn)key_hash_cstring);    /*        hash */
 }
 
-static void
-init_hash(Interp *interp, Hash *hash /*NN*/,
-        PARROT_DATA_TYPES val_type,
-        Hash_key_type hkey_type,
-        hash_comp_fn compare, hash_hash_key_fn keyhash)
-{
-    size_t i;
-    HashBucket *bp;
 
-    hash->compare = compare;
-    hash->hash_val = keyhash;
+/*
+
+=item C<static Hash * create_hash>
+
+Creates and initializes a hash.  Function pointers determine its behaviors.
+The container passed in is the address of the hash PMC that is using it.  The
+hash and the PMC point to each other.
+
+Memory from this function must be freed.
+
+=cut
+
+*/
+
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+PARROT_MALLOC
+static Hash *
+create_hash(PARROT_INTERP, PARROT_DATA_TYPE val_type, Hash_key_type hkey_type,
+        ARGIN(hash_comp_fn compare), ARGIN(hash_hash_key_fn keyhash))
+{
+    ASSERT_ARGS(create_hash)
+    HashBucket  *bp;
+    Hash * const hash = mem_allocate_zeroed_typed(Hash);
+    size_t       i;
+
+    PARROT_ASSERT(INITIAL_BUCKETS % 4 == 0);
+
+    hash->compare    = compare;
+    hash->hash_val   = keyhash;
     hash->entry_type = val_type;
-    hash->key_type = hkey_type;
-    /*
-     * TODO randomize
-     */
-    hash->seed = 3793;
-    assert(INITIAL_BUCKETS % 4 == 0);
-    hash->mask = INITIAL_BUCKETS-1;
-    hash->entries = 0;
+    hash->key_type   = hkey_type;
+    hash->seed       = interp->hash_seed;
+    hash->mask       = INITIAL_BUCKETS - 1;
+    hash->entries    = 0;
 
     /*
      * TODO if we have a significant amount of small hashes:
@@ -529,38 +938,66 @@ init_hash(Interp *interp, Hash *hash /*NN*/,
      */
     bp = (HashBucket *)mem_sys_allocate(HASH_ALLOC_SIZE(INITIAL_BUCKETS));
     hash->free_list = NULL;
+
     /* fill free_list from hi addresses so that we can use
      * buckets[i] directly in an OrderedHash, *if* nothing
-     * was deleted
-     */
-    hash->bs = bp;
-    bp += N_BUCKETS(INITIAL_BUCKETS);
-    hash->bi = (HashBucket**) bp;
+     * was deleted */
+
+    hash->bs  = bp;
+    bp       += N_BUCKETS(INITIAL_BUCKETS);
+    hash->bi  = (HashBucket **)bp;
+
     for (i = 0, --bp; i < N_BUCKETS(INITIAL_BUCKETS); ++i, --bp) {
-        bp->next = hash->free_list;
-        bp->key = bp->value = NULL;
+        bp->next        = hash->free_list;
+        bp->key         = NULL;
+        bp->value       = NULL;
         hash->free_list = bp;
     }
-    for (i = 0; i < INITIAL_BUCKETS; ++i) {
+
+    for (i = 0; i < INITIAL_BUCKETS; ++i)
         hash->bi[i] = NULL;
-    }
+
+    return hash;
 }
 
-PARROT_API
-void
-parrot_hash_destroy(Interp *interp, Hash *hash /*NN*/)
-{
-    UNUSED(interp);
 
+/*
+
+=item C<void parrot_hash_destroy>
+
+Frees the memory allocated to the specified hash and its bucket store.  Used by
+Parrot_chash_destroy.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+void
+parrot_hash_destroy(SHIM_INTERP, ARGMOD(Hash *hash))
+{
+    ASSERT_ARGS(parrot_hash_destroy)
     mem_sys_free(hash->bs);
     mem_sys_free(hash);
 }
 
+
+/*
+
+=item C<void parrot_chash_destroy>
+
+Deletes the specified hash by freeing the memory allocated to all the key-value
+pairs, and finally the hash itself.
+
+=cut
+
+*/
+
 void
-parrot_chash_destroy(Interp *interp, Hash *hash /*NN*/)
+parrot_chash_destroy(PARROT_INTERP, ARGMOD(Hash *hash))
 {
+    ASSERT_ARGS(parrot_chash_destroy)
     UINTVAL i;
-    UNUSED(interp);
 
     for (i = 0; i <= hash->mask; i++) {
         HashBucket *bucket = hash->bi[i];
@@ -574,236 +1011,337 @@ parrot_chash_destroy(Interp *interp, Hash *hash /*NN*/)
     parrot_hash_destroy(interp, hash);
 }
 
+
 /*
 
-FUNCDOC: parrot_new_hash_x
+=item C<void parrot_chash_destroy_values>
 
-Returns a new hash in C<hptr>.
+Deletes the specified hash by freeing the memory allocated to all the key-value
+pairs, calling the provided callback to free the values, and finally the hash
+itself.
+
+The callback returns C<void> and takes a C<void *>.
+
+=cut
+
+*/
+
+void
+parrot_chash_destroy_values(PARROT_INTERP, ARGMOD(Hash *hash),
+    ARGIN(value_free func))
+{
+    ASSERT_ARGS(parrot_chash_destroy_values)
+    UINTVAL i;
+
+    for (i = 0; i <= hash->mask; i++) {
+        HashBucket *bucket = hash->bi[i];
+        while (bucket) {
+            mem_sys_free(bucket->key);
+            func(bucket->value);
+            bucket = bucket->next;
+        }
+    }
+
+    parrot_hash_destroy(interp, hash);
+}
+
+
+/*
+
+=item C<void parrot_new_hash_x>
+
+Creates and stores a new hash in C<hptr>.
 
 FIXME: This function can go back to just returning the hash struct
 pointer once Buffers can define their own custom mark routines.
 
-The problem is: During DODs stack walking the item on the stack must be
+The problem is: During GC stack walking the item on the stack must be
 a PMC. When an auto C<Hash*> is seen, it doesn't get properly marked
 (only the C<Hash*> buffer is marked, not its contents). By passing the
 C<**hptr> up to the Hash's init function, the newly constructed PMC is
 on the stack I<including> this newly constructed Hash, so that it gets
 marked properly.
 
+=cut
+
 */
 
 void
-parrot_new_hash_x(Interp *interp, Hash **hptr /*NN*/,
-        PARROT_DATA_TYPES val_type,
+parrot_new_hash_x(PARROT_INTERP,
+        ARGOUT(Hash **hptr),
+        PARROT_DATA_TYPE val_type,
         Hash_key_type hkey_type,
-        hash_comp_fn compare, hash_hash_key_fn keyhash)
+        NOTNULL(hash_comp_fn compare),
+        NOTNULL(hash_hash_key_fn keyhash))
 {
-    Hash * const hash = mem_allocate_typed(Hash);
-    hash->container = NULL;
-    *hptr = hash;
-    init_hash(interp, hash, val_type, hkey_type,
-            compare, keyhash);
+    ASSERT_ARGS(parrot_new_hash_x)
+    *hptr = create_hash(interp, val_type, hkey_type, compare, keyhash);
 }
+
 
 /*
 
-FUNCDOC: parrot_new_pmc_hash_x
-Like parrot_new_hash_x but w/o the described problems. The passed in
-C<container> PMC gets stored in the Hash end the newly created Hash is
-in PMC_struct_val(container).
+=item C<void parrot_new_pmc_hash_x>
+
+Creates a new PMC hash.
+
+Like parrot_new_hash_x but w/o the described problems.  The passed in
+C<container> PMC gets stored in the Hash and the newly created Hash is in
+PMC_struct_val(container).
+
+=cut
 
 */
 
 void
-parrot_new_pmc_hash_x(Interp *interp, PMC *container /*NN*/,
-        PARROT_DATA_TYPES val_type,
+parrot_new_pmc_hash_x(PARROT_INTERP,
+        ARGMOD(PMC *container),
+        PARROT_DATA_TYPE val_type,
         Hash_key_type hkey_type,
-        hash_comp_fn compare, hash_hash_key_fn keyhash)
+        NOTNULL(hash_comp_fn compare),
+        NOTNULL(hash_hash_key_fn keyhash))
 {
-    Hash * const hash = mem_allocate_typed(Hash);
+    ASSERT_ARGS(parrot_new_pmc_hash_x)
+    Hash * const hash         = create_hash(interp, val_type, hkey_type,
+                                            compare, keyhash);
     PMC_struct_val(container) = hash;
-    hash->container = container;
-    init_hash(interp, hash, val_type, hkey_type,
-            compare, keyhash);
+    hash->container           = container;
 }
+
 
 /*
 
-FUNCDOC:
-Create a new HASH with void * keys and values.
+=item C<void parrot_new_pointer_hash>
+
+Creates a new hash with void * keys and values, storing it via the passed-in
+Hash **.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-parrot_new_pointer_hash(Interp *interp, Hash **hptr /*NN*/)
+parrot_new_pointer_hash(PARROT_INTERP, ARGOUT(Hash **hptr))
 {
+    ASSERT_ARGS(parrot_new_pointer_hash)
     parrot_new_hash_x(interp, hptr, enum_type_ptr, Hash_key_type_ptr,
-                        pointer_compare, key_hash_pointer);
+            pointer_compare, key_hash_pointer);
 }
+
 
 /*
 
-FUNCDOC:
-Create a new Hash PMC with INTVAL keys and values. C<flags> can be
+=item C<PMC* Parrot_new_INTVAL_hash>
+
+Creates and returns new Hash PMC with INTVAL keys and values. C<flags> can be
 C<PObj_constant_FLAG> or 0.
 
+=cut
+
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 PMC*
-Parrot_new_INTVAL_hash(Interp *interp, UINTVAL flags)
+Parrot_new_INTVAL_hash(PARROT_INTERP, UINTVAL flags)
 {
-    PMC *h;
+    ASSERT_ARGS(Parrot_new_INTVAL_hash)
+    PMC * const h = (flags & PObj_constant_FLAG)
+                  ? constant_pmc_new_noinit(interp, enum_class_Hash)
+                  : pmc_new_noinit(interp, enum_class_Hash);
 
-    if (flags & PObj_constant_FLAG)
-        h = constant_pmc_new_noinit(interp, enum_class_Hash);
-    else
-        h = pmc_new_noinit(interp, enum_class_Hash);
     parrot_new_pmc_hash_x(interp, h, enum_type_INTVAL, Hash_key_type_int,
             int_compare, key_hash_int);
     PObj_active_destroy_SET(h);
     return h;
 }
 
+
 /*
 
-FUNCDOC:
-Return the number of used entries in the hash.
+=item C<INTVAL parrot_hash_size>
+
+Returns the number of used entries in the hash.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
 INTVAL
-parrot_hash_size(Interp *interp, Hash *hash /*NN*/)
-    /*PURE, WARN_UNUSED*/
+parrot_hash_size(PARROT_INTERP, ARGIN(const Hash *hash))
 {
-    UNUSED(interp);
+    ASSERT_ARGS(parrot_hash_size)
 
-    if (hash)
-        return hash->entries;
-    internal_exception(1, "parrot_hash_size asked to check a NULL hash\n");
-    return 0;
+    return hash->entries;
 }
 
+
 /*
 
-FUNCDOC:
-Called by iterator.
+=item C<void * parrot_hash_get_idx>
+
+Finds the next index into the hash's internal storage for the given Key.  Used
+by iterators.  Ugly.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
 void *
-parrot_hash_get_idx(Interp *interp, const Hash *hash, PMC *key /*NN*/)
-    /* PURE, WARN_UNUSED */
+parrot_hash_get_idx(PARROT_INTERP, ARGIN(const Hash *hash), ARGMOD(PMC *key))
 {
-    INTVAL i = PMC_int_val(key);
-    const BucketIndex bi = (BucketIndex)PMC_data(key);
-    HashBucket *b;
-    void *res;
+    ASSERT_ARGS(parrot_hash_get_idx)
+    HashBucket       *b;
+    void             *res;
+    INTVAL            i  = VTABLE_get_integer(interp, key);
+    PMC              *fake_bi;
+    BucketIndex       bi;
 
     /* idx directly in the bucket store, which is at negative
-     * address from the data pointer
-     */
+     * address from the data pointer */
     /* locate initial */
     const INTVAL size = (INTVAL)N_BUCKETS(hash->mask + 1);
+
+    GETATTR_Key_next_key(interp, key, fake_bi);
+    bi = (BucketIndex)fake_bi;
+
     if (bi == INITBucketIndex) {
-        i = 0;
-        PMC_data(key) = NULL;
+        i             = 0;
+        SETATTR_Key_next_key(interp, key, NULL);
     }
     else if (i >= size || i < 0) {
-        PMC_int_val(key) = -1;
+        /* NOTE: These instances of SETATTR_Key_int_key can't be VTABLE
+         * functions because of the "special" way hash iterators work. */
+        SETATTR_Key_int_key(interp, key, -1);
         return NULL;
     }
+
     res = NULL;
+
     for (b = hash->bs + i; i < size ; ++i, ++b) {
-        /* XXX int keys may be zero - use different iterator
-         */
+        /* XXX int keys may be zero - use different iterator */
         if (b->key) {
-            if (!res) {
+            if (!res)
                 res = b->key;
-            }
-            else {    /* found next key - FIXME hash iter does auto next */
+
+            /* found next key - FIXME hash iter does auto next */
+            else
                 break;
-            }
         }
     }
+
     if (i >= size)
         i = -1;
-    PMC_int_val(key) = i;
+
+    SETATTR_Key_int_key(interp, key, i);
+
     return res;
 }
 
+
 /*
 
-FUNCDOC:
-Returns the bucket for C<key>.
+=item C<HashBucket * parrot_hash_get_bucket>
+
+Returns the bucket for C<key>, if found, and NULL otherwise.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
 HashBucket *
-parrot_hash_get_bucket(Interp *interp, const Hash *hash, void *key)
-    /* PURE, WARN_UNUSED */
+parrot_hash_get_bucket(PARROT_INTERP, ARGIN(const Hash *hash), ARGIN(const void *key))
 {
-    const UINTVAL  hashval = (hash->hash_val)(interp, key, hash->seed);
-    HashBucket    *bucket  = hash->bi[hashval & hash->mask];
-    while (bucket) {
-        /* store hash_val or not */
-        if ((hash->compare)(interp, key, bucket->key) == 0)
-            return bucket;
-        bucket = bucket->next;
+    ASSERT_ARGS(parrot_hash_get_bucket)
+    if (hash->entries > 0) {
+        const UINTVAL hashval = (hash->hash_val)(interp, key, hash->seed);
+        HashBucket   *bucket  = hash->bi[hashval & hash->mask];
+
+        while (bucket) {
+            /* store hash_val or not */
+            if ((hash->compare)(interp, key, bucket->key) == 0)
+                return bucket;
+            bucket = bucket->next;
+        }
     }
+
     return NULL;
 }
 
+
 /*
 
-FUNCDOC:
-Returns the bucket for C<key> or C<NULL> if no bucket is found.
+=item C<void * parrot_hash_get>
+
+Returns the value keyed by C<key>, or C<NULL> if no bucket is found.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
 void *
-parrot_hash_get(Interp *interp, Hash *hash, void *key)
-    /* PURE, WARN_UNUSED */
+parrot_hash_get(PARROT_INTERP, ARGIN(Hash *hash), ARGIN(const void *key))
 {
+    ASSERT_ARGS(parrot_hash_get)
     const HashBucket * const bucket = parrot_hash_get_bucket(interp, hash, key);
     return bucket ? bucket->value : NULL;
 }
 
+
 /*
 
-FUNCDOC:
+=item C<INTVAL parrot_hash_exists>
+
 Returns whether the key exists in the hash.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
 INTVAL
-parrot_hash_exists(Interp *interp, Hash *hash, void *key)
-    /* PURE, WARN_UNUSED */
+parrot_hash_exists(PARROT_INTERP, ARGIN(Hash *hash), ARGIN(void *key))
 {
+    ASSERT_ARGS(parrot_hash_exists)
     const HashBucket * const bucket = parrot_hash_get_bucket(interp, hash, key);
     return bucket ? 1 : 0;
 }
 
+
 /*
 
-FUNCDOC:
-Puts the key and value into the hash. Note that C<key> is B<not>
-copied.
+=item C<HashBucket* parrot_hash_put>
+
+Puts the key and value into the hash. Note that C<key> is B<not> copied.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
+PARROT_IGNORABLE_RESULT
+PARROT_CANNOT_RETURN_NULL
 HashBucket*
-parrot_hash_put(Interp *interp, Hash *hash, void *key, void *value)
+parrot_hash_put(PARROT_INTERP, ARGMOD(Hash *hash), ARGIN(void *key), ARGIN_NULLOK(void *value))
 {
+    ASSERT_ARGS(parrot_hash_put)
     const UINTVAL hashval = (hash->hash_val)(interp, key, hash->seed);
-    HashBucket   *bucket = hash->bi[hashval & hash->mask];
+    HashBucket   *bucket  = hash->bi[hashval & hash->mask];
 
     while (bucket) {
         /* store hash_val or not */
@@ -814,15 +1352,16 @@ parrot_hash_put(Interp *interp, Hash *hash, void *key, void *value)
 
     if (bucket) {
         if (hash->entry_type == enum_type_PMC && hash->container) {
-            DOD_WRITE_BARRIER_KEY(interp, hash->container,
-                    (PMC*)bucket->value, bucket->key, (PMC*)value, key);
+            GC_WRITE_BARRIER_KEY(interp, hash->container,
+                    (PMC *)bucket->value, bucket->key, (PMC *)value, key);
         }
-        bucket->value = value;        /* replace value */
+
+        bucket->value = value;
     }
     else {
         if (hash->entry_type == enum_type_PMC && hash->container) {
-            DOD_WRITE_BARRIER_KEY(interp, hash->container,
-                    NULL, NULL, (PMC*)value, key);
+            GC_WRITE_BARRIER_KEY(interp, hash->container,
+                    NULL, NULL, (PMC *)value, key);
         }
 
         bucket = hash->free_list;
@@ -843,62 +1382,71 @@ parrot_hash_put(Interp *interp, Hash *hash, void *key, void *value)
     return bucket;
 }
 
+
 /*
 
-FUNCDOC:
+=item C<void parrot_hash_delete>
+
 Deletes the key from the hash.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-parrot_hash_delete(Interp *interp, Hash *hash, void *key)
+parrot_hash_delete(PARROT_INTERP, ARGMOD(Hash *hash), ARGIN(void *key))
 {
-    HashBucket *bucket;
-    HashBucket *prev = NULL;
-
+    ASSERT_ARGS(parrot_hash_delete)
+    HashBucket   *bucket;
+    HashBucket   *prev    = NULL;
     const UINTVAL hashval = (hash->hash_val)(interp, key, hash->seed) & hash->mask;
 
     for (bucket = hash->bi[hashval]; bucket; bucket = bucket->next) {
         if ((hash->compare)(interp, key, bucket->key) == 0) {
+
             if (prev)
                 prev->next = bucket->next;
-            else {
+            else
                 hash->bi[hashval] = bucket->next;
-            }
+
             hash->entries--;
-            bucket->next = hash->free_list;
-            bucket->key = NULL;
+            bucket->next    = hash->free_list;
+            bucket->key     = NULL;
             hash->free_list = bucket;
+
             return;
         }
+
         prev = bucket;
     }
 }
 
+
 /*
 
-FUNCDOC:
+=item C<void parrot_hash_clone>
+
 Clones C<hash> to C<dest>.
+
+=cut
 
 */
 
-PARROT_API
+PARROT_EXPORT
 void
-parrot_hash_clone(Interp *interp, Hash *hash /*NN*/, Hash **dest)
+parrot_hash_clone(PARROT_INTERP, ARGIN(const Hash *hash), ARGOUT(Hash *dest))
 {
+    ASSERT_ARGS(parrot_hash_clone)
+    UINTVAL entries = hash->entries;
     UINTVAL i;
 
-    parrot_new_hash_x(interp, dest, hash->entry_type,
-            hash->key_type, hash->compare, hash->hash_val);
+    for (i = 0; i < entries; i++) {
+        void         *valtmp;
+        HashBucket   *b   = hash->bs+i;
+        void * const  key = b->key;
 
-    for (i = 0; i <= hash->mask; i++) {
-        HashBucket *b = hash->bi[i];
-        while (b) {
-            void * const  key = b->key;
-            void         *valtmp;
-
-            switch (hash->entry_type) {
+        switch (hash->entry_type) {
             case enum_type_undef:
             case enum_type_ptr:
             case enum_type_INTVAL:
@@ -906,72 +1454,34 @@ parrot_hash_clone(Interp *interp, Hash *hash /*NN*/, Hash **dest)
                 break;
 
             case enum_type_STRING:
-                valtmp = (void *)string_copy(interp, (STRING *)b->value);
+                valtmp = (void *)Parrot_str_copy(interp, (STRING *)b->value);
                 break;
 
             case enum_type_PMC:
-                valtmp = (void *)VTABLE_clone(interp, (PMC*)b->value);
+                if (PMC_IS_NULL((PMC *)b->value))
+                    valtmp = (void *)PMCNULL;
+                else
+                    valtmp = (void *)VTABLE_clone(interp, (PMC*)b->value);
                 break;
 
             default:
-                internal_exception(-1, "hash corruption: type = %d\n",
-                                   hash->entry_type);
                 valtmp = NULL; /* avoid warning */
-            };
-            parrot_hash_put(interp, *dest, key, valtmp);
-            b = b->next;
-        }
+                Parrot_ex_throw_from_c_args(interp, NULL, -1,
+                    "hash corruption: type = %d\n", hash->entry_type);
+        };
+
+        if (key)
+            parrot_hash_put(interp, dest, key, valtmp);
     }
 }
 
 /*
 
+=back
+
 =head1 SEE ALSO
 
 F<docs/pdds/pdd08_keys.pod>.
-
-=head1 HISTORY
-
-=over 4
-
-=item * Initial version by Jeff G. on 2001.12.05
-
-=item * Substantially rewritten by Steve F.
-
-=item * 2003.10.25
-
-leo add function pointer for compare, hash, mark
-
-hash keys are now C<(void *)>
-
-add C<parrot_new_cstring_hash()> function
-
-=item * 2003.11.04
-
-C<< bucket->value >> is now a plain pointer, no more an C<HASH_ENTRY>
-
-With little changes, we can again store arbitrary items if needed, see
-TODO in code.
-
-=item * 2003.11.06
-
-boemmels renamed C<HASH> and C<HASHBUCKET> to C<Hash> and C<HashBucket>
-
-=item * 2003.11.11
-
-leo randomize C<key_hash> seed
-
-extend C<parrot_new_hash_x()> init call by C<value_type> and C<_size>.
-
-=item * 2003.11.14
-
-leo C<USE_STRING_EQUAL> define, see comment above
-
-=item * 2005.05.23
-
-leo heavy rewrite: use just one piece of malloced memory
-
-=back
 
 =head1 TODO
 

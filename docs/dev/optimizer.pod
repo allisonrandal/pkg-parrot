@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: optimizer.pod 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: optimizer.pod 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -167,19 +167,10 @@ Removes unreachable code
 
 Does conservative constant propagation, i.e. replaces "1 + 2" with "3"
 
-=item clone_remove()
-
-Removes a clone, TURNED OFF
-
 =item used_once()
 
 Removes an instruction when the register written is only used once (only
 appears in that instruction)
-
-=item loop_optimization()
-
-Moves an invariant instruction outside of the loop, TURNED OFF (not currently
-working)
 
 =back
 

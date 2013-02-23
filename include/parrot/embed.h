@@ -1,7 +1,7 @@
 /* embed.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: embed.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: embed.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.
@@ -15,6 +15,7 @@
 #ifndef PARROT_EMBED_H_GUARD
 #define PARROT_EMBED_H_GUARD
 
+#include "parrot/core_types.h"  /* types used */
 #include "parrot/compiler.h"    /* compiler capabilities */
 #include "parrot/config.h"      /* PARROT_VERSION, PARROT_JIT_CAPABLE... */
 #include "parrot/interpreter.h" /* give us the interpreter flags */
@@ -22,48 +23,59 @@
 
 typedef int Parrot_warnclass;
 
-PARROT_API Parrot_Interp Parrot_new(Parrot_Interp parent);
+typedef enum {
+    enum_DIS_BARE      = 1,
+    enum_DIS_HEADER    = 2
+} Parrot_disassemble_options;
 
-/* XXX Parrot_init() should be removed, no longer required for embedders */
-PARROT_API void Parrot_init(Parrot_Interp);
-PARROT_API void Parrot_init_stacktop(Parrot_Interp, void *);
+PARROT_EXPORT Parrot_Interp Parrot_new(Parrot_Interp parent);
 
-PARROT_API void Parrot_set_flag(Parrot_Interp, Parrot_Int);
-PARROT_API void Parrot_clear_flag(Parrot_Interp, Parrot_Int);
-PARROT_API Parrot_Int Parrot_test_flag(Parrot_Interp, Parrot_Int);
+PARROT_EXPORT void Parrot_init_stacktop(Parrot_Interp, void *);
 
-PARROT_API void Parrot_set_trace(Parrot_Interp, Parrot_UInt);
-PARROT_API void Parrot_clear_trace(Parrot_Interp, Parrot_UInt);
-PARROT_API Parrot_UInt Parrot_test_trace(Parrot_Interp, Parrot_UInt);
+PARROT_EXPORT void Parrot_set_flag(Parrot_Interp, Parrot_Int);
+PARROT_EXPORT void Parrot_clear_flag(Parrot_Interp, Parrot_Int);
+PARROT_EXPORT Parrot_Int Parrot_test_flag(Parrot_Interp, Parrot_Int);
 
-PARROT_API void Parrot_set_debug(Parrot_Interp, Parrot_UInt);
-PARROT_API void Parrot_clear_debug(Parrot_Interp, Parrot_UInt);
-PARROT_API Parrot_UInt Parrot_test_debug(Parrot_Interp, Parrot_UInt);
+PARROT_EXPORT void Parrot_set_trace(Parrot_Interp, Parrot_UInt);
+PARROT_EXPORT void Parrot_clear_trace(Parrot_Interp, Parrot_UInt);
+PARROT_EXPORT Parrot_UInt Parrot_test_trace(Parrot_Interp, Parrot_UInt);
 
-PARROT_API void Parrot_set_run_core(Parrot_Interp, Parrot_Run_core_t core);
+PARROT_EXPORT void Parrot_set_debug(Parrot_Interp, Parrot_UInt);
+PARROT_EXPORT void Parrot_clear_debug(Parrot_Interp, Parrot_UInt);
+PARROT_EXPORT Parrot_UInt Parrot_test_debug(Parrot_Interp, Parrot_UInt);
 
-PARROT_API void Parrot_setwarnings(Parrot_Interp, Parrot_warnclass);
+PARROT_EXPORT void Parrot_set_executable_name(Parrot_Interp, Parrot_String);
 
-PARROT_API Parrot_PackFile Parrot_readbc(Parrot_Interp, const char *);
+PARROT_EXPORT void Parrot_set_run_core(Parrot_Interp, Parrot_Run_core_t core);
 
-PARROT_API void Parrot_loadbc(Parrot_Interp, Parrot_PackFile);
+PARROT_EXPORT void Parrot_setwarnings(Parrot_Interp, Parrot_warnclass);
 
-PARROT_API void Parrot_setup_argv(Parrot_Interp, int argc, char ** argv);
+PARROT_EXPORT Parrot_PackFile Parrot_pbc_read(Parrot_Interp, const char *, const int);
 
-PARROT_API void Parrot_setup_opt(Parrot_Interp, int n, char *argv);
+PARROT_EXPORT void Parrot_pbc_load(Parrot_Interp, Parrot_PackFile);
 
-PARROT_API void Parrot_runcode(Parrot_Interp, int argc, char *argv[]);
+PARROT_EXPORT void Parrot_pbc_fixup_loaded(Parrot_Interp);
 
-PARROT_API void Parrot_destroy(Parrot_Interp);
+PARROT_EXPORT void Parrot_setup_argv(Parrot_Interp, int argc, const char **argv);
 
-PARROT_API Parrot_Opcode * Parrot_debug(Parrot_Interp, Parrot_Opcode *pc);
+PARROT_EXPORT void Parrot_setup_opt(Parrot_Interp, int n, char *argv);
 
-PARROT_API void Parrot_disassemble(Parrot_Interp);
+PARROT_EXPORT void Parrot_runcode(Parrot_Interp, int argc, char **argv);
 
-PARROT_API void Parrot_exit(Parrot_Interp, int status)
-                __attribute__noreturn__;
+PARROT_EXPORT Parrot_PMC Parrot_compile_string(Parrot_Interp,
+        Parrot_String type, const char *code, Parrot_String *error);
 
-PARROT_API void Parrot_run_native(Parrot_Interp interp, native_func_t func);
+PARROT_EXPORT void Parrot_destroy(Parrot_Interp);
+
+PARROT_EXPORT Parrot_Opcode * Parrot_debug(Parrot_Interp, Parrot_Interp, Parrot_Opcode *pc);
+
+PARROT_EXPORT void Parrot_disassemble(Parrot_Interp, const char *outfile, Parrot_disassemble_options options);
+
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+void Parrot_exit(Parrot_Interp, int status);
+
+PARROT_EXPORT void Parrot_run_native(PARROT_INTERP, native_func_t func);
 
 /* Parrot_set_config_hash exists in *_config.o (e.g install_config.o),
    so if you make this call then you will need to link with it in
@@ -71,6 +83,12 @@ PARROT_API void Parrot_run_native(Parrot_Interp interp, native_func_t func);
 void Parrot_set_config_hash(void);
 
 int Parrot_revision(void);
+
+/* Deprecated */
+
+/* with 0.9.1 TT #266 */
+#define Parrot_readbc(i, c)  Parrot_pbc_read((i), (c), 0)
+#define Parrot_loadbc(i, pf) Parrot_pbc_load((i), (pf))
 
 #endif /* PARROT_EMBED_H_GUARD */
 

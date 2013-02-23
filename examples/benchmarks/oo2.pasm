@@ -1,4 +1,4 @@
-# $Id: oo2.pasm 12177 2006-04-11 19:56:05Z bernhard $
+# $Id: oo2.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 # all timings Athlon 800, gcc 2.95.2
 
@@ -10,50 +10,45 @@
 # python oo2.py                               2.9 (first time)
 # python oo2.py                               2.4
 
-# parrot -C oo2.pasm            -g           -O3
+# parrot -R cgp oo2.pasm            -g           -O3
 #   with reuse regsave mem                    6.15
 # anchor P1                                   6.7
 # Dan's new object layout                     5.1
 
-# parrot -j oo2.pasm            -g           -O3
+# parrot -R jit oo2.pasm            -g           -O3
 #   with reuse regsave mem                    6.1
 # anchor P1                                   6.5
 # Dan's new object layout                     4.9
 
-# parrot -C oo2-prop.pasm                     2.8
-# parrot -j oo2-prop.pasm                     2.6
+# parrot -R cgp oo2-prop.pasm                     2.8
+# parrot -R jit oo2-prop.pasm                     2.6
+
+.namespace [ "Foo" ]
 
     newclass P1, "Foo"
-    find_global P2, "init"
-    store_global "Foo", "__init", P2
     addattribute P1, ".i"
     addattribute P1, ".j"
 
     set I10, 0
     set I11, 500000
-    find_type I12, "Foo"
 loop:
-    new P3, I12
+    new P3, "Foo"
     inc I10
     lt I10, I11, loop
 
-    new P3, I12
-    classoffset I0, P3, "Foo"
-    getattribute P2, P3, I0
+    new P3, "Foo"
+    getattribute P2, P3, ".i"
     print P2
     print "\n"
-    typeof I0, P3
     end
 
-.pcc_sub init:
+.pcc_sub __init:
 .include "interpinfo.pasm"
     interpinfo P2, .INTERPINFO_CURRENT_OBJECT
-    classoffset I0, P2, "Foo"
-    new P10, .Integer
+    new P10, 'Integer'
     set P10, 10
-    setattribute P2, I0, P10
-    inc I0
-    new P10, .Integer
+    setattribute P2, ".i", P10
+    new P10, 'Integer'
     set P10, 20
-    setattribute P2, I0, P10
+    setattribute P2, ".j", P10
     returncc

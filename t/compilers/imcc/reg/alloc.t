@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: alloc.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: alloc.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -12,22 +12,22 @@ pir_output_is( <<'CODE', <<'OUT', "alligator" );
 # detected this program prints "Hi\nalligator\n"
 
 .sub main :main
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = "Hi\n"
     $I0 = 2
 lab:
     print $P0
     dec $I0
     unless $I0 goto ex
-    new $P1, .Continuation
+    new $P1, 'Continuation'
     set_addr $P1, lab
     $P2 = find_name "alligator"
-    set_args "(0)", $P1
+    set_args "0", $P1
     invokecc $P2
 ex:
 .end
 .sub alligator
-    get_params "(0)", $P0
+    get_params "0", $P0
     invokecc $P0
 .end
 CODE
@@ -38,7 +38,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "alligator 2 - r9629" );
 .sub xyz
     .local pmc args
-    args = new .ResizablePMCArray
+    args = new 'ResizablePMCArray'
     push args, "abc"
     push args, "def"
     push args, "POPME"
@@ -86,8 +86,8 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "Explicit large register: S, PIR" );
 .sub main
-  S32 = "ok\n"
-  print S32
+  $S32 = "ok\n"
+  print $S32
 .end
 CODE
 ok
@@ -95,18 +95,18 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "Explicit large register: N, PIR" );
 .sub main
-  N32 = 3.8
-  print N32
+  $N32 = 3.8
+  print $N32
   print "\n"
 .end
 CODE
-3.800000
+3.8
 OUT
 
 pir_output_is( <<'CODE', <<'OUT', "Explicit large register: I, PIR" );
 .sub main
-  I32 = 123
-  print I32
+  $I32 = 123
+  print $I32
   print "\n"
 .end
 CODE
@@ -115,9 +115,9 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "Explicit large register: P, PIR" );
 .sub main
-  P32 = new .String
-  P32 = "ok\n"
-  print P32
+  $P32 = new 'String'
+  $P32 = "ok\n"
+  print $P32
 .end
 CODE
 ok
@@ -137,7 +137,7 @@ pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: N, PASM" );
   print "\n"
   end
 CODE
-3.800000
+3.8
 OUT
 
 pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: I, PASM" );
@@ -150,7 +150,7 @@ CODE
 OUT
 
 pasm_output_is( <<'CODE', <<'OUT', "Explicit large register: P, PASM" );
-  new P32, .String
+  new P32, 'String'
   set P32, "ok\n"
   print P32
   end

@@ -4,14 +4,15 @@ library/Getopt/Obj.pir - parse long and short command line options
 
 =head1 SYNOPSIS
 
- .sub main :main
-     .param pmc argv
-     .local string prog_name
-     prog_name = shift argv
-     load_bytecode "Getopt/Obj.pir"
-     .local pmc getopts
-     getopts = new "Getopt::Obj"
-     getopts."notOptStop"(1)
+  .sub main :main
+    .param pmc argv
+
+    .local string prog_name
+    prog_name = shift argv
+    load_bytecode "Getopt/Obj.pir"
+    .local pmc getopts
+    getopts = new "Getopt::Obj"
+    getopts."notOptStop"(1)
 
      # these two are identical, with the exception of the call to name
 
@@ -22,7 +23,7 @@ library/Getopt/Obj.pir - parse long and short command line options
      $P0."long"("foo")
      $P0."short"("f")
      $P0."optarg"(1)
-     $P0."type"(.String)
+     $P0."type"('String')
 
      # these two are identical
 
@@ -31,13 +32,13 @@ library/Getopt/Obj.pir - parse long and short command line options
      $P0 = getopts."add"()
      $P0."long"("bar")
      $P0."short"("b")
-     $P0."type"(.String)
+     $P0."type"('String')
 
      .local pmc opts
      opts = getopts."get_options"(argv)
      .local string foo
      foo = opts["Foobar"]
- .end
+  .end
 
 =head1 DESCRIPTION
 
@@ -92,16 +93,16 @@ Our nice little module.
 
 .namespace ["Getopt::Obj"]
 
-=item C<__init()>
+=item C<init()>
 
-Creates the Specs and notOptStop attribute, interal stuff.
+Creates the Specs and notOptStop attribute, internal stuff.
 
 =cut
 
 .sub init :vtable :method
-    $P0 = new .ResizablePMCArray
+    $P0 = new 'ResizablePMCArray'
     setattribute self, "Specs", $P0
-    $P0 = new .Boolean
+    $P0 = new 'Boolean'
     setattribute self, "notOptStop", $P0
 .end
 
@@ -114,10 +115,11 @@ wanted.
 
 .sub get_options :method
     .param pmc argv
+
     .local pmc return, spec
     .local int i, j, argc
     .local string name, long, short, arg, key, val
-    return = new .Hash
+    return = new 'Hash'
 
     i = 0
 beginfor:
@@ -172,8 +174,9 @@ endif_2:
     $I0 = length $S0
     unless long == key goto beginstore_1
     $I0 = spec."optarg"()
-    $I1 = spec."type"()
-    unless $I1 == .Boolean goto endif_4
+    .local string type
+    type = spec."type"()
+    unless type == 'Boolean' goto endif_4
     val = 1
     goto beginstore_1
 endif_4:
@@ -197,10 +200,11 @@ shortarg:
 
     key = name
 
-    $I1 = spec."type"()
+    .local string type
+    type = spec."type"()
     $I2 = length val
 
-    unless $I1 == .Boolean goto else_6
+    unless type == 'Boolean' goto else_6
     if $I2 == 0 goto beginstore
     # ok, boolean and bundled
     .local string keys
@@ -214,10 +218,11 @@ beginfor_0:
 
     (name, spec) = self."getNameForKey"(key)
     if null name goto redofor
-    $I0 = spec."type"()
-    unless $I0 == .Boolean goto error_2
+    .local string type
+    type = spec."type"()
+    unless type == 'Boolean' goto error_2
 
-    $P0 = new .Boolean
+    $P0 = new 'Boolean'
     $P0 = 1
     return[name] = $P0
     inc jkl
@@ -244,8 +249,8 @@ else_6:
 error_1:
     MissingRequired(name)
 error_2:
-    $P0 = new .Exception
-    $P0["_message"] = "Not using only boolean arguments in a bundled argument"
+    $P0 = new 'Exception'
+    $P0 = "Not using only boolean arguments in a bundled argument"
     throw $P0
 
     ################  STORE  ###########################
@@ -256,22 +261,22 @@ beginstore:
 
 beginstore_1:
     # Store the value...
-    $I0 = spec."type"()
-    $S0 = typeof $I0
+    .local string type
+    type = spec."type"()
     if_null val, undef
-    if $I0 == .String goto str
-    if $I0 == .Array goto array
-    if $I0 == .Hash goto hash
-    if $I0 == .Integer goto integer
-    if $I0 == .Float goto flt
-    if $I0 == .Boolean goto bool
+    if type == 'String' goto str
+    if type == 'Array' goto array
+    if type == 'Hash' goto hash
+    if type == 'Integer' goto integer
+    if type == 'Float' goto flt
+    if type == 'Boolean' goto bool
     # XXX default to boolean?
     # And are pmc's necessary?
     goto bool
 undef:
     $I0 = spec."optarg"()
     unless $I0 goto optelse
-    $P0 = new .Undef
+    $P0 = new 'Undef'
     goto endifelse
 optelse:
     MissingRequired(name)
@@ -279,20 +284,22 @@ optelse:
 array:
     $P0 = return[name]
     if null $P0 goto not_set
-    $I0 = typeof $P0
-    unless $I0 != .ResizableStringArray goto endif_5
+    .local string type
+    type = typeof $P0
+    unless type != 'ResizableStringArray' goto endif_5
 not_set:
-    $P0 = new .ResizableStringArray
+    $P0 = new 'ResizableStringArray'
 endif_5:
     push $P0, val
     goto endifelse
 hash:
     $P0 = return[name]
     if null $P0 goto not_set_hash
-    $I0 = typeof $P0
-    unless $I0 != .Hash goto endif_7
+    .local string type
+    type = typeof $P0
+    unless type != 'Hash' goto endif_7
 not_set_hash:
-    $P0 = new .Hash
+    $P0 = new 'Hash'
 endif_7:
     $I0 = index val, '='
     unless $I0 == -1 goto else_8
@@ -305,21 +312,21 @@ else_8:
     $P0[$S0] = $S1
     goto endifelse
 str:
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = val
     goto endifelse
 integer:
-    $P0 = new .Integer
+    $P0 = new 'Integer'
     $I0 = val
     $P0 = $I0
     goto endifelse
 flt:
-    $P0 = new .Float
+    $P0 = new 'Float'
     $N0 = val
     $P0 = $N0
     goto endifelse
 bool:
-    $P0 = new .Boolean
+    $P0 = new 'Boolean'
     $P0 = 1
 endifelse:
     return[name] = $P0
@@ -351,25 +358,24 @@ A vtable method, invoked by e.g. C<push getopts, "foo|f=s">.  The format is as s
 
 =item "foo|f"
 
-A long option of "foo" and a short option of "f" is set to C<.Boolean>.
+A long option of "foo" and a short option of "f" is set to C<Boolean>.
 
 =item "foo"
 
-A long option of "foo" is set to C<.Boolean>.
+A long option of "foo" is set to C<Boolean>.
 
 =item "f"
 
-A short option of "f" is set to C<.Boolean>.
+A short option of "f" is set to C<Boolean>.
 
 =item "f=s"
 
-A short option of "f" is set to C<.String>.  Use C<i> for C<.Integer>, C<f> for
-C<.Float>, C<@> for an C<.Array>, and C<%> for a C<.Hash>.
-
+A short option of "f" is set to C<String>.  Use C<i> for C<Integer>, C<f> for
+C<Float>, C<@> for an C<Array>, and C<%> for a C<Hash>.
 
 =item "foo:s"
 
-A long option of "foo" is set to C<.String>, with "optarg" set to a true value.
+A long option of "foo" is set to C<String>, with "optarg" set to a true value.
 
 =back
 
@@ -387,7 +393,7 @@ A long option of "foo" is set to C<.String>, with "optarg" set to a true value.
 else_0:
     key = format
     $I0 = index format, '='
-    # .Boolean is the default
+    # Boolean is the default
     if $I0 == -1 goto endcase
 check:
     key = substr format, 0, $I0
@@ -400,27 +406,27 @@ check:
     if type == '%' goto hash
     if type == 'i' goto integer
     if type == 'f' goto flt
-    $P0 = new .Exception
+    $P0 = new 'Exception'
     $S0 = "Unknown specs option '"
     $S0 .= type
     $S0 .= "'"
-    $P0["_message"] = $S0
+    $P0 = $S0
     throw $P0
 
 str:
-    $P0."type"(.String)
+    $P0."type"('String')
     goto endcase
 array:
-    $P0."type"(.Array)
+    $P0."type"('Array')
     goto endcase
 hash:
-    $P0."type"(.Hash)
+    $P0."type"('Hash')
     goto endcase
 integer:
-    $P0."type"(.Integer)
+    $P0."type"('Integer')
     goto endcase
 flt:
-    $P0."type"(.Float)
+    $P0."type"('Float')
 endcase:
     $I0 = index key, '|'
     unless $I0 == -1 goto endif_2
@@ -464,10 +470,11 @@ return the name for the key.
 
 =cut
 
-# XXX should the name really ever be passed?
+# RT #56782 should the name really ever be passed?
 
 .sub "getNameForKey" :method
     .param string key
+
     .local int j, specslen
     .local pmc specs, spec
     .local string name, long, short
@@ -494,15 +501,16 @@ endfor:
     # Don't return anything, easier to catch an exception...
     $I0 = self."notOptStop"()
     if $I0 goto finish
-    $P0 = new .Exception
+    $P0 = new 'Exception'
     $S0 = "Option '"
-    $S0 .= key 
+    $S0 .= key
     $S0 .= "' not in specs"
-    $P0["_message"] = $S0
+    $P0 = $S0
     throw $P0
 finish:
     null $S0
     null $P0
+
     .return ($S0, $P0)
 .end
 
@@ -521,6 +529,7 @@ later.  Or of course, it's not an argument at all and perhaps a filename.
 .sub "notOptStop" :method
     .param int val :optional
     .param int opt :opt_flag
+
     $P0 = getattribute self, "notOptStop"
     unless opt goto else_0
     # Setting
@@ -530,6 +539,7 @@ else_0:
     # Getting
     val = $P0
 endif_0:
+
     .return(val)
 .end
 
@@ -542,11 +552,12 @@ When a required argument is missing, throws an exception with the message
 
 .sub MissingRequired
     .param string arg
-    $P0 = new .Exception
+
+    $P0 = new 'Exception'
     $S0 = "Missing a required argument for option '"
     $S0 .= arg
     $S0 .= "'"
-    $P0["_message"] = $S0
+    $P0 = $S0
     throw $P0
 .end
 
@@ -554,7 +565,7 @@ When a required argument is missing, throws an exception with the message
 
 =head2 Class Getopt::Obj::Spec
 
-Interal use only, at least don't do any new "Getopt::Obj::Spec" yourself...
+Internal use only, at least don't do any new "Getopt::Obj::Spec" yourself...
 This makes an easy holder for each possible match.
 
 =over 4
@@ -563,30 +574,30 @@ This makes an easy holder for each possible match.
 
 .namespace ["Getopt::Obj::Spec"]
 
-=item C<__init()>
+=item C<init()>
 
 Set the defaults to all our attributes, more internal stuff.  Sets the default
-"type" to C<.Boolean>.
+"type" to C<Boolean>.
 
 =cut
 
 .sub init :vtable :method
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = ''
     setattribute self, "name", $P0
     # TODO? These next two will be ResizablePMCArray's
     # to allow the whole --height --length type thing
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = ''
     setattribute self, "long", $P0
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = ''
     setattribute self, "short", $P0
-    $P0 = new .Boolean
+    $P0 = new 'Boolean'
     $P0 = 0
     setattribute self, "optarg", $P0
-    $P0 = new .Integer
-    $P0 = .Boolean
+    $P0 = new 'String'
+    $P0 = 'Boolean'
     setattribute self, "type", $P0
 .end
 
@@ -605,6 +616,7 @@ long/short arguments instead of one of each.
 .sub name :method
     .param string val :optional
     .param int opt :opt_flag
+
     $P0 = getattribute self, "name"
     unless opt goto else
     # Setting
@@ -620,6 +632,7 @@ else:
     $P0 = getattribute self, "short"
     val = $P0
 endif:
+
     .return(val)
 .end
 
@@ -635,6 +648,7 @@ string set as the long.
 .sub "long" :method
     .param string val :optional
     .param int opt :opt_flag
+
     $P0 = getattribute self, "long"
     unless opt goto else_0
     # Setting
@@ -644,6 +658,7 @@ else_0:
     # Getting
     val = $P0
 endif_0:
+
     .return(val)
 .end
 
@@ -661,6 +676,7 @@ NOTE: There is no checking to ensure that short is only one character.
 .sub "short" :method
     .param string val :optional
     .param int opt :opt_flag
+
     $P0 = getattribute self, "short"
     unless opt goto else_0
     # Setting
@@ -670,6 +686,7 @@ else_0:
     # Getting
     val = $P0
 endif_0:
+
     .return(val)
 .end
 
@@ -680,44 +697,42 @@ endif_0:
 If val is given, set the type to that.  If val is not given, return the int set
 as the type.
 
-NOTE: It doesn't verify it's a corrent type.
-
-Use the constants:
+NOTE: It doesn't verify it's a correct type.
 
 =over 4
 
-=item C<.Boolean>
+=item C<Boolean>
 
 A true/false value, the default.
 
-For a short argument, it's simply C<-f>.  Groups of C<.Boolean>'s tied
+For a short argument, it's simply C<-f>.  Groups of C<Boolean>'s tied
 together, such as C<-foobar>, if C<-f>, C<-o>, C<-b>, C<-a>, and C<-r> are all
-C<.Boolean> values, then each will be set.  If C<-f> is a C<.Boolean> but one
+C<Boolean> values, then each will be set.  If C<-f> is a C<Boolean> but one
 of the others is not, an exception is thrown.
 
 For a long argument, it takes the form C<--foo>.  Usage such as C<--foo=this>
 or C<--foo=> are allowed, but it just sets it to true, so no difference.
 
-=item C<.String>
+=item C<String>
 
 A string.  This can take the form of C<--foo=bar>, C<-f bar>, or C<-fbar>.
 
-=item C<.Integer>
+=item C<Integer>
 
 An integer, --foo=3.14 is stored as 3.  Type conversions are done by Parrot.
-Same forms as for C<.String>.
+Same forms as for C<String>.
 
-=item C<.Float>
+=item C<Float>
 
 A float.  Same forms apply here as well.
 
-=item C<.Array>
+=item C<Array>
 
 An array, done via multiple arguments.  For something such as
 C<-I./include -I./src/include> for example, C<I> will be an array of
 C<./include> and C<./src/include>.  If only used once, it's a one sized array.
 
-=item C<.Hash>
+=item C<Hash>
 
 A hash, such as defines.  For a short argument, the form is C<-Dfoo=bar>,
 C<-Dfoo>, and C<--define=foo=bar>(both equal signs required).
@@ -730,8 +745,9 @@ code.  There's no guarantees they won't be reassigned.
 =cut
 
 .sub "type" :method
-    .param int val :optional
+    .param string val :optional
     .param int opt :opt_flag
+
     $P0 = getattribute self, "type"
     unless opt goto else_0
     # Setting
@@ -741,6 +757,7 @@ else_0:
     # Getting
     val = $P0
 endif_0:
+
     .return(val)
 .end
 
@@ -757,6 +774,7 @@ C<-fbar>, C<-f> is set to C<bar>.  In C<-f bar> it is NOT set.
 .sub "optarg" :method
     .param int val :optional
     .param int opt :opt_flag
+
     $P0 = getattribute self, "optarg"
     unless opt goto else_0
     # Setting
@@ -766,6 +784,8 @@ else_0:
     # Getting
     val = $P0
 endif_0:
+
+
     .return(val)
 .end
 
@@ -789,19 +809,15 @@ How to handle an unknown arg, currently kept in argv.
 
 =item *
 
-Should a lonesome hyphen be a permited value as not an option.  Currently kept
+Should a lonesome hyphen be a permitted value as not an option.  Currently kept
 in argv in case the program wants it, such as indicating stdin or stdout.
 
 =item *
 
 For an arg to a short arg, e.g. -C -d, will put -d as the value for -C so long
-as -C is not a C<.Boolean>.  Should it be an error?
+as -C is not a C<Boolean>.  Should it be an error?
 
 =back
-
-=head1 CAVEAT EMPTOR
-
-It's new, not well tested, etc...
 
 =head1 BUGS
 
@@ -818,7 +834,7 @@ argument to -f is required, it will be given '-b'.
 
 =item *
 
-Bundling of options will only work for C<.Boolean> options.  So my little "perl
+Bundling of options will only work for C<Boolean> options.  So my little "perl
 pie" annoyance isn't handled, C<perl -pie "code">, although perl doesn't handle
 it in a DWIM manner...
 
@@ -838,9 +854,7 @@ F<t/library/getopt_obj.t>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2006, The Perl Foundation.
-This program is free software. It is subject to the same
-license as The Parrot Interpreter.
+Copyright (C) 2006-2008, Parrot Foundation.
 
 =cut
 
@@ -848,4 +862,4 @@ license as The Parrot Interpreter.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

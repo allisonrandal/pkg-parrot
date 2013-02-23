@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: subs.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: subs.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;

@@ -1,14 +1,15 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: const.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: const.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+use vars qw($TODO);
+
 use Test::More;
 use Parrot::Config;
 use Parrot::Test tests => 34;
-use vars qw($TODO);
 
 pir_output_is( <<'CODE', <<'OUT', "globalconst 1" );
 
@@ -71,15 +72,15 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "array/hash consts" );
 .sub 'main' :main
-   .local Array ar
+   .local pmc ar
    .local pmc ha
    .local string key1
    .const string key2 = "key2"
    .local int idx1
    .const int idx2 = 2
-   ar = new Array
+   ar = new 'Array'
    ar = 3
-   ha = new Hash
+   ha = new 'Hash'
    key1 = "key1"
    idx1 = 1
    ha[key1] = idx1
@@ -114,7 +115,7 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "PMC const 1 - Sub" );
 .sub 'main' :main
-    .const .Sub $P0 = "foo"
+    .const 'Sub' $P0 = "foo"
     print "ok 1\n"
     $P0()
     print "ok 3\n"
@@ -130,7 +131,7 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "PMC const 2 - Sub ident" );
 .sub 'main' :main
-    .const .Sub func = "foo"
+    .const 'Sub' func = "foo"
     print "ok 1\n"
     func()
     print "ok 3\n"
@@ -154,7 +155,7 @@ pasm_output_is( <<'CODE', <<'OUT', "const I/N mismatch" );
     end
 CODE
 2
-2.000000
+2
 ok
 OUT
 
@@ -163,7 +164,7 @@ pir_output_is( <<'CODE', <<'OUT', "const I/N mismatch 2" );
     .const int i = 2.0
     print i
     print "\n"
-    .const float n = 2
+    .const num n = 2
     print n
     print "\nok\n"
     .const string s = ascii:"ok 2\n"
@@ -171,7 +172,7 @@ pir_output_is( <<'CODE', <<'OUT', "const I/N mismatch 2" );
 .end
 CODE
 2
-2.000000
+2
 ok
 ok 2
 OUT
@@ -272,7 +273,7 @@ CODE
 abc\tdef
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', 'PIR heredoc: rejects unquoted terminator');
+pir_error_output_like( <<'CODE', <<'OUT', 'PIR heredoc: rejects unquoted terminator' );
 .sub 'main' :main
     $S0 = <<Jabberwocky
 "Beware the Jabberwock, my son!
@@ -286,7 +287,7 @@ CODE
 /^error:imcc:syntax error, unexpected SHIFT_LEFT.*/
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects inline heredoc");
+pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects inline heredoc" );
 .sub 'main' :main
     $S0 .= <<Jabberwocky
 He took his vorpal sword in hand:
@@ -301,7 +302,7 @@ CODE
 /^error:imcc:syntax error, unexpected SHIFT_LEFT.*/
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects null terminator");
+pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects null terminator" );
 .sub 'main' :main
     $S0 = <<
 And, as in uffish thought he stood,
@@ -315,7 +316,7 @@ CODE
 /^error:imcc:syntax error, unexpected SHIFT_LEFT.*/
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects terminator with spaces");
+pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects terminator with spaces" );
 .sub 'main' :main
     $S0 = << "terminator with spaces"
 One, two! One, two! And through and through
@@ -365,7 +366,7 @@ All mimsy were the borogoves,
   And the mome raths outgrabe.
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects interpolated terminator");
+pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: rejects interpolated terminator" );
 .sub 'main' :main
     $S1 = 'e_e_cummings'
     $S0 = <<$S1
@@ -418,7 +419,7 @@ CODE
 The line above is empty.
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: line numbers");
+pir_error_output_like( <<'CODE', <<'OUT', "PIR heredoc: line numbers" );
 .sub main :main
     .local string s
     .local pmc nil
@@ -540,7 +541,7 @@ line 10
 line 2
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "heredoc not eol 2 - nested");
+pir_error_output_like( <<'CODE', <<'OUT', "heredoc not eol 2 - nested" );
 .sub main :main
     cat(<<"H1", <<"H2")
 line 1
@@ -563,31 +564,31 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', ".const in mixed opcodes" );
 .sub main :main
     .const int I = 5
-    .local float f
+    .local num f
     f = 2.0
     f *= I
     print f
     print "\n"
 .end
 CODE
-10.000000
+10
 OUT
 
 pir_output_is( <<'CODE', <<'OUT', "RT # 34991" );
 .const int c = 12
 .sub test
-    .local float a
+    .local num a
     a = 96
     # Uncomment this line, and the c symbol is 'forgotten'
     a += c
     print a
-    print_newline
+    print "\n"
     print c
-    print_newline
+    print "\n"
     end
 .end
 CODE
-108.000000
+108
 12
 OUT
 

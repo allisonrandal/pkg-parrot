@@ -1,3 +1,6 @@
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: oofib.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 use strict;
 use warnings;
 
@@ -19,7 +22,7 @@ sub fibA {
 
 package B;
 @B::ISA = qw(A);
-sub new { bless {}, $_[0] }
+sub new { return bless {}, $_[0] }
 
 sub fibB {
     my $self = shift;

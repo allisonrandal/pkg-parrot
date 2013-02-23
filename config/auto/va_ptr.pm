@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: va_ptr.pm 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: va_ptr.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,38 +15,42 @@ package auto::va_ptr;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Test the type of va_ptr (this test is likely to segfault)';
 
-@args = qw();
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Test the type of va_ptr};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
     my $va_type;
-    cc_gen('config/auto/va_ptr/test_c.in');
-    eval { cc_build('-DVA_TYPE_X86'); };
+    $conf->cc_gen('config/auto/va_ptr/test_c.in');
+    eval { $conf->cc_build('-DVA_TYPE_STACK'); };
 
-    if ( $@ || cc_run() !~ /^ok/ ) {
-        eval { cc_build('-DVA_TYPE_PPC'); };
-        if ( $@ || cc_run() !~ /^ok/ ) {
+    if ( $@ || $conf->cc_run() !~ /^ok/ ) {
+        eval { $conf->cc_build('-DVA_TYPE_REGISTER'); };
+        if ( $@ || $conf->cc_run() !~ /^ok/ ) {
             die "Unknown va_ptr type";
         }
-        $va_type = 'ppc';
+        $va_type = 'register';
     }
     else {
-        $va_type = 'x86';
+        $va_type = 'stack';
     }
-    cc_clean();
+    $conf->cc_clean();
     $self->set_result($va_type);
     $conf->data->set( va_ptr_type => $va_type );
 
-    return $self;
+    return 1;
 }
 
 1;

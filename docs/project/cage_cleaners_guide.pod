@@ -1,14 +1,15 @@
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: cage_cleaners_guide.pod 17918 2007-04-01 07:30:00Z paultcochrane $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: cage_cleaners_guide.pod 36833 2009-02-17 20:09:26Z allison $
 
 =head1 Cage Cleaner Guide
 
-From F<docs/roles_responsibilities.pod>:
+From F<docs/project/roles_responsibilities.pod>:
 
- Fixes failing tests, makes sure coding standards are implemented, reviews
- documentation and examples. A class of tickets in the tracking system (RT)
- has been created for use by this group. This is an entry level position, and
- viewed as a good way to get familiar with parrot internals.
+ Fixes failing tests, makes sure coding standards are implemented,
+ reviews documentation and examples. A class of tickets in the
+ tracking system (RT or Trac) has been created for use by this
+ group. This is an entry level position, and viewed as a good way
+ to get familiar with parrot internals.
 
 =head1 Testing Parrot after making a code cleaning change
 
@@ -39,6 +40,16 @@ problems.  Parrot has to be the most portable thing we've created.
 More platforms also means more compilers.  Maybe your DEC compiler
 is more picky than gcc, and spews more warnings.  Good!  More
 opportunities for cleaning!
+
+=head3 icc
+
+C<icc> is the Intel C/C++ Compiler and is available for free for
+non-commercial use.  To use C<icc> to build parrot, use the following
+arguments to C<Configure.pl>:
+
+  perl Configure.pl --cc=icc --ld=icc
+
+(courtesy of Steve Peters, C<steve at fisharerojo dot org>).
 
 =head2 Compiler pickiness
 
@@ -195,7 +206,7 @@ the net.
     cdecl> explain const char * str;
     declare str as pointer to const char
     cdecl> explain char * const str;
-    declare str as const pointer to char=back
+    declare str as const pointer to char
 
 =head2 Decreasing the amount of repeated code
 
@@ -274,6 +285,14 @@ many more.
 Valgrind (L<http://valgrind.org/>) is a profiler/debugger most notable
 for the way it magically monitors memory accesses and management.
 
+To run parrot under Valgrind, the following argument set should be helpful:
+
+  valgrind --num-callers=500 \
+     --leak-check=full --leak-resolution=high --show-reachable=yes \
+     parrot --leak-test
+
+(adapted from a post to C<parrot-porters> by chromatic).
+
 =head2 IMCC cleanup
 
 From #parrot:
@@ -293,7 +312,11 @@ L<http://www.oreillynet.com/onlamp/blog/2006/07/calling_for_parrot_janitors.html
     be worked out. It'd be great if a Cage Cleaner could step up
     and help our new contributor bang the code into Parrotish form.
 
-=head2 Fix usage of deprecated features
+=head2 Remove usage of deprecated features
+
+F<DEPRECATED.pod> lists features that are deprecated but not yet removed;
+An RT ticket will document how this deprecated feature is to be replaced.
+Help prepare for the actual removal of the feature by replacing its usage.
 
 =head2 Clean up skipped tests
 
@@ -350,9 +373,8 @@ Paul Cochrane a.k.a. ptc; original document by Andy Lester
 
 =head1 SEE ALSO
 
-F<docs/roles_responsibilities.pod>, F<RESPONSIBLE_PARTIES>
-Also look at F<docs/ROADMAP.pod> and the list of Cage items on RT:
+F<docs/project/roles_responsibilities.pod>, F<RESPONSIBLE_PARTIES>
+and the list of Cage items on RT:
 L<http://xrl.us/owsd> (Link to rt.perl.org)
-
 
 =cut

@@ -89,19 +89,19 @@ done_init:
     # Default to a null. We could in the future make this more
     # clever, or conditional.
 json_null:
-    .return _json_null(thing,pretty,indent)
+    .tailcall _json_null(thing,pretty,indent)
 json_string:
-    .return _json_string(thing,pretty,indent)
+    .tailcall _json_string(thing,pretty,indent)
 json_array:
-    .return _json_array(thing,pretty,indent)
+    .tailcall _json_array(thing,pretty,indent)
 json_hash:
-    .return _json_hash(thing,pretty,indent)
+    .tailcall _json_hash(thing,pretty,indent)
 json_boolean:
-    .return _json_boolean(thing,pretty,indent)
+    .tailcall _json_boolean(thing,pretty,indent)
 json_integer:
-    .return _json_number(thing,pretty,indent)
+    .tailcall _json_number(thing,pretty,indent)
 json_float:
-    .return _json_number(thing,pretty,indent)
+    .tailcall _json_number(thing,pretty,indent)
 
 .end
 
@@ -123,18 +123,15 @@ plain:
 .end
 
 .sub '_json_string'
-  .param pmc thing
+  .param string thing
   .param int pretty
   .param int indent
 
   .local string result
 
-  $S0 = thing
-  .local pmc escaper
-  escaper = find_global "Data::Escape", "String"
-  $S0 = escaper($S0,'"')
+  thing = escape thing
 
-  result = '"' . $S0
+  result = '"' . thing
   result = result . '"'
 
   unless pretty goto plain
@@ -202,7 +199,7 @@ plain:
 
   unless pretty goto pre_loop
   unless indent goto pre_loop
- 
+
   $S0 = repeat _json_prefix, indent
   result = $S0 . result
   if len goto pre_loop
@@ -261,9 +258,9 @@ done:
   not_empty = thing
 
   .local pmc keys
-  keys = new .ResizablePMCArray
-  .local pmc iter 
-  iter = new .Iterator, thing
+  keys = new 'ResizablePMCArray'
+  .local pmc iter
+  iter = new 'Iterator', thing
   iter = 0
   .local string key
 
@@ -274,8 +271,7 @@ iter_loop:
   goto iter_loop
 
 done_iter:
-  $P0 = find_global 'Data::Sort', 'simple' 
-  $P0( keys ) 
+  keys.'sort'()
 
   .local string result,separator
 
@@ -285,7 +281,7 @@ done_iter:
   unless pretty goto pre_loop
   separator = ' : '
   unless indent goto pre_loop
- 
+
   $S0 = repeat _json_prefix, indent
   result = $S0 . result
   if not_empty goto pre_loop
@@ -310,15 +306,15 @@ loop:
 
   # remove any leading whitespace on the value's string.
   unless pretty goto space_loop_skip
- 
+
   .local int space_pos,space_len
   space_pos = 0
   space_len = length $S0
- 
+
 space_loop:
   if space_pos >= space_len goto space_loop_done
   $I0 = ord $S0, space_pos
-  if $I0 != 32 goto space_loop_done 
+  if $I0 != 32 goto space_loop_done
 
   inc space_pos
   goto space_loop
@@ -359,9 +355,6 @@ done:
   .return (result)
 .end
 
-.include  'library/Data/Escape.pir'
-.include  'library/Data/Sort.pir'
-
 =back
 
 =head1 TODO
@@ -380,4 +373,4 @@ Thunk a better way to deal with the maximum recursion depth exception (Or make i
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

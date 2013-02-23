@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: ref.pmc 18407 2007-05-03 05:08:51Z chromatic $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: ref.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ C<Parrot::Pmc2c>.
 
 #include "parrot/parrot.h"
 
-pmclass Ref does ref {
+pmclass Ref provides ref {
 
 /*
 
@@ -35,11 +35,11 @@ Sets the referenced PMC to C<PMCNULL>.
 
 */
 
-    void init() {
+    VTABLE void init() {
         SELF.init_pmc(PMCNULL);
     }
 
-    void destroy() {
+    VTABLE void destroy() {
         SELF.init_pmc(NULL);
         /* don't pass it on */
     }
@@ -54,17 +54,14 @@ Sets the referenced PMC to C<initializer>.
 
 */
 
-    void init_pmc(PMC *initializer) {
-        PMC_pmc_val(SELF) = initializer; /* the referred PMC itself */
+    VTABLE void init_pmc(PMC *initializer) {
+        /* the referred PMC itself */
+        PMC_pmc_val(SELF) = initializer;
         PObj_custom_mark_SET(SELF);
-        if (initializer) {
-            /*
-             * if referred PMC needs active destruction
-             * we have to pass it on
-             */
-            if (PObj_active_destroy_TEST(initializer))
-                PObj_active_destroy_SET(SELF);
-        }
+
+        /* if referred PMC needs active destruction we have to pass it on */
+        if (initializer && PObj_active_destroy_TEST(initializer))
+            PObj_active_destroy_SET(SELF);
     }
 
 /*
@@ -73,7 +70,7 @@ Sets the referenced PMC to C<initializer>.
 
 Sets the referenced PMC to C<*other>.
 
-=item C<PMC* get_pmc()>
+=item C<PMC *get_pmc()>
 
 Get the referenced PMC.
 
@@ -81,16 +78,17 @@ Get the referenced PMC.
 
 */
 
-    void set_pmc(PMC* other) {
+    VTABLE void set_pmc(PMC *other) {
         PObj_active_destroy_CLEAR(SELF);
-        DOD_WRITE_BARRIER(INTERP, SELF, PMC_pmc_val(SELF), other);
+        GC_WRITE_BARRIER(INTERP, SELF, PMC_pmc_val(SELF), other);
         SELF.init_pmc(other);
     }
-    void assign_pmc(PMC* other) {
-        SELF.set_pmc(other);   /* audreyt */
+
+    VTABLE void assign_pmc(PMC *other) {
+        SELF.set_pmc(other);
     }
 
-    PMC* get_pmc() {
+    VTABLE PMC *get_pmc() {
         return PMC_pmc_val(SELF);
     }
 
@@ -104,7 +102,7 @@ Returns the PMC's type.
 
 */
 
-    INTVAL type() {
+    VTABLE INTVAL type() {
         return VTABLE_type(interp, PMC_pmc_val(SELF));
     }
 
@@ -118,8 +116,8 @@ Marks the referenced PMC as live.
 
 */
 
-    void mark() {
-        pobject_lives(INTERP, (PObj *) PMC_pmc_val(SELF));
+    VTABLE void mark() {
+        pobject_lives(INTERP, (PObj *)PMC_pmc_val(SELF));
     }
 
 /*
@@ -138,9 +136,10 @@ Returns the name of the PMC, not the name of the referenced PMC.
 
 */
 
-    STRING* name() {
+    VTABLE STRING *name() {
         return SUPER();
     }
+
 }
 
 /*

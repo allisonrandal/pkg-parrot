@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: beta.pm 18405 2007-05-03 01:40:40Z jkeenan $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: beta.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -10,21 +10,24 @@ t/configure/testlib/init/beta.pm - Module used in configuration tests
 package init::beta;
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step;
-
-$description = 'Determining if your computer does beta';
-@args = qw( verbose );
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determining if your computer does beta};
+    $data{args}        = [ qw( verbose ) ];
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
     my $verbose = $conf->options->get('verbose');
     print "\nbeta is verbose\n" if $verbose;
     print "\nYou've got beta\n";
-    return $self;
+    return 1;
 }
 
 1;

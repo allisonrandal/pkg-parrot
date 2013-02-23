@@ -1,7 +1,7 @@
 /* atomic/gcc_x86.h
- *  Copyright (C) 2006, The Perl Foundation.
+ *  Copyright (C) 2006-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: gcc_x86.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: gcc_x86.h 36833 2009-02-17 20:09:26Z allison $
  *  Overview:
  *     This header provides an implementation of atomic
  *     operations on x86 platforms with GCC-style
@@ -15,6 +15,29 @@
 #ifndef PARROT_ATOMIC_GCC_X86_H_GUARD
 #define PARROT_ATOMIC_GCC_X86_H_GUARD
 
+/* HEADERIZER BEGIN: src/atomic/gcc_x86.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_EXPORT
+PARROT_CANNOT_RETURN_NULL
+void * parrot_i386_cmpxchg(
+    ARGMOD(void *volatile *ptr),
+    ARGIN_NULLOK(void *expect),
+    ARGIN_NULLOK(void *update))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*ptr);
+
+PARROT_EXPORT
+long parrot_i386_xadd(ARGIN(volatile long *l), long amount)
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_parrot_i386_cmpxchg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ptr)
+#define ASSERT_ARGS_parrot_i386_xadd __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(l)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: src/atomic/gcc_x86.c */
+
 typedef struct Parrot_atomic_pointer {
     void *volatile val;
 } Parrot_atomic_pointer;
@@ -27,34 +50,21 @@ typedef struct Parrot_atomic_integer {
  * if both I386 and X86_64 cmpxchg are defined, we are on x86_64 -
  * reuse existing code
  */
-inline static void *parrot_i386_cmpxchg(void *volatile *ptr, void *expect,
-                                        void *update)
-{
-#if defined(PARROT_HAS_X86_64_GCC_CMPXCHG)
-    __asm__ __volatile__("lock\n"
-                         "cmpxchgq %1,%2":"=a"(expect):"q"(update), "m"(*ptr),
-                         "0"(expect)
-                         :"memory");
-#else
-    __asm__ __volatile__("lock\n"
-                         "cmpxchgl %1,%2":"=a"(expect):"q"(update), "m"(*ptr),
-                         "0"(expect)
-                         :"memory");
-#endif
-    return expect;
-}
+PARROT_INLINE
+void *parrot_i386_cmpxchg(void *volatile *ptr, void *expect,
+                                        void *update);
 
-#define PARROT_ATOMIC_PTR_GET(result, a) (result = (a).val)
+#define PARROT_ATOMIC_PTR_GET(result, a) ((result) = (a).val)
 
-#define PARROT_ATOMIC_PTR_SET(a, b) ((a).val = b)
+#define PARROT_ATOMIC_PTR_SET(a, b) ((a).val = (b))
 
-#define PARROT_ATOMIC_PTR_CAS(result, a, expect, update)  \
+#define PARROT_ATOMIC_PTR_CAS(result, a, expect, update) \
     do { \
-        if (expect == parrot_i386_cmpxchg(&(a).val, expect, update)) { \
-            result = 1; \
+        if ((expect) == parrot_i386_cmpxchg(&(a).val, (expect), (update))) { \
+            (result) = 1; \
         } \
         else { \
-            result = 0; \
+            (result) = 0; \
         } \
     } while (0)
 
@@ -66,45 +76,33 @@ inline static void *parrot_i386_cmpxchg(void *volatile *ptr, void *expect,
 
 #define PARROT_ATOMIC_INT_DESTROY(a)
 
-#define PARROT_ATOMIC_INT_GET(result, a) (result = (a).val)
+#define PARROT_ATOMIC_INT_GET(result, a) ((result) = (a).val)
 
-#define PARROT_ATOMIC_INT_SET(a, b) ((a).val = b)
+#define PARROT_ATOMIC_INT_SET(a, b) ((a).val = (b))
 
 #define PARROT_ATOMIC_INT_CAS(result, a, expect, update) \
     do { \
-        if (expect == (long) parrot_i386_cmpxchg( \
-                (void * volatile *) &(a).val, \
-                (void *) expect, (void *) update)) { \
-            result = 1; \
+        void *res = parrot_i386_cmpxchg((void * volatile *) &(a).val, \
+                (void *) (expect), (void *) (update)); \
+        if ((expect) == (long)res) { \
+            (result) = 1; \
         } \
         else { \
-            result = 0; \
+            (result) = 0; \
         } \
     } while (0)
 
-inline static long parrot_i386_xadd(volatile long *l, long amount)
-{
-    long result = amount;
-#if defined(PARROT_HAS_X86_64_GCC_CMPXCHG)
-    __asm__ __volatile__("lock\n" "xaddq %0, %1" : "=r"(result), "=m"(*l) :
-            "0"(result), "m"(*l)
-        );
-#else
-    __asm__ __volatile__("lock\n" "xaddl %0, %1" : "=r"(result), "=m"(*l) :
-            "0"(result), "m"(*l)
-        );
-#endif
-    return result + amount;
-}
+PARROT_INLINE
+long parrot_i386_xadd(volatile long *l, long amount);
 
 #define PARROT_ATOMIC_INT_INC(result, a) \
     do { \
-        result = parrot_i386_xadd(&(a).val, 1); \
+        (result) = parrot_i386_xadd(&(a).val, 1); \
     } while (0)
 
 #define PARROT_ATOMIC_INT_DEC(result, a) \
     do { \
-        result = parrot_i386_xadd(&(a).val, -1); \
+        (result) = parrot_i386_xadd(&(a).val, -1); \
     } while (0)
 
 #endif /* PARROT_ATOMIC_GCC_X86_H_GUARD */

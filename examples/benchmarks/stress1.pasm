@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: stress1.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: stress1.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ examples/benchmarks/stress1.pasm - GC stress-testing
 =head1 DESCRIPTION
 
 Creates 500 arrays with 20000 elements each. Prints out the number of
-DOD runs made.
+GC runs made.
 
 =cut
 
@@ -22,7 +22,7 @@ DOD runs made.
 mloop:
 
 	set I0, 10
-	new P0, .ResizablePMCArray
+	new P0, 'ResizablePMCArray'
 
 ol:	bsr buildarray
 	set P0[I0], P1
@@ -30,7 +30,7 @@ ol:	bsr buildarray
 	if I0, ol
 
 	set I0, 20
-	new P2, .ResizablePMCArray
+	new P2, 'ResizablePMCArray'
 
 ol1:	bsr buildarray
 	set P2[I0], P1
@@ -38,7 +38,7 @@ ol1:	bsr buildarray
 	if I0, ol1
 
 	set I0, 20
-	new P3, .ResizablePMCArray
+	new P3, 'ResizablePMCArray'
 
 ol2:	bsr buildarray
 	set P3[I0], P1
@@ -53,7 +53,7 @@ ol2:	bsr buildarray
 	interpinfo I1, 2
 	print "\nA total of "
 	print I1
-	print " DOD runs were made\n"
+	print " GC runs were made\n"
 
 	dec I20
 	if I20, mloop
@@ -64,9 +64,9 @@ ol2:	bsr buildarray
 	# Our inner loop, 20000 times
 buildarray:
 	set I1, 20000
-	new P1, .ResizablePMCArray
+	new P1, 'ResizablePMCArray'
 	set P1, I1	# set length => fixed sized array
-loop1:	new P9, .Integer
+loop1:	new P9, 'Integer'
 	set P9, I1
 	set P1[I1], P9
 	dec I1

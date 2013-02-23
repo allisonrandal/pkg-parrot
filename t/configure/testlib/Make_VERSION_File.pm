@@ -1,12 +1,12 @@
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: Make_VERSION_File.pm 18440 2007-05-06 18:41:27Z bernhard $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: Make_VERSION_File.pm 36833 2009-02-17 20:09:26Z allison $
 
 package Make_VERSION_File;
 
 use strict;
 use warnings;
 
-use vars qw(@ISA @EXPORT_OK);
+our (@ISA, @EXPORT_OK);
 
 @ISA       = qw( Exporter );
 @EXPORT_OK = qw( make_VERSION_file );

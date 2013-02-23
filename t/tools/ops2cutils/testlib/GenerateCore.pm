@@ -1,25 +1,30 @@
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: GenerateCore.pm 17576 2007-03-17 22:50:07Z paultcochrane $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: GenerateCore.pm 37200 2009-03-08 11:46:01Z fperrad $
 package GenerateCore;
 use strict;
 use warnings;
 our ( @ISA, @EXPORT_OK );
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(
-    generate_core
-);
-use Carp;
-use File::Copy;
-use lib ("./lib");
-use Parrot::Ops2pm::Utils;
 
-my @srcopsfiles = qw( src/ops/core.ops src/ops/bit.ops src/ops/cmp.ops
+our @srcopsfiles = qw( src/ops/core.ops src/ops/bit.ops src/ops/cmp.ops
     src/ops/debug.ops src/ops/experimental.ops src/ops/io.ops src/ops/math.ops
     src/ops/object.ops src/ops/pic.ops src/ops/pmc.ops src/ops/set.ops
     src/ops/stack.ops src/ops/stm.ops src/ops/string.ops src/ops/sys.ops
     src/ops/var.ops );
-my $num  = "src/ops/ops.num";
-my $skip = "src/ops/ops.skip";
+our $num  = "src/ops/ops.num";
+our $skip = "src/ops/ops.skip";
+
+@EXPORT_OK = qw(
+    generate_core
+    @srcopsfiles
+    $num
+    $skip
+);
+use Carp;
+use File::Copy;
+use lib ("./lib");
+use Parrot::Ops2pm;
+
 
 sub generate_core {
     my ( $cwd, $tdir, $srcopsref, $num_file, $skip_file ) = @_;
@@ -42,7 +47,7 @@ sub generate_core {
     mkdir qq{$tdir/include/parrot};
     mkdir qq{$tdir/include/parrot/oplib};
 
-    my $o2p = Parrot::Ops2pm::Utils->new(
+    my $o2p = Parrot::Ops2pm->new(
         {
             argv   => [@opsfiles],
             script => "tools/build/ops2pm.pl",

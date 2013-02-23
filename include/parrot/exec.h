@@ -1,8 +1,12 @@
 /*
+ * Copyright (C) 2003-2007, Parrot Foundation.
+ */
+
+/*
  * exec.h
  *
  * SVN Info
- *    $Id: exec.h 18945 2007-06-12 14:08:35Z fperrad $
+ *    $Id: exec.h 37257 2009-03-10 04:22:07Z Util $
  * Overview:
  *    Exec header file.
  * History:
@@ -16,20 +20,20 @@
 
 #if EXEC_CAPABLE
 
-#  if PARROT_EXEC_OS_OPENBSD
+#  ifdef PARROT_EXEC_OS_OPENBSD
 #    ifdef PARROT_OPENBSD_ELF
 #      define EXEC_ELF
 #    else
 #      define EXEC_A_OUT
 #    endif
 #  endif
-#  if PARROT_EXEC_OS_DARWIN
+#  ifdef PARROT_EXEC_OS_DARWIN
 #    define EXEC_MACH_O
 #  endif
-#  if (PARROT_EXEC_OS_FREEBSD) || (PARROT_EXEC_OS_NETBSD) || (PARROT_EXEC_OS_LINUX)
+#  if defined(PARROT_EXEC_OS_FREEBSD) || defined(PARROT_EXEC_OS_NETBSD) || defined(PARROT_EXEC_OS_LINUX)
 #    define EXEC_ELF
 #  endif
-#  if PARROT_EXEC_OS_MSWIN32
+#  if defined(PARROT_EXEC_OS_MSWIN32) || defined(PARROT_EXEC_OS_CYGWIN)
 #    define EXEC_COFF
 #  endif
 
@@ -74,7 +78,7 @@ typedef struct Parrot_exec_rellocation_t {
 
 typedef struct Parrot_exec_section_t {
     char                                               *code;
-    int                                                 size;
+    size_t                                              size;
 } Parrot_exec_section_t;
 
 typedef struct Parrot_exec_objfile_t {
@@ -94,24 +98,81 @@ typedef struct Parrot_exec_objfile_t {
 } Parrot_exec_objfile_t;
 
 /* HEADERIZER BEGIN: src/exec.c */
-void Parrot_exec(Interp *interp, opcode_t *pc,
-    opcode_t *code_start, opcode_t *code_end);
-PARROT_API void Parrot_exec_add_text_rellocation_func(Parrot_exec_objfile_t *obj,
-    char *nptr, const char *func_name);
-PARROT_API int *Parrot_exec_add_text_rellocation_reg(Parrot_exec_objfile_t *obj,
-    char *nptr, const char *var, int offset, int disp);
-PARROT_API void Parrot_exec_add_text_rellocation(Parrot_exec_objfile_t *obj,
-    char *nptr, int type, const char *symbol, int disp);
-int Parrot_exec_add_symbol(Parrot_exec_objfile_t *obj, const char *symbol, int stype)
-    __attribute__nonnull__(1)
-    __attribute__nonnull__(2);
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-void Parrot_exec_save(Parrot_exec_objfile_t *obj, const char *file);
+PARROT_EXPORT
+void Parrot_exec_add_text_rellocation(
+    ARGIN(Parrot_exec_objfile_t *obj),
+    ARGIN(char *nptr),
+    int type,
+    ARGIN(const char *symbol),
+    int disp)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4);
 
-void Parrot_exec_emit_mov_mr(Interp *interp, char *mem, int reg);
-void Parrot_exec_emit_mov_mr_n(Interp *interp, char *mem, int reg);
-void Parrot_exec_emit_mov_rm(Interp *interp, int reg, char *mem);
-void Parrot_exec_emit_mov_rm_n(Interp *interp, int reg, char *mem);
+PARROT_EXPORT
+void Parrot_exec_add_text_rellocation_func(
+    ARGIN(Parrot_exec_objfile_t *obj),
+    ARGIN(char *nptr),
+    ARGIN(const char *func_name))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+int * Parrot_exec_add_text_rellocation_reg(
+    ARGIN(Parrot_exec_objfile_t *obj),
+    ARGIN(char *nptr),
+    ARGIN(const char *var),
+    int offset,
+    int disp)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+void Parrot_exec(PARROT_INTERP,
+    ARGIN(opcode_t *pc),
+    ARGIN(opcode_t *code_start),
+    ARGIN(opcode_t *code_end))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4);
+
+int Parrot_exec_add_symbol(
+    ARGMOD(Parrot_exec_objfile_t *obj),
+    ARGIN(const char *symbol),
+    int stype)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*obj);
+
+#define ASSERT_ARGS_Parrot_exec_add_text_rellocation \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(obj) \
+    || PARROT_ASSERT_ARG(nptr) \
+    || PARROT_ASSERT_ARG(symbol)
+#define ASSERT_ARGS_Parrot_exec_add_text_rellocation_func \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(obj) \
+    || PARROT_ASSERT_ARG(nptr) \
+    || PARROT_ASSERT_ARG(func_name)
+#define ASSERT_ARGS_Parrot_exec_add_text_rellocation_reg \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(obj) \
+    || PARROT_ASSERT_ARG(nptr) \
+    || PARROT_ASSERT_ARG(var)
+#define ASSERT_ARGS_Parrot_exec __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pc) \
+    || PARROT_ASSERT_ARG(code_start) \
+    || PARROT_ASSERT_ARG(code_end)
+#define ASSERT_ARGS_Parrot_exec_add_symbol __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(obj) \
+    || PARROT_ASSERT_ARG(symbol)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/exec.c */
 
 #endif /* EXEC_CAPABLE */

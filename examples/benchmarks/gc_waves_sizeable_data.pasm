@@ -1,9 +1,9 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: gc_waves_sizeable_data.pasm 12973 2006-06-19 15:06:58Z leo $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: gc_waves_sizeable_data.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
-examples/benchmarks/gc_waves_sizeable_data.pasm - GC/DOD Benchmark
+examples/benchmarks/gc_waves_sizeable_data.pasm - GC Benchmark
 
 =head1 SYNOPSIS
 
@@ -20,7 +20,7 @@ statistics indicating:
 
 =item * the total number of bytes allocated
 
-=item * the total of DOD runs made
+=item * the total of GC runs made
 
 =item * the total number of collection runs made
 
@@ -97,7 +97,7 @@ getout:	time N6
 	interpinfo I1, 2
 	print "A total of "
 	print I1
-	print " DOD runs were made\n"
+	print " GC runs were made\n"
 
 	interpinfo I1, 3
 	print "A total of "

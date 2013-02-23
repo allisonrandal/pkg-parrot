@@ -1,32 +1,32 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: pcc.t 16244 2006-12-25 22:14:04Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: pcc.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 20;
+use Parrot::Test tests => 22;
 
 ##############################
 # Parrot Calling Conventions
 
 pir_output_is( <<'CODE', <<'OUT', "low-level syntax" );
 .sub test :main
-    .const .Sub sub = "_sub"
+    .const 'Sub' sub = "_sub"
     .const int y = 20
-    .pcc_begin
-    .arg 10
-    .arg y
-    .pcc_call sub
+    .begin_call
+    .set_arg 10
+    .set_arg y
+    .call sub
     .local string z
-    .result z
-    .pcc_end
+    .get_result z
+    .end_call
     print z
     end
 .end
-.pcc_sub _sub
+.sub _sub
     .param int a
     .param int b
     print a
@@ -49,7 +49,7 @@ pir_output_is( <<'CODE', <<'OUT', "func() syntax" );
     print z
     end
 .end
-.pcc_sub _sub
+.sub _sub
     .param int a
     .param int b
     print a
@@ -87,7 +87,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "_func() syntax with var - global" );
 .sub test :main
     .local pmc the_sub
-    the_sub = global "_sub"
+    the_sub = get_global "_sub"
     the_sub(10, 20)
     end
 .end
@@ -130,7 +130,7 @@ pir_output_is( <<'CODE', <<'OUT', "tail recursive sub" );
     end
 .end
 
-.pcc_sub _fact
+.sub _fact
    .param int product
    .param int count
    if count > 1 goto recur
@@ -138,7 +138,7 @@ pir_output_is( <<'CODE', <<'OUT', "tail recursive sub" );
 recur:
    product = product * count
    dec count
-   .return _fact(product, count)
+   .tailcall _fact(product, count)
 .end
 
 CODE
@@ -170,7 +170,7 @@ pir_output_is( <<'CODE', <<'OUT', "coroutine iterator" );
 .sub test :main
   .local int i
   i=5
-  new $P1, .Continuation
+  new $P1, 'Continuation'
   set_addr $P1, after_loop
 loop:
   $I2 = _addtwo($P1, i)
@@ -178,7 +178,7 @@ loop:
     print "\n"
     goto loop
  after_loop:
-  .get_results ()  
+  .get_results ()
   print "done in main\n"
 .end
 
@@ -238,7 +238,7 @@ loop:
     goto loop
  done:
   print "done in coroutine\n"
-  new $P0, .Exception
+  new $P0, 'Exception'
   throw $P0
 .end
 CODE
@@ -256,31 +256,31 @@ done in coroutine
 done in main
 OUT
 
-pir_output_is( <<'CODE', <<'OUT', ".arg :flat" );
+pir_output_is( <<'CODE', <<'OUT', ".set_arg :flat" );
 .sub _main
     .local pmc x, y, z, ar, ar2, s
-    x = new .String
+    x = new 'String'
     x = "first\n"
-    y = new .String
+    y = new 'String'
     y = "middle\n"
-    z = new .String
+    z = new 'String'
     z = "last\n"
-    ar = new .ResizablePMCArray
+    ar = new 'ResizablePMCArray'
     push ar, "ok 1\n"
     push ar, "ok 2\n"
-    ar2 = new .ResizablePMCArray
+    ar2 = new 'ResizablePMCArray'
     push ar2, "ok 3\n"
     push ar2, "ok 4\n"
     push ar2, "ok 5\n"
-    .const .Sub s = "_sub"
-    .pcc_begin
-    .arg x
-    .arg ar :flat
-    .arg y
-    .arg ar2 :flat
-    .arg z
-    .pcc_call s
-    .pcc_end
+    .const 'Sub' s = "_sub"
+    .begin_call
+    .set_arg x
+    .set_arg ar :flat
+    .set_arg y
+    .set_arg ar2 :flat
+    .set_arg z
+    .call s
+    .end_call
     end
 .end
 .sub _sub
@@ -315,16 +315,16 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "foo (arg :flat)" );
 .sub _main
     .local pmc x, y, z, ar, ar2
-    x = new .String
+    x = new 'String'
     x = "first\n"
-    y = new .String
+    y = new 'String'
     y = "middle\n"
-    z = new .String
+    z = new 'String'
     z = "last\n"
-    ar = new .ResizablePMCArray
+    ar = new 'ResizablePMCArray'
     push ar, "ok 1\n"
     push ar, "ok 2\n"
-    ar2 = new .ResizablePMCArray
+    ar2 = new 'ResizablePMCArray'
     push ar2, "ok 3\n"
     push ar2, "ok 4\n"
     push ar2, "ok 5\n"
@@ -399,15 +399,15 @@ OUT
 
 pir_output_is( <<'CODE', <<'OUT', "\:main defined twice" );
 .sub foo :main
-        set S0, 'not ok'
-        print S0
+        set $S0, 'not ok'
+        print $S0
         print "\r\n"
         end
 .end
 
 .sub bar :main
-        set S0, 'ok'
-        print S0
+        set $S0, 'ok'
+        print $S0
         print "\r\n"
         end
 .end
@@ -426,9 +426,9 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "\:anon doesn't install symbol 1" );
 .sub main :main
     .local pmc result
-    result = find_global 'anon'
+    result = get_global 'anon'
     unless null result goto callit
-    result = find_global 'ok'
+    result = get_global 'ok'
   callit:
     result()
 .end
@@ -447,7 +447,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "\:anon doesn't install symbol 2" );
 .sub main :main
     .local pmc result
-    result= find_global 'anon'
+    result= get_global 'anon'
     result()
 .end
 
@@ -465,9 +465,9 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "multiple \:anon subs with same name" );
 .sub main :main
     .local pmc result
-    result= find_global 'anon'
+    result= get_global 'anon'
     unless null result goto callit
-    result = find_global 'ok'
+    result = get_global 'ok'
   callit:
     result()
 .end
@@ -493,7 +493,7 @@ pir_output_is( <<'CODE', <<'OUT', "()=foo() syntax, no return values" );
 .end
 .sub foo
         print "foo\n"
-.end    
+.end
 CODE
 foo
 OUT
@@ -505,10 +505,42 @@ pir_output_is( <<'CODE', <<'OUT', "()=foo() syntax, skip returned value" );
 .sub foo
         print "foo\n"
     .return(1)
-.end    
+.end
 CODE
 foo
 OUT
+
+#RT #58866 calling a PIR sub with 206 params segfaults parrot
+my $too_many_args = <<'CODE';
+.sub main :main
+    'foo'(_ARGS_)
+    say "didn't segfault"
+.end
+
+.sub foo
+.end
+CODE
+
+my $too_many_args_args = join ',', 1 .. 20_000;
+$too_many_args =~ s/_ARGS_/$too_many_args_args/;
+
+pir_output_is( $too_many_args, "didn't segfault\n", "calling a sub with way too many args" );
+
+my $too_many_params = <<'CODE';
+.sub main :main
+    'foo'()
+    say "didn't segfault"
+.end
+
+.sub foo
+    _PARAMS_
+.end
+CODE
+
+my $too_many_params_params = join map { "    .param pmc xx$_\n" } 1 .. 20_000;
+$too_many_params =~ s/_PARAMS_/$too_many_params_params/;
+
+pir_output_is( $too_many_params, "didn't segfault\n", "calling a sub with way too many params" );
 
 # Local Variables:
 #   mode: cperl

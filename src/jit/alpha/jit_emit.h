@@ -1,9 +1,13 @@
 /*
+ * Copyright (C) 2002-2007, Parrot Foundation.
+ */
+
+/*
  * jit_emit.h
  *
  * ALPHA
  *
- * $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
+ * $Id: jit_emit.h 37392 2009-03-13 19:51:47Z Util $
  */
 
 /*  Register usage:
@@ -94,16 +98,16 @@ typedef enum {
 enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
 
 #  define emit_nop(pc) { \
-      *(pc++) = 0x1f; \
-      *(pc++) = 0x04; \
-      *(pc++) = 0xff; \
-      *(pc++) = 0x47; }
+      *((pc)++) = 0x1f; \
+      *((pc)++) = 0x04; \
+      *((pc)++) = 0xff; \
+      *((pc)++) = 0x47; }
 
 #  define jit_emit_mov_rr(pc, src, Ra)  { \
-      *(pc++) = Ra; \
-      *(pc++) = 0x04; \
-      *(pc++) = 0xe0 + src; \
-      *(pc++) = 0x47; }
+      *((pc)++) = (Ra); \
+      *((pc)++) = 0x04; \
+      *((pc)++) = 0xe0 + (src); \
+      *((pc)++) = 0x47; }
 
 /* Memory instruction format
  *
@@ -122,10 +126,10 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
  */
 
 #  define emit_mem(pc, opcode, Ra, Rb, disp) \
-      *(pc++) = (char)disp; \
-      *(pc++) = (char)((disp) >> 8); \
-      *(pc++) = (char)(Rb | (char)(Ra << 5)); \
-      *(pc++) = opcode << 2 | Ra >> 3
+      *((pc)++) = (char)(disp); \
+      *((pc)++) = (char)((disp) >> 8); \
+      *((pc)++) = (char)((Rb) | (char)((Ra) << 5)); \
+      *((pc)++) = (opcode) << 2 | (Ra) >> 3
 
 #  define base_reg REG9_s0
 
@@ -137,34 +141,34 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
 /* Load / Store a Parrot register.
  *
  * Perform a memory operation using a Parrot register as the source or
- * the destinatination.
+ * the destination.
  *
  */
 
 #  define emit_l_s_r(pc, opcode, Ra, Rb, Parrot_reg) \
-      emit_mem(pc, opcode, Ra, Rb, \
-        (((char *)Parrot_reg) - (char *)&REG_INT(0)))
+      emit_mem((pc), (opcode), (Ra), (Rb), \
+        (((char *)(Parrot_reg)) - (char *)&REG_INT(interp, 0)))
 
 #  define emit_ldq_b(pc, Ra, addr, Rb) \
-      emit_mem(pc, LDQ, Ra, Rb, addr)
+      emit_mem((pc), LDQ, (Ra), (Rb), (addr))
 
 #  define emit_lda_b(pc, Ra, addr, Rb) \
-      emit_mem(pc, LDA, Ra, Rb, addr)
+      emit_mem((pc), LDA, (Ra), (Rb), (addr))
 
 #  define jit_emit_mov_rm_i(pc, Ra, addr) \
-      emit_l_s_r(pc, LDQ, Ra, base_reg, addr)
+      emit_l_s_r((pc), LDQ, (Ra), (base_reg), (addr))
 
 #  define emit_lda(pc, Ra, addr) \
-      emit_l_s_r(pc, LDA, Ra, base_reg, addr)
+      emit_l_s_r((pc), LDA, (Ra), (base_reg), (addr))
 
 #  define emit_ldah(pc, Ra, addr, Rb) \
-      emit_mem(pc, LDH, Ra, Rb, addr)
+      emit_mem((pc), LDH, (Ra), (Rb), (addr))
 
 #  define emit_stq_b(pc, Ra, addr, Rb) \
-      emit_mem(pc, STQ, Ra, Rb, addr)
+      emit_mem((pc), STQ, (Ra), (Rb), (addr))
 
 #  define jit_emit_mov_mr_i(pc, addr, Ra) \
-      emit_l_s_r(pc, STQ, Ra, base_reg, addr)
+      emit_l_s_r((pc), STQ, (Ra), (base_reg), (addr))
 
 /* Branch instruction format
  *
@@ -181,10 +185,10 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
  */
 
 #  define emit_branch(pc, opcode, Ra) \
-      *(pc++) = 0; \
-      *(pc++) = 0; \
-      *(pc++) = Ra << 5; \
-      *(pc++) = opcode << 2 | Ra >> 3
+      *((pc)++) = 0; \
+      *((pc)++) = 0; \
+      *((pc)++) = (Ra) << 5; \
+      *((pc)++) = (opcode) << 2 | (Ra) >> 3
 
 /* Operate instruction format
  *
@@ -206,10 +210,10 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
  */
 
 #  define emit_operate1(pc, opcode, Ra, Rb, function, Rc) \
-      *(pc++) = Rc | (char)(function << 5); \
-      *(pc++) = (char)(function >> 5); \
-      *(pc++) = Rb | (char)Ra << 5; \
-      *(pc++) = opcode << 2 | Ra >> 3
+      *((pc)++) = (Rc) | (char)((function) << 5); \
+      *((pc)++) = (char)((function) >> 5); \
+      *((pc)++) = (Rb) | (char)(Ra) << 5; \
+      *((pc)++) = (opcode) << 2 | (Ra) >> 3
 
 /* Addq (Operate instruction)
  *
@@ -219,7 +223,7 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
  */
 
 #  define jit_emit_add_rrr(pc, Ra, Rb, Rc) \
-      emit_operate1(pc, 16, Ra, Rb, 128, Rc)
+      emit_operate1((pc), 16, (Ra), (Rb), 128, (Rc))
 
 /* Subq (Operate instruction)
  *
@@ -229,7 +233,7 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
  */
 
 #  define jit_emit_sub_rrr(pc, Ra, Rb, Rc) \
-      emit_operate1(pc, 16, Ra, Rb, 161, Rc)
+      emit_operate1((pc), 16, (Ra), (Rb), 161, (Rc))
 
 /* Mulq (Operate instruction)
  *
@@ -239,16 +243,16 @@ enum { JIT_ALPHABRANCH, JIT_ALPHABSR };
  */
 
 #  define emit_mulq(pc, Ra, Rb, Rc) \
-      emit_operate1(pc, 19, Ra, Rb, 128, Rc)
+      emit_operate1((pc), 19, (Ra), (Rb), 128, (Rc))
 
 /* Load a constant */
 
 #  define jit_emit_mov_ri_i(pc, target, constant) \
-      pc = emit_l_c(jit_info, interp, target, (long)constant)
+      (pc) = emit_l_c(jit_info, interp, (target), (long)(constant))
 
 static void
 emit_load_intval_cpool(Parrot_jit_info_t *jit_info,
-    Interp *interp, alpha_register_t dest, INTVAL constant)
+    PARROT_INTERP, alpha_register_t dest, INTVAL constant)
 {
     char *new_arena;
 
@@ -314,11 +318,11 @@ calculate_displacement(long *s, long *d, long *high, long *low)
 }
 
 static char *
-emit_l_c(Parrot_jit_info_t *jit_info, Interp *interp,
+emit_l_c(Parrot_jit_info_t *jit_info, PARROT_INTERP,
     alpha_register_t target, long constant)
 {
     char *pc = jit_info->native_ptr;
-    long high,low;
+    long high, low;
 
     if ((constant < -0x7fffffff) || (constant > 0x7fffffff)) {
         emit_load_intval_cpool(jit_info, interp, target, (INTVAL)constant);
@@ -357,19 +361,19 @@ emit_b(Parrot_jit_info_t *jit_info, branch_t opcode, alpha_register_t reg,
 }
 
 #  define emit_bne(pc, reg, disp) \
-      pc = emit_b(jit_info, BNE, reg, disp)
+      (pc) = emit_b(jit_info, BNE, (reg), (disp))
 
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-    Interp *interp)
+    PARROT_INTERP)
 {
     emit_lda_b(jit_info->native_ptr, REG30_sp, -16, REG30_sp);
     emit_stq_b(jit_info->native_ptr, REG26_ra, 0, REG30_sp);
     emit_stq_b(jit_info->native_ptr, REG15_s6, 8, REG30_sp);
-    jit_emit_mov_rr(jit_info->native_ptr,REG16_a0,REG9_s0);
-    jit_emit_mov_rr(jit_info->native_ptr,REG27_t12,REG15_s6);
+    jit_emit_mov_rr(jit_info->native_ptr, REG16_a0, REG9_s0);
+    jit_emit_mov_rr(jit_info->native_ptr, REG27_t12, REG15_s6);
     /* TODO
-    emit_ldah(jit_info->native_ptr,REG15_s6, -1, REG15_s6);
+    emit_ldah(jit_info->native_ptr, REG15_s6, -1, REG15_s6);
     */
     emit_lda_b(jit_info->native_ptr, REG15_s6, -0x7ff8, REG15_s6);
     jit_emit_mov_ri_i(jit_info->native_ptr, REG10_s1,
@@ -379,12 +383,12 @@ Parrot_jit_begin(Parrot_jit_info_t *jit_info,
 
 void
 Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-    Interp *interp)
+    PARROT_INTERP)
 {
     Parrot_jit_fixup_t *fixup;
     char *fixup_ptr;
     char *disp;
-    long d,high,low;
+    long d, high, low;
 
     fixup = jit_info->arena.fixups;
 
@@ -408,7 +412,7 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
                 *(fixup_ptr++) |= *(disp + 2) & 0x1f;
                 break;
             default:
-                internal_exception(JIT_ERROR, "Unknown fixup type:%d\n",
+                exit_fatal(EXCEPTION_JIT_ERROR, "Unknown fixup type:%d\n",
                                    fixup->type);
                 break;
         }
@@ -418,7 +422,7 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
 
 static char *
 emit_bsr(Parrot_jit_info_t *jit_info,
-    Interp *interp)
+    PARROT_INTERP)
 {
     char *pc = jit_info->native_ptr;
 
@@ -440,22 +444,22 @@ emit_bsr(Parrot_jit_info_t *jit_info,
 
 /* TODO: re-write this properly */
 #  define emit_jsr(pc) { \
-        *(pc++) = 0; \
-        *(pc++) = 0x40; \
-        *(pc++) = 0xe0; \
-        *(pc++) = 0x6b; \
+        *((pc)++) = 0; \
+        *((pc)++) = 0x40; \
+        *((pc)++) = 0xe0; \
+        *((pc)++) = 0x6b; \
 }
 
 #  define emit_ret(pc) { \
-        *(pc++) = 1; \
-        *(pc++) = 0x80; \
-        *(pc++) = 0xfa; \
-        *(pc++) = 0x6b; \
+        *((pc)++) = 1; \
+        *((pc)++) = 0x80; \
+        *((pc)++) = 0xfa; \
+        *((pc)++) = 0x6b; \
 }
 
 void
 Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-    Interp *interp)
+    PARROT_INTERP)
 {
     jit_emit_mov_ri_i(jit_info->native_ptr, REG16_a0, jit_info->cur_op);
     jit_emit_mov_rr(jit_info->native_ptr, REG9_s0, REG17_a1);
@@ -464,9 +468,9 @@ Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
 
 void
 Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-    Interp *interp)
+    PARROT_INTERP)
 {
-    Parrot_jit_normal_op(jit_info,interp);
+    Parrot_jit_normal_op(jit_info, interp);
 
     jit_emit_sub_rrr(jit_info->native_ptr, ISR1, REG10_s1, ISR1);
     jit_emit_add_rrr(jit_info->native_ptr, ISR1, REG11_s2, ISR1);
@@ -478,7 +482,7 @@ Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
 
 /* move reg to mem (i.e. intreg) */
 void
-Parrot_jit_emit_mov_mr(Interp *interp, char *mem, int reg)
+Parrot_jit_emit_mov_mr(PARROT_INTERP, char *mem, int reg)
 {
     jit_emit_mov_mr_i(
         ((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr, mem, reg);
@@ -486,7 +490,7 @@ Parrot_jit_emit_mov_mr(Interp *interp, char *mem, int reg)
 
 /* move mem (i.e. intreg) to reg */
 void
-Parrot_jit_emit_mov_rm(Interp *interp, int reg, char *mem)
+Parrot_jit_emit_mov_rm(PARROT_INTERP, int reg, char *mem)
 {
     jit_emit_mov_rm_i(
         ((Parrot_jit_info_t *)(interp->code->jit_info))->native_ptr, reg, mem);
@@ -494,13 +498,13 @@ Parrot_jit_emit_mov_rm(Interp *interp, int reg, char *mem)
 
 /* move reg to mem (i.e. numreg) */
 void
-Parrot_jit_emit_mov_mr_n(Interp *interp, char *mem, int reg)
+Parrot_jit_emit_mov_mr_n(PARROT_INTERP, char *mem, int reg)
 {
 }
 
 /* move mem (i.e. numreg) to reg */
 void
-Parrot_jit_emit_mov_rm_n(Interp *interp, int reg, char *mem)
+Parrot_jit_emit_mov_rm_n(PARROT_INTERP, int reg, char *mem)
 {
 }
 

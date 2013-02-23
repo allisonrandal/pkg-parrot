@@ -1,9 +1,13 @@
 /*
+ * Copyright (C) 2005-2007, Parrot Foundation.
+ */
+
+/*
  * jit_emit.h
  *
  * skeleton example - a stripped down jit/ppc/jit_emit.h
  *
- * $Id: jit_emit.h 18945 2007-06-12 14:08:35Z fperrad $
+ * $Id: jit_emit.h 37392 2009-03-13 19:51:47Z Util $
  */
 
 #ifndef PARROT_JIT_SKELETON_JIT_EMIT_H_GUARD
@@ -32,7 +36,7 @@ typedef enum {
     ISR1 = r11,         /* temp aka intermediate scratch reg 1 */
     r12,
     ISR2 = r12,         /* temp reg 2 */
-    BP   = r13,         /* register base pointer (peristent) */
+    BP   = r13,         /* register base pointer (persistent) */
     OP_MAP = r14,       /* cached op_map (persistent) */
     CODE_START = r15,   /* cached code begint (persistent) */
     INTERP = r16,       /* cached interpreter register (persistent) */
@@ -96,19 +100,19 @@ enum { JIT_ARCH_CALL, JIT_ARCH_BRANCH, JIT_ARCH_UBRANCH };
  * this is used to load hardware cpu registers from parrot registers
  */
 #  define jit_emit_mov_rm_i(pc, reg, offs) \
-      jit_emit_lwz(pc, reg, offs, BP)     /* e.g. PPC */
+      jit_emit_lwz((pc), (reg), (offs), BP)     /* e.g. PPC */
 
 /* load floating point register from Parrot register */
 #  define jit_emit_mov_rm_n(pc, reg, offs) \
-      jit_emit_lfd(pc, reg, offs, BP)     /* e.g. PPC */
+      jit_emit_lfd((pc), (reg), (offs), BP)     /* e.g. PPC */
 
 /* Store a CPU register back to a Parrot register. */
 
 #  define jit_emit_mov_mr_i(pc, offs, reg) \
-      jit_emit_stw(pc, reg, offs, BP)
+      jit_emit_stw((pc), (reg), (offs), BP)
 
 #  define jit_emit_mov_mr_n(pc, offs, reg) \
-      jit_emit_stfd(pc, reg,  offs, BP)
+      jit_emit_stfd((pc), (reg), (offs), BP)
 
 /*
  * emit a branch and remember the branch target for code fixup,
@@ -138,8 +142,8 @@ jit_emit_bc(Parrot_jit_info_t *jit_info, branch_t cond, opcode_t disp)
  */
 
 #  define add_disp(pc, D, disp) \
-      jit_emit_mov_ri_i(pc, ISR1, disp); \
-      jit_emit_add_rrr(pc, D, CODE_START, ISR1)
+      jit_emit_mov_ri_i((pc), ISR1, (disp)); \
+      jit_emit_add_rrr((pc), (D), CODE_START, ISR1)
 
 /*
  * emit code that gets interp->code->jit_info->arena->op_map
@@ -175,7 +179,7 @@ jit_emit_bc(Parrot_jit_info_t *jit_info, branch_t cond, opcode_t disp)
  */
 void
 Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-                     Interp *interp)
+                     PARROT_INTERP)
 {
 }
 
@@ -186,7 +190,7 @@ Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
  */
 void
 Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-                   Interp *interp)
+                   PARROT_INTERP)
 {
     Parrot_jit_normal_op(jit_info, interp);
 
@@ -212,7 +216,7 @@ static void Parrot_end_jit(Parrot_jit_info_t *, Interp *);
  */
 void
 Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
-                      Interp *interp)
+                      PARROT_INTERP)
 {
 }
 
@@ -233,7 +237,7 @@ Parrot_jit_restart_op(Parrot_jit_info_t *jit_info,
  */
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
-                 Interp *interp)
+                 PARROT_INTERP)
 {
     ...
 }
@@ -243,7 +247,7 @@ Parrot_jit_begin(Parrot_jit_info_t *jit_info,
  */
 static void
 Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
-                   Interp *interp)
+                   PARROT_INTERP)
 {
 }
 
@@ -350,7 +354,7 @@ static const jit_arch_info arch_info = {
  */
 
 const jit_arch_info *
-Parrot_jit_init(Interp *interp)
+Parrot_jit_init(PARROT_INTERP)
 {
     return &arch_info;
 }

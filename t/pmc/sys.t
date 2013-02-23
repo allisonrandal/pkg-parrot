@@ -1,12 +1,15 @@
 #! perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: sys.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: sys.t 37393 2009-03-13 19:56:52Z Util $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
-use Parrot::Test tests => 1;
+use Parrot::Test::Util 'create_tempfile';
+
+use Parrot::Test tests => 2;
 
 =head1 NAME
 
@@ -18,22 +21,20 @@ t/pmc/sys.t - System Tests
 
 =head1 DESCRIPTION
 
-Tests system dependend stuff
+Tests system dependent stuff
 
 =cut
 
-END {
-    unlink "temp.pir";
-}
+my (undef, $temp_pir) = create_tempfile( SUFFIX => '.pir', UNLINK => 1 );
 
-pir_output_is( <<'CODE', <<OUT, "spawnw, _config" );
+pir_output_is( <<"CODE", <<OUT, "spawnw, _config" );
 
 .sub _test :main
      .local pmc O
-     open O, "temp.pir", ">"
-     print O, ".sub _main :main\n"
-     print O, "\tprint \"Hello, World!\\n\"\n"
-     print O, ".end\n"
+     open O, "$temp_pir", 'w'
+     print O, ".sub _main :main\\n"
+     print O, "\tsay \\"Hello, World!\\"\\n"
+     print O, ".end\\n"
      close O
     .local pmc conf_hash
     conf_hash = _config()
@@ -45,16 +46,33 @@ pir_output_is( <<'CODE', <<OUT, "spawnw, _config" );
     cmd = '.'
     cmd .= slash
     cmd .= parrot
-    cmd .= " temp.pir"
-    spawnw $I0, cmd
-    print $I0
-    print "\n"
+    cmd .= " $temp_pir"
+    spawnw \$I0, cmd
+    say \$I0
 .end
 
 .include "library/config.pir"
 CODE
 Hello, World!
 0
+OUT
+
+pir_output_is( <<'CODE', <<'OUT', "conf_hash is read-only")
+.sub _test :main
+    .local pmc conf_hash
+    conf_hash = _config()
+    push_eh is_ro
+    conf_hash['foo'] = 'bar'
+    pop_eh
+    goto end
+is_ro:
+    say 'hash is read-only'
+end:
+.end
+
+.include 'library/config.pir'
+CODE
+hash is read-only
 OUT
 
 # Local Variables:

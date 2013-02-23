@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: 05-gen_c.t 18799 2007-06-04 07:35:02Z paultcochrane $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: 05-gen_c.t 36833 2009-02-17 20:09:26Z allison $
 # 05-gen_c.t
 
 use strict;
@@ -19,14 +19,13 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 74;
+use Test::More tests => 44;
 use Carp;
 use File::Basename;
 use File::Copy;
 use FindBin;
-use Data::Dumper;
 use_ok('Parrot::Pmc2c::Pmc2cMain');
-use_ok('Parrot::IO::Capture::Mini');
+use IO::CaptureOutput qw| capture |;
 use_ok('Cwd');
 use_ok( 'File::Temp', qw| tempdir | );
 
@@ -38,19 +37,18 @@ my $cwd = cwd();
 
 my @include_orig = ( qq{$main::topdir}, qq{$main::topdir/src/pmc}, );
 my ( $tie, $msg, @lines );
-my $warnpattern =
-    qr/get_bool_keyed_int.*elements_keyed_int.*set_bool_keyed_int.*is_equal_str/s;
 
 # basic test:  @args holds default.pmc
 {
     my $tdir = tempdir( CLEANUP => 1 );
     ok( chdir $tdir, 'changed to temp directory for testing' );
-    my $pmcdir = q{src/pmc};
-    ok( ( mkdir qq{$tdir/src} ), "created src/ under tempdir" );
-    my $temppmcdir = qq{$tdir/src/pmc};
-    ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
 
-    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc", );
+    my $temppmcdir = qq{$tdir/src/pmc};
+    for ( qq{$tdir/src}, $temppmcdir ) {
+        ok( mkdir($_), "created $_ under tempdir" );
+    }
+
+    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc" );
     my $pmcfilecount = scalar(@pmcfiles);
     my $copycount;
     foreach my $pmcfile (@pmcfiles) {
@@ -67,29 +65,18 @@ my $warnpattern =
             include => \@include,
             opt     => \%opt,
             args    => [@args],
+            bin     => $Bin,
         }
     );
     isa_ok( $self, q{Parrot::Pmc2c::Pmc2cMain} );
-    $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
+    $dump_file = $self->dump_vtable("$main::topdir/src/vtable.tbl");
     ok( -e $dump_file, "dump_vtable created vtable.dump" );
 
     ok( $self->dump_pmc(), "dump_pmc succeeded" );
     ok( -f qq{$temppmcdir/default.dump}, "default.dump created as expected" );
 
-    {
-        $tie = tie *STDERR, "Parrot::IO::Capture::Mini"
-            or croak "Unable to tie";
-        $rv = $self->gen_c();
-        @lines = $tie->READLINE;
-        untie *STDERR or croak "Unable to untie";
-        ok( $rv, "gen_c completed successfully; args:  default.pmc" );
-        $msg = join("\n", @lines);
-        like( $msg,
-            $warnpattern,
-            "Warnings from Parrot::Pmc2c re 4 unknown methods have been captured"
-        );
-    }
-
+    $rv = $self->gen_c();
+    ok( $rv, "gen_c completed successfully; args:  default.pmc" );
 
     ok( chdir $cwd, "changed back to original directory" );
 }
@@ -103,7 +90,7 @@ my $warnpattern =
     my $temppmcdir = qq{$tdir/src/pmc};
     ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
 
-    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc", );
+    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc" );
     my $pmcfilecount = scalar(@pmcfiles);
     my $copycount;
     foreach my $pmcfile (@pmcfiles) {
@@ -120,162 +107,28 @@ my $warnpattern =
             include => \@include,
             opt     => \%opt,
             args    => [@args],
+            bin     => $Bin,
         }
     );
     isa_ok( $self, q{Parrot::Pmc2c::Pmc2cMain} );
-    $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
+    $dump_file = $self->dump_vtable("$main::topdir/src/vtable.tbl");
     ok( -e $dump_file, "dump_vtable created vtable.dump" );
 
+    #create a dump for default.pmc
+    Parrot::Pmc2c::Pmc2cMain->new(
+        {
+            include => \@include, 
+            opt=>\%opt,
+            args=>[qq{$temppmcdir/default.pmc}],
+            bin=>$Bin
+        }
+    )->dump_pmc();
     ok( $self->dump_pmc(),               "dump_pmc succeeded" );
     ok( -f qq{$temppmcdir/default.dump}, "default.dump created as expected" );
     ok( -f qq{$temppmcdir/array.dump},   "array.dump created as expected" );
 
-    {
-        $tie = tie *STDERR, "Parrot::IO::Capture::Mini"
-            or croak "Unable to tie";
-        $rv = $self->gen_c();
-        @lines = $tie->READLINE;
-        untie *STDERR or croak "Unable to untie";
-        ok( $rv, "gen_c completed successfully; args:  default.pmc and array.pmc" );
-        $msg = join("\n", @lines);
-        like( $msg,
-            $warnpattern,
-            "Warnings from Parrot::Pmc2c re 4 unknown methods have been captured"
-        );
-    }
-
-    ok( chdir $cwd, "changed back to original directory" );
-}
-
-# debug option
-{
-    my $tdir = tempdir( CLEANUP => 1 );
-    ok( chdir $tdir, 'changed to temp directory for testing' );
-    my $pmcdir = q{src/pmc};
-    ok( ( mkdir qq{$tdir/src} ), "created src/ under tempdir" );
-    my $temppmcdir = qq{$tdir/src/pmc};
-    ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
-
-    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc", );
-    my $pmcfilecount = scalar(@pmcfiles);
-    my $copycount;
-    foreach my $pmcfile (@pmcfiles) {
-        my $basename = basename($pmcfile);
-        my $rv = copy( $pmcfile, qq{$temppmcdir/$basename} );
-        $copycount++ if $rv;
-    }
-    is( $copycount, $pmcfilecount, "all src/pmc/*.pmc files copied to tempdir" );
-    my @include = ( $tdir, $temppmcdir, @include_orig );
-
-    @args = ( qq{$temppmcdir/default.pmc}, );
-    my %opt = ( debug => 1 );
-    $self = Parrot::Pmc2c::Pmc2cMain->new(
-        {
-            include => \@include,
-            opt     => \%opt,
-            args    => [@args],
-        }
-    );
-    isa_ok( $self, q{Parrot::Pmc2c::Pmc2cMain} );
-    $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
-    ok( -e $dump_file, "dump_vtable created vtable.dump" );
-
-    ok( $self->dump_pmc(), "dump_pmc succeeded" );
-    ok( -f qq{$temppmcdir/default.dump}, "default.dump created as expected" );
-
-    {
-        $tie = tie *STDERR, "Parrot::IO::Capture::Mini"
-            or croak "Unable to tie";
-        my ( $fh, $dmsg, $rv );
-        {
-            my $currfh = select($fh);
-            open( $fh, '>', \$dmsg ) or die "Unable to open handle: $!";
-            $rv = $self->gen_c();
-            select($currfh);
-        }
-        @lines = $tie->READLINE;
-        untie *STDERR or croak "Unable to untie";
-        ok( $rv, "gen_c completed successfully; args:  default.pmc" );
-        like( $dmsg, qr{src/pmc/default\.pmc}, "debug option worked" );
-        $msg = join("\n", @lines);
-        like( $msg,
-            $warnpattern,
-            "Warnings from Parrot::Pmc2c re 4 unknown methods have been captured"
-        );
-    }
-
-    ok( chdir $cwd, "changed back to original directory" );
-}
-
-# debug and verbose options
-{
-    my $tdir = tempdir( CLEANUP => 1 );
-    ok( chdir $tdir, 'changed to temp directory for testing' );
-    my $pmcdir = q{src/pmc};
-    ok( ( mkdir qq{$tdir/src} ), "created src/ under tempdir" );
-    my $temppmcdir = qq{$tdir/src/pmc};
-    ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
-
-    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc", );
-    my $pmcfilecount = scalar(@pmcfiles);
-    my $copycount;
-    foreach my $pmcfile (@pmcfiles) {
-        my $basename = basename($pmcfile);
-        my $rv = copy( $pmcfile, qq{$temppmcdir/$basename} );
-        $copycount++ if $rv;
-    }
-    is( $copycount, $pmcfilecount, "all src/pmc/*.pmc files copied to tempdir" );
-    my @include = ( $tdir, $temppmcdir, @include_orig );
-
-    @args = ( qq{$temppmcdir/default.pmc}, );
-    my %opt = ( debug => 2, verbose => 1 );
-    $self = Parrot::Pmc2c::Pmc2cMain->new(
-        {
-            include => \@include,
-            opt     => \%opt,
-            args    => [@args],
-        }
-    );
-    isa_ok( $self, q{Parrot::Pmc2c::Pmc2cMain} );
-
-    my ( $fh, $dmsg, $rv );
-    {
-        my $currfh = select($fh);
-        open( $fh, '>', \$dmsg ) or die "Unable to open handle: $!";
-        $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
-        select($currfh);
-    }
-    ok( -e $dump_file, "dump_vtable created vtable.dump" );
-    like( $dmsg, qr{^Writing}, "verbose option worked" );
-
-    {
-        my $currfh = select($fh);
-        open( $fh, '>', \$dmsg ) or die "Unable to open handle: $!";
-        ok( $self->dump_pmc(), "dump_pmc succeeded" );
-        select($currfh);
-    }
-    ok( -f qq{$temppmcdir/default.dump}, "default.dump created as expected" );
-    like( $dmsg, qr{^Reading}, "verbose option worked" );
-
-    {
-        $tie = tie *STDERR, "Parrot::IO::Capture::Mini"
-            or croak "Unable to tie";
-        {
-            my $currfh = select($fh);
-            open( $fh, '>', \$dmsg ) or die "Unable to open handle: $!";
-            $rv = $self->gen_c();
-            select($currfh);
-        }
-        @lines = $tie->READLINE;
-        untie *STDERR or croak "Unable to untie";
-        ok( $rv, "gen_c completed successfully; args:  default.pmc" );
-        like( $dmsg, qr{src/pmc/default\.pmc}, "debug option worked" );
-        $msg = join("\n", @lines);
-        like( $msg,
-            $warnpattern,
-            "Warnings from Parrot::Pmc2c re 4 unknown methods have been captured"
-        );
-    }
+    $rv = $self->gen_c();
+    ok( $rv, "gen_c completed successfully; args:  default.pmc and array.pmc" );
 
     ok( chdir $cwd, "changed back to original directory" );
 }
@@ -289,7 +142,7 @@ my $warnpattern =
     my $temppmcdir = qq{$tdir/src/pmc};
     ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
 
-    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc", );
+    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/array.pmc" );
     my $pmcfilecount = scalar(@pmcfiles);
     my $copycount;
     foreach my $pmcfile (@pmcfiles) {
@@ -306,20 +159,27 @@ my $warnpattern =
             include => \@include,
             opt     => \%opt,
             args    => [@args],
+            bin     => $Bin,
         }
     );
     isa_ok( $self, q{Parrot::Pmc2c::Pmc2cMain} );
-    $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
+    $dump_file = $self->dump_vtable("$main::topdir/src/vtable.tbl");
     ok( -e $dump_file, "dump_vtable created vtable.dump" );
 
-    # $self->dump_pmc();
+    ### $self->dump_pmc();
 
-    eval { $rv = $self->gen_c(); };
-    like(
-        $@,
-        qr<^cannot find file '.*/src/pmc/default.dump' in path>,
-        "gen_c() predictably failed because dump_pmc() was not called first"
-    );
+    {
+        my $stdout;
+        capture(
+            sub { eval { $rv = $self->gen_c(); } },
+            \$stdout
+        );;
+        like(
+            $@,
+            qr<^cannot find file '.*/src/pmc/default.dump' in path>,
+            "gen_c() predictably failed because dump_pmc() was not called first"
+        );
+    }
 
     ok( chdir $cwd, "changed back to original directory" );
 }
@@ -333,7 +193,7 @@ my $warnpattern =
     my $temppmcdir = qq{$tdir/src/pmc};
     ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
 
-    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/class.pmc", );
+    my @pmcfiles = ( "$main::topdir/src/pmc/default.pmc", "$main::topdir/src/pmc/class.pmc" );
     my $pmcfilecount = scalar(@pmcfiles);
     my $copycount;
     foreach my $pmcfile (@pmcfiles) {
@@ -350,29 +210,32 @@ my $warnpattern =
             include => \@include,
             opt     => \%opt,
             args    => [@args],
+            bin     => $Bin,
         }
     );
     isa_ok( $self, q{Parrot::Pmc2c::Pmc2cMain} );
-    $dump_file = $self->dump_vtable("$main::topdir/vtable.tbl");
+    $dump_file = $self->dump_vtable("$main::topdir/src/vtable.tbl");
     ok( -e $dump_file, "dump_vtable created vtable.dump" );
+
+
+    #create dumps for dependencies of boolean
+    for my $pmc ( qq{$temppmcdir/default.pmc},  qq{$temppmcdir/class.pmc} ) {
+        Parrot::Pmc2c::Pmc2cMain->new(
+            {
+                include => \@include, 
+                opt=>\%opt,
+                args=>[$pmc],
+                bin=>$Bin
+            }
+        )->dump_pmc();
+    }
 
     ok( $self->dump_pmc(),               "dump_pmc succeeded" );
     ok( -f qq{$temppmcdir/default.dump}, "default.dump created as expected" );
     ok( -f qq{$temppmcdir/class.dump},   "class.dump created as expected" );
 
-    {
-        $tie = tie *STDERR, "Parrot::IO::Capture::Mini"
-            or croak "Unable to tie";
-        $rv = $self->gen_c();
-        @lines = $tie->READLINE;
-        untie *STDERR or croak "Unable to untie";
-        ok( $rv, "gen_c completed successfully; args:  default.pmc and class.pmc" );
-        $msg = join("\n", @lines);
-        like( $msg,
-            $warnpattern,
-            "Warnings from Parrot::Pmc2c re 4 unknown methods have been captured"
-        );
-    }
+    $rv = $self->gen_c();
+    ok( $rv, "gen_c completed successfully; args:  default.pmc and class.pmc" );
 
     ok( chdir $cwd, "changed back to original directory" );
 }

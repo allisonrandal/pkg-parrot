@@ -1,5 +1,8 @@
 # perl program by Thomas Klausner posted on Vienna-PM list
 #
+# Copyright (C) 2004-2006, Parrot Foundation.
+# $Id: vpm.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 use strict;
 use warnings;
 

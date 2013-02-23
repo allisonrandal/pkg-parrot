@@ -1,4 +1,4 @@
-# $Id: bench_op.pir 17611 2007-03-18 10:56:51Z paultcochrane $
+# $Id: bench_op.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -156,22 +156,22 @@ do_help:
 no_v1:
     # op may be a file or an opcode - try to open it
     .local pmc F
-    open F, op, "<"
+    open F, op, 'r'
     .local int def
     def = defined F
     unless def goto op_is_op
 	read op, F, 10000	# TODO use stat
 	close F
 op_is_op:
-    .local float empty
+    .local num empty
     empty = _bench(times, verbose, '', '')
     unless verbose goto no_v2
         print "Empty "
         print empty
         print "\n"
 no_v2:
-    .local float test
-    .local float diff
+    .local num test
+    .local num diff
     test = _bench(times, verbose, op, preops)
     diff = test - empty
     unless verbose goto no_v3
@@ -218,12 +218,12 @@ no_v3:
 	print "#---------\n"
 no_v2:
     compiled = compiler(prog)
-    .local float now
+    .local num now
     time now
     .local pmc entry
     find_global entry, entry_label
     entry(n)
-    .local float later
+    .local num later
     time later
     later = later - now
 
@@ -245,4 +245,4 @@ Leopold Toetsch <lt@toetsch.at>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -5,14 +5,14 @@
 #
 # Note, empty regex/options are just ignored.
 #
-src/platform.c      -{-Wcast-qual}           # noisy
-src/spf_render.c    -{-Wformat-nonliteral}   # noisy
+src/platform.c      -{-Wcast-qual}          # noisy
+src/spf_render.c    -{-Wformat-nonliteral}  # noisy
 src/tsq.c           -{@optimize@}           # never optimize tsq.c!
 src/ops/core_ops_cg.c      -{@optimize@}    # takes too long
 src/ops/core_ops_switch.c  -{@optimize@}    # Overwhelms some compilers.
-src/py_func.c       +{-Ipmc}             # include pmc_default.h
+#IF(cpuarch==amd64):src/gc/system.c  -{@optimize@}              # TT #405 amd64 --optimize problem
 
-# io should be -Wunsed clean
+# io should be -Wunused clean
 {^src/io/}              s/-Wno-unused/-Wunused/
 
 # files which make their way into dynamically loaded files should be compiled
@@ -21,10 +21,11 @@ src/extend.c        +{@cc_shared@}
 src/nci_test.c      +{@cc_shared@}
 
 # imcc file settings
-{^compilers/imcc/}            -{-Wwrite-strings -Wcast-qual} 
+{^compilers/imcc/}            -{-Wwrite-strings -Wcast-qual}
 {^compilers/imcc/(?!imclexer)}      s/-Wno-unused/-Wunused/
 compilers/imcc/instructions.c -{-Wformat-nonliteral} # noisy
 compilers/imcc/debug.c        -{-Wformat-nonliteral} # noisy
 compilers/imcc/optimizer.c    -{-Wformat-nonliteral} # noisy
 compilers/imcc/parser_util.c  -{-Wformat-nonliteral} # noisy
-compilers/imcc/imclexer       -{-Wunused}  # noisy
+compilers/imcc/imclexer.c     -{-Wunused}  # noisy
+compilers/imcc/imclexer.c     -{-Wswitch-default}  # occurs in generated code

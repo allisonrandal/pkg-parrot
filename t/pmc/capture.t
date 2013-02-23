@@ -1,13 +1,13 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: capture.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: capture.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 9;
+use Parrot::Test tests => 8;
 
 =head1 NAME
 
@@ -27,7 +27,7 @@ a variety of keys and values.
 my $PRE = <<PRE;
 .sub 'test' :main
     .local pmc capt
-    capt = new .Capture
+    capt = new ['Capture']
 PRE
 
 my $POST = <<POST;
@@ -47,33 +47,33 @@ OUT
 pir_output_is( <<'CODE', <<'OUTPUT', "Basic capture tests" );
 .sub main :main
     .local pmc capt
-    capt = new .Capture
+    capt = new ['Capture']
 
     capt[0] = 0
     capt[1] = 1.5
     capt[2] = 'two'
-    $P0 = new .Integer
+    $P0 = new ['Integer']
     $P0 = 3
     capt[3] = $P0
 
     push capt, 4
     push capt, 5.5
     push capt, 'six'
-    $P0 = new .Integer
+    $P0 = new ['Integer']
     $P0 = 7
     push capt, $P0
 
     unshift capt, 8
     unshift capt, 9.5
     unshift capt, 'ten'
-    $P0 = new .Integer
+    $P0 = new ['Integer']
     $P0 = 11
     unshift capt, $P0
 
     capt['alpha'] = 12
     capt['beta'] = 13.5
     capt['gamma'] = 'fourteen'
-    $P0 = new .Integer
+    $P0 = new ['Integer']
     $P0 = 15
     capt['delta'] = $P0
 
@@ -149,22 +149,22 @@ pir_output_is( <<'CODE', <<'OUTPUT', "Basic capture tests" );
 
 CODE
 12
-7 six 5.500000 4
-7 six 5.500000 4
+7 six 5.5 4
+7 six 5.5 4
 8
-11 ten 9.500000 8
+11 ten 9.5 8
 4
 3
 two
 1.5
 0
-15 fourteen 13.500000 12
+15 fourteen 13.5 12
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "defined, delete, exists" );
 .sub main :main
     .local pmc capt
-    capt = new .Capture
+    capt = new ['Capture']
 
     $I0 = defined capt[2]
     $I1 = exists capt[2]
@@ -182,7 +182,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "defined, delete, exists" );
 
     capt[2] = 1
     capt['alpha'] = 1
-    $P0 = new .Undef
+    $P0 = new ['Undef']
     capt['beta'] = $P0
 
     $I0 = defined capt[2]
@@ -237,15 +237,15 @@ CODE
 0 0
 1 1
 1 1
-0 1
+0 0
 0 1
 0 0
 0 0
 OUTPUT
 
-pir_output_is( $PRE . <<'CODE'. $POST, <<'OUTPUT', "get_hash, get_array" );
-    $P0 = capt.'get_array'()
-    $P1 = capt.'get_hash'()
+pir_output_is( $PRE . <<'CODE'. $POST, <<'OUTPUT', "hash, list" );
+    $P0 = capt.'list'()
+    $P1 = capt.'hash'()
 
     $S0 = typeof $P0
     $S1 = typeof $P1
@@ -258,34 +258,28 @@ Hash
 OUTPUT
 
 pir_error_output_like( $PRE . <<'CODE'. $POST, <<'OUT', 'get_integer not implemented' );
-    I0 = capt
+    $I0 = capt
 CODE
 /get_integer\(\) not implemented in class 'Capture'/
 OUT
 
-pir_error_output_like( $PRE . <<'CODE'. $POST, <<'OUT', 'get_string not implemented' );
-    S0 = capt
-CODE
-/get_string\(\) not implemented in class 'Capture'/
-OUT
-
 pir_error_output_like( $PRE . <<'CODE'. $POST, <<'OUT', 'get_number not implemented' );
-    N0 = capt
+    $N0 = capt
 CODE
 /get_number\(\) not implemented in class 'Capture'/
 OUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', '*_keyed_int delegation', todo => "Fix objects vs. vtables" );
+pir_output_is( <<'CODE', <<'OUTPUT', '*_keyed_int delegation' );
 .sub main :main
     $P99 = subclass 'Capture', 'Match'
-    $P1 = new 'Match'
+    $P1 = new ['Match']
     $P1[1] = 1
     $I1 = elements $P1
     print $I1
     print "\n"
 
     $P99 = subclass 'Match', 'Exp'
-    $P2 = new 'Exp'
+    $P2 = new ['Exp']
     $P2[1] = 1
     $I2 = elements $P2
     print $I2
@@ -297,20 +291,20 @@ CODE
 2
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', 'get_array method delegation' );
+pir_output_is( <<'CODE', <<'OUTPUT', 'list method delegation' );
 .sub main :main
     $P0 = subclass 'Capture', 'Match'
     addattribute $P0, '$.abc'
     addattribute $P0, '$.xyz'
-    $P1 = new 'Match'
+    $P1 = new ['Match']
     $P1[1] = 1
 
-    $P2 = new .String
+    $P2 = new ['String']
     setattribute $P1, '$.abc', $P2
-    $P2 = new .String
+    $P2 = new ['String']
     setattribute $P1, '$.xyz', $P2
 
-    $P2 = $P1.'get_array'()
+    $P2 = $P1.'list'()
     $P2 = 0
     $I0 = elements $P2
     print $I0

@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: Syck.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: Syck.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ Parses a YAML string and returns a data structure.
 
     # prepare user data
     .local pmc user_data
-    user_data = new String
+    user_data = new 'String'
 
     .local string library_name
     library_name = 'libsyck'
@@ -53,12 +53,12 @@ Parses a YAML string and returns a data structure.
 
     # A Sub that can be given to the library
     # this callback function will eventually by called by the library
-    .const .Sub yaml_handler = "_yaml_handler"
+    .const 'Sub' yaml_handler = "_yaml_handler"
     .local pmc yaml_handler_wrapped
     yaml_handler_wrapped = new_callback yaml_handler, user_data, "vUp"	# Z in pdd16
 
     .local pmc synchronous
-    synchronous = new Integer
+    synchronous = new 'Integer'
     synchronous = 1
     setprop user_data, "_synchronous", synchronous
 
@@ -74,7 +74,7 @@ Parses a YAML string and returns a data structure.
 
     # tell about the string
     .local pmc syck_parser_str, read
-    read = new .UnManagedStruct
+    read = new 'UnManagedStruct'
     pin yaml_string
     syck_parser_str = dlfunc libsyck, "syck_parser_str", "vpbip"
     .local int yaml_string_len
@@ -139,8 +139,8 @@ NOT_LOADED:
 
     # external_data is an UnManagedStruct PMC containing node info
     .local pmc external_data_decl, data_str_decl, data_str
-    external_data_decl = new ResizablePMCArray
-    data_str_decl      = new ResizablePMCArray
+    external_data_decl = new 'ResizablePMCArray'
+    data_str_decl      = new 'ResizablePMCArray'
 
     # id
     push external_data_decl, .DATATYPE_INT
@@ -171,11 +171,11 @@ NOT_LOADED:
     push data_str_decl, .DATATYPE_INT
     push data_str_decl, 0
     push data_str_decl, 0
-    data_str = new .UnManagedStruct, data_str_decl
+    data_str = new 'UnManagedStruct', data_str_decl
 
     push  external_data_decl, .DATATYPE_STRUCT_PTR
-    P9 = external_data_decl[-1]
-    setprop P9, "_struct", data_str
+    $P9 = external_data_decl[-1]
+    setprop $P9, "_struct", data_str
     push external_data_decl, 0
     push external_data_decl, 0
 
@@ -225,4 +225,4 @@ Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

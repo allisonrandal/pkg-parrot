@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: mops.c 15173 2006-11-07 18:01:26Z paultcochrane $
+Copyright (C) 2001-2003, Parrot Foundation.
+$Id: mops.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -41,6 +41,18 @@ Prints out:
 #include <stdio.h>
 
 
+/*
+
+=over 4
+
+=item C<int main(int argc, char *argv[])>
+
+The main function which runs the mops example.
+
+=cut
+
+*/
+
 int
 main(int argc, char *argv[])
 {
@@ -72,7 +84,7 @@ main(int argc, char *argv[])
     /*                          */
   REDO:                        /* REDO:                    */
     I4 = I4 - I3;               /* sub    I4, I4, I3        */
-    if ( I4 )
+    if (I4)
         goto REDO;              /* if     I4, REDO          */
     /*                          */
   DONE:                        /* DONE:                    */
@@ -97,6 +109,8 @@ main(int argc, char *argv[])
 }
 
 /*
+
+=back
 
 =head1 SEE ALSO
 

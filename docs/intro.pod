@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: intro.pod 18689 2007-05-30 15:58:47Z coke $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: intro.pod 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -98,7 +98,7 @@ The amount of registers needed is determined per subroutine at compile-time.
 
 =head2 PMCs
 
-PMC stands for Parrot Magic Cookie. PMCs represent any complex data structure
+PMC stands for Polymorphic Container. PMCs represent any complex data structure
 or type, including aggregate data types (arrays, hash tables, etc). A PMC can
 implement its own behavior for arithmetic, logical and string operations
 performed on it, allowing for language-specific behavior to be introduced. PMCs
@@ -116,13 +116,13 @@ is, no longer referenced) whenever the garbage collector runs.
 
 =head2 Where to get Parrot
 
-Periodically, numbered releases will appear on CPAN.  At this stage of the
+Every month, numbered releases will appear on CPAN.  At this stage of the
 project, an awful lot is changing between releases. You can get a copy of the
 latest Parrot from the SVN repository. This is done as follows:
 
-  svn co https://svn.perl.org/parrot/trunk parrot
+  svn co https://svn.parrot.org/parrot/trunk parrot
 
-You can find more instructions at: L<http://www.parrotcode.org/source.html>
+You can find more instructions at: L<http://www.parrot.org/download>.
 
 =head2 Building Parrot
 
@@ -220,7 +220,7 @@ mapped to real numbered registers.
   .end
 
 The C<.local> directive indicates that the named register is only needed inside
-the current compilation unit (that is, between C<.sub> and C<.end>). Following
+the current subroutine (that is, between C<.sub> and C<.end>). Following
 C<.local> is a type. This can be C<int> (for I registers), C<float> (for N
 registers), C<string> (for S registers), C<pmc> (for P registers) or the name
 of a PMC type.
@@ -387,13 +387,13 @@ entitled I<Testing Parrot> that will help with this.
 =head2 The Parrot Mailing List
 
 Much Parrot development and discussion takes place on the
-parrot-porters mailing list. You can subscribe by sending an email to
-C<parrot-porters-subscribe@perl.org> or read the NNTP archive at
-L<http://www.nntp.perl.org/group/perl.perl6.internals>.
+parrot-dev mailing list. You can subscribe by filling out the form at
+L<http://lists.parrot.org/mailman/listinfo/parrot-dev> or read the NNTP
+archive at L<http://groups.google.com/group/parrot-dev/>.
 
 =head2 IRC
 
-The Parrot IRC channel is hosted on irc.perl.org and is named C<#parrot>.
+The Parrot IRC channel is hosted on irc.parrot.org and is named C<#parrot>.
 Alternative IRC servers are at irc.pobox.com and irc.rhizomatic.net.
 
 =cut

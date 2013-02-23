@@ -1,6 +1,25 @@
 /*
- * math stuff
+ * $Id: math.c 37200 2009-03-08 11:46:01Z fperrad $
+ * Copyright (C) 2006-2007, Parrot Foundation.
  */
+
+/*
+
+=head1 NAME
+
+math.c
+
+=head1 DESCRIPTION
+
+math stuff
+
+=head2 Functions
+
+=over 4
+
+=cut
+
+*/
 
 /*
  * force atan2() to use IEEE behavior
@@ -10,15 +29,19 @@
 
 _LIB_VERSION_TYPE _LIB_VERSION = _IEEE_;
 
-/*
- * return true if the Numval has a negative sign.
- * This is mostly for handling the -0.0 case.
- *
- * Parrot_signbit is exported because PerlNum.set_number_native() uses it.
- * XXX: This is probably not a good reason.
- */
 #if DOUBLE_SIZE == 2 * INT_SIZE
-PARROT_API extern int
+/*
+
+=item C<extern int Parrot_signbit(double x)>
+
+return true if the Numval has a negative sign.
+This is mostly for handling the -0.0 case.
+
+=cut
+
+*/
+
+extern int
 Parrot_signbit(double x)
 {
     union {
@@ -35,6 +58,17 @@ Parrot_signbit(double x)
 #endif
 
 #if NUMVAL_SIZE == 12 && DOUBLE_SIZE == 3 * INT_SIZE && PARROT_LITTLE_ENDIAN
+/*
+
+=item C<int
+Parrot_signbit_l(long double x)>
+
+RT#48260: Not yet documented!!!
+
+=cut
+
+*/
+
 int
 Parrot_signbit_l(long double x)
 {
@@ -46,6 +80,14 @@ Parrot_signbit_l(long double x)
     return u.i[2] < 0;
 }
 #endif
+
+/*
+
+=back
+
+=cut
+
+*/
 
 /*
  * Local variables:

@@ -1,3 +1,5 @@
+# Copyright (C) 2004-2007, Parrot Foundation.
+# $Id: PGE.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -225,7 +227,7 @@ sub _generate_pir_for {
             load_bytecode "PGE/Dumper.pir"
             load_bytecode "PGE/Text.pir"
             load_bytecode "PGE/Util.pir"
-            p6rule_compile = compreg "PGE::P6Regex"
+            p6rule_compile = compreg "PGE::Perl6Regex"
 
             .local string target
             .local string pattern
@@ -260,7 +262,7 @@ sub _generate_pir_catch_for {
             load_bytecode "PGE/Dumper.pir"
             load_bytecode "PGE/Text.pir"
             load_bytecode "PGE/Util.pir"
-            p6rule_compile = compreg "PGE::P6Regex"
+            p6rule_compile = compreg "PGE::Perl6Regex"
 
             .local string pattern
             .local pmc rulesub
@@ -292,7 +294,7 @@ sub _generate_subrule_pir {
         .sub _PGE_Test
             .local pmc p6rule_compile
             load_bytecode "PGE.pbc"
-            p6rule_compile = compreg "PGE::P6Regex"
+            p6rule_compile = compreg "PGE::Perl6Regex"
 
             .local string target
             .local pmc rulesub

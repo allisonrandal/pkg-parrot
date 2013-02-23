@@ -1,22 +1,23 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: errors.t 18564 2007-05-16 02:26:11Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: errors.t 37344 2009-03-12 05:43:51Z allison $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Config;
 use Parrot::Test;
 
 plan skip_all => 'No reason to compile invalid PBC here'
-    if $ENV{TEST_PROG_ARGS} =~ /-r/;
+    if $ENV{TEST_PROG_ARGS} && $ENV{TEST_PROG_ARGS} =~ m/--run-pbc/;
 
-plan tests => 4;
+plan tests => 5;
 
 ## tests for imcc error messages
 
-pir_error_output_like( <<'CODE', <<'OUT', "op not found.");
+pir_error_output_like( <<'CODE', <<'OUT', "op not found." );
 .sub 'test' :main
     branch $P0
 .end
@@ -24,7 +25,7 @@ CODE
 /.*The opcode 'branch_p' \(branch\<1\>\) was not found\. Check the type and number of the arguments.*/
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', "check parser recovery 1.");
+pir_error_output_like( <<'CODE', <<'OUT', "check parser recovery 1." );
 .sub foo :main
         $I1 = 2
         print "foo\n"
@@ -51,19 +52,31 @@ for ( 1 .. 50 ) {
 }
 $test_3_pir_code .= ".end\n";
 
-pir_error_output_like( $test_3_pir_code, <<'OUT', "check parser recovery patience.");
-/Too many errors. Correct some first.\n$/
+pir_error_output_like( $test_3_pir_code, <<'OUT', "check parser recovery patience." );
+/Too many errors. Correct some first.\n/
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', '#line nnn "file"');
+pir_error_output_like( <<'END_PIR', <<'END_EXPECTED', 'identifier SomethingFunny is unexpected' );
 .sub main :main
-#line 54 "xyz.pir"
-    say "Hello"
-    say 3
+  .local SomethingFunny my_string
+  my_string = new String
+  my_string = 'hello'
+  say my_string
 .end
-CODE
-/in file 'xyz.pir' line 57/
-OUT
+END_PIR
+/^error:imcc:syntax error, unexpected IDENTIFIER, expecting/
+END_EXPECTED
+
+pir_error_output_like( <<'END_PIR', <<'END_EXPECTED', 'Array is on type, RT #42769' );
+.sub main :main
+  .local Array my_string
+  my_string = new String
+  my_string = 'hello'
+  say my_string
+.end
+END_PIR
+/^error:imcc:syntax error, unexpected IDENTIFIER, expecting/
+END_EXPECTED
 
 # Local Variables:
 #   mode: cperl

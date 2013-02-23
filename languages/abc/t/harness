@@ -1,7 +1,0 @@
-#! perl
-
-# $Id: harness 16973 2007-02-13 21:24:55Z bernhard $
-
-use FindBin;
-use lib qw( . lib ../lib ../../lib ../../lib );
-use Parrot::Test::Harness language => 'abc', compiler => 'abc.pbc';

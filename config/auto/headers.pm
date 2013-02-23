@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: headers.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: headers.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,35 +15,76 @@ package auto::headers;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
+use Parrot::Configure::Utils ':auto';
 
-use Parrot::Configure::Step ':auto';
-use Config;
-
-$description = 'Probing for C headers';
-
-@args = qw(miniparrot verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Probe for C headers};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    if ( $conf->options->get('miniparrot') ) {
-        $self->set_result('skipped');
-        return $self;
+    _set_from_Config($conf);
+
+    my @extra_headers = _list_extra_headers($conf);
+
+    my @found_headers;
+    foreach my $header (@extra_headers) {
+        my $pass = 0;
+
+        # First try with just the header. If that fails, try with all the
+        # headers we found so far. This is somewhat a hack, but makes probing
+        # work on *BSD where some headers are documented as relying on others
+        # being included first.
+        foreach my $use_headers ( [$header], [ @found_headers, $header ] ) {
+            $conf->data->set( TEMP_testheaders =>
+                join( '', map { "#include <$_>\n" } @$use_headers ) );
+            $conf->data->set( TEMP_testheader => $header );
+
+            $conf->cc_gen('config/auto/headers/test_c.in');
+
+            $conf->data->set( TEMP_testheaders => undef );
+            $conf->data->set( TEMP_testheader  => undef );
+
+            eval { $conf->cc_build(); };
+            if ( !$@ && $conf->cc_run() =~ /^$header OK/ ) {
+                $pass = 1;
+                push @found_headers, $header;
+            }
+            $conf->cc_clean();
+            last if $pass;
+        }
+
+        my $flag = "i_$header";
+        $flag =~ s/\.h$//g;
+        $flag =~ s/\///g;
+        print "$flag: $pass\n" if defined $conf->options->get('verbose');
+        $conf->data->set( $flag => $pass ? 'define' : undef );
     }
 
+    return 1;
+}
+
+sub _set_from_Config {
+    my $conf = shift;
     # perl5's Configure system doesn't call this by its full name, which may
     # confuse use later, particularly once we break free and start doing all
     # probing ourselves
     my %mapping = ( i_niin => "i_netinetin" );
 
-    for ( keys %Config ) {
-        next unless /^i_/;
-        $conf->data->set( $mapping{$_} || $_ => $Config{$_} );
+    for ( grep { /^i_/ } $conf->data->keys_p5() ) {
+        $conf->data->set( $mapping{$_} || $_ => $conf->data->get_p5($_) );
     }
+}
 
+sub _list_extra_headers {
+    my $conf = shift;
     # some headers may not be probed-for by perl 5, or might not be
     # properly reflected in %Config (i_fcntl seems to be wrong on my machine,
     # for instance).
@@ -60,44 +101,12 @@ sub runstep {
         sys/stat.h sysexit.h limits.h);
 
     # more extra_headers needed on mingw/msys; *BSD fails if they are present
-    if ( $^O eq "msys" ) {
+    if ( $conf->data->get_p5('OSNAME') eq "msys" ) {
         push @extra_headers, qw(sysmman.h netdb.h);
     }
-    my @found_headers;
-    foreach my $header (@extra_headers) {
-        my $pass = 0;
-
-        # First try with just the header. If that fails, try with all the
-        # headers we found so far. This is somewhat a hack, but makes probing
-        # work on *BSD where some headers are documented as relying on others
-        # being included first.
-        foreach my $use_headers ( [$header], [ @found_headers, $header ] ) {
-            $conf->data->set( testheaders => join( '', map { "#include <$_>\n" } @$use_headers ) );
-            $conf->data->set( testheader => $header );
-
-            cc_gen('config/auto/headers/test_c.in');
-
-            $conf->data->set( testheaders => undef );
-            $conf->data->set( testheader  => undef );
-
-            eval { cc_build(); };
-            if ( !$@ && cc_run() =~ /^$header OK/ ) {
-                $pass = 1;
-                push @found_headers, $header;
-            }
-            cc_clean();
-            last if $pass;
-        }
-
-        my $flag = "i_$header";
-        $flag =~ s/\.h$//g;
-        $flag =~ s/\///g;
-        print "$flag: $pass\n" if defined $conf->options->get('verbose');
-        $conf->data->set( $flag => $pass ? 'define' : undef );
-    }
-
-    return $self;
+    return @extra_headers;
 }
+
 
 1;
 

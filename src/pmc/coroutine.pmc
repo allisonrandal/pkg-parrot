@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: coroutine.pmc 19040 2007-06-16 08:20:45Z chromatic $
+Copyright (C) 2001-2008, Parrot Foundation.
+$Id: coroutine.pmc 37393 2009-03-13 19:56:52Z Util $
 
 =head1 NAME
 
@@ -32,53 +32,30 @@ stopped. See the L<Glossary|docs/glossary.pod> for more information.
 
 #include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
-#include <assert.h>
-
-/*
- * XXX put these into exceptions.h
- */
-
-
-#define TRY \
-    do { \
-        new_internal_exception(INTERP); \
-        if (!setjmp(INTERP->exceptions->destination))
-
-#define CATCH \
-    else
-
-#define ENDTRY \
-    } while (0); \
-    do { \
-        Parrot_exception *e = INTERP->exceptions; \
-        INTERP->exceptions = e->prev; \
-        INTERP->exc_free_list = e; \
-    } while (0)
-
-
-#define THROW(e)  \
-    do { \
-        exceptions->err = e; \
-        longjmp(exceptions->dest, 1); \
-    } while (0)
 
 static void
-print_sub_name(Interp* interp, PMC* sub)
+print_sub_name(PARROT_INTERP, PMC *sub_pmc)
 {
-    Parrot_coro *co     = PMC_coro(sub);
-    Interp      *tracer = interp->debugger ? interp->debugger : interp;
+    /* It's actually a Parrot_coro, but this avoids casting warnings. */
+    Parrot_sub          *co;
+    Interp      * const tracer = (interp->pdb && interp->pdb->debugger) ?
+        interp->pdb->debugger :
+        interp;
 
-    PIO_eprintf(tracer, "# %s coro '%Ss'",
-        !(PObj_get_FLAGS(sub) & SUB_FLAG_CORO_FF) ?
+    GETATTR_Coroutine_sub(interp, sub_pmc, co);
+
+    Parrot_io_eprintf(tracer, "# %s coro '%Ss'",
+        !(PObj_get_FLAGS(sub_pmc) & SUB_FLAG_CORO_FF) ?
         "Calling" : "yielding from",
-        Parrot_full_sub_name(interp, sub));
-    if (co->ctx &&
-        (PObj_get_FLAGS(sub) & SUB_FLAG_CORO_FF)) {
-        PIO_eprintf(tracer, " to '%Ss'",
+        Parrot_full_sub_name(interp, sub_pmc));
+
+    if (co->ctx && (PObj_get_FLAGS(sub_pmc) & SUB_FLAG_CORO_FF)) {
+        Parrot_io_eprintf(tracer, " to '%Ss'",
                 Parrot_full_sub_name(interp,
                     co->ctx->caller_ctx->current_sub));
     }
-    PIO_eprintf(tracer, "\n# ");
+
+    Parrot_io_eprintf(tracer, "\n# ");
     print_pbc_location(interp);
 }
 
@@ -88,19 +65,21 @@ pmclass Coroutine extends Sub need_ext {
 
 =item C<void init()>
 
-Initializes the co-routine.
+Initializes the coroutine.
 
-=item C<PMC* clone()>
+=item C<PMC *clone()>
 
-Clone the couroutine.
+Clone the coroutine.
 
 =cut
 
 */
 
-    void init() {
-        PMC_struct_val(SELF) = new_coroutine(INTERP);
-        PMC_pmc_val(SELF)    = NULL;
+    VTABLE void init() {
+        Parrot_Coroutine_attributes *attrs =
+            mem_allocate_zeroed_typed(Parrot_Coroutine_attributes);
+        attrs->sub = (Parrot_sub*)new_coroutine(INTERP);
+        PMC_data(SELF) = attrs;
         PObj_custom_mark_destroy_SETALL(SELF);
     }
 
@@ -110,29 +89,33 @@ Clone the couroutine.
 
 Destroys the coroutine.
 
+=cut
+
 */
 
-    void destroy () {
-        Parrot_coro *sub = PMC_coro(SELF);
+    VTABLE void destroy() {
+        Parrot_Coroutine_attributes *attrs = PARROT_COROUTINE(SELF);
+        Parrot_sub                  *sub   = attrs->sub;
+
         if (sub->ctx)
-            Parrot_free_context(interp, sub->ctx, 0);
+            Parrot_free_context(interp, sub->ctx, 1);
 
         SUPER();
     }
 
-    PMC* clone() {
-        Parrot_coro *sub;
-        PMC         *ret    = pmc_new_noinit(INTERP, SELF->vtable->base_type);
+    VTABLE PMC *clone() {
+        Parrot_coro * const coro_sub = mem_allocate_typed(Parrot_coro);
+        PMC         * const ret      = pmc_new(INTERP, SELF->vtable->base_type);
+        Parrot_sub         *sub;
 
         PObj_custom_mark_destroy_SETALL(ret);
 
-        sub                 = mem_allocate_typed(Parrot_coro);
-        PMC_struct_val(ret) = sub;
-        PMC_pmc_val(ret)    = NULL;
+        SET_ATTR_sub(INTERP, ret, (Parrot_sub *)coro_sub);
 
-        memcpy(sub, PMC_sub(SELF), sizeof (Parrot_coro));
+        PMC_get_sub(INTERP, SELF, sub);
+        memcpy(coro_sub, sub, sizeof (Parrot_coro));
 
-        sub->name           = string_copy(INTERP, sub->name);
+        coro_sub->name      = Parrot_str_copy(INTERP, coro_sub->name);
 
         return ret;
     }
@@ -147,38 +130,38 @@ Swaps the "context".
 
 */
 
-    opcode_t* invoke(void *next) {
-        parrot_context_t   *caller_ctx;
+    VTABLE opcode_t *invoke(void *next) {
         PackFile_ByteCode  *wanted_seg;
-        struct Stack_Chunk *state;
-        parrot_context_t   *ctx;
-        PMC                *ccont;
-        Parrot_coro        *co   = PMC_coro(SELF);
-        opcode_t           *dest = co->address;
+        Parrot_Coroutine_attributes *attrs = PARROT_COROUTINE(SELF);
+        Parrot_coro * const co = (Parrot_coro*)attrs->sub;
+        opcode_t    * dest     = co->address;
 
         if (Interp_trace_TEST(INTERP, PARROT_TRACE_SUB_CALL_FLAG))
             print_sub_name(INTERP, SELF);
 
         if (!co->ctx) {
-            /* TODO factor out common code with Sub.invoke
-             *      and inherit it
-             */
+            Parrot_Context *caller_ctx;
+            Parrot_Context *ctx;
+            PMC *ccont;
+
+            /* RT#46699 factor out common code with Sub.invoke and inherit it */
             ccont = INTERP->current_cont;
+
             if (ccont == NEED_CONTINUATION)
                 ccont = (PMC *)new_ret_continuation_pmc(interp,
                                                        (opcode_t *)next);
 
             if (PObj_get_FLAGS(ccont) & SUB_FLAG_TAILCALL)
-                real_exception(INTERP, NULL, E_Exception,
+                Parrot_ex_throw_from_c_args(INTERP, NULL, CONTROL_ERROR,
                         "tail call to coro not allowed");
 
-            caller_ctx = CONTEXT(INTERP->ctx);
-
             /* first time set current sub, cont, object */
-            Parrot_alloc_context(INTERP, co->n_regs_used);
+            caller_ctx = CONTEXT(interp);
+            ctx        = Parrot_set_new_context(INTERP, co->n_regs_used);
 
-            co->ctx                   = ctx = CONTEXT(INTERP->ctx);
+            co->ctx                   = ctx;
             co->dynamic_state         = interp->dynamic_env;
+
             ctx->caller_ctx           = caller_ctx;
             PMC_cont(ccont)->from_ctx = ctx;
             ctx->current_sub          = SELF;
@@ -192,8 +175,7 @@ Swaps the "context".
             /* create pad if needed */
             if (!PMC_IS_NULL(co->lex_info)) {
                 ctx->lex_pad = pmc_new_init(INTERP,
-                        Parrot_get_ctx_HLL_type(interp,
-                            enum_class_LexPad),
+                        Parrot_get_ctx_HLL_type(interp, enum_class_LexPad),
                         co->lex_info);
                 VTABLE_set_pointer(INTERP, ctx->lex_pad, ctx);
             }
@@ -206,6 +188,10 @@ Swaps the "context".
 
         /* if calling the Coro we need the segment of the Coro */
         else if (!(PObj_get_FLAGS(SELF) & SUB_FLAG_CORO_FF)) {
+            PMC *ccont;
+            Stack_Chunk_t    *state;
+            Parrot_Context   *ctx;
+
             PObj_get_FLAGS(SELF) |= SUB_FLAG_CORO_FF;
             wanted_seg            = co->seg;
 
@@ -215,16 +201,22 @@ Swaps the "context".
 
             /* and the recent call context */
             ccont                 = ctx->current_cont;
-            ctx->caller_ctx       = PMC_cont(ccont)->to_ctx = CONTEXT(INTERP->ctx);
+            ctx->caller_ctx       = PMC_cont(ccont)->to_ctx
+                                  = CONTEXT(interp);
+
             /* set context to coro context */
             state                 = interp->dynamic_env;
             interp->dynamic_env   = co->dynamic_state;
             co->dynamic_state     = state;
-            CONTEXT(INTERP->ctx)  = ctx;
+            CONTEXT(interp)       = ctx;
             INTERP->ctx.bp        = ctx->bp;
             INTERP->ctx.bp_ps     = ctx->bp_ps;
         }
         else {
+            PMC *ccont;
+            Stack_Chunk_t    *state;
+            Parrot_Context   *ctx;
+
             PObj_get_FLAGS(SELF) &= ~SUB_FLAG_CORO_FF;
             /* switch back to last remembered code seg and context */
 
@@ -238,14 +230,14 @@ Swaps the "context".
                    problem is that the defunct coroutine yields up one more
                    result before we get here.  -- rgr, 7-Oct-06.
                 */
-                real_exception(INTERP, NULL, E_Exception,
+                Parrot_ex_throw_from_c_args(INTERP, NULL, CONTROL_ERROR,
                                "Cannot resume dead coroutine.");
             }
 
             state                = interp->dynamic_env;
             interp->dynamic_env  = co->dynamic_state;
             co->dynamic_state    = state;
-            CONTEXT(INTERP->ctx) = ctx;
+            CONTEXT(interp)      = ctx;
             INTERP->ctx.bp       = ctx->bp;
             INTERP->ctx.bp_ps    = ctx->bp_ps;
         }
@@ -270,12 +262,18 @@ Marks the coroutine as live.
 
 */
 
-    void mark() {
-        Parrot_coro *c = PMC_coro(SELF);
-        if (c && c->ctx)
-            mark_context(INTERP, c->ctx);
-        if (c && c->dynamic_state)
-            mark_stack(INTERP, c->dynamic_state);
+    VTABLE void mark() {
+        Parrot_Coroutine_attributes *attrs = PARROT_COROUTINE(SELF);
+        Parrot_coro * const co = (Parrot_coro *)attrs->sub;
+
+        if (co) {
+            if (co->ctx)
+                mark_context(INTERP, co->ctx);
+            if (co->dynamic_state)
+                mark_stack(INTERP, co->dynamic_state);
+
+        }
+
         SUPER();
     }
 }
@@ -283,10 +281,6 @@ Marks the coroutine as live.
 /*
 
 =back
-
-=head1 HISTORY
-
-Initial version by Melvin on 2002/06/6.
 
 =cut
 

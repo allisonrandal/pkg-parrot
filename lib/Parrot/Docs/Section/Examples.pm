@@ -1,5 +1,5 @@
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: Examples.pm 16245 2006-12-25 22:15:39Z paultcochrane $
+# Copyright (C) 2004, Parrot Foundation.
+# $Id: Examples.pm 37466 2009-03-16 05:41:07Z cotto $
 
 =head1 NAME
 
@@ -45,7 +45,6 @@ sub new {
         $self->new_group( 'PASM and PIR',          '', 'examples/pasm' ),
         $self->new_group( 'PIR',                   '', 'examples/pir' ),
         $self->new_group( 'Subroutines',           '', 'examples/subs' ),
-        $self->new_group( 'IO',                    '', 'examples/io' ),
         $self->new_group( 'Streams',               '', 'examples/streams' ),
         $self->new_group( 'Benchmarking',          '', 'examples/benchmarks' ),
         $self->new_group( 'Speed Comparison',      '', 'examples/mops' ),

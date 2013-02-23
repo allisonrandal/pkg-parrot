@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: primes.c 16298 2006-12-28 22:25:17Z paultcochrane $
+Copyright (C) 2001-2003, Parrot Foundation.
+$Id: primes.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -16,11 +16,26 @@ examples/benchmarks/primes.c - Calculate prime numbers < 50000
 Calculates all the prime numbers up to 50000 and prints out the number
 of primes and the last one found.
 
+=head2 Functions
+
+=over 4
+
 =cut
 
 */
 
 #include <stdio.h>
+
+/*
+
+=item C<int
+main(int argc, char *argv[])>
+
+Main function to run the example.
+
+=cut
+
+*/
 
 int
 main(int argc, char *argv[])
@@ -59,6 +74,8 @@ main(int argc, char *argv[])
 
 /*
 
+=back
+
 =head1 SEE ALSO
 
 F<examples/benchmarks/primes.c>,
@@ -66,7 +83,7 @@ F<examples/benchmarks/primes.pasm>,
 F<examples/benchmarks/primes.pl>,
 F<examples/benchmarks/primes2_p.pasm>,
 F<examples/benchmarks/primes2.c>,
-F<examples/benchmarks/primes2.pasm>,
+F<examples/benchmarks/primes2.pir>,
 F<examples/benchmarks/primes2.py>.
 
 =cut

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: pge_examples.t 17577 2007-03-17 22:51:14Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: pge_examples.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -27,21 +27,21 @@ pir_output_is( <<'CODE', <<'OUT', "This made Parrot m4 fail" );
   load_bytecode "PGE.pbc"
 
   .local pmc p6rule
-  p6rule = compreg "PGE::P6Regex"
+  p6rule = compreg "PGE::Perl6Regex"
 
   .local pmc rulesub_a, rulesub_b
   rulesub_a  = p6rule( "a" )
   rulesub_b  = p6rule( "^(<[b]>)" )
 
-  .local string input_string    
+  .local string input_string
   input_string    = "_____________________________________________________________________"
 
-  rulesub_b( input_string ) 
+  rulesub_b( input_string )
 
   print "ok1\n"
   # end
 
-  rulesub_a( input_string ) 
+  rulesub_a( input_string )
   print "ok2\n"
 
 .end
@@ -59,15 +59,15 @@ pir_output_is( <<'CODE', <<'OUT', "parse FASTA" );
 
 .sub "example" :main
     load_bytecode 'PGE.pbc'
-    load_bytecode 'PGE/P6Grammar.pbc'
+    load_bytecode 'PGE/Perl6Grammar.pbc'
 
     .local string fasta_grammar
     fasta_grammar = <<'END_FASTA_GRAMMAR'
 grammar Bio::Fasta;
 
 regex databank    { <Bio::Fasta::entry>+ }
-regex entry       { <Bio::Fasta::desc_line> \n <Bio::Fasta::sequence> } 
-regex desc_line   { <Bio::Fasta::start_entry> <Bio::Fasta::id> \s+ <Bio::Fasta::desc> } 
+regex entry       { <Bio::Fasta::desc_line> \n <Bio::Fasta::sequence> }
+regex desc_line   { <Bio::Fasta::start_entry> <Bio::Fasta::id> \s+ <Bio::Fasta::desc> }
 regex start_entry { \> }
 regex id          { (\S+) }
 regex desc        { (\N*) }
@@ -88,7 +88,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 END_FASTA
 
     .local pmc p6grammar
-    p6grammar = compreg "PGE::P6Grammar"
+    p6grammar = compreg "PGE::Perl6Grammar"
     .local pmc code
     ( code ) = p6grammar.'compile'(fasta_grammar, 'target'=>'PIR')
     $P0 = compreg 'PIR'
@@ -97,10 +97,10 @@ END_FASTA
     # print code
 
     .local pmc fasta_rule
-    fasta_rule = find_global "Bio::Fasta", "databank"
+    fasta_rule = get_global ['Bio';'Fasta'], "databank"
     .local pmc match
     ( match ) = fasta_rule( fasta )
-    
+
     # TODO: Extract named or positional captures
     print match
 

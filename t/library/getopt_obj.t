@@ -1,20 +1,21 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: getopt_obj.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: getopt_obj.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Test tests => 15;
 
 =head1 NAME
 
-t/library/getopt_obj.t - testing the module Getopt/Obj.pir
+t/library/getopt_obj.t - testing the PIR module Getopt::Obj
 
 =head1 SYNOPSIS
 
-        % prove t/library/getopt_obj.t
+    % prove t/library/getopt_obj.t
 
 =head1 DESCRIPTION
 
@@ -24,11 +25,11 @@ module F<runtime/parrot/library/Getopt/Obj.pir>.
 =cut
 
 # 1
-pir_output_is( <<'CODE', <<'OUT', "basic long options" );
+pir_output_is( <<'CODE', <<'OUT', 'basic long options' );
 
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo=bar'
         push argv, '--bar=3.14'
         push argv, '--bax=3'
@@ -40,15 +41,15 @@ pir_output_is( <<'CODE', <<'OUT', "basic long options" );
 
         $P0 = getopts."add"()
         $P0."long"("foo")
-        $P0."type"(.String)
+        $P0."type"('String')
 
         $P0 = getopts."add"()
         $P0."long"("bar")
-        $P0."type"(.Float)
+        $P0."type"('Float')
 
         $P0 = getopts."add"()
         $P0."long"("bax")
-        $P0."type"(.Integer)
+        $P0."type"('Integer')
 
         $P0 = getopts."add"()
         $P0."long"("baz")
@@ -87,7 +88,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "basic short options" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '-f'
         push argv, 'bar'
         push argv, '-Abc'
@@ -99,11 +100,11 @@ pir_output_is( <<'CODE', <<'OUT', "basic short options" );
 
         $P0 = getopts."add"()
         $P0."short"("f")
-        $P0."type"(.String)
+        $P0."type"('String')
 
         $P0 = getopts."add"()
         $P0."short"("A")
-        $P0."type"(.String)
+        $P0."type"('String')
 
         $P0 = getopts."add"()
         $P0."short"("c")
@@ -135,7 +136,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "simple array" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '-Iinca'
         push argv, '-Iincb'
 
@@ -145,7 +146,7 @@ pir_output_is( <<'CODE', <<'OUT', "simple array" );
 
         $P0 = getopts."add"()
         $P0."short"("I")
-        $P0."type"(.Array)
+        $P0."type"('Array')
 
         $P1 = getopts."get_options"(argv)
 
@@ -169,7 +170,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "mixing long and short with array" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '-Iinca'
         push argv, '--include=incb'
 
@@ -180,7 +181,7 @@ pir_output_is( <<'CODE', <<'OUT', "mixing long and short with array" );
         $P0 = getopts."add"()
         $P0."long"("include")
         $P0."short"("I")
-        $P0."type"(.Array)
+        $P0."type"('Array')
 
         $P1 = getopts."get_options"(argv)
 
@@ -204,7 +205,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "hash" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '-Dfoo=bar'
         push argv, '--define=bax=baz'
         push argv, '-Dfoobar'
@@ -216,7 +217,7 @@ pir_output_is( <<'CODE', <<'OUT', "hash" );
         $P0 = getopts."add"()
         $P0."long"("define")
         $P0."short"("D")
-        $P0."type"(.Hash)
+        $P0."type"('Hash')
 
         $P1 = getopts."get_options"(argv)
 
@@ -246,7 +247,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "bundling short options" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '-abc'
 
         load_bytecode "Getopt/Obj.pir"
@@ -288,7 +289,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "ignored options" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--ignore'
         push argv, '--foo'
 
@@ -322,7 +323,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "double dash stop" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo'
         push argv, '--'
         push argv, '--bar'
@@ -365,7 +366,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "notOptStop" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo'
         push argv, 'foo'
         push argv, '--bar'
@@ -414,7 +415,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "optarg" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo'
         push argv, '-f'
         push argv, '-bbar'
@@ -427,17 +428,17 @@ pir_output_is( <<'CODE', <<'OUT', "optarg" );
         $P0 = getopts."add"()
         $P0."long"("foo")
         $P0."optarg"(1)
-        $P0."type"(.String)
+        $P0."type"('String')
 
         $P0 = getopts."add"()
         $P0."short"("f")
         $P0."optarg"(1)
-        $P0."type"(.String)
+        $P0."type"('String')
 
         $P0 = getopts."add"()
         $P0."short"("b")
         $P0."optarg"(1)
-        $P0."type"(.String)
+        $P0."type"('String')
 
         $P1 = getopts."get_options"(argv)
 
@@ -467,7 +468,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "pass through" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo'
         push argv, 'foo'
         push argv, '--bar'
@@ -516,7 +517,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "lone dash" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo'
         push argv, '-'
         push argv, '--bar'
@@ -558,7 +559,7 @@ OUT
 pir_output_is( <<'CODE', <<'OUT', "push interface" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo=file'
         push argv, '-bfile.txt'
         push argv, '-x'
@@ -654,7 +655,7 @@ OUT
 pir_error_output_like( <<'CODE', <<'OUT', "missing spec" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo=file'
         load_bytecode "Getopt/Obj.pir"
         .local pmc getopts
@@ -677,7 +678,7 @@ OUT
 pir_error_output_like( <<'CODE', <<'OUT', "missing argument" );
 .sub main :main
         .local pmc argv
-        argv = new .ResizablePMCArray
+        argv = new 'ResizablePMCArray'
         push argv, '--foo=file'
         push argv, '--bar'
         load_bytecode "Getopt/Obj.pir"

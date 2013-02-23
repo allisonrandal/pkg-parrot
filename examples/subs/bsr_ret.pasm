@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: bsr_ret.pasm 12835 2006-05-30 13:32:26Z coke $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: bsr_ret.pasm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

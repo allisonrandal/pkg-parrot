@@ -1,3 +1,8 @@
+/*
+ * $Id: instructions.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2002-2009, Parrot Foundation.
+ */
+
 #ifndef PARROT_IMCC_INSTRUCTIONS_H_GUARD
 #define PARROT_IMCC_INSTRUCTIONS_H_GUARD
 
@@ -19,21 +24,23 @@ enum INSTYPE {    /*instruction type can be   */
 
 
 typedef struct _Instruction {
-    char * op;          /* opstring w/o params */
-    char * fmt;         /* printf style format string for params   */
-    unsigned int flags; /* how the instruction affects each of the values */
-    unsigned int type;  /* 16 bit register branches, + ITxxx */
-    int keys;           /* bitmask of keys used in this instruction */
-    int index;          /* index on instructions[] */
-    int bbindex;        /* number of basic block containing instruction */
-    struct _Instruction * prev;
-    struct _Instruction * next;
-    int opnum;          /* parrot op number */
-    int opsize;         /* parrot op size   */
-    int line;           /* source code line number */
-    int n_r;            /* count of regs in **r */
-    SymReg * r[1];      /* instruction is allocated variabled sized
-                           to hold more SymRegs */
+    char        *opname;   /* opstring w/o params */
+    char        *format;   /* printf style format string for params   */
+    int          keys;     /* bitmask of keys used in this instruction */
+    unsigned int flags;    /* how the instruction affects each of the values */
+    unsigned int type;     /* 16 bit register branches, + ITxxx */
+    unsigned int index;    /* index on instructions[] */
+    unsigned int bbindex;  /* number of basic block containing instruction */
+
+    struct _Instruction *prev;
+    struct _Instruction *next;
+
+    int     opnum;         /* parrot op number */
+    int     opsize;        /* parrot op size   */
+    int     line;          /* source code line number */
+    int     symreg_count;  /* count of regs in **symregs */
+    SymReg *symregs[1];    /* instruction is allocated variable sized
+                              to hold more SymRegs */
 } Instruction;
 
 
@@ -42,29 +49,31 @@ typedef struct _Instruction {
  * int flags_w
  * int flags_jump
  */
+#define INSTRUCTION_BIT(n) ((UINTVAL)1 << (n))
 typedef enum {
     /* Indicate how the instruction affects each of the registers */
-    IF_r0_read  = (1 << 0),
-    IF_r1_read  = (1 << 1),
-    IF_r2_read  = (1 << 2),
-    IF_r3_read  = (1 << 3),
+    IF_r0_read      = INSTRUCTION_BIT(0),
+    IF_r1_read      = INSTRUCTION_BIT(1),
+    IF_r2_read      = INSTRUCTION_BIT(2),
+    IF_r3_read      = INSTRUCTION_BIT(3),
     /* .... */
-    IF_r0_write = (1 << 16),
-    IF_r1_write = (1 << 17),
-    IF_r2_write = (1 << 18),
-    IF_r3_write = (1 << 19),
+    IF_r0_write     = INSTRUCTION_BIT(16),
+    IF_r1_write     = INSTRUCTION_BIT(17),
+    IF_r2_write     = INSTRUCTION_BIT(18),
+    IF_r3_write     = INSTRUCTION_BIT(19),
     /* .... */
-    IF_binary  = (IF_r0_write|IF_r1_read|IF_r2_read), /* templ for binary op */
-    IF_unary   = (IF_r0_write|IF_r1_read),           /* templ for unary  op */
-    IF_inplace = (IF_r0_write|IF_r0_read),    /* templ for inplace unary  op */
+    IF_binary       = (IF_r0_write|IF_r1_read|IF_r2_read), /* templ for binary op */
+    IF_unary        = (IF_r0_write|IF_r1_read),           /* templ for unary  op */
+    IF_inplace      = (IF_r0_write|IF_r0_read),    /* templ for inplace unary  op */
     /* the branch flags are the low 16 bits of type
      * for upper 16 see ITXX above */
-    IF_r0_branch  = (1 << 0),
-    IF_r1_branch  = (1 << 1),
-    IF_r2_branch  = (1 << 2),
-    IF_r3_branch  = (1 << 3),
-    IF_goto =       (1 << 15)
+    IF_r0_branch    = INSTRUCTION_BIT(0),
+    IF_r1_branch    = INSTRUCTION_BIT(1),
+    IF_r2_branch    = INSTRUCTION_BIT(2),
+    IF_r3_branch    = INSTRUCTION_BIT(3),
+    IF_goto         = INSTRUCTION_BIT(15)
 } Instruction_Flags;
+#undef INSTRUCTION_BIT
 
 
 /* Forward decl */
@@ -72,60 +81,211 @@ struct _IMC_Unit;
 
 
 /* Functions */
-/*
- * _mk_instruction and iANY are not intended for outside usage
- * please use INS
- */
-#ifdef _PARSER
-Instruction * _mk_instruction(const char *,const char *, int n, SymReg **, int);
-#else
-#  define _mk_instruction(a,b,n,c,d) dont_use(a,b)
-#endif
-Instruction * INS(Interp *, struct _IMC_Unit *, char * name,
-        const char *fmt, SymReg **regs, int nargs, int keyv, int emit);
-Instruction * INS_LABEL(Interp * interp, struct _IMC_Unit *, SymReg * r0, int emit);
-
-Instruction * iNEW(Interp *, struct _IMC_Unit *, SymReg * r0, char * type,
-        SymReg *init, int emit);
-Instruction * iNEWSUB(Interp *, struct _IMC_Unit *, SymReg * r0, int type,
-        SymReg *init, int emit);
-Instruction * emitb(Interp * interp, struct _IMC_Unit *, Instruction *);
-
-int instruction_reads(Instruction *, SymReg *);
-int instruction_writes(Instruction *, SymReg *);
-int ins_reads2(Instruction *, int);
-int ins_writes2(Instruction *, int);
-
-void free_ins(Instruction *);
-int ins_print(Interp *, FILE *fd, Instruction * ins);
-
-Instruction *delete_ins(struct _IMC_Unit *, Instruction *ins, int needs_freeing);
-void insert_ins(struct _IMC_Unit *, Instruction *ins, Instruction * tmp);
-void prepend_ins(struct _IMC_Unit *, Instruction *ins, Instruction * tmp);
-Instruction *move_ins(struct _IMC_Unit *, Instruction *cur, Instruction *to);
-void subst_ins(struct _IMC_Unit *, Instruction *ins, Instruction * tmp, int);
-
-int get_branch_regno(Instruction * ins);
-SymReg *get_branch_reg(Instruction * ins);
-
 /* Globals */
 
 typedef struct _emittert {
-    int (*open)(Interp *, void *param);
-    int (*emit)(Interp *, void *param, struct _IMC_Unit *, Instruction *ins);
-    int (*new_sub)(Interp *, void *param, struct _IMC_Unit *);
-    int (*end_sub)(Interp *, void *param, struct _IMC_Unit *);
-    int (*close)(Interp *, void *param);
+    int (*open)(PARROT_INTERP, void *param);
+    int (*emit)(PARROT_INTERP, void *param, const struct _IMC_Unit *, const Instruction *ins);
+    int (*new_sub)(PARROT_INTERP, void *param, struct _IMC_Unit *);
+    int (*end_sub)(PARROT_INTERP, void *param, struct _IMC_Unit *);
+    int (*close)(PARROT_INTERP, void *param);
 } Emitter;
 
 enum Emitter_type { EMIT_FILE, EMIT_PBC };
 
-PARROT_API int emit_open(Interp *, int type, void *param);
-PARROT_API int emit_flush(Interp *, void *param, struct _IMC_Unit *);
-PARROT_API int emit_close(Interp *, void *param);
+/* HEADERIZER BEGIN: compilers/imcc/instructions.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API void open_comp_unit(void);
-PARROT_API void close_comp_unit(Parrot_Interp);
+PARROT_EXPORT
+int emit_close(PARROT_INTERP, ARGIN_NULLOK(void *param))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+int emit_flush(PARROT_INTERP,
+    ARGIN_NULLOK(void *param),
+    ARGIN(IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+int emit_open(PARROT_INTERP, int type, ARGIN_NULLOK(void *param))
+        __attribute__nonnull__(1);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+Instruction * _delete_ins(ARGMOD(IMC_Unit *unit), ARGIN(Instruction *ins))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit);
+
+PARROT_MALLOC
+PARROT_CANNOT_RETURN_NULL
+Instruction * _mk_instruction(
+    ARGIN(const char *op),
+    ARGIN(const char *fmt),
+    int n,
+    ARGIN(SymReg * const *r),
+    int flags)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+Instruction * delete_ins(ARGMOD(IMC_Unit *unit), ARGMOD(Instruction *ins))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*ins);
+
+PARROT_CAN_RETURN_NULL
+Instruction * emitb(PARROT_INTERP,
+    ARGMOD_NULLOK(IMC_Unit *unit),
+    ARGIN_NULLOK(Instruction *i))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*unit);
+
+void free_ins(ARGMOD(Instruction *ins))
+        __attribute__nonnull__(1)
+        FUNC_MODIFIES(*ins);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+SymReg * get_branch_reg(ARGIN(const Instruction *ins))
+        __attribute__nonnull__(1);
+
+int get_branch_regno(ARGIN(const Instruction *ins))
+        __attribute__nonnull__(1);
+
+void imcc_init_tables(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+int ins_print(PARROT_INTERP, ARGIN(PMC *io), ARGIN(const Instruction *ins))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+int ins_writes2(ARGIN(const Instruction *ins), int t)
+        __attribute__nonnull__(1);
+
+void insert_ins(
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD_NULLOK(Instruction *ins),
+    ARGMOD(Instruction *tmp))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*ins)
+        FUNC_MODIFIES(*tmp);
+
+int instruction_reads(ARGIN(const Instruction *ins), ARGIN(const SymReg *r))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+int instruction_writes(
+    ARGIN(const Instruction *ins),
+    ARGIN(const SymReg *r))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_CAN_RETURN_NULL
+Instruction * move_ins(
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD(Instruction *ins),
+    ARGMOD(Instruction *to))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*ins)
+        FUNC_MODIFIES(*to);
+
+void prepend_ins(
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD_NULLOK(Instruction *ins),
+    ARGMOD(Instruction *tmp))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*ins)
+        FUNC_MODIFIES(*tmp);
+
+void subst_ins(
+    ARGMOD(IMC_Unit *unit),
+    ARGMOD(Instruction *ins),
+    ARGMOD(Instruction *tmp),
+    int needs_freeing)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*unit)
+        FUNC_MODIFIES(*ins)
+        FUNC_MODIFIES(*tmp);
+
+#define ASSERT_ARGS_emit_close __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_emit_flush __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_emit_open __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS__delete_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS__mk_instruction __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(op) \
+    || PARROT_ASSERT_ARG(fmt) \
+    || PARROT_ASSERT_ARG(r)
+#define ASSERT_ARGS_delete_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_emitb __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_free_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_get_branch_reg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_get_branch_regno __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_imcc_init_tables __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_ins_print __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(io) \
+    || PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_ins_writes2 __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ins)
+#define ASSERT_ARGS_insert_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(tmp)
+#define ASSERT_ARGS_instruction_reads __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ins) \
+    || PARROT_ASSERT_ARG(r)
+#define ASSERT_ARGS_instruction_writes __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(ins) \
+    || PARROT_ASSERT_ARG(r)
+#define ASSERT_ARGS_move_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins) \
+    || PARROT_ASSERT_ARG(to)
+#define ASSERT_ARGS_prepend_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(tmp)
+#define ASSERT_ARGS_subst_ins __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(ins) \
+    || PARROT_ASSERT_ARG(tmp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/instructions.c */
+
+/*
+ * _mk_instruction and iANY are not intended for outside usage
+ * please use INS
+ */
+#ifndef _PARSER
+#  define _mk_instruction(a, b, n, c, d) dont_use_this_function((a), (b))
+#endif
+/* This macro must come after the declaration of _mk_instruction() */
 
 #endif /* PARROT_IMCC_INSTRUCTIONS_H_GUARD */
 

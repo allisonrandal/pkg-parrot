@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: tabs.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2009, Parrot Foundation.
+# $Id: tabs.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -31,7 +31,7 @@ L<docs/pdds/pdd07_codingstd.pod>
 =cut
 
 my $DIST = Parrot::Distribution->new;
-my @files = @ARGV ? @ARGV : $DIST->get_c_language_files();
+my @files = @ARGV ? <@ARGV> : $DIST->get_c_language_files();
 my @tabs;
 
 foreach my $file (@files) {
@@ -58,8 +58,8 @@ foreach my $file (@files) {
 
 ## L<PDD07/Code Formatting/"Indentation must consist only of spaces">
 ok( !scalar(@tabs), "tabs in leading whitespace" )
-    or diag(
-    "Found tab in leading whitespace " . scalar(@tabs) . " instances.  Lines found:\n@tabs" );
+    or
+    diag( "Found tab in leading whitespace " . scalar(@tabs) . " instances.  Lines found:\n@tabs" );
 
 # Local Variables:
 #   mode: cperl

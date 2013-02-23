@@ -1,7 +1,7 @@
 /* global_setup.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: global_setup.h 18963 2007-06-12 20:39:15Z petdance $
+ *     $Id: global_setup.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *      Contains declarations of global data and the functions
  *      that initialize that data.
@@ -18,18 +18,33 @@
 #include "parrot/interpreter.h"
 
 /* HEADERIZER BEGIN: src/global_setup.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-void init_world( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-void parrot_global_setup_2( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
+PARROT_EXPORT
 void Parrot_set_config_hash_internal(
-    const unsigned char* parrot_config /*NN*/,
-    unsigned int parrot_config_size )
+    ARGIN(const unsigned char* parrot_config),
+    unsigned int parrot_config_size)
         __attribute__nonnull__(1);
 
+void init_world(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+void init_world_once(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+void parrot_global_setup_2(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_Parrot_set_config_hash_internal \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(parrot_config)
+#define ASSERT_ARGS_init_world __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_init_world_once __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_parrot_global_setup_2 __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/global_setup.c */
 
 #endif /* PARROT_GLOBAL_SETUP_H_GUARD */

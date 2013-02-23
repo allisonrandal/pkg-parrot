@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2003, The Perl Foundation.
-$Id: random.pmc 14874 2006-10-09 22:03:46Z bernhard $
+Copyright (C) 2001-2007, Parrot Foundation.
+$Id: random.pmc 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -21,11 +21,24 @@ This is a singleton (monadic) class - only one instance exists.
 */
 
 #include "parrot/parrot.h"
-#include <assert.h>
 
-static PMC * Rand_PMC;
+static PMC *Rand_PMC;
 
 pmclass Random singleton {
+
+/*
+
+=item C<void class_init()>
+
+Class initialization.  Clears the singleton PMC.
+
+=cut
+
+*/
+
+    void class_init() {
+        Rand_PMC = NULL;
+    }
 
 /*
 
@@ -35,7 +48,7 @@ pmclass Random singleton {
 
 */
 
-void* get_pointer() {
+    VTABLE void *get_pointer() {
         return Rand_PMC;
     }
 
@@ -50,9 +63,9 @@ information see F<src/pmc.c>.
 
 */
 
-    void set_pointer(void* ptr) {
-        assert(!Rand_PMC);
-        Rand_PMC = (PMC*) ptr;
+    VTABLE void set_pointer(void *ptr) {
+        PARROT_ASSERT(!Rand_PMC);
+        Rand_PMC = (PMC *)ptr;
     }
 
 /*
@@ -65,7 +78,7 @@ Sets the random number seed to C<seed>.
 
 */
 
-    void set_integer_native(INTVAL seed) {
+    VTABLE void set_integer_native(INTVAL seed) {
         Parrot_srand(seed);
     }
 
@@ -79,7 +92,7 @@ Returns a random integer in the range C<-2^31..2^31>.
 
 */
 
-    INTVAL get_integer() {
+    VTABLE INTVAL get_integer() {
         return Parrot_int_rand(0);
     }
 
@@ -93,7 +106,7 @@ Returns a random integer in the range C<0..max>.
 
 */
 
-    INTVAL get_integer_keyed_int(INTVAL max) {
+    VTABLE INTVAL get_integer_keyed_int(INTVAL max) {
         return Parrot_range_rand(0, max, 0);
     }
 
@@ -107,7 +120,7 @@ Returns a random floating-point number in the range C<0.0..1.0>.
 
 */
 
-    FLOATVAL get_number() {
+    VTABLE FLOATVAL get_number() {
         return Parrot_float_rand(0);
     }
 

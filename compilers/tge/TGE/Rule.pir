@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
+# Copyright (C) 2005-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -10,18 +10,18 @@ A basic class to hold defined attribute grammar rules.
 
 =cut
 
-.namespace [ "TGE::Rule" ]
+.namespace [ 'TGE'; 'Rule' ]
 
 # Possibly better named "type", "name", "parent", "action/exec",
 # "copy/value"
 
 .sub "__onload" :load
     .local pmc base
-    newclass base, "TGE::Rule"
+    newclass base, ['TGE';'Rule']
     addattribute base, "type"   # node type that this rule applies to
     addattribute base, "name"   # name of attribute being defined
     addattribute base, "parent" # where the attribute is applied
-			        # (current node or child node)
+                                # (current node or child node)
     addattribute base, "action" # a compiled subroutine
     addattribute base, "line"   # line number in the grammar source file
     .return ()
@@ -35,12 +35,12 @@ attribute grammar rule.
 =cut
 
 .sub __init :method
-    $P0 = new .Undef
-    $P1 = new .Undef
-    $P2 = new .Undef
-    $P3 = new .Undef
-    $P4 = new .Undef
-    $P5 = new .Sub
+    $P0 = new 'Undef'
+    $P1 = new 'Undef'
+    $P2 = new 'Undef'
+    $P3 = new 'Undef'
+    $P4 = new 'Undef'
+    $P5 = new 'Sub'
     setattribute self, "type", $P0
     setattribute self, "name", $P1
     setattribute self, "parent", $P2
@@ -73,4 +73,4 @@ Produce a data dump of the current contents of the rule object.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

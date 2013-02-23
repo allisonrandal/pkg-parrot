@@ -1,5 +1,5 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: mandel.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2005-2008, Parrot Foundation.
+# $Id: mandel.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -99,4 +99,4 @@ PRINT:  $I1 = k % 16
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

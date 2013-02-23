@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: parrotobject.t 18541 2007-05-15 03:01:29Z allison $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: parrotobject.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -10,7 +10,7 @@ use Parrot::Test tests => 11;
 
 =head1 NAME
 
-t/pmc/parrotobject.t - test the ParrotObject PMC
+t/pmc/parrotobject.t - test the Object PMC
 
 
 =head1 SYNOPSIS
@@ -19,18 +19,17 @@ t/pmc/parrotobject.t - test the ParrotObject PMC
 
 =head1 DESCRIPTION
 
-Tests the ParrotObject PMC.
+Tests the Object PMC.
 
 =cut
 
 pir_error_output_like( <<'CODE', <<'OUT', 'new' );
 .sub 'test' :main
-    new P0, .ParrotObject
+    new $P0, ['Object']
     print "ok 1\n"
 .end
 CODE
-/Can't create new ParrotObjects - use the registered class instead
-current instr\.:/
+/Object must be created by a class./
 OUT
 
 # '
@@ -139,11 +138,11 @@ pir_output_is( <<'CODE', <<'OUT', ':vtable inheritance from core classes' );
     $P0 = subclass 'Hash', 'Foo'
     $P0 = subclass 'Hash', 'Bar'
 
-    $P1 = new 'Foo'
+    $P1 = new ['Foo']
     $S1 = $P1
     say $S1
 
-    $P1 = new 'Bar'
+    $P1 = new ['Bar']
     $S1 = $P1
     say $S1
 .end
@@ -168,11 +167,11 @@ OUT
 
 # assign opcode in inherited classes
 pir_output_is(
-    <<'CODE', <<'OUT', 'assign opcode in inherited classes', 'todo' => 'assign opcode inheritance' );
+    <<'CODE', <<'OUT', 'assign opcode in inherited classes' );
 .sub main :main
-    $P1 = new .ResizablePMCArray
+    $P1 = new ['ResizablePMCArray']
     push $P1, 3
-    $P2 = new .ResizablePMCArray
+    $P2 = new ['ResizablePMCArray']
     assign $P2, $P1
     $I0 = elements $P2
     print $I0
@@ -192,7 +191,7 @@ CODE
 1
 OUT
 
-pir_output_is( <<'CODE', <<'OUT', 'RT#41733 - Execution ends after returning from invoke' );
+pir_output_is( <<'CODE', <<'OUT', 'RT #41733 - Execution ends after returning from invoke' );
 .namespace ['Foo']
 
 .sub invoke :vtable
@@ -202,8 +201,8 @@ say "you invoked me!"
 
 .sub main :main
 $P0 = newclass "Foo"
-$P1 = new "Foo"
-$P1()
+$P1 = new ['Foo']
+$P1($P1)   # pass the object it"self"
 say "got here"
 .end
 CODE
@@ -224,8 +223,8 @@ pir_output_is( <<'CODE', <<'OUT', 'params/returns from overridden invoke' );
 
 .sub main :main
   $P0 = newclass "Foo"
-  $P1 = new "Foo"
-  $I0 = $P1(2)
+  $P1 = new ['Foo']
+  $I0 = $P1($P1, 2) # pass the object it"self"
   print $I0
   print "\n"
 .end
@@ -234,7 +233,7 @@ CODE
 3
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', 'RT#41732' );
+pir_error_output_like( <<'CODE', <<'OUT', 'RT #41732' );
 .namespace ['Foo']
 
 .sub invoke :vtable
@@ -244,11 +243,11 @@ pir_error_output_like( <<'CODE', <<'OUT', 'RT#41732' );
 
 .sub main :main
     $P0 = newclass "Foo"
-    $P1 = new "Foo"
+    $P1 = new ['Foo']
     $P1()
 .end
 CODE
-/1 params expected/
+/2 params expected/
 OUT
 
 # '

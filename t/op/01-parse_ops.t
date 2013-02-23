@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: 01-parse_ops.t 18564 2007-05-16 02:26:11Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: 01-parse_ops.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -34,38 +34,21 @@ my $object_map = {
     n   => q<N0>,
     nc  => q<13.013>,
     p   => q<P0>,
-    pc  => undef,                  ## TODO: figure out how to test this type
+    pc  => undef,                  ## RT #39992 figure out how to test this type
     s   => q<S0>,
     sc  => q<'foo'>,
 };
 
 my %parse_errors = map { $_ => 1 } qw(
-    abs
-    bnot
-    bnots
-    ceil
     defined
     delete
-    downcase
     eq
     exists
-    floor
-    ge
-    get_hll_namespace
-    get_namespace
-    get_root_namespace
-    gt
     le
     lt
     ne
-    neg
-    not
-    print
     set
     slice
-    titlecase
-    typeof
-    upcase
     yield
 );
 
@@ -75,7 +58,7 @@ my %cmds;
 for my $op (@$Parrot::OpLib::core::ops) {
     my @regtypes = $op->arg_types;
 
-    ## for now, avoid opcodes with regtypes i don't know how to represent
+    ## for now, avoid opcodes with regtypes i do not know how to represent
     next unless @regtypes == grep { defined $$object_map{$_} } @regtypes;
 
     ## extract the basename of the opcode
@@ -86,14 +69,15 @@ for my $op (@$Parrot::OpLib::core::ops) {
 
     ## store the test commands
     $cmds{$basename}{ $basename . ' ' . $args }++;
-    $cmds{$basename}{ $op->full_name . ' ' . $args }++;
 }
 
+$ENV{TEST_PROG_ARGS} ||= '';
+
 plan skip_all => 'IMCC cannot do parse-only with JIT enabled'
-    if $ENV{TEST_PROG_ARGS} =~ /-j/;
+    if $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/;
 
 plan skip_all => 'IMCC cannot do parse-only with switched core'
-    if $ENV{TEST_PROG_ARGS} =~ /-S/;
+    if $ENV{TEST_PROG_ARGS} =~ /--runcore=switch/;
 
 plan tests => scalar keys %cmds;
 
@@ -102,13 +86,14 @@ for my $cmd ( sort keys %cmds ) {
         ## retrieve the test commands, and trick IMCC to parse only
         join( $/ => 'end', sort( keys %{ $cmds{$cmd} } ), '' ),
         qr/^(?!error:imcc:syntax error,)/,
-        "parsing: $cmd" );
+        "parsing: $cmd"
+    );
 
-    if ($parse_errors{ $cmd }) {
-        pasm_error_output_like( @args )
+    if ( $parse_errors{$cmd} ) {
+        pasm_error_output_like(@args);
     }
     else {
-        pasm_output_like( @args );
+        pasm_output_like(@args);
     }
 }
 

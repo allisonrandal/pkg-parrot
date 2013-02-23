@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: 03-print_c_header_file.t 17576 2007-03-17 22:50:07Z paultcochrane $
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: 03-print_c_header_file.t 37200 2009-03-08 11:46:01Z fperrad $
 # 03-print_c_header_file.t
 
 use strict;
@@ -19,22 +19,19 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More tests => 25;
+use Test::More tests => 24;
 use Carp;
 use Cwd;
 use File::Copy;
 use File::Temp (qw| tempdir |);
-use_ok('Parrot::Ops2pm::Utils');
+use_ok('Parrot::Ops2pm');
 use lib ("$main::topdir/t/tools/ops2cutils/testlib");
-use_ok( "GenerateCore", qw| generate_core | );
-
-my @srcopsfiles = qw( src/ops/core.ops src/ops/bit.ops src/ops/cmp.ops
-    src/ops/debug.ops src/ops/experimental.ops src/ops/io.ops src/ops/math.ops
-    src/ops/object.ops src/ops/pic.ops src/ops/pmc.ops src/ops/set.ops
-    src/ops/stack.ops src/ops/stm.ops src/ops/string.ops src/ops/sys.ops
-    src/ops/var.ops );
-my $num  = "src/ops/ops.num";
-my $skip = "src/ops/ops.skip";
+use GenerateCore qw|
+    generate_core
+    @srcopsfiles
+    $num
+    $skip
+|;
 
 ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
 my $cwd = cwd();

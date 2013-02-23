@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: alignptrs.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: alignptrs.pm 37368 2009-03-13 00:33:00Z rurban $
 
 =head1 NAME
 
@@ -15,59 +15,89 @@ package auto::alignptrs;
 
 use strict;
 use warnings;
-use vars qw($description $result @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
-use Config;
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Determining your minimum pointer alignment';
-
-@args = qw(miniparrot);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determine your minimum pointer alignment};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = ( shift, shift );
 
-    if ( $conf->options->get('miniparrot') ) {
-        $self->set_result('skipped');
-        return $self;
-    }
-
-    $self->set_result('');
+    my $result_str = '';
     my $align;
     if ( defined( $conf->data->get('ptr_alignment') ) ) {
         $align = $conf->data->get('ptr_alignment');
-        $self->set_result("configured: ");
+        $result_str .= "configured: ";
     }
-    elsif ( $^O eq 'hpux' && $Config{ccflags} !~ /DD64/ ) {
+    elsif ( $conf->data->get_p5('OSNAME') eq 'hpux'
+            && $conf->data->get_p5('ccflags') !~ /DD64/ ) {
 
         # HP-UX 10.20/32 hangs in this test.
         $align = 4;
         $conf->data->set( ptr_alignment => $align );
-        $self->set_result = "for hpux: ";
+        $result_str .= "for hpux: ";
     }
     else {
 
         # Now really test by compiling some code
-        cc_gen('config/auto/alignptrs/test_c.in');
-        cc_build();
-        for my $try_align ( 64, 32, 16, 8, 4, 2, 1 ) {
-            my $results = cc_run_capture($try_align);
-            if ( $results =~ /OK/ && $results !~ /align/i ) {
-                $align = $try_align;
+        $conf->cc_gen('config/auto/alignptrs/test_c.in');
+        $conf->cc_build();
+        my $minimum_valid_align;
+        my @aligns = (1, 2, 4, 8, 16, 32, 64);
+        TRY_ALIGN: while ( defined( my $try_align = shift(@aligns) ) ) {
+            my $results = $conf->cc_run_capture($try_align);
+            $align = _evaluate_results($results, $try_align);
+            if (defined $align) {
+                $minimum_valid_align = $align;
+                last TRY_ALIGN;
+            }
+            else {
+                next TRY_ALIGN;
             }
         }
-        cc_clean();
+        $conf->cc_clean();
 
-        die "Can't determine alignment!\n" unless defined $align;
-        $conf->data->set( ptr_alignment => $align );
+        _evaluate_ptr_alignment($conf, $minimum_valid_align);
+
+        # If at this point we haven't died, then we can assign
+        # $minimum_valid_align to $align.
+        $align = $minimum_valid_align;
     }
 
-    $self->set_result( $self->result . " $align byte" );
-    $self->set_result( $self->result . 's' ) unless $align == 1;
+    $self->_finalize_result_str($align, $result_str);
 
-    return $self;
+    return 1;
+}
+
+sub _evaluate_results {
+    my ($results, $try_align) = @_;
+    my $align;
+    if ( $results =~ /OK/ && $results !~ /align/i ) {
+        $align = $try_align;
+    }
+    return $align;
+}
+
+sub _evaluate_ptr_alignment {
+    my ($conf, $minimum_valid_align) = @_;
+    die "Can't determine alignment!\n" unless defined $minimum_valid_align;
+    $conf->data->set( ptr_alignment => $minimum_valid_align );
+}
+
+sub _finalize_result_str {
+    my $self = shift;
+    my ($align, $result_str) = @_;
+    $result_str .= " $align byte";
+    $result_str .= "s" unless $align == 1;
+    $self->set_result($result_str);
 }
 
 1;

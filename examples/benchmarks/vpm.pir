@@ -5,14 +5,14 @@
 
 .sub main
 
-.sym string _string
+.local string _string
 _string = "just another perl hacker"
 
 $I0 = 0
 
 loop0:
-	.sym pmc _str
-	.sym pmc _f
+	.local pmc _str
+	.local pmc _f
 	split _str, "", _string
 
        # you can't shift from the type of array that split returns. Do a
@@ -20,7 +20,7 @@ loop0:
        _f = _str[0]
        delete _str[0]
 
-       # you can't push onto the type of array that split returns. Do a 
+       # you can't push onto the type of array that split returns. Do a
        # two step.
        $I1 = _str
        $I2 = $I1 + 1
@@ -44,4 +44,4 @@ end
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

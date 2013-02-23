@@ -1,4 +1,4 @@
-# $Id: Writer.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: Writer.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 TITLE
 
@@ -11,11 +11,10 @@ version 0.1
 =head1 SYNOPSIS
 
     # create the stream
-    find_type $I0, "Stream::Writer"
-    new stream, $I0
+    new stream, "Stream::Writer"
 
     # set the source sub
-    .const .Sub temp = "_reader"
+    .const 'Sub' temp = "_reader"
     stream."source"( temp )
 
     stream."write"( "hello, world" )
@@ -35,12 +34,12 @@ version 0.1
 .namespace ["Stream::Writer"]
 
 .sub __onload :load
-    find_type $I0, "Stream::Writer"
-    if $I0 > 1 goto END
+    $P0 = get_class "Stream::Writer"
+    unless null $P0 goto END
 
     load_bytecode "library/Stream/Base.pir"
 
-    getclass $P0, "Stream::Base"
+    get_class $P0, "Stream::Base"
     subclass $P1, $P0, "Stream::Writer"
 
     addattribute $P1, "writer"
@@ -65,39 +64,33 @@ END:
     source()
 
     # close the source
-    source = find_global "Stream::Base", "close"
+    source = get_hll_global ['Stream::Base'], 'close'
     self."setSource"()
 
     # mark it as closed
-    classoffset $I0, self, "Stream::Writer"
-    inc $I0
     .local pmc status
     interpinfo self, .INTERPINFO_CURRENT_OBJECT
-    getattribute status, self, $I0
+    getattribute status, self, 'status'
     status = 0
 .end
 
 .sub init :vtable :method
     .local pmc status
 
-    new status, .Integer
+    new status, 'Integer'
     set status, 0
-    classoffset $I0, self, "Stream::Writer"
-    inc $I0
-    setattribute self, $I0, status
+    setattribute self, 'status', status
 .end
 
 .sub set_pmc :vtable :method
     .param pmc source
     .local pmc status
 
-    .const .Sub stub = "_reader_stub"
+    .const 'Sub' stub = "_reader_stub"
     setprop stub, "CALL", source
     self."setSource"( stub )
 
-    classoffset $I0, self, "Stream::Writer"
-    inc $I0
-    getattribute status, self, $I0
+    getattribute status, self, 'status'
     status = 1
 .end
 
@@ -117,9 +110,7 @@ END:
     .local pmc status
     .local int ret
 
-    classoffset $I0, self, "Stream::Writer"
-    inc $I0
-    getattribute status, self, $I0
+    getattribute status, self, 'status'
     ret = status
     .return(ret)
 .end
@@ -135,12 +126,10 @@ END:
     .local pmc source
     .local pmc status
 
-    classoffset $I0, self, "Stream::Writer"
     .include "interpinfo.pasm"
     $P0 = interpinfo .INTERPINFO_CURRENT_CONT
-    setattribute self, $I0, $P0
-    inc $I0
-    getattribute status, self, $I0
+    setattribute self, 'writer', $P0
+    getattribute status, self, 'status'
 
     if status == 0 goto END
     if status == 2 goto WRITE
@@ -148,20 +137,18 @@ END:
     self."write"( "" )
 WRITE:
 
-    classoffset $I0, self, "Stream::Writer"
     .include "interpinfo.pasm"
     $P0 = interpinfo .INTERPINFO_CURRENT_CONT
-    setattribute self, $I0, $P0
+    setattribute self, 'writer', $P0
 
     source = self."source"()
-    if_null source, END
-    typeof $I0, source
-    if $I0 == .Undef goto END
+    $I0 = defined source
+    unless $I0 goto END
 
     source( str )
 END:
     .return()
-    goto WRITE	# XXX else self get's overwritten by source
+    goto WRITE	# XXX else self gets overwritten by source
 .end
 
 =item source."rawRead"() (B<internal>)
@@ -178,14 +165,12 @@ END:
     cont = self."source"()
     if_null cont, END_OF_STREAM
 
-    classoffset $I0, self, "Stream::Writer"
-    getattribute writer, self, $I0
+    getattribute writer, self, 'writer'
     str = self."_call_writer"(writer)
     .return(str)
 END_OF_STREAM:
     null writer
-    classoffset $I0, self, "Stream::Writer"
-    setattribute self, $I0, writer
+    setattribute self, 'writer', writer
     null str
 
     .return(str)
@@ -213,7 +198,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -221,4 +206,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,12 +1,6 @@
-#!perl
-# Copyright (C) 2007, The Perl Foundation.
-# $Id: ops.t 18233 2007-04-16 04:45:33Z chromatic $
-
-use strict;
-use warnings;
-use lib qw( . lib ../lib ../../lib );
-use Test::More;
-use Parrot::Test tests => 6;
+#! parrot
+# Copyright (C) 2007, Parrot Foundation.
+# $Id: ops.t 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -22,145 +16,107 @@ Tests opcodes related to the OO implementation.
 
 =cut
 
-pir_output_is( <<'CODE', <<'OUT', 'addrole_p_p' );
-.sub 'test' :main
+.sub main :main
+    .include 'except_types.pasm'
+    .include 'test_more.pir' 
+
+    plan(18)
+
+    op_addrole_p_p()
+    op_inspect_p_p()
+    op_inspect_p_p_s()
+    op_get_class_p_s()
+    op_get_class_p_p()
+    op_addattribute_p_s()
+    op_new_p_s()
+    op_can_i_p_s()
+
+.end
+
+.sub op_addrole_p_p
     $P0 = new 'Role'
     $P1 = new 'Class'
+
     addrole $P1, $P0
-    print "ok 1 - addrole op executed\n"
+    $P2 = $P1.'roles'()
+    $I1 = elements $P2
+    is ($I1, 1, 'addrole op executed and  verified')
 
-    $P2 = $P1.roles()
-    $I0 = elements $P2
-    if $I0 == 1 goto ok_2
-    print "not "
-ok_2:
-    print "ok 2 - addrole op actually added the role\n"
 .end
-CODE
-ok 1 - addrole op executed
-ok 2 - addrole op actually added the role
-OUT
 
-pir_output_is( <<'CODE', <<'OUT', 'inspect_p_p' );
-.sub 'test' :main
+.sub op_inspect_p_p
     $P0 = new 'Class'
 
     $P1 = inspect $P0
-    print "ok 1 - inspect_p_p op executed\n"
+    $I1 = elements $P1
+    is ($I1, 7, 'inspect op executed and hash count verified')
 
-    $I0 = elements $P1
-    if $I0 == 6 goto ok_2
-    print "not "
-ok_2:
-    print "ok 2 - returned hash had correct number of elements\n"
 .end
-CODE
-ok 1 - inspect_p_p op executed
-ok 2 - returned hash had correct number of elements
-OUT
 
-pir_output_is( <<'CODE', <<'OUT', 'inspect_p_p_s' );
-.sub 'test' :main
+.sub op_inspect_p_p_s
     $P0 = new 'Class'
-    $P0.name('foo')
-    $P0.add_attribute('a')
+    $P0.'name'('foo')
+    $P0.'add_attribute'('a')
 
     $P1 = inspect $P0, 'name'
-    say $P1
-    print "ok 1 - inspect_p_p_s with $3='name'\n"
+    is ($P1, 'foo', 'inspect_p_p_s with name')
+
+    $P1 = inspect $P0, 'flags'
+    $I0 = $P1
+    $I1 = 1 << 29 # flag 29 is PObj_is_class_FLAG
+    $I2 = $I0 & $I1
+    ok ($I2, 'inspect_p_p_s with flags')
 
     $P1 = inspect $P0, 'attributes'
     $I0 = elements $P1
-    if $I0 == 1 goto ok_2
-    print "not "
-ok_2:
-    print "ok 2 - inspect_p_p_s with $3='attributes'\n"
+    is ($I0, 1, 'inspect_p_p_s with attributes')
 .end
-CODE
-foo
-ok 1 - inspect_p_p_s with $3='name'
-ok 2 - inspect_p_p_s with $3='attributes'
-OUT
 
-pir_output_is( <<'CODE', <<'OUT', 'get_class_p_s' );
-.sub main :main
+.sub op_get_class_p_s
     $P0 = new 'Hash'
     $P4 = new 'String'
     $P4 = 'Monkey'
     $P0['name'] = $P4
 
     $P1 = new 'Class', $P0
-    print "ok 1 - created new class named Monkey\n"
+    $I0 = isa $P1 , 'Class'
+    ok ($I0, 'created new class named Monkey')
 
-    push_eh nok_2
     $P2 = get_class 'Monkey'
-    clear_eh
-    goto ok_2
-nok_2:
-    print "not "
-ok_2:
-    print "ok 2 - get_class found a class\n"
+    $I1 = isa $P2 , 'Class'
+    ok ($I1, 'get_class found a class')
 
     $P3 = $P2.'inspect'('name')
-    print $P3
-    print "\nok 3 - got name of found class\n"
-.end
-CODE
-ok 1 - created new class named Monkey
-ok 2 - get_class found a class
-Monkey
-ok 3 - got name of found class
-OUT
+    is ($P3, 'Monkey', 'got name of found class')
 
-pir_output_is( <<'CODE', <<'OUT', 'get_class_p_p' );
-.sub main :main
+.end
+
+.sub op_get_class_p_p 
     $P0 = new 'Hash'
     $P4 = new 'String'
-    $P4 = 'Monkey'
+    $P4 = 'Ape'
     $P0['name'] = $P4
 
     $P1 = new 'Class', $P0
-    print "ok 1 - created new class named Monkey\n"
+    $I0 = isa $P1 , 'Class'
+    ok ($I0, 'created new class named Ape')
 
-    push_eh nok_2
-    $P2 = get_class [ 'Monkey' ]
-    clear_eh
-    goto ok_2
-nok_2:
-    print "not "
-ok_2:
-    print "ok 2 - get_class with a Key found a class\n"
+    $P2 = get_class [ 'Ape' ]
+    $I1 = isa $P2 , 'Class'
+    ok ($I1, 'get_class with a key found a class')
 
     $P3 = $P2.'inspect'('name')
-    print $P3
-    print "\nok 3 - got name of found class\n"
+    is ($P3, 'Ape', 'got name of found class')
 
-    push_eh nok_4
     $P3 = get_namespace [ 'Monkey' ]
     $P2 = get_class $P3
-    clear_eh
-    goto ok_4
-nok_4:
-    print "not "
-ok_4:
-    print "ok 4 - get_class with a NameSpace found a class\n"
-
-    $P3 = $P2.'inspect'('name')
-    print $P3
-    print "\nok 5 - got name of found class\n"
+    $I1 = isa $P2 , 'Class'
+    ok ($I1, 'get_class with a namespace found a class')
+    is ($P3, 'Monkey', 'got name of found class')
 .end
-CODE
-ok 1 - created new class named Monkey
-ok 2 - get_class with a Key found a class
-Monkey
-ok 3 - got name of found class
-ok 4 - get_class with a NameSpace found a class
-Monkey
-ok 5 - got name of found class
-OUT
 
-pir_output_like( <<'CODE', <<'OUT', 'addattribute_p_s' );
-.sub main :main
+.sub op_addattribute_p_s
+    .local pmc eh
     $P0 = new 'Class'
     addattribute $P0, 'foo'
 
@@ -171,22 +127,61 @@ pir_output_like( <<'CODE', <<'OUT', 'addattribute_p_s' );
     setattribute $P1, 'foo', $P2
     getattribute $P2, $P1, 'foo'
 
-    print $P2
-    print "\n"
 
     $P0 = new 'Hash'
+try:
+    eh = new 'ExceptionHandler'
+    eh.'handle_types'(.EXCEPTION_INVALID_OPERATION)
+    set_addr eh, catch
+
+    push_eh eh
     addattribute $P0, 'oops'
-    print "Not here!\n"
+    $I0 = 1 # add attribute success flag
+    goto finally
+
+catch:
+    $I0 = 0 # add attribute failure flag
+
+finally:
+    pop_eh
+    is ($P2, 100, 'reading assigned attribute')
+    nok ($I0,'attempt to add attribute to non-class')
+
 .end
-CODE
-/100
-Cannot add attribute to non-class
-current instr\.: 'main'/
-OUT
+
+.sub op_new_p_s
+    $P0 = newclass "Foo"
+    addattribute $P0, 'foo'
+
+    $S0 = "Foo"
+    $P1 = new $S0
+
+    $P2 = new 'Integer'
+    $P2 = 100
+    setattribute $P1, 'foo', $P2
+    getattribute $P2, $P1, 'foo'
+
+    is ($P2, 100, 'reading assigned attribute')
+
+.end
+
+.sub op_can_i_p_s
+    $P0 = newclass "Baz"
+    $P1 = new $P0
+
+    can $I0, $P1, "bar"
+    ok ($I0, 'PMC has method bar')
+    $I1 = $P1.'bar'()
+    ok ($I1, 'called bar method on PMC')
+.end
+
+.namespace ["Baz"]
+.sub bar :method
+    .return (1) 
+.end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

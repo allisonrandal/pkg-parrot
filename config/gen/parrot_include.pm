@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: parrot_include.pm 16180 2006-12-18 06:00:55Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: parrot_include.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,150 +15,217 @@ package gen::parrot_include;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':gen';
+use Parrot::Configure::Utils ':gen';
 
-$description = 'Generating runtime/parrot/include';
 
-my @files = qw(
-    include/parrot/cclass.h
-    include/parrot/core_pmcs.h
-    include/parrot/datatypes.h
-    include/parrot/enums.h
-    include/parrot/events.h
-    include/parrot/exceptions.h
-    include/parrot/interpreter.h
-    include/parrot/io.h
-    include/parrot/longopt.h
-    include/parrot/mmd.h
-    include/parrot/resources.h
-    include/parrot/stat.h
-    include/parrot/string.h
-    include/parrot/pmc.h
-    include/parrot/vtable.h
-    include/parrot/warnings.h
-    src/pmc/timer.pmc
-    src/utils.c
-);
-my $destdir = 'runtime/parrot/include';
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Generate runtime/parrot/include};
+    $data{result} = q{};
+    $data{source_files} = [ qw(
+        include/parrot/cclass.h
+        include/parrot/datatypes.h
+        include/parrot/enums.h
+        include/parrot/events.h
+        include/parrot/scheduler.h
+        include/parrot/exceptions.h
+        include/parrot/interpreter.h
+        include/parrot/io.h
+        include/parrot/longopt.h
+        include/parrot/multidispatch.h
+        include/parrot/resources.h
+        include/parrot/stat.h
+        include/parrot/string.h
+        include/parrot/pmc.h
+        include/parrot/warnings.h
+        src/pmc/timer.pmc
+        src/utils.c
+    ) ];
+    $data{generated_files} = [ qw(
+        include/parrot/vtable.h
+        include/parrot/core_pmcs.h
+    ) ];
+    $data{destdir} = 'runtime/parrot/include';
+    return \%data;
+}
 
-@args = qw(verbose);
+sub const_to_parrot {
+    map ".macro_const $_->[0]\t$_->[1]", @_;
+}
+
+sub const_to_perl {
+    map "use constant $_->[0] => $_->[1];", @_;
+}
+
+sub transform_name {
+    my $action = shift;
+
+    return map { [ $action->( $_->[0] ), $_->[1] ] } @_;
+}
+
+sub prepend_prefix {
+    my $prefix = shift;
+
+    transform_name( sub { $prefix . $_[0] }, @_ );
+}
+
+sub perform_directive {
+    my ($d) = @_;
+
+    my @defs = prepend_prefix $d->{prefix}, @{ $d->{defs} };
+    if ( my $subst = $d->{subst} ) {
+        @defs = transform_name( sub { local $_ = shift; eval $subst; $_ }, @defs );
+    }
+    @defs;
+}
+
+sub parse_file {
+    my ( $file, $fh ) = @_;
+
+    my ( @d, %values, $last_val, $cur, $or_continues );
+    while ( my $line = <$fh> ) {
+        if (
+            $line =~ m!
+            &gen_from_(enum|def) \( ( [^)]* ) \)
+            (?: \s+ prefix \( (\w+) \) )?
+            (?: \s+ subst \( (s/.*?/.*?/[eig]?) \) )?
+            !x
+            )
+        {
+            $cur and die "Missing '&end_gen' in $file\n";
+            $cur = {
+                type   => $1,
+                files  => [ split ' ', $2 ],
+                prefix => defined $3 ? $3 : '',
+                defined $4 ? ( subst => $4 ) : (),
+            };
+            $last_val = -1;
+        }
+        elsif ( $line =~ /&end_gen\b/ ) {
+            $cur or die "Missing &gen_from_(enum|def) in $file\n";
+            push @d, $cur;
+            $cur = undef;
+        }
+
+        $cur or next;
+
+        if ( $cur->{type} eq 'def' && $line =~ /^\s*#define\s+(\w+)\s+(-?\w+|"[^"]*")/ ) {
+            push @{ $cur->{defs} }, [ $1, $2 ];
+        }
+        elsif ( $cur->{type} eq 'enum' ) {
+            # Special case: enum value is or'd combination of other values
+            if ( $or_continues ) {
+                $or_continues = 0;
+                my $last_def = $cur->{defs}->[-1];
+                my ($k, $v) = @{$last_def};
+                my @or_values = grep {defined $_} $line =~ /^\s*(-?\w+)(?:\s*\|\s*(-?\w+))*/;
+                for my $or (@or_values) {
+                    if ( defined $values{$or} ) {
+                        $v |= $values{$or};
+                    }
+                    elsif ( $or =~ /^0/ ) {
+                        $v |= oct $or;
+                    }
+                }
+                if ($line =~ /\|\s*$/) {
+                    $or_continues = 1;
+                }
+                $values{$k} = $last_val = $v;
+                $cur->{defs}->[-1]->[1] = $v;
+            }
+            elsif ( $line =~ /^\s*(\w+)\s*=\s*(-?\w+)\s*\|/ ) {
+                my ( $k, $v ) = ( $1, $2 );
+                my @or_values = ($v, $line =~ /\|\s*(-?\w+)/g);
+                $v = 0;
+                for my $or (@or_values) {
+                    if ( defined $values{$or} ) {
+                        $v |= $values{$or};
+                    }
+                    elsif ( $or =~ /^0/ ) {
+                        $v |= oct $or;
+                    }
+                }
+                if ($line =~ /\|\s*$/) {
+                    $or_continues = 1;
+                }
+                $values{$k} = $last_val = $v;
+                push @{ $cur->{defs} }, [ $k, $v ];
+            }
+            elsif ( $line =~ /^\s*(\w+)\s*=\s*(-?\w+)/ ) {
+                my ( $k, $v ) = ( $1, $2 );
+                if ( defined $values{$v} ) {
+                    $v = $values{$v};
+                }
+                elsif ( $v =~ /^0/ ) {
+                    $v = oct $v;
+                }
+                $values{$k} = $last_val = $v;
+                push @{ $cur->{defs} }, [ $k, $v ];
+            }
+            elsif ( $line =~ m!^\s*(\w+)\s*(?:,\s*)?(?:/\*|$)! ) {
+                my $k = $1;
+                my $v = $values{$k} = ++$last_val;
+                push @{ $cur->{defs} }, [ $k, $v ];
+            }
+        }
+    }
+    $cur and die "Missing '&end_gen' in $file\n";
+
+    return @d;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
+    my $verbose = $conf->options->get('verbose');
 
     # need vtable.h now
     system( $^X, "tools/build/vtable_h.pl" );
-    my @generated = ();
-    for my $f (@files) {
-        my $in_def = '';    # in #define='def', in enum='enum'
-        my ( $inc, $prefix, $last_val, $subst, %values );
-        my ( %var, $match, $block );
-        open my $F, "<", "$f" or die "Can't open $f\n";
-        my $INC;
-        while (<$F>) {
-            if (
-                m!
-                &gen_from_(enum|def|template)\((.*?)\)
-                (\s+prefix\((\w+)\))?
-                (\s+subst\((s/.*?/.*?/\w*)\))?
-                !x
-                )
-            {
-                $inc = $2;
-                print "$2 " if $conf->options->get('verbose');
-                $prefix = ( $4 || '' );
-                $subst  = ( $6 || '' );
-                $in_def = $1;
-                $last_val = -1;
-                %values   = ();
-                open $INC, ">", "$inc.tmp" or die "Can't write $inc.tmp";
-                print {$INC} "/*\n" if $inc =~ /\.h/;
-                print {$INC} <<"EOF";
+
+    my @generated;
+    for my $file ( @{ $self->{source_files} }, @{ $self->{generated_files} } ) {
+        open my $fh, '<', $file or die "Can't open $file: $!\n";
+        my @directives = parse_file $file, $fh;
+        close $fh;
+        for my $d (@directives) {
+            my @defs = perform_directive $d;
+            for my $target ( @{ $d->{files} } ) {
+                $verbose and print "$target ";
+                my $gen;
+                if ( $target =~ /\.pm$/ ) {
+                    $gen = join "\n", &const_to_perl(@defs);
+                    $gen .= "\n1;";
+                }
+                else {
+                    $gen = join "\n", &const_to_parrot(@defs);
+                }
+                $conf->append_configure_log(qq{$self->{destdir}/$target});
+                my $target_tmp = "$target.tmp";
+                open my $out, '>', $target_tmp or die "Can't open $target_tmp: $!\n";
+
+                print $out <<"EOF";
 # DO NOT EDIT THIS FILE.
 #
 # This file is generated automatically from
-# $f by config/gen/parrot_include.pm
+# $file by config/gen/parrot_include.pm
 #
 # Any changes made here will be lost.
 #
+$gen
 EOF
-                print {$INC} "*/\n" if $inc =~ /\.h/;
-                next;
+                close $out or die "Can't write $target_tmp: $!\n";
+                $target =~ m[/] or $target = "$self->{destdir}/$target";
+                move_if_diff( $target_tmp, $target );
+                push @generated, $target;
             }
-            if (/&end_gen/) {
-                close $INC;
-                my $destfile = ( $inc =~ m[/] ) ? "$inc" : "$destdir/$inc";
-
-                #move_if_diff("$inc.tmp", "$destdir/$inc");
-                #push(@generated, "$destdir/$inc");
-                move_if_diff( "$inc.tmp", "$destfile" );
-                push( @generated, "$destfile" );
-                $in_def = '';
-                next;
-            }
-            if ( $in_def eq 'def' ) {
-                if (/#define\s+(\w+)\s+(-?\w+|".*?")/) {
-                    local $_ = "$prefix$1\t$2";
-                    eval $subst if ( $subst ne '' );
-                    print {$INC} ".constant $_\n";
-                }
-            }
-            elsif ( $in_def eq 'enum' ) {
-                if (/(\w+)\s+=\s+(-?\w+)/) {
-                    local $_;
-                    if ( defined( $values{$2} ) ) {
-                        $_        = "$prefix$1\t" . $values{$2};
-                        $last_val = $values{$2};
-                    }
-                    else {
-                        $_        = "$prefix$1\t$2";
-                        $last_val = $2;
-                    }
-                    $values{$1} = $2;
-                    eval $subst if ( $subst ne '' );
-                    print {$INC} ".constant $_\n";
-                }
-                elsif (/^\s+(\w+)\s*(?!=)/) {
-                    $last_val++;
-                    $values{$1} = $last_val;
-                    local $_ = "$prefix$1\t$last_val";
-                    eval $subst if ( $subst ne '' );
-                    print {$INC} ".constant $_\n";
-                }
-            }
-            elsif ( $in_def eq 'template' ) {
-                if (/match{(.*)}/) {
-                    $match = $1;
-                    next;
-                }
-                if (/eval{{/) {
-                    while (<$F>) {
-                        last if /}}/;
-                        $block .= $_;
-                    }
-                    next;
-                }
-                if (/$match/) {
-                    select $INC;
-                    eval $block;
-                    select STDOUT;
-                    die $@ if $@;
-                }
-            }
-
         }
-        if ( $in_def ne '' ) {
-            die "Missing '&end_gen' in $f\n";
-        }
-        close($F);
     }
-    $conf->data->set( TEMP_gen_pasm_includes => join( "\t\\\n\t", @generated ) );
+    $conf->data->set( TEMP_gen_pasm_includes => join( " \\\n    ", @generated ) );
 
-    return $self;
+    return 1;
 }
 
 1;

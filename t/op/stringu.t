@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: stringu.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: stringu.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 25;
+use Parrot::Test tests => 27;
 use Parrot::Config;
 
 =head1 NAME
@@ -23,127 +23,147 @@ Tests Parrot unicode string system.
 
 =cut
 
-pasm_output_is( <<'CODE', <<OUTPUT, "angstrom" );
-    getstdout P0
-    push P0, "utf8"
-    chr S0, 0x212B
-    print P0, S0
-    print P0, "\n"
+pir_output_is( <<'CODE', <<OUTPUT, "angstrom" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    chr $S0, 0x212B
+    print $P0, $S0
+    print $P0, "\n"
     end
+.end
 CODE
 \xe2\x84\xab
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, "escaped angstrom" );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"\x{212b}"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, "escaped angstrom" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"\x{212b}"
+    print $S0
     print "\n"
     end
+.end
 CODE
 \xe2\x84\xab
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, "escaped angstrom 2" );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\x{212b}"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, "escaped angstrom 2" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\x{212b}"
+    print $S0
     print "\n"
     end
+.end
 CODE
 aaaaaa\xe2\x84\xab
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, "escaped angstrom 3" );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\x{212b}-aaaaaa"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, "escaped angstrom 3" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\x{212b}-aaaaaa"
+    print $S0
     print "\n"
     end
+.end
 CODE
 aaaaaa\xe2\x84\xab-aaaaaa
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, 'escaped angstrom 3 \uhhhh' );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\u212b-aaaaaa"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, 'escaped angstrom 3 \uhhhh' );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\u212b-aaaaaa"
+    print $S0
     print "\n"
     end
+.end
 CODE
 aaaaaa\xe2\x84\xab-aaaaaa
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, "MATHEMATICAL BOLD CAPITAL A" );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\x{1d400}-aaaaaa"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, "MATHEMATICAL BOLD CAPITAL A" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\x{1d400}-aaaaaa"
+    print $S0
     print "\n"
     end
+.end 
 CODE
 aaaaaa\xf0\x9d\x90\x80-aaaaaa
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, 'MATHEMATICAL BOLD CAPITAL A \U' );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\U0001d400-aaaaaa"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, 'MATHEMATICAL BOLD CAPITAL A \U' );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\U0001d400-aaaaaa"
+    print $S0
     print "\n"
     end
+.end
 CODE
 aaaaaa\xf0\x9d\x90\x80-aaaaaa
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, "two upscales" );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\x{212b}-bbbbbb\x{1d400}-cccccc"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, "two upscales" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\x{212b}-bbbbbb\x{1d400}-cccccc"
+    print $S0
     print "\n"
-    length I0, S0
-    print I0
+    length $I0, $S0
+    print $I0
     print "\n"
     end
+.end
 CODE
 aaaaaa\xe2\x84\xab-bbbbbb\xf0\x9d\x90\x80-cccccc
 22
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, "two upscales - don't downscale" );
-    getstdout P0
-    push P0, "utf8"
-    set S0, unicode:"aaaaaa\x{1d400}-bbbbbb\x{212b}-cccccc"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, "two upscales - don't downscale" );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, unicode:"aaaaaa\x{1d400}-bbbbbb\x{212b}-cccccc"
+    print $S0
     print "\n"
-    length I0, S0
-    print I0
+    length $I0, $S0
+    print $I0
     print "\n"
     end
+.end
 CODE
 aaaaaa\xf0\x9d\x90\x80-bbbbbb\xe2\x84\xab-cccccc
 22
 OUTPUT
 
-pasm_output_is( <<'CODE', <<OUTPUT, '\cX, \ooo' );
-    getstdout P0
-    push P0, "utf8"
-    set S0, "ok 1\cJ"
-    print S0
-    set S0, "ok 2\012"
-    print S0
-    set S0, "ok 3\12"
-    print S0
-    set S0, "ok 4\x0a"
-    print S0
-    set S0, "ok 5\xa"
-    print S0
+pir_output_is( <<'CODE', <<OUTPUT, '\cX, \ooo' );
+.sub main :main
+    getstdout $P0
+    $P0.'encoding'("utf8")
+    set $S0, "ok 1\cJ"
+    print $S0
+    set $S0, "ok 2\012"
+    print $S0
+    set $S0, "ok 3\12"
+    print $S0
+    set $S0, "ok 4\x0a"
+    print $S0
+    set $S0, "ok 5\xa"
+    print $S0
     end
+.end
 CODE
 ok 1
 ok 2
@@ -326,6 +346,35 @@ CODE
 1102269
 OUTPUT
 
+# Tests for .CCLASS_ANY
+pir_output_is( <<'CODE', <<'OUTPUT', "CCLASS_ANY in unicode" );
+.sub main
+    .include 'cclass.pasm'
+    .local string s
+    s = unicode:" \t\u207babc\n\u2000\u2009"
+    $I9 = length s
+    $I0 = is_cclass .CCLASS_ANY, s, 0
+    print $I0
+    $I0 = is_cclass .CCLASS_ANY, s, 1
+    print $I0
+    $I0 = is_cclass .CCLASS_ANY, s, 2
+    print $I0
+    $I0 = is_cclass .CCLASS_ANY, s, $I9
+    print $I0
+    $I0 = find_not_cclass .CCLASS_ANY, s, 0, $I9
+    print $I0
+    $I0 = find_not_cclass .CCLASS_ANY, s, $I0, $I9
+    print $I0
+    $I0 = find_cclass .CCLASS_ANY, s, $I0, $I9
+    print $I0
+    $I0 = find_cclass .CCLASS_ANY, s, 2, $I9
+    print $I0
+    print "\n"
+.end
+CODE
+11109992
+OUTPUT
+
 SKIP: {
     skip "Tests seem to fail on big endian machines with icu", 2 if $PConfig{byteorder} eq '4321';
 
@@ -356,9 +405,10 @@ CODE
 1102269
 OUTPUT
 
-    # Concatenate unicode: with iso-8859-1; RT #39930 if no icu
+    # Concatenate unicode: with iso-8859-1
+    # See RT #39930 for discussion
     pir_output_is(
-        <<'CODE', <<"OUTPUT", "Concat unicode with iso-8859-1", $PConfig{has_icu} ? () : ( todo => 'RT #39930' ) );
+        <<'CODE', <<"OUTPUT", "Concat unicode with iso-8859-1" );
 .sub main
     $S0 = unicode:"A"
     $S1 = ascii:"B"
@@ -381,9 +431,26 @@ OUTPUT
 CODE
 AB
 AB
-A\x00B\x00
+AB
 OUTPUT
 }
+
+pasm_output_is( <<'CODE', <<OUTPUT, "UTF-8 and Unicode literals", todo => 'TT #24' );
+    set S0, unicode:"\u00ab"
+    length I0, S0
+    say I0
+    say S0
+    set S0, iso-8859-1:"\xab"
+    length I0, S0
+    say I0
+    say S0
+    end
+CODE
+1
+\xc2\xab
+1
+\xc2\xab
+OUTPUT
 
 # Local Variables:
 #   mode: cperl

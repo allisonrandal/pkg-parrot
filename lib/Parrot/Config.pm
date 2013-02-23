@@ -1,3 +1,5 @@
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: Config.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -25,13 +27,14 @@ if ($@) {
 
 use Exporter;
 
-use vars qw(@ISA @EXPORT %PConfig);
+use vars qw(@ISA @EXPORT %PConfig %PConfig_Temp);
 
 @ISA = qw(Exporter);
 
-@EXPORT = qw(%PConfig);
+@EXPORT = qw(%PConfig %PConfig_Temp);
 
-%PConfig = %Parrot::Config::Generated::PConfig;
+%PConfig      = %Parrot::Config::Generated::PConfig;
+%PConfig_Temp = %Parrot::Config::Generated::PConfig_Temp;
 
 1;
 

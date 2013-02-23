@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: md5.t 17575 2007-03-17 22:49:07Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: md5.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -18,7 +18,7 @@ t/library/md5.t - test MD5 library
 
 =head1 DESCRIPTION
 
-Tests the MD5 library. You can create the test results using using
+Tests the MD5 library. You can create the test results using
 the command-line md5sum like this:
 
  $ echo -n Hello World! | md5sum

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: subclass_with_pir_method.t 17094 2007-02-20 20:10:40Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: subclass_with_pir_method.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -30,14 +30,15 @@ pir_output_is(
 .sub main :main
   new $P0, 'PerlString'
   $P0.'perl_printhi'()
-  getclass $P2, 'PerlString'
+  get_class $P2, 'PerlString'
   subclass $P0, $P2, 'NewPerlString'
   $P0.'perl_printhi'()
   new $P1, 'NewPerlString'
   $P1.'perl_printhi'()
 .end
 
-.HLL 'Perl', 'perl_group'
+.HLL 'Perl'
+.loadlib 'perl_group'
 .namespace ['PerlString']
 .sub 'perl_printhi' :method
     print "HI from PerlString\n"
@@ -51,11 +52,12 @@ OUTPUT
 
 pir_output_is(
     <<'CODE', <<'OUTPUT', "subclass with pir method - .HLL", todo => "PMCs don't obey HLL namespaces" );
-.HLL 'Perl', 'perl_group'
+.HLL 'Perl'
+.loadlib 'perl_group'
 .sub main :main
   new $P0, 'PerlString'
   $P0.'perl_printhi'()
-  getclass $P2, 'PerlString'
+  get_class $P2, 'PerlString'
   subclass $P0, $P2, 'NewPerlString'
   $P0.'perl_printhi'()
   new $P1, 'NewPerlString'

@@ -1,5 +1,5 @@
 #!./parrot
-# Copyright (C) 2006-2007, The Perl Foundation.
+# Copyright (C) 2006-2008, Parrot Foundation.
 
 =head1 NAME
 
@@ -27,9 +27,9 @@ Test cases taken from base64.t of MIME::Base64.
     load_bytecode 'compilers/json/JSON.pbc'
 
     .local pmc plan, is, ok
-    plan = get_hll_global ['Test::More'], 'plan'
-    is   = get_hll_global ['Test::More'], 'is'
-    ok   = get_hll_global ['Test::More'], 'ok'
+    plan = get_hll_global [ 'Test'; 'More' ], 'plan'
+    is   = get_hll_global [ 'Test'; 'More' ], 'is'
+    ok   = get_hll_global [ 'Test'; 'More' ], 'ok'
 
     plan(550)
 
@@ -377,7 +377,7 @@ END_JSON
     enc_sub = get_global [ "MIME"; "Base64" ], 'encode_base64'
 
     .local pmc is
-    is   = get_hll_global ['Test::More'], 'is'
+    is   = get_hll_global [ 'Test'; 'More' ], 'is'
 
     .local string result_encode
     result_encode = enc_sub( plain )
@@ -397,7 +397,7 @@ END_JSON
     eight_to_six = get_global 'eight_to_six'
 
     .local pmc is
-    is   = get_hll_global ['Test::More'], 'is'
+    is   = get_hll_global [ 'Test'; 'More' ], 'is'
 
     .local string result_decode
     result_decode = dec_sub( base64 )
@@ -409,3 +409,9 @@ END_JSON
 Bernhard Schmalhofer <Bernhard Schmalhofer@gmx.de>
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

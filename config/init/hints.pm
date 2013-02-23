@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: hints.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: hints.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -16,50 +16,61 @@ package init::hints;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use File::Spec::Functions qw/catfile/;
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step;
-
-$description = 'Loading platform and local hints files';
-
-@args = qw( cc verbose define );
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Load platform and local hints files};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
 
     my $verbose = $conf->options->get('verbose');
+    print "\n[ " if $verbose;
 
     my $hints_used = 0;
 
-    my $hints = "init::hints::" . lc($^O);
+    my $osname = lc( $conf->data->get_p5('OSNAME') );
+    my $hints_file = catfile('config', 'init', 'hints', "$osname.pm");
+    if ( -f $hints_file ) {
+        my $hints_pkg = "init::hints::" . $osname;
 
-    print "[ $hints " if $verbose;
+        print "$hints_pkg " if $verbose;
 
-    eval "use $hints";
-    die $@ if $@;
+        eval "use $hints_pkg";
+        die $@ if $@;
 
-    # call the runstep method if it exists.  Otherwise the step must have done
-    # it's work when it was loaded.
-    $hints->runstep( $conf, @_ ) if $hints->can('runstep');
-    $hints_used++;
-
-    $hints = "init::hints::local";
-    print "$hints " if $verbose;
-    eval "use $hints";
-    unless ($@) {
-        $hints->runstep( $conf, @_ ) if $hints->can('runstep');
+        # Call the runstep method if it exists.
+        # Otherwise the step must have done its work when it was loaded.
+        $hints_pkg->runstep( $conf, @_ ) if $hints_pkg->can('runstep');
         $hints_used++;
+
+        $hints_pkg = "init::hints::local";
+        print "$hints_pkg " if $verbose;
+        eval "use $hints_pkg";
+
+        unless ($@) {
+            $hints_pkg->runstep( $conf, @_ ) if $hints_pkg->can('runstep');
+            $hints_used++;
+        }
+    }
+    else {
+        print "No $hints_file found.  " if $verbose;
     }
 
-    if ( $hints_used == 0 ) {
-        print "(no hints) " if $verbose;
+    if ( $hints_used == 0 and $verbose ) {
+        print "(no hints) ";
     }
 
     print "]" if $verbose;
 
-    return $self;
+    return 1;
 }
 
 1;

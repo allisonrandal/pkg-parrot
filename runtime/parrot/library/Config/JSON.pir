@@ -8,7 +8,7 @@ Provides a simple wrapper to read and write JSON config files.
 
 =head2 ReadConfig(filename)
 
-Given a filename, parse the file containing valid JSON and return a 
+Given a filename, parse the file containing valid JSON and return a
 PMC containing the data.
 
 If the data is not valid, an exception will be thrown.
@@ -20,17 +20,17 @@ If the data is not valid, an exception will be thrown.
 
     # Slurp in the file
     .local string text
-    .local pmc pio
+    .local pmc fh
 
-    pio = open filename, '<'
-    if pio goto slurp_file
-    $P0 = new .Exception
+    fh = open filename, 'r'
+    if fh goto slurp_file
+    $P0 = new 'Exception'
     $S0 = concat "can't open file: ", filename
-    $P0['_message'] = $S0
+    $P0 = $S0
     throw $P0
 
   slurp_file:
-    text = pio.'slurp'(filename)
+    text = fh.'readall'()
 
     # convert the text to an object and return it.
     load_bytecode 'compilers/json/JSON.pbc'
@@ -38,7 +38,7 @@ If the data is not valid, an exception will be thrown.
     .local pmc JSON, config
     JSON = compreg "JSON"
 
-    .return JSON(text)
+    .tailcall JSON(text)
 .end
 
 =head2 WriteConfig(config, filename, ?:compact)
@@ -72,7 +72,7 @@ the rendered JSON will not be formatted. The default is false.
     output = _json( config, expanded )
 
     # write out the file..
-    $P1 = open filename, '>'
+    $P1 = open filename, 'w'
     print $P1, output
     close $P1
 
@@ -83,4 +83,4 @@ the rendered JSON will not be formatted. The default is false.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

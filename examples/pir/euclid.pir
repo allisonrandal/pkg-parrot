@@ -1,7 +1,7 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
+# Copyright (C) 2001-2008, Parrot Foundation.
 # This program is free software. It is subject to the same
 # license as Perl itself.
-# $Id: euclid.pir 18563 2007-05-16 00:53:55Z chromatic $
+# $Id: euclid.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -32,16 +32,16 @@ Page 2:
 =cut
 
 .sub 'example' :main
-        I1 = 96
-        I2 = 64
+        $I1 = 96
+        $I2 = 64
         print  "Algorithm E (Euclid's algorithm)\n"
-e1:     I4 = mod I1, I2
-e2:     unless I4 goto done
-e3:     I1 = I2
-        I2 = I4
+e1:     $I4 = mod $I1, $I2
+e2:     unless $I4 goto done
+e3:     $I1 = $I2
+        $I2 = $I4
         branch e1
 done:   print "The greatest common denominator of 96 and 64 is "
-        print  I2
+        print  $I2
         print  ".\n"
 .end
 
@@ -49,4 +49,4 @@ done:   print "The greatest common denominator of 96 and 64 is "
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: zeta.pm 18405 2007-05-03 01:40:40Z jkeenan $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: zeta.pm 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 
@@ -10,24 +10,25 @@ t/configure/testlib/init/zeta.pm - Module used in configuration tests
 package init::zeta;
 use strict;
 use warnings;
-use vars qw($description @args);
-# use vars qw($description @args $step);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step;
-
-$description = 'Determining if your computer does zeta';
-@args = ();
-
-my $result = q|Hello world|;
-sub runstep {
-    my ( $self, $conf ) = @_;
-    $self->set_result( $result );
-    return $self;
-#    $self->result();
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Determining if your computer does zeta};
+    $data{args}        = [ qw( ) ];
+    $data{result}      = q{};
+    return \%data;
 }
 
+my $result = q|Goodbye, cruel world|;
+
+sub runstep {
+    my ( $self, $conf ) = @_;
+    $self->set_result($result);
+    return;
+}
 
 1;
 

@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: integer.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: integer.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 57;
+use Parrot::Test tests => 56;
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ t/op/integer.t - Integer Registers
 
 =head1 SYNOPSIS
 
-        % prove t/op/integer.t
+    % prove t/op/integer.t
 
 =head1 DESCRIPTION
 
@@ -1052,9 +1052,9 @@ pasm_output_is( <<CODE, <<OUTPUT, "set_n_i" );
         print   "\\n"
         end
 CODE
-0.000000
-2147483647.000000
--2147483648.000000
+0
+2147483647
+-2147483648
 OUTPUT
 
 pasm_output_is( <<CODE, <<OUTPUT, "cleari" );
@@ -1269,13 +1269,6 @@ OUTPUT
 pasm_error_output_like( <<'CODE', <<OUTPUT, "div_i_i_ic by zero" );
         set I1, 10
         div I2, I1, 0
-        end
-CODE
-/.*Divide by zero.*/
-OUTPUT
-
-pasm_error_output_like( <<'CODE', <<OUTPUT, "div_i_ic_ic by zero" );
-        div I2, 0, 0
         end
 CODE
 /.*Divide by zero.*/

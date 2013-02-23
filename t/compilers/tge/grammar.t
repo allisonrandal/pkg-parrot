@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: grammar.t 17577 2007-03-17 22:51:14Z paultcochrane $
+# Copyright (C) 2005-2006, Parrot Foundation.
+# $Id: grammar.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -30,30 +30,39 @@ pir_output_is( <<'CODE', <<'OUT', 'test compiling anonymous and named grammars' 
 .sub _main :main
     load_bytecode 'TGE.pbc'
 
-    # Load the grammar in a string
-    .local string source
-    source = <<'GRAMMAR'
-    transform min (Leaf) :language('PIR') { 
+    # Compile a grammar from the source
+    .local pmc grammar
+    $P1 = new ['TGE';'Compiler']
+    grammar = $P1.'compile'(<<'GRAMMAR')
+    transform min (Leaf) :language('PIR') {
         $P1 = getattribute node, "value"
        .return ($P1)
     }
 GRAMMAR
-
-    # Compile a grammar from the source 
-    .local pmc grammar
-    $P1 = new 'TGE::Compiler'
-    grammar = $P1.'compile'(source)
     $S1 = typeof grammar
     say $S1
 
     # Add the grammar keyword and recompile
-    source = "grammar TreeMin is TGE::Grammar;\n\n" . source
-    grammar = $P1.'compile'(source)
+    grammar = $P1.'compile'(<<'GRAMMAR')
+    grammar TreeMin is TGE;Grammar;
+    transform min (Leaf) :language('PIR') {
+        $P1 = getattribute node, "value"
+       .return ($P1)
+    }
+GRAMMAR
     $S1 = typeof grammar
     say $S1
 
     # Add a POD comment and recompile
-    source = "=head NAME\n\n  TreeMin\n\n=cut\n\n" . source
+    .local string source
+    source = "=head NAME\n\n TreeMin2\n\n=cut\n\n"
+    source .= <<'GRAMMAR'
+    grammar TreeMin2 is TGE;Grammar;
+    transform min (Leaf) :language('PIR') {
+        $P1 = getattribute node, "value"
+       .return ($P1)
+    }
+GRAMMAR
     grammar = $P1.'compile'(source)
     $S1 = typeof grammar
     say $S1
@@ -61,7 +70,7 @@ GRAMMAR
 CODE
 AnonGrammar
 TreeMin
-TreeMin
+TreeMin2
 OUT
 
 pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' );
@@ -74,9 +83,9 @@ pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' )
     # Load the grammar in a string
     .local string source
     source = <<'GRAMMAR'
-    grammar TreeMin is TGE::Grammar;
+    grammar TreeMin is TGE;Grammar;
 
-    transform min (Leaf) :language('PIR') { 
+    transform min (Leaf) :language('PIR') {
         $P1 = getattribute node, "value"
        .return ($P1)
     }
@@ -89,9 +98,9 @@ pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' )
         .local pmc right_val
 
         left = getattribute node, "left"
-        left_val = tree.get('min', left)
+        left_val = tree.'get'('min', left)
         right = getattribute node, "right"
-        right_val = tree.get('min', right)
+        right_val = tree.'get'('min', right)
 
         min = left_val
         if min <= right_val goto got_min
@@ -101,22 +110,22 @@ pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' )
     }
 
     # find the global minimum and propagate it back down the tree
-    transform gmin (ROOT) :language('PIR') { 
+    transform gmin (ROOT) :language('PIR') {
         .local pmc gmin
-        gmin = new Integer
-        gmin = tree.get('min', node)
+        gmin = new 'Integer'
+        gmin = tree.'get'('min', node)
         .return (gmin)
     }
 
-    transform gmin (Branch) :applyto('left') :language('PIR') { 
+    transform gmin (Branch) :applyto('left') :language('PIR') {
         .local pmc gmin
-        gmin = tree.get('gmin', node)
+        gmin = tree.'get'('gmin', node)
         .return (gmin)
     }
 
     transform gmin (Branch) :applyto('right') :language('PIR') {
         .local pmc gmin
-        gmin = tree.get('gmin', node)
+        gmin = tree.'get'('gmin', node)
         .return (gmin)
     }
 
@@ -126,7 +135,7 @@ pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' )
         .local pmc newnode
 
         newnode = new 'Leaf'
-        $P1 = tree.get('gmin', node)
+        $P1 = tree.'get'('gmin', node)
         setattribute newnode, 'value', $P1
         .return(newnode)
     }
@@ -138,8 +147,8 @@ pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' )
         newnode = new 'Branch'
         left_child = getattribute node, 'left'
         right_child = getattribute node, 'right'
-        $P1 = tree.get('result', left_child)
-        $P2 = tree.get('result', right_child)
+        $P1 = tree.'get'('result', left_child)
+        $P2 = tree.'get'('result', right_child)
 
         setattribute newnode, 'left', $P1
         setattribute newnode, 'right', $P2
@@ -147,9 +156,9 @@ pir_output_is( <<'CODE', <<'OUT', 'complete example: Branch/Leaf tree grammar' )
     }
 GRAMMAR
 
-    # Compile a grammar from the source 
+    # Compile a grammar from the source
     .local pmc grammar
-    $P1 = new 'TGE::Compiler'
+    $P1 = new ['TGE';'Compiler']
     grammar = $P1.'compile'(source)
 
     # Build up the tree for testing
@@ -158,10 +167,10 @@ GRAMMAR
 
     # Apply the grammar to the test tree
     .local pmc AGI
-    AGI = grammar.apply(tree)
+    AGI = grammar.'apply'(tree)
 
     # Retrieve the value of a top level attribute
-    $P4 = AGI.get('gmin')
+    $P4 = AGI.'get'('gmin')
     print "the global minimum attribute value is: "
     print $P4
     print " of type: "
@@ -170,7 +179,7 @@ GRAMMAR
     print "\n"
 
     # Rerieve the transformed tree
-    $P5 = AGI.get('result')
+    $P5 = AGI.'get'('result')
 
     $P6 = getattribute tree, 'left'
     $P7 = getattribute $P6, 'left'
@@ -240,7 +249,7 @@ GRAMMAR
     .param int value
     .local pmc newnode
     newnode = new 'Leaf'
-    $P1 = new Integer
+    $P1 = new 'Integer'
     $P1 = value
     setattribute newnode, 'value', $P1
     .return(newnode)
@@ -276,36 +285,36 @@ TODO: {
     # Load the grammar in a string
     .local string source
     source = <<'GRAMMAR'
-    grammar TreeMin is TGE::Grammar;
+    grammar TreeMin is TGE;Grammar;
 
-    transform tiddlywinks (ROOT) :language('PIR') { 
+    transform tiddlywinks (ROOT) :language('PIR') {
         say 'in tiddlywinks'
         tree.'get'('twister', node, 'pingpong')
         tree.'get'('twister', node, 'pongpong')
     }
-    transform twister (pingpong) :language('PIR') { 
+    transform twister (pingpong) :language('PIR') {
         say 'in first twister'
     }
-    transform twister (pongpong) :language('PIR') { 
+    transform twister (pongpong) :language('PIR') {
         say 'in second twister'
     }
 GRAMMAR
 
 
     .local object testing
-    testing = new .Hash
+    testing = new 'Hash'
 
-    # Compile a grammar from the source 
+    # Compile a grammar from the source
     .local pmc grammar
-    $P1 = new 'TGE::Compiler'
+    $P1 = new 'TGE;Compiler'
     grammar = $P1.'compile'(source)
 
     # Apply the grammar to the test tree
     .local pmc AGI
-    AGI = grammar.apply(testing)
+    AGI = grammar.'apply'(testing)
 
     # Retrieve the value of a top level attribute
-    $P4 = AGI.get('tiddlywinks')
+    $P4 = AGI.'get'('tiddlywinks')
     end
 .end
 

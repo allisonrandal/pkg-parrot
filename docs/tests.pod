@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: tests.pod 18617 2007-05-22 02:53:55Z jkeenan $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: tests.pod 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -24,20 +24,14 @@ testj>. It works just like C<make test>, but uses the JIT engine when possible.
 C<make languages-test> runs the test suite for most language implementations
 in the languages directory.
 
-=head2 Submitting smoke test results
+=head2 Submitting smolder test results
 
-Parrot has a status page with smoke test results
-L<http://smoke.parrotcode.org/smoke/>. You can supply new tests
-results by just running C<make smoke>. It will run the same tests as
-C<make test> would, but will additionally create a HTML table with the test
-results. At the end, it will try to upload the test results to the
-smoke server.
+Parrot has a status page with smoke test results at
+L<http://smolder.plusthree.com/app/public_projects/details/8>.
 
-It is also possible to run a smoke test on JIT. For that, try running
-C<make smokej>.
-
-C<make languages-smoke> does smoke testing for most language implementations
-in the languages directory.
+You can supply new tests results by just running C<make smoke>. 
+It will run the same tests as C<make test> would, but will upload
+the test results to the website.
 
 =head1 Location of the test files
 
@@ -68,7 +62,7 @@ for Perl 5 based test scripts.
 =head2 Testing Parrot Assembler
 
 PASM tests are mostly used for testing ops.  Appropriate test files for basic
-ops are F<t/op/*.t>.  Perl Magic Cookies are tested in F<t/pmc/*.t>.  Add the
+ops are F<t/op/*.t>.  Polymorphic Containers are tested in F<t/pmc/*.t>.  Add the
 new test like this:
 
     pasm_output_is(<<'CODE', <<'OUTPUT', "name for test");
@@ -108,20 +102,20 @@ C source tests are usually located in F<t/src/*.t>.  A simple test looks like:
     static opcode_t *the_test(Parrot_Interp, opcode_t *, opcode_t *);
 
     int main(int argc, char* argv[]) {
-        Parrot_Interp interpreter;
+        Parrot_Interp interp;
         interpreter = Parrot_new(NULL);
 
         if (!interpreter)
             return 1;
 
-        Parrot_run_native(interpreter, the_test);
+        Parrot_run_native(interp, the_test);
         printf("done\n");
     fflush(stdout);
         return 0;
     }
 
     static opcode_t*
-    the_test(Parrot_Interp interpreter,
+    the_test(PARROT_INTERP,
         opcode_t *cur_op, opcode_t *start)
     {
         /* Your test goes here. */
@@ -134,7 +128,7 @@ C source tests are usually located in F<t/src/*.t>.  A simple test looks like:
     OUTPUT
 
 Note that it's always a good idea to output "done" to confirm that the compiled
-code executed completely. When mixing C<printf> and C<PIO_printf> always append
+code executed completely. When mixing C<printf> and C<Parrot_io_printf> always append
 a C<fflush(stdout);> after the former.
 
 =head2 Testing Perl5 components
@@ -190,6 +184,19 @@ F<t/postconfigure/>, F<t/tools/>, and so on.
 
 It is our objective to test all Perl 5 components of the Parrot distribution
 using the methodology above.
+
+=head3 Build Tools Tests
+
+The files in F<t/postconfigure> are tests for build system. The build tools
+tests are intended to be run after someone has made changes in modules such as
+F<lib/Parrot/Pmc2cUtils/>, F<Ops2cUtils/> and F<Ops2pmutils/>.  They're set up
+to be run after F<Configure.pl> has completed but before make has been invoked.
+(In fact, they will generate errors if make has completed.)  You can run them
+with any of the following:
+ 
+     perl Configure.pl --test
+     perl Configure.pl --test=build
+     make buildtools_tests  (following Configure.pl)
 
 =head2 Testing language implementations
 

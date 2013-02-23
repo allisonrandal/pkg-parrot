@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: file_metadata.t 19061 2007-06-17 14:22:00Z paultcochrane $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: file_metadata.t 37200 2009-03-08 11:46:01Z fperrad $
 
 use strict;
 use warnings;
@@ -11,7 +11,6 @@ use File::Basename qw( fileparse );
 use File::Spec::Functions qw( catfile splitpath splitdir );
 use File::Spec::Unix;
 use Parrot::Config;
-use Parrot::Revision;
 use ExtUtils::Manifest qw( maniread );
 
 =head1 NAME
@@ -34,6 +33,7 @@ Note: These tests would benefit from judicial application of Iterators.
 =cut
 
 my $cmd = -d '.svn' ? 'svn' : 'svk';
+my @git_svn_metadata;    # set in BEGIN block
 
 # how many files to check at a time. May have to lower this when we run
 # this on systems with finicky command lines.
@@ -43,10 +43,43 @@ my $chunk_size = 100;
 my @manifest_files =
     sort keys %{ maniread( catfile $PConfig{build_dir}, 'MANIFEST' ) };
 
+my $mime_types = get_attribute( 'svn:mime-type', @manifest_files );
+
+## only certain mime types are expected.
+
+
+VALID_MIME: {
+
+    my $test        = 'svn:mime-type';
+    my @expected    = qw[
+        text/css
+        text/plain
+        text/script
+        text/xml
+        application/octet-stream
+        application/postscript
+        image/gif
+        image/png
+    ];
+    push @expected, 'text/plain; charset=UTF-8';
+
+    my $expected    = join '|', @expected, "";
+    my $expected_re = qr{^(${expected})$};
+
+    my @failed      = verify_attributes( $test, $expected_re, 0, $mime_types, \@manifest_files, 1 );
+
+    if (@failed) {
+        my $failure = join q{}, "Invalid svn:mime-types found in the following files:\n",
+            map { "$_\n" } @failed;
+        is( $failure, '', $test );
+    }
+    else {
+        pass($test);
+    }
+}    # VALID_MIME
+
 ## all test files must have "text/plain" mime-type. Assume anything in the
 ## repository with a .t is test file.
-
-my $mime_types = get_attribute( 'svn:mime-type', @manifest_files );
 
 TEST_MIME: {
 
@@ -56,14 +89,16 @@ TEST_MIME: {
     my $test        = 'svn:mime-type';
     my $expected    = 'text/plain';
     my @failed      = verify_attributes( $test, $expected, 0, $mime_types, \@test_files );
+    my $test_name   = "$test for .t files";
 
     if (@failed) {
         my $failure = join q{}, "Set $test with:\n",
-            map { " $cmd ps $test '$expected' $_;\n" } @failed;
-        is( $failure, '', $test );
+            map { " $cmd ps $test '$expected' $_\n" } @failed;
+        $failure = "git svn metadata $test incorrect for @failed" if -d '.git';
+        is( $failure, '', $test_name );
     }
     else {
-        pass($test);
+        pass($test_name);
     }
 }    # TEST_MIME
 
@@ -91,7 +126,8 @@ KEYWORD_EXP: {
 
     if (@failed) {
         my $failure = join q{}, "Set $test with:\n",
-            map { " $cmd ps $test '$expected' $_;\n" } @failed;
+            map { " $cmd ps $test \"$expected\" $_\n" } @failed;
+        $failure = "git svn metadata $test incorrect for @failed" if -d '.git';
         is( $failure, '', $test );
     }
     else {
@@ -108,10 +144,10 @@ KEYWORD_EXP: {
 ## files with LF are the ones we expect, and that the rest are native.
 
 our $lf_files_regexp = qr{
-    ^examples/shootout/.*\.input$ |
-    ^examples/shootout/.*\.output$ |
+    ^examples/shootout/.*\.pir_input$ |
+    ^examples/shootout/.*\.pir_output$ |
     ^t/compilers/pge/p5regex/re_tests$ |
-    ^t/library/perlhist.txt$ |
+    ^t/library/perlhist\.txt$ |
     ^t/op/sprintf_tests$
      }x;
 
@@ -139,7 +175,8 @@ NATIVE_EOL_STYLE: {
 
     if (@failed) {
         my $failure = join q{}, "Set $test with:\n",
-            map { " $cmd ps $test '$expected' $_;\n" } @failed;
+            map { " $cmd ps $test $expected $_\n" } @failed;
+        $failure = "git svn metadata $test incorrect for @failed" if -d '.git';
         is( $failure, '', $test_name );
     }
     else {
@@ -170,7 +207,8 @@ LF_EOL_STYLE: {
 
     if (@failed) {
         my $failure = join q{}, "Set $test with:\n",
-            map { " $cmd ps $test '$expected' $_;\n" } @failed;
+            map { " $cmd ps $test $expected $_\n" } @failed;
+        $failure = "git svn metadata $test incorrect for @failed" if -d '.git';
         is( $failure, '', $test_name );
     }
     else {
@@ -179,48 +217,30 @@ LF_EOL_STYLE: {
 
 }    # LF_EOL_STYLE
 
-=for skip
-
-# When unskipped, rewrite to conform to other tests.
-
-SKIP: {
-    skip 'custom svn keywords not yet supported' => 1;
-## Copyright keyword
-COPYRIGHT: {
-    my $readme = catfile( $PConfig{build_dir}, 'README' );
-    open my $IN, '<' => $readme
-        or die qq|can't open $readme: $!|;
-
-    my $official_copyright;
-    while( <$IN> )
-    {
-        next unless m/^Parrot is (Copyright .*)/;
-        $official_copyright = $1;
-        last;
-    }
-    fail('official copyright not found') and last COPYRIGHT
-        unless length $official_copyright;
-
-    @cmd = qw(pg Copyright);
-
-    $msg = 'Copyright property matches official copyright';
-    diag $msg;
-
-    is(
-        sub{ my $r = qx($cmd @cmd $_); chomp $r; "$_: $r" }->(),
-        "$_: $official_copyright",
-        "$msg ($_)"
-    ) for @manifest_files;
-} # COPYRIGHT
-} # SKIP
-
-=cut
-
 BEGIN {
-    unless ( $Parrot::Revision::current or `svk ls .` ) {
+    if ( -d '.git' ) {
+        my $git_svn_metadata = catfile(qw/.git svn git-svn unhandled.log/);
+        if ( -e $git_svn_metadata ) {
+            diag 'Checking git svn metadata';
+            plan tests => 5;
+
+            # Read the file once and store lines
+            if ( !open my $git_svn_metadata_fh, '<', $git_svn_metadata ) {
+                diag "trouble opening metadata file: $git_svn_metadata";
+            }
+            else {
+                @git_svn_metadata = <$git_svn_metadata_fh>;
+                close $git_svn_metadata_fh;
+            }
+        }
+        else {
+            plan skip_all => q{git svn file metadata not retained};
+        }
+    }
+    elsif ( !( (-d '.svn' && `svn info .`) or `svk info .` ) ) {
         plan skip_all => 'not a working copy';
     }
-    else { plan tests => 4 }
+    else { plan tests => 5 }
 }
 
 #
@@ -233,19 +253,13 @@ sub at_a_time {
     my $sub   = shift;
     my @list  = @_;
 
-    return unless $count;
     return unless $sub;
     return unless @list;
 
-    my $pos = 0;
-
-    while ( $pos < @list ) {
-        my $start = $pos;
-        my $end   = $pos + $count - 1;
-        if ( $end >= @list ) { $end = @list - 1 }
-        my @sublist = @list[ $start .. $end ];
+    while (@list) {
+        $count = @list if $count > @list;
+        my @sublist = splice @list, 0, $count;
         $sub->(@sublist);
-        $pos += $count;
     }
 
     return;
@@ -259,11 +273,19 @@ sub get_attribute {
 
     diag "Collecting $attribute attributes...\n";
 
-    my %results;
-    map { $results{$_} = undef } @list;
+    my %results = map { $_ => undef } @list;
+
+    if ( -d '.git' ) {
+        return git_svn_metadata( $attribute, \%results );
+    }
+
+    # choose a chunk size such that we don't end calling svn on
+    # a single file (which causes the output format to change).
+    my $csize = $chunk_size;
+    $csize-- while ( ( $csize > 1 ) && ( @list % $csize == 1 ) );
 
     at_a_time(
-        $chunk_size,
+        $csize,
         sub {
             my @partial_list = @_;
 
@@ -278,11 +300,9 @@ sub get_attribute {
                     my @directories = splitdir $directories;
 
                     # put it back together as a unix path (to match MANIFEST)
-                    $full_path = File::Spec::Unix->catpath(
-                        $volume,
-                        File::Spec::Unix->catdir(@directories),
-                        $file
-                    );
+                    $full_path =
+                        File::Spec::Unix->catpath( $volume, File::Spec::Unix->catdir(@directories),
+                        $file );
 
                     # store the attribute into the results hash
                     $results{$full_path} = $attribute;
@@ -301,6 +321,9 @@ sub verify_attributes {
     my $exact     = shift;    # should this be an exact match?
     my $results   = shift;    # the results hash ref: file -> value
     my $files     = shift;    # an arrayref of files we care about. (undef->all)
+    my $allow_empty = shift;  # should we allow blank values? (default: no)
+
+    $allow_empty = 0 unless defined $allow_empty;
 
     my @files;
     if ( defined($files) ) {
@@ -313,6 +336,9 @@ sub verify_attributes {
     my @failures;
     foreach my $file ( sort @files ) {
         my $actual = $results->{$file};
+        if ($allow_empty && ! defined $actual) {
+            $actual = "";
+        }
         if ( !defined $actual ) {
             push @failures, $file;
             next;
@@ -330,6 +356,26 @@ sub verify_attributes {
     }
 
     return @failures;
+}
+
+sub git_svn_metadata {
+    my $attribute   = shift;
+    my $results_ref = shift;
+
+GIT_SVN:
+    for my $line (@git_svn_metadata) {
+
+        # Determine file name and attribute value for the files we want
+        my ( $filename, $value ) = $line =~ m/prop: (\S+) $attribute (\S+)/;
+        next GIT_SVN unless $filename && exists $results_ref->{$filename};
+
+        # Unescape hex values that are in git-svn log and remove any newlines
+        $value =~ s/%([0-9A-F]{2})/chr(hex($1))/gie;
+        chomp($value);
+
+        $results_ref->{$filename} = $value;
+    }
+    return $results_ref;
 }
 
 # Local Variables:

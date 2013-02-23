@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: basic.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: basic.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 23;
+use Parrot::Test tests => 24;
 
 =head1 NAME
 
@@ -107,6 +107,24 @@ pasm_output_is( <<'CODE', <<'OUTPUT', "bsr_i" );
 
 LAB1:   print   "lab 1\n"
         ret
+CODE
+start
+lab 1
+done
+OUTPUT
+
+pasm_output_is( <<'CODE', <<'OUTPUT', "local_branch_c_i" );
+        print    "start\n"
+
+        new P0, 'ResizableIntegerArray'
+
+        local_branch P0, LAB1
+
+        print    "done\n"
+        end
+
+LAB1:   print    "lab 1\n"
+        local_return P0
 CODE
 start
 lab 1

@@ -1,5 +1,8 @@
 #! perl
 
+# Copyright (C) 2003-2006, Parrot Foundation.
+# $Id: kate_syntax.pl 37201 2009-03-08 12:07:48Z fperrad $
+
 # Create Kate syntax highlighting XML file for IMCC
 # Language:     Parrot IMCC
 # Maintainer:   Andy Bussey <andybussey@yahoo.co.uk>, Parrot Team
@@ -19,21 +22,21 @@ if ( $parrot eq '-h' ) {
 
 $parrot =~ s/\/$//;
 
-my @imcc_oplike = qw(.sym .arg prototyped non_prototyped .class
-    .endclass .param inc dec new defined addr global clone saveall
-    restoreall);
-my @imcc_spdirec = qw(.pcc_call .result .return .local .const .globalconst
+my @imcc_oplike = qw( .sym .arg prototyped non_prototyped .class
+    .endclass .param inc dec new defined global clone );
+
+my @imcc_spdirec = qw(.call .result .return .local .const .globalconst
     end goto if unless call branch jump jsr ret invoke invokecc throw
-    rethrow die_hard .emit .eom .sub .end .pcc_begin
-    .pcc_end .pcc_sub .pcc_begin_return .pcc_end_return .pcc_begin_yield
-    .pcc_end_yield .loadlib .namespace .endnamespace .macro .include);
+    rethrow die_hard .emit .eom .sub .end .begin_call
+    .end_call .pcc_sub .begin_return .end_return .begin_yield
+    .end_yield .loadlib .namespace .endnamespace .macro .include);
 my @pod_start         = qw(head[1-6] over back item for begin end pod);
 my $pod_start_rx      = join '|', @pod_start;
 my @imcc_basic_types  = qw(int float string pmc);
 my $parrot_pmcsh_file = "include/parrot/core_pmcs.h";
 my $date              = localtime(time);
 
-my $ops_dir="$parrot/src/ops";
+my $ops_dir = "$parrot/src/ops";
 opendir my $PARROT, "$ops_dir" or die "Supply Parrot directory as argument!";
 my @ops_files = map { "$ops_dir/$_" } grep /\.ops$/, readdir $PARROT;
 closedir $PARROT;
@@ -44,7 +47,7 @@ print <<END;
  <!-- Created automatically by kate_syntax.pl  $date -->
 
 <language name="IMCC" version="0.2" kateversion="2.0"
-          section="Sources" extensions="*.imc;*.pasm;*.pir" mimetype="">
+          section="Sources" extensions="*.pasm;*.pir" mimetype="">
 
   <highlighting>
 

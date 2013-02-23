@@ -1,63 +1,58 @@
 #!./parrot
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: sprintf.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: sprintf.t 37200 2009-03-08 11:46:01Z fperrad $
 
 =head1 NAME
 
 t/op/sprintf.t  -- sprintf tests
 
+=head1 SYNOPSIS
+
+    % prove t/op/sprintf.t
+
 =head1 DESCRIPTION
 
-These tests are based on sprintf tests from perl 5.9.4.
+These tests are based on C<sprintf> tests from perl 5.9.4.
 
-Tests sprintf, excluding handling of 64-bit integers or long
+Tests C<sprintf>, excluding handling of 64-bit integers or long
 doubles (if supported), of machine-specific short and long
 integers, machine-specific floating point exceptions (infinity,
-not-a-number ...), of the effects of locale, and of features
+not-a-number, etc.), of the effects of locale, and of features
 specific to multi-byte characters (under the utf8 pragma and such).
 
-Individual tests are stored in the C<sprintf_tests> file in the same
+Individual tests are stored in the F<sprintf_tests> file in the same
 directory; There is one test per line. In each test, there are three
 required fields:
 
 =over 4
 
-=item printf template
+=item * printf template
 
-=item data to be formatted (as a parrot expression)
+=item * data to be formatted (as a parrot expression)
 
-=item expected result of formatting
-
-=back
-
-Optional fields contain
-
-=over 4
-
-=item a comment
+=item * expected result of formatting
 
 =back
+
+Optional fields contain a comment.
 
 Each field is separated by one or more tabs.  If formatting requires more than
 one data item (for example, if variable field widths are used), the Parrot
 data expression should return a reference to an array having the requisite
 number of elements.  Even so, subterfuge is sometimes required:
-see tests for %n and %p.
+see tests for C<%n> and C<%p>.
 
-XXX: FIXME: TODO:
+=head1 XXX: FIXME: TODO:
+
 Tests that are expected to fail on a certain OS can be marked as such
-by trailing the comment with a skip: section. Skips are tags separated
-by space consisting of a $^O optionally trailed with :osvers. In the
+by trailing the comment with a C<skip:> section. Skips are tags separated
+by space consisting of a C<$^O> optionally trailed with C<:osvers>. In the
 latter case, all os-levels below that are expected to fail. A special
-tag 'all' is allowed for todo tests that should fail on any system
+tag C<all> is allowed for todo tests that should fail on any system.
 
->%GE<gt>   >1234567e96<  >1.23457E+102<   >exponent too big skip: os390<
->%.0g< >-0.0<        >-0<             >No minus skip: MSWin32 VMS hpux:10.20<
->%d<   >4<           >1<              >4 != 1 skip: all<
-
-=head1 SYNOPSIS
-
-    % prove t/op/sprintf.t
+	%G	1234567e96	1.23457E+102	exponent too big skip: os390
+	%.0f	-0.1	-0	C library bug: no minus skip: VMS
+	%d 	4	1	4 != 1 skip: all
 
 =cut
 
@@ -69,10 +64,11 @@ tag 'all' is allowed for todo tests that should fail on any system
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Dumper.pbc'
     .include "iglobals.pasm"
+    .include "sysinfo.pasm"
 
     # Variable declarations, initializations
     .local pmc test       # the test harness object.
-               test = new 'Test::Builder'
+               test = new [ 'Test'; 'Builder' ]
 
     .local pmc todo_tests # keys indicate test file; values test number.
                todo_tests = new 'Hash'
@@ -105,6 +101,7 @@ tag 'all' is allowed for todo tests that should fail on any system
     .local string data        # the data to format with the template
     .local string expected    # expected result of this test
     .local string description # user-facing description of the test
+    .local int    skip_it     # skip this test on this platform?
     .local string actual      # actual result of the test
 
     todo_tests = 'set_todo_info'()
@@ -128,7 +125,7 @@ tag 'all' is allowed for todo tests that should fail on any system
 
     # Open the test file
     .local pmc file_handle   # currently open file
-               file_handle = open test_file, '<'
+               file_handle = open test_file, 'r'
 
     unless file_handle goto bad_file
 
@@ -151,14 +148,14 @@ tag 'all' is allowed for todo tests that should fail on any system
 
   parse_data:
     push_eh eh_bad_line
-    ( template, data, expected, description ) = parse_data( test_line )
-    clear_eh
+    ( template, data, expected, description, skip_it ) = parse_data( test_line )
+    pop_eh
 
     # prepend test filename and line number to description
     description = 'build_test_desc'( description, template )
 
     .local pmc data_hash
-    data_hash = new .Hash
+    data_hash = new 'Hash'
     data_hash["''"] = ''
     data_hash['2**32-1'] = 0xffffffff
     $N0 = pow 2, 38
@@ -174,19 +171,23 @@ tag 'all' is allowed for todo tests that should fail on any system
 #    expected = backslash_escape (expected)
 
     # Should this test be skipped?
+    $S0  = description
+    $S0 .= ' (skipped on this platform)'
+    if skip_it goto must_skip
     $I0 = exists skip_tests[test_name]
     unless $I0 goto not_skip
     $P0 = skip_tests[test_name]
     $I0 = exists $P0[local_test_number]
     unless $I0 goto not_skip
     $S0 = $P0[local_test_number]
+  must_skip:
     test.'skip'(1, $S0)
     goto loop
 
   not_skip:
     push_eh eh_sprintf
     actual = 'sprintf'(template, data)
-    clear_eh
+    pop_eh
     unless_null actual, sprintf_ok
     $P1 = new 'Exception'
     $P1[0] = 'sprintf error'
@@ -241,9 +242,10 @@ tag 'all' is allowed for todo tests that should fail on any system
     print "'\n"
 
   eh_sprintf:
-    .sym pmc exception
-    .sym string message
-    get_results '(0,0)', exception, message
+    .local pmc exception
+    .local string message
+    get_results '0', exception
+    message = exception
     $I0 = index message, 'is not a valid sprintf format'
     if $I0 == -1 goto other_error
     $I0 = index expected, ' INVALID'
@@ -300,7 +302,7 @@ tag 'all' is allowed for todo tests that should fail on any system
     .return (todo_tests)
 
   reset_todo_info:
-    todo_info = new .Hash
+    todo_info = new 'Hash'
     ret
 
   set_todo_loop:
@@ -356,6 +358,7 @@ tag 'all' is allowed for todo tests that should fail on any system
     skip_info[233] = 'harness needs support for * modifier'
     skip_info[234] = 'perl5-specific extension (%v...)'
     skip_info[235] = 'perl5-specific extension (%v...)'
+    skip_info[300] = 'harness needs support for * modifier'
 
     $S0 = 'perl5-specific test'
     $I0 = 238
@@ -375,7 +378,7 @@ tag 'all' is allowed for todo tests that should fail on any system
     .return (skip_tests)
 
   reset_skip_info:
-    skip_info = new .Hash
+    skip_info = new 'Hash'
     ret
 
   set_skip_loop:
@@ -399,6 +402,8 @@ tag 'all' is allowed for todo tests that should fail on any system
     .local string data        # the data to format with the template
     .local string expected    # expected result of this test
     .local string description # user-facing description of the test
+    .local int    skip_it     # skip this test on this platform
+                  skip_it = 0
 
     # NOTE: there can be multiple tabs between entries, so skip until
     # we have something.
@@ -431,12 +436,14 @@ tag 'all' is allowed for todo tests that should fail on any system
     inc tab_number
     if description == '' goto get_description
 
+    ( description, skip_it ) = find_skip_in_description( description )
+
     # chop (description)
     # substr description, -1, 1, ''
 
   return:
   empty_expected:
-    .return ( template, data, expected, description )
+    .return ( template, data, expected, description, skip_it )
 
   no_desc:
     description = ''
@@ -446,6 +453,45 @@ tag 'all' is allowed for todo tests that should fail on any system
       $P1 = new 'Exception'
       $P1[0] = 'invalid data format'
       throw $P1
+.end
+
+
+.sub 'find_skip_in_description'
+    .param string description
+
+    .local pmc parts
+    parts = split ' skip: ', description
+
+    $I0 = parts
+    if $I0 > 1 goto check_os
+    .return( description, 0 )
+
+  check_os:
+    description = shift parts
+
+    .local string skip_list
+    skip_list = shift parts
+
+    .local pmc skip_os
+    skip_os = split ' ', skip_list
+
+    .local pmc iter
+    iter = new 'Iterator', skip_os
+
+    .local string osname
+    osname = sysinfo .SYSINFO_PARROT_OS
+
+  iter_loop:
+    unless iter goto iter_end
+    .local string os_name
+    os_name = shift iter
+    eq os_name, osname, skip_it
+    goto iter_loop
+  iter_end:
+    .return( description, 0 )
+
+  skip_it:
+    .return( description, 1 )
 .end
 
 
@@ -476,4 +522,8 @@ tag 'all' is allowed for todo tests that should fail on any system
 
 =cut
 
-# vim: sw=4 expandtab
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

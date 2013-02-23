@@ -1,20 +1,22 @@
-# Copyright (C) 2005-2007, The Perl Foundation.
-# $Id: linux.pm 18877 2007-06-08 14:15:40Z paultcochrane $
+# Copyright (C) 2005-2007, Parrot Foundation.
+# $Id: linux.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 package init::hints::linux;
 
 use strict;
 use warnings;
 
-use Config;
-
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $libs      = $conf->data->get('libs');
-    my $cflags    = $conf->data->get('ccflags');
-    my $cc        = $conf->data->get('cc');
-    my $linkflags = $conf->data->get('linkflags');
+    my $libs      = $conf->option_or_data('libs');
+    my $ccflags   = $conf->option_or_data('ccflags');
+    my $cc        = $conf->option_or_data('cc');
+    my $linkflags = $conf->option_or_data('linkflags');
+    my $verbose;
+
+    $verbose = $conf->options->get('verbose');
+    print "\n" if $verbose;
 
     # should find g++ in most cases
     my $link = $conf->data->get('link') || 'c++';
@@ -28,19 +30,76 @@ sub runstep {
     if ( $cc =~ /icc/ ) {
 
         # Intel C++ compiler has the same name as its C compiler
-        $link = 'icc';
-
-        # don't allow icc to pretend it's gcc
-        $cflags .= ' -no-gcc';
+        $link = $cc;
 
         # suppress sprintf warnings that don't apply
-        $cflags .= ' -wd269';
-        if ( $ld_share_flags !~ /-fPIC/ ) {
-            $ld_share_flags .= ' -fPIC';
-        }
-        if ( $cc_shared !~ /-fPIC/ ) {
-            $cc_shared .= ' -fPIC';
-        }
+        $ccflags .= ' -wd269';
+
+        # suppress remarks about floating point comparisons
+        $ccflags .= ' -wd1572';
+
+        # suppress remarks about hiding of parameter declarations
+        $ccflags .= ' -wd1599';
+
+        # suppress remarks about "argument is incompatible with corresponding
+        # format string conversion"
+        $ccflags .= ' -wd181';
+
+        # gcc is currently not looking for unused variables, so should icc
+        # for the time being (this will reduce the noise somewhat)
+        $ccflags .= ' -wd869';
+
+        # ignore "operands are evaluated in unspecified order" warning
+        $ccflags .= ' -wd981';
+
+        # ignore "external declaration in primary source file"
+        # (only done temporarily to reduce noise)
+        $ccflags .= ' -wd1419';
+
+        # ignore "function 'xxx' was declared but never referenced"
+        # (only done temporarily to reduce noise)
+        $ccflags .= ' -wd117';
+
+        # ignore "conversion from "" to "" may lose significant bits"
+        # warnings (only done temporarily to reduce noise)
+        $ccflags .= ' -wd810';
+
+        # ignore "function "" was declared but never referenced"
+        # warnings (only done temporarily to reduce noise)
+        $ccflags .= ' -wd177';
+
+        # ignore warnings springing from problems with computed goto
+        # statements.  If someone can find out how to make icc play nicely
+        # in these situations, that would be good.
+        $ccflags .= ' -wd1296';
+
+        $ccflags .= ' -Wall -Wcheck -w2';
+
+        $ccflags .= ' -Wabi';
+        $ccflags .= ' -Wcomment';
+        $ccflags .= ' -Wdeprecated';
+        $ccflags .= ' -Wmain';
+        $ccflags .= ' -Wmissing-prototypes';
+
+        #$ccflags .= ' -Wp64';
+        $ccflags .= ' -Wpointer-arith';
+        $ccflags .= ' -Wreturn-type';
+        $ccflags .= ' -Wstrict-prototypes';
+
+        #$ccflags .= ' -Wtrigraphs';
+        $ccflags .= ' -Wuninitialized';
+        $ccflags .= ' -Wunknown-pragmas';
+        $ccflags .= ' -Wunused-function';
+        $ccflags .= ' -Wunused-variable';
+
+        # enable correct floating point behavior
+        # which is *not* the default behavior. ahem.
+        $ccflags .= ' -we147';
+
+        $ld_share_flags = ' -shared -g -pipe -fexceptions -fPIC';
+        $cc_shared .= ' -fPIC';
+
+        $verbose and print " ccflags: $ccflags\n";
     }
     elsif ( $cc =~ /suncc/ ) {
         $link = 'sunCC';
@@ -63,20 +122,19 @@ sub runstep {
         $linkflags .= ' -Wl,-E';
     }
 
-    if ( $cflags !~ /-D_GNU_SOURCE/ ) {
+    if ( $ccflags !~ /-D_GNU_SOURCE/ ) {
 
         # Request visibility of all POSIX symbols
         # _XOPEN_SOURCE=600 doesn't work with glibc 2.1.3
         # _XOPEN_SOURCE=500 gives 2 undefined warns (setenv, unsetenv) on 2.1.3
-        $cflags .= ' -D_GNU_SOURCE';
+        $ccflags .= ' -D_GNU_SOURCE';
     }
 
     $conf->data->set(
-        ccflags        => $cflags,
+        ccflags        => $ccflags,
         libs           => $libs,
         ld_share_flags => $ld_share_flags,
         ld_load_flags  => $ld_share_flags,
-        i_lib_pthread  => 1,                 # RT#43149 fake a header entry
         linkflags      => $linkflags,
         link           => $link,
         cc_shared      => $cc_shared,
@@ -89,9 +147,11 @@ sub runstep {
         libparrot_soname       => '-Wl,-soname=libparrot$(SHARE_EXT).$(SOVERSION)',
     );
 
-    if ( ( split( '-', $Config{archname} ) )[0] eq 'ia64' ) {
+     if ( ( split( m/-/, $conf->data->get_p5('archname'), 2 ) )[0] eq 'ia64' ) {
+
         $conf->data->set( platform_asm => 1 );
     }
+    return;
 }
 
 1;

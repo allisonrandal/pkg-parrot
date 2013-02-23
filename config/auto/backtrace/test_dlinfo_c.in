@@ -1,0 +1,24 @@
+/*
+Copyright (C) 2009, Parrot Foundation.
+$Id: test_dlinfo_c.in 36833 2009-02-17 20:09:26Z allison $
+
+check that Dl_info is avaible
+*/
+
+#include <execinfo.h>
+#include <dlfcn.h>
+#include <stdlib.h>
+
+int
+main(int argc, char **argv)
+{
+    Dl_info frameInfo;
+    return EXIT_SUCCESS;
+}
+
+/*
+ * Local variables:
+ *   c-file-style: "parrot"
+ * End:
+ * vim: expandtab shiftwidth=4:
+ */

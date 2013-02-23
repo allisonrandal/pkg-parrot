@@ -19,11 +19,11 @@ This class defines the following methods:
 
 =cut
 
-.namespace [ 'Test::Builder::Output' ]
+.namespace [ 'Test'; 'Builder'; 'Output' ]
 
 .sub _initialize :load
 	.local pmc   tbo_class
-	newclass     tbo_class, 'Test::Builder::Output'
+	newclass     tbo_class, [ 'Test'; 'Builder'; 'Output' ]
 	addattribute tbo_class, 'output'
 	addattribute tbo_class, 'diag_output'
 .end
@@ -111,7 +111,7 @@ unescaped newlines.
 .sub escape_newlines :method
 	.param string message
 	.local pmc lines
-	lines = new ResizableStringArray
+	lines = new 'ResizableStringArray'
 
 	.local int newline_index
 	.local string line
@@ -153,7 +153,7 @@ unescaped newlines.
 
   	inc i
 	if i < num_lines goto LOOP
-	
+
 	message = join '', lines
 	concat message, "\n"
 
@@ -203,7 +203,7 @@ to the Perl 6 internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005-2007, The Perl Foundation.
+Copyright (C) 2005-2008, Parrot Foundation.
 
 =cut
 
@@ -211,4 +211,4 @@ Copyright (C) 2005-2007, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

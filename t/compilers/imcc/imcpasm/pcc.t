@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005, The Perl Foundation.
-# $Id: pcc.t 16171 2006-12-17 19:06:36Z paultcochrane $
+# Copyright (C) 2005, Parrot Foundation.
+# $Id: pcc.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;

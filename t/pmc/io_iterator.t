@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: io_iterator.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: io_iterator.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -22,24 +22,22 @@ Tests the I/O Iterator PMC described in PDD22.
 
 =cut
 
-# TODO create helper functions to put data in an i/o pmc
-
 # L<PDD22/I\/O Iterator PMC API/=item new>
 pir_output_is( <<'CODE', <<'OUT', 'new', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P99 = 1 # TODO replace with io object
-    $P0 = new .Iterator, $P99
-    say 'ok 1 - $P0 = new .Iterator, $P1'
+    $P99 = 1 # RT #46847 replace with io object
+    $P0 = new ['Iterator'], $P99
+    say "ok 1 - $P0 = new ['Iterator'], $P1"
 .end
 CODE
-ok 1 - $P0 = new .Iterator, $P1
+ok 1 - $P0 = new ['Iterator'], $P1
 OUT
 
 # L<PDD22/I\/O Iterator PMC API/=item shift>
 pir_output_is( <<'CODE', <<'OUT', 'shift', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P99 = 1 # TODO replace with io object
-    $P0 = new .Iterator, $P99
+    $P99 = 1 # RT #46847 replace with io object
+    $P0 = new ['Iterator'], $P99
 
     $S0 = shift $P0
 
@@ -48,7 +46,7 @@ pir_output_is( <<'CODE', <<'OUT', 'shift', todo => 'not yet implemented' );
   ok_1:
     say 'ok 1 - $S0 = shift $P1 # success'
 
-    # TODO test more return values, including end of file
+    # RT #46851 test more return values, including end of file
 .end
 CODE
 ok 1 - $I0 = shift $P1 # success
@@ -57,8 +55,8 @@ OUT
 # L<PDD22/I\/O Iterator PMC API/=item get_bool (vtable)>
 pir_output_is( <<'CODE', <<'OUT', 'get_bool (vtable)', todo => 'not yet implemented' );
 .sub 'test' :main
-    $P99 = 1 # TODO replace with io object
-    $P0 = new .Iterator, $P99
+    $P99 = 1 # RT #46847 replace with io object
+    $P0 = new ['Iterator'], $P99
 
     # empty i/o object
     unless $P0 goto ok_1
@@ -66,7 +64,7 @@ pir_output_is( <<'CODE', <<'OUT', 'get_bool (vtable)', todo => 'not yet implemen
   ok_1:
     say 'ok 1 - $P0 # empty i/o object returns false'
 
-    # TODO setup i/o object with two lines
+    # RT #46853 setup i/o object with two lines
     if $P0 got ok_2
     print 'not '
   ok_2:

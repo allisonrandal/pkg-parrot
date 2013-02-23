@@ -1,29 +1,31 @@
 /*
- * Sample Foo class used to verify dynamic loading and
- * proper inheritance - used for testing only
+ * $Id: foo.pmc 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2003-2008, Parrot Foundation.
  */
 
-#include "parrot/parrot.h"
+/*
+ * Sample Foo class used to verify dynamic loading and
+ * proper inheritance - for testing only
+ */
 
-pmclass Foo dynpmc does scalar extends Integer {
+pmclass Foo dynpmc provides scalar extends Integer {
 
-    INTVAL get_integer() {
+    VTABLE INTVAL get_integer() {
         return 42;
     }
 
-    PMC* subtract(PMC* value, PMC* dest) {
-MMD_Integer: {
+    MULTI PMC* subtract(Integer value, PMC *dest) {
         if (!dest)
-            dest = pmc_new(INTERP, SELF->vtable->base_type);
-        VTABLE_set_integer_native(INTERP, dest, 144);
+            dest = pmc_new(interp, SELF->vtable->base_type);
+        VTABLE_set_integer_native(interp, dest, 144);
         return dest;
-        }
-MMD_DEFAULT: {
+    }
+
+    MULTI PMC* subtract(DEFAULT value, PMC *dest) {
         if (!dest)
-            dest = pmc_new(INTERP, SELF->vtable->base_type);
-        VTABLE_set_integer_native(INTERP, dest, 244);
+            dest = pmc_new(interp, SELF->vtable->base_type);
+        VTABLE_set_integer_native(interp, dest, 244);
         return dest;
-        }
     }
 }
 

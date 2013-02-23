@@ -1,5 +1,4 @@
-
-# $Id: Button.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: Button.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -8,18 +7,17 @@ SDL::Button - A multi state SDL Button
 =head1 SYNOPSIS
 
     # the image to use for the button
-    $P0 = new .String
+    $P0 = new 'String'
     $P0 = "filename/to/image.png"
 
     # create the button
-    $I0 = find_type 'SDL::Button'
-    button = new $I0, $P0
+    button = new 'SDL::Button', $P0
 
     # set the position
     button.'xpos'( 10 )
     button.'ypos'( 10 )
 
-    # set the number of states    
+    # set the number of states
     button.'states'( 2 )
 
     # activate the second status (first is 0)
@@ -46,17 +44,19 @@ An SDL::Button object has the following methods:
 .namespace ['SDL::Button']
 
 .sub __onload :load
+    .local pmc class
+    class = get_class 'SDL::Button'
+    if_null class, define_class
+    .return()
 
-    $I0 = find_type 'SDL::Button'
-    if $I0 > 1 goto END
-    newclass $P0, 'SDL::Button'
-    addattribute $P0, "image"
-    addattribute $P0, "status"
-    addattribute $P0, "states"
-    addattribute $P0, "rect"
-    addattribute $P0, "clicked"
-    addattribute $P0, "actions"
-END:
+  define_class:
+    newclass     class, 'SDL::Button'
+    addattribute class, 'image'
+    addattribute class, 'status'
+    addattribute class, 'states'
+    addattribute class, 'rect'
+    addattribute class, 'clicked'
+    addattribute class, 'actions'
 .end
 
 =item button = new ID, name
@@ -65,42 +65,27 @@ END:
 
 .sub init_pmc :vtable :method
     .param pmc name
-    
-    $I0 = classoffset self, 'SDL::Button'
-    
-    # image
-    $I1 = find_type 'SDL::Image'
-    $P0 = new $I1, name
-    setattribute self, $I0, $P0
-    
-    # status
-    inc $I0
-    $P0 = new .Integer
-    $P0 = 0
-    setattribute self, $I0, $P0
 
-    # states
-    inc $I0
-    $P0 = new .Integer
+    $P0 = new 'SDL::Image', name
+    setattribute self, 'image', $P0
+
+    $P0 = new 'Integer'
+    $P0 = 0
+    setattribute self, 'status', $P0
+
+    $P0 = new 'Integer'
     $P0 = 1
-    setattribute self, $I0, $P0
+    setattribute self, 'states', $P0
 
-    # rect
-    inc $I0
-    $I1 = find_type 'SDL::Rect'
-    $P0 = new $I1
-    setattribute self, $I0, $P0
+    $P0 = new 'SDL::Rect'
+    setattribute self, 'rect', $P0
 
-    # clicked
-    inc $I0
-    $P0 = new .Integer
+    $P0 = new 'Integer'
     $P0 = 0
-    setattribute self, $I0, $P0
+    setattribute self, 'clicked', $P0
 
-    # actions
-    inc $I0
-    $P0 = new .ResizablePMCArray
-    setattribute self, $I0, $P0
+    $P0 = new 'ResizablePMCArray'
+    setattribute self, 'actions', $P0
 .end
 
 =item set_integer_native
@@ -109,10 +94,8 @@ END:
 
 .sub set_integer_native :vtable :method
     .param int val
-    
-    $I0 = classoffset self, 'SDL::Button'
-    inc $I0
-    $P0 = getattribute self, $I0
+
+    $P0 = getattribute self, 'status'
     $P0 = val
 .end
 
@@ -121,9 +104,7 @@ END:
 =cut
 
 .sub get_integer :vtable :method
-    $I0 = classoffset self, 'SDL::Button'
-    inc $I0
-    $P0 = getattribute self, $I0
+    $P0 = getattribute self, 'status'
     $I0 = $P0
 
     .return( $I0 )
@@ -135,10 +116,8 @@ END:
 
 .sub states :method
     .param int count
-    
-    $I0 = classoffset self, 'SDL::Button'
-    add $I0, 2
-    $P0 = getattribute self, $I0
+
+    $P0 = getattribute self, 'states'
     $P0 = count
 .end
 
@@ -150,9 +129,7 @@ END:
     .param int x
     .param int y
 
-    $I0 = classoffset self, 'SDL::Button'
-    add $I0, 3
-    $P0 = getattribute self, $I0
+    $P0 = getattribute self, 'rect'
 
     $P0.'x'( x )
     $P0.'y'( y )
@@ -166,10 +143,8 @@ END:
     .param int w
     .param int h
 
-    $I0 = classoffset self, 'SDL::Button'
-    add $I0, 3
-    $P0 = getattribute self, $I0
-    
+    $P0 = getattribute self, 'rect'
+
     $P0.'width'( w )
     $P0.'height'( h )
 .end
@@ -186,27 +161,19 @@ END:
     .local pmc drect
     .local pmc srect
     .local pmc clicked
-    
-    $I0 = classoffset self, 'SDL::Button'
 
-    image = getattribute self, $I0
+    image   = getattribute self, 'image'
 
-    inc $I0
-    $P0 = getattribute self, $I0
-    status = $P0
+    $P0     = getattribute self, 'status'
+    status  = $P0
 
-    inc $I0
-    $P0 = getattribute self, $I0
-    states = $P0
+    $P0     = getattribute self, 'states'
+    states  = $P0
 
-    inc $I0
-    drect = getattribute self, $I0
+    drect   = getattribute self, 'rect'
+    clicked = getattribute self, 'clicked'
 
-    inc $I0
-    clicked = getattribute self, $I0
-    
-    $I1 = find_type 'SDL::Rect'
-    srect = new $I1
+    srect   = new 'SDL::Rect'
 
     $I1 = drect.'height'()
     srect.'height'( $I1 )
@@ -216,7 +183,7 @@ END:
     cmod $I0, status, states
     $I0 *= $I1
     srect.'x'( $I0 )
-    
+
     $I1 = drect.'height'()
     $I0 = clicked
     $I0 *= $I1
@@ -238,11 +205,8 @@ END:
     .local pmc rect
     .local pmc clicked
 
-    $I0 = classoffset self, 'SDL::Button'
-    add $I0, 3
-    rect = getattribute self, $I0
-    inc $I0
-    clicked = getattribute self, $I0
+    rect    = getattribute self, 'rect'
+    clicked = getattribute self, 'clicked'
 
     $I0 = rect.'x'()
     if x < $I0 goto OUT
@@ -287,18 +251,14 @@ END:
     .param pmc arg
     .local int status
     .local pmc action
-    
-    $I0 = classoffset self, 'SDL::Button'
 
-    inc $I0
-    $P0 = getattribute self, $I0
+    $P0    = getattribute self, 'status'
     status = $P0
-    
-    add $I0, 4
-    action = getattribute self, $I0
 
-    $P0 = action[status]
-    
+    action = getattribute self, 'actions'
+
+    $P0    = action[status]
+
     $P0( arg )
 .end
 
@@ -310,11 +270,8 @@ END:
     .param int status
     .param pmc cb
     .local pmc action
-    
-    $I0 = classoffset self, 'SDL::Button'
-    add $I0, 5
-    action = getattribute self, $I0
 
+    action         = getattribute self, 'actions'
     action[status] = cb
 .end
 
@@ -328,7 +285,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -336,4 +293,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

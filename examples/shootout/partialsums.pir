@@ -1,4 +1,4 @@
-#!./parrot -C
+#!./parrot -R cgp
 #
 # partialsums N  (N = 2500000 for shootout)
 #
@@ -8,9 +8,9 @@
 .sub main :main
 	.param pmc argv
 	.local int k, n
-	.local float sum, a
+	.local num sum, a
 	.local pmc parray
-	parray = new .FixedFloatArray
+	parray = new 'FixedFloatArray'
 	parray = 1
 	$I0 = argv
 	n = 25000
@@ -107,7 +107,7 @@ beginfor_6:
 	inc k
 	goto beginfor_6
 endfor_6:
-	parray[0] = sum 
+	parray[0] = sum
 	$S0 = sprintf "%.9f\tHarmonic\n", parray
 	print $S0
 
@@ -163,4 +163,4 @@ endfor_9:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

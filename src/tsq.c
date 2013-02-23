@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2007, The Perl Foundation.
-$Id: tsq.c 19030 2007-06-16 03:51:02Z petdance $
+Copyright (C) 2001-2007, Parrot Foundation.
+$Id: tsq.c 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -8,26 +8,35 @@ src/tsq.c - Thread-safe queues
 
 =head1 DESCRIPTION
 
+This file implements thread-safe queues for Parrot.
+
 =head2 Functions
+
+=over 4
+
+=cut
 
 */
 
 #include "parrot/parrot.h"
-#include <assert.h>
 
-/* HEADER: include/parrot/tsq.h */
+/* HEADERIZER HFILE: include/parrot/tsq.h */
 
 /*
 
-FUNCDOC: pop_entry
+=item C<QUEUE_ENTRY * pop_entry>
 
 Does a synchronized removal of the head entry off the queue and returns it.
 
+=cut
+
 */
 
+PARROT_CAN_RETURN_NULL
 QUEUE_ENTRY *
-pop_entry(QUEUE *queue /*NN*/)
+pop_entry(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(pop_entry)
     QUEUE_ENTRY *returnval;
     queue_lock(queue);
     returnval = nosync_pop_entry(queue);
@@ -37,33 +46,42 @@ pop_entry(QUEUE *queue /*NN*/)
 
 /*
 
-FUNCDOC: peek_entry
+=item C<QUEUE_ENTRY * peek_entry>
 
 This does no locking, so the result might have changed by the time you
 get the entry, but a synchronized C<pop_entry()> will check again and
 return C<NULL> if the queue is empty.
 
+=cut
+
 */
 
+PARROT_CAN_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 QUEUE_ENTRY *
-peek_entry(QUEUE *queue /*NN*/)
+peek_entry(ARGIN(const QUEUE *queue))
 {
+    ASSERT_ARGS(peek_entry)
     return queue->head;
 }
 
 /*
 
-FUNCDOC: nosync_pop_entry
+=item C<QUEUE_ENTRY * nosync_pop_entry>
 
 Grab an entry off the queue with no synchronization. Internal only,
 because it's darned evil and shouldn't be used outside the module. It's
 in here so we don't have to duplicate pop code.
 
+=cut
+
 */
 
+PARROT_CANNOT_RETURN_NULL
 QUEUE_ENTRY *
-nosync_pop_entry(QUEUE *queue /*NN*/)
+nosync_pop_entry(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(nosync_pop_entry)
     QUEUE_ENTRY *returnval;
     if (!queue->head) {
         return NULL;
@@ -82,16 +100,20 @@ nosync_pop_entry(QUEUE *queue /*NN*/)
 
 /*
 
-FUNCDOC: wait_for_entry
+=item C<QUEUE_ENTRY * wait_for_entry>
 
 Does a synchronized removal of the head entry off the queue, waiting if
 necessary until there is an entry, and then returns it.
 
+=cut
+
 */
 
+PARROT_CAN_RETURN_NULL
 QUEUE_ENTRY *
-wait_for_entry(QUEUE *queue /*NN*/)
+wait_for_entry(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(wait_for_entry)
     QUEUE_ENTRY *returnval;
 
     queue_lock(queue);
@@ -106,15 +128,18 @@ wait_for_entry(QUEUE *queue /*NN*/)
 
 /*
 
-FUNCDOC: push_entry
+=item C<void push_entry>
 
 Does a synchronized insertion of C<entry> onto the tail of the queue.
+
+=cut
 
 */
 
 void
-push_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry)
+push_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
 {
+    ASSERT_ARGS(push_entry)
     queue_lock(queue);
     /* Is there something in the queue? */
     if (queue->tail) {
@@ -131,15 +156,18 @@ push_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry)
 
 /*
 
-FUNCDOC: unshift_entry
+=item C<void unshift_entry>
 
 Does a synchronized insertion of C<entry> into the head of the queue.
+
+=cut
 
 */
 
 void
-unshift_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry)
+unshift_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
 {
+    ASSERT_ARGS(unshift_entry)
     QUEUE_ENTRY *cur;
 
     queue_lock(queue);
@@ -159,22 +187,25 @@ unshift_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry)
 
 /*
 
-FUNCDOC: nosync_insert_entry
+=item C<void nosync_insert_entry>
 
 Inserts a timed event according to C<abstime>. The caller has to hold the
 queue mutex.
 
+=cut
+
 */
 
 void
-nosync_insert_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry /*NN*/)
+nosync_insert_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
 {
+    ASSERT_ARGS(nosync_insert_entry)
     QUEUE_ENTRY *cur = queue->head;
     QUEUE_ENTRY *prev;
     parrot_event *event;
     FLOATVAL abs_time;
 
-    assert(entry->type == QUEUE_ENTRY_TYPE_TIMED_EVENT);
+    PARROT_ASSERT(entry->type == QUEUE_ENTRY_TYPE_TIMED_EVENT);
     /*
      * empty queue - just insert
      */
@@ -209,15 +240,18 @@ nosync_insert_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry /*NN*/)
 
 /*
 
-FUNCDOC: insert_entry
+=item C<void insert_entry>
 
 Does a synchronized insert of C<entry>.
+
+=cut
 
 */
 
 void
-insert_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry /*NN*/)
+insert_entry(ARGMOD(QUEUE *queue), ARGIN(QUEUE_ENTRY *entry))
 {
+    ASSERT_ARGS(insert_entry)
     queue_lock(queue);
     nosync_insert_entry(queue, entry);
     queue_signal(queue);
@@ -226,99 +260,122 @@ insert_entry(QUEUE *queue /*NN*/, QUEUE_ENTRY *entry /*NN*/)
 
 /*
 
-FUNCDOC: queue_lock
+=item C<void queue_lock>
 
 Locks the queue's mutex.
+
+=cut
 
 */
 
 void
-queue_lock(QUEUE *queue /*NN*/)
+queue_lock(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(queue_lock)
     LOCK(queue->queue_mutex);
 }
 
 /*
 
-FUNCDOC: queue_unlock
+=item C<void queue_unlock>
 
 Unlocks the queue's mutex.
+
+=cut
 
 */
 
 void
-queue_unlock(QUEUE *queue /*NN*/)
+queue_unlock(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(queue_unlock)
     UNLOCK(queue->queue_mutex);
 }
 
 /*
 
-FUNCDOC: queue_broadcast
+=item C<void queue_broadcast>
 
 This function wakes up I<every> thread waiting on the queue.
+
+=cut
 
 */
 
 void
-queue_broadcast(QUEUE *queue /*NN*/)
+queue_broadcast(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(queue_broadcast)
     COND_BROADCAST(queue->queue_condition);
 }
 
 /*
 
-FUNCDOC: queue_signal
+=item C<void queue_signal>
 
-XXX Needs a description
+RT#48260: Document this!
+
+=cut
 
 */
 
 void
-queue_signal(QUEUE *queue /*NN*/)
+queue_signal(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(queue_signal)
     COND_SIGNAL(queue->queue_condition);
 }
 
 /*
 
-FUNCDOC: queue_wait
+=item C<void queue_wait>
 
 Instructs the queue to wait.
+
+=cut
 
 */
 
 void
-queue_wait(QUEUE *queue /*NN*/)
+queue_wait(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(queue_wait)
     COND_WAIT(queue->queue_condition, queue->queue_mutex);
 }
 
 /*
 
-FUNCDOC: queue_timedwait
+=item C<void queue_timedwait>
 
 Instructs the queue to wait for C<abs_time> seconds (?).
+
+=cut
 
 */
 
 void
-queue_timedwait(QUEUE *queue /*NN*/, struct timespec *abs_time /*NN*/)
+queue_timedwait(ARGMOD(QUEUE *queue), ARGIN(const struct timespec *abs_time))
 {
+    ASSERT_ARGS(queue_timedwait)
     COND_TIMED_WAIT(queue->queue_condition, queue->queue_mutex, abs_time);
 }
 
 /*
 
-FUNCDOC: queue_init
+=item C<QUEUE* queue_init>
 
 Initializes the queue, setting C<prio> as the queue's priority.
 
+=cut
+
 */
 
+PARROT_CAN_RETURN_NULL
+PARROT_MALLOC
 QUEUE*
 queue_init(UINTVAL prio)
 {
+    ASSERT_ARGS(queue_init)
     QUEUE * const queue = mem_allocate_typed(QUEUE);
 
     queue->head = queue->tail = NULL;
@@ -330,17 +387,21 @@ queue_init(UINTVAL prio)
 
 /*
 
-FUNCDOC: queue_destroy
+=item C<void queue_destroy>
 
 Destroys the queue, raising an exception if it is not empty.
+
+=cut
 
 */
 
 void
-queue_destroy(QUEUE *queue /*NN*/)
+queue_destroy(ARGMOD(QUEUE *queue))
 {
+    ASSERT_ARGS(queue_destroy)
     if (peek_entry(queue))
-        internal_exception(1, "Queue not empty on destroy");
+        exit_fatal(1, "Queue not empty on destroy");
+
     COND_DESTROY(queue->queue_condition);
     MUTEX_DESTROY(queue->queue_mutex);
     mem_sys_free(queue);
@@ -348,9 +409,13 @@ queue_destroy(QUEUE *queue /*NN*/)
 
 /*
 
+=back
+
 =head1 SEE ALSO
 
 F<include/parrot/tsq.h>.
+
+=cut
 
 */
 

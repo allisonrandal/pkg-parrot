@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: Info.pm 19049 2007-06-16 23:55:25Z chromatic $
+# Copyright (C) 2004-2006, Parrot Foundation.
+# $Id: Info.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -47,10 +47,12 @@ sub new {
                 'README'
             ),
             $self->new_item(
-                'Instructions for Parrot in a Win32 environment.', 'README.win32.pod'
+                'Instructions for Parrot in a cygwin environment.', 'README_cygwin.pod'
+            ),
+            $self->new_item(
+                'Instructions for Parrot in a Win32 environment.', 'README_win32.pod'
             ),
             $self->new_item( 'This file lists what\'s new in each version.', 'NEWS' ),
-            $self->new_item( 'A plan for Parrot.',                           'docs/ROADMAP.pod' ),
             $self->new_item( 'Where to find or put things that need doing in Parrot.', 'TODO' ),
             $self->new_item(
 'This is a description of the steps someone should follow when they have to prepare a new version for release.',
@@ -59,10 +61,7 @@ sub new {
         ),
         $self->new_group(
             'Legal', '',
-            $self->new_item(
-                'The licences under which Parrot is distributed.', 'LICENSES/Artistic',
-                'LICENSES/gpl.txt'
-            ),
+            $self->new_item( 'The licence under which Parrot is distributed.', 'LICENSE' ),
         ),
         $self->new_group(
             'Status', '',
@@ -70,14 +69,19 @@ sub new {
                 'A table showing which aspects of Parrot run on various platforms.', 'PLATFORMS'
             ),
             $self->new_item( 'Contains the version number of the distribution.', 'VERSION' ),
-            do { -e '../DEVELOPING' ?  $self->new_item(
+            do {
+                -e '../DEVELOPING'
+                    ? $self->new_item(
 'The presence of this file indicates that the distribution is a development version.',
-                'DEVELOPING' ) : ()
+                    'DEVELOPING'
+                    )
+                    : ();
             },
-            $self->new_item( 'The status of the Parrot test suite.', 't/TESTS.STATUS.pod' ),
+            $self->new_item( 'The status of the Parrot test suite.', 't/TESTS_STATUS.pod' ),
         ),
         $self->new_group(
-            'People', '',
+            'People',
+            '',
             $self->new_item(
                 'A list of some of the Parrot developers with SVN commit access.',
                 'RESPONSIBLE_PARTIES'

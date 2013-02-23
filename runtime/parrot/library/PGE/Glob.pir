@@ -13,7 +13,7 @@ A parser for shell-stype glob notation.
 =item C<compile_glob(PMC source, PMC adverbs :slurpy :named)>
 
 Return the result of compiling the glob expression given by
-C<source>.   Normally this function is obtained using 
+C<source>.   Normally this function is obtained using
 C<compreg 'PGE::Glob'> instead of calling it directly.
 
 Returns the compiled regular expression.  If a C<target>
@@ -23,7 +23,7 @@ or the resulting PIR code (target='PIR').
 
 =cut
 
-.namespace [ 'PGE::Glob' ]
+.namespace [ 'PGE';'Glob' ]
 
 .sub 'compile_glob'
     .param pmc source
@@ -52,9 +52,9 @@ or the resulting PIR code (target='PIR').
 
   analyze:
     .local pmc exp, pad
-    exp = new 'PGE::Exp::Concat'
+    exp = new ['PGE';'Exp';'Concat']
     $I0 = 1
-    $P0 = new 'PGE::Exp::Anchor'
+    $P0 = new ['PGE';'Exp';'Anchor']
     $P0.'result_object'('^')
     exp[0] = $P0
     if null match goto analyze_1
@@ -62,11 +62,11 @@ or the resulting PIR code (target='PIR').
     exp[$I0] = $P0
     inc $I0
   analyze_1:
-    $P0 = new 'PGE::Exp::Anchor'
+    $P0 = new ['PGE';'Exp';'Anchor']
     $P0.'result_object'('$')
     exp[$I0] = $P0
 
-    .return exp.'compile'(adverbs :flat :named)
+    .tailcall exp.'compile'(adverbs :flat :named)
 .end
 
 
@@ -77,37 +77,40 @@ or the resulting PIR code (target='PIR').
     load_bytecode 'PGE/Dumper.pbc'
 
     $P0 = compreg 'PGE::Glob'
-    .return $P0.'command_line'(args)
+    .tailcall $P0.'command_line'(args)
 .end
 
 
 .sub '__onload' :load :init
     .local pmc optable
     load_bytecode 'PGE.pbc'
-    load_bytecode 'Parrot/HLLCompiler.pbc'
 
-    optable = new 'PGE::OPTable'
-    store_global '$optable', optable
+    optable = new ['PGE';'OPTable']
+    set_global '$optable', optable
 
-    $P0 = find_global 'glob_literal'
-    optable.newtok('term:', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_global 'glob_literal'
+    optable.'newtok'('term:', 'precedence'=>'=', 'nows'=>1, 'parsed'=>$P0)
 
-    $P0 = find_global 'glob_quest'
-    optable.newtok('term:?', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_global 'glob_quest'
+    optable.'newtok'('term:?', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
-    $P0 = find_global 'glob_star'
-    optable.newtok('term:*', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_global 'glob_star'
+    optable.'newtok'('term:*', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
-    $P0 = find_global 'glob_enum'
-    optable.newtok('term:[', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_global 'glob_enum'
+    optable.'newtok'('term:[', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
-    $P0 = find_global 'glob_alt'
-    optable.newtok('term:{', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
+    $P0 = get_global 'glob_alt'
+    optable.'newtok'('term:{', 'equiv'=>'term:', 'nows'=>1, 'parsed'=>$P0)
 
-    optable.newtok('infix:', 'looser'=>'term:', 'assoc'=>'list', 'nows'=>1, 'match'=>'PGE::Exp::Concat')
+    optable.'newtok'('infix:', 'looser'=>'term:', 'assoc'=>'list', 'nows'=>1, 'match'=>'PGE::Exp::Concat')
+
+    .local pmc p6meta
+    p6meta = get_hll_global 'P6metaclass'
+    p6meta.'new_class'('PGE::Glob::Compiler', 'attr'=>'$!compsub')
 
     $P0 = get_global 'compile_glob'
-    $P1 = new [ 'HLLCompiler' ]
+    $P1 = new [ 'PGE';'Glob';'Compiler' ]
     $P1.'register'('PGE::Glob', $P0)
     .return ()
 .end
@@ -116,18 +119,18 @@ or the resulting PIR code (target='PIR').
 =item C<glob(PMC mob, PMC adverbs :slurpy :named)>
 
 Parses a glob expression, returning the corresponding
-parse C<PGE::Match> object.   
+parse C<PGE::Match> object.
 
 =cut
 
-.const int GLOB_INF = 2147483647 
+.const int GLOB_INF = 2147483647
 
 .sub 'glob'
     .param pmc mob
     .param pmc adverbs         :slurpy :named
 
     .local pmc optable, match
-    optable = find_global 'PGE::Glob', '$optable'
+    optable = get_hll_global ['PGE';'Glob'], '$optable'
     match = optable.'parse'(mob)
     .return (match)
 .end
@@ -172,13 +175,11 @@ set to the decoded literal.
     .param pmc adverbs         :slurpy :named
 
     .local string target
-    .local pmc mfrom, mpos
     .local int pos
-    (mob, target, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::Literal')
-    pos = mfrom
-    ($S0, $I0) = 'scan_literal'(target, mfrom, '*?[{')
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::Literal')
+    ($S0, $I0) = 'scan_literal'(target, pos, '*?[{')
     if $I0 <= pos goto end
-    mpos = $I0
+    mob.'to'($I0)
     mob.'result_object'($S0)
   end:
     .return (mob)
@@ -195,10 +196,9 @@ return a CCShortcut that is set to '.'
 .sub 'glob_quest'
     .param pmc mob
     .param pmc adverbs         :slurpy :named
-    .local pmc mtarget, mfrom, mpos
     ##   The '?' is already in mob['KEY'], so we don't need to find it here.
-    (mob, mtarget, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::CCShortcut')
-    assign mpos, mfrom
+    (mob, $I0) = mob.'new'(mob, 'grammar'=>'PGE::Exp::CCShortcut')
+    mob.'to'($I0)
     mob.'result_object'('.')
     .return (mob)
 .end
@@ -214,15 +214,15 @@ bit more complex, as we have to return a quantified '.'.
 .sub 'glob_star'
     .param pmc mob
     .param pmc adverbs         :slurpy :named
-    .local pmc mtarget, mfrom, mpos
+    .local int pos
     ##   The '*' is already in mob['KEY'], so we don't need to find it here.
     ##   We create a Quant object, then a CCShortcut inside of it.
-    (mob, mtarget, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::Quant')
-    assign mpos, mfrom
+    (mob, pos) = mob.'new'(mob, 'grammar'=>'PGE::Exp::Quant')
+    mob.'to'(pos)
     mob['min'] = 0
     mob['max'] = GLOB_INF
-    ($P0, $P1, $P2, $P3) = mob.newfrom(0, 'PGE::Exp::CCShortcut')
-    assign $P3, $P2
+    $P0 = mob.'new'(mob, 'grammar'=>'PGE::Exp::CCShortcut')
+    $P0.'to'(pos)
     $P0.'result_object'('.')
     mob[0] = $P0
     .return (mob)
@@ -240,12 +240,10 @@ Parse an enumerated character list, such as [abcd],
     .param pmc adverbs         :slurpy :named
 
     .local string target
-    .local pmc mfrom, mpos
-    (mob, target, mfrom, mpos) = mob.newfrom(0, 'PGE::Exp::EnumCharList')
-
     .local int pos, lastpos
-    pos = mfrom
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::EnumCharList')
     lastpos = length target
+
     $S0 = substr target, pos, 1
     if $S0 == '!' goto negate
     if $S0 == '^' goto negate
@@ -286,12 +284,12 @@ Parse an enumerated character list, such as [abcd],
     charlist .= '-'
   scan_end:
     inc pos
-    mpos = pos
+    mob.'to'(pos)
     mob.'result_object'(charlist)
     .return (mob)
 
   err_noclose:
-    mpos = -1
+    mob.'to'(-1)
     .return (mob)
 .end
 
@@ -308,38 +306,73 @@ Parse an enumerated character list, such as [abcd],
 
     .local string target
     .local int pos, lastpos
-    (mob, target, $P2, $P3) = mob.newfrom(0, 'PGE::Exp::Literal')
-    pos = $P2
+    (mob, pos, target) = mob.'new'(mob, 'grammar'=>'PGE::Exp::Literal')
     lastpos = length target
 
     ($S0, pos) = 'scan_literal'(target, pos, ',}')
+    mob.'to'(pos)
     mob.'result_object'($S0)
-    $P3 = pos
   alt_loop:
     if pos >= lastpos goto err_noclose
     $S0 = substr target, pos, 1
     if $S0 == '}' goto end
-    ($P0, $P1, $P2, $P3) = mob.newfrom(0, 'PGE::Exp::Alt')
+    $P0 = mob.'new'(mob, 'grammar'=>'PGE::Exp::Alt')
     inc pos
-    $P3 = pos
+    mob.'to'(pos)
     $P0[0] = mob
     mob = $P0
-    ($P0, $P1, $P2, $P3) = mob.newfrom(0, 'PGE::Exp::Literal')
+    $P0 = mob.'new'(mob, 'grammar'=>'PGE::Exp::Literal')
     ($S0, pos) = 'scan_literal'(target, pos, ',}')
-    $P3 = pos
+    mob.'to'(pos)
     $P0.'result_object'($S0)
     mob[1] = $P0
     goto alt_loop
   end:
     inc pos
-    mob.to(pos)
+    mob.'to'(pos)
     .return (mob)
 
   err_noclose:
-    mob.to(-1)
+    mob.'to'(-1)
     .return (mob)
 .end
 
+.namespace [ 'PGE';'Glob';'Compiler' ]
+
+=item register(string name, pmc compsub)
+
+Registers this compiler object as C<name> and
+using C<compsub> as the subroutine to call for performing compilation.
+
+=cut
+
+.sub 'register' :method
+    .param string name
+    .param pmc compsub
+
+    setattribute self, '$!compsub', compsub
+    compreg name, self
+
+    .return ()
+.end
+
+=item compile(pmc code [, "option" => value, ... ])
+
+Compile C<source> (possibly modified by any provided options).
+
+=cut
+
+.sub 'compile' :method
+    .param pmc source
+    .param pmc adverbs         :slurpy :named
+
+    .local pmc compsub
+
+    #   $!compsub is deprecated
+    compsub = getattribute self, '$!compsub'
+
+    .tailcall compsub(source, adverbs :flat :named)
+.end
 
 =back
 
@@ -355,4 +388,4 @@ It has been updated for later versions of PGE by Patrick R. Michaud
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

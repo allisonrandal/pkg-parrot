@@ -1,12 +1,12 @@
 #! perl
-# Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: parrot_config_c.pl 17580 2007-03-17 22:53:00Z paultcochrane $
+# Copyright (C) 2001-2006, Parrot Foundation.
+# $Id: parrot_config_c.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 use warnings;
 use strict;
 
 my ($svnid) =
-    '$Id: parrot_config_c.pl 17580 2007-03-17 22:53:00Z paultcochrane $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+    '$Id: parrot_config_c.pl 37201 2009-03-08 12:07:48Z fperrad $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 
@@ -75,7 +75,7 @@ else {
     $_ = <$F>;
     close $F;
 
-    my @c = split '';
+    my @c = split m//;
     die "'$image_file' is truncated. Remove it and rerun make\n" if !@c;
 
     print '    ';
@@ -105,11 +105,13 @@ print << "EOC";
 /*
  * Local variables:
  *   c-file-style: "parrot"
+ *   buffer-read-only: t
  * End:
  * vim: expandtab shiftwidth=4:
  */
 EOC
 
+
 # Local Variables:
 #   mode: cperl
 #   cperl-indent-level: 4

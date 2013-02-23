@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: io.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: io.pir 37487 2009-03-16 16:41:10Z moritz $
 
 =head1 NAME
 
@@ -18,38 +18,32 @@ You should check where the file is going to be before you run this.
 =cut
 
 .sub 'example' :main
-    .local string test_fn 
+    .local string test_fn
     test_fn = "tmp_example_io.tmp"
-    P0 = open test_fn, ">"
-    seek P0, 300, 0
+    $P0 = open test_fn, 'w'
+    seek $P0, 300, 0
     # 64bit version of seek with high 32bits = 0
-    #seek IO, P0, 0, 400, 0
-    print P0, "test1\n"
-    print P0, "test2\n"
-    print P0, "test3\n"
-    seek P0, 0, 0
-    print P0, "test4\n"
-    print P0, "test5\n"
-    close P0
+    #seek $IO, $P0, 0, 400, 0
+    print $P0, "test1\n"
+    print $P0, "test2\n"
+    print $P0, "test3\n"
+    seek $P0, 0, 0
+    print $P0, "test4\n"
+    print $P0, "test5\n"
+    close $P0
 
-    P0 = open test_fn, "<"
-    S0 = read P0, 1024 
-    print S0
+    $P0 = open test_fn, 'r'
+    $S0 = read $P0, 1024
+    print $S0
 
     # now clean up after ourselves.
-    P1 = new "OS"
-    P1."rm"(test_fn)
+    $P1 = new "OS"
+    $P1."rm"(test_fn)
 
 .end
-
-=head1 SEE ALSO
-
-F<examples/io>.
-
-=cut
 
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

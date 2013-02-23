@@ -1,5 +1,11 @@
+/*
+ * Copyright (C) 2002-2009, Parrot Foundation.
+ * $Id: debug.h 37201 2009-03-08 12:07:48Z fperrad $
+ */
+
 #ifndef PARROT_IMCC_DEBUG_H_GUARD
 #define PARROT_IMCC_DEBUG_H_GUARD
+
 
 #define DEBUG_PARROT 0x0001
 #define DEBUG_LEXER  0x0002
@@ -18,25 +24,140 @@
 #define DEBUG_PBC_CONST    0x2000
 #define DEBUG_PBC_FIXUP    0x4000
 
-PARROT_API void IMCC_fatal(Interp *, int code,  const char *fmt, ...);
-PARROT_API void IMCC_fataly(Interp *, int code, const char *fmt, ...);
-PARROT_API void IMCC_fatal_standalone(Interp *, int code,  const char *fmt, ...);
-PARROT_API void IMCC_fataly_standalone(Interp *, int code, const char *fmt, ...);
-PARROT_API void IMCC_print_inc(Interp *);
-PARROT_API void IMCC_warning(Interp*, const char *fmt, ...);
-PARROT_API void IMCC_debug(Interp*, int level, const char *fmt, ...);
-PARROT_API void IMCC_info(Interp*, int level, const char *fmt, ...);
+/* HEADERIZER BEGIN: compilers/imcc/debug.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-void dump_instructions(Interp *, IMC_Unit *);
-void dump_cfg(IMC_Unit *);
-void dump_loops(IMC_Unit *);
-void dump_labels(IMC_Unit *);
-void dump_symreg(IMC_Unit *);
-void dump_interference_graph(IMC_Unit *);
-void dump_dominators(IMC_Unit *);
-void dump_dominance_frontiers(IMC_Unit *);
-void dump_liveness_status(IMC_Unit *);
-void dump_liveness_status_var(IMC_Unit *, SymReg*);
+PARROT_EXPORT
+void IMCC_debug(PARROT_INTERP, int level, ARGIN(const char *fmt), ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+void IMCC_fatal(PARROT_INTERP,
+    NULLOK(int code),
+    ARGIN(const char *fmt),
+    ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+void IMCC_fatal_standalone(PARROT_INTERP,
+    int code,
+    ARGIN(const char *fmt),
+    ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+void IMCC_fataly(PARROT_INTERP,
+    NULLOK(int code),
+    ARGIN(const char *fmt),
+    ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+PARROT_DOES_NOT_RETURN
+void IMCC_fataly_standalone(PARROT_INTERP,
+    int code,
+    ARGIN(const char *fmt),
+    ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+void IMCC_info(PARROT_INTERP, int level, ARGIN(const char *fmt), ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+void IMCC_warning(PARROT_INTERP, ARGIN(const char *fmt), ...)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void dump_cfg(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_dominance_frontiers(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_dominators(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_instructions(PARROT_INTERP, ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void dump_interference_graph(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_labels(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_liveness_status(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_liveness_status_var(
+    ARGIN(const IMC_Unit *unit),
+    ARGIN(const SymReg* r))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void dump_loops(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+void dump_symreg(ARGIN(const IMC_Unit *unit))
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_IMCC_debug __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_IMCC_fatal __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_IMCC_fatal_standalone __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_IMCC_fataly __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_IMCC_fataly_standalone __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_IMCC_info __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_IMCC_warning __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(fmt)
+#define ASSERT_ARGS_dump_cfg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_dominance_frontiers __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_dominators __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_instructions __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_interference_graph __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_labels __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_liveness_status __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_liveness_status_var __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit) \
+    || PARROT_ASSERT_ARG(r)
+#define ASSERT_ARGS_dump_loops __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+#define ASSERT_ARGS_dump_symreg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(unit)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: compilers/imcc/debug.c */
+
 
 #endif /* PARROT_IMCC_DEBUG_H_GUARD */
 

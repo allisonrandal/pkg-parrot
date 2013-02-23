@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: Iter.pir 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2008, Parrot Foundation.
+# $Id: Iter.pir 36833 2009-02-17 20:09:26Z allison $
 
 =head1 TITLE
 
@@ -37,7 +37,7 @@ Currently implemented only for Array type PMCs. Expect Hash support shortly.
 .namespace ['Iter']
 
 .sub '__onload' :load
-    $P0 = getclass 'Undef'
+    $P0 = get_class 'Undef'
     $P1 = subclass $P0, 'Iter'
     addattribute $P1, 'aggregate'
     addattribute $P1, 'exhausted'
@@ -60,7 +60,7 @@ Initialize the iterator. Must pass a PMC aggregate, or an exception is thrown.
     .param pmc agg
     $P0 = clone agg
     setattribute self, 'aggregate', $P0
-    $P99 = new .Integer
+    $P99 = new 'Integer'
     $P99 = 0
     setattribute self, 'exhausted', $P99
     null $P99
@@ -90,7 +90,7 @@ attribute if the iterator is exhausted.
     goto test_limit
   first_time:
     $I1 = 0
-    index = new .Integer
+    index = new 'Integer'
     index = 0
     goto test_limit
   test_limit:
@@ -100,14 +100,15 @@ attribute if the iterator is exhausted.
     ## TODO better handling for exhaustion
     push_eh eh_exhausted
     value = agg[index]
-    clear_eh
+    pop_eh
 
     setattribute self, 'value', value
     setattribute self, 'index', index
     goto return
 
   eh_exhausted:
-    get_results '(0,0)', $P0, $S0
+    .get_results ($P0)
+    pop_eh
   exhausted:
     $P99 = getattribute self, 'exhausted'
     inc $P99
@@ -151,7 +152,7 @@ Executes C<.'next'()>, and returns C<.'value'()>.
 
 .sub 'nextval' :method
     self.'next'()
-    .return self.'value'()
+    .tailcall self.'value'()
 .end
 
 =back
@@ -166,4 +167,4 @@ Jerry Gay a.k.a. particle
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

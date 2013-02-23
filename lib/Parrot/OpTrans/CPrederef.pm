@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: CPrederef.pm 18744 2007-06-02 01:10:38Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: CPrederef.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ sub defines {
 /* defines - $0 -> $type */
 #define REL_PC ((size_t)(cur_opcode - (opcode_t*)interp->code->prederef.code))
 #define CUR_OPCODE \\
-    ((opcode_t*)cur_opcode + CONTEXT(interp->ctx)->pred_offset)
+    ((opcode_t*)cur_opcode + CONTEXT(interp)->pred_offset)
 #define OP_AS_OFFS(o) (_reg_base + ((opcode_t*)cur_opcode)[o])
 
 END
@@ -76,7 +76,7 @@ sub run_core_func_decl {
     my $prefix = $self->core_prefix;
     return <<END;
 /* run_core_func_decl - $0 -> $type */
-opcode_t * $prefix$core(opcode_t *cur_op, Parrot_Interp interp)
+opcode_t * $prefix$core(opcode_t *cur_op, PARROT_INTERP)
 END
 }
 

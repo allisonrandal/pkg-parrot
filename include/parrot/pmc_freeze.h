@@ -1,7 +1,7 @@
 /* pmc_freeze.h
- *  Copyright (C) 2001-2003, The Perl Foundation.
+ *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: pmc_freeze.h 18945 2007-06-12 14:08:35Z fperrad $
+ *     $Id: pmc_freeze.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:
@@ -14,7 +14,7 @@
 #define      PARROT_PMC_FREEZE_H_GUARD
 
 struct _visit_info;
-typedef void (*visit_f)(Parrot_Interp, PMC*, struct _visit_info*);
+typedef void (*visit_f)(PARROT_INTERP, PMC*, struct _visit_info*);
 
 typedef enum {
     VISIT_FREEZE_NORMAL,
@@ -28,14 +28,14 @@ typedef enum {
 
 struct _image_io;
 #define IMAGE_IO struct _image_io
-typedef void    (*push_integer_f)       (Parrot_Interp, IMAGE_IO*, INTVAL);
-typedef void    (*push_pmc_f)           (Parrot_Interp, IMAGE_IO*, PMC*);
-typedef void    (*push_string_f)        (Parrot_Interp, IMAGE_IO*, STRING*);
-typedef void    (*push_number_f)        (Parrot_Interp, IMAGE_IO*, FLOATVAL);
-typedef INTVAL  (*shift_integer_f)      (Parrot_Interp, IMAGE_IO*);
-typedef PMC*    (*shift_pmc_f)          (Parrot_Interp, IMAGE_IO*);
-typedef STRING* (*shift_string_f)       (Parrot_Interp, IMAGE_IO*);
-typedef FLOATVAL(*shift_number_f)       (Parrot_Interp, IMAGE_IO*);
+typedef void (*push_integer_f)       (PARROT_INTERP, IMAGE_IO*, INTVAL);
+typedef void (*push_pmc_f)           (PARROT_INTERP, IMAGE_IO*, PMC*);
+typedef void (*push_string_f)        (PARROT_INTERP, IMAGE_IO*, STRING*);
+typedef void (*push_number_f)        (PARROT_INTERP, IMAGE_IO*, FLOATVAL);
+typedef INTVAL (*shift_integer_f)      (PARROT_INTERP, IMAGE_IO*);
+typedef PMC*    (*shift_pmc_f)          (PARROT_INTERP, IMAGE_IO*);
+typedef STRING* (*shift_string_f)       (PARROT_INTERP, IMAGE_IO*);
+typedef FLOATVAL (*shift_number_f)       (PARROT_INTERP, IMAGE_IO*);
 
 typedef struct _image_funcs {
     push_integer_f      push_integer;
@@ -51,7 +51,7 @@ typedef struct _image_funcs {
 typedef struct _image_io {
     STRING *image;
     struct PackFile *pf;
-    image_funcs *vtable;
+    const image_funcs *vtable;
 } image_io;
 
 typedef enum {
@@ -66,31 +66,80 @@ typedef struct _visit_info {
     visit_f             visit_pmc_later;
     visit_f             visit_action;   /* freeze, thaw ... */
     INTVAL              what;
-    STRING*             image;
-    PMC*                mark_ptr;
-    PMC**               thaw_ptr;       /* where to thaw a new PMC */
-    PMC*                container;      /* when thawing aggregate items */
+    STRING             *image;
+    PMC                *mark_ptr;
+    PMC               **thaw_ptr;       /* where to thaw a new PMC */
+    PMC                *container;      /* when thawing aggregate items */
     INTVAL              last_type;
-    PMC*                seen;           /* seen hash */
-    PMC*                todo;           /* todo list */
-    PMC*                id_list;        /* seen list used by thaw */
+    PMC                *seen;           /* seen hash */
+    PMC                *todo;           /* todo list */
+    PMC                *id_list;        /* seen list used by thaw */
     UINTVAL             id;             /* freze ID of PMC */
-    void*               extra;          /* PMC specific */
+    void               *extra;          /* PMC specific */
     INTVAL              extra_flags;    /* concerning to extra */
-    PMC*                thaw_result;    /* 1st thawed */
-    IMAGE_IO            *image_io;
+    PMC                *thaw_result;    /* 1st thawed */
+    IMAGE_IO           *image_io;
 } visit_info;
 
 /*
  * public interfaces
  */
-PARROT_API STRING* Parrot_freeze(Parrot_Interp, PMC*);
-PARROT_API STRING* Parrot_freeze_at_destruct(Parrot_Interp, PMC*);
 
-PARROT_API PMC*    Parrot_thaw(Parrot_Interp, STRING*);
-PARROT_API PMC*    Parrot_thaw_constants(Parrot_Interp, STRING*);
+/* HEADERIZER BEGIN: src/pmc_freeze.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API PMC*    Parrot_clone(Parrot_Interp, PMC*);
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+PMC* Parrot_clone(PARROT_INTERP, ARGIN(PMC* pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+STRING* Parrot_freeze(PARROT_INTERP, ARGIN(PMC* pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+STRING* Parrot_freeze_at_destruct(PARROT_INTERP, ARGIN(PMC* pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+PMC* Parrot_thaw(PARROT_INTERP, ARGIN(STRING* image))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+PMC* Parrot_thaw_constants(PARROT_INTERP, ARGIN(STRING* image))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+#define ASSERT_ARGS_Parrot_clone __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_freeze __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_freeze_at_destruct __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_thaw __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(image)
+#define ASSERT_ARGS_Parrot_thaw_constants __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(image)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: src/pmc_freeze.c */
 
 #endif /* PARROT_PMC_FREEZE_H_GUARD */
 

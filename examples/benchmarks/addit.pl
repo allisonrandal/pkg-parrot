@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: addit.pl 16145 2006-12-17 18:44:04Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: addit.pl 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

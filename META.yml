@@ -1,23 +1,27 @@
+# $Id: META.yml 37535 2009-03-17 22:21:02Z allison $
+#
+# This file describes the CPAN distribution for Parrot.
+# See http://module-build.sourceforge.net/META-spec-current.html for details.
 ---
 name: parrot
-version: 0.4.13
-author: ~
-abstract: ~
-license: perl
+version: 1.0.0
+author: parrot-dev@lists.parrot.org
+abstract: a virtual machine designed for dynamic languages
+license: artistic2
 no_index:
     directory:
         - config
         - languages
-        - lib/Class
+        - lib
         - lib/Digest
         - lib/File
         - lib/Parse
+        - lib/Perl/Critic
         - lib/Pod
-        - lib/Test
-        - lib/Text
         - t
         - tools
     file:
+        - lib/IO/CaptureOutput.pm
         - lib/SmartLink.pm
     package:
         - DB
@@ -28,7 +32,11 @@ no_index:
         - Parrot::OpTrans::CSwitch
         - Parrot::OpTrans::Compiled
         - Parrot::OpsFile
+requires:
+  Storable: 2.12
+  perl: 5.8.4
 resources:
-    homepage: http://parrotcode.org/
-    bugtracker: https://rt.perl.org/rt3/
+    homepage:   'http://parrot.org/'
+    license:    'http://opensource.org/licenses/artistic-license-2.0.php'
+    bugtracker: 'https://trac.parrot.org/parrot/'
 generated_by: Humans

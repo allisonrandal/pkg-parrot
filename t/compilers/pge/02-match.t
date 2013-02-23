@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2006-2007, The Perl Foundation.
-# $Id: 02-match.t 18563 2007-05-16 00:53:55Z chromatic $
+# Copyright (C) 2006-2007, Parrot Foundation.
+# $Id: 02-match.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;
@@ -27,16 +27,16 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'concat on a Match object (rt#39135)' );
 .sub main :main
     load_bytecode 'PGE.pbc'
 
-    $P0 = compreg 'PGE::P6Regex'
+    $P0 = compreg 'PGE::Perl6Regex'
     $P1 = $P0('.+')
     $P2 = $P1('world')
 
     say $P2              # world
 
-    $P3 = new .String
+    $P3 = new 'String'
     $P3 = 'hello '
 
-    $P4 = n_concat $P3, $P2
+    $P4 = concat $P3, $P2
     say $P4              # hello world
 .end
 
@@ -49,11 +49,11 @@ pir_output_is( <<'CODE', <<'OUTPUT', 'push on a Match object' );
 .sub main :main
     .local pmc match, str, arr
     load_bytecode 'PGE.pbc'
-    match = new 'PGE::Match'
-    str = new .String
+    match = new ['PGE';'Match']
+    str = new 'String'
     str = 'foo'
     push match, str
-    arr = match.'get_array'()
+    arr = match.'list'()
     $I0 = elements arr
     print $I0
     print "\n"

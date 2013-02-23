@@ -1,5 +1,5 @@
-# Copyright (C) 2004, The Perl Foundation.
-# $Id: IMCC.pm 16245 2006-12-25 22:15:39Z paultcochrane $
+# Copyright (C) 2004, Parrot Foundation.
+# $Id: IMCC.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: object-mro.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: object-mro.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -31,7 +31,7 @@ pir_output_is( <<'CODE', <<'OUTPUT', "print mro diamond" );
 #     \ /
 #      F
 .sub main :main
-    .local pmc A, B, C, D, E, F, m, p, it
+    .local pmc A, B, C, D, E, F, mro, p, it
     newclass A, "A"
     newclass B, "B"
     subclass C, A, "C"
@@ -43,19 +43,18 @@ pir_output_is( <<'CODE', <<'OUTPUT', "print mro diamond" );
 
     subclass F, C, "F"
     addparent F, D
-    m = get_mro F
-    it = new .Iterator, m
+    mro = F.'inspect'('all_parents')
+    it = new ['Iterator'], mro
     it = 0
 loop:
     unless it goto ex
     p = shift it
-    $S0 = classname p
+    $S0 = p
     print $S0
     print ' '
     goto loop
 ex:
-    print 'G'
-    print_newline
+    say 'G'
 .end
 CODE
 F C D A B E G
@@ -111,21 +110,20 @@ pir_output_is( <<'CODE', <<'OUTPUT', "print mro 1" );
     subclass A, B, "A"
     addparent A, C
 
-    .local pmc m, it, p
+    .local pmc mro, it, p
 
-    m = get_mro A
-    it = new .Iterator, m
+    mro = A.'inspect'('all_parents')
+    it = new ['Iterator'], mro
     it = 0
 loop:
     unless it goto ex
     p = shift it
-    $S0 = classname p
+    $S0 = p
     print $S0
     print ' '
     goto loop
 ex:
-    print 'G'
-    print_newline
+    say 'G'
 .end
 CODE
 A B C D E F O G
@@ -182,21 +180,20 @@ pir_output_is( <<'CODE', <<'OUTPUT', "print mro 2" );
     subclass A, B, "A"
     addparent A, C
 
-    .local pmc m, it, p
+    .local pmc mro, it, p
 
-    m = get_mro A
-    it = new .Iterator, m
+    mro = A.'inspect'('all_parents')
+    it = new ['Iterator'], mro
     it = 0
 loop:
     unless it goto ex
     p = shift it
-    $S0 = classname p
+    $S0 = p
     print $S0
     print ' '
     goto loop
 ex:
-    print 'G'
-    print_newline
+    say 'G'
 .end
 CODE
 A B E C D F O G
@@ -220,21 +217,20 @@ pir_output_is( <<'CODE', <<'OUTPUT', "print mro 3" );
     subclass D, A, "D"
     addparent D, B
 
-    .local pmc m, it, p
+    .local pmc mro, it, p
 
-    m = get_mro D
-    it = new .Iterator, m
+    mro = D.'inspect'('all_parents')
+    it = new ['Iterator'], mro
     it = 0
 loop:
     unless it goto ex
     p = shift it
-    $S0 = classname p
+    $S0 = p
     print $S0
     print ' '
     goto loop
 ex:
-    print 'G'
-    print_newline
+    say 'G'
 .end
 CODE
 D A B C G
@@ -280,21 +276,20 @@ pir_output_is( <<'CODE', <<'OUTPUT', "print mro 4" );
     subclass Vulcan, Intelligent, "Vulcan"
     addparent Vulcan, Humanoid
 
-    .local pmc m, it, p
+    .local pmc mro, it, p
 
-    m = get_mro Vulcan
-    it = new .Iterator, m
+    mro = Vulcan.'inspect'('all_parents')
+    it = new ['Iterator'], mro
     it = 0
 loop:
     unless it goto ex
     p = shift it
-    $S0 = classname p
+    $S0 = p
     print $S0
     print ' '
     goto loop
 ex:
-    print 'R'
-    print_newline
+    say 'R'
 .end
 CODE
 Vulcan Intelligent Sentient Humanoid BiPedal LifeForm TestObject R
@@ -334,7 +329,7 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', "mro error 1" );
     addparent Z, B
 .end
 CODE
-/inconsisten class hierarchy/
+/ambiguous hierarchy/
 OUTPUT
 
 # Local Variables:

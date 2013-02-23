@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: funcptr.pm 16144 2006-12-17 18:42:49Z paultcochrane $
+# Copyright (C) 2001-2003, Parrot Foundation.
+# $Id: funcptr.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -15,15 +15,19 @@ package auto::funcptr;
 
 use strict;
 use warnings;
-use vars qw($description @args);
 
-use base qw(Parrot::Configure::Step::Base);
+use base qw(Parrot::Configure::Step);
 
-use Parrot::Configure::Step ':auto';
+use Parrot::Configure::Utils ':auto';
 
-$description = 'Verifying that the compiler supports function pointer casts';
 
-@args = qw(verbose);
+sub _init {
+    my $self = shift;
+    my %data;
+    $data{description} = q{Does compiler support function pointer casts};
+    $data{result}      = q{};
+    return \%data;
+}
 
 sub runstep {
     my ( $self, $conf ) = @_;
@@ -31,10 +35,21 @@ sub runstep {
     my $jitcapable = $conf->data->get('jitcapable');
 
     if ($jitcapable) {
-        cc_gen('config/auto/funcptr/test_c.in');
-        eval { cc_build(); };
+        $conf->cc_gen('config/auto/funcptr/test_c.in');
+        eval { $conf->cc_build(); };
 
-        if ( $@ || cc_run() !~ /OK/ ) {
+        if ( $@ || $conf->cc_run() !~ /OK/ ) {
+            _cast_void_pointers_msg();
+            exit(-1);
+        }
+        $conf->cc_clean();
+        $self->_set_positive_result($conf);
+    }
+
+    return 1;
+}
+
+sub _cast_void_pointers_msg {
             print <<"END";
 Although it is not required by the ANSI C standard,
 Parrot requires the ability to cast from void pointers to function
@@ -47,14 +62,12 @@ to use the JIT code.
 If you wish to continue without JIT support, please re-run this script
 With the '--jitcapable=0' argument.
 END
-            exit(-1);
-        }
-        cc_clean();
-        print " (yes) " if $conf->options->get('verbose');
-        $self->set_result('yes');
-    }
+}
 
-    return $self;
+sub _set_positive_result {
+    my ($self, $conf) = @_;
+    print " (yes) " if $conf->options->get('verbose');
+    $self->set_result('yes');
 }
 
 1;

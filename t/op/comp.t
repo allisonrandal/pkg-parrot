@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: comp.t 17574 2007-03-17 22:47:11Z paultcochrane $
+# Copyright (C) 2001-2005, Parrot Foundation.
+# $Id: comp.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -158,9 +158,9 @@ ok 3
 OUTPUT
 
 pasm_output_is( <<'CODE', <<OUTPUT, "eq_num" );
-        new P0, .Float
+        new P0, 'Float'
         set P0, -1.2
-        new P1, .String
+        new P1, 'String'
         set P1, "-1.2"
         eq_num P0, P1, OK
         print "not "

@@ -1,7 +1,7 @@
 /* events.h
- *  Copyright (C) 2001-2007, The Perl Foundation.
+ *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: events.h 19022 2007-06-15 15:48:51Z petdance $
+ *     $Id: events.h 37201 2009-03-08 12:07:48Z fperrad $
  *  Overview:
  *     This api will handle parrot events
  *  Data Structure and Algorithms:
@@ -12,6 +12,8 @@
 
 #ifndef PARROT_EVENTS_H_GUARD
 #define PARROT_EVENTS_H_GUARD
+
+#include "parrot/compiler.h"
 
 typedef void* (*event_func_t)(Parrot_Interp, void*);
 
@@ -75,61 +77,135 @@ typedef struct parrot_event {
 
 struct QUEUE_ENTRY;
 
-#define CHECK_EVENTS(i, n)  (opcode_t *)Parrot_do_check_events(i, n)
-#define HANDLE_EVENTS(i, n) (opcode_t *)Parrot_do_handle_events(i, 1, n)
+#define CHECK_EVENTS(i, n)  (opcode_t *)Parrot_do_check_events((i), (n))
+#define HANDLE_EVENTS(i, n) (opcode_t *)Parrot_do_handle_events((i), 1, (n))
 
 /* HEADERIZER BEGIN: src/events.c */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_API void Parrot_del_timer_event( Interp *interp, PMC *timer );
-PARROT_API opcode_t * Parrot_do_check_events( Interp *interp, opcode_t *next );
-PARROT_API opcode_t * Parrot_do_handle_events( Interp *interp /*NN*/,
-    int restore,
-    opcode_t *next )
-        __attribute__nonnull__(1);
-
-PARROT_API void Parrot_event_add_io_event( Interp *interp,
-    PMC *pio,
-    PMC *sub,
-    PMC *data,
-    INTVAL which );
-
-PARROT_API void Parrot_init_events( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-PARROT_API void Parrot_init_signals( void );
-PARROT_API void Parrot_kill_event_loop( void );
-PARROT_API void Parrot_new_cb_event( Interp *interp /*NN*/,
-    PMC *cbi,
-    char *ext )
-        __attribute__nonnull__(1);
-
-PARROT_API void Parrot_new_suspend_for_gc_event( Interp *interp /*NN*/ )
-        __attribute__nonnull__(1);
-
-PARROT_API void Parrot_new_terminate_event( Interp *interp );
-PARROT_API void Parrot_new_timer_event( Interp *interp,
-    PMC *timer,
-    FLOATVAL diff,
-    FLOATVAL interval,
-    int repeat,
-    PMC *sub,
-    parrot_event_type_enum typ );
-
-PARROT_API void Parrot_schedule_event( Interp *interp,
-    parrot_event* ev /*NN*/ )
-        __attribute__nonnull__(2);
-
-PARROT_API void Parrot_schedule_interp_qentry( Interp *interp /*NN*/,
-    struct QUEUE_ENTRY *entry /*NN*/ )
+PARROT_EXPORT
+void Parrot_del_timer_event(PARROT_INTERP, ARGIN(const PMC *timer))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-PARROT_API opcode_t * Parrot_sleep_on_event( Interp *interp /*NN*/,
-    FLOATVAL t,
-    opcode_t *next )
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+opcode_t * Parrot_do_check_events(PARROT_INTERP,
+    ARGIN_NULLOK(opcode_t *next))
         __attribute__nonnull__(1);
 
-void Parrot_schedule_broadcast_qentry( struct QUEUE_ENTRY *entry );
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+opcode_t * Parrot_do_handle_events(PARROT_INTERP,
+    int restore,
+    ARGIN_NULLOK(opcode_t *next))
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_event_add_io_event(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *pio),
+    ARGIN_NULLOK(PMC *sub),
+    ARGIN_NULLOK(PMC *data),
+    INTVAL which)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_init_events(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_init_signals(void);
+
+PARROT_EXPORT
+void Parrot_kill_event_loop(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_new_cb_event(PARROT_INTERP, ARGIN(PMC *cbi), ARGIN(char *ext))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+void Parrot_new_suspend_for_gc_event(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_new_terminate_event(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_new_timer_event(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *timer),
+    FLOATVAL diff,
+    FLOATVAL interval,
+    int repeat,
+    ARGIN_NULLOK(PMC *sub),
+    parrot_event_type_enum typ)
+        __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_schedule_event(PARROT_INTERP, ARGMOD(parrot_event* ev))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(* ev);
+
+PARROT_EXPORT
+void Parrot_schedule_interp_qentry(PARROT_INTERP,
+    ARGIN(struct QUEUE_ENTRY *entry))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+opcode_t * Parrot_sleep_on_event(PARROT_INTERP,
+    FLOATVAL t,
+    ARGIN_NULLOK(opcode_t *next))
+        __attribute__nonnull__(1);
+
+void Parrot_schedule_broadcast_qentry(ARGIN(struct QUEUE_ENTRY *entry))
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_Parrot_del_timer_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(timer)
+#define ASSERT_ARGS_Parrot_do_check_events __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_do_handle_events __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_event_add_io_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_init_events __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_init_signals __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
+#define ASSERT_ARGS_Parrot_kill_event_loop __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_new_cb_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(cbi) \
+    || PARROT_ASSERT_ARG(ext)
+#define ASSERT_ARGS_Parrot_new_suspend_for_gc_event \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_new_terminate_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_new_timer_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_schedule_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(ev)
+#define ASSERT_ARGS_Parrot_schedule_interp_qentry __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(entry)
+#define ASSERT_ARGS_Parrot_sleep_on_event __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_schedule_broadcast_qentry \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(entry)
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/events.c */
 
 /* &gen_from_enum(io_thr_msg.pasm) */

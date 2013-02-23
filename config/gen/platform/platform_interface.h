@@ -1,3 +1,8 @@
+/*
+ * $Id: platform_interface.h 37201 2009-03-08 12:07:48Z fperrad $
+ * Copyright (C) 2003-2008, Parrot Foundation.
+ */
+
 #ifndef PARROT_PLATFORM_INTERFACE_H_GUARD
 #define PARROT_PLATFORM_INTERFACE_H_GUARD
 /*
@@ -9,11 +14,12 @@
 ** I/O:
 */
 
+
 /*
 ** Math:
 */
 
-PARROT_API extern int Parrot_signbit(double x);
+extern int Parrot_signbit(double x);
 #if NUMVAL_SIZE == 12
 int Parrot_signbit_l(long double x);
 #endif
@@ -29,7 +35,7 @@ void Parrot_free_memalign(void *);
 #if !defined(PARROT_HAS_SOME_MEMALIGN)
 #  define Parrot_memalign_if_possible(a, s) malloc(s)
 #else
-#  define Parrot_memalign_if_possible(a, s) Parrot_memalign(a, s)
+#  define Parrot_memalign_if_possible(a, s) Parrot_memalign((a), (s))
 #endif
 
 #ifdef PARROT_HAS_EXEC_PROTECT
@@ -49,17 +55,17 @@ void* Parrot_memcpy_aligned(void*, void*, size_t);
 typedef void* (*Parrot_memcpy_func_t)(void *dest, const void *src, size_t);
 extern Parrot_memcpy_func_t Parrot_memcpy_aligned_sse;
 
-#  define Parrot_memcpy_aligned(d,s,l) Parrot_memcpy_aligned_sse(d,s,l)
+#  define Parrot_memcpy_aligned(d, s, l) Parrot_memcpy_aligned_sse((d), (s), (l))
 
 #elif defined(PARROT_HAS_I386_MMX)
 
 typedef void* (*Parrot_memcpy_func_t)(void *dest, const void *src, size_t);
 extern Parrot_memcpy_func_t Parrot_memcpy_aligned_mmx;
 
-#  define Parrot_memcpy_aligned(d,s,l) Parrot_memcpy_aligned_mmx(d,s,l)
+#  define Parrot_memcpy_aligned(d, s, l) Parrot_memcpy_aligned_mmx((d), (s), (l))
 
 #else
-#  define Parrot_memcpy_aligned(d,s,l) mem_sys_memcopy(d,s,l)
+#  define Parrot_memcpy_aligned(d, s, l) mem_sys_memcopy((d), (s), (l))
 #endif
 
 /*
@@ -67,6 +73,7 @@ extern Parrot_memcpy_func_t Parrot_memcpy_aligned_mmx;
 */
 
 void Parrot_sleep(unsigned int seconds);
+void Parrot_usleep(unsigned int microseconds);
 INTVAL Parrot_intval_time(void);
 FLOATVAL Parrot_floatval_time(void);
 struct tm * Parrot_gmtime_r(const time_t *, struct tm *);

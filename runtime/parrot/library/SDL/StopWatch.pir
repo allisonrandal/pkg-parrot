@@ -1,5 +1,5 @@
 
-# $Id: StopWatch.pir 18401 2007-05-02 22:49:45Z mdiep $
+# $Id: StopWatch.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 
@@ -8,8 +8,7 @@ SDL::StopWatch - A stopwatch using SDL::LCD
 =head1 SYNOPSIS
 
     # create the stopwatch
-    $I0 = find_type 'SDL::StopWatch'
-    watch = new $I0, screen
+    watch = new 'SDL::StopWatch', screen
 
     # set its position
     watch.'xpos'( 5 )
@@ -37,16 +36,19 @@ An SDL::StopWatch object has the following methods:
 .namespace ['SDL::StopWatch']
 
 .sub __onload :load
-    $I0 = find_type 'SDL::StopWatch'
-    if $I0 > 1 goto END
+    .local pmc class
+    class = get_class 'SDL::StopWatch'
+    if_null class, create_class
+    .return()
 
+  create_class:
     load_bytecode "library/SDL/LCD.pir"
-    $P0 = getclass 'SDL::LCD'
-    $P0 = subclass $P0, 'SDL::StopWatch'
-    addattribute $P0, "time"
-    addattribute $P0, "precision"
-    addattribute $P0, "start"
-    addattribute $P0, "screen"
+    class = get_class 'SDL::LCD'
+    class = subclass class, 'SDL::StopWatch'
+    addattribute $P0, 'time'
+    addattribute $P0, 'precision'
+    addattribute $P0, 'start'
+    addattribute $P0, 'screen'
 END:
 .end
 
@@ -61,19 +63,16 @@ The stopwatch will be drawn onto the specified screen.
 .sub init :vtable :method
     .param pmc screen
 
-    $I0 = classoffset self, 'SDL::StopWatch'
-    
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = 0
-    setattribute self, $I0, $P0
+    setattribute self, 'time', $P0
 
-    inc $I0
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = 0.1
-    setattribute self, $I0, $P0
+    setattribute self, 'precision', $P0
 
     inc $I0
-    $P0 = new .Float
+    $P0 = new 'Float'
     $P0 = 0
     setattribute self, $I0, $P0
 
@@ -96,15 +95,12 @@ Resets the stopwatch.
     .local pmc start
 
     # read the attributes
-    $I0 = classoffset self, 'SDL::StopWatch'    
-    total = getattribute self, $I0
-    inc $I0
-    precision = getattribute self, $I0
-    inc $I0
-    start = getattribute self, $I0
+    total     = getattribute self, 'time'
+    precision = getattribute self, 'precision'
+    start     = getattribute self, 'start'
 
-    total = 0
-    start = 0
+    total     = 0
+    start     = 0
 .end
 
 =item start()
@@ -119,19 +115,16 @@ Starts the stopwatch.
     .local pmc start
 
     # read the attributes
-    $I0 = classoffset self, 'SDL::StopWatch'    
-    total = getattribute self, $I0
-    inc $I0
-    precision = getattribute self, $I0
-    inc $I0
-    start = getattribute self, $I0
+    total     = getattribute self, 'time'
+    precision = getattribute self, 'precision'
+    start     = getattribute self, 'start'
 
     if start != 0 goto END
 
     total = 0
     time $N0
     start = $N0
-    
+
     $P0 = find_global "SDL::StopWatch::Timer", "addWatch"
     $P0( self )
 END:
@@ -147,31 +140,28 @@ Stops the stopwatch.
     .local pmc total
     .local pmc precision
     .local pmc start
-    
+
     # read the attributes
-    $I0 = classoffset self, 'SDL::StopWatch'    
-    total = getattribute self, $I0
-    inc $I0
-    precision = getattribute self, $I0
-    inc $I0
-    start = getattribute self, $I0
+    total     = getattribute self, 'time'
+    precision = getattribute self, 'precision'
+    start     = getattribute self, 'start'
 
     if start == 0 goto END
 
     time $N0
-    $N1 = start
-    $N0 = $N0 - $N1
-    
-    $N1 = total
-    $N0 += $N1
+    $N1   = start
+    $N0   = $N0 - $N1
 
-    $N1 = precision
-    $N0 /= $N1    
-    
-    total = $N0 
+    $N1   = total
+    $N0 + = $N1
+
+    $N1   = precision
+    $N0 / = $N1
+
+    total = $N0
     start = 0
 
-    $P0 = find_global "SDL::StopWatch::Timer", "removeWatch"
+    $P0   = find_global "SDL::StopWatch::Timer", "removeWatch"
     $P0( self )
 END:
 .end
@@ -188,28 +178,25 @@ reciprocal of the precision value.
     .local pmc precision
     .local pmc start
     .local int ret
-    
+
     # read the attributes
-    $I0 = classoffset self, 'SDL::StopWatch'    
-    total = getattribute self, $I0
-    inc $I0
-    precision = getattribute self, $I0
-    inc $I0
-    start = getattribute self, $I0
+    total     = getattribute self, 'time'
+    precision = getattribute self, 'precision'
+    start     = getattribute self, 'start'
 
     ret = total
     if start == 0 goto END
 
     time $N0
-    $N1 = start
-    $N0 = $N0 - $N1
-    
-    $N1 = total
-    $N0 += $N1
+    $N1   = start
+    $N0   = $N0 - $N1
 
-    $N1 = precision
-    $N0 /= $N1
-    ret = $N0
+    $N1   = total
+    $N0 + = $N1
+
+    $N1   = precision
+    $N0 / = $N1
+    ret   = $N0
 
 END:
     .return( ret )
@@ -225,7 +212,7 @@ It is drawn onto the screen consigned to the constructor.
 
 .sub draw :method
     $I0 = self.'current_time'()
-    
+
     cmod $I5, $I0, 10
     $I0 /= 10
     cmod $I4, $I0, 10
@@ -243,7 +230,7 @@ It is drawn onto the screen consigned to the constructor.
     $S3 = $I3
     $S4 = $I4
     $S5 = $I5
-    
+
     concat $S0, ":"
     concat $S0, $S1
     concat $S0, $S2
@@ -252,15 +239,13 @@ It is drawn onto the screen consigned to the constructor.
     concat $S0, $S4
     concat $S0, "."
     concat $S0, $S5
-    
+
     self = $S0
-    
+
     .local pmc screen
-    
-    $I0 = classoffset self, "SDL::StopWatch"
-    add $I0, 3
-    screen = getattribute self, $I0
-    $P0 = find_global "SDL::LCD", "draw"
+    screen = getattribute self, 'screen'
+    $P0    = find_global "SDL::LCD", "draw"
+
     $P0( screen )
 .end
 
@@ -268,10 +253,10 @@ It is drawn onto the screen consigned to the constructor.
 
 .sub __onload :load
     # XXX: an old array will be overwritten when loading this file again
-    $P0 = new .ResizablePMCArray
+    $P0 = new 'ResizablePMCArray'
     store_global "SDL::StopWatch::Timer", "array", $P0
-    
-    $P0 = new SArray
+
+    $P0 = new 'FixedPMCArray'
     $P1 = find_global "SDL::StopWatch::Timer", "tick"
     $P0 = 8
     $P0[0] = .PARROT_TIMER_NSEC
@@ -283,30 +268,30 @@ It is drawn onto the screen consigned to the constructor.
     $P0[6] = .PARROT_TIMER_RUNNING
     $P0[7] = 0
 
-    $P0 = new .Timer, $P0
+    $P0 = new 'Timer', $P0
     store_global "SDL::StopWatch::Timer", "timer", $P0
 .end
 
 .sub tick
     .local pmc timer
     .local pmc array
-    
+
     timer = find_global "SDL::StopWatch::Timer", "timer"
     array = find_global "SDL::StopWatch::Timer", "array"
-    
+
     $I0 = array
     if $I0 == 0 goto DISABLE
 
-    array = new .Iterator, array
+    array = new 'Iterator', array
     array = .ITERATE_FROM_START
 LOOP:
     unless array goto END
     $P0 = shift array
 
     $P0.'draw'()
-        
+
     branch LOOP
-    
+
 DISABLE:
     timer[.PARROT_TIMER_RUNNING] = 0
 
@@ -318,7 +303,7 @@ END:
     .param pmc obj
     .local pmc timer
     .local pmc array
-    
+
     timer = find_global "SDL::StopWatch::Timer", "timer"
     array = find_global "SDL::StopWatch::Timer", "array"
 
@@ -330,7 +315,7 @@ END:
     .param pmc obj
     .local pmc timer
     .local pmc array
-    
+
     timer = find_global "SDL::StopWatch::Timer", "timer"
     array = find_global "SDL::StopWatch::Timer", "array"
 
@@ -348,7 +333,7 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2008, Parrot Foundation.
 
 =cut
 
@@ -356,4 +341,4 @@ Copyright (C) 2004-2006, The Perl Foundation.
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

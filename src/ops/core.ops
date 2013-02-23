@@ -1,16 +1,19 @@
 /*
+ * $Id: core.ops 37420 2009-03-14 23:40:56Z allison $
 ** core.ops
 */
 
 #include "parrot/dynext.h"
 #include "parrot/embed.h"
 #include "../interp_guts.h"
+#include "../pmc/pmc_continuation.h"
+#include "../pmc/pmc_parrotlibrary.h"
 
 VERSION = PARROT_VERSION;
 
 =head1 NAME
 
-core.ops - Parrot Core Ops
+core.ops - Core Opcodes
 
 =cut
 
@@ -46,7 +49,7 @@ Halts the interpreter. (Must be op #0, CORE_OPS_end). See also B<exit>.
 
 =cut
 
-inline op end() :base_core,check_event {
+inline op end() :base_core :check_event :flow {
     HALT();
 }
 
@@ -95,59 +98,71 @@ Reserve 1 more fix entry.
 
 =item B<load_bytecode>(in STR)
 
-Load Parrot bytecode from file $1, and
-RT#42381 search the library path to locate the file.
+Load Parrot bytecode from file $1, and search the library path to locate the
+file.
 
 =cut
 
 inline op noop() :base_core {
-    goto NEXT();
 }
 
 inline op cpu_ret() {
+    /* We only want to call __asm__("ret") if we're in the JIT core. Otherwise
+       we want to throw an error. Seriously people: Do not use this opcode
+       directly in PIR. Ever. It absolutely makes no sense and it doesn't do
+       anything productive. You've been warned. */
+    if (interp->run_core & PARROT_JIT_CORE) {
 #ifdef __GNUC__
 #  ifdef I386
-    __asm__("ret");
+        __asm__("ret");
 #  endif
 #endif
-    goto NEXT();
+    }
+    else {
+        opcode_t * const handler= Parrot_ex_throw_from_op_args(interp,
+            NULL, EXCEPTION_INVALID_OPERATION,
+            "cpu_ret: May not use this opcode from PIR source");
+        goto ADDRESS(handler);
+    }
 }
 
-inline op check_events() :base_core {
+inline op check_events() :base_core :flow {
     opcode_t *next = expr NEXT();
-    next = CHECK_EVENTS(interp, next);
+    Parrot_cx_check_tasks(interp, interp->scheduler);
     goto ADDRESS(next);   /* force this being a branch op */
 }
 
-inline op check_events__() :internal {
+inline op check_events__() :internal :flow {
     opcode_t *_this = CUR_OPCODE;
-    _this = HANDLE_EVENTS(interp, _this);
+    /* Restore op_func_table. */
+    disable_event_checking(interp);
+    Parrot_cx_handle_tasks(interp, interp->scheduler);
     goto ADDRESS(_this);   /* force this being a branch op */
 }
 
-inline op wrapper__() :internal {
+inline op wrapper__() :internal :flow {
     opcode_t *pc = CUR_OPCODE;
     DO_OP(pc, interp);
     goto ADDRESS(pc);
 }
 
-inline op prederef__() :internal {
-    opcode_t *_this = CUR_OPCODE;
+inline op prederef__() :internal :flow {
+    opcode_t * const _this = CUR_OPCODE;
     if (interp->run_core & PARROT_CGOTO_CORE) {
         /* must be CGP then - check for events in not yet prederefed code */
-        _this = CHECK_EVENTS(interp, _this);
+        Parrot_cx_runloop_wake(interp, interp->scheduler);
+    /*    _this = CHECK_EVENTS(interp, _this); */
     }
     do_prederef((void**)cur_opcode, interp, op_lib.core_type);
     goto ADDRESS(_this); /* force this being a branch op */
 }
 
 inline op reserved(inconst INT) {
-    goto NEXT();  /* reserve 1 entries */
+    /* reserve 1 entries */
 }
 
 inline op load_bytecode(in STR) :load_file {
     Parrot_load_bytecode(interp, $1);
-    goto NEXT();
 }
 
 =back
@@ -166,13 +181,13 @@ The control flow opcodes check conditions and manage program flow.
 
 ########################################
 
-=item B<branch>(label INT)
+=item B<branch>(in LABEL)
 
 Branch forward or backward by the amount in $1.
 
 =cut
 
-inline op branch (label INT) :base_loop {
+inline op branch(in LABEL) :base_loop :flow {
     goto OFFSET($1);
 }
 
@@ -183,31 +198,39 @@ Intersegment branch to location in fixup table named $1.
 
 =cut
 
-inline op branch_cs (in STR) :base_loop,check_event {
-    char * const label = string_to_cstring(interp, $1);
-    PackFile_FixupEntry *fe = PackFile_find_fixup_entry(interp,
-            enum_fixup_label, label);
-    if (!fe)
-        internal_exception(1, "branch_cs: fixup for '%s' not found", label);
+inline op branch_cs(in STR) :base_loop :check_event :flow {
+    PackFile_FixupEntry * fe;
+    {
+        char * const label = Parrot_str_to_cstring(interp, $1);
+        fe = PackFile_find_fixup_entry(interp, enum_fixup_label, label);
+        Parrot_str_free_cstring(label);
+    }
+
+    if (!fe) {
+        opcode_t * handler= Parrot_ex_throw_from_op_args(interp, NULL,
+            EXCEPTION_INVALID_OPERATION,
+            "branch_cs: fixup for '%Ss' not found", $1);
+        goto ADDRESS(handler);
+    }
     else {
         interp->resume_offset = fe->offset;
         Parrot_switch_to_cs(interp, fe->seg, 1);
+        mem_sys_free(fe);
     }
-    string_cstring_free(label);
     interp->resume_flag = 2;
     goto ADDRESS(0);
 }
 
 ########################################
 
-=item B<bsr>(label INT)
+=item B<bsr>(in LABEL)
 
 Branch to the location specified by $1. Push the current location onto the call
 stack for later returning.
 
 =cut
 
-inline op bsr (label INT) :base_core,check_event {
+inline op bsr(in LABEL) :base_core :check_event :flow {
     stack_push(interp, &interp->dynamic_env,
              expr NEXT(),  STACK_ENTRY_DESTINATION, STACK_CLEANUP_NULL);
     goto OFFSET($1);
@@ -219,21 +242,81 @@ Pop the location off the top of the call stack and go there.
 
 =cut
 
-inline op ret() {
+inline op ret() :flow {
     goto POP();
 }
+
+########################################
+
+=item B<local_branch>(invar PMC, in LABEL)
+
+Go to the location specified by the label in $2. Push the current location onto
+the stack passed in $1 for later returning.
+
+=cut
+
+inline op local_branch(invar PMC, in LABEL) :base_core :check_event :flow {
+    INTVAL return_addr;
+    opcode_t *dest = expr NEXT();
+
+    if (PMC_IS_NULL($1) || $1->vtable->base_type != enum_class_ResizableIntegerArray) {
+        opcode_t * handler = Parrot_ex_throw_from_op_args(interp, dest,
+            EXCEPTION_INVALID_OPERATION,
+            "Must pass a valid integer array to 'local_branch'");
+        goto ADDRESS(handler);
+    }
+
+    return_addr = PTR2INTVAL(dest);
+    VTABLE_push_integer(interp, $1, return_addr);
+
+    goto OFFSET($2);
+}
+
+=item B<local_return>(invar PMC)
+
+Pop the location off the top of the call stack and go there.
+
+=cut
+
+inline op local_return(invar PMC) :flow {
+    INTVAL return_addr;
+    opcode_t *next;
+    opcode_t *dest = expr NEXT();
+
+    if (PMC_IS_NULL($1) || $1->vtable->base_type != enum_class_ResizableIntegerArray) {
+        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, dest,
+            EXCEPTION_INVALID_OPERATION,
+            "Must pass a valid integer array to 'local_return'");
+        goto ADDRESS(handler);
+    }
+
+    return_addr = VTABLE_pop_integer(interp, $1);
+    next = INTVAL2PTR(opcode_t *, return_addr);
+
+    /* The return address must be within the current code segment. */
+    if (! (next >= interp->code->base.data
+           && next < (interp->code->base.data + interp->code->base.size))) {
+        opcode_t *handler = Parrot_ex_throw_from_op_args(interp, dest,
+            EXCEPTION_INVALID_OPERATION,
+            "Address for 'local_return' must be within the current code segment");
+        goto ADDRESS(handler);
+    }
+
+    goto ADDRESS(next);
+}
+
 
 
 ########################################
 
-=item B<jsr>(label INT)
+=item B<jsr>(in LABEL)
 
 Jump to the location specified by register $1. Push the current
 location onto the call stack for later returning.
 
 =cut
 
-inline op jsr(label INT) :base_core,check_event {
+inline op jsr(in LABEL) :base_core :check_event :flow {
     opcode_t * loc;
     stack_push(interp, &interp->dynamic_env,
              expr NEXT(),  STACK_ENTRY_DESTINATION, STACK_CLEANUP_NULL);
@@ -241,16 +324,15 @@ inline op jsr(label INT) :base_core,check_event {
     goto ADDRESS(loc);
 }
 
-
 ########################################
 
-=item B<jump>(label INT)
+=item B<jump>(in LABEL)
 
 Jump to the address held in register $1.
 
 =cut
 
-inline op jump(label INT) :base_loop {
+inline op jump(in LABEL) :base_loop :flow {
     opcode_t * const loc = INTVAL2PTR(opcode_t *, $1);
     goto ADDRESS(loc);
 }
@@ -263,8 +345,8 @@ Internal opcode used to jump from normal bytecode into a JITted version.
 
 =cut
 
-op enternative() {
-    opcode_t *addr = run_native(interp, CUR_OPCODE,
+op enternative() :flow {
+    opcode_t * const addr = run_native(interp, CUR_OPCODE,
             interp->code->base.data);
     goto ADDRESS(addr);
 }
@@ -286,86 +368,70 @@ met, the branch happens.  Otherwise control falls to the next operation.
 
 ########################################
 
-=item B<if>(invar INT, labelconst INT)
+=item B<if>(invar INT, inconst LABEL)
 
-=item B<if>(invar NUM, labelconst INT)
+=item B<if>(invar NUM, inconst LABEL)
 
-=item B<if>(invar PMC, labelconst INT)
+=item B<if>(invar PMC, inconst LABEL)
 
-=item B<if>(invar STR, labelconst INT)
+=item B<if>(invar STR, inconst LABEL)
 
 Check register $1. If true, branch by $2.
 
 =cut
 
-inline op if(invar INT, labelconst INT) {
-    if ($1 != 0) {
+inline op if (invar INT, inconst LABEL) {
+    if ($1 != 0)
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
-inline op if(invar NUM, labelconst INT) {
-    if ($1 != 0.0) {
+inline op if (invar NUM, inconst LABEL) {
+    if (!FLOAT_IS_ZERO($1))
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
-op if (invar STR, labelconst INT) {
-    if (string_bool(interp, $1)) {
+op if (invar STR, inconst LABEL) {
+    if (Parrot_str_boolean(interp, $1))
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
-op if(invar PMC, labelconst INT) {
-    if ($1->vtable->get_bool(interp, $1)) {
+op if (invar PMC, inconst LABEL) {
+    if (VTABLE_get_bool(interp, $1))
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
 ########################################
 
-=item B<unless>(invar INT, labelconst INT)
+=item B<unless>(invar INT, inconst LABEL)
 
-=item B<unless>(invar NUM, labelconst INT)
+=item B<unless>(invar NUM, inconst LABEL)
 
-=item B<unless>(invar PMC, labelconst INT)
+=item B<unless>(invar PMC, inconst LABEL)
 
-=item B<unless>(invar STR, labelconst INT)
+=item B<unless>(invar STR, inconst LABEL)
 
 Check register $1. If false, branch by $2.
 
 =cut
 
-inline op unless(invar INT, labelconst INT) {
-    if ($1 == 0) {
+inline op unless(invar INT, inconst LABEL) {
+    if ($1 == 0)
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
-inline op unless(invar NUM, labelconst INT) {
-    if ($1 == 0.0) {
+inline op unless(invar NUM, inconst LABEL) {
+    if (FLOAT_IS_ZERO($1))
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
-op unless (invar STR, labelconst INT) {
-    if (!string_bool(interp, $1)) {
+op unless(invar STR, inconst LABEL) {
+    if (!Parrot_str_boolean(interp, $1))
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
-op unless(invar PMC, labelconst INT) {
-    if (!$1->vtable->get_bool(interp, $1)) {
+op unless(invar PMC, inconst LABEL) {
+    if (!VTABLE_get_bool(interp, $1))
         goto OFFSET($2);
-    }
-    goto NEXT();
 }
 
 =back
@@ -408,23 +474,28 @@ continuation.
 
 Return from the sub or method via the current continuation.
 
+=item B<capture_lex>(invar PMC)
+
+Capture the current lexical state of the inner subroutine PMC.
+
 =item B<newclosure>(out PMC, invar PMC)
 
 Create a closure of the given subroutine PMC by cloning the sub's state.
 
 =cut
 
-inline op invokecc(invar PMC) {
-    opcode_t *dest;
-    PMC * const p = $1;
-    dest = expr NEXT();
+inline op invokecc(invar PMC) :flow {
+    PMC      * const p     = $1;
+    opcode_t *dest         = expr NEXT();
+
     interp->current_object = NULL;
-    interp->current_cont = NEED_CONTINUATION;
-    dest = (opcode_t *)p->vtable->invoke(interp, p, dest);
+    interp->current_cont   = NEED_CONTINUATION;
+    dest                   = (opcode_t *)p->vtable->invoke(interp, p, dest);
+
     goto ADDRESS(dest);
 }
 
-inline op invoke(invar PMC, invar PMC) {
+inline op invoke(invar PMC, invar PMC) :flow {
     opcode_t *dest;
     PMC * const p = $1;
 
@@ -434,33 +505,36 @@ inline op invoke(invar PMC, invar PMC) {
     goto ADDRESS(dest);
 }
 
-inline op yield() {
+inline op yield() :flow {
     opcode_t *dest = expr NEXT();
-    PMC * const p = CONTEXT(interp->ctx)->current_sub;
+    PMC * const p = CONTEXT(interp)->current_sub;
     dest = (opcode_t *)p->vtable->invoke(interp, p, dest);
     goto ADDRESS(dest);
 }
 
-inline op tailcall(invar PMC) {
+inline op tailcall(invar PMC) :flow {
     opcode_t *dest;
     PMC * const p = $1;
     dest = expr NEXT();
-    interp->current_cont = CONTEXT(interp->ctx)->current_cont;
+    interp->current_cont = CONTEXT(interp)->current_cont;
     PObj_get_FLAGS(interp->current_cont) |= SUB_FLAG_TAILCALL;
     dest = (opcode_t *)p->vtable->invoke(interp, p, dest);
     goto ADDRESS(dest);
 }
 
-inline op returncc() {
-    PMC * const p = CONTEXT(interp->ctx)->current_cont;
+inline op returncc() :flow {
+    PMC * const p = CONTEXT(interp)->current_cont;
     opcode_t * const dest = (opcode_t *)p->vtable->invoke(interp,
             p, expr NEXT());
     goto ADDRESS(dest);
 }
 
+inline op capture_lex(invar PMC) {
+    Parrot_capture_lex(interp, $1);
+}
+
 inline op newclosure(out PMC, invar PMC) {
     $1 = parrot_new_closure(interp, $2);
-    goto NEXT();
 }
 
 =back
@@ -489,7 +563,7 @@ Define return results for the subroutine return statement.
 
 For all of these opcodes the passed invar PMC constant is the string
 representation of a FixedIntegerArray with one flag word per argument.
-The flags are documented currently in F<include/parrot/enum.h> only.
+The flags are documented currently in F<include/parrot/enums.h> only.
 
 After this argument a variable amount of arguments must follow according
 to the elements of the signature array.
@@ -497,37 +571,37 @@ to the elements of the signature array.
 =cut
 
 
-op set_args(inconst PMC) {
+op set_args(inconst PMC) :flow {
     opcode_t * const _this = CUR_OPCODE;
     PMC * const signature = $1;
     INTVAL argc;
 
     /* for now just point to the opcode */
     interp->current_args = _this;
-    argc = SIG_ELEMS(signature);
+    argc = VTABLE_elements(interp, signature);
     goto OFFSET(argc + 2);
 }
 
-op get_results(inconst PMC) {
+op get_results(inconst PMC) :flow {
     opcode_t * const _this = CUR_OPCODE;
     PMC * const signature = $1;
     INTVAL argc;
 
-    CONTEXT(interp->ctx)->current_results = _this;
-    argc = SIG_ELEMS(signature);
+    CONTEXT(interp)->current_results = _this;
+    argc = VTABLE_elements(interp, signature);
     goto OFFSET(argc + 2);
 }
 
-op get_params(inconst PMC) {
+op get_params(inconst PMC) :flow {
     opcode_t * const _this = CUR_OPCODE;
-    parrot_context_t *caller_ctx, *ctx;
+    Parrot_Context *caller_ctx, *ctx;
     PMC * ccont;
     PMC * const signature = $1;
     INTVAL argc;
     opcode_t *src_indexes, *dst_indexes;
 
     interp->current_params = _this;
-    ctx = CONTEXT(interp->ctx);
+    ctx = CONTEXT(interp);
     ccont = ctx->current_cont;
 
     caller_ctx = ctx->caller_ctx;
@@ -545,32 +619,32 @@ op get_params(inconst PMC) {
         ctx->caller_ctx = caller_ctx->caller_ctx;
         /* ordinarily, this will free the context immediately, but not if the
            sub created a closure (or continuation, or . . .).  */
-        Parrot_free_context(interp, caller_ctx, 0);
+        Parrot_free_context(interp, caller_ctx, 1);
         interp->current_args = NULL;
     }
-    argc = SIG_ELEMS(signature);
+    argc = VTABLE_elements(interp, signature);
     goto OFFSET(argc + 2);
 }
 
-op set_returns(inconst PMC) {
+op set_returns(inconst PMC) :flow {
     opcode_t * const _this = CUR_OPCODE;
-    parrot_context_t *ctx;
+    Parrot_Context *ctx;
     PMC *ccont;
     PMC *signature = $1;
     INTVAL argc;
     opcode_t *src_indexes, *dest_indexes;
 
     interp->current_returns = _this;
-    ctx = CONTEXT(interp->ctx);
+    ctx = CONTEXT(interp);
     ccont = ctx->current_cont;
 
     if (PMC_cont(ccont)->address) {
-        /* else it's from runops_fromc */
-        parrot_context_t * const caller_ctx = PMC_cont(ccont)->to_ctx;
+        /* Call is from runops_fromc */
+        Parrot_Context * const caller_ctx = PMC_cont(ccont)->to_ctx;
         if (! caller_ctx) {
-            /* there is no point calling real_exception here, because
+            /* there is no point calling Parrot_ex_throw_..., because
                PDB_backtrace can't deal with a missing to_ctx either. */
-            internal_exception(1, "No caller_ctx for continuation %p.", ccont);
+            exit_fatal(1, "No caller_ctx for continuation %p.", ccont);
         }
 
         src_indexes = interp->current_returns;
@@ -581,7 +655,12 @@ op set_returns(inconst PMC) {
 
         parrot_pass_args(interp, ctx, caller_ctx, src_indexes, dest_indexes, PARROT_PASS_RESULTS);
     }
-    argc = SIG_ELEMS(signature);
+    else if (ctx->caller_ctx->results_signature) {
+    /* We have a dynamic result signature, from pcc_invoke */
+        parrot_pass_args(interp, ctx, ctx->caller_ctx, interp->current_returns,
+                ctx->caller_ctx->current_results, PARROT_PASS_RESULTS);
+    }
+    argc = VTABLE_elements(interp, signature);
     goto OFFSET(argc + 2);
 }
 
@@ -596,7 +675,7 @@ specified in F<docs/pdds/pdd03_calling_conventions.pod>.
 
 inline op result_info(out PMC) {
     /* Get context of callee from return continuation. */
-    PMC * const cc = CONTEXT(interp->ctx)->current_cont;
+    PMC * const cc = CONTEXT(interp)->current_cont;
     PMC *sig = NULL;
     if (cc && PMC_cont(cc)->to_ctx) {
         /* caller context has results */
@@ -612,7 +691,6 @@ inline op result_info(out PMC) {
         $1 = pmc_new(interp, enum_class_FixedIntegerArray);
     else
         $1 = sig;
-    goto NEXT();
 }
 
 =back
@@ -621,21 +699,19 @@ inline op result_info(out PMC) {
 
 =for clarity
 
-########################################
-
 =cut
 
 =over 4
 
-=item B<set_addr>(out INT, labelconst INT)
+=item B<set_addr>(out INT, inconst LABEL)
 
 Sets register $1 to the current address plus the offset $2.
 
-=item B<set_addr>(invar PMC, labelconst INT)
+=item B<set_addr>(invar PMC, inconst LABEL)
 
 Sets PMC in register $1 to the current address plus the offset $2.
 
-=item B<set_addr>(invar PMC, labelvar INT)
+=item B<set_addr>(invar PMC, invar LABEL)
 
 Sets PMC in register $1 to the absolute address $2 obtained from B<get_addr>.
 
@@ -645,24 +721,49 @@ Sets $1 to the absolute address of the Sub PMC $2.
 
 =cut
 
-inline op set_addr(out INT, labelconst INT) {
+inline op set_addr(out INT, inconst LABEL) {
     $1 = PTR2OPCODE_T(CUR_OPCODE + $2);
-    goto NEXT();
 }
 
-inline op set_addr(invar PMC, labelconst INT) {
-    $1->vtable->set_pointer(interp, $1, (CUR_OPCODE + $2));
-    goto NEXT();
+inline op set_addr(invar PMC, inconst LABEL) {
+    VTABLE_set_pointer(interp, $1, (CUR_OPCODE + $2));
 }
 
-inline op set_addr(invar PMC, labelvar INT) {
-    $1->vtable->set_pointer(interp, $1, (void*)$2);
-    goto NEXT();
+inline op set_addr(invar PMC, invar LABEL) {
+    VTABLE_set_pointer(interp, $1, (void*)$2);
 }
 
 inline op get_addr(out INT, invar PMC) {
-    $1 = (INTVAL)$2->vtable->get_pointer(interp, $2);
-    goto NEXT();
+    void *ptr = VTABLE_get_pointer(interp, $2);
+    $1        = (INTVAL)ptr;
+}
+
+=back
+
+=cut
+
+########################################
+
+=head2 Concurrency operations
+
+=over 4
+
+=item B<schedule>(invar PMC)
+
+Register a task with the concurrency scheduler. Details about the task are
+stored within the task PMC.
+
+inline op schedule(invar PMC) {
+    Parrot_cx_schedule_task(interp, $1);
+}
+
+=item B<addhandler>(invar PMC)
+
+Add an event or exception handler to the concurrency scheduler. Details about
+the handler are stored within the handler PMC.
+
+inline op addhandler(invar PMC) {
+    Parrot_cx_add_handler(interp, $1);
 }
 
 =back
@@ -675,22 +776,40 @@ inline op get_addr(out INT, invar PMC) {
 
 =over 4
 
-=item B<push_eh>(labelconst INT)
+=item B<push_eh>(inconst LABEL)
 
 Create an exception handler for the given catch label and push it onto
-the control stack.
+the exception handler stack.
 
-=item B<clear_eh>()
+=item B<push_eh>(invar PMC)
 
-Clear out the most recently placed exception.
+Push an invokable PMC onto the exception handler stack.
+
+=item B<pop_eh>()
+
+Pop the most recently placed exception off the handler stack.
 
 =item B<throw>(invar PMC)
 
-Throw the exception in $1.
+Throw the exception in $1 with current continuation.
+
+=item B<throw>(invar PMC, invar PMC)
+
+Throw the exception in $1 with continuation from $2.
 
 =item B<rethrow>(invar PMC)
 
 Only valid inside an exception handler. Rethrow the exception $1.
+
+=item B<count_eh>(out INT)
+
+Get a count of currently active exception handlers on the stack.
+
+=item B<die>(in STR)
+
+=item B<die>(in PMC)
+
+Die with message $1
 
 =item B<die>(in INT, in INT)
 
@@ -720,54 +839,114 @@ return; C<1> means an exception has been raised.
 
 =cut
 
-inline op push_eh(labelconst INT) {
-    PMC * const eh = pmc_new(interp, enum_class_Exception_Handler);
+inline op push_eh(inconst LABEL) {
+    PMC * const eh = pmc_new(interp, enum_class_ExceptionHandler);
     VTABLE_set_pointer(interp, eh, CUR_OPCODE + $1);
-    push_exception(interp, eh);
-    goto NEXT();
+    Parrot_cx_add_handler_local(interp, eh);
 }
 
-inline op clear_eh() {
-    pop_exception(interp);
-    goto NEXT();
+inline op push_eh(invar PMC) {
+    Parrot_cx_add_handler_local(interp, $1);
 }
 
-inline op throw(invar PMC) {
-    opcode_t * const ret = expr NEXT();
-    opcode_t * const dest = (opcode_t *)throw_exception(interp, $1, ret);
+inline op pop_eh() {
+    Parrot_cx_delete_handler_local(interp,
+            Parrot_str_new(interp, "exception", 9));
+}
+
+inline op throw(invar PMC) :flow {
+    opcode_t *dest;
+    opcode_t *const ret    = expr NEXT();
+    PMC            *resume = new_ret_continuation_pmc(interp, ret);
+    /*
+     * We might return here after handling the exception, so mark the
+     * current context appropriately.
+     */
+    Parrot_context_ref(interp, CONTEXT(interp));
+    VTABLE_set_attr_str(interp, $1, Parrot_str_new_constant(interp, "resume"), resume);
+    dest = Parrot_ex_throw_from_op(interp, $1, ret);
     goto ADDRESS(dest);
 }
 
-inline op rethrow(invar PMC) {
-    opcode_t * const dest = (opcode_t *)rethrow_exception(interp, $1);
+inline op throw(invar PMC, invar PMC) :flow {
+    opcode_t * const dest = Parrot_ex_throw_from_op(interp, $1,
+                                VTABLE_get_pointer(interp, $2));
     goto ADDRESS(dest);
 }
 
-inline op die(in INT, in INT) {
+inline op rethrow(invar PMC) :flow {
+    opcode_t * const dest = Parrot_ex_rethrow_from_op(interp, $1);
+    goto ADDRESS(dest);
+}
+
+inline op count_eh(out INT) {
+    $1 = Parrot_cx_count_handlers_local(interp,
+            Parrot_str_new(interp, "exception", 9));
+}
+
+inline op die(in STR) :flow {
+    opcode_t        *dest;
+    opcode_t * const ret       = expr NEXT();
+    PMC             *resume    = new_ret_continuation_pmc(interp, ret);
+    PMC             *exception = Parrot_ex_build_exception(interp, EXCEPT_error,
+                                    CONTROL_ERROR, $1);
+
+    VTABLE_set_attr_str(interp, exception,
+                        Parrot_str_new_constant(interp, "resume"), resume);
+    dest = Parrot_ex_throw_from_op(interp, exception, ret);
+    goto ADDRESS(dest);
+}
+
+inline op die(in PMC) :flow {
+    opcode_t        *dest;
+    opcode_t * const ret       = expr NEXT();
+    PMC             *resume    = new_ret_continuation_pmc(interp, ret);
+    STRING          *msg       = PMC_IS_NULL($1)
+                               ? NULL : VTABLE_get_string(interp, $1);
+    PMC             *exception =
+        Parrot_ex_build_exception(interp, EXCEPT_error, CONTROL_ERROR, msg);
+
+    VTABLE_set_attr_str(interp, exception,
+                        Parrot_str_new_constant(interp, "resume"), resume);
+    dest = Parrot_ex_throw_from_op(interp, exception, ret);
+    goto ADDRESS(dest);
+}
+
+inline op die(in INT, in INT) :flow {
     if ($1 == EXCEPT_doomed)
         _exit($2);
-    do_exception(interp, $1, $2);
-    restart NEXT();
+    else {
+        opcode_t * const ret       = expr NEXT();
+        PMC             *exception = Parrot_ex_build_exception(interp, $1,
+                                                               $2, NULL);
+        opcode_t * const dest      = Parrot_ex_throw_from_op(interp,
+                                                             exception, ret);
+        goto ADDRESS(dest);
+    }
 }
 
-inline op exit(in INT) {
-    do_exception(interp, EXCEPT_exit, $1);
-    restart NEXT();
+inline op exit(in INT) :flow {
+    opcode_t        *dest;
+    opcode_t * const ret       = expr NEXT();
+    PMC             *resume    = new_ret_continuation_pmc(interp, ret);
+    PMC             *exception = Parrot_ex_build_exception(interp, EXCEPT_exit,
+                                                      $1, NULL);
+    VTABLE_set_attr_str(interp, exception,
+                        Parrot_str_new_constant(interp, "resume"), resume);
+    dest = Parrot_ex_throw_from_op(interp, exception, ret);
+    goto ADDRESS(dest);
 }
 
 inline op pushmark(in INT) {
     Parrot_push_mark(interp, $1);
-    goto NEXT();
 }
 
 inline op popmark(in INT) {
     Parrot_pop_mark(interp, $1);
-    goto NEXT();
 }
 
 inline op pushaction(invar PMC) {
     Parrot_push_action(interp, $1);
-    goto NEXT();
 }
 
 =back
@@ -793,7 +972,7 @@ If $1 is zero, turn off debugging. Otherwise turn debug flag $1 on.
 
 =cut
 
-inline op debug(in INT) {
+inline op debug(in INT) :flow {
     if ($1 != 0) { Interp_debug_SET(interp,   $1); }
     else         { Interp_debug_CLEAR(interp, PARROT_ALL_DEBUG_FLAGS); }
     restart NEXT();
@@ -808,7 +987,7 @@ If $1 is zero, turn off byte code bounds checking. Otherwise turn it on.
 
 =cut
 
-inline op bounds(in INT) {
+inline op bounds(in INT) :flow {
     if ($1 != 0) { Parrot_set_flag(interp,   PARROT_BOUNDS_FLAG); }
     else         { Interp_flags_CLEAR(interp, PARROT_BOUNDS_FLAG); }
     restart NEXT();
@@ -823,7 +1002,7 @@ If $1 is zero, turn off profiling. Otherwise turn it on.
 
 =cut
 
-inline op profile(in INT) {
+inline op profile(in INT) :flow {
     if ($1 != 0) { Parrot_set_flag(interp,   PARROT_PROFILE_FLAG); }
     else         { Interp_flags_CLEAR(interp, PARROT_PROFILE_FLAG); }
     restart NEXT();
@@ -838,7 +1017,7 @@ If $1 is zero, turn off tracing. Otherwise turn trace flag $1 on.
 
 =cut
 
-inline op trace(in INT) {
+inline op trace(in INT) :flow {
     if ($1 != 0) { Parrot_set_trace(interp,   $1); }
     else         { Parrot_clear_trace(interp, PARROT_ALL_TRACE_FLAGS); }
     restart NEXT();
@@ -855,7 +1034,6 @@ If $1 is zero, turn off GC_DEBUG. Otherwise turn it on.
 inline op gc_debug(in INT) {
     if ($1 != 0) { Interp_flags_SET(interp,   PARROT_GC_DEBUG_FLAG); }
     else         { Interp_flags_CLEAR(interp, PARROT_GC_DEBUG_FLAG); }
-    goto NEXT();
 }
 
 ########################################
@@ -870,10 +1048,10 @@ The valid constants for each return value are:
 
 =item B<interpinfo>(out INT, in INT)
 
-.TOTAL_MEM_ALLOC, .DOD_RUNS, .COLLECT_RUNS, .ACTIVE_PMCS, .ACTIVE_BUFFERS,
+.TOTAL_MEM_ALLOC, .GC_MARK_RUNS, .GC_COLLECT_RUNS, .ACTIVE_PMCS, .ACTIVE_BUFFERS,
 .TOTAL_PMCS, .TOTAL_BUFFERS, .HEADER_ALLOCS_SINCE_COLLECT,
-.MEM_ALLOCS_SINCE_COLLECT, .TOTAL_COPIED, .IMPATIENT_PMCS, .LAZY_DOD_RUNS,
-.EXTENDED_PMCS
+.MEM_ALLOCS_SINCE_COLLECT, .TOTAL_COPIED, .IMPATIENT_PMCS, .GC_LAZY_MARK_RUNS,
+.EXTENDED_PMCS, .RUNCORE
 
 =item B<interpinfo>(out PMC, in INT)
 
@@ -889,34 +1067,24 @@ The valid constants for each return value are:
 
 op interpinfo(out INT, in INT) {
     $1 = interpinfo(interp, $2);
-    goto NEXT();
 }
 
 op interpinfo(out PMC, in INT) {
     $1 = interpinfo_p(interp, $2);
-    goto NEXT();
 }
 
 op interpinfo(out STR, in INT) {
     $1 = interpinfo_s(interp, $2);
-    goto NEXT();
 }
 
 =item B<warningson>(in INT)
 
 Turns on warnings categories. Categories already turned on will stay on.
 Initial setting is currently all warnings off.  Include F<warnings.pasm> to
-access the categories.  They are:
+access the categories. Refer to that file for the current list of warnings
+available.
 
 =over 4
-
-=item .PARROT_WARNINGS_UNDEF_FLAG
-
-=item .PARROT_WARNINGS_IO_FLAG
-
-=item .PARROT_WARNINGS_PLATFORM_FLAG
-
-=item .PARROT_WARNINGS_ALL_FLAG
 
 =back
 
@@ -926,7 +1094,6 @@ To turn on multiple categories, OR the category numbers together.
 
 inline op warningson(in INT) {
     PARROT_WARNINGS_on(interp, $1);
-    goto NEXT();
 }
 
 =item B<warningsoff>(in INT)
@@ -939,7 +1106,6 @@ numbers.
 
 inline op warningsoff(in INT) {
     PARROT_WARNINGS_off(interp, $1);
-    goto NEXT();
 }
 
 =item B<errorson>(in INT)
@@ -975,7 +1141,6 @@ To turn on multiple categories, OR the category numbers together.
 
 inline op errorson(in INT) {
     PARROT_ERRORS_on(interp, $1);
-    goto NEXT();
 }
 
 =item B<errorsoff>(in INT)
@@ -988,12 +1153,11 @@ numbers.
 
 inline op errorsoff(in INT) {
     PARROT_ERRORS_off(interp, $1);
-    goto NEXT();
 }
 
 ########################################
 
-=item B<runinterp>(invar PMC, label INT)
+=item B<runinterp>(invar PMC, in LABEL)
 
 Run the code starting at offset $2 within interpreter $1.
 
@@ -1003,18 +1167,16 @@ Get the current ParrotInterpreter.
 
 =cut
 
-op runinterp(invar PMC, label INT) {
-    Interp * const new_interp = (Interp *)PMC_data($1);
+op runinterp(invar PMC, in LABEL) {
+    Interp * const new_interp = (Interp *)VTABLE_get_pointer(interp, $1);
     Interp_flags_SET(new_interp, PARROT_EXTERN_CODE_FLAG);
     new_interp->code = interp->code;
     runops(new_interp, REL_PC + $2);
-    goto NEXT();
 }
 
 op getinterp(out PMC) {
     $1 = VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
            IGLOBALS_INTERPRETER);
-    goto NEXT();
 }
 
 #######################################
@@ -1027,9 +1189,9 @@ op getinterp(out PMC) {
 
 ###############################################################################
 
-=head2 Dead Object Detection/Garbage Collection
+=head2 Garbage Collection
 
-Opcodes that interact with the DOD and GC subsystems.
+Opcodes that interact with the GC subsystem.
 
 =over 4
 
@@ -1039,18 +1201,18 @@ Opcodes that interact with the DOD and GC subsystems.
 
 =item B<sweep>(inconst INT)
 
-Triggers a DOD run, based on the value of $1, where:
+Triggers a GC run, based on the value of $1, where:
 
 =over
 
 =item * 0
 
-Trigger a DOD run only if there are things that have flagged themselves as
+Trigger a GC run only if there are things that have flagged themselves as
 really needing to be collected.
 
 =item * 1
 
-Trigger a dead object detection (DOD) sweep unconditionally.
+Trigger a GC run unconditionally.
 
 =back
 
@@ -1058,11 +1220,10 @@ Trigger a dead object detection (DOD) sweep unconditionally.
 
 op sweep(inconst INT) {
     if ($1)
-        Parrot_do_dod_run(interp, 0);
+        Parrot_do_gc_run(interp, 0);
     else
-        if (interp->arena_base->num_early_DOD_PMCs)
-            Parrot_do_dod_run(interp, DOD_lazy_FLAG);
-    goto NEXT();
+        if (interp->arena_base->num_early_gc_PMCs)
+            Parrot_do_gc_run(interp, GC_lazy_FLAG);
 }
 
 =item B<collect>()
@@ -1073,29 +1234,26 @@ Trigger a garbage collection.
 
 op collect() {
     Parrot_go_collect(interp);
-    goto NEXT();
 }
 
 =item B<sweepoff>()
 
-Disable DOD sweeps. (Nestable)
+Disable GC runs. (Nestable)
 
 =cut
 
 op sweepoff() {
-    Parrot_block_DOD(interp);
-    goto NEXT();
+    Parrot_block_GC_mark(interp);
 }
 
 =item B<sweepon>()
 
-Re-enable DOD sweeps.
+Re-enable GC runs.
 
 =cut
 
 op sweepon() {
-    Parrot_unblock_DOD(interp);
-    goto NEXT();
+    Parrot_unblock_GC_mark(interp);
 }
 
 =item B<collectoff>()
@@ -1105,8 +1263,7 @@ Disable GC runs (nestable).
 =cut
 
 op collectoff() {
-    Parrot_block_GC(interp);
-    goto NEXT();
+    Parrot_block_GC_sweep(interp);
 }
 
 =item B<collecton>()
@@ -1116,8 +1273,7 @@ Re-enable GC.
 =cut
 
 op collecton() {
-    Parrot_unblock_GC(interp);
-    goto NEXT();
+    Parrot_unblock_GC_sweep(interp);
 }
 
 =item B<needs_destroy>(invar PMC)
@@ -1128,14 +1284,11 @@ when unused during the lazy sweep, triggered by C<sweep 0>.
 =cut
 
 op needs_destroy(invar PMC) {
-     PObj_needs_early_DOD_SET($1);
-     ++interp->arena_base->num_early_DOD_PMCs;
-    goto NEXT();
+     PObj_needs_early_gc_SET($1);
+     ++interp->arena_base->num_early_gc_PMCs;
 }
 
 =back
-
-###############################################################################
 
 =head2 Native Call Interface
 
@@ -1163,18 +1316,17 @@ Look up symbol $3 in library $2. We assume that this is actually a
 variable address rather than a function address, and build an
 UnManagedStruct PMC and stick the address into its data pointer.
 
-=item B<compile>(out PMC, invar PMC, in STR)
-
-Don't use compile -- just invoke the compiler.
-
 =item B<compreg>(out PMC, in STR)
 
-Get a compiler for source type $2.
+Get the compiler object for source type $2.  The returned compiler
+object should provide a C<compile> method for translating code
+in the source type.  However, some Parrot compilers such as
+C<PIR> and C<PASM> currently return a sub that is to be
+invoked directly on the source.
 
 =item B<compreg>(in STR, invar PMC)
 
-Register the sub $2 as a compiler for source type $1.
-$2 is either a NCI PMC with signature C<pIt> or a PASM Sub.
+Register $2 as the compiler object for source type $1.
 
 =item B<new_callback>(out PMC, invar PMC, invar PMC, in STR)
 
@@ -1188,17 +1340,27 @@ the callback function.
 =cut
 
 inline op loadlib(out PMC, in STR) {
-
     $1 = Parrot_load_lib(interp, $2, NULL);
-    goto NEXT();
 }
 
-op dlfunc (out PMC, invar PMC, in STR, in STR) {
-    char * const name = string_to_cstring(interp, ($3));
+op dlfunc(out PMC, invar PMC, in STR, in STR) {
+    char * const  name      = Parrot_str_to_cstring(interp, ($3));
+    void         *dl_handle = NULL;
+    void         *ptr       = NULL;
+    funcptr_t     p;
 
-    funcptr_t p = D2FPTR(Parrot_dlsym(PMC_IS_NULL($2) ?
-            NULL : PMC_data($2), name));
-    string_cstring_free(name);
+    if (!PMC_IS_NULL($2) && $2->vtable->base_type == enum_class_ParrotLibrary) {
+        dl_handle = ((Parrot_ParrotLibrary_attributes*)PMC_data($2))->dl_handle;
+    }
+
+    ptr = Parrot_dlsym(
+            PMC_IS_NULL($2) ? NULL :
+            VTABLE_defined(interp, $2) ? dl_handle :
+            NULL,
+            name);
+
+    p = D2FPTR(ptr);
+
     if (p == NULLfunc) {
         const char * err = Parrot_dlerror();
         Parrot_warn(interp, PARROT_WARNINGS_UNDEF_FLAG,
@@ -1207,17 +1369,21 @@ op dlfunc (out PMC, invar PMC, in STR, in STR) {
     }
     else {
         $1 = pmc_new(interp, enum_class_NCI);
-        $1->vtable->set_pointer_keyed_str(interp, $1, $4, F2DPTR(p));
+        VTABLE_set_pointer_keyed_str(interp, $1, $4, F2DPTR(p));
         PObj_get_FLAGS($1) |= PObj_private1_FLAG;
     }
-    goto NEXT();
+    Parrot_str_free_cstring(name);
 }
 
-op dlvar (out PMC, invar PMC, in STR) {
-    char * const name = string_to_cstring(interp, ($3));
+op dlvar(out PMC, invar PMC, in STR) {
+    char * const  name      = Parrot_str_to_cstring(interp, ($3));
+    void *        p         = NULL;
+    void         *dl_handle = NULL;
 
-    void * const p = Parrot_dlsym(PMC_IS_NULL($2) ? NULL : PMC_data($2), name);
-    string_cstring_free(name);
+    if (!PMC_IS_NULL($2) && $2->vtable->base_type == enum_class_ParrotLibrary) {
+        dl_handle = ((Parrot_ParrotLibrary_attributes*)PMC_data($2))->dl_handle;
+        p         = Parrot_dlsym(PMC_IS_NULL($2) ? NULL : dl_handle, name);
+    }
     if (p == NULL) {
         const char * const err = Parrot_dlerror();
         Parrot_warn(interp, PARROT_WARNINGS_UNDEF_FLAG,
@@ -1230,30 +1396,76 @@ op dlvar (out PMC, invar PMC, in STR) {
         $1 = pmc_new(interp, enum_class_UnManagedStruct);
         PMC_data($1) = p;
     }
-    goto NEXT();
-}
-
-inline op compile(out PMC, invar PMC, in STR) {
-    internal_exception(1, "don't use compile - just invoke the compiler");
-    goto NEXT();
+    Parrot_str_free_cstring(name);
 }
 
 inline op compreg(in STR, invar PMC) {
     PMC * const compreg_hash = VTABLE_get_pmc_keyed_int(interp,
             interp->iglobals, IGLOBALS_COMPREG_HASH);
     VTABLE_set_pmc_keyed_str(interp, compreg_hash, $1, $2);
-    goto NEXT();
 }
 
 inline op compreg(out PMC, in STR) {
     PMC * const compreg_hash = VTABLE_get_pmc_keyed_int(interp,
             interp->iglobals, IGLOBALS_COMPREG_HASH);
     $1 = VTABLE_get_pmc_keyed_str(interp, compreg_hash, $2);
-    goto NEXT();
 }
 
 op new_callback(out PMC, invar PMC, invar PMC, in STR) {
     $1 = Parrot_make_cb(interp, $2, $3, $4);
+}
+
+=back
+
+=cut
+
+###############################################################################
+
+=head2 Annotations operations
+
+These operations relate to bytecode annotations.
+
+=over 4
+
+=cut
+
+########################################
+
+=item B<annotations>(out PMC)
+
+Gets all bytecode annotations in effect at the current point, in a Hash.
+If there are none, returns an empty Hash.
+
+=cut
+
+inline op annotations(out PMC) {
+    if (interp->code->annotations) {
+        opcode_t const cur_pos = (expr NEXT()) - interp->code->base.data;
+        $1 = PackFile_Annotations_lookup(interp, interp->code->annotations,
+                cur_pos, NULL);
+    }
+    else {
+        $1 = pmc_new(interp, enum_class_Hash);
+    }
+    goto NEXT();
+}
+
+=item B<annotations>(out PMC, in STR)
+
+Gets the bytecode annotation with the given name that is in effect at the
+current point. Returns PMCNULL if there is none.
+
+=cut
+
+inline op annotations(out PMC, in STR) {
+    if (interp->code->annotations) {
+        opcode_t const cur_pos = (expr NEXT()) - interp->code->base.data;
+        $1 = PackFile_Annotations_lookup(interp, interp->code->annotations,
+                cur_pos, $2);
+    }
+    else {
+        $1 = PMCNULL;
+    }
     goto NEXT();
 }
 
@@ -1265,7 +1477,7 @@ op new_callback(out PMC, invar PMC, invar PMC, in STR) {
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2006, The Perl Foundation.
+Copyright (C) 2001-2008, Parrot Foundation.
 
 =head1 LICENSE
 

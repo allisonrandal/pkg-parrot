@@ -1,18 +1,15 @@
-# $Id: overload.pir 17599 2007-03-18 10:51:10Z paultcochrane $
+# $Id: overload.pir 37201 2009-03-08 12:07:48Z fperrad $
 
 .sub bench :main
 .include "pmctypes.pasm"
 .include "mmd.pasm"
-   .local pmc my_mul
-   my_mul = global "my_mul"
-   mmdvtregister .MMD_MULTIPLY, .Integer, .Integer, my_mul
    .local int i
    .local pmc r
    .local pmc a
    .local pmc b
-   a = new Integer
-   b = new Integer
-   r = new Integer
+   a = new 'Integer'
+   b = new 'Integer'
+   r = new 'Integer'
    a = 7
    b = 6
    i = 1
@@ -26,7 +23,7 @@ loop:
 .end
 
 
-.sub my_mul
+.sub my_mul :multi(Integer, Integer, Integer)
    .param pmc left
    .param pmc right
    .param pmc dest
@@ -41,4 +38,4 @@ loop:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

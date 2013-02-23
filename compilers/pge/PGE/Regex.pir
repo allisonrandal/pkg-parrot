@@ -9,15 +9,16 @@ a number of built-in rules.
 
 =cut
 
-.namespace [ 'PGE::Match' ]
+.namespace [ 'PGE'; 'Match' ]
 
 .include 'cclass.pasm'
 .include 'interpinfo.pasm'
 
 .sub '__onload' :load
-    .local pmc base
-    $P0 = subclass 'PGE::Match', 'PGE::Grammar'
-    $P0 = new .Hash
+    .local pmc p6meta
+    p6meta = new 'P6metaclass'
+    p6meta.'new_class'('PGE::Grammar', 'parent'=>'PGE::Match')
+    $P0 = new 'Hash'
     set_global '%!cache', $P0
     .return ()
 .end
@@ -33,17 +34,15 @@ Match an identifier.
 
 =cut
 
-.sub 'ident'
-    .param pmc mob
+.sub 'ident' :method
     .param pmc adverbs         :slurpy :named
     .local string target
-    .local pmc mfrom, mpos
+    .local pmc mob, mfrom, mpos
     .local int pos, lastpos
 
-    $P0 = get_hll_global ["PGE::Match"], 'newfrom'
-    (mob, target, mfrom, mpos) = $P0(mob)
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target) = $P0.'new'(self)
 
-    pos = mfrom
     lastpos = length target
     $S0 = substr target, pos, 1
     if $S0 == '_' goto ident_1
@@ -51,7 +50,7 @@ Match an identifier.
     if $I0 == 0 goto end
   ident_1:
     pos = find_not_cclass .CCLASS_WORD, target, pos, lastpos
-    mpos = pos
+    mob.'to'(pos)
   end:
     .return (mob)
 .end
@@ -63,13 +62,13 @@ Match a null string (always returns true on first match).
 
 =cut
 
-.sub "null"
-    .param pmc mob
-    .local pmc target, mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    assign mpos, mfrom
-    .return (mob)    
+.sub "null" :method
+    .local pmc mob
+    .local int pos
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos) = $P0.'new'(self)
+    mob.'to'(pos)
+    .return (mob)
 .end
 
 =item C<fail()>
@@ -78,11 +77,11 @@ Force a backtrack.  (Taken from A05.)
 
 =cut
 
-.sub "fail"
-    .param pmc mob
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    .return $P0(mob)
+.sub "fail" :method
+    $P0 = get_hll_global ['PGE'], 'Match'
+    .tailcall $P0.'new'(self)
 .end
+
 
 =item C<upper()>
 
@@ -90,19 +89,10 @@ Match a single uppercase character.
 
 =cut
 
-.sub "upper"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_UPPERCASE, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub 'upper' :method
+    .tailcall '!cclass'(self, .CCLASS_UPPERCASE)
 .end
+
 
 =item C<lower()>
 
@@ -110,19 +100,10 @@ Match a single lowercase character.
 
 =cut
 
-.sub "lower"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_LOWERCASE, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "lower" :method
+    .tailcall '!cclass'(self, .CCLASS_LOWERCASE)
 .end
+
 
 =item C<alpha()>
 
@@ -130,18 +111,8 @@ Match a single alphabetic character.
 
 =cut
 
-.sub "alpha"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_ALPHABETIC, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "alpha" :method
+    .tailcall '!cclass'(self, .CCLASS_ALPHABETIC)
 .end
 
 =item C<digit()>
@@ -150,18 +121,8 @@ Match a single digit.
 
 =cut
 
-.sub "digit"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_NUMERIC, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "digit" :method
+    .tailcall '!cclass'(self, .CCLASS_NUMERIC)
 .end
 
 =item C<xdigit()>
@@ -170,18 +131,8 @@ Match a single alphanumeric character.
 
 =cut
 
-.sub "xdigit"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_HEXADECIMAL, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "xdigit" :method
+    .tailcall '!cclass'(self, .CCLASS_HEXADECIMAL)
 .end
 
 =item C<space()>
@@ -190,18 +141,8 @@ Match a single whitespace character.
 
 =cut
 
-.sub "space"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_WHITESPACE, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "space" :method
+    .tailcall '!cclass'(self, .CCLASS_WHITESPACE)
 .end
 
 =item C<print()>
@@ -210,18 +151,8 @@ Match a single printable character.
 
 =cut
 
-.sub "print"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_PRINTING, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "print" :method
+    .tailcall '!cclass'(self, .CCLASS_PRINTING)
 .end
 
 =item C<graph()>
@@ -230,18 +161,8 @@ Match a single "graphical" character.
 
 =cut
 
-.sub "graph"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_GRAPHICAL, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "graph" :method
+    .tailcall '!cclass'(self, .CCLASS_GRAPHICAL)
 .end
 
 =item C<blank()>
@@ -250,18 +171,8 @@ Match a single "blank" character.
 
 =cut
 
-.sub "blank"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_BLANK, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "blank" :method
+    .tailcall '!cclass'(self, .CCLASS_BLANK)
 .end
 
 =item C<cntrl()>
@@ -270,18 +181,8 @@ Match a single "control" character.
 
 =cut
 
-.sub "cntrl"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_CONTROL, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "cntrl" :method
+    .tailcall '!cclass'(self, .CCLASS_CONTROL)
 .end
 
 =item C<punct()>
@@ -290,18 +191,8 @@ Match a single punctuation character.
 
 =cut
 
-.sub "punct"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_PUNCTUATION, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "punct" :method
+    .tailcall '!cclass'(self, .CCLASS_PUNCTUATION)
 .end
 
 =item C<alnum()>
@@ -310,18 +201,8 @@ Match a single alphanumeric character.
 
 =cut
 
-.sub "alnum"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $I1 = is_cclass .CCLASS_ALPHANUMERIC, target, $I0
-    unless $I1 goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "alnum" :method
+    .tailcall '!cclass'(self, .CCLASS_ALPHANUMERIC)
 .end
 
 =item C<sp()>
@@ -330,18 +211,8 @@ Match a single space character.  (Taken from E05.)
 
 =cut
 
-.sub "sp"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $S0 = substr target, $I0, 1
-    if $S0 != " " goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "sp" :method
+    .tailcall '!literal'(self, ' ')
 .end
 
 =item C<lt()>
@@ -350,18 +221,8 @@ Match a single left angle bracket.  (Taken from E05.)
 
 =cut
 
-.sub "lt"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $S0 = substr target, $I0, 1
-    if $S0 != "<" goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "lt" :method
+    .tailcall '!literal'(self, '<')
 .end
 
 =item C<gt()>
@@ -370,18 +231,8 @@ Match a single right angle bracket. (Taken from E05.)
 
 =cut
 
-.sub "gt"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $S0 = substr target, $I0, 1
-    if $S0 != ">" goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "gt" :method
+    .tailcall '!literal'(self, '>')
 .end
 
 =item C<dot()>
@@ -390,18 +241,8 @@ Match a single dot ('.').  (Taken from E05.)
 
 =cut
 
-.sub "dot"
-    .param pmc mob
-    .local string target
-    .local pmc mfrom, mpos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    $I0 = mfrom
-    $S0 = substr target, $I0, 1
-    if $S0 != "." goto end
-    mpos = mfrom + 1
-  end:
-    .return (mob)
+.sub "dot" :method
+    .tailcall '!literal'(self, '.')
 .end
 
 =item C<ws()>
@@ -410,17 +251,16 @@ Match whitespace between tokens.
 
 =cut
 
-.sub "ws"
-    .param pmc mob
+.sub "ws" :method
     .local string target
-    .local pmc mfrom, mpos
+    .local pmc mob, mfrom, mpos
     .local int rep, pos, lastpos
     .local string nextchars
-    .const .Sub corou = "ws_corou"
+    .const 'Sub' corou = "ws_corou"
     nextchars = ""
   ws_1:
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target, mfrom, mpos) = $P0.'new'(self)
     lastpos = length target
     pos = mfrom
     if pos >= lastpos goto found
@@ -443,7 +283,7 @@ Match whitespace between tokens.
     mpos = pos
     $P0 = corou
     $P0 = clone $P0
-    setattribute mob, "PGE::Match\x0&!corou", $P0
+    setattribute mob, '&!corou', $P0
     $P0(mob, mfrom, mpos)
     .return (mob)
   nobacktrack:
@@ -465,7 +305,7 @@ Match whitespace between tokens.
     dec mpos
     if mpos > mfrom goto loop
     null $P0
-    setattribute mob, "PGE::Match\x0&!corou", $P0
+    setattribute mob, '&!corou', $P0
     goto loop
 .end
 
@@ -477,23 +317,21 @@ Perl 5's \b regex).
 
 =cut
 
-.sub "wb"
-    .param pmc mob
+.sub "wb" :method
     .local string target
-    .local pmc mfrom, mpos
+    .local pmc mob
     .local int pos
-    $P0 = get_hll_global ["PGE::Match"], "newfrom"
-    (mob, target, mfrom, mpos) = $P0(mob)
-    pos = mfrom
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target) = $P0.'new'(self)
     if pos == 0 goto succeed
     $I0 = length target
     if pos == $I0 goto succeed
-    $I1 = is_cclass .CCLASS_WORD, target, pos
-    dec pos
-    $I0 = is_cclass .CCLASS_WORD, target, pos
-    if $I0 == $I1 goto end    
+    $I0 = pos - 1
+    $I1 = is_cclass .CCLASS_WORD, target, $I0
+    $I2 = is_cclass .CCLASS_WORD, target, pos
+    if $I1 == $I2 goto end
   succeed:
-    assign mpos, mfrom
+    mob.'to'(pos)
   end:
     .return (mob)
 .end
@@ -507,14 +345,14 @@ success.
 
 =cut
 
-.sub "before"
-    .param pmc mob
+.sub "before" :method
     .param string pattern      :optional
     .param int has_pattern     :opt_flag
-    .local pmc cache, rule
+    .param pmc adverbs         :slurpy :named
+    .local pmc mob, cache, rule
 
     if has_pattern goto lookahead
-    mob = fail(mob)
+    mob = 'fail'(self)
     .return (mob)
   lookahead:
     cache = get_global '%!cache'
@@ -523,17 +361,17 @@ success.
     rule = cache[pattern]
     goto match
   new_pattern:
-    $P0 = compreg 'PGE::P6Regex'
+    $P0 = compreg 'PGE::Perl6Regex'
     rule = $P0(pattern)
     cache[pattern] = rule
   match:
-    mob = rule(mob)
+    mob = rule(self)
     unless mob goto end
     $P0 = getattribute mob, '$.from'
     $P1 = getattribute mob, '$.pos'
     assign $P1, $P0
     null $P0
-    setattribute mob, "PGE::Match\x0&!corou", $P0
+    setattribute mob, '&!corou', $P0
   end:
     .return (mob)
 .end
@@ -545,7 +383,7 @@ current position matches <pattern> (anchored at the end).
 Returns a zero-width Match object on success.
 
 XXX: Note that this implementation cheats in a big way.
-S05 says that C<after> is implemented by reversing the 
+S05 says that C<after> is implemented by reversing the
 syntax tree and looking for things in opposite order going
 to the left.  This implementation just grabs the (sub)string
 up to the current match position and tests that, anchoring
@@ -554,13 +392,14 @@ potentially very inefficient, but it "works" for now.
 
 =cut
 
-.sub "after"
-    .param pmc mob
+.sub "after" :method
     .param string pattern      :optional
     .param int has_pattern     :opt_flag
-    .local pmc cache, rule
+    .param pmc adverbs         :slurpy :named
+    .local pmc mob, cache, rule
     .local int from
 
+    mob = self
     if has_pattern goto lookbehind
     mob = fail(mob)
     .return (mob)
@@ -573,7 +412,7 @@ potentially very inefficient, but it "works" for now.
     rule = cache[pattern]
     goto match
   new_pattern:
-    $P0 = compreg 'PGE::P6Regex'
+    $P0 = compreg 'PGE::Perl6Regex'
     rule = $P0(pattern)
     cache[pattern] = rule
   match:
@@ -594,8 +433,80 @@ potentially very inefficient, but it "works" for now.
     .return (mob)
 .end
 
+=item FAILGOAL(pmc mob, string goal [, 'dba'=>dba])
+
+Throw an exception when parsing fails in goal matching.
+
+=cut
+
+.sub 'FAILGOAL' :method
+    .param string goal
+    .param pmc options         :slurpy :named
+    .local string dba
+    dba = options['dba']
+    if dba goto have_dba
+    $P0 = getinterp
+    $P0 = $P0['sub'; 1]
+    dba = $P0
+  have_dba:
+    .local string message
+    message = concat "Unable to parse ", dba
+    message .= ", couldn't find final "
+    message .= goal
+    die message
+.end
+
 =back
-    
+
+=head2  Support subroutines
+
+=over 4
+
+=item C<!cclass(mob, cclass)>
+
+Match according to character class C<cclass>.
+
+=cut
+
+.sub '!cclass'
+    .param pmc mob
+    .param int cclass
+
+    .local string target
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, $I0, target) = $P0.'new'(mob)
+    $I1 = is_cclass cclass, target, $I0
+    unless $I1 goto end
+    inc $I0
+    mob.'to'($I0)
+  end:
+    .return (mob)
+.end
+
+=item C<!literal(mob, literal)>
+
+Match according to C<literal>.
+
+=cut
+
+.sub '!literal'
+    .param pmc mob
+    .param string literal
+    .local string target
+    .local int pos
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target) = $P0.'new'(mob)
+    $I0 = length literal
+    $S0 = substr target, pos, $I0
+    if $S0 != literal goto end
+    pos += $I0
+    mob.'to'(pos)
+  end:
+    .return (mob)
+.end
+
+=back
+
 =head1 AUTHOR
 
 Patrick Michaud (pmichaud@pobox.com) is the author and maintainer.
@@ -608,4 +519,4 @@ Patches and suggestions should be sent to the Perl 6 compiler list
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

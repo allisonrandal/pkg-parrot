@@ -1,12 +1,12 @@
 #!perl
-# Copyright (C) 2001-2007, The Perl Foundation.
-# $Id: debuginfo.t 18533 2007-05-14 01:12:54Z chromatic $
+# Copyright (C) 2001-2007, Parrot Foundation.
+# $Id: debuginfo.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 6;
+use Parrot::Test tests => 8;
 
 =head1 NAME
 
@@ -23,21 +23,26 @@ as well as backtrace tests.
 
 =cut
 
-pasm_output_like( <<'CODE', <<'OUTPUT', "getline, getfile" );
+$ENV{TEST_PROG_ARGS} ||= '';
+my $nolineno = $ENV{TEST_PROG_ARGS} =~ /--runcore=(fast|cgoto)/
+    ? "\\(unknown file\\)\n-1" : "debuginfo_\\d+\\.pasm\n\\d";
+
+SKIP: {
+skip "disabled on fast-core",1 if $ENV{TEST_PROG_ARGS} =~ /--runcore=(fast|cgoto)/;
+
+pasm_output_like( <<'CODE', <<"OUTPUT", "getline, getfile" );
 .pcc_sub main:
     getfile S0
     getline I0
-    print S0
-    print "\n"
-    print I0
-    print "\n"
+    say S0
+    say I0
     end
 CODE
-/debuginfo_\d+\.pasm
-\d/
+/$nolineno/
 OUTPUT
+}
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - Null PMC access");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - Null PMC access" );
 .sub main
     print "ok 1\n"
     a()
@@ -78,7 +83,7 @@ called from Sub 'a' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - method not found");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - method not found" );
 .namespace ["Test1"]
 .sub main
     print "ok 1\n"
@@ -87,7 +92,7 @@ pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - method not found
 .end
 .sub foo
     print "ok 2\n"
-    $P0 = new Integer
+    $P0 = new 'Integer'
     print "ok 3\n"
     $P0."nosuchmethod"()
     print "not ok 4\n"
@@ -96,12 +101,12 @@ CODE
 /^ok 1
 ok 2
 ok 3
-Method 'nosuchmethod' not found
+Method 'nosuchmethod' not found for invocant of class 'Integer'
 current instr.: 'parrot;Test1;foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'parrot;Test1;main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - fetch of unknown lexical");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - fetch of unknown lexical" );
 .namespace ["Test2"]
 .sub main
     print "ok 1\n"
@@ -121,11 +126,11 @@ current instr.: 'parrot;Test2;foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'parrot;Test2;main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
-# XXX
+# RT #46895
 # in plain functional run-loop result is 999
 # other run-loops report 998
-# TODO investigate this after interpreter strtup is done
-# see also TODO in src/embed.c
+# investigate this after interpreter strtup is done
+# see also todo item in src/embed.c
 pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 1" );
 .sub main
     main()
@@ -134,10 +139,10 @@ CODE
 /^maximum recursion depth exceeded
 current instr\.: 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)
-\.\.\. call repeated 1000 times/
+\.\.\. call repeated \d+ times/
 OUTPUT
 
-pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 2");
+pir_error_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 2" );
 .sub main
     rec(91)
 .end
@@ -158,6 +163,48 @@ called from Sub 'rec' pc (\d+|-1) \(.*?:(\d+|-1)\)
 \.\.\. call repeated 90 times
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
+
+$nolineno = $ENV{TEST_PROG_ARGS} =~ /--runcore=fast/
+    ? '\(\(unknown file\):-1\)' : '\(xyz.pir:126\)';
+
+SKIP: {
+skip "disabled on this core",2 if $ENV{TEST_PROG_ARGS} =~ /--runcore=(fast|cgoto|jit|switch)/;
+
+# See "RT #43269 and .annotate
+pir_error_output_like( <<'CODE', <<"OUTPUT", "setfile and setline" );
+.sub main :main
+    setfile "xyz.pir"
+    setline 123
+    $S0 = 'hello'
+    $I0 = 456
+    'no_such_function'($S0, $I0)
+.end
+CODE
+/$nolineno/
+OUTPUT
+
+$nolineno = $ENV{TEST_PROG_ARGS} =~ /--runcore=(fast|cgoto|jit|switch)/
+    ? '\(\(unknown file\):-1\)' : '\(foo.p6:128\)';
+# See "RT #43269 and .annotate
+pir_error_output_like( <<'CODE', <<"OUTPUT", "setfile and setline" );
+.sub main :main
+    setfile "foo.p6"
+    setline 123
+    $P0 = new 'Integer'
+    assign $P0, 9876
+    set_global '$a', $P0
+
+    setline 124
+    $P0 = get_global '$a'
+    $P1 = clone $P0
+    add $P1, 1
+    'nsf'($P1)
+.end
+CODE
+/$nolineno/
+OUTPUT
+
+}
 
 # Local Variables:
 #   mode: cperl

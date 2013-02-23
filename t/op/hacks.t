@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: hacks.t 17574 2007-03-17 22:47:11Z paultcochrane $
+# Copyright (C) 2001-2008, Parrot Foundation.
+# $Id: hacks.t 37201 2009-03-08 12:07:48Z fperrad $
 
 use strict;
 use warnings;
@@ -42,11 +42,11 @@ SKIP: {
     end
 _handler:
     print "catched it\n"
-    set I0, P5["_type"]
+    set I0, P5["type"]
     print "error "
     print I0
     print "\n"
-    set I0, P5["_severity"]
+    set I0, P5
     print "severity "
     print I0
     print "\n"
@@ -66,7 +66,7 @@ OUT
 _handler:
 .include "signal.pasm"
     print "catched it\n"
-    set I0, P5["_type"]
+    set I0, P5["type"]
     neg I0, I0
     ne I0, .SIGFPE, nok
     print "ok\n"

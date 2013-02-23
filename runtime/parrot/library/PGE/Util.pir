@@ -11,13 +11,14 @@ parsing tasks using PGE.
 
 =cut
 
-.namespace [ 'PGE::Util' ]
+.namespace [ 'PGE';'Util' ]
 
 .include 'cclass.pasm'
 
 .sub "__onload" :load
-    .local pmc base
-    $P0 = subclass 'PGE::Grammar', 'PGE::Util'
+    .local pmc p6meta
+    p6meta = new 'P6metaclass'
+    p6meta.'new_class'('PGE::Util', 'parent'=>'PGE::Grammar')
     .return ()
 .end
 
@@ -38,7 +39,7 @@ of the match.
     .local pmc iter
     .local string message
     message = ''
-    iter = new .Iterator, list
+    iter = new 'Iterator', list
   iter_loop:
     unless iter goto iter_end
     $S0 = shift iter
@@ -47,20 +48,19 @@ of the match.
   iter_end:
 
     # get a copy of the match object
-    .local pmc newfrom, mfrom, mpos
     .local string target
-    newfrom = find_global 'PGE::Match', 'newfrom'
-    (mob, target, mfrom, mpos) = newfrom(mob, 0)
+    .local int pos
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target) = $P0.'new'(mob)
     $I0 = length message
     dec $I0
     $I0 = is_cclass .CCLASS_NEWLINE, message, $I0
     if $I0 goto throw_message
 
-    .local int pos, lines
+    .local int lines
     .local pmc line_number
-    pos = mfrom
     #  FIXME: use 'line_number' method instead?
-    line_number = get_hll_global ['PGE::Util'], 'line_number'
+    line_number = get_hll_global ['PGE';'Util'], 'line_number'
     (lines) = mob.line_number(pos)
     inc lines
     message .= ' at line '
@@ -78,11 +78,11 @@ of the match.
     message .= "\"\n"
 
   throw_message:
-    $P0 = new .Exception
-    $P0['_message'] = message
+    $P0 = new 'Exception'
+    $P0 = message
     throw $P0
 
-    mpos = -3
+    mob.'to'(-3)
     .return (mob)
 .end
 
@@ -100,7 +100,7 @@ Emits the list of messages to stderr.
     .local pmc iter
     .local string message
     message = ''
-    iter = new .Iterator, list
+    iter = new 'Iterator', list
   iter_loop:
     unless iter goto iter_end
     $S0 = shift iter
@@ -109,20 +109,19 @@ Emits the list of messages to stderr.
   iter_end:
 
     # get a copy of the match object
-    .local pmc newfrom, mfrom, mpos
     .local string target
-    newfrom = find_global 'PGE::Match', 'newfrom'
-    (mob, target, mfrom, mpos) = newfrom(mob, 0)
+    .local int pos
+    $P0 = get_hll_global ['PGE'], 'Match'
+    (mob, pos, target) = $P0.'new'(mob)
     $I0 = length message
     dec $I0
     $I0 = is_cclass .CCLASS_NEWLINE, message, $I0
     if $I0 goto emit_message
 
-    .local int pos, lines
+    .local int lines
     .local pmc line_number
-    pos = mfrom
     #  FIXME: use 'line_number' method instead?
-    line_number = get_hll_global ['PGE::Util'], 'line_number'
+    line_number = get_hll_global ['PGE';'Util'], 'line_number'
     (lines) = mob.line_number(pos)
     inc lines
     message .= ' at line '
@@ -132,7 +131,7 @@ Emits the list of messages to stderr.
   emit_message:
     printerr message
 
-    assign mpos, mfrom
+    mob.'to'(pos)
     .return (mob)
 .end
 
@@ -196,7 +195,7 @@ the number of splits.
     .local pmc result, match
     .local int pos, n
 
-    result = new .ResizablePMCArray
+    result = new 'ResizablePMCArray'
     pos    = 0
     n      = 1
 
@@ -206,14 +205,14 @@ split_loop:
     unless match goto split_end
 
     ##  save substring up to current match
-    $I0 = match.from()
+    $I0 = match.'from'()
     $I0 -= pos
     $S0 = substr str, pos, $I0
     push result, $S0
-    pos = match.to()
+    pos = match.'to'()
 
     .local pmc captures
-    captures = match.get_array()
+    captures = match.'list'()
     if null captures goto capture_end
     $I0 = elements captures
     $I1 = 0
@@ -247,4 +246,4 @@ end:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

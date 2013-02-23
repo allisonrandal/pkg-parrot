@@ -1,4 +1,4 @@
-#!./parrot -C
+#!./parrot -R cgp
 #
 # fasta.pir N         (N = 2500000 for shootout)
 # by Joshua Isom
@@ -10,16 +10,16 @@
 .sub makeCumulative
 	.param pmc genelist
 	.param int count
-	.local float cp
+	.local num cp
 	.local int i
 	cp = 0.0
-	i = 0 
+	i = 0
 beginfor:
 	unless i < count goto endfor
 	$N0 = genelist[i;1]
 	cp += $N0
 	genelist[i;1] = cp
-	inc i 
+	inc i
 	goto beginfor
 endfor:
 .end
@@ -27,7 +27,7 @@ endfor:
 .sub selectRandom
 	.param pmc genelist
 	.param int count
-	.local float r
+	.local num r
 	r = gen_random(1.0)
 	.local int i, lo, hi
 
@@ -72,7 +72,7 @@ endwhile:
 	print " "
 	print desc
 	print "\n"
-	
+
 	.local string pick
 beginfor:
 	unless todo > 0 goto endfor
@@ -83,7 +83,7 @@ beginfor:
 	else:
 		m = LINE_LENGTH
 	endif:
-	
+
 	i = 0
 beginfor_1:
 	unless i < m goto endfor_1
@@ -116,7 +116,7 @@ endfor:
 	print " "
 	print desc
 	print "\n"
-	
+
 beginfor:
 	unless todo > 0 goto endfor
 
@@ -149,7 +149,7 @@ endfor:
 .end
 
 .macro InitStruct (iub, i, char, num)
-	$P0 = new .FixedPMCArray
+	$P0 = new 'FixedPMCArray'
 	$P0 = 2
 	.iub[.i] = $P0
 	.iub[.i;0] = .char
@@ -162,7 +162,7 @@ endfor:
 	.local int n
 	# stdout is linebuffered per default - make it block buffered
 	stdout = getstdout
-	stdout.'setbuf'(40960)
+	stdout.'buffer_size'(40960)
 	$I0 = argv
 	if $I0 > 1 goto argsok
 	n = 1000
@@ -172,7 +172,7 @@ argsok:
 	n = $S0
 argsdone:
 	.local pmc iub
-	iub = new .FixedPMCArray
+	iub = new 'FixedPMCArray'
 	iub = 15
 	.InitStruct(iub, 0, "a", 0.27)
 	.InitStruct(iub, 1, "c", 0.12)
@@ -192,7 +192,7 @@ argsdone:
 	.InitStruct(iub, 14, "Y", 0.02)
 
 	.local pmc homosapiens
-	homosapiens = new .FixedPMCArray
+	homosapiens = new 'FixedPMCArray'
 	homosapiens = 4
 	.InitStruct(homosapiens, 0, "a", 0.3029549426680)
 	.InitStruct(homosapiens, 1, "c", 0.1979883004921)
@@ -204,7 +204,7 @@ argsdone:
 
 	makeCumulative(iub, 15)
 	makeCumulative(homosapiens, 4)
-	
+
 	$I0 = n * 2
 	makeRepeatFasta("ONE", "Homo sapiens alu", alu, $I0)
 	$I0 = n * 3
@@ -213,13 +213,13 @@ argsdone:
 	makeRandomFasta ("THREE", "Homo sapiens frequency", homosapiens, 4, $I0)
 .end
 
-.const float IM = 139968.0
-.const float IA = 3877.0
-.const float IC = 29573.0
+.const num IM = 139968.0
+.const num IA = 3877.0
+.const num IC = 29573.0
 
 .sub gen_random
-	.param float max
-	.local float last
+	.param num max
+	.local num last
 	last = 42.0
 loop:
 	$N0 = last
@@ -231,7 +231,7 @@ loop:
 	$N1 /= IM
 	last = $N0
 	.yield($N1)
-	get_params "(0)", max
+	get_params "0", max
 	goto loop
 .end
 
@@ -240,4 +240,4 @@ loop:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

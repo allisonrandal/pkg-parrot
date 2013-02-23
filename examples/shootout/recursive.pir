@@ -1,14 +1,15 @@
-#!./parrot -Oc -Cj
+#!./parrot
 #
 # Ack by Leopold Toetsch
 # Fib and Tak by Joshua Isom
 # modified default value to n=3. Karl Forner
+# ./parrot -Oc -R cgp-jit recursive.pir N
 
 .sub main :main
 	.param pmc argv
 	.local int argc, n
 	argc = argv
-	n = 3 
+	n = 3
 	unless argc == 2 goto argsok
 	$S0 = argv[1]
 	n = $S0
@@ -17,7 +18,7 @@ argsok:
     $P0.'recursion_limit'(100000)
 
 	.local pmc array
-	array = new .FixedFloatArray
+	array = new 'FixedFloatArray'
 	array = 11
 
 	dec n
@@ -66,12 +67,12 @@ a1:
 	if y goto a2
 	$I0 = x - 1
 	$I1 = 1
-	.return ack($I0, $I1)
+	.tailcall ack($I0, $I1)
 a2:
 	$I2 = y - 1
 	$I3 = ack(x, $I2)
 	$I4 = x - 1
-	.return ack($I4, $I3)
+	.tailcall ack($I4, $I3)
 .end
 
 .sub FibInt
@@ -91,7 +92,7 @@ endif:
 .sub FibNum
 	.param num n
 	unless n < 2 goto endif
-	.return(1)
+	.return(1.0)
 endif:
 	.local num tmp
 	tmp = n - 2
@@ -103,20 +104,20 @@ endif:
 .end
 
 .sub TakNum
-	.param float x
-	.param float y
-	.param float z
+	.param num x
+	.param num y
+	.param num z
 	unless y >= x goto endif
 	.return(z)
 endif:
-	.local float tmp
-	tmp = x - 1
+	.local num tmp
+	tmp = x - 1.0
 	$N0 = TakNum(tmp, y, z)
-	tmp = y - 1
+	tmp = y - 1.0
 	$N1 = TakNum(tmp, z, x)
-	tmp = z - 1
+	tmp = z - 1.0
 	$N2 = TakNum(tmp, x, y)
-	.return TakNum($N0, $N1, $N2)
+	.tailcall TakNum($N0, $N1, $N2)
 .end
 
 .sub TakInt
@@ -130,10 +131,10 @@ endif:
 	tmp = x - 1
 	$I0 = TakInt(tmp, y, z)
 	tmp = y - 1
-	$I1 = TakInt(tmp, z, x)
-	tmp = z - 1
-	$I2 = TakInt(tmp, x, y)
-	.return TakInt($I0, $I1, $I2)
+	tmp = TakInt(tmp, z, x)
+	dec z
+	z = TakInt(tmp, x, y)
+	.tailcall TakInt($I0, tmp, z)
 .end
 
 
@@ -141,4 +142,4 @@ endif:
 #   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:
