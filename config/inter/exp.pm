@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: exp.pm 10637 2005-12-24 11:00:22Z jhoblitt $
+# $Id: exp.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Asks the user whether to set up experimental networking.
 package inter::exp;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -41,6 +41,8 @@ sub runstep
     }
 
     $conf->data->set(expnetworking => $net);
+
+    return $self;
 }
 
 1;

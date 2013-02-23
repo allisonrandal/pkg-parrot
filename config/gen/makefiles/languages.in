@@ -1,15 +1,16 @@
-# $Id: languages.in 10681 2005-12-26 21:17:45Z bernhard $
+# $Id: languages.in 11366 2006-01-28 20:03:50Z bernhard $
 
 # setup of commands
-${make_set_make}
-PERL      = ${perl}
-MAKE      = ${make_c}
-RM_F      = ${rm_f}
+@make_set_make@
+PERL      = @perl@
+MAKE      = @make_c@
+RM_F      = @rm_f@
 
 # add new languages here
 # remove obsolete languages here
 LANGUAGES = \
     BASIC \
+    HQ9plus \
     Zcode \
     bc \
     befunge \
@@ -57,14 +58,14 @@ help:
 	@echo "  make <lang>"
 	@echo "  make <lang>.test"
 	@echo "  make <lang>.clean"
-	@echo "For the status of individual languages see LANGUAGES.STATUS"
+	@echo "For the status of individual languages see LANGUAGES.STATUS.pod"
 	@echo ""
 
 test:   all
-	$(PERL) testall
+	$(PERL) t/harness
 
 smoke:  all
-	$(PERL) testall --html
+	$(PERL) t/harness --html
 	$(PERL) ../tools/util/smokeserv-client.pl languages_smoke.html
 
 smoke-clean :
@@ -72,6 +73,7 @@ smoke-clean :
 
 clean: \
     BASIC.clean \
+    HQ9plus.clean \
     Zcode.clean \
     bc.clean \
     befunge.clean \
@@ -154,6 +156,14 @@ forth.test:
 # Looks like there are no tests for forth
 forth.clean:
 # no Makefile
+
+HQ9plus: HQ9plus.dummy
+HQ9plus.dummy:
+	- $(MAKE) HQ9plus
+HQ9plus.test:
+	- $(MAKE) HQ9plus test
+HQ9plus.clean:
+	- $(MAKE) HQ9plus clean
 
 jako: jako.dummy
 jako.dummy:

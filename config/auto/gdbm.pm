@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: gdbm.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: gdbm.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ GDBMHash PMC.
 package auto::gdbm;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -71,7 +71,7 @@ sub runstep
         if ($test eq "gdbm is working.\n") {
             $has_gdbm = 1;
             print " (yes) " if $verbose;
-            $result = 'yes';
+            $self->result('yes');
         }
     }
     unless ($has_gdbm) {
@@ -81,9 +81,11 @@ sub runstep
         $conf->data->set(ccflags   => $ccflags);
         $conf->data->set(linkflags => $linkflags);
         print " (no) " if $verbose;
-        $result = 'no';
+        $self->set_result('no');
     }
-    $conf->data->set(has_gdbm => $has_gdbm); # for gdbmhash.t and dynclasses.in
+    $conf->data->set(has_gdbm => $has_gdbm); # for gdbmhash.t and dynpmc.in
+
+    return $self;
 }
 
 1;

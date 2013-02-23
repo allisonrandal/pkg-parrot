@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: lexicals.t 10967 2006-01-07 16:40:28Z particle $
+# $Id: lexicals.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ Tests various lexical scratchpad operations, as described in PDD20.
 =cut
 
 
-output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (\'$a\') succeeds');
+pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (\'$a\') succeeds');
 .pcc_sub main:
     .lex "$a", P0
     print "ok\n"
@@ -33,7 +33,7 @@ CODE
 ok
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (S0) fails', todo => 'specification unclear');
+pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (S0) fails', todo => 'specification unclear');
 .pcc_sub main:
 	S0 = '$a'
     .lex S0, P0
@@ -43,7 +43,7 @@ CODE
 ok
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM ($S0) fails', todo => 'specification unclear');
+pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM ($S0) fails', todo => 'specification unclear');
 .pcc_sub main:
 	$S0 = '$a'
     .lex $S0, P0
@@ -86,7 +86,7 @@ CODE
 ok
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', '.lex - same PMC twice (PASM)');
+pasm_output_is(<<'CODE', <<'OUTPUT', '.lex - same PMC twice (PASM)');
 .pcc_sub main:
     .lex '$a', P0
     .lex '$b', P0
@@ -271,7 +271,7 @@ CODE
 13013
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', ':lex parsing - PASM');
+pasm_output_is(<<'CODE', <<'OUTPUT', ':lex parsing - PASM');
 .pcc_sub main:
     print "ok\n"
     end
@@ -291,7 +291,7 @@ CODE
 ok
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', ':outer parsing - PASM');
+pasm_output_is(<<'CODE', <<'OUTPUT', ':outer parsing - PASM');
 .pcc_sub main:
     print "ok\n"
     end
@@ -463,121 +463,6 @@ foo
 main
 main
 I messed with your var
-OUTPUT
-
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer(outer sub name reused) - always uses first sub of same name');
-.sub main :main
-	bar()
-.end
-
-.sub foo :anon :outer('main')
-.end
-
-.sub foo :anon
-.end
-
-.sub foo
-.end
-
-.sub bar :outer('foo')
-	.include 'interpinfo.pasm'
-	$P1 = interpinfo .INTERPINFO_CURRENT_SUB
-	$P2 = $P1.'get_outer'()
-	print $P2
-	print "\n"
-	$P3 = $P2.'get_outer'()
-	print $P3
-	print "\n"
-.end
-CODE
-foo
-main
-OUTPUT
-
-pir_output_like(<<'CODE', <<'OUTPUT', 'get_outer(outer sub name reused) - always uses first sub of same name');
-.sub main :main
-	bar()
-.end
-
-.sub foo :anon
-.end
-
-.sub foo :anon :outer('main')
-.end
-
-.sub foo
-.end
-
-.sub bar :outer('foo')
-	.include 'interpinfo.pasm'
-	$P1 = interpinfo .INTERPINFO_CURRENT_SUB
-	$P2 = $P1.'get_outer'()
-	print $P2
-	print "\n"
-	$P3 = $P2.'get_outer'()
-	print $P3
-	print "\n"
-.end
-CODE
-/foo\nNull PMC access in get_string()/
-OUTPUT
-
-pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer(outer sub name reused) - always uses first sub of same name');
-.sub main :main
-	bar()
-.end
-
-.sub foo :outer('main')
-.end
-
-.sub foo :anon
-.end
-
-.sub foo :anon
-.end
-
-.sub bar :outer('foo')
-	.include 'interpinfo.pasm'
-	$P1 = interpinfo .INTERPINFO_CURRENT_SUB
-	$P2 = $P1.'get_outer'()
-	print $P2
-	print "\n"
-	$P3 = $P2.'get_outer'()
-	print $P3
-	print "\n"
-.end
-CODE
-foo
-main
-OUTPUT
-
-pir_output_like(<<'CODE', <<'OUTPUT', 'get_outer(outer sub name reused) - always uses first sub of same name');
-.sub main :main
-	bar()
-.end
-
-.sub foo
-.end
-
-.sub foo :anon :outer('main')
-.end
-
-.sub foo :anon
-.end
-
-.sub bar :outer('foo')
-	.include 'interpinfo.pasm'
-	$P1 = interpinfo .INTERPINFO_CURRENT_SUB
-	$P2 = $P1.'get_outer'()
-	print $P2
-	print "\n"
-	$P3 = $P2.'get_outer'()
-	print $P3
-	print "\n"
-.end
-CODE
-/foo\nNull PMC access in get_string()/
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', 'closure 3');
@@ -1024,6 +909,170 @@ ok
 ok
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 1');
+# my $x;
+# sub f{$x++}
+# f()
+# print "$x\n"
+.sub '&main' :main :anon
+    .local pmc sx
+    .lex '$x', sx
+    sx = new .PerlUndef
+    '&f'()
+    print sx	# no find_lex needed - 'sx' is defined here
+    print "\n"
+.end
+
+.sub '&f' :outer('&main') 
+    $P0 = find_lex '$x'           # find_lex needed
+    inc $P0
+.end
+CODE
+1
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 2');
+# my $x;
+# sub f{$x++}
+# sub g{f();f()}
+# g()
+# print "$x\n"
+.sub '&main' :main :anon
+    .local pmc sx
+    .lex '$x', sx
+    sx = new .PerlUndef
+    '&g'()
+    print sx
+    print "\n"
+.end
+
+.sub '&f' :outer('&main') 
+    $P0 = find_lex '$x'
+    inc $P0
+.end
+
+.sub '&g' :outer('&main') # :outer not needed - no find_lex
+    '&f'()
+    '&f'()
+.end
+CODE
+2
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 3 - autoclose');
+#     sub f ($x) { 
+#         sub g ($y) { $x + $y }; g($x); 
+#     } 
+#     f(10); # 20 
+#     g(100); # 110
+.sub '&f' 
+    .param pmc x
+    .lex '$x', x
+    $P0 = '&g'(x)
+    .return ($P0)
+.end
+
+.sub '&g' :outer('&f')
+    .param pmc y
+    .lex '$y', y
+    .local pmc x
+    x = find_lex '$x'
+    $P0 = n_add x, y
+    .return ($P0)
+.end
+
+.sub '&main' :main :anon
+    $P0 = '&f'(10)
+    print $P0
+    print "\n"
+    $P0 = '&g'(100)
+    print $P0
+    print "\n"
+.end
+
+
+CODE
+20
+110
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', 'package-scoped closure 4 - autoclose');
+#     sub f ($x) { 
+#         sub g () { print $x }; 
+#     } 
+#     g(); 
+.sub '&f' 
+    .param pmc x
+    .lex '$x', x
+.end
+
+.sub '&g' :outer('&f')
+    .local pmc x
+    x = find_lex '$x'
+    print x
+.end
+
+.sub '&main' :main :anon
+    '&g'()
+    print "never\n"
+.end
+CODE
+/Null PMC access/
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 5 - autoclose');
+#     sub f ($x) { 
+#         sub g () { print "$x\n" }; 
+#     } 
+#     f(10); 
+#     g(); 
+.sub '&f' 
+    .param pmc x
+    .lex '$x', x
+.end
+
+.sub '&g' :outer('&f')
+    .local pmc x
+    x = find_lex '$x'
+    print x
+    print "\n"
+.end
+
+.sub '&main' :main :anon
+    '&f'(10)
+    '&g'()
+.end
+CODE
+10
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 6 - autoclose');
+#     sub f ($x) { 
+#         sub g () { print "$x\n" }; 
+#     } 
+#     f(10); 
+#     f(20); 
+#     g(); 
+.sub '&f' 
+    .param pmc x
+    .lex '$x', x
+.end
+
+.sub '&g' :outer('&f')
+    .local pmc x
+    x = find_lex '$x'
+    print x
+    print "\n"
+.end
+
+.sub '&main' :main :anon
+    '&f'(10)
+    '&f'(20)
+    '&g'()
+.end
+CODE
+20
+OUTPUT
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 40; }
+BEGIN { plan tests => 42; }

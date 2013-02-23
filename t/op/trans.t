@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: trans.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: trans.t 11665 2006-02-19 14:16:42Z leo $
 
 use strict;
 use warnings;
@@ -74,7 +74,7 @@ my $fp_equality_macro = <<'ENDOFMACRO';
 .endm
 ENDOFMACRO
 
-output_is( <<"CODE", <<OUTPUT, "sin" );
+pasm_output_is( <<"CODE", <<OUTPUT, "sin" );
 @{[ $fp_equality_macro ]}
 	set	N1, 1.0
 	sin	N2, N1
@@ -94,7 +94,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "cos" );
+pasm_output_is( <<"CODE", <<OUTPUT, "cos" );
 @{[ $fp_equality_macro ]}
 	set	N1, 1.0
 	cos	N2, N1
@@ -113,7 +113,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "tan" );
+pasm_output_is( <<"CODE", <<OUTPUT, "tan" );
 @{[ $fp_equality_macro ]}
     	set	N1, 1.0
     	tan	N2, N1
@@ -132,7 +132,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "sec" );
+pasm_output_is( <<"CODE", <<OUTPUT, "sec" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	sec N2, N1
@@ -151,7 +151,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "atan" );
+pasm_output_is( <<"CODE", <<OUTPUT, "atan" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	atan N2, N1
@@ -170,7 +170,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "asin" );
+pasm_output_is( <<"CODE", <<OUTPUT, "asin" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	asin N2, N1
@@ -190,7 +190,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "acos" );
+pasm_output_is( <<"CODE", <<OUTPUT, "acos" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	acos N2, N1
@@ -210,7 +210,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "asec" );
+pasm_output_is( <<"CODE", <<OUTPUT, "asec" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	asec N2, N1
@@ -230,7 +230,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "cosh" );
+pasm_output_is( <<"CODE", <<OUTPUT, "cosh" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	cosh N2, N1
@@ -250,7 +250,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "sinh" );
+pasm_output_is( <<"CODE", <<OUTPUT, "sinh" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	sinh N2, N1
@@ -270,7 +270,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "tanh" );
+pasm_output_is( <<"CODE", <<OUTPUT, "tanh" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	tanh N2, N1
@@ -290,7 +290,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "sech" );
+pasm_output_is( <<"CODE", <<OUTPUT, "sech" );
 @{[ $fp_equality_macro ]}
 	set N1, 1.0
 	sech N2, N1
@@ -310,7 +310,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "atan2" );
+pasm_output_is( <<"CODE", <<OUTPUT, "atan2" );
 @{[ $fp_equality_macro]}
         set N0, 0.0
         set I0, 0
@@ -427,7 +427,7 @@ ok 16
 ok 17
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "log2" );
+pasm_output_is( <<"CODE", <<OUTPUT, "log2" );
 @{[ $fp_equality_macro ]}
 	set N1, 10.0
 	log2 N2, N1
@@ -447,7 +447,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "log10" );
+pasm_output_is( <<"CODE", <<OUTPUT, "log10" );
 @{[ $fp_equality_macro ]}
 	set N1, 15.0
 	log10 N2, N1
@@ -467,7 +467,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "ln" );
+pasm_output_is( <<"CODE", <<OUTPUT, "ln" );
 @{[ $fp_equality_macro ]}
 	set N1, 10.0
 	ln N2, N1
@@ -486,7 +486,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "exp" );
+pasm_output_is( <<"CODE", <<OUTPUT, "exp" );
 @{[ $fp_equality_macro ]}
 	set N1, 10.0
 	exp N2, N1
@@ -505,7 +505,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "pow" );
+pasm_output_is( <<"CODE", <<OUTPUT, "pow" );
 @{[ $fp_equality_macro ]}
 	set N1, 3.0
 	set I1, 3
@@ -616,7 +616,7 @@ ok 15
 ok 16
 OUTPUT
 
-output_is( <<"CODE", <<OUTPUT, "sqrt" );
+pasm_output_is( <<"CODE", <<OUTPUT, "sqrt" );
 @{[ $fp_equality_macro ]}
        set N1, 9.0
        sqrt N2, N1
@@ -636,7 +636,132 @@ ok 1
 ok 2
 OUTPUT
 
+pasm_output_is( <<'CODE', <<OUTPUT, "pow_n_n_ic" );
+    set N0, 2.0
+    pow N1, N0, 0
+    print N1
+    print "\n"
+    pow N1, N0, 1
+    print N1
+    print "\n"
+    pow N1, N0, 2
+    print N1
+    print "\n"
+    pow N1, N0, 3
+    print N1
+    print "\n"
+    pow N1, N0, 4
+    print N1
+    print "\n"
+    pow N1, N0, 5
+    print N1
+    print "\n"
+    pow N1, N0, 6
+    print N1
+    print "\n"
+    pow N1, N0, 7
+    print N1
+    print "\n"
+    pow N1, N0, -1
+    print N1
+    print "\n"
+    pow N1, N0, -2
+    print N1
+    print "\n"
+    pow N1, N0, -3
+    print N1
+    print "\n"
+    pow N1, N0, -4
+    print N1
+    print "\n"
+    pow N1, N0, -5
+    end
+CODE
+1.000000
+2.000000
+4.000000
+8.000000
+16.000000
+32.000000
+64.000000
+128.000000
+0.500000
+0.250000
+0.125000
+0.062500
+OUTPUT
+
+pasm_output_is( <<'CODE', <<OUTPUT, "pow_n_n_i" );
+    set N0, 2.0
+    set I0, 0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    inc I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    inc I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    inc I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    inc I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    inc I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    inc I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    set I0, -1
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    dec I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    dec I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    dec I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    dec I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    dec I0
+    pow N1, N0, I0
+    print N1
+    print "\n"
+    end
+CODE
+1.000000
+2.000000
+4.000000
+8.000000
+16.000000
+32.000000
+64.000000
+0.500000
+0.250000
+0.125000
+0.062500
+0.031250
+0.015625
+OUTPUT
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 19; }
+BEGIN { plan tests => 21; }
 

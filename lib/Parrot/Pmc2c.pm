@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Pmc2c.pm 10472 2005-12-12 22:12:28Z particle $
+# $Id: Pmc2c.pm 11536 2006-02-14 07:37:34Z fperrad $
 
 =head1 NAME
 
@@ -159,7 +159,7 @@ sub dynext_load_code {
 EOC
     $cout .= <<"EOC";
 
-extern Parrot_PMC Parrot_lib_${lc_libname}_load(Parrot_INTERP interpreter); /* don't warn */
+PARROT_DYNEXT_EXPORT extern Parrot_PMC Parrot_lib_${lc_libname}_load(Parrot_INTERP interpreter); /* don't warn */
 Parrot_PMC Parrot_lib_${lc_libname}_load(Parrot_INTERP interpreter)
 {
     Parrot_STRING whoami;
@@ -223,7 +223,7 @@ EOC
 Returns C<$self> as a new instance.
 
 C<$self> is a hash reference C<eval>-ed from a F<*.dump> file generated
-by F<src/classes/pmc2c.pl> from a F<*.pmc> file. It is C<bless>-ed either into
+by F<tools/build/pmc2c.pl> from a F<*.pmc> file. It is C<bless>-ed either into
 C<Parrot::Pmc2c::::Standard>, or into one of the other I<special> PMCs:
 F<default>, C<delegate>, C<Null>, C<Ref> or C<SharedRef>.
 
@@ -379,22 +379,25 @@ sub decl() {
     my $meth= $method->{meth};
     my $args= $method->{parameters};
     $args = ", $args" if $args =~ /\S/;
-    my ($extern, $newl, $semi, $interp, $pmc);
+    my ($export, $extern, $newl, $semi, $interp, $pmc);
     if ($for_header) {
-	$extern = "extern ";
-	$newl = " ";
-	$semi = ";";
+        $export = $self->{flags}->{dynpmc} ? 'PARROT_DYNEXT_EXPORT ' :
+                                             'PARROT_API ';
+        $extern = "extern ";
+	    $newl = " ";
+	    $semi = ";";
         $interp = $pmc = "";
     }
     else {
-	$extern = "";
-	$newl = "\n";
-	$semi = "";
+	    $export = "";
+	    $extern = "";
+	    $newl = "\n";
+	    $semi = "";
         $interp = ' interpreter';
         $pmc = ' pmc';
     }
     return <<"EOC";
-$extern$ret${newl}Parrot_${classname}_$meth(Interp*$interp, PMC*$pmc$args)$semi
+$export$extern$ret${newl}Parrot_${classname}_$meth(Interp*$interp, PMC*$pmc$args)$semi
 EOC
 }
 
@@ -497,7 +500,7 @@ sub proto ($$) {
 =item C<rewrite_nci_method($class, $method, $super, $super_table)>
 
 Rewrites the method body performing the various macro substitutions for
-nci method bodies (see F<src/classes/pmc2c.pl>).
+nci method bodies (see F<tools/build/pmc2c.pl>).
 
 =cut
 
@@ -515,7 +518,7 @@ sub rewrite_nci_method ($$$) {
 =item C<rewrite_vtable_method($class, $method, $super, $super_table)>
 
 Rewrites the method body performing the various macro substitutions for
-vtable method bodies (see F<src/classes/pmc2c.pl>).
+vtable method bodies (see F<tools/build/pmc2c.pl>).
 
 =cut
 
@@ -624,14 +627,14 @@ sub body
         }
         else {
             my $sub_meth_decl = $self->decl($classname, $method);
+            my $sub_meth_decl_h = $self->decl($classname, $method, 1);
             $sub_meth_decl =~ /(\w+)\(/;
             my $sub_meth_name = $1;
             my $sub_meth =  $sub_meth_decl;   # no "static ." ...
             $sub_meth =~ s/\(/_$right_type(/;
-            $sub_meth_decl = $sub_meth;
-            $sub_meth_decl =~ s/\n/ /g;
+            $sub_meth_decl_h =~ s/\(/_$right_type(/;
             $self->{hdecls} .= <<EOH;
-$sub_meth_decl;
+$sub_meth_decl_h
 EOH
             $additional_bodies .= $sub_meth;
             $additional_bodies .= "{$body_part\n}";
@@ -798,7 +801,7 @@ sub init_func() {
         if ($method->{mmd} =~ /MMD_/ && !$defaulted) {
             my ($func, $left, $right);
             $func = $method->{mmd};
-            # dynamic classes need the runtime type
+            # dynamic PMCs need the runtime type
             # which is passed in entry to class_init
             $left = 0;  # set to 'entry' below in initialization loop.
             $right = 'enum_type_PMC';
@@ -841,7 +844,7 @@ void
 Parrot_${classname}_class_init(Parrot_Interp interp, int entry, int pass)
 {
     const struct _vtable temp_base_vtable = {
-        NULL,	/* package */
+        NULL,	/* namespace */
         $enum_name,	/* base_type */
         NULL,	/* whoami */
         $vtbl_flag, /* flags */
@@ -860,7 +863,7 @@ EOC
    $const MMD_init _temp_mmd_init[] = {
         $mmd_list
     };
-    /*  Dynamic classes need the runtime type
+    /*  Dynamic PMCs need the runtime type
 	which is passed in entry to class_init.
     */
 EOC
@@ -956,10 +959,10 @@ EOC
 EOC
 
     # declare auxiliary variables for dyncpmc IDs
-    foreach my $dynclass (keys %init_mmds) {
-        next if $dynclass eq $classname;
+    foreach my $dynpmc (keys %init_mmds) {
+        next if $dynpmc eq $classname;
         $cout .= <<"EOC";
-        int my_enum_class_$dynclass = Parrot_PMC_typenum(interp, "$dynclass");
+        int my_enum_class_$dynpmc = pmc_type(interp, string_from_const_cstring(interp, "$dynpmc", 0));
 EOC
     }
         $cout .= <<"EOC";
@@ -979,10 +982,10 @@ EOC
         }
     }
     # just to be safe
-    foreach my $dynclass (keys %init_mmds) {
-        next if $dynclass eq $classname;
+    foreach my $dynpmc (keys %init_mmds) {
+        next if $dynpmc eq $classname;
         $cout .= <<"EOC";
-        assert(my_enum_class_$dynclass != enum_class_default);
+        assert(my_enum_class_$dynpmc != enum_class_default);
 EOC
     }
     if (scalar @mmds) {
@@ -1014,6 +1017,9 @@ sub gen_c {
     my ($self, $out_name) = @_;
 
     my $cout = dont_edit($self->{file});
+    if ($self->{flags}{dynpmc}) {
+        $cout .= "#define PARROT_IN_EXTENSION\n";
+    }
     $cout .= $self->line_directive(1, $self->{file})
 	. $self->{pre};
     $cout .= $self->line_directive_here($cout, $out_name)
@@ -1054,6 +1060,9 @@ sub hdecls() {
         $hout .= $self->decl($classname, $method, 1);
     }
     # class init decl
+    if ($self->{flags}->{dynpmc}) {
+        $hout .= 'PARROT_DYNEXT_EXPORT ';
+    }
     $hout .= <<"EOC";
 void Parrot_${classname}_class_init(Parrot_Interp, int, int);
 EOC
@@ -1079,6 +1088,10 @@ sub gen_h() {
 #define PARROT_PMC_${name}_H_GUARD
 
 EOH
+
+    if ($self->{flags}{dynpmc}) {
+        $hout .= "#define PARROT_IN_EXTENSION\n";
+    }
 
     $hout .= $self->hdecls();
     if ($self->{const}) {

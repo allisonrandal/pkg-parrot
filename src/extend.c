@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: extend.c 10472 2005-12-12 22:12:28Z particle $
+$Id: extend.c 11563 2006-02-16 00:42:07Z jisom $
 
 =head1 NAME
 
@@ -1038,10 +1038,10 @@ Remove a reference of the PMC from the interpreters DOD registry. If the
 reference count reaches zero, the PMC will be destroyed during the next
 DOD run.
 
-=iterm <Parrot_PMC Parrot_get_dod_registry(Parrot_INTERP)>
+=item C<Parrot_PMC Parrot_get_dod_registry(Parrot_INTERP)>
 
 Return Parrot's internal DOD registry PMC.
-See also: F<src/classes/addrregistry.pmc>.
+See also: F<src/pmc/addrregistry.pmc>.
 
 =cut
 

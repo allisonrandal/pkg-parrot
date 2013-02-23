@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: struct.pod 9344 2005-10-05 03:02:04Z jhoblitt $
+# $Id: struct.pod 11248 2006-01-18 20:02:15Z bernhard $
 
 =head1 NAME
 
@@ -269,7 +269,7 @@ C isn't finished.
 
 =head1 FILES
 
-F<classes/unmanagedstruct.pmc>, F<classes/managedstruct.pmc>
+F<src/pmc/unmanagedstruct.pmc>, F<src/pmc/managedstruct.pmc>
 
 =head1 SEE ALSO
 

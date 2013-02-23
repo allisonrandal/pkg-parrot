@@ -1,12 +1,12 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: regex.in 10933 2006-01-06 01:43:24Z particle $
+# $Id: regex.in 11115 2006-01-12 04:06:05Z jhoblitt $
 
 # Makefile for languages/regex
 
 # Setup of some commands
-PARROT = ..${slash}..${slash}parrot${exe}
-PERL = ${perl}
-RM_F = ${rm_f}
+PARROT = ..@slash@..@slash@parrot@exe@
+PERL = @perl@
+RM_F = @rm_f@
 YAPP = yapp
 
 all : lib/Regex/Grammar.pm regex-compiler.pbc

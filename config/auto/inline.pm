@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: inline.pm 10710 2005-12-28 00:25:21Z jhoblitt $
+# $Id: inline.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines whether the compiler supports C<inline>.
 package auto::inline;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -52,15 +52,17 @@ sub runstep
         }
         if ($test) {
             print " ($test) " if $verbose;
-            $result = 'yes';
+            $self->set_result('yes');
         } else {
             print " no " if $verbose;
-            $result = 'no';
+            $self->set_result('no');
             $test   = '';
         }
     }
 
     $conf->data->set(inline => $test);
+
+    return $self;
 }
 
 1;

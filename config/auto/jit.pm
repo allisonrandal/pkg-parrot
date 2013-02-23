@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: jit.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ capability available.
 package auto::jit;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -30,7 +30,10 @@ sub runstep
 {
     my ($self, $conf) = @_;
 
-    return if $conf->options->get('miniparrot');
+    if ($conf->options->get('miniparrot')) {
+        $self->set_result('skipped');
+        return $self;
+    }
 
     my $verbose = $conf->options->get('verbose');
 
@@ -78,17 +81,14 @@ sub runstep
         if $verbose;
 
     # XXX disable all but i386, ppc
-    if (-e "$jitbase/$cpuarch/core.jit" && ($cpuarch eq 'i386' || $cpuarch eq 'ppc')) {
-        $jitcapable = 1;
+    my %working_jit = (
+	i386 => 1,
+	ppc => 1,	
+	# all others are seriously b0rked
+    );
 
-        # XXX disable sun4 - doesn't even build
-        if (
-            $cpuarch =~ /sun4|sparc64/
-            && (1
-                || $conf->data->get('intvalsize') > $conf->data->get('ptrsize'))
-            ) {
-            $jitcapable = 0;
-        }
+    if (-e "$jitbase/$cpuarch/core.jit" && $working_jit{$cpuarch}) {
+        $jitcapable = 1;
     }
 
     if (-e "$jitbase/$cpuarch/$jitarchname.s") {
@@ -194,6 +194,8 @@ sub runstep
             TEMP_exec_o => ''
         );
     }
+
+    return $self;
 }
 
 1;

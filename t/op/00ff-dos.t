@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: 00ff-dos.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: 00ff-dos.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -25,12 +25,12 @@ Tests file formats.
 
 
 my $code = qq(print "ok\\n"\r\nend\r\n);
-output_is($code, <<'OUT', "fileformat dos");
+pasm_output_is($code, <<'OUT', "fileformat dos");
 ok
 OUT
 
 $code = qq(print "ok\\n"\r\nend\r\n\cZ\r\n);
-output_is($code, <<'OUT', "fileformat dos w ctrl-z");
+pasm_output_is($code, <<'OUT', "fileformat dos w ctrl-z");
 ok
 OUT
 

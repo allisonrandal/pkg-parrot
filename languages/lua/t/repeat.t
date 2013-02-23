@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: repeat.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: repeat.t 11446 2006-02-06 14:07:49Z fperrad $
 
 =head1 NAME
 
@@ -23,6 +23,7 @@ use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 2;
+use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'repeat' );
 a = {"one", "two", "three"}

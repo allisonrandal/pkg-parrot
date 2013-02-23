@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: ops.pm 10637 2005-12-24 11:00:22Z jhoblitt $
+# $Id: ops.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Asks the user to select which ops files to include.
 package inter::ops;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -63,6 +63,8 @@ END
     }
 
     $conf->data->set(ops => $ops);
+
+    return $self;
 }
 
 1;

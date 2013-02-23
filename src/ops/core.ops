@@ -497,7 +497,7 @@ op set_args(inconst PMC) {
 
     /* for now just point to the opcode */
     interpreter->current_args = this;
-    argc = VTABLE_elements(interpreter, signature);
+    argc = SIG_ELEMS(signature);
     goto OFFSET(argc + 2);
 }
 
@@ -507,7 +507,7 @@ op get_results(inconst PMC) {
     INTVAL argc;
 
     CONTEXT(interpreter->ctx)->current_results = this;
-    argc = VTABLE_elements(interpreter, signature);
+    argc = SIG_ELEMS(signature);
     goto OFFSET(argc + 2);
 }
 
@@ -548,10 +548,14 @@ op set_returns(inconst PMC) {
     if (PMC_cont(ccont)->address) {
 	/* else its from runops_fromc */
 	caller_ctx = PMC_cont(ccont)->to_ctx;
+	if (! caller_ctx) {
+	    real_exception(interpreter, NULL, INVALID_OPERATION,
+			   "null caller_ctx for ccont %p", ccont);
+	}
 	parrot_pass_args(interpreter, ctx, caller_ctx,
 		PARROT_OP_get_results_pc);
     }
-    argc = VTABLE_elements(interpreter, signature);
+    argc = SIG_ELEMS(signature);
     goto OFFSET(argc + 2);
 }
 
@@ -567,19 +571,21 @@ specified in F<docs/pdds/pdd03_calling_conventions.pod>.
 inline op result_info(out PMC) {
     /* Get context of callee from return continuation. */
     PMC *cc = CONTEXT(interpreter->ctx)->current_cont;
-    PMC *i = NULL;
-    if (cc && PMC_cont(cc)->to_ctx)
-    {
-        /* Find results PMC index and get PMC. */
-        opcode_t results_pmc = PMC_cont(cc)->to_ctx->current_results[1];
-        i = PF_CONST(PMC_cont(cc)->seg, results_pmc)->u.key;
+    PMC *sig = NULL;
+    if (cc && PMC_cont(cc)->to_ctx) {
+	/* caller context has results */
+        opcode_t *results = PMC_cont(cc)->to_ctx->current_results;
+        if (results) {
+	    /* get results PMC index and get PMC. */
+	    sig = PF_CONST(PMC_cont(cc)->seg, results[1])->u.key;
+	}
     }
 
     /* If no elements, hand back empty array; otherwise PMC. */
-    if (PMC_IS_NULL(i))
+    if (!sig)
         $1 = pmc_new(interpreter, enum_class_FixedIntegerArray);
     else
-        $1 = i;
+        $1 = sig;
     goto NEXT();
 }
 
@@ -827,14 +833,30 @@ inline op gc_debug(in INT) {
 
 ########################################
 
-=item B<interpinfo>(out INT, in INT)
-
-=item B<interpinfo>(out PMC, in INT)
-
-=item B<interpinfo>(out STR, in INT)
+=item B<interpinfo>
 
 Fetch some piece of information about the interpreter and put it in $1.
 Possible values for $2 are defined in F<runtime/parrot/include/interpinfo.pasm>.
+Below are listed the valid constants for each return value.
+
+=over 4
+
+=item B<interpinfo>(out INT, in INT)
+
+.TOTAL_MEM_ALLOC, .DOD_RUNS, .COLLECT_RUNS, .ACTIVE_PMCS, .ACTIVE_BUFFERS,
+.TOTAL_PMCS, .TOTAL_BUFFERS, .HEADER_ALLOCS_SINCE_COLLECT,
+.MEM_ALLOCS_SINCE_COLLECT, .TOTAL_COPIED, .IMPATIENT_PMCS, .LAZY_DOD_RUNS,
+.EXTENDED_PMCS
+
+=item B<interpinfo>(out PMC, in INT)
+
+.CURRENT_SUB, .CURRENT_CONT, .CURRENT_OBJECT, .NAMESPACE_ROOT, .CURRENT_LEXPAD
+
+=item B<interpinfo>(out STR, in INT)
+
+.CURRENT_METHOD
+
+=back
 
 =cut
 
@@ -1198,10 +1220,10 @@ inline op loadlib(out PMC, in STR) {
 op dlfunc (out PMC, in PMC, in STR, in STR) {
   char * name = string_to_cstring(interpreter, ($3));
 
-  Parrot_csub_t p = (Parrot_csub_t)D2FPTR(
-	  Parrot_dlsym(PMC_IS_NULL($2) ? NULL : PMC_data($2), name));
+  funcptr_t p = D2FPTR(Parrot_dlsym(PMC_IS_NULL($2) ? 
+	NULL : PMC_data($2), name));
   string_cstring_free(name);
-  if (p == NULL) {
+  if (p == NULLfunc) {
       const char * err = Parrot_dlerror();
       Parrot_warn(interpreter, PARROT_WARNINGS_UNDEF_FLAG,
 	 "Symbol '%s' not found: %s\n", name, err ? err : "unknown reason");

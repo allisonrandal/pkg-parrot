@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrot.c 5158 2004-01-27 23:08:08Z mikescott $
+$Id: parrot.c 11507 2006-02-11 17:08:54Z leo $
 
 =head1 NAME
 
@@ -8,7 +8,8 @@ src/parrot.c -
 
 =head1 DESCRIPTION
 
-THIS FILE IS NOT USED.
+THIS FILE IS NOT USED.  
+The main function for parrot is found in ../compilers/imcc/main.c.
 
 =cut
 

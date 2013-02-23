@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Distribution.pm 10507 2005-12-13 21:15:11Z bernhard $
+# $Id: Distribution.pm 11177 2006-01-14 13:29:48Z bernhard $
 
 =head1 NAME
 
@@ -102,7 +102,6 @@ sub c_source_file_directories
         $self->directory_with_name('src/io'),
         $self->directory_with_name('src/ops'),
         $self->directory_with_name('src/packfile'),
-        $self->directory_with_name('src/types'),
     ;
 }
 

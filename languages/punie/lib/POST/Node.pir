@@ -20,7 +20,7 @@ All POST nodes subclass from this base type.
 .end
 
 
-.sub __init method
+.sub __init :method
     $P1 = new PerlUndef
     $P2 = new Integer
     $P3 = new PerlUndef
@@ -30,7 +30,7 @@ All POST nodes subclass from this base type.
     setattribute self, "children", $P3
 .end
 
-.sub "set_node" method
+.sub "set_node" :method
     .param string source
     .param int pos
     .param pmc children
@@ -42,24 +42,24 @@ All POST nodes subclass from this base type.
     .return ()
 .end
 
-.sub source method
+.sub source :method
     $P2 = getattribute self, "source"
     .return ($P2)
 .end
 
-.sub pos method
+.sub pos :method
     $P2 = getattribute self, "pos"
     .return ($P2)
 .end
 
-.sub children method
+.sub children :method
     $P2 = getattribute self, "children"
     .return ($P2)
 .end
 
 
-.sub "dump" method
-    .param int level
+.sub "dump" :method
+    .param int level :optional
     .local string indent
     indent = repeat "    ", level # tab is 4 spaces here
     level += 1 # set level for attributes
@@ -80,24 +80,32 @@ All POST nodes subclass from this base type.
     .return ()
 .end
 
-.sub "dump_attribute" method
+.sub "dump_attribute" :method
     .param string name
-    .param int level
+    .param int level :optional
     .local string indent
     indent = repeat "    ", level # tab is 4 spaces here
     # print value for this attribute
     print indent
     print "'"
     print name
-    print "' => '"
+    print "' => "
     $P1 = getattribute self, name
+    $I0 = defined $P1
+    unless $I0 goto attribute_undef
+    print "'"
     print $P1
-    print "',\n"
+    print "'"
+    goto attribute_def
+  attribute_undef:
+    print "undef"
+  attribute_def:
+    print ",\n"
     .return ()
 .end
 
-.sub "dump_children" method
-    .param int level
+.sub "dump_children" :method
+    .param int level :optional
     .local string indent
     indent = repeat "    ", level # tab is 4 spaces here
     level += 1 # set level to pass on to children
@@ -122,4 +130,47 @@ All POST nodes subclass from this base type.
   no_children:
     print "]\n"
     .return ()
+.end
+
+.sub generate_label :method
+    .param string name :optional
+    .param int got_name :opt_flag
+    .local string label
+     unless got_name goto no_name
+       label = name . "_"
+  no_name:
+     label .= "label_"
+     $I1 = _new_label_id()
+     $S1 = $I1
+     label .= $S1
+     .return (label)
+.end
+
+# Autoincrementing id generator
+.sub _new_label_id
+    .local int id
+    id = 0
+loop:
+    inc id 
+    .yield(id)
+    goto loop
+.end
+
+.sub generate_temp :method
+    .local string temp
+       temp = "$P"
+     $I1 = _new_temp_id()
+     $S1 = $I1
+     temp .= $S1
+     .return (temp)
+.end
+
+# Autoincrementing id generator
+.sub _new_temp_id
+    .local int id
+    id = 0
+loop:
+    inc id 
+    .yield(id)
+    goto loop
 .end

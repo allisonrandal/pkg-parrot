@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: interpreter.c 10613 2005-12-21 10:15:55Z leo $
+$Id: interpreter.c 11571 2006-02-16 08:19:11Z leo $
 
 =head1 NAME
 
@@ -47,7 +47,6 @@ have the same number of elements since there is a one-to-one mapping.
 #  include "parrot/oplib/core_ops_cg.h"
 #  include "parrot/oplib/core_ops_cgp.h"
 #endif
-#include "parrot/method_util.h"
 #include "parrot/dynext.h"
 
 
@@ -88,7 +87,7 @@ prederef_args(void **pc_prederef, Interp *interpreter,
         int type;
         if (i >= m) {
 	    sig = (PMC*) pc_prederef[1]; 
-	    type = VTABLE_get_integer_keyed_int(interpreter, sig, i - m);
+	    type = SIG_ITEM(sig, i - m);
             type &= (PARROT_ARG_TYPE_MASK | PARROT_ARG_CONSTANT);       
         }
 	else
@@ -183,7 +182,9 @@ do_prederef(void **pc_prederef, Parrot_Interp interpreter, int type)
     prederef_args(pc_prederef, interpreter, pc, opinfo);
     switch (type) {
         case PARROT_SWITCH_CORE:
+        case PARROT_SWITCH_JIT_CORE:
         case PARROT_CGP_CORE:
+        case PARROT_CGP_JIT_CORE:
             parrot_PIC_prederef(interpreter, *pc, pc_prederef, type);
             break;
         default:
@@ -284,10 +285,12 @@ get_op_lib_init(int core_op, int which, PMC *lib)
     if (core_op) {
         switch (which) {
             case PARROT_SWITCH_CORE:
+            case PARROT_SWITCH_JIT_CORE:
                 init_func = PARROT_CORE_SWITCH_OPLIB_INIT;
                 break;
 #ifdef HAVE_COMPUTED_GOTO
             case PARROT_CGP_CORE:
+            case PARROT_CGP_JIT_CORE:
                 init_func = PARROT_CORE_CGP_OPLIB_INIT;
                 break;
             case PARROT_CGOTO_CORE:
@@ -472,7 +475,8 @@ init_jit(Interp *interpreter, opcode_t *pc)
     opcode_t *code_start;
     UINTVAL code_size;          /* in opcodes */
     opcode_t *code_end;
-    jit_f jit_code;
+    Parrot_jit_info_t *jit_info;
+
     if (interpreter->code->jit_info)
         return ((Parrot_jit_info_t *)interpreter->code->jit_info)->arena.start;
 
@@ -487,8 +491,10 @@ init_jit(Interp *interpreter, opcode_t *pc)
 #    endif
 #  endif
 
-    jit_code = build_asm(interpreter, code_start, code_start, code_end, NULL);
-    return F2DPTR(jit_code);
+    interpreter->code->jit_info = 
+        jit_info = parrot_build_asm(interpreter, code_start, code_end, 
+            NULL, JIT_CODE_FILE);
+    return jit_info->arena.start;
 #else
     return NULL;
 #endif
@@ -513,7 +519,9 @@ prepare_for_run(Parrot_Interp interpreter)
             (void) init_jit(interpreter, interpreter->code->base.data);
             break;
         case PARROT_SWITCH_CORE:
+        case PARROT_SWITCH_JIT_CORE:
         case PARROT_CGP_CORE:
+        case PARROT_CGP_JIT_CORE:
             init_prederef(interpreter, interpreter->run_core);
             break;
         default:
@@ -729,6 +737,7 @@ runops_int(Interp *interpreter, size_t offset)
 #endif
                 break;
             case PARROT_CGP_CORE:
+            case PARROT_CGP_JIT_CORE:
 #ifdef HAVE_COMPUTED_GOTO
                 core = runops_cgp;
 #else
@@ -736,6 +745,7 @@ runops_int(Interp *interpreter, size_t offset)
 #endif
                 break;
             case PARROT_SWITCH_CORE:
+            case PARROT_SWITCH_JIT_CORE:
                 core = runops_switch;
                 break;
             case PARROT_JIT_CORE:
@@ -753,6 +763,10 @@ runops_int(Interp *interpreter, size_t offset)
                         "but interpreter is not EXEC_CAPABLE!\n");
 #endif
                 core = runops_exec;
+                break;
+            default:
+                internal_exception(UNIMPLEMENTED,
+                        "ambigious runcore switch used");
                 break;
         }
 

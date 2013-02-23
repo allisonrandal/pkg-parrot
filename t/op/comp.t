@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: comp.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: comp.t 11552 2006-02-15 10:36:37Z leo $
 
 use strict;
 use warnings;
@@ -26,7 +26,7 @@ Tests various conditional branch operations.
 
 # some of these were failing with JIT/i386
 
-output_is(<<'CODE', <<OUTPUT, "gt_ic_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "gt_ic_i_ic");
 	set I0, 10
 	gt 11, I0, ok1
 	print "nok gt\n"
@@ -44,7 +44,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "ge_ic_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "ge_ic_i_ic");
 	set I0, 10
 	ge 11, I0, ok1
 	print "nok ge\n"
@@ -67,7 +67,7 @@ ok 2
 ok 3
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "le_ic_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "le_ic_i_ic");
 	set I0, 10
 	le 9, I0, ok1
 	print "nok le\n"
@@ -90,7 +90,7 @@ ok 2
 ok 3
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "lt_ic_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "lt_ic_i_ic");
 	set I0, 10
 	lt 9, I0, ok1
 	print "nok lt\n"
@@ -108,7 +108,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "eq_ic_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "eq_ic_i_ic");
 	set I0, 10
 	eq 9, I0, nok1
 	print "ok 1\n"
@@ -133,7 +133,7 @@ ok 2
 ok 3
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "ne_ic_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "ne_ic_i_ic");
 	set I0, 10
 	ne 9, I0, ok1
 	print "nok 1\n"
@@ -159,7 +159,7 @@ ok 2
 ok 3
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "cmp");
+pasm_output_is(<<'CODE', <<OUTPUT, "cmp");
         set I0, 10
         cmp I1, I0, 9
         set N0, -2.4
@@ -180,15 +180,32 @@ output_is(<<'CODE', <<OUTPUT, "cmp");
         print "\n"
         print I4
         print "\n"
+
+        set I5, 9
+        set I6, 10
+        set I7, 11
+        cmp I1, I0, I5
+        cmp I2, I0, I6
+        cmp I3, I0, I7
+        print I1
+        print "\n"
+        print I2
+        print "\n"
+        print I3
+        print "\n"
+
 	end
 CODE
 1
 0
 -1
 1
+1
+0
+-1
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "eq_num");
+pasm_output_is(<<'CODE', <<OUTPUT, "eq_num");
         new P0, .Float
         set P0, -1.2
         new P1, .String
@@ -201,7 +218,7 @@ CODE
 ok
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_i_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_i_i");
         set I1, 111
         set I2, 222
         set I3, 333
@@ -219,7 +236,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_ic_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_ic_i");
         set I1, 111
         set I3, 333
         isgt I1, 222, I3
@@ -234,7 +251,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_i_ic");
         set I1, 111
         set I2, 222
         isgt I1, I2, 223
@@ -249,7 +266,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_ic_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_ic_ic");
         set I1, 111
         isgt I1, 222, 223
         print I1
@@ -263,7 +280,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_n_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_n_n");
         set I1, 111
         set N2, 2.22
         set N3, 3.33
@@ -281,7 +298,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_nc_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_nc_n");
         set I1, 111
         set N3, 3.33
         isgt I1, 2.22, N3
@@ -296,7 +313,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_n_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_n_nc");
         set I1, 111
         set N2, 2.22
         isgt I1, N2, 2.23
@@ -311,7 +328,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_nc_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_nc_nc");
         set I1, 111
         isgt I1, 2.22, 2.23
         print I1
@@ -325,7 +342,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_s_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_s_s");
         set I1, 111
         set S2, "Aaa"
         set S3, "Bbb"
@@ -343,7 +360,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_sc_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_sc_s");
         set I1, 111
         set S3, "Bbb"
         isgt I1, "Aaa", S3
@@ -358,7 +375,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_s_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_s_sc");
         set I1, 111
         set S2, "Bbb"
         isgt I1, S2, "Ccc"
@@ -373,7 +390,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isgt_i_sc_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isgt_i_sc_sc");
         set I1, 111
         isgt I1, "Bbb", "Ccc"
         print I1
@@ -387,7 +404,7 @@ CODE
 001
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_i_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_i_i");
         set I1, 111
         set I2, 222
         set I3, 333
@@ -405,7 +422,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_ic_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_ic_i");
         set I1, 111
         set I3, 333
         isge I1, 222, I3
@@ -420,7 +437,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_i_ic");
         set I1, 111
         set I2, 222
         isge I1, I2, 223
@@ -435,7 +452,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_ic_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_ic_ic");
         set I1, 111
         isge I1, 222, 223
         print I1
@@ -449,7 +466,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_n_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_n_n");
         set I1, 111
         set N2, 2.22
         set N3, 3.33
@@ -467,7 +484,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_nc_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_nc_n");
         set I1, 111
         set N3, 3.33
         isge I1, 2.22, N3
@@ -482,7 +499,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_n_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_n_nc");
         set I1, 111
         set N2, 2.22
         isge I1, N2, 2.23
@@ -497,7 +514,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_nc_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_nc_nc");
         set I1, 111
         isge I1, 2.22, 2.23
         print I1
@@ -511,7 +528,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_s_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_s_s");
         set I1, 111
         set S2, "Aaa"
         set S3, "Bbb"
@@ -529,7 +546,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_sc_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_sc_s");
         set I1, 111
         set S3, "Bbb"
         isge I1, "Aaa", S3
@@ -544,7 +561,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_s_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_s_sc");
         set I1, 111
         set S2, "Bbb"
         isge I1, S2, "Ccc"
@@ -559,7 +576,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isge_i_sc_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isge_i_sc_sc");
         set I1, 111
         isge I1, "Bbb", "Ccc"
         print I1
@@ -573,7 +590,7 @@ CODE
 011
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_i_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_i_i");
         set I1, 111
         set I2, 222
         set I3, 333
@@ -591,7 +608,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_ic_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_ic_i");
         set I1, 111
         set I3, 333
         isle I1, 222, I3
@@ -606,7 +623,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_i_ic");
         set I1, 111
         set I2, 222
         isle I1, I2, 223
@@ -621,7 +638,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_ic_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_ic_ic");
         set I1, 111
         isle I1, 222, 223
         print I1
@@ -635,7 +652,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_n_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_n_n");
         set I1, 111
         set N2, 2.22
         set N3, 3.33
@@ -653,7 +670,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_nc_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_nc_n");
         set I1, 111
         set N3, 3.33
         isle I1, 2.22, N3
@@ -668,7 +685,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_n_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_n_nc");
         set I1, 111
         set N2, 2.22
         isle I1, N2, 2.23
@@ -683,7 +700,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_nc_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_nc_nc");
         set I1, 111
         isle I1, 2.22, 2.23
         print I1
@@ -697,7 +714,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_s_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_s_s");
         set I1, 111
         set S2, "Aaa"
         set S3, "Bbb"
@@ -715,7 +732,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_sc_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_sc_s");
         set I1, 111
         set S3, "Bbb"
         isle I1, "Aaa", S3
@@ -730,7 +747,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_s_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_s_sc");
         set I1, 111
         set S2, "Bbb"
         isle I1, S2, "Ccc"
@@ -745,7 +762,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isle_i_sc_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isle_i_sc_sc");
         set I1, 111
         isle I1, "Bbb", "Ccc"
         print I1
@@ -759,7 +776,7 @@ CODE
 110
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_i_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_i_i");
         set I1, 111
         set I2, 222
         set I3, 333
@@ -777,7 +794,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_ic_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_ic_i");
         set I1, 111
         set I3, 333
         islt I1, 222, I3
@@ -792,7 +809,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_i_ic");
         set I1, 111
         set I2, 222
         islt I1, I2, 223
@@ -807,7 +824,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_ic_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_ic_ic");
         set I1, 111
         islt I1, 222, 223
         print I1
@@ -821,7 +838,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_n_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_n_n");
         set I1, 111
         set N2, 2.22
         set N3, 3.33
@@ -839,7 +856,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_nc_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_nc_n");
         set I1, 111
         set N3, 3.33
         islt I1, 2.22, N3
@@ -854,7 +871,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_n_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_n_nc");
         set I1, 111
         set N2, 2.22
         islt I1, N2, 2.23
@@ -869,7 +886,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_nc_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_nc_nc");
         set I1, 111
         islt I1, 2.22, 2.23
         print I1
@@ -883,7 +900,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_s_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_s_s");
         set I1, 111
         set S2, "Aaa"
         set S3, "Bbb"
@@ -901,7 +918,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_sc_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_sc_s");
         set I1, 111
         set S3, "Bbb"
         islt I1, "Aaa", S3
@@ -916,7 +933,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_s_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_s_sc");
         set I1, 111
         set S2, "Bbb"
         islt I1, S2, "Ccc"
@@ -931,7 +948,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "islt_i_sc_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "islt_i_sc_sc");
         set I1, 111
         islt I1, "Bbb", "Ccc"
         print I1
@@ -945,7 +962,7 @@ CODE
 100
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_i_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_i_i");
         set I1, 111
         set I2, 222
         set I3, 333
@@ -963,7 +980,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_ic_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_ic_i");
         set I1, 111
         set I3, 333
         iseq I1, 222, I3
@@ -978,7 +995,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_i_ic");
         set I1, 111
         set I2, 222
         iseq I1, I2, 223
@@ -993,7 +1010,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_ic_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_ic_ic");
         set I1, 111
         iseq I1, 222, 223
         print I1
@@ -1007,7 +1024,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_n_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_n_n");
         set I1, 111
         set N2, 2.22
         set N3, 3.33
@@ -1025,7 +1042,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_nc_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_nc_n");
         set I1, 111
         set N3, 3.33
         iseq I1, 2.22, N3
@@ -1040,7 +1057,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_n_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_n_nc");
         set I1, 111
         set N2, 2.22
         iseq I1, N2, 2.23
@@ -1055,7 +1072,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_nc_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_nc_nc");
         set I1, 111
         iseq I1, 2.22, 2.23
         print I1
@@ -1069,7 +1086,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_s_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_s_s");
         set I1, 111
         set S2, "Aaa"
         set S3, "Bbb"
@@ -1087,7 +1104,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_sc_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_sc_s");
         set I1, 111
         set S3, "Bbb"
         iseq I1, "Aaa", S3
@@ -1102,7 +1119,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_s_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_s_sc");
         set I1, 111
         set S2, "Bbb"
         iseq I1, S2, "Ccc"
@@ -1117,7 +1134,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "iseq_i_sc_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "iseq_i_sc_sc");
         set I1, 111
         iseq I1, "Bbb", "Ccc"
         print I1
@@ -1131,7 +1148,7 @@ CODE
 010
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_i_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_i_i");
         set I1, 111
         set I2, 222
         set I3, 333
@@ -1149,7 +1166,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_ic_i");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_ic_i");
         set I1, 111
         set I3, 333
         isne I1, 222, I3
@@ -1164,7 +1181,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_i_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_i_ic");
         set I1, 111
         set I2, 222
         isne I1, I2, 223
@@ -1179,7 +1196,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_ic_ic");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_ic_ic");
         set I1, 111
         isne I1, 222, 223
         print I1
@@ -1193,7 +1210,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_n_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_n_n");
         set I1, 111
         set N2, 2.22
         set N3, 3.33
@@ -1211,7 +1228,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_nc_n");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_nc_n");
         set I1, 111
         set N3, 3.33
         isne I1, 2.22, N3
@@ -1226,7 +1243,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_n_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_n_nc");
         set I1, 111
         set N2, 2.22
         isne I1, N2, 2.23
@@ -1241,7 +1258,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_nc_nc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_nc_nc");
         set I1, 111
         isne I1, 2.22, 2.23
         print I1
@@ -1255,7 +1272,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_s_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_s_s");
         set I1, 111
         set S2, "Aaa"
         set S3, "Bbb"
@@ -1273,7 +1290,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_sc_s");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_sc_s");
         set I1, 111
         set S3, "Bbb"
         isne I1, "Aaa", S3
@@ -1288,7 +1305,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_s_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_s_sc");
         set I1, 111
         set S2, "Bbb"
         isne I1, S2, "Ccc"
@@ -1303,7 +1320,7 @@ CODE
 101
 OUTPUT
 
-output_is(<<'CODE', <<OUTPUT, "isne_i_sc_sc");
+pasm_output_is(<<'CODE', <<OUTPUT, "isne_i_sc_sc");
         set I1, 111
         isne I1, "Bbb", "Ccc"
         print I1

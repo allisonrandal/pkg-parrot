@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: runops_cores.c 10574 2005-12-19 01:07:17Z leo $
+$Id: runops_cores.c 11698 2006-02-21 19:33:43Z leo $
 
 =head1 NAME
 
@@ -22,6 +22,7 @@ the faster dispatch of operations.
 */
 
 #include "parrot/runops_cores.h"
+#include "parrot/embed.h"
 #include "parrot/trace.h"
 
 #include "parrot/interp_guts.h"
@@ -91,24 +92,9 @@ runops_slow_core(Interp *interpreter, opcode_t *pc)>
 Runs the Parrot operations starting at C<pc> until there are no more
 operations, with tracing and bounds checking enabled.
 
-Note that using an C<extern> interpreter for tracing is currently broken
-because C<Parrot_destroy()> fails to cleanup of C<ctx> correctly.
-
 =cut
 
 */
-
-#define USE_TRACE_INTERP 0
-
-opcode_t *
-runops_slow_core(Interp *interpreter, opcode_t *pc)
-{
-#if USE_TRACE_INTERP
-    Interp * trace_i;
-    struct Parrot_Context *trace_ctx;
-#endif
-    static size_t dod, gc;
-    struct Arenas *arena_base = interpreter->arena_base;
 
 #ifdef code_start
 #  undef code_start
@@ -120,32 +106,61 @@ runops_slow_core(Interp *interpreter, opcode_t *pc)
 #define  code_start interpreter->code->base.data
 #define  code_end   (interpreter->code->base.data + \
         interpreter->code->base.size)
-
-
-#if USE_TRACE_INTERP
-    if (Interp_trace_TEST(interpreter, PARROT_TRACE_OPS_FLAG)) {
-        /* XXX reentering run loop: store this interpreter in
-         * some debug structure
-         * XXX leak
-         */
-        trace_i = make_interpreter(interpreter, 0);
-        Parrot_init(trace_i);
-        /* remember old context */
-        trace_ctx = mem_sys_allocate(sizeof(struct Parrot_Context));
-        mem_sys_memcopy(trace_ctx, &trace_i->ctx,
-                sizeof(struct Parrot_Context));
-        /* copy in current */
-        mem_sys_memcopy(&trace_i->ctx, &interpreter->ctx,
-                sizeof(struct Parrot_Context));
-        trace_i->code = interpreter->code;
-        Interp_flags_SET(trace_i, PARROT_EXTERN_CODE_FLAG);
-    }
-#endif
+static opcode_t *
+runops_trace_core(Interp *interpreter, opcode_t *pc)
+{
+    static size_t dod, gc;
+    struct Arenas *arena_base = interpreter->arena_base;
+    Interp *debugger;
 
     dod = arena_base->dod_runs;
     gc = arena_base->collect_runs;
-    if (Interp_trace_TEST(interpreter, PARROT_TRACE_OPS_FLAG)) {
+    if (!interpreter->debugger) {
+        PMC *pio;
+
+        debugger = interpreter->debugger = make_interpreter(interpreter, 0);
+        debugger->lo_var_ptr = interpreter->lo_var_ptr;
+        pio = PIO_STDERR(debugger);
+        if (PIO_isatty(debugger, pio))
+            PIO_setlinebuf(debugger, pio);
+        else {
+            /* this is essential (100 x faster!)  and should probably be in init/open code */
+            PIO_setbuf(debugger, pio, 8192);
+        }
+    }
+    else 
+        debugger = interpreter->debugger;
+    trace_op(interpreter, code_start, code_end, pc);
+    while (pc) {
+        if ( pc < code_start || pc >= code_end) {
+            internal_exception(1,
+                    "attempt to access code outside of current code segment");
+        }
+        CONTEXT(interpreter->ctx)->current_pc = pc;
+
+        DO_OP(pc, interpreter);
         trace_op(interpreter, code_start, code_end, pc);
+        if (dod != arena_base->dod_runs) {
+            dod = arena_base->dod_runs;
+            PIO_eprintf(debugger, "       DOD\n");
+        }
+        if (gc != arena_base->collect_runs) {
+            gc = arena_base->collect_runs;
+            PIO_eprintf(debugger, "       GC\n");
+        }
+    }
+    return pc;
+}
+
+opcode_t *
+runops_slow_core(Interp *interpreter, opcode_t *pc)
+{
+
+    if (Interp_trace_TEST(interpreter, PARROT_TRACE_OPS_FLAG)) {
+        return runops_trace_core(interpreter, pc);
+    }
+    else if (interpreter->debugger && interpreter->debugger->pdb) {
+        return Parrot_debug(interpreter->debugger, pc);
     }
     while (pc) {
         if ( pc < code_start || pc >= code_end) {
@@ -156,33 +171,7 @@ runops_slow_core(Interp *interpreter, opcode_t *pc)
 
         DO_OP(pc, interpreter);
 
-        if (Interp_trace_TEST(interpreter, PARROT_TRACE_OPS_FLAG)) {
-#if USE_TRACE_INTERP
-            mem_sys_memcopy(&trace_i->ctx, &interpreter->ctx,
-                    sizeof(struct Parrot_Context));
-            trace_i->code = interpreter->code;
-            trace_op(trace_i, code_start, code_end, pc);
-#else
-            trace_op(interpreter, code_start, code_end, pc);
-#endif
-            if (dod != arena_base->dod_runs) {
-                dod = arena_base->dod_runs;
-                PIO_eprintf(interpreter, "       DOD\n");
-            }
-            if (gc != arena_base->collect_runs) {
-                gc = arena_base->collect_runs;
-                PIO_eprintf(interpreter, "       GC\n");
-            }
-        }
     }
-#if USE_TRACE_INTERP
-    if (Interp_trace_TEST(interpreter, PARROT_TRACE_OPS_FLAG)) {
-        /* restore trace context */
-        mem_sys_memcopy(&trace_i->ctx, trace_ctx,
-                sizeof(struct Parrot_Context));
-        mem_sys_free(trace_ctx);
-    }
-#endif
 #undef code_start
 #undef code_end
     return pc;

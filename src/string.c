@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: string.c 10938 2006-01-06 16:12:02Z leo $
+$Id: string.c 11042 2006-01-10 16:51:12Z leo $
 
 =head1 NAME
 
@@ -1930,8 +1930,10 @@ string_to_int(Interp *interpreter, const STRING *s)
                     sign = -1;
                     in_number = 1;
                 }
-                else if (c == '+' || isspace(c))
+                else if (c == '+')
                     in_number = 1;
+                else if (isspace(c))
+                    ;
                 else
                     break;
             }

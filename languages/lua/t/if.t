@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: if.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: if.t 11446 2006-02-06 14:07:49Z fperrad $
 
 =head1 NAME
 
@@ -23,6 +23,7 @@ use FindBin;
 use lib "$FindBin::Bin";
 
 use Parrot::Test tests => 5;
+use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'if' );
 a = -2
@@ -43,7 +44,6 @@ OUT
 language_output_is( 'lua', <<'CODE', <<'OUT', 'if else' );
 a = 12
 b = 34
-r = 0
 if a < b then r = b else r = a end
 print(r)
 CODE
@@ -53,7 +53,6 @@ OUT
 language_output_is( 'lua', <<'CODE', <<'OUT', 'if else' );
 a = 12
 b = 34
-r = 0
 if a > b then r = b else r = a end
 print(r)
 CODE
@@ -64,7 +63,6 @@ language_output_is( 'lua', <<'CODE', <<'OUT', 'elseifs' );
 a = 3
 b = 7
 op = "*"
-r = 0
 if op == "+" then
     r = a + b
 elseif op == "-" then

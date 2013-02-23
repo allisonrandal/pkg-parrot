@@ -1,13 +1,13 @@
-# $Id: Zcode.in 10933 2006-01-06 01:43:24Z particle $
+# $Id: Zcode.in 11115 2006-01-12 04:06:05Z jhoblitt $
 
 # Makefile for languages/Zcode
 
 # Setup of some commands
-PARROT  = ..${slash}..${slash}parrot${exe}
-PERL       = ${perl}
-RM_F       = ${rm_f}
+PARROT  = ..@slash@..@slash@parrot@exe@
+PERL       = @perl@
+RM_F       = @rm_f@
 
-EXAMPLES = examples${slash}small.z3 examples${slash}hello.z3
+EXAMPLES = examples@slash@small.z3 examples@slash@hello.z3
 
 default: all
 

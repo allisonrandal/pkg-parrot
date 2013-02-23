@@ -23,7 +23,6 @@ void graph_coloring_reg_alloc(Interp *interpreter, IMC_Unit * unit);
 static void make_stat(IMC_Unit *, int *sets, int *cols);
 static void imc_stat_init(IMC_Unit *);
 static void print_stat(Parrot_Interp, IMC_Unit *);
-static void allocate_wanted_regs(IMC_Unit *);
 static void build_reglist(Parrot_Interp, IMC_Unit * unit);
 static void rebuild_reglist(Parrot_Interp, IMC_Unit * unit);
 static void build_interference_graph(Parrot_Interp, IMC_Unit *);
@@ -131,8 +130,10 @@ imc_reg_alloc(Interp *interpreter, IMC_Unit * unit)
         } while (cfg_optimize(interpreter, unit));
 
         compute_dominators(interpreter, unit);
-        compute_dominance_frontiers(interpreter, unit);
         find_loops(interpreter, unit);
+        if (IMCC_INFO(interpreter)->optimizer_level) {
+            compute_dominance_frontiers(interpreter, unit);
+        }
 
         build_reglist(interpreter, unit);
         life_analysis(interpreter, unit);
@@ -182,8 +183,6 @@ graph_coloring_reg_alloc(Interp *interpreter, IMC_Unit * unit)
 {
 
     build_interference_graph(interpreter, unit);
-    if (IMCC_INFO(interpreter)->optimizer_level & OPT_SUB)
-        allocate_wanted_regs(unit);
 
     try_allocate(interpreter, unit);
     IMCC_INFO(interpreter)->allocated = 1;
@@ -339,6 +338,8 @@ build_reglist(Parrot_Interp interpreter, IMC_Unit * unit)
         }
     }
     unit->n_symbols = n_symbols = count;
+    if (IMCC_INFO(interpreter)->debug & DEBUG_IMC)
+        dump_symreg(unit);
     compute_du_chain(unit);
     /* we might have unused symbols here, from optimizations */
     for (i = count = unused = 0; i < n_symbols; i++) {
@@ -527,6 +528,35 @@ interferes(Interp *interpreter, IMC_Unit * unit, SymReg * r0, SymReg * r1)
      * if this instrucion does modify r0, if its value is never used
      * later, then they can share the same register.
      */
+#if 1
+    /* If they only overlap one instruction and one is used RHS only
+     * and the other LHS, then that's ok
+     *
+     * But only, if that isn't inside a loop, tested via loop_depth
+     * see also imcc/t/reg/alloc_2
+     *
+     * TODO no interferences, if the life range ends in this
+     *      basic block, because it's end is e.g. a returncc
+     */
+    if (r0->first_ins->index == r1->last_ins->index &&
+            instruction_writes(r0->first_ins, r0) &&
+            instruction_reads(r1->last_ins, r1) &&
+            !instruction_reads(r0->first_ins, r0)) {
+        Basic_block *bb;
+        bb = unit->bb_list[r0->first_ins->bbindex];
+        if (bb->loop_depth == 0)
+            return 0;
+    }
+    if (r1->first_ins->index == r0->last_ins->index &&
+            instruction_writes(r1->first_ins, r1) &&
+            instruction_reads(r0->last_ins, r0) &&
+            !instruction_reads(r1->first_ins, r1)) {
+        Basic_block *bb;
+        bb = unit->bb_list[r1->first_ins->bbindex];
+        if (bb->loop_depth == 0)
+            return 0;
+    }
+#endif
 
     /* Now: */
 
@@ -554,25 +584,6 @@ interferes(Interp *interpreter, IMC_Unit * unit, SymReg * r0, SymReg * r1)
         if (l1->first_ins->index > l0->last_ins->index)
             continue;
 
-#if 0
-        /* If they only overlap one instruction and one is used RHS only
-         * and the other LHS, then that's ok
-         * same if both are LHS
-         *
-         * XXX While the idea is ok, the following tests are wrong
-         * see imcc/t/reg/alloc_2
-         */
-        if (l0->first_ins->index == l1->last_ins->index &&
-                instruction_writes(l0->first_ins, r0) &&
-                instruction_reads(l1->last_ins, r1) &&
-                !instruction_reads(l0->first_ins, r0))
-            continue;
-        if (l1->first_ins->index == l0->last_ins->index &&
-                instruction_writes(l1->first_ins, r1) &&
-                instruction_reads(l0->last_ins, r0) &&
-                !instruction_reads(l1->first_ins, r1))
-            continue;
-#endif
 
         return 1;
     }
@@ -580,36 +591,6 @@ interferes(Interp *interpreter, IMC_Unit * unit, SymReg * r0, SymReg * r1)
     return 0;
 }
 
-/*
- * try to allocate as much as possible
- */
-static void
-allocate_wanted_regs(IMC_Unit * unit)
-{
-    int i, y, interf, n_symbols;
-    SymReg *r;
-
-    n_symbols = unit->n_symbols;
-    for (i = 0; i < n_symbols; i++) {
-        r = unit->reglist[i];
-        if (r->color >= 0 || r->want_regno == -1 || strchr("ISPN", r->set == 0))
-            continue;
-        interf = 0;
-        for (y = 0; y < n_symbols; y++) {
-            SymReg *s;
-            if (! ig_test(i, y, n_symbols, unit->interference_graph))
-                continue;
-            s = unit->reglist[y];
-            if (   s
-                && s->color == r->want_regno
-                && s->set == r->set) {
-                interf = 1;
-            }
-        }
-        if (!interf)
-            r->color = r->want_regno;
-    }
-}
 /*
  * find available color for register #x in available colors
  */
@@ -719,7 +700,7 @@ map_colors(IMC_Unit* unit, int x, unsigned int *graph, char avail[],
  */
 
 static int
-first_avail(IMC_Unit *unit, int reg_set)
+first_avail(IMC_Unit *unit, int reg_set, Set **avail)
 {
     int i, n, first;
     SymReg * r;
@@ -742,7 +723,10 @@ first_avail(IMC_Unit *unit, int reg_set)
         }
     }
     first = set_first_zero(allocated);
-    set_free(allocated);
+    if (avail)
+        *avail = allocated;
+    else
+        set_free(allocated);
     return first;
 }
 
@@ -758,11 +742,12 @@ allocate_uniq(Parrot_Interp interpreter, IMC_Unit *unit, int usage)
     int i, j, reg_set, first_reg;
     SymReg * r;
     SymHash *hsh;
+    Set *avail;
 
     hsh = &unit->hash;
     for (j = 0; j < 4; j++) {
         reg_set = type[j];
-        first_reg = first_avail(unit, reg_set);
+        first_reg = first_avail(unit, reg_set, &avail);
         for (i = 0; i < hsh->size; i++) {
             for (r = hsh->data[i]; r; r = r->next) {
                 if (r->set != reg_set)
@@ -770,6 +755,9 @@ allocate_uniq(Parrot_Interp interpreter, IMC_Unit *unit, int usage)
                 if ((r->type & VTREGISTER) &&
                         r->color == -1 &&
                         (r->usage & usage)) {
+                    if (set_contains(avail, first_reg))
+                        first_reg = first_avail(unit, reg_set, NULL);
+                    set_add(avail, first_reg);
                     r->color = first_reg++;
                     IMCC_debug(interpreter, DEBUG_IMC,
                             "allocate %s sym %c '%s'  color %d\n",
@@ -778,6 +766,7 @@ allocate_uniq(Parrot_Interp interpreter, IMC_Unit *unit, int usage)
                 }
             }
         }
+        set_free(avail);
         unit->first_avail[j] = first_reg;
     }
     /*

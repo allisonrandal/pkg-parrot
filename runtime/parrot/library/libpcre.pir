@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: libpcre.pir 10747 2005-12-28 21:53:23Z particle $
+# $Id: libpcre.pir 11563 2006-02-16 00:42:07Z jisom $
 
 =head1 TITEL
 
@@ -160,8 +160,6 @@ all:
     if i < ok goto loop
     end
 .end
-
-=back
 
 =head1 FILES
 

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: signal.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: signal.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines some signal stuff.
 package auto::signal;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -37,7 +37,8 @@ sub runstep
         has_setitimer      => undef
     );
     if (defined $conf->options->get('miniparrot')) {
-        return;
+        $self->set_result('skipped');
+        return $self;
     }
 
     cc_gen('config/auto/signal/test_1.in');
@@ -85,5 +86,8 @@ EOF
         $i++;
     }
     close O;
+    
+    return $self;
 }
+
 1;

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: debug.c 10543 2005-12-15 22:36:46Z leo $
+$Id: debug.c 11647 2006-02-18 16:12:23Z leo $
 
 =head1 NAME
 
@@ -28,6 +28,9 @@ debugger, and the C<debug> ops.
 #include "parrot/trace.h"
 #include "parrot/debug.h"
 #include "parrot/oplib/ops.h"
+
+
+static const char* GDB_P(Interp *interpreter, const char *s);
 
 /* na(c) [Next Argument (Char pointer)]
  *
@@ -281,16 +284,15 @@ PDB_get_command(Interp *interpreter)
         while (pdb->cur_opcode != line->opcode)
             line = line->next;
 
-        PIO_eprintf(interpreter, "\n%li  ", line->number);
+        PIO_eprintf(interpreter, "%li  ", line->number);
         c = pdb->file->source + line->source_offset;
         while (*c != '\n'  && c)
             PIO_eprintf(interpreter, "%c", *(c++));
-        PIO_eprintf(interpreter, "\n");
     }
 
     i = 0;
 
-    c = (char *)mem_sys_allocate(255);
+    c = (char *)mem_sys_allocate(255);  /* XXX who frees that */
 
     PIO_eprintf(interpreter, "\n(pdb) ");
 
@@ -379,7 +381,7 @@ PDB_run_command(Interp *interpreter, const char *command)
             break;
         case c_p:
         case c_print:
-            /* PDB_print(interpreter, command);  XXX */
+            PDB_print(interpreter, command); 
             break;
         case c_n:
         case c_next:
@@ -448,7 +450,7 @@ PDB_next(Interp *interpreter, const char *command)
 
     /* Execute */
     for ( ; n && pdb->cur_opcode; n--)
-        DO_OP(pdb->cur_opcode,interpreter);
+        DO_OP(pdb->cur_opcode, pdb->debugee);
 
     /* Set the stopped flag */
     pdb->state |= PDB_STOPPED;
@@ -481,6 +483,7 @@ PDB_trace(Interp *interpreter,
 {
     PDB_t *pdb = interpreter->pdb;
     unsigned long n = 1;
+    Interp *debugee;
 
     if (!(pdb->state & PDB_RUNNING))
     {
@@ -492,13 +495,14 @@ PDB_trace(Interp *interpreter,
 
     pdb->state &= ~PDB_STOPPED;
 
+    debugee = pdb->debugee;
     for ( ; n && pdb->cur_opcode; n--) {
-        trace_op(interpreter,
-                interpreter->code->base.data,
-                interpreter->code->base.data +
-                interpreter->code->base.size,
-                interpreter->pdb->cur_opcode);
-        DO_OP(pdb->cur_opcode,interpreter);
+        trace_op(debugee,
+                debugee->code->base.data,
+                debugee->code->base.data +
+                debugee->code->base.size,
+                debugee->pdb->cur_opcode);
+        DO_OP(pdb->cur_opcode, debugee);
     }
 
     pdb->state |= PDB_STOPPED;
@@ -843,62 +847,13 @@ extern void imcc_init(Parrot_Interp interpreter);
 void
 PDB_init(Interp *interpreter, const char *command)
 {
-    PMC *userargv;
-    char c[256];
-    STRING *arg;
-    unsigned long i;
     PDB_t *pdb = interpreter->pdb;
 
-#if 0
-    struct PackFile *code;
-    void* stacktop = interpreter->lo_var_ptr;
-
-    /* XXX this causes reuse of structures of the old interpreter
-     * the new interpreter isn't returned nor setup properly
-     * -leo
-     */
-    /* The bytecode is readonly, right? */
-    code = interpreter->code;
-    /* Destroy the old interpreter FIXME */
-    free(interpreter);
-    /* Get a new interpreter */
-    interpreter = make_interpreter(interpreter, NO_FLAGS);
-    interpreter->code = code;
-    interpreter->pdb = pdb;
-    interpreter->lo_var_ptr = stacktop;
-#else
-    Parrot_clear_i(interpreter);
-    Parrot_clear_n(interpreter);
-    Parrot_clear_s(interpreter);
-    Parrot_clear_p(interpreter);
-#endif
-
-    /* setup PASM compiler */
-    imcc_init(interpreter);
-
-    /* set the user arguments */
-    userargv = pmc_new(interpreter, enum_class_ResizableStringArray);
-    REG_PMC(5) = userargv;
-
-    while (command && *command) {
-        i = 0;
-        while (command[i] && !isspace((int) command[i])) {
-            c[i] = command[i];
-            i++;
-        }
-        c[i] = '\0';
-        na(command);
-
-        arg = string_make(interpreter, c, i, NULL, 0);
-        VTABLE_push_string(interpreter, userargv, arg);
-    }
-
+    UNUSED(command);
     /* Restart if we are already running */
     if (pdb->state & PDB_RUNNING)
         PIO_eprintf(interpreter, "Restarting\n");
 
-    /* Get the bytecode start */
-    pdb->cur_opcode = interpreter->code->base.data;
     /* Add the RUNNING state */
     pdb->state |= PDB_RUNNING;
 }
@@ -934,7 +889,7 @@ PDB_continue(Interp *interpreter,
     }
     /* Run while no break point is reached */
     while (!PDB_break(interpreter))
-        DO_OP(pdb->cur_opcode,interpreter);
+        DO_OP(pdb->cur_opcode, pdb->debugee);
 }
 
 
@@ -2190,399 +2145,21 @@ PDB_print_user_stack(Interp *interpreter, const char *command)
 =item C<void
 PDB_print(Interp *interpreter, const char *command)>
 
-Print interpreter registers.
+Print interpreter registers. 
 
 =cut
 
 */
 
-#if 0
-/* XXX TODO */
 void
 PDB_print(Interp *interpreter, const char *command)
 {
-    unsigned long c = 0;
-    PMC* key = NULL;
-    int regnum = -1;
-
-    command = skip_ws(command);
-    command = parse_command(command, &c);
-    if (command == NULL) {
-        PDB_print_int(interpreter, &interpreter->int_reg, -1);
-        PDB_print_num(interpreter, &interpreter->num_reg, -1);
-        PDB_print_string(interpreter, &interpreter->string_reg, -1);
-        PDB_print_pmc(interpreter, &interpreter->pmc_reg, -1, NULL);
-        return;
-    }
-
-    command = skip_ws(command);
-
-    if (isdigit((int) *command)) {
-        command = parse_int(command, &regnum);
-        command = skip_ws(command);
-    }
-
-
-    if (*command == '[') {
-        command = parse_key(interpreter, command, &key);
-    }
-
-    switch (c) {
-        case c_i:
-        case c_int:
-            PDB_print_int(interpreter, &interpreter->int_reg, regnum);
-            break;
-        case c_n:
-        case c_num:
-            PDB_print_num(interpreter, &interpreter->num_reg, regnum);
-            break;
-        case c_s:
-        case c_str:
-            PDB_print_string(interpreter,&interpreter->string_reg, regnum);
-            break;
-        case c_p:
-        case c_pmc:
-            PDB_print_pmc(interpreter,&interpreter->pmc_reg, regnum, key);
-            break;
-        default:
-            PIO_eprintf(interpreter, "Unrecognized print option: "
-                        "must be 'int', 'num', 'str', 'pmc', or a register\n");
-    }
-
+    const char *s;
+        
+    s = GDB_P(interpreter->pdb->debugee, command);
+    PIO_eprintf(interpreter, "%s\n", s);
 }
 
-/*
-
-=item C<void
-PDB_print_int(Interp *interpreter, struct IReg *int_reg,
-              int regnum)>
-
-Print the whole or a specific value of a integer register structure.
-
-=cut
-
-*/
-
-void
-PDB_print_int(Interp *interpreter, struct IReg *int_reg,
-              int regnum)
-{
-    int i,j = 0, k = NUM_REGISTERS;
-
-    if (regnum >= NUM_REGISTERS || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register I%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "Integer Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PIO_eprintf(interpreter, "I%i =\t",i);
-        PIO_eprintf(interpreter, "%11vi\n",int_reg->registers[i]);
-    }
-}
-
-/*
-
-=item C<void
-PDB_print_int_frame(Interp *interpreter,
-                    struct IRegFrame *int_reg, int regnum)>
-
-Print the whole or a specific value of a integer register frame
-structure.
-
-=cut
-
-*/
-
-void
-PDB_print_int_frame(Interp *interpreter,
-                    struct IRegFrame *int_reg, int regnum)
-{
-    int i,j = 0, k = NUM_REGISTERS/2;
-
-    if (regnum >= NUM_REGISTERS/2 || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register I%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "Integer Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PIO_eprintf(interpreter, "I%i =\t",i);
-        PIO_eprintf(interpreter, "%11vi\n",int_reg->registers[i]);
-    }
-}
-
-/*
-
-=item C<void
-PDB_print_num(Interp *interpreter, struct NReg *num_reg,
-              int regnum)>
-
-Print the whole or a specific value of a float register structure.
-
-=cut
-
-*/
-
-void
-PDB_print_num(Interp *interpreter, struct NReg *num_reg,
-              int regnum)
-{
-    int i,j = 0, k = NUM_REGISTERS;
-
-    if (regnum >= NUM_REGISTERS || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register N%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "Float Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PIO_eprintf(interpreter, "N%i =\t",i);
-        PIO_eprintf(interpreter, "%20.4f\n",num_reg->registers[i]);
-    }
-}
-
-/* PDB_print_num_frame
- * print the whole or a specific value of a float register frame structure.
- */
-/*
-
-=item C<void
-PDB_print_num_frame(Interp *interpreter,
-                    struct NRegFrame *num_reg, int regnum)>
-
-Print the whole or a specific value of a float register frame structure.
-
-=cut
-
-*/
-
-void
-PDB_print_num_frame(Interp *interpreter,
-                    struct NRegFrame *num_reg, int regnum)
-{
-    int i,j = 0, k = NUM_REGISTERS/2;
-
-    if (regnum >= NUM_REGISTERS/2 || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register N%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "Float Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PIO_eprintf(interpreter, "N%i =\t",i);
-        PIO_eprintf(interpreter, "%20.4f\n",num_reg->registers[i]);
-    }
-}
-
-/*
-
-=item C<void
-PDB_print_string(Interp *interpreter, struct SReg *string_reg,
-                 int regnum)>
-
-Print the whole or a specific value of a string register structure.
-
-=cut
-
-*/
-
-void
-PDB_print_string(Interp *interpreter, struct SReg *string_reg,
-                 int regnum)
-{
-    int i,j = 0, k = NUM_REGISTERS;
-
-    if (regnum >= NUM_REGISTERS || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register S%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "String Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PIO_eprintf(interpreter, "S%i =\n",i);
-        dump_string(interpreter, string_reg->registers[i]);
-    }
-}
-
-/*
-
-=item C<void
-PDB_print_string_frame(Interp *interpreter,
-                       struct SRegFrame *string_reg, int regnum)>
-
-Print the whole or a specific value of a string register frame structure.
-
-=cut
-
-*/
-
-void
-PDB_print_string_frame(Interp *interpreter,
-                       struct SRegFrame *string_reg, int regnum)
-{
-    int i,j = 0, k = NUM_REGISTERS/2;
-
-    if (regnum >= NUM_REGISTERS/2 || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register S%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "String Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PIO_eprintf(interpreter, "S%i =\n",i);
-        dump_string(interpreter, string_reg->registers[i]);
-    }
-}
-
-/*
-
-=item C<static void
-print_pmc(Interp *interpreter, PMC* pmc)>
-
-Prints out a human-readable description of C<pmc>.
-
-=cut
-
-*/
-
-static void
-print_pmc(Interp *interpreter, PMC* pmc)
-{
-    if (pmc && pmc->vtable) {
-        STRING* s = VTABLE_name(interpreter, pmc);
-        if (s) {
-            PIO_eprintf(interpreter, " [%S]\n", s);
-        }
-        PIO_eprintf(interpreter, "Stringified: %PS\n",
-                    VTABLE_get_string(interpreter, pmc));
-    }
-    else {
-        PIO_eprintf(interpreter, "<null pmc>\n");
-    }
-}
-
-/*
-
-=item C<void
-PDB_print_pmc(Interp *interpreter, struct PReg *pmc_reg,
-              int regnum, PMC* key)>
-
-Print the whole or a specific value of a PMC register structure.
-
-=cut
-
-*/
-
-void
-PDB_print_pmc(Interp *interpreter, struct PReg *pmc_reg,
-              int regnum, PMC* key)
-{
-    int i,j = 0, k = NUM_REGISTERS;
-
-    if (regnum >= NUM_REGISTERS || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register P%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "PMC Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PMC* pmc = pmc_reg->registers[i];
-
-        PIO_eprintf(interpreter, "P%i", i);
-        if (key) trace_key_dump(interpreter, key);
-        PIO_eprintf(interpreter, " =");
-
-        if (key) pmc = VTABLE_get_pmc_keyed(interpreter, pmc, key);
-        print_pmc(interpreter, pmc);
-    }
-}
-
-/*
-
-=item C<void
-PDB_print_pmc_frame(Interp *interpreter,
-                    struct PRegFrame *pmc_reg, int regnum, PMC* key)>
-
-Print the whole or a specific value of a PMC register frame structure.
-
-=cut
-
-*/
-
-void
-PDB_print_pmc_frame(Interp *interpreter,
-                    struct PRegFrame *pmc_reg, int regnum, PMC* key)
-{
-    int i,j = 0, k = NUM_REGISTERS/2;
-
-    if (regnum >= NUM_REGISTERS/2 || regnum < -1) {
-        PIO_eprintf(interpreter, "No such register P%d", regnum);
-        return;
-    }
-    else if (regnum != -1) {
-        j = regnum;
-        k = regnum + 1;
-    }
-    else {
-        PIO_eprintf(interpreter, "PMC Registers:\n");
-    }
-
-    for (i = j; i < k; i++) {
-        PMC* pmc = pmc_reg->registers[i];
-
-        PIO_eprintf(interpreter, "P%i", i);
-        if (key) trace_key_dump(interpreter, key);
-        PIO_eprintf(interpreter, " =");
-
-        if (key) pmc = VTABLE_get_pmc_keyed(interpreter, pmc, key);
-        print_pmc(interpreter, pmc);
-    }
-}
-
-#endif  /* PDB_print stuff */
 
 /*
 
@@ -2724,7 +2301,7 @@ This is the same as the information you get when running Parrot with\n\
 the -t option.\n");
             break;
         case c_print:
-            PIO_eprintf(interpreter,"No documentation yet");
+            PIO_eprintf(interpreter,"Print register: e.g. p I2\n");
             break;
         case c_info:
             PIO_eprintf(interpreter,
@@ -2791,16 +2368,19 @@ PDB_backtrace(Interp *interpreter)
     if (!PMC_IS_NULL(sub)) {
         str = Parrot_Context_infostr(interpreter, ctx);
         if (str)
-            PIO_eprintf(interpreter, "%Ss", str);
+            PIO_eprintf(interpreter, "%Ss\n", str);
     }
 
     /* backtrace: follow the continuation chain */
     while (1) {
+        parrot_cont_t sub_cont;
         sub = ctx->current_cont;
         if (!sub)
             break;
-        str = Parrot_Context_infostr(interpreter,
-            PMC_cont(sub)->to_ctx);
+        sub_cont = PMC_cont(sub);
+        if (!sub_cont)
+            break;
+        str = Parrot_Context_infostr(interpreter, sub_cont->to_ctx);
         if (!str)
             break;
         
@@ -2818,18 +2398,113 @@ PDB_backtrace(Interp *interpreter)
 
         /* print the context description */
         if (rec_level == 0)
-            PIO_eprintf(interpreter, "%Ss", str);
+            PIO_eprintf(interpreter, "%Ss\n", str);
 
         /* get the next Continuation */
         ctx = PMC_cont(sub)->to_ctx;
         old = sub;
-        if (!ctx || !ctx->prev)
+        if (!ctx)
             break;
     }
     if (rec_level != 0) {
         PIO_eprintf(interpreter, "... call repeated %d times\n", rec_level);
     }
 }
+
+/*
+ * GDB functions
+ *
+ * GDB_P  gdb> pp $I0   print register I0 value
+ *
+ * TODO more, more 
+ */
+
+static const char*
+GDB_P(Interp *interpreter, const char *s) {
+    int t, n;
+    switch (*s) {
+        case 'I': t = REGNO_INT; break;
+        case 'N': t = REGNO_NUM; break;
+        case 'S': t = REGNO_STR; break;
+        case 'P': t = REGNO_PMC; break;
+        default: return "no such reg";
+    }
+    if (s[1] && isdigit(s[1]))
+        n = atoi(s + 1);
+    else
+        return "no such reg";
+
+    if (n >= 0 && n < CONTEXT(interpreter->ctx)->n_regs_used[t]) {
+        switch (t) {
+            case REGNO_INT:
+                return string_from_int(interpreter, REG_INT(n))->strstart;
+            case REGNO_NUM:
+                return string_from_num(interpreter, REG_NUM(n))->strstart;
+            case REGNO_STR:
+                return REG_STR(n)->strstart;
+            case REGNO_PMC:
+                /* prints directly */
+                trace_pmc_dump(interpreter, REG_PMC(n));
+                return "";
+        }
+    }
+    return "no such reg";
+}
+
+/* TODO move these to debugger interpreter
+ */
+static PDB_breakpoint_t *gdb_bps;
+
+/*
+ * GDB_pb   gdb> pb 244     # set breakpoint at opcode 244
+ * 
+ * XXX We can't remove the breakpoint yet, executing the next ins
+ * most likely fails, as the length of the debug-brk stmt doesn't
+ * match the old opcode
+ * Setting a breakpoint will also fail, if the bytecode os r/o
+ *
+ */
+static int
+GDB_B(Interp *interpreter, char *s) {
+    PDB_breakpoint_t *bp, *newbreak;
+    int nr;
+    opcode_t *pc;
+
+    if ((unsigned long)s < 0x10000) {
+        /* HACK alarm  pb 45 is passed as the integer not a string */
+        unsigned long offs = (unsigned long)s;
+        /* TODO check if in bounds */
+        pc = interpreter->code->base.data + offs;
+        
+        if (!gdb_bps) {
+            nr = 0;
+            newbreak = mem_sys_allocate(sizeof(PDB_breakpoint_t));
+            newbreak->prev = NULL;
+            newbreak->next = NULL;
+            gdb_bps = newbreak;
+        }
+        else {
+            /* create new one */
+            for (nr = 0, bp = gdb_bps; ; bp = bp->next, ++nr) {
+                if (bp->pc == pc)
+                    return nr;
+                if (!bp->next)
+                    break;
+            }
+            ++nr;
+            newbreak = mem_sys_allocate(sizeof(PDB_breakpoint_t));
+            newbreak->prev = bp;
+            newbreak->next = NULL;
+            bp->next = newbreak;
+        }
+        newbreak->pc = pc;
+        newbreak->id = *pc;
+        *pc = PARROT_OP_debug_brk;
+        return nr;
+    }
+    return -1;
+}
+
 
 /*
 
@@ -2841,8 +2516,25 @@ F<include/parrot/debug.h>, F<src/pdb.c> and F<ops/debug.ops>.
 
 =head1 HISTORY
 
-Initial version by Daniel Grunblatt on 2002.5.19.
+=over 4
 
+=item Initial version by Daniel Grunblatt on 2002.5.19.
+
+=item Start of rewrite - leo 2005.02.16
+
+The debugger now uses its own interpreter. User code is run in
+Interp* debugee. We have:
+
+  debug_interp->pdb->debugee->debugger
+    ^                            |
+    |                            v
+    +------------- := -----------+
+
+Debug commands are mostly run inside the C<debugger>. User code
+runs of course in the C<debugee>.
+
+=back
+    
 =cut
 
 */

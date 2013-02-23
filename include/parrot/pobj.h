@@ -1,7 +1,7 @@
 /* pobj.h
  *  Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: pobj.h 10592 2005-12-20 14:53:14Z leo $
+ *     $Id: pobj.h 11346 2006-01-25 15:59:27Z leo $
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:
@@ -136,10 +136,6 @@ struct parrot_string_t {
     UINTVAL hashval; /* cached hash value computation; not yet used */
 };
 
-    /* cache.* is intended to just be *shortcuts* to*/
-    /* commonly-accessed data, *not* pointers to */
-    /* completely different data.  That's why it's */
-    /* referred to as a "cache". */
 
 /* put data into the PMC_EXT structure */
 #define PMC_DATA_IN_EXT 1

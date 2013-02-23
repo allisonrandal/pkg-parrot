@@ -1,4 +1,4 @@
-# $Id: RELEASE_INSTRUCTIONS 10986 2006-01-08 14:15:28Z leo $
+# $Id: RELEASE_INSTRUCTIONS 11703 2006-02-22 13:35:12Z leo $
 
 To prepare a release:
 
@@ -15,13 +15,14 @@ To prepare a release:
             - parrot.spec, 
 	    - compilers/imcc/main.c
             - MANIFEST.generated
+            - META.yml
 
         b.  Change the information in DEVELOPING to reflect
             this release's version number and date.
 
         c.  Update README.
 
-        d.  Update ChangeLog, NEWS, docs/ROADMAP, and docs/BROKEN.
+        d.  Update ChangeLog, NEWS, docs/ROADMAP.pod, and docs/BROKEN.pod.
 
         e.  Make sure nothing in TODO has been done.
 

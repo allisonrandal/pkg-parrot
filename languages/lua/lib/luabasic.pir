@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: luabasic.pir 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: luabasic.pir 11675 2006-02-20 08:00:49Z fperrad $
 
 =head1 NAME
 
@@ -204,10 +204,10 @@ it defaults to "assertion failed!"
 =cut
 
 .sub _lua_assert :anon
-    .param pmc v
+    .param pmc v :optional
     .param pmc message :optional
     checkany(v)
-    $I0 = v
+    $I0 = istrue v
     if $I0 goto L0
     $S0 = optstring(message, "assertion failed!")
     error($S0)
@@ -226,6 +226,8 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_collectgarbage :anon
+    .param pmc limit :optional
+    $I0 = optint(limit, 0)
     not_implemented()
 .end
 
@@ -242,6 +244,8 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_dofile :anon
+    .param pmc filename :optional
+    $S0 = optstring(filename, "")
     not_implemented()
 .end
 
@@ -260,7 +264,7 @@ STILL INCOMPLETE.
 =cut
 
 .sub _lua_error :anon
-    .param pmc message
+    .param pmc message :optional
     .param pmc level :optional
     $I0 = optint(level, 1)
     checkany(message)
@@ -294,12 +298,24 @@ If the object does not have a metatable, returns B<nil>. Otherwise, if the
 object’s metatable has a C<"__metatable"> field, returns the associated value.
 Otherwise, returns the metatable of the given object.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_getmetatable :anon
-    not_implemented()
+    .param pmc obj :optional
+    .local pmc ret
+    checkany(obj)
+    ret = getprop "__metatable", obj
+    if ret goto L1
+    new ret, .LuaNil
+    .return (ret)
+L1:
+    .local pmc prot
+    .const .LuaString mt = "__metatable"
+    prot = ret[mt]
+    unless prot goto L2
+    .return (prot)
+L2:
+    .return (ret)
 .end
 
 =item C<gcinfo ()>
@@ -324,12 +340,32 @@ Returns an iterator function, the table C<t>, and 0, so that the construction
 will iterate over the pairs (C<1,t[1]>), (C<2,t[2]>), ... , up to the first
 integer key with a nil value in the table.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_ipairs :anon
-    not_implemented()
+    .param pmc t :optional
+    .param pmc i :optional
+    checktype(t, "table")
+    unless_null i, L0
+    .local pmc _G
+    _G = global "_G"
+    .const .LuaString key_ipairs = "ipairs"
+    .local pmc ipairs
+    ipairs = _G[key_ipairs]
+    .local pmc zero
+    new zero, .LuaNumber
+    zero = 0.0
+    .return (ipairs, t, zero)
+L0:
+    .local pmc n
+    .local pmc ret
+    new n, .LuaNumber
+    n = i + 1.0
+    ret = t[n]
+    unless ret goto L1
+    .return (n, ret)
+L1:
+    .return ()
 .end
 
 =item C<loadfile (filename)>
@@ -344,6 +380,8 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_loadfile :anon
+    .param pmc filename :optional
+    $S0 = optstring(filename, "")
     not_implemented()
 .end
 
@@ -382,6 +420,10 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_loadstring :anon
+    .param pmc s :optional
+    .param pmc chunkname :optional
+    $S0 = checkstring(s)
+    $S1 = optstring(chunkname, s)
     not_implemented()
 .end
 
@@ -404,12 +446,21 @@ in numeric order, use a numerical for or the C<ipairs> function.)
 The behavior of C<next> is I<undefined> if, during the traversal, you assign
 any value to a non-existent field in the table.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see next in luapir.pir).
 
 =cut
 
 .sub _lua_next :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc index :optional
+    .local pmc idx
+    .local pmc value
+    checktype(table, "table")
+    (idx, value) = next(table, index)
+    unless idx goto L1
+    .return (idx, value) 
+L1:
+    .return (idx)	# nil                               
 .end
 
 =item C<pairs (t)>
@@ -421,12 +472,21 @@ construction
 
 will iterate over all key-value pairs of table C<t>.
 
-NOT YET IMPLEMENTED.
+STILL INCOMPLETE (see next).
 
 =cut
 
 .sub _lua_pairs :anon
-    not_implemented()
+    .param pmc t :optional
+    checktype(t, "table")
+    .local pmc _G
+    _G = global "_G"
+    .const .LuaString key_next = "next"
+    .local pmc next
+    next = _G[key_next]
+    .local pmc nil
+    new nil, .LuaNil
+    .return (next, t, nil)
 .end
 
 =item C<pcall (f, arg1, arg2, ...)>
@@ -438,12 +498,28 @@ boolean), which is B<true> if the call succeeds without errors. In such case,
 C<pcall> also returns all results from the call, after this first result.
 In case of any error, C<pcall> returns B<false> plus the error message.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_pcall :anon
-    not_implemented()
+    .param pmc f :optional
+    .param pmc argv :slurpy
+    .local pmc ret
+    .local pmc status
+    new status, .LuaBoolean
+    checkany(f)
+    push_eh _handler
+    (ret :slurpy) = f(argv :flat)
+    status = 1
+    .return (status, ret :flat)
+_handler:
+    .local pmc e
+    .local string s
+    .local pmc msg
+    .get_results (e, s)
+    status = 0    
+    new msg, .LuaString
+    msg = s
+    .return (status, msg)
 .end
 
 =item C<print (e1, e2, ...)>
@@ -453,7 +529,7 @@ the C<tostring> function to convert them to strings. This function is not
 intended for formatted output, but only as a quick way to show a value,
 typically for debugging. For formatted output, use C<format>.
 
-STILL INCOMPLETE.
+STILL INCOMPLETE (see tostring).
 
 =cut
 
@@ -461,8 +537,6 @@ STILL INCOMPLETE.
     .param pmc argv :slurpy
     .local int argc
     .local int i
-    .local pmc curr
-#    .local string str
     argc = argv
     i = 0
 L1:
@@ -470,10 +544,9 @@ L1:
     if i == 0 goto L2
     print "\t"
 L2:
-    curr = argv[i]
-    print curr
-#    str = tostring(curr)
-#    print str
+    $P0 = argv[i]
+    $P1 = $P0."tostring"()
+    print $P1
     i = i + 1
     goto L1
 L3:
@@ -490,6 +563,10 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_rawequal :anon
+    .param pmc v1 :optional
+    .param pmc v2 :optional
+    checkany(v1)
+    checkany(v2)
     not_implemented()
 .end
 
@@ -498,12 +575,17 @@ NOT YET IMPLEMENTED.
 Gets the real value of C<table[index]>, without invoking any metamethod.
 C<table> must be a table; C<index> is any value different from B<nil>.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_rawget :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc index :optional
+    .local pmc ret
+    checktype(table, "table")
+    checkany(index)
+#    ret = table[index]
+     ret = table."rawget"(index)
+    .return (ret)
 .end
 
 =item C<rawset (table, index, value)>
@@ -512,12 +594,18 @@ Sets the real value of C<table[index]> to value, without invoking any
 metamethod. C<table> must be a table, C<index> is any value different from
 B<nil>, and C<value> is any Lua value.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_rawset :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc index :optional
+    .param pmc value :optional
+    checktype(table, "table")
+    checkany(index)
+    checkany(value)
+#    table[index] = value
+    table."rawset"(index, value)
+    .return ()
 .end
 
 =item C<require (packagename)>
@@ -562,6 +650,8 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_require :anon
+    .param pmc packagename :optional
+    $S0 = checkstring(packagename)
     not_implemented()
 .end
 
@@ -580,6 +670,9 @@ NOT YET IMPLEMENTED.
 =cut
 
 .sub _lua_setfenv :anon
+    .param pmc f :optional
+    .param pmc table :optional
+    checktype(table, "table")
     not_implemented()
 .end
 
@@ -590,12 +683,34 @@ a userdata from Lua.) If metatable is B<nil>, removes the metatable of the
 given table. If the original metatable has a C<"__metatable"> field, raises
 an error.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_setmetatable :anon
-    not_implemented()
+    .param pmc table :optional
+    .param pmc metatable :optional
+    checktype(table, "table")
+    if_null metatable, L0
+    $S0 = typeof metatable
+    if $S0 == "nil" goto L1
+    if $S0 == "table" goto L1
+L0:
+    argerror("nil or table expected")
+L1:
+    .local pmc meta
+    meta = getprop "__metatable", table
+    unless meta goto L3
+    .local pmc prot
+    .const .LuaString mt = "__metatable"
+    prot = meta[mt]
+    unless prot goto L3
+    error("cannot change a protected metatable")
+L3:
+    if $S0 == "table" goto L4
+    delprop table, "__metatable"
+    .return ()
+L4:    
+    setprop table, "__metatable", metatable
+    .return ()
 .end
 
 =item C<tonumber (e [, base])>
@@ -611,37 +726,27 @@ with ‘Z’ representing 35. In base 10 (the default), the number may have a
 decimal part, as well as an optional exponent part. In other bases, only
 unsigned integers are accepted.
 
-STILL INCOMPLETE.
-
 =cut
 
 .sub _lua_tonumber :anon
-    .param pmc e
+    .param pmc e :optional 
     .param pmc base :optional
     .local pmc ret
-    $I0 = optint(base, 10)
-    unless $I0 == 10 goto L0
     checkany(e)
-    $I1 = isa e, "LuaNumber"
-    unless $I1 goto L1
-    return (e)
+    $I0 = optint(base, 10)
+    unless $I0 == 10 goto L1
+    ret = e."tonumber"()
+    .return (ret)
 L1:
-    $I1 = isa e, "LuaString"
-    unless $I1 goto L2
-    $S0 = e
-#    print $S0
-#    print "\n"
-    $N0 = $S0
-#    print $N0
-#    print "\n"
-    new ret, .LuaNumber
-    ret = $N0
-    .return (ret)
+    $P0 = checkstring(e)
+    unless 2 <= $I0 goto L2
+    unless $I0 <= 36 goto L2
+    goto L3
 L2:
-    new ret, .LuaNil
+    argerror("base out of range")
+L3:
+    ret = $P0."tobase"($I0)
     .return (ret)
-L0:
-    not_implemented()
 .end
 
 =item C<tostring (e)>
@@ -653,22 +758,15 @@ If the metatable of e has a C<"__tostring"> field, C<tostring> calls the
 corresponding value with C<e> as argument, and uses the result of the call
 as its result.
 
-STILL INCOMPLETE.
+STILL INCOMPLETE (see tostring in luatable.pmc & luauserdata.pmc).
 
 =cut
 
 .sub _lua_tostring :anon
-    .param pmc e
+    .param pmc e :optional
     .local pmc ret
     checkany(e)
-    # TODO: __tostring
-    $I1 = isa e, "LuaString"
-    unless $I1 goto L1
-    .return (e)
-L1:
-    $S0 = e
-    new ret, .LuaString
-    ret = $S0
+    ret = e."tostring"()
     .return (ret)
 .end
 
@@ -682,7 +780,7 @@ C<"userdata">.
 =cut
 
 .sub _lua_type :anon
-    .param pmc v
+    .param pmc v :optional
     .local pmc ret
     checkany(v)
     $S0 = typeof v
@@ -700,12 +798,30 @@ Returns all elements from the given list. This function is equivalent to
 except that the above code can be written only for a fixed I<n>. The number
 I<n> is the size of the list, as defined for the C<table.getn> function.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_unpack :anon
-    not_implemented()
+    .param pmc list :optional
+    .local pmc ret
+    .local pmc index
+    .local int n
+    .local int i
+    checktype(list, "table")
+    n = getn(list)
+    new ret, .Array
+    set ret, n
+    new index, .LuaNumber
+    index = 1.0
+    i = 0
+L0:    
+    unless i < n goto L1
+    $P0 = list[index]
+    ret[i] = $P0
+    index = index + 1.0
+    i = i + 1
+    goto L0
+L1:
+    .return (ret :flat)
 .end
 
 =item C<xpcall (f, err)>
@@ -721,12 +837,31 @@ is true if the call succeeds without errors. In such case, C<xpcall> also
 returns all results from the call, after this first result. In case of any
 error, C<xpcall> returns false plus the result from C<err>.
 
-NOT YET IMPLEMENTED.
-
 =cut
 
 .sub _lua_xpcall :anon
-    not_implemented()
+    .param pmc f :optional
+    .param pmc err :optional
+    .local pmc ret
+    .local pmc status
+    new status, .LuaBoolean
+    checkany(f)
+    checkany(err)
+    push_eh _handler
+    (ret :slurpy) = f()
+    status = 1
+    .return (status, ret :flat)
+_handler:
+    .local pmc e
+    .local pmc msg
+    status = 0
+    $S0 = typeof err
+    unless $S0 == "Sub" goto L0    
+    .get_results (e)
+    (ret :slurpy) = err(e)
+    .return (status, ret :flat)
+L0:
+    .return (status)    
 .end
 
 =back

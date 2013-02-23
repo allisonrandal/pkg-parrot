@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: yacc.pm 10933 2006-01-06 01:43:24Z particle $
+# $Id: yacc.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ package inter::yacc;
 
 use strict;
 
-use vars qw( $description $result @args $prompt $util );
+use vars qw( $description @args $prompt $util );
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -37,8 +37,8 @@ sub runstep
 
     unless ($conf->options->get('maintainer')) {
         $conf->data->set($util => 'echo');
-        $result = 'skipped';
-        return undef;
+        $self->set_result('skipped');
+        return $self;
     }
 
     my $prog;
@@ -52,8 +52,8 @@ sub runstep
     # the user is responsible for the consequences.
     if (defined $prog) {
         $conf->data->set($util => $prog);
-        $result = 'yes';
-        return undef;
+        $self->set_result('yes');
+        return $self;
     }
 
     $prog = check_progs(['bison -v -y', 'yacc', 'byacc'], $verbose);
@@ -61,8 +61,8 @@ sub runstep
     unless ($prog) {
 
         # fall back to default
-        $result = 'no';
-        return undef;
+        $self->set_result('no');
+        return $self;
     }
 
     if ($conf->options->get('ask')) {
@@ -76,8 +76,8 @@ sub runstep
     if ($ret == -1 and !$conf->options->get('ask')) {
 
         # fall back to default
-        $result = 'no';
-        return undef;
+        $self->set_result('no');
+        return $self;
     }
 
     # if '--version' returns a string assume that this is bison.
@@ -87,7 +87,9 @@ sub runstep
     }
 
     $conf->data->set($util => $prog);
-    $result = 'yes';
+    $self->set_result('yes');
+
+    return $self;
 }
 
 1;

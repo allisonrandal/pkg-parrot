@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: debuginfo.t 10304 2005-12-02 01:32:09Z leo $
+# $Id: debuginfo.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -28,7 +28,7 @@ as well as backtrace tests.
 SKIP:
 {
   skip("getline/setline changes not finished", 3);
-output_is( <<'CODE', <<OUTPUT, "set/getline" );
+pasm_output_is( <<'CODE', <<OUTPUT, "set/getline" );
 	setline 1
 	setline 2
 	getline I0
@@ -44,7 +44,7 @@ CODE
 1
 OUTPUT
 
-output_is( <<'CODE', <<OUTPUT, "set/getpackage" );
+pasm_output_is( <<'CODE', <<OUTPUT, "set/getpackage" );
 	setpackage "foo"
 	setpackage "bar"
 	getpackage S0
@@ -60,7 +60,7 @@ bar
 foo
 OUTPUT
 
-output_is( <<'CODE', <<OUTPUT, "set/getfile" );
+pasm_output_is( <<'CODE', <<OUTPUT, "set/getfile" );
 	setfile "foo"
 	setfile "bar"
 	getfile S0

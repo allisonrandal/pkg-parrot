@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: namespace.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: namespace.t 11345 2006-01-25 14:46:30Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 17;
+use Parrot::Test tests => 18;
 
 =head1 NAME
 
@@ -37,6 +37,21 @@ ok
 bar
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', "verify NameSpace type");
+.sub 'main' :main
+    $P0 = find_global "\0Foo"
+    typeof $S0, $P0
+    print $S0
+    print "\n"
+.end
+
+.namespace ["Foo"]
+.sub 'bar'
+    noop
+.end
+CODE
+NameSpace
+OUTPUT
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::bar");
 .sub 'main' :main
     $P0 = find_global "Foo", "bar"
@@ -72,8 +87,7 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::bar ns");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
-    $P1 = find_global $P0, "bar"
+    $P1 = find_global ["Foo"], "bar"
     print "ok\n"
     $P1()
 .end
@@ -125,9 +139,7 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global Foo::Bar::baz");
 .sub 'main' :main
-    $P0 = find_global "\0Foo"
-    $P1 = find_global $P0, "\0Bar"
-    $P2 = find_global $P1, "baz"
+    $P2 = find_global ["Foo";"Bar"], "baz"
     print "ok\n"
     $P2()
 .end

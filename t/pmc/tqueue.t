@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: tqueue.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: tqueue.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -22,7 +22,7 @@ Tests the thread queue.
 
 =cut
 
-output_is(<<'CODE', <<'OUT', "thread safe queue 1");
+pasm_output_is(<<'CODE', <<'OUT', "thread safe queue 1");
     new P10, .TQueue
     print "ok 1\n"
     set I0, P10

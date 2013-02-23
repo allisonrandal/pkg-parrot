@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: cpu.pm 10709 2005-12-28 00:12:36Z jhoblitt $
+# $Id: cpu.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Runs C<&run_cpu()> in F<config/gen/cpu/${cpuarch}/auto.pm> if it exists.
 package gen::cpu;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -29,7 +29,10 @@ sub runstep
 {
     my ($self, $conf) = @_;
 
-    return if $conf->options->get('miniparrot');
+    if ($conf->options->get('miniparrot')) {
+        $self->set_result('skipped');
+        return $self;
+    }
 
     my $verbose = $conf->options->get('verbose');
 
@@ -43,6 +46,8 @@ sub runstep
     } else {
         print "(no cpu specific hints)" if $verbose;
     }
+
+    return $self;
 }
 
 1;

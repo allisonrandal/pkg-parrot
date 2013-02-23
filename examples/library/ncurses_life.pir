@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: ncurses_life.pir 10739 2005-12-28 18:56:46Z particle $
+# $Id: ncurses_life.pir 11319 2006-01-23 12:26:25Z leo $
 
 =head1 NAME
 
@@ -321,7 +321,7 @@ dumpend:
 	$I0 = COLOR_PAIR(1)
 	
 	# We pass what's returned from COLOR_PAIR straight on
-	WATTRON($I0)
+	WATTRON(STDSCR, $I0)
 
 	CURS_SET(0)			# turn off cursor
 	NODELAY(STDSCR, 1)	# set nodelay mode

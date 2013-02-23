@@ -1,7 +1,7 @@
 /* string.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: stat.h 6674 2004-09-22 21:59:32Z dan $
+ *     $Id: stat.h 11109 2006-01-12 01:19:20Z jonathan $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -38,12 +38,12 @@
 
 /* &end_gen */
 
-PMC *Parrot_stat_file(Parrot_Interp, STRING *);
-PMC *Parrot_stat_info_pmc(Parrot_Interp, STRING *, INTVAL);
-STRING *Parrot_stat_info_string(Parrot_Interp, STRING *, INTVAL);
-INTVAL Parrot_stat_info_intval(Parrot_Interp, STRING *, INTVAL);
-INTVAL Parrot_fstat_info_intval(Parrot_Interp, INTVAL, INTVAL);
-FLOATVAL Parrot_stat_info_floatval(Parrot_Interp, STRING *, INTVAL);
+PARROT_API PMC *Parrot_stat_file(Parrot_Interp, STRING *);
+PARROT_API PMC *Parrot_stat_info_pmc(Parrot_Interp, STRING *, INTVAL);
+PARROT_API STRING *Parrot_stat_info_string(Parrot_Interp, STRING *, INTVAL);
+PARROT_API INTVAL Parrot_stat_info_intval(Parrot_Interp, STRING *, INTVAL);
+PARROT_API INTVAL Parrot_fstat_info_intval(Parrot_Interp, INTVAL, INTVAL);
+PARROT_API FLOATVAL Parrot_stat_info_floatval(Parrot_Interp, STRING *, INTVAL);
 
 #endif /* PARROT_STRING_H_GUARD */
 

@@ -1,16 +1,16 @@
 #
 # Makefile.in
 #
-# $Id: jako.in 10744 2005-12-28 20:54:06Z particle $
+# $Id: jako.in 11115 2006-01-12 04:06:05Z jhoblitt $
 #
 
-PERL = ${perl}
-RM_F = ${rm_f}
+PERL = @perl@
+RM_F = @rm_f@
 
 DIR=languages/jako
 TOOL_DIR=../..
 JAKOC=$(PERL) -I lib jakoc
-INTERP=../../${test_prog}
+INTERP=../../@test_prog@
 ASM=$(INTERP) -a --output-pbc
 
 .SUFFIXES: .jako .pir .pbc

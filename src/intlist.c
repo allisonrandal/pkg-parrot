@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: intlist.c 5751 2004-03-26 18:30:32Z leo $
+$Id: intlist.c 11563 2006-02-16 00:42:07Z jisom $
 
 =head1 NAME
 
@@ -77,7 +77,7 @@ operations are implemented as:
 
 Write element, push a new chunk if necessary.
 
-item C<pop>
+=item C<pop>
 
 Check to see if we have to back up a chunk, read element.
 

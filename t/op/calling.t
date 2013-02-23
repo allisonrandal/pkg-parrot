@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: calling.t 10518 2005-12-14 09:13:31Z leo $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: calling.t 11702 2006-02-22 12:19:59Z leo $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ Tests Parrot calling conventions.
 =cut
 
 
-output_is(<<'CODE', <<'OUTPUT', "set_args - parsing");
+pasm_output_is(<<'CODE', <<'OUTPUT', "set_args - parsing");
     noop
     set_args "(0b10, 0)", P0, I0
     print "Ok 1\n"
@@ -36,7 +36,7 @@ Ok 1
 Ok 2
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "var_args - parsing");
+pasm_output_is(<<'CODE', <<'OUTPUT', "var_args - parsing");
 .pcc_sub main:
     print "Ok 1\n"
     set_args "(0b10, 0)", P0, I0
@@ -60,7 +60,7 @@ Ok 4
 Ok 5
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "call - i, ic");
+pasm_output_is(<<'CODE', <<'OUTPUT', "call - i, ic");
 .pcc_sub main:
     set I16, 77
     set_args "(0b100, 0)", 42, I16
@@ -81,7 +81,7 @@ CODE
 back
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "call - i, ic, return i, ic");
+pasm_output_is(<<'CODE', <<'OUTPUT', "call - i, ic, return i, ic");
 .pcc_sub main:
     set I16, 77
     set_args "(0b100, 0)", 42, I16
@@ -110,7 +110,7 @@ CODE
 back
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "call - i, ic, return i, ic - adjust sig");
+pasm_output_is(<<'CODE', <<'OUTPUT', "call - i, ic, return i, ic - adjust sig");
 .pcc_sub main:
     set I16, 77
     set_args "(0, 0)", 42, I16
@@ -139,7 +139,7 @@ CODE
 back
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "all together now");
+pasm_output_is(<<'CODE', <<'OUTPUT', "all together now");
 .pcc_sub main:
     set I16, 77
     set N16, 2.3
@@ -192,7 +192,7 @@ ok 3
 ok 4
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "flatten arg");
+pasm_output_is(<<'CODE', <<'OUTPUT', "flatten arg");
 .pcc_sub main:
     new P16, .String
     set P16, "ok 1\n"
@@ -224,7 +224,7 @@ ok 5
 back
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "slurpy param");
+pasm_output_is(<<'CODE', <<'OUTPUT', "slurpy param");
 .pcc_sub main:
     new P16, .String
     set P16, "ok 1\n"
@@ -273,7 +273,7 @@ CODE
 hello
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "flatten + slurpy param");
+pasm_output_is(<<'CODE', <<'OUTPUT', "flatten + slurpy param");
 .pcc_sub main:
     new P16, .String
     set P16, "ok 1\n"
@@ -396,7 +396,7 @@ CODE
 hello 42 again 47.11
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "maybe flatten + slurpy param");
+pasm_output_is(<<'CODE', <<'OUTPUT', "maybe flatten + slurpy param");
 .pcc_sub main:
     new P16, .String
     set P16, "ok 1\n"
@@ -469,6 +469,36 @@ CODE
 /too few arguments passed/
 OUTPUT
 
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too many - no getparams", todo => 'no get_params at all');
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+    foo(5)
+.end
+.sub foo
+    print "nada"
+.end
+CODE
+/too many arguments passed/
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too many - force get_params");
+.macro no_params
+    get_params '()'
+.endm
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+    foo(5)
+.end
+.sub foo
+    .no_params
+    print "nada"
+.end
+CODE
+/too many arguments passed/
+OUTPUT
+
 pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too many");
 .sub main :main
     .include "errors.pasm"
@@ -522,7 +552,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "argc mismatch, optional");
     invokecc $P1
 .end
 .sub foo
-    get_params "(0,0x20)", $P0, $P1
+    get_params "(0,0x20,0x40)", $P0, $P1, $I0
     print $P0
     if_null $P1, ok
     print "not "
@@ -534,7 +564,31 @@ hello
 ok
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "get_param later");
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, optional");
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+    .local pmc ar
+    ar = new ResizableIntegerArray
+    push ar, 1
+    push ar, 2
+    push ar, 3
+    push ar, 4
+    foo(ar :flat)
+    print "never\n"
+.end
+.sub foo
+    .param int i
+    .param int j     :optional
+    .param int got_j :opt_flag
+    .param int k     :optional
+    .param int got_k :opt_flag
+.end
+CODE
+/too many arguments passed/
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "get_param later");
 .pcc_sub main:
     set I16, 77
     set_args "(0b100, 0)", 42, I16
@@ -647,7 +701,10 @@ from_foo
 bar_ret
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "get_params twice");
+SKIP: {
+  skip("can't get_params twice any more.", 1);
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "get_params twice");
 .pcc_sub main:
     new P16, .String
     set P16, "ok 1\n"
@@ -686,6 +743,8 @@ ok 3
 back
 OUTPUT
 
+} # end of SKIP.
+
 pir_output_is(<<'CODE', <<'OUTPUT', "empty args");
 .sub main :main
     $P0 = new String
@@ -695,7 +754,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "empty args");
     invokecc $P1
 .end
 .sub foo
-    get_params "(0x20)", $P1
+    get_params "(0x20, 0x40)", $P1, $I0
     if_null $P1, ok
     print "not "
 ok:
@@ -714,7 +773,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "optional args");
     invokecc $P1
 .end
 .sub foo
-    get_params "(0x20)", $P1
+    get_params "(0x20, 0x40)", $P1, $I0
     unless_null $P1, ok
     print "not "
 ok:
@@ -724,30 +783,6 @@ CODE
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "optional, argcX");
-.sub main :main
-    $P0 = new String
-    $P0 = "hello\n"
-    find_name $P1, "foo"
-    set_args "(0,0)", $P0, 10
-    invokecc $P1
-.end
-.sub foo
-    .local int opt_argc
-    get_params "(0,0,0x20,0x20,0x20,0x20,0x40)", $P0, $I0, $P1, $S1, $I1, $N1, opt_argc
-    print $P0
-    if_null $P1, ok
-    print "not "
-ok:
-    print "ok\n"
-    print opt_argc
-    print "\n"
-.end
-CODE
-hello
-ok
-0
-OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "pir uses no ops");
 .sub main :main
@@ -825,20 +860,25 @@ OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "type conversion - native");
 .sub main :main
-    foo(42, "42", 42.20)
+    foo_int(42, "42", 42.20)
+    foo_float(42, "42", 42.20)
+    foo_string(42, "42", 42.20)
 .end
-.sub foo
+.sub foo_int
     get_params "(0,0,0)", $I0, $I1, $I2
     print_item $I0
     print_item $I1
     print_item $I2
     print_newline
-    # yeah fetch args again
+.end
+.sub foo_float
     get_params "(0,0,0)", $N0, $N1, $N2
     print_item $N0
     print_item $N1
     print_item $N2
     print_newline
+.end
+.sub foo_string
     get_params "(0,0,0)", $S0, $S1, $S2
     print_item $S0
     print_item $S1
@@ -859,6 +899,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "type conversion - PIR const");
 .end
 .sub "foo"
     .param string str1 :optional
+    .param int has_s   :opt_flag
     print str1
     print "\n"
 .end
@@ -1548,6 +1589,57 @@ ok 1
 ok 2
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', "set_args via explicit continuation");
+.sub main :main
+    .local string result
+    result = "not ok 2\n"
+    .local pmc cont
+    cont = new .Continuation
+    set_addr cont, cont_dest
+    bar(cont, "ok 1\n")
+    print "oops\n"
+cont_dest:
+    .get_results (result)
+    print result
+.end
+
+.sub bar
+    .param pmc cc
+    .param string s
+    print s
+    cc("ok 2\n")
+.end
+CODE
+ok 1
+ok 2
+OUTPUT
+
+# this is a regression test for a bug in which tail-calling without set_args
+# used the args of the sub.
+pir_output_is(<<'CODE', <<'OUTPUT', "tailcall explicit continuation, no args");
+.sub main :main
+    .local string result
+    result = "not ok 2\n"
+    .local pmc cont
+    cont = new .Continuation
+    set_addr cont, cont_dest
+    bar(cont, "ok 1\n")
+    print "oops\n"
+cont_dest:
+    print "ok 2\n"
+.end
+
+.sub bar
+    .param pmc cc
+    .param string s
+    print s
+    .return cc()
+.end
+CODE
+ok 1
+ok 2
+OUTPUT
+
 pir_output_is(<<'CODE', <<'OUTPUT', "call evaled vtable code");
 .sub main :main
     .local string s
@@ -1571,7 +1663,557 @@ CODE
 17
 OUTPUT
 
+pasm_output_is(<<'CODE', <<'OUTPUT', "named - 1");
+.pcc_sub main:
+    set_args "(0x80, 0, 0x80, 0)", "b", 10, "a", 20
+    get_results "()"
+    find_name P1, "foo"
+    invokecc P1
+    print "ok\n"
+    end
+.pcc_sub foo:
+    get_params "(0x80, 0, 0x80, 0)", "a", I0, "b", I1
+    print_item I1
+    print_item I0
+    print_newline
+    returncc
+CODE
+10 20
+ok
+OUTPUT
 
+pasm_output_is(<<'CODE', <<'OUTPUT', "named - 2 flatten");
+.pcc_sub main:
+    new P0, .Hash
+    set P0['a'], 20
+    set P0['b'], 10
+    set_args "(0x88)", P0            # :flatten :named
+    get_results "()"
+    find_name P1, "foo"
+    invokecc P1
+    print "ok\n"
+    end
+.pcc_sub foo:
+    get_params "(0x80, 0, 0x80, 0)", "a", I0, "b", I1
+    print_item I1
+    print_item I0
+    print_newline
+    returncc
+CODE
+10 20
+ok
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "named - 3 slurpy hash");
+.pcc_sub main:
+    set_args "(0x80, 0, 0x80, 0,0x80, 0)", "a", 10, "b", 20, 'c', 30
+    get_results "()"
+    find_name P1, "foo"
+    invokecc P1
+    print "ok\n"
+    end
+.pcc_sub foo:
+    get_params "(0x80, 0, 0x88)", "a", I0, P0
+    print_item I0
+    elements I1, P0
+    print_item I1
+    typeof S0, P0
+    print_item S0
+    set I2, P0['b']
+    print_item I2
+    set I2, P0['c']
+    print_item I2
+    print_newline
+    returncc
+
+CODE
+10 2 Hash 20 30
+ok
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "named - 4 positional -> named");
+.pcc_sub main:
+    set_args  "(0, 0, 0)", 10, 20, 30
+    get_results "()"
+    find_name P1, "foo"
+    invokecc P1
+    print "ok\n"
+    end
+.pcc_sub foo:
+    get_params "(0x80, 0, 0x80, 0, 0x80, 0)", "a", I0, "b", I1, 'c', I2
+    print_item I0
+    print_item I1
+    print_item I2
+    print_newline
+    returncc
+CODE
+10 20 30
+ok
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "named - 5 slurpy array -> named");
+.pcc_sub main:
+    set_args  "(0, 0, 0, 0x80, 0, 0x80, 0)", 10, 20, 30, 'a', 40, 'b', 50
+    get_results "()"
+    find_name P1, "foo"
+    invokecc P1
+    print "ok\n"
+    end
+.pcc_sub foo:
+    get_params "(0, 0x08, 0x80, 0, 0x80, 0)", I0, P0, "b", I1, "a", I2
+    print_item I0
+    set I0, P0[0]
+    print_item I0
+    set I0, P0[1]
+    print_item I0
+    print_item I1
+    print_item I2
+    print_newline
+    returncc
+CODE
+10 20 30 50 40
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', ":optional followed by :slurpy (empty)");
+.sub main :main
+	_write_thing(3)
+.end
+.sub _write_thing
+	.param pmc arg1 :optional
+	.param pmc rest_arg :slurpy
+	print arg1
+	print ' '
+	print rest_arg
+	print "\n"
+.end
+CODE
+3 0
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', ":optional followed by :slurpy (used)");
+.sub main :main
+	_write_thing(3, 4, 5)
+.end
+.sub _write_thing
+	.param pmc arg1 :optional
+	.param pmc rest_arg :slurpy
+	print arg1
+	print ' '
+	print rest_arg
+	print "\n"
+.end
+CODE
+3 2
+OUTPUT
+
+## Named
+pir_output_is(<<'CODE', <<'OUTPUT', ":named(\"...\") syntax for .param and sub call");
+.sub main :main
+        foo( 10 :named("b"), 20 :named("a"))
+        print "ok\n"
+        end
+.end
+
+.sub foo
+        .param int c :named("a")
+        .param int d :named("b")
+
+        print_item d
+        print_item c
+        print_newline
+        .return()
+.end
+CODE
+10 20
+ok
+OUTPUT
+
+
+## Named
+pir_output_is(<<'CODE', <<'OUTPUT', ":named(\"...\") syntax for the 4 kind");
+.sub main :main
+        ($I0 :named("b"), $I1 :named("a")) = foo( 10 :named("b"), 20 :named("a"))
+        print_item $I0
+        print_item $I1
+        print_newline
+        print "ok\n"
+
+        end
+.end
+
+.sub foo
+        .param int c :named("a")
+        .param int d :named("b")
+
+        print_item d
+        print_item c
+        print_newline
+
+        .return ( 10 :named("a"), 20 :named("b"))
+.end
+CODE
+10 20
+20 10
+ok
+OUTPUT
+
+
+
+## Named
+pir_output_is(<<'CODE', <<'OUTPUT', " 'foo' => 10 syntax for function call");
+.sub main :main
+        foo ('a'=>20,'b'=>10)
+        print "ok\n"
+
+        end
+.end
+
+.sub foo
+        .param int c :named("a")
+        .param int d :named("b")
+
+        print_item d
+        print_item c
+        print_newline
+
+        .return ()
+.end
+CODE
+10 20
+ok
+OUTPUT
+
+
+## Named
+pir_output_is(<<'CODE', <<'OUTPUT', " 'foo' => d syntax for parameters");
+.sub main :main
+        foo ('a'=>20,'b'=>10)
+        print "ok\n"
+
+        end
+.end
+
+.sub foo
+        .param int "b" => d
+        .param int "a" => c
+
+        print_item d
+        print_item c
+        print_newline
+
+        .return ()
+.end
+CODE
+10 20
+ok
+OUTPUT
+
+
+## Named
+pir_output_is(<<'CODE', <<'OUTPUT', " 'foo' => d syntax for target list");
+.sub main :main
+        ("b" => $I0 , "a" => $I1) = foo( "b" => 10 , "a" => 20)
+        print_item $I0
+        print_item $I1
+        print_newline
+        print "ok\n"
+
+        end
+.end
+
+.sub foo
+        .param int "a" => c
+        .param int "b" => d
+
+        print_item d
+        print_item c
+        print_newline
+
+        .return ( 10 :named("a"), 20 :named("b"))
+.end
+CODE
+10 20
+20 10
+ok
+OUTPUT
+
+
+## Named
+pir_output_is(<<'CODE', <<'OUTPUT', " 'foo' => d syntax for return");
+.sub main :main
+        ("b" => $I0 , "a" => $I1) = foo( "b" => 10 , "a" => 20)
+        print_item $I0
+        print_item $I1
+        print_newline
+        print "ok\n"
+
+        end
+.end
+
+.sub foo
+        .param int "a" => c
+        .param int "b" => d
+
+        print_item d
+        print_item c
+        print_newline
+
+        .return ( "a" => 10, "b" => 20 )
+.end
+CODE
+10 20
+20 10
+ok
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "named => pos passing");
+.sub main :main
+        foo( "b" => 10 , "a" => 20)
+        print "never\n"
+        end
+.end
+
+.sub foo
+        .param int a
+        .param int b
+.end
+CODE
+/many named arguments/
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "named optional - set");
+.sub main :main
+        foo ('a'=>20,'b'=>10)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b')
+	.param int c :named('a') :optional
+        print_item d
+        print_item c
+        print_newline
+.end
+CODE
+10 20
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "named optional - set");
+.sub main :main
+        foo ('a'=>20,'b'=>10)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int 'b' => d
+	.param int 'a' => c  :optional
+        print_item d
+        print_item c
+        print_newline
+.end
+CODE
+10 20
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "named optional - set, :opt_flag");
+.sub main :main
+        foo ('a'=>20,'b'=>10)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b') :optional
+	.param int has_d :opt_flag
+	.param int c :named('a') :optional
+	.param int has_c :opt_flag
+        print_item d
+        print_item has_d
+        print_item c
+        print_item has_c
+        print_newline
+.end
+CODE
+10 1 20 1
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "named optional - mix");
+.sub main :main
+        foo ('a'=>20,'b'=>10)
+        foo ('b'=>10)
+        foo ('a'=>20)
+        foo ()
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b') :optional
+	.param int has_d :opt_flag
+	.param int c :named('a') :optional
+	.param int has_c :opt_flag
+        print_item d
+        print_item has_d
+        print_item c
+        print_item has_c
+        print_newline
+.end
+CODE
+10 1 20 1
+10 1 0 0
+0 0 20 1
+0 0 0 0
+ok
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "named flat/slurpy");
+.sub main :main
+        .local pmc h
+        h = new .Hash
+        h['a'] = 20
+        h['b'] = 10
+        foo( h :named :flat )
+        print "ok\n"
+        end
+.end
+
+.sub foo
+        .param pmc h :named :slurpy
+        $I0 = h['a']
+        $I1 = h['b']
+        print_item $I0
+        print_item $I1
+        print_newline
+.end
+CODE
+20 10
+ok
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "param .. 'a' => v :named('foo'");
+.sub main :main
+        foo( "b" => 10, "a" => 20)
+        print "never\n"
+        end
+.end
+
+.sub foo
+        .param int "a" => c :named("foo")
+        .param int "b" => d
+.end
+CODE
+/Named parameter with more than one name/
+OUTPUT
+
+
+pir_output_like(<<'CODE', <<'OUTPUT', "param .. 'a' => v :named('foo'");
+.sub main :main
+        foo( "b" => 10, "a" => 20)
+        print "never\n"
+        end
+.end
+
+.sub foo
+        .param int  c :named("foo") :named("bar")
+        .param int "b" => d
+.end
+CODE
+/Named parameter with more than one name/
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "default value for an unused :optional");
+.sub main :main
+	print 1
+	foo(1)
+	foo(2)
+	foo()
+	print "\n"
+.end
+.sub foo
+	.param int var :optional
+	print var
+.end
+CODE
+1120
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch - missing named");
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+        foo ('b'=>10)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b') 
+	.param int c :named('a') 
+        print_item d
+        print_item c
+        print_newline
+.end
+CODE
+/too few arguments/
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch - missing named");
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+        foo ('a'=>10)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b') 
+	.param int c :named('a') 
+        print_item d
+        print_item c
+        print_newline
+.end
+CODE
+/too few arguments/
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch - too many named");
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+        foo ('a'=>10, 'b'=>20, 'c'=>30)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b') 
+	.param int c :named('a') 
+        print_item d
+        print_item c
+        print_newline
+.end
+CODE
+/too many/
+OUTPUT
+
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch - duplicate named");
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+        foo ('a'=>10, 'b'=>20, 'a'=>30)
+        print "ok\n"
+.end
+
+.sub foo
+        .param int d :named('b') 
+	.param int c :named('a') 
+        print_item d
+        print_item c
+        print_newline
+.end
+CODE
+/duplicate name/
+OUTPUT
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 57; }
+BEGIN { plan tests => 87 }
 

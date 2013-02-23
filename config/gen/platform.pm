@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: platform.pm 10653 2005-12-25 08:55:48Z jhoblitt $
+# $Id: platform.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Moves the various platform-specific files into place.
 package gen::platform;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -228,6 +228,8 @@ HERE
 
     # interface is the same for all platforms
     copy_if_diff("config/gen/platform/platform_interface.h", "include/parrot/platform_interface.h");
+
+    return $self;
 }
 
 1;

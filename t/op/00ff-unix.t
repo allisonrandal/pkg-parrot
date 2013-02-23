@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: 00ff-unix.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: 00ff-unix.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ Tests file formats.
 =cut
 
 
-output_is(<<'CODE', <<'OUT', "fileformat unix");
+pasm_output_is(<<'CODE', <<'OUT', "fileformat unix");
     print "ok\n"
     end
 CODE

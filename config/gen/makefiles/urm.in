@@ -1,10 +1,10 @@
-# $Id: urm.in 10492 2005-12-13 14:44:22Z leo $
+# $Id: urm.in 11115 2006-01-12 04:06:05Z jhoblitt $
 
 # Makefile for languages/urm
 
 # Setup of some commands
-RM_F   = ${rm_f}
-PERL   = ${perl}
+RM_F   = @rm_f@
+PERL   = @perl@
 PARROT = ../../parrot
 
 default: build

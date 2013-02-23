@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: exception.t 10902 2006-01-05 10:24:17Z leo $
+# $Id: exception.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 26;
+use Parrot::Test tests => 29;
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ Tests C<Exception> and C<Exception_Handler> PMCs.
 
 =cut
 
-output_is(<<'CODE', <<'OUTPUT', "push_eh - clear_eh");
+pasm_output_is(<<'CODE', <<'OUTPUT', "push_eh - clear_eh");
     push_eh _handler
     print "ok 1\n"
     clear_eh
@@ -35,7 +35,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "push_eh - throw");
+pasm_output_is(<<'CODE', <<'OUTPUT', "push_eh - throw");
     print "main\n"
     push_eh _handler
     new P30, .Exception
@@ -50,7 +50,7 @@ main
 caught it
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "get_results");
+pasm_output_is(<<'CODE', <<'OUTPUT', "get_results");
     print "main\n"
     push_eh handler
     new P1, .Exception
@@ -74,6 +74,27 @@ main
 caught it
 Exception
 just pining
+OUTPUT
+
+output_is(<<'CODE', <<'OUTPUT', "get_results - be sure registers are ok");
+# see also #38459
+    print "main\n"
+    new P0, .Integer
+    push_eh handler
+    new P1, .Exception
+    set P1[0], "just pining"
+    throw P1
+    print "not reached\n"
+    end
+handler:
+    get_results "(0,0)", P1, S0
+    inc P0
+    print "ok\n"
+    end
+
+CODE
+main
+ok
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', ".get_results() - PIR");
@@ -104,7 +125,7 @@ Exception
 just pining
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "push_eh - throw - message");
+pasm_output_is(<<'CODE', <<'OUTPUT', "push_eh - throw - message");
     print "main\n"
     push_eh _handler
 
@@ -125,7 +146,7 @@ caught it
 something happend
 OUTPUT
 
-output_like(<<'CODE', <<'OUTPUT', "throw - no handler");
+pasm_output_like(<<'CODE', <<'OUTPUT', "throw - no handler");
     new P0, .Exception
     set P0["_message"], "something happend"
     throw P0
@@ -135,7 +156,7 @@ CODE
 /something happend/
 OUTPUT
 
-output_like(<<'CODE', <<'OUTPUT', "throw - no handler, no message");
+pasm_output_like(<<'CODE', <<'OUTPUT', "throw - no handler, no message");
     push_eh _handler
     new P0, .Exception
     clear_eh
@@ -148,7 +169,7 @@ CODE
 /No exception handler and no message/
 OUTPUT
 
-output_like(<<'CODE', <<'OUTPUT', "throw - no handler, no message");
+pasm_output_like(<<'CODE', <<'OUTPUT', "throw - no handler, no message");
     new P0, .Exception
     throw P0
     print "not reached\n"
@@ -157,7 +178,7 @@ CODE
 /No exception handler and no message/
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "2 exception handlers");
+pasm_output_is(<<'CODE', <<'OUTPUT', "2 exception handlers");
     print "main\n"
     push_eh _handler1
     push_eh _handler2
@@ -185,7 +206,7 @@ caught it in 2
 something happend
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "2 exception handlers, throw next");
+pasm_output_is(<<'CODE', <<'OUTPUT', "2 exception handlers, throw next");
     print "main\n"
     push_eh _handler1
     push_eh _handler2
@@ -216,7 +237,7 @@ caught it in 1
 something happend
 OUTPUT
 
-output_is(<<'CODE', <<OUT, "die");
+pasm_output_is(<<'CODE', <<OUT, "die");
     push_eh _handler
     die 3, 100
     print "not reached\n"
@@ -228,7 +249,7 @@ CODE
 caught it
 OUT
 
-output_is(<<'CODE', <<OUT, "die, error, severity");
+pasm_output_is(<<'CODE', <<OUT, "die, error, severity");
     push_eh _handler
     die 3, 100
     print "not reached\n"
@@ -251,7 +272,7 @@ error 100
 severity 3
 OUT
 
-output_like(<<'CODE', <<OUT, "die - no handler");
+pasm_output_like(<<'CODE', <<OUT, "die - no handler");
     die 3, 100
     print "not reached\n"
     end
@@ -263,14 +284,14 @@ CODE
 OUT
 
 
-output_is(<<'CODE', '', "exit exception");
+pasm_output_is(<<'CODE', '', "exit exception");
     noop
     exit 0
     print "not reached\n"
     end
 CODE
 
-output_is(<<'CODE', <<'OUTPUT', "push_eh - throw");
+pasm_output_is(<<'CODE', <<'OUTPUT', "push_eh - throw");
     print "main\n"
     push_eh handler
     print "ok\n"
@@ -288,7 +309,7 @@ caught it
 OUTPUT
 1;
 
-output_is(<<'CODE', <<'OUTPUT', "pushmark");
+pasm_output_is(<<'CODE', <<'OUTPUT', "pushmark");
     pushmark 10
     print "ok 1\n"
     popmark 10
@@ -299,7 +320,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "pushmark nested");
+pasm_output_is(<<'CODE', <<'OUTPUT', "pushmark nested");
     pushmark 10
     pushmark 11
     print "ok 1\n"
@@ -312,7 +333,7 @@ ok 1
 ok 2
 OUTPUT
 
-output_like(<<'CODE', <<'OUTPUT', "pushmark - pop wrong one");
+pasm_output_like(<<'CODE', <<'OUTPUT', "pushmark - pop wrong one");
     pushmark 10
     print "ok 1\n"
     popmark 500
@@ -322,7 +343,7 @@ CODE
 /mark not found/
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "pushaction");
+pasm_output_is(<<'CODE', <<'OUTPUT', "pushaction");
     pushmark 10
     print "ok 1\n"
     .const .Sub P10 = "action"
@@ -344,7 +365,7 @@ in action I5 = 0
 ok 3
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "pushaction, throw");
+pasm_output_is(<<'CODE', <<'OUTPUT', "pushaction, throw");
     push_eh handler
     print "ok 1\n"
     .const .Sub P10 = "action"
@@ -541,7 +562,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'cleanup global:  throw');
 	print "skipped.\n"
 eh:
 	.local pmc exception
-	.get_results (exception)
+	.get_results (exception, $S0)
 	print "Error: "
 	print exception
 	print "\n"
@@ -591,3 +612,44 @@ Innerer value
 Error: something happened
 Outer value
 OUTPUT
+
+
+pir_output_like(<<'CODE', <<'OUTPUT', 'clear_eh out of context (1)');
+.sub main :main
+	pushmark 1
+	clear_eh
+	print "no exceptions.\n"
+.end
+CODE
+/No exception to pop./
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'clear_eh out of context (2)');
+.sub main :main
+	.local pmc outer, cont
+	push_eh handler
+	test1()
+	print "skipped.\n"
+	goto done
+handler:
+	.local pmc exception
+	.get_results (exception, $S0)
+	print "Error: "
+	print $S0
+	print "\n"
+done:
+	print "done.\n"
+.end
+.sub test1
+	.local pmc exit
+	print "[in test1]\n"
+	## clear_eh is illegal here, and signals an exception.
+	clear_eh
+	print "[cleared]\n"
+.end
+CODE
+[in test1]
+Error: No exception to pop.
+done.
+OUTPUT
+

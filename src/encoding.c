@@ -1,14 +1,18 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: encoding.c 9875 2005-11-10 09:54:28Z leo $
+$Id: encoding.c 11563 2006-02-16 00:42:07Z jisom $
 
 =head1 NAME
 
 src/encoding.c - global encoding functions
 
-head1 DESCRIPTION
+=head1 DESCRIPTION
 
 These are parrot's generic encoding handling functions
+
+=over 4
+
+=cut
 
 */
 
@@ -99,6 +103,8 @@ Return the number of the encoding or -1 if not found.
 =item C<INTVAL Parrot_encoding_number_of_str(Interp *, const STRING *src)>
 
 Return the number of the encoding of the given string or -1 if not found.
+
+=cut
 
 */
 

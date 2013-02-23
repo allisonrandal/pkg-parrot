@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: embed.c 10656 2005-12-25 15:00:46Z leo $
+$Id: embed.c 11698 2006-02-21 19:33:43Z leo $
 
 =head1 NAME
 
@@ -459,12 +459,11 @@ setup_argv(Interp *interpreter, int argc, char ** argv)
     }
 
     /* XXX @ARGS should propably be a ResizableStringArray */
-    userargv = pmc_new_noinit(interpreter, enum_class_SArray);
+    userargv = pmc_new_noinit(interpreter, enum_class_ResizableStringArray);
     /* immediately anchor pmc to root set */
     VTABLE_set_pmc_keyed_int(interpreter, interpreter->iglobals,
             (INTVAL)IGLOBALS_ARGV_LIST, userargv);
     VTABLE_init(interpreter, userargv);
-    VTABLE_set_integer_native(interpreter, userargv, argc);
 
     for (i = 0; i < argc; i++) {
         /* Run through argv, adding everything to @ARGS. */
@@ -748,9 +747,11 @@ Parrot_runcode(Interp *interpreter, int argc, char *argv[])
                 PIO_eprintf(interpreter, "Fast core");
                 break;
             case PARROT_SWITCH_CORE:
+            case PARROT_SWITCH_JIT_CORE:
                 PIO_eprintf(interpreter, "Switch core");
                 break;
             case PARROT_CGP_CORE:
+            case PARROT_CGP_JIT_CORE:
                 PIO_eprintf(interpreter, "CGP core");
                 break;
             case PARROT_CGOTO_CORE:
@@ -803,39 +804,6 @@ Parrot_runcode(Interp *interpreter, int argc, char *argv[])
 
 /*
 
-=item C<static char *argv_join(char **argv)>
-
-XXX Doesn't handle arguments with spaces.
-
-=cut
-
-*/
-
-static char*
-argv_join(char ** argv)
-{
-    char* command;
-    char* p;
-    int space = 0;
-    int i;
-
-    for (i = 0; argv[i]; i++)
-        space += strlen(argv[i]) + 1;
-
-    command = (char*) mem_sys_allocate(space == 0 ? 1 : space);
-    p = command;
-    for (i = 0; argv[i]; i++) {
-        strcpy(p, argv[i]);
-        p += strlen(argv[i]);
-        *(p++) = ' ';
-    }
-    if (p > command) p--;
-    *p = '\0';
-    return command;
-}
-
-/*
-
 =item C<void
 Parrot_debug(Interp *interpreter, int argc, char **argv)>
 
@@ -845,25 +813,31 @@ Runs the interpreter's bytecode in debugging mode.
 
 */
 
-void
-Parrot_debug(Interp *interpreter, int argc, char ** argv)
+opcode_t *
+Parrot_debug(Interp *debugger, opcode_t * pc)
 {
     PDB_t *pdb;
     const char *command;
+    Interp *interpreter;
 
-    pdb = (PDB_t *)mem_sys_allocate_zeroed(sizeof(PDB_t));
+    pdb = debugger->pdb;
 
+    pdb->cur_opcode = pc;
+
+    PDB_init(debugger, NULL);
+    /* disassemble needs this for now */
+    interpreter = pdb->debugee;
     interpreter->pdb = pdb;
-    pdb->cur_opcode = interpreter->code->base.data;
+    debugger->lo_var_ptr = interpreter->lo_var_ptr;
+    
+    PDB_disassemble(interpreter, NULL);
 
-    /* Parrot_setup_argv(interpreter, argc, argv); */
-    PDB_init(interpreter, argv_join(argv));
-    PDB_disassemble(interpreter,NULL);
     while (!(pdb->state & PDB_EXIT)) {
-        PDB_get_command(interpreter);
+        PDB_get_command(debugger);
         command = pdb->cur_command;
-        PDB_run_command(interpreter, command);
+        PDB_run_command(debugger, command);
     }
+    return NULL;
 }
 
 /*

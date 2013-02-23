@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: encoding.pm 10637 2005-12-24 11:00:22Z jhoblitt $
+# $Id: encoding.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Asks the user to select which encoding files to include.
 package inter::encoding;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -48,7 +48,7 @@ END
         }
     }
 
-    # names of class files for src/classes/Makefile
+    # names of class files for src/pmc/Makefile
     (my $TEMP_encoding_o = $encoding_list) =~ s/\.c/\$(O)/g;
 
     my $TEMP_encoding_build = <<"E_NOTE";
@@ -75,6 +75,8 @@ END
         TEMP_encoding_o     => $TEMP_encoding_o,
         TEMP_encoding_build => $TEMP_encoding_build,
     );
+
+    return $self;
 }
 
 1;

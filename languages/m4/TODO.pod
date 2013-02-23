@@ -1,4 +1,4 @@
-# $Id: TODO.pod 9406 2005-10-08 11:55:03Z bernhard $
+# $Id: TODO.pod 11171 2006-01-14 11:06:02Z bernhard $
 
 =head1 Documentation
 
@@ -25,14 +25,6 @@
 =item Add tests for new features
 
 =item Add test for dumping frozen file
-
-=back
-
-=head1 Perl5
-
-=over
-
-=item Test with Perl 5.005
 
 =back
 

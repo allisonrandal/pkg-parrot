@@ -4,7 +4,7 @@ punie -- A compiler for Perl 1
 
 =head1 SYNOPSIS
 
-  $ ../../parrot punie.pir script.p1
+  $ ./parrot languages/punie/punie.pir script.p1
 
 =head1 DESCRIPTION
 
@@ -17,17 +17,26 @@ compiler, see:
 
 http://svn.lohutok.net/nam/trunk/parrot/docs/compiler_tools.pod
 
-Punie currently only parses and compiles a series of statements to print
-integers or double-quoted strings, in the form of:
+So far, Punie handles constants (strings, integers, floats), print
+statements, conditionals, do blocks, comma lists, and some basic math
+and logic ops.
 
   print 1;
-  print 45;
+  print 45.5;
   print "ok 1\n";
+  print 1 + 2, "\n", 2 + 3, "\n";
+  unless (1 - 1) {
+    print "a sum of nothing\n";
+  }
 
 =cut
 
+.include "errors.pasm"
+
 .sub _main :main
     .param pmc args
+
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
 
     load_bytecode "languages/punie/lib/PunieGrammar.pbc"
 
@@ -73,6 +82,7 @@ integers or double-quoted strings, in the form of:
 
     # Compile the abstract syntax tree down to an opcode syntax tree
     load_bytecode "languages/punie/lib/POST.pir"
+    load_bytecode 'languages/punie/lib/PunieOpLookup.pir'
     .local string ost_tg_source
     ost_tg_source = _slurp_file('languages/punie/lib/past2post.g')
     .local pmc ostgrammar
@@ -114,7 +124,7 @@ integers or double-quoted strings, in the form of:
     end
 
   err_match_fail:
-    print "parse failed"
+    print "parse failed\n"
     goto cleanup
 
   err_no_ast:

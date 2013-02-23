@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: objects.t 10826 2005-12-31 22:40:24Z ambs $
+# $Id: objects.t 11587 2006-02-16 18:07:47Z particle $
 
 use strict;
 use warnings;
@@ -151,7 +151,7 @@ pir_output_is(<<'CODE', <<'OUT', "initializer");
 .end
 
 .namespace [""]	# main again
-.sub _sub method
+.sub _sub
     print "in sub\n"
 .end
 CODE

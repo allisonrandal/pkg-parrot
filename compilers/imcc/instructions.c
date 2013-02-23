@@ -1,4 +1,4 @@
-/* $Id: instructions.c 10396 2005-12-07 21:08:05Z particle $ */
+/* $Id: instructions.c 11479 2006-02-09 11:15:30Z leo $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -208,13 +208,14 @@ instruction_reads(Instruction* ins, SymReg* r) {
     }
     /* a sub call reads the previous args */
     if (ins->type & ITPCCSUB) {
-        assert(ins->r[0]->pcc_sub);
-        for (i = 0; i < ins->r[0]->pcc_sub->nargs; ++i) {
-            if (r == ins->r[0]->pcc_sub->args[i])
+        while (ins && ins->opnum != PARROT_OP_set_args_pc)
+            ins = ins->prev;
+        if (!ins)
+            return 0;
+        for (i = 0; i < ins->n_r; i++) {
+            if (ins->r[i] == r)
                 return 1;
         }
-
-
     }
     return 0;
 }
@@ -228,8 +229,43 @@ instruction_writes(Instruction* ins, SymReg* r) {
 
     f = ins->flags;
 
-    if (ins->opnum == PARROT_OP_get_params_pc ||
-            ins->opnum == PARROT_OP_get_results_pc) {
+    /* 
+     * a get_results opcode is before the actual sub call
+     * but for the register allocator, the effect matters, thus
+     * postpone the effect after the invoke
+     */
+    if (ins->opnum == PARROT_OP_get_results_pc) {
+        /* but only, if it isn't the get_results opcode of
+         * an exception_handler, which doesn't have
+         * a call next
+         */
+        if (ins->next && (ins->next->type & ITPCCSUB)) 
+            return 0;
+        for (i = 0; i < ins->n_r; i++) {
+            if (ins->r[i] == r)
+                return 1;
+        }
+        return 0;
+    }
+    else if (ins->type & ITPCCSUB) {
+        ins = ins->prev;
+        /* can't used pcc_sub->ret due to bug #38406
+         * it seems that all sub SymRegs are shared
+         * and point to the most recemt pcc_sub
+         * structure
+         */
+        while (ins && ins->opnum != PARROT_OP_get_results_pc)
+            ins = ins->prev;
+        if (!ins)
+            return 0;
+        for (i = 0; i < ins->n_r; i++) {
+            if (ins->r[i] == r)
+                return 1;
+        }
+        return 0;
+    }
+
+    if (ins->opnum == PARROT_OP_get_params_pc) {
         for (i = 0; i < ins->n_r; i++) {
             if (ins->r[i] == r)
                 return 1;

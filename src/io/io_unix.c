@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_unix.c 10462 2005-12-12 17:00:32Z particle $
+$Id: io_unix.c 11698 2006-02-21 19:33:43Z leo $
 
 =head1 NAME
 
@@ -294,9 +294,6 @@ PIO_unix_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)
 {
     ParrotIO *io;
     INTVAL oflags, mode;
-#  ifdef PARROT_HAS_HEADER_FCNTL
-    INTVAL rflags;
-#  endif
 
     UNUSED(layer);
 
@@ -304,19 +301,28 @@ PIO_unix_fdopen(theINTERP, ParrotIOLayer *layer, PIOHANDLE fd, INTVAL flags)
 
     oflags = flags_to_unix(flags);
 
-        /* FIXME - Check file handle flags, validity */
+#if 0
+    /* XXX the fcntl fails (-1, errno=0) with
+     * ./parrot -tf - < foo.pir
+     */
+
+    /* FIXME - Check file handle flags, validity */
 #  ifdef PARROT_HAS_HEADER_FCNTL
+    {
+        INTVAL rflags;
         /* Get descriptor flags */
         if ((rflags = fcntl(fd, F_GETFL, 0)) >= 0) {
             UNUSED(rflags);
-        /*int accmode = rflags & O_ACCMODE; */
-        /* Check other flags (APPEND, ASYNC, etc) */
-    }
-    else {
-        /* Probably invalid descriptor */
-        return NULL;
+            /*int accmode = rflags & O_ACCMODE; */
+            /* Check other flags (APPEND, ASYNC, etc) */
+        }
+        else {
+            /* Probably invalid descriptor */
+            return NULL;
+        }
     }
 #  endif
+#endif
 
     if (PIO_unix_isatty(fd))
         flags |= PIO_F_CONSOLE;

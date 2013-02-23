@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: key.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: key.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -22,7 +22,7 @@ Tests the C<Key> PMC.
 
 =cut
 
-output_is(<<'CODE', <<'OUT', 'traverse key chain');
+pasm_output_is(<<'CODE', <<'OUT', 'traverse key chain');
     new P0, .Key
     set P0, "1"
     new P1, .Key

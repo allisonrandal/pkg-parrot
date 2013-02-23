@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: subs.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: subs.t 11402 2006-02-02 14:45:05Z leo $
 
 use strict;
 use warnings;
@@ -72,9 +72,9 @@ Hello from main
 END_EXPECTED
 
     'single_retval.pir'     =>  << 'END_EXPECTED',
-7 10 nine 10
+7 8 nine 10
 return: 10
-7 10 nine 10
+7 8 nine 10
 return: 10
 END_EXPECTED
 

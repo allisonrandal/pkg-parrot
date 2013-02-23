@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: parrotlib.t 10751 2005-12-28 22:47:30Z particle $
+# $Id: parrotlib.t 11578 2006-02-16 09:31:34Z chromatic $
 
 use strict;
 use warnings;
@@ -101,7 +101,7 @@ END_OUT
 pir_output_is( << "END_CODE", << 'END_OUT', 'dynext_location, non-existent' );
 $template_top
   location_sub = find_global "_parrotlib", "imcc_compile_file_location"
-  location     = location_sub( 'nonexistent', '$PConfig{load_ext}' )
+  location     = location_sub( 'nonexistent' )
 $template_bottom
 END_CODE
 

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: intro.pod 10340 2005-12-04 06:58:31Z chromatic $
+# $Id: intro.pod 11226 2006-01-17 19:09:59Z bernhard $
 
 =head1 NAME
 
@@ -152,7 +152,7 @@ will look something like this:
 
   C:\Perl\bin\perl.exe t\harness --gc-debug --running-make-test
     t\library\*.t  t\op\*.t  t\pmc\*.t  t\run\*.t  t\native_pbc\*.t
-    imcc\t\*\*.t  t\dynclass\*.t  t\p6rules\*.t t\src\*.t t\perl\*.t
+    imcc\t\*\*.t  t\dynpmc\*.t  t\p6rules\*.t t\src\*.t t\perl\*.t
   t\library\dumper...............ok
   t\library\getopt_long..........ok
   ...

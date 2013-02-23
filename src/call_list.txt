@@ -1,5 +1,5 @@
 # Copyright: 2002-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: call_list.txt 10851 2006-01-03 00:52:25Z leo $
+# $Id: call_list.txt 11622 2006-02-17 11:39:36Z leo $
 
 # Function signature declarations for Parrot Native Call Interface.
 # The first alphanumeric is the type of the return value,
@@ -55,6 +55,7 @@ d                # t/pmc/nci.t
 d	d
 d	JOd      # Parrot builtins
 I       JOS
+S       JOS      # ParrotIO.readline
 d	v
 I	JI	 # Parrot_is_char_*
 v       JOSP     # String.trans
@@ -235,6 +236,10 @@ P	JO
 S	JO
 i       P
 
+# Needed by integer.pmc
+S	JOI
+
+
 # the following are use by t/pmc/nci.t
 i	sc
 s	sc
@@ -332,7 +337,9 @@ S      JOi
 v      JOi
 I      JO
 N      JO
+v      JON
+P      JOi
+v      JOI
 
-
-
-
+# Make lua stop panic'ing.
+P      JOI

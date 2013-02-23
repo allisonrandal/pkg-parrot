@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Docs.pm 5833 2004-04-09 11:03:12Z mikescott $
+# $Id: Docs.pm 11231 2006-01-17 20:39:30Z bernhard $
 
 =head1 NAME
 
@@ -55,7 +55,7 @@ sub new
 			$self->new_item('', 'docs/strings.pod'),
 			$self->new_item('', 'docs/memory_internals.pod'),
 			$self->new_item('', 'docs/parrotbyte.pod'),
-			$self->new_item('', 'docs/packfile-c.pod'),
+			$self->new_item('', 'docs/parrotbyte.pod'),
 			$self->new_item('', 'docs/jit.pod'),
 			$self->new_item('', 'docs/native_exec.pod'),
 			$self->new_item('', 'docs/running.pod'),

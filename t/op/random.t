@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: random.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: random.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -24,7 +24,7 @@ Tests random number generation
 =cut
 
 
-output_is(<<'CODE', <<OUT, "generate random int");
+pasm_output_is(<<'CODE', <<OUT, "generate random int");
     new P0, .Random
     set I0, P0
     print "Called random just fine\n"

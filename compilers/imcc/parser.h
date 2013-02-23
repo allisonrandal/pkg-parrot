@@ -1,3 +1,9 @@
+/* 
+ * XXX - We need a description of the file here
+ *
+ * $Id: parser.h 11473 2006-02-08 15:12:31Z jonathan $
+ */
+
 #if !defined(PARROT_IMCC_PARSER_H_GUARD)
 #define PARROT_IMCC_PARSER_H_GUARD
 
@@ -9,6 +15,7 @@
 
 typedef struct _IdList {
     char* id;
+    int unique_reg;
     struct _IdList*  next;
 } IdList;
 
@@ -19,17 +26,17 @@ EXTERN int expect_pasm;
 EXTERN int is_def;
 
 /* bison */
-EXTERN int yydebug;
+PARROT_API EXTERN int yydebug;
 
 #define KEY_BIT(argnum) (1 << (argnum))
 
 
 SymReg * macro(Interp *, char *name);
-int yyerror(char *);
-int yyparse(void *param);
-int yylex(YYSTYPE *valp, Interp *);
+PARROT_API int yyerror(Interp*, char *);
+PARROT_API int yyparse(void *param);
+PARROT_API int yylex(YYSTYPE *valp, Interp *);
 void op_fullname(char * dest, const char * name, SymReg * args[], int, int);
-void open_comp_unit(void);
+PARROT_API void open_comp_unit(void);
 void register_compilers(Parrot_Interp);
 void *imcc_eval_pasm(Parrot_Interp, const char *s);
 void *imcc_eval_pir (Parrot_Interp, const char *s);

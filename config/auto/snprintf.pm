@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: snprintf.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: snprintf.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Tests if snprintf is present and if it's C99 compliant.
 package auto::snprintf;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -42,6 +42,8 @@ sub runstep
         $conf->data->set(HAS_OLD_SNPRINTF => 1);
     }
     print " ($res) " if $conf->options->get('verbose');
+
+    return $self;
 }
 
 1;

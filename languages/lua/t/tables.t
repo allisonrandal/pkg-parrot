@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: tables.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: tables.t 11675 2006-02-20 08:00:49Z fperrad $
 
 =head1 NAME
 
@@ -20,7 +20,8 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 2;
+use Parrot::Test tests => 7;
+use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', '' );
 a = {}
@@ -50,5 +51,73 @@ b = nil
 CODE
 10
 20
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+a = {}
+for i=1,1000 do a[i] = i*2 end
+print(a[9])
+a["x"] = 10
+print(a["x"])
+print(a["y"])
+CODE
+18
+10
+nil
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+a = {}
+x = "y"
+a[x] = 10
+print(a[x])
+print(a.x)
+print(a.y)
+CODE
+10
+nil
+10
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+i = 10; j = "10"; k = "+10"
+a = {}
+a[i] = "one value"
+a[j] = "another value"
+a[k] = "yet another value"
+print(a[j])
+print(a[k])
+print(a[tonumber(j)])
+print(a[tonumber(k)])
+CODE
+another value
+yet another value
+one value
+one value
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+t = { {"a","b","c"}, 10 }
+print(t[2])
+print(t[1][3])
+t[1][1] = "A"
+print(table.concat(t[1],","))
+CODE
+10
+c
+A,b,c
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+local t
+t = { {"a","b","c"}, 10 }
+print(t[2])
+print(t[1][3])
+t[1][1] = "A"
+print(table.concat(t[1],","))
+CODE
+10
+c
+A,b,c
 OUT
 

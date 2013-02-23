@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: m4.pm 10933 2006-01-06 01:43:24Z particle $
+# $Id: m4.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ Currently GNU m4 is only used for doublechecking Parrot m4.
 package auto::m4;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -51,7 +51,9 @@ sub runstep
     }
 
     $conf->data->set(has_gnu_m4 => $has_gnu_m4);
-    $result = $has_gnu_m4 ? 'yes' : 'no';
+    $self->set_result($has_gnu_m4 ? 'yes' : 'no');
+
+    return $self;
 }
 
 1;

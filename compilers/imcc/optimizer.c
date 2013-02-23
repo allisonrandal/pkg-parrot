@@ -486,6 +486,8 @@ constant_propagation(Interp *interpreter, IMC_Unit * unit)
     int any = 0;
     int found;
 
+    o = c = NULL; /* silence compiler uninit warning */
+
     IMCC_info(interpreter, 2, "\tconstant_propagation\n");
     for (ins = unit->instructions; ins; ins = ins->next) {
         found = 0;
@@ -647,7 +649,13 @@ eval_ins(Interp *interpreter, char *op, size_t ops, SymReg **r)
     }
 
     /* eval the opcode */
+    new_internal_exception(interpreter);
+    if (setjmp(interpreter->exceptions->destination)) {
+        fprintf(stderr, "eval_ins: op '%s' failed\n", op);
+        handle_exception(interpreter);
+    }
     pc = (interpreter->op_func_table[opnum]) (eval, interpreter);
+    free_internal_exception(interpreter);
     /* the returned pc is either incremented by op_count or is eval,
      * as the branch offset is 0 - return true if it branched
      */
@@ -692,7 +700,7 @@ IMCC_subst_constants(Interp *interpreter, IMC_Unit * unit, char *name,
 
     size_t i;
     char b[128], fmt[64], op[20];
-    const char *debug_fmt;
+    const char *debug_fmt = NULL;   /* gcc -O uninit warn */
     int found, branched;
     parrot_context_t *ctx;
     INTVAL regs_used[4] = {3,3,3,3};

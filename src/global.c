@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: global.c 10364 2005-12-05 23:47:45Z leo $
+$Id: global.c 11345 2006-01-25 14:46:30Z leo $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ Return NULL if the global isn't found or the global.
 Parrot_get_global(Parrot_Interp interpreter, STRING *class, STRING *globalname)>
 
 If the global exists, return it. If not either throw an exception or return an
-C<Undef> depending on the interpreter's error settings.
+C<Null> PMC depending on the interpreter's error settings.
 
 =cut
 
@@ -141,7 +141,7 @@ Parrot_find_global_p(Parrot_Interp interpreter, PMC *ns, STRING *name)
             }
             return Parrot_find_global_p(interpreter, stash, name);
             /* fall through */
-        case enum_class_Hash:
+        case enum_class_NameSpace:
             if (!VTABLE_exists_keyed_str(interpreter, ns, name)) {
                 return NULL;
             }
@@ -162,7 +162,7 @@ Parrot_get_global(Parrot_Interp interpreter, STRING *class,
                 "Global '%Ss' not found",
                 name);
     }
-    return pmc_new(interpreter, enum_class_Undef);
+    return PMCNULL;
 }
 
 PMC *
@@ -176,7 +176,7 @@ Parrot_get_global_p(Parrot_Interp interpreter, PMC *ns, STRING *name)
                 "Global '%Ss' not found",
                 name);
     }
-    return pmc_new(interpreter, enum_class_Undef);
+    return PMCNULL;
 }
 
 /*
@@ -184,7 +184,7 @@ Parrot_get_global_p(Parrot_Interp interpreter, PMC *ns, STRING *name)
 =item C<PMC* Parrot_get_name(Interp* interpreter, STRING *name)>
 
 Find the name in lexicals, globals, and builtins. If the name
-isn't found throw and exception or return Undef, depending on
+isn't found throw and exception or return the Null PMC, depending on
 the interpreter's errors setting.
 
 =cut
@@ -232,7 +232,7 @@ Parrot_get_name(Interp* interpreter, STRING *name)
                 "Name '%Ss' not found", name);
     }
 
-    return pmc_new(interpreter, enum_class_Undef);
+    return PMCNULL;
 }
 
 /*
@@ -263,7 +263,7 @@ Parrot_global_namespace(Interp *interpreter, PMC *globals, STRING *class)
             string_from_cstring(interpreter, "\0", 1),
             class, 0);
     if (!VTABLE_exists_keyed_str(interpreter, globals, ns_name)) {
-        stash = pmc_new(interpreter, enum_class_Hash);
+        stash = pmc_new(interpreter, enum_class_NameSpace);
         VTABLE_set_pmc_keyed_str(interpreter, globals, ns_name, stash);
     }
     else {

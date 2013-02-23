@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pcc.t 10826 2005-12-31 22:40:24Z ambs $
+# $Id: pcc.t 11591 2006-02-16 18:56:15Z leo $
 
 use strict;
 use warnings;
@@ -180,6 +180,7 @@ loop:
     print "\n"
     goto loop
  after_loop:
+  .get_results ()  
   print "done in main\n"
 .end
 

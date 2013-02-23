@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: mmd.t 10754 2005-12-29 01:19:55Z particle $
+# $Id: mmd.t 11644 2006-02-18 15:36:46Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 30;
+use Parrot::Test tests => 32;
 
 =head1 NAME
 
@@ -275,7 +275,7 @@ CODE
 42
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "PASM INTVAL - new result");
+pasm_output_is(<<'CODE', <<'OUTPUT', "PASM INTVAL - new result");
 .include "pmctypes.pasm"
 .include "datatypes.pasm"
 .include "mmd.pasm"
@@ -302,7 +302,7 @@ ok
 1
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "PASM INTVAL - existing result");
+pasm_output_is(<<'CODE', <<'OUTPUT', "PASM INTVAL - existing result");
 .include "pmctypes.pasm"
 .include "datatypes.pasm"
 .include "mmd.pasm"
@@ -329,7 +329,7 @@ ok
 1
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "PASM INTVAL - mixed");
+pasm_output_is(<<'CODE', <<'OUTPUT', "PASM INTVAL - mixed");
 .include "pmctypes.pasm"
 .include "datatypes.pasm"
 .include "mmd.pasm"
@@ -387,13 +387,13 @@ pir_output_is(<<'CODE', <<'OUT', "first dynamic MMD call");
     foo(b, f)
 .end
 
-.sub foo method, :multi(Foo, Bar)
+.sub foo :multi(Foo, Bar)
     .param pmc x
     .param pmc y
     print "  Foo::foo\n"
 .end
 
-.sub foo method, :multi(Bar, Foo)
+.sub foo :multi(Bar, Foo)
     .param pmc x
     .param pmc y
     print "  Bar::foo\n"
@@ -487,6 +487,45 @@ pir_output_is(<<'CODE', <<'OUT', "MMD on PMC types");
 .end
 
 .sub p :multi(PerlString)
+    .param pmc p
+    print "PerlSt "
+    print p
+.end
+CODE
+String ok 1
+PerlSt ok 2
+PerlSt ok 3
+String ok 4
+OUT
+
+pir_output_is(<<'CODE', <<'OUT', "MMD on PMC types quoted");
+.namespace ["main"]
+.sub main :main
+    $P0 = new String
+    $P0 = "ok 1\n"
+    $P1 = new PerlString
+    $P1 = "ok 2\n"
+    p($P0)
+    p($P1)
+    $P0 = subclass "PerlString", "Xstring"
+    $P0 = new "Xstring"
+    $P0 = "ok 3\n"
+    $P1 = subclass "String", "Ystring"
+    $P1 = new "Ystring"
+    $P1 = "ok 4\n"
+    p($P0)
+    p($P1)
+.end
+
+.namespace [""]
+
+.sub p :multi("String")
+    .param pmc p
+    print "String "
+    print p
+.end
+
+.sub p :multi("PerlString")
     .param pmc p
     print "PerlSt "
     print p
@@ -1018,4 +1057,23 @@ pir_output_is(<<'CODE', <<'OUTPUT', "multisub vs find_name");
 .end
 CODE
 MultiSub
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "multisub w void");
+.sub main :main
+    foo('xx')
+    foo()
+    foo('xx')
+.end
+.sub foo :multi(string)
+    .param pmc x
+    print "foo string\n"
+.end
+.sub foo :multi()
+    print "foo\n"
+.end
+CODE
+foo string
+foo
+foo string
 OUTPUT

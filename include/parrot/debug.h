@@ -2,7 +2,7 @@
  * debug.h
  *
  * CVS Info
- *    $Id: debug.h 8689 2005-07-24 01:06:57Z coke $
+ *    $Id: debug.h 11588 2006-02-16 18:24:58Z leo $
  * Overview:
  *    Parrot debugger header files
  * History:
@@ -149,6 +149,7 @@ typedef struct PDB_breakpoint {
  *  last_command:       Last command executed.
  *  cur_opcode:         Current opcode.
  *  state:              The status of the program being debugged.
+ *  debugee:            The interpreter we are debugging
  */
 
 typedef struct PDB {
@@ -160,6 +161,7 @@ typedef struct PDB {
     char                    *last_command;
     opcode_t                *cur_opcode;
     int                     state;
+    Interp                  *debugee;  
 } PDB_t;
 
 void PDB_run_command(Interp *interpreter, const char *command);

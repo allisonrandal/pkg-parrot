@@ -1,3 +1,4 @@
-# $Id: README 5151 2004-01-26 10:14:43Z leo $
+# $Id: README 11544 2006-02-14 21:00:57Z bernhard $
 
 frozen2yaml    - Dumps the contents of a frozen state file as YAML.
+scrutinize.pl  - Test with Perl::Critic

@@ -1,7 +1,7 @@
 /* misc.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: misc.h 9734 2005-11-03 08:34:12Z leo $
+ *     $Id: misc.h 11154 2006-01-13 20:15:01Z jonathan $
  *  Overview:
  *     Miscellaneous functions, mainly the Parrot_sprintf family
  *  Data Structure and Algorithms:
@@ -29,45 +29,45 @@
 INTVAL   intval_mod(INTVAL i2, INTVAL i3);
 FLOATVAL floatval_mod(FLOATVAL n2, FLOATVAL n3);
 
-FLOATVAL Parrot_float_rand(INTVAL how_random);
-INTVAL Parrot_uint_rand(INTVAL how_random);
-INTVAL Parrot_int_rand(INTVAL how_random);
-INTVAL Parrot_range_rand(INTVAL from, INTVAL to, INTVAL how_random);
-void Parrot_srand(INTVAL seed);
+PARROT_API FLOATVAL Parrot_float_rand(INTVAL how_random);
+PARROT_API INTVAL Parrot_uint_rand(INTVAL how_random);
+PARROT_API INTVAL Parrot_int_rand(INTVAL how_random);
+PARROT_API INTVAL Parrot_range_rand(INTVAL from, INTVAL to, INTVAL how_random);
+PARROT_API void Parrot_srand(INTVAL seed);
 
-void *Parrot_make_la(Interp *, PMC *);
-void *Parrot_make_cpa(Interp *, PMC *);
-void Parrot_destroy_la(long *);
-void Parrot_destroy_cpa(char **);
+PARROT_API void *Parrot_make_la(Interp *, PMC *);
+PARROT_API void *Parrot_make_cpa(Interp *, PMC *);
+PARROT_API void Parrot_destroy_la(long *);
+PARROT_API void Parrot_destroy_cpa(char **);
 PMC* tm_to_array(Parrot_Interp interpreter, struct tm *tm);
-INTVAL Parrot_byte_index(Interp *interpreter, const STRING *base,
+PARROT_API INTVAL Parrot_byte_index(Interp *interpreter, const STRING *base,
         const STRING *search, UINTVAL start_offset);
-INTVAL Parrot_byte_rindex(Interp *interpreter, const STRING *base,
+PARROT_API INTVAL Parrot_byte_rindex(Interp *interpreter, const STRING *base,
         const STRING *search, UINTVAL start_offset);
 /*
  * misc.c
  */
 
-STRING *Parrot_vsprintf_s(Interp *, STRING *pat, va_list);
+PARROT_API STRING *Parrot_vsprintf_s(Interp *, STRING *pat, va_list);
 
-STRING *Parrot_vsprintf_c(Interp *, const char *pat, va_list);
+PARROT_API STRING *Parrot_vsprintf_c(Interp *, const char *pat, va_list);
 
-void Parrot_vsprintf(Interp *, char *targ, const char *pat,
+PARROT_API void Parrot_vsprintf(Interp *, char *targ, const char *pat,
                      va_list);
 
-void Parrot_vsnprintf(Interp *, char *targ, size_t len,
+PARROT_API void Parrot_vsnprintf(Interp *, char *targ, size_t len,
                       const char *pat, va_list);
 
-STRING *Parrot_sprintf_s(Interp *, STRING *pat, ...);
+PARROT_API STRING *Parrot_sprintf_s(Interp *, STRING *pat, ...);
 
-STRING *Parrot_sprintf_c(Interp *, const char *pat, ...);
+PARROT_API STRING *Parrot_sprintf_c(Interp *, const char *pat, ...);
 
-void Parrot_sprintf(Interp *, char *targ, const char *pat, ...);
+PARROT_API void Parrot_sprintf(Interp *, char *targ, const char *pat, ...);
 
-void Parrot_snprintf(Interp *, char *targ, size_t len,
+PARROT_API void Parrot_snprintf(Interp *, char *targ, size_t len,
                      const char *pat, ...);
 
-STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
+PARROT_API STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
                         PMC * ary);
 
 
@@ -167,7 +167,7 @@ STRING *Parrot_psprintf(Interp *interpreter, STRING *pat,
 /*
  * generated src/revision.c
  */
-int Parrot_config_revision(void);
+PARROT_API int Parrot_config_revision(void);
 
 #endif /* PARROT_MISC_H_GUARD */
 

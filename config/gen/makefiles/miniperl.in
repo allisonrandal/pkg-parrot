@@ -1,17 +1,17 @@
 #
 # Makefile
 #
-# $Id: miniperl.in 10475 2005-12-13 00:36:26Z particle $
+# $Id: miniperl.in 11115 2006-01-12 04:06:05Z jhoblitt $
 #
 
-PERL=${perl}
+PERL=@perl@
 DIR=languages/miniperl
 TOOL_DIR=../..
-IMCC=../../parrot${exe}
+IMCC=../../parrot@exe@
 ASM=$(IMCC) -a --output-pbc
 MINIPERLC=$(PERL) miniperlc
-INTERP=./${test_prog}
-RM_F = ${rm_f}
+INTERP=./@test_prog@
+RM_F = @rm_f@
 
 #
 # Default target:

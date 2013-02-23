@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: icu.pm 10653 2005-12-25 08:55:48Z jhoblitt $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: icu.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,12 +14,13 @@ Configures ICU and add appropriate targets to the Makefile.
 package gen::icu;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
 use Config;
 use Cwd qw(cwd);
+use File::Basename;
 use Parrot::Configure::Step qw(capture_output cc_gen cc_clean);
 
 $description = "Determining whether ICU is installed";
@@ -36,7 +37,7 @@ sub runstep
     my $autodetect  = !defined($icushared)
         && !defined($icuheaders);
 
-    $result = undef;
+    $self->set_result(undef);
     unless ($without) {
         if (!$autodetect) {
             print "specified a icu config parameter,\nICU autodetection disabled.\n" if $verbose;
@@ -77,7 +78,7 @@ sub runstep
             }
 
             if ($without) {
-                $result = "failed";
+                $self->set_result("failed");
             }
         }
     }
@@ -91,10 +92,11 @@ sub runstep
     if ($without) {
         $conf->data->set(
             has_icu    => 0,
-            icu_shared => '', # used for generating src/dynclasses/Makefile
+            icu_shared => '', # used for generating src/dynpmc/Makefile
+            icu_dir    => '',
         );
-        $result = "no" unless defined $gen::icu::result;
-        return;
+        $self->set_result("no") unless defined $self->result;
+        return $self;
     }
 
     my $ok = 1;
@@ -131,9 +133,12 @@ HELP
 
     #'
 
+    my $icudir = dirname($icuheaders);
+
     $conf->data->set(
         has_icu    => 1,
         icu_shared => $icushared,
+        icu_dir    => $icudir,
     );
 
     # Add -I $Icuheaders if necessary
@@ -155,8 +160,9 @@ HELP
     }
     cc_clean();
 
-    $result = "yes";
+    $self->set_result("yes");
 
+    return $self;
 }
 
 1;

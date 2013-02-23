@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: funcptr.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: funcptr.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Verifies that the compiler supports function pointer casts.
 package auto::funcptr;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -51,8 +51,10 @@ END
         }
         cc_clean();
         print " (yes) " if $conf->options->get('verbose');
-        $result = 'yes';
+        $self->set_result('yes');
     }
+
+    return $self;
 }
 
 1;

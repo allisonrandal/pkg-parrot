@@ -1,4 +1,4 @@
-# $Id: m4.pir 10743 2005-12-28 20:48:15Z particle $
+# $Id: m4.pir 11181 2006-01-14 17:07:29Z jisom $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ m4.pir - An implementation of GNU m4 in Parrot Intermediate Representation
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer.  All Rights Reserved.
-CVS Info:   $Id: m4.pir 10743 2005-12-28 20:48:15Z particle $
+CVS Info:   $Id: m4.pir 11181 2006-01-14 17:07:29Z jisom $
 Overview:   Main of Parrot m4.
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
@@ -48,7 +48,7 @@ Load needed libraries
 
 .sub "__onload" @LOAD
 
-  #load_bytecode "Getopt/Long.pbc" 
+  #load_bytecode "Getopt/Obj.pbc" 
   # load_bytecode "PGE.pbc"       
 
 .end
@@ -64,69 +64,64 @@ Looks at the command line arguments and acts accordingly.
   .param pmc argv
 
   # TODO: put this into '__onload'
-  load_bytecode "Getopt/Long.pbc"  # This also loads PGE
+  load_bytecode "Getopt/Obj.pbc"  
   load_bytecode "PGE.pbc"          # Parrot Grammar engine
 
-  .local pmc get_options
-  find_global get_options, "Getopt::Long", "get_options"
-
-  # name of the program
+  # shift name of the program, so that argv contains only options and extra params
   .local string program_name
   program_name = shift argv
 
-  # Specification of known command line arguments.
-  # The args are parsed with library/Getopt/Long.pir which should work 
-  # somewhat like the Perl5 module Getopt::Long.
-  .local pmc opt_spec      
-  opt_spec = new .ResizableStringArray
-  # --version, boolean
-  push opt_spec, "version"
-  # --help, boolean
-  push opt_spec, "help"
-  # -G or --traditional, boolean
-  push opt_spec, "traditional"
-  # -E or --fatal-warnings, boolean
-  push opt_spec, "fatal-warnings"
-  # -d or --debug, string
-  push opt_spec, "debug=s"
-  # -l or --arglength, number
-  push opt_spec, "arglength=i"
-  # -o or --error-output, string
-  push opt_spec, "error-output=s"
-  # -I or --include, string
-  push opt_spec, "include=s"
-  # -e or --interactive, boolean
-  push opt_spec, "interactive"
-  # -s or --synclines, boolean
-  push opt_spec, "synclines"
-  # -P or --prefix-builtins, boolean
-  push opt_spec, "prefix-builtins"
-  # -W or --word-regexp, string
-  push opt_spec, "word-regexp=s"
-  # -H or --hash-size, integer
-  push opt_spec, "hash-size=i"
-  # -L or --nesting-limit, integer
-  push opt_spec, "nesting-limit=i"
-  # -Q or --quiet or --silent, boolean
-  push opt_spec, "quiet"
-  push opt_spec, "silent"
-  # -N or --diversions, integer
-  push opt_spec, "diversions=i"
-  # -D or --define, string
-  push opt_spec, "define=s"
-  # -U or --undefine, string
-  push opt_spec, "undefine=s"
-  # -t or --trace, string
-  push opt_spec, "trace=s"
-  # --freeze-state=m4.frozen, string
-  push opt_spec, "freeze-state=s"
-  # --reload-state=m4.frozen, string
-  push opt_spec, "reload-state=s"
+  # Specification of command line arguments.
+  .local pmc getopts
+  getopts = new "Getopt::Obj"
+  # getopts."notOptStop"(1)
 
-  # Make a copy of argv, because this can easier be handled in get_options
-  # TODO: eliminate need for copy
+  # --version, boolean
+  push getopts, "version"
+  # --help, boolean
+  push getopts, "help"
+  # -G or --traditional, boolean
+  push getopts, "traditional"
+  # -E or --fatal-warnings, boolean
+  push getopts, "fatal-warnings"
+  # -d or --debug, string
+  push getopts, "debug=s"
+  # -l or --arglength, number
+  push getopts, "arglength=i"
+  # -o or --error-output, string
+  push getopts, "error-output=s"
+  # -I or --include, string
+  push getopts, "include=s"
+  # -e or --interactive, boolean
+  push getopts, "interactive"
+  # -s or --synclines, boolean
+  push getopts, "synclines"
+  # -P or --prefix-builtins, boolean
+  push getopts, "prefix-builtins"
+  # -W or --word-regexp, string
+  push getopts, "word-regexp=s"
+  # -H or --hash-size, integer
+  push getopts, "hash-size=i"
+  # -L or --nesting-limit, integer
+  push getopts, "nesting-limit=i"
+  # -Q or --quiet or --silent, boolean
+  push getopts, "quiet"
+  push getopts, "silent"
+  # -N or --diversions, integer
+  push getopts, "diversions=i"
+  # -D or --define, string
+  push getopts, "define=s"
+  # -U or --undefine, string
+  push getopts, "undefine=s"
+  # -t or --trace, string
+  push getopts, "trace=s"
+  # --freeze-state=m4.frozen, string
+  push getopts, "freeze-state=s"
+  # --reload-state=m4.frozen, string
+  push getopts, "reload-state=s"
+
   .local pmc opt
-  ( opt ) = get_options( argv, opt_spec )
+  opt = getopts."get_options"(argv)
 
   # Now dow what the options want
   .local int is_defined
@@ -256,8 +251,8 @@ NO_UNIMPLEMENTED_OPTION:
 
   # First we set up a table of all symbols, that is macros 
   .local pmc symtab
-  #symtab = new .Hash
-  symtab = new .OrderedHash
+  symtab = new .Hash
+  # symtab = new .OrderedHash
   state['symtab'] = symtab    
 
   # TODO: read M4PATH with env.pmc 
@@ -273,8 +268,6 @@ NO_UNIMPLEMENTED_OPTION:
   # TODO: handle reading from STDIN, multiple input files
 
   # check argc, we need at least one input file
-  .local pmc argv
-  argv = clone argv
   .local int argc
   argc = argv
   if argc >= 1 goto ARGC_IS_OK

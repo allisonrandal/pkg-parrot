@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: mk_inno.pl 9083 2005-08-28 17:41:48Z bernhard $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: mk_inno.pl 11146 2006-01-13 13:58:13Z fperrad $
 ################################################################################
 
 =head1 TITLE
@@ -26,9 +26,9 @@ The install prefix.
 
 The parrot version.
 
-=item C<icudatadir>
+=item C<icudir>
 
-The directory to locate ICU's data file(s).
+The directory to locate ICU.
 
 =back
 
@@ -45,7 +45,7 @@ use strict;
 my %options = (
 		version => 'x.y.z',
 		prefix => '\usr\local\parrot',
-		icudatadir => '',
+		icudir => '',
 );
 
 foreach (@ARGV) {
@@ -55,15 +55,13 @@ foreach (@ARGV) {
 }
 
 $options{prefix} =~ s/\//\\/g;
-$options{icudatadir} =~ s/\//\\/g;
+$options{icudir} =~ s/\//\\/g;
 
 my $icu_section = '';
-if ($options{icudatadir}) {
-	my $icuroot = $options{icudatadir};
-	$icuroot =~ s/\\\w+$//;
+if ($options{icudir}) {
 	$icu_section = qq{
-Source: "$icuroot\\license.html"; DestDir: "{app}\\icu"; Flags:
-Source: "$icuroot\\bin\\icu*.dll"; DestDir: "{app}\\bin"; Flags:
+Source: "$options{icudir}\\license.html"; DestDir: "{app}\\icu"; Flags:
+Source: "$options{icudir}\\bin\\icu*.dll"; DestDir: "{app}\\bin"; Flags:
 };
 }
 
@@ -82,7 +80,7 @@ AppUpdatesURL=http://www.parrotcode.org/
 DefaultDirName={pf}\\parrot-$options{version}
 DefaultGroupName=parrot
 AllowNoIcons=yes
-LicenseFile=$options{prefix}\\LICENSES\\Artistic
+LicenseFile=$options{prefix}\\share\\doc\\parrot\\LICENSES\\Artistic
 OutputDir=.\\
 OutputBaseFilename=setup-parrot-$options{version}
 Compression=lzma

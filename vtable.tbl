@@ -1,4 +1,4 @@
-# $Id: vtable.tbl 8334 2005-06-13 08:38:35Z leo $
+# $Id: vtable.tbl 11356 2006-01-26 16:54:12Z leo $
 # [MAIN] #default section name
 
 # MMD_EQ ... MMD_STRCMP must be in one block
@@ -352,7 +352,6 @@ void become_parent(PMC* class)
 INTVAL class_type()
 void add_method(STRING* method, PMC* sub_pmc)
 void remove_method(STRING* method)
-STRING* namespace_name()
 PMC* new_singleton()
 PMC* get_anonymous_subclass()
 

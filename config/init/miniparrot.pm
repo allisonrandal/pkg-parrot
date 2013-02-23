@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: miniparrot.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: miniparrot.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ from using  Configure at all for miniparrot builds.
 package init::miniparrot;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -33,7 +33,10 @@ sub runstep
 {
     my ($self, $conf) = @_;
 
-    return unless $conf->options->get('miniparrot');
+    unless ($conf->options->get('miniparrot')) {
+        $self->set_result('skipped');
+        return $self;
+    }
 
     $conf->data->set(
         miniparrot         => 1,
@@ -75,6 +78,8 @@ sub runstep
         ) {
         $conf->data->set("i_$_" => 1);
     }
+
+    return $self;
 }
 
 1;

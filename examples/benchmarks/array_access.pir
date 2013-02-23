@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: array_access.pir 10754 2005-12-29 01:19:55Z particle $
+# $Id: array_access.pir 11703 2006-02-22 13:35:12Z leo $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ examples/benchmarks/array_access.pir - Reading from array
 
 =head1 SYNOPSIS
 
-    ./parrot examples/benchmarks/array_access.pir --arr-size=1000
+    ./parrot examples/benchmarks/array_access.pir --arr-size=2000
 
 =head1 DESCRIPTION
 
@@ -18,45 +18,44 @@ Inspired by computer language shootout.
 .sub main :main
     .param pmc argv
 
-    load_bytecode "Getopt/Long.pbc"
-    .local pmc get_options
-    find_global get_options, "Getopt::Long", "get_options"
-
+    load_bytecode "Getopt/Obj.pbc"
+    
     # name of the program
     .local string program_name
     program_name = shift argv
 
-    # Assemble specification for get_options
-    # in an array of format specifiers
-    .local pmc opt_spec  
-    opt_spec = new PerlArray  
-    push opt_spec, "arr-size=i"
+    # Specification of command line arguments.
+    .local pmc getopts
+    getopts = new "Getopt::Obj"
+    push getopts, "arr-size=i"
 
     # Make a copy of argv, because this can easier be handled in get_options()
     .local pmc argv_clone
     argv_clone = clone argv
 
     .local pmc opt
-    ( opt ) = get_options( argv_clone, opt_spec )
+    opt = getopts."get_options"(argv)
 
     .local int arr_size
-    S1 = opt['arr-size']
-    arr_size = S1
-    
+    arr_size = 100
+    .local int def
+    def = defined opt["arr-size"]
+    unless def goto use_default_arr_size
+    arr_size = opt['arr-size']
+use_default_arr_size:
+
     _bench( .Array, arr_size )
     _bench( .FixedFloatArray, arr_size )
     _bench( .FixedIntegerArray, arr_size )
     _bench( .FixedPMCArray, arr_size )
     _bench( .FixedStringArray, arr_size )
     _bench( .IntList, arr_size )
-    _bench( .OrderedHash, arr_size )
     _bench( .PerlArray, arr_size )
     _bench( .ResizableFloatArray, arr_size )
     _bench( .ResizableIntegerArray, arr_size )
     _bench( .ResizablePMCArray, arr_size )
     _bench( .ResizableStringArray, arr_size )
     _bench( .SArray, arr_size )
-    _bench( .StringArray, arr_size )
 
     end
 .end

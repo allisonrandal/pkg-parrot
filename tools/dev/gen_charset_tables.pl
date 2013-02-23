@@ -8,11 +8,11 @@ use File::Spec;
 
 =head1 NAME
 
-tools/build/gen_charset_tables.pl -- generate charset tables
+tools/dev/gen_charset_tables.pl -- generate charset tables
 
 =head1 SYNOPSIS
 
-	perl tools/build/gen_charset_tables.pl
+	perl tools/dev/gen_charset_tables.pl
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ Generate character set tables.
 =cut
 
 
-my ($svnid) = '$Id: gen_charset_tables.pl 10933 2006-01-06 01:43:24Z particle $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+my ($svnid) = '$Id: gen_charset_tables.pl 11280 2006-01-21 13:33:08Z bernhard $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 my $fileid = '$'.'id $';
 my $charset_dir = File::Spec->catdir(qw/ src charset /);
 

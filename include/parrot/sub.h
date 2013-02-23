@@ -1,7 +1,7 @@
 /* sub.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: sub.h 10656 2005-12-25 15:00:46Z leo $
+ *     $Id: sub.h 11235 2006-01-18 00:19:14Z leo $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures
@@ -24,6 +24,8 @@ typedef enum {
     SUB_FLAG_CORO_FF      = PObj_private0_FLAG,
     SUB_FLAG_C_HANDLER    = PObj_private0_FLAG,
 
+    SUB_FLAG_IS_OUTER     = PObj_private1_FLAG,
+
     SUB_FLAG_TAILCALL     = PObj_private2_FLAG,
     SUB_FLAG_GENERATOR    = PObj_private3_FLAG,
 
@@ -34,7 +36,7 @@ typedef enum {
     SUB_FLAG_PF_IMMEDIATE = PObj_private6_FLAG,
     SUB_FLAG_PF_POSTCOMP  = PObj_private7_FLAG,
 
-    SUB_FLAG_PF_MASK      = 0xf8   /* anon ... postcomp */
+    SUB_FLAG_PF_MASK      = 0xfa   /* anon ... postcomp, is_outer*/
 
 } sub_flags_enum;
 

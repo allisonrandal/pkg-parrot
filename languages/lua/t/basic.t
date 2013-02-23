@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: basic.t 11675 2006-02-20 08:00:49Z fperrad $
 
 =head1 NAME
 
@@ -21,10 +21,12 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 7;
+use Parrot::Test tests => 20;
 use Test::More;
 
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function assert(false, msg)");
+assert("text", "assert string")
+assert({}, "assert table")
 assert(false, "ASSERTION TEST")
 CODE
 /ASSERTION TEST/
@@ -40,6 +42,108 @@ language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function assert(false, nil
 assert(false, nil)
 CODE
 /assertion failed!/
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function ipairs");
+a = {"a","b","c"}
+local f, v, s = ipairs(a)
+if type(f) == type(type) then print "ok" end
+if a == v then print "ok" end
+print(s)
+-- print(type(f), type(v), s)
+s, v = f(a, s)
+print(s, v)
+s, v = f(a, s)
+print(s, v)
+s, v = f(a, s)
+print(s, v)
+s, v = f(a, s)
+print(s, v)
+CODE
+ok
+ok
+0
+1	a
+2	b
+3	c
+nil	nil
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function next (array)");
+t = {"a","b","c"}
+a = next(t, nil)
+print(a)
+a = next(t, 1) 
+print(a)
+a = next(t, 2) 
+print(a)
+a = next(t, 3) 
+print(a)
+CODE
+1
+2
+3
+nil
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function pairs");
+a = {"a","b","c"}
+local f, v, s = pairs(a)
+if type(f) == type(type) then print "ok" end
+if a == v then print "ok" end
+print(s)
+-- print(type(f), type(v), s)
+s = f(v, s)
+print(s)
+s = f(v, s)
+print(s)
+s = f(v, s)
+print(s)
+s = f(v, s)
+print(s)
+CODE
+ok
+ok
+nil
+1
+2
+3
+nil
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function pcall");
+r = pcall(assert, true)
+print(r)
+r, msg = pcall(assert, false, "catched")
+print(r, msg)
+r = pcall(assert)
+print(r)
+CODE
+true
+false	catched
+false
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function pcall (incomplete)");
+r, msg = pcall(assert)
+print(msg)
+CODE
+/value expected/
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function rawget");
+t = {a = "letter a", b = "letter b"}
+print(rawget(t, "a"))
+CODE
+letter a
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function rawset");
+t = {}
+rawset(t, "a", "letter a")
+print(t.a)
+CODE
+letter a
 OUTPUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function type");
@@ -58,13 +162,27 @@ nil
 string
 OUTPUT
 
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function type");
+print(type(a))
+a = 10
+print(type(a))
+a = "a string!!"
+print(type(a))
+a = print
+-- a(type(a))
+CODE
+nil
+number
+string
+OUTPUT
+
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function type (no arg)");
 type()
 CODE
 /value expected/
 OUTPUT
 
-language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function tonumber");
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function type");
 a = 12.34
 t = type(a)
 print(a)
@@ -74,15 +192,73 @@ CODE
 number
 OUTPUT
 
-SKIP: {
-skip("tonumber !", 1);
-
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function tonumber");
-a = "text12"
-i = tonumber(a)
-print(i)
+r = tonumber("text12")
+print(type(r), r)
+r = tonumber("12text")
+print(type(r), r)
+r = tonumber(3.14)
+print(type(r), r)
+r = tonumber("3.14")
+print(type(r), r)
+r = tonumber("  3.14  ")
+print(type(r), r)
+r = tonumber(111, 2)
+print(type(r), r)
+r = tonumber("111", 2)
+print(type(r), r)
+r = tonumber("  111  ", 2)
+print(type(r), r)
+a = {}
+r = tonumber(a)
+print(type(r), r)
 CODE
-nil
+nil	nil
+nil	nil
+number	3.14
+number	3.14
+number	3.14
+number	7
+number	7
+number	7
+nil	nil
 OUTPUT
 
-}
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function tonumber (no arg)");
+tonumber()
+CODE
+/value expected/
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function tonumber (bad base)");
+r = tonumber("111", 200)
+print(type(r), r)
+CODE
+/base out of range/
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function tostring (no arg)");
+tostring()
+CODE
+/value expected/
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function unpack");
+print(unpack{})
+print(unpack{"a"})
+print(unpack{"a","b","c"})
+print((unpack{"a","b","c"}))
+CODE
+
+a
+a	b	c
+a
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function xpcall");
+r = xpcall(assert, nil)
+print(r)
+CODE
+false
+OUTPUT
+

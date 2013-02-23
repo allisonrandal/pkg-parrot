@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: byteorder.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: byteorder.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Computes the native byteorder for Parrot's wordsize.
 package auto::byteorder;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use Parrot::Configure::Step qw(:auto);
 use base qw(Parrot::Configure::Step::Base);
@@ -39,16 +39,18 @@ sub runstep
             byteorder => $byteorder,
             bigendian => 0
         );
-        $result = 'little-endian';
+        $self->set_result('little-endian');
     } elsif ($byteorder =~ /^(8765|4321)/) {
         $conf->data->set(
             byteorder => $byteorder,
             bigendian => 1
         );
-        $result = 'big-endian';
+        $self->set_result('big-endian');
     } else {
         die "Unsupported byte-order [$byteorder]!";
     }
+
+    return $self;
 }
 
 1;

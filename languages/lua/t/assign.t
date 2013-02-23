@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: assign.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: assign.t 11446 2006-02-06 14:07:49Z fperrad $
 
 =head1 NAME
 
@@ -22,7 +22,8 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 5;
+use Parrot::Test tests => 7;
+use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'global variable' );
 print(b)
@@ -71,13 +72,41 @@ CODE
 0	nil	nil
 OUT
 
+language_output_is( 'lua', <<'CODE', <<'OUT', 'adjust with function' );
+function f() return 1, 2 end
+a, b, c, d = f()
+print(a, b, c, d)
+CODE
+1	2	nil	nil
+OUT
+
 language_output_is( 'lua', <<'CODE', <<'OUT', 'local variable' );
 j = 10
 local i = 1
 print(i)
 print(j)
+local i = 2
+print(i)
 CODE
 1
 10
+2
 OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', 'param & result of function' );
+local function f(x) return 2*x end
+
+print(f(2))
+a = 2
+a = f(a)
+print(a)
+local b = 2
+b = f(b)
+print(b)
+CODE
+4
+4
+4
+OUT
+
 

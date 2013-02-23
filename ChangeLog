@@ -1,8 +1,20 @@
-# $Id: ChangeLog 10986 2006-01-08 14:15:28Z leo $
+# $Id: ChangeLog 11703 2006-02-22 13:35:12Z leo $
+
+2006.02.22    leo
+	* Released 0.4.2
+	See NEWS for more.
+
+2006.01.16    bernhard
+	 * rename src/dynclasses to src/dynpmc 
+	 * rename src/classes to src/pmc 
+
+2006.01.15    leo
+
+	 * find_global and friends returns a .Null PMC instead of .Undef on
+	  lookup failure, iff lookup exceptions are off
 
 2006.01.08    leo
 	* Released 0.4.1
-
 	See NEWS for more.
 
 2005.12.28    particle
@@ -3587,9 +3599,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 10986 2006-01-08 14:15:28Z leo $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 11703 2006-02-22 13:35:12Z leo $
 	into generated files
-	   but the $Id: ChangeLog 10986 2006-01-08 14:15:28Z leo $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 11703 2006-02-22 13:35:12Z leo $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

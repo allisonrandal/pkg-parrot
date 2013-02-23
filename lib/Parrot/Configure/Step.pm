@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Step.pm 10844 2006-01-02 02:56:12Z jhoblitt $
+# $Id: Step.pm 11115 2006-01-12 04:06:05Z jhoblitt $
 
 =head1 NAME
 
@@ -205,15 +205,16 @@ sub genfile
         print $out "\n"; # extra newline after header
     }
 
-    # this loop can not be impliment as a foreach loop as the body is dependant
-    # on <IN> being evaluated lazily
+    # this loop can not be implemented as a foreach loop as the body
+    # is dependant on <IN> being evaluated lazily
     while (my $line = <$in>) {
         # everything after the line starting with #perl is eval'ed
         if ($line =~ /^#perl/ && $options{feature_file}) {
             # OUT was/is used at the output filehandle in eval'ed scripts
             local *OUT = $out;
             my $text = do {local $/; <$in>};
-            $text =~ s{ \$\{(\w+)\} }{\$conf->data->get("$1")}gx;
+           # interoplate @foo@ values
+            $text =~ s{ \@ (\w+) \@ }{\$conf->data->get("$1")}gx;
             eval $text;
             die $@ if $@;
             last;
@@ -232,7 +233,9 @@ sub genfile
                 $line = $2;
             }
         }
-        $line =~ s{ \$\{(\w+)\} }{
+
+        # interoplate @foo@ values
+        $line =~ s{ \@ (\w+) \@ }{
             if(defined(my $val=$conf->data->get($1))) {
                 #use Data::Dumper;warn Dumper("val for $1 is ",$val);
                 $val;
@@ -241,6 +244,7 @@ sub genfile
                 '';
             }
         }egx;
+
         if ($options{replace_slashes}) {
             $line =~ s{(/+)}{
                 my $len = length $1;
@@ -250,6 +254,7 @@ sub genfile
             # replace \* with \\*, so make will not eat the \
             $line =~ s{(\\\*)}{\\$1}g;
         }
+ 
         print $out $line;
     }
 

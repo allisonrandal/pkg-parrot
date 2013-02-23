@@ -1,6 +1,6 @@
 /*
-Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: builtin.c 10850 2006-01-02 22:14:48Z ambs $
+Copyright: 2003-2006 The Perl Foundation.  All Rights Reserved.
+$Id: builtin.c 11307 2006-01-22 16:37:38Z ambs $
 
 =head1 NAME
 
@@ -37,15 +37,18 @@ static Builtins builtins[] = {
     { "asin", 	"PJO", 		"Float", 	0, 0 },
     { "atan", 	"PJO", 		"Float", 	0, 0 },
     { "atan2", 	"PJOP",		"Float", 	0, 0 },
+    { "copy",   "vJOSS",        "File",         0, 0 },
     { "cos", 	"PJO", 		"Float", 	0, 0 },
     { "cosh", 	"PJO", 		"Float", 	0, 0 },
-    { "cd",     "vJOS",         "OS",           0, 0 },
+    { "chdir",  "vJOS",         "OS",           0, 0 },
+    { "chroot", "vJOS",         "OS",           0, 0 },
     { "cwd",    "SJO",          "OS",           0, 0 },
     { "exp", 	"PJO", 		"Float", 	0, 0 },
     { "mkdir",  "vJOSI",        "OS",           0, 0 },
     { "ln", 	"PJO", 		"Float", 	0, 0 },
     { "log10",  "PJO",          "Float", 	0, 0 },
     { "log2", 	"PJO", 		"Float", 	0, 0 },
+    { "rename", "vJOSS",        "File",         0, 0 },
     { "sec", 	"PJO", 		"Float", 	0, 0 },
     { "sech", 	"PJO", 		"Float", 	0, 0 },
     { "sin", 	"PJO", 		"Float", 	0, 0 },
@@ -56,6 +59,7 @@ static Builtins builtins[] = {
     { "is_integer","IJS",       "String",       0, 0 },
     { "link",   "vJOSS",        "OS",           0, 0 },
     { "lower", 	"PJO",	        "String", 	0, 0 },
+    { "lstat",  "PJOS",         "OS",           0, 0 },
     { "open", 	"PJS.S",	"ParrotIO", 	0, 0 },
     { "puts", 	"IJOS",         "ParrotIO", 	0, 0 },
     { "reverse","vJS",          "String",       0, 0 },

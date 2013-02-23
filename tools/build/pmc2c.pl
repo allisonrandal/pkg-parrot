@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pmc2c.pl 10479 2005-12-13 01:50:55Z particle $
+# $Id: pmc2c.pl 11248 2006-01-18 20:02:15Z bernhard $
 
 =head1 NAME
 
@@ -8,9 +8,9 @@ tools/build/pmc2c.pl - PMC compiler (Version 2)
 
 =head1 SYNOPSIS
 
-Create F<src/classes/foo.dump>:
+Create F<src/pmc/foo.dump>:
 
-    % perl tools/build/pmc2c.pl --dump src/classes/foo.pmc ...
+    % perl tools/build/pmc2c.pl --dump src/pmc/foo.pmc ...
 
 Create F<vtable.dump>:
 
@@ -18,17 +18,17 @@ Create F<vtable.dump>:
 
 Print a class tree for the specified PMCs:
 
-    % perl tools/build/pmc2c.pl --tree src/classes/*.pmc
+    % perl tools/build/pmc2c.pl --tree src/pmc/*.pmc
 
-Create F<src/classes/foo.c> and C<pmc_foo.h> from F<src/classes/foo.dump>:
+Create F<src/pmc/foo.c> and C<pmc_foo.h> from F<src/pmc/foo.dump>:
 
-    % perl tools/build/pmc2c.pl -c src/classes/foo.pmc ...
+    % perl tools/build/pmc2c.pl -c src/pmc/foo.pmc ...
 
 Create fooX.c and pmc_fooX.h from fooX.dump files, also create libfoo.c
 containing the initialization function for all fooX PMCs.
 
     % perl tools/build/pmc2c.pl --library libfoo -c \
-           src/classes/foo1.pmc src/classes/foo2.pmc ...
+           src/pmc/foo1.pmc src/pmc/foo2.pmc ...
 
 =head1 DESCRIPTION
 
@@ -161,14 +161,14 @@ The default is "scalar". Other currently used interfaces are:
     boolean  : PMC that does true/false only.
     integer  : PMC that behaves similarly to the base int type
     float    : PMC that behaves similarly to the base number type
-    scalar   : (only used by the sample src/dynclasses/foo.pmc)
+    scalar   : (only used by the sample src/dynpmc/foo.pmc)
 
 This is not a canonical list, but merely a snapshot of what's in use.
 
 =item C<dynpmc>
 
 The class is a dynamic class. These have a special C<class_init>
-routine suitable for dynamic loading at runtime. See the F<dynclasses>
+routine suitable for dynamic loading at runtime. See the F<src/dynpmc>
 directory for an example.
 
 =item C<group GROUP>
@@ -746,14 +746,14 @@ sub gen_c {
     Parrot::Pmc2c::Library
         ->new( \%opt, read_dump($include, "vtable.pmc"), %pmcs )
         ->write_all_files;
-    
-    gen_def($include, \%pmcs) if $^O eq 'MSWin32';
 }
 
 #
 #   gen_def( [$dir1, $dir2], \%pmc )
 # 
 # Generate a .def file for symbols to export for dynamic PMCs.
+# Currently unused, but retained for being a basis for supporting
+# platforms that need a symbol export list.
 #
 sub gen_def {
     my ($include, $pmcs) = @_;
@@ -850,7 +850,7 @@ sub main {
         "verbose+"      => \$opt{verbose},
         "library=s"     => \$opt{library},
     );
-    unshift @include, ".", "$FindBin::Bin/../..", "$FindBin::Bin/../../src/classes/";
+    unshift @include, ".", "$FindBin::Bin/../..", "$FindBin::Bin/../../src/pmc/";
 
     dump_default()                  and exit if $default;
     dump_pmc(\@include, @ARGV)      and exit if $dump;

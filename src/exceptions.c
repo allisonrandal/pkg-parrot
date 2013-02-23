@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: exceptions.c 10902 2006-01-05 10:24:17Z leo $
+$Id: exceptions.c 11444 2006-02-06 11:41:39Z leo $
 
 =head1 NAME
 
@@ -327,12 +327,22 @@ pop_exception(Interp * interpreter)
 {
     Stack_entry_type type;
     PMC *handler;
+    struct Parrot_cont * cc;
 
-    handler = stack_peek(interpreter, CONTEXT(interpreter->ctx)->control_stack, &type);
+    handler = stack_peek(interpreter, 
+            CONTEXT(interpreter->ctx)->control_stack, &type);
     if (type != STACK_ENTRY_PMC ||
-            handler->vtable->base_type != enum_class_Exception_Handler)
-        return; /* no exception on TOS */
-    (void)stack_pop(interpreter, &CONTEXT(interpreter->ctx)->control_stack, NULL,
+            handler->vtable->base_type != enum_class_Exception_Handler) {
+        real_exception(interpreter, NULL, E_RuntimeError,
+                "No exception to pop.");
+    }
+    cc = PMC_cont(handler);
+    if (cc->to_ctx != CONTEXT(interpreter->ctx)) {
+        real_exception(interpreter, NULL, E_RuntimeError,
+                "No exception to pop.");
+    }
+    (void)stack_pop(interpreter, 
+                    &CONTEXT(interpreter->ctx)->control_stack, NULL,
                     STACK_ENTRY_PMC);
 }
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: multisub.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: multisub.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
@@ -22,7 +22,7 @@ Tests the creation and invocation of Perl6 multi subs.
 
 =cut
 
-output_is(<<'CODE', <<'OUTPUT', "create PMC");
+pasm_output_is(<<'CODE', <<'OUTPUT', "create PMC");
     new P0, .MultiSub
     print "ok 1\n"
     elements I0, P0

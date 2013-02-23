@@ -11,7 +11,7 @@ pir_output_is(<<'CODE', <<'OUT', 'load the libraries');
 CODE
 OUT
 
-foreach my $module (qw(Sub Var)) {
+foreach my $module (qw(Sub Ops)) {
 my $code = <<'CODE'
 .sub _main
     load_bytecode 'languages/punie/lib/POST.pir'

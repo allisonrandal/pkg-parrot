@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: metachars.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: metachars.t 11495 2006-02-10 07:09:08Z pmichaud $
 
 use strict;
 use warnings;
@@ -120,7 +120,7 @@ p6rule_is  ("bcd", '<[a..d]>+ | <[b..e]>+', 'alternation (|)');
 p6rule_is  ("bcd", '^ <[a..d]>+ | <[b..e]>+ $', 'alternation (|)');
 p6rule_is  ("bcd", '<[a..c]>+ | <[b..e]>+', 'alternation (|)');
 p6rule_is  ("bcd", '<[a..d]>+ | <[c..e]>+', 'alternation (|)');
-p6rule_like("bcd", 'b|', '/Missing term/', 'alternation (|) - null right arg illegal');
+p6rule_like("bcd", 'b|', '/rule error/', 'alternation (|) - null right arg illegal');
 p6rule_like("bcd", '|b', '/Missing term/', 'alternation (|) - null left arg illegal', todo => 'not yet implemented');
 p6rule_like("bcd", '|', '/Missing term/', 'alternation (|) - null both args illegal', todo => 'not yet implemented');
 p6rule_is  ("|", '\|', 'alternation (|) - literal must be escaped');
@@ -133,20 +133,24 @@ p6rule_is  ("bcd", '<[a..d]>+ & <[b..e]>+', 'conjunction (&)');
 p6rule_is  ("bcd", '^ <[a..d]>+ & <[b..e]>+ $', 'conjunction (&)');
 p6rule_is  ("bcd", '<[a..c]>+ & <[b..e]>+', 'conjunction (&)');
 p6rule_is  ("bcd", '<[a..d]>+ & <[c..e]>+', 'conjunction (&)');
-p6rule_like("bcd", 'b&', '/Missing term/', 'conjunction (&) - null right arg illegal');
+p6rule_like("bcd", 'b&', '/rule error/', 'conjunction (&) - null right arg illegal');
 p6rule_like("bcd", '&b', '/Missing term/', 'conjunction (&) - null left arg illegal', todo => 'not yet implemented');
 p6rule_like("bcd", '&', '/Missing term/', 'conjunction (&) - null both args illegal', todo => 'not yet implemented');
 p6rule_is  ("&", '\&', 'conjunction (&) - literal must be escaped');
 p6rule_isnt("&", '&', 'conjunction (&) - literal must be escaped', todo => 'not yet implemented');
-p6rule_isnt("a&|b", 'a&|b', 'alternation and conjunction (&|) - parse error');
-p6rule_isnt("a|&b", 'a|&b', 'alternation and conjunction (|&) - parse error', todo => 'not yet implemented');
+p6rule_isnt("a&|b", 'a&|b', 'alternation and conjunction (&|) - parse error',
+        todo => 'parse errors not yet trapped');
+p6rule_isnt("a|&b", 'a|&b', 'alternation and conjunction (|&) - parse error', 
+        todo => 'parse errors not yet trapped');
 
 
 ## \p and \P -- deprecated
 p6rule_is  ("pabc", '\pabc', 'retired metachars (\p)');
-p6rule_isnt("a", '\p{InConsonant}', 'retired metachars (\p)');
+p6rule_isnt("a", '\p{InConsonant}', 'retired metachars (\p)',
+        todo => 'closure not yet implemented' );
 p6rule_is  ("Pabc", '\Pabc', 'retired metachars (\P)');
-p6rule_isnt("a", '\P{InConsonant}', 'retired metachars (\P)');
+p6rule_isnt("a", '\P{InConsonant}', 'retired metachars (\P)',
+        todo => 'closure not yet implemented' );
 
 
 ## \L...\E, \U...\E, \Q...\E -- deprecated

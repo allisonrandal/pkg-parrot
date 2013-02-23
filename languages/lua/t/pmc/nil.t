@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: nil.t 10933 2006-01-06 01:43:24Z particle $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: nil.t 11586 2006-02-16 17:44:54Z fperrad $
 
 =head1 NAME
 
@@ -13,11 +13,11 @@ t/pmc/nil.t - LuaNil
 =head1 DESCRIPTION
 
 Tests C<LuaNil> PMC
-(implemented in F<languages/lua/classes/luanil.pmc>).
+(implemented in F<languages/lua/pmc/luanil.pmc>).
 
 =cut
 
-use Parrot::Test tests => 9;
+use Parrot::Test tests => 10;
 use Test::More;
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
@@ -27,7 +27,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
     .local pmc pmc1
     pmc1 = new $I0
     .local int bool1
-    bool1 = isa pmc1, "None"
+    bool1 = isa pmc1, "LuaBase"
     print bool1
     print "\n"
     bool1 = isa pmc1, "LuaNil"
@@ -94,21 +94,21 @@ CODE
 nil
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check get_repr");
-.sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNil"
-    .local pmc pmc1
-    pmc1 = new $I0
-    .local string str1
-    str1 = get_repr pmc1
-    print str1
-    print "\n"
-    end
-.end
-CODE
-nil
-OUTPUT
+#pir_output_is(<< 'CODE', << 'OUTPUT', "check get_repr");
+#.sub _main
+#    loadlib P1, "lua_group"
+#    find_type $I0, "LuaNil"
+#    .local pmc pmc1
+#    pmc1 = new $I0
+#    .local string str1
+#    str1 = get_repr pmc1
+#    print str1
+#    print "\n"
+#    end
+#.end
+#CODE
+#nil
+#OUTPUT
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "check get_bool");
 .sub _main
@@ -149,28 +149,6 @@ true
 boolean
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check singleton");
-.sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaNil"
-    .local pmc pmc1
-    pmc1 = new $I0
-    .local pmc pmc2
-    pmc2 = new $I0
-    .local int bool1
-    bool1 = iseq pmc1, pmc2
-    print bool1
-    print "\n"
-    bool1 = issame pmc1, pmc2
-    print bool1
-    print "\n"
-    end
-.end
-CODE
-1
-1
-OUTPUT
-
 pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL");
 .HLL "Lua", "lua_group"
 .sub _main
@@ -187,4 +165,60 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL");
 CODE
 nil
 1
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL & .const");
+.HLL "Lua", "lua_group"
+.sub _main
+    .const .LuaNil cst1 = "dummy"
+    print cst1
+    print "\n"
+    .local int bool1
+    bool1 = isa cst1, "LuaNil"
+    print bool1
+    print "\n"
+.end
+CODE
+nil
+1
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check tostring");
+.HLL "Lua", "lua_group"
+.sub _main
+    .local pmc pmc1
+    pmc1 = new .LuaNil
+    print pmc1                 
+    print "\n"
+    $P0 = pmc1."tostring"()
+    print $P0
+    print "\n"
+    $S0 = typeof $P0
+    print $S0
+    print "\n"
+.end
+CODE
+nil
+nil
+string
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "check tonumber");
+.HLL "Lua", "lua_group"
+.sub _main
+    .local pmc pmc1
+    pmc1 = new .LuaNil
+    print pmc1
+    print "\n"
+    $P0 = pmc1."tonumber"()
+    print $P0
+    print "\n"
+    $S0 = typeof $P0
+    print $S0
+    print "\n"
+.end
+CODE
+nil
+nil
+nil
 OUTPUT

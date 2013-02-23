@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: yaml_parser_syck.t 10751 2005-12-28 22:47:30Z particle $
+# $Id: yaml_parser_syck.t 11563 2006-02-16 00:42:07Z jisom $
 
 use strict;
 use warnings;
@@ -158,8 +158,6 @@ elem12345678
 OUT
 };
 
-
-=back
 
 =head1 AUTHOR
 

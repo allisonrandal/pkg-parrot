@@ -61,7 +61,25 @@ use base qw(Lua::opcode);
 package KeyedSetOp;
 use base qw(Lua::opcode);
 
+package IncrOp;
+use base qw(Lua::opcode);
+
+package NoOp;
+use base qw(Lua::opcode);
+
 package FindGlobalOp;
+use base qw(Lua::opcode);
+
+package FindLexOp;
+use base qw(Lua::opcode);
+
+package StoreLexOp;
+use base qw(Lua::opcode);
+
+package NewOp;
+use base qw(Lua::opcode);
+
+package NewClosureOp;
 use base qw(Lua::opcode);
 
 package CloneOp;
@@ -83,6 +101,9 @@ package BranchIfOp;
 use base qw(Lua::opcode);
 
 package BranchUnlessOp;
+use base qw(Lua::opcode);
+
+package BranchUnlessNullOp;
 use base qw(Lua::opcode);
 
 package SubDir;

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: aio.pm 10710 2005-12-28 00:25:21Z jhoblitt $
+# $Id: aio.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines whether the platform supports AIO.
 package auto::aio;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -46,7 +46,7 @@ sub runstep
 		ok/x
             ) {
             print " (yes) " if $verbose;
-            $result = 'yes';
+            $self->set_result('yes');
 
             $conf->data->set(
                 aio        => 'define',
@@ -59,8 +59,10 @@ sub runstep
     } else {
         $conf->data->set(libs => $libs);
         print " (no) " if $verbose;
-        $result = 'no';
+        $self->set_result('no');
     }
+
+    return $self;
 }
 
 1;

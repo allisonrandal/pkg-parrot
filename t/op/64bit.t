@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: 64bit.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: 64bit.t 11477 2006-02-09 05:17:54Z particle $
 
 use strict;
 use warnings;
@@ -35,7 +35,7 @@ else {
 }
 
 
-output_is(<<'CODE', <<'OUTPUT', "bitops64");
+pasm_output_is(<<'CODE', <<'OUTPUT', "bitops64");
 	# check bitops for 8-byte ints
 	set I0, 0xffffffffffffffff
 	print I0 # -1

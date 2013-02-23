@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: revision.pm 10933 2006-01-06 01:43:24Z particle $
+# $Id: revision.pm 11518 2006-02-13 10:02:02Z jhoblitt $
 
 =head1 NAME
 
@@ -36,10 +36,12 @@ sub runstep
     );
 
     if ($revision >= 1) {
-        $result = "r$revision";
+        $self->set_result("r$revision");
     } else {
-        $result = "done";
+        $self->set_result("done");
     }
+
+    return $self;
 }
 
 1;

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pmc_freeze.c 10754 2005-12-29 01:19:55Z particle $
+$Id: pmc_freeze.c 11500 2006-02-10 17:06:23Z coke $
 
 =head1 NAME
 
@@ -937,7 +937,10 @@ do_thaw(Parrot_Interp interpreter, PMC* pmc, visit_info *info)
     UINTVAL id;
     INTVAL type;
     PMC ** pos;
-    int must_have_seen = thaw_pmc(interpreter, info, &id, &type);
+    int must_have_seen;
+   
+    type = 0; /* silence compiler uninit warning */
+    must_have_seen = thaw_pmc(interpreter, info, &id, &type);
 
     id >>= 2;
 

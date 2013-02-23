@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: va_ptr.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: va_ptr.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Tests which kind of PARROT_VA_TO_VAPTR to use.
 package auto::va_ptr;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -42,8 +42,10 @@ sub runstep
         $va_type = 'x86';
     }
     cc_clean();
-    $result = $va_type;
+    $self->set_result($va_type);
     $conf->data->set(va_ptr_type => $va_type);
+
+    return $self;
 }
 
 1;

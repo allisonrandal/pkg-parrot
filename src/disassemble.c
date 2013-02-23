@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: disassemble.c 10044 2005-11-16 21:13:33Z rafl $
+$Id: disassemble.c 11017 2006-01-09 16:00:17Z particle $
 
 =head1 NAME
 
@@ -41,7 +41,7 @@ int
 main(int argc, char *argv[])
 {
     Parrot_Interp interpreter;
-    char *filename, *disassemble;
+    char *filename;
     Parrot_PackFile pf;
 
     interpreter = Parrot_new(NULL);

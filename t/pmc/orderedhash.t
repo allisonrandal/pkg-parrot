@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: orderedhash.t 10706 2005-12-27 23:03:52Z particle $
+# $Id: orderedhash.t 11489 2006-02-09 18:58:48Z particle $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 22;
+use Parrot::Test tests => 27;
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ Tests the C<OrderedHash> PMC.
 
 =cut
 
-output_is(<<'CODE', <<OUT, "init");
+pasm_output_is(<<'CODE', <<OUT, "init");
     new P0, .OrderedHash
     print "ok 1\n"
     set I0, P0
@@ -36,7 +36,7 @@ ok 2
 OUT
 
 
-output_is(<<'CODE', <<OUT, "set keys, get idx");
+pasm_output_is(<<'CODE', <<OUT, "set keys, get idx");
     new P0, .OrderedHash
     new P1, .String
     set P1, "ok 1\n"
@@ -77,7 +77,7 @@ ok 1
 ok 2
 OUT
 
-output_is(<<'CODE', <<OUT, "iterate");
+pasm_output_is(<<'CODE', <<OUT, "iterate");
     .include "iterator.pasm"
     new P0, .OrderedHash
     new P1, .String
@@ -116,14 +116,14 @@ ok 2
 ok 1
 OUT
 
-output_is(<<'CODE', <<OUT, "idx only");
+pasm_output_is(<<'CODE', <<OUT, "idx only");
     new P0, .OrderedHash
-    new P1, .String
-    set P1, "ok 2\n"
-    set P0[1], P1
     new P1, .String
     set P1, "ok 1\n"
     set P0[0], P1
+    new P1, .String
+    set P1, "ok 2\n"
+    set P0[1], P1
 
     set P2, P0[0]
     print P2
@@ -135,7 +135,7 @@ ok 1
 ok 2
 OUT
 
-output_is(<<'CODE', <<OUT, "set keys, get idx - cloned");
+pasm_output_is(<<'CODE', <<OUT, "set keys, get idx - cloned");
     new P10, .OrderedHash
     new P1, .String
     set P1, "ok 1\n"
@@ -189,7 +189,7 @@ ok 2
 ok 1
 OUT
 
-output_is(<<'CODE', <<OUT, "exists_keyed");
+pasm_output_is(<<'CODE', <<OUT, "exists_keyed");
     new P0, .OrderedHash
     new P1, .Integer
     set P0["key"], P1
@@ -214,7 +214,7 @@ CODE
 110010
 OUT
 
-output_is(<<'CODE', <<OUT, "defined_keyed");
+pasm_output_is(<<'CODE', <<OUT, "defined_keyed");
     new P0, .OrderedHash
     new P1, .Undef
     set P0["key"], P1
@@ -252,7 +252,7 @@ CODE
 0000001110
 OUT
 
-output_is(<<'CODE', <<OUT, "delete");
+pasm_output_is(<<'CODE', <<OUT, "delete");
     .include "iterator.pasm"
     new P0, .OrderedHash
     new P1, .String
@@ -268,20 +268,22 @@ output_is(<<'CODE', <<OUT, "delete");
     delete P0["a"]
 
     new P2, .Iterator, P0
-    set P2, .ITERATE_FROM_START
+    set P2, .ITERATE_FROM_START_KEYS
 iter_loop:
     unless P2, end_iter
-    shift P3, P2
+    shift S3, P2
+    set P3, P2[S3]
     print P3
     branch iter_loop
 end_iter:
 
     delete P0[0]
 
-    set P2, .ITERATE_FROM_START
+    set P2, .ITERATE_FROM_START_KEYS
 iter_loop2:
     unless P2, end_iter2
-    shift P3, P2
+    shift S3, P2
+    set P3, P2[S3]
     print P3
     branch iter_loop2
 end_iter2:
@@ -293,9 +295,7 @@ ok 3
 ok 3
 OUT
 
-SKIP: {
-    skip("Mixing keyed & indexed access is broken - see ticket 33641", 1);
-output_is(<<'CODE', <<'OUTPUT', "delete with int keys");
+pasm_output_is(<<'CODE', <<'OUTPUT', "delete with int keys");
     new P0, .OrderedHash
     set P0["abc"], "Foo"
     set P0["def"], 12.6
@@ -315,13 +315,13 @@ output_is(<<'CODE', <<'OUTPUT', "delete with int keys");
     print I0
     exists I0, P0[2]
     print I0
+    print "\n"
     end
 CODE
-101110
+101101
 OUTPUT
-}
 
-output_like(<<'CODE', '/[axj]/', "iterate over keys");
+pasm_output_like(<<'CODE', '/[axj]/', "iterate over keys");
     .include "iterator.pasm"
     new P0, .OrderedHash
     new P1, .String
@@ -345,7 +345,7 @@ end_iter:
     end
 CODE
 
-output_like(<<'CODE', <<'OUT', "iterate over keys, get value");
+pasm_output_like(<<'CODE', <<'OUT', "iterate over keys, get value");
     .include "iterator.pasm"
     new P0, .OrderedHash
     new P1, .String
@@ -493,7 +493,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "OrderedHash set_number_keyed");
     end
 .end
 CODE
--16.160000
+-16.16
 OUTPUT
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "OrderedHash get_integer");
@@ -532,7 +532,7 @@ CODE
 OUTPUT
 
 
-output_is(<<'CODE', <<'OUTPUT', "delete and access remaining");
+pasm_output_is(<<'CODE', <<'OUTPUT', "delete and access remaining");
     new P0, .OrderedHash
     new P1, .String
     set P1, "A"
@@ -585,7 +585,7 @@ CODE
 0
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "get_integer_keyed");
+pasm_output_is(<<'CODE', <<'OUTPUT', "get_integer_keyed");
     new P0, .OrderedHash
     set P0["Foo"], 10
     set P0["Bar"], 20
@@ -609,7 +609,7 @@ CODE
 20
 OUTPUT
 
-output_is(<<'CODE', <<'OUTPUT', "get_number_keyed");
+pasm_output_is(<<'CODE', <<'OUTPUT', "get_number_keyed");
      new P0, .OrderedHash
      set N0, 12.3
      set N1, 45.1
@@ -638,3 +638,174 @@ ok 2
 ok 3
 ok 4
 OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "set/get compound key");
+    new P0, .OrderedHash
+    set P0["a"], "Foo\n"
+    new P1, .Hash
+    set P1['foo'], "bar\n"
+    set P0["b"], P1
+    set P2, P0['b'; 'foo']
+    print P2
+    set P0['b'; 'foo'], "baz\n"
+    set P0['b'; 'quux'], "xyzzy\n"
+    set P2, P0['b'; 'foo']
+    print P2
+    set P2, P0['b'; 'quux']
+    print P2
+    print "--\n"
+    set P2, P0[0] 
+    print P2
+    set P2, P0[1, 'foo'] 
+    print P2
+    set P2, P0[1, 'quux'] 
+    print P2
+    end
+CODE
+bar
+baz
+xyzzy
+--
+Foo
+baz
+xyzzy
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "exists compound key");
+    new P0, .OrderedHash
+    set P0["a"], "Foo"
+    new P1, .Hash
+    set P1['foo'], "bar\n"
+    set P0["b"], P1
+    set P0['b'; 'quux'], "xyzzy\n"
+    exists I0, P0['a']
+    print I0
+    exists I0, P0['b'; 'foo']
+    print I0
+    exists I0, P0['b'; 'quux']
+    print I0
+    exists I0, P0['b'; 'nada']
+    print I0
+    exists I0, P0['c']
+    print I0
+    print "\n--\n"
+    exists I0, P0[0]
+    print I0
+    exists I0, P0[1; 'foo']
+    print I0
+    exists I0, P0[1; 'quux']
+    print I0
+    exists I0, P0[1; 'nada']
+    print I0
+    exists I0, P0[2]
+    print I0
+    print "\n"
+    end
+CODE
+11100
+--
+11100
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "delete compound key");
+    new P0, .OrderedHash
+    set P0["a"], "Foo"
+    new P1, .Hash
+    set P1['foo'], "bar\n"
+    set P0["b"], P1
+    set P0['b'; 'quux'], "xyzzy\n"
+    delete  P0['b'; 'foo']
+    exists I0, P0['a']
+    print I0
+    exists I0, P0['b'; 'foo']
+    print I0
+    exists I0, P0['b'; 'quux']
+    print I0
+    exists I0, P0['b'; 'nada']
+    print I0
+    exists I0, P0['c']
+    print I0
+    print "\n--\n"
+    exists I0, P0[0]
+    print I0
+    exists I0, P0[1; 'foo']
+    print I0
+    exists I0, P0[1; 'quux']
+    print I0
+    exists I0, P0[1; 'nada']
+    print I0
+    exists I0, P0[2]
+    print I0
+    print "\n--\n"
+    delete P0[1, 'quux']
+    exists I0, P0['b'; 'quux']
+    print I0
+    exists I0, P0[1; 'quux']
+    print I0
+    print "\n"
+    end
+CODE
+10100
+--
+10100
+--
+00
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "freeze/thaw 1");
+    new P0, .OrderedHash
+    set P0["a"], "Foo\n"
+    set P0["b"], "Bar\n"
+    
+    freeze S0, P0
+    thaw P1, S0
+    set P2, P1["a"]
+    print P2
+    set P2, P1[0]
+    print P2
+    set P2, P1["b"]
+    print P2
+    set P2, P1[1]
+    print P2
+  
+    end
+CODE
+Foo
+Foo
+Bar
+Bar
+OUTPUT
+
+pasm_output_is(<<'CODE', <<'OUTPUT', "freeze/thaw 2");
+    new P0, .OrderedHash
+    set P0["a"], "Foo\n"
+    new P1, .Hash
+    set P1['foo'], "bar\n"
+    set P0["b"], P1
+    set P0['b'; 'quux'], "xyzzy\n"
+    
+    freeze S0, P0
+    thaw P1, S0
+    set P2, P1["a"]
+    print P2
+    set P2, P1[0]
+    print P2
+    set P2, P1["b";"foo"]
+    print P2
+    set P2, P1[1; "foo"]
+    print P2
+    set P2, P1["b";"quux"]
+    print P2
+    set P2, P1[1; "quux"]
+    print P2
+  
+    end
+CODE
+Foo
+Foo
+bar
+bar
+xyzzy
+xyzzy
+OUTPUT
+

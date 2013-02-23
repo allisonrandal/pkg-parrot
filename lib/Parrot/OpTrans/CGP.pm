@@ -1,5 +1,5 @@
 # Copyright: 2002 The Perl Foundation.  All Rights Reserved.
-# $Id: CGP.pm 10519 2005-12-14 12:23:38Z leo $
+# $Id: CGP.pm 11198 2006-01-15 18:49:33Z leo $
 
 =head1 NAME
 
@@ -145,7 +145,7 @@ sub run_core_func_start
      * # if 1191 := PARROT_OP_set_args_pc
      * (gdb) disas l_ops_addr[1191] l_ops_addr[1192]
      */
-#if defined(__GNUC__) && defined(I386) && __GNUC__ == 3
+#if defined(__GNUC__) && defined(I386) && defined(PARROT_CGP_REGS)
     register opcode_t *cur_opcode asm ("esi") = cur_op;
     register char *   _reg_base   asm ("edi");
 #else

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: isreg.pm 10649 2005-12-25 03:15:38Z jhoblitt $
+# $Id: isreg.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -14,7 +14,7 @@ Determines if the C library has a working C<S_ISREG>.
 package auto::isreg;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -39,7 +39,9 @@ sub runstep
 
     $conf->data->set(isreg => $test);
     print($test ? " (Yep) " : " (no) ") if $conf->options->get('verbose');
-    $result = $test ? 'yes' : 'no';
+    $self->set_result($test ? 'yes' : 'no');
+
+    return $self;
 }
 
 1;

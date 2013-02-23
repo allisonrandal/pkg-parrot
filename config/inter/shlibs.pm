@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: shlibs.pm 10933 2006-01-06 01:43:24Z particle $
+# $Id: shlibs.pm 11662 2006-02-19 03:22:51Z jhoblitt $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ on which compiler is in use.  Thus it should come after the gccversion test.
 package inter::shlibs;
 
 use strict;
-use vars qw($description $result @args);
+use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
@@ -40,6 +40,9 @@ sub runstep
         $cc_shared)
         if $conf->options->get('ask');
     $conf->data->set(cc_shared => $cc_shared);
-    $result = ($cc_shared =~ m/^ ?$/) ? 'done' : $cc_shared;
+    $self->set_result(($cc_shared =~ m/^ ?$/) ? 'done' : $cc_shared);
+
+    return $self;
 }
+
 1;

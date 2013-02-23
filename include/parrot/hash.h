@@ -1,7 +1,7 @@
 /* hash.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: hash.h 8222 2005-05-31 10:42:39Z leo $
+ *     $Id: hash.h 11139 2006-01-13 00:58:55Z jonathan $
  *  Overview:
  *     Hashtable implementation
  *  Data Structure and Algorithms:
@@ -55,10 +55,8 @@ typedef struct _hashbucket {
 } HashBucket;
 
 typedef struct _hash {
-    union {
-	HashBucket **bi;        /* list of Bucket pointers */
-	HashBucket *bs;         /* store of buckets */
-    } bu;
+    HashBucket *bs;             /* store of buckets */
+    HashBucket **bi;            /* list of Bucket pointers */
     HashBucket *free_list;      /* empty buckets */
     UINTVAL entries;            /* Number of values stored in hashtable */
     UINTVAL mask;               /* alloced - 1 */
@@ -71,30 +69,30 @@ typedef struct _hash {
     hash_hash_key_fn hash_val;  /* generate a hash value for key */
 } Hash;
 
-void new_hash(Interp * interpreter, Hash **hptr);
-void hash_destroy(Interp * interpreter, Hash *h);
-void new_pmc_hash(Interp * interpreter, PMC *container);
+PARROT_API void new_hash(Interp * interpreter, Hash **hptr);
+PARROT_API void hash_destroy(Interp * interpreter, Hash *h);
+PARROT_API void new_pmc_hash(Interp * interpreter, PMC *container);
 void new_hash_x(Interp *, Hash**, PARROT_DATA_TYPES,
         Hash_key_type, hash_comp_fn, hash_hash_key_fn);
 void new_pmc_hash_x(Interp *, PMC*, PARROT_DATA_TYPES,
         Hash_key_type, hash_comp_fn, hash_hash_key_fn);
-void new_cstring_hash(Interp *interpreter, Hash **);
+PARROT_API void new_cstring_hash(Interp *interpreter, Hash **);
 
-PMC* Parrot_new_INTVAL_hash(Interp *interpreter, UINTVAL flags);
+PARROT_API PMC* Parrot_new_INTVAL_hash(Interp *interpreter, UINTVAL flags);
 
-void hash_clone(Interp * interpreter, Hash * src, Hash **dest);
-INTVAL hash_size(Interp * interpreter, Hash *hash);
-void hash_set_size(Interp * interpreter, Hash *hash, UINTVAL size);
-void hash_destroy(Interp * interpreter, Hash *hash);
-HashBucket *hash_get_bucket(Interp * interpreter, Hash *hash, void *key);
-void *hash_get(Interp * interpreter, Hash *hash, void *key);
-INTVAL hash_exists(Interp * interpreter, Hash *hash, void *key);
-HashBucket *hash_put(Interp * interpreter, Hash *hash, void *key, void *value);
-void hash_delete(Interp * interpreter, Hash *hash, void *key);
-void mark_hash(Interp * interpreter, Hash *hash);
-void hash_visit(Interp * interpreter, Hash *hash, void*);
-void dump_hash(Interp * interpreter, Hash *hash);
-void* hash_get_idx(Interp *interpreter, Hash *hash, PMC *key);
+PARROT_API void hash_clone(Interp * interpreter, Hash * src, Hash **dest);
+PARROT_API INTVAL hash_size(Interp * interpreter, Hash *hash);
+PARROT_API void hash_set_size(Interp * interpreter, Hash *hash, UINTVAL size);
+PARROT_API void hash_destroy(Interp * interpreter, Hash *hash);
+PARROT_API HashBucket *hash_get_bucket(Interp * interpreter, Hash *hash, void *key);
+PARROT_API void *hash_get(Interp * interpreter, Hash *hash, void *key);
+PARROT_API INTVAL hash_exists(Interp * interpreter, Hash *hash, void *key);
+PARROT_API HashBucket *hash_put(Interp * interpreter, Hash *hash, void *key, void *value);
+PARROT_API void hash_delete(Interp * interpreter, Hash *hash, void *key);
+PARROT_API void mark_hash(Interp * interpreter, Hash *hash);
+PARROT_API void hash_visit(Interp * interpreter, Hash *hash, void*);
+PARROT_API void dump_hash(Interp * interpreter, Hash *hash);
+PARROT_API void* hash_get_idx(Interp *interpreter, Hash *hash, PMC *key);
 
 #endif /* PARROT_HASH_H_GUARD */
 
