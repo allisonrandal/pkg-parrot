@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: sort.t 7810 2005-04-12 10:09:05Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: sort.t 10741 2005-12-28 20:32:30Z particle $
+
+use strict;
+use warnings;
+use lib qw( t . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/library/sort.t - Sorting
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/library/sort.t
+	% prove t/library/sort.t
 
 =head1 DESCRIPTION
 
@@ -16,9 +23,6 @@ Tests sorting.
 
 =cut
 
-use strict;
-
-use Parrot::Test tests => 9;
 
 pir_output_is(<<'CODE', <<'OUT', "sorting already sorted numbers");
 
@@ -53,7 +57,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 0
 1
@@ -99,7 +103,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 0
 1
@@ -146,7 +150,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 0
 1
@@ -191,7 +195,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 alpha
 bravo
@@ -234,7 +238,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 alpha
 bravo
@@ -289,7 +293,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 0
 0
@@ -340,7 +344,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 h
 w
@@ -386,7 +390,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 h
 w
@@ -425,7 +429,7 @@ LOOP:
     if i < j goto LOOP
     end
 .end
-.include "library/Data/Sort.imc"
+.include "library/Data/Sort.pir"
 CODE
 aaaa1
 aaaa2
@@ -435,3 +439,8 @@ hash2
 hello
 hello2
 OUT
+
+
+## remember to change the number of tests! :-)
+BEGIN { plan tests => 9; }
+

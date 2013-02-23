@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: byteorder.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: byteorder.pm 10649 2005-12-25 03:15:38Z jhoblitt $
 
 =head1 NAME
 
@@ -11,44 +11,44 @@ Computes the native byteorder for Parrot's wordsize.
 
 =cut
 
-package Configure::Step;
+package auto::byteorder;
 
 use strict;
 use vars qw($description $result @args);
 
+use Parrot::Configure::Step qw(:auto);
 use base qw(Parrot::Configure::Step::Base);
 
+$description = "Computing native byteorder for Parrot's wordsize...";
 
-$description="Computing native byteorder for Parrot's wordsize...";
+@args = ();
 
-@args=();
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-sub runstep {
-    my $self = shift;
-  cc_gen('config/auto/byteorder/test_c.in');
-  cc_build();
-  my $byteorder=cc_run() or die "Can't run the byteorder testing program: $!";
-  cc_clean();
+    cc_gen('config/auto/byteorder/test_c.in');
+    cc_build();
+    my $byteorder = cc_run() or die "Can't run the byteorder testing program: $!";
+    cc_clean();
 
-  chomp $byteorder;
+    chomp $byteorder;
 
-  if($byteorder =~ /^1234/) {
-    Parrot::Configure::Data->set(
-      byteorder => $byteorder,
-      bigendian => 0
-    );
-    $result = 'little-endian';
-  }
-  elsif($byteorder =~ /^(8765|4321)/) {
-    Parrot::Configure::Data->set(
-      byteorder => $byteorder,
-      bigendian => 1
-    );
-    $result = 'big-endian';
-  }
-  else {
-    die "Unsupported byte-order [$byteorder]!";
-  }
+    if ($byteorder =~ /^1234/) {
+        $conf->data->set(
+            byteorder => $byteorder,
+            bigendian => 0
+        );
+        $result = 'little-endian';
+    } elsif ($byteorder =~ /^(8765|4321)/) {
+        $conf->data->set(
+            byteorder => $byteorder,
+            bigendian => 1
+        );
+        $result = 'big-endian';
+    } else {
+        die "Unsupported byte-order [$byteorder]!";
+    }
 }
 
 1;

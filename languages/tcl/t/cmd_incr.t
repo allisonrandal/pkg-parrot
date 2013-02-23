@@ -2,7 +2,7 @@
 
 use strict;
 use lib qw(tcl/t t . ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 6;
+use Parrot::Test tests => 11;
 use Test::More;
 
 language_output_is("tcl",<<'TCL',<<OUT,"simple");
@@ -45,10 +45,49 @@ TCL
 -1
 OUT
 
-language_output_is("tcl",<<'TCL',<<OUT,"error");
+language_output_is("tcl",<<'TCL',<<OUT,"explicit positive offset");
+ set a 2
+ incr a +3
+ puts $a
+TCL
+5
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"too many args");
  set a 1
  incr a 3 2
  puts $a
 TCL
 wrong # args: should be "incr varName ?increment?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"too few args");
+ set a 1
+ incr
+ puts $a
+TCL
+wrong # args: should be "incr varName ?increment?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"expected integer, got alpha");
+  set a 1
+  incr a a
+TCL
+expected integer but got "a"
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"expected integer, got float");
+  set a 1
+  incr a 1.5
+TCL
+expected integer but got "1.5"
+OUT
+
+# Uses the same parsing mechanism as 
+# [expr <octal>] - all the edge cases are tested there.
+language_output_is("tcl",<<'TCL',<<'OUT',"octal offset");
+  set i 25; incr i 000012345
+  puts $i
+TCL
+5374
 OUT

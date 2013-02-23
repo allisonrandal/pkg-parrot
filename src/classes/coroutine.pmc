@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: coroutine.pmc 10465 2005-12-12 19:45:07Z leo $
+$Id: coroutine.pmc 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -59,8 +59,8 @@ stopped. See the L<Glossary|docs/glossary.pod> for more information.
 
 #define THROW(e)  \
     do { \
-	exceptions->err = e; \
-	longjmp(exceptions->dest, 1); \
+        exceptions->err = e; \
+        longjmp(exceptions->dest, 1); \
     } while(0)
 
 static void
@@ -164,6 +164,7 @@ Swaps the "context".
             PObj_get_FLAGS(SELF) |= SUB_FLAG_CORO_FF;
             wanted_seg = co->seg;
             co->caller_seg = INTERP->code;
+            co->address = co->seg->base.data + co->start_offs;
         }
         /* if calling the Coro we need the segment of the Coro */
         else if (!(PObj_get_FLAGS(SELF) & SUB_FLAG_CORO_FF)) {
@@ -191,6 +192,7 @@ Swaps the "context".
         }
 
         /* toggle address */
+        dest = co->address;
         co->address = next;
         if (INTERP->code != wanted_seg) {
             Parrot_switch_to_cs(INTERP, wanted_seg, 1);

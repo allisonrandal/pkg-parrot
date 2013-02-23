@@ -1,6 +1,13 @@
-#! perl -w
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: perlint.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: perlint.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 70;
+use Parrot::PMC '%pmc_types';
 
 =head1 NAME
 
@@ -8,16 +15,13 @@ t/pmc/perlint.t - Perl Integers
 
 =head1 SYNOPSIS
 
-    % perl -Ilib t/pmc/perlint.t
+    % prove t/pmc/perlint.t
 
 =head1 DESCRIPTION
 
 Tests the PerlInt PMC. Checks Perl-specific integer behaviour.
 
 =cut
-
-use Parrot::Test tests => 70;
-use Parrot::PMC '%pmc_types';
 
 my $perlint = $pmc_types{'PerlInt'};
 my $ok = '"ok 1\n"';

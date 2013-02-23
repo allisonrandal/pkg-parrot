@@ -1,4 +1,4 @@
-﻿# $Id: CREDITS 10450 2005-12-11 21:47:13Z chromatic $
+﻿# $Id: CREDITS 10939 2006-01-06 16:52:23Z particle $
 
 	Following in the steps of other open source projects that
 	eventually take over the world, here is the partial list
@@ -26,8 +26,7 @@ D: Building on various platforms.
 
 N: Alberto Manuel Brandao Simoes
 E: ambs@cpan.org
-D: reported a problem with File::Spec in Parrot::IO::Directory and provided a
-partial patch to fix it.
+D: Some random patches
 
 N: Aldo Calpini
 D: Debugging tutorial
@@ -41,6 +40,15 @@ D: P6C and Punie (Perl 1)
 N: Amir Karger
 D: editor bugfixes
 E: akarger@cgr.harvard.edu
+
+N: Amos Robinson
+D: IMCC Optimizer patches
+D: ParTcl builtins
+E: amos@coscom.net
+
+N: Anders Nor Berle
+D: Some cleanups and FreeBSD related fixes.
+E: debolaz@gmail.com
 
 N: Andrew Rodland
 D: vim syntax files and editor doc
@@ -331,11 +339,10 @@ N: Nicholas Clark
 D: Building and platform compat and more.
 
 N: Nick Glencross
-D: Bugfixes to trace and more.
-D: fixes file perms for hpux & cygwin in config/gen/makefiles/dynclasses_pl
-D: A patch to skip tests that hang on hp-ux in t/pmc/nci.t
-D: The example circle.pir
-E: nickg@glencros.demon.co.uk
+D: Various low hanging bug fixes
+D: Build and smoke fixes for HP-UX and cygwin
+D: Some examples, such as circle.pir and MD5.pir
+E: nick.glencross@gmail.com
 
 N: Nick Kostirya
 D: Win32, FreeBSD build fixes

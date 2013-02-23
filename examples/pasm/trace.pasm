@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: trace.pasm 10184 2005-11-26 11:13:11Z bernhard $
+# $Id: trace.pasm 10798 2005-12-30 19:22:44Z particle $
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ Shows you what happens when you turn on tracing.
 
 =cut
 
+sweepoff
 print "Howdy!\n"
 trace 1
 print "There!\n"

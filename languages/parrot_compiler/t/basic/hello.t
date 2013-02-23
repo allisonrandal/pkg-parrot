@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hello.t 9895 2005-11-10 23:15:53Z bernhard $
+# $Id: hello.t 10737 2005-12-28 18:28:52Z particle $
 
 use strict;
 use lib 'parrot_compiler/lib';
@@ -82,7 +82,7 @@ $ENV{TEST_PROG_ARGS} = 'parrot_compiler.pbc --language=PIR';
 language_output_is( 'ParrotCompiler', $code{PIR}, $out{PIR},
                     $ENV{TEST_PROG_ARGS} );
 
-$ENV{TEST_PROG_ARGS} = 'parrot_compiler.imc --language=PIR';
+$ENV{TEST_PROG_ARGS} = 'parrot_compiler.pir --language=PIR';
 language_output_is( 'ParrotCompiler', $code{PIR}, $out{PIR},
                     $ENV{TEST_PROG_ARGS} );
 
@@ -99,7 +99,7 @@ TODO:
 $ENV{TEST_PROG_ARGS} = 'parrot_compiler.pbc --language=PAST';
 language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST}, $ENV{TEST_PROG_ARGS} );
 
-$ENV{TEST_PROG_ARGS} = 'parrot_compiler.imc --language=PAST';
+$ENV{TEST_PROG_ARGS} = 'parrot_compiler.pir --language=PAST';
 language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST},
                     $ENV{TEST_PROG_ARGS} );
 

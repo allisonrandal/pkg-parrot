@@ -84,6 +84,7 @@ imcc_globals_destroy(int ex, void *param)
             mem_sys_free(s);
             s = prev_s;
         }
+	clear_sym_hash(&cs->key_consts);
         prev_cs = cs->prev;
         mem_sys_free(cs);
         cs = prev_cs;
@@ -540,20 +541,26 @@ create_lexinfo(Interp *interpreter, IMC_Unit *unit, PMC *sub, int need_lex)
     for (i = 0; i < hsh->size; i++) {
         for (r = hsh->data[i]; r; r = r->next) {
             if (r->set == 'P' && r->usage & U_LEXICAL) {
+                SymReg *n;
                 if (!lex_info) {
                     lex_info = pmc_new_noinit(interpreter, lex_info_id);
                     VTABLE_init_pmc(interpreter, lex_info, sub);
                 }
-                assert(r->reg); /* lexical name */
-                k = r->reg->color;
-                assert(k >= 0);
-                lex_name = constants[k]->u.string;
-                assert(PObj_is_string_TEST(lex_name));
-                IMCC_debug(interpreter, DEBUG_PBC_CONST,
-                        "add lexical '%s' to sub name '%s'\n",
-                        r->reg->name, (char*)PMC_sub(sub)->name->strstart);
-                (decl_func)(interpreter,
-                            lex_info, lex_name, r->color);
+                n = r->reg;
+                assert(n); /* at least one lexical name */
+                while (n) {
+                    k = n->color;
+                    assert(k >= 0);
+                    lex_name = constants[k]->u.string;
+                    assert(PObj_is_string_TEST(lex_name));
+                    IMCC_debug(interpreter, DEBUG_PBC_CONST,
+                            "add lexical '%s' to sub name '%s'\n",
+                            n->name, (char*)PMC_sub(sub)->name->strstart);
+                    (decl_func)(interpreter,
+                                lex_info, lex_name, r->color);
+                    /* next possible name */
+                    n = n->reg;
+                }
             }
         }
     }
@@ -672,8 +679,8 @@ add_const_pmc_sub(Interp *interpreter, SymReg *r,
         }
     }
     sub->namespace = ns_pmc;
-    sub->address = (opcode_t*)(long)offs;
-    sub->end = (opcode_t*)(long)end;
+    sub->start_offs = offs;
+    sub->end_offs = end;
     sub->HLL_id = unit->HLL_id;
     for (i = 0; i < 4; ++i)
         sub->n_regs_used[i] = unit->n_regs_used[i];
@@ -871,6 +878,8 @@ IMCC_int_from_reg(Interp *interpreter, SymReg *r)
         r = r->reg;
     if (r->name[0] == '0' && (r->name[1] == 'x' || r->name[1] == 'X'))
         i = strtoul(r->name+2, 0, 16);
+    else if (r->name[0] == '0' && (r->name[1] == 'O' || r->name[1] == 'o'))
+        i = strtoul(r->name+2, 0, 8);
     else if (r->name[0] == '0' &&
             (r->name[1] == 'b' || r->name[1] == 'B'))
         i = strtoul(r->name+2, 0, 2);
@@ -968,7 +977,12 @@ constant_folding(Interp *interpreter, IMC_Unit * unit)
                 add_1_const(interpreter, r);
             }
             if (r->usage & U_LEXICAL) {
-                add_1_const(interpreter, r->reg); /* lex_name */
+                SymReg *n = r->reg;
+                /* r->reg is a chain of names for the same lex sym */
+                while (n) {
+                    add_1_const(interpreter, n); /* lex_name */
+                    n = n->reg;
+                }
             }
         }
     }
@@ -1215,11 +1229,11 @@ e_pbc_emit(Interp *interpreter, void *param, IMC_Unit * unit, Instruction * ins)
         /* Get the info for that opcode */
         op_info = &interpreter->op_info_table[op];
         IMCC_debug(interpreter, DEBUG_PBC, "%d %s", npc, op_info->full_name);
-        for (i = 0; i < op_info->arg_count-1; i++) {
-            switch (op_info->types[i+1]) {
+        for (i = 0; i < op_info->op_count-1; i++) {
+            switch (op_info->types[i]) {
                 case PARROT_ARG_IC:
                     /* branch instruction */
-                    if (op_info->labels[i+1]) {
+                    if (op_info->labels[i]) {
                         if (last_label == 0)   /* we don't have a branch with offset 0 !? */
                             IMCC_fatal(interpreter, 1, "e_pbc_emit: "
                                     "no label offset found\n");

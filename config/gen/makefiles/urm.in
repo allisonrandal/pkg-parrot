@@ -1,4 +1,4 @@
-# $Id: urm.in 10475 2005-12-13 00:36:26Z particle $
+# $Id: urm.in 10492 2005-12-13 14:44:22Z leo $
 
 # Makefile for languages/urm
 
@@ -44,7 +44,7 @@ clean:
 		"*~" "*.pasm" \
 		"*~" \
 		"\#*" \
-		"examples/*.pasm" examples/*.pbc" \
+		"examples/*.pasm" "examples/*.pbc" \
 		"examples/*~" \
 		"examples/\#*" \
 		"t/*.pasm" "t/*.urm" "t/*.out"

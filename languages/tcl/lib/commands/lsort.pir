@@ -20,6 +20,8 @@
 
   # possible options
   .local int decr, unique
+  decr = 0
+  unique = 0
 chew_flag:
   $P0 = shift argv
   unless argv goto got_list
@@ -55,6 +57,7 @@ got_list:
 
   unless unique goto skip_unique
   .local int c, size
+  c=0
   size = $P0
 
   if size == 0 goto strip_end
@@ -95,7 +98,6 @@ wrong_args:
   .local int size
   size = list
   size -= 1
-
   quicksort(compare, list, 0, size, decreasing)
 .end
 
@@ -149,6 +151,7 @@ move_end:
 
   $I0 = l - 1
   $I1 = l + 1
+
   quicksort(compare, list, lo, $I0, decreasing)
   quicksort(compare, list, $I1, hi, decreasing)
 

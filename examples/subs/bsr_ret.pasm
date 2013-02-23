@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: bsr_ret.pasm 9503 2005-10-17 19:51:53Z bernhard $
+# $Id: bsr_ret.pasm 10690 2005-12-27 11:27:44Z bernhard $
 
 =head1 NAME
 
@@ -12,6 +12,11 @@ examples/subs/bsr_ret.pasm - Branch to location
 =head1 DESCRIPTION
 
 Shows branching and returning to a location saved on the call stack.
+
+=head1 SEE ALSO
+
+F<docs/ops/core.pod>
+F<docs/pdds/pdd03_calling_conventions.pod>
 
 =cut
 

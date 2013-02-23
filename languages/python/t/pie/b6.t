@@ -1,4 +1,4 @@
-# $Id: b6.t 7803 2005-04-11 13:37:27Z leo $
+# $Id: b6.t 7344 2004-12-25 12:08:18Z rubys $
 
 use strict;
 use lib '../../lib';

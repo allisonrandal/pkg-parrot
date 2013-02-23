@@ -1,4 +1,4 @@
-# $Id: languages.in 10375 2005-12-06 19:37:27Z particle $
+# $Id: languages.in 10681 2005-12-26 21:17:45Z bernhard $
 
 # setup of commands
 ${make_set_make}
@@ -157,7 +157,7 @@ forth.clean:
 
 jako: jako.dummy
 jako.dummy:
-# don't make jako, as tests are executed by default
+	- $(MAKE) jako
 jako.test:
 	- $(MAKE) jako test
 jako.clean:

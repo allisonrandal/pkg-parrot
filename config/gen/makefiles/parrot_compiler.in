@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_compiler.in 10475 2005-12-13 00:36:26Z particle $
+# $Id: parrot_compiler.in 10737 2005-12-28 18:28:52Z particle $
 
 # Makefile for languages/parrot_compiler
 
@@ -39,9 +39,9 @@ realclean : clean
 parrot.pbc : parrot.pasm
 	$(PARROT) -o parrot.pbc parrot.pasm
 
-parrot_compiler.pbc : parrot_compiler.imc
-	$(PARROT) -o parrot_compiler.pbc parrot_compiler.imc
+parrot_compiler.pbc : parrot_compiler.pir
+	$(PARROT) -o parrot_compiler.pbc parrot_compiler.pir
 
-parrot_compiler.pasm : parrot_compiler.imc
-	$(PARROT) -o parrot_compiler.pasm parrot_compiler.imc
+parrot_compiler.pasm : parrot_compiler.pir
+	$(PARROT) -o parrot_compiler.pasm parrot_compiler.pir
 

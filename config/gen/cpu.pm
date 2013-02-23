@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: cpu.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: cpu.pm 10709 2005-12-28 00:12:36Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Runs C<&run_cpu()> in F<config/gen/cpu/${cpuarch}/auto.pm> if it exists.
 
 =cut
 
-package Configure::Step;
+package gen::cpu;
 
 use strict;
 use vars qw($description $result @args);
@@ -21,21 +21,28 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step qw(copy_if_diff);
 use Carp;
 
-$description="Running CPU specific stuff...";
+$description = "Running CPU specific stuff...";
 
-@args=qw(miniparrot verbose);
+@args = qw(miniparrot verbose);
 
-sub runstep {
-    my $self = shift;
-  my ($miniparrot, $verbose) = @_;
-  return if $miniparrot;
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-  my $cpu = Parrot::Configure::Data->get('cpuarch');
-  print "\t(cpu = '$cpu') " if $verbose;
-  my $f;
-  if (-d "config/gen/cpu/$cpu" && -e ($f = "config/gen/cpu/$cpu/auto.pm")) {
-    require $f;
-    &run_cpu($verbose);
-  }
+    return if $conf->options->get('miniparrot');
+
+    my $verbose = $conf->options->get('verbose');
+
+    my $hints = "gen::cpu::" . $conf->data->get('cpuarch') . "::auto";
+
+    print "\t(cpu hints = '$hints') " if $verbose;
+
+    eval "use $hints";
+    unless ($@) {
+        $hints->runstep($conf, @_);
+    } else {
+        print "(no cpu specific hints)" if $verbose;
+    }
 }
 
+1;

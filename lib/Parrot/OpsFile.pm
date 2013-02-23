@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: OpsFile.pm 10361 2005-12-05 23:09:12Z particle $
+# $Id: OpsFile.pm 10543 2005-12-15 22:36:46Z leo $
 
 =head1 NAME
 
@@ -481,7 +481,7 @@ sub make_op
     {
         my (@fixedargs)=split(/,/,$variant);
         my $op = Parrot::Op->new($code++, $type, $short_name,
-            [ 'op', @fixedargs ], [ '', @$argdirs ], [0, @$labels], $flags);
+            [ @fixedargs ], [ @$argdirs ], [ @$labels ], $flags);
         my $op_size = $op->size;
         my $jumps = "0";
 

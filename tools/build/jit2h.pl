@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit2h.pl 10361 2005-12-05 23:09:12Z particle $
+# $Id: jit2h.pl 10543 2005-12-15 22:36:46Z leo $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ my @core_opfunc = map { $_->func_name($trans) } @$Parrot::OpLib::core::ops;
 my %opcodes;
 
 for(@$Parrot::OpLib::core::ops) {
-    my $name = $_->{NAME} . '_' .join '_',@{$_->{ARGS}}[1..$#{$_->{ARGS}}];
+    my $name = $_->{NAME} . '_' .join '_',@{$_->{ARGS}}[0..$#{$_->{ARGS}}];
     $opcodes{$name} = $_->{CODE};
 }
 
@@ -306,7 +306,7 @@ if (($cpuarch eq 'ppc') && ($genfile ne "src/jit_cpu.c")) {
 }
 
 
-%core_ops = readjit("jit/$cpuarch/core.jit");
+%core_ops = readjit("src/jit/$cpuarch/core.jit");
 
 print JITCPU $header if ($header);
 

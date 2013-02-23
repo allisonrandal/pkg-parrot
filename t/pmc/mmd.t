@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: mmd.t 9451 2005-10-11 13:40:14Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: mmd.t 10754 2005-12-29 01:19:55Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 30;
 
 =head1 NAME
 
@@ -8,15 +14,13 @@ t/pmc/mmd.t - Multi-Method Dispatch
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/mmd.t
+	% prove t/pmc/mmd.t
 
 =head1 DESCRIPTION
 
 Tests the multi-method dispatch.
 
 =cut
-
-use Parrot::Test tests => 30;
 
 pir_output_is(<<'CODE', <<'OUTPUT', "PASM divide");
 
@@ -229,7 +233,7 @@ ok 2
 -42
 OUTPUT
 
-my $temp = "temp.imc";
+my $temp = "temp.pir";
 END { unlink $temp; };
 
 open S, ">$temp" or die "Can't write $temp";
@@ -252,7 +256,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "PASM MMD divide - loaded sub");
 .include "mmd.pasm"
 
     .local pmc divide
-    load_bytecode "temp.imc"
+    load_bytecode "temp.pir"
     divide = global "Integer_divide_Integer"
     mmdvtregister .MMD_DIVIDE, .Integer, .Integer, divide
 
@@ -868,7 +872,7 @@ CODE
 2
 OUTPUT
 
-## my $temp = "temp.imc";
+## my $temp = "temp.pir";
 ## END { unlink $temp; };
 
 open P, ">$temp" or die "can't write $temp";
@@ -887,7 +891,7 @@ EOF
 
 pir_output_is(<<'CODE', <<'OUTPUT', "override builtin n_add");
 .sub main
-    load_bytecode "temp.imc"
+    load_bytecode "temp.pir"
     $P0 = new Integer
     $P1 = new Integer
     set $P0, 6

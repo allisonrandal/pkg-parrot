@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: string.c 10301 2005-12-01 22:32:51Z particle $
+$Id: string.c 10938 2006-01-06 16:12:02Z leo $
 
 =head1 NAME
 
@@ -39,8 +39,9 @@ strings.
 
 
 #define saneify_string(s) \
-    assert(s->encoding); \
-    assert(s->charset)
+    assert(s->encoding && \
+           s->charset && \
+           !PObj_on_free_list_TEST(s))
 
 
 /*
@@ -87,7 +88,7 @@ Parrot_unmake_COW(Interp *interpreter, STRING *s)
         PObj_bufstart(s) = PObj_bufstart(&for_alloc);
         s->strstart      = for_alloc.strstart;
         PObj_buflen(s)   = PObj_buflen(&for_alloc);
-        /* COW_FLAG | external_FLAG | bufstart_external_FLAG immobile_FLAG */
+        /* COW_FLAG | external_FLAG */
         PObj_is_external_CLEARALL(s);
     }
 
@@ -203,8 +204,9 @@ string_set(Interp *interpreter, STRING *dest, STRING *src)
         return dest;
     if (dest) { /* && dest != src */
         /* they are different, dest is not an external string */
+    /* TODO create string_free API for reusing string headers */
 #ifdef GC_IS_MALLOC
-        if (!PObj_is_external_TESTALL(dest) && PObj_bufstart(dest)) {
+        if (!PObj_is_cowed_TESTALL(dest) && PObj_bufstart(dest)) {
             mem_sys_free((INTVAL*)PObj_bufstart(dest) - 1);
         }
 #endif
@@ -263,37 +265,6 @@ string_init(Parrot_Interp interpreter)
         /* Load in the basic encodings and charsets
          */
         Parrot_charsets_encodings_init(interpreter);
-
-#if 0
-        /* DEFAULT_ICU_DATA_DIR is configured at build time, or it may be
-           set through the $PARROT_ICU_DATA_DIR environment variable. Need
-           a way to specify this via the command line as well. */
-        data_dir = Parrot_getenv("PARROT_ICU_DATA_DIR", &free_data_dir);
-        if (data_dir == NULL) {
-            const char *prefix;
-            char *p, *build_path;
-            build_path = data_dir = const_cast(DEFAULT_ICU_DATA_DIR);
-            /*
-             * if the installed --prefix directory exists then use it
-             * but only, if data_dir isn't empty
-             */
-            if (!*data_dir)
-                goto no_set;
-            prefix = Parrot_get_runtime_prefix(interpreter, NULL);
-            if (prefix && (p = strstr(build_path, "blib"))) {
-                /* .../blib/lib/... */
-                --p;        /* slash or backslash - XXX FIXME - assumes single char */
-                data_dir = mem_sys_allocate(strlen(prefix) + strlen(p) + 1);
-                strcpy(data_dir, prefix);
-                strcat(data_dir, p);
-                free_data_dir = 1;
-            }
-        }
-        string_set_data_directory(data_dir);
-no_set:
-        if (free_data_dir)
-            mem_sys_free(const_cast(data_dir));
-#endif
     }
 
     /*
@@ -505,9 +476,9 @@ string_append(Interp *interpreter,
     total_length = a->bufused + b->bufused;
 
     /* make sure A's big enough for both  */
-    if (a_capacity < total_length) {
+    if (total_length >= a_capacity)  {
         Parrot_reallocate_string(interpreter, a,
-                total_length + EXTRA_SIZE);
+                total_length << 1);
     }
 
     /* A is now ready to receive the contents of B */
@@ -694,7 +665,6 @@ string_make_direct(Interp *interpreter, const void *buffer,
            */
         PObj_bufstart(s) = s->strstart = const_cast(buffer);
         PObj_buflen(s)   = s->bufused = len;
-        PObj_bufstart_external_SET(s);
         if (encoding == Parrot_fixed_8_encoding_ptr)
             s->strlen = len;
         else
@@ -1112,9 +1082,16 @@ string_substr(Interp *interpreter, STRING *src,
 
     /* do in-place i.e. reuse existing header if one */
     if (replace_dest && *d) {
-        CHARSET_GET_CODEPOINTS_INPLACE(interpreter, src,
-                true_offset, true_length, *d);
+        assert(src->encoding == Parrot_fixed_8_encoding_ptr);
         dest = *d;
+        dest->encoding = src->encoding;
+        dest->charset = src->charset;
+
+        dest->strstart = (char *)src->strstart + true_offset ;
+        dest->bufused = true_length;
+
+        dest->strlen = true_length;
+        dest->hashval = 0;
     }
     else
         dest = CHARSET_GET_CODEPOINTS(interpreter, src, true_offset,
@@ -1164,6 +1141,24 @@ string_replace(Interp *interpreter, STRING *src,
     CHARSET *cs;
     ENCODING *enc;
     String_iter iter;
+
+    /* special case */
+    if (d == NULL &&
+            src &&
+            rep &&
+            src->encoding == Parrot_fixed_8_encoding_ptr &&
+            rep->encoding == Parrot_fixed_8_encoding_ptr &&
+            offset >= 0 &&
+            (UINTVAL)offset < src->strlen &&
+            length == 1 &&
+            rep->strlen == 1
+            ) {
+        if (PObj_is_cowed_TESTALL(src)) {
+            Parrot_unmake_COW(interpreter, src);
+        }
+        ((char*)src->strstart)[offset] = ((char*)rep->strstart)[0];
+        return NULL;
+    }
 
     true_offset = (UINTVAL)offset;
     true_length = (UINTVAL)length;
@@ -1913,7 +1908,7 @@ number, rounding towards zero.
 INTVAL
 string_to_int(Interp *interpreter, const STRING *s)
 {
-#if 0
+#if 1
     INTVAL i = 0;
 
     if (s) {
@@ -1923,9 +1918,9 @@ string_to_int(Interp *interpreter, const STRING *s)
         INTVAL in_number = 0;
 
         while (start < end) {
-            UINTVAL c = s->encoding->decode(start);
+            unsigned char c = *start;
 
-            if (Parrot_char_is_digit(s->type,c)) {
+            if (isdigit(c)) {
                 in_number = 1;
                 i = i * 10 + (c - '0');
             }
@@ -1933,16 +1928,17 @@ string_to_int(Interp *interpreter, const STRING *s)
                 /* we've not yet seen any digits */
                 if (c == '-') {
                     sign = -1;
+                    in_number = 1;
                 }
-                else {
-                    sign = 1;
-                }
+                else if (c == '+' || isspace(c))
+                    in_number = 1;
+                else
+                    break;
             }
             else {
                 break;
             }
-
-            start = s->encoding->skip_forward(start, 1);
+            ++start;
         }
 
         i = i * sign;
@@ -2165,37 +2161,11 @@ result in a memory leak.
 char *
 string_to_cstring(Interp * interpreter, STRING * s)
 {
-#if 0
-    if (PObj_buflen(s) == s->bufused) {
-        string_grow(interpreter, s, 1);
-    }
-    else
-        Parrot_unmake_COW(interpreter, s);
-
-    /* PObj_immobile_SET(s);
-     *
-     * XXX we don't know, how this cstring gets used by external code
-     * so setting the string to immobile would be the best thing, but
-     * immobile strings don't get moved - yes - but they get freed in
-     * compact_pool :-(
-     * The correct way to handle this is probably to malloc the memory
-     * and set the PObj_sysmem_FLAG
-     * -leo
-     */
-
-    ((char *)s->strstart)[s->bufused] = 0;
-    /* don't return local vars, return the right thing */
-    return (char*)s->strstart;
-#else
-    /* TODO XXX FIXME ;-) non ascii & memory leak  -leo
-     * the real solution WRT leak is this:
-     * the caller of this function has to free this cstring that's all
-     */
-     /*
-     or better, don't have this, but have method to return a buffer PMC
-     with the right bytes
-     */
     char *p;
+    /*
+     * TODO always provide a NUL at end of strings
+     *      ICU needs this too for a lot of string functions
+     */
     if (s == NULL) {
         return NULL;
     }
@@ -2203,7 +2173,6 @@ string_to_cstring(Interp * interpreter, STRING * s)
     memcpy(p, s->strstart, s->bufused);
     p[s->bufused] = 0;
     return p;
-#endif
 }
 
 /*
@@ -2242,15 +2211,6 @@ string_pin(Interp * interpreter, STRING * s) {
     void *memory;
     INTVAL size;
 
-    /* If this string is marked as immobile, external memory, starts
-    in external memory, is already from system memory, or is a
-    constant, we just don't do this */
-    if (PObj_get_FLAGS(s) & (PObj_immobile_FLAG | PObj_external_FLAG |
-                        PObj_bufstart_external_FLAG | PObj_sysmem_FLAG |
-                        PObj_constant_FLAG)) {
-        return;
-    }
-
     /* XXX -lt: COW strings have the external_FLAG set, so this will
      *          not work for these
      *          so probably only sysmem should be tested
@@ -2262,8 +2222,7 @@ string_pin(Interp * interpreter, STRING * s) {
     PObj_bufstart(s) = memory;
     s->strstart = memory;
     /* Mark the memory as both from the system and immobile */
-    PObj_flags_SETTO(s, PObj_get_FLAGS(s) |
-        (PObj_immobile_FLAG | PObj_sysmem_FLAG));
+    PObj_sysmem_SET(s);
 }
 
 /*
@@ -2306,7 +2265,6 @@ string_unpin(Interp * interpreter, STRING * s) {
     Parrot_unblock_GC(interpreter);
     mem_sys_memcopy(PObj_bufstart(s), memory, size);
     /* Mark the memory as neither immobile nor system allocated */
-    PObj_immobile_CLEAR(s);
     PObj_sysmem_CLEAR(s);
     /* Free up the memory */
     mem_sys_free(memory);

@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation. All Rights Reserved.
-$Id: $
+$Id: pbc_merge.c 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -216,7 +216,7 @@ pbc_merge_bytecode(Interp *interpreter, struct pbc_merge_input **inputs,
     /* Stash produced bytecode. */
     bc_seg->base.data = bc;
     bc_seg->base.size = cursor;
-    bc_seg->base.name = "MERGED";
+    bc_seg->base.name = strdup("MERGED");
     return bc_seg;
 }
 
@@ -304,8 +304,8 @@ pbc_merge_constants(Interp *interpreter, struct pbc_merge_input **inputs,
                     case enum_class_Closure:
                     case enum_class_Coroutine:
                         sub = PMC_sub(copy->u.key);
-                        sub->address += inputs[i]->code_start;
-                        sub->end += inputs[i]->code_start;
+                        sub->start_offs += inputs[i]->code_start;
+                        sub->end_offs += inputs[i]->code_start;
                         break;
                 }
             }
@@ -591,10 +591,10 @@ pbc_merge_ctpointers(Interp *interpreter, struct pbc_merge_input **inputs,
         cur_op++;
 
         /* Loop over the arguments. */
-        for (cur_arg = 1; cur_arg < op->arg_count; cur_arg++)
+        for (cur_arg = 1; cur_arg < op->op_count; cur_arg++)
         {
             /* Pick out any indexes into the constant table and correct them. */
-            switch (op->types[cur_arg])
+            switch (op->types[cur_arg - 1])
             {
                 case PARROT_ARG_NC:
                 case PARROT_ARG_PC:

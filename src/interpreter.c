@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: interpreter.c 9645 2005-10-30 13:46:40Z leo $
+$Id: interpreter.c 10613 2005-12-21 10:15:55Z leo $
 
 =head1 NAME
 
@@ -73,16 +73,28 @@ prederef_args(void **pc_prederef, Interp *interpreter,
 {
     struct PackFile_ConstTable * const_table
         = interpreter->code->const_table;
-    int i, regs_n, regs_i, regs_p, regs_s;
+    int i, n, m, regs_n, regs_i, regs_p, regs_s;
+    PMC *sig = NULL;
 
     regs_n = CONTEXT(interpreter->ctx)->n_regs_used[REGNO_NUM];
     regs_i = CONTEXT(interpreter->ctx)->n_regs_used[REGNO_INT];
     regs_p = CONTEXT(interpreter->ctx)->n_regs_used[REGNO_PMC];
     regs_s = CONTEXT(interpreter->ctx)->n_regs_used[REGNO_STR];
-    for (i = 1; i < opinfo->arg_count; i++) {
+    /* prederef var part too */
+    n = m = opinfo->op_count; 
+    ADD_OP_VAR_PART(interpreter, interpreter->code, pc, n);
+    for (i = 1; i < n; i++) {
         opcode_t arg = pc[i];
+        int type;
+        if (i >= m) {
+	    sig = (PMC*) pc_prederef[1]; 
+	    type = VTABLE_get_integer_keyed_int(interpreter, sig, i - m);
+            type &= (PARROT_ARG_TYPE_MASK | PARROT_ARG_CONSTANT);       
+        }
+	else
+	    type = opinfo->types[i - 1];
 
-        switch (opinfo->types[i]) {
+        switch (type) {
 
         case PARROT_ARG_KI:
         case PARROT_ARG_I:
@@ -112,7 +124,7 @@ prederef_args(void **pc_prederef, Interp *interpreter,
 
         case PARROT_ARG_KIC:
         case PARROT_ARG_IC:
-            pc_prederef[i] = (void *)&pc[i];
+            pc_prederef[i] = (void *)pc[i];
             break;
 
         case PARROT_ARG_NC:
@@ -124,20 +136,18 @@ prederef_args(void **pc_prederef, Interp *interpreter,
         case PARROT_ARG_SC:
             if (arg < 0 || arg >= const_table->const_count)
                 internal_exception(INTERP_ERROR, "Illegal constant number");
-            pc_prederef[i] = (void *)
-                &const_table->constants[arg]->u.string;
+            pc_prederef[i] = (void *)const_table->constants[arg]->u.string;
             break;
 
         case PARROT_ARG_PC:
         case PARROT_ARG_KC:
             if (arg < 0 || arg >= const_table->const_count)
                 internal_exception(INTERP_ERROR, "Illegal constant number");
-            pc_prederef[i] = (void *)
-                &const_table->constants[arg]->u.key;
+            pc_prederef[i] = (void *)const_table->constants[arg]->u.key;
             break;
         default:
             internal_exception(ARG_OP_NOT_HANDLED,
-                               "Unhandled argtype %d\n",opinfo->types[i]);
+                               "Unhandled argtype 0x%x\n", type);
             break;
         }
     }
@@ -183,9 +193,9 @@ do_prederef(void **pc_prederef, Parrot_Interp interpreter, int type)
     /*
      * now remember backward branches, invoke and similar opcodes
      */
-    n = opinfo->arg_count;
+    n = opinfo->op_count;
     if (((opinfo->jump & PARROT_JUMP_RELATIVE) &&
-            opinfo->types[n - 1] == PARROT_ARG_IC &&
+            opinfo->types[n - 2] == PARROT_ARG_IC &&
             pc[n - 1] < 0) ||   /* relative backward branch */
             (opinfo->jump & PARROT_JUMP_ADDRESS)) {
         Prederef *pi = &interpreter->code->prederef;
@@ -355,6 +365,10 @@ init_prederef(Interp *interpreter, int which)
         void **temp = (void **)Parrot_memalign_if_possible(256,
                 N * sizeof(void *));
 #endif
+	/*
+	 * calc and remember pred_offset
+	 */
+	CONTEXT(interpreter->ctx)->pred_offset = pc - (opcode_t*)temp;
 
         /* fill with the prederef__ opcode function */
         if (which == PARROT_SWITCH_CORE)
@@ -365,15 +379,8 @@ init_prederef(Interp *interpreter, int which)
         for (i = n_pics = 0; i < N; ) {
             opinfo = &interpreter->op_info_table[*pc];
             temp[i] = pred_func;
-            n = opinfo->arg_count;
-            if (*pc == PARROT_OP_set_args_pc ||
-                    *pc == PARROT_OP_get_results_pc ||
-                    *pc == PARROT_OP_get_params_pc ||
-                    *pc == PARROT_OP_set_returns_pc) {
-                PMC *sig;
-                sig = interpreter->code->const_table->constants[pc[1]]->u.key;
-                n += VTABLE_elements(interpreter, sig);
-            }
+            n = opinfo->op_count;
+	    ADD_OP_VAR_PART(interpreter, interpreter->code, pc, n);
             /* count ops that need a PIC */
             if (parrot_PIC_op_is_cached(interpreter, *pc))
                 n_pics++;
@@ -672,7 +679,7 @@ runops_int(Interp *interpreter, size_t offset)
     opcode_t *(*core) (Interp *, opcode_t *) =
         (opcode_t *(*) (Interp *, opcode_t *)) 0;
 
-    if (interpreter->resume_flag & RESUME_INITIAL) {
+    if (!interpreter->lo_var_ptr) {
         /*
          * if we are entering the run loop the first time
          */

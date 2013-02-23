@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Config.pm 6352 2004-07-09 19:07:20Z mikescott $
+# $Id: Config.pm 10751 2005-12-28 22:47:30Z particle $
 
 =head1 NAME
 
@@ -26,26 +26,17 @@ use strict;
 use Parrot::Docs::Section;
 @Parrot::Docs::Section::Config::ISA = qw(Parrot::Docs::Section);
 
-use Parrot::Configure::RunSteps;
-
 =item C<config_groups()>
 
 Dynamically creates the Configuration section's groups by studying the
-contents of C<@Parrot::Configure::RunSteps::steps>.
+contents of C<@Parrot::Configure::steps>.
 
 =cut
 
 sub config_groups
 {
-	my $self = shift;
-    my %groups = ();
-    
-    foreach my $path (@Parrot::Configure::RunSteps::steps)
-    {
-        my ($dir) = $path =~ m|^([^/]+)|o;
-        
-        push @{$groups{$dir}}, "config/$path";
-    }
+    my $self = shift;
+    my $dist = Parrot::Distribution->new;
     
     my @groups = ();
     my %titles = (
@@ -55,12 +46,14 @@ sub config_groups
         'gen' => 'File Creation Steps',
     );
     
-    foreach my $dir (qw(init inter auto gen))
+    foreach my $group (qw(init inter auto gen))
     {
+        my $dir = $dist->existing_directory_with_name('config/' . $group);
+        my @files = $dir->files_with_suffix('pm', 1);    
         push @groups,
             $self->new_group(
-                $titles{$dir}, '',
-                map {$self->new_item('', $_)} @{$groups{$dir}});
+                $titles{$group}, '',
+                map {$self->new_item('', $dist->relative_path($_))} @files);
     }
     
     return @groups;
@@ -79,7 +72,7 @@ sub new
 	return $self->SUPER::new(
 		'Configuration', 'config.html', 'Parrot is configured by running
 the <i>Configure.pl</i> script. This is essentially just a wrapper around
-<code>Parrot::Configure::RunSteps</code>. The steps are listed below in the order in
+<code>Parrot::Configure</code>. The steps are listed below in the order in
 which they are performed.',
 		$self->new_item('', 'Configure.pl'),
 		$self->config_groups,
@@ -89,7 +82,7 @@ which they are performed.',
 		),
 		$self->new_group('Library', '',
 		    $self->new_item('PASM/IMC access to Parrot configuration data.', 
-		        'runtime/parrot/library/config.imc')
+		        'runtime/parrot/library/config.pir')
 		),
 	);
 }

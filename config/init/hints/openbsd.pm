@@ -1,19 +1,25 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: openbsd.pm 9954 2005-11-13 22:06:22Z jhoblitt $
+# $Id: openbsd.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
+package init::hints::openbsd;
 
-my $ccflags = Parrot::Configure::Data->get('ccflags');
-if ( $ccflags !~ /-pthread/ ) {
-    $ccflags .= ' -pthread';
+use strict;
+
+sub runstep
+{
+    my ($self, $conf) = @_;
+
+    my $ccflags = $conf->data->get('ccflags');
+    if ($ccflags !~ /-pthread/) {
+        $ccflags .= ' -pthread';
+    }
+    $conf->data->set(ccflags => $ccflags);
+
+    my $libs = $conf->data->get('libs');
+    if ($libs !~ /-lpthread/) {
+        $libs .= ' -lpthread';
+    }
+    $conf->data->set(libs => $libs);
 }
-Parrot::Configure::Data->set(
-    ccflags => $ccflags,
-);
 
-my $libs = Parrot::Configure::Data->get('libs');
-if ( $libs !~ /-lpthread/ ) {
-    $libs .= ' -lpthread';
-}
-Parrot::Configure::Data->set(
-    libs => $libs,
-);
+1;

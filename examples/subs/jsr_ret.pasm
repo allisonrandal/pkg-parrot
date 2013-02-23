@@ -1,8 +1,8 @@
-# Copyright (C) 2001 Gregor N. Purdy. All rights reserved.
+# Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 # This program is free software. It is subject to the same
 # license as Perl itself.
 #
-# $Id: jsr_ret.pasm 9536 2005-10-23 10:33:23Z bernhard $
+# $Id: jsr_ret.pasm 10698 2005-12-27 18:32:31Z gregor $
 
 =head1 NAME
 
@@ -15,6 +15,11 @@ examples/subs/jsr_ret.pasm - Jumping to subroutine
 =head1 DESCRIPTION
 
 A program to demonstrate the use of the C<jump> and of the C<jsr> opcode.
+
+=head1 SEE ALSO
+
+F<docs/ops/core.pod>
+F<docs/pdds/pdd03_calling_conventions.pod>
 
 =cut
 

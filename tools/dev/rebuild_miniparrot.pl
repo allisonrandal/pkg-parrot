@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: rebuild_miniparrot.pl 10472 2005-12-12 22:12:28Z particle $
+# $Id: rebuild_miniparrot.pl 10542 2005-12-15 21:56:31Z particle $
 ################################################################################
 
 =head1 NAME
@@ -82,7 +82,7 @@ sub prebuild_classes {
 sub clean {
     print "** $0: removing files in miniparrot directory\n";
     find(sub {
-	     return if ($File::Find::dir =~ /CVS/);
+	     return if ($File::Find::dir =~ /\.svn/);
 	     unlink($_) if (-f $_);
          }, 'miniparrot');
 }

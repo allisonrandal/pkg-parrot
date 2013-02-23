@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: coroutine.pasm 9686 2005-11-01 16:25:50Z leo $
+# $Id: coroutine.pasm 10690 2005-12-27 11:27:44Z bernhard $
 
 =head1 NAME
 
@@ -12,6 +12,11 @@ examples/pasm/coroutine.pasm - Sample co-routines in Parrot
 =head1 DESCRIPTION
 
 This shows you how to create two coroutines and C<invoke> them.
+
+=head1 SEE ALSO
+
+F<docs/ops/core.pod>
+F<docs/pdds/pdd03_calling_conventions.pod>
 
 =cut
 

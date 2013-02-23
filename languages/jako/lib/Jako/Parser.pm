@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as Perl itself.
 #
-# $Id: Parser.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Parser.pm 10644 2005-12-24 18:06:41Z gregor $
 #
 
 use strict;
@@ -282,7 +282,7 @@ sub parse
       $self->INTERNAL_ERROR("Could not determine type.") unless defined $type;
 
       $self->SYNTAX_ERROR("Cannot declare constants of type '%s'.", $type) # TODO: This can happen later.
-        if ($access eq 'const' and $type->isa("Jako::Construct::Type::Object"));
+        if ($access eq 'const' and $type->isa("Jako::Construct::Type::PMC"));
 
       my @identifiers = ();
 
@@ -972,13 +972,13 @@ sub parse
     }
 
     #
-    # Object Construction:
+    # PMC Construction:
     #
     # a = new Foo;
     #
 
     if (m/^([A-Za-z][A-Za-z0-9_]*)\s*=\s*new\s+([A-Za-z][A-Za-z0-9_]*)$/) {
-      new_obj($1, $2);
+      new_pmc($1, $2);
       next;
     }
 

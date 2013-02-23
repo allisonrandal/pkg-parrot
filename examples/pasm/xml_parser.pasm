@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: xml_parser.pasm 9632 2005-10-29 17:30:22Z bernhard $
+# $Id: xml_parser.pasm 10798 2005-12-30 19:22:44Z particle $
 
 =head1 NAME
 
@@ -363,6 +363,8 @@ CHAR:   restore S0
 # Main Body
 #
 MAIN:
+	set I8, 0
+
 	# For now, this is the XML that's going to get parsed.
 	# When the read() stuff gets fixed, this can be read from
 	#    a file as it's being processed.  For now, slurp it.

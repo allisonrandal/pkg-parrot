@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Distribution.pm 10425 2005-12-10 01:51:41Z particle $
+# $Id: Distribution.pm 10507 2005-12-13 21:15:11Z bernhard $
 
 =head1 NAME
 
@@ -97,9 +97,9 @@ sub c_source_file_directories
             ->directory_with_name('imcc'),
         $self->directory_with_name('examples')
             ->directory_with_name('c'),
-        $self->directory_with_name('io'),
         $self->directory_with_name('src'),
         $self->directory_with_name('src/encodings'),
+        $self->directory_with_name('src/io'),
         $self->directory_with_name('src/ops'),
         $self->directory_with_name('src/packfile'),
         $self->directory_with_name('src/types'),

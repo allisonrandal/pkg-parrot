@@ -2,7 +2,7 @@
 
 use strict;
 use lib qw(tcl/t t . ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 17;
+use Parrot::Test tests => 18;
 use Test::More;
 use vars qw($TODO);
 
@@ -110,5 +110,11 @@ language_output_is("tcl",<<'TCL',<<OUT,"namespace exists: global explicit");
    puts [namespace exists ::]
 TCL
 1
+OUT
+
+language_output_is("tcl",<<'TCL',<<'OUT',"command: global explicit");
+  ::puts ok
+TCL
+ok
 OUT
 }

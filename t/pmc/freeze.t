@@ -1,5 +1,12 @@
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: freeze.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: freeze.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 27;
 
 =head1 NAME
 
@@ -7,16 +14,13 @@ t/pmc/freeze.t - Archiving
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/freeze.t
+	% prove t/pmc/freeze.t
 
 =head1 DESCRIPTION
 
 Tests the freeze/thaw archiving subsystem.
 
 =cut
-
-use Parrot::Test tests => 27;
-use Test::More;
 
 END { unlink "temp.fpmc"; };
 

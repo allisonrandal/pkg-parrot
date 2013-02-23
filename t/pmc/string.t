@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: string.t 9412 2005-10-09 01:37:19Z coke $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: string.t 10789 2005-12-30 15:21:00Z ambs $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 38;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/string.t - Strings
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/string.t
+	% prove t/pmc/string.t
 
 =head1 DESCRIPTION
 
 Tests the C<String> PMC.
 
 =cut
-
-use Parrot::Test tests => 35;
-use Test::More; # Included for skip().
 
 my $fp_equality_macro = <<'ENDOFMACRO';
 .macro fp_eq ( J, K, L )
@@ -403,86 +406,6 @@ false
 true
 false
 OUTPUT
-
-# XXX unimplemented ops... should remove tests
-
-## XXX these tests better should get generated
-##     with all combinations of params and ops
-#output_is(<<'CODE', <<OUTPUT, "add str_int, str_int");
-#	new P0, .String
-#	set P0, "23"
-#	new P1, .String
-#	set P1, "2"
-#	new P2, .Undef
-#	add P2, P0, P1
-#	print P2
-#	print "\n"
-#	end
-#CODE
-#25
-#OUTPUT
-
-#output_is(<<"CODE", <<OUTPUT, "add str_int, str_num");
-#@{[ $fp_equality_macro ]}
-# 	new P0, .String
-# 	set P0, "23"
-# 	new P1, .String
-# 	set P1, "2.5"
-# 	new P2, .Undef
-# 	add P2, P0, P1
-#         .fp_eq(P2, 25.5, EQ1)
-#         print "not "
-# EQ1:    print "ok 1\\n"
-# 	end
-# CODE
-# ok 1
-# OUTPUT
-
-# output_is(<<'CODE', <<OUTPUT, "add str_int, int");
-# 	new P0, .String
-# 	set P0, "23"
-# 	new P1, .Integer
-# 	set P1, 2
-# 	new P2, .Undef
-# 	add P2, P0, P1
-# 	print P2
-# 	print "\n"
-# 	end
-# CODE
-# 25
-# OUTPUT
-
-# output_is(<<"CODE", <<OUTPUT, "add str_int, num");
-# @{[ $fp_equality_macro ]}
-# 	new P0, .String
-# 	set P0, "23"
-# 	new P1, .Float
-# 	set P1, 2.5
-# 	new P2, .Undef
-# 	add P2, P0, P1
-#         .fp_eq(P2, 25.5, EQ1)
-#         print "not "
-# EQ1:    print "ok 1\\n"
-# 	end
-# CODE
-# ok 1
-# OUTPUT
-
-# output_is(<<"CODE", <<OUTPUT, "add str_num, int");
-# @{[ $fp_equality_macro ]}
-# 	new P0, .String
-# 	set P0, "23.5"
-# 	new P1, .Integer
-# 	set P1, 2
-# 	new P2, .Undef
-# 	add P2, P0, P1
-#         .fp_eq(P2, 25.5, EQ1)
-#         print "not "
-# EQ1:    print "ok 1\\n"
-# 	end
-# CODE
-# ok 1
-#OUTPUT
 
 output_is(<<'CODE', <<OUTPUT, "concat");
 	new P0, .String
@@ -1011,34 +934,6 @@ ok 2
 ok 3
 OUTPUT
 
-SKIP: {
-skip("No unicode yet", 1);
-output_is( <<'CODE', <<OUTPUT, "bnots 2");
- getstdout P0
- push P0, "utf8"
- new P1, .String
- new P2, .String
- set P1, "a2c"
- bnots P2, P1
- print P1
- print "\n"
- print P2
- print "\n"
- bnots P1, P1
- print P1
- print "\n"
- bnots P1, P1
- print P1
- print "\n"
- end
-CODE
-a2c
-\xC2\x9E\xC3\x8D\xC2\x9C
-\xC2\x9E\xC3\x8D\xC2\x9C
-a2c
-OUTPUT
-}
-
 output_is( <<'CODE', <<OUTPUT, "eq_str");
         new P1, .String
         new P2, .String
@@ -1191,4 +1086,117 @@ hello world
 he--o wor-d
 he--o !!!!r-d
 -o !!!!r-d
+OUTPUT
+
+output_is( <<'CODE', <<OUTPUT, "set I0, P0 - string_to_int");
+  new P0, .String
+  set P0, "12.3E5\n"
+  set I0, P0
+  print I0
+  print "\n"
+  end
+CODE
+12
+OUTPUT
+
+pir_output_is( <<'CODE', <<OUTPUT, 'String."trans"' );
+
+# tr{wsatugcyrkmbdhvnATUGCYRKMBDHVN}
+#            {WSTAACGRYMKVHDBNTAACGRYMKVHDBN};
+
+# create tr table at compile-time
+.sub tr_00_init :immediate
+    .local pmc tr_array
+    tr_array = new .FixedIntegerArray   # Todo char array
+    tr_array = 256                      # Python compat ;)
+    .local string from, to
+    from = 'wsatugcyrkmbdhvnATUGCYRKMBDHVN'
+    to   = 'WSTAACGRYMKVHDBNTAACGRYMKVHDBN'
+    .local int i, ch, r, len
+    len = length from
+    null i
+loop:
+    ch = ord from, i
+    r  = ord to,   i
+    tr_array[ch] = r
+    inc i
+    if i < len goto loop
+    .return(tr_array)
+.end
+
+.sub tr_test :main
+    .local string s, t
+    .local int el
+    s = "atugcsATUGCS"
+    .const .Sub tr_00 = 'tr_00_init'
+    el = elements tr_00
+    print el
+    print "\n"
+    trans s, tr_00
+    print s
+    print "\n"
+.end
+CODE
+256
+TAACGSTAACGS
+OUTPUT
+
+
+pir_output_is( <<'CODE', <<OUTPUT, "reverse P0 - reverse string");
+.sub main :main
+  $P0 = new String
+  $P0 = "torrap"
+  reverse $P0
+  print $P0
+  print "\n"
+  end
+.end
+CODE
+parrot
+OUTPUT
+
+
+pir_output_is( <<'CODE', <<OUTPUT, "is_integer - check integer");
+.sub main :main
+  $P0 = new String
+
+  $P0 = "543"
+  $I0 = is_integer $P0
+  print $I0
+  print "\n"
+
+  $P0 = "4.3"
+  $I0 = is_integer $P0
+  print $I0
+  print "\n"
+
+  $P0 = "foo"
+  $I0 = is_integer $P0
+  print $I0
+  print "\n"
+
+  $P0 = "-1"
+  $I0 = is_integer $P0
+  print $I0
+  print "\n"
+
+  $P0 = "+-1"
+  $I0 = is_integer $P0
+  print $I0
+  print "\n"
+
+  $P0 = "+1"
+  $I0 = is_integer $P0
+  print $I0
+  print "\n"
+
+  end
+.end
+CODE
+1
+0
+0
+1
+0
+1
 OUTPUT

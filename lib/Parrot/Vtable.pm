@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Vtable.pm 10472 2005-12-12 22:12:28Z particle $
+# $Id: Vtable.pm 10541 2005-12-15 21:33:32Z particle $
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ Parrot::Vtable - Functions for manipulating vtables
 
 C<Parrot::Vtable> provides a collection of functions for manipulating
 PMC vtables. It is used by F<tools/build/jit2h.pl>, F<tools/build/pmc2c.pl>,
-F<tools/build/vtable_h.pl>, F<src/classes/genclass.pl>, and
+F<tools/build/vtable_h.pl>, F<tools/dev/gen_class.pl>, and
 F<src/classes/null.pl>.
 
 =head2 Functions
@@ -401,7 +401,7 @@ sub parse_params
 
 =item F<tools/build/vtable_h.pl>
 
-=item F<src/classes/genclass.pl>
+=item F<tools/dev/gen_class.pl>
 
 =item F<src/classes/null.pl>
 

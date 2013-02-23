@@ -2,9 +2,11 @@
 
 use strict;
 use lib qw(tcl/t t . ../lib ../../lib ../../../lib);
-use Parrot::Test tests => 63;
+
+use Parrot::Test tests => 136;
 use Parrot::Config;
 use Test::More;
+
 
 language_output_is("tcl",<<TCL,<<OUT,"first, initial");
  string
@@ -13,13 +15,13 @@ wrong # args: should be "string option arg ?arg ...?"
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"first, initial");
- puts [string first a abcdef]
+ puts [string first a abcdefa]
 TCL
 0
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"first, middle");
- puts [string first a federal]
+ puts [string first a federala]
 TCL
 5
 OUT
@@ -37,7 +39,7 @@ TCL
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"first, index, end");
- puts [string first c abcd end-3]
+ puts [string first c abcdc end-4]
 TCL
 2
 OUT
@@ -49,7 +51,7 @@ TCL
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"first, index");
- puts [string first c abcd 1]
+ puts [string first c abcdc 1]
 TCL
 2
 OUT
@@ -57,7 +59,7 @@ OUT
 language_output_is("tcl",<<TCL,<<OUT,"first, index, invalid index");
  puts [string first c abcd joe]
 TCL
-bad index "joe": must be integer or end?-integer?
+bad index "joe": must be integer?[+-]integer? or end?[+-]integer?
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"first, not enough args");
@@ -70,6 +72,68 @@ language_output_is("tcl",<<TCL,<<OUT,"first, too many args");
  string first a b c d
 TCL
 wrong # args: should be "string first subString string ?startIndex?"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, initial");
+ puts [string last a abcdefa]
+TCL
+6
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, middle");
+ puts [string last a federala]
+TCL
+7
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, failure");
+ puts [string last c green]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, index, failure");
+ puts [string last c green 0]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, index, end");
+ puts [string last c abcdc end-2]
+TCL
+2
+OUT
+
+## Overshot is ignored in this case as the maximum between the string
+## of the offset is considered
+language_output_is("tcl",<<TCL,<<OUT,"last, index, overshot");
+ puts [string last c abcd 20]
+TCL
+2
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, index");
+ puts [string last c abcdc 1]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, index, invalid index");
+ puts [string last c abcd joe]
+TCL
+bad index "joe": must be integer?[+-]integer? or end?[+-]integer?
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, not enough args");
+ string last
+TCL
+wrong # args: should be "string last subString string ?lastIndex?"
+OUT
+
+language_output_is("tcl",<<TCL,<<OUT,"last, too many args");
+ string last a b c d
+TCL
+wrong # args: should be "string last subString string ?lastIndex?"
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"index, too many args");
@@ -117,25 +181,25 @@ OUT
 language_output_is("tcl",<<TCL,<<OUT,"index, float");
  puts [string index abcde 1.2]
 TCL
-bad index "1.2": must be integer or end?-integer?
+bad index "1.2": must be integer?[+-]integer? or end?[+-]integer?
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"index, end-float");
  puts [string index abcde end-1.2]
 TCL
-bad index "end-1.2": must be integer or end?-integer?
+bad index "end-1.2": must be integer?[+-]integer? or end?[+-]integer?
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"index, overshot, neg.");
  puts [string index abcde bogus]
 TCL
-bad index "bogus": must be integer or end?-integer?
+bad index "bogus": must be integer?[+-]integer? or end?[+-]integer?
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"index, bad -end");
  puts [string index abcde end-bogus]
 TCL
-bad index "end-bogus": must be integer or end?-integer?
+bad index "end-bogus": must be integer?[+-]integer? or end?[+-]integer?
 OUT
 
 language_output_is("tcl",<<TCL,<<OUT,"length, too many args");
@@ -393,4 +457,369 @@ TCL
 1
 OUT
 }
+
+language_output_is("tcl",<<'TCL',<<OUT,"string tolower, Simple");
+  puts [string tolower "AabcD ABC"]
+TCL
+aabcd abc
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string tolower, bad args");
+   string tolower
+TCL
+wrong # args: should be "string tolower string ?first? ?last?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string tolower, both limits");
+    puts [string tolower PARROT end-4 4]
+TCL
+ParroT
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string tolower, single index");
+    puts [string tolower PARROT 4]
+TCL
+PARRoT
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string tolower, single index, out of string");
+    puts [string tolower PARROT 40]
+TCL
+PARROT
+OUT
+
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string toupper, Simple");
+  puts [string toupper "AabcD ABC"]
+TCL
+AABCD ABC
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string toupper, bad args");
+   string toupper
+TCL
+wrong # args: should be "string toupper string ?first? ?last?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string toupper, both limits");
+    puts [string toupper parrot end-4 4]
+TCL
+pARROt
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string toupper, single index");
+    puts [string toupper parrot 4]
+TCL
+parrOt
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string toupper, single index, out of string");
+    puts [string tolower parrot 40]
+TCL
+parrot
+OUT
+
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string totitle, Simple");
+  puts [string totitle "AabcD ABC"]
+TCL
+Aabcd abc
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string totitle, bad args");
+   string totitle
+TCL
+wrong # args: should be "string totitle string ?first? ?last?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string totitle, both limits");
+    puts [string totitle PARROT end-4 4]
+TCL
+PArroT
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string totitle, single index");
+    puts [string totitle parrot 4]
+TCL
+parrOt
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string totitle, single index, out of string");
+    puts [string totitle PARROT 40]
+TCL
+PARROT
+OUT
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string replace, bad args");
+    string replace
+TCL
+wrong # args: should be "string replace string first last ?string?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string replace, simple");
+    puts [string replace parrcamelot 4 8]
+TCL
+parrot
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string replace, negative index");
+    puts [string replace junkparrot -10 3]
+TCL
+parrot
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string replace, index bigger than string");
+    puts [string replace parrotjunk 6 20]
+TCL
+parrot
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string replace, by something");
+    puts [string replace perl 1 3 arrot]
+TCL
+parrot
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string replace, swapped indexes");
+    puts [string replace perl 3 1 arrot]
+TCL
+perl
+OUT
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimleft, bad args");
+   string trimleft
+TCL
+wrong # args: should be "string trimleft string ?chars?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimleft, no chars");
+   puts [string trimleft "  \nfoo"]
+TCL
+foo
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimleft, char set");
+   puts [string trimleft "abcfaoo" abc]
+TCL
+faoo
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimleft, char set, no match");
+   puts [string trimleft "abcfaoo" z]
+TCL
+abcfaoo
+OUT
+
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimright, bad args");
+   string trimright
+TCL
+wrong # args: should be "string trimright string ?chars?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimright, no chars");
+   puts [string trimright " foo  "]
+TCL
+ foo
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimright, char set");
+   puts [string trimright "abcfaoo" ao]
+TCL
+abcf
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trimright, char set, no match");
+   puts [string trimright "abcfaoo" z]
+TCL
+abcfaoo
+OUT
+
+
+
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trim, bad args");
+   string trim
+TCL
+wrong # args: should be "string trim string ?chars?"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trim, no chars");
+   puts [string trim " \n foo  "]
+TCL
+foo
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trim, char set");
+   puts [string trim "ooabacfaoo" ao]
+TCL
+bacf
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string trim, char set, no match");
+   puts [string trim "abcfaoo" z]
+TCL
+abcfaoo
+OUT
+
+# XXX - many of the classes are NOT tested here, and we rely
+# on the cvs tests from tcl for that.
+
+my %doubles = qw(
+  2.1    1    
+  7.0    1
+  7      1
+  1e1    1
+  .1     1
+  no     0
+  .      0
+  +2.    1
+  -2.    1
+);
+
+foreach my $double (keys %doubles) {
+  language_output_is("tcl",<<"TCL",<<"OUT","string is double: $double");
+    puts [string is double $double]
+TCL
+$doubles{$double}
+OUT
+
+}
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, bad args (1)");
+   string compare
+TCL
+wrong # args: should be "string compare ?-nocase? ?-length int? string1 string2"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, bad args (2)");
+   string compare -length "aaa" "bbb"
+TCL
+wrong # args: should be "string compare ?-nocase? ?-length int? string1 string2"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, bad args (3)");
+   string compare -length 4 -length 8 "aaa" "bbb"
+TCL
+wrong # args: should be "string compare ?-nocase? ?-length int? string1 string2"
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, same string");
+   puts [string compare aaa aaa]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, \"lower\" string");
+   puts [string compare aaa aab]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, \"higher\" string");
+   puts [string compare aab aaa]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, bigger string");
+   puts [string compare aaaa aaa]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, smaller string");
+   puts [string compare aaa aaaa]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different sizes, len specified");
+   puts [string compare -length 3 aaa aaaa]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different strings, len specified");
+   puts [string compare -length 4 aaabc aaabb]
+TCL
+0
+OUT
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different strings, len specified");
+   string compare -length four aaabc aaabb
+TCL
+wrong # args: should be "string compare ?-nocase? ?-length int? string1 string2"
+OUT
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different strings, len specified");
+   string compare -length -10 aaabc aaabb
+TCL
+wrong # args: should be "string compare ?-nocase? ?-length int? string1 string2"
+OUT
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different strings, len specified");
+   string compare -length 4.2 aaabc aaabb
+TCL
+wrong # args: should be "string compare ?-nocase? ?-length int? string1 string2"
+OUT
+
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, same string, different case");
+   puts [string compare -nocase AAA aaa]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, \"lower\" string, different case");
+   puts [string compare -nocase aaa AAB]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, \"higher\" string, different case");
+   puts [string compare -nocase AAB aaa]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, bigger string, different case");
+   puts [string compare -nocase AAAA aaa]
+TCL
+1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, smaller string, different case");
+   puts [string compare -nocase AAA aaaa]
+TCL
+-1
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different sizes, len specified, different case");
+   puts [string compare -length 3 -nocase aaa AAAA]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, different strings, len specified, different case");
+   puts [string compare -length 4 -nocase AAABC aaabb]
+TCL
+0
+OUT
+
+language_output_is("tcl",<<'TCL',<<OUT,"string compare, same string, different case");
+   puts [string compare AAAA aaaa]
+TCL
+-1
+OUT
 

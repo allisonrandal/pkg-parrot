@@ -1,4 +1,4 @@
-# $Id: oo_class.t 7803 2005-04-11 13:37:27Z leo $
+# $Id: oo_class.t 7292 2004-12-14 13:37:48Z rubys $
 
 use strict;
 use lib '../../lib';

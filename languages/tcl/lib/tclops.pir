@@ -1,4 +1,5 @@
 .include "languages/tcl/lib/returncodes.pir"
+.include "languages/tcl/lib/macros.pir"
 
 .namespace [ "TclUnaryOp" ]
 
@@ -57,7 +58,7 @@ minus:
   goto done
 
 plus: 
-  .return compile(operand,register_num) 
+  .return compile(register_num, operand) 
 
 bitwise_not:
   opcode = "bnot"
@@ -66,7 +67,7 @@ bitwise_not:
 logical_not:
   opcode = "not" 
 done:
-  (register_num,pir_code) = compile(operand,register_num)
+  (register_num,pir_code) = compile(register_num,operand)
 
   .local pmc printf_args
   printf_args = new .Array

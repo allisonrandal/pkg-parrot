@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: vtablecache.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: vtablecache.pmc 10871 2006-01-03 17:50:14Z particle $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ pmclass VtableCache extends default needs_ext {
     }
 
     void destroy () {
-	return;
+        return;
         if (NULL != PMC_struct_val(SELF)) {
             Parrot_destroy_vtable(INTERP, PMC_data(SELF));
         }

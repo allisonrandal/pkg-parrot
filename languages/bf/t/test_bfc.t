@@ -1,4 +1,4 @@
-# $Id$
+# $Id: test_bfc.t 10933 2006-01-06 01:43:24Z particle $
 
 # Test bf interpreter
 # Print TAP, Test Anything Protocol

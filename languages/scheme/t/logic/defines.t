@@ -1,10 +1,11 @@
 #! perl -w
-# $Id: defines.t 7978 2005-05-04 19:45:04Z bernhard $
+# $Id: defines.t 10770 2005-12-29 18:45:07Z bernhard $
 
 use FindBin;
 use lib "$FindBin::Bin/../..";
 
-use Scheme::Test tests => 12;
+# use Scheme::Test tests => 12;
+use Scheme::Test skip_all => 'Using obsolete calling conventions';
 
 output_is (<<'CODE', 'a', 'a symbol');
 (write 'a) ; for emacs ')

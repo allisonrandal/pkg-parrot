@@ -1,6 +1,25 @@
-# $Id: NEWS 10343 2005-12-04 15:27:40Z leo $
+# $Id: NEWS 10986 2006-01-08 14:15:28Z leo $
+
+New in 0.4.1
+
+- Installation: 'make install' is using standard locations now
+  (/usr/local is the default --prefix)
+- Produce static and shared libraries on some systems
+- Configure system rearragement
+- OS pmc started (mkdir,cd,cwd,rm,umask,stat)
+- Shootout examples
+- Test files are now testable with 'prove'
+- Smoke (and smokej) outputs progress 
+- PIR supports: I = A < B (>,<=,>=,==,!=)
+- Add support for octal number constants
+- partcl updates:
+  - almost finish [string]; start [file]
+  - add build tool for generating inline'd tcl builtins from templates.
+- Jako updates: NCI, subroutines, global variables and constants all work. 
+  (Gregor)
 
 New in 0.4.0
+
 - New lexical handling and closure support including better
   introspection for caller and outer
 - PGE (Parrot Grammar Engine) provides now compilers for P6Rule, 

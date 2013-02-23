@@ -1,6 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: perlhash.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: perlhash.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 37;
 
 =head1 NAME
 
@@ -8,7 +14,7 @@ t/pmc/perlhash.t - testing the PerlHash PMC
 
 =head1 SYNOPSIS
 
-    % perl -Ilib t/pmc/perlhash.t
+    % prove t/pmc/perlhash.t
 
 =head1 DESCRIPTION
 
@@ -17,9 +23,6 @@ normal and potentially hazardous keys. Does a bit of stress testing as
 well.
 
 =cut
-
-use Parrot::Test tests => 37;
-use Test::More;
 
 output_is(<<CODE, <<OUTPUT, "Initial PerlHash tests");
     new    P0, .PerlHash

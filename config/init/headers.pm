@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: headers.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: headers.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Uses C<ExtUtils::Manifest> to determine which headers are nongenerated.
 
 =cut
 
-package Configure::Step;
+package init::headers;
 
 use strict;
 use vars qw($description $result @args);
@@ -21,26 +21,28 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step;
 use ExtUtils::Manifest qw(maniread);
 
-$description="Determining nongenerated header files...";
+$description = "Determining nongenerated header files...";
 
-@args=();
+@args = ();
 
-sub runstep {
-    my $self = shift;
+sub runstep
+{
+    my ($self, $conf) = @_;
+
     my $inc = 'include/parrot';
 
-    my @headers=(
-	sort
-	map  { m{^$inc/(.*\.h)\z} }
-	keys %{maniread()}
+    my @headers = (
+        sort
+            map { m{^$inc/(.*\.h)\z} }
+            keys %{maniread()}
     );
 
     $_ = "\$(INC_DIR)/$_" for @headers;
     my $TEMP_nongen_headers = join("\\\n	", @headers);
 
-    Parrot::Configure::Data->set(
-	inc            => $inc,
-	TEMP_nongen_headers => $TEMP_nongen_headers,
+    $conf->data->set(
+        inc                 => $inc,
+        TEMP_nongen_headers => $TEMP_nongen_headers,
     );
 }
 

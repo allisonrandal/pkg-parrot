@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: CPrederef.pm 7930 2005-04-27 07:24:32Z leo $
+# $Id: CPrederef.pm 10519 2005-12-14 12:23:38Z leo $
 
 =head1 NAME
 
@@ -61,8 +61,9 @@ sub defines
 {
     return <<END;
 #define REL_PC ((size_t)(cur_opcode - interpreter->code->prederef.code))
-#define CUR_OPCODE (interpreter->code->base.data + REL_PC)
+#define CUR_OPCODE ((opcode_t*)cur_opcode + CONTEXT(interpreter->ctx)->pred_offset)
 
+#if 0
 static opcode_t* prederef_to_opcode(Interp* interpreter,
                                            void** prederef_addr)
 {
@@ -80,8 +81,14 @@ static void** opcode_to_prederef(Interp* interpreter,
     offset_in_ops = opcode_addr - (opcode_t*) interpreter->code->base.data;
     return interpreter->code->prederef.code + offset_in_ops;
 }
+#else
+#  define prederef_to_opcode(i, pred) (pred ? \\
+     ((opcode_t*)pred + CONTEXT(i->ctx)->pred_offset) : NULL)
+#  define opcode_to_prederef(i, op)   (op ? \\
+     (void**) (op   - CONTEXT(i->ctx)->pred_offset) : NULL)
+#endif
 
-#define OP_AS_OFFS(o) ((char *)interpreter->ctx.bp + ((opcode_t*)cur_opcode)[o])
+#define OP_AS_OFFS(o) (_reg_base + ((opcode_t*)cur_opcode)[o])
 
 END
 }
@@ -192,18 +199,18 @@ sub access_arg
         'op' => "cur_opcode[%ld]",
 
         'i'  => "(*(INTVAL *)OP_AS_OFFS(%ld))",
+        'ki'  => "(*(INTVAL *)OP_AS_OFFS(%ld))",
         'n'  => "(*(FLOATVAL *)OP_AS_OFFS(%ld))",
         'p'  => "(*(PMC **)OP_AS_OFFS(%ld))",
         's'  => "(*(STRING **)OP_AS_OFFS(%ld))",
         'k'  => "(*(PMC **)OP_AS_OFFS(%ld))",
-        'ki'  => "(*(INTVAL *)OP_AS_OFFS(%ld))",
 
-        'ic' => "(*(INTVAL *)cur_opcode[%ld])",
+        'ic' => "((INTVAL)cur_opcode[%ld])",
+        'kic' => "((INTVAL)cur_opcode[%ld])",
         'nc' => "(*(FLOATVAL *)cur_opcode[%ld])",
-        'pc' => "(*(PMC **)cur_opcode[%ld])",
-        'sc' => "(*(STRING **)cur_opcode[%ld])",
-        'kc' => "(*(PMC **)cur_opcode[%ld])",
-        'kic' => "(*(INTVAL *)cur_opcode[%ld])"
+        'sc' => "((STRING *)cur_opcode[%ld])",
+        'pc' => "((PMC *)cur_opcode[%ld])",
+        'kc' => "((PMC *)cur_opcode[%ld])",
     );
 
     die "Unrecognized type '$type' for num '$num' in opcode @{[$op->full_name]}"

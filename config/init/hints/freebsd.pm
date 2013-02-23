@@ -1,32 +1,43 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: freebsd.pm 9954 2005-11-13 22:06:22Z jhoblitt $
+# $Id: freebsd.pm 10939 2006-01-06 16:52:23Z particle $
 
-my $libs = Parrot::Configure::Data->get('libs');
+package init::hints::freebsd;
 
-# get rid of old pthread-stuff, if any
-$libs =~ s/(-lpthreads|-lc_r)\b\s*//g;
+use strict;
 
-# The following test is from FreeBSD's /usr/ports/Mk/bsd.port.mk,
-# which must be assumed to do the right thing.
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-my $osversion;
-if (-e "/sbin/sysctl") {
-    $osversion = `/sbin/sysctl -n kern.osreldate`;
-}
-else {
-    $osversion = `/usr/sbin/sysctl -n kern.osreldate`;
-}
-chomp $osversion;
+    my $libs = $conf->data->get('libs');
 
-if ($osversion < 500016) { 
+    # get rid of old pthread-stuff, if any
+    $libs =~ s/(-lpthreads|-lc_r)\b\s*//g;
+
+    # The following test is from FreeBSD's /usr/ports/Mk/bsd.port.mk,
+    # which must be assumed to do the right thing.
+
+    my $osversion;
+    if (-e "/sbin/sysctl") {
+        $osversion = `/sbin/sysctl -n kern.osreldate`;
+    } else {
+        $osversion = `/usr/sbin/sysctl -n kern.osreldate`;
+    }
+    chomp $osversion;
+
     $libs .= ' -pthread';
-}
-else {
-    $libs =~ s/-lc\b\s*//;
-    $libs .= ' -lc_r';
+
+    $conf->data->set(
+        libs                    => $libs,
+        link                    => 'g++',
+        rpath                   => '-Wl,-R',
+
+        has_dynamic_linking     => 1,
+        parrot_is_shared        => 1,
+        libparrot_shared        => 'libparrot$(SHARE_EXT).$(SOVERSION)',
+        libparrot_shared_alias  => 'libparrot$(SHARE_EXT)',
+        libparrot_soname        => '-Wl,-soname=libparrot$(SHARE_EXT).$(SOVERSION)',
+    );
 }
 
-Parrot::Configure::Data->set(
-    libs => $libs,
-    link => 'g++',
-);
+1;

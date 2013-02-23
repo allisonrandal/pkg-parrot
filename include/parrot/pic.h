@@ -1,7 +1,7 @@
 /* pic.h
  *  Copyright: 2005 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id$
+ *     $Id: pic.h 10933 2006-01-06 01:43:24Z particle $
  *  Overview:
  *     This is the api header for the pic subsystem
  *  Data Structure and Algorithms:
@@ -48,7 +48,7 @@ typedef struct Parrot_mic_t {
         STRING *method;                 /* for callmethod */
         INTVAL func_nr;			/* MMD function number */
         STRING *attribute;              /* obj.attribute */
-        int arg_count;                  /* arg passing */
+        PMC *sig;                       /* arg passing */
     } m;
     Parrot_PIC *pic;                    /* more cache entries */
 } Parrot_MIC;
@@ -77,9 +77,8 @@ void parrot_pic_find_infix_v_pp(Interp *, PMC *left, PMC *right,
                 Parrot_MIC *mic, opcode_t *cur_opcode);
 void * parrot_pic_opcode(Interp *, INTVAL op);
 
-typedef void (*arg_pass_f)(Interp *, int arg_count,
-        struct Parrot_Context *src_ctx, opcode_t *src_pc,
-        struct Parrot_Context *dst_ctx, opcode_t *dst_pc);
+typedef int (*arg_pass_f)(Interp *, PMC *sig,
+        char *src_base, void **src_pc, char *dest_base, void **dest_pc);
 
 #endif /* PARROT_PIC_H_GUARD */
 

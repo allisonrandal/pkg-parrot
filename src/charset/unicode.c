@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: unicode.c 10412 2005-12-09 00:47:03Z particle $
+$Id: unicode.c 10592 2005-12-20 14:53:14Z leo $
 
 =head1 NAME
 
@@ -86,7 +86,7 @@ compose(Interp *interpreter, STRING *src)
        UErrorCode *status);
        */
     dest_len = src_len = src->strlen;
-    dest = string_make_direct(interpreter, NULL, src_len,
+    dest = string_make_direct(interpreter, NULL, src_len * sizeof(UChar),
             src->encoding, src->charset, 0);
     err = U_ZERO_ERROR;
     dest_len = unorm_normalize(src->strstart, src_len,

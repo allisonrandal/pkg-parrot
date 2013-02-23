@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: bc.py 10448 2005-12-11 17:58:12Z bernhard $
+# $Id: bc.py 10933 2006-01-06 01:43:24Z particle $
 
 import os
 import sys

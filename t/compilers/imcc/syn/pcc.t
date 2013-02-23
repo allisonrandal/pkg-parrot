@@ -1,8 +1,12 @@
-#!perl -w
+#!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pcc.t 10288 2005-12-01 16:02:47Z leo $
+# $Id: pcc.t 10826 2005-12-31 22:40:24Z ambs $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Config;
 use Parrot::Test tests => 21;
 
 ##############################

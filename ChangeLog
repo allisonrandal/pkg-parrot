@@ -1,16 +1,28 @@
-# $Id: ChangeLog 10479 2005-12-13 01:50:55Z particle $
+# $Id: ChangeLog 10986 2006-01-08 14:15:28Z leo $
 
-2005.12-12    particle
+2006.01.08    leo
+	* Released 0.4.1
+
+	See NEWS for more.
+
+2005.12.28    particle
+	* renamed all .imc files to .pir
+	* modified all doc references to .pir as well
+
+2005.12.13    particle
+	* moved jit/ directory to src/jit/
+
+2005.12.12    particle
 	* moved io/ directory to src/io/
 	* moved classes/ directory to src/classes/
 	* moved dynclasses/ directory to src/dynclasses/
 
-2005.12-08    particle
+2005.12.08    particle
 	* moved types/ directory to src/types/
 	* moved pf/ directory to src/packfile/
 	* moved ops/ directory to src/ops/
 
-2005.12-08    particle
+2005.12.08    particle
 	* moved charset/ directory to src/charset/
 	* moved encodings/ directory to src/encodings/
 
@@ -3575,9 +3587,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 10479 2005-12-13 01:50:55Z particle $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 10986 2006-01-08 14:15:28Z leo $
 	into generated files
-	   but the $Id: ChangeLog 10479 2005-12-13 01:50:55Z particle $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 10986 2006-01-08 14:15:28Z leo $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

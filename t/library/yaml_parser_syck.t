@@ -1,13 +1,21 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: yaml_parser_syck.t 8104 2005-05-14 20:56:37Z bernhard $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: yaml_parser_syck.t 10751 2005-12-28 22:47:30Z particle $
+
+use strict;
+use warnings;
+use lib qw( t . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
-t/library/yaml_parser_syck.t - testing library/YAML/Parser/Syck.imc
+t/library/yaml_parser_syck.t - testing library/YAML/Parser/Syck.pir
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/library/yaml_parser_syck.t
+	% prove t/library/yaml_parser_syck.t
 
 =head1 DESCRIPTION
 
@@ -15,10 +23,6 @@ Try to parse a YAML document.
 
 =cut
 
-use strict;
-
-use Parrot::Test tests => 1;
-use Test::More;
 
 TODO: {
 
@@ -26,8 +30,8 @@ TODO: {
 
   pir_output_is( << 'CODE', << 'OUT', "basic parsing" );
 
-.include "library/YAML/Parser/Syck.imc"
-.include "library/dumper.imc"
+.include "library/YAML/Parser/Syck.pir"
+.include "library/dumper.pir"
 .sub test @MAIN 
 
   .local pmc loaded 
@@ -154,6 +158,7 @@ elem12345678
 OUT
 };
 
+
 =back
 
 =head1 AUTHOR
@@ -162,6 +167,11 @@ Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
 
 =head1 SEE ALSO
 
-F<runtime/parrot/library/YAML/Parser/Syck.imc>
+F<runtime/parrot/library/YAML/Parser/Syck.pir>
 
 =cut
+
+
+## remember to change the number of tests! :-)
+BEGIN { plan tests => 1; }
+

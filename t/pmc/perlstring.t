@@ -1,6 +1,12 @@
-#! perl -w
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: perlstring.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: perlstring.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 67;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/perlstring.t - Perl Strings
 
 =head1 SYNOPSIS
 
-    % perl -Ilib t/pmc/perlstring.t
+    % prove t/pmc/perlstring.t
 
 =head1 DESCRIPTION
 
 Tests the C<PerlString> PMC. Checks Perl-specific string behaviour.
 
 =cut
-
-use Parrot::Test tests => 68;
-use Test::More; # Included for skip().
 
 my $fp_equality_macro = <<'ENDOFMACRO';
 .macro fp_eq ( J, K, L )
@@ -1723,34 +1726,6 @@ ok 1
 ok 2
 ok 3
 OUTPUT
-
-SKIP: {
-skip("No unicode yet", 1);
-output_is( <<'CODE', <<OUTPUT, "bnots 2");
- getstdout P0
- push P0, "utf8"
- new P1, .PerlString
- new P2, .PerlString
- set P1, "a2c"
- bnots P2, P1
- print P1
- print "\n"
- print P2
- print "\n"
- bnots P1, P1
- print P1
- print "\n"
- bnots P1, P1
- print P1
- print "\n"
- end
-CODE
-a2c
-\xC2\x9E\xC3\x8D\xC2\x9C
-\xC2\x9E\xC3\x8D\xC2\x9C
-a2c
-OUTPUT
-}
 
 output_is( <<'CODE', <<OUTPUT, "eq");
     new P1, .PerlString

@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Ops.pm 10425 2005-12-10 01:51:41Z particle $
+# $Id: Ops.pm 10620 2005-12-22 07:48:49Z fperrad $
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ sub new
 			$self->new_item('', 'src/ops/ops.num'),
 			$self->new_item('', 'tools/build/ops2pm.pl'),
 		),
-		$self->new_group('Op Libs', '', 'ops'),
+		$self->new_group('Op Libs', '', 'src/ops'),
 	);
 }
 

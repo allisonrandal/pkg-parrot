@@ -1,8 +1,19 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: aix.pm 9954 2005-11-13 22:06:22Z jhoblitt $
+# $Id: aix.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
-Parrot::Configure::Data->set(
-    cc => 'cc_r',
-    link => 'cc_r',
-    platform_asm => 1,
-);
+package init::hints::aix;
+
+use strict;
+
+sub runstep
+{
+    my ($self, $conf) = @_;
+
+    $conf->data->set(
+        cc           => 'cc_r',
+        link         => 'cc_r',
+        platform_asm => 1,
+    );
+}
+
+1;

@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: bigint.pmc 10466 2005-12-12 20:10:20Z leo $
+$Id: bigint.pmc 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -198,7 +198,6 @@ bigint_mod_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC *dest)
     int n = value < 0;
     if (n) {
         mpz_mod_ui(BN(dest), BN(self), -value);
-        mpz_neg(BN(dest), BN(dest));
     }
     else
         mpz_mod_ui(BN(dest), BN(self), value);

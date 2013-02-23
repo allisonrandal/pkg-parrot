@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: string.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: string.t 10938 2006-01-06 16:12:02Z leo $
 
 use strict;
 use warnings;
@@ -2824,7 +2824,25 @@ CODE
 Cannot get character before beginning of string
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUT', 'string_to_int --4');
+   .sub 'main' :main
+      print_as_integer('-4')
+      print_as_integer('X-4')
+      print_as_integer('--4')
+   .end
+
+   .sub 'print_as_integer'
+      .param string s
+      $I0 = s
+      print $I0
+      print "\n"
+   .end
+CODE
+-4
+0
+0
+OUT
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 157; }
+BEGIN { plan tests => 158; }
 

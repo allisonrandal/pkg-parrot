@@ -1,21 +1,33 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: vms.pm 9954 2005-11-13 22:06:22Z jhoblitt $
+# $Id: vms.pm 10701 2005-12-27 21:14:53Z jhoblitt $
 
-Parrot::Configure::Data->set(
-  ccflags => qq{/Standard=Relaxed_ANSI/Prefix=All/Obj=.obj/NoList/NOANSI_ALIAS/include="./include"},
-  perl    => "MCR $^X",
-  exe     => "exe"
-);
+package init::hints::vms;
 
+use strict;
+
+sub runstep
 {
-  local $^W;		#no warnings on redefinition
+    my ($self, $conf) = @_;
 
-  *Parrot::Configure::Step::cc_build=sub {
-    system("$c{cc} $c{ccflags} test.c") and die "C compiler died!";
-    system("link/exe=test test") and die "Link failed!";
-  };
+    $conf->data->set(
+        ccflags => qq{/Standard=Relaxed_ANSI/Prefix=All/Obj=.obj/NoList/NOANSI_ALIAS/include="./include"},
+        perl    => "MCR $^X",
+        exe     => "exe"
+    );
 
-  *Parrot::Configure::Step::cc_run=sub {
-    `mcr []test`
-  };
+    {
+        local $^W;    # no warnings on redefinition
+
+        *Parrot::Configure::Step::cc_build = sub {
+            my ($cc, $ccflags) = $conf->data->get(qw(cc ccflags));
+            system("$cc $ccflags test.c") and die "C compiler died!";
+            system("link/exe=test test")        and die "Link failed!";
+        };
+
+        *Parrot::Configure::Step::cc_run = sub {
+            `mcr []test`;
+        };
+    }
 }
+
+1;

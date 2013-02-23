@@ -1,6 +1,6 @@
 /* cclass.h
 *
-* $Id: cclass.h jrieks $
+* $Id: cclass.h 10933 2006-01-06 01:43:24Z particle $
 *
 *   Parrot character classes
 */

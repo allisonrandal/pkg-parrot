@@ -1,6 +1,12 @@
-#! perl -w
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: resizablepmcarray.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: resizablepmcarray.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 23;
 
 =head1 NAME
 
@@ -8,7 +14,7 @@ t/pmc/resizablepmcarray.t - testing the ResizablePMCArray PMC
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/resizablepmcarray.t
+	% prove t/pmc/resizablepmcarray.t
 
 =head1 DESCRIPTION
 
@@ -17,7 +23,6 @@ out-of-bounds test. Checks INT and PMC keys.
 
 =cut
 
-use Parrot::Test tests => 23;
 
 my $fp_equality_macro = <<'ENDOFMACRO';
 .macro fp_eq (	J, K, L )

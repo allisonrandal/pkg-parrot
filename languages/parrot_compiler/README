@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: README 10933 2006-01-06 01:43:24Z particle $
 
 'languages/parrot_compiler' is not really a language implementation.
 

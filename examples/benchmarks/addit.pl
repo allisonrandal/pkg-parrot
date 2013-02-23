@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: addit.pl 5175 2004-01-31 13:16:08Z mikescott $
+# $Id: addit.pl 10728 2005-12-28 17:00:50Z particle $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ print "$result\n";
 
 =head1 SEE ALSO
 
-F<examples/benchmarks/addit.pasm>, F<examples/benchmarks/addit.imc>,
-F<examples/benchmarks/addit2.imc>.
+F<examples/benchmarks/addit.pasm>, F<examples/benchmarks/addit.pir>,
+F<examples/benchmarks/addit2.pir>.
 
 =cut

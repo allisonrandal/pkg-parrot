@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pmc_freeze.c 9893 2005-11-10 22:10:01Z bernhard $
+$Id: pmc_freeze.c 10754 2005-12-29 01:19:55Z particle $
 
 =head1 NAME
 
@@ -1465,7 +1465,7 @@ run_thaw(Parrot_Interp interpreter, STRING* image, visit_enum_type what)
      *
      * XXX
      *
-     * md5_3.imc shows a segfault during thawing the config hash
+     * md5_3.pir shows a segfault during thawing the config hash
      * info->thaw_ptr becomes invalid - seems that the hash got
      * collected under us.
      */

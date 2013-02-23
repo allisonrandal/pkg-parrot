@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: install_files.pl 9403 2005-10-07 21:53:16Z autrijus $
+# $Id: install_files.pl 10951 2006-01-07 12:45:55Z rafl $
 ################################################################################
 
 =head1 TITLE
@@ -110,7 +110,7 @@ F<tools/dev/mk_manifests.pl>
 
 ################################################################################
 
-use File::Basename qw(dirname);
+use File::Basename qw(dirname basename);
 use File::Copy;
 use File::Spec;
 use strict;
@@ -122,12 +122,14 @@ my $exe = $PConfig{'exe'};
 # When run from the makefile, which is probably the only time this
 # script will ever be used, all of these defaults will get overridden.
 my %options = ( buildprefix => '',
-                prefix => '/usr',
+                prefix      => '/usr',
+                destdir     => '',
                 exec_prefix => '/usr',
-                bindir => '/usr/bin',
-                libdir => '/usr/lib',
-                includedir => '/usr/include',
-		'dry-run' => 0,
+                bindir      => '/usr/bin',
+                libdir      => '/usr/lib',
+                includedir  => '/usr/include',
+                docdir      => '/usr/share/doc',
+                'dry-run'   => 0,
               );
 
 my @manifests;
@@ -143,6 +145,7 @@ foreach (@ARGV) {
 my %seen;
 
 my @files;
+my @installable_exe;
 my %directories;
 @ARGV = @manifests;
 while(<>) {
@@ -172,17 +175,27 @@ while(<>) {
     $meta{$_} = 1 for (keys %meta); # Laziness
 
     if ($meta{lib}) {
-        $dest = File::Spec->catdir($options{libdir}, $dest);
+        # don't allow libraries to be installed into subdirs of libdir
+        $dest = File::Spec->catdir($options{libdir}, basename($dest));
     } elsif ($meta{bin}) {
-	$dest =~ s/^installable_//;	# parrot with different config
+        my $copy = $dest;
+        $dest =~ s/^installable_//; # parrot with different config
         $dest = File::Spec->catdir($options{bindir}, $dest);
         if ($exe) {
            $src .= $exe;
            $dest .= $exe;
         }
+        if ($copy =~ /^installable/) {
+            push @installable_exe, [$src, $dest];
+            next;
+        }
     } elsif ($meta{include}) {
+        $dest =~ s/^include//;
         $dest = File::Spec->catdir($options{includedir}, $dest);
+    } elsif ($meta{doc}) {
+        $dest = File::Spec->catdir($options{docdir}, $dest);
     } else {
+        $dest =~ s/^runtime/lib/;
         $dest = File::Spec->catdir($options{prefix}, $dest);
     }
 
@@ -196,7 +209,7 @@ while(<>) {
 }
 
 unless ($options{'dry-run'}) {
-    for my $dir (keys %directories) {
+    for my $dir (map { $options{destdir} . $_ } keys %directories) {
 	unless (-d $dir) {
 	    # Make full path to the directory $dir
 	    my @dirs;
@@ -211,8 +224,9 @@ unless ($options{'dry-run'}) {
     }
 }
 print("Installing ...\n");
-foreach (@files) {
+foreach (@files, @installable_exe) {
     my ($src, $dest) = @$_;
+    $dest = $options{destdir}.$dest;
     if ($options{'dry-run'}) {
 	print "$src -> $dest\n";
 	next;

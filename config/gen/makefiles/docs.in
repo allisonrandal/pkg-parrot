@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: docs.in 9799 2005-11-05 17:46:03Z rafl $
+# $Id: docs.in 10714 2005-12-28 02:12:59Z jhoblitt $
 
 #
 # Setup of some commands
@@ -8,7 +8,8 @@
 PERL = ${perl}
 RM_F = ${rm_f}
 # Make directory; do not die if dir exists.
-MKDIR = $(PERL) -e ${PQ}-d or mkdir $$_,0777 or die foreach @ARGV${PQ}
+MKDIR = ${mkdir}
+CHMOD = ${chmod}
 
 # long list of .pod files
 POD = ${pod}

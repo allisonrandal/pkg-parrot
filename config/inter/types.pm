@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: types.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: types.pm 10844 2006-01-02 02:56:12Z jhoblitt $
 
 =head1 NAME
 
@@ -7,12 +7,12 @@ config/inter/types.pm - Sizes for Parrot Types
 
 =head1 DESCRIPTION
 
-Asks the user which size integer, floating-point number and opcode types
-should be.
+Asks the user which size integer, floating-point number and opcode types should
+be.
 
 =cut
 
-package Configure::Step;
+package inter::types;
 
 use strict;
 use vars qw($description $result @args);
@@ -23,29 +23,28 @@ use Parrot::Configure::Step ':inter';
 
 $description = 'Determining what types Parrot should use...';
 
-@args=qw(ask intval opcode floatval);
+@args = qw(ask intval opcode floatval);
 
-sub runstep {
-    my $self = shift;
-  my %args;
-  @args{@args}=@_;
-  
-  my $intval=$args{intval} || 'long';
-  my $floatval=$args{floatval} || 'double';
-  my $opcode=$args{opcode} || 'long';
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-  if($args{ask}) {
-    $intval=prompt("\n\nHow big would you like your integers to be?", $intval);
-    $floatval=prompt("And your floats?", $floatval);
-    $opcode=prompt("What's your native opcode type?", $opcode);
-    print "\n";
-  }
-  
-  Parrot::Configure::Data->set(
-    iv       => $intval,
-    nv       => $floatval,
-    opcode_t => $opcode
-  );
+    my $intval   = $conf->options->get('intval')   || 'long';
+    my $floatval = $conf->options->get('floatval') || 'double';
+    my $opcode   = $conf->options->get('opcode')   || 'long';
+
+    if ($conf->options->get('ask')) {
+        $intval   = prompt("\n\nHow big would you like your integers to be?", $intval);
+        $floatval = prompt("And your floats?",                                $floatval);
+        $opcode   = prompt("What's your native opcode type?",                 $opcode);
+        print "\n";
+    }
+
+    $conf->data->set(
+        iv       => $intval,
+        nv       => $floatval,
+        opcode_t => $opcode
+    );
 }
 
 1;

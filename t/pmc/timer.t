@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: timer.t 8858 2005-08-07 19:32:34Z bernhard $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: timer.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 8;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/timer.t - Timer PMCs
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/timer.t
+	% prove t/pmc/timer.t
 
 =head1 DESCRIPTION
 
 Tests the Timer PMC.
 
 =cut
-
-use Parrot::Test tests => 8;
-use Test::More;
 
 my %platforms = map {$_=>1} qw/
     aix

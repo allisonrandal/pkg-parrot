@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: parrot.h 10346 2005-12-05 14:30:45Z leo $
+ *     $Id: parrot.h 10841 2006-01-01 22:46:24Z jhoblitt $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -103,6 +103,10 @@ typedef jmp_buf Parrot_jump_buff;
 #ifdef PARROT_HAS_HEADER_PTHREAD
 #  include <pthread.h>
 #endif /* PARROT_HAS_HEADER_PTHREAD */
+
+#ifdef PARROT_HAS_HEADER_LIMITS
+#  include <limits.h>
+#endif /* PARROT_HAS_HEADER_LIMITS */
 
 #define NUM_REGISTERS 32
 #define PARROT_MAGIC 0x13155a1

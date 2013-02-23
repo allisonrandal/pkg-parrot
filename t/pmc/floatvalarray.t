@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: floatvalarray.t 7803 2005-04-11 13:37:27Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: floatvalarray.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 10;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/floatvalarray.t - FloatvalArray tests
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/floatvalarray.t
+	% prove t/pmc/floatvalarray.t
 
 =head1 DESCRIPTION
 
 Tests the C<FloatvalArray> PMC.
 
 =cut
-
-use Parrot::Test tests => 10;
-use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', 'creation');
     new P0, .FloatvalArray

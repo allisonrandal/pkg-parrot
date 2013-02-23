@@ -1,9 +1,14 @@
-#!perl -w
+#!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: eval.t 10238 2005-11-29 03:16:07Z particle $
+# $Id: eval.t 10826 2005-12-31 22:40:24Z ambs $
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Config;
 use Parrot::Test tests => 7;
+
 
 SKIP: {
 	skip("changed eval semantics - see t/pmc/eval.t", 7);

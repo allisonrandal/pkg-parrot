@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: streams.t 9686 2005-11-01 16:25:50Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: streams.t 10741 2005-12-28 20:32:30Z particle $
+
+use strict;
+use warnings;
+use lib qw( t . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/library/streams.t - Stream tests
 
 =head1 SYNOPSIS
 
-        % perl -Ilib t/library/streams.t
+	% prove t/library/streams.t
 
 =head1 DESCRIPTION
 
@@ -16,12 +23,8 @@ Tests string streams.
 
 =cut
 
-use strict;
 
 my @streams = qw[Combiner Coroutine Filter Lines ParrotIO Replay Sub Writer];
-
-use Parrot::Test tests => 20;
-use Test::More;
 
 for my $a ( @streams ) {
 
@@ -32,7 +35,7 @@ pir_output_is(<<"CODE", <<"OUT", "load and create a Stream::$a");
 
 .sub _main
     print "loading '$a'...\\n"
-    load_bytecode "library/Stream/$a.imc"
+    load_bytecode "library/Stream/$a.pir"
     print "loaded\\n"
 
     find_type \$I0, "Stream::$a"
@@ -61,7 +64,7 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Sub");
 .sub _main :main
     .local pmc stream
 
-    load_bytecode "library/Stream/Sub.imc"
+    load_bytecode "library/Stream/Sub.pir"
 
     find_type I0, "Stream::Sub"
     new stream, I0
@@ -108,8 +111,8 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::read_bytes");
 .sub _main :main
     .local pmc stream
 
-    load_bytecode "library/Stream/Sub.imc"
-    load_bytecode "library/Stream/Replay.imc"
+    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode "library/Stream/Replay.pir"
 
     find_type $I0, "Stream::Sub"
     new $P0, $I0
@@ -187,9 +190,9 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Combiner");
     .local pmc text
     .local pmc combined
 
-    load_bytecode "library/Stream/Base.imc"
-    load_bytecode "library/Stream/Combiner.imc"
-    load_bytecode "library/Stream/Sub.imc"
+    load_bytecode "library/Stream/Base.pir"
+    load_bytecode "library/Stream/Combiner.pir"
+    load_bytecode "library/Stream/Sub.pir"
 
     # create the counter stream
     find_type I0, "Stream::Sub"
@@ -276,8 +279,8 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Coroutine");
 .sub _main
     .local pmc stream
 
-    load_bytecode "library/Stream/Base.imc"
-    load_bytecode "library/Stream/Coroutine.imc"
+    load_bytecode "library/Stream/Base.pir"
+    load_bytecode "library/Stream/Coroutine.pir"
 
     # create the coroutine stream
     find_type I0, "Stream::Coroutine"
@@ -349,10 +352,10 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::ParrotIO");
 
     name = "t/library/perlhist.txt"
 
-    load_bytecode "library/Stream/ParrotIO.imc"
-    load_bytecode "library/Stream/Lines.imc"
-    load_bytecode "library/Stream/Sub.imc"
-    load_bytecode "library/Stream/Combiner.imc"
+    load_bytecode "library/Stream/ParrotIO.pir"
+    load_bytecode "library/Stream/Lines.pir"
+    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode "library/Stream/Combiner.pir"
 
     # create a file stream
     find_type $I0, "Stream::ParrotIO"
@@ -714,8 +717,8 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Filter");
     .local pmc stream
     .local pmc filter
 
-    load_bytecode "library/Stream/Sub.imc"
-    load_bytecode "library/Stream/Filter.imc"
+    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode "library/Stream/Filter.pir"
 
     # create the counter stream
     find_type I0, "Stream::Sub"
@@ -801,7 +804,7 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::include");
 .sub _main
     .local pmc stream
 
-    load_bytecode "library/Stream/Sub.imc"
+    load_bytecode "library/Stream/Sub.pir"
 
     find_type I0, "Stream::Sub"
     new stream, I0
@@ -910,8 +913,8 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Lines");
     .local pmc stream
     .local pmc lines
 
-    load_bytecode "library/Stream/Sub.imc"
-    load_bytecode "library/Stream/Lines.imc"
+    load_bytecode "library/Stream/Sub.pir"
+    load_bytecode "library/Stream/Lines.pir"
 
     # create a text stream
     find_type I0, "Stream::Sub"
@@ -959,7 +962,7 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::ParrotIO");
     .local pmc stream
     .local pmc temp
 
-    load_bytecode "library/Stream/ParrotIO.imc"
+    load_bytecode "library/Stream/ParrotIO.pir"
 
     # create the ParrotIO stream
     find_type I0, "Stream::ParrotIO"
@@ -1274,8 +1277,8 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Replay");
 .sub _main :main
     .local pmc stream
 
-    load_bytecode "library/Stream/Writer.imc"
-    load_bytecode "library/Stream/Replay.imc"
+    load_bytecode "library/Stream/Writer.pir"
+    load_bytecode "library/Stream/Replay.pir"
 
     find_type I0, "Stream::Writer"
     new stream, I0
@@ -1378,8 +1381,8 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Sub");
     .local pmc stream
     .local pmc temp
 
-    load_bytecode "library/Stream/Base.imc"
-    load_bytecode "library/Stream/Sub.imc"
+    load_bytecode "library/Stream/Base.pir"
+    load_bytecode "library/Stream/Sub.pir"
 
     find_type I0, "Stream::Sub"
     new stream, I0
@@ -1440,7 +1443,7 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::Write");
 .sub _main :main
     .local pmc stream
 
-    load_bytecode "library/Stream/Writer.imc"
+    load_bytecode "library/Stream/Writer.pir"
 
     find_type I0, "Stream::Writer"
     new stream, I0
@@ -1480,3 +1483,8 @@ main done
 finished
 OUT
 }
+
+
+## remember to change the number of tests! :-)
+BEGIN { plan tests => 20; }
+

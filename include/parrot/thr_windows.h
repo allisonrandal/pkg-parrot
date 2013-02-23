@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id$
+ *     $Id: thr_windows.h 10933 2006-01-06 01:43:24Z particle $
  *  Overview:
  *     This is the api header for the windows thread primitives
  *  Data Structure and Algorithms:

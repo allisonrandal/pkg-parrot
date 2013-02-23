@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_buf.c 10462 2005-12-12 17:00:32Z particle $
+$Id: io_buf.c 10597 2005-12-20 18:39:45Z leo $
 
 =head1 NAME
 
@@ -182,8 +182,10 @@ PIO_buf_setbuf(theINTERP, ParrotIOLayer *layer, ParrotIO *io, size_t bufsize)
     else
         b->flags &= ~PIO_BF_MALLOC;
 
-    if (b->size != 0)
+    if (b->size != 0) {
+        io->flags &= ~PIO_F_LINEBUF;
         io->flags |= PIO_F_BLKBUF;
+    }
     else
         io->flags &= ~(PIO_F_BLKBUF | PIO_F_LINEBUF);
 
@@ -414,8 +416,7 @@ PIO_buf_read(theINTERP, ParrotIOLayer *layer, ParrotIO *io,
     s = *buf;
     len = s->bufused;
     if (!s->strstart) {
-        PObj_bufstart(s) = s->strstart = mem_sys_allocate(len);
-        PObj_sysmem_SET(s);
+        Parrot_allocate_string(interpreter, s, len);
     }
     out_buf = s->strstart;
     /* read Data from buffer */

@@ -1,4 +1,5 @@
 .include "languages/tcl/lib/returncodes.pir"
+.include "languages/tcl/lib/macros.pir"
 
 .namespace [ "TclBinaryOp" ]
 
@@ -39,7 +40,7 @@
   goto done
 .endm 
 
-.macro binary_op2(FORMAT)
+.macro binary_op2num(FORMAT)
   $P1 = new .Array
   $P1 = 6 
   $P1[0] = register_num
@@ -68,6 +69,22 @@
   goto done
 .endm 
 
+.macro binary_op2(FORMAT)
+  $P1 = new .Array
+  $P1 = 6
+  $P1[0] = register_num
+  $P1[1] = l_reg
+  $P1[2] = r_reg
+  $P1[3] = register_num
+  $P1[4] = register_num
+  $P1[5] = register_num
+  op_code = sprintf .FORMAT, $P1
+  pir_code = l_code . r_code
+
+  pir_code .= op_code
+  goto done
+.endm
+
 .macro binary_op3(FORMAT)
   $P1 = new .Array
   $P1 = 10
@@ -75,9 +92,10 @@
   $P1[1] = l_reg
   $P1[2] = r_reg # $S%i=$P%i
   $P1[3] = r_reg
-  $P1[5] = register_num  # $I%i = isne $S%i, $S%i
-  $P1[6] = l_reg
-  $P1[7] = r_reg
+  $P1[4] = register_num  # $I%i = isne $S%i, $S%i
+  $P1[5] = l_reg
+  $P1[6] = r_reg
+  $P1[7] = register_num # $P%i = new .String
   $P1[8] = register_num # $P%i = $I%i
   $P1[9] = register_num
 
@@ -134,9 +152,9 @@ Initialize the attributes for an instance of the class
 
   .local string l_code,r_code,op_code
   .local int l_reg,r_reg
-  (l_reg,l_code) = compile(l_operand,register_num)
+  (l_reg,l_code) = compile(register_num, l_operand)
   register_num = l_reg + 1
-  (r_reg,r_code) = compile(r_operand,register_num)
+  (r_reg,r_code) = compile(register_num, r_operand)
   register_num = r_reg + 1
 
   if op == OPERATOR_MUL goto op_mul
@@ -182,7 +200,7 @@ $P%i=new .TclInt
 $P%i= $I%i
 END_PIR
 
-  .binary_op2 ($S0)
+  .binary_op2($S0)
 op_gt:
 
   $S0 = <<"END_PIR"
@@ -191,7 +209,7 @@ $P%i=new .TclInt
 $P%i= $I%i
 END_PIR
 
-  .binary_op2 ($S0)
+  .binary_op2($S0)
 op_lte:
 
   $S0 = <<"END_PIR"
@@ -200,7 +218,7 @@ $P%i=new .TclInt
 $P%i= $I%i
 END_PIR
 
-  .binary_op2 ($S0)
+  .binary_op2($S0)
 op_gte:
 
   $S0 = <<"END_PIR"
@@ -209,7 +227,7 @@ $P%i=new .TclInt
 $P%i= $I%i
 END_PIR
 
-  .binary_op2 ($S0)
+  .binary_op2($S0)
 op_equal:
 
   $S0 = <<"END_PIR"
@@ -218,7 +236,7 @@ $P%i=new .TclInt
 $P%i= $I%i
 END_PIR
 
-  .binary_op2 ($S0)
+  .binary_op2($S0)
 op_unequal:
 
   $S0 = <<"END_PIR"
@@ -227,7 +245,7 @@ $P%i=new .TclInt
 $P%i= $I%i
 END_PIR
 
-  .binary_op2 ($S0)
+  .binary_op2($S0)
 op_bitand:
   .binary_op("$P%i = band $P%i, $P%i\n")
 op_bitxor:

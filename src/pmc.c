@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pmc.c 9919 2005-11-12 16:00:52Z leo $
+$Id: pmc.c 10754 2005-12-29 01:19:55Z particle $
 
 =head1 NAME
 
@@ -200,7 +200,7 @@ get_new_pmc_header(Interp *interpreter, INTVAL base_type,
         /*
          * XXX not yet we can't assure that all contents in the
          * const PMC is const too
-         * see e.g. t/pmc/sarray_13.imc
+         * see e.g. t/pmc/sarray_13.pir
          */
 #if 0
         flags = PObj_constant_FLAG;

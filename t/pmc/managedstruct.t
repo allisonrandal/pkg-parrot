@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: managedstruct.t 7803 2005-04-11 13:37:27Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: managedstruct.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 6;
+use Parrot::Config;
 
 =head1 NAME
 
@@ -8,17 +15,13 @@ t/pmc/managedstruct.t - Managed C Structure
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/managedstruct.t
+	% prove t/pmc/managedstruct.t
 
 =head1 DESCRIPTION
 
 Tests the ManagedStruct PMC. Checks element access and memory allocation.
 
 =cut
-
-use Parrot::Test tests => 6;
-use Test::More;
-use Parrot::Config;
 
 output_is(<<'CODE', <<'OUTPUT', "Setting ManagedStruct size");
 	new P0,.ManagedStruct

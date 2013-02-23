@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: string_cclass.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;

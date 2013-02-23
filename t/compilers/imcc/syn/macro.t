@@ -1,8 +1,13 @@
-#!perl -w
+#!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: macro.t 10238 2005-11-29 03:16:07Z particle $
+# $Id: macro.t 10826 2005-12-31 22:40:24Z ambs $
+
 
 use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Config;
 use Parrot::Test tests => 23;
 
 # macro tests

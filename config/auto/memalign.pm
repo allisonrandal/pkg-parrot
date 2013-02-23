@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: memalign.pm 10337 2005-12-04 02:53:32Z jhoblitt $
+# $Id: memalign.pm 10649 2005-12-25 03:15:38Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determines if the C library supports C<memalign()>.
 
 =cut
 
-package Configure::Step;
+package auto::memalign;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,43 +20,43 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description="Determining if your C library supports memalign...";
+$description = "Determining if your C library supports memalign...";
 
-@args=qw(miniparrot verbose);
+@args = qw(miniparrot verbose);
 
-sub runstep {
-    my $self = shift;
-    my ($miniparrot, $verbose) = @_;
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-    if ($miniparrot) {
-        Parrot::Configure::Data->set(memalign => '');
-	print "(skipped) " if $verbose;
-	return;
+    my $verbose = $conf->options->get('verbose');
+
+    if ($conf->options->get('miniparrot')) {
+        $conf->data->set(memalign => '');
+        print "(skipped) " if $verbose;
+        return;
     }
 
-    if (defined Parrot::Configure::Data->get('memalign')) {
-		return; # already set; leave it alone
-	}
+    if (defined $conf->data->get('memalign')) {
+        return; # already set; leave it alone
+    }
     my $test = 0;
 
-    if (Parrot::Configure::Data->get('i_malloc')) {
-	Parrot::Configure::Data->set(malloc_header => 'malloc.h');
-    }
-    else {
-	Parrot::Configure::Data->set(malloc_header => 'stdlib.h');
+    if ($conf->data->get('i_malloc')) {
+        $conf->data->set(malloc_header => 'malloc.h');
+    } else {
+        $conf->data->set(malloc_header => 'stdlib.h');
     }
 
-    if (Parrot::Configure::Data->get('ptrsize') == Parrot::Configure::Data->get('intsize')) {
-       Parrot::Configure::Data->set(ptrcast => 'int');
-      }
-    else {
-       Parrot::Configure::Data->set(ptrcast => 'long');
-      }
+    if ($conf->data->get('ptrsize') == $conf->data->get('intsize')) {
+        $conf->data->set(ptrcast => 'int');
+    } else {
+        $conf->data->set(ptrcast => 'long');
+    }
 
     cc_gen('config/auto/memalign/test_c.in');
     eval { cc_build(); };
     unless ($@ || cc_run_capture() !~ /ok/) {
-	$test = 1;
+        $test = 1;
     }
     cc_clean();
 
@@ -65,15 +65,17 @@ sub runstep {
     cc_gen('config/auto/memalign/test_c2.in');
     eval { cc_build(); };
     unless ($@ || cc_run_capture() !~ /ok/) {
-	$test2 = 1;
+        $test2 = 1;
     }
     cc_clean();
 
-    Parrot::Configure::Data->set(malloc_header => undef);
+    $conf->data->set(malloc_header => undef);
 
-    my $f = $test2 ? 'posix_memalign' :
-            $test  ? 'memalign'       : '';
-    Parrot::Configure::Data->set(memalign => $f);
+    my $f =
+          $test2 ? 'posix_memalign'
+        : $test  ? 'memalign'
+        : '';
+    $conf->data->set(memalign => $f);
     print($test ? " (Yep:$f) " : " (no) ") if $verbose;
     $result = $test ? 'yes' : 'no';
 }

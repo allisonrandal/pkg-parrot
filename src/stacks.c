@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: stacks.c 9836 2005-11-08 09:48:34Z leo $
+$Id: stacks.c 10902 2006-01-05 10:24:17Z leo $
 
 =head1 NAME
 
@@ -308,7 +308,7 @@ stack_pop(Interp *interpreter, Stack_Chunk_t **stack_p,
     }
 
     /* Cleanup routine? */
-    if (entry->cleanup) {
+    if (entry->cleanup != STACK_CLEANUP_NULL) {
         (*entry->cleanup) (interpreter, entry);
     }
 

@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: C.pm 9855 2005-11-09 16:32:50Z jonathan $
+# $Id: C.pm 10620 2005-12-22 07:48:49Z fperrad $
 
 =head1 NAME
 
@@ -197,7 +197,7 @@ sub new
             'PMCs', 
             '',
             $self->c_pair_item('', 'pmc'),
-            $self->c_header_item('', 'vtable'),
+            $self->c_header_item('', 'vtables'),
             $self->c_pair_item('', 'key'),
             $self->c_pair_item('', 'sub'),
             $self->c_pair_item('', 'method_util'),
@@ -220,7 +220,7 @@ sub new
             ),
             $self->c_item(
                 'String encodings', 
-                'contents' => ['encodings']
+                'contents' => ['src/encodings']
             ),
             $self->c_header_item('', 'unicode'),
             $self->c_item(
@@ -268,7 +268,7 @@ sub new
             $self->c_item(
                 'Parrot\'s layer-based I/O subsystem.', 
                 'headers' => ['io'], 
-                'contents' => ['io']
+                'contents' => ['src/io']
             ),
         ),
         $self->new_group(

@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: coroutine.t 10257 2005-11-29 21:53:33Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: coroutine.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 10;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/coroutines.t - Coroutines
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/coroutines.t
+	% prove t/pmc/coroutines.t
 
 =head1 DESCRIPTION
 
 Tests the C<Coroutine> PMC.
 
 =cut
-
-use Parrot::Test tests => 10;
-use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', "Coroutine 1");
 .include "interpinfo.pasm"

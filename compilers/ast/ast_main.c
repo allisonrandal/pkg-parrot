@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-$Id: ast_main.c 10396 2005-12-07 21:08:05Z particle $
+$Id: ast_main.c 10656 2005-12-25 15:00:46Z leo $
 
 =head1 NAME
 
@@ -87,8 +87,8 @@ ast_compile_past(Parrot_Interp interp, const char *src_string)
      */
     sub_data = PMC_sub(sub);
     sub_data->seg = new_cs;
-    sub_data->address = new_cs->base.data;
-    sub_data->end = new_cs->base.data + new_cs->base.size;
+    sub_data->start_offs = 0;
+    sub_data->end_offs = new_cs->base.size;
     sub_data->name = string_from_cstring(interp, "PAST", 0);
 
     if (imc_info) {

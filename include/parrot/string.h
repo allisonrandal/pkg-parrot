@@ -1,7 +1,7 @@
 /* string.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: string.h 7585 2005-03-02 10:43:16Z leo $
+ *     $Id: string.h 10592 2005-12-20 14:53:14Z leo $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -24,14 +24,9 @@ struct parrot_string_t;
 
 typedef struct parrot_string_t String;
 
-
-/* Tail added to end of string buffers; used for COW GC */
-struct Buffer_Tail {
-    unsigned char flags;
-};
-typedef enum TAIL_flag {
-    TAIL_moved_FLAG = 1 << 0
-} TAIL_flags;
+typedef enum Forward_flag {
+    Buffer_moved_FLAG = 1 << 0
+} Forward_flags;
 
 /* String iterator */
 typedef struct string_iterator_t {

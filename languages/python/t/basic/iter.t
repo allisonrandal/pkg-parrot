@@ -1,4 +1,4 @@
-# $Id: iter.t 7803 2005-04-11 13:37:27Z leo $
+# $Id: iter.t 7243 2004-12-06 18:09:37Z rubys $
 
 use strict;
 use lib '../../lib';

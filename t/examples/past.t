@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: past.t 10183 2005-11-26 11:05:39Z bernhard $
+# $Id: past.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;

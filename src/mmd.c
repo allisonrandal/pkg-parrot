@@ -1,6 +1,6 @@
 /*
 Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: mmd.c 10240 2005-11-29 12:12:58Z leo $
+$Id: mmd.c 10659 2005-12-25 17:49:33Z leo $
 
 =head1 NAME
 
@@ -135,7 +135,7 @@ get_mmd_dispatch_type(Interp *interpreter, INTVAL func_nr, INTVAL left_type,
         PMC *method = Parrot_MMD_search_default_infix(interpreter,
                 meth_s, left_type, r);
         if (!method)
-            real_exception(interpreter, 0, 1, "MMD function %s not found"
+            real_exception(interpreter, 0, 1, "MMD function %s not found "
                     "for types (%d, %d)", meth_c, left_type, r);
         if (method->vtable->base_type == enum_class_NCI) {
             PMC *nci;
@@ -2070,7 +2070,7 @@ mmd_create_builtin_multi_meth_2(Interp *interpreter,
         signature[0] = 'v';
     meth_name = const_string(interpreter, short_name);
     class = Parrot_base_vtables[type]->class;
-    method = Parrot_find_method_with_cache(interpreter, class, meth_name);
+    method = Parrot_find_method_direct(interpreter, class, meth_name);
     if (!method) {
         /* first method */
         method = constant_pmc_new(interpreter, enum_class_NCI);

@@ -1,9 +1,13 @@
-#!perl -w
+#!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: const.t 10487 2005-12-13 08:40:17Z leo $
+# $Id: const.t 10826 2005-12-31 22:40:24Z ambs $
 
 use strict;
-use Parrot::Test;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Config;
+use Parrot::Test tests => 33;
 use vars qw($TODO);
 
 pir_output_is(<<'CODE', <<'OUT', "globalconst 1");
@@ -591,5 +595,4 @@ CODE
 10.000000
 OUT
 
-## remember to change the number of tests!
-BEGIN { plan tests => 33; }
+

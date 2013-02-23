@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Op.pm 10361 2005-12-05 23:09:12Z particle $
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: Op.pm 10698 2005-12-27 18:32:31Z gregor $
 
 =head1 NAME
 
@@ -44,7 +44,6 @@ Op Direction:
 
 Op Type:
 
-    op  The opcode itself, argument 0.
     i   The argument is an integer register index.
     n   The argument is a number register index.
     p   The argument is a PMC register index.
@@ -55,6 +54,7 @@ Op Type:
     sc  The argument is a string constant index.
     kc  The argument is a key constant index.
     ki  The argument is a key integer register index.
+    kic  The argument is a key integer constant (in-line).
 
 =head2 Class Methods
 
@@ -168,8 +168,6 @@ sub full_name
     my $self = shift;
     my $name = $self->name;
     my @arg_types = $self->arg_types;
-
-    shift @arg_types; # Remove the 'op' type.
 
     $name .=  "_" . join("_", @arg_types) if @arg_types;
 
@@ -343,8 +341,8 @@ sub _substitute
     local $_ = shift;
     my $trans = shift;
 
-    s/{{([a-z]+)\@([^{]*?)}}/ $trans->access_arg($1, $2, $self); /me;
-    s/{{\@([^{]*?)}}/   $trans->access_arg($self->arg_type($1), $1, $self); /me;
+    s/{{([a-z]+)\@([^{]*?)}}/ $trans->access_arg($1, $2, $self); /me;  # XXX ???
+    s/{{\@([^{]*?)}}/   $trans->access_arg($self->arg_type($1 - 1), $1, $self); /me;
 
     s/{{=0,=([^{]*?)}}/   $trans->restart_address($1) . "; {{=0}}"; /me;
     s/{{=0,\+=([^{]*?)}}/ $trans->restart_offset($1)  . "; {{=0}}"; /me;
@@ -411,6 +409,12 @@ sub source
 {
     my ($self, $trans) = @_;
 
+    if ($self->flags =~ /:pic/ &&
+	!(ref($trans) eq 'Parrot::OpTrans::CGP' ||
+	  ref($trans) eq 'Parrot::OpTrans::CSwitch')) {
+        return qq{PANIC("How did you do that");return 0;\n};   
+    }
+
     return $self->rewrite_body($self->full_body, $trans);
 }
 
@@ -425,7 +429,7 @@ sub size
 {
     my $self = shift;
 
-    return scalar($self->arg_types);
+    return scalar($self->arg_types + 1);
 }
 
 =back
@@ -465,7 +469,7 @@ license as Parrot itself.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Gregor N. Purdy. All rights reserved.
+Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 
 =end TODO
 

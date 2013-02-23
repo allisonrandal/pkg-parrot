@@ -11,7 +11,7 @@ Summary of the contents of the PDD.
 
 =head1 VERSION
 
-$Revision: 10264 $
+$Revision$
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: modifiers.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;
@@ -30,7 +30,7 @@ ver. 7, in the B<'Modifiers'> section
 my $pre = <<PRE;
 .sub 'main' :main
     load_bytecode "PGE.pbc"
-    load_bytecode "dumper.imc"
+    load_bytecode "dumper.pir"
     load_bytecode "PGE/Dumper.pir"
     load_bytecode "PGE/Glob.pir"
     load_bytecode "PGE/Text.pir"

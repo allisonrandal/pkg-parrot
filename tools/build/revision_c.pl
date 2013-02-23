@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: revision_c.pl 7804 2005-04-11 14:12:16Z jrieks $
+# $Id: revision_c.pl 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -38,11 +38,6 @@ print <<"EOF";
 int Parrot_revision(void);
 /* also in "parrot/misc.h" */
 int Parrot_config_revision(void);
-
-#if PARROT_REVISION != ${Parrot::Revision::config}
-#error revision PARROT_REVISION != configure revision ${Parrot::Revision::config}
-#endif
-
 
 int Parrot_revision(void)
 {

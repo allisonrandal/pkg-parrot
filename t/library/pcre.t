@@ -1,25 +1,29 @@
-#! perl -w
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: pcre.t 9479 2005-10-13 18:56:52Z bernhard $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: pcre.t 10747 2005-12-28 21:53:23Z particle $
+
+use strict;
+use warnings;
+use lib qw( t . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
-t/library/pcre.t - testing library/pcre.imc
+t/library/pcre.t - testing library/pcre.pir
 
 =head1 SYNOPSIS
 
-    % perl -Ilib t/library/pcre.t
+	% prove t/library/pcre.t
 
 =head1 DESCRIPTION
 
-This program tests whether the 'pcre.imc' library accesses
+This program tests whether the 'pcre.pir' library accesses
 the installed PCRE library, and matches patterns successfully.
 
 =cut
 
-use strict;
-
-use Parrot::Test tests => 1;
 
 # if we keep pcre, we need a config test
 my $cmd = ($^O =~ /MSWin32/) ? "pcregrep --version" : "pcre-config --version";
@@ -34,7 +38,7 @@ pir_output_is( <<'CODE', <<'OUT', 'soup to nuts' );
 
 
 .sub main :main
-    load_bytecode "library/pcre.imc"
+    load_bytecode "library/pcre.pir"
     .local pmc func
     .local pmc lib
 
@@ -108,3 +112,8 @@ ok 5
 OUT
 
 };
+
+
+## remember to change the number of tests! :-)
+BEGIN { plan tests => 1; }
+

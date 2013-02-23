@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: arithmetics.t 10228 2005-11-28 22:52:05Z particle $
+# $Id: arithmetics.t 10642 2005-12-24 16:12:17Z azuroth $
 
 use strict;
 use warnings;
@@ -210,7 +210,7 @@ OUTPUT
 #
 # Operations on a single NUMVAL
 #
-output_is(<<'CODE', <<OUTPUT, "turn a native number into it's negative");
+output_is(<<'CODE', <<OUTPUT, "turn a native number into its negative");
 	set N0, 0
 	neg N0
 	print N0

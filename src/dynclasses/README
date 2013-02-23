@@ -12,7 +12,7 @@ providing the Foo PMC class.
 =item 1
 
 Edit/create your foo.pmc source - For details on creating PMCs, see
-L<../src/classes/genclass.pl>
+F<tools/dev/gen_class.pl>
 
 There are some differences you have to be aware of when creating dynamic PMCs.
 
@@ -51,7 +51,7 @@ PASM op C<loadlib>.
 
         pmclass Match extends Hash dynpmc group match_group { ... }
 
-and then in your .imc or .pasm file:
+and then in your .pir or .pasm file:
 
         loadlib $P0, "match_group"
 

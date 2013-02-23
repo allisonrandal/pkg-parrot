@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_create.c 10240 2005-11-29 12:12:58Z leo $
+$Id: inter_create.c 10613 2005-12-21 10:15:55Z leo $
 
 =head1 NAME
 
@@ -109,13 +109,12 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
      * the last interpreter (w/o) parent has to cleanup globals
      * so remember parent if any
      */
+    SET_NULL(interpreter->lo_var_ptr);
     if (parent) {
         interpreter->parent_interpreter = parent;
-        interpreter->lo_var_ptr = parent->lo_var_ptr;
     }
     else {
         SET_NULL(interpreter->parent_interpreter);
-        SET_NULL(interpreter->lo_var_ptr);
         /*
          * we need a global mutex to protect the interpreter array
          */

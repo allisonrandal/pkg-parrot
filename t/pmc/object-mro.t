@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: object-mro.t 10372 2005-12-06 11:34:56Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: object-mro.t 10933 2006-01-06 01:43:24Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 6;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/object-mro.t - Object Methods Resolution Order
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/object-mro.t
+	% prove t/pmc/object-mro.t
 
 =head1 DESCRIPTION
 
 These are tests for the C3 MRO order
 
 =cut
-
-use Parrot::Test tests => 6;
-use Test::More;
 
 pir_output_is(<<'CODE', <<'OUTPUT', "print mro diamond");
 #

@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pasm.t 10218 2005-11-28 20:04:11Z leo $
+# $Id: pasm.t 10933 2006-01-06 01:43:24Z particle $
 
 use strict;
 use warnings;
@@ -80,9 +80,9 @@ END_EXPECTED
 
     'trace.pasm'        =>  << 'END_EXPECTED',
 Howdy!
-     4 print "There!\n"
+     5 print "There!\n"
 There!
-     6 trace 0
+     7 trace 0
 Partner!
 END_EXPECTED
 

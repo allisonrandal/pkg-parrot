@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: README 10323 2005-12-03 14:55:16Z bernhard $
+# $Id: README 10933 2006-01-06 01:43:24Z particle $
 
 This is an implementation of 'POSIX bc' for Parrot.
 'bc' is an arbitrary precision calculator dating back from Unix stone age.

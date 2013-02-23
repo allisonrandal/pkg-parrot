@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: enumerate.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: enumerate.pmc 10871 2006-01-03 17:50:14Z particle $
 
 =head1 NAME
 
@@ -52,7 +52,7 @@ the next one.
         PMC *key = PMC_struct_val(SELF);
         PMC *iter = PMC_pmc_val(SELF);
         PMC *item, *tupl, *val;
-	INTVAL i = PMC_int_val(key);
+        INTVAL i = PMC_int_val(key);
 
         if (i == -1)
             real_exception(INTERP, NULL, E_StopIteration, "StopIteration");

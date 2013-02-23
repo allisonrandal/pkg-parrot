@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: dod.c 9899 2005-11-11 10:58:20Z leo $
+$Id: dod.c 10622 2005-12-22 12:09:19Z leo $
 
 =head1 NAME
 
@@ -40,7 +40,6 @@ int CONSERVATIVE_POINTER_CHASING = 0;
 #endif
 
 static size_t find_common_mask(size_t val1, size_t val2);
-static void trace_active_buffers(Interp *interpreter);
 
 /*
 
@@ -293,23 +292,10 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
 
     /* mark it as used  */
     pobject_lives(interpreter, (PObj *)interpreter->iglobals);
-    /* Now, go run through the PMC registers and mark them as live */
-    /* First mark the current set. */
+
+    /* mark the current context. */
     ctx = CONTEXT(interpreter->ctx);
-    for (i = 0; i < (unsigned int)ctx->n_regs_used[REGNO_PMC]; i++) {
-        if (REG_PMC(i)) {
-            pobject_lives(interpreter, (PObj *)REG_PMC(i));
-        }
-    }
-    /*
-     * mark current context stuff
-     */
-    if (ctx->current_sub)
-        pobject_lives(interpreter, (PObj*)ctx->current_sub);
-    if (ctx->current_cont)
-        pobject_lives(interpreter, (PObj*)ctx->current_cont);
-    if (ctx->current_object)
-        pobject_lives(interpreter, (PObj*)ctx->current_object);
+    mark_context(interpreter, ctx);
 
     /*
      * mark vtable->data
@@ -358,8 +344,6 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
     if (interpreter->DOD_registry)
         pobject_lives(interpreter, (PObj *)interpreter->DOD_registry);
 
-    /* Walk all stacks */
-    mark_context(interpreter, ctx);
 
     /* Walk the iodata */
     Parrot_IOData_mark(interpreter, interpreter->piodata);
@@ -374,8 +358,6 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
     if (trace_stack)
         trace_system_areas(interpreter);
 
-    /* And the buffers */
-    trace_active_buffers(interpreter);
     if (interpreter->profile)
         Parrot_dod_profile_end(interpreter, PARROT_PROF_DOD_p1);
     return 1;
@@ -490,37 +472,6 @@ Parrot_dod_trace_children(Interp *interpreter, size_t how_many)
     return 1;
 }
 
-/*
-
-=item C<static void
-trace_active_buffers(Interp *interpreter)>
-
-Scan any buffers in string registers and other non-PMC places and mark
-them as active.
-
-=cut
-
-*/
-
-static void
-trace_active_buffers(Interp *interpreter)
-{
-    UINTVAL i;
-
-    /* First mark the current set. We assume that all pointers in S registers
-     * are pointing to valid buffers. This is not a good assumption, but it'll
-     * do for now. */
-    for (i = 0; i < (unsigned int)CONTEXT(interpreter->ctx)->n_regs_used[REGNO_STR]; i++) {
-        Buffer *reg = (Buffer *)REG_STR(i);
-
-        if (reg)
-            pobject_lives(interpreter, reg);
-    }
-
-    /* The interpreter might have a few strings of its own,
-     * but currently there are none.
-     * When the interpreter gets strings again, then mark them as alive */
-}
 
 #ifdef GC_IS_MALLOC
 
@@ -1216,6 +1167,8 @@ Parrot_dod_ms_run(Interp *interpreter, int flags)
      */
     if (flags & DOD_finish_FLAG) {
         Parrot_dod_sweep(interpreter, interpreter->arena_base->pmc_pool);
+        Parrot_dod_sweep(interpreter, 
+		interpreter->arena_base->constant_pmc_pool);
         return;
     }
     ++arena_base->DOD_block_level;

@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: undef.t 8126 2005-05-19 19:34:57Z chromatic $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: undef.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 10;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/undef.t - Undef PMC
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/undef.t
+	% prove t/pmc/undef.t
 
 =head1 DESCRIPTION
 
 Tests mainly morphing undef to other types.
 
 =cut
-
-use Parrot::Test tests => 10;
-use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', "morph to string");
         new P0, .String

@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: charset.pm 10472 2005-12-12 22:12:28Z particle $
+# $Id: charset.pm 10637 2005-12-24 11:00:22Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Asks the user to select which charset files to include.
 
 =cut
 
-package Configure::Step;
+package inter::charset;
 
 use strict;
 use vars qw($description $result @args);
@@ -22,56 +22,59 @@ use Parrot::Configure::Step ':inter';
 
 $description = 'Determining what charset files should be compiled in...';
 
-@args=qw(ask charset);
+@args = qw(ask charset);
 
-sub runstep {
-    my $self = shift;
-  my @charset=(
-    sort
-    map  { m{\./src/charset/(.*)} }
-    glob "./src/charset/*.c"
-  );
+sub runstep
+{
+    my ($self, $conf) = @_;
 
-  my $charset_list = $_[1] || join(' ', grep {defined $_} @charset);
+    my @charset = (
+        sort
+            map { m{\./src/charset/(.*)} } glob "./src/charset/*.c"
+    );
 
-  if($_[0]) {
-  print <<"END";
+    my $charset_list = $conf->options->get('charset')
+        || join(' ', grep { defined $_ } @charset);
+
+    if ($conf->options->get('ask')) {
+        print <<"END";
 
 
 The following charsets are available:
   @charset
 END
-    {
-      $charset_list = prompt('Which charsets would you like?', $charset_list);
+        {
+            $charset_list = prompt('Which charsets would you like?', $charset_list);
+        }
     }
-  }
-  # names of class files for src/classes/Makefile
-  (my $TEMP_charset_o = $charset_list) =~ s/\.c/\$(O)/g;
 
-  my $TEMP_charset_build = <<"E_NOTE";
+    # names of class files for src/classes/Makefile
+    (my $TEMP_charset_o = $charset_list) =~ s/\.c/\$(O)/g;
+
+    my $TEMP_charset_build = <<"E_NOTE";
 
 # the following part of the Makefile was built by 'config/inter/charset.pl'
 
 E_NOTE
 
-  foreach my $charset (split(/\s+/, $charset_list)) {
-      $charset =~ s/\.c$//;
-      $TEMP_charset_build .= <<END
+    foreach my $charset (split(/\s+/, $charset_list)) {
+        $charset =~ s/\.c$//;
+        $TEMP_charset_build .= <<END
 src/charset/$charset\$(O): src/charset/$charset.h src/charset/ascii.h src/charset/$charset.c \$(NONGEN_HEADERS)
 
 
 END
-  }
+    }
 
-  # build list of libraries for link line in Makefile
-  my $slash = Parrot::Configure::Data->get('slash');
-  $TEMP_charset_o  =~ s/^| / src${slash}charset${slash}/g;
+    # build list of libraries for link line in Makefile
+    my $slash = $conf->data->get('slash');
+    $TEMP_charset_o =~ s/^| / src${slash}charset${slash}/g;
 
-  Parrot::Configure::Data->set(
-    charset             => $charset_list,
-    TEMP_charset_o           => $TEMP_charset_o,
-    TEMP_charset_build       => $TEMP_charset_build,
-  );
+    $conf->data->set(
+        charset            => $charset_list,
+        TEMP_charset_o     => $TEMP_charset_o,
+        TEMP_charset_build => $TEMP_charset_build,
+    );
 }
 
 1;

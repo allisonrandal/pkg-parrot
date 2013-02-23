@@ -1,6 +1,6 @@
 #! perl -w
 # TODO: Resolve copyright. See ADDITIONAL section at end of file.
-# $Id: pbc2c.pl 10361 2005-12-05 23:09:12Z particle $
+# $Id: pbc2c.pl 10698 2005-12-27 18:32:31Z gregor $
 
 =head1 NAME
 
@@ -355,9 +355,7 @@ Gregor N. Purdy E<lt>gregor@focusresearch.comE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Gregor N. Purdy. All rights reserved.
-
-Copyright (C) 2001-2002 The Perl Foundation. All rights reserved.
+Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
 This program is free software. It is subject to the same license
 as the Parrot interpreter.
 

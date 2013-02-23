@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: jit.c 10449 2005-12-11 18:51:08Z leo $
+$Id: jit.c 10754 2005-12-29 01:19:55Z particle $
 
 =head1 NAME
 
@@ -210,11 +210,11 @@ make_branch_list(Interp *interpreter,
         if (op_info->jump)
             branch[rel_offset] |= JIT_BRANCH_SOURCE;
 
-        n = op_info->arg_count;
+        n = op_info->op_count;
 
         for (i = 1; i < n; ++i) {
             /* If it's not a constant, no joy */
-            if (op_info->types[i] == PARROT_ARG_IC && op_info->labels[i]) {
+            if (op_info->types[i-1] == PARROT_ARG_IC && op_info->labels[i-1]) {
                 /* The branch target is relative,
                  * the offset is in the i argument
                  */
@@ -294,9 +294,10 @@ set_register_usage(Interp *interpreter,
      *
      * registers are set per their type [IPSN]
      * */
-    for (argn = op_info->arg_count - 1; argn > 0; argn--) {
+    for (argn = op_info->op_count - 1; argn > 0; argn--) {
+        /* TODO check the argn-1 entries */
         int idx = *(cur_op + argn);
-        switch (op_info->types[argn]) {
+        switch (op_info->types[argn-1]) {
             case PARROT_ARG_I:
             case PARROT_ARG_KI:
                 typ = 0;
@@ -346,14 +347,14 @@ set_register_usage(Interp *interpreter,
              * for register allocation */
             map[cur_op + argn - code_start] = typ + 1;
             if ((!ru[typ].reg_count[idx]++) &&
-                (op_info->dirs[argn] & PARROT_ARGDIR_IN))
+                (op_info->dirs[argn-1] & PARROT_ARGDIR_IN))
                 ru[typ].reg_dir[idx] |= PARROT_ARGDIR_IN;
-            if (op_info->dirs[argn] & PARROT_ARGDIR_OUT) {
+            if (op_info->dirs[argn-1] & PARROT_ARGDIR_OUT) {
                 ru[typ].reg_dir[idx] |= PARROT_ARGDIR_OUT;
             }
         }
         /* key constants may have register keys */
-        else if (op_info->types[argn] == PARROT_ARG_KC) {
+        else if (op_info->types[argn-1] == PARROT_ARG_KC) {
             PMC *key = interpreter->code->const_table->constants[idx]->u.key;
             while (key) {
                 UINTVAL flags = PObj_get_FLAGS(key);
@@ -430,7 +431,7 @@ make_sections(Interp *interpreter,
         op_info = &interpreter->op_info_table[op];
 
         /* Calculate the next pc */
-        next_op = cur_op + op_info->arg_count;
+        next_op = cur_op + op_info->op_count;
         ADD_OP_VAR_PART(interpreter, interpreter->code, cur_op, next_op);
 
         /* Update op_count */
@@ -731,7 +732,8 @@ assign_registers(Interp *interpreter,
            op = CORE_OPS_wrapper__;
         op_info = &interpreter->op_info_table[op];
         /* For each argument of the current opcode */
-        for (op_arg = 1; op_arg < op_info->arg_count; op_arg++) {
+        n = op_info->op_count;
+        for (op_arg = 1; op_arg < n; op_arg++) {
             /* get the register typ */
             typ = map[cur_op + op_arg - code_start];
             /* clear the register typ/map */
@@ -758,7 +760,6 @@ assign_registers(Interp *interpreter,
         }
 
         /* Move to the next opcode */
-        n = op_info->arg_count;
         ADD_OP_VAR_PART(interpreter, interpreter->code, cur_op, n);
         cur_op += n;
     }
@@ -846,12 +847,12 @@ debug_sections(Interp *interpreter,
                     cur_op - code_start, op_jit[*cur_op].extcall, instr);
 #  if JIT_DEBUG > 1
             PIO_eprintf(interpreter, "\t\t\tmap_branch: ");
-            for (i = 0; i < op_info->arg_count; i++)
+            for (i = 0; i < op_info->op_count; i++)
                 PIO_eprintf(interpreter, "%02x ", map[cur_op-code_start+i]);
             PIO_eprintf(interpreter, "\n");
 #  endif
 
-            n = op_info->arg_count;
+            n = op_info->op_count;
             ADD_OP_VAR_PART(interpreter, interpreter->code, cur_op, n);
             cur_op += n;
         }
@@ -1010,7 +1011,7 @@ optimize_imcc_jit(Interp *interpreter, opcode_t *cur_op,
             set_register_usage(interpreter, optimizer, section,
                     op_info, cur_op, code_start);
             section->op_count++;
-            n = op_info->arg_count;
+            n = op_info->op_count;
             ADD_OP_VAR_PART(interpreter, interpreter->code, cur_op, n);
             cur_op += n;
         }
@@ -1222,6 +1223,7 @@ set_reg_usage(Interp *interpreter, opcode_t *pc)
     PMC *sub_pmc;
     parrot_sub_t sub;
     int i, ci;
+    size_t offs;
 
     seg = interpreter->code;
     ft = seg->fixups;
@@ -1236,7 +1238,8 @@ set_reg_usage(Interp *interpreter, opcode_t *pc)
                 ci = ft->fixups[i]->offset;
                 sub_pmc = ct->constants[ci]->u.key;
                 sub = PMC_sub(sub_pmc);
-                if (pc >= sub->address && pc < sub->end) {
+                offs = pc - sub->seg->base.data;
+                if (offs >= sub->start_offs && offs < sub->end_offs) {
 		    CONTEXT(interpreter->ctx)->n_regs_used = sub->n_regs_used;
                     return;
                 }
@@ -1265,7 +1268,7 @@ Finally this code here is used to generate native executables (or better
 object files that are linked to executables), if EXEC_CAPABLE is defined.
 This functionality is triggered by
 
-  parrot -o foo.o foo.imc
+  parrot -o foo.o foo.pir
 
 which uses the JIT engine to translate to native code inside the object
 file.
@@ -1506,7 +1509,7 @@ build_asm(Interp *interpreter, opcode_t *pc,
             jit_info->prev_op = cur_op;
 
             op_info = &interpreter->op_info_table[*cur_op];
-            n = op_info->arg_count;
+            n = op_info->op_count;
             ADD_OP_VAR_PART(interpreter, interpreter->code, cur_op, n);
             cur_op += n;
             /* update op_i and cur_op accordingly */

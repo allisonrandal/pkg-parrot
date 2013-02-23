@@ -7,7 +7,7 @@ docs/pdds/pdd00_pdd.pod - Parrot Design Documents
 
 =head1 VERSION
 
-$Revision: 10264 $
+$Revision$
 
 =head1 ABSTRACT
 

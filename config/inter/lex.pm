@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: lex.pm 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determines whether C<lex> is installed and if it's actually C<flex>.
 
 =cut
 
-package Configure::Step;
+package inter::lex;
 
 use strict;
 
@@ -21,56 +21,60 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step qw( :inter capture_output check_progs );
 
-$util           = 'lex';
-$description    = "Determining whether $util is installed";
-$prompt         = "Do you have a lexical analyzer generator like flex or lex?";
-@args           = qw( lex ask maintainer );
+$util        = 'lex';
+$description = "Determining whether $util is installed";
+$prompt      = "Do you have a lexical analyzer generator like flex or lex?";
+@args        = qw( lex ask maintainer );
 
-sub runstep {
-    my $self = shift;
-    my %args;
-    @args{@args}=@_;
+sub runstep
+{
+    my ($self, $conf) = @_;
+
+    my $verbose = $conf->options->get('verbose');
 
     # undef means we don't have flex... default to not having flex
-    Parrot::Configure::Data->set(flex_version => undef);
+    $conf->data->set(flex_version => undef);
 
-    unless ($args{maintainer}) {
-        Parrot::Configure::Data->set( $util => 'echo' );
+    unless ($conf->options->get('maintainer')) {
+        $conf->data->set($util => 'echo');
         $result = 'skipped';
         return undef;
     }
 
     my $prog;
+
     # precedence of sources for the program:
     # default -> probe -> environment -> option -> ask
-    $prog ||= $args{$util};
+    $prog ||= $conf->options->get($util);
     $prog ||= $ENV{uc($util)};
 
     # never override the user.  If a non-existent program is specified then
     # the user is responsible for the consequences.
     if (defined $prog) {
-        Parrot::Configure::Data->set($util => $prog);
+        $conf->data->set($util => $prog);
         $result = 'yes';
         return undef;
     }
 
-    $prog = check_progs(['flex', 'lex']);
+    $prog = check_progs(['flex', 'lex'], $verbose);
 
     unless ($prog) {
+
         # fall back to default
         $result = 'no';
         return undef;
     }
 
-    if ($args{ask}) {
-        $prog = prompt($prompt, $prog ? $prog : Parrot::Configure::Data->get($util));
+    if ($conf->options->get('ask')) {
+        $prog = prompt($prompt, $prog ? $prog : $conf->data->get($util));
     }
 
     my ($stdout, $stderr, $ret) = capture_output($prog, '--version');
 
     # don't override the user even if the program they provided appears to be
     # broken
-    if ($ret == -1 and ! $args{ask}) {
+    if ($ret == -1 and !$conf->options->get('ask')) {
+
         # fall back to default
         $result = 'no';
         return undef;
@@ -79,10 +83,10 @@ sub runstep {
     # if '--version' returns a string assume that this is flex.
     # flex calls it self by $0 so it will claim to be lex if invoked as `lex`
     if ($stdout =~ /f?lex .*? (\d+) \. (\d+) \. (\d+)/x) {
-        Parrot::Configure::Data->set(flex_version => "$1.$2.$3");
+        $conf->data->set(flex_version => "$1.$2.$3");
     }
 
-    Parrot::Configure::Data->set($util => $prog);
+    $conf->data->set($util => $prog);
     $result = 'yes';
 }
 

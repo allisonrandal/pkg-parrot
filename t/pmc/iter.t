@@ -1,7 +1,12 @@
-#! perl -w
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: iter.t 10706 2005-12-27 23:03:52Z particle $
 
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: iter.t 9547 2005-10-24 21:05:09Z leo $
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 42;
 
 =head1 NAME
 
@@ -9,16 +14,13 @@ t/pmc/iter.t - Iteration
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/iter.t
+	% prove t/pmc/iter.t
 
 =head1 DESCRIPTION
 
 Tests the C<Iterator> PMC.
 
 =cut
-
-use Parrot::Test tests => 42;
-use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', "new iter");
 	new P2, .PerlArray

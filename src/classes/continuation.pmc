@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: continuation.pmc 10472 2005-12-12 22:12:28Z particle $
+$Id: continuation.pmc 10871 2006-01-03 17:50:14Z particle $
 
 =head1 NAME
 
@@ -263,7 +263,7 @@ Experimental: return caller info as a STRING.
 */
 
     STRING* get_string() {
-	return Parrot_Context_infostr(INTERP, PMC_cont(SELF)->to_ctx);
+        return Parrot_Context_infostr(INTERP, PMC_cont(SELF)->to_ctx);
     }
 
 /*
@@ -279,7 +279,7 @@ Experimental: return caller PMC or Undef if none.
     METHOD PMC* caller() {
         struct Parrot_cont * cc = PMC_cont(SELF);
         PMC *caller = cc->to_ctx->current_sub;
-        if (!caller || !PMC_sub(caller)->address) {
+        if (!caller || !PMC_sub(caller)->seg) {
             caller = pmc_new(INTERP, enum_class_Undef);
         }
         return caller;

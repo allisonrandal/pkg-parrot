@@ -1,6 +1,6 @@
 /* packfile.h
 *
-* $Id: packfile.h 10401 2005-12-08 10:07:33Z leo $
+* $Id: packfile.h 10656 2005-12-25 15:00:46Z leo $
 *
 * History:
 *  Rework by Melvin; new bytecode format, make bytecode portable.
@@ -258,7 +258,7 @@ typedef enum {
 } pbc_action_enum_t;
 
 void PackFile_fixup_subs(Interp *, pbc_action_enum_t, PMC *eval_pmc);
-void fixup_subs(Interp *, struct PackFile_ByteCode *, int, PMC *eval_pmc);
+void do_sub_pragmas(Interp *, struct PackFile_ByteCode *, int, PMC *eval_pmc);
 /*
  * directory functions
  */

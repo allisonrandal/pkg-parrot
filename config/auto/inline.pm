@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: inline.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: inline.pm 10710 2005-12-28 00:25:21Z jhoblitt $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Determines whether the compiler supports C<inline>.
 
 =cut
 
-package Configure::Step;
+package auto::inline;
 
 use strict;
 use vars qw($description $result @args);
@@ -20,47 +20,47 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description="Determining if your compiler supports inline...";
+$description = "Determining if your compiler supports inline...";
 
-@args=qw(inline verbose);
+@args = qw(inline verbose);
 
-sub runstep {
-    my $self = shift;
+sub runstep
+{
+    my ($self, $conf) = @_;
+
     my $test;
-    my ($inline, $verbose) = @_;
+    my ($inline, $verbose) = $conf->options->get(qw(inline verbose));
 
     if (defined $inline) {
-	$test = $inline;
-    }
-    else {
-	cc_gen('config/auto/inline/test_1.in');
-	eval { cc_build(); };
-	if (! $@) {
-	    $test = cc_run();
-	    chomp $test if $test;
-	}
-	cc_clean();
-	if (!$test) {
-	    cc_gen('config/auto/inline/test_2.in');
-	    eval { cc_build(); };
-	    if (! $@) {
-		$test = cc_run();
-		chomp $test if $test;
-	    }
-	    cc_clean();
-	}
-	if ($test) {
-	    print " ($test) " if $verbose;
+        $test = $inline;
+    } else {
+        cc_gen('config/auto/inline/test_1.in');
+        eval { cc_build(); };
+        if (!$@) {
+            $test = cc_run();
+            chomp $test if $test;
+        }
+        cc_clean();
+        if (!$test) {
+            cc_gen('config/auto/inline/test_2.in');
+            eval { cc_build(); };
+            if (!$@) {
+                $test = cc_run();
+                chomp $test if $test;
+            }
+            cc_clean();
+        }
+        if ($test) {
+            print " ($test) " if $verbose;
             $result = 'yes';
-	}
-	else {
-	    print " no " if $verbose;
+        } else {
+            print " no " if $verbose;
             $result = 'no';
-	    $test = '';
-	}
+            $test   = '';
+        }
     }
 
-    Parrot::Configure::Data->set(
-	inline => $test
-    );
+    $conf->data->set(inline => $test);
 }
+
+1;

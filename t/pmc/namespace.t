@@ -1,6 +1,12 @@
-#! perl -w
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: namespace.t 9465 2005-10-12 04:50:00Z mdiep $
+# $Id: namespace.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 17;
 
 =head1 NAME
 
@@ -8,16 +14,13 @@ t/pmc/namespace.t - Namespaces
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/namespace.t
+	% prove t/pmc/namespace.t
 
 =head1 DESCRIPTION
 
 Tests the namespace manipulation.
 
 =cut
-
-use Parrot::Test;
-use Test::More;
 
 pir_output_is(<<'CODE', <<'OUTPUT', "find_global bar");
 .sub 'main' :main
@@ -372,7 +375,3 @@ CODE
 unicode namespaces are fun
 OUT
 
-
-
-# remember to modify the number of tests!
-BEGIN { plan tests => 17; }

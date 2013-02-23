@@ -1,6 +1,12 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: resizableintegerarray.t 7810 2005-04-12 10:09:05Z leo $
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: resizableintegerarray.t 10706 2005-12-27 23:03:52Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 13;
 
 =head1 NAME
 
@@ -8,7 +14,7 @@ t/pmc/resizableintegerarray.t - ResizableIntegerArray PMC
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/pmc/ResizableIntegerArray.t
+	% prove t/pmc/ResizableIntegerArray.t
 
 =head1 DESCRIPTION
 
@@ -16,9 +22,6 @@ Tests C<ResizableIntegerArray> PMC. Checks size, sets various elements, includin
 out-of-bounds test. Checks INT and PMC keys.
 
 =cut
-
-use Parrot::Test tests => 13;
-use Test::More;
 
 my $fp_equality_macro = <<'ENDOFMACRO';
 .macro fp_eq (	J, K, L )

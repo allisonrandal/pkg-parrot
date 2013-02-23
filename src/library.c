@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: library.c 10463 2005-12-12 17:13:09Z particle $
+$Id: library.c 10987 2006-01-08 15:13:23Z leo $
 
 =head1 NAME
 
@@ -76,9 +76,9 @@ parrot_init_library_paths(Interp *interpreter)
     VTABLE_push_string(interpreter, paths, entry);
     entry = CONST_STRING(interpreter, "./");
     VTABLE_push_string(interpreter, paths, entry);
-    entry = CONST_STRING(interpreter, "lib/parrot/runtime/include/");
+    entry = CONST_STRING(interpreter, "lib/parrot/include/");
     VTABLE_push_string(interpreter, paths, entry);
-    entry = CONST_STRING(interpreter, "lib/parrot/runtime/");
+    entry = CONST_STRING(interpreter, "lib/parrot/");
     VTABLE_push_string(interpreter, paths, entry);
 
     /* define library paths */
@@ -91,9 +91,9 @@ parrot_init_library_paths(Interp *interpreter)
     VTABLE_push_string(interpreter, paths, entry);
     entry = CONST_STRING(interpreter, "./");
     VTABLE_push_string(interpreter, paths, entry);
-    entry = CONST_STRING(interpreter, "lib/parrot/runtime/library/");
+    entry = CONST_STRING(interpreter, "lib/parrot/library/");
     VTABLE_push_string(interpreter, paths, entry);
-    entry = CONST_STRING(interpreter, "lib/parrot/runtime/");
+    entry = CONST_STRING(interpreter, "lib/parrot/");
     VTABLE_push_string(interpreter, paths, entry);
 
     /* define dynext paths */
@@ -104,7 +104,7 @@ parrot_init_library_paths(Interp *interpreter)
     VTABLE_push_string(interpreter, paths, entry);
     entry = CONST_STRING(interpreter, "");
     VTABLE_push_string(interpreter, paths, entry);
-    entry = CONST_STRING(interpreter, "lib/parrot/runtime/dynext/");
+    entry = CONST_STRING(interpreter, "lib/parrot/dynext/");
     VTABLE_push_string(interpreter, paths, entry);
 
     /* shared exts */
@@ -395,6 +395,11 @@ parrot_split_path_ext(Interp* interpreter, STRING *in,
     if (pos_sl == -1)
 	pos_sl = CHARSET_RINDEX(interpreter, in, slash2, len);
     pos_dot = CHARSET_RINDEX(interpreter, in, dot, len);
+    
+    /* XXX directory parrot-0.4.1 or such */
+    if (pos_dot != -1 && isdigit( ((char*)in->strstart)[pos_dot+1]))
+        pos_dot = -1;
+
     ++pos_dot;
     ++pos_sl;
     if (pos_sl && pos_dot ) {

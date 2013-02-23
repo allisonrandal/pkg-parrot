@@ -6,7 +6,7 @@ PunieGrammar -- A grammar for parsing Perl 1
 
   .sub _main :main
       load_bytecode 'PunieGrammar.pir'
-      .local pmc line
+      .local pmc start_rule
       .local pmc match
       .local string source
  
@@ -14,10 +14,10 @@ PunieGrammar -- A grammar for parsing Perl 1
       source = 'print 1;'
 
       # Retrieve the start rule
-      line = find_global 'PunieGrammar', 'line'
+      start_rule = find_global 'PunieGrammar', 'prog'
 
       # Parse the source and return a match object
-      match = line(source)
+      match = prog(source)
 
       ... # Do something with the parse tree
 
@@ -43,18 +43,11 @@ digit, in the form of 'print 1;'.
 
     $P0 = getclass 'PGE::Rule'
     $P1 = subclass $P0, 'PunieGrammar'
-
-    # Construct the grammar
-    .local pmc p6rule
-    find_global p6rule, 'PGE', 'p6rule'
-
-    p6rule('\d+ | <PGE::Text::bracketed: ">', 'PunieGrammar', 'term')
-    p6rule('(print) \s* <PunieGrammar::expr>', 'PunieGrammar', 'gprint')
-    p6rule('<PunieGrammar::gprint> | <PunieGrammar::term>', 'PunieGrammar', 'expr')
-    p6rule('\s*<PunieGrammar::expr>;\s*', 'PunieGrammar', 'line')
-    p6rule('\s*<PunieGrammar::line>*\s*', 'PunieGrammar', 'lineseq')
-    p6rule('^<PunieGrammar::lineseq>$', 'PunieGrammar', 'prog')
 .end
+
+# Pull in the compiled grammar
+
+.include "languages/punie/lib/punie_grammar_gen.pir"
 
 =head1 LICENSE
 

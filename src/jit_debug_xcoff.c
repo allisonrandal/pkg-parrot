@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: jit_debug_xcoff.c 9877 2005-11-10 10:56:05Z leo $
+$Id: jit_debug_xcoff.c 10754 2005-12-29 01:19:55Z particle $
 
 =head1 NAME
 
@@ -263,12 +263,12 @@ Parrot_jit_debug_stabs(Interp *interpreter)
         pasmfile = string_make(interpreter, src, strlen(src), NULL,
                 PObj_external_FLAG);
         file = string_copy(interpreter, pasmfile);
-        /* chop pasm/imc */
+        /* chop pasm/pir */
 
         ext = strrchr(src, '.');
         if (ext && strcmp (ext, ".pasm") == 0)
             file = string_chopn(interpreter, file, 4, 1);
-        else if (ext && strcmp (ext, ".imc") == 0)
+        else if (ext && strcmp (ext, ".pir") == 0)
             file = string_chopn(interpreter, file, 3, 1);
         else if (!ext) /* EVAL_n */
             file = string_append(interpreter, file,

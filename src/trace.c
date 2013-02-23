@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: trace.c 9893 2005-11-10 22:10:01Z bernhard $
+$Id: trace.c 10745 2005-12-28 21:35:00Z particle $
 
 =head1 NAME
 
@@ -107,15 +107,9 @@ trace_pmc_dump(Interp *interpreter, PMC* pmc)
     else if (pmc->vtable->base_type == enum_class_RetContinuation
             ||  pmc->vtable->base_type == enum_class_Continuation
             ||  pmc->vtable->base_type == enum_class_Sub) {
-        opcode_t *pc, *seg;
-        pc = PMC_sub(pmc)->address;
-        if (pc)
-            seg = PMC_sub(pmc)->seg->base.data;
-        else
-            seg = NULL;
         PIO_eprintf(interpreter, "%S=PMC(%#p pc:%d)",
                 VTABLE_name(interpreter, pmc), pmc,
-                pc - seg);
+                PMC_sub(pmc)->start_offs);
     }
     else if (PObj_is_object_TEST(pmc)) {
         PIO_eprintf(interpreter, "Object(%Ss)=PMC(%#p)",
@@ -264,7 +258,7 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
     else
         PIO_eprintf(interpreter, "%s", info->name);
 
-    n = info->arg_count;
+    n = info->op_count;
     var_args = 0;
 
     if (*pc == PARROT_OP_set_args_pc ||
@@ -281,8 +275,8 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
         /* pass 1 print arguments */
         for (i = s; i < n; i++) {
             opcode_t o = *(pc + i);
-            if (i < info->arg_count)
-                type = info->types[i];
+            if (i < info->op_count)
+                type = info->types[i - 1];
             else
                 type = get_var_type(interpreter, sig, i - 2);
             if (i > s &&
@@ -356,8 +350,8 @@ trace_op_dump(Interp *interpreter, opcode_t *code_start,
         /* pass 2 print argument details if needed */
         for (i = 1; i < n; i++) {
             opcode_t o = *(pc + i);
-            if (i < info->arg_count)
-                type = info->types[i];
+            if (i < info->op_count)
+                type = info->types[i - 1];
             else
                 type = get_var_type(interpreter, sig, i - 2);
             if (i > s) {

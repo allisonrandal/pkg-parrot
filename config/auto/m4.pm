@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: m4.pm 10933 2006-01-06 01:43:24Z particle $
 
 =head1 NAME
 
@@ -7,29 +7,31 @@ config/auto/m4 - Check whether GNU m4 works
 
 =head1 DESCRIPTION
 
-Determines whether GNU m4 exists on the system.
-It is OK when it doesn't exist. Currently GNU m4 is only used for doublechecking
-Parrot m4.
+Determines whether GNU m4 exists on the system. It is OK when it doesn't exist.
+Currently GNU m4 is only used for doublechecking Parrot m4.
 
 =cut
 
-package Configure::Step;
+package auto::m4;
 
 use strict;
 use vars qw($description $result @args);
 
 use base qw(Parrot::Configure::Step::Base);
 
+use Config;
 use Parrot::Configure::Step ':auto', 'capture_output';
 
 $description = "Determining whether GNU m4 is installed...";
 
-@args = qw(verbose);
+@args = qw();
 
-sub runstep {
-    my $self = shift;
-    my $archname =  $Config{archname};
-    my ($cpuarch, $osname)       =  split('-', $archname);
+sub runstep
+{
+    my ($self, $conf) = @_;
+
+    my $archname = $Config{archname};
+    my ($cpuarch, $osname) = split('-', $archname);
     if (!defined $osname) {
         ($osname, $cpuarch) = ($cpuarch, "");
     }
@@ -37,18 +39,18 @@ sub runstep {
     my $has_gnu_m4;
 
     # Calling 'm4 --version' hangs under FreeBSD
-    my %m4_hangs = ( freebsd => 1 
-                   );
+    my %m4_hangs = (freebsd => 1);
 
-    if ( $m4_hangs{$osname} ) {
+    if ($m4_hangs{$osname}) {
         $has_gnu_m4 = 0;
     } else {
+
         # This seems to work for GNU m4 1.4.2
-        my $output = capture_output( 'm4', '--version' ) || '';
-        $has_gnu_m4 = ( $output =~ m/^GNU [mM]4 / ) ? 1 : 0;
+        my $output = capture_output('m4', '--version') || '';
+        $has_gnu_m4 = ($output =~ m/^GNU [mM]4 /) ? 1 : 0;
     }
 
-    Parrot::Configure::Data->set(has_gnu_m4 => $has_gnu_m4);
+    $conf->data->set(has_gnu_m4 => $has_gnu_m4);
     $result = $has_gnu_m4 ? 'yes' : 'no';
 }
 
