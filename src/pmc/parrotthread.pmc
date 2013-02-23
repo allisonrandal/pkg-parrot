@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: parrotthread.pmc 39675 2009-06-20 20:24:17Z Infinoid $
+$Id: parrotthread.pmc 41239 2009-09-12 18:51:03Z NotFound $
 
 =head1 NAME
 
@@ -63,6 +63,11 @@ static INTVAL do_thread_run(PARROT_INTERP, PMC *thread,
                             INTVAL clone_flags, PMC *sub, PMC *args) {
     INTVAL tid = VTABLE_get_integer(interp, thread);
 
+    if (PMC_IS_NULL(sub)) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Invalid thread sub");
+    }
+
     clone_interpreter(PMC_interp(thread), interp, clone_flags);
 
     interp->flags &= ~PARROT_THR_COPY_INTERP; /* XXX */
@@ -82,7 +87,7 @@ static INTVAL do_thread_run_clone_default(PARROT_INTERP,
 }
 
 
-pmclass ParrotThread extends ParrotInterpreter need_ext no_ro {
+pmclass ParrotThread extends ParrotInterpreter no_ro {
 
 /*
 
@@ -103,14 +108,12 @@ Equivalent to calling run with PARROT_CLONE_DEFAULT.
     void class_init() {
         const int typ = enum_class_ParrotThread;
 
-        if (pass) {
-            register_nci_method(INTERP, typ,
-                    F2DPTR(do_thread_run), "run", "IJOIP@");
+        register_nci_method(INTERP, typ,
+                F2DPTR(do_thread_run), "run", "IJOIP@");
 
-            /* XXX appropriate name given that this won't clone globals? */
-            register_nci_method(INTERP, typ,
-                    F2DPTR(do_thread_run_clone_default), "run_clone", "IJOP@");
-        }
+        /* XXX appropriate name given that this won't clone globals? */
+        register_nci_method(INTERP, typ,
+                F2DPTR(do_thread_run_clone_default), "run_clone", "IJOP@");
     }
 
 /*

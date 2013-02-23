@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 08-sort_ops.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: 08-sort_ops.t 40198 2009-07-21 20:49:40Z cotto $
 # 08-sort_ops.t
 
 use strict;
@@ -221,8 +221,6 @@ ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
 /*
 ** dummy.ops
 */
-
-VERSION = PARROT_VERSION;
 
 inline op zzzzzz(inout INT, in INT) :base_core {
   goto NEXT();

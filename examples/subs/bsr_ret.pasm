@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: bsr_ret.pasm 38119 2009-04-15 16:30:07Z fperrad $
+# $Id: bsr_ret.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 NAME
 
@@ -20,21 +20,24 @@ F<docs/pdds/pdd03_calling_conventions.pod>
 
 =cut
 
-MAIN:	print "Main\n"
-	bsr TESTSUB
-	print "Main: Return from TestSub\n"
-END:	end
+MAIN:
+    new P1, 'ResizableIntegerArray'
+    print "Main\n"
+    local_branch P1, TESTSUB
+    print "Main: Return from TestSub\n"
+END:
+    end
 
 
 TESTSUB:
-	print "TestSub\n"
-	bsr NESTSUB
-	print "TestSub: Ret from NestSub\n"
-	ret
+    print "TestSub\n"
+    local_branch P1, NESTSUB
+    print "TestSub: Ret from NestSub\n"
+    local_return P1
 
 NESTSUB:
-	print "NestSub\n"
-	ret
+    print "NestSub\n"
+    local_return P1
 
 # Local Variables:
 #   mode: pir

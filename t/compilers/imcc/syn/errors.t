@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: errors.t 39656 2009-06-18 19:00:42Z NotFound $
+# $Id: errors.t 40227 2009-07-23 15:23:56Z NotFound $
 
 use strict;
 use warnings;
@@ -78,9 +78,6 @@ END_PIR
 /^error:imcc:syntax error, unexpected IDENTIFIER, expecting/
 END_EXPECTED
 
-TODO: {
-  local $TODO = 'TT #767';
-
 pir_error_output_like( <<'END_PIR', <<'END_EXPECTED', 'no multiple .local, TT #767' );
 .sub main :main
   .local pmc p
@@ -89,8 +86,6 @@ pir_error_output_like( <<'END_PIR', <<'END_EXPECTED', 'no multiple .local, TT #7
 END_PIR
 /^error:imcc:syntax error, duplicated IDENTIFIER/
 END_EXPECTED
-
-}
 
 # Local Variables:
 #   mode: cperl

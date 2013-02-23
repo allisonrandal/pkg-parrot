@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: mk_language_shell.pl 40119 2009-07-16 17:13:22Z fperrad $
+# $Id: mk_language_shell.pl 40990 2009-09-05 08:53:14Z fperrad $
 
 =head1 NAME
 
@@ -95,7 +95,7 @@ my $uclang = uc $lang;
 
 ## the name and revision of the script, for use in the generated README
 my $script = $0;
-my $rev = '$Revision: 40119 $';
+my $rev = '$Revision: 40990 $';
 $rev =~ s/^\D*(\d+)\D*$/$1/;
 
 my $no_doc = $with_doc ? '' : '#';
@@ -297,8 +297,7 @@ __build/src/ops/Makefile.in__
 VERSION_DIR   := @versiondir@
 INCLUDE_DIR   := @includedir@$(VERSION_DIR)
 LIB_DIR       := @libdir@$(VERSION_DIR)
-#STAGING_DIR   := ../../dynext
-STAGING_DIR   := @build_dir@/runtime/parrot/dynext
+STAGING_DIR   := ../../dynext
 #INSTALL_DIR   := $(LIB_DIR)/languages/@lclang@/dynext
 INSTALL_DIR   := $(LIB_DIR)/dynext
 
@@ -309,6 +308,7 @@ O             := @o@
 # Setup some commands
 PERL          := @perl@
 RM_F          := @rm_f@
+MKPATH        := @mkpath@
 CHMOD         := @chmod@
 CP            := @cp@
 CC            := @cc@ -c
@@ -361,6 +361,7 @@ staging: linklibs
 
 install:
 #IF(cygwin or hpux):	CHMOD 0775 "*$(LOAD_EXT)"
+	$(MKPATH) $(INSTALL_DIR)
 	$(CP) "*$(LOAD_EXT)" $(INSTALL_DIR)
 
 uninstall:
@@ -389,8 +390,7 @@ INCLUDE_DIR   := @includedir@$(VERSION_DIR)
 LIB_DIR       := @libdir@$(VERSION_DIR)
 SRC_DIR       := @srcdir@$(VERSION_DIR)
 TOOLS_DIR     := @libdir@$(VERSION_DIR)/tools/lib
-#STAGING_DIR   := ../../dynext
-STAGING_DIR   := @build_dir@/runtime/parrot/dynext
+STAGING_DIR   := ../../dynext
 #INSTALL_DIR   := $(LIB_DIR)/languages/@lclang@/dynext
 INSTALL_DIR   := $(LIB_DIR)/dynext
 
@@ -401,6 +401,7 @@ O             := @o@
 # Setup some commands
 PERL          := @perl@
 RM_F          := @rm_f@
+MKPATH        := @mkpath@
 CHMOD         := @chmod@
 CP            := @cp@
 CC            := @cc@ -c
@@ -463,6 +464,7 @@ staging: linklibs
 
 install:
 #IF(cygwin or hpux):	CHMOD 0775 "*$(LOAD_EXT)"
+	$(MKPATH) $(INSTALL_DIR)
 	$(CP) "*$(LOAD_EXT)" $(INSTALL_DIR)
 
 uninstall:
@@ -1093,7 +1095,6 @@ pmclass @lang@
     provides array
     group   @lclang@_group
 
-    need_ext
     dynpmc
     {
 /*
@@ -1228,8 +1229,11 @@ __src/ops/@lclang@.ops__
  * Copyright (C) 20xx, Parrot Foundation.
  */
 
+BEGIN_OPS_PREAMBLE
+
 #include "parrot/dynext.h"
-VERSION = PARROT_VERSION;
+
+END_OPS_PREAMBLE
 
 /* Op to get the address of a PMC. */
 inline op @lclang@_pmc_addr(out INT, invar PMC) :base_core {

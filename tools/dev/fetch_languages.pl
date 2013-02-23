@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: fetch_languages.pl 39818 2009-06-29 02:05:56Z Infinoid $
+# $Id: fetch_languages.pl 40839 2009-08-28 08:45:02Z fperrad $
 
 =head1 NAME
 
@@ -57,6 +57,12 @@ my @hlls = (
         name       => 'bf',
         scm        => 'SVN',
         repository => 'https://svn.parrot.org/languages/bf/trunk'
+    },
+
+    {
+        name       => 'blizkost',
+        scm        => 'GIT',
+        repository => 'git://github.com/jnthn/blizkost.git'
     },
 
     {

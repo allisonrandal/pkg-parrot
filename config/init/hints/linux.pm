@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: linux.pm 39871 2009-07-03 14:40:18Z jkeenan $
+# $Id: linux.pm 41081 2009-09-06 20:40:14Z bacek $
 
 package init::hints::linux;
 
@@ -23,8 +23,11 @@ sub runstep {
     # should find g++ in most cases
     my $link = $conf->data->get('link') || 'c++';
 
-    if ( $libs !~ /-lpthread/ ) {
+    if ( $libs !~ /-lpthread\b/ ) {
         $libs .= ' -lpthread';
+    }
+    if ( $libs !~ /-lrt\b/ ) {
+        $libs .= ' -lrt';
     }
     my $ld_share_flags = $conf->data->get('ld_share_flags');
     my $cc_shared      = $conf->data->get('cc_shared');
@@ -148,6 +151,8 @@ sub runstep {
         libparrot_shared_alias => "libparrot$share_ext",
         libparrot_soname       => "-Wl,-soname=libparrot$share_ext.$version",
     );
+
+    $conf->data->set( clock_best => '-DCLOCK_BEST=CLOCK_PROCESS_CPUTIME_ID' );
 
      if ( ( split( m/-/, $conf->data->get_p5('archname'), 2 ) )[0] eq 'ia64' ) {
 

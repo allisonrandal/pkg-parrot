@@ -1,4 +1,4 @@
-# $Id: Compiler.pir 38270 2009-04-22 13:12:12Z pmichaud $
+# $Id: Compiler.pir 40928 2009-09-02 15:43:32Z pmichaud $
 
 =head1 NAME
 
@@ -82,6 +82,8 @@ Return generated PIR for C<node> and all of its children.
     pos = cpost['pos']
     if null pos goto done_subline
     source = cpost['source']
+    $I0 = can source, 'lineof'
+    unless $I0 goto done_subline
     line = source.'lineof'(pos)
     inc line
   done_subline:
@@ -293,11 +295,11 @@ the sub.
     .local pmc paramlist
     paramlist = node['paramlist']
     if null paramlist goto paramlist_done
-    .local pmc iter
-    iter = new 'Iterator', paramlist
+    .local pmc it
+    it = iter paramlist
   param_loop:
-    unless iter goto paramlist_done
-    $P0 = shift iter
+    unless it goto paramlist_done
+    $P0 = shift it
     if null $P0 goto param_loop
     subpir .= $P0
     goto param_loop

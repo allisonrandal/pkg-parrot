@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2009, Parrot Foundation.
-$Id: unicode.c 39844 2009-06-30 16:42:20Z pmichaud $
+$Id: unicode.c 40974 2009-09-04 19:52:48Z NotFound $
 
 =head1 NAME
 
@@ -440,7 +440,7 @@ upcase(PARROT_INTERP, ARGIN(STRING *src))
 
     /* use all available space - see below XXX */
     /* TODO downcase, titlecase too */
-    dest_len = PObj_buflen(src) / sizeof (UChar);
+    dest_len = Buffer_buflen(src) / sizeof (UChar);
     src_len  = src->bufused     / sizeof (UChar);
 
     /*
@@ -968,6 +968,11 @@ find_not_cclass(PARROT_INTERP, INTVAL flags,
     UINTVAL     pos = offset;
     UINTVAL     end = offset + count;
     int         bit;
+
+    if (pos > source_string->strlen) {
+        /* XXX: Throw in this case? */
+        return offset + count;
+    }
 
     ENCODING_ITER_INIT(interp, source_string, &iter);
 

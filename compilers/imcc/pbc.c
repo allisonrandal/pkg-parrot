@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2009, Parrot Foundation.
- * $Id: pbc.c 39841 2009-06-30 11:00:05Z jkeenan $
+ * $Id: pbc.c 41197 2009-09-11 00:25:57Z darbelo $
  */
 
 #include "imc.h"
@@ -183,11 +183,6 @@ PARROT_WARN_UNUSED_RESULT
 static int old_blocks(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-PARROT_CONST_FUNCTION
-PARROT_WARN_UNUSED_RESULT
-PARROT_CANNOT_RETURN_NULL
-static const char * slice_deb(int bits);
-
 static void store_fixup(PARROT_INTERP,
     ARGIN(const SymReg *r),
     int pc,
@@ -277,7 +272,6 @@ static void verify_signature(PARROT_INTERP,
     || PARROT_ASSERT_ARG(r)
 #define ASSERT_ARGS_old_blocks __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_slice_deb __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_store_fixup __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(r)
@@ -673,7 +667,10 @@ store_fixup(PARROT_INTERP, ARGIN(const SymReg *r), int pc, int offset)
         fixup->type |= VT_ENCODED;
 
     if (r->usage & U_SUBID_LOOKUP)
-      fixup->usage = U_SUBID_LOOKUP;
+        fixup->usage = U_SUBID_LOOKUP;
+
+    if (r->usage & U_LEXICAL)
+        fixup->usage |= U_LEXICAL;
 
     /* set_p_pc   = 2  */
     fixup->color  = pc;
@@ -867,7 +864,9 @@ fixup_globals(PARROT_INTERP)
                 subs_t *s1;
 
                 /* check in matching namespace */
-                if (fixup->usage & U_SUBID_LOOKUP) {
+                if (fixup->usage & U_LEXICAL)
+                    s1 = NULL;
+                else if (fixup->usage & U_SUBID_LOOKUP) {
                     subid_lookup = 1;
                     /* s1 = find_sub_by_subid(interp, fixup->name, &pc); */
                     s1 = find_sub_by_subid(interp, fixup->name, s, &pc);
@@ -1206,7 +1205,7 @@ create_lexinfo(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(PMC *sub_pmc),
                 while (n) {
                     STRING     *lex_name;
                     const int   k = n->color;
-                    Parrot_sub *sub;
+                    Parrot_Sub_attributes *sub;
                     PARROT_ASSERT(k >= 0);
 
                     lex_name = constants[k]->u.string;
@@ -1214,8 +1213,8 @@ create_lexinfo(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(PMC *sub_pmc),
 
                     PMC_get_sub(interp, sub_pmc, sub);
                     IMCC_debug(interp, DEBUG_PBC_CONST,
-                            "add lexical '%s' to sub name '%s'\n",
-                            n->name, (char*)sub->name->strstart);
+                            "add lexical '%s' to sub name '%Ss'\n",
+                            n->name, sub->name);
 
                     Parrot_PCCINVOKE(interp, lex_info,
                             string_from_literal(interp, "declare_lex_preg"),
@@ -1256,7 +1255,8 @@ find_outer(PARROT_INTERP, ARGIN(const IMC_Unit *unit))
     subs_t      *s;
     PMC         *current;
     STRING      *cur_name;
-    Parrot_sub *sub;
+    char        *cur_name_str;
+    Parrot_Sub_attributes *sub;
     size_t      len;
 
     if (!unit->outer)
@@ -1281,19 +1281,22 @@ find_outer(PARROT_INTERP, ARGIN(const IMC_Unit *unit))
     }
 
     /* could be eval too; check if :outer is the current sub */
-    current = CONTEXT(interp)->current_sub;
+    current = Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
 
-    if (!current)
+    if (PMC_IS_NULL(current))
         IMCC_fatal(interp, 1, "Undefined :outer sub '%s'.\n",
                    unit->outer->name);
 
     PMC_get_sub(interp, current, sub);
     cur_name = sub->name;
 
-    if (cur_name->strlen == len
-    && (memcmp((char*)cur_name->strstart, unit->outer->name, len) == 0))
+    cur_name_str = Parrot_str_to_cstring(interp,  sub->name);
+    if (strlen(cur_name_str) == len
+    && (memcmp(cur_name_str, unit->outer->name, len) == 0)) {
+        Parrot_str_free_cstring(cur_name_str);
         return current;
-
+    }
+    Parrot_str_free_cstring(cur_name_str);
     return NULL;
 }
 
@@ -1321,9 +1324,9 @@ static int
 add_const_pmc_sub(PARROT_INTERP, ARGMOD(SymReg *r), size_t offs, size_t end)
 {
     ASSERT_ARGS(add_const_pmc_sub)
-    PMC                 *ns_pmc;
-    PMC                 *sub_pmc;
-    Parrot_sub          *sub, *outer_sub;
+    PMC                   *ns_pmc;
+    PMC                   *sub_pmc;
+    Parrot_Sub_attributes *sub, *outer_sub;
 
     const int            k            = add_const_table(interp);
     PackFile_ConstTable * const ct    = interp->code->const_table;
@@ -1435,7 +1438,7 @@ add_const_pmc_sub(PARROT_INTERP, ARGMOD(SymReg *r), size_t offs, size_t end)
     sub->namespace_name = ns_pmc;
     sub->start_offs     = offs;
     sub->end_offs       = end;
-    sub->HLL_id         = CONTEXT(interp)->current_HLL;
+    sub->HLL_id         = Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp));
 
     for (i = 0; i < 4; ++i)
         sub->n_regs_used[i] = unit->n_regs_used[i];
@@ -1512,14 +1515,13 @@ add_const_pmc_sub(PARROT_INTERP, ARGMOD(SymReg *r), size_t offs, size_t end)
         PMC_get_sub(interp, sub->outer_sub, outer_sub);
 
     IMCC_debug(interp, DEBUG_PBC_CONST,
-            "add_const_pmc_sub '%s' flags %x color %d (%s) "
-            "lex_info %s :outer(%s)\n",
+            "add_const_pmc_sub '%s' flags %x color %d (%Ss) "
+            "lex_info %s :outer(%Ss)\n",
             r->name, r->pcc_sub->pragma, k,
-            (char *) sub_pmc->vtable->whoami->strstart,
+            sub_pmc->vtable->whoami,
             sub->lex_info ? "yes" : "no",
-            sub->outer_sub ?
-                (char *)outer_sub->name->strstart :
-                "*none*");
+            sub->outer_sub? outer_sub->name :
+            Parrot_str_new(interp, "*none*", 0));
 
     /*
      * create entry in our fixup (=symbol) table
@@ -1583,42 +1585,6 @@ add_const_key(PARROT_INTERP, ARGIN(const opcode_t *key), int size, ARGIN(const c
 
 /*
 
-=item C<static const char * slice_deb(int bits)>
-
-Returns debugging information for the indicated slice type.
-
-=cut
-
-*/
-
-PARROT_CONST_FUNCTION
-PARROT_WARN_UNUSED_RESULT
-PARROT_CANNOT_RETURN_NULL
-static const char *
-slice_deb(int bits)
-{
-    ASSERT_ARGS(slice_deb)
-    if ((bits & VT_SLICE_BITS) == (VT_START_SLICE|VT_END_SLICE))
-        return "start+end";
-
-    if ((bits & VT_SLICE_BITS) == (VT_START_ZERO|VT_END_SLICE))
-        return "..end";
-
-    if ((bits & VT_SLICE_BITS) == (VT_START_SLICE|VT_END_INF))
-        return "start..";
-
-    if (bits & VT_START_SLICE)
-        return "start";
-
-    if (bits & VT_END_SLICE)
-        return "end";
-
-    return "";
-}
-
-
-/*
-
 =item C<static opcode_t build_key(PARROT_INTERP, SymReg *key_reg)>
 
 Builds a Key PMC from the given SymReg.
@@ -1655,7 +1621,7 @@ build_key(PARROT_INTERP, ARGIN(SymReg *key_reg))
 
     for (key_length = 0; reg ; reg = reg->nextkey, key_length++) {
         SymReg *r = reg;
-        int     var_type, slice_bits, type;
+        int     type;
 
         if ((pc - key - 2) >= KEYLEN)
             IMCC_fatal(interp, 1, "build_key:"
@@ -1667,17 +1633,14 @@ build_key(PARROT_INTERP, ARGIN(SymReg *key_reg))
         if (r->reg)
             r = r->reg;
 
-        var_type   = type & ~VT_SLICE_BITS;
-        slice_bits = type &  VT_SLICE_BITS;
-
-        switch (var_type) {
+        switch (type) {
             case VTIDENTIFIER:       /* P[S0] */
             case VTPASM:             /* P[S0] */
             case VTREG:              /* P[S0] */
                 if (r->set == 'I')
-                    *pc++ = PARROT_ARG_I | slice_bits;    /* register type */
+                    *pc++ = PARROT_ARG_I;    /* register type */
                 else if (r->set == 'S')
-                    *pc++ = PARROT_ARG_S | slice_bits;
+                    *pc++ = PARROT_ARG_S;
                 else
                     IMCC_fatal(interp, 1, "build_key: wrong register set\n");
 
@@ -1690,9 +1653,8 @@ build_key(PARROT_INTERP, ARGIN(SymReg *key_reg))
                 sprintf(s+strlen(s), "%c%d", r->set, (int)r->color);
 
                 IMCC_debug(interp, DEBUG_PBC_CONST,
-                        " keypart reg %s %c%d slice %s\n",
-                        r->name, r->set, (int)r->color,
-                        slice_deb(slice_bits));
+                        " keypart reg %s %c%d\n",
+                        r->name, r->set, (int)r->color);
                 break;
             case VT_CONSTP:
             case VTCONST:
@@ -1700,27 +1662,25 @@ build_key(PARROT_INTERP, ARGIN(SymReg *key_reg))
                 switch (r->set) {
                     case 'S':                       /* P["key"] */
                         /* str constant */
-                        *pc++ = PARROT_ARG_SC | slice_bits;
+                        *pc++ = PARROT_ARG_SC;
 
                         /* constant idx */
                         *pc++ = r->color;
 
                         IMCC_debug(interp, DEBUG_PBC_CONST,
-                                " keypart SC %s #%d slice %s\n",
-                                r->name, r->color,
-                                slice_deb(slice_bits));
+                                " keypart SC %s #%d\n",
+                                r->name, r->color);
                         break;
                     case 'I':                       /* P[;42;..] */
                         /* int constant */
-                        *pc++ = PARROT_ARG_IC | slice_bits;
+                        *pc++ = PARROT_ARG_IC;
 
                         /* value */
                         *pc++ = r->color = atol(r->name);
 
                         IMCC_debug(interp, DEBUG_PBC_CONST,
-                                " keypart IC %s #%d slice %s\n",
-                                r->name, r->color,
-                                slice_deb(slice_bits));
+                                " keypart IC %s #%d\n",
+                                r->name, r->color);
                         break;
                     default:
                         IMCC_fatal(interp, 1, "build_key: unknown set\n");
@@ -1729,7 +1689,7 @@ build_key(PARROT_INTERP, ARGIN(SymReg *key_reg))
                 break;
             default:
                 IMCC_fatal(interp, 1, "build_key: "
-                    "unknown type 0x%x on %s\n", var_type, r->name);
+                    "unknown type 0x%x on %s\n", type, r->name);
         }
     }
 
@@ -2226,7 +2186,7 @@ e_pbc_emit(PARROT_INTERP, SHIM(void *param), ARGIN(const IMC_Unit *unit),
             /* Create segment. "_ANN" is added to the name */
             const               size_t len  = strlen(interp->code->base.name) + 5;
             char               * const name = (char *) mem_sys_allocate(len);
-            int                        add  = interp->code && interp->code->base.dir;
+            int                        add  = interp->code->base.dir ? 1 : 0;
             PackFile_Directory * const dir  = add ? interp->code->base.dir :
                     &interp->initial_pf->directory;
             strcpy(name, interp->code->base.name);

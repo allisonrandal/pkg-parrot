@@ -1,5 +1,5 @@
 ##! perl
-# $Id: mk_gitignore.pl 39599 2009-06-16 22:54:02Z whiteknight $
+# $Id: mk_gitignore.pl 40726 2009-08-23 01:18:17Z whiteknight $
 # Copyright (C) 2009, Parrot Foundation.
 
 use strict;

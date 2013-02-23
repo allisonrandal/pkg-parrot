@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_function_docs.t 38909 2009-05-18 13:51:26Z coke $
+# $Id: c_function_docs.t 41195 2009-09-10 23:23:10Z chromatic $
 
 use strict;
 use warnings;
@@ -71,7 +71,7 @@ foreach my $path (@files) {
             $missing = 'missing';
         }
         if ($missing) {
-            push @missing_docs, "$path ($missing)\n$function_decl\n";
+            push @missing_docs, "$path ($missing)\n$function_decl\nWant:\n$escaped_decl\n";
         }
     }
 
@@ -79,7 +79,7 @@ foreach my $path (@files) {
         local $TODO = 'Missing function docs' if $todos{$path};
 
     ok ( ! @missing_docs, $path)
-        or diag( scalar @missing_docs
+        or diag( @missing_docs
             . " function(s) lacking documentation:\n"
             . join ("\n", @missing_docs, "\n"));
     }
@@ -120,8 +120,8 @@ config/gen/platform/openbsd/memexec.c
 config/gen/platform/solaris/math.c
 config/gen/platform/solaris/time.c
 examples/c/nanoparrot.c
+examples/c/pbc_info.c
 examples/compilers/japhc.c
-examples/embed/lorito.c
 src/atomic/gcc_x86.c
 src/debug.c
 src/gc/gc_malloc.c
@@ -134,7 +134,6 @@ src/jit/i386/exec_dep.c
 src/jit/ppc/exec_dep.c
 src/nci_test.c
 src/pbc_dump.c
-src/pbc_info.c
 src/pic.c
 src/pic_jit.c
 src/string/charset/ascii.c

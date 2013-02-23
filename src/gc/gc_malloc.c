@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: gc_malloc.c 38843 2009-05-16 20:52:24Z whiteknight $
+$Id: gc_malloc.c 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -81,9 +81,6 @@ sweep_cb(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool), int flag,
 
     if (flag & POOL_BUFFER)
         clear_cow(interp, pool, 0);
-
-    if (interp->profile && (flag & POOL_PMC))
-        Parrot_gc_profile_end(interp, PARROT_PROF_GC_cp);
 
     *total_free += pool->num_free_objects;
 

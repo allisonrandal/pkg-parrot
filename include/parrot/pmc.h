@@ -1,7 +1,7 @@
 /* pmc.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: pmc.h 40100 2009-07-15 13:15:25Z bacek $
+ *     $Id: pmc.h 40851 2009-08-29 16:08:02Z NotFound $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:
@@ -52,6 +52,12 @@ void gc_unregister_pmc(PARROT_INTERP, ARGIN(PMC *pmc))
 PARROT_EXPORT
 void Parrot_create_mro(PARROT_INTERP, INTVAL type)
         __attribute__nonnull__(1);
+
+PARROT_EXPORT
+void Parrot_pmc_destroy(PARROT_INTERP, ARGMOD(PMC *pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*pmc);
 
 PARROT_EXPORT
 INTVAL PMC_is_null(SHIM_INTERP, ARGIN_NULLOK(const PMC *pmc));
@@ -149,6 +155,9 @@ PMC * temporary_pmc_new(PARROT_INTERP, INTVAL base_type)
     || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_create_mro __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_pmc_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_PMC_is_null __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
 #define ASSERT_ARGS_pmc_new __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)

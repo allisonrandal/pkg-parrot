@@ -1,4 +1,4 @@
-# $Id: More.pir 39874 2009-07-04 12:20:46Z bacek $
+# $Id: More.pir 41089 2009-09-07 01:29:16Z dukeleto $
 
 =head1 NAME
 
@@ -13,7 +13,7 @@ Test::More - Parrot extension for testing modules
     .local pmc exports, curr_namespace, test_namespace
     curr_namespace = get_namespace
     test_namespace = get_namespace [ 'Test'; 'More' ]
-    exports        = split ' ', 'plan diag ok nok is is_deeply like isa_ok skip isnt todo'
+    exports        = split ' ', 'plan diag ok nok is is_deeply like isa_ok skip isnt todo throws_like'
 
     test_namespace.'export_to'(curr_namespace, exports)
 
@@ -577,8 +577,8 @@ This handles comparisons of array-like and hash-like structures.
     .local pmc r_iter
     .local int count
 
-    l_iter = new 'Iterator', l_array
-    r_iter = new 'Iterator', r_array
+    l_iter = iter l_array
+    r_iter = iter r_array
     l_iter = 0
     r_iter = 0
     count  = 0
@@ -641,7 +641,7 @@ This handles comparisons of array-like and hash-like structures.
     .local pmc l_iter
     .local int count
 
-    l_iter = new 'Iterator', l_hash
+    l_iter = iter l_hash
     l_iter = 0
     count  = 0
 
@@ -814,6 +814,54 @@ This handles comparisons of array-like and hash-like structures.
     .return( equal )
 .end
 
+=item C<throws_like( codestring, pattern, description )>
+
+Takes PIR code in C<codestring> and a PGE pattern to match in C<pattern>, as
+well as an optional message in C<description>. Passes a test if the PIR throws
+an exception that matches the pattern, fails the test otherwise.
+
+=cut
+
+.sub throws_like
+    .param string target
+    .param string pattern
+    .param string description :optional
+
+    .local pmc test
+    get_hll_global test, [ 'Test'; 'More' ], '_test'
+
+    .local pmc comp
+    .local pmc compfun
+    .local pmc compiler
+    compiler = compreg 'PIR'
+
+    .local pmc eh
+    eh = new 'ExceptionHandler'
+    set_addr eh, handler            # set handler label for exceptions
+    push_eh eh
+
+    compfun = compiler(target)
+    compfun()                       # eval the target code
+
+    pop_eh
+
+    # if it doesn't throw an exception, fail
+    test.'ok'( 0, description )
+    test.'diag'( 'no error thrown' )
+
+    goto done
+
+  handler:
+    .local pmc ex
+    .local string error_msg
+    .get_results (ex)
+    pop_eh
+    error_msg = ex
+    like(error_msg, pattern, description)
+
+  done:
+.end
+
 =item C<like( target, pattern, description )>
 
 Similar to is, but using the Parrot Grammar Engine to compare the string
@@ -854,7 +902,11 @@ optional test description in C<description>.
   match_success:
     goto pass_it
   match_fail:
-    diagnostic = "match failed"
+    diagnostic = "match failed: target '"
+    diagnostic .= target
+    diagnostic .= "' does not match pattern '"
+    diagnostic .= pattern
+    diagnostic .= "'"
     goto report
   rule_fail:
     diagnostic = "rule error"
@@ -995,7 +1047,7 @@ to the Perl 6 internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005-2008, Parrot Foundation.
+Copyright (C) 2005-2009, Parrot Foundation.
 
 =cut
 

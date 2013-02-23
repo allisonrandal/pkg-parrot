@@ -1,5 +1,5 @@
 /*
- * $Id: cfg.h 37201 2009-03-08 12:07:48Z fperrad $
+ * $Id: cfg.h 40340 2009-07-30 14:30:51Z NotFound $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -45,7 +45,6 @@ typedef struct _loop_info {
 
 
 /* Functions: */
-struct _IMC_Unit;
 
 /* HEADERIZER BEGIN: compilers/imcc/cfg.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */

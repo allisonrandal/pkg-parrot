@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: default.pmc 39963 2009-07-09 17:25:32Z chromatic $
+$Id: default.pmc 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -48,7 +48,7 @@ caller(PARROT_INTERP, PMC *pmc /*NULLOK*/)
 /*
 
 =item C<static void cant_do_method(PARROT_INTERP, PMC *pmc,
-                                   const char *methname)>
+                                   int index)>
 
 Throws an exception "$methname() not implemented in class '$class'", used by
 all unimplemented messages.
@@ -59,10 +59,11 @@ all unimplemented messages.
 
 PARROT_DOES_NOT_RETURN
 static void
-cant_do_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, const char *methname)
+cant_do_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, int index)
 {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_ILL_INHERIT,
-            "%s() not implemented in class '%Ss'", methname,
+            "%s() not implemented in class '%Ss'",
+            Parrot_get_vtable_name(interp, index),
             caller(interp, pmc));
 }
 
@@ -70,7 +71,7 @@ cant_do_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, const char *methname)
 /*
 
 =item C<static void cant_do_write_method(PARROT_INTERP, PMC *pmc,
-                                   const char *methname)>
+                                   int index)>
 
 Throws an exception "$methname() on read-only instance of '$class'", used by
 all updating messages on read-only instances.
@@ -81,10 +82,11 @@ all updating messages on read-only instances.
 
 PARROT_DOES_NOT_RETURN
 static void
-cant_do_write_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, const char *methname)
+cant_do_write_method(PARROT_INTERP, PMC *pmc /*NULLOK*/, int index)
 {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_WRITE_TO_CONSTCLASS,
-            "%s() in read-only instance of '%Ss'", methname,
+            "%s() in read-only instance of '%Ss'",
+            Parrot_get_vtable_name(interp, index),
             caller(interp, pmc));
 }
 
@@ -228,9 +230,6 @@ static PMC*
 make_prop_hash(PARROT_INTERP, PMC *self) {
     PMC *prop;
 
-    if (!self->pmc_ext)
-        Parrot_gc_add_pmc_ext(interp, self);
-
     PMC_metadata(self) = prop = pmc_new(interp, enum_class_Hash);
     GC_WRITE_BARRIER(interp, self, NULL, prop);
     propagate_std_props(interp, self, prop);
@@ -325,6 +324,19 @@ With a null C<initializer>, calls C<init()>, else throws an exception.
 
 /*
 
+=item C<void destroy()>
+
+Does nothing.
+
+=cut
+
+*/
+
+    VTABLE void destroy() {
+    }
+
+/*
+
 =item C<PMC *instantiate(PMC *init)>
 
 Default fallback. Creates a new PMC of the type of the class SELF and
@@ -375,7 +387,7 @@ NULL PMC is returned.
 */
 
     VTABLE PMC *getprop(STRING *key) {
-        if (SELF->pmc_ext && PMC_metadata(SELF))
+        if (PMC_metadata(SELF))
             return VTABLE_get_pmc_keyed_str(INTERP, PMC_metadata(SELF), key);
         else
             return check_get_std_props(interp, SELF, key);
@@ -395,10 +407,8 @@ Sets the property for C<*key> to C<*value>.
         if (check_set_std_props(INTERP, SELF, key, value))
             return;
 
-        if (SELF->pmc_ext && PMC_metadata(SELF)) {
-            VTABLE_set_pmc_keyed_str(INTERP,
-                PMC_metadata(SELF), key, value);
-        }
+        if (PMC_metadata(SELF))
+            VTABLE_set_pmc_keyed_str(INTERP, PMC_metadata(SELF), key, value);
         else {
             PMC * const prop = make_prop_hash(INTERP, SELF);
 
@@ -417,7 +427,7 @@ Deletes the property for C<*key>.
 */
 
     VTABLE void delprop(STRING *key) {
-        if (SELF->pmc_ext && PMC_metadata(SELF))
+        if (PMC_metadata(SELF))
             VTABLE_delete_keyed_str(INTERP, PMC_metadata(SELF), key);
     }
 
@@ -432,9 +442,6 @@ Returns the PMC's properties or the NULL PMC if no properties exist.
 */
 
     VTABLE PMC *getprops() {
-        if (!SELF->pmc_ext)
-            Parrot_gc_add_pmc_ext(INTERP, SELF);
-
         if (!PMC_metadata(SELF)) {
             if (has_pending_std_props(SELF))
                 return make_prop_hash(INTERP, SELF);
@@ -829,22 +836,6 @@ Converts C<key> to a PMC key and calls C<delete_keyed()> with it.
 
 /*
 
-=item C<PMC *nextkey_keyed_int(INTVAL key, INTVAL w)>
-
-Converts C<key> to a PMC key and returns the result of calling
-C<nextkey_keyed()> with it.
-
-=cut
-
-*/
-
-    VTABLE PMC *nextkey_keyed_int(INTVAL key, INTVAL w) {
-        PMC *const r_key = INT2KEY(INTERP, key);
-        return SELF.nextkey_keyed(r_key, w);
-    }
-
-/*
-
 =item C<INTVAL can(STRING *method)>
 
 Reports whether the PMC "can" perform C<method>.
@@ -1069,7 +1060,7 @@ Used by GC to mark the PMC.
 
     VTABLE void visit(visit_info *info) {
         /* default - mark prop hash */
-        if (SELF->pmc_ext && PMC_metadata(SELF) &&
+        if (PMC_metadata(SELF) &&
             info->extra_flags != EXTRA_IS_PROP_HASH) {
             info->extra_flags = EXTRA_IS_PROP_HASH;
             info->extra       = PMC_metadata(SELF);
@@ -1124,9 +1115,6 @@ Initializes the PMC during unarchiving.
     VTABLE void thaw(visit_info *info) {
         /* default - initialize the PMC */
         if (info->extra_flags == EXTRA_IS_PROP_HASH) {
-            if (!SELF->pmc_ext)
-                Parrot_gc_add_pmc_ext(INTERP, SELF);
-
             info->thaw_ptr  = &PMC_metadata(SELF);
             info->container = SELF;
 

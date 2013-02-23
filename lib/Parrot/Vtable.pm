@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Vtable.pm 38848 2009-05-16 21:36:59Z petdance $
+# $Id: Vtable.pm 41099 2009-09-07 06:28:02Z cotto $
 
 =head1 NAME
 
@@ -169,7 +169,7 @@ typedef struct _vtable {
     PMC    *_namespace;     /* Pointer to namespace for this class */
     INTVAL  base_type;      /* 'type' value for MMD */
     STRING *whoami;         /* Name of class this vtable is for */
-    UINTVAL flags;          /* Flags. Duh */
+    UINTVAL flags;          /* VTABLE flags (constant, is_ro, etc). */
     STRING *provides_str;   /* space-separated list of interfaces */
     Hash   *isa_hash;       /* Hash of class names */
     PMC    *pmc_class;      /* for PMCs: a PMC of that type
@@ -185,6 +185,10 @@ EOF
         next if ( $entry->[4] =~ /MMD_/ );
         $struct .= "    $entry->[1]_method_t $entry->[1];\n";
     }
+
+    $struct .= <<'EOF';
+    UINTVAL attr_size;      /* Size of the attributes struct */
+EOF
 
     $struct .= "} _vtable;\n";
 
@@ -238,6 +242,16 @@ EOM
 
 EOM
 
+    # Slot numbers
+    my $vtable_slot_num = 9;
+    for my $entry ( @{$vtable} ) {
+        my $uc_meth = uc $entry->[1];
+        $macros .= <<"EOM";
+#define PARROT_VTABLE_SLOT_${uc_meth} ${vtable_slot_num}
+EOM
+        ++$vtable_slot_num;
+    }
+
     # finally the name mapping
     $macros .= <<'EOM';
 /*
@@ -251,7 +265,7 @@ static PARROT_OBSERVER const char * const Parrot_vtable_slot_names[] = {
     "",   /* Pointer to namespace for this class */
     "",   /* 'type' value for MMD */
     "",   /* Name of class this vtable is for */
-    "",   /* Flags. Duh */
+    "",   /* VTABLE flags (constant, is_ro, etc). */
     "",   /* space-separated list of interfaces */
     "",   /* space-separated list of classes */
     "",   /* class */
@@ -273,48 +287,6 @@ EOM
 };
 
 #define NUM_VTABLE_FUNCTIONS $num_vtable_funcs
-
-#endif /* PARROT_IN_OBJECTS_C */
-
-/* Need this for add, subtract, multiply, divide, mod, cmod, bitwise
-   (and, or, xor, lshift, rshift), concat, logical (and, or, xor),
-   repeat, eq, cmp */
-
-/* &gen_from_enum(mmd.pasm) */
-
-typedef enum {
-EOM
-    for my $entry ( @{$vtable} ) {
-        next unless ( $entry->[4] =~ /MMD_/ );
-        next if ( $entry->[4] =~ /_INT$/ );
-        next if ( $entry->[4] =~ /_STR$/ );
-        next if ( $entry->[4] =~ /_FLOAT$/ );
-        $macros .= <<"EOM";
-        $entry->[4],
-EOM
-    }
-    $macros .= <<'EOM';
-        MMD_USER_FIRST
-} parrot_mmd_func_enum;
-
-/* &end_gen */
-
-#ifdef PARROT_IN_OBJECTS_C
-static PARROT_OBSERVER const char * const Parrot_mmd_func_names[] = {
-EOM
-
-    for my $entry ( @{$vtable} ) {
-        next unless ( $entry->[4] =~ /MMD_/ );
-        next if ( $entry->[4] =~ /_INT$/ );
-        next if ( $entry->[4] =~ /_STR$/ );
-        next if ( $entry->[4] =~ /_FLOAT$/ );
-        $macros .= <<"EOM";
-        \"$entry->[1]\",
-EOM
-    }
-    $macros .= <<"EOM";
-    NULL
-};
 
 #endif /* PARROT_IN_OBJECTS_C */
 EOM

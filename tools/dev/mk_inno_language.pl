@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: mk_inno_language.pl 37900 2009-04-04 12:34:50Z fperrad $
+# $Id: mk_inno_language.pl 40990 2009-09-05 08:53:14Z fperrad $
 
 =head1 TITLE
 
@@ -69,7 +69,7 @@ my $pmc = <src/pmc/*.dll>
 my $ops = <src/ops/*.dll>
         ? qq{Source: ".\\src\\ops\\*.dll"; DestDir: "{app}\\lib\\parrot\\dynext"; Flags:}
         : '; no ops';
-my $dynext = <dynext/*.dll>
+my $dynext = <dynext/*.dll> && !<src/pmc/*.dll> && !<src/ops/*.dll>
            ? qq{Source: ".\\dynext\\*.dll"; DestDir: "{app}\\lib\\parrot\\dynext"; Flags:}
            : '; no dynext';
 my $man = -d 'man'

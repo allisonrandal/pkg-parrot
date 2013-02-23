@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Copyright (C) 2009, Parrot Foundation
-# $Id: parrot-fuzzer 39413 2009-06-05 23:19:30Z chromatic $
+# $Id: parrot-fuzzer 40432 2009-08-06 21:15:57Z cotto $
 
 from fusil.application    import Application
 from fusil.process.watch  import WatchProcess
@@ -419,7 +419,6 @@ class PMCTypeGenerator:
 class OpfuncGenerator:
     opfunc_list = []
     opfunc_blacklist = [
-            'branch_cs', # TT# 470 - known to segfault
             'check_events', #only for testing
             'check_events__', #not for direct use
             'clears', #clearing all [SPIN] registers isn't useful

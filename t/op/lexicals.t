@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: lexicals.t 39633 2009-06-17 21:31:46Z NotFound $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id: lexicals.t 40984 2009-09-05 01:34:21Z pmichaud $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ $ENV{TEST_PROG_ARGS} ||= '';
 plan( skip_all => 'lexicals not thawed properly from PBC, RT #60652' )
     if $ENV{TEST_PROG_ARGS} =~ /--run-pbc/;
 
-plan( tests => 47 );
+plan( tests => 51 );
 
 =head1 NAME
 
@@ -1463,6 +1463,99 @@ CODE
 #     ]
 #     script
 # ]
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'TT #536: lexical sub lookup' );
+.sub 'main'
+    .const 'Sub' $P0 = 'lexfoo'
+    .lex 'foo1', $P0
+    .lex 'foo2', $P0
+
+    'foo1'(1)
+    'foo2'(2)
+.end
+
+.sub 'lexfoo'
+    .param int count
+    print 'ok '
+    print count
+    say ' - looking up lexical sub'
+.end
+
+.sub 'foo2'
+    .param int count
+    print 'not ok '
+    print count
+    say ' - looked up global sub, not lexical'
+.end
+CODE
+ok 1 - looking up lexical sub
+ok 2 - looking up lexical sub
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'find_dynamic_lex basic' );
+.sub 'main'
+    $P0 = box 'main'
+    .lex '$*VAR', $P0
+    'foo'()
+    $P1 = find_dynamic_lex '$*VAR'
+    if null $P1 goto p1_null
+    print 'not '
+  p1_null:
+    say 'null'
+.end
+
+.sub 'foo'
+    $P1 = find_dynamic_lex '$*VAR'
+    say $P1
+.end
+CODE
+main
+null
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', "find_dynamic_lex doesn't search outer" );
+.sub 'main'
+    $P0 = box 'main'
+    .lex '$*VAR', $P0
+    'bar'()
+.end
+
+.sub 'bar'
+    $P0 = box 'bar'
+    .lex '$*VAR', $P0
+    'foo'()
+.end
+
+.sub 'foo' :outer('main')
+    $P1 = find_dynamic_lex '$*VAR'
+    say $P1
+    $P1 = find_lex '$*VAR'
+    say $P1
+.end
+CODE
+bar
+main
+OUTPUT
+
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'find_dynamic_lex two levels deep' );
+.sub 'main'
+    $P0 = box 'main'
+    .lex '$*VAR', $P0
+    'bar'()
+.end
+
+.sub 'bar'
+    'foo'()
+.end
+
+.sub 'foo'
+    $P1 = find_dynamic_lex '$*VAR'
+    say $P1
+.end
+CODE
+main
 OUTPUT
 
 # Local Variables:

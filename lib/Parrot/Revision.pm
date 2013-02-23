@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: Revision.pm 38687 2009-05-11 14:24:04Z Infinoid $
+# $Id: Revision.pm 40307 2009-07-28 14:44:07Z NotFound $
 
 =head1 NAME
 
@@ -83,9 +83,11 @@ sub _analyze_sandbox {
     my $revision = 0;
     # code taken from pugs/util/version_h.pl rev 14410
     # modified because in xml output commit and entry revision
-    # are difficult to distinguih in a simplified parsing
+    # are difficult to distinguish in a simplified parsing
     my $nul = File::Spec->devnull;
-    local $ENV{LANG} = 'C';
+    # Avoid locale troubles with svn messages
+    local $ENV{LANG}   = 'C';
+    local $ENV{LC_ALL} = 'C';
     if ( my @svn_info = qx/svn info 2>$nul/ and $? == 0 ) {
         if ( my ($line) = grep /^Revision:/, @svn_info ) {
             ($revision) = $line =~ /(\d+)/;

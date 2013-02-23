@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: key.c 39700 2009-06-22 04:48:36Z petdance $
+$Id: key.c 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -332,8 +332,6 @@ key_integer(PARROT_INTERP, ARGIN(PMC *key))
     FLOATVAL num_key;
 
     switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
-        case KEY_hash_iterator_FLAGS:
-
         case KEY_integer_FLAG:
             GETATTR_Key_int_key(interp, key, int_key);
             return int_key;
@@ -367,14 +365,6 @@ key_integer(PARROT_INTERP, ARGIN(PMC *key))
             return Parrot_str_to_int(interp, s_reg);
             }
 
-        case KEY_string_FLAG | KEY_start_slice_FLAG:
-        case KEY_string_FLAG | KEY_inf_slice_FLAG:
-            {
-            STRING * const s_key = VTABLE_get_string(interp, key);
-            return Parrot_str_to_int(interp, s_key);
-            }
-        case KEY_start_slice_FLAG:
-        case KEY_inf_slice_FLAG:
         default:
             break;
     }
@@ -554,7 +544,7 @@ key_next(PARROT_INTERP, ARGIN(PMC *key))
     ASSERT_ARGS(key_next)
     PMC *next_key;
 
-    if (VTABLE_isa(interp, key, CONST_STRING(interp, "Key")) && key->pmc_ext) {
+    if (VTABLE_isa(interp, key, CONST_STRING(interp, "Key"))) {
         GETATTR_Key_next_key(interp, key, next_key);
         return next_key;
     }
@@ -616,6 +606,7 @@ void
 key_mark(PARROT_INTERP, ARGIN(PMC *key))
 {
     ASSERT_ARGS(key_mark)
+    PMC          *next_key;
     const UINTVAL flags = PObj_get_FLAGS(key) & KEY_type_FLAGS;
 
     if (flags == KEY_string_FLAG) {
@@ -627,16 +618,10 @@ key_mark(PARROT_INTERP, ARGIN(PMC *key))
         Parrot_gc_mark_PObj_alive(interp, (PObj *)str_key);
     }
 
-    /*
-     * KEY_hash_iterator_FLAGS denote a hash key iteration, PMC_data() is
-     * the bucket_index and not the next key component
-     * Note to self: shoot whoever thought this was a good idea.
-     */
-    if (flags != KEY_hash_iterator_FLAGS) {
-        PMC *next_key;
-        /* if iteration hasn't started, above flag isn't set yet */
+    /* Mark next key */
+    if ((flags == KEY_string_FLAG) || (flags == KEY_pmc_FLAG)) {
         GETATTR_Key_next_key(interp, key, next_key);
-        if (next_key && (void *)next_key != (void *)INITBucketIndex)
+        if (next_key)
             Parrot_gc_mark_PObj_alive(interp, (PObj *)next_key);
     }
 

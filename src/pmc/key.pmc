@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: key.pmc 38960 2009-05-20 04:44:04Z petdance $
+$Id: key.pmc 40739 2009-08-23 15:04:07Z whiteknight $
 
 =head1 NAME
 
@@ -18,7 +18,7 @@ These are the vtable functions for the Key PMC class.
 
 */
 
-pmclass Key need_ext {
+pmclass Key auto_attrs {
     ATTR PMC      *next_key; /* Sometimes it's the next key, sometimes it's
                                 not.  The Key code is like that. */
     ATTR INTVAL    int_key;  /* int value of this key, or something magical if
@@ -40,25 +40,7 @@ Initializes the key.
 */
 
     VTABLE void init() {
-
-        Parrot_Key_attributes * const attrs =
-            mem_allocate_zeroed_typed(Parrot_Key_attributes);
-
-        PMC_data(SELF) = attrs;
-        PObj_custom_mark_destroy_SETALL(SELF);
-    }
-
-/*
-
-=item C<void destroy()>
-
-Destroy this Key, but not in the way anyone reading its code would want.
-
-=cut
-
-*/
-    VTABLE void destroy() {
-        mem_sys_free(PMC_data(SELF));
+        PObj_custom_mark_SET(SELF);
     }
 
 /*
@@ -75,8 +57,6 @@ Creates and returns a clone of the key.
         PMC * const dest = pmc_new(INTERP, SELF->vtable->base_type);
         PMC *dkey        = dest;
         PMC *key         = SELF;
-
-        PObj_custom_mark_destroy_SETALL(dest);
 
         for (; key ;) {
             switch (PObj_get_FLAGS(key) & KEY_type_FLAGS) {
@@ -277,9 +257,6 @@ chain.
     VTABLE PMC *shift_pmc() {
         PMC *next_key;
 
-        if (!SELF->pmc_ext)
-            return NULL;
-
         GET_ATTR_next_key(INTERP, SELF, next_key);
         return next_key;
     }
@@ -304,95 +281,6 @@ Returns the key itself.
         return key;
     }
 
-/*
-
-=item C<PMC *nextkey_keyed(PMC *key, INTVAL what)>
-
-Returns the next key relative to the location specified in C<what>.
-int_key == -1 means end of iteration.
-
-=cut
-
-*/
-
-    VTABLE PMC *nextkey_keyed(PMC *agg, INTVAL what) {
-        PMC  * const ret = SELF;
-        const INTVAL n   = VTABLE_elements(INTERP, agg);
-        INTVAL       int_key;
-
-        switch (what) {
-            case ITERATE_FROM_START_KEYS:
-                /*
-                 * OrderedHash supports two iterators: by key
-                 * or by ordered values
-                 */
-                PObj_get_FLAGS(ret) &= ~KEY_type_FLAGS;
-                PObj_get_FLAGS(ret) |=  KEY_integer_FLAG;
-
-                if (agg->vtable->base_type == enum_class_OrderedHash)
-                    PObj_get_FLAGS(ret) |= KEY_number_FLAG;
-
-                goto init;
-            case ITERATE_FROM_START:    /* reset key */
-                PObj_get_FLAGS(ret) &= ~KEY_type_FLAGS;
-                PObj_get_FLAGS(ret) |= KEY_integer_FLAG;
-
-                /*
-                 * KEY_hash_iterator_FLAGS, which is the same as
-                 * KEY_integer_FLAG | KEY_number_FLAG
-                 * indicates a hash iterator operation
-                 * KEY_integer_FLAG alone is an indexed hash lookup
-                 * with an Integer KEY
-                 */
-
-                 if (VTABLE_isa(INTERP, agg, CONST_STRING(interp, "Hash"))
-                 &&  agg->vtable->base_type != enum_class_OrderedHash)
-                    PObj_get_FLAGS(ret) |= KEY_hash_iterator_FLAGS;
-        init:
-                if (!n) {
-                    SET_ATTR_int_key(INTERP, ret, -1);
-                }
-                else {
-                    SET_ATTR_int_key(INTERP, ret, 0);
-                }
-
-                /* iterating over a hash additionally needs the Bucket index */
-                if (KEY_IS_HASH_ITERATOR(ret))
-                    SET_ATTR_next_key(INTERP, ret, (PMC *)INITBucketIndex);
-
-                break;
-            case ITERATE_GET_NEXT:
-                /*
-                 * src/hash.c:parrot_hash_get_idx() advances to next
-                 * so, if we are iterating over a hash do nothing
-                 * */
-                if (!KEY_IS_HASH_ITERATOR(ret)) {
-                    GET_ATTR_int_key(INTERP, ret, int_key);
-                    if (int_key < n - 1) {
-                        SET_ATTR_int_key(INTERP, ret, int_key+1);
-                    }
-                    else {
-                        SET_ATTR_int_key(INTERP, ret, -1);
-                    }
-                }
-                break;
-            case ITERATE_GET_PREV:
-                GET_ATTR_int_key(INTERP, ret, int_key);
-                if (int_key >= 0)
-                    SET_ATTR_int_key(INTERP, ret, int_key-1);
-                break;
-            case ITERATE_FROM_END:
-                PObj_get_FLAGS(ret) &= ~KEY_type_FLAGS;
-                PObj_get_FLAGS(ret) |= KEY_integer_FLAG;
-                SET_ATTR_int_key(INTERP, ret, n-1);
-                break;
-            default:
-                Parrot_ex_throw_from_c_args(interp, NULL,
-                    EXCEPTION_INVALID_OPERATION,
-                    "Unknown iterator type in Key.nextkey_keyed: %d", what);
-        }
-        return ret;
-    }
 /*
 
 =item C<void visit(visit_info *info)>

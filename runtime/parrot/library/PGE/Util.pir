@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Util.pir 39631 2009-06-17 20:30:30Z NotFound $
+# $Id: Util.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 TITLE
 
@@ -39,13 +39,13 @@ of the match.
     .param pmc mob                                 # match object
     .param pmc list            :slurpy             # message arguments
 
-    .local pmc iter
+    .local pmc it
     .local string message
     message = ''
-    iter = new 'Iterator', list
+    it = iter list
   iter_loop:
-    unless iter goto iter_end
-    $S0 = shift iter
+    unless it goto iter_end
+    $S0 = shift it
     message .= $S0
     goto iter_loop
   iter_end:
@@ -100,13 +100,13 @@ Emits the list of messages to stderr.
     .param pmc mob                                 # match object
     .param pmc list            :slurpy             # message arguments
 
-    .local pmc iter
+    .local pmc it
     .local string message
     message = ''
-    iter = new 'Iterator', list
+    it = iter list
   iter_loop:
-    unless iter goto iter_end
-    $S0 = shift iter
+    unless it goto iter_end
+    $S0 = shift it
     message .= $S0
     goto iter_loop
   iter_end:

@@ -1,5 +1,5 @@
 /*
- * $Id: platform_interface.h 37991 2009-04-09 02:03:12Z Infinoid $
+ * $Id: platform_interface.h 41081 2009-09-06 20:40:14Z bacek $
  * Copyright (C) 2003-2008, Parrot Foundation.
  */
 
@@ -125,6 +125,13 @@ int get_sys_timer_ms(void *handle);
 #  define get_sys_timer_ms(h) 0
 
 #endif
+
+/*
+ * high-resolution timer support
+ */
+
+UHUGEINTVAL Parrot_hires_get_time(void);
+UINTVAL     Parrot_hires_get_tick_duration(void);
 
 
 struct parrot_string_t;

@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Perl6Regex.pir 40066 2009-07-13 22:23:46Z pmichaud $
+# $Id: Perl6Regex.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 TITLE
 
@@ -1667,14 +1667,14 @@ Parse a modifier.
     .tailcall exp1.'perl6exp'(pad)
   with_lhs:
 
-    .local pmc lexscope, savescope, iter
+    .local pmc lexscope, savescope, it
     lexscope = pad['lexscope']
     savescope = new 'Hash'
-    iter = new 'Iterator', lexscope
+    it = iter lexscope
   iter_loop:
-    unless iter goto iter_end
-    $P1 = shift iter
-    $P2 = iter[$P1]
+    unless it goto iter_end
+    $P1 = shift it
+    $P2 = it[$P1]
     savescope[$P1] = $P2
     goto iter_loop
   iter_end:

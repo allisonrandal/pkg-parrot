@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: JSON.pir 39161 2009-05-24 22:47:20Z NotFound $
+# $Id: JSON.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 TITLE
 
@@ -262,14 +262,13 @@ done:
 
   .local pmc keys
   keys = new 'ResizablePMCArray'
-  .local pmc iter
-  iter = new 'Iterator', thing
-  iter = 0
+  .local pmc it
+  it = iter thing
   .local string key
 
 iter_loop:
-  unless iter, done_iter
-  shift key, iter
+  unless it, done_iter
+  shift key, it
   push keys, key
   goto iter_loop
 

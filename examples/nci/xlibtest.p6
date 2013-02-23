@@ -1,5 +1,5 @@
-# Copyright (C) 2008, Parrot Foundation.
-# $Id: xlibtest.p6 38490 2009-05-05 15:52:27Z NotFound $
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: xlibtest.p6 41264 2009-09-14 19:34:53Z NotFound $
 
 use v6;
 
@@ -22,7 +22,7 @@ Press Esc key to exit the program.
 
 =end pod
 
-use Xlib;
+use Xlib:from<parrot>;
 
 # Event types
 constant KeyPress      =  2;

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, Parrot Foundation.
-# $Id: grammar.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: grammar.t 41156 2009-09-08 15:14:46Z NotFound $
 
 use strict;
 use warnings;
@@ -301,12 +301,12 @@ TODO: {
 GRAMMAR
 
 
-    .local object testing
+    .local pmc testing
     testing = new 'Hash'
 
     # Compile a grammar from the source
     .local pmc grammar
-    $P1 = new 'TGE;Compiler'
+    $P1 = new ['TGE';'Compiler']
     grammar = $P1.'compile'(source)
 
     # Apply the grammar to the test tree

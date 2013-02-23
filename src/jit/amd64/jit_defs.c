@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008-2009, Parrot Foundation.
-$Id: jit_defs.c 39124 2009-05-24 03:26:54Z petdance $
+$Id: jit_defs.c 40958 2009-09-03 11:56:50Z bacek $
 */
 
 #include "parrot/parrot.h"
@@ -153,7 +153,9 @@ Parrot_emit_jump_to_rax(Parrot_jit_info_t *jit_info, Interp *interp)
 #endif
     }
     /* Base pointer */
-    emit_mov_r_mr(jit_info->native_ptr, RBX, INTERP, (long)offsetof(Interp, ctx.bp));
+    emit_mov_r_mr(jit_info->native_ptr, RBX, INTERP, (long)offsetof(Interp, ctx));
+    emit_mov_r_mr(jit_info->native_ptr, RBX, RBX, (long)offsetof(PMC, data));
+    emit_mov_r_mr(jit_info->native_ptr, RBX, RBX, (long)offsetof(Parrot_Context, bp));
 
 #ifdef USE_OP_MAP_AND_CODE_START
     emit_jmp_r_r(jit_info->native_ptr, RAX, OP_MAP);

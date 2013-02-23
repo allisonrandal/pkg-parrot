@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2006, Parrot Foundation.
-$Id: exec_start.c 37201 2009-03-08 12:07:48Z fperrad $
+Copyright (C) 2001-2009, Parrot Foundation.
+$Id: exec_start.c 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -97,7 +97,7 @@ main(int argc, char * argv[])
 #if defined(JIT_CGP)
     exec_init_prederef(interp, &exec_prederef_code);
 #endif
-    /* Parrot_set_run_core(interp, PARROT_EXEC_CORE);
+    /* Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "exec"));
     interp->code->base.data =
         (opcode_t *)&((&program_code)[bytecode_offset]);
     Parrot_exec_run = 0; */

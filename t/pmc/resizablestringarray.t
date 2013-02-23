@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: resizablestringarray.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: resizablestringarray.t 40511 2009-08-13 03:16:27Z allison $
 
 =head1 NAME
 
@@ -1354,7 +1354,8 @@ bad_type:
     .get_results (exception)
     message = exception
 still_ok:
-    like(message, 'illegal\ type\ for\ splice', "splice with a different type")
+    message = substr message, 22, 23
+    is(message, 'illegal type for splice', "splice with a different type")
 .end
 
 #

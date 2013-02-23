@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: gdbm.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: gdbm.pm 41071 2009-09-06 16:53:22Z NotFound $
 
 =head1 NAME
 
@@ -61,10 +61,6 @@ sub runstep {
         default         => '-lgdbm',
     } );
 
-    # On OS X check the presence of the gdbm header in the standard
-    # Fink location.
-    $self->_handle_darwin_for_fink($conf, $osname, 'gdbm.h');
-
     $conf->cc_gen('config/auto/gdbm/gdbm_c.in');
     eval { $conf->cc_build( q{}, $extra_libs ); };
     my $has_gdbm = 0;
@@ -74,6 +70,7 @@ sub runstep {
         $has_gdbm = $self->_evaluate_cc_run($test, $has_gdbm, $verbose);
     }
     $conf->data->set( has_gdbm => $has_gdbm );    # for gdbmhash.t and dynpmc.in
+    $self->set_result($has_gdbm ? 'yes' : 'no');
 
     return 1;
 }

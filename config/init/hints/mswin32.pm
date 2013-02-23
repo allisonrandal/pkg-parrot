@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: mswin32.pm 39871 2009-07-03 14:40:18Z jkeenan $
+# $Id: mswin32.pm 41081 2009-09-06 20:40:14Z bacek $
 
 package init::hints::mswin32;
 
@@ -44,6 +44,8 @@ sub runstep {
     if ( $bindir =~ /\s/ ) {
         $conf->data->set( bindir => Win32::GetShortPathName($bindir) );
     }
+
+    $conf->data->set( clock_best => ' ' );
 
     if ($is_msvc) {
         my $msvcversion = $conf->data->get('msvcversion');
@@ -114,6 +116,8 @@ sub runstep {
         # Unclear if it's needed both for ld and link.
         $conf->data->set( libparrot_ldflags   => "\"$build_dir\\libparrot.lib\"" );
         $conf->data->set( libparrot_linkflags   => "\"$build_dir\\libparrot.lib\"" );
+        $conf->data->set( inst_libparrot_ldflags   => "\"$bindir\\libparrot.lib\"" );
+        $conf->data->set( inst_libparrot_linkflags   => "\"$bindir\\libparrot.lib\"" );
 
         # 'link' needs to be link.exe, not cl.exe.
         # This makes 'link' and 'ld' the same.

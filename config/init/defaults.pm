@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: defaults.pm 40161 2009-07-19 23:54:50Z jkeenan $
+# $Id: defaults.pm 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -243,6 +243,8 @@ sub runstep {
         # generate #line directives. These can confuse
         # debugging internals.
         no_lines_flag => $conf->options->get('no-line-directives') ? '--no-lines' : '',
+
+        tempdir => File::Spec->tmpdir,
     );
 
     # add profiling if needed
@@ -253,6 +255,9 @@ sub runstep {
             ld_debug => " -pg ",
         );
     }
+
+    #clock_id used to call the clock_gettime() in the profiling runcore.
+    $conf->data->set( clock_best => '-DCLOCK_BEST=CLOCK_PROF' );
 
     $conf->data->set( 'archname', $Config{archname});
     # adjust archname, cc and libs for e.g. --m=32

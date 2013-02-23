@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: libparrot.pm 39871 2009-07-03 14:40:18Z jkeenan $
+# $Id: libparrot.pm 41022 2009-09-06 00:02:34Z dukeleto $
 
 =head1 NAME
 
@@ -55,6 +55,9 @@ sub runstep {
     }
     if ($^O eq 'cygwin') {
         @libs = ('libparrot.dll.a');
+    }
+    if ($^O eq 'darwin'){
+        @libs = qw/libparrot.dylib libparrot.a/;
     }
     if (defined $ENV{LD_LIBRARY_PATH}) {
         push @libpaths, (split /:/, $ENV{LD_LIBRARY_PATH});

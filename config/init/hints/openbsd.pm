@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: openbsd.pm 39871 2009-07-03 14:40:18Z jkeenan $
+# $Id: openbsd.pm 41081 2009-09-06 20:40:14Z bacek $
 
 package init::hints::openbsd;
 
@@ -12,13 +12,13 @@ sub runstep {
     my $share_ext = $conf->option_or_data('share_ext');
     my $version   = $conf->option_or_data('VERSION');
     my $ccflags = $conf->data->get('ccflags');
-    if ( $ccflags !~ /-pthread/ ) {
+    if ( $ccflags !~ /-pthread\b/ ) {
         $ccflags .= ' -pthread';
     }
     $conf->data->set( ccflags => $ccflags );
 
     my $libs = $conf->data->get('libs');
-    if ( $libs !~ /-lpthread/ ) {
+    if ( $libs !~ /-lpthread\b/ ) {
         $libs .= ' -lpthread';
     }
     $conf->data->set(
@@ -37,6 +37,7 @@ sub runstep {
         $conf->data->set( as => 'as -mregnames' );
     }
 
+    $conf->data->set( clock_best => '-DCLOCK_BEST=CLOCK_MONOTONIC' );
 }
 
 1;

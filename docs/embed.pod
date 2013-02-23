@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: embed.pod 40178 2009-07-21 01:38:13Z jhorwitz $
+# $Id: embed.pod 40936 2009-09-03 00:21:51Z chromatic $
 
 =head1 NAME
 
@@ -276,7 +276,7 @@ is unclear.
 Returns the internal type number corresponding to C<type>.  Useful for
 instantiating various Parrot data types.
 
-=item C<char *Parrot_str_to_cstring(PARROT_INTERP)>
+=item C<char *Parrot_str_to_cstring(PARROT_INTERP, const STRING *s)>
 
 XXX needs to be a formal Parrot_* API.
 Returns the C string representation of a Parrot string.
@@ -343,11 +343,6 @@ Store the PMC C<val> into the namespace PMC C<namespace> with name C<globalname>
 
 Sets the value of a global called C<name> in the namespace C<namespace>.  Does
 nothing if the global is not found.
-
-=item C<Parrot_PMC Parrot_find_global_k(PARROT_INTERP, Parrot_PMC namespace_key, Parrot_String name)>
-
-Find and return a global called C<name> in the keyed namespace C<namespace>.
-Returns C<PMCNULL> if not found.
 
 =back
 
@@ -1012,8 +1007,6 @@ The list may also be augmented if additional functionality is required.
 
 =item C<Parrot_mmd_cache_store_by_values>
 
-=item C<Parrot_MMD_method_name>
-
 =item C<Parrot_new>
 
 =item C<Parrot_new_cb_event>
@@ -1411,12 +1404,6 @@ The list may also be augmented if additional functionality is required.
 =item C<Parrot_PMC_new>
 
 =item C<Parrot_PMC_newclass>
-
-=item C<Parrot_PMC_nextkey_keyed>
-
-=item C<Parrot_PMC_nextkey_keyed_int>
-
-=item C<Parrot_PMC_nextkey_keyed_str>
 
 =item C<Parrot_PMC_null>
 
@@ -1866,7 +1853,7 @@ The list may also be augmented if additional functionality is required.
 
 =item C<pmc_type>
 
-=item C<PObj_active_destroy_SET>
+=item C<PObj_custom_destroy_SET>
 
 =item C<PObj_custom_mark_SET>
 

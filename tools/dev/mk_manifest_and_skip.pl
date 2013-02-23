@@ -1,5 +1,5 @@
 ##! perl
-# $Id: mk_manifest_and_skip.pl 36833 2009-02-17 20:09:26Z allison $
+# $Id: mk_manifest_and_skip.pl 40457 2009-08-08 17:39:57Z dukeleto $
 # Copyright (C) 2006-2009, Parrot Foundation.
 
 use strict;
@@ -9,6 +9,12 @@ use lib qw| lib |;
 use Parrot::Manifest;
 
 my $script = $0;
+
+if (-e '.git') {
+    print "Sorry, this script is not compatible with git-svn\n";
+    print "Patches Welcome!\n";
+    exit 1;
+}
 
 my $mani = Parrot::Manifest->new( { script => $script, } );
 

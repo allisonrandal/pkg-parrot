@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: 01-sub.pir 37812 2009-03-29 11:36:54Z barney $
+# $Id: 01-sub.pir 40200 2009-07-21 21:51:54Z bacek $
 
 =for doc
 
@@ -100,11 +100,11 @@ roughly represents following Perl 6 code:
 .sub 'say'
     .param pmc args :slurpy
     if null args goto end
-    .local pmc iter
-    iter = new 'Iterator', args
+    .local pmc it
+    it = iter args
   loop:
-    unless iter goto end
-    $P0 = shift iter
+    unless it goto end
+    $P0 = shift it
     print $P0
     goto loop
   end:

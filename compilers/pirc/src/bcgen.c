@@ -1,5 +1,5 @@
 /*
- * $Id: bcgen.c 38095 2009-04-13 14:20:12Z coke $
+ * $Id: bcgen.c 41197 2009-09-11 00:25:57Z darbelo $
  * Copyright (C) 2008-2009, Parrot Foundation.
  */
 #include <stdio.h>
@@ -910,8 +910,9 @@ find_outer_sub(ARGIN(bytecode * const bc), ARGIN_NULLOK(char const * const outer
 {
     ASSERT_ARGS(find_outer_sub)
     PMC          *current;
-    Parrot_sub   *sub;
+    Parrot_Sub_attributes *sub;
     STRING       *cur_name;
+    STRING       *out_name;
     size_t        len;
     global_label *outersub;
 
@@ -959,8 +960,8 @@ find_outer_sub(ARGIN(bytecode * const bc), ARGIN_NULLOK(char const * const outer
     PMC_get_sub(interp, current, sub);
     cur_name = sub->name;
 
-    /* XXX can't this be a call to Parrot_str_compare() ? */
-    if (cur_name->strlen == len && (memcmp((char *)cur_name->strstart, outername, len) == 0))
+    out_name = Parrot_str_new(interp, outername, len);
+    if (Parrot_str_compare(interp, cur_name, out_name) == 0)
         return current;
 
     return NULL;
@@ -1131,7 +1132,7 @@ add_sub_pmc(ARGIN(bytecode * const bc), ARGIN(sub_info * const info), int needle
 {
     ASSERT_ARGS(add_sub_pmc)
     PMC                   *sub_pmc;        /* the "Sub" pmc, or a variant, such as "Coroutine" */
-    Parrot_sub            *sub;
+    Parrot_Sub_attributes *sub;
     int                    subconst_index; /* index in const table for the sub pmc */
     int                    subname_index;
     int                    i;              /* for loop iterator */

@@ -1,4 +1,4 @@
-# $Id: Compiler.pir 39895 2009-07-06 04:08:27Z pmichaud $
+# $Id: Compiler.pir 40984 2009-09-05 01:34:21Z pmichaud $
 
 =head1 NAME
 
@@ -83,6 +83,7 @@ any value type.
     piropsig['print']      = 'v*'
     piropsig['set']        = 'PP'
     piropsig['setprop']    = '0P~P'
+    piropsig['setattribute'] = '0P~P'
     set_global '%piropsig', piropsig
 
     ##  %valflags specifies when PAST::Val nodes are allowed to
@@ -664,7 +665,7 @@ Return the POST representation of a C<PAST::Control>.
     .local string rtype
     rtype = options['rtype']
 
-    .local pmc iter, node, ops, pops, tail, skip
+    .local pmc it, node, ops, pops, tail, skip
     $P0 = get_hll_global ['POST'], 'Ops'
     ops = $P0.'new'('node'=>node)
     $P0 = get_hll_global ['POST'], 'Ops'
@@ -675,10 +676,10 @@ Return the POST representation of a C<PAST::Control>.
     $S0 = self.'unique'('skip_handler_')
     skip = $P0.'new'('result'=>$S0)
 
-    iter = new 'Iterator', ehs
+    it = iter ehs
   handler_loop:
-    unless iter, handler_loop_done
-    node = shift iter
+    unless it, handler_loop_done
+    node = shift it
 
     .local pmc ehpir, types, label
     .local string ehreg, type
@@ -826,14 +827,14 @@ Return the POST representation of a C<PAST::Block>.
     ##  merge the Block's symtable with outersym
     symtable = clone symtable
   symtable_merge:
-    .local pmc iter
-    iter = new 'Iterator', outersym
+    .local pmc it
+    it = iter outersym
   symtable_merge_loop:
-    unless iter goto have_symtable
-    $S0 = shift iter
+    unless it goto have_symtable
+    $S0 = shift it
     $I0 = exists symtable[$S0]
     if $I0 goto symtable_merge_loop
-    $P0 = iter[$S0]
+    $P0 = it[$S0]
     symtable[$S0] = $P0
     goto symtable_merge_loop
   have_symtable:
@@ -988,6 +989,8 @@ the node's "pasttype" attribute.
     unless $I0 goto have_lvalue
     $P0 = node[0]
     if null $P0 goto have_lvalue
+    $I1 = exists $P0['lvalue']
+    if $I1 goto have_lvalue
     $P0.'lvalue'($I0)
   have_lvalue:
 
@@ -1187,11 +1190,13 @@ a 'pasttype' of if/unless.
 
     exprpost = self.'as_post'(exprpast, 'rtype'=>exprrtype)
 
+    .local pmc jmpstack
+    jmpstack = new 'ResizableIntegerArray'
     childpast = thenpast
-    bsr make_childpost
+    local_branch jmpstack, make_childpost
     thenpost = childpost
     childpast = elsepast
-    bsr make_childpost
+    local_branch jmpstack, make_childpost
     elsepost = childpost
 
     if null elsepost goto no_elsepost
@@ -1241,7 +1246,7 @@ a 'pasttype' of if/unless.
     unless result goto ret_childpost
     childpost = self.'coerce'(childpost, result)
   ret_childpost:
-    ret
+    local_return jmpstack
 .end
 
 .sub 'unless' :method :multi(_, ['PAST';'Op'])
@@ -1499,14 +1504,14 @@ to C<ResizablePMCArray> if not set.
     returns = box 'ResizablePMCArray'
   have_returns:
 
-    .local pmc listpost, iter
+    .local pmc listpost, it
     listpost = self.'as_vivipost'(returns, 'rtype'=>'P')
     ops.'result'(listpost)
     ops.'push'(listpost)
-    iter = new 'Iterator', posargs
+    it = iter posargs
   iter_loop:
-    unless iter goto iter_end
-    $S0 = shift iter
+    unless it goto iter_end
+    $S0 = shift it
     ops.'push_pirop'('push', listpost, $S0)
     goto iter_loop
   iter_end:
@@ -2251,8 +2256,13 @@ attribute.
     .tailcall self.'vivify'(node, ops, fetchop, storeop)
 
   attribute_bind:
-    $P0 = get_hll_global ['POST'], 'Op'
-    .tailcall $P0.'new'(call_on, name, bindpost, 'pirop'=>'setattribute', 'result'=>bindpost)
+    $P0 = get_hll_global ['POST'], 'Ops'
+    $P0 = $P0.'new'()
+    $P0.'push'(call_on)
+    $P1 = get_hll_global ['POST'], 'Op'
+    $P1 = $P1.'new'(call_on, name, bindpost, 'pirop'=>'setattribute', 'result'=>bindpost)
+    $P0.'push'($P1)
+    .return ($P0)
 .end
 
 

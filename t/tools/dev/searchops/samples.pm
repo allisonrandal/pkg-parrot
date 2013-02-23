@@ -1,6 +1,6 @@
 package samples;
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
+# $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
 
 use strict;
 use warnings;
@@ -13,15 +13,17 @@ our @EXPORT_OK = qw($core $debug $mangled $string);
 
 $core = q{
 /*
- * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
+ * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
 ** pseudo-core.ops
 */
+
+BEGIN_OPS_PREAMBLE
 
 #include "parrot/dynext.h"
 #include "parrot/embed.h"
 #include "../interp/interp_guts.h"
 
-VERSION = PARROT_VERSION;
+END_OPS_PREAMBLE
 
 =head1 NAME
 
@@ -143,15 +145,13 @@ as the Parrot interpreter itself.
 
  $debug = q{
 /*
- * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
+ * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
  * Copyright (C) 2002-2008, Parrot Foundation.
  */
 
 /*
 ** pseudo-debug.ops
 */
-
-VERSION = PARROT_VERSION;
 
 =head1 NAME
 
@@ -208,7 +208,7 @@ op debug_load(inconst STR) :base_debug {
 
  $mangled = q{
 /*
- * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
+ * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
 ** string.ops
 */
 
@@ -266,11 +266,9 @@ as the Parrot interpreter itself.
 
 $string = q{
 /*
- * $Id: samples.pm 38275 2009-04-22 20:06:30Z chromatic $
+ * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
 ** pseudo-string.ops
 */
-
-VERSION = PARROT_VERSION;
 
 =head1 NAME
 

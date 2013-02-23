@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Conf.pm 39976 2009-07-10 08:20:13Z fperrad $
+# $Id: Conf.pm 40208 2009-07-22 00:41:45Z whiteknight $
 package Parrot::Configure::Options::Conf;
 
 use strict;
@@ -18,7 +18,7 @@ use FindBin qw($Bin);
 
 our $script         = q{Configure.pl};
 our $parrot_version = Parrot::BuildUtil::parrot_version("$Bin/../../");
-our $svnid          = '$Id: Conf.pm 39976 2009-07-10 08:20:13Z fperrad $';
+our $svnid          = '$Id: Conf.pm 40208 2009-07-22 00:41:45Z whiteknight $';
 
 sub print_version {
     print "Parrot Version $parrot_version Configure 2.0\n";
@@ -94,8 +94,6 @@ Parrot Options:
    --cgoto=0            Don't build cgoto core - recommended when short of mem
    --jitcapable         Use JIT
    --execcapable        Use JIT to emit a native executable
-   --gc=(type)          Determine the type of garbage collection
-                        type=(gc|libc|malloc|malloc-trace) default is gc
    --without-threads    Build parrot without thread support
 
 External Library Options:

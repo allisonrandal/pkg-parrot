@@ -1,5 +1,5 @@
 /*
- * $Id: rotest.pmc 38336 2009-04-25 04:53:29Z bacek $
+ * $Id: rotest.pmc 40628 2009-08-18 17:24:24Z NotFound $
  * Copyright (C) 2006-2008, Parrot Foundation.
  */
 
@@ -8,7 +8,7 @@
  * generation.  For testing only.
  */
 
-pmclass ROTest dynpmc provides scalar extends Integer {
+pmclass ROTest dynpmc provides scalar extends Integer auto_attrs {
     VTABLE void set_integer_native(INTVAL value) :read {
     }
     VTABLE INTVAL get_integer() :write {

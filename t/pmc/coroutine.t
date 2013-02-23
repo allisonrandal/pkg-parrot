@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: coroutine.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: coroutine.t 41244 2009-09-13 01:05:35Z NotFound $
 
 use strict;
 use warnings;
@@ -308,7 +308,7 @@ ex:
 CODE
 
 pir_output_like(
-    <<'CODE', <<'OUTPUT', "Call an exited coroutine", todo => 'goes one iteration too far.' );
+    <<'CODE', <<'OUTPUT', "Call an exited coroutine", todo => 'goes one iteration too far TT #1003' );
 .sub main :main
     .local pmc c
     c = get_global "coro"

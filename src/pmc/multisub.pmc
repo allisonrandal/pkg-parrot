@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: multisub.pmc 39694 2009-06-22 02:49:35Z cotto $
+$Id: multisub.pmc 40739 2009-08-23 15:04:07Z whiteknight $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ Sub PMCs with the same short name, but different long names.
 
 */
 
-pmclass MultiSub extends ResizablePMCArray need_ext provides array {
+pmclass MultiSub extends ResizablePMCArray auto_attrs provides array {
 
     VTABLE void push_pmc(PMC *value) {
         STRING * const _sub = CONST_STRING(interp, "Sub");

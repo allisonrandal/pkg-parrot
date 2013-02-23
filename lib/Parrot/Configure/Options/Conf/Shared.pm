@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Shared.pm 39976 2009-07-10 08:20:13Z fperrad $
+# $Id: Shared.pm 40208 2009-07-22 00:41:45Z whiteknight $
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -18,6 +18,8 @@ our @shared_valid_options = qw{
     cgoto
     configure_trace
     cxx
+    darwin_no_fink
+    darwin_no_macports
     datadir
     debugging
     define
@@ -27,7 +29,6 @@ our @shared_valid_options = qw{
     fatal
     fatal-step
     floatval
-    gc
     help
     icu-config
     icuheaders

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: inter_create.c 39675 2009-06-20 20:24:17Z Infinoid $
+$Id: inter_create.c 41210 2009-09-11 14:27:06Z NotFound $
 
 =head1 NAME
 
@@ -144,16 +144,18 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
         MUTEX_INIT(interpreter_array_mutex);
     }
 
-    create_initial_context(interp);
+    /* Must initialize flags before Parrot_gc_initialize() is called
+     * so the GC_DEBUG stuff is available. */
+    interp->flags = flags;
+    /* Set up the memory allocation system */
+    Parrot_gc_initialize(interp, (void*)&stacktop);
+    Parrot_block_GC_mark(interp);
+    Parrot_block_GC_sweep(interp);
+
+    interp->ctx         = PMCNULL;
     interp->resume_flag = RESUME_INITIAL;
 
-    /* main is called as a Sub too - this will get depth 0 then */
-    CONTEXT(interp)->recursion_depth = (UINTVAL)-1;
     interp->recursion_limit = RECURSION_LIMIT;
-
-    /* Must initialize flags here so the GC_DEBUG stuff is available before
-     * Parrot_gc_initialize() is called. */
-    interp->flags = flags;
 
     /* PANIC will fail until this is done */
     interp->piodata = NULL;
@@ -168,16 +170,13 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
 #endif
     }
 
-    /* Set up the memory allocation system */
-    Parrot_gc_initialize(interp, (void*)&stacktop);
-    Parrot_block_GC_mark(interp);
-    Parrot_block_GC_sweep(interp);
-
     /*
      * Set up the string subsystem
      * This also generates the constant string tables
      */
     Parrot_str_init(interp);
+
+    Parrot_initialize_core_vtables(interp);
 
     /* Set up the MMD struct */
     interp->binop_mmd_funcs = NULL;
@@ -210,16 +209,15 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
     PARROT_ERRORS_on(interp, PARROT_ERRORS_RESULT_COUNT_FLAG);
 #endif
 
-    /* allocate stack chunk cache */
-    stack_system_init(interp);
-
-    /* And a dynamic environment stack */
-    interp->dynamic_env = new_stack(interp, "DynamicEnv");
+    create_initial_context(interp);
 
     /* clear context introspection vars */
-    CONTEXT(interp)->current_sub    = NULL;
-    CONTEXT(interp)->current_cont   = NULL;
-    CONTEXT(interp)->current_object = NULL;
+    Parrot_pcc_set_sub(interp, CURRENT_CONTEXT(interp), NULL);
+    Parrot_pcc_set_continuation(interp, CURRENT_CONTEXT(interp), NULL); /* TODO Use PMCNULL */
+    Parrot_pcc_set_object(interp, CURRENT_CONTEXT(interp), NULL);
+
+    /* initialize built-in runcores */
+    Parrot_runcore_init(interp);
 
     /* Load the core op func and info tables */
     interp->op_lib          = PARROT_CORE_OPLIB_INIT(1);
@@ -230,10 +228,13 @@ make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags)
     interp->evc_func_table  = NULL;
     interp->save_func_table = NULL;
     interp->code            = NULL;
-    interp->profile         = NULL;
 
     /* create the root set registry */
     interp->gc_registry     = pmc_new(interp, enum_class_AddrRegistry);
+
+    /* And a dynamic environment stack */
+    /* TODO: We should really consider removing this (TT #876) */
+    interp->dynamic_env = pmc_new(interp, enum_class_ResizablePMCArray);
 
     /* create exceptions list */
     interp->current_runloop_id    = 0;
@@ -364,6 +365,10 @@ Parrot_really_destroy(PARROT_INTERP, SHIM(int exit_code), SHIM(void *arg))
     /* Now the PIOData gets also cleared */
     Parrot_io_finish(interp);
 
+    /* deinit runcores and dynamic op_libs */
+    if (!interp->parent_interpreter)
+        Parrot_runcore_destroy(interp);
+
     /*
      * now all objects that need timely destruction should be finalized
      * so terminate the event loop
@@ -395,6 +400,12 @@ Parrot_really_destroy(PARROT_INTERP, SHIM(int exit_code), SHIM(void *arg))
     /* copies of constant tables */
     Parrot_destroy_constants(interp);
 
+    destroy_runloop_jump_points(interp);
+
+    /* packfile */
+    if (interp->initial_pf)
+        PackFile_destroy(interp, interp->initial_pf);
+
     /* buffer headers, PMCs */
     Parrot_gc_destroy_header_pools(interp);
 
@@ -407,20 +418,6 @@ Parrot_really_destroy(PARROT_INTERP, SHIM(int exit_code), SHIM(void *arg))
 
     /* cache structure */
     destroy_object_cache(interp);
-
-    /* packfile */
-    if (interp->initial_pf)
-        PackFile_destroy(interp, interp->initial_pf);
-
-    if (interp->profile) {
-        mem_sys_free(interp->profile->data);
-        interp->profile->data = NULL;
-        mem_sys_free(interp->profile);
-        interp->profile = NULL;
-    }
-
-    destroy_context(interp);
-    destroy_runloop_jump_points(interp);
 
     if (interp->evc_func_table) {
         mem_sys_free(interp->evc_func_table);
@@ -438,15 +435,6 @@ Parrot_really_destroy(PARROT_INTERP, SHIM(int exit_code), SHIM(void *arg))
 
         /* free vtables */
         parrot_free_vtables(interp);
-
-        /* dynop libs */
-        if (interp->n_libs > 0) {
-            mem_sys_free(interp->op_info_table);
-            mem_sys_free(interp->op_func_table);
-
-            /* deinit op_lib */
-            Parrot_runcore_destroy(interp);
-        }
 
         MUTEX_DESTROY(interpreter_array_mutex);
         mem_sys_free(interp);

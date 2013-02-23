@@ -1,6 +1,6 @@
 =pod
 
-﻿# $Id: CREDITS 40173 2009-07-20 20:25:31Z dukeleto $
+﻿# $Id: CREDITS 41186 2009-09-10 22:17:00Z darbelo $
 
     Following in the steps of other open source projects that
     eventually take over the world, here is the partial list
@@ -92,7 +92,7 @@ E: yDNA@cpan.org
 N: Andrew Whitworth
 D: Internals development
 D: Documentation
-D: Release manager for 0.8.2 and 1.3.0
+D: Release manager for 0.8.2, 1.3.0 and 1.5.0
 E: wknight8111@gmail.com
 U: Whiteknight
 
@@ -237,6 +237,7 @@ U: cotto
 D: Patch for key flags in pdd08
 D: Range check in Env PMC
 A: christoph_googleacct@mksig.org
+A: christop...@mksig.org
 D: Pipp
 E: christoph@mksig.org
 
@@ -304,7 +305,7 @@ N: Daniel Arbelo Arrocha
 U: darbelo
 A: arbelo
 D: OpenBSD fixes and testing, gsoc2009-decnum-dynpmcs
-E: dany.arbelo@gmail.com
+E: arbelo@gmail.com
 
 N: Dave Woldrich
 D: Win32 build fixes
@@ -479,6 +480,10 @@ U: particle
 E: Jerry.Gay@gmail.com
 D: Whatever
 S: Seattle, WA
+
+N: Jesse Taylor
+U: jrtayloriv
+E: jrtayloriv@gmail.com
 
 N: Jesse Vincent
 U: jesse
@@ -673,6 +678,11 @@ N: Michael Cartmell
 E: Michael.Cartmell@thomson.com
 D: README.win32 spelling patch
 
+N: Michael H. Hind
+U: mikehh
+D: codingstd patches
+E: mike.hind@gmail.com
+
 N: Michael G. Schwern
 
 N: Michael Scott
@@ -682,9 +692,6 @@ D: HTML documentation for Parrot
 E: michael_scott@mac.com
 U: mikescott
 W: http://xrl.us/sml
-
-U: mikehh
-D: codingstd patches
 
 N: Michael Stevens
 D: Remove an unused variable in C-land
@@ -851,6 +858,11 @@ D: Pythonic and OO patches
 N: Sam Vilain
 D: Prototype object model and tests
 
+N: Samuel Harrington
+E: samuel.harrington@mines.sdsmt.edu
+U: samlh
+D: css patch
+
 N: Sean O'Rourke
 E: educated_foo@yahoo.com
 U: educated_foo
@@ -927,6 +939,11 @@ D: lolcode patches
 N: Tanton Gibbs
 U: thgibbs
 E: thgibbs@deltafarms.com
+
+N: Ted Reed
+U: treed
+E: ted.reed@gmail.com
+D: cardinal
 
 N: Thilo Planz
 D: partcl tests and inspiration

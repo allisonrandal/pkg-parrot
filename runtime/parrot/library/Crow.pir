@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Crow.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: Crow.pir 40191 2009-07-21 12:56:20Z bacek $
 
 .namespace ['Crow']
 
@@ -110,16 +110,16 @@ END_HELP
     .param string template
     .param pmc    data
 
-    .local pmc    iter
-    iter = new 'Iterator', data
+    .local pmc    it
+    it = iter data
 
     .local string symbol, value
 
   it_loop:
-    unless iter goto it_done
-    $P0 = shift iter
+    unless it goto it_done
+    $P0 = shift it
     symbol = 'get_symbol'($P0)
-    value  = iter[$P0]
+    value  = it[$P0]
       repl_loop:
         $I0 = index template, symbol
         if -1 == $I0 goto repl_done

@@ -1,5 +1,5 @@
 /*
- * $Id: instructions.h 39837 2009-06-30 04:30:24Z petdance $
+ * $Id: instructions.h 40340 2009-07-30 14:30:51Z NotFound $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -75,19 +75,14 @@ typedef enum {
 } Instruction_Flags;
 #undef INSTRUCTION_BIT
 
-
-/* Forward decl */
-struct _IMC_Unit;
-
-
 /* Functions */
 /* Globals */
 
 typedef struct _emittert {
     int (*open)(PARROT_INTERP, void *param);
-    int (*emit)(PARROT_INTERP, void *param, const struct _IMC_Unit *, const Instruction *ins);
-    int (*new_sub)(PARROT_INTERP, void *param, struct _IMC_Unit *);
-    int (*end_sub)(PARROT_INTERP, void *param, struct _IMC_Unit *);
+    int (*emit)(PARROT_INTERP, void *param, const IMC_Unit *, const Instruction *ins);
+    int (*new_sub)(PARROT_INTERP, void *param, IMC_Unit *);
+    int (*end_sub)(PARROT_INTERP, void *param, IMC_Unit *);
     int (*close)(PARROT_INTERP, void *param);
 } Emitter;
 

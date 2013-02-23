@@ -1,7 +1,7 @@
 /* gc_api.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: gc_api.h 40013 2009-07-12 12:46:24Z whiteknight $
+ *     $Id: gc_api.h 41069 2009-09-06 13:57:25Z whiteknight $
  *  Overview:
  *     Handles dead object destruction of the various headers
  *  History:
@@ -172,11 +172,6 @@ int Parrot_gc_active_pmcs(PARROT_INTERP)
 int Parrot_gc_active_sized_buffers(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-void Parrot_gc_add_pmc_ext(PARROT_INTERP, ARGMOD(PMC *pmc))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        FUNC_MODIFIES(*pmc);
-
 void Parrot_gc_add_pmc_sync(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
@@ -188,6 +183,16 @@ void Parrot_gc_allocate_buffer_storage_aligned(PARROT_INTERP,
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*buffer);
+
+PARROT_CANNOT_RETURN_NULL
+void * Parrot_gc_allocate_fixed_size_storage(PARROT_INTERP, size_t size)
+        __attribute__nonnull__(1);
+
+PARROT_CANNOT_RETURN_NULL
+void * Parrot_gc_allocate_pmc_attributes(PARROT_INTERP, ARGMOD(PMC *pmc))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*pmc);
 
 void Parrot_gc_allocate_string_storage(PARROT_INTERP,
     ARGOUT(STRING *str),
@@ -220,28 +225,37 @@ void Parrot_gc_destroy_header_pools(PARROT_INTERP)
 void Parrot_gc_destroy_memory_pools(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-UINTVAL Parrot_gc_extended_pmcs(PARROT_INTERP)
-        __attribute__nonnull__(1);
-
 void Parrot_gc_finalize(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 void Parrot_gc_free_bufferlike_header(PARROT_INTERP,
-    ARGMOD(PObj *obj),
+    ARGMOD(Buffer *obj),
     size_t size)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*obj);
 
-void Parrot_gc_free_pmc_ext(PARROT_INTERP, ARGMOD(PMC *p))
+void Parrot_gc_free_fixed_size_storage(PARROT_INTERP,
+    size_t size,
+    ARGMOD(void *data))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*data);
+
+void Parrot_gc_free_pmc_attributes(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        FUNC_MODIFIES(*p);
+        FUNC_MODIFIES(*pmc);
 
 void Parrot_gc_free_pmc_header(PARROT_INTERP, ARGMOD(PMC *pmc))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*pmc);
+
+void Parrot_gc_free_pmc_sync(PARROT_INTERP, ARGMOD(PMC *p))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*p);
 
 void Parrot_gc_free_string_header(PARROT_INTERP, ARGMOD(STRING *s))
         __attribute__nonnull__(1)
@@ -350,9 +364,6 @@ int Parrot_gc_total_sized_buffers(PARROT_INTERP)
 #define ASSERT_ARGS_Parrot_gc_active_sized_buffers \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_gc_add_pmc_ext __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_gc_add_pmc_sync __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc)
@@ -360,6 +371,13 @@ int Parrot_gc_total_sized_buffers(PARROT_INTERP)
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(buffer)
+#define ASSERT_ARGS_Parrot_gc_allocate_fixed_size_storage \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_gc_allocate_pmc_attributes \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_gc_allocate_string_storage \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
@@ -383,20 +401,25 @@ int Parrot_gc_total_sized_buffers(PARROT_INTERP)
 #define ASSERT_ARGS_Parrot_gc_destroy_memory_pools \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_gc_extended_pmcs __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_gc_finalize __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_gc_free_bufferlike_header \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(obj)
-#define ASSERT_ARGS_Parrot_gc_free_pmc_ext __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_Parrot_gc_free_fixed_size_storage \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(p)
+    || PARROT_ASSERT_ARG(data)
+#define ASSERT_ARGS_Parrot_gc_free_pmc_attributes __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(pmc)
 #define ASSERT_ARGS_Parrot_gc_free_pmc_header __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(pmc)
+#define ASSERT_ARGS_Parrot_gc_free_pmc_sync __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+       PARROT_ASSERT_ARG(interp) \
+    || PARROT_ASSERT_ARG(p)
 #define ASSERT_ARGS_Parrot_gc_free_string_header __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(s)
@@ -457,12 +480,6 @@ int Parrot_gc_total_sized_buffers(PARROT_INTERP)
 /* HEADERIZER END: src/gc/api.c */
 
 void Parrot_gc_inf_init(PARROT_INTERP);
-
-
-/* DEPRECATED. pobject_lives is being renamed to Parrot_gc_mark_PObj_alive.
-   this macro is provided for compatibility until version 1.4 or later when
-   it can be removed per the deprecation policy. See TT #664 for details */
-#define pobject_lives Parrot_gc_mark_PObj_alive
 
 /* write barrier */
 #if PARROT_GC_MS

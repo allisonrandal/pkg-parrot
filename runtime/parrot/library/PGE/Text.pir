@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Text.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: Text.pir 40667 2009-08-19 23:36:58Z coke $
 
 =head1 TITLE
 
@@ -50,7 +50,6 @@ of the extraction.
     .local int balanced                            # in balanced match
     .local pmc stack                               # lookket backtracking
 
-    stack = new 'ResizableStringArray'
     $P0 = get_hll_global ['PGE'], 'Match'
     (mob, pos, target) = $P0.'new'(tgt)
     from = pos
@@ -88,6 +87,7 @@ of the extraction.
     if $I0 < 0 goto end                            # no leading delim fails
     lookket = ''
     balanced = 1
+    stack = new 'ResizableStringArray'
   next:
     $S0 = substr target, pos, 1                    # check current pos
     if $S0 == '' goto fail                         # end of string -> fail

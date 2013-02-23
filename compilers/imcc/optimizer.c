@@ -1,5 +1,5 @@
 /*
- * $Id: optimizer.c 39824 2009-06-29 07:11:48Z petdance $
+ * $Id: optimizer.c 40222 2009-07-22 23:46:14Z petdance $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -1501,14 +1501,12 @@ dead_code_remove(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
         }
     }
 
-    /* Unreachable instructions */
 
+    /* Unreachable instructions */
 
     for (last = unit->instructions, ins = last->next;
          last && ins;
          ins = ins->next) {
-         if (!last && !ins)
-            break;
 
         if ((last->type & IF_goto) && !(ins->type & ITLABEL) &&
             STREQ(last->opname, "branch")) {

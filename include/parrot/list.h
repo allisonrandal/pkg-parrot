@@ -3,7 +3,7 @@
  *  Copyright (C) 2002-2008, Parrot Foundation.
  *  License:  Artistic 2.0, see README and LICENSE for details
  *  SVN Info
- *     $Id: list.h 39896 2009-07-06 04:30:07Z petdance $
+ *     $Id: list.h 40726 2009-08-23 01:18:17Z whiteknight $
  *  Overview:
  *     list aka array routines for Parrot
  *     s. list.c for more
@@ -15,7 +15,7 @@
 #define PARROT_LIST_H_GUARD
 
 typedef struct List_chunk {
-    Buffer             data;        /* item store */
+    Buffer             data;        /* item store, Buffer must be first element in struct*/
     struct List_chunk *next;
     struct List_chunk *prev;
     UINTVAL            flags;       /* chunk flags */

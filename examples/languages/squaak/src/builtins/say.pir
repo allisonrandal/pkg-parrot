@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: say.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: say.pir 40200 2009-07-21 21:51:54Z bacek $
 
 
 =head1
@@ -12,11 +12,11 @@ Squaak built-in routines
 
 .sub 'print'
     .param pmc args            :slurpy
-    .local pmc iter
-    iter = new 'Iterator', args
+    .local pmc it
+    it = iter args
   iter_loop:
-    unless iter goto iter_end
-    $P0 = shift iter
+    unless it goto iter_end
+    $P0 = shift it
     print $P0
     goto iter_loop
   iter_end:

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: hashiteratorkey.pmc 40106 2009-07-15 15:01:38Z NotFound $
+$Id: hashiteratorkey.pmc 40972 2009-09-04 18:39:53Z NotFound $
 
 =head1 NAME
 
@@ -19,44 +19,9 @@ Single (key,value) pair.
 
 */
 
-pmclass HashIteratorKey no_ro {
+pmclass HashIteratorKey no_ro auto_attrs {
     ATTR Hash        *parrot_hash; /* Underlying parrot's hash */
     ATTR HashBucket  *bucket;      /* Current bucket from HashItertor */
-
-/*
-
-=item C<void init()>
-
-Initializes the PMC.
-
-Not really part of public API.
-
-=cut
-
-*/
-
-    VTABLE void init() {
-        Parrot_HashIteratorKey_attributes *attrs =
-            mem_allocate_zeroed_typed(Parrot_HashIteratorKey_attributes);
-
-        PMC_data(SELF) = attrs;
-
-        PObj_active_destroy_SET(SELF);
-    }
-
-/*
-
-=item C<void destroy()>
-
-Destroys this PMC
-
-=cut
-
-*/
-
-    VTABLE void destroy() {
-        mem_sys_free(PMC_data(SELF));
-    }
 
 /*
 
@@ -79,21 +44,23 @@ Get "key".
         Parrot_HashIteratorKey_attributes *attrs =
                 PARROT_HASHITERATORKEY(SELF);
 
-        switch (attrs->parrot_hash->key_type) {
-            case Hash_key_type_int:
-                return Parrot_str_from_int(INTERP, (INTVAL)attrs->bucket->key);
+        if (attrs->parrot_hash) {
+            switch (attrs->parrot_hash->key_type) {
+                case Hash_key_type_int:
+                    return Parrot_str_from_int(INTERP, (INTVAL)attrs->bucket->key);
 
-            case Hash_key_type_STRING:
-                return (STRING*)attrs->bucket->key;
+                case Hash_key_type_STRING:
+                    return (STRING*)attrs->bucket->key;
 
-            case Hash_key_type_PMC:
-                return VTABLE_get_string(INTERP, (PMC *)attrs->bucket->key);
+                case Hash_key_type_PMC:
+                    return VTABLE_get_string(INTERP, (PMC *)attrs->bucket->key);
 
-            default:
-                /* Horribly die? */
-                break;
+                default:
+                    break;
+            }
         }
 
+        /* Horribly die? */
         return NULL;
     }
 

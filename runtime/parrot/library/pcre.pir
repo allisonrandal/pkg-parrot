@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: pcre.pir 39334 2009-06-02 14:51:55Z barney $
+# $Id: pcre.pir 40354 2009-08-01 00:15:11Z NotFound $
 
 =head1 TITLE
 
@@ -59,9 +59,19 @@ and is additionally stored as global 'PCRE', 'lib'.
     if 'cygwin'  == osname goto LIB_CYGWIN
 
 LIB_DEFAULT:
+# Plain name
     loadlib libpcre, 'libpcre'
     loaded = defined libpcre
     if loaded goto LIB_LOADED
+# Shared object name
+    loadlib libpcre, 'libpcre.so'
+    loaded = defined libpcre
+    if loaded goto LIB_LOADED
+# soname of recent version
+    loadlib libpcre, 'libpcre.so.3'
+    loaded = defined libpcre
+    if loaded goto LIB_LOADED
+
     branch LIB_FAILED
 
 LIB_WIN32:

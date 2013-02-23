@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: orderedhash.t 40100 2009-07-15 13:15:25Z bacek $
+# $Id: orderedhash.t 40191 2009-07-21 12:56:20Z bacek $
 
 use strict;
 use warnings;
@@ -89,7 +89,7 @@ pasm_output_is( <<'CODE', <<OUT, "iterate" );
     set P1, "ok 3\n"
     set P0["j"], P1
 
-    new P2, ['Iterator'], P0
+    iter P2, P0
     set P2, .ITERATE_FROM_START
 iter_loop:
     unless P2, end_iter
@@ -268,7 +268,7 @@ pasm_output_is( <<'CODE', <<OUT, "delete" );
 
     delete P0["a"]
 
-    new P2, ['Iterator'], P0
+    iter P2, P0
     set P2, .ITERATE_FROM_START_KEYS
 iter_loop:
     unless P2, end_iter
@@ -335,7 +335,7 @@ pasm_output_like( <<'CODE', '/[axj]/', "iterate over keys" );
     set P1, "ok 3\n"
     set P0["j"], P1
 
-    new P2, ['Iterator'], P0
+    iter P2, P0
     set P2, .ITERATE_FROM_START_KEYS
 iter_loop:
     unless P2, end_iter
@@ -359,7 +359,7 @@ pasm_output_like( <<'CODE', <<'OUT', "iterate over keys, get value" );
     set P1, "ok 3\n"
     set P0["j"], P1
 
-    new P2, ['Iterator'], P0
+    iter P2, P0
     set P2, .ITERATE_FROM_START_KEYS
 iter_loop:
     unless P2, end_iter

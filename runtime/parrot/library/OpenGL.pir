@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: OpenGL.pir 39762 2009-06-25 00:42:22Z japhb $
+# $Id: OpenGL.pir 40399 2009-08-04 20:58:43Z japhb $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ F<examples/opengl/triangle.pir>.
 
     # Load OpenGL libary and a helper library for calling glutInit
     load_bytecode 'OpenGL.pbc'
-    load_bytecode 'NCI/call_toolkit_init.pbc'
+    load_bytecode 'NCI/Utils.pbc'
 
     # Import all OpenGL/GLU/GLUT functions
     .local pmc import_gl
@@ -28,7 +28,7 @@ F<examples/opengl/triangle.pir>.
 
     # Initialize GLUT
     .local pmc call_toolkit_init
-    call_toolkit_init = get_global ['NCI'], 'call_toolkit_init'
+    call_toolkit_init = get_global ['NCI';'Utils'], 'call_toolkit_init'
 
     .const 'Sub' glutInit = 'glutInit'
     argv = call_toolkit_init(glutInit, argv)

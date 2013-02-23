@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: resizablepmcarray.pmc 38994 2009-05-20 22:27:54Z chromatic $
+$Id: resizablepmcarray.pmc 41253 2009-09-13 18:44:48Z NotFound $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ It puts things into Integer, Float, or String PMCs as appropriate.
 #define PMC_array(x)     ((Parrot_ResizablePMCArray_attributes *)PMC_data(x))->pmc_array
 #define PMC_threshold(x) ((Parrot_ResizablePMCArray_attributes *)PMC_data(x))->resize_threshold
 
-pmclass ResizablePMCArray extends FixedPMCArray need_ext provides array {
+pmclass ResizablePMCArray extends FixedPMCArray auto_attrs provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs resizing */
 
 
@@ -37,10 +37,6 @@ Initializes the array.
 */
 
     VTABLE void init() {
-        Parrot_ResizablePMCArray_attributes *attrs =
-            mem_allocate_zeroed_typed(Parrot_ResizablePMCArray_attributes);
-
-        PMC_data(SELF) = attrs;
         PObj_custom_mark_destroy_SETALL(SELF);
     }
 
@@ -597,45 +593,6 @@ Creates and returns a copy of the array.
         PMC_threshold(copy) = PMC_size(SELF);
 
         return copy;
-    }
-
-/*
-
-=item C<INTVAL is_equal(PMC *value)>
-
-The C<==> operation. Compares two array to hold equal elements.
-
-=cut
-
-*/
-
-    VTABLE INTVAL is_equal(PMC *value) {
-        INTVAL j, n;
-
-        if (value->vtable->base_type != enum_class_ResizablePMCArray)
-            return 0;
-
-        n = SELF.elements();
-
-        if (VTABLE_elements(INTERP, value) != n)
-            return 0;
-
-        for (j = 0; j < n; ++j) {
-            PMC *item1 = SELF.get_pmc_keyed_int(j);
-            PMC *item2 = VTABLE_get_pmc_keyed_int(INTERP, value, j);
-            INTVAL result;
-
-            if (item1 == item2)
-                continue;
-
-            Parrot_mmd_multi_dispatch_from_c_args(INTERP,
-                    "is_equal", "PP->I", item1, item2, &result);
-
-            if (!result)
-                return 0;
-        }
-
-        return 1;
     }
 
 /*

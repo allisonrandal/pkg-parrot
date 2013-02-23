@@ -1,7 +1,7 @@
 /* global.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id: global.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id: global.h 40226 2009-07-23 06:51:50Z petdance $
  *  Overview:
  *      Contains accessor functions for globals
  *  Data Structure and Algorithms:
@@ -22,15 +22,6 @@ PARROT_CAN_RETURN_NULL
 PMC * Parrot_find_global_cur(PARROT_INTERP,
     ARGIN_NULLOK(STRING *globalname))
         __attribute__nonnull__(1);
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-PMC * Parrot_find_global_k(PARROT_INTERP,
-    ARGIN_NULLOK(PMC *pmc_key),
-    ARGIN(STRING *globalname))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
@@ -78,17 +69,12 @@ PMC * Parrot_get_global(PARROT_INTERP,
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
-PMC * Parrot_get_namespace_autobase(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
-        __attribute__nonnull__(1);
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
 PMC * Parrot_get_namespace_keyed(PARROT_INTERP,
     ARGIN(PMC *base_ns),
-    ARGIN_NULLOK(PMC *pmc_key))
+    ARGIN(PMC *pmc_key))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
@@ -110,9 +96,10 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 PMC * Parrot_make_namespace_keyed(PARROT_INTERP,
     ARGIN(PMC *base_ns),
-    ARGIN_NULLOK(PMC *pmc_key))
+    ARGIN(PMC *pmc_key))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
@@ -159,9 +146,6 @@ void Parrot_store_sub_in_namespace(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 
 #define ASSERT_ARGS_Parrot_find_global_cur __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_find_global_k __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(globalname)
 #define ASSERT_ARGS_Parrot_find_global_n __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_find_global_op __attribute__unused__ int _ASSERT_ARGS_CHECK = \
@@ -174,11 +158,10 @@ void Parrot_store_sub_in_namespace(PARROT_INTERP, ARGIN(PMC *sub_pmc))
     || PARROT_ASSERT_ARG(name)
 #define ASSERT_ARGS_Parrot_get_global __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_get_namespace_autobase __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_get_namespace_keyed __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(base_ns)
+    || PARROT_ASSERT_ARG(base_ns) \
+    || PARROT_ASSERT_ARG(pmc_key)
 #define ASSERT_ARGS_Parrot_get_namespace_keyed_str \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
@@ -188,7 +171,8 @@ void Parrot_store_sub_in_namespace(PARROT_INTERP, ARGIN(PMC *sub_pmc))
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_Parrot_make_namespace_keyed __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(base_ns)
+    || PARROT_ASSERT_ARG(base_ns) \
+    || PARROT_ASSERT_ARG(pmc_key)
 #define ASSERT_ARGS_Parrot_make_namespace_keyed_str \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \

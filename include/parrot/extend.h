@@ -1,7 +1,7 @@
 /* extend.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: extend.h 37722 2009-03-25 17:56:55Z Infinoid $
+ *     $Id: extend.h 40846 2009-08-28 20:50:10Z NotFound $
  *  Overview:
  *     This is the Parrot extension mechanism, the face we present to
  *     extension modules and whatnot
@@ -35,10 +35,15 @@
    pointer, which is on the stack and as good a thing as any to use as
    an anchor */
 #define PARROT_CALLIN_START(x) void *oldtop = (x)->lo_var_ptr; \
-                               if (!oldtop) (x)->lo_var_ptr = &oldtop;
+                               if (oldtop) {} else (x)->lo_var_ptr = &oldtop
 /* Put the stack top back, if what we cached was NULL. Otherwise we
    leave it alone and assume it's OK */
-#define PARROT_CALLIN_END(x)   if (!oldtop) (x)->lo_var_ptr = NULL;
+#define PARROT_CALLIN_END(x)   do {\
+                if (!oldtop) {\
+                    PARROT_ASSERT((x)->lo_var_ptr == &oldtop);\
+                    (x)->lo_var_ptr = NULL;\
+                }\
+            } while (0)
 
 #else
 

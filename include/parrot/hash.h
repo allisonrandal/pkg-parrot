@@ -1,7 +1,7 @@
 /* hash.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: hash.h 40100 2009-07-15 13:15:25Z bacek $
+ *     $Id: hash.h 40726 2009-08-23 01:18:17Z whiteknight $
  *  Overview:
  *     Hashtable implementation
  *  Data Structure and Algorithms:
@@ -28,11 +28,12 @@ typedef enum {
 
 /*
  * hash_entry is currently unused in the hash structure
- */
+
 typedef struct _hash_entry {
     HashEntryType type;
     UnionVal val;
 } HashEntry;
+*/
 
 /* A BucketIndex is an index into the pool of available buckets. */
 typedef UINTVAL BucketIndex;
@@ -42,7 +43,7 @@ typedef UINTVAL BucketIndex;
 #define HASH_ALLOC_SIZE(n) (N_BUCKETS(n) * sizeof (HashBucket) + \
                                      (n) * sizeof (HashBucket *))
 
-typedef int (*hash_comp_fn)(PARROT_INTERP, const void*const, const void*const);
+typedef int (*hash_comp_fn)(PARROT_INTERP, const void *const, const void *const);
 typedef void (*hash_mark_key_fn)(PARROT_INTERP, PObj *);
 typedef size_t (*hash_hash_key_fn)(PARROT_INTERP, ARGIN(const void *), size_t seed);
 
@@ -194,12 +195,6 @@ Hash* parrot_new_intval_hash(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
-void parrot_new_pmc_hash(PARROT_INTERP, ARGOUT(PMC *container))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        FUNC_MODIFIES(*container);
-
-PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
 Hash * parrot_new_pointer_hash(PARROT_INTERP)
         __attribute__nonnull__(1);
@@ -285,9 +280,6 @@ Hash * parrot_create_hash(PARROT_INTERP,
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_parrot_new_intval_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_parrot_new_pmc_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(container)
 #define ASSERT_ARGS_parrot_new_pointer_hash __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
 #define ASSERT_ARGS_int_compare __attribute__unused__ int _ASSERT_ARGS_CHECK = 0

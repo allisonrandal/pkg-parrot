@@ -1,13 +1,13 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: arithmetics.t 39864 2009-07-02 01:02:48Z Infinoid $
+# $Id: arithmetics.t 40749 2009-08-24 07:56:48Z dukeleto $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 23;
+use Parrot::Test tests => 21;
 
 # test for GMP
 use Parrot::Config;
@@ -594,44 +594,6 @@ CODE
 OUTPUT
 }
 
-pir_output_is( <<'CODE', <<OUTPUT, "Inf/NaN - basic arith" );
-.sub 'test' :main
-    $N0 = 'Inf'
-    say $N0
-    $N0 -= $N0
-    say $N0
-.end
-CODE
-Inf
-NaN
-OUTPUT
-
-pir_output_is( <<'CODE', <<OUTPUT, "Inf/NaN - rounding" );
-.sub 'test' :main
-    $N0 = 'NaN'
-    $N1 = floor $N0
-    say $N1
-    $N2 = ceil $N0
-    say $N2
-    $N0 = 'Inf'
-    $N1 = floor $N0
-    say $N1
-    $N2 = ceil $N0
-    say $N2
-    $N0 = '-Inf'
-    $N1 = floor $N0
-    say $N1
-    $N2 = ceil $N0
-    say $N2
-.end
-CODE
-NaN
-NaN
-Inf
-Inf
--Inf
--Inf
-OUTPUT
 
 # Local Variables:
 #   mode: cperl

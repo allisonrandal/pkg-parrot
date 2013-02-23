@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: resizablepmcarray.t 38234 2009-04-20 17:20:02Z pmichaud $
+# $Id: resizablepmcarray.t 41253 2009-09-13 18:44:48Z NotFound $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ out-of-bounds test. Checks INT and PMC keys.
     .include 'fp_equality.pasm'
     .include 'test_more.pir'
 
-    plan(121)
+    plan(125)
 
     resize_tests()
     negative_array_size()
@@ -30,6 +30,7 @@ out-of-bounds test. Checks INT and PMC keys.
     set_keyed_get_keyed_tests()
     interface_check()
     inherited_sort_method()
+    sort_subclass()
     push_pmc()
     push_int()
     push_string()
@@ -48,6 +49,7 @@ out-of-bounds test. Checks INT and PMC keys.
     method_forms_of_unshift_etc()
     sort_with_broken_cmp()
     addr_tests()
+    equality_tests()
 .end
 
 
@@ -325,6 +327,35 @@ lp:
     goto lp
 done:
     is(sorted, "1 2 5 9 10 ", "inherited sort method works")
+.end
+
+
+.sub sort_subclass
+    .local pmc subrpa, arr
+    subrpa = subclass ['ResizablePMCArray'], 'ssRPA'
+    arr = new subrpa
+    arr[0] = 'p'
+    arr[1] = 'a'
+    arr[2] = 'z'
+    # Use a comparator that gives a reverse alphabetical order
+    # to make sure sort is using it, and not some default from
+    # elsewhere.
+    .local pmc comparator
+    comparator = get_global 'compare_reverse'
+    arr.'sort'(comparator)
+    .local string s, aux
+    s = typeof arr
+    concat s, ':'
+    aux = join '-', arr
+    concat s, aux
+    is(s, 'ssRPA:z-p-a', "sort works in a pir subclass, TT #218")
+.end
+
+.sub compare_reverse
+    .param string a
+    .param string b
+    $I0 = cmp_str b, a
+    .return($I0)
 .end
 
 
@@ -703,7 +734,7 @@ loop:
 .sub get_array_string
     .param pmc p
     $S0 = ''
-    $P3 = new ['Iterator'], p
+    $P3 = iter p
 loop:
     unless $P3 goto loop_end
     $P4 = shift $P3
@@ -833,7 +864,7 @@ loop_end:
 
 #RT #40958 - can't iterate subclass of ResizablePMCArray
 .sub iterate_subclass_of_rpa
-    .local pmc arr, iter
+    .local pmc arr, it
     $P0 = subclass 'ResizablePMCArray', 'MyArray'
 
     arr = new ['MyArray']
@@ -844,10 +875,10 @@ loop_end:
     is($I0, 3, "RPA subclass has correct element count")
 
     $S1 = ''
-    iter = new ['Iterator'], arr
+    it = iter arr
 loop:
-    unless iter goto end
-    $P2 = shift iter
+    unless it goto end
+    $P2 = shift it
     $S0 = $P2
     concat $S1, $S0
     concat $S1, ","
@@ -912,6 +943,33 @@ end:
     is($I0, $I1, 'Adding element to RPA keeps same addr')
 .end
 
+.sub 'equality_tests'
+    .local pmc array1, array2, array3, array4
+    array1 = new ['ResizablePMCArray']
+    array2 = new ['ResizablePMCArray']
+    array3 = new ['ResizablePMCArray']
+
+    array1[0] = "Hello Parrot!"
+    array1[1] = 1664
+    array1[2] = 2.718
+
+    $P0 = box "Hello Parrot!"
+    array2[0] = $P0
+    $P0 = box 1664
+    array2[1] = $P0
+    $P0 = box 2.718
+    array2[2] = $P0
+
+    array3[0] = "Goodbye Parrot!"
+    array3[1] = 1664
+    array3[2] = 2.718
+
+    array4 = clone array1
+
+    is(array1, array2, 'Physically disjoint, but equal arrays')
+    is(array1, array4, 'Clones are equal')
+    isnt(array1, array3, 'Different arrays')
+.end
 
 # don't forget to change the test plan
 

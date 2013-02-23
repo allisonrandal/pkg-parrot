@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006-2009, Parrot Foundation.
-$Id: pic_jit.c 37854 2009-04-01 20:00:45Z coke $
+$Id: pic_jit.c 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -34,6 +34,7 @@ TODO:
 #include "parrot/parrot.h"
 #include "parrot/oplib/ops.h"
 #include "pmc/pmc_sub.h"
+#include "parrot/runcore_api.h"
 
 /* HEADERIZER HFILE: include/parrot/pic.h */
 
@@ -212,7 +213,7 @@ jit_can_compile_sub(PARROT_INTERP, ARGIN(PMC *sub_pmc))
     const jit_arch_info * const info = Parrot_jit_init(interp);
     const jit_arch_regs * const regs = info->regs + JIT_CODE_SUB_REGS_ONLY;
     INTVAL                     *n_regs_used;
-    Parrot_sub                 *sub;
+    Parrot_Sub_attributes      *sub;
 
     PMC_get_sub(interp, sub_pmc, sub);
     n_regs_used = sub->n_regs_used;
@@ -349,7 +350,7 @@ call_is_safe(PARROT_INTERP, ARGIN(PMC *sub_pmc), ARGMOD(opcode_t **set_args))
 {
     ASSERT_ARGS(call_is_safe)
     PMC        *called, *sig_results;
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     PMC        *sig_args;
     opcode_t   *pc  = *set_args;
 
@@ -480,7 +481,7 @@ parrot_pic_is_safe_to_jit(PARROT_INTERP, ARGIN(PMC *sub_pmc), ARGIN(PMC *sig_arg
     ASSERT_ARGS(parrot_pic_is_safe_to_jit)
 #ifdef HAS_JIT
     opcode_t   *base, *start, *end;
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
 
     *flags = 0;
 
@@ -488,7 +489,7 @@ parrot_pic_is_safe_to_jit(PARROT_INTERP, ARGIN(PMC *sub_pmc), ARGIN(PMC *sig_arg
      * 0) if runcore setting doesn't contain JIT
      *    forget it
      */
-    if (!(interp->run_core & PARROT_JIT_CORE))
+    if (!(PARROT_RUNCORE_JIT_OPS_TEST(interp->run_core)))
         return 0;
 
     /* 1) if the JIT system can't JIT_CODE_SUB_REGS_ONLY
@@ -549,11 +550,11 @@ parrot_pic_JIT_sub(PARROT_INTERP, ARGIN(PMC *sub_pmc), int flags)
     /*
      * create JIT code - just a test
      */
-    Parrot_sub        *sub;
-    opcode_t          *base;
-    opcode_t          *start;
-    opcode_t          *end;
-    Parrot_jit_info_t *jit_info;
+    Parrot_Sub_attributes *sub;
+    opcode_t              *base;
+    opcode_t              *start;
+    opcode_t              *end;
+    Parrot_jit_info_t     *jit_info;
 
     PMC_get_sub(interp, sub_pmc, sub);
     base  = sub->seg->base.data;

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: gc_inf.c 40027 2009-07-12 21:48:15Z NotFound $
+$Id: gc_inf.c 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -221,8 +221,7 @@ gc_inf_more_traceable_objects(SHIM_INTERP, ARGMOD(Small_Object_Pool *pool))
 Initializes the function pointers in a new pool. When a new pool is created
 we assign several function pointers to it for managing memory in the pool.
 In this way we can treat different pools differently if they have special
-management needs. In general all PObj-like pools are treated one way, and
-other pools (such as the pmc_ext pool) are treated differently.
+management needs. In general all PObj-like pools are treated the same.
 
 This function is mostly called from the function C<initialize_header_pools>
 in F<src/gc/mark_sweep.c> at Parrot startup.

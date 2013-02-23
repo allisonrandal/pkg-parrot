@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, The Perl Foundation.
-# $Id: pod.t 39567 2009-06-15 01:17:57Z coke $
+# $Id: pod.t 40400 2009-08-05 01:27:41Z coke $
 
 use strict;
 use warnings;
@@ -159,7 +159,7 @@ underscore).
 
 =item * FRAGMENT
 
-For PIR, wraps the code in a C<.sub> block to
+For PIR, wraps the code in a C<.sub> block.
 
 =item * TODO
 

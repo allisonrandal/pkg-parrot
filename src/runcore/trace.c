@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: trace.c 39971 2009-07-10 05:13:18Z pmichaud $
+$Id: trace.c 40726 2009-08-23 01:18:17Z whiteknight $
 
 =head1 NAME
 
@@ -105,7 +105,7 @@ trace_pmc_dump(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc))
 {
     ASSERT_ARGS(trace_pmc_dump)
     Interp * const debugger = debugger_or_interp(interp);
-    Parrot_sub    *sub;
+    Parrot_Sub_attributes    *sub;
 
     if (!pmc) {
         Parrot_io_eprintf(debugger, "(null)");
@@ -288,21 +288,7 @@ trace_op_dump(PARROT_INTERP,
 
     s = 1;
     len = Parrot_io_eprintf(debugger, "%6vu ", (UINTVAL)(pc - code_start));
-    if (STREQ(info->name, "infix")) {
-        /* this should rather be MMD_opcode_name, which doesn't
-         * exit yet
-         */
-        len += Parrot_io_eprintf(debugger, "%s",
-                Parrot_MMD_method_name(interp, pc[1]) + 2);
-        s = 2;
-    }
-    else if (STREQ(info->name, "n_infix")) {
-        len += Parrot_io_eprintf(debugger, "n_%s",
-                Parrot_MMD_method_name(interp, pc[1]) + 2);
-        s = 2;
-    }
-    else
-        len += Parrot_io_eprintf(debugger, "%s", info->name);
+    len += Parrot_io_eprintf(debugger, "%s", info->name);
 
     n = info->op_count;
     var_args = 0;

@@ -1,4 +1,4 @@
-# $Id: board.pir 38115 2009-04-15 14:41:32Z fperrad $
+# $Id: board.pir 40557 2009-08-15 10:41:06Z dukeleto $
 
 =head1 TITLE
 
@@ -18,6 +18,7 @@ board.pir - a tetris board class.
 =cut
 
 .namespace ["Tetris::Board"]
+.loadlib 'math_ops'
 
 .sub __onload :load
     $P0 = get_class "Tetris::Board"
@@ -885,8 +886,7 @@ TDB
     $I0 = blocks
 
     # get a random block id
-    $P0 = new 'Random'
-    $N0 = $P0
+    rand $N0
     $N0 = $N0 * $I0
     id = $N0
 

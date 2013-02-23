@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: exceptions.c 39937 2009-07-07 22:31:06Z NotFound $
+$Id: exceptions.c 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -41,7 +41,7 @@ PARROT_CAN_RETURN_NULL
 static opcode_t * pass_exception_args(PARROT_INTERP,
     ARGIN(const char *sig),
     ARGIN(opcode_t *dest),
-    ARGIN(Parrot_Context * old_ctx),
+    ARGIN(PMC * old_ctx),
     ...)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
@@ -107,9 +107,16 @@ die_from_exception(PARROT_INTERP, ARGIN(PMC *exception))
     INTVAL         exit_status = 1;
     const INTVAL   severity    = VTABLE_get_integer_keyed_str(interp, exception, CONST_STRING(interp, "severity"));
 
+    /* In some cases we have a fatal exception before the IO system
+     * is completely initialized. Do some attempt to output the
+     * message to stderr, to help diagnosing. */
+    int use_perr = !PMC_IS_NULL(Parrot_io_STDERR(interp));
+
     /* flush interpreter output to get things printed in order */
-    Parrot_io_flush(interp, Parrot_io_STDOUT(interp));
-    Parrot_io_flush(interp, Parrot_io_STDERR(interp));
+    if (!PMC_IS_NULL(Parrot_io_STDOUT(interp)))
+        Parrot_io_flush(interp, Parrot_io_STDOUT(interp));
+    if (use_perr)
+        Parrot_io_flush(interp, Parrot_io_STDERR(interp));
 
     if (interp->pdb) {
         Interp * interpdeb = interp->pdb->debugger;
@@ -120,7 +127,14 @@ die_from_exception(PARROT_INTERP, ARGIN(PMC *exception))
     }
 
     if (Parrot_str_not_equal(interp, message, CONST_STRING(interp, ""))) {
-        Parrot_io_eprintf(interp, "%S\n", message);
+        if (use_perr)
+            Parrot_io_eprintf(interp, "%S\n", message);
+        else {
+            char * const msg = Parrot_str_to_cstring(interp, message);
+            fflush(stderr);
+            fprintf(stderr, "\n%s\n", msg);
+            Parrot_str_free_cstring(msg);
+        }
 
         /* caution against output swap (with PDB_backtrace) */
         fflush(stderr);
@@ -237,9 +251,9 @@ Parrot_ex_throw_from_op(PARROT_INTERP, ARGIN(PMC *exception), ARGIN_NULLOK(void 
            passed properly. */
     }
     /* Set up the continuation context of the handler in the interpreter. */
-    else if (PMC_cont(handler)->current_results)
+    else if (PARROT_CONTINUATION(handler)->current_results)
         address = pass_exception_args(interp, "P", address,
-                CONTEXT(interp), exception);
+                CURRENT_CONTEXT(interp), exception);
 
     if (PObj_get_FLAGS(handler) & SUB_FLAG_C_HANDLER) {
         /* it's a C exception handler */
@@ -254,7 +268,7 @@ Parrot_ex_throw_from_op(PARROT_INTERP, ARGIN(PMC *exception), ARGIN_NULLOK(void 
 /*
 
 =item C<static opcode_t * pass_exception_args(PARROT_INTERP, const char *sig,
-opcode_t *dest, Parrot_Context * old_ctx, ...)>
+opcode_t *dest, PMC * old_ctx, ...)>
 
 Passes arguments to the exception handler routine. These are retrieved with
 the .get_results() directive in PIR code.
@@ -266,7 +280,7 @@ the .get_results() directive in PIR code.
 PARROT_CAN_RETURN_NULL
 static opcode_t *
 pass_exception_args(PARROT_INTERP, ARGIN(const char *sig),
-        ARGIN(opcode_t *dest), ARGIN(Parrot_Context * old_ctx), ...)
+        ARGIN(opcode_t *dest), ARGIN(PMC * old_ctx), ...)
 {
     ASSERT_ARGS(pass_exception_args)
     va_list   ap;
@@ -342,24 +356,12 @@ Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
     ASSERT_ARGS(Parrot_ex_throw_from_c)
 
     Parrot_runloop    *return_point = interp->current_runloop;
-    RunProfile * const profile      = interp->profile;
     opcode_t *address;
     PMC        * const handler      =
                              Parrot_cx_find_handler_local(interp, exception);
 
     if (PMC_IS_NULL(handler))
         die_from_exception(interp, exception);
-
-    /* If profiling, remember end time of lastop and generate entry for
-     * exception. */
-    if (profile && Interp_flags_TEST(interp, PARROT_PROFILE_FLAG)) {
-        const FLOATVAL now = Parrot_floatval_time();
-
-        profile->data[profile->cur_op].time += now - profile->starttime;
-        profile->cur_op                      = PARROT_PROF_EXCEPTION;
-        profile->starttime                   = now;
-        profile->data[PARROT_PROF_EXCEPTION].numcalls++;
-    }
 
     if (Interp_debug_TEST(interp, PARROT_BACKTRACE_DEBUG_FLAG)) {
         STRING * const exit_code = CONST_STRING(interp, "exit_code");
@@ -375,7 +377,8 @@ Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
 
     /* Note the thrower.
      * XXX TT#596 - pass in current context instead when we have context PMCs. */
-    VTABLE_set_attr_str(interp, exception, CONST_STRING(interp, "thrower"), CONTEXT(interp)->current_cont);
+    /* Don't split line. It will break CONST_STRING handling */
+    VTABLE_set_attr_str(interp, exception, CONST_STRING(interp, "thrower"), Parrot_pcc_get_continuation(interp, CURRENT_CONTEXT(interp)));
 
     /* it's a C exception handler */
     if (PObj_get_FLAGS(handler) & SUB_FLAG_C_HANDLER) {
@@ -386,9 +389,9 @@ Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
 
     /* Run the handler. */
     address = VTABLE_invoke(interp, handler, NULL);
-    if (PMC_cont(handler)->current_results)
+    if (PARROT_CONTINUATION(handler)->current_results)
         address = pass_exception_args(interp, "P", address,
-                CONTEXT(interp), exception);
+                CURRENT_CONTEXT(interp), exception);
     PARROT_ASSERT(return_point->handler_start == NULL);
     return_point->handler_start = address;
     longjmp(return_point->resume, 2);

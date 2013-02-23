@@ -1,4 +1,4 @@
-# $Id: DEPRECATED.pod 40182 2009-07-21 04:57:50Z pmichaud $
+# $Id: DEPRECATED.pod 40621 2009-08-18 14:30:59Z coke $
 
 =head1 Purpose
 
@@ -33,30 +33,9 @@ specifically by including this C<PIR> code:
  .include 'warnings.pasm'
  warningson .PARROT_WARNINGS_DEPRECATED_FLAG
 
-=head1 Configuration
-
-=over 4
-
-=item Alternate GC configurations [eligible in 1.5]
-
-C<malloc>, C<malloc-trace> and C<libc> will be removed as potential
-options for the C<--gc> config option.
-
-L<https://trac.parrot.org/parrot/ticket/490>
-
-=back
-
 =head1 PMCS
 
 =over 4
-
-=item pair (dynamic PMC) [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/187>
-
-=item random [eligible in 1.1]
-
-L<https://trac.parrot.org/parrot/ticket/189>
 
 =item moved to dynpmc [eligible in 1.1]
 
@@ -79,21 +58,6 @@ L<https://trac.parrot.org/parrot/ticket/679>
 
 L<https://trac.parrot.org/parrot/ticket/264>
 
-=item Direct creation of Iterator [eligible in 1.5]
-
-Iterator PMC became pure interface class and direct creation of them is
-deprecated. Use C<iter> opcode instead.
-
-Code will become runtime error:
-
-  $P0 = new 'Iterator', aggr
-
-Proper invocation:
-
-  $P0 = iter arrg
-
-L<https://trac.parrot.org/parrot/ticket/811>
-
 =item VTABLE nomenclature. [eligible in 1.5]
 
 Current list of VTABLE functions will be reviewed and cleaned.
@@ -106,25 +70,12 @@ L<https://trac.parrot.org/parrot/ticket/866>
 
 =over 4
 
-=item ops file format [eligible in 1.5]
-
-The ops file format has some cruft in the form of the "VERSION =
-PARROT_VERSION;" line and is hard to parse when several ops files are
-concatenated together.   This item covers the removal of the VERSION line and
-an improved syntax for ops preambles.
-
-L<https://trac.parrot.org/parrot/ticket/836>
-
 =item moved to dynop [eligible in 1.1]
 
 Parts or all of: bit.ops, debug.ops, io.ops, math.ops, set.ops
 (the obscure and rarely used parts), sys.ops.
 
 L<https://trac.parrot.org/parrot/ticket/449>
-
-=item experimental ops [eligible in 1.1]
-
-F<src/ops/experimental.ops> - only the C<trap> opcode remains
 
 =item get_addr and set_addr [eligible in 1.5]
 
@@ -134,14 +85,6 @@ These opcodes are being repurposed. They will always return a unique memory
 address of the PMC. Uses of get_addr and set_addr that would set label values
 for Sub, Exception, and related PMC types will instead be handled by
 get_label and set_label.
-
-=item C<bsr>, C<jsr>, and C<ret> [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/702>
-
-=item C<branch_cs> [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/470>
 
 =back
 
@@ -165,9 +108,11 @@ L<https://trac.parrot.org/parrot/ticket/451>
 
 =head1 Class Features
 
-=over 4
+[Nothing at this time.]
 
-=back
+=head1 Debugger
+
+Assigning to registers [experimental]
 
 =head1 PIR syntax
 
@@ -175,21 +120,7 @@ L<https://trac.parrot.org/parrot/ticket/451>
 
 =item Assignment syntax with opcodes [eligible in 1.1]
 
-When the first argument of an opcode is C<OUT>, then
-the assignment syntax will be allowed, as it is today.
-
-In any other case (i.e. C<INOUT>, C<IN>), this will become
-a syntax error. For example:
-
-    $S0 = print
-    $P0 = substr 1, 2, "x"
-
-Will have to be:
-
-    print $S0
-    substr $P0, 1, 2, "x"
-
-L<http://rt.perl.org/rt3/Ticket/Display.html?id=36283>
+L<https://trac.parrot.org/parrot/ticket/906>
 
 =item named class/pmc lookup in pir syntax such as new, isa, subclass, 
     get_class, etc [eligible in 1.1]
@@ -247,62 +178,42 @@ check in 1.4 or 2.0 for the new names.
 
 L<https://trac.parrot.org/parrot/ticket/443>
 
-=item parrot_new_pmc_hash [eligible in 1.5]
+=item PMC Attributes Allocation Functions [experimental]
 
-This function will be removed.  parrot_new_hash should be used in its place.
+ Parrot_gc_allocate_pmc_attributes
+ Parrot_gc_free_pmc_attributes
 
-L<https://trac.parrot.org/parrot/ticket/494>
+These items and related helper functions are added as experimental support
+for TT #895
 
-=item Parrot_get_namespace_autobase [eligible in 1.5]
+=item PDB_compile and PDB_eval [eligible in 2.1]
 
-L<https://trac.parrot.org/parrot/ticket/155>
+The function PDB_compile doesn't work since some time, and his implementation
+was a hack. His functionality may be reimplemented in another way. Until the
+end of deprecation cycle it just throws an excpetion.
 
-=item Parrot_find_global_k [eligible in 1.5]
+The PDB_eval function, that used in the debugger to support the eval
+command, was using PDB_compile. His functionality must be reimplemented
+in another way and with a name that follows current conventions, in the
+meantime and until the end of the deprecation cycle it just shows a
+diagnostic message.
 
-L<https://trac.parrot.org/parrot/ticket/156>
-
-=item Parrot_MMD_method_name [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/625>
-
-=item pobject_lives [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/664>
-
-=item functions in src/stack.c [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/702>
-Here is a list of functions in this file which are currently being exported:
-
-  stack_system_init
-  cst_new_stack_chunk
-  new_stack
-  mark_stack
-  stack_height
-  stack_entry
-  stack_prepare_push
-  stack_push
-  stack_prepare_pop
-  stack_pop
-  pop_dest
-  stack_peep
-  Parrot_dump_dynamic_environment
-  Parrot_push_action*
-  Parrot_push_mark*
-  Parrot_pop_mark*
-
-* = item may be kept but reimplemented.
-
-=item Parrot_str_free [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/826>
-
-This function was an attempt of optimization, but is error prone. Let the
-garbage collector take care.
+L<https://trac.parrot.org/parrot/ticket/872>
 
 =back
 
 =head1 Compiler tools
+
+=head2 PASM1 compiler
+
+=over 4
+
+=item C<PASM1 compiler> [eligible in 2.1]
+
+See PDB_compile. Note that the current version of the C<PASM1> compiler
+issues a warning and is not functional. (However, it used to segfault.)
+
+=back
 
 =head2 Parrot Grammar Engine (PGE)
 
@@ -315,12 +226,6 @@ end which cause invocation of an action method if a C<:action>
 object is supplied.
 
 L<https://trac.parrot.org/parrot/ticket/843>
-
-=item C<find_key> method on PGE::Match [eligible in 1.5]
-
-The C<find_key> method on PGE::Match objects will be removed.
-
-L<https://trac.parrot.org/parrot/ticket/851>
 
 =back
 
@@ -388,11 +293,7 @@ instead.
 
 L<https://trac.parrot.org/parrot/ticket/842>
 
-=cut
-
 =back
-
-=cut
 
 =head1 build tools
 
@@ -425,17 +326,9 @@ L<https://trac.parrot.org/parrot/ticket/665>
 
 =over 4
 
-=item Data::Replace [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/108>
-
 =item JSON, JSON, and Config;JSON [eligible in 1.5]
 
 L<https://trac.parrot.org/parrot/ticket/508>
-
-=item NCI::call_toolkit_init [eligible in 1.5]
-
-L<https://trac.parrot.org/parrot/ticket/753>
 
 =item Cross-HLL library loading [experimental]
 

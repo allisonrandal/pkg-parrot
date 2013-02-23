@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: addit.pasm 38923 2009-05-19 06:07:42Z cotto $
+# $Id: addit.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 NAME
 
@@ -18,6 +18,7 @@ prints the result (21001097.970000).
 =cut
 
 _main:
+        new P10, 'ResizableIntegerArray'
         new P5, 'ResizablePMCArray'
         push P5, 1000
         push P5, 7.100
@@ -28,7 +29,7 @@ _main:
 AGAIN:
         dec I9
         lt I9, 0, FIN
-        bsr _varargs_adder
+        local_branch P10, _varargs_adder
         branch AGAIN
 FIN:
         print N5
@@ -46,7 +47,7 @@ LOOP:
         branch LOOP
 DONE:
         set N5, P2
-        ret
+        local_return P10
 
 =head1 SEE ALSO
 

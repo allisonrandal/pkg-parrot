@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: generational_ms.c 39599 2009-06-16 22:54:02Z whiteknight $
+$Id: generational_ms.c 40936 2009-09-03 00:21:51Z chromatic $
 
 =head1 NAME
 
@@ -606,7 +606,7 @@ gc_gms_add_free_object(PARROT_INTERP, SHIM(Small_Object_Pool *pool),
 =item C<static void gc_gms_chain_objects(PARROT_INTERP, Small_Object_Pool *pool,
 Small_Object_Arena *new_arena, size_t real_size)>
 
-TODO: interfere active_destroy and put these items into a
+TODO: interfere custom_destroy and put these items into a
 separate white area, so that a sweep has just to run through these
 objects
 
@@ -1081,7 +1081,7 @@ parrot_gc_gms_wb(PARROT_INTERP, ARGIN(PMC *agg), ARGIN(void *old),
     /* if this may be an aggregate store it in IGP list, thus making
      * it a possible root for this generation
      */
-    if (PObj_is_PMC_TEST((PObj *)_new) && ((PMC *)_new)->pmc_ext)
+    if (PObj_is_PMC_TEST((PObj *)_new))
         gc_gms_store_igp(interp, nh);
 
     /* promote RHS to old generation of aggregate */
@@ -1494,7 +1494,7 @@ parrot_gc_gms_Parrot_gc_mark_PObj_alive(PARROT_INTERP, ARGMOD(PObj *obj))
         ++interp->arena_base->num_early_PMCs_seen;
     h = PObj_to_GMSH(obj);
     /* unsnap it from white, put it into gray or black */
-    if (PObj_is_PMC_TEST(obj) && ((PMC*)obj)->pmc_ext)
+    if (PObj_is_PMC_TEST(obj))
         gc_gms_setto_gray(interp, h, priority);
     else
         gc_gms_setto_black(interp, h, priority);
@@ -1691,16 +1691,8 @@ sweep_cb_pmc(PARROT_INTERP, ARGIN(Small_Object_Pool *pool), int flag, SHIM(void 
         PMC * const obj = (PMC*)GMSH_to_PObj(h);
         if (PObj_needs_early_gc_TEST(obj))
             --arena_base->num_early_gc_PMCs;
-        if (PObj_active_destroy_TEST(obj))
+        if (PObj_custom_destroy_TEST(obj))
             VTABLE_destroy(interp, (PMC *)obj);
-        if (PObj_is_PMC_EXT_TEST(obj) && obj->pmc_ext) {
-            /* if the PMC has a PMC_EXT structure,
-             * return it to the pool
-             */
-            Small_Object_Pool * const ext_pool = arena_base->pmc_ext_pool;
-            ext_pool->add_free_object(interp, ext_pool, obj->pmc_ext);
-        }
-
     }
     pool->free_list = pool->white;
     return 0;

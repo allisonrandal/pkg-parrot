@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: exceptionhandler.t 39633 2009-06-17 21:31:46Z NotFound $
+# $Id: exceptionhandler.t 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -22,7 +22,8 @@ Tests the ExceptionHandler PMC.
 .sub main :main
     .include 'test_more.pir'
 
-    plan(8)
+    # If test exited with "bad plan" MyHandlerCan.can_handle wasn't invoked.
+    plan(9)
 
     .local pmc eh
     eh = new ['ExceptionHandler']
@@ -213,6 +214,7 @@ Tests the ExceptionHandler PMC.
 
 .sub can_handle :method
     .param pmc ex
+    ok(1, 'MyHandlerCan.can_handle invoked')
     .return(1)
 .end
 

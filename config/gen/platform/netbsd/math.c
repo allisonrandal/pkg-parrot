@@ -1,4 +1,4 @@
-/* $Id: math.c 37877 2009-04-02 20:20:22Z coke $ */
+/* $Id: math.c 40837 2009-08-28 08:00:44Z cotto $ */
 
 /*
  * Copyright (C) 2006-2007, Parrot Foundation.
@@ -22,13 +22,7 @@ math stuff
 
 */
 
-/*
- * force atan2() to use IEEE behavior
- */
-
 #include <math.h>
-
-_LIB_VERSION_TYPE _LIB_VERSION = _IEEE_;
 
 #if DOUBLE_SIZE == 2 * INT_SIZE
 /*

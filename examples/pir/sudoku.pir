@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: sudoku.pir 38693 2009-05-11 18:45:05Z NotFound $
+# $Id: sudoku.pir 40200 2009-07-21 21:51:54Z bacek $
 
 =pod
 
@@ -339,7 +339,7 @@ some:
     if name goto sel_name
 
 list_names:
-    new it, 'Iterator', b
+    it = iter b
     it = .ITERATE_FROM_START
 loop:
     unless it goto fin
@@ -901,7 +901,7 @@ ret_0:
 .sub check_seen
     .param pmc seen
     .local pmc it
-    new it, 'Iterator', seen
+    it = iter seen
     it = .ITERATE_FROM_START
 loop:
     unless it goto ok

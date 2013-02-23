@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: global.c 39170 2009-05-25 17:31:15Z NotFound $
+$Id: global.c 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -205,20 +205,15 @@ internal_ns_keyed(PARROT_INTERP, ARGIN(PMC *base_ns), ARGIN(PMC *pmc_key), int f
         PMC *ns = base_ns;
 
         for (i = 0; i < n; ++i) {
-            if (!pmc_key)
-                Parrot_ex_throw_from_c_args(interp, NULL, 1,
-                    "Passed a NULL pmc_key into VTABLE_get_string_keyed_int");
-            else {
-                STRING * const part = VTABLE_get_string_keyed_int(interp, pmc_key, i);
-                PMC *sub_ns = VTABLE_get_pmc_keyed_str(interp, ns, part);
+            STRING * const part = VTABLE_get_string_keyed_int(interp, pmc_key, i);
+            PMC *sub_ns = VTABLE_get_pmc_keyed_str(interp, ns, part);
 
-                if (PMC_IS_NULL(sub_ns) || !VTABLE_isa(interp, sub_ns, isans)) {
-                    sub_ns = internal_ns_maybe_create(interp, ns, part, flags);
-                    if (PMC_IS_NULL(sub_ns))
-                        return PMCNULL;
-                }
-                ns = sub_ns;
+            if (PMC_IS_NULL(sub_ns) || !VTABLE_isa(interp, sub_ns, isans)) {
+                sub_ns = internal_ns_maybe_create(interp, ns, part, flags);
+                if (PMC_IS_NULL(sub_ns))
+                    return PMCNULL;
             }
+            ns = sub_ns;
         }
         return ns;
     }
@@ -280,7 +275,7 @@ PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 PMC *
-Parrot_get_namespace_keyed(PARROT_INTERP, ARGIN(PMC *base_ns), ARGIN_NULLOK(PMC *pmc_key))
+Parrot_get_namespace_keyed(PARROT_INTERP, ARGIN(PMC *base_ns), ARGIN(PMC *pmc_key))
 {
     ASSERT_ARGS(Parrot_get_namespace_keyed)
     return internal_ns_keyed(interp, base_ns, pmc_key, 0);
@@ -327,7 +322,7 @@ PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 PMC *
 Parrot_make_namespace_keyed(PARROT_INTERP, ARGIN(PMC *base_ns),
-        ARGIN_NULLOK(PMC *pmc_key))
+        ARGIN(PMC *pmc_key))
 {
     ASSERT_ARGS(Parrot_make_namespace_keyed)
     return internal_ns_keyed(interp, base_ns, pmc_key, INTERN_NS_CREAT);
@@ -380,40 +375,11 @@ Parrot_make_namespace_autobase(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
     ASSERT_ARGS(Parrot_make_namespace_autobase)
     PMC *base_ns;
     if (VTABLE_isa(interp, key, CONST_STRING(interp, "String")))
-        base_ns = CONTEXT(interp)->current_namespace;
+        base_ns = Parrot_pcc_get_namespace(interp, CURRENT_CONTEXT(interp));
     else
         base_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
-            CONTEXT(interp)->current_HLL);
+            Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
     return Parrot_make_namespace_keyed(interp, base_ns, key);
-}
-
-/*
-
-=item C<PMC * Parrot_get_namespace_autobase(PARROT_INTERP, PMC *key)>
-
-Find a namespace with the key C<key>, which may be a String, a Key, or an
-array of strings. If it is a String, then the lookup is relative to the
-current namespace. Otherwise, it is relative to the current HLL root
-namespace. Return the namespace, or NULL if not found.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-PMC *
-Parrot_get_namespace_autobase(PARROT_INTERP, ARGIN_NULLOK(PMC *key))
-{
-    ASSERT_ARGS(Parrot_get_namespace_autobase)
-    PMC *base_ns;
-    if (VTABLE_isa(interp, key, CONST_STRING(interp, "String")))
-        base_ns = CONTEXT(interp)->current_namespace;
-    else
-        base_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
-            CONTEXT(interp)->current_HLL);
-    return Parrot_get_namespace_keyed(interp, base_ns, key);
 }
 
 /*
@@ -565,37 +531,7 @@ PMC *
 Parrot_find_global_cur(PARROT_INTERP, ARGIN_NULLOK(STRING *globalname))
 {
     ASSERT_ARGS(Parrot_find_global_cur)
-    PMC * const ns = CONTEXT(interp)->current_namespace;
-    return Parrot_find_global_n(interp, ns, globalname);
-}
-
-/*
-
-=item C<PMC * Parrot_find_global_k(PARROT_INTERP, PMC *pmc_key, STRING
-*globalname)>
-
-Search the namespace designated by C<pmc_key>, which may be a key PMC,
-an array of namespace name strings, or a string PMC, for an object
-with name C<globalname>.  Return the object, or NULL if not found.
-
-RT #46161 - For now this function prefers non-namespaces, it will eventually
-entirely use the untyped interface.
-
-=cut
-
-*/
-
-PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-PMC *
-Parrot_find_global_k(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc_key), ARGIN(STRING *globalname))
-{
-    ASSERT_ARGS(Parrot_find_global_k)
-    PMC * const ns =
-        Parrot_get_namespace_keyed(interp,
-                                   Parrot_get_ctx_HLL_namespace(interp),
-                                   pmc_key);
+    PMC * const ns = Parrot_pcc_get_namespace(interp, CURRENT_CONTEXT(interp));
     return Parrot_find_global_n(interp, ns, globalname);
 }
 
@@ -742,7 +678,7 @@ PMC *
 Parrot_find_name_op(PARROT_INTERP, ARGIN(STRING *name), SHIM(void *next))
 {
     ASSERT_ARGS(Parrot_find_name_op)
-    Parrot_Context * const ctx = CONTEXT(interp);
+    PMC * const ctx     = CURRENT_CONTEXT(interp);
     PMC * const lex_pad = Parrot_find_pad(interp, name, ctx);
     PMC *g;
 
@@ -782,7 +718,7 @@ static PMC *
 get_namespace_pmc(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 {
     ASSERT_ARGS(get_namespace_pmc)
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     PMC        *nsname, *nsroot;
 
     PMC_get_sub(interp, sub_pmc, sub);
@@ -816,7 +752,7 @@ static void
 store_sub_in_multi(PARROT_INTERP, ARGIN(PMC *sub_pmc), ARGIN(PMC *ns))
 {
     ASSERT_ARGS(store_sub_in_multi)
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
     STRING     *ns_entry_name;
     PMC        *multisub;
 
@@ -852,17 +788,17 @@ void
 Parrot_store_sub_in_namespace(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 {
     ASSERT_ARGS(Parrot_store_sub_in_namespace)
-    const INTVAL cur_id = CONTEXT(interp)->current_HLL;
+    const INTVAL cur_id = Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp));
 
     PMC        *ns;
-    Parrot_sub *sub;
+    Parrot_Sub_attributes *sub;
 
     /* PF structures aren't fully constructed yet */
     Parrot_block_GC_mark(interp);
 
     /* store relative to HLL namespace */
     PMC_get_sub(interp, sub_pmc, sub);
-    CONTEXT(interp)->current_HLL = sub->HLL_id;
+    Parrot_pcc_set_HLL(interp, CURRENT_CONTEXT(interp), sub->HLL_id);
 
     ns = get_namespace_pmc(interp, sub_pmc);
 
@@ -888,7 +824,7 @@ Parrot_store_sub_in_namespace(PARROT_INTERP, ARGIN(PMC *sub_pmc))
     }
 
     /* restore HLL_id */
-    CONTEXT(interp)->current_HLL = cur_id;
+    Parrot_pcc_set_HLL(interp, CURRENT_CONTEXT(interp), cur_id);
     Parrot_unblock_GC_mark(interp);
 }
 

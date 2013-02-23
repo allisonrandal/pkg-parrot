@@ -1,7 +1,7 @@
 /* string_funcs.h
  *  Copyright (C) 2001-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: string_funcs.h 39214 2009-05-28 08:08:29Z chromatic $
+ *     $Id: string_funcs.h 41164 2009-09-08 21:05:36Z chromatic $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -523,26 +523,10 @@ const char* string_primary_encoding_for_representation(PARROT_INTERP,
         __attribute__nonnull__(1);
 
 PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-const CHARSET * string_rep_compatible(SHIM_INTERP,
-    ARGIN(const STRING *a),
-    ARGIN(const STRING *b),
-    ARGOUT(const ENCODING **e))
-        __attribute__nonnull__(2)
-        __attribute__nonnull__(3)
-        __attribute__nonnull__(4)
-        FUNC_MODIFIES(*e);
-
-PARROT_EXPORT
 PARROT_MALLOC
 PARROT_CAN_RETURN_NULL
 char * string_to_cstring_nullable(SHIM_INTERP,
     ARGIN_NULLOK(const STRING *s));
-
-void Parrot_str_free(PARROT_INTERP, ARGIN(STRING *s))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
 
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
@@ -729,14 +713,7 @@ STRING* Parrot_str_from_uint(PARROT_INTERP,
 #define ASSERT_ARGS_string_primary_encoding_for_representation \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_string_rep_compatible __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(a) \
-    || PARROT_ASSERT_ARG(b) \
-    || PARROT_ASSERT_ARG(e)
 #define ASSERT_ARGS_string_to_cstring_nullable __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
-#define ASSERT_ARGS_Parrot_str_free __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(s)
 #define ASSERT_ARGS_Parrot_str_from_int_base __attribute__unused__ int _ASSERT_ARGS_CHECK = \
        PARROT_ASSERT_ARG(interp) \
     || PARROT_ASSERT_ARG(tc)

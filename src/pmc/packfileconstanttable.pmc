@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: packfileconstanttable.pmc 38971 2009-05-20 07:42:14Z bacek $
+$Id: packfileconstanttable.pmc 41228 2009-09-12 12:55:08Z bacek $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ PDD13 for the design spec.
 
 */
 
-pmclass PackfileConstantTable extends PackfileSegment {
+pmclass PackfileConstantTable auto_attrs extends PackfileSegment {
     /* ResizablePMCArray for storing constants */
     ATTR PMC *constants;
 
@@ -43,12 +43,12 @@ Create empty PackfileConstantTable.
 
     VTABLE void init() {
         Parrot_PackfileConstantTable_attributes * attrs =
-                mem_allocate_zeroed_typed(Parrot_PackfileConstantTable_attributes);
+                PMC_data_typed(SELF, Parrot_PackfileConstantTable_attributes*);
 
         attrs->constants = pmc_new(interp, enum_class_ResizablePMCArray);
         attrs->types     = pmc_new(interp, enum_class_ResizableIntegerArray);
 
-        PObj_custom_mark_destroy_SETALL(SELF);
+        PObj_custom_mark_SET(SELF);
         PMC_data(SELF) = attrs;
     }
 
@@ -66,34 +66,13 @@ Marks the object as live.
         Parrot_PackfileConstantTable_attributes * attrs =
                 PARROT_PACKFILECONSTANTTABLE(SELF);
 
-        if (attrs->constants)
+        if (!PMC_IS_NULL(attrs->constants))
             Parrot_gc_mark_PObj_alive(interp, (PObj *)attrs->constants);
-        if (attrs->types)
+        if (!PMC_IS_NULL(attrs->types))
             Parrot_gc_mark_PObj_alive(interp, (PObj *)attrs->types);
 
         SUPER();
     }
-
-/*
-
-=item C<void destroy()>
-
-Destroys the PMC and frees all allocated memory.
-
-=cut
-
-*/
-
-    VTABLE void destroy() {
-        Parrot_PackfileConstantTable_attributes * attrs =
-                PARROT_PACKFILECONSTANTTABLE(SELF);
-
-        if (attrs) {
-            mem_sys_free(attrs);
-            PMC_data(SELF) = NULL;
-        }
-    }
-
 
 
 /*
@@ -393,6 +372,20 @@ TODO: Add same for PMCs.
         /* Constant not found. Add new one */
         VTABLE_set_number_keyed_int(interp, SELF, i, value);
         return i;
+    }
+
+/*
+
+=item C<METHOD type()>
+
+Set segment type.
+
+=cut
+
+*/
+
+    METHOD type() {
+        RETURN(INTVAL PF_CONST_SEG);
     }
 
 

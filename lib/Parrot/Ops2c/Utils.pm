@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Utils.pm 38502 2009-05-06 06:20:50Z chromatic $
+# $Id: Utils.pm 40958 2009-09-03 11:56:50Z bacek $
 package Parrot::Ops2c::Utils;
 use strict;
 use warnings;
@@ -685,7 +685,7 @@ sub _print_goto_opcode {
     __asm__ ("jmp *4(%ebp)");  /* jump to ret addr, used by JIT */
 # endif
 #endif
-    _reg_base = (char*)interp->ctx.bp.regs_i;
+    _reg_base = (char*)Parrot_pcc_get_regs_ni(interp, CURRENT_CONTEXT(interp))->regs_i;
     goto **(void **)cur_opcode;
 
 END_C

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: fixedbooleanarray.pmc 40100 2009-07-15 13:15:25Z bacek $
+$Id: fixedbooleanarray.pmc 40945 2009-09-03 05:08:36Z mikehh $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ PMC.
 
 #define BITS_PER_CHAR 8
 
-pmclass FixedBooleanArray need_ext provides array {
+pmclass FixedBooleanArray auto_attrs provides array {
     ATTR UINTVAL         size;             /* # of bits this fba holds */
     ATTR UINTVAL         resize_threshold; /* max capacity before resizing */
     ATTR unsigned char * bit_array;        /* where the bits go */
@@ -45,11 +45,7 @@ Initializes the array.
 */
 
     VTABLE void init() {
-        Parrot_FixedBooleanArray_attributes* attrs =
-            mem_allocate_zeroed_typed(Parrot_FixedBooleanArray_attributes);
-
-        PMC_data(SELF) = attrs;
-        PObj_active_destroy_SET(SELF);
+        PObj_custom_destroy_SET(SELF);
     }
 
 /*
@@ -67,7 +63,6 @@ Destroys the array.
         GET_ATTR_bit_array(INTERP, SELF, bit_array);
         if (bit_array)
             mem_sys_free(bit_array);
-        mem_sys_free(PMC_data(SELF));
     }
 
 /*
@@ -102,7 +97,7 @@ Creates and returns a copy of the array.
             SET_ATTR_bit_array(INTERP, dest, clone_bit_array);
         }
 
-        PObj_active_destroy_SET(dest);
+        PObj_custom_destroy_SET(dest);
         return dest;
     }
 
@@ -555,15 +550,15 @@ Used to unarchive the string.
 
         if (info->extra_flags == EXTRA_IS_NULL) {
             unsigned char * bit_array;
+            UINTVAL         threshold;
             const INTVAL    size      = VTABLE_shift_integer(INTERP, io);
             STRING * const  s         = VTABLE_shift_string(INTERP, io);
 
-            bit_array = (unsigned char*)mem_sys_allocate_zeroed(s->bufused);
-            mem_sys_memcopy(bit_array, s->strstart, s->bufused);
+            bit_array = (unsigned char *)Parrot_str_to_cstring(INTERP, s);
+            threshold = Parrot_str_byte_length(interp, s) * BITS_PER_CHAR;
 
             SET_ATTR_size(INTERP, SELF, size);
-            SET_ATTR_resize_threshold(INTERP, SELF,
-                    s->bufused * BITS_PER_CHAR);
+            SET_ATTR_resize_threshold(INTERP, SELF, threshold);
             SET_ATTR_bit_array(INTERP, SELF, bit_array);
         }
     }

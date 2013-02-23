@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: system.c 39599 2009-06-16 22:54:02Z whiteknight $
+$Id: system.c 40894 2009-08-31 20:48:43Z NotFound $
 
 =head1 NAME
 
@@ -238,6 +238,7 @@ trace_system_stack(PARROT_INTERP)
        the "bottom" of the stack. We must trace the entire area between the
        top and bottom. */
     const size_t lo_var_ptr = (size_t)interp->lo_var_ptr;
+    PARROT_ASSERT(lo_var_ptr);
 
     trace_mem_block(interp, (size_t)lo_var_ptr,
             (size_t)&lo_var_ptr);

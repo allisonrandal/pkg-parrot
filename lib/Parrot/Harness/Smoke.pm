@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Smoke.pm 38498 2009-05-06 00:59:52Z jkeenan $
+# $Id: Smoke.pm 40331 2009-07-30 01:49:02Z jkeenan $
 
 =head1 NAME
 
@@ -169,7 +169,7 @@ sub collect_test_environment_data {
             $devel .= (" ".@mods." mods");
         }
         my $info = `svn info .`;
-        ($branch) = $info =~ m{URL: .+/parrot/(\w+)$}m;
+        ($branch) = $info =~ m{URL: .+/parrot/(?:branches/)?(\w+)$}m;
     }
     my $me = $^O eq 'MSWin32' ? $ENV{'USERNAME'}
            : $ENV{'LOGNAME'} || eval { getpwuid($<) };

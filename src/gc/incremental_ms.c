@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: incremental_ms.c 39599 2009-06-16 22:54:02Z whiteknight $
+$Id: incremental_ms.c 41081 2009-09-06 20:40:14Z bacek $
 
 =head1 NAME
 
@@ -519,7 +519,7 @@ gc_ims_add_free_object(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool), ARGOUT(vo
 {
     ASSERT_ARGS(gc_ims_add_free_object)
     *(void **)to_add = pool->free_list;
-    pool->free_list  = to_add;
+    pool->free_list  = (GC_MS_PObj_Wrapper*)to_add;
 #if DISABLE_GC_DEBUG
     UNUSED(interp);
 #else
@@ -561,7 +561,7 @@ gc_ims_get_free_object(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool))
         (*pool->alloc_objects) (interp, pool);
 
     ptr             = (PObj *)pool->free_list;
-    pool->free_list = *(void **)ptr;
+    pool->free_list = (GC_MS_PObj_Wrapper*)(*(void **)ptr);
 
     /*
      * buffers are born black, PMCs not yet?
@@ -773,9 +773,6 @@ sweep_cb(PARROT_INTERP, ARGMOD(Small_Object_Pool *pool), int flag, ARGIN(void *a
 
     Parrot_gc_sweep_pool(interp, pool);
 
-    if (interp->profile && (flag & POOL_PMC))
-        Parrot_gc_profile_end(interp, PARROT_PROF_GC_cp);
-
     *n_obj += pool->total_objects - pool->num_free_objects;
 
     return 0;
@@ -824,12 +821,8 @@ parrot_gc_ims_sweep(PARROT_INTERP)
             (void*)&n_objects, sweep_cb);
     UNUSED(ignored);
 
-    if (interp->profile)
-        Parrot_gc_profile_end(interp, PARROT_PROF_GC_cb);
-
     g_ims->state           = GC_IMS_COLLECT;
     g_ims->n_objects       = n_objects;
-    g_ims->n_extended_PMCs = arena_base->num_extended_PMCs;
 }
 
 
@@ -906,9 +899,6 @@ parrot_gc_ims_collect(PARROT_INTERP, int check_only)
     Gc_ims_private *g_ims;
     int             ret;
 
-    if (!check_only && interp->profile)
-        Parrot_gc_profile_start(interp);
-
     g_ims = (Gc_ims_private *)arena_base->gc_private;
 
     ret   = header_pools_iterate_callback(interp, POOL_BUFFER,
@@ -919,9 +909,6 @@ parrot_gc_ims_collect(PARROT_INTERP, int check_only)
 
     if (check_only)
         return 0;
-
-    if (interp->profile)
-        Parrot_gc_profile_end(interp, PARROT_PROF_GC);
 
     g_ims->state = GC_IMS_FINISHED;
 #endif

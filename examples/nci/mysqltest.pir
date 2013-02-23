@@ -1,5 +1,5 @@
-# Copyright (C) 2008, Parrot Foundation.
-# $Id: mysqltest.pir 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2008-2009, Parrot Foundation.
+# $Id: mysqltest.pir 41252 2009-09-13 16:58:01Z NotFound $
 
 =head1 TITLE
 
@@ -38,9 +38,11 @@ Connection data and query are hard coded, edit the file to change.
     say $S0
     exit 1
 good:
+    say 'connect...'
 
     m.'connect'('localhost', 'parrot', 'baDworD', 'parrot')
 
+    say 'query...'
     m.'query'('select * from hello;')
 
     .local pmc r
@@ -72,12 +74,16 @@ finish:
 
 # Testing prepared statement
 
+# Skipping, still not working
+    .return()
+
     .local pmc stmt
     stmt = m.'prepare'('select * from hello where foo = ?')
     $I0 = stmt.'param_count'()
     print 'Param count: '
     say $I0
 
+    say 'Closing...'
     $I0 = stmt.'close'()
     print 'Close result: '
     say $I0

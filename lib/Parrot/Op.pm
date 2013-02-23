@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Op.pm 39997 2009-07-11 08:36:05Z cotto $
+# $Id: Op.pm 40980 2009-09-04 23:18:14Z chromatic $
 
 =head1 NAME
 
@@ -329,8 +329,6 @@ sub _substitute {
     s/{{=0,\+=([^{]*?)}}/ $trans->restart_offset($1)  . "; {{=0}}"; /me;
     s/{{=0,-=([^{]*?)}}/  $trans->restart_offset(-$1) . "; {{=0}}"; /me;
 
-    s/{{=\*}}/            $trans->goto_pop();       /me;
-
     s/{{\+=([^{]*?)}}/    $trans->goto_offset($1);  /me;
     s/{{-=([^{]*?)}}/     $trans->goto_offset(-$1); /me;
     s/{{=([^*][^{]*?)}}/  $trans->goto_address($1); /me;
@@ -395,7 +393,11 @@ sub source {
         return qq{PANIC(interp, "How did you do that");\n};
     }
 
-    return $self->rewrite_body( $self->full_body, $trans );
+    my $prelude = $trans->can( 'add_body_prelude' )
+                ? $trans->add_body_prelude()
+                : '';
+
+    return $self->rewrite_body( $prelude . $self->full_body, $trans );
 }
 
 =item C<size()>

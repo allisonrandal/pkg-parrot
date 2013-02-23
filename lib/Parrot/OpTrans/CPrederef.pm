@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: CPrederef.pm 39866 2009-07-02 07:07:07Z cotto $
+# $Id: CPrederef.pm 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ sub defines {
 /* defines - $0 -> $type */
 #define REL_PC ((size_t)(cur_opcode - (opcode_t*)interp->code->prederef.code))
 #define CUR_OPCODE \\
-    ((opcode_t*)cur_opcode + CONTEXT(interp)->pred_offset)
+    ((opcode_t*)cur_opcode + Parrot_pcc_get_pred_offset(interp, CURRENT_CONTEXT(interp)))
 #define OP_AS_OFFS(o) (_reg_base + ((opcode_t*)cur_opcode)[o])
 
 END

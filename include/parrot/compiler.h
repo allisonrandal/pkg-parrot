@@ -1,7 +1,7 @@
 /* compiler.h
  *  Copyright (C) 2007-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: compiler.h 40159 2009-07-19 18:14:46Z moritz $
+ *     $Id: compiler.h 41175 2009-09-09 22:26:43Z bacek $
  *  Overview:
  *     defines compiler capabilities
  */
@@ -40,7 +40,11 @@
 #  ifdef _MSC_VER
 #    define __attribute__noreturn__         __declspec(noreturn)
 #  else
-#    define __attribute__noreturn__         __attribute__((__noreturn__))
+#    ifdef __clang__
+#      define __attribute__noreturn__         __attribute__((analyzer_noreturn))
+#    else
+#      define __attribute__noreturn__         __attribute__((__noreturn__))
+#    endif
 #  endif
 #endif
 #ifdef HASATTRIBUTE_PURE

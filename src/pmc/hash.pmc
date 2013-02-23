@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: hash.pmc 40136 2009-07-17 14:34:11Z particle $
+$Id: hash.pmc 41254 2009-09-13 19:34:03Z NotFound $
 
 =head1 NAME
 
@@ -376,7 +376,7 @@ hash_value_to_number(PARROT_INTERP, const Hash * const hash, void *value)
 /* Needs ext struct for the next_for_GC pointer
  * We would get recursive marking of a deeply nested HoHoH...
  */
-pmclass Hash need_ext provides hash {
+pmclass Hash provides hash auto_attrs {
     ATTR Hash *hash;
 
 /*
@@ -395,9 +395,8 @@ Free hash structure.
 
     VTABLE void init() {
         Parrot_Hash_attributes * const attr =
-            mem_allocate_typed(Parrot_Hash_attributes);
+            (Parrot_Hash_attributes *) PMC_data(SELF);
 
-        PMC_data(SELF)        = attr;
         attr->hash            = parrot_new_hash(INTERP);
         attr->hash->container = SELF;
         PObj_custom_mark_destroy_SETALL(SELF);
@@ -407,8 +406,6 @@ Free hash structure.
         Hash * const hash = (Hash *)SELF.get_pointer();
         if (hash)
             parrot_hash_destroy(INTERP, hash);
-
-        mem_sys_free(PMC_data(SELF));
     }
 /*
 
@@ -623,16 +620,20 @@ Return a representation of the hash contents.
 
         for (j = 0; j < n; ++j) {
             STRING * const key       = VTABLE_shift_string(INTERP, iter);
+            char *         key_str;
+            size_t         i, str_len;
             int            all_digit = 1;
-            int            i;
             PMC           *val;
 
-            for (i = 0; i < (int)key->strlen; ++i) {
-                if (!isdigit((unsigned char)((const char *)key->strstart)[i])) {
+            key_str = Parrot_str_to_cstring(INTERP, key);
+            str_len = strlen(key_str);
+            for (i = 0; i < str_len; ++i) {
+                if (!isdigit((unsigned char)key_str[i])) {
                     all_digit = 0;
                     break;
                 }
             }
+            Parrot_str_free_cstring(key_str);
 
             if (all_digit) {
                 res = Parrot_str_append(INTERP, res, key);
@@ -1329,7 +1330,6 @@ Check if two hashes hold the same keys and values.
         for (j = 0; j < n; ++j) {
             STRING * const key = VTABLE_shift_string(INTERP, iter);
             PMC           *item1, *item2;
-            INTVAL         result;
 
             if (!VTABLE_exists_keyed_str(INTERP, value, key))
                 return 0;
@@ -1340,9 +1340,7 @@ Check if two hashes hold the same keys and values.
             if (item1 == item2)
                 continue;
 
-            Parrot_mmd_multi_dispatch_from_c_args(INTERP, "is_equal",
-                "PP->I", item1, item2, &result);
-            if (!result)
+            if (!VTABLE_is_equal(INTERP, item1, item2))
                 return 0;
         }
 

@@ -7,7 +7,7 @@
  *
  * PPC
  *
- * $Id: jit_emit.h 39124 2009-05-24 03:26:54Z petdance $
+ * $Id: jit_emit.h 40958 2009-09-03 11:56:50Z bacek $
  */
 
 #ifndef PARROT_PPC_JIT_EMIT_H_GUARD
@@ -675,7 +675,9 @@ jit_emit_bx(Parrot_jit_info_t *jit_info, char type, opcode_t disp)
     jit_emit_lwz((pc), r15,  offsetof(PackFile_Segment, data), ISR1)
 
 #  define jit_emit_branch_to_opcode(pc, D) \
-    jit_emit_lwz((pc), r13, offsetof(Interp, ctx.bp), r16); \
+    jit_emit_lwz((pc), r13, offsetof(Interp, ctx), r16); \
+    jit_emit_lwz((pc), r13, offsetof(PMC, data), r13); \
+    jit_emit_lwz((pc), r13, offsetof(Parrot_Context, bp), r13); \
     jit_emit_sub_rrr(jit_info->native_ptr, ISR1, (D), r15); \
     jit_emit_lwzx(jit_info->native_ptr, ISR1, ISR1, r14); \
     jit_emit_mtctr(jit_info->native_ptr, ISR1); \

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2009, Parrot Foundation.
-$Id: oo.c 40162 2009-07-20 00:25:21Z whiteknight $
+$Id: oo.c 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -143,14 +143,7 @@ Parrot_oo_extract_methods_from_namespace(PARROT_INTERP, ARGIN(PMC *self), ARGIN(
             /* Look up the name of the vtable function from the index. */
             const INTVAL vtable_index = Parrot_str_to_int(interp, vtable_index_str);
             const char * const meth_c = Parrot_vtable_slot_names[vtable_index];
-            STRING     *vtable_name   = Parrot_str_new(interp, meth_c, 0);
-
-            /* Strip leading underscores in the vtable name */
-            if (Parrot_str_find_index(interp, vtable_name, CONST_STRING(interp, "__"), 0) == 0) {
-                vtable_name = Parrot_str_substr(interp, vtable_name, 2,
-                    Parrot_str_byte_length(interp, vtable_name) - 2, NULL, 0);
-            }
-
+            STRING     * const vtable_name   = Parrot_str_new(interp, meth_c, 0);
             VTABLE_add_vtable_override(interp, self, vtable_name, vtable_sub);
         }
     }
@@ -216,7 +209,7 @@ Parrot_oo_get_class(PARROT_INTERP, ARGIN(PMC *key))
                 {
                 PMC * const hll_ns = VTABLE_get_pmc_keyed_int(interp,
                                         interp->HLL_namespace,
-                                        CONTEXT(interp)->current_HLL);
+                                        Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
                 PMC * const ns     = Parrot_get_namespace_keyed(interp,
                                         hll_ns, key);
 
@@ -279,8 +272,7 @@ Parrot_oo_clone_object(PARROT_INTERP, ARGIN(PMC *pmc),
     if (!PMC_IS_NULL(dest)) {
         PARROT_ASSERT(!PMC_IS_NULL(class_));
         PARROT_ASSERT(class_->vtable->base_type == enum_class_Class);
-        obj = (Parrot_Object_attributes *)
-            Parrot_oo_new_object_attrs(interp, class_);
+        obj    = PARROT_OBJECT(pmc);
         cloned = dest;
     }
     else {
@@ -294,15 +286,15 @@ Parrot_oo_clone_object(PARROT_INTERP, ARGIN(PMC *pmc),
 
     /* Set custom GC mark and destroy on the object. */
     PObj_custom_mark_SET(cloned);
-    PObj_active_destroy_SET(cloned);
+    PObj_custom_destroy_SET(cloned);
 
     /* Flag that it is an object */
     PObj_is_object_SET(cloned);
 
-    /* Now create the underlying structure, and clone attributes list.class. */
-    cloned_guts               = mem_allocate_zeroed_typed(Parrot_Object_attributes);
-    PMC_data(cloned)          = cloned_guts;
+    /* Now clone attributes list.class. */
+    cloned_guts               = (Parrot_Object_attributes *) PMC_data(cloned);
     cloned_guts->_class       = obj->_class;
+    cloned_guts->attrib_store = NULL;
     cloned_guts->attrib_store = VTABLE_clone(interp, obj->attrib_store);
     num_attrs                 = VTABLE_elements(interp, cloned_guts->attrib_store);
     for (i = 0; i < num_attrs; i++) {
@@ -337,10 +329,9 @@ Parrot_oo_clone_object(PARROT_INTERP, ARGIN(PMC *pmc),
 
 =item C<void * Parrot_oo_new_object_attrs(PARROT_INTERP, PMC * class_)>
 
-Create a new C<Parrot_Object_attributes> structure, which is the thing that
-holds data for an Object PMC. We need this for places where a new Object
-is being created without being instantiated by it's associated class, such
-as in C<Parrot_oo_clone_object>.
+Create a new C<Parrot_Object_attributes> structure to hold data for an Object
+PMC. We need this for places which create a new Object without instantiating it
+through its associated class, such as in C<Parrot_oo_clone_object>.
 
 =cut
 
@@ -381,10 +372,17 @@ static PMC *
 get_pmc_proxy(PARROT_INTERP, INTVAL type)
 {
     ASSERT_ARGS(get_pmc_proxy)
+    PMC * type_class;
 
     /* Check if not a PMC or invalid type number */
     if (type > interp->n_vtable_max || type <= 0)
         return PMCNULL;
+
+    type_class = interp->vtables[type]->pmc_class;
+    if (type != enum_class_Class
+        && type_class->vtable->base_type == enum_class_Class) {
+        return type_class;
+    }
     else {
         PMC * const parrot_hll = Parrot_get_namespace_keyed_str(interp, interp->root_namespace, CONST_STRING(interp, "parrot"));
         PMC * const pmc_ns =
@@ -423,7 +421,7 @@ Parrot_oo_get_class_str(PARROT_INTERP, ARGIN(STRING *name))
 
     /* First check in current HLL namespace */
     PMC * const hll_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
-                           CONTEXT(interp)->current_HLL);
+                           Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
     PMC * const ns     = Parrot_get_namespace_keyed_str(interp, hll_ns, name);
     PMC * const _class = PMC_IS_NULL(ns)
                        ? PMCNULL : VTABLE_get_class(interp, ns);
@@ -477,6 +475,7 @@ Lookup a vtable override in a specific class object.
 
 */
 
+PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 PMC *
@@ -504,6 +503,7 @@ from parents.
 
 */
 
+PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 PMC *
@@ -515,11 +515,7 @@ Parrot_oo_find_vtable_override(PARROT_INTERP,
     PMC                            *result =
         VTABLE_get_pmc_keyed_str(interp, _class->parent_overrides, name);
 
-    if (!PMC_IS_NULL(result))
-        return result;
-    else if (VTABLE_exists_keyed_str(interp, _class->parent_overrides, name))
-        return PMCNULL;
-    else {
+    if (PMC_IS_NULL(result)) {
         /* Walk and search for the vtable method. */
         const INTVAL num_classes = VTABLE_elements(interp, _class->all_parents);
         INTVAL       i;
@@ -535,11 +531,13 @@ Parrot_oo_find_vtable_override(PARROT_INTERP,
             if (!PMC_IS_NULL(result))
                 break;
         }
-
+        if (PMC_IS_NULL(result))
+            result = pmc_new(interp, enum_class_Undef);
         VTABLE_set_pmc_keyed_str(interp, _class->parent_overrides, name, result);
-
-        return result;
     }
+    if (result->vtable->base_type == enum_class_Undef)
+        result = PMCNULL;
+    return result;
 }
 
 
@@ -617,33 +615,6 @@ Parrot_get_vtable_name(SHIM_INTERP, INTVAL idx)
     return Parrot_vtable_slot_names[idx];
 }
 
-
-/*
-
-=item C<const char* Parrot_MMD_method_name(PARROT_INTERP, INTVAL idx)>
-
-Return the method name for the given MMD enum.
-
-{{**DEPRECATE**}}
-
-=cut
-
-*/
-
-PARROT_EXPORT
-PARROT_PURE_FUNCTION
-PARROT_CAN_RETURN_NULL
-const char*
-Parrot_MMD_method_name(SHIM_INTERP, INTVAL idx)
-{
-    ASSERT_ARGS(Parrot_MMD_method_name)
-    PARROT_ASSERT(idx >= 0);
-
-    if (idx >= MMD_USER_FIRST)
-        return NULL;
-
-    return Parrot_mmd_func_names[idx];
-}
 
 /*
 

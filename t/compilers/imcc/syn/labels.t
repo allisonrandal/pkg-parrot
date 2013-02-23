@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: labels.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: labels.t 40268 2009-07-25 19:53:04Z whiteknight $
 
 use strict;
 use warnings;
@@ -42,15 +42,13 @@ OUT
 ##############################
 pir_error_output_like( <<'CODE', <<'OUT', "illegal label" );
 .sub bogus
-         bsr _function
-         print "never\n"
-         end
+    goto _function
+    print "never\n"
+    end
 .end
 .sub _function
-         bsr FOO
-         ret
-FOO:    print "in function\n"
-         ret
+    print "in function\n"
+    .return()
 .end
 CODE
 /no label offset defined/

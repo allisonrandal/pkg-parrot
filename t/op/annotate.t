@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: annotate.t 37842 2009-04-01 17:56:47Z barney $
+# $Id: annotate.t 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -37,6 +37,7 @@ Test various use cases of the annotate directive.
   failed:
     .local pmc exception
     .get_results (exception)
+    pop_eh
     $P0 = exception.'annotations'()
     isa_ok ($P0, 'Hash', 'annotations gives back hash')
     $I0 = elements $P0
@@ -59,6 +60,7 @@ Test various use cases of the annotate directive.
   failed:
     .local pmc exception
     .get_results (exception)
+    pop_eh
 
     $P0 = exception.'annotations'('file')
     is ($P0, 'foo.p6', "file annotation got OK")
@@ -107,6 +109,7 @@ Test various use cases of the annotate directive.
   failed:
     .local pmc exception, bt, frame, ann
     .get_results (exception)
+    pop_eh
     bt = exception.'backtrace'()
     $I0 = elements bt
     $I0 = $I0 > 3

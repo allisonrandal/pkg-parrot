@@ -1,4 +1,4 @@
-# $Id: Combiner.pir 38689 2009-05-11 17:22:23Z NotFound $
+# $Id: Combiner.pir 40191 2009-07-21 12:56:20Z bacek $
 
 =head1 TITLE
 
@@ -118,8 +118,7 @@ Returns 1 if all assigned sources are connected, 0 otherwise.
     if i == 0 goto NOT_CONNECTED
 
     # create an iterator for the sources
-    new sources, 'Iterator', sources
-    set sources, .ITERATE_FROM_START
+    sources = iter sources
 
 LOOP:
     # stream is connected if no sources are left
@@ -162,8 +161,7 @@ Reads from all assigned sources and calls the combiner.
     if i == 0 goto END_OF_STREAM
 
     # create an iterator for the sources
-    new sources, 'Iterator', sources
-    set sources, .ITERATE_FROM_START
+    sources = iter sources
 
     # create the string array
     new args, 'ResizableStringArray'

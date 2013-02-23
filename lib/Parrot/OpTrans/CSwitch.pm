@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: CSwitch.pm 39866 2009-07-02 07:07:07Z cotto $
+# $Id: CSwitch.pm 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 
@@ -76,7 +76,7 @@ sub defines {
     return $pred_def . <<END;
 /* defines - $0 -> $type */
 #  define opcode_to_prederef(i, op)   (op ? \\
-     (opcode_t*) (op   - CONTEXT(i)->pred_offset) : (opcode_t*)NULL)
+     (opcode_t*) (op   - Parrot_pcc_get_pred_offset(interp, i->ctx)) : (opcode_t*)NULL)
 END
 }
 
@@ -117,20 +117,6 @@ sub goto_offset {
     return "{ cur_opcode += $offset; goto SWITCH_AGAIN; }";
 }
 
-=item C<goto_pop()>
-
-Transforms the C<goto POP()> macro in an ops file into the relevant C
-code.
-
-=cut
-
-sub goto_pop {
-    my ($self) = @_;
-    return "{ opcode_t *dest = (opcode_t*)pop_dest(interp);
-              cur_opcode = opcode_to_prederef(interp, dest);
-              goto SWITCH_AGAIN; }";
-}
-
 =item C<init_func_init1($base)>
 
 Returns the C code for the init function.
@@ -168,7 +154,7 @@ sub run_core_func_start {
 #endif
 
 SWITCH_RELOAD:
-    _reg_base = (char*)interp->ctx.bp.regs_i;
+    _reg_base = (char*)Parrot_pcc_get_regs_ni(interp, CURRENT_CONTEXT(interp))->regs_i;
     do {
 SWITCH_AGAIN:
     Parrot_cx_handle_tasks(interp, interp->scheduler);

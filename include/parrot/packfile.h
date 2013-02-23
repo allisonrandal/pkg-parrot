@@ -4,7 +4,7 @@
 
 /* packfile.h
 *
-* $Id: packfile.h 39123 2009-05-24 03:08:38Z petdance $
+* $Id: packfile.h 40204 2009-07-21 23:30:33Z jkeenan $
 *
 * History:
 *  Rework by Melvin; new bytecode format, make bytecode portable.
@@ -55,7 +55,7 @@
 /*
 ** Parrot_pbc_read() options:
 **   parrot, pbc_merge, parrot_debugger use 0
-**   pbc_dump, pbc_disassemble, pbc_info use 1 to skip the version check
+**   pbc_dump, pbc_disassemble use 1 to skip the version check
 **   pbc_dump -h requires 2
 **   The rest is for TRACE_PACKFILE debugging with switch -D in pbc_dump
 */

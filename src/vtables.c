@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: vtables.c 39076 2009-05-23 10:38:31Z chromatic $
+$Id: vtables.c 40673 2009-08-20 11:05:41Z NotFound $
 
 =head1 NAME
 
@@ -18,6 +18,10 @@ src/vtables.c - Functions to build and manipulate vtables
 
 #include "parrot/parrot.h"
 #include "parrot/vtables.h"
+
+/* This function is defined in the auto-generated file core_pmcs.c */
+/* XXX Get it into some public place */
+extern void Parrot_initialize_core_pmcs(PARROT_INTERP, int pass);
 
 /* HEADERIZER HFILE: include/parrot/vtables.h */
 
@@ -218,6 +222,28 @@ mark_vtables(PARROT_INTERP)
             Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->provides_str);
         if (vtable->pmc_class)
             Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->pmc_class);
+    }
+}
+
+/*
+
+=item C<void Parrot_initialize_core_vtables(PARROT_INTERP)>
+
+Initialize vtables for the core PMCs.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+void
+Parrot_initialize_core_vtables(PARROT_INTERP)
+{
+    ASSERT_ARGS(Parrot_initialize_core_vtables)
+
+    if (! interp->vtables) {
+        parrot_alloc_vtables(interp);
+        Parrot_initialize_core_pmcs(interp, 0);
     }
 }
 

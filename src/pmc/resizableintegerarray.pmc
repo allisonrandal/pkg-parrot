@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: resizableintegerarray.pmc 38794 2009-05-15 16:12:33Z coke $
+$Id: resizableintegerarray.pmc 40946 2009-09-03 05:30:53Z NotFound $
 
 =head1 NAME
 
@@ -20,24 +20,8 @@ conversions.
 
 */
 
-pmclass ResizableIntegerArray extends FixedIntegerArray need_ext provides array {
+pmclass ResizableIntegerArray extends FixedIntegerArray auto_attrs provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs to be resized */
-
-/*
-
-=item C<void init()>
-
-Initializes the array.
-
-=cut
-
-*/
-    VTABLE void init() {
-        Parrot_ResizableIntegerArray_attributes* attrs =
-            mem_allocate_zeroed_typed(Parrot_ResizableIntegerArray_attributes);
-        PMC_data(SELF) = attrs;
-        PObj_active_destroy_SET(SELF);
-    }
 
 /*
 
@@ -310,11 +294,6 @@ Used to unarchive the array.
     }
 
     VTABLE void thaw(visit_info *info) {
-
-        Parrot_ResizableIntegerArray_attributes *attrs =
-            mem_allocate_zeroed_typed(Parrot_ResizableIntegerArray_attributes);
-        PMC_data(SELF) = attrs;
-
         if (info->extra_flags == EXTRA_IS_NULL) {
             IMAGE_IO * const io = info->image_io;
             const INTVAL n = VTABLE_shift_integer(INTERP, io);

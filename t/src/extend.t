@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: extend.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: extend.t 40388 2009-08-02 15:20:06Z NotFound $
 
 use strict;
 use warnings;
@@ -731,13 +731,15 @@ main(int argc, char *argv[]) {
 
     for (i = 1; i <= niter; i++) {
         printf("Starting interp %d\n", i);
+        fflush(stdout);
         interp = Parrot_new(NULL);
-        Parrot_set_flag(interp, PARROT_DESTROY_FLAG);
-
         if (!interp)
             return 1;
 
+        Parrot_set_flag(interp, PARROT_DESTROY_FLAG);
+
         printf("Destroying interp %d\n", i);
+        fflush(stdout);
         interp_cleanup(interp, 0);
     }
 
