@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: string_pmc_bitwise.t 47124 2010-05-30 01:56:17Z plobsing $
 
 =head1 NAME
 

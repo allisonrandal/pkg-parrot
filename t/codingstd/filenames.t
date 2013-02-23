@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: filenames.t 37712 2009-03-25 14:17:35Z coke $
 
 use strict;
 use warnings;

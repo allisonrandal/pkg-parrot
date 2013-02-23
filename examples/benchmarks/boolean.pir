@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: boolean.pir 48965 2010-09-12 16:31:59Z Paul C. Anagnostopoulos $
 
 =head1 NAME
 

@@ -1,5 +1,4 @@
-# Copyright (C) 2004-2007, Parrot Foundation.
-# $Id: HTMLPage.pm 48124 2010-07-20 13:20:57Z coke $
+# Copyright (C) 2004-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -94,7 +93,7 @@ sub footer {
             </div> <!-- "mainbody" -->
             <div id="divider"></div>
             <div id="footer">
-	        Copyright &copy; 2002-2010, Parrot Foundation.
+	        Copyright &copy; 2002-2011, Parrot Foundation.
 FOOTER
 
     $footer .= "\n<br>Parrot version $version" if $version;

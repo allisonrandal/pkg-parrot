@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: parrotinterpreter.t 48811 2010-09-06 14:35:49Z NotFound $
 
 =head1 NAME
 

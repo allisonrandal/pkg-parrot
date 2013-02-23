@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2001-2010, Parrot Foundation.
-$Id: pcc.c 49492 2010-10-10 14:40:36Z jkeenan $
+Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -69,14 +68,14 @@ You must pass the address_of(&) the OUT results, of course.
 
 
 Signatures:
-  uppercase letters repesent each arg and denote its types
+  uppercase letters represent each arg and denote its types
 
   I INTVAL
   N FLOATVAL
   S STRING *
   P PMC *
 
-  lowercase letters are adverb modifiers to the preceeding uppercase arg
+  lowercase letters are adverb modifiers to the preceding uppercase arg
   identifier
 
   f flatten
@@ -303,7 +302,7 @@ Parrot_pcc_invoke_from_sig_object(PARROT_INTERP, ARGIN(PMC *sub_obj),
     ASSERT_ARGS(Parrot_pcc_invoke_from_sig_object)
 
     opcode_t    *dest;
-    UINTVAL      n_regs_used[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    const UINTVAL n_regs_used[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     PMC         *ctx  = Parrot_push_context(interp, n_regs_used);
     PMC * const  ret_cont = pmc_new(interp, enum_class_Continuation);
 
@@ -318,7 +317,7 @@ Parrot_pcc_invoke_from_sig_object(PARROT_INTERP, ARGIN(PMC *sub_obj),
     /* PIR Subs need runops to run their opcodes. Methods and NCI subs
      * don't. */
     if (dest && do_run_ops(interp, sub_obj)) {
-        Parrot_runcore_t *old_core = interp->run_core;
+        Parrot_runcore_t * const old_core = interp->run_core;
         const opcode_t offset = dest - interp->code->base.data;
 
         runops(interp, offset);
@@ -345,5 +344,5 @@ F<include/parrot/interpreter.h>, F<src/call/ops.c>, F<src/pmc/sub.pmc>.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

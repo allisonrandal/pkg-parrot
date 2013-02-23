@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd09_gc.pod 49269 2010-09-23 08:34:38Z bacek $
 
 =head1 PDD 9: Garbage Collection Subsystem
 
@@ -8,9 +7,9 @@
 This PDD specifies Parrot's garbage collection and memory management
 subsystems.
 
-=head2 Version
 
-$Revision: 49269 $
+
+
 
 =head2 Definitions
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: Attribute.pm 46210 2010-05-01 21:39:10Z NotFound $
 
 package Parrot::Pmc2c::Attribute;
 

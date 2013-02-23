@@ -1,10 +1,9 @@
 /*
-Copyright (C) 2001-2010, Parrot Foundation.
-$Id: alloc_memory.c 49492 2010-10-10 14:40:36Z jkeenan $
+Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
-src/gc/memory.c - Memory allocation
+src/gc/alloc_memory.c - Memory allocation
 
 =head1 DESCRIPTION
 
@@ -24,23 +23,36 @@ setup function to initialize the memory pools.
 #include "parrot/parrot.h"
 #include "parrot/memory.h"
 
-PARROT_DOES_NOT_RETURN
-static void failed_allocation(unsigned int line, unsigned long size) /* HEADERIZER SKIP */
-{
-    fprintf(stderr, "Failed allocation of %lu bytes\n", size);
-    do_panic(NULL, "Out of mem", __FILE__, line);
-}
 
-#define PANIC_OUT_OF_MEM(size) failed_allocation(__LINE__, (size))
+#define PANIC_OUT_OF_MEM(size) panic_failed_allocation(__LINE__, (size))
+#define PANIC_ZERO_ALLOCATION(func) panic_zero_byte_allocation(__LINE__, (func))
 
 /* HEADERIZER HFILE: include/parrot/memory.h */
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+PARROT_DOES_NOT_RETURN
+static void panic_failed_allocation(unsigned int line, unsigned long size);
+
+PARROT_DOES_NOT_RETURN
+static void panic_zero_byte_allocation(
+    unsigned int line,
+    ARGIN(const char *func))
+        __attribute__nonnull__(2);
+
+#define ASSERT_ARGS_panic_failed_allocation __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_panic_zero_byte_allocation __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(func))
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+
 
 /*
 
 =item C<void * mem_sys_allocate(size_t size)>
 
 Uses C<malloc> to allocate system memory. Panics if the system cannot
-return memory.
+return memory, or if a zero-byte allocation is attempted.
 
 =cut
 
@@ -48,16 +60,18 @@ return memory.
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 void *
 mem_sys_allocate(size_t size)
 {
     ASSERT_ARGS(mem_sys_allocate)
     void * const ptr = malloc(size);
+    if (size==0)
+        PANIC_ZERO_ALLOCATION("mem_sys_allocate");
 #ifdef DETAIL_MEMORY_DEBUG
     fprintf(stderr, "Allocated %i at %p\n", size, ptr);
 #endif
-    if (!ptr && size)
+    if (!ptr)
         PANIC_OUT_OF_MEM(size);
     return ptr;
 }
@@ -75,16 +89,19 @@ otherwise.
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 void *
 mem_sys_allocate_zeroed(size_t size)
 {
     ASSERT_ARGS(mem_sys_allocate_zeroed)
     void * const ptr = calloc(1, (size_t)size);
+
+    if (size==0)
+        PANIC_ZERO_ALLOCATION("mem_sys_allocate_zeroed");
 #ifdef DETAIL_MEMORY_DEBUG
     fprintf(stderr, "Allocated %i at %p\n", size, ptr);
 #endif
-    if (!ptr && size)
+    if (!ptr)
         PANIC_OUT_OF_MEM(size);
     return ptr;
 }
@@ -103,12 +120,14 @@ block.
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 void *
 mem_sys_realloc(ARGFREE(void *from), size_t size)
 {
     ASSERT_ARGS(mem_sys_realloc)
     void *ptr;
+    if (size==0)
+        PANIC_ZERO_ALLOCATION("mem_sys_realloc");
 #ifdef DETAIL_MEMORY_DEBUG
     fprintf(stderr, "Freed %p (realloc -- %i bytes)\n", from, size);
 #endif
@@ -119,7 +138,7 @@ mem_sys_realloc(ARGFREE(void *from), size_t size)
 #ifdef DETAIL_MEMORY_DEBUG
     fprintf(stderr, "Allocated %i at %p\n", size, ptr);
 #endif
-    if (!ptr && size)
+    if (!ptr)
         PANIC_OUT_OF_MEM(size);
     return ptr;
 }
@@ -139,12 +158,14 @@ allocated and zeroed instead.
 
 PARROT_EXPORT
 PARROT_MALLOC
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 void *
 mem_sys_realloc_zeroed(ARGFREE(void *from), size_t size, size_t old_size)
 {
     ASSERT_ARGS(mem_sys_realloc_zeroed)
     void *ptr;
+    if (size==0)
+        PANIC_ZERO_ALLOCATION("mem_sys_realloc_zeroed");
 #ifdef DETAIL_MEMORY_DEBUG
     fprintf(stderr, "Freed %p (realloc -- %i bytes)\n", from, size);
 #endif
@@ -152,7 +173,7 @@ mem_sys_realloc_zeroed(ARGFREE(void *from), size_t size, size_t old_size)
 #ifdef DETAIL_MEMORY_DEBUG
     fprintf(stderr, "Allocated %i at %p\n", size, ptr);
 #endif
-    if (!ptr && size)
+    if (!ptr)
         PANIC_OUT_OF_MEM(size);
 
     if (size > old_size)
@@ -211,6 +232,48 @@ mem_sys_strdup(ARGIN(const char *src))
 
 /*
 
+=item C<static void panic_failed_allocation(unsigned int line, unsigned long
+size)>
+
+Print an error message and die.
+
+=cut
+
+*/
+
+PARROT_DOES_NOT_RETURN
+static void
+panic_failed_allocation(unsigned int line, unsigned long size)
+{
+    ASSERT_ARGS(panic_failed_allocation)
+
+    fprintf(stderr, "Failed allocation of %lu bytes\n", size);
+    do_panic(NULL, "Out of mem", __FILE__, line);
+}
+
+/*
+
+=item C<static void panic_zero_byte_allocation(unsigned int line, const char
+*func)>
+
+Print an error message and die.
+
+=cut
+
+*/
+
+PARROT_DOES_NOT_RETURN
+static void
+panic_zero_byte_allocation(unsigned int line, ARGIN(const char *func))
+{
+    ASSERT_ARGS(panic_zero_byte_allocation)
+
+    fprintf(stderr, "Zero-byte allocation not allowed in %s", func);
+    do_panic(NULL, "Out of mem", __FILE__, line);
+}
+
+/*
+
 =back
 
 =cut
@@ -221,5 +284,5 @@ mem_sys_strdup(ARGIN(const char *src))
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2003-2010, Parrot Foundation.
-$Id: string.pmc 49542 2010-10-15 07:00:37Z cotto $
+Copyright (C) 2003-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -190,13 +189,9 @@ Sets the value of the string to that of the specified C<string>.
             value = STRINGNULL;
 
         /* Only allow constant PMCs to embed constant strings */
-        if (PObj_constant_TEST(SELF) && !PObj_constant_TEST(value)) {
-            char * const copy = Parrot_str_to_cstring(INTERP, value);
-            value             = Parrot_str_new_init(INTERP, copy, strlen(copy),
-                Parrot_default_encoding_ptr,
-                PObj_constant_FLAG);
-            Parrot_str_free_cstring(copy);
-        }
+        if (PObj_constant_TEST(SELF) && !PObj_constant_TEST(value))
+            value = Parrot_str_new_init(INTERP, value->strstart, value->bufused,
+                                        value->encoding, PObj_constant_FLAG);
 
         SET_ATTR_str_val(INTERP, SELF, value);
     }
@@ -244,10 +239,6 @@ they match.
         STRING * const v = VTABLE_get_string(INTERP, value);
         GET_ATTR_str_val(INTERP, SELF, str_val);
         return (INTVAL)(STRING_equal(INTERP, str_val, v));
-    }
-
-    MULTI INTVAL is_equal(PMC *value) {
-        return SELF.is_equal(value);
     }
 
 /*
@@ -404,7 +395,7 @@ numbers count from the end.
         GET_ATTR_str_val(INTERP, SELF, str_val);
         n = Parrot_str_length(INTERP, str_val);
 
-        return (INTVAL)((k >= 0 && k <= n) || (k < 0 && -k <= n));
+        return (INTVAL)((k >= 0 && k < n) || (k < 0 && -k <= n));
     }
 
 /*
@@ -532,22 +523,22 @@ TODO Currently overflow to BigInt is B<not> handled nor detected.
 */
 
     METHOD to_int(INTVAL base) {
-        PMC * const result = Parrot_pmc_new(INTERP, Parrot_get_ctx_HLL_type(INTERP,
+        PMC * const result = Parrot_pmc_new(INTERP, Parrot_hll_get_ctx_HLL_type(INTERP,
                         enum_class_Integer));
 
-        /* TODO verify encoding */
-        const STRING *me  = VTABLE_get_string(INTERP, SELF);
-        char  * const str = Parrot_str_to_cstring(INTERP, me);
+        String_iter   iter;
+        const STRING * const me  = VTABLE_get_string(INTERP, SELF);
         UINTVAL       i   = 0;
-        size_t        j   = 0;
-        size_t        len = strlen(str);
+        size_t        len = STRING_length(me);
 
         if (base < 2 || base > 36)
             Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
                     "invalid conversion to int - bad base %d", base);
 
-        while (j < len) {
-            const unsigned char c = str[j];
+        STRING_ITER_INIT(interp, &iter);
+
+        while (iter.charpos < len) {
+            const int c = STRING_iter_get_and_advance(interp, me, &iter);
             int dig;
 
             if (isdigit((unsigned char)c))
@@ -557,23 +548,15 @@ TODO Currently overflow to BigInt is B<not> handled nor detected.
             else if (c >= 'A' && c <= 'Z')
                 dig = c - 'A' + 10;
             else
-                break;
+                dig = base;
 
             if (dig >= base)
-                break;
+                Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
+                        "invalid conversion to int - bad char %c", c);
 
             i = i * base + dig;
-            ++j;
         }
 
-        if (j < len) {
-            const char ch = str[j];
-            Parrot_str_free_cstring(str);
-            Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
-                    "invalid conversion to int - bad char %c", ch);
-        }
-
-        Parrot_str_free_cstring(str);
         /* TODO: autopromote to BigInt instead of casting away the high bit */
         VTABLE_set_integer_native(INTERP, result, (INTVAL)i);
         RETURN(PMC *result);
@@ -653,26 +636,6 @@ Used to unarchive the string.
 
 =over 4
 
-=item C<PMC *lower()>
-
-Downcase this string
-
-=cut
-
-*/
-
-    METHOD lower() {
-        STRING *str_val;
-        STRING *s;
-
-        GET_ATTR_str_val(INTERP, SELF, str_val);
-        s = Parrot_str_downcase(INTERP, str_val);
-
-        RETURN(STRING *s);
-    }
-
-/*
-
 =item C<void trans(STRING *src, PMC *trams_table)>
 
 Translate ascii string C<src> with entries from C<trans_table>.
@@ -724,11 +687,11 @@ if present.
 */
 
     METHOD reverse(STRING *src :optional, INTVAL got_src :opt_flag) {
-        STRING *s;
         if (got_src) {
             SET_ATTR_str_val(INTERP, SELF, Parrot_str_reverse(INTERP, src));
         }
         else {
+            STRING *s;
             GET_ATTR_str_val(INTERP, SELF, s);
             SET_ATTR_str_val(INTERP, SELF, Parrot_str_reverse(INTERP, s));
         }
@@ -745,9 +708,8 @@ Checks if the ascii STRING C<str> is just an integer.
 */
 
     METHOD is_integer(STRING *src) {
-        INTVAL         i;
-        char          *p;
         const INTVAL   len = Parrot_str_length(INTERP, src);
+        const char *p;
 
         if (!len)
             RETURN(INTVAL 0);
@@ -756,11 +718,9 @@ Checks if the ascii STRING C<str> is just an integer.
             Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_ENCODING,
                 "Can't is_integer non fixed_8");
 
-        i = 0;
         p = src->strstart;
-
-        if (p[i] == '-' || p[i] == '+' ||
-            (p[i] >= '0' && p[i] <= '9')) {
+        if (p[0] == '-' || p[0] == '+' || (p[0] >= '0' && p[0] <= '9')) {
+            int i;
             for (i = 1; i < len; ++i)
                 if (p[i] < '0' || p[i] > '9')
                     RETURN(INTVAL 0);
@@ -798,7 +758,7 @@ Find last occurrence of C<substring>, but not after the C<start> position.
 */
 
     METHOD reverse_index(STRING *substring, INTVAL start) {
-        STRING * const src = VTABLE_get_string(INTERP, SELF);
+        const STRING * const src = VTABLE_get_string(INTERP, SELF);
         INTVAL         res = -1;
         UINTVAL        len;
 
@@ -832,11 +792,11 @@ EXPERIMENTAL, for testing only. See TT #1628
 
     METHOD unescape(STRING *encodingname)
     {
-        const STR_VTABLE *encoding = Parrot_get_encoding(INTERP,
-            Parrot_encoding_number(INTERP, encodingname));
+        const STR_VTABLE * const encoding = Parrot_find_encoding_by_string(INTERP, encodingname);
         STRING * const src = VTABLE_get_string(INTERP, SELF);
         STRING * const dest = Parrot_str_unescape_string(INTERP, src,
                 encoding, 0);
+        Parrot_warn_experimental(INTERP, "Method unescape on String is experimental");
         RETURN(STRING *dest);
     }
 
@@ -855,5 +815,5 @@ EXPERIMENTAL, for testing only. See TT #1628
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

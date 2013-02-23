@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Crow.pir 47300 2010-06-02 13:07:49Z coke $
 
 .namespace ['Crow']
 

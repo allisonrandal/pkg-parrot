@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: mops_intval.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -62,7 +61,7 @@ BUG:    print "This can't happen\n"
 
 =head1 SEE ALSO
 
-F<examples/assembly/mops_p.pasm>,
+F<examples/benchmarks/mops.pasm>,
 F<examples/mops/mops.c>,
 F<examples/mops/mops.cs>,
 F<examples/mops/mops.il>,

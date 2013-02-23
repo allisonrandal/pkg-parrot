@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: inf_nan.t 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 

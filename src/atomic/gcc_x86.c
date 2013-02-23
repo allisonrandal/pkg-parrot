@@ -1,7 +1,5 @@
 /* atomic/gcc_x86.c
  *  Copyright (C) 2006-2010, Parrot Foundation.
- *  SVN Info
- *     $Id: gcc_x86.c 44168 2010-02-19 11:51:46Z mikehh $
  */
 
 #include "parrot/parrot.h"
@@ -109,5 +107,5 @@ parrot_i386_xadd(ARGIN(volatile long *l), long amount)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

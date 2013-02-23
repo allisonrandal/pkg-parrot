@@ -1,6 +1,5 @@
 #! perl
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd_format.t 45018 2010-03-18 18:06:44Z Util $
+# Copyright (C) 2001-2011, Parrot Foundation.
 
 use strict;
 use warnings;
@@ -43,7 +42,6 @@ sub check_pdd_formatting {
     my $diag = q{};
     my @toolong = ();
     my @sections_needed = qw(
-        Version
         Abstract
         Description
         Implementation

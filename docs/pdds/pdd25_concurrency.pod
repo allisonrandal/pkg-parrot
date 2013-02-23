@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd25_concurrency.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 25: Concurrency
 
@@ -8,9 +7,9 @@
 This document defines the requirements and implementation strategy for
 Parrot's concurrency models.
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Description
 

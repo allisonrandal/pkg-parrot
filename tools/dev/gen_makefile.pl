@@ -1,7 +1,6 @@
 #! perl
 
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: gen_makefile.pl 41443 2009-09-24 13:07:47Z fperrad $
 
 use 5.008;
 use strict;

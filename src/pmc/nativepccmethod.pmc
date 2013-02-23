@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2010, Parrot Foundation.
-$Id: nativepccmethod.pmc 48909 2010-09-10 15:28:24Z pmichaud $
+Copyright (C) 2010-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -165,7 +164,7 @@ Create a clone of this PMC.
 */
 
     VTABLE PMC *clone() {
-        PMC *ret = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
+        PMC * const ret = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
         Parrot_NativePCCMethod_attributes *self_attrs = PARROT_NATIVEPCCMETHOD(SELF);
         Parrot_NativePCCMethod_attributes *ret_attrs  = PARROT_NATIVEPCCMETHOD(ret);
 
@@ -175,6 +174,24 @@ Create a clone of this PMC.
         ret_attrs->mmd_multi_sig      = self_attrs->mmd_multi_sig;
 
         return ret;
+    }
+
+/*
+
+=item C<METHOD get_multisig()>
+
+Return the MMD signature PMC, if any or C<PMCNULL>.
+
+=cut
+
+*/
+
+    METHOD get_multisig() {
+        PMC *sig;
+        GET_ATTR_mmd_multi_sig(INTERP, SELF, sig);
+        if (PMC_IS_NULL(sig))
+            sig = PMCNULL;
+        RETURN(PMC *sig);
     }
 }
 
@@ -194,5 +211,5 @@ F<docs/pdds/pdd03_calling_conventions.pod>.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

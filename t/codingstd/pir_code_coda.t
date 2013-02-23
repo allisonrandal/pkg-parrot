@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: pir_code_coda.t 48544 2010-08-17 03:02:21Z petdance $
 
 use strict;
 use warnings;

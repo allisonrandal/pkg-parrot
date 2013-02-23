@@ -1,6 +1,5 @@
 /*
- * $Id: subproxy.pmc 46300 2010-05-05 03:58:50Z jimmy $
- * Copyright (C) 2003-2009, Parrot Foundation.
+Copyright (C) 2003-2011, Parrot Foundation.
  */
 
 /*
@@ -28,7 +27,7 @@ pmclass SubProxy dynpmc extends Sub auto_attrs {
     VTABLE opcode_t* invoke(void* next) {
         if (PObj_get_FLAGS(SELF) & PObj_private0_FLAG) {
 
-            PMC         *key = PMC_data_typed(SELF, PMC *);
+            PMC         * const key = PMC_data_typed(SELF, PMC *);
             STRING      *file;
             PMC         *rsub_pmc, *sub_pmc;
             Parrot_Sub_attributes  *rsub,     *my_sub;
@@ -40,7 +39,7 @@ pmclass SubProxy dynpmc extends Sub auto_attrs {
             if (!file)
                 Parrot_ex_throw_from_c_args(INTERP, NULL, 1, "SubProxy: no file");
 
-            sub_pmc = key_next(INTERP, key);
+            sub_pmc = Parrot_key_next(INTERP, key);
             if (!sub_pmc)
                 Parrot_ex_throw_from_c_args(INTERP, NULL, 1, "SubProxy: no sub");
 
@@ -68,5 +67,5 @@ pmclass SubProxy dynpmc extends Sub auto_attrs {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

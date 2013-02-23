@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: gc_alloc_new.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -36,6 +35,7 @@ indicating:
 
 # a rather useless test to check if your system does swapping
 # if sizes are too big
+.pcc_sub :main main:
 	set I0, 6
 	set I1, 0
 	set S1,  "1234567890"

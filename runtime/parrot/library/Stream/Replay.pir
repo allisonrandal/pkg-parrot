@@ -1,4 +1,3 @@
-# $Id: Replay.pir 38689 2009-05-11 17:22:23Z NotFound $
 
 =head1 TITLE
 

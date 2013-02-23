@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: methods.t 47281 2010-06-02 04:57:02Z plobsing $
 
 =head1 NAME
 

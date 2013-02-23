@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: make_code_coda.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

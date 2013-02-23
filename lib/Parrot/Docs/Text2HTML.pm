@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Text2HTML.pm 37070 2009-03-02 07:39:57Z fperrad $
 
 =head1 NAME
 

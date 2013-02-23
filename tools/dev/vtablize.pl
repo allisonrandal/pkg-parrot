@@ -1,5 +1,4 @@
 #! perl -pi.bak
-# $Id: vtablize.pl 43921 2010-02-13 02:10:36Z whiteknight $
 # Copyright (C) 2008-2009, Parrot Foundation.
 
 =head1 NAME

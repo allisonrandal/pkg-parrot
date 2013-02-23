@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 019-version.t 37154 2009-03-07 04:12:31Z jkeenan $
 # 019-version.t
 
 use strict;

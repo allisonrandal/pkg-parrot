@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: shootout.t 45949 2010-04-24 01:14:23Z cotto $
 
 use strict;
 use warnings;
@@ -70,10 +69,8 @@ foreach my $script (@shootouts) {
     if ( $shebang =~ /^\#.+parrot\s+(.+)$/ ) {
         $args = $1;    # parrot options
     }
-    unless ( $PConfig{jitcapable} ) {
-        $args =~ s/-j/-C/;
-        $args =~ s/-Cj/-C/;
-    }
+    $args =~ s/-j/-C/;
+    $args =~ s/-Cj/-C/;
     $args =~ s/-Cj/-j/;
 
     # Remove any plain -C option.

@@ -1,4 +1,3 @@
-# $Id: README.pod 46612 2010-05-14 15:25:05Z coke $
 
 =head1 Parrot Compiler Toolkit (PCT)
 

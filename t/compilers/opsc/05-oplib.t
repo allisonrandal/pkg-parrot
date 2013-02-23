@@ -1,6 +1,5 @@
 #!./parrot-nqp
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: 05-oplib.t 47003 2010-05-26 01:35:32Z cotto $
 
 # Checking for OpLib num and skip files parsing.
 

@@ -1,4 +1,3 @@
-# $Id: SubCounter.pir 38689 2009-05-11 17:22:23Z NotFound $
 
 =head1 Counter Example
 
@@ -14,7 +13,7 @@ Creates a C<Stream::Sub> and dumps it.
 
 =cut
 
-.sub _main
+.sub _main :main
     .local pmc stream
 
     load_bytecode 'Stream/Base.pbc'

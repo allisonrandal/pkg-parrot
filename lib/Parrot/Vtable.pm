@@ -1,5 +1,4 @@
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: Vtable.pm 45297 2010-03-30 01:33:45Z coke $
+# Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -12,8 +11,8 @@ Parrot::Vtable - Functions for manipulating vtables
 =head1 DESCRIPTION
 
 C<Parrot::Vtable> provides a collection of functions for manipulating PMC
-vtables. It is used by F<tools/build/pmc2c.pl>, F<tools/build/vtable_h.pl>, and
-F<tools/dev/gen_class.pl>.
+vtables. It is used by F<tools/build/pmc2c.pl>, F<tools/build/vtable_h.pl>,
+F<tools/build/vtable_extend.pl> and F<tools/dev/gen_class.pl>.
 
 =head2 Functions
 
@@ -67,14 +66,14 @@ Returns a reference to an array containing
 
   [ return_type method_name parameters section MMD_type attributes ]
 
-for each vtable function defined in C<$file>. If C<$file> is unspecified it
-defaults to F<src/vtable.tbl>.  If it is not an MMD method, C<MMD_type> is -1.
+for each vtable function defined in C<$file>.  If it is not an MMD method,
+C<MMD_type> is -1.
 
 =cut
 
 sub parse_vtable {
 
-    my $file    = defined $_[0] ? shift() : 'src/vtable.tbl';
+    my $file    = shift;
     my $vtable  = [];
     my $mmd     = [];
     my $fh      = FileHandle->new( $file, O_RDONLY ) or die "Can't open $file for reading: $!\n";
@@ -133,7 +132,18 @@ sub vtbl_defs {
 
     for my $entry ( @{$vtable} ) {
         next if ( $entry->[4] =~ /MMD_/ );
-        my $args = join( ", ", 'PARROT_INTERP', 'PMC* pmc', split( /\s*,\s*/, $entry->[2] ) );
+
+        # Put arg annotations on points if appropriate
+        my @args = split( /\s*,\s*/, $entry->[2] );
+        for my $arg ( @args ) {
+            if ( $arg =~ /^STRING\b/ ) {
+                # It would be nice if we could const STRINGs but they might have to calculate a hashval.
+                $arg = "ARGMOD($arg)";
+            }
+        }
+
+        # The source PMC can always get modified.
+        my $args = join( ', ', 'PARROT_INTERP', 'ARGMOD(PMC *pmc)', @args);
         $defs .= "typedef $entry->[0] (*$entry->[1]_method_t)($args);\n";
     }
 
@@ -242,8 +252,6 @@ EOM
     # finally the name mapping
     $macros .= <<'EOM';
 
-#ifdef PARROT_IN_OBJECTS_C
-
 #define PARROT_VTABLE_LOW 9
 
 static PARROT_OBSERVER const char * const Parrot_vtable_slot_names[] = {
@@ -273,7 +281,6 @@ EOM
 
 #define NUM_VTABLE_FUNCTIONS $num_vtable_funcs
 
-#endif /* PARROT_IN_OBJECTS_C */
 EOM
 
     $macros;
@@ -387,7 +394,7 @@ sub parse_params {
 
 =over 4
 
-=item F<tools/build/jit2c.pl>
+=item F<tools/build/vtable_extend.pl>
 
 =item F<tools/build/pmc2c.pl>
 

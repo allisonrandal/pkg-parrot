@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: progs-02.t 49440 2010-10-04 12:54:05Z plobsing $
 # inter/progs-02.t
 
 use strict;
@@ -50,6 +49,7 @@ my ($stdout, $debug, $debug_validity);
 foreach my $p (
     qw|
         cc
+        cxx
         link
         ar
         ld
@@ -58,7 +58,6 @@ foreach my $p (
         arflags
         ldflags
         libs
-        cxx
     |
     )
 {

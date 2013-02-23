@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: make.pm 42595 2009-11-20 02:49:02Z jkeenan $
 
 =head1 NAME
 
@@ -113,19 +112,10 @@ sub runstep {
 sub _set_make_c {
     my ($conf, $prog) = @_;
     if ( $conf->data->get('gmake_version') ) {
-        $conf->data->set( make_c => "$prog -C" );
+        $conf->data->set( make_c => "+$prog -C" );
     }
     else {
-
-        # get the default value
-        my $make_c = $conf->data->get('make_c');
-
-        # TT #1049: this is an ugly hack
-        # replace the value for $(MAKE) with the actual path or we'll end up
-        # with a variable that recursively refers to itself
-        $make_c =~ s/\$\(MAKE\)/$prog/;
-
-        $conf->data->set( make_c => $make_c );
+        # The default value is fine.
     }
 }
 

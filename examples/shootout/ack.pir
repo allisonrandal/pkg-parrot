@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: ack.pir 45949 2010-04-24 01:14:23Z cotto $
 # OUTPUT="Ack(3, 9) = 4093\n"
 #
 # ./parrot -Oc

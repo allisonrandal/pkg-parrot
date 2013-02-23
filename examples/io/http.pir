@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: http.pir 47583 2010-06-13 01:02:26Z coke $
 
 =head1 NAME
 

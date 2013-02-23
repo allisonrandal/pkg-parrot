@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: signal.t 44631 2010-03-04 20:42:24Z coke $
 
 use strict;
 use warnings;

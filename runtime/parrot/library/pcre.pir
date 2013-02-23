@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: pcre.pir 48995 2010-09-14 07:45:12Z fperrad $
 
 =head1 TITLE
 

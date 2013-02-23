@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Dumper.pir 46364 2010-05-06 15:01:00Z bacek $
 
 =head1 TITLE
 
@@ -7,8 +6,6 @@ PGE::Dumper - various methods for displaying PGE structures
 
 =cut
 
-.sub __onload
-.end
 
 .namespace [ "PGE";"Match" ]
 

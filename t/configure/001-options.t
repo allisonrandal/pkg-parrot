@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 001-options.t 36833 2009-02-17 20:09:26Z allison $
 # 001-options.t
 
 use strict;
@@ -103,7 +102,7 @@ my $CX = "/usr/bin/g++-3.3";
 ($args, $step_list_ref) = process_options(
     {
         argv => [
-            q{--cc=$CC},      q{--cxx=$CX}, q{--link=$CX}, q{--ld=$CX},
+            q{--cc=$CC},      q{--link=$CX}, q{--ld=$CX},
             q{--without-icu}, q{--without-gmp},
         ],
         mode => q{configure},

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: string_utils.t 49513 2010-10-11 18:40:23Z nwellnhof $
 
 =head1 NAME
 

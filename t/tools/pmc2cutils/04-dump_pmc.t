@@ -1,10 +1,10 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: 04-dump_pmc.t 44538 2010-02-28 02:46:06Z coke $
 # 04-dump_pmc.t
 
 use strict;
 use warnings;
+use Carp;
 
 BEGIN {
     use FindBin qw($Bin);
@@ -44,7 +44,11 @@ my @include_orig = ( qq{$main::topdir}, qq{$main::topdir/src/pmc}, );
     my $temppmcdir = qq{$tdir/src/pmc};
     ok( ( mkdir $temppmcdir ), "created src/pmc/ under tempdir" );
 
-    my @pmcfiles     = glob("$main::topdir/src/pmc/*.pmc");
+    opendir my $DIRH, "$main::topdir/src/pmc"
+        or croak "Unable to open directory for reading";
+    my @pmcfiles =
+        map { qq|$main::topdir/src/pmc/$_| } grep { m/\.pmc$/ } readdir $DIRH;
+    closedir $DIRH or croak;
     my $pmcfilecount = scalar(@pmcfiles);
     my $copycount;
     foreach my $pmcfile (@pmcfiles) {

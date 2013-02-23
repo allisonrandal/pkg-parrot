@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: op.t 47051 2010-05-27 08:45:23Z plobsing $
 
 .sub test :main
     .include 'test_more.pir'

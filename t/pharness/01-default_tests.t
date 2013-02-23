@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 01-default_tests.t 41850 2009-10-14 02:12:37Z jkeenan $
 # 01-default_tests.t
 
 use strict;

@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2009, Parrot Foundation.
-# $Id: flow.pir 40557 2009-08-15 10:41:06Z dukeleto $
 
 # ** direction changing
 

@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: 032-data.t 36833 2009-02-17 20:09:26Z allison $
 
 use strict;
 use warnings;

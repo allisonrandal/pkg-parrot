@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: parrot_config.t 47624 2010-06-14 16:57:14Z coke $
 
 =head1 NAME
 
@@ -45,8 +44,8 @@ config_output_like(
 );
 
 config_output_like(
-    'non_existant_key',
-     qr/no such key: 'non_existant_key'/,
+    'non_existent_key',
+     qr/no such key: 'non_existent_key'/,
      'missing keys'
 );
 

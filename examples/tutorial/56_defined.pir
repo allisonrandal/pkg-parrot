@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 56_defined.pir 45297 2010-03-30 01:33:45Z coke $
 
 =head1 defined
 

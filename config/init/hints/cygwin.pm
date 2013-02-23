@@ -1,5 +1,4 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: cygwin.pm 45750 2010-04-17 13:32:28Z darbelo $
 
 package init::hints::cygwin;
 

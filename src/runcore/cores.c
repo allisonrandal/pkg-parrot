@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: cores.c 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -27,7 +26,7 @@ requires an understanding of the Parrot runcores.
 
 Parrot has multiple runcores. Some are useful for particular maintenance
 tasks, some are only available as optimizations in certain compilers,
-some are intended for general use, and some are just interesing flights
+some are intended for general use, and some are just interesting flights
 of fancy with no practical benefits. Here we list the various runcores,
 their uses, and their benefits.
 
@@ -180,7 +179,7 @@ next opcode, which means faster throughput. Remember that whatever dispatch
 mechanism is used will be called after every single opcode, and some large
 programs may have millions of opcodes! Every single machine instruction
 that can be cut out of the dispatch mechanism could increase the execution
-speed of Parrot in a significant and noticable way. B<The dispatch mechanism
+speed of Parrot in a significant and noticeable way. B<The dispatch mechanism
 used by the various runcores is hardly the largest performance bottleneck in
 Parrot anyway, but we like to use faster cores to shave every little bit of
 speed out of the system>.
@@ -504,13 +503,6 @@ runops_fast_core(PARROT_INTERP, SHIM(Parrot_runcore_t *runcore), ARGIN(opcode_t 
     Parrot_pcc_set_pc(interp, CURRENT_CONTEXT(interp), NULL);
 
     while (pc) {
-        /* TODO
-         * Decide do we need check here.
-         * Fast-core cause segfaults even on test suite
-        if (pc < code_start || pc >= code_end)
-            Parrot_ex_throw_from_c_args(interp, NULL, 1,
-                "attempt to access code outside of current code segment");
-        */
         DO_OP(pc, interp);
     }
 
@@ -575,7 +567,7 @@ runops_trace_core(PARROT_INTERP, ARGIN(opcode_t *pc))
 
         pio = Parrot_io_STDERR(debugger);
 
-        if (Parrot_io_is_tty(debugger, pio))
+        if (Parrot_io_is_tty_handle(debugger, pio))
             Parrot_io_setlinebuf(debugger, pio);
         else {
             /* this is essential (100 x faster!)  and should probably
@@ -609,7 +601,7 @@ runops_trace_core(PARROT_INTERP, ARGIN(opcode_t *pc))
         }
     }
 
-    Parrot_io_flush(debugger, Parrot_io_STDERR(debugger));
+    Parrot_io_flush_handle(debugger, Parrot_io_STDERR(debugger));
 
     return pc;
 }
@@ -807,5 +799,5 @@ runops_exec_core(PARROT_INTERP, ARGIN(Parrot_runcore_t *runcore), ARGIN(opcode_t
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

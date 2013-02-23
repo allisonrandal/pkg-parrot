@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: readline-01.t 48925 2010-09-11 01:21:55Z jkeenan $
 # auto/readline-01.t
 
 use strict;

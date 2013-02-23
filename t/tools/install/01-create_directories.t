@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 01-create_directories.t 43419 2010-01-10 14:00:24Z barney $
 # 01-create_directories.t
 
 use strict;

@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: stress_integers.pir 49272 2010-09-23 11:18:21Z mikehh $
 
 =head1 NAME
 

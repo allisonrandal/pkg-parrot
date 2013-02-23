@@ -1,12 +1,11 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: vpm.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 # beginn
 #use strict;
 #
 #use warnings;
 
-.sub main
+.sub main :main
 
 .local string _string
 _string = "just another perl hacker"

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: cuddled_else.t 44322 2010-02-22 22:12:02Z mikehh $
 
 use strict;
 use warnings;

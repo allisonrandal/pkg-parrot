@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: stress3.pasm 40268 2009-07-25 19:53:04Z whiteknight $
 
 =head1 NAME
 
@@ -30,6 +29,8 @@ at the moment:
     FixedPMCArray: Entry not an integer!
 
 =cut
+
+.pcc_sub :main main:
 
 # How can I get to the command line args?
 

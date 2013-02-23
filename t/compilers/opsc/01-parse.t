@@ -1,6 +1,5 @@
 #! parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: 01-parse.t 46923 2010-05-23 22:04:01Z cotto $
 
 .include 't/compilers/opsc/common.pir'
 
@@ -105,7 +104,6 @@ END
 
     buf = <<"END"
 /*
- * $Id: 01-parse.t 46923 2010-05-23 22:04:01Z cotto $
 ** core.ops
 */
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: number.pasm 42885 2009-12-03 19:31:31Z mikehh $
 
         set     N0, 1.0
         set     N1, 4.0

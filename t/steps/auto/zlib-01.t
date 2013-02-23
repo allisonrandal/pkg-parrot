@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: zlib-01.t 47318 2010-06-03 01:36:45Z jkeenan $
 
 use strict;
 use warnings;

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: pod.t 44436 2010-02-24 02:04:47Z jkeenan $
 
 use strict;
 use warnings;

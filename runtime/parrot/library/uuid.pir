@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: uuid.pir 46060 2010-04-27 13:39:27Z bacek $
 
 =head1 NAME
 

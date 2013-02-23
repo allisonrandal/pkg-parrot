@@ -1,4 +1,3 @@
-# $Id: Base.pir 44543 2010-02-28 05:02:25Z coke $
 
 =head1 TITLE
 
@@ -211,7 +210,7 @@ NOT_IN_CACHE:
     # (in general, it will not, let it override the general ones below)
     typeof temp, _dump
     set func, "pmc"
-    concat func, temp
+    func = concat func, temp
     can ret, self, func
     if ret goto DUMP
 

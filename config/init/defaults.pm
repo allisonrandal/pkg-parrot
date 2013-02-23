@@ -1,5 +1,4 @@
-# Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: defaults.pm 49433 2010-10-04 03:19:11Z plobsing $
+# Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -59,6 +58,7 @@ sub runstep {
         ccflags
         d_socklen_t
         optimize
+        osvers
         scriptdirexp
         sig_name
         sPRIgldbl
@@ -80,9 +80,7 @@ sub runstep {
     my $ccdlflags = $Config{ccdlflags};
     $ccdlflags =~ s/\s*-Wl,-rpath,\S*//g if $conf->options->get('disable-rpath');
 
-    # escape spaces in build directory
     my $build_dir =  abs_path($FindBin::Bin);
-    $build_dir    =~ s{ }{\\ }g;
 
     my $cc_option = $conf->options->get('cc');
     # We need a Glossary somewhere!
@@ -105,6 +103,15 @@ sub runstep {
         # Flags used to indicate this object file is to be compiled
         # with position-independent code suitable for dynamic loading.
         cc_shared => $Config{cccdlflags},    # e.g. -fpic for GNU cc.
+
+        # C++ compiler -- used to compile parts of ICU.  ICU's configure
+        # will try to find a suitable compiler, but it prefers GNU c++ over
+        # a system c++, which might not be appropriate.  This setting
+        # allows you to override ICU's guess, but is otherwise currently
+        # unset.  Ultimately, it should be set to whatever ICU figures
+        # out, or parrot should look for it and always tell ICU what to
+        # use.
+        cxx => 'c++',
 
         # Linker, used to link object files (plus libraries) into
         # an executable.  It is usually $cc on Unix-ish systems.
@@ -248,6 +255,7 @@ sub runstep {
         tempdir => File::Spec->tmpdir,
 
         PKGCONFIG_DIR => $conf->options->get('pkgconfigdir') || '',
+        coveragedir => $conf->options->get('coveragedir') || $build_dir,
     );
 
     # TT #855:  Profiling options are too specific to GCC
@@ -261,6 +269,13 @@ sub runstep {
     $conf->data->set( clock_best => "" );
 
     $conf->data->set( 'archname', $Config{archname});
+
+    $conf->data->set( has_core_nci_thunks => 1 );
+    $conf->data->set( HAS_CORE_NCI_THUNKS => 1 );
+    if ( $conf->options->get( 'without-core-nci-thunks' ) ) {
+        $conf->data->set( has_core_nci_thunks => 0 );
+        $conf->data->set( HAS_CORE_NCI_THUNKS => 0 );
+    }
 
     $conf->data->set( has_extra_nci_thunks => 1 );
     $conf->data->set( HAS_EXTRA_NCI_THUNKS => 1 );
@@ -287,12 +302,12 @@ sub _64_bit_adjustments {
             $archname =~ s/x86_64/i386/;
 
             # adjust gcc?
-            for my $cc qw(cc link ld) {
+            for my $cc qw(cc cxx link ld) {
                 $conf->data->add( ' ', $cc, '-m32' );
             }
 
             # and lib flags
-            for my $lib qw(ld_load_flags ld_share_flags ldflags linkflags) {
+            for my $lib (qw(ld_load_flags ld_share_flags ldflags linkflags)) {
                 my $item = $conf->data->get($lib);
                 ( my $ni = $item ) =~ s/lib64/lib/g;
                 $conf->data->set( $lib, $ni );

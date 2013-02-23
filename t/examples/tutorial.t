@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: tutorial.t 46108 2010-04-28 15:43:41Z mikehh $
 
 use strict;
 use warnings;

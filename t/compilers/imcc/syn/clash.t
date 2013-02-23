@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: clash.t 47174 2010-05-30 22:39:53Z plobsing $
 
 use strict;
 use warnings;

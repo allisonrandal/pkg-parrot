@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Options.pm 45949 2010-04-24 01:14:23Z cotto $
 
 =head1 NAME
 

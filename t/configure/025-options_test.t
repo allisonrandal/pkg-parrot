@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 025-options_test.t 44538 2010-02-28 02:46:06Z coke $
 # 025-options_test.t
 
 use strict;

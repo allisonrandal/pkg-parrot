@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: 034-step.t 44649 2010-03-05 16:20:00Z tene $
 
 use strict;
 use warnings;

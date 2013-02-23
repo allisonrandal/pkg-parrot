@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: packfilerawsegment.t 49313 2010-09-25 01:27:42Z plobsing $
 
 =head1 NAME
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: static-triangle.pir 39521 2009-06-12 07:51:40Z japhb $
 
 =head1 TITLE
 
@@ -28,7 +27,7 @@ keyboard handling has been removed.
 .sub main :main
     .param pmc argv
 
-    # Load OpenGL libary and a helper library for calling glutInit
+    # Load OpenGL library and a helper library for calling glutInit
     load_bytecode 'OpenGL.pbc'
     load_bytecode 'NCI/Utils.pbc'
 

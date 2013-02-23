@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: porting_intro.pod 45949 2010-04-24 01:14:23Z cotto $
 
 =head1 NAME
 

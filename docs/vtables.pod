@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: vtables.pod 49012 2010-09-15 05:33:20Z luben $
 
 =head1 NAME
 

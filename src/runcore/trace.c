@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: trace.c 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -213,13 +212,9 @@ trace_key_dump(PARROT_INTERP, ARGIN(PMC *key))
               len += Parrot_io_eprintf(debugger, "%vi",
                  VTABLE_get_integer(interp, key));
             break;
-          case KEY_number_FLAG:
-              len += Parrot_io_eprintf(debugger, "%vg",
-                  VTABLE_get_number(interp, key));
-            break;
           case KEY_string_FLAG:
             {
-            const STRING * const s = key_string(interp, key);
+            const STRING * const s = Parrot_key_string(interp, key);
             STRING * const escaped = Parrot_str_escape_truncate(interp, s, 20);
 
             if (escaped)
@@ -232,11 +227,6 @@ trace_key_dump(PARROT_INTERP, ARGIN(PMC *key))
               len += Parrot_io_eprintf(debugger, "I%vd=%vd",
                   VTABLE_get_integer(interp, key),
                     REG_INT(interp, VTABLE_get_integer(interp, key)));
-            break;
-          case KEY_number_FLAG|KEY_register_FLAG:
-              len += Parrot_io_eprintf(debugger, "I%vd=%vd",
-                  VTABLE_get_integer(interp, key),
-                    REG_NUM(interp, VTABLE_get_integer(interp, key)));
             break;
           case KEY_string_FLAG|KEY_register_FLAG:
             {
@@ -552,5 +542,5 @@ F<src/trace.h>
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

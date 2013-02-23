@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd17_pmc.pod 49012 2010-09-15 05:33:20Z luben $
 
 =head1 PDD 17: Polymorphic Containers
 
@@ -8,9 +7,9 @@
 This PDD describes the internal structure and behavior of the Polymorphic
 Container (PMC) data type.
 
-=head2 Version
 
-$Revision: 49012 $
+
+
 
 =head2 Description
 
@@ -565,7 +564,7 @@ Used by C<freeze> and C<thaw> to visit the contents of the PMC.
 
 Mark a PMC as shared and read-only.
 
-[NOTE: these seem to be used interchangably, should be distinguished or
+[NOTE: these seem to be used interchangeably, should be distinguished or
 merged.]
 
 =back

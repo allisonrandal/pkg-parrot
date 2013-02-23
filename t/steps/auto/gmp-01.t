@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: gmp-01.t 47318 2010-06-03 01:36:45Z jkeenan $
 # auto/gmp-01.t
 
 use strict;

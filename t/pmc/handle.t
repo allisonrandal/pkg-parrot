@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: handle.t 47717 2010-06-19 18:11:52Z NotFound $
 
 =head1 NAME
 

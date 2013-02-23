@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: trans-infnan.t 49213 2010-09-21 22:30:44Z Paul C. Anagnostopoulos $
 
 =head1 NAME
 

@@ -1,5 +1,4 @@
-# Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: DefaultTests.pm 47561 2010-06-12 01:47:47Z whiteknight $
+# Copyright (C) 2006-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -72,6 +71,7 @@ our @EXPORT_OK = qw(
 # this list and the list above are run in response to --core-tests
 @core_tests = qw(
     t/src/*.t
+    t/src/embed/*.t
     t/run/*.t
     t/perl/*.t
 );
@@ -87,6 +87,7 @@ our @EXPORT_OK = qw(
     t/compilers/opsc/*.t
     t/compilers/data_json/*.t
     t/dynoplibs/*.t
+    t/dynpmc/*.t
     t/library/*.t
     t/tools/*.t
     t/profiling/*.t
@@ -96,7 +97,6 @@ our @EXPORT_OK = qw(
 @configure_tests = qw( t/configure/*.t t/steps/*.t t/postconfigure/*.t );
 
 @developing_tests = (
-    't/distro/file_metadata.t',
     ( glob 't/codingstd/*.t' ),
 );
 

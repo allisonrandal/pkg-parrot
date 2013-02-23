@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Curses.pir 40256 2009-07-24 19:37:52Z tene $
 
 .macro export_dl_func(lib, name, sig)
     .local pmc edlftmp

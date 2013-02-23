@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: four_plus_one.pir 40200 2009-07-21 21:51:54Z bacek $
 
 # Set up a PAST data structure that represents a sub and run it.
 

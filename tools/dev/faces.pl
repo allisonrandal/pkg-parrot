@@ -1,5 +1,4 @@
 #! perl
-# $Id: faces.pl 48593 2010-08-21 21:22:59Z jkeenan $
 # Copyright (C) 2010, Parrot Foundation.
 
 use strict;

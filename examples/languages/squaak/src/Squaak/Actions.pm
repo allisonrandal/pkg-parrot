@@ -1,6 +1,5 @@
 #! nqp
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Actions.pm 48133 2010-07-20 18:42:27Z mikehh $
 class Squaak::Actions is HLL::Actions;
 
 method begin_TOP ($/) {

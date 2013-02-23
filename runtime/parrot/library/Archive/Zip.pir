@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Zip.pir 48955 2010-09-12 13:27:17Z fperrad $
 
 =head1 NAME
 
@@ -53,8 +52,7 @@ See L<http://search.cpan.org/~adamk/Archive-Zip/>
     .param pmc args :slurpy
     $S0 = join '', args
     $P0 = getinterp
-    .include 'stdio.pasm'
-    $P1 = $P0.'stdhandle'(.PIO_STDERR_FILENO)
+    $P1 = $P0.'stderr_handle'()
     $P1.'print'($S0)
     $P1.'print'("\n")
 .end

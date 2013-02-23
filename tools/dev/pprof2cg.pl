@@ -1,7 +1,6 @@
 #! perl
 
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: pprof2cg.pl 48246 2010-08-01 18:22:31Z jkeenan $
 
 use strict;
 use warnings;

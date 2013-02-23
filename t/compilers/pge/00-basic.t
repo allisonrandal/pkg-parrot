@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: 00-basic.t 44327 2010-02-22 22:35:45Z mikehh $
 
 =head1 NAME
 

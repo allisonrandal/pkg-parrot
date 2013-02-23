@@ -1,9 +1,8 @@
-# Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Smoke.pm 49023 2010-09-15 18:11:35Z dukeleto $
+# Copyright (C) 2006-2010, Parrot Foundation.
 
 =head1 NAME
 
-Parrot::Harness::Smoke - Subroutines used by harness-scripts to generate smoke reports
+Parrot::Harness::Smoke - Generate smoke reports
 
 =head1 DESCRIPTION
 
@@ -18,7 +17,7 @@ The module currently exports three subroutines on demand.
 
     %env_data = collect_test_environment_data();
 
-Subroutine collects environmental data via:
+It collects environmental data via:
 
 =over 4
 
@@ -26,7 +25,7 @@ Subroutine collects environmental data via:
 
 =item * Environmental variables
 
-=item * Analysis of C<.svn> metadata
+=item * Analysis of C<git> metadata
 
 =item * Application of CPAN modules.  F<Mail::Util> and F<Sys::Hostname> are
 used, if available.
@@ -132,7 +131,7 @@ sub send_archive_to_smolder {
             password     => $SMOLDER_CONFIG{password},
             tags         => $tags,
             report_file  => $report_file,
-            revision     => $PConfig{revision},
+            revision     => $PConfig{git_describe},
         ]
     );
 
@@ -159,18 +158,18 @@ sub collect_test_environment_data {
     my $arch = $PConfig{cpuarch} eq 'sun4' ? 'sparc' : $PConfig{cpuarch};
     # add the 32/64 bit suffix to the cpuarch
     if ($arch !~ /\d$/) {
-      $arch .= 8 * $PConfig{opcode_t_size};
+      $arch .= 8 * $PConfig{opcodesize};
     }
     my $devel = $PConfig{DEVEL};
-    # check for local-modifications if -d .svn and query to continue
-    if (-d ".svn") {
-        my $status = `svn status`;
-        @mods = grep /\S/, map { /^M +(.+)$/ and $1 } split(/\n/, $status);
+    # check for local-modifications if -d .git and query to continue
+    if (-d ".git") {
+        my $status = `git status`;
+        @mods = grep /\S/, map { /^#\s+modified:\s+(.+)$/ and $1 } split(/\n/, $status);
         if (@mods) {
             $devel .= (" ".@mods." mods");
         }
-        my $info = `svn info .`;
-        ($branch) = $info =~ m{URL: .+/parrot/(?:branches/)?(\w+)$}m;
+        my $out = `git branch`;
+        ($branch) = $out =~ m{\* ([-/\w]+)$}m;
     }
     my $me = $^O eq 'MSWin32' ? $ENV{'USERNAME'}
            : $ENV{'LOGNAME'} || eval { getpwuid($<) };
@@ -200,6 +199,8 @@ sub collect_test_environment_data {
     push @data, ( 'Configure args' => $PConfig{configure_args} )
       if $PConfig{configure_args};
     push @data, ( 'Modifications' => join(" ", @mods) ) if @mods;
+    push @data, ( 'Git sha1' => $PConfig{sha1} )
+      if $PConfig{sha1};
     return @data;
 }
 

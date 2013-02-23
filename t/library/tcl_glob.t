@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: tcl_glob.t 44383 2010-02-23 11:56:15Z mikehh $
 
 =head1 NAME
 

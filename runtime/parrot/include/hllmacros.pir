@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: hllmacros.pir 41323 2009-09-17 15:32:11Z coke $
 
 =head1 High Level Language Macros
 

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: new-old.t 44423 2010-02-24 00:04:33Z mikehh $
 
 use strict;
 use warnings;

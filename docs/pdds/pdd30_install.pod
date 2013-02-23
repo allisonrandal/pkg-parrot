@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: pdd30_install.pod 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 PDD 30: Installation
 
@@ -10,9 +9,9 @@ installation system will provide support for binary packages, a working C<make
 install> target, compiled installables, and Filesystem Hierarchy Standard
 (FHS) compliant search paths for the installables.
 
-=head2 Version
 
-$Revision: 49492 $
+
+
 
 =head2 Synopsis
 

@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2005-2006, Parrot Foundation.
-# $Id: streams.t 38885 2009-05-18 02:16:09Z coke $
 
 use strict;
 use warnings;
@@ -144,7 +143,7 @@ read:[   21 stream for it. Then it combines the stream with a stream providing l
 read:[   22 ]
 read:[   23 =cut]
 read:[   24 ]
-read:[   25 .sub _main]
+read:[   25 .sub _main :main]
 read:[   26     .param pmc argv]
 read:[   27     .local int argc]
 read:[   28     .local pmc file]

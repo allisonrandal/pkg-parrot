@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: 01-tests.t 44435 2010-02-24 02:01:45Z jkeenan $
 
 use strict;
 use warnings;

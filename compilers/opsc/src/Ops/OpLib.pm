@@ -1,6 +1,5 @@
 #! nqp
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: OpLib.pm 47003 2010-05-26 01:35:32Z cotto $
 
 INIT {
     pir::load_bytecode("dumper.pbc");

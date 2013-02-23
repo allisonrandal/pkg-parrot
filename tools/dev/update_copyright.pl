@@ -1,5 +1,4 @@
 #! perl
-# $Id: update_copyright.pl 49492 2010-10-10 14:40:36Z jkeenan $
 
 # Copyright (C) 2008, Parrot Foundation.
 

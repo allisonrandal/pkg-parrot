@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: yaml_dumper.pir 44543 2010-02-28 05:02:25Z coke $
 
 =head1 TITLE
 
@@ -163,9 +162,7 @@ Returns the global dumper instance used by the non object interface.
     end
 TYPE_OK:
 
-    errorsoff .PARROT_ERRORS_GLOBALS_FLAG
     self = get_global ['YAML'; 'Dumper'], 'global'
-    errorson .PARROT_ERRORS_GLOBALS_FLAG
     if null self goto create_type
 
 create_type:

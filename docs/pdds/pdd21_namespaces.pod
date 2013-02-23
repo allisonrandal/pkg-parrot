@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2010, Parrot Foundation.
-# $Id: pdd21_namespaces.pod 47324 2010-06-03 06:55:51Z plobsing $
 
 =head1 PDD 21: Namespaces
 
@@ -7,9 +6,9 @@
 
 Description and implementation of Parrot namespaces.
 
-=head2 Version
 
-$Revision: 47324 $
+
+
 
 =head2 Description
 

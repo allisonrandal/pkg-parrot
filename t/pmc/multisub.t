@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: multisub.t 42716 2009-11-21 14:34:17Z jkeenan $
 
 =head1 NAME
 

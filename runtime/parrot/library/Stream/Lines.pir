@@ -1,4 +1,3 @@
-# $Id: Lines.pir 38689 2009-05-11 17:22:23Z NotFound $
 
 =head1 TITLE
 
@@ -158,7 +157,7 @@ BUFFER_END:
     if_null str, END
 
     # concat to the buffer
-    concat buffer, str
+    buffer = concat buffer, str
     temp = buffer
     setattribute self, 'line_buffer', temp
     code = 1

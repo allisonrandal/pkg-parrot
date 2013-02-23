@@ -1,5 +1,4 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: openbsd.pm 44401 2010-02-23 19:49:15Z darbelo $
 
 package init::hints::openbsd;
 

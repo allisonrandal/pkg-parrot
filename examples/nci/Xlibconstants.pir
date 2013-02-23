@@ -1,5 +1,4 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: Xlibconstants.pir 36833 2009-02-17 20:09:26Z allison $
 
 =head1 TITLE
 

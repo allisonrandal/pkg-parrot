@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: osutils.t 49084 2010-09-17 15:19:32Z fperrad $
 
 =head1 NAME
 

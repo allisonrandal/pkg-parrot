@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: ext.in 43593 2010-01-26 02:39:50Z jkeenan $
 
 # setup of commands
 @make_set_make@

@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2010, Parrot Foundation.
-$Id: test_c.in 49408 2010-10-02 15:56:37Z mikehh $
 
 seeing if struct stat has BSD extensions
 
@@ -24,5 +23,5 @@ main()
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

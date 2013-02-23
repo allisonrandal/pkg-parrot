@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: pointer.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

@@ -1,6 +1,5 @@
 #!parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: post.pir 49139 2010-09-18 19:45:45Z dukeleto $
 
 .include 'iglobals.pasm'
 

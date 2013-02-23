@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Rand.pir 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 

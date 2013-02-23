@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: c_parens.t 45038 2010-03-18 22:25:09Z Util $
 
 use strict;
 use warnings;

@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: JSON.pir 45972 2010-04-24 04:36:29Z coke $
 
 =head1 TITLE
 

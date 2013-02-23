@@ -1,6 +1,5 @@
 #! ./parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: crow.pir 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 TITLE
 

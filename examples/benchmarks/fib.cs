@@ -1,5 +1,4 @@
 // (C) 2009, Parrot Foundation
-// $Id: fib.cs 43073 2009-12-15 17:14:04Z NotFound $
 
 // Fibonacci Benchmark
 

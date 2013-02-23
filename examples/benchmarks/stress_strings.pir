@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: stress_strings.pir 46088 2010-04-28 01:18:43Z jkeenan $
 
 =head1 NAME
 

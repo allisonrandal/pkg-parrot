@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: sdl_blue_rectangle.pir 46460 2010-05-10 05:54:56Z plobsing $
 
 .sub _main :main
     _init()

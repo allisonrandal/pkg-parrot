@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: ops.c 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
@@ -279,5 +278,5 @@ F<include/parrot/interpreter.h>, F<src/interpreter.c>.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

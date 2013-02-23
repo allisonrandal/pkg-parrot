@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: squaak.pir 48123 2010-07-20 09:04:20Z tcurtis $
 
 =head1 TITLE
 

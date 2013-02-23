@@ -1,5 +1,4 @@
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: pdd31_hll.pod 46867 2010-05-21 19:13:51Z pmichaud $
 
 =head1 [DRAFT] PDD 31: HLL Compilers and Libraries
 
@@ -8,9 +7,9 @@
 This PDD describes the standard compiler API and support for
 cross-library communication between high-level languages (HLLs).
 
-=head2 Version
 
-$Revision: 46867 $
+
+
 
 =head2 Description
 

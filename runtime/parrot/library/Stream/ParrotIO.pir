@@ -1,4 +1,3 @@
-# $Id: ParrotIO.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 TITLE
 

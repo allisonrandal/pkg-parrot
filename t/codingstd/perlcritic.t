@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: perlcritic.t 48706 2010-08-28 02:39:25Z jkeenan $
 
 =head1 NAME
 
@@ -15,6 +14,9 @@ t/codingstd/perlcritic.t - use perlcritic for perl coding stds.
 
  # test specific files
  % perl t/codingstd/perlcritic.t src/foo.pl lib/parrot/bar.pm
+
+ # Skip perlcritic when running a testing target.
+ % PARROT_TEST_NO_PERLCRITIC=1 make codetest
 
 =head1 DESCRIPTION
 
@@ -85,7 +87,7 @@ if ( !@ARGV ) {
     @files = grep {! m/$filter_languages/}
              map  { $_->path }
              grep { $_->read !~ m/use v6;/ }
-             grep { $_->read !~ m/#! nqp/ }
+             grep { $_->read !~ m/#!\s*nqp/ }
              $dist->get_perl_language_files();
 }
 else {

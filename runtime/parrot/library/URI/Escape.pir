@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Escape.pir 49002 2010-09-14 19:11:14Z nwellnhof $
 
 =head1 NAME
 

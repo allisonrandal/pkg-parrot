@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 13_logical_ops.pir 40124 2009-07-16 21:36:57Z allison $
 
 =head1 Logical Operations
 

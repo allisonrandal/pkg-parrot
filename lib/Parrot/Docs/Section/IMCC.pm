@@ -1,5 +1,4 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: IMCC.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

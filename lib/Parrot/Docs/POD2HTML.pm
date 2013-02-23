@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: POD2HTML.pm 38969 2009-05-20 06:00:28Z allison $
 
 =head1 NAME
 

@@ -1,7 +1,5 @@
 /* objects.h
  *  Copyright (C) 2007-2008, Parrot Foundation.
- *  SVN Info
- *     $Id: oo.h 45476 2010-04-09 04:16:32Z petdance $
  *  Overview:
  *     Parrot class and object header stuff
  *  Data Structure and Algorithms:
@@ -244,5 +242,5 @@ INTVAL Parrot_oo_register_type(PARROT_INTERP,
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

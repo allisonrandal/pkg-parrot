@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2004-2010, Parrot Foundation.
-$Id: encoding.c 49416 2010-10-02 22:25:15Z nwellnhof $
 
 =head1 NAME
 
@@ -17,11 +16,14 @@ These are parrot's generic encoding handling functions
 */
 
 #include "parrot/encoding.h"
+#include "encoding.str"
 
-STR_VTABLE *Parrot_default_encoding_ptr = NULL;
+STR_VTABLE *Parrot_default_encoding_ptr  = NULL;
+STR_VTABLE *Parrot_platform_encoding_ptr = NULL;
 
 static STR_VTABLE **encodings;
 static int          n_encodings;
+static STRING      *platform_str;
 /* for backwards compatibility */
 static STRING      *unicode_str;
 static STRING      *fixed_8_str;
@@ -80,7 +82,7 @@ Parrot_new_encoding(PARROT_INTERP)
 =item C<const STR_VTABLE * Parrot_find_encoding(PARROT_INTERP, const char
 *encodingname)>
 
-Finds an encoding with the name C<encodingname>. Returns the encoding
+Finds an encoding with the C string name C<encodingname>. Returns the encoding
 if it is successfully found, returns NULL otherwise.
 
 =cut
@@ -106,8 +108,55 @@ Parrot_find_encoding(SHIM_INTERP, ARGIN(const char *encodingname))
     if (strcmp(encodingname, "unicode") == 0)
         return Parrot_utf8_encoding_ptr;
 
+    if (strcmp(encodingname, "platform") == 0)
+        return Parrot_platform_encoding_ptr;
+
     return NULL;
 }
+
+
+/*
+
+=item C<const STR_VTABLE * Parrot_find_encoding_by_string(PARROT_INTERP, STRING
+*encodingname)>
+
+Finds an encoding with the STRING name C<encodingname>. Returns the encoding
+if it is successfully found, throws an exception otherwise. Returns the
+default encoding for the NULL string.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+PARROT_PURE_FUNCTION
+PARROT_WARN_UNUSED_RESULT
+PARROT_CAN_RETURN_NULL
+const STR_VTABLE *
+Parrot_find_encoding_by_string(PARROT_INTERP, ARGIN(STRING *encodingname))
+{
+    ASSERT_ARGS(Parrot_find_encoding_by_string)
+    const int n = n_encodings;
+    int i;
+
+    if (STRING_IS_NULL(encodingname))
+        return Parrot_default_encoding_ptr;
+
+    for (i = 0; i < n; ++i)
+        if (STRING_equal(interp, encodings[i]->name_str, encodingname))
+            return encodings[i];
+
+    /* backwards compatibility */
+    if (STRING_equal(interp, encodingname, CONST_STRING(interp, "unicode")))
+        return Parrot_utf8_encoding_ptr;
+
+    if (STRING_equal(interp, encodingname, CONST_STRING(interp, "platform")))
+        return Parrot_platform_encoding_ptr;
+
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_ENCODING,
+            "invalid encoding '%Ss'", encodingname);
+}
+
 
 /*
 
@@ -177,6 +226,12 @@ Parrot_encoding_number(PARROT_INTERP, ARGIN(const STRING *encodingname))
     else if (STRING_equal(interp, encodingname, fixed_8_str)) {
         for (i = 0; i < n; ++i) {
             if (STREQ(encodings[i]->name, "ascii"))
+                return i;
+        }
+    }
+    else if (STRING_equal(interp, encodingname, platform_str)) {
+        for (i = 0; i < n; ++i) {
+            if (encodings[i] == Parrot_platform_encoding_ptr)
                 return i;
         }
     }
@@ -306,8 +361,10 @@ Parrot_str_internal_register_encoding_names(PARROT_INTERP)
     for (n = 0; n < n_encodings; ++n)
         encodings[n]->name_str =
             Parrot_str_new_constant(interp, encodings[n]->name);
-    unicode_str = Parrot_str_new_constant(interp, "unicode");
-    fixed_8_str = Parrot_str_new_constant(interp, "fixed_8");
+    /* Can't use CONST_STRING here, not setup yet */
+    unicode_str  = Parrot_str_new_constant(interp, "unicode");
+    fixed_8_str  = Parrot_str_new_constant(interp, "fixed_8");
+    platform_str = Parrot_str_new_constant(interp, "platform");
 }
 
 /*
@@ -372,6 +429,7 @@ Parrot_encodings_init(PARROT_INTERP)
     Parrot_register_encoding(interp, Parrot_ucs4_encoding_ptr);
 
     Parrot_default_encoding_ptr = Parrot_ascii_encoding_ptr;
+    Parrot_init_platform_encoding(interp);
 
     /* Now that the plugins are registered, we can create STRING
      * names for them.  */
@@ -425,5 +483,5 @@ Parrot_default_encoding(SHIM_INTERP)
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

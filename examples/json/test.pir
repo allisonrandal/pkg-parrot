@@ -1,6 +1,5 @@
 #!../../parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: test.pir 41138 2009-09-07 21:53:09Z japhb $
 
 .sub main :main
    .param pmc argv

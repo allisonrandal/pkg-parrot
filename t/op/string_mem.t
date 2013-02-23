@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: string_mem.t 49269 2010-09-23 08:34:38Z bacek $
 
 =head1 NAME
 

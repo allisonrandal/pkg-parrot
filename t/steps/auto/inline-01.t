@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: inline-01.t 48028 2010-07-07 12:45:50Z Util $
 # auto/inline-01.t
 
 use strict;

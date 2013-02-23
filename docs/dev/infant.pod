@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: infant.pod 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 

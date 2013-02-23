@@ -1,4 +1,3 @@
-# $Id: Builder.pir 48967 2010-09-12 17:33:33Z jkeenan $
 
 =head1 NAME
 

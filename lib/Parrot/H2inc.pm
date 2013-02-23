@@ -1,6 +1,5 @@
 package Parrot::H2inc;
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: H2inc.pm 49492 2010-10-10 14:40:36Z jkeenan $
 
 use strict;
 use warnings;
@@ -138,8 +137,8 @@ sub parse_file {
             }
         }
     }
-    $cur and die "Missing '&end_gen' in $in_file\n";
     close $fh or die "Could not close handle to $in_file after reading: $!";
+    $cur and die "Missing '&end_gen' in $in_file\n";
 
     return;
 }

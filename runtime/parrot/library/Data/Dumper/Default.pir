@@ -1,4 +1,3 @@
-# $Id: Default.pir 44539 2010-02-28 02:58:59Z coke $
 
 =head1 TITLE
 
@@ -92,7 +91,7 @@ A Data::Dumper::Default object has the following methods:
 
     print " with-properties: "
     clone name, paramName
-    concat name, ".properties()"
+    name = concat name, ".properties()"
     ret = self."dump"( name, prop )
 
 END:

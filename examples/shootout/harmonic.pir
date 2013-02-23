@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: harmonic.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 =head1 NAME
 

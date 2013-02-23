@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pod_todo.t 46566 2010-05-13 02:36:00Z mikehh $
 
 use strict;
 use warnings;

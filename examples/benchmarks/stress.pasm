@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: stress.pasm 40279 2009-07-26 11:26:07Z whiteknight $
 
 =head1 NAME
 
@@ -15,6 +14,8 @@ Creates 50 arrays with 10000 elements each, and then prints out the
 total number of GC runs made.
 
 =cut
+
+.pcc_sub :main main:
 
         new P10, 'ResizableIntegerArray'
 	set I0, 10

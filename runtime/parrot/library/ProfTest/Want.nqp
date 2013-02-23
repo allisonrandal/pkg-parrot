@@ -1,6 +1,5 @@
 
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Want.nqp 46060 2010-04-27 13:39:27Z bacek $
 
 class ProfTest::Want is Hash;
 

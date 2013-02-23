@@ -1,6 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-## $Id: Makefile 46239 2010-05-03 17:03:35Z NotFound $
-
+#
 # To build this example with an installed parrot:
 #
 # PATH=/parrot_install_directory/bin:$PATH

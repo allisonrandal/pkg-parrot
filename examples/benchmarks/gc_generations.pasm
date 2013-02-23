@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: gc_generations.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -34,6 +33,7 @@ prints out some statistics indicating:
 
 =cut
 
+.pcc_sub :main main:
 	set I0, 70
 	set I2, 70
 	set I4, 70

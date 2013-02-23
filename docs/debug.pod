@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: debug.pod 43017 2009-12-12 13:50:40Z darbelo $
 
 =head1 NAME
 

@@ -1,6 +1,5 @@
 
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: NQPProfile.nqp 45322 2010-03-30 16:26:59Z bubaflub $
 
 class ProfTest::NQPProfile is ProfTest::PIRProfile;
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: darwin.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 package init::hints::darwin;
 
@@ -44,9 +43,12 @@ sub runstep {
     _set_deployment_environment();
 
     my $lib_dir = $conf->data->get('build_dir') . "/blib/lib";
-    $flagsref->{ldflags} .= " -L$lib_dir";
+    $flagsref->{ldflags} .= ' -L"' . $lib_dir . '"';
 
     if ($ENV{'MACOSX_DEPLOYMENT_TARGET'} eq '10.6') {
+        $flagsref->{ccflags} .= ' -pipe -fno-common ';
+    }
+    elsif ($ENV{'MACOSX_DEPLOYMENT_TARGET'} eq '10.5') {
         $flagsref->{ccflags} .= ' -pipe -fno-common ';
     }
     else {
@@ -62,9 +64,13 @@ sub runstep {
         $flagsref->{$flag} =~ s/^\s+//;
     }
 
+    my $osvers = `/usr/sbin/sysctl -n kern.osrelease`;
+    chomp $osvers;
+
     $conf->data->set(
         darwin              => 1,
         osx_version         => $ENV{'MACOSX_DEPLOYMENT_TARGET'},
+        osvers              => $osvers,
         ccflags             => $flagsref->{ccflags},
         ldflags             => $flagsref->{ldflags},
         ccwarn              => "-Wno-shadow",
@@ -88,9 +94,11 @@ sub runstep {
         libparrot_shared_alias => "libparrot$share_ext",
         rpath                  => "-L",
         libparrot_soname       => "-install_name "
-            . $lib_dir
+            . '"'
+            . $conf->data->get('libdir')
             . '/libparrot'
             . $conf->data->get('share_ext')
+            . '"'
     );
 }
 

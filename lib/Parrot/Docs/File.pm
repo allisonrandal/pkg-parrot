@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: File.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -47,7 +46,6 @@ my $UNDEFINED = 'Undefined';
 my %type_for_suffix = (
     'BASIC'        => 'README file',
     'C'            => 'C code',
-    'Log'          => 'SVN Entries file',                  # probably obsolete
     'PL'           => 'Perl script',
     'SKIP'         => 'MANIFEST skip file',
     'TXT'          => 'Text file',
@@ -277,26 +275,6 @@ sub pod_errors {
     $self->check_pod;
 
     return $self->{POD_ERRORS};
-}
-
-=item C<pod_as_html()>
-
-Runs C<Parrot::Docs::POD2HTML> on the contents of the file. Executable files
-are assumed not to contain POD and therefore not formatted.
-
-=cut
-
-sub pod_as_html {
-    my $self = shift;
-
-    if ( $self->contains_pod ) {
-        my $formatter = Parrot::Docs::POD2HTML->new;
-        $formatter->no_errata_section(1); # don't dump errors into HTML output
-
-        $self->{POD_HTML} = $formatter->html_for_file($self);
-    }
-
-    return $self->{POD_HTML};
 }
 
 =item C<is_docs_link()>

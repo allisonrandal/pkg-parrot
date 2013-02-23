@@ -1,6 +1,5 @@
 #! parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: opsc.pir 46956 2010-05-24 10:50:27Z bacek $
 
 .namespace [ 'Ops';'Compiler' ]
 

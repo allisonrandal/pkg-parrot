@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: QtHelloWorld.pir 44152 2010-02-19 01:53:12Z plobsing $
 
 =head1 NAME
 

@@ -1,5 +1,4 @@
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: pdd28_strings.pod 49541 2010-10-15 06:53:08Z cotto $
 
 =head1 PDD 28: Strings
 
@@ -9,9 +8,9 @@ This PDD describes the conventions for strings in Parrot,
 including but not limited to support for multiple character sets,
 encodings, and languages.
 
-=head2 Version
 
-$Revision: 49541 $
+
+
 
 =head2 Definitions
 

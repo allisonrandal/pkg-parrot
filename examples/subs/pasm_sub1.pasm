@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pasm_sub1.pasm 38119 2009-04-15 16:30:07Z fperrad $
 
 =head1 NAME
 
@@ -25,7 +24,8 @@ F<docs/pdds/pdd03_calling_conventions.pod>
 
 =cut
 
-    # Fetch a subroutine objec
+.pcc_sub :main main:
+    # Fetch a subroutine object
     .const 'Sub' P0 = "_sub"
 
     # Call the sub in argument, create return continuation

@@ -1,5 +1,4 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: UserAgent.pir 47619 2010-06-14 08:36:21Z fperrad $
 
 =head1 NAME
 

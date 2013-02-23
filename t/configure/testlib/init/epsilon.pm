@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: epsilon.pm 42766 2009-11-21 19:19:43Z jkeenan $
 
 =head1 NAME
 

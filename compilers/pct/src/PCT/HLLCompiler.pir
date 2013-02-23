@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: HLLCompiler.pir 49555 2010-10-16 18:30:53Z cotto $
 
 =head1 NAME
 
@@ -25,14 +24,13 @@ running compilers from a command line.
 .namespace [ 'PCT';'HLLCompiler' ]
 
 .include 'cclass.pasm'
-.include 'stdio.pasm'
 .include 'iglobals.pasm'
 
 .sub 'init' :vtable :method
     $P0 = split ' ', 'parse past post pir evalpmc'
     setattribute self, '@stages', $P0
 
-    $P0 = split ' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats'
+    $P0 = split ' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats ll-backtrace'
     setattribute self, '@cmdoptions', $P0
 
     $P1 = box <<'    USAGE'
@@ -342,7 +340,7 @@ when the stage corresponding to target has been reached.
     $N1 = time
     $N2 = $N1 - $N0
     $P0 = getinterp
-    $P1 = $P0.'stdhandle'(.PIO_STDERR_FILENO)
+    $P1 = $P0.'stderr_handle'()
     $P1.'print'("Stage '")
     $P1.'print'(stagename)
     $P1.'print'("': ")
@@ -380,15 +378,6 @@ to any options and return the resulting parse tree.
   tcode_loop:
     unless tcode_it goto transcode_done
     tcode = shift tcode_it
-    push_eh tcode_enc
-    $I0 = find_charset tcode
-    $S0 = source
-    $S0 = trans_charset $S0, $I0
-    assign source, $S0
-    pop_eh
-    goto transcode_done
-  tcode_enc:
-    pop_eh
     push_eh tcode_fail
     $I0 = find_encoding tcode
     $S0 = source
@@ -566,7 +555,7 @@ Transform PAST C<source> into POST.
 
     $P0 = compreg 'PIR'
     $P1 = $P0(source)
-    .return ($P1)
+    .return($P1)
 .end
 
 
@@ -629,13 +618,13 @@ specifies the encoding to use for the input (e.g., "utf8").
     # on startup show the welcome message
     $P0 = self.'commandline_banner'()
     $P1 = getinterp
-    $P2 = $P1.'stdhandle'(.PIO_STDERR_FILENO)
+    $P2 = $P1.'stderr_handle'()
     $P2.'print'($P0)
 
     .local pmc stdin
     .local int has_readline
     $P0 = getinterp
-    stdin = $P0.'stdhandle'(.PIO_STDIN_FILENO)
+    stdin = $P0.'stdin_handle'()
     encoding = adverbs['encoding']
     if encoding == 'fixed_8' goto interactive_loop
     unless encoding goto interactive_loop
@@ -657,7 +646,7 @@ specifies the encoding to use for the input (e.g., "utf8").
     code = stdin.'readline_interactive'(prompt)
     if null code goto interactive_end
     unless code goto interactive_loop
-    concat code, "\n"
+    code = concat code, "\n"
     push_eh interactive_trap
     $P0 = self.'eval'(code, adverbs :flat :named)
     pop_eh
@@ -765,7 +754,7 @@ options are passed to the evaluator.
     ifh.'encoding'(encoding)
   iter_loop_1:
     $S0 = ifh.'readall'(iname)
-    code .= $S0
+    code = concat code, $S0
     ifh.'close'()
     goto iter_loop
   iter_end:
@@ -866,9 +855,11 @@ Generic method for compilers invoked from a shell command line.
     $I0 = adverbs['version']
     if $I0 goto version
 
-    .local int can_backtrace
+    .local int can_backtrace, ll_backtrace
     can_backtrace = can self, 'backtrace'
     unless can_backtrace goto no_push_eh
+    ll_backtrace = adverbs['ll-backtrace']
+    if ll_backtrace goto no_push_eh
     push_eh uncaught_exception
   no_push_eh:
 
@@ -906,7 +897,7 @@ Generic method for compilers invoked from a shell command line.
     .local string output
     .local pmc ofh
     $P0 = getinterp
-    ofh = $P0.'stdhandle'(.PIO_STDOUT_FILENO)
+    ofh = $P0.'stdout_handle'()
     output = adverbs['output']
     if output == '' goto save_output_1
     if output == '-' goto save_output_1
@@ -936,7 +927,7 @@ Generic method for compilers invoked from a shell command line.
     .get_results ($P0)
     pop_eh
     $P1 = getinterp
-    $P1 = $P1.'stdhandle'(.PIO_STDERR_FILENO)
+    $P1 = $P1.'stderr_handle'()
     $I0 = $P0['severity']
     if $I0 == .EXCEPT_EXIT goto do_exit
     $S0 = self.'backtrace'($P0)

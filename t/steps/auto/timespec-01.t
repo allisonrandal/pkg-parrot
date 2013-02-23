@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: timespec-01.t 49550 2010-10-15 16:39:58Z jkeenan $
 # auto/timespec-01.t
 
 use strict;

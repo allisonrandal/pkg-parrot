@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: ops.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 
@@ -141,7 +140,7 @@ Tests opcodes related to the OO implementation.
 try:
     eh = new 'ExceptionHandler'
     eh.'handle_types'(.EXCEPTION_INVALID_OPERATION)
-    set_addr eh, catch
+    set_label eh, catch
 
     push_eh eh
     addattribute $P0, 'oops'

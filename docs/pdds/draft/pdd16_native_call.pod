@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd16_native_call.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 [DRAFT] PDD 16: Native Call Interface (NCI)
 
@@ -8,9 +7,9 @@
 This PDD describes the native call interface, and the function signatures used
 to describe those functions.
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Description
 
@@ -280,7 +279,7 @@ it call back into Parrot.
     fun = dlfunc lib, "sayhello", "vpP"
 
     # do the NCI call, foo_callback is invoked from C
-    fun()
+    fun(callback_sub, userdata)
 
   .end
 

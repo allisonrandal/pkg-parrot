@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: c_arg_assert.t 44340 2010-02-23 00:59:14Z mikehh $
 
 use strict;
 use warnings;

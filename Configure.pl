@@ -1,11 +1,11 @@
 #! perl
 
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: Configure.pl 49433 2010-10-04 03:19:11Z plobsing $
 
 use 5.008;
 use strict;
 use warnings;
+use Data::Dumper;$Data::Dumper::Indent=1;
 use lib 'lib';
 
 use Parrot::Configure;
@@ -42,6 +42,7 @@ my ($args, $steps_list_ref) = process_options(
     }
 );
 exit(1) unless defined $args;
+#print STDERR Dumper $args;
 
 my $opttest = Parrot::Configure::Options::Test->new($args);
 
@@ -52,7 +53,8 @@ $opttest->run_configure_tests( get_preconfiguration_tests() );
 my $parrot_version = $Parrot::Configure::Options::Conf::parrot_version;
 
 # from Parrot::Configure::Messages
-print_introduction($parrot_version);
+print_introduction($parrot_version)
+    unless $args->{silent};
 
 # Update revision number if needed
 Parrot::Revision::update();
@@ -80,7 +82,7 @@ $opttest->run_build_tests( get_postconfiguration_tests() );
 
 my $make = $conf->data->get('make');
 # from Parrot::Configure::Messages
-( print_conclusion( $conf, $make ) ) ? exit 0 : exit 1;
+( print_conclusion( $conf, $make, $args ) ) ? exit 0 : exit 1;
 
 ################### DOCUMENTATION ###################
 
@@ -197,6 +199,11 @@ run the tests described in C<--test=build>.
 Store the results of each configuration step in a Storable F<.sto> file on
 disk, for later analysis by F<Parrot::Configure::Trace> methods.
 
+=item C<--coveragedir>
+
+In preparation for calling C<make cover> to perform coverage analysis,
+provide a user-specified directory for top level of HTML output.
+
 =item Operating system-specific configuration options
 
 =over 4
@@ -259,7 +266,11 @@ Tell Configure that the compiler supports C<inline>.
 
 =item C<--cc=(compiler)>
 
-Specify which compiler to use.
+Specify which C compiler to use.
+
+=item C<--cxx=(compiler)>
+
+Specify which C++ compiler to use.
 
 =item C<--ccflags=(flags)>
 
@@ -268,10 +279,6 @@ Use the given compiler flags.
 =item C<--ccwarn=(flags)>
 
 Use the given compiler warning flags.
-
-=item C<--cxx=(compiler)>
-
-Specify which C++ compiler to use (for ICU).
 
 =item C<--libs=(libs)>
 
@@ -351,17 +358,9 @@ Use the given type for opcodes.
 
 Use the given ops files.
 
-=item C<--jitcapable>
-
-Use JIT system.
-
 =item C<--buildframes>
 
 Dynamically build NCI call frames.
-
-=item C<--execcapable>
-
-Use JIT to emit a native executable.
 
 =back
 
@@ -408,6 +407,11 @@ E.g.
 Use this option if you want imcc's parser and lexer files to be generated.
 Needs a working parser and lexer.
 
+=item C<--with-llvm>
+
+Use this option if you have a recent version of LLVM installed and wish Parrot
+to link to it.
+
 =back
 
 =head1 CONFIGURATION-FILE INTERFACE
@@ -453,7 +457,6 @@ for the purpose of setting environmental variables used in options, like this:
     CX="/usr/bin/g++"
     /usr/local/bin/perl Configure.pl \
         --cc="$CC" \
-        --cxx="$CX" \
         --link="$CX" \
         --ld="$CX"
 
@@ -480,7 +483,6 @@ Parrot configuration options.  Entries in this section must be either
 I<option=value> pairs or be options which will be assigned a true value.
 
     cc=$CC
-    cxx=$CX
     link=$CX
     ld=/usr/bin/g++
     verbose
@@ -549,7 +551,7 @@ for example, wish to designate only a few steps for verbose output:
 
     ...
     init::hints verbose-step
-    init::headers
+    ...
     inter::progs fatal-step
     ...
     auto::gcc verbose-step
@@ -586,7 +588,6 @@ configuration file.
     =general
 
     cc=$CC
-    cxx=$CX
     link=$CX
     ld=/usr/bin/g++
 
@@ -596,7 +597,6 @@ configuration file.
     init::defaults
     init::install
     init::hints verbose-step
-    init::headers
     inter::progs
     inter::make
     inter::lex
@@ -631,7 +631,6 @@ configuration file.
     auto::signal
     auto::socklen_t
     auto::env
-    auto::extra_nci_thunks
     auto::gmp
     auto::readline
     auto::pcre
@@ -642,11 +641,11 @@ configuration file.
     auto::ctags
     auto::revision
     auto::icu
+    auto::platform
     gen::config_h
     gen::core_pmcs
     gen::opengl
     gen::makefiles
-    gen::platform
     gen::config_pm
 
     =cut

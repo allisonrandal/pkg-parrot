@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: pge_examples.t 42773 2009-11-21 20:41:51Z jkeenan $
 
 use strict;
 use warnings;

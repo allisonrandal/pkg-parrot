@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: auto.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -36,7 +35,6 @@ sub runstep {
                     "HAS_PPC_$suffix" => '1',
                 );
                 $conf->debug(" (\U$suffix) ");
-                $conf->data->add( ' ', TEMP_generated => $f );
             }
         }
         $conf->cc_clean();

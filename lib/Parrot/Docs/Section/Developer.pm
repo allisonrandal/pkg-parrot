@@ -1,5 +1,4 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Developer.pm 41360 2009-09-19 08:47:28Z chromatic $
 
 =head1 NAME
 

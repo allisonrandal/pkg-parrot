@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: format-01.t 49546 2010-10-15 15:07:21Z jkeenan $
 # auto/format-01.t
 
 use strict;

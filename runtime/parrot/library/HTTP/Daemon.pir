@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: Daemon.pir 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 

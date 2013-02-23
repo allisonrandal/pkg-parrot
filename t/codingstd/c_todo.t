@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: c_todo.t 48723 2010-08-30 01:07:21Z jkeenan $
 
 use strict;
 use warnings;

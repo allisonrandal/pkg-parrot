@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: manifest_generated.t 46713 2010-05-16 17:09:57Z jkeenan $
 
 use strict;
 use warnings;

@@ -1,11 +1,10 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: VTable.pm 36833 2009-02-17 20:09:26Z allison $
 package Parrot::Pmc2c::VTable;
 use strict;
 use warnings;
 
 use Storable ();
-use Parrot::Vtable;
+use Parrot::Vtable ();
 use Parrot::Pmc2c::Method ();
 use File::Basename;
 use Cwd qw(cwd);
@@ -20,7 +19,7 @@ sub new {
 
 sub build {
     my ( $self, $filename ) = @_;
-    my $vtable_table = parse_vtable($filename);
+    my $vtable_table = Parrot::Vtable::parse_vtable($filename);
 
     my ( %method_lookup, @methods, @method_names );
 
@@ -33,9 +32,6 @@ sub build {
                 name        => $entry->[1],
                 parameters  => $entry->[2],
                 section     => $entry->[3],
-                mmd_name    => $entry->[4] eq -1 ? "" : $entry->[4],
-                right       => right_type( $entry->[4] ),
-                mmd_prefix  => prefix( $entry->[4] ),
                 attrs       => $entry->[5],
                 type        => Parrot::Pmc2c::Method::VTABLE_ENTRY,
             }
@@ -51,24 +47,6 @@ sub build {
     return;
 }
 
-sub right_type {
-    my ($mmd_name) = @_;
-    return '' if $mmd_name eq -1;
-    return 'enum_type_INTVAL'   if ( $mmd_name =~ s/_INT$// );
-    return 'enum_type_FLOATVAL' if ( $mmd_name =~ s/_FLOAT$// );
-    return 'enum_type_STRING'   if ( $mmd_name =~ s/_STR$// );
-    return 'enum_type_PMC';
-}
-
-sub prefix {
-    my ($mmd_name) = @_;
-    return '' if $mmd_name eq -1;
-    $mmd_name =~ s/_INT$//;
-    $mmd_name =~ s/_FLOAT$//;
-    $mmd_name =~ s/_STR$//;
-    return $mmd_name;
-}
-
 sub dump {
     my ($self) = @_;
 
@@ -82,12 +60,6 @@ sub dump {
 sub has_method {
     my ( $self, $methodname ) = @_;
     return $self->{'has_method'}->{$methodname};
-}
-
-sub is_mmd {
-    my ( $self, $methodname ) = @_;
-    my $method = $self->get_method($methodname);
-    return ( defined $method and $method->is_mmd );
 }
 
 sub get_method {

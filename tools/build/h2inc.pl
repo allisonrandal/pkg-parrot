@@ -1,5 +1,4 @@
-# Copyright (C) 2009, Parrot Foundation.
-# $Id: h2inc.pl 49492 2010-10-10 14:40:36Z jkeenan $
+# Copyright (C) 2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -14,6 +13,11 @@ Invoked by F<make>.  Imports functions from Parrot::H2inc.
 =head1 USAGE
 
     perl tools/build/h2inc.pl <input_file> <output_file>
+
+Example (from F<make> output):
+
+    /usr/local/bin/perl tools/build/h2inc.pl include/parrot/enums.h \
+        lib/Parrot/Pmc2c/PCCMETHOD_BITS.pm
 
 =cut
 

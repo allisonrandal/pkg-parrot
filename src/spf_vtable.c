@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: spf_vtable.c 49417 2010-10-02 22:26:13Z nwellnhof $
 
 =head1 NAME
 
@@ -660,5 +659,5 @@ this point neither of those is needed.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

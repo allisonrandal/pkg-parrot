@@ -3,7 +3,6 @@
 =begin RUBY_COMMENT
 
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id: mops.rb 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

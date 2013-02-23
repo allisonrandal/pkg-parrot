@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: parrotobject.t 45297 2010-03-30 01:33:45Z coke $
 
 use strict;
 use warnings;

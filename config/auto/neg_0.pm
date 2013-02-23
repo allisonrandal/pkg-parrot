@@ -1,5 +1,4 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: neg_0.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 

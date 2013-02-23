@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: namespace_dump.pir 48812 2010-09-06 19:06:37Z plobsing $
 
 .include "interpinfo.pasm"
 .include "iterator.pasm"

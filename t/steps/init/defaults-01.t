@@ -1,11 +1,10 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: defaults-01.t 47318 2010-06-03 01:36:45Z jkeenan $
 # init/defaults-01.t
 
 use strict;
 use warnings;
-use Test::More tests => 49;
+use Test::More tests => 63;
 use Carp;
 use Cwd;
 use File::Copy;
@@ -85,6 +84,7 @@ $step = test_step_constructor_and_description($conf);
 
 $conf->data->set( archname => 'x86_64' );
 $conf->data->set( cc => 'cc' );
+$conf->data->set( cxx => 'c++' );
 $conf->data->set( link => 'cc' );
 $conf->data->set( ld => 'env cc' );
 $conf->data->set( ld_load_flags => '-bundle -L/usr/local/lib64' );
@@ -95,6 +95,7 @@ ok(init::defaults::_64_bit_adjustments($conf),
     "_64_bit_adjustments() returned true");
 is($conf->data->get( 'archname' ), 'i386', "Got expected value for 'archname'");
 is($conf->data->get( 'cc' ), 'cc -m32', "Got expected value for 'cc'");
+is($conf->data->get( 'cxx' ), 'c++ -m32', "Got expected value for 'cxx'");
 is($conf->data->get( 'link' ), 'cc -m32', "Got expected value for 'link'");
 is($conf->data->get( 'ld' ), 'env cc -m32', "Got expected value for 'ld'");
 is($conf->data->get( 'ld_load_flags' ), '-bundle -L/usr/local/lib',
@@ -122,6 +123,7 @@ $step = test_step_constructor_and_description($conf);
 
 $conf->data->set( archname => 'x86_64' );
 $conf->data->set( cc => 'cc' );
+$conf->data->set( cxx => 'c++' );
 $conf->data->set( link => 'cc' );
 $conf->data->set( ld => 'env cc' );
 $conf->data->set( ld_load_flags => '-bundle -L/usr/local/lib64' );
@@ -132,6 +134,7 @@ ok(init::defaults::_64_bit_adjustments($conf),
     "_64_bit_adjustments() returned true");
 is($conf->data->get( 'archname' ), 'x86_64', "Got expected value for 'archname'");
 is($conf->data->get( 'cc' ), 'cc', "Got expected value for 'cc'");
+is($conf->data->get( 'cxx' ), 'c++', "Got expected value for 'cxx'");
 is($conf->data->get( 'link' ), 'cc', "Got expected value for 'link'");
 is($conf->data->get( 'ld' ), 'env cc', "Got expected value for 'ld'");
 is($conf->data->get( 'ld_load_flags' ), '-bundle -L/usr/local/lib64',
@@ -145,6 +148,41 @@ is($conf->data->get( 'linkflags' ), '-bundle -L/usr/local/lib64',
 
 $conf->replenish($serialized);
 
+##### with core-nci-thunks #####
+($args, $step_list_ref) = process_options(
+    {
+        argv => [ ],
+        mode => q{configure},
+    }
+);
+
+$conf->options->set( %{$args} );
+$step = test_step_constructor_and_description($conf);
+$ret = $step->runstep($conf);
+ok( defined $ret, "runstep() returned defined value" );
+ok($conf->data->get( 'has_core_nci_thunks' ),
+    "Got expected value for has_core_nci_thunks" );
+ok($conf->data->get( 'HAS_CORE_NCI_THUNKS' ),
+    "Got expected value for HAS_CORE_NCI_THUNKS" );
+
+$conf->replenish($serialized);
+
+##### without core-nci-thunks #####
+($args, $step_list_ref) = process_options(
+    {
+        argv => [ q{--without-core-nci-thunks} ],
+        mode => q{configure},
+    }
+);
+
+$conf->options->set( %{$args} );
+$step = test_step_constructor_and_description($conf);
+$ret = $step->runstep($conf);
+ok( defined $ret, "runstep() returned defined value" );
+ok(! $conf->data->get( 'has_core_nci_thunks' ),
+    "Got expected value for has_core_nci_thunks" );
+ok(! $conf->data->get( 'HAS_CORE_NCI_THUNKS' ),
+    "Got expected value for HAS_CORE_NCI_THUNKS" );
 ##### with extra-nci-thunks #####
 ($args, $step_list_ref) = process_options(
     {

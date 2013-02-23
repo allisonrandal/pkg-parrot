@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: sys.t 47051 2010-05-27 08:45:23Z plobsing $
 
 use strict;
 use warnings;

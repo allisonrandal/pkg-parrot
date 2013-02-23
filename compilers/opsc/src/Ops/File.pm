@@ -1,6 +1,5 @@
 #! nqp
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: File.pm 48736 2010-08-31 15:49:14Z cotto $
 
 # XXX Better to put this into docs/ somewhere.
 
@@ -325,7 +324,7 @@ method _set_version() {
     self<version>       := [
         +self<version_major>,
         +self<version_minor>,
-        +self<version_match>,
+        +self<version_patch>,
     ];
 }
 

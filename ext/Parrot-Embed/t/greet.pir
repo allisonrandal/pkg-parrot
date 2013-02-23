@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: greet.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 .sub greet
 	.param pmc    name

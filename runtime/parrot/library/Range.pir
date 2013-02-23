@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Range.pir 43695 2010-02-01 21:11:43Z bacek $
 
 =head1 Range
 

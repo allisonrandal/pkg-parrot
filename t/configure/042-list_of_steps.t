@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 042-list_of_steps.t 36833 2009-02-17 20:09:26Z allison $
 # 042-list_of_steps.t
 
 use strict;

@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd03_calling_conventions.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 3: Calling Conventions
 
@@ -7,9 +6,9 @@
 
 Parrot's inter-routine calling conventions.
 
-=head2 Version
 
-$Revision: 45652 $
+
+
 
 =head2 Synopsis
 

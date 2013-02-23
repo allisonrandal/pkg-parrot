@@ -1,5 +1,4 @@
 /*
- * $Id: rotest.pmc 40628 2009-08-18 17:24:24Z NotFound $
  * Copyright (C) 2006-2008, Parrot Foundation.
  */
 
@@ -30,5 +29,5 @@ pmclass ROTest dynpmc provides scalar extends Integer auto_attrs {
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

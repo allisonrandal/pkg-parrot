@@ -1,5 +1,4 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: extend.pod 43615 2010-01-27 03:39:51Z coke $
 
 =head1 NAME
 

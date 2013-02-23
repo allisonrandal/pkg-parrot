@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: uri_escape.t 47730 2010-06-20 14:42:37Z NotFound $
 
 =head1 NAME
 

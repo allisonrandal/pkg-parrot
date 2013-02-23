@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: symbols.t 42720 2009-11-21 14:41:16Z jkeenan $
 
 use strict;
 use warnings;

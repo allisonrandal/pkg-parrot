@@ -1,5 +1,4 @@
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: netbsd.pm 41996 2009-10-21 21:49:38Z mikehh $
 
 package init::hints::netbsd;
 

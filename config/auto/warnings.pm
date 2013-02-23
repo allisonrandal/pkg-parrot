@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: warnings.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -101,8 +100,8 @@ sub _init {
 
     my @gcc_or_gpp = qw(
         -falign-functions=16
-        -fvisibility=hidden
         -funit-at-a-time
+        -fexcess-precision=standard
         -maccumulate-outgoing-args
         -W
         -Wall
@@ -157,7 +156,6 @@ sub _init {
 
     # Add some gcc-only warnings that would break g++
     push @{$gcc->{'basic'}}, qw(
-        -Wbad-function-cast
         -Wc++-compat
         -Wdeclaration-after-statement
         -Werror=declaration-after-statement
@@ -182,8 +180,9 @@ sub _init {
         -Wdeprecated-declarations
         -Wno-format-extra-args
         -Wno-import
-        -Wsuggest-attribute=pure
         -Wsuggest-attribute=const
+        -Wsuggest-attribute=noreturn
+        -Wsuggest-attribute=pure
         -Wunreachable-code
         -Wunused
         -Wunused-function
@@ -293,6 +292,13 @@ sub runstep {
         return 1;
     }
 
+    if (
+        ( $compiler eq 'gcc' or $compiler eq 'g++' ) and
+        ( $conf->data->get('gccversion') >= 4.0    )
+    ) {
+        push @{$self->{'warnings'}{$compiler}{'basic'}},
+            '-fvisibility=hidden';
+    };
     # standard warnings.
     my @warnings = grep {$self->valid_warning($conf, $_)}
         @{$self->{'warnings'}{$compiler}{'basic'}};

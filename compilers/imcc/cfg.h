@@ -1,6 +1,5 @@
 /*
- * $Id: cfg.h 46430 2010-05-09 05:42:43Z plobsing $
- * Copyright (C) 2002-2009, Parrot Foundation.
+ * Copyright (C) 2002-2011, Parrot Foundation.
  */
 
 
@@ -49,47 +48,52 @@ typedef struct _loop_info {
 /* HEADERIZER BEGIN: compilers/imcc/cfg.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_WARN_UNUSED_RESULT
-int blocks_are_connected(
-    ARGIN(const Basic_block *from),
-    ARGIN(const Basic_block *to))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2);
-
-void build_cfg(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+void build_cfg(ARGMOD(imc_info_t *imcc), ARGMOD(IMC_Unit *unit))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
+        FUNC_MODIFIES(*imcc)
         FUNC_MODIFIES(*unit);
 
 void clear_basic_blocks(ARGMOD(IMC_Unit *unit))
         __attribute__nonnull__(1)
         FUNC_MODIFIES(*unit);
 
-void compute_dominance_frontiers(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+void compute_dominance_frontiers(
+    ARGMOD(imc_info_t *imcc),
+    ARGMOD(IMC_Unit *unit))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
+        FUNC_MODIFIES(*imcc)
         FUNC_MODIFIES(*unit);
 
-void compute_dominators(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+void compute_dominators(ARGMOD(imc_info_t *imcc), ARGMOD(IMC_Unit *unit))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
+        FUNC_MODIFIES(*imcc)
         FUNC_MODIFIES(*unit);
 
 PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
 int edge_count(ARGIN(const IMC_Unit *unit))
         __attribute__nonnull__(1);
 
-void find_basic_blocks(PARROT_INTERP, ARGMOD(IMC_Unit *unit), int first)
+void find_basic_blocks(
+    ARGMOD(imc_info_t *imcc),
+    ARGMOD(IMC_Unit *unit),
+    int first)
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
+        FUNC_MODIFIES(*imcc)
         FUNC_MODIFIES(*unit);
 
-void find_loops(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
+void find_loops(ARGMOD(imc_info_t *imcc), ARGMOD(IMC_Unit *unit))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
+        FUNC_MODIFIES(*imcc)
         FUNC_MODIFIES(*unit);
 
 PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
 int natural_preheader(
     ARGIN(const IMC_Unit *unit),
     ARGIN(const Loop_info *loop_info))
@@ -103,27 +107,24 @@ void search_predecessors_not_in(
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*s);
 
-#define ASSERT_ARGS_blocks_are_connected __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(from) \
-    , PARROT_ASSERT_ARG(to))
 #define ASSERT_ARGS_build_cfg __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
+       PARROT_ASSERT_ARG(imcc) \
     , PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_clear_basic_blocks __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_compute_dominance_frontiers __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
+       PARROT_ASSERT_ARG(imcc) \
     , PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_compute_dominators __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
+       PARROT_ASSERT_ARG(imcc) \
     , PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_edge_count __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_find_basic_blocks __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
+       PARROT_ASSERT_ARG(imcc) \
     , PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_find_loops __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
+       PARROT_ASSERT_ARG(imcc) \
     , PARROT_ASSERT_ARG(unit))
 #define ASSERT_ARGS_natural_preheader __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(unit) \
@@ -141,6 +142,6 @@ void search_predecessors_not_in(
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */
 

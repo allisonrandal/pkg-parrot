@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 02-install_files.t 44356 2010-02-23 02:17:31Z jkeenan $
 # 02-install_files.t
 
 use strict;

@@ -1,6 +1,5 @@
 #!perl
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: annotate-old.t 47508 2010-06-09 11:30:18Z mikehh $
 
 use strict;
 use warnings;

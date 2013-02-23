@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: arch.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -101,6 +100,8 @@ sub runstep {
     );
 
     $conf->data->set( 'platform' => $self->_get_platform( $conf ) );
+    $conf->data->set( 'osvers' => $conf->data->get('osvers_provisional') )
+        unless $conf->data->get('osvers');
 
     _report_verbose( $conf );
 
@@ -119,7 +120,7 @@ sub _get_platform {
         $platform = 'ia64';
     }
 
-    $platform = 'generic' unless -d "config/gen/platform/$platform";
+    $platform = 'generic' unless -d "src/platform/$platform";
 
     return $platform;
 }

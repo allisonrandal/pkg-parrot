@@ -1,6 +1,5 @@
 /*
-Copyright (C) 2001-2010, Parrot Foundation.
-$Id: parrotthread.pmc 46300 2010-05-05 03:58:50Z jimmy $
+Copyright (C) 2001-2011, Parrot Foundation.
 
 =head1 NAME
 
@@ -124,10 +123,9 @@ Join the thread, returning whatever its main method returns.
 
 */
     METHOD join() {
-        PMC *ret;
-        INTVAL ttid = VTABLE_get_integer(INTERP, SELF);
+        const INTVAL ttid = VTABLE_get_integer(INTERP, SELF);
+        PMC * const ret = pt_thread_join(INTERP, ttid);
 
-        ret = pt_thread_join(INTERP, ttid);
         /* invalidate self */
         VTABLE_set_integer_native(INTERP, SELF, -1);
 
@@ -177,5 +175,5 @@ Terminate a running thread.
  * Local variables:
  *   c-file-style: "parrot"
  * End:
- * vim: expandtab shiftwidth=4:
+ * vim: expandtab shiftwidth=4 cinoptions='\:2=2' :
  */

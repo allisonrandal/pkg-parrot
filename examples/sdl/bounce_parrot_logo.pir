@@ -1,4 +1,3 @@
-# $Id: bounce_parrot_logo.pir 44547 2010-02-28 06:02:31Z coke $
 
 =head1 TITLE
 

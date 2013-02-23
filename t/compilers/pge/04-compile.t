@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 04-compile.t 46702 2010-05-16 13:34:53Z jkeenan $
 
 =head1 NAME
 

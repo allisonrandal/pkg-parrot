@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: p6object.t 48244 2010-08-01 06:29:50Z pmichaud $
 
 =head1 NAME
 

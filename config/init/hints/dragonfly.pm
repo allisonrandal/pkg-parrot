@@ -1,5 +1,4 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: dragonfly.pm 40811 2009-08-26 04:57:21Z dukeleto $
 
 package init::hints::dragonfly;
 

@@ -2,10 +2,6 @@
 
 Parrot::Exception - Auxiliary methods for Exceptions
 
-=head1 VERSION
-
- $Id: Exception.pir 36833 2009-02-17 20:09:26Z allison $
-
 =head1 SYNOPSIS
 
         load_bytecode 'Parrot/Exception.pbc'

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: dump_pbc.t 48706 2010-08-28 02:39:25Z jkeenan $
 
 =head1 NAME
 

@@ -1,6 +1,5 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: lex-01.t 42575 2009-11-19 01:00:42Z jkeenan $
 # inter/lex-01.t
 
 use strict;

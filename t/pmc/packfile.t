@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: packfile.t 49313 2010-09-25 01:27:42Z plobsing $
 
 =head1 NAME
 
@@ -422,7 +421,7 @@ load_error:
     push_eh load_error
     $S0 = '_filename'()
     $P0 = new ['FileHandle']
-    $P0.'open'($S0, 'r')
+    $P0.'open'($S0, 'rb')
 
     orig = $P0.'readall'()
 

@@ -1,6 +1,5 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: pmc_pow.t 47124 2010-05-30 01:56:17Z plobsing $
 
 =head1 NAME
 
@@ -60,7 +59,7 @@ Test handling 3-arg C<pow> on PMCs.
 
     $S0 = "original dest is untouched in pow for "
     $S1 = type
-    concat $S0, $S1
+    $S0 = concat $S0, $S1
 
     # ignore exceptions
     push_eh done

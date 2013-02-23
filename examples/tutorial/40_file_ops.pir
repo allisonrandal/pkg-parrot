@@ -1,5 +1,4 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 40_file_ops.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 File Operations
 

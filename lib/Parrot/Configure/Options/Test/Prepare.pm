@@ -1,5 +1,4 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: Prepare.pm 49538 2010-10-15 04:55:19Z jkeenan $
 package Parrot::Configure::Options::Test::Prepare;
 use strict;
 use warnings;
