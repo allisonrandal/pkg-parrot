@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: parrotclass.pmc 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pmc/parrotclass.pmc 13858 2006-08-03T20:42:41.309483Z chip  $
 
 =head1 NAME
 
@@ -83,8 +83,6 @@ argument is not a PMC* but the C<classname> STRING.
     }
 
     void init_pmc (PMC* name) {
-        STRING *class_name;
-
         SELF.init();
         Parrot_new_class(INTERP, SELF, name);
     }

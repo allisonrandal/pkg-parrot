@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: pcc.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/compilers/imcc/imcpasm/pcc.t 12838 2006-05-30T14:19:10.150135Z coke  $
 
 use strict;
 use Parrot::Test tests => 1;

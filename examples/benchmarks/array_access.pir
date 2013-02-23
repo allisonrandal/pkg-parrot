@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: array_access.pir 12835 2006-05-30 13:32:26Z coke $
+# $Id: /local/examples/benchmarks/array_access.pir 12835 2006-05-30T13:32:26.641316Z coke  $
 
 =head1 NAME
 

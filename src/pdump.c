@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: pdump.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pdump.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -273,12 +273,12 @@ main(int argc, char **argv)
         }
         fclose(fp);
         mem_sys_free(pack);
-        Parrot_exit(0);
+        Parrot_exit(interpreter, 0);
     }
 
     PackFile_header_dump(interpreter, pf);
     if (header) {
-        Parrot_exit(0);
+        Parrot_exit(interpreter, 0);
     }
     /* install a dumper function */
     if (!terse) {
@@ -290,7 +290,7 @@ main(int argc, char **argv)
     /* do a directory dump, which dumps segs then */
     PackFile_Segment_dump(interpreter, &pf->directory.base);
 
-    Parrot_exit(0);
+    Parrot_exit(interpreter, 0);
     return 0;
 }
 

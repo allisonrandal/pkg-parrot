@@ -1,4 +1,4 @@
-$Id: queens_r.pir 12193 2006-04-12 20:04:06Z bernhard $
+$Id: /local/examples/pir/queens_r.pir 12193 2006-04-12T20:04:06.066885Z bernhard  $
 
 # recursive queens placement
 # prints all 92 solutions in chess notation

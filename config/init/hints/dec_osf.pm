@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: dec_osf.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/init/hints/dec_osf.pm 13185 2006-07-06T22:40:33.769052Z chip  $
 
 package init::hints::dec_osf;
 
@@ -45,6 +45,9 @@ sub runstep
 
     # Required because of ICU using c++.
     $conf->data->set(link => "cxx");
+
+    # Perl 5 hasn't been compiled with this visible.
+    $conf->data->set( has_socklen_t => 1 );
 }
 
 1;

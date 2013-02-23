@@ -1,4 +1,4 @@
-# $Id: TESTS.STATUS.pod 11986 2006-03-22 19:22:29Z bernhard $
+# $Id: /local/t/TESTS.STATUS.pod 11986 2006-03-22T19:22:29.034389Z bernhard  $
 
 =head1 Parrot Testing Status
 

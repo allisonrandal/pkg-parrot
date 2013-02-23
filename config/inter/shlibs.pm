@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: shlibs.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/inter/shlibs.pm 12827 2006-05-30T02:28:15.110975Z coke  $
 
 =head1 NAME
 

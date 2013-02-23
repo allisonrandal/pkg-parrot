@@ -162,7 +162,7 @@ OPTIONS
     $S0 = "<?ident> [ \:\: <?ident> ]*"
     p6regex($S0, 'grammar'=>'PGE::P6Grammar', 'name'=>'name')
 
-    $S0 = '[ \# \N+ | \s+ ]* :::'
+    $S0 = '[ \# \N* | \s+ ]* :::'
     p6regex($S0, 'grammar'=>'PGE::P6Grammar', 'name'=>'ws')
 
    $S0 = <<'      END_ARG_RULE'
@@ -178,16 +178,17 @@ OPTIONS
         $<cmd>:=(grammar) $<name>:=<arg> ;?
       | $<cmd>:=(regex|token|rule) 
           $<name>:=<arg>
-          \{<regex>\}
+          $<optable>:=(is optable)?
+          [ \{<regex>\} | <?PGE::Util::die: unable to parse regex> ]
       | [multi]? $<cmd>:=(proto)
           $<name>:=<arg>
           ( is $<trait>:=[\w+]<arg>? )*
-          [ \{ <-[}]>*: \} | ; | <PGE::Util::die: missing proto/sub body> ]
+          [ \{ <-[}]>*: \} | ; | <?PGE::Util::die: missing proto/sub body> ]
       | [$|<PGE::Util::die: unrecognized statement>]
       STMT_PARSE
     $P0 = p6regex($S0, 'grammar'=>'PGE::P6Grammar', 'name'=>'statement', 'w'=>1)
 
-    $P0 = find_global 'compile_p6grammar'
+    $P0 = get_global 'compile_p6grammar'
     compreg 'PGE::P6Grammar', $P0
 .end
 
@@ -208,11 +209,11 @@ OPTIONS
 
     # get our initial match object
     .local pmc match 
-    $P0 = find_global 'PGE::Match', 'newfrom'
+    $P0 = get_hll_global ['PGE::Match'], 'newfrom'
     match = $P0(source, 0, 'PGE::P6Grammar')
 
     .local pmc stmtrule
-    stmtrule = find_global 'statement'
+    stmtrule = get_global 'statement'
 
   stmt_loop:
     match = stmtrule(match)
@@ -250,7 +251,7 @@ OPTIONS
     $P0 = ns['optable']
     if $P0 == '' goto iter_loop
     initpir.emit("          optable = new 'PGE::OPTable'")
-    initpir.emit("          store_global '%0', '$optable', optable", namespace)
+    initpir.emit("          set_hll_global ['%0'], '$optable', optable", namespace)
     initpir .= $P0
     goto iter_loop
   iter_end:
@@ -312,11 +313,6 @@ OPTIONS
     $P0 = stmt['name']
     name = $P0[0]
 
-    ##   compile the rule to pir
-    .local pmc p6regex, regex, rulepir
-    p6regex = compreg 'PGE::P6Regex'
-    regex = stmt['regex']
-
     ##   set compile adverbs
     .local pmc adverbs
     adverbs = new .Hash
@@ -331,7 +327,27 @@ OPTIONS
     adverbs['words'] = 1
   with_adverbs:
 
+    $I0 = exists stmt['optable']
+    if $I0 goto rulepir_optable
+    ##   compile the rule to pir
+    .local pmc p6regex, regex, rulepir
+    p6regex = compreg 'PGE::P6Regex'
+    regex = stmt['regex']
     rulepir = p6regex(regex, 'target'=>'PIR', adverbs :flat :named)
+    goto with_rulepir
+  rulepir_optable:
+    ##   this is a special rule generated via the 'is optable' trait
+    rulepir = new 'PGE::CodeString'
+    rulepir.emit(<<'      END', namespace, name)
+      .namespace [ "%0" ]
+      .sub "%1"
+        .param pmc mob
+        .param pmc adverbs :named :slurpy
+        $P0 = get_hll_global ["%0"], "$optable"
+        .return $P0.'parse'(mob, adverbs :named :flat)
+      .end
+      END
+  with_rulepir:
 
     ##   add to set of rules
     .local pmc code
@@ -393,7 +409,7 @@ OPTIONS
     if $S0 != '&' goto trait_parsed_1
     arg = substr arg, 1
   trait_parsed_1:
-    optable.emit("          $P0 = find_global '%0', '%1'", namespace, arg)
+    optable.emit("          $P0 = get_hll_global ['%0'], '%1'", namespace, arg)
     arg = '$P0'
   trait_arg:
     if arg > '' goto trait_arg_2

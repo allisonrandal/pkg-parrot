@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: grammar.t 12899 2006-06-07 05:40:21Z allison $
+# $Id: /local/t/compilers/tge/grammar.t 13684 2006-07-29T21:31:17.363951Z chip  $
 
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ tge/grammar.t - TGE::Parser tests
 
 =head1 SYNOPSIS
 
-    $ prove t/parser.t
+    $ prove t/compilers/tge/grammar.t
 
 =head1 DESCRIPTION
 

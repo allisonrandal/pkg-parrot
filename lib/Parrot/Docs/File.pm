@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: File.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/File.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -26,9 +26,9 @@ It's used by the documentation tools in F<tools/docs>.
 package Parrot::Docs::File;
 
 use strict;
+use warnings;
 
-use Parrot::IO::File;
-@Parrot::Docs::File::ISA = qw(Parrot::IO::File);
+use base qw( Parrot::IO::File );
 
 use Pod::Simple::Checker;
 use Parrot::Docs::POD2HTML;

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2005, The Perl Foundation.
-# $Id: $
+# $Id: /local/lib/Parrot/PIR/Formatter.pm 13523 2006-07-24T15:49:07.843920Z chip  $
 
 package Parrot::PIR::Formatter;
 

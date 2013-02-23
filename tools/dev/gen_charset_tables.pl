@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! perl
 use strict;
 use warnings;
 use POSIX qw(locale_h);
@@ -21,7 +21,7 @@ Generate character set tables.
 =cut
 
 
-my ($svnid) = '$Id: gen_charset_tables.pl 12841 2006-05-30 15:23:20Z coke $' =~ /^\$[iI][dD]:\s(.*)\$$/;
+my ($svnid) = '$Id: /local/tools/dev/gen_charset_tables.pl 13529 2006-07-24T17:20:02.191389Z chip  $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 my $fileid = '$'.'id $';
 my $charset_dir = File::Spec->catdir(qw/ src charset /);
 

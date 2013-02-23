@@ -1,58 +1,66 @@
 ###
 # [uplevel]
 
-# Pretty much a copy of "eval" except for the call_level...
+# Pretty much a copy of 'eval' except for the call_level...
 # needs argument checking.
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&uplevel"
+.sub '&uplevel'
   .param pmc argv :slurpy
  
-  .local string expr
   .local int argc
-  .local int looper
+  argc = elements argv
+  if argc == 0 goto bad_args
+  
+  .local string expr
+  .local int i
  
-  .local pmc compiler,pir_compiler
-  .get_from_HLL(compiler, '_tcl', 'compile')
-  .get_from_HLL(pir_compiler, '_tcl', 'pir_compiler')
+  .local pmc compiler, pir_compiler, __call_level
+  compiler     = get_root_global ['_tcl'], 'compile'
+  pir_compiler = get_root_global ['_tcl'], 'pir_compiler'
+  __call_level = get_root_global ['_tcl'], '__call_level'
 
   # save the old call level
-  .local pmc old_call_level
-  .get_from_HLL($P2, '_tcl', 'call_level')
-  old_call_level = clone $P2
+  .local pmc call_level, old_call_level
+  call_level     = get_root_global ['_tcl'], 'call_level'
+  old_call_level = clone call_level
 
-  .local pmc call_level
-  call_level = argv[0]
+  .local pmc new_call_level
+  new_call_level = argv[0]
  
   .local int defaulted 
-  (call_level,defaulted) = __get_call_level(call_level)
+  (new_call_level,defaulted) = __call_level(new_call_level)
   if defaulted == 1 goto skip
 
   $P1 = shift argv # pop the call level argument 
 skip:
 
-  expr = ""
-  looper = 1
+  .local pmc call_level_diff, difference
+  call_level_diff = get_root_global ['_tcl'], 'call_level_diff'
+  difference = new .Integer
+  difference = old_call_level - new_call_level
+
+  expr = ''
+  i = 0
   argc = argv
 
 loop:
-  if looper == argc goto loop_done
-  $S0 = argv[looper]
+  if i == argc goto loop_done
+  $S0 = argv[i]
   concat expr, $S0
-  inc looper
-  if looper == argc goto loop_done
-  concat expr," "
+  inc i
+  if i == argc goto loop_done
+  concat expr,' '
 
   goto loop
 
 loop_done:
 
   # Set the new level 
-  .set_in_HLL('_tcl', 'call_level', call_level)
-
-  $P1 = parse(expr,0,0)
+  assign call_level, new_call_level
+  call_level_diff += difference
 
   ($I0,$P0) = compiler(0,expr)
   $P1 = pir_compiler($I0,$P0)
@@ -61,8 +69,13 @@ loop_done:
   $P0 = $P1()
 
   #restore the old level
-  .set_in_HLL('_tcl', 'call_level', old_call_level)
+  call_level_diff -= difference
+  assign call_level, old_call_level
 
 done:
-  .return($P0) 
+  .return($P0)
+
+bad_args:
+  .throw('wrong # args: should be "uplevel ?level? command ?arg ...?"')
 .end
+

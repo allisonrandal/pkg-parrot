@@ -2,14 +2,14 @@
 # [array]
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
 #
 # similar to but not exactly like [string]'s subcommand dispatch
 #   - we pass in a boolean (array or not), the array itself, and the name
 #   - we know we need an array name for *all* args, so we test for it here.
 
-.sub "&array"
+.sub '&array'
   .param pmc argv :slurpy
 
   .local int argc
@@ -22,36 +22,28 @@
   .local pmc subcommand_proc
   null subcommand_proc
 
-  .get_from_HLL(subcommand_proc, '_tcl'; 'helpers'; 'array', subcommand_name)
-  if_null subcommand_proc, bad_args
+  push_eh bad_args
+    subcommand_proc = get_root_global ['_tcl'; 'helpers'; 'array'], subcommand_name
+  clear_eh
 
   .local int is_array
-  .local string array_name, sigil_array_name
+  .local string array_name
   .local pmc the_array
-
+  
   array_name = shift argv
-  sigil_array_name = "$" . array_name
 
   .local int call_level
-  .get_from_HLL($P0, '_tcl', 'call_level')
+  $P0 = get_root_global ['_tcl'], 'call_level'
   call_level = $P0
   null the_array
 
-  push_eh catch_var
-    if call_level goto find_lexical
-    the_array = find_global sigil_array_name
-    goto done_find
-find_lexical:
-    the_array = find_lex sigil_array_name
-done_find:
-  clear_eh
-resume_var:
-
-  catch_var: #XXX [array set bug: sometimes this exception handler is called on the return from subcommand_proc()]
+  .local pmc __find_var
+  __find_var = get_root_global ['_tcl'], '__find_var'
+  the_array  = __find_var(array_name)
 
   if_null the_array, array_no
 
-  $I99 = does the_array, "hash"
+  $I99 = does the_array, 'hash'
   if $I99==0 goto array_no
 
   is_array = 1
@@ -64,13 +56,13 @@ scommand:
   .return subcommand_proc(is_array,the_array,array_name,argv)
 
 bad_args:
-  $S0  = "bad option \""
+  $S0  = 'bad option "'
   $S0 .= subcommand_name
-  $S0 .= "\": must be anymore, donesearch, exists, get, names, nextelement, set, size, startsearch, statistics, or unset"
+  $S0 .= '": must be anymore, donesearch, exists, get, names, nextelement, set, size, startsearch, statistics, or unset'
   .throw($S0)
 
 few_args:
-  .throw("wrong # args: should be \"array option arrayName ?arg ...?\"")
+  .throw('wrong # args: should be "array option arrayName ?arg ...?"')
 
 .end
 
@@ -91,7 +83,7 @@ few_args:
   .return (is_array)
 
 bad_args:
-  .throw ("wrong # args: should be \"array exists arrayName\"")
+  .throw ('wrong # args: should be "array exists arrayName"')
 .end
 
 .sub 'size'
@@ -112,7 +104,7 @@ size_none:
   .return (0)
 
 bad_args:
-  .throw ("wrong # args: should be \"array size arrayName\"")
+  .throw ('wrong # args: should be "array size arrayName"')
 .end
 
 .sub 'set'
@@ -129,8 +121,8 @@ bad_args:
   elems = argv[0]
 
   .local pmc __list
-  .get_from_HLL(__list, '_tcl', '__list')
-  elems = __list(elems)
+  __list = get_root_global ['_tcl'], '__list'
+  elems  = __list(elems)
 
 pre_loop:
   .local int count
@@ -145,7 +137,7 @@ pre_loop:
   .local pmc    val
 
   .local pmc set
-  .get_from_HLL(set, '_tcl', '__set')
+  set = get_root_global ['_tcl'], '__set'
 
   if_null the_array, new_array # create a new array if no var
   goto set_loop
@@ -211,8 +203,6 @@ no_args:
   .local pmc iter, val
   .local string str
 
-  load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Glob.pbc'
   .local pmc globber
   globber = compreg 'PGE::Glob'
   .local pmc rule
@@ -250,7 +240,7 @@ push_end:
   .return (retval)
 
 bad_args:
-  .throw("wrong # args: should be \"array get arrayName ?pattern?\"")
+  .throw('wrong # args: should be "array get arrayName ?pattern?"')
 
 not_array:
   .throw('')
@@ -283,8 +273,6 @@ no_args:
   .local pmc iter, val
   .local string str
 
-  load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Glob.pbc'
   .local pmc globber
   globber = compreg 'PGE::Glob'
   .local pmc rule
@@ -309,7 +297,7 @@ push_end:
 
 
 bad_args:
-  .throw("wrong # args: should be \"array unset arrayName ?pattern?\"")
+  .throw('wrong # args: should be "array unset arrayName ?pattern?"')
 
 not_array:
   .throw('')
@@ -351,12 +339,12 @@ skip_args:
   .return match_proc(the_array, pattern)
 
 bad_args:
-  .throw ("wrong # args: should be \"array names arrayName ?mode? ?pattern?\"")
+  .throw ('wrong # args: should be "array names arrayName ?mode? ?pattern?"')
 
 bad_mode:
-  $S0 = "bad option \""
+  $S0 = 'bad option "'
   $S0 .= mode
-  $S0 .= "\": must be -exact, -glob, or -regexp"
+  $S0 .= '": must be -exact, -glob, or -regexp'
   .throw ($S0)
 
 not_array:
@@ -372,8 +360,6 @@ not_array:
   .local pmc iter
   .local string name
 
-  load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Glob.pbc'
   .local pmc globber, retval
   globber = compreg 'PGE::Glob'
   .local pmc rule
@@ -439,7 +425,6 @@ found_match:
   .local pmc iter
   .local string name
 
-  load_bytecode 'PGE.pbc'
   .local pmc tclARE, retval
   tclARE = compreg 'PGE::P5Regex'
   .local pmc rule

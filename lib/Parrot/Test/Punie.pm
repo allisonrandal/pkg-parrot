@@ -1,4 +1,4 @@
-# $Id: Punie.pm 12039 2006-03-26 19:46:16Z bernhard $
+# $Id: /local/lib/Parrot/Test/Punie.pm 12039 2006-03-26T19:46:16.084129Z bernhard  $
 
 package Parrot::Test::Punie;
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: Docs.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/Section/Docs.pm 14013 2006-08-08T17:52:22.102100Z chip  $
 
 =head1 NAME
 
@@ -22,9 +22,9 @@ A documentation section describing all the POD documentation in F<docs>.
 package Parrot::Docs::Section::Docs;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Section;
-@Parrot::Docs::Section::Docs::ISA = qw(Parrot::Docs::Section);
+use base qw( Parrot::Docs::Section );
 
 =item C<new()>
 
@@ -55,7 +55,6 @@ sub new
 			$self->new_item('', 'docs/strings.pod'),
 			$self->new_item('', 'docs/memory_internals.pod'),
 			$self->new_item('', 'docs/parrotbyte.pod'),
-			$self->new_item('', 'docs/parrotbyte.pod'),
 			$self->new_item('', 'docs/jit.pod'),
 			$self->new_item('', 'docs/native_exec.pod'),
 			$self->new_item('', 'docs/running.pod'),
@@ -68,6 +67,7 @@ sub new
 		$self->new_group('Development Documentation', '', 'docs/dev'),
 		$self->new_group('PMC Documentation', '', 'docs/pmc'),
 		$self->new_group('Parrot Design Documents (PDD)', '', 'docs/pdds'),
+		$self->new_group('Articles', '', 'docs/art'),
 	);
 }
 

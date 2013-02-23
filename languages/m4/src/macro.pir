@@ -1,4 +1,4 @@
-# $Id: macro.pir 11903 2006-03-14 20:49:11Z bernhard $
+# $Id: /local/languages/m4/src/macro.pir 11903 2006-03-14T20:49:11.779219Z bernhard  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ src/macro.pir - does macro substitution
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: macro.pir 11903 2006-03-14 20:49:11Z bernhard $
+SVN Info:   $Id: /local/languages/m4/src/macro.pir 11903 2006-03-14T20:49:11.779219Z bernhard  $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 

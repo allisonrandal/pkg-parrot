@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: pbc_merge.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/tools/pbc_merge.t 13020 2006-06-26T01:06:16.304549Z jonathan  $
 
 =head1 NAME
 
@@ -30,7 +30,7 @@ my $PBCMERGE = ".$PConfig{slash}pbc_merge$PConfig{exe}";
 
 # Only test if we have the PBC merge tool built.
 if (-e $PBCMERGE) {
-   plan tests => 3;
+   plan tests => 4;
 } else {
    plan skip_all => "PBC Merge tool not built or test disabled";
 }
@@ -130,4 +130,25 @@ PIR
 PIR
     pbc_merge("pbc_merge_t3", "pbc_merge_t3_1", "pbc_merge_t3_2");
     is(run_pbc("pbc_merge_t3"), "Stirb nicht vor mir");
+}
+
+# Fourth test - passing constant string arguments.
+{
+    pir_to_pbc( "pbc_merge_t4_1", <<'PIR' );
+.sub main :main
+    elephant()
+.end
+PIR
+
+    pir_to_pbc( "pbc_merge_t4_2", <<'PIR' );
+.sub elephant
+    trunk_action("spray")
+.end
+.sub trunk_action
+    .param string s
+    print s
+.end
+PIR
+    pbc_merge("pbc_merge_t4", "pbc_merge_t4_1", "pbc_merge_t4_2");
+    is(run_pbc("pbc_merge_t4"), "spray");
 }

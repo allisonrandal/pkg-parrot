@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: luastring.pmc 12840 2006-05-30 15:08:05Z coke $
+$Id: /local/languages/lua/pmc/luastring.pmc 13236 2006-07-10T06:47:56.488120Z fperrad  $
 
 =head1 NAME
 
@@ -39,8 +39,6 @@ pmclass LuaString
 */
     void class_init() {
         if (pass) {
-            PMC *meth;
-
             Parrot_LuaBase_super_init(INTERP, NULL);
             luastring_name = const_string(INTERP, "string");
             dynpmc_LuaBoolean = pmc_type(INTERP,

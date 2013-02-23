@@ -2,7 +2,7 @@
  * jit_emit.h
  *
  * SVN Info
- *    $Id: jit_emit.h 11903 2006-03-14 20:49:11Z bernhard $
+ *    $Id: /local/src/jit/mips/jit_emit.h 11903 2006-03-14T20:49:11.779219Z bernhard  $
  * Overview:
  *    MIPS JIT
  * History:

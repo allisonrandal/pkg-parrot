@@ -1,5 +1,5 @@
 # Copyright (C) 2002, The Perl Foundation.
-# $Id: OpTrans.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/OpTrans.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =head1 NAME
 
@@ -32,10 +32,10 @@ The subclass hierarchy is as follows:
 
 =cut
 
-use strict;
-#use warnings;
-
 package Parrot::OpTrans;
+
+use strict;
+use warnings;
 
 =item C<new()>
 

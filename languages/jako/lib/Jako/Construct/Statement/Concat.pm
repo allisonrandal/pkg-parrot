@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: $
+# $Id: /local/languages/jako/lib/Jako/Construct/Statement/Concat.pm 13523 2006-07-24T15:49:07.843920Z chip  $
 #
 
 use strict;

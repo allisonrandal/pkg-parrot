@@ -3,9 +3,9 @@
 #
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&lrange"
+.sub '&lrange'
   .param pmc argv :slurpy  
 
   # XXX need error handling.
@@ -16,24 +16,21 @@
   .local pmc first
   first = argv[1]
 
-  # XXX - BUG - list_index is currently geared to linsert, which treats
-  # end differently. need to have an option to pass in, or another 
-
-  .local pmc list_index
-  .get_from_HLL(list_index, '_tcl', '_list_index')
+  .local pmc __index
+  __index = get_root_global ['_tcl'], '__index'
 
   .local pmc __list
-  .get_from_HLL(__list, '_tcl', '__list')
+  __list = get_root_global ['_tcl'], '__list'
  
   the_list = __list(the_list)
 
-  ($P0,$I2) = list_index(the_list,first)
+  ($P0,$I2) = __index(first, the_list)
   first = $P0
 
   .local pmc last
   last = argv[2]
 
-  ($P0,$I2) = list_index(the_list,last)
+  ($P0,$I2) = __index(last, the_list)
   last = $P0
  
   .local int the_index

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2006, The Perl Foundation.
-$Id: pic_jit.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pic_jit.c 12981 2006-06-20T19:26:31.775154Z bernhard  $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ TODO:
 
 #if HAS_JIT
 #include "parrot/exec.h"
-#include "parrot/jit.h"
+#include "jit.h"
 
 #if PIC_TEST
 /*

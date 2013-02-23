@@ -1,4 +1,4 @@
-# $Id: bfc.pir 9896 2005-11-10 23:40:39Z bernhard $
+# $Id: /local/languages/bf/bfc.pir 11501 2006-02-10T18:27:13.457666Z particle  $
 # A Brainfuck compiler
 # By Leon Brocard <acme@astray.com>
 #

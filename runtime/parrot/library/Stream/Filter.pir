@@ -1,4 +1,4 @@
-# $Id: Filter.pir 12837 2006-05-30 13:47:57Z coke $
+# $Id: /local/runtime/parrot/library/Stream/Filter.pir 12837 2006-05-30T13:47:57.477012Z coke  $
 
 =head1 TITLE
 

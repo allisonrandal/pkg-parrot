@@ -1,4 +1,4 @@
-# $Id: scanalt.t 10005 2005-11-15 22:47:26Z bernhard $
+# $Id: /local/languages/regex/t/basic/scanalt.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use FindBin;

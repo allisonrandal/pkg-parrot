@@ -1,7 +1,7 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
 # This program is free software. It is subject to the same
 # license as Perl itself.
-# $Id: euclid.pir 12835 2006-05-30 13:32:26Z coke $
+# $Id: /local/examples/pir/euclid.pir 12835 2006-05-30T13:32:26.641316Z coke  $
 
 =head1 NAME
 

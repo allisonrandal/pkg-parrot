@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 #
-# $Id: basic.pl 9464 2005-10-12 02:11:40Z coke $
+# $Id: /local/languages/BASIC/interpreter/basic.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 # $Log: basic.pl,v 
 # Revision 1.11  2002/06/16 21:23:28  clint
 # Floating Point BASI
@@ -23,6 +23,10 @@
 # Subsequent runs can be done with:
 #    parrot.exe out.pbc
 #
+
+use strict;
+use warnings;
+
 open(T, ">merged_basic.pasm") || die;
 
 print T <<'EOF';

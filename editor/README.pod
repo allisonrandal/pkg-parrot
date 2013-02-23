@@ -1,4 +1,4 @@
-# $Id: README.pod 12895 2006-06-07 05:36:32Z allison $
+# $Id: /local/editor/README.pod 12895 2006-06-07T05:36:32.235972Z allison  $
 
 =head1 NAME
 

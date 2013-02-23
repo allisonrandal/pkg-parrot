@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: inter_call.c 12884 2006-06-05 13:29:13Z audreyt $
+$Id: /local/src/inter_call.c 12884 2006-06-05T13:29:13.115985Z audreyt  $
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-## $Id: builtins.pir 12709 2006-05-17 01:42:08Z pmichaud $
+## $Id: /local/languages/perl6/src/builtins/assign.pir 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ src/builtins/inplace.pir - Inplace assignments
 
 =cut
 
-.namespace [ "" ]
+.namespace
 
 ## assignment
 ## TODO: infix::= infix:::= infix:.=

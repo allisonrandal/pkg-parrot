@@ -1,4 +1,4 @@
-## $Id$
+## $Id: /local/languages/perl6/src/main.pir 13278 2006-07-13T13:40:14.092490Z coke  $
 
 =head1 NAME
 

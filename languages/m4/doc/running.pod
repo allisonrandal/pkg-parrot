@@ -1,4 +1,4 @@
-# $Id: running.pod 9439 2005-10-10 19:14:39Z bernhard $
+# $Id: /local/languages/m4/doc/running.pod 11501 2006-02-10T18:27:13.457666Z particle  $
 
 =head1 TITLE
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: core_pmcs.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/gen/core_pmcs.pm 12827 2006-05-30T02:28:15.110975Z coke  $
 
 =head1 NAME
 

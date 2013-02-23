@@ -1,4 +1,4 @@
-# $Id: hello.pasm 12064 2006-03-28 19:08:48Z bernhard $
+# $Id: /local/examples/pasm/hello.pasm 12064 2006-03-28T19:08:48.197307Z bernhard  $
 
 =head1 NAME
 

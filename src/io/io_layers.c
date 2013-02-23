@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: io_layers.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/io/io_layers.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ is found for that particular slot.
 PIO_base_new_layer(ParrotIOLayer *proto)>
 
 The default IO layer constructor. Creates and returns a new
-C<ParrotIOLayer>. If a prototype C<*proto> is supplied then it's values
+C<ParrotIOLayer>. If a prototype C<*proto> is supplied then its values
 will be copied to the new instance.
 
 =cut

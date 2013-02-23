@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 
-# $Id: frozen2yaml.pl 5896 2004-04-20 08:36:57Z leo $
+# $Id: /local/languages/m4/tools/frozen2yaml.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 DESCRIPTION
 
@@ -10,6 +10,7 @@
 
 # pragmata
 use strict;
+use warnings;
 use 5.005;
 
 # standard perl modules

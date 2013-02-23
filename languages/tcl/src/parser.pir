@@ -1,5 +1,5 @@
 .HLL '_Tcl', ''
-.namespace [ '' ]
+.namespace
 
 =head1 NAME
 
@@ -100,7 +100,7 @@ or the position after the comment.
     Incoming: # comment\n
               ^
     Outgoing: # comment\n
-                       ^^
+                         ^
 
 =cut
 
@@ -108,31 +108,32 @@ or the position after the comment.
   .param string tcl_code
   .param int    pos
 
-  .local pmc chars
-  chars = new .Hash
-  chars[10] = 1 # \n
-  
   .local pmc word   
   .local int orig, len
-  orig = pos
   len  = length tcl_code
+
+  $I0 = len - pos
+  pos = find_not_cclass .CCLASS_WHITESPACE, tcl_code, pos, $I0
+
+  # we might as well skip the whitespace either way
+  orig = pos
+  if pos > len goto check
 
 get:
   # try to get a command name
   if pos >= len goto check
-  (word, pos) = get_word(tcl_code, chars, pos)
-  inc pos
-  if_null word, get
-  $S0 = word
-  $I0 = ord $S0, 0
+  $I0 = ord tcl_code, pos
   if $I0 == 35 goto got_comment
 check:
   .return(orig)
 got_comment:
-  dec pos
   .local int new_pos
   new_pos = index tcl_code, "\n", pos
-  .return (new_pos)
+  if new_pos == -1 goto end
+  inc new_pos
+  .return(new_pos)
+end:    
+  .return(len)
 .end
 
 =item C<(pmc command, int pos) = get_command(string tcl_code, pmc chars, int pos)>
@@ -512,7 +513,11 @@ Parses a subcommand and returns a TclCommand or TclCommandList object.
   chars[93] = 1 # ]
   chars[59] = 1 # ;
  
+  .local int len
+  len = length tcl_code
+ 
   (command, pos) = get_command(tcl_code, chars, pos)
+  if pos > len goto missing_bracket
   dec pos
   $I0 = ord tcl_code, pos
   if $I0 == 59 goto list # ;
@@ -534,6 +539,9 @@ loop:
   
   inc pos
   .return(commands, pos)
+
+missing_bracket:
+  .throw("missing close-bracket")
 .end
 
 =item C<(pmc var, int pos) = get_variable(string tcl_code, int pos)>
@@ -587,10 +595,22 @@ colon:
   goto check_length
 
 index:
-  pos = index tcl_code, ")", pos
-  if pos == -1 goto missing_paren
+  .local pmc var
+  len = pos - start
+  $S0 = substr tcl_code, start, len
+  $I0 = find_type "TclVar"
+  var = new $I0
+  var = $S0
+  
+  .local pmc chars
+  chars = new Hash
+  chars[41] = 1 # )
+  
   inc pos
-  goto check_length
+  ($P0, pos) = get_word(tcl_code, chars, pos)
+  setattribute var, "index", $P0
+  inc pos
+  .return(var, pos)
 
 failed:
   $I0 = find_type "TclConst"

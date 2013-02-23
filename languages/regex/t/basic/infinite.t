@@ -1,4 +1,4 @@
-# $Id: infinite.t 10034 2005-11-16 20:38:30Z bernhard $
+# $Id: /local/languages/regex/t/basic/infinite.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use FindBin;

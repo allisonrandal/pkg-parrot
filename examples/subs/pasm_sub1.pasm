@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: pasm_sub1.pasm 12835 2006-05-30 13:32:26Z coke $
+# $Id: /local/examples/subs/pasm_sub1.pasm 12835 2006-05-30T13:32:26.641316Z coke  $
 
 =head1 NAME
 

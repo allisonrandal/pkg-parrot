@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: pmc2c.pl 12524 2006-05-05 21:50:26Z petdance $
+# $Id: /local/tools/build/headerize.pl 13523 2006-07-24T15:49:07.843920Z chip  $
 
 use strict;
 use warnings;
@@ -26,6 +26,14 @@ on the command line.
 * Generate docs from funcs
 
 * Test the POD of the stuff we're parsing.
+
+=head1 NOTES
+
+* the .c files MUST have a /* HEADER: foo/bar.h */ directive in them
+
+* Support for multiple .c files pointing at the same .h file
+
+* Does NOT remove all blocks in the .h file, so if a .c file disappears, it's block is "orphaned" and will remain there.
 
 =head1 COMMAND-LINE OPTIONS
 
@@ -161,24 +169,67 @@ sub main {
         $pmcfile =~ s/\Q$PConfig{o}\E$/.pmc/;
 
         my $sourcefile = -f $pmcfile ? $pmcfile : $cfile;
-        my $hfile = $cfile;
-        $hfile =~ s/\.c$/.h/;
 
         my $fh = open_file( "<", $cfile );
         my $source = do { local $/; <$fh> };
         close $fh;
 
         print "\n=== $cfile ===\n";
+
+        die "can't find HEADER directive in '$cfile'" unless $source =~ m#/\*\s+HEADER:\s+([^*]+?)\s+\*/#s;
+        my $hfile = $1;
+        die "'$hfile' not found (referenced from '$cfile')" unless -f $hfile;
+
         my @funcs = extract_functions( $source );
 
         for my $func ( @funcs ) {
-            push( @{$files{$hfile}}, function_components( $func ) );
+            push( @{$files{$hfile}->{$cfile}}, function_components( $func ) );
             ++$nfuncs;
         }
     } # for @cfiles
     my $nfiles = scalar keys %files;
-    print Dumper( \%files );
+    print Dumper( \%files ) if $opt{verbose};
     print "$nfuncs funcs in $nfiles files\n";
+
+    for my $hfile ( sort keys %files ) {
+        my $cfiles = $files{$hfile};
+
+        open FILE, '<', $hfile or die "couldn't read '$hfile': $!";
+        my $header = do {local $/=undef; <FILE>};  # slurp
+        close FILE;
+
+        for my $cfile ( sort keys %$cfiles ) {
+            my $funcs = $cfiles->{$cfile};
+
+            my @function_defs;
+            foreach my $func ( sort { $a->[2] cmp $b->[2] } @$funcs ) {
+                my $static = shift @$func;
+                next if $static;
+
+                my $ret_type = shift @$func;
+                my $funcname = shift @$func;
+                my @args = @$func;
+
+                push( @function_defs,
+                    sprintf "PARROT_API %s %s( %s );\n",
+                        $ret_type,
+                        $funcname,
+                        join( ",\n\t", @args ),
+                );
+            }
+
+            my $function_defs = join( "\n", @function_defs );
+            my $STARTMARKER = qr#/\* HEADERIZER BEGIN: $cfile \*/\n#;
+            my $ENDMARKER   = qr#/\* HEADERIZER END: $cfile \*/\n?#;
+            $header =~ s#($STARTMARKER)(?:.*?)($ENDMARKER)#$1$function_defs$2#s
+                or die "no HEADERIZER markers for '$cfile' found in '$hfile'";
+        } # for %cfiles
+
+        open FILE, '>', $hfile or die "couldn't write '$hfile': $!";
+        print FILE $header;
+        close FILE;
+        print "Wrote '$hfile'\n";
+    } # for %files
 }
 
 # vim: expandtab shiftwidth=4:

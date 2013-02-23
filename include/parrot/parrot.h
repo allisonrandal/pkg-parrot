@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: parrot.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/parrot.h 13603 2006-07-26T02:38:24.100453Z chip  $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -212,6 +212,12 @@ typedef struct parrot_interp_t Interp;
  * cast discards qualifiers from pointer target type
  * for usage grep e.g. in string.c
  */
+
+#define DECL_CONST_CAST_OF(CCTYPE) \
+    union { const CCTYPE *__c_ptr; CCTYPE *__ptr; } __ptr_u
+
+#define DECL_CONST_CAST \
+    DECL_CONST_CAST_OF(void)
 
 #define const_cast(b) (__ptr_u.__c_ptr = (b), __ptr_u.__ptr)
 

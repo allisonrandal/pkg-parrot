@@ -1,7 +1,7 @@
 /* TclInt.pmc
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: tclint.pmc 12840 2006-05-30 15:08:05Z coke $
+ *     $Id: /local/languages/tcl/src/pmc/tclint.pmc 13581 2006-07-25T13:40:11.354510Z chip  $
  *  Overview:
  *     These are the vtable functions for the TclInt base class
  *  Data Structure and Algorithms:
@@ -28,7 +28,7 @@ pmclass TclInt extends TclObject extends Integer dynpmc group tcl_group hll Tcl 
         if (!dest)
             dest = pmc_new(INTERP, SELF->vtable->base_type);
 
-        PMC_int_val(dest) = n / d;
+        VTABLE_set_integer_native(INTERP, dest, n / d);
         return dest;
       }
       MMD_DEFAULT: {

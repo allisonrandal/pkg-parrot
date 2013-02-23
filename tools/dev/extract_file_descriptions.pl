@@ -1,7 +1,7 @@
-#! perl -w
+#! perl
 ################################################################################
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: extract_file_descriptions.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/dev/extract_file_descriptions.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 ################################################################################
 
 =head1 NAME
@@ -63,9 +63,10 @@ handling;
 
 ################################################################################
 
+use strict;
+use warnings;
 use Regexp::Common qw/comment/;
 use Getopt::Long;
-use strict;
 
 if(1) {
     my $show_full = 0;

@@ -1,4 +1,4 @@
-# $Id: 007_empty_line.t 12226 2006-04-14 15:02:50Z bernhard $
+# $Id: /local/languages/m4/t/basic/007_empty_line.t 12226 2006-04-14T15:02:50.254463Z bernhard  $
 
 use strict;
 use warnings;

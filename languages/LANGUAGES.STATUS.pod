@@ -1,4 +1,4 @@
-# $Id: LANGUAGES.STATUS.pod 12958 2006-06-17 10:00:58Z bernhard $
+# $Id: /local/languages/LANGUAGES.STATUS.pod 13676 2006-07-29T19:32:10.957437Z chip  $
 
 =head1 Languages targeting parrot
 
@@ -6,6 +6,7 @@ Any language that targets parrot should be listed here. In addition,
 any languages bundled with parrot that work with the unified test
 suite will have their test results listed under the smokes marked
 'languages' at http://smoke.parrotcode.org/smoke/.
+
 
 =head2 Amber for parrot
 
@@ -38,6 +39,7 @@ The Amber PMCs are in C<languages/amber>.
 
 =back
 
+
 =head2 APL
 
 =over 4
@@ -58,13 +60,14 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
 L<languages/APL>
 
 =back
+
 
 =head2 BASIC/compiler
 
@@ -140,7 +143,7 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -196,7 +199,7 @@ Passes all tests. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -204,7 +207,35 @@ C<languages/bf>
 
 =back
 
+
 =head2 Cardinal
+
+=over 4
+
+=item Author
+
+Kevin Tew
+
+=item Description
+
+Implementation of Ruby CVS Head 1.9
+
+=item Status
+
+Parser is pretty complete.
+Only generates PIR for hello world at the moment
+
+=item Last verified with parrot version
+
+0.4.5
+
+=item Location
+
+C<languages/cardinal>
+
+=back
+
+=head2 Cardinal OLD DEAD
 
 =over 4
 
@@ -222,7 +253,7 @@ Not active.
 
 =item Last verified with parrot version
 
-Unknown
+unknown
 
 =item Location
 
@@ -242,6 +273,8 @@ Melvin Smith
 =item Description
 
 Java like language with some hybrid Perl features like regex operators planned.
+
+See also L<http://en.wikipedia.org/wiki/Cola_programming_language>.
 
 =item Status
 
@@ -387,7 +420,7 @@ Works and is mostly complete.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -411,6 +444,8 @@ language that is higher level than IMC, but still exposes the underlying virtual
 rather directly, in the hope that this will eventually be useful for coding extensions to
 the VM in a language more natural than IMC.
 
+See also L<http://en.wikipedia.org/wiki/Jako_(programming)>.
+
 =item Status
 
 The compiler Works, and the language and examples include subroutines and global
@@ -426,7 +461,7 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -454,7 +489,7 @@ Working, but not complete. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -479,11 +514,13 @@ Lua 5.1 Standard Libraries implemented in PIR (still incomplete).
 
 =item Status
 
-Early stage - Part of languages smoke testing.
+Part of languages smoke testing.
+
+See details in F<languages/lua/doc/status.pod>.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -548,7 +585,7 @@ Development is stalled. Takers are welcome.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -604,7 +641,7 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -689,7 +726,7 @@ Working. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -720,15 +757,13 @@ Part of languages smoke testing.
 
 =item Last verified with Parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
 C<languages/perl6>
 
 =back
-
-
 
 
 =head2 Pheme
@@ -831,19 +866,20 @@ TGE, Tree Grammar Engine, and PGE, Parrot Grammar Engine.
 
 =item Status
 
-So far, Punie handles constants (strings, integers, floats), print
+So far, Punie handles constants (strings, integers, floats), variables, print
 statements, conditionals, do blocks, comma lists, and some basic math
 and logic ops.
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.5
 
 =item Location
 
 C<languages/punie>
 
 =back
+
 
 =head2 Python
 
@@ -892,7 +928,7 @@ Part of languages smoke testing. Almost all tests are succeeding.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -979,7 +1015,7 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -1008,11 +1044,38 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
 C<languages/tcl>
+
+=back
+
+
+=head2 TAP (Test Anything Protocol)
+
+=over 4
+
+=item Author
+
+Chris Dolan and Jerry Gay
+
+=item Description
+
+A parser for the Test Anything Protocol
+
+=item Status
+
+See Parrot RT for details. Search for [TAP]
+
+=item Last verified with parrot version
+
+0.4.6
+
+=item Location
+
+C<languages/tap>
 
 =back
 
@@ -1038,7 +1101,7 @@ Working. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
@@ -1066,11 +1129,43 @@ expected to change soon.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 
 C<languages/urm>
+
+=back
+
+
+=head2 WMLScript Translator
+
+=over 4
+
+=item Author
+
+Francois Perrad
+
+=item Description
+
+Translates WMLScript bytecode to PIR.
+
+The language WMLScript is a subset of ECMAScript (ie JavaScript).
+WMLScript defines also an bytecode interpreter (stack based), a binary format.
+
+=item Status
+
+Part of languages smoke testing.
+
+See details in F<languages/WMLScript/doc/status.pod>.
+
+=item Last verified with parrot version
+
+0.4.5
+
+=item Location
+
+C<languages/WMLScript>
 
 =back
 
@@ -1122,7 +1217,7 @@ Infocom's Z-machine. See also http://en.wikipedia.org/wiki/Z-machine.
 
 =item Last verified with parrot version
 
-0.4.4
+0.4.5
 
 =item Location
 

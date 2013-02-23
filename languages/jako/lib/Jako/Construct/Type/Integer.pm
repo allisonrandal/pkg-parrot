@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Integer.pm 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/jako/lib/Jako/Construct/Type/Integer.pm 12840 2006-05-30T15:08:05.048089Z coke  $
 #
 
 use strict;

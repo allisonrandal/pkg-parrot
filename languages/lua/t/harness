@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: harness 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/lua/t/harness 13236 2006-07-10T06:47:56.488120Z fperrad  $
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ if ( grep {m/^--files$/} @ARGV ) {
     # Only the Makefile in 'parrot/languages' uses --files
     my $dir = File::Spec->catfile( $language, 't' );
     my @files = glob( File::Spec->catfile( $dir, '*.t' ) );
-    push @files, glob( File::Spec->catfile( $dir, '*/*.t' ) );
+    push @files, glob( File::Spec->catfile( $dir, '*', '*.t' ) );
     print join( "\n", @files );
     print "\n" if scalar(@files);
 }

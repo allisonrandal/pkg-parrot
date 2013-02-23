@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: disassemble.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/disassemble.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -54,7 +54,7 @@ main(int argc, char *argv[])
 
     if (argc != 2) {
         fprintf(stderr, "Usage: disassemble programfile \n");
-        Parrot_exit(1);
+        Parrot_exit(interpreter, 1);
     }
 
     filename = argv[1];
@@ -69,7 +69,7 @@ main(int argc, char *argv[])
 
     do_dis(interpreter);
 
-    Parrot_exit(0);
+    Parrot_exit(interpreter, 0);
 
     return 0;
 }

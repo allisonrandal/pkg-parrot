@@ -1,7 +1,7 @@
 /* global_setup.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: global_setup.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/global_setup.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *      Contains declarations of global data and the functions
  *      that initialize that data.

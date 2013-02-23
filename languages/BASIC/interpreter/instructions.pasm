@@ -12,7 +12,7 @@
 
 #  If you need to modify varaibles, see the save/restore trick for LET
 #
-# $Id: instructions.pasm 4059 2003-09-05 14:02:39Z leo $
+# $Id: /local/languages/BASIC/interpreter/instructions.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 # $Log: instructions.pasm,v
 # Revision 1.9  2002/06/16 21:23:28  clint
 # Floating Point BASI

@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: harness 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/t/harness 13394 2006-07-20T06:00:01.955543Z fperrad  $
 
 use strict;
 use warnings;
@@ -98,6 +98,8 @@ my @unified_testable_languages
               bc
               befunge
               bf
+              cardinal
+              dotnet
               HQ9plus
               jako
               lazy-k
@@ -111,6 +113,7 @@ my @unified_testable_languages
               tcl
               unlambda
               urm
+              WMLScript
               Zcode
             );
 my @harnesses

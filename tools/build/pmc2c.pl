@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: pmc2c.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/build/pmc2c.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 NAME
 

@@ -5,16 +5,16 @@
 # append var [...]
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&append"
+.sub '&append'
   .param pmc argv :slurpy
 
   .local int argc 
   argc = argv
 
   .local pmc read
-  .get_from_HLL(read, '_tcl', '__read')
+  read = get_root_global ['_tcl'], '__read'
 
   .local string value
   .local int looper
@@ -36,7 +36,7 @@ setter:
   goto loop
 
 new_variable:
-  value = ""
+  value = ''
 
 loop:
   if looper == argc goto loop_done
@@ -48,12 +48,12 @@ loop:
 
 loop_done:
   .local pmc set
-  .get_from_HLL(set, '_tcl', '__set')
+  set = get_root_global ['_tcl'], '__set'
   .return set(name, value)
 
 getter:
   .return read(name)
 
 badargs:
-  .throw ("wrong # args: should be \"append varName ?value value ...?\"")
+  .throw ('wrong # args: should be "append varName ?value value ...?"')
 .end

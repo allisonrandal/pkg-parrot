@@ -1,4 +1,4 @@
-# $Id: antlr_3.pod 12965 2006-06-18 13:12:15Z bernhard $
+# $Id: /local/languages/bc/docs/antlr_3.pod 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 Overview
 
@@ -16,7 +16,7 @@ Bc.java needs to find the needed classes. This works for me:
 
   export ANTLR_HOME=/home/bernhard/devel/ANTLR/antlr-3
   export PARROT_HOME=/home/bernhard/devel/Parrot/repos/parrot
-  export CLASSPATH=$ANTLR_HOME/lib/antlr-2.7.6.jar:$ANTLR_HOME/lib/antlr-3.0ea10.jar:$ANTLR_HOME/lib/stringtemplate-2.3b7.jar:$PARROT_HOME/languages/bc/grammar/antlr_3:$PARROT_HOME/languages/bc
+  export CLASSPATH=$ANTLR_HOME/lib/antlr-2.7.6.jar:$ANTLR_HOME/lib/antlr-3.0b3.jar:$ANTLR_HOME/lib/stringtemplate-2.3b9.jar:$PARROT_HOME/languages/bc/grammar/antlr_3:$PARROT_HOME/languages/bc 
 
 And see the targest maintain-java, build-java, test-java in bc/Makefile.
 
@@ -45,7 +45,9 @@ options
 'Sigil $' is for referencing alternations in actions, Lexer items only ???, also for setting returns
 
 '->' Is for tree construction
-'^' Is for definition and matching of tree nodes
+'^^' Makes a mother
+'^' Is for matching of tree nodes
+'[]' declaration and passing of parameters
 
 @members  declare additional member variables in the parser class
 
@@ -94,7 +96,8 @@ Bernhard Schmalhofer - <Bernhard.Schmalhofer@gmx.de>
 =head1 SEE ALSO
 
   L<http://www.antlr.org/>
-  L<http://www.antlr.org/blog/index.tml>
+  L<http://www.antlr.org/v3/index.html>
+  L<http://www.antlr.org/wiki/display/ANTLR3/Welcome+to+ANTLR+V3>
   L<http://www.antlr.org:8080/pipermail/antlr-dev/>
 
 =cut

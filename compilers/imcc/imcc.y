@@ -9,7 +9,7 @@
  *
  * Grammar for the parser.
  *
- * $Id: imcc.y 12868 2006-06-02 13:29:32Z leo $
+ * $Id: /local/compilers/imcc/imcc.y 13822 2006-08-03T15:57:14.122427Z chip  $
  *
  */
 
@@ -21,6 +21,7 @@
 #define _PARSER
 #define PARSER_MAIN
 #include "imc.h"
+#include "parrot/dynext.h"
 #include "pbc.h"
 #include "parser.h"
 
@@ -35,8 +36,6 @@
  * attached to the interpreter
  */
 
-#define YYPARSE_PARAM interp
-#define YYLEX_PARAM interp
 /*
  * Choosing instructions for Parrot is pretty easy since
  * many are polymorphic.
@@ -202,7 +201,7 @@ static Instruction * iSUBROUTINE(Interp *interp, IMC_Unit * unit, SymReg * r) {
     r->type = (r->type & VT_ENCODED) ? VT_PCC_SUB|VT_ENCODED : VT_PCC_SUB;
     r->pcc_sub = calloc(1, sizeof(struct pcc_sub_t));
     cur_call = r;
-    i->line = line - 1;
+    i->line = line;
     add_namespace(interp, unit);
     return i;
 }
@@ -383,6 +382,13 @@ adv_named_set(Interp *interp, char *name) {
     adv_named_id = name;
 }
 
+static void 
+do_loadlib(Interp *interp, char *lib) 
+{
+    STRING *s = string_unescape_cstring(interp, lib + 1, '"', NULL);
+    Parrot_load_lib(interp, s, NULL);
+    Parrot_register_HLL(interp, NULL, s);
+}
 
 %}
 
@@ -417,7 +423,7 @@ adv_named_set(Interp *interp, char *name) {
 %token <t> PCC_BEGIN PCC_END PCC_CALL PCC_SUB PCC_BEGIN_RETURN PCC_END_RETURN
 %token <t> PCC_BEGIN_YIELD PCC_END_YIELD NCI_CALL METH_CALL INVOCANT
 %token <t> MAIN LOAD IMMEDIATE POSTCOMP METHOD ANON OUTER NEED_LEX
-%token <t> MULTI
+%token <t> MULTI LOADLIB
 %token <t> UNIQUE_REG
 %token <s> LABEL
 %token <t> EMIT EOM
@@ -441,7 +447,7 @@ adv_named_set(Interp *interp, char *name) {
 %type <i> func_assign get_results
 %type <i> opt_invocant
 %type <sr> target targetlist reg const var string result
-%type <sr> key keylist _keylist
+%type <sr> keylist keylist_force _keylist key maybe_ns
 %type <sr> vars _vars var_or_i _var_or_i label_op sub_label_op sub_label_op_c
 %type <i> pasmcode pasmline pasm_inst
 %type <sr> pasm_args
@@ -457,7 +463,13 @@ adv_named_set(Interp *interp, char *name) {
 
 %pure_parser
 
+/* Note that we pass interp last, because Bison only passes
+   the last param to yyerror().  (Tested on bison <= 2.3)
+*/
+%parse-param {void *yyscanner}
+%lex-param   {void *yyscanner}
 %parse-param {Interp *interp}
+%lex-param   {Interp *interp}
 
 %start program
 
@@ -491,6 +503,7 @@ compilation_unit:
 
 pragma: PRAGMA pragma_1 '\n'   { $$ = 0; }
    | hll_def            '\n'   { $$ = 0; }
+   | LOADLIB STRINGC    '\n'   { $$ = 0; do_loadlib(interp, $2); }
    ;
 
 pragma_1:  N_OPERATORS INTC
@@ -559,6 +572,7 @@ pasmline:
    | LINECOMMENT                       { $$ = 0; }
    | class_namespace  { $$ = $1; }
    | pmc_const
+   | pragma
    ;
 
 pasm_inst:         { clear_state(); }
@@ -607,19 +621,24 @@ opt_pasmcode:
   ;
 
 class_namespace:
-    NAMESPACE '[' keylist ']'
+    NAMESPACE maybe_ns '\n'
                 {
                     int re_open = 0;
-                    $$=0;
+                    $$ = 0;
                     if (IMCC_INFO(interp)->state->pasm_file && cur_namespace) {
                         imc_close_unit(interp, cur_unit);
                         re_open = 1;
                     }
-                    IMCC_INFO(interp)->cur_namespace = $3;
-                    cur_namespace = $3;
+                    IMCC_INFO(interp)->cur_namespace = $2;
+                    cur_namespace = $2;
                     if (re_open)
                         cur_unit = imc_open_unit(interp, IMC_PASM);
                 }
+   ;
+
+maybe_ns:
+     '[' keylist ']'	{ $$ = $2; }
+   |			{ $$ = NULL; }
    ;
 
 sub:
@@ -1356,9 +1375,10 @@ _var_or_i:
                    {
                       regs[nargs++] = $1;
                       keyvec |= KEY_BIT(nargs);
-                      regs[nargs++] = $3; $$ = $1;
+                      regs[nargs++] = $3;
+                      $$ = $1;
                    }
-   | '[' keylist ']'
+   | '[' keylist_force ']'
                    {
                       regs[nargs++] = $2;
                       $$ = $2;
@@ -1390,8 +1410,12 @@ var:
    | const
    ;
 
-keylist:           {  nkeys=0; in_slice = 0; }
-     _keylist      {  $$ = link_keys(interp, nkeys, keys); }
+keylist:           {  nkeys = 0; in_slice = 0; }
+     _keylist      {  $$ = link_keys(interp, nkeys, keys, 0); }
+   ;
+
+keylist_force:     {  nkeys = 0; in_slice = 0; }
+     _keylist      {  $$ = link_keys(interp, nkeys, keys, 1); }
    ;
 
 _keylist:
@@ -1440,7 +1464,7 @@ string:
 %%
 
 
-int yyerror(Interp *interp, char * s)
+int yyerror(void *yyscanner, Interp *interp, char * s)
 {
     /* support bison 1.75, convert 'parse error to syntax error' */
     if (!memcmp(s, "parse", 5))

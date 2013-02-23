@@ -1,4 +1,4 @@
-# $Id: bfco.pir 12959 2006-06-17 10:29:48Z bernhard $
+# $Id: /local/languages/bf/bfco.pir 12959 2006-06-17T10:29:48.512439Z bernhard  $
 #
 # An Optimizing Brainfuck compiler
 # By Leo based on bfc.imc by Leon

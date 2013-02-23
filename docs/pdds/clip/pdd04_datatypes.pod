@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: pdd04_datatypes.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/pdds/clip/pdd04_datatypes.pod 13638 2006-07-26T21:52:12.500635Z chip  $
 
 =head1 NAME
 
@@ -8,6 +8,9 @@ docs/pdds/pdd04_datatypes.pod - Parrot's internal data types
 =head1 ABSTRACT
 
 This PDD describes Parrot's internal data types.
+
+{{ NOTE: this is a good overview, but we need more complete
+specifications of the behavior of the datatypes. }}
 
 =head1 DESCRIPTION
 

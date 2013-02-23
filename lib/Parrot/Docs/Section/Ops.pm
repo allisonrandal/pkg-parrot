@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: Ops.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/Section/Ops.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -22,9 +22,9 @@ A documentation section describing the Parrot ops.
 package Parrot::Docs::Section::Ops;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Section;
-@Parrot::Docs::Section::Ops::ISA = qw(Parrot::Docs::Section);
+use base qw( Parrot::Docs::Section );
 
 =item C<new()>
 

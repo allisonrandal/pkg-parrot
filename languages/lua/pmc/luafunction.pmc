@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2006, The Perl Foundation.
-$Id: luafunction.pmc 12840 2006-05-30 15:08:05Z coke $
+$Id: /local/languages/lua/pmc/luafunction.pmc 13236 2006-07-10T06:47:56.488120Z fperrad  $
 
 =head1 NAME
 
@@ -37,8 +37,6 @@ pmclass LuaFunction
 */
     void class_init() {
         if (pass) {
-            PMC *meth;
-
             luafunction_name = const_string(INTERP, "function");
             dynpmc_LuaBoolean = pmc_type(INTERP,
               string_from_const_cstring(INTERP, "LuaBoolean", 0));

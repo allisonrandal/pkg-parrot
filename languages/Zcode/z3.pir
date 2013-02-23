@@ -1,4 +1,4 @@
-# $Id: z3.pir 11191 2006-01-15 14:18:22Z bernhard $
+# $Id: /local/languages/Zcode/z3.pir 11501 2006-02-10T18:27:13.457666Z particle  $
 
 =head1 NAME
 

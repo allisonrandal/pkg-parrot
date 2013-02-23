@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: Pmc2c.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Pmc2c.pm 13329 2006-07-17T16:31:20.911822Z leo  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Pmc2c - PMC to C Code Generation
 
 =head1 SYNOPSIS
 
-	use Parrot::Pmc2c;
+    use Parrot::Pmc2c;
 
 =head1 DESCRIPTION
 
@@ -25,17 +25,17 @@ package Parrot::Pmc2c;
 use strict;
 use warnings;
 
-use vars qw( @writes %writes );
 use Parrot::PMC qw(%pmc_types);
 
 use base qw( Exporter );
+
 our @EXPORT_OK = qw(count_newlines gen_ret dont_edit dynext_load_code);
 
-BEGIN {
-    @writes = qw(STORE PUSH POP SHIFT UNSHIFT DELETE);
-    @writes{@writes} = (1) x @writes;
-};
-
+our %writes;
+{
+  my @writes = qw(STORE PUSH POP SHIFT UNSHIFT DELETE);
+  @writes{@writes} = (1) x @writes;
+}
 use Text::Balanced 'extract_bracketed';
 
 =item C<does_write($method, $section)>
@@ -951,23 +951,27 @@ EOC
     $class_init_code
 EOC
 
+    $cout .= <<"EOC";
+        {
+EOC
+
     # declare auxiliary variables for dyncpmc IDs
     foreach my $dynpmc (keys %init_mmds) {
         next if $dynpmc eq $classname;
         $cout .= <<"EOC";
-        int my_enum_class_$dynpmc = pmc_type(interp, string_from_const_cstring(interp, "$dynpmc", 0));
+            int my_enum_class_$dynpmc = pmc_type(interp, string_from_const_cstring(interp, "$dynpmc", 0));
 EOC
     }
     # init MMD "right" slots with the dynpmc types
     foreach my $entry (@init_mmds) {
         if ($entry->[1] eq $classname) {
             $cout .= <<"EOC";
-        _temp_mmd_init[$entry->[0]].right = entry;
+            _temp_mmd_init[$entry->[0]].right = entry;
 EOC
         }
         else {
             $cout .= <<"EOC";
-        _temp_mmd_init[$entry->[0]].right = my_enum_class_$entry->[1];
+            _temp_mmd_init[$entry->[0]].right = my_enum_class_$entry->[1];
 EOC
         }
     }
@@ -975,18 +979,19 @@ EOC
     foreach my $dynpmc (keys %init_mmds) {
         next if $dynpmc eq $classname;
         $cout .= <<"EOC";
-        assert(my_enum_class_$dynpmc != enum_class_default);
+            assert(my_enum_class_$dynpmc != enum_class_default);
 EOC
     }
     if (scalar @mmds) {
         $cout .= <<"EOC";
 #define N_MMD_INIT (sizeof(_temp_mmd_init)/sizeof(_temp_mmd_init[0]))
-        Parrot_mmd_register_table(interp, entry,
-            _temp_mmd_init, N_MMD_INIT);
+            Parrot_mmd_register_table(interp, entry,
+                _temp_mmd_init, N_MMD_INIT);
 EOC
     }
 
     $cout .= <<"EOC";
+        }
     } /* pass */
 } /* Parrot_${classname}_class_init */
 EOC

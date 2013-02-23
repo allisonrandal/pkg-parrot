@@ -5,9 +5,9 @@
 =cut
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&info"
+.sub '&info'
   .param pmc argv :slurpy
 
   .local int argc
@@ -19,26 +19,27 @@
   .local pmc subcommand_proc
   null subcommand_proc
 
-  .get_from_HLL(subcommand_proc, '_tcl';'helpers';'info', subcommand_name)
+  push_eh bad_subcommand
+    subcommand_proc = get_root_global ['_tcl';'helpers';'info'], subcommand_name
+  clear_eh
 
-  if_null subcommand_proc, bad_subcommand
   .return subcommand_proc(argv)
 
 bad_subcommand:
-  $S0  = "bad option \""
+  $S0  = 'bad option "'
   $S0 .= subcommand_name
-  $S0 .= "\": must be args, body, cmdcount, commands, complete, default, exists, functions, globals, hostname, level, library, loaded, locals, nameofexecutable, patchlevel, procs, script, sharedlibextension, tclversion, or vars"
+  $S0 .= '": must be args, body, cmdcount, commands, complete, default, exists, functions, globals, hostname, level, library, loaded, locals, nameofexecutable, patchlevel, procs, script, sharedlibextension, tclversion, or vars'
 
   .throw ($S0)
 
 bad_args:
-  .throw("wrong # args: should be \"info option ?arg arg ...?\"")
+  .throw('wrong # args: should be "info option ?arg arg ...?"')
 .end
 
 .HLL '_Tcl', ''
 .namespace [ 'helpers'; 'info' ]
 
-.sub "args"
+.sub 'args'
   .param pmc argv
 
   .local int argc
@@ -49,22 +50,22 @@ bad_args:
 
   .local string procname
   procname = shift argv
-  .get_from_HLL($P1, '_tcl', 'proc_args')
+  $P1 = get_root_global ['_tcl'], 'proc_args'
   $P2 = $P1[procname]
   if_null $P2, no_args
   .return($P2)
 
 no_args:
-  $S0 = "\""
+  $S0 = '"'
   $S0 .= procname
   $S0 .= "\" isn't a procedure"
   .throw ($S0)
 
 bad_args:
-  .throw ("wrong # args: should be \"info args procname\"")
+  .throw ('wrong # args: should be "info args procname"')
 .end
 
-.sub "body"
+.sub 'body'
   .param pmc argv
 
   .local int argc
@@ -75,66 +76,115 @@ bad_args:
 
   .local string procname
   procname = argv[0]
-  .get_from_HLL($P1, '_tcl', 'proc_body')
+  $P1 = get_root_global ['_tcl'], 'proc_body'
   $P2 = $P1[procname]
   if_null $P2, no_body
   .return($P2)
 
 no_body:
-  $S0 = "\""
+  $S0 = '"'
   $S0 .= procname
   $S0 .= "\" isn't a procedure"
   .throw ($S0)
 
 bad_args:
-  .throw ("wrong # args: should be \"info body procname\"")
+  .throw ('wrong # args: should be "info body procname"')
 .end
 
-.sub "functions"
+.sub 'functions'
   .param pmc argv
 
   .local int argc
   argc = argv
   if argc > 1 goto bad_args
 
-  .local pmc math_funcs,iterator,retval
+  .local pmc mathfunc,iterator,retval
 
-  .get_from_HLL(math_funcs, '_tcl', 'functions')
-  iterator = new .Iterator, math_funcs
+  mathfunc = get_root_namespace ['tcl'; 'tcl'; 'mathfunc']
+  iterator = new .Iterator, mathfunc
   iterator = 0
   retval = new .TclList
 
   if argc == 0 goto loop
-  load_bytecode 'PGE.pbc'
-  load_bytecode 'PGE/Glob.pbc'
   .local pmc globber,rule,match
   globber = compreg 'PGE::Glob'
   $S1 = argv[0]
+  $S1 = '&' . $S1
   rule = globber($S1)
 pattern_loop:
+  unless iterator goto pattern_end
   $S0 = shift iterator
+  $P0 = mathfunc[$S0]
+  $I0 = isa $P0, 'Sub'
+  unless $I0 goto pattern_loop
   match = rule($S0)
-  unless match goto pattern_next
+  unless match goto pattern_loop
   $P0 = new .TclString
-  $P0 = $S0
+  $S1 = substr $S0, 1
+  $P0 = $S1
   push retval, $P0
-pattern_next:
-  if iterator goto pattern_loop
+pattern_end:
   .return(retval)
 
 loop:
   $S0 = shift iterator
   $P0 = new .TclString
-  $P0 = $S0
+  $S1 = substr $S0, 1
+  $P0 = $S1
   push retval, $P0
   if iterator goto loop
   .return(retval)
 
 bad_args:
-  .throw ("wrong # args: should be \"info functions ?pattern?\"")
+  .throw ('wrong # args: should be "info functions ?pattern?"')
 .end
 
-.sub "exists"
+.sub 'commands'
+    .param pmc argv
+
+    .local int argc
+    argc = argv
+    if argc > 1 goto bad_args
+    .local pmc matching 
+    null matching
+    if argc ==0 goto done_setup
+
+    $P1 = compreg 'PGE::Glob'
+    .local string pattern
+    pattern = argv[0]
+    matching = $P1(pattern)
+
+  done_setup:
+    .local pmc result
+    result = new 'TclList'
+
+    .local pmc ns
+    ns = get_root_global 'tcl'
+  
+    .local pmc iter
+    iter = new 'Iterator', ns
+  iter_loop:
+     unless iter goto iter_loop_end
+     $S1 = shift iter
+     $S2 = substr $S1, 0, 1
+     unless $S2 == '&' goto iter_loop
+     $S1 = substr $S1, 1
+     if_null matching, add_result
+     $P2 = matching($S1)
+     unless $P2 goto iter_loop
+  add_result: 
+     push result, $S1
+     goto iter_loop 
+  iter_loop_end:
+
+    .return(result)
+
+  bad_args:
+    .throw('wrong # args: should be "info commands ?pattern?"')
+
+.end
+
+.sub 'exists'
   .param pmc argv
 
   .local int argc
@@ -144,21 +194,20 @@ bad_args:
   .local string varname
   varname = argv[0]
 
-  .local pmc find_var
-  .get_from_HLL(find_var, '_tcl', '__find_var')
-  .local pmc found_var
+  .local pmc find_var, found_var
+  find_var  = get_root_global ['_tcl'], '__find_var'
   found_var = find_var(varname)
-  if_null found_var, not_found
+  if null found_var goto not_found
 
   .return (1)
 not_found:
   .return (0)
 
 bad_args:
-  .throw ("wrong # args: should be \"info exists varName\"")
+  .throw ('wrong # args: should be "info exists varName"')
 .end
 
-.sub "tclversion"
+.sub 'tclversion'
   .param pmc argv
 
   .local int argc
@@ -166,11 +215,11 @@ bad_args:
 
   if argc != 0 goto bad_args
 
-  .get_from_HLL($P1,'tcl','$tcl_version')
+  $P1 = get_root_global ['tcl'], '$tcl_version'
   .return($P1)
 
 bad_args:
-  .throw ("wrong # args: should be \"info tclversion\"")
+  .throw ('wrong # args: should be "info tclversion"')
 
 .end
 

@@ -1,8 +1,9 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-$Id: README 12835 2006-05-30 13:32:26Z coke $
+$Id: /local/examples/japh/README 13870 2006-08-03T23:40:24.624450Z chip  $
 
 XXX
 XXX a lot of the JAPHs are currently broken due to recent core changes
+XXX some of them have been removed as doomed never to work again
 XXX
 
 These programs show very different ways how to print a simple

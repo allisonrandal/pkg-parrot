@@ -1,4 +1,4 @@
-# $Id: RT_initialize.pir 11761 2006-02-27 07:57:10Z bernhard $
+# $Id: /local/languages/BASIC/compiler/RT_initialize.pir 11761 2006-02-27T07:57:10.879453Z bernhard  $
 
 .const int TYPE = 0
 .const int VALUE = 1

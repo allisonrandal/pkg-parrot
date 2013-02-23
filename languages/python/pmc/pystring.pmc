@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: pystring.pmc 12840 2006-05-30 15:08:05Z coke $
+$Id: /local/languages/python/pmc/pystring.pmc 13451 2006-07-24T05:28:54.687646Z chip  $
 
 =head1 NAME
 
@@ -310,7 +310,7 @@ Returns pythons string repr (w/o any escaping, just single quotes around)
             repr = string_copy(INTERP, q);
 
         if ((i_q < 0) && (i_bs < 0))
-            string_append(INTERP, repr, s, 0);
+            repr = string_append(INTERP, repr, s, 0);
         else {
            STRING *sub;
            while ((i_q >= 0) || (i_bs >= 0)) {
@@ -325,13 +325,13 @@ Returns pythons string repr (w/o any escaping, just single quotes around)
                    i_q = string_str_index(INTERP, s, q, start+1);
                }
 
-               string_append(INTERP, repr, sub, 0);
-               string_append(INTERP, repr, bs, 0);
+               repr = string_append(INTERP, repr, sub, 0);
+               repr = string_append(INTERP, repr, bs, 0);
            }
 
            i_q = string_length(INTERP, s);
            sub = string_substr(INTERP, s, start, i_q-start, NULL, 0);
-           string_append(INTERP, repr, sub, 0);
+           repr = string_append(INTERP, repr, sub, 0);
         }
 
         repr = string_append(INTERP, repr, q, 0);

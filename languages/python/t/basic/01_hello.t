@@ -1,4 +1,4 @@
-# $Id: 01_hello.t 6308 2004-07-03 20:22:06Z leo $
+# $Id: /local/languages/python/t/basic/01_hello.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use strict;
 use lib '../../lib';

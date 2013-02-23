@@ -1,4 +1,4 @@
-# $Id: syn.t 7984 2005-05-05 14:06:34Z bernhard $
+# $Id: /local/languages/urm/t/syn.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";

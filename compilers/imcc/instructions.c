@@ -1,4 +1,4 @@
-/* $Id: instructions.c 12606 2006-05-10 17:54:59Z petdance $ */
+/* $Id: /local/compilers/imcc/instructions.c 12606 2006-05-10T17:54:59.703856Z petdance  $ */
 
 #include <stdlib.h>
 #include <string.h>

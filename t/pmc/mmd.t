@@ -1,13 +1,13 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: mmd.t 12859 2006-05-31 17:43:38Z coke $
+# $Id: /local/t/pmc/mmd.t 13099 2006-07-01T21:25:20.974025Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 38;
+use Parrot::Test tests => 39;
 
 =head1 NAME
 
@@ -747,7 +747,7 @@ pir_output_is(<<'CODE', <<'OUT', "MMD on PMC types - Any");
     q($P0)
 .end
 
-.namespace [""]
+.namespace
 
 .sub p :multi(String)
     .param pmc p
@@ -790,8 +790,9 @@ pir_output_is(<<'CODE', <<'OUTPUT', "__add as function - Int, Float");
     r = new Float
     l = 3
     r = 39.42
-    ns = get_namespace ["__parrot_core"]
-    a = ns["__add"]
+    .include "interpinfo.pasm"
+    ns = interpinfo .INTERPINFO_NAMESPACE_ROOT
+    a = ns["__parrot_core"; "__add"]
     a(l, r, d)
     print d
     print "\n"
@@ -997,7 +998,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "mmd bug reported by Jeff");
     print "nothing\n"
 .end
 
-.namespace ['']
+.namespace
 
 .sub main :main
     newclass $P0, 'Foo'
@@ -1270,4 +1271,31 @@ pir_output_is(<<'CODE', <<'OUTPUT', "unicode sub names and multi (RT#39254)");
 CODE
 String:what
 Int:23
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "autoboxing on multis");
+.sub box_me_up :multi(string)
+	.param string first
+	.param pmc    second
+
+	.local string promoted_type
+	promoted_type = typeof second
+	print "BMU autobox type: "
+	print promoted_type
+	print "\n"
+.end
+
+.sub box_me_up :multi()
+	print "BMU no autobox, so sad\n"
+.end
+
+.sub box_me_up :multi(int, int)
+	print "BMU inty, so bad\n"
+.end
+
+.sub main :main
+	box_me_up( 'foo', 'bar' )
+.end
+CODE
+BMU autobox type: String
 OUTPUT

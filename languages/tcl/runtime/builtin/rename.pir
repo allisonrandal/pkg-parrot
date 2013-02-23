@@ -2,54 +2,86 @@
 # [rename]
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&rename"
+.sub '&rename'
   .param pmc argv :slurpy
 
   .local int argc
   argc = argv
+  if argc != 2 goto bad_args
 
-  if argc != 2 goto error
-  .local string old_s
-  old_s = argv[0]
-  .local string new_s
-  new_s = argv[1]
+  .local string oldName, newName
+  oldName = argv[0]
+  newName = argv[1]
 
   # Change the epoch
-  .get_from_HLL($P0, '_tcl', 'epoch')
+  $P0 = get_root_global ['_tcl'], 'epoch'
   inc $P0
 
-  .local string old_proc,new_proc
-  old_proc = "&" . old_s
-  new_proc = "&" . new_s
+  .local pmc sub, args, builtin
 
- 
-  .local pmc theSub
-  # Grab the original sub
+  $S0 = '&' . oldName
   push_eh doesnt_exist
-    theSub = find_global old_proc
+    sub = get_root_global ['tcl'], $S0
   clear_eh
 
-  # If newName is empty, then just delete
-  if new_s == "" goto delete
+  # if the newName is '', just delete the sub
+  .local int delete_only
+  delete_only = 0
+  if newName != '' goto delete_sub
+  delete_only = 1
 
-add:
+
+delete_sub:
+  $P0 = get_root_namespace ['tcl']
+  delete $P0[$S0]
+  
+  if delete_only goto delete_builtin
+
+add_sub:
   # Create the new sub
-  store_global new_proc, theSub
+  $S0 = '&' . newName
+  set_root_global ['tcl'], $S0, sub
 
-delete:
-  null theSub
-  store_global old_proc, theSub
-  .return("")
+
+delete_builtin:
+  push_eh delete_args
+    builtin = get_root_global ['_tcl'; 'builtins'], oldName
+  clear_eh
+  
+  $P0 = get_root_namespace ['_tcl'; 'builtins']
+  delete $P0[oldName]
+
+  if delete_only goto delete_args
+
+add_builtin:
+  set_root_global ['_tcl'; 'builtins'], newName, builtin
+
+
+delete_args:
+  $P0 = get_root_global ['_tcl'], 'proc_args'
+  $I0 = exists $P0[oldName]
+  unless $I0 goto return
+
+  args = $P0[oldName]
+  delete $P0[oldName]
+
+  if delete_only goto return
+
+add_args:
+  $P0[newName] = args
+
+
+return:
+  .return('')
 
 doesnt_exist:
   $S0 = "can't rename \""
-  $S0 .= old_s
+  $S0 .= oldName
   $S0 .= "\": command doesn't exist"
   .throw ($S0)
 
-error:
-  .throw ("wrong # args: should be \"rename oldName newName\"")
-
+bad_args:
+  .throw('wrong # args: should be "rename oldName newName"')
 .end

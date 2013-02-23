@@ -1,4 +1,4 @@
-' $Id: count_to_100.bas 11020 2006-01-09 19:49:33Z bernhard $
+' $Id: /local/languages/BASIC/compiler/samples/count_to_100.bas 11501 2006-02-10T18:27:13.457666Z particle  $
 '   
 ' count_to_100.bas
 '

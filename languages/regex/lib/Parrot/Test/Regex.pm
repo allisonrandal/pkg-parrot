@@ -1,4 +1,4 @@
-# $Id: Regex.pm 12512 2006-05-05 07:12:06Z fperrad $
+# $Id: /local/languages/regex/lib/Parrot/Test/Regex.pm 12512 2006-05-05T07:12:06.535041Z fperrad  $
 
 require Parrot::Test;
 

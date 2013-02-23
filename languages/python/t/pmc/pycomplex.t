@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: pycomplex.t 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/python/t/pmc/pycomplex.t 12840 2006-05-30T15:08:05.048089Z coke  $
 
 use strict;
 use warnings;

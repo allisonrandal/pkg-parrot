@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: dynlexpad.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/dynpmc/dynlexpad.t 13274 2006-07-13T00:32:07.017597Z audreyt  $
 
 use strict;
 use warnings;
@@ -41,14 +41,11 @@ OUTPUT
 
 my $loadlib = <<'EOC';
 #
-# the immediate sub gets run, before the .HLL_map below
-# is parsed, therefore the .DynLexPad constant is aready
+# the .loadlib directive gets run, before the .HLL_map below
+# is parsed, therefore the .DynLexPad constant is already
 # available
 #
-.sub _load_lib :immediate
-    .local pmc lib
-    lib = loadlib "dynlexpad"
-.end
+.loadlib "dynlexpad"
 
 .HLL "Some", "dynlexpad"
 .HLL_map .LexPad, .DynLexPad

@@ -3,7 +3,7 @@
  *
  * ALPHA
  *
- * $Id: jit_emit.h 7930 2005-04-27 07:24:32Z leo $
+ * $Id: /local/src/jit/alpha/jit_emit.h 11501 2006-02-10T18:27:13.457666Z particle  $
  */
 
 /*  Register usage:

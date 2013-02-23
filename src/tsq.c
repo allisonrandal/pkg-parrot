@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: tsq.c 12933 2006-06-13 05:28:20Z petdance $
+$Id: /local/src/tsq.c 12933 2006-06-13T05:28:20.267948Z petdance  $
 
 =head1 NAME
 

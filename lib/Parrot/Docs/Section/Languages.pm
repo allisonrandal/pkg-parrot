@@ -1,5 +1,5 @@
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: Languages.pm 12970 2006-06-19 06:51:09Z fperrad $
+# $Id: /local/lib/Parrot/Docs/Section/Languages.pm 13394 2006-07-20T06:00:01.955543Z fperrad  $
 
 =head1 NAME
 
@@ -22,9 +22,9 @@ A documentation section describing Parrot's client languages.
 package Parrot::Docs::Section::Languages;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Section;
-@Parrot::Docs::Section::Languages::ISA = qw(Parrot::Docs::Section);
+use base qw( Parrot::Docs::Section );
 
 =item C<new()>
 
@@ -46,6 +46,7 @@ sub new
         $self->new_section('bc', 'bc.html', '', 'languages/bc'),
         $self->new_section('Befunge', 'befunge.html', '', 'languages/befunge'),
         $self->new_section('BF', 'bf.html', '', 'languages/bf'),
+        $self->new_section('Cardinal', 'cardinal.html', '', 'languages/cardinal'),
         $self->new_section('Cola', 'cola.html', '', 'languages/cola'),
         $self->new_section('Commun Lisp', 'lisp.html', '', 'languages/lisp'),
         $self->new_section('.Net', 'dotnet.html', '', 'languages/dotnet'),
@@ -63,9 +64,11 @@ sub new
         $self->new_section('Python', 'python.html', '', 'languages/python'),
         $self->new_section('Regex', 'regex.html', '', 'languages/regex'),
         $self->new_section('Scheme', 'scheme.html', '', 'languages/scheme'),
+        $self->new_section('TAP', 'tap.html', '', 'languages/tap'),
         $self->new_section('TCL', 'tcl.html', '', 'languages/tcl'),
         $self->new_section('unlambda', 'unlambda.html', '', 'languages/unlambda'),
         $self->new_section('URM', 'urm.html', '', 'languages/urm'),
+        $self->new_section('WMLScript', 'wmlscript.html', '', 'languages/WMLScript'),
         $self->new_section('Zcode', 'zcode.html', '', 'languages/Zcode'),
     );
 }

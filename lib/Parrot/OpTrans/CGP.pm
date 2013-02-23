@@ -1,5 +1,5 @@
 # Copyright (C) 2002, The Perl Foundation.
-# $Id: CGP.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/OpTrans/CGP.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -17,16 +17,12 @@ and C C<goto> run loop.
 
 =cut
 
-use strict;
-#use warnings;
-
 package Parrot::OpTrans::CGP;
 
-use Parrot::OpTrans;
-use Parrot::OpTrans::CPrederef;
-use Parrot::OpTrans::CGoto;
-use vars qw(@ISA);
-@ISA = qw(Parrot::OpTrans::CPrederef Parrot::OpTrans::CGoto);
+use strict;
+use warnings;
+
+use base qw( Parrot::OpTrans::CPrederef Parrot::OpTrans::CGoto );
 
 =item C<core_type()>
 

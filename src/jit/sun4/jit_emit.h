@@ -3,7 +3,7 @@
 **
 ** SPARC
 **
-** $Id: jit_emit.h 11975 2006-03-21 22:23:53Z bernhard $
+** $Id: /local/src/jit/sun4/jit_emit.h 14039 2006-08-09T02:41:13.737274Z chip  $
 **/
 
 #if !defined(PARROT_SUN4_JIT_EMIT_H_GUARD)
@@ -903,6 +903,7 @@ Parrot_jit_vtable_n_op(Parrot_jit_info_t *jit_info,
                 emitm_ld_i(jit_info->native_ptr, XSR1, 0, emitm_o(rdx));
               break;
             case PARROT_ARG_KC:
+            case PARROT_ARG_PC:
 #                define KC_addr &interpreter->code->const_table->constants[pi]->u.key
                 emitm_sethi(jit_info->native_ptr, emitm_hi22(KC_addr), XSR1);
                 emitm_or_i(jit_info->native_ptr, XSR1, emitm_lo10(KC_addr), XSR1);

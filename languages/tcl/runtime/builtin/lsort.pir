@@ -3,9 +3,9 @@
 #
 
 .HLL 'Tcl', 'tcl_group'
-.namespace [ '' ]
+.namespace
 
-.sub "&lsort"
+.sub '&lsort'
   .param pmc argv :slurpy
 
   .local int return_type, argc
@@ -16,8 +16,8 @@
   argc = argv
   if argc == 0 goto wrong_args
 
-  .get_from_HLL(compare,'_tcl';'helpers';'lsort','ascii')
-  .get_from_HLL(sort,'_tcl';'helpers';'lsort','sort')
+  compare = get_root_global ['_tcl';'helpers';'lsort'], 'ascii'
+  sort    = get_root_global ['_tcl';'helpers';'lsort'], 'sort'
 
   # possible options
   .local int decr, unique
@@ -27,10 +27,10 @@ chew_flag:
   $P0 = shift argv
   unless argv goto got_list
 
-  if $P0 == "-decreasing" goto c_decr
-  if $P0 == "-increasing" goto c_incr
-  if $P0 == "-unique" goto c_uniq
-  if $P0 == "-integer" goto c_int
+  if $P0 == '-decreasing' goto c_decr
+  if $P0 == '-increasing' goto c_incr
+  if $P0 == '-unique' goto c_uniq
+  if $P0 == '-integer' goto c_int
   # XXX dictionary, real, command etc necessary
   branch bad_opt
 
@@ -44,14 +44,14 @@ c_uniq:
   unique = 1
   branch chew_flag
 c_int:
-  .get_from_HLL(compare,'_tcl';'helpers';'lsort','integer')
+  compare = get_root_global ['_tcl';'helpers';'lsort'], 'integer'
   branch chew_flag
 
 
 got_list:
 
   .local pmc __list
-  .get_from_HLL(__list,'_tcl','__list')
+  __list = get_root_global ['_tcl'], '__list'
   $P0 = __list($P0)
 
   sort(compare, $P0, decr)
@@ -80,19 +80,19 @@ skip_unique:
   .return ($P0)
 
 bad_opt:
-  $S0 = "bad option \""
+  $S0 = 'bad option "'
   $S1 = $P0
   $S0 .= $S1
-  $S0 .= "\": must be -ascii, -command, -decreasing, -dictionary, -increasing, -index, -integer, -real, or -unique"
+  $S0 .= '": must be -ascii, -command, -decreasing, -dictionary, -increasing, -index, -indices, -integer, -nocase, -real, or -unique'
   .throw ($S0)
 wrong_args:
-  .throw ("wrong # args: should be \"lsort ?options? list\"")
+  .throw ('wrong # args: should be "lsort ?options? list"')
 .end
 
 .HLL '_Tcl', ''
 .namespace [ 'helpers'; 'lsort' ]
 
-.sub "sort"
+.sub 'sort'
   .param pmc compare
   .param pmc list
   .param int decreasing
@@ -103,7 +103,7 @@ wrong_args:
   quicksort(compare, list, 0, size, decreasing)
 .end
 
-.sub "quicksort"
+.sub 'quicksort'
   .param pmc compare
   .param pmc list
   .param int lo
@@ -161,7 +161,7 @@ done:
   .return ()
 .end
 
-.sub "ascii"
+.sub 'ascii'
   .param pmc s1
   .param pmc s2
   .param int is_decr
@@ -173,40 +173,22 @@ decreasing:
   .return ($I0)
 .end
 
-.sub "integer"
+.sub 'integer'
   .param pmc s1
   .param pmc s2
   .param int is_decr
 
   # check that they're actually integers.
-  .local pmc __number
-  .get_from_HLL(__number, '_tcl', '__number')
-  s1 = __number(s1)
-  s2 = __number(s2)
-
-  $I0 = typeof s1
-  if $I0 != .TclInt goto bad_s1
-  $I0 = typeof s2
-  if $I0 != .TclInt goto bad_s2
+  .local pmc __integer
+  __integer = get_root_global ['_tcl'], '__integer'
+  s1 = __integer(s1)
+  s2 = __integer(s2)
 
   if is_decr goto decreasing
   $I0 = cmp_num s1, s2
   .return ($I0)
+
 decreasing:
   $I0 = cmp_num s2, s1
   .return ($I0)
-
-bad_s1:
-  $S1 = s1
-  goto bad
-
-bad_s2:
-  $S1 = s2
-
-bad:
-  $S0  = "expected integer but got \""
-  $S0 .= $S1
-  $S0 .= "\""
-
-  .throw ($S0)
 .end

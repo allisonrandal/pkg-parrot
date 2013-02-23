@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: pdd05_opfunc.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/pdds/clip/pdd05_opfunc.pod 13638 2006-07-26T21:52:12.500635Z chip  $
 
 =head1 NAME
 
@@ -9,6 +9,9 @@ docs/pdds/pdd05_opfunc.pod - Opcode Function specs
 
 This PDD specifies how the opcode functions should behave and how they are
 called by the Parrot interpreter.
+
+{{ NOTE: this PDD is only loosely connected to the current state of
+Parrot. }}
 
 =head1 DESCRIPTION
 

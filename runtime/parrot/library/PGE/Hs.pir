@@ -67,6 +67,9 @@ whole thing may be taken out or refactored away at any moment.
 
     p6rule_compile = compreg 'PGE::P6Regex'
     null rulesub
+
+    # adverbs['grammar'] = 'PGE::Grammar'
+    # adverbs['name'] = name
     rulesub = p6rule_compile(pattern, adverbs :named :flat)
 
     $I0 = exists adverbs["grammar"]
@@ -92,7 +95,7 @@ whole thing may be taken out or refactored away at any moment.
 
     push_eh match_error
     rulesub = p6rule_compile(pattern, adverbs :named :flat)
-    match = rulesub(x)
+    match = rulesub(x, 'grammar' => 'PGE::Grammar')
 
   match_result:
     unless match goto match_fail

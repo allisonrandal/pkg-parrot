@@ -1,4 +1,4 @@
-# $Id: ChangeLog 11159 2006-01-13 21:19:13Z bernhard $
+# $Id: /local/languages/m4/ChangeLog 11501 2006-02-10T18:27:13.457666Z particle  $
 
 2005-06-29     Bernhard Schmalhofer
         * Switch from Getopt/Long.pbc to Getopt/Obj.pbc

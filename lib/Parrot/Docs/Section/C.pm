@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: C.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Docs/Section/C.pm 13276 2006-07-13T05:36:53.515002Z fperrad  $
 
 =head1 NAME
 
@@ -22,9 +22,9 @@ A documentation section describing all the C source code in Parrot.
 package Parrot::Docs::Section::C;
 
 use strict;
+use warnings;
 
-use Parrot::Docs::Section;
-@Parrot::Docs::Section::C::ISA = qw(Parrot::Docs::Section);
+use base qw( Parrot::Docs::Section );
 
 use Parrot::Distribution;
 
@@ -219,7 +219,10 @@ sub new
                 'String encodings', 
                 'contents' => ['src/encodings']
             ),
-            $self->c_header_item('', 'unicode'),
+            $self->c_item(
+                'String charset', 
+                'contents' => ['src/charset']
+            ),
             $self->c_item(
                 'Miscellaneous, <code>sprintf</code> and utility functions.', 
                 'pairs' => ['misc'],

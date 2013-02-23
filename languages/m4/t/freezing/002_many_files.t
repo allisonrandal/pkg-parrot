@@ -1,4 +1,4 @@
-# $Id: 002_many_files.t 12226 2006-04-14 15:02:50Z bernhard $
+# $Id: /local/languages/m4/t/freezing/002_many_files.t 12226 2006-04-14T15:02:50.254463Z bernhard  $
 
 use strict;
 use warnings;

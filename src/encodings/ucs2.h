@@ -1,7 +1,7 @@
 /* ucs2.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: ucs2.h 12826 2006-05-30 01:36:30Z coke $
+ *     $Id: /local/src/encodings/ucs2.h 12826 2006-05-30T01:36:30.308856Z coke  $
  *  Overview:
  *     This is the header for the ucs2 fixed-width encoding.
  *  Data Structure and Algorithms:

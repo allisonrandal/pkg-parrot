@@ -1,4 +1,4 @@
-# $Id: m4.pir 12688 2006-05-15 19:40:33Z bernhard $
+# $Id: /local/languages/m4/src/m4.pir 12688 2006-05-15T19:40:33.020324Z bernhard  $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ m4.pir - An implementation of GNU m4 in Parrot Intermediate Representation
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: m4.pir 12688 2006-05-15 19:40:33Z bernhard $
+SVN Info:   $Id: /local/languages/m4/src/m4.pir 12688 2006-05-15T19:40:33.020324Z bernhard  $
 Overview:   Main of Parrot m4.
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html

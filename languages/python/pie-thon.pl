@@ -1,12 +1,13 @@
-#!/usr/bin/perl -w
+#! perl
 
-# $Id: pie-thon.pl 11761 2006-02-27 07:57:10Z bernhard $
+# $Id: /local/languages/python/pie-thon.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 # This is a minimal and incomplete python bytecode to PIR translator
 # It's purpose is just to investigate missing pythonic features
 # in Parrot and how to translate Python stack-oriented bytecode to PIR.
 
 use strict;
+use warnings;
 use Getopt::Std;
 
 my ($DIS, @dis, @source, $file, %opt, $DEFVAR, $cur_func, $lambda_count,
@@ -250,7 +251,7 @@ sub New_func {
     }
     print <<EOC;
 .end		# $cur_func
-.namespace [""]
+.namespace
 
 $nst
 .sub $real_name prototyped$meth $cmt

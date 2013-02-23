@@ -1,12 +1,13 @@
 #! perl
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: past.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/examples/past.t 13690 2006-07-30T00:05:31.251789Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 1;
+# use Parrot::Test tests => 1;
+use Parrot::Test plan  skip_all => 'PAST is being redesigned';
 use Parrot::Config;
 
 

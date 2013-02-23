@@ -1,5 +1,5 @@
 #! perl -w
-#$Id: MD5.pm 7329 2004-12-22 01:59:12Z chromatic $
+#$Id: /local/lib/Digest/Perl/MD5.pm 11501 2006-02-10T18:27:13.457666Z particle  $
 
 package Digest::Perl::MD5;
 use strict;

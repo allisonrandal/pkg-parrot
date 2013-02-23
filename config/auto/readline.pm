@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: readline.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/auto/readline.pm 13861 2006-08-03T21:16:38.168101Z chip  $
 
 =head1 NAME
 
@@ -59,13 +59,14 @@ sub runstep
     }
 
     cc_gen('config/auto/readline/readline.in');
-    eval { cc_build(); };
     my $has_readline = 0;
+    eval { cc_build() };
     if (!$@) {
-	$has_readline = 1;
-	print " (yes) " if $verbose;
-	$self->set_result('yes');
-
+	if (cc_run()) {
+	    $has_readline = 1;
+	    print " (yes) " if $verbose;
+	    $self->set_result('yes');
+	}
 	$conf->data->set(
 	    readline     => 'define',
 	    HAS_READLINE => $has_readline,

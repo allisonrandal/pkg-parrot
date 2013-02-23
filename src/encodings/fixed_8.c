@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004, The Perl Foundation.
-$Id: fixed_8.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/encodings/fixed_8.c 12826 2006-05-30T01:36:30.308856Z coke  $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: forlist.t 11357 2006-01-27 07:56:36Z fperrad $
+# $Id: /local/languages/lua/t/forlist.t 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 

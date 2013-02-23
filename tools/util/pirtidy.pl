@@ -1,5 +1,5 @@
 #! perl
-# $Id: pirtidy.pl 12617 2006-05-11 16:43:46Z particle $
+# $Id: /local/tools/util/pirtidy.pl 12617 2006-05-11T16:43:46.320675Z particle  $
 
 use strict;
 use warnings;

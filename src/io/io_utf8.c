@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: io_utf8.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/io/io_utf8.c 13029 2006-06-26T19:26:45.696181Z bernhard  $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ representation.
 
 #include "parrot/parrot.h"
 #include "io_private.h"
-#include "parrot/unicode.h"
+#include "../unicode.h"
 
 /* Defined at bottom */
 static const ParrotIOLayerAPI pio_utf8_layer_api;

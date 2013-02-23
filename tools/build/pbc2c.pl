@@ -1,6 +1,6 @@
-#! perl -w
+#! perl
 # TODO: Resolve copyright. See ADDITIONAL section at end of file.
-# $Id: pbc2c.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/build/pbc2c.pl 13529 2006-07-24T17:20:02.191389Z chip  $
 
 =head1 NAME
 
@@ -17,6 +17,7 @@ input if no file is named, and turn it into a C implementation file.
 
 =cut
 
+use warnings;
 use strict;
 
 use lib 'lib';

@@ -1,4 +1,4 @@
-# $Id: P6C.pm 12463 2006-04-30 14:02:48Z bernhard $
+# $Id: /local/languages/regex/lib/Regex/Parse/P6C.pm 12463 2006-04-30T14:02:48.452322Z bernhard  $
 
 package Regex::Parse::P6C;
 

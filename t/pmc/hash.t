@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: hash.t 12856 2006-05-31 15:18:28Z leo $
+# $Id: /local/t/pmc/hash.t 12856 2006-05-31T15:18:28.565772Z leo  $
 
 use strict;
 use warnings;

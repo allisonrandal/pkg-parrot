@@ -1,0 +1,8 @@
+#!/usr/bin/perl
+
+# $Id: /local/languages/cardinal/t/harness 13594 2006-07-25T22:35:08.338062Z chip  $
+
+use FindBin;
+use lib qw( . lib ../lib ../../lib ../../lib );
+use Parrot::Test::Harness language => 'Cardinal';
+

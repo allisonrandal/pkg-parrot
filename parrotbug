@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # Copyright (C) 2004, The Perl Foundation.
-# $Id: parrotbug 12954 2006-06-16 17:35:29Z ambs $
+# $Id: /local/parrotbug 13183 2006-07-06T20:05:47.681449Z chip  $
 #
 
 eval 'exec perl -w -S $0 ${1+"$@"}'
@@ -64,7 +64,7 @@ parrot distribution, and any solutions to such problems, to parrot
 developers.
 
 If you're just looking for help with parrot, subscribe to the parrot
-mailing list, perl6-internals<at>perl.org.
+mailing list, parrot-porters<at>perl.org.
 
 
 

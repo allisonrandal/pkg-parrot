@@ -1,6 +1,6 @@
 # Pugs-specific PMC testing
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: pmc.pm 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/pugs/t/pmc.pm 12840 2006-05-30T15:08:05.048089Z coke  $
 
 package t::pmc;
 use Parrot::Test 'no_plan';

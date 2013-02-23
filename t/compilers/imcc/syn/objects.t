@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: objects.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/compilers/imcc/syn/objects.t 13099 2006-07-01T21:25:20.974025Z chip  $
 
 use strict;
 use warnings;
@@ -150,7 +150,7 @@ pir_output_is(<<'CODE', <<'OUT', "initializer");
     print "baz_init\n"
 .end
 
-.namespace [""]	# main again
+.namespace  # main again
 .sub _sub
     print "in sub\n"
 .end

@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: miniparrot.pm 12827 2006-05-30 02:28:15Z coke $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: /local/config/init/miniparrot.pm 12981 2006-06-20T19:26:31.775154Z bernhard  $
 
 =head1 NAME
 
@@ -56,7 +56,6 @@ sub runstep
         jitcapable         => 0,
         execcapable        => 0,
         cc_hasjit          => '',
-        TEMP_jit_h         => '',
         TEMP_jit_o         => '',
         TEMP_exec_h        => '',
         TEMP_exec_o        => '',

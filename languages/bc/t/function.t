@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: function.t 12840 2006-05-30 15:08:05Z coke $
+# $Id: /local/languages/bc/t/function.t 12840 2006-05-30T15:08:05.048089Z coke  $
 
 =head1 NAME
 

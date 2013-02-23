@@ -1,4 +1,4 @@
-# $Id: japh8.pasm 12882 2006-06-05 11:05:52Z leo $
+# $Id: /local/examples/japh/japh8.pasm 12882 2006-06-05T11:05:52.409812Z leo  $
 
 # Little Endian only using struct
     new P1, .ResizablePMCArray

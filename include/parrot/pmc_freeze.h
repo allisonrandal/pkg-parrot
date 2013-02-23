@@ -1,7 +1,7 @@
 /* pmc_freeze.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: pmc_freeze.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/pmc_freeze.h 13925 2006-08-04T15:10:35.798913Z chip  $
  *  Overview:
  *     PMC freeze and thaw interface
  *  Data Structure and Algorithms:
@@ -56,7 +56,7 @@ typedef struct _image_io {
 
 typedef enum {
     EXTRA_IS_NULL,
-    EXTRA_IS_COUNT,
+    EXTRA_IS_UNUSED,
     EXTRA_IS_PROP_HASH,
     EXTRA_CLASS_EXISTS
 } extra_flags_enum;

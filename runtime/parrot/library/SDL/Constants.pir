@@ -1,5 +1,5 @@
 
-# $Id: Constants.pir 12837 2006-05-30 13:47:57Z coke $
+# $Id: /local/runtime/parrot/library/SDL/Constants.pir 13081 2006-07-01T03:36:07.973456Z chromatic  $
 
 =head1 NAME
 
@@ -31,8 +31,7 @@ This library declares the following constants:
 	# load the constants
 	_load_key_names()
 
-	.pcc_begin_return
-	.pcc_end_return
+	.return()
 .end
 
 =item * SDL::Constant::key_names
@@ -289,8 +288,7 @@ For example, C<8> corresponds to C<backspace>.
 	key_names[ 321 ] = 'euro'
 	key_names[ 322 ] = 'undo'
 
-	.pcc_begin_return
-	.pcc_end_return
+	.return()
 .end
 
 =back

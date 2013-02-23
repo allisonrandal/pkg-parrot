@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: Syck.pir 12837 2006-05-30 13:47:57Z coke $
+# $Id: /local/runtime/parrot/library/YAML/Parser/Syck.pir 12837 2006-05-30T13:47:57.477012Z coke  $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 #! perl -w
-# $Id: defines.t 10770 2005-12-29 18:45:07Z bernhard $
+# $Id: /local/languages/scheme/t/logic/defines.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use FindBin;
 use lib "$FindBin::Bin/../..";

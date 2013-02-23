@@ -1,11 +1,14 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: pdd14_bignum.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/pdds/clip/pdd14_bignum.pod 13638 2006-07-26T21:52:12.500635Z chip  $
 
 =head1 NAME
 
 docs/pdds/pdd14_bignum.pod - Big Numbers
 
 =head1 ABSTRACT
+
+{{ NOTE: needs to be compared to current behavior of bignum library.
+Future directions?}}
 
 This document describes the big number library, the functionality it provides
 and some internal details of interest to people making use of the library. 
@@ -382,9 +385,9 @@ Perl's Math::Big* modules.
     Maintainer: Alex Gough (alex@earth.li)
     Class: Internals
     PDD Number: 14
-    Version: $Id: pdd14_bignum.pod 12839 2006-05-30 14:34:31Z coke $
+    Version: $Id: /local/docs/pdds/clip/pdd14_bignum.pod 13638 2006-07-26T21:52:12.500635Z chip  $
     Status: Informational
-    Last Modified: $Id: pdd14_bignum.pod 12839 2006-05-30 14:34:31Z coke $
+    Last Modified: $Id: /local/docs/pdds/clip/pdd14_bignum.pod 13638 2006-07-26T21:52:12.500635Z chip  $
     PDD Format: 1
     Language: English
 

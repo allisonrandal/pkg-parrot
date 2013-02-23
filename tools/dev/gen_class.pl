@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2003, The Perl Foundation.
-# $Id: gen_class.pl 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/tools/dev/gen_class.pl 12841 2006-05-30T15:23:20.183054Z coke  $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: jit.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/auto/jit.pm 13660 2006-07-28T17:05:24.263356Z chip  $
 
 =head1 NAME
 
@@ -36,8 +36,8 @@ sub runstep
 
     my $verbose = $conf->options->get('verbose');
 
-    my $jitbase  = "src/jit";        # base path for jit sources
-    my $archname = $Config{archname};
+    my $jitbase  = 'src/jit';        # base path for jit sources
+    my $archname = $conf->data->get('archname');
     my ($cpuarch, $osname) = split(/-/, $archname);
 
     if (!defined $osname) {
@@ -84,13 +84,13 @@ sub runstep
         if $verbose;
 
     # XXX disable all but i386, ppc
-    my %working_jit = (
+    my %jit_is_working = (
 	i386 => 1,
-	ppc => 1,	
+	ppc  => 1,	
 	# all others are seriously b0rked
     );
 
-    if (-e "$jitbase/$cpuarch/core.jit" && $working_jit{$cpuarch}) {
+    if (-e "$jitbase/$cpuarch/core.jit" && $jit_is_working{$cpuarch}) {
         $jitcapable = 1;
     }
 
@@ -117,7 +117,6 @@ sub runstep
             jitosname   => uc($jitosname),
             jitcapable  => 1,
             cc_hasjit   => " -DHAS_JIT -D\U$jitcpuarch",
-            TEMP_jit_h  => '$(INC_DIR)/jit.h',
             TEMP_jit_o  =>
                 '$(SRC_DIR)/jit$(O) $(SRC_DIR)/jit_cpu$(O) $(SRC_DIR)/jit_debug$(O) $(SRC_DIR)/jit_debug_xcoff$(O)'
         );
@@ -140,7 +139,7 @@ sub runstep
         if ($execcapable) {
             $conf->data->set(
                 TEMP_exec_h =>
-                    '$(INC_DIR)/jit.h $(INC_DIR)/exec.h $(SRC_DIR)/exec_dep.h $(SRC_DIR)/exec_save.h',
+                    '$(SRC_DIR)/jit.h $(INC_DIR)/exec.h $(SRC_DIR)/exec_dep.h $(SRC_DIR)/exec_save.h',
                 TEMP_exec_o =>
                     '$(SRC_DIR)/exec$(O) $(SRC_DIR)/exec_cpu$(O) $(SRC_DIR)/exec_save$(O)',
                 execcapable => 1
@@ -191,7 +190,6 @@ sub runstep
             jitcapable  => 0,
             execcapable => 0,
             cc_hasjit   => '',
-            TEMP_jit_h  => '',
             TEMP_jit_o  => '',
             TEMP_exec_h => '',
             TEMP_exec_o => ''

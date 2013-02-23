@@ -1,5 +1,5 @@
 # Copyright (C) 2006, The Perl Foundation.
-# $Id$
+# $Id: /local/config/init/hints/netbsd.pm 13278 2006-07-13T13:40:14.092490Z coke  $
 
 package init::hints::netbsd;
 

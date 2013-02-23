@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, The Perl Foundation.
-# $Id: File.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/IO/File.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -24,8 +24,7 @@ package Parrot::IO::File;
 use strict;
 use warnings;
 
-use Parrot::IO::Path;
-our @ISA = qw(Parrot::IO::Path);
+use base qw( Parrot::IO::Path );
 
 use FileHandle;
 use Parrot::IO::Directory;

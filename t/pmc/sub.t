@@ -1,13 +1,13 @@
 #! perl
 # Copyright (C) 2001-2006, The Perl Foundation.
-# $Id: sub.t 12871 2006-06-02 14:19:51Z coke $
+# $Id: /local/t/pmc/sub.t 13660 2006-07-28T17:05:24.263356Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 53;
+use Parrot::Test tests => 56;
 use Parrot::Config;
 
 =head1 NAME
@@ -1252,3 +1252,42 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'literal \u in sub name (not unicode)');
 CODE
 ok
 OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'load_bytecode with .pir (RT #39807)');
+.sub main :main
+    load_bytecode 'PGE.pbc'
+    load_bytecode 'dumper.pir'
+    load_bytecode 'PGE/Dumper.pir'
+
+    $P0 = compreg 'PGE::P5Regex'
+    $P1 = $P0('aabb*')
+    $P2 = $P1('fooaabbbar')
+
+    _dumper($P2)
+.end
+CODE
+"VAR1" => PMC 'PGE::Match' => "aabbb" @ 3
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', 'load_bytecode with .pbc (RT #39807)');
+.sub main :main
+    load_bytecode 'PGE.pbc'
+    load_bytecode 'dumper.pbc'
+    load_bytecode 'PGE/Dumper.pbc'
+
+    $P0 = compreg 'PGE::P5Regex'
+    $P1 = $P0('aabb*')
+    $P2 = $P1('fooaabbbar')
+
+    _dumper($P2)
+.end
+CODE
+"VAR1" => PMC 'PGE::Match' => "aabbb" @ 3
+OUTPUT
+
+pir_output_like(<<'CODE', qr/Null PMC access in invoke()/, 'invoking null pmc');
+.sub main :main
+    null $P0
+    $P0()
+.end
+CODE

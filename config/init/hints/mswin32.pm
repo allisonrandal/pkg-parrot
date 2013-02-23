@@ -1,5 +1,5 @@
 # Copyright (C) 2005, The Perl Foundation.
-# $Id: mswin32.pm 12827 2006-05-30 02:28:15Z coke $
+# $Id: /local/config/init/hints/mswin32.pm 13784 2006-08-01T17:54:04.760248Z chip  $
 
 package init::hints::mswin32;
 
@@ -196,6 +196,8 @@ sub runstep
             ncilib_link_extra    => 'src/libnci_test.def',
             sym_export           => '__declspec(dllexport)',
             sym_import           => '__declspec(dllimport)',
+            make                 => 'mingw32-make',
+            make_c               => 'mingw32-make -C',
         );
     }
 }

@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: Op.pm 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/lib/Parrot/Op.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =head1 NAME
 
@@ -62,9 +62,11 @@ Op Type:
 
 =cut
 
-use strict;
-
 package Parrot::Op;
+
+use strict;
+use warnings;
+
 
 =item C<new($code, $type, $name, $args, $argdirs, $labels, $flags)>
 

@@ -1,6 +1,6 @@
 /* quantumreg.pmc
  *  SVN Info
- *     $Id: quantumreg.pmc 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: /local/src/dynpmc/quantumreg.pmc 13523 2006-07-24T15:49:07.843920Z chip  $
  *  Overview:
  *     These are the vtable functions for the QuantumReg PMC
  *  Data Structure and Algorithms:
@@ -15,6 +15,10 @@
 =head1 NAME
 
 src/dynpmc/quantumreg.pmc - QuantumReg PMC
+
+=head1 STATUS
+
+Development has stalled. Takers are welcome.
 
 =head1 DESCRIPTION
 
@@ -123,7 +127,7 @@ Returns the number of qbits in the quantum register.
 
 =head1 SEE ALSO
 
-F<docs/pdds/pdd08_keys.pod>, L<http://gdbm.gnu.org>
+L<http://www.enyo.de/libquantum/>
 
 =cut
 

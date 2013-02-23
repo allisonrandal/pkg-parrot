@@ -2,7 +2,7 @@
 Copyright (C) 2001-2005, The Perl Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packdump.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/packdump.c 12826 2006-05-30T01:36:30.308856Z coke  $
 
 =head1 NAME
 

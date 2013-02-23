@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: array.pmc 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pmc/array.pmc 13265 2006-07-12T18:35:05.831240Z particle  $
 
 =head1 NAME
 
@@ -1263,8 +1263,8 @@ Used to unarchive the array.
         SUPER(info);
         if (info->extra_flags == EXTRA_IS_NULL)
             DYNSELF.set_integer_native(io->vtable->shift_integer(INTERP, io));
-        }
     }
+}
 
 /*
 

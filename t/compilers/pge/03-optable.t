@@ -1,5 +1,5 @@
 #! perl
-# $Id: 03-optable.t 12668 2006-05-14 15:36:59Z pmichaud $
+# $Id: /local/t/compilers/pge/03-optable.t 12668 2006-05-14T15:36:59.519628Z pmichaud  $
 
 use strict;
 use warnings;

@@ -12,7 +12,7 @@
 #     (Length of variable name)[+1+subscriptlen+1+[subscriptlen+1]...
 #     So that FOO(56,1) will occupy FOO|1,56 an 8-byte slot
 #
-# $Id: basicvar.pasm 3118 2003-03-09 23:08:58Z clintp $
+# $Id: /local/languages/BASIC/interpreter/basicvar.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 # $Log: basicvar.pasm,v 
 # Revision 1.9  2002/06/16 21:23:28  clint
 # Floating Point BASI

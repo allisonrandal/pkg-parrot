@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: embed.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/embed.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ to get destroyed.
 #if EXEC_CAPABLE
 #  include "parrot/exec.h"
 #endif /* EXEC_CAPABLE */
-#include "parrot/jit.h"
+#include "jit.h"
 #endif
 Parrot_Interp
 Parrot_new(Parrot_Interp parent)
@@ -432,6 +432,10 @@ Loads the C<PackFile> returned by C<Parrot_readbc()>.
 void
 Parrot_loadbc(Interp *interpreter, struct PackFile *pf)
 {
+	if (pf == NULL) {
+		PIO_eprintf(interpreter, "Invalid packfile\n" );
+		return;
+	}
     interpreter->initial_pf = pf;
     interpreter->code = pf->cur_cs;
 }
@@ -568,7 +572,7 @@ calibrate(Parrot_Interp interpreter)
 
 /*
 
-=item C<static void print_profile(int status, void *p)>
+=item C<static void print_profile(Interp*, int status, void *p)>
 
 Prints out a profile listing.
 
@@ -577,10 +581,8 @@ Prints out a profile listing.
 */
 
 static void
-print_profile(int status, void *p)
+print_profile(Interp *interpreter, int status, void *p)
 {
-    Parrot_Interp interpreter = (Parrot_Interp) p;
-
     if (interpreter->profile != NULL) {
         UINTVAL j;
         int k;
@@ -642,7 +644,7 @@ print_profile(int status, void *p)
 
 /*
 
-=item C<static void print_debug(int status, void *p)>
+=item C<static void print_debug(Interp*, int status, void *p)>
 
 Prints GC info.
 
@@ -651,9 +653,8 @@ Prints GC info.
 */
 
 static void
-print_debug(int status, void *p)
+print_debug(Interp *interpreter, int status, void *p)
 {
-    Parrot_Interp interpreter = (Parrot_Interp) p;
     if (Interp_debug_TEST(interpreter, PARROT_MEM_STAT_DEBUG_FLAG)) {
         /* Give the souls brave enough to activate debugging an earful
          * about GC. */
@@ -785,8 +786,8 @@ Parrot_runcode(Interp *interpreter, int argc, char *argv[])
      * If any profile information was gathered, print it out
      * before exiting, then print debug infos if turned on.
      */
-    Parrot_on_exit(print_debug,   interpreter);
-    Parrot_on_exit(print_profile, interpreter);
+    Parrot_on_exit(interpreter, print_debug,   NULL);
+    Parrot_on_exit(interpreter, print_profile, NULL);
 
     /* Let's kick the tires and light the fires--call interpreter.c:runops. */
     main_sub = CONTEXT(interpreter->ctx)->current_sub;

@@ -3,7 +3,7 @@
  *  Copyright (C) 2002, The Perl Foundation.
  *  License:  Artistic/GPL, see README and LICENSES for details
  *  SVN Info
- *     $Id: datatypes.h 12821 2006-05-29 13:44:57Z coke $
+ *     $Id: /local/include/parrot/datatypes.h 12821 2006-05-29T13:44:57.786877Z coke  $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *

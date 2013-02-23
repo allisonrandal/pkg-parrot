@@ -1,7 +1,7 @@
 /* charset.h
  *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: charset.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/charset.h 13784 2006-08-01T17:54:04.760248Z chip  $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:
@@ -30,7 +30,7 @@ PARROT_API extern CHARSET *Parrot_ascii_charset_ptr;
 #endif
 
 #define PARROT_DEFAULT_CHARSET Parrot_ascii_charset_ptr
-#define PARROT_BINARY_CHARSET Parrot_binary_charset
+#define PARROT_BINARY_CHARSET Parrot_binary_charset_ptr
 #define PARROT_UNICODE_CHARSET Parrot_unicode_charset_ptr
 
 typedef STRING *(*charset_get_graphemes_t)(Interp *, STRING *source_string, UINTVAL offset, UINTVAL count);

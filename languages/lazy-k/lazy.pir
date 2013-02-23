@@ -1,4 +1,4 @@
-# $Id: lazy.pir 11641 2006-02-18 12:54:27Z bernhard $
+# $Id: /local/languages/lazy-k/lazy.pir 11641 2006-02-18T12:54:27.528543Z bernhard  $
 
 =head1 DESCRIPTION
 

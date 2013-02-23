@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: test_file_coverage.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/distro/test_file_coverage.t 13385 2006-07-19T15:47:16.358568Z coke  $
 
 use strict;
 use warnings;
@@ -60,10 +60,9 @@ PMC: {
         local $TODO = "not yet implemented";
         ok(!@$pmc_miss, "there are test files for all PMC files in $pmc_dir")
             or diag "files in $test_dir but not in PMC dir:\n\t@$pmc_miss";
-
-        ok(!@$test_miss, "there are PMC files for all test files in $test_dir")
-            or diag "files in $pmc_dir but not in test dir:\n\t@$test_miss";
     }
+    ok(!@$test_miss, "there are PMC files for all test files in $test_dir")
+        or diag "files in $pmc_dir but not in test dir:\n\t@$test_miss";
 
 } # PMC
 

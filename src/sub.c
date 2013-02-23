@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2006, The Perl Foundation.
-$Id: sub.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/sub.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -141,6 +141,7 @@ new_continuation(Interp *interp, struct Parrot_cont *to)
 
     cc->to_ctx = to_ctx;
     cc->from_ctx = CONTEXT(interp->ctx);
+    cc->runloop_id = 0;
     CONTEXT(interp->ctx)->ref_count++;
     if (to) {
         cc->seg = to->seg;
@@ -171,6 +172,7 @@ new_ret_continuation(Interp *interp)
     struct Parrot_cont * const cc = mem_sys_allocate(sizeof(struct Parrot_cont));
     cc->to_ctx = CONTEXT(interp->ctx);
     cc->from_ctx = NULL;    /* filled in during a call */
+    cc->runloop_id = 0;
     cc->seg = interp->code;
     cc->current_results = NULL;
     cc->address = NULL;

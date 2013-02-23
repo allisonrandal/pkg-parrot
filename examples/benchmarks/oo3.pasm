@@ -1,4 +1,4 @@
-# $Id: oo3.pasm 12177 2006-04-11 19:56:05Z bernhard $
+# $Id: /local/examples/benchmarks/oo3.pasm 12177 2006-04-11T19:56:05.232596Z bernhard  $
 
     newclass P1, "Foo"
     find_global P2, "init"

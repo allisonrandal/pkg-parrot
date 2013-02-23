@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: subrules.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/compilers/pge/p6regex/subrules.t 13402 2006-07-20T18:04:44.539601Z pmichaud  $
 
 use strict;
 use warnings;
@@ -74,6 +74,14 @@ p6rule_is("ab",
 
 p6rule_isnt("   ab", '^ <ws>: \ ab', "cut on subrules");
 
+p6rule_isnt('whence',
+    [
+        [ subrule => 'when <commit> ever' ],
+        [ _MASTER => '<subrule> | whence' ],
+    ],
+    "<commit> in nested subrule");
+
+
 
 # remember to change the number of tests :-)
-BEGIN { plan tests => 6; }
+BEGIN { plan tests => 7; }

@@ -1,7 +1,7 @@
 /* encoding.h
  *  Copyright (C) 2004-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: encoding.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/encoding.h 12834 2006-05-30T13:17:39.723584Z coke  $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:

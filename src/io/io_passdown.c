@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: io_passdown.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/io/io_passdown.c 12826 2006-05-30T01:36:30.308856Z coke  $
 
 =head1 NAME
 

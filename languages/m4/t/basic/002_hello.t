@@ -1,4 +1,4 @@
-# $Id: 002_hello.t 12226 2006-04-14 15:02:50Z bernhard $
+# $Id: /local/languages/m4/t/basic/002_hello.t 12226 2006-04-14T15:02:50.254463Z bernhard  $
 
 use strict;
 use warnings;

@@ -1,4 +1,4 @@
-# $Id: bf.pasm 9951 2005-11-13 17:36:39Z coke $
+# $Id: /local/languages/bf/bf.pasm 11501 2006-02-10T18:27:13.457666Z particle  $
 # A Brainfuck interpreter
 # By Leon Brocard <acme@astray.com>
 #

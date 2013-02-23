@@ -1,5 +1,5 @@
 // Copyright (C) 2005-2006, The Perl Foundation.
-// $Id: antlr_past2pir_past.g 12840 2006-05-30 15:08:05Z coke $
+// $Id: /local/languages/bc/grammar/antlr_2/antlr_past2pir_past.g 12840 2006-05-30T15:08:05.048089Z coke  $
 
 header "AntlrPast2PirPastTreeWalker.__init__" 
 {

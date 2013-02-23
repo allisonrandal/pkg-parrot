@@ -1,18 +1,17 @@
 #!perl
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: file_metadata.t 12838 2006-05-30 14:19:10Z coke $
+# $Id: /local/t/distro/file_metadata.t 13907 2006-08-04T05:53:16.699881Z chip  $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
-use File::Find qw( find );
 use File::Basename qw( fileparse );
-use File::Spec::Functions qw( canonpath catdir catfile );
+use File::Spec::Functions qw( catfile );
 use Parrot::Config;
 use Parrot::Revision;
 use ExtUtils::Manifest qw( maniread );
-
 
 =head1 NAME
 
@@ -28,65 +27,57 @@ Makes sure that file metadata meets our expectations. For example, checks
 include 'all test files have "text/plain" mime-type',
 and 'all "text/plain" files have keyword expansion enabled'.
 
-NOTE: these tests take a B<LONG> time to run.
+Note: These tests would benefit from judicial application of Iterators.
 
 =cut
 
+my $cmd = -d '.svn' ? 'svn' : 'svk';
+# how many files to check at a time. May have to lower this when we run
+# this on systems with finicky command lines.
+my $chunk_size = 100; 
 
 # get files listed in MANIFEST
 my @manifest_files =
 	sort keys %{maniread( catfile $PConfig{build_dir}, 'MANIFEST' )};
 
+## all test files have "text/plain" mime-type. Assume anything in the
+## repository with a .t is test file.
 
-## all test files have "text/plain" mime-type
+my $mime_types = get_attribute('svn:mime-type', @manifest_files);
+
 TEST_MIME: {
-	my $test_dir = 't';
-	my $test_suffix = '.t';
-
-	my @test_files;
-
-
 	# find test files
-	find { no_chdir => 1,
-			wanted => sub{ files_of_type( \@test_files, $test_suffix ) },
-		} => canonpath catdir( $PConfig{build_dir}, $test_dir );
-
-
-	my @cmd = qw(svn pg svn:mime-type);
-
-	my $msg = "test file has 'text/plain' mime-type";
-	diag $msg;
-
-	is(
-		sub{ my $r = qx(@cmd $_); chomp $r; "$_ ($r)" }->(),
-		"$_ (text/plain)",
-		"$msg ($_)"
-	) for @test_files;
+	my $test_suffix = '.t';
+	my @test_files = grep { m/\Q$test_suffix\E$/} @manifest_files;
+    verify_attributes('mime-type', 'text/plain', 0, $mime_types, \@test_files);
+ 
 } # TEST_MIME
 
+## keyword expansion should be set for any manifest files with an explicit
+## mime type of text/plain. Assume a default of text/plain if not specified
 
-## keyword expansion
 KEYWORD_EXP: {
-	diag "this may take a while...";
 
-	my @cmd = qw(svn pg svn:mime-type);
+    # we only want those files whose mime types that start with text/plain
 
-	my @plain_files =
-		grep { $_ if qx(@cmd $_) =~ m!text/plain! } @manifest_files;
-	chomp @plain_files;
+    my @plain_files;
+    foreach my $file (keys %$mime_types) {
+        if (!defined($mime_types->{$file}) ||
+            $mime_types->{$file} =~ qr{^text/plain}) {
 
-	@cmd = qw(svn pg svn:keywords);
+            push @plain_files, $file;
+        }
+    }
 
-	my $msg = "'text/plain' file has keyword expansion";
-	diag $msg;
+    my $keywords = get_attribute ('svn:keywords', @plain_files);
 
-	is(
-		sub{ my $r = qx(@cmd $_); chomp $r; "$_ ($r)" }->(),
-		"$_ (Author Date Id Revision)",
-		"$msg ($_)"
-	) for @plain_files;
+    verify_attributes('svn:keywords', 'Author Date Id Revision', 1, $keywords);
+
 } # KEYWORD_EXP
 
+=for skip
+
+# When unskipped, rewrite to use get_attribute()...
 
 SKIP: {
 	skip 'custom svn keywords not yet supported' => 1;
@@ -106,20 +97,21 @@ COPYRIGHT: {
 	fail('official copyright not found') and last COPYRIGHT
 		unless length $official_copyright;
 
-	my @cmd = qw(svn pg Copyright);
+	@cmd = qw(pg Copyright);
 
-	my $msg = 'Copyright property matches official copyright';
+	$msg = 'Copyright property matches official copyright';
 	diag $msg;
 
 	is(
-		sub{ my $r = qx(@cmd $_); chomp $r; "$_: $r" }->(),
+		sub{ my $r = qx($cmd @cmd $_); chomp $r; "$_: $r" }->(),
 		"$_: $official_copyright",
 		"$msg ($_)"
 	) for @manifest_files;
 } # COPYRIGHT
 } # SKIP
 
-# remember to change the number of tests :-)
+=cut
+
 BEGIN {
 	unless( $Parrot::Revision::svn_entries or `svk ls .` )
 	{ plan skip_all => 'not a working copy'; }
@@ -127,19 +119,82 @@ BEGIN {
 	{ plan 'no_plan' };
 }
 
-
-
 exit;
 
+#
+# Given a list, a count, and a sub, process that list count elements
+# at a time. (do this to speed up execution for the svn/svk commands)
+#
 
+sub at_a_time {
+    my $count = shift;
+    my $sub   = shift;
+    my @list  = @_;
 
-sub files_of_type
-{
-	my( $listref, $ext ) = @_;
+    return unless $count;
+    return unless $sub;
+    return unless @list;
 
-	return unless -f $File::Find::name
-		&& $File::Find::name =~ m/\Q$ext\E$/;
+    my $pos = 0;
 
-	push @$listref => $File::Find::name;
+    while ($pos < @list) {
+        my $start = $pos;
+        my $end   = $pos+$count-1;
+        if ($end >= @list) { $end = @list -1};
+        my @sublist = @list[$start..$end];
+        $sub->(@sublist);
+        $pos += $count;
+    }
 }
 
+# Given an attribute and a list of files, return a hashref
+# containing filenames/values.
+sub get_attribute {
+    my $attribute = shift;
+    my @list      = @_;
+
+    diag "Collecting $attribute attributes...\n";
+
+    my %results;
+    map {$results{$_}=undef} @list;
+
+    at_a_time($chunk_size, sub {
+        my @partial_list = @_;
+
+        foreach my $result (qx($cmd pg $attribute @partial_list)) {
+            # This RE may be a little wonky.
+            if ($result =~ m{(.*) - (.*)}) {
+                $results{$1} = $2;
+            }
+        }
+    
+    }, @list);
+    return \%results;
+}
+
+sub verify_attributes {
+    my $attribute = shift;  # name of the attribute
+    my $expected  = shift;  # the expected value
+    my $exact     = shift;  # should this be an exact match?
+    my $results   = shift;  # the results hash ref: file -> value
+    my $files     = shift;  # an arrayref of files we care about. (undef->all)
+
+    my @files;
+    if (defined($files)) {
+        @files = @$files;
+    } else {
+        @files = keys %$results;
+    }
+ 
+    foreach my $file (@files) {
+        my $actual   = "$file - (" . $results->{$file} . ")"; 
+        my $platonic;
+        if ($exact) {
+            $platonic = "$file - ($expected)";
+            is ($actual, $platonic, "$file ($attribute)")
+        } else {
+            $platonic = qr{^$file - \($expected};
+            like ($actual, $platonic, "$file ($attribute)")
+        }
+    }
+}

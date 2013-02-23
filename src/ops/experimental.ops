@@ -135,23 +135,7 @@ inline op gcd(out INT, out INT, out INT, in INT, in INT) :advanced_math {
 
 =cut
 
-=item B<new>(out PMC, in INT, in KEY)
-
-XXX
-
-=cut
-
-op new(out PMC, in INT, in KEY) {
-  if ($2 <= 0 || $2 >= interpreter->n_vtable_max) {
-    internal_exception(1, "Illegal PMC enum (%d) in new", (int)$2);
-  }
-  $1 = pmc_new_init(interpreter, $2, $3);
-  goto NEXT();
-}
-
-########################################
-
-=item B<splice>(in PMC, in PMC, in INT, in INT)
+=item B<splice>(invar PMC, invar PMC, in INT, in INT)
 
 Replace $4 values at offset $3 in aggregate $1 with the PMCs in aggregate $2.
 The values are put into the aggregate by a shallow copy. If the values would
@@ -159,53 +143,53 @@ be reused, they have to be B<clone>d.
 
 =cut
 
-inline op splice(in PMC, in PMC, in INT, in INT) {
+inline op splice(invar PMC, invar PMC, in INT, in INT) {
     $1->vtable->splice(interpreter, $1, $2, $3, $4);
     goto NEXT();
 }
 
 
-=item B<slice>(out PMC, in PMC, in KEY)
+=item B<slice>(out PMC, invar PMC, in KEY)
 
 Return a new Iterator PMC $1 for aggregate $2 and Slice PMC $3.
 
-=item B<slice>(out PMC, in PMC, in KEY, inconst INT)
+=item B<slice>(out PMC, invar PMC, in KEY, inconst INT)
 
 Return a new list PMC $1 for aggregate $2 and Slice PMC $3.
 
 This is a Python opcode. Range is i <= k < j. $4 must be 1.
 May change and move to python.ops.
 
-=item B<iter>(out PMC, in PMC)
+=item B<iter>(out PMC, invar PMC)
 
 Return a new Iterator PMC $1 for aggregate $2.
 
 =cut
 
-inline op slice (out PMC, in PMC, in KEY) :base_core {
+inline op slice (out PMC, invar PMC, in KEY) :base_core {
     $1 = $2->vtable->slice(interpreter, $2, $3, 0);
     goto NEXT();
 }
 
-inline op slice (out PMC, in PMC, in KEY, inconst INT) :python {
+inline op slice (out PMC, invar PMC, in KEY, inconst INT) :python {
     $1 = $2->vtable->slice(interpreter, $2, $3, $4);
     goto NEXT();
 }
 
-inline op iter (out PMC, in PMC) :base_core {
+inline op iter (out PMC, invar PMC) :base_core {
     $1 = $2->vtable->get_iter(interpreter, $2);
     goto NEXT();
 }
 
 ########################################
 
-=item B<morph>(in PMC, in INT)
+=item B<morph>(invar PMC, in INT)
 
 Have $1 turn itself into a PMC of type $2.
 
 =cut
 
-inline op morph(in PMC, in INT) {
+inline op morph(invar PMC, in INT) {
   VTABLE_morph(interpreter, $1, $2);
   goto NEXT();
 }
@@ -224,16 +208,15 @@ inline op exec(in STR) {
   goto NEXT();
 }
 
-=back
 
-=item B<classname>(out PMC, in PMC)
+=item B<classname>(out PMC, invar PMC)
 
 Get the class name for the class in $2 and put it in $1. Note that $1 will be
 a Key PMC that you can use with "new", for example.
 
 =cut
 
-op classname(out PMC, in PMC) :object_base {
+op classname(out PMC, invar PMC) :object_base {
     PMC *ns = Parrot_NameSpace_name(interpreter, 
                                     VTABLE_namespace(interpreter, $2));
     if (PMC_IS_NULL(ns) || VTABLE_elements(interpreter, ns) < 2)
@@ -318,31 +301,6 @@ inline op pow(out NUM, in NUM, in INT) :base_core {
     goto NEXT();
 }
 
-=item B<new>(out PMC, inconst STR, in PMC)
-
-Create a new PMC of class $2;
-
- new P0, "Foo", P1
-
-The PMC in $3 is passed to the constructor. It's up to the class what to do
-with the intializer.
-
-=cut
-
-op new(out PMC, in STR, in PMC) {
-	STRING *class = $2;
-	INTVAL type = pmc_type(interpreter, class);
-	if (!type) {
-		Parrot_autoload_class(interpreter, class);
-		type = pmc_type(interpreter, class);
-	}
-	if (type <= 0)
-		real_exception(interpreter, NULL, NO_CLASS,
-				"Class '%Ss' not found", class);
-	$1 = pmc_new_init(interpreter, type, $3);
-	goto NEXT();
-}
-
 =item op B<getclass>(out PMC, in INT)
 
 Return the class PMC of the type $2.
@@ -358,10 +316,108 @@ op getclass(out PMC, in INT) {
     goto NEXT();
 }
 
-inline op new(out PMC, in PMC) :object_classes {
+=item B<new>(out PMC, in INT, in STR)
+
+Create a new PMC of the type $2 according to the PMCs string representation
+in $3. See also B<instantiate> for a more general form.
+
+BUT SINCE INSTANTIATE WILL PROBABLY DIE, DON'T USE THIS;
+OR IF YOU NEED THIS (OR INSTANTIATE), TELL CHIP
+
+=cut
+
+op new(out PMC, in INT, in STR) {
+  PMC *class;
+  if ($2 <= 0 || $2 >= interpreter->n_vtable_max) {
+    real_exception(interpreter, 0, NO_CLASS,
+		   "Illegal PMC enum (%d) in new", (int)$2);
+  }
+  class = interpreter->vtables[$2]->class;
+  $1 = VTABLE_new_from_string(interpreter, class, $3, 0);
+  goto NEXT();
+}
+
+=item B<instantiate>(out PMC)
+
+Create a new PMC of the type of class ARGS[0]. This is a classmethod.
+Arguments are passed according to the calling conventions in
+F<docs/pdds/pdd03_calling_conventions.pod> with the C<set_args> opcode.
+See also the I<getclass> opcode to get a class PMC.
+BUT SINCE INSTANTIATE WILL PROBABLY DIE, DON'T USE IT;
+OR IF YOU NEED IT, TELL CHIP
+
+=cut
+
+op instantiate(out PMC) {
+  opcode_t* arg_op;
+  PMC *sig, *class;
+  int typ;
+  
+  arg_op = interpreter->current_args;
+  if (!arg_op) {
+        real_exception(interpreter, NULL, NULL_REG_ACCESS,
+            "No set_args with instantiate");
+  }
+  sig = CONTEXT(interpreter->ctx)->constants[arg_op[1]]->u.key;
+  ASSERT_SIG_PMC(sig);
+  if (!SIG_ELEMS(sig)) {
+        real_exception(interpreter, NULL, E_ValueError,
+            "Empty signature with instantiate");
+  }
+  switch (SIG_ITEM(sig, 0)) {
+      case PARROT_ARG_IC:
+	  typ = arg_op[2];
+	  if (typ <= 1 || typ >= interpreter->n_vtable_max) {
+	      real_exception(interpreter, NULL, E_ValueError,
+		      "Illegal PMC enum (%d) in instantiate", typ);
+	  }
+	  class = interpreter->vtables[typ]->class;
+	  break;
+      case PARROT_ARG_P:
+	  class = REG_PMC(arg_op[2]);
+	  break;
+      default:
+	  internal_exception(UNIMPLEMENTED, 
+		  "uninplement class argument in instantiate");
+	  class = NULL; /* just for cc */
+	  break;
+  }
+  $1 = VTABLE_instantiate(interpreter, class, sig);
+  interpreter->current_args = NULL;
+  goto NEXT();
+}
+
+=item B<pmcinfo>(out INT, invar PMC, inconst INT)
+
+Extract some information about PMC $2 and store it in $1.
+Possible values for $3 are:
+
+=over 4
+
+=item .PMCINFO_FLAGS Get the PMC's flags.
+
+=back
+
+B<TODO> move/officalize this opcode at next op cleanup.
+
+=cut
+
+op pmcinfo(out INT, invar PMC, inconst INT) {
+  switch ($3) {
+    case PMCINFO_FLAGS:    $1 = PObj_get_FLAGS($2); break;
+  }
+  goto NEXT();
+}
+
+########################################
+
+=item B<new>(out PMC, invar PMC)
+
+=cut
+
+inline op new(out PMC, invar PMC) :object_classes {
     INTVAL type;
-    switch ($2->vtable->base_type)
-    {
+    switch ($2->vtable->base_type) {
         case enum_class_String:
 	        type = pmc_type(interpreter, PMC_str_val($2));
             if (type <= 0)

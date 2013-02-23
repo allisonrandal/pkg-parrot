@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: CSwitch.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/OpTrans/CSwitch.pm 12996 2006-06-21T18:44:31.111564Z bernhard  $
 
 =head1 NAME
 
@@ -17,15 +17,13 @@ C<switch>ed run loop.
 
 =cut
 
-use strict;
-#use warnings;
-
 package Parrot::OpTrans::CSwitch;
 
+use strict;
+use warnings;
+
 use Parrot::OpTrans;
-use Parrot::OpTrans::CPrederef;
-use vars qw(@ISA);
-@ISA = qw(Parrot::OpTrans::CPrederef);
+use base qw( Parrot::OpTrans::CPrederef );
 
 sub new
 {

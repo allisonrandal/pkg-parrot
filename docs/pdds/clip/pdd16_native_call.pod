@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: pdd16_native_call.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/pdds/clip/pdd16_native_call.pod 13638 2006-07-26T21:52:12.500635Z chip  $
 
 =head1 NAME
 
@@ -126,7 +126,7 @@ Note that not all types are valid as return types.
 =head2 Examples
 
 Most of the function parameters are reasonably self-evident. Some, however,
-merit additional explanation. The
+merit additional explanation. The {{ ??? }}
 
 =head2 Callbacks
 

@@ -1,4 +1,4 @@
-# $Id: vtable.tbl 12706 2006-05-16 20:27:30Z chip $
+# $Id: /local/vtable.tbl 12706 2006-05-16T20:27:30.337530Z chip  $
 # [MAIN] #default section name
 
 # MMD_EQ ... MMD_STRCMP must be in one block

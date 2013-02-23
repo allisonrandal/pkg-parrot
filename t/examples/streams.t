@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2006, The Perl Foundation.
-# $Id: streams.t 12841 2006-05-30 15:23:20Z coke $
+# $Id: /local/t/examples/streams.t 12841 2006-05-30T15:23:20.183054Z coke  $
 
 use strict;
 use warnings;

@@ -1,4 +1,4 @@
-## $Id: builtins.pir 12709 2006-05-17 01:42:08Z pmichaud $
+## $Id: /local/languages/perl6/src/builtins/control.pir 13523 2006-07-24T15:49:07.843920Z chip  $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ src/builtins/control.pir - Perl 6 Control functions
 =cut
 
 
-.namespace [ "" ]
+.namespace
 ## TODO: get the next line to work
 ## .namespace [ 'Control::Basic' ]
 

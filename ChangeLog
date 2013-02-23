@@ -1,4 +1,38 @@
-# $Id: ChangeLog 12972 2006-06-19 14:01:03Z leo $
+#1 $Id: /local/ChangeLog 14032 2006-08-09T01:15:23.527431Z chip  $
+
+2006.08.08    chip
+	* Released 0.4.6
+	See NEWS for more.
+
+2006.08.02    chip
+	* opcodes: "in PMC" is no longer a synonym for "invar PMC";
+	there are opcodes now that want the real "in PMC".
+	* namespace and global opcodes now accept name arrays again, as
+	well as keys; the corresponding namespace PMC methods are gone.
+
+2006.07.21    leo
+	* Parrot_exit, Parrot_on_exit take now an Interp * argument
+
+2006.07.25    chip
+	* add experimental op find_type_i_p
+	* fix longstanding bug that sometimes didn't encode pasm keys as
+	Key PMCs (specifically "[S0]" and "['stringliteral']").
+
+2006.07.24    chip
+	further implementation of new pdd21:
+	* new opcodes {get,set}*global
+	  (old {find,store}*global will be supported for a short while)
+
+2006.07.20    audreyt
+	* --maintainer prerequesites are now bison 2.2+ and flex 2.5.3x
+	  (or some such --leo) 
+          (at the moment code is checking for 2.0 -- ambs)
+
+2006.07.17    chip
+	partial implementation of new pdd21:
+	* old: "get_namespace KEY".  new: "get_hll_namespace KEY"
+	* get_namespace and find_global opcodes no longer accept arrays
+	  of strings.  To use arrays, call namespace object methods.
 
 2006.06.19    leo
 	* Released 0.4.5
@@ -3622,9 +3656,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 12972 2006-06-19 14:01:03Z leo $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: /local/ChangeLog 14032 2006-08-09T01:15:23.527431Z chip  $
 	into generated files
-	   but the $Id: ChangeLog 12972 2006-06-19 14:01:03Z leo $ string gets mangled when it's committed.
+	   but the $Id: /local/ChangeLog 14032 2006-08-09T01:15:23.527431Z chip  $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

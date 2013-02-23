@@ -1,7 +1,7 @@
 /* pmc.h
  *  Copyright (C) 2001-2006, The Perl Foundation.
  *  SVN Info
- *     $Id: pmc.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/pmc.h 13523 2006-07-24T15:49:07.843920Z chip  $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:
@@ -43,6 +43,14 @@ PARROT_API void dod_unregister_pmc(Interp *, PMC*);
 
 /* mro creation */
 PARROT_API void Parrot_create_mro(Interp *, INTVAL);
+
+/* pmcinfo parameters */
+
+/* &gen_from_def(pmcinfo.pasm) */
+
+#define PMCINFO_FLAGS    4      /* see also STRINGINFO_FLAGS */
+
+/* &end_gen */
 
 #endif /* PARROT_PMC_H_GUARD */
 

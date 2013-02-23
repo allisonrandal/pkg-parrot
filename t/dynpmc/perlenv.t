@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006, The Perl Foundation.
-# $Id: perlenv.t 12937 2006-06-14 06:57:39Z fperrad $
+# $Id: /local/t/dynpmc/perlenv.t 12937 2006-06-14T06:57:39.884482Z fperrad  $
 
 use strict;
 use warnings;

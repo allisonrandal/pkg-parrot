@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005, The Perl Foundation.
-# $Id: Base.pm 12836 2006-05-30 13:40:58Z coke $
+# $Id: /local/lib/Parrot/Configure/Step/Base.pm 12983 2006-06-20T20:02:00.179448Z bernhard  $
 
 =pod
 
@@ -28,6 +28,7 @@ I<symbols>.
 package Parrot::Configure::Step::Base;
 
 use strict;
+use warnings;
 
 =head2 Methods
 

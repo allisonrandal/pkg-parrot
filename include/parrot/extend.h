@@ -1,7 +1,7 @@
 /* extend.h
  *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: extend.h 12834 2006-05-30 13:17:39Z coke $
+ *     $Id: /local/include/parrot/extend.h 13848 2006-08-03T18:03:23.853558Z chip  $
  *  Overview:
  *     This is the Parrot extension mechanism, the face we present to
  *     extension modules and whatnot
@@ -91,7 +91,7 @@ void Parrot_PMC_delete_pmckey(Parrot_INTERP, Parrot_PMC, Parrot_PMC);
 
 Parrot_PMC Parrot_PMC_new(Parrot_INTERP, Parrot_Int);
 Parrot_PMC Parrot_PMC_null(void);
-Parrot_Int Parrot_PMC_typenum(Parrot_INTERP, const char *);
+PARROT_API Parrot_Int Parrot_PMC_typenum(Parrot_INTERP, const char *);
 
 void Parrot_free_cstring(char *);
 

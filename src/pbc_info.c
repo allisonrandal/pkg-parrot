@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, The Perl Foundation.
-$Id: pbc_info.c 12826 2006-05-30 01:36:30Z coke $
+$Id: /local/src/pbc_info.c 13784 2006-08-01T17:54:04.760248Z chip  $
 
 =head1 NAME
 
@@ -86,7 +86,7 @@ main(int argc, char * argv[] )
     printf("%s\n", pf->directory.base.name);
     PackFile_map_segments(interpreter, &pf->directory, iter, (void*)2);
 
-    Parrot_exit(0);
+    Parrot_exit(interpreter, 0);
     return 0;
 }
 

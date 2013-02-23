@@ -1,5 +1,5 @@
 #! perl -w
-# $Id: basic.t 10753 2005-12-28 23:06:44Z bernhard $
+# $Id: /local/languages/befunge/t/basic.t 11501 2006-02-10T18:27:13.457666Z particle  $
 
 use Data::Dumper;
 #use Test::More tests => 1;

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, The Perl Foundation.
-# $Id: vtables.pod 12839 2006-05-30 14:34:31Z coke $
+# $Id: /local/docs/vtables.pod 12839 2006-05-30T14:34:31.126984Z coke  $
 
 =head1 NAME
 
