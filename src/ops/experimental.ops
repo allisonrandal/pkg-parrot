@@ -1,5 +1,5 @@
 /*
- * $Id: experimental.ops 47678 2010-06-18 00:29:10Z whiteknight $
+ * $Id: experimental.ops 48933 2010-09-11 15:38:03Z nwellnhof $
 ** experimental.ops
 */
 
@@ -363,9 +363,9 @@ op find_codepoint(out INT, in STR) {
     Parrot_str_free_cstring(cstr);
     $1 = U_SUCCESS(err) ? (INTVAL) codepoint : -1;
 #else
-    opcode_t * const dest = expr NEXT();
-    Parrot_ex_throw_from_op_args(interp, dest, EXCEPTION_LIBRARY_ERROR,
-        "no ICU lib loaded");
+    opcode_t * const dest = Parrot_ex_throw_from_op_args(interp, expr NEXT(),
+        EXCEPTION_LIBRARY_ERROR, "no ICU lib loaded");
+    goto ADDRESS(dest);
 #endif
 }
 

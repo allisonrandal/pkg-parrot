@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: httpd.pir 47583 2010-06-13 01:02:26Z coke $
+# $Id: httpd.pir 48979 2010-09-13 18:55:26Z nwellnhof $
 
 =head1 NAME
 
@@ -142,11 +142,11 @@ NEXT:
     req = ""
 MORE:
     buf = work.'recv'()
-    # charset I0, buf
-    # charsetname S1, I0
+    # encoding I0, buf
+    # encodingname S1, I0
     # print "\nret: "
     # print ret
-    # print "\ncharset of buf: "
+    # print "\nencoding of buf: "
     # print S1
     # print "\nbuf:"
     # print buf

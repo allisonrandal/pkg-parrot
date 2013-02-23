@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2010, Parrot Foundation.
- * $Id: platform_interface.h 47066 2010-05-27 21:53:29Z bacek $
+ * $Id: platform_interface.h 48580 2010-08-20 12:42:42Z NotFound $
  */
 
 #ifndef PARROT_PLATFORM_INTERFACE_H_GUARD
@@ -48,6 +48,13 @@ void *mem_realloc_executable(void *, size_t, size_t);
 #  define mem_free_executable(a, b) mem_internal_free(a)
 #  define mem_realloc_executable(a, b, c) mem_internal_realloc((a), (c))
 #endif
+
+
+/*
+** Process ID
+*/
+
+UINTVAL Parrot_getpid(void);
 
 /*
 ** Time

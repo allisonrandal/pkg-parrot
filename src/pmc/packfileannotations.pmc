@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: packfileannotations.pmc 46369 2010-05-06 17:18:01Z NotFound $
+$Id: packfileannotations.pmc 48891 2010-09-09 21:37:38Z nwellnhof $
 
 =head1 NAME
 
@@ -80,6 +80,8 @@ Marks the object as live.
                 PARROT_PACKFILEANNOTATIONS(SELF);
 
         Parrot_gc_mark_PMC_alive(INTERP, attrs->const_table);
+        Parrot_gc_mark_PMC_alive(INTERP, attrs->gr_byte);
+        Parrot_gc_mark_PMC_alive(INTERP, attrs->gr_entries);
         Parrot_gc_mark_PMC_alive(INTERP, attrs->annotations);
 
         SUPER();

@@ -1,6 +1,6 @@
 #! nqp
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: File.pm 47049 2010-05-27 06:24:01Z cotto $
+# $Id: File.pm 48736 2010-08-31 15:49:14Z cotto $
 
 # XXX Better to put this into docs/ somewhere.
 
@@ -296,13 +296,37 @@ method _calculate_op_codes() {
 
 method _set_version() {
     my $config := _config();
-    my $version := $config<VERSION>;
+    my $version_filename;
+    if $config<installed> {
+        $version_filename :=
+            $config<libdir> ~
+            $config<versiondir> ~
+            $config<slash> ~
+            'VERSION';
+    }
+    else {
+        $version_filename :=
+            $config<prefix> ~
+            $config<slash> ~
+            'VERSION';
+    }
+
+    grammar VERSION {
+        rule TOP { <version> }
+        rule version { $<major>=(\d+) '.' $<minor>=(\d+) '.' $<patch>=(\d+) }
+    }
+
+    my $version       := slurp($version_filename);
+    my $version_match := VERSION.parse($version);
     #say("# $version");
-    my @bits := split('.', $version);
-    self<version_major> := @bits[0];
-    self<version_minor> := @bits[1];
-    self<version_patch> := @bits[2];
-    self<version>       := @bits;
+    self<version_major> := +$version_match<version><major>;
+    self<version_minor> := +$version_match<version><minor>;
+    self<version_patch> := +$version_match<version><patch>;
+    self<version>       := [
+        +self<version_major>,
+        +self<version_minor>,
+        +self<version_match>,
+    ];
 }
 
 # Local Variables:

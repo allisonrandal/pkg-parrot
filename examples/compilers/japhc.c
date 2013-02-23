@@ -1,4 +1,4 @@
-/* $Id: japhc.c 47917 2010-06-29 23:18:38Z jkeenan $ */
+/* $Id: japhc.c 48837 2010-09-07 23:48:07Z nwellnhof $ */
 
 /*
  * Copyright (C) 2004-2008, Parrot Foundation.
@@ -147,8 +147,8 @@ add_const_str(PARROT_INTERP, PackFile_ConstTable *consts, char *str)
     /* Allocate a new constant */
     consts->constants[--k] = PackFile_Constant_new(interp);
     consts->constants[k]->type = PFC_STRING;
-    consts->constants[k]->u.string =
-        string_make(interp, buf, (UINTVAL) l, "iso-8859-1", 0);
+    consts->constants[k]->u.string = Parrot_str_new_init(interp, buf,
+            (UINTVAL) l, Parrot_latin1_encoding_ptr, 0);
     free(o);
     return k;
 }

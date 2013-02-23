@@ -1,15 +1,20 @@
-This is Parrot, version 2.6.0
+This is Parrot, version 2.9.1
 ------------------------------
 
 Parrot is Copyright (C) 2001-2010, Parrot Foundation.
 
-$Id: README 48146 2010-07-21 00:49:08Z coke $
+$Id: README 49584 2010-10-19 22:15:03Z cotto $
 
 LICENSE INFORMATION
 -------------------
 
 This code is distributed under the terms of the Artistic License 2.0.
 For more details, see the full text of the license in the file LICENSE.
+
+OVERVIEW
+--------
+Parrot is a virtual machine designed to efficiently compile and execute
+bytecode for dynamic languages.
 
 PREREQUISITES
 -------------

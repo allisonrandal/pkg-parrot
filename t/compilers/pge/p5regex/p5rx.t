@@ -1,7 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: p5rx.t 47051 2010-05-27 08:45:23Z plobsing $
-# vi: ft=pir
+# $Id: p5rx.t 48491 2010-08-14 19:38:27Z petdance $
 
 =head1 NAME
 

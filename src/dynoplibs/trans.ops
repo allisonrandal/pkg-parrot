@@ -1,5 +1,5 @@
 /*
- * $Id: trans.ops 47051 2010-05-27 08:45:23Z plobsing $
+ * $Id: trans.ops 48564 2010-08-19 02:03:11Z cotto $
  * trans.ops
  */
 
@@ -101,6 +101,30 @@ Set $1 to the hyperbolic cosine of $2 (given in radians).
 
 inline op cosh(out NUM, in NUM) :base_math {
     $1 = cosh((FLOATVAL)$2);
+}
+
+########################################
+
+=item B<cot>(out NUM, in NUM)
+
+Set $1 to the cotangent of $2 (given in radians).
+
+=cut
+
+inline op cot(out NUM, in NUM) :base_math {
+    $1 = ((FLOATVAL)1) / tan((FLOATVAL)$2);
+}
+
+########################################
+
+=item B<csc>(out NUM, in NUM)
+
+Set $1 to the cosecant of $2 (given in radians).
+
+=cut
+
+inline op csc(out NUM, in NUM) :base_math {
+    $1 = ((FLOATVAL)1) / sin((FLOATVAL)$2);
 }
 
 ########################################

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: socket_unix.c 47583 2010-06-13 01:02:26Z coke $
+$Id: socket_unix.c 48981 2010-09-13 19:17:36Z nwellnhof $
 
 =head1 NAME
 
@@ -349,10 +349,11 @@ Parrot_io_recv_unix(PARROT_INTERP, ARGMOD(PMC *socket), ARGOUT(STRING **s))
 AGAIN:
     if ((error = recv(io->os_handle, buf, 2048, 0)) >= 0) {
         bytesread += error;
-        /* The charset should probably be 'binary', but right now httpd.pir
+        /* The encoding should probably be 'binary', but right now httpd.pir
          * only works with 'ascii'
          */
-        *s = string_make(interp, buf, bytesread, "ascii", 0);
+        *s = Parrot_str_new_init(interp, buf, bytesread,
+                Parrot_ascii_encoding_ptr, 0);
         return bytesread;
     }
     else {
@@ -369,11 +370,11 @@ AGAIN:
           case ECONNRESET:
             /* XXX why close it on err return result is -1 anyway */
             close(io->os_handle);
-            *s = Parrot_str_new_noinit(interp, enum_stringrep_one, 0);
+            *s = Parrot_str_new_noinit(interp, 0);
             return -1;
           default:
             close(io->os_handle);
-            *s = Parrot_str_new_noinit(interp, enum_stringrep_one, 0);
+            *s = Parrot_str_new_noinit(interp, 0);
             return -1;
         }
     }

@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: parrot.h 47678 2010-06-18 00:29:10Z whiteknight $
+ *     $Id: parrot.h 48833 2010-09-07 22:58:38Z nwellnhof $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -255,7 +255,6 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 #include "parrot/interpreter.h"
 #include "parrot/datatypes.h"
 #include "parrot/encoding.h"
-#include "parrot/charset.h"
 #include "parrot/string.h"
 #include "parrot/string_primitives.h"
 #include "parrot/hash.h"

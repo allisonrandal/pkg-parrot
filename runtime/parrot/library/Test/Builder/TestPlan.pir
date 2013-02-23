@@ -1,4 +1,4 @@
-# $Id: TestPlan.pir 38115 2009-04-15 14:41:32Z fperrad $
+# $Id: TestPlan.pir 48951 2010-09-12 09:25:53Z fperrad $
 
 =head1 NAME
 
@@ -52,6 +52,15 @@ Both classes support the following methods.
     .local pmc plan
     plan = new [ 'Test'; 'Builder'; 'ActivePlan' ], args
     setattribute self, 'plan', plan
+.end
+
+.sub 'get_bool' :vtable :method
+    .local pmc plan
+    plan = getattribute self, 'plan'
+
+    $I0 = isa plan, [ 'Test'; 'Builder'; 'NullPlan' ]
+    $I0 = not $I0
+    .return ($I0)
 .end
 
 .sub 'set_tests' :method

@@ -1,7 +1,7 @@
 /* io.h
  *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *     $Id: io.h 47051 2010-05-27 08:45:23Z plobsing $
+ *     $Id: io.h 48551 2010-08-17 15:52:29Z petdance $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:
@@ -875,6 +875,7 @@ INTVAL Parrot_io_socket(PARROT_INTERP,
         FUNC_MODIFIES(*socket);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 INTVAL Parrot_io_socket_is_closed(ARGMOD(PMC *socket))

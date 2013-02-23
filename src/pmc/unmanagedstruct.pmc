@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: unmanagedstruct.pmc 47863 2010-06-26 12:50:08Z whiteknight $
+$Id: unmanagedstruct.pmc 48837 2010-09-07 23:48:07Z nwellnhof $
 
 =head1 NAME
 
@@ -488,7 +488,8 @@ ret_string(PARROT_INTERP, ARGIN(char *p), int type)
                other type or flag must be added.
                Need to provide some way to specify charset and encoding.
              */
-            return string_make(interp, cstr, len, "iso-8859-1", 0);
+            return Parrot_str_new_init(interp, cstr, len,
+                    Parrot_latin1_encoding_ptr, 0);
         }
         else
             return NULL;

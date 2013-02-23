@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: thread.h 46291 2010-05-04 22:41:27Z darbelo $
+ *     $Id: thread.h 49378 2010-09-29 05:00:01Z plobsing $
  *  Overview:
  *     This is the api header for the thread primitives
  *  Data Structure and Algorithms:
@@ -46,13 +46,12 @@
 
 typedef void (*Cleanup_Handler)(void *);
 
-#  ifndef __timespec_defined
-#    define __timespec_defined
+#  if ! PARROT_HAS_TIMESPEC
 struct timespec {
     time_t tv_sec;
     long tv_nsec;
 };
-#  endif /* __timespec_defined */
+#  endif /* PARROT_HAS_TIMESPEC */
 
 #endif /* PARROT_HAS_THREADS */
 

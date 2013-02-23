@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: hash.t 47739 2010-06-21 14:58:48Z NotFound $
+# $Id: hash.t 49513 2010-10-11 18:40:23Z nwellnhof $
 
 =head1 NAME
 
@@ -25,11 +25,12 @@ well.
 .sub main :main
     .include 'test_more.pir'
 
-    plan(172)
+    plan(174)
 
     initial_hash_tests()
     more_than_one_hash()
     hash_key_type()
+    hash_value_type()
     null_key()
     hash_keys_with_nulls_in_them()
     nearly_the_same_hash_keys()
@@ -154,6 +155,26 @@ invalid_type:
     pop_eh
     ok(1, 'Setting invalid type throws')
 end:
+.end
+
+.sub hash_value_type
+    .local pmc h, eh
+    .local int r
+    h = new ['Hash']
+
+    h.'set_value_type'(.DATATYPE_INTVAL)
+    r  = h.'get_value_type'()
+    is(r, .DATATYPE_INTVAL, 'get/set _value_type')
+
+    r = 1
+    eh = new ['ExceptionHandler']
+    eh.'handle_types'(.EXCEPTION_UNIMPLEMENTED)
+    set_label eh, catch
+    push_eh eh
+    h.'set_value_type'(999999)
+    r = 0
+  catch:
+    is(r, 1, 'set_value_type with invalid type throws')
 .end
 
 .sub null_key
@@ -1290,7 +1311,7 @@ postit_end:
 .sub unicode_keys_register_rt_39249
   $P1 = new ['Hash']
 
-  $S99 = unicode:"\u7777"
+  $S99 = utf8:"\u7777"
   $P1[$S99] = "ok"
   $S1 = $P1[$S99]
   is( $S1, 'ok', 'unicode key' )
@@ -1299,11 +1320,11 @@ postit_end:
 .sub unicode_keys_literal_rt_39249
   $P1 = new ['Hash']
 
-  $P1[unicode:"\u7777"] = "ok"
-  $S1 = $P1[unicode:"\u7777"]
+  $P1[utf8:"\u7777"] = "ok"
+  $S1 = $P1[utf8:"\u7777"]
   is( $S1, 'ok', 'literal unicode key' )
 
-  $S2 = unicode:"\u7777"
+  $S2 = utf8:"\u7777"
   $S1 = $P1[$S2]
   is( $S1, 'ok', 'literal unicode key lookup via var' )
 .end

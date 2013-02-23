@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: fixedpmcarray.t 46007 2010-04-25 11:44:15Z fperrad $
+# $Id: fixedpmcarray.t 49533 2010-10-14 02:00:50Z cotto $
 
 =head1 NAME
 
@@ -69,7 +69,6 @@ out-of-bounds test. Checks INT and PMC keys.
 
 .sub test_sort
      .local pmc compares, cmp_fun
-     # TT #1317 doesnt work wit prederef of JIT
      bounds 1
      compares = new ['Integer']
      compares = 0

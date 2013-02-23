@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: smoke_languages.pl 43310 2009-12-29 11:33:50Z fperrad $
+# $Id: smoke_languages.pl 49339 2010-09-26 08:54:02Z fperrad $
 
 use strict;
 use warnings;
@@ -323,6 +323,8 @@ unlink($filename);
 
 SKIP:
 {
+delete $ENV{LUA_INIT};
+delete $ENV{LUA_PATH};
 $exe = quote(catfile($pwd, $bindir, 'parrot-lua'));
 skip("Lua", 1) unless (-d "$pwd/$langdir/lua" || -e $exe);
 chdir("$pwd/$langdir/lua");

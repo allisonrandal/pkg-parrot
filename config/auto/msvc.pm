@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: msvc.pm 47318 2010-06-03 01:36:45Z jkeenan $
+# $Id: msvc.pm 48890 2010-09-09 20:54:16Z nwellnhof $
 
 =head1 NAME
 
@@ -89,6 +89,9 @@ sub _evaluate_msvc {
         # for details.
         $conf->data->add( " ", "ccflags", "-D_CRT_SECURE_NO_DEPRECATE" );
     }
+
+    $conf->data->set( noinline   => '__declspec(noinline)' );
+
     return 1;
 }
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2010, Parrot Foundation.
-$Id: multidispatch.c 47678 2010-06-18 00:29:10Z whiteknight $
+$Id: multidispatch.c 49416 2010-10-02 22:25:15Z nwellnhof $
 
 =head1 NAME
 
@@ -43,6 +43,7 @@ them, with default behaviour.
 #include "parrot/oplib/ops.h"
 #include "multidispatch.str"
 #include "pmc/pmc_nci.h"
+#include "pmc/pmc_nativepccmethod.h"
 #include "pmc/pmc_sub.h"
 #include "pmc/pmc_callcontext.h"
 
@@ -400,13 +401,13 @@ mmd_build_type_tuple_from_type_list(PARROT_INTERP, ARGIN(PMC *type_list))
         STRING *type_name = VTABLE_get_string_keyed_int(interp, type_list, i);
         INTVAL  type;
 
-        if (Parrot_str_equal(interp, type_name, CONST_STRING(interp, "DEFAULT")))
+        if (STRING_equal(interp, type_name, CONST_STRING(interp, "DEFAULT")))
             type = enum_type_PMC;
-        else if (Parrot_str_equal(interp, type_name, CONST_STRING(interp, "STRING")))
+        else if (STRING_equal(interp, type_name, CONST_STRING(interp, "STRING")))
             type = enum_type_STRING;
-        else if (Parrot_str_equal(interp, type_name, CONST_STRING(interp, "INTVAL")))
+        else if (STRING_equal(interp, type_name, CONST_STRING(interp, "INTVAL")))
             type = enum_type_INTVAL;
-        else if (Parrot_str_equal(interp, type_name, CONST_STRING(interp, "FLOATVAL")))
+        else if (STRING_equal(interp, type_name, CONST_STRING(interp, "FLOATVAL")))
             type = enum_type_FLOATVAL;
         else
             type = Parrot_pmc_get_type_str(interp, type_name);
@@ -590,8 +591,17 @@ mmd_distance(PARROT_INTERP, ARGIN(PMC *pmc), ARGIN(PMC *arg_tuple))
     Parrot_Sub_attributes *sub;
     INTVAL      args, dist, i, j, n, m;
 
-    /* has to be a builtin multi method */
-    if (pmc->vtable->base_type == enum_class_NCI) {
+    if (pmc->vtable->base_type == enum_class_NativePCCMethod) {
+        GETATTR_NativePCCMethod_mmd_multi_sig(interp, pmc, multi_sig);
+        if (PMC_IS_NULL(multi_sig)) {
+            STRING *long_sig;
+
+            GETATTR_NativePCCMethod_mmd_long_signature(interp, pmc, long_sig);
+            multi_sig = mmd_build_type_tuple_from_long_sig(interp, long_sig);
+            SETATTR_NativePCCMethod_mmd_multi_sig(interp, pmc, multi_sig);
+        }
+    }
+    else if (pmc->vtable->base_type == enum_class_NCI) {
         GETATTR_NCI_multi_sig(interp, pmc, multi_sig);
         if (PMC_IS_NULL(multi_sig)) {
             STRING *long_sig;
@@ -602,10 +612,10 @@ mmd_distance(PARROT_INTERP, ARGIN(PMC *pmc), ARGIN(PMC *arg_tuple))
         }
     }
     else {
-        /* not a multi; no distance */
         PMC_get_sub(interp, pmc, sub);
+
         if (!sub->multi_signature)
-            return 0;
+            return 0; /* not a multi; no distance */
 
         multi_sig = Parrot_mmd_get_cached_multi_sig(interp, pmc);
     }
@@ -963,18 +973,19 @@ Parrot_mmd_add_multi_from_long_sig(PARROT_INTERP,
     ASSERT_ARGS(Parrot_mmd_add_multi_from_long_sig)
     Parrot_Sub_attributes *sub;
     STRING     *sub_str     = CONST_STRING(interp, "Sub");
-    STRING     *closure_str = CONST_STRING(interp, "Closure");
     PMC        *type_list   = Parrot_str_split(interp, CONST_STRING(interp, ","), long_sig);
     STRING     *ns_name     = VTABLE_get_string_keyed_int(interp, type_list, 0);
 
     /* Attach a type tuple array to the sub for multi dispatch */
     PMC    *multi_sig = mmd_build_type_tuple_from_type_list(interp, type_list);
 
-    if (sub_obj->vtable->base_type == enum_class_NCI) {
+    if (sub_obj->vtable->base_type == enum_class_NativePCCMethod) {
+        SETATTR_NativePCCMethod_mmd_multi_sig(interp, sub_obj, multi_sig);
+    }
+    else if (sub_obj->vtable->base_type == enum_class_NCI) {
         SETATTR_NCI_multi_sig(interp, sub_obj, multi_sig);
     }
-    else if (VTABLE_isa(interp, sub_obj, sub_str)
-         ||  VTABLE_isa(interp, sub_obj, closure_str)) {
+    else if (VTABLE_isa(interp, sub_obj, sub_str)) {
         PMC_get_sub(interp, sub_obj, sub);
         sub->multi_signature = multi_sig;
     }

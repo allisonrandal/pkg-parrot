@@ -1,7 +1,7 @@
 /* runcore_api.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: runcore_profiling.h 47917 2010-06-29 23:18:38Z jkeenan $
+ *     $Id: runcore_profiling.h 49535 2010-10-14 08:19:29Z cotto $
  *  Overview:
  *     Functions and macros to dispatch opcodes.
  */
@@ -88,7 +88,6 @@ struct profiling_runcore_t {
     STRING         *profile_filename;
     PMC            *prev_sub;
     Parrot_Context *prev_ctx;
-    UINTVAL         level;      /* how many nested runloops */
     UINTVAL         time_size;  /* how big is the following array */
     UHUGEINTVAL    *time;       /* time spent between DO_OP and start/end of a runcore */
     Hash           *line_cache; /* hash for caching pc -> line mapping */

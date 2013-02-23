@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: MD5.pir 47051 2010-05-27 08:45:23Z plobsing $
+# $Id: MD5.pir 48341 2010-08-07 10:50:01Z moritz $
 #
 # Parrot MD5 library; Nick Glencross <nickg@glencros.demon.co.uk>
 #                     Improvements from Leo and Jens Rieks
@@ -48,6 +48,8 @@ Still has some limitations on input buffer size, largely due to memory
 consumption which should be resolved soon.
 
 =cut
+
+.HLL 'parrot'
 
 .loadlib 'bit_ops'
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: eval.t 47646 2010-06-15 19:30:29Z NotFound $
+# $Id: eval.t 49323 2010-09-25 11:34:15Z plobsing $
 
 use strict;
 use warnings;
@@ -399,7 +399,7 @@ CODE
 written
 OUTPUT
 
-pir_output_is( <<"CODE", <<'OUTPUT', "eval.thaw", todo => 'TT #1142' );
+pir_output_is( <<"CODE", <<'OUTPUT', "eval.thaw");
 .sub main :main
     .local pmc io, e
     .local string file

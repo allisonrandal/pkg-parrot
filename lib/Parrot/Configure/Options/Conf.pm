@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Conf.pm 47020 2010-05-26 08:56:38Z gerd $
+# $Id: Conf.pm 49433 2010-10-04 03:19:11Z plobsing $
 package Parrot::Configure::Options::Conf;
 
 use strict;
@@ -18,7 +18,7 @@ use FindBin qw($Bin);
 
 our $script         = q{Configure.pl};
 our $parrot_version = Parrot::BuildUtil::parrot_version("$Bin/../../");
-our $svnid          = '$Id: Conf.pm 47020 2010-05-26 08:56:38Z gerd $';
+our $svnid          = '$Id: Conf.pm 49433 2010-10-04 03:19:11Z plobsing $';
 
 sub print_version {
     print "Parrot Version $parrot_version Configure 2.0\n";
@@ -72,6 +72,8 @@ Compile Options:
    --libs=(libs)        Use the given libraries
    --link=(linker)      Use the given linker
    --linkflags=(flags)  Use the given linker flags
+   --ar=(archiver)      Use the given librarian for static libraries
+   --arflags=(flags)    Use the given flags for static libraries
    --ld=(linker)        Use the given loader for shared libraries
    --ldflags=(flags)    Use the given loader flags for shared libraries
    --lex=(lexer)        Use the given lexical analyzer generator
@@ -102,6 +104,7 @@ External Library Options:
    --without-gettext    Build parrot without gettext support
    --without-gmp        Build parrot without GMP support
    --without-opengl     Build parrot without OpenGL support (GL/GLU/GLUT)
+   --without-readline   Build parrot without readline support
    --without-pcre       Build parrot without pcre support
    --without-zlib       Build parrot without zlib support
 

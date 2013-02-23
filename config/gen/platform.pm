@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: platform.pm 47917 2010-06-29 23:18:38Z jkeenan $
+# $Id: platform.pm 48580 2010-08-20 12:42:42Z NotFound $
 
 =head1 NAME
 
@@ -197,6 +197,7 @@ sub _set_implementations {
         exec.c
         misc.c
         hires_timer.c
+        pid.c
         /;
 
     my $plat_c = q{src/platform.c};

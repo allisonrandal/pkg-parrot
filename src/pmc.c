@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: pmc.c 47001 2010-05-26 00:42:22Z whiteknight $
+$Id: pmc.c 49420 2010-10-02 22:28:04Z nwellnhof $
 
 =head1 NAME
 
@@ -127,7 +127,7 @@ Parrot_pmc_destroy(PARROT_INTERP, ARGMOD(PMC *pmc))
 
 #ifndef NDEBUG
 
-    pmc->vtable      = (VTABLE  *)0xdeadbeef;
+    pmc->data = (DPOINTER *)0xdeadbeef;
 
 #endif
 
@@ -573,10 +573,9 @@ Parrot_pmc_new_init_int(PARROT_INTERP, INTVAL base_type, INTVAL init)
     PMC *const classobj = interp->vtables[base_type]->pmc_class;
 
     if (!PMC_IS_NULL(classobj) && PObj_is_class_TEST(classobj)) {
-        PMC * const initial =
-          Parrot_pmc_new(interp, Parrot_get_ctx_HLL_type(interp, enum_class_Integer));
-        VTABLE_set_integer_native(interp, initial, init);
-        return VTABLE_instantiate(interp, classobj, initial);
+        PMC * const obj = VTABLE_instantiate(interp, classobj, PMCNULL);
+        VTABLE_set_integer_native(interp, obj, init);
+        return obj;
     }
     else {
         PMC * const pmc = get_new_pmc_header(interp, base_type, 0);
@@ -997,7 +996,7 @@ Parrot_pmc_type_does(PARROT_INTERP, ARGIN(STRING *role), INTVAL type)
 
     do {
         INTVAL len;
-        const INTVAL idx = Parrot_str_find_index(interp, what, role, (INTVAL)pos);
+        const INTVAL idx = STRING_index(interp, what, role, pos);
 
         if ((idx < 0) || (idx >= length))
             return 0;
@@ -1005,14 +1004,14 @@ Parrot_pmc_type_does(PARROT_INTERP, ARGIN(STRING *role), INTVAL type)
         pos = idx;
         len = Parrot_str_byte_length(interp, role);
 
-        if (pos && (Parrot_str_indexed(interp, what, pos - 1) != 32)) {
+        if (pos && (STRING_ord(interp, what, pos - 1) != 32)) {
             pos += len;
             continue;
         }
 
         if (pos + len < length) {
             pos += len;
-            if (Parrot_str_indexed(interp, what, pos) != 32)
+            if (STRING_ord(interp, what, pos) != 32)
                 continue;
         }
 

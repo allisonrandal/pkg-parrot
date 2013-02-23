@@ -1,9 +1,10 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: fetch_languages.pl 47917 2010-06-29 23:18:38Z jkeenan $
+# $Id: fetch_languages.pl 49492 2010-10-10 14:40:36Z jkeenan $
 
 =head1 NAME
 
-fetch_languages.pl - A helper to fetch language implementations from the SCM repoistories
+fetch_languages.pl - Fetch language implementations from their source code
+management repositories
 
 =head1 SYNOPSIS
 
@@ -230,7 +231,7 @@ my @hlls = (
     {
         name       => 'pir',
         scm        => 'GIT',
-        repository => 'http://github.com/bacek/pir.git'
+        repository => 'http://github.com/parrot/pir.git'
     },
 
     {

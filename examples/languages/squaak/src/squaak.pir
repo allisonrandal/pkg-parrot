@@ -1,5 +1,5 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: squaak.pir 48123 2010-07-20 09:04:20Z tcurtis $
+# $Id: squaak.pir 48557 2010-08-17 21:19:30Z coke $
 
 =head1 TITLE
 
@@ -10,7 +10,7 @@ squaak.pir - A Squaak compiler.
 This is the base file for the Squaak compiler.
 
 This file includes the parsing and grammar rules from
-the src/ directory, loads the relevant PGE libraries,
+the src/ directory, loads the relevant PCT libraries,
 and registers the compiler under the name 'Squaak'.
 
 =head2 Functions

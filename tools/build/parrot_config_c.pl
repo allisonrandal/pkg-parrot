@@ -1,12 +1,9 @@
 #! perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: parrot_config_c.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: parrot_config_c.pl 48845 2010-09-08 01:12:20Z dukeleto $
 
 use warnings;
 use strict;
-
-my ($svnid) =
-    '$Id: parrot_config_c.pl 37201 2009-03-08 12:07:48Z fperrad $' =~ /^\$[iI][dD]:\s(.*)\$$/;
 
 =head1 NAME
 
@@ -29,8 +26,6 @@ and will in turn be used to provide the config environment for
 subsequently created Interpreters.
 
 =cut
-
-use strict;
 
 my ( $mini_parrot, $install_parrot );
 

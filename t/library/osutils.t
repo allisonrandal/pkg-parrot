@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: osutils.t 47083 2010-05-28 07:33:24Z fperrad $
+# $Id: osutils.t 49084 2010-09-17 15:19:32Z fperrad $
 
 =head1 NAME
 
@@ -21,12 +21,13 @@ Test the osutils library
 
     load_bytecode 'osutils.pir'
 
-    plan(17)
+    plan(19)
     test_basename()
     test_dirname()
     test_catfile()
     test_splitpath()
     test_newer()
+    test_rindex()
 .end
 
 .sub 'test_basename'
@@ -78,6 +79,13 @@ Test the osutils library
     nok($I0, "newer('osutils.no_file', ['osutils.pir', 'stat.pasm'])")
     $I0 = newer('runtime/parrot/library/osutils.pir', $P0)
     nok($I0, "newer('osutils.pir', ['osutils.pir', 'stat.pasm'])")
+.end
+
+.sub 'test_rindex'
+    $I0 = rindex('abc', '.')
+    is($I0, -1, "rindex('abc', '.')")
+    $I0 = rindex('abc.def.ghi', '.')
+    is($I0, 7, "rindex('abc.def.ghi', '.')")
 .end
 
 

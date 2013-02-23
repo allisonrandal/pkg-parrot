@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: coroutine.pmc 47005 2010-05-26 02:04:07Z petdance $
+$Id: coroutine.pmc 48435 2010-08-12 19:37:47Z chromatic $
 
 =head1 NAME
 
@@ -46,6 +46,13 @@ static void print_sub_name(PARROT_INTERP, ARGIN(PMC *sub_pmc))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
+/*
+
+=item C<static void print_sub_name(PARROT_INTERP, PMC *sub_pmc)>
+
+=cut
+
+*/
 
 static void
 print_sub_name(PARROT_INTERP, ARGIN(PMC *sub_pmc))

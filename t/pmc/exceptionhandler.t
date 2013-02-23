@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: exceptionhandler.t 47759 2010-06-22 15:31:33Z NotFound $
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: exceptionhandler.t 49205 2010-09-21 17:57:04Z pmichaud $
 
 =head1 NAME
 
@@ -23,9 +23,12 @@ Tests the ExceptionHandler PMC.
     .include 'test_more.pir'
 
     # If test exited with "bad plan" MyHandlerCan.can_handle wasn't invoked.
-    plan(11)
+    plan(19)
 
-    .local pmc eh
+    test_bool()
+    test_int()
+
+    .local pmc eh, eh2
     eh = new ['ExceptionHandler']
     ok(1, 'Instantiated ExceptionHandler')
 
@@ -34,11 +37,21 @@ Tests the ExceptionHandler PMC.
     eh.'max_severity'(.EXCEPT_WARNING)
     push_eh eh
 
-    eh = new ['ExceptionHandler']
-    set_addr eh, error_handler_one
-    eh.'min_severity'(.EXCEPT_ERROR)
-    eh.'max_severity'(.EXCEPT_FATAL)
-    push_eh eh
+    eh2 = new ['ExceptionHandler']
+    set_addr eh2, error_handler_one
+    eh2.'min_severity'(.EXCEPT_ERROR)
+    eh2.'max_severity'(.EXCEPT_FATAL)
+    push_eh eh2
+
+    .local int i
+    i = eh.'min_severity'()
+    is(i, .EXCEPT_NORMAL, 'get min_severity - 1')
+    i = eh.'max_severity'()
+    is(i, .EXCEPT_WARNING, 'get max_severity - 1')
+    i = eh2.'min_severity'()
+    is(i, .EXCEPT_ERROR, 'get min_severity - 2')
+    i = eh2.'max_severity'()
+    is(i, .EXCEPT_FATAL, 'get max_severity - 2')
 
     $P0 = new ['Exception']
     $P0['severity'] = .EXCEPT_NORMAL
@@ -92,7 +105,7 @@ Tests the ExceptionHandler PMC.
 
     test_handle_types_except()
 
-    goto subclass_handler
+    goto init_int
 
   typed_handler_one:
     .get_results (e)
@@ -106,6 +119,21 @@ Tests the ExceptionHandler PMC.
     c = e['resume']
     eh = 0
     c()
+
+  init_int:
+    eh = new ['ExceptionHandler'], .CONTROL_BREAK
+    set_addr eh, init_int_eh
+    push_eh eh
+    $P0 = new ['Exception']
+    $P0['type'] = .CONTROL_BREAK
+    throw $P0
+    $I0 = 0
+    goto init_int_done
+  init_int_eh:
+    pop_eh
+    $I0 = 1
+  init_int_done:
+    ok($I0, "init_int handler correctly caught exception")
 
   subclass_handler:
     .local pmc myhandler, myhandlercan
@@ -125,6 +153,26 @@ Tests the ExceptionHandler PMC.
   outcatch:
     ok($I0, 'Exception Handler subclass catch exception')
 .end
+
+.sub test_bool
+    $P0 = new 'ExceptionHandler'
+    nok($P0,'ExceptionHandler without address is false')
+    set_addr $P0, _handler
+    ok($P0,'ExceptionHandler with address is true')
+  _handler:
+.end
+
+.sub test_int
+    $P0 = new 'ExceptionHandler'
+    set_addr $P0, _handler
+    push_eh $P0
+    $I0 = $P0
+    ok(1,'get_integer on ExceptionHandler ')
+    .return()
+  _handler:
+    say "howdy int!"
+.end
+
 
 .sub subclass_exception_handler
     .local pmc myhandler

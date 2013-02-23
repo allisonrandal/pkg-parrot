@@ -1,4 +1,4 @@
-# $Id: Node.pir 47839 2010-06-25 18:49:10Z chromatic $
+# $Id: Node.pir 49325 2010-09-25 22:46:43Z jonathan $
 
 =head1 NAME
 
@@ -598,6 +598,21 @@ Get/set the C<hll> for this block.
     .param pmc value           :optional
     .param int has_value       :opt_flag
     .tailcall self.'attr'('hll', value, has_value)
+.end
+
+
+=item loadlibs([lib1, lib2, ...])
+
+Get/set the libraries to be loaded at startup. EXPERIMENTAL (not subject to
+deprecation policy, yet).
+
+=cut
+
+.sub 'loadlibs' :method
+    .param pmc libs :slurpy
+    .local int has_value
+    has_value = elements libs
+    .tailcall self.'attr'('loadlibs', libs, has_value)
 .end
 
 

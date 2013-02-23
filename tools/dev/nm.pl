@@ -143,7 +143,7 @@ require 5.005;
 $VERSION = sprintf "%d.%d", q$Revision: 37201 $ =~ /(\d+)/g;    # jhi@iki.fi;
 
 my $ME       = basename($0);
-my $RCS_DATE = q$Date: 2009-03-08 08:07:48 -0400 (Sun, 08 Mar 2009) $;
+my $RCS_DATE = q$Date: 2009-03-08 05:07:48 -0700 (Sun, 08 Mar 2009) $;
 
 my $nm_cmd = 'nm';
 my $nm_opt = '';

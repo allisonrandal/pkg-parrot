@@ -1,5 +1,5 @@
 /*
- * $Id: imc.c 46897 2010-05-22 20:50:13Z plobsing $
+ * $Id: imc.c 48412 2010-08-11 05:38:18Z plobsing $
  * Copyright (C) 2002-2009, Parrot Foundation.
  */
 
@@ -97,6 +97,7 @@ imc_compile_all_units(PARROT_INTERP)
     }
 
     IMCC_INFO(interp)->imc_units = NULL;
+    IMCC_INFO(interp)->cur_unit  = NULL;
     IMCC_INFO(interp)->last_unit = NULL;
 }
 

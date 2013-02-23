@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: objects.t 46484 2010-05-11 03:25:26Z plobsing $
+# $Id: objects.t 49513 2010-10-11 18:40:23Z nwellnhof $
 
 .sub main :main
     .include 'test_more.pir'
@@ -28,7 +28,7 @@
 .namespace ["Foo"]
 .namespace [ ]
 .namespace []
-.namespace [unicode:"»ö«"; ascii:"perl6"]
+.namespace [utf8:"»ö«"; ascii:"perl6"]
 
 .sub test
     $I0 = 42
