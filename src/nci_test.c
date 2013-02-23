@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: nci_test.c 7511 2005-01-27 08:00:00Z leo $
+Copyright (C) 2001-2005, The Perl Foundation.
+$Id: nci_test.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

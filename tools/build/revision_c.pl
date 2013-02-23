@@ -1,5 +1,5 @@
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: revision_c.pl 11245 2006-01-18 17:33:03Z jonathan $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: revision_c.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

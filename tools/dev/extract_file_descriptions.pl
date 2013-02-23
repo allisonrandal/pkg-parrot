@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: extract_file_descriptions.pl 8111 2005-05-17 19:16:11Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: extract_file_descriptions.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 NAME

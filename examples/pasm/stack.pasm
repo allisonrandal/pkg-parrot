@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: stack.pasm 10184 2005-11-26 11:13:11Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: stack.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

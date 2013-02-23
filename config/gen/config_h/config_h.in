@@ -1,5 +1,5 @@
-/* Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved. */
-/* $Id: config_h.in 11901 2006-03-14 19:35:40Z bernhard $ */
+/* Copyright (C) 2001-2006, The Perl Foundation. */
+/* $Id: config_h.in 12827 2006-05-30 02:28:15Z coke $ */
 
 /* config.h
  *

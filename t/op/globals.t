@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: globals.t 11477 2006-02-09 05:17:54Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: globals.t 12929 2006-06-12 22:15:20Z jonathan $
 
 use strict;
 use warnings;
@@ -67,7 +67,21 @@ ok 1
 ok 2
 OUT
 
+pir_output_is(<<'CODE', <<OUT, "find/store global with key");
+.sub main :main
+	set_it()
+	$P1 = find_global [ "Monkey" ; "Toaster" ], "Explosion"
+	print $P1
+.end
+.sub set_it
+	$P0 = new .String
+	$P0 = "Ook...BANG!\n"
+	store_global [ "Monkey" ; "Toaster" ], "Explosion", $P0
+.end
+CODE
+Ook...BANG!
+OUT
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 4; }
+BEGIN { plan tests => 5; }
 

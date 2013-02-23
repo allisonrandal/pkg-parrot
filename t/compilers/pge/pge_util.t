@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pge_util.t 12668 2006-05-14 15:36:59Z pmichaud $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: pge_util.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

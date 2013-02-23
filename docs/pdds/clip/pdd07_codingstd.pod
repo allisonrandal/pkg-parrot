@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd07_codingstd.pod 12104 2006-04-03 20:29:21Z petdance $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: pdd07_codingstd.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

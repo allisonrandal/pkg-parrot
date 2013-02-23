@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: fixedpmcarray.pmc 11853 2006-03-10 14:24:22Z leo $
+Copyright (C) 2001-2005, The Perl Foundation.
+$Id: fixedpmcarray.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

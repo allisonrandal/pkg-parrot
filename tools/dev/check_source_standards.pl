@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: check_source_standards.pl 12414 2006-04-24 19:28:14Z particle $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: check_source_standards.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

@@ -1,11 +1,11 @@
 #
 # Token.pm
 #
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2001-2005, The Perl Foundation.
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Token.pm 12028 2006-03-26 04:31:23Z gregor $
+# $Id: Token.pm 12840 2006-05-30 15:08:05Z coke $
 #
 #
 

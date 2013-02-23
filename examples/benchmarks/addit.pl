@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: addit.pl 10728 2005-12-28 17:00:50Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: addit.pl 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

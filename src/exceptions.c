@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: exceptions.c 12527 2006-05-06 02:40:55Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: exceptions.c 12921 2006-06-10 19:00:07Z rgrjr $
 
 =head1 NAME
 
@@ -40,7 +40,12 @@ Define the internal interpreter exceptions.
 =item C<void
 internal_exception(int exitcode, const char *format, ...)>
 
-Exception handler.
+Signal a fatal exception.  This involves printing an error message to stderr,
+and calling C<Parrot_exit> to invoke exit handlers and exit the process with the
+given exitcode.  No error handlers are used, so it is not possible for Parrot
+bytecode to intercept a fatal error (cf. C<real_exception>).  Furthermore, no
+stack unwinding is done, so the exit handlers run in the current dynamic
+environment.
 
 =cut
 
@@ -501,7 +506,7 @@ dest2offset(Interp * interpreter, const opcode_t *dest)
         case PARROT_SWITCH_JIT_CORE:
         case PARROT_CGP_CORE:
         case PARROT_CGP_JIT_CORE:
-            offset = (void ** const)dest - interpreter->code->prederef.code;
+            offset = dest - (const opcode_t *)interpreter->code->prederef.code;
         default:
             offset = dest - interpreter->code->base.data;
     }
@@ -653,9 +658,15 @@ do_exception(Interp * interpreter,
 
 =item C<void
 real_exception(Interp *interpreter, void *ret_addr,
-        int exitcode,  const char *format, ...)>
+        int exitcode, const char *format, ...)>
 
-Unlike C<internal_exception()> this throws a real exception.
+Throws a real exception, with an error message constructed from the format
+string and arguments.  C<ret_addr> is the address from which to resume, if some
+handler decides that is appropriate, or zero to make the error non-resumable.
+C<exitcode> is a C<exception_type_enum> value.
+
+See also C<internal_exception()>, which signals fatal errors, and
+C<throw_exception>, which calls the handler.
 
 =cut
 
@@ -698,6 +709,15 @@ real_exception(Interp *interpreter, void *ret_addr,
     /*
      * FIXME classify errors
      */
+    if (!the_exception) {
+	PIO_eprintf(interpreter, 
+                "real_exception (severity:%d error:%d): %Ss\n"
+                "likely reason: argument count mismatch in main "
+                "(more than 1 param)\n", 
+	    EXCEPT_error, exitcode, msg );
+        /* [what if exitcode is a multiple of 256?] */
+        exit(exitcode);
+    }
     the_exception->severity = EXCEPT_error;
     the_exception->error = exitcode;
     the_exception->msg = msg;

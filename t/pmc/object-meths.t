@@ -1,12 +1,12 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: object-meths.t 11755 2006-02-27 01:02:12Z chromatic $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: object-meths.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 33;
+use Parrot::Test tests => 34;
 
 =head1 NAME
 
@@ -1115,4 +1115,21 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate keyed_int PMC derived - inherit");
 CODE
 ikey
 42
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "addmethod op");
+.sub main :main
+    .local pmc c
+    c = newclass ['whatever']
+    .const .Sub foo = "whatever_foo"
+    addmethod c, "foo", foo
+    $P0 = new ['whatever']
+    $P0.'foo'()
+.end
+
+.sub whatever_foo :anon :method
+    print "Foo!\n"
+.end
+CODE
+Foo!
 OUTPUT

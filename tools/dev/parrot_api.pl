@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
-# Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_api.pl 7628 2005-03-13 09:24:26Z jhi $
+# Copyright (C) 2004, The Perl Foundation.
+# $Id: parrot_api.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

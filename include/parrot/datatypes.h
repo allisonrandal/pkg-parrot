@@ -1,9 +1,9 @@
 /*
  * datatypes.h
- *  Copyright: (c) 2002 Leopold Toetsch <lt@toetsch.at>
+ *  Copyright (C) 2002, The Perl Foundation.
  *  License:  Artistic/GPL, see README and LICENSES for details
  *  SVN Info
- *     $Id: datatypes.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: datatypes.h 12821 2006-05-29 13:44:57Z coke $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *

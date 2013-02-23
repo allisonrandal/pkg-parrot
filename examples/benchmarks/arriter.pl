@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright (C) 2001-2006 The Perl Foundation.  All rights reserved.
-# $Id: arriter.pl 11931 2006-03-18 22:30:14Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: arriter.pl 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

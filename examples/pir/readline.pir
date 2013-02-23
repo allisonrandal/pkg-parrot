@@ -1,7 +1,7 @@
 # This line will be printed by ./parrot examples/pir/readline.t
 
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: readline.pir 10800 2005-12-30 19:58:54Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: readline.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

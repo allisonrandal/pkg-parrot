@@ -1,11 +1,11 @@
 #
 # Variable.pm
 #
-# Copyright: 2002-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2002-2005, The Perl Foundation.
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Variable.pm 10644 2005-12-24 18:06:41Z gregor $
+# $Id: Variable.pm 12840 2006-05-30 15:08:05Z coke $
 #
 
 use strict;

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_run.c 10179 2005-11-25 18:25:52Z leo $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: inter_run.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
@@ -157,9 +157,11 @@ runops_args(Parrot_Interp interpreter, PMC *sub, PMC *obj,
     if (!dest)
         internal_exception(1, "Subroutine returned a NULL address");
     if (PMC_IS_NULL(obj)) {
+        /* skip over the return type */
         sig_p = sig + 1;
     }
     else if (sig[1] == 'O') {
+        /* skip over the return type */
         sig_p = sig + 1;
     }
     else  {

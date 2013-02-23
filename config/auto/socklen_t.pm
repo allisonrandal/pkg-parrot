@@ -1,5 +1,5 @@
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: socklen_t.pm 11750 2006-02-26 14:40:58Z bernhard $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: socklen_t.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pyexception.pmc 11225 2006-01-17 18:37:08Z bernhard $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: pyexception.pmc 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

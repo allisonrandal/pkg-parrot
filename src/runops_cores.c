@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: runops_cores.c 12132 2006-04-06 21:20:46Z bernhard $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: runops_cores.c 12928 2006-06-12 19:33:05Z bernhard $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ the faster dispatch of operations.
 #include "runops_cores.h"
 #include "parrot/embed.h"
 #include "parrot/trace.h"
-#include "parrot/interp_guts.h"
+#include "interp_guts.h"
 
 #ifdef HAVE_COMPUTED_GOTO
 #  include "parrot/oplib/core_ops_cg.h"

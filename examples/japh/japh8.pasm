@@ -1,4 +1,4 @@
-# $Id: japh8.pasm 12193 2006-04-12 20:04:06Z bernhard $
+# $Id: japh8.pasm 12882 2006-06-05 11:05:52Z leo $
 
 # Little Endian only using struct
     new P1, .ResizablePMCArray
@@ -14,6 +14,7 @@
     set P0[0;5], 1801675080
     set P0[0;6], 1879732837
     set P1[0], -93
+    null I1
     assign P0, P1
 l:  set I0, P0[0;I1]
     chr S0, I0

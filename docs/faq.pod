@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: faq.pod 11858 2006-03-10 18:23:19Z autrijus $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: faq.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 
@@ -552,7 +552,7 @@ L<http://developer.apple.com/techpubs/mac/PPCSoftware/PPCSoftware-13.html>
 =head1 VERSION
 
 The FAQ is now in version control and "Revision" isn't really being tracked.
-The most recent SVN ID is C<$Id: faq.pod 11858 2006-03-10 18:23:19Z autrijus $>
+The most recent SVN ID is C<$Id: faq.pod 12839 2006-05-30 14:34:31Z coke $>
 
 =over 4
 

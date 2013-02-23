@@ -1,5 +1,5 @@
-# Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Group.pm 5757 2004-03-27 22:23:02Z mikescott $
+# Copyright (C) 2004, The Perl Foundation.
+# $Id: Group.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

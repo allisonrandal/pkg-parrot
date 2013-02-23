@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: optimize.pm 12004 2006-03-24 14:13:06Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: optimize.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 

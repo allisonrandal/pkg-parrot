@@ -1,5 +1,5 @@
-# Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pcre.pir 11563 2006-02-16 00:42:07Z jisom $
+# Copyright (C) 2004-2005, The Perl Foundation.
+# $Id: pcre.pir 12837 2006-05-30 13:47:57Z coke $
 
 =head1 TITLE
 

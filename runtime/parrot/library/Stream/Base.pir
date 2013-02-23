@@ -1,4 +1,4 @@
-# $Id: Base.pir 12262 2006-04-15 16:16:43Z bernhard $
+# $Id: Base.pir 12837 2006-05-30 13:47:57Z coke $
 
 =head1 TITLE
 
@@ -380,6 +380,6 @@ Please send patches and suggestions to the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2006, the Perl Foundation.
+Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut

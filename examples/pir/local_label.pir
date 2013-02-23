@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: local_label.pir 9571 2005-10-25 21:41:16Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: local_label.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

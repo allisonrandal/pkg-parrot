@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit2c.pl 12094 2006-04-03 07:10:43Z fperrad $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: jit2c.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

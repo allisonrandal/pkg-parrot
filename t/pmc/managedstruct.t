@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: managedstruct.t 11845 2006-03-10 02:27:01Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: managedstruct.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: array.t 11489 2006-02-09 18:58:48Z particle $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: array.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

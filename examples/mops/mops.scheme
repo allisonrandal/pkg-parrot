@@ -11,11 +11,11 @@
 ; NOTE: 1,000,000 iterations used instead of 100,000,000
 ; to keep thing from bogging down too much.
 ;
-; Copyright (C) 2001-2005 The Perl Foundation. All rights reserved.
+; Copyright (C) 2001-2005, The Perl Foundation.
 ; This program is free software. It is subject to the same
 ; license as The Parrot Interpreter.
 ;
-; $Id: mops.scheme 9676 2005-10-31 11:28:17Z rafl $
+; $Id: mops.scheme 12835 2006-05-30 13:32:26Z coke $
 ;
 
 (let ((I1 0) (I2 0) (I3 1)   ; set    I2, 0

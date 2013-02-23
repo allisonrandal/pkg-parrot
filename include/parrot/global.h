@@ -1,7 +1,7 @@
 /* global.h
- *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2004, The Perl Foundation.
  *  SVN Info
- *     $Id: global.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: global.h 12966 2006-06-18 18:12:06Z leo $
  *  Overview:
  *      Contains accessor functions for globals
  *  Data Structure and Algorithms:
@@ -19,6 +19,7 @@ PARROT_API PMC *Parrot_find_global_p(Interp *, PMC *ns, STRING *name);
 PARROT_API PMC *Parrot_get_global_p(Interp *, PMC *ns,  STRING *name);
 PARROT_API PMC *Parrot_global_namespace(Interp *, PMC *globals, STRING *ns);
 PARROT_API void Parrot_store_global(Interp *, STRING *class, STRING *globalname, PMC *pmc);
+PARROT_API void Parrot_store_global_p(Interp *, PMC *ns, STRING *globalname, PMC *pmc);
 PARROT_API void Parrot_store_sub_in_namespace(Interp*, PMC* sub_pmc);
 
 PARROT_API PMC *Parrot_get_name(Interp *, STRING *name);

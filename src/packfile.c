@@ -1,8 +1,8 @@
 /*
-Copyright (C) 2001-2006 The Perl Foundation. All rights reserved.
+Copyright (C) 2001-2006, The Perl Foundation.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packfile.c 12310 2006-04-17 23:09:44Z leo $
+$Id: packfile.c 12932 2006-06-13 05:12:41Z petdance $
 
 =head1 NAME
 
@@ -311,6 +311,7 @@ do_1_sub_pragma(Parrot_Interp interpreter, PMC* sub_pmc, int action)
                 interpreter->lo_var_ptr = lo_var_ptr;
                 return result;
             }
+            break;
         case PBC_POSTCOMP:
             /*
              * run POSTCOMP sub
@@ -324,6 +325,7 @@ do_1_sub_pragma(Parrot_Interp interpreter, PMC* sub_pmc, int action)
                 interpreter->resume_flag = RESUME_INITIAL;
                 return NULL;
             }
+            break;
 
         case PBC_LOADED:
             if (PObj_get_FLAGS(sub_pmc) & SUB_FLAG_PF_LOAD) {
@@ -921,7 +923,8 @@ Register the C<pack>/C<unpack>/... functions for a packfile type.
 
 */
 
-INTVAL PackFile_funcs_register(Interp* interpreter,
+INTVAL
+PackFile_funcs_register(Interp* interpreter,
         struct PackFile *pf, UINTVAL type, struct PackFile_funcs funcs)
 {
     /* TODO dynamic registering */
@@ -940,7 +943,8 @@ The default unpack function.
 
 */
 
-static opcode_t * default_unpack (Interp *interpreter,
+static opcode_t *
+default_unpack (Interp *interpreter,
         struct PackFile_Segment *self, opcode_t *cursor)
 {
     if (self->pf->header->dir_format) {
@@ -2671,7 +2675,8 @@ I<What does this do?>
 
 */
 
-void PackFile_FixupTable_new_entry(Interp *interpreter,
+void
+PackFile_FixupTable_new_entry(Interp *interpreter,
         char *label, enum_fixup_t type, opcode_t offs)
 {
     struct PackFile_FixupTable *self = interpreter->code->fixups;

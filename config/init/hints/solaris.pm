@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: solaris.pm 10637 2005-12-24 11:00:22Z jhoblitt $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: solaris.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::solaris;
 

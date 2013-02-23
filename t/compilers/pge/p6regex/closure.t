@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: closure.t 12477 2006-05-01 17:45:50Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: closure.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

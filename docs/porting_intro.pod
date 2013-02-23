@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: porting_intro.pod 11507 2006-02-11 17:08:54Z leo $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: porting_intro.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

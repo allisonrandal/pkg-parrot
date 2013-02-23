@@ -1,6 +1,6 @@
 /*
-Copyright: 2005 The Perl Foundation. All Rights Reserved.
-$Id: pbc_merge.c 12217 2006-04-14 10:59:04Z bernhard $
+Copyright (C) 2005, The Perl Foundation.
+$Id: pbc_merge.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: p5rx.t 12571 2006-05-09 05:02:50Z pmichaud $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: p5rx.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

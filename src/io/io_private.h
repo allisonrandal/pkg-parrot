@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: io_private.h 11750 2006-02-26 14:40:58Z bernhard $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: io_private.h 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

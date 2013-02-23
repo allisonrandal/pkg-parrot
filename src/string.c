@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: string.c 12590 2006-05-10 03:23:37Z autrijus $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: string.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

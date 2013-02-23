@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: objects.t 12615 2006-05-11 14:46:56Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: objects.t 12938 2006-06-14 11:29:11Z jonathan $
 
 use strict;
 use warnings;
@@ -1570,8 +1570,6 @@ ok 4
 MyInt2(42)
 OUTPUT
 
-TODO: {
-  local $TODO = "methods can't be overridden in derived class only";
 pir_output_is(<<'CODE', <<'OUTPUT', "PMC as classes - derived 3");
 
 .sub main :main
@@ -1635,7 +1633,7 @@ ok 4
 42
 MyInt2(42)
 OUTPUT
-};
+
 
 pir_output_is(<<'CODE', <<'OUTPUT', "subclassing ParrotClass");
 
@@ -1714,75 +1712,6 @@ CODE
 OUTPUT
 }
 
-{ local $TODO = "new Px, Ix: argcP is wrong in __init method";
-pir_output_is(<<'CODE', <<'OUTPUT', "__init argcP");
-
-.sub main :main
-    $P0 = newclass "Foo"
-    $I0 = find_type "Foo"
-
-    argcI = 2
-    argcS = 3
-    argcP = 4
-    argcN = 5
-
-    print "a: "
-    print argcI
-    print argcS
-    print argcP
-    print argcN
-    print "\n"
-
-    $P0 = new $I0
-
-    print "b: "
-    print argcI
-    print argcS
-    print argcP
-    print argcN
-    print "\n"
-
-    argcI = 6
-    argcS = 7
-    argcP = 8
-    argcN = 9
-
-    print "c: "
-    print argcI
-    print argcS
-    print argcP
-    print argcN
-    print "\n"
-    $P0 = new $I0, $P0
-    print "d: "
-    print argcI
-    print argcS
-    print argcP
-    print argcN
-    print "\n"
-
-    end
-.end
-
-.namespace ["Foo"]
-.sub __init :method
-    print "X: "
-    print argcI
-    print argcS
-    print argcP
-    print argcN
-    print "\n"
-.end
-CODE
-a: 2345
-X: 0000
-b: 2345
-c: 6789
-X: 0010
-d: 6789
-OUTPUT
-
-}
 
 pir_output_is(<<'CODE', <<'OUTPUT', "namespace vs name");
 .sub main :main
@@ -2136,11 +2065,12 @@ CODE
 110
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "new nested ordering", todo => 'awaiting fix');
+pir_output_is(<<'CODE', <<'OUTPUT', "new nested ordering");
 .sub main :main
-    .local pmc c1, c2
+    .local pmc c1, c2, o
     c1 = newclass ['Foo']
-    c2 = newclass ['Foo';'Baz']
+    c2 = newclass ['Foo';'Bar']
+    o = new ['Foo';'Bar']
     print "ok\n"
 .end
 .namespace ['Foo']
@@ -2152,12 +2082,11 @@ pir_output_is(<<'CODE', <<'OUTPUT', "new nested ordering", todo => 'awaiting fix
 	print "__init Bar\n"
 .end
 CODE
-__init Foo
 __init Bar
 ok
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "vtable override once removed (#39056)", todo=>'rt #39056');
+pir_output_is(<<'CODE', <<'OUTPUT', "vtable override once removed (#39056)");
 .sub main :main
     .local pmc base
     $P0 = getclass 'Integer'
@@ -2199,5 +2128,26 @@ pir_output_is(<<'CODE', <<'OUTPUT', "super __init called twice (#39081)");
 .end
 CODE
 foo constructor
+OUTPUT
+
+
+pir_output_is(<<'CODE', <<'OUTPUT', "Using key from classname op with new");
+.sub main :main
+    $P0 = newclass [ "Monkey" ; "Banana" ]
+    $P0 = new [ "Monkey" ; "Banana" ]
+    $P0.ook()
+    $P1 = class $P0
+    $P2 = classname $P0
+    $P3 = new $P2
+    $P3.ook()    
+.end
+
+.namespace [ "Monkey" ; "Banana" ]
+.sub ook
+    print "Ook!\n"
+.end
+CODE
+Ook!
+Ook!
 OUTPUT
 

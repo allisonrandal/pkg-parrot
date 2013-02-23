@@ -1,4 +1,4 @@
-# $Id: m4.pir 11903 2006-03-14 20:49:11Z bernhard $
+# $Id: m4.pir 12688 2006-05-15 19:40:33Z bernhard $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ m4.pir - An implementation of GNU m4 in Parrot Intermediate Representation
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer.  All Rights Reserved.
-SVN Info:   $Id: m4.pir 11903 2006-03-14 20:49:11Z bernhard $
+SVN Info:   $Id: m4.pir 12688 2006-05-15 19:40:33Z bernhard $
 Overview:   Main of Parrot m4.
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
@@ -140,7 +140,7 @@ NO_VERSION_FLAG:
     end
 NO_HELP_FLAG: 
 
-  # TODO: In near future we propably should use objects here
+  # TODO: In near future we probably should use objects here
   # For now let's just just use a hash with all state information
   .local pmc state
   state = new .Hash

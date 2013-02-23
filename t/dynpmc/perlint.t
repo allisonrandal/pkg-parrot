@@ -1,5 +1,5 @@
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: perlint.t 12501 2006-05-04 16:58:46Z particle $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: perlint.t 12937 2006-06-14 06:57:39Z fperrad $
 
 use strict;
 use warnings;
@@ -12,11 +12,11 @@ use Parrot::Config;
 
 =head1 NAME
 
-t/pmc/perlint.t - Perl Integers
+t/dynpmc/perlint.t - Perl Integers
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/perlint.t
+    % prove t/dynpmc/perlint.t
 
 =head1 DESCRIPTION
 

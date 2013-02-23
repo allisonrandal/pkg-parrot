@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cgoto.pm 12259 2006-04-15 13:03:46Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: cgoto.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 

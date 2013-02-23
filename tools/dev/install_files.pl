@@ -1,7 +1,7 @@
 #! perl -w
 ################################################################################
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: install_files.pl 11442 2006-02-06 08:34:08Z fperrad $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: install_files.pl 12841 2006-05-30 15:23:20Z coke $
 ################################################################################
 
 =head1 TITLE

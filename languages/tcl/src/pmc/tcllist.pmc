@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: tcllist.pmc 12341 2006-04-18 15:13:54Z coke $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: tcllist.pmc 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

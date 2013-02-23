@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_coverage.pl 7661 2005-03-18 20:03:46Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: parrot_coverage.pl 12841 2006-05-30 15:23:20Z coke $
 
 =head1 NAME
 

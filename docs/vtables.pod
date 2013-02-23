@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: vtables.pod 11975 2006-03-21 22:23:53Z bernhard $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: vtables.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 
@@ -172,7 +172,17 @@ Return a string containing your class name.
 
 =item C<init>
 
-Do any data set-up you need to do.
+Initialization.  Parrot makes exactly one call to either C<init> or
+C<init_pmc> at PMC construction time.
+
+=item C<init_pmc>
+
+Alternative entry point for initialization that takes a PMC argument.
+Parrot makes exactly one call to either C<init> or C<init_pmc> at PMC
+construction time.
+
+NOTE: It is strongly suggested that C<init_pmc(PMCNULL)> be equivalent to
+C<init()>.
 
 =item C<is_equal>
 

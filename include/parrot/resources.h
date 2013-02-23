@@ -1,7 +1,7 @@
 /* resources.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: resources.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: resources.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     Defines the resource allocation API
  *  Data Structure and Algorithms:
@@ -109,11 +109,6 @@ struct Arenas {
      * private data for the GC subsystem
      */
     void *  gc_private;         /* gc subsystem data */
-};
-
-struct Stash {
-    struct PMC *stash_hash;
-    struct Stash *parent_stash;
 };
 
 /* &gen_from_enum(interpinfo.pasm) prefix(INTERPINFO_) */

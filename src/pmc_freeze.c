@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: pmc_freeze.c 12139 2006-04-08 00:09:10Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: pmc_freeze.c 12884 2006-06-05 13:29:13Z audreyt $
 
 =head1 NAME
 
@@ -931,7 +931,9 @@ do_thaw(Parrot_Interp interpreter, PMC* pmc, visit_info *info)
     UINTVAL id;
     INTVAL type;
     PMC ** pos;
-    int must_have_seen = thaw_pmc(interpreter, info, &id, &type);
+    int must_have_seen;
+    type = 0; /* it's set below, avoid compiler warning. */
+    must_have_seen = thaw_pmc(interpreter, info, &id, &type);
 
     id >>= 2;
 
@@ -1189,7 +1191,7 @@ todo_list_seen(Parrot_Interp interpreter, PMC *pmc, visit_info *info,
         UINTVAL *id)
 {
     HashBucket * const b =
-        hash_get_bucket(interpreter, PMC_struct_val(info->seen), pmc);
+        parrot_hash_get_bucket(interpreter, PMC_struct_val(info->seen), pmc);
 
     if (b) {
         *id = (UINTVAL) b->value;
@@ -1198,7 +1200,7 @@ todo_list_seen(Parrot_Interp interpreter, PMC *pmc, visit_info *info,
 
     info->id += 4;      /* next id to freeze */
     *id = info->id;
-    hash_put(interpreter, PMC_struct_val(info->seen), pmc, (void*)*id);
+    parrot_hash_put(interpreter, PMC_struct_val(info->seen), pmc, (void*)*id);
     /* remember containers */
     if (pmc->pmc_ext)
         list_unshift(interpreter, PMC_data(info->todo), pmc, enum_type_PMC);

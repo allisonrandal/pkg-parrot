@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: function.t 11457 2006-02-06 21:11:20Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: function.t 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

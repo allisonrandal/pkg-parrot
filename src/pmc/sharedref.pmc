@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: sharedref.pmc 12544 2006-05-07 05:19:38Z petdance $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: sharedref.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
@@ -71,23 +71,8 @@ shouldn't leak unshared PMCs into different threads.
 
 */
 
-    void init_pmc(PMC* init) {
-        SUPER(init);
-        PObj_active_destroy_SET(SELF);
-    }
-
-/*
-
-=item C<void init_pmc_props(PMC *init, PMC *props)>
-
-Initialize the shared reference with the specified properties.
-
-=cut
-
-*/
-
-    void init_pmc_props(PMC* init, PMC* props) {
-        SUPER(init, props);
+    void init_pmc(PMC* initializer) {
+        SUPER(initializer);
         PObj_active_destroy_SET(SELF);
     }
 

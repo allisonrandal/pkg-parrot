@@ -283,7 +283,7 @@ hard to extend it for hash-like structures, too.
 
 =cut
 
-.sub is_deeply
+.sub is_deeply :multi( pmc, pmc )
     .param pmc left
     .param pmc right
     .param string description :optional
@@ -709,7 +709,7 @@ to the Perl 6 internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005, the Perl Foundation.
+Copyright (C) 2005, The Perl Foundation.
 
 =cut
 

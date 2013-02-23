@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: cat.pasm 9503 2005-10-17 19:51:53Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: cat.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

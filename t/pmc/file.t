@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: file.t 12425 2006-04-25 16:05:55Z chromatic $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: file.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

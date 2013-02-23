@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: syntax.pod 12377 2006-04-19 16:16:09Z coke $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: syntax.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

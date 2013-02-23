@@ -1,5 +1,5 @@
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: va_ptr.pm 11744 2006-02-26 10:55:39Z bernhard $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: va_ptr.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 

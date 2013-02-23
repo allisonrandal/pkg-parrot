@@ -1,7 +1,7 @@
 /*
-Copyright: (c) 2002-2005 Leopold Toetsch <lt@toetsch.at>
+Copyright (C) 2002-2005, The Perl Foundation.
 License:  Artistic/GPL, see README and LICENSES for details
-$Id: datatypes.c 7851 2005-04-16 11:06:03Z leo $
+$Id: datatypes.c 12821 2006-05-29 13:44:57Z coke $
 
 =head1 NAME
 

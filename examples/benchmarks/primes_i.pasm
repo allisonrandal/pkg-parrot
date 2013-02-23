@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: primes_i.pasm 5578 2004-03-08 11:43:48Z leo $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: primes_i.pasm 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

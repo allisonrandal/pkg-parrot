@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: readline.pm 11802 2006-03-06 16:01:29Z fperrad $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: readline.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 

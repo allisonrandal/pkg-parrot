@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pyint.t 11228 2006-01-17 19:41:07Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: pyint.t 12840 2006-05-30 15:08:05Z coke $
 
 use strict;
 use warnings;

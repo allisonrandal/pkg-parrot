@@ -1,7 +1,7 @@
 /* string_funcs.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: string_funcs.h 12537 2006-05-06 20:06:21Z petdance $
+ *     $Id: string_funcs.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:

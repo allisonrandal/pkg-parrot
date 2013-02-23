@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: global_setup.c 12465 2006-04-30 15:11:25Z bernhard $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: global_setup.c 12932 2006-06-13 05:12:41Z petdance $
 
 =head1 NAME
 
@@ -65,7 +65,8 @@ using the last registered config data.
 
 */
 
-static void parrot_set_config_hash_interpreter (Interp* interpreter)
+static void
+parrot_set_config_hash_interpreter (Interp* interpreter)
 {
     PMC *iglobals = interpreter->iglobals;
 
@@ -164,7 +165,7 @@ parrot_global_setup_2(Interp *interpreter)
     
 
     /* create the namespace root stash */
-    interpreter->stash_hash =
+    interpreter->root_namespace =
         pmc_new(interpreter, enum_class_NameSpace);
 
     interpreter->HLL_info = constant_pmc_new(interpreter,
@@ -178,7 +179,7 @@ parrot_global_setup_2(Interp *interpreter)
     parrot_ns = 
         VTABLE_get_pmc_keyed_int(interpreter, interpreter->HLL_namespace, 0); 	
     CONTEXT(interpreter->ctx)->current_namespace = parrot_ns; 
-    VTABLE_set_pmc_keyed_str(interpreter, interpreter->stash_hash, 	
+    VTABLE_set_pmc_keyed_str(interpreter, interpreter->root_namespace, 	
             const_string(interpreter, "parrot"),
             parrot_ns);
     /* We need a class hash */

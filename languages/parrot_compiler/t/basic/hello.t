@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hello.t 11761 2006-02-27 07:57:10Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: hello.t 12840 2006-05-30 15:08:05Z coke $
 
 use strict;
 use lib 'parrot_compiler/lib';

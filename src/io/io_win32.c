@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: io_win32.c 10462 2005-12-12 17:00:32Z particle $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: io_win32.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
@@ -690,7 +690,7 @@ AGAIN:
         else {
             close((SOCKET)io->fd);
         }
-        /* The charset should propably be 'binary', but right now httpd.imc
+        /* The charset should probably be 'binary', but right now httpd.imc
          * only works with 'ascii'
          */
         *s = string_make(interpreter, buf, bytesread, "ascii", 0);

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: dod.c 12592 2006-05-10 04:55:00Z petdance $
+Copyright (C) 2001-2005, The Perl Foundation.
+$Id: dod.c 12932 2006-06-13 05:12:41Z petdance $
 
 =head1 NAME
 
@@ -188,7 +188,9 @@ pobject_lives(Interp *interpreter, PObj *obj)
 
 #  else
 
-void pobject_lives(Interp *interpreter, PObj *obj)
+/* XXX This should really use the same header, with different guts #ifdeffed */
+void
+pobject_lives(Interp *interpreter, PObj *obj)
 {
     /* if object is live or on free list return */
     if (PObj_is_live_or_free_TESTALL(obj)) {
@@ -323,8 +325,8 @@ Parrot_dod_trace_root(Interp *interpreter, int trace_stack)
     for (i = 0; i <= E_LAST_PYTHON_E; ++i) {
         pobject_lives(interpreter, (PObj*)interpreter->exception_list[i]);
     }
-    /* mark the stash_hash */
-    pobject_lives(interpreter, (PObj *)interpreter->stash_hash);
+    /* mark the root_namespace */
+    pobject_lives(interpreter, (PObj *)interpreter->root_namespace);
     /* s. packfile.c */
     mark_const_subs(interpreter);
 

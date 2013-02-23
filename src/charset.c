@@ -1,6 +1,6 @@
 /*
-Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: charset.c 11563 2006-02-16 00:42:07Z jisom $
+Copyright (C) 2004, The Perl Foundation.
+$Id: charset.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
@@ -244,8 +244,6 @@ Parrot_register_charset(Interp *interpreter, const char *charsetname,
     }
     return 0;
 }
-
-void parrot_init_encodings_2(Interp *interpreter);
 
 void
 Parrot_charsets_encodings_init(Interp *interpreter)

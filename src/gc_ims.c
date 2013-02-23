@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-$Id: gc_ims.c 12045 2006-03-27 16:21:22Z leo $
+Copyright (C) 2001-2004, The Perl Foundation.
+$Id: gc_ims.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

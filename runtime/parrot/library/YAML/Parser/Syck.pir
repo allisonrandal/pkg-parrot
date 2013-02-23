@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Syck.pir 10751 2005-12-28 22:47:30Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: Syck.pir 12837 2006-05-30 13:47:57Z coke $
 
 =head1 NAME
 

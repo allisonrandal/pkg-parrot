@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cygwin.pm 11313 2006-01-22 22:58:27Z nickg $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: cygwin.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::cygwin;
 
@@ -14,6 +14,9 @@ sub runstep
     my $libs = $conf->data->get('libs');
     $libs =~ s/-lutil\b//g;
 
+    my $build_dir = $conf->data->get('build_dir');
+    $build_dir =~ s/ /\\ /g;
+
     # A note about building shared libraries:  Perl5 uses the 'ld2' tool, which
     # is installed as part of the perl5 installation.  So far, it appears
     # parrot can get by with simply using gcc -shared, so we override the
@@ -21,6 +24,7 @@ sub runstep
     # If this later causes problems, it might be worth revisiting.
     # A. Dougherty 9/9/2002
     $conf->data->set(
+        build_dir           => $build_dir,
         ld                  => 'gcc',
         ld_share_flags      => '-shared',
         ld_load_flags       => '-shared',

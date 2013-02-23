@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: step.t 12426 2006-04-25 16:12:36Z chromatic $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: step.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

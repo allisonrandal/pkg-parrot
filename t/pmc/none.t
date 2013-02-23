@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: none.t 11911 2006-03-16 18:16:52Z particle $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: none.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

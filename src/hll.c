@@ -1,6 +1,6 @@
 /*
-Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: hll.c 12394 2006-04-22 00:21:27Z petdance $
+Copyright (C) 2005, The Perl Foundation.
+$Id: hll.c 12884 2006-06-05 13:29:13Z audreyt $
 
 =head1 NAME
 
@@ -113,7 +113,7 @@ Parrot_register_HLL(Interp *interpreter,
      * XXX always try to fetch namespace first?
      */
     ns_hash  = pmc_new(interpreter, enum_class_NameSpace);
-    VTABLE_set_pmc_keyed_str(interpreter, interpreter->stash_hash,
+    VTABLE_set_pmc_keyed_str(interpreter, interpreter->root_namespace,
             hll_name, ns_hash);
     /* cache HLLs toplevel namespace */
     VTABLE_set_pmc_keyed_int(interpreter, interpreter->HLL_namespace, 
@@ -176,7 +176,7 @@ Parrot_register_HLL_type(Interp *interpreter, INTVAL hll_id,
     type_hash = VTABLE_get_pmc_keyed_int(interpreter, entry, e_HLL_typemap);
     assert(!PMC_IS_NULL(type_hash));
     hash = PMC_struct_val(type_hash);
-    hash_put(interpreter, hash, (void*)core_type, (void*)hll_type);
+    parrot_hash_put(interpreter, hash, (void*)core_type, (void*)hll_type);
 }
 
 INTVAL
@@ -206,7 +206,7 @@ Parrot_get_HLL_type(Interp *interpreter, INTVAL hll_id, INTVAL core_type)
     hash = PMC_struct_val(type_hash);
     if (!hash->entries)
         return core_type;
-    b = hash_get_bucket(interpreter, hash, (void*)core_type);
+    b = parrot_hash_get_bucket(interpreter, hash, (void*)core_type);
     if (b)
         return (INTVAL) b->value;
     return core_type;

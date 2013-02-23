@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: mswin32.pm 12405 2006-04-24 15:06:32Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: mswin32.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::mswin32;
 

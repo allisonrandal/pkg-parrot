@@ -1,4 +1,7 @@
-# $Id: ChangeLog 11678 2006-02-20 18:40:50Z bernhard $
+# $Id: ChangeLog 12958 2006-06-17 10:00:58Z bernhard $
+
+2006-06-17     Bernhard Schmalhofer
+        * Try to make it work with current compiler tools and antlr-3ea10
 
 2006-02-20     Bernhard Schmalhofer
         * Add the generated Java code to SVN

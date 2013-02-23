@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: dynpmc_pl.in 11697 2006-02-21 19:02:14Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: dynpmc_pl.in 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 
@@ -31,7 +31,7 @@ our $O = qq[@o@];
 our $CFLAGS = qq[@ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@];
 
 our $LIBPARROT = qq[];
-#CONDITIONED_LINE(parrot_is_shared):$LIBPARROT = qq[@libparrot_ldflags@];
+#CONDITIONED_LINE(parrot_is_shared):$LIBPARROT = q[@libparrot_ldflags@];
 
 # Here comes some stuff for Win32.
 our $PATHQUOTE = '';
@@ -145,7 +145,11 @@ elsif ($mode eq 'copy') {
         gather_groups_and_libs(@pmcs);
     my @ungrouped_pmcs = grep { ! exists $pmc_group->{$_} } @pmcs;
 
-    foreach (@ungrouped_pmcs, keys %$group_files) {
+    my (@list_to_process) = (@ungrouped_pmcs, keys %$group_files);
+
+    die "nothing found to copy" unless @list_to_process;
+
+    foreach (@list_to_process) {
         copy("$_$LOAD_EXT", $dest) or die "Copy $_$LOAD_EXT failed ($?)\n";
 
         # Execute permissions on libraries is especially important on

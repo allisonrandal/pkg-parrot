@@ -1,5 +1,5 @@
 
-# $Id: Constants.pir 12412 2006-04-24 19:25:04Z bernhard $
+# $Id: Constants.pir 12837 2006-05-30 13:47:57Z coke $
 
 =head1 NAME
 
@@ -303,6 +303,6 @@ Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2006, The Perl Foundation.
+Copyright (C) 2004-2006, The Perl Foundation.
 
 =cut

@@ -1,5 +1,5 @@
-# Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Parrot.pm 12404 2006-04-24 06:38:43Z fperrad $
+# Copyright (C) 2004-2006, The Perl Foundation.
+# $Id: Parrot.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

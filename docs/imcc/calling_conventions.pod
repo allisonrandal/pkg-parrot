@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: calling_conventions.pod 10353 2005-12-05 17:44:29Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: calling_conventions.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

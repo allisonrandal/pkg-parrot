@@ -1,7 +1,7 @@
 /*
-Copyright: (c) 2002 Leopold Toetsch <lt@toetsch.at>
+Copyright (C) 2002, The Perl Foundation.
 License:  Artistic/GPL, see README and LICENSES for details
-$Id: list.c 12094 2006-04-03 07:10:43Z fperrad $
+$Id: list.c 12821 2006-05-29 13:44:57Z coke $
 
 =head1 NAME
 
@@ -1227,7 +1227,7 @@ After getting these values out of the key/value pairs, a new array with
 these values is stored in user_data, where the keys are explicit.
 
 =item C<List *
-list_new_init(Interp *interpreter, PMC *container, PMC *init)>
+list_pmc_new_init(Interp *interpreter, PMC *container, PMC *init)>
 
 Create a new list containing PMC* values in PMC_data(container).
 

@@ -1,7 +1,7 @@
 /* sub.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
+ *  Copyright (C) 2001-2003, The Perl Foundation.
  *  SVN Info
- *     $Id: sub.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: sub.h 12834 2006-05-30 13:17:39Z coke $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Subroutine, coroutine, closure and continuation structures

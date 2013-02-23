@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: freebsd.pm 11197 2006-01-15 18:04:01Z jisom $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: freebsd.pm 12827 2006-05-30 02:28:15Z coke $
 
 package init::hints::freebsd;
 

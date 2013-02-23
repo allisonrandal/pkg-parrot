@@ -1,5 +1,5 @@
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: perlscalar.t 12465 2006-04-30 15:11:25Z bernhard $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: perlscalar.t 12937 2006-06-14 06:57:39Z fperrad $
 
 use strict;
 use warnings;
@@ -10,11 +10,11 @@ use Parrot::Test tests => 3;
 
 =head1 NAME
 
-t/pmc/perlscalar.t - test Perl non-container PMCs
+t/dynpmc/perlscalar.t - test Perl non-container PMCs
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/perlscalar.t
+    % prove t/dynpmc/perlscalar.t
 
 =head1 DESCRIPTION
 

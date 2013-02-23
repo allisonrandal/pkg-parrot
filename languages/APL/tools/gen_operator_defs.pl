@@ -81,36 +81,36 @@ END_PIR
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2227']  =  <<"END_PIR"            # and
+    $P0[unicode:"dyadic:\u2227"]  =  <<"END_PIR"            # and
     $I100 = %1
     $I101 = %2
     $I100 = and $I100, $I101
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2228']  = <<"END_PIR"             # or
+    $P0[unicode:"dyadic:\u2228"]  = <<"END_PIR"             # or
     $I100 = %1
     $I101 = %2
     $I100 = or $I100, $I101
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2260']  = <<"END_PIR"             # not equal
+    $P0[unicode:"dyadic:\u2260"]  = <<"END_PIR"             # not equal
     $I100 = isne %1, %2
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2264']  = <<"END_PIR"             # not greater than
+    $P0[unicode:"dyadic:\u2264"]  = <<"END_PIR"             # not greater than
     $I100 = isle %1, %2
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2265']  = <<"END_PIR"             # not less than
+    $P0[unicode:"dyadic:\u2265"]  = <<"END_PIR"             # not less than
     $I100 = isge %1, %2
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2371']  = <<"END_PIR"             # nor
+    $P0[unicode:"dyadic:\u2371"]  = <<"END_PIR"             # nor
     $I100 = %1
     $I101 = %2
     $I100 = or $I100, $I101
@@ -118,7 +118,7 @@ END_PIR
     %1 = $I100
 END_PIR
 
-    $P0['dyadic:\u2372']  =  <<"END_PIR"            # nand
+    $P0[unicode:"dyadic:\u2372"]  =  <<"END_PIR"            # nand
     $I100 = %1
     $I101 = %2
     $I100 = and $I100, $I101
@@ -135,39 +135,39 @@ END_PIR
 END_PIR
 
     $P0['monadic:*']      =  "    %1 = exp %1"      # exp
-    $P0['monadic:\x{d7}'] =  <<"END_PIR"            # signum
+    $P0[unicode:"monadic:\x{d7}"] =  <<"END_PIR"            # signum
     $N100 = %1
     $I100 = cmp_num $N100, 0.0
     %1 = $I100
 END_PIR
-    $P0['monadic:\x{f7}'] =  <<"END_PIR"            # reciprocal
+    $P0[unicode:"monadic:\x{f7}"] =  <<"END_PIR"            # reciprocal
     $N100 = %1
     $N100 = 1.0 / $N100
     %1 = $N100
 END_PIR
 
-    $P0['monadic:\u2212'] =  "    %1 = neg %1"      # negate
-    $P0['monadic:\u2308'] =  <<"END_PIR"            # ceiling
+    $P0[unicode:"monadic:\u2212"] =  "    %1 = neg %1"      # negate
+    $P0[unicode:"monadic:\u2308"] =  <<"END_PIR"            # ceiling
     $N100 = %1
     $I100 = ceil $N100
     %1 = $I100
 END_PIR
 
-    $P0['monadic:\u230a'] =  <<"END_PIR"            # floor
+    $P0[unicode:"monadic:\u230a"] =  <<"END_PIR"            # floor
     $N100 = %1
     $I100 = floor $N100
     %1 = $I100
 END_PIR
 
-    $P0['monadic:\u235f'] =  "    %1 = ln %1"
+    $P0[unicode:"monadic:\u235f"] =  "    %1 = ln %1"
 
 
-    $P0['monadic:\u25cb'] =  "    %1 *= 3.14159265358979323846"
+    $P0[unicode:"monadic:\u25cb"] =  "    %1 *= 3.14159265358979323846"
                                       # PI
 
-    $P0['monadic:\u2373']  =  <<"END_PIR"            # index of
+    $P0[unicode:"monadic:\u2373"]  =  <<"END_PIR"            # index of
     #XXX hack all the _1's need the same, generated unique number.
-    $P100 = new .ResizablePMCArray
+    $P100 = new 'APLVector'
     $I100 = 1
     $I101 = 0
     $I102 = %1
@@ -190,26 +190,76 @@ END_PIR
     result = ''
 
     .local pmc value
-    $I0 = isa arg, "ResizablePMCArray"
-    if $I0 goto print_array
+    $I0 = does arg, 'array'
+    if $I0 goto print_vector
     value = arg
     bsr print_value
     .return (result)
 
-  print_array:
-    .local pmc iter
+  print_vector:
+    .local pmc shape, iter
+    .local string value_type, old_type
+    value_type = 'String'
     iter = new .Iterator, arg
-    iter = 0
+    shape = arg.'get_shape'()
+    $I0 = shape
+    if $I0 == 2 goto print_2D
+    # XXX assume 1d otherwise.
     unless iter goto iter_end
   iter_loop:
+    old_type = value_type
     value = shift iter
     bsr print_value
     unless iter goto iter_end
+    value_type = typeof value
+    if value_type != 'String' goto print_space
+    if old_type != value_type goto print_space
+    goto iter_loop
+  print_space:
     result .= ' '
     goto iter_loop
   iter_end:
     .return (result)
 
+  print_2D:
+    .local int row_size, pos, newline
+    row_size = shape[1]
+    pos = 1 
+    iter = new .Iterator, arg
+    value_type = 'String'
+    unless iter goto loop_end_2d
+  loop_2d:
+    newline = 0
+    if pos != row_size goto cont_2d
+    newline = 1
+    pos = 0
+
+  cont_2d:
+    old_type = value_type
+    value = shift iter
+    bsr print_value
+    unless iter goto loop_end_2d
+    value_type = typeof value
+    if newline goto print_newline
+    if value_type != 'String' goto print_space_2d
+    if old_type != value_type goto print_space_2d
+    goto print_newline
+
+  print_space_2d:  # don't print a space if we're about to end a row
+    if newline goto print_newline
+    result .= ' '
+    goto continue_2d
+
+  print_newline:
+    if newline==0 goto continue_2d
+    result .= "\n"
+
+  continue_2d:
+    inc pos 
+    goto loop_2d
+  loop_end_2d:
+   .return(result)
+ 
   print_value:
     if value >= 0.0 goto print_value_1
     result .= unicode:"\u207b"
@@ -231,35 +281,7 @@ END_PIR
 # integer - but if you set it to Integer or int, the program dies with
 # 'Method not found.' or dispatches to the wrong method.
 
-.sub 'dyadic:\u2296' :multi(pmc, String) # rotate
-    .param int    op1
-    .param string op2
-
-    if op1 == 0 goto nothing
-    if op1 <  0 goto neg
-pos:
-    # chop off the first N characters
-    $S0 = substr op2, 0, op1, ''
-    # tack them on the end.
-    op2 .= $S0
-    .return (op2)
-neg:
-    # chop off the last N characters 
-    # prepend them on the beginning.
-    $I1 = abs op1
-    $S0 = substr op2, op1, $I1, ''
-    op2 = $S0 . op2
-    .return (op2)
-
-nothing:
-    .return(op2)
-.end
-
-# XXX - the first argument to this multi sub should be some variant of
-# integer - but if you set it to Integer or int, the program dies with
-# 'Method not found.' or dispatches to the wrong method.
-
-.sub 'dyadic:\u2296' :multi(pmc, ResizablePMCArray) # rotate
+.sub unicode:"dyadic:\u2296" :multi(pmc, APLVector) # rotate
     .param int op1
     .param pmc op2
 
@@ -301,60 +323,26 @@ nothing:
     .return($N2)
 .end
 
-.sub 'dyadic:\u2373' :multi(String, String) # index of
-    .param string op1
-    .param string op2
-
-    .local pmc result
-    result = new .ResizablePMCArray
-    
-    .local int pos
-    pos = 0
-    .local int len
-    len = length op2
-    .local int index_pos
-    .local string index_char
-    .local int not_there
-    not_there = length op1
-    inc not_there
-
-loop_begin:
-    if pos == len goto loop_end
-    index_char = substr op2, pos, 1 
-    index_pos = index op1, index_char 
-    if index_pos == -1 goto not_found
-    inc index_pos
-    push result, index_pos
-    goto loop_next
-not_found:
-    push result, not_there
-loop_next:
-    inc pos
-    goto loop_begin
-loop_end:
-    .return (result)
-.end
-
-.sub 'dyadic:\u2373' :multi(ResizablePMCArray, ResizablePMCArray) # index of
+.sub unicode:"dyadic:\u2373" :multi(APLVector, APLVector) # index of
     .param pmc op1
     .param pmc op2
-
+ 
     .local pmc iter_one, iter_two
     .local pmc item_one, item_two
     .local int pos_one
     .local int not_found
+
     not_found = op1
+    inc not_found
 
     .local pmc result
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
 
     iter_two = new .Iterator, op2
-    iter_two = 0 # start from beginning
 loop_two:
     unless iter_two goto loop_two_end
     item_two = shift iter_two 
     iter_one = new .Iterator, op1
-    iter_one = 0 # start from beginning
     pos_one = 0 # parrot's 0 == APL's 1
 loop_one:
     unless iter_one goto loop_one_end
@@ -374,12 +362,12 @@ loop_two_end:
     .return (result)
 .end
 
-.sub 'dyadic:\u2373' :multi(ResizablePMCArray, Float) # index of
+.sub unicode:"dyadic:\u2373" :multi(APLVector, Float) # index of
     .param pmc op1
     .param float op2
 
     .local pmc result
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
  
     .local int pos
     pos = 0
@@ -389,7 +377,6 @@ loop_two_end:
     inc not_there
     .local pmc iter
     iter = new .Iterator, op1
-    iter = 0 # start from beginning.
 loop_begin:
     unless iter goto no_gots
     value_at = shift iter
@@ -405,7 +392,7 @@ no_gots:
     .return (result)
 .end
 
-.sub 'dyadic:\u25cb'          # circle
+.sub unicode:"dyadic:\u25cb"          # circle
     .param num op1
     .param num op2
     $I1 = op1
@@ -496,7 +483,7 @@ neg_seven: # arctanh(x) = .5 * (ln (1+x) - ln (1 -x))
     .return ($N1)
 .end
 
-.sub 'dyadic:\u235f'          # logarithm
+.sub unicode:"dyadic:\u235f"          # logarithm
     .param num op1
     .param num op2
     $N1 = ln op1
@@ -533,26 +520,12 @@ true:
     .return(0)
 .end
 
-.sub 'monadic:\u233d' :multi(String) # reverse
-    .param string op1
-    # XXX reverse only works on ascii strings...
-    $I1 = find_charset 'ascii'
-    $S1 = trans_charset op1, $I1
-    
-    # sorry, ascii Strings.
-    $P1 = new String
-    $P1 = $S1
-    reverse $P1
-    .return($P1)
-.end
-
-.sub 'monadic:\u233d' :multi(ResizablePMCArray) # reverse
+.sub unicode:"monadic:\u233d" :multi(APLVector) # reverse
     .param pmc op1
 
     .local pmc result,iter
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
     iter = new .Iterator, op1
-    iter = 0
 
 loop:
     unless iter goto done
@@ -563,37 +536,12 @@ done:
     .return(result)
 .end
 
-.sub 'dyadic:~' :multi(String, String) # without
-    .param string op1
-    .param string op2
-
-    .local string result
-    result = ''
-
-    .local int pos,len
-    .local string char
-    pos = 0
-    len = length op1
-
-loop:
-    if pos > len goto done
-    char = substr op1, pos, 1 
-    $I1 = index op2, char
-    if $I1 != -1 goto next
-    result .= char
-next:
-    inc pos
-    goto loop
-done:
-    .return(result)
-.end
-
-.sub 'dyadic:~' :multi(ResizablePMCArray, ResizablePMCArray) # without
+.sub 'dyadic:~' :multi(APLVector, APLVector) # without
     .param pmc op1
     .param pmc op2
 
     .local pmc result
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
 
     .local pmc iter1,iter2
     iter1 = new .Iterator, op1
@@ -617,18 +565,18 @@ outer_done:
     .return(result)
 .end
 
-.sub 'monadic:\u2191' # first
+.sub unicode:"monadic:\u2191" # first
     .param pmc op1
     $P1 = shift op1
     .return ($P1)
 .end
 
-.sub 'dyadic:\u2191' :multi (Float, ResizablePMCArray) # take
+.sub unicode:"dyadic:\u2191" :multi (Float, APLVector) # take
     .param int op1
     .param pmc op2
 
     .local pmc result 
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
 
     .local pmc iter
     iter = new .Iterator, op2
@@ -660,25 +608,7 @@ done:
     .return (result)
 .end
 
-.sub 'dyadic:\u2191' :multi (Float, String) # take
-    .param int op1
-    .param string op2
-
-    if op1 < 0 goto neg
-pos:
-    $S1 = substr op2, 0, op1
-    .return ($S1)
-
-neg:
-    .local int pos
-    pos = length op2
-    op1 = abs op1
-    pos -= op1
-    $S1 = substr op2, pos, op1
-    .return ($S1)
-.end
-
-.sub 'dyadic:\u2193' :multi (Float, ResizablePMCArray) # drop
+.sub unicode:"dyadic:\u2193" :multi (Float, APLVector) # drop
     .param int op1
     .param pmc op2
 
@@ -700,57 +630,63 @@ done:
     .return (op2)
 .end
 
-.sub 'dyadic:\u2193' :multi (Float, String) # drop
-    .param int op1
-    .param string op2
-
-    .local int diff
-    diff = length op2
-
-    if op1 < 0 goto neg
-
-pos:
-    diff -= op1
-    $S1 = substr op2, op1, diff
-    .return ($S1)
-
-neg:
-    diff += op1
-    $S1 = substr op2, 0, diff
-    .return ($S1)
-.end
-
-.sub 'monadic:\u2374' :multi (String) # shape
-    .param string op1
-
-    $I1 = length op1
-    .return ($I1)
-.end
-
-.sub 'monadic:\u2374' :multi (Float) # shape
+.sub unicode:"monadic:\u2374" :multi (Float) # shape
     .param pmc op1
 
     .local pmc result
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
     .return (result)
 .end
 
-.sub 'monadic:\u2374' :multi (ResizablePMCArray) # shape
+.sub unicode:"monadic:\u2374" :multi (APLVector) # shape
     .param pmc op1
-
-    .local pmc result
-    result = new .ResizablePMCArray
-
-    $I1 = op1
-    push result, $I1
-    .return (result)
+    .return op1.'get_shape'()
 .end
 
-.sub 'monadic:\u2355' #format
+.sub unicode:"dyadic:\u2374" :multi (APLVector,APLVector) # reshape
+    .param pmc op1
+    .param pmc op2
+
+    # XXX is a clone needed here?
+    op2.'set_shape'(op1)
+    .return (op2)
+.end
+
+.sub unicode:"dyadic:\u2374" :multi (APLVector,Float) # reshape
+    .param pmc op1
+    .param pmc op2
+
+    # Convert the scalar into a vector and reshape it.
+    $P1 = new 'APLVector'
+    push $P1, op2
+    $P1.'set_shape'(op1)
+    .return ($P1)
+.end
+
+
+.sub unicode:"monadic:\u2355" #format
     .param pmc op1
 
     $S0 = aplformat(op1)
-    .return($S0)
+    .local pmc result
+    result = new 'APLVector'
+    $I0 = 0
+    $I1 = length $S0
+  loop:
+    if $I0 >= $I1 goto loop_end 
+    $S1 = substr $S0, $I0, 1
+    push result, $S1
+    inc $I0
+    goto loop
+  loop_end:
+    .return(result)
+.end
+
+.sub unicode:"monadic:\u2395\u2190" # quad output
+    .param pmc op1
+
+    'aplprint'(op1)
+    .return(op1)
 .end
 
 
@@ -758,15 +694,10 @@ END_OF_TEMPLATE
 
 # Generate all variants for scalar dyadic ops.
 my @type_pairs = (
-  [ 'String', 'String' ],
-  [ 'String', 'Float' ],
-  [ 'Float', 'String' ],
-  [ 'String', 'ResizablePMCArray' ],
-  [ 'ResizablePMCArray', 'String' ],
   [ 'Float', 'Float' ],
-  [ 'Float', 'ResizablePMCArray' ], 
-  [ 'ResizablePMCArray', 'Float' ], 
-  [ 'ResizablePMCArray', 'ResizablePMCArray' ], 
+  [ 'Float', 'APLVector' ], 
+  [ 'APLVector', 'Float' ], 
+  [ 'APLVector', 'APLVector' ], 
 );
 
 foreach my $operator (keys %scalar) {
@@ -778,19 +709,15 @@ foreach my $operator (keys %scalar) {
 
 
 # $name
-.sub 'dyadic:$operator' :multi ( $type1, $type2 )
+.sub unicode:"dyadic:$operator" :multi ( $type1, $type2 )
     .param pmc op1
     .param pmc op2
 END_PREAMBLE
 
-        if ($type1 eq "String" || $type2 eq "String") {
-            # For now, anything with a string is a domain error.
-            $template .= "%% DOMAIN_ERROR %%";
-
-        } elsif ($type1 eq "Float" && $type2 eq "Float") {
+        if ($type1 eq "Float" && $type2 eq "Float") {
           # scalar to scalar..
             $template .= interpolate($code, 'op1', 'op2');
-        } elsif ($type1 eq "ResizablePMCArray" && $type2 eq "ResizablePMCArray") {
+        } elsif ($type1 eq "APLVector" && $type2 eq "APLVector") {
           # vector to vector
           $template .= << 'END_PIR';
     # Verify Shapes conform.
@@ -798,18 +725,26 @@ END_PREAMBLE
     $I2 = op2
     if $I1 == $I2 goto good
     %% DOMAIN_ERROR %%
-good:
+  good:
     # Create a result vector
     .local pmc result 
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
     # Loop through each vector, doing the ops.
     .local pmc iter1, iter2
     iter1 = new .Iterator, op1
     iter2 = new .Iterator, op2
-loop:    
+  loop:    
     unless iter1 goto loop_done
     $P1 = shift iter1
     $P2 = shift iter2
+    $S1 = typeof $P1
+    if $S1 == 'String' goto bad_args
+    $S2 = typeof $P2
+    if $S2 == 'String' goto bad_args
+    goto got_args
+  bad_args:
+    %% DOMAIN_ERROR %%
+  got_args:
 END_PIR
    
      $template .= interpolate($code, '$P1', '$P2');
@@ -826,7 +761,7 @@ END_PIR
         } else {
            # Vector to Scalar
            my ($vector, $scalar, @order);
-           if ($type1 eq 'ResizablePMCArray') {
+           if ($type1 eq 'APLVector') {
                $vector = "op1";
                $scalar = "op2";
 			   @order = qw/ $P1 $P2 /;
@@ -839,13 +774,17 @@ END_PIR
            $template .= << "END_PIR";
     # Create a result vector
     .local pmc result 
-    result = new .ResizablePMCArray
+    result = new 'APLVector'
     # Loop through each vector, doing the ops.
     .local pmc iter1
     iter1 = new .Iterator, $vector
-loop:    
+  loop:    
     unless iter1 goto loop_done
     \$P1 = shift iter1
+    \$S1 = typeof \$P1
+    if \$S1 != 'String' goto got_args
+    %% DOMAIN_ERROR %%
+  got_args:
 	\$P2 = clone $scalar
 END_PIR
    
@@ -894,17 +833,9 @@ __END__
 tools/gen_operator_defs.pl - Generate the definitions for all the various
 APL operators in all possible configurations.
 
-=for comment
-
-Note that the sub names generated here are single quoted - they look
-like unicode, but they're really escaped unicode. Parrot doesn't
-allow unicode sub-names yet, so we escape them and use that instead.
-
-Eventually make these be unicode strings. [perl #38964]
-
 =head1 LICENSE
 
-Copyright (c) 2005-2006 The Perl Foundation
+Copyright (C) 2005-2006, The Perl Foundation.
 
 This is free software; you may redistribute it and/or modify
 it under the same terms as Parrot.

@@ -1,5 +1,5 @@
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Lua.pm 12325 2006-04-18 06:59:24Z fperrad $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: Lua.pm 12840 2006-05-30 15:08:05Z coke $
 
 package Parrot::Test::Lua;
 

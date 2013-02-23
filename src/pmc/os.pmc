@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: os.pmc 11615 2006-02-17 02:54:09Z particle $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: os.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

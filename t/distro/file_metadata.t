@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: file_metadata.t 11598 2006-02-16 21:30:59Z particle $
+# Copyright (C) 2006, The Perl Foundation.
+# $Id: file_metadata.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

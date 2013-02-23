@@ -1,5 +1,5 @@
-# Copyright (C) 2005 The Perl Foundation.  All rights reserved.
-# $Id: httpd.pir 10730 2005-12-28 17:22:52Z particle $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: httpd.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

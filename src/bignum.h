@@ -1,6 +1,6 @@
 /* 
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: bignum.h 11177 2006-01-14 13:29:48Z bernhard $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: bignum.h 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

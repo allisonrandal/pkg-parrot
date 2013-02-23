@@ -459,7 +459,7 @@ __END__
 
 =head1 VERSION
 
-$Id: Block.pm 12028 2006-03-26 04:31:23Z gregor $
+$Id: Block.pm 12840 2006-05-30 15:08:05Z coke $
 
 =head1 AUTHOR
 
@@ -467,7 +467,7 @@ Gregor N. Purdy E<lt>gregor@focusresearch.comE<gt>
 
 =head1 COPYRIGHT
 
-Copyright: 2002-2005 The Perl Foundation.  All Rights Reserved.
+Copyright (C) 2002-2005, The Perl Foundation.
 
 =head1 LICENSE
 

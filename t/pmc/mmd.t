@@ -1,13 +1,13 @@
 #! perl
-# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: mmd.t 12465 2006-04-30 15:11:25Z bernhard $
+# Copyright (C) 2001-2006, The Perl Foundation.
+# $Id: mmd.t 12859 2006-05-31 17:43:38Z coke $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
-use Parrot::Test tests => 32;
+use Parrot::Test tests => 38;
 
 =head1 NAME
 
@@ -1111,4 +1111,163 @@ CODE
 foo string
 foo
 foo string
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "multisub w/o .HLL");
+.sub main :main
+    $P0 = new .Integer
+    $P0 = 3
+    $P9 = 'foo'($P0)
+
+    $P0 = new .ResizablePMCArray
+    push $P0, 4
+    $P1 = new .String
+    $P1 = 'hello'
+    $P9 = 'foo'($P0, $P1)
+.end
+
+.sub 'foo' :multi(Integer)
+    print "foo(Integer)\n"
+    .return (0)
+.end
+
+.sub 'foo' :multi(ResizablePMCArray, _)
+    print "foo(ResizablePMCArray,_)\n"
+    .return (0)
+.end
+CODE
+foo(Integer)
+foo(ResizablePMCArray,_)
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "multisub w/ .HLL, rt #39161");
+.HLL 'Perl6', ''
+.sub main :main
+    $P0 = new .Integer
+    $P0 = 3
+    $P9 = 'foo'($P0)
+
+    $P0 = new .ResizablePMCArray
+    push $P0, 4
+    $P1 = new .String
+    $P1 = 'hello'
+    $P9 = 'foo'($P0, $P1)
+.end
+
+.sub 'foo' :multi(Integer)
+    print "foo(Integer)\n"
+    .return (0)
+.end
+
+.sub 'foo' :multi(ResizablePMCArray, _)
+    print "foo(ResizablePMCArray,_)\n"
+    .return (0)
+.end
+CODE
+foo(Integer)
+foo(ResizablePMCArray,_)
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "multisub w/ flatten");
+# see also 'rt #39173
+.sub main :main
+    .local pmc int_pmc
+    int_pmc = new .Integer
+    int_pmc = 3
+
+    .local pmc args
+    args = new .ResizablePMCArray
+    push args, int_pmc
+    'foo'( args :flat )
+
+    .local pmc string_pmc
+    string_pmc = new .String
+    string_pmc = 'hello'
+
+    args = new .ResizablePMCArray
+    push args, string_pmc
+    'foo'( args :flat )
+    end
+.end
+
+.sub 'foo' :multi(Integer)
+    print "foo(Integer)\n"
+.end
+
+.sub 'foo' :multi(String)
+    print "foo(String)\n"
+.end
+CODE
+foo(Integer)
+foo(String)
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "keyed class name and multi");
+.sub main :main
+	.local pmc class
+	newclass class, [ 'Some'; 'Class' ]
+
+	.local int class_type
+	class_type = find_type [ 'Some'; 'Class' ]
+
+    .local pmc instance
+	instance = new class_type
+
+	.local string name
+	name = typeof instance
+
+	print "Type: "
+	print name
+	print "\n"
+    end
+.end
+CODE
+Type: Some;Class
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "keyed class name and multi");
+.sub main :main
+	.local pmc class
+	newclass class, [ 'Some'; 'Class' ]
+
+	.local int class_type
+	class_type = find_type [ 'Some'; 'Class' ]
+
+    .local pmc instance
+	instance = new class_type
+
+	foo( instance )
+    end
+.end
+
+.sub 'foo' :multi( [ 'Some'; 'Class' ])
+    print "Called multi for class\n"
+.end
+
+.sub 'foo' :multi(_)
+    print "Called wrong multi\n"
+.end
+CODE
+Called multi for class
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "unicode sub names and multi (RT#39254)");
+.sub unicode:"\u7777" :multi(string)
+  .param pmc arg
+  print 'String:'
+  say arg
+.end
+.sub unicode:"\u7777" :multi(int)
+  .param pmc arg
+  print 'Int:'
+  say arg
+.end
+
+.sub main :main
+  unicode:"\u7777"('what')
+  unicode:"\u7777"(23)
+.end
+CODE
+String:what
+Int:23
 OUTPUT

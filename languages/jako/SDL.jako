@@ -3,11 +3,11 @@
 #
 # A Jako module for interfacing with the SDL library.
 #
-# Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
+# Copyright (C) 2004-2005, The Perl Foundation.
 # This program is free software. Its use is subject to the same
 # license as Parrot.
 #
-# $Id: SDL.jako 10933 2006-01-06 01:43:24Z particle $
+# $Id: SDL.jako 12840 2006-05-30 15:08:05Z coke $
 #
 
 module SDL

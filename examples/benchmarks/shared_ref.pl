@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: shared_ref.pl 5175 2004-01-31 13:16:08Z mikescott $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: shared_ref.pl 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pyclass.t 11763 2006-02-27 08:29:19Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: pyclass.t 12840 2006-05-30 15:08:05Z coke $
 
 use strict;
 use warnings;

@@ -1,6 +1,6 @@
 #!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: debuginfo.t 12199 2006-04-13 12:09:36Z leo $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: debuginfo.t 12838 2006-05-30 14:19:10Z coke $
 
 use strict;
 use warnings;

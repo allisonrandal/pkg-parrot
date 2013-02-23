@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: multi_retvals.pir 10690 2005-12-27 11:27:44Z bernhard $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: multi_retvals.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

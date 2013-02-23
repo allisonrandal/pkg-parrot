@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pyfunc.t 11764 2006-02-27 08:42:12Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: pyfunc.t 12840 2006-05-30 15:08:05Z coke $
 
 use strict;
 use warnings;

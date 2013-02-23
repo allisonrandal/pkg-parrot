@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: if.t 11446 2006-02-06 14:07:49Z fperrad $
+# Copyright (C) 2005-2006, The Perl Foundation.
+# $Id: if.t 12840 2006-05-30 15:08:05Z coke $
 
 =head1 NAME
 

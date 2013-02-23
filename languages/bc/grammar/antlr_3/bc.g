@@ -1,5 +1,5 @@
-// Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-// $Id: bc.g 11917 2006-03-17 17:49:10Z bernhard $ 
+// Copyright (C) 2006, The Perl Foundation.
+// $Id: bc.g 12840 2006-05-30 15:08:05Z coke $ 
  
 // Parse bc with ANTLR3
 // This grammar is derived from <http://www.funet.fi/pub/doc/posix/p1003.2/d11.2/4.3>

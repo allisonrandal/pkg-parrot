@@ -1,5 +1,5 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: regex.in 11898 2006-03-14 17:30:01Z bernhard $
+# Copyright (C) 2005, The Perl Foundation.
+# $Id: regex.in 12827 2006-05-30 02:28:15Z coke $
 
 # Makefile for languages/regex
 

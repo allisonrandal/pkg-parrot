@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: memory_internals.pod 9346 2005-10-05 03:47:00Z jhoblitt $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: memory_internals.pod 12839 2006-05-30 14:34:31Z coke $
 
 =head1 NAME
 

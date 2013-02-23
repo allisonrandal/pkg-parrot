@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrot.c 11507 2006-02-11 17:08:54Z leo $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: parrot.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

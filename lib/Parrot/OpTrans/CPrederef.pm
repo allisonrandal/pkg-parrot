@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: CPrederef.pm 10519 2005-12-14 12:23:38Z leo $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: CPrederef.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

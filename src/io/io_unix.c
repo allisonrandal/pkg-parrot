@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: io_unix.c 11836 2006-03-09 16:00:15Z leo $
+Copyright (C) 2001-2006, The Perl Foundation.
+$Id: io_unix.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
@@ -943,7 +943,7 @@ AGAIN:
         else {
             close(io->fd);
         }
-        /* The charset should propably be 'binary', but right now httpd.imc
+        /* The charset should probably be 'binary', but right now httpd.imc
          * only works with 'ascii'
          */
         *s = string_make(interpreter, buf, bytesread, "ascii", 0);

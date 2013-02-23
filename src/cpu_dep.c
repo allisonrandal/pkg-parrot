@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: cpu_dep.c 7854 2005-04-17 03:28:29Z chromatic $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: cpu_dep.c 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 

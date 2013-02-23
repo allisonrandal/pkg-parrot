@@ -1,4 +1,14 @@
-# $Id: NEWS 12662 2006-05-14 09:04:54Z leo $
+# $Id: NEWS 12972 2006-06-19 14:01:03Z leo $
+
+New in 0.4.5
+
+- unicode subroutine names
+- hierarchical class names finished including MMD support
+- new dotnet CLI to PIR translator
+- improved TGE code and compiler
+- APL: vector handling
+- new STM branch in the svn repository
+- the usual bugfixes and enhancements
 
 New in 0.4.4
 

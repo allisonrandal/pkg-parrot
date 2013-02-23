@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: CSwitch.pm 11757 2006-02-27 01:03:39Z chromatic $
+# Copyright (C) 2001-2004, The Perl Foundation.
+# $Id: CSwitch.pm 12836 2006-05-30 13:40:58Z coke $
 
 =head1 NAME
 

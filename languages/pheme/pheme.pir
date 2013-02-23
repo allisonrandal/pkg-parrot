@@ -6,17 +6,42 @@
 	errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
 
 	load_bytecode 'languages/pheme/lib/PhemeCompiler.pbc'
+	load_bytecode 'languages/pheme/lib/PhemeObjects.pir'
 	load_bytecode 'languages/pheme/lib/PhemeSymbols.pbc'
 	load_bytecode 'languages/pheme/lib/pheme_grammar_gen.pir'
 
 	.local string source
 	source     = _get_source( args )
 
-	.local pmc compile_pheme
-	compile_pheme = find_global 'PhemeCompiler', 'compile_pheme'
+	.local int compiler_type
+	.local pmc compiler
+
+	compiler_type = find_type 'PhemeCompiler'
+
+	.local pmc init_args
+	init_args = new .Hash
+
+	.local string tge_source
+	.local pmc    tge_source_pmc
+	tge_source             = _slurp_file( 'lib/pge2past.tg' )
+	tge_source_pmc         =  new .String
+	tge_source_pmc         = tge_source
+	init_args['pge2past']  = tge_source_pmc
+
+	tge_source             = _slurp_file( 'lib/past2post.tg' )
+	tge_source_pmc         =  new .String
+	tge_source_pmc         = tge_source
+	init_args['past2post'] = tge_source_pmc
+
+	tge_source             = _slurp_file( 'lib/post2pir.tg' )
+	tge_source_pmc         =  new .String
+	tge_source_pmc         = tge_source
+	init_args['post2pir']  = tge_source_pmc
+
+	compiler = new compiler_type, init_args
 
 	.local pmc ast
-	ast = compile_pheme( source )
+	ast = compiler.'compile'( source )
 	end
 .end
 
@@ -59,7 +84,7 @@
 
 =head1 LICENSE
 
-Copyright (c) 2006 The Perl Foundation
+Copyright (C) 2006, The Perl Foundation.
 
 This is free software; you may redistribute it and/or modify it under the same
 terms as Parrot.

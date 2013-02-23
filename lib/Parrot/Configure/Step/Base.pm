@@ -1,5 +1,5 @@
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Base.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: Base.pm 12836 2006-05-30 13:40:58Z coke $
 
 =pod
 

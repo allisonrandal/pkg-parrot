@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: single_retval.pir 10754 2005-12-29 01:19:55Z particle $
+# Copyright (C) 2001-2005, The Perl Foundation.
+# $Id: single_retval.pir 12835 2006-05-30 13:32:26Z coke $
 
 =head1 NAME
 

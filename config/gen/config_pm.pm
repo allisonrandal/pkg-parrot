@@ -1,5 +1,5 @@
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: config_pm.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: config_pm.pm 12827 2006-05-30 02:28:15Z coke $
 
 =head1 NAME
 

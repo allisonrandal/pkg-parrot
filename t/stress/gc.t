@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: gc.t 11489 2006-02-09 18:58:48Z particle $
+# Copyright (C) 2001-2003, The Perl Foundation.
+# $Id: gc.t 12838 2006-05-30 14:19:10Z coke $
 
 =head1 NAME
 

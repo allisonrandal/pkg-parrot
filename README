@@ -1,9 +1,9 @@
-This is Parrot, version 0.4.4
+This is Parrot, version 0.4.5
 -----------------------------
 
 Parrot is Copyright (C) 2001-2006, The Perl Foundation.
 
-$Id: README 12672 2006-05-14 15:43:40Z leo $
+$Id: README 12972 2006-06-19 14:01:03Z leo $
 
 LICENSE INFORMATION
 -------------------
@@ -65,7 +65,7 @@ For systems like HPUX that don't have inet_pton please run
 
 If you want to install Parrot into a non-standard location use
 
-    perl Configure.pl --prefix=/Users/foo/parrot-0.4.4
+    perl Configure.pl --prefix=/Users/foo/parrot-0.4.5
 
 Running Configure.pl will generate a config.h header, a Parrot::Config
 module, platform files and some Makefiles.

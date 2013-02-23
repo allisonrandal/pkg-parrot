@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: exception_handler.pmc 11445 2006-02-06 11:52:16Z leo $
+Copyright (C) 2001-2003, The Perl Foundation.
+$Id: exception_handler.pmc 12826 2006-05-30 01:36:30Z coke $
 
 =head1 NAME
 
