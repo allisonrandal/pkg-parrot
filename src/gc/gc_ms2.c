@@ -7,6 +7,8 @@ src/gc/gc_ms2.c - Non-recursive M&S
 
 =head1 DESCRIPTION
 
+This program implements a non-recursive M&S garbage collection.
+
 =cut
 
 */
@@ -1470,7 +1472,7 @@ failed_allocation(unsigned int line, unsigned long size)
 {
     ASSERT_ARGS(failed_allocation)
     fprintf(stderr, "Failed allocation of %lu bytes\n", size);
-    do_panic(NULL, "Out of mem", __FILE__, line);
+    Parrot_x_panic_and_exit(NULL, "Out of mem", __FILE__, line);
 }
 
 

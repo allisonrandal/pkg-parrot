@@ -177,7 +177,7 @@ verify_CD(ARGIN(char *external_data), ARGMOD_NULLOK(PMC *user_data))
         PANIC(interp, "user_data is NULL");
     if (PMC_IS_NULL(user_data))
         PANIC(interp, "user_data is PMCNULL");
-    if ((UINTVAL)user_data & 3)
+    if ((ptrcast_t)user_data & 3)
         PANIC(interp, "user_data doesn't look like a pointer");
 
     /* Fetch original interpreter from prop */
@@ -262,9 +262,9 @@ callback_CD(PARROT_INTERP, ARGIN(char *external_data), ARGMOD(PMC *user_data))
          * then wait for the CB_EVENT_xx to finish and return the
          * result
          */
-        PMC *callback = Parrot_pmc_new(interp, enum_class_Callback);
-        Parrot_Callback_attributes *cb_data = PARROT_CALLBACK(callback);
-        cb_data->user_data     = (PMC*) user_data;
+        PMC * const callback = Parrot_pmc_new(interp, enum_class_Callback);
+        Parrot_Callback_attributes * const cb_data = PARROT_CALLBACK(callback);
+        cb_data->user_data     = user_data;
         cb_data->external_data = (PMC*) external_data;
 
         Parrot_cx_schedule_immediate(interp, callback);

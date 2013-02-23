@@ -5,6 +5,10 @@ Copyright (C) 2010-2012, Parrot Foundation.
 
 src/alarm.c - Implements a mechanism for alarms, setting a flag after a delay.
 
+=head1 DESCRIPTION
+
+This program implements a mechanism for alarms, setting a flag after a delay.
+
 =cut
 
 */
@@ -66,10 +70,8 @@ Parrot_alarm_init(void)
     sa.sa_handler = Parrot_alarm_callback;
     sa.sa_flags   = SA_RESTART;
 
-    if (sigaction(SIGALRM, &sa, 0) == -1) {
-        perror("sigaction failed in Parrot_timers_init");
-        exit(EXIT_FAILURE);
-    }
+    if (sigaction(SIGALRM, &sa, 0) == -1)
+        Parrot_x_force_error_exit(NULL, 1, "sigaction failed in Parrot_timers_init");
 
     Parrot_alarm_unmask(NULL);
 #endif
@@ -93,11 +95,10 @@ posix_alarm_set(FLOATVAL wait)
     /* TODO: Implement on Windows */
 #else
     const int MIL = 1000000;
-    struct itimerval itmr;
-    int sec, usec;
+    const int sec  = (int) wait;
+    const int usec = (int) ((wait - sec) * MIL);
 
-    sec  = (int) wait;
-    usec = (int) ((wait - sec) * MIL);
+    struct itimerval itmr;
 
     itmr.it_value.tv_sec     = sec;
     itmr.it_value.tv_usec    = usec;
@@ -108,10 +109,8 @@ posix_alarm_set(FLOATVAL wait)
         if (errno == EINVAL) {
             Parrot_alarm_callback(SIGALRM);
         }
-        else {
-            perror("setitimer failed in set_posix_alarm");
-            exit(EXIT_FAILURE);
-        }
+        else
+            Parrot_x_force_error_exit(NULL, 1, "setitimer failed in set_posix_alarm");
     }
 #endif
 }
@@ -222,7 +221,7 @@ Parrot_alarm_set(FLOATVAL when)
 #ifdef _WIN32
     /* TODO: Implement on Windows */
 #else
-    FLOATVAL now = Parrot_floatval_time();
+    const FLOATVAL now = Parrot_floatval_time();
 
     /* Better late than early */
     when += 0.0001;
