@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: lexicals.t 45751 2010-04-17 13:38:31Z fperrad $
+# $Id: lexicals.t 46450 2010-05-10 01:14:23Z plobsing $
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ $ENV{TEST_PROG_ARGS} ||= '';
 plan( skip_all => 'lexicals not thawed properly from PBC, TT #1171' )
     if $ENV{TEST_PROG_ARGS} =~ /--run-pbc/;
 
-plan( tests => 57 );
+plan( tests => 56 );
 
 =head1 NAME
 
@@ -98,16 +98,6 @@ pir_output_is( <<'CODE', <<'OUTPUT', '.lex - same PMC twice fails (.local pmc ab
 .end
 CODE
 ok
-ok
-OUTPUT
-
-pir_output_is( <<'CODE', <<'OUTPUT', '.lex - same lex twice' );
-.sub main
- .lex '$a', $P0
- .lex '$a', $P1
- say "ok"
-.end
-CODE
 ok
 OUTPUT
 

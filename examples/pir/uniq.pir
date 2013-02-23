@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: uniq.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: uniq.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -40,6 +40,8 @@ By Leon Brocard <acme@astray.com>.
 Converted to PIR by Bernhard Schmalhofer.
 
 =cut
+
+.loadlib 'io_ops' # convenient I/O dynamic opcodes
 
 .sub "uniq" :main
   .param pmc argv

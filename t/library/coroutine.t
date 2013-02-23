@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: coroutine.t 44540 2010-02-28 03:15:48Z coke $
+# $Id: coroutine.t 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -27,6 +27,8 @@ L<http://swiss.csail.mit.edu/classes/symbolic/spring06/psets/ps6/samefringe.scm>
 =cut
 
 .const int N_TESTS = 6
+
+.loadlib 'io_ops'
 
 ## Build an N-ary tree (where N is passed as node_width) of the specified depth,
 ## with the leaves being consecutive integer PMCs from start but less than N.

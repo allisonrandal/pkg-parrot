@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: makefiles.pm 44876 2010-03-11 14:24:43Z darbelo $
+# $Id: makefiles.pm 46126 2010-04-29 00:43:09Z darbelo $
 
 =head1 NAME
 
@@ -48,10 +48,12 @@ sub _init {
             conditioned_lines => 1,
         },
 
-        'compilers/ncigen/Makefile'  =>
-            { SOURCE => 'compilers/ncigen/config/makefiles/ncigen.in' },
-        'src/dynpmc/Makefile'        =>
-            { SOURCE => 'config/gen/makefiles/dynpmc.in' },
+        'src/dynpmc/Rules.mak' => {
+             SOURCE => 'src/dynpmc/Rules.in',
+        },
+        'src/dynpmc/Defines.mak' => {
+             SOURCE => 'src/dynpmc/Defines.in',
+        },
         'editor/Makefile'            =>
             { SOURCE => 'config/gen/makefiles/editor.in' },
 

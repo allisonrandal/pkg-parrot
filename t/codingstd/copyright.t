@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: copyright.t 44198 2010-02-19 20:51:15Z mikehh $
+# $Id: copyright.t 46702 2010-05-16 13:34:53Z jkeenan $
 
 use strict;
 use warnings;
@@ -145,6 +145,18 @@ my @permitted_duplicate_copyright_files = (
     {
         file    => 'examples/pir/quine_ord.pir',
         reason  => 'quine',
+    },
+    {
+        file    => 'tools/dev/nci_thunk_gen.pir',
+        reason  => 'heredoc text for generated file',
+    },
+    {
+        file    => 'src/main.c',
+        reason  => 'Parrot_version() prints copyright notice ',
+    },
+    {
+        file    => 't/examples/streams.t',
+        reason  => 'heredoc-like text in test',
     },
 );
 my $cwd = cwd();

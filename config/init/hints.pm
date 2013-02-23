@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: hints.pm 45027 2010-03-18 21:01:36Z petdance $
+# $Id: hints.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -31,8 +31,7 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $verbose = $conf->options->get('verbose');
-    print "\n[ " if $verbose;
+    $conf->debug("\n[ ");
 
     my $hints_used = 0;
     my $hints_file;
@@ -46,7 +45,7 @@ sub runstep {
     if ( -f $hints_file ) {
         my $hints_pkg = "init::hints::" . $hints_file_name;
 
-        print "$hints_pkg " if $verbose;
+        $conf->debug("$hints_pkg ");
 
         eval "use $hints_pkg";
         die $@ if $@;
@@ -57,7 +56,7 @@ sub runstep {
         $hints_used++;
 
         $hints_pkg = "init::hints::local";
-        print "$hints_pkg " if $verbose;
+        $conf->debug("$hints_pkg ");
         eval "use $hints_pkg";
 
         unless ($@) {
@@ -66,14 +65,14 @@ sub runstep {
         }
     }
     else {
-        print "No $hints_file found.  " if $verbose;
+        $conf->debug("No $hints_file found.  ");
     }
 
-    if ( $hints_used == 0 and $verbose ) {
-        print "(no hints) ";
+    if ( $hints_used == 0 ) {
+        $conf->debug("(no hints) ");
     }
 
-    print "]" if $verbose;
+    $conf->debug("]");
 
     return 1;
 }

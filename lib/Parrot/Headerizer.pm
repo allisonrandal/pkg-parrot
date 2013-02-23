@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2010, Parrot Foundation.
-# $Id: Headerizer.pm 45585 2010-04-12 05:24:17Z petdance $
+# $Id: Headerizer.pm 46820 2010-05-20 17:22:03Z petdance $
 
 package Parrot::Headerizer;
 
@@ -91,7 +91,9 @@ Returns a list of all the valid PARROT_XXX macros.
 sub valid_macros {
     my $self = shift;
 
-    return sort keys %{$self->{valid_macros}};
+    my @macros = sort keys %{$self->{valid_macros}};
+
+    return @macros;
 }
 
 =item $headerizer->extract_function_declarations($text)
@@ -245,8 +247,10 @@ sub function_components_from_declaration {
     }
     if ( $return_type =~ /\*/ ) {
         if ( !$macros{PARROT_CAN_RETURN_NULL} && !$macros{PARROT_CANNOT_RETURN_NULL} ) {
-            $self->squawk( $file, $name,
-                'Returns a pointer, but no PARROT_CAN(NOT)_RETURN_NULL macro found.' );
+            if ( $name !~ /^yy/ ) { # Don't complain about lexer-created functions
+                $self->squawk( $file, $name,
+                    'Returns a pointer, but no PARROT_CAN(NOT)_RETURN_NULL macro found.' );
+            }
         }
         elsif ( $macros{PARROT_CAN_RETURN_NULL} && $macros{PARROT_CANNOT_RETURN_NULL} ) {
             $self->squawk( $file, $name,

@@ -1,7 +1,7 @@
 # This line will be printed by ./parrot examples/pir/readline.t
 
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: readline.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: readline.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -19,6 +19,7 @@ received the buffer is printed and the program is terminated.
 =cut
 
 .include 'cclass.pasm'
+.loadlib 'io_ops'
 
 .sub "example" :main
         .local pmc stdin

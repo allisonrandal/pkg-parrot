@@ -1,7 +1,7 @@
 /* utf16.h
  *  Copyright (C) 2004-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: utf16.h 41533 2009-09-27 17:30:32Z NotFound $
+ *     $Id: utf16.h 45852 2010-04-21 10:06:00Z bacek $
  *  Overview:
  *     This is the header for the utf16 variable-width encoding.
  *  Data Structure and Algorithms:
@@ -16,8 +16,7 @@
 /* HEADERIZER BEGIN: src/string/encoding/utf16.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_CANNOT_RETURN_NULL
-ENCODING * Parrot_encoding_utf16_init(PARROT_INTERP)
+void Parrot_encoding_utf16_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 #define ASSERT_ARGS_Parrot_encoding_utf16_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\

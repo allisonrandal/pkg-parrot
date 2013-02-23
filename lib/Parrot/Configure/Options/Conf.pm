@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Conf.pm 44984 2010-03-17 17:09:04Z gerd $
+# $Id: Conf.pm 47020 2010-05-26 08:56:38Z gerd $
 package Parrot::Configure::Options::Conf;
 
 use strict;
@@ -18,7 +18,7 @@ use FindBin qw($Bin);
 
 our $script         = q{Configure.pl};
 our $parrot_version = Parrot::BuildUtil::parrot_version("$Bin/../../");
-our $svnid          = '$Id: Conf.pm 44984 2010-03-17 17:09:04Z gerd $';
+our $svnid          = '$Id: Conf.pm 47020 2010-05-26 08:56:38Z gerd $';
 
 sub print_version {
     print "Parrot Version $parrot_version Configure 2.0\n";
@@ -44,8 +44,6 @@ General Options:
                         which upon failure cause Configure.pl to halt
    --silent             Don't be verbose, interactive or fatal
    --nomanicheck        Don't check the MANIFEST
-   --languages="list of languages"
-                        Specify a list of languages to process
 
    --ask                Have Configure ask for commonly-changed info
    --test=configure     Run tests of configuration tools before configuring
@@ -91,20 +89,21 @@ Parrot Options:
    --opcode=(type)      Use the given type for opcodes
    --ops=(files)        Use the given ops files
 
-   --cgoto=0            Don't build cgoto core - recommended when short of mem
    --jitcapable         Use JIT
    --execcapable        Use JIT to emit a native executable
    --without-threads    Build parrot without thread support
    --buildframes        Dynamically build NCI call frames
+   --without-extra-nci-thunks
+                        Build parrot without unnecessary
+                        statically compiled NCI call frames
 
 External Library Options:
 
-   --without-crypto     Build parrot without crypto support (libssl)
-   --without-gdbm       Build parrot without GDBM support
    --without-gettext    Build parrot without gettext support
    --without-gmp        Build parrot without GMP support
    --without-opengl     Build parrot without OpenGL support (GL/GLU/GLUT)
    --without-pcre       Build parrot without pcre support
+   --without-zlib       Build parrot without zlib support
 
 ICU Options:
 

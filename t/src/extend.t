@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: extend.t 45791 2010-04-19 05:45:56Z petdance $
+# $Id: extend.t 47678 2010-06-18 00:29:10Z whiteknight $
 
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use Parrot::Test::Util 'create_tempfile';
 use Parrot::Test;
 use Parrot::Config;
 
-plan tests => 20;
+plan tests => 18;
 
 =head1 NAME
 
@@ -148,7 +148,7 @@ CODE
 Test
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_intval' );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_integer' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -169,8 +169,8 @@ main(int argc, const char *argv[])
     type    = Parrot_PMC_typenum(interp, "Integer");
     testpmc = Parrot_PMC_new(interp, type);
 
-    Parrot_PMC_set_intval(interp, testpmc, value);
-    new_value = Parrot_PMC_get_intval(interp, testpmc);
+    Parrot_PMC_set_integer_native(interp, testpmc, value);
+    new_value = Parrot_PMC_get_integer(interp, testpmc);
 
     printf("%ld\n", (long)new_value);
 
@@ -181,7 +181,7 @@ CODE
 101010
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_intval_intkey' );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_integer_keyed_int' );
 
 #include <stdio.h>
 #include "parrot/parrot.h"
@@ -197,9 +197,9 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     Parrot_Int key   = 10;
     Parrot_Int new_value;
 
-    Parrot_PMC_set_intval_intkey(interp, array, key, value);
+    Parrot_PMC_set_integer_keyed_int(interp, array, key, value);
 
-    new_value = Parrot_PMC_get_intval_intkey(interp, array, key);
+    new_value = Parrot_PMC_get_integer_keyed_int(interp, array, key);
 
     printf("%ld\n", (long)new_value);
     return NULL;
@@ -244,13 +244,13 @@ main(int argc, const char *argv[])
     type    = Parrot_PMC_typenum(interp, "Integer");
     testpmc = Parrot_PMC_new(interp, type);
 
-    Parrot_PMC_set_intval(interp, testpmc, value);
+    Parrot_PMC_set_integer_native(interp, testpmc, value);
 
     parrot_reg = 31;
     Parrot_set_pmcreg(interp, parrot_reg, testpmc);
 
     newpmc    = Parrot_get_pmcreg(interp, parrot_reg);
-    new_value = Parrot_PMC_get_intval(interp, newpmc);
+    new_value = Parrot_PMC_get_integer(interp, newpmc);
 
     printf("%d\n", (int)new_value);
 
@@ -261,7 +261,7 @@ CODE
 -123
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_numval' );
+c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_number' );
 
 #include <stdio.h>
 #include "parrot/embed.h"
@@ -283,8 +283,8 @@ main(int argc, const char *argv[])
     type    = Parrot_PMC_typenum(interp, "Float");
     testpmc = Parrot_PMC_new(interp, type);
 
-    Parrot_PMC_set_numval(interp, testpmc, value);
-    new_value = Parrot_PMC_get_numval(interp, testpmc);
+    Parrot_PMC_set_number_native(interp, testpmc, value);
+    new_value = Parrot_PMC_get_number(interp, testpmc);
 
     printf("%.7f\n", (double)new_value);
 
@@ -317,7 +317,7 @@ main(int argc, const char *argv[])
     testpmc = Parrot_PMC_new(interp, type);
 
     value     = Parrot_new_string(interp, "Pumpking", 8, "iso-8859-1", 0);
-    Parrot_PMC_set_string(interp, testpmc, value);
+    Parrot_PMC_set_string_native(interp, testpmc, value);
     new_value = Parrot_PMC_get_string(interp, testpmc);
 
     Parrot_eprintf(interp, "%S\n", new_value);
@@ -329,92 +329,18 @@ CODE
 Pumpking
 OUTPUT
 
-c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_cstring' );
-
-#include <stdio.h>
-#include "parrot/embed.h"
-#include "parrot/extend.h"
-
-int
-main(int argc, const char *argv[])
-{
-    Parrot_Interp interp = Parrot_new(NULL);
-    Parrot_Int    type;
-    Parrot_PMC    testpmc;
-    char         *new_value;
-
-    /* Interpreter set-up */
-    if (!interp)
-        return 1;
-
-    type    = Parrot_PMC_typenum(interp, "String");
-    testpmc = Parrot_PMC_new(interp, type);
-
-    Parrot_PMC_set_cstring(interp, testpmc, "Wibble");
-    new_value = Parrot_PMC_get_cstring(interp, testpmc);
-
-    printf("%s\n", new_value);
-
-    Parrot_free_cstring(new_value);
-
-    Parrot_exit(interp, 0);
-    return 0;
-}
-CODE
-Wibble
-OUTPUT
-
-c_output_is( <<'CODE', <<'OUTPUT', 'PMC_set/get_cstringn' );
-
-#include <stdio.h>
-#include "parrot/embed.h"
-#include "parrot/extend.h"
-
-int
-main(int argc, const char *argv[])
-{
-    Parrot_Interp interp = Parrot_new(NULL);
-    Parrot_Int    length = 6;
-    Parrot_Int    type;
-    Parrot_Int    new_len;
-    Parrot_PMC    testpmc;
-    char         *new_value;
-
-    /* Interpreter set-up */
-    if (!interp)
-        return 1;
-
-    type    = Parrot_PMC_typenum(interp, "String");
-    testpmc = Parrot_PMC_new(interp, type);
-
-    Parrot_PMC_set_cstringn(interp, testpmc, "Wibble", length);
-    new_value = Parrot_PMC_get_cstringn(interp, testpmc, &new_len);
-
-    printf("%s\n", new_value);
-    printf("%d\n", (int)(new_len));
-
-    Parrot_free_cstring(new_value);
-
-    Parrot_exit(interp, 0);
-    return 0;
-}
-CODE
-Wibble
-6
-OUTPUT
-
 my ($TEMP, $temp_pasm) = create_tempfile( SUFFIX => '.pasm', UNLINK => 1 );
 
 print $TEMP <<'EOF';
   .pcc_sub _sub1:
   get_params ""
-  printerr "in sub1\n"
+  print "in sub1\n"
   set_returns ""
   returncc
   .pcc_sub _sub2:
   get_params "0", P5
-  printerr P5
-  printerr "in sub2\n"
+  print P5
+  print "in sub2\n"
   set_returns ""
   returncc
 EOF
@@ -456,7 +382,7 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     PMC           *sub, *arg;
 
     Parrot_pbc_load(interp, pf);
-    sub = Parrot_find_global_cur(interp, name);
+    sub = Parrot_ns_find_current_namespace_global(interp, name);
     Parrot_ext_call(interp, sub, "->");
     Parrot_eprintf(interp, "back\\n");
 
@@ -464,7 +390,7 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     Parrot_io_flush(interp, Parrot_io_STDERR(interp));
 
     name = Parrot_str_new_constant(interp, "_sub2");
-    sub  = Parrot_find_global_cur(interp, name);
+    sub  = Parrot_ns_find_current_namespace_global(interp, name);
     arg  = Parrot_pmc_new(interp, enum_class_String);
 
     Parrot_PMC_set_string_native(interp, arg,
@@ -514,7 +440,7 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     PMC           *sub, *arg;
 
     Parrot_pbc_load(interp, pf);
-    sub = Parrot_find_global_cur(interp, name);
+    sub = Parrot_ns_find_current_namespace_global(interp, name);
     Parrot_ext_call(interp, sub, "->");
     Parrot_eprintf(interp, "back\\n");
 
@@ -522,7 +448,7 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     Parrot_io_flush(interp, Parrot_io_STDERR(interp));
 
     name = Parrot_str_new_constant(interp, "_sub2");
-    sub  = Parrot_find_global_cur(interp, name);
+    sub  = Parrot_ns_find_current_namespace_global(interp, name);
     arg  = Parrot_pmc_new(interp, enum_class_String);
 
     Parrot_PMC_set_string_native(interp, arg,
@@ -545,8 +471,8 @@ OUTPUT
 print $TEMP <<'EOF';
   .sub foo
       .param pmc input
-      printerr input
-      printerr "in sub2\n"
+      print input
+      print "in sub2\n"
       $P0 = new "Integer"
       $P0 = 42
       .return($P0)
@@ -591,7 +517,7 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     Parrot_Int     result;
 
     Parrot_pbc_load(interp, pf);
-    sub  = Parrot_find_global_cur(interp, name);
+    sub  = Parrot_ns_find_current_namespace_global(interp, name);
     arg  = Parrot_pmc_new(interp, enum_class_String);
 
     Parrot_PMC_set_string_native(interp, arg,
@@ -614,9 +540,9 @@ OUTPUT
 print $TEMP <<'EOF';
   .pcc_sub _sub1:
   get_params ""
-  printerr "in sub1\n"
+  print "in sub1\n"
   find_lex P2, "no_such_var"
-  printerr "never\n"
+  print "never\n"
   returncc
 EOF
 close $TEMP;
@@ -658,7 +584,7 @@ the_test(PARROT_INTERP, opcode_t *cur_op, opcode_t *start)
     Parrot_runloop jump_point;
 
     Parrot_pbc_load(interp, pf);
-    sub = Parrot_find_global_cur(interp, name);
+    sub = Parrot_ns_find_current_namespace_global(interp, name);
 
     if (setjmp(jump_point.resume)) {
         Parrot_eprintf(interp, "caught\\n");
@@ -788,7 +714,7 @@ main(int argc, const char *argv[])
     }
 
     foo_name = Parrot_str_new_constant( interp, "foo" );
-    sub      = Parrot_find_global_cur( interp, foo_name );
+    sub      = Parrot_ns_find_current_namespace_global( interp, foo_name );
 
     Parrot_ext_call(interp, sub, "->");
 
@@ -820,7 +746,7 @@ main(int argc, const char *argv[])
     pf = Parrot_pbc_read( interp, "$temp_pbc", 0 );
     Parrot_pbc_load( interp, pf );
 
-    sub      = Parrot_find_global_cur( interp, Parrot_str_new_constant( interp, "add" ) );
+    sub      = Parrot_ns_find_current_namespace_global( interp, Parrot_str_new_constant( interp, "add" ) );
     Parrot_ext_call(interp, sub, "II->I", 100, 200, &result);
     printf( "Result is %d.\\n", result );
 
@@ -852,7 +778,7 @@ main(int argc, const char *argv[])
     pf = Parrot_pbc_read( interp, "$temp_pbc", 0 );
     Parrot_pbc_load( interp, pf );
 
-    sub      = Parrot_find_global_cur( interp, Parrot_str_new_constant( interp, "add" ) );
+    sub      = Parrot_ns_find_current_namespace_global( interp, Parrot_str_new_constant( interp, "add" ) );
     Parrot_ext_call( interp, sub, "II->I", 100, 200, &result );
     printf( "Result is %d.\\n", result );
 

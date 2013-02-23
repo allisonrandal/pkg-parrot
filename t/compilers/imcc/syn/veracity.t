@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: veracity.t 44367 2010-02-23 05:07:43Z mikehh $
+# $Id: veracity.t 46007 2010-04-25 11:44:15Z fperrad $
 
 .sub test :main
     .include 'test_more.pir'

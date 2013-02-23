@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 05-trace.t 36833 2009-02-17 20:09:26Z allison $
+# $Id: 05-trace.t 48000 2010-07-05 01:37:52Z jkeenan $
 # 05-trace.t
 
 use strict;
@@ -14,7 +14,8 @@ if ( ( -e qq{./lib/Parrot/Config/Generated.pm} )
     plan tests => 40;
 }
 else {
-    plan skip_all => q{Tests irrelevant unless configuration completed with tracing requested};
+    plan skip_all =>
+        q{Tests irrelevant unless configuration completed with tracing requested};
 }
 use lib qw( lib );
 use Parrot::Config;

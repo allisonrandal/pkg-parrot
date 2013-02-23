@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: OpenGL.pir 44141 2010-02-18 19:38:51Z plobsing $
+# $Id: OpenGL.pir 46055 2010-04-27 11:35:54Z bacek $
 
 =head1 NAME
 
@@ -309,8 +309,7 @@ at :load time by _opengl_init().
     # Rename all 'glutcb*' symbols to 'glut*'
   rename_callbacks:
     .local string renamed
-    renamed = clone symbol
-    substr renamed, 4, 2, ''
+    renamed = replace symbol, 4, 2, ''
     export_renames[symbol] = renamed
     goto symbol_loop
   symbol_loop_end:
@@ -371,8 +370,7 @@ caller's namespace is assumed.
     # Rename all 'glutcb*' symbols to 'glut*'
   rename_callbacks:
     .local string renamed
-    renamed = clone symbol
-    substr renamed, 4, 2, ''
+    renamed = replace symbol, 4, 2, ''
     export_renames[symbol] = renamed
     goto symbol_loop
   symbol_loop_end:

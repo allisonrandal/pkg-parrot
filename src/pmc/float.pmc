@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2009, Parrot Foundation.
-$Id: float.pmc 45219 2010-03-28 01:11:50Z petdance $
+$Id: float.pmc 46193 2010-04-30 08:53:15Z jimmy $
 
 =head1 NAME
 
@@ -300,7 +300,7 @@ Increments the number.
     VTABLE void increment() {
         FLOATVAL fv;
         GET_ATTR_fv(INTERP, SELF, fv);
-        fv++;
+        ++fv;
         SET_ATTR_fv(INTERP, SELF, fv);
     }
 
@@ -317,7 +317,7 @@ Decrements the number.
     VTABLE void decrement() {
         FLOATVAL fv;
         GET_ATTR_fv(INTERP, SELF, fv);
-        fv--;
+        --fv;
         SET_ATTR_fv(INTERP, SELF, fv);
     }
 /*

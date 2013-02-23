@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: httpd.pir 37827 2009-03-31 16:34:25Z Infinoid $
+# $Id: httpd.pir 47583 2010-06-13 01:02:26Z coke $
 
 =head1 NAME
 
@@ -94,6 +94,9 @@ The code was heavily hacked by bernhard and leo.
 .include "stat.pasm"
 .include 'except_types.pasm'
 .include 'socket.pasm'
+
+.loadlib 'io_ops'
+.loadlib 'sys_ops'
 
 .sub main :main
     .local pmc listener, work, fp
@@ -267,7 +270,6 @@ SERVE_404:
 
 ERR_NO_SOCKET:
     print "Could not open socket.\n"
-    print "Did you enable PARROT_NET_DEVEL in include/io_private.h?\n"
     end
 ERR_bind:
     print "bind failed\n"

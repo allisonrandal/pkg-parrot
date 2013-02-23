@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2010, Parrot Foundation
-# $Id: pdd26_ast.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd26_ast.pod 46600 2010-05-14 07:20:42Z pmichaud $
 
 =head1 PDD 26: Compiler Tools - Abstract Syntax Tree
 
@@ -10,7 +10,7 @@ Abstract Syntax Tree representation.
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 46600 $
 
 =head2 Description
 
@@ -481,12 +481,19 @@ the C<symbol> method below.
 =item blocktype([type])
 
 Get/set the type of the block to C<type>.  The currently
-understood values are 'declaration' and 'immediate'.  'Declaration'
-indicates that a block is simply being defined at this point, the
-result of the node is a reference to the block.  A C<blocktype>
-of 'immediate' indicates a block that is to be immediately
+understood values are 'declaration', 'immediate',  and 'method'.  
+'Declaration' indicates that a block is simply being defined at 
+this point, the result of the node is a reference to the block.  
+A C<blocktype> of 'immediate' indicates a block that is to be immediately
 executed when it is evaluated in the AST, and the result of the
 last operation is used as the return value for the block.
+
+=item closure([value])
+
+Get/set the closure flag for the block to C<value>.  If the closure
+flag on a (non-immediate) block is true, then the node returns a 
+reference to a clone of the block that has captured the current
+lexical context.
 
 =item namespace([value])
 

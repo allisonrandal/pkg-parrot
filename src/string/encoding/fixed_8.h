@@ -1,7 +1,7 @@
 /* fixed_8.h
  *  Copyright (C) 2004-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: fixed_8.h 41533 2009-09-27 17:30:32Z NotFound $
+ *     $Id: fixed_8.h 45852 2010-04-21 10:06:00Z bacek $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:
@@ -16,8 +16,7 @@
 /* HEADERIZER BEGIN: src/string/encoding/fixed_8.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
-PARROT_CANNOT_RETURN_NULL
-ENCODING * Parrot_encoding_fixed_8_init(PARROT_INTERP)
+void Parrot_encoding_fixed_8_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
 #define ASSERT_ARGS_Parrot_encoding_fixed_8_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2010, Parrot Foundation.
-# $Id: PCCMETHOD.pm 45817 2010-04-20 05:47:08Z petdance $
+# $Id: PCCMETHOD.pm 46384 2010-05-07 08:02:45Z jimmy $
 
 package Parrot::Pmc2c::PCCMETHOD;
 use strict;
@@ -399,7 +399,7 @@ sub rewrite_pccmethod {
     unshift @$linear_args,
         {
         type  => convert_type_string_to_reg_type('PMC'),
-        name  => 'pmc',
+        name  => '_self',
         attrs => parse_adverb_attributes(':invocant')
         };
 
@@ -415,7 +415,7 @@ sub rewrite_pccmethod {
     PMC * const _ctx         = CURRENT_CONTEXT(interp);
     PMC * const _ccont       = Parrot_pcc_get_continuation(interp, _ctx);
     PMC * const _call_object = Parrot_pcc_get_signature(interp, _ctx);
-    PMC * _ret_object        = PMCNULL;
+    PMC * _ret_object;
 
     { /* BEGIN PARMS SCOPE */
 END

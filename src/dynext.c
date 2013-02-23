@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: dynext.c 45117 2010-03-22 23:42:16Z petdance $
+$Id: dynext.c 48009 2010-07-05 14:33:31Z NotFound $
 
 =head1 NAME
 
@@ -276,7 +276,7 @@ get_path(PARROT_INTERP, ARGMOD_NULLOK(STRING *lib), Parrot_dlopen_flags flags,
     if (lib == NULL) {
         *handle = Parrot_dlopen((char *)NULL, flags);
         if (*handle) {
-            return string_from_literal(interp, "");
+            return CONST_STRING(interp, "");
         }
         err = Parrot_dlerror();
         Parrot_warn(interp, PARROT_WARNINGS_DYNEXT_FLAG,
@@ -294,7 +294,7 @@ get_path(PARROT_INTERP, ARGMOD_NULLOK(STRING *lib), Parrot_dlopen_flags flags,
 
         for (i = 0; i < n; ++i) {
             ext = VTABLE_get_string_keyed_int(interp, share_ext, i);
-            full_name = Parrot_str_concat(interp, wo_ext, ext, 0);
+            full_name = Parrot_str_concat(interp, wo_ext, ext);
             path = Parrot_locate_runtime_file_str(interp, full_name,
                     PARROT_RUNTIME_FT_DYNEXT);
             if (path) {
@@ -341,7 +341,7 @@ get_path(PARROT_INTERP, ARGMOD_NULLOK(STRING *lib), Parrot_dlopen_flags flags,
     if (!STRING_IS_EMPTY(lib) && memcmp(lib->strstart, "lib", 3) == 0) {
         *handle = Parrot_dlopen((char *)lib->strstart + 3, 0);
         if (*handle) {
-            path = Parrot_str_substr(interp, lib, 3, lib->strlen - 3, NULL, 0);
+            path = Parrot_str_substr(interp, lib, 3, lib->strlen - 3);
             return path;
         }
     }
@@ -350,8 +350,8 @@ get_path(PARROT_INTERP, ARGMOD_NULLOK(STRING *lib), Parrot_dlopen_flags flags,
     /* And on cygwin replace a leading "lib" by "cyg". */
 #ifdef __CYGWIN__
     if (!STRING_IS_EMPTY(lib) && memcmp(lib->strstart, "lib", 3) == 0) {
-        path = Parrot_str_append(interp, CONST_STRING(interp, "cyg"),
-            Parrot_str_substr(interp, lib, 3, lib->strlen - 3, NULL, 0));
+        path = Parrot_str_concat(interp, CONST_STRING(interp, "cyg"),
+            Parrot_str_substr(interp, lib, 3, lib->strlen - 3));
 
         *handle = dlopen_string(interp, flags, path);
 
@@ -376,8 +376,8 @@ get_path(PARROT_INTERP, ARGMOD_NULLOK(STRING *lib), Parrot_dlopen_flags flags,
 
 /*
 
-=item C<PMC * Parrot_init_lib(PARROT_INTERP, PMC *(*load_func(PARROT_INTERP)),
-void (*init_func(PARROT_INTERP, PMC *)))>
+=item C<PMC * Parrot_init_lib(PARROT_INTERP, dynext_load_func load_func,
+dynext_init_func init_func)>
 
 Initializes a new library. First, calls C<load_func> to load the library
 (if C<load_func> is provided) and then calls C<init_func>. Returns a
@@ -391,8 +391,8 @@ PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
 PMC *
 Parrot_init_lib(PARROT_INTERP,
-                ARGIN_NULLOK(PMC *(*load_func)(PARROT_INTERP)),
-                ARGIN_NULLOK(void (*init_func)(PARROT_INTERP, ARGIN_NULLOK(PMC *))))
+        NULLOK(dynext_load_func load_func),
+        NULLOK(dynext_init_func init_func))
 {
     ASSERT_ARGS(Parrot_init_lib)
     PMC *lib_pmc = NULL;
@@ -409,6 +409,36 @@ Parrot_init_lib(PARROT_INTERP,
         (init_func)(interp, lib_pmc);
 
     return lib_pmc;
+}
+
+/*
+
+=item C<void * Parrot_dlsym_str(PARROT_INTERP, void *handle, STRING *symbol)>
+
+Same as Parrot_dlsym but takes the symbol name from a Parrot String instead
+of a C string.
+
+=cut
+
+*/
+
+PARROT_EXPORT
+PARROT_CAN_RETURN_NULL
+void *
+Parrot_dlsym_str(PARROT_INTERP,
+        ARGIN_NULLOK(void *handle), ARGIN_NULLOK(STRING *symbol))
+{
+    ASSERT_ARGS(Parrot_dlsym_str)
+
+    void *ptr;
+    if (STRING_IS_NULL(symbol))
+        ptr = NULL;
+    else {
+        char *const symbol_cs = Parrot_str_to_cstring(interp, symbol);
+        ptr = Parrot_dlsym(handle, symbol_cs);
+        Parrot_str_free_cstring(symbol_cs);
+    }
+    return ptr;
 }
 
 /*
@@ -453,18 +483,14 @@ run_init_lib(PARROT_INTERP, ARGIN(void *handle),
                                         "Parrot_lib_%Ss_load", lib_name);
         STRING * const init_func_name  = Parrot_sprintf_c(interp,
                                         "Parrot_lib_%Ss_init", lib_name);
-        char   * const cload_func_name = Parrot_str_to_cstring(interp, load_name);
-        char   * const cinit_func_name = Parrot_str_to_cstring(interp, init_func_name);
 
         /* get load_func */
-        void * dlsymfunc = Parrot_dlsym(handle, cload_func_name);
+        void * dlsymfunc = Parrot_dlsym_str(interp, handle, load_name);
         load_func = (PMC * (*)(PARROT_INTERP)) D2FPTR(dlsymfunc);
-        Parrot_str_free_cstring(cload_func_name);
 
         /* get init_func */
-        dlsymfunc = Parrot_dlsym(handle, cinit_func_name);
+        dlsymfunc = Parrot_dlsym_str(interp, handle, init_func_name);
         init_func = (void (*)(PARROT_INTERP, PMC *)) D2FPTR(dlsymfunc);
-        Parrot_str_free_cstring(cinit_func_name);
     }
     else {
         load_func = NULL;
@@ -660,7 +686,7 @@ Parrot_load_lib(PARROT_INTERP, ARGIN_NULLOK(STRING *lib), ARGIN_NULLOK(PMC *para
         lib_name = parrot_split_path_ext(interp, lib, &wo_ext, &ext);
     }
     else {
-        wo_ext   = string_from_literal(interp, "");
+        wo_ext   = CONST_STRING(interp, "");
         lib_name = NULL;
         ext      = NULL;
     }

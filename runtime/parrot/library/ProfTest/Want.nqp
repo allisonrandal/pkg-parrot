@@ -1,6 +1,6 @@
 
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Want.nqp 45660 2010-04-14 09:39:23Z cotto $
+# $Id: Want.nqp 46060 2010-04-27 13:39:27Z bacek $
 
 class ProfTest::Want is Hash;
 
@@ -147,7 +147,7 @@ method new(:$ns?, :$slurp_until?) {
 
 method accepts(%prof_line) {
     if self<found_cs> && self<slurp_until> {
-        if pir::downcase(%prof_line<type>) ne self<slurp_until> {
+        if pir::downcase__SS(%prof_line<type>) ne self<slurp_until> {
             return 1;
         }
         return 0;

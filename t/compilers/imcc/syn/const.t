@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: const.t 43695 2010-02-01 21:11:43Z bacek $
+# $Id: const.t 47301 2010-06-02 13:21:07Z coke $
 
 use strict;
 use warnings;
@@ -198,7 +198,7 @@ pir_output_is( <<'CODE', <<'OUT', 'PIR heredocs: accepts inline with concat' );
     $S0 = ""
     $I0 = 0
 LOOP:
-    $S0 = concat <<"end"
+    concat $S0, <<"end"
 ending
 end
     inc $I0

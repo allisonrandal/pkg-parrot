@@ -1,5 +1,5 @@
 # Copyright (C) 2004, Parrot Foundation.
-# $Id: Ops.pm 37229 2009-03-09 04:39:01Z allison $
+# $Id: Ops.pm 46946 2010-05-24 08:15:45Z cotto $
 
 =head1 NAME
 
@@ -53,12 +53,6 @@ sub new {
         'Opcodes',
         'ops.html',
         '',
-        $self->new_group(
-            'Tools',
-            '',
-            $self->new_item( '', 'tools/build/ops2c.pl' ),
-            $self->new_item( '', 'tools/build/ops2pm.pl' ),
-        ),
         $self->new_group( 'Opcode Libraries', '', @core_ops ),
         $self->new_group( 'Dynamic Opcode Libraries', '', @dynamic_ops ),
     );

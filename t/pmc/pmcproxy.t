@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: pmcproxy.t 45665 2010-04-14 12:12:08Z allison $
+# $Id: pmcproxy.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

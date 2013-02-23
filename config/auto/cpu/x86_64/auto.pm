@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: auto.pm 36853 2009-02-18 06:16:14Z rurban $
+# $Id: auto.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -20,8 +20,6 @@ sub runstep {
     my ( $self, $conf ) = @_;
 
     # x86_64 is recently new and has cmpxchg
-
-    my $verbose = $conf->options->get('verbose');
     my $gcc     = $conf->data->get('gccversion');
 
     # when running on gcc, we just define the config item

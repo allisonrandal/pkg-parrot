@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: debug.c 45480 2010-04-09 05:47:15Z chromatic $
+$Id: debug.c 47059 2010-05-27 18:09:27Z fperrad $
 
 =head1 NAME
 
@@ -863,7 +863,7 @@ Start debugger.
 
 PARROT_EXPORT
 void
-Parrot_debugger_start(PARROT_INTERP, ARGIN(opcode_t * cur_opcode))
+Parrot_debugger_start(PARROT_INTERP, ARGIN_NULLOK(opcode_t * cur_opcode))
 {
     ASSERT_ARGS(Parrot_debugger_start)
     TRACEDEB_MSG("Parrot_debugger_start");
@@ -1157,22 +1157,6 @@ PDB_next(PARROT_INTERP, ARGIN_NULLOK(const char *command))
     /* Erase the stopped flag */
     pdb->state &= ~PDB_STOPPED;
 
-    /* Testing use of the debugger runloop */
-    #if 0
-
-    /* Execute */
-    for (; n && pdb->cur_opcode; n--)
-        DO_OP(pdb->cur_opcode, pdb->debugee);
-
-    /* Set the stopped flag */
-    pdb->state |= PDB_STOPPED;
-
-    /* If program ended */
-
-    if (!pdb->cur_opcode)
-        (void)PDB_program_end(interp);
-    #endif
-
     debugee     = pdb->debugee;
 
     new_runloop_jump_point(debugee);
@@ -1366,7 +1350,7 @@ PDB_cond(PARROT_INTERP, ARGIN(const char *command))
     if (*(command + 1) == '=')
         command += 2;
     else
-        command++;
+        ++command;
 
     command = skip_whitespace(command);
 
@@ -1425,7 +1409,7 @@ PDB_cond(PARROT_INTERP, ARGIN(const char *command))
             condition->type               |= PDB_cond_const;
         }
         else if (condition->type & PDB_cond_str) {
-            for (i = 1; ((command[i] != '"') && (i < DEBUG_CMD_BUFFER_LENGTH)); i++)
+            for (i = 1; ((command[i] != '"') && (i < DEBUG_CMD_BUFFER_LENGTH)); ++i)
                 str[i - 1] = command[i];
             str[i - 1] = '\0';
 #if TRACE_DEBUGGER
@@ -1513,7 +1497,7 @@ PDB_set_break(PARROT_INTERP, ARGIN_NULLOK(const char *command))
             /* Move to the line where we will set the break point */
             line = pdb->file->line;
 
-            for (i = 1; ((i < ln) && (line->next)); i++)
+            for (i = 1; ((i < ln) && (line->next)); ++i)
                 line = line->next;
 
             /* Abort if the line number provided doesn't exist */
@@ -1684,27 +1668,6 @@ PDB_continue(PARROT_INTERP, ARGIN_NULLOK(const char *command))
         PDB_skip_breakpoint(interp, ln);
     }
 
-    /* Run while no break point is reached */
-    /*
-    while (!PDB_break(interp))
-        DO_OP(pdb->cur_opcode, pdb->debugee);
-    */
-
-    #if 0
-    pdb->tracing           = 0;
-    Parrot_runcore_switch(pdb->debugee, CONST_STRING(interp, "debugger"));
-
-    new_internal_exception(pdb->debugee);
-    if (setjmp(pdb->debugee->exceptions->destination)) {
-        Parrot_io_eprintf(pdb->debugee, "Unhandled exception while debugging: %Ss\n",
-            pdb->debugee->exceptions->msg);
-        pdb->state |= PDB_STOPPED;
-        return;
-    }
-    runops_int(pdb->debugee, pdb->debugee->code->base.data - pdb->cur_opcode);
-    if (!pdb->cur_opcode)
-        (void)PDB_program_end(interp);
-    #endif
     pdb->state |= PDB_RUNNING;
     pdb->state &= ~PDB_BREAK;
     pdb->state &= ~PDB_STOPPED;
@@ -2115,7 +2078,7 @@ PDB_break(PARROT_INTERP)
         /* If we have to skip breakpoints, do so. */
         if (pdb->breakpoint_skip) {
             TRACEDEB_MSG("PDB_break skipping");
-            pdb->breakpoint_skip--;
+            --pdb->breakpoint_skip;
             return 0;
         }
 
@@ -2168,7 +2131,7 @@ PDB_escape(PARROT_INTERP, ARGIN(const char *string), UINTVAL length)
 
     fill = _new = mem_gc_allocate_n_typed(interp, length * 2 + 1, char);
 
-    for (; string < end; string++) {
+    for (; string < end; ++string) {
         switch (*string) {
           case '\0':
             *(fill++) = '\\';
@@ -2199,7 +2162,14 @@ PDB_escape(PARROT_INTERP, ARGIN(const char *string), UINTVAL length)
             *(fill++) = '"';
             break;
           default:
-            *(fill++) = *string;
+            /* Hide non-ascii chars that may come from utf8 or latin-1
+             * strings in constant strings.
+             * Workaround for TT #1557
+             */
+            if ((unsigned char)*string > 127)
+                *(fill++) = '?';
+            else
+                *(fill++) = *string;
             break;
         }
     }
@@ -2225,8 +2195,8 @@ PDB_unescape(ARGMOD(char *string))
     ASSERT_ARGS(PDB_unescape)
     int l = 0;
 
-    for (; *string; string++) {
-        l++;
+    for (; *string; ++string) {
+        ++l;
 
         if (*string == '\\') {
             char *fill;
@@ -2254,7 +2224,7 @@ PDB_unescape(ARGMOD(char *string))
 
             fill = string;
 
-            for (i = 1; fill[i + 1]; i++)
+            for (i = 1; fill[i + 1]; ++i)
                 fill[i] = fill[i + 1];
 
             fill[i] = '\0';
@@ -2300,7 +2270,7 @@ PDB_disassemble_op(PARROT_INTERP, ARGOUT(char *dest), size_t space,
     dest[size++] = ' ';
 
     /* Concat the arguments */
-    for (j = 1; j < info->op_count; j++) {
+    for (j = 1; j < info->op_count; ++j) {
         char      buf[256];
         INTVAL    i = 0;
 
@@ -2511,15 +2481,14 @@ PDB_disassemble_op(PARROT_INTERP, ARGOUT(char *dest), size_t space,
                                      " :unused040",
                                      " :optional",
                                      " :opt_flag",
-                                     " :named",
-                                     NULL
+                                     " :named"
         };
 
 
         /* Register decoding.  It would be good to abstract this, too. */
         PARROT_OBSERVER static const char regs[] = "ISPN";
 
-        for (j = 0; j < n_values; j++) {
+        for (j = 0; j < n_values; ++j) {
             size_t idx = 0;
             const int sig_value = VTABLE_get_integer_keyed_int(interp, sig, j);
 
@@ -2533,7 +2502,7 @@ PDB_disassemble_op(PARROT_INTERP, ARGOUT(char *dest), size_t space,
 
             /* Add flags, if we have any. */
             {
-                int flag_idx = 0;
+                unsigned int flag_idx = 0;
                 int flags = sig_value;
 
                 /* End when we run out of flags, off the end of flag_names, or
@@ -2541,10 +2510,12 @@ PDB_disassemble_op(PARROT_INTERP, ARGOUT(char *dest), size_t space,
                  * 100 is just an estimate of all buf lengths added together.
                  */
                 while (flags && idx < sizeof (buf) - 100) {
-                    const char * const flag_string
-                                    = (specialop == 2  && STREQ(flag_names[flag_idx], " :flat"))
+                    const char * const flag_string =
+                            flag_idx < (sizeof flag_names / sizeof (char *))
+                                ? (specialop == 2  && STREQ(flag_names[flag_idx], " :flat"))
                                     ? " :slurpy"
-                                    : flag_names[flag_idx];
+                                    : flag_names[flag_idx]
+                                : (const char *) NULL;
 
                     if (! flag_string)
                         break;
@@ -2805,7 +2776,7 @@ PDB_load_source(PARROT_INTERP, ARGIN(const char *command))
     /* Get the name of the file */
     for (j = 0; command[j] == ' '; ++j)
         continue;
-    for (i = 0; command[j]; i++, j++)
+    for (i = 0; command[j]; ++i, ++j)
         f[i] = command[j];
 
     f[i] = '\0';
@@ -2838,7 +2809,7 @@ PDB_load_source(PARROT_INTERP, ARGIN(const char *command))
         }
         pfile->source[pfile->size] = (char)c;
 
-        pfile->size++;
+        ++pfile->size;
 
         if (c == '\n') {
             /* If the line has an opcode move to the next one,
@@ -2903,7 +2874,7 @@ PDB_hasinstruction(ARGIN(const char *c))
             h = 0;
         }
 
-        c++;
+        ++c;
     }
 
     return h;
@@ -2956,7 +2927,7 @@ PDB_assign(PARROT_INTERP, ARGIN(const char *command))
         return;
     }
     reg_type_id = (unsigned char) toupper((unsigned char) command[0]);
-    command++;
+    ++command;
     register_num = get_ulong(&command, 0);
 
     switch (reg_type_id) {
@@ -3039,7 +3010,7 @@ PDB_list(PARROT_INTERP, ARGIN(const char *command))
 
     line = pdb->file->line;
 
-    for (i = 0; i < pdb->file->list_line && line->next; i++)
+    for (i = 0; i < pdb->file->list_line && line->next; ++i)
         line = line->next;
 
     i = 1;
@@ -3100,6 +3071,7 @@ Print interp registers.
 
 */
 
+PARROT_EXPORT
 void
 PDB_print(PARROT_INTERP, ARGIN(const char *command))
 {
@@ -3212,6 +3184,7 @@ Prints a backtrace of the interp's call chain.
 
 */
 
+PARROT_EXPORT
 void
 PDB_backtrace(PARROT_INTERP)
 {
@@ -3410,7 +3383,7 @@ GDB_P(PARROT_INTERP, ARGIN(const char *s))
     TRACEDEB_MSG("GDB_P");
     /* Skip leading whitespace. */
     while (isspace((unsigned char)*s))
-        s++;
+        ++s;
 
     reg_type = (unsigned char) toupper((unsigned char)*s);
 
@@ -3426,7 +3399,7 @@ GDB_P(PARROT_INTERP, ARGIN(const char *s))
         const int max_reg = Parrot_pcc_get_regs_used(interp, CURRENT_CONTEXT(interp), t);
         int n;
 
-        for (n = 0; n < max_reg; n++) {
+        for (n = 0; n < max_reg; ++n) {
             /* this must be done in two chunks because PMC's print directly. */
             Parrot_io_eprintf(interp, "\n  %c%d = ", reg_type, n);
             Parrot_io_eprintf(interp, "%Ss", GDB_print_reg(interp, t, n));

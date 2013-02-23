@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: utils.c 45609 2010-04-12 17:16:24Z darbelo $
+$Id: utils.c 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -62,12 +62,12 @@ static INTVAL COMPARE(PARROT_INTERP,
 static void next_rand(_rand_buf X);
 static void process_cycle_without_exit(
     int node_index,
-    ARGIN(parrot_prm_context* c))
+    ARGIN(const parrot_prm_context *c))
         __attribute__nonnull__(2);
 
 static void rec_climb_back_and_mark(
     int node_index,
-    ARGIN(parrot_prm_context* c))
+    ARGIN(const parrot_prm_context *c))
         __attribute__nonnull__(2);
 
 #define ASSERT_ARGS__drand48 __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
@@ -540,7 +540,7 @@ typedef enum {
 
 /*
 
-=item C<PMC* tm_to_array(PARROT_INTERP, const struct tm *tm)>
+=item C<PMC* Parrot_tm_to_array(PARROT_INTERP, const struct tm *tm)>
 
 Helper to convert a B<struct tm *> to an Array
 
@@ -548,12 +548,13 @@ Helper to convert a B<struct tm *> to an Array
 
 */
 
+PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 PMC*
-tm_to_array(PARROT_INTERP, ARGIN(const struct tm *tm))
+Parrot_tm_to_array(PARROT_INTERP, ARGIN(const struct tm *tm))
 {
-    ASSERT_ARGS(tm_to_array)
+    ASSERT_ARGS(Parrot_tm_to_array)
 
     PMC * const Array = Parrot_pmc_new(interp,
         Parrot_get_ctx_HLL_type(interp, enum_class_FixedIntegerArray));
@@ -664,8 +665,8 @@ Parrot_byte_rindex(SHIM_INTERP, ARGIN(const STRING *base),
 
 /*
 
-=item C<static void rec_climb_back_and_mark(int node_index, parrot_prm_context*
-c)>
+=item C<static void rec_climb_back_and_mark(int node_index, const
+parrot_prm_context *c)>
 
 Recursive function, used by Parrot_register_move to
 climb back the graph of register moves operations.
@@ -689,7 +690,7 @@ case marks it, and set node_index as its backup.
 */
 
 static void
-rec_climb_back_and_mark(int node_index, ARGIN(parrot_prm_context* c))
+rec_climb_back_and_mark(int node_index, ARGIN(const parrot_prm_context *c))
 {
     ASSERT_ARGS(rec_climb_back_and_mark)
     const int node = c->dest_regs[node_index];
@@ -715,8 +716,8 @@ rec_climb_back_and_mark(int node_index, ARGIN(parrot_prm_context* c))
 
 /*
 
-=item C<static void process_cycle_without_exit(int node_index,
-parrot_prm_context* c)>
+=item C<static void process_cycle_without_exit(int node_index, const
+parrot_prm_context *c)>
 
 Recursive function, used by Parrot_register_move to handle the case
 of cycles without exits, that are cycles of move ops between registers
@@ -732,7 +733,7 @@ For instance: 1-->2, 2-->3, 3-->1
 */
 
 static void
-process_cycle_without_exit(int node_index, ARGIN(parrot_prm_context* c))
+process_cycle_without_exit(int node_index, ARGIN(const parrot_prm_context *c))
 {
     ASSERT_ARGS(process_cycle_without_exit)
     const int pred = c->src_regs[node_index];
@@ -845,7 +846,7 @@ Parrot_register_move(PARROT_INTERP,
     c.temp_reg = temp_reg;
 
     /* compute max_reg, the max reg number + 1 */
-    for (i = 0; i < n_regs; i++) {
+    for (i = 0; i < n_regs; ++i) {
         if (src_regs[i] > max_reg)
             max_reg = src_regs[i];
         if (dest_regs[i] > max_reg)
@@ -861,26 +862,26 @@ Parrot_register_move(PARROT_INTERP,
     c.reg_to_index = reg_to_index = mem_gc_allocate_n_zeroed_typed(interp, max_reg, int);
 
     /* init backup array */
-    for (i = 0; i < n_regs; i++)
+    for (i = 0; i < n_regs; ++i)
         backup[i] = -1;
 
     /* fill in the conversion array between a register number and its index */
-    for (i = 0; i < max_reg; i++)
+    for (i = 0; i < max_reg; ++i)
         reg_to_index[i] = -1;
-    for (i = 0; i < n_regs; i++) {
+    for (i = 0; i < n_regs; ++i) {
         const int index = dest_regs[i];
         if (index != src_regs[i]) /* get rid of self-assignment */
             reg_to_index[index] = i;
     }
 
     /* count the nb of successors for each reg index */
-    for (i = 0; i < n_regs; i++) {
+    for (i = 0; i < n_regs; ++i) {
         const int index = reg_to_index[ src_regs[i] ];
         if (index >= 0) /* not interested in the wells that have no preds */
-            nb_succ[ index ]++;
+            ++nb_succ[index];
     }
     /* process each well if any */
-    for (i = 0; i < n_regs; i++) {
+    for (i = 0; i < n_regs; ++i) {
         if (0 == nb_succ[i]) { /* a well */
             rec_climb_back_and_mark(i, &c);
         }
@@ -888,7 +889,7 @@ Parrot_register_move(PARROT_INTERP,
 
     /* process remaining dest registers not processed */
     /* remaining nodes are members of cycles without exits */
-    for (i = 0; i < n_regs; i++) {
+    for (i = 0; i < n_regs; ++i) {
         if (0 < nb_succ[i] && 0 > backup[i]) { /* not a well nor visited*/
             process_cycle_without_exit(i, &c);
         }
@@ -915,6 +916,7 @@ returns 1 if C<a> is bigger, and returns -1 if C<b> is bigger.
 /* TODO: Macroize COMPARE */
 /* This is an awfully expensive function to call, what with all the */
 /* comparisons that never change. We ought to precompute everything. */
+/* XXX We should be able to guarantee that *a and *b never change via const parameters. */
 static INTVAL
 COMPARE(PARROT_INTERP, ARGIN(void *a), ARGIN(void *b), ARGIN(PMC *cmp))
 {

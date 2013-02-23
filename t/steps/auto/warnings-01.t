@@ -1,11 +1,11 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: warnings-01.t 44649 2010-03-05 16:20:00Z tene $
+# $Id: warnings-01.t 47608 2010-06-13 23:27:29Z jkeenan $
 # auto/warnings-01.t
 
 use strict;
 use warnings;
-use Test::More qw(no_plan); # tests =>  26;
+use Test::More tests =>  18;
 use Carp;
 use lib qw( lib t/configure/testlib );
 use_ok('config::auto::warnings');

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: timer.pmc 45219 2010-03-28 01:11:50Z petdance $
+$Id: timer.pmc 47644 2010-06-15 17:10:29Z Chandon $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ initializer.
 /* HEADERIZER BEGIN: static */
 /* HEADERIZER END: static */
 
-pmclass Timer extends Task provides event auto_attrs {
+pmclass Timer extends Task provides event provides invokable auto_attrs {
     ATTR FLOATVAL duration;  /* The duration of the timer pause */
     ATTR FLOATVAL interval;  /* How often to repeat */
     ATTR INTVAL   repeat;    /* Whether to repeat:
@@ -86,8 +86,8 @@ Initializes the timer.
 
         /* Set up the core struct. */
         core_struct->id          = 0;
-        core_struct->type        = CONST_STRING(interp, "timer");
-        core_struct->subtype     = CONST_STRING(interp, "");
+        core_struct->type        = CONST_STRING(INTERP, "timer");
+        core_struct->subtype     = CONST_STRING(INTERP, "");
         core_struct->priority    = 0;
         core_struct->status      = CONST_STRING(interp, "created");
         core_struct->birthtime   = 0.0;
@@ -105,7 +105,7 @@ Initializes the timer.
 
 =item C<void init_pmc(PMC *init)>
 
-See F<docs/pdds/pdd02_vtables.pod> for initializers.
+Takes an even-length collection of keys and values.
 
 =cut
 
@@ -313,7 +313,7 @@ Sets the PMC associated with C<key> to C<*value>.
             Parrot_Timer_attributes * const core_struct = PARROT_TIMER(SELF);
             core_struct->codeblock = value;
 */
-            SET_ATTR_codeblock(interp, SELF, value);
+            SET_ATTR_codeblock(INTERP, SELF, value);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: time.c 40155 2009-07-19 15:43:37Z whiteknight $
+ * $Id: time.c 47051 2010-05-27 08:45:23Z plobsing $
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 
@@ -122,6 +122,7 @@ Returns a C<time_t> structure for the current Greenwich Mean Time.
 
 */
 
+PARROT_EXPORT
 struct tm *
 Parrot_gmtime_r(const time_t *t, struct tm *tm)
 {
@@ -139,6 +140,7 @@ Returns a C<time_t> struct for the current local time.
 
 */
 
+PARROT_EXPORT
 struct tm *
 Parrot_localtime_r(const time_t *t, struct tm *tm)
 {
@@ -157,6 +159,7 @@ character array C<buffer>.
 
 */
 
+PARROT_EXPORT
 char*
 Parrot_asctime_r(const struct tm *tm, char *buffer)
 {

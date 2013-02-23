@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Shared.pm 44984 2010-03-17 17:09:04Z gerd $
+# $Id: Shared.pm 47020 2010-05-26 08:56:38Z gerd $
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -15,7 +15,6 @@ our @shared_valid_options = qw{
     cc
     ccflags
     ccwarn
-    cgoto
     configure_trace
     cxx
     darwin_no_fink
@@ -40,7 +39,6 @@ our @shared_valid_options = qw{
     intval
     jitcapable
     buildframes
-    languages
     ld
     ldflags
     lex
@@ -73,6 +71,7 @@ our @shared_valid_options = qw{
     verbose-step
     version
     without-crypto
+    without-extra-nci-thunks
     without-gdbm
     without-gettext
     without-gmp
@@ -80,6 +79,7 @@ our @shared_valid_options = qw{
     without-opengl
     without-pcre
     without-threads
+    without-zlib
     yacc
 };
 

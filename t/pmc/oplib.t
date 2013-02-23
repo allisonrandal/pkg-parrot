@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: oplib.t 44507 2010-02-26 22:50:34Z NotFound $
+# $Id: oplib.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

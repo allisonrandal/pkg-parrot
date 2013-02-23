@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: inter_misc.c 45619 2010-04-12 22:44:02Z plobsing $
+$Id: inter_misc.c 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 NAME
 
@@ -26,10 +26,6 @@ NCI function setup, compiler registration, C<interpinfo>, and C<sysinfo> opcodes
 #include "pmc/pmc_callcontext.h"
 
 #include "parrot/has_header.h"
-
-#ifdef PARROT_HAS_HEADER_SYSUTSNAME
-#  include <sys/utsname.h>
-#endif
 
 /* HEADERIZER HFILE: include/parrot/interpreter.h */
 
@@ -111,10 +107,9 @@ Parrot_mark_method_writes(PARROT_INTERP, int type, ARGIN(const char *name))
 {
     ASSERT_ARGS(Parrot_mark_method_writes)
     STRING *const str_name = Parrot_str_new_constant(interp, name);
-    PMC    *const pmc_true = Parrot_pmc_new(interp, enum_class_Integer);
+    PMC    *const pmc_true = Parrot_pmc_new_init_int(interp, enum_class_Integer, 1);
     PMC    *const method   = VTABLE_get_pmc_keyed_str(
         interp, interp->vtables[type]->_namespace, str_name);
-    VTABLE_set_integer_native(interp, pmc_true, 1);
     VTABLE_setprop(interp, method, CONST_STRING(interp, "write"), pmc_true);
 }
 
@@ -170,7 +165,7 @@ void *
 Parrot_compile_file(PARROT_INTERP, ARGIN(const char *fullname), ARGOUT(STRING **error))
 {
     ASSERT_ARGS(Parrot_compile_file)
-    return IMCC_compile_file_s(interp, fullname, error);
+    return imcc_compile_file(interp, fullname, error);
 }
 
 /*
@@ -237,12 +232,6 @@ interpinfo(PARROT_INTERP, INTVAL what)
             else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "fast")))
                 return PARROT_FAST_CORE;
             else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "switch")))
-                return PARROT_SWITCH_CORE;
-            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "cgp")))
-                return PARROT_CGP_CORE;
-            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "cgoto")))
-                return PARROT_CGOTO_CORE;
-            else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "exec")))
                 return PARROT_EXEC_CORE;
             else if (Parrot_str_equal(interp, name, CONST_STRING(interp, "gc_debug")))
                 return PARROT_GC_DEBUG_CORE;
@@ -272,30 +261,33 @@ interpreter.
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 PMC*
 interpinfo_p(PARROT_INTERP, INTVAL what)
 {
     ASSERT_ARGS(interpinfo_p)
+
+    PMC *result;
     switch (what) {
       case CURRENT_SUB:
-        return Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
+        result = Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
+        break;
       case CURRENT_CONT:
-        {
-            PMC * const cont = Parrot_pcc_get_continuation(interp, CURRENT_CONTEXT(interp));
-            if (!PMC_IS_NULL(cont) && cont->vtable->base_type ==
-                    enum_class_RetContinuation)
-                return VTABLE_clone(interp, cont);
-            return cont;
-        }
+        result = Parrot_pcc_get_continuation(interp, CURRENT_CONTEXT(interp));
+        break;
       case CURRENT_OBJECT:
-        return Parrot_pcc_get_object(interp, CURRENT_CONTEXT(interp));
+        result = Parrot_pcc_get_object(interp, CURRENT_CONTEXT(interp));
+        break;
       case CURRENT_LEXPAD:
-        return Parrot_pcc_get_lex_pad(interp, CURRENT_CONTEXT(interp));
+        result = Parrot_pcc_get_lex_pad(interp, CURRENT_CONTEXT(interp));
+        break;
       default:        /* or a warning only? */
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
                 "illegal argument in interpinfo");
     }
+
+    /* Don't send NULL values to P registers */
+    return result ? result : PMCNULL;
 }
 
 /*
@@ -325,7 +317,7 @@ interpinfo_s(PARROT_INTERP, INTVAL what)
             PMC * const exe_name = VTABLE_get_pmc_keyed_int(interp, interp->iglobals,
                     IGLOBALS_EXECUTABLE);
             if (PMC_IS_NULL(exe_name))
-                return string_from_literal(interp, "");
+                return CONST_STRING(interp, "");
             return VTABLE_get_string(interp, exe_name);
         }
         case EXECUTABLE_BASENAME: {
@@ -333,7 +325,7 @@ interpinfo_s(PARROT_INTERP, INTVAL what)
                                 interp->iglobals, IGLOBALS_EXECUTABLE);
 
             if (PMC_IS_NULL(exe_name))
-                return string_from_literal(interp, "");
+                return CONST_STRING(interp, "");
 
             else {
                 /* Need to strip back to what follows the final / or \. */
@@ -345,10 +337,10 @@ interpinfo_s(PARROT_INTERP, INTVAL what)
                 while (pos              >  0
                 &&     fullname_c[pos] != '/'
                 &&     fullname_c[pos] != '\\')
-                    pos--;
+                    --pos;
 
                 if (pos > 0)
-                    pos++;
+                    ++pos;
 
                 basename = Parrot_str_new(interp, fullname_c + pos, 0);
                 Parrot_str_free_cstring(fullname_c);
@@ -366,105 +358,6 @@ interpinfo_s(PARROT_INTERP, INTVAL what)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_UNIMPLEMENTED,
                 "illegal argument in interpinfo");
     }
-}
-
-/*
-
-=item C<INTVAL sysinfo_i(PARROT_INTERP, INTVAL info_wanted)>
-
-Returns the system info.
-
-C<info_wanted> is one of:
-
-    PARROT_INTSIZE
-    PARROT_FLOATSIZE
-    PARROT_POINTERSIZE
-    PARROT_INTMAX
-    PARROT_INTMIN
-
-In unknown info is requested then -1 is returned.
-
-=cut
-
-*/
-
-PARROT_WARN_UNUSED_RESULT
-INTVAL
-sysinfo_i(SHIM_INTERP, INTVAL info_wanted)
-{
-    ASSERT_ARGS(sysinfo_i)
-    switch (info_wanted) {
-      case PARROT_INTSIZE:
-        return sizeof (INTVAL);
-      case PARROT_FLOATSIZE:
-        return sizeof (FLOATVAL);
-      case PARROT_POINTERSIZE:
-        return sizeof (void *);
-      case PARROT_INTMIN:
-        return PARROT_INTVAL_MIN;
-      case PARROT_INTMAX:
-        return PARROT_INTVAL_MAX;
-      default:
-        return -1;
-    }
-}
-
-/*
-
-=item C<STRING * sysinfo_s(PARROT_INTERP, INTVAL info_wanted)>
-
-Returns the system info string.
-
-C<info_wanted> is one of:
-
-    PARROT_OS
-    PARROT_OS_VERSION
-    PARROT_OS_VERSION_NUMBER
-    CPU_ARCH
-    CPU_TYPE
-
-If unknown info is requested then an empty string is returned.
-
-=cut
-
-*/
-
-PARROT_CANNOT_RETURN_NULL
-PARROT_WARN_UNUSED_RESULT
-STRING *
-sysinfo_s(PARROT_INTERP, INTVAL info_wanted)
-{
-    ASSERT_ARGS(sysinfo_s)
-    switch (info_wanted) {
-      case PARROT_OS:
-        return Parrot_str_new_constant(interp, BUILD_OS_NAME);
-      case PARROT_OS_VERSION:
-#ifdef PARROT_HAS_HEADER_SYSUTSNAME
-        {
-            struct utsname info;
-            if (uname(&info) == 0) {
-                return string_make(interp, info.version, strlen(info.version), "ascii", 0);
-            }
-        }
-#endif
-        break;
-      case PARROT_OS_VERSION_NUMBER:
-#ifdef PARROT_HAS_HEADER_SYSUTSNAME
-        {
-            struct utsname info;
-            if (uname(&info) == 0) {
-                return string_make(interp, info.release, strlen(info.version), "ascii", 0);
-            }
-        }
-#endif
-        break;
-      case CPU_ARCH:
-        return string_make(interp, PARROT_CPU_ARCH, sizeof (PARROT_CPU_ARCH) - 1, "ascii", 0);
-      case CPU_TYPE:
-      default:
-        break;
-    }
-    return string_from_literal(interp, "");
 }
 
 /*

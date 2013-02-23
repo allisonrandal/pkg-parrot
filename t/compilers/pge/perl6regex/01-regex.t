@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: 01-regex.t 40191 2009-07-21 12:56:20Z bacek $
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: 01-regex.t 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -53,6 +53,8 @@ Description of the test.
 =cut
 
 .const string TESTS = 'no_plan'
+
+.loadlib 'io_ops'
 
 .sub main :main
     load_bytecode 'Test/Builder.pbc'
@@ -237,8 +239,8 @@ Description of the test.
     # remove /'s
     $S0 = substr result, 0, 1
     if $S0 != "/" goto bad_line
-    substr result, 0, 1, ''
-    substr result, -1, 1, ''
+    result = replace result, 0, 1, ''
+    result = replace result, -1, 1, ''
 
     $I0 = index $S1, result
     if $I0 == -1 goto is_nok
@@ -276,12 +278,13 @@ Description of the test.
     .local string message
     get_results '0', exception
     message = exception
+    print '# '
     say message
     # remove /'s
     $S0 = substr result, 0, 1
     if $S0 != "/" goto bad_error
-    substr result, 0, 1, ''
-    substr result, -1, 1, ''
+    result = replace result, 0, 1, ''
+    result = replace result, -1, 1, ''
     $I0 = index message, result
     if $I0 == -1 goto bad_error
     ok = 1
@@ -313,7 +316,7 @@ Description of the test.
     # NOTE: there can be multiple tabs between entries, so skip until
     # we have something.
     # remove the trailing newline from record
-    chopn test_line, 1
+    test_line = chopn test_line, 1
 
     $P1 = split "\t", test_line
     $I0 = elements $P1 # length of array
@@ -408,7 +411,7 @@ Description of the test.
 .end
 
 
-# given a single digit hex value, return it's int value.
+# given a single digit hex value, return its int value.
 .sub hex_val
   .param string digit
 
@@ -441,27 +444,27 @@ bad_digit:
   target1:
     $I0 = index target, '\n'
     if $I0 == -1 goto target2
-    substr target, $I0, 2, "\n"
+    target = replace target, $I0, 2, "\n"
     goto target1
   target2:
     $I0 = index target, '\r'
     if $I0 == -1 goto target3
-    substr target, $I0, 2, "\r"
+    target = replace target, $I0, 2, "\r"
     goto target2
   target3:
     $I0 = index target, '\e'
     if $I0 == -1 goto target4
-    substr target, $I0, 2, "\e"
+    target = replace target, $I0, 2, "\e"
     goto target3
   target4:
     $I0 = index target, '\t'
     if $I0 == -1 goto target5
-    substr target, $I0, 2, "\t"
+    target = replace target, $I0, 2, "\t"
     goto target4
   target5:
     $I0 = index target, '\f'
     if $I0 == -1 goto target6
-    substr target, $I0, 2, "\f"
+    target = replace target, $I0, 2, "\f"
     goto target5
   target6:
     # handle \xHH, hex escape.
@@ -474,7 +477,7 @@ bad_digit:
     ($S0, $I2) = $P0(target, 'x', $I1)
     $S3 = substr target, $I1, $I2
     $I2 += 2
-    substr target, $I0, $I2, $S0
+    target = replace target, $I0, $I2, $S0
     goto target6
   target7:
     .return (target)

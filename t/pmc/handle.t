@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: handle.t 45261 2010-03-29 00:59:25Z whiteknight $
+# $Id: handle.t 47717 2010-06-19 18:11:52Z NotFound $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ here.
 .sub main :main
     .include 'test_more.pir'
 
-    plan(2)
+    plan(3)
     'test_create'()
     'test_does_tt_1473'()
 .end
@@ -35,6 +35,17 @@ here.
     ok(1, "Cannot instantiate an abstract type")
     pop_eh
   create_end:
+
+    $P1 = new ['String']
+    push_eh cant_instantiate_arg
+    $P0 = new ['Handle'], $P1
+    ok(0, "Can instantiate an abstract type with arg")
+    pop_eh
+    goto create_end_arg
+  cant_instantiate_arg:
+    ok(1, "Cannot instantiate an abstract type with arg")
+    pop_eh
+  create_end_arg:
 .end
 
 .sub 'test_does_tt_1473'

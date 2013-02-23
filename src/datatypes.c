@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2002-2009, Parrot Foundation.
 License:  Artistic 2.0, see README and LICENSE for details
-$Id: datatypes.c 39173 2009-05-26 05:52:21Z petdance $
+$Id: datatypes.c 46192 2010-04-30 08:27:15Z jimmy $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ Parrot_get_datatype_enum(PARROT_INTERP, ARGIN(const STRING *type_name))
     char * const type = Parrot_str_to_cstring(interp, type_name);
     int i;
 
-    for (i = enum_first_type; i < enum_last_type; i++) {
+    for (i = enum_first_type; i < enum_last_type; ++i) {
         if (STREQ(data_types[i - enum_first_type].name, type)) {
             Parrot_str_free_cstring(type);
             return i;

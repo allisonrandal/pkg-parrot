@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: callcontext.t 45108 2010-03-22 20:53:12Z chromatic $
+# $Id: callcontext.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

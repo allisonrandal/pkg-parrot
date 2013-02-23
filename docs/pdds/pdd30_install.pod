@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: pdd30_install.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd30_install.pod 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 PDD 30: Installation
 
@@ -12,7 +12,7 @@ install> target, compiled installables, and Filesystem Hierarchy Standard
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 47917 $
 
 =head2 Synopsis
 

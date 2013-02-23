@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Null.pm 45297 2010-03-30 01:33:45Z coke $
+# $Id: Null.pm 46010 2010-04-25 12:17:42Z bacek $
 
 package Parrot::Pmc2c::PMC::Null;
 use base 'Parrot::Pmc2c::PMC';
@@ -44,7 +44,7 @@ sub pre_method_gen {
         # to avoid compiler warnings
         my $body = <<"EOC";
     UNUSED(interp)
-    UNUSED(pmc)
+    UNUSED(_self)
 EOC
 
         foreach my $param (split /,\s*/, $method->parameters) {

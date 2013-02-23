@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: gc.t 45149 2010-03-24 13:31:21Z bacek $
+# $Id: gc.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 
@@ -508,7 +508,6 @@ lp:
 
 # coro context and invalid return continuations
 # this is a stripped down version of imcc/t/syn/pcc_16
-# s. also src/pmc/retcontinuation.pmc
 
 .sub coro_context_ret_continuation
     .const 'Sub' $P0 = "co1"

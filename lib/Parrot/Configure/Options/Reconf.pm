@@ -1,5 +1,5 @@
-# Copyright (C) 2007, Parrot Foundation.
-# $Id: Reconf.pm 36833 2009-02-17 20:09:26Z allison $
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: Reconf.pm 47020 2010-05-26 08:56:38Z gerd $
 
 package Parrot::Configure::Options::Reconf;
 
@@ -16,7 +16,6 @@ our @valid_options = qw{
     ask
     debugging
     help
-    languages
     lex
     maintainer
     step
@@ -57,8 +56,6 @@ General Options:
    --step=(gen::makefiles)
                         Execute a single configure step
    --target=(Makefile)  Regenerate a specific makefile
-   --languages="list of languages"
-                        Specify a list of languages to process
 
    --ask                Have Configure ask for commonly-changed info
 

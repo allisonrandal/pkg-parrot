@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2009, Parrot Foundation.
-# $Id: debug.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: debug.pir 47327 2010-06-03 08:53:49Z fperrad $
 
 #
 # ** globals used for debug purposes:
@@ -179,9 +179,10 @@
     _debug__print_status()
 
     print "bef> "
-    $P0 = getstdin
-    $S0 = readline $P0
-    chopn $S0, 1
+    $P0 = getinterp
+    $P0 = $P0.'stdhandle'(.PIO_STDIN_FILENO)
+    $S0 = $P0.'readline'()
+    $S0 = chopn $S0, 1
     $I0 = length $S0
 
     if $I0 == 0 goto DEBUG__INTERACT__NEXT
@@ -205,7 +206,7 @@
     goto DEBUG__INTERACT__LOOP
 
   DEBUG__INTERACT__BREAK:
-    substr $S0, 0, 6, ""
+    $S0 = replace $S0, 0, 6, ""
     $P0 = get_global "breakpoints"
     $P0[$S0] = 1
     set_global "breakpoints", $P0
@@ -218,7 +219,7 @@
     goto DEBUG__INTERACT__END
 
   DEBUG__INTERACT__DELETE:
-    substr $S0, 0, 7, ""
+    $S0 = replace $S0, 0, 7, ""
     $P0 = get_global "breakpoints"
     delete $P0[$S0]
     set_global "breakpoints", $P0

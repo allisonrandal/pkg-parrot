@@ -1,23 +1,25 @@
 #!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: sumcol.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: sumcol.pir 47421 2010-06-06 04:41:48Z plobsing $
 #
 # ./parrot -R jit sumcol.pir < sum8M
 # by Joshua Isom
 # N.B. it is called the sum-file benchmark on the computer shootout (KF)
 
 .sub main :main
-	.local pmc stdin
+	.local pmc interp, stdin
 	.local string line
 	.local int count, tmp, linelen
-	count = 0
-	stdin = getstdin
+	count  = 0
+	interp = getinterp
+        .include 'stdio.pasm'
+	stdin  = interp.'stdhandle'(.PIO_STDIN_FILENO)
 beginwhile:
-	line = readline stdin
+	line    = stdin.'readline'()
 	linelen = length line
 	unless linelen goto endwhile
-	tmp	= line
-	count += tmp
+	tmp     = line
+	count  += tmp
 	goto beginwhile
 endwhile:
 	print count

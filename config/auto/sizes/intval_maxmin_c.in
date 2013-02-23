@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2008-2009, Parrot Foundation.
-  $Id: intval_maxmin_c.in 45619 2010-04-12 22:44:02Z plobsing $
+  $Id: intval_maxmin_c.in 47917 2010-06-29 23:18:38Z jkeenan $
 */
 
 #if @i_limits@ == "define"

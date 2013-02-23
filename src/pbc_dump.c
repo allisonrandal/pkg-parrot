@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: pbc_dump.c 45791 2010-04-19 05:45:56Z petdance $
+$Id: pbc_dump.c 46192 2010-04-30 08:27:15Z jimmy $
 
 =head1 NAME
 
@@ -111,7 +111,7 @@ Disassemble and dump.
 static void
 disas_dump(PARROT_INTERP, const PackFile_Segment *self)
 {
-    opcode_t *pc = self->data;
+    const opcode_t *pc = self->data;
 
     Parrot_io_printf(interp, "%Ss => [ # %d ops at offs 0x%x\n",
             self->name, (int)self->size, (int)self->file_offset + 4);
@@ -124,7 +124,7 @@ disas_dump(PARROT_INTERP, const PackFile_Segment *self)
         /* trace_op_dump(interp, self->pf->src, pc); */
         Parrot_io_printf(interp, " %04x:  ", (int)(pc - self->data));
 
-        for (i = 0; i < 6; i++)
+        for (i = 0; i < 6; ++i)
             if (i < n)
                 Parrot_io_printf(interp, "%08lx ", (unsigned long)pc[i]);
             else
@@ -154,14 +154,14 @@ Disassembles and dumps op names and line numbers only.
 static void
 nums_dump(PARROT_INTERP, const PackFile_Segment *self)
 {
-    STRING                 *debug_name = Parrot_str_concat(interp, self->name,
-            Parrot_str_new_constant(interp, "_DB"), 0);
+    const STRING           *debug_name = Parrot_str_concat(interp, self->name,
+            Parrot_str_new_constant(interp, "_DB"));
     const PackFile_Segment *debug      = PackFile_find_segment(interp,
                                             self->dir, debug_name, 1);
 
-    opcode_t               *pc         = self->data;
-    opcode_t               *debug_ops  = debug->data;
-    const op_info_t * const op_info    = interp->op_info_table;
+    const opcode_t  * pc            = self->data;
+    const opcode_t  * debug_ops     = debug->data;
+    const op_info_t * const op_info = interp->op_info_table;
 
     while (pc < self->data + self->size) {
         /* n can't be const; the ADD_OP_VAR_PART macro increments it */
@@ -210,7 +210,7 @@ null_dir_dump(PARROT_INTERP, const PackFile_Segment *self)
     const PackFile_Directory * const dir = (const PackFile_Directory *)self;
     size_t i;
 
-    for (i = 0; i < dir->num_segments; i++)
+    for (i = 0; i < dir->num_segments; ++i)
         self->pf->PackFuncs[dir->segments[i]->type].dump(interp, dir->segments[i]);
 }
 
@@ -440,7 +440,7 @@ main(int argc, const char **argv)
     if (nums_only) {
         int i;
 
-        for (i = PF_DIR_SEG + 1; i < PF_MAX_SEG; i++)
+        for (i = PF_DIR_SEG + 1; i < PF_MAX_SEG; ++i)
             pf->PackFuncs[i].dump = null_dump;
 
         pf->PackFuncs[PF_DIR_SEG].dump   = null_dir_dump;

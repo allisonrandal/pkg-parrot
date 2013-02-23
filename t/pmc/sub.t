@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: sub.t 44447 2010-02-24 03:22:53Z jkeenan $
+# $Id: sub.t 47167 2010-05-30 17:07:38Z plobsing $
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test::Util 'create_tempfile';
 
-use Parrot::Test tests => 69;
+use Parrot::Test tests => 70;
 use Parrot::Config;
 
 =head1 NAME
@@ -837,15 +837,7 @@ the_sub
 main
 OUTPUT
 
-@todo = (
-    defined $ENV{TEST_PROG_ARGS}
-        and
-    $ENV{TEST_PROG_ARGS} =~ /--runcore=jit/
-)
-    ? ( todo => 'broken with JIT (TT #983)' )
-    : ();
-
-pir_output_is( <<'CODE', <<'OUTPUT', "caller introspection via interp", @todo );
+pir_output_is( <<'CODE', <<'OUTPUT', "caller introspection via interp" );
 .sub main :main
 .include "interpinfo.pasm"
     # this test will fail when run with -Oc
@@ -999,21 +991,22 @@ OUTPUT
 unlink( $l1_pbc, $l2_pbc );
 
 pir_output_is( <<'CODE', <<'OUTPUT', "immediate code as const" );
-.sub make_pi :immediate :anon
-    $N0 = atan 1.0, 1.0
-    $N0 *= 4
+.sub make_phi :immediate :anon
+    $N0 = sqrt 5
+    $N0 += 1
+    $N0 /= 2
     $P0 = new ['Float']
     $P0 = $N0
     .return ($P0)
 .end
 
 .sub main :main
-    .const 'Sub' pi = "make_pi"
-    print pi
+    .const 'Sub' phi = "make_phi"
+    print phi
     print "\n"
 .end
 CODE
-3.14159265358979
+1.61803398874989
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUTPUT', "immediate code as const - obj" );
@@ -1734,6 +1727,24 @@ named_required 3
 named_optional 5
 named_slurpy 8
 OUTPUT
+
+pir_output_is( <<'CODE', <<'OUT', 'interface' );
+.sub 'main' :main
+    .const 'Sub' $P0 = "main"
+
+    $I0 = does $P0, 'scalar'
+    say $I0 # Sub does not scalar
+    $I0 = does $P0, 'invokable'
+    say $I0 # Sub does invokable
+    $I0 = does $P0, 'no_interface'
+    say $I0 # Sub does not no_interface
+.end
+CODE
+0
+1
+0
+OUT
+
 
 # Local Variables:
 #   mode: cperl

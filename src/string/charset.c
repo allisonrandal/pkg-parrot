@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id: charset.c 44291 2010-02-22 09:28:39Z bacek $
+$Id: charset.c 46998 2010-05-25 22:43:21Z darbelo $
 
 =head1 NAME
 
@@ -23,22 +23,23 @@ These are Parrot's generic charset handling functions
 #include "encoding/utf8.h"
 #include "encoding/utf16.h"
 #include "encoding/ucs2.h"
+#include "encoding/ucs4.h"
 
 #include "charset/ascii.h"
 #include "charset/binary.h"
 #include "charset/iso-8859-1.h"
 #include "charset/unicode.h"
 
-CHARSET *Parrot_iso_8859_1_charset_ptr;
-CHARSET *Parrot_binary_charset_ptr;
-CHARSET *Parrot_default_charset_ptr;
-CHARSET *Parrot_unicode_charset_ptr;
-CHARSET *Parrot_ascii_charset_ptr;
+const CHARSET *Parrot_iso_8859_1_charset_ptr;
+const CHARSET *Parrot_binary_charset_ptr;
+const CHARSET *Parrot_default_charset_ptr;
+const CHARSET *Parrot_unicode_charset_ptr;
+const CHARSET *Parrot_ascii_charset_ptr;
 
 /* all registered charsets are collected in one global structure */
 
 typedef struct To_converter {
-    NOTNULL(CHARSET *to);
+    NOTNULL(const CHARSET *to);
     NOTNULL(charset_converter_t func);
 } To_converter;
 
@@ -97,7 +98,7 @@ Allocates a new C<CHARSET> structure from the system.
 */
 
 PARROT_EXPORT
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 PARROT_MALLOC
 CHARSET *
 Parrot_new_charset(PARROT_INTERP)
@@ -149,6 +150,7 @@ Returns the charset if it is found, NULL otherwise.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 const CHARSET *
@@ -168,7 +170,8 @@ Parrot_find_charset(SHIM_INTERP, ARGIN(const char *charsetname))
 
 /*
 
-=item C<CHARSET * Parrot_load_charset(PARROT_INTERP, const char *charsetname)>
+=item C<const CHARSET * Parrot_load_charset(PARROT_INTERP, const char
+*charsetname)>
 
 Throws an exception (Can't load charsets dynamically yet. https://trac.parrot.org/parrot/wiki/StringsTasklist).
 
@@ -179,7 +182,7 @@ Throws an exception (Can't load charsets dynamically yet. https://trac.parrot.or
 PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
-CHARSET *
+const CHARSET *
 Parrot_load_charset(PARROT_INTERP, ARGIN(const char *charsetname))
 {
     ASSERT_ARGS(Parrot_load_charset)
@@ -226,6 +229,7 @@ Return the number of the charset of the given string or -1 if not found.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL
 Parrot_charset_number_of_str(SHIM_INTERP, ARGIN(const STRING *src))
@@ -243,7 +247,7 @@ Parrot_charset_number_of_str(SHIM_INTERP, ARGIN(const STRING *src))
 
 /*
 
-=item C<STRING* Parrot_charset_name(PARROT_INTERP, INTVAL number_of_charset)>
+=item C<STRING * Parrot_charset_name(PARROT_INTERP, INTVAL number_of_charset)>
 
 Returns the name of the charset given by the INTVAL index
 C<number_of_charset>.
@@ -253,14 +257,15 @@ C<number_of_charset>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
-STRING*
+STRING *
 Parrot_charset_name(SHIM_INTERP, INTVAL number_of_charset)
 {
     ASSERT_ARGS(Parrot_charset_name)
     if (number_of_charset < 0 || number_of_charset >= all_charsets->n_charsets)
-        return NULL;
+        return STRINGNULL;
     return all_charsets->set[number_of_charset].name;
 }
 
@@ -276,6 +281,7 @@ Returns the charset given by the INTVAL index C<number_of_charset>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 const CHARSET *
@@ -300,6 +306,7 @@ INTVAL index C<number_of_charset>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 const char *
@@ -347,7 +354,7 @@ register_charset(PARROT_INTERP, ARGIN(const char *charsetname),
         all_charsets->set = mem_gc_realloc_n_typed_zeroed(interp,
                 all_charsets->set, n + 1, n, One_charset);
 
-    all_charsets->n_charsets++;
+    ++all_charsets->n_charsets;
     all_charsets->set[n].charset      = charset;
     all_charsets->set[n].n_converters = 0;
 
@@ -371,7 +378,7 @@ Parrot_str_internal_register_charset_names(PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_str_internal_register_charset_names)
     int n;
-    for (n = 0; n < all_charsets->n_charsets; n++)
+    for (n = 0; n < all_charsets->n_charsets; ++n)
         all_charsets->set[n].name =
             Parrot_str_new_constant(interp, all_charsets->set[n].charset->name);
 }
@@ -491,6 +498,7 @@ Parrot_charsets_encodings_init(PARROT_INTERP)
     Parrot_encoding_utf8_init(interp);
     Parrot_encoding_ucs2_init(interp);
     Parrot_encoding_utf16_init(interp);
+    Parrot_encoding_ucs4_init(interp);
 
     Parrot_charset_ascii_init(interp);
     Parrot_charset_iso_8859_1_init(interp);
@@ -509,7 +517,7 @@ Parrot_charsets_encodings_init(PARROT_INTERP)
 /*
 
 =item C<INTVAL Parrot_make_default_charset(PARROT_INTERP, const char
-*charsetname, CHARSET *charset)>
+*charsetname, const CHARSET *charset)>
 
 Sets the current default charset to C<charset> with name C<charsetname>.
 
@@ -520,7 +528,7 @@ Sets the current default charset to C<charset> with name C<charsetname>.
 PARROT_EXPORT
 INTVAL
 Parrot_make_default_charset(SHIM_INTERP, SHIM(const char *charsetname),
-        ARGIN(CHARSET *charset))
+        ARGIN(const CHARSET *charset))
 {
     ASSERT_ARGS(Parrot_make_default_charset)
     Parrot_default_charset_ptr = charset;
@@ -538,6 +546,7 @@ Returns the default charset.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const CHARSET *
@@ -559,6 +568,7 @@ Finds a converter from charset C<lhs> to charset C<rhs>.
 */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 charset_converter_t
@@ -571,7 +581,7 @@ Parrot_find_charset_converter(SHIM_INTERP,
 
     for (i = 0; i < n; ++i) {
         if (lhs == all_charsets->set[i].charset) {
-            One_charset * const left = all_charsets->set + i;
+            const One_charset * const left = all_charsets->set + i;
             const int nc = left->n_converters;
             int j;
 
@@ -587,7 +597,7 @@ Parrot_find_charset_converter(SHIM_INTERP,
 /*
 
 =item C<void Parrot_register_charset_converter(PARROT_INTERP, const CHARSET
-*lhs, CHARSET *rhs, charset_converter_t func)>
+*lhs, const CHARSET *rhs, charset_converter_t func)>
 
 Registers a converter C<func> from charset C<lhs> to C<rhs>.
 
@@ -598,7 +608,7 @@ Registers a converter C<func> from charset C<lhs> to C<rhs>.
 PARROT_EXPORT
 void
 Parrot_register_charset_converter(PARROT_INTERP,
-        ARGIN(const CHARSET *lhs), ARGIN(CHARSET *rhs),
+        ARGIN(const CHARSET *lhs), ARGIN(const CHARSET *rhs),
         ARGIN(charset_converter_t func))
 {
     ASSERT_ARGS(Parrot_register_charset_converter)

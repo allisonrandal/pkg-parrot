@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2010, Parrot Foundation.
-# $Id: pdd28_strings.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd28_strings.pod 47637 2010-06-15 04:50:08Z plobsing $
 
 =head1 PDD 28: Strings
 
@@ -11,7 +11,7 @@ encodings, and languages.
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 47637 $
 
 =head2 Definitions
 
@@ -161,7 +161,7 @@ This means that even in the most normalized Unicode form, string manipulation
 code must always assume a variable-byte encoding, and use expensive
 lookaheads. The cost is incurred on every operation, though the particular
 string operated on might not contain combining characters. It's particularly
-noticeable in parsing and regular expression matches, where backtracking
+noticeable in parsing and regular expres699sion matches, where backtracking
 operations may re-traverse the characters of a simple string hundreds of
 times.
 
@@ -296,7 +296,7 @@ The length of the string, in bytes. {{NOTE, not in characters, as characters
 may be variably sized.}}
 
 =item hashval
-
+699
 A cache of the hash value of the string, for rapid lookups when the string is
 used as a hash key.
 
@@ -378,13 +378,6 @@ to a new string buffer and clear the copy-on-write flag.
 Concatenate two strings. Takes three arguments: two strings, and one integer
 value of flags. If both string arguments are null, return a new string created
 according to the integer flags.
-
-=head4 Parrot_str_append (was string_append)
-
-Append one string to another and return the result. In the default case, the
-return value is the same as the first string argument (modifying that argument
-in place). If the first argument is COW or read-only, then the return value is
-a new string.
 
 =head4 Parrot_str_new (was string_from_cstring)
 
@@ -590,7 +583,7 @@ Only useful on a very narrow set of string encodings/character sets.
 =head4 string_make
 
 A crippled version of a string initializer, now replaced with the full version
-C<Parrot_string_new_init>.
+C<Parrot_str_new_init>.
 
 =head4 string_capacity
 
@@ -621,10 +614,9 @@ that specially allows returning a NULL string.
 Old Perl 5-style behavior where "aa" goes to "bb". Only useful for ASCII
 strings, and not terribly useful even there.
 
-=head4 Parrot_string_cstring
+=head4 Parrot_str_cstring
 
 Unsafe, and behavior handled by Parrot_str_to_cstring.
-
 
 =head4 Parrot_str_split
 

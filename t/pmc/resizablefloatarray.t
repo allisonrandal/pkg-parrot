@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: resizablefloatarray.t 41972 2009-10-21 16:54:18Z allison $
+# $Id: resizablefloatarray.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

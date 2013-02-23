@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Utils.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id: Utils.pir 46060 2010-04-27 13:39:27Z bacek $
 
 .namespace ['String';'Utils']
 
@@ -53,7 +53,7 @@ and return in C<$S0>. If C<$S2> is not specified, the default C<\n> is used.
     $I0 = strl - sepl
     $I1 = index res, sep, $I0
     unless $I1 == $I0 goto return
-    chopn res, sepl
+    res = chopn res, sepl
     goto chomp
 
   return:

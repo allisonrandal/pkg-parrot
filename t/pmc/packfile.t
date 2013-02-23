@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: packfile.t 44381 2010-02-23 11:32:28Z mikehh $
+# $Id: packfile.t 47493 2010-06-08 23:12:00Z bacek $
 
 =head1 NAME
 
@@ -15,6 +15,8 @@ t/pmc/packfile.t - test the Packfile PMC
 
 Tests the Packfile PMC.
 
+If you see this tests failing after bumping PBC_COMPAT rerun tools/dev/mk_packfile_pbc.
+
 =cut
 
 .include 't/pmc/testlib/packfile_common.pir'
@@ -22,7 +24,7 @@ Tests the Packfile PMC.
 .sub main :main
 .include 'test_more.pir'
 
-    plan(34)
+    plan(36)
     'test_new'()
     'test_get_string'()
     'test_set_string'()
@@ -32,8 +34,10 @@ Tests the Packfile PMC.
     'test_load'()
     'test_pack_fresh_packfile'()
     'test_pack'()
-    # This test will crash on many platforms. See TT #545.
-    #'test_synonyms'()
+
+    skip(2, "test_synonyms crash on many platforms. See TT #545")
+    # 'test_synonyms'()
+
 .end
 
 
@@ -43,11 +47,10 @@ Tests the Packfile PMC.
     pf = new ['Packfile']
     $I0 = defined pf
     ok($I0, 'new')
-    _check_header(pf)
+    .tailcall _check_header(pf)
 .end
 
 
-# Packfile.get_integer_keyed_str
 .sub 'test_get_string'
     .local pmc pf
     pf = new ['Packfile']
@@ -66,7 +69,6 @@ Tests the Packfile PMC.
     .return ()
 .end
 
-# Packfile.get_integer_keyed_str
 .sub 'test_set_string'
     .local pmc pf
     pf = new ['Packfile']
@@ -95,12 +97,11 @@ Tests the Packfile PMC.
 .end
 
 
-
-
-# Packfile.set_string_native, Packfile.get_integer_keyed_str
 .sub 'test_get_integer'
     .local pmc pf
+    push_eh load_error
     pf  = _pbc()
+    pop_eh
     $I0 = pf["version_major"]
     ok(1, "get_integer_keyed_str(version_major)")
 
@@ -120,14 +121,23 @@ Tests the Packfile PMC.
     pop_eh
     ok(1, "get_integer_keyed_str handle unknown key properly")
     .return ()
-
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, "get_integer_keyed_str(version_major)")
+    report_load_error($P0, "get_integer_keyed_str(version_minor)")
+    report_load_error($P0, "get_integer_keyed_str(version_patch)")
+    report_load_error($P0, "get_integer_keyed_str unknown key")
+    .return()
 .end
 
 
 # Packfile.set_integer_keyed_str
 .sub 'test_set_integer'
     .local pmc pf
+    push_eh load_error
     pf  = _pbc()
+    pop_eh
     $S1 = 'version_major'
     $I0 = pf[$S1]
     $I1 = $I0
@@ -137,6 +147,12 @@ Tests the Packfile PMC.
     $I3 = cmp $I0, $I2
     $I3 = cmp $I3, 0
     ok($I3, 'set_integer_keyed_str version bumped')
+    .return()
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, 'set_integer_keyed_str version bumped')
+    .return()
 .end
 
 # Packfile.get_directory
@@ -151,12 +167,20 @@ Tests the Packfile PMC.
 # PackfileSegment.pack (via subclass PackfileDirectory)
 .sub 'test_get_directory'
     .local pmc pf, pfdir
+    push_eh load_error
     pf    = _pbc()
+    pop_eh
     pfdir = pf.'get_directory'()
     $S0   = pfdir.'pack'()
     $I0   = length $S0
     $I1 = cmp $I0, 0
     ok($I1, 'get_directory')
+    .return()
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, 'get_directory')
+    .return()
 .end
 
 
@@ -164,9 +188,18 @@ Tests the Packfile PMC.
 # Check that packfile was loaded properly and set various attributes
 .sub 'test_load'
     .local pmc pf
+    push_eh load_error
     pf = _pbc()
+    pop_eh
 
-    _check_header(pf)
+    .tailcall _check_header(pf)
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, "Wordsize set")
+    report_load_error($P0, "version_major set")
+    report_load_error($P0, "bytecode_major set")
+    .return()
 .end
 
 # Helper sub to check fields in Packfile header
@@ -264,30 +297,45 @@ Tests the Packfile PMC.
 # Packfile.pack.
 # Check that unpack-pack produce correct result.
 .sub 'test_pack'
-    .local string filename, first
+    .local string filename, orig
+    push_eh load_error
     $S0 = '_filename'()
-    $P0 = open $S0, 'r'
+    $P0 = new ['FileHandle']
+    $P0.'open'($S0, 'r')
 
-    first = $P0.'readall'()
+    orig = $P0.'readall'()
 
     .local pmc packfile
     packfile = new 'Packfile'
-    packfile = first
+    packfile = orig
+    pop_eh
 
-    # Packed file should be exactly the same as loaded
-    .local string second
+    # Loaded packfile can be from different platform/config,
+    # packing and unpacking again to avoid that differences.
+    .local string first, second
     # Pack
-    second = packfile
+    first = packfile
+    .local pmc packfilesecond
+    packfilesecond = new 'Packfile'
+    packfilesecond = first
+    second = packfilesecond
 
-    $I0 = cmp first, second
-    $I0 = not $I0
-    todo($I0, 'pack produced same result twice')
+    is(first, second, 'pack produced same result twice: TT #1614')
+    .return()
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, 'pack produced same result twice')
+    .return()
 .end
 
 # Test pack/set_string unpack/get_string equivalency
+
 .sub 'test_synonyms'
     .local pmc pf
+    push_eh load_error
     pf = '_pbc'()
+    pop_eh
 
     $S0 = pf
     $S1 = pf.'pack'()
@@ -304,6 +352,13 @@ Tests the Packfile PMC.
     $S1 = $P1
     $I0 = cmp $S0, $S1
     is($I0, 0, "unpack and set_string are synonyms")
+    .return()
+load_error:
+    .get_results($P0)
+    pop_eh
+    report_load_error($P0, "pack and get_string are synonyms")
+    report_load_error($P0, "unpack and set_string are synonyms")
+    .return()
 .end
 
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: nci.t 45108 2010-03-22 20:53:12Z chromatic $
+# $Id: nci.t 47051 2010-05-27 08:45:23Z plobsing $
 
 use strict;
 use warnings;
@@ -608,24 +608,26 @@ dlfunced
 ok 1
 OUTPUT
 
-    pasm_output_is( <<'CODE', <<'OUTPUT', "nci_it" );
-  loadlib P1, "libnci_test"
+    pir_output_is( <<'CODE', <<'OUTPUT', "nci_it" );
+.loadlib 'io_ops'
+.sub 'main' :main
+  loadlib $P1, "libnci_test"
   printerr "loaded\n"
-  dlfunc P0, P1, "nci_it", "it"
+  dlfunc $P0, $P1, "nci_it", "it"
   printerr "dlfunced\n"
-  set S5, "ko\n"
-  set_args "0", S5
-  invokecc P0
-  get_results "0", I5
-  ne I5, 2, nok_1
+  set $S5, "ko\n"
+  set_args "0", $S5
+  invokecc $P0
+  get_results "0", $I5
+  ne $I5, 2, nok_1
   printerr "ok 2\n"
   end
 nok_1: printerr "nok 1\n"
-  printerr I5
+  printerr $I5
   printerr "\n"
   end
 nok_2: printerr "nok 2\n"
-  end
+.end
 CODE
 loaded
 dlfunced
@@ -636,6 +638,7 @@ OUTPUT
     pir_output_is( <<'CODE', <<'OUTPUT', "nci_it" );
 
 .include "datatypes.pasm"
+.loadlib 'io_ops'
 
 .sub test :main
   loadlib $P1, "libnci_test"
@@ -1330,16 +1333,6 @@ OUTPUT
   push P2, 0    # 1 elem array
   push P2, 0
   new P5, ['ManagedStruct'], P2
-  set I6, 0
-  sizeof I7, .DATATYPE_DOUBLE
-  add I6, I7
-  sizeof I7, .DATATYPE_FLOAT
-  add I6, I7
-  sizeof I7, .DATATYPE_INT
-  add I6, I7
-  sizeof I7, .DATATYPE_CSTR
-  add I6, I7
-  set P5, I6
   set P5[0], 10.0
   set P5[1], 4.0
   set P5[2], 17

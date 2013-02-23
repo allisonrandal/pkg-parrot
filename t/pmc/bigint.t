@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: bigint.t 44377 2010-02-23 10:54:07Z mikehh $
+# $Id: bigint.t 46409 2010-05-08 12:57:57Z jkeenan $
 
 =head1 NAME
 
@@ -51,7 +51,7 @@ Tests the BigInt PMC.
     $P2 = $P1['gmp']
     $I1 = isnull $P2
     if $I1, NoLibGMP
-    say 'This Parrot uses GMP'
+    say '# This Parrot uses GMP'
 
     # check version is >= 4.1.4
     $P0 = new ['BigInt']
@@ -70,20 +70,16 @@ Tests the BigInt PMC.
     lt $I2, 4, OldLibGMP
 
 Config2:
-    print 'Suitable GMP version ['
-    print $S3
-    say '] available'
+    diag( 'Suitable GMP version [', $S3, '] available' )
     goto ret
 
 NoLibGMP:
-    say 'No BigInt Lib configured'
+    diag( 'No BigInt Lib configured' )
     skip(34)
     exit 0
 
 OldLibGMP:
-    print 'Buggy GMP version ['
-    print $S3
-    say '] with huge digit multiply - please upgrade'
+    diag( 'Buggy GMP version [', $S3, '] with huge digit multiply - please upgrade' )
     skip(34)
     exit 0
 
@@ -567,7 +563,7 @@ sz4:
     goto esz
 
 esz:
-    print 'Using '
+    print '# Using '
     $I0 = mul $I0, 8
     print $I0
     print '-bit Integers ['
@@ -749,7 +745,7 @@ k24:
     ne $S0, $S6, k25
     inc $I1
 k25:
-    todo($I1, 'integer negation of MinInt converts MaxInt+1 to BigInt')
+    todo( $I1, 'integer negation of MinInt converts MaxInt+1 to BigInt', 'TT #1616')
 
     $I1 = 0
     $P0 = new ['Integer']
@@ -764,7 +760,7 @@ k26:
     ne $S0, $S6, k27
     inc $I1
 k27:
-    todo($I1, 'integer absolute-value of MinInt converts MaxInt+1 to BigInt')
+    todo( $I1, 'integer absolute-value of MinInt converts MaxInt+1 to BigInt', 'TT #1616')
 
     $P0 = new ['Integer']
     $P0 = $I3

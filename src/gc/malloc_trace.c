@@ -2,7 +2,7 @@
  *
  * by Wolfram Gloger 1995.
  *
- * $Id: malloc_trace.c 45619 2010-04-12 22:44:02Z plobsing $
+ * $Id: malloc_trace.c 47917 2010-06-29 23:18:38Z jkeenan $
  * Copyright (C) 2002-2007, Parrot Foundation.
  */
 
@@ -76,9 +76,9 @@ open_log_file()
     if (fd2>=0 && (count = read(fd2, cmdline, 127)) > 0) {
         close(fd2);
         cmdline[count] = 0;
-        for (s=cmdline; *s++;); s--;
+        for (s=cmdline; ++*s;); --s;
         while (--s>cmdline && *s!='/');
-        if (*s == '/') s++;
+        if (*s == '/') ++s;
         sprintf(name, LOG_NAME ".%.12s.%d", s, pid);
     }
         else {
@@ -116,7 +116,7 @@ malloc_trace_destructor(void)
     buffer[buffer_i].size = t.tv_sec;
     buffer[buffer_i].ptr = (void *)t.tv_usec;
     buffer[buffer_i].ptr2 = NULL;
-    buffer_i++;
+    ++buffer_i;
     if (fd < 0) open_log_file();
     if (getpid() != pid) { /* Oops, must have forked... */
         if (fd >= 0) close(fd);
@@ -176,7 +176,7 @@ malloc_record(int code, size_t size, void *ptr, void *ptr2)
         buffer[buffer_i].size = t.tv_sec;
         buffer[buffer_i].ptr = (void *)t.tv_usec;
         buffer[buffer_i].ptr2 = NULL;
-        buffer_i++;
+        ++buffer_i;
     }
     buffer[buffer_i].code = code;
     buffer[buffer_i].size = size;

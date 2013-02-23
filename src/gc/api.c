@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: api.c 45619 2010-04-12 22:44:02Z plobsing $
+$Id: api.c 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 NAME
 
@@ -177,13 +177,6 @@ Parrot_gc_mark_PMC_alive_fun(PARROT_INTERP, ARGMOD_NULLOK(PMC *obj))
         /* if object is a PMC and contains buffers or PMCs, then attach the PMC
          * to the chained mark list. */
         if (PObj_is_special_PMC_TEST(obj)) {
-            if (PObj_is_PMC_shared_TEST(obj)) {
-                Parrot_Interp i = PMC_sync(obj)->owner;
-
-                if (!i->mem_pools->gc_mark_ptr)
-                    i->mem_pools->gc_mark_ptr = obj;
-            }
-
             if (PObj_custom_mark_TEST(obj))
                 VTABLE_mark(interp, obj);
         }
@@ -336,12 +329,10 @@ Parrot_gc_new_pmc_header(PARROT_INTERP, UINTVAL flags)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_ALLOCATION_ERROR,
             "Parrot VM: PMC allocation failed!\n");
 
-    if (flags & PObj_is_PMC_shared_FLAG)
-        Parrot_gc_add_pmc_sync(interp, pmc);
-
     PObj_get_FLAGS(pmc) = PObj_is_PMC_FLAG|flags;
     pmc->vtable         = NULL;
     PMC_data(pmc)       = NULL;
+    PMC_metadata(pmc)   = PMCNULL;
 
     return pmc;
 }
@@ -361,59 +352,6 @@ Parrot_gc_free_pmc_header(PARROT_INTERP, ARGMOD(PMC *pmc))
 {
     ASSERT_ARGS(Parrot_gc_free_pmc_header)
     interp->gc_sys->free_pmc_header(interp, pmc);
-}
-
-/*
-
-=item C<void Parrot_gc_free_pmc_sync(PARROT_INTERP, PMC *p)>
-
-Frees the PMC_sync field of the PMC, if one exists.
-
-=cut
-
-*/
-
-void
-Parrot_gc_free_pmc_sync(SHIM_INTERP, ARGMOD(PMC *p))
-{
-    ASSERT_ARGS(Parrot_gc_free_pmc_sync)
-
-    if (PObj_is_PMC_shared_TEST(p) && PMC_sync(p)) {
-        MUTEX_DESTROY(PMC_sync(p)->pmc_lock);
-        mem_internal_free(PMC_sync(p));
-        PMC_sync(p) = NULL;
-    }
-}
-
-/*
-
-=item C<void Parrot_gc_add_pmc_sync(PARROT_INTERP, PMC *pmc)>
-
-Adds a C<Sync*> structure to the given C<PMC>. Initializes the PMC's owner
-field and the synchronization mutext. Throws an exception if Sync allocation
-fails.
-
-=cut
-
-*/
-
-void
-Parrot_gc_add_pmc_sync(PARROT_INTERP, ARGMOD(PMC *pmc))
-{
-    ASSERT_ARGS(Parrot_gc_add_pmc_sync)
-
-    /* This mutex already exists, leave it alone. */
-    if (PMC_sync(pmc))
-        return;
-
-    PMC_sync(pmc) = mem_gc_allocate_zeroed_typed(interp, Sync);
-
-    if (!PMC_sync(pmc))
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_ALLOCATION_ERROR,
-            "Parrot VM: PMC Sync allocation failed!\n");
-
-    PMC_sync(pmc)->owner = interp;
-    MUTEX_INIT(PMC_sync(pmc)->pmc_lock);
 }
 
 /*
@@ -952,7 +890,7 @@ Parrot_gc_impatient_pmcs(PARROT_INTERP)
 
 =item C<void Parrot_block_GC_mark(PARROT_INTERP)>
 
-Blocks the GC from performing it's mark phase.
+Blocks the GC from performing its mark phase.
 
 =item C<void Parrot_unblock_GC_mark(PARROT_INTERP)>
 
@@ -960,7 +898,7 @@ Unblocks the GC mark.
 
 =item C<void Parrot_block_GC_sweep(PARROT_INTERP)>
 
-Blocks the GC from performing it's sweep phase.
+Blocks the GC from performing its sweep phase.
 
 =item C<void Parrot_unblock_GC_sweep(PARROT_INTERP)>
 

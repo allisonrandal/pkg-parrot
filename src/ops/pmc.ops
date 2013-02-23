@@ -1,6 +1,6 @@
 /*
 
-$Id: pmc.ops 45286 2010-03-29 20:06:11Z petdance $
+$Id: pmc.ops 47678 2010-06-18 00:29:10Z whiteknight $
 
 pmc.ops
 
@@ -14,6 +14,9 @@ pmc.ops - PMC Opcodes
 
 Operations that deal with PMCs, including creation and
 destruction, manipulation, and introspection.
+
+When making changes to any ops file, run C<make bootstrap-ops> to regenerate
+all generated ops files.
 
 =cut
 
@@ -143,7 +146,7 @@ to do with the initializer.
 op root_new(out PMC, in PMC) {
     PMC * const key      = $2;
     PMC * const root_ns  = interp->root_namespace;
-    PMC * const ns       = Parrot_get_namespace_keyed(interp, root_ns, key);
+    PMC * const ns       = Parrot_ns_get_namespace_keyed(interp, root_ns, key);
     PMC * classobj       = PMCNULL;
 
     if (!PMC_IS_NULL(ns))
@@ -161,7 +164,7 @@ op root_new(out PMC, in PMC) {
 op root_new(out PMC, in PMC, in PMC) {
     PMC * const key      = $2;
     PMC * const root_ns  = interp->root_namespace;
-    PMC * const ns       = Parrot_get_namespace_keyed(interp, root_ns, key);
+    PMC * const ns       = Parrot_ns_get_namespace_keyed(interp, root_ns, key);
     PMC * classobj       = PMCNULL;
 
     if (!PMC_IS_NULL(ns))

@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: libparrot.pm 44649 2010-03-05 16:20:00Z tene $
+# $Id: libparrot.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -46,27 +46,8 @@ sub runstep {
     # Parrot can't necessarily handle a pre-existing installed shared
     # libparrot.so. At this point, we don't know the actual name
     # of the shared parrot library. So we try some candidates.
-    my @libs = ('libparrot.so');
-    my @libpaths = ('/usr/local/lib', '/usr/lib', $conf->data->get('libdir'));
-    if ($^O eq 'MSWin32') {
-        push @libpaths, (split /;/, $ENV{PATH});
-        @libs = ('libparrot.dll', 'libparrot.lib', 'libparrot.dll.a');
-    }
-    if ($^O eq 'cygwin') {
-        @libs = ('libparrot.dll.a');
-    }
-    if ($^O eq 'darwin'){
-        @libs = qw/libparrot.dylib libparrot.a/;
-    }
-    if (defined $ENV{LD_LIBRARY_PATH}) {
-        push @libpaths, (split /:/, $ENV{LD_LIBRARY_PATH});
-    }
-    if (defined $ENV{LD_RUN_PATH}) {
-        push @libpaths, (split /:/, $ENV{LD_RUN_PATH});
-    }
-    if (defined $ENV{DYLD_LIBRARY_PATH}) {
-        push @libpaths, (split /:/, $ENV{DYLD_LIBRARY_PATH});
-    }
+    my @libs = get_libs();
+    my @libpaths = get_libpaths($conf);
     foreach my $f (@libs) {
         foreach my $d (@libpaths) {
             my $oldversion = File::Spec->catfile($d, $f);
@@ -162,6 +143,38 @@ sub runstep {
     $self->set_result( $parrot_is_shared ? 'yes' : 'no' );
 
     return 1;
+}
+
+sub get_libs {
+    my @libs = ('libparrot.so');
+    if ($^O eq 'MSWin32') {
+        @libs = ('libparrot.dll', 'libparrot.lib', 'libparrot.dll.a');
+    }
+    if ($^O eq 'cygwin') {
+        @libs = ('libparrot.dll.a');
+    }
+    if ($^O eq 'darwin'){
+        @libs = qw/libparrot.dylib libparrot.a/;
+    }
+    return @libs;
+}
+
+sub get_libpaths {
+    my $conf = shift;
+    my @libpaths = ('/usr/local/lib', '/usr/lib', $conf->data->get('libdir'));
+    if ($^O eq 'MSWin32') {
+        push @libpaths, (split /;/, $ENV{PATH});
+    }
+    if (defined $ENV{LD_LIBRARY_PATH}) {
+        push @libpaths, (split /:/, $ENV{LD_LIBRARY_PATH});
+    }
+    if (defined $ENV{LD_RUN_PATH}) {
+        push @libpaths, (split /:/, $ENV{LD_RUN_PATH});
+    }
+    if (defined $ENV{DYLD_LIBRARY_PATH}) {
+        push @libpaths, (split /:/, $ENV{DYLD_LIBRARY_PATH});
+    }
+    return @libpaths
 }
 
 1;

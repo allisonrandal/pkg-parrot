@@ -1,8 +1,8 @@
-#!./parrot -R cgp
+#!./parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: takfp.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: takfp.pir 45949 2010-04-24 01:14:23Z cotto $
 #
-# ./parrot -R cgp takfp.pir N         (N = 10 for shootout)
+# ./parrot takfp.pir N         (N = 10 for shootout)
 # by Joshua Isom
 # changed default value to N=7 (shootout default before being deprecated)
 # anyway N=10 froze my laptop. Karl Forner

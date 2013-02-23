@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Tools.pm 44649 2010-03-05 16:20:00Z tene $
+# $Id: Tools.pm 46946 2010-05-24 08:15:45Z cotto $
 
 =head1 NAME
 
@@ -53,8 +53,6 @@ sub new {
             '',
             $self->new_item( '', 'docs/configuration.pod' ),
             $self->new_item( '', 'tools/build/c2str.pl' ),
-            $self->new_item( '', 'tools/build/ops2c.pl' ),
-            $self->new_item( '', 'tools/build/ops2pm.pl' ),
             $self->new_item( '', 'tools/build/parrot_config_c.pl' ),
             $self->new_item( '', 'tools/build/pmc2c.pl' ),
             $self->new_item( '', 'tools/dev/install_files.pl' ),

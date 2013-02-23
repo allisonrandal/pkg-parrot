@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: key.t 42703 2009-11-21 14:15:41Z jkeenan $
+# $Id: key.t 46055 2010-04-27 11:35:54Z bacek $
 
 =head1 NAME
 
@@ -129,7 +129,7 @@ iterate:
 loop:
   unless iterator goto end
   elem = shift iterator
-  $S0 = substr elem, 0, 1, ''
+  $S0 = replace elem, 0, 1, ''
   goto loop
 end:
   .return('')

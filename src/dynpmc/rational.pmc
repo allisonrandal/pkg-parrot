@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008-2009, Parrot Foundation.
-$Id: rational.pmc 45291 2010-03-30 00:24:50Z coke $
+$Id: rational.pmc 48028 2010-07-07 12:45:50Z Util $
 
 =pod
 
@@ -541,7 +541,7 @@ Adds Integer-, Float- or Rational-PMCs to SELF and stores them in dest.
 
 */
     VTABLE PMC *add_int(INTVAL value, PMC* dest) {
-        dest = STATICSELF.clone();;
+        dest = STATICSELF.clone();
         rat_add_integer(INTERP, dest, (int) value);
         return dest;
     }

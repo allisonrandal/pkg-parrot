@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: pcc.c 45619 2010-04-12 22:44:02Z plobsing $
+$Id: pcc.c 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 NAME
 
@@ -291,12 +291,19 @@ do_run_ops(PARROT_INTERP, ARGIN(PMC *sub_obj))
 {
     ASSERT_ARGS(do_run_ops)
 
-    if (sub_obj->vtable->base_type < enum_class_core_max)
-        return sub_obj->vtable->base_type == enum_class_Sub
-            || sub_obj->vtable->base_type == enum_class_MultiSub
-            || sub_obj->vtable->base_type == enum_class_Eval;
-    else
-        return is_invokable(interp, sub_obj);
+    if (sub_obj->vtable->base_type < enum_class_core_max) {
+        switch (sub_obj->vtable->base_type) {
+          case enum_class_Sub:
+          case enum_class_MultiSub:
+          case enum_class_Eval:
+            return 1;
+          case enum_class_Object:
+            break;
+          default:
+            return 0;
+        }
+    }
+    return is_invokable(interp, sub_obj);
 }
 
 /*
@@ -340,7 +347,7 @@ Parrot_pcc_invoke_from_sig_object(PARROT_INTERP, ARGIN(PMC *sub_obj),
     opcode_t    *dest;
     UINTVAL      n_regs_used[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     PMC         *ctx  = Parrot_push_context(interp, n_regs_used);
-    PMC * const  ret_cont = new_ret_continuation_pmc(interp, NULL);
+    PMC * const  ret_cont = pmc_new(interp, enum_class_Continuation);
 
     Parrot_pcc_set_signature(interp, ctx, call_object);
     Parrot_pcc_set_continuation(interp, ctx, ret_cont);
@@ -352,12 +359,9 @@ Parrot_pcc_invoke_from_sig_object(PARROT_INTERP, ARGIN(PMC *sub_obj),
 
     /* PIR Subs need runops to run their opcodes. Methods and NCI subs
      * don't. */
-    if (do_run_ops(interp, sub_obj)) {
+    if (dest && do_run_ops(interp, sub_obj)) {
         Parrot_runcore_t *old_core = interp->run_core;
         const opcode_t offset = dest - interp->code->base.data;
-
-        if (PARROT_RUNCORE_PREDEREF_OPS_TEST(interp->run_core))
-            Parrot_runcore_switch(interp, CONST_STRING(interp, "slow"));
 
         runops(interp, offset);
         Interp_core_SET(interp, old_core);

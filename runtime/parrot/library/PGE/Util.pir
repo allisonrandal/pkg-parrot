@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Util.pir 40191 2009-07-21 12:56:20Z bacek $
+# $Id: Util.pir 47421 2010-06-06 04:41:48Z plobsing $
 
 =head1 TITLE
 
@@ -132,7 +132,10 @@ Emits the list of messages to stderr.
     message .= $S0
     message .= "\n"
   emit_message:
-    printerr message
+    $P0 = getinterp
+    .include 'stdio.pasm'
+    $P1 = $P0.'stdhandle'(.PIO_STDERR_FILENO)
+    $P1.'print'(message)
 
     mob.'to'(pos)
     .return (mob)

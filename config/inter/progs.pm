@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: progs.pm 45323 2010-03-30 16:45:07Z bubaflub $
+# $Id: progs.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -100,7 +100,7 @@ sub _get_programs {
         if $ask;
     $conf->data->set( ccflags => $ccflags );
 
-    $conf->options->get('verbose') and print "\nccflags: $ccflags\n";
+    $conf->debug("\nccflags: $ccflags\n");
 
     $linkflags = $conf->data->get('linkflags');
     $linkflags =~ s/-libpath:\S+//g;    # TT #854: No idea why.

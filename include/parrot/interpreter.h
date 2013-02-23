@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *     $Id: interpreter.h 45619 2010-04-12 22:44:02Z plobsing $
+ *     $Id: interpreter.h 47655 2010-06-16 15:26:43Z NotFound $
  *  Overview:
  *     The interpreter API handles running the operations
  */
@@ -24,12 +24,7 @@ typedef enum {
 
     PARROT_IS_THREAD        = 0x1000, /* interpreter is a thread */
     PARROT_THR_COPY_INTERP  = 0x2000, /* thread start copies interp state */
-    PARROT_THR_THREAD_POOL  = 0x4000, /* type3 threads */
-
-    PARROT_THR_TYPE_1       = PARROT_IS_THREAD,
-    PARROT_THR_TYPE_2       = PARROT_IS_THREAD | PARROT_THR_COPY_INTERP,
-    PARROT_THR_TYPE_3       = PARROT_IS_THREAD | PARROT_THR_COPY_INTERP |
-                              PARROT_THR_THREAD_POOL
+    PARROT_THR_THREAD_POOL  = 0x4000  /* type3 threads */
 
 } Parrot_Interp_flag;
 /* &end_gen */
@@ -64,9 +59,6 @@ typedef enum {
     PARROT_SLOW_CORE,                       /* slow bounds/trace/profile core */
     PARROT_FUNCTION_CORE    = PARROT_SLOW_CORE,
     PARROT_FAST_CORE        = 0x01,         /* fast DO_OP core */
-    PARROT_SWITCH_CORE      = 0x02,         /*   P   = prederef   */
-    PARROT_CGP_CORE         = 0x06,         /*  CP                */
-    PARROT_CGOTO_CORE       = 0x04,         /*  C    = cgoto      */
     PARROT_EXEC_CORE        = 0x20,         /* TODO Parrot_exec_run variants */
     PARROT_GC_DEBUG_CORE    = 0x40,         /* run GC before each op */
     PARROT_DEBUGGER_CORE    = 0x80,         /* used by parrot debugger */
@@ -151,18 +143,6 @@ struct _imc_info_t;
 
 struct _Thread_data;    /* in thread.h */
 struct _Caches;         /* caches .h */
-
-typedef struct _Prederef_branch {       /* item for recording branches */
-    size_t offs;                        /* offset in code */
-    void  *op;                          /* opcode at that position */
-} Prederef_branch;
-
-typedef struct _Prederef {
-    void **code;                        /* prederefed code */
-    Prederef_branch *branches;          /* list of branches in code */
-    size_t n_branches;                  /* entries in that list */
-    size_t n_allocated;                 /* allocated size of it */
-} Prederef;
 
 /* Get Context from interpreter */
 #define CONTEXT(interp)         Parrot_pcc_get_context_struct((interp), (interp)->ctx)
@@ -384,6 +364,7 @@ typedef PMC *(*Parrot_compiler_func_t)(PARROT_INTERP,
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
+PARROT_MALLOC
 Parrot_Interp allocate_interpreter(
     ARGIN_NULLOK(Interp *parent),
     INTVAL flags);
@@ -396,6 +377,7 @@ Parrot_Interp initialize_interpreter(PARROT_INTERP, ARGIN(void *stacktop))
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
+PARROT_MALLOC
 Parrot_Interp make_interpreter(ARGIN_NULLOK(Interp *parent), INTVAL flags);
 
 PARROT_EXPORT
@@ -485,7 +467,7 @@ INTVAL interpinfo(PARROT_INTERP, INTVAL what)
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
+PARROT_CANNOT_RETURN_NULL
 PMC* interpinfo_p(PARROT_INTERP, INTVAL what)
         __attribute__nonnull__(1);
 
@@ -540,14 +522,6 @@ void register_raw_nci_method_in_ns(PARROT_INTERP,
         __attribute__nonnull__(3)
         __attribute__nonnull__(4);
 
-PARROT_WARN_UNUSED_RESULT
-INTVAL sysinfo_i(SHIM_INTERP, INTVAL info_wanted);
-
-PARROT_CANNOT_RETURN_NULL
-PARROT_WARN_UNUSED_RESULT
-STRING * sysinfo_s(PARROT_INTERP, INTVAL info_wanted)
-        __attribute__nonnull__(1);
-
 #define ASSERT_ARGS_interpinfo __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_interpinfo_p __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -574,9 +548,6 @@ STRING * sysinfo_s(PARROT_INTERP, INTVAL info_wanted)
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(func) \
     , PARROT_ASSERT_ARG(name))
-#define ASSERT_ARGS_sysinfo_i __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
-#define ASSERT_ARGS_sysinfo_s __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/interp/inter_misc.c */
 

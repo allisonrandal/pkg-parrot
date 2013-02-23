@@ -1,4 +1,4 @@
-# $Id: Builder.pir 38693 2009-05-11 18:45:05Z NotFound $
+# $Id: Builder.pir 46472 2010-05-10 13:34:07Z bacek $
 
 =head1 NAME
 
@@ -312,22 +312,50 @@ declared a plan or if you pass an invalid argument.
     .return()
 .end
 
-=item C<diag( diagnostic_message )>
+=item done_testing
+
+=cut
+
+.sub 'done_testing' :method
+    .param string tests     :optional
+    .param int    has_tests :opt_flag
+
+    .local pmc testplan
+    testplan = self.'testplan'()
+
+    unless has_tests goto write_footer
+
+    .local int num_tests
+    num_tests = tests
+    unless num_tests goto write_footer
+
+    testplan.'set_tests'( num_tests )
+
+  write_footer:
+    .local pmc output
+    output = self.'output'()
+
+    $S0 = testplan.'header'()
+    output.'write'( $S0 )
+
+    $I0 = self.'results'()
+    $S0 = testplan.'footer'( $I0 )
+    output.'write'( $S0 )
+
+.end
+
+=item C<diag( diagnostic_message, ... )>
 
 Records a diagnostic message for output.
 
 =cut
 
 .sub 'diag' :method
-    .param string diagnostic
+    .param pmc args :slurpy
 
-    if diagnostic goto DIAGNOSTIC_SET
-    .return()
-
-  DIAGNOSTIC_SET:
     .local pmc output
     output = self.'output'()
-    output.'diag'( diagnostic )
+    .tailcall output.'diag'( args :flat )
 .end
 
 =item C<ok( passed, description )>
@@ -497,7 +525,8 @@ also calls C<exit>.
     .local pmc output
     output   = self.'output'()
 
-    .local string bail_out
+    .local pmc bail_out
+    bail_out = new ['StringBuilder']
     bail_out = 'Bail out!'
 
     unless has_reason goto WRITE_REASON

@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: imageiosize.t 44379 2010-02-23 11:15:03Z mikehh $
+# $Id: imageiosize.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

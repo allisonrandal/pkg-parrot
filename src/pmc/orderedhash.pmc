@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2010, Parrot Foundation.
-$Id: orderedhash.pmc 45387 2010-04-02 22:22:55Z NotFound $
+$Id: orderedhash.pmc 47408 2010-06-06 00:05:18Z mikehh $
 
 =head1 NAME
 
@@ -263,7 +263,7 @@ Marks the OrderedHash as live.
                 PARROT_ORDEREDHASH(SELF);
 
         if (attrs->hash)
-            Parrot_gc_mark_PObj_alive(INTERP, (PObj *)attrs->hash);
+            Parrot_gc_mark_PMC_alive(INTERP, attrs->hash);
 
         /* Don't mark C<first> and C<last>. They are in lookup hash anyway */
     }

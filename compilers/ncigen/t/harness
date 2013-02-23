@@ -1,7 +1,0 @@
-#!/usr/bin/perl
-
-# $Id: harness 30480 2008-08-23 14:26:06Z jkeenan $
-
-use FindBin;
-use lib qw( . lib ../lib ../../lib ../../lib );
-use Parrot::Test::Harness language => 'ncigen'

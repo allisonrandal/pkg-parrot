@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: Method.pm 42783 2009-11-22 04:18:46Z jkeenan $
+# $Id: Method.pm 46482 2010-05-11 00:28:12Z NotFound $
 package Parrot::Pmc2c::Method;
 use strict;
 use warnings;
@@ -192,6 +192,7 @@ sub pcc_signature {
     }
     else {
         $result_decl = "$return_type result;";
+        $result_decl = "$return_type result = PMCNULL;" if $return_type_char eq 'P';
         $args .= ', &result';
         $sig .= $return_type_char;
         $return_stmt = "return ($return_type) result;";

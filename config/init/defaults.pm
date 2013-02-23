@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: defaults.pm 45809 2010-04-19 16:26:24Z coke $
+# $Id: defaults.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -257,6 +257,13 @@ sub runstep {
     $conf->data->set( clock_best => "" );
 
     $conf->data->set( 'archname', $Config{archname});
+
+    $conf->data->set( has_extra_nci_thunks => 1 );
+    $conf->data->set( HAS_EXTRA_NCI_THUNKS => 1 );
+    if ( $conf->options->get( 'without-extra-nci-thunks' ) ) {
+        $conf->data->set( has_extra_nci_thunks => 0 );
+        $conf->data->set( HAS_EXTRA_NCI_THUNKS => 0 );
+    }
 
     # adjust archname, cc and libs for e.g. --m=32
     # remember corrected archname - jit.pm was using $Config('archname')

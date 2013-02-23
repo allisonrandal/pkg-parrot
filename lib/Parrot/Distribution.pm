@@ -1,5 +1,5 @@
-# Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: Distribution.pm 45389 2010-04-03 00:46:43Z jkeenan $
+# Copyright (C) 2004-2010, Parrot Foundation.
+# $Id: Distribution.pm 46922 2010-05-23 21:38:28Z bacek $
 
 =head1 NAME
 
@@ -248,13 +248,13 @@ BEGIN {
                 # and make a hash out of the directories
                 my %dirs =
                     map { ( ( File::Spec->splitpath($_) )[1] => 1 ) }
-                    grep { m|(?i)(?:$filter_ext)| } $self->_dist_files;
+                    grep { m/(?i)(?:$filter_ext)/ } $self->_dist_files;
 
                 # Filter out ignored directories
                 # and return the results
                 my @dirs = sort
                     map  { $self->directory_with_name($_) }
-                    grep { !m|(?:$filter_dir)| }
+                    grep { !m/(?:$filter_dir)/ }
                     keys %dirs;
                 return @dirs;
             };
@@ -281,7 +281,7 @@ BEGIN {
                     }
                 }
 
-                print 'WARNING: ' . __FILE__ . ':' . __LINE__ . ' File not found: ' . $name . "\n";
+                print '# WARNING: ' . __FILE__ . ':' . __LINE__ . ' File not found: ' . $name . "\n";
                 return;
             };
 
@@ -293,7 +293,7 @@ BEGIN {
                 # and return a sorted list of filenames
                 my @files = sort
                     map  { $self->file_with_name($_) }
-                    grep { m|(?i)(?:$filter_ext)| }
+                    grep { m/(?i)(?:$filter_ext)/ }
                     $self->_dist_files;
                 return @files;
             };
@@ -334,7 +334,7 @@ sub get_make_language_files {
     # and return a sorted list of filenames
     my @files = sort
         map  { $self->file_with_name($_) }
-        grep { m|[/\\]makefiles[/\\][a-z]+\.in$| }
+        grep { m{[/\\]makefiles[/\\][a-z]+\.in$} }
         $self->_dist_files;
     return @files;
 }
@@ -430,7 +430,11 @@ This is to exclude automatically generated C-language files Parrot might have.
             compilers/pirc/macro/macroparser.h
             include/parrot/config.h
             include/parrot/has_header.h
+            include/parrot/oplib/core_ops.h
+            include/parrot/oplib/ops.h
+            include/parrot/opsenum.h
             src/gc/malloc.c
+            src/ops/core_ops.c
             } unless @exemptions;
 
         my $path = -f $file ? $file : $file->path;
@@ -510,6 +514,7 @@ sub get_perl_exemption_regexp {
         lib/File/
         lib/IO/
         lib/Pod/
+        ext/
     };
 
     my $regex = join '|', map { quotemeta $_ } @paths;

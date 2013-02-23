@@ -10,7 +10,7 @@
 /* src/nci/core_thunks.c
  *  Copyright (C) 2010, Parrot Foundation.
  *  SVN Info
- *     $Id: core_thunks.c 45617 2010-04-12 22:05:52Z plobsing $
+ *     $Id: core_thunks.c 47675 2010-06-17 17:31:33Z NotFound $
  *  Overview:
  *     Native Call Interface routines. The code needed to build a
  *     parrot to C call frame is in here
@@ -125,7 +125,7 @@ pcf_P_Jt(PARROT_INTERP, PMC *nci, SHIM(PMC *self))
     char *t_1; STRING *ts_1;
     UNUSED(return_data); /* Potentially unused, at least */
     Parrot_pcc_fill_params_from_c_args(interp, call_object, "S", &ts_1);
-    t_1 = ts_1 ? Parrot_str_to_cstring(interp, ts_1) : (char *)NULL;
+    t_1 = STRING_IS_NULL(ts_1) ? (char *)NULL : Parrot_str_to_cstring(interp, ts_1);
     GETATTR_NCI_orig_func(interp, nci, orig_func);
     fn_pointer = (func_t)D2FPTR(orig_func);
     return_data =  (PMC *)(*fn_pointer)(interp, t_1);
@@ -868,7 +868,7 @@ pcf_i_JPt(PARROT_INTERP, PMC *nci, SHIM(PMC *self))
     char *t_2; STRING *ts_2;
     UNUSED(return_data); /* Potentially unused, at least */
     Parrot_pcc_fill_params_from_c_args(interp, call_object, "PS", &t_1, &ts_2);
-    t_2 = ts_2 ? Parrot_str_to_cstring(interp, ts_2) : (char *)NULL;
+    t_2 = STRING_IS_NULL(ts_2) ? (char *)NULL : Parrot_str_to_cstring(interp, ts_2);
     GETATTR_NCI_orig_func(interp, nci, orig_func);
     fn_pointer = (func_t)D2FPTR(orig_func);
     return_data =  (int)(*fn_pointer)(interp, t_1, t_2);

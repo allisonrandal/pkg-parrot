@@ -1,5 +1,5 @@
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: pdd31_hll.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd31_hll.pod 46867 2010-05-21 19:13:51Z pmichaud $
 
 =head1 [DRAFT] PDD 31: HLL Compilers and Libraries
 
@@ -10,7 +10,7 @@ cross-library communication between high-level languages (HLLs).
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 46867 $
 
 =head2 Description
 
@@ -77,11 +77,11 @@ a dynamic compilation at runtime.
 
 =item C<eval>
 
-    $P0 = compiler.'eval'(source [, options :named :slurpy])
+    $P0 = compiler.'eval'(source [, args :slurpy] [, options :named :slurpy])
 
 Compile and evaluate (execute) the code given by C<source>
-according to C<options>.  The available options are generally
-the same as for the C<compile> method above; in particular,
+with C<args> and according to C<options>.  The available options 
+are generally the same as for the C<compile> method above; in particular,
 the C<outer_ctx> option can be used to specify the outer lexical
 context for the evaluated source.
 

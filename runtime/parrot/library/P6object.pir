@@ -1,4 +1,4 @@
-# $Id: P6object.pir 45669 2010-04-14 14:23:59Z allison $
+# $Id: P6object.pir 47972 2010-07-03 13:26:41Z jonathan $
 
 =head1 NAME
 
@@ -111,7 +111,8 @@ Return the C<P6protoobject> for the invocant.
 .sub 'WHAT' :method :nsentry
     .local pmc how, what
     how = self.'HOW'()
-    .tailcall how.'WHAT'()
+    what = getattribute how, 'protoobject'
+    .return (what)
 .end
 
 
@@ -162,25 +163,13 @@ below).
 
 =over
 
-=item WHAT()
-
-Return the protoobject for this metaclass.
-
-=cut
-
-.namespace ['P6metaclass']
-
-.sub 'WHAT' :method :nsentry
-    $P0 = getattribute self, 'protoobject'
-    .return ($P0)
-.end
-
 =item isa(x)
 
 Return a true value if the invocant 'isa' C<x>.
 
 =cut
 
+.namespace ['P6metaclass']
 .sub 'isa' :method :multi(_,_, _)
     .param pmc obj
     .param pmc x
@@ -251,8 +240,7 @@ Deprecated; use add_parent(class, parentclass)
 
   parent_proxy:
     ##  iterate over parent's mro and methods, adding them to parrotclass' namespace
-    .local pmc parrotclassns, mroiter, methods, methoditer
-    parrotclassns = parrotclass.'get_namespace'()
+    .local pmc mroiter, methods, methoditer
     $P0 = parentclass.'inspect'('all_parents')
     mroiter = iter $P0
   mro_loop:
@@ -270,18 +258,20 @@ Deprecated; use add_parent(class, parentclass)
     $I0 = isa methodpmc, 'NCI'
     if $I0 goto method_loop
     # if there's no existing entry, add method directly
-    $P0 = parrotclassns[methodname]
+    push_eh add_method_failed
+    $P0 = inspect parrotclass, 'methods'
+    $P0 = $P0[methodname]
     if null $P0 goto add_method
     # if existing entry isn't a MultiSub, skip it
     $I0 = isa $P0, ['MultiSub']
     unless $I0 goto method_loop
-    push_eh err
-    parrotclassns.'add_sub'(methodname, methodpmc)
-  err:
+    parrotclass.'add_method'(methodname, methodpmc)
     pop_eh
     goto method_loop
   add_method:
-    parrotclassns[methodname] = methodpmc
+    parrotclass.'add_method'(methodname, methodpmc)
+  add_method_failed:
+    pop_eh
     goto method_loop
   mro_end:
 
@@ -828,7 +818,9 @@ will be used in lieu of this one.)
     $I0 = 1
 
   end:
-    .return ($I0)
+    $P0 = new ['Boolean']
+    assign $P0, $I0
+    .return ($P0)
 .end
 
 

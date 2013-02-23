@@ -1,6 +1,6 @@
 /*
- * $Id: time.c 42765 2009-11-21 19:12:15Z jkeenan $
- * Copyright (C) 2007, Parrot Foundation.
+ * $Id: time.c 47917 2010-06-29 23:18:38Z jkeenan $
+ * Copyright (C) 2007-2010, Parrot Foundation.
  */
 
 /*
@@ -27,6 +27,8 @@ Time-related functions.
 
 =item C<INTVAL Parrot_intval_time(void)>
 
+Parrot wrapper around standard library C<time()> function, returning an INTVAL.
+
 =cut
 
 */
@@ -42,6 +44,9 @@ Parrot_intval_time(void)
 
 =item C<FLOATVAL Parrot_floatval_time(void)>
 
+Note:  We are unable to provide this level of precision under ANSI-C, so we
+just fall back to intval time for this.
+
 =cut
 
 */
@@ -49,8 +54,6 @@ Parrot_intval_time(void)
 FLOATVAL
 Parrot_floatval_time(void)
 {
-    /* unable to provide this level of precision under ANSI-C, so just fall
-       back to intval time for this. */
     Parrot_warn(NULL, PARROT_WARNINGS_PLATFORM_FLAG, "Parrot_floatval_time not accurate");
     return (FLOATVAL)Parrot_intval_time();
 }
@@ -59,6 +62,8 @@ Parrot_floatval_time(void)
 /*
 
 =item C<void Parrot_sleep(unsigned int seconds)>
+
+Sleep for at least the specified number of seconds.
 
 =cut
 

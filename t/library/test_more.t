@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2005-2010, Parrot Foundation.
-# $Id: test_more.t 45769 2010-04-18 00:11:45Z bacek $
+# $Id: test_more.t 46007 2010-04-25 11:44:15Z fperrad $
 
 .sub _main :main
     load_bytecode 'Test/Builder/Tester.pbc'

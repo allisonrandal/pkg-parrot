@@ -1,5 +1,5 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: Harness.pir 45811 2010-04-19 17:02:35Z fperrad $
+# $Id: Harness.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 NAME
 
@@ -12,6 +12,13 @@ and TAP::Harness::Archive (version 0.14)
 
 See L<http://search.cpan.org/~andya/Test-Harness/>
 end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
+
+=head3 Class TAP;Harness
+
+This is a simple test harness which allows tests to be run and results
+automatically aggregated and output to STDOUT.
+
+=over 4
 
 =cut
 
@@ -38,10 +45,14 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     set_global ['TAP';'Harness'], 'LEGAL_CALLBACK', $P0
 .end
 
-.sub 'init' :vtable :init
+.sub 'init' :vtable :method
     $P0 = get_global ['TAP';'Harness'], 'LEGAL_CALLBACK'
     setattribute self, 'ok_callbacks', $P0
 .end
+
+=item process_args
+
+=cut
 
 .sub 'process_args' :method
     .param pmc opts
@@ -68,12 +79,20 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
   L3:
 .end
 
+=item formatter
+
+=cut
+
 .sub 'formatter' :method
     .param pmc formatter
     setattribute self, 'formatter', formatter
 .end
 
-.sub 'runtests' :method
+=item runtests
+
+=cut
+
+.sub 'runtests' :method :nsentry
     .param pmc tests
     $P0 = getattribute self, 'formatter'
     unless null $P0 goto L1
@@ -193,9 +212,8 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     $I0 = exists $P0['PARROT_TEST_HARNESS_DUMP_TAP']
     unless $I0 goto L1
     .local string spool
-    spool = $P0['PARROT_TEST_HARNESS_DUMP_TAP']
-    spool .= '/'
-    spool .= test
+    $S0 = $P0['PARROT_TEST_HARNESS_DUMP_TAP']
+    spool = catfile($S0, test)
     $S0 = dirname(spool)
     mkpath($S0)
     $P0 = new 'FileHandle'
@@ -208,25 +226,45 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     .param pmc parser
     $P0 = parser.'delete_spool'()
     if null $P0 goto L1
-    close $P0
+    $P0.'close'()
   L1:
 .end
 
+=back
+
+=head3 Class TAP';Harness;Archive
+
+This module is a direct subclass of C<TAP;Harness> and behaves
+in exactly the same way except for one detail. In addition to
+outputting a running progress of the tests and an ending summary
+it can also capture all of the raw TAP from the individual test
+files or streams into an archive file (C<.tar.gz>).
+
+=over 4
+
+=cut
 
 .namespace ['TAP';'Harness';'Archive']
 
 .sub '' :init :load :anon
-    load_bytecode 'osutils.pbc'
     $P0 = subclass ['TAP';'Harness'], ['TAP';'Harness';'Archive']
     $P0.'add_attribute'('archive_file')
     $P0.'add_attribute'('archive_extra_files')
     $P0.'add_attribute'('archive_extra_props')
 .end
 
+=item archive
+
+=cut
+
 .sub 'archive' :method
     .param pmc archive
     setattribute self, 'archive_file', archive
 .end
+
+=item extra_files
+
+=cut
 
 .sub 'extra_files' :method
     .param pmc extra_files
@@ -237,6 +275,10 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     setattribute self, 'archive_extra_files', extra_files
 .end
 
+=item extra_props
+
+=cut
+
 .sub 'extra_props' :method
     .param pmc extra_props
     $I0 = does extra_props, 'hash'
@@ -246,14 +288,19 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     setattribute self, 'archive_extra_props', extra_props
 .end
 
+=item runtests
+
+=cut
+
 .sub 'runtests' :method
     .param pmc files
+    load_bytecode 'Archive/Tar.pbc'
     $P0 = getattribute self, 'archive_file'
     unless null $P0 goto L1
     die "You must provide the name of the archive to create!"
   L1:
-    .local string archive, dir
-    archive = $P0
+    .local string archive_file, dir
+    archive_file = $P0
     dir = tempdir()
     .local pmc env
     env = new 'Env'
@@ -264,31 +311,22 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     .local string current_dir, cmd
     current_dir = cwd()
     chdir(dir)
-    $S0 = self.'_mk_meta'(aggregate)
-    spew('meta.yml', $S0)
+    .local pmc archive
+    archive = new ['Archive';'Tar']
+    archive.'add_files'(files :flat)
+    chdir(current_dir)
+    rmtree(dir)
     $P0 = getattribute self, 'archive_extra_files'
     if null $P0 goto L2
-    $P1 = iter $P0
-  L3:
-    unless $P1 goto L2
-    $S2 = shift $P1
-    $S1 = current_dir . '/'
-    $S1 .= $S2
-    cp($S1, $S2)
-    goto L3
+    archive.'add_files'($P0 :flat)
   L2:
-    $I0 = length archive
-    $I0 -= 3
-    $S0 = substr archive, 0, $I0
-    cmd = "tar -cf " . current_dir
-    cmd .= "/"
-    cmd .= $S0
-    cmd .= " *"
-    system(cmd)
-    chdir(current_dir)
-    cmd = "gzip --best " . $S0
-    system(cmd)
-    rmtree(dir)
+    $S0 = self.'_mk_meta'(aggregate)
+    archive.'add_data'('meta.yml', $S0)
+    $P0 = loadlib 'gziphandle'
+    $P0 = new 'GzipHandle'
+    $P0.'open'(archive_file, 'wb')
+    archive.'write'($P0)
+    $P0.'close'()
     .return (aggregate)
 .end
 
@@ -353,6 +391,7 @@ end L<http://search.cpan.org/~wonko/TAP-Harness-Archive/>.
     .return ($S0)
 .end
 
+=back
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: cmp-nonbranch.t 41751 2009-10-07 08:01:42Z mikehh $
+# $Id: cmp-nonbranch.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: osutils.pir 45761 2010-04-17 16:54:03Z fperrad $
+# $Id: osutils.pir 47085 2010-05-28 07:51:09Z fperrad $
 
 =head1 NAME
 
@@ -8,6 +8,12 @@ osutils - Parrot OS Utilities
 =head2 DESCRIPTION
 
 =over 4
+
+=cut
+
+.sub '' :init :load :anon
+    $P0 = loadlib 'os'
+.end
 
 =item system
 
@@ -39,6 +45,7 @@ osutils - Parrot OS Utilities
     .return ($I0)
 .end
 
+.loadlib 'io_ops'
 .include 'stat.pasm'
 
 .sub 'file_exists'
@@ -260,19 +267,8 @@ osutils - Parrot OS Utilities
     .param string filename
     .param int mode
     .param int verbose          :named('verbose') :optional
-    # see TT #1322
-    $P0 = get_config()
-    .local string cmd
-    cmd = $P0['perl']
-    cmd .= " -MExtUtils::Command -e ExtUtils::Command::chmod "
-    $P1 = new 'FixedIntegerArray'
-    set $P1, 1
-    $P1[0] = mode
-    $S0 = sprintf '0%o', $P1
-    cmd .= $S0
-    cmd .= " "
-    cmd .= filename
-    system(cmd, verbose :named('verbose'))
+    $P0 = new 'OS'
+    $P0.'chmod'(filename, mode)
 .end
 
 =item unlink
@@ -762,6 +758,97 @@ osutils - Parrot OS Utilities
     $S0 = join "/", $P0
     .return ($S0)
   L7:
+.end
+
+=item gzip
+
+=cut
+
+.sub 'gzip'
+    .param string filename
+    .local pmc fh, gh
+    fh = new 'FileHandle'
+    push_eh _handler1
+    $S0 = fh.'readall'(filename)
+    $I0 = length $S0
+    pop_eh
+    $P0 = loadlib 'gziphandle'
+    push_eh _handler2
+    gh = new 'GzipHandle'
+    $S1 = filename . '.gz'
+    gh.'open'($S1, 'wb')
+    gh.'puts'($S0)
+    gh.'close'()
+    unlink(filename)
+    .return ()
+  _handler1:
+    .local pmc e
+    .get_results (e)
+    $S0 = "Can't open '"
+    $S0 .= filename
+    $S0 .= "' ("
+    $S1 = err
+    $S0 .= $S1
+    $S0 .= ")\n"
+    e = $S0
+    rethrow e
+  _handler2:
+    .local pmc e
+    .get_results (e)
+    $S0 = "Can't gzip '"
+    $S0 .= filename
+    $S0 .= "'\n"
+    e = $S0
+    rethrow e
+.end
+
+=item catfile
+
+=cut
+
+.sub 'catfile'
+    .param pmc args             :slurpy
+    .param int native           :named('native') :optional
+    .param int has_native       :opt_flag
+    .local string slash
+    slash = '/'
+    unless has_native goto L1
+    unless native goto L1
+    $P0 = getinterp
+    $P0 = $P0[.IGLOBALS_CONFIG_HASH]
+    slash = $P0['slash']
+  L1:
+    $S0 = join slash, args
+    .return ($S0)
+.end
+
+=item splitpath
+
+=cut
+
+.sub 'splitpath'
+    .param string path
+    .local string volume, directories, file
+    volume = ''
+    $I0 = index path, ':'
+    unless $I0 == 1 goto L1
+    volume = substr path, 0, 2
+    path = substr path, 2
+  L1:
+    $I0 = 0
+  L2:
+    $I1 = index path, '/', $I0
+    if $I1 < 0 goto L3
+    $I0 = $I1 + 1
+    goto L2
+  L3:
+    file = substr path, $I0
+    directories = ''
+    dec $I0
+    unless $I0 > 0 goto L4
+    directories = substr path, 0, $I0
+  L4:
+    .return (volume, directories, file)
 .end
 
 =back

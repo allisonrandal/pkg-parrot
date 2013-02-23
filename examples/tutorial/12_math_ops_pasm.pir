@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 12_math_ops_pasm.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: 12_math_ops_pasm.pir 46782 2010-05-19 08:55:32Z plobsing $
 
 =head1 Math Operations (continued)
 
@@ -9,7 +9,13 @@ PIR. In these cases you can use the opcode name directly.
 For a large list of the various mathematical operations supported by Parrot,
 see the documentation at F<src/ops/math.ops>.
 
+Some uncommon math operations have opcodes packaged with Parrot but not part of
+core. These must be loaded as libraries. see the documentation at
+F<src/dynoplibs/math.ops>, F<src/dynoplibs/obscure.ops>.
+
 =cut
+
+.loadlib 'obscure_ops' # fact lives in the obscure dynops lib
 
 .sub main :main
     $N0 = abs -5.0  # the absolute value of -5.0 is 5.0

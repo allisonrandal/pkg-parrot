@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: Prepare.pm 43593 2010-01-26 02:39:50Z jkeenan $
+# $Id: Prepare.pm 46946 2010-05-24 08:15:45Z cotto $
 package Parrot::Configure::Options::Test::Prepare;
 use strict;
 use warnings;
@@ -78,6 +78,8 @@ sub _find_steps_tests {
                 ? qq|$secondlevel-$number|
                 : $number;
             $steps_tests_complex{$category}{$class}{$final}++;
+
+            return;
         }
     } # END wanted()
     finddepth( \&wanted, ( $steps_dir ) );
@@ -159,8 +161,6 @@ Returns a list of the tests found in these directories:
 
     t/postconfigure/
     t/tools/pmc2cutils/
-    t/tools/ops2cutils/
-    t/tools/ops2pm/
     t/pharness/
 
 =back

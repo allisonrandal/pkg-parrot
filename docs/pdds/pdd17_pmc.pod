@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: pdd17_pmc.pod 45652 2010-04-14 02:57:43Z coke $
+# $Id: pdd17_pmc.pod 46291 2010-05-04 22:41:27Z darbelo $
 
 =head1 PDD 17: Polymorphic Containers
 
@@ -10,7 +10,7 @@ Container (PMC) data type.
 
 =head2 Version
 
-$Revision: 45652 $
+$Revision: 46291 $
 
 =head2 Description
 
@@ -48,7 +48,6 @@ All PMCs have the form:
         VTABLE *vtable;
         DPOINTER *data;
         PMC *_metadata;
-        struct _Sync *_synchronize;    # [Note: may be deprecated, see STM]
     }
 
 C<flags> holds a set of flags associated with the PMC; these are documented

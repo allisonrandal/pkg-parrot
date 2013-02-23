@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2008, Parrot Foundation.
-$Id: handle.pmc 45219 2010-03-28 01:11:50Z petdance $
+Copyright (C) 2008-2010, Parrot Foundation.
+$Id: handle.pmc 47805 2010-06-24 11:47:24Z NotFound $
 
 =head1 NAME
 
@@ -14,9 +14,12 @@ This is the base-class for all IO-related PMCs.
 
 =over 4
 
-=item * [to come]
+=item C<init>
 
-=back
+=item C<init_pmc>
+
+Handle shouldn't be directly instantiated, init and init_pmc throws
+EXCEPTION_INVALID_OPERATION.
 
 =cut
 
@@ -34,14 +37,37 @@ pmclass Handle provides Handle manual_attrs {
     ATTR PIOHANDLE os_handle;         /* Low level OS descriptor      */
 
     VTABLE void init() {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
             "Handle cannot be instantiated directly.");
     }
 
     VTABLE void init_pmc(PMC * init) {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
             "Handle cannot be instantiated directly.");
     }
+
+/*
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<METHOD isatty()>
+
+Returns a boolean value indicating whether C<SELF> is a console/tty.
+This default implementation always return false. Override it in
+subtypes that are or can be tty.
+
+=cut
+
+*/
+
+    METHOD isatty() {
+        RETURN(INTVAL 0);
+    }
+
 }
 
 /*

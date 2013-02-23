@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2004, Parrot Foundation.
-# $Id: exit.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: exit.t 46013 2010-04-25 16:05:56Z fperrad $
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ my $pbcfn = File::Spec->catfile($tempdir, "test.pbc");
 my $pirfile = IO::File->new(">$pirfn");
 $pirfile->print("Parse error.\n");
 $pirfile->close();
-my $rv = system("$PARROT -o $pbcfn $pirfn") >> 8;
+my $rv = system(qq|$PARROT -o $pbcfn $pirfn $redir > $redir 2> $redir|) >> 8;
 isnt($rv, 0, "parrot returns error on parse failure\n");
 ok(! -e $pbcfn, "parrot doesn't create outfile on parse failure\n");
 

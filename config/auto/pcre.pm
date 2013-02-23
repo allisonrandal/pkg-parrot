@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: pcre.pm 42341 2009-11-07 23:48:27Z jkeenan $
+# $Id: pcre.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -33,12 +33,7 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my ( $verbose, $without ) = $conf->options->get(
-        qw|
-            verbose
-            without-pcre
-        |
-    );
+    my $without = $conf->options->get( qw| without-pcre | );
 
     if ($without) {
         $conf->data->set( HAS_PCRE => 0 );
@@ -61,7 +56,7 @@ sub runstep {
     my $has_pcre = 0;
     if ( !$@ ) {
         my $test = $conf->cc_run();
-        $has_pcre = $self->_evaluate_cc_run($test, $verbose);
+        $has_pcre = $self->_evaluate_cc_run($conf, $test);
     }
     $conf->data->set( HAS_PCRE => $has_pcre);
 
@@ -70,12 +65,12 @@ sub runstep {
 
 sub _evaluate_cc_run {
     my $self = shift;
-    my ($test, $verbose) = @_;
+    my ($conf, $test) = @_;
     my $has_pcre = 0;
     if ( $test =~ /pcre (\d+\.\d+)/ ) {
         my $pcre_version = $1;
         $has_pcre = 1;
-        print " (yes, $pcre_version) " if $verbose;
+        $conf->debug(" (yes, $pcre_version) ");
         $self->set_result("yes, $pcre_version");
     }
     return $has_pcre;

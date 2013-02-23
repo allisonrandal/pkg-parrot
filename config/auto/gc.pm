@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: gc.pm 43593 2010-01-26 02:39:50Z jkeenan $
+# $Id: gc.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ EOF
         TEMP_gc_o => "src/gc/alloc_resources\$(O)",
         gc_flag   => '',
     );
-    print(" ($gc) ") if $conf->options->get('verbose');
+    $conf->debug(" ($gc) ");
 
     return 1;
 }

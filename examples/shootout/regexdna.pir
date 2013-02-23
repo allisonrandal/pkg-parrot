@@ -1,5 +1,5 @@
-# Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: regexdna.pir 40200 2009-07-21 21:51:54Z bacek $
+# Copyright (C) 2006-2010, Parrot Foundation.
+# $Id: regexdna.pir 47421 2010-06-06 04:41:48Z plobsing $
 
 .sub main :main
 	load_bytecode "PGE.pbc"
@@ -61,11 +61,14 @@
 	############################################
 	# Read in the file
 beginwhile:
-	chunk = read 65535
-	chunklen = length chunk
+        $P0      = getinterp
+        .include 'stdio.pasm'
+        $P1      = $P0.'stdhandle'(.PIO_STDIN_FILENO)
+        chunk    = $P1.'read'(65535)
+        chunklen = length chunk
 	unless chunklen goto endwhile
 	# They don't say you have to match case insenitive...
-	downcase chunk
+	chunk = downcase chunk
 	seq .= chunk
 	goto beginwhile
 endwhile:
@@ -84,7 +87,7 @@ stripfind:
 	$I0 = $P0."from"()
 	$I1 = $P0."to"()
 	$I1 -= $I0
-	substr seq, $I0, $I1, ''
+	seq = replace seq, $I0, $I1, ''
 	goto stripfind
 endstripfind:
 	seqlen = length seq
@@ -140,7 +143,7 @@ iter_loop:
 #	$I0 = $P0."from"()
 #	$I1 = $P0."to"()
 #	$I1 -= $I0
-#	substr seq, $I0, $I1, replacement
+#	seq = replace seq, $I0, $I1, replacement
 #	goto switchfind
 #endswitchfind:
 
@@ -164,7 +167,7 @@ switchloop:
 	$P0 = pop matches
 	$I0 = $P0[0]
 	$I1 = $P0[1]
-	substr seq, $I0, $I1, replacement
+	seq = replace seq, $I0, $I1, replacement
 	goto switchloop
 endswitchloop:
 #############################################

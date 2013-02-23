@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: headers.pm 42899 2009-12-05 02:45:27Z jkeenan $
+# $Id: headers.pm 47318 2010-06-03 01:36:45Z jkeenan $
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ sub runstep {
         my $flag = "i_$header";
         $flag =~ s/\.h$//g;
         $flag =~ s/\///g;
-        print "$flag: $pass\n" if defined $conf->options->get('verbose');
+        $conf->debug("$flag: $pass\n");
         $conf->data->set( $flag => $pass ? 'define' : undef );
     }
 

@@ -1,7 +1,7 @@
 /* io_unix.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: io_unix.h 45585 2010-04-12 05:24:17Z petdance $
+ *     $Id: io_unix.h 46109 2010-04-28 15:52:24Z petdance $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:
@@ -117,11 +117,10 @@ PIOOFF_T Parrot_io_tell_unix(PARROT_INTERP, ARGMOD(PMC *filehandle))
 
 size_t Parrot_io_write_unix(PARROT_INTERP,
     ARGIN(PMC *filehandle),
-    ARGMOD(STRING *s))
+    ARGIN(const STRING *s))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
-        __attribute__nonnull__(3)
-        FUNC_MODIFIES(*s);
+        __attribute__nonnull__(3);
 
 #define ASSERT_ARGS_Parrot_io_async_unix __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \

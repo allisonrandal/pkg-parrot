@@ -1,7 +1,7 @@
 /* call.h
  *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *  $Id: call.h 45774 2010-04-18 07:24:50Z chromatic $
+ *  $Id: call.h 47917 2010-06-29 23:18:38Z jkeenan $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Call argument handling.
@@ -28,6 +28,7 @@ typedef struct parrot_runloop_t {
     struct parrot_runloop_t *prev;          /* interpreter's runloop
                                              * jump buffer stack */
     opcode_t                *handler_start; /* Used in exception handling */
+    int                      id;            /* runloop id */
 
     /* let the biggest element cross the cacheline boundary */
     Parrot_jump_buff         resume;        /* jmp_buf */

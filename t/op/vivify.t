@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2009-2010, Parrot Foundation.
-# $Id: vivify.t 44389 2010-02-23 12:57:26Z mikehh $
+# $Id: vivify.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 
@@ -28,7 +28,6 @@ Tests Parrot's experimental vivify opcode.
 .end
 
 .sub 'test_vivify_keyed_int'
-    diag( 'test_vivify_keyed_int' )
     $P0    = new [ 'Hash' ]
     $P1    = box 111
     $P0[1] = $P1
@@ -56,7 +55,6 @@ Tests Parrot's experimental vivify opcode.
 .end
 
 .sub 'test_vivify_keyed_str'
-    diag( 'test_vivify_keyed_str' )
     $P0          = new [ 'Hash' ]
     $P1          = box 111
     $P0['one']   = $P1
@@ -84,7 +82,6 @@ Tests Parrot's experimental vivify opcode.
 .end
 
 .sub 'test_vivify_keyed_pmc'
-    diag( 'test_vivify_keyed_pmc' )
     $P0          = new [ 'Hash' ]
     $P1          = box 111
 

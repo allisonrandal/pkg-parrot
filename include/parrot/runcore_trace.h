@@ -1,7 +1,7 @@
 /* runcore_trace.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: runcore_trace.h 45619 2010-04-12 22:44:02Z plobsing $
+ *     $Id: runcore_trace.h 47917 2010-06-29 23:18:38Z jkeenan $
  *  Overview:
  *     Tracing runcore.
  *  Data Structure and Algorithms:
@@ -17,10 +17,6 @@
 
 /* HEADERIZER BEGIN: src/runcore/trace.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
-
-PARROT_CANNOT_RETURN_NULL
-Interp * debugger_or_interp(PARROT_INTERP)
-        __attribute__nonnull__(1);
 
 int trace_key_dump(PARROT_INTERP, ARGIN(PMC *key))
         __attribute__nonnull__(1)
@@ -44,8 +40,6 @@ void trace_op_dump(PARROT_INTERP,
 void trace_pmc_dump(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_debugger_or_interp __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_trace_key_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(key))

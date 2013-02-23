@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2007, Parrot Foundation.
-# $Id: exporter.t 44445 2010-02-24 03:08:37Z jkeenan $
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: exporter.t 47736 2010-06-21 14:28:25Z NotFound $
 
 use strict;
 use warnings;
@@ -27,6 +27,10 @@ pir_output_is( <<'CODE', <<'OUT', 'new' );
 .sub 'test' :main
     $P0 = new ['Exporter']
     say "ok 1 - $P0 = new ['Exporter']"
+
+    # Most uses of export are short-lived, so use a explicit sweep
+    # here to ensure coverage of the mark vtable.
+    sweep 1
 
     $I0 = isa $P0, 'Exporter'
     if $I0 goto ok_2
@@ -172,8 +176,8 @@ pir_output_is( <<'CODE', <<'OUT', 'globals' );
   ok_2:
     say 'ok 2 - globals() with empty array arg sets PMCNULL'
 
-    $P99 = push 'Alex'
-    $P99 = push 'Prince'
+    push $P99, 'Alex'
+    push $P99, 'Prince'
 
     $P0.'globals'($P99)
     $P1 = $P0.'globals'()
@@ -323,8 +327,8 @@ pir_output_is( <<'CODE', <<'OUT', 'import - globals as array' );
 
     src     = get_namespace [ 'Test'; 'More' ]
     globals = new ['ResizableStringArray']
-    globals = push 'ok'
-    globals = push 'plan'
+    push globals, 'ok'
+    push globals, 'plan'
 
     exporter = new ['Exporter']
     exporter.'import'( src :named('source'), globals :named('globals') )
@@ -385,8 +389,8 @@ pir_output_is( <<'CODE', <<'OUT', 'import - globals with destination' );
     src     = get_namespace [ 'Test'; 'More' ]
     dest    = get_namespace ['foo']
     globals = new ['ResizableStringArray']
-    globals = push 'ok'
-    globals = push 'plan'
+    push globals, 'ok'
+    push globals, 'plan'
 
     exporter = new ['Exporter']
     exporter.'import'( src :named('source'), dest :named('destination'), globals :named('globals') )

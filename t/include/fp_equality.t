@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: fp_equality.t 40497 2009-08-12 03:43:02Z dukeleto $
+# $Id: fp_equality.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

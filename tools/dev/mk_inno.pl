@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: mk_inno.pl 42772 2009-11-21 20:21:37Z jkeenan $
+# $Id: mk_inno.pl 47604 2010-06-13 16:46:59Z fperrad $
 
 =head1 TITLE
 
@@ -34,7 +34,7 @@ Source: "$PConfig{icu_dir}\\bin\\icu*.dll"; DestDir: "{app}\\bin"; Flags:
 } if ($PConfig{has_icu});
 
 my %dll = (
-    has_gdbm     => [ 'gdbm3.dll' ],
+    gccversion   => [ 'libgcc_s_sjlj-1.dll' ],
     HAS_GETTEXT  => [ 'libintl3.dll', 'libiconv2.dll' ],
     HAS_PCRE     => [ 'pcre3.dll' ],
     HAS_READLINE => [ 'readline5.dll' ],

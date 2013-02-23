@@ -1,4 +1,4 @@
-# $Id: Node.pir 42156 2009-10-28 13:45:58Z jonathan $
+# $Id: Node.pir 47839 2010-06-25 18:49:10Z chromatic $
 
 =head1 NAME
 
@@ -286,6 +286,18 @@ attribute.
     .tailcall self.'attr'('vivibase', value, has_value)
 .end
 
+=item multitype([type])
+
+Get/set MMD type of Var when used as parameter of Block.
+
+=cut
+
+.sub 'multitype' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('multitype', value, has_value)
+.end
+
 
 =back
 
@@ -394,14 +406,6 @@ PIR opcodes that PAST "knows" about is in F<POST.pir>.
 Get/set whether this node is an lvalue, or treats its first
 child as an lvalue (e.g., for assignment).
 
-=cut
-
-.sub 'lvalue' :method
-    .param pmc value           :optional
-    .param int has_value       :opt_flag
-    .tailcall self.'attr'('lvalue', value, has_value)
-.end
-
 =item inline([STRING code])
 
 Get/set the code to be used for inline PIR when C<pasttype> is
@@ -498,6 +502,21 @@ blocks in Perl6 C<if>, C<while>, and other similar statements).
 .end
 
 
+=item closure([value])
+
+Get/set the closure flag for the block to C<value>.  If set,
+any block reference returned by the node is to a clone of the
+block that has captured the current lexical context.
+
+=cut
+
+.sub 'closure' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('closure', value, has_value)
+.end
+
+
 =item control([value])
 
 Get/set the control exception handler for this block to C<value>.
@@ -553,6 +572,19 @@ can be either a string or an array of strings.
     .param pmc value           :optional
     .param int has_value       :opt_flag
     .tailcall self.'attr'('namespace', value, has_value)
+.end
+
+=item multi([multi])
+
+Get/set the multi signature for this block.  The C<multi> argument
+can be either a string or an array of strings.
+
+=cut
+
+.sub 'multi' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('multi', value, has_value)
 .end
 
 

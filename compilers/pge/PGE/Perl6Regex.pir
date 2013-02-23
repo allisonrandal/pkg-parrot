@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Perl6Regex.pir 42679 2009-11-21 13:21:27Z jkeenan $
+# $Id: Perl6Regex.pir 46060 2010-04-27 13:39:27Z bacek $
 
 =head1 TITLE
 
@@ -1021,7 +1021,7 @@ Extract an enumerated character list.
     ##   by converting to <, <+, <-, or <!
     $S0 = substr op, -1, 1
     if $S0 != '[' goto parse_loop
-    chopn op, 1
+    op = chopn op, 1
     goto enum
 
   parse_loop:

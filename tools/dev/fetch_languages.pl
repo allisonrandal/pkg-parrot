@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: fetch_languages.pl 45619 2010-04-12 22:44:02Z plobsing $
+# $Id: fetch_languages.pl 47917 2010-06-29 23:18:38Z jkeenan $
 
 =head1 NAME
 
@@ -48,7 +48,7 @@ my %checkout_cmd = (
 my %update_cmd = (
     SVN => [qw(svn update)],
     GIT => [qw(git pull)],
-    HG  => [qw(hg pull)],
+    HG  => [qw(hg pull --update)],
 );
 
 my @hlls = (
@@ -229,8 +229,8 @@ my @hlls = (
 
     {
         name       => 'pir',
-        scm        => 'SVN',
-        repository => 'https://svn.parrot.org/languages/pir/trunk'
+        scm        => 'GIT',
+        repository => 'http://github.com/bacek/pir.git'
     },
 
     {
@@ -265,8 +265,8 @@ my @hlls = (
 
     {
         name       => 'pynie',
-        scm        => 'SVN',
-        repository => 'http://pynie.googlecode.com/svn/trunk'
+        scm        => 'HG',
+        repository => 'http://bitbucket.org/allison/pynie'
     },
 
     {

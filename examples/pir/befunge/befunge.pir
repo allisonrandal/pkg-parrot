@@ -1,6 +1,9 @@
 # Copyright (C) 2002-2009, Parrot Foundation.
-# $Id: befunge.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: befunge.pir 47327 2010-06-03 08:53:49Z fperrad $
 
+.loadlib 'io_ops'
+
+.include "stdio.pasm"
 .include "debug.pir"
 .include "flow.pir"
 .include "io.pir"
@@ -15,7 +18,8 @@
 
     # disable buffering on stdout
     .local pmc stdout
-    getstdout stdout
+    $P0 = getinterp
+    stdout = $P0.'stdhandle'(.PIO_STDOUT_FILENO)
     stdout.'buffer_type'("unbuffered")
 
     # parsing argv

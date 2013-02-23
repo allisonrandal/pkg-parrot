@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2006-2010, Parrot Foundation.
-# $Id: 03-optable.t 44368 2010-02-23 05:19:04Z mikehh $
+# $Id: 03-optable.t 46007 2010-04-25 11:44:15Z fperrad $
 
 .sub main :main
     .include 'test_more.pir'

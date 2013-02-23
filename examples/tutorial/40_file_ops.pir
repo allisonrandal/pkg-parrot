@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 40_file_ops.pir 40124 2009-07-16 21:36:57Z allison $
+# $Id: 40_file_ops.pir 47051 2010-05-27 08:45:23Z plobsing $
 
 =head1 File Operations
 
@@ -10,16 +10,19 @@ This example demonstrates basic file operations.
 .sub main :main
     .local pmc fileout, filein
 
-    fileout = open '40_file_ops_data.txt', 'w'
-    print fileout, "The quick brown fox jumps over the lazy dog.\n"
-    close fileout
+    fileout = new ['FileHandle']
+    fileout.'open'('40_file_ops_data.txt', 'w')
+    fileout.'print'("The quick brown fox jumps over the lazy dog.\n")
+    fileout.'close'()
 
-    filein = open '40_file_ops_data.txt', 'r'
-    $S0 = readline filein
+    filein = new ['FileHandle']
+    filein.'open'('40_file_ops_data.txt', 'r')
+    $S0 = filein.'readline'()
     say $S0
-    close filein
+    filein.'close'()
 
     # Be nice and remove the temporary file we created.
+    $P0 = loadlib 'os'
     $P1 = new ['OS']
     $P1.'rm'('40_file_ops_data.txt')
 .end

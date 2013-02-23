@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: platform-01.t 45115 2010-03-22 23:24:35Z plobsing $
+# $Id: platform-01.t 47318 2010-06-03 01:36:45Z jkeenan $
 # gen/platform-01.t
 
 use strict;
@@ -42,18 +42,17 @@ my $step = test_step_constructor_and_description($conf);
 my $platform_orig = $conf->data->get('osname');
 my $archname_orig = $conf->data->get('archname');
 $conf->data->set( archname => 'foo-bar' );
-my $verbose = 0;
 
 ########## _get_generated() ##########
 
 my $TEMP_generated_orig = $conf->data->get('TEMP_generated');
 {
-    $verbose = 1;
+    $conf->options->set(verbose => 1);
     my ($stdout, $stderr, $rv);
     my $expected = q{foo};
     $conf->data->set( TEMP_generated => $expected );
     capture(
-        sub { $rv = $step->_get_generated( $conf, $verbose ) },
+        sub { $rv = $step->_get_generated( $conf ) },
         \$stdout,
         \$stderr,
     );
@@ -61,8 +60,8 @@ my $TEMP_generated_orig = $conf->data->get('TEMP_generated');
     like( $stdout, qr/\($expected\)/, "Got expected verbose output");
 }
 $conf->data->set( TEMP_generated => undef );
-$verbose = 0;
-is( $step->_get_generated( $conf, $verbose ), q{},
+$conf->options->set(verbose => 0);
+is( $step->_get_generated( $conf ), q{},
     "Got expected generated");
 
 # re-set to original values

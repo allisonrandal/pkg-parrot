@@ -1,6 +1,6 @@
-#! parrot
+#!./parrot
 # Copyright (C) 2007-2010, Parrot Foundation.
-# $Id: names.t 44342 2010-02-23 01:11:38Z mikehh $
+# $Id: names.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 

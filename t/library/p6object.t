@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: p6object.t 45665 2010-04-14 12:12:08Z allison $
+# $Id: p6object.t 46410 2010-05-08 13:03:42Z jkeenan $
 
 =head1 NAME
 
@@ -138,7 +138,7 @@ Testing Perl 6 objects.
     $I0 = $P0.'can'(rpaobj, 'foo')
     ok($I0, '< ResizablePMCArray_obj.^can("foo") >')
     $I0 = $P0.'isa'(rpaobj, listproto)
-    todo($I0, '< ResizablePMCArray_obj.^isa(List) >', 'UNIMPL?')
+    todo($I0, '< ResizablePMCArray_obj.^isa(List) >', 'unimplemented: TT #1617')
 
     ##  create class with a different proto name
     .local pmc myobjectproto

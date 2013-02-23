@@ -1,11 +1,11 @@
 #!./parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: recursive.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id: recursive.pir 45949 2010-04-24 01:14:23Z cotto $
 #
 # Ack by Leopold Toetsch
 # Fib and Tak by Joshua Isom
 # modified default value to n=3. Karl Forner
-# ./parrot -Oc -R cgp-jit recursive.pir N
+# ./parrot -Oc recursive.pir N
 
 .sub main :main
 	.param pmc argv

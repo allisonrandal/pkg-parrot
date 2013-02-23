@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: objects.t 44367 2010-02-23 05:07:43Z mikehh $
+# $Id: objects.t 46484 2010-05-11 03:25:26Z plobsing $
 
 .sub main :main
     .include 'test_more.pir'
@@ -28,11 +28,22 @@
 .namespace ["Foo"]
 .namespace [ ]
 .namespace []
+.namespace [unicode:"»ö«"; ascii:"perl6"]
 
 .sub test
     $I0 = 42
 .end
 CODE
+    # TODO (waiting on TT #1610)
+#     throws_substring( '.namespace [$P0]', syn_err, <<'DESC', todo => 'TT #1610' )
+# invalid namespace declarations (register)
+# DESC
+#     throws_substring( '.namespace [1]',   syn_err, <<'DESC', todo => 'TT #1610' )
+# invalid namespace declarations (integer)
+# DESC
+#     throws_substring( '.namespace [1.2]', syn_err, <<'DESC', todo => 'TT #1610' )
+# invalid namespace declarations (float)
+# DESC
 .end
 
 ##############################

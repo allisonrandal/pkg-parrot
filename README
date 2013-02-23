@@ -1,9 +1,9 @@
-This is Parrot, version 2.3.0
+This is Parrot, version 2.6.0
 ------------------------------
 
 Parrot is Copyright (C) 2001-2010, Parrot Foundation.
 
-$Id: README 45819 2010-04-20 09:48:04Z gerd $
+$Id: README 48146 2010-07-21 00:49:08Z coke $
 
 LICENSE INFORMATION
 -------------------
@@ -79,7 +79,7 @@ You can install Parrot with:
 By default, this installs in /usr/local, with the Parrot executable in
 /usr/local/bin. If you want to install Parrot into another location use:
 
-    perl Configure.pl --prefix=/Users/foo/parrot-0.7.0
+    perl Configure.pl --prefix=/home/joe/bird
     make install
 
 But please note that dynamic libs will not be found for non-standard
@@ -91,14 +91,6 @@ docs/submissions.pod.  These documents are in POD format. You can view these
 files with the command:
 
     perldoc -F docs/intro.pod
-
-NOTES
------
-
-On some older computers with little RAM, the computed-goto dispatch core
-(ops/core_ops_cg.c) may take a while to compile or may fail to compile at all.
-You can pass a flag to Configure.pl (--cgoto=0) to disable the computed-goto
-core, at a slight cost in runtime speed.
 
 CHANGES
 -------

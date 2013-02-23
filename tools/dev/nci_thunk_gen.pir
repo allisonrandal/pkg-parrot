@@ -1,5 +1,5 @@
 # Copyright (C) 2010, Parrot Foundation.
-# $Id: nci_thunk_gen.pir 45617 2010-04-12 22:05:52Z plobsing $
+# $Id: nci_thunk_gen.pir 47887 2010-06-27 03:50:08Z petdance $
 
 =head1 NAME
 
@@ -45,8 +45,11 @@ F<docs/pdds/pdd16_native_call.pod>.
     sigs = 'read_sigs'()
 
     $S0 = 'read_from_opts'('output')
-    $P0 = open $S0, 'w'
-    setstdout $P0
+    $P0 = new ['FileHandle']
+    $P0.'open'($S0, 'w')
+    $P1 = getinterp
+    .include 'stdio.pasm'
+    $P1.'stdhandle'(.PIO_STDOUT_FILENO, $P0)
 
     if targ == 'head'          goto get_targ
     if targ == 'thunks'        goto get_targ
@@ -323,7 +326,7 @@ USAGE
 /* %s
  *  Copyright (C) 2010, Parrot Foundation.
  *  SVN Info
- *     $Id: nci_thunk_gen.pir 45617 2010-04-12 22:05:52Z plobsing $
+ *     $Id: nci_thunk_gen.pir 47887 2010-06-27 03:50:08Z petdance $
  *  Overview:
  *     Native Call Interface routines. The code needed to build a
  *     parrot to C call frame is in here
@@ -636,7 +639,7 @@ TEMPLATE
     typedef %s(* func_t)(%s);
     func_t fn_pointer;
     void *orig_func;
-    PMC *       ctx         = CURRENT_CONTEXT(interp);
+    PMC * const ctx         = CURRENT_CONTEXT(interp);
     PMC * const call_object = Parrot_pcc_get_signature(interp, ctx);
     PMC *       ret_object  = PMCNULL;
     %s
@@ -708,7 +711,9 @@ TEMPLATE
 
 .sub 'read_sigs'
     .local pmc stdin, seen, sigs
-    stdin = getstdin
+    $P0 = getinterp
+    .include 'stdio.pasm'
+    stdin = $P0.'stdhandle'(.PIO_STDIN_FILENO)
     seen  = new ['Hash']
     sigs  = new ['ResizablePMCArray']
 
@@ -735,7 +740,10 @@ TEMPLATE
                 $S0 = 'sprintf'(<<'ERROR', full_sig, lineno, $I0)
 Ignored signature '%s' on line %d (previously seen on line %d)
 ERROR
-                printerr $S0
+                $P0 = getinterp
+                .include 'stdio.pasm'
+                $P1 = $P0.'stdhandle'(.PIO_STDERR_FILENO)
+                $P1.'print'($S0)
             end_dup_warn:
             goto read_loop
         unseen:
@@ -758,7 +766,7 @@ ERROR
     .param pmc fh
 
     .local string line
-    line = readline fh
+    line = fh.'readline'()
 
     # handle comments
     $I0 = index line, '#'
@@ -776,7 +784,7 @@ ERROR
         inner_whitespace_loop:
             $I0 = index line, $S0
             if $I0 < 0 goto end_inner_whitespace_loop
-            substr line, $I0, 1, ' '
+            line = replace line, $I0, 1, ' '
             goto inner_whitespace_loop
         end_inner_whitespace_loop:
 
@@ -787,14 +795,16 @@ ERROR
     multispace_loop:
         $I0 = index line, '  '
         if $I0 < 0 goto end_multispace_loop
-        $S0 = substr line, $I0, 2, ' '
+        $S0  = substr line, $I0, 2
+        line = replace line, $I0, 2, ' '
         goto multispace_loop
     end_multispace_loop:
 
     # remove leading whitespace
     $S0 = substr line, 0, 1
     unless $S0 == ' ' goto end_leading
-        $S0 = substr line, 0, 1, ''
+        $S0  = substr line, 0, 1
+        line = replace line, 0, 1, ' '
     end_leading:
 
     # handle empty (or whitespace only) lines
@@ -804,7 +814,8 @@ ERROR
     # remove trailing whitespace
     $S0 = substr line, -1, 1
     unless $S0 == ' ' goto end_trailing
-        $S0 = substr line, -1, 1, ''
+        $S0  = substr line, -1, 1
+        line = replace line, -1, 1, ''
     end_trailing:
 
     # read the signature
@@ -848,7 +859,7 @@ ERROR
            "sig_char": "S",
            "temp_tmpl": "char *t_%i; STRING *ts_%i",
            "fill_params_tmpl": ", &ts_%i",
-           "preamble_tmpl": "t_%i = ts_%i ? Parrot_str_to_cstring(interp, ts_%i) : (char *)NULL;",
+           "preamble_tmpl": "t_%i = STRING_IS_NULL(ts_%i) ? (char *)NULL : Parrot_str_to_cstring(interp, ts_%i);",
            "postamble_tmpl": "if (t_%i) Parrot_str_free_cstring(t_%i);" },
     "v": { "as_proto": "void",
            "return_type": "void *",
@@ -876,7 +887,7 @@ ERROR
            "sig_char": "S",
            "fill_params_tmpl": ", &ts_%i",
            "temp_tmpl": "char *t_%i; STRING *ts_%i",
-           "preamble_tmpl": "t_%i = ts_%i ? Parrot_str_to_cstring(interp, ts_%i) : (char *) NULL;",
+           "preamble_tmpl": "t_%i = STRING_IS_NULL(ts_%i) ? (char *) NULL : Parrot_str_to_cstring(interp, ts_%i);",
            "call_param_tmpl": "&t_%i",
            "postamble_tmpl": "if (t_%i) Parrot_str_free_cstring(t_%i);" },
     "2": { "as_proto": "short *",
@@ -918,7 +929,7 @@ JSON
 
     # decode table
     .local pmc compiler
-    load_bytecode 'data_json.pbc'
+    load_language 'data_json'
     compiler = compreg 'data_json'
 
     .local pmc table
@@ -1111,7 +1122,7 @@ JSON
         $S1 = substr file, $I1, $I0
         unless $S1 == $S0 goto extn_loop
         extn = $S1
-        substr file, $I1, $I0, ''
+        file = replace file, $I1, $I0, ''
     end_extn_loop:
 
     .return (dir, file, extn)

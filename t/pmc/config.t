@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: config.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id: config.t 46060 2010-04-27 13:39:27Z bacek $
 
 use strict;
 use warnings;
@@ -49,7 +49,7 @@ pir_output_is( <<'CODE', ($^O eq 'MSWin32' ? lc(cwd) : cwd), "prefix" );
     cfg = _config()
     $S1 = cfg['osname']
     if $S1 != 'MSWin32' goto sayit
-    downcase $S0
+    $S0 = downcase $S0
   sayit:
     print $S0
 .end

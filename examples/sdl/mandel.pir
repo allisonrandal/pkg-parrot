@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: mandel.pir 44547 2010-02-28 06:02:31Z coke $
+# $Id: mandel.pir 45949 2010-04-24 01:14:23Z cotto $
 
 =head1 TITLE
 
@@ -556,9 +556,7 @@ Plain runcore and unoptimized parrot:
 Optimized build
 
   [2] plain  runcore 64 bit                  3.0s
-  [2] -R cgp runcore 64 bit                  1.5s
   [2] plain  runcore 32 bit                  3.6s
-  [2] -R cgp runcore 32 bit                  1.6s
   [1] -R jit                                 1.1s
   [2] -R jit                                 0.8s
   [3] -R jit                                 0.5s

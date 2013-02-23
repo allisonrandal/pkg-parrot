@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: hints-01.t 42575 2009-11-19 01:00:42Z jkeenan $
+# $Id: hints-01.t 48028 2010-07-07 12:45:50Z Util $
 # init/hints-01.t
 
 use strict;
@@ -156,7 +156,7 @@ $step = test_step_constructor_and_description($conf);
         sub { $ret = $step->runstep($conf); },
         \$stdout,
         \$stderr,
-    );;
+    );
     like(
         $stdout,
         qr/No \Q$hints_file\E found/s,

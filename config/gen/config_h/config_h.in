@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2009, Parrot Foundation.
- * $Id: config_h.in 43490 2010-01-20 03:38:39Z jkeenan $
+ * $Id: config_h.in 45949 2010-04-24 01:14:23Z cotto $
  */
 
 /* config.h
@@ -152,10 +152,6 @@ typedef void DPOINTER;
 /* Oplib and dynamic ops related. */
 #define PARROT_CORE_OPLIB_NAME "core"
 #define PARROT_CORE_OPLIB_INIT Parrot_DynOp_core_@MAJOR@_@MINOR@_@PATCH@
-#define PARROT_CORE_PREDEREF_OPLIB_INIT Parrot_DynOp_core_prederef_@MAJOR@_@MINOR@_@PATCH@
-#define PARROT_CORE_SWITCH_OPLIB_INIT Parrot_DynOp_core_switch_@MAJOR@_@MINOR@_@PATCH@
-#define PARROT_CORE_CG_OPLIB_INIT Parrot_DynOp_core_cg_@MAJOR@_@MINOR@_@PATCH@
-#define PARROT_CORE_CGP_OPLIB_INIT Parrot_DynOp_core_cgp_@MAJOR@_@MINOR@_@PATCH@
 
 /* ICU. */
 #define PARROT_HAS_ICU @has_icu@

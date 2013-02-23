@@ -1,11 +1,11 @@
 #!perl
 # Copyright (C) 2005-2010, Parrot Foundation.
-# $Id: optc.t 45108 2010-03-22 20:53:12Z chromatic $
+# $Id: optc.t 46424 2010-05-09 01:25:45Z plobsing $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
-use Parrot::Test tests => 43;
+use Parrot::Test tests => 42;
 use Test::More;
 
 # these tests are run with -Oc by TestCompiler and show
@@ -251,20 +251,6 @@ foo:
   print P0
   set_returns
   returncc/
-OUT
-
-pir_2_pasm_like( <<'CODE', <<'OUT', "tailcall 1", todo => "TT #1281" );
-.sub _main
-    foo(1, 2)
-.end
-.sub foo
-    .param int i
-    .param int j
-    .tailcall foo(I2, I3)
-.end
-CODE
-/ set I\d, I2
-  set I\d, I3/
 OUT
 
 pir_2_pasm_like( <<'CODE', <<'OUT', "tailcall 2" );

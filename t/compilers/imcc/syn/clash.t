@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: clash.t 42722 2009-11-21 14:48:37Z jkeenan $
+# $Id: clash.t 47174 2010-05-30 22:39:53Z plobsing $
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use lib qw( . lib ../lib ../../lib );
 
 use Test::More;
 use Parrot::Config;
-use Parrot::Test tests => 17;
+use Parrot::Test tests => 15;
 
 pir_output_is( <<'CODE', <<'OUT', "if/unless" );
 .sub test :main
@@ -210,38 +210,6 @@ CODE
 ok
 OUTPUT
 
-pir_output_is( <<'CODE', <<'OUTPUT', "eq_num => eq" );
-.sub test :main
-    .local int i
-    .local int j
-    i = 1
-    j = 1
-    eq_num i, j, ok1
-    print "not "
-ok1:
-    print "ok 1\n"
-    end
-.end
-CODE
-ok 1
-OUTPUT
-
-pir_output_is( <<'CODE', <<'OUTPUT', "eq_num => eq mixed => eq_n_n" );
-.sub test :main
-    .local int i
-    .local num j
-    i = 1
-    j = 1.0
-    eq_num j, i, ok1
-    print "not "
-ok1:
-    print "ok 1\n"
-    end
-.end
-CODE
-ok 1
-OUTPUT
-
 pir_error_output_like( <<'CODE', <<'OUT', "undefined ident" );
 .sub test :main
     print no_such
@@ -261,7 +229,7 @@ CODE
 ok
 OUT
 
-pir_error_output_like( <<'CODE', <<'OUT', 'lexical redeclared in sub', todo => 'TT #1073' );
+pir_error_output_like( <<'CODE', <<'OUT', 'lexical redeclared in sub');
 .sub 'main' :main
     .lex 'foo', $P0
     $P1 = box 'ok 1'
@@ -282,7 +250,7 @@ pir_error_output_like( <<'CODE', <<'OUT', 'lexical redeclared in sub', todo => '
     store_lex 'foo', $P7
 .end
 CODE
-/Lexical 'foo' already declared/
+/Multiple declarations of lexical 'foo'/
 OUT
 
 # Local Variables:

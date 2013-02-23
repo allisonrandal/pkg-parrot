@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: global_setup.c 45448 2010-04-08 14:44:30Z petdance $
+$Id: global_setup.c 46620 2010-05-15 01:17:03Z plobsing $
 
 =head1 NAME
 
@@ -194,7 +194,9 @@ init_world(PARROT_INTERP)
     pmc = Parrot_pmc_new(interp, enum_class_Hash);
     VTABLE_set_pmc_keyed_int(interp, iglobals, IGLOBALS_NCI_FUNCS, pmc);
     Parrot_nci_load_core_thunks(interp);
+#if PARROT_HAS_EXTRA_NCI_THUNKS
     Parrot_nci_load_extra_thunks(interp);
+#endif
 }
 
 /*

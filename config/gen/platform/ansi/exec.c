@@ -1,6 +1,6 @@
 /*
- * $Id: exec.c 42964 2009-12-09 21:32:53Z darbelo $
- * Copyright (C) 2004-2008, Parrot Foundation.
+ * $Id: exec.c 47917 2010-06-29 23:18:38Z jkeenan $
+ * Copyright (C) 2004-2010, Parrot Foundation.
  */
 
 /*
@@ -25,7 +25,7 @@ Functions for dealing with child processes and Execs. (Currently not implemented
 
 =item C<INTVAL Parrot_Run_OS_Command(PARROT_INTERP, STRING *command)>
 
-Spawn a subprocess
+B<Not yet implemented on this platform.> Spawn a subprocess.
 
 =cut
 
@@ -42,6 +42,8 @@ Parrot_Run_OS_Command(PARROT_INTERP, STRING *command)
 /*
 
 =item C<INTVAL Parrot_Run_OS_Command_Argv(PARROT_INTERP, PMC *cmdargs)>
+
+B<Not yet implemented on this platform.>
 
 =cut
 

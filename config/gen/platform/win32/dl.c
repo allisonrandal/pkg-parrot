@@ -1,5 +1,5 @@
 /*
- * $Id: dl.c 45089 2010-03-21 23:23:38Z plobsing $
+ * $Id: dl.c 47081 2010-05-28 02:37:15Z jkeenan $
  * Copyright (C) 2004-2008, Parrot Foundation.
  */
 
@@ -42,7 +42,7 @@ Parrot_dlopen(const char *filename, SHIM(Parrot_dlopen_flags flags))
 
 =item C<const char * Parrot_dlerror(void)>
 
-System-dependant error code that indicates failure in opening a DL.
+System-dependent error code that indicates failure in opening a DL.
 
 =cut
 

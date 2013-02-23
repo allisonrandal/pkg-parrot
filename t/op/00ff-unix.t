@@ -1,6 +1,6 @@
-#!parrot
+#!./parrot
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id: 00ff-unix.t 44385 2010-02-23 12:09:51Z mikehh $
+# $Id: 00ff-unix.t 46007 2010-04-25 11:44:15Z fperrad $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ Tests file formats.
 .sub test_fileformat_unix
     lives_ok( <<'CODE', 'fileformat unix' )
 .sub main
-    print "testing\n"
+    print "# testing\n"
 .end
 CODE
 .end

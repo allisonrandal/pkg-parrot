@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Exp.pir 45672 2010-04-14 19:19:34Z allison $
+# $Id: Exp.pir 46062 2010-04-27 13:50:11Z bacek $
 
 =head1 TITLE
 
@@ -362,7 +362,7 @@ tree as a PIR code object that can be compiled.
     args['I'] = ''
     $I0 = self['ignorecase']
     if $I0 == 0 goto ignorecase_end
-    args['I'] = 'downcase $S0'
+    args['I'] = '$S0 = downcase $S0'
     literal = downcase literal
   ignorecase_end:
 
@@ -718,7 +718,7 @@ tree as a PIR code object that can be compiled.
 
 .namespace [ 'PGE';'Exp';'CGroup' ]
 
-.sub 'pir' :method
+.sub 'pir' :method :nsentry
     .param pmc code
     .param string label
     .param string next
