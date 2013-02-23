@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: debuginfo.t 42752 2009-11-21 18:07:29Z jkeenan $
 
 use strict;
 use warnings;

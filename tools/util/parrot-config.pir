@@ -1,5 +1,5 @@
 #!/usr/bin/env parrot
-# $Id$
+# $Id: parrot-config.pir 37751 2009-03-26 20:01:38Z coke $
 
 =head1 NAME
 

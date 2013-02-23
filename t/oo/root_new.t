@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2007-2010, Parrot Foundation.
+# $Id: root_new.t 45619 2010-04-12 22:44:02Z plobsing $
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ via the C<root_new> opcode.
 #
 .sub _test_instance
     .param pmc obj
-    .param string in_str 
+    .param string in_str
 
     # Set up local variables
     .local pmc key_pmc
@@ -92,4 +92,10 @@ via the C<root_new> opcode.
     $P0 = root_new ['parrot';'Integer']
     _test_instance($P0, 'Integer')
 .end
-  
+
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

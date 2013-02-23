@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: Actions.pir 41901 2009-10-17 15:09:24Z pmichaud $
 
 .sub '__onload' :init :load
     $P0 = get_hll_global 'P6metaclass'

@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: string.t 45619 2010-04-12 22:44:02Z plobsing $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ Tests the C<String> PMC.
 .sub main :main
     .include 'test_more.pir'
 
-    plan(171)
+    plan(173)
 
     set_or_get_strings()
     setting_integers()
@@ -102,6 +102,12 @@ Tests the C<String> PMC.
         set $P0, "0xFFFFFF"
         set $S0, $P0
         is( $S0, "0xFFFFFF", 'String obj set with literal hex string' )
+
+        null $S0
+        set $P0, $S0
+        set $S1, $P0
+        isnull $I0, $S1
+        ok( $I0, 'String obj is null-in null-out' )
 .end
 
 .sub setting_integers
@@ -230,7 +236,7 @@ Tests the C<String> PMC.
     new $P1, ['Float']
     set $P1, 6.5
     repeat $P2, $P0, $P1
-    is( $P2, 'yyyyyy', 'Float arg to repeat' ) 
+    is( $P2, 'yyyyyy', 'Float arg to repeat' )
 
     set $P0, "z"
     new $P1, ['String']
@@ -256,7 +262,7 @@ Tests the C<String> PMC.
     new $P1, ['Float']
     set $P1, 6.5
     repeat $P3, $P0, $P1
-    is( $P3, 'yyyyyy', 'Float arg to repeat' ) 
+    is( $P3, 'yyyyyy', 'Float arg to repeat' )
 
     set $P0, "z"
     new $P1, ['String']
@@ -1026,16 +1032,17 @@ check:
     # Get
     $S0 = s[0]
     is($S0, 'B', 'Get string by index')
-    
+
     $I0 = s[1]
     $I1 = ord 'A'
     is($I0, $I1, 'Get integer by index')
-    
+
     $P0 = s[2]
     is($P0, 'R', 'Get PMC by index')
 
     # Set
     s = new ['String']
+    s = ''
 
     $S0 = 'f'
     s[0] = $S0
@@ -1049,11 +1056,20 @@ check:
     $P0 = 'o'
     s[2] = $P0
     is(s, 'foo', 'Set PMC keyed')
+
+    push_eh null_replace
+    s = new ['String']
+    s[0] = 'f'
+    nok('Replace on null string throws')
+    goto done_null_replace
+
+  null_replace:
+    ok(1, 'Replace on null string throws')
+  done_null_replace:
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

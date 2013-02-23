@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id$
+$Id: binary.c 41533 2009-09-27 17:30:32Z NotFound $
 
 =head1 NAME
 

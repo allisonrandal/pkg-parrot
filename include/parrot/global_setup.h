@@ -1,7 +1,7 @@
 /* global_setup.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: global_setup.h 45616 2010-04-12 21:56:53Z petdance $
  *  Overview:
  *      Contains declarations of global data and the functions
  *      that initialize that data.
@@ -16,6 +16,13 @@
 
 #include "parrot/config.h"
 #include "parrot/interpreter.h"
+
+void Parrot_register_core_pmcs(PARROT_INTERP, ARGIN(PMC *registry))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+void Parrot_initialize_core_pmcs(PARROT_INTERP, int pass)
+        __attribute__nonnull__(1);
 
 /* HEADERIZER BEGIN: src/global_setup.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */

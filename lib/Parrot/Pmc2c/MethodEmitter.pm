@@ -1,6 +1,6 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
 
-# $Id$
+# $Id: MethodEmitter.pm 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 
@@ -115,58 +115,6 @@ static $decs $ret${newl}Parrot_${pmcname}_$meth(PARROT_INTERP, $pmcarg$args)$sem
 EOC
 }
 
-=item C<proto($type,$parameters)>
-
-Determines the prototype (argument signature) for a method body
-(see F<src/call_list>).
-
-=cut
-
-my %calltype = (
-    'char'     => 'c',
-    'short'    => 's',
-    'char'     => 'c',
-    'short'    => 's',
-    'int'      => 'i',
-    'INTVAL'   => 'I',
-    'float'    => 'f',
-    'FLOATVAL' => 'N',
-    'double'   => 'd',
-    'STRING*'  => 'S',
-    'STRING *' => 'S',
-    'char*'    => 't',
-    'char *'   => 't',
-    'PMC*'     => 'P',
-    'PMC *'    => 'P',
-    'short*'   => '2',
-    'short *'  => '2',
-    'int*'     => '3',
-    'int *'    => '3',
-    'long*'    => '4',
-    'long *'   => '4',
-    'void'     => 'v',
-    'void*'    => 'b',
-    'void *'   => 'b',
-    'void**'   => 'B',
-    'void **'  => 'B',
-);
-
-sub proto {
-    my ( $type, $parameters ) = @_;
-
-    # reduce to a comma separated set of types
-    $parameters =~ s/\w+(,|$)/,/g;
-    $parameters =~ s/ //g;
-
-    # type method(interp, self, parameters...)
-    my $ret = $calltype{ $type or "void" };
-    $ret .= "JO" . join( '',
-        map { $calltype{$_} or die "Unknown signature type '$_'" }
-        split( /,/, $parameters ) );
-
-    return $ret;
-}
-
 =item C<rewrite_nci_method($self, $pmc )>
 
 Rewrites the method body performing the various macro substitutions for
@@ -215,7 +163,7 @@ sub rewrite_nci_method {
 =item C<rewrite_vtable_method($self, $pmc, $super, $super_table)>
 
 Rewrites the method body performing the various macro substitutions for
-vtable method bodies (see F<tools/build/pmc2c.pl>).
+vtable function bodies (see F<tools/build/pmc2c.pl>).
 
 =cut
 
@@ -232,7 +180,7 @@ sub rewrite_vtable_method {
     # Some MMD variants don't have a super mapping.
     if ($super) {
         my $supertype = "enum_class_$super";
-        die "$pmcname defines unknown vtable method '$name'\n" unless defined $super_table->{$name};
+        die "$pmcname defines unknown vtable function '$name'\n" unless defined $super_table->{$name};
         my $supermethod = "Parrot_" . $super_table->{$name} . "_$name";
 
         # Rewrite OtherClass.SUPER(args...)

@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: stringiterator.t 44382 2010-02-23 11:41:28Z mikehh $
 
 =head1 NAME
 
@@ -97,8 +97,7 @@ Tests the C<StringIterator> PMC. Iterate over string in both directions.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

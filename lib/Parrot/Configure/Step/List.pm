@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: List.pm 44649 2010-03-05 16:20:00Z tene $
 package Parrot::Configure::Step::List;
 use strict;
 use warnings;
@@ -23,6 +23,8 @@ my @steps = qw(
     auto::msvc
     auto::attributes
     auto::warnings
+    auto::arch
+    auto::cpu
     init::optimize
     inter::shlibs
     inter::libparrot
@@ -31,17 +33,14 @@ my @steps = qw(
     inter::types
     auto::ops
     auto::pmc
-    auto::alignptrs
     auto::headers
     auto::sizes
     auto::byteorder
     auto::va_ptr
     auto::format
     auto::isreg
-    auto::arch
     auto::jit
     auto::frames
-    auto::cpu
     auto::cgoto
     auto::inline
     auto::gc
@@ -67,9 +66,7 @@ my @steps = qw(
     gen::config_h
     gen::core_pmcs
     gen::crypto
-    gen::parrot_include
     gen::opengl
-    gen::call_list
     gen::makefiles
     gen::platform
     gen::config_pm

@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2009-2010, Parrot Foundation.
+# $Id: packfilesegment.t 44381 2010-02-23 11:32:28Z mikehh $
 
 =head1 NAME
 
@@ -26,8 +26,7 @@ Tests the PackfileSegment PMC.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:

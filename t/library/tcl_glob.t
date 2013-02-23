@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: tcl_glob.t 44383 2010-02-23 11:56:15Z mikehh $
 
 =head1 NAME
 
@@ -106,3 +106,9 @@ load_failed:
 
    .return(boolean)
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

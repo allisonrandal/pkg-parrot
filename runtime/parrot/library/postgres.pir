@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: postgres.pir 38369 2009-04-26 12:57:09Z fperrad $
 
 .namespace ['Pg']
 .sub __postgres_init :load

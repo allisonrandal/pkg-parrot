@@ -4,7 +4,7 @@ Subs - Parrot Subroutines
 
 =head1 VERSION
 
-$Revision$
+$Revision: 43438 $
 
 =head1 ABSTRACT
 

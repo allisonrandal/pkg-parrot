@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: iterator.t 44446 2010-02-24 03:14:57Z jkeenan $
 
 use strict;
 use warnings;
@@ -23,7 +23,7 @@ Tests the C<Iterator> PMC.
 
 =cut
 
-# XXX Split this test into aggregate specific one.
+# TT #1478: Split this test into aggregate specific one.
 
 pasm_output_is( <<'CODE', <<'OUTPUT', "new iter" );
     new P2, ['ResizablePMCArray']

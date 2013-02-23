@@ -1,6 +1,6 @@
 #! perl
 
-# $Id$
+# $Id: harness 27031 2008-04-19 12:17:01Z bernhard $
 
 use strict;
 use warnings;

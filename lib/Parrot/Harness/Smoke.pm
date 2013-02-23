@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: Smoke.pm 43400 2010-01-06 21:55:09Z mikehh $
 
 =head1 NAME
 

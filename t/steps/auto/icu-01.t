@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: icu-01.t 39967 2009-07-10 00:16:41Z jkeenan $
 # auto/icu-01.t
 
 use strict;

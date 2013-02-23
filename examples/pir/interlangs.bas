@@ -1,5 +1,5 @@
 1 REM Copyright (C) 2009, Parrot Foundation.
-2 REM $Id$
+2 REM $Id: interlangs.bas 37097 2009-03-03 16:56:53Z NotFound $
 3 REM
 110 REM +--------------------------------------------------------------------+
 120 REM + interlangs.bas                                                     +

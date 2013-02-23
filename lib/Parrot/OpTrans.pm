@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id$
+# $Id: OpTrans.pm 44578 2010-03-02 04:38:37Z cotto $
 
 =head1 NAME
 
@@ -74,22 +74,6 @@ variable names. This default implementation returns an empty string.
 
 sub suffix {
     return '';
-}
-
-=item C<defines()>
-
-Implemented in subclasses to return the C C<#define> macros required.
-
-=item C<opsarraytype()>
-
-Returns the type for the array of opcodes. By default here it's an array
-C<opcode_t>, but the prederef runops core uses an array of C<void*> to
-do its clever tricks.
-
-=cut
-
-sub opsarraytype {
-    return 'opcode_t';
 }
 
 =item C<core_type()>

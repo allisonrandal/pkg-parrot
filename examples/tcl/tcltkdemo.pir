@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: tcltkdemo.pir 39338 2009-06-02 16:59:27Z NotFound $
 # demonstrate Tcl/Tk GUI using NCI
 
 .sub try :main

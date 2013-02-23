@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2009, Parrot Foundation.
-$Id$
+$Id: iso-8859-1.c 45425 2010-04-07 13:38:10Z bacek $
 
 =head1 NAME
 

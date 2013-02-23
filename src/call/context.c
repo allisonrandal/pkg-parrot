@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2009, Parrot Foundation.
-$Id$
+$Id: context.c 45108 2010-03-22 20:53:12Z chromatic $
 
 =head1 NAME
 
@@ -306,7 +306,7 @@ init_context(PARROT_INTERP, ARGMOD(PMC *pmcctx), ARGIN_NULLOK(PMC *pmcold))
                            ? NULL
                            : get_context_struct_fast(interp, pmcold);
 
-    PARROT_ASSERT(!PMC_IS_NULL(pmcctx) || !"Can't initialise Null CallContext");
+    PARROT_ASSERT_MSG(!PMC_IS_NULL(pmcctx), "Can't initialise Null CallContext");
 
     /*
      * FIXME Invoking corotine shouldn't initialise context. So just
@@ -315,8 +315,6 @@ init_context(PARROT_INTERP, ARGMOD(PMC *pmcctx), ARGIN_NULLOK(PMC *pmcold))
     if (!PMC_IS_NULL(ctx->current_sub))
         return;
 
-    ctx->current_results   = NULL;
-    ctx->results_signature = NULL;
     ctx->lex_pad           = PMCNULL;
     ctx->outer_ctx         = NULL;
     ctx->current_cont      = NULL;
@@ -567,7 +565,7 @@ Parrot_alloc_context(PARROT_INTERP, ARGIN(const UINTVAL *number_regs_used),
     ARGIN_NULLOK(PMC *old))
 {
     ASSERT_ARGS(Parrot_alloc_context)
-    PMC            *pmcctx = pmc_new(interp, enum_class_CallContext);
+    PMC            *pmcctx = Parrot_pmc_new(interp, enum_class_CallContext);
 
     allocate_registers(interp, pmcctx, number_regs_used);
     init_context(interp, pmcctx, old);
@@ -593,7 +591,7 @@ PMC *
 Parrot_pcc_allocate_empty_context(PARROT_INTERP, ARGIN_NULLOK(PMC *old))
 {
     ASSERT_ARGS(Parrot_pcc_allocate_empty_context)
-    PMC            *pmcctx = pmc_new(interp, enum_class_CallContext);
+    PMC            *pmcctx = Parrot_pmc_new(interp, enum_class_CallContext);
 
     init_context(interp, pmcctx, old);
 

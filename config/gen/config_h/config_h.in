@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2009, Parrot Foundation.
- * $Id$
+ * $Id: config_h.in 43490 2010-01-20 03:38:39Z jkeenan $
  */
 
 /* config.h
@@ -94,7 +94,6 @@ struct PackFile;      typedef struct PackFile * Parrot_PackFile;
 #define PARROT_OS_NAME          "@jitosname@"
 #define PARROT_BYTEORDER        0x@byteorder@
 #define PARROT_BIGENDIAN        @bigendian@
-#define PARROT_PTR_ALIGNMENT    @ptr_alignment@
 
 #define PARROT_LITTLEENDIAN	!(PARROT_BIGENDIAN)
 

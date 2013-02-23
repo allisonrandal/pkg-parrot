@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2005, Parrot Foundation.
-# $Id$
+# Copyright (C) 2005-2010, Parrot Foundation.
+# $Id: optc.t 45108 2010-03-22 20:53:12Z chromatic $
 
 use strict;
 use warnings;
@@ -242,8 +242,8 @@ CODE
 @pcc_sub_call_\d:
   set_args
   set_p_pc (P\d+), foo
-  get_results
   invokecc \2
+  get_results
   noop
   end
 foo:
@@ -307,22 +307,9 @@ CODE
 i 1 j 3 k 2
 OUT
 
-sub permute (&@) {
-    my $code = shift;
-    my @idx  = 0 .. $#_;
-    while ( $code->( @_[@idx] ) ) {
-        my $p = $#idx;
-        --$p while $idx[ $p - 1 ] > $idx[$p];
-        my $q = $p or return;
-        push @idx, reverse splice @idx, $p;
-        ++$q while $idx[ $p - 1 ] > $idx[$q];
-        @idx[ $p - 1, $q ] = @idx[ $q, $p - 1 ];
-    }
-}
-
 my @array = ( 'i', 'j', 'k' );
 my @b;
-permute { push @b, "@_" } @array;
+my_permute( sub { push @b, "@_" }, @array );
 my $x;
 my $y;
 foreach $x (@b) {
@@ -356,7 +343,7 @@ OUT
 undef @b;
 
 @array = ( 'i', 'j', 'k', 'l' );
-permute { push @b, "@_" } @array;
+my_permute( sub { push @b, "@_" }, @array );
 foreach $x (@b) {
     $x =~ tr/ /,/;
     $y = $x;
@@ -392,7 +379,7 @@ OUT
 undef @b;
 
 @array = ( 'i', 'j' );
-permute { push @b, "@_" } @array;
+my_permute( sub { push @b, "@_" }, @array );
 foreach $x (@b) {
     $x =~ tr/ /,/;
     $y = $x;
@@ -419,10 +406,21 @@ $y
 OUT
 }
 
+sub my_permute {
+    my $code = shift;
+    my @idx  = 0 .. $#_;
+    while ( $code->( @_[@idx] ) ) {
+        my $p = $#idx;
+        --$p while $idx[ $p - 1 ] > $idx[$p];
+        my $q = $p or return;
+        push @idx, reverse splice @idx, $p;
+        ++$q while $idx[ $p - 1 ] > $idx[$q];
+        @idx[ $p - 1, $q ] = @idx[ $q, $p - 1 ];
+    }
+}
 # Local Variables:
 #   mode: cperl
 #   cperl-indent-level: 4
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4:
-

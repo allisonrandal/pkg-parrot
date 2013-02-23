@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: sub.c 45108 2010-03-22 20:53:12Z chromatic $
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ PMC *
 new_ret_continuation_pmc(PARROT_INTERP, ARGIN_NULLOK(opcode_t *address))
 {
     ASSERT_ARGS(new_ret_continuation_pmc)
-    PMC* const continuation = pmc_new(interp, enum_class_RetContinuation);
+    PMC* const continuation = Parrot_pmc_new(interp, enum_class_RetContinuation);
     VTABLE_set_pointer(interp, continuation, address);
     return continuation;
 }
@@ -570,6 +570,7 @@ Parrot_continuation_rewind_environment(PARROT_INTERP, ARGIN(PMC *pmc))
     ASSERT_ARGS(Parrot_continuation_rewind_environment)
 
     PMC * const to_ctx = PARROT_CONTINUATION(pmc)->to_ctx;
+    PMC * const sig    = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
 
     /* debug print before context is switched */
     if (Interp_trace_TEST(interp, PARROT_TRACE_SUB_CALL_FLAG)) {
@@ -582,6 +583,7 @@ Parrot_continuation_rewind_environment(PARROT_INTERP, ARGIN(PMC *pmc))
 
     /* set context */
     CURRENT_CONTEXT(interp) = to_ctx;
+    Parrot_pcc_set_signature(interp, to_ctx, sig);
 }
 
 
@@ -612,7 +614,7 @@ Parrot_get_sub_pmc_from_subclass(PARROT_INTERP, ARGIN(PMC *subclass)) {
         }
 
         /* Get the Sub PMC itself. */
-        key = pmc_new(interp, enum_class_String);
+        key = Parrot_pmc_new(interp, enum_class_String);
         VTABLE_set_string_native(interp, key, CONST_STRING(interp, "Sub"));
         sub_pmc = VTABLE_get_attr_keyed(interp, subclass, key, CONST_STRING(interp, "proxy"));
         if (sub_pmc->vtable->base_type == enum_class_Sub) {

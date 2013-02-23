@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: string_cs.t 42740 2009-11-21 17:52:46Z jkeenan $
 
 use strict;
 use warnings;

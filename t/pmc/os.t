@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: os.t 44321 2010-02-22 22:08:59Z mikehh $
 
 use strict;
 use warnings;
@@ -238,7 +238,8 @@ done:
         end
 .end
 CODE
-} else {
+}
+else {
   SKIP: {
     skip 'broken test TT #457', 1 if $solaris;
 

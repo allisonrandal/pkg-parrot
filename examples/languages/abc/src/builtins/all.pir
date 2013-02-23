@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: all.pir 42970 2009-12-10 04:56:22Z tene $
 
 =head1
 

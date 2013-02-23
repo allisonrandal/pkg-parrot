@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: static-triangle-hll.pir 40172 2009-07-20 20:03:52Z NotFound $
 
 =head1 TITLE
 

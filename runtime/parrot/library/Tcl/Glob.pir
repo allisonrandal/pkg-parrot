@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: Glob.pir 41333 2009-09-18 12:57:53Z coke $
 
 =head1 TITLE
 

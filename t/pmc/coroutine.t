@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# $Id: coroutine.t 41769 2009-10-09 02:54:33Z jkeenan $
 
 use strict;
 use warnings;

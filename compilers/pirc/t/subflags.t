@@ -1,8 +1,11 @@
 #!perl
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# $Id: subflags.t 44433 2010-02-24 01:39:38Z mikehh $
 
-use lib "../../lib";
+use strict;
+use warnings;
+
+use lib qw(lib);
 use Parrot::Test tests => 1;
 
 pirc_2_pasm_is(<<'CODE', <<'OUTPUT', "a single const declaration");

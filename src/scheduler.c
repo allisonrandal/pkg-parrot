@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2007-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2007-2010, Parrot Foundation.
+$Id: scheduler.c 45499 2010-04-10 04:05:56Z petdance $
 
 =head1 NAME
 
@@ -18,6 +18,7 @@ exceptions, async I/O, and concurrent tasks (threads).
 
 #include "parrot/parrot.h"
 #include "parrot/scheduler_private.h"
+#include "parrot/runcore_api.h"
 
 #include "pmc/pmc_scheduler.h"
 #include "pmc/pmc_task.h"
@@ -79,7 +80,7 @@ Parrot_cx_init_scheduler(PARROT_INTERP)
         /* Add the very first interpreter to the list of interps. */
         pt_add_to_interpreters(interp, NULL);
 
-        scheduler = pmc_new(interp, enum_class_Scheduler);
+        scheduler = Parrot_pmc_new(interp, enum_class_Scheduler);
         scheduler = VTABLE_share_ro(interp, scheduler);
 
         interp->scheduler = scheduler;
@@ -290,7 +291,7 @@ Parrot_cx_schedule_timer(PARROT_INTERP,
         INTVAL repeat, ARGIN_NULLOK(PMC *sub))
 {
     ASSERT_ARGS(Parrot_cx_schedule_timer)
-    PMC * const timer = pmc_new(interp, enum_class_Timer);
+    PMC * const timer = Parrot_pmc_new(interp, enum_class_Timer);
 
     VTABLE_set_number_keyed_int(interp, timer, PARROT_TIMER_NSEC, duration);
     VTABLE_set_number_keyed_int(interp, timer, PARROT_TIMER_INTERVAL, interval);
@@ -328,7 +329,7 @@ Parrot_cx_schedule_repeat(PARROT_INTERP, ARGIN(PMC *task))
     FLOATVAL duration = VTABLE_get_number_keyed_int(interp, task,
             PARROT_TIMER_INTERVAL);
     if (repeat != 0) {
-        PMC *repeat_task = VTABLE_clone(interp, task);
+        PMC * const repeat_task = VTABLE_clone(interp, task);
         VTABLE_set_number_keyed_int(interp, repeat_task, PARROT_TIMER_NSEC, duration);
 
         if (repeat > 0)
@@ -356,7 +357,7 @@ Parrot_cx_schedule_callback(PARROT_INTERP,
         ARGIN(PMC *user_data), ARGIN(char *ext_data))
 {
     ASSERT_ARGS(Parrot_cx_schedule_callback)
-    PMC *callback = pmc_new(interp, enum_class_Task);
+    PMC * const callback = Parrot_pmc_new(interp, enum_class_Task);
     Parrot_Task_attributes * const task_struct = PARROT_TASK(callback);
 
     task_struct->type    = CONST_STRING(interp, "callback");
@@ -483,7 +484,8 @@ Parrot_cx_add_handler_local(PARROT_INTERP, ARGIN(PMC *handler))
 {
     ASSERT_ARGS(Parrot_cx_add_handler_local)
     if (PMC_IS_NULL(Parrot_pcc_get_handlers(interp, interp->ctx)))
-        Parrot_pcc_set_handlers(interp, interp->ctx, pmc_new(interp, enum_class_ResizablePMCArray));
+        Parrot_pcc_set_handlers(interp, interp->ctx, Parrot_pmc_new(interp,
+                                                                    enum_class_ResizablePMCArray));
 
     VTABLE_unshift_pmc(interp, Parrot_pcc_get_handlers(interp, interp->ctx), handler);
 
@@ -529,11 +531,10 @@ Parrot_cx_delete_handler_local(PARROT_INTERP, ARGIN(STRING *handler_type))
             Parrot_str_equal(interp, handler_type, event_str) ?
                 Hevent :
                 Hunknown;
-        STRING * const handler_name = (htype == Hexception) ?
-            handler_str : (STRING *) NULL;
+        STRING * const handler_name = (htype == Hexception) ? handler_str : (STRING *)NULL;
 
         for (index = 0; index < elements; ++index) {
-            PMC *handler = VTABLE_get_pmc_keyed_int(interp, handlers, index);
+            PMC * const handler = VTABLE_get_pmc_keyed_int(interp, handlers, index);
             if (!PMC_IS_NULL(handler)) {
                 switch (htype) {
                   case Hexception:
@@ -577,7 +578,7 @@ INTVAL
 Parrot_cx_count_handlers_local(PARROT_INTERP, ARGIN(STRING *handler_type))
 {
     ASSERT_ARGS(Parrot_cx_count_handlers_local)
-    PMC *handlers = Parrot_pcc_get_handlers(interp, interp->ctx);
+    PMC * const handlers = Parrot_pcc_get_handlers(interp, interp->ctx);
     INTVAL elements;
 
     if (PMC_IS_NULL(handlers))
@@ -603,11 +604,10 @@ Parrot_cx_count_handlers_local(PARROT_INTERP, ARGIN(STRING *handler_type))
             (Parrot_str_equal(interp, handler_type, event_str)) ?
                 Hevent :
                 Hunknown;
-        STRING * const handler_name = (htype == Hexception) ?
-            handler_str : (STRING *) NULL;
+        STRING * const handler_name = (htype == Hexception) ? handler_str : (STRING *)NULL;
 
         for (index = 0; index < elements; ++index) {
-            PMC *handler = VTABLE_get_pmc_keyed_int(interp, handlers, index);
+            PMC * const handler = VTABLE_get_pmc_keyed_int(interp, handlers, index);
             if (!PMC_IS_NULL(handler)) {
                 switch (htype) {
                   case Hexception:
@@ -643,7 +643,7 @@ void
 Parrot_cx_add_handler(PARROT_INTERP, ARGIN(PMC *handler))
 {
     ASSERT_ARGS(Parrot_cx_add_handler)
-    STRING *add_handler = CONST_STRING(interp, "add_handler");
+    STRING * const add_handler = CONST_STRING(interp, "add_handler");
     if (!interp->scheduler)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Scheduler was not initialized for this interpreter.\n");
@@ -730,7 +730,7 @@ Parrot_cx_send_message(PARROT_INTERP, ARGIN(STRING *messagetype), SHIM(PMC *payl
     ASSERT_ARGS(Parrot_cx_send_message)
     if (interp->scheduler) {
         Parrot_Scheduler_attributes * sched_struct = PARROT_SCHEDULER(interp->scheduler);
-        PMC *message = pmc_new(interp, enum_class_SchedulerMessage);
+        PMC *message = Parrot_pmc_new(interp, enum_class_SchedulerMessage);
         VTABLE_set_string_native(interp, message, messagetype);
         message = VTABLE_share_ro(interp, message);
 
@@ -893,7 +893,7 @@ Parrot_cx_find_handler_local(PARROT_INTERP, ARGIN(PMC *task))
         keep_context = context;
         /* Loop from newest handler to oldest handler. */
         while (!PMC_IS_NULL(iter) && VTABLE_get_bool(interp, iter)) {
-            PMC *handler = VTABLE_shift_pmc(interp, iter);
+            PMC * const handler = VTABLE_shift_pmc(interp, iter);
 
             if (!PMC_IS_NULL(handler)) {
                 INTVAL valid_handler = 0;

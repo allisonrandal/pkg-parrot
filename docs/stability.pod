@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: stability.pod 37200 2009-03-08 11:46:01Z fperrad $
 
 =head1 NAME
 

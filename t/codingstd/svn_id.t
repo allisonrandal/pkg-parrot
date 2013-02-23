@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: svn_id.t 40475 2009-08-10 03:02:23Z dukeleto $
 
 use strict;
 use warnings;

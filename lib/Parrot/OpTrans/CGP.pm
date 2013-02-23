@@ -1,5 +1,5 @@
 # Copyright (C) 2002, Parrot Foundation.
-# $Id$
+# $Id: CGP.pm 40958 2009-09-03 11:56:50Z bacek $
 
 =head1 NAME
 

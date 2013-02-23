@@ -1,4 +1,4 @@
-# $Id$
+# $Id: eventhandler.pir 44547 2010-02-28 06:02:31Z coke $
 
 =head1 TITLE
 
@@ -6,7 +6,7 @@ eventhandler.pir - a minesweeper event handler
 
 =head1 SYNOPSIS
 
-    $P0 = new "SDL::Event"
+    $P0 = new ['SDL'; 'Event']
 
     $P1 = new "Mines::EventHandler"
 

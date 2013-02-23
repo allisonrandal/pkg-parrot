@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: api.c 45635 2010-04-13 16:02:38Z darbelo $
 
 =head1 NAME
 
@@ -89,7 +89,7 @@ PMC *
 Parrot_io_new_pmc(PARROT_INTERP, INTVAL flags)
 {
     ASSERT_ARGS(Parrot_io_new_pmc)
-    PMC * const new_io = pmc_new(interp, enum_class_FileHandle);
+    PMC * const new_io = Parrot_pmc_new(interp, enum_class_FileHandle);
 
     Parrot_io_set_flags(interp, new_io, flags);
 
@@ -125,7 +125,7 @@ Parrot_io_open(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc),
     if (PMC_IS_NULL(pmc)) {
         /* TODO: We should look up the HLL mapped type, instead of always
            using FileHandle here */
-        new_filehandle = pmc_new(interp, enum_class_FileHandle);
+        new_filehandle = Parrot_pmc_new(interp, enum_class_FileHandle);
         PARROT_ASSERT(new_filehandle->vtable->base_type == enum_class_FileHandle);
     }
     else
@@ -179,9 +179,8 @@ Parrot_io_fdopen(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc), PIOHANDLE fd,
 {
     ASSERT_ARGS(Parrot_io_fdopen)
     PMC *new_filehandle;
-    INTVAL flags;
+    const INTVAL flags = Parrot_io_parse_open_flags(interp, sflags);
 
-    flags = Parrot_io_parse_open_flags(interp, sflags);
     if (!flags)
         return PMCNULL;
 
@@ -349,7 +348,7 @@ Parrot_io_reads(PARROT_INTERP, ARGMOD(PMC *pmc), size_t length)
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_PIO_ERROR,
                 "Cannot read from a closed or non-readable filehandle");
 
-        result = Parrot_io_make_string(interp, &result, length);
+        result = Parrot_str_new_noinit(interp, enum_stringrep_one, length);
         result->bufused = length;
 
         if (Parrot_io_is_encoding(interp, pmc, CONST_STRING(interp, "utf8")))
@@ -369,9 +368,8 @@ Parrot_io_reads(PARROT_INTERP, ARGMOD(PMC *pmc), size_t length)
         if (length == 0)
             result = Parrot_str_copy(interp, string_orig);
         else {
-            INTVAL orig_length, read_length;
-            read_length = length;
-            orig_length = Parrot_str_byte_length(interp, string_orig);
+            INTVAL read_length = length;
+            const INTVAL orig_length = Parrot_str_byte_length(interp, string_orig);
 
             GETATTR_StringHandle_read_offset(interp, pmc, offset);
 
@@ -905,7 +903,7 @@ Parrot_io_make_offset32(INTVAL hi, INTVAL lo)
 
 =item C<PIOOFF_T Parrot_io_make_offset_pmc(PARROT_INTERP, PMC *pmc)>
 
-Returns the return value of the C<get_integer> vtable method on C<*pmc>.
+Returns the return value of the C<get_integer> vtable on C<*pmc>.
 
 =cut
 

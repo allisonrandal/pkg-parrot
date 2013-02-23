@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: library.h 41533 2009-09-27 17:30:32Z NotFound $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:

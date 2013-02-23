@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: c_arg_assert.t 44340 2010-02-23 00:59:14Z mikehh $
 
 use strict;
 use warnings;
@@ -51,7 +51,7 @@ sub check_asserts {
             if ( my ($func) = $line =~ m/^#define ASSERT_ARGS_([_a-zA-Z0-9]+)\s/s ) {
                 push @defines, [$func, $path];
             }
-            
+
             if ( my ($func) = $line =~ m/^\s+ASSERT_ARGS\(([_a-zA-Z0-9]+)\)$/ ) {
                 $usages{$func} = 1;
 

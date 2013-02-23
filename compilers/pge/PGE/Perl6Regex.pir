@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: Perl6Regex.pir 42679 2009-11-21 13:21:27Z jkeenan $
 
 =head1 TITLE
 

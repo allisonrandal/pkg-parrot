@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: uuid.t 44383 2010-02-23 11:56:15Z mikehh $
 
 =head1 NAME
 
@@ -124,8 +124,7 @@ uuid library tests
 
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

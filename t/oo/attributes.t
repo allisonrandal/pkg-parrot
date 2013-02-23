@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: attributes.t 44384 2010-02-23 12:01:27Z mikehh $
 
 =head1 NAME
 
@@ -71,3 +71,9 @@ Tests OO features related to adding and removing attributes.
     is(message, "No such attribute 'data'", 'class attribute deleted')
 
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

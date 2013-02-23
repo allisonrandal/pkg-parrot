@@ -1,7 +1,7 @@
 /* call.h
- *  Copyright (C) 2001-2008, Parrot Foundation.
+ *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *  $Id$
+ *  $Id: call.h 45774 2010-04-18 07:24:50Z chromatic $
  *  Overview:
  *  Data Structure and Algorithms:
  *     Call argument handling.
@@ -139,9 +139,6 @@ void new_runloop_jump_point(PARROT_INTERP)
 void destroy_runloop_jump_points(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-void really_destroy_runloop_jump_points(
-    ARGIN_NULLOK(Parrot_runloop *jump_point));
-
 void runops(PARROT_INTERP, size_t offs)
         __attribute__nonnull__(1);
 
@@ -151,8 +148,6 @@ void runops(PARROT_INTERP, size_t offs)
        PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_destroy_runloop_jump_points __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
-#define ASSERT_ARGS_really_destroy_runloop_jump_points \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_runops __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
@@ -162,22 +157,34 @@ void runops(PARROT_INTERP, size_t offs)
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
-void Parrot_pcc_append_result(PARROT_INTERP,
-    ARGIN(PMC *sig_object),
-    ARGIN(STRING *type),
-    ARGIN(void *result))
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC* Parrot_pcc_build_call_from_c_args(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *signature),
+    ARGIN(const char *sig),
+    ...)
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+PARROT_EXPORT
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+PMC* Parrot_pcc_build_call_from_varargs(PARROT_INTERP,
+    ARGIN_NULLOK(PMC *signature),
+    ARGIN(const char *sig),
+    ARGMOD(va_list *args))
+        __attribute__nonnull__(1)
         __attribute__nonnull__(3)
-        __attribute__nonnull__(4);
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*args);
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 PMC* Parrot_pcc_build_sig_object_from_op(PARROT_INTERP,
     ARGIN_NULLOK(PMC *signature),
-    ARGIN(PMC * const raw_sig),
-    ARGIN(opcode_t * const raw_args))
+    ARGIN(PMC *raw_sig),
+    ARGIN(opcode_t *raw_args))
         __attribute__nonnull__(1)
         __attribute__nonnull__(3)
         __attribute__nonnull__(4);
@@ -193,17 +200,6 @@ PMC* Parrot_pcc_build_sig_object_from_varargs(PARROT_INTERP,
         __attribute__nonnull__(3);
 
 PARROT_EXPORT
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-PMC* Parrot_pcc_build_sig_object_returns_from_op(PARROT_INTERP,
-    ARGIN_NULLOK(PMC *signature),
-    ARGIN(PMC *raw_sig),
-    ARGIN(opcode_t *raw_args))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3)
-        __attribute__nonnull__(4);
-
-PARROT_EXPORT
 void Parrot_pcc_fill_params_from_c_args(PARROT_INTERP,
     ARGMOD(PMC *call_object),
     ARGIN(const char *signature),
@@ -217,40 +213,24 @@ PARROT_EXPORT
 void Parrot_pcc_fill_params_from_op(PARROT_INTERP,
     ARGMOD_NULLOK(PMC *call_object),
     ARGIN(PMC *raw_sig),
-    ARGIN(opcode_t *raw_params))
+    ARGIN(opcode_t *raw_params),
+    Errors_classes direction)
         __attribute__nonnull__(1)
         __attribute__nonnull__(3)
         __attribute__nonnull__(4)
         FUNC_MODIFIES(*call_object);
 
 PARROT_EXPORT
-void Parrot_pcc_fill_returns_from_c_args(PARROT_INTERP,
+void Parrot_pcc_fill_params_from_varargs(PARROT_INTERP,
     ARGMOD_NULLOK(PMC *call_object),
     ARGIN(const char *signature),
-    ...)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3)
-        FUNC_MODIFIES(*call_object);
-
-PARROT_EXPORT
-void Parrot_pcc_fill_returns_from_continuation(PARROT_INTERP,
-    ARGMOD_NULLOK(PMC *call_object),
-    ARGIN(PMC *raw_sig),
-    ARGIN(PMC *from_call_obj))
+    ARGMOD(va_list *args),
+    Errors_classes direction)
         __attribute__nonnull__(1)
         __attribute__nonnull__(3)
         __attribute__nonnull__(4)
-        FUNC_MODIFIES(*call_object);
-
-PARROT_EXPORT
-void Parrot_pcc_fill_returns_from_op(PARROT_INTERP,
-    ARGMOD_NULLOK(PMC *call_object),
-    ARGIN(PMC *raw_sig),
-    ARGIN(opcode_t *raw_returns))
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(3)
-        __attribute__nonnull__(4)
-        FUNC_MODIFIES(*call_object);
+        FUNC_MODIFIES(*call_object)
+        FUNC_MODIFIES(*args);
 
 void Parrot_pcc_merge_signature_for_tailcall(PARROT_INTERP,
     ARGMOD_NULLOK(PMC * parent),
@@ -271,11 +251,25 @@ void Parrot_pcc_parse_signature_string(PARROT_INTERP,
         FUNC_MODIFIES(*arg_flags)
         FUNC_MODIFIES(*return_flags);
 
-#define ASSERT_ARGS_Parrot_pcc_append_result __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+void Parrot_pcc_split_signature_string(
+    ARGIN(const char *signature),
+    ARGMOD(const char **arg_sig),
+    ARGMOD(const char **return_sig))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*arg_sig)
+        FUNC_MODIFIES(*return_sig);
+
+#define ASSERT_ARGS_Parrot_pcc_build_call_from_c_args \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(sig_object) \
-    , PARROT_ASSERT_ARG(type) \
-    , PARROT_ASSERT_ARG(result))
+    , PARROT_ASSERT_ARG(sig))
+#define ASSERT_ARGS_Parrot_pcc_build_call_from_varargs \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(sig) \
+    , PARROT_ASSERT_ARG(args))
 #define ASSERT_ARGS_Parrot_pcc_build_sig_object_from_op \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
@@ -285,11 +279,6 @@ void Parrot_pcc_parse_signature_string(PARROT_INTERP,
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(sig))
-#define ASSERT_ARGS_Parrot_pcc_build_sig_object_returns_from_op \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(raw_sig) \
-    , PARROT_ASSERT_ARG(raw_args))
 #define ASSERT_ARGS_Parrot_pcc_fill_params_from_c_args \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
@@ -300,20 +289,11 @@ void Parrot_pcc_parse_signature_string(PARROT_INTERP,
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(raw_sig) \
     , PARROT_ASSERT_ARG(raw_params))
-#define ASSERT_ARGS_Parrot_pcc_fill_returns_from_c_args \
+#define ASSERT_ARGS_Parrot_pcc_fill_params_from_varargs \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(signature))
-#define ASSERT_ARGS_Parrot_pcc_fill_returns_from_continuation \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(raw_sig) \
-    , PARROT_ASSERT_ARG(from_call_obj))
-#define ASSERT_ARGS_Parrot_pcc_fill_returns_from_op \
-     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(raw_sig) \
-    , PARROT_ASSERT_ARG(raw_returns))
+    , PARROT_ASSERT_ARG(signature) \
+    , PARROT_ASSERT_ARG(args))
 #define ASSERT_ARGS_Parrot_pcc_merge_signature_for_tailcall \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
@@ -323,6 +303,11 @@ void Parrot_pcc_parse_signature_string(PARROT_INTERP,
     , PARROT_ASSERT_ARG(signature) \
     , PARROT_ASSERT_ARG(arg_flags) \
     , PARROT_ASSERT_ARG(return_flags))
+#define ASSERT_ARGS_Parrot_pcc_split_signature_string \
+     __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(signature) \
+    , PARROT_ASSERT_ARG(arg_sig) \
+    , PARROT_ASSERT_ARG(return_sig))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/call/args.c */
 
@@ -334,10 +319,10 @@ void Parrot_pcc_parse_signature_string(PARROT_INTERP,
 
 /* XXX Remove interp from this */
 #define ADD_OP_VAR_PART(interp, seg, pc, n) do { \
-    if (*(pc) == PARROT_OP_set_args_pc || \
-            *(pc) == PARROT_OP_get_results_pc || \
-            *(pc) == PARROT_OP_get_params_pc || \
-            *(pc) == PARROT_OP_set_returns_pc) { \
+    if (*(pc) == PARROT_OP_set_args_pc       \
+    ||  *(pc) == PARROT_OP_get_results_pc    \
+    ||  *(pc) == PARROT_OP_get_params_pc     \
+    ||  *(pc) == PARROT_OP_set_returns_pc) { \
         PMC * const sig = (seg)->const_table->constants[(pc)[1]]->u.key; \
         (n) += VTABLE_elements((interp), sig); \
     } \

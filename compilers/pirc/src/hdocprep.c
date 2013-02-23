@@ -665,7 +665,7 @@ static yyconst flex_int16_t yy_rule_linenum[21] =
 #line 28 "hdocprep.l"
 
 /*
- * $Id$
+ * $Id: hdocprep.c 43258 2009-12-27 05:15:10Z coke $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

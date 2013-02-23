@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: yacc.pm 37201 2009-03-08 12:07:48Z fperrad $
 
 =head1 NAME
 

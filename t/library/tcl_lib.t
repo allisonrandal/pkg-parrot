@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: tcl_lib.t 42773 2009-11-21 20:41:51Z jkeenan $
 
 =head1 NAME
 

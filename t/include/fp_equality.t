@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: fp_equality.t 40497 2009-08-12 03:43:02Z dukeleto $
 
 =head1 NAME
 

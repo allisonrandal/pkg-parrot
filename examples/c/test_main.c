@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+$Id: test_main.c 42918 2009-12-06 15:03:28Z fperrad $
 
 =head1 NAME
 

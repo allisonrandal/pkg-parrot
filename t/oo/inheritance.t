@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: inheritance.t 44384 2010-02-23 12:01:27Z mikehh $
 
 =head1 NAME
 
@@ -121,3 +121,9 @@ fail:
     ok( $I1, 'diamond')
 fail:
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

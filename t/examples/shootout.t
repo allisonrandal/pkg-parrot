@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id$
+# $Id: shootout.t 42572 2009-11-19 00:02:55Z mikehh $
 
 use strict;
 use warnings;

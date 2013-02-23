@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id$
+# $Id: ComposedMethod.pm 36833 2009-02-17 20:09:26Z allison $
 package Parrot::Pmc2c::ComposedMethod;
 use strict;
 use warnings;

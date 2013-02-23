@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id$
+# $Id: addrregistry.t 37842 2009-04-01 17:56:47Z barney $
 
 =head1 NAME
 

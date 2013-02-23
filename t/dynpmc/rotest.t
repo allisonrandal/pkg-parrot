@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id$
+# $Id: rotest.t 45297 2010-03-30 01:33:45Z coke $
 
 use strict;
 use warnings;
@@ -49,7 +49,7 @@ CODE
     my %tests = (
 
         # these first two tests would test overriding of the default
-        # read-onlyness notion of vtable methods
+        # read-onlyness notion of vtables
         q{value = 42}  => [ 1, 0 ],
         q{$I0 = value} => [ 0, 0 ],
 

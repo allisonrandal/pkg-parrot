@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id$
+# $Id: CGoto.pm 44578 2010-03-02 04:38:37Z cotto $
 
 =head1 NAME
 
@@ -283,7 +283,6 @@ Returns the run core C code for section after the address table.
 
 sub run_core_after_addr_table {
     my ( $self, $bs ) = @_;
-    my $t = $self->opsarraytype;
     return <<END_C;
 
     if (!${bs}ops_addr)

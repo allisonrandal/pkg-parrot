@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2009, Parrot Foundation.
- * $Id$
+ * $Id: parser.h 40345 2009-07-30 18:29:24Z NotFound $
  */
 
 #ifndef PARROT_IMCC_PARSER_H_GUARD

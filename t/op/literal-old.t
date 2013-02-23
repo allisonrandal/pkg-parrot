@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# $Id: literal-old.t 42483 2009-11-13 10:18:38Z dukeleto $
 
 use strict;
 use warnings;

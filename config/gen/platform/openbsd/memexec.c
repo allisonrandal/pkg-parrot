@@ -1,6 +1,6 @@
 /*
- * $Id$
- * Copyright (C) 2004-2006, Parrot Foundation.
+ * $Id: memexec.c 44166 2010-02-19 11:39:48Z mikehh $
+ * Copyright (C) 2004-2010, Parrot Foundation.
  */
 
 /*
@@ -65,7 +65,8 @@ mem_free_executable(void *p, size_t size)
 
 /*
 
-=item C<void * mem_realloc_executable(void* oldp, size_t oldsize, size_t newsize)>
+=item C<void * mem_realloc_executable(void* oldp, size_t oldsize, size_t
+newsize)>
 
 Reallocate executable memory
 Round up to page size because the whole page will be marked as executable

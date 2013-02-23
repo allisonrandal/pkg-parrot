@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: parrotbyte.pod 37252 2009-03-10 01:59:54Z allison $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: signal.c 37877 2009-04-02 20:20:22Z coke $
  * Copyright (C) 2004-2007, Parrot Foundation.
  */
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: answer.pir 36833 2009-02-17 20:09:26Z allison $
 .sub _main
     print "The answer is\n"
     add $I0, 20, 23

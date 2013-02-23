@@ -1,7 +1,7 @@
 /* global.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: global.h 41533 2009-09-27 17:30:32Z NotFound $
  *  Overview:
  *      Contains accessor functions for globals
  *  Data Structure and Algorithms:

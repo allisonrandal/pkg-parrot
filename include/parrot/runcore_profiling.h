@@ -1,7 +1,7 @@
 /* runcore_api.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: runcore_profiling.h 45619 2010-04-12 22:44:02Z plobsing $
  *  Overview:
  *     Functions and macros to dispatch opcodes.
  */
@@ -27,8 +27,8 @@ typedef enum Parrot_profiling_flags {
     PROFILING_EXIT_CHECK_FLAG         = 1 << 0,
     PROFILING_FIRST_LOOP_FLAG         = 1 << 1,
     PROFILING_HAVE_PRINTED_CLI_FLAG   = 1 << 2,
-    PROFILING_REPORT_ANNOTATIONS_FLAG = 1 << 3
-
+    PROFILING_REPORT_ANNOTATIONS_FLAG = 1 << 3,
+    PROFILING_CANONICAL_OUTPUT_FLAG   = 1 << 4
 } Parrot_profiling_flags;
 
 typedef enum Parrot_profiling_line {
@@ -40,7 +40,7 @@ typedef enum Parrot_profiling_line {
     PPROF_LINE_END_OF_RUNLOOP
 } Parrot_profiling_line;
 
-typedef void (*profiling_output_fn)(ARGIN(Parrot_profiling_runcore_t*), ARGIN_NULLOK(Parrot_profiling_line));
+typedef void (*profiling_output_fn)(ARGIN(Parrot_profiling_runcore_t*), ARGIN(PPROF_DATA*), ARGIN_NULLOK(Parrot_profiling_line));
 typedef        profiling_output_fn Parrot_profiling_output_fn;
 
 typedef enum Parrot_profiling_datatype {
@@ -64,7 +64,7 @@ typedef enum Parrot_profiling_datatype {
 
     PPROF_DATA_CLI = 0,
 
-    PPROF_DATA_MAX = 3,
+    PPROF_DATA_MAX = 3
 } Parrot_profiling_datatype;
 
 struct profiling_runcore_t {
@@ -92,7 +92,6 @@ struct profiling_runcore_t {
     UINTVAL         time_size;  /* how big is the following array */
     UHUGEINTVAL    *time;       /* time spent between DO_OP and start/end of a runcore */
     Hash           *line_cache; /* hash for caching pc -> line mapping */
-    PPROF_DATA      pprof_data[PPROF_DATA_MAX+1]; /* array for storage of one line of profiling data */
 };
 
 #define Profiling_flag_SET(runcore, flag) \
@@ -129,6 +128,13 @@ struct profiling_runcore_t {
     Profiling_flag_SET(o, PROFILING_REPORT_ANNOTATIONS_FLAG)
 #define Profiling_report_annotations_CLEAR(o) \
     Profiling_flag_CLEAR(o, PROFILING_REPORT_ANNOTATIONS_FLAG)
+
+#define Profiling_canonical_output_TEST(o) \
+    Profiling_flag_TEST(o, PROFILING_CANONICAL_OUTPUT_FLAG)
+#define Profiling_canonical_output_SET(o) \
+    Profiling_flag_SET(o, PROFILING_CANONICAL_OUTPUT_FLAG)
+#define Profiling_canonical_output_CLEAR(o) \
+    Profiling_flag_CLEAR(o, PROFILING_CANONICAL_OUTPUT_FLAG)
 
 /* HEADERIZER BEGIN: src/runcore/profiling.c */
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */

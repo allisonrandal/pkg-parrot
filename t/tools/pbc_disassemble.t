@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2009, Parrot Foundation
-# $Id$
+# Copyright (C) 2009-2010, Parrot Foundation.
+# $Id: pbc_disassemble.t 44331 2010-02-22 23:25:15Z mikehh $
 
 =head1 NAME
 

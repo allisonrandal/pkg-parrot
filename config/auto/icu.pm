@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# $Id: icu.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -321,7 +321,13 @@ sub _handle_icushared {
         if (length $icushared == 0) {
             $without = 1;
         }
+        else {
+            # on MacOS X there's sometimes an errornous \c at the end of the
+            # output line. Remove it.
+            $icushared =~ s/\s\\c$//;
+        }
     }
+
     return ($icushared, $without);
 }
 
@@ -333,8 +339,7 @@ sub _handle_icuheaders {
         if (! -d $icuheaders) {
             $without = 1;
         }
-        my $slash = $conf->data->get('slash');
-        $icuheaders .= "${slash}include";
+        $icuheaders .= "/include";
         if (! -d $icuheaders) {
             $without = 1;
         }

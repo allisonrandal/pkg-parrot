@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: key.pmc 45425 2010-04-07 13:38:10Z bacek $
 
 =head1 NAME
 
@@ -17,6 +17,10 @@ These are the vtable functions for the Key PMC class.
 =cut
 
 */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass Key auto_attrs {
     ATTR PMC      *next_key; /* Sometimes it's the next key, sometimes it's
@@ -54,7 +58,7 @@ Creates and returns a clone of the key.
 */
 
     VTABLE PMC *clone() {
-        PMC * const dest = pmc_new(INTERP, SELF->vtable->base_type);
+        PMC * const dest = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
         PMC *dkey        = dest;
         PMC *key         = SELF;
 
@@ -283,19 +287,19 @@ Returns the key itself.
 
 /*
 
-=item C<void visit(visit_info *info)>
+=item C<void visit(PMC *info)>
 
 This is used by freeze/thaw to visit the contents of the Key.
 
-=item C<void freeze(visit_info *info)>
+=item C<void freeze(PMC *info)>
 
 Archives the Key.
 
-=item C<void thaw(visit_info *info)>
+=item C<void thaw(PMC *info)>
 
 Unarchives the Key.
 
-=item C<void thawfinish(visit_info *info)>
+=item C<void thawfinish(PMC *info)>
 
 Called after the Key has been thawed: convert last PMC_NULL key to NULL.
 
@@ -303,7 +307,7 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
 
 */
 
-    VTABLE void visit(visit_info *info) {
+    VTABLE void visit(PMC *info) {
         /* Sometimes visit gets an uninitialized Key.  Initialize it. */
         if (!PMC_data(SELF))
             SELF.init();
@@ -311,7 +315,7 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
         VISIT_PMC_ATTR(INTERP, info, SELF, Key, next_key);
     }
 
-    void freeze(visit_info *info) {
+    void freeze(PMC *info) {
         /* write flags */
         const INTVAL flags  = (PObj_get_FLAGS(SELF) & KEY_type_FLAGS);
 
@@ -340,7 +344,7 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
         }
     }
 
-    void thaw(visit_info *info) {
+    void thaw(PMC *info) {
         const INTVAL flags  = VTABLE_shift_integer(INTERP, info) & KEY_type_FLAGS;
 
         PObj_get_FLAGS(SELF) |= flags;
@@ -367,7 +371,7 @@ Called after the Key has been thawed: convert last PMC_NULL key to NULL.
         }
     }
 
-    VTABLE void thawfinish(visit_info *info) {
+    VTABLE void thawfinish(PMC *info) {
         PMC *key = SELF;
         UNUSED(info)
 

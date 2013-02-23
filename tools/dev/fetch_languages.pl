@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: fetch_languages.pl 45619 2010-04-12 22:44:02Z plobsing $
 
 =head1 NAME
 
@@ -312,7 +312,7 @@ my @hlls = (
     },
 
     {
-        name       => 'winexd',
+        name       => 'winxed',
         scm        => 'SVN',
         repository => 'http://winxed.googlecode.com/svn/trunk/'
     },

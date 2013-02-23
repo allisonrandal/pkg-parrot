@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: Math.pir 39750 2009-06-23 22:27:19Z japhb $
 
 =head1 NAME
 

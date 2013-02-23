@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+$Id: resizablefloatarray.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -19,6 +19,10 @@ which stores FLOATVALs. It uses Float PMCs to do all necessary conversions.
 =cut
 
 */
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass ResizableFloatArray extends FixedFloatArray auto_attrs provides array {
     ATTR INTVAL resize_threshold; /* max size before array needs resizing */
@@ -130,8 +134,7 @@ equal to three quarters of the old size).
                 cur          &= ~0xfff;
             }
             SET_ATTR_float_array(INTERP, SELF,
-                    (FLOATVAL*)mem_sys_realloc(float_array,
-                    cur * sizeof (FLOATVAL)));
+                    mem_gc_realloc_n_typed(INTERP, float_array, cur, FLOATVAL));
             SET_ATTR_size(INTERP, SELF, size);
             SET_ATTR_resize_threshold(INTERP, SELF, cur);
         }

@@ -1,7 +1,7 @@
 /* io_portable.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: io_portable.h 41533 2009-09-27 17:30:32Z NotFound $
  *  Overview:
  *      Parrot IO subsystem
  *  Data Structure and Algorithms:

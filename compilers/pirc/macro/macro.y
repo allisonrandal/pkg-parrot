@@ -1,7 +1,7 @@
 %{
 
 /*
- * $Id$
+ * $Id: macro.y 36666 2009-02-13 10:23:23Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

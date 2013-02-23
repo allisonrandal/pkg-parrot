@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: sys.t 39335 2009-06-02 15:22:24Z NotFound $
 
 use strict;
 use warnings;

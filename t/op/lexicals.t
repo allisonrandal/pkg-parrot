@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2010, Parrot Foundation.
-# $Id$
+# $Id: lexicals.t 45751 2010-04-17 13:38:31Z fperrad $
 
 use strict;
 use warnings;

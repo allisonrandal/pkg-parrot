@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: stat.c 42918 2009-12-06 15:03:28Z fperrad $
  * Copyright (C) 2007-2008, Parrot Foundation.
  */
 

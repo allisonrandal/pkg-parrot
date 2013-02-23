@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: defaults.pm 45809 2010-04-19 16:26:24Z coke $
 
 =head1 NAME
 
@@ -80,6 +80,7 @@ sub runstep {
     my $ccdlflags = $Config{ccdlflags};
     $ccdlflags =~ s/\s*-Wl,-rpath,\S*//g if $conf->options->get('disable-rpath');
 
+    my $cc_option = $conf->options->get('cc');
     # We need a Glossary somewhere!
     $conf->data->set(
         debugging => $conf->options->get('debugging') ? 1 : 0,
@@ -92,22 +93,14 @@ sub runstep {
 
         # Compiler -- used to turn .c files into object files.
         # (Usually cc or cl, or something like that.)
-        cc      => $Config{cc},
-        ccflags => $Config{ccflags},
-        ccwarn  => exists( $Config{ccwarn} ) ? $Config{ccwarn} : '',
+        cc      => $cc_option ? $cc_option : $Config{cc},
+        # If we specify a compiler, we can't use existing ccflags.
+        ccflags => $cc_option ? ''         : $Config{ccflags},
+        ccwarn  => '',
 
         # Flags used to indicate this object file is to be compiled
         # with position-independent code suitable for dynamic loading.
         cc_shared => $Config{cccdlflags},    # e.g. -fpic for GNU cc.
-
-        # C++ compiler -- used to compile parts of ICU.  ICU's configure
-        # will try to find a suitable compiler, but it prefers GNU c++ over
-        # a system c++, which might not be appropriate.  This setting
-        # allows you to override ICU's guess, but is otherwise currently
-        # unset.  Ultimately, it should be set to whatever ICU figures
-        # out, or parrot should look for it and always tell ICU what to
-        # use.
-        cxx => 'c++',
 
         # Linker, used to link object files (plus libraries) into
         # an executable.  It is usually $cc on Unix-ish systems.
@@ -187,12 +180,11 @@ sub runstep {
         libparrot_soname => '',
 
         perl      => $^X,
-        perl_inc  => $self->find_perl_headers(),
         test_prog => 'parrot',
 
         # some utilities in Makefile
         cat       => '$(PERL) -MExtUtils::Command -e cat',
-        chmod     => '$(PERL) -MExtUtils::Command -e ExtUtils::Command::chmod',
+        chmod     => '$(PERL) -MExtUtils::Command -e chmod',
         cp        => '$(PERL) -MExtUtils::Command -e cp',
         mkpath    => '$(PERL) -MExtUtils::Command -e mkpath',
         mv        => '$(PERL) -MExtUtils::Command -e mv',
@@ -250,6 +242,8 @@ sub runstep {
         no_lines_flag => $conf->options->get('no-line-directives') ? '--no-lines' : '',
 
         tempdir => File::Spec->tmpdir,
+
+        PKGCONFIG_DIR => $conf->options->get('pkgconfigdir') || '',
     );
 
     # TT #855:  Profiling options are too specific to GCC
@@ -273,11 +267,6 @@ sub runstep {
     return 1;
 }
 
-sub find_perl_headers {
-    my $self = shift;
-    return File::Spec->catdir( $Config::Config{archlib}, 'CORE' );
-}
-
 sub _64_bit_adjustments {
     my $conf = shift;
     my $m = $conf->options->get('m');
@@ -287,7 +276,7 @@ sub _64_bit_adjustments {
             $archname =~ s/x86_64/i386/;
 
             # adjust gcc?
-            for my $cc qw(cc cxx link ld) {
+            for my $cc qw(cc link ld) {
                 $conf->data->add( ' ', $cc, '-m32' );
             }
 

@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: exceptions.c 45442 2010-04-08 05:34:26Z petdance $
 
 =head1 NAME
 
@@ -68,7 +68,7 @@ Parrot_ex_build_exception(PARROT_INTERP, INTVAL severity,
         long error, ARGIN_NULLOK(STRING *msg))
 {
     ASSERT_ARGS(Parrot_ex_build_exception)
-    PMC *exception = pmc_new(interp, enum_class_Exception);
+    PMC *exception = Parrot_pmc_new(interp, enum_class_Exception);
 
     VTABLE_set_integer_keyed_str(interp, exception, CONST_STRING(interp, "severity"), severity);
     VTABLE_set_integer_keyed_str(interp, exception, CONST_STRING(interp, "type"), error);
@@ -89,6 +89,7 @@ Print a stack trace for C<exception>, a message if there is one, and then exit.
 */
 
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 die_from_exception(PARROT_INTERP, ARGIN(PMC *exception))
 {
@@ -176,7 +177,7 @@ void
 Parrot_ex_add_c_handler(PARROT_INTERP, ARGIN(Parrot_runloop *jp))
 {
     ASSERT_ARGS(Parrot_ex_add_c_handler)
-    PMC * const handler = pmc_new(interp, enum_class_ExceptionHandler);
+    PMC * const handler = Parrot_pmc_new(interp, enum_class_ExceptionHandler);
     /* Flag to mark a C exception handler */
     PObj_get_FLAGS(handler) |= SUB_FLAG_C_HANDLER;
     VTABLE_set_pointer(interp, handler, jp);
@@ -261,7 +262,7 @@ setup_exception_args(PARROT_INTERP, ARGIN(const char *sig), ...)
     PMC     *sig_obj;
 
     va_start(args, sig);
-    sig_obj = Parrot_pcc_build_sig_object_from_varargs(interp, PMCNULL, sig, args);
+    sig_obj = Parrot_pcc_build_call_from_varargs(interp, PMCNULL, sig, &args);
     va_end(args);
 
     CALLSIGNATURE_is_exception_SET(sig_obj);
@@ -326,6 +327,7 @@ the exception can be stored in the exception's payload.
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
 {
@@ -423,6 +425,7 @@ See also C<Parrot_ex_throw_from_op> and C<exit_fatal()>.
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 Parrot_ex_throw_from_c_args(PARROT_INTERP, SHIM(void *ret_addr),
         int exitcode, ARGIN(const char *format), ...)
@@ -476,6 +479,7 @@ and throws it again.
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 Parrot_ex_rethrow_from_c(PARROT_INTERP, ARGIN(PMC *exception))
 {
@@ -511,8 +515,8 @@ Parrot_ex_mark_unhandled(PARROT_INTERP, ARGIN(PMC *exception))
 
 =over 4
 
-=item C<PARROT_DOES_NOT_RETURN_WHEN_FALSE void Parrot_assert(INTVAL condition,
-const char *condition_string, const char *file, unsigned int line)>
+=item C<void Parrot_assert(INTVAL condition, const char *condition_string, const
+char *file, unsigned int line)>
 
 A better version of assert() that gives a backtrace.
 
@@ -544,6 +548,7 @@ Prints a backtrace and message for a failed assertion.
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 Parrot_confess(ARGIN(const char *cond), ARGIN(const char *file), unsigned int line)
 {
@@ -637,6 +642,7 @@ require an interpreter).
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 exit_fatal(int exitcode, ARGIN(const char *format), ...)
 {
@@ -675,6 +681,7 @@ developers
 */
 
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void
 do_panic(NULLOK_INTERP, ARGIN_NULLOK(const char *message),
          ARGIN_NULLOK(const char *file), unsigned int line)

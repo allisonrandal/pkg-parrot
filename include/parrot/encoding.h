@@ -1,7 +1,7 @@
 /* encoding.h
  *  Copyright (C) 2004-2007, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: encoding.h 45626 2010-04-13 08:32:58Z chromatic $
  *  Overview:
  *     This is the header for the generic encoding functions
  *  Data Structure and Algorithms:
@@ -30,6 +30,7 @@ typedef void (*encoding_become_encoding_t)(PARROT_INTERP, STRING *src);
 typedef UINTVAL (*encoding_codepoints_t)(PARROT_INTERP, STRING *src);
 typedef UINTVAL (*encoding_bytes_t)(PARROT_INTERP, STRING *src);
 typedef UINTVAL (*encoding_find_cclass_t)(PARROT_INTERP, STRING *s, const INTVAL *typetable, INTVAL flags, UINTVAL offset, UINTVAL count);
+typedef size_t (*encoding_hash_t)(PARROT_INTERP, const STRING *s, size_t hashval);
 
 /* iterator support */
 
@@ -57,6 +58,7 @@ struct _encoding {
     encoding_bytes_t                    bytes;
     encoding_iter_init_t                iter_init;
     encoding_find_cclass_t              find_cclass;
+    encoding_hash_t                     hash;
 };
 
 typedef struct _encoding ENCODING;
@@ -79,21 +81,25 @@ typedef INTVAL (*encoding_converter_t)(PARROT_INTERP, ENCODING *lhs, ENCODING *r
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 const ENCODING * Parrot_default_encoding(SHIM_INTERP);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const char * Parrot_encoding_c_name(SHIM_INTERP, INTVAL number_of_encoding);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 STRING* Parrot_encoding_name(SHIM_INTERP, INTVAL number_of_encoding);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL Parrot_encoding_number(PARROT_INTERP,
     ARGIN(const STRING *encodingname))
@@ -101,11 +107,13 @@ INTVAL Parrot_encoding_number(PARROT_INTERP,
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 INTVAL Parrot_encoding_number_of_str(SHIM_INTERP, ARGIN(const STRING *src))
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const ENCODING * Parrot_find_encoding(SHIM_INTERP,
@@ -122,6 +130,7 @@ encoding_converter_t Parrot_find_encoding_converter(PARROT_INTERP,
         __attribute__nonnull__(3);
 
 PARROT_EXPORT
+PARROT_PURE_FUNCTION
 PARROT_WARN_UNUSED_RESULT
 PARROT_CAN_RETURN_NULL
 const ENCODING* Parrot_get_encoding(SHIM_INTERP, INTVAL number_of_encoding);
@@ -143,7 +152,8 @@ INTVAL Parrot_make_default_encoding(SHIM_INTERP,
 PARROT_EXPORT
 PARROT_MALLOC
 PARROT_CANNOT_RETURN_NULL
-ENCODING * Parrot_new_encoding(SHIM_INTERP);
+ENCODING * Parrot_new_encoding(PARROT_INTERP)
+        __attribute__nonnull__(1);
 
 PARROT_EXPORT
 INTVAL Parrot_register_encoding(PARROT_INTERP,
@@ -153,7 +163,9 @@ INTVAL Parrot_register_encoding(PARROT_INTERP,
         __attribute__nonnull__(2)
         __attribute__nonnull__(3);
 
-void parrot_deinit_encodings(void);
+void parrot_deinit_encodings(PARROT_INTERP)
+        __attribute__nonnull__(1);
+
 void Parrot_str_internal_register_encoding_names(PARROT_INTERP)
         __attribute__nonnull__(1);
 
@@ -178,12 +190,14 @@ void Parrot_str_internal_register_encoding_names(PARROT_INTERP)
     , PARROT_ASSERT_ARG(encodingname))
 #define ASSERT_ARGS_Parrot_make_default_encoding __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(encoding))
-#define ASSERT_ARGS_Parrot_new_encoding __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_Parrot_new_encoding __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_register_encoding __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(encodingname) \
     , PARROT_ASSERT_ARG(encoding))
-#define ASSERT_ARGS_parrot_deinit_encodings __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_parrot_deinit_encodings __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_Parrot_str_internal_register_encoding_names \
      __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp))
@@ -222,6 +236,8 @@ void Parrot_str_internal_register_encoding_names(PARROT_INTERP)
     ((src)->encoding)->iter_init((i), (src), (iter))
 #define ENCODING_FIND_CCLASS(i, src, typetable, flags, pos, end) \
     ((src)->encoding)->find_cclass((i), (src), (typetable), (flags), (pos), (end))
+#define ENCODING_HASH(i, src, seed) \
+    ((src)->encoding)->hash((i), (src), (seed))
 
 #endif /* PARROT_ENCODING_H_GUARD */
 

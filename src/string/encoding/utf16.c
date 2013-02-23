@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: utf16.c 45720 2010-04-16 17:55:32Z petdance $
 
 =head1 NAME
 
@@ -298,7 +298,7 @@ to_encoding(PARROT_INTERP, ARGIN(STRING *src), ARGIN_NULLOK(STRING *dest))
 #if PARROT_HAS_ICU
     if (in_place) {
         /* need intermediate memory */
-        p = (UChar *)mem_sys_allocate(src_len * sizeof (UChar));
+        p = mem_gc_allocate_n_typed(interp, src_len, UChar);
     }
     else {
         Parrot_gc_reallocate_string_storage(interp, dest, sizeof (UChar) * src_len);
@@ -319,7 +319,7 @@ to_encoding(PARROT_INTERP, ARGIN(STRING *src), ARGIN_NULLOK(STRING *dest))
              * have to resize - required len in UChars is in dest_len
              */
             if (in_place)
-                p = (UChar *)mem_sys_realloc(p, dest_len * sizeof (UChar));
+                p = mem_gc_realloc_n_typed(interp, p, dest_len, UChar);
             else {
                 result->bufused = dest_len * sizeof (UChar);
                 Parrot_gc_reallocate_string_storage(interp, dest,
@@ -335,7 +335,7 @@ to_encoding(PARROT_INTERP, ARGIN(STRING *src), ARGIN_NULLOK(STRING *dest))
     if (in_place) {
         Parrot_gc_reallocate_string_storage(interp, src, src->bufused);
         memcpy(src->strstart, p, src->bufused);
-        mem_sys_free(p);
+        mem_gc_free(interp, p);
     }
     result->charset  = Parrot_unicode_charset_ptr;
     result->encoding = Parrot_utf16_encoding_ptr;
@@ -421,6 +421,12 @@ static UINTVAL
 find_cclass(PARROT_INTERP, ARGIN(STRING *s), ARGIN(const INTVAL *typetable),
 INTVAL flags, UINTVAL pos, UINTVAL end)
 {
+    UNUSED(s);
+    UNUSED(typetable);
+    UNUSED(flags);
+    UNUSED(pos);
+    UNUSED(end);
+
     Parrot_ex_throw_from_c_args(interp, NULL,
         EXCEPTION_UNIMPLEMENTED,
         "No find_cclass support in unicode encoding plugins");
@@ -843,7 +849,8 @@ Parrot_encoding_utf16_init(PARROT_INTERP)
         codepoints,
         bytes,
         iter_init,
-        find_cclass
+        find_cclass,
+        NULL
     };
     STRUCT_COPY_FROM_STRUCT(return_encoding, base_encoding);
     Parrot_register_encoding(interp, "utf16", return_encoding);

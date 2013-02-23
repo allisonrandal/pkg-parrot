@@ -1,6 +1,6 @@
 /*
- * $Id$
- * Copyright (C) 2002-2009, Parrot Foundation.
+ * $Id: optimizer.c 45804 2010-04-19 14:00:14Z mikehh $
+ * Copyright (C) 2002-2010, Parrot Foundation.
  */
 
 /*
@@ -256,6 +256,10 @@ cfg_optimize(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 =item C<int optimize(PARROT_INTERP, IMC_Unit *unit)>
 
+Runs after the CFG is built and handles constant propogation.
+
+used_once ... deletes assignments, when LHS is unused
+
 =cut
 
 */
@@ -366,7 +370,7 @@ if_branch(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
                               last->symregs, args, 0, 0);
                     last->opnum = tmp->opnum;
                     last->opsize = tmp->opsize;
-                    free(last->opname);
+                    mem_sys_free(last->opname);
                     last->opname = mem_sys_strdup(tmp->opname);
                     free_ins(tmp);
 
@@ -802,7 +806,7 @@ eval_ins(PARROT_INTERP, ARGIN(const char *op), size_t ops, ARGIN(SymReg **r))
     int i;
     op_info_t *op_info;
 
-    opnum = interp->op_lib->op_code(op, 1);
+    opnum = interp->op_lib->op_code(interp, op, 1);
     if (opnum < 0)
         IMCC_fatal(interp, 1, "eval_ins: op '%s' not found\n", op);
     op_info = interp->op_info_table + opnum;
@@ -1225,6 +1229,11 @@ branch_reorg(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 =item C<static int branch_cond_loop_swap(PARROT_INTERP, IMC_Unit *unit,
 Instruction *branch, Instruction *start, Instruction *cond)>
 
+Converts conditional loops to post-test
+
+Returns TRUE if any optimizations were performed. Otherwise, returns
+FALSE.
+
 =cut
 
 */
@@ -1293,7 +1302,7 @@ branch_cond_loop_swap(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGMOD(Instruction 
             changed = 1;
         }
 
-        free(label);
+        mem_sys_free(label);
     }
 
     return changed;
@@ -1461,6 +1470,10 @@ unused_label(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 
 =item C<static int dead_code_remove(PARROT_INTERP, IMC_Unit *unit)>
 
+dead code elimination
+... unreachable blocks
+... unreachable instructions
+
 =cut
 
 */
@@ -1540,6 +1553,8 @@ dead_code_remove(PARROT_INTERP, ARGMOD(IMC_Unit *unit))
 /*
 
 =item C<static int used_once(PARROT_INTERP, IMC_Unit *unit)>
+
+used_once ... deletes assignments, when LHS is unused
 
 =cut
 

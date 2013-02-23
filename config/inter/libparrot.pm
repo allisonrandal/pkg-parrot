@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id$
+# $Id: libparrot.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -105,7 +105,7 @@ sub runstep {
                                      && $conf->data->get('rpath') )
         ? $conf->data->get('rpath')
             . $conf->data->get('build_dir')
-            . $conf->data->get('slash')
+            . '/'
             . $conf->data->get('blib_dir')
         : ''
     );
@@ -144,7 +144,7 @@ sub runstep {
         $conf->data->set(libparrot_linkflags =>
         '-L'
         . $conf->data->get('build_dir')
-        . $conf->data->get('slash')
+        . '/'
         . $conf->data->get('blib_dir')
         . ' -lparrot'
         );

@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: fixedpmcarray.t 45360 2010-03-31 19:47:07Z NotFound $
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ out-of-bounds test. Checks INT and PMC keys.
 
 .sub main :main
     .include 'test_more.pir'
-    plan(76)
+    plan(83)
     test_setting_array_size()
     test_assign_from_another()
     test_assign_self()
@@ -27,6 +27,7 @@ out-of-bounds test. Checks INT and PMC keys.
     test_resize_exception()
     test_truthiness()
     test_tt991()
+    test_tt1039()
     test_setting_first_elem()
     test_setting_second_elem()
     test_negative_index()
@@ -45,6 +46,8 @@ out-of-bounds test. Checks INT and PMC keys.
     test_splice()
     test_sort()
     test_exists()
+    test_new_style_init()
+    test_invalid_init_tt1509()
 .end
 
 .sub test_exists
@@ -555,6 +558,48 @@ CODE
 CODE
 .end
 
+.sub test_tt1039
+    .local pmc arr
+    arr = new 'FixedPMCArray'
+    arr = 4
+    arr[0] = 'just'
+    arr[1] = 'another'
+    arr[2] = 'perl'
+    arr[3] = 'hacker'
+
+    .local pmc sorted_arr
+    sorted_arr = new 'FixedPMCArray'
+    sorted_arr = 4
+    sorted_arr[0] = 'another'
+    sorted_arr[1] = 'hacker'
+    sorted_arr[2] = 'just'
+    sorted_arr[3] = 'perl'
+
+    $P0 = get_global 'cmpfn1'
+    $P1 = clone arr
+    $P1.'sort'($P0)
+    is_deeply($P1, sorted_arr, 'fpa.sort called with normal Sub')
+
+    $P0 = get_global 'cmpfn2'
+    $P1 = clone arr
+    $P1.'sort'($P0)
+    is_deeply($P1, sorted_arr, 'fpa.sort called with MultiSub')
+.end
+
+.sub 'cmpfn1'
+    .param pmc a
+    .param pmc b
+    $I0 = cmp_str a, b
+    .return ($I0)
+.end
+
+.sub 'cmpfn2' :multi(_, _)
+    .param pmc a
+    .param pmc b
+    $I0 = cmp_str a, b
+    .return ($I0)
+.end
+
 .sub test_resize_exception
     throws_substring(<<'CODE',"FixedPMCArray: Can't resize",'cannot resize FixedPMCArray')
         .sub main
@@ -623,9 +668,39 @@ CODE
     is($I0,1,'size of FixedPMCArray is 1')
 .end
 
+.sub 'test_new_style_init'
+    $P0 = new 'FixedPMCArray', 10
+
+    $I0 = $P0
+    is($I0, 10, "New style init creates the correct # of elements")
+
+    $P0 = new ['FixedPMCArray'], 10
+
+    $I0 = $P0
+    is($I0, 10, "New style init creates the correct # of elements for a key constant")
+
+    $P1 = new 'Integer'
+    $P0[9] = $P1
+    $P2 = $P0[9]
+    is($P2, $P1, 'New style init creates the array')
+.end
+
+.sub test_invalid_init_tt1509
+    throws_substring(<<'CODE', 'Cannot set array size to a negative number (-10)', 'New style init does not dump core for negative array lengths')
+    .sub main
+        $P0 = new ['FixedPMCArray'], -10
+    .end
+CODE
+
+    throws_substring(<<'CODE', 'Cannot set array size to a negative number (-10)', 'New style init (key constant) does not dump core for negative array lengths')
+    .sub main
+        $P0 = new 'FixedPMCArray', -10
+    .end
+CODE
+.end
+
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

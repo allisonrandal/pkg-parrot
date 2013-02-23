@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2001-2009, Parrot Foundation.
-  $Id$
+  $Id: readline_c.in 42918 2009-12-06 15:03:28Z fperrad $
 */
 
 #include <stdio.h>

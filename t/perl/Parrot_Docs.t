@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id$
+# $Id: Parrot_Docs.t 37235 2009-03-09 09:04:58Z allison $
 
 use strict;
 use warnings;

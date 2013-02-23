@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id$
+# $Id: Trace.pm 42369 2009-11-08 14:32:07Z jkeenan $
 package Parrot::Configure::Trace;
 use strict;
 use warnings;

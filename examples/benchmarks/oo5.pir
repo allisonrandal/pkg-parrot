@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: oo5.pir 38923 2009-05-19 06:07:42Z cotto $
 
 .sub bench :main
     .local pmc cl

@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id$
+# $Id: japh.t 37404 2009-03-14 03:10:14Z allison $
 
 use strict;
 use warnings;

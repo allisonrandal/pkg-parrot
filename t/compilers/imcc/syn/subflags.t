@@ -1,10 +1,10 @@
 #!./parrot
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: subflags.t 44367 2010-02-23 05:07:43Z mikehh $
 
 =head1 NAME
 
-t/compilers/imcc/syn/subflags.t 
+t/compilers/imcc/syn/subflags.t
 
 =head1 SYNOPSIS
 
@@ -185,3 +185,9 @@ test flags on PIR subs
 .sub 'anon4' :subid('subid4')
     .return ('anon4')
 .end
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

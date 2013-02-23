@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: heredocmain.c 43206 2009-12-22 14:36:43Z coke $
  * Copyright (C) 2008-2009, Parrot Foundation.
  */
 

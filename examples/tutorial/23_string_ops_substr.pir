@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: 23_string_ops_substr.pir 40124 2009-07-16 21:36:57Z allison $
 
 =head1 String Operations (continued)
 

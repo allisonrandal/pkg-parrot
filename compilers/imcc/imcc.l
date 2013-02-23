@@ -30,7 +30,7 @@
  *
  * The tokenizer.
  *
- * $Id$
+ * $Id: imcc.l 44649 2010-03-05 16:20:00Z tene $
  *
  */
 
@@ -718,20 +718,32 @@ SP              [ ]
     }
 
 <macro>".$"{ID} {
-        if (valp) {
-            const size_t len = strlen(IMCC_INFO(interp)->cur_macro_name) + yyleng + 12;
-            char * const label = (char *)mem_sys_allocate(len);
+    if (valp) {
+        if (!IMCC_INFO(interp)->cur_macro_name) {
+            if (valp->s)
+                mem_sys_free(valp->s);
+            IMCC_fataly(interp, EXCEPTION_SYNTAX_ERROR,
+                "Invalid LABEL outside of macro");
+        }
+        else {
+            const char * const fmt    = "local__%s__%s__$";
+            const size_t fmtlen = strlen(fmt) - (2 * strlen("%s"));
+            const size_t len    = strlen(IMCC_INFO(interp)->cur_macro_name)
+                                + yyleng + fmtlen;
+            char * const label  = (char *)mem_sys_allocate(len);
 
-            snprintf(label, len, "local__%s__%s__$",
-                IMCC_INFO(interp)->cur_macro_name, yytext+2);
+            /* skip over ".$" prefix with the +2 */
+            snprintf(label, len, fmt,
+                IMCC_INFO(interp)->cur_macro_name, yytext + 2);
 
             if (valp->s)
                 mem_sys_free(valp->s);
             valp->s = label;
         }
-
-        return IDENTIFIER;
     }
+
+    return IDENTIFIER;
+}
 
 <macro>^{WS}+                       /* skip leading ws */;
 <macro>{WS}+                        DUP_AND_RET(valp, ' ');
@@ -775,7 +787,7 @@ int yywrap(void* yyscanner) {
 static macro_frame_t *
 new_frame(PARROT_INTERP) {
     static int label   = 0;
-    macro_frame_t * const tmp = mem_allocate_zeroed_typed(macro_frame_t);
+    macro_frame_t * const tmp = mem_gc_allocate_zeroed_typed(interp, macro_frame_t);
 
     tmp->label         = ++label;
     tmp->s.line        = IMCC_INFO(interp)->line;
@@ -883,7 +895,7 @@ read_braced(YYSTYPE *valp, PARROT_INTERP, const char *macro_name,
                         macro_name);
 
         len     += strlen(val.s);
-        current  = (char *)realloc(current, len + 1);
+        current  = (char *)mem_sys_realloc(current, len + 1);
         strcat(current,val.s);
 
         mem_sys_free(val.s);
@@ -951,7 +963,7 @@ read_params(YYSTYPE *valp, PARROT_INTERP, params_t *params,
         else {
             if (!need_id || c != ' ') {
                 len     += strlen(val.s);
-                current  = (char *)realloc(current, len + 1);
+                current  = (char *)mem_sys_realloc(current, len + 1);
                 strcat(current, val.s);
             }
 
@@ -1007,7 +1019,6 @@ read_macro(YYSTYPE *valp, PARROT_INTERP, void *yyscanner)
     }
 
     while (c != ENDM) {
-        char *old_s = valp->s;
         int   elem_len;
 
         if (c <= 0) {
@@ -1095,7 +1106,7 @@ define_macro(PARROT_INTERP, ARGIN(const char *name), ARGIN(const params_t *param
         m->expansion = NULL;
     }
     else {
-        m = mem_allocate_zeroed_typed(macro_t);
+        m = mem_gc_allocate_zeroed_typed(interp, macro_t);
 
         if (!IMCC_INFO(interp)->macros)
             IMCC_INFO(interp)->macros = parrot_new_cstring_hash(interp);
@@ -1139,7 +1150,7 @@ expand_macro(PARROT_INTERP, ARGIN(const char *name), void *yyscanner)
 
     m = find_macro(interp, name);
     if (m) {
-        int i,c,start_cond;
+        int i, c, start_cond;
 
         macro_frame_t * frame = new_frame(interp);
         frame->params         = &m->params;

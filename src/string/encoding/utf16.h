@@ -1,7 +1,7 @@
 /* utf16.h
  *  Copyright (C) 2004-2007, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: utf16.h 41533 2009-09-27 17:30:32Z NotFound $
  *  Overview:
  *     This is the header for the utf16 variable-width encoding.
  *  Data Structure and Algorithms:

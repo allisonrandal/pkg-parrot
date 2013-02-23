@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id $
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: c_macro_args.t 44326 2010-02-22 22:32:10Z mikehh $
 
 use strict;
 use warnings;

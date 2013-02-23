@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: misc.h 38331 2009-04-24 18:37:41Z coke $
  * Copyright (C) 2009, Parrot Foundation.
  */
 

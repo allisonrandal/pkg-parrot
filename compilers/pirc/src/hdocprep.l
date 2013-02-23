@@ -27,7 +27,7 @@
 %{
 
 /*
- * $Id$
+ * $Id: hdocprep.l 43258 2009-12-27 05:15:10Z coke $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

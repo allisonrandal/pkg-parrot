@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Base.pir 45670 2010-04-14 14:24:36Z allison $
 
 =head1 TITLE
 
@@ -65,7 +65,7 @@ END:
 
 =cut
 
-.sub close :method
+.sub close :method :nsentry
     .local pmc temp
 
     # reset source

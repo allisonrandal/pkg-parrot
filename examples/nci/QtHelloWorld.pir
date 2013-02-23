@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: QtHelloWorld.pir 44152 2010-02-19 01:53:12Z plobsing $
 
 =head1 NAME
 
@@ -21,7 +21,8 @@ work, see F<examples/nci/PQt.C> for more information.
 
 Note that this will either need JIT for building the NCI-functions on
 the fly. If this is not available try adding missing signatures to
-F<src/call_list.txt> and rebuilding Parrot.
+F<src/nci/extra_thunks.nci>, running F<tools/dev/mk_nci_thunks.pl>, and
+rebuilding Parrot.
 
 =cut
 .sub main

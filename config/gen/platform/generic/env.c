@@ -1,6 +1,6 @@
 /*
- * $Id$
- * Copyright (C) 2004-2006, Parrot Foundation.
+ * $Id: env.c 45402 2010-04-05 04:03:11Z petdance $
+ * Copyright (C) 2004-2010, Parrot Foundation.
  */
 
 /*
@@ -26,7 +26,9 @@ Environment manipulation stuff
 
 /*
 
-=item C<void Parrot_setenv(const char *name, const char *value)>
+=item C<void Parrot_setenv(PARROT_INTERP, STRING *str_name, STRING *str_value)>
+
+Set up Environment vars
 
 =cut
 
@@ -61,7 +63,9 @@ Parrot_setenv(PARROT_INTERP, STRING *str_name, STRING *str_value)
 
 /*
 
-=item C<void Parrot_unsetenv(const char *name)>
+=item C<void Parrot_unsetenv(PARROT_INTERP, STRING *str_name)>
+
+UnSet Environment vars
 
 =cut
 
@@ -70,7 +74,7 @@ Parrot_setenv(PARROT_INTERP, STRING *str_name, STRING *str_value)
 void
 Parrot_unsetenv(PARROT_INTERP, STRING *str_name)
 {
-    char *name = Parrot_str_to_cstring(interp, str_name);
+    char * const name = Parrot_str_to_cstring(interp, str_name);
 #ifdef PARROT_HAS_UNSETENV
     unsetenv(name);
 #else
@@ -81,7 +85,9 @@ Parrot_unsetenv(PARROT_INTERP, STRING *str_name)
 
 /*
 
-=item C<char * Parrot_getenv(const char *name, int *free_it)>
+=item C<char * Parrot_getenv(PARROT_INTERP, STRING *str_name)>
+
+Get Environment vars
 
 =cut
 

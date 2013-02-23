@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: utf8.c 45626 2010-04-13 08:32:58Z chromatic $
 
 =head1 NAME
 
@@ -41,14 +41,12 @@ static UINTVAL codepoints(PARROT_INTERP, ARGMOD(STRING *src))
 
 PARROT_WARN_UNUSED_RESULT
 static UINTVAL find_cclass(PARROT_INTERP,
-    ARGIN(STRING *s),
-    ARGIN(const INTVAL *typetable),
-    INTVAL flags,
-    UINTVAL pos,
-    UINTVAL end)
-        __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        __attribute__nonnull__(3);
+    SHIM(STRING *s),
+    SHIM(const INTVAL *typetable),
+    SHIM(INTVAL flags),
+    SHIM(UINTVAL pos),
+    SHIM(UINTVAL end))
+        __attribute__nonnull__(1);
 
 static UINTVAL get_byte(SHIM_INTERP,
     ARGIN(const STRING *src),
@@ -193,9 +191,7 @@ static const void * utf8_skip_forward(ARGIN(const void *ptr), UINTVAL n)
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(src))
 #define ASSERT_ARGS_find_cclass __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
-       PARROT_ASSERT_ARG(interp) \
-    , PARROT_ASSERT_ARG(s) \
-    , PARROT_ASSERT_ARG(typetable))
+       PARROT_ASSERT_ARG(interp))
 #define ASSERT_ARGS_get_byte __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(src))
 #define ASSERT_ARGS_get_bytes __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
@@ -285,6 +281,8 @@ typedef unsigned char utf8_t;
 byte_len)>
 
 Returns the number of characters in the C<byte_len> bytes from C<*ptr>.
+
+XXX This function is unused.
 
 =cut
 
@@ -420,6 +418,8 @@ utf8_skip_forward(ARGIN(const void *ptr), UINTVAL n)
 =item C<static const void * utf8_skip_backward(const void *ptr, UINTVAL n)>
 
 Moves C<ptr> C<n> characters back.
+
+XXX This function is unused.
 
 =cut
 
@@ -585,7 +585,7 @@ to_encoding(PARROT_INTERP, ARGMOD(STRING *src), ARGMOD_NULLOK(STRING *dest))
     String_iter src_iter;
     UINTVAL offs, dest_len, dest_pos, src_len;
     const int in_place = (dest == NULL);
-    unsigned char *new_pos, *pos, *p;
+    unsigned char *p;
 
     if (src->encoding == Parrot_utf8_encoding_ptr)
         return in_place ? src : Parrot_str_copy(interp, src);
@@ -608,7 +608,7 @@ to_encoding(PARROT_INTERP, ARGMOD(STRING *src), ARGMOD_NULLOK(STRING *dest))
 
     if (in_place) {
         /* need intermediate memory */
-        p = (unsigned char *)mem_sys_allocate(src_len);
+        p = mem_gc_allocate_n_typed(interp, src_len, unsigned char);
     }
     else {
         Parrot_gc_reallocate_string_storage(interp, dest, src_len);
@@ -625,13 +625,16 @@ to_encoding(PARROT_INTERP, ARGMOD(STRING *src), ARGMOD_NULLOK(STRING *dest))
         dest_pos = 0;
         for (offs = 0; offs < src_len; ++offs) {
             const UINTVAL c = src_iter.get_and_advance(interp, &src_iter);
+            unsigned char *new_pos;
+            unsigned char *pos;
+
             if (dest_len - dest_pos < 6) {
                 UINTVAL need = (UINTVAL)((src->strlen - offs) * 1.5);
                 if (need < 16)
                     need = 16;
                 dest_len += need;
                 if (in_place)
-                    p = (unsigned char *)mem_sys_realloc(p, dest_len);
+                    p = mem_gc_realloc_n_typed(interp, p, dest_len, unsigned char);
                 else {
                     result->bufused = dest_pos;
                     Parrot_gc_reallocate_string_storage(interp, dest, dest_len);
@@ -648,7 +651,7 @@ to_encoding(PARROT_INTERP, ARGMOD(STRING *src), ARGMOD_NULLOK(STRING *dest))
     if (in_place) {
         Parrot_gc_reallocate_string_storage(interp, src, src->bufused);
         memcpy(src->strstart, p, src->bufused);
-        mem_sys_free(p);
+        mem_gc_free(interp, p);
     }
     return result;
 }
@@ -709,8 +712,8 @@ Stub, the charset level handles this for unicode strings.
 
 PARROT_WARN_UNUSED_RESULT
 static UINTVAL
-find_cclass(PARROT_INTERP, ARGIN(STRING *s), ARGIN(const INTVAL *typetable),
-INTVAL flags, UINTVAL pos, UINTVAL end)
+find_cclass(PARROT_INTERP, SHIM(STRING *s), SHIM(const INTVAL *typetable),
+SHIM(INTVAL flags), SHIM(UINTVAL pos), SHIM(UINTVAL end))
 {
     Parrot_ex_throw_from_c_args(interp, NULL,
         EXCEPTION_UNIMPLEMENTED,
@@ -1055,7 +1058,8 @@ Parrot_encoding_utf8_init(PARROT_INTERP)
         codepoints,
         bytes,
         iter_init,
-        find_cclass
+        find_cclass,
+        NULL
     };
     STRUCT_COPY_FROM_STRUCT(return_encoding, base_encoding);
     Parrot_register_encoding(interp, "utf8", return_encoding);

@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: globals.t 39817 2009-06-29 02:05:49Z Infinoid $
 
 =head1 NAME
 

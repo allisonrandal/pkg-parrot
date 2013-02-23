@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: misc.h 37201 2009-03-08 12:07:48Z fperrad $
  * Copyright (C) 2004-2007, Parrot Foundation.
  */
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: fixup_gen_file.pl 36833 2009-02-17 20:09:26Z allison $
 
 =head1 NAME
 

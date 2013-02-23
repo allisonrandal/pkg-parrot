@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2009-2010, Parrot Foundation.
+# $Id: vivify.t 44389 2010-02-23 12:57:26Z mikehh $
 
 =head1 NAME
 
@@ -134,7 +134,6 @@ Tests Parrot's experimental vivify opcode.
 
 # Local Variables:
 #   mode: pir
-#   cperl-indent-level: 4
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 ft=pir :
+# vim: expandtab shiftwidth=4 ft=pir:

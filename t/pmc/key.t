@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: key.t 42703 2009-11-21 14:15:41Z jkeenan $
 
 =head1 NAME
 

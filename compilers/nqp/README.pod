@@ -1,4 +1,4 @@
-## $Id$
+## $Id: README.pod 27198 2008-04-26 19:29:28Z pmichaud $
 
 =head1 NQP - Not Quite Perl (6)
 

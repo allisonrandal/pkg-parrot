@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: lex-03.t 42575 2009-11-19 01:00:42Z jkeenan $
 # inter/lex-03.t
 
 use strict;

@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Manifest.pm 45334 2010-03-31 04:51:16Z bubaflub $
 # Copyright (C) 2007, Parrot Foundation.
 
 =head1 NAME
@@ -68,7 +68,7 @@ sub new {
     my %data = (
         id         => '$' . 'Id$',
         time       => scalar gmtime,
-        cmd        => -d '.svn' ? 'svn' : 'svk',
+        cmd        => 'svn',
         script     => $argsref->{script},
         file       => $argsref->{file}      ? $argsref->{file}      : q{MANIFEST},
         skip       => $argsref->{skip}      ? $argsref->{skip}      : q{MANIFEST.SKIP},
@@ -241,8 +241,6 @@ sub _get_manifest_entry {
             : m[^lib/Parrot/]                 ? '[devel]lib'
             : m[^runtime/]                    ? '[library]'
             : m[^src/pmc/.*\.h]               ? '[devel]include'
-            : m[^src/pmc/.*\.pmc]             ? '[devel]src'
-            : m[^src/dynpmc/.*\.pmc]          ? '[devel]src'
             : m[^runtime/parrot/library/PCT]  ? '[pct]'
             : m[^runtime/parrot/library/PCT]  ? '[pge]'
             : m[^runtime/parrot/library/TGE]  ? '[tge]'

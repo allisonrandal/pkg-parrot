@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# $Id: branching_guide.pod 42784 2009-11-22 04:26:22Z jkeenan $
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id$
+# $Id: getopt_demo.pir 43141 2009-12-18 07:27:22Z tene $
 
 =head1 NAME
 

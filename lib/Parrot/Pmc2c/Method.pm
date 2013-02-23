@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id$
+# $Id: Method.pm 42783 2009-11-22 04:18:46Z jkeenan $
 package Parrot::Pmc2c::Method;
 use strict;
 use warnings;

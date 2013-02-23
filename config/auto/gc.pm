@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: gc.pm 43593 2010-01-26 02:39:50Z jkeenan $
 
 =head1 NAME
 
@@ -45,9 +45,9 @@ sub runstep {
 
     $conf->data->set(
         TEMP_gc_c => <<"EOF",
-\$(SRC_DIR)/gc/alloc_resources\$(O):	\$(GENERAL_H_FILES) \$(SRC_DIR)/gc/alloc_resources.c
+src/gc/alloc_resources\$(O):	\$(GENERAL_H_FILES) src/gc/alloc_resources.c
 EOF
-        TEMP_gc_o => "\$(SRC_DIR)/gc/alloc_resources\$(O)",
+        TEMP_gc_o => "src/gc/alloc_resources\$(O)",
         gc_flag   => '',
     );
     print(" ($gc) ") if $conf->options->get('verbose');

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id$
+# $Id: charset.pm 44649 2010-03-05 16:20:00Z tene $
 
 =head1 NAME
 
@@ -75,8 +75,7 @@ END
     }
 
     # build list of libraries for link line in Makefile
-    my $slash = $conf->data->get('slash');
-    $TEMP_charset_o =~ s/^| / src${slash}string${slash}charset${slash}/g;
+    $TEMP_charset_o =~ s{^| }{ src/string/charset/}g;
 
     $conf->data->set(
         charset            => $charset_list,

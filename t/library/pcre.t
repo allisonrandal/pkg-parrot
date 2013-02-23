@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: pcre.t 40353 2009-07-31 23:34:00Z NotFound $
 
 use strict;
 use warnings;

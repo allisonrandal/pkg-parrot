@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2009-2010, Parrot Foundation.
+# $Id: inf_nan.t 44387 2010-02-23 12:36:16Z mikehh $
 
 =head1 NAME
 
@@ -500,8 +500,7 @@ Tests for mathematical operations with Inf and Nan.
 .end
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

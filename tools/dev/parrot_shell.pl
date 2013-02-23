@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id$
+# $Id: parrot_shell.pl 40886 2009-08-31 06:35:38Z dukeleto $
 
 use 5.008;
 use strict;

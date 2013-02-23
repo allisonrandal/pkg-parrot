@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2003-2007, Parrot Foundation.
-# $Id$
+# $Id: ncidef2pasm.pl 42770 2009-11-21 20:00:08Z jkeenan $
 
 =head1 NAME
 

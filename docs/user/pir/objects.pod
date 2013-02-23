@@ -1,4 +1,4 @@
-# $Id$
+# $Id: objects.pod 39689 2009-06-21 17:36:39Z japhb $
 
 =head1 Programming Parrot -- Using objects
 

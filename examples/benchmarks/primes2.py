@@ -1,6 +1,6 @@
 """
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id$
+$Id: primes2.py 38923 2009-05-19 06:07:42Z cotto $
 
 =head1 NAME
 

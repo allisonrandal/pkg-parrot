@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: pbc_compat.t 37029 2009-02-27 03:41:02Z jkeenan $
 use strict;
 use warnings;
 use Carp;

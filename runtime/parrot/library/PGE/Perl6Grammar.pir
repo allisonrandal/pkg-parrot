@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: Perl6Grammar.pir 41741 2009-10-06 18:40:07Z pmichaud $
 
 =head1 TITLE
 

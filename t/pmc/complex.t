@@ -1,6 +1,6 @@
 #! parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: complex.t 44753 2010-03-08 01:49:12Z plobsing $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ Tests the Complex PMC.
     .include 'fp_equality.pasm'
     .include "iglobals.pasm"
 
-    plan(467)
+    plan(459)
 
     string_parsing()
     exception_malformed_string__real_part()
@@ -50,10 +50,10 @@ Tests the Complex PMC.
     instantiate__pir__s()
     test_complex_neg()
     test_clone()
+    test_freeze_thaw()
     test_sub()
     test_i_sub()
     sprintf_with_a_complex()
-    pow_with_complex_numbers()
     e_raised_pi_time_i__plus_1_equal_0()
     ln_of_complex_numbers()
     exp_of_complex_numbers()
@@ -592,6 +592,14 @@ handler:
      .fp_eq_ok($N1, -3.0, '... nor to imag portion')
 .end
 
+.sub test_freeze_thaw
+    $P0 = new ['Complex']
+    set $P0, "1 - 3i"
+    $S0 = freeze $P0
+    $P1 = thaw $S0
+    is($P0, $P1, 'roundtrip serialize Complex PMC')
+.end
+
 .sub test_sub
     .local pmc d, f, c
     d = new ['Undef']
@@ -639,33 +647,6 @@ handler:
     .sprintf_is( "%d%+di", "1.35+35.1i", "1+35i" )
     .sprintf_is( "%.3f%+.3fi", "0+3.141592653589793i", "0.000+3.142i" )
     .sprintf_is( "%.3f%+.3fi", "0+i", "0.000+1.000i" )
-.end
-
-.macro pow_test_is(base, power, message)
-    c = .base
-    c2 = .power
-    c3 = pow c, c2
-    $S0 = sprintf "%.6f%+.6fi", c3
-    $S1 = .message
-    is( $S0, $S1, $S1 )
-.endm
-
-.sub pow_with_complex_numbers
-    .local pmc c, c2, c3
-    c  = new ['Complex']
-    c2 = new ['Complex']
-    c3 = new ['Complex']
-    .pow_test_is( "i", "i", "0.207880+0.000000i" )
-    .pow_test_is( "i", "2", "-1.000000+0.000000i" )
-    .pow_test_is( "2i", "2", "-4.000000+0.000000i" )
-    .pow_test_is( "2+2i", "2+2i", "-1.452505-0.809890i" )
-    .pow_test_is( "i", "0.5i", "0.455938+0.000000i" )
-    .pow_test_is( 2, "2i", "0.183457+0.983028i" )
-    c2 = new ['Integer']
-    .pow_test_is( "2i", 2, "-4.000000+0.000000i" )
-    .pow_test_is( "2", 4, "16.000000+0.000000i" )
-    c2 = new ['Float']
-    .pow_test_is( "2i", 0.5, "1.000000+1.000000i" )
 .end
 
 .sub e_raised_pi_time_i__plus_1_equal_0
@@ -1206,8 +1187,7 @@ todo:
 
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2009, The Perl Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: pod_description.t 44329 2010-02-22 23:13:26Z mikehh $
 
 use strict;
 use warnings;

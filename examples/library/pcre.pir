@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: pcre.pir 39302 2009-06-01 16:06:20Z NotFound $
 
 =head1 NAME
 

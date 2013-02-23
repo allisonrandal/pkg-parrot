@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: hashiteratorkey.t 44379 2010-02-23 11:15:03Z mikehh $
 
 =head1 NAME
 
@@ -37,8 +37,7 @@ iterating over Hash. Just check that we create it.
 
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4:
+# vim: expandtab shiftwidth=4 ft=pir:

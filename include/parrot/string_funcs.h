@@ -1,7 +1,7 @@
 /* string_funcs.h
- *  Copyright (C) 2001-2008, Parrot Foundation.
+ *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: string_funcs.h 45613 2010-04-12 20:52:49Z petdance $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -213,7 +213,7 @@ STRING * Parrot_str_format_data(PARROT_INTERP,
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
-void Parrot_str_free_cstring(ARGIN_NULLOK(char *p));
+void Parrot_str_free_cstring(ARGFREE(char *p));
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
@@ -249,6 +249,11 @@ INTVAL Parrot_str_is_cclass(PARROT_INTERP,
         __attribute__nonnull__(3);
 
 PARROT_EXPORT
+PARROT_HOT
+PARROT_PURE_FUNCTION
+INTVAL Parrot_str_is_null(SHIM_INTERP, ARGIN_NULLOK(const STRING *s));
+
+PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 STRING* Parrot_str_join(PARROT_INTERP,
@@ -258,9 +263,8 @@ STRING* Parrot_str_join(PARROT_INTERP,
         __attribute__nonnull__(3);
 
 PARROT_EXPORT
-PARROT_IGNORABLE_RESULT
-INTVAL /*@alt void@*/
-Parrot_str_length(PARROT_INTERP, ARGMOD(STRING *s))
+PARROT_WARN_UNUSED_RESULT
+INTVAL Parrot_str_length(PARROT_INTERP, ARGMOD(STRING *s))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2)
         FUNC_MODIFIES(*s);
@@ -382,7 +386,7 @@ STRING * Parrot_str_set(PARROT_INTERP,
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
-PARROT_CANNOT_RETURN_NULL
+PARROT_CAN_RETURN_NULL
 PMC* Parrot_str_split(PARROT_INTERP,
     ARGIN_NULLOK(STRING *delim),
     ARGIN_NULLOK(STRING *str))
@@ -492,6 +496,8 @@ STRING * string_increment(PARROT_INTERP, ARGIN(const STRING *s))
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
+PARROT_HOT
+PARROT_PURE_FUNCTION
 INTVAL STRING_is_null(SHIM_INTERP, ARGIN_NULLOK(const STRING *s));
 
 PARROT_EXPORT
@@ -516,6 +522,7 @@ STRING * string_make_from_charset(PARROT_INTERP,
 
 PARROT_EXPORT
 PARROT_WARN_UNUSED_RESULT
+PARROT_PURE_FUNCTION
 INTVAL string_max_bytes(SHIM_INTERP, ARGIN(const STRING *s), UINTVAL nchars)
         __attribute__nonnull__(2);
 
@@ -626,6 +633,7 @@ STRING* Parrot_str_from_uint(PARROT_INTERP,
 #define ASSERT_ARGS_Parrot_str_is_cclass __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(s))
+#define ASSERT_ARGS_Parrot_str_is_null __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
 #define ASSERT_ARGS_Parrot_str_join __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
     , PARROT_ASSERT_ARG(ar))

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: 08-nolines.t 37200 2009-03-08 11:46:01Z fperrad $
 # 08-nolines.t
 
 use strict;

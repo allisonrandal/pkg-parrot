@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id$
+# $Id: streams.t 38689 2009-05-11 17:22:23Z NotFound $
 
 use strict;
 use warnings;

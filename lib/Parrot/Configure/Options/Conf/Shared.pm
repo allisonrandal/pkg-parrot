@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: Shared.pm 44984 2010-03-17 17:09:04Z gerd $
 package Parrot::Configure::Options::Conf::Shared;
 
 use strict;
@@ -30,6 +30,7 @@ our @shared_valid_options = qw{
     fatal-step
     floatval
     help
+    hintsfile
     icu-config
     icuheaders
     icushared
@@ -60,6 +61,7 @@ our @shared_valid_options = qw{
     ops
     optimize
     parrot_is_shared
+    pkgconfigdir
     prefix
     profile
     sbindir

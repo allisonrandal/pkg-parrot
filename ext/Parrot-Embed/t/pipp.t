@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2008-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: pipp.t 44437 2010-02-24 02:07:33Z jkeenan $
 
 use strict;
 use warnings;
@@ -33,8 +33,8 @@ my $pipp_x = $interp->find_global( 'Pipp' );
     isa_ok( $pipp_x, 'Parrot::PMC' );
 }
 
-# TODO: get hll id of Pipp
-# TODO: set hll namespace root to 'pipp'
+# todo: get hll id of Pipp
+# todo: set hll namespace root to 'pipp'
 # find sub 'eval' and hll namespace 'pipp'
 my $pipp_eval = $interp->find_global( 'pipp', 'eval' );
 # isa_ok( $pipp_eval, 'Parrot::PMC', todo => '$pipp_eval is not found'  );
@@ -73,3 +73,11 @@ if (0)
     ok( $pmc, 'invoke() should return a PMC, given that signature' );
     is( $pmc->get_string(), 42, 'value returned in the PMC' );
 }
+
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2008-2010, Parrot Foundation.
+# $Id: hll.t 44422 2010-02-23 23:43:40Z mikehh $
 
 use strict;
 use warnings;
@@ -81,3 +81,10 @@ CODE
 Stack
 OUT
 }
+
+# Local Variables:
+#   mode: cperl
+#   cperl-indent-level: 4
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4:

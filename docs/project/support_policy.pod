@@ -1,5 +1,5 @@
 # Copyright (C) 2009, The Parrot Foundation.
-# $Id$
+# $Id: support_policy.pod 43101 2009-12-16 14:09:42Z coke $
 
 =pod
 

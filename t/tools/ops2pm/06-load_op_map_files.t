@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: 06-load_op_map_files.t 36833 2009-02-17 20:09:26Z allison $
 # 06-load_op_map_files.t
 
 use strict;

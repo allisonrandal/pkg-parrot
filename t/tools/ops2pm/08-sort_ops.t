@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: 08-sort_ops.t 44426 2010-02-24 00:28:18Z jkeenan $
 # 08-sort_ops.t
 
 use strict;
@@ -177,17 +177,12 @@ ok( chdir $main::topdir, "Positioned at top-level Parrot directory" );
             \$stderr
         );
         ok($ret, "sort_ops returned successfully" );
-#  TODO: {
-#             local $TODO = 'broken warning about experimental ops';
 
-            like(
-                $stderr,
-                qr|experimental, not in ops\.num|,
-                "Got expected warning about experimental ops"
-            );
-#        }
-
-        # To do:  Test that the sorting was correct.
+        like(
+            $stderr,
+            qr|experimental, not in ops\.num|,
+            "Got expected warning about experimental ops"
+        );
 
         ok( chdir $cwd, 'changed back to starting directory after testing' );
     }

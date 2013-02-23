@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: pushaction.t 42213 2009-11-01 16:45:23Z coke $
 
 use strict;
 use warnings;

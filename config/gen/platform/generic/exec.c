@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: exec.c 44291 2010-02-22 09:28:39Z bacek $
  * Copyright (C) 2004-2009, Parrot Foundation.
  */
 
@@ -106,7 +106,7 @@ Parrot_Run_OS_Command_Argv(PARROT_INTERP, PMC *cmdargs)
         int status, i;
         STRING *s;
         char   *cmd;
-        char  **argv = mem_allocate_n_typed((len+1), char*);
+        char  **argv = mem_gc_allocate_n_typed(interp, (len+1), char*);
 
         for (i = 0; i < len; ++i) {
             s = VTABLE_get_string_keyed_int(interp, cmdargs, i);

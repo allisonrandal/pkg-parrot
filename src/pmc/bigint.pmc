@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2004-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2004-2010, Parrot Foundation.
+$Id: bigint.pmc 45350 2010-03-31 11:02:21Z mikehh $
 
 =head1 NAME
 
@@ -14,9 +14,9 @@ C<BigInt> provides arbitrary precision integer mathematic functions.
 
 =over 4
 
-=item C<static void bigint_set_long(Interp*, PMC *, long value)>
+=item C<static void bigint_set_long(PARROT_INTERP, PMC *self, long value)>
 
-=item C<static void bigint_set_double(Interp*, PMC *, double value)>
+=item C<static void bigint_set_double(PARROT_INTERP, PMC *self, double value)>
 
 =cut
 
@@ -35,23 +35,381 @@ typedef struct BIGINT {
 } BIGINT;
 
 
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static void bigint_abs(PARROT_INTERP, ARGIN(PMC *self), ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_add_bigint(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGIN(PMC *value),
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_add_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_check_divide_zero(PARROT_INTERP, ARGIN(PMC *value))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void bigint_clear(PARROT_INTERP, ARGIN(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+static INTVAL bigint_cmp(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *value))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3);
+
+PARROT_WARN_UNUSED_RESULT
+static INTVAL bigint_cmp_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void bigint_div_bigint(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGIN(PMC *value),
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_div_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_fdiv_bigint(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGMOD(PMC *value),
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*value)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_fdiv_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+PARROT_WARN_UNUSED_RESULT
+static int bigint_get_bool(PARROT_INTERP, ARGIN(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+static double bigint_get_double(PARROT_INTERP, ARGIN(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+static long bigint_get_long(PARROT_INTERP, ARGIN(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
+static BIGINT* bigint_get_self(PARROT_INTERP, ARGIN(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
+static char * bigint_get_string(PARROT_INTERP, ARGIN(PMC *self), int base)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void bigint_init(PARROT_INTERP, ARGIN(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2);
+
+static void bigint_mod_bigint(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGMOD(PMC *value),
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*value)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_mod_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_mul_bigint(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGIN(PMC *value),
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_mul_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_neg(PARROT_INTERP, ARGIN(PMC *self), ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_pow_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_set(PARROT_INTERP, ARGMOD(PMC *dest), ARGIN(PMC *src))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_set_double(PARROT_INTERP,
+    ARGMOD(PMC *self),
+    double value)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*self);
+
+static void bigint_set_long(PARROT_INTERP, ARGMOD(PMC *self), long value)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*self);
+
+static void bigint_set_self(PARROT_INTERP,
+    ARGMOD(PMC *self),
+    ARGIN(BIGINT *value))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*self);
+
+static void bigint_set_str(PARROT_INTERP,
+    ARGMOD(PMC *self),
+    ARGIN(const char *value),
+    int base)
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        FUNC_MODIFIES(*self);
+
+static void bigint_sub_bigint(PARROT_INTERP,
+    ARGIN(PMC *self),
+    ARGIN(PMC *value),
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void bigint_sub_bigint_int(PARROT_INTERP,
+    ARGIN(PMC *self),
+    INTVAL value,
+    ARGMOD(PMC *dest))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(4)
+        FUNC_MODIFIES(*dest);
+
+static void int_check_divide_zero(PARROT_INTERP, INTVAL value)
+        __attribute__nonnull__(1);
+
+#define ASSERT_ARGS_bigint_abs __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_add_bigint __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_add_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_check_divide_zero __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_bigint_clear __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_cmp __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_bigint_cmp_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_div_bigint __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_div_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_fdiv_bigint __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_fdiv_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_get_bool __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_get_double __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_get_long __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_get_self __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_get_string __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_mod_bigint __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_mod_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_mul_bigint __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_mul_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_neg __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_pow_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_set __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(dest) \
+    , PARROT_ASSERT_ARG(src))
+#define ASSERT_ARGS_bigint_set_double __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_set_long __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+#define ASSERT_ARGS_bigint_set_self __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_bigint_set_str __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value))
+#define ASSERT_ARGS_bigint_sub_bigint __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(value) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_bigint_sub_bigint_int __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self) \
+    , PARROT_ASSERT_ARG(dest))
+#define ASSERT_ARGS_int_check_divide_zero __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+/* HEADERIZER HFILE: none */
+
 static void
-bigint_init(PARROT_INTERP, PMC *self) {
-    BIGINT * const bi = mem_allocate_zeroed_typed(BIGINT);
+bigint_init(PARROT_INTERP, ARGIN(PMC *self))
+{
+    ASSERT_ARGS(bigint_init)
+
+    BIGINT * const bi = mem_gc_allocate_zeroed_typed(interp, BIGINT);
     SETATTR_BigInt_bi(interp, self, bi);
     mpz_init(bi->b);
 }
 
 static void
-bigint_clear(PARROT_INTERP, PMC *self) {
+bigint_clear(PARROT_INTERP, ARGIN(PMC *self))
+{
+    ASSERT_ARGS(bigint_clear)
+
     BIGINT * bi;
     GETATTR_BigInt_bi(interp, self, bi);
     mpz_clear(bi->b);
-    mem_sys_free(bi);
+    mem_gc_free(interp, bi);
 }
 
 static void
-bigint_set(PARROT_INTERP, PMC *dest, PMC *src) {
+bigint_set(PARROT_INTERP, ARGMOD(PMC *dest), ARGIN(PMC *src))
+{
+    ASSERT_ARGS(bigint_set)
+
     BIGINT *bi_dest, *bi_src;
     GETATTR_BigInt_bi(interp, dest, bi_dest);
     GETATTR_BigInt_bi(interp, src,  bi_src);
@@ -61,42 +419,63 @@ bigint_set(PARROT_INTERP, PMC *dest, PMC *src) {
 }
 
 static void
-bigint_set_long(PARROT_INTERP, PMC *self, long value) {
+bigint_set_long(PARROT_INTERP, ARGMOD(PMC *self), long value)
+{
+    ASSERT_ARGS(bigint_set_long)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     mpz_set_si(bi->b, value);
 }
 
 static void
-bigint_set_double(PARROT_INTERP, PMC *self, double value) {
+bigint_set_double(PARROT_INTERP, ARGMOD(PMC *self), double value)
+{
+    ASSERT_ARGS(bigint_set_double)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     mpz_set_d(bi->b, value);
 }
 
 static void
-bigint_set_str(PARROT_INTERP, PMC *self, char *value, int base) {
+bigint_set_str(PARROT_INTERP, ARGMOD(PMC *self), ARGIN(const char *value), int base)
+{
+    ASSERT_ARGS(bigint_set_str)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     mpz_set_str(bi->b, value, base);
 }
 
+PARROT_CANNOT_RETURN_NULL
+PARROT_WARN_UNUSED_RESULT
 static BIGINT*
-bigint_get_self(PARROT_INTERP, PMC *self) {
+bigint_get_self(PARROT_INTERP, ARGIN(PMC *self))
+{
+    ASSERT_ARGS(bigint_get_self)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     return bi;
 }
 
 static void
-bigint_set_self(PARROT_INTERP, PMC *self, BIGINT *value) {
+bigint_set_self(PARROT_INTERP, ARGMOD(PMC *self), ARGIN(BIGINT *value))
+{
+    ASSERT_ARGS(bigint_set_self)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     mpz_set(bi->b, (mpz_srcptr)((BIGINT*)value)->b);
 }
 
+PARROT_WARN_UNUSED_RESULT
 static long
-bigint_get_long(PARROT_INTERP, PMC *self) {
+bigint_get_long(PARROT_INTERP, ARGIN(PMC *self))
+{
+    ASSERT_ARGS(bigint_get_long)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     if (mpz_fits_slong_p(bi->b))
@@ -105,8 +484,12 @@ bigint_get_long(PARROT_INTERP, PMC *self) {
     Parrot_ex_throw_from_c_args(interp, NULL, 1, "bigint_get_long: number too big");
 }
 
+PARROT_WARN_UNUSED_RESULT
 static int
-bigint_get_bool(PARROT_INTERP, PMC *self) {
+bigint_get_bool(PARROT_INTERP, ARGIN(PMC *self))
+{
+    ASSERT_ARGS(bigint_get_bool)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     if (mpz_sgn(bi->b) != 0)
@@ -115,27 +498,39 @@ bigint_get_bool(PARROT_INTERP, PMC *self) {
         return 0;
 }
 
+PARROT_WARN_UNUSED_RESULT
+PARROT_CANNOT_RETURN_NULL
 static char *
-bigint_get_string(PARROT_INTERP, PMC *self, int base) {
+bigint_get_string(PARROT_INTERP, ARGIN(PMC *self), int base)
+{
+    ASSERT_ARGS(bigint_get_string)
+
     BIGINT *bi;
     size_t  n;
     char   *s;
 
     GETATTR_BigInt_bi(interp, self, bi);
     n = mpz_sizeinbase(bi->b, base) + 2;
-    s = (char *)mem_sys_allocate(n);
+    s = mem_gc_allocate_n_typed(interp, n, char);
     return mpz_get_str(s, base, bi->b);
 }
 
+PARROT_WARN_UNUSED_RESULT
 static double
-bigint_get_double(PARROT_INTERP, PMC *self) {
+bigint_get_double(PARROT_INTERP, ARGIN(PMC *self))
+{
+    ASSERT_ARGS(bigint_get_double)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     return mpz_get_d(bi->b);
 }
 
 static void
-bigint_add_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_add_bigint(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *value), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_add_bigint)
+
     BIGINT *bi_self, *bi_value, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, value, bi_value);
@@ -144,7 +539,10 @@ bigint_add_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
 }
 
 static void
-bigint_add_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_add_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_add_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -155,7 +553,10 @@ bigint_add_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
 }
 
 static void
-bigint_sub_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_sub_bigint(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *value), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_sub_bigint)
+
     BIGINT *bi_self, *bi_value, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, value, bi_value);
@@ -164,7 +565,10 @@ bigint_sub_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
 }
 
 static void
-bigint_sub_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_sub_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_sub_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -175,7 +579,10 @@ bigint_sub_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
 }
 
 static void
-bigint_mul_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_mul_bigint(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *value), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_mul_bigint)
+
     BIGINT *bi_self, *bi_value, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, value, bi_value);
@@ -184,7 +591,10 @@ bigint_mul_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
 }
 
 static void
-bigint_mul_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_mul_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_mul_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -192,7 +602,10 @@ bigint_mul_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
 }
 
 static void
-bigint_pow_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_pow_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_pow_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -200,14 +613,18 @@ bigint_pow_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
 }
 
 static void
-int_check_divide_zero(PARROT_INTERP, INTVAL value) {
+int_check_divide_zero(PARROT_INTERP, INTVAL value)
+{
     if (value == 0)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_DIV_BY_ZERO,
             "Divide by zero");
 }
 
 static void
-bigint_check_divide_zero(PARROT_INTERP, PMC *value) {
+bigint_check_divide_zero(PARROT_INTERP, ARGIN(PMC *value))
+{
+    ASSERT_ARGS(bigint_check_divide_zero)
+
     /* Throw an exception if we are dividing by zero. */
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, value, bi);
@@ -217,7 +634,10 @@ bigint_check_divide_zero(PARROT_INTERP, PMC *value) {
 }
 
 static void
-bigint_div_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_div_bigint(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *value), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_div_bigint)
+
     BIGINT *bi_self, *bi_value, *bi_dest;
     bigint_check_divide_zero(interp, value);
     GETATTR_BigInt_bi(interp, self, bi_self);
@@ -228,7 +648,10 @@ bigint_div_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
 }
 
 static void
-bigint_div_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_div_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_div_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -244,7 +667,10 @@ bigint_div_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
 }
 
 static void
-bigint_fdiv_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_fdiv_bigint(PARROT_INTERP, ARGIN(PMC *self), ARGMOD(PMC *value), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_fdiv_bigint)
+
     BIGINT *bi_self, *bi_value, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, value, bi_value);
@@ -254,7 +680,10 @@ bigint_fdiv_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
 }
 
 static void
-bigint_fdiv_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_fdiv_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_fdiv_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -269,7 +698,10 @@ bigint_fdiv_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
 }
 
 static void
-bigint_mod_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_mod_bigint(PARROT_INTERP, ARGIN(PMC *self), ARGMOD(PMC *value), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_mod_bigint)
+
     BIGINT *bi_self, *bi_value, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, value, bi_value);
@@ -279,7 +711,10 @@ bigint_mod_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
 }
 
 static void
-bigint_mod_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_mod_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_mod_bigint_int)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -292,23 +727,34 @@ bigint_mod_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
         mpz_mod_ui(bi_dest->b, bi_self->b, (unsigned long int)value);
 }
 
+PARROT_WARN_UNUSED_RESULT
 static INTVAL
-bigint_cmp(PARROT_INTERP, PMC *self, PMC *value) {
+bigint_cmp(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *value))
+{
+    ASSERT_ARGS(bigint_cmp)
+
     BIGINT *bi_self, *bi_value;
     GETATTR_BigInt_bi(interp, self,  bi_self);
     GETATTR_BigInt_bi(interp, value, bi_value);
     return mpz_cmp(bi_self->b, bi_value->b);
 }
 
+PARROT_WARN_UNUSED_RESULT
 static INTVAL
-bigint_cmp_int(PARROT_INTERP, PMC *self, INTVAL value) {
+bigint_cmp_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value)
+{
+    ASSERT_ARGS(bigint_cmp_int)
+
     BIGINT *bi;
     GETATTR_BigInt_bi(interp, self, bi);
     return mpz_cmp_si(bi->b, value);
 }
 
 static void
-bigint_abs(PARROT_INTERP, PMC *self, PMC *dest) {
+bigint_abs(PARROT_INTERP, ARGIN(PMC *self), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_abs)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
@@ -316,42 +762,17 @@ bigint_abs(PARROT_INTERP, PMC *self, PMC *dest) {
 }
 
 static void
-bigint_neg(PARROT_INTERP, PMC *self, PMC *dest) {
+bigint_neg(PARROT_INTERP, ARGIN(PMC *self), ARGMOD(PMC *dest))
+{
+    ASSERT_ARGS(bigint_neg)
+
     BIGINT *bi_self, *bi_dest;
     GETATTR_BigInt_bi(interp, self, bi_self);
     GETATTR_BigInt_bi(interp, dest, bi_dest);
     mpz_neg(bi_dest->b, bi_self->b);
 }
 
-static void
-bigint_bitwise_shl_bigint_int(PARROT_INTERP, PMC *self,
-                              INTVAL value, PMC *dest)
-{
-    BIGINT *bi_self, *bi_dest;
-    GETATTR_BigInt_bi(interp, self, bi_self);
-    GETATTR_BigInt_bi(interp, dest, bi_dest);
-    /* The third args to mpz_mul_2exp and mpz_tdiv_q_2exp are unsigned, so we
-       need to do something sensible with negative values. */
-    if (value >= 0)
-        mpz_mul_2exp(bi_dest->b, bi_self->b, (unsigned long int)value);
-    else
-        mpz_tdiv_q_2exp(bi_dest->b, bi_self->b, (unsigned long int)-value);
-}
-
-static void
-bigint_bitwise_shr_bigint_int(PARROT_INTERP, PMC *self,
-                              INTVAL value, PMC *dest)
-{
-    BIGINT *bi_self, *bi_dest;
-    GETATTR_BigInt_bi(interp, self, bi_self);
-    GETATTR_BigInt_bi(interp, dest, bi_dest);
-    /* The third args to mpz_mul_2exp and mpz_tdiv_q_2exp are unsigned, so we
-       need to do something sensible with negative values. */
-    if (value >= 0)
-        mpz_tdiv_q_2exp(bi_dest->b, bi_self->b, (unsigned long int)value);
-    else
-        mpz_mul_2exp(bi_dest->b, bi_self->b, (unsigned long int)-value);
-}
+/* HEADERIZER STOP */
 
 #else /* ifdef PARROT_HAS_GMP */
 
@@ -360,19 +781,19 @@ typedef struct BIGINT {
 } BIGINT;
 
 static void
-bigint_init(PARROT_INTERP, PMC *self) {
+bigint_init(PARROT_INTERP, ARGIN(PMC *self)) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_clear(PARROT_INTERP, PMC *self) {
+bigint_clear(PARROT_INTERP, ARGIN(PMC *self)) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_set_long(PARROT_INTERP, PMC *self, long value) {
+bigint_set_long(PARROT_INTERP, ARGIN(PMC *self), long value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
@@ -384,177 +805,151 @@ bigint_set(PARROT_INTERP, PMC *dest, PMC *src) {
 }
 
 static void
-bigint_set_double(PARROT_INTERP, PMC *self, double value) {
+bigint_set_double(PARROT_INTERP, ARGIN(PMC *self), double value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_set_str(PARROT_INTERP, PMC *self, char *value, int base) {
+bigint_set_str(PARROT_INTERP, ARGIN(PMC *self), char *value, int base) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_set_self(PARROT_INTERP, PMC *self, BIGINT *value) {
+bigint_set_self(PARROT_INTERP, ARGIN(PMC *self), BIGINT *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static BIGINT*
-bigint_get_self(PARROT_INTERP, PMC *self) {
+bigint_get_self(PARROT_INTERP, ARGIN(PMC *self)) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static char *
-bigint_get_string(PARROT_INTERP, PMC *self, int base) {
+bigint_get_string(PARROT_INTERP, ARGIN(PMC *self), int base) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static long
-bigint_get_long(PARROT_INTERP, PMC *self) {
+bigint_get_long(PARROT_INTERP, ARGIN(PMC *self)) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
-static long
-bigint_get_bool(PARROT_INTERP, PMC *self) {
+static int
+bigint_get_bool(PARROT_INTERP, ARGIN(PMC *self)) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static double
-bigint_get_double(PARROT_INTERP, PMC *self) {
+bigint_get_double(PARROT_INTERP, ARGIN(PMC *self)) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_add_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_add_bigint(PARROT_INTERP, ARGIN(PMC *self), PMC *value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_add_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_add_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_sub_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_sub_bigint(PARROT_INTERP, ARGIN(PMC *self), PMC *value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_sub_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_sub_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_mul_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_mul_bigint(PARROT_INTERP, ARGIN(PMC *self), PMC *value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_mul_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_mul_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_pow_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_pow_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_div_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_div_bigint(PARROT_INTERP, ARGIN(PMC *self), PMC *value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_div_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_div_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_fdiv_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_fdiv_bigint(PARROT_INTERP, ARGIN(PMC *self), PMC *value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_fdiv_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_fdiv_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_mod_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
+bigint_mod_bigint(PARROT_INTERP, ARGIN(PMC *self), PMC *value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_mod_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest) {
+bigint_mod_bigint_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value, PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static INTVAL
-bigint_cmp(PARROT_INTERP, PMC *self, PMC *value) {
+bigint_cmp(PARROT_INTERP, ARGIN(PMC *self), PMC *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static INTVAL
-bigint_cmp_int(PARROT_INTERP, PMC *self, INTVAL value) {
+bigint_cmp_int(PARROT_INTERP, ARGIN(PMC *self), INTVAL value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_abs(PARROT_INTERP, PMC *self, PMC *dest) {
+bigint_abs(PARROT_INTERP, ARGIN(PMC *self), PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
 
 static void
-bigint_neg(PARROT_INTERP, PMC *self, PMC *dest) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no bigint lib loaded");
-}
-
-static void
-bigint_bitwise_shl_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no bigint lib loaded");
-}
-
-static void
-bigint_bitwise_shl_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest)
-{
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no bigint lib loaded");
-}
-
-static void
-bigint_bitwise_shr_bigint(PARROT_INTERP, PMC *self, PMC *value, PMC *dest) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
-        "no bigint lib loaded");
-}
-
-static void
-bigint_bitwise_shr_bigint_int(PARROT_INTERP, PMC *self, INTVAL value, PMC *dest)
-{
+bigint_neg(PARROT_INTERP, ARGIN(PMC *self), PMC *dest) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LIBRARY_ERROR,
         "no bigint lib loaded");
 }
@@ -596,7 +991,7 @@ Return GMP version string "x.y.z".
     }
 
     VTABLE PMC *clone() {
-        PMC *res = pmc_new(INTERP, SELF->vtable->base_type);
+        PMC *res = Parrot_pmc_new(INTERP, SELF->vtable->base_type);
         bigint_set(INTERP, res, SELF);
         return res;
     }
@@ -701,20 +1096,6 @@ Returns the value of the integer.
 
 /*
 
-=item C<PMC *get_bignum()>
-
-Returns SELF
-
-=cut
-
-*/
-
-    VTABLE PMC *get_bignum() {
-        return SELF;
-    }
-
-/*
-
 =item C<INTVAL get_bool()>
 
 Returns the boolean value of the integer.
@@ -749,14 +1130,14 @@ appended.
     VTABLE STRING *get_string() {
         char   * const s  = bigint_get_string(INTERP, SELF, 10);
         STRING * const ps = Parrot_str_new(INTERP, s, 0);
-        mem_sys_free(s);
+        mem_gc_free(INTERP, s);
         return ps;
     }
 
     VTABLE STRING *get_string_keyed_int(INTVAL base) {
         char   * const s  = bigint_get_string(INTERP, SELF, base);
         STRING * const ps = Parrot_str_new(INTERP, s, 0);
-        mem_sys_free(s);
+        mem_gc_free(INTERP, s);
         return ps;
     }
 
@@ -793,14 +1174,14 @@ Decrements the integer.
     }
 
     MULTI PMC *add(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_add_bigint(INTERP, SELF, value, dest);
         return dest;
     }
 
     MULTI PMC *add(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_add_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
         return dest;
@@ -815,7 +1196,7 @@ Decrements the integer.
     }
 
     VTABLE PMC *add_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_add_bigint_int(INTERP, SELF, value, dest);
         return dest;
@@ -849,14 +1230,14 @@ Decrements the integer.
 
 
     MULTI PMC *subtract(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_sub_bigint(INTERP, SELF, value, dest);
         return dest;
     }
 
     MULTI PMC *subtract(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_sub_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
         return dest;
@@ -871,7 +1252,7 @@ Decrements the integer.
     }
 
     VTABLE PMC *subtract_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_sub_bigint_int(INTERP, SELF, value, dest);
         return dest;
@@ -905,14 +1286,14 @@ Decrements the integer.
 
 
     MULTI PMC *multiply(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_mul_bigint(INTERP, SELF, value, dest);
         return dest;
     }
 
     MULTI PMC *multiply(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_mul_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
         return dest;
@@ -927,7 +1308,7 @@ Decrements the integer.
     }
 
     VTABLE PMC *multiply_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_mul_bigint_int(INTERP, SELF, value, dest);
         return dest;
@@ -957,25 +1338,18 @@ Decrements the integer.
             "BigInt: no multiple dispatch variant 'i_multiply_float' for FLOATVAL");
     }
 
-    VTABLE PMC *pow_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_pow_bigint_int(INTERP, SELF, value, dest);
-        return dest;
-    }
-
-    MULTI PMC *pow(PMC *value, PMC *dest) {
+    METHOD PMC *pow(PMC *value) {
         /* XXX only Integer RHS currently */
         const INTVAL r = VTABLE_get_integer(INTERP, value);
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        PMC *dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_pow_bigint_int(INTERP, SELF, r, dest);
-        return dest;
+        RETURN(PMC *dest);
     }
 
     MULTI PMC *divide(BigInt value, PMC *dest) {
         BIGINT *bi;
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_div_bigint(INTERP, SELF, value, dest);
 #if 0
@@ -991,7 +1365,7 @@ Decrements the integer.
     }
 
     MULTI PMC *divide(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_div_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
         return dest;
@@ -1006,7 +1380,7 @@ Decrements the integer.
     }
 
     VTABLE PMC *divide_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_div_bigint_int(INTERP, SELF, value, dest);
         return dest;
@@ -1030,14 +1404,14 @@ Decrements the integer.
     }
 
     MULTI PMC *floor_divide(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_fdiv_bigint(INTERP, SELF, value, dest);
         return dest;
     }
 
     MULTI PMC *floor_divide(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_fdiv_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
         return dest;
@@ -1052,7 +1426,7 @@ Decrements the integer.
     }
 
     VTABLE PMC *floor_divide_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_fdiv_bigint_int(INTERP, SELF, value, dest);
         return dest;
@@ -1078,14 +1452,14 @@ Decrements the integer.
     }
 
     MULTI PMC *modulus(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_mod_bigint(INTERP, SELF, value, dest);
         return dest;
     }
 
     MULTI PMC *modulus(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_mod_bigint_int(INTERP, SELF, VTABLE_get_integer(interp, value), dest);
         return dest;
@@ -1155,7 +1529,7 @@ Sets C<dest> to the absolute value of SELF.
 */
 
     VTABLE PMC *absolute(PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_abs(INTERP, SELF, dest);
         return dest;
@@ -1179,7 +1553,7 @@ Set C<dest> to the negated value of C<SELF>.
 */
 
     VTABLE PMC *neg(PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
+        dest = Parrot_pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         bigint_neg(INTERP, SELF, dest);
         return dest;
@@ -1187,151 +1561,6 @@ Set C<dest> to the negated value of C<SELF>.
 
     VTABLE void i_neg() {
         bigint_neg(INTERP, SELF, SELF);
-    }
-
-/*
-
-=item C<PMC *bitwise_shl(PMC *value, PMC *dest)>
-
-=item C<PMC *bitwise_shl_int(INTVAL value, PMC *dest)>
-
-Returns in C<*dest> the shift left of the BigInt by C<*value>.
-
-=item C<void i_bitwise_shl(PMC *value)>
-
-=item C<void i_bitwise_shl_int(INTVAL value)>
-
-Inplace shift left.
-
-=cut
-
-*/
-
-    MULTI PMC *bitwise_shl(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_bitwise_shl_bigint_int(INTERP, SELF,
-                                      VTABLE_get_integer(INTERP, value),
-                                      dest);
-        return dest;
-    }
-
-    MULTI PMC *bitwise_shl(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_bitwise_shl_bigint_int(INTERP, SELF,
-                VTABLE_get_integer(interp, value), dest);
-        return dest;
-    }
-    MULTI PMC *bitwise_shl(DEFAULT value, PMC *dest) {
-        UNUSED(dest)
-        Parrot_ex_throw_from_c_args(INTERP, NULL,
-            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
-            "BigInt: no multiple dispatch variant 'bitwise_shl' for %Ss",
-            VTABLE_name(interp, value));
-    }
-
-    VTABLE PMC *bitwise_shl_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_bitwise_shl_bigint_int(INTERP, SELF, value, dest);
-        return dest;
-    }
-
-
-    MULTI void i_bitwise_shl(BigInt value) {
-        bigint_bitwise_shl_bigint_int(INTERP, SELF,
-                                      VTABLE_get_integer(INTERP, value),
-                                      SELF);
-    }
-
-    MULTI void i_bitwise_shl(Integer value) {
-        bigint_bitwise_shl_bigint_int(INTERP, SELF,
-                VTABLE_get_integer(interp, value), SELF);
-    }
-
-    MULTI void i_bitwise_shl(DEFAULT value) {
-        Parrot_ex_throw_from_c_args(INTERP, NULL,
-            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
-            "BigInt: no multiple dispatch variant 'i_bitwise_shl' for %Ss",
-            VTABLE_name(interp, value));
-    }
-
-    VTABLE void i_bitwise_shl_int(INTVAL value) {
-        bigint_bitwise_shl_bigint_int(INTERP, SELF, value, SELF);
-    }
-
-/*
-
-=item C<PMC *bitwise_shr(PMC *value, PMC *dest)>
-
-=item C<PMC *bitwise_shr_int(INTVAL value, PMC *dest)>
-
-Returns in C<*dest> the shift right of the BigInt by C<*value>.
-
-=item C<void i_bitwise_shr(PMC *value)>
-
-=item C<void i_bitwise_shr_int(INTVAL value)>
-
-Inplace shift left.
-
-=cut
-
-*/
-
-    MULTI PMC *bitwise_shr(BigInt value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_bitwise_shr_bigint_int(INTERP, SELF,
-                                      VTABLE_get_integer(INTERP, value),
-                                      dest);
-        return dest;
-    }
-
-    MULTI PMC *bitwise_shr(Integer value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_bitwise_shr_bigint_int(INTERP, SELF,
-                VTABLE_get_integer(interp, value), dest);
-        return dest;
-    }
-
-    MULTI PMC *bitwise_shr(DEFAULT value, PMC *dest) {
-        UNUSED(dest)
-        Parrot_ex_throw_from_c_args(INTERP, NULL,
-            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
-            "BigInt: no multiple dispatch variant 'bitwise_shr' for %Ss",
-            VTABLE_name(interp, value));
-    }
-
-    VTABLE PMC *bitwise_shr_int(INTVAL value, PMC *dest) {
-        dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
-
-        bigint_bitwise_shr_bigint_int(INTERP, SELF, value, dest);
-        return dest;
-    }
-
-
-    MULTI void i_bitwise_shr(BigInt value) {
-        bigint_bitwise_shr_bigint_int(INTERP, SELF,
-                                      VTABLE_get_integer(INTERP, value),
-                                      SELF);
-    }
-
-    MULTI void i_bitwise_shr(Integer value) {
-        bigint_bitwise_shr_bigint_int(INTERP, SELF,
-                VTABLE_get_integer(interp, value), SELF);
-    }
-
-    MULTI void i_bitwise_shr(DEFAULT value) {
-        Parrot_ex_throw_from_c_args(INTERP, NULL,
-            EXCEPTION_INTERNAL_NOT_IMPLEMENTED,
-            "BigInt: no multiple dispatch variant 'i_bitwise_shr' for %Ss",
-            VTABLE_name(interp, value));
-    }
-
-    VTABLE void i_bitwise_shr_int(INTVAL value) {
-        bigint_bitwise_shr_bigint_int(INTERP, SELF, value, SELF);
     }
 }
 

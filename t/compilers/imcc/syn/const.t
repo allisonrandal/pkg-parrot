@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: const.t 43695 2010-02-01 21:11:43Z bacek $
 
 use strict;
 use warnings;
@@ -78,7 +78,7 @@ pir_output_is( <<'CODE', <<'OUT', "array/hash consts" );
    .const string key2 = "key2"
    .local int idx1
    .const int idx2 = 2
-   ar = new 'Array'
+   ar = new 'ResizablePMCArray'
    ar = 3
    ha = new 'Hash'
    key1 = "key1"

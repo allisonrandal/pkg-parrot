@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: ParrotClass.pm 45297 2010-03-30 01:33:45Z coke $
 
 =head1 NAME
 
@@ -66,7 +66,7 @@ our $dont_delegate = { map { $_, 1 } (@dont_delegate) };
 sub pre_method_gen {
     my ($self) = @_;
 
-    # vtable methods
+    # vtables
     foreach my $method ( @{ $self->vtable->methods } ) {
         my $vt_method_name = $method->name;
         next if exists $dont_delegate->{$vt_method_name};

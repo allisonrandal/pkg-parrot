@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# $Id: nto.pm 36833 2009-02-17 20:09:26Z allison $
 
 package init::hints::nto;
 

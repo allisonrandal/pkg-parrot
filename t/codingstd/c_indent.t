@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: c_indent.t 44321 2010-02-22 22:08:59Z mikehh $
 
 use strict;
 use warnings;
@@ -183,7 +183,7 @@ sub check_indent {
             my ($indent) = $line =~ /^(\s+)/ or next;
             $indent = length($indent);
 
-            # Ignore the indentation of the current line if the last 
+            # Ignore the indentation of the current line if the last
             # character of the was anything but a ';'.
             #
             # The indentation of the previous line is not considered.
@@ -198,7 +198,8 @@ sub check_indent {
                         . "    apparent non-2 space outdenting ($indent spaces)\n";
                     $c_failed{"$path\n"} = 1
                 }
-            } else {
+            }
+            else {
                 if ( $indent % 4 &&
                     !$state{in_comment} &&
                     $state{prev_last_char} eq ';'

@@ -1,7 +1,7 @@
 /* exceptions.h
- *  Copyright (C) 2001-2008, Parrot Foundation.
+ *  Copyright (C) 2001-2010, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: exceptions.h 45412 2010-04-07 05:21:25Z petdance $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:
@@ -118,6 +118,7 @@ typedef enum {
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void exit_fatal(int exitcode, ARGIN(const char *format), ...)
         __attribute__nonnull__(2);
 
@@ -133,6 +134,7 @@ void Parrot_assert(
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void Parrot_confess(
     ARGIN(const char *cond),
     ARGIN(const char *file),
@@ -160,6 +162,7 @@ void Parrot_ex_mark_unhandled(PARROT_INTERP, ARGIN(PMC *exception))
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void Parrot_ex_rethrow_from_c(PARROT_INTERP, ARGIN(PMC *exception))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
@@ -173,12 +176,14 @@ opcode_t * Parrot_ex_rethrow_from_op(PARROT_INTERP, ARGIN(PMC *exception))
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void Parrot_ex_throw_from_c(PARROT_INTERP, ARGIN(PMC *exception))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_EXPORT
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void Parrot_ex_throw_from_c_args(PARROT_INTERP,
     SHIM(void *ret_addr),
     int exitcode,
@@ -206,11 +211,13 @@ opcode_t * Parrot_ex_throw_from_op_args(PARROT_INTERP,
         __attribute__nonnull__(4);
 
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void die_from_exception(PARROT_INTERP, ARGIN(PMC *exception))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
 PARROT_DOES_NOT_RETURN
+PARROT_COLD
 void do_panic(
     NULLOK_INTERP,
     ARGIN_NULLOK(const char *message),
@@ -272,10 +279,14 @@ void Parrot_print_backtrace(void);
 #ifdef NDEBUG
 #  define PARROT_ASSERT(x) /*@-noeffect@*/((void)0)/*@=noeffect@*/
 #  define PARROT_ASSERT_ARG(x) (0)
+#  define PARROT_FAILURE(x) /*@-noeffect@*/((void)0)/*@=noeffect@*/
+#  define PARROT_ASSERT_MSG(x, s) /*@-noeffect@*/((void)0)/*@=noeffect@*/
 #  define ASSERT_ARGS(a)
 #else
 #  define PARROT_ASSERT(x) (x) ? ((void)0) : Parrot_confess(#x, __FILE__, __LINE__)
 #  define PARROT_ASSERT_ARG(x) ((x) ? (0) : (Parrot_confess(#x, __FILE__, __LINE__), 0))
+#  define PARROT_FAILURE(x) Parrot_confess((x), __FILE__, __LINE__)
+#  define PARROT_ASSERT_MSG(x, s) ((x) ? (0) : (Parrot_confess(s, __FILE__, __LINE__), 0))
 
 #  ifdef __GNUC__
 #    define ASSERT_ARGS(a) ASSERT_ARGS_ ## a ;

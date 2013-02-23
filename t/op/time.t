@@ -1,6 +1,6 @@
 #!parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: time.t 44388 2010-02-23 12:39:51Z mikehh $
 
 =head1 NAME
 
@@ -140,7 +140,9 @@ t/op/time.t - Time and Sleep
     $I0 = $P0
     is($I0, 9, "decodetime result has 9 values")
     $S0 = typeof $P0
-    is($S0, "Array", "decodetime returns the correct PMC type")
+    # TODO: Actually, this should return whatever HLL type replaces
+    # FixedIntegerArray. We should test this behavior with a new HLL
+    is($S0, "FixedIntegerArray", "decodetime returns the correct PMC type")
 .end
 
 .sub test_localtime_s_i
@@ -156,13 +158,14 @@ t/op/time.t - Time and Sleep
     $I0 = $P0
     is($I0, 9, "decodelocaltime result has 9 values")
     $S0 = typeof $P0
-    is($S0, "Array", "decodelocaltime returns the correct PMC type")
+    # TODO: Actually, this should return whatever HLL type replaces
+    # FixedIntegerArray. We should test this behavior with a new HLL
+    is($S0, "FixedIntegerArray", "decodelocaltime returns the correct PMC type")
 .end
 
 
 # Local Variables:
-#   mode: cperl
-#   cperl-indent-level: 4
+#   mode: pir
 #   fill-column: 100
 # End:
-# vim: expandtab shiftwidth=4 filetype=pir:
+# vim: expandtab shiftwidth=4 ft=pir:

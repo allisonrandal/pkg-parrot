@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: buffer.c 45639 2010-04-13 18:38:01Z darbelo $
 
 =head1 NAME
 
@@ -99,14 +99,14 @@ Parrot_io_setbuf(PARROT_INTERP, ARGMOD(PMC *filehandle), size_t bufsize)
     buffer_size = Parrot_io_get_buffer_size(interp, filehandle);
 
     if (buffer_start && (buffer_flags & PIO_BF_MALLOC)) {
-        mem_sys_free(buffer_start);
+        mem_gc_free(interp, buffer_start);
         Parrot_io_set_buffer_start(interp, filehandle, NULL);
         Parrot_io_set_buffer_next(interp, filehandle, NULL);
         buffer_start = buffer_next = NULL;
     }
 
     if (buffer_size > 0) {
-        buffer_start = buffer_next = (unsigned char *)mem_sys_allocate(buffer_size);
+        buffer_start = buffer_next = mem_gc_allocate_n_typed(interp, buffer_size, unsigned char);
         Parrot_io_set_buffer_start(interp, filehandle, buffer_start);
         Parrot_io_set_buffer_next(interp, filehandle, buffer_next);
         buffer_flags |= PIO_BF_MALLOC;
@@ -228,14 +228,13 @@ size_t
 Parrot_io_fill_readbuf(PARROT_INTERP, ARGMOD(PMC *filehandle))
 {
     ASSERT_ARGS(Parrot_io_fill_readbuf)
-    size_t   got;
-    STRING   fake;
-    STRING  *s    = &fake;
     PIOOFF_T pos  = Parrot_io_get_file_position(interp, filehandle);
-
-    Buffer_bufstart(s) = Parrot_io_get_buffer_start(interp, filehandle);
-    fake.bufused       = Parrot_io_get_buffer_size(interp, filehandle);
-    got                = PIO_READ(interp, filehandle, &s);
+    char    *buf  = (char *) Parrot_io_get_buffer_start(interp, filehandle);
+    size_t   size = Parrot_io_get_buffer_size(interp, filehandle);
+    STRING  *s    = Parrot_str_new_init(interp, buf, size,
+                        PARROT_DEFAULT_ENCODING, PARROT_DEFAULT_CHARSET,
+                        PObj_external_FLAG);
+    size_t   got  = PIO_READ(interp, filehandle, &s);
 
     /* buffer-filling does not change fileposition */
     Parrot_io_set_file_position(interp, filehandle, pos);
@@ -292,17 +291,11 @@ Parrot_io_read_buffer(PARROT_INTERP, ARGMOD(PMC *filehandle),
     if (Parrot_io_get_flags(interp, filehandle) & PIO_F_LINEBUF)
         return Parrot_io_readline_buffer(interp, filehandle, buf);
 
-    if (*buf == NULL) {
-        *buf = Parrot_gc_new_string_header(interp, 0);
-        (*buf)->bufused = len = 2048;
-    }
+    if (*buf == NULL)
+        *buf = Parrot_str_new_noinit(interp, enum_stringrep_one, 2048);
 
-    s   = *buf;
-    len = s->bufused;
-
-    if (!s->strstart)
-        Parrot_gc_allocate_string_storage(interp, s, len);
-
+    s       = *buf;
+    len     = s->bufused;
     out_buf = (unsigned char *)s->strstart;
 
     /* read Data from buffer */
@@ -357,9 +350,7 @@ Parrot_io_read_buffer(PARROT_INTERP, ARGMOD(PMC *filehandle),
         }
 
         got = Parrot_io_fill_readbuf(interp, filehandle);
-        len = (len < got)
-            ? len
-            : (got > 0) ? got : 0;
+        len = (len < got) ? len : got;
     }
 
     /* read from the read_buffer */

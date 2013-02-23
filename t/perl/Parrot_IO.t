@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: Parrot_IO.t 44418 2010-02-23 23:03:28Z mikehh $
 
 use strict;
 use warnings;
@@ -40,9 +40,9 @@ to ensure nothing is broken.
 BEGIN { use_ok('Parrot::IO::Path') }
 
 my $file_temp_work_path = tempdir(
-	'PARROT_IO_XXXX',
-	TMPDIR => 1,
-	CLEANUP => 1
+    'PARROT_IO_XXXX',
+    TMPDIR => 1,
+    CLEANUP => 1
 );
 # you can sort of count on the var below being the unique part of the temp dir
 my $file_temp_dir = (splitdir($file_temp_work_path))[-1];
@@ -89,7 +89,7 @@ isa_ok( $r, 'Parrot::IO::Directory' );
 ok( !$r->parent(), 'root has no parent' );
 
 my $d = Parrot::IO::Directory->tmp_directory(
-	catfile($file_temp_dir, 't')
+    catfile($file_temp_dir, 't')
 );
 ok( $d, 'tmp_directory' );
 

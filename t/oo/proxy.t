@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: proxy.t 45665 2010-04-14 12:12:08Z allison $
 
 =head1 NAME
 
@@ -93,7 +93,7 @@ Tests OO features related to creating and using class proxies.
 .end
 
 .namespace ['Complex']
-.sub 'Complex' :method
+.sub 'Complex' :method :nsentry('Complex')
     .return (self)
 .end
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: japh1.pasm 38369 2009-04-26 12:57:09Z fperrad $
 
 	newclass P0, "Japh"
 	new P0, "Japh"

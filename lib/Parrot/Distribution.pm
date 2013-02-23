@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id$
+# $Id: Distribution.pm 45389 2010-04-03 00:46:43Z jkeenan $
 
 =head1 NAME
 
@@ -537,7 +537,7 @@ sub is_perl {
 
     # test files (.t) might need testing.
     # ignore everything else.
-    return 0 unless $filename !~ /\.t$/;
+    return 0 if $filename !~ /\.t$/;
 
     # Now let's check to see if there's a perl shebang.
 
@@ -580,11 +580,9 @@ This is to exclude automatically generated PIR-language files Parrot might have.
 
 =cut
 
-{
-    sub is_pir_exemption {
-        my ( $self, $file ) = @_;
-        $file->path =~ m{/ext/};
-    }
+sub is_pir_exemption {
+    my ( $self, $file ) = @_;
+    return $file->path =~ m{/ext/};
 }
 
 
@@ -608,7 +606,7 @@ sub is_pir {
 
     # test files (.t) files might need testing.
     # ignore everything else.
-    return 0 unless $filename !~ /\.t$/;
+    return 0 if $filename !~ /\.t$/;
 
     # Now let's check to see if there's a plain parrot shebang.
     open my $file_handle, '<', $filename
@@ -616,7 +614,7 @@ sub is_pir {
     my $line = <$file_handle>;
     close $file_handle;
 
-    if ( $line && $line =~ /^#!.*parrot/ ) {
+    if ( $line && $line =~ /^#!.*parrot(?:\s|$)/ ) {
         # something that specifies a pir or pbc is probably a HLL, skip it
         return 0 if $line =~ /\.(?:pir|pbc)/;
         return 1;

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: number.t 44441 2010-02-24 02:56:39Z jkeenan $
 
 use strict;
 use warnings;
@@ -132,7 +132,7 @@ sub this_arch {
       . "_"
       . (substr($PConfig{byteorder},0,2) eq '12' ? "le" : "be");
 }
-sub bc_version($) {
+sub bc_version {
     my $f = shift;
     my $b;
     open my $F, "<", "$f" or return "Can't open $f: $!";

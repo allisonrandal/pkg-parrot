@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+$Id: spf_render.c 45654 2010-04-14 04:40:03Z petdance $
 
 =head1 NAME
 
@@ -65,6 +65,7 @@ static void gen_sprintf_call(
         FUNC_MODIFIES(*out)
         FUNC_MODIFIES(*info);
 
+PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING * handle_flags(PARROT_INTERP,
     ARGIN(const SpfInfo *info),
@@ -123,6 +124,7 @@ Handles C<+>, C<->, C<0>, C<#>, space, width, and prec.
 
 */
 
+PARROT_WARN_UNUSED_RESULT
 PARROT_CANNOT_RETURN_NULL
 static STRING *
 handle_flags(PARROT_INTERP, ARGIN(const SpfInfo *info), ARGMOD(STRING *str),
@@ -328,7 +330,7 @@ Parrot_sprintf_format(PARROT_INTERP,
     INTVAL i;
     INTVAL len     = 0;
     INTVAL old     = 0;
-    INTVAL pat_len = (INTVAL)Parrot_str_byte_length(interp, pat);
+    const INTVAL pat_len = (INTVAL)Parrot_str_byte_length(interp, pat);
     HUGEINTVAL num;
 
     /* start with a buffer; double the pattern length to avoid realloc #1 */

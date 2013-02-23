@@ -22,7 +22,7 @@
 %{
 
 /*
- * $Id$
+ * $Id: macro.l 42141 2009-10-27 20:41:22Z kjs $
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

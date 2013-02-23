@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: namespace-old.t 45619 2010-04-12 22:44:02Z plobsing $
 
 use strict;
 use warnings;
@@ -284,7 +284,7 @@ pir_error_output_like( <<"CODE", <<'OUTPUT', "export_to -- success with hash (an
 CODE
 /^a_foo
 b_foo
-Could not find non-existent sub b_foo/
+Could not find sub b_foo/
 OUTPUT
 
 
@@ -950,7 +950,7 @@ pir_output_like( <<'CODE', <<'OUTPUT', 'del_namespace() with error' );
 
 .sub main :main
     .local pmc not_a_ns
-    not_a_ns = new ['Array']
+    not_a_ns = new ['ResizablePMCArray']
 
     set_global 'Not_A_NS', not_a_ns
 
@@ -1040,7 +1040,7 @@ OUTPUT
 pir_output_like( <<'CODE', <<'OUTPUT', 'del_sub() with error' );
 .sub main :main
     .local pmc not_a_ns
-    not_a_ns = new ['Array']
+    not_a_ns = new ['ResizablePMCArray']
 
     set_global 'Not_A_Sub', not_a_ns
 
@@ -1248,7 +1248,7 @@ pir_error_output_like( <<'CODE', <<'OUT', 'adding :anon sub to a namespace, TT #
 CODE
 /
 ok 1
-Could not find non-existent sub nok/
+Could not find sub nok/
 OUT
 
 

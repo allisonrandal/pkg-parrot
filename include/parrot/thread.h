@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: thread.h 45190 2010-03-26 05:52:50Z petdance $
  *  Overview:
  *     This is the api header for the thread primitives
  *  Data Structure and Algorithms:
@@ -196,7 +196,7 @@ void pt_suspend_self_for_gc(PARROT_INTERP)
 
 void pt_thread_detach(UINTVAL tid);
 PARROT_CAN_RETURN_NULL
-PMC* pt_thread_join(NOTNULL(Parrot_Interp parent), UINTVAL tid)
+PMC* pt_thread_join(ARGIN(Parrot_Interp parent), UINTVAL tid)
         __attribute__nonnull__(1);
 
 void pt_thread_kill(UINTVAL tid);

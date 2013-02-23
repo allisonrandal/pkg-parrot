@@ -1,7 +1,7 @@
 /* settings.h
  *  Copyright (C) 2001-2004, Parrot Foundation.
  *  SVN Info
- *     $Id$
+ *     $Id: settings.h 43017 2009-12-12 13:50:40Z darbelo $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:

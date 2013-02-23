@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2009, Parrot Foundation.
- * $Id$
+ * $Id: debug.h 41533 2009-09-27 17:30:32Z NotFound $
  */
 
 #ifndef PARROT_IMCC_DEBUG_H_GUARD

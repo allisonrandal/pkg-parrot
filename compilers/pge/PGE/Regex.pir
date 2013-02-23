@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id$
+# $Id: Regex.pir 45664 2010-04-14 12:09:48Z allison $
 
 =head1 TITLE
 
@@ -37,7 +37,7 @@ Match an identifier.
 
 =cut
 
-.sub 'ident' :method
+.sub 'ident' :method :nsentry('ident')
     .param pmc adverbs         :slurpy :named
     .local string target
     .local pmc mob, mfrom, mpos

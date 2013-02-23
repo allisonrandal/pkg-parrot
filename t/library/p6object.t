@@ -1,6 +1,6 @@
 #!./parrot
-# Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: p6object.t 45665 2010-04-14 12:12:08Z allison $
 
 =head1 NAME
 
@@ -165,7 +165,7 @@ Testing Perl 6 objects.
     jklobj = new ['Foo';'JKL']
     $S0 = jklobj.'bar'()
     is($S0, 'ABC::foo', 'JKL.bar via add_method')
-    
+
     .local pmc hll_tests
     hll_tests = get_root_global ['myhll'], 'hll_tests'
     hll_tests()
@@ -174,7 +174,7 @@ Testing Perl 6 objects.
     $P0 = p6meta.'new_class'('OMG::Lol')
     omgproto = get_hll_global ['OMG'], 'Lol'
     omgprotoexport = get_hll_global ['OMG';'EXPORT';'ALL'], 'Lol'
-    is_same(omgproto,omgprotoexport,'protoobject added to ["EXPORT";"ALL"] subnamespace') 
+    is_same(omgproto,omgprotoexport,'protoobject added to ["EXPORT";"ALL"] subnamespace')
 
     .return ()
 .end
@@ -437,7 +437,7 @@ diagnostic message).
 
 
 .namespace ['ABC']
-.sub 'foo' :method
+.sub 'foo' :method :nsentry('foo')
     .return ('ABC::foo')
 .end
 
@@ -496,7 +496,7 @@ diagnostic message).
     p6obj_tests(wxyproto, 'WXY', 'isa'=>'WXY P6object', 'can'=>'foo', 'who'=>wxyns)
 
     ## build a Parrotclass
-    .local pmc vwx_nsarray, vwx_ns, vwx_parrotclass, vwx_proto 
+    .local pmc vwx_nsarray, vwx_ns, vwx_parrotclass, vwx_proto
     vwx_nsarray = new 'ResizablePMCArray'
     push vwx_nsarray, 'VWX'
     vwx_ns = get_hll_namespace vwx_nsarray
@@ -523,3 +523,9 @@ diagnostic message).
 =back
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:

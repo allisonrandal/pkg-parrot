@@ -1,6 +1,6 @@
 /*
- * $Id$
- * Copyright (C) 2002-2009, Parrot Foundation.
+ * $Id: instructions.c 45800 2010-04-19 13:15:18Z mikehh $
+ * Copyright (C) 2002-2010, Parrot Foundation.
  */
 
 #include <stdlib.h>
@@ -50,7 +50,7 @@ static int e_file_emit(PARROT_INTERP,
         __attribute__nonnull__(1)
         __attribute__nonnull__(4);
 
-static int e_file_open(PARROT_INTERP, ARGIN(void *param))
+static int e_file_open(PARROT_INTERP, ARGIN(const char *param))
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
@@ -149,7 +149,7 @@ imcc_init_tables(PARROT_INTERP)
     if (!w_special[0]) {
         size_t i;
         for (i = 0; i < N_ELEMENTS(writes); i++) {
-            const int n = interp->op_lib->op_code(writes[i], 1);
+            const int n = interp->op_lib->op_code(interp, writes[i], 1);
             PARROT_ASSERT(n);
             w_special[i] = n;
         }
@@ -275,13 +275,9 @@ instruction_writes(ARGIN(const Instruction *ins), ARGIN(const SymReg *r))
 {
     ASSERT_ARGS(instruction_writes)
     const int f = ins->flags;
-    int i;
+    int j;
 
-    /*
-     * a get_results opcode is before the actual sub call
-     * but for the register allocator, the effect matters, thus
-     * postpone the effect after the invoke
-     */
+    /* a get_results opcode occurs after the actual sub call */
     if (ins->opnum == PARROT_OP_get_results_pc) {
         int i;
 
@@ -289,7 +285,7 @@ instruction_writes(ARGIN(const Instruction *ins), ARGIN(const SymReg *r))
          * an ExceptionHandler, which doesn't have
          * a call next
          */
-        if (ins->next && (ins->next->type & ITPCCSUB))
+        if (ins->prev && (ins->prev->type & ITPCCSUB))
             return 0;
 
         for (i = ins->symreg_count - 1; i >= 0; --i) {
@@ -308,7 +304,7 @@ instruction_writes(ARGIN(const Instruction *ins), ARGIN(const SymReg *r))
          * structure
          */
         while (ins && ins->opnum != PARROT_OP_get_results_pc)
-            ins = ins->prev;
+            ins = ins->next;
 
         if (!ins)
             return 0;
@@ -336,13 +332,14 @@ instruction_writes(ARGIN(const Instruction *ins), ARGIN(const SymReg *r))
         return 0;
     }
 
-    for (i = 0; i < ins->symreg_count; i++)
-        if (f & (1 << (16 + i)))
-            if (ins->symregs[i] == r)
+    for (j = 0; j < ins->symreg_count; j++)
+        if (f & (1 << (16 + j)))
+            if (ins->symregs[j] == r)
                 return 1;
 
     return 0;
 }
+
 
 /*
 
@@ -650,9 +647,9 @@ void
 free_ins(ARGMOD(Instruction *ins))
 {
     ASSERT_ARGS(free_ins)
-    free(ins->format);
-    free(ins->opname);
-    free(ins);
+    mem_sys_free(ins->format);
+    mem_sys_free(ins->opname);
+    mem_sys_free(ins);
 }
 
 /*
@@ -785,7 +782,7 @@ static char *output;
 
 /*
 
-=item C<static int e_file_open(PARROT_INTERP, void *param)>
+=item C<static int e_file_open(PARROT_INTERP, const char *param)>
 
 Prints a message to STDOUT.
 
@@ -794,19 +791,19 @@ Prints a message to STDOUT.
 */
 
 static int
-e_file_open(PARROT_INTERP, ARGIN(void *param))
+e_file_open(PARROT_INTERP, ARGIN(const char *param))
 {
     ASSERT_ARGS(e_file_open)
-    char * const file = (char *) param;
+    DECL_CONST_CAST;
 
-    if (!STREQ(file, "-")) {
-        FILE *newfile = freopen(file, "w", stdout);
+    if (!STREQ(param, "-")) {
+        FILE *newfile = freopen(param, "w", stdout);
         if (!newfile)
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_EXTERNAL_ERROR,
                 "Cannot reopen stdout: %s'\n", strerror(errno));
     }
 
-    output = file;
+    output = PARROT_const_cast(char *, param);
     Parrot_io_printf(interp, "# IMCC does produce b0rken PASM files\n");
     Parrot_io_printf(interp, "# see http://guest@rt.perl.org/rt3/Ticket/Display.html?id=32392\n");
     return 1;
@@ -815,6 +812,8 @@ e_file_open(PARROT_INTERP, ARGIN(void *param))
 /*
 
 =item C<static int e_file_close(PARROT_INTERP, void *param)>
+
+Close STDOUT
 
 =cut
 
@@ -834,6 +833,8 @@ e_file_close(PARROT_INTERP, SHIM(void *param))
 
 =item C<static int e_file_emit(PARROT_INTERP, void *param, const IMC_Unit *unit,
 const Instruction *ins)>
+
+emit the Instruction C<ins> to the given IMC_Unit C<unit>, passing C<param>
 
 =cut
 
@@ -862,7 +863,7 @@ e_file_emit(PARROT_INTERP,
 
 /*
 
-=item C<int emit_open(PARROT_INTERP, int type, void *param)>
+=item C<int emit_open(PARROT_INTERP, int type, const char *param)>
 
 Opens the emitter function C<open> of the given C<type>. Passes
 the C<param> to the open function.
@@ -873,7 +874,7 @@ the C<param> to the open function.
 
 PARROT_EXPORT
 int
-emit_open(PARROT_INTERP, int type, ARGIN_NULLOK(void *param))
+emit_open(PARROT_INTERP, int type, ARGIN_NULLOK(const char *param))
 {
     ASSERT_ARGS(emit_open)
     IMCC_INFO(interp)->emitter       = type;

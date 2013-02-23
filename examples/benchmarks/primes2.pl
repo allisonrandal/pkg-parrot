@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id$
+# $Id: primes2.pl 38923 2009-05-19 06:07:42Z cotto $
 
 use strict;
 use warnings;

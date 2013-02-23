@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: Make_VERSION_File.pm 42767 2009-11-21 19:21:17Z jkeenan $
 
 package Make_VERSION_File;
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id$
+# $Id: 70_class_object.pir 39674 2009-06-20 14:09:03Z cotto $
 
 =head1 Classes
 

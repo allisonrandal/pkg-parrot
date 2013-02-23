@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: platform.pm 45091 2010-03-22 02:39:25Z plobsing $
 
 =head1 NAME
 
@@ -25,7 +25,6 @@ sub _init {
     my %data;
     $data{description} = q{Move platform files into place};
     $data{result}      = q{};
-    $data{platform_interface} = q{config/gen/platform/platform_interface.h};
     $data{coda} = <<'CODA';
 /*
  * Local variables:
@@ -51,10 +50,6 @@ sub runstep {
     $self->_set_implementations($conf, $verbose, $generated);
 
     $self->_handle_asm($conf);
-
-    # interface is the same for all platforms
-    copy_if_diff( $self->{platform_interface},
-        "include/parrot/platform_interface.h" );
 
     $self->_set_limits($conf, $verbose);
 

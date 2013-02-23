@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2008-2009, Parrot Foundation.
-$Id$
+$Id: filehandle.pmc 45425 2010-04-07 13:38:10Z bacek $
 
 =head1 NAME
 
@@ -30,6 +30,10 @@ extern "C" {
 }
 #endif
 #endif
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass FileHandle extends Handle auto_attrs {
     ATTR INTVAL flags;                /* Filehandle flags             */
@@ -153,7 +157,7 @@ Free structures.
             }
 
             if (data_struct->buffer_start)
-                mem_sys_free(data_struct->buffer_start);
+                mem_gc_free(INTERP, data_struct->buffer_start);
         }
     }
 
@@ -374,7 +378,7 @@ Read a line from the filehandle and return it in a string.
                 add_history(r);
 
             string_result = Parrot_str_new(INTERP, r, 0);
-            mem_sys_free(r);
+            mem_internal_free(r);
         }
 #else
         if (got_prompt)

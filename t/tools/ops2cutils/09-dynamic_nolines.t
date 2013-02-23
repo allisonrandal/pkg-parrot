@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id$
+# $Id: 09-dynamic_nolines.t 39944 2009-07-08 02:48:40Z coke $
 # 09-dynamic_nolines.t
 
 use strict;

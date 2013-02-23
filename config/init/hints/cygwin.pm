@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id$
+# $Id: cygwin.pm 45750 2010-04-17 13:32:28Z darbelo $
 
 package init::hints::cygwin;
 
@@ -36,6 +36,7 @@ sub runstep {
     # this later causes problems, it might be worth revisiting.  A. Dougherty
     # 9/9/2002
     $conf->data->set(
+        cp                  => '/bin/cp', # ExtUtils::Command::cp broken cpan #56666
         build_dir           => $build_dir,
         ld                  => $conf->data->get('ld') eq 'ld2'
                                ? 'gcc' # do not use old perl5 linker helper

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: 03-new.t 36833 2009-02-17 20:09:26Z allison $
 # 03-new.t
 
 use strict;

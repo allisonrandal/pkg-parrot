@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: resizablefloatarray.t 41972 2009-10-21 16:54:18Z allison $
 
 =head1 NAME
 

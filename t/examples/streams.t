@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2006, Parrot Foundation.
-# $Id$
+# $Id: streams.t 38885 2009-05-18 02:16:09Z coke $
 
 use strict;
 use warnings;

@@ -1,11 +1,11 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: platform-01.t 45115 2010-03-22 23:24:35Z plobsing $
 # gen/platform-01.t
 
 use strict;
 use warnings;
-use Test::More tests => 13;
+use Test::More tests => 12;
 use Carp;
 use Cwd;
 use File::Copy;
@@ -38,9 +38,6 @@ my $pkg = q{gen::platform};
 $conf->add_steps($pkg);
 $conf->options->set( %{$args} );
 my $step = test_step_constructor_and_description($conf);
-
-ok(-f $step->{platform_interface},
-    "Located required platform interface header");
 
 my $platform_orig = $conf->data->get('osname');
 my $archname_orig = $conf->data->get('archname');

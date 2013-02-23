@@ -1,6 +1,6 @@
 /*
-Copyright (C) 2001-2009, Parrot Foundation.
-$Id$
+Copyright (C) 2001-2010, Parrot Foundation.
+$Id: hashiterator.pmc 45348 2010-03-31 10:53:57Z mikehh $
 
 =head1 NAME
 
@@ -49,13 +49,32 @@ Generic iterator for traversing Hash.
 #include "pmc/pmc_hash.h"
 #include "pmc/pmc_hashiteratorkey.h"
 
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+
+static void advance_to_next(PARROT_INTERP, ARGMOD(PMC *self))
+        __attribute__nonnull__(1)
+        __attribute__nonnull__(2)
+        FUNC_MODIFIES(*self);
+
+#define ASSERT_ARGS_advance_to_next __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(self))
+/* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
+/* HEADERIZER END: static */
+
 /*
 
 Advance to next position. Return found (if any) HashBucket.
 
 */
-static HashBucket*
-advance_to_next(PARROT_INTERP, PMC *self) {
+
+static void
+advance_to_next(PARROT_INTERP, ARGMOD(PMC *self))
+{
+    ASSERT_ARGS(advance_to_next)
+
     Parrot_HashIterator_attributes * const attrs  = PARROT_HASHITERATOR(self);
     HashBucket                            *bucket = attrs->bucket;
 
@@ -72,7 +91,8 @@ advance_to_next(PARROT_INTERP, PMC *self) {
     }
     attrs->bucket = bucket;
     attrs->elements--;
-    return bucket;
+
+    return;
 }
 
 pmclass HashIterator extends Iterator no_ro auto_attrs {
@@ -125,7 +145,7 @@ Marks the hash as live.
 */
 
     VTABLE void mark() {
-        PMC *hash = PARROT_HASHITERATOR(SELF)->pmc_hash;
+        PMC * const hash = PARROT_HASHITERATOR(SELF)->pmc_hash;
         Parrot_gc_mark_PMC_alive(INTERP, hash);
         /* We don't mark underlying parrot_hash. Hash PMC will mark it */
     }
@@ -229,7 +249,7 @@ the next one.
             Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
                 "StopIteration");
 
-        ret = pmc_new(INTERP, enum_class_HashIteratorKey);
+        ret = Parrot_pmc_new(INTERP, enum_class_HashIteratorKey);
         VTABLE_set_pointer_keyed_int(INTERP, ret, 0, attrs->parrot_hash);
         VTABLE_set_pointer_keyed_int(INTERP, ret, 1, attrs->bucket);
 
@@ -246,7 +266,7 @@ the next one.
     VTABLE STRING* shift_string() {
         PMC    * const key = SELF.shift_pmc();
         STRING * const ret = VTABLE_get_string(INTERP, key);
-        temporary_pmc_free(INTERP, key);
+        Parrot_pmc_free_temporary(INTERP, key);
         return ret;
     }
 

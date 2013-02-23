@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: regression.t 42773 2009-11-21 20:41:51Z jkeenan $
 
 use strict;
 use warnings;

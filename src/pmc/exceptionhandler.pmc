@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id$
+$Id: exceptionhandler.pmc 45219 2010-03-28 01:11:50Z petdance $
 
 =head1 NAME
 
@@ -21,6 +21,10 @@ exception object's C<_P5> attribute.
 */
 
 #include "parrot/oplib/ops.h"
+
+/* HEADERIZER HFILE: none */
+/* HEADERIZER BEGIN: static */
+/* HEADERIZER END: static */
 
 pmclass ExceptionHandler extends Continuation auto_attrs {
 

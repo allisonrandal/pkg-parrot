@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id$
+# $Id: copy.t 39199 2009-05-27 18:18:01Z NotFound $
 
 =head1 NAME
 

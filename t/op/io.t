@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id$
+# $Id: io.t 43063 2009-12-15 10:31:24Z fperrad $
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# $Id: managedstruct.t 38027 2009-04-10 17:48:14Z whiteknight $
 
 =head1 NAME
 

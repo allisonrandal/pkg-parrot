@@ -1,6 +1,6 @@
 #! perl
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: multidispatch.t 45274 2010-03-29 13:16:28Z whiteknight $
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use lib qw( . lib ../lib ../../lib );
 use Test::More;
 use Parrot::Test::Util 'create_tempfile';
 
-use Parrot::Test tests => 48;
+use Parrot::Test tests => 47;
 
 =head1 NAME
 
@@ -237,88 +237,6 @@ pir_output_is( <<"CODE", <<'OUTPUT', "PASM MMD divide - loaded sub", todo => 'TT
 .end
 CODE
 42
-OUTPUT
-
-pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - new result", todo => 'TT #452' );
-.include "datatypes.pasm"
-    get_global P10, "Integer_bxor_Intval"
-    add_multi "bitwise_xor_int", "Integer,INTVAL,PMC", P10
-
-    new P1, ['Integer']
-    set P1, 3
-    bxor P9, P1, 2
-    print P9
-    print "\n"
-    end
-.pcc_sub Integer_bxor_Intval:
-    get_params "0,0,0", P5, I5, P6
-    print "ok\n"
-    set I10, P5
-    bxor I11, I10, I5
-    new P6, ['Integer']
-    set P6, I11
-    set_returns "0", P6
-    returncc
-CODE
-ok
-1
-OUTPUT
-
-pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - existing result", todo => 'TT #452' );
-.include "datatypes.pasm"
-    get_global P10, "Integer_bxor_Intval"
-    add_multi "bitwise_xor_int", "Integer,INTVAL,PMC", P10
-
-    new P0, ['Integer']
-    new P1, ['Integer']
-    set P1, 3
-    bxor P0, P1, 2
-    print P0
-    print "\n"
-    end
-.pcc_sub Integer_bxor_Intval:
-    get_params "0,0,0", P5, I5, P6
-    print "ok\n"
-    set I10, P5
-    bxor I11, I10, I5
-    set P6, I11
-    set_returns "0", P6
-    returncc
-CODE
-ok
-1
-OUTPUT
-
-pasm_output_is( <<'CODE', <<'OUTPUT', "PASM INTVAL - mixed", todo => 'TT #452' );
-.include "datatypes.pasm"
-    get_global P10, "Integer_bxor_Intval"
-    add_multi "bitwise_xor_int", "Integer,INTVAL,PMC", P10
-
-    new P0, ['Integer']
-    new P1, ['Integer']
-    set P1, 3
-    bxor P0, P1, 2
-    print P0
-    print "\n"
-    bxor P9, P1, 2
-    print P9
-    print "\n"
-    end
-.pcc_sub Integer_bxor_Intval:
-    get_params "0,0,0", P5, I5, P6
-    print "ok\n"
-    set I10, P5
-    bxor I11, I10, I5
-    new P6, ['Integer']
-    set P6, I11
-    set_returns "0", P6
-    returncc
-
-CODE
-ok
-1
-ok
-1
 OUTPUT
 
 pir_output_is( <<'CODE', <<'OUT', "first dynamic MMD call" );
@@ -1574,6 +1492,53 @@ GoodbyeTa ta2
 77.788.8
 77.788.899.9
 OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'Integer subclass and MMD - TT #784' );
+.sub main :main
+    .local pmc int_c
+    int_c = get_class "Integer"
+
+    .local pmc sub_c
+    sub_c = subclass int_c, "MyInt"
+
+    $P1 = new 'Integer'
+    $P1 = 4
+    $P1 -= 3
+    say $P1
+
+    $P1 = new 'MyInt'
+    $P1 = 4
+    $P1 -= 3
+    say $P1
+.end
+CODE
+1
+1
+OUTPUT
+
+pir_output_is( <<'CODE', <<'OUTPUT', 'int autoboxes to scalar - TT #1133' );
+    .sub 'foo' :multi(['scalar'])
+        .param pmc x
+        say "Scalar!"
+    .end
+
+    .sub 'foo' :multi()
+        .param pmc x
+        $I0 = isa x, 'scalar'
+        print "Scalar? "
+        say $I0
+    .end
+
+    .sub 'main' :main
+        'foo'(1)
+        $P0 = box 1
+        'foo'($P0)
+    .end
+CODE
+Scalar!
+Scalar!
+OUTPUT
+
 
 # Local Variables:
 #   mode: cperl

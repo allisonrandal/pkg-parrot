@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id$
+$Id: nci_test.c 44152 2010-02-19 01:53:12Z plobsing $
 
 =head1 NAME
 
@@ -67,7 +67,7 @@ typedef struct Opaque {
 /* Function declarations.
 
 *** If you add a new test function here,
-*** please update src/libnci_test.def and src/call_list.txt too. ***
+*** please update src/libnci_test.def and src/nci/extra_thunks.nci too. ***
 
 */
 

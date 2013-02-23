@@ -1,4 +1,4 @@
-# $Id$
+# $Id: README_win32.pod 43412 2010-01-09 10:27:08Z fperrad $
 
 This file is best viewed with "perldoc README_win32".
 

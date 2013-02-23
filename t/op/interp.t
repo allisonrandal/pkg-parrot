@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id$
+# $Id: interp.t 45324 2010-03-30 17:06:22Z NotFound $
 
 use strict;
 use warnings;
@@ -81,8 +81,8 @@ pasm_output_like(
     end
 CODE
 /^ok\s1\n
-(?:\s+8.*)?\n
-(?:\s+10.*)?\n
+(?:0+8.*)?\n
+(?:0+a.*)?\n
 ok\s2\n$/x
 OUTPUT
 

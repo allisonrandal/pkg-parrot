@@ -1,11 +1,11 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id$
+# Copyright (C) 2001-2010, Parrot Foundation.
+# $Id: pdd07_codingstd.pod 45652 2010-04-14 02:57:43Z coke $
 
 =head1 PDD 7: Conventions and Guidelines for Parrot Source Code
 
 =head2 Version
 
-$Revision$
+$Revision: 45652 $
 
 =head2 Abstract
 
@@ -1006,7 +1006,7 @@ for example, all files under a given directory.
 
 =head2 References
 
-none
+None.
 
 =cut
 
