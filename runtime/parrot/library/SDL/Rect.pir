@@ -1,3 +1,6 @@
+
+# $Id: Rect.pir 12412 2006-04-24 19:25:04Z bernhard $
+
 =head1 NAME
 
 SDL::Rect - Parrot class representing rectangles in Parrot SDL
@@ -17,7 +20,7 @@ SDL::Rect - Parrot class representing rectangles in Parrot SDL
 	# set some arguments for this SDL::Rect
 	.local pmc rect_args
 
-	new rect_args, .PerlHash
+	new rect_args, .Hash
 	rect_args[ 'x'      ] = 270
 	rect_args[ 'y'      ] = 190
 	rect_args[ 'height' ] = 100
@@ -54,7 +57,7 @@ An SDL::Rect object has the following methods:
 	addattribute rect_class, '_rect'
 
 	.local pmc initializer
-	new initializer, .PerlString
+	new initializer, .String
 	initializer = '_new'
 	setprop      rect_class, 'BUILD', initializer
 END:
@@ -63,7 +66,7 @@ END:
 
 =item _new( rect_args )
 
-Given a PerlHash of arguments, sets the attributes of this object.  The hash
+Given a C<Hash> of arguments, sets the attributes of this object.  The hash
 has the following keys:
 
 =over 4
@@ -165,16 +168,15 @@ the value.
 =cut
 
 .sub height method
-	.param int new_height
+	.param int new_height     :optional
+	.param int has_new_height :opt_flag
 
 	.local pmc rect 
 	.local int result
-	.local int param_count
 
-	param_count      = I1
 	rect             = self.'rect'()
 
-	if param_count   == 0 goto getter
+	unless has_new_height goto getter
 	rect[ 'height' ] = new_height
 
 getter:
@@ -193,16 +195,15 @@ value.
 =cut
 
 .sub width method
-	.param int new_width
+	.param int new_width     :optional
+	.param int has_new_width :optional
 
 	.local pmc rect 
 	.local int result
-	.local int param_count
 
-	param_count     = I1
 	rect            = self.'rect'()
 
-	if param_count  == 0 goto getter
+	unless has_new_width goto getter
 	rect[ 'width' ] = new_width
 
 getter:
@@ -221,24 +222,21 @@ integer.
 =cut
 
 .sub x method
-	.param int new_x
+	.param int new_x     :optional
+	.param int has_new_x :opt_flag
 
-	.local int param_count
 	.local pmc rect 
 
-	param_count    = I1
 	rect           = self.'rect'()
 
-	if param_count == 0 goto getter
+	unless has_new_x goto getter
 	rect[ 'x' ]    = new_x
 
 getter:
 	.local int result
 	result         = rect[ 'x' ]
 
-	.pcc_begin_return
-		.return result
-	.pcc_end_return
+	.return( result )
 .end
 
 =item y( [ new_y_coordinate ] )
@@ -249,15 +247,14 @@ integer.
 =cut
 
 .sub y method
-	.param int new_y
+	.param int new_y     :optional
+	.param int has_new_y :opt_flag
 
-	.local int param_count 
 	.local pmc rect 
 
-	param_count    = I1
 	rect           = self.'rect'()
 
-	if param_count == 0 goto _getter
+	unless has_new_y goto _getter
 	rect[ 'y' ]    = new_y
 
 _getter:
@@ -279,6 +276,6 @@ the Perl 6 Internals mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004, The Perl Foundation.
+Copyright (c) 2004-2006, The Perl Foundation.
 
 =cut

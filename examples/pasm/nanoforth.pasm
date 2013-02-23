@@ -1,4 +1,4 @@
-# $Id: nanoforth.pasm 10183 2005-11-26 11:05:39Z bernhard $
+# $Id: nanoforth.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 =pod
 
@@ -27,7 +27,7 @@ checking is disabled.
 .endm
 
 _main:
-    new P16, .PerlHash
+    new P16, .Hash
     .core("+", _add)
     .core("-", _sub)
     .core(".", _print)

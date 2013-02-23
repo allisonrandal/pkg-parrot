@@ -1,6 +1,6 @@
 #! perl -w
 # TODO: Resolve copyright. See ADDITIONAL section at end of file.
-# $Id: pbc2c.pl 10698 2005-12-27 18:32:31Z gregor $
+# $Id: pbc2c.pl 12217 2006-04-14 10:59:04Z bernhard $
 
 =head1 NAME
 
@@ -235,7 +235,6 @@ main(int argc, char **argv) {
     if (!interpreter) {
         return 1;
     }
-    Parrot_init(interpreter, (void*) &dummy_var);
 
     run_native = run_compiled;
     /* TODO make also a shared variant of PackFile_new */

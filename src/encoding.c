@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: encoding.c 11563 2006-02-16 00:42:07Z jisom $
+$Id: encoding.c 12592 2006-05-10 04:55:00Z petdance $
 
 =head1 NAME
 
@@ -37,7 +37,6 @@ typedef struct {
 
 static All_encodings *all_encodings;
 
-void parrot_init_encodings_2(Interp *interpreter);
 void
 parrot_init_encodings_2(Interp *interpreter)
 {

@@ -1,3 +1,5 @@
+# $Id: Tester.pir 12656 2006-05-13 23:32:41Z chromatic $
+
 =head1 NAME
 
 Test::Builder::Tester - Parrot extension for testing test modules
@@ -78,8 +80,8 @@ This module defines the following public functions:
 
 	.local pmc output
 	.local pmc diagnostics
-	output      = new .PerlArray
-	diagnostics = new .PerlArray
+	output      = new .ResizablePMCArray
+	diagnostics = new .ResizablePMCArray
 	setattribute self, offset, output
 	inc offset
 	setattribute self, offset, diagnostics
@@ -156,7 +158,7 @@ This module defines the following public functions:
   JOIN_LINES:
 	.local string diag_string
 	diag_string = join "\n", diagnostics
-	set diagnostics, 0
+	diagnostics = 0
 	.return( diag_string )
 .end
 
@@ -199,8 +201,8 @@ This module defines the following public functions:
 	set args['output'], output
 	test        = tb_create( args )
 
-	expect_out  = new .PerlArray
-	expect_diag = new .PerlArray
+	expect_out  = new .ResizablePMCArray
+	expect_diag = new .ResizablePMCArray
 
 	store_global 'Test::Builder::Tester', '_test',         test
 	store_global 'Test::Builder::Tester', '_default_test', default_test
@@ -388,9 +390,8 @@ output or diagnostic output.
 	received_out_string  = test_output.'output'()
 	received_diag_string = test_output.'diagnostics'()
 
-	.local int num_lines
-
   MAKE_EXPECTED_OUTPUT_STRING:
+	.local int num_lines
 	num_lines = expect_out
 	ne num_lines, 0, JOIN_EO_STRING
 	goto MAKE_EXPECTED_DIAG_STRING
@@ -429,12 +430,12 @@ output or diagnostic output.
 	test.'ok'( 1, description )
 	.return( 1 )
 
-  	.local string diagnostic
   FAIL_TEST:
   	test.'ok'( 0, description )
 	eq output_matches, 1, REPORT_DIAG_MISMATCH
 
   REPORT_OUTPUT_MISMATCH:
+  	.local string diagnostic
 	diagnostic = "output mismatch\nexpected: "
 	concat diagnostic, expected_out_string
 	concat diagnostic, "\nreceived: "
@@ -445,11 +446,11 @@ output or diagnostic output.
 	eq diag_matches, 1, RETURN
 
   REPORT_DIAG_MISMATCH:
-	diagnostic = "diagnostic mismatch\nexpected: "
+	diagnostic = "diagnostic mismatch\nexpected: '"
 	concat diagnostic, expected_diag_string
-	concat diagnostic, "\nreceived: "
+	concat diagnostic, "'\nreceived: '"
 	concat diagnostic, received_diag_string
-	concat diagnostic, "\n"
+	concat diagnostic, "'\n"
   	test.'diag'( diagnostic )
 
   RETURN:
@@ -467,6 +468,6 @@ mailing list.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005, the Perl Foundation.
+Copyright (c) 2005-2006, the Perl Foundation.
 
 =cut

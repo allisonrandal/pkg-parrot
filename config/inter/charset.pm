@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: charset.pm 11744 2006-02-26 10:55:39Z bernhard $
+# $Id: charset.pm 12474 2006-05-01 09:51:59Z bernhard $
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ END
 
     my $TEMP_charset_build = <<"E_NOTE";
 
-# the following part of the Makefile was built by 'config/inter/charset.pl'
+# the following part of the Makefile was built by 'config/inter/charset.pm'
 
 E_NOTE
 

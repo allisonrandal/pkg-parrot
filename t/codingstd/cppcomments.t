@@ -1,10 +1,9 @@
 #! perl
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: cppcomments.t 12008 2006-03-24 17:06:02Z coke $
+# $Id: cppcomments.t 12410 2006-04-24 18:55:08Z particle $
 
 use strict;
 use warnings;
-use 5.008;
 
 use lib qw( . lib ../lib ../../lib );
 use Test::More tests => 1;
@@ -55,13 +54,13 @@ my @comments;
 
 foreach my $glob ( @globs ) {
     foreach my $file ( glob $glob ) {
-        
+
         open FILE, "<$file" or die "Can not open '$file' for reading!\n";
         foreach my $line ( <FILE> ) {
             next unless $line =~ m{//};
             next if $line =~ m{://};     # skip ftp:// http:// etc
             next if $line =~ m{"//};     # skip printf("//= ")
-            
+
             push @comments, "$file: $line"
         }
         close FILE;

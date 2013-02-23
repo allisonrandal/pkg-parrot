@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: disassemble.c 11017 2006-01-09 16:00:17Z particle $
+$Id: disassemble.c 12217 2006-04-14 10:59:04Z bernhard $
 
 =head1 NAME
 
@@ -51,7 +51,6 @@ main(int argc, char *argv[])
     }
 
     interpreter->lo_var_ptr = &interpreter;
-    Parrot_init(interpreter);
 
     if (argc != 2) {
         fprintf(stderr, "Usage: disassemble programfile \n");

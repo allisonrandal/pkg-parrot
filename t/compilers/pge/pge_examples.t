@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pge_examples.t 12000 2006-03-24 03:45:10Z pmichaud $
+# $Id: pge_examples.t 12571 2006-05-09 05:02:50Z pmichaud $
 
 use strict;
 use warnings;
@@ -28,7 +28,7 @@ pir_output_is(<<'CODE', <<'OUT', "This made Parrot m4 fail");
   load_bytecode "PGE.pbc"
 
   .local pmc p6rule
-  p6rule = compreg "PGE::P6Rule"
+  p6rule = compreg "PGE::P6Regex"
 
   .local pmc rulesub_a, rulesub_b
   rulesub_a  = p6rule( "a" )
@@ -61,19 +61,19 @@ pir_output_is(<<'CODE', <<'OUT', "parse FASTA");
 
 .sub "example" :main
     load_bytecode 'PGE.pbc'
-    load_bytecode 'PGE/P6Grammar.pir'
+    load_bytecode 'compilers/pge/pgc.pir'
 
     .local string fasta_grammar
     fasta_grammar = <<'END_FASTA_GRAMMAR'
 grammar Bio::Fasta;
 
-rule databank    { <Bio::Fasta::entry>+ }
-rule start_entry { \> }
-rule desc_line   { <Bio::Fasta::start_entry> <Bio::Fasta::id> \s+ <Bio::Fasta::desc> } 
-rule entry       { <Bio::Fasta::desc_line> \n <Bio::Fasta::sequence> } 
-rule id          { (\S+) }
-rule desc        { (\N*) }
-rule sequence    { (<-[>]>*) }
+regex databank    { <Bio::Fasta::entry>+ }
+regex start_entry { \> }
+regex desc_line   { <Bio::Fasta::start_entry> <Bio::Fasta::id> \s+ <Bio::Fasta::desc> } 
+regex entry       { <Bio::Fasta::desc_line> \n <Bio::Fasta::sequence> } 
+regex id          { (\S+) }
+regex desc        { (\N*) }
+regex sequence    { (<-[>]>*) }
 
 END_FASTA_GRAMMAR
 
@@ -91,6 +91,9 @@ END_FASTA
     p6grammar = compreg "PGE::P6Grammar"
     .local pmc code
     ( code ) = p6grammar(fasta_grammar)
+    $P0 = compreg 'PIR'
+    $P1 = $P0(code)
+    $P1()
     # print code
 
     .local pmc fasta_rule

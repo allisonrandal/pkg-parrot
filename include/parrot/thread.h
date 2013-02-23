@@ -1,7 +1,7 @@
 /* thread.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: thread.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: thread.h 12117 2006-04-05 04:49:19Z petdance $
  *  Overview:
  *     This is the api header for the thread primitives
  *  Data Structure and Algorithms:
@@ -122,7 +122,7 @@ int  pt_thread_run_2(Parrot_Interp, PMC* dest_interp, PMC* sub);
 int  pt_thread_run_3(Parrot_Interp, PMC* dest_interp, PMC* sub);
 
 void pt_thread_prepare_for_run(Parrot_Interp d, Parrot_Interp s);
-void pt_clone_code(Parrot_Interp d, Parrot_Interp s);
+void pt_clone_code(Parrot_Interp d, const Parrot_Interp s);
 void pt_add_to_interpreters(Parrot_Interp first, Parrot_Interp new_interp);
 void pt_thread_yield(void);
 void * pt_thread_join(Parrot_Interp, UINTVAL);

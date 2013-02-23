@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: makefiles.pm 12013 2006-03-24 23:08:57Z pmichaud $
+# $Id: makefiles.pm 12458 2006-04-30 02:43:47Z chromatic $
 
 =head1 NAME
 
@@ -80,6 +80,11 @@ sub makefiles
         commentType                             => '#',
         replace_slashes                         => 0,
         conditioned_lines                       => 1
+    );
+    genfile(
+        'config/gen/makefiles/past.in' => 'compilers/past/Makefile',
+        commentType                   => '#',
+        replace_slashes               => 1
     );
     genfile(
         'config/gen/makefiles/pge.in' => 'compilers/pge/Makefile',
@@ -189,6 +194,11 @@ sub makefiles
     );
     genfile(
         'config/gen/makefiles/perl6.in' => 'languages/perl6/Makefile',
+        commentType                     => '#',
+        replace_slashes                 => 1
+    );
+    genfile(
+        'config/gen/makefiles/pheme.in' => 'languages/pheme/Makefile',
         commentType                     => '#',
         replace_slashes                 => 1
     );

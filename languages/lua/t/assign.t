@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: assign.t 11446 2006-02-06 14:07:49Z fperrad $
+# $Id: assign.t 12325 2006-04-18 06:59:24Z fperrad $
 
 =head1 NAME
 
@@ -108,5 +108,4 @@ CODE
 4
 4
 OUT
-
 

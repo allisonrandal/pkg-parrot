@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: smallobject.c 12044 2006-03-27 13:27:10Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: smallobject.c 12584 2006-05-09 21:51:17Z petdance $
 
 =head1 NAME
 
@@ -50,7 +50,7 @@ contained_in_pool(Interp *interpreter,
     ptr = PObj_to_ARENA(ptr);
 
     for (arena = pool->last_Arena; arena; arena = arena->prev) {
-        ptrdiff_t ptr_diff = (ptrdiff_t)ptr - (ptrdiff_t)arena->start_objects;
+        const ptrdiff_t ptr_diff = (ptrdiff_t)ptr - (ptrdiff_t)arena->start_objects;
 
         if (0 <= ptr_diff
                 && ptr_diff <
@@ -75,7 +75,7 @@ Returns whether C<*pmc> is a constant PMC.
 int
 Parrot_is_const_pmc(Parrot_Interp interpreter, PMC *pmc)
 {
-    struct Small_Object_Pool *pool
+    struct Small_Object_Pool * const pool
         = interpreter->arena_base->constant_pmc_pool;
     int c;
 #if  ARENA_DOD_FLAGS
@@ -106,14 +106,16 @@ static void
 more_traceable_objects(Interp *interpreter,
         struct Small_Object_Pool *pool)
 {
-    struct Small_Object_Arena *arena;
     if (pool->skip)
         pool->skip = 0;
-    else if ((arena = pool->last_Arena)) {
-        if (arena->used == arena->total_objects)
-            Parrot_do_dod_run(interpreter, DOD_trace_stack_FLAG);
-        if (pool->num_free_objects <= pool->replenish_level)
-            pool->skip = 1;
+    else {
+        struct Small_Object_Arena * const arena = pool->last_Arena;
+        if (arena) {
+            if (arena->used == arena->total_objects)
+                Parrot_do_dod_run(interpreter, DOD_trace_stack_FLAG);
+            if (pool->num_free_objects <= pool->replenish_level)
+                pool->skip = 1;
+        }
     }
 
     /* requires that num_free_objects be updated in Parrot_do_dod_run. If dod
@@ -310,8 +312,7 @@ and put them on.
 
 #if ARENA_DOD_FLAGS
 static void
-gc_ms_alloc_objects(Interp *interpreter,
-        struct Small_Object_Pool *pool)
+gc_ms_alloc_objects(Interp *interpreter, struct Small_Object_Pool *pool)
 {
     struct Small_Object_Arena *new_arena;
     size_t size;
@@ -385,8 +386,7 @@ gc_ms_alloc_objects(Interp *interpreter,
 #else
 
 static void
-gc_ms_alloc_objects(Interp *interpreter,
-        struct Small_Object_Pool *pool)
+gc_ms_alloc_objects(Interp *interpreter, struct Small_Object_Pool *pool)
 {
     struct Small_Object_Arena *new_arena;
     size_t size;
@@ -445,9 +445,9 @@ struct Small_Object_Pool *
 new_small_object_pool(Interp *interpreter,
         size_t object_size, size_t objects_per_alloc)
 {
-    struct Small_Object_Pool *pool;
+    struct Small_Object_Pool * const pool =
+        mem_internal_allocate_zeroed(sizeof(struct Small_Object_Pool));
 
-    pool = mem_internal_allocate_zeroed(sizeof(struct Small_Object_Pool));
     SET_NULL(pool->last_Arena);
     SET_NULL(pool->free_list);
     SET_NULL(pool->mem_pool);
@@ -494,9 +494,8 @@ C<more_object_fn>.
 void
 Parrot_gc_ms_init(Interp* interpreter)
 {
-    struct Arenas *arena_base;
+    struct Arenas * const arena_base = interpreter->arena_base;
 
-    arena_base = interpreter->arena_base;
     arena_base->do_dod_run = Parrot_dod_ms_run;
     arena_base->de_init_gc_system = (void (*)(Interp*)) NULLfunc;
     arena_base->init_pool = gc_ms_pool_init;

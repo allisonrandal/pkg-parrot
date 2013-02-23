@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: options.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: options.t 12103 2006-04-03 20:14:43Z particle $
 
 =head1 NAME
 
@@ -23,6 +23,7 @@ use Test::More;
 use Parrot::Test;
 use Parrot::Config;
 use File::Temp 0.13 qw/tempfile/;
+use File::Spec;
 
 
 my $PARROT = ".$PConfig{slash}$PConfig{test_prog}";
@@ -37,29 +38,28 @@ my $first = create_pir_file('first');
 my $second = create_pir_file('second');
 
 # executing a PIR file
-is( `$PARROT $first`, "first\n", 'running first.pir' );
-is( `$PARROT $second`, "second\n", 'running second.pir' );
+is( `"$PARROT" "$first"`, "first\n", 'running first.pir' );
+is( `"$PARROT" "$second"`, "second\n", 'running second.pir' );
 
 # Ignore further arguments
-is( `$PARROT $first $second`, "first\n",
+is( `"$PARROT" "$first" "$second"`, "first\n",
     'ignore a pir-file' );
-is( `$PARROT $first asdf`, "first\n", 'ignore nonsense' );
+is( `"$PARROT" "$first" "asdf"`, "first\n", 'ignore nonsense' );
 
 
 # redirect STDERR to avoid warnings
-# windows wants '>nul', most everything else wants '>/dev/null'
-my $redir = $^O =~ /^(MSWin\d+)$/ ? q{2>nul} : q{2>/dev/null};
+my $redir = '2>' . File::Spec->devnull;
 
 # Test the trace option
-is( `$PARROT -t $first $redir`, "first\n", 'option -t' );
+is( `"$PARROT" -t "$first" $redir`, "first\n", 'option -t' );
 TODO:
 {
    local $TODO = '--trace behaves not like -t';
-   is( `$PARROT --trace $first $redir`, "first\n", 'option --trace' );
+   is( `"$PARROT" --trace "$first" $redir`, "first\n", 'option --trace' );
 };
-is( `$PARROT -t $first $second $redir`, "second\n",
+is( `"$PARROT" -t "$first" "$second" $redir`, "second\n",
     'option -t with flags' );
-is( `$PARROT --trace $first $second $redir`, "second\n",
+is( `"$PARROT" --trace "$first" "$second" $redir`, "second\n",
     'option --trace with flags' );
 
 unlink $first;

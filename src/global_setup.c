@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: global_setup.c 11928 2006-03-18 17:43:35Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: global_setup.c 12465 2006-04-30 15:11:25Z bernhard $
 
 =head1 NAME
 
@@ -161,7 +161,7 @@ parrot_global_setup_2(Interp *interpreter)
     PMC *classname_hash, *iglobals;
     int i;
     PMC *parrot_ns;
-    STRING *parrot = const_string(interpreter, "parrot");
+    
 
     /* create the namespace root stash */
     interpreter->stash_hash =
@@ -171,7 +171,9 @@ parrot_global_setup_2(Interp *interpreter)
             enum_class_ResizablePMCArray);
     interpreter->HLL_namespace = constant_pmc_new(interpreter,
             enum_class_ResizablePMCArray);
-    Parrot_register_HLL(interpreter, parrot, NULL);
+    Parrot_register_HLL(interpreter,
+            const_string(interpreter, "parrot"),
+            NULL);
 
     parrot_ns = 
         VTABLE_get_pmc_keyed_int(interpreter, interpreter->HLL_namespace, 0); 	
@@ -181,7 +183,7 @@ parrot_global_setup_2(Interp *interpreter)
             parrot_ns);
     /* We need a class hash */
     interpreter->class_hash = classname_hash =
-        pmc_new(interpreter, enum_class_Hash);
+        pmc_new(interpreter, enum_class_NameSpace);
     Parrot_register_core_pmcs(interpreter, classname_hash);
     /* init the interpreter globals array */
     iglobals = pmc_new(interpreter, enum_class_SArray);

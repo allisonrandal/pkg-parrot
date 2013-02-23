@@ -4,12 +4,28 @@
 
 Parrot::Test::Perl6 -- testing routines for languages/perl6
 
+=head1 SYNOPSIS
+
+    use Parrot::Test::Perl6 tests => 3;
+
+    perl6_output_is(<<'CODE', <<'OUTPUT', 'hello, world!');
+    say 'hello, world!';
+    CODE
+    hello, world!
+    OUTPUT
+
+    perl6_stderr_like($code, qr/$expected/, $desc);
+
+    perl6_stdout_isnt($code, qr/$expected/, $desc);
+
 =head1 DESCRIPTION
 
-This module was reused and heavily refactored from Parrot::Test. Hopefully,
-similar refactoring will be carried out in Parrot::Test someday soon.
+This module provides Perl6 test functions. It has been heavily refactored
+from Parrot::Test. Hopefully,similar refactoring will be carried out in
+Parrot::Test someday soon.
 
 =cut
+
 
 package Parrot::Test::Perl6;
 
@@ -29,9 +45,9 @@ our @EXPORT = qw( plan skip );
 
 my $lang = 'perl6';
 my $streams = {
-    output => sub{return ( STDOUT => $_[0],       STDERR => $_[0]       )},
-    stdout => sub{return ( STDOUT => $_[0],       STDERR => '/dev/null' )},
-    stderr => sub{return ( STDOUT => '/dev/null', STDERR => $_[0]       )},
+    output => sub{return ( STDOUT => $_[0], STDERR => $_[0] )},
+    stdout => sub{return ( STDOUT => $_[0], STDERR => File::Spec->devnull )},
+    stderr => sub{return ( STDOUT => File::Spec->devnull, STDERR => $_[0] )},
 };
 my $tests = {
     is   => 'is_eq',

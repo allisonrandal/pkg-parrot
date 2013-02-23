@@ -1,10 +1,10 @@
-#!perl
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: lexicals.t 11930 2006-03-18 20:58:54Z bernhard $
+# $Id: lexicals.t 12264 2006-04-15 18:58:05Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Test;
 
@@ -27,26 +27,6 @@ Tests various lexical scratchpad operations, as described in PDD20.
 pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (\'$a\') succeeds');
 .pcc_sub main:
     .lex "$a", P0
-    print "ok\n"
-    end
-CODE
-ok
-OUTPUT
-
-pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM (S0) fails', todo => 'specification unclear');
-.pcc_sub main:
-    S0 = '$a'
-    .lex S0, P0
-    print "ok\n"
-    end
-CODE
-ok
-OUTPUT
-
-pasm_output_is(<<'CODE', <<'OUTPUT', '.lex parsing - PASM ($S0) fails', todo => 'specification unclear');
-.pcc_sub main:
-    $S0 = '$a'
-    .lex $S0, P0
     print "ok\n"
     end
 CODE
@@ -393,7 +373,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer');
     print "\n"
 .end
 CODE
-main
+parrot;main
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer 2');
@@ -414,8 +394,8 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer 2');
     print "\n"
 .end
 CODE
-foo
-main
+parrot;foo
+parrot;main
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer via interp');
@@ -454,10 +434,10 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'get_outer via interp');
     pad['a'] = $P0
 .end
 CODE
-foo
-foo
-main
-main
+parrot;foo
+parrot;foo
+parrot;main
+parrot;main
 I messed with your var
 OUTPUT
 
@@ -565,11 +545,11 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'closure 4');
      .const .Sub choose_sub = "_choose"
      .const .Sub fail_sub = "_fail"
      fail = newclosure fail_sub
-     arr1 = new PerlArray
+     arr1 = new ResizablePMCArray
      arr1[0] = 1
      arr1[1] = 3
      arr1[2] = 5
-     arr2 = new PerlArray
+     arr2 = new ResizablePMCArray
      arr2[0] = 1
      arr2[1] = 5
      arr2[2] = 9
@@ -603,7 +583,8 @@ the_end:
 .end
 
 .sub _choose :outer(main)
-     .param PerlArray choices
+     .param ResizablePMCArray choices
+
      .local pmc our_try, old_fail, cc, try
      .lex 'old_fail', old_fail
      .lex 'cc', cc
@@ -621,7 +602,8 @@ the_end:
 .end
 
 .sub _try :outer(_choose)
-     .param PerlArray choices
+     .param ResizablePMCArray choices
+
      .lex 'choices', $P0
      #print "In try\n"
      clone $P0, choices
@@ -826,10 +808,12 @@ bar: 13014
 bar: 46
 OUTPUT
 
-pir_output_is(<<'CODE', '54', 'closure 8', todo => 'unspeccced or b0rken');
+pir_output_like(<<'CODE', <<'OUT', 'closure 8');
 
 # p6 example from pmichaud
 # { my $x = 5;  { print $x; my $x = 4; print $x; } }
+
+## According to S04 this is an error
 
 .sub main :main
     .lex '$x', $P0
@@ -848,6 +832,8 @@ pir_output_is(<<'CODE', '54', 'closure 8', todo => 'unspeccced or b0rken');
     print $P1
 .end
 CODE
+/Null PMC access/
+OUT
 
 pir_output_like(<<'CODE', <<'OUTPUT', 'get non existing');
 .sub "main" :main
@@ -913,9 +899,18 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 1');
 .sub '&main' :main :anon
     .local pmc sx
     .lex '$x', sx
-    sx = new .PerlUndef
+    sx = new .Integer
+    sx = 33
     '&f'()
     print sx    # no find_lex needed - 'sx' is defined here
+    print "\n"
+
+    '&f'()
+    print sx 
+    print "\n"
+
+    '&f'()
+    print sx 
     print "\n"
 .end
 
@@ -924,7 +919,9 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 1');
     inc $P0
 .end
 CODE
-1
+34
+35
+36
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 2');
@@ -936,10 +933,20 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 2');
 .sub '&main' :main :anon
     .local pmc sx
     .lex '$x', sx
-    sx = new .PerlUndef
+    sx = new .Integer
+    sx = -32
     '&g'()
     print sx
     print "\n"
+
+    '&g'()
+    print sx
+    print "\n"
+
+    '&g'()
+    print sx
+    print "\n"
+
 .end
 
 .sub '&f' :outer('&main') 
@@ -952,7 +959,9 @@ pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 2');
     '&f'()
 .end
 CODE
-2
+-30
+-28
+-26
 OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', 'package-scoped closure 3 - autoclose');
@@ -1071,4 +1080,4 @@ CODE
 OUTPUT
 
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 42; }
+BEGIN { plan tests => 40; }

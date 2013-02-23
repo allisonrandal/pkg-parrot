@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: intlist.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: intlist.t 12217 2006-04-14 10:59:04Z bernhard $
 
 use strict;
 use warnings;
@@ -36,7 +36,6 @@ c_output_is(<<'CODE', <<'OUTPUT', "creation");
 
             Interp* interpreter = Parrot_new(NULL);
             if (interpreter == NULL) return 1;
-            Parrot_init(interpreter);
 
             list = intlist_new(interpreter);
             if (list == NULL) return 1;
@@ -66,7 +65,6 @@ c_output_is(<<'CODE', <<'OUTPUT', "list aerobics");
 
             Interp* interpreter = Parrot_new(NULL);
             if (interpreter == NULL) return "create interpreter";
-            Parrot_init(interpreter);
 
             list = intlist_new(interpreter);
             if (list == NULL) return "create list";
@@ -199,7 +197,6 @@ c_output_is(<<'CODE', <<'OUTPUT', "step aerobics");
 
             interpreter = Parrot_new(NULL);
             if (interpreter == NULL) return 1;
-            Parrot_init(interpreter);
 
             list = intlist_new(interpreter);
             if (list == NULL) return 1;
@@ -304,7 +301,6 @@ c_output_is(<<'CODE', <<'OUTPUT', "yoyo");
 
             interpreter = Parrot_new(NULL);
             if (interpreter == NULL) return 1;
-            Parrot_init(interpreter);
 
             list = intlist_new(interpreter);
             if (list == NULL) return 1;

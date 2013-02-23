@@ -1,12 +1,13 @@
 #! perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: sub.t 11992 2006-03-22 22:25:01Z bernhard $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: sub.t 12465 2006-04-30 15:11:25Z bernhard $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
-use Parrot::Test tests => 41;
+use Parrot::Test tests => 44;
 use Parrot::Config;
 
 =head1 NAME
@@ -15,7 +16,7 @@ t/pmc/sub.t - Subroutine PMCs
 
 =head1 SYNOPSIS
 
-	% prove t/pmc/sub.t
+    % prove t/pmc/sub.t
 
 =head1 DESCRIPTION
 
@@ -25,6 +26,13 @@ C<Continuation> PMCs.
 =cut
 
 my $temp = "temp.pasm";
+my $load_perl = <<'END_PASM';
+    loadlib P20, 'perl_group'
+    find_type I24, 'PerlInt'
+    find_type I25, 'PerlNum'
+    find_type I28, 'PerlUndef'
+END_PASM
+
 
 END {
     unlink($temp, 'temp.pbc');
@@ -716,26 +724,25 @@ main
 back
 OUTPUT
 
-
-pir_output_like(<<'CODE', <<'OUTPUT', "warn on in main");
+# This is the behavior of Parrot 0.4.3
+# XXX Should there be a warning ?
+pir_output_is(<<'CODE', '', 'warn on in main');
 .sub _main :main
 .include "warnings.pasm"
     warningson .PARROT_WARNINGS_UNDEF_FLAG
     _f1()
 .end
 .sub _f1
-    $P0 = new .PerlUndef
+    $P0 = new .Undef
     print $P0
 .end
 CODE
-/uninit/
-OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "warn on in sub");
 .sub _main :main
 .include "warnings.pasm"
     _f1()
-    $P0 = new .PerlUndef
+    $P0 = new .Undef
     print $P0
     print "ok\n"
 .end
@@ -746,11 +753,14 @@ CODE
 ok
 OUTPUT
 
-pir_output_like(<<'CODE', <<'OUTPUT', "warn on in sub, turn off in f2");
+# XXX This is the behavior of Parrot 0.4.3
+# It looks like core PMCs never emit warning.
+# Look in perlundef.t for a more sane test of 'warningson' in subs
+pir_output_is(<<'CODE', <<'OUTPUT', "warn on in sub, turn off in f2");
 .sub _main :main
 .include "warnings.pasm"
     _f1()
-    $P0 = new .PerlUndef
+    $P0 = new .Undef
     print "back\n"
     print $P0
     print "ok\n"
@@ -758,14 +768,15 @@ pir_output_like(<<'CODE', <<'OUTPUT', "warn on in sub, turn off in f2");
 .sub _f1
     warningson .PARROT_WARNINGS_UNDEF_FLAG
     _f2()
-    $P0 = new .PerlUndef
+    $P0 = new .Undef
     print $P0
 .end
 .sub _f2
     warningsoff .PARROT_WARNINGS_UNDEF_FLAG
 .end
 CODE
-/uninit.*\n.*\nback\nok/
+back
+ok
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "sub names");
@@ -787,9 +798,9 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "sub names");
     interpinfo P1, .INTERPINFO_CURRENT_CONT
     returncc
 CODE
-main
-the_sub
-main
+parrot;main
+parrot;the_sub
+parrot;main
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "sub names w MAIN");
@@ -814,9 +825,9 @@ pasm_output_is(<<'CODE', <<'OUTPUT', "sub names w MAIN");
     interpinfo P1, .INTERPINFO_CURRENT_CONT
     returncc
 CODE
-main
-the_sub
-main
+parrot;main
+parrot;the_sub
+parrot;main
 OUTPUT
 
 
@@ -864,15 +875,15 @@ tb_end:
 CODE
 main foo
 Bar bar
-subname: Bar :: bar
+subname: parrot;Bar;bar
 Bar foo
-caller 0 Bar :: foo
-caller 1 Bar :: bar
-caller 2 foo
-caller 3 main
+caller 0 parrot;Bar;foo
+caller 1 parrot;Bar;bar
+caller 2 parrot;foo
+caller 3 parrot;main
 Bar foo
-caller 0 Bar :: foo
-caller 1 main
+caller 0 parrot;Bar;foo
+caller 1 parrot;main
 ok
 OUTPUT
 
@@ -882,7 +893,7 @@ OUTPUT
     # actually the POSTCOMP is run and "initial" is printed, but
     # its not captured by the test system
 
-    my $code = << 'CODE';
+    my $code = <<'CODE';
 .sub optc :immediate, :postcomp
     print "initial\n"
 .end
@@ -890,7 +901,7 @@ OUTPUT
     print "main\n"
 .end
 CODE
-    my $output = << 'OUTPUT';
+    my $output = <<'OUTPUT';
 initial
 main
 OUTPUT
@@ -1071,3 +1082,64 @@ pir_output_is(<<'CODE', <<'OUTPUT', "__get_regs_used 2");
 CODE
 81101
 OUTPUT
+
+
+pir_output_like(<<"CODE", <<'OUTPUT', 'warn on in main');
+.sub 'test' :main
+.include "warnings.pasm"
+    warningson .PARROT_WARNINGS_UNDEF_FLAG
+    _f1()
+.end
+.sub _f1
+$load_perl
+
+    P0 = new I28
+    print P0
+.end
+CODE
+/uninit/
+OUTPUT
+
+
+pir_output_is(<<"CODE", <<'OUTPUT', 'warn on in sub');
+.sub 'test' :main
+$load_perl
+.include "warnings.pasm"
+    _f1()
+    P0 = new I28
+    print P0
+    print "ok\\n"
+.end
+.sub _f1
+    warningson .PARROT_WARNINGS_UNDEF_FLAG
+.end
+CODE
+ok
+OUTPUT
+
+
+pir_output_like(<<"CODE", <<'OUTPUT', 'warn on in sub, turn off in f2');
+.sub 'test' :main
+$load_perl
+.include "warnings.pasm"
+    _f1()
+    P0 = new I28
+    print "back\\n"
+    print P0
+    print "ok\\n"
+.end
+.sub _f1
+$load_perl
+    warningson .PARROT_WARNINGS_UNDEF_FLAG
+    _f2()
+    P0 = new I28
+    print P0
+.end
+.sub _f2
+    warningsoff .PARROT_WARNINGS_UNDEF_FLAG
+.end
+CODE
+/uninit.*\n.*\nback\nok/
+OUTPUT
+
+

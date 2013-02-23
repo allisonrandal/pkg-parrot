@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: unicode.c 12073 2006-03-29 13:22:04Z leo $
+$Id: unicode.c 12590 2006-05-10 03:23:37Z autrijus $
 
 =head1 NAME
 
@@ -581,6 +581,8 @@ Parrot_charset_unicode_init(Interp *interpreter)
     /*
      * for now use utf8
      * TODO replace it with a fixed uint_16 or uint_32 encoding
+     *      XXX if this is changed, modify string_make so it
+     *          still takes "utf8" when fed "unicode" as charset!
      */
     return_set->preferred_encoding = Parrot_utf8_encoding_ptr;
     Parrot_register_charset(interpreter, "unicode", return_set);

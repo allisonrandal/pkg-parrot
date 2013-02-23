@@ -78,7 +78,7 @@ OUT
 language_output_like( 'lua', <<'CODE', <<'OUT', '1 % 0' );
 print(1 % 0)
 CODE
-/-1.#IND/
+/(nan|-1.#IND)/
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', '3 ^ 3' );
@@ -212,7 +212,6 @@ print(1 .. true)
 CODE
 /attempt to concatenate a boolean value/
 OUT
-
 
 language_output_is( 'lua', <<'CODE', <<'OUT', '1.0 == 1' );
 print(1.0 == 1)

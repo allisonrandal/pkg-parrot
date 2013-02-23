@@ -1,6 +1,6 @@
 #! perl -w
-# Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: freeze.pl 5175 2004-01-31 13:16:08Z mikescott $
+# Copyright (C) 2001-2006 The Perl Foundation.  All rights reserved.
+# $Id: freeze.pl 12177 2006-04-11 19:56:05Z bernhard $
 
 =head1 NAME
 
@@ -12,21 +12,22 @@ examples/benchmarks/freeze.pl - Freeze/Thaw Benchmarks
 
 =head1 DESCRIPTION
 
-Freeze/thaw a Perl array. Uses C<Storable> to archive the array.
+Freeze/thaw a C<ResizablePMCArray>. Uses C<Storable> to archive the array.
 
 =cut
 
 use strict;
+use warnings;
+
 use Storable qw( freeze thaw dclone );
 use Time::HiRes qw( time );
 
-my (@a);
-my ($s, $e);
-$s = time();
+my @a;
+my $s = time();
 for my $i (0..99999) {
     push @a, $i;
 };
-$e = time();
+my $e = time();
 printf "constr.time %.6f\n", $e-$s;
 
 $s = time();

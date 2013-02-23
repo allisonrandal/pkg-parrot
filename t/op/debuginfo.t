@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: debuginfo.t 11882 2006-03-13 12:39:45Z leo $
+# $Id: debuginfo.t 12199 2006-04-13 12:09:36Z leo $
 
 use strict;
 use warnings;
@@ -98,8 +98,8 @@ CODE
 ok 2
 ok 3
 Method 'nosuchmethod' not found
-current instr.: 'Test1 :: foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
-called from Sub 'Test1 :: main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
+current instr.: 'parrot;Test1;foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
+called from Sub 'parrot;Test1;main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
 pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - fetch of unknown lexical" );
@@ -118,8 +118,8 @@ CODE
 /^ok 1
 ok 2
 Lexical 'nosuchlex' not found
-current instr.: 'Test2 :: foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
-called from Sub 'Test2 :: main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
+current instr.: 'parrot;Test2;foo' pc (\d+|-1) \(.*?:(\d+|-1)\)
+called from Sub 'parrot;Test2;main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
 
 # XXX

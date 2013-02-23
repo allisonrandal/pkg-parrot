@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-$Id: exec_start.c 12064 2006-03-28 19:08:48Z bernhard $
+$Id: exec_start.c 12492 2006-05-03 20:53:31Z bernhard $
 
 =head1 NAME
 
@@ -70,7 +70,6 @@ main(int argc, char * argv[])
     if (!interpreter) {
         return 1;
     }
-    Parrot_init(interpreter);
 
     /* run_native = run_compiled; */
     /* TODO make also a shared variant of PackFile_new */
@@ -117,7 +116,7 @@ main(int argc, char * argv[])
 
 =head1 SEE ALSO
 
-F<include/parrot/exec.h>, F<include/parrot/exec_save.h>, F<src/exec.c>
+F<include/parrot/exec.h>, F<src/exec_save.h>, F<src/exec.c>
 and F<compilers/imcc/main.c>.
 
 =head1 HISTORY

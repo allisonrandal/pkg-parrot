@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation. All Rights Reserved.
-$Id: pbc_merge.c 12076 2006-03-29 22:22:22Z bernhard $
+$Id: pbc_merge.c 12217 2006-04-14 10:59:04Z bernhard $
 
 =head1 NAME
 
@@ -723,7 +723,6 @@ main(int argc, char **argv)
 
     /* Create a Parrot interpreter. */
     interpreter = Parrot_new(NULL);
-    Parrot_init(interpreter);
     Parrot_block_DOD(interpreter);
 
     /* Get options, ensuring we have at least one input

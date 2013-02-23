@@ -1,5 +1,5 @@
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Configure.pm 11788 2006-03-04 16:22:21Z bernhard $
+# $Id: Configure.pm 12106 2006-04-04 03:24:30Z petdance $
 
 =pod
 
@@ -20,7 +20,7 @@ Parrot::Configure - Conducts the execution of Configuration Steps
 
 =head1 DESCRIPTION
 
-This module provides provides a mean for registering, executing, and
+This module provides provides a means for registering, executing, and
 coordinating one or more Configuration steps.  Please see
 F<docs/configuration.pod> for further details about the configuration
 framework.
@@ -29,7 +29,7 @@ framework.
 
 =head2 Import Parameters
 
-This module accepts no arguments to it's C<import> method and exports no
+This module accepts no arguments to its C<import> method and exports no
 I<symbols>.
 
 =cut

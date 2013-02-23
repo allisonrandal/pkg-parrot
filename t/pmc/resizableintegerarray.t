@@ -1,12 +1,12 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: resizableintegerarray.t 11360 2006-01-28 10:55:10Z bernhard $
+# $Id: resizableintegerarray.t 12231 2006-04-14 16:04:05Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 13;
+use Parrot::Test tests => 15;
 
 =head1 NAME
 
@@ -391,4 +391,45 @@ pasm_output_like(<<'CODE', <<'OUTPUT', 'pop from empty array');
      end
 CODE
 /ResizableIntegerArray: Can't pop from an empty array!/
+OUTPUT
+
+#'
+pir_output_is(<< 'CODE', << 'OUTPUT', "shift integer");
+.sub test :main
+    .local pmc ar
+    ar = new ResizableIntegerArray
+    ar[0] = 10
+    ar[1] = 20
+    $I0 = elements ar
+    print_item $I0
+    $I0 = shift ar
+    print_item $I0
+    $I0 = elements ar
+    print_item $I0
+    $I0 = shift ar
+    print_item $I0
+    $I0 = elements ar
+    print_item $I0
+    print_newline
+.end
+CODE
+2 10 1 20 0
+OUTPUT
+
+pir_output_is(<< 'CODE', << 'OUTPUT', "unshift integer");
+.sub test :main
+    .local pmc ar
+    ar = new ResizableIntegerArray
+    unshift ar, 10
+    unshift ar, 20
+    $I0 = elements ar
+    print_item $I0
+    $I0 = ar[0]
+    print_item $I0
+    $I0 = ar[1]
+    print_item $I0
+    print_newline
+.end
+CODE
+2 20 10
 OUTPUT

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrotclass.pmc 11840 2006-03-09 22:01:37Z leo $
+$Id: parrotclass.pmc 12340 2006-04-18 15:10:09Z leo $
 
 =head1 NAME
 
@@ -83,10 +83,10 @@ argument is not a PMC* but the C<classname> STRING.
     }
 
     void init_pmc (PMC* name) {
-        STRING *class_name = (STRING*) name;
+        STRING *class_name;
 
         SELF.init();
-        Parrot_new_class(INTERP, SELF, class_name);
+        Parrot_new_class(INTERP, SELF, name);
     }
 
 /*
@@ -127,12 +127,14 @@ Return the classname.
     }
 
     STRING* name() {
-        PMC **class_data;
+        PMC **class_data, *name;
         class_data = (PMC **)PMC_data(SELF);
 
-        return class_data ? 
-            VTABLE_get_string(INTERP, class_data[PCD_CLASS_NAME]) :
-            SELF->vtable->whoami;
+        if (class_data) {
+            name = class_data[PCD_CLASS_NAME];
+            return readable_name(interpreter, name);
+        }
+        return SELF->vtable->whoami;
     }
 
 
@@ -236,8 +238,10 @@ Create the class from the thawed parents and attributes array.
                 info->extra_flags = EXTRA_CLASS_EXISTS;
             }
             else {
+                PMC *name = pmc_new(interpreter, enum_class_String);
                 real_class = SELF;
-                SELF.init_pmc((PMC*)class_name);
+                VTABLE_set_string_native(interpreter, name, class_name);
+                SELF.init_pmc(name);
             }
             /* make room for thawed arrays */
             if (PMC_int_val(real_class) == PCD_MAX) {

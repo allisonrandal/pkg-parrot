@@ -1,4 +1,4 @@
-/* $Id: instructions.c 11479 2006-02-09 11:15:30Z leo $ */
+/* $Id: instructions.c 12606 2006-05-10 17:54:59Z petdance $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -560,10 +560,11 @@ ins_print(Interp *interp, FILE *fd, Instruction * ins)
 
 /* for debug */
 static char *output;
+
 static int
 e_file_open(Interp *interp, void *param)
 {
-    char *file = (char *) param;
+    char * const file = (char *) param;
 
     UNUSED(interp);
     if (strcmp(file, "-"))

@@ -1,10 +1,10 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: repeat.t 11446 2006-02-06 14:07:49Z fperrad $
+# $Id: repeat.t 12325 2006-04-18 06:59:24Z fperrad $
 
 =head1 NAME
 
-t/repeat.t - Lua C<repeat> statement
+t/repeat.t - Lua repeat statement
 
 =head1 SYNOPSIS
 
@@ -50,5 +50,4 @@ print(a[i])
 CODE
 stop
 OUT
-
 

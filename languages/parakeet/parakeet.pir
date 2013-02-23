@@ -1,4 +1,4 @@
-# $Id: parakeet.pir 11763 2006-02-27 08:29:19Z bernhard $
+# $Id: parakeet.pir 12598 2006-05-10 15:42:04Z leo $
 
 # Parakeet is a stack machine language for the Parrot VM not entirely
 # unlike the Forth programming language.  Parakeet is extremely simple
@@ -1202,7 +1202,7 @@
     bsr CollectWord
     .emit(".POP\n")
     .emit("$S0 = \"_\"\n")
-    .emit("fetchmethod $P0, .TOS, \"_")
+    .emit("find_method $P0, .TOS, \"_")
     .emit(.CURR)
     .emit("\"\n")
     .emit(".SAVEM\n")

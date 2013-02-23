@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: step.t 10983 2006-01-08 12:58:17Z leo $
+# $Id: step.t 12426 2006-04-25 16:12:36Z chromatic $
 
 use strict;
 use warnings;
@@ -11,6 +11,7 @@ use Test::More tests => 19;
 
 use File::Basename qw(basename dirname);
 use File::Temp 0.13 qw/tempfile/;
+use File::Spec;
 use IO::Handle;
 
 =head1 NAME
@@ -74,14 +75,16 @@ is(integrate(1, 2), 2, "integrate(1, 1)");
     my( $fromfile, $fromfname ) = tempfile(UNLINK => 1);
     my( $tofile, $tofname ) = tempfile(UNLINK => 1);
     print $fromfile "foo" x 1000;
-    $fromfile->flush;
+    $fromfile->close;
+    $tofile->close;
 
     # redirect STDERR to avoid warnings
-    # windows wants '>nul', most everything else wants '>/dev/null'
-    my $redir = $^O =~ /^(MSWin\d+)$/ ? q{2>nul} : q{2>/dev/null};
+    my $redir = File::Spec->devnull;
 
     # copy file descriptors
     open OLDERR, ">&STDERR";
+    $fromfile->close();
+    $tofile->close();
 
     ok(move_if_diff("$fromfname", "$tofname"),
         "move_if_diff() true return status");

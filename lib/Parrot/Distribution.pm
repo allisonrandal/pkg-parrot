@@ -1,5 +1,5 @@
 # Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: Distribution.pm 11904 2006-03-14 22:53:28Z bernhard $
+# $Id: Distribution.pm 12407 2006-04-24 17:39:25Z particle $
 
 =head1 NAME
 
@@ -31,7 +31,6 @@ package Parrot::Distribution;
 
 use strict;
 use warnings;
-use 5.008;
 
 use Data::Dumper;
 use ExtUtils::Manifest;

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: tsq.c 7826 2005-04-13 23:38:16Z chromatic $
+$Id: tsq.c 12592 2006-05-10 04:55:00Z petdance $
 
 =head1 NAME
 
@@ -52,7 +52,8 @@ return C<NULL> if the queue is empty.
 
 */
 QUEUE_ENTRY *
-peek_entry(QUEUE *queue) {
+peek_entry(QUEUE *queue)
+{
     return queue->head;
 }
 
@@ -183,7 +184,7 @@ void
 nosync_insert_entry(QUEUE *queue, QUEUE_ENTRY *entry)
 {
     QUEUE_ENTRY *cur = queue->head, *prev;
-    parrot_event *event, *cur_event;
+    parrot_event *event;
     FLOATVAL abs_time;
 
     assert(entry->type == QUEUE_ENTRY_TYPE_TIMED_EVENT);
@@ -200,7 +201,7 @@ nosync_insert_entry(QUEUE *queue, QUEUE_ENTRY *entry)
     event = entry->data;
     abs_time = event->u.timer_event.abs_time;
     while (cur && cur->type == QUEUE_ENTRY_TYPE_TIMED_EVENT) {
-        cur_event = cur->data;
+        const parrot_event * const cur_event = cur->data;
         if (abs_time > cur_event->u.timer_event.abs_time) {
             prev = cur;
             cur = cur->next;
@@ -348,7 +349,7 @@ Initializes the queue, setting C<prio> as the queue's priority.
 QUEUE*
 queue_init(UINTVAL prio)
 {
-    QUEUE *queue = mem_sys_allocate(sizeof(QUEUE));
+    QUEUE * const queue = mem_sys_allocate(sizeof(QUEUE));
     queue->head = queue->tail = NULL;
     queue->max_prio = prio;
     COND_INIT(queue->queue_condition);

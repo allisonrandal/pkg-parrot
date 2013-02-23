@@ -1,4 +1,4 @@
-# $Id: vtable.tbl 12005 2006-03-24 15:19:48Z leo $
+# $Id: vtable.tbl 12338 2006-04-18 14:33:30Z leo $
 # [MAIN] #default section name
 
 # MMD_EQ ... MMD_STRCMP must be in one block
@@ -340,7 +340,7 @@ INTVAL does(STRING* method)
 
 INTVAL isa(STRING* _class)
 
-PMC* subclass(STRING* name)
+PMC* subclass(PMC* name)
 
 PMC* get_attr(INTVAL idx)
 PMC* get_attr_str(STRING* idx)

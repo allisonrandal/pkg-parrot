@@ -1,6 +1,6 @@
 =head1 TITLE
 
-PGE::Rule::Text - rules for extracting delimited text sequences from strings
+PGE::Text - rules for extracting delimited text sequences from strings
 
 =head1 DESCRIPTION
 
@@ -16,8 +16,7 @@ also.)
 
 .sub "__onload" :load
     .local pmc base
-    base = getclass "PGE::Rule"
-    $P0 = subclass base, "PGE::Text"
+    $P0 = subclass 'PGE::Grammar', 'PGE::Text'
 .end
 
 =head2 Available rules
@@ -45,7 +44,9 @@ of the extraction.
     .local string lookket                          # closing bracket char
     .local int pos                                 # current match position
     .local int balanced                            # in balanced match
+    .local pmc stack                               # lookket backtracking
 
+    stack = new .ResizableStringArray
     newfrom = find_global "PGE::Match", "newfrom"
     (mob, target, mfrom, mpos) = newfrom(tgt, 0)
     pos = mfrom
@@ -100,13 +101,13 @@ of the extraction.
     pos += 2                                       # skip escape + char
     goto next                                      # try next
   open:                                            # open new nesting
-    save lookket                                   # save current nest
+    push stack, lookket                            # save current nest
     lookket = substr delim_ket, $I0, 1             # search to end of nest
     balanced = index bra, $S0                      # is this a balanced nest?
     inc pos                                        # skip open char
     goto next                                      # continue scanning
   close:                                           # close current nesting
-    restore lookket                                # restore previous nest
+    lookket = pop stack                            # restore previous nest
     balanced = 1                                   # we're balancing again
     inc pos                                        # skip close char
     if lookket != '' goto next                     # still nested?
@@ -115,11 +116,7 @@ of the extraction.
     $P2 = mfrom + 1
     $P3 = mpos - 1
     mob[0] = $P0
-    goto end
   fail:                                            # fail match
-    if lookket == '' goto end                      # clean up restore stack
-    restore lookket
-    goto fail
   end:
     .return (mob)
 .end

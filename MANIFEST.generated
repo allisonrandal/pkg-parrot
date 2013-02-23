@@ -1,12 +1,12 @@
-# $Id: MANIFEST.generated 12089 2006-04-02 13:44:22Z leo $
+# $Id: MANIFEST.generated 12672 2006-05-14 15:43:40Z leo $
 # See tools/dev/install_files.pl for documentation on the
 # format of this file.
 # Please re-sort this file after *EVERY* modification
-blib/lib/libparrot.0.4.3.dylib                    [main]lib
+blib/lib/libparrot.0.4.4.dylib                    [main]lib
 blib/lib/libparrot.a                              [main]lib
 blib/lib/libparrot.dylib                          [main]lib
 blib/lib/libparrot.so                             [main]lib
-blib/lib/libparrot.so.0.4.3                       [main]lib
+blib/lib/libparrot.so.0.4.4                       [main]lib
 disassemble                                       [main]bin
 disassemble.exe                                   [main]bin
 docs/ops/bit.pod                                  [main]doc

@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: bigint.pmc 12005 2006-03-24 15:19:48Z leo $
+$Id: bigint.pmc 12434 2006-04-26 13:27:42Z particle $
 
 =head1 NAME
 
@@ -152,16 +152,38 @@ bigint_mul_bigint_int(Interp *interpreter, PMC* self, INTVAL value,
 }
 
 static void
+int_check_divide_zero(Interp *interpreter, INTVAL value)
+{
+    if (value == 0) {
+        real_exception(interpreter, NULL, E_ZeroDivisionError,
+                       "Divide by zero");
+    }
+}
+
+static void
+bigint_check_divide_zero(Interp *interpreter, PMC *value)
+{
+    /* Throw an exception if we are dividing by zero. */
+    if (mpz_cmp_si(BN(value), 0) == 0) {
+        real_exception(interpreter, NULL, E_ZeroDivisionError,
+                       "Divide by zero");
+    }
+}
+
+static void
 bigint_div_bigint(Interp *interpreter, PMC* self, PMC *value, PMC *dest)
 {
+    bigint_check_divide_zero(interpreter, value);
     /* this is mpz_fdiv_q */
     mpz_div(BN(dest), BN(self), BN(value));
 }
 static void
 bigint_div_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC *dest)
 {
+    int n;
+    int_check_divide_zero(interpreter, value);
     /* this is mpz_fdiv_q */
-    int n = value < 0;
+    n = value < 0;
     if (n) {
         mpz_div_ui(BN(dest), BN(self), -value);
         mpz_neg(BN(dest), BN(dest));
@@ -172,12 +194,15 @@ bigint_div_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC *dest)
 static void
 bigint_fdiv_bigint(Interp *interpreter, PMC* self, PMC *value, PMC *dest)
 {
+    bigint_check_divide_zero(interpreter, value);
     mpz_fdiv_q(BN(dest), BN(self), BN(value));
 }
 static void
 bigint_fdiv_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC *dest)
 {
-    int n = value < 0;
+    int n;
+    int_check_divide_zero(interpreter, value);
+    n = value < 0;
     if (n) {
         mpz_fdiv_q_ui(BN(dest), BN(self), -value);
         mpz_neg(BN(dest), BN(dest));
@@ -189,13 +214,16 @@ bigint_fdiv_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC *dest)
 static void
 bigint_mod_bigint(Interp *interpreter, PMC* self, PMC *value, PMC *dest)
 {
+    bigint_check_divide_zero(interpreter, value);
     mpz_mod(BN(dest), BN(self), BN(value));
 }
 
 static void
 bigint_mod_bigint_int(Interp *interpreter, PMC* self, INTVAL value, PMC *dest)
 {
-    int n = value < 0;
+    int n;
+    int_check_divide_zero(interpreter, value);
+    n = value < 0;
     if (n) {
         mpz_mod_ui(BN(dest), BN(self), -value);
     }

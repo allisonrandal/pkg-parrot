@@ -1,7 +1,7 @@
-# $Id: japh8.pasm 9150 2005-09-07 19:51:21Z bernhard $
+# $Id: japh8.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 # Little Endian only using struct
-    new P1, .PerlArray
+    new P1, .ResizablePMCArray
     push P1, -100
     push P1, 28
     push P1, I0

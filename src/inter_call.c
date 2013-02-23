@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_call.c 11896 2006-03-14 12:19:16Z leo $
+$Id: inter_call.c 12612 2006-05-11 10:47:18Z leo $
 
 =head1 NAME
 
@@ -681,7 +681,7 @@ locate_named_named(Interp *interpreter, struct call_state *st)
             /* if bit is set we got duplicated */
             if (st->named_done & (1 << n_named))
                 real_exception(interpreter, NULL, E_ValueError,
-                        "duplicate named argument - '%Ss' no expected",
+                        "duplicate named argument - '%Ss' not expected",
                         param);
             st->named_done |= 1 << n_named;
             return 1;
@@ -838,11 +838,14 @@ process_args(Interp *interpreter, struct call_state *st,
          */
         if (!(state & CALL_STATE_NAMED_x)) {
             if (!(state & CALL_STATE_SLURP) &&
-                    st->dest.sig & PARROT_ARG_SLURPY_ARRAY) {
+                    (st->dest.sig & 
+                     (PARROT_ARG_SLURPY_ARRAY|PARROT_ARG_NAME)) == 
+                    PARROT_ARG_SLURPY_ARRAY) {
                 /* create array */
                 idx = st->dest.u.op.pc[st->dest.i];
                 assert(idx >= 0);
                 create_slurpy_ar(interpreter, st, idx);
+                state = CALL_STATE_POS_POS_SLURP;
             }
             /* positional src -> named src */
             if (st->name) {
@@ -852,9 +855,22 @@ process_args(Interp *interpreter, struct call_state *st,
                     /* stop slurpy array */
                     st->dest.slurp = NULL;
                     st->dest.mode &= ~CALL_STATE_SLURP;
-                    st->src.mode &= ~CALL_STATE_NEXT_ARG;
-                    st->dest.mode |= CALL_STATE_NEXT_ARG;
-                    continue;
+                    /*
+                     * work around bad interaction of _NEXT_ARG
+                     * and flattening (which always advances to next)
+                     * TODO rewrite all again, now that all pieces are
+                     * together
+                     */
+                    if (st->src.mode & CALL_STATE_FLATTEN) {
+                        if (!next_arg(interpreter, &st->dest)) {
+                            st->dest.mode |= CALL_STATE_x_END;
+                        }
+                    }
+                    else {
+                        st->src.mode &= ~CALL_STATE_NEXT_ARG;
+                        st->dest.mode |= CALL_STATE_NEXT_ARG;
+                        continue;
+                    }
                 }
             }
         }
@@ -870,7 +886,7 @@ process_args(Interp *interpreter, struct call_state *st,
             case CALL_STATE_NAMED_NAMED_OPT: 
                 if (!locate_named_named(interpreter, st))
                     real_exception(interpreter, NULL, E_ValueError,
-                            "too many named arguments - '%Ss' no expected",
+                            "too many named arguments - '%Ss' not expected",
                             st->name);
                 if (st->dest.mode & CALL_STATE_SLURP)
                     state         |= CALL_STATE_SLURP;

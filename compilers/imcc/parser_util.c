@@ -20,6 +20,7 @@
 #include "parrot/interp_guts.h"
 #include "parrot/dynext.h"
 #include "parrot/embed.h"
+#include "parrot/builtin.h"
 #include "pbc.h"
 #include "parser.h"
 
@@ -50,7 +51,7 @@ iNEW(Interp *interpreter, IMC_Unit * unit, SymReg * r0,
     SymReg *regs[3];
     SymReg *pmc;
     int i, nargs;
-    int pmc_num = pmc_type(interpreter,
+    const int pmc_num = pmc_type(interpreter,
             string_from_cstring(interpreter, *type == '.' ?type+1:type, 0));
 
     sprintf(fmt, "%d", pmc_num);
@@ -61,7 +62,7 @@ iNEW(Interp *interpreter, IMC_Unit * unit, SymReg * r0,
                 "Unknown PMC type '%s'\n", type);
     sprintf(fmt, "%%s, %d\t # .%s", pmc_num, type);
     r0->usage |= U_NEW;
-    if (!strcmp(type, "PerlArray") || !strcmp(type, "PerlHash") || !strcmp(type, "Hash"))
+    if (!strcmp(type, "Hash"))
         r0->usage |= U_KEYED;
     free(type);
     regs[0] = r0;
@@ -167,8 +168,6 @@ check_op(Interp *interpreter, char *fullname,
     op = interpreter->op_lib->op_code(fullname, 1);
     return op;
 }
-
-int Parrot_is_builtin(Interp *, char *func, char *sig);
 
 static Instruction *
 maybe_builtin(Interp *interpreter, IMC_Unit *unit, char *name,
@@ -278,7 +277,7 @@ to_infix(Interp *interpreter, char *name, SymReg **r, int *n, int mmd_op)
 }
 
 static int
-is_infix(char *name, int n, SymReg **r)
+is_infix(const char *name, int n, SymReg **r)
 {
     if (n < 2 || r[0]->set != 'P')
         return -1;
@@ -511,7 +510,7 @@ INS(Interp *interpreter, IMC_Unit * unit, char *name,
     ins->opnum = op;
     ins->opsize = n + 1;
     /* mark end as absolute branch */
-    if (!strcmp(name, "end")) {
+    if (!strcmp(name, "end") || !strcmp(name, "ret")) {
         ins->type |= ITBRANCH | IF_goto;
     }
     else if (!strcmp(name, "warningson")) {
@@ -780,7 +779,6 @@ imcc_compile_file (Parrot_Interp interp, const char *fullname)
     return cs;
 }
 
-void * IMCC_compile_file (Parrot_Interp interp, const char *s);
 void *
 IMCC_compile_file (Parrot_Interp interp, const char *s)
 {

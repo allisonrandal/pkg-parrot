@@ -1,5 +1,5 @@
 # Copyright 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd21_namespaces.pod 11858 2006-03-10 18:23:19Z autrijus $
+# $Id: pdd21_namespaces.pod 12290 2006-04-17 15:44:43Z coke $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ docs/pdds/pdd21_namespaces.pod - Parrot Namespaces
 
 =head1 VERSION
 
-$Revision: 11858 $
+$Revision: 12290 $
 
 =head1 DESCRIPTION
 
@@ -47,12 +47,18 @@ of a subroutine unless you're prepared for weird consequences.
 initialize the runtime current namespace as well as determine where to store
 compiled symbols.)
 
-=head2 namespace separator: "::"
+=head2 namespace indexing syntax
 
-In this document, "::" indicates namespace nesting.  For example, "a::b" means
-"the namespace 'b' inside the namespace 'a'".  In Parrot, nesting is actually
-denoted by other means (e.g. multidimensional hash keys), but writing ["a"; "b"]
-is harder to both write and read.
+Namespaces are denoted in Parrot as either simple strings or (potentially)
+multimentional hash keys.
+
+A non-nested namespace may appear in Parrot source code as the string
+C<"a"> or the key C<["a"]>.
+
+A nested namespace "b" inside the namespace "a" will appear as the key
+C<["a"; "b"]>.
+
+(There is no limit to namespace nesting.)
 
 =head1 IMPLEMENTATION
 
@@ -67,6 +73,23 @@ best internal representation.
 
 =over 4
 
+=item HLL Root Namespaces
+
+Each HLL must store public items in a namespace named with the lowercased
+name of the HLL.  This is the HLL root namespace.  For instance, Tcl's user-
+created namespaces should live in the C<tcl> namespace.  This eliminates any
+accidental collisions between languages.
+
+This namespace must be stored at the first level in parrot's namespace
+hierarchy.  These top-level namespaces should also be specified in a standard
+unicode encoding.  The reasons for these restrictions is to allow compilers
+to remain completely ignorant of each other.
+
+=item True Root Namespace
+
+The true root namespace is available only via introspection with the
+C<interpinfo> opcode, e.g. C<$P0 = interpinfo .INTERPINFO_NAMESPACE_ROOT>.
+
 =item HLL Implementation Namespaces
 
 Each HLL must store implementation internals (private items) in a namespace
@@ -75,18 +98,10 @@ Tcl's implementation internals should live in the C<_tcl> namespace.
 
 =item HLL User-Created Namespaces
 
-Each HLL must store all user-created namespaces under a namespace named with
-the lowercased name of the HLL.  For example, Perl 5's CGI module must be
-named "perl5::CGI".  This eliminates any accidental collisions between
-languages.
-
-These top-level namespaces should also be specified in a standard unicode
-encoding.  The reasons for these restrictions is to allow compilers to remain
-completely ignorant of each other.
-
-HLLs should use hierarchical namespaces to the extent practical.  A single
-flat namespace can be made to work, of course, but it complicates symbol
-exportation.
+Each HLL must store all user-created namespaces under the HLL root namespace.
+It is suggested that HLLs use hierarchical namespaces to the extent
+practical.  A single flat namespace can be made to work, but it complicates
+symbol exportation.
 
 =back
 
@@ -144,8 +159,9 @@ Store $P0 as a subroutine with the name of $S0.
 
 Store $P0 as a variable under the name of $S0.
 
-IMPLEMENTATION NOTE: perl6::namespace.add_var may choose to check which parts
-of the variable interface are implemented by $P0 so it can decide on an
+IMPLEMENTATION NOTE: Perl namespace implementations may choose to implement
+add_var() by checking what which parts of the variable interface are
+implemented by $P0 (scalar, array, and/or hash) so it can decide on an
 appropriate sigil.
 
 =item del_namespace($S0)
@@ -164,9 +180,11 @@ Delete the sub, namespace, or variable named $S0.
 
 Find the sub, namespace, or variable named $S0.
 
-IMPLEMENTATION NOTE: perl6::namespace.find_var should check all variable
-sigils, but the order is not to be counted on by users.  If you're planning to
-let Python code see your module, don't have both C<our $A> and C<our @A>.
+IMPLEMENTATION NOTE: Perl namespace implementations should implement
+find_var() to check all variable sigils, but the order is not to be counted on
+by users.  If you're planning to let Python code see your module, you should
+avoid exporting both C<our $A> and C<our @A>.  (Well, you might want to
+consider not exporting variables at all, but that's a style issue.)
 
 =item export_to($P0, $P1)
 
@@ -184,10 +202,16 @@ NOTE: Exportation may entail non-obvious, odd, or even mischievious behavior.
 For example, Perl's pragmata are implemented as exports, and they don't
 actually export anything.
 
-IMPLEMENTATION EXAMPLES: Perl 6 C<use tcl:Some::Module 'c*'> will import all
-the commands that start with 'c' from the given Tcl namespace into the current
-Perl namespace.  Regardless of whether 'c*' is a Perl 6 style export pattern,
-it I<is> a valid Tcl export pattern.
+IMPLEMENTATION EXAMPLES: Suppose a Perl program were to import some Tcl module
+with an import pattern of "c*" -- something that might be expressed in Perl 6
+as C<use tcl:Some::Module 'c*'>.  This operation would import all the commands
+that start with 'c' from the given Tcl namespace into the current Perl
+namespace.  This is so because, regardless of whether 'c*' is a Perl 6 style
+export pattern, it I<is> a valid Tcl export pattern.
+
+{XXX - Is the ':' for HLL approved or just proposed?  Somebody familiar with
+Perl 6 please fix the example in the preceding paragraph to use the currently
+planned syntax for importing modules from other languages.}
 
 IMPLEMENTATION NOTE: Most namespace export_to implementations will restrict
 themselves to using the typed interface on the target namespace.  However,
@@ -205,12 +229,15 @@ These methods don't belong to either the typed or the generic interface.
 
 =over 4
 
-=item $P0 = name()
+=item $P0 = get_name()
 
-Returns the name of the namespace as an array of strings.  So perl5:Some::Module
-would return an array containing "perl5", "Some", "Module".
+Gets the name of the namespace as an array of strings.  For example, if the
+current language is Perl 5 and the current Perl 5 namespace is "Some::Module"
+(that's Perl 5 syntax), then get_name() on that namespace returns an array of
+"perl5", "Some", "Module".
 
-NOTE: This is a naive method.  It does not account for any aliasing.
+NOTE: Due to aliasing, this value may be wrong, even if nobody's been playing
+around with it.
 
 =back
 
@@ -220,11 +247,37 @@ NOTE: This is a naive method.  It does not account for any aliasing.
 
 =over 4
 
-=item load_library($P0)
+=item get_namespace($P0)
+
+Ask this compiler to find its namespace named by the elements of the array in
+$P0.  Returns namespace PMC on success and null PMC on failure.  Note that a
+null PMC or an empty array requests the HLL's base namespace.
+
+This method allows other HLLs to know one name (the HLL) and then work with
+that HLL's modules without having to know the name it chose for its namespace
+tree.  (If you really want to know the name, the name() method should work on
+the returned namespace PMC.)
+
+Note that this method is basically a convenience and/or performance hack, as
+it does the equivalent of C<interpinfo .INTERPINFO_NAMESPACE_ROOT> followed by
+zero or more calls to <namespace>.find_namespace().  However, any compiler is
+free to cheat if it doesn't get caught, e.g. to use the untyped namespace
+interface if the language doesn't mangle namespace names.
+
+=item load_library($P0, $P1)
 
 Ask this compiler to load a library/module named by the elements of the array
-in $P0.  So perl5:Some::Module should be loaded using (in pseudo Perl 6):
-C<perl5.load_library(["Some", "Module"])>.
+in $P0, with optional control information in $P1.
+
+For example, Perl 5's module named "Some::Module" should be loaded using (in
+pseudo Perl 6): C<perl5.load_library(["Some", "Module"], null)>.
+
+The meaning of $P1 is compiler-specific.  The only universal legal value is
+Null, which requests a "normal" load.  The meaning of "normal" varies, but
+the ideal would be to perform only the minimal actions required.
+
+On failure, an exception is thrown.  {XXX - I'd settle for a universal error
+pmc interface.  Hm, sounds like a new pdd.  >>TODO}
 
 =back
 
@@ -246,6 +299,10 @@ that it may have been exported to.)
 
 =head2 Namespace Opcodes
 
+Note that all namespace opcodes operate from the local HLL root namespace.
+Navigating outside one's own HLL namespace requires either the C<interpinfo
+.INTERPINFO_NAMESPACE_ROOT> opcode or the get_namespace() compiler PMC method.
+
 =over 4
 
 =item add_namespace $P0, $P1
@@ -261,7 +318,8 @@ Delete the namespace $P0 (an array of names or a multidimensional hash index).
 
 =item $P0 = find_global $S0
 
-Find the variable $S0 in $P1 or the current namespace.
+Find $P0 as the variable $S0 in the current namespace. or in $P1, relative
+to the HLL root namespace.
 
 =item $P0 = get_namespace $P1
 
@@ -281,7 +339,8 @@ or this:
 
 =item store_global $S0, $P0
 
-Store $P0 as the variable $S0 in $P1 or the current namespace.
+Store $P0 as the variable $S0 in the current namespace, or in $P1, relative
+to the HLL root namespace.
 
 =back
 
@@ -323,9 +382,9 @@ Consider the following Perl5 program:
   $a = 'x';
   ${"Foo::$a"} = 5;
 
-The Foo:: namespace is created at run-time (without any optimizations).  In these
-cases, Parrot should create the namespace based on the HLL of the PIR subroutine
-that calls the store function.
+The Foo:: namespace is created at run-time (without any optimizations).  In
+these cases, Parrot should create the namespace based on the HLL of the PIR
+subroutine that calls the store function.
 
   .HLL "Perl5", "perl5_group"
   .sub main :main
@@ -346,8 +405,9 @@ that calls the store function.
     store_global $P2, $S0, $P3
   .end
 
-In this case, C<store_global> should see that it was called from "main", which is
-in a Perl5 namespace, so "Foo::" should be also created as a Perl 5 namespace.
+In this case, C<store_global> should see that it was called from "main", which
+is in a Perl5 namespace, so it will create the "Foo" namespace as a Perl5
+namespace.
 
 =head1 LANGUAGE NOTES
 
@@ -396,13 +456,15 @@ PIR:
 
   .sub main :main
     $P0 = find_name "&foo"
-    $P1 = get_namespace ["perl6"; "Foo"]
+    $P1 = get_namespace ["Foo"]
+
     # A smart perl6 compiler would emit this,
     # because it knows that Foo is a perl6 namespace:
-    #   $P1["&bar"] = $P0
-    # But a naive one would emit this:
+    $P1["&bar"] = $P0
+
+    # But a naive perl6 compiler would emit this:
     $P1.add_sub("bar", $P0)
-    end
+
   .end
 
   .sub foo
@@ -411,23 +473,28 @@ PIR:
 
 =head3 Cross-language Exportation
 
-Perl:
+Perl5:
 
   #!/usr/bin/perl
-  use tcl:Some::Module 'w*';
+  use tcl:Some::Module 'w*';   # XXX - is ':' after HLL standard Perl 6?
   write("this is a tcl command");
 
-PIR:
+PIR (without error checking):
 
   .sub main :main
     .local pmc tcl
+    .local pmc ns
     tcl = compreg "tcl"
-    tcl.load_library("Some", "Module")
-    $P0 = get_namespace
-    $P1 = get_namespace ["tcl"; "Some"; "Module"]
-    $P1.export_to($P0, 'w*')
-    write("this is a tcl command")
-    end
+    ns = new .Array
+    ns = 2
+    ns[0] = "Some"
+    ns[1] = "Module"
+    null $P0
+    tcl.load_library(ns, $P0)
+    $P0 = tcl.get_namespace(ns)
+    $P1 = get_namespace
+    $P0.export_to($P1, 'w*')
+    "write"("this is a tcl command")
   .end
 
 =head1 ATTACHMENTS

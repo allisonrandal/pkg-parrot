@@ -1,11 +1,11 @@
-# $Id: japh14.pasm 9150 2005-09-07 19:51:21Z bernhard $
+# $Id: japh14.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 # 2 timer subs are alternately spitting out the JaPH
 .include "timer.pasm"
-    new P7, .PerlString
+    new P7, .String
     set P7, "Just another Parrot Hacker\n"
     store_global "t", P7
-    new P1, .PerlArray
+    new P1, .ResizablePMCArray
     push P1, .PARROT_TIMER_NSEC
     push P1, 0.001
     push P1, .PARROT_TIMER_HANDLER

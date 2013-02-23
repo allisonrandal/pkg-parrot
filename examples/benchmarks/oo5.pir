@@ -1,4 +1,6 @@
-.sub _main
+# $Id: oo5.pir 12177 2006-04-11 19:56:05Z bernhard $
+
+.sub bench :main
     .local pmc cl
     cl = newclass "Foo"
     addattribute cl, ".i"
@@ -13,12 +15,12 @@
 loop:
     $P4 = o."i"()
     .local pmc x
-    x = new PerlInt
+    x = new .Integer
     assign x, $P4
 
     $P5 = o."j"()
     .local pmc y
-    y = new PerlInt
+    y = new .Integer
     assign y, $P5
     inc i
     if i <= 500000 goto loop
@@ -33,11 +35,11 @@ loop:
 .sub __init method
     .local int ofs
     ofs = classoffset self, "Foo"
-    new $P10, .PerlInt
+    new $P10, .Integer
     set $P10, 10
     setattribute self, ofs, $P10
     inc ofs
-    new $P10, .PerlInt
+    new $P10, .Integer
     set $P10, 20
     setattribute self, ofs, $P10
 .end

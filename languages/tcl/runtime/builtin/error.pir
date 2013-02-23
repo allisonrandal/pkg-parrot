@@ -6,7 +6,8 @@
 # ready yet.
 # (So, the usage statement lies)
 
-.namespace [ "Tcl" ]
+.HLL 'Tcl', 'tcl_group'
+.namespace [ '' ]
 
 .sub "&error"
   .param pmc argv :slurpy
@@ -38,8 +39,8 @@ arg_2:
   errorInfo = argv[1]
 
 finish:
-  store_global 'Tcl', '$errorInfo', errorInfo
-  store_global 'Tcl', '$errorCode', errorCode
+  store_global '$errorInfo', errorInfo
+  store_global '$errorCode', errorCode
   $P0 = argv[0]
   .throw($P0)
 

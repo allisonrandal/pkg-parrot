@@ -1,15 +1,14 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sarray.pmc 11613 2006-02-17 02:40:57Z particle $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: sarray.pmc 12508 2006-05-04 22:23:38Z bernhard $
 
 =head1 NAME
 
-src/pmc/sarray.pmc - Subroutine Parameter Array
+src/pmc/sarray.pmc - Simple Array or Subroutine Parameter Array
 
 =head1 DESCRIPTION
 
-These are the vtable functions for the SArray base class
-
+Simple Array or Subroutine Parameter Array PMC.
 SArray data are kept in an malloced array of C<HashEntry>'s:
 
 =over 4
@@ -28,12 +27,21 @@ Data.
 
 =back
 
-This is the Simple (or Static) Array class for parameter
-passing according to PDD 3.
-
 SArrays are fixed size, implying that the first operation on it must be
 setting its size, and that only the most important vtable methods are
-implemented
+implemented.
+
+Currently SArray's are used for:
+
+=over 4
+
+=item Global data per interpreter
+
+=item For implementing lists, see F<src/list.c>. 
+
+=item Base class of the Exception PMC, see F<src/exception.pmc>
+
+=back
 
 =head2 Functions
 

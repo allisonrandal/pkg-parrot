@@ -1,7 +1,7 @@
 /* string_funcs.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: string_funcs.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: string_funcs.h 12537 2006-05-06 20:06:21Z petdance $
  *  Overview:
  *     This is the api header for the string subsystem
  *  Data Structure and Algorithms:
@@ -12,6 +12,8 @@
 
 #if !defined(PARROT_STRING_FUNCS_H_GUARD)
 #define PARROT_STRING_FUNCS_H_GUARD
+
+#include "parrot/compiler.h"
 
 #ifdef PARROT_IN_CORE
 
@@ -67,15 +69,16 @@ PARROT_API STRING *string_set(Interp *, STRING *d, STRING *s);
                          STRING **dest_ptr); */
 PARROT_API void string_init(Parrot_Interp);
 PARROT_API void string_deinit(Parrot_Interp);
-PARROT_API UINTVAL string_capacity(Interp *interpreter, STRING *s);
-PARROT_API void *string_pointer_to_index(Interp *,
-								const STRING *s, UINTVAL idx);
+PARROT_API UINTVAL string_capacity(Interp *interpreter, const STRING *s)
+            __attribute__nonnull__(2);
+PARROT_API void *string_pointer_to_index(Interp *, const STRING *s, UINTVAL idx);
 PARROT_API INTVAL string_index(Interp *, const STRING *, UINTVAL idx);
 PARROT_API INTVAL string_str_index(Interp *interpreter, const STRING *s,
         const STRING *s2, INTVAL start);
 PARROT_API STRING *string_from_cstring(Interp *, const void *, UINTVAL);
 PARROT_API STRING *string_from_const_cstring(Interp *, const void *, UINTVAL);
-PARROT_API STRING *const_string(Interp *, const char *);
+PARROT_API STRING *const_string(Interp *, const char *buffer)
+    __attribute__nonnull__(2);
 PARROT_API char *string_to_cstring(Interp *, STRING *);
 PARROT_API void string_cstring_free(void *);
 PARROT_API void string_pin(Interp *, STRING *);
@@ -128,6 +131,8 @@ PARROT_API STRING* Parrot_string_trans_encoding(Interp *, STRING *src,
 
 PARROT_API CHARSET* string_rep_compatible (Interp *, STRING *a, const STRING *b,
         ENCODING**);
+PARROT_API STRING* string_join(Interp *, STRING *j, PMC *ar);
+PARROT_API PMC* string_split(Interp *, STRING *del, STRING *s);
 
 #endif /* PARROT_IN_CORE */
 #endif /* PARROT_STRING_FUNCS_H_GUARD */

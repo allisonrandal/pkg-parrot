@@ -1,4 +1,4 @@
-# $Id: nanoforth2.pasm 10183 2005-11-26 11:05:39Z bernhard $
+# $Id: nanoforth2.pasm 12193 2006-04-12 20:04:06Z bernhard $
 
 =pod
 
@@ -34,7 +34,7 @@ _main:
 
 .pcc_sub _nano_forth_compiler:
     set S17, S5		#input src code
-    new P6, .PerlHash
+    new P6, .Hash
     .core("+", "_add")
     .core("-", "_sub")
     .core(".", "_print")
@@ -49,8 +49,8 @@ _main:
     .core("8", "_const")
     .core("9", "_const")
     # .core(":", "_start_compile")
-    new P5, .PerlArray
-    new P10, .PerlInt
+    new P5, .ResizablePMCArray
+    new P10, .Integer
     store_global "compiling", P10
 
     #set S17, ": a + ; 2 1 a ."

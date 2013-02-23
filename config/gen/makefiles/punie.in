@@ -1,4 +1,4 @@
-# $Id: punie.in 11965 2006-03-21 16:00:59Z particle $
+# $Id: punie.in 12442 2006-04-27 03:57:44Z pmichaud $
 
 # Setup some commands
 LN_S     = @lns@
@@ -6,16 +6,29 @@ PERL     = @perl@
 RM_F     = @rm_f@
 PARROT   = ..@slash@..@slash@parrot@exe@
 PGE_DIR  = ..@slash@..@slash@compilers@slash@pge
+TGE_DIR  = ..@slash@..@slash@compilers@slash@tge
 CP       = @cp@
 
 # the default target
 all: punie.pbc
 
-lib/PunieGrammar.pbc: lib/PunieGrammar.pir lib/punie.g
-	$(PARROT) $(PGE_DIR)@slash@rulec.pir --output=lib/punie_grammar_gen.pir lib/punie.g
+lib/PunieGrammar.pbc: lib/PunieGrammar.pir lib/punie.pg
+	$(PARROT) $(PGE_DIR)@slash@pgc.pir --output=lib/punie_grammar_gen.pir lib/punie.pg
 	$(PARROT) -o lib/PunieGrammar.pbc --output-pbc lib/PunieGrammar.pir 
 
-punie.pbc: lib/PunieGrammar.pbc punie.pir
+lib/ASTGrammar.pbc: lib/ASTGrammar.pir lib/pge2past.tg
+	$(PARROT) $(TGE_DIR)@slash@tgc.pir --output=lib@slash@pge2past_gen.pir lib@slash@pge2past.tg
+	$(PARROT) -o lib@slash@ASTGrammar.pbc --output-pbc lib@slash@ASTGrammar.pir 
+
+lib/OSTGrammar.pbc: lib/OSTGrammar.pir lib/past2post.tg
+	$(PARROT) $(TGE_DIR)@slash@tgc.pir --output=lib@slash@past2post_gen.pir lib@slash@past2post.tg
+	$(PARROT) -o lib@slash@OSTGrammar.pbc --output-pbc lib@slash@OSTGrammar.pir 
+
+lib/PIRGrammar.pbc: lib/PIRGrammar.pir lib/post2pir.tg
+	$(PARROT) $(TGE_DIR)@slash@tgc.pir --output=lib@slash@post2pir_gen.pir lib@slash@post2pir.tg
+	$(PARROT) -o lib@slash@PIRGrammar.pbc --output-pbc lib@slash@PIRGrammar.pir 
+
+punie.pbc: punie.pir lib/PunieGrammar.pbc lib/ASTGrammar.pbc lib/OSTGrammar.pbc lib/PIRGrammar.pbc
 	$(PARROT) -o punie.pbc --output-pbc punie.pir 
 
 # This is a listing of all targets, that are meant to be called by users
@@ -39,15 +52,21 @@ help:
 	@echo ""
 
 test: all
-	$(PERL) -Ilib t/harness t/*.t
+	$(PERL) -Ilib -I..@slash@..@slash@lib t@slash@harness
 
 testclean:
-	$(RM_F) "t/*.p1" "t/*.out"
+	$(RM_F) "t/*.p1" "t/*.out" "t/*.pir"
 
 clean: testclean
-	$(RM_F) punie.pbc
-	$(RM_F) lib/punie_grammar_gen.pir
-	$(RM_F) lib/PunieGrammar.pbc
+	$(RM_F) punie.pbc \
+	lib/punie_grammar_gen.pir \
+	lib/PunieGrammar.pbc \
+	lib/ASTGrammar.pbc \
+	lib/pge2past_gen.pir \
+	lib/OSTGrammar.pbc \
+	lib/past2post_gen.pir \
+	lib/PIRGrammar.pbc \
+	lib/post2pir_gen.pir
 
 realclean: clean
 	$(RM_F) Makefile

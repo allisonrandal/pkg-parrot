@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: encoding.pm 11744 2006-02-26 10:55:39Z bernhard $
+# $Id: encoding.pm 12474 2006-05-01 09:51:59Z bernhard $
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ END
 
     my $TEMP_encoding_build = <<"E_NOTE";
 
-# the following part of the Makefile was built by 'config/inter/encoding.pl'
+# the following part of the Makefile was built by 'config/inter/encoding.pm'
 
 E_NOTE
 

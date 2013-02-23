@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-$Id: node.c 10463 2005-12-12 17:13:09Z particle $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: node.c 12114 2006-04-04 22:50:48Z bernhard $
 
 =head1 NAME
 
@@ -39,10 +39,10 @@ static int show_context;
  * for now, Undef morphs to wrong types that don't implement
  * all needed vtables
  */
-#define UNDEF_TYPE "PerlUndef"
-#define INT_TYPE "PerlInt"
-#define FLOAT_TYPE "PerlNum"
-#define STRING_TYPE "PerlString"
+#define UNDEF_TYPE "Undef"
+#define INT_TYPE "Integer"
+#define FLOAT_TYPE "Float"
+#define STRING_TYPE "String"
 
 /*
  * constant node handling

@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: resources.c 12045 2006-03-27 16:21:22Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: resources.c 12167 2006-04-11 05:06:00Z petdance $
 
 =head1 NAME
 
@@ -47,17 +47,16 @@ static void *
 alloc_new_block(Interp *interpreter,
         size_t size, struct Memory_Pool *pool, const char *why)
 {
-    size_t alloc_size;
     struct Memory_Block *new_block;
 
-    alloc_size = (size > pool->minimum_block_size)
+    const size_t alloc_size = (size > pool->minimum_block_size)
             ? size : pool->minimum_block_size;
 #if RESOURCE_DEBUG
     fprintf(stderr, "new_block (%s) size %u -> %u\n",
         why, size, alloc_size);
 #else
     UNUSED(why)
-#endif    
+#endif
 
     /* Allocate a new block. Header info's on the front */
     new_block = mem_internal_allocate_zeroed(sizeof(struct Memory_Block) +
@@ -183,18 +182,16 @@ mem_allocate(Interp *interpreter, size_t size, struct Memory_Pool *pool)
 }
 
 #if RESOURCE_DEBUG
-static const char* 
-buffer_location(Interp *interpreter, PObj *b)
+static const char*
+buffer_location(Interp *interpreter, const PObj *b)
 {
-    PObj *obj;
-    parrot_context_t* ctx;
     int i;
     const char *s = "???";
     static char reg[10];
 
-    ctx = CONTEXT(interpreter->ctx);
+    parrot_context_t* const ctx = CONTEXT(interpreter->ctx);
     for (i = 0; i < ctx->n_regs_used[REGNO_STR]; ++i) {
-        obj = (PObj*) CTX_REG_STR(ctx, i);
+        PObj * const obj = (PObj*) CTX_REG_STR(ctx, i);
         if (obj == b) {
             sprintf(reg, "S%d", i);
             return reg;
@@ -202,11 +199,12 @@ buffer_location(Interp *interpreter, PObj *b)
     }
     return s;
 }
+
 static void
-debug_print_buf(Interp *interpreter, PObj *b)
+debug_print_buf(Interp *interpreter, const PObj *b)
 {
     fprintf(stderr, "found %p, len %d, flags 0x%08x at %s\n",
-            b, (int)PObj_buflen(b), PObj_get_FLAGS(b),
+            b, (int)PObj_buflen(b), (uint)PObj_get_FLAGS(b),
             buffer_location(interpreter, b));
 }
 #endif
@@ -234,7 +232,7 @@ compact_pool(Interp *interpreter, struct Memory_Pool *pool)
     UINTVAL total_size;
     struct Memory_Block *new_block;     /* A pointer to our working block */
     char *cur_spot;             /* Where we're currently copying to */
-    struct Arenas *arena_base = interpreter->arena_base;
+    struct Arenas * const arena_base = interpreter->arena_base;
     struct Small_Object_Arena *cur_buffer_arena;
     struct Small_Object_Pool *header_pool;
     INTVAL j;
@@ -515,7 +513,7 @@ Parrot_reallocate(Interp *interpreter, Buffer *buffer, size_t tosize)
 {
     size_t copysize;
     void *mem;
-    struct Memory_Pool *pool = interpreter->arena_base->memory_pool;
+    struct Memory_Pool * const pool = interpreter->arena_base->memory_pool;
     size_t new_size, needed, old_size;
 
     /*
@@ -565,8 +563,7 @@ Parrot_reallocate(Interp *interpreter, Buffer *buffer, size_t tosize)
 /*
 
 =item C<void 
-Parrot_reallocate_string(Interp *interpreter, STRING *str,
-        size_t tosize)>
+Parrot_reallocate_string(Interp *interpreter, STRING *str, size_t tosize)>
 
 Reallocate the STRING's buffer memory to the given size. The allocated
 buffer will not shrink. This function sets also C<str-E<gt>strstart> to the
@@ -577,17 +574,16 @@ new buffer location, C<str-E<gt>bufused> is B<not> changed.
 */
 
 void 
-Parrot_reallocate_string(Interp *interpreter, STRING *str,
-        size_t tosize)
+Parrot_reallocate_string(Interp *interpreter, STRING *str, size_t tosize)
 {
     size_t copysize;
     char *mem, *oldmem;
-    struct Memory_Pool *pool;
     size_t new_size, needed, old_size;
 
-    pool = PObj_constant_TEST(str)
-        ? interpreter->arena_base->constant_string_pool
-        : interpreter->arena_base->memory_pool;
+    struct Memory_Pool * const pool =
+        PObj_constant_TEST(str)
+            ? interpreter->arena_base->constant_string_pool
+            : interpreter->arena_base->memory_pool;
     /*
      * if the requested size is smaller then buflen, we are done
      */
@@ -688,12 +684,11 @@ Parrot_allocate_aligned(Interp *interpreter, Buffer *buffer, size_t size)
 /*
 
 =item C<void 
-Parrot_allocate_string(Interp *interpreter, STRING *str,
-        size_t size)>
+Parrot_allocate_string(Interp *interpreter, STRING *str, size_t size)>
 
 Allocate the STRING's buffer memory to the given size. The allocated
 buffer maybe be slightly bigger than the given C<size>. This function
-sets also C<str-E<gt>strstart> to the new buffer location, C<str-E<gt>bufused>
+sets also C<< str->strstart >> to the new buffer location, C<< str->bufused >>
 is B<not> changed.
 
 =cut
@@ -701,8 +696,7 @@ is B<not> changed.
 */
 
 void 
-Parrot_allocate_string(Interp *interpreter, STRING *str,
-        size_t size)
+Parrot_allocate_string(Interp *interpreter, STRING *str, size_t size)
 {
     size_t new_size;
     struct Memory_Pool *pool;
@@ -735,9 +729,9 @@ Create a new memory pool.
 static struct Memory_Pool *
 new_memory_pool(size_t min_block, compact_f compact)
 {
-    struct Memory_Pool *pool;
+    struct Memory_Pool * const pool =
+        mem_internal_allocate(sizeof(struct Memory_Pool));
 
-    pool = mem_internal_allocate(sizeof(struct Memory_Pool));
     if (pool) {
         pool->top_block = NULL;
         pool->compact = compact;
@@ -765,15 +759,14 @@ Initialize the managed memory pools.
 void
 Parrot_initialize_memory_pools(Interp *interpreter)
 {
-    struct Arenas *arena_base = interpreter->arena_base;
+    struct Arenas * const arena_base = interpreter->arena_base;
 
     arena_base->memory_pool = new_memory_pool(POOL_SIZE, &compact_pool);
     alloc_new_block(interpreter, POOL_SIZE, arena_base->memory_pool, "init");
 
     /* Constant strings - not compacted */
     arena_base->constant_string_pool = new_memory_pool(POOL_SIZE, (compact_f)NULLfunc);
-    alloc_new_block(interpreter, POOL_SIZE, arena_base->constant_string_pool, 
-            "init");
+    alloc_new_block(interpreter, POOL_SIZE, arena_base->constant_string_pool, "init");
 }
 
 /*
@@ -793,14 +786,14 @@ Parrot_destroy_memory_pools(Interp *interpreter)
     int i;
 
     for (i = 0; i < 2; i++) {
-        struct Memory_Pool *pool = i ?
+        struct Memory_Pool * const pool = i ?
                 interpreter->arena_base->constant_string_pool :
                 interpreter->arena_base->memory_pool;
-        struct Memory_Block *cur_block, *next_block;
+        struct Memory_Block *cur_block;
 
         cur_block = pool->top_block;
         while (cur_block) {
-            next_block = cur_block->prev;
+            struct Memory_Block * const next_block = cur_block->prev;
             mem_internal_free(cur_block);
             cur_block = next_block;
         }

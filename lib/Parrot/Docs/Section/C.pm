@@ -1,5 +1,5 @@
-# Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: C.pm 11440 2006-02-06 08:26:11Z fperrad $
+# Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: C.pm 12490 2006-05-03 20:16:29Z bernhard $
 
 =head1 NAME
 
@@ -200,7 +200,6 @@ sub new
             $self->c_pair_item('', 'key'),
             $self->c_pair_item('', 'sub'),
             $self->c_header_item('', 'pobj'),
-            $self->c_header_item('', 'perltypes'),
             $self->c_pair_item('', 'pmc_freeze'),
         ),
         $self->new_group(

@@ -1,7 +1,7 @@
 /* exceptions.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: exceptions.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: exceptions.h 12549 2006-05-07 06:21:28Z petdance $
  *  Overview:
  *     define the internal interpreter exceptions
  *  Data Structure and Algorithms:
@@ -13,15 +13,23 @@
 #if !defined(PARROT_EXCEPTIONS_H_GUARD)
 #define PARROT_EXCEPTIONS_H_GUARD
 
+#include "parrot/compiler.h"
 
 /* Prototypes */
 void Parrot_init_exceptions(Interp *interpreter);
 
-PARROT_API void internal_exception(int exitcode, const char *format, ...);
+PARROT_API void internal_exception(int exitcode, const char *format, ...)
+        __attribute__nonnull__(2)
+        __attribute__noreturn__;
 PARROT_API void real_exception(Interp *interpreter,
-        void *ret_addr, int exitcode,  const char *format, ...);
+        void *ret_addr, int exitcode, const char *format, ...)
+        __attribute__nonnull__(4)
+        __attribute__noreturn__;
 PARROT_API void do_panic(Interp *interpreter, const char *message,
-              const char *file, int line);
+        const char *file, int line)
+        __attribute__nonnull__(2)
+        __attribute__nonnull__(3)
+        __attribute__noreturn__;
 
 #define PANIC(message)\
         do_panic(interpreter, message, __FILE__, __LINE__)

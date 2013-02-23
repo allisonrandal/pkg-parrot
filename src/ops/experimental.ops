@@ -250,7 +250,6 @@ Find the variable $3 in $2.
 =cut
 
 op get_namespace(out PMC) {
-    PMC *current_sub;
     $1 = CONTEXT(interpreter->ctx)->current_namespace;
     goto NEXT();
 }
@@ -373,6 +372,68 @@ op getclass(out PMC, in INT) {
 	real_exception(interpreter, NULL, E_ValueError,
 		"type number out of range");
     $1 = interpreter->vtables[typ]->class;
+    goto NEXT();
+}
+
+inline op newclass(out PMC, in KEY) :object_classes {
+  $1 = pmc_new_init(interpreter, enum_class_ParrotClass, $2);
+  goto NEXT();
+}
+
+inline op new(out PMC, in KEY) :object_classes {
+  PMC *class = $2;
+    INTVAL type = pmc_type_p(interpreter, class);
+    if (type <= 0)
+        real_exception(interpreter, NULL, NO_CLASS,
+            "Class '%Ss' not found", class);
+  $1 = pmc_new(interpreter, type);
+  goto NEXT();
+}
+
+op subclass(out PMC, in STR, in KEY) :object_classes {
+  PMC *class = Parrot_class_lookup(interpreter, $2);
+  opcode_t *next = expr NEXT();
+  if (PMC_IS_NULL(class)) {
+    real_exception(interpreter, next, NO_CLASS, "Class '%s' doesn't exist",
+		string_to_cstring( interpreter, $2 ));
+  }
+  $1 = VTABLE_subclass(interpreter, class, $3);
+  goto ADDRESS(next);
+}
+
+op subclass(out PMC, in KEY, in KEY) :object_classes {
+  PMC *class = Parrot_class_lookup_p(interpreter, $2);
+  opcode_t *next = expr NEXT();
+  if (PMC_IS_NULL(class)) {
+    STRING *name = readable_name(interpreter, $2);
+    real_exception(interpreter, next, NO_CLASS, 
+		"Class '%Ss' doesn't exist", name);
+  }
+  $1 = VTABLE_subclass(interpreter, class, $3);
+  goto ADDRESS(next);
+}
+
+inline op subclass(out PMC, in PMC, in KEY) :object_base {
+  $1 = VTABLE_subclass(interpreter, $2, $3);
+  goto NEXT();
+}
+
+inline op getclass(out PMC, in KEY) :object_classes {
+  PMC *class = Parrot_class_lookup_p(interpreter, $2);
+  opcode_t *next = expr NEXT();
+  if (PMC_IS_NULL(class)) {
+    STRING *name = readable_name(interpreter, $2);
+    real_exception(interpreter, next, NO_CLASS, 
+         "Class '%Ss' doesn't exist", name);
+  }
+  else
+    $1 = class;
+  goto ADDRESS(next);
+}
+
+inline op isa(out INT, in PMC, in KEY) :object_base {
+    PMC *class = Parrot_class_lookup_p(interpreter, $3);
+    $1 = Parrot_object_isa(interpreter, $2, class);
     goto NEXT();
 }
 

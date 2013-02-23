@@ -1,4 +1,5 @@
-.namespace [ "_Tcl::builtins" ]
+.HLL '_Tcl', ''
+.namespace [ 'builtins' ]
 
 .sub "for"
   .param int register_num
@@ -12,17 +13,17 @@
   .local string ex_label, step_label, done_label
   .local int cond_num, body_num
   $S0 = register_num
-  loop_label = "loop"  . $S0
-  ex_label   = "excep" . $S0
-  step_label = "step"  . $S0
-  done_label = "done"  . $S0
+  loop_label = 'loop'  . $S0
+  ex_label   = 'excep' . $S0
+  step_label = 'step'  . $S0
+  done_label = 'done'  . $S0
 
   .local pmc start,cond,step,body
   .local pmc compiler,compile_dispatch,expr_compiler
 
-  compiler         = find_global "_Tcl", "compile"
-  compile_dispatch = find_global "_Tcl", "compile_dispatch"
-  expr_compiler    = find_global "_Tcl", "__expression_compile"
+  .get_from_HLL(compiler ,'_tcl', 'compile')
+  .get_from_HLL(compile_dispatch, '_tcl', 'compile_dispatch')
+  .get_from_HLL(expr_compiler, '_tcl', '__expression_compile')
 
   start = argv[0]
   cond  = argv[1]
@@ -36,8 +37,8 @@
   (register_num,temp_code) = compile_dispatch(register_num, body)
   pir_code .= temp_code
   pir_code .= ".local pmc compiler, pir_compiler, pir\n"
-  pir_code .= "compiler     = find_global '_Tcl', 'compile'\n"
-  pir_code .= "pir_compiler = find_global '_Tcl', 'pir_compiler'\n"
+  pir_code .= ".get_from_HLL(compiler,'_tcl', 'compile')\n"
+  pir_code .= ".get_from_HLL(pir_compiler,'_tcl', 'pir_compiler')\n"
   pir_code .= "($I0, pir) = compiler(0, $P"
   $S0 = register_num
   pir_code .= $S0

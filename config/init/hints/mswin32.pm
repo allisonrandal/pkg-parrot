@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: mswin32.pm 11697 2006-02-21 19:02:14Z leo $
+# $Id: mswin32.pm 12405 2006-04-24 15:06:32Z particle $
 
 package init::hints::mswin32;
 
@@ -35,7 +35,7 @@ sub runstep
         # This will prevent the 'optimization is not available in the
         # standard edition compiler' warning each time we compile.
         # The logo gets printed to STDERR; hence the redirection.
-        my $cc_output = `$cc /? 2>&1`;
+        my $cc_output = `$cc /? 2>&1` || '';
         $ccflags =~ s/-O1 // if $cc_output =~ m/Standard/ || $cc_output =~ m{/ZI};
         $ccflags =~ s/-Gf/-GF/ if $cc_output =~ m/Version (\d+)/ && $1 >= 13;
 

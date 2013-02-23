@@ -1,4 +1,11 @@
-# $Id: ChangeLog 12089 2006-04-02 13:44:22Z leo $
+# $Id: ChangeLog 12672 2006-05-14 15:43:40Z leo $
+
+2006.05.14    leo
+	* Released 0.4.4
+	See NEWS for more.
+
+2006.04.30    bernhard
+	* Make the Perl PMCs dynamic and move them to src/dynpmc
 
 2006.04.02    leo
 	* Released 0.4.3
@@ -3608,9 +3615,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 12089 2006-04-02 13:44:22Z leo $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 12672 2006-05-14 15:43:40Z leo $
 	into generated files
-	   but the $Id: ChangeLog 12089 2006-04-02 13:44:22Z leo $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 12672 2006-05-14 15:43:40Z leo $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

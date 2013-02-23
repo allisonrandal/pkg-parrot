@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: interpreter.c 11742 2006-02-25 23:19:54Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: interpreter.c 12132 2006-04-06 21:20:46Z bernhard $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ have the same number of elements since there is a one-to-one mapping.
 #include "parrot/oplib/core_ops.h"
 #include "parrot/oplib/core_ops_switch.h"
 #include "parrot/oplib/ops.h"
-#include "parrot/runops_cores.h"
+#include "runops_cores.h"
 #if JIT_CAPABLE
 #  include "parrot/exec.h"
 #  include "parrot/jit.h"

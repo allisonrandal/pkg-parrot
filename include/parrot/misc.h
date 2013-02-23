@@ -1,7 +1,7 @@
 /* misc.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: misc.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: misc.h 12101 2006-04-03 20:01:34Z petdance $
  *  Overview:
  *     Miscellaneous functions, mainly the Parrot_sprintf family
  *  Data Structure and Algorithms:
@@ -39,7 +39,7 @@ PARROT_API void *Parrot_make_la(Interp *, PMC *);
 PARROT_API void *Parrot_make_cpa(Interp *, PMC *);
 PARROT_API void Parrot_destroy_la(long *);
 PARROT_API void Parrot_destroy_cpa(char **);
-PMC* tm_to_array(Parrot_Interp interpreter, struct tm *tm);
+PMC* tm_to_array(Parrot_Interp interpreter, const struct tm *tm);
 PARROT_API INTVAL Parrot_byte_index(Interp *interpreter, const STRING *base,
         const STRING *search, UINTVAL start_offset);
 PARROT_API INTVAL Parrot_byte_rindex(Interp *interpreter, const STRING *base,

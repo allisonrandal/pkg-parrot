@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_create.c 11929 2006-03-18 18:00:28Z leo $
+$Id: inter_create.c 12350 2006-04-18 17:54:42Z particle $
 
 =head1 NAME
 
@@ -292,7 +292,6 @@ Note that C<exit_code> is ignored.
 void
 Parrot_really_destroy(int exit_code, void *vinterp)
 {
-    int i;
     Interp *interpreter = (Interp*) vinterp;
 
     UNUSED(exit_code);

@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: function.t 11949 2006-03-20 14:49:38Z fperrad $
+# $Id: function.t 12325 2006-04-18 06:59:24Z fperrad $
 
 =head1 NAME
 
@@ -17,10 +17,10 @@ Tests C<LuaFunction> PMC
 
 =cut
 
-use Parrot::Test tests => 10;
+use Parrot::Test tests => 9;
 use Test::More;
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check inheritance' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaFunction"
@@ -44,31 +44,11 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check inheritance");
 CODE
 0
 1
-0
+1
 1
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check interface");
-.sub _main
-    loadlib P1, "lua_group"
-    find_type $I0, "LuaFunction"
-    .local pmc pmc1
-    pmc1 = new $I0
-    .local int bool1
-    bool1 = does pmc1, "sub"
-    print bool1
-    print "\n"
-    bool1 = does pmc1, "no_interface"
-    print bool1
-    print "\n"
-    end
-.end
-CODE
-1
-0
-OUTPUT
-
-pir_output_is(<< 'CODE', << 'OUTPUT', "check name");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check name' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaFunction"
@@ -83,7 +63,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check name");
     print "\n"
     end
 .end
-.sub f1
+.sub f1 :outer(_main)
     print "f1()\n"
     end
 .end
@@ -92,7 +72,7 @@ function
 function
 OUTPUT
 
-pir_output_like(<< 'CODE', << 'OUTPUT', "check get_string");
+pir_output_like( << 'CODE', << 'OUTPUT', 'check get_string' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaFunction"
@@ -106,7 +86,7 @@ CODE
 /function: [0-9A-Fa-f]{8}/
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check get_bool");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check get_bool' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaFunction"
@@ -121,13 +101,9 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check get_bool");
     bool1 = istrue pmc1
     print bool1
     print "\n"
-#    .local string str1
-#    str1 = classname pmc1
-#    print str1
-#    print "\n"
     end
 .end
-.sub f1
+.sub f1 :outer(_main)
     print "f1()\n"
     end
 .end
@@ -136,7 +112,7 @@ CODE
 1
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check logical_not");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check logical_not' );
 .sub _main
     loadlib P1, "lua_group"
     find_type $I0, "LuaFunction"
@@ -159,7 +135,7 @@ false
 boolean
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL' );
 .HLL "Lua", "lua_group"
 .sub _main
 #    .const .LuaFunction F1 = "f1"
@@ -171,7 +147,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL");
     pmc1()
     end
 .end
-.sub f1
+.sub f1 :outer(_main)
     print "f1()\n"
     .return ()
 .end
@@ -180,7 +156,7 @@ CODE
 f1()
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL (autoboxing)");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check HLL (autoboxing)' );
 .HLL "Lua", "lua_group"
 .sub _main
     .local pmc pmc1
@@ -190,7 +166,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "check HLL (autoboxing)");
     print bool1
     print "\n"
 .end
-.sub test
+.sub test :outer(_main)
     .const .Sub T = "test"
     .return (T)
 .end
@@ -198,7 +174,7 @@ CODE
 1
 OUTPUT
 
-pir_output_like(<< 'CODE', << 'OUTPUT', "check tostring");
+pir_output_like( << 'CODE', << 'OUTPUT', 'check tostring' );
 .HLL "Lua", "lua_group"
 .sub _main
     .local pmc pmc1
@@ -216,7 +192,7 @@ CODE
 /function: [0-9A-Fa-f]{8}\nfunction: [0-9A-Fa-f]{8}\nstring/
 OUTPUT
 
-pir_output_is(<< 'CODE', << 'OUTPUT', "check tonumber");
+pir_output_is( << 'CODE', << 'OUTPUT', 'check tonumber' );
 .HLL "Lua", "lua_group"
 .sub _main
     .local pmc pmc1

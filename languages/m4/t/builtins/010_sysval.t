@@ -1,8 +1,8 @@
-# $Id: 010_sysval.t 9723 2005-11-02 20:15:57Z bernhard $
+# $Id: 010_sysval.t 12226 2006-04-14 15:02:50Z bernhard $
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../../lib", "$FindBin::Bin/../../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib m4/lib );
 
 use Parrot::Config;
 use Parrot::Test tests => 1 + 1;

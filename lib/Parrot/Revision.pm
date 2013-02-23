@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Revision.pm 11788 2006-03-04 16:22:21Z bernhard $
+# $Id: Revision.pm 12405 2006-04-24 15:06:32Z particle $
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ package Parrot::Revision;
 
 use strict;
 use warnings;
-use 5.008;
+
 
 our $svn_entries = undef;
 

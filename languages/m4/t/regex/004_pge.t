@@ -1,8 +1,8 @@
-# $Id: 004_pge.t 10224 2005-11-28 21:28:14Z bernhard $
+# $Id: 004_pge.t 12442 2006-04-27 03:57:44Z pmichaud $
 
 use strict;
-use FindBin;
-use lib "$FindBin::Bin/../../lib", "$FindBin::Bin/../../../../lib";
+use warnings;
+use lib qw( lib ../lib ../../lib m4/lib );
 
 use Parrot::Test tests => 1;
 
@@ -16,7 +16,7 @@ pir_output_is( << 'END_PIR', << 'END_OUT', "check whether PGE is there" );
     load_bytecode "PGE/Dumper.pbc"
 
     .local pmc p6rule
-    p6rule = compreg "PGE::P6Rule"
+    p6rule = compreg "PGE::P6Regex"
 
     .local string pattern       
     pattern = "^(<[_a..zA..Z]><[_a..zA..Z0..9]>*)"  # capture the complete id

@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: namespace.pmc 11873 2006-03-12 13:52:21Z leo $
+$Id: namespace.pmc 12369 2006-04-19 07:43:47Z mdiep $
 
 =head1 NAME
 
@@ -100,12 +100,12 @@ of strings or a chained key, add all components to the namespace.
 
 =item C<PMC* get_pmc_keyed(PMC *key)> 
 
-Return the given namespace or NULL. C<key> is either an array of 
+Return the given namespace or PMCNULL. C<key> is either an array of 
 strings, or a possibly nested key.
 
 =item C<PMC* get_pmc_keyed_str(PMC *key)> 
 
-Return the given namespace item or NULL. If the named item is either
+Return the given namespace item or PMCNULL. If the named item is either
 a NameSpace or a var, the NameSpace is returned.
 
 =cut
@@ -117,9 +117,6 @@ a NameSpace or a var, the NameSpace is returned.
         HashBucket *b = hash_get_bucket(INTERP, 
                 (Hash*) PMC_struct_val(SELF), key);
         int val_is_NS = value->vtable->base_type == enum_class_NameSpace;
-        if (PMC_IS_NULL(value))
-            real_exception(INTERP, NULL, E_NameError,
-                    "Attempt to set NULL namespace (part)");
         if (!b)
             SUPER(key, value);
         else {
@@ -171,13 +168,17 @@ a NameSpace or a var, the NameSpace is returned.
         PMC *ns = SELF, *next;
         STRING *part;
         INTVAL i, n;
+        if (key->vtable->base_type == enum_class_String) {
+            SELF.set_pmc_keyed_str(VTABLE_get_string(INTERP, key), value);
+            return;
+        }
         if (key->vtable->base_type == enum_class_Key) {
             while (1) {
                 part = key_string(INTERP, key);
                 key = key_next(INTERP, key);
                 next = VTABLE_get_pmc_keyed_str(INTERP, ns, part);
                 if (key) {
-                    if (!next || 
+                    if (PMC_IS_NULL(next) || 
                             next->vtable->base_type != enum_class_NameSpace) {
                         next = pmc_new(interpreter, enum_class_NameSpace);
                         VTABLE_set_pmc_keyed_str(INTERP, ns, part, next);
@@ -199,7 +200,8 @@ a NameSpace or a var, the NameSpace is returned.
             part = VTABLE_get_string_keyed_int(INTERP, key, i);
             next = VTABLE_get_pmc_keyed_str(INTERP, ns, part);
             if (i < n - 1) {
-                if (!next || next->vtable->base_type != enum_class_NameSpace) {
+                if (PMC_IS_NULL(next) || 
+                        next->vtable->base_type != enum_class_NameSpace) {
                     next = pmc_new(interpreter, enum_class_NameSpace);
                     VTABLE_set_pmc_keyed_str(INTERP, ns, part, next);
                 }
@@ -216,7 +218,7 @@ a NameSpace or a var, the NameSpace is returned.
         PMC *ns = hash_get(INTERP, 
                 (Hash*) PMC_struct_val(SELF), key);
         if (!ns)
-            return NULL;
+            return PMCNULL;
         if ((PObj_get_FLAGS(ns) & FPA_is_ns_ext) &&
                 ns->vtable->base_type == enum_class_FixedPMCArray)
             ns = VTABLE_get_pmc_keyed_int(INTERP, ns, NS_slot_ns);
@@ -228,33 +230,38 @@ a NameSpace or a var, the NameSpace is returned.
         STRING *part;
         INTVAL i, n;
         
-        if (key->vtable->base_type == enum_class_Key) {
+        if (key->vtable->base_type == enum_class_String) {
+            return SELF.get_pmc_keyed_str(VTABLE_get_string(INTERP, key));
+        }
+        else if (key->vtable->base_type == enum_class_Key) {
             while (key) {
                 part = key_string(INTERP, key);
                 ns = VTABLE_get_pmc_keyed_str(INTERP, ns, part);
-                if (!ns)
-                    return NULL;
+                if (PMC_IS_NULL(ns))
+                    return PMCNULL;
                 key = key_next(INTERP, key);
             }
             return ns;
         }
         n = VTABLE_elements(INTERP, key);
         if (!n)
-            return NULL;
+            return PMCNULL;
         for (i = 0; i < n; ++i) {
             part = VTABLE_get_string_keyed_int(INTERP, key, i);
             ns = VTABLE_get_pmc_keyed_str(INTERP, ns, part);
-            if (!ns)
-                return NULL;
+            if (PMC_IS_NULL(ns))
+                return PMCNULL;
         }
         return ns;
     }
 
 /*
 
-=item C<void* get_pointer_keyed_str(PMC *key)> 
+=item C<void* get_pointer_keyed_str(STRING *key)> 
 
-Return the given namespace item or NULL. If the named item is either
+=item C<void* get_pointer_keyed(PMC *key)> 
+
+Return the given namespace item or PMCNULL. If the named item is either
 a NameSpace or a var, the var is returned.
 
 =cut
@@ -265,10 +272,46 @@ a NameSpace or a var, the var is returned.
         PMC *ns = hash_get(INTERP, 
                 (Hash*) PMC_struct_val(SELF), key);
         if (!ns)
-            return NULL;
+            return PMCNULL;
         if ((PObj_get_FLAGS(ns) & FPA_is_ns_ext) &&
                 ns->vtable->base_type == enum_class_FixedPMCArray)
             ns = VTABLE_get_pmc_keyed_int(INTERP, ns, NS_slot_var_sub);
+        return ns;
+    }
+
+    void* get_pointer_keyed(PMC *key) {
+        PMC *ns = SELF;
+        STRING *part;
+        INTVAL i, n;
+        
+        if (key->vtable->base_type == enum_class_String) {
+            return SELF.get_pointer_keyed_str(VTABLE_get_string(INTERP, key));
+        }
+        else if (key->vtable->base_type == enum_class_Key) {
+            while (key) {
+                part = key_string(INTERP, key);
+                key = key_next(INTERP, key);
+                if (key)
+                    ns = VTABLE_get_pmc_keyed_str(INTERP, ns, part);
+                else
+                    ns = VTABLE_get_pointer_keyed_str(INTERP, ns, part);
+                if (PMC_IS_NULL(ns))
+                    return PMCNULL;
+            }
+            return ns;
+        }
+        n = VTABLE_elements(INTERP, key);
+        if (!n)
+            return PMCNULL;
+        for (i = 0; i < n; ++i) {
+            part = VTABLE_get_string_keyed_int(INTERP, key, i);
+            if (i < n - 1)
+                ns = VTABLE_get_pmc_keyed_str(INTERP, ns, part);
+            else
+                ns = VTABLE_get_pointer_keyed_str(INTERP, ns, part);
+            if (PMC_IS_NULL(ns))
+                return PMCNULL;
+        }
         return ns;
     }
     
@@ -325,8 +368,34 @@ XXX Should the NULL String of namespace root be included?
         }
         return ar;
     }
-}
 
+/*
+
+=item C<METHOD void export_to(PMC* dest, PMC* what)>
+
+Export items from this NameSpace into the C<dest> NameSpace. C<what>
+is an array of (string) names to be exported.
+
+=cut
+
+*/
+
+    METHOD void export_to(PMC* dest, PMC* what) {
+        INTVAL i, n;
+
+        n = VTABLE_elements(INTERP, what);
+        if (!n)
+            return;
+        for (i = 0; i < n; ++i) {
+            STRING *name;
+            PMC *el;
+
+            name = VTABLE_get_string_keyed_int(INTERP, what, i);
+            el = VTABLE_get_pmc_keyed_str(INTERP, SELF, name);
+            VTABLE_set_pmc_keyed_str(INTERP, dest, name, el);
+        }
+    }
+}
 /*
 
 =back

@@ -1,7 +1,7 @@
 /* stacks.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: stacks.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: stacks.h 12540 2006-05-07 04:27:54Z petdance $
  *  Overview:
  *     Stack handling routines for Parrot
  *  Data Structure and Algorithms:
@@ -14,6 +14,7 @@
 #define PARROT_STACKS_H_GUARD
 
 #include "parrot/parrot.h"
+#include "parrot/compiler.h"
 
 #define STACK_CHUNK_LIMIT 100000
 
@@ -54,7 +55,7 @@ PARROT_API void stack_destroy(Stack_Chunk_t * top);
  * stack_common functions
  */
 Stack_Chunk_t * register_new_stack(Parrot_Interp, const char *name, size_t);
-Stack_Chunk_t * cst_new_stack_chunk(Parrot_Interp, Stack_Chunk_t *);
+Stack_Chunk_t * cst_new_stack_chunk(Parrot_Interp, const Stack_Chunk_t *chunk);
 void* stack_prepare_push(Parrot_Interp, Stack_Chunk_t **stack_p);
 void* stack_prepare_pop(Parrot_Interp, Stack_Chunk_t **stack_p);
 void mark_stack_chunk_cache(Parrot_Interp interpreter);
@@ -64,12 +65,15 @@ void mark_stack_chunk_cache(Parrot_Interp interpreter);
  */
 
 PARROT_API Stack_Chunk_t * new_stack(Interp *interpreter, const char *name);
-PARROT_API void mark_stack(Interp *, Stack_Chunk_t * cur_stack);
+PARROT_API void mark_stack(Interp *, Stack_Chunk_t * cur_stack)
+                __attribute__nonnull__(2);
 
-PARROT_API size_t stack_height(Interp *interpreter, Stack_Chunk_t *stack_base);
+PARROT_API size_t stack_height(Interp *interpreter, const Stack_Chunk_t *stack_base)
+                __attribute__nonnull__(2);
 
 PARROT_API Stack_Entry_t * stack_entry(Interp *intepreter, Stack_Chunk_t *stack_base,
-                          INTVAL stack_depth);
+                          INTVAL stack_depth)
+                __attribute__nonnull__(2);
 
 PARROT_API void rotate_entries(Interp *interpreter, Stack_Chunk_t **stack_base,
                     INTVAL num_entries);
@@ -86,7 +90,8 @@ PARROT_API void *pop_dest(Interp *interpreter);
 PARROT_API void *stack_peek(Interp *interpreter, Stack_Chunk_t *stack,
                 Stack_entry_type *type);
 
-PARROT_API Stack_entry_type get_entry_type(Interp *interpreter, Stack_Entry_t *entry);
+PARROT_API Stack_entry_type get_entry_type(Interp *interpreter, Stack_Entry_t *entry)
+    __attribute__nonnull__(2);
 
 
 

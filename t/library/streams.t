@@ -1,10 +1,10 @@
-#!perl
-# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: streams.t 11755 2006-02-27 01:02:12Z chromatic $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: streams.t 12162 2006-04-09 20:07:40Z bernhard $
 
 use strict;
 use warnings;
 use lib qw( t . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Test;
 
@@ -15,7 +15,7 @@ t/library/streams.t - Stream tests
 
 =head1 SYNOPSIS
 
-	% prove t/library/streams.t
+    % prove t/library/streams.t
 
 =head1 DESCRIPTION
 
@@ -396,7 +396,7 @@ pir_output_is(<<'CODE', <<'OUT', "Stream::ParrotIO");
     .local pmc array
 
     i = 0
-    array = new .PerlArray
+    array = new .ResizablePMCArray
 
 LOOP:
     inc i

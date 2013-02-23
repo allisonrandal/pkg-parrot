@@ -1,7 +1,7 @@
 /* embed.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  SVN Info
- *     $Id: embed.h 11903 2006-03-14 20:49:11Z bernhard $
+ *     $Id: embed.h 12537 2006-05-06 20:06:21Z petdance $
  *  Overview:
  *     This is the Parrot embedding system--the only part of Parrot that
  *     the outside world should see.
@@ -15,6 +15,7 @@
 #if !defined(PARROT_EMBED_H_GUARD)
 #define PARROT_EMBED_H_GUARD
 
+#include "parrot/compiler.h"    /* compiler capabilities */
 #include "parrot/config.h"      /* PARROT_VERSION, PARROT_JIT_CAPABLE... */
 #include "parrot/interpreter.h" /* give us the interpreter flags */
 #include "parrot/warnings.h"    /* give us the warnings flags    */
@@ -23,6 +24,7 @@ typedef int Parrot_warnclass;
 
 PARROT_API Parrot_Interp Parrot_new(Parrot_Interp parent);
 
+/* XXX Parrot_init() should be removed, no longer required for embedders */
 PARROT_API void Parrot_init(Parrot_Interp);
 PARROT_API void Parrot_init_stacktop(Parrot_Interp, void *);
 
@@ -58,7 +60,8 @@ PARROT_API Parrot_Opcode * Parrot_debug(Parrot_Interp, Parrot_Opcode* pc);
 
 PARROT_API void Parrot_disassemble(Parrot_Interp);
 
-PARROT_API void Parrot_exit(int status);
+PARROT_API void Parrot_exit(int status)
+                __attribute__noreturn__;
 
 PARROT_API void Parrot_run_native(Parrot_Interp interpreter, native_func_t func);
 

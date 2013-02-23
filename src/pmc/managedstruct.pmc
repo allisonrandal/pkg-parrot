@@ -1,6 +1,6 @@
 /*
-Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: managedstruct.pmc 11355 2006-01-26 12:23:21Z leo $
+Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+$Id: managedstruct.pmc 12546 2006-05-07 05:27:27Z petdance $
 
 =head1 DESCRIPTION
 
@@ -21,8 +21,6 @@ C<struct> values that Parrot is responsible for disposing of.
 
 #include "parrot/parrot.h"
 
-
-INTVAL key_2_idx(Interp* interpreter, PMC *pmc, PMC *key);
 
 pmclass ManagedStruct extends UnManagedStruct need_ext {
 

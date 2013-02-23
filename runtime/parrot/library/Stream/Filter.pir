@@ -1,3 +1,5 @@
+# $Id: Filter.pir 12262 2006-04-15 16:16:43Z bernhard $
+
 =head1 TITLE
 
 Stream::Filter - filter and/or alter a stream

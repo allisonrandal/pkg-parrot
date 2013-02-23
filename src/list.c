@@ -1,7 +1,7 @@
 /*
 Copyright: (c) 2002 Leopold Toetsch <lt@toetsch.at>
 License:  Artistic/GPL, see README and LICENSES for details
-$Id: list.c 10587 2005-12-19 19:14:03Z leo $
+$Id: list.c 12094 2006-04-03 07:10:43Z fperrad $
 
 =head1 NAME
 
@@ -196,7 +196,7 @@ static List_chunk *alloc_next_size(Interp *interpreter, List *list,
         int where, UINTVAL idx);
 static List_chunk *add_chunk(Interp *interpreter, List *list,
         int where, UINTVAL idx);
-UINTVAL ld(UINTVAL x);
+PARROT_API UINTVAL ld(UINTVAL x);
 static List_chunk *get_chunk(Interp *interpreter, List *list, UINTVAL *idx);
 static void split_chunk(Interp *interpreter, List *list,
         List_chunk *chunk, UINTVAL idx);

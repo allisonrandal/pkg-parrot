@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: string.t 11890 2006-03-13 19:54:14Z particle $
+# $Id: string.t 12217 2006-04-14 10:59:04Z bernhard $
 
 use strict;
 use warnings;
@@ -43,7 +43,6 @@ int main(int argc, char* argv[])
     if (!interpreter) {
         return 1;
     }
-    Parrot_init(interpreter);
 
     PIO_eprintf(interpreter, "main\n");
 

@@ -27,11 +27,8 @@ PunieGrammar -- A grammar for parsing Perl 1
 =head1 DESCRIPTION
 
 This is a grammar to parse Perl 1 programs. It inherits the behavior
-of the PGE::Rule class. It parses a string of source code according to
+of the PGE::Grammar class. It parses a string of source code according to
 its hierarchy of rules and returns a PGE::Match object (a parse tree).
-
-Currently, all it can parse is a single statement printing a single
-digit, in the form of 'print 1;'.
 
 =cut
 
@@ -41,7 +38,7 @@ digit, in the form of 'print 1;'.
     load_bytecode 'PGE.pbc'
     load_bytecode 'PGE/Text.pbc'
 
-    $P0 = getclass 'PGE::Rule'
+    $P0 = getclass 'PGE::Grammar'
     $P1 = subclass $P0, 'PunieGrammar'
 
     .local pmc optable
@@ -50,22 +47,22 @@ digit, in the form of 'print 1;'.
     optable = new $I0
     store_global "PunieGrammar", "$optable", optable
 
-    optable.addtok("infix:+")
-    optable.addtok("infix:-", "infix:+")
-    optable.addtok("infix:.", "infix:+")
-    optable.addtok("infix:*", ">infix:+")
-    optable.addtok("infix:/", "infix:*")
-    optable.addtok("infix:%", "infix:*")
-    optable.addtok("infix:x", "infix:*")
+    optable.newtok('infix:+', 'precedence'=>'=')
+    optable.newtok("infix:-", 'equiv'=>"infix:+")
+    optable.newtok("infix:.", 'equiv'=>"infix:+")
+    optable.newtok("infix:*", 'tighter'=>"infix:+")
+    optable.newtok("infix:/", 'equiv'=>"infix:*")
+    optable.newtok("infix:%", 'equiv'=>"infix:*")
+    optable.newtok("infix:x", 'equiv'=>"infix:*")
 
-    optable.addtok("infix:<<", "<infix:+")
-    optable.addtok("infix:>>", "infix:<<")
-    optable.addtok("infix:&", "<infix:<<")
-    optable.addtok("infix:|", "<infix:&")
-    optable.addtok("infix:^", "infix:|")
+    optable.newtok("infix:<<", 'looser'=>"infix:+")
+    optable.newtok("infix:>>", 'equiv'=>"infix:<<")
+    optable.newtok("infix:&",  'looser'=>"infix:<<")
+    optable.newtok("infix:|",  'looser'=>"infix:&")
+    optable.newtok("infix:^",  'equiv'=>"infix:|")
 
     term = find_global "PunieGrammar", "term"
-    optable.addtok("term:", ">infix:+", "left", term)
+    optable.newtok("term:", 'tighter'=>"infix:+", 'parsed'=>term)
 
 .end
 

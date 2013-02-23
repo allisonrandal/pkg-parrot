@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cgoto.pm 11744 2006-02-26 10:55:39Z bernhard $
+# $Id: cgoto.pm 12259 2006-04-15 13:03:46Z leo $
 
 =head1 NAME
 
@@ -51,9 +51,14 @@ $(OPS_DIR)/core_ops_cg$(O): $(GENERAL_H_FILES) $(OPS_DIR)/core_ops_cg.c
 $(OPS_DIR)/core_ops_cgp$(O): $(GENERAL_H_FILES) $(OPS_DIR)/core_ops_cgp.c
 $(SRC_DIR)/runops_cores.c: $(INC_DIR)/oplib/core_ops_cgp.h
 
-$(OPS_DIR)/core_ops_cg.c $(INC_DIR)/oplib/core_ops_cg.h: $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGoto.pm lib/Parrot/OpLib/core.pm
+$(INC_DIR)/oplib/core_ops_cg.h: $(OPS_DIR)/core_ops_cg.c 
+
+$(OPS_DIR)/core_ops_cg.c : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGoto.pm lib/Parrot/OpLib/core.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2c.pl CGoto --core
-$(OPS_DIR)/core_ops_cgp.c $(INC_DIR)/oplib/core_ops_cgp.h: $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGP.pm lib/Parrot/OpLib/core.pm
+
+$(INC_DIR)/oplib/core_ops_cgp.h: $(OPS_DIR)/core_ops_cgp.c 
+
+$(OPS_DIR)/core_ops_cgp.c : $(OPS_FILES) $(BUILD_TOOLS_DIR)/ops2c.pl lib/Parrot/OpsFile.pm lib/Parrot/Op.pm lib/Parrot/OpTrans/CGP.pm lib/Parrot/OpLib/core.pm
 	$(PERL) $(BUILD_TOOLS_DIR)/ops2c.pl CGP --core
 EOF
             TEMP_cg_o => '$(OPS_DIR)/core_ops_cg$(O) $(OPS_DIR)/core_ops_cgp$(O)',

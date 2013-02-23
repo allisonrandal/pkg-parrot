@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: docs.in 11280 2006-01-21 13:33:08Z bernhard $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: docs.in 12466 2006-04-30 18:23:37Z bernhard $
 
 # Setup of some commands
 PERL  = @perl@

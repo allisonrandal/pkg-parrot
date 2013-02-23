@@ -1,5 +1,5 @@
 #! perl
-# $Id: c2str.pl 11280 2006-01-21 13:33:08Z bernhard $
+# $Id: c2str.pl 12179 2006-04-12 12:38:15Z leo $
 
 =head1 NAME
 
@@ -110,9 +110,13 @@ HEADER
 	    die "Seen line $line before in $infile - can't continue";
 	}
 
+	# TODO maybe cope with escaped \"
+	my $cnt = tr/"/"/;
+	die "bogus CONST_STRING at line $line" unless $cnt == 2;
+
 	my $str = extract_delimited; # $_, '"';
 	$str = substr $str, 1, -1;
-	# print STDERR "** '$str' $line\n";
+	## print STDERR "** '$str' $line\n";
 	my $n;
 	if ($n = $known_strings{$str}) {
 	    if (!$this_file_seen{$str}) {

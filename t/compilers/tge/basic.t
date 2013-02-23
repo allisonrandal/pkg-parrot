@@ -1,6 +1,6 @@
 #!perl
 # Copyright 2005, The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 11891 2006-03-13 20:18:30Z bernhard $
+# $Id: basic.t 12460 2006-04-30 08:30:00Z chromatic $
 
 use strict;
 use warnings;
@@ -79,7 +79,7 @@ OUT
 pir_output_is(<<'CODE', <<'OUT', '"Malformed string" in r11890 under Linux i386');
 
 .sub test
-  load_bytecode "languages/punie/lib/PAST.pir"
+  load_bytecode "PAST.pbc"
   load_bytecode "TGE.pbc"
   print "1\n"
 .end

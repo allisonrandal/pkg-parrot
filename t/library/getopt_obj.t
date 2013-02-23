@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: getopt_obj.t 11911 2006-03-16 18:16:52Z particle $
+# $Id: getopt_obj.t 12223 2006-04-14 13:13:50Z leo $
 
 use strict;
 use warnings;
@@ -297,6 +297,7 @@ pir_output_is(<<'CODE', <<'OUT', "ignored options");
 	load_bytecode "Getopt/Obj.pir"
 	.local pmc getopts
 	getopts = new "Getopt::Obj"
+	getopts."notOptStop"(1)
 
 	$P0 = getopts."add"()
 	$P0."long"("foo")
@@ -652,6 +653,56 @@ define[foobar] is 1
 argv[0] is text
 OUT
 
+# 14
+pir_output_like(<<'CODE', <<'OUT', "missing spec");
+.sub main :main 
+	.local pmc argv
+	argv = new .ResizablePMCArray
+	push argv, '--foo=file'
+	load_bytecode "Getopt/Obj.pir"
+	.local pmc getopts
+	getopts = new "Getopt::Obj"
+	$P1 = getopts."get_options"(argv)
+	$S0 = $P1["foo"]
+	print "foo is "
+	print $S0
+	print "\n"
+	$S0 = argv[0]
+	print "argv[0] is "
+	print $S0
+	print "\n"
+.end
+CODE
+/Option 'foo' not in specs/
+OUT
+
+# 15
+pir_output_like(<<'CODE', <<'OUT', "missing argument");
+.sub main :main 
+	.local pmc argv
+	argv = new .ResizablePMCArray
+	push argv, '--foo=file'
+	push argv, '--bar'
+	load_bytecode "Getopt/Obj.pir"
+	.local pmc getopts
+	getopts = new "Getopt::Obj"
+	push getopts, 'foo=s'
+	push getopts, 'bar=s'
+	$P1 = getopts."get_options"(argv)
+	$S0 = $P1["foo"]
+	print "foo is "
+	print $S0
+	print "\n"
+	$S0 = argv[0]
+	print "argv[0] is "
+	print $S0
+	print "\n"
+.end
+CODE
+/Missing a required argument for option 'bar'/
+OUT
+
+
 =head1 AUTHOR
 
 Joshua Isom - C<loneowl@ritalin.shout.net>
@@ -662,5 +713,5 @@ F<runtime/parrot/library/Getopt/Obj.pir>
 
 =cut
 
-BEGIN { plan tests => 13; }
+BEGIN { plan tests => 15; }
 

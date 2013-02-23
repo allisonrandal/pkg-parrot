@@ -192,6 +192,8 @@ See L<tools/build/pmc2c.pl> for a list of available interfaces.
 
 =item B<isa>(out INT, in PMC, in STR)
 
+=item B<isa>(out INT, in PMC, in KEY)
+
 Sets $1 to true or false, depending on whether $2 isa $3.
 
 =cut
@@ -211,13 +213,18 @@ inline op isa(out INT, in PMC, in STR) :object_base {
 =item B<newclass>(out PMC, in STR)
 
 Creates a new Parrot-style class, named $2, and puts the new PMC for it
-into $1. (This is a real out--the contents of $1 are ignored and the
-pointer for the new PMC is put in there).
+into $1. 
+
+=item B<newclass>(out PMC, in KEY)
+
+Create a new Parrot-style class, with the hierachical name given in $2.
 
 =cut
 
 inline op newclass(out PMC, in STR) :object_classes {
-  $1 = pmc_new_init(interpreter, enum_class_ParrotClass, (PMC*)$2);
+  PMC *name = pmc_new(interpreter, enum_class_String);
+  VTABLE_set_string_native(interpreter, name, $2);
+  $1 = pmc_new_init(interpreter, enum_class_ParrotClass, name);
   goto NEXT();
 }
 
@@ -232,12 +239,22 @@ inline op newclass(out PMC, in STR) :object_classes {
 Create a new class, put in $1, that is a subclass of $2. $3, if available,
 is the name of the new class--if not, the subclass is an anonymous subclass.
 
-$1 is replaced--a new PMC for the subclass is generated and put in it.
+=item B<subclass>(out PMC, in PMC, in KEY)
+
+=item B<subclass>(out PMC, in KEY, in KEY)
+
+=item B<subclass>(out PMC, in STR, in KEY)
+
+Create a new class $1, that is a subclass of $2. If $3 isn't a NULL key,
+it's the name of the class.
 
 =cut
 
 inline op subclass(out PMC, in PMC, in STR) :object_base {
-  $1 = VTABLE_subclass(interpreter, $2, $3);
+  PMC *name;
+  name = pmc_new(interpreter, enum_class_String);
+  VTABLE_set_string_native(interpreter, name, $3);
+  $1 = VTABLE_subclass(interpreter, $2, name);
   goto NEXT();
 }
 
@@ -248,12 +265,15 @@ inline op subclass(out PMC, in PMC) :object_classes {
 
 op subclass(out PMC, in STR, in STR) :object_classes {
   PMC *class = Parrot_class_lookup(interpreter, $2);
+  PMC *name;
   opcode_t *next = expr NEXT();
   if (PMC_IS_NULL(class)) {
     real_exception(interpreter, next, NO_CLASS, "Class '%s' doesn't exist",
-		string_to_cstring( interpreter, $3 ));
+		string_to_cstring( interpreter, $2 ));
   }
-  $1 = VTABLE_subclass(interpreter, class, $3);
+  name = pmc_new(interpreter, enum_class_String);
+  VTABLE_set_string_native(interpreter, name, $3);
+  $1 = VTABLE_subclass(interpreter, class, name);
   goto ADDRESS(next);
 }
 
@@ -270,11 +290,9 @@ op subclass(out PMC, in STR) :object_classes {
 
 =item B<getclass>(out PMC, in STR)
 
-Find the PMC for a class, by name. Note that this is a one-level hash, so for
-classes that have some structure you need to impose that structure externally.
+=item B<getclass>(out PMC, in KEY)
 
-Parrot's conventions are that level separators are noted with the NULL
-character, so Perl's Foo::Bar would be Foo\0Bar.
+Find the PMC for a class, by name.
 
 =cut
 

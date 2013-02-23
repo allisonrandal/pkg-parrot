@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: utf8.c 10587 2005-12-19 19:14:03Z leo $
+$Id: utf8.c 12592 2006-05-10 04:55:00Z petdance $
 
 =head1 NAME
 
@@ -151,9 +151,6 @@ utf8_encode(void *ptr, UINTVAL c)
 
     return u8ptr + len;
 }
-
-/* temporary */
-void * Parrot_utf8_encode(void *ptr, UINTVAL c);
 
 void *
 Parrot_utf8_encode(void *ptr, UINTVAL c)

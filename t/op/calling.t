@@ -1,10 +1,10 @@
-#!perl
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: calling.t 11896 2006-03-14 12:19:16Z leo $
+# $Id: calling.t 12612 2006-05-11 10:47:18Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Test::More;
 use Parrot::Test;
 
@@ -894,7 +894,7 @@ OUTPUT
 pir_output_is(<<'CODE', <<'OUTPUT', "type conversion - PIR const");
 .const int MYCONST = -2
 .sub main :main
-    $P0 = new PerlString
+    $P0 = new String
     "foo"(MYCONST)
 .end
 .sub "foo"
@@ -2298,6 +2298,90 @@ CODE
 /duplicate name/
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', "slurpy named after slurpy array");
+.sub main :main
+    foo(0, 'abc' => 1)
+    foo('abc' => 2)
+    $P0 = new .ResizablePMCArray
+    push $P0, 1
+    foo($P0 :flat, 'abc' => 3)
+    $P0 = new .ResizablePMCArray
+    foo($P0 :flat, 'abc' => 4)
+.end
+
+.sub foo
+        .param pmc array :slurpy
+        .param pmc hash :slurpy :named
+        print "ok "
+        $P0 = hash['abc']
+        print $P0
+        print "\n"
+.end
+CODE
+ok 1
+ok 2
+ok 3
+ok 4
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "slurpy named loses :flat arg (#39044)");
+.sub main :main
+    $P0 = new .Hash
+    $P0['a'] = 11
+    $P0['b'] = 22
+    $P0['c'] = 33
+    foo(0, 1, $P0 :flat :named)
+.end
+
+.sub foo
+    .param pmc array :slurpy
+    .param pmc hash :slurpy :named
+    $I0 = elements array
+    print $I0
+    print "\n"
+    $P0 = hash['a']
+    say $P0
+    $P0 = hash['b']
+    say $P0
+    $P0 = hash['c']
+    say $P0
+.end
+CODE
+2
+11
+22
+33
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "slurpy named loses :flat arg");
+.sub main :main
+    $P0 = new .Hash
+    $P0['a'] = 11
+    $P0['b'] = 22
+    $P0['c'] = 33
+    foo(0, 1, 'z'=>2626, $P0 :flat :named)
+.end
+
+.sub foo
+    .param pmc array :slurpy
+    .param pmc hash :slurpy :named
+    $P0 = hash['a']
+    say $P0
+    $P0 = hash['b']
+    say $P0
+    $P0 = hash['c']
+    say $P0
+    $P0 = hash['z']
+    say $P0
+.end
+CODE
+11
+22
+33
+2626
+OUTPUT
+
+
 ## remember to change the number of tests :-)
-BEGIN { plan tests => 89 }
+BEGIN { plan tests => 92 }
 

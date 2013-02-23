@@ -34,7 +34,7 @@ data file, possibly in YAML.
 
 .sub _load :load
     .local pmc lookuptable
-    lookuptable = new PerlHash
+    lookuptable = new .Hash
     _add_entry(lookuptable, 'infix:+', 'add')
     _add_entry(lookuptable, 'infix:-', 'sub')
     _add_entry(lookuptable, 'infix:*', 'mul')
@@ -48,6 +48,12 @@ data file, possibly in YAML.
     _add_entry(lookuptable, 'infix:&', 'band')
     _add_entry(lookuptable, 'infix:|', 'bor')
     _add_entry(lookuptable, 'infix:^', 'bxor')
+
+    # These look odd, I know, but the logic is actually cleaner when
+    # it's reversed.
+    _add_entry(lookuptable, 'if', 'unless')
+    _add_entry(lookuptable, 'unless', 'if')
+    _add_entry(lookuptable, 'elsif', 'unless')
 
     store_global 'PunieOpLookup', 'lookuptable', lookuptable
 .end
@@ -64,7 +70,7 @@ data file, possibly in YAML.
     .param pmc lookuptable
     .param string key
     .param string value
-    $P1 = new PerlString
+    $P1 = new .String
     $P1 = value
     lookuptable[ key ] = $P1
 .end
