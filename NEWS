@@ -1,4 +1,15 @@
-# $Id: NEWS 11703 2006-02-22 13:35:12Z leo $
+# $Id: NEWS 12089 2006-04-02 13:44:22Z leo $
+
+New in 0.4.3
+
+- namespaces partially implemented
+- rulec, Perl6 rule compiler
+- PGE improvements including return values for closure
+- parts of a Perl6 parser based on PGE
+- complex trigonometric methods
+- type of Sub PMC is now overridable by HLL
+- NetBSD support
+- many bug fixes and improvements
 
 New in 0.4.2
 

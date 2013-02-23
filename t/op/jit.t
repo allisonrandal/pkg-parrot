@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.t 11532 2006-02-14 00:50:03Z leo $
+# $Id: jit.t 11843 2006-03-10 00:39:48Z leo $
 
 use strict;
 use warnings;
@@ -322,6 +322,7 @@ CODE
 OUTPUT
 
 pasm_output_is(<<'CODE', <<'OUTPUT', "sub_i_ic 0 mapped");
+cleari
 set I0,0
 set I1,1
 set I2,2

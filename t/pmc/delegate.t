@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: delegate.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: delegate.t 11755 2006-02-27 01:02:12Z chromatic $
 
 use strict;
 use warnings;
@@ -146,7 +146,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_i");
     end
 .end
 .namespace ["delegate"]
-.sub __set_integer_native method
+.sub __set_integer_native :method
     .param int i
     # just return
     print i
@@ -184,7 +184,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_p");
     end
 .end
 .namespace ["delegate"]
-.sub __set_integer_native method
+.sub __set_integer_native :method
     .param int i
     # cant keep state yet
     # just print arg and return
@@ -205,7 +205,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "delegate add_p_p_p");
     d = 3
     .return (d)
 .end
-.sub __get_string method
+.sub __get_string :method
     .return("one")
 .end
 CODE

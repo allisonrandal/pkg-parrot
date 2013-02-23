@@ -1,7 +1,7 @@
 /* pobj.h
  *  Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: pobj.h 11346 2006-01-25 15:59:27Z leo $
+ *  SVN Info
+ *     $Id: pobj.h 12044 2006-03-27 13:27:10Z leo $
  *  Overview:
  *     Parrot Object data members and flags enum
  *  Data Structure and Algorithms:
@@ -81,9 +81,6 @@ typedef union UnionVal {
 typedef struct pobj_t {
     UnionVal u;
     Parrot_UInt flags;
-#if ! DISABLE_GC_DEBUG
-    UINTVAL _pobj_version;
-#endif /* ! DISABLE_GC_DEBUG */
 } pobj_t;
 
 /* plain Buffer is the smallest Parrot Obj */
@@ -108,13 +105,6 @@ typedef Buffer PObj;
  * #define buflen   obj.u._b._buflen
  * END DEPRECATED BUFFER ACCESSORS
  */
-
-#if ! DISABLE_GC_DEBUG
-/* BEGIN DEPRECATED POBJ ACCESSOR */
-#  define pobj_version obj._pobj_version
-/* END DEPRECATED POBJ ACCESSOR */
-#  define PObj_version(pobj)  (pobj)->obj._pobj_version
-#endif /* ! DISABLE_GC_DEBUG */
 
 typedef enum {
     enum_stringrep_unknown = 0,
@@ -165,9 +155,9 @@ struct PMC_EXT {
     /* This flag determines the next PMC in the 'used' list during
        dead object detection in the GC. It is a linked list, which is
        only valid in trace_active_PMCs. Also, the linked list is
-       guaranteed to have the tail element's next_for_GC point to itself,
+       guaranteed to have the tail element's _next_for_GC point to itself,
        which makes much of the logic and checks simpler. We then have to
-       check for PMC->next_for_GC == PMC to find the end of list. */
+       check for PMC->_next_for_GC == PMC to find the end of list. */
     PMC *_next_for_GC;
 
     /* Yeah, the GC data should be out of
@@ -200,11 +190,6 @@ typedef struct PMC_EXT PMC_EXT;
 #define PMC_next_for_GC(pmc)  PMC_ext_checked(pmc)->_next_for_GC
 #define PMC_sync(pmc)         PMC_ext_checked(pmc)->_synchronize
 #define PMC_union(pmc)        (pmc)->obj.u
-
-/* macro for accessing union data */
-#define next_for_GC pmc_ext->_next_for_GC
-#define metadata pmc_ext->_metadata
-#define synchronize pmc_ext->_synchronize
 
 /* PObj flags */
 typedef enum PObj_enum {

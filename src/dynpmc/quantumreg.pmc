@@ -1,6 +1,6 @@
 /* quantumreg.pmc
- *  CVS Info
- *     $Id: quantumreg.pmc 11228 2006-01-17 19:41:07Z bernhard $
+ *  SVN Info
+ *     $Id: quantumreg.pmc 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     These are the vtable functions for the QuantumReg PMC
  *  Data Structure and Algorithms:

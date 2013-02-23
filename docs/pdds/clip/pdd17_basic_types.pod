@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd17_basic_types.pod 9421 2005-10-09 23:57:52Z chip $
+# $Id: pdd17_basic_types.pod 11719 2006-02-23 22:07:13Z particle $
 
 =head1 NAME
 
@@ -108,7 +108,7 @@ splice, on fixed arrays will result in an exception.
 
 A statically sized array which holds only Boolean values.
 
-=item ResizeableBooleanArray
+=item ResizableBooleanArray
 
 A dynamically sized array which holds only Boolean values.
 
@@ -116,7 +116,7 @@ A dynamically sized array which holds only Boolean values.
 
 A statically sized array which holds only Integer values.
 
-=item ResizeableIntegerArray
+=item ResizableIntegerArray
 
 A dynamically sized array which holds only Integer values.
 
@@ -124,7 +124,7 @@ A dynamically sized array which holds only Integer values.
 
 A statically sized array which holds only Float values.
 
-=item ResizeableFloatArray
+=item ResizableFloatArray
 
 A dynamically sized array which holds only Float values.
 
@@ -132,7 +132,7 @@ A dynamically sized array which holds only Float values.
 
 A statically sized array which holds only PMC values.
 
-=item ResizeablePMCArray
+=item ResizablePMCArray
 
 A dynamically sized array which holds only PMC values.
 
@@ -140,7 +140,7 @@ A dynamically sized array which holds only PMC values.
 
 A statically sized array which holds only String values.
 
-=item ResizeableStringArray
+=item ResizableStringArray
 
 A dynamically sized array which holds only String values.
 

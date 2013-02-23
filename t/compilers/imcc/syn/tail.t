@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: tail.t 10826 2005-12-31 22:40:24Z ambs $
+# $Id: tail.t 11801 2006-03-06 13:29:55Z leo $
 
 use strict;
 use warnings;
@@ -50,7 +50,7 @@ pir_output_is(<<'CODE', <<'OUT', "tail call optimization, final position");
 .sub _funcall
     .local pmc function
     .local pmc argv
-    get_params "(0,0x8)", function, argv
+    get_params "(0,0x20)", function, argv
     print "[doing _funcall]\n"
     $I33 = defined function
     if $I33 goto doit
@@ -58,7 +58,7 @@ bad_func:
     printerr "_funcall:  Bad function.\n"
     exit 0
 doit:
-    set_args "(0x8)", argv
+    set_args "(0x20)", argv
     tailcall function
 .end
 
@@ -335,7 +335,7 @@ pir_output_is(<<'CODE', <<'OUT', "new tail method call syntax");
 .end
 
 .namespace ["Foo"]
-.sub go method
+.sub go :method
     .local pmc n
     n = getattribute self, "Foo\0n"
     dec n

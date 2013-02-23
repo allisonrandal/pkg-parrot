@@ -1,7 +1,7 @@
 /* misc.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: misc.h 11154 2006-01-13 20:15:01Z jonathan $
+ *  SVN Info
+ *     $Id: misc.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Miscellaneous functions, mainly the Parrot_sprintf family
  *  Data Structure and Algorithms:

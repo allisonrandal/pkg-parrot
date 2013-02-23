@@ -1,7 +1,7 @@
 /* stacks.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: stacks.h 11109 2006-01-12 01:19:20Z jonathan $
+ *  SVN Info
+ *     $Id: stacks.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Stack handling routines for Parrot
  *  Data Structure and Algorithms:

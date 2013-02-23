@@ -1,9 +1,9 @@
-This is Parrot, version 0.4.2
+This is Parrot, version 0.4.3
 -----------------------------
 
 Parrot is Copyright (C) 2001-2006, The Perl Foundation.
 
-$Id: README 11703 2006-02-22 13:35:12Z leo $
+$Id: README 12089 2006-04-02 13:44:22Z leo $
 
 LICENSE INFORMATION
 -------------------
@@ -65,7 +65,7 @@ For systems like HPUX that don't have inet_pton please run
 
 If you want to install Parrot into a non-standard location use
 
-    perl Configure.pl --prefix=/Users/foo/parrot-0.4.2
+    perl Configure.pl --prefix=/Users/foo/parrot-0.4.3
 
 Running Configure.pl will generate a config.h header, a Parrot::Config
 module, platform files and some Makefiles.
@@ -84,6 +84,11 @@ On other systems, just try 'make'
 Now, the interpreter should build.  If you are building the ICU library
 (this is the default on most systems), you need to use GNU make instead
 (or something compatible with it).
+
+NOTE: If you have trouble linking parrot, this *may* be due to a pre-existing
+parrot version installed via 'make install'. Until this issue is resolved,
+you may have to delete the installed version of parrot before building a new
+one. Our apologies.
 
 You can test parrot by running
 

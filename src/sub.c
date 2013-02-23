@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sub.c 11612 2006-02-17 02:29:10Z rgrjr $
+$Id: sub.c 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ mark_context(Interp* interpreter, parrot_context_t* ctx)
     obj = (PObj*)ctx->current_method;
     if (obj)
         pobject_lives(interpreter, obj);
-    obj = (PObj*)ctx->current_package;
+    obj = (PObj*)ctx->current_namespace;
     if (obj)
         pobject_lives(interpreter, obj);
     obj = (PObj*)ctx->lex_pad;
@@ -244,9 +244,9 @@ invalidate_retc_context(Interp *interpreter, PMC *cont)
          * if one were created, everything up the chain would have been
          * invalidated earlier.
          */
-        if (cont->vtable != Parrot_base_vtables[enum_class_RetContinuation])
+        if (cont->vtable != interpreter->vtables[enum_class_RetContinuation])
             break;
-        cont->vtable = Parrot_base_vtables[enum_class_Continuation];
+        cont->vtable = interpreter->vtables[enum_class_Continuation];
         ctx->ref_count++;
         cont = ctx->current_cont;
         ctx = PMC_cont(cont)->from_ctx;
@@ -270,6 +270,7 @@ STRING*
 Parrot_full_sub_name(Interp* interpreter, PMC* sub)
 {
     struct Parrot_sub * s;
+    STRING *res;
 
     if (!sub || !VTABLE_defined(interpreter, sub))
         return NULL;
@@ -277,16 +278,19 @@ Parrot_full_sub_name(Interp* interpreter, PMC* sub)
     if (PMC_IS_NULL(s->namespace)) {
         return s->name;
     } else {
+        Parrot_block_DOD(interpreter);
         if (s->name) {
 	    STRING* ns = VTABLE_get_string(interpreter, s->namespace);
 
     	    ns = string_concat(interpreter, ns,
 		string_from_cstring(interpreter, " :: ", 4), 0);
-	    return string_concat(interpreter, ns, s->name, 0);
+	    res =  string_concat(interpreter, ns, s->name, 0);
         } else {
 	    STRING* ns = string_from_cstring(interpreter, "??? :: ", 7);
-	    return string_concat(interpreter, ns, s->name, 0);
+	    res =  string_concat(interpreter, ns, s->name, 0);
 	}
+        Parrot_unblock_DOD(interpreter);
+        return res;
     }
     return NULL;
 }
@@ -377,13 +381,16 @@ Parrot_Context_infostr(Interp *interpreter, parrot_context_t *ctx)
     const char* msg = (CONTEXT(interpreter->ctx) == ctx) ?
         "current instr.:":
         "called from Sub";
+    STRING *res = NULL;
 
+    Parrot_block_DOD(interpreter);
     if (Parrot_Context_info(interpreter, ctx, &info)) {
-        return Parrot_sprintf_c(interpreter,
+        res = Parrot_sprintf_c(interpreter,
             "%s '%Ss' pc %d (%s:%d)", msg,
             info.fullname, info.pc, info.file, info.line);
     }
-    return NULL;
+    Parrot_unblock_DOD(interpreter);
+    return res;
 }
 
 /*
@@ -411,6 +418,18 @@ Parrot_find_pad(Interp* interpreter, STRING *lex_name, parrot_context_t *ctx)
             if (VTABLE_exists_keyed_str(interpreter, lex_pad, lex_name))
                 return lex_pad;
         }
+#if CTX_LEAK_DEBUG
+        if (outer == ctx) {
+            /* This is a bug; a context can never be its own :outer context.
+             * Detecting it avoids an unbounded loop, which is difficult to
+             * debug, though we'd rather not pay the cost of detection in a
+             * production release.
+             */
+            real_exception(interpreter, NULL, INVALID_OPERATION,
+                           "Bug:  Context %p :outer points back to itself.",
+                           ctx);
+        }
+#endif
         ctx = outer;
     }
     return NULL;
@@ -425,7 +444,7 @@ parrot_new_closure(Interp *interpreter, PMC *sub_pmc)
     parrot_context_t *ctx;
 
     clos_pmc = VTABLE_clone(interpreter, sub_pmc);
-    clos_pmc->vtable = Parrot_base_vtables[enum_class_Closure];
+    clos_pmc->vtable = interpreter->vtables[enum_class_Closure];
     sub = PMC_sub(sub_pmc);
     clos = PMC_sub(clos_pmc);
     /* 
@@ -450,7 +469,7 @@ parrot_new_closure(Interp *interpreter, PMC *sub_pmc)
     }
     cont = ctx->current_cont;
     /* preserve this frame by converting the continuation */
-    cont->vtable = Parrot_base_vtables[enum_class_Continuation];
+    cont->vtable = interpreter->vtables[enum_class_Continuation];
     /* remember this (the :outer) ctx in the closure */
     clos->outer_ctx = ctx;
     /* the closure refs now this context too */

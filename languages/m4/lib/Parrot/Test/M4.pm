@@ -1,4 +1,4 @@
-# $Id: M4.pm 11544 2006-02-14 21:00:57Z bernhard $
+# $Id: M4.pm 12039 2006-03-26 19:46:16Z bernhard $
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ foreach my $func ( keys %language_test_map ) {
 
         # This does nor create byte code, but m4 code
         my $parrotdir       = dirname( $self->{parrot} );
-        Parrot::Test::generate_code( $code, $parrotdir, $count, $lang_fn );
+        Parrot::Test::write_code_to_file( $code, $lang_fn );
 
         # STDERR is written into same output file
         my $exit_code = Parrot::Test::run_command( 
@@ -92,7 +92,7 @@ foreach my $func ( keys %language_test_map ) {
         }
 
         # The generated files are left in the t/* directories.
-        # Let 'make clean' and '.cvsignore' take care of them.
+        # Let 'make clean' and 'svn:ignore' take care of them.
 
         return $pass;
     }

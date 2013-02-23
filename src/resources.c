@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: resources.c 11039 2006-01-10 13:36:31Z leo $
+$Id: resources.c 12045 2006-03-27 16:21:22Z leo $
 
 =head1 NAME
 
@@ -143,18 +143,20 @@ mem_allocate(Interp *interpreter, size_t size, struct Memory_Pool *pool)
          * TODO pass required allocation size to the DOD system,
          *      so that collection can be skipped if needed
          */
-        Parrot_do_dod_run(interpreter, DOD_trace_stack_FLAG);
+        if (!interpreter->arena_base->DOD_block_level) {
+            Parrot_do_dod_run(interpreter, DOD_trace_stack_FLAG);
 #if !PARROT_GC_IMS
-        /* Compact the pool if allowed and worthwhile */
-        if (pool->compact) {
-            /* don't bother reclaiming if it's just chicken feed */
-            if ((pool->possibly_reclaimable * pool->reclaim_factor +
-                    pool->guaranteed_reclaimable) > size) {
-                (*pool->compact) (interpreter, pool);
-            }
+            /* Compact the pool if allowed and worthwhile */
+            if (pool->compact) {
+                /* don't bother reclaiming if it's just chicken feed */
+                if ((pool->possibly_reclaimable * pool->reclaim_factor +
+                            pool->guaranteed_reclaimable) > size) {
+                    (*pool->compact) (interpreter, pool);
+                }
 
-        }
+            }
 #endif
+        }
         if (pool->top_block->free < size) {
             if (pool->minimum_block_size < 65536*16)
                 pool->minimum_block_size *= 2;
@@ -339,6 +341,7 @@ compact_pool(Interp *interpreter, struct Memory_Pool *pool)
                         /* Find out who else references our data */
                         Buffer *hdr = *(Buffer **)(PObj_bufstart(b));
 
+                        assert(PObj_is_COWable_TEST(b));
                         /* Make sure they know that we own it too */
                         PObj_COW_SET(hdr);
                         /* TODO incr ref_count, after fixing string
@@ -364,6 +367,7 @@ compact_pool(Interp *interpreter, struct Memory_Pool *pool)
                         memcpy(cur_spot, PObj_bufstart(b), PObj_buflen(b));
                         /* If we're COW */
                         if (PObj_COW_TEST(b)) {
+                            assert(PObj_is_COWable_TEST(b));
                             /* Let the old buffer know how to find us */
                             *(Buffer **)(PObj_bufstart(b)) = b;
                             /* No guarantees that our data is still COW, so

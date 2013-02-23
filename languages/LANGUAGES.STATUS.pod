@@ -1,4 +1,4 @@
-# $Id: LANGUAGES.STATUS.pod 11699 2006-02-21 19:55:49Z bernhard $
+# $Id: LANGUAGES.STATUS.pod 11947 2006-03-20 07:53:35Z fperrad $
 
 =head1 Languages targeting parrot
 
@@ -22,10 +22,13 @@ Scripting language inspired by Eiffel and ruby.
 =item Status
 
 Incomplete - but all examples and test cases are working.
+Estimated progress towards release 1.0: language constructs 47%,
+libraries 6%, documentation 4%, robustness 6%.
+See also http://xamber.org/history.html
 
 =item Last verified with parrot version
 
-0.4.0
+0.4.2
 
 =item Location
 
@@ -34,6 +37,31 @@ The Amber PMCs are in C<languages/amber>.
 
 =back
 
+=head2 APL
+
+=over 4
+
+=item Author
+
+Will Coleda
+
+=item Description
+
+APL
+
+=item Status
+
+Virtually nonexistant
+
+=item Last verified with parrot version
+
+N/A
+
+=item Location
+
+L<languages/APL>
+
+=back
 
 =head2 BASIC/compiler
 
@@ -100,6 +128,7 @@ Bernhard Schmalhofer
 =item Description
 
 Based on ANTLR and Python. ANTLR is needed only for maintainance, for generation of Python runtime files. 
+A new implementation with Java code generated with ANTLR 3 is under construction.
 
 =item Status
 
@@ -107,7 +136,7 @@ Very simple arithmetic expressions are working. Some test failures
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -163,7 +192,7 @@ Passes all tests.
 
 =item Last verified with parrot version
 
-0.3.1
+0.4.2
 
 =item Location
 
@@ -316,15 +345,15 @@ Bernhard Schmalhofer
 
 =item Description
 
-A joke language.
+A joke language. See http://en.wikipedia.org/wiki/HQ9+
 
 =item Status
 
-Works.
+Works and is mostly complete.
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -360,7 +389,7 @@ be familiar to Perl programmers.
 
 =item Last verified with parrot version
 
-0.4.0 (actually, HEAD of TRUNK as of 2005-12-22, which is post 0.4.0)
+0.4.2
 
 =item Location
 
@@ -388,7 +417,7 @@ Working, but not complete. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.0
+0.4.2
 
 =item Location
 
@@ -407,9 +436,9 @@ Francois Perrad
 
 =item Description
 
-Lua 5.0 compiler, implemented in Perl5 with yapp.
+Lua 5.1 compiler, implemented in Perl5 with yapp.
 
-Lua Standard Libraries implemented in PIR (still incomplete).
+Lua 5.1 Standard Libraries implemented in PIR (still incomplete).
 
 =item Status
 
@@ -417,7 +446,7 @@ Early stage - but all examples and test cases are working.
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -476,9 +505,11 @@ Port of GNU m4 to PIR.
 Functioning for handcrafted test cases. Loading frozen
 state is currently broken. Far from complete. Revision 0.0.14
 
+Development is stalled. Takers are welcome. 
+
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -532,7 +563,7 @@ Samples working, README explain how to build/use.
 
 =item Last verified with parrot version
 
-0.3.0
+0.4.2
 
 =item Location
 
@@ -617,7 +648,7 @@ Working. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.3.1
+0.4.2
 
 =item Location
 
@@ -659,7 +690,7 @@ http://www.akbkhome.com/svn.php/PintCompiler http://www.akbkhome.com/blog.php/Vi
 
 =item Author
 
-Autrijus Tang, et al.
+Audrey Tang, et al.
 
 =item Description
 
@@ -671,7 +702,7 @@ Basic IO and control flow elements; mutable variables; assignment.
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -757,7 +788,7 @@ Part of languages smoke testing. Almost all tests are succeeding.
 
 =item Last verified with parrot version
 
-0.4.0
+0.4.2
 
 =item Location
 
@@ -843,7 +874,7 @@ Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -871,7 +902,7 @@ Passes about 5.5% of tcl's (converted) test suite
 
 =item Last verified with parrot version
 
-0.4.1
+0.4.2
 
 =item Location
 
@@ -898,7 +929,7 @@ Working. Part of languages smoke testing.
 
 =item Last verified with parrot version
 
-0.4.0
+0.4.2
 
 =item Location
 
@@ -926,7 +957,7 @@ expected to change soon.
 
 =item Last verified with parrot version
 
-0.3.1
+0.4.2
 
 =item Location
 
@@ -982,7 +1013,7 @@ Infocom's Z-machine. See also http://en.wikipedia.org/wiki/Z-machine.
 
 =item Last verified with parrot version
 
-0.4.0
+0.4.2
 
 =item Location
 

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: gc.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: gc.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining what allocator to use...";
+$description = 'Determining what allocator to use';
 
 # valid libc/malloc/malloc-trace/gc
 @args = qw(gc verbose);

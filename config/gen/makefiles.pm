@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: makefiles.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: makefiles.pm 12013 2006-03-24 23:08:57Z pmichaud $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':gen';
 
-$description = "Generating build files...";
+$description = 'Generating makefiles and other build files';
 
 @args = ();
 
@@ -161,6 +161,12 @@ sub makefiles
         conditioned_lines             => 1
     );
     genfile(
+        'languages/pugs/config/makefiles/root.in' => 'languages/pugs/Makefile',
+        commentType                   => '#',
+        replace_slashes               => 1,
+        conditioned_lines             => 1
+    );
+    genfile(
         'config/gen/makefiles/miniperl.in' => 'languages/miniperl/Makefile',
         commentType                        => '#',
         replace_slashes                    => 1
@@ -182,6 +188,11 @@ sub makefiles
         replace_slashes                           => 1
     );
     genfile(
+        'config/gen/makefiles/perl6.in' => 'languages/perl6/Makefile',
+        commentType                     => '#',
+        replace_slashes                 => 1
+    );
+    genfile(
         'config/gen/makefiles/punie.in' => 'languages/punie/Makefile',
         commentType                     => '#',
         replace_slashes                 => 1
@@ -195,6 +206,12 @@ sub makefiles
         'config/gen/makefiles/scheme.in' => 'languages/scheme/Makefile',
         commentType                      => '#',
         replace_slashes                  => 1
+    );
+    genfile(
+        'languages/APL/config/root.in' => 'languages/APL/Makefile',
+        commentType                    => '#',
+        replace_slashes                => 1,
+        conditioned_lines              => 1
     );
     genfile(
         'languages/tcl/config/root.in' => 'languages/tcl/Makefile',

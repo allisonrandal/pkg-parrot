@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-# $Id: none.t 11232 2006-01-17 22:27:20Z particle $
+# $Id: none.t 11911 2006-03-16 18:16:52Z particle $
 
 use strict;
 use warnings;
@@ -26,13 +26,24 @@ Tests the None PMC.
 
 pir_output_is(<<'CODE', <<'OUT', 'new');
 .sub 'test' :main
-	new P0, .None
-	print "ok 1\n"
+    new P0, .None
+    print "ok 1\n"
 .end
 CODE
 ok 1
 OUT
 
+pir_output_is(<<'CODE', <<'OUT', 'get_string returns ""');
+.sub 'test' :main
+    new P0, .None
+    S0 = P0
+    eq S0, '', OK
+NOK:print "not "
+OK: print "ok\n"
+.end
+CODE
+ok
+OUT
 
 # remember to change the number of tests :-)
-BEGIN { plan tests => 1; }
+BEGIN { plan tests => 2; }

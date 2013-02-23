@@ -1,7 +1,7 @@
 /* interpreter.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: interpreter.h 11698 2006-02-21 19:33:43Z leo $
+ *  Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+ *  SVN Info
+ *     $Id: interpreter.h 12076 2006-03-29 22:22:22Z bernhard $
  *  Overview:
  *     The interpreter api handles running the operations
  *  Data Structure and Algorithms:
@@ -178,7 +178,7 @@ typedef union {
 
 typedef struct Parrot_Context {
     /* common header with Interp_Context */
-    struct Parrot_Context *unused1;	/* placeholder */
+    struct Parrot_Context *caller_ctx;  /* caller context */
     Regs_ni                bp;          /* pointers to FLOATVAL & INTVAL */
     Regs_ps                bp_ps;       /* pointers to PMC & STR */
     /* end common header */
@@ -191,7 +191,6 @@ typedef struct Parrot_Context {
     struct Stack_Chunk *control_stack;  /* Base of the flow control stack */
     PMC      *lex_pad;                  /* LexPad PMC */
     struct Parrot_Context *outer_ctx;   /* outer context, if a closure */
-    struct Parrot_Context *caller_ctx;  /* caller context */
     UINTVAL warns;             /* Keeps track of what warnings
                                  * have been activated */
     UINTVAL errors;            /* fatals that can be turned off */
@@ -209,7 +208,7 @@ typedef struct Parrot_Context {
     PMC *current_object;        /* current object if a method call */
     STRING *current_method;     /* name of method */
     opcode_t *current_pc;       /* program counter of Sub invocation */
-    String *current_package;    /* The package we're currently in */
+    PMC *current_namespace;     /* The namespace we're currently in */
     INTVAL current_HLL;         /* see also src/hll.c */
     opcode_t *current_results;   /* ptr into code with get_results opcode */
     /* deref the constants - we need it all the time */
@@ -277,13 +276,15 @@ struct parrot_interp_t {
     struct Interp_Context ctx;
     context_mem ctx_mem;                      /* ctx memory managment */
 
-    struct Stash *globals;                    /* Pointer to the global variable
-                                               * area */
+    struct PMC *stash_hash;                   /* namespace hash */
 
     struct Arenas *arena_base;                /* Pointer to this interpreter's
                                                * arena */
 
     PMC *class_hash;                          /* Hash of classes */
+    VTABLE **vtables;                         /* array of vtable ptrs */ 
+    int    n_vtable_max;                      /* highest used type */
+    int    n_vtable_alloced;                  /* alloced vtable space */
 
     struct _ParrotIOData *piodata;            /* interpreter's IO system */
 
@@ -348,6 +349,7 @@ struct parrot_interp_t {
     PMC* DOD_registry;                        /* registered PMCs added to the root set */
 
     PMC* HLL_info;                            /* storage for HLL names and types */
+    PMC* HLL_namespace;                       /* cache of HLL toplevel ns */
 
     MMD_table *binop_mmd_funcs;               /* Table of MMD functions */
     UINTVAL n_binop_mmd_funcs;                /* function count */

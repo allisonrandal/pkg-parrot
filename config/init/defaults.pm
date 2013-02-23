@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: defaults.pm 11697 2006-02-21 19:02:14Z leo $
+# $Id: defaults.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -22,9 +22,9 @@ use Config;
 use FindBin;    # see build_dir
 use Parrot::Configure::Step;
 
-$description = "Setting up Configure's default values...";
+$description = q{Setting up Configure's default values};
 
-@args = ('debugging', 'optimize', 'profile', 'verbose', 'prefix');
+@args = qw(debugging optimize profile verbose prefix);
 
 sub runstep
 {

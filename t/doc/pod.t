@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pod.t 11567 2006-02-16 01:47:46Z jhoblitt $
+# $Id: pod.t 11968 2006-03-21 16:42:57Z coke $
 
 =head1 NAME
 
@@ -46,6 +46,8 @@ BEGIN {
 my $build_dir = $PConfig{build_dir};
 my $manifest     = maniread("$build_dir/MANIFEST");
 my $manifest_gen = maniread("$build_dir/MANIFEST.generated");
+
+diag "finding files with pod, this may take a minute.";
 
 foreach my $file (keys(%$manifest), keys(%$manifest_gen)) {
     $file = "$build_dir/$file";

@@ -1,7 +1,7 @@
 /* headers.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: headers.h 10592 2005-12-20 14:53:14Z leo $
+ *  SVN Info
+ *     $Id: headers.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Header management functions. Handles getting of various headers,
  *     and pool creation

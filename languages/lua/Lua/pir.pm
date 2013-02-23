@@ -17,11 +17,13 @@ sub new {
 #  print "start Lua\n"
   load_bytecode "languages/lua/lib/luabasic.pbc"
   load_bytecode "languages/lua/lib/luacoroutine.pbc"
+  load_bytecode "languages/lua/lib/luapackage.pbc"
   load_bytecode "languages/lua/lib/luastring.pbc"
   load_bytecode "languages/lua/lib/luatable.pbc"
   load_bytecode "languages/lua/lib/luamath.pbc"
   load_bytecode "languages/lua/lib/luaio.pbc"
   load_bytecode "languages/lua/lib/luaos.pbc"
+  load_bytecode "languages/lua/lib/luadebug.pbc"
   _main()
 .end
 
@@ -79,7 +81,7 @@ sub visitIncrOp {
 	my $self = shift;
 	my ($op) = @_;
 	my $FH = $self->{fh};
-	print $FH "  add $op->{result}->{symbol}, 1.0\n";
+	print $FH "  inc $op->{result}->{symbol}\n";
 }
 
 sub visitFindGlobalOp {
@@ -163,6 +165,39 @@ sub visitCallOp {
 	print $FH "$op->{arg1}->{symbol}(";
 	my $first = 1;
 	foreach (@{$op->{arg2}}) {
+		print $FH ", " unless ($first);
+		print $FH "$_->{symbol}";
+		if (exists $_->{pragma} and $_->{pragma} eq "multi") {
+			print $FH " :flat";
+		}
+		$first = 0;
+	}
+	print $FH ")\n";
+}
+
+sub visitCallMethOp {
+	my $self = shift;
+	my ($op) = @_;
+	my $FH = $self->{fh};
+	print $FH "  ";
+	if (exists $op->{result} and scalar(@{$op->{result}})) {
+		print $FH "(";
+		my $first = 1;
+		foreach (@{$op->{result}}) {
+			print $FH ", " unless ($first);
+			print $FH "$_->{symbol}";
+			if (exists $_->{pragma} and $_->{pragma} eq "multi") {
+				print $FH " :slurpy";
+			}
+			$first = 0;
+		}
+		print $FH ") = ";
+	}
+	my @args = @{$op->{arg2}}; 
+	my $obj = shift @args; 
+	print $FH "$obj->{symbol}.$op->{arg1}(";
+	my $first = 1;
+	foreach (@args) {
 		print $FH ", " unless ($first);
 		print $FH "$_->{symbol}";
 		if (exists $_->{pragma} and $_->{pragma} eq "multi") {

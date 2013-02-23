@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: shlibs.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: shlibs.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':inter';
 
-$description = 'Determining flags for building shared libraries...';
+$description = 'Determining flags for building shared libraries';
 
 @args = qw(ask verbose cc_shared);
 

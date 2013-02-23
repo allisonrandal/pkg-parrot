@@ -2,8 +2,8 @@
  * list.h
  *  Copyright: (c) 2002 Leopold Toetsch <lt@toetsch.at>
  *  License:  Artistic/GPL, see README and LICENSES for details
- *  CVS Info
- *     $Id: list.h 11108 2006-01-12 00:42:48Z jonathan $
+ *  SVN Info
+ *     $Id: list.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     list aka array routines for Parrot
  *     s. list.c for more

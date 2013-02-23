@@ -30,7 +30,7 @@
     $P1 = subclass $P0, "PGE::Exp::Closure"
     $P1 = subclass $P0, "PGE::Exp::Commit"
     $P0 = new .Integer
-    store_global "PGE::Exp", "$_serno", $P0
+    store_global "PGE::Exp", "$!serno", $P0
 .end
 
 
@@ -59,7 +59,7 @@ won't be a problem, but is the use of the start parameter thread-safe?
     if has_prefix goto serno_1
     prefix = "R"
   serno_1:
-    $P0 = find_global "PGE::Exp", "$_serno"
+    $P0 = find_global "PGE::Exp", "$!serno"
     inc $P0
     unless has_start goto serno_2
     $P0 = start
@@ -119,7 +119,7 @@ won't be a problem, but is the use of the start parameter thread-safe?
   saveregs_1:
     if $I0 >= savec goto emitsub_1
     $S0 = save[$I0]
-    emit(code, "    save %s", $S0)
+    emit(code, "    push ustack, %s", $S0)
     inc $I0
     goto saveregs_1
   emitsub_1:
@@ -128,7 +128,7 @@ won't be a problem, but is the use of the start parameter thread-safe?
   restoreregs_1:
     if $I0 < 0 goto gencut
     $S0 = save[$I0]
-    emit(code, "    restore %s", $S0)
+    emit(code, "    %s = pop ustack", $S0)
     dec $I0
     goto restoreregs_1
   gencut:
@@ -285,11 +285,11 @@ register.
     if $I0 goto end
     emit(code, "    $I0 = defined captscope[%s]", cname)
     emit(code, "    if $I0 goto %s_c1", label)
-    emit(code, "    $P0 = new .PerlArray")
+    emit(code, "    $P0 = new .ResizablePMCArray")
     emit(code, "    captscope[%s] = $P0", cname)
-    emit(code, "    save captscope")
+    emit(code, "    push ustack, captscope")
     emit(code, "    bsr %s_c1", label)
-    emit(code, "    restore captscope")
+    emit(code, "    captscope = pop ustack")
     emit(code, "    delete captscope[%s]", cname)
     emit(code, "    goto fail")
     emit(code, "  %s_c1:", label)
@@ -368,15 +368,17 @@ register.
     emit(code, "    .local int cutting")
     emit(code, "    .local string lit")
     emit(code, "    .local int litlen")
+    emit(code, "    .local pmc ustack")
     emit(code, "    .local pmc gpad, rcache")
     emit(code, "    .local pmc captscope")
     emit(code, "    newfrom = find_global \"PGE::Match\", \"newfrom\"")
     emit(code, "    (mob, target, mfrom, mpos) = newfrom(mob, -1)")
     emit(code, "    $P0 = interpinfo %s", .INTERPINFO_CURRENT_SUB)
-    emit(code, "    setattribute mob, \"PGE::Match\\x0&:corou\", $P0")
+    emit(code, "    setattribute mob, \"PGE::Match\\x0&!corou\", $P0")
     emit(code, "    lastpos = length target")
-    emit(code, "    gpad = new .PerlArray")
-    emit(code, "    rcache = new .PerlHash")
+    emit(code, "    ustack = new .ResizablePMCArray")
+    emit(code, "    gpad = new .ResizablePMCArray")
+    emit(code, "    rcache = new .Hash")
     emit(code, "    captscope = mob")
     emit(code, "    pos = mfrom")
     emit(code, "    if pos >= 0 goto try_at_pos")
@@ -406,7 +408,7 @@ register.
     emit(code, "  fail_cut:")
     emit(code, "    mpos = cutting")
     emit(code, "    null $P0")
-    emit(code, "    setattribute mob, \"PGE::Match\\x0&:corou\", $P0")
+    emit(code, "    setattribute mob, \"PGE::Match\\x0&!corou\", $P0")
     emit(code, "    .yield (mob)")
     emit(code, "    goto fail_forever")
     emit(code, "  succeed:")
@@ -507,7 +509,7 @@ register.
     .return (self)
 .end
     
-.sub "gen" method
+.sub "gen" :method
     .param pmc code
     .param string label
     .param string next
@@ -518,7 +520,7 @@ register.
     cname = self["cname"]
     emit(code, "\n  %s: # scalar %s %s    ##", label, cname, $S0)
     emit(code, "    $P0 = mob[%s]", cname)
-    emit(code, "    $I0 = isa $P0, \"Array\"")
+    emit(code, "    $I0 = does $P0, \"array\"")
     emit(code, "    if $I0 == 0 goto %s_0", label)
     emit(code, "    $P0 = $P0[-1]")
     emit(code, "  %s_0:", label)
@@ -1007,15 +1009,15 @@ register.
   capture_2:
     emit(code, "    goto fail")
     emit(code, "  %s:", expnext)
-    emit(code, "    save captscope")
+    emit(code, "    push ustack, captscope")
     emit(code, "    $P0 = pop gpad")
     emit(code, "    captscope = pop gpad")
-    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$:pos\"")
+    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$.pos\"")
     emit(code, "    $P1 = pos")
     self.emitsub(code, next, "$P0", "captscope", "NOCUT")
     emit(code, "    push gpad, captscope")
     emit(code, "    push gpad, $P0")
-    emit(code, "    restore captscope")
+    emit(code, "    captscope = pop ustack")
     emit(code, "    goto fail")
   end:
     exp.gen(code, explabel, expnext)
@@ -1032,7 +1034,7 @@ register.
     .return (self)
 .end
 
-.sub "gen" method
+.sub "gen" :method
     .param pmc code
     .param string label
     .param string next
@@ -1076,14 +1078,16 @@ register.
     emit(code, "    $P0 = find_global \"%s\", \"%s\"", $S0, $S1)
     goto subrule_3
   subrule_simple_name:
-    emit(code, "    $P0 = getattribute captscope, \"PGE::Match\\x0$:pos\"")
+    emit(code, "    $P0 = getattribute captscope, \"PGE::Match\\x0$.pos\"")
     emit(code, "    $P0 = pos")
     emit(code, "    $I0 = can mob, \"%s\"", subname)
     emit(code, "    if $I0 == 0 goto %s_s1", label)
     emit(code, "    $P0 = find_method mob, \"%s\"", subname)
     emit(code, "    goto %s_s2", label)
     emit(code, "  %s_s1:", label)
-    emit(code, "    $P0 = find_global \"%s\"", subname)
+    ## leo: this was find_global - find_name looks into current namespace too
+    ##      I don't know, in which ns the subrule gets emitted
+    emit(code, "    $P0 = find_name \"%s\"", subname)
     emit(code, "  %s_s2:", label)
     emit(code, "    $P1 = captscope", subargs)
   subrule_3:
@@ -1094,12 +1098,12 @@ register.
     emit(code, "    setprop $P0, \"nextchars\", $P2")
   subrule_3a:
     emit(code, "    $P0 = $P0($P1%s)", subargs)
-    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$:pos\"")
+    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$.pos\"")
     emit(code, "    if $P1 <= %s goto %s_commit", PGE_CUT_MATCH, label)
     if isnegated == 0 goto subrule_4
     emit(code, "    if $P1 >= 0 goto fail")
     emit(code, "    $P1 = pos")
-    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$:from\"")
+    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$.from\"")
     emit(code, "    $P1 = pos")
     emit(code, "    goto %s", next)
     goto subrule_commit
@@ -1117,11 +1121,11 @@ register.
     emit(code, "    goto %s", next)
     goto subrule_commit
   subrule_6:
-    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0&:corou\"")
+    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0&!corou\"")
     emit(code, "    if_null $P1, %s", next)
     self.emitsub(code, next, "$P0", "NOCUT")
     emit(code, "    $P0.next()")
-    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$:pos\"")
+    emit(code, "    $P1 = getattribute $P0, \"PGE::Match\\x0$.pos\"")
     emit(code, "    if $P1 >= 0 goto %s_s3", label)
     emit(code, "    if $P1 > %s goto fail", PGE_CUT_MATCH)
   subrule_commit:
@@ -1179,7 +1183,7 @@ register.
     emit(code, "    $S0 = concat %s, \":\"", lang)
     emit(code, "    $S1 = %s", value)
     emit(code, "    $S0 .= $S1")
-    emit(code, "    $P0 = find_global \"PGE::Rule\", \"%:cache\"")
+    emit(code, "    $P0 = find_global \"PGE::Rule\", \"%!cache\"")
     emit(code, "    $I0 = exists $P0[$S0]")
     emit(code, "    if $I0 goto %s_1", label)
     emit(code, "    $P1 = compreg %s", lang)
@@ -1188,8 +1192,13 @@ register.
     emit(code, "  %s_1:", label)
     emit(code, "    $P1 = $P0[$S0]")
     emit(code, "    mpos = pos")
-    emit(code, "    $P1(mob)")
-    emit(code, "    goto %s", next)
+    emit(code, "    ($P0 :optional, $I0 :opt_flag) = $P1(mob)")
+    emit(code, "    if $I0 == 0 goto %s", next)
+    emit(code, "    setattribute mob, \"PGE::Match\\x0$!value\", $P0")
+    self.emitsub(code, "succeed", "pos")
+    emit(code, "    null $P0")
+    emit(code, "    setattribute mob, \"PGE::Match\\x0$!value\", $P0")
+    emit(code, "    goto fail")
     .return ()
 .end
 

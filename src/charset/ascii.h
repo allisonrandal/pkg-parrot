@@ -1,7 +1,7 @@
 /* ascii.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: ascii.h 10028 2005-11-16 18:21:29Z leo $
+ *  SVN Info
+ *     $Id: ascii.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the header for the ascii charset functions
  *  Data Structure and Algorithms:

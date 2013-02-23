@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: exceptions.c 11444 2006-02-06 11:41:39Z leo $
+$Id: exceptions.c 11742 2006-02-25 23:19:54Z leo $
 
 =head1 NAME
 
@@ -500,7 +500,9 @@ dest2offset(Interp * interpreter, opcode_t *dest)
      */
     switch (interpreter->run_core) {
         case PARROT_SWITCH_CORE:
+        case PARROT_SWITCH_JIT_CORE:
         case PARROT_CGP_CORE:
+        case PARROT_CGP_JIT_CORE:
             offset = (void **)dest - interpreter->code->prederef.code;
         default:
             offset = dest - interpreter->code->base.data;

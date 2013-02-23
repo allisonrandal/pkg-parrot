@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: modifiers.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: modifiers.t 12000 2006-03-24 03:45:10Z pmichaud $
 
 use strict;
 use warnings;
@@ -34,7 +34,6 @@ my $pre = <<PRE;
     load_bytecode "PGE/Dumper.pir"
     load_bytecode "PGE/Glob.pir"
     load_bytecode "PGE/Text.pir"
-    load_bytecode "PGE/Util.pir"
     .local string target
     .local string pattern
     .local string modifier

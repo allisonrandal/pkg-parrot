@@ -1,7 +1,7 @@
 /* settings.h
  *  Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: settings.h 7506 2005-01-25 14:47:33Z leo $
+ *  SVN Info
+ *     $Id: settings.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Overall settings for Parrot
  *  Data Structure and Algorithms:

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_call.c 11656 2006-02-19 00:23:04Z rgrjr $
+$Id: inter_call.c 11896 2006-03-14 12:19:16Z leo $
 
 =head1 NAME
 
@@ -1115,22 +1115,6 @@ parrot_pass_args(Interp *interpreter,  parrot_context_t *src_ctx,
     } else {
         if (!PARROT_ERRORS_test(interpreter, PARROT_ERRORS_PARAM_COUNT_FLAG))
             err_check = 0;
-    }
-    if (src_pc && (src_pc[-3] == PARROT_OP_tailcallmethod_p_sc ||
-            src_pc[-3] == PARROT_OP_tailcallmethod_p_s)) {
-        /*
-         * If we have this sequence:
-         *
-         * tailcallmethod_p_s?
-         * set_returns_pc '()'
-         * return_cc
-         *
-         * we are returning 1 retval to caller on behalf
-         * of the NCI (a PIR method had already returned
-         * all and doesn't run anything after the
-         * tailcall - ignore arg_count
-         */
-        err_check = 0;
     }
     process_args(interpreter, &st, action, err_check);
 

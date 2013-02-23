@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: vtables.c 7616 2005-03-09 14:52:01Z leo $
+$Id: vtables.c 11928 2006-03-18 17:43:35Z leo $
 
 =head1 NAME
 
@@ -41,6 +41,10 @@ Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable)>
 
 Clones C<*base_vtable> and returns a pointer to the new C<VTABLE>.
 
+=item C<void
+Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable)>
+
+Destroys C<*vtable>.
 =cut
 
 */
@@ -54,69 +58,46 @@ Parrot_clone_vtable(Parrot_Interp interpreter, const VTABLE *base_vtable) {
     return new_vtable;
 }
 
-/*
-
-=item C<void
-Parrot_vtable_set_type(Parrot_Interp interpreter, VTABLE *vtable, INTVAL type)>
-
-Sets the type of C<*vtable> to C<type>.
-
-=cut
-
-*/
-
-void
-Parrot_vtable_set_type(Parrot_Interp interpreter, VTABLE *vtable, INTVAL type) {
-    vtable->base_type = type;
-}
-
-/*
-
-=item C<void
-Parrot_vtable_set_name(Parrot_Interp interpreter, VTABLE *vtable,
-                       STRING *whoami)>
-
-Sets the name of C<*vtable> to C<*whoami>.
-
-=cut
-
-*/
-
-void
-Parrot_vtable_set_name(Parrot_Interp interpreter, VTABLE *vtable, STRING *whoami) {
-    vtable->whoami = whoami;
-}
-
-/*
-
-=item C<void
-Parrot_vtable_set_data(Parrot_Interp interpreter, VTABLE *vtable, void *stuff)>
-
-Sets the data of C<*vtable> to C<*stuff>.
-
-=cut
-
-*/
-
-void
-Parrot_vtable_set_data(Parrot_Interp interpreter, VTABLE *vtable, void *stuff) {
-    vtable->class = stuff;
-}
-
-/*
-
-=item C<void
-Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable)>
-
-Destroys C<*vtable>.
-
-=cut
-
-*/
 
 void
 Parrot_destroy_vtable(Parrot_Interp interpreter, VTABLE *vtable) {
     mem_sys_free(vtable);
+}
+
+void 
+parrot_alloc_vtables(Interp *interpreter)
+{
+    interpreter->vtables =
+        mem_sys_allocate_zeroed(sizeof(VTABLE *) * PARROT_MAX_CLASSES);
+    interpreter->n_vtable_max = enum_class_core_max;
+    interpreter->n_vtable_alloced = PARROT_MAX_CLASSES;
+}
+
+void 
+parrot_realloc_vtables(Interp *interpreter)
+{
+    /* 16 bigger seems reasonable, though it's only a pointer
+       table and we could get bigger without blowing much memory
+       */
+    INTVAL new_max = interpreter->n_vtable_alloced + 16;
+    INTVAL new_size = new_max * sizeof(VTABLE *);
+    INTVAL i;
+    interpreter->vtables = mem_sys_realloc(interpreter->vtables, new_size);
+    /* Should set all the empty slots to the null PMC's
+       vtable pointer */
+    for (i = interpreter->n_vtable_max; i < new_max; ++i)
+        interpreter->vtables[i] = NULL;
+    interpreter->n_vtable_alloced = new_max;
+}
+
+void 
+parrot_free_vtables(Interp *interpreter)
+{
+    int i;
+
+    for (i = 1; i < interpreter->n_vtable_max; i++)
+        Parrot_destroy_vtable(interpreter, interpreter->vtables[i]);
+    mem_sys_free(interpreter->vtables);
 }
 
 /*

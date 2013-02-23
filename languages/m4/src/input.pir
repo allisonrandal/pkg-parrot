@@ -1,4 +1,4 @@
-# $Id: input.pir 10280 2005-11-30 21:23:07Z bernhard $
+# $Id: input.pir 11903 2006-03-14 20:49:11Z bernhard $
 
 =head1 NAME 
 
@@ -7,7 +7,7 @@ input.pir - Setting up input and reading input
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer. All Rights Reserved.
-CVS Info:   $Id: input.pir 10280 2005-11-30 21:23:07Z bernhard $
+SVN Info:   $Id: input.pir 11903 2006-03-14 20:49:11Z bernhard $
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
 

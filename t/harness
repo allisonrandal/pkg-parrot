@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: harness 11226 2006-01-17 19:09:59Z bernhard $
+# $Id: harness 12047 2006-03-27 19:18:31Z bernhard $
 
 =head1 NAME
 
@@ -82,8 +82,10 @@ Emit a C<smoke.html> file instead of displaying results.
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
+
 use Getopt::Std;
 use Test::Harness();
+use English qw( -no_match_vars );
 use Parrot::Config qw/%PConfig/;
 
 
@@ -97,6 +99,9 @@ my $gc_debug = grep { $_ eq '--gc-debug' } @ARGV;
 
 my $html = grep { $_ eq '--html' } @ARGV;
 @ARGV = grep { $_ ne '--html' } @ARGV;
+
+my $run_exec = grep { $_ eq '--run-exec' } @ARGV;
+@ARGV = grep { $_ ne '--run-exec' } @ARGV;
 
 # Suck the short options into the TEST_PROG_ARGS evar:
 my %opts;
@@ -126,6 +131,8 @@ EOF
 my $args = join(' ', map { "-$_" } keys %opts );
 $args =~ s/-O/-O$opts{O}/ if $opts{O};
 $args .= ' --gc-debug'    if $gc_debug;
+# XXX find better way for passing run_exec to Parrot::Test
+$args .= ' --run-exec'    if $run_exec; 
 $ENV{TEST_PROG_ARGS} = $args;
 
 # Pass in a list of tests to run on the command line, else run all the tests.
@@ -147,6 +154,10 @@ my @default_tests = map {glob "t/$_/*.t"} qw( configure
                                               tools
                                               perl
                                               doc );
+# manifest.t was moved from t/perl to t/distro
+# codingstd.t was moved from t/perl to t/codingstd
+push @default_tests, 't/distro/manifest.t', 't/codingstd/cppcomments.t';
+
 my @tests = @ARGV ? map { glob( $_ ) } @ARGV : @default_tests;
 
 unless ($html) {
@@ -168,7 +179,7 @@ unless ($html) {
         require Test::TAP::HTMLMatrix;
         require Test::TAP::Model::Visual;
     };
-    die "You must have Test::TAP::HTMLMatrix installed.\n\n$@" if $@;
+    die "You must have Test::TAP::HTMLMatrix installed.\n\n$EVAL_ERROR" if $EVAL_ERROR;
 
     ## FIXME: ###
     # This is a temporary solution until Test::TAP::Model version

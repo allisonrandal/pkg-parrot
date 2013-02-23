@@ -1,7 +1,7 @@
 /* TclArray.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: tclarray.pmc 11474 2006-02-08 15:46:44Z coke $
+ *  SVN Info
+ *     $Id: tclarray.pmc 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     These are the vtable functions for the TclArray base class
  *  Data Structure and Algorithms:

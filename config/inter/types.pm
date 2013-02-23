@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: types.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: types.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':inter';
 
-$description = 'Determining what types Parrot should use...';
+$description = 'Determining what types Parrot should use';
 
 @args = qw(ask intval opcode floatval);
 

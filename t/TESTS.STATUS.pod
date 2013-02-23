@@ -1,4 +1,4 @@
-# $Id$
+# $Id: TESTS.STATUS.pod 11986 2006-03-22 19:22:29Z bernhard $
 
 =head1 Parrot Testing Status
 
@@ -171,6 +171,17 @@ I<seems> to run fine, giving a false sense of security.
 B<Fair>. Opcode documentation is well-tested, and Pod files are checked
 for standards-conformance, but many documentation tests are missing.
 Tests under B<t/doc>.
+
+=back
+
+=head3 Coding standard
+
+=over 4
+
+=item Status
+
+B<Poor>. In the test suite there is only F<t/codingstd/cppcomments.t>.
+There is also an unmaintained script F<tools/dev/check_source_standards.pl>.
 
 =back
 

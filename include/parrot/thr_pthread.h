@@ -1,7 +1,7 @@
 /* thr_pthread.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: thr_pthread.h 5911 2004-04-22 08:55:40Z leo $
+ *  SVN Info
+ *     $Id: thr_pthread.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     POSIS pthread interface
  *  Data Structure and Algorithms:

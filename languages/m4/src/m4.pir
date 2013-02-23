@@ -1,4 +1,4 @@
-# $Id: m4.pir 11181 2006-01-14 17:07:29Z jisom $
+# $Id: m4.pir 11903 2006-03-14 20:49:11Z bernhard $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ m4.pir - An implementation of GNU m4 in Parrot Intermediate Representation
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer.  All Rights Reserved.
-CVS Info:   $Id: m4.pir 11181 2006-01-14 17:07:29Z jisom $
+SVN Info:   $Id: m4.pir 11903 2006-03-14 20:49:11Z bernhard $
 Overview:   Main of Parrot m4.
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
@@ -46,7 +46,7 @@ Load needed libraries
 
 =cut
 
-.sub "__onload" @LOAD
+.sub "__onload" :load
 
   #load_bytecode "Getopt/Obj.pbc" 
   # load_bytecode "PGE.pbc"       
@@ -60,7 +60,7 @@ Looks at the command line arguments and acts accordingly.
 
 =cut
 
-.sub 'm4' @MAIN 
+.sub 'm4' :main 
   .param pmc argv
 
   # TODO: put this into '__onload'

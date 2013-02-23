@@ -1,7 +1,7 @@
 /* vtables.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: vtables.h 11139 2006-01-13 00:58:55Z jonathan $
+ *  SVN Info
+ *     $Id: vtables.h 11927 2006-03-18 16:24:50Z leo $
  *  Overview:
  *     Vtable manipulation code. Not to be confused with vtable.h
  *  Data Structure and Algorithms:
@@ -13,13 +13,13 @@
 #if !defined(PARROT_VTABLES_H_GUARD)
 #define PARROT_VTABLES_H_GUARD
 
-PARROT_API VTABLE *Parrot_new_vtable(Parrot_Interp);
-PARROT_API VTABLE *Parrot_clone_vtable(Parrot_Interp, const VTABLE *base_vtable);
-PARROT_API void Parrot_destroy_vtable(Parrot_Interp, VTABLE *vtable);
+PARROT_API VTABLE *Parrot_new_vtable(Interp*);
+PARROT_API VTABLE *Parrot_clone_vtable(Interp*, const VTABLE *base_vtable);
+PARROT_API void Parrot_destroy_vtable(Interp*, VTABLE *vtable);
 
-PARROT_API void Parrot_vtable_set_type(Parrot_Interp, VTABLE *, INTVAL);
-PARROT_API void Parrot_vtable_set_name(Parrot_Interp, VTABLE *, STRING *);
-PARROT_API void Parrot_vtable_set_data(Parrot_Interp, VTABLE *, void *);
+void parrot_alloc_vtables(Interp *);
+void parrot_realloc_vtables(Interp *);
+void parrot_free_vtables(Interp *);
 
 #endif /* PARROT_VTABLES_H_GUARD */
 

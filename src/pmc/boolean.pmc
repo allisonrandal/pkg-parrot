@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: boolean.pmc 11248 2006-01-18 20:02:15Z bernhard $
+$Id: boolean.pmc 12005 2006-03-24 15:19:48Z leo $
 
 =head1 NAME
 
@@ -55,7 +55,7 @@ XXX are these generally useful or should they be moved to src/py_func.c?
 
 /*
 
-=item C<PMC* instantiate()>
+=item C<PMC* instantiate(PMC* sig)>
 
 Object constructor. SELF is a Boolean Class object. Return a new
 C<bool> object according to the passed PMC value.
@@ -63,12 +63,13 @@ C<bool> object according to the passed PMC value.
 =cut
 
 */
-    PMC* instantiate() {
+    PMC* instantiate(PMC* sig) {
         /* XXX other types */
         int argcP = REG_INT(3);
         PMC *res = pmc_new(interpreter, enum_class_Boolean);
         if (argcP)
             PMC_int_val(res) = VTABLE_get_bool(interpreter, REG_PMC(5));
+        return PMCNULL; /* TODO */
         return res;
     }
 /*

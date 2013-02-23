@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: array_access.pir 11703 2006-02-22 13:35:12Z leo $
+# Copyright (C) 2001-2006 The Perl Foundation.  All rights reserved.
+# $Id: array_access.pir 11729 2006-02-24 19:20:28Z bernhard $
 
 =head1 NAME
 
@@ -29,10 +29,6 @@ Inspired by computer language shootout.
     getopts = new "Getopt::Obj"
     push getopts, "arr-size=i"
 
-    # Make a copy of argv, because this can easier be handled in get_options()
-    .local pmc argv_clone
-    argv_clone = clone argv
-
     .local pmc opt
     opt = getopts."get_options"(argv)
 
@@ -41,7 +37,7 @@ Inspired by computer language shootout.
     .local int def
     def = defined opt["arr-size"]
     unless def goto use_default_arr_size
-    arr_size = opt['arr-size']
+        arr_size = opt['arr-size']
 use_default_arr_size:
 
     _bench( .Array, arr_size )

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: register.c 11616 2006-02-17 03:31:57Z rgrjr $
+$Id: register.c 11882 2006-03-13 12:39:45Z leo $
 
 =head1 NAME
 
@@ -145,6 +145,11 @@ Allocate a new context and set the context pointer. Please note that the registe
 usage C<n_regs_used> is not copied, just the pointer is stored.
 The function returns the new context.
 
+=item C<parrot_context_t* Parrot_push_context(Interp *, INTVAL *n_regs_used)>
+
+Like above, remember old context in C<caller_ctx>, suitable to use with
+C<Parrot_pop_context>.
+
 =item C<parrot_context_t* Parrot_dup_context(Interp *, parrot_context_t*)>
 
 Like above but duplicate the passed context.
@@ -157,6 +162,11 @@ Mark the context as possible threshold.
 
 Free the context. If C<re_use> is true, this function is called by a
 return continuation invoke, else from the destructur of a continuation.
+
+=item C<void Parrot_pop_context(Interp *)>
+
+Free the context created with C<Parrot_push_context> and restore the previous
+context.
 
 =cut
 
@@ -226,9 +236,9 @@ init_context(Interp *interpreter, parrot_context_t *ctx, parrot_context_t *old)
     ctx->lex_pad = PMCNULL;
     ctx->outer_ctx = NULL;
     ctx->current_cont = NULL;
-    ctx->current_package = NULL; /* XXX unused except tests */
     ctx->current_method = NULL; /* XXX who clears it? */
     ctx->current_object = NULL; /* XXX who clears it?  */
+    ctx->current_HLL = 0;
     if (old) {
         /* some items should better be COW copied */
         ctx->constants = old->constants;
@@ -240,6 +250,8 @@ init_context(Interp *interpreter, parrot_context_t *ctx, parrot_context_t *old)
         ctx->trace_flags = old->trace_flags;
         ctx->runloop_level = old->runloop_level;
 	ctx->pred_offset = old->pred_offset;
+        ctx->current_HLL = old->current_HLL;
+        ctx->current_namespace = old->current_namespace;
         /* end COW */
         ctx->recursion_depth = old->recursion_depth;
     }
@@ -273,6 +285,33 @@ Parrot_dup_context(Interp *interpreter, struct Parrot_Context *old)
     interpreter->ctx.bp_ps.regs_s += diff;
     init_context(interpreter, ctx, old);
     return ctx;
+}
+
+struct Parrot_Context *
+Parrot_push_context(Interp *interpreter, INTVAL *n_regs_used)
+{
+    struct Parrot_Context *old, *ctx;
+
+    old = CONTEXT(interpreter->ctx);
+    ctx = Parrot_alloc_context(interpreter, n_regs_used);
+    ctx->caller_ctx = old;
+    ctx->current_sub = old->current_sub;  /* doesn't change */
+    /* copy more ? */
+    return ctx;
+}
+
+void
+Parrot_pop_context(Interp *interpreter)
+{
+    struct Parrot_Context *old, *ctx;
+    ctx = CONTEXT(interpreter->ctx);
+    old = ctx->caller_ctx;
+
+    Parrot_free_context(interpreter, ctx, 1);
+    /* restore old, set cached interpreter base pointers */
+    CONTEXT(interpreter->ctx) = old;
+    interpreter->ctx.bp = old->bp;
+    interpreter->ctx.bp_ps = old->bp_ps;
 }
 
 struct Parrot_Context *

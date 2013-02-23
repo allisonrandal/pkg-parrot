@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: jit.pm 12088 2006-04-01 18:44:06Z mdiep $
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Config;
 use Parrot::Configure::Step qw(copy_if_diff cc_gen cc_clean cc_build cc_run);
 
-$description = "Determining architecture, OS and JIT capability...";
+$description = 'Determining architecture, OS and JIT capability';
 
 @args = qw(jitcapable miniparrot execcapable verbose);
 
@@ -52,7 +52,11 @@ sub runstep
     # the above split fails because archname is "darwin-thread-multi-2level".
     if ($cpuarch =~ /darwin/) {
         $osname  = 'darwin';
-        $cpuarch = 'ppc';
+        if ($conf->data->get('byteorder') == 1234) {
+            $cpuarch = 'i386';
+        } else {
+            $cpuarch = 'ppc';
+        }
     } elsif ($cpuarch =~ /MSWin32/) {
         $cpuarch = 'i386';
         $osname  = 'MSWin32';

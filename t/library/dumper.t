@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: dumper.t 11602 2006-02-16 22:15:36Z leo $
+# $Id: dumper.t 12043 2006-03-27 13:02:27Z leo $
 
 use strict;
 use warnings;
@@ -346,7 +346,7 @@ CODE
 "VAR1" => PerlArray (size:2) [
     "test1",
     "test2"
-] with-properties: PerlHash {
+] with-properties: Hash {
     "key1" => "value1",
     "key2" => "value2"
 }
@@ -399,7 +399,7 @@ CODE
 |  |  "test2" => "test2"
 |  },
 |  "test1" => "test1"
-} with-properties: PerlHash {
+} with-properties: Hash {
 |  "array2" => \hash["hash2"]["array"][1]
 }
 "hash" => PerlHash {
@@ -413,7 +413,7 @@ CODE
 |  |  "test2" => "test2"
 |  },
 |  "test1" => "test1"
-} with-properties: PerlHash {
+} with-properties: Hash {
 |  "array2" => \hash["hash2"]["array"][1]
 }
 name = 'hash'
@@ -436,7 +436,7 @@ pir_output_is(<<'CODE', <<'OUT', "back-referencing properties");
 CODE
 "VAR1" => PerlHash {
     "hello" => "world"
-} with-properties: PerlHash {
+} with-properties: Hash {
     "backref" => \VAR1
 }
 OUT
@@ -451,6 +451,7 @@ pir_output_is(<<'CODE', <<'OUT', "self-referential properties (1)");
     new hash, .PerlHash
 
     set hash["hello"], "world"
+    setprop hash, "self", hash
     prophash prop, hash
     setprop hash, "self", prop
     _dumper( hash )
@@ -459,7 +460,7 @@ pir_output_is(<<'CODE', <<'OUT', "self-referential properties (1)");
 CODE
 "VAR1" => PerlHash {
     "hello" => "world"
-} with-properties: PerlHash {
+} with-properties: Hash {
     "self" => \VAR1.properties()
 }
 OUT
@@ -479,6 +480,7 @@ pir_output_is(<<'CODE', <<'OUT', "self-referential properties (2)");
 
     set hash1["hello1"], "world1"
     set hash2["hello2"], "world2"
+    setprop hash1, "das leben", hash2
     prophash prop, hash1
     set prop["das leben"], "ist schoen"
     setprop hash2, "hash1prop", prop
@@ -494,12 +496,12 @@ CODE
 "VAR1" => PerlArray (size:4) [
     PerlHash {
         "hello1" => "world1"
-    } with-properties: PerlHash {
+    } with-properties: Hash {
         "das leben" => "ist schoen"
     },
     PerlHash {
         "hello2" => "world2"
-    } with-properties: PerlHash {
+    } with-properties: Hash {
         "hash1prop" => \VAR1[0].properties()
     },
     \VAR1[0].properties(),
@@ -528,7 +530,7 @@ pir_output_is(<<'CODE', <<'OUT', "dumping objects");
 
 .namespace ["TestClass"]
 
-.sub __dump method
+.sub __dump :method
     .param pmc dumper
     .param string dname
     .local string subindent
@@ -933,14 +935,14 @@ pir_output_is(<<'CODE', <<'OUTPUT', "custom dumper");
 .end
 
 .namespace ["bar"]
-.sub __init method
+.sub __init :method
     .local pmc ar
     ar = getattribute self, '__value'
     push ar, 1
     push ar, 2
 .end
 
-.sub __dump method
+.sub __dump :method
     .param pmc dumper
     .param string label
     print " __value => {\n"

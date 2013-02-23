@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: pack.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: pack.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step;
 use Config;
 
-$description = "Figuring out how to pack() Parrot's types...";
+$description = q{Figuring out how to pack() Parrot's types};
 
 @args = ();
 

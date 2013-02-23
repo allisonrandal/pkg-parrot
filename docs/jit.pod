@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: jit.pod 11674 2006-02-20 06:31:06Z jhoblitt $
+# $Id: jit.pod 11712 2006-02-23 18:35:01Z rafl $
 
 =head1 NAME
 

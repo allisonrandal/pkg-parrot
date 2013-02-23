@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: jit_debug_xcoff.c 10754 2005-12-29 01:19:55Z particle $
+$Id: jit_debug_xcoff.c 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -60,7 +60,7 @@ typedef struct {
 
 /*
 
-=item C<static void write_types(FILE *stabs)>
+=item C<static void write_types(FILE *stabs, Interp *interpreter)>
 
 Writes the types to C<stabs>.
 
@@ -69,7 +69,7 @@ Writes the types to C<stabs>.
 */
 
 static void
-write_types(FILE *stabs)
+write_types(FILE *stabs, Interp *interpreter)
 {
     int i, j;
     /* borrowed from mono */
@@ -130,9 +130,9 @@ write_types(FILE *stabs)
                 );
 
     fprintf(stabs, ".stabx \"PMCType:T%d=e", i++);
-    for (j = 0; j < enum_class_max; ++j) {
-        if (Parrot_base_vtables[j] && Parrot_base_vtables[j]->whoami) {
-            STRING* name = Parrot_base_vtables[j]->whoami;
+    for (j = 0; j < interpreter->n_vtable_max; ++j) {
+        if (interpreter->vtables[j] && interpreter->vtables[j]->whoami) {
+            STRING* name = interpreter->vtables[j]->whoami;
             fwrite(name->strstart, name->strlen, 1, stabs);
             fprintf(stabs, ":%d,", j);
         }
@@ -304,7 +304,7 @@ Parrot_jit_debug_stabs(Interp *interpreter)
     fprintf(stabs, ".function .jit_func,.jit_func,0,0\n" );
     fprintf(stabs, ".bf 1\n" );
 
-    write_types(stabs);
+    write_types(stabs, interpreter);
     write_vars(stabs, interpreter);
     /* if we don't have line numbers, emit dummys, assuming there are
      * no comments and spaces in source for testing

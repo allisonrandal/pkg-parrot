@@ -1,6 +1,6 @@
 VERSION
 -------
-$Id: README.BASIC 5482 2004-02-29 13:19:06Z leo $
+$Id: README.BASIC 11903 2006-03-14 20:49:11Z bernhard $
 
 DESCRIPTION
 -----------
@@ -9,7 +9,7 @@ entirely in Parrot bytecode.  The NOTES below are intended for Parrot
 developers.
 
 This README will always reflect the *current* state of things.  You can 
-find the most recent version of BASIC in the Parrot CVS repository.
+find the most recent version of BASIC in the Parrot SVN repository.
 
 This BASIC is of the fairly old school.  Line numbers are required, and
 the following keywords are recognized:

@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: pic.c 11572 2006-02-16 08:25:56Z leo $
+$Id: pic.c 11736 2006-02-25 10:39:18Z leo $
 
 =head1 NAME
 
@@ -253,7 +253,7 @@ parrot_pic_opcode(Interp *interpreter, INTVAL op)
     op_lib_t *cg_lib;
 #endif
 
-    if (core == PARROT_SWITCH_CORE)
+    if (core == PARROT_SWITCH_CORE || core == PARROT_SWITCH_JIT_CORE)
         return (void*) op;
 #ifdef HAVE_COMPUTED_GOTO
     cg_lib = PARROT_CORE_CGP_OPLIB_INIT(1);
@@ -605,7 +605,7 @@ parrot_PIC_prederef(Interp *interpreter, opcode_t op, void **pc_pred, int core)
     /*
      * rewrite opcode
      */
-    if (core == PARROT_SWITCH_CORE)
+    if (core == PARROT_SWITCH_CORE || core == PARROT_SWITCH_JIT_CORE)
         *pc_pred = (void**) op;
     else
         *pc_pred = ((void **)prederef_op_func)[op];

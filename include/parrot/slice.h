@@ -1,7 +1,7 @@
 /* slice.h
  *  Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: slice.h 6351 2004-07-09 16:39:01Z leo $
+ *  SVN Info
+ *     $Id: slice.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the api header for slices.
  *  Data Structure and Algorithms:

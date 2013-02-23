@@ -1,7 +1,7 @@
 /* autoprefix.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: autoprefix.h 6520 2004-08-09 21:53:50Z dan $
+ *  SVN Info
+ *     $Id: autoprefix.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     provide Parrot_ prefixes for functions that don't have them
  *  Data Structure and Algorithms:

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrotio.pmc 11628 2006-02-17 16:17:17Z leo $
+$Id: parrotio.pmc 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -42,7 +42,7 @@ as class method
 */
 
     METHOD INTVAL say(STRING *s) {
-        PMC *out = SELF == Parrot_base_vtables[enum_class_ParrotIO]->class ?
+        PMC *out = SELF == interpreter->vtables[enum_class_ParrotIO]->class ?
             PIO_STDOUT(INTERP) : SELF;
         INTVAL r = PIO_putps(INTERP, out, s);
         r  += PIO_puts(INTERP, out, "\n");

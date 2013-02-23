@@ -1,10 +1,11 @@
-# $Id: pge.in 11115 2006-01-12 04:06:05Z jhoblitt $
+# $Id: pge.in 11999 2006-03-23 22:04:50Z pmichaud $
 
 # Setup some commands
 LN_S     = @lns@
 PERL     = @perl@
 RM_RF    = @rm_rf@
 PARROT   = ..@slash@..@slash@parrot@exe@
+TOOL_DIR = ..@slash@..
 CP       = @cp@
 
 # Where to put things
@@ -16,9 +17,11 @@ all: $(PARROT_LIBRARY)@slash@PGE.pbc
 $(PARROT_LIBRARY)@slash@PGE.pbc: PGE.pbc
 	$(CP) PGE.pbc $(PARROT_LIBRARY)
 
-PGE.pbc: PGE.pir PGE/Exp.pir PGE/Match.pir PGE/Rule.pir PGE/P6Rule.pir PGE/TokenHash.pir PGE/OPTable.pir PGE/P5Regexp.pir mklib.pir library.pge
-	$(PARROT) mklib.pir >PGE/Library.pir
-	$(PARROT) -o PGE.pbc --output-pbc PGE.pir 
+PGE.pbc: PGE.pir PGE/Exp.pir PGE/Match.pir PGE/Rule.pir PGE/P6Rule.pir PGE/OPTable.pir PGE/P5Regexp.pir rulec.pir library.pge
+	$(PERL) -e "" >PGE/Library.pir
+	$(PARROT) -o PGE.pbc --output-pbc PGE.pir
+	$(PARROT) rulec.pir  --output=PGE/Library.pir library.pge
+	$(PARROT) -o PGE.pbc --output-pbc PGE.pir
 
 # This is a listing of all targets, that are meant to be called by users
 help:
@@ -41,7 +44,7 @@ help:
 	@echo ""
 
 test: all
-	prove -r ../../t/compilers/pge
+	cd $(TOOL_DIR); prove -r t/compilers/pge
 
 testclean:
 	$(RM_RF) "../../t/compilers/pge/*.pir" \
@@ -50,8 +53,8 @@ testclean:
 	$(RM_RF) "../../t/compilers/pge/*.pbc" \
 	    "../../t/compilers/pge/p5regexp/*.pbc" \
 	    "../../t/compilers/pge/p6rules/*.pbc"
-	$(RM_RF) "../../t/p6rules/*.pir" 
-	$(RM_RF) "../../t/p6rules/*.pbc" 
+	$(RM_RF) "../../t/p6rules/*.pir"
+	$(RM_RF) "../../t/p6rules/*.pbc"
 
 clean: testclean
 	$(RM_RF) PGE.pbc $(PARROT_LIBRARY)@slash@PGE.pbc PGE/Library.pir

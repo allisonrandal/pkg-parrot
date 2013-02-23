@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: string.c 11042 2006-01-10 16:51:12Z leo $
+$Id: string.c 12070 2006-03-29 12:37:38Z leo $
 
 =head1 NAME
 
@@ -109,14 +109,7 @@ Copies the string header from the first Parrot string to the second.
 static void
 copy_string_header(Interp *interpreter, String *dest, String *src)
 {
-#if ! DISABLE_GC_DEBUG
-    UINTVAL vers;
-    vers= PObj_version(dest);
-#endif
     memcpy(dest, src, sizeof(String));
-#if ! DISABLE_GC_DEBUG
-    PObj_version(dest) = vers;
-#endif
 }
 
 /*
@@ -142,6 +135,11 @@ Parrot_make_COW_reference(Interp *interpreter, STRING *s)
         d = new_string_header(interpreter, 0);
         PObj_COW_SET(s);
         copy_string_header(interpreter, d, s);
+        /* we can't move the memory, because constants aren't
+         * scanned in compact_pool, therefore the other end
+         * would point to garbage.
+         */
+        PObj_external_SET(d);
     }
     else {
         d = new_string_header(interpreter, PObj_get_FLAGS(s));
@@ -174,6 +172,7 @@ Parrot_reuse_COW_reference(Interp *interpreter, STRING *s, STRING *d)
         PObj_COW_SET(s);
         copy_string_header(interpreter, d, s);
         PObj_constant_CLEAR(d);
+        PObj_external_SET(d);
     }
     else {
         PObj_COW_SET(s);
@@ -288,9 +287,12 @@ string_init(Parrot_Interp interpreter)
 void
 string_deinit(Parrot_Interp interpreter)
 {
-    mem_sys_free(interpreter->const_cstring_table);
-    interpreter->const_cstring_table = NULL;
-    Parrot_charsets_encodings_deinit(interpreter);
+    /* all are shared between interpreters */
+    if (!interpreter->parent_interpreter) {
+        mem_sys_free(interpreter->const_cstring_table);
+        interpreter->const_cstring_table = NULL;
+        Parrot_charsets_encodings_deinit(interpreter);
+    }
 }
 
 /*
@@ -368,6 +370,11 @@ CHARSET *
 string_rep_compatible (Interp *interpreter, STRING *a, const STRING *b,
         ENCODING **e)
 {
+    if (a->encoding == b->encoding && a->charset == b->charset) {
+        *e = a->encoding;
+        return a->charset;
+    }
+            
     /*
      * a table could possibly simplify the logic
      */
@@ -2570,6 +2577,7 @@ string_upcase_inplace(Interp *interpreter, STRING *s)
 {
     if (!s)
         return;
+    Parrot_unmake_COW(interpreter, s);
     CHARSET_UPCASE(interpreter, s);
 }
 
@@ -2613,6 +2621,13 @@ string_downcase_inplace(Interp *interpreter, STRING *s)
 {
     if (!s)
         return;
+    /*
+     * TODO get rid of all the inplace variants. We have for utf8:
+     * * 1 string_copy from the non-incase variant
+     * * conversion to utf16, with doubling the buffer
+     * * possibly one more reallocation in downcase
+     */
+    Parrot_unmake_COW(interpreter, s);
     CHARSET_DOWNCASE(interpreter, s);
 }
 
@@ -2656,6 +2671,7 @@ string_titlecase_inplace(Interp *interpreter, STRING *s)
 {
     if (!s)
         return;
+    Parrot_unmake_COW(interpreter, s);
     CHARSET_TITLECASE(interpreter, s);
 }
 
@@ -2676,6 +2692,7 @@ string_increment(Interp *interpreter, const STRING *s)
 
     if (string_length(interpreter, s) != 1)
         internal_exception(1, "increment only for length=1 done");
+
     o = string_ord(interpreter, s, 0);
     if ((o >= 'A' && o < 'Z') ||
             (o >= 'a' && o < 'z')) {
@@ -2791,6 +2808,7 @@ Parrot_string_trans_charset(Interp *interpreter, STRING *src,
         if (new_charset == src->charset) {
             return src;
         }
+        Parrot_unmake_COW(interpreter, src);
     }
     return new_charset->to_charset(interpreter, src, dest);
 }
@@ -2822,6 +2840,7 @@ Parrot_string_trans_encoding(Interp *interpreter, STRING *src,
         if (new_encoding == src->encoding) {
             return src;
         }
+        Parrot_unmake_COW(interpreter, src);
     }
     return new_encoding->to_encoding(interpreter, src, dest);
 }

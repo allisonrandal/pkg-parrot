@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: sub.pmc 11613 2006-02-17 02:40:57Z particle $
+$Id: sub.pmc 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -24,42 +24,15 @@ These are the vtable functions for the Sub (subroutine) base class
 #include <assert.h>
 
 static void
-clear_fixup(Interp* interpreter, PMC* self)
-{
-    opcode_t i, ci;
-    struct PackFile_ByteCode *seg;
-    struct PackFile_FixupTable *ft;
-    struct PackFile_ConstTable *ct;
-
-    seg = PMC_sub(self)->seg;
-    if (!seg)
-        return;
-    ft = seg->fixups;
-    if (!ft)
-        return;
-    ct = seg->const_table;
-    if (!ct)
-        return;
-    for (i = 0; i < ft->fixup_count; i++) {
-        switch (ft->fixups[i]->type) {
-            case enum_fixup_sub:
-                ci = ft->fixups[i]->offset;
-                if (ct->constants[ci]->u.key == self) {
-                    ct->constants[ci]->u.key = NULL;
-                    ft->fixups[i]->type = 0;
-                    break;
-                }
-
-        }
-    }
-}
-
-static void
 print_sub_name(Interp* interpreter, PMC* sub)
 {
+    Interp *tracer;
+
+    tracer = interpreter->debugger ? 
+        interpreter->debugger : interpreter;
 
         /* sub was located via globals */
-    PIO_eprintf(interpreter, "# Calling sub '%Ss'\n# ",
+    PIO_eprintf(tracer, "# Calling sub '%Ss'\n# ",
         Parrot_full_sub_name(interpreter, sub));
     print_pbc_location(interpreter);
 }
@@ -130,7 +103,6 @@ Destroys the subroutine.
                     n && n->strstart ? (char*)n->strstart : "???");
         }
 #endif
-        clear_fixup(INTERP, SELF);
         mem_sys_free(sub);
         PMC_struct_val(SELF) = NULL;
     }
@@ -311,7 +283,7 @@ Invokes the subroutine.
         sub->ctx = context;
         if (PObj_get_FLAGS(SELF) & SUB_FLAG_IS_OUTER) {
             /* don't destroy context */
-            ccont->vtable = Parrot_base_vtables[enum_class_Continuation];
+            ccont->vtable = interpreter->vtables[enum_class_Continuation];
             context->ref_count++;
         }
 
@@ -322,6 +294,10 @@ Invokes the subroutine.
             INTERP->current_method = NULL;
         }
         context->current_HLL = sub->HLL_id;
+        if (sub->namespace_stash) {
+            /* :anon sub don't have it */
+            context->current_namespace = sub->namespace_stash;
+        }
         /* create pad if needed
          * TODO move this up in front of argument passing
          *      and factor out common code with coroutine pmc
@@ -537,8 +513,9 @@ Unarchives the subroutine.
 
 =item C<METHOD PMC* get_namespace()>
 
-Return the namespace PMC or Undef. The namespace PMC is either a
-String PMC or a Key PMC for a nested namespace.
+Return the namespace PMC, where the Sub is defined. 
+
+TODO return C<namespace_stash> instead.
 
 =item C<METHOD INTVAL __get_regs_used(char *kind)>
 
@@ -548,6 +525,10 @@ Return amount of used registers for register kinds "I", "S", "P", "N".
 
 Return the LexInfo PMC, if any or a Null PMC.
 
+=item C<METHOD PMC* get_multisig()>
+
+Return the MMD signature PMC, if any or a Null PMC.
+
 =cut
 
 */
@@ -556,8 +537,7 @@ Return the LexInfo PMC, if any or a Null PMC.
     METHOD PMC* get_namespace() {
         struct Parrot_sub * sub = PMC_sub(SELF);
 
-        return PMC_IS_NULL(sub->namespace) ?
-            pmc_new(INTERP, enum_class_Undef) : sub->namespace;
+        return sub->namespace_stash;
     }
 
     METHOD INTVAL __get_regs_used(char *kind) {
@@ -589,6 +569,10 @@ Return the LexInfo PMC, if any or a Null PMC.
         return sub->outer_sub ? sub->outer_sub : PMCNULL;
     }
 
+    METHOD PMC* get_multisig() {
+        struct Parrot_sub * sub = PMC_sub(SELF);
+        return sub->multi_signature ? sub->multi_signature : PMCNULL;
+    }
 }
 
 /*

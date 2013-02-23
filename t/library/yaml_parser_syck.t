@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: yaml_parser_syck.t 11563 2006-02-16 00:42:07Z jisom $
+# $Id: yaml_parser_syck.t 11755 2006-02-27 01:02:12Z chromatic $
 
 use strict;
 use warnings;
@@ -32,7 +32,7 @@ TODO: {
 
 .include "library/YAML/Parser/Syck.pir"
 .include "library/dumper.pir"
-.sub test @MAIN 
+.sub test :main
 
   .local pmc loaded 
   ( loaded ) = load( "---\n- key1: val1\n  key2: val2\n- elem1\n- elem12\n- elem123\n- elem1234\n- elem12345\n- elem123456\n- elem1234567\n- elem12345678\n" )

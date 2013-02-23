@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ParrotCompiler.pm 7836 2005-04-15 08:39:07Z jrieks $
+# $Id: ParrotCompiler.pm 12039 2006-03-26 19:46:16Z bernhard $
 
 use strict;
 
@@ -49,8 +49,7 @@ sub gen_output
   my $test_prog_args = $ENV{TEST_PROG_ARGS} || '';
   my $cmd = "$self->{parrot} languages/parrot_compiler/$test_prog_args < languages/$code_f";
 
-  my $parrotdir       = File::Basename::dirname( $self->{parrot} );
-  Parrot::Test::generate_code( $code, $parrotdir, $test_no, $code_f );
+  Parrot::Test::write_code_to_file( $code, $code_f );
 
   # STDERR is written into same output file
   my $diag = '';

@@ -1,4 +1,4 @@
-# $Id: editor.in 11115 2006-01-12 04:06:05Z jhoblitt $
+# $Id: editor.in 11835 2006-03-09 14:12:00Z particle $
 
 OPS_DIR     = ../src/ops
 VIM_DIR     = $(HOME)/.vim
@@ -31,12 +31,13 @@ help :
 	@echo "  realclean:         clean up local files including Makefile"
 	@echo ""
 
-pir.vim: pir.vim.in $(OPS_DIR)/*.ops
+pir.vim: pir.vim.in $(OPS_DIR)/*.ops ops2vim.pl
 	$(CP) pir.vim.in pir.vim
 	$(PERL) ops2vim.pl $(OPS_DIR)/*.ops >> pir.vim
 
 vim-install: pir.vim
 	$(MKDIR) $(VIM_DIR)
+	$(CP) skeleton.pir $(VIM_DIR)
 	$(MKDIR) $(VIM_SYN_DIR)
 	$(CP) pir.vim $(VIM_SYN_DIR)
 	$(CP) pasm.vim $(VIM_SYN_DIR)

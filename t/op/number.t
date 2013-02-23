@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: number.t 11477 2006-02-09 05:17:54Z particle $
+# $Id: number.t 11960 2006-03-21 12:58:52Z leo $
 
 use strict;
 use warnings;
@@ -1086,8 +1086,12 @@ pasm_output_is(<<'CODE', <<OUTPUT, "sqrt_n_n");
 	sqrt N2, N1
 	print N2
 	print "\n"
+	sqrt N2, 2.0
+	print N2
+	print "\n"
 	end
 CODE
+1.414214
 1.414214
 OUTPUT
 

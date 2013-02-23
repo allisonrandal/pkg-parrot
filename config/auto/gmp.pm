@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: gmp.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: gmp.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Config;
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining if your platform supports GMP...";
+$description = 'Determining if your platform supports GMP';
 
 @args = qw(verbose);
 
@@ -45,11 +45,7 @@ sub runstep
         $conf->data->add(' ', libs => '-lgmp');
     }
 
-    my $archname = $Config{archname};
-    my ($cpuarch, $osname) = split('-', $archname);
-    if (!defined $osname) {
-        ($osname, $cpuarch) = ($cpuarch, "");
-    }
+    my $osname = $Config{osname};
 
     # On OS X check the presence of the gmp header in the standard
     # Fink location. TODO: Need a more generalized way for finding

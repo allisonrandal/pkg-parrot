@@ -1,7 +1,7 @@
 /* utf8.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: utf8.h 7583 2005-03-01 17:25:47Z leo $
+ *  SVN Info
+ *     $Id: utf8.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the header for the utf8 variable-width encoding.
  *  Data Structure and Algorithms:

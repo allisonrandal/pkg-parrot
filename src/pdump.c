@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pdump.c 10572 2005-12-18 22:51:26Z leo $
+$Id: pdump.c 12076 2006-03-29 22:22:22Z bernhard $
 
 =head1 NAME
 
@@ -209,8 +209,9 @@ main(int argc, char **argv)
     if (argc < 2) {
         help();
     }
-    interpreter = make_interpreter(NULL, PARROT_NO_FLAGS);
-    Parrot_init(interpreter);
+    interpreter = Parrot_new(NULL);
+    /* init and set top of stack */
+    Parrot_init_stacktop(interpreter, &status);
     while ((status = longopt_get(interpreter,
                     argc, argv, options, &opt)) > 0) {
         switch (opt.opt_id) {

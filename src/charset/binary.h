@@ -1,7 +1,7 @@
 /* binary.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: binary.h 9388 2005-10-07 11:25:43Z leo $
+ *  SVN Info
+ *     $Id: binary.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the header for the binary charset functions
  *  Data Structure and Algorithms:

@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: basic.t 11675 2006-02-20 08:00:49Z fperrad $
+# $Id: basic.t 11995 2006-03-23 09:40:07Z fperrad $
 
 =head1 NAME
 
@@ -21,12 +21,18 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 20;
+use Parrot::Test tests => 25;
 use Test::More;
 
-language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function assert(false, msg)");
-assert("text", "assert string")
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function assert");
+v, msg = assert("text", "assert string")
+print(v, msg)
 assert({}, "assert table")
+CODE
+text	assert string
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function assert(false, msg)");
 assert(false, "ASSERTION TEST")
 CODE
 /ASSERTION TEST/
@@ -47,10 +53,7 @@ OUTPUT
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function ipairs");
 a = {"a","b","c"}
 local f, v, s = ipairs(a)
-if type(f) == type(type) then print "ok" end
-if a == v then print "ok" end
-print(s)
--- print(type(f), type(v), s)
+print(type(f), type(v), s)
 s, v = f(a, s)
 print(s, v)
 s, v = f(a, s)
@@ -60,9 +63,7 @@ print(s, v)
 s, v = f(a, s)
 print(s, v)
 CODE
-ok
-ok
-0
+function	table	0
 1	a
 2	b
 3	c
@@ -89,10 +90,7 @@ OUTPUT
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function pairs");
 a = {"a","b","c"}
 local f, v, s = pairs(a)
-if type(f) == type(type) then print "ok" end
-if a == v then print "ok" end
-print(s)
--- print(type(f), type(v), s)
+print(type(f), type(v), s)
 s = f(v, s)
 print(s)
 s = f(v, s)
@@ -102,9 +100,7 @@ print(s)
 s = f(v, s)
 print(s)
 CODE
-ok
-ok
-nil
+function	table	nil
 1
 2
 3
@@ -131,6 +127,51 @@ CODE
 /value expected/
 OUTPUT
 
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function rawequal (true)");
+t = {}
+a = t
+print(rawequal(nil, nil))
+print(rawequal(false, false))
+print(rawequal(3, 3))
+print(rawequal("text", "text"))
+print(rawequal(t, a))
+print(rawequal(print, print))
+CODE
+true
+true
+true
+true
+true
+true
+OUTPUT
+
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function rawequal (false)");
+t = {}
+print(rawequal(nil, 2))
+print(rawequal(false, true))
+print(rawequal(false, 2))
+print(rawequal(3, 2))
+print(rawequal(3, "2"))
+print(rawequal("text", "2"))
+print(rawequal("text", 2))
+print(rawequal(t, {}))
+print(rawequal(t, 2))
+print(rawequal(print, format))
+print(rawequal(print, 2))
+CODE
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+OUTPUT
+
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function rawget");
 t = {a = "letter a", b = "letter b"}
 print(rawget(t, "a"))
@@ -146,19 +187,43 @@ CODE
 letter a
 OUTPUT
 
+language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function select");
+print(select("#"))
+print(select("#","a","b","c"))
+print(select(1,"a","b","c"))
+print(select(3,"a","b","c"))
+print(select(5,"a","b","c"))
+CODE
+0
+3
+a	b	c
+c
+
+OUTPUT
+
+language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function select (out of range)");
+print(select(0,"a","b","c"))
+CODE
+/index out of range/
+OUTPUT
+
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function type");
 print(type("Hello world"))
 print(type(10.4*3))
--- print(type(print))
--- print(type(type))
+print(type(print))
+print(type(type))
 print(type(true))
 print(type(nil))
+print(type(io.stdin))
 print(type(type(X)))
 CODE
 string
 number
+function
+function
 boolean
 nil
+userdata
 string
 OUTPUT
 
@@ -169,11 +234,13 @@ print(type(a))
 a = "a string!!"
 print(type(a))
 a = print
--- a(type(a))
+a(type(a))
+--print(type(function () end))
 CODE
 nil
 number
 string
+function
 OUTPUT
 
 language_output_like( 'lua', << 'CODE', << 'OUTPUT', "function type (no arg)");
@@ -248,11 +315,15 @@ print(unpack{})
 print(unpack{"a"})
 print(unpack{"a","b","c"})
 print((unpack{"a","b","c"}))
+print(unpack({"a","b","c","d","e"},2,4))
+print(unpack({"a","b","c"},2,4))
 CODE
 
 a
 a	b	c
 a
+b	c	d
+b	c	nil
 OUTPUT
 
 language_output_is( 'lua', << 'CODE', << 'OUTPUT', "function xpcall");

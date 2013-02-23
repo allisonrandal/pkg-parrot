@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Lua.pm 11117 2006-01-12 07:07:11Z fperrad $
+# $Id: Lua.pm 12039 2006-03-26 19:46:16Z bernhard $
 
 package Parrot::Test::Lua;
 
@@ -72,7 +72,7 @@ foreach my $func ( keys %language_test_map ) {
 
         # This does not create byte code, but lua code
         my $parrotdir       = dirname( $self->{parrot} );
-        Parrot::Test::generate_code( $code, $parrotdir, $count, $lang_fn );
+        Parrot::Test::write_code_to_file( $code, $lang_fn );
 
         # STDERR is written into same output file
         my $exit_code = Parrot::Test::run_command(
@@ -109,7 +109,7 @@ Mostly taken from F<languages/bc/lib/Parrot/Test/Bc.pm>.
 
 =head1 SEE ALSO
 
-F<languages/tcl/t/Parrot/Test/Tcl.pm>, F<languages/m4/lib/Parrot/Test/m4.pm>
+F<languages/tcl/lib/Parrot/Test/Tcl.pm>, F<languages/m4/lib/Parrot/Test/M4.pm>
 
 =head1 AUTHOR
 

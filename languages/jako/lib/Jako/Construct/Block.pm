@@ -120,7 +120,7 @@ sub set_symbol
   confess "Extra arguments!" if @_;
 
   die "Redefinition of symbol '$name', which was defined earlier in this block!" if $self->get_symbol($name);
-  warn "Definition of symbol '$name' shadows definition in parent block!" if $self->find_symbol($name);
+#  warn "Definition of symbol '$name' shadows definition in parent block!" if $self->find_symbol($name);
 
   $self->{SYMBOLS}{$name} = $sym;
 }
@@ -459,7 +459,7 @@ __END__
 
 =head1 VERSION
 
-$Id: Block.pm 10644 2005-12-24 18:06:41Z gregor $
+$Id: Block.pm 12028 2006-03-26 04:31:23Z gregor $
 
 =head1 AUTHOR
 

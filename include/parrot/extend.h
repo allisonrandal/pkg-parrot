@@ -1,7 +1,7 @@
 /* extend.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: extend.h 9641 2005-10-30 11:49:47Z rafl $
+ *  SVN Info
+ *     $Id: extend.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the Parrot extension mechanism, the face we present to
  *     extension modules and whatnot

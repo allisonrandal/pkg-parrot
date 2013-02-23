@@ -1,7 +1,7 @@
 /* caches.h
  *  Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: caches.h 9260 2005-09-28 16:00:42Z robert $
+ *  SVN Info
+ *     $Id: caches.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Cache and direct freelist handling for various items.
  *  Data Structure and Algorithms:

@@ -39,7 +39,7 @@ the one in the Parrot tree instead.
 
 Granted, it is possible to pass in Pugs's own library path into an
 environment variable (maybe C<PARROT_LIBS>?), but as this was not in
-the 0.3.0 release, I (autrijus) decided to take the easy route. :-)
+the 0.3.0 release, I (audreyt) decided to take the easy route. :-)
 
 =head1 CAVEATS
 
@@ -51,8 +51,8 @@ whole thing may be taken out or refactored away at any moment.
 .namespace [ "PGE::Hs" ]
 
 .const string PGE_FAIL = "PGE_Fail"
-.const string PGE_SUB_POS = "@:capt"
-.const string PGE_SUB_NAMED = "%:capt"
+.const string PGE_SUB_POS = "@!capt"
+.const string PGE_SUB_NAMED = "%!capt"
 
 .sub "__onload" :load
     .local pmc load
@@ -67,7 +67,8 @@ whole thing may be taken out or refactored away at any moment.
     find_global p6rule_compile, "PGE", "p6rule"
     null rulesub
     rulesub = p6rule_compile(pattern)
-    store_global name, rulesub
+    ## leo XXX need namespace
+    store_global "PGE::Rule", name, rulesub
 
     .return (name)
 .end

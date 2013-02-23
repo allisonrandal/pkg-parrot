@@ -1,6 +1,6 @@
 #!perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: closure.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: closure.t 11921 2006-03-18 00:48:00Z pmichaud $
 
 use strict;
 use warnings;
@@ -42,6 +42,25 @@ p6rule_like("123 any",
      }}}}",
      qr/foo/, "multi-line PASM closure");
 
+p6rule_like("abcdef",
+    ":lang(PIR) abc {{{{
+        .return (\"xyz\")
+     }}}}",
+    qr/xyz/, "PIR closure with return");
 
+p6rule_like("abcdef",
+    ":lang(PIR) abc {{{{
+        .return (\"xyz\")
+     }}}} ghi",
+    qr/xyz/, "PIR closure with return always succeeds");
+
+p6rule_like("1234xyz5678",
+    ":lang(PIR) 2\\d\\d {{{{
+        \$I0 = match
+        \$I0 += 123
+        .return (\$I0)
+     }}}} ghi",
+    qr/357/, "PIR closure modifying match");
+ 
 # remember to change the number of tests :-)
-BEGIN { plan tests => 3; }
+BEGIN { plan tests => 6; }

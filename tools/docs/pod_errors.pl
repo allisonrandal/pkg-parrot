@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: pod_errors.pl 5395 2004-02-24 20:44:37Z scog $
+# $Id: pod_errors.pl 11903 2006-03-14 20:49:11Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use lib 'lib';
 use Parrot::Docs::Directory;
 
 my $dir = Parrot::Docs::Directory->new(shift || '.');
-my $ignore = shift || '^(CVS|icu)$';
+my $ignore = shift || '^(icu)$';
 
 foreach my $file ($dir->files(1, $ignore))
 {

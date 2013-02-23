@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: ref.pmc 11355 2006-01-26 12:23:21Z leo $
+$Id: ref.pmc 11858 2006-03-10 18:23:19Z autrijus $
 
 =head1 NAME
 
@@ -103,7 +103,7 @@ Get the referenced PMC.
         SELF.init_pmc(other);
     }
     void assign_pmc(PMC* other) {
-        SELF.set_pmc(other);   /* autrijus */
+        SELF.set_pmc(other);   /* audreyt */
     }
 
     PMC* get_pmc() {

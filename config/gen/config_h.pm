@@ -1,5 +1,5 @@
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: config_h.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: config_h.pm 11750 2006-02-26 14:40:58Z bernhard $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':gen';
 
-$description = "Generating C headers...";
+$description = 'Generating C headers';
 
 @args = ('define');
 

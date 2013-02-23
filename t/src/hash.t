@@ -1,13 +1,14 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hash.t 10142 2005-11-23 01:56:46Z particle $
+# $Id: hash.t 11890 2006-03-13 19:54:14Z particle $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
-use Parrot::Test tests => 11;
+use Parrot::Test;
 
+plan $^O =~ m/MSWin32/ ? (skip_all => 'broken on win32') : (tests => 11);
 
 =head1 NAME
 

@@ -1,7 +1,7 @@
 /* charset.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: charset.h 11093 2006-01-11 17:50:35Z jonathan $
+ *  SVN Info
+ *     $Id: charset.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:

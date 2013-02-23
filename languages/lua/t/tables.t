@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: tables.t 11675 2006-02-20 08:00:49Z fperrad $
+# $Id: tables.t 11947 2006-03-20 07:53:35Z fperrad $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin";
 
-use Parrot::Test tests => 7;
+use Parrot::Test tests => 9;
 use Test::More;
 
 language_output_is( 'lua', <<'CODE', <<'OUT', '' );
@@ -119,5 +119,26 @@ CODE
 10
 c
 A,b,c
+OUT
+
+language_output_like( 'lua', <<'CODE', <<'OUT', 'call' );
+a = {}
+a()
+CODE
+/attempt to call/
+OUT
+
+language_output_is( 'lua', <<'CODE', <<'OUT', '' );
+local t
+t = { {"a","b","c"}, 10 }
+print((t)[2])
+print((t[1])[3]);
+(t)[1][2] = "B"
+(t[1])[3] = "C"
+print(table.concat(t[1],","))
+CODE
+10
+c
+a,B,C
 OUT
 

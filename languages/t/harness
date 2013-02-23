@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: harness 11641 2006-02-18 12:54:27Z bernhard $
+# $Id: harness 11706 2006-02-22 20:21:43Z bernhard $
 
 use strict;
 use warnings;
@@ -101,12 +101,13 @@ my @unified_testable_languages =
        m4
        ook
        parrot_compiler
+       punie
        regex
        scheme
        tcl
        unlambda
        urm );
-# @unified_testable_languages = qw( bc );
+# @unified_testable_languages = qw( punie );
 
 my @harnesses =
     grep {-f $_}

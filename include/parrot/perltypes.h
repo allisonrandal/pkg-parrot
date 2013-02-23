@@ -1,7 +1,7 @@
 /* perltypes.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: perltypes.h 5911 2004-04-22 08:55:40Z leo $
+ *  SVN Info
+ *     $Id: perltypes.h 11975 2006-03-21 22:23:53Z bernhard $
  *  Overview:
  *     Header to be shared among Perl PMC classes
  *  Data Structure and Algorithms:
@@ -19,10 +19,10 @@
  */
 
 #define DONT_USE_CHANGE_TYPE(thing, type) { \
-    if ((thing)->vtable == &Parrot_base_vtables[enum_class_PerlString]) { \
+    if ((thing)->vtable == &interpreter->vtables[enum_class_PerlString]) { \
 	PObj_is_buffer_ptr_CLEAR(thing); \
     } \
-    (thing)->vtable = &Parrot_base_vtables[enum_class_ ## type]; \
+    (thing)->vtable = &interpreter->vtables[enum_class_ ## type]; \
     if (enum_class_ ## type == enum_class_PerlString) { \
 	PObj_is_buffer_ptr_SET(thing); \
     } \

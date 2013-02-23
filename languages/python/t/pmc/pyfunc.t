@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pyfunc.t 11228 2006-01-17 19:41:07Z bernhard $
+# $Id: pyfunc.t 11764 2006-02-27 08:42:12Z bernhard $
 
 use strict;
 use warnings;
@@ -51,7 +51,7 @@ my $base = << 'CODE';
     testcase()
 .end
 
-.sub _f0 @ANON
+.sub _f0 :anon
     .param object x   
     .param object y   
     .param object z   

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: alignptrs.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: alignptrs.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step ':auto';
 use Config;
 
-$description = "Determining your minimum pointer alignment...";
+$description = 'Determining your minimum pointer alignment';
 
 @args = qw(miniparrot);
 

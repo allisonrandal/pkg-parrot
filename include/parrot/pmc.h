@@ -1,7 +1,7 @@
 /* pmc.h
- *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: pmc.h 11153 2006-01-13 18:59:41Z jonathan $
+ *  Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+ *  SVN Info
+ *     $Id: pmc.h 11975 2006-03-21 22:23:53Z bernhard $
  *  Overview:
  *     This is the api header for the pmc subsystem
  *  Data Structure and Algorithms:
@@ -18,10 +18,6 @@
 #include "parrot/thread.h"
 
 #define PARROT_MAX_CLASSES 100
-PARROT_API VAR_SCOPE VTABLE **Parrot_base_vtables;/*[PARROT_MAX_CLASSES];*/
-VAR_SCOPE INTVAL class_table_size;
-VAR_SCOPE INTVAL enum_class_max;
-VAR_SCOPE Parrot_mutex class_count_mutex;
 
 /* Internal use */
 PMC *pmc_init_null(Interp * interpreter);

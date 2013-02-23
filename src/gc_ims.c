@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-$Id: gc_ims.c 8802 2005-08-04 07:35:53Z leo $
+$Id: gc_ims.c 12045 2006-03-27 16:21:22Z leo $
 
 =head1 NAME
 
@@ -438,7 +438,7 @@ gc_ims_add_free_object(Interp *interpreter,
     if (GC_DEBUG(interpreter)) {
         if (pool == interpreter->arena_base->pmc_pool) {
             PMC *p = to_add;
-            p->vtable = Parrot_base_vtables[enum_class_Null];
+            p->vtable = interpreter->vtables[enum_class_Null];
         }
     }
 #endif
@@ -471,10 +471,6 @@ gc_ims_get_free_object(Interp *interpreter,
      */
     PObj_flags_SETTO(ptr, pool == arena_base->pmc_pool ? 0 : PObj_live_FLAG);
     --pool->num_free_objects;
-#if ! DISABLE_GC_DEBUG
-    if (GC_DEBUG(interpreter))
-        PObj_version((Buffer*)ptr) = arena_base->dod_runs;
-#endif
     return ptr;
 }
 

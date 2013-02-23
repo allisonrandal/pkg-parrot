@@ -1,6 +1,6 @@
 /*
 Copyright: 2003 The Perl Foundation.  All Rights Reserved.
-$Id: float.pmc 11248 2006-01-18 20:02:15Z bernhard $
+$Id: float.pmc 12055 2006-03-28 03:34:43Z jisom $
 
 =head1 NAME
 
@@ -38,22 +38,23 @@ Initializes the number to zero.
 
 /*
 
-=item C<PMC* instantiate()>
+=item C<PMC new_from_string(STRING *rep)>
 
-Create a new Float from the passed in argument. This is a class method,
-arguments are passed according to pdd03.
+Class method to construct an Integer from the string representation C<rep>.
 
 =cut
 
 */
-    PMC* instantiate() {
-        int argcP = REG_INT(3);
-        PMC *class = REG_PMC(2);
-        PMC *res = pmc_new(INTERP, class->vtable->base_type);
-        /* TODO non-PMC arguments */
-        if (argcP)
-            VTABLE_set_number_native(INTERP, res,
-                    VTABLE_get_number(INTERP, REG_PMC(5)));
+    PMC* new_from_string(STRING *rep, INTVAL flags) {
+        INTVAL type;
+        PMC *res;
+
+        type = SELF->vtable->base_type;
+        if (flags & PObj_constant_FLAG)
+            res = constant_pmc_new(INTERP, type);
+        else
+            res = pmc_new(INTERP, type);
+        PMC_num_val(res) = string_to_num(INTERP, rep);
         return res;
     }
 
@@ -437,6 +438,8 @@ Used to unarchive the number.
 
 =item C<METHOD PMC* tanh()>
 
+=item C<METHOD PMC* sqrt()>
+
 Return a new PMC of the type of C<SELF> with I<FUNC>(value) of SELF.
 
 =cut
@@ -527,6 +530,12 @@ Return a new PMC of the type of C<SELF> with I<FUNC>(value) of SELF.
     METHOD PMC* tanh() {
         PMC *d = pmc_new(INTERP, SELF->vtable->base_type);
         PMC_num_val(d) = tanh(PMC_num_val(SELF));
+        return d;
+    }
+
+    METHOD PMC* sqrt() {
+        PMC *d = pmc_new(INTERP, SELF->vtable->base_type);
+        PMC_num_val(d) = sqrt(PMC_num_val(SELF));
         return d;
     }
 

@@ -1,8 +1,8 @@
 /*
  * exec_dep.h
  *
- * CVS Info
- *    $Id: exec_dep.h 7930 2005-04-27 07:24:32Z leo $
+ * SVN Info
+ *    $Id: exec_dep.h 11903 2006-03-14 20:49:11Z bernhard $
  * Overview:
  *    ARM dependent functions to emit an executable.
  * History:

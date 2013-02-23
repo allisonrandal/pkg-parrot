@@ -1,7 +1,7 @@
 /* library.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: library.h 11108 2006-01-12 00:42:48Z jonathan $
+ *  SVN Info
+ *     $Id: library.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *      Contains accessor functions for the _parrotlib bytecode interface
  *  Data Structure and Algorithms:

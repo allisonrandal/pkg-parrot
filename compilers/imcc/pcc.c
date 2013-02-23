@@ -166,16 +166,24 @@ expand_pcc_sub(Parrot_Interp interp, IMC_Unit * unit, Instruction *ins)
     nargs = sub->pcc_sub->nargs;
     if (nargs) {
         ins = pcc_get_args(interp, unit, ins, "get_params", nargs,
-                           sub->pcc_sub->args, sub->pcc_sub->arg_flags);
+                sub->pcc_sub->args, sub->pcc_sub->arg_flags);
     }
 
     /*
      * check if there is a return
      */
+    if (unit->last_ins->type & (ITPCCSUB) &&
+            unit->last_ins->n_r == 1 &&
+            ( sub = unit->last_ins->r[0] ) &&
+            sub->pcc_sub &&
+            !sub->pcc_sub->object &&                   /* s. src/inter_call.c:119 */
+            (sub->pcc_sub->flags & isTAIL_CALL))
+        return;
     if (unit->last_ins->type != (ITPCCSUB|ITLABEL) &&
             strcmp(unit->last_ins->op, "ret") &&
             strcmp(unit->last_ins->op, "exit") &&
             strcmp(unit->last_ins->op, "end") &&
+            strcmp(unit->last_ins->op, "branch") &&
             strcmp(unit->last_ins->op, "returncc") /* was adding rets multiple times... */
        ) {
         if (sub->pcc_sub->pragma & P_MAIN) {
@@ -189,26 +197,6 @@ expand_pcc_sub(Parrot_Interp interp, IMC_Unit * unit, Instruction *ins)
         IMCC_debug(interp, DEBUG_IMC, "add sub ret - %I\n", tmp);
         insert_ins(unit, unit->last_ins, tmp);
     }
-
-#if 0
-    /*
-     * a coroutine (generator) needs a small hook that gets called
-     * from the shift_pmc() vtable
-     */
-    if (sub->pcc_sub->calls_a_sub & ITPCCYIELD) {
-        /*
-         * set P0, P5
-         * invokecc
-         * end
-         */
-        ins = unit->last_ins;
-        regs[0] = get_pasm_reg(interp, "P0");
-        regs[1] = get_pasm_reg(interp, "P5");
-        ins = insINS(interp, unit, ins, "set", regs, 2);
-        ins = insINS(interp, unit, ins, "invokecc", regs, 0);
-        ins = insINS(interp, unit, ins, "end", regs, 0);
-    }
-#endif
 }
 
 
@@ -245,6 +233,122 @@ expand_pcc_sub_ret(Parrot_Interp interp, IMC_Unit * unit, Instruction *ins)
     }
 }
 
+/* XXX s. src.utils.c */
+typedef int (*reg_move_func)(Interp*, unsigned char d, unsigned char s, void *);
+
+void 
+Parrot_register_move(Interp *, int n_regs,
+        unsigned char *dest_regs, unsigned char *src_regs,
+        unsigned char temp_reg, 
+        reg_move_func mov, 
+        reg_move_func mov_alt, 
+        void *info);
+
+struct move_info_t {
+    IMC_Unit *unit;
+    Instruction *ins;
+    int n;
+    SymReg **dest;
+    SymReg **src;
+};
+
+static int 
+pcc_reg_mov(Interp *interpreter, unsigned char d, unsigned char s,
+        void *vinfo)
+{
+    struct move_info_t *info = vinfo;
+    SymReg *regs[2], *src, *dest;
+    static SymReg *temps[4];
+    char types[] = "INSP";
+    int t;
+
+    src = dest = NULL;
+    if (d == 255) {
+        /* handle temp use/create temp of src type */
+        assert(s != 255);
+        assert(s < 2 * info->n);
+        src = s < info->n ? info->dest[(int)s] : info->src[(int)s - info->n];
+        for (t = 0; t < 4; ++t) {
+            if (types[t] == src->set) {
+                if (temps[t])
+                    dest = temps[t];
+                else {
+                    dest = temps[t] = mk_temp_reg(interpreter, src->set);
+                }
+                break;
+            }
+
+        }
+    }
+    else if (s == 255) {
+        /* handle temp use/create temp of dest type */
+        assert(d < 2 * info->n);
+        dest = d < info->n ? info->dest[(int)d] : info->src[(int)d - info->n];
+        for (t = 0; t < 4; ++t) {
+            if (types[t] == dest->set) {
+                if (temps[t])
+                    src = temps[t];
+                else {
+                    src = temps[t] = mk_temp_reg(interpreter, dest->set);
+                }
+                break;
+            }
+
+        }
+    }
+    if (!dest)
+        dest = d < info->n ? info->dest[(int)d] : info->src[(int)d - info->n];
+    if (!src)
+        src = s < info->n ? info->dest[(int)s] : info->src[(int)s - info->n];
+    regs[0] = dest;
+    regs[1] = src;
+    info->ins = insINS(interpreter, info->unit, info->ins, "set", regs, 2);
+    return 1;
+}
+
+static Instruction *
+move_regs(Parrot_Interp interp, IMC_Unit * unit,
+        Instruction *ins, int n, SymReg **dest, SymReg **src)
+{
+    unsigned char *move_list;
+    int i, j;
+    SymReg *ri, *rj;
+    struct move_info_t move_info;
+
+    if (!n)
+        return ins;
+
+
+    move_list = mem_sys_allocate(2 * n);
+    move_info.unit = unit;
+    move_info.ins  = ins;
+    move_info.n    = n;
+    move_info.dest = dest;
+    move_info.src  = src;
+
+    memset(move_list, -1, 2 * n);
+    for (i = 0; i < 2 * n; ++i) {
+        ri = i < n ? dest[i] : src[i - n];
+        for (j = 0; j < i; ++j) {
+            rj = j < n ? dest[j] : src[j - n];
+            if (ri == rj) {
+                assert(j < 255);
+                move_list[i] = j;
+                goto done;
+            }
+        }
+        assert(i < 255);
+        move_list[i] = i;
+done:
+        ;
+    }
+    Parrot_register_move(interp, n, move_list, move_list + n, 255,
+        pcc_reg_mov, NULL, &move_info);
+
+    mem_sys_free(move_list);
+    return move_info.ins;
+}
+
 /*
  * convert a recursive tailcall into a loop
  */
@@ -253,9 +357,8 @@ static int
 recursive_tail_call(Parrot_Interp interp, IMC_Unit * unit,
         Instruction *ins, SymReg *sub)
 {
-    SymReg *called_sub, *this_sub, *r0, *r1, *label;
+    SymReg *called_sub, *this_sub, *label;
     SymReg *regs[2];
-    int i;
     Instruction *get_params, *tmp_ins;
     char *buf;
 
@@ -270,7 +373,7 @@ recursive_tail_call(Parrot_Interp interp, IMC_Unit * unit,
     if (sub->pcc_sub->nargs != this_sub->pcc_sub->nargs)
         return 0;
     /* TODO check if we have only positional args
-     */
+    */
 
     get_params = unit->instructions->next;
     if (get_params->opnum != PARROT_OP_get_params_pc)
@@ -284,20 +387,9 @@ recursive_tail_call(Parrot_Interp interp, IMC_Unit * unit,
     }
     free(buf);
 
-    for (i = 0; i < sub->pcc_sub->nargs; ++i) {
-        /*
-         * TODO if there is a register collision
-         *      try to reverse assignmened order
-         *      or use a temp var
-         */
-        r0 = this_sub->pcc_sub->args[i];
-        r1 = sub->pcc_sub->args[i];
-        if (r0 != r1) {
-            regs[0] = r0;
-            regs[1] = r1;
-            ins = insINS(interp, unit, ins, "set", regs, 2);
-        }
-    }
+    ins = move_regs(interp, unit, ins, sub->pcc_sub->nargs, 
+            this_sub->pcc_sub->args, sub->pcc_sub->args);
+
     regs[0] = label;
     insINS(interp, unit, ins, "branch", regs, 1);
     return 1;

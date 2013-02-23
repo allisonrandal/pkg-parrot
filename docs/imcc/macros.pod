@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: macros.pod 10353 2005-12-05 17:44:29Z particle $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: macros.pod 11820 2006-03-08 01:22:45Z jisom $
 
 =head1 NAME
 
@@ -59,7 +59,7 @@ Constants are new and the syntax looks like:
 Several constants are predefined, namely the PMC classes, e.g.
 
   .constant Array 0
-  .constant PerlUndef 1
+  .constant Undef 1
   ...
 
 The ".include" statement is followed by a string literal. The file of
@@ -93,7 +93,7 @@ Some predefined constants exist for your convenience, namely:
 
   .Array
   .Hash
-  .PerlArray
+  .ResizablePMCArray
 
 and the other PMC types.
 
@@ -136,6 +136,10 @@ simple example follows:
   .endm
 
   .inc3(I0) # Expands to the obvious ('inc I0\n') x 3
+
+Using braces, C<{ }>, allows you to use commas and parenthesis inside
+parameters for a macro.  See F<runtime/parrot/include/hllmacros.pir> for
+examples and possible usage.
 
 =cut
 

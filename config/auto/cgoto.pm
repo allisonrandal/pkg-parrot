@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cgoto.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: cgoto.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining whether your compiler supports computed goto...";
+$description = 'Determining whether your compiler supports computed goto';
 @args        = qw(cgoto miniparrot verbose);
 
 sub runstep

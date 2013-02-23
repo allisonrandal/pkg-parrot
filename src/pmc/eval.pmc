@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: eval.pmc 11248 2006-01-18 20:02:15Z bernhard $
+$Id: eval.pmc 12007 2006-03-24 15:56:23Z leo $
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ evaluation and execution.
 #include "parrot/parrot.h"
 
 static void
-clear_fixups(Interp* interpreter, PMC* self)
+clear_fixups(Interp* interpreter, parrot_sub_t sub_data)
 {
     opcode_t i, ci;
     struct PackFile_ByteCode *seg;
@@ -30,7 +30,7 @@ clear_fixups(Interp* interpreter, PMC* self)
     struct PackFile_ConstTable *ct;
     PMC *sub;
 
-    seg = PMC_sub(self)->seg;
+    seg = sub_data->seg;
     if (!seg)
         return;
     ft = seg->fixups;
@@ -44,7 +44,10 @@ clear_fixups(Interp* interpreter, PMC* self)
             case enum_fixup_sub:
                 ci = ft->fixups[i]->offset;
                 sub = ct->constants[ci]->u.key;
-                PMC_sub(sub)->seg = NULL;
+                if (PMC_sub(sub)) {
+                    PMC_sub(sub)->seg = NULL;
+                    PMC_sub(sub)->eval_pmc = NULL;
+                }
                 ct->constants[ci]->u.key = NULL;
                 ft->fixups[i]->type = 0;
         }
@@ -146,34 +149,46 @@ Invokes the first subroutine in the eval code.
          * TODO walk the fixups for this segment, locate globals
          *      and nullify the Sub PMC.
          * This probably needs a pointer into the globals.
+         *
+         * OTOH - if the global exists - this eval pmc ought
+         *        to be alive and destroy isn't called.
          */
         parrot_sub_t sub_data;
         struct PackFile_Segment *seg;
         struct PackFile_ByteCode *cur_cs;
 
-        clear_fixups(INTERP, SELF);
         sub_data = PMC_sub(SELF);
 
         if (!sub_data)
             return;
+        clear_fixups(INTERP, sub_data);
         cur_cs = sub_data->seg;
         if (!cur_cs)
             return;
 
-        if (cur_cs->const_table)
-            PackFile_ConstTable_clear(INTERP, cur_cs->const_table);
-        cur_cs->const_table = NULL;
-        seg = (struct PackFile_Segment *)cur_cs->debugs;
-        if (seg)
+        /* TODO create PF API, move it there */
+        seg = (struct PackFile_Segment *)cur_cs->const_table;
+        if (seg) {
             PackFile_Segment_destroy(INTERP, seg);
-        cur_cs->debugs = NULL;
-        if (cur_cs->fixups)
-            PackFile_FixupTable_clear(INTERP, cur_cs->fixups);
-        cur_cs->fixups = NULL;
+        }
+        seg = (struct PackFile_Segment *)cur_cs->debugs;
+        if (seg) {
+            PackFile_Segment_destroy(INTERP, seg);
+        }
+        seg = (struct PackFile_Segment *)cur_cs->fixups;
+        if (seg) {
+            PackFile_Segment_destroy(INTERP, seg);
+            cur_cs->fixups = NULL;
+        }
+        seg = cur_cs->pic_index;
+        if (seg) {
+            PackFile_Segment_destroy(INTERP, seg);
+        }
         seg = (struct PackFile_Segment *)cur_cs;
         PackFile_Segment_destroy(INTERP, seg);
         sub_data->seg = NULL;
         PMC_struct_val(SELF) = NULL;
+        mem_sys_free(sub_data);
     }
 
     void mark() {
@@ -227,9 +242,10 @@ for writing to disc and later loading via C<load_bytecode>.
         aligned_size = size + 15;
         res = string_make_empty(INTERP, enum_stringrep_one, aligned_size);
         res->strlen = res->bufused = size;
-        if ((size_t)res->strstart & 0xf) {
-            LVALUE_CAST(char*,res->strstart) +=
-                16 - ((size_t)res->strstart & 0xf);
+        if ((size_t)(res->strstart) & 0xf) {
+            char *adr = res->strstart;
+            adr += 16 - ((size_t)adr & 0xf);
+            res->strstart = adr;
         }
         PackFile_pack(INTERP, pf, res->strstart);
         /* now remove all segments from directory again and destroy

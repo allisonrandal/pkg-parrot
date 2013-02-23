@@ -1,6 +1,6 @@
 #! perl
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pasm.t 11604 2006-02-16 23:31:37Z leo $
+# Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: pasm.t 12067 2006-03-28 20:17:11Z bernhard $
 
 use strict;
 use warnings;
@@ -16,7 +16,7 @@ t/examples/pasm.t - Test examples in F<examples/pasm>
 
 =head1 SYNOPSIS
 
-	% prove t/examples/pasm.t
+    % prove t/examples/pasm.t
 
 =head1 DESCRIPTION
 

@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Revision.pm 10933 2006-01-06 01:43:24Z particle $
+# $Id: Revision.pm 11788 2006-03-04 16:22:21Z bernhard $
 
 =head1 NAME
 
@@ -19,8 +19,10 @@ Get parrot's current and configure time revision.
 =cut
 
 package Parrot::Revision;
+
 use strict;
-use 5.006;
+use warnings;
+use 5.008;
 
 our $svn_entries = undef;
 
@@ -30,8 +32,8 @@ sub __get_revision {
 
     # code taken from pugs/util/version_h.pl rev 859
     if (-r $svn_entries) {
-        open FH, $svn_entries or die $!;
-        while (<FH>) {
+        open my $FH, '<', $svn_entries or die $!;
+        while (<$FH>) {
             /^ *committed-rev=.(\d+)./ or next;
             return $1;
         }

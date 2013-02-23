@@ -1,4 +1,4 @@
-# $Id: HQ9plus.pm 11366 2006-01-28 20:03:50Z bernhard $
+# $Id: HQ9plus.pm 12039 2006-03-26 19:46:16Z bernhard $
 
 package Parrot::Test::HQ9plus;
 
@@ -50,7 +50,7 @@ foreach my $func ( keys %language_test_map ) {
 
         # This does nor create byte code, but HQ9plus code
         my $parrotdir = dirname( $self->{parrot} );
-        Parrot::Test::generate_code( $code, $parrotdir, $count, $lang_fn );
+        Parrot::Test::write_code_to_file( $code, $lang_fn );
 
         # STDERR is written into same output file
         my $exit_code = Parrot::Test::run_command( 
@@ -75,7 +75,7 @@ foreach my $func ( keys %language_test_map ) {
         }
 
         # The generated files are left in the t/* directories.
-        # Let 'make clean' and '.cvsignore' take care of them.
+        # Let 'make clean' and 'svn:ignore' take care of them.
 
         return $pass;
     }

@@ -1,5 +1,5 @@
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: cpu.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# Copyright: 2001-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: cpu.pm 11750 2006-02-26 14:40:58Z bernhard $
 
 =head1 NAME
 
@@ -14,6 +14,7 @@ Runs C<&run_cpu()> in F<config/gen/cpu/${cpuarch}/auto.pm> if it exists.
 package gen::cpu;
 
 use strict;
+use warnings;
 use vars qw($description @args);
 
 use base qw(Parrot::Configure::Step::Base);
@@ -21,7 +22,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Parrot::Configure::Step qw(copy_if_diff);
 use Carp;
 
-$description = "Running CPU specific stuff...";
+$description = 'Running CPU specific stuff';
 
 @args = qw(miniparrot verbose);
 

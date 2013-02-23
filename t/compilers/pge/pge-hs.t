@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pge-hs.t 10933 2006-01-06 01:43:24Z particle $
+# $Id: pge-hs.t 11906 2006-03-15 16:14:19Z leo $
 
 use strict;
 use warnings;
@@ -33,7 +33,6 @@ pir_output_is(<<'CODE', <<'OUT', "PGE::Hs match");
     add_rule = find_global "PGE::Hs", "add_rule"
     add_rule("foo", "s")
     result = match("test", "t(.<foo>)t")
-
     eq result, "PGE_Match 0 4 [PGE_Match 1 3 [] [(\"foo\", PGE_Match 2 3 [] [])]] []\n", OK
     print "not "
 

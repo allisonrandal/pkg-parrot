@@ -1,6 +1,6 @@
 /*
 Copyright: 2006 The Perl Foundation.  All Rights Reserved.
-$Id: pic_jit.c 11599 2006-02-16 21:32:27Z particle $
+$Id: pic_jit.c 11746 2006-02-26 13:08:48Z leo $
 
 =head1 NAME
 
@@ -8,13 +8,20 @@ src/pic_jit.c - Polymorphic Inline Cache to JIT compilation
 
 =head1 DESCRIPTION
 
-Some statically known and simple subroutines are replace by
+Some statically known and simple subroutines are replaced by
 their JITted variants, if
 
   - JIT is supported and can JIT subroutines
   - arguments passing is simple
   - the code is fully JITtable
   - and more such checks
+
+TODO:
+
+  - save jit_info in sub
+  - check for multiple calls to the same sub
+    either reuse code or create new
+  - handle void calls/returns  
 
 =head2 Functions
 
@@ -143,13 +150,6 @@ returns_match_results(Interp *interpreter, PMC *sig_ret, PMC *sig_result)
     int n, type;
     
     n = parrot_pic_check_sig(interpreter, sig_ret, sig_result, &type);
-    if (n == -1 && !SIG_ELEMS(sig_ret)) {
-        /* XXX we currently have a spurious set_returns after a
-         * tail_call -O1 would get rid of that dead block but is 
-         * broken currently - work around ignore empty set_returns
-         */
-        return 1;
-    }
     if (n == -1) {
         /* arg count mismatch */
         return 0;
@@ -339,15 +339,7 @@ parrot_pic_JIT_sub(Interp *interpreter, PMC *sub, int flags) {
 #endif
 }
 
-
-
-
-
-
-
-
-
-#else
+#else   /* HAS_JIT */
 
 int
 parrot_pic_is_safe_to_jit(Interp *interpreter, PMC *sub,

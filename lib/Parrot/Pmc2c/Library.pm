@@ -1,5 +1,5 @@
-# Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Library.pm 11389 2006-01-31 13:42:31Z jonathan $
+# Copyright: 2004-2006 The Perl Foundation.  All Rights Reserved.
+# $Id: Library.pm 11788 2006-03-04 16:22:21Z bernhard $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot::Pmc2c::Library - PMC to C Code Generation
 
 =head1 SYNOPSIS
 
-	use Parrot::Pmc2c::Library;
+    use Parrot::Pmc2c::Library;
 
 =head1 DESCRIPTION
 
@@ -22,6 +22,10 @@ one PMC, which is the case used by the Parrot core. See L<Parrot::Pmc2c>
 =cut
 
 package Parrot::Pmc2c::Library;
+
+use strict;
+use warnings;
+
 use Parrot::Pmc2c qw(dynext_load_code dont_edit);
 
 =item C<new($opt, $vtable_dump, %pmcs)>
@@ -55,21 +59,20 @@ sub new {
 sub _write_a_file($$$) {
     my ($generator, $h_name, $c_name) = @_;
     my $opt = $generator->{opt};
-    local (*H, *C);
 
     print Data::Dumper->Dump([$generator]) if $opt->{debug} > 1;
     my $cout = $generator->gen_c($c_name);
     print $cout if $opt->{debug};
     print "Writing $c_name\n" if $opt->{verbose};
-    open C, ">$c_name" or die "Can't write '$c_name";
-    print C $cout;
-    close C;
+    open my $C, '>', $c_name or die "Can't write '$c_name";
+    print $C $cout;
+    close $C;
     my $hout = $generator->gen_h($h_name);
     print $hout if $opt->{debug};
     print "Writing $h_name\n" if $opt->{verbose};
-    open H, ">$h_name" or die "Can't write '$h_name";
-    print H $hout;
-    close H;
+    open my $H, '>', $h_name or die "Can't write '$h_name";
+    print $H $hout;
+    close $H;
 }
 
 =item C<write_all_files()>
@@ -85,21 +88,21 @@ sub write_all_files {
     my $library = $self->{opt}{library};
 
     if ($library) {
-	my $hout = $self->gen_h($library);
+        my $hout = $self->gen_h($library);
         my $h = "$library.h";
         my $c = "$library.c";
-	_write_a_file($self, $h, $c);
+        _write_a_file($self, $h, $c);
     } else {
-	while (my @fc = each %{$self->{pmcs}}) {
-	    my ($file, $generator) = @fc;
-	    my $h;
-	    ($h = $file) =~ s/\.\w+$/.h/;
-	    $h =~ s/(\w+)\.h$/pmc_$1.h/;
-	    my $c;
-	    ($c = $file) =~ s/\.\w+$/.c/;
+        while (my @fc = each %{$self->{pmcs}}) {
+            my ($file, $generator) = @fc;
+            my $h;
+            ($h = $file) =~ s/\.\w+$/.h/;
+            $h =~ s/(\w+)\.h$/pmc_$1.h/;
+            my $c;
+            ($c = $file) =~ s/\.\w+$/.c/;
 
-	    _write_a_file($generator, $h, $c);
-	}
+            _write_a_file($generator, $h, $c);
+        }
     }
 }
 
@@ -133,8 +136,8 @@ sub gen_c {
 
     $cout .= $self->includes;
     $cout .= dynext_load_code($self->{opt}{library},
-			      map { $_->{class} => $_ }
-			      values %{$self->{pmcs}} );
+                              map { $_->{class} => $_ }
+                              values %{$self->{pmcs}} );
 
     return $cout;
 }
@@ -155,8 +158,8 @@ sub includes() {
 #include "parrot/dynext.h"
 EOC
     foreach my $pmc (values %{$self->{pmcs}}) {
-	my $name = lc $pmc->{class};
-	$cout .= <<"EOC";
+        my $name = lc $pmc->{class};
+        $cout .= <<"EOC";
 #include "pmc_$name.h"
 EOC
     }
@@ -176,5 +179,6 @@ EOC
 =cut
 
 # vim: expandtab shiftwidth=4:
+
 1;
 

@@ -3,7 +3,7 @@
 **
 ** SPARC
 **
-** $Id: jit_emit.h 10543 2005-12-15 22:36:46Z leo $
+** $Id: jit_emit.h 11975 2006-03-21 22:23:53Z bernhard $
 **/
 
 #if !defined(PARROT_SUN4_JIT_EMIT_H_GUARD)
@@ -1110,7 +1110,7 @@ Parrot_jit_vtable_newp_ic_op(Parrot_jit_info_t *jit_info,
     int p1 = *(jit_info->cur_op + 1);
     int i2 = *(jit_info->cur_op + 2);
 
-    if (i2 <= 0 || i2 >= enum_class_max)
+    if (i2 <= 0 || i2 >= interpreter->n_vtable_max)
         internal_exception(1, "Illegal PMC enum (%d) in new", i2);
 
     /* get "a" pmc first - calling function:  pmc_new_noinit(...) */

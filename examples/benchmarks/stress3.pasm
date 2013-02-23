@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: stress3.pasm 5175 2004-01-31 13:16:08Z mikescott $
+# $Id: stress3.pasm 11952 2006-03-20 20:24:31Z bernhard $
 
 =head1 NAME
 
@@ -31,9 +31,12 @@ at the moment:
 
 =cut
 
-	set I10, P5
-	lt I10, 2, noarg
-	set I11, P5[1]
+# How can I get to the command line args?
+
+	#set I10, P5
+	#lt I10, 2, noarg
+	#set I11, P5[1]
+	set I11, 0
 noarg:
 	set I0, 100
 	new P0, .PerlArray

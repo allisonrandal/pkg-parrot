@@ -2,8 +2,8 @@
  * datatypes.h
  *  Copyright: (c) 2002 Leopold Toetsch <lt@toetsch.at>
  *  License:  Artistic/GPL, see README and LICENSES for details
- *  CVS Info
- *     $Id: datatypes.h 11093 2006-01-11 17:50:35Z jonathan $
+ *  SVN Info
+ *     $Id: datatypes.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Parrot and native data types enums and type names.
  *

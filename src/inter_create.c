@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_create.c 11612 2006-02-17 02:29:10Z rgrjr $
+$Id: inter_create.c 11929 2006-03-18 18:00:28Z leo $
 
 =head1 NAME
 
@@ -116,7 +116,6 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
          * we need a global mutex to protect the interpreter array
          */
         MUTEX_INIT(interpreter_array_mutex);
-        MUTEX_INIT(class_count_mutex);
     }
     create_initial_context(interpreter);
     interpreter->resume_flag = RESUME_INITIAL;
@@ -204,10 +203,6 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
     SET_NULL_P(interpreter->all_op_libs, op_lib_t **);
     SET_NULL_P(interpreter->evc_func_table, op_func_t *);
     SET_NULL_P(interpreter->save_func_table, op_func_t *);
-
-    /* Set up defaults for line/package/file */
-    CONTEXT(interpreter->ctx)->current_package =
-        string_make(interpreter, "(unknown package)", 18, NULL, 0);
 
     SET_NULL_P(interpreter->code, struct PackFile *);
     SET_NULL_P(interpreter->profile, ProfData *);
@@ -299,7 +294,6 @@ Parrot_really_destroy(int exit_code, void *vinterp)
 {
     int i;
     Interp *interpreter = (Interp*) vinterp;
-    struct Stash *stash, *next_stash;
 
     UNUSED(exit_code);
 
@@ -368,17 +362,8 @@ Parrot_really_destroy(int exit_code, void *vinterp)
             PackFile_destroy(interpreter, pf);
     }
 
-    /* walk and free the stash, pmc's are already dead */
-    stash = interpreter->globals;
-    while (stash) {
-        next_stash = stash->parent_stash;
-        mem_sys_free(stash);
-        stash = next_stash;
-    }
     /* free vtables */
-    if (!interpreter->parent_interpreter)
-        for (i = 1; i < (int)enum_class_max; i++)
-            Parrot_destroy_vtable(interpreter, Parrot_base_vtables[i]);
+    parrot_free_vtables(interpreter);
     mmd_destroy(interpreter);
 
 
@@ -401,21 +386,14 @@ Parrot_really_destroy(int exit_code, void *vinterp)
     mem_sys_free(interpreter->exception_list);
     if (interpreter->evc_func_table)
         mem_sys_free(interpreter->evc_func_table);
-    /* strings, chartype, encodings */
+    /* strings, charsets, encodings - only once */
+    string_deinit(interpreter);
     if (!interpreter->parent_interpreter) {
         MUTEX_DESTROY(interpreter_array_mutex);
-        MUTEX_DESTROY(class_count_mutex);
-        string_deinit(interpreter);
-        /*
-           chartype_destroy();
-           encoding_destroy();
-           */
         mem_sys_free(interpreter);
         /*
          * finally free other globals
          */
-        mem_sys_free(Parrot_base_vtables);
-        Parrot_base_vtables = NULL;
         mem_sys_free(interpreter_array);
         interpreter_array = NULL;
     }

@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: pmc_freeze.c 11500 2006-02-10 17:06:23Z coke $
+$Id: pmc_freeze.c 11975 2006-03-21 22:23:53Z bernhard $
 
 =head1 NAME
 
@@ -846,7 +846,7 @@ thaw_pmc(Parrot_Interp interpreter, visit_info *info,
         info->last_type = *type = io->vtable->shift_integer(interpreter, io);
         if (*type <= 0)
             internal_exception(1, "Unknown PMC type to thaw %d", (int) *type);
-        if (*type >= enum_class_max) {
+        if (*type >= interpreter->n_vtable_max) {
             /* that ought to be a class */
             *type = enum_class_ParrotClass;
         }

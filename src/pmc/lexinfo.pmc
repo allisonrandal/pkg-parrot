@@ -1,6 +1,6 @@
 /*
 Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-$Id: lexinfo.pmc 11248 2006-01-18 20:02:15Z bernhard $
+$Id: lexinfo.pmc 11928 2006-03-18 17:43:35Z leo $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ subroutine.
     void class_init() {
         if (pass == 1) {
             /* there is no pmclass const_pmc flag yet */
-            Parrot_base_vtables[entry]->flags |= VTABLE_IS_CONST_PMC_FLAG;
+            interp->vtables[entry]->flags |= VTABLE_IS_CONST_PMC_FLAG;
         }
 
     }

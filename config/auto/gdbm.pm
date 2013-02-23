@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: gdbm.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: gdbm.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ use base qw(Parrot::Configure::Step::Base);
 use Config;
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining if your platform supports gdbm...";
+$description = 'Determining if your platform supports gdbm';
 
 @args = qw(verbose);
 
@@ -37,11 +37,7 @@ sub runstep
     my $linkflags = $conf->data->get('linkflags');
     my $ccflags   = $conf->data->get('ccflags');
 
-    my $archname = $Config{archname};
-    my ($cpuarch, $osname) = split('-', $archname);
-    if (!defined $osname) {
-        ($osname, $cpuarch) = ($cpuarch, "");
-    }
+    my $osname = $Config{osname};
 
     # On OS X check the presence of the gdbm header in the standard
     # Fink location. TODO: Need a more generalized way for finding

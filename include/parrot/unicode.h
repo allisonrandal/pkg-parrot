@@ -1,7 +1,7 @@
 /* unicode.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: unicode.h 7606 2005-03-07 09:18:50Z leo $
+ *  SVN Info
+ *     $Id: unicode.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     Unicode support header
  *  Data Structure and Algorithms:

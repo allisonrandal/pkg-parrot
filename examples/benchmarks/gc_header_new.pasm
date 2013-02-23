@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003 The Perl Foundation.  All rights reserved.
-# $Id: gc_header_new.pasm 5482 2004-02-29 13:19:06Z leo $
+# $Id: gc_header_new.pasm 11937 2006-03-19 14:18:26Z bernhard $
 
 =head1 NAME
 
@@ -31,6 +31,17 @@ indicating:
 =item * the total number of C<Buffer> C<struct>s
 
 =back
+
+=head1 SEE ALSO
+
+F<examples/benchmarks/bench_newp.pasm>,
+F<examples/benchmarks/gc_alloc_new.pasm>,
+F<examples/benchmarks/gc_alloc_reuse.pasm>,
+F<examples/benchmarks/gc_generations.pasm>,
+F<examples/benchmarks/gc_header_reuse.pasm>,
+F<examples/benchmarks/gc_waves_headers.pasm>,
+F<examples/benchmarks/gc_waves_sizeable_data.pasm>,
+F<examples/benchmarks/gc_waves_sizeable_headers.pasm>.
 
 =cut
 
@@ -71,7 +82,6 @@ loop:
 	concat S29, S0, S0
 	concat S30, S0, S0
 	concat S31, S0, S0
-	pushs
 	inc I1
 	lt I1, I0, loop
 
@@ -113,16 +123,3 @@ getout:	time N6
 	print " total Buffer structs\n"
 
 	end
-
-=head1 SEE ALSO
-
-F<examples/benchmarks/bench_newp.pasm>,
-F<examples/benchmarks/gc_alloc_new.pasm>,
-F<examples/benchmarks/gc_alloc_reuse.pasm>,
-F<examples/benchmarks/gc_generations.pasm>,
-F<examples/benchmarks/gc_header_reuse.pasm>,
-F<examples/benchmarks/gc_waves_headers.pasm>,
-F<examples/benchmarks/gc_waves_sizeable_data.pasm>,
-F<examples/benchmarks/gc_waves_sizeable_headers.pasm>.
-
-=cut

@@ -1,7 +1,7 @@
 /* tclobject.pmc
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: tclobject.pmc 11226 2006-01-17 19:09:59Z bernhard $
+ *  SVN Info
+ *     $Id: tclobject.pmc 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     These are the vtable functions for the tclobject base class
  *  Data Structure and Algorithms:

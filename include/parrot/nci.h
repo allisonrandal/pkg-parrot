@@ -1,7 +1,7 @@
 /* nci.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
- *  CVS Info
- *     $Id: nci.h 6853 2004-10-18 01:35:33Z brentdax $
+ *  SVN Info
+ *     $Id: nci.h 11903 2006-03-14 20:49:11Z bernhard $
  *  Overview:
  *     The nci api handles building native call frames
  *  Data Structure and Algorithms:

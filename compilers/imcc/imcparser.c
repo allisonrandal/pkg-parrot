@@ -300,7 +300,7 @@
  *
  * Grammar for the parser.
  *
- * $Id: imcc.y 11644 2006-02-18 15:36:46Z leo $
+ * $Id: imcc.y 11852 2006-03-10 11:49:20Z leo $
  *
  */
 
@@ -2258,7 +2258,7 @@ yyreduce:
             STRING *hll_name, *hll_lib;
             hll_name = string_unescape_cstring(interp, yyvsp[-2].s + 1, '"', NULL);
             hll_lib =  string_unescape_cstring(interp, yyvsp[0].s + 1, '"', NULL);
-            IMCC_INFO(interp)->HLL_id =
+            CONTEXT(((Interp*)interp)->ctx)->current_HLL = 
                 Parrot_register_HLL(interp, hll_name, hll_lib);
             yyval.t = 0;
          }
@@ -2268,7 +2268,7 @@ yyreduce:
 #line 499 "compilers/imcc/imcc.y"
     {
              Parrot_register_HLL_type(interp,
-                IMCC_INFO(interp)->HLL_id, atoi(yyvsp[-2].s), atoi(yyvsp[0].s));
+                CONTEXT(((Interp*)interp)->ctx)->current_HLL, atoi(yyvsp[-2].s), atoi(yyvsp[0].s));
              yyval.t = 0;
          }
     break;

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: intro.pod 11226 2006-01-17 19:09:59Z bernhard $
+# $Id: intro.pod 11733 2006-02-24 21:01:01Z leo $
 
 =head1 NAME
 
@@ -336,7 +336,7 @@ compute factorial.
   .end
 
 
-  .sub _main @MAIN
+  .sub _main :main
       .local int f, i
 
       # We'll do factorial 0 to 1.

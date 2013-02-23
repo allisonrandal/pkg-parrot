@@ -1,4 +1,9 @@
+# $Id: Python.pm 12039 2006-03-26 19:46:16Z bernhard $
+
 package Parrot::Test::Python;
+
+use strict;
+use warnings;
 
 use File::Basename;
 
@@ -15,11 +20,10 @@ based on ast2past and versions before that on pie-thon.
 =cut
 
 sub new {
-  return bless {};
+    return bless {};
 }
 
 sub output_is() {
-
     my ($self, $code, $output, $desc) = @_;
 
     $count = $self->{builder}->current_test + 1;
@@ -34,7 +38,7 @@ sub output_is() {
     $TEST_PROG_ARGS = $ENV{TEST_PROG_ARGS} || '-j -Oc';
     my $args = $TEST_PROG_ARGS;
 
-    Parrot::Test::generate_code( $code, $parrotdir, $count, $lang_f );
+    Parrot::Test::write_code_to_file( $code, $lang_f );
 
     my ($pycmd, $cmd, $pass, $dir);
     my $exit_code = 0;
@@ -49,17 +53,16 @@ sub output_is() {
     my $py_file = Parrot::Test::slurp_file($py_out_f);
     my $pirate_file;
 
-    $exit_code |= Parrot::Test::run_command($cmd,
-	    STDOUT => $pirate_out_f);
-	$pirate_file = Parrot::Test::slurp_file($pirate_out_f);
+    $exit_code |= Parrot::Test::run_command($cmd, STDOUT => $pirate_out_f);
+    $pirate_file = Parrot::Test::slurp_file($pirate_out_f);
     $pass = $self->{builder}->is_eq( $pirate_file, $py_file, $desc );
     $self->{builder}->diag("'$cmd' failed with exit code $exit_code")
     if $exit_code and not $pass;
 
-    unless($ENV{POSTMORTEM}) {
-	unlink $lang_f;
-	unlink $py_out_f;
-	unlink $pirate_out_f;
+    unless ($ENV{POSTMORTEM}) {
+        unlink $lang_f;
+        unlink $py_out_f;
+        unlink $pirate_out_f;
     }
 
     return $pass;

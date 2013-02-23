@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pyclass.t 11228 2006-01-17 19:41:07Z bernhard $
+# $Id: pyclass.t 11763 2006-02-27 08:29:19Z bernhard $
 
 use strict;
 use warnings;
@@ -213,7 +213,7 @@ pir_output_is(<< 'CODE', << 'OUTPUT', "overriding builtins");
     .return ()
 .end
 
-.sub ___repr__ :anon, method
+.sub ___repr__ :anon, :method
     find_type $I0, 'PyObject'
     new $P0, $I0
     find_type $I1, 'PyString'

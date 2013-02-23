@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: sub.t 11489 2006-02-09 18:58:48Z particle $
+# $Id: sub.t 11992 2006-03-22 22:25:01Z bernhard $
 
 use strict;
 use warnings;
@@ -355,7 +355,7 @@ OK2:  print "ok 2\n"
       end
 
 .pcc_sub :outer(main) f2:
-      new P1, .PerlUndef
+      new P1, .Undef
       end
 CODE
 ok 1
@@ -382,7 +382,7 @@ OK2:  print "ok 2\n"
       end
 
 .pcc_sub f2:
-      new P1, .PerlUndef
+      new P1, .Undef
       end
 CODE
 ok 1
@@ -724,7 +724,7 @@ pir_output_like(<<'CODE', <<'OUTPUT', "warn on in main");
     _f1()
 .end
 .sub _f1
-    $P0 = new PerlUndef
+    $P0 = new .PerlUndef
     print $P0
 .end
 CODE
@@ -735,7 +735,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "warn on in sub");
 .sub _main :main
 .include "warnings.pasm"
     _f1()
-    $P0 = new PerlUndef
+    $P0 = new .PerlUndef
     print $P0
     print "ok\n"
 .end
@@ -750,7 +750,7 @@ pir_output_like(<<'CODE', <<'OUTPUT', "warn on in sub, turn off in f2");
 .sub _main :main
 .include "warnings.pasm"
     _f1()
-    $P0 = new PerlUndef
+    $P0 = new .PerlUndef
     print "back\n"
     print $P0
     print "ok\n"
@@ -758,7 +758,7 @@ pir_output_like(<<'CODE', <<'OUTPUT', "warn on in sub, turn off in f2");
 .sub _f1
     warningson .PARROT_WARNINGS_UNDEF_FLAG
     _f2()
-    $P0 = new PerlUndef
+    $P0 = new .PerlUndef
     print $P0
 .end
 .sub _f2
@@ -900,7 +900,7 @@ OUTPUT
         TODO:
         {
             local $TODO = "output from :postcomp is lost";
-            output_is( $code, $output, $descr);
+            pasm_output_is( $code, $output, $descr);
         };
     } else {
         pir_output_is( $code, $output, $descr);

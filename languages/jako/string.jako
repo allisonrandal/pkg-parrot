@@ -5,12 +5,12 @@
 # This program is free software. Its use is subject to the
 # same license as Parrot.
 #
-# $Id: string.jako 7819 2005-04-13 00:20:52Z gregor $
+# $Id: string.jako 12028 2006-03-26 04:31:23Z gregor $
 #
 
 module string
 {
-  sub     concat :op (str dest, str s);
+#  sub     concat :op (str dest, str s);
   sub int index  :op (str input, str pattern, int start);
   sub int length :op (str dest);
   sub str substr :op (str s, int i, int l);

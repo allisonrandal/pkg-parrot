@@ -1,15 +1,17 @@
-# Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: README 11471 2006-02-08 06:12:47Z particle $
+# Copyright: 2006 The Perl Foundation.  All Rights Reserved.
+# $Id: README 11986 2006-03-22 19:22:29Z bernhard $
 
 This directory contains the Parrot test suite.
-For details, see the documentation in 'docs/tests.pod'.
+For details, see the documentation in '../docs/tests.pod'.
 For status of the testing effort, see 'TESTS.STATUS.pod' in this directory.
 
 benchmark:    Run all benchmarks
 
 compilers:    Mini languages distributed with Parrot
 
-configure:    Configuration subsystem
+configure:    Perl modules of configuration subsystem
+
+codingstd:    Conventions and Guidelines for Parrot Source Code
 
 distro:       Tests run before a distro is released
 
@@ -25,7 +27,7 @@ native_pbc:   Parrot Byte Code
 
 op:           Try to cover all core operators
 
-perl:         Tests written in Perl5. XXX Is this a meaningful category?
+perl:         Test Perl5 modules used for configuration, building and testing of Parrot.
 
 pmc:          Try to cover all builtin PMCs
 

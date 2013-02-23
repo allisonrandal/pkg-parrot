@@ -478,7 +478,7 @@ strength_reduce(Interp *interpreter, IMC_Unit * unit)
 static int
 constant_propagation(Interp *interpreter, IMC_Unit * unit)
 {
-    Instruction *ins, *ins2, *tmp;
+    Instruction *ins, *ins2, *tmp, *prev;
     int op;
     int i;
     char fullname[128];
@@ -530,21 +530,28 @@ constant_propagation(Interp *interpreter, IMC_Unit * unit)
                                 unit, ins2->op, ins2->r, ins2->opsize,
                                 &found);
                             if (found) {
-                                subst_ins(unit, ins2, tmp, 1);
-                                any = 1;
-                                IMCC_debug(interpreter, DEBUG_OPT2," reduced to %I\n", tmp);
+                                prev = ins2->prev;
+                                if (prev) {
+                                    subst_ins(unit, ins2, tmp, 1);
+                                    any = 1;
+                                    IMCC_debug(interpreter, DEBUG_OPT2,
+                                            " reduced to %I\n", tmp);
+                                    ins2 = prev->next;
+                                }
                             } else {
                                 op = check_op(interpreter, fullname, ins2->op,
                                     ins2->r, ins2->n_r, ins2->keys);
                                 if (op < 0) {
                                     ins2->r[i] = old;
-                                    IMCC_debug(interpreter, DEBUG_OPT2," - no %s\n", fullname);
+                                    IMCC_debug(interpreter, DEBUG_OPT2,
+                                            " - no %s\n", fullname);
                                 }
                                 else {
                                     --old->use_count;
                                     ins2->opnum = op;
                                     any = 1;
-                                    IMCC_debug(interpreter, DEBUG_OPT2," -> %I\n", ins2);
+                                    IMCC_debug(interpreter, DEBUG_OPT2,
+                                            " -> %I\n", ins2);
                                 }
                             }
                         }
@@ -686,7 +693,7 @@ IMCC_subst_constants(Interp *interpreter, IMC_Unit * unit, char *name,
         "iseq", "isne", "islt", "isle", "isgt", "isge", "cmp"
     };
     const char *ops2[] = {
-        "abs", "neg", "not", "fact", "sqrt",
+        "abs", "neg", "not", "fact", "sqrt", "ceil", "floor"
         "acos", "asec", "asin",
         "atan", "cos", "cosh", "exp", "ln", "log10", "log2", "sec",
         "sech", "sin", "sinh", "tan", "tanh", "fact"
@@ -702,9 +709,6 @@ IMCC_subst_constants(Interp *interpreter, IMC_Unit * unit, char *name,
     char b[128], fmt[64], op[20];
     const char *debug_fmt = NULL;   /* gcc -O uninit warn */
     int found, branched;
-    parrot_context_t *ctx;
-    INTVAL regs_used[4] = {3,3,3,3};
-
 
     /* construct a FLOATVAL_FMT with needed precision */
     switch (NUMVAL_SIZE) {
@@ -785,9 +789,6 @@ IMCC_subst_constants(Interp *interpreter, IMC_Unit * unit, char *name,
         *ok = 0;
         return NULL;
     }
-    /* preserve registers */
-    ctx = CONTEXT(interpreter->ctx);
-    Parrot_alloc_context(interpreter, regs_used);
 
     IMCC_debug(interpreter, DEBUG_OPT1, debug_fmt, name);
     /* we construct a parrot instruction
@@ -834,13 +835,6 @@ IMCC_subst_constants(Interp *interpreter, IMC_Unit * unit, char *name,
         IMCC_debug(interpreter, DEBUG_OPT1, "%I\n", tmp);
     }
     *ok = 1;
-    /*
-     * restore and recycle register frame
-     */
-    Parrot_free_context(interpreter, CONTEXT(interpreter->ctx), 1);
-    CONTEXT(interpreter->ctx) = ctx;
-    interpreter->ctx.bp = ctx->bp;
-    interpreter->ctx.bp_ps = ctx->bp_ps;
     return tmp;
 }
 
@@ -1011,12 +1005,12 @@ branch_cond_loop_swap(Interp *interp, IMC_Unit *unit, Instruction *branch,
             regs[get_branch_regno(cond)] = 
                 mk_label_address(interp, str_dup(label));
             tmp = INS(interp, unit, (char*)neg_op, "", regs, args, 0, 0);
-            subst_ins(unit, branch, tmp, 1);
             
             IMCC_debug(interp, DEBUG_OPT1, 
             "loop %s -> %s converted to post-test, added label %s\n",
             branch->r[0]->name, get_branch_reg(cond)->name, label);
 
+            subst_ins(unit, branch, tmp, 1);
             ostat.branch_cond_loop++;
             changed = 1;
         }
@@ -1045,7 +1039,7 @@ branch_cond_loop_swap(Interp *interp, IMC_Unit *unit, Instruction *branch,
 static int
 branch_cond_loop(Interp *interpreter, IMC_Unit * unit)
 {
-    Instruction *ins, *cond, *end, *start;
+    Instruction *ins, *cond, *end, *start, *prev;
     SymReg * r;
     int changed = 0, found;
 
@@ -1083,7 +1077,15 @@ branch_cond_loop(Interp *interpreter, IMC_Unit * unit)
                     char *lbl = get_branch_reg(cond)->name;
                     r = get_sym(lbl);
                     if (r && (r->type & VTADDRESS) && r->first_ins == end) {
-                        changed |= branch_cond_loop_swap(interpreter, unit, ins, start, cond);
+                        /* the current ins is replaced - remember prev
+                         * and set ins again after the changes
+                         */
+                        prev = ins->prev;
+                        if (!prev)
+                            continue;
+                        changed |= branch_cond_loop_swap(interpreter, 
+                                unit, ins, start, cond);
+                        ins = prev->next;
                     }
                 }
             }

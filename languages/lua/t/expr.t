@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2005-2006 The Perl Foundation.  All Rights Reserved.
-# $Id: expr.t 11586 2006-02-16 17:44:54Z fperrad $
+# $Id: expr.t 11798 2006-03-06 07:28:55Z fperrad $
 
 =head1 NAME
 
@@ -75,6 +75,7 @@ text
 OUT
 
 language_output_is( 'lua', <<'CODE', <<'OUT', 'logical op' );
+print(10 or 20)
 print(10 or error())
 print(nil or "a")
 print(nil and 10)
@@ -83,6 +84,7 @@ print(false and nil)
 print(false or nil)
 print(10 and 20)
 CODE
+10
 10
 a
 nil

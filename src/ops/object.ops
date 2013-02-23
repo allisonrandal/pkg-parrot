@@ -217,8 +217,7 @@ pointer for the new PMC is put in there).
 =cut
 
 inline op newclass(out PMC, in STR) :object_classes {
-  PMC* class = $1 = pmc_new(interpreter, enum_class_ParrotClass);
-  Parrot_new_class(interpreter, class, $2);
+  $1 = pmc_new_init(interpreter, enum_class_ParrotClass, (PMC*)$2);
   goto NEXT();
 }
 
@@ -249,22 +248,24 @@ inline op subclass(out PMC, in PMC) :object_classes {
 
 op subclass(out PMC, in STR, in STR) :object_classes {
   PMC *class = Parrot_class_lookup(interpreter, $2);
+  opcode_t *next = expr NEXT();
   if (PMC_IS_NULL(class)) {
-    internal_exception(NO_CLASS, "Class '%s' doesn't exist",
+    real_exception(interpreter, next, NO_CLASS, "Class '%s' doesn't exist",
 		string_to_cstring( interpreter, $3 ));
   }
   $1 = VTABLE_subclass(interpreter, class, $3);
-  goto NEXT();
+  goto ADDRESS(next);
 }
 
 op subclass(out PMC, in STR) :object_classes {
   PMC *class = Parrot_class_lookup(interpreter, $2);
+  opcode_t *next = expr NEXT();
   if (PMC_IS_NULL(class)) {
-    internal_exception(NO_CLASS, "Class '%s' doesn't exist",
+    real_exception(interpreter, next, NO_CLASS, "Class '%s' doesn't exist",
 		string_to_cstring( interpreter, $2 ));
   }
   $1 = VTABLE_subclass(interpreter, class, NULL);
-  goto NEXT();
+  goto ADDRESS(next);
 }
 
 =item B<getclass>(out PMC, in STR)
@@ -279,13 +280,14 @@ character, so Perl's Foo::Bar would be Foo\0Bar.
 
 inline op getclass(out PMC, in STR) :object_classes {
   PMC *class = Parrot_class_lookup(interpreter, $2);
+  opcode_t *next = expr NEXT();
   if (PMC_IS_NULL(class)) {
-    internal_exception(NO_CLASS, "Class '%s' doesn't exist",
+    real_exception(interpreter, next, NO_CLASS, "Class '%s' doesn't exist",
 		string_to_cstring( interpreter, $2 ));
   }
   else
     $1 = class;
-  goto NEXT();
+  goto ADDRESS(next);
 }
 
 =item B<singleton>(in PMC)  B<(unimplemented)>
@@ -317,21 +319,8 @@ Get the class name for the class in $2 and put it in $1.
 =cut
 
 inline op classname(out STR, in PMC) :object_base {
-  PMC* classname_pmc;
-
-  if (!(PObj_get_FLAGS($2) & (PObj_is_class_FLAG|PObj_is_object_FLAG))) {
     $1 = VTABLE_name(interpreter, $2);
-  }
-  else {
-    classname_pmc = get_attrib_num((Buffer *)PMC_data($2), PCD_CLASS_NAME);
-    if (classname_pmc) {
-      $1 = VTABLE_get_string(interpreter, classname_pmc);
-    }
-    else {
-      internal_exception(NO_CLASS, "Class doesn't exist");
-    }
-  }
-  goto NEXT();
+    goto NEXT();
 }
 
 
@@ -434,13 +423,15 @@ Throws an exception if $3 isn't in $2's hierarchy.
 =cut
 
 op classoffset(out INT, in PMC, in STR) :object_classes {
+    opcode_t *next = expr NEXT();
     INTVAL offset;
     offset = Parrot_class_offset(interpreter, $2, $3);
     if (offset < 0) {
-        internal_exception(NO_CLASS, "Class not parent of object");
+        real_exception(interpreter, next, NO_CLASS,
+            "Class not parent of object");
     }
     $1 = offset;
-    goto NEXT();
+    goto ADDRESS(next);
 }
 
 

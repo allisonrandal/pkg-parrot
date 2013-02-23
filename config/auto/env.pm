@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: env.pm 11662 2006-02-19 03:22:51Z jhoblitt $
+# $Id: env.pm 11744 2006-02-26 10:55:39Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ use base qw(Parrot::Configure::Step::Base);
 
 use Parrot::Configure::Step ':auto';
 
-$description = "Determining if your C library has setenv / unsetenv...";
+$description = 'Determining if your C library has setenv / unsetenv';
 @args        = qw(verbose);
 
 sub runstep

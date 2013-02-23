@@ -532,7 +532,7 @@ create_lexinfo(Interp *interpreter, IMC_Unit *unit, PMC *sub, int need_lex)
     /* TODO use CONST_STRING */
     decl_lex = const_string(interpreter, "declare_lex_preg");
     lex_info_id = Parrot_get_ctx_HLL_type(interpreter, enum_class_LexInfo);
-    lex_info_class = Parrot_base_vtables[lex_info_id]->class;
+    lex_info_class = interpreter->vtables[lex_info_id]->class;
     decl_lex_meth = VTABLE_find_method(interpreter,
             lex_info_class, decl_lex);
     if (!decl_lex_meth) {
@@ -671,7 +671,11 @@ add_const_pmc_sub(Interp *interpreter, SymReg *r,
     type = (r->pcc_sub->calls_a_sub & ITPCCYIELD) ?
         enum_class_Coroutine :
         unit->outer ? enum_class_Closure : enum_class_Sub;
-    /* TODO constant - see also src/packfile.c
+    /*
+     * use a possible type mapping for the Sub PMCs
+     */
+    type = Parrot_get_ctx_HLL_type(interpreter, type);
+    /* TODO create constant - see also src/packfile.c
     */
     sub_pmc = pmc_new(interpreter, type);
     PObj_get_FLAGS(sub_pmc) |= (r->pcc_sub->pragma & SUB_FLAG_PF_MASK);
@@ -695,7 +699,7 @@ add_const_pmc_sub(Interp *interpreter, SymReg *r,
     sub->namespace = ns_pmc;
     sub->start_offs = offs;
     sub->end_offs = end;
-    sub->HLL_id = unit->HLL_id;
+    sub->HLL_id = CONTEXT(interpreter->ctx)->current_HLL;
     for (i = 0; i < 4; ++i)
         sub->n_regs_used[i] = unit->n_regs_used[i];
     sub->lex_info = create_lexinfo(interpreter, unit, sub_pmc,
@@ -919,7 +923,7 @@ make_pmc_const(Interp *interpreter, SymReg *r)
         s = string_unescape_cstring(interpreter, r->name + 1, '\'', NULL);
     else
         s = string_unescape_cstring(interpreter, r->name, 0, NULL);
-    class = Parrot_base_vtables[r->pmc_type]->class;
+    class = interpreter->vtables[r->pmc_type]->class;
     p = VTABLE_new_from_string(interpreter, class, s, PObj_constant_FLAG);
     /* append PMC constant */
     k = PDB_extend_const_table(interpreter);
@@ -1199,7 +1203,7 @@ e_pbc_emit(Interp *interpreter, void *param, IMC_Unit * unit, Instruction * ins)
     }
     if (ins->op && *ins->op) {
         SymReg *addr, *r;
-        opcode_t last_label = 0;
+        opcode_t last_label = 1;
 #if IMC_TRACE_HIGH
         PIO_eprintf(NULL, "emit_pbc: op [%d %s]\n", ins->opnum, ins->op);
 #endif
@@ -1211,7 +1215,8 @@ e_pbc_emit(Interp *interpreter, void *param, IMC_Unit * unit, Instruction * ins)
                 IMCC_fatal(interpreter, 1, "e_pbc_emit: "
                         "no label offset defined for '%s'\n", addr->name);
             last_label = addr->color - npc;
-            IMCC_debug(interpreter, DEBUG_PBC_FIXUP, "branch label at pc %d addr %d %s %d\n",
+            IMCC_debug(interpreter, DEBUG_PBC_FIXUP, 
+                    "branch label at pc %d addr %d %s %d\n",
                     npc, addr->color, addr->name, last_label);
         }
         /* add debug line info */
@@ -1243,11 +1248,12 @@ e_pbc_emit(Interp *interpreter, void *param, IMC_Unit * unit, Instruction * ins)
                 case PARROT_ARG_IC:
                     /* branch instruction */
                     if (op_info->labels[i]) {
-                        if (last_label == 0)   /* we don't have a branch with offset 0 !? */
+                        if (last_label == 1)   
+                            /* we don't have a branch with offset 1 !? */
                             IMCC_fatal(interpreter, 1, "e_pbc_emit: "
                                     "no label offset found\n");
                         *pc++ = last_label;
-                        last_label = 0;
+                        last_label = 1;
                         break;
                         /* else fall through */
                     }
