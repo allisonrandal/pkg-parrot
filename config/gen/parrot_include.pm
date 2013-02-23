@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: parrot_include.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: parrot_include.pm 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ my @files = qw(
     include/parrot/string.h
     include/parrot/vtable.h
     include/parrot/warnings.h
-    classes/timer.pmc
+    src/classes/timer.pmc
     src/utils.c
 );
 my $destdir = 'runtime/parrot/include';
@@ -47,7 +47,7 @@ my $destdir = 'runtime/parrot/include';
 sub runstep {
     my $self = shift;
     # need vtable.h now
-    system($^X, "build_tools/vtable_h.pl");
+    system($^X, "tools/build/vtable_h.pl");
     my @generated = ();
     for my $f (@files) {
 	my $in_def = ''; # in #define='def', in enum='enum'

@@ -1,7 +1,7 @@
 #! perl -w
 
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pmc.t 9919 2005-11-12 16:00:52Z leo $
+# $Id: pmc.t 10433 2005-12-10 20:05:50Z leo $
 
 =head1 NAME
 
@@ -429,6 +429,7 @@ CODE
 1001
 OUTPUT
 
+SKIP: { skip("no instantiate", 1);
 output_is(<<'CODE', <<'OUTPUT', "instantiate - no args");
     getclass P2, "Integer"
     set I0, 0	# unproto
@@ -445,6 +446,7 @@ CODE
 Integer
 0
 OUTPUT
+}
 
 output_is(<<'CODE', <<'OUT', ".const - Sub constant");
 .pcc_sub :main main:

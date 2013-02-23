@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: embed.c 10177 2005-11-25 15:05:03Z leo $
+$Id: embed.c 10373 2005-12-06 12:19:56Z leo $
 
 =head1 NAME
 
@@ -261,7 +261,7 @@ Read in a bytecode, unpack it into a C<PackFile> structure, and do fixups.
 */
 
 struct PackFile *
-Parrot_readbc(Interp *interpreter, const char *filename)
+Parrot_readbc(Interp *interpreter, const char *fullname)
 {
     INTVAL program_size, wanted;
     char *program_code;
@@ -271,27 +271,15 @@ Parrot_readbc(Interp *interpreter, const char *filename)
 #ifdef PARROT_HAS_HEADER_SYSMMAN
     int fd = -1;
 #endif
-    const char *fullname;
 
-    if (filename == NULL || strcmp(filename, "-") == 0) {
+    if (fullname == NULL || strcmp(fullname, "-") == 0) {
         /* read from STDIN */
         io = stdin;
         /* read 1k at a time */
         program_size = 0;
-        fullname = filename;    /* gcc -O3 warn */
     }
     else {
-
-        STRING *fs;
-
-        fullname = Parrot_locate_runtime_file(interpreter, filename,
-                PARROT_RUNTIME_FT_PBC);
-        if (fullname == NULL) {
-            PIO_eprintf(interpreter, "Parrot VM: Can't locate %s, code %i.\n",
-                        filename, errno);
-            return NULL;
-        }
-        fs = string_make(interpreter, fullname,
+        STRING *fs = string_make(interpreter, fullname,
                 strlen(fullname), NULL, 0);
         if (!Parrot_stat_info_intval(interpreter, fs, STAT_EXISTS)) {
             PIO_eprintf(interpreter, "Parrot VM: Can't stat %s, code %i.\n",

@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: pic.c 10301 2005-12-01 22:32:51Z particle $
+$Id: pic.c 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -83,7 +83,7 @@ lookup of the cache has to be done in the opcode itself.
 #endif
 
 /* needs a Makefile dependency */
-/* #include "../classes/pmc_integer.h" */
+/* #include "classes/pmc_integer.h" */
 
 extern void Parrot_Integer_i_subtract_Integer(Interp* , PMC* pmc, PMC* value);
 

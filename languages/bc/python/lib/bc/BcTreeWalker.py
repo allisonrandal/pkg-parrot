@@ -1,4 +1,4 @@
-### $ANTLR 2.7.5 (20051104): "bc_python.g" -> "BcTreeWalker.py"$
+### $ANTLR 2.7.5 (20050416): "bc_python.g" -> "BcTreeWalker.py"$
 ### import antlr and other modules ..
 import sys
 import antlr
@@ -62,6 +62,12 @@ PIR_NOOP = 41
 PIR_COMMENT = 42
 PIR_NEWLINE = 43
 PAST_Stmts = 44
+PAST_Code = 45
+PAST_Stmt = 46
+PAST_Exp = 47
+PAST_Op = 48
+PAST_Val = 49
+PAST_Noop = 50
 
 ### user code>>>
 
@@ -120,8 +126,8 @@ class Walker(antlr.TreeParser):
             reg_name = "$P%d" % self.reg_num
             self.reg_num = self.reg_num + 1
             pir = "\n" + \
-                 reg_name + " = new .Float\n" + \
-                 reg_name + " = add " + reg_name_left + ", " + reg_name_right + "\n #"
+            reg_name + " = new .Float\n" + \
+            reg_name + " = add " + reg_name_left + ", " + reg_name_right + "\n #"
             plus_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), left_AST, right_AST, self.astFactory.create(PIR_OP,pir));
             currentAST.root = plus_AST
             if (plus_AST != None) and (plus_AST.getFirstChild() != None):
@@ -249,8 +255,8 @@ class Walker(antlr.TreeParser):
             reg_name = "$P%d" % self.reg_num
             self.reg_num = self.reg_num + 1
             pir = "\n" + \
-                 reg_name + " = new .Float\n" + \
-                 reg_name + " = sub " + reg_name_left + ", " + reg_name_right + "\n #"
+            reg_name + " = new .Float\n" + \
+            reg_name + " = sub " + reg_name_left + ", " + reg_name_right + "\n #"
             minus_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), left_AST, right_AST, self.astFactory.create(PIR_OP,pir));
             currentAST.root = minus_AST
             if (minus_AST != None) and (minus_AST.getFirstChild() != None):
@@ -308,8 +314,8 @@ class Walker(antlr.TreeParser):
             reg_name = "$P%d" % self.reg_num
             self.reg_num = self.reg_num + 1
             pir = "\n" + \
-                 reg_name + " = new .Float\n" + \
-                 reg_name + " = mul " + reg_name_left + ", " + reg_name_right + "\n #"
+               reg_name + " = new .Float\n" + \
+               reg_name + " = mul " + reg_name_left + ", " + reg_name_right + "\n #"
             mul_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), left_AST, right_AST, self.astFactory.create(PIR_OP,pir));
             currentAST.root = mul_AST
             if (mul_AST != None) and (mul_AST.getFirstChild() != None):
@@ -367,8 +373,8 @@ class Walker(antlr.TreeParser):
             reg_name = "$P%d" % self.reg_num
             self.reg_num = self.reg_num + 1
             pir = "\n" + \
-                 reg_name + " = new .Float\n" + \
-                 reg_name + " = div " + reg_name_left + ", " + reg_name_right + "\n #"
+               reg_name + " = new .Float\n" + \
+               reg_name + " = div " + reg_name_left + ", " + reg_name_right + "\n #"
             div_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), left_AST, right_AST, self.astFactory.create(PIR_OP,pir));
             currentAST.root = div_AST
             if (div_AST != None) and (div_AST.getFirstChild() != None):
@@ -426,8 +432,8 @@ class Walker(antlr.TreeParser):
             reg_name = "$P%d" % self.reg_num
             self.reg_num = self.reg_num + 1
             pir = "\n" + \
-                 reg_name + " = new .Float\n" + \
-                 reg_name + " = mod " + reg_name_left + ", " + reg_name_right + "\n #"
+               reg_name + " = new .Float\n" + \
+               reg_name + " = mod " + reg_name_left + ", " + reg_name_right + "\n #"
             mod_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), left_AST, right_AST, self.astFactory.create(PIR_OP,pir));
             currentAST.root = mod_AST
             if (mod_AST != None) and (mod_AST.getFirstChild() != None):
@@ -972,16 +978,16 @@ class Walker(antlr.TreeParser):
         self.returnAST = None
         currentAST = antlr.ASTPair()
         gen_antlr_past_AST = None
-        B_AST = None
-        B = None
+        E_LIST_AST = None
+        E_LIST = None
         try:      ## for error handling
             pass
-            B = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
-            self.expr_list(_t)
+            E_LIST = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            self.past_expr_list(_t)
             _t = self._retTree
-            B_AST = self.returnAST
+            E_LIST_AST = self.returnAST
             gen_antlr_past_AST = currentAST.root
-            gen_antlr_past_AST = antlr.make(self.astFactory.create(PAST_Stmts,"dummy past stmts\n#"));
+            gen_antlr_past_AST = antlr.make(self.astFactory.create(PAST_Stmts,"dummy past stmts"), E_LIST_AST)
             currentAST.root = gen_antlr_past_AST
             if (gen_antlr_past_AST != None) and (gen_antlr_past_AST.getFirstChild() != None):
                 currentAST.child = gen_antlr_past_AST.getFirstChild()
@@ -995,6 +1001,301 @@ class Walker(antlr.TreeParser):
                 _t = _t.getNextSibling()
         
         self.returnAST = gen_antlr_past_AST
+        self._retTree = _t
+    
+    def past_expr_list(self, _t):    
+        
+        past_expr_list_AST_in = None
+        if _t != antlr.ASTNULL:
+            past_expr_list_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        past_expr_list_AST = None
+        try:      ## for error handling
+            pass
+            _cnt112= 0
+            while True:
+                if not _t:
+                    _t = antlr.ASTNULL
+                la1 = _t.getType()
+                if False:
+                    pass
+                elif la1 and la1 in [PIR_PRINT_PMC]:
+                    pass
+                    self.past_p_expr_p_newline(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                elif la1 and la1 in [PIR_FUNCTION_DEF]:
+                    pass
+                    self.past_function_def(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                else:
+                        break
+                    
+                _cnt112 += 1
+            if _cnt112 < 1:
+                raise antlr.NoViableAltException(_t)
+            past_expr_list_AST = currentAST.root
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = past_expr_list_AST
+        self._retTree = _t
+    
+    def past_p_expr_p_newline(self, _t):    
+        
+        past_p_expr_p_newline_AST_in = None
+        if _t != antlr.ASTNULL:
+            past_p_expr_p_newline_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        past_p_expr_p_newline_AST = None
+        E1_AST = None
+        E1 = None
+        try:      ## for error handling
+            pass
+            _t114 = _t
+            tmp13_AST = None
+            tmp13_AST_in = None
+            tmp13_AST = self.astFactory.create(_t)
+            tmp13_AST_in = _t
+            _currentAST114 = currentAST.copy()
+            currentAST.root = currentAST.child
+            currentAST.child = None
+            self.match(_t,PIR_PRINT_PMC)
+            _t = _t.getFirstChild()
+            E1 = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            self.past_expr(_t)
+            _t = self._retTree
+            E1_AST = self.returnAST
+            currentAST = _currentAST114
+            _t = _t114
+            _t = _t.getNextSibling()
+            past_p_expr_p_newline_AST = currentAST.root
+            past_p_expr_p_newline_AST = antlr.make(self.astFactory.create(PAST_Code,"two statements"), antlr.make(self.astFactory.create(PAST_Stmt,"dummy stmt 1"), antlr.make(self.astFactory.create(PAST_Exp,"dummy exp 1"), antlr.make(self.astFactory.create(PAST_Op,"dummy print op 1"), antlr.make(self.astFactory.create(PAST_Exp,"dummy exp 1:1"), E1_AST)))), antlr.make(self.astFactory.create(PAST_Stmt,"dummy stmt 2"), antlr.make(self.astFactory.create(PAST_Exp,"dummy exp 2"), antlr.make(self.astFactory.create(PAST_Op,"dummy print op 2"), antlr.make(self.astFactory.create(PAST_Exp,"dummy exp 2:1"), self.astFactory.create(PAST_Val,"\"\\n\""))))));
+            currentAST.root = past_p_expr_p_newline_AST
+            if (past_p_expr_p_newline_AST != None) and (past_p_expr_p_newline_AST.getFirstChild() != None):
+                currentAST.child = past_p_expr_p_newline_AST.getFirstChild()
+            else:
+                currentAST.child = past_p_expr_p_newline_AST
+            currentAST.advanceChildToEnd()
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = past_p_expr_p_newline_AST
+        self._retTree = _t
+    
+    def past_function_def(self, _t):    
+        
+        past_function_def_AST_in = None
+        if _t != antlr.ASTNULL:
+            past_function_def_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        past_function_def_AST = None
+        try:      ## for error handling
+            pass
+            tmp14_AST = None
+            tmp14_AST_in = None
+            tmp14_AST = self.astFactory.create(_t)
+            tmp14_AST_in = _t
+            self.addASTChild(currentAST, tmp14_AST)
+            self.match(_t,PIR_FUNCTION_DEF)
+            _t = _t.getNextSibling()
+            past_function_def_AST = currentAST.root
+            past_function_def_AST = antlr.make(self.astFactory.create(PAST_Val,"not implemented yet"))
+            currentAST.root = past_function_def_AST
+            if (past_function_def_AST != None) and (past_function_def_AST.getFirstChild() != None):
+                currentAST.child = past_function_def_AST.getFirstChild()
+            else:
+                currentAST.child = past_function_def_AST
+            currentAST.advanceChildToEnd()
+            past_function_def_AST = currentAST.root
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = past_function_def_AST
+        self._retTree = _t
+    
+    def past_expr(self, _t):    
+        
+        past_expr_AST_in = None
+        if _t != antlr.ASTNULL:
+            past_expr_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        past_expr_AST = None
+        E_AST = None
+        E = None
+        try:      ## for error handling
+            if not _t:
+                _t = antlr.ASTNULL
+            la1 = _t.getType()
+            if False:
+                pass
+            elif la1 and la1 in [LETTER,MUL,DIV,MOD,PLUS,MINUS]:
+                pass
+                if not _t:
+                    _t = antlr.ASTNULL
+                la1 = _t.getType()
+                if False:
+                    pass
+                elif la1 and la1 in [PLUS]:
+                    pass
+                    self.plus(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                elif la1 and la1 in [MINUS]:
+                    pass
+                    self.minus(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                elif la1 and la1 in [MUL]:
+                    pass
+                    self.mul(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                elif la1 and la1 in [DIV]:
+                    pass
+                    self.div(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                elif la1 and la1 in [MOD]:
+                    pass
+                    self.mod(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                elif la1 and la1 in [LETTER]:
+                    pass
+                    self.namedExpression(_t)
+                    _t = self._retTree
+                    self.addASTChild(currentAST, self.returnAST)
+                else:
+                        raise antlr.NoViableAltException(_t)
+                    
+                past_expr_AST = currentAST.root
+                past_expr_AST = antlr.make(self.astFactory.create(PAST_Val,"Not implemented yet"));
+                currentAST.root = past_expr_AST
+                if (past_expr_AST != None) and (past_expr_AST.getFirstChild() != None):
+                    currentAST.child = past_expr_AST.getFirstChild()
+                else:
+                    currentAST.child = past_expr_AST
+                currentAST.advanceChildToEnd()
+                past_expr_AST = currentAST.root
+            elif la1 and la1 in [NUMBER,UNARY_MINUS]:
+                pass
+                E = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+                self.past_signExpression(_t)
+                _t = self._retTree
+                E_AST = self.returnAST
+                self.addASTChild(currentAST, self.returnAST)
+                past_expr_AST = currentAST.root
+                past_expr_AST = E_AST
+                currentAST.root = past_expr_AST
+                if (past_expr_AST != None) and (past_expr_AST.getFirstChild() != None):
+                    currentAST.child = past_expr_AST.getFirstChild()
+                else:
+                    currentAST.child = past_expr_AST
+                currentAST.advanceChildToEnd()
+                past_expr_AST = currentAST.root
+            else:
+                    raise antlr.NoViableAltException(_t)
+                
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = past_expr_AST
+        self._retTree = _t
+    
+    def past_signExpression(self, _t):    
+        
+        past_signExpression_AST_in = None
+        if _t != antlr.ASTNULL:
+            past_signExpression_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        past_signExpression_AST = None
+        i1_AST = None
+        i1 = None
+        i2_AST = None
+        i2 = None
+        try:      ## for error handling
+            if not _t:
+                _t = antlr.ASTNULL
+            la1 = _t.getType()
+            if False:
+                pass
+            elif la1 and la1 in [NUMBER]:
+                pass
+                i1 = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+                self.integer(_t)
+                _t = self._retTree
+                i1_AST = self.returnAST
+                self.addASTChild(currentAST, self.returnAST)
+                past_signExpression_AST = currentAST.root
+                val = i1.getText();
+                past_signExpression_AST = antlr.make(self.astFactory.create(PAST_Val,val));
+                currentAST.root = past_signExpression_AST
+                if (past_signExpression_AST != None) and (past_signExpression_AST.getFirstChild() != None):
+                    currentAST.child = past_signExpression_AST.getFirstChild()
+                else:
+                    currentAST.child = past_signExpression_AST
+                currentAST.advanceChildToEnd()
+                past_signExpression_AST = currentAST.root
+            elif la1 and la1 in [UNARY_MINUS]:
+                pass
+                _t118 = _t
+                tmp15_AST = None
+                tmp15_AST_in = None
+                tmp15_AST = self.astFactory.create(_t)
+                tmp15_AST_in = _t
+                self.addASTChild(currentAST, tmp15_AST)
+                _currentAST118 = currentAST.copy()
+                currentAST.root = currentAST.child
+                currentAST.child = None
+                self.match(_t,UNARY_MINUS)
+                _t = _t.getFirstChild()
+                i2 = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+                self.integer(_t)
+                _t = self._retTree
+                i2_AST = self.returnAST
+                self.addASTChild(currentAST, self.returnAST)
+                currentAST = _currentAST118
+                _t = _t118
+                _t = _t.getNextSibling()
+                past_signExpression_AST = currentAST.root
+                val = '-' + i2.getText();
+                past_signExpression_AST = antlr.make(self.astFactory.create(PAST_Val,val));
+                currentAST.root = past_signExpression_AST
+                if (past_signExpression_AST != None) and (past_signExpression_AST.getFirstChild() != None):
+                    currentAST.child = past_signExpression_AST.getFirstChild()
+                else:
+                    currentAST.child = past_signExpression_AST
+                currentAST.advanceChildToEnd()
+                past_signExpression_AST = currentAST.root
+            else:
+                    raise antlr.NoViableAltException(_t)
+                
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = past_signExpression_AST
         self._retTree = _t
     
 
@@ -1043,6 +1344,12 @@ _tokenNames = [
     "PIR_NOOP", 
     "PIR_COMMENT", 
     "PIR_NEWLINE", 
-    "PAST_Stmts"
+    "PAST_Stmts", 
+    "PAST_Code", 
+    "PAST_Stmt", 
+    "PAST_Exp", 
+    "PAST_Op", 
+    "PAST_Val", 
+    "PAST_Noop"
 ]
     

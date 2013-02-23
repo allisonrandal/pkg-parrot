@@ -1,4 +1,31 @@
-# $Id: ChangeLog 10343 2005-12-04 15:27:40Z leo $
+# $Id: ChangeLog 10479 2005-12-13 01:50:55Z particle $
+
+2005.12-12    particle
+	* moved io/ directory to src/io/
+	* moved classes/ directory to src/classes/
+	* moved dynclasses/ directory to src/dynclasses/
+
+2005.12-08    particle
+	* moved types/ directory to src/types/
+	* moved pf/ directory to src/packfile/
+	* moved ops/ directory to src/ops/
+
+2005.12-08    particle
+	* moved charset/ directory to src/charset/
+	* moved encodings/ directory to src/encodings/
+
+2005.12.07    particle
+	* moved imcc/ directory to compilers/imcc/
+
+2005.12.06    particle
+	* moved util/ directory to tools/util/
+	* removed imcc/examples/ directory
+	* moved ast/ directory to compilers/ast/
+
+2005.12.05    particle
+	* moved imcc/docs/ directory to docs/imcc/
+	* moved build_tools/ directory to tools/build/
+	* modified MANIFEST, MANIFEST.generated, and MANIFEST.SKIP
 
 2005.12.04    leo
 	* Released 0.4.0
@@ -3548,9 +3575,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 10343 2005-12-04 15:27:40Z leo $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 10479 2005-12-13 01:50:55Z particle $
 	into generated files
-	   but the $Id: ChangeLog 10343 2005-12-04 15:27:40Z leo $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 10479 2005-12-13 01:50:55Z particle $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

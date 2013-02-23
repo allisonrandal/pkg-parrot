@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: dynext.c 9509 2005-10-18 18:56:07Z bernhard $
+$Id: dynext.c 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -69,17 +69,12 @@ store_lib_pmc(Parrot_Interp interpreter, PMC* lib_pmc, STRING *path,
     iglobals = interpreter->iglobals;
     dyn_libs = VTABLE_get_pmc_keyed_int(interpreter, iglobals,
             IGLOBALS_DYN_LIBS);
-    if (!dyn_libs) {
-        dyn_libs = pmc_new(interpreter, enum_class_ResizablePMCArray);
-        VTABLE_set_pmc_keyed_int(interpreter, iglobals,
-                IGLOBALS_DYN_LIBS, dyn_libs);
-    }
     /*
      * remember path/file in props
      */
-    set_cstring_prop(interpreter, lib_pmc, "_filename", path);
+    set_cstring_prop(interpreter, lib_pmc, "_filename", path);  /* XXX */
     set_cstring_prop(interpreter, lib_pmc, "_type", type);
-    VTABLE_push_pmc(interpreter, dyn_libs, lib_pmc);
+    VTABLE_set_pmc_keyed_str(interpreter, dyn_libs, path, lib_pmc);
 }
 
 /*
@@ -97,27 +92,14 @@ If it does, return it. Otherwise, return NULL.
 static PMC*
 is_loaded(Parrot_Interp interpreter, STRING *path)
 {
-    PMC *iglobals, *dyn_libs, *prop, *lib_pmc;
-    STRING *key;
-    INTVAL i, n;
+    PMC *iglobals, *dyn_libs;
 
     iglobals = interpreter->iglobals;
     dyn_libs = VTABLE_get_pmc_keyed_int(interpreter, iglobals,
             IGLOBALS_DYN_LIBS);
-    if (!dyn_libs) {
+    if (!VTABLE_exists_keyed_str(interpreter, dyn_libs, path))
         return NULL;
-    }
-    n = VTABLE_elements(interpreter, dyn_libs);
-    key = const_string(interpreter, "_filename");
-    /* we could use an ordered hash for faster lookup here */
-    for (i = 0; i < n; i++) {
-        lib_pmc = VTABLE_get_pmc_keyed_int(interpreter, dyn_libs, i);
-        prop = VTABLE_getprop(interpreter, lib_pmc, key);
-        if (!string_compare(interpreter,
-                    VTABLE_get_string(interpreter, prop), path))
-            return lib_pmc;
-    }
-    return NULL;
+    return VTABLE_get_pmc_keyed_str(interpreter, dyn_libs, path);
 }
 
 /*
@@ -133,101 +115,49 @@ Return path and handle of a dynamic lib, setting lib_name to just the filestem
 */
 
 static STRING *
-get_path(Interp *interpreter, STRING *lib, void **handle, char **lib_name)
+get_path(Interp *interpreter, STRING *lib, void **handle, STRING *wo_ext, STRING *ext)
 {
-    STRING *path;
-    char *full_name, *file_name, *file_w_ext = NULL;
-    char *tmp_lib_name, *path_end, *ext_start = NULL;
+    STRING *path, *full_name;
     const char *err = NULL;    /* buffer returned from Parrot_dlerror */
+    PMC *iglobals, *lib_paths, *share_ext;
+    INTVAL i, n;
 
-    /* Find the pure library name, without path or extension.  */
-    file_name = string_to_cstring(interpreter, lib);
-    tmp_lib_name = file_name;
-    path_end = strrchr(tmp_lib_name, '/');
-    if (! path_end)
-        path_end = strrchr(tmp_lib_name, '\\');
-    if (path_end)
-        tmp_lib_name = path_end+1;
-    *lib_name = malloc(strlen(tmp_lib_name)+1);
-    strcpy(*lib_name, tmp_lib_name);
-    ext_start = strrchr(*lib_name, '.');
-    if (ext_start)
-        *ext_start = '\0';
+    iglobals = interpreter->iglobals;
+    lib_paths = VTABLE_get_pmc_keyed_int(interpreter, iglobals,
+            IGLOBALS_LIB_PATHS);
+    share_ext = VTABLE_get_pmc_keyed_int(interpreter, lib_paths, 
+	    PARROT_LIB_DYN_EXTS);
 
     /*
      * first, try to add an extension to the file if it has none.
      */
-    if (! ext_start) {
-        file_w_ext = malloc(strlen(file_name) +
-                strlen(PARROT_LOAD_EXT) + 1);
-        strcpy(file_w_ext, file_name);
-        strcat(file_w_ext, PARROT_LOAD_EXT);
-        full_name = Parrot_locate_runtime_file(interpreter, file_w_ext,
-                PARROT_RUNTIME_FT_DYNEXT);
-        if (full_name) {
-            *handle = Parrot_dlopen(full_name);
-            if (*handle) {
-                path = string_from_cstring(interpreter, full_name, 0);
-                string_cstring_free(file_name);
-                string_cstring_free(full_name);
-                string_cstring_free(file_w_ext);
-                return path;
-            }
-            err = Parrot_dlerror();
-            Parrot_warn(interpreter, PARROT_WARNINGS_DYNEXT_FLAG, "Couldn't load '%s': %s\n",
-                    full_name, err ? err : "unknown reason");
-            string_cstring_free(file_name);
-            string_cstring_free(full_name);
-            string_cstring_free(file_w_ext);
-            return NULL;
-        }
+    if (! ext) {
+	n = VTABLE_elements(interpreter, share_ext);
+	for (i = 0; i < n; ++i) {
+	    ext = VTABLE_get_string_keyed_int(interpreter, share_ext, i);
+	    full_name = string_concat(interpreter, wo_ext, ext, 0);
+	    path = Parrot_locate_runtime_file_str(interpreter, full_name,
+		    PARROT_RUNTIME_FT_DYNEXT);
+	    if (path) {
+		*handle = Parrot_dlopen(path->strstart);
+		if (*handle) {
+		    return path;
+		}
+		err = Parrot_dlerror();
+		Parrot_warn(interpreter, PARROT_WARNINGS_DYNEXT_FLAG, "Couldn't load '%Ss': %s\n",
+			full_name, err ? err : "unknown reason");
+		return NULL;
+	    }
 
-        /*
-         * File with extension and prefix was not found, 
-         * so try file.extension w/o prefix
-         */
-        *handle = Parrot_dlopen(file_w_ext);
-        if (*handle) {
-            path = string_from_cstring(interpreter, file_w_ext, 0);
-            string_cstring_free(file_name);
-            string_cstring_free(file_w_ext);
-            return path;
-        }
-        string_cstring_free(file_w_ext);
-        if (strcmp(PARROT_LOAD_EXT, PARROT_SHARE_EXT)) {
-            file_w_ext = malloc(strlen(file_name) +
-                    strlen(PARROT_SHARE_EXT) + 1);
-            strcpy(file_w_ext, file_name);
-            strcat(file_w_ext, PARROT_SHARE_EXT);
-            full_name = Parrot_locate_runtime_file(interpreter, file_w_ext,
-                    PARROT_RUNTIME_FT_DYNEXT);
-            if (full_name) {
-                *handle = Parrot_dlopen(full_name);
-                if (*handle) {
-                    path = string_from_cstring(interpreter, full_name, 0);
-                    string_cstring_free(file_name);
-                    string_cstring_free(file_w_ext);
-                    return path;
-                }
-                err = Parrot_dlerror();
-                Parrot_warn(interpreter, PARROT_WARNINGS_DYNEXT_FLAG, "Couldn't load '%s': %s\n",
-                        full_name, err ? err : "unknown reason");
-                string_cstring_free(file_name);
-                string_cstring_free(file_w_ext);
-                return NULL;
-            }
-            /*
-             * then file.extension w/o prefix
-             */
-            *handle = Parrot_dlopen(file_w_ext);
-            if (*handle) {
-                path = string_from_cstring(interpreter, file_w_ext, 0);
-                string_cstring_free(file_name);
-                string_cstring_free(file_w_ext);
-                return path;
-            }
-            string_cstring_free(file_w_ext);
-        }
+	    /*
+	     * File with extension and prefix was not found, 
+	     * so try file.extension w/o prefix
+	     */
+	    *handle = Parrot_dlopen(full_name->strstart);
+	    if (*handle) {
+		return full_name;
+	    }
+	}
     }
     /*
      * finally, try the given file name as is. We still use
@@ -235,15 +165,12 @@ get_path(Interp *interpreter, STRING *lib, void **handle, char **lib_name)
      * the standard locations, and (b) the angle of the slashes are adjusted as
      * required for non-Unix systems.
      */
-    full_name = Parrot_locate_runtime_file(interpreter, file_name,
+    full_name = Parrot_locate_runtime_file_str(interpreter, lib,
             PARROT_RUNTIME_FT_DYNEXT);
     if (full_name) {
-        *handle = Parrot_dlopen(full_name);
+        *handle = Parrot_dlopen(full_name->strstart);
         if (*handle) {
-            path = string_from_cstring(interpreter, full_name, 0);
-            string_cstring_free(file_name);
-            string_cstring_free(full_name);
-            return path;
+            return full_name;
         }
     }
     /*
@@ -251,19 +178,17 @@ get_path(Interp *interpreter, STRING *lib, void **handle, char **lib_name)
      * [shouldn't this happen in Parrot_locate_runtime_file instead?]
      */
 #ifdef WIN32
-    if (memcmp(file_name, "lib", 3) == 0) {
-        *handle = Parrot_dlopen(file_name + 3);
+    if (memcmp(lib->strstart, "lib", 3) == 0) {
+        *handle = Parrot_dlopen((char*)lib->strstart + 3);
         if (*handle) {
-            path = string_from_cstring(interpreter, file_name + 3, 0);
-            string_cstring_free(file_name);
+            path = string_substr(interpreter, lib, 3, lib->strlen - 3, NULL, 0);
             return path;
         }
     }
 #endif
     err = Parrot_dlerror();
-    Parrot_warn(interpreter, PARROT_WARNINGS_DYNEXT_FLAG, "Couldn't load '%s': %s\n",
-            file_name, err ? err : "unknown reason");
-    string_cstring_free(file_name);
+    Parrot_warn(interpreter, PARROT_WARNINGS_DYNEXT_FLAG, "Couldn't load '%Ss': %s\n",
+            lib, err ? err : "unknown reason");
     return NULL;
 }
 
@@ -308,7 +233,7 @@ Parrot_init_lib(Interp *interpreter,
         /*
          * this PMC should better be constant, but then all the contents
          * and the metadata have to be constant too
-         * s. also build_tools/ops2c.pl and lib/Parrot/Pmc2c.pm
+         * s. also tools/build/ops2c.pl and lib/Parrot/Pmc2c.pm
          */
         lib_pmc = pmc_new(interpreter, enum_class_ParrotLibrary);
     }
@@ -331,10 +256,22 @@ Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer)
     void (*init_func)(Interp *, PMC *);
     char *cinit_func_name, *cload_func_name;
     PMC *lib_pmc;
-    char *lib_name;	/* library stem without path or extension.  */
+    STRING *lib_name, *wo_ext, *ext;	/* library stem without path or extension.  */
 
     UNUSED(initializer);
-    path = get_path(interpreter, lib, &handle, &lib_name);
+    /* Find the pure library name, without path or extension.  */
+    /*
+     * TODO move the class_count_mutex here
+     *
+     * LOCK()
+     */
+    lib_name = parrot_split_path_ext(interpreter, lib, &wo_ext, &ext);
+    lib_pmc = is_loaded(interpreter, wo_ext);
+    if (lib_pmc) {
+	/* UNLOCK() */
+        return lib_pmc;
+    }
+    path = get_path(interpreter, lib, &handle, wo_ext, ext);
     if (!path || !handle) {
         /*
          * XXX internal_exception? return PMCNULL?
@@ -344,36 +281,24 @@ Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer)
     }
 
     /*
-     * TODO move the class_count_mutex here
-     *
-     * LOCK()
-     */
-    lib_pmc = is_loaded(interpreter, path);
-    if (lib_pmc) {
-        Parrot_dlclose(handle);
-        /* UNLOCK */
-        return lib_pmc;
-    }
-    /*
      * work around gcc 3.3.3 and other problem with dynclasses
      * something during library loading doesn't stand a DOD run
      */
     Parrot_block_DOD(interpreter);
     /* get load_func */
-    load_func_name = Parrot_sprintf_c(interpreter, "Parrot_lib_%s_load",
+    load_func_name = Parrot_sprintf_c(interpreter, "Parrot_lib_%Ss_load",
                                       lib_name);
     cload_func_name = string_to_cstring(interpreter, load_func_name);
     load_func = (PMC * (*)(Interp *))D2FPTR(Parrot_dlsym(handle,
                 cload_func_name));
     string_cstring_free(cload_func_name);
     /* get init_func */
-    init_func_name = Parrot_sprintf_c(interpreter, "Parrot_lib_%s_init",
+    init_func_name = Parrot_sprintf_c(interpreter, "Parrot_lib_%Ss_init",
                                       lib_name);
     cinit_func_name = string_to_cstring(interpreter, init_func_name);
     init_func = (void (*)(Interp *, PMC *))D2FPTR(Parrot_dlsym(handle,
                 cinit_func_name));
     string_cstring_free(cinit_func_name);
-    string_cstring_free(lib_name);
 
     lib_pmc = Parrot_init_lib(interpreter, load_func, init_func);
 
@@ -390,7 +315,7 @@ Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer)
     /*
      * remember lib_pmc in iglobals
      */
-    store_lib_pmc(interpreter, lib_pmc, path, type);
+    store_lib_pmc(interpreter, lib_pmc, wo_ext, type);
     /* UNLOCK */
     Parrot_unblock_DOD(interpreter);
     return lib_pmc;
@@ -402,7 +327,7 @@ Parrot_load_lib(Interp *interpreter, STRING *lib, PMC *initializer)
 
 =head1 SEE ALSO
 
-F<include/parrot/dynext.h> and F<classes/parrotlibrary.pmc>.
+F<include/parrot/dynext.h> and F<src/classes/parrotlibrary.pmc>.
 
 =head1 HISTORY
 

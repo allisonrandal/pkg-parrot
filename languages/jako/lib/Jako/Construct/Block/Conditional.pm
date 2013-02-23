@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Conditional.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Conditional.pm 10454 2005-12-12 00:43:01Z gregor $
 #
 
 use strict;
@@ -54,7 +54,7 @@ sub compile
   }
 
   if ($kind eq 'if') {
-    $op = $compiler->invert_relop($op);
+    $op = $compiler->invert_relop($op); # Invert the test, since we jump *unless* the condition is true
   }
   elsif ($kind eq 'unless') {
     $kind = 'if';

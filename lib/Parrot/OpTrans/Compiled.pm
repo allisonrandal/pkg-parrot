@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Compiled.pm 7329 2004-12-22 01:59:12Z chromatic $
+# $Id: Compiled.pm 10361 2005-12-05 23:09:12Z particle $
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ Parrot::OpTrans::Compiled - Transform Parrot Bytecode To C
 =head1 DESCRIPTION
 
 C<Parrot::OpTrans::Compiled> inherits from C<Parrot::OpTrans> and is
-used by F<build_tools/pbc2c.pl> to transform Parrot bytecode to a C code
+used by F<tools/build/pbc2c.pl> to transform Parrot bytecode to a C code
 run loop.
 
 =head2 Instance Methods

@@ -1,9 +1,9 @@
 #!perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: labels.t 10238 2005-11-29 03:16:07Z particle $
+# $Id: labels.t 10394 2005-12-07 20:07:02Z particle $
 
 use strict;
-use Parrot::Test tests => 7;
+use Parrot::Test tests => 6;
 
 ##############################
 pir_output_is(<<'CODE', <<'OUT', "goto 1");
@@ -30,34 +30,6 @@ foo:
 	goto bar
 .end
 
-CODE
-ok 1
-ok 2
-OUT
-
-##############################
-pir_output_is(<<'CODE', <<'OUT', "local labels");
-# this code is illegal for assemble.pl
-.sub __main
-	null $I0
-	_sub1()
-	_sub2()
-	end
-.end
-.sub _sub1
-	if $I0 goto L1
-	print "ok 1\n"
-L1:
-.end
-.sub _sub2
-	branch L1
-L2:
-	.return()
-L1:
-	print "ok 2\n"
-	unless $I0 goto L2
-	print "nok\n"
-.end
 CODE
 ok 1
 ok 2

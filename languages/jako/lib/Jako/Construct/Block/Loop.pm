@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Loop.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Loop.pm 10452 2005-12-12 00:35:41Z gregor $
 #
 
 use strict;
@@ -54,13 +54,11 @@ sub compile
     $right = $self->right->value;
   }
 
-  if ($kind eq 'while') {
-    $op = $compiler->invert_relop($op); # Invert the sense for 'while' loops.
-  }
-
   if ($kind eq 'while' or $kind eq 'until') {
+    my $test = ($kind eq 'while') ? 'unless' : 'if';
+
     $compiler->emit("${prefix}_NEXT:");
-    $compiler->emit("  if $left $op $right goto ${prefix}_LAST");
+    $compiler->emit("  $test $left $op $right goto ${prefix}_LAST");
     $compiler->emit("${prefix}_REDO:");
 
     if ($self->content) {

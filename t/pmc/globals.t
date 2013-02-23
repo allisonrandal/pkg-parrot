@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: globals.t 7249 2004-12-07 13:08:40Z leo $
+# $Id: globals.t 7803 2005-04-11 13:37:27Z leo $
 
 =head1 NAME
 

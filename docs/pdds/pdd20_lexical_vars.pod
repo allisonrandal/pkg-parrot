@@ -7,7 +7,7 @@ docs/pdds/pdd20_lexical_vars.pod - Lexical variables
 
 =head1 VERSION
 
-$Revision$
+$Revision: 10336 $
 
 =head1 ABSTRACT
 

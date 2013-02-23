@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: bc.in 10475 2005-12-13 00:36:26Z particle $
 
 # Setup of some commands
 PERL           = ${perl}
@@ -49,14 +49,14 @@ maintain: $(PYTHON_RUNTIME_FILES)
 # TODO: antlr2past shouldn't need BcLexerTokenTypes.txt
 $(PYTHON_RUNTIME_FILES): grammar/bc_python.g grammar/antlr2past.g
 	antlr -o python/lib/bc grammar/bc_python.g
-	antlr -o python/lib/antlr2past grammar/antlr2past.g
 	$(CP) python/lib/bc/BcLexerTokenTypes.txt python/lib/antlr2past
+	antlr -o python/lib/antlr2past grammar/antlr2past.g
 
 clean:
 	$(RM_RF) \
-    python/lib/bc/*.pyc \
-    python/lib/antlr/*.pyc \
-    t/*.bc t/*.pir t/*.posix_out t/*.parrot_out
+    "python/lib/bc/*.pyc" \
+    "python/lib/antlr/*.pyc" \
+    "t/*.bc" "t/*.pir" "t/*.posix_out" "t/*.parrot_out"
 
 realclean: clean
 	$(RM_RF) \

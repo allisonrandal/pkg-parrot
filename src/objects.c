@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: objects.c 10301 2005-12-01 22:32:51Z particle $
+$Id: objects.c 10445 2005-12-11 15:58:47Z leo $
 
 =head1 NAME
 
@@ -1151,7 +1151,6 @@ next instance of this method.
 void
 Parrot_note_method_offset(Interp* interpreter, UINTVAL offset, PMC *method)
 {
-    CONTEXT(interpreter->ctx)->current_class_offset = offset;
 }
 
 /*

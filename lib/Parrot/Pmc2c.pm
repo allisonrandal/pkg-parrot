@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Pmc2c.pm 10093 2005-11-18 15:21:29Z coke $
+# $Id: Pmc2c.pm 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ Parrot::Pmc2c - PMC to C Code Generation
 =head1 DESCRIPTION
 
 C<Parrot::Pmc2c> (and the L<subclasses|/SUBCLASSES> defined in this
-file) is used by F<build_tools/pmc2c.pl> to generate C code from PMC files.
+file) is used by F<tools/build/pmc2c.pl> to generate C code from PMC files.
 
 =head2 Functions
 
@@ -223,7 +223,7 @@ EOC
 Returns C<$self> as a new instance.
 
 C<$self> is a hash reference C<eval>-ed from a F<*.dump> file generated
-by F<classes/pmc2c.pl> from a F<*.pmc> file. It is C<bless>-ed either into
+by F<src/classes/pmc2c.pl> from a F<*.pmc> file. It is C<bless>-ed either into
 C<Parrot::Pmc2c::::Standard>, or into one of the other I<special> PMCs:
 F<default>, C<delegate>, C<Null>, C<Ref> or C<SharedRef>.
 
@@ -497,7 +497,7 @@ sub proto ($$) {
 =item C<rewrite_nci_method($class, $method, $super, $super_table)>
 
 Rewrites the method body performing the various macro substitutions for
-nci method bodies (see F<classes/pmc2c.pl>).
+nci method bodies (see F<src/classes/pmc2c.pl>).
 
 =cut
 
@@ -515,7 +515,7 @@ sub rewrite_nci_method ($$$) {
 =item C<rewrite_vtable_method($class, $method, $super, $super_table)>
 
 Rewrites the method body performing the various macro substitutions for
-vtable method bodies (see F<classes/pmc2c.pl>).
+vtable method bodies (see F<src/classes/pmc2c.pl>).
 
 =cut
 

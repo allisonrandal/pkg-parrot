@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Test.pm 10095 2005-11-18 17:47:48Z particle $
+# $Id: Test.pm 10446 2005-12-11 16:13:16Z bernhard $
 
 =head1 NAME
 
@@ -54,11 +54,6 @@ if the  output matches the expected result.
 =item C<language_output_isnt( $language, $code, $expected, $description)> 
 
 Runs a langugage test and passes the test if a string comparison
-if a string comparison of the output with the unexpected result is false.
-
-=item C<pasm_output_isnt($code, $unexpected, $description)> or C<output_isnt($code, $unexpected, $description)>
-
-Runs the Parrot Assembler code and passes the test
 if a string comparison of the output with the unexpected result is false.
 
 =item C<pasm_output_is($code, $expected, $description)> or C<output_is($code, $expected, $description)>
@@ -512,7 +507,7 @@ sub _generate_functions {
     foreach my $func ( keys %language_test_map ) {
         no strict 'refs';
 
-        *{$package.'::'.$func} = sub ($$$;$) {
+        *{$package.'::'.$func} = sub ($$;$%) {
             my ( $language, @remaining ) = @_;
 
             my $meth = $language_test_map{$func};
@@ -570,6 +565,8 @@ sub _generate_functions {
             $exe_f =~ s@[\\/:]@$PConfig{slash}@g;
             my $out_f = per_test('.out', $test_no);
             my $build_f = per_test('.build', $test_no);
+            my $pdb_f = per_test('.pdb', $test_no);
+            my $ilk_f = per_test('.ilk', $test_no);
 
             open SOURCE, "> $source_f" or die "Unable to open '$source_f'";
             binmode SOURCE;
@@ -642,6 +639,8 @@ sub _generate_functions {
                 unlink $build_f;
                 unlink $exe_f;
                 unlink $obj_f;
+                unlink $pdb_f;
+                unlink $ilk_f;
             }
 
             return $pass;

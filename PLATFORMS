@@ -1,4 +1,4 @@
-# $Id: PLATFORMS 10344 2005-12-04 15:49:02Z leo $
+# $Id: PLATFORMS 10348 2005-12-05 16:12:38Z particle $
 
 Parrot was reported to compile and run tests successfully on the following
 platforms. See also http://smoke.parrotcode.org/smoke/ for recent results.
@@ -34,8 +34,8 @@ netbsd                                 Y             Y    Y*1
 openbsd                      Y    Y/5  Y     Y   -   Y    Y
 openbsd_beta_3.5-vax                                 Y*4  Y/26
 os2
-solaris8-sparc-cc       B    -    Y/425 -    -   -   Y    Y/15     20050804
-solaris8-sparc-gcc3.4.2 B    -    Y     -    Y   -   Y    Y/1      20050930
+solaris8-sparc-cc       B    -    -    -     -   -   -    -        20051202
+solaris8-sparc-gcc3.4.3 B    -    -    -     -   -   -    -        20051202
 solaris9-sparc-gcc3.3.2 B    -    Y/2  -     Y       Y    Y/2      20050814
 solaris10-sparc-gcc3.4.3 B                           Y*7  Y/1      20050804
 tru64-alpha-gcc          8                   Y       Y    Y

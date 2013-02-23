@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: global_setup.c 8220 2005-05-31 09:04:59Z leo $
+$Id: global_setup.c 10459 2005-12-12 12:54:33Z leo $
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ void
 init_world(Interp *interpreter)
 {
     PMC *iglobals;
-    PMC *self;
+    PMC *self, *pmc;
 
 #ifdef PARROT_HAS_PLATFORM_INIT_CODE
     Parrot_platform_init_code();
@@ -106,6 +106,19 @@ init_world(Interp *interpreter)
                 enum_class_ResizablePMCArray);
         Parrot_register_HLL(interpreter, parrot, NULL);
     }
+    /*
+     * lib search paths
+     */
+    parrot_init_library_paths(interpreter);
+    /*
+     * load_bytecode and dynlib loaded hash
+     */
+    pmc = pmc_new(interpreter, enum_class_Hash);
+    VTABLE_set_pmc_keyed_int(interpreter, iglobals,
+            IGLOBALS_PBC_LIBS, pmc);
+    pmc = pmc_new(interpreter, enum_class_Hash);
+    VTABLE_set_pmc_keyed_int(interpreter, iglobals,
+            IGLOBALS_DYN_LIBS, pmc);
 }
 
 /*

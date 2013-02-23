@@ -1,4 +1,4 @@
-### $ANTLR 2.7.5 (20051104): "antlr2past.g" -> "Antlr2PastTreeWalker.py"$
+### $ANTLR 2.7.5 (20050416): "antlr2past.g" -> "Antlr2PastTreeWalker.py"$
 ### import antlr and other modules ..
 import sys
 import antlr
@@ -62,6 +62,12 @@ PIR_NOOP = 41
 PIR_COMMENT = 42
 PIR_NEWLINE = 43
 PAST_Stmts = 44
+PAST_Code = 45
+PAST_Stmt = 46
+PAST_Exp = 47
+PAST_Op = 48
+PAST_Val = 49
+PAST_Noop = 50
 
 ### user code>>>
 
@@ -74,8 +80,9 @@ class Walker(antlr.TreeParser):
         antlr.TreeParser.__init__(self, *args, **kwargs)
         self.tokenNames = _tokenNames
         ### __init__ header action >>> 
-        self.reg_num   = 0;  # counter for unlimited number of PMC registers
+        self.reg       = 10;  # counter for unlimited number of PMC registers
         self.label_num = 0;  # counter for generation jump labels
+        self.level     = 0;  # for indentation
         ### __init__ header action <<< 
     
     ### user action >>>
@@ -88,82 +95,41 @@ class Walker(antlr.TreeParser):
         self.returnAST = None
         currentAST = antlr.ASTPair()
         gen_pir_past_AST = None
+        PEPN_AST = None
+        PEPN = None
         try:      ## for error handling
             pass
+            _t2 = _t
             tmp1_AST = None
             tmp1_AST_in = None
             tmp1_AST = self.astFactory.create(_t)
             tmp1_AST_in = _t
+            _currentAST2 = currentAST.copy()
+            currentAST.root = currentAST.child
+            currentAST.child = None
             self.match(_t,PAST_Stmts)
+            _t = _t.getFirstChild()
+            PEPN = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            self.p_expr_p_newline(_t)
+            _t = self._retTree
+            PEPN_AST = self.returnAST
+            currentAST = _currentAST2
+            _t = _t2
             _t = _t.getNextSibling()
             gen_pir_past_AST = currentAST.root
-            pir = """
-                 .local pmc val
-                 val = new 'PAST::Val'
-                 val.set_node('1', 0, 1 )
-                 
-                 .local pmc exp
-                 exp = new 'PAST::Exp'
-                 $P4 = new PerlArray
-                 push $P4, val 
-                 exp.set_node('1', 1, $P4)
-                 
-                 .local pmc op
-                 op = new 'PAST::Op'
-                 $P5 = new PerlArray
-                 push $P5, exp 
-                 op.set_node('1', 1, 'print' ,$P5)
-                 
-                 .local pmc exp
-                 exp = new 'PAST::Exp'
-                 $P6 = new PerlArray
-                 push $P6, op 
-                 exp.set_node('1', 1 ,$P6)
-                 
-                 .local pmc stmt1
-                 stmt1 = new 'PAST::Stmt'
-                 $P7 = new PerlArray
-                 push $P7, exp 
-                 stmt1.set_node('1', 1 ,$P7)
-                 
-                 .local pmc val
-                 val = new 'PAST::Val'
-                 val.set_node('1', 0, '"\\n"' )
-                 
-                 .local pmc exp
-                 exp = new 'PAST::Exp'
-                 $P4 = new PerlArray
-                 push $P4, val 
-                 exp.set_node('1', 1, $P4)
-                 
-                 .local pmc op
-                 op = new 'PAST::Op'
-                 $P5 = new PerlArray
-                 push $P5, exp 
-                 op.set_node('1', 1, 'print' ,$P5)
-                 
-                 .local pmc exp
-                 exp = new 'PAST::Exp'
-                 $P6 = new PerlArray
-                 push $P6, op 
-                 exp.set_node('1', 1 ,$P6)
-                 
-                 .local pmc stmt2
-                 stmt2 = new 'PAST::Stmt'
-                 $P7 = new PerlArray
-                 push $P7, exp 
-                 stmt2.set_node('1', 1 ,$P7)
+            pir_before = """
+            .local pmc stmts_children
+            stmts_children = new PerlArray
+            #"""
+            pir_after = """
+            .local pmc stmts
+            stmts = new 'PAST::Stmts'
             
-            
-                 .local pmc stmts
-                 stmts = new 'PAST::Stmts'
-                 $P8 = new PerlArray
-                 push $P8, stmt1
-                 push $P8, stmt2
-                 stmts.set_node('1', 1, $P8)
+            stmts.set_node('1', 1, stmts_children)
                  
             #"""
-            gen_pir_past_AST = antlr.make(self.astFactory.create(PIR_OP,pir));
+            
+            gen_pir_past_AST = antlr.make(self.astFactory.create(PIR_OP,pir_before), PEPN_AST, self.astFactory.create(PIR_OP,pir_after));
             currentAST.root = gen_pir_past_AST
             if (gen_pir_past_AST != None) and (gen_pir_past_AST.getFirstChild() != None):
                 currentAST.child = gen_pir_past_AST.getFirstChild()
@@ -178,6 +144,339 @@ class Walker(antlr.TreeParser):
         
         self.returnAST = gen_pir_past_AST
         self._retTree = _t
+    
+    def p_expr_p_newline(self, _t):    
+        
+        p_expr_p_newline_AST_in = None
+        if _t != antlr.ASTNULL:
+            p_expr_p_newline_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        p_expr_p_newline_AST = None
+        S1_AST = None
+        S1 = None
+        S2_AST = None
+        S2 = None
+        try:      ## for error handling
+            pass
+            _t4 = _t
+            tmp2_AST = None
+            tmp2_AST_in = None
+            tmp2_AST = self.astFactory.create(_t)
+            tmp2_AST_in = _t
+            _currentAST4 = currentAST.copy()
+            currentAST.root = currentAST.child
+            currentAST.child = None
+            self.match(_t,PAST_Code)
+            _t = _t.getFirstChild()
+            S1 = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            reg_S1=self.stmt(_t)
+            _t = self._retTree
+            S1_AST = self.returnAST
+            S2 = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            reg_S2=self.stmt(_t)
+            _t = self._retTree
+            S2_AST = self.returnAST
+            currentAST = _currentAST4
+            _t = _t4
+            _t = _t.getNextSibling()
+            p_expr_p_newline_AST = currentAST.root
+            pir = """
+            push stmts_children, $P%d
+            push stmts_children, $P%d
+            #""" % ( reg_S1, reg_S2 )
+            
+            p_expr_p_newline_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), S1_AST, S2_AST, self.astFactory.create(PIR_OP,pir));
+            currentAST.root = p_expr_p_newline_AST
+            if (p_expr_p_newline_AST != None) and (p_expr_p_newline_AST.getFirstChild() != None):
+                currentAST.child = p_expr_p_newline_AST.getFirstChild()
+            else:
+                currentAST.child = p_expr_p_newline_AST
+            currentAST.advanceChildToEnd()
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = p_expr_p_newline_AST
+        self._retTree = _t
+    
+    def stmt(self, _t):    
+        reg = None
+        
+        stmt_AST_in = None
+        if _t != antlr.ASTNULL:
+            stmt_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        stmt_AST = None
+        E_AST = None
+        E = None
+        try:      ## for error handling
+            pass
+            _t6 = _t
+            tmp3_AST = None
+            tmp3_AST_in = None
+            tmp3_AST = self.astFactory.create(_t)
+            tmp3_AST_in = _t
+            _currentAST6 = currentAST.copy()
+            currentAST.root = currentAST.child
+            currentAST.child = None
+            self.match(_t,PAST_Stmt)
+            _t = _t.getFirstChild()
+            E = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            reg_E=self.exp(_t)
+            _t = self._retTree
+            E_AST = self.returnAST
+            currentAST = _currentAST6
+            _t = _t6
+            _t = _t.getNextSibling()
+            stmt_AST = currentAST.root
+            reg = self.reg;
+            self.reg = self.reg + 10;
+            pir = """
+            $P%d = new 'PAST::Stmt'
+            $P%d = new PerlArray
+            
+            push $P%d, $P%d 
+            $P%d.set_node('1', 1 ,$P%d)
+            #""" % (
+            reg,
+            reg + 1,
+            reg + 1, reg_E,
+            reg, reg + 1
+            )
+            
+            stmt_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), E_AST, self.astFactory.create(PIR_OP,pir));
+            currentAST.root = stmt_AST
+            if (stmt_AST != None) and (stmt_AST.getFirstChild() != None):
+                currentAST.child = stmt_AST.getFirstChild()
+            else:
+                currentAST.child = stmt_AST
+            currentAST.advanceChildToEnd()
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = stmt_AST
+        self._retTree = _t
+        return reg
+    
+    def exp(self, _t):    
+        reg = None
+        
+        exp_AST_in = None
+        if _t != antlr.ASTNULL:
+            exp_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        exp_AST = None
+        O_AST = None
+        O = None
+        V_AST = None
+        V = None
+        try:      ## for error handling
+            pass
+            _t8 = _t
+            tmp4_AST = None
+            tmp4_AST_in = None
+            tmp4_AST = self.astFactory.create(_t)
+            tmp4_AST_in = _t
+            _currentAST8 = currentAST.copy()
+            currentAST.root = currentAST.child
+            currentAST.child = None
+            self.match(_t,PAST_Exp)
+            _t = _t.getFirstChild()
+            if not _t:
+                _t = antlr.ASTNULL
+            la1 = _t.getType()
+            if False:
+                pass
+            elif la1 and la1 in [PAST_Op]:
+                pass
+                O = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+                reg_O=self.op(_t)
+                _t = self._retTree
+                O_AST = self.returnAST
+                exp_AST = currentAST.root
+                reg = self.reg;
+                self.reg = self.reg + 10;
+                pir = """
+                         $P%d = new 'PAST::Exp'
+                         $P%d = new PerlArray
+                
+                         push $P%d, $P%d 
+                         $P%d.set_node('1', 1, $P%d)
+                #""" % (
+                         reg,
+                         reg + 1,
+                
+                         reg + 1, reg_O,
+                         reg, reg + 1
+                )
+                
+                exp_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), O_AST, self.astFactory.create(PIR_OP,pir));
+                currentAST.root = exp_AST
+                if (exp_AST != None) and (exp_AST.getFirstChild() != None):
+                    currentAST.child = exp_AST.getFirstChild()
+                else:
+                    currentAST.child = exp_AST
+                currentAST.advanceChildToEnd()
+            elif la1 and la1 in [PAST_Val]:
+                pass
+                V = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+                reg_V=self.val(_t)
+                _t = self._retTree
+                V_AST = self.returnAST
+                exp_AST = currentAST.root
+                reg = self.reg;
+                self.reg = self.reg + 10;
+                pir = """
+                         $P%d = new 'PAST::Exp'
+                         $P%d = new PerlArray
+                
+                         push $P%d, $P%d 
+                         $P%d.set_node('1', 1, $P%d)
+                #""" % (
+                         reg,
+                         reg + 1,
+                
+                         reg + 1, reg_V,
+                         reg, reg + 1
+                )
+                
+                exp_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), V_AST, self.astFactory.create(PIR_OP,pir));
+                currentAST.root = exp_AST
+                if (exp_AST != None) and (exp_AST.getFirstChild() != None):
+                    currentAST.child = exp_AST.getFirstChild()
+                else:
+                    currentAST.child = exp_AST
+                currentAST.advanceChildToEnd()
+            else:
+                    raise antlr.NoViableAltException(_t)
+                
+            currentAST = _currentAST8
+            _t = _t8
+            _t = _t.getNextSibling()
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = exp_AST
+        self._retTree = _t
+        return reg
+    
+    def op(self, _t):    
+        reg = None
+        
+        op_AST_in = None
+        if _t != antlr.ASTNULL:
+            op_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        op_AST = None
+        E_AST = None
+        E = None
+        try:      ## for error handling
+            pass
+            _t11 = _t
+            tmp5_AST = None
+            tmp5_AST_in = None
+            tmp5_AST = self.astFactory.create(_t)
+            tmp5_AST_in = _t
+            _currentAST11 = currentAST.copy()
+            currentAST.root = currentAST.child
+            currentAST.child = None
+            self.match(_t,PAST_Op)
+            _t = _t.getFirstChild()
+            E = antlr.ifelse(_t == antlr.ASTNULL, None, _t)
+            reg_E=self.exp(_t)
+            _t = self._retTree
+            E_AST = self.returnAST
+            currentAST = _currentAST11
+            _t = _t11
+            _t = _t.getNextSibling()
+            op_AST = currentAST.root
+            reg = self.reg;
+            self.reg = self.reg + 10;
+            pir = """
+                 $P%d = new 'PAST::Op'
+                 $P%d = new PerlArray
+            
+                 push $P%d, $P%d 
+                 $P%d.set_node('1', 1, 'print' ,$P%d)
+            #""" % (
+                 reg,
+                 reg + 1,
+            
+                 reg + 1, reg_E,
+                 reg, reg + 1
+            )
+            
+            op_AST = antlr.make(self.astFactory.create(PIR_NOOP,"noop"), E_AST, self.astFactory.create(PIR_OP,pir));
+            currentAST.root = op_AST
+            if (op_AST != None) and (op_AST.getFirstChild() != None):
+                currentAST.child = op_AST.getFirstChild()
+            else:
+                currentAST.child = op_AST
+            currentAST.advanceChildToEnd()
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = op_AST
+        self._retTree = _t
+        return reg
+    
+    def val(self, _t):    
+        reg = None
+        
+        val_AST_in = None
+        if _t != antlr.ASTNULL:
+            val_AST_in = _t
+        self.returnAST = None
+        currentAST = antlr.ASTPair()
+        val_AST = None
+        V = None
+        V_AST = None
+        try:      ## for error handling
+            pass
+            V = _t
+            V_AST_in = None
+            V_AST = self.astFactory.create(V)
+            self.match(_t,PAST_Val)
+            _t = _t.getNextSibling()
+            val_AST = currentAST.root
+            reg = self.reg;
+            self.reg = self.reg + 10;
+            pir = """
+                         $P%d = new 'PAST::Val'
+                         $P%d.set_node('1', 0, '%s' )
+            #""" % ( reg, reg, V.getText() )
+            
+            val_AST = antlr.make(self.astFactory.create(PIR_OP,pir));
+            currentAST.root = val_AST
+            if (val_AST != None) and (val_AST.getFirstChild() != None):
+                currentAST.child = val_AST.getFirstChild()
+            else:
+                currentAST.child = val_AST
+            currentAST.advanceChildToEnd()
+        
+        except antlr.RecognitionException, ex:
+            self.reportError(ex)
+            if _t:
+                _t = _t.getNextSibling()
+        
+        self.returnAST = val_AST
+        self._retTree = _t
+        return reg
     
 
 _tokenNames = [
@@ -225,6 +524,12 @@ _tokenNames = [
     "PIR_NOOP", 
     "PIR_COMMENT", 
     "PIR_NEWLINE", 
-    "PAST_Stmts"
+    "PAST_Stmts", 
+    "PAST_Code", 
+    "PAST_Stmt", 
+    "PAST_Exp", 
+    "PAST_Op", 
+    "PAST_Val", 
+    "PAST_Noop"
 ]
     

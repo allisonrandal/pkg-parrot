@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Ops.pm 5757 2004-03-27 22:23:02Z mikescott $
+# $Id: Ops.pm 10425 2005-12-10 01:51:41Z particle $
 
 =head1 NAME
 
@@ -39,9 +39,9 @@ sub new
 	return $self->SUPER::new(
 		'Ops', 'ops.html', '',
 		$self->new_group('Tools', '',
-			$self->new_item('', 'build_tools/ops2c.pl'),
-			$self->new_item('', 'ops/ops.num'),
-			$self->new_item('', 'build_tools/ops2pm.pl'),
+			$self->new_item('', 'tools/build/ops2c.pl'),
+			$self->new_item('', 'src/ops/ops.num'),
+			$self->new_item('', 'tools/build/ops2pm.pl'),
 		),
 		$self->new_group('Op Libs', '', 'ops'),
 	);

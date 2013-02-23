@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: extend.c 10177 2005-11-25 15:05:03Z leo $
+$Id: extend.c 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -1041,7 +1041,7 @@ DOD run.
 =iterm <Parrot_PMC Parrot_get_dod_registry(Parrot_INTERP)>
 
 Return Parrot's internal DOD registry PMC.
-See also: F<classes/addrregistry.pmc>.
+See also: F<src/classes/addrregistry.pmc>.
 
 =cut
 

@@ -1,5 +1,5 @@
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: Distribution.pm 10033 2005-11-16 20:28:19Z allison $
+# $Id: Distribution.pm 10425 2005-12-10 01:51:41Z particle $
 
 =head1 NAME
 
@@ -90,12 +90,20 @@ sub c_source_file_directories
 {
     my $self = shift;
     
-    return $self->directory_with_name('src'),
-        $self->directory_with_name('encodings'),
+    return
+        $self->directory_with_name('compilers')
+            ->directory_with_name('ast'),
+        $self->directory_with_name('compilers')
+            ->directory_with_name('imcc'),
+        $self->directory_with_name('examples')
+            ->directory_with_name('c'),
         $self->directory_with_name('io'),
-        $self->directory_with_name('pf'),
-        $self->directory_with_name('types'),
-        $self->directory_with_name('examples')->directory_with_name('c'),;
+        $self->directory_with_name('src'),
+        $self->directory_with_name('src/encodings'),
+        $self->directory_with_name('src/ops'),
+        $self->directory_with_name('src/packfile'),
+        $self->directory_with_name('src/types'),
+    ;
 }
 
 =item C<c_source_file_with_name($name)>
@@ -133,7 +141,11 @@ sub c_header_file_directories
 {
     my $self = shift;
     
-    return $self->directory_with_relative_path('include/parrot');
+    return
+        $self->directory_with_relative_path('compilers/ast'),
+        $self->directory_with_relative_path('compilers/imcc'),
+        $self->directory_with_relative_path('include/parrot'),
+    ;
 }
 
 =item C<c_header_file_with_name($name)>
@@ -254,12 +266,13 @@ sub gen_manifest_skip {
        my $patterns = capture_output( "$svn_cmd propget svn:ignore $dir" );
        # TODO: escape chars that are special in regular expressions
        push @skip, qq{# generated from svn:ignore of '$dir'},
-                   map { my $end = $dir_list{ $dir . $_} ? '$' : '/'; # ignore file or dir
-                         s/\./\\./g;                          # . is simply a dot
-                         s/\*/.*/g;                           # * is any amount of chars
-                         "^${dir}${_}\$",                     # SVN globs are specific to a dir
-                         "^${dir}${_}/",                      # SVN globs are specific to a dir
-                       } split( /\n/, $patterns );
+           map { 
+               my $end = $dir_list{ $dir . $_} ? '$' : '/'; # ignore file or dir
+               s/\./\\./g;                  # . is simply a dot
+               s/\*/.*/g;                   # * is any amount of chars
+               "^${dir}${_}\$",             # SVN globs are specific to a dir
+               "^${dir}${_}/",              # SVN globs are specific to a dir
+           } split( /\n/, $patterns );
     }
 
     return \@skip;

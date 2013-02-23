@@ -17,10 +17,12 @@ compiler, see:
 
 http://svn.lohutok.net/nam/trunk/parrot/docs/compiler_tools.pod
 
-Punie currently only parses and compiles a single statement to print a
-single digit, in the form of:
+Punie currently only parses and compiles a series of statements to print
+integers or double-quoted strings, in the form of:
 
   print 1;
+  print 45;
+  print "ok 1\n";
 
 =cut
 
@@ -34,9 +36,9 @@ single digit, in the form of:
 
     # Match against the source
     .local pmc match
-    .local pmc line
-    line = find_global "PunieGrammar", "line"
-    match = line(source)
+    .local pmc start_rule
+    start_rule = find_global "PunieGrammar", "prog"
+    match = start_rule(source)
 
     # Verify the match
     $I0 = match.__get_bool()

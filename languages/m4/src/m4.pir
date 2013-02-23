@@ -1,4 +1,4 @@
-# $Id: m4.pir 10280 2005-11-30 21:23:07Z bernhard $
+# $Id: m4.pir 10470 2005-12-12 22:00:51Z bernhard $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ m4.pir - An implementation of GNU m4 in Parrot Intermediate Representation
 =head1 DESCRIPTION
 
 Copyright:  2004-2005 Bernhard Schmalhofer.  All Rights Reserved.
-CVS Info:   $Id: m4.pir 10280 2005-11-30 21:23:07Z bernhard $
+CVS Info:   $Id: m4.pir 10470 2005-12-12 22:00:51Z bernhard $
 Overview:   Main of Parrot m4.
 History:    Ported from GNU m4 1.4
 References: http://www.gnu.org/software/m4/m4.html
@@ -48,8 +48,8 @@ Load needed libraries
 
 .sub "__onload" @LOAD
 
-  # load_bytecode "PGE.pbc"        # Loaded by Getopt/Long.pbc
-  #load_bytecode "Getopt/Long.pbc"  # This also loads PGE
+  #load_bytecode "Getopt/Long.pbc" 
+  # load_bytecode "PGE.pbc"       
 
 .end
 
@@ -65,6 +65,7 @@ Looks at the command line arguments and acts accordingly.
 
   # TODO: put this into '__onload'
   load_bytecode "Getopt/Long.pbc"  # This also loads PGE
+  load_bytecode "PGE.pbc"          # Parrot Grammar engine
 
   .local pmc get_options
   find_global get_options, "Getopt::Long", "get_options"

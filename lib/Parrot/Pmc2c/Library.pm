@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Library.pm 7900 2005-04-21 11:07:13Z leo $
+# $Id: Library.pm 10361 2005-12-05 23:09:12Z particle $
 
 =head1 NAME
 
@@ -168,7 +168,7 @@ EOC
 
 =over 4
 
-=item F<build_tools/pmc2c.pl>
+=item F<tools/build/pmc2c.pl>
 
 =back
 

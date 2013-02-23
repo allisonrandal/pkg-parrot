@@ -5,7 +5,7 @@
 # This program is free software. It is subject to the same license
 # as the Parrot interpreter.
 #
-# $Id: Call.pm 7819 2005-04-13 00:20:52Z gregor $
+# $Id: Call.pm 10453 2005-12-12 00:38:50Z gregor $
 #
 
 use strict;
@@ -110,6 +110,10 @@ sub compile
     }
   }
 
+  #
+  # For NCI (Native Call Interface):
+  #
+
   if (exists $props{fn} or exists $props{fnlib}) {
     foreach my $arg (@args) {
       $compiler->emit("  .arg $arg");
@@ -119,6 +123,11 @@ sub compile
  
     $compiler->emit("  call _${name}_THUNK");
   }
+
+  #
+  # For built-in subs (ops):
+  #
+
   elsif (exists $props{op}) {
     my $op = $props{op};
 
@@ -131,17 +140,17 @@ sub compile
 
     $compiler->emit("  $name ", join(", ", $dest, @args));
   }
+
+  #
+  # For user-defined subs:
+  #
+
   else {
 #    $self->DEBUG(0, "Calling '%s' as regular sub (props = %s)...", $name, join(", ", %props));
 
-    foreach my $arg (@args) {
-      $compiler->emit("  .arg $arg");
-    }
-
     $name =~ s/::/__/g;
 
-    $compiler->emit("  call _${name}");
-    $compiler->emit("  .result $dest");
+    $compiler->emit("  $dest = _${name}(" . join(", ", @args) . ")");
   }
 
   return 1;

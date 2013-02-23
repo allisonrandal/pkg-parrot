@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Examples.pm 6114 2004-05-22 12:30:08Z mikescott $
+# $Id: Examples.pm 10406 2005-12-08 19:55:13Z bernhard $
 
 =head1 NAME
 
@@ -47,7 +47,7 @@ sub new
 		$self->new_group('Streams', '', 'examples/streams'),
 		$self->new_group('Benchmarking', '', 'examples/benchmarks'),
 		$self->new_group('Speed Comparison', '', 'examples/mops'),
-		$self->new_group('Parrot Extensions', '', 'examples/pni'),
+		$self->new_group('Parrot Extensions', '', 'examples/nci'),
 	);
 }
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cppcomments.t 10143 2005-11-23 02:08:19Z particle $
+# $Id: cppcomments.t 10479 2005-12-13 01:50:55Z particle $
 
 use strict;
 use warnings;
@@ -24,25 +24,25 @@ Checks that no source file in the distribution uses C++ style comments.
 
 
 my @globs = qw(
-    ast/*.c
-    ast/*.h
-    classes/*.pmc
-    classes/*.c
-    dynclasses/*.pmc
-    encodings/*.c
-    imcc/*.c
-    imcc/*.h
+    compilers/ast/*.c
+    compilers/ast/*.h
+    compilers/imcc/*.c
+    compilers/imcc/*.h
     include/parrot/*.h
     include/parrot/oplib/*.h
-    io/*.c
-    io/*.h
     jit/*/*.h
-    ops/*.ops
-    ops/*.c
-    pf/*.c
     src/*.c
-    types/*.c
-    types/*.h
+    src/classes/*.pmc
+    src/classes/*.c
+    src/dynclasses/*.pmc
+    src/encodings/*.c
+    src/io/*.c
+    src/io/*.h
+    src/ops/*.ops
+    src/ops/*.c
+    src/packfile/*.c
+    src/types/*.c
+    src/types/*.h
 );
 
 my @comments;

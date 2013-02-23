@@ -11,7 +11,7 @@ Parrot's inter-routine calling conventions.
 
 =head1 VERSION
 
-$Revision$
+$Revision: 10264 $
 
 =head1 DESCRIPTION
 

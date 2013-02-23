@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: managedstruct.t 7594 2005-03-04 17:49:11Z bernhard $
+# $Id: managedstruct.t 7803 2005-04-11 13:37:27Z leo $
 
 =head1 NAME
 

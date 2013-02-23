@@ -1,18 +1,13 @@
 #! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: manifest.t 10305 2005-12-02 01:51:48Z particle $
+# $Id: manifest.t 10386 2005-12-07 12:00:41Z leo $
 
 use strict;
 use warnings;
 use lib qw( . lib ../lib ../../lib );
 use Test::More;
 
-use Data::Dumper;
-use File::Find qw(find);
 use ExtUtils::Manifest;
-use Parrot::Distribution;
-use Parrot::Revision;
-
 
 =head1 NAME
 
@@ -37,8 +32,6 @@ ok(-e $ExtUtils::Manifest::MANIFEST . '.SKIP', 'MANIFEST.SKIP exists');
 
 SKIP:
 {
-    skip 'Not a working copy' => 1
-        unless ($Parrot::Revision::svn_entries || `svk ls .`);
 
     diag "this may take a while...";
 

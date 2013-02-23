@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Tools.pm 5757 2004-03-27 22:23:02Z mikescott $
+# $Id: Tools.pm 10368 2005-12-06 01:04:53Z particle $
 
 =head1 NAME
 
@@ -42,13 +42,13 @@ sub new
 		'Tools', 'tools.html', '',
 		$self->new_group('Configuration', '',
 			$self->new_item('', 'tools/dev/cc_flags.pl'),
-			$self->new_item('', 'build_tools/build_nativecall.pl'),
-			$self->new_item('', 'build_tools/jit2h.pl'),
-			$self->new_item('', 'build_tools/vtable_h.pl'),
+			$self->new_item('', 'tools/build/nativecall.pl'),
+			$self->new_item('', 'tools/build/jit2h.pl'),
+			$self->new_item('', 'tools/build/vtable_h.pl'),
 		),
 		$self->new_group('Bytecode', '',
-			$self->new_item('', 'build_tools/fingerprint_c.pl'),
-			$self->new_item('', 'build_tools/pbc2c.pl'),
+			$self->new_item('', 'tools/build/fingerprint_c.pl'),
+			$self->new_item('', 'tools/build/pbc2c.pl'),
 			$self->new_item('', 'tools/dev/nm.pl'),
 			$self->new_item('', 'tools/dev/symlink.pl'),
 		),

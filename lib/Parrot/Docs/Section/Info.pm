@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Info.pm 7630 2005-03-13 13:04:14Z bernhard $
+# $Id: Info.pm 10361 2005-12-05 23:09:12Z particle $
 
 =head1 NAME
 
@@ -66,7 +66,7 @@ sub new
 		),
 		$self->new_group('History', '',
 			$self->new_item('Provide a timeline of changes made to the project.', 'ChangeLog'),
-			$self->new_item('Documents incompatible changes to Parrot that invalidate existing bytecode files. This is the new experimental alternative to the fingerprint produced by build_tools/fingerprint_c.pl.', 'PBC_COMPAT'),
+			$self->new_item('Documents incompatible changes to Parrot that invalidate existing bytecode files. This is the new experimental alternative to the fingerprint produced by tools/build/fingerprint_c.pl.', 'PBC_COMPAT'),
 		),
 	);
 }

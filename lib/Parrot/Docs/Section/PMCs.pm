@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: PMCs.pm 6362 2004-07-10 17:14:12Z mikescott $
+# $Id: PMCs.pm 10472 2005-12-12 22:12:28Z particle $
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ sub new
 {
 	my $self = shift;
 	my $dist = Parrot::Distribution->new;
-    my $dir = $dist->existing_directory_with_name('classes');
+    my $dir = $dist->existing_directory_with_name('src/classes');
 	my @tools_items = ();
 	
 	foreach my $file ($dir->files_with_suffix('pl'))

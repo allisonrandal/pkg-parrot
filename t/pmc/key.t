@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: key.t 6741 2004-10-01 21:16:56Z jrieks $
+# $Id: key.t 7803 2005-04-11 13:37:27Z leo $
 
 =head1 NAME
 

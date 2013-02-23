@@ -1,5 +1,5 @@
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: ops.pm 10204 2005-11-28 07:45:03Z fperrad $
+# $Id: ops.pm 10425 2005-12-10 01:51:41Z particle $
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ sub runstep {
       return               ( $a cmp $b )
     }
     grep { !/vtable\.ops/ }
-    glob "ops/*.ops"
+    glob "src/ops/*.ops"
   );
 
 

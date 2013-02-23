@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: IMCC.pm 5757 2004-03-27 22:23:02Z mikescott $
+# $Id: IMCC.pm 10425 2005-12-10 01:51:41Z particle $
 
 =head1 NAME
 
@@ -38,9 +38,9 @@ sub new
 	
 	return $self->SUPER::new(
 		'IMCC', 'imcc.html', '', 
-		$self->new_group('Documentation', '', 'imcc/docs'),
-		$self->new_group('Examples', '', 'imcc/examples'),
-		$self->new_group('Tests', '', 'imcc/t'),
+		$self->new_group('Documentation', '', 'docs/imcc'),
+		$self->new_group('Examples', '', 'examples/imcc'),
+		$self->new_group('Tests', '', 't/compilers/imcc'),
 	);
 }
 
