@@ -44,7 +44,8 @@ sub make_re {
 my $ident_re   = make_re('[A-Za-z_][A-Za-z0-9_]*');
 my $type_re    = make_re( '(?:(?:struct\s+)|(?:union\s+))?' . $ident_re . '\**' );
 my $const_re   = make_re( '(?:const\s+)?' );
-my $param_re   = make_re( $const_re . $type_re . '\s+' . $ident_re );
+my $c_param_re = make_re( $const_re . $type_re . '\s+' . $ident_re );
+my $param_re   = make_re( '(?:(?:' . $c_param_re . ')|(?:ARG[_A-Z]+\(\s*' . $c_param_re . '\)))' );
 my $arglist_re = make_re( '(?:' . $param_re . '(?:\s*,\s*' . $param_re . ')*)?' );
 my $method_re =
     make_re( '^\s*(' . $type_re . ')\s+(' . $ident_re . ')\s*\((' . $arglist_re . ')\)\s*$' );
@@ -227,6 +228,7 @@ EOM
     for my $entry ( @{$vtable} ) {
         next if ( $entry->[4] =~ /MMD_/ );
         my @args = split /,\s*/, $entry->[2];
+        s/^ARG[_A-Z]+\((.+)\)/$1/ for @args; # Strip annotations, if any
         unshift @args, "i interp", "p pmc";
         my $args = join ', ', map { ( split / /, $args[$_] )[-1] } ( 0 .. $#args );
         $macros .= <<"EOM";
@@ -316,6 +318,9 @@ sub vtbl_embed {
 
         next if $@;
 
+        # these are internals-ish and should not be exposed
+        next if $name =~ m/^(destroy|mark|invoke)$/;
+
         my $signature = join( ', ', @sig );
         my $arguments = join( ', ', @args );
 
@@ -343,10 +348,8 @@ sub vtbl_embed {
         $funcs .= sprintf $func_header, ( $ret_type, $name, $signature ) x 2;
 
         $funcs .= "    $ret_type retval;\n" unless $ret_type eq 'void';
-        $funcs .= "    PARROT_CALLIN_START( interp );\n    ";
         $funcs .= "retval = " unless $ret_type eq 'void';
         $funcs .= "VTABLE_$name( $arguments );
-    PARROT_CALLIN_END( interp );
     return";
         $funcs .= " retval" unless $ret_type eq 'void';
         $funcs .= ";\n}\n\n";
