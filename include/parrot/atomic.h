@@ -1,7 +1,7 @@
 /* atomic.h
  *  Copyright (C) 2006-2008, Parrot Foundation.
  *  SVN Info
- *     $Id: atomic.h 39977 2009-07-10 08:35:52Z fperrad $
+ *     $Id$
  *  Overview:
  *     This header implements portable atomic operations.
  *  Data Structure and Algorithms:

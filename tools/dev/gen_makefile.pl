@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: gen_makefile.pl 37353 2009-03-12 12:44:37Z fperrad $
+# $Id$
 
 use 5.008;
 use strict;
@@ -28,6 +28,10 @@ my $makefile = $ARGV[1];
 my $conf = Parrot::Configure->new();
 $conf->options->set( %{$args} );
 $conf->data()->get_PConfig(); #load configuration data
+foreach (@ARGV) {
+    next unless (/--(\w+)=(\w+)/);
+    $conf->data->set( $1 => $2 );
+}
 $conf->genfile(
     $template           => $makefile,
     file_type           => 'makefile',

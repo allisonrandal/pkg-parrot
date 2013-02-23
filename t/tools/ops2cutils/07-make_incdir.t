@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 07-make_incdir.t 37200 2009-03-08 11:46:01Z fperrad $
+# $Id$
 # 07-make_incdir.t
 
 use strict;

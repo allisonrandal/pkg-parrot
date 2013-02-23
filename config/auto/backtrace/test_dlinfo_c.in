@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2009, Parrot Foundation.
-$Id: test_dlinfo_c.in 37626 2009-03-21 21:36:23Z cotto $
+$Id$
 
 check that Dl_info is avaible
 */

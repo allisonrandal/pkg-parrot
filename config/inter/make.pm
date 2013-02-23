@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: make.pm 37440 2009-03-15 16:06:11Z rurban $
+# $Id$
 
 =head1 NAME
 
@@ -120,7 +120,7 @@ sub _set_make_c {
         # get the default value
         my $make_c = $conf->data->get('make_c');
 
-        # RT#43171 this is an ugly hack
+        # TT #1049: this is an ugly hack
         # replace the value for $(MAKE) with the actual path or we'll end up
         # with a variable that recursively refers to itself
         $make_c =~ s/\$\(MAKE\)/$prog/;

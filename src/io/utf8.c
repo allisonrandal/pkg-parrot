@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: utf8.c 38654 2009-05-09 20:02:23Z whiteknight $
+$Id$
 
 =head1 NAME
 
@@ -80,8 +80,8 @@ Parrot_io_read_utf8(PARROT_INTERP, ARGMOD(PMC *filehandle),
                 s2->charset  = Parrot_unicode_charset_ptr;
                 s2->encoding = Parrot_utf8_encoding_ptr;
 
-                /* RT#46413 need to check the amount read here? */
-                read         = Parrot_io_read_buffer(interp, filehandle, &s2);
+                /* TT #1257: need to check the amount read here? */
+                read = Parrot_io_read_buffer(interp, filehandle, &s2);
                 UNUSED(read);
 
                 s->strlen    = iter.charpos;

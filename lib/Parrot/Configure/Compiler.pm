@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Compiler.pm 38867 2009-05-17 10:27:28Z fperrad $
+# $Id$
 
 =head1 NAME
 

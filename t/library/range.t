@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: range.t 38697 2009-05-11 19:59:22Z NotFound $
+# $Id$
 
 =head1 NAME
 

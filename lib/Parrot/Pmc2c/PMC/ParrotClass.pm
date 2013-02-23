@@ -1,7 +1,15 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: ParrotClass.pm 40193 2009-07-21 13:11:18Z bacek $
+# $Id$
 
-=head1 Parrot::Pmc2c::ParrotClass Instance Methods
+=head1 NAME
+
+Parrot::Pmc2c::ParrotClass
+
+=head1 DESCRIPTION
+
+Instance Methods
+
+=head1 METHODS
 
 =over 4
 
@@ -18,6 +26,8 @@ use Parrot::Pmc2c::ComposedMethod;
 Mixes in delegate.pmc methods for all unimplmented methods except
 @dont_delegate which should fall through to the default.pmc
 implementation.
+
+=back
 
 =cut
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2009, Parrot Foundation.
-# $Id: maths.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 
 #
 # push number on befunge's stack.

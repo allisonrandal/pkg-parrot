@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: PMC.pm 39660 2009-06-18 21:42:24Z cotto $
+# $Id$
 #
 
 =head1 NAME
@@ -225,9 +225,9 @@ sub attributes {
 }
 
 sub filename {
-    my ( $self, $type ) = @_;
+    my ( $self, $type, $is_dynamic ) = @_;
     return $self->{filename} unless $type;
-    return Parrot::Pmc2c::UtilFunctions::filename( $self->{filename}, $type );
+    return Parrot::Pmc2c::UtilFunctions::filename( $self->{filename}, $type, $is_dynamic );
 }
 
 sub get_flags {

@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: squaak.pir 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 TITLE
 
@@ -57,7 +57,7 @@ to the Squaak compiler.
 .end
 
 
-.include 'src/gen_builtins.pir'
+.include 'src/builtins/say.pir'
 .include 'src/gen_grammar.pir'
 .include 'src/gen_actions.pir'
 

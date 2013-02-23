@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: spawnw.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;
@@ -26,6 +26,9 @@ So only the exit code can be tested.
 The returned value is actually returned from the 'waitpid' system call.
 In order to get the exit code from the spawned process, it needs to be right
 shifted by 8 bit.
+
+TT #1271: Do not rely on the existence of Perl5 here. Spawn Parrot or some
+other program which will exist on the target platform
 
 =head1 TODO
 

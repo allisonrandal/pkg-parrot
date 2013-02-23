@@ -1,7 +1,7 @@
 /* gdbmhash.pmc
  *  Copyright (C) 2005-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: gdbmhash.pmc 41222 2009-09-12 00:28:58Z darbelo $
+ *     $Id$
  *  Overview:
  *     These are the vtable functions for the GDBMHash PMC
  *  Data Structure and Algorithms:
@@ -93,7 +93,7 @@ So we do a bit of cheating here, and load it during class initialization.
 
     VTABLE void class_init() {
 #ifdef WIN32
-        /* RT #46393: What if libgdbm.so cannot be loaded */
+        /* TT #1252:  What if libgdbm.so cannot be loaded */
         /* Parrot_load_lib(interp, slib, NULL); */
         STRING *slib = CONST_STRING(interp, "gdbm3");
 #endif
@@ -383,12 +383,14 @@ Deletes the element associated with C<*key>.
         if (!dbf) return;
         keystr = make_hash_key(interp, key);
 
-        key_gdbm.dsize = keystr->strlen;
-        key_gdbm.dptr  = keystr->strstart;
+        key_gdbm.dptr  = Parrot_str_to_cstring(interp, keystr);
+        key_gdbm.dsize = strlen(key_gdbm.dptr);
 
         if (gdbm_exists(dbf, key_gdbm)) {
            gdbm_delete(dbf, key_gdbm);
         }
+
+        Parrot_str_free_cstring(key_gdbm.dptr);
 
         return;
     }

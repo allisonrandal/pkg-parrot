@@ -1,7 +1,7 @@
 /* binary.h
  *  Copyright (C) 2004-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: binary.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id$
  *  Overview:
  *     This is the header for the binary charset functions
  *  Data Structure and Algorithms:
@@ -20,8 +20,8 @@ PARROT_CANNOT_RETURN_NULL
 const CHARSET * Parrot_charset_binary_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_Parrot_charset_binary_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_charset_binary_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/string/charset/binary.c */
 

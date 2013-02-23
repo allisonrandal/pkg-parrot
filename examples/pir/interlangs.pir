@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: interlangs.pir 37097 2009-03-03 16:56:53Z NotFound $
+# $Id$
 
 # interlangs.pir
 # An example of language interoperability

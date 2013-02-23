@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: 08-pmc-pm.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 08-pmc-pm.t
 
 use strict;
@@ -49,6 +49,8 @@ pass("Completed all tests in $0");
     % prove t/tools/pmc2cutils/08-pmc-pm.t
 
 =head1 DESCRIPTION
+
+Test functionality of Parrot::Pmc2c::PMC.
 
 =head1 AUTHOR
 

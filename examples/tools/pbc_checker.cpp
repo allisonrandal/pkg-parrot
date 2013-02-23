@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009, Parrot Foundation.
- * $Id: pbc_checker.cpp 37363 2009-03-12 20:24:03Z NotFound $
+ * $Id$
 */
 
 // pbc_checker.cpp

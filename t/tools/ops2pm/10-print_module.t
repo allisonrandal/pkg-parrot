@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 10-print_module.t 39955 2009-07-09 00:02:26Z jkeenan $
+# $Id$
 # 10-print_module.t
 
 use strict;

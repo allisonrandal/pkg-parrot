@@ -1,7 +1,7 @@
 #! perl
 ################################################################################
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: install_files.pl 40040 2009-07-13 01:40:06Z jkeenan $
+# $Id$
 ################################################################################
 
 =head1 TITLE
@@ -148,8 +148,6 @@ my(%metatransforms) = (
         optiondir => 'doc',
         transform => sub {
             my($filehash) = @_;
-            $filehash->{Dest} =~ s#^docs/resources#resources#; # resources go in the top level of docs
-            $filehash->{Dest} =~ s/^docs/pod/; # other docs are actually raw Pod
             $filehash->{DestDirs} = [$parrotdir];
             return($filehash);
         },

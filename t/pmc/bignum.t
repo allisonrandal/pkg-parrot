@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: bignum.t 39595 2009-06-16 21:58:19Z Infinoid $
+# $Id$
 
 use strict;
 use warnings;

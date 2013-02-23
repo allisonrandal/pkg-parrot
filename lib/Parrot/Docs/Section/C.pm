@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: C.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -229,11 +229,6 @@ sub new {
             $self->c_pair_item( '', 'memory' ),
             $self->c_source_item( '', 'malloc' ),
             $self->c_source_item( '', 'malloc-trace' ),
-            $self->c_item(
-                '',
-                'pairs'   => ['resources'],
-                'sources' => ['res_lea']
-            ),
             $self->c_source_item( '', 'mark_sweep' ),
         ),
         $self->new_group(

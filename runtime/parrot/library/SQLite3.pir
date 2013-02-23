@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: SQLite3.pir 41154 2009-09-08 08:39:49Z mikehh $
+# $Id$
 
 .namespace ['SQLite3']
 

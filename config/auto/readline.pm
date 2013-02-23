@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: readline.pm 41071 2009-09-06 16:53:22Z NotFound $
+# $Id$
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ sub runstep {
     my $verbose = $conf->options->get('verbose');
 
     my $cc     = $conf->data->get('cc');
-    my $osname = $conf->data->get_p5('OSNAME');
+    my $osname = $conf->data->get('osname');
 
     my $extra_libs = $self->_select_lib( {
         conf            => $conf,

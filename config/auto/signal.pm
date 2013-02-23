@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: signal.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -107,7 +107,7 @@ sub _print_signalpasm {
 EOF
     my ( $i, $name );
     $i = 0;
-    foreach $name ( split( ' ', $conf->data->get_p5('sig_name') ) ) {
+    foreach $name ( split( ' ', $conf->data->get('sig_name_provisional') ) ) {
         print {$O} ".macro_const SIG$name\t$i\n" if $i;
         $i++;
     }

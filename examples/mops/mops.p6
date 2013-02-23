@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: mops.p6 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =begin pod
 

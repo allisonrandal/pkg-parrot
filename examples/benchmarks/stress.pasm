@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: stress.pasm 40279 2009-07-26 11:26:07Z whiteknight $
+# $Id$
 
 =head1 NAME
 

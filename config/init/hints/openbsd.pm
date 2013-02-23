@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: openbsd.pm 41081 2009-09-06 20:40:14Z bacek $
+# $Id$
 
 package init::hints::openbsd;
 
@@ -33,7 +33,7 @@ sub runstep {
         libparrot_soname       => "-Wl,-soname=libparrot$share_ext.$version",
     );
 
-    if ( ( split( m/-/, $conf->data->get_p5('archname'), 2 ) )[0] eq 'powerpc' ) {
+    if ( ( split( m/-/, $conf->data->get('archname_provisional'), 2 ) )[0] eq 'powerpc' ) {
         $conf->data->set( as => 'as -mregnames' );
     }
 

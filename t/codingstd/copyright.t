@@ -1,12 +1,13 @@
 #! perl
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: copyright.t 39050 2009-05-22 19:12:51Z coke $
+# $Id$
 
 use strict;
 use warnings;
+use lib qw( . lib ../lib ../../lib );
+
 use Cwd;
 use File::Spec ();
-use lib qw( . lib ../lib ../../lib );
 use Parrot::Distribution;
 use Test::More tests => 3;
 
@@ -140,6 +141,10 @@ my @permitted_duplicate_copyright_files = (
     {
         file    => 'tools/build/vtable_extend.pl',
         reason  => 'heredoc text for generated file',
+    },
+    {
+        file    => 'tools/dev/create_language.pl',
+        reason  => 'generated files in data section',
     },
     {
         file    => 'examples/pir/quine_ord.pir',

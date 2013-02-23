@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: pccmethod_test.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ t/pmc/pmethod_test.t - test the PCCMETHOD_Test PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/pmethod_test.t
+    % prove t/pmc/pccmethod_test.t
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2009, Parrot Foundation.
-$Id: oo.c 40958 2009-09-03 11:56:50Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -71,26 +71,26 @@ static void invalidate_all_caches(PARROT_INTERP)
 static void invalidate_type_caches(PARROT_INTERP, UINTVAL type)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_C3_merge __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_C3_merge __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(merge_list)
-#define ASSERT_ARGS_debug_trace_find_meth __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(merge_list))
+#define ASSERT_ARGS_debug_trace_find_meth __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(_class) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_fail_if_type_exists __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(_class) \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_fail_if_type_exists __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_find_method_direct_1 __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_find_method_direct_1 __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(_class) \
-    || PARROT_ASSERT_ARG(method_name)
-#define ASSERT_ARGS_get_pmc_proxy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_invalidate_all_caches __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_invalidate_type_caches __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+    , PARROT_ASSERT_ARG(_class) \
+    , PARROT_ASSERT_ARG(method_name))
+#define ASSERT_ARGS_get_pmc_proxy __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_invalidate_all_caches __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_invalidate_type_caches __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -109,15 +109,15 @@ into the class.
 void
 Parrot_oo_extract_methods_from_namespace(PARROT_INTERP, ARGIN(PMC *self), ARGIN(PMC *ns))
 {
-   ASSERT_ARGS(Parrot_oo_extract_methods_from_namespace)
-   PMC *methods, *vtable_overrides;
+    ASSERT_ARGS(Parrot_oo_extract_methods_from_namespace)
+    PMC *methods, *vtable_overrides;
 
     /* Pull in methods from the namespace, if any. */
-   if (PMC_IS_NULL(ns))
-       return;
+    if (PMC_IS_NULL(ns))
+        return;
 
     /* Import any methods. */
-    Parrot_PCCINVOKE(interp, ns, CONST_STRING(interp, "get_associated_methods"), "->P", &methods);
+    Parrot_pcc_invoke_method_from_c_args(interp, ns, CONST_STRING(interp, "get_associated_methods"), "->P", &methods);
 
     if (!PMC_IS_NULL(methods)) {
         PMC * const iter = VTABLE_get_iter(interp, methods);
@@ -131,7 +131,7 @@ Parrot_oo_extract_methods_from_namespace(PARROT_INTERP, ARGIN(PMC *self), ARGIN(
     }
 
     /* Import any vtable methods. */
-    Parrot_PCCINVOKE(interp, ns, CONST_STRING(interp, "get_associated_vtable_methods"), "->P", &vtable_overrides);
+    Parrot_pcc_invoke_method_from_c_args(interp, ns, CONST_STRING(interp, "get_associated_vtable_methods"), "->P", &vtable_overrides);
 
     if (!PMC_IS_NULL(vtable_overrides)) {
         PMC * const iter = VTABLE_get_iter(interp, vtable_overrides);
@@ -156,6 +156,9 @@ Parrot_oo_extract_methods_from_namespace(PARROT_INTERP, ARGIN(PMC *self), ARGIN(
 
 Lookup a namespace object from a class PMC.
 
+This function is deprecated, see TT #1069.
+Use the inspect interface in the Class PMC instead.
+
 =cut
 
 */
@@ -165,7 +168,7 @@ PARROT_WARN_UNUSED_RESULT
 PMC *
 Parrot_oo_get_namespace(SHIM_INTERP, ARGIN(const PMC *classobj))
 {
-   ASSERT_ARGS(Parrot_oo_get_namespace)
+    ASSERT_ARGS(Parrot_oo_get_namespace)
     Parrot_Class_attributes * const _class     = PARROT_CLASS(classobj);
     PMC          * const _namespace = _class->_namespace;
 
@@ -200,13 +203,13 @@ Parrot_oo_get_class(PARROT_INTERP, ARGIN(PMC *key))
     else {
         /* Fast select of behavior based on type of the lookup key */
         switch (key->vtable->base_type) {
-            case enum_class_NameSpace:
-                classobj = VTABLE_get_class(interp, key);
-                break;
-            case enum_class_String:
-            case enum_class_Key:
-            case enum_class_ResizableStringArray:
-                {
+          case enum_class_NameSpace:
+            classobj = VTABLE_get_class(interp, key);
+            break;
+          case enum_class_String:
+          case enum_class_Key:
+          case enum_class_ResizableStringArray:
+            {
                 PMC * const hll_ns = VTABLE_get_pmc_keyed_int(interp,
                                         interp->HLL_namespace,
                                         Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
@@ -215,9 +218,9 @@ Parrot_oo_get_class(PARROT_INTERP, ARGIN(PMC *key))
 
                 if (!PMC_IS_NULL(ns))
                     classobj = VTABLE_get_class(interp, ns);
-                }
-            default:
-                break;
+            }
+          default:
+            break;
         }
     }
 
@@ -327,30 +330,6 @@ Parrot_oo_clone_object(PARROT_INTERP, ARGIN(PMC *pmc),
 
 /*
 
-=item C<void * Parrot_oo_new_object_attrs(PARROT_INTERP, PMC * class_)>
-
-Create a new C<Parrot_Object_attributes> structure to hold data for an Object
-PMC. We need this for places which create a new Object without instantiating it
-through its associated class, such as in C<Parrot_oo_clone_object>.
-
-=cut
-
-*/
-
-PARROT_CANNOT_RETURN_NULL
-void *
-Parrot_oo_new_object_attrs(PARROT_INTERP, ARGIN(PMC * class_))
-{
-    ASSERT_ARGS(Parrot_oo_new_object_attrs)
-    Parrot_Object_attributes * const obj_guts =
-        mem_allocate_typed(Parrot_Object_attributes);
-    obj_guts->_class       = class_;
-    obj_guts->attrib_store = pmc_new(interp, enum_class_ResizablePMCArray);
-    return (void *)obj_guts;
-}
-
-/*
-
 =item C<static PMC * get_pmc_proxy(PARROT_INTERP, INTVAL type)>
 
 Get the PMC proxy for a PMC with the given type, creating it if does not exist.
@@ -395,7 +374,7 @@ get_pmc_proxy(PARROT_INTERP, INTVAL type)
             PMC * const type_num = pmc_new(interp, enum_class_Integer);
             VTABLE_set_integer_native(interp, type_num, type);
             proxy = pmc_new_init(interp, enum_class_PMCProxy, type_num);
-            Parrot_PCCINVOKE(interp, pmc_ns, CONST_STRING(interp, "set_class"), "P->", proxy);
+            Parrot_pcc_invoke_method_from_c_args(interp, pmc_ns, CONST_STRING(interp, "set_class"), "P->", proxy);
         }
         return proxy;
     }
@@ -415,22 +394,27 @@ PARROT_EXPORT
 PARROT_CAN_RETURN_NULL
 PARROT_WARN_UNUSED_RESULT
 PMC *
-Parrot_oo_get_class_str(PARROT_INTERP, ARGIN(STRING *name))
+Parrot_oo_get_class_str(PARROT_INTERP, ARGIN_NULLOK(STRING *name))
 {
     ASSERT_ARGS(Parrot_oo_get_class_str)
 
-    /* First check in current HLL namespace */
-    PMC * const hll_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
-                           Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
-    PMC * const ns     = Parrot_get_namespace_keyed_str(interp, hll_ns, name);
-    PMC * const _class = PMC_IS_NULL(ns)
-                       ? PMCNULL : VTABLE_get_class(interp, ns);
+    if (STRING_IS_NULL(name))
+        return PMCNULL;
+    else {
 
-    /* If not found, check for a PMC */
-    if (PMC_IS_NULL(_class))
-        return get_pmc_proxy(interp, pmc_type(interp, name));
-    else
-        return _class;
+        /* First check in current HLL namespace */
+        PMC * const hll_ns = VTABLE_get_pmc_keyed_int(interp, interp->HLL_namespace,
+                               Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp)));
+        PMC * const ns     = Parrot_get_namespace_keyed_str(interp, hll_ns, name);
+        PMC * const _class = PMC_IS_NULL(ns)
+                           ? PMCNULL : VTABLE_get_class(interp, ns);
+
+        /* If not found, check for a PMC */
+        if (PMC_IS_NULL(_class))
+            return get_pmc_proxy(interp, pmc_type(interp, name));
+        else
+            return _class;
+    }
 }
 
 
@@ -639,24 +623,24 @@ fail_if_type_exists(PARROT_INTERP, ARGIN(PMC *name))
         return 0;
 
     switch (VTABLE_type(interp, value)) {
-        case enum_class_NameSpace:
-            return 0;
-            break;
-        case enum_class_Integer:
-            {
-                const INTVAL type = VTABLE_get_integer(interp, value);
-                if (type < enum_type_undef)  {
-                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+      case enum_class_NameSpace:
+        return 0;
+        break;
+      case enum_class_Integer:
+        {
+            const INTVAL type = VTABLE_get_integer(interp, value);
+            if (type < enum_type_undef)  {
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                             "native type with name '%s' already exists - "
                             "can't register Class", data_types[type].name);
-                }
-                return type;
             }
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
+            return type;
+        }
+        break;
+      default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Unrecognized class name PMC type");
-            break;
+        break;
     }
 }
 
@@ -743,7 +727,7 @@ mark_object_cache(PARROT_INTERP)
         for (entry = 0; entry < TBL_SIZE; ++entry) {
             Meth_cache_entry *e = mc->idx[type][entry];
             while (e) {
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)e->pmc);
+                Parrot_gc_mark_PMC_alive(interp, e->pmc);
                 e = e->next;
             }
         }
@@ -898,14 +882,6 @@ Parrot_invalidate_method_cache(PARROT_INTERP, ARGIN_NULLOK(STRING *_class))
         invalidate_type_caches(interp, (UINTVAL)type);
 }
 
-
-/*
- * quick'n'dirty method cache
- * RT #45987: use a hash if method_name is not constant
- *       i.e. from obj.$Sreg(args)
- *       If this hash is implemented mark it during GC
- */
-
 /*
 
 =item C<PMC * Parrot_find_method_direct(PARROT_INTERP, PMC *_class, STRING
@@ -962,23 +938,23 @@ PMC *
 Parrot_find_method_with_cache(PARROT_INTERP, ARGIN(PMC *_class), ARGIN(STRING *method_name))
 {
     ASSERT_ARGS(Parrot_find_method_with_cache)
-    UINTVAL type, bits;
 
+    UINTVAL type, bits;
     Caches           *mc;
-    Meth_cache_entry *e, *old;
+    Meth_cache_entry *e;
 
     PARROT_ASSERT(method_name != 0);
 
 #if DISABLE_METH_CACHE
     return Parrot_find_method_direct(interp, _class, method_name);
-#endif
+#else
 
     if (! PObj_constant_TEST(method_name))
         return Parrot_find_method_direct(interp, _class, method_name);
 
     mc   = interp->caches;
     type = _class->vtable->base_type;
-    bits = (((UINTVAL) method_name->strstart) >> 2) & TBL_SIZE_MASK;
+    bits = (((UINTVAL) Buffer_bufstart(method_name)) >> 2) & TBL_SIZE_MASK;
 
     if (type >= mc->mc_size) {
         if (mc->idx) {
@@ -998,10 +974,8 @@ Parrot_find_method_with_cache(PARROT_INTERP, ARGIN(PMC *_class), ARGIN(STRING *m
     }
 
     e   = mc->idx[type][bits];
-    old = NULL;
 
-    while (e && e->strstart != method_name->strstart) {
-        old = e;
+    while (e && e->strstart != Buffer_bufstart(method_name)) {
         e   = e->next;
     }
 
@@ -1009,17 +983,16 @@ Parrot_find_method_with_cache(PARROT_INTERP, ARGIN(PMC *_class), ARGIN(STRING *m
         /* when here no or no correct entry was at [bits] */
         e     = mem_allocate_typed(Meth_cache_entry);
 
-        if (old)
-            old->next = e;
-        else
-            mc->idx[type][bits] = e;
+        mc->idx[type][bits] = e;
 
         e->pmc      = Parrot_find_method_direct(interp, _class, method_name);
         e->next     = NULL;
-        e->strstart = method_name->strstart;
+        e->strstart = Buffer_bufstart(method_name);
     }
 
     return e->pmc;
+
+#endif
 }
 
 
@@ -1337,7 +1310,7 @@ Parrot_ComposeRole(PARROT_INTERP, ARGIN(PMC *role),
             return;
 
     /* Get the methods from the role. */
-    Parrot_PCCINVOKE(interp, role, CONST_STRING(interp, "methods"), "->P", &methods);
+    Parrot_pcc_invoke_method_from_c_args(interp, role, CONST_STRING(interp, "methods"), "->P", &methods);
 
     if (PMC_IS_NULL(methods))
         return;
@@ -1482,7 +1455,7 @@ Parrot_ComposeRole(PARROT_INTERP, ARGIN(PMC *role),
      * that it did itself. Note that we already have the correct methods
      * as roles "flatten" the methods they get from other roles into their
      * own method list. */
-    Parrot_PCCINVOKE(interp, role, CONST_STRING(interp, "roles"), "->P", &roles_of_role);
+    Parrot_pcc_invoke_method_from_c_args(interp, role, CONST_STRING(interp, "roles"), "->P", &roles_of_role);
     roles_of_role_count = VTABLE_elements(interp, roles_of_role);
 
     for (i = 0; i < roles_of_role_count; i++) {

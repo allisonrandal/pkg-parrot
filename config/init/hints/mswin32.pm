@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: mswin32.pm 41081 2009-09-06 20:40:14Z bacek $
+# $Id$
 
 package init::hints::mswin32;
 

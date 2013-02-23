@@ -1,5 +1,5 @@
 /*
- * $Id: pirregalloc.h 37143 2009-03-06 03:28:51Z Util $
+ * $Id$
  * Copyright (C) 2008-2009, Parrot Foundation.
  */
 

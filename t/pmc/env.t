@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: env.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -176,7 +176,6 @@ end:
     delete env['PARROT_TMP_ADD_3']
 .end
 
-## RT #50186 - shouldn't segfault
 .sub oob_query
     $P0 = new ['Env']
     set $S0, $P0[999]

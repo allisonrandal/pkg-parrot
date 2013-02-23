@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: parrotinterpreter.pmc 41081 2009-09-06 20:40:14Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -29,8 +29,8 @@ These are the vtable functions for the ParrotInterpreter base class
 #include "parrot/dynext.h"
 #include "parrot/io.h"
 #include "parrot/runcore_api.h"
-#include "pmc_class.h"
-#include "pmc_sub.h"
+#include "pmc/pmc_class.h"
+#include "pmc/pmc_sub.h"
 
 #define PMC_interp(x) ((Parrot_ParrotInterpreter_attributes *)PMC_data(x))->interp
 #define PMC_args(x)   ((Parrot_ParrotInterpreter_attributes *)PMC_data(x))->args
@@ -127,12 +127,12 @@ clone_interpreter(Parrot_Interp d, Parrot_Interp s, INTVAL flags)
                     PObj_is_class_TEST(s->vtables[i]->pmc_class)) {
                 /* Cloning the class into the new interpreter ought
                  * to be sufficient to instantiate the class.  */
-                 PMC          *source       = s->vtables[i]->pmc_class;
-                 PMC          *dest         = Parrot_clone(d, source);
-                 Parrot_Class_attributes *source_class = PARROT_CLASS(source);
-                 Parrot_Class_attributes *dest_class   = PARROT_CLASS(dest);
-                 dest_class->name           = Parrot_str_copy(d, source_class->name);
-                 dest_class->_namespace     = VTABLE_clone(d, source_class->_namespace);
+                PMC          *source       = s->vtables[i]->pmc_class;
+                PMC          *dest         = Parrot_clone(d, source);
+                Parrot_Class_attributes *source_class = PARROT_CLASS(source);
+                Parrot_Class_attributes *dest_class   = PARROT_CLASS(dest);
+                dest_class->name           = Parrot_str_copy(d, source_class->name);
+                dest_class->_namespace     = VTABLE_clone(d, source_class->_namespace);
             }
         }
     }
@@ -143,7 +143,7 @@ clone_interpreter(Parrot_Interp d, Parrot_Interp s, INTVAL flags)
     if (flags & PARROT_CLONE_GLOBALS)
         pt_clone_globals(d, s);
 
-    Parrot_unblock_GC_sweep(d);
+    Parrot_unblock_GC_mark(d);
 }
 
 
@@ -430,6 +430,7 @@ Returns the PMC global value for C<key>.
 
 Introspection interface. C<key> can be:
 
+  "context"                 ... return Context PMC
   "sub"                     ... return Sub object of this subroutine
   "continuation"            ... return Continuation PMC
   "lexpad"                  ... return lexpad PMC for this sub
@@ -449,17 +450,17 @@ Introspection interface. C<key> can be:
         PMC    *nextkey, *cont;
         STRING *outer = NULL;
         STRING *item  = key_string(interp, key);
-        STRING *s     = CONST_STRING(interp, "globals");
+        STRING *name  = CONST_STRING(interp, "globals");
         int     level = 0;
 
         PMC *ctx;
 
-        if (Parrot_str_equal(interp, item, s))
+        if (Parrot_str_equal(interp, item, name))
             return interp->root_namespace;
 
-        s     = CONST_STRING(interp, "outer");
+        name  = CONST_STRING(interp, "outer");
 
-        if (Parrot_str_equal(interp, item, s)) {
+        if (Parrot_str_equal(interp, item, name)) {
             outer   = item;
             nextkey = key_next(INTERP, key);
 
@@ -509,29 +510,34 @@ Introspection interface. C<key> can be:
         if (item == outer)
             return Parrot_pcc_get_sub(interp, ctx);
 
-        s = CONST_STRING(interp, "sub");
+        name = CONST_STRING(interp, "context");
 
-        if (Parrot_str_equal(interp, item, s))
+        if (Parrot_str_equal(interp, item, name))
+            return ctx;
+
+        name = CONST_STRING(interp, "sub");
+
+        if (Parrot_str_equal(interp, item, name))
             return Parrot_pcc_get_sub(interp, ctx);
 
-        s = CONST_STRING(interp, "lexpad");
+        name = CONST_STRING(interp, "lexpad");
 
-        if (Parrot_str_equal(interp, item, s))
+        if (Parrot_str_equal(interp, item, name))
             return Parrot_pcc_get_lex_pad(interp, ctx);
 
-        s = CONST_STRING(interp, "namespace");
+        name = CONST_STRING(interp, "namespace");
 
-        if (Parrot_str_equal(interp, item, s))
+        if (Parrot_str_equal(interp, item, name))
             return Parrot_pcc_get_namespace(interp, ctx);
 
-        s = CONST_STRING(interp, "continuation");
+        name = CONST_STRING(interp, "continuation");
 
-        if (Parrot_str_equal(interp, item, s))
+        if (Parrot_str_equal(interp, item, name))
             return VTABLE_clone(interp, Parrot_pcc_get_continuation(interp, ctx));
 
-        s = CONST_STRING(interp, "annotations");
+        name = CONST_STRING(interp, "annotations");
 
-        if (Parrot_str_equal(interp, item, s)) {
+        if (Parrot_str_equal(interp, item, name)) {
             PMC        *sub_pmc = Parrot_pcc_get_sub(interp, ctx);
             if (ctx == CURRENT_CONTEXT(interp)) {
                 /* We can't know the current program counter for the currently
@@ -702,8 +708,8 @@ Finish thawing.
          */
 
         /*  HLL_info */
-        if (info->what == VISIT_THAW_NORMAL ||
-                info->what == VISIT_THAW_CONSTANTS) {
+        if (VTABLE_get_integer(INTERP, info) == VISIT_THAW_NORMAL ||
+            VTABLE_get_integer(INTERP, info) == VISIT_THAW_CONSTANTS) {
             pos = &PMC_args(SELF);
         }
         else
@@ -714,21 +720,14 @@ Finish thawing.
     }
 
     VTABLE void thaw(visit_info *info) {
-        if (info->extra_flags == EXTRA_IS_PROP_HASH) {
-            SUPER(info);
+        if (!PMC_data(SELF)) {
+            Parrot_ParrotInterpreter_attributes *attrs =
+                mem_allocate_zeroed_typed(Parrot_ParrotInterpreter_attributes);
+            PMC_data(SELF) = attrs;
+            PObj_custom_destroy_SET(SELF);
         }
-        else if (info->extra_flags == EXTRA_IS_NULL) {
 
-            if (!PMC_data(SELF)) {
-                Parrot_ParrotInterpreter_attributes *attrs =
-                    mem_allocate_zeroed_typed(Parrot_ParrotInterpreter_attributes);
-                PMC_data(SELF) = attrs;
-                PObj_custom_destroy_SET(SELF);
-            }
-
-            PMC_interp(SELF) = INTERP;
-            info->what       = VISIT_THAW_CONSTANTS;
-        }
+        PMC_interp(SELF) = INTERP;
     }
 
     VTABLE void thawfinish(visit_info *info) {

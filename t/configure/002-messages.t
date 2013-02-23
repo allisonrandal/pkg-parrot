@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 002-messages.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 002-messages.t
 
 use strict;

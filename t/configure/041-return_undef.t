@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 041-return_undef.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 041-return_undef.t
 
 use strict;

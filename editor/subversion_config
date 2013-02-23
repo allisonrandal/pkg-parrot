@@ -1,4 +1,4 @@
-### $Id: subversion_config 31776 2008-10-08 03:05:51Z coke $
+### $Id$
 
 ### This file configures various client-side behaviors for Subversion for
 ### use with Parrot.

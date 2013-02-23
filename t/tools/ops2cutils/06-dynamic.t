@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 06-dynamic.t 39944 2009-07-08 02:48:40Z coke $
+# $Id$
 # 06-dynamic.t
 
 use strict;

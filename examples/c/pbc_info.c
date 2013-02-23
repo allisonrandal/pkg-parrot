@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2003, Parrot Foundation.
-$Id: pbc_info.c 40204 2009-07-21 23:30:33Z jkeenan $
+$Id$
 
 =head1 NAME
 

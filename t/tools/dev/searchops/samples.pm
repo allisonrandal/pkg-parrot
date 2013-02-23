@@ -1,6 +1,6 @@
 package samples;
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
+# $Id$
 
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ our @EXPORT_OK = qw($core $debug $mangled $string);
 
 $core = q{
 /*
- * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
+ * $Id$
 ** pseudo-core.ops
 */
 
@@ -54,8 +54,8 @@ inline op end() :base_core :check_event :flow {
 
 =item B<load_bytecode>(in STR)
 
-Load Parrot bytecode from file $1, and
-RT#42381 search the library path to locate the file.
+Load Parrot bytecode from file $1, and search the library path to locate the
+file.
 
 =cut
 
@@ -145,7 +145,7 @@ as the Parrot interpreter itself.
 
  $debug = q{
 /*
- * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
+ * $Id$
  * Copyright (C) 2002-2008, Parrot Foundation.
  */
 
@@ -208,7 +208,7 @@ op debug_load(inconst STR) :base_debug {
 
  $mangled = q{
 /*
- * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
+ * $Id$
 ** string.ops
 */
 
@@ -266,7 +266,7 @@ as the Parrot interpreter itself.
 
 $string = q{
 /*
- * $Id: samples.pm 40198 2009-07-21 20:49:40Z cotto $
+ * $Id$
 ** pseudo-string.ops
 */
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Perl6Grammar.pir 40191 2009-07-21 12:56:20Z bacek $
+# $Id$
 
 =head1 TITLE
 
@@ -103,6 +103,7 @@ the output to the correct output file.
       | '<' (<-[>]>*:) '>'
       | \xc2\xab (.*?) \xc2\xbb
       | \xab (<-[\xbb]>*:) \xbb
+      | ( 'sym<' <-[>]>*: '>' )
       | (\S+)
       ]
       END_ARG_RULE

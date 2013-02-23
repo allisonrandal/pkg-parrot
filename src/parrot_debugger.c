@@ -1,22 +1,21 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: parrot_debugger.c 41081 2009-09-06 20:40:14Z bacek $
-
-History:
-    Renamed from pdb.c in 2008.7.15
+$Id$
 
 =head1 NAME
 
-parrot_debugger - The Parrot debugger
-
-=head1 SYNOPSIS
-
- parrot_debugger programfile
- parrot_debugger --script scriptfile programfile
+parrot_debugger
 
 =head1 DESCRIPTION
 
-=head2 Commands
+The Parrot debugger
+
+=head1 SYNOPSIS
+
+    parrot_debugger programfile
+    parrot_debugger --script scriptfile programfile
+
+=head1 COMMANDS
 
 =over 4
 
@@ -145,6 +144,7 @@ and C<debug_break> ops in F<ops/debug.ops>.
 #include "../compilers/imcc/parser.h"
 #include "parrot/embed.h"
 #include "parrot/debugger.h"
+#include "parrot/runcore_api.h"
 
 static void PDB_printwelcome(void);
 static void PDB_run_code(PARROT_INTERP, int argc, char *argv[]);
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
         const char source []= ".sub aux :main\nexit 0\n.end\n";
         PMC *code = Parrot_compile_string(interp, compiler, source, &errstr);
 
-        if (!STRING_IS_NULL(errstr))
+        if (!STRING_is_null(interp, errstr))
             Parrot_io_eprintf(interp, "%Ss\n", errstr);
     }
 
@@ -360,6 +360,10 @@ history/completion).
 
 
 =back
+
+=head1 HISTORY
+
+Renamed from F<pdb.c> on 2008.7.15
 
 =cut
 

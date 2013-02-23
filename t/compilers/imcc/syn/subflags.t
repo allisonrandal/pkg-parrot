@@ -1,16 +1,18 @@
 #!./parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: subflags.t 38691 2009-05-11 17:41:35Z NotFound $
+# $Id$
 
 =head1 NAME
 
-t/compilers/imcc/syn/subflags.t  - test flags on PIR subs
+t/compilers/imcc/syn/subflags.t 
 
 =head1 SYNOPSIS
 
     % prove t/compilers/imcc/syn/subflags.t
 
 =head1 DESCRIPTION
+
+test flags on PIR subs
 
 =cut
 

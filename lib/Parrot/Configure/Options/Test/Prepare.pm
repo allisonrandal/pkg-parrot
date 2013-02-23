@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: Prepare.pm 39967 2009-07-10 00:16:41Z jkeenan $
+# $Id$
 package Parrot::Configure::Options::Test::Prepare;
 use strict;
 use warnings;
@@ -29,11 +29,12 @@ my @steps_tests = _prepare_steps_tests_list(
 );
 
 sub get_preconfiguration_tests {
-    return ( @framework_tests, @steps_tests );
+    return ( @framework_tests );
 };
 
 sub get_postconfiguration_tests {
     my @postconfiguration_tests = (
+        @steps_tests,
         glob("t/postconfigure/*.t"),
         glob("t/tools/pmc2cutils/*.t"),
         glob("t/tools/ops2cutils/*.t"),

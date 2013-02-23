@@ -1,7 +1,7 @@
 /* atomic/fallback.h
  *  Copyright (C) 2006, Parrot Foundation.
  *  SVN Info
- *     $Id: fallback.h 36833 2009-02-17 20:09:26Z allison $
+ *     $Id$
  *  Overview:
  *     This header provides an implementation of atomic
  *     operations in terms of threading primitives.

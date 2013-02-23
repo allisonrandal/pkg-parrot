@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: japh3.pasm 40268 2009-07-25 19:53:04Z whiteknight $
+# $Id$
 
 # the substr JaPH
     set S0, "Hacker\n"

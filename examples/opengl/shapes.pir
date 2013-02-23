@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: shapes.pir 40571 2009-08-15 19:06:51Z dukeleto $
+# $Id$
 
 =head1 TITLE
 

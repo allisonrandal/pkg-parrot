@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pge_globs.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;
@@ -11,11 +11,15 @@ use Parrot::Test::PGE;
 
 =head1 NAME
 
-t/library/pge_globs.t - Parrot Grammar Engine tests of globs
+t/library/pge_globs.t
 
 =head1 SYNOPSIS
 
         % prove -Ilib t/library/pge_globs.t
+
+=head1 DESCRIPTION
+
+Parrot Grammar Engine tests of globs
 
 =cut
 

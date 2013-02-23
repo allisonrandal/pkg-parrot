@@ -1,6 +1,6 @@
 package Parrot::Install;
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: Install.pm 39589 2009-06-16 14:22:35Z Util $
+# $Id$
 use strict;
 use warnings;
 use File::Basename qw(dirname);

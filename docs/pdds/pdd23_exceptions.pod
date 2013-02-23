@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pdd23_exceptions.pod 38816 2009-05-16 04:08:22Z coke $
+# $Id$
 
 =head1 PDD 23: Exceptions
 
@@ -10,7 +10,7 @@ Parrot's exception system.
 
 =head2 Version
 
-$Revision: 38816 $
+$Revision$
 
 =head2 Description
 

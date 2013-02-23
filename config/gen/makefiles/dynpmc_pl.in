@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: dynpmc_pl.in 38231 2009-04-20 16:03:13Z Infinoid $
+# $Id$
 
 =head1 NAME
 
@@ -56,8 +56,6 @@ sub compile_cmd {
         $dynpmc_include = "-I" . $PATHQUOTE . $dynpmc_include . $PATHQUOTE . " ";
     }
 
-
-    # TT #288 - need long term solution for passing in include paths
     return
         "$CC " .
         '@cc_o_out@' . $target . " " .

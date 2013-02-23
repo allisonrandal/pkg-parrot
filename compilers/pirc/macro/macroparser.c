@@ -134,7 +134,7 @@
 
 
 /*
- * $Id: macroparser.c 36666 2009-02-13 10:23:23Z kjs $
+ * $Id$
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -156,7 +156,6 @@
 
 #include "lexer.h"
 
-#include "parrot/string_funcs.h"
 #include "parrot/parrot.h"
 
 

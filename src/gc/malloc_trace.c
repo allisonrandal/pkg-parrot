@@ -2,7 +2,7 @@
  *
  * by Wolfram Gloger 1995.
  *
- * $Id: malloc_trace.c 40726 2009-08-23 01:18:17Z whiteknight $
+ * $Id$
  * Copyright (C) 2002-2007, Parrot Foundation.
  */
 
@@ -16,8 +16,6 @@
 #  include <signal.h>
 #  include <asm/signal.h>
 #endif
-
-#include "malloc-trace.h"
 
 #define ACTION_BUF_SIZE 1024
 #define TIMESTAMP_FREQ  50
@@ -40,7 +38,7 @@ src/malloc-trace.c
 
 =head1 DESCRIPTION
 
-RT#48264
+TT #292
 
 =head2 Functions
 

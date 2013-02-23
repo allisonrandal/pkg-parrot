@@ -1,5 +1,5 @@
 1 rem Copyright (C) 2008, Parrot Foundation.
-2 rem $Id: genprog.bas 36833 2009-02-17 20:09:26Z allison $
+2 rem $Id$
 3 rem
 10 rem Hello
 20 on error exit 1

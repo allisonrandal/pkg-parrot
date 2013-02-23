@@ -1,5 +1,5 @@
 ##! perl
-# $Id: mk_manifest_and_skip.pl 40457 2009-08-08 17:39:57Z dukeleto $
+# $Id$
 # Copyright (C) 2006-2009, Parrot Foundation.
 
 use strict;

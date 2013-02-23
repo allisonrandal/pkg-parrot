@@ -1,19 +1,20 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: oofib.pir 41158 2009-09-08 18:03:48Z chromatic $
+# $Id$
 
 .sub bench :main
     .param pmc argv
     .local int argc
     argc = argv
     .local pmc N
+    N = new 'Integer'
     if argc <= 1 goto noarg
     $S0 = argv[1]
     N = $S0
-noarg:
-    N = new 'Integer'
-    N = 24
     goto begin
+noarg:
+    N = 24
 begin:
+
     .local num start
     time start
 
@@ -45,35 +46,40 @@ begin:
 .namespace ["A"]
 
 .sub fib :method
-    .param pmc n
+    .param int n
     if n >= 2 goto rec
     .return (n)
 rec:
-    .local pmc n1
-    .local pmc n2
-    .local pmc r1
-    .local pmc r2
-    n1 = n - 1
-    n2 = n - 2
-    r1 = self."fibA"(n1)
-    r2 = self."fibB"(n2)
+    .local int prev
+    .local int r1
+    prev = n
+    dec prev
+    r1 = self."fibA"(prev)
+
+    dec prev
+    .local int r2
+    r2 = self."fibB"(prev)
+
     n = r1 + r2
     .return (n)
 .end
 
 .sub fibA :method
-    .param pmc n
+    .param int n
     if n >= 2 goto rec
     .return (n)
 rec:
-    .local pmc n1
-    .local pmc n2
-    .local pmc r1
-    .local pmc r2
-    n1 = n - 1
-    n2 = n - 2
-    r1 = self."fib"(n1)
-    r2 = self."fibB"(n2)
+    .local int prev
+    prev = n
+
+    dec prev
+    .local int r1
+    r1 = self."fib"(prev)
+
+    dec prev
+    .local int r2
+    r2 = self."fibB"(prev)
+
     n = r1 + r2
     .return (n)
 .end
@@ -81,18 +87,21 @@ rec:
 .namespace ["B"]
 
 .sub fibB :method
-    .param pmc n
+    .param int n
     if n >= 2 goto rec
     .return (n)
 rec:
-    .local pmc n1
-    .local pmc n2
-    .local pmc r1
-    .local pmc r2
-    n1 = n - 1
-    n2 = n - 2
-    r1 = self."fib"(n1)
-    r2 = self."fibA"(n2)
+    .local int prev
+    prev = n
+
+    dec prev
+    .local int r1
+    r1 = self."fib"(prev)
+
+    dec prev
+    .local int r2
+    r2 = self."fibA"(prev)
+
     n = r1 + r2
     .return (n)
 .end

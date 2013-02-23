@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: Vtable.pm 41099 2009-09-07 06:28:02Z cotto $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id$
 
 =head1 NAME
 
@@ -11,9 +11,9 @@ Parrot::Vtable - Functions for manipulating vtables
 
 =head1 DESCRIPTION
 
-C<Parrot::Vtable> provides a collection of functions for manipulating
-PMC vtables. It is used by F<tools/build/jit2c.pl>, F<tools/build/pmc2c.pl>,
-F<tools/build/vtable_h.pl>, F<tools/dev/gen_class.pl>.
+C<Parrot::Vtable> provides a collection of functions for manipulating PMC
+vtables. It is used by F<tools/build/pmc2c.pl>, F<tools/build/vtable_h.pl>, and
+F<tools/dev/gen_class.pl>.
 
 =head2 Functions
 
@@ -224,25 +224,12 @@ EOM
     (pmc)->vtable->$entry->[1]($args)
 EOM
     }
-    $macros .= <<'EOM';
-
-/*
- * vtable method name defines for delegate
- */
-
-EOM
-    for my $entry ( @{$vtable} ) {
-        my $uc_meth = uc $entry->[1];
-        $macros .= <<"EOM";
-#define PARROT_VTABLE_${uc_meth}_METHNAME \"$entry->[1]\"
-EOM
-
-    }
-    $macros .= <<'EOM';
-
-EOM
-
     # Slot numbers
+    $macros .= <<"EOM";
+/*
+ * vtable slot names
+ */
+EOM
     my $vtable_slot_num = 9;
     for my $entry ( @{$vtable} ) {
         my $uc_meth = uc $entry->[1];
@@ -254,9 +241,7 @@ EOM
 
     # finally the name mapping
     $macros .= <<'EOM';
-/*
- * vtable slot names
- */
+
 #ifdef PARROT_IN_OBJECTS_C
 
 #define PARROT_VTABLE_LOW 9

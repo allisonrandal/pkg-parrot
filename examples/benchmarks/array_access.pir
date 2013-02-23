@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: array_access.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ Inspired by computer language shootout.
 
     # Specification of command line arguments.
     .local pmc getopts
-    getopts = new [ 'Getopt::Obj' ]
+    getopts = new [ 'Getopt';'Obj' ]
     push getopts, "arr-size=i"
 
     .local pmc opt

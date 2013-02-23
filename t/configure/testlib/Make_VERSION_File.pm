@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: Make_VERSION_File.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 package Make_VERSION_File;
 
@@ -27,7 +27,7 @@ sub make_VERSION_file {
 
 t/configure/testlib/Make_VERSION_File.pm - Subroutines used in testing C<Parrot::Build::Util::parrot_version()>
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 Use only in test scripts.
 

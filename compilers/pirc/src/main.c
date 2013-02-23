@@ -1,5 +1,5 @@
 /*
- * $Id: main.c 36665 2009-02-13 10:20:10Z kjs $
+ * $Id$
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 
@@ -15,7 +15,6 @@
 #include "pirlexer.h"
 #include "pirheredoc.h"
 #include "pirregalloc.h"
-#include "piremit.h"
 #include "pircapi.h"
 
 /* global variable to set parser in debug mode.
@@ -153,7 +152,6 @@ runcode(PARROT_INTERP, int argc, char *argv[]) {
     /* runs :init functions */
     PackFile_fixup_subs(interp, PBC_MAIN, NULL);
 
-    /* RT#46149 no return value :-( */
     Parrot_runcode(interp, argc, argv);
 }
 

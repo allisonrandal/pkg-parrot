@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2008, Parrot Foundation.
-# $Id: getopt_demo.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ This is executed when you call F<getopt_demo.pir>.
 
   # Specification of command line arguments.
   .local pmc getopts
-  getopts = new "Getopt::Obj"
+  getopts = new ["Getopt";"Obj"]
   # getopts."notOptStop"(1)
 
   # --version, boolean

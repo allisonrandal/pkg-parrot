@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: pod.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;
@@ -9,7 +9,20 @@ use Test::More;
 use Parrot::Config;
 use Parrot::Test tests => 4;
 
-# POD
+=head1 NAME
+
+t/compilers/imcc/syn/pod.t
+
+=head1 SYNOPSIS
+
+    % prove t/compilers/imcc/syn/pod.t
+
+=head1 DESCRIPTION
+
+Tests PIR's handling of Plain Old Documentation (POD) format.
+
+=cut
+
 
 pir_output_is( <<'CODE', <<'OUT', "simple pod" );
 .sub test :main

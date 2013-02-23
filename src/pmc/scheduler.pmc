@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: scheduler.pmc 40958 2009-09-03 11:56:50Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -266,16 +266,11 @@ Marks any referenced strings and PMCs as live.
         if (PARROT_SCHEDULER(SELF)) {
             Parrot_Scheduler_attributes * const core_struct = PARROT_SCHEDULER(SELF);
 
-            if (core_struct->task_list)
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->task_list);
-            if (core_struct->task_index)
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->task_index);
-            if (core_struct->wait_index)
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->wait_index);
-            if (core_struct->handlers)
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->handlers);
-            if (core_struct->messages)
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)core_struct->messages);
+            Parrot_gc_mark_PMC_alive(interp, core_struct->task_list);
+            Parrot_gc_mark_PMC_alive(interp, core_struct->task_index);
+            Parrot_gc_mark_PMC_alive(interp, core_struct->wait_index);
+            Parrot_gc_mark_PMC_alive(interp, core_struct->handlers);
+            Parrot_gc_mark_PMC_alive(interp, core_struct->messages);
         }
     }
 
@@ -293,18 +288,11 @@ C<*info> is the visit info (see F<include/parrot/pmc_freeze.h>).
 */
 
     VTABLE void visit(visit_info *info) {
-        Parrot_Scheduler_attributes * const core_struct = PARROT_SCHEDULER(SELF);
-        PMC **pos;
-
         /* 1) visit task list */
-        pos            = &core_struct->task_list;
-        info->thaw_ptr = pos;
-        (info->visit_pmc_now)(INTERP, *pos, info);
+        VISIT_PMC_ATTR(INTERP, info, SELF, Scheduler, task_list);
 
         /* 2) visit the handlers */
-        pos            = &core_struct->handlers;
-        info->thaw_ptr = pos;
-        (info->visit_pmc_now)(INTERP, *pos, info);
+        VISIT_PMC_ATTR(INTERP, info, SELF, Scheduler, handlers);
     }
 
 
@@ -319,14 +307,13 @@ Archives the scheduler.
 */
 
     VTABLE void freeze(visit_info *info) {
-        IMAGE_IO *io = info->image_io;
         Parrot_Scheduler_attributes * const core_struct = PARROT_SCHEDULER(SELF);
 
         /* 1) freeze scheduler id */
-        VTABLE_push_integer(INTERP, io, core_struct->id);
+        VTABLE_push_integer(INTERP, info, core_struct->id);
 
         /* 2) freeze maximum task id */
-        VTABLE_push_integer(INTERP, io, core_struct->max_tid);
+        VTABLE_push_integer(INTERP, info, core_struct->max_tid);
     }
 
 
@@ -341,13 +328,11 @@ Unarchives the scheduler.
 */
 
     VTABLE void thaw(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
-
         /* 1. thaw scheduler id */
-        const INTVAL id = VTABLE_shift_integer(INTERP, io);
+        const INTVAL id = VTABLE_shift_integer(INTERP, info);
 
         /* 2. thaw maximum task id */
-        const INTVAL max_tid = VTABLE_shift_integer(INTERP, io);
+        const INTVAL max_tid = VTABLE_shift_integer(INTERP, info);
 
         /* Allocate the scheduler's core data struct and set custom flags. */
         SELF.init();

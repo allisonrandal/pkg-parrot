@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: context.t 39655 2009-06-18 17:42:57Z NotFound $
+# $Id$
 
 use strict;
 use warnings;
@@ -188,7 +188,6 @@ pir_output_is( $PRE . <<'CODE'. $POST, <<OUT, 'as array ([2,1,0] => "cba")' );
 CODE
 cba
 OUT
-## RT #44445: more
 
 ## as hash
 pir_output_is( $PRE . <<'CODE'. $POST, <<OUT, 'as hash (A => "a")' );

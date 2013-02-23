@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: revcomp.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 # Reads from stdin a file in the format made by fasta.pir
 # ./parrot -R jit
 # N = 2500000 for fasta

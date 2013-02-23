@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2004, Parrot Foundation.
-# $Id: multidispatch.pod 37009 2009-02-25 23:59:21Z jkeenan $
+# $Id$
 
 =head1 NAME
 

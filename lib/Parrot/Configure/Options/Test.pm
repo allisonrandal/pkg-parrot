@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: Test.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 package Parrot::Configure::Options::Test;
 use strict;
 use warnings;
@@ -42,10 +42,6 @@ sub new {
     |;
     for my $k (grep { ! $excluded_options{$_} } keys %{$argsref}) {
         $self->set($k, $argsref->{$k});
-    }
-    my $sto = '.configure_parallel.sto';
-    if (-e $sto) {
-        unlink $sto or die "Unable to unlink $sto: $!";
     }
     return $self;
 }

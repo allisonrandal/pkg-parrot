@@ -1,7 +1,7 @@
 /* longopt.h
  *  Copyright (C) 2001-2003, Parrot Foundation.
  *  SVN Info
- *     $Id: longopt.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id$
  *  Overview:
  *     Command line option parsing (for pre-initialized code)
  *  Data Structure and Algorithms:
@@ -59,11 +59,11 @@ int longopt_get(PARROT_INTERP,
         __attribute__nonnull__(5)
         FUNC_MODIFIES(* info_buf);
 
-#define ASSERT_ARGS_longopt_get __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_longopt_get __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(argv) \
-    || PARROT_ASSERT_ARG(options) \
-    || PARROT_ASSERT_ARG(info_buf)
+    , PARROT_ASSERT_ARG(argv) \
+    , PARROT_ASSERT_ARG(options) \
+    , PARROT_ASSERT_ARG(info_buf))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/longopt.c */
 

@@ -1,7 +1,7 @@
 #! perl
 
 # Copyright (C) 2003-2006, Parrot Foundation.
-# $Id: kate_syntax.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 # Create Kate syntax highlighting XML file for IMCC
 # Language:     Parrot IMCC

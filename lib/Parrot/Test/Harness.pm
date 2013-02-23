@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Harness.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 NAME
 
@@ -55,7 +55,7 @@ as is. This allows for extremely quiet or loud test output to be generated.
 Written by chromatic with most of the intelligence stolen from the Punie
 harness and most of that probably stolen from Test::Harness
 
-Please send patches and bug reports via Parrot's RT queue or to the mailing
+Please send patches and bug reports via Parrot's Trac queue or to the mailing
 list.
 
 =cut

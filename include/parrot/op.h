@@ -1,7 +1,7 @@
 /* op.h
  *  Copyright (C) 2001-2007, Parrot Foundation.
  *  SVN Info
- *     $Id: op.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id$
  *  Overview:
  *     Header file for op functions.
  *  Data Structure and Algorithms:
@@ -15,7 +15,7 @@
 
 #include "parrot/config.h"
 
-#define PARROT_MAX_ARGS 8
+#define PARROT_MAX_ARGS 16
 
 typedef enum {
     PARROT_INLINE_OP,

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2006, Parrot Foundation.
-# $Id: icu.pm 39801 2009-06-26 14:13:26Z rblasch $
+# $Id$
 
 =head1 NAME
 
@@ -288,6 +288,7 @@ sub _try_icuconfig {
         print "Trying $arg->{icuconfig} with '--ldflags'\n"
             if $arg->{verbose};
         $icushared = capture_output("$arg->{icuconfig} --ldflags");
+        chomp $icushared;
         print "icushared:  captured $icushared\n"
             if $arg->{verbose};
         ($icushared, $arg->{without}) =

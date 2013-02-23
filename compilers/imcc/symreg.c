@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2009, Parrot Foundation.
- * $Id: symreg.c 40414 2009-08-05 11:29:16Z bacek $
+ * $Id$
  */
 
 /*
@@ -99,29 +99,29 @@ static void resize_symhash(ARGMOD(SymHash *hsh))
         __attribute__nonnull__(1)
         FUNC_MODIFIES(*hsh);
 
-#define ASSERT_ARGS__get_sym_typed __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS__get_sym_typed __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(hsh) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS__mk_fullname __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS__mk_symreg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS__mk_fullname __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS__mk_symreg __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(hsh) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_add_ns __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_add_ns __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_get_sym_by_name __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_get_sym_by_name __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(hsh) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_int_overflows __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(r)
-#define ASSERT_ARGS_mk_pmc_const_2 __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_int_overflows __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(r))
+#define ASSERT_ARGS_mk_pmc_const_2 __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(unit) \
-    || PARROT_ASSERT_ARG(left) \
-    || PARROT_ASSERT_ARG(rhs)
-#define ASSERT_ARGS_resize_symhash __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(hsh)
+    , PARROT_ASSERT_ARG(unit) \
+    , PARROT_ASSERT_ARG(left) \
+    , PARROT_ASSERT_ARG(rhs))
+#define ASSERT_ARGS_resize_symhash __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(hsh))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -336,6 +336,7 @@ symreg_to_str(ARGIN(const SymReg *s))
     if (t & VT_FLAT)      { strcat(buf, "VT_FLAT ");       }
     if (t & VT_OPTIONAL)  { strcat(buf, "VT_OPTIONAL ");   }
     if (t & VT_NAMED)     { strcat(buf, "VT_NAMED ");      }
+    if (t & VT_CALL_SIG)  { strcat(buf, "VT_CALL_SIG ");   }
 
     strcat(buf, "]");
 
@@ -461,7 +462,7 @@ add_pcc_arg(ARGMOD(SymReg *r), ARGMOD(SymReg *arg))
     sub->args[n]      = arg;
     sub->arg_flags[n] = arg->type;
 
-    arg->type &= ~(VT_FLAT|VT_OPTIONAL|VT_OPT_FLAG|VT_NAMED);
+    arg->type &= ~(VT_FLAT|VT_OPTIONAL|VT_OPT_FLAG|VT_NAMED|VT_CALL_SIG);
 
     sub->nargs++;
 }
@@ -729,14 +730,14 @@ mk_pmc_const_2(PARROT_INTERP, ARGMOD(IMC_Unit *unit), ARGIN(SymReg *left),
     rhs->pmc_type = left->pmc_type;
 
     switch (rhs->pmc_type) {
-        case enum_class_Sub:
-        case enum_class_Coroutine:
-            r[1]        = rhs;
-            rhs->usage |= U_FIXUP;
-            INS(interp, unit, "set_p_pc", "", r, 2, 0, 1);
-            return NULL;
-        default:
-            break;
+      case enum_class_Sub:
+      case enum_class_Coroutine:
+        r[1]        = rhs;
+        rhs->usage |= U_FIXUP;
+        INS(interp, unit, "set_p_pc", "", r, 2, 0, 1);
+        return NULL;
+      default:
+        break;
     }
 
     r[1] = rhs;
@@ -824,7 +825,9 @@ _mk_const(ARGMOD(SymHash *hsh), ARGIN(const char *name), int t)
         r->type |= VT_ENCODED;
     }
 
-    /* autopromote big ints to floats; fallout from RT #53908 */
+    /* autopromote big ints to floats; fallout from
+     * http://rt.perl.org/rt3/Ticket/Display.html?id=53908
+     * */
     if (t == 'I') {
         if (int_overflows(r))
             r->set = 'N';

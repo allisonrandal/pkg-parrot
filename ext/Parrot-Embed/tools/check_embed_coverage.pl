@@ -1,7 +1,7 @@
 #!perl
 
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: check_embed_coverage.pl 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;

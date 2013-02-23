@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 04-prepare_ops.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 04-prepare_ops.t
 
 use strict;
@@ -19,7 +19,7 @@ BEGIN {
     }
     unshift @INC, qq{$topdir/lib};
 }
-use Test::More qw(no_plan); # tests => 70;
+use Test::More tests => 70;
 use Carp;
 use File::Copy;
 use File::Temp (qw| tempdir |);

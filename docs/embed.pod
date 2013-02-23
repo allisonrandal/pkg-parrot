@@ -1,5 +1,5 @@
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: embed.pod 40936 2009-09-03 00:21:51Z chromatic $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id$
 
 =head1 NAME
 
@@ -164,12 +164,6 @@ bytecode.  Valid runcores include:
 =item PARROT_CGP_CORE
 
 =item PARROT_CGOTO_CORE
-
-=item PARROT_JIT_CORE
-
-=item PARROT_CGP_JIT_CORE
-
-=item PARROT_SWITCH_JIT_CORE
 
 =item PARROT_EXEC_CORE
 
@@ -354,15 +348,21 @@ Not documented yet.
 
 =over 4
 
-=item C<void *Parrot_call_sub(PARROT_INTERP, Parrot_PMC sub, const_char *signature)>
+=item C<void Parrot_ext_call(PARROT_INTERP, Parrot_PMC sub, const_char *signature, varargs ...)>
+
+Call a Parrot subroutine using the supplied signature. Variables to be filled
+with return values are passed as references in the varargs list, after all
+arguments.
+
+=item [DEPRECATED] C<void *Parrot_call_sub(PARROT_INTERP, Parrot_PMC sub, const_char *signature)>
 
 Call a Parrot subroutine that returns a pointer using the supplied signature.
 
-=item C<Parrot_Int Parrot_call_sub_ret_int(PARROT_INTERP, Parrot_PMC sub, const_char *signature)>
+=item [DEPRECATED] C<Parrot_Int Parrot_call_sub_ret_int(PARROT_INTERP, Parrot_PMC sub, const_char *signature)>
 
 Call a Parrot subroutine that returns an integer using the supplied signature.
 
-=item C<Parrot_Float Parrot_call_sub_ret_float(PARROT_INTERP, Parrot_PMC sub, const_char *signature)>
+=item [DEPRECATED] C<Parrot_Float Parrot_call_sub_ret_float(PARROT_INTERP, Parrot_PMC sub, const_char *signature)>
 
 Call a Parrot subroutine that returns an float using the supplied signature.
 
@@ -389,7 +389,15 @@ supplying an argument.
 
 =head3 Calling methods
 
-Not documented yet.
+=over 4
+
+=item C<void Parrot_ext_call(PARROT_INTERP, Parrot_PMC method, const_char *signature, varargs ...)>
+
+Methods are called using the same API function as calling a subroutine. The
+first argument should be the object that the method will be invoked on, and it
+should have the signature "Pi".
+
+=back
 
 =head1 COMPILING
 
@@ -595,17 +603,19 @@ The list may also be augmented if additional functionality is required.
 
 =item C<Parrot_callback_D>
 
-=item C<Parrot_call_method>
+=item C<Parrot_ext_call>
 
-=item C<Parrot_call_method_ret_float>
+=item [DEPRECATED] C<Parrot_call_method>
 
-=item C<Parrot_call_method_ret_int>
+=item [DEPRECATED] C<Parrot_call_method_ret_float>
 
-=item C<Parrot_call_sub>
+=item [DEPRECATED] C<Parrot_call_method_ret_int>
 
-=item C<Parrot_call_sub_ret_float>
+=item [DEPRECATED] C<Parrot_call_sub>
 
-=item C<Parrot_call_sub_ret_int>
+=item [DEPRECATED] C<Parrot_call_sub_ret_float>
+
+=item [DEPRECATED] C<Parrot_call_sub_ret_int>
 
 =item C<Parrot_char_digit_value>
 
@@ -724,8 +734,6 @@ The list may also be augmented if additional functionality is required.
 =item C<Parrot_ex_add_c_handler>
 
 =item C<Parrot_ex_build_exception>
-
-=item C<Parrot_ex_calc_handler_offset>
 
 =item C<Parrot_exit>
 
@@ -1341,8 +1349,6 @@ The list may also be augmented if additional functionality is required.
 
 =item C<Parrot_PMC_instantiate>
 
-=item C<Parrot_PMC_instantiate_str>
-
 =item C<Parrot_PMC_invoke>
 
 =item C<Parrot_PMC_i_pow>
@@ -1551,8 +1557,6 @@ The list may also be augmented if additional functionality is required.
 
 =item C<Parrot_PMC_shift_string>
 
-=item C<Parrot_PMC_slice>
-
 =item C<Parrot_PMC_splice>
 
 =item C<Parrot_PMC_substr>
@@ -1564,8 +1568,6 @@ The list may also be augmented if additional functionality is required.
 =item C<Parrot_PMC_subtract_float>
 
 =item C<Parrot_PMC_subtract_int>
-
-=item C<Parrot_PMC_type_keyed>
 
 =item C<Parrot_PMC_typenum>
 
@@ -1615,37 +1617,7 @@ The list may also be augmented if additional functionality is required.
 
 =item C<Parrot_runcode>
 
-=item C<Parrot_run_meth_fromc>
-
-=item C<Parrot_run_meth_fromc_arglist>
-
-=item C<Parrot_run_meth_fromc_arglist_retf>
-
-=item C<Parrot_run_meth_fromc_arglist_reti>
-
-=item C<Parrot_run_meth_fromc_args>
-
-=item C<Parrot_run_meth_fromc_args_retf>
-
-=item C<Parrot_run_meth_fromc_args_reti>
-
 =item C<Parrot_run_native>
-
-=item C<Parrot_runops_fromc>
-
-=item C<Parrot_runops_fromc_arglist>
-
-=item C<Parrot_runops_fromc_arglist_retf>
-
-=item C<Parrot_runops_fromc_arglist_reti>
-
-=item C<Parrot_runops_fromc_args>
-
-=item C<Parrot_runops_fromc_args_event>
-
-=item C<Parrot_runops_fromc_args_retf>
-
-=item C<Parrot_runops_fromc_args_reti>
 
 =item C<Parrot_schedule_event>
 

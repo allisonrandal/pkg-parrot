@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Hs.pir 40268 2009-07-25 19:53:04Z whiteknight $
+# $Id$
 
 =head1 Title
 

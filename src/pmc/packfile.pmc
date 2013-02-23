@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: packfile.pmc 41228 2009-09-12 12:55:08Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ the top level parser and serializer for *.pbc files.
 
 */
 
-#include "pmc_packfiledirectory.h"
+#include "pmc/pmc_packfiledirectory.h"
 
 /*
 Copy attributes from PackFile* to Packfile PMC.
@@ -44,18 +44,18 @@ copy_packfile_header(PARROT_INTERP, PMC *self, PackFile *pf) {
 }
 
 pmclass Packfile auto_attrs {
-        ATTR INTVAL wordsize;
-        ATTR INTVAL byteorder;
-        ATTR INTVAL fptype;
-        ATTR INTVAL version_major;
-        ATTR INTVAL version_minor;
-        ATTR INTVAL version_patch;
-        ATTR INTVAL bytecode_major;
-        ATTR INTVAL bytecode_minor;
-        ATTR INTVAL uuid_type;
-        ATTR STRING *uuid;
+    ATTR INTVAL wordsize;
+    ATTR INTVAL byteorder;
+    ATTR INTVAL fptype;
+    ATTR INTVAL version_major;
+    ATTR INTVAL version_minor;
+    ATTR INTVAL version_patch;
+    ATTR INTVAL bytecode_major;
+    ATTR INTVAL bytecode_minor;
+    ATTR INTVAL uuid_type;
+    ATTR STRING *uuid;
 
-        ATTR PMC    *directory;
+    ATTR PMC    *directory;
 /*
 
 =item C<void init()>
@@ -95,10 +95,8 @@ Marks the Packfile as alive.
     VTABLE void mark() {
         Parrot_Packfile_attributes * attrs = PARROT_PACKFILE(SELF);
 
-        if (attrs->uuid)
-            Parrot_gc_mark_PObj_alive(INTERP, (PObj *)attrs->uuid);
-        if (!PMC_IS_NULL(attrs->directory))
-            Parrot_gc_mark_PObj_alive(INTERP, (PObj *)attrs->directory);
+        Parrot_gc_mark_STRING_alive(INTERP, attrs->uuid);
+        Parrot_gc_mark_PMC_alive(INTERP, attrs->directory);
     }
 /*
 

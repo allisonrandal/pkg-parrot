@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation
-# $Id: pdd26_ast.pod 37485 2009-03-16 16:13:50Z pmichaud $
+# $Id$
 
 =head1 PDD 26: Compiler Tools - Abstract Syntax Tree
 
@@ -10,7 +10,7 @@ Abstract Syntax Tree representation.
 
 =head2 Version
 
-$Revision: 37485 $
+$Revision$
 
 =head2 Description
 

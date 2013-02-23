@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: fp_equality.pasm 40481 2009-08-11 06:09:35Z dukeleto $
+# $Id$
 
 =head1 NAME
 

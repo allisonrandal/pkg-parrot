@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Rand.pir 40726 2009-08-23 01:18:17Z whiteknight $
+# $Id$
 
 =head1 NAME
 

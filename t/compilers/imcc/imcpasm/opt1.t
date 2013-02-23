@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2008, Parrot Foundation.
-# $Id: opt1.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;

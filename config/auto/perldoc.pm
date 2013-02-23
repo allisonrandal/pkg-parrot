@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: perldoc.pm 38239 2009-04-20 22:15:54Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ sub _init {
 sub runstep {
     my ( $self, $conf ) = @_;
 
-    my $cmd = $conf->data->get_p5('scriptdirexp') . q{/perldoc};
+    my $cmd = $conf->data->get('scriptdirexp_provisional') . q{/perldoc};
     my ( $fh, $filename ) = tempfile( UNLINK => 1 );
     my $content = capture_output("$cmd -ud $filename perldoc") || undef;
 

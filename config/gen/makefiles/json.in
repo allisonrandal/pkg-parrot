@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: json.in 36941 2009-02-23 17:49:25Z fperrad $
+# $Id$
 
 PERL     := @perl@
 RM_F     := @rm_f@

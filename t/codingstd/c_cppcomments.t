@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: c_cppcomments.t 37219 2009-03-09 00:38:24Z NotFound $
+# $Id$
 
 use strict;
 use warnings;

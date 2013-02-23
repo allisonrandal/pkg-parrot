@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: 08-sort_ops.t 40198 2009-07-21 20:49:40Z cotto $
+# $Id$
 # 08-sort_ops.t
 
 use strict;

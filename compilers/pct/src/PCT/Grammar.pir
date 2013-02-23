@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: Grammar.pir 37824 2009-03-31 01:24:46Z pmichaud $
+# $Id$
 
 =head1 NAME
 

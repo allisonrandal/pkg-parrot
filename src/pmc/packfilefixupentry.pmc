@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: packfilefixupentry.pmc 41228 2009-09-12 12:55:08Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -57,8 +57,7 @@ Marks the object as live.
         Parrot_PackfileFixupEntry_attributes * attrs =
                 PARROT_PACKFILEFIXUPENTRY(SELF);
 
-        if (attrs->name)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)attrs->name);
+        Parrot_gc_mark_STRING_alive(interp, attrs->name);
     }
 
 /*

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: resizablepmcarray.pmc 41253 2009-09-13 18:44:48Z NotFound $
+$Id$
 
 =head1 NAME
 
@@ -246,7 +246,7 @@ Sets the PMC value of the element at index C<key> to C<*src>.
 
 =item C<void set_pmc_keyed(PMC *key, PMC *src)>
 
-If key is a slice, do a splice as set that item.
+Sets the PMC value of the element keyed by C<key> to C<*src>.
 
 =cut
 
@@ -266,7 +266,7 @@ If key is a slice, do a splice as set that item.
             SELF.set_integer_native(key+1);
 
         data      = PMC_array(SELF);
-        GC_WRITE_BARRIER(INTERP, SELF, data[key], src);
+
         data[key] = src;
     }
 

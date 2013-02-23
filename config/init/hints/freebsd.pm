@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: freebsd.pm 39871 2009-07-03 14:40:18Z jkeenan $
+# $Id$
 
 package init::hints::freebsd;
 

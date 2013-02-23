@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: config_pm.pm 38962 2009-05-20 04:44:22Z Infinoid $
+# $Id$
 
 =head1 NAME
 

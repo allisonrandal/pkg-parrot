@@ -1,7 +1,7 @@
 /* ucs2.h
  *  Copyright (C) 2004, Parrot Foundation.
  *  SVN Info
- *     $Id: ucs2.h 37201 2009-03-08 12:07:48Z fperrad $
+ *     $Id$
  *  Overview:
  *     This is the header for the ucs2 fixed-width encoding.
  *  Data Structure and Algorithms:
@@ -20,8 +20,8 @@ PARROT_CANNOT_RETURN_NULL
 ENCODING * Parrot_encoding_ucs2_init(PARROT_INTERP)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_Parrot_encoding_ucs2_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_Parrot_encoding_ucs2_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/string/encoding/ucs2.c */
 

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: pmcrenumber.pl 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;
@@ -40,7 +40,8 @@ tools/dev/pmcrenumber.pl - Renumber F<src/pmc/pmc.num>.
 
 =head1 DESCRIPTION
 
-This program should be used when adding or removing PMCs.
+This program should be used when adding PMCs. Note that it does not remove
+numbers assigned to PMCs that have been removed; this happens very rarely.
 
 =head1 SEE ALSO
 

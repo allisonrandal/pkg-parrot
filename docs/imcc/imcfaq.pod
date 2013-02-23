@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: imcfaq.pod 38812 2009-05-16 02:13:00Z coke $
+# $Id$
 
 =head1 TITLE
 

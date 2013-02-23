@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2005-2008, Parrot Foundation.
-$Id: dynlexpad.pmc 40740 2009-08-23 15:20:12Z whiteknight $
+$Id$
 
 =head1 NAME
 
@@ -174,9 +174,9 @@ doesn't exist, it is created.
 
 /*
 
-=item C<METHOD PMC* get_lexinfo()>
+=item C<void destroy()>
 
-Return the LexInfo PMC, if any or a Null PMC.
+Destroy DynLexPad.
 
 =cut
 
@@ -200,8 +200,7 @@ Marks the lexpad hash as live.
 
     VTABLE void mark() {
         PMC *std_pad = PARROT_DYNLEXPAD(SELF)->init;
-        if (std_pad)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)std_pad);
+        Parrot_gc_mark_PMC_alive(INTERP, std_pad);
         if (PARROT_DYNLEXPAD(SELF)->hash)
             parrot_mark_hash(interp, PARROT_DYNLEXPAD(SELF)->hash);
     }

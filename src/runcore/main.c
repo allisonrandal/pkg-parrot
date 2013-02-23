@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: main.c 41159 2009-09-08 18:05:25Z chromatic $
+$Id$
 
 =head1 NAME
 
@@ -40,16 +40,13 @@ have the same number of elements because there is a one-to-one mapping.
 #include "parrot/oplib/ops.h"
 #include "main.str"
 
-#if JIT_CAPABLE
-#  include "parrot/exec.h"
-#  include "../jit.h"
-#endif
 #ifdef HAVE_COMPUTED_GOTO
 #  include "parrot/oplib/core_ops_cg.h"
 #  include "parrot/oplib/core_ops_cgp.h"
 #endif
 #include "parrot/dynext.h"
-#include "../pmc/pmc_parrotlibrary.h"
+#include "pmc/pmc_parrotlibrary.h"
+#include "pmc/pmc_callcontext.h"
 
 
 /* HEADERIZER HFILE: include/parrot/runcore_api.h */
@@ -94,23 +91,23 @@ static void stop_prederef(PARROT_INTERP)
 static void turn_ev_check(PARROT_INTERP, int on)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_dynop_register_switch __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
-#define ASSERT_ARGS_dynop_register_xx __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_get_dynamic_op_lib_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(lib)
-#define ASSERT_ARGS_notify_func_table __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_dynop_register_switch __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_dynop_register_xx __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_get_dynamic_op_lib_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(lib))
+#define ASSERT_ARGS_notify_func_table __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(table)
-#define ASSERT_ARGS_prederef_args __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(table))
+#define ASSERT_ARGS_prederef_args __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(pc_prederef) \
-    || PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pc) \
-    || PARROT_ASSERT_ARG(opinfo)
-#define ASSERT_ARGS_stop_prederef __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_turn_ev_check __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+    , PARROT_ASSERT_ARG(interp) \
+    , PARROT_ASSERT_ARG(pc) \
+    , PARROT_ASSERT_ARG(opinfo))
+#define ASSERT_ARGS_stop_prederef __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_turn_ev_check __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -128,11 +125,7 @@ void
 Parrot_runcore_init(PARROT_INTERP)
 {
     ASSERT_ARGS(Parrot_runcore_init)
-#ifdef NDEBUG
-    STRING * const default_core = CONST_STRING(interp, "slow");
-#else
     STRING * const default_core = CONST_STRING(interp, "fast");
-#endif
 
     interp->cores        = NULL;
     interp->num_cores    = 0;
@@ -141,8 +134,6 @@ Parrot_runcore_init(PARROT_INTERP)
     Parrot_runcore_fast_init(interp);
     Parrot_runcore_switch_init(interp);
 
-    Parrot_runcore_jit_init(interp);
-    Parrot_runcore_switch_jit_init(interp);
     Parrot_runcore_exec_init(interp);
     Parrot_runcore_gc_debug_init(interp);
     Parrot_runcore_debugger_init(interp);
@@ -155,7 +146,6 @@ Parrot_runcore_init(PARROT_INTERP)
 #ifdef HAVE_COMPUTED_GOTO
     Parrot_runcore_cgp_init(interp);
     Parrot_runcore_cgoto_init(interp);
-    Parrot_runcore_cgp_jit_init(interp);
 #endif
 }
 
@@ -265,8 +255,8 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
 
         switch (type) {
 
-        case PARROT_ARG_KI:
-        case PARROT_ARG_I:
+          case PARROT_ARG_KI:
+          case PARROT_ARG_I:
             if (arg < 0 || arg >= regs_i)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal register number");
@@ -274,7 +264,7 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
             pc_prederef[i] = (void *)REG_OFFS_INT(arg);
             break;
 
-        case PARROT_ARG_N:
+          case PARROT_ARG_N:
             if (arg < 0 || arg >= regs_n)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal register number");
@@ -282,8 +272,8 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
             pc_prederef[i] = (void *)REG_OFFS_NUM(arg);
             break;
 
-        case PARROT_ARG_K:
-        case PARROT_ARG_P:
+          case PARROT_ARG_K:
+          case PARROT_ARG_P:
             if (arg < 0 || arg >= regs_p)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal register number");
@@ -291,7 +281,7 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
             pc_prederef[i] = (void *)REG_OFFS_PMC(arg);
             break;
 
-        case PARROT_ARG_S:
+          case PARROT_ARG_S:
             if (arg < 0 || arg >= regs_s)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal register number");
@@ -299,12 +289,12 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
             pc_prederef[i] = (void *)REG_OFFS_STR(arg);
             break;
 
-        case PARROT_ARG_KIC:
-        case PARROT_ARG_IC:
+          case PARROT_ARG_KIC:
+          case PARROT_ARG_IC:
             pc_prederef[i] = (void *)pc[i];
             break;
 
-        case PARROT_ARG_NC:
+          case PARROT_ARG_NC:
             if (arg < 0 || arg >= const_table->const_count)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal constant number");
@@ -312,7 +302,7 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
             pc_prederef[i] = (void *)&const_table->constants[arg]->u.number;
             break;
 
-        case PARROT_ARG_SC:
+          case PARROT_ARG_SC:
             if (arg < 0 || arg >= const_table->const_count)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal constant number");
@@ -320,15 +310,15 @@ prederef_args(ARGMOD(void **pc_prederef), PARROT_INTERP,
             pc_prederef[i] = (void *)const_table->constants[arg]->u.string;
             break;
 
-        case PARROT_ARG_PC:
-        case PARROT_ARG_KC:
+          case PARROT_ARG_PC:
+          case PARROT_ARG_KC:
             if (arg < 0 || arg >= const_table->const_count)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INTERP_ERROR,
                     "Illegal constant number");
 
             pc_prederef[i] = (void *)const_table->constants[arg]->u.key;
             break;
-        default:
+          default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_ARG_OP_NOT_HANDLED,
                 "Unhandled argtype 0x%x\n", type);
             break;
@@ -368,8 +358,11 @@ do_prederef(ARGIN(void **pc_prederef), PARROT_INTERP, ARGIN(Parrot_runcore_t *ru
 
     prederef_args(pc_prederef, interp, pc, opinfo);
 
-    if (PARROT_RUNCORE_PREDEREF_OPS_TEST(runcore))
-        parrot_PIC_prederef(interp, *pc, pc_prederef, interp->run_core);
+    if (PARROT_RUNCORE_PREDEREF_OPS_TEST(runcore)) {
+        *pc_prederef = PARROT_RUNCORE_CGOTO_OPS_TEST(runcore)
+            ? ((void **)interp->op_lib->op_func_table)[*pc]
+            : (void**)*pc;
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "Tried to prederef wrong core");
@@ -493,93 +486,6 @@ stop_prederef(PARROT_INTERP)
     }
 
     Parrot_setup_event_func_ptrs(interp);
-}
-
-
-#if EXEC_CAPABLE
-
-/*
-
-=item C<void exec_init_prederef(PARROT_INTERP, void *prederef_arena)>
-
-C<< interp->op_lib >> = prederefed oplib
-
-The "normal" C<op_lib> has a copy in the interpreter structure - but get
-the C<op_code> lookup function from standard core prederef has no
-C<op_info_table>
-
-=cut
-
-*/
-
-void
-exec_init_prederef(PARROT_INTERP, ARGIN(void *prederef_arena))
-{
-    ASSERT_ARGS(exec_init_prederef)
-    Parrot_runcore_t *old_runcore = interp->run_core;
-    Parrot_runcore_switch(interp, Parrot_str_new_constant(interp, "cgp"));
-
-    load_prederef(interp, interp->run_core);
-    interp->run_core = old_runcore;
-
-    if (!interp->code->prederef.code) {
-        void ** const temp = (void **)prederef_arena;
-
-        interp->code->prederef.code = temp;
-        /* TODO */
-    }
-}
-
-#endif
-
-
-/*
-
-=item C<void * init_jit(PARROT_INTERP, opcode_t *pc)>
-
-Initializes JIT function for the specified opcode and returns it.
-
-=cut
-
-*/
-
-PARROT_WARN_UNUSED_RESULT
-PARROT_CAN_RETURN_NULL
-void *
-init_jit(PARROT_INTERP, SHIM(opcode_t *pc))
-{
-    ASSERT_ARGS(init_jit)
-#if JIT_CAPABLE
-    opcode_t          *code_start;
-    UINTVAL            code_size;          /* in opcodes */
-    opcode_t          *code_end;
-    Parrot_jit_info_t *jit_info;
-
-    if (interp->code->jit_info)
-        return ((Parrot_jit_info_t *)interp->code->jit_info)->arena.start;
-
-    code_start = interp->code->base.data;
-    code_size  = interp->code->base.size;
-    code_end   = code_start + code_size;
-
-#  if defined HAVE_COMPUTED_GOTO && PARROT_I386_JIT_CGP
-#    ifdef __GNUC__
-#      ifdef PARROT_I386
-    init_prederef(interp, PARROT_CGP_CORE);
-#      endif
-#    endif
-#  endif
-
-    interp->code->jit_info =
-        jit_info = parrot_build_asm(interp, code_start, code_end,
-            NULL, JIT_CODE_FILE);
-
-    return jit_info->arena.start;
-#else
-    UNUSED(interp);
-    return NULL;
-#endif
-
 }
 
 

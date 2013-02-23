@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: opsrenumber.pl 38825 2009-05-16 13:13:27Z jkeenan $
+# $Id$
 
 use strict;
 use warnings;

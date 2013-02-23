@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: handle.t 39524 2009-06-12 15:52:20Z whiteknight $
+# $Id$
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: pdd15_objects.pod 41220 2009-09-11 21:15:05Z darbelo $
+# $Id$
 
 =head1 PDD 15: Objects and Classes
 
@@ -9,7 +9,7 @@ This PDD describes the semantics of Parrot's object and class systems.
 
 =head2 Version
 
-$Revision: 41220 $
+$Revision$
 
 =head2 Definitions
 

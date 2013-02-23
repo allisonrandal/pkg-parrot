@@ -1,6 +1,6 @@
 =pod
 
-﻿# $Id: CREDITS 41186 2009-09-10 22:17:00Z darbelo $
+﻿# $Id$
 
     Following in the steps of other open source projects that
     eventually take over the world, here is the partial list
@@ -149,17 +149,20 @@ D: Fixes for VMS
 
 N: Bernhard Schmalhofer
 U: bernhard
-D: Bugfixes
 D: Eclectus, Scheme on Parrot
 D: Parrot m4
 D: Pipp, PHP on Parrot
 D: HQ9plus
-D: Release manager for Parrot 0.6.0 and Parrot 0.6.4
-D: Tests for languages/lisp
+D: Release manager for Parrot 0.6.0, Parrot 0.6.4, and Parrot 1.8.0
 E: Bernhard.Schmalhofer@gmx.de
 
 N: Bob Diertens
 D: patch regarding macro argument expansion
+
+N: Bob Kuo
+D: Convert some perl tests to PIR
+E: bobjkuo@gmail.com
+U: bubaflub
 
 N: Bob Rogers
 D: Random small bug fixes, including one for the linguine bug.
@@ -191,6 +194,11 @@ W: http://www.brentdax.com/
 U: bdwheele
 N: Brian Wheeler
 E: bdwheele@indiana.edu
+
+U: brianwisti
+N: Brian Wisti
+E: brian.wisti@gmail.com
+D: PIR Test demonstrating that $I1 and $I01 are different variables
 
 N: Bruce Gray
 U: util
@@ -384,6 +392,7 @@ D: Documentation patch for Parrot_PMC_get_pointer_intkey()
 
 N: Gerd Pokorra
 E: pokorra@uni-siegen.de
+D: Release manager for 1.9.0
 
 N: Goplat
 D: Win98 and other fixes.
@@ -504,7 +513,10 @@ D: pir-mode.el: fix for xemacs plus bugfixes and cleanups
 N: Jonathan Leto
 E: jonathan@leto.net
 W: http://leto.net
+D: Release manager for 1.7.0
 U: dukeleto
+A: leto
+A: Duke Leto
 S: Portland, OR
 
 N: Jonathan Scott Duff
@@ -786,6 +798,10 @@ N: Peter Gibbs
 U: petergibbs
 E: peter@emkel.co.za
 D: String subsystem
+
+N: Peter Lobsinger
+U: plobsing
+E: plobsing@gmail.com
 
 N: Philip Taylor
 D: Win32 ICC support

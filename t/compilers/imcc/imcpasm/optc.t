@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: optc.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;
@@ -253,7 +253,7 @@ foo:
   returncc/
 OUT
 
-pir_2_pasm_like( <<'CODE', <<'OUT', "tailcall 1", todo => "RT #57028" );
+pir_2_pasm_like( <<'CODE', <<'OUT', "tailcall 1", todo => "TT #1281" );
 .sub _main
     foo(1, 2)
 .end

@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 043-verbose_step.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 # 043-verbose_step.t
 
 use strict;

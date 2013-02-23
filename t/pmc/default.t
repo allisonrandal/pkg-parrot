@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: default.t 40813 2009-08-26 06:29:59Z dukeleto $
+# $Id$
 
 =head1 NAME
 

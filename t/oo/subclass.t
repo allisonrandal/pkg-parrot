@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: subclass.t 36967 2009-02-24 14:19:07Z NotFound $
+# $Id$
 
 =head1 NAME
 

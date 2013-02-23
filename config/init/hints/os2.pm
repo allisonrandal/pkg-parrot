@@ -1,5 +1,5 @@
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: os2.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 package init::hints::os2;
 

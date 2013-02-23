@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: single_retval.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 

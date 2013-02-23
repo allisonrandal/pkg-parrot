@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: core.c 38845 2009-05-16 20:57:52Z whiteknight $
+$Id$
 
 =head1 NAME
 
@@ -125,9 +125,7 @@ Parrot_IOData_mark(PARROT_INTERP, ARGIN(ParrotIOData *piodata))
      * to be kept alive AFAIK -leo
      */
     for (i = 0; i < 3; i++) {
-        if (table[i]) {
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)table[i]);
-        }
+        Parrot_gc_mark_PMC_alive(interp, table[i]);
     }
 }
 

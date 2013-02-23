@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: io_status.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 use strict;
 use warnings;

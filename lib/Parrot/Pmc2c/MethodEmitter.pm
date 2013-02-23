@@ -1,6 +1,6 @@
-# Copyright (C) 2004-2008, Parrot Foundation.
+# Copyright (C) 2004-2009, Parrot Foundation.
 
-# $Id: MethodEmitter.pm 40396 2009-08-04 09:09:02Z chromatic $
+# $Id$
 
 =head1 NAME
 
@@ -149,9 +149,6 @@ my %calltype = (
     'void *'   => 'b',
     'void**'   => 'B',
     'void **'  => 'B',
-
-    #"BIGNUM*" => "???" # RT#43731
-    #"BIGNUM *"=> "???" # RT#43731
 );
 
 sub proto {
@@ -163,13 +160,9 @@ sub proto {
 
     # type method(interp, self, parameters...)
     my $ret = $calltype{ $type or "void" };
-    $ret .= "JO" . join( '', map { $calltype{$_} or "?" } split( /,/, $parameters ) );
-
-    # RT#43733
-    # scan src/call_list.txt if the generated signature is available
-
-    # RT#43735 report errors for "?"
-    # --leo
+    $ret .= "JO" . join( '',
+        map { $calltype{$_} or die "Unknown signature type '$_'" }
+        split( /,/, $parameters ) );
 
     return $ret;
 }

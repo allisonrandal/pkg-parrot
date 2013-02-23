@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: Path.pm 39955 2009-07-09 00:02:26Z jkeenan $
+# $Id$
 
 =head1 NAME
 

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: pbc_disassemble.c 37845 2009-04-01 18:19:56Z coke $
+$Id$
 
 =head1 NAME
 
@@ -103,24 +103,24 @@ main(int argc, const char *argv[])
     while ((status = longopt_get(interp,
                     argc, argv, options, &opt)) > 0) {
         switch (opt.opt_id) {
-            case 'h':
-                option += enum_DIS_HEADER;
-                break;
-            case 'b':
-                option += enum_DIS_BARE;
-                break;
-            case 'o':
-                outfile = opt.opt_arg;
-                break;
+          case 'h':
+            option += enum_DIS_HEADER;
+            break;
+          case 'b':
+            option += enum_DIS_BARE;
+            break;
+          case 'o':
+            outfile = opt.opt_arg;
+            break;
 #if TRACE_PACKFILE
-            case 'D':
-                debug += atoi(opt.opt_arg) << 2;
-                break;
+          case 'D':
+            debug += atoi(opt.opt_arg) << 2;
+            break;
 #endif
-            case '?':
-            default:
-                help();
-                break;
+          case '?':
+          default:
+            help();
+            break;
         }
     }
     if (status == -1) {

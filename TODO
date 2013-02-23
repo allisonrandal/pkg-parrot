@@ -1,4 +1,4 @@
-# $Id: TODO 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 All todo items should have a corresponding trac ticket. See the current list:
 
@@ -8,7 +8,3 @@ To open a new todo ticket, use
 
  https://trac.parrot.org/
 
-Note that we are still transitioning away from RT. To see what todos remain
-in our old tracking system, use:
-
- http://www.parrotcode.org/todo

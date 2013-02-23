@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005, Parrot Foundation.
-# $Id: cfg.t 40268 2009-07-25 19:53:04Z whiteknight $
+# $Id$
 
 use strict;
 use warnings;

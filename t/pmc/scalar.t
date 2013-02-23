@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2006-2007, Parrot Foundation.
-# $Id: scalar.t 37607 2009-03-20 01:53:09Z coke $
+# $Id$
 
 =head1 NAME
 

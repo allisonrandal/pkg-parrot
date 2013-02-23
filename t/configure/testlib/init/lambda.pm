@@ -1,9 +1,13 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: lambda.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 NAME
 
 t/configure/testlib/init/lambda.pm - Module used in configuration tests
+
+=head1 DESCRIPTION
+
+Nonsense module used only in testing the configuration system.
 
 =cut
 

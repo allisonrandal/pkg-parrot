@@ -1,14 +1,16 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: pmc.c 41069 2009-09-06 13:57:25Z whiteknight $
+$Id$
 
 =head1 NAME
 
-src/pmc.c - The base vtable calling functions
+src/pmc.c
 
 =head1 DESCRIPTION
 
-=head2 Functions
+The base vtable calling functions
+
+=head1 FUNCTIONS
 
 =over 4
 
@@ -19,6 +21,7 @@ src/pmc.c - The base vtable calling functions
 #include "parrot/parrot.h"
 #include "pmc.str"
 #include "pmc/pmc_class.h"
+#include "pmc/pmc_callcontext.h"
 
 /* HEADERIZER HFILE: include/parrot/pmc.h */
 
@@ -50,15 +53,15 @@ static PMC* pmc_reuse_no_init(PARROT_INTERP,
         __attribute__nonnull__(1)
         __attribute__nonnull__(2);
 
-#define ASSERT_ARGS_check_pmc_reuse_flags __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_create_class_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_get_new_pmc_header __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_pmc_reuse_no_init __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_check_pmc_reuse_flags __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_create_class_pmc __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_get_new_pmc_header __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_pmc_reuse_no_init __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(pmc)
+    , PARROT_ASSERT_ARG(pmc))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: static */
 
@@ -109,14 +112,10 @@ Parrot_pmc_destroy(PARROT_INTERP, ARGMOD(PMC *pmc))
 {
     ASSERT_ARGS(Parrot_pmc_destroy)
 
-    if (PObj_custom_destroy_TEST(pmc)) {
+    if (PObj_custom_destroy_TEST(pmc))
         VTABLE_destroy(interp, pmc);
-        /* Prevent repeated calls. */
-        PObj_custom_destroy_CLEAR(pmc);
-    }
 
-    PObj_custom_mark_CLEAR(pmc);
-    PObj_live_CLEAR(pmc);
+    PObj_gc_CLEAR(pmc);
 
     if (PObj_is_PMC_shared_TEST(pmc) && PMC_sync(pmc))
         Parrot_gc_free_pmc_sync(interp, pmc);
@@ -460,13 +459,6 @@ get_new_pmc_header(PARROT_INTERP, INTVAL base_type, UINTVAL flags)
 
     if (vtable->attr_size)
         Parrot_gc_allocate_pmc_attributes(interp, pmc);
-
-#if GC_VERBOSE
-    if (Interp_flags_TEST(interp, PARROT_TRACE_FLAG)) {
-        /* XXX make a more verbose trace flag */
-        fprintf(stderr, "\t=> new %p type %d\n", pmc, (int)base_type);
-    }
-#endif
 
     return pmc;
 }

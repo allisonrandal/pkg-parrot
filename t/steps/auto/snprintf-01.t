@@ -1,22 +1,17 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: snprintf-01.t 39967 2009-07-10 00:16:41Z jkeenan $
+# $Id$
 # auto/snprintf-01.t
 
 use strict;
 use warnings;
-use Test::More tests => 33;
+use Test::More tests => 18;
 use Carp;
 use lib qw( lib t/configure/testlib );
-use_ok('config::init::defaults');
-use_ok('config::init::hints');
-use_ok('config::auto::attributes');
 use_ok('config::auto::snprintf');
-use Parrot::Configure;
 use Parrot::Configure::Options qw( process_options );
+use Parrot::Configure::Step::Test;
 use Parrot::Configure::Test qw(
-    test_step_thru_runstep
-    rerun_defaults_for_testing
     test_step_constructor_and_description
 );
 use IO::CaptureOutput qw| capture |;
@@ -28,11 +23,8 @@ my ($args, $step_list_ref) = process_options( {
     mode            => q{configure},
 } );
 
-my $conf = Parrot::Configure->new();
-
-test_step_thru_runstep($conf, q{init::defaults}, $args);
-test_step_thru_runstep($conf, q{init::hints}, $args);
-test_step_thru_runstep($conf, q{auto::attributes}, $args);
+my $conf = Parrot::Configure::Step::Test->new;
+$conf->include_config_results( $args );
 
 my $pkg = q{auto::snprintf};
 

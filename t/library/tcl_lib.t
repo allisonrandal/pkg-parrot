@@ -1,16 +1,18 @@
 #!./parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: tcl_lib.t 38695 2009-05-11 19:42:10Z NotFound $
+# $Id$
 
 =head1 NAME
 
-t/library/tcl_lib.t - test parrot to external Tcl connection
+t/library/tcl_lib.t
+
+=head1 DESCRIPTION
+
+test parrot to external Tcl connection
 
 =head1 SYNOPSIS
 
     % prove t/library/tcl_lib.t
-
-=head1 DESCRIPTION
 
 =cut
 

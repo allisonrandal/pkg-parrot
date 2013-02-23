@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: mk_chm.pl 38269 2009-04-22 12:06:11Z fperrad $
+# $Id$
 
 =head1 TITLE
 

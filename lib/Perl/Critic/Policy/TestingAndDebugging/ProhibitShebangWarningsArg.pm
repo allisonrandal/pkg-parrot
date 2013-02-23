@@ -1,4 +1,4 @@
-# $Id: ProhibitShebangWarningsArg.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 package Perl::Critic::Policy::TestingAndDebugging::ProhibitShebangWarningsArg;
 
 # Copyright (C) 2006-2007, Parrot Foundation.

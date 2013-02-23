@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2008, Parrot Foundation.
-$Id: integer.pmc 41230 2009-09-12 13:37:58Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ integer type without going to an I register.
 
 */
 
-#include "pmc_bigint.h"
+#include "pmc/pmc_bigint.h"
 
 static void
 maybe_throw_overflow_error(PARROT_INTERP)
@@ -88,29 +88,6 @@ Creates an exact duplicate of this PMC.
         VTABLE_set_integer_native(INTERP, clone, SELF.get_integer());
         return clone;
     }
-
-/*
-
-=item C<PMC instantiate_str(STRING *rep)>
-
-Class method to construct an Integer from the string representation C<rep>.
-
-=cut
-
-*/
-
-    VTABLE PMC *instantiate_str(STRING *rep, INTVAL flags) {
-        const INTVAL type = SELF->vtable->base_type;
-        PMC * const  res  = (flags & PObj_constant_FLAG)
-            ? constant_pmc_new(INTERP, type)
-            : pmc_new(INTERP, type);
-
-        /* Parrot_str_to_int catches overflow automatically, so we don't need to
-           worry about it here. */
-        VTABLE_set_integer_native(INTERP, res, Parrot_str_to_int(INTERP, rep));
-        return res;
-    }
-
 
 /*
 
@@ -1031,7 +1008,7 @@ Returns SELF to the C<value>th power in C<dest>.
 
 Raises SELF to the C<value>th power.
 
-RT #46631 Complex and BigInt rhs.
+TODO:  TT #1228: Implement Complex and BigInt RHS values for the pow() functions
 
 =cut
 
@@ -1122,17 +1099,17 @@ The C<==> operation.
         PMC *temp;
 
         switch (value->vtable->base_type) {
-            case enum_class_BigInt:
-                temp = pmc_new(INTERP, enum_class_BigInt);
-                VTABLE_set_integer_native(INTERP, temp, SELF.get_integer());
-                Parrot_mmd_multi_dispatch_from_c_args(interp,
+          case enum_class_BigInt:
+            temp = pmc_new(INTERP, enum_class_BigInt);
+            VTABLE_set_integer_native(INTERP, temp, SELF.get_integer());
+            Parrot_mmd_multi_dispatch_from_c_args(interp,
                     "is_equal", "PP->I", temp, value, &retval);
-                return retval;
-                break;
-            default:
-                return (VTABLE_get_integer(INTERP, SELF)
-                    ==  VTABLE_get_integer(INTERP, value));
-                break;
+            return retval;
+            break;
+          default:
+            return (VTABLE_get_integer(INTERP, SELF)
+                ==  VTABLE_get_integer(INTERP, value));
+            break;
         }
     }
 
@@ -1283,7 +1260,7 @@ Sets C<dest> to the absolute value of SELF.
     VTABLE PMC *absolute(PMC *dest) {
         const INTVAL a = abs(SELF.get_integer());
 
-        /* RT #46635 overflow for -maxint */
+        /* TT # 1245 overflow for -maxint */
         dest = pmc_new(INTERP, VTABLE_type(INTERP, SELF));
 
         VTABLE_set_integer_native(INTERP, dest, a);
@@ -1335,9 +1312,8 @@ Used to archive the integer.
 
 */
     VTABLE void freeze(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        VTABLE_push_integer(INTERP, io, SELF.get_integer());
+        VTABLE_push_integer(INTERP, info, SELF.get_integer());
     }
 
 
@@ -1351,10 +1327,8 @@ Used to unarchive the integer.
 
 */
     VTABLE void thaw(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        if (info->extra_flags == EXTRA_IS_NULL)
-            SELF.set_integer_native(VTABLE_shift_integer(INTERP, io));
+        SELF.set_integer_native(VTABLE_shift_integer(INTERP, info));
     }
 }
 

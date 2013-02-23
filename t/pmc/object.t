@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: object.t 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 =head1 NAME
 

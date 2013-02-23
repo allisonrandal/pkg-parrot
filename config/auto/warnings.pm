@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: warnings.pm 37144 2009-03-06 04:26:29Z Util $
+# $Id$
 
 =head1 NAME
 

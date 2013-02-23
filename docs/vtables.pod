@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2007, Parrot Foundation.
-# $Id: vtables.pod 40936 2009-09-03 00:21:51Z chromatic $
+# $Id$
 
 =head1 NAME
 

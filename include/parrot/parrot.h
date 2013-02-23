@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: parrot.h 41112 2009-09-07 14:00:38Z whiteknight $
+ *     $Id$
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -108,11 +108,6 @@ typedef jmp_buf Parrot_jump_buff;
 
 #define NUM_REGISTERS 32
 #define PARROT_MAGIC 0x13155a1
-
-#define OPCODE_TYPE_PERL 0x5045524c
-#define OPCODE_TYPE_PYTHON 0x5045524b
-#define OPCODE_TYPE_JAVA 4871757
-#define OPCODE_TYPE_MSNET 0x2e4e4554
 
 typedef void STRING_FUNCS;
 typedef struct parrot_interp_t Interp;
@@ -264,14 +259,13 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 #include "parrot/string.h"
 #include "parrot/string_primitives.h"
 #include "parrot/hash.h"
-#include "parrot/list.h"
 #include "parrot/pmc_freeze.h"
+#include "parrot/list.h"
 #include "parrot/vtable.h"
 #include "parrot/context.h"
 #include "parrot/exceptions.h"
 #include "parrot/warnings.h"
 #include "parrot/memory.h"
-#include "parrot/pic.h"
 #include "parrot/packfile.h"
 #include "parrot/io.h"
 #include "parrot/op.h"
@@ -295,7 +289,6 @@ typedef struct PackFile_ByteCode PackFile_ByteCode;
 #include "parrot/library.h"
 #include "parrot/global.h"
 #include "parrot/stat.h"
-#include "parrot/slice.h"
 #include "parrot/hll.h"
 #include "parrot/pbcversion.h"
 

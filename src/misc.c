@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2008, Parrot Foundation.
-$Id: misc.c 40939 2009-09-03 01:48:25Z cotto $
+$Id$
 
 =head1 NAME
 

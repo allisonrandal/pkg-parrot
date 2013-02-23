@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: sudoku.pir 40200 2009-07-21 21:51:54Z bacek $
+# $Id$
 
 =pod
 
@@ -281,7 +281,7 @@ err:
     # Specification of command line arguments.
     # --version, --debug, --inv=nnn, --builtin=name, --nc, --help
     .local pmc getopts
-    getopts = new "Getopt::Obj"
+    getopts = new ["Getopt";"Obj"]
     push getopts, "version"
     push getopts, "debug"
     push getopts, "pairs"

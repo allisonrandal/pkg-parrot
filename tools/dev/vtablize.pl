@@ -1,5 +1,5 @@
 #! perl -pi.bak
-# $Id: vtablize.pl 40193 2009-07-21 13:11:18Z bacek $
+# $Id$
 # Copyright (C) 2008-2009, Parrot Foundation.
 
 =head1 NAME
@@ -31,7 +31,6 @@ use warnings;
 s/^(\s*)(void\s+init\(\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+init_pmc\(PMC\s+\*\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(PMC\s+\*instantiate\(PMC\s+\*\w*\)\s+{)/$1VTABLE $2/;
-s/^(\s*)(PMC\s+\*instantiate_str\(STRING\s+\*\w*,\s+INTVAL\s+\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+morph\(INTVAL\s+\w*\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+mark\(\)\s+{)/$1VTABLE $2/;
 s/^(\s*)(void\s+destroy\(\)\s+{)/$1VTABLE $2/;

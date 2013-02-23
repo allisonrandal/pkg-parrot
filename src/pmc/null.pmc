@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2007, Parrot Foundation.
-$Id: null.pmc 40350 2009-07-31 00:12:14Z NotFound $
+$Id$
 
 =head1 NAME
 
@@ -68,6 +68,22 @@ Returns true if value is also a null PMC, false otherwise.
 */
     VTABLE INTVAL is_same(PMC *value) {
         return PMC_IS_NULL(value);
+    }
+
+/*
+
+=item C<PMC *find_method(STRING *method_name)>
+
+=cut
+
+Gives a more informative message than the automaticaaly generated version.
+
+*/
+
+    VTABLE PMC *find_method(STRING *method_name) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_NULL_REG_ACCESS,
+                "Null PMC access in find_method('%Ss')",
+                method_name);
     }
 
 }

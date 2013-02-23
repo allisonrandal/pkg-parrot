@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: array.t 40274 2009-07-26 04:40:36Z petdance $
+# $Id$
 
 =head1 NAME
 

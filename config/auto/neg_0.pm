@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: neg_0.pm 37147 2009-03-07 00:30:12Z jkeenan $
+# $Id$
 
 =head1 NAME
 

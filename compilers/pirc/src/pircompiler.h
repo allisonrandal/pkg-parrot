@@ -1,5 +1,5 @@
 /*
- * $Id: pircompiler.h 40382 2009-08-02 13:35:33Z kjs $
+ * $Id$
  * Copyright (C) 2007-2009, Parrot Foundation.
  */
 

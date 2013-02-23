@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: Crow.pir 40191 2009-07-21 12:56:20Z bacek $
+# $Id$
 
 .namespace ['Crow']
 
@@ -12,7 +12,7 @@
     load_bytecode 'Getopt/Obj.pbc'
 
     .local pmc getopts
-    getopts = new 'Getopt::Obj'
+    getopts = new ['Getopt';'Obj']
     getopts.'notOptStop'(1)
 
     getopts = push 'help|h'

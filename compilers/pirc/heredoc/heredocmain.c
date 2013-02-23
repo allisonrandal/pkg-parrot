@@ -1,11 +1,10 @@
 /*
- * $Id: heredocmain.c 36666 2009-02-13 10:23:23Z kjs $
+ * $Id$
  * Copyright (C) 2008-2009, Parrot Foundation.
  */
 
 #include <stdio.h>
 #include "parrot/parrot.h"
-#include "../new/pirheredoc.h"
 
 /*
 

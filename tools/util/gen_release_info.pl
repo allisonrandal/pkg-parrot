@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: gen_release_info.pl 37442 2009-03-15 16:22:12Z rurban $
+# $Id$
 
 use strict;
 use warnings;

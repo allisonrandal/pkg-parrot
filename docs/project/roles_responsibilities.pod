@@ -1,5 +1,5 @@
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: roles_responsibilities.pod 37200 2009-03-08 11:46:01Z fperrad $
+# $Id$
 
 =head1 Parrot Roles and Responsibilities
 

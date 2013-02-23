@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: obscure.t 40494 2009-08-11 21:31:34Z cotto $
+# $Id$
 
 =head1 NAME
 

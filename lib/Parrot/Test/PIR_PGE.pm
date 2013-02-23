@@ -1,4 +1,4 @@
-# $Id: PIR_PGE.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 
 # Copyright (C) 2007-2008, Parrot Foundation.
 
@@ -14,8 +14,10 @@ use File::Spec ();
 
 Parrot::Test::PIR_PGE -- testing routines for languages/PIR
 
+=head1 DESCRIPTION
+
 This is largely a copy of Parrot::Test::Punie, which is also a copy
-of something...
+of something ...
 
 This module is named PIR_PGE, because PIR is a "reserved" name,
 for internal use only.

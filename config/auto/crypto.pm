@@ -1,5 +1,5 @@
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: crypto.pm 41071 2009-09-06 16:53:22Z NotFound $
+# $Id$
 
 =head1 NAME
 
@@ -47,7 +47,7 @@ sub runstep {
         return 1;
     }
 
-    my $osname = $conf->data->get_p5('OSNAME');
+    my $osname = $conf->data->get('osname');
 
     my $extra_libs = $self->_select_lib( {
         conf            => $conf,

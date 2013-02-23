@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: namespace-old.t 41131 2009-09-07 19:04:06Z whiteknight $
+# $Id$
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ t/pmc/namespace.t - test the NameSpace PMC as described in PDD 21.
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/namespace.t
+    % prove t/pmc/namespace-old.t
 
 =head1 DESCRIPTION
 
@@ -1132,7 +1132,7 @@ CODE
 /Finding method/
 OUTPUT
 
-pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC, RT #39978" );
+pir_output_is( <<'CODE', <<OUT, "iterate through a NameSpace PMC" );
 .sub main :main
      $P0 = new ['String']
      $P0 = "Ook...BANG!\n"
@@ -1162,7 +1162,7 @@ CODE
 Explosion T0
 OUT
 
-pir_error_output_like( <<'CODE', <<OUT, "NameSpace with no class, RT #55620" );
+pir_error_output_like( <<'CODE', <<OUT, "NameSpace with no class" );
 .sub 'main' :main
     $P1 = new ['NameSpace']
     set_args '(0)', $P1

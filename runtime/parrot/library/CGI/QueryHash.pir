@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2008, Parrot Foundation.
-# $Id: QueryHash.pir 39631 2009-06-17 20:30:30Z NotFound $
+# $Id$
 
 .namespace ['CGI'; 'QueryHash']
 

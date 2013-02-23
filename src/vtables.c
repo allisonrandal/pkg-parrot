@@ -1,12 +1,14 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: vtables.c 40673 2009-08-20 11:05:41Z NotFound $
+$Id$
 
 =head1 NAME
 
-src/vtables.c - Functions to build and manipulate vtables
+src/vtables.c
 
 =head1 DESCRIPTION
+
+Functions to build and manipulate vtables
 
 =head2 Functions
 
@@ -17,7 +19,6 @@ src/vtables.c - Functions to build and manipulate vtables
 */
 
 #include "parrot/parrot.h"
-#include "parrot/vtables.h"
 
 /* This function is defined in the auto-generated file core_pmcs.c */
 /* XXX Get it into some public place */
@@ -212,16 +213,11 @@ mark_vtables(PARROT_INTERP)
         if (!vtable)
             continue;
 
-        if (vtable->mro)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->mro);
-        if (vtable->_namespace)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->_namespace);
-        if (vtable->whoami)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->whoami);
-        if (vtable->provides_str)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->provides_str);
-        if (vtable->pmc_class)
-            Parrot_gc_mark_PObj_alive(interp, (PObj *)vtable->pmc_class);
+        Parrot_gc_mark_PMC_alive(interp, vtable->mro);
+        Parrot_gc_mark_PMC_alive(interp, vtable->_namespace);
+        Parrot_gc_mark_STRING_alive(interp, vtable->whoami);
+        Parrot_gc_mark_STRING_alive(interp, vtable->provides_str);
+        Parrot_gc_mark_PMC_alive(interp, vtable->pmc_class);
     }
 }
 

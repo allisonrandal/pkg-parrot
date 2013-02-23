@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-## $Id: Makefile 40312 2009-07-28 20:39:09Z NotFound $
+## $Id$
 
 # To build this example with an installed parrot:
 #

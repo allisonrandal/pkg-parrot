@@ -1,7 +1,7 @@
 /* interpreter.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: interpreter.h 41112 2009-09-07 14:00:38Z whiteknight $
+ *     $Id$
  *  Overview:
  *     The interpreter API handles running the operations
  */
@@ -67,9 +67,6 @@ typedef enum {
     PARROT_SWITCH_CORE      = 0x02,         /*   P   = prederef   */
     PARROT_CGP_CORE         = 0x06,         /*  CP                */
     PARROT_CGOTO_CORE       = 0x04,         /*  C    = cgoto      */
-    PARROT_JIT_CORE         = 0x10,         /* J     = JIT        */
-    PARROT_CGP_JIT_CORE     = 0x16,         /* JCP                */
-    PARROT_SWITCH_JIT_CORE  = 0x12,         /* J P                */
     PARROT_EXEC_CORE        = 0x20,         /* TODO Parrot_exec_run variants */
     PARROT_GC_DEBUG_CORE    = 0x40,         /* run GC before each op */
     PARROT_DEBUGGER_CORE    = 0x80,         /* used by parrot debugger */
@@ -186,15 +183,19 @@ typedef struct _context_mem {
     int n_free_slots;               /* amount of allocated */
 } context_mem;
 
-
 struct _handler_node_t; /* forward def - exit.h */
 
 /* The actual interpreter structure */
 struct parrot_interp_t {
     PMC           *ctx;                       /* current Context */
 
-    struct Arenas *arena_base;                /* Pointer to this interpreter's
+    struct Memory_Pools *mem_pools;                /* Pointer to this interpreter's
                                                * arena */
+
+    struct GC_Subsystem *gc_sys;              /*functions and data specific
+                                                  to current GC subsystem*/
+
+    PMC *gc_registry;                         /* root set of registered PMCs */
 
     PMC     *class_hash;                      /* Hash of classes */
     VTABLE **vtables;                         /* array of vtable ptrs */
@@ -266,7 +267,6 @@ struct parrot_interp_t {
     /* 8:   PMC *PBC_Libs                Hash of load_bytecode cde */
     /* 9:   PMC *Executable              String PMC with name from argv[0]. */
 
-    PMC *gc_registry;                         /* root set of registered PMCs */
 
     PMC *HLL_info;                            /* HLL names and types */
     PMC *HLL_namespace;                       /* cache of HLL toplevel ns */
@@ -274,8 +274,6 @@ struct parrot_interp_t {
     PMC *root_namespace;                      /* namespace hash */
     PMC *scheduler;                           /* concurrency scheduler */
 
-    MMD_table *binop_mmd_funcs;               /* Table of MMD functions */
-    UINTVAL    n_binop_mmd_funcs;             /* MMD function count */
     MMD_Cache *op_mmd_cache;                  /* MMD cache for builtins. */
 
     struct _Caches * caches;                  /* see caches.h */
@@ -296,15 +294,6 @@ struct parrot_interp_t {
     struct _Thread_data *thread_data;         /* thread specific items */
 
     UINTVAL recursion_limit;                  /* Sub call resursion limit */
-
-    UINTVAL gc_generation;                    /* GC generation number */
-
-    opcode_t *current_args;                   /* ptr into code w/ set_args op */
-    opcode_t *current_params;                 /* ... w/ get_params op */
-    opcode_t *current_returns;                /* ... w/ get_returns op */
-    PMC      *args_signature;                 /* non-const args signature PMC */
-    PMC      *params_signature;               /* non-const params sig PMC     */
-    PMC      *returns_signature;              /* non-const returns sig PMC    */
 
     /* during a call sequencer the caller fills these objects
      * inside the invoke these get moved to the context structure */
@@ -352,7 +341,7 @@ typedef enum {
 #endif
 
 #if PARROT_CATCH_NULL
-PARROT_DATA PMC * PMCNULL;   /* Holds single Null PMC */
+PARROT_DATA PMC    *PMCNULL;    /* Holds single Null PMC */
 #else
 #  define PMCNULL         ((PMC *)NULL)
 #endif /* PARROT_CATCH_NULL */
@@ -364,7 +353,9 @@ PARROT_DATA PMC * PMCNULL;   /* Holds single Null PMC */
 #  define PMC_IS_NULL(pmc) (pmc) == NULL
 #endif
 
-#define STRING_IS_NULL(s) ((s) == NULL)
+PARROT_DATA STRING *STRINGNULL; /* a single Null STRING */
+
+#define STRING_IS_NULL(s) ((s) == STRINGNULL || (s) == NULL)
 #define STRING_IS_EMPTY(s) !(int)(s)->strlen
 
 /* &gen_from_def(sysinfo.pasm) prefix(SYSINFO_) */
@@ -407,11 +398,11 @@ void Parrot_really_destroy(PARROT_INTERP,
     SHIM(void *arg))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_make_interpreter __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
-#define ASSERT_ARGS_Parrot_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_really_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+#define ASSERT_ARGS_make_interpreter __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_Parrot_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_Parrot_really_destroy __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/interp/inter_create.c */
 
@@ -419,16 +410,19 @@ void Parrot_really_destroy(PARROT_INTERP,
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 
 PARROT_EXPORT
-void Parrot_callback_C(ARGIN(char *external_data), ARGMOD(PMC *user_data))
+void Parrot_callback_C(
+    ARGIN(char *external_data),
+    ARGMOD_NULLOK(PMC *user_data))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
         FUNC_MODIFIES(*user_data);
 
 PARROT_EXPORT
-void Parrot_callback_D(ARGMOD(PMC *user_data), ARGIN(char *external_data))
+void Parrot_callback_D(
+    ARGMOD(PMC *user_data),
+    ARGMOD_NULLOK(char *external_data))
         __attribute__nonnull__(1)
-        __attribute__nonnull__(2)
-        FUNC_MODIFIES(*user_data);
+        FUNC_MODIFIES(*user_data)
+        FUNC_MODIFIES(*external_data);
 
 PARROT_EXPORT
 PARROT_CANNOT_RETURN_NULL
@@ -452,21 +446,19 @@ void Parrot_run_callback(PARROT_INTERP,
         __attribute__nonnull__(3)
         FUNC_MODIFIES(* user_data);
 
-#define ASSERT_ARGS_Parrot_callback_C __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(external_data) \
-    || PARROT_ASSERT_ARG(user_data)
-#define ASSERT_ARGS_Parrot_callback_D __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(user_data) \
-    || PARROT_ASSERT_ARG(external_data)
-#define ASSERT_ARGS_Parrot_make_cb __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_Parrot_callback_C __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(external_data))
+#define ASSERT_ARGS_Parrot_callback_D __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(user_data))
+#define ASSERT_ARGS_Parrot_make_cb __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(sub) \
-    || PARROT_ASSERT_ARG(user_data) \
-    || PARROT_ASSERT_ARG(cb_signature)
-#define ASSERT_ARGS_Parrot_run_callback __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(sub) \
+    , PARROT_ASSERT_ARG(user_data) \
+    , PARROT_ASSERT_ARG(cb_signature))
+#define ASSERT_ARGS_Parrot_run_callback __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(user_data) \
-    || PARROT_ASSERT_ARG(external_data)
+    , PARROT_ASSERT_ARG(user_data) \
+    , PARROT_ASSERT_ARG(external_data))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/interp/inter_cb.c */
 
@@ -543,35 +535,35 @@ PARROT_WARN_UNUSED_RESULT
 STRING * sysinfo_s(PARROT_INTERP, INTVAL info_wanted)
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_interpinfo __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_interpinfo_p __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_interpinfo_s __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_Parrot_compile_file __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_interpinfo __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_interpinfo_p __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_interpinfo_s __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_Parrot_compile_file __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(fullname) \
-    || PARROT_ASSERT_ARG(error)
-#define ASSERT_ARGS_Parrot_compreg __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(fullname) \
+    , PARROT_ASSERT_ARG(error))
+#define ASSERT_ARGS_Parrot_compreg __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(type) \
-    || PARROT_ASSERT_ARG(func)
-#define ASSERT_ARGS_Parrot_mark_method_writes __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(type) \
+    , PARROT_ASSERT_ARG(func))
+#define ASSERT_ARGS_Parrot_mark_method_writes __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_register_nci_method __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_register_nci_method __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(func) \
-    || PARROT_ASSERT_ARG(name) \
-    || PARROT_ASSERT_ARG(proto)
-#define ASSERT_ARGS_register_raw_nci_method_in_ns __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(func) \
+    , PARROT_ASSERT_ARG(name) \
+    , PARROT_ASSERT_ARG(proto))
+#define ASSERT_ARGS_register_raw_nci_method_in_ns __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(func) \
-    || PARROT_ASSERT_ARG(name)
-#define ASSERT_ARGS_sysinfo_i __attribute__unused__ int _ASSERT_ARGS_CHECK = 0
-#define ASSERT_ARGS_sysinfo_s __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+    , PARROT_ASSERT_ARG(func) \
+    , PARROT_ASSERT_ARG(name))
+#define ASSERT_ARGS_sysinfo_i __attribute__unused__ int _ASSERT_ARGS_CHECK = (0)
+#define ASSERT_ARGS_sysinfo_s __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/interp/inter_misc.c */
 
@@ -581,7 +573,6 @@ void runops_int(Interp *, size_t offset);
 void exec_init_prederef(PARROT_INTERP,
     void *prederef_arena);
 void prepare_for_run(PARROT_INTERP);
-void *init_jit(PARROT_INTERP, opcode_t *pc);
 PARROT_EXPORT void dynop_register(PARROT_INTERP, PMC *op_lib);
 
 /* interpreter.pmc */
@@ -602,6 +593,9 @@ typedef void * *(*native_func_t)(PARROT_INTERP,
 
 #ifndef PMC_IS_NULL
 #  define PMC_IS_NULL(pmc) PMC_is_null(NULL, (pmc))
+#endif
+#ifndef STRING_IS_NULL
+#  define STRING_IS_NULL(s) ((s) == NULL || STRING_is_null(NULL, (s))
 #endif
 
 #endif   /* PARROT_INTERPRETER_H_GUARD */

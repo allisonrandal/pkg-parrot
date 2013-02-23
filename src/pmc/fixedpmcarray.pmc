@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: fixedpmcarray.pmc 41253 2009-09-13 18:44:48Z NotFound $
+$Id$
 
 =head1 NAME
 
@@ -45,13 +45,13 @@ Sort this array, optionally using the provided cmp_func
         const INTVAL n = SELF.elements();
 
         if (n > 1) {
-           /* XXX Workaround for TT #218 */
-           if (PObj_is_object_TEST(SELF)) {
-              PMC *parent = SELF.get_attr_str(CONST_STRING(interp, "proxy"));
-              Parrot_pcc_invoke_method_from_c_args(interp, parent, CONST_STRING(interp, "sort"), "P->", cmp_func);
-           }
-           else
-               Parrot_quicksort(interp, (void **)PMC_array(SELF), n, cmp_func);
+            /* XXX Workaround for TT #218 */
+            if (PObj_is_object_TEST(SELF)) {
+                PMC *parent = SELF.get_attr_str(CONST_STRING(interp, "proxy"));
+                Parrot_pcc_invoke_method_from_c_args(interp, parent, CONST_STRING(interp, "sort"), "P->", cmp_func);
+            }
+            else
+                Parrot_quicksort(interp, (void **)PMC_array(SELF), n, cmp_func);
         }
     }
 
@@ -179,7 +179,7 @@ Returns the number of elements in the array as a Parrot string. (??? -leo)
 =item C<STRING *get_repr()>
 
 Returns a string representation of the array contents.
-RT #46673 implement freeze/thaw and use that instead.
+TT #1229: implement freeze/thaw and use that instead.
 
 =cut
 
@@ -484,7 +484,7 @@ C<value>.
         else {
             PMC *box = SELF.get_pmc_keyed_int(k);
 
-            /* RT #46675: autovivify an Array and insert it in SELF */
+            /* TT #1295: autovivify an Array and insert it in SELF */
             if (!box)
                 box = pmc_new(INTERP, SELF.type());
 
@@ -549,7 +549,6 @@ Sets the PMC value of the element at index C<key> to C<*src>.
                 _("FixedPMCArray: index out of bounds!"));
 
         data      = PMC_array(SELF);
-        GC_WRITE_BARRIER(INTERP, SELF, data[key], src);
         data[key] = src;
     }
 
@@ -573,7 +572,7 @@ Sets the PMC at index C<key> to C<value>.
         else {
             PMC *box = SELF.get_pmc_keyed_int(k);
 
-            /* RT #46675: autovivify an Array and insert it in SELF */
+            /* TT #1295: autovivify an Array and insert it in SELF */
             if (!box)
                 box = pmc_new(INTERP, SELF.type());
 
@@ -620,13 +619,8 @@ The C<==> operation. Compares two array to hold equal elements.
         return 1;
     }
 
+
 /*
-
-=item C<PMC *slice(PMC *key, INTVAL f)>
-
-Return a new iterator for the slice PMC C<key> if f == 0.
-
-Return a new pythonic array slice if f == 1.
 
 =item C<PMC *get_iter()>
 
@@ -635,18 +629,6 @@ Return a new iterator for SELF.
 =cut
 
 */
-
-    VTABLE PMC *slice(PMC *key, INTVAL f) {
-        if (f == 0) {
-            STRING     *name = CONST_STRING(interp, "set_key");
-            PMC * const iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
-            Parrot_PCCINVOKE(interp, iter, name, "P->", key);
-            return iter;
-        }
-
-        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_OUT_OF_BOUNDS,
-                _("Array: Unknown slice type"));
-    }
 
     VTABLE PMC *get_iter() {
         return pmc_new_init(INTERP, enum_class_ArrayIterator, SELF);
@@ -739,16 +721,13 @@ Used to unarchive the array.
     }
 
     VTABLE void freeze(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        VTABLE_push_integer(INTERP, io, VTABLE_elements(INTERP, SELF));
+        VTABLE_push_integer(INTERP, info, VTABLE_elements(INTERP, SELF));
     }
 
     VTABLE void thaw(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        if (info->extra_flags == EXTRA_IS_NULL)
-            SELF.set_integer_native(VTABLE_shift_integer(INTERP, io));
+        SELF.set_integer_native(VTABLE_shift_integer(INTERP, info));
     }
 
 /*
@@ -788,8 +767,7 @@ Mark the array.
             return;
 
         for (i = PMC_size(SELF) - 1; i >= 0; --i)
-            if (data[i])
-                Parrot_gc_mark_PObj_alive(interp, (PObj *)data[i]);
+            Parrot_gc_mark_PMC_alive(interp, data[i]);
     }
 
 

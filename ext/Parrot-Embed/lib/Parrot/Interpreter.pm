@@ -1,6 +1,6 @@
 package Parrot::Interpreter;
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: Interpreter.pm 38763 2009-05-14 02:16:03Z jkeenan $
+# $Id$
 
 use strict;
 use warnings;

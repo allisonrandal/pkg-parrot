@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: auto.pm 36853 2009-02-18 06:16:14Z rurban $
+# $Id$
 
 =head1 NAME
 

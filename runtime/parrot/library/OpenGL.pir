@@ -1,5 +1,5 @@
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: OpenGL.pir 40399 2009-08-04 20:58:43Z japhb $
+# $Id$
 
 =head1 NAME
 

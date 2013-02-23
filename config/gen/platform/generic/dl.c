@@ -1,5 +1,5 @@
 /*
- * $Id: dl.c 37877 2009-04-02 20:20:22Z coke $
+ * $Id$
  * Copyright (C) 2004-2006, Parrot Foundation.
  */
 

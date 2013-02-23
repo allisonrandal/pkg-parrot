@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2009, Parrot Foundation.
-$Id: cotorra.c 40726 2009-08-23 01:18:17Z whiteknight $
+$Id$
 
 =head1 NAME
 
@@ -110,7 +110,6 @@ Parrot_Run_core_t getruncore(const char *name)
         { PARROT_SLOW_CORE,     "slow" },
         { PARROT_FAST_CORE,     "fast" },
         { PARROT_CGOTO_CORE,    "cgoto" },
-        { PARROT_JIT_CORE,      "jit" },
         { PARROT_GC_DEBUG_CORE, "gcdebug" },
         { PARROT_SWITCH_CORE,   "switch" }
     };

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: byteorder.c 37848 2009-04-01 18:29:18Z Infinoid $
+$Id$
 
 =head1 NAME
 
@@ -26,7 +26,6 @@ Configure will have checked for supported word sizes.
 */
 
 #include "parrot/parrot.h"
-#include "parrot/packfile.h"
 
 /* HEADERIZER HFILE: include/parrot/packfile.h */
 

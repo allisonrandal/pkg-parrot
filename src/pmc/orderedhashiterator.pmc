@@ -1,16 +1,16 @@
 /*
 Copyright (C) 2001-2009, Parrot Foundation.
-$Id: orderedhashiterator.pmc 40628 2009-08-18 17:24:24Z NotFound $
+$Id$
 
 =head1 NAME
 
-src/pmc/orderedhashiterator.pmc - Implementation of Iterator for OrderedHash.
+src/pmc/orderedhashiterator.pmc
 
 =head1 DESCRIPTION
 
-=head1 SYNOPSIS
+Implementation of Iterator for OrderedHash.
 
-=head1 Methods
+=head1 METHODS
 
 =over 4
 
@@ -18,8 +18,8 @@ src/pmc/orderedhashiterator.pmc - Implementation of Iterator for OrderedHash.
 
 */
 
-#include "pmc_hash.h"
-#include "pmc_hashiteratorkey.h"
+#include "pmc/pmc_hash.h"
+#include "pmc/pmc_hashiteratorkey.h"
 
 pmclass OrderedHashIterator extends Iterator no_ro auto_attrs {
     ATTR PMC        *pmc_hash;      /* the Hash which this Iterator iterates */
@@ -65,8 +65,7 @@ Marks the hash as live.
 
     VTABLE void mark() {
         PMC * const hash = PARROT_ORDEREDHASHITERATOR(SELF)->pmc_hash;
-        if (hash)
-             Parrot_gc_mark_PObj_alive(INTERP, (PObj *)hash);
+        Parrot_gc_mark_PMC_alive(INTERP, hash);
     }
 
 /*
@@ -115,6 +114,7 @@ Marks the hash as live.
 Returns this Iterator's Hash.
 
 =cut
+
 */
     VTABLE PMC* get_pmc() {
         return PARROT_ORDEREDHASHITERATOR(SELF)->pmc_hash;
@@ -182,9 +182,8 @@ the next one.
 
         /* Reuse HashIteratorKey */
         ret = pmc_new(INTERP, enum_class_HashIteratorKey);
-        /* Poke directly into HIK. We don't want to create any kind of public API for this */
-        PARROT_HASHITERATORKEY(ret)->parrot_hash = attrs->parrot_hash;
-        PARROT_HASHITERATORKEY(ret)->bucket      = bucket;
+        VTABLE_set_pointer_keyed_int(INTERP, ret, 0, attrs->parrot_hash);
+        VTABLE_set_pointer_keyed_int(INTERP, ret, 1, bucket);
 
         return ret;
     }
@@ -217,9 +216,8 @@ the next one for reverse iterator.
 
         /* Reuse HashIteratorKey */
         ret = pmc_new(INTERP, enum_class_HashIteratorKey);
-        /* Poke directly into HIK. We don't want to create any kind of public API for this */
-        PARROT_HASHITERATORKEY(ret)->parrot_hash = attrs->parrot_hash;
-        PARROT_HASHITERATORKEY(ret)->bucket      = bucket;
+        VTABLE_set_pointer_keyed_int(INTERP, ret, 0, attrs->parrot_hash);
+        VTABLE_set_pointer_keyed_int(INTERP, ret, 1, bucket);
 
         return ret;
     }

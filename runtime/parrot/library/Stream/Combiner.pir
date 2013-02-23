@@ -1,4 +1,4 @@
-# $Id: Combiner.pir 40191 2009-07-21 12:56:20Z bacek $
+# $Id$
 
 =head1 TITLE
 

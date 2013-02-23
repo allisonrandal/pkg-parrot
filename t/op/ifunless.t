@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2001-2005, Parrot Foundation.
-# $Id: ifunless.t 39804 2009-06-26 21:30:44Z whiteknight $
+# $Id$
 
 =head1 NAME
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # Copyright (C) 2004-2009, Parrot Foundation.
-# $Id: parrotbug 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 #
 
 eval 'exec perl -w -S $0 ${1+"$@"}'

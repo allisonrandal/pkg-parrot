@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2007-2008, Parrot Foundation.
-$Id: main.c 39628 2009-06-17 14:39:27Z NotFound $
+$Id$
 
 =head1 NAME
 

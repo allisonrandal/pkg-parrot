@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2005-2007, Parrot Foundation.
-# $Id: tail.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;

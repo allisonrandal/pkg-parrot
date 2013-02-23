@@ -1,5 +1,5 @@
 # Copyright (c) 2001-2009, Parrot Foundation.
-# $Id: pdd10_embedding.pod 37220 2009-03-09 01:25:49Z allison $
+# $Id$
 
 =head1 [DRAFT] PDD10: Embedding and Extending
 
@@ -13,7 +13,7 @@ just want to get the stub checked in. }}
 
 =head2 Version
 
-$Revision: 37220 $
+$Revision$
 
 =head2 Description
 
@@ -96,7 +96,7 @@ Gotchas:
 
 =item * probably a continuation/control flow boundary
 
-=item * packfiles and compilation units probably too much information for
+=item * packfiles and subroutines probably too much information for
 either
 
 =item * do not let MMD and other implementation details escape

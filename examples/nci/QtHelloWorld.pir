@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: QtHelloWorld.pir 37459 2009-03-15 20:43:46Z barney $
+# $Id$
 
 =head1 NAME
 

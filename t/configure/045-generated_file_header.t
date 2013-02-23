@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: 045-generated_file_header.t 37178 2009-03-07 20:14:29Z coke $
+# $Id$
 
 use strict;
 use warnings;

@@ -1,7 +1,7 @@
 /* runcore_trace.h
  *  Copyright (C) 2001-2009, Parrot Foundation.
  *  SVN Info
- *     $Id: runcore_trace.h 40726 2009-08-23 01:18:17Z whiteknight $
+ *     $Id$
  *  Overview:
  *     Tracing runcore.
  *  Data Structure and Algorithms:
@@ -44,21 +44,21 @@ void trace_op_dump(PARROT_INTERP,
 void trace_pmc_dump(PARROT_INTERP, ARGIN_NULLOK(PMC *pmc))
         __attribute__nonnull__(1);
 
-#define ASSERT_ARGS_debugger_or_interp __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
-#define ASSERT_ARGS_trace_key_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+#define ASSERT_ARGS_debugger_or_interp __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
+#define ASSERT_ARGS_trace_key_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(key)
-#define ASSERT_ARGS_trace_op __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(key))
+#define ASSERT_ARGS_trace_op __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(code_start) \
-    || PARROT_ASSERT_ARG(code_end)
-#define ASSERT_ARGS_trace_op_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = \
+    , PARROT_ASSERT_ARG(code_start) \
+    , PARROT_ASSERT_ARG(code_end))
+#define ASSERT_ARGS_trace_op_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
        PARROT_ASSERT_ARG(interp) \
-    || PARROT_ASSERT_ARG(code_start) \
-    || PARROT_ASSERT_ARG(pc)
-#define ASSERT_ARGS_trace_pmc_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = \
-       PARROT_ASSERT_ARG(interp)
+    , PARROT_ASSERT_ARG(code_start) \
+    , PARROT_ASSERT_ARG(pc))
+#define ASSERT_ARGS_trace_pmc_dump __attribute__unused__ int _ASSERT_ARGS_CHECK = (\
+       PARROT_ASSERT_ARG(interp))
 /* Don't modify between HEADERIZER BEGIN / HEADERIZER END.  Your changes will be lost. */
 /* HEADERIZER END: src/runcore/trace.c */
 

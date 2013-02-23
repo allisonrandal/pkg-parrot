@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: Configure.pm 38513 2009-05-06 21:10:56Z NotFound $
+# $Id$
 
 package Parrot::Configure;
 

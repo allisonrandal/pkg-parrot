@@ -1,6 +1,6 @@
 #!../../parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: postalcodes.pir 41138 2009-09-07 21:53:09Z japhb $
+# $Id$
 
 =head1 NAME
 

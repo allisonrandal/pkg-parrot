@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2001-2005, Parrot Foundation.
-  $Id: gmp_c.in 38647 2009-05-09 15:28:47Z Infinoid $
+  $Id$
 */
 
 #include <stdio.h>
@@ -17,7 +17,7 @@ main(int argc, char *argv[])
     char *s; int y;
 
 #ifdef WIN32
-    /* This is a workaround for RT #50212.
+    /* This is a workaround for http://rt.perl.org/rt3/Ticket/Display.html?id=50212
      * Strawberry Perl builds GMP with SSE2 instructions, which some older classes of
      * x86 processor can't handle.  This pops up an error dialog and waits for the user
      * to click before proceeding with the rest of configure.

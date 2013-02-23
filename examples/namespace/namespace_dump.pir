@@ -1,5 +1,5 @@
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: namespace_dump.pir 38952 2009-05-20 02:02:06Z allison $
+# $Id$
 
 #
 # dump all namespaces and the contents recursively

@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: stringiterator.t 40132 2009-07-17 10:09:10Z bacek $
+# $Id$
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/pmc/stringiterator.t - StringIterator.
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/string.t
+    % prove t/pmc/stringiterator.t
 
 =head1 DESCRIPTION
 

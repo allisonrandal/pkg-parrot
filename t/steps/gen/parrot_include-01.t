@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007, Parrot Foundation.
-# $Id: parrot_include-01.t 39967 2009-07-10 00:16:41Z jkeenan $
+# $Id$
 # gen/parrot_include-01.t
 
 use strict;
@@ -9,10 +9,9 @@ use Test::More tests =>  7;
 use Carp;
 use lib qw( lib );
 use_ok('config::gen::parrot_include');
-use Parrot::Configure;
 use Parrot::Configure::Options qw( process_options );
+use Parrot::Configure::Step::Test;
 use Parrot::Configure::Test qw(
-    test_step_thru_runstep
     test_step_constructor_and_description
 );
 
@@ -25,7 +24,9 @@ my ($args, $step_list_ref) = process_options(
     }
 );
 
-my $conf = Parrot::Configure->new;
+my $conf = Parrot::Configure::Step::Test->new;
+$conf->include_config_results( $args );
+
 my $pkg = q{gen::parrot_include};
 $conf->add_steps($pkg);
 $conf->options->set( %{$args} );

@@ -1,6 +1,6 @@
 #!parrot
 # Copyright (C) 2008-2009, Parrot Foundation.
-# $Id: box.t 40950 2009-09-03 07:29:57Z chromatic $
+# $Id$
 
 =head1 NAME
 

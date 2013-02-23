@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: key.t 40506 2009-08-13 01:38:06Z allison $
+# $Id$
 
 =head1 NAME
 
@@ -111,7 +111,7 @@ e2:
     a()
     collect
     a()
-    ok(1, 'register and non-register string keys should be COW (RT #60128)' )
+    ok(1, 'register and non-register string keys should be COW' )
 .end
 
 # support for do_not_collect_string_keys_early_rt_60128

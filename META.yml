@@ -1,10 +1,10 @@
-# $Id: META.yml 41266 2009-09-15 05:29:09Z particle $
+# $Id$
 #
 # This file describes the CPAN distribution for Parrot.
 # See http://module-build.sourceforge.net/META-spec-current.html for details.
 ---
 name: parrot
-version: 1.6.0
+version: 2.0.0
 author: parrot-dev@lists.parrot.org
 abstract: a virtual machine designed for dynamic languages
 license: artistic2

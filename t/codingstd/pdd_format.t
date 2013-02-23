@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd_format.t 38524 2009-05-07 03:20:31Z jkeenan $
+# $Id$
 
 use strict;
 use warnings;

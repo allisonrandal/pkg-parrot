@@ -1,6 +1,6 @@
 #!./parrot
 # Copyright (C) 2006-2009, Parrot Foundation.
-# $Id: partialsums-2.pir 38369 2009-04-26 12:57:09Z fperrad $
+# $Id$
 #
 # ./parrot -R jit partialsums-2.pir N  (N = 2500000 for shootout)
 #

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2003-2009, Parrot Foundation.
-$Id: string.pmc 41229 2009-09-12 13:14:55Z bacek $
+$Id$
 
 =head1 NAME
 
@@ -34,32 +34,10 @@ Initializes the string.
 */
 
     VTABLE void init() {
-        STRING *str_val = Parrot_str_new_noinit(INTERP, enum_stringrep_one, 0);
+        STRING *str_val = STRINGNULL;
         SET_ATTR_str_val(INTERP, SELF, str_val);
 
         PObj_custom_mark_SET(SELF);
-    }
-
-/*
-
-=item C<PMC instantiate_str(STRING *rep)>
-
-Class method to construct a String from the string representation C<rep>.
-
-=cut
-
-*/
-    VTABLE PMC *instantiate_str(STRING *rep, INTVAL flags) {
-        PMC         *res;
-        const INTVAL type   = SELF->vtable->base_type;
-
-        if (flags & PObj_constant_FLAG)
-            res = constant_pmc_new(INTERP, type);
-        else
-            res = pmc_new(INTERP, type);
-
-        SET_ATTR_str_val(INTERP, res, rep);
-        return res;
     }
 
 /*
@@ -74,10 +52,12 @@ Marks the string as live.
 
     VTABLE void mark() {
         STRING *str_val;
-        GET_ATTR_str_val(INTERP, SELF, str_val);
 
-        if (str_val)
-            Parrot_gc_mark_PObj_alive(INTERP, (PObj *)str_val);
+        if (!PMC_data(SELF))
+            return;
+
+        GET_ATTR_str_val(INTERP, SELF, str_val);
+        Parrot_gc_mark_STRING_alive(INTERP, str_val);
     }
 
 /*
@@ -226,8 +206,8 @@ Sets the value of the string to that of the specified C<string>.
 
         /* Only allow constant PMCs to embed constant strings */
         if (PObj_constant_TEST(SELF) && !PObj_constant_TEST(value)) {
-            char *copy = Parrot_str_to_cstring(INTERP, value);
-            value      = Parrot_str_new_init(INTERP, copy, strlen(copy),
+            char * const copy = Parrot_str_to_cstring(INTERP, value);
+            value             = Parrot_str_new_init(INTERP, copy, strlen(copy),
                 PARROT_DEFAULT_ENCODING, PARROT_DEFAULT_CHARSET,
                 PObj_constant_FLAG);
             Parrot_str_free_cstring(copy);
@@ -760,6 +740,8 @@ TODO Currently overflow to BigInt is B<not> handled nor detected.
         VTABLE_set_integer_native(INTERP, result, (INTVAL)i);
         RETURN(PMC *result);
     }
+
+
 /*
 
 =back
@@ -767,12 +749,6 @@ TODO Currently overflow to BigInt is B<not> handled nor detected.
 =head2 Iterator Interface
 
 =over 4
-
-=item C<PMC *slice(PMC *key, INTVAL f)>
-
-Return a new iterator for the slice PMC C<key> if f==0.
-
-Return a new pythonic slice if f == 1.
 
 =item C<PMC *get_iter(PMC *key)>
 
@@ -782,25 +758,12 @@ Return a new iterator for this string.
 
 Return length of the string.
 
-
 =cut
 
 */
 
     VTABLE INTVAL elements() {
         return Parrot_str_byte_length(INTERP, VTABLE_get_string(INTERP, SELF));
-    }
-
-    VTABLE PMC *slice(PMC *key, INTVAL f) {
-        if (f == 0) {
-            STRING     *name = CONST_STRING(interp, "set_key");
-            PMC * const iter = pmc_new_init(INTERP, enum_class_Iterator, SELF);
-            Parrot_PCCINVOKE(interp, iter, name, "P->", key);
-            return iter;
-        }
-
-        Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
-                "String: Unknown slice type");
     }
 
     VTABLE PMC *get_iter() {
@@ -823,9 +786,8 @@ Used to archive the string.
 
 */
     VTABLE void freeze(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        VTABLE_push_string(INTERP, io, VTABLE_get_string(INTERP, SELF));
+        VTABLE_push_string(INTERP, info, VTABLE_get_string(INTERP, SELF));
     }
 
 /*
@@ -838,10 +800,8 @@ Used to unarchive the string.
 
 */
     VTABLE void thaw(visit_info *info) {
-        IMAGE_IO * const io = info->image_io;
         SUPER(info);
-        if (info->extra_flags == EXTRA_IS_NULL)
-            SET_ATTR_str_val(INTERP, SELF, VTABLE_shift_string(INTERP, io));
+        SET_ATTR_str_val(INTERP, SELF, VTABLE_shift_string(INTERP, info));
     }
 /*
 

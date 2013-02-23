@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: overall.t 39955 2009-07-09 00:02:26Z jkeenan $
+# $Id$
 # overall.t
 
 use strict;
@@ -52,16 +52,6 @@ my $full_gen_pseudo = File::Spec->catfile( $cwd, $gen_pseudo );
             start   => File::Spec->catfile( qw| . LICENSE | ),
             end     => File::Spec->catfile(
                         $docdir, $versiondir, 'LICENSE' )
-        },
-        'docs/gettingstarted.pod' => {
-            start   => File::Spec->catfile( qw| . docs gettingstarted.pod | ),
-            end     => File::Spec->catfile(
-                        $docdir,  $versiondir, 'pod', 'gettingstarted.pod' ),
-        },
-        'docs/resources/phony_resource' => {
-            start   => File::Spec->catfile( qw| . docs resources phony_resource | ),
-            end     => File::Spec->catfile(
-                        $docdir,  $versiondir, 'resources', 'phony_resource' ),
         },
         'include/parrot/charset.h' => {
             start   => File::Spec->catfile( qw| . include parrot charset.h | ),

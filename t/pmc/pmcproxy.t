@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: pmcproxy.t 39122 2009-05-24 00:42:07Z NotFound $
+# $Id$
 
 =head1 NAME
 
@@ -198,7 +198,6 @@ Tests the PMCProxy PMC.
 .end
 
 
-#RT #56816 - issues with PMCProxy, 'typeof', and 'get_class'
 .sub get_class_and_typeof_return_same_pmcproxy
     $P0 = get_class 'Integer'
     $P1 = new $P0

@@ -1,5 +1,5 @@
 # Copyright (C) 2004-2006, Parrot Foundation.
-# $Id: Emitter.pm 38414 2009-04-30 11:22:20Z jkeenan $
+# $Id$
 package Parrot::Pmc2c::Emitter;
 use strict;
 use warnings;

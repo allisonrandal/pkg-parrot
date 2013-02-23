@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 55_iterator.pir 40200 2009-07-21 21:51:54Z bacek $
+# $Id$
 
 =head1 iterators
 

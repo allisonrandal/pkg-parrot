@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2009, The Perl Foundation.
-# $Id: pod.t 40400 2009-08-05 01:27:41Z coke $
+# $Id$
 
 use strict;
 use warnings;

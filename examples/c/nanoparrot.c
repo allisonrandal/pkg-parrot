@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2001-2008, Parrot Foundation.
- * $Id: nanoparrot.c 37878 2009-04-02 20:23:29Z coke $
+ * $Id$
 
 =head1 NAME
 

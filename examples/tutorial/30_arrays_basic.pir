@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2009, Parrot Foundation.
-# $Id: 30_arrays_basic.pir 40124 2009-07-16 21:36:57Z allison $
+# $Id$
 
 =head1
 

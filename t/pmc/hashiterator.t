@@ -1,6 +1,6 @@
 #! parrot
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: hashiterator.t 40106 2009-07-15 15:01:38Z NotFound $
+# $Id$
 
 =head1 NAME
 
@@ -8,7 +8,7 @@ t/pmc/hash.t - Test the Hash PMC
 
 =head1 SYNOPSIS
 
-    % prove t/pmc/hash.t
+    % prove t/pmc/hashiterator.t
 
 =head1 DESCRIPTION
 

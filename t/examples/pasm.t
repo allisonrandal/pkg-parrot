@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2005-2006, Parrot Foundation.
-# $Id: pasm.t 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 use strict;
 use warnings;

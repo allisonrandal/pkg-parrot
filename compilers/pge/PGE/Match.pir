@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2009, Parrot Foundation.
-# $Id: Match.pir 40786 2009-08-25 15:36:00Z pmichaud $
+# $Id$
 
 =head1 NAME
 

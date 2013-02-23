@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2009, Parrot Foundation.
-# $Id: pdd22_io.pod 40163 2009-07-20 02:06:25Z jkeenan $
+# $Id$
 
 =head1 PDD 22: I/O
 
@@ -9,7 +9,7 @@ Parrot's I/O subsystem.
 
 =head2 Version
 
-$Revision: 40163 $
+$Revision$
 
 =head2 Definitions
 
@@ -309,7 +309,7 @@ Accessor (get and set) for the I/O stream's encoding attribute. Currently,
 the only valid value to set is 'utf8' which turns on UTF-8 reading/writing
 mode for the stream. The default behavior is fixed-width 8-bit characters.
 
-=item C<get_fd> [RT #48312]
+=item C<get_fd>
 
 =begin PIR_FRAGMENT
 

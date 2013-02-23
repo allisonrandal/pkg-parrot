@@ -1,6 +1,6 @@
 #!perl
 # Copyright (C) 2007-2008 Parrot Foundation.
-# $Id: catchall.t 37394 2009-03-13 21:15:56Z allison $
+# $Id$
 
 use strict;
 use warnings;

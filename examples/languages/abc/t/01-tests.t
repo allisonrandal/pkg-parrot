@@ -1,6 +1,6 @@
 #!perl
-# Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: 01-tests.t 37337 2009-03-12 02:02:54Z Util $
+# Copyright (C) 2001-2009, Parrot Foundation.
+# $Id$
 
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use Parrot::Config;
 
 =head1 NAME
 
-languages/abc/t/01-tests.t - test harness for Parrot abc
+examples/languages/abc/t/01-tests.t - test harness for Parrot abc
 
 =head1 DESCRIPTION
 
@@ -58,7 +58,7 @@ array in this file.
 
 =head1 SYNOPSIS
 
-$ prove languages/abc/t/01-tests.t
+$ prove examples/languages/abc/t/01-tests.t
 
 =cut
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2007-2008, Parrot Foundation.
-# $Id: File.pm 36833 2009-02-17 20:09:26Z allison $
+# $Id$
 package Parrot::Configure::Options::Conf::File;
 
 use strict;

@@ -4,7 +4,7 @@
 
 /* cclass.h
 *
-* $Id: cclass.h 37201 2009-03-08 12:07:48Z fperrad $
+* $Id$
 *
 *   Parrot character classes
 */

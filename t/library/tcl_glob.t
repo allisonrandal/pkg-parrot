@@ -1,16 +1,18 @@
 #!./parrot
 # Copyright (C) 2008, Parrot Foundation.
-# $Id: tcl_glob.t 37811 2009-03-29 10:49:29Z barney $
+# $Id$
 
 =head1 NAME
 
-t/library/tcl_glob.t - test tcl-style globs
+t/library/tcl_glob.t
+
+=head1 DESCRIPTION
+
+test tcl-style globs
 
 =head1 SYNOPSIS
 
     % prove t/library/tcl_glob.t
-
-=head1 DESCRIPTION
 
 =cut
 

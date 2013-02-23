@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2007, Parrot Foundation.
-# $Id: OpTrans.pm 40288 2009-07-26 22:03:33Z whiteknight $
+# $Id$
 
 =head1 NAME
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2003, Parrot Foundation.
-# $Id: charset.pm 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 
@@ -68,7 +68,7 @@ E_NOTE
     foreach my $charset ( split( /\s+/, $charset_list ) ) {
         $charset =~ s/\.c$//;
         $TEMP_charset_build .= <<END
-src/string/charset/$charset\$(O): src/string/charset/$charset.h src/string/charset/ascii.h src/string/charset/$charset.c \$(NONGEN_HEADERS)
+src/string/charset/$charset\$(O): src/string/charset/$charset.h src/string/charset/ascii.h src/string/charset/$charset.c src/string/charset/tables.h \$(NONGEN_HEADERS)
 
 
 END

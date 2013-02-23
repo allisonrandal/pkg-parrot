@@ -1,7 +1,7 @@
 # This line will be printed by ./parrot examples/pir/readline.t
 
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: readline.pir 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 
 =head1 NAME
 

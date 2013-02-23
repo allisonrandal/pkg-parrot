@@ -1,6 +1,6 @@
 #!/home/tewk/srcs/parrot/perl6
 
-# $Id: NCIGENP6.pm 40249 2009-07-24 08:06:47Z cotto $
+# $Id$
 # Copyright (C) 2008, Parrot Foundation.
 
 use v6;

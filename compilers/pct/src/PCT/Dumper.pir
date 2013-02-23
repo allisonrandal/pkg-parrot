@@ -1,5 +1,5 @@
 # Copyright (C) 2009, Parrot Foundation.
-# $Id: Dumper.pir 39745 2009-06-23 17:37:39Z pmichaud $
+# $Id$
 
 =head1 NAME
 

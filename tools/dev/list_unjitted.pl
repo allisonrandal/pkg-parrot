@@ -1,6 +1,6 @@
 #! perl
 # Copyright (C) 2001-2008, Parrot Foundation.
-# $Id: list_unjitted.pl 37201 2009-03-08 12:07:48Z fperrad $
+# $Id$
 use warnings;
 use strict;
 use Carp;
@@ -59,7 +59,7 @@ printf "%-13s%5d\n", ( 'Total ops:' , scalar keys %ops );
 
 tools/dev/list_unjitted.pl
 
-=head1 ABSTRACT
+=head1 DESCRIPTION
 
 For a given platform, report the number of ops JITted or not JITted.
 
