@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: ROADMAP 9807 2005-11-06 12:55:21Z leo $
+# $Id: ROADMAP 10343 2005-12-04 15:27:40Z leo $
 
 =head1 NAME
 
@@ -25,9 +25,9 @@ document, among others.
 For a high level overview of parrot milestones, please see:
 L<http://www.perlfoundation.org/gc/grants/2005-p6-proposal.html>
 
-=head1 CURRENT RELEASE (0.3.1)
+=head1 CURRENT RELEASE (0.4.0)
 
-Parrot 0.3.1 was released on Nov. 6st, 2005. For a list of new and fixed
+Parrot 0.4.0 was released on Dec. 4th, 2005. For a list of new and fixed
 feature see L<NEWS>.
 
 =head1 OVERVIEW
@@ -330,7 +330,7 @@ from floating point types, sprintf output of bignumbers. L<PDD14>
 
 =item *
 
-Implement the parrot equivalent of perl5's C<$0>, based on recent (January
+Implement the Parrot equivalent of Perl 5's C<$0>, based on recent (January
 2005) mailing list activity.
 
 =item *

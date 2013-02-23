@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: stringu.t 8805 2005-08-04 09:29:52Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: stringu.t 10228 2005-11-28 22:52:05Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,19 +15,14 @@ t/op/stringu.t - Unicode String Test
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/stringu.t
+	% prove t/op/stringu.t
 
 =head1 DESCRIPTION
 
-Tests Parrot's unicode string system.
+Tests Parrot unicode string system.
 
 =cut
 
-#'
-
-use Parrot::Test tests => 17;
-use Test::More;
-#use vars qw($TODO);
 
 output_is( <<'CODE', <<OUTPUT, "angstrom" );
     getstdout P0
@@ -188,9 +190,37 @@ output_is( <<'CODE', <<OUTPUT, "UTF8 literals" );
     length I0, S0
     print I0
     print "\n"
+    print S0
+    print "\n"
     end
 CODE
 1
+\xc2\xab
+OUTPUT
+
+output_is( <<'CODE', <<OUTPUT, "UTF8 literals" );
+    set S0, utf8:unicode:"\xc2\xab"
+    length I0, S0
+    print I0
+    print "\n"
+    print S0
+    print "\n"
+    end
+CODE
+1
+\xc2\xab
+OUTPUT
+
+output_like( <<'CODE', <<OUTPUT, "UTF8 literals - illegal" );
+    set S0, utf8:unicode:"\xf2\xab"
+    length I0, S0
+    print I0
+    print "\n"
+    print S0
+    print "\n"
+    end
+CODE
+/Malformed UTF-8 string/
 OUTPUT
 
 output_like( <<'CODE', <<OUTPUT, "UTF8 as malformed ascii" );
@@ -214,4 +244,8 @@ output_is( <<'CODE', <<OUTPUT, "substr with a UTF8 replacement #36794" );
 CODE
 AAAAAAAAAA\xd9\xa6
 OUTPUT
+
+
+## remember to change the number of tests :-)
+BEGIN { plan tests => 19; }
 

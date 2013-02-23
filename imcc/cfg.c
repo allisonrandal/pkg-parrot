@@ -61,14 +61,15 @@ find_basic_blocks (Parrot_Interp interpreter, IMC_Unit * unit, int first)
 {
     Basic_block *bb;
     Instruction *ins;
+    SymHash *hsh = &unit->hash;
+    SymReg * r;
     int nu = 0;
     int i;
 
     IMCC_info(interpreter, 2, "find_basic_blocks\n");
     init_basic_blocks(unit);
-    for (i = 0; i < HASH_SIZE; i++) {
-        SymReg * r;
-        for (r = unit->hash[i]; r; r = r->next) {
+    for (i = 0; i < hsh->size; i++) {
+        for (r = hsh->data[i]; r; r = r->next) {
             if (r && (r->type & VTADDRESS)) {
                 r->last_ins = NULL;
             }
@@ -80,7 +81,7 @@ find_basic_blocks (Parrot_Interp interpreter, IMC_Unit * unit, int first)
     if (first && ins->type == ITLABEL && ins->r[0]->type == VT_PCC_SUB) {
         IMCC_debug(interpreter, DEBUG_CFG, "pcc_sub %s nparams %d\n",
                 ins->r[0]->name, ins->r[0]->pcc_sub->nargs);
-        expand_sub(interpreter, unit, ins);
+        expand_pcc_sub(interpreter, unit, ins);
     }
     ins->index = i = 0;
 
@@ -100,12 +101,12 @@ find_basic_blocks (Parrot_Interp interpreter, IMC_Unit * unit, int first)
             if (first) {
                 /* XXX FIXME: Now the way to check for a sub is unit->type */
                 if (ins->type & ITLABEL) {
-                    expand_sub_ret(interpreter, unit, ins);
+                    expand_pcc_sub_ret(interpreter, unit, ins);
                     ins->type &= ~ITLABEL;
                 }
                 else {
                     /* if this is a sub call expand it */
-                    expand_sub_call(interpreter, unit, ins);
+                    expand_pcc_sub_call(interpreter, unit, ins);
                 }
                 ins->type &= ~ITPCCSUB;
             }
@@ -140,7 +141,7 @@ find_basic_blocks (Parrot_Interp interpreter, IMC_Unit * unit, int first)
              */
             if (!strcmp(ins->op, "bsr") || !strcmp(ins->op, "set_addr")) {
                 char *name = ins->r[0]->name;
-                SymReg *r = get_sym(name);
+                r = get_sym(name);
                 if (*ins->op == 'b') {  /* bsr */
                     Instruction * lab;
                     found = r != NULL && r->first_ins;

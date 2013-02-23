@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: tcllist.pmc 8527 2005-07-06 04:26:48Z mdiep $
+$Id: tcllist.pmc 10093 2005-11-18 15:21:29Z coke $
 
 =head1 NAME
 
@@ -25,7 +25,7 @@ These are the vtable functions for the TclList base class
 static INTVAL dynclass_TclInt;
 static STRING *space, *ob, *cb;
 
-pmclass TclList extends Array need_ext does array dynpmc group tcl_group {
+pmclass TclList extends Array need_ext does array dynpmc group tcl_group hll Tcl maps Array {
 
 /*
 

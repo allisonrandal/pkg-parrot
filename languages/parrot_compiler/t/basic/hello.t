@@ -1,5 +1,5 @@
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: hello.t 9392 2005-10-07 17:23:12Z bernhard $
+# $Id: hello.t 9895 2005-11-10 23:15:53Z bernhard $
 
 use strict;
 use lib 'parrot_compiler/lib';
@@ -95,17 +95,17 @@ TODO:
 };
 
 # PAST tests
+
+$ENV{TEST_PROG_ARGS} = 'parrot_compiler.pbc --language=PAST';
+language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST}, $ENV{TEST_PROG_ARGS} );
+
+$ENV{TEST_PROG_ARGS} = 'parrot_compiler.imc --language=PAST';
+language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST},
+                    $ENV{TEST_PROG_ARGS} );
+
 TODO:
 {
-   local $TODO = 'PAST compiler seem to be broken';
-
-  $ENV{TEST_PROG_ARGS} = 'parrot_compiler.pbc --language=PAST';
-  language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST}, $ENV{TEST_PROG_ARGS} );
-
-  $ENV{TEST_PROG_ARGS} = 'parrot_compiler.imc --language=PAST';
-  language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST},
-                      $ENV{TEST_PROG_ARGS} );
-
+  local $TODO = 'generating PASM from PIR is not supported';
   $ENV{TEST_PROG_ARGS} = 'parrot_compiler.pasm --language=PAST';
   language_output_is( 'ParrotCompiler', $code{PAST}, $out{PAST},
                       $ENV{TEST_PROG_ARGS} );

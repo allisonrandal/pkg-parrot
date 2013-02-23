@@ -1,4 +1,8 @@
-# $Id: ChangeLog 9807 2005-11-06 12:55:21Z leo $
+# $Id: ChangeLog 10343 2005-12-04 15:27:40Z leo $
+
+2005.12.04    leo
+	* Released 0.4.0
+	* See NEWS for changes
 
 2005.11.06    leo
 	* Released 0.3.1
@@ -3544,9 +3548,9 @@
 2002-01-04 16:09  dan
 
 	* classes/: genclass.pl, perlarray.pmc, perlint.pmc, perlnum.pmc,
-	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 9807 2005-11-06 12:55:21Z leo $
+	perlstring.pmc, perlundef.pmc:	- genclass.pl attempts to put $Id: ChangeLog 10343 2005-12-04 15:27:40Z leo $
 	into generated files
-	   but the $Id: ChangeLog 9807 2005-11-06 12:55:21Z leo $ string gets mangled when it's committed.
+	   but the $Id: ChangeLog 10343 2005-12-04 15:27:40Z leo $ string gets mangled when it's committed.
 	   This patch fixes the existing .pmc files and fixes genclass.pl.
 
 	 - Makes capitalization in .pmc header match actual filenames

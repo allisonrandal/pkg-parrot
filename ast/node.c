@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-$Id: node.c 9260 2005-09-28 16:00:42Z robert $
+$Id: node.c 10220 2005-11-28 20:58:31Z leo $
 
 =head1 NAME
 
@@ -417,10 +417,10 @@ insert_find_lex(Interp* interpreter, nodeType *var)
 
     ins = cur_unit->last_ins;
     regs[0] = new_temp_var(interpreter, 'P');
-    regs[1] = get_const(interpreter, "-1", 'I');
     sprintf(buf, "\"%s\"", var->u.r->name);
-    regs[2] = get_const(interpreter, buf, 'S');
-    insINS(interpreter, cur_unit, ins, "find_lex", regs, 3);
+    regs[1] = get_const(interpreter, buf, 'S');
+    /* XXX not needed I think */
+    insINS(interpreter, cur_unit, ins, "find_lex", regs, 2);
     return regs[0];
 }
 
@@ -523,11 +523,11 @@ exp_Assign(Interp* interpreter, nodeType *p)
         ins = insINS(interpreter, cur_unit, ins, "set", regs, 2);
     }
     if (need_store) {
-        regs[0] = get_const(interpreter, "-1", 'I');
         sprintf(buf, "\"%s\"", var->u.r->name);
-        regs[1] = get_const(interpreter, buf, 'S');
-        regs[2] = lr;
-        insINS(interpreter, cur_unit, ins, "store_lex", regs, 3);
+        regs[0] = get_const(interpreter, buf, 'S');
+        regs[1] = lr;
+        /* XXX not needed I think */
+        insINS(interpreter, cur_unit, ins, "store_lex", regs, 2);
     }
     return lr;
 }
@@ -711,9 +711,6 @@ exp_Function(Interp* interpreter, nodeType *p)
     ins->r[1] = mk_pcc_sub(interpreter, str_dup(ins->r[0]->name), 0);
     add_namespace(interpreter, cur_unit);
 
-    regs[0] = get_const(interpreter, "-1", 'I');
-    insINS(interpreter, cur_unit, ins, "new_pad", regs, 1);
-
     body->expand(interpreter, body);
 
     cur_unit = last_unit;
@@ -836,16 +833,8 @@ exp_Py_Local(Interp* interpreter, nodeType *var)
         temp = new_temp_var(interpreter, 'P');
         insert_new(interpreter, temp, UNDEF_TYPE);
     }
-    /*
-     * now create a scratchpad slot for this var
-     */
-    ins = cur_unit->last_ins;
-    regs[0] = get_const(interpreter, "-1", 'I');
-    sprintf(buf, "\"%s\"", var->u.r->name);
-    regs[1] = get_const(interpreter, buf, 'S');
-    regs[2] = temp;
-    /* TODO remember locals and idx of local := cur_unit->local_count++; */
-    insINS(interpreter, cur_unit, ins, "store_lex", regs, 3);
+    temp->usage |= U_LEXICAL;
+    temp->reg = mk_const(interpreter, var->u.r->name, 'S');
     return NULL;
 }
 
@@ -873,7 +862,6 @@ exp_PCC_Sub(Interp* interpreter, nodeType *p)
     ins->r[0]->pcc_sub = calloc(1, sizeof(struct pcc_sub_t));
     add_namespace(interpreter, cur_unit);
     regs[0] = get_const(interpreter, "0", 'I');
-    insINS(interpreter, cur_unit, ins, "new_pad", regs, 1);
     /*
      * TODO create locals for __builtins__, __name__, __doc__
      */
@@ -904,11 +892,10 @@ exp_Py_Module(Interp* interpreter, nodeType *p)
     sub = mk_sub_label(interpreter, str_dup("__main__"));
     ins = INS_LABEL(cur_unit, sub, 1);
 
-    ins->r[1] = mk_pcc_sub(interpreter, str_dup(ins->r[0]->name), 0);
+    ins->r[0] = mk_pcc_sub(interpreter, str_dup(ins->r[0]->name), 0);
     add_namespace(interpreter, cur_unit);
-    ins->r[1]->pcc_sub->pragma = P_MAIN;
+    ins->r[0]->pcc_sub->pragma = P_MAIN;
     regs[0] = get_const(interpreter, "0", 'I');
-    insINS(interpreter, cur_unit, ins, "new_pad", regs, 1);
     /*
      * TODO create locals for __builtins__, __name__, __doc__
      */
@@ -1067,7 +1054,7 @@ create_Func(int nr, nodeType *self, nodeType *child)
     self = create_1(nr, self, child);
     r = child->u.r;
     last = cur_unit->prev;      /* XXX  ->caller */
-    r = _get_sym(last->hash, r->name);
+    r = _get_sym(&last->hash, r->name);
     if (r) {
         /* mark the name being a subroutine name
          * s. Py_Local

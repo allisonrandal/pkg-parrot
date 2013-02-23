@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: dod.c 9772 2005-11-04 14:10:03Z leo $
+$Id: dod.c 9899 2005-11-11 10:58:20Z leo $
 
 =head1 NAME
 
@@ -470,6 +470,7 @@ Parrot_dod_trace_children(Interp *interpreter, size_t how_many)
             }
             else {
                 /* All that's left is the custom */
+                assert(!PObj_on_free_list_TEST(current));
                 VTABLE_mark(interpreter, current);
             }
         }

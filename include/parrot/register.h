@@ -1,7 +1,7 @@
 /* register.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: register.h 9645 2005-10-30 13:46:40Z leo $
+ *     $Id: register.h 10179 2005-11-25 18:25:52Z leo $
  *  Overview:
  *     Defines the register api
  *  Data Structure and Algorithms:
@@ -75,7 +75,6 @@ void Parrot_clear_n(Interp *);
 
 struct Parrot_Context;        /* parrot/interpreter.h */
 void Parrot_alloc_context(Interp *, INTVAL *n_regs_used);
-void Parrot_realloc_context(Interp *, INTVAL *n_regs_used);
 void Parrot_free_context(Interp *, struct Parrot_Context *, int re_use);
 void Parrot_set_context_threshold(Interp *, struct Parrot_Context *);
 void parrot_gc_context(Interp *);

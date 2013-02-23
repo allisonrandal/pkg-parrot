@@ -1,7 +1,7 @@
 /* charset.h
  *  Copyright: 2004 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: charset.h 9388 2005-10-07 11:25:43Z leo $
+ *     $Id: charset.h 10028 2005-11-16 18:21:29Z leo $
  *  Overview:
  *     This is the header for the 8-bit fixed-width encoding
  *  Data Structure and Algorithms:
@@ -38,14 +38,11 @@ typedef STRING *(*charset_get_graphemes_inplace_t)(Interp *, STRING *source_stri
 typedef void (*charset_set_graphemes_t)(Interp *, STRING *source_string, UINTVAL offset, UINTVAL replace_count, STRING *insert_string);
 
 typedef STRING * (*charset_to_charset_t)(Interp *, STRING *source_string,
-        CHARSET *new_charset, STRING *dest);
-typedef STRING * (*charset_to_unicode_t)(Interp *, STRING *src, STRING *dest);
-typedef STRING * (*charset_from_charset_t)(Interp *, STRING *source_string,
         STRING *dest);
 typedef STRING * (*charset_from_unicode_t)(Interp *, STRING *source_string,
         STRING *dest);
-typedef void (*charset_compose_t)(Interp *, STRING *source_string);
-typedef void (*charset_decompose_t)(Interp *, STRING *source_string);
+typedef STRING* (*charset_compose_t)(Interp *, STRING *source_string);
+typedef STRING* (*charset_decompose_t)(Interp *, STRING *source_string);
 typedef void (*charset_upcase_t)(Interp *, STRING *source_string);
 typedef void (*charset_downcase_t)(Interp *, STRING *source_string);
 typedef void (*charset_titlecase_t)(Interp *, STRING *source_string);
@@ -104,9 +101,6 @@ struct _charset {
     charset_get_graphemes_inplace_t get_graphemes_inplace;
     charset_set_graphemes_t set_graphemes;
     charset_to_charset_t to_charset;
-    charset_to_unicode_t to_unicode;
-    charset_from_charset_t from_charset;
-    charset_from_unicode_t from_unicode;
     charset_compose_t compose;
     charset_decompose_t decompose;
     charset_upcase_t upcase;
@@ -130,7 +124,6 @@ struct _charset {
 #define CHARSET_GET_GRAPEMES(interp, source, offset, count) ((CHARSET *)source->charset)->get_graphemes(interpreter, source, offset, count)
 #define CHARSET_GET_GRAPHEMES_INPLACE(interp, source, dest, offset, count) ((CHARSET *)source->charset)->get_graphemes(interpreter, source, dest, offset, count)
 #define CHARSET_SET_GRAPHEMES(interp, source, offset, replace_count, insert) ((CHARSET *)source->charset)->set_graphemes(interpreter, source, offset, replace_count, insert)
-#define CHARSET_TO_CHARSET(interp, source, new_charset, dest) ((CHARSET *)source->charset)->to_charset(interpreter, source, new_charset, dest)
 #define CHARSET_TO_UNICODE(interp, source, dest) ((CHARSET *)source->charset)->to_unicode(interpreter, source, dest)
 #define CHARSET_COMPOSE(interp, source) ((CHARSET *)source->charset)->compose(interpreter, source)
 #define CHARSET_DECOMPOSE(interp, source) ((CHARSET *)source->charset)->decompose(interpreter, source)
@@ -150,7 +143,7 @@ struct _charset {
 #define CHARSET_COMPUTE_HASH(interp, source, seed) ((CHARSET *)source->charset)->compute_hash(interpreter, source, seed)
 #define CHARSET_GET_PREFERRED_ENCODING(interp, source) ((CHARSET *)source->charset)->preferred_encoding
 
-#define CHARSET_TO_ENCODING(interp, source, offset, count) ((ENCODING *)source->encoding)->to_encoding(interp, source, offset, count)
+#define CHARSET_TO_ENCODING(interp, source) ((ENCODING *)source->encoding)->to_encoding(interp, source)
 #define CHARSET_COPY_TO_ENCODING(interp, source) ((ENCODING *)source->encoding)->copy_to_encoding(interp, source)
 #define CHARSET_GET_CODEPOINT(interp, source, offset) ((ENCODING *)source->encoding)->get_codepoint(interp, source, offset)
 #define CHARSET_SET_CODEPOINT(interp, source, offset, codepoint) ((ENCODING *)source->encoding)->set_codepoint(interp, source, offset, codepoint)

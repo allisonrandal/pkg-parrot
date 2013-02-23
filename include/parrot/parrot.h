@@ -1,7 +1,7 @@
 /* parrot.h
  *  Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
  *  CVS Info
- *     $Id: parrot.h 9554 2005-10-25 10:15:48Z leo $
+ *     $Id: parrot.h 10240 2005-11-29 12:12:58Z leo $
  *  Overview:
  *     General header file includes for the parrot interpreter
  *  Data Structure and Algorithms:
@@ -277,7 +277,6 @@ typedef void (*funcptr_t)(void);
 #include "parrot/debug.h"
 #include "parrot/sub.h"
 #include "parrot/inter_call.h"
-#include "parrot/lexical.h"
 #include "parrot/key.h"
 #include "parrot/exit.h"
 #include "parrot/nci.h"

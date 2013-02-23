@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: calling.t 9736 2005-11-03 09:37:21Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: calling.t 10288 2005-12-01 16:02:47Z leo $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/op/calling.t - Parrot Calling Conventions
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/calling.t
+	% prove t/op/calling.t
 
 =head1 DESCRIPTION
 
@@ -16,8 +23,6 @@ Tests Parrot calling conventions.
 
 =cut
 
-use Parrot::Test tests => 47;
-use Test::More;
 
 output_is(<<'CODE', <<'OUTPUT', "set_args - parsing");
     noop
@@ -446,10 +451,10 @@ ok 6
 back
 OUTPUT
 
-SKIP: {
-  skip("arg count check disabled", 2);
 pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too few");
 .sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
     $P0 = new String
     $P0 = "hello\n"
     find_name $P1, "foo"
@@ -466,6 +471,8 @@ OUTPUT
 
 pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too many");
 .sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
     $P0 = new String
     $P0 = "hello\n"
     find_name $P1, "foo"
@@ -479,10 +486,35 @@ pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too many");
 CODE
 /too many arguments passed/
 OUTPUT
-}
+
+pir_output_like(<<'CODE', <<'OUTPUT', "argc mismatch, too many - catch exception");
+.sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
+    $P0 = new String
+    $P0 = "hello\n"
+    find_name $P1, "foo"
+    set_args "(0,0)", $P0,77
+    invokecc $P1
+.end
+.sub foo
+    push_eh arg_handler
+    get_params "(0)", $P0
+    print $P0
+    print "never\n"
+arg_handler:
+    get_results "(0,0)", $P1, $S0
+    print "catched: "
+    print $S0
+.end
+CODE
+/^catched: too many arguments passed/
+OUTPUT
 
 pir_output_is(<<'CODE', <<'OUTPUT', "argc mismatch, optional");
 .sub main :main
+    .include "errors.pasm"
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
     $P0 = new String
     $P0 = "hello\n"
     find_name $P1, "foo"
@@ -543,7 +575,6 @@ pir_output_is(<<'CODE', <<'OUTPUT', "tailcall 1");
 .sub foo
     .const .Sub b = "bar"
     print "foo\n"
-    set_returns "(0)", "foo_ret\n"
     tailcall b
 .end
 .sub bar
@@ -570,7 +601,6 @@ pir_output_is(<<'CODE', <<'OUTPUT', "tailcall 2 - pass arg");
     .const .Sub b = "bar"
     print "foo\n"
     set_args "(0)", "from_foo\n"
-    set_returns "(0)", "foo_ret\n"
     tailcall b
 .end
 .sub bar
@@ -600,7 +630,6 @@ pir_output_is(<<'CODE', <<'OUTPUT', "tailcall 3 - pass arg");
     .const .Sub b = "bar"
     print "foo\n"
     set_args "(0)", "from_foo\n"
-    set_returns "(0)", "foo_ret\n"
     tailcall b
 .end
 .sub bar
@@ -734,6 +763,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "pir uses no ops");
     print "\n"
     print I17
     print "\n"
+    set_returns "()"
     returncc
 .eom
 CODE
@@ -957,7 +987,7 @@ ok 1
 ok 2
 OUTPUT
 
-pir_output_is(<<'CODE', <<'OUTPUT', "OO argument passig");
+pir_output_is(<<'CODE', <<'OUTPUT', "OO argument passing");
 .sub main :main
     .local pmc cl, o, f
     cl = newclass "Foo"
@@ -994,6 +1024,61 @@ Foo ok 3
 Foo ok 4
 OUTPUT
 
+pir_output_is(<<'CODE', <<'OUTPUT', "OO argument passing - 2");
+.sub main :main
+    .local pmc cl, o, f
+    cl = newclass "Foo"
+    o = new "Foo"
+    $S0 = o
+    print $S0
+    $S1 = o[2]
+    print $S1
+    print $S0
+.end
+.namespace ["Foo"]
+.sub __get_string :method
+    $S0 = typeof self
+    print $S0
+    print " "
+    .return ("ok 1\n")
+.end
+.sub __get_string_keyed_int :method
+    .param int key
+    $S0 = "ok "
+    $S1 = key
+    $S0 .= $S1
+    $S0 .= "\n"
+    .return ($S0)
+.end
+CODE
+Foo ok 1
+ok 2
+ok 1
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "OO argument passing - 3");
+.sub main :main
+    .local pmc cl, o, f
+    cl = newclass "Foo"
+    o = new "Foo"
+    $S0 = foo(o)
+    print $S0
+.end
+.sub foo
+    .param pmc arg
+    .return (arg) # force conversion to string
+.end
+.namespace ["Foo"]
+.sub __get_string :method
+    $S0 = typeof self
+    print $S0
+    print " "
+    .return ("ok 1\n")
+.end
+
+CODE
+Foo ok 1
+OUTPUT
 # see also tcl in leo-ctx5 by Coke; Date 28.08.2005
 pir_output_is(<<'CODE', <<'OUTPUT', "bug - :slurpy promotes to :flatten");
 .sub main :main
@@ -1209,6 +1294,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "result_info op");
     $I0 = elements $P0
     print $I0
     print "\n"
+    .return (0)
 .end
 CODE
 0
@@ -1287,3 +1373,57 @@ has_ret:
 CODE
 ok 1
 OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "set_args via continuation -> results");
+.sub main :main
+    .local string result
+    result = foo("ok 1\n")
+    print result
+.end
+
+.sub foo
+    .param string s
+    .local pmc cc
+    .include 'interpinfo.pasm'
+    cc = interpinfo .INTERPINFO_CURRENT_CONT
+    bar(cc, s)
+.end
+
+.sub bar
+    .param pmc cc
+    .param string s
+    print s
+    cc("ok 2\n")
+.end
+CODE
+ok 1
+ok 2
+OUTPUT
+
+pir_output_is(<<'CODE', <<'OUTPUT', "call evaled vtable code");
+.sub main :main
+    .local string s
+    .local pmc cl, o
+    cl = newclass "Foo"
+    s  = ".namespace ['Foo']\n"
+    s .= ".sub __get_integer_keyed_int :method\n"
+    s .= ".param int i\n"
+    s .= "i += 5\n"
+    s .= ".return(i)\n"
+    s .= ".end\n"
+    .local pmc comp
+    comp = compreg "PIR"
+    $P0 = comp(s)
+    o = new 'Foo'
+    $I0 = o[12]
+    print $I0
+    print "\n"
+.end
+CODE
+17
+OUTPUT
+
+
+## remember to change the number of tests :-)
+BEGIN { plan tests => 52; }
+

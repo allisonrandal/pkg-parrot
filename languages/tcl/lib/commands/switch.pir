@@ -84,12 +84,15 @@ glob_loop:
   branch glob_loop
 
 regex_mode:
+  .local pmc tclARE,rule,match
+  tclARE = compreg "PGE::P5Regexp"
 regex_loop:
   unless body goto body_end
   pattern = shift body
   code = shift body
-# fix this when we've got regexes
-  if subject == pattern goto body_match
+  rule  = tclARE(pattern)
+  match = rule(subject)
+  if match goto body_match
   branch glob_loop
 
 body_end:
@@ -101,8 +104,8 @@ body_match:
   .local pmc compiler,pir_compiler
   compiler = find_global "_Tcl", "compile"
   pir_compiler = find_global "_Tcl", "pir_compiler"
-  ($I0,$P0) = compiler(0,code)
-  $P1 = pir_compiler($I0,$P0)
+  ($I0,$S0) = compiler(0,code)
+  $P1 = pir_compiler($I0,$S0)
   .return $P1()
 
 bad_args:

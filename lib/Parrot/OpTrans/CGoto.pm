@@ -1,5 +1,5 @@
 # Copyright: 2002 The Perl Foundation.  All Rights Reserved.
-# $Id: CGoto.pm 7943 2005-04-29 07:31:39Z leo $
+# $Id: CGoto.pm 10177 2005-11-25 15:05:03Z leo $
 
 =head1 NAME
 
@@ -76,7 +76,7 @@ sub defines
 #define NREG(i) REG_NUM(cur_opcode[i])
 #define PREG(i) REG_PMC(cur_opcode[i])
 #define SREG(i) REG_STR(cur_opcode[i])
-#define CONST(i) interpreter->code->const_table->constants[cur_opcode[i]]
+#define CONST(i) CONTEXT(interpreter->ctx)->constants[cur_opcode[i]]
 END
 }
 

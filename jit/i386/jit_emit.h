@@ -3,7 +3,7 @@
  *
  * i386
  *
- * $Id: jit_emit.h 9789 2005-11-04 22:30:31Z leo $
+ * $Id: jit_emit.h 9892 2005-11-10 22:04:51Z particle $
  */
 
 #if !defined(PARROT_I386_JIT_EMIT_H_GUARD)
@@ -1666,7 +1666,7 @@ static unsigned char *lastpc;
     jit_emit_fstore_mb_n(pc, emit_EBX, offs); \
 }
 
-#  define jit_emit_xchg_MR_n(pc, r, offs) { \
+#  define jit_emit_xchg_MR_n(pc, offs, r) { \
     emitm_fld((pc), r); \
     jit_emit_fload_mb_n(pc, emit_EBX, offs); \
     emitm_fstp((pc), (r+2)); \
@@ -1962,7 +1962,7 @@ emit_jump(Parrot_jit_info_t *jit_info, opcode_t disp)
         offset = jit_info->arena.op_map[opcode].offset -
                                 (jit_info->native_ptr - jit_info->arena.start);
         if (emit_is8bit(offset - 2)) {
-            emitm_jumps(jit_info->native_ptr, offset - 2);
+            emitm_jumps(jit_info->native_ptr, (char)(offset - 2));
         }
         else {
             emitm_jumpl(jit_info->native_ptr, offset - 5);
@@ -2267,7 +2267,7 @@ Parrot_jit_vtable_n_op(Parrot_jit_info_t *jit_info,
     size_t offset;
     op_info_t *op_info = &interpreter->op_info_table[*jit_info->cur_op];
     int pi;
-    int idx, i, j, op;
+    int idx, i, op;
     int st = 0;         /* stack pop correction */
     extern char **Parrot_exec_rel_addr;
     extern int Parrot_exec_rel_count;
@@ -2563,7 +2563,6 @@ Parrot_jit_vtable_if_unless_op(Parrot_jit_info_t *jit_info,
                      Interp * interpreter, int unless)
 {
     int ic = *(jit_info->cur_op + 2);   /* branch offset */
-    char *jmp_ptr, *sav_ptr;
 
     /* emit call  vtable function i.e. get_bool, result eax */
     Parrot_jit_vtable1_op(jit_info, interpreter);

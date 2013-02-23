@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: compiler_faq.pod 9700 2005-11-02 05:48:49Z leo $
+# $Id: compiler_faq.pod 10340 2005-12-04 06:58:31Z chromatic $
 
 =head1 NAME
 
@@ -361,6 +361,8 @@ of one pad depth are numbered from 0..n-1 in the order of their declaration.
 
 =head2 How do I create a module?
 
+TODO
+
 =head2 How do I create a class?
 
 With the C<newclass> op:
@@ -500,7 +502,11 @@ key/value pairs:
 
 =head2 How do I add module/class methods?
 
+TODO
+
 =head2 How do I access module/class variables?
+
+TODO
 
 =head1 Exceptions
 
@@ -529,13 +535,15 @@ Use C<push_eh> to push an exception handler onto the stack.
     clear_eh
     exit 0
 
+An exception handler is called with 2 arguments: the exception and the message.
+More information is available inside the exception 'object' (TBD).
+
   handler:
+    get_results '(0,0') P0, S0      # PASM syntax
     print "Exception caught!\n"
     exit 1
 
 =head2 How do I access the error message of an exception I've caught?
-
-P5 is the register used for the Exception object.
 
     push_eh handler
     $P0 = new .Exception
@@ -545,15 +553,17 @@ P5 is the register used for the Exception object.
     exit 0
 
   handler:
+    .local pmc exception
+    .local string message
+    .get_results (exception, message)   # PIR syntax
     print "Exception: "
-    $S0 = P5["_message"]
-    print $S0
+    print message
     print "\n"
     exit 1
 
 =head1 Misc
 
-=head2 How can I access a programs environment.
+=head2 How can I access a program's environment?
 
 Create a new C<Env> PMC and access it like a hash.
 
@@ -561,7 +571,7 @@ Create a new C<Env> PMC and access it like a hash.
     e = new .Env
     $P0 = e['USER']      # lt
 
-=head2 How can I access parrot's configuration.
+=head2 How can I access Parrot's configuration?
 
     .include "iglobals.pasm"
     .local pmc interp, cfg

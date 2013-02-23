@@ -1,6 +1,12 @@
-#! perl -w
+#! perl
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: cppcomments.t 9672 2005-10-31 10:37:51Z bernhard $
+# $Id: cppcomments.t 10143 2005-11-23 02:08:19Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More tests => 1;
+
 
 =head1 NAME
 
@@ -8,7 +14,7 @@ t/src/cppcomments.t - checks for C++ style comments
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/src/cppcomments.t
+	% prove t/src/cppcomments.t
 
 =head1 DESCRIPTION
 
@@ -16,8 +22,6 @@ Checks that no source file in the distribution uses C++ style comments.
 
 =cut
 
-use strict;
-use Test::More tests => 1;
 
 my @globs = qw(
     ast/*.c

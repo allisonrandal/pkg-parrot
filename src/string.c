@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-$Id: string.c 9565 2005-10-25 19:42:02Z leo $
+$Id: string.c 10301 2005-12-01 22:32:51Z particle $
 
 =head1 NAME
 
@@ -138,11 +138,9 @@ Parrot_make_COW_reference(Interp *interpreter, STRING *s)
         return NULL;
     }
     if (PObj_constant_TEST(s)) {
-        PObj_constant_CLEAR(s);
-        d = new_string_header(interpreter, PObj_get_FLAGS(s));
-        PObj_is_cowed_SETALL(s);
+        d = new_string_header(interpreter, 0);
+        PObj_COW_SET(s);
         copy_string_header(interpreter, d, s);
-        PObj_constant_CLEAR(d);
     }
     else {
         d = new_string_header(interpreter, PObj_get_FLAGS(s));
@@ -159,21 +157,20 @@ Parrot_reuse_COW_reference(Interp *interpreter, STRING *s, STRING *reuse)>
 
 Creates a copy-on-write string by cloning a string header without
 allocating a new buffer. Doesn't allocate a new string header, instead
-using the one passed in
+using the one passed in and returns it.
 
 =cut
 
 */
 
-void
+STRING*
 Parrot_reuse_COW_reference(Interp *interpreter, STRING *s, STRING *d)
 {
     if (s == NULL) {
-        return;
+        return NULL;
     }
     if (PObj_constant_TEST(s)) {
-        PObj_constant_CLEAR(s);
-        PObj_is_cowed_SETALL(s);
+        PObj_COW_SET(s);
         copy_string_header(interpreter, d, s);
         PObj_constant_CLEAR(d);
     }
@@ -182,33 +179,7 @@ Parrot_reuse_COW_reference(Interp *interpreter, STRING *s, STRING *d)
         copy_string_header(interpreter, d, s);
         PObj_sysmem_CLEAR(d);
     }
-}
-
-/*
-
-=item C<static void
-Parrot_make_COW_reference_from_header(Interp *interpreter,
-        STRING *s, STRING *d)>
-
-Makes the second Parrot string a copy-on-write reference to first.
-
-=cut
-
-*/
-
-static void
-Parrot_make_COW_reference_from_header(Interp *interpreter,
-        STRING *s, STRING *d)
-{
-    if (PObj_constant_TEST(s)) {
-        PObj_is_cowed_SETALL(s);
-        copy_string_header(interpreter, d, s);
-        PObj_constant_CLEAR(d);
-    }
-    else {
-        PObj_COW_SET(s);
-        copy_string_header(interpreter, d, s);
-    }
+    return d;
 }
 
 /*
@@ -237,7 +208,7 @@ string_set(Interp *interpreter, STRING *dest, STRING *src)
             mem_sys_free((INTVAL*)PObj_bufstart(dest) - 1);
         }
 #endif
-        Parrot_make_COW_reference_from_header(interpreter, src, dest);
+        dest = Parrot_reuse_COW_reference(interpreter, src, dest);
     }
     else
         dest = Parrot_make_COW_reference(interpreter, src);
@@ -356,7 +327,8 @@ string_deinit(Parrot_Interp interpreter)
 =item C<UINTVAL
 string_capacity(Interp *interpreter, STRING *s)>
 
-Returns the capacity of the specified Parrot string.
+Returns the capacity of the specified Parrot string in bytes, that
+is how many bytes can be appended onto strstart.
 
 =cut
 
@@ -365,10 +337,8 @@ Returns the capacity of the specified Parrot string.
 UINTVAL
 string_capacity(Interp *interpreter, STRING *s)
 {
-    saneify_string(s);
     return ((ptrcast_t)PObj_bufstart(s) + PObj_buflen(s) -
-            (ptrcast_t)s->strstart) /
-        ENCODING_MAX_BYTES_PER_CODEPOINT(interpreter, s);
+            (ptrcast_t)s->strstart);
 }
 
 /*
@@ -407,26 +377,52 @@ string_make_empty(Interp *interpreter,
     return s;
 }
 
+/*
+
+=item C<CHARSET *string_rep_compatible (Interp *, STRING *a, const STRING *b,
+        ENCODING **e)>
+
+Find the "lowest" possible charset and encoding for the given string. E.g.
+
+  ascii <op> utf8 => utf8
+                  => ascii, B<if> C<STRING *b> has ascii chars only.
+
+Returs NULL, if no compatible string representation can be found.
+
+=cut
+
+*/
+
 CHARSET *
 string_rep_compatible (Interp *interpreter, STRING *a, const STRING *b,
         ENCODING **e)
 {
-    if (e)
-        *e = a->encoding;
+    /*
+     * a table could possibly simplify the logic
+     */
     if (a->encoding == Parrot_utf8_encoding_ptr &&
             b->charset == Parrot_ascii_charset_ptr) {
+        if (a->strlen == a->bufused) {
+            *e = Parrot_fixed_8_encoding_ptr;
+            return Parrot_ascii_charset_ptr;
+        }
+        *e = a->encoding;
         return a->charset;
     }
     if (b->encoding == Parrot_utf8_encoding_ptr &&
             a->charset == Parrot_ascii_charset_ptr) {
-        if (e)
-            *e = Parrot_utf8_encoding_ptr;
-        else
-            a->encoding = Parrot_utf8_encoding_ptr;
+        if (b->strlen == b->bufused) {
+            *e = Parrot_fixed_8_encoding_ptr;
+            return a->charset;
+        }
+        *e = Parrot_utf8_encoding_ptr;
         return b->charset;
     }
     if (a->encoding != b->encoding)
         return NULL;
+    if (a->encoding != Parrot_fixed_8_encoding_ptr)
+        return NULL;
+    *e = Parrot_fixed_8_encoding_ptr;
     if (a->charset == b->charset)
         return a->charset;
     if (b->charset == Parrot_ascii_charset_ptr)
@@ -459,6 +455,11 @@ string_append(Interp *interpreter,
     UINTVAL a_capacity, b_len;
     UINTVAL total_length;
     CHARSET *cs;
+    ENCODING *enc;
+
+    /*
+     * XXX should this be a CHARSET method?
+     */
 
     UNUSED(Uflags);
 
@@ -475,47 +476,49 @@ string_append(Interp *interpreter,
     saneify_string(a);
     saneify_string(b);
 
-    /* If the destination's constant, then just fall back to
+    /* If the destination's constant, or external then just fall back to
        string_concat */
-    if (PObj_constant_TEST(a)) {
+    if (PObj_is_cowed_TESTALL(a)) {
         return string_concat(interpreter, a, b, Uflags);
     }
 
-    a_capacity = string_capacity(interpreter, a);
-    total_length = string_length(interpreter, a) + b_len;
-
-    /* make sure A's big enough for both */
-    if (a_capacity < total_length)
-    {
-        a = string_grow(interpreter, a,
-                (total_length - a_capacity) + EXTRA_SIZE);
+    cs = string_rep_compatible(interpreter, a, b, &enc);
+    if (cs != NULL) {
+        a->charset = cs;
+        a->encoding = enc;
     }
     else {
-        Parrot_unmake_COW(interpreter, a);
+        /* upgrade to utf16 */
+        Parrot_utf16_encoding_ptr->to_encoding(interpreter, a, NULL);
+        b = Parrot_utf16_encoding_ptr->to_encoding(interpreter, b,
+                new_string_header(interpreter, 0));
+        /*
+         * result could be mixed ucs2 / utf16
+         */
+        if (b->encoding == Parrot_utf16_encoding_ptr)
+            a->encoding = Parrot_utf16_encoding_ptr;
+    }
+    /*
+     * calc usable and total bytes
+     */
+    a_capacity = string_capacity(interpreter, a);
+    total_length = a->bufused + b->bufused;
+
+    /* make sure A's big enough for both  */
+    if (a_capacity < total_length) {
+        Parrot_reallocate_string(interpreter, a,
+                total_length + EXTRA_SIZE);
     }
 
     /* A is now ready to receive the contents of B */
 
-    /* if compatible rep, can memcopy */
-    if ( (cs = string_rep_compatible(interpreter, a, b, NULL))) {
-        a->charset = cs;
-        /* Tack B on the end of A */
-        mem_sys_memcopy((void *)((ptrcast_t)a->strstart + a->bufused),
-                b->strstart, b->bufused);
+    /* Tack B on the end of A */
+    mem_sys_memcopy((void *)((ptrcast_t)a->strstart + a->bufused),
+            b->strstart, b->bufused);
 
-        a->bufused += b->bufused;
-        a->strlen += b_len;
-        return a;
-    }
-    else {
-        internal_exception(UNIMPLEMENTED,
-                "Cross-type string appending (%s/%s) (%s/%s) unsupported",
-                ((ENCODING *)(a->encoding))->name,
-                ((CHARSET *)(a->charset))->name,
-                ((ENCODING *)(b->encoding))->name,
-                ((CHARSET *)(b->charset))->name);
-    }
-
+    a->bufused += b->bufused;
+    a->strlen += b_len;
+    a->hashval = 0;
     return a;
 }
 
@@ -675,36 +678,29 @@ string_make_direct(Interp *interpreter, const void *buffer,
         void * __ptr;
     } __ptr_u;
 
-    /*    PIO_eprintf(NULL, "string_make(): length = %ld, encoding name = %s, buffer = %s\n",
-          len, charset, (const char *)buffer); */
-
-    if (len && !buffer) {
-        internal_exception(BAD_BUFFER_SIZE,
-                "string_make: buffer pointer NULL, but length nonzero");
-    }
-
     s = new_string_header(interpreter, flags);
     s->encoding = encoding;
     s->charset = charset;
 
-    if (encoding == Parrot_fixed_8_encoding_ptr &&
-            charset == Parrot_ascii_charset_ptr) {
+    if (flags & PObj_external_FLAG) {
         /*
          * fast path for external (constant) strings - don't allocate
          * and copy data
          */
-        if (flags & PObj_external_FLAG) {
-            /* The following cast discards the 'const'.  That raises
-               a warning with gcc, but is ok since the caller indicated
-               it was safe by setting PObj_external_FLAG.
-               (The cast is necessary to pacify TenDRA's tcc.)
-               */
-            PObj_bufstart(s) = s->strstart = const_cast(buffer);
-            PObj_buflen(s)   = s->strlen = s->bufused = len;
-            PObj_bufstart_external_SET(s);
+        /* The following cast discards the 'const'.  That raises
+           a warning with gcc, but is ok since the caller indicated
+           it was safe by setting PObj_external_FLAG.
+           (The cast is necessary to pacify TenDRA's tcc.)
+           */
+        PObj_bufstart(s) = s->strstart = const_cast(buffer);
+        PObj_buflen(s)   = s->bufused = len;
+        PObj_bufstart_external_SET(s);
+        if (encoding == Parrot_fixed_8_encoding_ptr)
+            s->strlen = len;
+        else
+            string_compute_strlen(interpreter, s);
 
-            return s;
-        }
+        return s;
     }
 
     Parrot_allocate_string(interpreter, s, len);
@@ -712,7 +708,10 @@ string_make_direct(Interp *interpreter, const void *buffer,
     if (buffer) {
         mem_sys_memcopy(s->strstart, buffer, len);
         s->bufused = len;
-        string_compute_strlen(interpreter, s);
+        if (encoding == Parrot_fixed_8_encoding_ptr)
+            s->strlen = len;
+        else
+            string_compute_strlen(interpreter, s);
     }
     else {
         s->strlen = s->bufused = 0;
@@ -990,9 +989,19 @@ string_concat(Interp *interpreter,
 {
     if (a != NULL && a->strlen != 0) {
         if (b != NULL && b->strlen != 0) {
-            STRING *result =
-                string_make_empty(interpreter, enum_stringrep_one,
-                        a->strlen + b->strlen);
+            CHARSET *cs;
+            ENCODING *enc;
+            STRING *result;
+
+            cs = string_rep_compatible(interpreter, a, b, &enc);
+            if (!cs) {
+                cs = a->charset;
+                enc =a->encoding;
+            }
+            result =
+                string_make_direct(interpreter, NULL,
+                        a->bufused + b->bufused,
+                        enc, cs, 0);
 
             string_append(interpreter, result, a, Uflags);
             string_append(interpreter, result, b, Uflags);
@@ -1034,10 +1043,10 @@ string_repeat(Interp *interpreter, const STRING *s,
     STRING *dest;
     UINTVAL i;
 
-    dest = string_make_empty(interpreter, enum_stringrep_one, s->strlen * num);
+    dest = string_make_direct(interpreter, NULL,
+                        s->bufused * num,
+                        s->encoding, s->charset, 0);
 
-    /* dest = string_make(interpreter, NULL, s->bufused * num, s->encoding, 0,
-                       s->type); */
     if (num == 0) {
         return dest;
     }
@@ -1158,17 +1167,6 @@ string_replace(Interp *interpreter, STRING *src,
 
     true_offset = (UINTVAL)offset;
     true_length = (UINTVAL)length;
-
-    /* may have different reps..... */
-    if ( !(cs = string_rep_compatible(interpreter, src, rep, &enc))) {
-        internal_exception(UNIMPLEMENTED,
-                "Cross-type string replace (%s/%s) (%s/%s) unsupported",
-                ((ENCODING *)(src->encoding))->name,
-                ((CHARSET *)(src->charset))->name,
-                ((ENCODING *)(rep->encoding))->name,
-                ((CHARSET *)(rep->charset))->name);
-    }
-
     /* abs(-offset) may not be > strlen-1 */
     if (offset < 0) {
         true_offset = (UINTVAL)(src->strlen + offset);
@@ -1186,6 +1184,25 @@ string_replace(Interp *interpreter, STRING *src,
         true_length = (UINTVAL)(src->strlen - true_offset);
     }
 
+    /* Save the substring that is replaced for the return value */
+    if (d != NULL) {
+        dest = CHARSET_GET_CODEPOINTS(interpreter, src,
+                true_offset, true_length);
+        *d = dest;
+    }
+
+    /* may have different reps..... */
+    cs = string_rep_compatible(interpreter, src, rep, &enc);
+    if (!cs) {
+        Parrot_utf16_encoding_ptr->to_encoding(interpreter, src, NULL);
+        rep = Parrot_utf16_encoding_ptr->to_encoding(interpreter, rep,
+                new_string_header(interpreter, 0));
+    }
+    else {
+        src->charset = cs;
+        src->encoding = enc;
+    }
+
     /* get byte position of the part that will be replaced */
     ENCODING_ITER_INIT(interpreter, src, &iter);
     iter.set_position(interpreter, &iter, true_offset);
@@ -1198,26 +1215,7 @@ string_replace(Interp *interpreter, STRING *src,
         internal_exception(SUBSTR_OUT_OF_STRING,
                 "replace: subend somehow is less than substart");
     }
-    /* Save the substring that is replaced for the return value */
-    if (d != NULL) {
-        UINTVAL length_bytes = string_max_bytes(interpreter, src, true_length);
 
-        dest = string_make_empty(interpreter, enum_stringrep_one, length_bytes);
-        dest->charset = src->charset;
-        dest->encoding = src->encoding;
-
-        mem_sys_memcopy(dest->strstart,
-                (char *)src->strstart + start_byte,
-                end_byte - start_byte);
-
-        dest->bufused = end_byte - start_byte;
-        dest->strlen = true_length;
-
-        *d = dest;
-    }
-
-    src->charset = cs;
-    src->encoding = enc;
     /* Now do the replacement */
 
     /*
@@ -1269,19 +1267,33 @@ string_replace(Interp *interpreter, STRING *src,
 /*
 
 =item C<STRING *
-string_chopn(Interp *interpreter, STRING *s, INTVAL n)>
+string_chopn(Interp *interpreter, STRING *s, INTVAL n, int in_place)>
 
 Chops off the last C<n> characters of the specified Parrot string. If
 C<n> is negative, cuts the string after C<+n> characters.
+If C<in_place> is true, the string is chopped in places, else a copy
+of the string is chopped and returned.
 
 =cut
 
 */
 
 STRING *
-string_chopn(Interp *interpreter, STRING *s, INTVAL n)
+string_chopn(Interp *interpreter, STRING *s, INTVAL n, int in_place)
 {
-    UINTVAL new_length;
+    UINTVAL new_length, uchar_size;
+    String_iter iter;
+
+    if (!s)
+        return NULL;
+    if (in_place) {
+        /*
+         *  constant or external strings can't be chopped inplace
+         */
+        Parrot_unmake_COW(interpreter, s);
+    }
+    else
+        s = string_copy(interpreter, s);
 
     if (n < 0) {
         new_length = -n;
@@ -1294,10 +1306,24 @@ string_chopn(Interp *interpreter, STRING *s, INTVAL n)
         else
             new_length = 0;
     }
-
-    s->strlen = new_length;
-    s->bufused = string_max_bytes(interpreter, s, new_length);
     s->hashval = 0;
+    if (!new_length || !s->strlen) {
+        s->bufused = s->strlen = 0;
+        return s;
+    }
+    uchar_size = s->bufused / s->strlen;
+    s->strlen = new_length;
+    if (s->encoding == Parrot_fixed_8_encoding_ptr) {
+        s->bufused = new_length;
+    }
+    else if (s->encoding == Parrot_ucs2_encoding_ptr) {
+        s->bufused = new_length * uchar_size;
+    }
+    else {
+        ENCODING_ITER_INIT(interpreter, s, &iter);
+        iter.set_position(interpreter, &iter, new_length);
+        s->bufused = iter.bytepos;
+    }
 
     return s;
 }
@@ -1307,8 +1333,6 @@ INTVAL
 string_compare(Interp *interpreter,
     STRING *s1, STRING *s2)
 {
-    INTVAL cmp = 0;    /* gcc -O3 warning */
-
     if (!s1 && !s2) {
         return 0;
     }
@@ -1432,38 +1456,41 @@ string_bitwise_and(Interp *interpreter, STRING *s1,
     STRING *s2, STRING **dest)
 {
     STRING *res = NULL;
-    size_t minlen = 0;
-    parrot_string_representation_t maxrep = enum_stringrep_one;
-    CHARSET *cs;
-    ENCODING *enc;
+    size_t minlen;
 
+    /* we could also trans_charset to iso-8859-1 */
+    if (s1 && s1->encoding != Parrot_fixed_8_encoding_ptr) {
+        real_exception(interpreter, NULL, INVALID_ENCODING,
+                "string bitwise_and (%s/%s) unsupported",
+                ((ENCODING *)(s1->encoding))->name,
+                ((ENCODING *)(s2->encoding))->name);
+    }
+    if (s2 && s2->encoding != Parrot_fixed_8_encoding_ptr) {
+        real_exception(interpreter, NULL, INVALID_ENCODING,
+                "string bitwise_and (%s/%s) unsupported",
+                ((ENCODING *)(s2->encoding))->name,
+                ((ENCODING *)(s2->encoding))->name);
+    }
     /* think about case of dest string is one of the operands */
     if (s1 && s2) {
         minlen = s1->strlen > s2->strlen ? s2->strlen : s1->strlen;
     }
+    else
+        minlen = 0;
 
     if (dest && *dest) {
         res = *dest;
+        res->encoding = Parrot_fixed_8_encoding_ptr;
+        res->charset  = Parrot_binary_charset_ptr;
     }
-    else if (!s1 || !s2) {
-        res = string_make_empty(interpreter, enum_stringrep_one, 0);
-    }
-    else {
-        res = string_make_empty(interpreter, maxrep, minlen);
-    }
+    else
+        res = string_make_direct(interpreter, NULL, minlen,
+                Parrot_fixed_8_encoding_ptr, Parrot_binary_charset_ptr, 0);
 
     if (!s1 || !s2) {
         res->bufused = 0;
         res->strlen = 0;
         return res;
-    }
-    if ( !(cs = string_rep_compatible(interpreter, s1, s2, &enc))) {
-        internal_exception(UNIMPLEMENTED,
-                "Cross-type string bitwise_and (%s/%s) (%s/%s) unsupported",
-                ((ENCODING *)(s1->encoding))->name,
-                ((CHARSET *)(s1->charset))->name,
-                ((ENCODING *)(s2->encoding))->name,
-                ((CHARSET *)(s2->charset))->name);
     }
 #if ! DISABLE_GC_DEBUG
     /* trigger GC for debug */
@@ -1472,14 +1499,11 @@ string_bitwise_and(Interp *interpreter, STRING *s1,
 #endif
 
     make_writable(interpreter, &res, minlen, enum_stringrep_one);
-    res->charset = cs;
-    res->encoding = enc;
 
     BITWISE_AND_STRINGS(Parrot_UInt1, Parrot_UInt1,
             Parrot_UInt1, s1, s2, res, minlen);
 
-    res->strlen = minlen;
-    res->bufused = string_max_bytes(interpreter, res, res->strlen);
+    res->bufused = res->strlen = minlen;
 
     if (dest)
         *dest = res;
@@ -1545,43 +1569,44 @@ STRING *
 string_bitwise_or(Interp *interpreter,
     STRING *s1, STRING *s2, STRING **dest)
 {
-    STRING *res = NULL;
+    STRING *res;
     size_t maxlen = 0;
-    parrot_string_representation_t maxrep = enum_stringrep_one;
-    CHARSET *cs;
-    ENCODING *enc = NULL;
 
-    maxlen = s1 ? s1->bufused: 0;
-    if (s2 && s2->bufused > maxlen)
-        maxlen = s2->bufused;
+    if (s1) {
+        if (s1->encoding != Parrot_fixed_8_encoding_ptr) {
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                    "string bitwise_and (%s/%s) unsupported",
+                    ((ENCODING *)(s1->encoding))->name,
+                    ((ENCODING *)(s2->encoding))->name);
+        }
+        maxlen = s1->bufused;
+    }
+    if (s2) {
+        if (s2->encoding != Parrot_fixed_8_encoding_ptr) {
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                    "string bitwise_and (%s/%s) unsupported",
+                    ((ENCODING *)(s2->encoding))->name,
+                    ((ENCODING *)(s2->encoding))->name);
+        }
+        if (s2->bufused > maxlen)
+            maxlen = s2->bufused;
+    }
 
-    if (dest && *dest)
+    if (dest && *dest) {
         res = *dest;
-    else if (!s1 && !s2)
-        res = string_make_empty(interpreter, enum_stringrep_one, 0);
+        res->encoding = Parrot_fixed_8_encoding_ptr;
+        res->charset  = Parrot_binary_charset_ptr;
+    }
     else
-        res = string_make_empty(interpreter, maxrep, maxlen);
+        res = string_make_direct(interpreter, NULL, maxlen,
+                Parrot_fixed_8_encoding_ptr, Parrot_binary_charset_ptr, 0);
 
-    if (!s1 && !s2) {
+    if (!maxlen) {
         res->bufused = 0;
         res->strlen = 0;
         return res;
     }
 
-    if (!s1)
-        cs = s2->charset;
-    else if (!s2)
-        cs = s1->charset;
-    else {
-        if ( !(cs = string_rep_compatible(interpreter, s1, s2, &enc))) {
-            internal_exception(UNIMPLEMENTED,
-                    "Cross-type string bitwise_or (%s/%s) (%s/%s) unsupported",
-                    ((ENCODING *)(s1->encoding))->name,
-                    ((CHARSET *)(s1->charset))->name,
-                    ((ENCODING *)(s2->encoding))->name,
-                    ((CHARSET *)(s2->charset))->name);
-        }
-    }
 #if ! DISABLE_GC_DEBUG
     /* trigger GC for debug */
     if (interpreter && GC_DEBUG(interpreter))
@@ -1589,14 +1614,10 @@ string_bitwise_or(Interp *interpreter,
 #endif
 
     make_writable(interpreter, &res, maxlen, enum_stringrep_one);
-    res->charset = cs;
-    if (enc)
-        res->encoding = enc;
 
     BITWISE_OR_STRINGS(Parrot_UInt1, Parrot_UInt1, Parrot_UInt1,
             s1, s2, res, maxlen, |);
-    res->strlen = maxlen;
-    res->bufused = string_max_bytes(interpreter, res, res->strlen);
+    res->bufused = res->strlen = maxlen;
 
     if (dest)
         *dest = res;
@@ -1622,43 +1643,44 @@ STRING *
 string_bitwise_xor(Interp *interpreter,
     STRING *s1, STRING *s2, STRING **dest)
 {
-    STRING *res = NULL;
+    STRING *res;
     size_t maxlen = 0;
-    parrot_string_representation_t maxrep = enum_stringrep_one;
-    CHARSET *cs;
-    ENCODING *enc = NULL;
 
-    maxlen = s1 ? s1->bufused: 0;
-    if (s2 && s2->bufused > maxlen)
-        maxlen = s2->bufused;
+    if (s1) {
+        if (s1->encoding != Parrot_fixed_8_encoding_ptr) {
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                    "string bitwise_and (%s/%s) unsupported",
+                    ((ENCODING *)(s1->encoding))->name,
+                    ((ENCODING *)(s2->encoding))->name);
+        }
+        maxlen = s1->bufused;
+    }
+    if (s2) {
+        if (s2->encoding != Parrot_fixed_8_encoding_ptr) {
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                    "string bitwise_and (%s/%s) unsupported",
+                    ((ENCODING *)(s2->encoding))->name,
+                    ((ENCODING *)(s2->encoding))->name);
+        }
+        if (s2->bufused > maxlen)
+            maxlen = s2->bufused;
+    }
 
-    if (dest && *dest)
+    if (dest && *dest) {
         res = *dest;
-    else if (!s1 && !s2)
-        res = string_make_empty(interpreter, enum_stringrep_one, 0);
+        res->encoding = Parrot_fixed_8_encoding_ptr;
+        res->charset  = Parrot_binary_charset_ptr;
+    }
     else
-        res = string_make_empty(interpreter, maxrep, maxlen);
+        res = string_make_direct(interpreter, NULL, maxlen,
+                Parrot_fixed_8_encoding_ptr, Parrot_binary_charset_ptr, 0);
 
-    if (!s1 && !s2) {
+    if (!maxlen) {
         res->bufused = 0;
         res->strlen = 0;
         return res;
     }
 
-    if (!s1)
-        cs = s2->charset;
-    else if (!s2)
-        cs = s1->charset;
-    else {
-        if ( !(cs = string_rep_compatible(interpreter, s1, s2, &enc))) {
-            internal_exception(UNIMPLEMENTED,
-                    "Cross-type string bitwise_xor (%s/%s) (%s/%s) unsupported",
-                    ((ENCODING *)(s1->encoding))->name,
-                    ((CHARSET *)(s1->charset))->name,
-                    ((ENCODING *)(s2->encoding))->name,
-                    ((CHARSET *)(s2->charset))->name);
-        }
-    }
 #if ! DISABLE_GC_DEBUG
     /* trigger GC for debug */
     if (interpreter && GC_DEBUG(interpreter))
@@ -1666,38 +1688,16 @@ string_bitwise_xor(Interp *interpreter,
 #endif
 
     make_writable(interpreter, &res, maxlen, enum_stringrep_one);
-    res->charset = cs;  /* XXX binary for all bit ops --leo */
-    if (enc)
-        res->encoding = enc;
 
     BITWISE_OR_STRINGS(Parrot_UInt1, Parrot_UInt1, Parrot_UInt1,
             s1, s2, res, maxlen, ^);
-
-    res->strlen = maxlen;
-    res->bufused = string_max_bytes(interpreter, res, res->strlen);
+    res->bufused = res->strlen = maxlen;
 
     if (dest)
         *dest = res;
 
     return res;
 }
-
-/*
-#define BITWISE_NOT_STRING(type, s, res) \
-do { \
-    if (s && res) \
-    { \
-        const type *curr = (type *)s->strstart; \
-        size_t length = s->strlen; \
-        Parrot_UInt4 *dp = (Parrot_UInt4 *)res->strstart; \
- \
-        for ( ; length ; --length) \
-        { \
-            *dp++ = ~ *curr++; \
-        } \
-    } \
-} while(0)
-*/
 
 #define BITWISE_NOT_STRING(type, s, res) \
 do { \
@@ -1709,7 +1709,6 @@ do { \
  \
         for ( ; length ; --length, ++dp, ++curr) \
         { \
-            Parrot_UInt1 temp = *curr; \
             *dp = 0xFF & ~ *curr; \
         } \
     } \
@@ -1732,15 +1731,30 @@ STRING *
 string_bitwise_not(Interp *interpreter,
     STRING *s, STRING **dest)
 {
-    STRING *res = NULL;
-    size_t len = s ? s->strlen : 0;
+    STRING *res;
+    size_t len;
 
-    if (dest && *dest)
-        res = *dest;
+    if (s) {
+        if (s->encoding != Parrot_fixed_8_encoding_ptr) {
+            real_exception(interpreter, NULL, INVALID_ENCODING,
+                    "string bitwise_and (%s/%s) unsupported",
+                    ((ENCODING *)(s->encoding))->name,
+                    ((ENCODING *)(s->encoding))->name);
+        }
+        len = s->bufused;
+    }
     else
-        res = string_make_empty(interpreter, enum_stringrep_one, len);
+        len = 0;
+    if (dest && *dest) {
+        res = *dest;
+        res->encoding = Parrot_fixed_8_encoding_ptr;
+        res->charset  = Parrot_binary_charset_ptr;
+    }
+    else
+        res = string_make_direct(interpreter, NULL, len,
+                Parrot_fixed_8_encoding_ptr, Parrot_binary_charset_ptr, 0);
 
-    if (!s) {
+    if (!len) {
         res->bufused = 0;
         res->strlen = 0;
         return res;
@@ -1754,8 +1768,7 @@ string_bitwise_not(Interp *interpreter,
 
     make_writable(interpreter, &res, len, enum_stringrep_one);
 
-    res->strlen = len;
-    res->bufused = string_max_bytes(interpreter, res, len);
+    res->strlen = res->bufused = len;
 
     BITWISE_NOT_STRING(Parrot_UInt1, s, res);
     if (dest)
@@ -2328,7 +2341,128 @@ string_hash(Interp * interpreter, STRING *s, size_t seed)
     return h;
 }
 
+/*
 
+=item C<STRING *
+string_escape_string(Interp * interpreter, STRING *src)>
+
+Escape all non-ascii chars to backslash sequences. Control chars that
+C<string_unescape_cstring> can handle are esacped as I<\x>, as well
+as a double quote character. Other control chars and codepoints < 0x100 are
+escaped as I<\xhh>, codepoints up to 0xffff, as I<\uhhhh>, and codepoints
+greater than this as I<\x{hh...hh}>.
+
+=item C<STRING *
+string_escape_string_delimited(Interp * interpreter, STRING *src, UINTVAL len)>
+
+Like above but limit output to len chars (used for trace output of strings).
+
+=cut
+
+*/
+
+STRING *
+string_escape_string(Interp * interpreter, STRING *src)
+{
+    return string_escape_string_delimited(interpreter, src,
+            (UINTVAL) ~0);
+}
+
+STRING *
+string_escape_string_delimited(Interp * interpreter,
+        STRING *src, UINTVAL limit)
+{
+    STRING *result, *hex;
+    UINTVAL c, i, len, charlen;
+    String_iter iter;
+    unsigned char *dp;
+
+    if (!src)
+        return NULL;
+    len = src->strlen;
+    if (len > limit)
+        len = limit;
+    /* expect around 2x the chars */
+    charlen = 2 * len;
+    if (charlen < 16)
+        charlen = 16;
+    /* create ascii result */
+    result = string_make_direct(interpreter, NULL, charlen,
+            Parrot_fixed_8_encoding_ptr, Parrot_ascii_charset_ptr, 0);
+    /* more work TODO */
+    ENCODING_ITER_INIT(interpreter, src, &iter);
+    dp = result->strstart;
+    for (i = 0; len > 0; --len) {
+        c = iter.get_and_advance(interpreter, &iter);
+        if (c < 0x7f) {
+            /* process ASCII chars */
+            if (i >= charlen - 2) {
+                /* resize - still len codepoints to go */
+                charlen += len * 2 + 16;
+                Parrot_reallocate_string(interpreter, result, charlen);
+                /* start can change */
+                dp = result->strstart;
+            }
+            switch (c) {
+                case '\\':
+                    dp[i++] = '\\';
+                    break;
+                case '\a':
+                    dp[i++] = '\\';
+                    c = 'a';
+                    break;
+                case '\b':
+                    dp[i++] = '\\';
+                    c = 'b';
+                    break;
+                case '\n':
+                    dp[i++] = '\\';
+                    c = 'n';
+                    break;
+                case '\r':
+                    dp[i++] = '\\';
+                    c = 'r';
+                    break;
+                case '\t':
+                    dp[i++] = '\\';
+                    c = 't';
+                    break;
+                case '\f':
+                    dp[i++] = '\\';
+                    c = 'f';
+                    break;
+                case '"':
+                    dp[i++] = '\\';
+                    c = '"';
+                    break;
+                case 27:
+                    dp[i++] = '\\';
+                    c = 'e';
+                    break;
+            }
+            if (c >= 0x20) {
+                dp[i++] = (unsigned char)c;
+                assert(i < charlen);
+                continue;
+            }
+        }
+        /* escape by appending either \uhhhh or \x{hh...} */
+        result->bufused = result->strlen = i;
+        if (c < 0x0100 || c >= 0x10000)
+            hex = Parrot_sprintf_c(interpreter, "\\x{%x}", c);
+        else
+            hex = Parrot_sprintf_c(interpreter, "\\u%04x", c);
+        result = string_append(interpreter, result, hex, 0);
+        /* adjust our insert idx */
+        i += hex->strlen;
+        /* and usable len */
+        charlen = PObj_buflen(result);
+        dp = result->strstart;
+        assert(i < charlen);
+    }
+    result->bufused = result->strlen = i;
+    return result;
+}
 /*
 
 =item C<STRING *
@@ -2386,39 +2520,44 @@ string_unescape_cstring(Interp * interpreter,
         }
         result = string_make_direct(interpreter, cstring, clength,
                 encoding, charset, flags);
-        string_compute_strlen(interpreter, result);
+        encoding = Parrot_fixed_8_encoding_ptr;
     }
     else {
         result = string_make(interpreter, cstring, clength, enc_char, flags);
-        ENCODING_ITER_INIT(interpreter, result, &iter);
-        for (offs = d = 0; offs < clength; ++offs) {
-            r = (Parrot_UInt4)((unsigned char*)result->strstart)[offs];
-            /* There cannot be any NULs within this string.  */
-            assert(r != '\0');
-            if (r == '\\') {
-                ++offs;
-                r = string_unescape_one(interpreter, &offs, result);
-                --offs;
-            }
-            if (d == offs) {
-                /* we did it in place - no action */
-                ++d;
-                iter.bytepos++;
-                iter.charpos++;
-                continue;
-            }
-            assert(d < offs);
-            iter.set_and_advance(interpreter, &iter, r);
-            ++d;
-        }
-        result->strlen = d;
-        result->bufused = iter.bytepos;
         encoding = result->encoding;
     }
-    if (!CHARSET_VALIDATE(interpreter, result, 0)) {
-        internal_exception(INVALID_STRING_REPRESENTATION, "Malformed string");
+    encoding->iter_init(interpreter, result, &iter);
+    for (offs = d = 0; offs < clength; ++offs) {
+        r = (Parrot_UInt4)((unsigned char*)result->strstart)[offs];
+        /* There cannot be any NULs within this string.  */
+        assert(r != '\0');
+        if (r == '\\') {
+            ++offs;
+            r = string_unescape_one(interpreter, &offs, result);
+            --offs;
+        }
+        if (d == offs) {
+            /* we did it in place - no action */
+            ++d;
+            iter.bytepos++;
+            iter.charpos++;
+            continue;
+        }
+        assert(d < offs);
+        iter.set_and_advance(interpreter, &iter, r);
+        ++d;
     }
-    if (encoding == Parrot_utf8_encoding_ptr) {
+    result->strlen = d;
+    result->bufused = iter.bytepos;
+    if (encoding != result->encoding) {
+        /* this also validates the string */
+        string_compute_strlen(interpreter, result);
+    }
+    else if (!CHARSET_VALIDATE(interpreter, result, 0)) {
+        internal_exception(INVALID_STRING_REPRESENTATION,
+                "Malformed string");
+    }
+    if (result->encoding == Parrot_utf8_encoding_ptr) {
         /* Pythonic unicode flag - get rid of that, Python will
          * probably need a second string class anyway
          */
@@ -2644,6 +2783,23 @@ Parrot_string_find_not_cclass(Interp *interpreter, PARROT_CCLASS_FLAGS flags, ST
     return CHARSET_FIND_NOT_CCLASS(interpreter, flags, s, offset, count);
 }
 
+/*
+
+=item C< STRING*
+Parrot_string_trans_charset(Interp *interpreter, STRING *src,
+        INTVAL charset_nr, STRING *dest)>
+
+=item C< STRING*
+Parrot_string_trans_encoding(Interp *interpreter, STRING *src,
+        INTVAL charset_nr, STRING *dest)>
+
+If C<dest> == NULL convert  C<src> to the given charset or encoding inplace,
+else return a copy of C<src> with the charset/encoding in dest.
+
+=cut
+
+*/
+
 STRING*
 Parrot_string_trans_charset(Interp *interpreter, STRING *src,
         INTVAL charset_nr, STRING *dest)
@@ -2662,7 +2818,7 @@ Parrot_string_trans_charset(Interp *interpreter, STRING *src,
      */
     if (dest) {
         if (new_charset == src->charset) {
-            Parrot_reuse_COW_reference(interpreter, src, dest);
+            dest = Parrot_reuse_COW_reference(interpreter, src, dest);
             dest->charset = new_charset;
             /* keep encoding */
             return dest;
@@ -2676,9 +2832,49 @@ Parrot_string_trans_charset(Interp *interpreter, STRING *src,
             return src;
         }
     }
-    return CHARSET_TO_CHARSET(interpreter, src, new_charset, dest);
+    return new_charset->to_charset(interpreter, src, dest);
 }
 
+STRING*
+Parrot_string_trans_encoding(Interp *interpreter, STRING *src,
+        INTVAL encoding_nr, STRING *dest)
+{
+    ENCODING *new_encoding;
+
+    if (!src)
+        return NULL;
+    new_encoding = Parrot_get_encoding(interpreter, encoding_nr);
+    if (!new_encoding)
+        real_exception(interpreter, NULL, INVALID_CHARTYPE,
+                "encoding #%d not found", (int) encoding_nr);
+    /*
+     * dest is an empty string header or NULL, if an inplace
+     * operation is desired
+     */
+    if (dest) {
+        dest->encoding = new_encoding;
+        if (new_encoding == src->encoding) {
+            dest = Parrot_reuse_COW_reference(interpreter, src, dest);
+            return dest;
+        }
+    }
+    else {
+        if (new_encoding == src->encoding) {
+            return src;
+        }
+    }
+    return new_encoding->to_encoding(interpreter, src, dest);
+}
+
+STRING *
+string_compose(Interp * interpreter, STRING *src)
+{
+    if (!src)
+        return NULL;
+    if (!src->strlen)
+        return string_make_empty(interpreter, enum_stringrep_one, 0);
+    return CHARSET_COMPOSE(interpreter, src);
+}
 /*
 
 =back

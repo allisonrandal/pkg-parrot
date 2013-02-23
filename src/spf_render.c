@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: spf_render.c 9497 2005-10-17 11:21:10Z leo $
+$Id: spf_render.c 9877 2005-11-10 10:56:05Z leo $
 
 =head1 NAME
 
@@ -155,7 +155,7 @@ handle_flags(Interp *interpreter,
     else {
         /* string precision */
         if (info->flags & FLAG_PREC && info->prec < len) {
-            string_chopn(interpreter, str, -(INTVAL)(info->prec));
+            string_chopn(interpreter, str, -(INTVAL)(info->prec), 1);
             len = info->prec;
         }
     }
@@ -182,7 +182,7 @@ handle_flags(Interp *interpreter,
                     string_ord(interpreter, str,0) == '+')) {
                 STRING *temp = 0;
                 string_substr(interpreter, str, 1, len-1, &temp, 0);
-                string_chopn(interpreter, str, -1);
+                string_chopn(interpreter, str, -1, 1);
                 string_append(interpreter, str, fill, 0);
                 string_append(interpreter, str, temp, 0);
             }

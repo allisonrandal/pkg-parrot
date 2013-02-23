@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pdd_template.pod 9434 2005-10-10 17:38:11Z chip $
+# $Id: pdd_template.pod 10264 2005-11-30 03:07:41Z chip $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ Summary of the contents of the PDD.
 
 =head1 VERSION
 
-$Revision: 9434 $
+$Revision$
 
 =head1 DESCRIPTION
 
@@ -33,5 +33,9 @@ List of footnotes to the text.
 
 List of references.
 
-=back
+=cut
 
+__END__
+Local Variables:
+  fill-column:78
+End:

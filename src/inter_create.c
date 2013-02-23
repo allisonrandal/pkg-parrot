@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_create.c 9645 2005-10-30 13:46:40Z leo $
+$Id: inter_create.c 10240 2005-11-29 12:12:58Z leo $
 
 =head1 NAME
 
@@ -182,9 +182,6 @@ make_interpreter(Parrot_Interp parent, Interp_flags flags)
     stack_system_init(interpreter);
     /* Set up the initial register chunks */
     setup_register_stacks(interpreter);
-
-    /* Stack for lexical pads */
-    CONTEXT(interpreter->ctx)->pad_stack = new_stack(interpreter, "Pad");
 
     /* Need a user stack */
     CONTEXT(interpreter->ctx)->user_stack = new_stack(interpreter, "User");
@@ -393,7 +390,6 @@ Parrot_really_destroy(int exit_code, void *vinterp)
     /* deinit op_lib */
     (void) PARROT_CORE_OPLIB_INIT(0);
 
-    stack_destroy(CONTEXT(interpreter->ctx)->pad_stack);
     stack_destroy(CONTEXT(interpreter->ctx)->user_stack);
     stack_destroy(CONTEXT(interpreter->ctx)->control_stack);
 

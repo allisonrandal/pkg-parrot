@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: running.pod 9692 2005-11-01 19:58:39Z coke $
+# $Id: running.pod 10340 2005-12-04 06:58:31Z chromatic $
 
 =head1 NAME
 
@@ -7,7 +7,7 @@ Parrot - running
 
 =head1 VERSION
 
-$Revision $
+$Revision$
 
 =head1 OVERVIEW
 
@@ -161,7 +161,7 @@ Run with the slow core and do print an execution profile.
 
 =item -P, --predereferenced-core
 
-Prederefernce opcode function arguments on the fly.
+Predereference opcode function arguments on the fly.
 
 =item -t, --trace
 

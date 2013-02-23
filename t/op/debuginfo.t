@@ -1,6 +1,13 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: debuginfo.t 9277 2005-09-29 16:37:55Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: debuginfo.t 10304 2005-12-02 01:32:09Z leo $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+
 
 =head1 NAME
 
@@ -8,7 +15,7 @@ t/op/debuginfo.t - Debugging Info
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/debuginfo.t
+	% prove t/op/debuginfo.t
 
 =head1 DESCRIPTION
 
@@ -17,7 +24,6 @@ as well as backtrace tests.
 
 =cut
 
-use Parrot::Test tests => 8;
 
 SKIP:
 {
@@ -139,12 +145,11 @@ OUTPUT
 pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - fetch of unknown lexical" );
 .namespace ["Test2"]
 .sub main
-    new_pad 0
     print "ok 1\n"
     foo()
     print "not ok 3\n"
 .end
-.sub foo
+.sub foo :lex
     print "ok 2\n"
     find_lex $P0, "nosuchlex"
     print "not ok 3\n"
@@ -170,7 +175,7 @@ CODE
 /^maximum recursion depth exceeded
 current instr\.: 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)
-\.\.\. call repeated 99[89] times/
+\.\.\. call repeated 1000 times/
 OUTPUT
 
 pir_output_like( <<'CODE', <<'OUTPUT', "debug backtrace - recursion 2" );
@@ -194,3 +199,8 @@ called from Sub 'rec' pc (\d+|-1) \(.*?:(\d+|-1)\)
 \.\.\. call repeated 90 times
 called from Sub 'main' pc (\d+|-1) \(.*?:(\d+|-1)\)$/
 OUTPUT
+
+
+## remember to change the number of tests :-)
+BEGIN { plan tests => 8; }
+

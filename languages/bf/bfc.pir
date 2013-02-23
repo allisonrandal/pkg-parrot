@@ -1,4 +1,4 @@
-# $Id: bfc.pir 7989 2005-05-05 16:57:39Z bernhard $
+# $Id: bfc.pir 9896 2005-11-10 23:40:39Z bernhard $
 # A Brainfuck compiler
 # By Leon Brocard <acme@astray.com>
 #
@@ -251,7 +251,6 @@ NEXT:
 
   # Now actually run it
   compreg P1, "PASM"
-  compile P0, P1, code
-  invoke
-  end
+  P0 = P1( code )
+  P0()
 .end

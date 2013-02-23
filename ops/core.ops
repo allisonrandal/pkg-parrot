@@ -402,6 +402,10 @@ continuation.
 
 Return from the sub or method via the current continuation.
 
+=item B<newclosure>(out PMC, in PMC)
+
+Create a closure of the given subroutine PMC by cloning the sub's state.
+
 =cut
 
 inline op invokecc(in PMC) {
@@ -449,6 +453,11 @@ inline op returncc() {
   goto ADDRESS(dest);
 }
 
+inline op newclosure(out PMC, in PMC) {
+  $1 = parrot_new_closure(interpreter, $2);
+  goto NEXT();
+}
+
 =back
 
 =head2 Function argument opcode
@@ -491,7 +500,7 @@ op set_args(inconst PMC) {
     /* for now just point to the opcode */
     interpreter->current_args = this;
     argc = VTABLE_elements(interpreter, signature);
-    goto ADDRESS(this + 2 + argc);
+    goto OFFSET(argc + 2);
 }
 
 op get_results(inconst PMC) {
@@ -501,34 +510,51 @@ op get_results(inconst PMC) {
 
     CONTEXT(interpreter->ctx)->current_results = this;
     argc = VTABLE_elements(interpreter, signature);
-    goto ADDRESS(this + 2 + argc);
+    goto OFFSET(argc + 2);
 }
 
 op get_params(inconst PMC) {
     opcode_t *this = CUR_OPCODE;
-    PMC *signature = $1;
-    struct Parrot_sub * sub = PMC_sub(CONTEXT(interpreter->ctx)->current_sub);
-    parrot_context_t *caller_ctx;
-    PMC *cont_pmc;
+    parrot_context_t *caller_ctx, *ctx;
+    PMC *ccont;
     opcode_t *pc;
 
     interpreter->current_params = this;
-    cont_pmc = CONTEXT(interpreter->ctx)->current_cont;
+    ctx = CONTEXT(interpreter->ctx);
+    ccont = ctx->current_cont;
 
-    caller_ctx = PMC_cont(cont_pmc)->to_ctx;
-    pc = parrot_pass_args(interpreter, sub->seg, caller_ctx,
+    caller_ctx = ctx->caller_ctx;
+    pc = parrot_pass_args(interpreter, caller_ctx, ctx,
 	    PARROT_OP_get_params_pc);
+    if (PObj_get_FLAGS(ccont) & SUB_FLAG_TAILCALL) {
+	PObj_get_FLAGS(ccont) &= ~SUB_FLAG_TAILCALL;
+	--ctx->recursion_depth;
+	ctx->caller_ctx = caller_ctx->caller_ctx;
+	Parrot_free_context(interpreter, caller_ctx, 1);
+        interpreter->current_args = NULL;
+    }
     goto ADDRESS(pc);
 }
 
 op set_returns(inconst PMC) {
     opcode_t *this = CUR_OPCODE;
+    parrot_context_t *caller_ctx, *ctx;
+    PMC *ccont;
     PMC *signature = $1;
     INTVAL argc;
 
     interpreter->current_returns = this;
+    ctx = CONTEXT(interpreter->ctx);
+    ccont = ctx->current_cont;
+
+    if (PMC_cont(ccont)->address) {
+	/* else its from runops_fromc */
+	caller_ctx = PMC_cont(ccont)->to_ctx;
+	parrot_pass_args(interpreter, ctx, caller_ctx,
+		PARROT_OP_get_results_pc);
+    }
     argc = VTABLE_elements(interpreter, signature);
-    goto ADDRESS(this + 2 + argc);
+    goto OFFSET(argc + 2);
 }
 
 =item B<result_info>(out PMC)
@@ -870,14 +896,26 @@ inline op warningsoff(in INT) {
 =item B<errorson>(in INT)
 
 Turns on error categories. Categories already turned on will
-stay on. Current default setting is PARROT_ERRORS_GLOBALS_FLAG is on.
+stay on.
 Current categories are (include "errors.pasm"):
 
 =over 4
 
 =item .PARROT_ERRORS_GLOBALS_FLAG
 
-Throw an exception, if global doesn't exist.
+Throw an exception, if global doesn't exist, default on.
+
+=item .PARROT_ERRORS_OVERFLOW_FLAG
+
+Throw math overflow instead of promoting to BigInt, default off.
+
+=item .PARROT_ERRORS_PARAM_COUNT_FLAG
+
+Throw exception on argument <-> param count mismatch, default off
+
+=item .PARROT_ERRORS_RESULT_COUNT_FLAG
+
+Throw exception on return <-> result count mismatch, default off
 
 =item .PARROT_ERRORS_ALL_FLAG
 

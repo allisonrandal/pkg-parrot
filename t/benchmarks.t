@@ -1,6 +1,6 @@
 #! perl
 # Copyright: 2004-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: benchmarks.t 9807 2005-11-06 12:55:21Z leo $
+# $Id: benchmarks.t 9945 2005-11-13 14:32:42Z bernhard $
 
 =head1 NAME
 
@@ -154,6 +154,10 @@ my %outputs = (
     q(mops.pasm)      => qr/^Iterations:\s\s\s\s10000000\n
         Estimated\sops:\s20000000\n
         done\n
+        Elapsed\stime:\s\s\d+\.\d+\n
+        M\sop\/s:\s\s\s\s\s\s\s\s\d+\.\d+\n$/x,
+    q(mops_intval.pasm)      => qr/^Iterations:\s\s\s\s100000000\n
+        Estimated\sops:\s200000000\n
         Elapsed\stime:\s\s\d+\.\d+\n
         M\sop\/s:\s\s\s\s\s\s\s\s\d+\.\d+\n$/x,
     q(oo1.pasm)      => qq(10\n),

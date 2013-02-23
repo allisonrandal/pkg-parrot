@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrotinterpreter.pmc 9645 2005-10-30 13:46:40Z leo $
+$Id: parrotinterpreter.pmc 10206 2005-11-28 13:59:52Z leo $
 
 =head1 NAME
 
@@ -31,155 +31,6 @@ These are the vtable functions for the ParrotInterpreter base class
 
 /*
 
-=item C<static void
-clone_regs_interp(Parrot_Interp d, Parrot_Interp s, PMC *dest)>
-
-Copy/clone all interpreter registers. All resources are created in the
-destination interpreter.
-
-=cut
-
-*/
-
-static void
-clone_regs_interp(Parrot_Interp d, Parrot_Interp s, PMC *dest)
-{
-#if 0
-    int i;
-    mem_sys_memcopy(&INTERP_REG_INT(d, 0),
-        &INTERP_REG_INT(s, 0), sizeof(struct IReg));
-    mem_sys_memcopy(&INTERP_REG_NUM(d, 0),
-        &INTERP_REG_NUM(s, 0), sizeof(struct NReg));
-    for (i = 0; i < NUM_REGISTERS; i++) {
-        if (INTERP_REG_STR(s, i))
-            INTERP_REG_STR(d, i) =
-            string_copy(d, INTERP_REG_STR(s, i));
-        /*
-         * clone PMCS and strings
-         */
-        if (!PMC_IS_NULL(INTERP_REG_PMC(s, i))) {
-            PMC *sp = INTERP_REG_PMC(s, i);
-            /* special case, dont clone SELF again - ugly */
-            if ((sp->vtable->base_type == enum_class_ParrotInterpreter ||
-                sp->vtable->base_type == enum_class_ParrotThread))
-                INTERP_REG_PMC(d, i) = dest;
-            else {
-                /*
-                 * XXX clone isn't quite right here, it can't
-                 * work on self-referential structures
-                 */
-                PMC* dp = VTABLE_clone(d, sp);
-                INTERP_REG_PMC(d, i) = dp;
-            }
-        }
-    }
-#endif
-}
-
-/*
-
-=item C<static int
-need_reg(Parrot_Interp s, int i, int i3)>
-
-Called from C<clone_regs_thread()>. Currently commented out.
-
-=cut
-
-*/
-
-static int
-need_reg(Parrot_Interp s, int i, int i3)
-{
-    if (i >= 0 && i <= 2)       /* Sub, RetCont, object */
-        return 1;
-    if (i == 3 && i3 >= 11 && !PMC_IS_NULL(INTERP_REG_PMC(s, i)))
-        return 1;               /* overflow if present */
-    if (i >= 5 && i < 5 + i3)   /* i3 params */
-        return 1;
-    return 0;
-}
-
-/*
-
-=item C<static void
-clone_regs_thread(Parrot_Interp d, Parrot_Interp s, PMC *dest)>
-
-Copy/clone thread start parameters. All resources are created in the
-destination interpreter.
-
-=cut
-
-*/
-
-static void
-clone_regs_thread(Parrot_Interp d, Parrot_Interp s, PMC *dest)
-{
-    int i;
-    /*
-     * I3 has the number of PMCs
-     */
-    int i3 = INTERP_REG_INT(s, 3);
-
-    for (i = 0; i < NUM_REGISTERS/2; i++) {
-        /*
-         * clone PMCS
-         * we have to know the thread function signature to
-         * clone only param registers
-         */
-#if 0
-        /* wait for imcc fixes - PMC count is still in I2
-         */
-        if (!need_reg(s, i, i3))
-            continue;
-#endif
-        if (!PMC_IS_NULL(INTERP_REG_PMC(s, i))) {
-            PMC *sp = INTERP_REG_PMC(s, i);
-            /* special case, dont clone SELF again - ugly */
-            if ((sp->vtable->base_type == enum_class_ParrotInterpreter ||
-                     sp->vtable->base_type == enum_class_ParrotThread))
-            INTERP_REG_PMC(d, i) = dest;
-            else if (PObj_is_PMC_shared_TEST(sp)) {
-                /*
-                 * if PMC is a shared PMC, don't clone it, just
-                 * pass it over
-                 */
-                INTERP_REG_PMC(d, i) = sp;
-            }
-            else {
-                /*
-                 * XXX clone isn't quite right here, it can't
-                 * work on self-referential structures
-                 */
-                PMC* dp = VTABLE_clone(d, sp);
-                INTERP_REG_PMC(d, i) = dp;
-            }
-        }
-    }
-}
-
-/*
-
-=item C<static void
-clone_regs(Parrot_Interp d, Parrot_Interp s, PMC *dest)>
-
-Clones the registers.
-
-=cut
-
-*/
-
-static void
-clone_regs(Parrot_Interp d, Parrot_Interp s, PMC *dest)
-{
-    if (dest->vtable->base_type == enum_class_ParrotThread)
-        clone_regs_thread(d, s, dest);
-    else
-        clone_regs_interp(d, s, dest);
-    CONTEXT(d->ctx)->current_object = dest;
-}
-
-/*
-
 =item C<void
 clone_interpreter(PMC* dest, PMC* self)>
 
@@ -198,10 +49,6 @@ clone_interpreter(PMC* dest, PMC* self)
 
     d = PMC_data(dest);
 
-    /*
-     * copy register files
-     */
-    clone_regs(d, s, dest);
     /*
      * copy over packfile - done currently in the runinterp opcode
      * for multi-threading we have to generate separate
@@ -326,6 +173,7 @@ Initializes the interpreter.
             create_interp(SELF, INTERP);
         }
         PMC_struct_val(SELF) = NULL;
+        PMC_pmc_val(SELF) = NULL;
     }
 
 /*
@@ -407,6 +255,13 @@ Runs the interpreter's byte code.
          * setup code
          */
         pt_thread_prepare_for_run(new_interp, interpreter);
+        /*
+         * TODO pass arguments fro parent (interpreter)
+         *      to child (new_interp)
+         *      by possibly clone of share the arguments
+         *      r/o args can be passed as is
+         */
+
         /* calculate offset and run */
         runops(new_interp, (opcode_t *)PMC_struct_val(SELF) -
             (opcode_t *)interpreter->code->base.data);
@@ -437,14 +292,17 @@ Returns the PMC global value for C<key>.
 
 /*
 
-=item C<PMC *get_pmc_keyed_str(STRING* key)>
+=item C<PMC *get_pmc_keyed(PMC* key)>
 
 Introspection interface. C<key> can be:
 
   "sub"            ... return Sub object of this subroutine
   "continuation"   ... return Continuation PMC
-  "pad"            ... return scratchpad PMC for this sub
-  ["<item>"; level ] ... same for caller <level>
+  "lexpad"         ... return lexpad PMC for this sub
+  "outer"          ... return outer sub of this closure
+  "<item>"; level  ... same for caller <level>
+  "outer"; "<item>"  ... same for outer level 1
+  "outer"; "<item>"; level  ... same for outer <level>
 
   "globals"        ... return global stash
 
@@ -455,7 +313,7 @@ Introspection interface. C<key> can be:
     PMC* get_pmc_keyed(PMC * key) {
         int level = 0;
         PMC* nextkey;
-        STRING *item, *s;
+        STRING *item, *s, *outer;
         parrot_context_t *ctx;
         PMC *cont;
 
@@ -463,30 +321,59 @@ Introspection interface. C<key> can be:
         s = CONST_STRING(interpreter, "globals");
         if (string_equal(interpreter, item, s) == 0)
             return interpreter->globals->stash_hash;
+        outer = NULL;
+        s = CONST_STRING(interpreter, "outer");
+        if (string_equal(interpreter, item, s) == 0) {
+            outer = item;
+            nextkey = key_next(INTERP, key);
+            if (nextkey && (PObj_get_FLAGS(nextkey) & KEY_string_FLAG)) {
+                key = nextkey;
+                item = key_string(interpreter, key);
+            }
+        }
         nextkey = key_next(INTERP, key);
         if (nextkey)
             level = key_integer(interpreter, nextkey);
+        else if (outer)
+            level = 1;
+        if (level < 0)
+            real_exception(interpreter, NULL, E_ValueError,
+                    "No such caller depth");
         ctx = CONTEXT(interpreter->ctx);
-        for (; level; --level) {
-            cont = ctx->current_cont;
-            if (PMC_IS_NULL(cont) || !PMC_cont(cont)->seg)
-                real_exception(interpreter, NULL, E_ValueError,
-                        "No such caller depth");
-            ctx = PMC_cont(cont)->to_ctx;
-            if (!ctx->current_sub)
-                real_exception(interpreter, NULL, E_ValueError,
-                        "No such caller depth");
-
+        if (outer) {
+            for (; level; --level) {
+                ctx = ctx->outer_ctx;
+                if (!ctx)
+                    real_exception(interpreter, NULL, E_ValueError,
+                            "No such outer depth");
+            }
         }
+        else {
+            for (; level; --level) {
+                cont = ctx->current_cont;
+                if (PMC_IS_NULL(cont) || !PMC_cont(cont)->seg)
+                    real_exception(interpreter, NULL, E_ValueError,
+                            "No such caller depth");
+                ctx = PMC_cont(cont)->to_ctx;
+                if (!ctx->current_sub)
+                    real_exception(interpreter, NULL, E_ValueError,
+                            "No such caller depth");
+
+            }
+        }
+        if (item == outer)
+            return ctx->current_sub;
         s = CONST_STRING(interpreter, "sub");
         if (string_equal(interpreter, item, s) == 0)
             return ctx->current_sub;
-        s = CONST_STRING(interpreter, "pad");
+        s = CONST_STRING(interpreter, "lexpad");
         if (string_equal(interpreter, item, s) == 0)
-            return stack_peek(interpreter, ctx->pad_stack, NULL);
+            return ctx->lex_pad;
         s = CONST_STRING(interpreter, "continuation");
         if (string_equal(interpreter, item, s) == 0)
             return VTABLE_clone(interpreter, ctx->current_cont);
+        real_exception(interpreter, NULL, E_ValueError,
+                "No such item %Ss", item);
         return PMCNULL;
     }
 /*
@@ -612,14 +499,41 @@ Finish thawing.
 
     void visit(visit_info *info) {
         PMC **pos;
-        /* 1. HLL_info */
-        pos = &INTERP->HLL_info;
-        info->thaw_ptr = pos;
-        /* pass in the existing structure
-         * TODO pass a dummy PMC and merge the two structs
+        /*
+         * the information frozen here is part of all PBCs
+         * we probably need to freeze all dynamic extensible
+         * mappings (or at least the dynamic part)
+         * e.g.
+         *    charsets   idx - name
+         *    encodings  idx - name
+         *    pmc types  idx - name
+         *    dynamic oplibs    opcode nr - opname
+         *
+         * The machine thawing this info still needs to load
+         * these extensions, but the order of loading could be
+         * relaxed.
+         *
+         * creating all these info as standard PMCs would vastly
+         * simplify this process
+         *
+         * thaw would then need a merge operation:
+         *  - compare existing for sanity
+         *  - extend new
          */
-        info->extra = *pos;
-        info->extra_flags = EXTRA_CLASS_EXISTS;
+
+        /*  HLL_info */
+        if (info->what == VISIT_THAW_NORMAL ||
+                info->what == VISIT_THAW_CONSTANTS) {
+#if 0
+            if (PMC_pmc_val(SELF))
+                real_exception(INTERP, NULL, UNIMPLEMENTED,
+                        "Can't deal with recursive load_bytecode");
+#endif
+            pos = &PMC_pmc_val(SELF);
+        }
+        else
+            pos = &INTERP->HLL_info;
+        info->thaw_ptr = pos;
         (info->visit_pmc_now)(INTERP, *pos, info);
     }
 
@@ -640,19 +554,29 @@ Finish thawing.
     }
 
     void thawfinish(visit_info *info) {
-        INTVAL i, n;
-        PMC *hll_info, *entry, *lib_pmc;
+        INTVAL i, n, m;
+        PMC *hll_info, *entry, *lib_pmc, *new_info;
         STRING *lib_name;
 
         hll_info = INTERP->HLL_info;
         n = VTABLE_elements(INTERP, hll_info);
-        for (i = 0; i < n; ++i) {
-            entry = VTABLE_get_pmc_keyed_int(INTERP, hll_info, i);
+        new_info = PMC_pmc_val(SELF);
+        PMC_pmc_val(SELF) = NULL;
+        m = VTABLE_elements(INTERP, new_info);
+        /* merge new_info */
+        /* TODO compare old entries */
+        for (i = n; i < m; ++i) {
+            entry = VTABLE_get_pmc_keyed_int(INTERP, new_info, i);
             lib_pmc = VTABLE_get_pmc_keyed_int(INTERP, entry, 1);
             if (PMC_IS_NULL(lib_pmc))
                 continue;
             lib_name = VTABLE_get_string(INTERP, lib_pmc);
-            Parrot_load_lib(INTERP, lib_name, NULL);
+            if (lib_name->strlen)
+                Parrot_load_lib(INTERP, lib_name, NULL);
+        }
+        if (m > n) {
+            /* TODO destruct old HLL_info are constants */
+            INTERP->HLL_info = new_info;
         }
     }
 }

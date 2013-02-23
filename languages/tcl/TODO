@@ -7,45 +7,33 @@ means being able to deal with all the commands in:
 
 http://cvs.sourceforge.net/viewcvs.py/tcl/tcl/library/tcltest/tcltest.tcl?view=markup
 
-This will require a lot of work. On the plus side, we'll be passing a lot more
+This will require a *lot* of work. On the plus side, we'll be passing a lot more
 tests by then. =-)
 
 =over 4
 
-=item 0
-
-Add the "unknown command" logic from the (commented out) tclcommand's interpret
-to the compiled version, and then remove the interpret :method.
-
-=item 1
+=item *
 
 Generate compiler-variants for several builtins, esp. those used by
-examples/bench.tcl
+examples/bench.tcl - NB: bench.tcl is currently failing.
 
-Modify the compiler for tclcommand to generate the inline version if
-it's available. (C<proc> and C<expr> should also be straightforward, as they
-already compile anyway.)  [Completed: incr, break, continue, for, while]
-
-Note: compiled builtins always take two args: the register_num to begin
-using for the inlined code, and a single container pmc that contains the
-pre-parsed arguments. They return just like the compile methods in lib/tcl*.pir,
-that is, the register_num the result is in, and the inlinable code.
-
-=item 2
-
-When an inline compiled version exists, use it, but IFF a global counter
-indicates no procs have been redifined.  Update proc and rename to increment
-this counter whenever they are called.
-
-=item 3
+=item *
 
 Add compiled TclComment objects, which do nothing other than generate
 PIR comments with the same text.
 
-=item 4
+=item *
 
-It would be nice if C<--pir> generated human readable output. As long as
-it's functionally equivalent, internally generated PIR need not be pretty.
+It would be nice if C<--pir> generated more human readable output. It's OK,
+I think, if the generated PIR has more whitespace all the time, even if
+a human isn't peeking.
+
+=item *
+
+It should be possible to implement some builtins in terms of other builtins.
+See http://wiki.tcl.tk/15051 for some musings on this. We already at least
+partial implementations of most of the items there. If we go this route, then
+we need to pre-compile the builtins-in-tcl into PIR at build time.
 
 =back
 
@@ -53,15 +41,12 @@ it's functionally equivalent, internally generated PIR need not be pretty.
 
 =over 4
 
-=item pbc_merge
-
-Take advantage of the new C<pbc_merge> to combine the various .pbc files
-into a singleton.
-
 =item Makefile deps
 
 Should be more explicit about the PMC dependencies in the makefile. *something*
 is causing things to get rebuilt unecessarily each time "make tclsh" is run.
+Very likely due to the build_dynclasses targets that don't specify explicit
+deps.
 
 =back
 
@@ -69,10 +54,15 @@ is causing things to get rebuilt unecessarily each time "make tclsh" is run.
 
 =over 4
 
-=item keyed access
+=item Use new argument handling from inside [proc]s
 
-tcl is not using Keys when getting from aggregates. It probably should,
-at least for language interoperability.
+Most builtins take a varying number of arguments, so it's hard to use this
+there, but for procs without {args} arguments, this error handling can be
+help eliminate a chunk of the wrapper script. Throw an exception *inside*
+the sub, catch it, and then throw the appropriate tcl exception about the
+wrong # of args. See lt's mail to the p6i titled:
+
+ pdd03 and Overflow/Underflow - r10269
 
 =item implement default globals, etc.
 
@@ -98,10 +88,11 @@ Perhaps via [namespace import]? Can fake it right now with [inline]
 
 =over 4
 
-=item [expr]
+=item returncodes.pir
 
-clean up the generated expr subs so that they use a unique id. (in add
-to being anon)
+The __clone macro should be moved to 'lib/macros.pir'.
+
+=item [expr]
 
 Add "is_const" global which checks to see if something is, in fact,
 constant. (which will allow us to then constant fold. Leo assures us
@@ -121,10 +112,6 @@ need to specify the correct errors to throw.
 =head2 Things we can't do yet (need parrot)
 
 =over 4
-
-=item [regexp], [regsub], -regexp
-
-Don't have a tcl-style RE PGE class avaialable yet.
 
 =item [pwd], [cd] [#???]
 

@@ -1,5 +1,5 @@
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: calling_conventions.pod 9449 2005-10-11 13:30:27Z leo $
+# $Id: calling_conventions.pod 9934 2005-11-13 00:29:46Z coke $
 
 =head1 NAME
 
@@ -34,10 +34,11 @@ subroutines.
 
 =head1 Parrot calling conventions - CPS
 
-=head2 Explicitely Calling PASM Subroutines
+=head2 Explicitly Calling PASM Subroutines
 
-  newsub $P0, .Sub, _sub_label
-  newsub $P1, .Continuation, ret_addr
+  .const .Sub $P0 = "_sub_label" 
+  $P1 = new .Continuation
+  set_addr $P1, ret_addr
   ...
   .local int x
   .local num y
@@ -100,7 +101,7 @@ Similarly, one can yield using the .yield directive
 
 =head2 Subpragma
 
-This is a comma separated list of zero or more items with the
+This is a list of zero or more items with the
 following meaning:
 
 =over 4
@@ -114,7 +115,8 @@ are marked as B<:main>, the B<last> marked subroutine is entered.
 
 Run this subroutine during the B<load_library> opcode.
 B<:load> is ignored, if another subroutine in that file is marked with
-B<:main>.
+B<:main>. If multiple subs have the B<:load> pragma, the subs are
+run in compilation that is source code order.
 
 =item * :anon
 
@@ -125,7 +127,7 @@ name to be reused.
 
 Engage in multiple dispatch with the listed types.
 
-=item * method
+=item * :method
 
 Declare subroutine being a method.
 
@@ -134,11 +136,6 @@ Declare subroutine being a method.
 Notes:
 
 =over 4
-
-=item * B<newsub>
-
-Currently needs the B<.Class> syntax, i.e. a B<dot> in front of the
-class name.
 
 =item * B<pcc_call>
 

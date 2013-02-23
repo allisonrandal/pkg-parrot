@@ -1,9 +1,9 @@
 # Copyright (C) 2005 The Perl Foundation.  All rights reserved.
-# $Id: mandel.pir 9439 2005-10-10 19:14:39Z bernhard $
+# $Id: mandel.pir 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
-examples/assembly/mandel.imc - Print the Mandelbrot set
+examples/pir/mandel.pir - Print the Mandelbrot set
 
 =head1 SYNOPSIS
 

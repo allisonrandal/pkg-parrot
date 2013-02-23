@@ -10,8 +10,6 @@
 typedef enum {
     IMC_PASM    	= 0x01,
     IMC_PCCSUB  	= 0x02,
-    IMC_FASTSUB 	= 0x04,
-    IMC_CLASS 		= 0x08,
     IMC_HAS_SELF	= 0x10
 } IMC_Unit_Type;
 
@@ -20,8 +18,7 @@ typedef struct _IMC_Unit {
     IMC_Unit_Type type;
     Instruction * instructions;
     Instruction * last_ins;
-    SymReg ** hash;
-    Symbol * sym;
+    SymHash hash;
     int bb_list_size;
     int n_basic_blocks;
     Basic_block **bb_list;
@@ -36,6 +33,7 @@ typedef struct _IMC_Unit {
     unsigned int* interference_graph;
     SymReg** reglist;
     int n_symbols;
+    int max_color;
     struct _IMC_Unit * prev;
     struct _IMC_Unit * next;
 
@@ -48,7 +46,10 @@ typedef struct _IMC_Unit {
     INTVAL HLL_id;
     int n_vars_used[4];	/* INSP in PIR */
     int n_regs_used[4];	/* INSP in PBC */
+    int first_avail[4];	/* INSP */
     int has_push_eh;
+    SymReg *outer;
+    PMC *sub_pmc;	/* this sub */
 } IMC_Unit;
 
 

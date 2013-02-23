@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: io.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: io.t 9915 2005-11-12 07:09:38Z particle $
 
 =head1 NAME
 
@@ -16,7 +16,7 @@ Tests the Parrot IO operations.
 
 =cut
 
-use Parrot::Test tests => 31;
+use Parrot::Test tests => 32;
 use Test::More;
 
 sub file_content_is {
@@ -603,3 +603,14 @@ sub_1: 012
 sub_2: 012
 sub_3: 345
 OUTPUT
+
+
+pir_output_like(<<'CODE', <<'OUT', 'read on null PMC throws exception', todo => 'not yet implemented');
+.sub main :main
+	null $P1
+	$S0 = read $P1, 1
+	end
+.end
+CODE
+/some crazy exception/
+OUT

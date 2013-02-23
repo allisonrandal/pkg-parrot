@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: ascii.c 9388 2005-10-07 11:25:43Z leo $
+$Id: ascii.c 10028 2005-11-16 18:21:29Z leo $
 
 =head1 NAME
 
@@ -80,38 +80,34 @@ ascii_get_graphemes_inplace(Interp *interpreter, STRING *source_string,
             offset, count, dest_string);
 }
 
-
 static STRING *
-from_charset(Interp *interpreter, STRING *src, STRING *dest)
+to_ascii(Interp *interpreter, STRING *src, STRING *dest)
 {
-    UINTVAL offs, c;
     String_iter iter;
+    UINTVAL c, len, offs;
+    unsigned char *p;
 
+    len = src->strlen;
     if (dest) {
-        Parrot_reallocate_string(interpreter, dest, src->strlen);
-        dest->bufused = src->strlen;
-        dest->strlen  = src->strlen;
+        Parrot_reallocate_string(interpreter, dest, len);
     }
+    else {
+        /* the string can't grow - replace inplace */
+        dest = src;
+    }
+    p = dest->strstart;
     ENCODING_ITER_INIT(interpreter, src, &iter);
-    for (offs = 0; offs < src->strlen; ++offs) {
+    for (offs = 0; offs < len; ++offs) {
         c = iter.get_and_advance(interpreter, &iter);
-        if (c >= 0x80) {
-            EXCEPTION(LOSSY_CONVERSION, "lossy conversion to ascii");
-        }
-        if (dest)
-            ENCODING_SET_BYTE(interpreter, dest, offs, c);
+        if (c >= 128)
+            real_exception(interpreter, NULL, LOSSY_CONVERSION,
+                    "can't convert unicode string to ascii");
+        *p++ = (unsigned char)c;
     }
-    if (dest)
-        return dest;
-    src->charset = Parrot_ascii_charset_ptr;
-    return src;
-}
-
-static STRING *
-from_unicode(Interp *interpreter, STRING *source_string, STRING *dest)
-{
-    internal_exception(UNIMPLEMENTED, "Can't do this yet");
-    return NULL;
+    dest->bufused = dest->strlen = len;
+    dest->charset = Parrot_ascii_charset_ptr;
+    dest->encoding = CHARSET_GET_PREFERRED_ENCODING(interpreter, dest);
+    return dest;
 }
 
 static STRING *
@@ -131,32 +127,31 @@ to_unicode(Interp *interpreter, STRING *src, STRING *dest)
 }
 
 static STRING *
-to_charset(Interp *interpreter, STRING *src,
-        CHARSET *new_charset, STRING *dest)
+to_charset(Interp *interpreter, STRING *src, STRING *dest)
 {
     charset_converter_t conversion_func;
 
     if ((conversion_func = Parrot_find_charset_converter(interpreter,
-                    src->charset, new_charset))) {
+                    src->charset, Parrot_ascii_charset_ptr))) {
          return conversion_func(interpreter, src, dest);
     }
     else {
-        STRING *res = to_unicode(interpreter, src, dest);
-        return new_charset->from_charset(interpreter, res, dest);
-
+        return to_ascii(interpreter, src, dest);
     }
 }
 
 /* A noop. can't compose ascii */
-static void
-compose(Interp *interpreter, STRING *source_string)
+static STRING*
+compose(Interp *interpreter, STRING *src)
 {
+    return string_copy(interpreter, src);
 }
 
 /* A noop. can't decompose ascii */
-static void
-decompose(Interp *interpreter, STRING *source_string)
+static STRING*
+decompose(Interp *interpreter, STRING *src)
 {
+    return string_copy(interpreter, src);
 }
 
 static void
@@ -453,9 +448,6 @@ Parrot_charset_ascii_init(Interp *interpreter)
         ascii_get_graphemes_inplace,
         set_graphemes,
         to_charset,
-        to_unicode,
-        from_charset,
-        from_unicode,
         compose,
         decompose,
         upcase,

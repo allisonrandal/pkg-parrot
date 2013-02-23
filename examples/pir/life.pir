@@ -1,5 +1,5 @@
 # Copyright (C) 2001-2005 The Perl Foundation.  All rights reserved.
-# $Id: life.pir 9549 2005-10-24 22:36:35Z bernhard $
+# $Id: life.pir 10184 2005-11-26 11:13:11Z bernhard $
 
 =head1 NAME
 
@@ -20,7 +20,7 @@ Convert this into proper PIR.
 
 =head1 SEE ALSO
 
-F<examples/assembly/ncurses_life.imc>.
+F<examples/library/ncurses_life.imc>.
 
 =cut
 

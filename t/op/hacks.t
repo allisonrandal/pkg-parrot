@@ -1,6 +1,15 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: hacks.t 9352 2005-10-05 14:16:45Z leo $
+#!perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: hacks.t 10228 2005-11-28 22:52:05Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test;
+use Parrot::Config;
+use Config;
+
 
 =head1 NAME
 
@@ -8,7 +17,7 @@ t/op/hacks.t - IO Ops
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/op/hacks.t
+	% prove t/op/hacks.t
 
 =head1 DESCRIPTION
 
@@ -16,10 +25,6 @@ Tests basic file IO operations.
 
 =cut
 
-use Parrot::Test tests => 2;
-use Test::More;
-use Parrot::Config;
-use Config;
 
 sub has_signal {
   my $sig = shift;
@@ -75,4 +80,6 @@ ok
 OUT
 }
 
-1; # HONK
+
+## remember to change the number of tests :-)
+BEGIN { plan tests => 2; }

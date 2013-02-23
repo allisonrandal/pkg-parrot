@@ -18,73 +18,6 @@ Define the attributes required for the class.
   addattribute $P1, "name"
 .end
 
-
-
-=head2 interpret
-
-Execute the command.
-
-
-.sub interpret :method
-  .local pmc retval
- 
-  .local string name
-  $P0 = getattribute self, "TclCommand\x00name"
-  retval = $P0."interpret"()
-
-  name = retval
-  
-  .local pmc args
-  args = new .TclList
-  .local int elems, i
-  elems = self
-  i     = 0
-  
-  .local pmc cmd
-  push_eh no_command
-    $S0 = "&" . name
-    cmd = find_global "Tcl", $S0
-  clear_eh
-  
-  # we can't delete commands, so we store deleted commands
-  # as null PMCs
-  if_null cmd, no_command
-
-execute:
-  .local pmc word
-loop:
-  if i == elems goto loop_done
-  
-  word   = self[i]
-  retval = word."interpret"()
-  
-  push args, retval
-  inc i
-  goto loop
-  
-loop_done:
-  .return cmd(args :flat)
-
-no_command:
-  $P1 = find_global "Tcl", "$tcl_interactive"
-  unless $P1 goto no_command_non_interactive
-
-  # XXX Should probably make sure this wasn't redefined on us.
-  cmd = find_global "Tcl", "&unknown"
-  
-  # Add the command into the unknown handler, and fix our bookkeeping
-  unshift args, name
-  goto execute
-
-no_command_non_interactive:
-  $S0 = "invalid command name \""
-  $S0 .= name
-  $S0 .= "\""
-  .throw($S0)
-.end
-
-=cut
-
 .sub compile :method
    .param int register_num
 
@@ -140,11 +73,16 @@ arg_loop_done:
 
    (inline_result_num,retval) = $P1(register_num,self)
    
-   register_num = inline_result_num + 1
-   # XXX Need check here for global epoch.
-   pir_code .= "inlined_command"
+   register_num = inline_result_num + 2
+   .local pmc epoch
+   epoch = find_global '_Tcl', 'epoch'
+   $S0 = epoch
+   pir_code .= ".local pmc epoch\nepoch=find_global '_Tcl', 'epoch'\n"
+   pir_code .= 'if epoch != '
+   pir_code .= $S0
+   pir_code .= ' goto dynamic_command'
    pir_code .= label_num
-   pir_code .= ":\n"
+   pir_code .= "\n"
    pir_code .= retval
  
    $S0 = inline_result_num
@@ -212,6 +150,29 @@ elem_loop_done:
    pir_code2 .= $S0
    pir_code2 .="\n" 
    pir_code2 .= "bad_command"
+   pir_code2 .= $S0
+   pir_code2 .= ":\n"
+   pir_code2 .= ".local pmc interactive\ninteractive=find_global 'Tcl', '$tcl_interactive'\nunless interactive goto err_command"
+   pir_code2 .= $S0
+   pir_code2 .= "\n"
+   pir_code2 .= ".local pmc unk\nunk=find_global 'Tcl', '&unknown'\n"
+   pir_code2 .= "unk($P"
+   $S1 = name_register
+   pir_code2 .= $S1
+   
+   ii = 0
+unk_elem_loop:
+   if ii == num_args goto unk_elem_loop_done   
+   $S1 = compiled_args[ii]
+   pir_code2 .= ",$P"
+   pir_code2 .= $S1
+   inc ii 
+   goto unk_elem_loop 
+unk_elem_loop_done:
+
+   pir_code2 .= ")\ngoto done_command"
+   pir_code2 .= label_num
+   pir_code2 .= "\nerr_command"
    pir_code2 .= $S0
    pir_code2 .= ":\n$S"
    pir_code2 .= $S0

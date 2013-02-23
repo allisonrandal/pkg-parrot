@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: parrotobject.pmc 9482 2005-10-14 12:29:49Z pmichaud $
+$Id: parrotobject.pmc 10213 2005-11-28 17:34:30Z leo $
 
 =head1 NAME
 
@@ -50,12 +50,6 @@ static PMC *
 find_meth(Interp* interpreter, PMC *pmc, STRING *meth) {
     PMC *class = pmc;
 
-    if (Interp_trace_TEST(interpreter, PARROT_TRACE_SUB_CALL_FLAG)) {
-        char *name = string_to_cstring(interpreter, meth);
-        PIO_eprintf(interpreter, "# Calling meth '%s'\n#", name);
-        string_cstring_free(name);
-        print_pbc_location(interpreter);
-    }
     if (PObj_is_object_TEST(pmc)) {
         class = GET_CLASS((Buffer *)PMC_data(pmc), pmc);
     }

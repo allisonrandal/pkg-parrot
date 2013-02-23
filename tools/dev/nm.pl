@@ -139,10 +139,10 @@ use vars qw($VERSION);
 
 require 5.005;
 
-$VERSION = sprintf "%d.%d", q$Revision: 9508 $ =~ /(\d+)/g; # jhi@iki.fi;
+$VERSION = sprintf "%d.%d", q$Revision$ =~ /(\d+)/g; # jhi@iki.fi;
 
 my $ME = basename($0);
-my $RCS_DATE = q$Date: 2005-10-18 19:06:00 +0200 (Die, 18 Okt 2005) $;
+my $RCS_DATE = q$Date: 2005-10-18 19:06:00 +0200 (Tue, 18 Oct 2005) $;
 
 my $nm_cmd = 'nm';
 my $nm_opt = '';

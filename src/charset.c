@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: charset.c 7851 2005-04-16 11:06:03Z leo $
+$Id: charset.c 9875 2005-11-10 09:54:28Z leo $
 
 =head1 NAME
 
@@ -17,6 +17,8 @@ These are parrot's generic charset handling functions
 
 #include "../encodings/fixed_8.h"
 #include "../encodings/utf8.h"
+#include "../encodings/utf16.h"
+#include "../encodings/ucs2.h"
 
 #include "../charset/ascii.h"
 #include "../charset/binary.h"
@@ -73,7 +75,7 @@ Parrot_charsets_encodings_deinit(Interp *interpreter)
     mem_sys_free(all_charsets->set);
     mem_sys_free(all_charsets);
     all_charsets = NULL;
-    /* TODO free encodings */
+    parrot_deinit_encodings(interpreter);
 }
 
 CHARSET *
@@ -237,6 +239,8 @@ Parrot_register_charset(Interp *interpreter, const char *charsetname,
     return 0;
 }
 
+void parrot_init_encodings_2(Interp *interpreter);
+
 void
 Parrot_charsets_encodings_init(Interp *interpreter)
 {
@@ -246,11 +250,18 @@ Parrot_charsets_encodings_init(Interp *interpreter)
      */
     Parrot_encoding_fixed_8_init(interpreter);
     Parrot_encoding_utf8_init(interpreter);
+    Parrot_encoding_ucs2_init(interpreter);
+    Parrot_encoding_utf16_init(interpreter);
 
     Parrot_charset_ascii_init(interpreter);
     Parrot_charset_iso_8859_1_init(interpreter);
     Parrot_charset_binary_init(interpreter);
     Parrot_charset_unicode_init(interpreter);
+
+    /*
+     * now encoding strings don't have a charset yet - set default
+     */
+    parrot_init_encodings_2(interpreter);
     /*
      * now install charset converters
      */

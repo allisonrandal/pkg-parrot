@@ -43,7 +43,7 @@
     the_array = find_global "Tcl", sigil_array_name
     goto done_find
 find_lexical:
-    the_array = find_lex call_level, sigil_array_name
+    the_array = find_lex sigil_array_name
 done_find:
   clear_eh
 resume_var:
@@ -194,7 +194,6 @@ odd_args:
   argc = argv
   if argc > 1 goto bad_args
 
-
   .local string match_str
   # ?pattern? defaults to matching everything.
   match_str = "*"
@@ -215,13 +214,12 @@ no_args:
 
   globber = find_global "PGE", "glob"
   .local pmc rule
-  (rule, $P0, $P1) = globber(match_str)
+  rule = globber(match_str)
 
   iter = new .Iterator, the_array
   iter = .ITERATE_FROM_START
 
   retval = new .String
-
 
   .local int count
   count = 0
@@ -373,9 +371,9 @@ not_array:
 
   .local pmc globber, retval
 
-  globber = find_global "PGE", "glob"
+  globber = compreg "PGE::Glob"
   .local pmc rule
-  (rule, $P0, $P1) = globber(pattern)
+  rule = globber(pattern)
 
   iter = new .Iterator, the_array
   iter = .ITERATE_FROM_START
@@ -431,7 +429,42 @@ found_match:
 .end
 
 .sub "-regexp"
-.end
+  .param pmc the_array
+  .param string pattern
 
+  .local pmc iter
+  .local string name
+
+  .local pmc tclARE, retval
+
+  tclARE = compreg "PGE::P5Regexp"
+  .local pmc rule
+  rule = tclARE(pattern)
+
+  iter = new .Iterator, the_array
+  iter = .ITERATE_FROM_START
+
+  retval = new .String
+
+  .local int count
+  count = 0
+
+check_loop:
+  unless iter goto check_end
+  name = shift iter
+  $P0 = rule(name)
+  unless $P0 goto check_loop
+
+  unless count goto skip_space
+  retval .= " "
+skip_space:
+  inc count
+  retval .= name
+
+  branch check_loop
+check_end:
+
+  .return (retval)
+.end
 
 .namespace [ "_Tcl\0builtins\0array" ]

@@ -15,6 +15,11 @@ A parser for shell-stype glob notation.
 .const string STOPCHARS = ",*?{}[]"	# XXX: should be part of context
 .const int GLOB_INF = 2147483647	# XXX: arbitrary limit
 
+.sub "__onload" :load
+    $P0 = find_global "PGE", "glob"
+    compreg "PGE::Glob", $P0
+.end
+
 =item C<new(STR class [, PMC exp1 [, PMC exp2]])>
 
 Creates and returns  a new C<Exp> object of C<class>, initializing
@@ -59,7 +64,7 @@ output an error message
     .param pmc lex
     .param string message
 
-    $P0 = new Exception
+    $P0 = new .Exception
     $S0 = "PGE Parse error: "
     $S0 .= message
     $S0 .= " at offset "
@@ -281,7 +286,7 @@ Parse alternations of the form {a,b,c} where a,b, and c are the alternatives.
     .local pmc glob
     .local pmc aexp
 
-    lex = new Hash
+    lex = new .Hash
     lex["pos"] = 0
     $I0 = length pattern
     lex["plen"] = $I0

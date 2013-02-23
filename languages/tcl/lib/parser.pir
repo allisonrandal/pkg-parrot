@@ -1,5 +1,4 @@
-.namespace [ "_Tcl" ]
-
+.namespace [ "_Tcl" ] 
 =head1 NAME
 
 Tcl Parser
@@ -28,7 +27,7 @@ Return register_num is the register number that contains the result of this code
 .sub compile
   .param int register_num
   .param string tcl_code
-  
+
   .local int len
   len = length tcl_code
  
@@ -90,13 +89,13 @@ done_comment:
   
   push commands, command
   goto next_command
- 
+
 done:
   .return "compile_dispatch"(commands,register_num)
 .end
 
-=item C<(pmc invokable) = pir_compiler(string PIR, int register_num)>
-=item C<(string code)   = pir_compiler(string PIR, int register_num, 1)>
+=item C<(pmc invokable) = pir_compiler(int register_num, string PIR)>
+=item C<(string code)   = pir_compiler(int register_num, string PIR, 1)>
 
 A thin wrapper for the <compreg>'d PIR compiler. 
 Given inline PIR code, wrap it in anonymous subroutine and return the
@@ -130,9 +129,13 @@ done_init:
   # The library bits that they'll need.
 
   stub_code = <<"END_PIR"
+.sub _dynlexload :immediate
+$P1=loadlib 'dynlexpad'
+.end
 .HLL 'tcl', 'tcl_group'
+.HLL_map .LexPad, .DynLexPad
 .pragma n_operators 1
-.sub compiled_tcl_sub%i :anon
+.sub compiled_tcl_sub%i :anon :main
 load_bytecode 'languages/tcl/lib/tcllib.pbc'
 %s.return ($P%i)
 .end
@@ -167,7 +170,7 @@ set_args:
 compile_it:
   .local pmc pir_compiler
   pir_compiler = compreg "PIR"
-  
+
   .return pir_compiler(pir_code)
 .end
 
@@ -718,12 +721,18 @@ Return register_num is the register number that contains the result of this code
   rquote = ""
   if thing_type == "TclString" goto stringish
   if thing_type == "String" goto    stringish
+  $S0 = thing
   goto set_args
 stringish:
-  $P1 = find_global "Data::Escape", "String"
-  thing = $P1(thing,"\"")
+  $S0 = thing
 
-  lquote = "unicode:\""
+  .local string charset_name
+  $I0 = charset $S0
+  charset_name = charsetname $I0
+
+  $S0 = escape $S0
+
+  lquote = charset_name . ":\""
   rquote = "\"" 
 set_args:
 
@@ -734,10 +743,19 @@ set_args:
   printf_args[1] = thing_type
   printf_args[2] = register_num
   printf_args[3] = lquote
-  printf_args[4] = thing
+  printf_args[4] = $S0
   printf_args[5] = rquote
  
   pir_code = sprintf "$P%i = new .%s\n$P%i=%s%s%s\n", printf_args
+
+  # PIR's compiler can't deal with the utf16 code is generated as a result
+  # of the string manipulation that brings us to this point. So, we need
+  # to downcast it to ASCII. Which should be lossless, given the code that
+  # we're generating. It should be possible to move this trans_charset
+  # to where the upcasting is occuring instead of doing it once here. (XXX)
+
+  $I0 = find_charset 'ascii'
+  pir_code = trans_charset $I0
 
   .return(register_num,pir_code)
 

@@ -1,6 +1,14 @@
-#! perl -w
+#! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id$
+# $Id: pasm.t 10218 2005-11-28 20:04:11Z leo $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 7;
+use Parrot::Config;
+
 
 =head1 NAME
 
@@ -8,9 +16,7 @@ t/examples/pasm.t - Test examples in F<examples/pasm>
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/examples/pasm.t
-
-        % perl t/harness t/examples/pasm.t
+	% prove t/examples/pasm.t
 
 =head1 DESCRIPTION
 
@@ -18,7 +24,7 @@ Test the examples in F<examples/pasm>.
 
 =head1 TODO
 
-Check on remaining examples in 'examples/assembly'.
+Put expected output into the example files.
 
 =head1 SEE ALSO
 
@@ -26,12 +32,10 @@ F<t/examples/pir.t>
 
 =cut
 
-use strict;
-use Parrot::Test tests => 6;
-use Test::More;
 
 # Set up expected output for examples
-my %expected = (
+my %expected
+  = (
 
     'fact.pasm'        =>  << 'END_EXPECTED',
 fact of 0 is: 1
@@ -47,33 +51,27 @@ END_EXPECTED
 Hello World
 END_EXPECTED
 
-    'lexical.pasm'      =>  << 'END_EXPECTED',
-Storing 'a' in top lexical pad
-The lexical 'a' has in the current scope the value 1.
-
-Storing 'c' in bottom lexical pad
-The lexical 'a' has in the current scope the value 1.
-The lexical 'b' has in the current scope the value 3.
-
-Overwriting 'c' in bottom lexical pad
-The lexical 'a' has in the current scope the value 2.
-The lexical 'b' has in the current scope the value 3.
-
-Adding another stack level at bottom
-The lexical 'a' has in the current scope the value 2.
-The lexical 'b' has in the current scope the value 3.
-
-Override lexicals
-The lexical 'a' has in the current scope the value 5.
-The lexical 'b' has in the current scope the value 4.
-The lexical 'a' has in scope 1 the value 5.
-The lexical 'b' has in scope 1 the value 4.
-The lexical 'a' has in scope 0 the value 2.
-The lexical 'b' has in scope 0 the value 3.
-
-Getting rid of bottom stack
-The lexical 'a' has in the current scope the value 2.
-The lexical 'b' has in the current scope the value 3.
+    'queens.pasm'        =>  << 'END_EXPECTED',
+Making new board with 8 ranks and 8 files...
+Board length is 64.
+  +---+---+---+---+---+---+---+---+
+8 |   | * | Q | * |   | * |   | * |
+  +---+---+---+---+---+---+---+---+
+7 | * |   | * |   | * | Q | * |   |
+  +---+---+---+---+---+---+---+---+
+6 |   | * |   | Q |   | * |   | * |
+  +---+---+---+---+---+---+---+---+
+5 | * | Q | * |   | * |   | * |   |
+  +---+---+---+---+---+---+---+---+
+4 |   | * |   | * |   | * |   | Q |
+  +---+---+---+---+---+---+---+---+
+3 | * |   | * |   | Q |   | * |   |
+  +---+---+---+---+---+---+---+---+
+2 |   | * |   | * |   | * | Q | * |
+  +---+---+---+---+---+---+---+---+
+1 | Q |   | * |   | * |   | * |   |
+  +---+---+---+---+---+---+---+---+
+    A   B   C   D   E   F   G   H  
 END_EXPECTED
 
     'stack.pasm'        =>  << 'END_EXPECTED',
@@ -101,25 +99,14 @@ Close inner
 Close top
 END_EXPECTED
 
-                          );
-
-# Do the testing
-my %test_func = ( pasm => \&pasm_output_is,
-                  pir  => \&pir_output_is,
-                  imc  => \&pir_output_is );
+    );
 
 while ( my ( $example, $expected ) = each %expected ) {
-    my $code_fn   = "examples/pasm/$example";
-    my $code = Parrot::Test::slurp_file($code_fn);
-
-    my ( $extension ) = $example =~ m{ [.]                  # introducing extension
-                                       ( pasm | pir | imc ) # match and capture the extension
-                                       \z                   # at end of string
-                                     }ixms or Usage();
-    if ( defined $extension ) { 
-      $test_func{$extension}->($code, $expected, $code_fn);
-    }
-    else {
-      ok( defined $extension, "no extension recognized for $code_fn" );
-    }
+    example_output_is( "examples/pasm/$example", $expected );
 }
+
+TODO:
+{
+  local $TODO = 'nanoforth2.pasm not testable yet';
+  fail( 'nanoforth2.pasm' );
+};

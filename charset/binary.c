@@ -1,6 +1,6 @@
 /*
 Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-$Id: binary.c 9388 2005-10-07 11:25:43Z leo $
+$Id: binary.c 10028 2005-11-16 18:21:29Z leo $
 
 =head1 NAME
 
@@ -34,43 +34,31 @@ set_graphemes(Interp *interpreter, STRING *source_string,
 }
 
 static STRING*
-to_charset(Interp *interpreter, STRING *src, CHARSET *new_charset, STRING *dest)
+to_charset(Interp *interpreter, STRING *src, STRING *dest)
 {
+    charset_converter_t conversion_func;
+    if ((conversion_func = Parrot_find_charset_converter(interpreter,
+                    src->charset, Parrot_binary_charset_ptr))) {
+         return conversion_func(interpreter, src, dest);
+    }
     internal_exception(UNIMPLEMENTED, "to_charset for binary not implemented");
     return NULL;
 }
 
+/* A err. can't compose binary */
 static STRING*
-to_unicode(Interp *interpreter, STRING *source_string, STRING *dest)
-{
-    internal_exception(UNIMPLEMENTED, "to_unicode for binary not implemented");
-    return NULL;
-}
-
-static STRING*
-from_charset(Interp *interpreter, STRING *source_string, STRING *dest)
-{
-    internal_exception(UNIMPLEMENTED, "Can't do this yet");
-    return NULL;
-}
-
-static STRING *
-from_unicode(Interp *interpreter, STRING *source_string, STRING *dest)
-{
-    internal_exception(UNIMPLEMENTED, "Can't do this yet");
-    return NULL;
-}
-
-/* A noop. can't compose binary */
-static void
 compose(Interp *interpreter, STRING *source_string)
 {
+    EXCEPTION(INVALID_CHARTYPE, "Can't compose binary data");
+    return NULL;
 }
 
-/* A noop. can't decompose binary */
-static void
+/* A err. can't decompose binary */
+static STRING*
 decompose(Interp *interpreter, STRING *source_string)
 {
+    EXCEPTION(INVALID_CHARTYPE, "Can't decompose binary data");
+    return NULL;
 }
 
 static void
@@ -174,9 +162,6 @@ Parrot_charset_binary_init(Interp *interpreter)
         ascii_get_graphemes_inplace,
         set_graphemes,
         to_charset,
-        to_unicode,
-        from_charset,
-        from_unicode,
         compose,
         decompose,
         upcase,

@@ -1,4 +1,4 @@
-/* $Id: imc.h 9677 2005-10-31 12:56:28Z leo $ */
+/* $Id: imc.h 9916 2005-11-12 12:33:13Z leo $ */
 
 #if !defined(PARROT_IMCC_IMC_H_GUARD)
 #define PARROT_IMCC_IMC_H_GUARD
@@ -46,11 +46,8 @@
 
 #include "symreg.h"
 #include "instructions.h"
-#include "symbol.h"
-#include "class.h"
 #include "sets.h"
 #include "cfg.h"
-#include "stacks.h"
 #include "unit.h"
 #include "debug.h"
 
@@ -95,36 +92,15 @@ int imcc_fprintf(Interp *, FILE *fd, const char *fmt, ...);
 /* Call convention independant API */
 
 /*
- * sub.c
- */
-void expand_sub(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void expand_sub_ret(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void expand_sub_call(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-
-/* Call convention specific implementations (currently 2, FASTSUB and PCCSUB)*/
-
-/*
  * pcc.c
  */
 void expand_pcc_sub(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
 void expand_pcc_sub_ret(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
 void expand_pcc_sub_call(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
 
-/*
- * fastcall.c
- */
-void expand_fast_sub(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void expand_fast_sub_ret(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void expand_fast_sub_call(Parrot_Interp interpreter, IMC_Unit *, Instruction *ins);
-void fast_sub_optimize(Parrot_Interp interpreter, IMC_Unit *);
-
-/* Compiler pragma options that may affect the whole module being compiled */
+/* pragmas avialable: */
 typedef enum {
-  PR_FASTCALL = 0x01,       /* Use low level branch op, pass/return on stack
-                          * as opposed to pcc convention and invoke */
-                         /* more to come */
-  PR_PROTOTYPED = 0x02,     /* Currently undefined which will be the default */
-  PR_N_OPERATORS = 0x04
+  PR_N_OPERATORS = 0x01
 } _imc_pragmas;
 
 /* globals XXX */
@@ -166,6 +142,7 @@ struct parser_state_t {
     struct parser_state_t *next;
     Interp *interpreter;
     const char *file;
+    FILE *handle;
     int line;
     int pasm_file;      /* pasm_file mode of this frame */
     int pragmas;        /* n_operators ... */
@@ -197,7 +174,7 @@ typedef struct _imc_info_t {
     int dont_optimize;
     int has_compile;
     int allocated;
-    SymReg ** ghash;
+    SymHash ghash;
     SymReg  *  cur_namespace;
     struct nodeType_t *top_node;
 

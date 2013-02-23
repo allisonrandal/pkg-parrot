@@ -1,5 +1,5 @@
 // Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-// $Id$
+// $Id: bc_python.g 10341 2005-12-04 11:12:55Z bernhard $
 
 
 // based on antrltut by javadude
@@ -16,15 +16,15 @@
 // gets inserted in the __init__ method of the generated Python class
 //-----------------------------------------------------------------------------
 
+header "BcParser.__init__" 
+{
+  self.do_print = 1;    // indicate whether an expression should be printed
+}
+
 header "BcTreeWalker.__init__" 
 {
   self.reg_num   = 0;  // counter for unlimited number of PMC registers
   self.label_num = 0;  // counter for generation jump labels
-}
-
-header "BcParser.__init__" 
-{
-  self.do_print = 1;    // indicate whether an expression should be printed
 }
 
 
@@ -320,7 +320,7 @@ paren_expression
   ;
 
 //----------------------------------------------------------------------------
-// Transform AST, so that it contains code
+// Transform AST, so that it contains code or sets up PAST
 //----------------------------------------------------------------------------
 class BcTreeWalker extends TreeParser;
 options
@@ -330,11 +330,15 @@ options
 
 tokens 
 {
+  // TODO: These should go away
   PIR_FOOTER;     // At end of PIR script
   PIR_HEADER;     // At start of PIR script
   PIR_NOOP;       // noop
   PIR_COMMENT;    // A comment line
   PIR_NEWLINE;    // A comment line
+
+  // PAST as an ANTLR tree
+  PAST_Stmts;     // top level
 }
 
 plus! returns [reg_name]
@@ -506,9 +510,11 @@ gen_pir!
     }
   ;
 
-gen_p6!
+// generate an AST that is equivalent to a PAST data structure
+// TODO: undummy this 
+gen_antlr_past!
   : B:expr_list
     {
-      #gen_p6 = #([PIR_HEADER, "pir header\n#"], #B, [PIR_FOOTER, "pir footer\n#"]); 
+      #gen_antlr_past = #([PAST_Stmts, "dummy past stmts\n#"]); 
     }
   ;

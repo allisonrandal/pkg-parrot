@@ -3,7 +3,7 @@
  *
  * HPPA
  *
- * $Id: jit_emit.h 7930 2005-04-27 07:24:32Z leo $
+ * $Id: jit_emit.h 10009 2005-11-16 01:52:17Z rafl $
  */
 
 /*
@@ -686,6 +686,7 @@ Parrot_jit_emit_mov_rm_n(Interp * interpreter, int reg,char *mem)
 
 #  define REQUIRES_CONSTANT_POOL 0
 #  define INT_REGISTERS_TO_MAP 14
+#  define CACHELINESIZE 32
 
 #  ifndef JIT_IMCC
 
@@ -695,10 +696,15 @@ char intval_map[INT_REGISTERS_TO_MAP] =
 static void
 hppa_sync_cache (void *_start, void *_end)
 {
-    long size = (((long)_end) - ((long)_start));
-    __asm__ __volatile__ ("fdc %0, %1":: "r" ((long)_start),
-        "r" (size));
-    _asm__ __volatile__ ("sync");
+    char *start = (char*)(((int)_start) &~(CACHELINESIZE));
+    char *end = (char *)((((int)_end)+CACHELINESIZE) &~(CACHELINESIZE));
+    char *_sync;
+
+    for (_sync = start; _sync < end; _sync += CACHELINESIZE) {
+        __asm__ __volatile__ ("fdc %r0(%0)":: "r" ((long)_sync));
+    }
+
+    __asm__ __volatile__ ("sync");
 }
 
 #  endif

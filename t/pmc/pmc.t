@@ -1,7 +1,7 @@
 #! perl -w
 
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: pmc.t 9451 2005-10-11 13:40:14Z leo $
+# $Id: pmc.t 9919 2005-11-12 16:00:52Z leo $
 
 =head1 NAME
 
@@ -117,6 +117,8 @@ while (my ($type, $id) = each %pmc_types) {
     next if $type eq "ParrotObject";
     next if $type eq "deleg_pmc";
     next if $type eq "BigInt";
+    next if $type eq "LexInfo";
+    next if $type eq "LexPad";
     my $set_ro = ($type =~ /^Const\w+/) ? <<EOPASM : '';
     new P10, .PerlInt
     inc P10

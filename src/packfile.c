@@ -2,7 +2,7 @@
 Copyright (C) 2001-2002 Gregor N. Purdy. All rights reserved.
 This program is free software. It is subject to the same license as
 Parrot itself.
-$Id: packfile.c 9599 2005-10-27 19:43:43Z leo $
+$Id: packfile.c 10200 2005-11-27 18:08:15Z leo $
 
 =head1 NAME
 
@@ -188,6 +188,14 @@ make_code_pointers(struct PackFile_Segment *seg)
                 pf->cur_cs->const_table = (struct PackFile_ConstTable*)seg;
                 pf->cur_cs->const_table->code = pf->cur_cs;
             }
+        case PF_UNKNOWN_SEG:
+            if (memcmp(seg->name, "PIC_idx", 7) == 0)
+                pf->cur_cs->pic_index = seg;
+            break;
+        case PF_DEBUG_SEG:
+            pf->cur_cs->debugs = (struct PackFile_Debug*)seg;
+            pf->cur_cs->debugs->code = pf->cur_cs;
+            break;
         default:
             break;
     }
@@ -253,9 +261,11 @@ run_sub(Parrot_Interp interpreter, PMC* sub_pmc)
      * PackFile which isn't worth the effort - probably
      */
     if (interpreter->run_core != PARROT_CGOTO_CORE  &&
-        interpreter->run_core != PARROT_SLOW_CORE  &&
-        interpreter->run_core != PARROT_FAST_CORE)
+            interpreter->run_core != PARROT_SLOW_CORE  &&
+            interpreter->run_core != PARROT_FAST_CORE)
         interpreter->run_core = PARROT_FAST_CORE;
+    CONTEXT(interpreter->ctx)->constants =
+        interpreter->code->const_table->constants;
     retval = Parrot_runops_fromc_args(interpreter, sub_pmc, "P");
     interpreter->run_core = old;
     return retval;
@@ -442,7 +452,7 @@ in the sub structure, so that the eval PMC is kept alive be living subs.
 */
 
 void
-fixup_subs(Interp *interpreter, struct PackFile_ByteCode *self, 
+fixup_subs(Interp *interpreter, struct PackFile_ByteCode *self,
         int action, PMC *eval_pmc)
 {
     opcode_t i, ci;
@@ -2310,11 +2320,17 @@ Parrot_debug_add_mapping(Interp *interpreter,
         case PF_DEBUGMAPPINGTYPE_FILENAME:
             /* Need to put filename in constants table. */
             ct->const_count = ct->const_count + 1;
-            ct->constants = mem_sys_realloc(ct->constants,
-                ct->const_count * sizeof(Parrot_Pointer));
+            if (ct->constants)
+                ct->constants = mem_sys_realloc(ct->constants,
+                    ct->const_count * sizeof(Parrot_Pointer));
+            else
+                ct->constants = mem_sys_allocate(
+                    ct->const_count * sizeof(Parrot_Pointer));
             fnconst = PackFile_Constant_new(interpreter);
             fnconst->type = PFC_STRING;
-            fnconst->u.string = const_string(interpreter, filename);
+            fnconst->u.string = string_make_direct(interpreter, filename,
+                strlen(filename), PARROT_DEFAULT_ENCODING,
+                PARROT_DEFAULT_CHARSET, PObj_constant_FLAG);
             ct->constants[ct->const_count - 1] = fnconst;
             mapping->u.filename = ct->const_count - 1;
             break;
@@ -2327,7 +2343,7 @@ Parrot_debug_add_mapping(Interp *interpreter,
 }
 
 /*
-=item C<char *
+=item C<STRING*
 Parrot_debug_pc_to_filename(Interp *interpreter,
         struct PackFile_Debug *debug, opcode_t pc)>
 
@@ -2338,7 +2354,7 @@ that position.
 
 */
 
-char *
+STRING *
 Parrot_debug_pc_to_filename(Interp *interpreter,
         struct PackFile_Debug *debug, opcode_t pc)
 {
@@ -2356,18 +2372,20 @@ Parrot_debug_pc_to_filename(Interp *interpreter,
             switch (debug->mappings[i]->mapping_type)
             {
                 case PF_DEBUGMAPPINGTYPE_NONE:
-                    return (char*) "(unknown file)";
+                    return string_from_const_cstring(interpreter,
+                        "(unknown file)", 0);
                 case PF_DEBUGMAPPINGTYPE_FILENAME:
-                    return string_to_cstring(interpreter, PF_CONST(debug->code,
-                           debug->mappings[i]->u.filename)->u.string);
+                    return PF_CONST(debug->code,
+                        debug->mappings[i]->u.filename)->u.string;
                 case PF_DEBUGMAPPINGTYPE_SOURCESEG:
-                    return (char*) "(unknown file)";
+                    return string_from_const_cstring(interpreter,
+                        "(unknown file)", 0);
             }
         }
     }
 
     /* Otherwise, no mappings = no filename. */
-    return "(unknown file)";
+    return string_from_const_cstring(interpreter, "(unknown file)", 0);
 }
 
 /*
@@ -2431,6 +2449,7 @@ Parrot_switch_to_cs(Interp *interpreter,
         PIO_eprintf(interpreter, "*** switching to %s\n",
                 new_cs->base.name);
     interpreter->code = new_cs;
+    CONTEXT(interpreter->ctx)->constants = new_cs->const_table->constants;
     new_cs->prev = cur_cs;
     if (really)
         prepare_for_run(interpreter);
@@ -3340,7 +3359,7 @@ PackFile_append_pbc(Interp *interpreter, const char *filename)
 /*
 
 =item C<void
-Parrot_load_bytecode(Interp *interpreter, STRING *filename)>
+Parrot_load_bytecode(Interp *interpreter, const char *filename)>
 
 Load and append a bytecode, IMC or PASM file into interpreter.
 

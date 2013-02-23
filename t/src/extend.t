@@ -1,7 +1,14 @@
-#! perl -w
-# Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: extend.t 9771 2005-11-04 12:36:18Z leo $
-# Tests the extension API
+#! perl
+# Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
+# $Id: extend.t 10240 2005-11-29 12:12:58Z leo $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 13;
+use Parrot::Config;
+
 
 =head1 NAME
 
@@ -9,7 +16,7 @@ t/src/extend.t - Parrot Extension API
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/src/extend.t
+	% prove t/src/extend.t
 
 =head1 DESCRIPTION
 
@@ -17,8 +24,6 @@ Tests the extension API.
 
 =cut
 
-use Parrot::Test tests => 13;
-use Parrot::Config;
 
 c_output_is(<<'CODE', <<'OUTPUT', "set/get_intreg");
 
@@ -471,7 +476,6 @@ print S <<'EOF';
   .pcc_sub _sub1:
   get_params "()"
   printerr "in sub1\n"
-  new_pad 0
   find_lex P2, "no_such_var"
   printerr "never\n"
   returncc

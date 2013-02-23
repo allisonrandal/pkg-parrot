@@ -20,7 +20,7 @@
 #include "pbc.h"
 #include "parser.h"
 
-#define IMCC_VERSION "0.3.1"
+#define IMCC_VERSION "0.4.0"
 
 static int load_pbc, run_pbc, write_pbc, pre_process, pasm_file;
 static char optimizer_opt[20];
@@ -57,6 +57,7 @@ help_debug(void)
     "    0010    thread debugging\n"
     "    0020    eval/compile\n"
     "    0040    fill I, N registers with garbage\n"
+    "    0080    show, when a context is destroyed\n"
     "\n"
     "--trace -t [Flags] ...\n"
     "    0001    opcodes\n"
@@ -388,8 +389,6 @@ do_pre_process(Parrot_Interp interp)
             case ESUB:          printf(".end"); break;
             case RESULT:        printf(".result "); break;
             case RETURN:        printf(".return "); break;
-            case CLASS:         printf(".class "); break;
-            case ENDCLASS:      printf(".endclass"); break;
             case NAMESPACE:     printf(".namespace "); break;
             case ENDNAMESPACE:  printf(".endnamespace"); break;
             case CONST:         printf(".const "); break;

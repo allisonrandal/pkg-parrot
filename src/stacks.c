@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: stacks.c 9678 2005-10-31 16:19:28Z leo $
+$Id: stacks.c 9836 2005-11-08 09:48:34Z leo $
 
 =head1 NAME
 
@@ -343,13 +343,6 @@ stack_pop(Interp *interpreter, Stack_Chunk_t **stack_p,
         break;
     }
 
-    /*
-     * Invalidate stack entry. It seems that due to reusage (after GC)
-     * there can be stale entries on the stack. At least
-     * t/library/pge_4 failes without this hack
-     * TODO investigate further what's goin' on.
-     */
-    entry->entry_type = NO_STACK_ENTRY_TYPE;
     return where;
 }
 

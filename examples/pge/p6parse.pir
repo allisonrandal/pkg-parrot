@@ -3,7 +3,6 @@
 .sub "__onload"
     .local pmc optable
     .local pmc term
-    .local pmc p6rule
     .local string op
 
     $I0 = find_type "PGE::OPTable"
@@ -20,7 +19,7 @@ rule term { <sigil><name> | <name> | <integer> }
 
 P6_GRAMMAR
 
-    $P0 = find_global "PGE", "compile_rules"
+    $P0 = compreg "PGE::P6Grammar"
     $P0($S0)
 
     optable.addtok("infix:+")

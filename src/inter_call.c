@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: inter_call.c 9645 2005-10-30 13:46:40Z leo $
+$Id: inter_call.c 10288 2005-12-01 16:02:47Z leo $
 
 =head1 NAME
 
@@ -25,6 +25,17 @@ subroutines.
 #include "parrot/oplib/ops.h"
 #include "inter_call.str"
 
+#define PREMATURE_OPT
+
+#ifdef PREMATURE_OPT
+
+#undef VTABLE_elements
+#define VTABLE_elements(i, ar) PMC_int_val(ar)
+#undef VTABLE_get_integer_keyed_int
+#define VTABLE_get_integer_keyed_int(i, ar, idx) ((INTVAL*)PMC_data(ar))[idx]
+
+#endif
+
 
 static int next_arg(Interp *, struct call_state_1 *st);
 
@@ -47,11 +58,9 @@ int
 Parrot_init_arg_nci(Interp *interpreter, struct call_state *st,
         const char *sig)
 {
-    Parrot_init_arg_op(interpreter, interpreter->code,
-            CONTEXT(interpreter->ctx),
+    Parrot_init_arg_op(interpreter, CONTEXT(interpreter->ctx),
             interpreter->current_args, &st->src);
-    Parrot_init_arg_sig(interpreter, interpreter->code,
-            CONTEXT(interpreter->ctx),
+    Parrot_init_arg_sig(interpreter, CONTEXT(interpreter->ctx),
             sig, NULL, &st->dest);
     return 1;
 }
@@ -62,26 +71,21 @@ Parrot_init_ret_nci(Interp *interpreter, struct call_state *st,
 {
     PMC *current_cont;
     struct Parrot_Context *ctx;
-    struct PackFile_ByteCode *seg;
     /*
      * if this NCI call was a taicall, return results to caller's get_results
      * this also means that we pass the caller's register base pointer
-     * and code segment
      */
     current_cont = CONTEXT(interpreter->ctx)->current_cont;
     if ((PObj_get_FLAGS(current_cont) & SUB_FLAG_TAILCALL)) {
         ctx = PMC_cont(current_cont)->to_ctx;
-        seg = PMC_cont(current_cont)->seg;
     }
     else {
         ctx = CONTEXT(interpreter->ctx);
-        seg = interpreter->code;
     }
     /* TODO simplify all */
-    Parrot_init_arg_sig(interpreter, interpreter->code,
-            CONTEXT(interpreter->ctx),
+    Parrot_init_arg_sig(interpreter, CONTEXT(interpreter->ctx),
             sig, NULL, &st->src);
-    Parrot_init_arg_op(interpreter, seg, ctx,
+    Parrot_init_arg_op(interpreter, ctx,
             ctx->current_results, &st->dest);
     next_arg(interpreter, &st->src);
     next_arg(interpreter, &st->dest);
@@ -90,20 +94,17 @@ Parrot_init_ret_nci(Interp *interpreter, struct call_state *st,
 
 /*
 
-=item C<int Parrot_init_arg_sig(Interp *, struct PackFile_ByteCode *seg,
-        parrot_context_t *ctx,
+=item C<int Parrot_init_arg_sig(Interp *, parrot_context_t *ctx,
         const char *sig, void *ap, struct call_state_1 *st)>
 
 Initialize argument transfer with given code segment (holding the
 const_table), registers, function signature, and arguments.
 
-=item C<int Parrot_init_arg_op(Interp *, struct PackFile_ByteCode *seg,
-        parrot_context_t *ctx,
+=item C<int Parrot_init_arg_op(Interp *, parrot_context_t *ctx,
         opcode_t *pc, struct call_state_1 *st)>
 
-Initialize argument transfer with given code segment (holding the
-const_table), registers, and opcode location of a get_ or set_ argument
-opcode.
+Initialize argument transfer with given context registers, and opcode
+location of a get_ or set_ argument opcode.
 
 Both functions can be used for either source or destination, by passing
 either C<&st.src> or C<&st.dest> of a C<call_state> structure.
@@ -115,8 +116,7 @@ These functions return 0, if no arguments are present, or 1 on success.
 */
 
 int
-Parrot_init_arg_op(Interp *interpreter, struct PackFile_ByteCode *seg,
-        parrot_context_t *ctx,
+Parrot_init_arg_op(Interp *interpreter, parrot_context_t *ctx,
         opcode_t *pc, struct call_state_1 *st)
 {
     PMC *sig_pmc;
@@ -126,9 +126,8 @@ Parrot_init_arg_op(Interp *interpreter, struct PackFile_ByteCode *seg,
     st->mode = CALL_STATE_OP | CALL_STATE_NEXT_ARG;
     st->ctx = ctx;
     if (pc) {
-        st->constants = seg->const_table->constants;
         ++pc;
-        sig_pmc = st->constants[*pc]->u.key;
+        sig_pmc = ctx->constants[*pc]->u.key;
         assert(PObj_is_PMC_TEST(sig_pmc));
         assert(sig_pmc->vtable->base_type == enum_class_FixedIntegerArray);
         st->u.op.signature = sig_pmc;
@@ -139,8 +138,7 @@ Parrot_init_arg_op(Interp *interpreter, struct PackFile_ByteCode *seg,
 }
 
 int
-Parrot_init_arg_sig(Interp *interpreter, struct PackFile_ByteCode *seg,
-        parrot_context_t *ctx,
+Parrot_init_arg_sig(Interp *interpreter, parrot_context_t *ctx,
         const char *sig, void *ap, struct call_state_1 *st)
 
 {
@@ -181,7 +179,7 @@ fetch_arg_str_op(Interp *interpreter, struct call_state *st)
 
     idx = *st->src.u.op.pc;
     if ((st->src.sig & PARROT_ARG_CONSTANT)) {
-        s_arg = st->src.constants[idx]->u.string;
+        s_arg = st->src.ctx->constants[idx]->u.string;
     }
     else {
         s_arg = CTX_REG_STR(st->src.ctx, idx);
@@ -199,7 +197,7 @@ fetch_arg_num_op(Interp *interpreter, struct call_state *st)
 
     idx = *st->src.u.op.pc;
     if ((st->src.sig & PARROT_ARG_CONSTANT)) {
-        f_arg = st->src.constants[idx]->u.number;
+        f_arg = st->src.ctx->constants[idx]->u.number;
     }
     else {
         f_arg = CTX_REG_NUM(st->src.ctx, idx);
@@ -218,7 +216,7 @@ fetch_arg_pmc_op(Interp *interpreter, struct call_state *st)
 
     idx = *st->src.u.op.pc;
     if ((st->src.sig & PARROT_ARG_CONSTANT)) {
-        p_arg = st->src.constants[idx]->u.key;
+        p_arg = st->src.ctx->constants[idx]->u.key;
     }
     else {
         p_arg = CTX_REG_PMC(st->src.ctx, idx);
@@ -315,9 +313,6 @@ next_arg(Interp *interpreter, struct call_state_1 *st)
                     st->sig = PARROT_ARG_PMC; break;
             }
             break;
-        case CALL_STATE_TC:
-            st->sig = st->u.tc_args[st->i].type;
-            break;
     }
     return 1;
 }
@@ -348,14 +343,6 @@ fetch_arg(Interp *interpreter, struct call_state *st)
                     return fetch_arg_num_sig(interpreter, st);
                 case PARROT_ARG_PMC:
                     return fetch_arg_pmc_sig(interpreter, st);
-            }
-            break;
-        case CALL_STATE_TC:
-            {
-                HashEntry *e =  st->src.u.tc_args + st->src.i;
-                st->val = e->val;
-                st->src.sig = e->type;
-                st->src.mode |= CALL_STATE_NEXT_ARG;
             }
             break;
     }
@@ -554,8 +541,12 @@ again:
             return 0;
         goto again;
     }
-    if (st->src.i >= st->src.n)
+    if (st->src.i >= st->src.n) {
         return 0;
+    }    
+    if (st->dest.i >= st->dest.n) {
+        return 0;
+    }    
     if ((st->src.sig & PARROT_ARG_TYPE_MASK) == PARROT_ARG_PMC) {
         clone_key_arg(interpreter, st);
     }
@@ -640,108 +631,9 @@ the latter handles return values and yields.
 */
 
 
-#ifdef PREMATURE_OPT
-
-#undef VTABLE_elements
-#define VTABLE_elements(i, ar) PMC_int_val(ar)
-#undef VTABLE_get_integer_keyed_int
-#define VTABLE_get_integer_keyed_int(i, ar, idx) ((INTVAL*)PMC_data(ar))[idx]
-
-#endif
-
-/*
-
-=item C<int parrot_check_tail_call(Interp*, struct PackFile_ByteCode *, opcode_t *)>
-
-Check register usage of arguments and params for a conflict that would
-prevent proper argument passing. E.g.
-
-  args     P0   P1   P2
-  params   P1   P0   P2
-
-As in a tailcall we are working in the same register store, passing
-the first argument (P0 -> P1) would overwrite the next source (P1)
-and the second param would get a wrong value.
-
-The same problem arises if registers overlap due to variable-sized
-register chunks:
-
-  args     N1   N0    # sub with N-regs only
-  params   I2   I0    # sub with I-regs only
-
-We create an intermediate storage for conflicting registers and use
-this information in the subsequent argument passing.
-
-=cut
-
-*/
-
 opcode_t *
-parrot_pass_args_tail_call(Interp* interpreter,
-        struct Parrot_sub *dest_sub, opcode_t *pc)
-{
-    struct call_state st;
-    int todo, i, n;
-
-    if (*pc != PARROT_OP_get_params_pc)
-        return pc;
-    todo = Parrot_init_arg_op(interpreter, interpreter->code,
-            CONTEXT(interpreter->ctx),
-            interpreter->current_args, &st.src);
-    if (!todo)
-        return pc;
-    todo = Parrot_init_arg_op(interpreter, dest_sub->seg,
-            CONTEXT(interpreter->ctx),
-            pc, &st.dest);
-    if (!todo)
-        return pc;
-    /* allocate helper storage
-     * due to flatten, we need max(src, dest)
-     */
-    n = st.src.n;
-    if (st.dest.n > n)
-        n = st.dest.n;
-    st.dest.u.tc_args = mem_sys_allocate(n * sizeof(HashEntry));
-    /* fetch args */
-
-    st.dest.mode = CALL_STATE_TC;
-    for (i = 0;  ; ++i) {
-        if (!Parrot_fetch_arg(interpreter, &st))
-            break;
-        assert(i < n);
-        st.dest.u.tc_args[i].val = st.val;
-        st.dest.u.tc_args[i].type = st.src.sig;
-    }
-    /* now set new register structure, realloc if needed */
-    Parrot_realloc_context(interpreter, dest_sub->n_regs_used);
-    /* ctx might have moved */
-    st.dest.ctx = CONTEXT(interpreter->ctx);
-    /* and store args */
-
-    st.src.i = 0;
-    st.src.n = i;
-    st.opt_so_far = 0;
-    st.src.mode = CALL_STATE_TC;
-    st.src.u.tc_args = st.dest.u.tc_args;
-    /* reinit dest */
-    Parrot_init_arg_op(interpreter, dest_sub->seg,
-            CONTEXT(interpreter->ctx),
-            pc, &st.dest);
-    for (;;) {
-        Parrot_fetch_arg(interpreter, &st);
-        Parrot_convert_arg(interpreter, &st);
-        if (!Parrot_store_arg(interpreter, &st))
-            break;
-    }
-    /* free helper */
-    mem_sys_free(st.src.u.tc_args);
-    /* done. return position past get_params opcode */
-    return pc + st.dest.n + 2;
-}
-
-opcode_t *
-parrot_pass_args(Interp *interpreter, struct PackFile_ByteCode *dst_seg,
-        parrot_context_t *src_ctx, int what)
+parrot_pass_args(Interp *interpreter,  parrot_context_t *src_ctx,
+        parrot_context_t *dest_ctx, int what)
 {
     const char *action;
     struct call_state st;
@@ -752,38 +644,28 @@ parrot_pass_args(Interp *interpreter, struct PackFile_ByteCode *dst_seg,
 
     if (what == PARROT_OP_get_params_pc) {
         dst_pc = interpreter->current_params;
-        todo = Parrot_init_arg_op(interpreter, dst_seg,
-                CONTEXT(interpreter->ctx), dst_pc, &st.dest);
-        src_pc = CONTEXT(interpreter->ctx)->current_args;
-        Parrot_init_arg_op(interpreter, interpreter->code,
-                src_ctx, src_pc, &st.src);
+        src_pc = interpreter->current_args;
         interpreter->current_params = NULL;
         action = "params";
     }
     else {
-        dst_pc = CONTEXT(interpreter->ctx)->current_results;
-        if (!dst_pc)
-            return NULL;
-        src_pc = interpreter->current_returns;
-        action = "results";
-        if (!src_pc) {    /* no returns */
-            /* continuation call with args
-             *
-             * we move current_args into context the first time
-             * and use the context var for further get_params
-             * so that we can clean current_args and make this
-             * less ambiguous
-             */
+        dst_pc = dest_ctx->current_results;
+        if (what == PARROT_OP_get_results_pc) {
+            src_pc = interpreter->current_returns;
+            interpreter->current_returns = NULL;
+            action = "results";
+        }
+        else {
+            assert(what == PARROT_OP_set_args_pc);
             src_pc = interpreter->current_args;
-            if (!src_pc)
-                return NULL;
             action = "params";
         }
-        todo = Parrot_init_arg_op(interpreter, dst_seg,
-                CONTEXT(interpreter->ctx), dst_pc, &st.dest);
-        Parrot_init_arg_op(interpreter, interpreter->code,
-                src_ctx, src_pc, &st.src);
+        interpreter->current_args = NULL;
     }
+    if (!dst_pc)
+        return NULL;
+    todo = Parrot_init_arg_op(interpreter, dest_ctx, dst_pc, &st.dest);
+    Parrot_init_arg_op(interpreter, src_ctx, src_pc, &st.src);
     st.opt_so_far = 0;  /* XXX */
     while (todo) {
         Parrot_fetch_arg(interpreter, &st);
@@ -792,29 +674,48 @@ parrot_pass_args(Interp *interpreter, struct PackFile_ByteCode *dst_seg,
     }
 
 
-    /* never get more then the caller expects */
-#if 0
+    if (what == PARROT_OP_get_results_pc) {
+        if (!PARROT_ERRORS_test(interpreter, PARROT_ERRORS_RESULT_COUNT_FLAG))
+            return dst_pc + st.dest.n + 2;
+    } else {
+        if (!PARROT_ERRORS_test(interpreter, PARROT_ERRORS_PARAM_COUNT_FLAG))
+            return dst_pc + st.dest.n + 2;
+    }
+
     /*
      * check for arg count mismatch
-     *
-     * XXX not yet. PGE uses a lot of implicit :optionals
      */
-    if (src_i != src_n) {
-        /* ingore return value mismatch */
-        real_exception(interpreter, NULL, E_ValueError,
-                "too many arguments passed (%d) - %d %s expected",
-                src_n, dst_n, action);
+    if (src_pc[-3] == PARROT_OP_tailcallmethod_p_sc ||
+            src_pc[-3] == PARROT_OP_tailcallmethod_p_s) {
+        /*
+         * If we have this sequence:
+         *
+         * tailcallmethod_p_s?
+         * set_returns_pc '()'
+         * return_cc
+         *
+         * we are returning 1 retval to caller on behalf
+         * of the NCI (a PIR method had already returned
+         * all and doesn't run anything after the
+         * tailcall - ignore/fix missing arg_count
+         */
+        st.src.i = st.src.n;
     }
-    else if (dst_i != dst_n) {
-        dst_sig = VTABLE_get_integer_keyed_int(interpreter,
-                dst_signature, dst_i);
-        if (!(dst_sig & (PARROT_ARG_OPTIONAL|PARROT_ARG_SLURPY_ARRAY))) {
+
+    if (st.src.i > st.src.n) {
+        if (!(st.dest.sig & (PARROT_ARG_OPTIONAL|
+                        PARROT_ARG_SLURPY_ARRAY|PARROT_ARG_OPT_FLAG))) {
             real_exception(interpreter, NULL, E_ValueError,
                     "too few arguments passed (%d) - %d %s expected",
-                    src_n, dst_n, action);
+                    st.src.n, st.dest.n, action);
         }
     }
-#endif
+    else if (st.src.n && st.src.i < st.src.n) {
+        real_exception(interpreter, NULL, E_ValueError,
+                "too many arguments passed (%d) - %d %s expected",
+                st.src.n, st.dest.n, action);
+    }
+
     /* skip the get_params opcode - all done here */
     return dst_pc + st.dest.n + 2;
 }
@@ -848,9 +749,9 @@ parrot_pass_args_fromc(Interp *interpreter, const char *sig,
                 "no get_params in sub");
     }
 
-    Parrot_init_arg_op(interpreter, interpreter->code,
+    Parrot_init_arg_op(interpreter,
             CONTEXT(interpreter->ctx), dest, &st.dest);
-    todo = Parrot_init_arg_sig(interpreter, interpreter->code,
+    todo = Parrot_init_arg_sig(interpreter,
             old_ctxp, sig, PARROT_VA_TO_VAPTR(ap), &st.src);
     st.opt_so_far = 0;  /* XXX */
 
@@ -883,8 +784,7 @@ parrot_pass_args_fromc(Interp *interpreter, const char *sig,
  * handle void, and pointer (PMC*, STRING*) return values
  */
 void*
-set_retval(Parrot_Interp interpreter, int sig_ret,
-        struct PackFile_ByteCode *seg, parrot_context_t *ctx)
+set_retval(Parrot_Interp interpreter, int sig_ret, parrot_context_t *ctx)
 {
     opcode_t *src_pc;
     int todo;
@@ -897,12 +797,13 @@ set_retval(Parrot_Interp interpreter, int sig_ret,
     if (!sig_ret || sig_ret == 'v')
         return NULL;
 
-    Parrot_init_arg_op(interpreter, seg, ctx, src_pc, &st.src);
-    buf[0] = sig_ret;
-    buf[1] = 0;
-    todo = Parrot_init_arg_sig(interpreter, interpreter->code,
-            CONTEXT(interpreter->ctx), sig, NULL, &st.dest);
-
+    todo = Parrot_init_arg_op(interpreter, ctx, src_pc, &st.src);
+    if (todo) {
+        buf[0] = sig_ret;
+        buf[1] = 0;
+        todo = Parrot_init_arg_sig(interpreter,
+                CONTEXT(interpreter->ctx), sig, NULL, &st.dest);
+    }
     if (todo) {
         Parrot_fetch_arg(interpreter, &st);
         Parrot_convert_arg(interpreter, &st);
@@ -917,8 +818,7 @@ set_retval(Parrot_Interp interpreter, int sig_ret,
  * handle INTVAL return value
  */
 INTVAL
-set_retval_i(Parrot_Interp interpreter, int sig_ret,
-        struct PackFile_ByteCode *seg, parrot_context_t *ctx)
+set_retval_i(Parrot_Interp interpreter, int sig_ret, parrot_context_t *ctx)
 {
     opcode_t *src_pc;
     int todo;
@@ -931,8 +831,8 @@ set_retval_i(Parrot_Interp interpreter, int sig_ret,
     }
     src_pc = interpreter->current_returns;
     interpreter->current_returns = NULL;
-    Parrot_init_arg_op(interpreter, seg, ctx, src_pc, &st.src);
-    todo = Parrot_init_arg_sig(interpreter, interpreter->code,
+    Parrot_init_arg_op(interpreter, ctx, src_pc, &st.src);
+    todo = Parrot_init_arg_sig(interpreter,
             CONTEXT(interpreter->ctx), sig, NULL, &st.dest);
     if (todo) {
         Parrot_fetch_arg(interpreter, &st);
@@ -946,8 +846,7 @@ set_retval_i(Parrot_Interp interpreter, int sig_ret,
  * handle FLOATVAL return value
  */
 FLOATVAL
-set_retval_f(Parrot_Interp interpreter, int sig_ret,
-        struct PackFile_ByteCode *seg, parrot_context_t *ctx)
+set_retval_f(Parrot_Interp interpreter, int sig_ret, parrot_context_t *ctx)
 {
     opcode_t *src_pc;
     int todo;
@@ -960,8 +859,8 @@ set_retval_f(Parrot_Interp interpreter, int sig_ret,
     }
     src_pc = interpreter->current_returns;
     interpreter->current_returns = NULL;
-    Parrot_init_arg_op(interpreter, seg, ctx, src_pc, &st.src);
-    todo = Parrot_init_arg_sig(interpreter, interpreter->code,
+    Parrot_init_arg_op(interpreter, ctx, src_pc, &st.src);
+    todo = Parrot_init_arg_sig(interpreter,
             CONTEXT(interpreter->ctx), sig, NULL, &st.dest);
     if (todo) {
         Parrot_fetch_arg(interpreter, &st);

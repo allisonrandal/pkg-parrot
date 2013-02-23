@@ -6,18 +6,21 @@ PGE::TokenHash - hash implementation to speed up Token lookups
 
 .namespace [ "PGE::TokenHash" ]
 
-.sub "__onload" 
+.sub "__onload" :load
     .local pmc class
+    $I0 = find_type "PGE::TokenHash"
+    if $I0 goto end
     class = newclass "PGE::TokenHash"
     addattribute class, ".ihash"
     addattribute class, ".vhash"
+  end:
     .return ()
 .end
 
 .sub "__init" method
     .local pmc ihash, vhash
-    ihash = new Hash
-    vhash = new Hash
+    ihash = new .Hash
+    vhash = new .Hash
     setattribute self, "PGE::TokenHash\x0.ihash", ihash
     setattribute self, "PGE::TokenHash\x0.vhash", vhash
     .return ()

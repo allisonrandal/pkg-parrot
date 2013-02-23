@@ -1,6 +1,14 @@
-#! perl -w
+#! perl
 # Copyright: 2005 The Perl Foundation.  All Rights Reserved.
-# $Id: foo.t 9452 2005-10-11 13:45:38Z leo $
+# $Id: foo.t 10145 2005-11-23 03:15:23Z particle $
+
+use strict;
+use warnings;
+use lib qw( . lib ../lib ../../lib );
+use Test::More;
+use Parrot::Test tests => 9;
+use Parrot::Config;
+
 
 =head1 NAME
 
@@ -8,7 +16,7 @@ t/pmc/foo.t - Test for a very simple dynamic PMC
 
 =head1 SYNOPSIS
 
-	% perl -Ilib t/dynclass/foo.t
+	% prove t/dynclass/foo.t
 
 =head1 DESCRIPTION
 
@@ -16,8 +24,6 @@ Tests the Foo PMC.
 
 =cut
 
-use Parrot::Test tests => 9;
-use Parrot::Config;
 
 pir_output_is(<< 'CODE', << 'OUTPUT', "get_integer");
 

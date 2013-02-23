@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-# $Id: object-meths.t 9477 2005-10-13 13:33:57Z pmichaud $
+# $Id: object-meths.t 10257 2005-11-29 21:53:33Z leo $
 
 =head1 NAME
 
@@ -167,8 +167,8 @@ output_is(<<'CODE', <<'OUTPUT', "specified constructor method does not exist");
     end
 
 _handler:
+    get_results "(0,0)", P0, S0
     print "catched it\n"
-    set S0, P5["_message"]      # P5 is the exception object
     print S0
     print "\n"
     end
@@ -912,7 +912,7 @@ pir_output_is(<<'CODE', <<'OUTPUT', "tailcallmeth");
     n = getattribute self, "Foo\0n"
     dec n
     unless n goto done
-    tailcallmethod self, "go"
+    .return self."go"()
 done:
 .end
 CODE

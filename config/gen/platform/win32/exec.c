@@ -52,7 +52,7 @@ Parrot_Run_OS_Command_Argv(Parrot_Interp interpreter, PMC *cmdargs)
     DWORD status = 0;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
-    unsigned int pmclen;
+    int pmclen;
     int cmdlinelen = 1000;
     int cmdlinepos = 0;
     char *cmdline = mem_sys_allocate(cmdlinelen);
@@ -68,7 +68,7 @@ Parrot_Run_OS_Command_Argv(Parrot_Interp interpreter, PMC *cmdargs)
     for (i = 0; i < pmclen; i++) {
         STRING *s = VTABLE_get_string_keyed_int(interpreter, cmdargs, i);
         char *cs = string_to_cstring(interpreter, s);
-        if (cmdlinepos + s->strlen + 3 > cmdlinelen) {
+        if (cmdlinepos + (int)s->strlen + 3 > cmdlinelen) {
             cmdlinelen += s->strlen + 4;
             cmdline = mem_sys_realloc(cmdline, cmdlinelen);
         }

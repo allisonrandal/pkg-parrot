@@ -239,6 +239,7 @@ SP              [ ]
 <pod>{EOL}      { ++line; }
 
 ".sym"          return(LOCAL);
+<INITIAL,emit>".lex"          return(LEXICAL);
 ".arg"          return(ARG);
 ".sub"          return(SUB);
 ".end"          return(ESUB);
@@ -270,8 +271,11 @@ SP              [ ]
 <emit,INITIAL>":immediate"    return(IMMEDIATE);
 <emit,INITIAL>":postcomp"    return(POSTCOMP);
 <emit,INITIAL>":anon"    return(ANON);
+<emit,INITIAL>":outer"   return(OUTER);
+<emit,INITIAL>":lex"     return(NEED_LEX);
 
 ".result"       return(RESULT);
+".get_results"       return(GET_RESULTS);
 ".yield"        return(YIELDT);
 ".return"       return(RETURN);
 
@@ -280,24 +284,21 @@ SP              [ ]
 ":optional"     return(ADV_OPTIONAL);
 ":opt_flag"     return(ADV_OPT_FLAG);
 
-".class"        return(CLASS);
-".endclass"     return(ENDCLASS);
 <emit,INITIAL>".namespace"    return(NAMESPACE);
-<emit,INITIAL>".HLL"    return(HLL);
+<emit,INITIAL>".HLL"          return(HLL);
+<emit,INITIAL>".HLL_map"      return(HLL_MAP);
 ".endnamespace" return(ENDNAMESPACE);
-".field"        return(FIELD);
-".method"       return(DOT_METHOD);
 ".local"        return(LOCAL);
 ".global"       return(GLOBAL);
 <emit,INITIAL>".const"        return(CONST);
 ".globalconst"  return(GLOBAL_CONST);
 ".param"        return(PARAM);
 <*>".pragma"    return(PRAGMA);
-<*>"fastcall"   return(FASTCALL);
 <*>"n_operators"   return(N_OPERATORS);
 "goto"          return(GOTO);
 "if"            return(IF);
 "unless"        return(UNLESS);
+"null"          return(PNULL);
 "int"           return(INTV);
 "num"           return(FLOATV);
 "float"         return(FLOATV);
@@ -610,6 +611,7 @@ new_frame (Interp* interp)
     tmp = mem_sys_allocate_zeroed(sizeof(struct macro_frame_t));
     tmp->label = ++label;
     tmp->s.line = line;
+    tmp->s.handle = NULL;
     if (frames) {
         tmp->s.pasm_file = frames->s.pasm_file;
         tmp->s.file = frames->s.file;
@@ -921,7 +923,9 @@ include_file (Interp* interp, char *file_name)
     }
     else
         IMCC_fataly(interp, E_IOError, strerror(errno));
+
     frame->s.file = file_name;
+    frame->s.handle = file;
 
     ext = strrchr(file_name, '.');
     if (ext) {
@@ -969,6 +973,7 @@ pop_parser_state(Interp* interp)
     struct macro_frame_t *tmp;
     tmp = frames;
     if (tmp) {
+        if (tmp->s.handle) fclose (tmp->s.handle);
         frames = (struct macro_frame_t*) frames->s.next;
         destroy_frame(tmp);
     }

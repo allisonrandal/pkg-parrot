@@ -1,5 +1,5 @@
 # Copyright: 2001-2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Vtable.pm 9614 2005-10-28 14:04:19Z nicholas $
+# $Id: Vtable.pm 9922 2005-11-12 17:19:54Z leo $
 
 =head1 NAME
 
@@ -132,7 +132,8 @@ typedef enum {
     VTABLE_PMC_NEEDS_EXT = 0x04,
     VTABLE_DATA_IS_PMC   = 0x08,
     VTABLE_PMC_IS_SINGLETON = 0x10,
-    VTABLE_IS_SHARED_FLAG   = 0x20
+    VTABLE_IS_SHARED_FLAG   = 0x20,
+    VTABLE_IS_CONST_PMC_FLAG = 0x40
 } vtable_flags_t;
 
 struct _vtable {
@@ -324,7 +325,7 @@ sub vtbl_embed
         $protos .= sprintf "extern %s Parrot_PMC_%s( %s );\n",
             $ret_type, $name, $signature;
 
-        $funcs .= sprintf 
+        $funcs .= sprintf
 "/*
 
 =item C<%s

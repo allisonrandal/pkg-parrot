@@ -1,6 +1,6 @@
 #! perl -w
 # Copyright: 2001-2005 The Perl Foundation.  All Rights Reserved.
-# $Id: sub.t 9796 2005-11-05 15:06:00Z leo $
+# $Id: sub.t 10240 2005-11-29 12:12:58Z leo $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ C<Continuation> PMCs.
 
 =cut
 
-use Parrot::Test tests => 42;
+use Parrot::Test tests => 41;
 use Test::More;
 use Parrot::Config;
 
@@ -111,77 +111,6 @@ CODE
 0
 1
 OUTPUT
-
-output_is(<<'CODE', <<'OUTPUT', "PASM sub as closure");
-    # sub foo {
-    #     my ($n) = @_;
-    #     sub {$n += shift}
-    # }
-    # my $f = foo(5);
-    # print &$f(3), "\n";
-    # print &$f(3), "\n";
-    # print &$f(3), "\n";
-main:
-
-    .const .Sub P0 = "foo"
-
-    new P5, .Integer
-    set P5, 5
-
-    set_args "(0)", P5
-    get_results "(0)", P0
-    invokecc P0
-
-    new P5, .Integer
-    set P5, 3
-    set_args "(0)", P5
-    get_results "(0)", P2
-    invokecc P0
-    print P2
-    print "\n"
-
-    set_args "(0)", P5
-    get_results "(0)", P2
-    invokecc P0
-    print P2
-    print "\n"
-
-    set_args "(0)", P5
-    get_results "(0)", P2
-    invokecc P0
-    print P2
-    print "\n"
-
-    end
-
-# foo takes a number n (P5) and returns a sub (in P5) that takes
-# a number i (P5) and returns n incremented by i.
-.pcc_sub foo:
-    get_params "(0)", P5
-    new_pad 0
-    store_lex 0, "n", P5
-    .const .Sub P5 = "f"
-    newclosure P5, P5	# P5 has now the lexical "n" in the pad
-    set_returns "(0)", P5
-    returncc		# ret
-
-# expects arg in P5, returns incremented result in P5
-.pcc_sub f:
-    get_params "(0)", P5
-    find_lex P2, "n"	# invoke-ing the Sub pushes the lexical pad
-    			# of the closure on the pad stack
-    add P2, P5		# n += shift, the lexical is incremented
-    new P5, .Integer
-    assign P5, P2
-    set_returns "(0)", P5
-    returncc		# ret
-
-CODE
-8
-11
-14
-OUTPUT
-
 
 output_is(<<'CODE', <<'OUTPUT', "pcc sub");
     find_global P0, "_the_sub"
@@ -402,6 +331,7 @@ back
 OUTPUT
 
 output_is(<<'CODE', <<'OUTPUT', "equality of closures");
+.pcc_sub main:
       .const .Sub P3 = "f1"
       newclosure P0, P3
       clone P1, P0
@@ -417,11 +347,11 @@ BAD2: print "not "
 OK2:  print "ok 2\n"
       end
 
-.pcc_sub f1:
+.pcc_sub :outer(main) f1:
       print "Test\n"
       end
 
-.pcc_sub f2:
+.pcc_sub :outer(main) f2:
       new P1, .PerlUndef
       end
 CODE
@@ -887,7 +817,7 @@ main
 OUTPUT
 
 
-pir_output_is(<<'CODE', <<'OUTPUT', "caller introspection");
+pir_output_is(<<'CODE', <<'OUTPUT', "caller introspection via interp");
 .sub main :main
 .include "interpinfo.pasm"
     # this test will fail when run with -Oc
@@ -942,6 +872,7 @@ caller 0 Bar :: foo
 caller 1 main
 ok
 OUTPUT
+
 
 {
     # the test is failing when run with --run-pbc (make testr)

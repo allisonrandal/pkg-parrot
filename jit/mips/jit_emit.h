@@ -2,7 +2,7 @@
  * jit_emit.h
  *
  * CVS Info
- *    $Id: jit_emit.h 7930 2005-04-27 07:24:32Z leo $
+ *    $Id: jit_emit.h 10066 2005-11-17 13:27:21Z rafl $
  * Overview:
  *    MIPS JIT
  * History:
@@ -13,6 +13,9 @@
 
 #if !defined(PARROT_MIPS_JIT_EMIT_H_GUARD)
 #define PARROT_MIPS_JIT_EMIT_H_GUARD
+
+#  define BASE_REG s0
+#  define Parrot_jit_emit_get_base_reg_no(pc) BASE_REG
 
 typedef enum {
     zero,
@@ -108,15 +111,11 @@ enum { JIT_MIPS_CALL, JIT_MIPS_BRANCH };
 #  define emit_sw(pc, rt, offset, rs) \
     emit_i(pc, 0x2b, rs, rt, offset)
 
-#  define BASE_REG s0
-
 #  define emit_sw_r(pc, reg, addr) \
-    emit_sw(pc, reg, (((char *)addr) - \
-      ((char *)&interpreter->ctx.int_reg.registers[0])), BASE_REG)
+    emit_sw(pc, reg, addr, BASE_REG)
 
 #  define emit_lw_r(pc, reg, addr) \
-    emit_lw(pc, reg, (((char *)addr) - \
-      ((char *)&interpreter->ctx.int_reg.registers[0])), BASE_REG)
+    emit_lw(pc, reg, addr, BASE_REG)
 
 /*  LUI
  *
@@ -374,6 +373,10 @@ emit_if(Parrot_jit_info_t *jit_info, char opcode, mips_register_t rs,
     emit_slt(pc, rs, rt, at); \
     emit_beqz(pc, at, imm)
 
+#endif /* JIT_EMIT */
+
+#if JIT_EMIT == 2
+
 void
 Parrot_jit_begin(Parrot_jit_info_t *jit_info,
                  Interp * interpreter)
@@ -417,76 +420,68 @@ Parrot_jit_dofixup(Parrot_jit_info_t *jit_info,
 }
 
 void
-Parrot_jit_normal_op(Parrot_jit_info_t *jit_info,
-    Interp *interpreter)
+Parrot_jit_normal_op(Parrot_jit_info_t *jit_info, Interp * interpreter)
 {
-    emit_imm32(jit_info->native_ptr, a0, jit_info->cur_op);
-    emit_mov(jit_info->native_ptr, a1, s0);
-    emit_imm32(jit_info->native_ptr, t9,
-        interpreter->op_func_table[*(jit_info->cur_op)]);
-    emit_jalr(jit_info->native_ptr, t9, ra);
-    emit_nop(jit_info->native_ptr);
 }
 
 void
-Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info,
-    Interp *interpreter)
+Parrot_jit_cpcf_op(Parrot_jit_info_t *jit_info, Interp * interpreter)
 {
-    Parrot_jit_normal_op(jit_info,interpreter);
-    emit_sub(jit_info->native_ptr, v0, v0, s2);
-    emit_add(jit_info->native_ptr, v0, v0, s1);
-    emit_lw(jit_info->native_ptr, v0, 0, v0);
-    emit_jr(jit_info->native_ptr, v0);
 }
+
+/*void
+Parrot_jit_restart_op(Parrot_jit_info_t *jit_info, Interp * interpreter)
+{
+}*/
 
 /* move reg to mem (i.e. intreg) */
 void
-Parrot_jit_emit_mov_mr(Interp * interpreter, char *mem, int reg)
+Parrot_jit_emit_mov_mr_offs(Interp * interpreter, int base, size_t offs, int reg)
 {
-    emit_sw_r(jit_info->native_ptr, jit_info->intval_map[i],
-        &interpreter->ctx.int_reg.registers[cur_se->int_reg_usage[i]]);
 }
 
 /* move mem (i.e. intreg) to reg */
 void
-Parrot_jit_emit_mov_rm(Interp * interpreter, int reg, char *mem)
+Parrot_jit_emit_mov_rm_offs(Interp * interpreter, int reg, int base, size_t offs)
 {
-    emit_lw_r(jit_info->native_ptr, jit_info->intval_map[i],
-        &interpreter->ctx.int_reg.registers[cur_se->int_reg_usage[i]]);
 }
 
-/* move reg to mem (i.e. numreg) */
 void
-Parrot_jit_emit_mov_mr_n(Interp * interpreter, char *mem, int reg)
+Parrot_jit_emit_mov_mr_n_offs(Interp * interpreter, int base, size_t offs, int reg)
 {
 }
 
-/* move mem (i.e. numreg) to reg */
 void
-Parrot_jit_emit_mov_rm_n(Interp * interpreter, int reg, char *mem)
+Parrot_jit_emit_mov_rm_n_offs(Interp * interpreter, int reg, int base, size_t offs)
 {
 }
 
 
+# endif /* JIT_EMIT == 2 */
 
-#else
+#if JIT_EMIT == 0
 
 #  define REQUIRES_CONSTANT_POOL 0
 #  define INT_REGISTERS_TO_MAP 24
 
-char intval_map[INT_REGISTERS_TO_MAP] =
+#ifndef JIT_IMCC
+static char intval_map[INT_REGISTERS_TO_MAP] =
     { v0, v1, a0, a1, a2, a3, t0, t1, t2, t3, t4, t5, t6, t7, s0, s1, s2, s3,
       s4, s5, s6, s7, t8, t9 };
 
 #  include <asm/cachectl.h>
 
+extern int cacheflush(char* addr, int nbytes, int cache);
+static void sync_cache (void *_start, void *_end);
+
 static void
 sync_cache (void *_start, void *_end)
 {
-    cacheflush(_start, (int)((char *)_end - (char *)_start), BCACHE);
+    cacheflush((char*)_start, (int)((char *)_end - (char *)_start), BCACHE);
 }
 
-#endif
+#endif /* JIT_IMCC */
+#endif /* JIT_EMIT == 0 */
 #endif /* PARROT_MIPS_JIT_EMIT_H_GUARD */
 
 /*

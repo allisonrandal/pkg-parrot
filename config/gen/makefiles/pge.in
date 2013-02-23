@@ -1,4 +1,4 @@
-# $Id: pge.in 9669 2005-10-31 00:12:44Z rafl $
+# $Id: pge.in 10133 2005-11-22 03:23:55Z particle $
 
 # Setup some commands
 LN_S     = ${lns}
@@ -16,7 +16,7 @@ all: $(PARROT_LIBRARY)${slash}PGE.pbc
 $(PARROT_LIBRARY)${slash}PGE.pbc: PGE.pbc
 	$(CP) PGE.pbc $(PARROT_LIBRARY)
 
-PGE.pbc: PGE.pir PGE/Exp.pir PGE/Match.pir PGE/Rule.pir PGE/P6Rule.pir PGE/TokenHash.pir PGE/OPTable.pir mklib.pir library.pge
+PGE.pbc: PGE.pir PGE/Exp.pir PGE/Match.pir PGE/Rule.pir PGE/P6Rule.pir PGE/TokenHash.pir PGE/OPTable.pir PGE/P5Regexp.pir mklib.pir library.pge
 	$(PARROT) mklib.pir >PGE/Library.pir
 	$(PARROT) -o PGE.pbc --output-pbc PGE.pir 
 
@@ -41,10 +41,12 @@ help:
 	@echo ""
 
 test: all
-	cd ../..; $(PERL) -Ilib t/harness t/p6rules/*.t
+	prove -r ../../t/compilers/pge
 
 testclean:
-	$(RM_RF) ../../t/p6rules/*.pir ../../t/p6rules/*.pasm
+	$(RM_RF) ../../t/compilers/pge/*.pir \
+	    ../../t/compilers/pge/p5regexp/*.pir \
+	    ../../t/compilers/pge/p6rules/*.pir
 
 clean: testclean
 	$(RM_RF) PGE.pbc $(PARROT_LIBRARY)${slash}PGE.pbc PGE/Library.pir

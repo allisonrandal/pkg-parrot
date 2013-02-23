@@ -1,5 +1,5 @@
 # Copyright: 2004 The Perl Foundation.  All Rights Reserved.
-# $Id: Languages.pm 5757 2004-03-27 22:23:02Z mikescott $
+# $Id: Languages.pm 10273 2005-11-30 18:07:24Z fperrad $
 
 =head1 NAME
 
@@ -63,6 +63,7 @@ sub new
 		$self->new_section('Ook!', 'ook.html', '', 'languages/ook'),
 		$self->new_section('Python', 'python.html', '', 'languages/python'),
 		$self->new_section('PASM', 'pasm.html', '', 'languages/parrot_compiler'),
+		$self->new_section('Lua', 'lua.html', '', 'languages/lua'),
 	);
 }
 

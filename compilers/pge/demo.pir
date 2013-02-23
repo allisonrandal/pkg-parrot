@@ -1,3 +1,4 @@
+.include "errors.pasm"
 .sub _main
     .local string x
     .local string pattern
@@ -8,9 +9,12 @@
     .local pmc exp
     .local pmc match
     .local pmc p6rule_compile
+    .local pmc p5regexp_compile
     .local pmc glob_compile
     .local int istrace
     .local string gname
+
+    errorson .PARROT_ERRORS_PARAM_COUNT_FLAG
 
     load_bytecode "PGE.pbc"
     load_bytecode "dumper.imc"
@@ -18,8 +22,9 @@
     load_bytecode "PGE/Glob.pir"
     load_bytecode "PGE/Text.pir"
     load_bytecode "PGE/Util.pir"
-    find_global p6rule_compile, "PGE", "p6rule"
-    find_global glob_compile, "PGE", "glob"
+    p6rule_compile = compreg "PGE::P6Rule"
+    glob_compile = compreg "PGE::Glob"
+    p5regexp_compile = compreg "PGE::P5Regexp"
     istrace = 0
     null rulesub
 
@@ -44,6 +49,7 @@
     if $S0 == "exp" goto print_exp
     if $S0 == "trace" goto toggle_trace
     if $S0 == "use" goto use_grammar
+    if $S0 == "regexp" goto make_regexp
 
     if_null rulesub, match_nopattern
     match = rulesub(x)
@@ -72,6 +78,11 @@
   make_p6rule:
     pattern = substr x, 5
     (rulesub, pir, exp) = p6rule_compile(pattern)
+    goto read_loop
+
+  make_regexp:
+    pattern = substr x, 7
+    (rulesub, pir, exp) = p5regexp_compile(pattern)
     goto read_loop
 
   save_rule:

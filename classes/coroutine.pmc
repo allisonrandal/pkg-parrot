@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: coroutine.pmc 9698 2005-11-02 05:21:30Z leo $
+$Id: coroutine.pmc 10288 2005-12-01 16:02:47Z leo $
 
 =head1 NAME
 
@@ -116,8 +116,9 @@ Swaps the "context".
         PMC *ccont;
 
         if (!co->ctx) {
-            PMC *pad;
-
+            /* TODO factor out common code with Sub.invoke
+             *      and inherit it
+             */
             ccont = INTERP->current_cont;
             if (ccont == NEED_CONTINUATION) {
                 ccont = new_ret_continuation_pmc(interpreter, next);
@@ -131,33 +132,26 @@ Swaps the "context".
              */
             Parrot_alloc_context(INTERP, co->n_regs_used);
             co->ctx = ctx = CONTEXT(INTERP->ctx);
+            ctx->caller_ctx = caller_ctx;
             PMC_cont(ccont)->from_ctx = ctx;
-            /*
-             * XXX are our coroutines closures?
-             */
-            pad = scratchpad_get_current(INTERP);
-            if (pad) {
-                stack_push(INTERP, &ctx->pad_stack, pad,
-                        STACK_ENTRY_PMC, STACK_CLEANUP_NULL);
-            }
             ctx->current_sub = SELF;
             ctx->current_cont = ccont;
-            ctx->current_args = INTERP->current_args;
             ctx->current_object = NULL;
             INTERP->current_object = NULL;
             INTERP->current_cont = NULL;
-            INTERP->current_args = NULL;
+
+            /* create pad if needed */
+            if (!PMC_IS_NULL(co->lex_info)) {
+                ctx->lex_pad = pmc_new_init(INTERP,
+                        Parrot_get_ctx_HLL_type(interpreter,
+                            enum_class_LexPad),
+                        co->lex_info);
+                VTABLE_set_pointer(INTERP, ctx->lex_pad, ctx);
+            }
 
             PObj_get_FLAGS(SELF) |= SUB_FLAG_CORO_FF;
             wanted_seg = co->seg;
             co->caller_seg = INTERP->code;
-            /* copy args from interpreter */
-            if (*dest == PARROT_OP_get_params_pc) {
-                INTERP->current_params = dest;
-                dest = parrot_pass_args(INTERP, wanted_seg,
-                        caller_ctx,
-                        PARROT_OP_get_params_pc);
-            }
         }
         /* if calling the Coro we need the segment of the Coro */
         else if (!(PObj_get_FLAGS(SELF) & SUB_FLAG_CORO_FF)) {
@@ -165,11 +159,12 @@ Swaps the "context".
             wanted_seg = co->seg;
             /* remember segment of caller */
             co->caller_seg = INTERP->code;
+            ctx = co->ctx;
             /* and the recent call context */
-            ccont = co->ctx->current_cont;
-            PMC_cont(ccont)->to_ctx = CONTEXT(INTERP->ctx);
+            ccont = ctx->current_cont;
+            ctx->caller_ctx = PMC_cont(ccont)->to_ctx = CONTEXT(INTERP->ctx);
             /* set context to coro context */
-            CONTEXT(INTERP->ctx) = ctx = co->ctx;
+            CONTEXT(INTERP->ctx) = ctx;
             INTERP->ctx.bp = ctx->bp;
             INTERP->ctx.bp_ps = ctx->bp_ps;
         }
@@ -181,11 +176,6 @@ Swaps the "context".
             CONTEXT(INTERP->ctx) = ctx = PMC_cont(ccont)->to_ctx;
             INTERP->ctx.bp = ctx->bp;
             INTERP->ctx.bp_ps = ctx->bp_ps;
-            /* yield values */
-            if (INTERP->current_returns && ctx->current_results)
-                parrot_pass_args(INTERP, wanted_seg,
-                        co->ctx,
-                        PARROT_OP_get_results_pc);
         }
 
         /* toggle address */

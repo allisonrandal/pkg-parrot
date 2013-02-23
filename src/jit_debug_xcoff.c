@@ -1,6 +1,6 @@
 /*
 Copyright: 2001-2003 The Perl Foundation.  All Rights Reserved.
-$Id: jit_debug_xcoff.c 9674 2005-10-31 10:59:49Z leo $
+$Id: jit_debug_xcoff.c 9877 2005-11-10 10:56:05Z leo $
 
 =head1 NAME
 
@@ -257,8 +257,9 @@ Parrot_jit_debug_stabs(Interp *interpreter)
 
     if (interpreter->code->debugs) {
         char *ext;
-        char *src = Parrot_debug_pc_to_filename(interpreter,
-                interpreter->code->debugs, 0);
+        char *src = string_to_cstring(interpreter,
+            Parrot_debug_pc_to_filename(interpreter,
+            interpreter->code->debugs, 0));
         pasmfile = string_make(interpreter, src, strlen(src), NULL,
                 PObj_external_FLAG);
         file = string_copy(interpreter, pasmfile);
@@ -266,9 +267,9 @@ Parrot_jit_debug_stabs(Interp *interpreter)
 
         ext = strrchr(src, '.');
         if (ext && strcmp (ext, ".pasm") == 0)
-            file = string_chopn(interpreter, file, 4);
+            file = string_chopn(interpreter, file, 4, 1);
         else if (ext && strcmp (ext, ".imc") == 0)
-            file = string_chopn(interpreter, file, 3);
+            file = string_chopn(interpreter, file, 3, 1);
         else if (!ext) /* EVAL_n */
             file = string_append(interpreter, file,
                     string_make(interpreter, ".", 1, NULL, PObj_external_FLAG),
@@ -276,7 +277,7 @@ Parrot_jit_debug_stabs(Interp *interpreter)
     }
     else {
         /* chop pbc */
-        file = string_chopn(interpreter, file, 3);
+        file = string_chopn(interpreter, file, 3, 1);
         pasmfile = debug_file(interpreter, file, "pasm");
     }
     stabsfile = debug_file(interpreter, file, "stabs.s");

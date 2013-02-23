@@ -1,4 +1,4 @@
-# $Id: RELEASE_INSTRUCTIONS 9304 2005-10-02 21:41:40Z jhoblitt $
+# $Id: RELEASE_INSTRUCTIONS 10343 2005-12-04 15:27:40Z leo $
 
 To prepare a release:
 
@@ -11,15 +11,15 @@ To prepare a release:
     2.  Update files with version-specific information:
 
         a.  Increment the version number in:
-	    VERSION, parrot.spec, and docs/intro.pod,
-	    adjust IMCC_VERSION in imcc/main.c,
+	    VERSION, parrot.spec, 
+	    adjust IMCC_VERSION in imcc/main.c, MANIFEST.generated
 
         b.  Change the information in DEVELOPING to reflect
             this release's version number and date.
 
         c.  Update README.
 
-        d.  Update ChangeLog, NEWS and docs/ROADMAP.
+        d.  Update ChangeLog, NEWS, docs/ROADMAP, and docs/BROKEN.
 
         e.  Make sure nothing in TODO has been done.
 
